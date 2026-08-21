@@ -30,32 +30,114 @@ from linkedin_own_server.errors import ExtractionFailedError
 # ---------------------------------------------------------------------------
 
 #: Harvest cards anchored on a link whose href matches a pattern.
+#:
+#: The walk up from the link is the whole game. LinkedIn's newer surfaces are
+#: nested anonymous DIVs with hash-generated class names -- no ``li``, no
+#: ``article``, and ``data-view-name`` is attached by the client AFTER
+#: hydration, so it is there or not depending on how far the page got before
+#: we read it. When none of those three stops fires, an unbounded walk runs
+#: to ``maxHops`` and lands on a container holding the whole list AND the page
+#: heading, at which point every row reports the heading as its name. That is
+#: measured, not hypothetical: on /analytics/profile-views/ it produced four
+#: viewers all called "Who's viewed your profile".
+#:
+#: So the stop that matters is structural and needs no attribute: a row is the
+#: LARGEST ancestor that still speaks for exactly ONE match. One hop further
+#: swallows a sibling row. Nothing about that depends on class names, tag
+#: names, or how much of the page has hydrated.
 HARVEST_LINKED_CARDS_JS = """
 (cfg) => {
   const re = new RegExp(cfg.hrefPattern);
-  const out = [];
-  const seen = new Set();
-  const anchors = document.querySelectorAll('a[href]');
-  for (const a of anchors) {
-    const href = a.getAttribute('href') || '';
-    const m = href.match(re);
-    if (!m) continue;
-    const key = m[1] || href;
-    if (seen.has(key)) continue;
-    let node = a;
+  const keyOf = (href) => {
+    const m = (href || '').match(re);
+    return m ? (m[1] || href) : null;
+  };
+  const keysWithin = (node) => {
+    const keys = new Set();
+    if (!node.querySelectorAll) return keys;
+    for (const link of node.querySelectorAll('a[href]')) {
+      const key = keyOf(link.getAttribute('href') || '');
+      if (key) keys.add(key);
+    }
+    return keys;
+  };
+  const linkWithin = (node) => {
+    if (!node.querySelectorAll) return '';
+    for (const link of node.querySelectorAll('a[href]')) {
+      const href = link.getAttribute('href') || '';
+      if (keyOf(href)) return href;
+    }
+    return '';
+  };
+  const rowOf = (anchor) => {
+    let node = anchor;
+    let row = anchor;
     let hops = 0;
     while (node && hops < cfg.maxHops) {
+      if (keysWithin(node).size > 1) break;
+      row = node;
       const tag = node.tagName;
       if (tag === 'LI' || tag === 'ARTICLE') break;
       if (node.dataset && node.dataset.viewName) break;
       node = node.parentElement;
       hops += 1;
     }
-    const card = node || a;
-    const text = (card.innerText || '').trim();
-    if (!text) continue;
+    return row;
+  };
+  const record = (href, node) => {
+    const text = (node.innerText || '').trim();
+    if (!text) return null;
+    return { href: href, text: text.slice(0, cfg.maxChars) };
+  };
+
+  const found = [];
+  const seen = new Set();
+  for (const anchor of document.querySelectorAll('a[href]')) {
+    const href = anchor.getAttribute('href') || '';
+    const key = keyOf(href);
+    if (!key || seen.has(key)) continue;
     seen.add(key);
-    out.push({ href: href, text: text.slice(0, cfg.maxChars) });
+    found.push({ href: href, row: rowOf(anchor) });
+  }
+
+  if (cfg.siblingRows && found.length) {
+    // The list is the NEAREST COMMON ANCESTOR of the rows, not the parent of
+    // any one of them. Where the walk stopped varies with hydration -- the
+    // same page puts the rows at different depths from one load to the next
+    // -- so "the rows share a parent" is true on one render and false on the
+    // other, and keying on it silently returns nothing extra half the time.
+    const rowNodes = found.map((item) => item.row);
+    let list = rowNodes[0];
+    while (list && !rowNodes.every((node) => list.contains(node))) {
+      list = list.parentElement;
+    }
+    // The list has to be a STRICT ancestor of every row, or its "children"
+    // are one row's internals rather than the rows.
+    while (list && rowNodes.some((node) => node === list)) {
+      list = list.parentElement;
+    }
+    if (list) {
+      const rows = [];
+      let orderly = true;
+      for (const child of list.children) {
+        const keys = keysWithin(child);
+        if (child.tagName === 'A') {
+          const own = keyOf(child.getAttribute('href') || '');
+          if (own) keys.add(own);
+        }
+        if (keys.size > 1) { orderly = false; break; }
+        const item = record(linkWithin(child), child);
+        if (item) rows.push(item);
+        if (rows.length >= cfg.maxItems) break;
+      }
+      if (orderly && rows.length >= found.length) return rows;
+    }
+  }
+
+  const out = [];
+  for (const item of found) {
+    const rec = record(item.href, item.row);
+    if (rec) out.push(rec);
     if (out.length >= cfg.maxItems) break;
   }
   return out;
@@ -154,13 +236,26 @@ async def harvest_linked_cards(
     max_items: int,
     max_chars: int = 1200,
     max_hops: int = 8,
+    sibling_rows: bool = False,
 ) -> list[dict[str, Any]]:
-    """Return ``{href, text}`` for each card anchored on a matching link."""
+    """Return ``{href, text}`` for each card anchored on a matching link.
+
+    Args:
+        sibling_rows: also return the rows that carry NO link, by reading
+            every child of the list the linked rows sit in. Off by default,
+            because on most surfaces a row without a link is chrome. On
+            profile views it is a person: LinkedIn draws privacy-limited
+            viewers ("Someone at Acme", "Recruiter at Acme") with no link at
+            all, so a harvest anchored only on links cannot see one of them
+            and silently reports a shorter list than the page shows. Six of
+            ten viewers were invisible this way when it was measured.
+    """
     cfg = {
         "hrefPattern": href_pattern,
         "maxItems": int(max_items),
         "maxChars": int(max_chars),
         "maxHops": int(max_hops),
+        "siblingRows": bool(sibling_rows),
     }
     try:
         records = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok

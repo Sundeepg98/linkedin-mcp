@@ -465,11 +465,30 @@ def test_chrome_lines_do_not_become_job_title_company_or_location():
 
 
 def test_chrome_lines_do_not_become_the_person_headline():
-    text = "Priya Sharma\nMessage\nConnect\nEngineering Manager at Globex\n"
+    # The timestamp is not decoration here: a profile-view row without one is
+    # not treated as a viewer at all (see the test below).
+    text = (
+        "Priya Sharma\nMessage\nConnect\nEngineering Manager at Globex\n"
+        "2 days ago\n"
+    )
     card = parse_person_card({"href": "/in/priya-sharma-12ab34/", "text": text})
     assert card is not None
     assert card["name"] == "Priya Sharma"
     assert card["headline"] == "Engineering Manager at Globex"
+
+
+def test_a_row_without_a_viewed_time_is_not_a_viewer():
+    """The rule that rejects page furniture without needing to recognise it.
+
+    Every row LinkedIn draws on the profile-views surface carries a "Viewed
+    <when>" line. The page heading block and the "N recruiters viewed your
+    profile" roll-up do not, and both were being emitted as people. Requiring
+    the timestamp rejects them structurally; the cost is that if LinkedIn
+    ever stops rendering it this surface reads as zero rows, which the tool
+    reports as a failure rather than as an empty list.
+    """
+    text = "Priya Sharma\nEngineering Manager at Globex\n"
+    assert parse_person_card({"href": "/in/priya-sharma-12ab34/", "text": text}) is None
 
 
 # ---------------------------------------------------------------------------

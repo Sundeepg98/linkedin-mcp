@@ -255,14 +255,20 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     back 365 days rather than the free tier's five viewers.
 
     Rows carry name, headline, when the view happened, and a profile link.
-    Viewers browsing in private mode appear as LinkedIn shows them -- as
-    anonymous rows, flagged with "anonymous": true and no link. This server
-    does not try to work out who they are.
 
-    Reads the Premium analytics page; if that renders nothing it falls back
-    once to the classic profile-views page, and reports pages_loaded: 2.
-    Nothing is fetched about these people beyond the row LinkedIn already
-    displays to you.
+    Viewers browsing with limited visibility appear exactly as LinkedIn shows
+    them to you and no more: "Someone at Acme", "Recruiter at Acme", with a
+    date and no link, flagged "anonymous": true. They are the majority of a
+    typical list and often the most useful part of it -- a recruiter's view
+    is a recruiter's view whether or not it comes with a name. This server
+    makes no attempt to work out who they are, and there is no code here that
+    could: nothing is fetched about any viewer, and no viewer's profile is
+    ever opened. What you get is the row LinkedIn already put on your screen.
+
+    Reads the Premium analytics page. The older /me/profile-views/ address
+    now redirects to that same page, so the second attempt is a re-load for a
+    page that had not finished rendering rather than a different surface; it
+    still reports pages_loaded: 2 when it happens.
 
     Args:
         limit: maximum rows to return (default 25, max 100).
@@ -279,7 +285,13 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 last_url = await BROWSER.goto(page, url)
                 assert_not_authwall(last_url, surface="profile views")
                 records = await dom.harvest_linked_cards(
-                    page, href_pattern=dom.PERSON_HREF, max_items=limit * 3
+                    page,
+                    href_pattern=dom.PERSON_HREF,
+                    max_items=limit * 3,
+                    # Anonymous viewers carry no link, so a link-anchored
+                    # harvest cannot see them at all. Without this the list
+                    # is silently shorter than the page it was read from.
+                    sibling_rows=True,
                 )
                 rows, dropped = dom.parse_all(records, shape.parse_person_card)
                 if rows:
