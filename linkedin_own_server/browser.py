@@ -24,10 +24,26 @@ What this module guarantees, and why each guarantee exists:
 * **The window does not linger.** After :data:`config.IDLE_CLOSE_S` with no
   tool call the context closes and the lock is released.
 
-The browser is an ordinary Chromium launched by Playwright. It does not spoof
-a fingerprint, patch navigator properties, install a stealth plugin, or time
-anything to imitate a human. If a plain automated browser cannot see it, this
-server does not see it.
+The browser is an ordinary Chromium launched by Playwright with the two flags
+enumerated in :data:`config.LAUNCH_ARGS` and nothing else. It does not install
+a stealth plugin, spoof a user agent, platform, canvas, font list or timezone,
+route through a proxy, or time anything to imitate a human. What one of those
+two flags does do is stop Blink setting ``navigator.webdriver = true``, which
+is the difference between LinkedIn completing a sign-in and refusing one; that
+is a single Blink feature switch, it is what the sibling Naukri server has run
+for months, and the boundary stops there. ``tests/test_launch_boundary.py``
+holds the line as an executable check rather than a promise.
+
+TWO MODES, and the second is for recovery only:
+
+* **LAUNCH (default).** Playwright starts Chromium against the persistent
+  profile at :data:`config.CHROME_PROFILE`. The session lives in that profile
+  and survives restarts and reboots. This is the daily path.
+* **ATTACH.** With ``LINKEDIN_OWN_CDP_ATTACH=1`` this server launches nothing
+  and connects over CDP to a Chrome the operator started himself. It takes no
+  profile lock (it owns no profile), it opens its own tab rather than driving
+  one of his, and on teardown it disconnects without closing his browser --
+  measured, not assumed. See ``cdp_bridge.py`` for the exact requirements.
 """
 
 from __future__ import annotations
@@ -39,15 +55,20 @@ from typing import Any, AsyncIterator, Optional
 
 from linkedin_own_server import profile_lock
 from linkedin_own_server.config import (
+    CDP_ATTACH,
     CHROME_PROFILE,
     IDLE_CLOSE_S,
+    LAUNCH_ARGS,
     MIN_NAVIGATION_INTERVAL_S,
     NAV_TIMEOUT_MS,
     SETTLE_MS,
     logger,
 )
 from linkedin_own_server.errors import BrowserUnavailableError
-from linkedin_own_server.readonly import assert_read_url
+from linkedin_own_server.readonly import (
+    assert_launch_flags_permitted,
+    assert_read_url,
+)
 
 _HEADLESS_ENV = "LINKEDIN_OWN_HEADLESS"
 
@@ -74,6 +95,10 @@ class LinkedInBrowser:
         self._last_navigation_at: float = 0.0
         self._idle_task: Optional[asyncio.Task] = None
         self._holds_profile_lock = False
+        #: Set only in ATTACH mode: the CDP client we must disconnect, and the
+        #: tab we opened. Both stay None on the ordinary launch path.
+        self._cdp_client: Any = None
+        self._own_page: Any = None
 
     # -- lifecycle ---------------------------------------------------------
 
@@ -81,9 +106,31 @@ class LinkedInBrowser:
     def running(self) -> bool:
         return self._context is not None
 
+    @property
+    def attached(self) -> bool:
+        """True when this server is driving a browser it did not start."""
+        return self._cdp_client is not None
+
+    @property
+    def mode(self) -> str:
+        """``"attach"`` or ``"launch"`` -- what the NEXT start() would do."""
+        return "attach" if CDP_ATTACH else "launch"
+
     async def start(self) -> None:
-        """Launch the persistent context. Idempotent."""
+        """Bring up a browser context. Idempotent.
+
+        In the default LAUNCH mode this starts Chromium against the persistent
+        profile, holding the cross-process profile lock for as long as it
+        lives. In ATTACH mode it connects to a browser the operator already
+        started and takes NO profile lock -- it does not own that profile, and
+        claiming a lock on a directory another Chrome is actively using would
+        be a lie that blocks the launch path for no benefit.
+        """
         if self._context is not None:
+            return
+
+        if CDP_ATTACH:
+            await self._start_attached()
             return
 
         try:
@@ -101,23 +148,43 @@ class LinkedInBrowser:
         self._holds_profile_lock = True
 
         try:
+            # The launch boundary, enforced at runtime and not only in the
+            # test suite: a flag added here never reaches Chromium unless it
+            # is one the operator sanctioned.
+            assert_launch_flags_permitted(LAUNCH_ARGS)
             CHROME_PROFILE.mkdir(parents=True, exist_ok=True)
             self._pw = await async_playwright().start()
             self._context = await self._pw.chromium.launch_persistent_context(
                 user_data_dir=str(CHROME_PROFILE),
                 headless=_headless(),
                 viewport={"width": 1400, "height": 900},
+                args=list(LAUNCH_ARGS),
             )
             self._context.set_default_timeout(NAV_TIMEOUT_MS)
             logger.info(
-                "browser started (profile=%s, headless=%s)",
+                "browser started (profile=%s, headless=%s, args=%s)",
                 CHROME_PROFILE,
                 _headless(),
+                list(LAUNCH_ARGS),
             )
         except Exception:
             # Never hold the lock for a browser that did not come up.
             await self._teardown()
             raise
+
+    async def _start_attached(self) -> None:
+        """Connect to a browser the operator started. Recovery path only."""
+        from linkedin_own_server import cdp_bridge
+
+        pw, client, context = await cdp_bridge.attach()
+        self._pw = pw
+        self._cdp_client = client
+        self._context = context
+        try:
+            self._context.set_default_timeout(NAV_TIMEOUT_MS)
+        except Exception as exc:  # pragma: no cover - older client
+            logger.debug("set_default_timeout raised %s: %s", type(exc).__name__, exc)
+        logger.info("attached over CDP at %s", cdp_bridge.endpoint())
 
     async def stop(self) -> None:
         """Close the browser and release the profile lock. Never raises."""
@@ -125,19 +192,38 @@ class LinkedInBrowser:
 
     async def _teardown(self) -> None:
         context, pw = self._context, self._pw
+        client, own_page = self._cdp_client, self._own_page
         self._context = None
         self._pw = None
+        self._cdp_client = None
+        self._own_page = None
         # NB: _idle_close() clears this before calling us, so we never cancel
         # the task we are currently running inside -- doing so would raise
         # CancelledError at the next await and abandon the teardown halfway.
         if self._idle_task is not None:
             self._idle_task.cancel()
             self._idle_task = None
-        if context is not None:
+
+        if client is not None:
+            # ATTACH mode. The context belongs to the operator's browser, so
+            # closing it would close HIS window. Close only the tab we opened,
+            # then drop the CDP connection: measured on this machine, the
+            # client's close() disconnects and leaves Chrome serving.
+            if own_page is not None:
+                try:
+                    await own_page.close()
+                except Exception as exc:  # pragma: no cover - shutdown noise
+                    logger.debug("closing our tab raised %s: %s", type(exc).__name__, exc)
+            try:
+                await client.close()
+            except Exception as exc:  # pragma: no cover - shutdown noise
+                logger.debug("cdp disconnect raised %s: %s", type(exc).__name__, exc)
+        elif context is not None:
             try:
                 await context.close()
             except Exception as exc:  # pragma: no cover - shutdown noise
                 logger.debug("closing context raised %s: %s", type(exc).__name__, exc)
+
         if pw is not None:
             try:
                 await pw.stop()
@@ -201,6 +287,25 @@ class LinkedInBrowser:
         ctx = self._context
         if ctx is None:  # pragma: no cover - start() just ran
             raise BrowserUnavailableError("browser is not running")
+
+        if self._cdp_client is not None:
+            # ATTACH mode: every existing tab is one the operator opened, and
+            # navigating one away would yank a page out from under him. We
+            # always work in a tab of our own. (A probe of this box also found
+            # extensions opening and driving their own tabs in a freshly made
+            # profile, so "tab zero is mine" is not merely rude, it is wrong.)
+            try:
+                page = self._own_page
+                if page is not None and not page.is_closed():
+                    return page
+                self._own_page = await ctx.new_page()
+                return self._own_page
+            except Exception as exc:
+                raise BrowserUnavailableError(
+                    f"could not open a tab in the attached browser: "
+                    f"{type(exc).__name__}: {exc}"
+                ) from exc
+
         try:
             pages = [p for p in ctx.pages if not p.is_closed()]
             return pages[0] if pages else await ctx.new_page()

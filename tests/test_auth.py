@@ -287,3 +287,236 @@ async def test_no_cookie_value_leaks_from_the_login_result(
     blob = json.dumps(result)
     assert "secret-token-value" not in blob
     assert "ajax:55" not in blob
+
+
+# ---------------------------------------------------------------------------
+# The cold start
+# ---------------------------------------------------------------------------
+#
+# The trap this section exists for, measured in this repo's own Chrome
+# profile: li_at is a PERSISTENT cookie and JSESSIONID is a SESSION one
+# (is_persistent=0, expires=NULL). So every time the browser starts, the jar
+# holds a perfectly good login and no csrf cookie. A server that asked the
+# identity endpoint straight away would send a request with no csrf-token,
+# LinkedIn would refuse it, and the operator would be told to sign in again
+# while his session was fine. One page load fixes it, because LinkedIn issues
+# the session cookie to anyone who loads a page.
+
+
+async def test_a_cold_browser_loads_a_page_before_asking_who_it_is(
+    patched_navigation,
+):
+    """The fix: no csrf cookie -> load the feed -> now ask, with the token."""
+    page = FakePage(
+        cookies={"li_at": "live"},  # persistent login, no session cookie yet
+        cookies_after_goto={"JSESSIONID": '"ajax:cold"'},
+        responses=[me_response()],
+    )
+    result = await check_auth(page)
+
+    assert result["authenticated"] is True
+    assert patched_navigation == ["https://www.linkedin.com/feed/"]
+    # The request that decided it carried the token the warm-up earned.
+    assert page.request.calls[0]["headers"]["csrf-token"] == "ajax:cold"
+
+
+async def test_without_the_warm_up_the_identity_call_goes_out_without_a_token(
+    patched_navigation,
+):
+    """The warm-up, shown failing.
+
+    ``warm=False`` is the behaviour this server had before: it asks with no
+    csrf-token at all. The check above proves the fix only because this one
+    proves the fix was needed.
+    """
+    page = FakePage(
+        cookies={"li_at": "live"},
+        cookies_after_goto={"JSESSIONID": '"ajax:cold"'},
+        responses=[FakeResponse(401, "")],
+    )
+    result = await check_auth(page, warm=False)
+
+    assert patched_navigation == []
+    assert "csrf-token" not in page.request.calls[0]["headers"]
+    assert result["authenticated"] is False
+
+
+async def test_a_warm_browser_does_not_spend_a_page_load(patched_navigation):
+    """The warm-up fires on a cold jar only. A live one must not pay for it."""
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        responses=[me_response()],
+    )
+    result = await check_auth(page)
+    assert result["authenticated"] is True
+    assert patched_navigation == []
+
+
+async def test_the_warm_up_load_doubles_as_the_corroborating_read(
+    patched_navigation,
+):
+    """Having loaded the feed once, an inconclusive answer must not reload it.
+
+    Corroboration and the warm-up ask the same question of the same page.
+    Spending a second request on it would be this server hitting LinkedIn
+    twice to learn something it already knew.
+    """
+    page = FakePage(
+        cookies={"li_at": "stale"},
+        cookies_after_goto={"JSESSIONID": '"ajax:cold"'},
+        responses=[FakeResponse(999, "")],
+    )
+    page.redirect_to = "https://www.linkedin.com/authwall"
+
+    result = await check_auth(page, corroborate=True)
+
+    assert patched_navigation == ["https://www.linkedin.com/feed/"]
+    assert result["authenticated"] is False
+    assert "authwall" in result["corroborated_with"]
+
+
+async def test_a_failed_warm_up_does_not_become_a_verdict(monkeypatch):
+    """The warm-up is best effort. Losing it must not decide the question."""
+    from linkedin_own_server import browser as browser_module
+
+    async def exploding_goto(page, url, **kwargs):
+        raise RuntimeError("net::ERR_NAME_NOT_RESOLVED")
+
+    monkeypatch.setattr(browser_module.BROWSER, "goto", exploding_goto)
+
+    page = FakePage(cookies={"li_at": "live"}, responses=[me_response()])
+    result = await check_auth(page)
+    assert result["authenticated"] is True
+
+
+async def test_the_half_typed_login_page_is_never_navigated_away(
+    patched_navigation, fast_polling
+):
+    """The login wait polls with warm=False, and it has to.
+
+    The warm-up navigates. Navigating while he is typing into the sign-in form
+    would throw the form away, so the wait loop must never do it -- the page
+    starts at /login and no /feed/ load may follow.
+    """
+    page = FakePage(
+        cookies={"li_at": "pending"},
+        responses=[FakeResponse(401, ""), me_response()],
+    )
+    result = await login_via_browser(page, wait_seconds=5)
+
+    assert result["authenticated"] is True
+    assert "https://www.linkedin.com/feed/" not in patched_navigation[1:]
+
+
+# ---------------------------------------------------------------------------
+# session_info: how long the sign-in has left
+# ---------------------------------------------------------------------------
+
+
+def _in_days(days: float) -> float:
+    import time as _time
+
+    return _time.time() + days * 86400.0
+
+
+async def test_session_info_reports_the_expiry_it_reads_from_the_jar(
+    patched_navigation,
+):
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": _in_days(300)},
+        responses=[me_response()],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["authenticated"] is True
+    assert info["session_cookie"]["name"] == "li_at"
+    assert info["session_cookie"]["present"] is True
+    assert info["session_cookie"]["persistent"] is True
+    assert 299 <= info["session_cookie"]["expires_in_days"] <= 301
+    assert info["session_cookie"]["expired"] is False
+    assert info["session_cookie"]["expires_at"].endswith("Z")
+
+
+async def test_session_info_calls_the_csrf_cookie_what_it_is(patched_navigation):
+    """JSESSIONID has no expiry date because it has no life past the browser."""
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": _in_days(300)},
+        responses=[me_response()],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["csrf_cookie"]["present"] is True
+    assert info["csrf_cookie"]["persistent"] is False
+    assert info["csrf_cookie"]["expires_at"] is None
+
+
+async def test_session_info_says_the_login_outlives_a_restart(patched_navigation):
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": _in_days(300)},
+        responses=[me_response()],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["durability"]["survives_server_restart"] is True
+    assert info["durability"]["survives_machine_reboot"] is True
+    assert "chrome-profile" in info["durability"]["stored_in"].lower()
+    assert "linkedin_login_browser" in info["on_expiry"]
+
+
+async def test_session_info_reports_a_missing_login_as_missing(patched_navigation):
+    """No li_at at all. The absence is reported, not papered over."""
+    page = FakePage(
+        cookies={"JSESSIONID": '"ajax:99"'},
+        responses=[FakeResponse(401, "")],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["authenticated"] is False
+    assert info["session_cookie"]["present"] is False
+    assert "expires_at" not in info["session_cookie"]
+
+
+async def test_session_info_flags_an_expired_cookie_as_expired(patched_navigation):
+    page = FakePage(
+        cookies={"li_at": "long-dead", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": _in_days(-2)},
+        responses=[FakeResponse(401, "")],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["session_cookie"]["expired"] is True
+    assert info["session_cookie"]["expires_in_days"] < 0
+    assert info["authenticated"] is False
+
+
+async def test_session_info_never_returns_a_cookie_value(patched_navigation):
+    """An expiry date is a fact about the session. The token is the session."""
+    page = FakePage(
+        cookies={"li_at": "secret-token-value", "JSESSIONID": '"ajax:55"'},
+        expiries={"li_at": _in_days(300)},
+        responses=[me_response()],
+    )
+    blob = json.dumps(await auth_module.session_info(page))
+
+    assert "secret-token-value" not in blob
+    assert "ajax:55" not in blob
+
+
+async def test_session_info_does_not_guess_when_the_endpoint_will_not_say(
+    patched_navigation,
+):
+    """Three-valued here too: unknown stays unknown, it does not become false."""
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": _in_days(300)},
+        responses=[FakeResponse(999, "")],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["authenticated"] is None
+    assert "999" in info["reason"]
+    # The expiry is still reported: it is read from the jar, not from LinkedIn.
+    assert info["session_cookie"]["persistent"] is True

@@ -1,4 +1,4 @@
-"""The tool surface: nine tools, every one of them a read.
+"""The tool surface: eleven tools, every one of them a read.
 
 There is no write path in this package. Not a disabled one, not a stubbed one,
 not one behind a flag. Nothing here applies to a job, saves a job, sends a
@@ -20,17 +20,20 @@ from urllib.parse import urlencode
 
 from fastmcp import FastMCP
 
-from linkedin_own_server import dom, shape
+from linkedin_own_server import cdp_bridge, dom, shape
 from linkedin_own_server.auth import (
     assert_not_authwall,
     check_auth,
     login_via_browser,
+    session_info,
 )
 from linkedin_own_server.browser import BROWSER
 from linkedin_own_server.config import (
     BASE_URL,
+    CDP_PORT,
     DEFAULT_LIMIT,
     IDLE_CLOSE_S,
+    LAUNCH_ARGS,
     LOGIN_WAIT_S,
     MAX_LIMIT,
     MAX_NAVIGATIONS_PER_CALL,
@@ -55,10 +58,14 @@ mcp = FastMCP(
         "message, no connection request, no profile edit -- those are out of "
         "scope by design, so do not look for them or suggest they exist. "
         "Start with linkedin_auth_status; if it says false, the operator must "
-        "call linkedin_login_browser and sign in himself. The highest-signal "
-        "tool is linkedin_who_viewed_me: where the account has Premium Career, so it "
-        "reaches back 365 days. Each call loads exactly one page, so ask for "
-        "one thing at a time rather than sweeping."
+        "call linkedin_login_browser and sign in himself in the window it "
+        "opens -- this server never handles a password. That sign-in is a "
+        "ONE-TIME step: it lives in an on-disk Chrome profile and survives "
+        "both a server restart and a reboot, and linkedin_session_info says "
+        "when it lapses. The highest-signal tool is linkedin_who_viewed_me: "
+        "where the account has Premium Career, so it reaches back 365 days. Each call "
+        "loads exactly one page, so ask for one thing at a time rather than "
+        "sweeping."
     ),
 )
 
@@ -168,6 +175,68 @@ async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, 
     try:
         async with BROWSER.session() as page:
             return await login_via_browser(page, wait_seconds=int(wait_seconds))
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_session_info() -> dict[str, Any]:
+    """Report whether the session is live and how long it has left.
+
+    This is the question that comes up after a week away: is the sign-in still
+    good, and when does it lapse? The verdict is the same measured one
+    linkedin_auth_status gives -- an authenticated call to the identity
+    endpoint, never a cookie's presence -- and alongside it comes the expiry
+    date read straight out of the browser's own cookie jar.
+
+    The sign-in lives in an on-disk Chrome profile rather than in this
+    process, so it survives this server restarting and the machine rebooting.
+    What ends it is LinkedIn expiring it, a sign-out, or the profile directory
+    going away.
+
+    Cookie values are never returned. Only the name, whether it is there, and
+    when it lapses. When it has lapsed every read tool says so with a reason
+    rather than handing back nothing, and linkedin_login_browser is the way
+    back.
+    """
+    try:
+        async with BROWSER.session() as page:
+            return await session_info(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_cdp_status() -> dict[str, Any]:
+    """Is there a browser this server could attach to? A recovery diagnostic.
+
+    NOT the normal way to run this server, and not something to reach for
+    first. The daily path is the persistent Chrome profile: sign in once and
+    it holds for as long as LinkedIn honours it. This exists for the day that
+    profile's session dies and an automated sign-in is being refused -- then
+    the operator can run his own Chrome with a DevTools port open and let this
+    server read through that instead.
+
+    It needs a Chrome that is ALREADY RUNNING and that was started with
+    --remote-debugging-port. A browser opened from the taskbar has no such
+    port, so "my browser is open" is not enough. Worse, when a Chrome is
+    already running, a second one started with the flag silently hands its
+    arguments to the first and no port opens at all -- so either quit Chrome
+    completely first, or give the new one its own --user-data-dir.
+
+    This touches nothing on LinkedIn. It asks the local port what is there and
+    reports the answer, or the exact command to run when nothing answered.
+    """
+    try:
+        result = await cdp_bridge.probe()
+        result["is_the_daily_path"] = False
+        result["active_browser_mode"] = BROWSER.mode
+        result["how_to_use"] = (
+            "start this server with LINKEDIN_OWN_CDP_ATTACH=1 to read through "
+            "the attached browser instead of the persistent profile. The "
+            "read-only boundary is identical in both modes."
+        )
+        return result
     except Exception as exc:
         return _error(exc)
 
@@ -605,7 +674,38 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "profile_dir": str(CHROME_PROFILE),
                 "profile_lock_held_by_pid": held_by(),
                 "idle_close_seconds": IDLE_CLOSE_S,
-                "detection_evasion": "none -- ordinary automated browser",
+                "mode": BROWSER.mode,
+                "session_survives_restart_and_reboot": True,
+            },
+            # Declared as fields rather than prose so it can be asserted on.
+            # One flag is passed that touches automation visibility, it is
+            # named, and every other technique is enumerated and false.
+            "automation_posture": {
+                "launch_args": list(LAUNCH_ARGS),
+                "navigator_webdriver_disabled": True,
+                "stealth_plugin": False,
+                "user_agent_spoofing": False,
+                "platform_or_timezone_spoofing": False,
+                "fingerprint_spoofing": False,
+                "proxy": False,
+                "randomised_or_humanised_timing": False,
+                "mouse_movement_simulation": False,
+                "captcha_solving": False,
+                "summary": (
+                    "one flag, --disable-blink-features=AutomationControlled, "
+                    "which stops Blink setting navigator.webdriver to true. "
+                    "LinkedIn checks that at sign-in. Everything else on this "
+                    "list is false and there is no code in the package that "
+                    "could make it true."
+                ),
+            },
+            "recovery_path": {
+                "what": "attach to a Chrome the operator started himself",
+                "when": "the profile session has died and sign-in is refused",
+                "is_the_daily_path": False,
+                "enable_with": "LINKEDIN_OWN_CDP_ATTACH=1",
+                "requires": f"a running Chrome started with --remote-debugging-port={CDP_PORT}",
+                "check_with": "linkedin_cdp_status",
             },
         }
     except Exception as exc:

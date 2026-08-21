@@ -1,4 +1,4 @@
-"""The tool surface: nine tools, and not one of them offers a write.
+"""The tool surface: eleven tools, and not one of them offers a write.
 
 The brief for this server drew a hard line -- no writes, not now, not stubbed,
 not "for later". This file is that line expressed as assertions, including on
@@ -23,6 +23,8 @@ EXPECTED_TOOLS = {
     "linkedin_my_profile",
     "linkedin_notifications",
     "linkedin_server_info",
+    "linkedin_session_info",
+    "linkedin_cdp_status",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -52,9 +54,9 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_nine_reads(tools):
+async def test_the_surface_is_exactly_the_eleven_reads(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 9
+    assert len(tools) == 11
 
 
 async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):
@@ -143,7 +145,6 @@ async def test_server_info_declares_the_boundary_and_lists_no_writes():
     assert info["writes_available"] == []
     assert info["rate_discipline"]["auto_paging"] is False
     assert info["rate_discipline"]["scheduled_or_background_activity"] is False
-    assert info["browser"]["detection_evasion"].startswith("none")
     # The side effects are disclosed here too, not only in one docstring.
     joined = " ".join(info["known_side_effects"]).lower()
     assert "badge" in joined and "recent-search history" in joined
@@ -153,3 +154,112 @@ async def test_the_server_instructions_tell_a_caller_not_to_look_for_writes():
     text = (mcp.instructions or "").lower()
     assert "read-only" in text
     assert "no apply" in text
+
+
+# ---------------------------------------------------------------------------
+# The automation posture, declared as fields rather than as a promise
+# ---------------------------------------------------------------------------
+
+
+async def test_server_info_names_the_one_flag_and_denies_every_other_technique():
+    """A prose disclaimer cannot be asserted on. These fields can.
+
+    The operator's boundary is one Blink flag and nothing past it. Every
+    technique past it is enumerated here as a field, so crossing the line
+    means editing a False to a True in a diff rather than quietly adding an
+    argument somewhere.
+    """
+    from linkedin_own_server.config import LAUNCH_ARGS
+    from linkedin_own_server.server import linkedin_server_info
+
+    posture = (await linkedin_server_info())["automation_posture"]
+
+    assert posture["launch_args"] == list(LAUNCH_ARGS)
+    assert posture["navigator_webdriver_disabled"] is True
+    for technique in (
+        "stealth_plugin",
+        "user_agent_spoofing",
+        "platform_or_timezone_spoofing",
+        "fingerprint_spoofing",
+        "proxy",
+        "randomised_or_humanised_timing",
+        "mouse_movement_simulation",
+        "captcha_solving",
+    ):
+        assert posture[technique] is False, technique
+
+
+async def test_the_flags_server_info_reports_are_flags_it_is_allowed_to_pass():
+    """The report and the gate must not be able to drift apart.
+
+    Putting what the tool SAYS back through the boundary check means a flag
+    added to the launch list is caught here too, not only where it is used.
+    """
+    from linkedin_own_server.server import linkedin_server_info
+
+    posture = (await linkedin_server_info())["automation_posture"]
+    assert readonly.assert_launch_flags_permitted(posture["launch_args"]) is None
+
+
+async def test_the_posture_check_would_catch_a_third_flag():
+    """The check above, shown failing."""
+    with pytest.raises(Exception) as excinfo:
+        readonly.assert_launch_flags_permitted(
+            ["--disable-blink-features=AutomationControlled", "--user-agent=Mozilla"]
+        )
+    assert "--user-agent" in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
+# The two tools added for session durability and recovery
+# ---------------------------------------------------------------------------
+
+
+async def test_the_session_tool_says_the_sign_in_outlives_a_restart(tools):
+    """The operator's question is "do I have to do this again?" -- so answer it
+    in the description, where he reads it, not only in a field."""
+    text = (tools["linkedin_session_info"].description or "").lower()
+    assert "profile" in text
+    assert "restarting" in text and "rebooting" in text
+
+
+async def test_the_session_tool_promises_not_to_return_a_cookie_value(tools):
+    text = (tools["linkedin_session_info"].description or "").lower()
+    assert "cookie values are never returned" in text
+
+
+async def test_the_recovery_tool_is_labelled_as_recovery(tools):
+    """It must not read as an alternative daily path. It is a fallback."""
+    text = (tools["linkedin_cdp_status"].description or "").lower()
+    assert "not the normal way" in text
+    assert "recovery" in text
+
+
+async def test_the_recovery_tool_states_its_two_hard_requirements(tools):
+    """Both were measured. Both silently defeat an operator who does not know.
+
+    A Chrome opened normally has no DevTools port; and a second Chrome
+    started with the flag while one is already running hands its arguments to
+    the first and opens no port at all, with no error.
+    """
+    text = (tools["linkedin_cdp_status"].description or "").lower()
+    assert "already running" in text
+    assert "--remote-debugging-port" in text
+    assert "silently" in text
+    assert "--user-data-dir" in text
+
+
+async def test_server_info_points_at_the_recovery_path_without_promoting_it():
+    from linkedin_own_server.server import linkedin_server_info
+
+    recovery = (await linkedin_server_info())["recovery_path"]
+    assert recovery["is_the_daily_path"] is False
+    assert recovery["check_with"] == "linkedin_cdp_status"
+    assert "--remote-debugging-port" in recovery["requires"]
+
+
+async def test_the_instructions_tell_a_caller_the_sign_in_is_one_time():
+    """A caller that thinks the login is per-session will suggest it forever."""
+    text = (mcp.instructions or "").lower()
+    assert "one-time" in text
+    assert "linkedin_session_info" in text

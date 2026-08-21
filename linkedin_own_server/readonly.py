@@ -1,7 +1,7 @@
 """The read-only invariant, written down as something that can fail.
 
 "Read-only by design" is a claim. This module is the executable version of it,
-in three parts:
+in four parts:
 
 1. **A navigation allowlist.** :func:`assert_read_url` is the only door to
    ``page.goto``. Every url this server may open is enumerated below as a
@@ -17,9 +17,16 @@ in three parts:
 3. **A verb list.** :data:`WRITE_VERBS` is what the tool-surface test uses to
    assert that no tool name or docstring implies a mutation.
 
-The guarantee those three buy: this server can open a fixed set of LinkedIn's
+4. **A launch boundary.** :func:`assert_launch_flags_permitted` and
+   :func:`scan_source_for_evasion` hold the line on HOW the browser is
+   started: two sanctioned Chromium flags, and no anti-detection library
+   pulled in through the back door. ``browser.py`` runs the first of those
+   before every launch, so it binds at runtime and not only in the tests.
+
+The guarantee those four buy: this server can open a fixed set of LinkedIn's
 own read pages in the operator's browser and read what rendered. It has no
-code path that clicks, types, submits a form, or issues a non-GET request.
+code path that clicks, types, submits a form, or issues a non-GET request,
+and it reaches LinkedIn as the ordinary Chrome it is.
 """
 
 from __future__ import annotations
@@ -338,3 +345,157 @@ def docstring_write_claims(text: str) -> list[tuple[str, str]]:
             context = lowered[window_start : match.end() + 30].strip()
             claims.append((verb, context))
     return claims
+
+
+# ---------------------------------------------------------------------------
+# 4. The launch boundary
+# ---------------------------------------------------------------------------
+
+#: The flag NAMES this server may hand Chromium, with their values stripped
+#: off. The complete list it actually passes is ``config.LAUNCH_ARGS``; this
+#: is the gate that list has to get through, and
+#: ``tests/test_launch_boundary.py`` puts it through it.
+#:
+#: Two flags, and the reason the line is drawn immediately after them:
+#:
+#: * ``--disable-blink-features=AutomationControlled`` switches off the one
+#:   Blink feature that sets ``navigator.webdriver = true``. Without it the
+#:   browser announces on every page load that it is automated, and LinkedIn
+#:   will not complete a sign-in. It flips one boolean. The browser still
+#:   reports the user agent, platform, canvas, font list and timezone of the
+#:   Chrome it actually is.
+#: * ``--remote-debugging-port`` opens the DevTools port on 127.0.0.1 that
+#:   the recovery path attaches to (``cdp_bridge.py``).
+#:
+#: Anything past those two is a different activity rather than a bigger
+#: version of the same one: a stealth plugin, a spoofed user agent or
+#: platform, a patched canvas/WebGL/font/audio fingerprint, a proxy,
+#: randomised "human-like" delays, a captcha solver. This server does none of
+#: them. The check exists because whoever reaches for one will be fixing a
+#: real failure at the time, and this boundary should be something they have
+#: to raise with the operator rather than something a reviewer has to happen
+#: to notice in a diff.
+PERMITTED_LAUNCH_FLAGS: tuple[str, ...] = (
+    "--disable-blink-features",
+    "--remote-debugging-port",
+)
+
+#: The only Blink feature that may be switched off. The flag takes a
+#: comma-separated LIST and can disable arbitrary web-platform behaviour, so
+#: permitting the flag NAME is not enough: this one value is sanctioned, and
+#: every other value -- including this one with anything appended to it -- is
+#: not.
+_PERMITTED_BLINK_FEATURE = "AutomationControlled"
+
+
+def assert_launch_flags_permitted(args: Iterable[str]) -> None:
+    """Return quietly if every launch flag is permitted, else raise.
+
+    Args:
+        args: the arguments as handed to Chromium -- ``config.LAUNCH_ARGS``
+            in practice. Each entry is ``--name`` or ``--name=value``.
+
+    Raises:
+        WriteAttemptError: an argument's name is not in
+            :data:`PERMITTED_LAUNCH_FLAGS`, or ``--disable-blink-features``
+            carries a value other than ``AutomationControlled``. It is the
+            same error the navigation allowlist raises, for the same reason:
+            this server was asked to do something it has no business doing,
+            and the only correct outcome is a loud stop.
+    """
+    for arg in args:
+        name, _, value = str(arg).partition("=")
+        if name not in PERMITTED_LAUNCH_FLAGS:
+            raise WriteAttemptError(
+                f"launch flag {name!r} is not permitted. This server passes "
+                f"exactly {len(PERMITTED_LAUNCH_FLAGS)} Chromium flags -- "
+                f"{', '.join(PERMITTED_LAUNCH_FLAGS)} -- and nothing else: "
+                "no stealth plugin, no user-agent or platform spoofing, no "
+                "fingerprint patching, no proxy, no captcha solver. That is "
+                "a deliberate boundary, so widening it is the operator's "
+                "call to make and not a code review's."
+            )
+        if name == "--disable-blink-features" and value != _PERMITTED_BLINK_FEATURE:
+            raise WriteAttemptError(
+                f"launch flag {name!r} may switch off "
+                f"{_PERMITTED_BLINK_FEATURE!r} and nothing else, not "
+                f"{value!r}. That one feature is what sets "
+                "navigator.webdriver, and turning it off is the difference "
+                "between a sign-in completing and being refused; the same "
+                "flag can disable arbitrary Blink behaviour, which is a "
+                "different thing and needs the operator's say-so, not a "
+                "code review's."
+            )
+
+
+def _import_pattern(*packages: str) -> re.Pattern[str]:
+    """Compile a pattern matching an import statement for any of ``packages``.
+
+    Anchored to the start of a line under ``re.MULTILINE``, so it fires on
+    ``import x`` and on ``from x import y`` and on nothing else. A package
+    named in a sentence, a docstring or a comment is prose, and prose is not
+    a dependency.
+    """
+    names = "|".join(re.escape(package) for package in packages)
+    return re.compile(rf"^\s*(?:import|from)\s+(?:{names})\b", re.MULTILINE)
+
+
+#: Anti-detection libraries, matched on the IMPORT LINE ONLY. Pulling one of
+#: these in would cross the boundary above in a second way -- not through a
+#: flag but through a dependency -- so it gets its own scan, run over every
+#: module of this package by ``tests/test_launch_boundary.py``.
+#:
+#: Anchoring on ``import``/``from`` rather than on a bare substring is
+#: load-bearing, not tidiness: this package says out loud, in this very
+#: module, that it does not use a stealth plugin and does not spoof a user
+#: agent. A substring check would make documenting the boundary impossible,
+#: which is a worse outcome than not checking at all.
+EVASION_IMPORT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "stealth",
+        _import_pattern(
+            "playwright_stealth", "selenium_stealth", "puppeteer_stealth"
+        ),
+    ),
+    ("undetected", _import_pattern("undetected_chromedriver")),
+    (
+        "captcha",
+        _import_pattern("twocaptcha", "2captcha", "anticaptcha", "capsolver"),
+    ),
+    ("useragent_spoofing", _import_pattern("fake_useragent", "user_agents")),
+    ("tls_spoofing", _import_pattern("curl_cffi", "tls_client")),
+    ("fingerprint", _import_pattern("browserforge", "fingerprint_suite")),
+)
+
+
+def scan_source_for_evasion(source: str) -> list[tuple[int, str, str]]:
+    """Return ``(line_number, label, line)`` for every evasion import found.
+
+    Three kinds of line are skipped -- the same three
+    :func:`scan_source_for_mutations` skips, and for the same reason, since
+    the table above is built out of the very package names being hunted:
+
+    * comments;
+    * ``re.compile(...)`` lines;
+    * any line ending in ``# readonly-ok``, so a genuine false positive is
+      waived visibly in the diff rather than by quietly loosening a pattern.
+
+    The fourth skip in :func:`scan_source_for_mutations` -- a line that is
+    nothing but a quoted string -- is not repeated here because it cannot
+    matter: these patterns match an import STATEMENT, and a bare literal is
+    never one.
+    """
+    hits: list[tuple[int, str, str]] = []
+    for lineno, line in enumerate(source.splitlines(), start=1):
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue
+        if "re.compile(" in stripped:
+            continue
+        if stripped.endswith("# readonly-ok"):
+            continue
+        for label, pattern in EVASION_IMPORT_PATTERNS:
+            if pattern.search(line):
+                hits.append((lineno, label, stripped))
+                break
+    return hits

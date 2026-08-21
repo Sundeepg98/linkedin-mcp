@@ -62,13 +62,24 @@ class FakeRequestContext:
 class FakeBrowserContext:
     """``page.context`` -- owns the cookie jar."""
 
-    def __init__(self, cookies: Optional[dict[str, str]] = None):
+    def __init__(
+        self,
+        cookies: Optional[dict[str, str]] = None,
+        expiries: Optional[dict[str, float]] = None,
+    ):
         self.jar = dict(cookies or {})
+        #: name -> expiry, seconds since the epoch. Playwright reports -1 for
+        #: a cookie that dies with the browser, and that is the default here
+        #: because it is what LinkedIn's JSESSIONID actually is.
+        self.expiries = dict(expiries or {})
         self.cookie_reads = 0
 
-    async def cookies(self, url: Optional[str] = None) -> list[dict[str, str]]:
+    async def cookies(self, url: Optional[str] = None) -> list[dict[str, Any]]:
         self.cookie_reads += 1
-        return [{"name": k, "value": v} for k, v in self.jar.items()]
+        return [
+            {"name": k, "value": v, "expires": self.expiries.get(k, -1)}
+            for k, v in self.jar.items()
+        ]
 
 
 class FakePage:
@@ -82,8 +93,15 @@ class FakePage:
         url: str = "https://www.linkedin.com/feed/",
         evaluate_result: Any = None,
         default_response: Any = None,
+        expiries: Optional[dict[str, float]] = None,
+        cookies_after_goto: Optional[dict[str, str]] = None,
     ):
-        self.context = FakeBrowserContext(cookies)
+        self.context = FakeBrowserContext(cookies, expiries)
+        #: Cookies LinkedIn issues once a page is actually loaded. This is how
+        #: a cold browser behaves: the persistent li_at is already in the jar,
+        #: and the session cookie the identity call needs only appears after
+        #: something has been fetched.
+        self.cookies_after_goto = dict(cookies_after_goto or {})
         self.request = FakeRequestContext(responses, default=default_response)
         self.url = url
         self.gotos: list[str] = []
@@ -97,6 +115,9 @@ class FakePage:
     async def goto(self, url: str, **kwargs) -> None:
         self.gotos.append(url)
         self.url = self.redirect_to or url
+        if self.cookies_after_goto:
+            self.context.jar.update(self.cookies_after_goto)
+            self.cookies_after_goto = {}
 
     async def wait_for_load_state(self, *args, **kwargs) -> None:
         return None
@@ -116,6 +137,10 @@ class FakePage:
 
     def close_window(self) -> None:
         """Simulate the operator closing the login window."""
+        self._closed = True
+
+    async def close(self) -> None:
+        """Playwright's own page.close(). Used by the attach-mode teardown."""
         self._closed = True
 
 

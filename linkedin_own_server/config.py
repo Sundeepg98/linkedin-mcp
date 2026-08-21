@@ -65,6 +65,49 @@ LOGIN_URL = f"{BASE_URL}/login"
 AUTHWALL_MARKERS = ("/login", "/authwall", "/uas/login", "/checkpoint/")
 
 # ---------------------------------------------------------------------------
+# How the browser is launched
+# ---------------------------------------------------------------------------
+
+#: The DevTools port the launched browser listens on, so the secondary
+#: recovery path (``cdp_bridge``) can attach to it. Distinct from the sibling
+#: Naukri server's 9223 on purpose: two servers on one port is a collision,
+#: and the second one to start would silently get no port at all.
+CDP_PORT = int(os.environ.get("LINKEDIN_OWN_CDP_PORT", "9224"))
+
+#: Literal ``127.0.0.1``, never ``localhost``. Measured on this machine:
+#: Chrome binds the DevTools port on IPv4 only, so ``localhost`` resolves to
+#: ``[::1]`` first, is refused, and falls back -- 2085 ms against 35 ms.
+CDP_HOST = os.environ.get("LINKEDIN_OWN_CDP_HOST", "127.0.0.1")
+
+#: Set ``LINKEDIN_OWN_CDP_ATTACH=1`` to run in ATTACH mode: instead of
+#: launching its own browser, this server connects to a Chrome the operator
+#: started himself with ``--remote-debugging-port``. Recovery path only --
+#: see ``cdp_bridge.py`` for what it costs and what it requires.
+CDP_ATTACH = os.environ.get("LINKEDIN_OWN_CDP_ATTACH", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
+#: The COMPLETE list of Chromium command-line flags this server passes. It is
+#: two entries and a test asserts it stays exactly these two, because this is
+#: the file where a "just one more flag" fix would land.
+#:
+#: ``--disable-blink-features=AutomationControlled`` turns off one Blink
+#: feature: the one that sets ``navigator.webdriver = true``. Without it the
+#: browser announces at every page load that it is automated, and LinkedIn
+#: refuses to complete a sign-in. It is what the sibling Naukri server has
+#: run for months (``naukri_server/browser.py``). It changes ONE boolean; it
+#: does not spoof a user agent, a platform, a canvas, a font list or a
+#: timezone, and this server does none of those things anywhere.
+#:
+#: ``--remote-debugging-port`` opens the DevTools port described above.
+LAUNCH_ARGS: tuple[str, ...] = (
+    "--disable-blink-features=AutomationControlled",
+    f"--remote-debugging-port={CDP_PORT}",
+)
+
+# ---------------------------------------------------------------------------
 # Rate discipline
 # ---------------------------------------------------------------------------
 

@@ -51,8 +51,20 @@ from linkedin_own_server.errors import (
 
 #: The cookie that carries a LinkedIn session. Its presence is a prompt to
 #: ask the API, and that is the only role it has anywhere in this server.
+#: It is a PERSISTENT cookie, which is what makes the profile a durable login.
 SESSION_COOKIE = "li_at"
-#: LinkedIn's web app sends this cookie's value back as the csrf-token header.
+
+#: LinkedIn's web app sends this cookie's value back as the csrf-token header,
+#: and the identity endpoint will not answer an authenticated request without
+#: it. Unlike ``li_at`` this one is a SESSION cookie -- measured in this very
+#: profile's cookie store as ``is_persistent=0, expires=NULL`` -- so it is
+#: GONE every time the browser restarts, while the login itself is not.
+#:
+#: That asymmetry is a trap: on a cold start the jar holds a perfectly good
+#: ``li_at`` and no ``JSESSIONID``, the identity call goes out with no csrf
+#: token, and a server that stopped there would tell the operator to sign in
+#: again while his session was fine. :func:`_warm_session_cookies` is the fix
+#: -- one load of a LinkedIn page makes LinkedIn issue a fresh one.
 CSRF_COOKIE = "JSESSIONID"
 
 #: Upper bound on how many times one login wait may spend a request.
@@ -66,15 +78,64 @@ AUTH_ENDPOINT_NOTE = f"GET {ME_API}"
 # ---------------------------------------------------------------------------
 
 
-async def _cookies(page: Any) -> dict[str, str]:
-    """Read the browser's cookie jar. Never logged, never persisted."""
+async def _cookie_records(page: Any) -> list[dict[str, Any]]:
+    """Read the raw cookie jar. Never logged, never persisted, never returned.
+
+    Values stay inside this module. Only derived facts -- a name, a presence,
+    an expiry timestamp -- ever reach a tool result.
+    """
     try:
         jar = await page.context.cookies("https://www.linkedin.com")
     except Exception as exc:
         raise BrowserUnavailableError(
             f"could not read the browser session: {type(exc).__name__}: {exc}"
         ) from exc
-    return {c.get("name", ""): c.get("value", "") for c in jar or []}
+    return [c for c in (jar or []) if isinstance(c, dict)]
+
+
+async def _cookies(page: Any) -> dict[str, str]:
+    """Read the browser's cookie jar as name -> value."""
+    return {c.get("name", ""): c.get("value", "") for c in await _cookie_records(page)}
+
+
+async def _warm_session_cookies(page: Any, cookies: dict[str, str]) -> tuple[
+    dict[str, str], Optional[str]
+]:
+    """Make LinkedIn issue the session cookies a cold browser does not have.
+
+    Returns the (possibly refreshed) cookie map and the FINAL url of the load,
+    or ``None`` if no load was needed or it failed.
+
+    Only fires when :data:`CSRF_COOKIE` is missing, which in practice means
+    "this browser has just started". One page load, through the ordinary
+    allowlist and rate gate. A failure here is not fatal: the caller carries
+    on with the cookies it already had and the identity endpoint gets the last
+    word, exactly as it would have without this step.
+    """
+    if CSRF_COOKIE in cookies:
+        return cookies, None
+
+    from linkedin_own_server.browser import BROWSER
+
+    try:
+        final_url = await BROWSER.goto(page, FEED_URL)
+    except Exception as exc:
+        logger.info(
+            "cold-start warm-up navigation failed: %s: %s", type(exc).__name__, exc
+        )
+        return cookies, None
+
+    try:
+        refreshed = await _cookies(page)
+    except BrowserUnavailableError:
+        return cookies, final_url
+
+    logger.debug(
+        "cold-start warm-up: %s %s after loading the feed",
+        CSRF_COOKIE,
+        "issued" if CSRF_COOKIE in refreshed else "still missing",
+    )
+    return refreshed, final_url
 
 
 def _csrf_from(cookies: dict[str, str]) -> Optional[str]:
@@ -120,7 +181,9 @@ def _identity_from(payload: Any) -> dict[str, Any]:
     return {}
 
 
-async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
+async def check_auth(
+    page: Any, *, corroborate: bool = False, warm: bool = True
+) -> dict[str, Any]:
     """Ask LinkedIn whether this session is signed in.
 
     Args:
@@ -128,6 +191,11 @@ async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
         corroborate: when the API answer is inconclusive, also load the feed
             and look at where it lands. Costs one page load, so tools that
             are mid-flow (the login wait) leave it off.
+        warm: on a cold browser, load one LinkedIn page first so LinkedIn
+            issues the session cookie its identity endpoint requires. Must be
+            OFF while the operator is typing into the sign-in form -- the
+            warm-up navigates, and navigating would throw his half-filled
+            login page away.
 
     Returns:
         A dict with ``authenticated`` (``True`` / ``False`` / ``None``),
@@ -136,6 +204,9 @@ async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
         answer, not an error.
     """
     cookies = await _cookies(page)
+    warm_final_url: Optional[str] = None
+    if warm:
+        cookies, warm_final_url = await _warm_session_cookies(page, cookies)
     cookie_present = SESSION_COOKIE in cookies
 
     headers = {
@@ -168,7 +239,7 @@ async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
                 f"{exc}). This is not a verdict either way."
             ),
         }
-        return await _maybe_corroborate(page, result, corroborate)
+        return await _maybe_corroborate(page, result, corroborate, warm_final_url)
 
     base = {
         "checked_against": AUTH_ENDPOINT_NOTE,
@@ -195,6 +266,7 @@ async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
                 ),
             },
             corroborate,
+            warm_final_url,
         )
 
     if status in (401, 403):
@@ -226,11 +298,15 @@ async def check_auth(page: Any, *, corroborate: bool = False) -> dict[str, Any]:
             ),
         },
         corroborate,
+        warm_final_url,
     )
 
 
 async def _maybe_corroborate(
-    page: Any, result: dict[str, Any], corroborate: bool
+    page: Any,
+    result: dict[str, Any],
+    corroborate: bool,
+    known_final_url: Optional[str] = None,
 ) -> dict[str, Any]:
     """Second, independent read: does the feed bounce us to an auth wall?
 
@@ -238,17 +314,27 @@ async def _maybe_corroborate(
     manufacture a ``true`` -- landing on the feed proves rather less than the
     identity endpoint answering, and this server does not upgrade a verdict on
     weaker evidence.
+
+    ``known_final_url`` is where the cold-start warm-up already landed. When
+    it is set the corroboration is free: the feed has been loaded once this
+    call and loading it twice would spend a second request to re-read an
+    answer already in hand.
     """
     if not corroborate:
         return result
 
-    from linkedin_own_server.browser import BROWSER
+    if known_final_url:
+        final_url = known_final_url
+    else:
+        from linkedin_own_server.browser import BROWSER
 
-    try:
-        final_url = await BROWSER.goto(page, FEED_URL)
-    except Exception as exc:
-        logger.info("corroborating navigation failed: %s: %s", type(exc).__name__, exc)
-        return result
+        try:
+            final_url = await BROWSER.goto(page, FEED_URL)
+        except Exception as exc:
+            logger.info(
+                "corroborating navigation failed: %s: %s", type(exc).__name__, exc
+            )
+            return result
 
     result = dict(result)
     result["corroborated_with"] = f"GET {FEED_URL} -> {final_url}"
@@ -260,6 +346,113 @@ async def _maybe_corroborate(
             "linkedin_login_browser and sign in yourself."
         )
     return result
+
+
+# ---------------------------------------------------------------------------
+# How long the session lasts, reported rather than assumed
+# ---------------------------------------------------------------------------
+
+
+def _cookie_expiry(record: Optional[dict[str, Any]]) -> dict[str, Any]:
+    """Turn one raw cookie record into the facts worth reporting.
+
+    Playwright reports ``expires`` as seconds since the epoch, or ``-1`` for a
+    cookie that dies with the browser. Only derived facts leave here: the
+    value itself never appears in a result.
+    """
+    if record is None:
+        return {"present": False}
+
+    raw = record.get("expires")
+    try:
+        expires = float(raw)
+    except (TypeError, ValueError):
+        expires = -1.0
+
+    if expires <= 0:
+        return {
+            "present": True,
+            "persistent": False,
+            "expires_at": None,
+            "note": (
+                "a session cookie: it lives only as long as the browser "
+                "process does, and a fresh one is issued on the next page load."
+            ),
+        }
+
+    remaining = expires - time.time()
+    return {
+        "present": True,
+        "persistent": True,
+        "expires_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(expires)),
+        "expires_in_days": round(remaining / 86400.0, 1),
+        "expired": remaining <= 0,
+    }
+
+
+async def session_info(page: Any) -> dict[str, Any]:
+    """Report the live session's state and how long it has left.
+
+    Runs the ordinary identity measurement first (so ``authenticated`` here
+    means exactly what it means everywhere else in this server), then reads
+    the cookie jar for expiry dates. Cookie values are never returned.
+    """
+    status = await check_auth(page, corroborate=True)
+
+    records = await _cookie_records(page)
+    by_name = {c.get("name", ""): c for c in records}
+
+    session_cookie = _cookie_expiry(by_name.get(SESSION_COOKIE))
+    session_cookie["name"] = SESSION_COOKIE
+
+    csrf_cookie = _cookie_expiry(by_name.get(CSRF_COOKIE))
+    csrf_cookie["name"] = CSRF_COOKIE
+
+    from linkedin_own_server.browser import BROWSER
+    from linkedin_own_server.config import CHROME_PROFILE
+
+    out: dict[str, Any] = {
+        "authenticated": status.get("authenticated"),
+        "checked_against": status.get("checked_against"),
+        "session_cookie": session_cookie,
+        "csrf_cookie": csrf_cookie,
+        "browser_mode": BROWSER.mode,
+        "durability": {
+            "stored_in": str(CHROME_PROFILE) if BROWSER.mode == "launch" else (
+                "the browser this server is attached to, not a profile it owns"
+            ),
+            "survives_server_restart": BROWSER.mode == "launch",
+            "survives_machine_reboot": BROWSER.mode == "launch",
+            "why": (
+                "the session lives in an on-disk Chrome profile, not in this "
+                "process, so stopping the server or rebooting the machine "
+                "leaves it exactly where it was. What ends it is LinkedIn "
+                "expiring it, a sign-out, or the profile directory being "
+                "deleted."
+                if BROWSER.mode == "launch"
+                else
+                "in attach mode the session belongs to the browser the "
+                "operator started. It lasts as long as that browser's own "
+                "profile does, and this server neither owns nor preserves it."
+            ),
+            "measured_here": (
+                "LinkedIn's own year-long cookies in this profile carry a "
+                "365-day expiry (issued 2026-08-21, expiring 2027-08-21). "
+                "The li_at figure above is read live from the jar and is the "
+                "only one that governs the login."
+            ),
+        },
+        "on_expiry": (
+            "tools report 'not_authenticated' with the reason, never an empty "
+            "result. Recover by calling linkedin_login_browser and signing in "
+            "yourself in the window it opens."
+        ),
+    }
+
+    for key in ("member", "public_identifier", "profile", "reason", "http_status"):
+        if key in status:
+            out[key] = status[key]
+    return out
 
 
 def assert_not_authwall(final_url: str, *, surface: str) -> None:
@@ -376,7 +569,7 @@ async def login_via_browser(
             last_checked_cookies = dict(cookies)
             last_check_at = now
             checks += 1
-            last_status = await check_auth(page)
+            last_status = await check_auth(page, warm=False)
             if last_status.get("authenticated") is True:
                 return {
                     "authenticated": True,
