@@ -1,0 +1,32 @@
+# LOCAL STATE -- READ THIS BEFORE ADDING AN EXCEPTION TO IT.
+#
+# `_state/` holds the PERSISTENT CHROME PROFILE (config.py: STATE_DIR, and
+# PROFILE_DIR = STATE_DIR/chrome-profile). That profile is where the operator's
+# LIVE LinkedIn SESSION COOKIES live: it is a working, signed-in login to his
+# real account, not a cache that can be regenerated from public data. Anyone
+# holding it is holding the account. Committing it would publish those cookies,
+# and git does not forget -- deleting the files in a later commit leaves the
+# credentials sitting in history for everyone who ever clones. Nothing under
+# _state/ is ever committed, and no `!` un-ignore line belongs in this file.
+_state/
+
+# The profile directory again, unanchored, because LINKEDIN_OWN_PROFILE_DIR can
+# relocate it out from under _state/ (config.py reads that env var). Same
+# cookies, same rule, wherever inside the tree it lands.
+chrome-profile/
+browser_profile/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Scratch
+*.log

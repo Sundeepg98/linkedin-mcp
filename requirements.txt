@@ -1,0 +1,71 @@
+# Data path: a real, signed-in Chrome. Nothing in this file is optional at
+# runtime, which is the one way this server's dependency story differs from the
+# sibling instahyre server's.
+
+# THE BROWSER IS THE DATA PATH. Every tool in server.py reads LinkedIn by
+# driving a persistent Chrome profile through playwright
+# (linkedin_own_server/browser.py); there is no signed-request API path to fall
+# back to, so playwright is a hard dependency rather than the `browser` extra it
+# is in instahyre. Declaring it optional would only move the failure from
+# install time to first tool call. Note that the import is LAZY -- measured
+# 2026-08-21, no playwright module is loaded by `import
+# linkedin_own_server.server` -- so a missing install stays invisible right up
+# until someone asks for data, which is the argument for the hard requirement,
+# not against it.
+#
+# Floor, not a pin: >=1.40 is where the async persistent-context API this server
+# uses settled. Measured in the development environment 2026-08-21: playwright
+# 1.58.0 on CPython 3.13.14. Worth knowing before trusting a fresh venv: `pip
+# install playwright` installs the DRIVER only. The browser binaries are a
+# separate `playwright install chromium` step, and a venv that skips it fails at
+# browser launch, not at import.
+playwright>=1.40
+
+# The upper bound is load-bearing, and it is here BEFORE this server has ever
+# been bitten, on the strength of a sibling that was.
+#
+# WHY A BOUND: on 2026-08-20 the sibling naukri server declared
+# `mcp[cli]>=1.25.0` unbounded. `mcp 2.0.0` shipped, relocating
+# mcp/server/fastmcp to mcp/server/mcpserver, and a clean resolve killed all 55
+# of its test modules at collection ("5 deselected, 55 errors", zero tests run)
+# while every LOCAL naukri run stayed green on a venv holding an older mcp from
+# before 2.0.0 existed. An unbounded `>=` on a framework package is a time bomb
+# lit by someone else's release, and a local venv -- which is only a cache of a
+# resolve that happened in the past -- cannot see it coming.
+#
+# THIS SERVER IS EXPOSED TO EXACTLY THAT MOVE, which was measured rather than
+# assumed, and the measurement came out the OPPOSITE way from instahyre's.
+# After `import linkedin_own_server.server` (2026-08-21) sys.modules holds 92
+# mcp.* submodules INCLUDING mcp.server.fastmcp -- the very module mcp 2.0.0
+# relocated. What keeps that safe is not luck but a transitive cap: `fastmcp`
+# 3.4.2 is a meta-package requiring `fastmcp-slim[client,server]==3.4.2`, which
+# declares `mcp<2.0,>=1.24.0`, so a resolve here picks mcp 1.x and 2.x cannot
+# arrive by accident. That cap belongs to fastmcp, so the cap BELOW is what
+# stops a future fastmcp major from quietly changing it.
+#
+# WHY <4 AND NOT <3: measured 2026-08-21, this server imports clean under
+# fastmcp 3.4.2. Capping <3 would pin a working server to an older major for no
+# reason anyone could point at -- the cargo-cult version of naukri's fix. The
+# bound goes at the next UNKNOWN major instead: fastmcp 4.x is code nobody has
+# run this against, and fastmcp 2.0 was itself a rewrite of the library that
+# became mcp.server.fastmcp, so its majors have a track record of moving things.
+# Raising this to <5 is a decision to go test on 4.x first, not a formality.
+# tests/test_requirements_pins.py fails if this cap disappears or narrows.
+#
+# NOT DECLARED HERE: `mcp` itself. It arrives transitively through fastmcp,
+# which caps it; a direct line here could only fight that cap or duplicate it,
+# and a duplicated cap is a second source of truth waiting to drift.
+fastmcp>=2.0,<4
+
+# Tests only. Listed in this file because `pip install -r requirements.txt`
+# followed immediately by `pytest` is the recipe anyone reaches for, and it is
+# literally what scripts/clean_install_check.py runs; a recipe whose second line
+# dies on ModuleNotFoundError is a recipe that lies to a new developer.
+# (`pip install -e .[test]` installs the same thing from pyproject.toml.)
+pytest>=8.0
+
+# The suite has async tests (browser lifecycle, the login gate), so the
+# plugin that runs them is a hard requirement, not a local convenience.
+# pytest.ini sets asyncio_mode=auto; without this line a clean venv would
+# collect those tests and not actually run them.
+pytest-asyncio>=0.23
