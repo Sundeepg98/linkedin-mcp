@@ -77,7 +77,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 357 passed
+python -m pytest            # 400 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -322,21 +322,41 @@ linkedin_own_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the eleven tools
   errors.py
-tests/                       357 tests, mocked, no network, no browser
+tests/                       400 tests, no network, no account
+  fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **357 tests**, no network, no browser, no account.
+Built and tested: **400 tests**, no network and no account. Most run with no
+browser at all; the profile-views fixture tests launch a local headless
+Chromium to run the real injected harvester over frozen markup, which reaches
+nothing outside the machine.
 
-**Nothing has been verified against a live LinkedIn session.** The selectors,
-the profile-views surface, the `/voyager/api/me` response shape and the
-`li_at` lifetime are all unconfirmed until someone signs in and runs the
-tools. Expect the first live run to need selector adjustments, particularly
-on notifications.
+**First live run: 2026-08-21.** Sign-in succeeded and the session persisted,
+so the flag above is now **verified sufficient** on this machine, and
+`/voyager/api/me` and the `li_at` lifetime (365 days) are confirmed. Every
+read tool was then run once against the real account. Four of the eleven
+worked; the sweep is written up in
+`../_audit/2026-08-21-linkedin-parse-fix.md`, and this is what it found.
 
-One earlier live sign-in attempt failed outright: the browser was launched
-with no flags, so Blink advertised `navigator.webdriver = true` and LinkedIn
-refused the sign-in. That is what the flag above fixes. Whether the flag alone
-is sufficient is **unverified** -- it is what the sibling Naukri server has run
-for months on the same machine, and it is where the boundary stops either way.
+`linkedin_who_viewed_me` **was returning names that were not names.** Every
+row carried the page heading, "Who's viewed your profile", attached to a real
+person's profile link -- four rows, one repeated name, all four links
+genuine. It was fixed the same day: the row boundary no longer depends on an
+attribute LinkedIn attaches after hydration, privacy-limited viewers are no
+longer silently dropped (they were six of ten), and the timestamps are read.
+Verified live: 10 rows, 10 distinct names, none missing a field.
+
+Three surfaces are **known broken** and are not fixed yet:
+
+| tool | what happens | why |
+|---|---|---|
+| `linkedin_my_profile` | errors: no name could be read | LinkedIn rebuilt the profile page. The document has **zero** `h1` elements and none of the `about` / `experience` / `education` / `skills` section ids. Needs a fresh capture and new anchors. |
+| `linkedin_my_applications`, `linkedin_saved_jobs` | error | `/my-items/saved-jobs/` now redirects to `/jobs-tracker/`, which is not on the allowlist and has a different layout. Both lists were also genuinely empty at capture time, so the error is honest, not a misparse. |
+| `linkedin_notifications` | returns rows, with noise | Screen-reader text ("Unread notification.", "Status is reachable") is glued to the front of each body, and `when` is always null because the page writes `2h`, not `2 hours ago`. |
+
+`linkedin_search_jobs` works, with one field defect: on rows for verified
+companies LinkedIn inserts a "<title> with verification" line, which lands in
+`company` and pushes the real company into `location`. Two of five rows in
+the last live run.

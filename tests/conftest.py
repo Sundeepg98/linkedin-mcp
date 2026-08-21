@@ -1,10 +1,16 @@
 """Fakes for a browser that is never launched.
 
-Every test in this suite runs with no network and no Chromium. The fakes below
-stand in for the three Playwright objects this server touches -- a page, its
-browser context, and its request context -- and they RECORD what was asked of
-them, so a test can assert not just the answer but that the question was
-actually put to LinkedIn.
+No test in this suite reaches the network or an account. Nearly all of them
+run with no Chromium either, on the fakes below: they stand in for the three
+Playwright objects this server touches -- a page, its browser context, and
+its request context -- and they RECORD what was asked of them, so a test can
+assert not just the answer but that the question was actually put to
+LinkedIn.
+
+The exception is ``test_profile_views_fixture.py``, which launches a LOCAL
+headless Chromium over frozen markup and still touches nothing outside this
+machine. It has to: the bug it pins lives in a DOM walk, and a fake page
+cannot walk a DOM. That module says more about why.
 
 That recording is the point. The failure this suite exists to prevent is a
 server that reports a live session without ever asking whether there is one,
