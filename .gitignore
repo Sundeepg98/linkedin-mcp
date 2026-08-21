@@ -30,3 +30,9 @@ htmlcov/
 
 # Scratch
 *.log
+
+# Environment files -- never commit. Secrets land in .env by default, and a
+# tracked .env means the next key added to it commits without anyone noticing.
+.env
+.env.*
+!.env.example
