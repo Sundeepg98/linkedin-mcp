@@ -732,6 +732,15 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
                         out["skills"] = skills
                         out["skills_count"] = len(skills)
                         out["completeness"]["skills_listed"] = len(skills)
+                        # Say where the number came from. Skills is one of the
+                        # sections the profile page defers, so it is listed as
+                        # not rendered there AND counted here, and without this
+                        # the two read as a contradiction.
+                        out["completeness"]["skills_listed_source"] = (
+                            "the /details/skills/ page, loaded as the second "
+                            "page of this call -- not the profile page, where "
+                            "the skills section had not rendered"
+                        )
                     else:
                         out["skills_note"] = (
                             "the skills page loaded but no skill entries could "

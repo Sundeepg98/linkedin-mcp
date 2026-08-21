@@ -38,7 +38,7 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_saved_jobs` | Jobs you bookmarked. |
 | `linkedin_search_jobs` | Job search with keywords, location, remote, date posted, experience level. |
-| `linkedin_my_profile` | Your own profile: headline, about, skills, which sections are filled in. |
+| `linkedin_my_profile` | Your own profile: headline, about, skills, and which sections rendered. Experience/Education/Skills are deferred by LinkedIn until the page is scrolled, so they read UNKNOWN rather than zero. |
 | `linkedin_notifications` | Your notification list. |
 | `linkedin_auth_status` | Whether there is a live session, measured by an authenticated request. |
 | `linkedin_login_browser` | Opens a window for you to sign in yourself. |
@@ -61,9 +61,15 @@ appears.
 A read that changes something has to say so:
 
 1. **Opening the notifications page clears LinkedIn's unread badge** -- exactly
-   as it would if you opened the page yourself. It is inherent to loading the
-   page, not an action this server takes, and individual items are not opened.
-   If you would rather it did not happen, do not call `linkedin_notifications`.
+   as it would if you opened the page yourself. Measured, not theorised: one
+   call on 2026-08-21 took the badge from 1 to 0, and it does not come back.
+   It cannot be avoided: LinkedIn marks the list seen on the server when the
+   page is served, so there is no read of this surface that leaves the badge
+   alone. No click, no scroll and no per-item open is involved, and there is no
+   mark-as-read call anywhere in the package. **The only way not to clear the
+   badge is not to call `linkedin_notifications`.** Since the badge is going
+   either way, each row carries `unread` as LinkedIn had it at the moment of
+   reading -- the one fact the page load destroys.
 2. **Running a job search adds to your own recent-search history**, the same as
    typing the query on the site.
 
@@ -77,7 +83,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 400 passed
+python -m pytest            # 483 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -322,14 +328,14 @@ linkedin_own_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the eleven tools
   errors.py
-tests/                       400 tests, no network, no account
+tests/                       483 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **400 tests**, no network and no account. Most run with no
-browser at all; the profile-views fixture tests launch a local headless
+Built and tested: **483 tests**, no network and no account. Most run with no
+browser at all; the two fixture-driven modules launch a local headless
 Chromium to run the real injected harvester over frozen markup, which reaches
 nothing outside the machine.
 
@@ -348,15 +354,24 @@ attribute LinkedIn attaches after hydration, privacy-limited viewers are no
 longer silently dropped (they were six of ten), and the timestamps are read.
 Verified live: 10 rows, 10 distinct names, none missing a field.
 
-Three surfaces are **known broken** and are not fixed yet:
+**Second pass, 2026-08-22.** The three surfaces that pass left broken were
+repaired and verified live. All four defects had the same shape: a reader
+anchored on markup LinkedIn no longer emits, or on markup whose presence
+depends on how far the page had rendered.
 
-| tool | what happens | why |
+| tool | was | now |
 |---|---|---|
-| `linkedin_my_profile` | errors: no name could be read | LinkedIn rebuilt the profile page. The document has **zero** `h1` elements and none of the `about` / `experience` / `education` / `skills` section ids. Needs a fresh capture and new anchors. |
-| `linkedin_my_applications`, `linkedin_saved_jobs` | error | `/my-items/saved-jobs/` now redirects to `/jobs-tracker/`, which is not on the allowlist and has a different layout. Both lists were also genuinely empty at capture time, so the error is honest, not a misparse. |
-| `linkedin_notifications` | returns rows, with noise | Screen-reader text ("Unread notification.", "Status is reachable") is glued to the front of each body, and `when` is always null because the page writes `2h`, not `2 hours ago`. |
+| `linkedin_my_profile` | errored: no name could be read | reads name, headline, location, About and photo from a page with **zero** `h1`. A section is now the largest ancestor of its heading holding exactly ONE heading -- the same rule the row walk uses -- which gives identical output pre- and post-hydration. Verified live. |
+| `linkedin_saved_jobs`, `linkedin_my_applications` | errored on a redirect | read `/jobs-tracker/?stage=saved` and `?stage=applied`. Both lists are genuinely empty, and an empty result now says so **explicitly**, with LinkedIn's own tab count and the empty-state wording. A zero the page does not corroborate is still an error. Verified live. |
+| `linkedin_notifications` | rows, with noise | screen-reader text is subtracted by count rather than by phrase, and `when` comes from the card's own time element. Each row also carries `unread` as it stood when read. Verified against a frozen capture of the live page. |
+| skills, inside `my_profile` | returned `All`, `Industry Knowledge`, `Tools & Technologies` | returns the real list -- 20 skills on the live account -- keyed on the only per-skill anchor the page offers. |
 
-`linkedin_search_jobs` works, with one field defect: on rows for verified
-companies LinkedIn inserts a "<title> with verification" line, which lands in
-`company` and pushes the real company into `location`. Two of five rows in
-the last live run.
+One thing the profile reader will not do: **Experience, Education and Skills
+are not on the profile page at all.** LinkedIn defers them until it is
+scrolled, and this server does not scroll. They are reported as UNKNOWN, never
+as zero, and `details_urls` gives you the page for each.
+
+`linkedin_search_jobs` is the one remaining **known defect**, unfixed: on rows
+for verified companies LinkedIn inserts a "<title> with verification" line,
+which lands in `company` and pushes the real company into `location`. Two of
+five rows in the last live run.
