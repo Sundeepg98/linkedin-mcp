@@ -77,7 +77,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 290 passed
+python -m pytest            # 357 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
