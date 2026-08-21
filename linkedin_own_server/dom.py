@@ -45,6 +45,20 @@ from linkedin_own_server.errors import ExtractionFailedError
 #: LARGEST ancestor that still speaks for exactly ONE match. One hop further
 #: swallows a sibling row. Nothing about that depends on class names, tag
 #: names, or how much of the page has hydrated.
+#:
+#: That rule has a blind spot, and the job tracker fell straight into it: it
+#: counts DEDUPED KEYS, so a card carrying two anchors to the SAME job is still
+#: "one match" and the walk sails past it. On a tracker page holding a single
+#: job the walk therefore ran to ``maxHops`` and every field came back as page
+#: furniture -- title "Job tracker", company "Saved <dot> 0". Measured on the
+#: real page, not imagined.
+#:
+#: The second stop closes it: once the row we have ACCEPTED already has text, a
+#: candidate holding more matching ANCHORS than one is a container, not a row.
+#: The "already has text" clause is what keeps it safe on profile views, where
+#: LinkedIn wraps the photo in its own link to the same person: the walk starts
+#: on that empty anchor, and a bare link-count stop would freeze there and drop
+#: the viewer entirely. Both fixtures pin that.
 HARVEST_LINKED_CARDS_JS = """
 (cfg) => {
   const re = new RegExp(cfg.hrefPattern);
@@ -69,12 +83,26 @@ HARVEST_LINKED_CARDS_JS = """
     }
     return '';
   };
+  const linksWithin = (node) => {
+    if (!node.querySelectorAll) return 0;
+    let count = 0;
+    for (const link of node.querySelectorAll('a[href]')) {
+      if (keyOf(link.getAttribute('href') || '')) count += 1;
+    }
+    return count;
+  };
+  const hasText = (node) => !!(node && node.innerText && node.innerText.trim());
   const rowOf = (anchor) => {
     let node = anchor;
     let row = anchor;
     let hops = 0;
     while (node && hops < cfg.maxHops) {
       if (keysWithin(node).size > 1) break;
+      // A container, not a row: it repeats the link we came in on, and we
+      // already hold something readable. Before we hold text, a second link
+      // to the same target is the row's own photo link and must be climbed
+      // through rather than stopped at.
+      if (hasText(row) && linksWithin(node) > 1) break;
       row = node;
       const tag = node.tagName;
       if (tag === 'LI' || tag === 'ARTICLE') break;
@@ -145,20 +173,59 @@ HARVEST_LINKED_CARDS_JS = """
 """
 
 #: Harvest block-shaped cards (notifications) that have no reliable link.
+#:
+#: Alongside the card's text this returns three things the text alone cannot
+#: give, and each one fixes a measured defect:
+#:
+#: * ``hidden`` -- the strings the page itself marked screen-reader-only.
+#:   ``innerText`` includes them, so every notification body arrived with
+#:   "Unread notification." or "Status is reachable" welded to the front. They
+#:   are returned as a LIST rather than subtracted here, because some of them
+#:   are a second copy of the VISIBLE body and deleting those by phrase would
+#:   empty the notification. ``shape.parse_notification`` removes one
+#:   occurrence per hidden element, which is exact and needs no phrase list.
+#: * ``time`` -- the card's own timestamp element. The page writes "2h", with
+#:   no "ago", so no amount of scanning the body finds it; ``when`` was null on
+#:   all 22 rows.
+#: * ``unread`` -- whether LinkedIn was still calling this one unread at the
+#:   moment we looked, which is the one fact loading the page destroys.
 HARVEST_BLOCK_CARDS_JS = """
 (cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
   for (const selector of cfg.selectors) {
     let nodes;
     try { nodes = document.querySelectorAll(selector); } catch (e) { continue; }
     if (!nodes || nodes.length === 0) continue;
     const out = [];
     for (const node of nodes) {
-      const text = (node.innerText || '').trim();
+      const text = textOf(node);
       if (!text) continue;
       const link = node.querySelector('a[href]');
+      const hidden = [];
+      if (cfg.hiddenSelector) {
+        let marked;
+        try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
+        for (const el of marked) {
+          const value = textOf(el);
+          if (value) hidden.push(value.slice(0, cfg.maxChars));
+        }
+      }
+      let when = '';
+      if (cfg.timeSelector) {
+        let stamp;
+        try { stamp = node.querySelector(cfg.timeSelector); } catch (e) { stamp = null; }
+        when = textOf(stamp).slice(0, 40);
+      }
+      let unread = null;
+      if (cfg.unreadClass && node.classList) {
+        unread = node.classList.contains(cfg.unreadClass);
+      }
       out.push({
         href: link ? (link.getAttribute('href') || '') : '',
         text: text.slice(0, cfg.maxChars),
+        hidden: hidden,
+        time: when,
+        unread: unread,
         selector: selector
       });
       if (out.length >= cfg.maxItems) break;
@@ -169,56 +236,60 @@ HARVEST_BLOCK_CARDS_JS = """
 }
 """
 
-#: Read the operator's own profile page: identity, about, section presence.
+#: Read the operator's own profile page as a list of SECTIONS.
+#:
+#: The old version of this script asked for ``main h1`` and for elements with
+#: ids ``about`` / ``experience`` / ``education`` / ``skills``. LinkedIn has
+#: since rebuilt the profile on server-driven UI: measured 2026-08-22, the page
+#: contains ZERO ``h1`` and none of those ids. Every field came back null and
+#: the tool errored on its own owner's profile.
+#:
+#: What survives is the same shape the row walk leans on, one level up: a
+#: SECTION is the largest ancestor of its heading that still holds exactly ONE
+#: heading. Nothing in that depends on a class name, an id, or a tag beyond
+#: h1/h2/h3, and it produces byte-identical topcard lines on the pre-hydration
+#: and hydrated renders -- which is the property the two frozen fixtures pin.
+#:
+#: The climb is bounded by ``main`` rather than by a hop count: a page with a
+#: single heading would otherwise walk out to ``documentElement`` and return
+#: the entire document as one "section".
+#:
+#: This returns raw LINES and does no interpretation. Deciding which line is a
+#: headline and which is a location is ``shape.py``'s job, where it can be
+#: tested without a browser.
 READ_PROFILE_JS = """
-() => {
-  const pick = (sels) => {
-    for (const s of sels) {
-      let el;
-      try { el = document.querySelector(s); } catch (e) { continue; }
-      if (el && el.innerText && el.innerText.trim()) return el.innerText.trim();
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const linesOf = (node) =>
+    textOf(node).split('\\n').map((s) => s.trim()).filter(Boolean);
+  const main = document.querySelector('main');
+  const headingsIn = (node) =>
+    node.querySelectorAll ? node.querySelectorAll('h1,h2,h3').length : 0;
+  const sections = [];
+  if (main) {
+    for (const heading of main.querySelectorAll('h1,h2,h3')) {
+      let node = heading;
+      let block = heading;
+      let hops = 0;
+      while (node && node !== main && hops < cfg.maxHops) {
+        if (headingsIn(node) > 1) break;
+        block = node;
+        node = node.parentElement;
+        hops += 1;
+      }
+      sections.push({
+        heading: textOf(heading).slice(0, 120),
+        lines: linesOf(block).slice(0, cfg.maxLines),
+        images: block.querySelectorAll ? block.querySelectorAll('img').length : 0
+      });
+      if (sections.length >= cfg.maxSections) break;
     }
-    return null;
-  };
-  const sectionIds = [];
-  for (const node of document.querySelectorAll('main div[id], main section[id]')) {
-    const id = node.getAttribute('id') || '';
-    if (id && id.length < 40 && !/^ember/.test(id)) sectionIds.push(id);
   }
-  const sectionText = (id) => {
-    const anchor = document.getElementById(id);
-    if (!anchor) return null;
-    const section = anchor.closest('section') || anchor.parentElement;
-    if (!section) return null;
-    const text = (section.innerText || '').trim();
-    return text ? text.slice(0, 4000) : null;
-  };
-  const countIn = (id) => {
-    const anchor = document.getElementById(id);
-    if (!anchor) return null;
-    const section = anchor.closest('section') || anchor.parentElement;
-    if (!section) return null;
-    return section.querySelectorAll('li').length;
-  };
   return {
     url: document.location.href,
-    name: pick(['main h1', 'h1']),
-    headline: pick([
-      'main .text-body-medium.break-words',
-      'main .top-card-layout__headline',
-      'main h1 + div'
-    ]),
-    location: pick([
-      'main .text-body-small.inline.t-black--light.break-words',
-      'main .top-card__subline-item'
-    ]),
-    photo: !!document.querySelector('main img.pv-top-card-profile-picture__image, main img[class*="profile-photo"]'),
-    sections: sectionIds,
-    about: sectionText('about'),
-    skills_text: sectionText('skills'),
-    experience_count: countIn('experience'),
-    education_count: countIn('education'),
-    skills_count: countIn('skills')
+    title: document.title || '',
+    has_main: !!main,
+    sections: sections
   };
 }
 """
@@ -273,12 +344,28 @@ async def harvest_block_cards(
     selectors: list[str],
     max_items: int,
     max_chars: int = 800,
+    hidden_selector: str = "",
+    time_selector: str = "",
+    unread_class: str = "",
 ) -> list[dict[str, Any]]:
-    """Return ``{href, text, selector}`` for the first selector that matches."""
+    """Return ``{href, text, hidden, time, unread, selector}`` per card.
+
+    Args:
+        hidden_selector: elements inside a card whose text the page marks
+            screen-reader-only. Returned verbatim so the shaper can subtract
+            exactly one occurrence of each -- see the script's own note for
+            why subtracting by phrase would be wrong.
+        time_selector: the element carrying the card's timestamp, for surfaces
+            that write the time somewhere the body text never reaches.
+        unread_class: a class the card wears while it is unread.
+    """
     cfg = {
         "selectors": list(selectors),
         "maxItems": int(max_items),
         "maxChars": int(max_chars),
+        "hiddenSelector": str(hidden_selector or ""),
+        "timeSelector": str(time_selector or ""),
+        "unreadClass": str(unread_class or ""),
     }
     try:
         records = await page.evaluate(HARVEST_BLOCK_CARDS_JS, cfg)  # readonly-ok
@@ -290,16 +377,43 @@ async def harvest_block_cards(
     return list(records or [])
 
 
-async def read_profile_fields(page: Any) -> dict[str, Any]:
-    """Return the raw profile fields read off the rendered profile page."""
+async def read_profile_fields(
+    page: Any,
+    *,
+    max_sections: int = 40,
+    max_lines: int = 60,
+    max_hops: int = 20,
+) -> dict[str, Any]:
+    """Return the profile page's sections, each as a heading plus its lines."""
+    cfg = {
+        "maxSections": int(max_sections),
+        "maxLines": int(max_lines),
+        "maxHops": int(max_hops),
+    }
     try:
-        data = await page.evaluate(READ_PROFILE_JS)  # readonly-ok
+        data = await page.evaluate(READ_PROFILE_JS, cfg)  # readonly-ok
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the profile page: {type(exc).__name__}: {exc}",
             url=_url_of(page),
         ) from exc
     return dict(data or {})
+
+
+async def read_main_text(page: Any) -> str:
+    """Return the rendered text of ``main``, or an empty string if there is none.
+
+    A plain Playwright text read -- no script is injected and nothing is
+    evaluated. It exists because two facts the job tracker will not put in any
+    card are printed in its own furniture: the per-tab COUNTS, and the empty
+    state. Without them an empty list and a broken parse look identical, which
+    is the failure this whole module is arranged to prevent.
+    """
+    try:
+        return str(await page.inner_text("main") or "")
+    except Exception as exc:
+        logger.debug("main text unreadable: %s: %s", type(exc).__name__, exc)
+        return ""
 
 
 def _url_of(page: Any) -> str:
@@ -317,6 +431,25 @@ def _url_of(page: Any) -> str:
 PERSON_HREF = r"/in/([A-Za-z0-9\-_%]{2,})"
 #: A job card. The capture group is the numeric job id.
 JOB_HREF = r"/jobs/view/(?:[^/?#]*-)?(\d{6,})"
+
+#: One entry on the skills page. LinkedIn hangs an inline edit affordance off
+#: every skill on the owner's own profile, and its id is the only per-skill key
+#: the page offers -- the names sit in generated-class divs with no list
+#: semantics, and ``main ul li`` finds the three filter pills ("All", "Industry
+#: Knowledge", "Tools & Technologies"), which is what this tool used to return
+#: as the operator's skills.
+#:
+#: It is used ONLY as a DOM key. Nothing navigates to it, and nothing could:
+#: ``readonly._FORBIDDEN_URL_SUBSTRINGS`` blocks ``/edit/`` outright, so a url
+#: built from one of these hrefs is refused before the allowlist is even
+#: consulted.
+SKILL_HREF = r"/details/skills/edit/forms/(\d+)"
+
+#: Notification cards mark their screen-reader-only text with this class, carry
+#: their timestamp in this element, and wear this class while unread.
+NOTIFICATION_HIDDEN_SELECTOR = ".visually-hidden"
+NOTIFICATION_TIME_SELECTOR = "p.nt-card__time-ago"
+NOTIFICATION_UNREAD_CLASS = "nt-card--unread"
 
 #: Notification cards, in order of preference. LinkedIn's notification list
 #: has no dependable per-item link, so this is the one surface anchored on

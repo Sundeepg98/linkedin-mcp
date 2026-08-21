@@ -117,6 +117,19 @@ class FakePage:
         #: url the next goto should land on, if it differs from the target
         #: (a redirect to the auth wall, for instance).
         self.redirect_to: Optional[str] = None
+        #: What ``page.inner_text(selector)`` hands back. The job tracker reads
+        #: this to get LinkedIn's own per-tab counts, which is what lets it
+        #: tell an empty list from a failed one -- so a test that wants to
+        #: model "the tab says 4 but nothing parsed" sets this.
+        self.inner_text_result: Any = ""
+        self.inner_text_calls: list[str] = []
+
+    async def inner_text(self, selector: str) -> str:
+        self.inner_text_calls.append(selector)
+        result = self.inner_text_result
+        if isinstance(result, Exception):
+            raise result
+        return str(result)
 
     async def goto(self, url: str, **kwargs) -> None:
         self.gotos.append(url)

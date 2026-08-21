@@ -49,6 +49,15 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/me/profile-views/?(\?[^#]*)?$"),
     # Saved / applied jobs. cardType selects which list renders; both are reads.
     re.compile(r"^https://www\.linkedin\.com/my-items/saved-jobs/?(\?[^#]*)?$"),
+    # The job tracker, which is where /my-items/saved-jobs/ now redirects (the
+    # cardType query is dropped on the way). ``?stage=`` selects which of his
+    # own lists renders -- saved, applied, interview, archived, draft. It is a
+    # read: measured 2026-08-22 by opening three stages in turn and re-reading
+    # the default view afterwards, where every tab count was unchanged. The tab
+    # strip itself is a set of client-side radios with no url of their own, so
+    # ``?stage=`` is the ONLY way to reach the applied list without clicking --
+    # which is exactly why this pattern exists rather than a click.
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/?(\?[^#]*)?$"),
     # Job search results.
     re.compile(r"^https://www\.linkedin\.com/jobs/search/?(\?[^#]*)?$"),
     # Own profile. /in/me/ redirects to whoever is signed in.

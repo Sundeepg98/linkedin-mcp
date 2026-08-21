@@ -54,8 +54,38 @@ from tests.conftest import FakePage
 
 ANALYTICS_VIEWS_URL = "https://www.linkedin.com/analytics/profile-views/"
 CLASSIC_VIEWS_URL = "https://www.linkedin.com/me/profile-views/"
-APPLIED_URL = "https://www.linkedin.com/my-items/saved-jobs/?cardType=APPLIED"
-SAVED_URL = "https://www.linkedin.com/my-items/saved-jobs/?cardType=SAVED"
+#: /my-items/saved-jobs/ now redirects here and drops its query string, and the
+#: tracker's tabs are client-side radios with no urls of their own -- ?stage=
+#: is the only address a given list has.
+APPLIED_URL = "https://www.linkedin.com/jobs-tracker/?stage=applied"
+SAVED_URL = "https://www.linkedin.com/jobs-tracker/?stage=saved"
+
+#: The tracker's tab strip, as ``page.inner_text("main")`` returns it. The
+#: counts are what let an empty list be told apart from a failed read, so a
+#: test about emptiness sets this and a test about rows mostly need not.
+TRACKER_TABS = "\n".join(
+    [
+        "Job tracker",
+        "Saved " + chr(0xB7) + " 3",
+        "In Progress " + chr(0xB7) + " 1",
+        "Applied " + chr(0xB7) + " 2",
+        "Interview " + chr(0xB7) + " 0",
+        "Archived",
+        "Date posted",
+    ]
+)
+TRACKER_ALL_EMPTY = "\n".join(
+    [
+        "Job tracker",
+        "Saved " + chr(0xB7) + " 0",
+        "In Progress " + chr(0xB7) + " 1",
+        "Applied " + chr(0xB7) + " 0",
+        "Interview " + chr(0xB7) + " 0",
+        "Archived",
+        "Date posted",
+        "No jobs here",
+    ]
+)
 NOTIFICATIONS_URL = "https://www.linkedin.com/notifications/"
 PROFILE_ME_URL = "https://www.linkedin.com/in/me/"
 PROFILE_RESOLVED_URL = "https://www.linkedin.com/in/sundeep-g/"
@@ -262,38 +292,78 @@ def saved_job_card(n: int) -> dict:
     }
 
 
+#: The profile page as ``READ_PROFILE_JS`` now returns it: a list of sections,
+#: each a heading plus its own lines. There is no ``name`` field to read any
+#: more, because the page carries no h1 and no section ids -- see that script's
+#: note. The topcard lines are in the order LinkedIn draws them, PRONOUNS AND
+#: ALL, because the pronoun line sits exactly where a headline would and is the
+#: reason the headline is chosen by what a line is rather than where it sits.
 PROFILE_FIELDS = {
     "url": PROFILE_RESOLVED_URL,
-    "name": "Alex R",
-    "headline": "Senior Node.js Engineer | TypeScript | AWS",
-    "location": "Riverton, Fairhaven, United States",
-    "photo": True,
-    "sections": ["about", "experience", "education", "skills", ""],
-    "about": "I build backend services in Node.js and TypeScript.",
-    "skills_text": "Node.js\nTypeScript\nPostgreSQL",
-    "experience_count": 4,
-    "education_count": 2,
-    # The profile page shows a trimmed skills section; the skills page below
-    # holds more. Two different measurements of two different pages.
-    "skills_count": 5,
+    "title": "Alex R | LinkedIn",
+    "has_main": True,
+    "sections": [
+        {
+            "heading": "Alex R",
+            "lines": [
+                "Alex R",
+                "He/Him",
+                "Senior Node.js Engineer | TypeScript | AWS",
+                "Riverton, Fairhaven, United States",
+                chr(0xB7),
+                "Contact info",
+                "Indian Institute of Information Technology",
+                "268 connections",
+                "Open to",
+                "Add section",
+            ],
+            "images": 1,
+        },
+        {
+            "heading": "Analytics",
+            "lines": ["Analytics", "Private to you", "27 profile views"],
+            "images": 0,
+        },
+        {
+            "heading": "About",
+            "lines": [
+                "About",
+                "I build backend services in Node.js and TypeScript.",
+            ],
+            "images": 0,
+        },
+        {"heading": "Featured", "lines": ["Featured", "Link"], "images": 0},
+    ],
 }
 
+#: The skills page, as the LINK-anchored harvest now returns it. Each entry is
+#: keyed on the inline edit affordance LinkedIn hangs off every skill, which is
+#: the only per-skill key the page has. The old selector, ``main ul li``, found
+#: the three filter pills and this tool reported them as his skills.
 SKILL_CARDS = [
-    {"href": "", "text": "Node.js\nNode.js\n15 endorsements", "selector": "main ul li"},
     {
-        "href": "",
-        "text": "TypeScript\nTypeScript\nEndorsed by 3 colleagues",
-        "selector": "main ul li",
+        "href": "/in/sundeep-g/details/skills/edit/forms/11/",
+        "text": "Node.js\nNode.js\n15 endorsements",
     },
-    {"href": "", "text": "PostgreSQL\nPostgreSQL", "selector": "main ul li"},
+    {
+        "href": "/in/sundeep-g/details/skills/edit/forms/12/",
+        "text": "TypeScript\nTypeScript\nEndorsed by 3 colleagues",
+    },
+    {
+        "href": "/in/sundeep-g/details/skills/edit/forms/13/",
+        "text": "PostgreSQL\nPostgreSQL",
+    },
     # The same skill again: the skills page repeats entries across its
     # sections, and a repeat must not become a second row.
-    {"href": "", "text": "Node.js\nNode.js\n15 endorsements", "selector": "main ul li"},
-    # A structural li holding no text at all.
-    {"href": "", "text": "   \n  ", "selector": "main ul li"},
-    {"href": "", "text": "AWS\nAWS", "selector": "main ul li"},
-    {"href": "", "text": "Docker\nDocker", "selector": "main ul li"},
-    {"href": "", "text": "Redis\nRedis", "selector": "main ul li"},
+    {
+        "href": "/in/sundeep-g/details/skills/edit/forms/14/",
+        "text": "Node.js\nNode.js\n15 endorsements",
+    },
+    # A structural entry holding no text at all.
+    {"href": "/in/sundeep-g/details/skills/edit/forms/15/", "text": "   \n  "},
+    {"href": "/in/sundeep-g/details/skills/edit/forms/16/", "text": "AWS\nAWS"},
+    {"href": "/in/sundeep-g/details/skills/edit/forms/17/", "text": "Docker\nDocker"},
+    {"href": "/in/sundeep-g/details/skills/edit/forms/18/", "text": "Redis\nRedis"},
 ]
 
 
@@ -370,6 +440,96 @@ async def test_saved_jobs_have_no_status_and_keep_title_company_location(drive):
     assert row["job_id"] == "4098765432"
     assert "status" not in row, "a saved job was never applied to"
     assert navigations == [SAVED_URL]
+
+
+# ---------------------------------------------------------------------------
+# 1b. The tracker's two kinds of zero
+# ---------------------------------------------------------------------------
+#
+# Both lists were genuinely EMPTY when this surface was first read live
+# (Saved 0, Applied 0), so "rows came back" cannot be the success signal here.
+# What can be checked is that the two zeros are told apart, and these are the
+# tests that check it.
+
+
+async def test_a_corroborated_empty_list_is_a_result_not_an_error(drive):
+    """Nothing saved, and LinkedIn's own tab agrees. That is an answer."""
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = TRACKER_ALL_EMPTY
+    navigations = drive(page)
+
+    result = await linkedin_saved_jobs(limit=25)
+
+    assert "error" not in result, result
+    assert result["results"] == []
+    assert result["count"] == 0
+    assert result["empty"] is True
+    assert result["linkedin_count"] == 0
+    assert result["empty_state"] == "No jobs here"
+    assert result["tab"] == "Saved"
+    assert result["tab_counts"]["in_progress"] == 1
+    assert "not a failed read" in result["note"]
+    assert navigations == [SAVED_URL]
+    assert page.inner_text_calls == ["main"], "the tab strip has to be read"
+
+
+async def test_an_uncorroborated_empty_list_is_still_an_error(drive):
+    """LinkedIn says two. Nothing parsed. Reporting [] would be the lie."""
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = TRACKER_TABS
+    drive(page)
+
+    result = await linkedin_my_applications(limit=25)
+
+    assert result["error"] == "extraction_failed", result
+    assert "Applied tab says 2" in result["message"]
+    assert "results" not in result
+    assert "count" not in result
+
+
+async def test_an_empty_list_with_no_readable_tab_strip_is_an_error(drive):
+    """No count to corroborate with, so the zero cannot be believed."""
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = ""
+    drive(page)
+
+    result = await linkedin_saved_jobs(limit=25)
+
+    assert result["error"] == "extraction_failed", result
+    assert "count could not be read" in result["message"]
+
+
+async def test_rows_are_reported_alongside_linkedins_own_count(drive):
+    page = FakePage(evaluate_result=[SAVED_CARD])
+    page.inner_text_result = TRACKER_TABS
+    drive(page)
+
+    result = await linkedin_saved_jobs(limit=25)
+
+    assert result["empty"] is False
+    assert result["count"] == 1
+    assert result["linkedin_count"] == 3
+    assert result["tab_counts"] == {
+        "saved": 3,
+        "in_progress": 1,
+        "applied": 2,
+        "interview": 0,
+    }
+    # One page load, no scrolling: the shortfall is explained, not hidden.
+    assert "does not scroll" in result["note"]
+
+
+async def test_a_full_read_is_not_annotated_with_a_shortfall(drive):
+    """The shortfall note, shown NOT firing. A note that always fires is noise."""
+    page = FakePage(evaluate_result=[saved_job_card(n) for n in range(3)])
+    page.inner_text_result = TRACKER_TABS
+    drive(page)
+
+    result = await linkedin_saved_jobs(limit=25)
+
+    assert result["count"] == 3
+    assert result["linkedin_count"] == 3
+    assert "note" not in result
 
 
 async def test_a_search_result_is_shaped_like_the_other_job_rows(drive):
@@ -815,17 +975,21 @@ async def test_the_completeness_block_is_labelled_derived_and_invents_no_score(d
 
     assert completeness["has_photo"] is True
     assert completeness["has_about"] is True
-    # The empty section id the page emitted is dropped, not counted.
-    assert completeness["sections_present"] == [
-        "about",
-        "experience",
-        "education",
-        "skills",
+    # Only LinkedIn's own profile SECTIONS. "Analytics" rendered too, but it is
+    # page furniture and is reported under headings_seen, not as a section.
+    assert completeness["sections_present"] == ["About", "Featured"]
+    assert "Analytics" in completeness["headings_seen"]
+    # The sections LinkedIn defers until the page is scrolled. They are null,
+    # never zero, and the result says out loud that null means unknown.
+    assert completeness["sections_not_rendered"] == [
+        "Experience",
+        "Education",
+        "Skills",
     ]
-    assert completeness["experience_entries"] == 4
-    assert completeness["education_entries"] == 2
-    # Counted off the profile page's own section: not invented, not scaled.
-    assert completeness["skills_listed"] == 5
+    assert completeness["experience_entries"] is None
+    assert completeness["education_entries"] is None
+    assert completeness["skills_listed"] is None
+    assert "UNKNOWN, not zero" in completeness["not_rendered_means"]
 
     invented = ("score", "strength", "percent", "rating", "grade", "out_of")
     offenders = [

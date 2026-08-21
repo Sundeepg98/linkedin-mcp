@@ -123,6 +123,94 @@ async def _read_cards(
         )
 
 
+async def _read_tracker(
+    stage: str, *, tab_label: str, limit: int, surface: str
+) -> dict[str, Any]:
+    """Read one stage of the job tracker, and say which kind of zero a zero is.
+
+    LinkedIn retired ``/my-items/saved-jobs/`` into ``/jobs-tracker/``, whose
+    tabs are client-side radios with no urls of their own; ``?stage=`` is what
+    reaches a given list without clicking anything.
+
+    The part that matters is the reconciliation. An empty harvest is ``[]``
+    whether the operator has saved nothing or the parser broke, and those two
+    must never look alike -- so the tab strip is read as well, and a zero is
+    only reported as an empty list when LinkedIn's OWN count for that tab says
+    zero and the page drew its empty state. A zero that cannot be corroborated
+    that way is a failure and is raised as one.
+    """
+    url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
+    async with BROWSER.session() as page:
+        final_url = await BROWSER.goto(page, url)
+        assert_not_authwall(final_url, surface=surface)
+
+        main_text = await dom.read_main_text(page)
+        tab_counts = shape.parse_tracker_tabs(main_text)
+        empty_state = shape.tracker_empty_state(main_text)
+        linkedin_count = tab_counts.get(stage)
+
+        records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.JOB_HREF, max_items=limit * 3
+        )
+        rows, dropped = dom.parse_all(records, shape.parse_job_card)
+
+        if not rows and not shape.empty_is_believable(
+            linkedin_count=linkedin_count, empty_state=empty_state
+        ):
+            raise ExtractionFailedError(
+                f"no {surface} could be read, and the page does not corroborate "
+                f"an empty list: LinkedIn's own {tab_label} tab "
+                + (
+                    f"says {linkedin_count}"
+                    if linkedin_count is not None
+                    else "count could not be read"
+                )
+                + (
+                    f", and the empty state ({empty_state!r}) did show"
+                    if empty_state
+                    else ", and no empty state was drawn"
+                )
+                + ". Reporting nothing here would be indistinguishable from "
+                "you genuinely having none, so it is reported as a failure "
+                "instead.",
+                url=final_url,
+                hint="open the url yourself and compare with what this reports",
+            )
+
+        extra: dict[str, Any] = {
+            "tab": tab_label,
+            "linkedin_count": linkedin_count,
+            "tab_counts": tab_counts,
+        }
+        if not rows:
+            extra["empty"] = True
+            extra["empty_state"] = empty_state
+            extra["note"] = (
+                f"EMPTY, and confirmed empty: LinkedIn's own {tab_label} tab "
+                f"reads {linkedin_count} and the page drew its empty state "
+                f"({empty_state!r}). This is an empty list, not a failed read."
+            )
+        else:
+            extra["empty"] = False
+            if (
+                linkedin_count is not None
+                and len(rows) < linkedin_count
+                and len(rows) <= limit
+            ):
+                extra["note"] = (
+                    f"read {len(rows)} rows but LinkedIn's {tab_label} tab says "
+                    f"{linkedin_count}. This tool loads one page and does not "
+                    "scroll, so the rest are below the fold rather than missing."
+                )
+        return shape.envelope(
+            rows,
+            limit=limit,
+            source_url=final_url,
+            dropped=dropped,
+            extra=extra,
+        )
+
+
 # ---------------------------------------------------------------------------
 # Session
 # ---------------------------------------------------------------------------
@@ -318,23 +406,27 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
 async def linkedin_my_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """List the jobs you have applied to on LinkedIn, with their status.
 
-    Reads your own My Items > Applied list. Each row carries title, company,
-    location, the status LinkedIn shows (applied, application viewed, resume
-    downloaded, no longer accepting applications) and how long ago, plus the
-    job id and link.
+    Reads the Applied tab of your own job tracker (the page My Items > Applied
+    became). Each row carries title, company, location, the status LinkedIn
+    shows (applied, application viewed, resume downloaded, no longer accepting
+    applications) and how long ago, plus the job id and link.
 
     Status is whatever LinkedIn displays; this server does not infer, score or
     chase anything, and it cannot see applications you made anywhere else.
+
+    An empty result says so explicitly and carries LinkedIn's own count for the
+    tab, so "you have applied to nothing" and "this could not be read" are
+    never the same answer. If the two disagree -- no rows, but a non-zero count
+    -- you get an error rather than an empty list.
 
     Args:
         limit: maximum rows to return (default 25, max 100).
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     try:
-        return await _read_cards(
-            f"{BASE_URL}/my-items/saved-jobs/?cardType=APPLIED",
-            href_pattern=dom.JOB_HREF,
-            parser=shape.parse_job_card,
+        return await _read_tracker(
+            "applied",
+            tab_label="Applied",
             limit=limit,
             surface="applied jobs",
         )
@@ -346,21 +438,26 @@ async def linkedin_my_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]
 async def linkedin_saved_jobs(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """List the jobs you have bookmarked on LinkedIn.
 
-    Reads your own My Items > Saved list: title, company, location, when it
-    was posted where LinkedIn shows it, and the job link.
+    Reads the Saved tab of your own job tracker: title, company, location, when
+    it was posted where LinkedIn shows it, and the job link.
 
     Read-only in both directions -- this lists what you saved and has no way
     to add to or remove from the list.
+
+    An empty result says so explicitly and carries LinkedIn's own count for the
+    tab, so an empty list can never be mistaken for a read that failed.
+
+    The tracker also holds In Progress, Interview and Archived tabs. They are
+    not exposed as tools: this reads the two lists it names and nothing else.
 
     Args:
         limit: maximum rows to return (default 25, max 100).
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     try:
-        return await _read_cards(
-            f"{BASE_URL}/my-items/saved-jobs/?cardType=SAVED",
-            href_pattern=dom.JOB_HREF,
-            parser=shape.parse_job_card,
+        return await _read_tracker(
+            "saved",
+            tab_label="Saved",
             limit=limit,
             surface="saved jobs",
         )
@@ -512,17 +609,24 @@ async def linkedin_search_jobs(
 async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
     """Read your own LinkedIn profile as LinkedIn currently stores it.
 
-    Returns name, headline, location, the About text, and which sections are
-    present with their item counts.
+    Returns name, headline, location, the About text, and which sections were
+    on the page when it was read.
 
     On completeness: LinkedIn's own profile-strength meter is not exposed
     here, so this server does not report one. What it reports is derived and
-    labelled as such -- which sections rendered and how many entries each
-    holds -- so you can see the gaps without a made-up score.
+    labelled as such.
+
+    One honest limitation, stated because its absence would otherwise read as
+    data: LinkedIn now defers Experience, Education and Skills until the page
+    is SCROLLED, and this server does not scroll. Those sections are therefore
+    usually absent from the render, and absent means UNKNOWN here, never zero.
+    sections_not_rendered names them, and details_urls gives you the page for
+    each one if you want to look yourself.
 
     Args:
-        include_skills: also load the full skills page. That is a second page
-            load, reported as pages_loaded: 2. Pass false to stay at one.
+        include_skills: also load the full skills page, which is where a real
+            skills list can be read. That is a second page load, reported as
+            pages_loaded: 2. Pass false to stay at one.
     """
     try:
         async with BROWSER.session() as page:
@@ -530,46 +634,90 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
             assert_not_authwall(final_url, surface="profile")
             fields = await dom.read_profile_fields(page)
 
-            if not fields.get("name"):
+            sections = [s for s in (fields.get("sections") or []) if s]
+            topcard = shape.pick_topcard(sections, fields.get("title"))
+            identity = shape.parse_profile_topcard(
+                (topcard or {}).get("lines") or []
+            )
+
+            if not identity.get("name"):
                 raise ExtractionFailedError(
                     "the profile page rendered but no name could be read from "
                     "it, which means the page did not finish loading or "
-                    "LinkedIn changed its layout.",
+                    "LinkedIn changed its layout again. The page carries no "
+                    "h1 at all now, so the name is taken from the first "
+                    "heading inside main, cross-checked against the document "
+                    "title.",
                     url=final_url,
+                    hint=f"headings seen: {[s.get('heading') for s in sections]}",
                 )
 
-            sections = [s for s in (fields.get("sections") or []) if s]
+            about_lines = shape.profile_section_lines(sections, "About")
+            about = shape.trim(" ".join(about_lines), 1200) if about_lines else None
+
+            headings = [str(s.get("heading", "")).strip() for s in sections]
+            folded = {h.casefold() for h in headings}
+            present = [
+                h for h in shape.PROFILE_SECTION_HEADINGS if h.casefold() in folded
+            ]
+            deferred = [
+                h
+                for h in ("About", "Experience", "Education", "Skills")
+                if h.casefold() not in folded
+            ]
+            # A section that did not render says nothing about whether it is
+            # filled in, so has_about is False only when the About section WAS
+            # on the page and held nothing.
+            has_about = bool(about) if "about" in folded else None
+
+            slug = shape.profile_slug_from(final_url)
             out: dict[str, Any] = {
-                "name": shape.trim(fields.get("name"), 120),
-                "headline": shape.trim(fields.get("headline"), 240),
-                "location": shape.trim(fields.get("location"), 120),
-                "public_identifier": shape.profile_slug_from(final_url),
+                "name": identity["name"],
+                "headline": identity["headline"],
+                "location": identity["location"],
+                "public_identifier": slug,
                 "profile_url": final_url.split("?", 1)[0],
-                "about": shape.trim(fields.get("about"), 1200),
+                "about": about,
                 "completeness": {
                     "derived_by": (
                         "this server, from which sections rendered -- not "
                         "LinkedIn's own profile-strength meter"
                     ),
-                    "has_photo": bool(fields.get("photo")),
-                    "has_about": bool(fields.get("about")),
-                    "sections_present": sections,
-                    "experience_entries": fields.get("experience_count"),
-                    "education_entries": fields.get("education_count"),
-                    "skills_listed": fields.get("skills_count"),
+                    "has_photo": bool((topcard or {}).get("images")),
+                    "has_about": has_about,
+                    "sections_present": present,
+                    "sections_not_rendered": deferred,
+                    "headings_seen": headings,
+                    "experience_entries": None,
+                    "education_entries": None,
+                    "skills_listed": None,
                 },
                 "pages_loaded": 1,
                 "source_url": final_url,
             }
+            if deferred:
+                out["completeness"]["not_rendered_means"] = (
+                    "UNKNOWN, not zero. LinkedIn loads these sections only "
+                    "once the page is scrolled and this server does not "
+                    "scroll, so their absence here says nothing about whether "
+                    "they are filled in."
+                )
+            if slug:
+                out["details_urls"] = {
+                    section.lower(): f"{BASE_URL}/in/{slug}/details/{section.lower()}/"
+                    for section in ("Experience", "Education", "Skills")
+                }
 
             if include_skills:
-                slug = out["public_identifier"]
                 if slug:
                     skills_url = f"{BASE_URL}/in/{slug}/details/skills/"
                     skills_final = await BROWSER.goto(page, skills_url)
                     assert_not_authwall(skills_final, surface="skills")
-                    records = await dom.harvest_block_cards(
-                        page, selectors=["main ul li"], max_items=200, max_chars=300
+                    records = await dom.harvest_linked_cards(
+                        page,
+                        href_pattern=dom.SKILL_HREF,
+                        max_items=200,
+                        max_chars=300,
                     )
                     skills: list[str] = []
                     for record in records:
@@ -579,9 +727,17 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
                         name = shape.trim(lines[0], 80)
                         if name and name not in skills:
                             skills.append(name)
-                    out["skills"] = skills
-                    out["skills_count"] = len(skills)
                     out["pages_loaded"] = 2
+                    if skills:
+                        out["skills"] = skills
+                        out["skills_count"] = len(skills)
+                        out["completeness"]["skills_listed"] = len(skills)
+                    else:
+                        out["skills_note"] = (
+                            "the skills page loaded but no skill entries could "
+                            "be read from it. That is a failed read, not an "
+                            "empty skills list, so no list is reported."
+                        )
                 else:
                     out["skills_note"] = (
                         "could not resolve your public profile identifier, so "
@@ -598,12 +754,31 @@ async def linkedin_notifications(
 ) -> dict[str, Any]:
     """List your LinkedIn notifications as they appear on the notifications page.
 
-    SIDE EFFECT, stated plainly: opening this page clears LinkedIn's unread
-    badge, exactly as it would if you opened the page in your own browser.
-    That is inherent to loading the page, not something this tool does on
-    purpose -- there is no mark-as-read call here, and individual items are
-    not opened. It is the only server-side change any tool in this package
-    causes, and if you would rather it did not happen, do not call this tool.
+    ====================== SIDE EFFECT -- READ FIRST ======================
+    THIS TOOL CHANGES SOMETHING ON LINKEDIN. Loading the notifications page
+    CLEARS YOUR UNREAD BADGE -- every notification LinkedIn was still counting
+    as unread stops being counted, exactly as if you had opened the page
+    yourself. MEASURED, not theorised: one call on 2026-08-21 took the badge
+    from 1 to 0, and it does not come back.
+
+    It cannot be avoided. LinkedIn marks the list seen on the server when the
+    page is served, so there is no read of this surface that leaves the badge
+    alone: no click, no scroll and no per-item open is involved, and there is
+    no mark-as-read call anywhere in this package. The only way not to clear
+    the badge is not to call this tool.
+
+    It is the ONE server-side change any tool here causes. Everything else in
+    this package leaves LinkedIn exactly as it found it.
+
+    Partial compensation, since the badge is going either way: each row carries
+    "unread": true/false as LinkedIn had it AT THE MOMENT OF READING -- which
+    is the fact the page load is about to destroy. Read it here or lose it.
+    =========================================================================
+
+    Rows carry the notification text, how long ago it arrived, whether it was
+    unread, and the link LinkedIn attaches. Screen-reader-only text ("Unread
+    notification.", "Status is reachable") is stripped, so the body is what you
+    would read on screen.
 
     Args:
         limit: maximum notifications to return (default 20, max 50).
@@ -617,6 +792,9 @@ async def linkedin_notifications(
                 page,
                 selectors=dom.NOTIFICATION_SELECTORS,
                 max_items=limit * 2,
+                hidden_selector=dom.NOTIFICATION_HIDDEN_SELECTOR,
+                time_selector=dom.NOTIFICATION_TIME_SELECTOR,
+                unread_class=dom.NOTIFICATION_UNREAD_CLASS,
             )
             dom.require_rows(
                 records,
@@ -633,8 +811,14 @@ async def linkedin_notifications(
                 rows, limit=limit, source_url=final_url, dropped=dropped
             )
             envelope["side_effect"] = (
-                "loading this page cleared LinkedIn's unread notification badge"
+                "loading this page cleared LinkedIn's unread notification "
+                "badge. Unavoidable -- LinkedIn marks the list seen when it "
+                "serves the page -- and it is the only change any tool in this "
+                "package makes. The per-row 'unread' flag is how it stood "
+                "before this call."
             )
+            unread = [row for row in envelope["results"] if row.get("unread")]
+            envelope["unread_when_read"] = len(unread)
             return envelope
     except Exception as exc:
         return _error(exc)
