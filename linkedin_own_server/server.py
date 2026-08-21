@@ -192,7 +192,20 @@ async def _read_tracker(
             )
         else:
             extra["empty"] = False
-            if (
+            if linkedin_count is not None and len(rows) > linkedin_count:
+                # The mirror of the empty case, and just as much a symptom. A
+                # walk that overshoots its row does not return NOTHING, it
+                # returns page furniture shaped like a job -- which is how this
+                # surface failed in the first place. More rows than LinkedIn
+                # counts means something is being read that is not a job.
+                extra["note"] = (
+                    f"DISAGREEMENT: read {len(rows)} rows but LinkedIn's "
+                    f"{tab_label} tab says {linkedin_count}. More rows than the "
+                    "page claims usually means something that is not a job is "
+                    "being parsed as one, so treat these rows with suspicion "
+                    "and open the url yourself."
+                )
+            elif (
                 linkedin_count is not None
                 and len(rows) < linkedin_count
                 and len(rows) <= limit

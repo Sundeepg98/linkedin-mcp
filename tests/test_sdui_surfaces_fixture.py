@@ -26,20 +26,32 @@ WHAT WAS BROKEN, and what each fixture pins:
   ``about``/``experience``/``skills`` ids the reader used to look for, so every
   field read null and the tool errored on its owner's own profile. Both renders
   are kept because agreeing across them is the property being claimed.
-* ``profile_skills.html`` -- the skills page. ``main ul li`` matched the three
-  filter pills, so "All", "Industry Knowledge" and "Tools & Technologies" were
-  being reported as his skills.
+* ``profile_skills.html`` -- the skills page. On the live page ``main ul li``
+  matched the three filter pills, so "All", "Industry Knowledge" and "Tools &
+  Technologies" were being reported as his skills. NOTE that this fixture keeps
+  only the six skill entries, so the pills are not in it and no test here can
+  reproduce the old wrong answer; what it does pin is that the page offers no
+  list element to select at all, and that the per-skill anchor the reader now
+  uses is there once per skill.
 
 Every fixture is the region named above and nothing else, with scripts, styles,
-svg and images stripped, and with names, companies, slugs and member ids
-replaced by invented ones. Stripping the styles makes these renders HARSHER
-than the live page -- without CSS, ``innerText`` runs hidden menu items and
-duplicated bodies together -- which is deliberate: a parser that survives both
-layouts cannot be reading one particular render.
+svg and images stripped, and with names, companies, slugs, member ids, content
+urns and impression tokens replaced by invented ones. Stripping the styles
+makes these renders HARSHER than the live page -- without CSS, ``innerText``
+runs hidden menu items and duplicated bodies together -- which is deliberate: a
+parser that survives both layouts cannot be reading one particular render.
+
+TWO SHAPES ARE WRITTEN BY HAND rather than captured, and section 1c says why:
+a row whose photo link comes before its name link, and two profile sections
+sharing a wrapper. Neither is in any capture -- the photo links were stripped
+along with the images -- and without them both of the row walk's stop
+conditions and the profile section rule could be DELETED with the whole suite
+green. That was found by a cold review, not by this module.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -102,8 +114,12 @@ FILTER_PILLS = ("All", "Industry Knowledge", "Tools & Technologies")
 
 async def _with_page(path: Path, work):
     """Run ``work(page)`` over one frozen page in a LOCAL headless Chromium."""
+    return await _with_html(path.read_text(encoding="utf-8"), work)
+
+
+async def _with_html(html: str, work):
+    """The same, over markup written here rather than captured."""
     playwright = pytest.importorskip("playwright.async_api")
-    html = path.read_text(encoding="utf-8")
     async with playwright.async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
         try:
@@ -122,7 +138,7 @@ async def _with_page(path: Path, work):
 # fixture quietly emptied or regenerated wrong would make every assertion
 # about "the rows" true of nothing at all.
 
-ALL_FIXTURES = [
+NEW_FIXTURES = [
     TRACKER_ROW,
     TRACKER_EMPTY,
     NOTIFICATIONS,
@@ -131,8 +147,17 @@ ALL_FIXTURES = [
     PROFILE_SKILLS,
 ]
 
+#: The privacy checks below run over EVERY fixture in the repo, including the
+#: two the previous pass froze. Scoping them to this module's own files is how
+#: two real member urns sat in the older pair unnoticed until a cold review
+#: went looking.
+ALL_FIXTURES = [
+    FIXTURE_DIR / "profile_views_analytics.html",
+    FIXTURE_DIR / "profile_views_analytics_hydrated.html",
+] + NEW_FIXTURES
 
-@pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
+
+@pytest.mark.parametrize("path", NEW_FIXTURES, ids=lambda p: p.name)
 def test_the_fixture_exists_and_is_pure_ascii(path):
     assert path.exists(), f"missing fixture: {path}"
     raw = path.read_bytes()
@@ -143,8 +168,59 @@ def test_the_fixture_exists_and_is_pure_ascii(path):
 @pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
 def test_the_fixture_carries_no_session_material(path):
     html = path.read_text(encoding="utf-8")
-    for token in ("li_at", "JSESSIONID", "csrfToken", "urn:li:member", "Bearer "):
+    for token in ("li_at", "JSESSIONID", "csrfToken", "Bearer "):
         assert token not in html, token
+
+
+#: Every opaque LinkedIn identifier these captures are known to carry, matched
+#: RAW and PERCENT-ENCODED. A member urn, an activity or post urn and a
+#: per-impression tracking token each name a real person or a real post as
+#: surely as a name does.
+#:
+#: This check is written as a SHAPE rather than as a list of known-bad strings
+#: on purpose. The list version has now failed twice for the same reason: it
+#: looked for ``urn:li:member`` and the files held ``urn%3Ali%3Afsd_profile``
+#: and ``urn:li:ugcPost``, so two real viewers and three real posts passed it.
+#: A guard that cannot see the CLASS of thing it guards against is not a guard.
+_OPAQUE_ID_PATTERNS = (
+    ("member or content urn", re.compile(r"urn(?::|%3A)li(?::|%3A)", re.I)),
+    ("member id", re.compile(r"\bACoAA[A-Za-z0-9_-]{20,}")),
+    ("impression tracking token", re.compile(r"[Tt]rackingId=[A-Za-z0-9%+/=_-]{8,}")),
+)
+
+#: The pseudonyms the fixtures are allowed to keep, listed EXACTLY rather than
+#: by shape. A loose exemption is how a real id hides behind the guard, which
+#: is the failure mode this whole check exists to close -- so every permitted
+#: id is written out, and a new capture has to add its own here deliberately.
+_ALLOWED_OPAQUE_IDS = re.compile(
+    "|".join(
+        re.escape(value)
+        for value in (
+            # Two profile-view viewers.
+            "ACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7",
+            "ACoAAC8s7T6u5V4w3X2y1Z0a9B8c7D6e5F4g3H2",
+            # The profile owner, on the profile and skills fixtures.
+            "ACoAAA1B2C3D4E5F6G7H8I9J0KLMNOPQRSTUVWX",
+            # Three notification content ids.
+            "7400000000000000001",
+            "7400000000000000002",
+            "7400000000000000003",
+            # Two impression tokens.
+            "AAAAAAAAAAAAAAAAAAAAAA%3D%3D",
+            "BBBBBBBBBBBBBBBBBBBBBB%3D%3D",
+        )
+    )
+)
+
+
+@pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
+def test_no_fixture_carries_a_real_opaque_linkedin_id(path):
+    """Names are the easy half. The ids underneath them identify people too."""
+    html = path.read_text(encoding="utf-8")
+    for label, pattern in _OPAQUE_ID_PATTERNS:
+        for match in pattern.finditer(html):
+            tail = html[match.start() : match.start() + 120]
+            assert _ALLOWED_OPAQUE_IDS.search(tail), (label, tail[:90])
 
 
 @pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
@@ -164,8 +240,34 @@ def test_no_fixture_names_a_real_person_or_employer(path):
         "redacted",
         "redacted",
         "redacted",
+        "redacted",
     ):
         assert token not in lowered, token
+
+
+def test_the_opaque_id_guard_can_actually_fail():
+    """The control. This guard has twice been unable to see a real leak.
+
+    Runs the same check over the real ids that WERE in these files before they
+    were pseudonymised -- two viewers' member urns and three content urns --
+    and requires every one to be caught.
+    """
+    leaks = (
+        "urn%3Ali%3Afsd_profile%3AACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7",
+        "urn%3Ali%3Aactivity%3A7496511672837246977",
+        "urn:li:ugcPost:7490000000000000002",
+        "highlightedUpdateTrackingId=FKZM68XkSbul4YFGPd7nRQ%3D%3D",
+    )
+    for leak in leaks:
+        caught = False
+        for _, pattern in _OPAQUE_ID_PATTERNS:
+            match = pattern.search(leak)
+            if match and not _ALLOWED_OPAQUE_IDS.search(
+                leak[match.start() : match.start() + 120]
+            ):
+                caught = True
+                break
+        assert caught, leak
 
 
 def test_the_tracker_fixture_keeps_the_duplicate_anchor():
@@ -254,16 +356,171 @@ async def test_every_anchor_the_old_profile_reader_used_is_gone(which):
     }, found
 
 
-async def test_the_selector_the_old_skills_reader_used_finds_nothing():
-    """``main ul li`` -- which on the live page matched the three filter pills."""
+async def test_the_skills_page_has_no_list_semantics_for_a_selector_to_use():
+    """Why ``main ul li`` could never have worked here.
+
+    An earlier version of this test asserted that the old selector harvests
+    nothing from the fixture, which a cold review correctly called vacuous: the
+    file has no ``ul`` and no ``li`` at all, and ``harvest_block_cards``
+    returns ``[]`` for any selector matching nothing, so the assertion was a
+    tautology about a frozen file rather than a statement about the page.
+
+    This says the thing that is actually true and actually falsifiable: the
+    skills page uses ARIA roles on divs, so there is no list element to select,
+    while the per-skill edit anchor the reader now keys on is present once per
+    skill.
+    """
 
     async def work(page):
-        records = await dom.harvest_block_cards(
-            page, selectors=["main ul li"], max_items=200, max_chars=300
+        return await page.evaluate(
+            """() => ({
+                 ul: document.querySelectorAll('main ul').length,
+                 li: document.querySelectorAll('main li').length,
+                 listitem_roles: document.querySelectorAll('[role="listitem"]').length,
+                 skill_anchors: document.querySelectorAll(
+                   'a[href*="/details/skills/edit/forms/"]').length
+               })"""
         )
-        return records
 
-    assert await _with_page(PROFILE_SKILLS, work) == []
+    shape_of_page = await _with_page(PROFILE_SKILLS, work)
+    assert shape_of_page["ul"] == 0
+    assert shape_of_page["li"] == 0
+    assert shape_of_page["skill_anchors"] == 6, shape_of_page
+
+
+# ---------------------------------------------------------------------------
+# 1c. The row walk's two stop conditions, each on markup that needs it
+# ---------------------------------------------------------------------------
+#
+# These are written here rather than captured, and that is the point. A cold
+# review showed that BOTH stops in the walk could be deleted with the whole
+# suite green, because no committed fixture contains the shape either one
+# exists for: LinkedIn wraps a row's photo in its own link to the same person,
+# and every viewer in both profile-view fixtures has exactly ONE anchor -- the
+# images were stripped when those files were scrubbed. Capturing a page with
+# photos would drag a real person's picture into the repo, so the shape is
+# reproduced instead, minimally and by hand.
+
+#: A NESTED row: the photo link and the name link sit inside a row container.
+#: Walking from the photo link, which has no text, a bare link-count stop
+#: freezes on that empty anchor and the viewer is dropped entirely. The
+#: ``hasText(row)`` clause is what climbs through it.
+NESTED_ROWS_HTML = """
+<main><div id="list">
+  <div class="row">
+    <a href="/in/priya-sharma-8a41b207/"><img alt=""></a>
+    <div>
+      <a href="/in/priya-sharma-8a41b207/">Priya Sharma</a>
+      <div>Engineer at Northwind</div>
+      <div>Viewed 3d ago</div>
+    </div>
+  </div>
+  <div class="row">
+    <a href="/in/arun-b-4c19d833/"><img alt=""></a>
+    <div>
+      <a href="/in/arun-b-4c19d833/">Arun Balakrishnan</a>
+      <div>Analyst at Ashgrove</div>
+      <div>Viewed 5d ago</div>
+    </div>
+  </div>
+</div></main>
+"""
+
+#: A FLAT row: the photo link's own parent is already the whole list. Here the
+#: text clause disables the link stop, so only the "more than one deduped key"
+#: stop can halt the walk -- without it the first viewer's record swallows the
+#: entire list and the second viewer disappears into it.
+FLAT_ROWS_HTML = """
+<main><div id="list">
+  <a href="/in/priya-sharma-8a41b207/"><img alt=""></a>
+  <span>Priya Sharma</span><span>Engineer at Northwind</span><span>Viewed 3d ago</span>
+  <a href="/in/arun-b-4c19d833/"><img alt=""></a>
+  <span>Arun Balakrishnan</span><span>Analyst at Ashgrove</span><span>Viewed 5d ago</span>
+</div></main>
+"""
+
+
+async def _people_from(html: str):
+    async def work(page):
+        records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.PERSON_HREF, max_items=40
+        )
+        rows, dropped = dom.parse_all(records, shape.parse_person_card)
+        return records, rows, dropped
+
+    return await _with_html(html, work)
+
+
+async def test_a_row_whose_photo_link_comes_first_is_not_lost():
+    """Pins ``hasText(row)``. Without it this returns nothing at all."""
+    records, rows, _ = await _people_from(NESTED_ROWS_HTML)
+
+    assert len(records) == 2, records
+    assert [row["name"] for row in rows] == ["Priya Sharma", "Arun Balakrishnan"]
+    assert rows[0]["headline"] == "Engineer at Northwind"
+    assert rows[0]["viewed"] == "3 days ago"
+    assert rows[1]["viewed"] == "5 days ago"
+
+
+async def test_a_flat_list_of_photo_links_does_not_collapse_into_one_row():
+    """Pins the deduped-key stop, which the link stop cannot cover here.
+
+    With the key stop removed, the first viewer's record grows to hold the
+    whole list and the second is skipped as already seen -- one row wearing two
+    people's text, which is the profile-views failure all over again.
+    """
+    records, _, _ = await _people_from(FLAT_ROWS_HTML)
+
+    for record in records:
+        names = [
+            name
+            for name in ("Priya Sharma", "Arun Balakrishnan")
+            if name in record["text"]
+        ]
+        assert len(names) <= 1, record["text"][:160]
+
+
+# ---------------------------------------------------------------------------
+# 1d. The profile section rule, on markup that needs it
+# ---------------------------------------------------------------------------
+#
+# Same gap, same reason: in both profile fixtures every heading already sits
+# inside its own direct child of ``main``, so the ``node !== main`` bound alone
+# gives the right answer and the heading stop can be deleted green. Here two
+# sections share a wrapper, which is what the stop is for.
+
+SHARED_WRAPPER_HTML = """
+<main><div id="wrapper">
+  <div class="card">
+    <h2>Alex Rivera</h2><div>He/Him</div>
+    <div>Senior Backend Engineer</div>
+    <div>Riverton, Fairhaven, United States</div>
+    <div>Contact info</div>
+  </div>
+  <div class="card"><h2>About</h2><div>Nine years of backend work.</div></div>
+</div></main>
+"""
+
+
+async def test_a_section_stops_before_the_wrapper_it_shares_with_the_next_one():
+    """Pins ``headingsIn(node) > 1``: without it both sections are the wrapper."""
+
+    async def work(page):
+        return await dom.read_profile_fields(page)
+
+    fields = await _with_html(SHARED_WRAPPER_HTML, work)
+    sections = fields["sections"]
+
+    assert [s["heading"] for s in sections] == ["Alex Rivera", "About"]
+    # The topcard must not have swallowed the About card.
+    assert "Nine years of backend work." not in " ".join(sections[0]["lines"])
+    assert shape.profile_section_lines(sections, "About") == [
+        "Nine years of backend work."
+    ]
+    identity = shape.parse_profile_topcard(sections[0]["lines"])
+    assert identity["name"] == "Alex Rivera"
+    assert identity["headline"] == "Senior Backend Engineer"
+    assert identity["location"] == "Riverton, Fairhaven, United States"
 
 
 # ---------------------------------------------------------------------------
@@ -305,6 +562,7 @@ async def test_the_tracker_row_is_the_job_and_not_the_page():
 async def test_no_tracker_field_is_page_furniture():
     """The heading and the tab strip are the values the old walk returned."""
     _, rows, _ = await _tracker_rows(TRACKER_ROW)
+    assert len(rows) == 1, "an empty harvest would make this loop vacuous"
     forbidden = (PAGE_HEADING, "Saved", "Applied", "Interview", "Date posted", DOT)
     for row in rows:
         for field in ("title", "company", "location"):
@@ -362,6 +620,24 @@ async def test_the_populated_tracker_publishes_its_own_counts():
     assert "archived" not in counts
     # This page has a row, so it drew no empty state.
     assert shape.tracker_empty_state(text) is None
+
+
+def test_both_empty_state_wordings_are_recognised():
+    """"No matches" is the one the tools will actually meet, and it was untested.
+
+    Both frozen tracker fixtures show "No jobs here", which is the DEFAULT
+    tab's wording. Every read this server performs goes through ``?stage=``,
+    and a stage-selected tab that is empty says "No matches" instead -- so the
+    wording on the live code path was the one no test exercised.
+    """
+    default_tab = "Saved " + DOT + " 0\nDate posted\nNo jobs here\nFind more jobs"
+    stage_tab = "Applied " + DOT + " 0\nDate posted\nNo matches\nNot seeing some jobs?"
+
+    assert shape.tracker_empty_state(default_tab) == "No jobs here"
+    assert shape.tracker_empty_state(stage_tab) == "No matches"
+    assert shape.tracker_empty_state("Saved " + DOT + " 0\nDate posted") is None
+    # A line that merely CONTAINS the wording is not the empty state.
+    assert shape.tracker_empty_state("No matches were harmed") is None
 
 
 @pytest.mark.parametrize(
@@ -457,6 +733,7 @@ async def test_the_notification_harvest_finds_every_card():
 async def test_no_notification_body_carries_accessibility_text():
     """The defect. "Unread notification." was welded to the front of a body."""
     _, rows, _ = await _notification_rows()
+    assert len(rows) == 6, "an empty harvest would make this loop vacuous"
     for row in rows:
         for noise in A11Y_NOISE:
             assert noise not in row["text"], (noise, row["text"])
@@ -464,6 +741,9 @@ async def test_no_notification_body_carries_accessibility_text():
 
 async def test_every_notification_body_is_exactly_what_the_page_showed():
     _, rows, _ = await _notification_rows()
+    # zip() truncates silently, so a harvest that returned one row would make
+    # every assertion below vacuously true.
+    assert len(rows) == len(EXPECTED_NOTIFICATIONS)
     for row, (expected, _, _) in zip(rows, EXPECTED_NOTIFICATIONS):
         if expected is None:
             continue
@@ -480,7 +760,7 @@ async def test_a_body_the_page_prints_twice_keeps_one_copy():
     """
     _, rows, _ = await _notification_rows()
     body = rows[2]["text"]
-    assert body.startswith("Forgeworks was live for redacted with Boulder:")
+    assert body.startswith("Forgeworks was live for Open Source Tuesday with Boulder:")
     assert body.count("Forgeworks was live") == 1
 
 
@@ -494,6 +774,7 @@ async def test_every_notification_carries_the_time_the_page_wrote():
 
 async def test_a_notification_body_does_not_end_with_its_own_timestamp():
     _, rows, _ = await _notification_rows()
+    assert len(rows) == 6, "an empty harvest would make this loop vacuous"
     for row in rows:
         assert not row["text"].rstrip().endswith(("22m", "1h", "2h", "3h", "4h"))
 

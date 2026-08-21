@@ -532,6 +532,29 @@ async def test_a_full_read_is_not_annotated_with_a_shortfall(drive):
     assert "note" not in result
 
 
+async def test_more_rows_than_linkedin_counts_is_flagged_as_a_disagreement(drive):
+    """The mirror of the empty case, and the same symptom.
+
+    The reconciliation was one-sided at first: it raised on too FEW rows and
+    said nothing about too many. But a walk that overshoots its row does not
+    return nothing -- it returns page furniture wearing a job's shape, which is
+    exactly how this surface broke. Five rows where LinkedIn counts two is that
+    symptom.
+    """
+    page = FakePage(evaluate_result=[saved_job_card(n) for n in range(5)])
+    page.inner_text_result = TRACKER_TABS.replace(
+        "Saved " + chr(0xB7) + " 3", "Saved " + chr(0xB7) + " 2"
+    )
+    drive(page)
+
+    result = await linkedin_saved_jobs(limit=25)
+
+    assert result["count"] == 5
+    assert result["linkedin_count"] == 2
+    assert "DISAGREEMENT" in result["note"]
+    assert "with suspicion" in result["note"]
+
+
 async def test_a_search_result_is_shaped_like_the_other_job_rows(drive):
     page = FakePage(evaluate_result=[SEARCH_CARD])
     navigations = drive(page)

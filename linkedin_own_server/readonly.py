@@ -47,17 +47,26 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # Own profile views (Premium analytics view, and the classic one).
     re.compile(r"^https://www\.linkedin\.com/analytics/profile-views/?(\?[^#]*)?$"),
     re.compile(r"^https://www\.linkedin\.com/me/profile-views/?(\?[^#]*)?$"),
-    # Saved / applied jobs. cardType selects which list renders; both are reads.
-    re.compile(r"^https://www\.linkedin\.com/my-items/saved-jobs/?(\?[^#]*)?$"),
     # The job tracker, which is where /my-items/saved-jobs/ now redirects (the
-    # cardType query is dropped on the way). ``?stage=`` selects which of his
-    # own lists renders -- saved, applied, interview, archived, draft. It is a
-    # read: measured 2026-08-22 by opening three stages in turn and re-reading
-    # the default view afterwards, where every tab count was unchanged. The tab
-    # strip itself is a set of client-side radios with no url of their own, so
-    # ``?stage=`` is the ONLY way to reach the applied list without clicking --
-    # which is exactly why this pattern exists rather than a click.
-    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/?(\?[^#]*)?$"),
+    # cardType query is dropped on the way, and that older address is no longer
+    # on this list because nothing builds it any more). ``?stage=`` selects
+    # which of his own lists renders. It is a read: measured 2026-08-22 by
+    # opening three stages in turn and re-reading the default view afterwards,
+    # where every tab count was unchanged. The tab strip itself is a set of
+    # client-side radios with no url of their own, so ``?stage=`` is the ONLY
+    # way to reach the applied list without clicking -- which is exactly why
+    # this pattern exists rather than a click.
+    #
+    # The two stages are ENUMERATED rather than left as ``?[^#]*``. LinkedIn's
+    # own payload also names interview, archived, draft and clicked_apply, and
+    # a wildcard would have admitted all of them plus ``?stage=withdraw`` and
+    # ``?apply=1`` -- unreachable today, since the stage is a literal in
+    # server.py and never a tool argument, but an allowlist should permit what
+    # is opened rather than what happens to be harmless. A third stage needs a
+    # deliberate edit here, which is the point.
+    re.compile(
+        r"^https://www\.linkedin\.com/jobs-tracker/\?stage=(saved|applied)$"
+    ),
     # Job search results.
     re.compile(r"^https://www\.linkedin\.com/jobs/search/?(\?[^#]*)?$"),
     # Own profile. /in/me/ redirects to whoever is signed in.
@@ -113,6 +122,19 @@ def assert_read_url(url: str) -> str:
     """
     if not isinstance(url, str) or not url:
         raise WriteAttemptError("empty navigation target")
+
+    # Whitespace is refused up front, before any pattern sees the string.
+    # Python's ``$`` matches before a trailing newline and ``[^#]*`` happily
+    # eats a CRLF, so every anchored pattern below would otherwise accept
+    # "https://www.linkedin.com/feed/\n" and a query carrying "\r\nHost: ...".
+    # No caller can build such a string today; this closes the shape rather
+    # than the instance.
+    if any(character.isspace() for character in url):
+        raise WriteAttemptError(
+            f"navigation blocked: {url!r} contains whitespace. A url this "
+            "server builds never does, and a newline inside one is how an "
+            "anchored pattern is talked past."
+        )
 
     lowered = url.lower()
     for bad in _FORBIDDEN_URL_SUBSTRINGS:

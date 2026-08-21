@@ -83,7 +83,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 483 passed
+python -m pytest            # 519 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -147,9 +147,19 @@ package. A check that cannot fail certifies nothing.
    on import lines only so this file can go on describing the boundary in
    prose.
 
-The three injected scripts are scanned separately for anything that could
-mutate the page (`.click(`, `.value =`, `dispatchEvent`, `fetch(`, ...). They
-query the DOM and read text.
+The injected scripts are scanned separately for anything that could mutate the
+page (`.click(`, `.value =`, `dispatchEvent`, `fetch(`, ...). They query the
+DOM and read text.
+
+That scan is bound to **what actually runs**, not to what is named a certain
+way. The tests parse the package, find the first argument of every
+`page.evaluate(...)` call, resolve it to its module-level constant and scan
+that -- so a script cannot be injected without being read, and one this check
+cannot resolve (assembled at runtime, say) fails the build outright. The
+earlier version scanned a hand-written list of three names ending in `_JS`; a
+cold review put a constant called `EVIL_INLINE`, carrying `localStorage.setItem`
+and `fetch(`, through the existing call site and shipped it with every test
+green. That hole is closed, and the attack is now a test.
 
 ## The login gate: a cookie is never a login
 
@@ -328,13 +338,13 @@ linkedin_own_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the eleven tools
   errors.py
-tests/                       483 tests, no network, no account
+tests/                       519 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **483 tests**, no network and no account. Most run with no
+Built and tested: **519 tests**, no network and no account. Most run with no
 browser at all; the two fixture-driven modules launch a local headless
 Chromium to run the real injected harvester over frozen markup, which reaches
 nothing outside the machine.
