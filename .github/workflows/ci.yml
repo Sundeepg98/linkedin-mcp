@@ -1,0 +1,164 @@
+name: CI
+
+# This suite has 684 tests and has never run anywhere but one Windows laptop.
+# It also holds the read-only guarantees this server is built around -- the
+# navigation allowlist, the AST scan for write-shaped JS, the launch-flag
+# boundary, the tool-surface check -- so "green when someone remembers" is not
+# a gate for it.
+#
+# THE ONE DESIGN DECISION, and it was measured rather than argued. With the
+# browser binary absent, 77 of the 684 fail, all with the identical error:
+#
+#     BrowserType.launch: Executable doesn't exist at ...
+#
+# They live in tests/test_profile_views_fixture.py, test_job_search_fixture.py
+# and test_sdui_surfaces_fixture.py, and every one of them does
+# `chromium.launch(headless=True)` followed by `page.set_content(html)` over
+# frozen local markup. Not one calls page.goto(). So they need a BROWSER
+# BINARY and nothing else: no network, no cookie, no LinkedIn session. The
+# operator's li_at never has to leave his disk for these to run, which is what
+# makes installing chromium here the right call instead of marking them and
+# deselecting them.
+#
+# The coverage argument settles it. Those three modules are the ONLY tests
+# that caught the profile-views heading duplication, the job-search field
+# shift, and the tracker row walk -- three bugs that shipped while every pure
+# test in the repo passed. Deselecting them on CI would deselect precisely the
+# class of test the pure ones provably cannot substitute for. Marking would
+# also not be clean at file granularity: test_profile_views_fixture.py holds
+# 18 browser tests alongside 25 that need no browser at all.
+#
+# Note that test_browser.py, test_launch_boundary.py and test_preflight.py
+# only TALK about the browser -- they fake the driver and launch nothing. They
+# pass with no chromium present and are not part of the 77.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: pytest (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        # bash on both, including the Windows cell (Git Bash ships on the
+        # runner). Two steps below redirect command output to a file that a
+        # later step parses, and identical redirection semantics across the
+        # matrix is worth more here than using each platform's native shell.
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # An explicit list, not a cross product, because the cells are not
+        # equally priced: this is a PRIVATE repository, so runner minutes come
+        # out of the account's free allowance and a Windows minute is billed
+        # at 2x a Linux one. The suite takes ~1m45s plus a chromium download.
+        #
+        #   3.10  -- the floor pyproject.toml declares (requires-python
+        #            ">=3.10"). A floor nobody runs is a claim, not a fact, and
+        #            the four dependencies that resolve here all declare the
+        #            same floor, so this cell is the only thing that can catch
+        #            one of them raising it.
+        #   3.13  -- what the operator's box runs (3.13.14, measured).
+        #   windows x 3.13 -- one cell, not two. Windows earns a place because
+        #            three of this repo's concerns are Windows-shaped: the
+        #            cp1252 console encoding the ASCII guard exists for, the
+        #            core.autocrlf line-ending difference the vendored-drift
+        #            comparison normalises away, and the preflight path logic
+        #            pinned to a real 2026-08-22 failure. None of those vary
+        #            with the Python version, so one cell measures all three.
+        include:
+          - { os: ubuntu-latest, python-version: "3.10" }
+          - { os: ubuntu-latest, python-version: "3.13" }
+          - { os: windows-latest, python-version: "3.13" }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # tests/test_vendored_buildinfo.py compares linkedin_server/buildinfo.py
+      # and paths.py against jobcore's originals, and SKIPS when it cannot find
+      # a jobcore checkout by walking up from the test file. Without this step
+      # CI would report green while the only guard that noticed those copies
+      # drifting had quietly not run -- which is the same defect in a new suit.
+      #
+      # It goes OUTSIDE the workspace, as a sibling, because that is the layout
+      # the walk looks for (../jobcore/src/jobcore) and it keeps the checkout's
+      # own working tree clean, which the build-stamp tests read.
+      #
+      # FULL history, not a shallow clone: the header-pin test runs
+      # `git show <pinned-sha>:src/jobcore/paths.py` inside this clone to prove
+      # the vendored body matches the commit its header NAMES, and a depth-1
+      # clone would turn that into a silent skip.
+      #
+      # Tracking master rather than a pinned sha is deliberate and is the same
+      # call the sibling uplers repo made: a jobcore fix that a vendored copy
+      # has not picked up is exactly what this is here to surface. Today's
+      # example is real -- jobcore 6acc7e6 taught its path scrubber the doubled
+      # separator spelling that OSError.__str__ produces, and this repo's copy
+      # did not have it.
+      - name: Check out jobcore as a sibling, so the drift guards run
+        # A plain relative target rather than actions/checkout: that action
+        # refuses any path outside the workspace, and outside the workspace is
+        # exactly where this has to land.
+        run: |
+          git clone --quiet https://github.com/Sundeepg98/jobcore.git ../jobcore
+          echo "jobcore at $(git -C ../jobcore rev-parse --short HEAD)"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        # requirements.txt is the whole story here: playwright and fastmcp are
+        # runtime, pytest and pytest-asyncio are in the same file on purpose
+        # (README's recipe is this line followed by pytest). No `pip install
+        # -e .` -- pytest.ini sets pythonpath=., so linkedin_server imports
+        # from the checkout, which is the code we want measured.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: The resolve this run actually got
+        # Printed, not asserted. A local venv is a cache of a resolve that
+        # happened in the past; this is the only place that shows what pip
+        # picks TODAY under the requirements.txt bounds -- the gap that hid a
+        # completely broken clean install in the sibling naukri repo for a day.
+        run: pip list --format=freeze
+
+      - name: Install the Chromium binary
+        # `pip install playwright` installs the DRIVER only. The browser is a
+        # separate download, and skipping it is what produces the 77 failures
+        # described at the top of this file.
+        run: python -m playwright install --with-deps chromium
+
+      - name: The server imports and registers its tools
+        # A decorator error can leave `import linkedin_server.server` raising
+        # nothing while registering ZERO tools. That is a shape the suite would
+        # catch, but it would surface as a wall of assertion failures rather
+        # than as one line saying the surface is empty.
+        run: |
+          python -c "import asyncio; from linkedin_server.server import mcp; \
+          print('tools registered:', len(asyncio.run(mcp.list_tools())))"
+
+      - name: How many tests this checkout contains
+        # Written to a file rather than eyeballed: the next-but-one step
+        # compares it against what actually ran. Collection launches nothing.
+        run: python -m pytest --collect-only -q | tee collected.txt | tail -1
+
+      - name: Run the whole suite
+        # No -m filter, no --ignore, no --deselect anywhere in this line, and
+        # that is load-bearing: the check below fails if the number that ran
+        # is not the number that exists. -rs so any skip prints its reason.
+        run: python -m pytest -q -rs --junitxml=junit.xml
+
+      - name: Every test that exists actually ran
+        # if: always() -- this must report the counts on a RED run too. A run
+        # that failed AND ran a subset is two problems, and the second one is
+        # the one nobody would otherwise look for.
+        if: always()
+        run: python scripts/ci_full_run_check.py collected.txt junit.xml
