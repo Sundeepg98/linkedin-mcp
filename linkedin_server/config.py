@@ -15,6 +15,9 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from typing import Any, Optional
+
+from linkedin_server import paths as _paths
 
 # ---------------------------------------------------------------------------
 # Identity
@@ -42,6 +45,73 @@ STATE_DIR = Path(
 CHROME_PROFILE = Path(
     os.environ.get("LINKEDIN_PROFILE_DIR", str(STATE_DIR / "chrome-profile"))
 ).resolve()
+
+# ---------------------------------------------------------------------------
+# Rendering a path INTO a tool result
+# ---------------------------------------------------------------------------
+
+#: The anchor every displayed path is measured against, defined ONCE here so
+#: that no call site can quietly pick a different one and produce two spellings
+#: of the same directory in one payload.
+#:
+#: Absolute local paths do not belong in a tool result: they publish this
+#: machine's directory layout into any transcript the result is pasted into,
+#: and they are paid for in tokens on every response that carries one. The fix
+#: is NOT to delete the field -- "where does my session actually live" is a
+#: real question these fields answer, and a null trades a leak for a field that
+#: answers nothing. See ``paths.py`` (vendored from jobcore) for the three
+#: rendering forms and why the third one exists.
+DISPLAY_ANCHOR = REPO_ROOT
+
+
+def display(raw: Any) -> Optional[str]:
+    """Render one path for a tool result: anchor-relative, ``~/...``, or tail."""
+    return _paths.display_path(raw, anchor=DISPLAY_ANCHOR)
+
+
+def known_paths() -> tuple[str, ...]:
+    """The absolute paths this server knows it may have baked into a message.
+
+    Read fresh on every call rather than frozen into a constant, because the
+    profile directory is overridable by environment variable and a test that
+    points it somewhere else must get that directory scrubbed too.
+
+    This is the deliberately SHORT list that :func:`scrub` is allowed to
+    substitute. It is not "every path-shaped thing in the text": see
+    ``paths.relativise_known`` for why a heuristic scrubber does more damage
+    than the leak it was written for.
+    """
+    out: list[str] = []
+    for raw in (CHROME_PROFILE, STATE_DIR, REPO_ROOT, PACKAGE_DIR):
+        text = str(raw)
+        out.append(text)
+        # ...and the same path as REPR would spell it. Measured 2026-08-22:
+        # OSError.__str__ renders its filename through repr(), so
+        #     OSError(2, "...", r"D:")
+        # stringifies with DOUBLED backslashes -- "D:\a\b" -- and an exact
+        # substitution for the single-backslash form finds nothing. The regex
+        # second opinion in tests/test_path_hygiene.py caught this after the
+        # path-string check had already declared the payload clean, which is
+        # the whole argument for keeping two detectors. On posix the two forms
+        # are identical and this adds nothing.
+        escaped = text.replace("\\", "\\\\")
+        if escaped != text:
+            out.append(escaped)
+    return tuple(out)
+
+
+def scrub(text: Any) -> Any:
+    """Replace this server's own known paths wherever they sit inside prose.
+
+    Renaming a field does not help when the path was interpolated into a
+    sentence. Several messages in this package are built as
+    ``f"...{path}...{exc}"`` -- and an OSError stringifies with the filename it
+    failed on -- so a path reaches a caller through error text from call sites
+    that render no path field of their own. Non-strings pass through untouched,
+    so this is safe to map over a whole payload.
+    """
+    return _paths.relativise_known(text, known=known_paths(), render=display)
+
 
 # ---------------------------------------------------------------------------
 # LinkedIn endpoints (read surfaces only -- see readonly.py for the guard)

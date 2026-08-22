@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 
 from fastmcp import FastMCP
 
-from linkedin_server import cdp_bridge, dom, preflight, shape
+from linkedin_server import buildinfo, cdp_bridge, dom, preflight, shape
 from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
@@ -46,9 +46,43 @@ from linkedin_server.config import (
     SERVER_NAME,
     SERVER_VERSION,
     CHROME_PROFILE,
+    REPO_ROOT,
+    display,
+    scrub,
 )
 from linkedin_server.errors import ExtractionFailedError, LinkedInReaderError
 from linkedin_server.profile_lock import held_by
+
+# ---------------------------------------------------------------------------
+# What code this process is running -- resolved ONCE, here, at import
+# ---------------------------------------------------------------------------
+
+#: The commit this process was imported from, frozen at import and never
+#: re-read. A per-call ``git rev-parse`` from a stale process would report the
+#: NEW commit on disk and read as confirmation that a fix is loaded, which is
+#: the exact failure this exists to prevent. ``linkedin_server_info`` READS
+#: this constant; it must never re-resolve.
+BUILD = buildinfo.stamp(REPO_ROOT)
+
+#: When this process came up. Kept OUT of the frozen stamp on purpose: uptime
+#: is derived fresh on every call, and a cached uptime is a lie that grows.
+CLOCK = buildinfo.ProcessClock()
+
+#: There is NO second stamp to report here. The sibling naukri, uplers and
+#: instahyre servers report a ``jobcore`` commit alongside their own because
+#: they depend on that library; this server does not depend on it and must not
+#: start -- it VENDORS the two modules it needs (see the headers on
+#: ``buildinfo.py`` and ``paths.py``). Stated as a value in the payload rather
+#: than left as a missing key, because an absent field is indistinguishable
+#: from a field nobody remembered to write, and a reader comparing two servers
+#: in this family would be left guessing.
+JOBCORE_STAMP_NOTE = (
+    "none -- this server has no jobcore dependency. It vendors buildinfo.py "
+    "and paths.py from jobcore d1720c3 instead; the vendored commit is pinned "
+    "in each file's header and tests/test_vendored_buildinfo.py fails if a "
+    "copy drifts. Reporting a jobcore stamp here would be a lie."
+)
+
 
 mcp = FastMCP(
     name=SERVER_NAME,
@@ -79,15 +113,22 @@ mcp = FastMCP(
 def _error(exc: Exception) -> dict[str, Any]:
     """Report a failure as a failure, with everything needed to act on it."""
     if isinstance(exc, LinkedInReaderError):
-        out: dict[str, Any] = {"error": exc.kind, "message": str(exc)}
+        out: dict[str, Any] = {"error": exc.kind, "message": scrub(str(exc))}
         url = getattr(exc, "url", "")
         if url:
             out["url"] = url
         hint = getattr(exc, "hint", "")
         if hint:
-            out["hint"] = hint
+            out["hint"] = scrub(hint)
         return out
-    return {"error": "unexpected", "message": f"{type(exc).__name__}: {exc}"}
+    # An OSError stringifies with the filename it failed on, so this line
+    # publishes an absolute path from call sites that render no path field of
+    # their own. Every tool funnels its failures through here, which makes this
+    # ONE boundary the cheapest place to close that whole class.
+    return {
+        "error": "unexpected",
+        "message": scrub(f"{type(exc).__name__}: {exc}"),
+    }
 
 
 def _clamp(value: Optional[int], default: int, maximum: int) -> int:
@@ -892,11 +933,40 @@ async def linkedin_server_info() -> dict[str, Any]:
 
     Useful for confirming the read-only boundary and the rate settings without
     reading the source.
+
+    ``version`` and ``build.code.commit`` are two different facts and both are
+    reported. ``version`` is a HAND-MAINTAINED label: it says what this server
+    calls itself, and it keeps saying it whether or not anybody remembered to
+    bump it. ``build.code.commit`` is MEASURED -- it is the commit this process
+    was imported from, read once at import and frozen.
+
+    WHAT TO DO WITH IT. A fix committed to disk changes nothing for a server
+    that is already running. To tell "the fix is not loaded" from "the fix is
+    wrong", compare ``build.code.commit`` against ``git rev-parse HEAD`` in the
+    checkout::
+
+        git -C <this checkout> rev-parse --short=12 HEAD
+
+    They MATCH -> the running process holds that commit, so a bug you can still
+    reproduce is a real bug. They DIFFER -> the process is STALE and no further
+    committing will change its behaviour until the MCP client restarts it.
+    ``build.code.dirty`` says whether the working tree had uncommitted changes
+    when this process started, so a matching commit with ``dirty: true`` means
+    the commit is necessary but not sufficient to describe what is loaded.
+    ``build.process.started_at`` dates the answer.
     """
     try:
         return {
             "name": SERVER_NAME,
             "version": SERVER_VERSION,
+            # Read from module constants; never re-resolved here. A per-call
+            # git from a STALE process would report the NEW commit on disk and
+            # read as confirmation that a fix is loaded -- worse than silence.
+            "build": {
+                "code": BUILD.as_dict(),
+                "process": CLOCK.as_dict(),
+                "jobcore": JOBCORE_STAMP_NOTE,
+            },
             "read_only": True,
             "writes_available": [],
             "capabilities": [
@@ -929,7 +999,9 @@ async def linkedin_server_info() -> dict[str, Any]:
             },
             "browser": {
                 "engine": "playwright chromium, persistent profile",
-                "profile_dir": str(CHROME_PROFILE),
+                # Relativised, not deleted: "where does my session actually
+                # live" is a real question, and a null answers nothing.
+                "profile_dir": display(CHROME_PROFILE),
                 "profile_lock_held_by_pid": held_by(),
                 "idle_close_seconds": IDLE_CLOSE_S,
                 "mode": BROWSER.mode,

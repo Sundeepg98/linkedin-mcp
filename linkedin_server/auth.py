@@ -392,10 +392,13 @@ def _cookie_expiry(record: Optional[dict[str, Any]]) -> dict[str, Any]:
 
 def _durability(mode: str) -> dict[str, Any]:
     """Where the session is kept and what it survives. Shared by both paths."""
-    from linkedin_server.config import CHROME_PROFILE
+    from linkedin_server.config import CHROME_PROFILE, display
 
     return {
-        "stored_in": str(CHROME_PROFILE) if mode == "launch" else (
+        # Relativised rather than deleted. This is the one field that answers
+        # "where does my session actually live", and it is shared by BOTH the
+        # live and the offline session result, so it is rendered once here.
+        "stored_in": display(CHROME_PROFILE) if mode == "launch" else (
             "the browser this server is attached to, not a profile it owns"
         ),
         "survives_server_restart": mode == "launch",
@@ -521,6 +524,7 @@ def session_info_offline(
     each reason" is more use than either error on its own.
     """
     from linkedin_server import cookie_jar
+    from linkedin_server.config import scrub
 
     session_cookie: dict[str, Any] = {"present": False}
     csrf_cookie: dict[str, Any] = {"present": False}
@@ -531,9 +535,11 @@ def session_info_offline(
         session_cookie = _cookie_expiry(by_name.get(SESSION_COOKIE))
         csrf_cookie = _cookie_expiry(by_name.get(CSRF_COOKIE))
     except cookie_jar.CookieJarUnavailableError as exc:
-        jar_error = str(exc)
+        # cookie_jar builds its messages as f"...{profile_dir}..." so the path
+        # is INSIDE the prose, where renaming a field cannot reach it.
+        jar_error = scrub(str(exc))
     except Exception as exc:  # pragma: no cover - defensive
-        jar_error = f"{type(exc).__name__}: {exc}"
+        jar_error = scrub(f"{type(exc).__name__}: {exc}")
 
     session_cookie["name"] = SESSION_COOKIE
     csrf_cookie["name"] = CSRF_COOKIE
