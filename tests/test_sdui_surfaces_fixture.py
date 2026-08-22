@@ -147,22 +147,21 @@ NEW_FIXTURES = [
     PROFILE_SKILLS,
 ]
 
-#: The privacy checks below run over EVERY fixture in the repo, including the
-#: two the previous pass froze. Scoping them to this module's own files is how
-#: two real member urns sat in the older pair unnoticed until a cold review
-#: went looking.
-ALL_FIXTURES = [
-    FIXTURE_DIR / "profile_views_analytics.html",
-    FIXTURE_DIR / "profile_views_analytics_hydrated.html",
-    # The job-search captures. Their own module is
-    # ``test_job_search_fixture.py``; they are listed HERE because the privacy
-    # guards must cover every fixture in the repo rather than every fixture a
-    # module happens to remember, which is how two real member urns survived
-    # the last pass.
-    FIXTURE_DIR / "jobs_search.html",
-    FIXTURE_DIR / "jobs_search_hydrated.html",
-    FIXTURE_DIR / "jobs_search_salary.html",
-] + NEW_FIXTURES
+#: The privacy checks below run over EVERY fixture in the repo, DISCOVERED
+#: rather than listed.
+#:
+#: This was a hand-written list, under a comment recording that scoping the
+#: privacy checks to one module's own files is how two real member urns sat
+#: unnoticed in the older pair until a cold review went looking. A list is
+#: that same failure moved one step later: a fixture frozen by a later wave is
+#: not on it, so the guards never run over the new file and nothing fails --
+#: the checks stay green by not looking. Three job-posting captures landed on
+#: 2026-08-22 and would have been exactly that case.
+#:
+#: A glob closes the class instead of the instance: a capture is covered the
+#: moment it lands in the directory, by whoever adds it, without their having
+#: to know this module exists.
+ALL_FIXTURES = sorted(FIXTURE_DIR.glob("*.html"))
 
 
 @pytest.mark.parametrize("path", NEW_FIXTURES, ids=lambda p: p.name)
@@ -171,6 +170,23 @@ def test_the_fixture_exists_and_is_pure_ascii(path):
     raw = path.read_bytes()
     assert raw, f"empty fixture: {path}"
     raw.decode("ascii")
+
+
+def test_the_privacy_guards_cover_every_fixture_on_disk():
+    """A discovered list still has to be shown discovering something.
+
+    If the glob ever returns nothing -- a moved directory, a renamed suffix --
+    every parametrised guard below silently collapses to zero cases and the
+    suite goes green having checked no file at all. That is a worse outcome
+    than the stale list this replaced, so it is asserted rather than assumed.
+    """
+    assert ALL_FIXTURES, f"no fixtures discovered under {FIXTURE_DIR}"
+    for path in NEW_FIXTURES:
+        assert path in ALL_FIXTURES, f"{path.name} not discovered"
+    # The three job-posting captures are named because they are the reason
+    # the list became a glob.
+    for name in ("job_detail.html", "job_detail_hydrated.html", "job_detail_shell.html"):
+        assert FIXTURE_DIR / name in ALL_FIXTURES, name
 
 
 @pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)

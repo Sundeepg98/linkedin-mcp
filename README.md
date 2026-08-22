@@ -38,6 +38,7 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_saved_jobs` | Jobs you bookmarked. |
 | `linkedin_search_jobs` | Job search with keywords, location, remote, date posted, experience level. |
+| `linkedin_job_detail` | One posting in full -- pay range, LinkedIn's applicant count, workplace and employment type, hiring status, and the description. None of these is on a search or saved-jobs card. |
 | `linkedin_my_profile` | Your own profile: headline, about, skills, and which sections rendered. Experience/Education/Skills are deferred by LinkedIn until the page is scrolled, so they read UNKNOWN rather than zero. |
 | `linkedin_notifications` | Your notification list. |
 | `linkedin_auth_status` | Whether there is a live session, measured by an authenticated request. |
@@ -122,6 +123,11 @@ package. A check that cannot fail certifies nothing.
    cannot become a navigation to an action url. Blocked targets include
    `/jobs/application/`, `/messaging/`, invitations, `/edit/`, `open-to-work`,
    anything with `action=`, and every host that is not `www.linkedin.com`.
+   The job-posting pattern is the tightest on the list: it admits a numeric
+   id and **no query string at all**, because the url is built from an integer
+   and so never has one to preserve. The slug form LinkedIn also serves
+   (`/jobs/view/senior-node-engineer-at-acme-4600000042`) is refused for the
+   same reason -- a slug is a job title, and a title is a string.
 
 2. **A source scanner.** The package is grepped for calls that could change
    state -- `click`, `fill`, `type`, `press`, `select_option`, `set_input_files`,

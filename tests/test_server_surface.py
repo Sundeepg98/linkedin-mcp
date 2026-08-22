@@ -1,4 +1,4 @@
-"""The tool surface: eleven tools, and not one of them offers a write.
+"""The tool surface: twelve tools, and not one of them offers a write.
 
 The brief for this server drew a hard line -- no writes, not now, not stubbed,
 not "for later". This file is that line expressed as assertions, including on
@@ -20,6 +20,7 @@ EXPECTED_TOOLS = {
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
+    "linkedin_job_detail",
     "linkedin_my_profile",
     "linkedin_notifications",
     "linkedin_server_info",
@@ -54,9 +55,9 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_eleven_reads(tools):
+async def test_the_surface_is_exactly_the_twelve_reads(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 11
+    assert len(tools) == 12
 
 
 async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):

@@ -700,6 +700,84 @@ async def linkedin_search_jobs(
 
 
 @mcp.tool()
+async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
+    """Read one job posting in full, including the description and the pay.
+
+    Every list tool here returns CARDS -- title, company, location, link.
+    This reads the posting behind one of them, which is where the facts that
+    settle a decision actually live: the pay range, LinkedIn's own applicant
+    count, the workplace and employment type, the hiring status, and the
+    description itself. None of those is on any card.
+
+    One page load, one posting. There is no sweep and no paging.
+
+    A read in both directions: this does not apply to the job, does not save
+    it, and has no way to change anything about the posting. Nobody else on
+    the page is collected either -- LinkedIn draws a hiring team and a
+    "people also viewed" rail beside a job, and neither is read here.
+
+    A field the page did not carry comes back null rather than blank. If the
+    page did not render the posting at all the call FAILS instead of
+    returning an empty one: LinkedIn serves the document title before the
+    body, so a title with nothing behind it is never treated as an answer.
+
+    Args:
+        job_id: the numeric job id, or a job url to take it from --
+            linkedin_search_jobs and linkedin_saved_jobs both return each.
+    """
+    try:
+        raw = str(job_id or "").strip()
+        digits = raw if raw.isdigit() else (shape.job_id_from(raw) or "")
+        if not digits.isdigit() or len(digits) < 6:
+            return {
+                "error": "bad_argument",
+                "message": (
+                    f"job_id must be a numeric LinkedIn job id or a job url, "
+                    f"got {job_id!r}. The id is the long number in a job link, "
+                    "e.g. 4600000042 in /jobs/view/4600000042."
+                ),
+            }
+
+        # Built from the digits alone. Nothing the caller typed reaches the
+        # url, which is what lets the allowlist pattern refuse a query string
+        # outright rather than having to sanitise one.
+        url = f"{BASE_URL}/jobs/view/{digits}"
+        async with BROWSER.session() as page:
+            final_url = await BROWSER.goto(page, url)
+            assert_not_authwall(final_url, surface="job posting")
+
+            identity = await dom.read_job_identity(page)
+            detail = shape.parse_job_detail(
+                await dom.read_main_text(page),
+                company=identity.get("company"),
+                document_title=identity.get("document_title"),
+            )
+
+            if not shape.job_detail_is_believable(detail):
+                raise ExtractionFailedError(
+                    "the job page loaded but no posting could be read from it. "
+                    "Reporting the fields that did arrive would be worse than "
+                    "reporting nothing: LinkedIn sets the document title on the "
+                    "server, so a posting that never rendered still has a title, "
+                    "and a result carrying one with no body reads as a real job "
+                    "with an empty description. Either the page had not finished "
+                    "rendering, or the posting is no longer there.",
+                    url=final_url,
+                    hint="open the url yourself and compare with what this reports",
+                )
+
+            out: dict[str, Any] = dict(detail)
+            out["job_id"] = digits
+            out["company_url"] = identity.get("company_url")
+            out["url"] = f"{BASE_URL}/jobs/view/{digits}"
+            out["pages_loaded"] = 1
+            out["source_url"] = final_url
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
 async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
     """Read your own LinkedIn profile as LinkedIn currently stores it.
 
@@ -974,6 +1052,7 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "applied jobs and their status",
                 "saved jobs",
                 "job search with filters",
+                "one job posting in full: pay, applicant count, description",
                 "own profile",
                 "notifications",
                 "session status",

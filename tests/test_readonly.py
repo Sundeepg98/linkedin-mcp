@@ -242,6 +242,9 @@ ALLOWED = [
     "https://www.linkedin.com/notifications/",
     "https://www.linkedin.com/feed/",
     "https://www.linkedin.com/login",
+    # One job posting, addressed by its numeric id and nothing else.
+    "https://www.linkedin.com/jobs/view/4600000042",
+    "https://www.linkedin.com/jobs/view/4600000042/",
 ]
 
 BLOCKED = [
@@ -276,6 +279,17 @@ BLOCKED = [
     # off the list -- a pattern kept for a url the server never opens is a
     # door with nobody watching it.
     "https://www.linkedin.com/my-items/saved-jobs/?cardType=SAVED",
+    # A job posting, at every address this server does NOT build. The tool
+    # takes an integer and formats it, so the numeric form is the only one
+    # that can ever be produced -- and the pattern permits only that. A slug
+    # carries a job title, which is a string, which is the thing an allowlist
+    # exists to keep out of a url.
+    "https://www.linkedin.com/jobs/view/senior-node-engineer-at-acme-4600000042/",
+    "https://www.linkedin.com/jobs/view/4600000042/?refId=abc",
+    "https://www.linkedin.com/jobs/view/4600000042/applying",
+    "https://www.linkedin.com/jobs/view/12345",
+    "https://www.linkedin.com/jobs/view/",
+    "https://www.linkedin.com/jobs/view/abc/",
     # Whitespace, which every anchored pattern would otherwise swallow: "$"
     # matches before a trailing newline and "[^#]*" matches a CRLF.
     "https://www.linkedin.com/feed/\n",

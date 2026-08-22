@@ -24,6 +24,7 @@ browser.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from linkedin_server.config import logger
@@ -498,6 +499,74 @@ async def read_profile_fields(
             url=_url_of(page),
         ) from exc
     return dict(data or {})
+
+
+#: The employer block on a job posting. LinkedIn labels it itself --
+#: ``aria-label="Company, Ashgrove Systems."`` -- and that label is the
+#: strongest anchor the page offers: it is the page DECLARING which element
+#: is the employer, rather than this module inferring it from position or
+#: from a generated class name. Measured on the 2026-08-22 capture: it occurs
+#: exactly ONCE in both the pre-hydration and the hydrated render, and not at
+#: all in the unrendered shell, which is exactly the discrimination wanted.
+#:
+#: The posting carries several other ``/company/`` links -- the insights
+#: panel, the About-the-company card -- so "the first company link on the
+#: page" is NOT the same thing and would drift with LinkedIn's layout.
+COMPANY_BLOCK = '[aria-label^="Company,"]'
+
+#: ``Company, Ashgrove Systems.`` -> ``Ashgrove Systems``.
+_COMPANY_LABEL = re.compile(r"^\s*Company\s*,\s*(.+?)\s*\.?\s*$", re.I)
+
+#: The employer's slug, taken out of whatever company url the block carries
+#: (``/life/``, ``/insights/?insightType=...``). The base page is rebuilt from
+#: the slug rather than the href being returned as found, so a tracking query
+#: never travels out in a tool result.
+_COMPANY_SLUG = re.compile(r"/company/([A-Za-z0-9\-_%]+)")
+
+
+async def read_job_identity(page: Any) -> dict[str, Any]:
+    """Return the employer and the document title of a job posting.
+
+    Both are plain Playwright reads -- an attribute, a title, no script is
+    injected and nothing is evaluated. Every field is ``None`` when the page
+    did not render it, and a missing employer is the signal the caller uses to
+    tell an unrendered page from a real posting: LinkedIn sets the document
+    title server-side, so the title arrives even on a shell that carries no
+    posting at all, and a reader that trusted it alone would report a job that
+    was never on the page.
+    """
+    out: dict[str, Any] = {
+        "company": None,
+        "company_url": None,
+        "document_title": None,
+    }
+
+    try:
+        out["document_title"] = str(await page.title() or "").strip() or None
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("document title unreadable: %s: %s", type(exc).__name__, exc)
+
+    try:
+        block = page.locator(COMPANY_BLOCK).first
+        label = await block.get_attribute("aria-label")
+    except Exception as exc:
+        logger.debug("company block unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+
+    match = _COMPANY_LABEL.match(str(label or ""))
+    if match:
+        out["company"] = match.group(1).strip() or None
+
+    try:
+        href = await block.locator('a[href*="/company/"]').first.get_attribute("href")
+    except Exception as exc:
+        logger.debug("company url unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+
+    slug = _COMPANY_SLUG.search(str(href or ""))
+    if slug:
+        out["company_url"] = f"https://www.linkedin.com/company/{slug.group(1)}/"
+    return out
 
 
 async def read_main_text(page: Any) -> str:

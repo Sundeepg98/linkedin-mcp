@@ -707,6 +707,250 @@ def empty_is_believable(
 
 
 # ---------------------------------------------------------------------------
+# One job posting
+# ---------------------------------------------------------------------------
+#
+# Every list surface in this server returns CARDS, and a card cannot settle a
+# decision: it has no pay, no applicant count and no description. Those three
+# live only on the posting, which is why this parser exists.
+#
+# NOTHING BELOW IS READ BY LINE NUMBER. That is not a style preference. The
+# job-card parser on this repo was broken for precisely the other reason --
+# "line 1, line 2, line 3" made every field hostage to whatever LinkedIn
+# inserted above it, and a verified-employer badge shifted the company into
+# the location slot on 5 of 14 live rows. So each fact here is claimed by
+# WHAT IT IS: an applicant count looks like one, a time-ago looks like one, a
+# pay range carries a currency mark, and the two chips are matched against
+# LinkedIn's own closed vocabularies.
+
+#: The heading LinkedIn puts above the posting body.
+JOB_BODY_HEADING = "About the job"
+
+#: Where the posting stops. Everything from here on is the page's own
+#: furniture -- alert controls, premium insight panels, the company card --
+#: and none of it is the job. chr(0x2026) is the ellipsis in LinkedIn's
+#: "... more" truncation affordance, which both ends the visible body and is
+#: itself a control rather than a line of the description.
+JOB_BODY_STOPS = (
+    chr(0x2026) + " more",
+    "show more",
+    "set alert for similar jobs",
+    "put your best foot forward",
+    "insights about this job",
+    "see how you compare",
+    "insights about the company",
+    "about the company",
+    "more jobs",
+    "similar jobs",
+    "people also viewed",
+)
+
+#: LinkedIn's closed vocabulary for the workplace chip.
+WORKPLACE_TYPES = ("Remote", "Hybrid", "On-site", "Onsite")
+
+#: LinkedIn's closed vocabulary for the employment chip. Matched as whole
+#: lines: the description says "Type: Contract" and "Location: Remote" in
+#: prose, and neither is the chip. Only the header region above the body
+#: heading is scanned, which is what keeps the two apart.
+EMPLOYMENT_TYPES = (
+    "Full-time",
+    "Part-time",
+    "Contract",
+    "Internship",
+    "Temporary",
+    "Volunteer",
+    "Other",
+)
+
+#: The hiring signals LinkedIn prints beside the metadata. Matched as
+#: phrases inside a line, because LinkedIn welds two of them onto one line
+#: ("Promoted by hirer <dot> Actively reviewing applicants") and the useful
+#: half is the second one.
+JOB_STATUS_PHRASES = (
+    "No longer accepting applications",
+    "Actively reviewing applicants",
+    "Be an early applicant",
+    "Actively recruiting",
+)
+
+#: "Over 100 applicants", "47 applicants", "1 applicant".
+_APPLICANT_COUNT = re.compile(r"^(over\s+)?[\d,]+\+?\s+applicants?$", re.I)
+
+#: Currency marks LinkedIn prints a pay range with, spelled by codepoint so
+#: this file stays pure ASCII exactly as :data:`MIDDLE_DOT` does. In order:
+#: dollar, rupee, pound, euro, yen.
+_CURRENCY_MARKS = "$" + chr(0x20B9) + chr(0x00A3) + chr(0x20AC) + chr(0x00A5)
+
+
+def job_title_from_document_title(
+    document_title: Optional[str], company: Optional[str]
+) -> Optional[str]:
+    """Recover the job title from ``<title>``, given the employer.
+
+    LinkedIn writes the document title as
+    ``"<job title> | <employer> | LinkedIn"``. Splitting on the separator is
+    the obvious move and it is WRONG: a real title on this account's own
+    search results is "Backend Engineer | Remote", which contains one. So the
+    known parts are removed from the END instead, and whatever is left is the
+    title however many separators it holds.
+
+    Returns ``None`` rather than a guess when the employer is unknown or when
+    the title does not carry it -- a document title belonging to some other
+    page must never become this job's title.
+    """
+    text = str(document_title or "").strip()
+    name = str(company or "").strip()
+    if not text or not name:
+        return None
+
+    suffix = " | LinkedIn"
+    if text.casefold().endswith(suffix.casefold()):
+        text = text[: -len(suffix)].strip()
+
+    tail = " | " + name
+    if not text.casefold().endswith(tail.casefold()):
+        return None
+    text = text[: -len(tail)].strip()
+    return trim(text, 200) or None
+
+
+def _classify_meta(parts: Iterable[str]) -> dict[str, Optional[str]]:
+    """Assign each half of the metadata line by identity, never by order."""
+    out: dict[str, Optional[str]] = {
+        "location": None,
+        "posted": None,
+        "applicants": None,
+    }
+    for part in parts:
+        value = part.strip()
+        if not value:
+            continue
+        if out["applicants"] is None and _APPLICANT_COUNT.match(value):
+            out["applicants"] = trim(value, 60)
+        elif out["posted"] is None and has_time_ago(value):
+            out["posted"] = trim(value, 60)
+        elif out["location"] is None:
+            out["location"] = trim(value, 120)
+    return out
+
+
+def _split_meta_line(lines: Iterable[str]) -> dict[str, Optional[str]]:
+    """Find the metadata line and read it, or report nothing found.
+
+    The line is identified by CONTENT: it separates its facts with the middle
+    dot and at least one of those facts is recognisably a time or an
+    applicant count. A header line that merely contains a dot is not enough,
+    or the status line ("Promoted by hirer <dot> ...") would be read as
+    metadata and its halves scattered across location and posted.
+    """
+    for line in lines:
+        if MIDDLE_DOT not in line:
+            continue
+        parts = [p.strip() for p in line.split(MIDDLE_DOT) if p.strip()]
+        if len(parts) < 2:
+            continue
+        if not any(has_time_ago(p) or _APPLICANT_COUNT.match(p) for p in parts):
+            continue
+        return _classify_meta(parts)
+    return {"location": None, "posted": None, "applicants": None}
+
+
+def _looks_like_pay(line: str) -> bool:
+    """A pay range carries a currency mark and a number. Both, not either."""
+    return any(mark in line for mark in _CURRENCY_MARKS) and any(
+        character.isdigit() for character in line
+    )
+
+
+def _match_vocabulary(lines: Iterable[str], vocabulary: Iterable[str]) -> Optional[str]:
+    """The first line that IS one of ``vocabulary``, compared whole."""
+    folded = {word.casefold(): word for word in vocabulary}
+    for line in lines:
+        hit = folded.get(line.strip().casefold())
+        if hit:
+            return hit
+    return None
+
+
+def _find_status(lines: Iterable[str]) -> Optional[str]:
+    for line in lines:
+        for phrase in JOB_STATUS_PHRASES:
+            if phrase.casefold() in line.casefold():
+                return phrase
+    return None
+
+
+def _body_index(lines: list[str]) -> Optional[int]:
+    for index, line in enumerate(lines):
+        if line.strip().casefold() == JOB_BODY_HEADING.casefold():
+            return index
+    return None
+
+
+def _job_body(lines: list[str], start: int) -> Optional[str]:
+    """The posting itself: everything under its heading, until the furniture."""
+    body: list[str] = []
+    for line in lines[start + 1 :]:
+        folded = line.strip().casefold()
+        if any(folded.startswith(stop) for stop in JOB_BODY_STOPS):
+            break
+        body.append(line)
+    joined = "\n".join(body).strip()
+    return trim(joined, 8000) or None
+
+
+def parse_job_detail(
+    main_text: str,
+    *,
+    company: Optional[str] = None,
+    document_title: Optional[str] = None,
+) -> dict[str, Any]:
+    """Shape one job posting from the page's rendered text.
+
+    ``company`` and ``document_title`` come from the DOM rather than from this
+    text, because the page states both explicitly and inferring them from
+    lines would be the guess this module exists to avoid.
+
+    Every field is ``None`` when the page did not carry it. A missing fact
+    reads as missing and never promotes the next one into its place.
+    """
+    lines = [line for line in clean_lines(str(main_text or "")) if not is_chrome(line)]
+
+    body_at = _body_index(lines)
+    # Only the region ABOVE the body heading is scanned for the header facts.
+    # The description says "Type: Contract" and "Location: Remote" in prose,
+    # and without this boundary those sentences would be read as the chips.
+    header = lines[:body_at] if body_at is not None else lines
+
+    out: dict[str, Any] = {
+        "title": job_title_from_document_title(document_title, company),
+        "company": trim(company, 200) if company else None,
+    }
+    out.update(_split_meta_line(header))
+    out["salary"] = next(
+        (trim(line, 120) for line in header if _looks_like_pay(line)), None
+    )
+    out["workplace_type"] = _match_vocabulary(header, WORKPLACE_TYPES)
+    out["employment_type"] = _match_vocabulary(header, EMPLOYMENT_TYPES)
+    out["status"] = _find_status(header)
+    out["description"] = _job_body(lines, body_at) if body_at is not None else None
+    return out
+
+
+def job_detail_is_believable(detail: dict[str, Any]) -> bool:
+    """Is this a posting that was READ, or a page that did not render?
+
+    The two are not distinguishable from the field values alone -- an
+    unrendered shell produces a dict of ``None`` exactly as a parser failure
+    would -- so the caller raises on a false here rather than handing back a
+    posting with nothing in it. A title with no body, and a body with no
+    title, are both failures: LinkedIn sets the document title server-side, so
+    the title survives on a page that never drew the job.
+    """
+    return bool(detail.get("title")) and bool(detail.get("description"))
+
+
+# ---------------------------------------------------------------------------
 # The operator's own profile
 # ---------------------------------------------------------------------------
 

@@ -69,6 +69,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     ),
     # Job search results.
     re.compile(r"^https://www\.linkedin\.com/jobs/search/?(\?[^#]*)?$"),
+    # ONE job posting, addressed by its numeric id and nothing else.
+    #
+    # No query string is permitted here, unlike every other pattern on this
+    # list. LinkedIn hangs tracking parameters off its own job links
+    # (``?refId=``, ``?trackingId=``, ``?eBP=``) and a real posting url in the
+    # wild carries them, so admitting ``\?[^#]*`` would look like the
+    # neighbourly thing to do. It is not: this server BUILDS the url from an
+    # integer, so it never has a query to preserve, and a pattern that accepts
+    # one is a pattern that accepts whatever a caller appends.
+    #
+    # The slug form LinkedIn also serves --
+    # ``/jobs/view/senior-node-engineer-at-acme-4600000042`` -- is refused for
+    # the same reason. A slug is a job TITLE, which is a string, and a string
+    # in a url is the thing an allowlist exists to prevent. The numeric id is
+    # the whole of what identifies a posting, and ``dom.JOB_HREF`` already
+    # captures exactly that group out of either form.
+    re.compile(r"^https://www\.linkedin\.com/jobs/view/\d{6,}/?$"),
     # Own profile. /in/me/ redirects to whoever is signed in.
     re.compile(r"^https://www\.linkedin\.com/in/me/?$"),
     re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/?$"),
