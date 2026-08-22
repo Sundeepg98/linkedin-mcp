@@ -22,10 +22,10 @@ import os
 
 import pytest
 
-from linkedin_own_server import browser as browser_module
-from linkedin_own_server import cdp_bridge, profile_lock
-from linkedin_own_server.browser import LinkedInBrowser
-from linkedin_own_server.errors import BrowserUnavailableError, WriteAttemptError
+from linkedin_server import browser as browser_module
+from linkedin_server import cdp_bridge, profile_lock
+from linkedin_server.browser import LinkedInBrowser
+from linkedin_server.errors import BrowserUnavailableError, WriteAttemptError
 from tests.conftest import FakePage
 
 

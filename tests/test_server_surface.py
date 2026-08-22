@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from linkedin_own_server import readonly
-from linkedin_own_server.server import mcp
+from linkedin_server import readonly
+from linkedin_server.server import mcp
 
 EXPECTED_TOOLS = {
     "linkedin_auth_status",
@@ -138,7 +138,7 @@ async def test_the_auth_tool_documents_that_a_cookie_is_not_a_verdict(tools):
 
 
 async def test_server_info_declares_the_boundary_and_lists_no_writes():
-    from linkedin_own_server.server import linkedin_server_info
+    from linkedin_server.server import linkedin_server_info
 
     info = await linkedin_server_info()
     assert info["read_only"] is True
@@ -169,8 +169,8 @@ async def test_server_info_names_the_one_flag_and_denies_every_other_technique()
     means editing a False to a True in a diff rather than quietly adding an
     argument somewhere.
     """
-    from linkedin_own_server.config import LAUNCH_ARGS
-    from linkedin_own_server.server import linkedin_server_info
+    from linkedin_server.config import LAUNCH_ARGS
+    from linkedin_server.server import linkedin_server_info
 
     posture = (await linkedin_server_info())["automation_posture"]
 
@@ -195,7 +195,7 @@ async def test_the_flags_server_info_reports_are_flags_it_is_allowed_to_pass():
     Putting what the tool SAYS back through the boundary check means a flag
     added to the launch list is caught here too, not only where it is used.
     """
-    from linkedin_own_server.server import linkedin_server_info
+    from linkedin_server.server import linkedin_server_info
 
     posture = (await linkedin_server_info())["automation_posture"]
     assert readonly.assert_launch_flags_permitted(posture["launch_args"]) is None
@@ -250,7 +250,7 @@ async def test_the_recovery_tool_states_its_two_hard_requirements(tools):
 
 
 async def test_server_info_points_at_the_recovery_path_without_promoting_it():
-    from linkedin_own_server.server import linkedin_server_info
+    from linkedin_server.server import linkedin_server_info
 
     recovery = (await linkedin_server_info())["recovery_path"]
     assert recovery["is_the_daily_path"] is False

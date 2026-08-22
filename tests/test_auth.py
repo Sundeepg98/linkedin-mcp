@@ -14,15 +14,15 @@ import json
 
 import pytest
 
-from linkedin_own_server import auth as auth_module
-from linkedin_own_server.auth import (
+from linkedin_server import auth as auth_module
+from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
     login_via_browser,
     require_auth,
 )
-from linkedin_own_server.config import ME_API
-from linkedin_own_server.errors import AuthUnknownError, NotAuthenticatedError
+from linkedin_server.config import ME_API
+from linkedin_server.errors import AuthUnknownError, NotAuthenticatedError
 from tests.conftest import FakePage, FakeResponse, me_response
 
 
@@ -377,7 +377,7 @@ async def test_the_warm_up_load_doubles_as_the_corroborating_read(
 
 async def test_a_failed_warm_up_does_not_become_a_verdict(monkeypatch):
     """The warm-up is best effort. Losing it must not decide the question."""
-    from linkedin_own_server import browser as browser_module
+    from linkedin_server import browser as browser_module
 
     async def exploding_goto(page, url, **kwargs):
         raise RuntimeError("net::ERR_NAME_NOT_RESOLVED")

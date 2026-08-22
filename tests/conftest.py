@@ -206,7 +206,7 @@ def signed_out_page() -> FakePage:
 @pytest.fixture
 def patched_navigation(monkeypatch):
     """Replace BROWSER.goto with a recorder, so nothing launches Chromium."""
-    from linkedin_own_server import browser as browser_module
+    from linkedin_server import browser as browser_module
 
     navigations: list[str] = []
 

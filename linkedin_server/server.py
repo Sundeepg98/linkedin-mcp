@@ -20,15 +20,15 @@ from urllib.parse import urlencode
 
 from fastmcp import FastMCP
 
-from linkedin_own_server import cdp_bridge, dom, shape
-from linkedin_own_server.auth import (
+from linkedin_server import cdp_bridge, dom, shape
+from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
     login_via_browser,
     session_info,
 )
-from linkedin_own_server.browser import BROWSER
-from linkedin_own_server.config import (
+from linkedin_server.browser import BROWSER
+from linkedin_server.config import (
     BASE_URL,
     CDP_PORT,
     DEFAULT_LIMIT,
@@ -46,8 +46,8 @@ from linkedin_own_server.config import (
     SERVER_VERSION,
     CHROME_PROFILE,
 )
-from linkedin_own_server.errors import ExtractionFailedError, LinkedInReaderError
-from linkedin_own_server.profile_lock import held_by
+from linkedin_server.errors import ExtractionFailedError, LinkedInReaderError
+from linkedin_server.profile_lock import held_by
 
 mcp = FastMCP(
     name=SERVER_NAME,
@@ -333,7 +333,7 @@ async def linkedin_cdp_status() -> dict[str, Any]:
         result["is_the_daily_path"] = False
         result["active_browser_mode"] = BROWSER.mode
         result["how_to_use"] = (
-            "start this server with LINKEDIN_OWN_CDP_ATTACH=1 to read through "
+            "start this server with LINKEDIN_CDP_ATTACH=1 to read through "
             "the attached browser instead of the persistent profile. The "
             "read-only boundary is identical in both modes."
         )
@@ -921,7 +921,7 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "what": "attach to a Chrome the operator started himself",
                 "when": "the profile session has died and sign-in is refused",
                 "is_the_daily_path": False,
-                "enable_with": "LINKEDIN_OWN_CDP_ATTACH=1",
+                "enable_with": "LINKEDIN_CDP_ATTACH=1",
                 "requires": f"a running Chrome started with --remote-debugging-port={CDP_PORT}",
                 "check_with": "linkedin_cdp_status",
             },

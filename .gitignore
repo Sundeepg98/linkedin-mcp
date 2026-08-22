@@ -10,7 +10,7 @@
 # _state/ is ever committed, and no `!` un-ignore line belongs in this file.
 _state/
 
-# The profile directory again, unanchored, because LINKEDIN_OWN_PROFILE_DIR can
+# The profile directory again, unanchored, because LINKEDIN_PROFILE_DIR can
 # relocate it out from under _state/ (config.py reads that env var). Same
 # cookies, same rule, wherever inside the tree it lands.
 chrome-profile/

@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_own_server import dom, readonly
-from linkedin_own_server.errors import WriteAttemptError
+from linkedin_server import dom, readonly
+from linkedin_server.errors import WriteAttemptError
 
 PACKAGE_DIR = Path(readonly.__file__).resolve().parent
 MODULES = sorted(PACKAGE_DIR.glob("*.py"))
@@ -130,7 +130,7 @@ def _scripts_this_package_executes() -> dict[str, str]:
         targets = evaluate_targets(module.read_text(encoding="utf-8"))
         if not targets:
             continue
-        imported = importlib.import_module(f"linkedin_own_server.{module.stem}")
+        imported = importlib.import_module(f"linkedin_server.{module.stem}")
         for kind, value, lineno in targets:
             label = f"{module.stem}:{lineno}"
             if kind == "inline":
@@ -329,7 +329,7 @@ def test_a_keyword_cannot_smuggle_a_forbidden_path_into_a_search_url():
 
 
 def test_the_urls_the_server_actually_builds_all_pass_the_allowlist():
-    from linkedin_own_server.config import BASE_URL, FEED_URL, LOGIN_URL
+    from linkedin_server.config import BASE_URL, FEED_URL, LOGIN_URL
 
     built = [
         f"{BASE_URL}/analytics/profile-views/",

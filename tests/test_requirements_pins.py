@@ -12,7 +12,7 @@ mcp installed before 2.0.0 existed.
 
 This server is exposed to precisely that move, and unlike the instahyre sibling
 it is exposed on the measured evidence rather than in theory: after `import
-linkedin_own_server.server` (measured 2026-08-21) sys.modules holds 92 mcp.*
+linkedin_server.server` (measured 2026-08-21) sys.modules holds 92 mcp.*
 submodules INCLUDING mcp.server.fastmcp, the exact module mcp 2.0.0 relocated.
 What holds it safe is a transitive cap -- fastmcp 3.4.2 requires
 fastmcp-slim[client,server]==3.4.2, which declares `mcp<2.0,>=1.24.0` -- and a
@@ -42,7 +42,7 @@ PYPROJECT = REPO / "pyproject.toml"
 
 # The major this server is measured to import under. Bumping this line is a
 # claim that the server has been RUN on the newer major, not a formality.
-# Measured 2026-08-21: `import linkedin_own_server.server` succeeds on fastmcp
+# Measured 2026-08-21: `import linkedin_server.server` succeeds on fastmcp
 # 3.4.2, CPython 3.13.14.
 FASTMCP_TESTED_MAJOR = 3
 
@@ -112,7 +112,7 @@ def _pyproject_main_requirements():
     main = _DEPENDENCIES_ARRAY.search(text)
     assert main, (
         "no top-level `dependencies = [...]` array was found in pyproject.toml. "
-        "Either it was removed -- in which case `pip install linkedin-own-mcp` "
+        "Either it was removed -- in which case `pip install linkedin-mcp` "
         "now installs a server with no fastmcp and no playwright -- or it was "
         "reformatted in a way this parser cannot see, which is just as bad "
         "because every test below would then be asserting about nothing."
@@ -170,7 +170,7 @@ def test_fastmcp_has_an_upper_bound():
 def test_the_fastmcp_cap_is_not_narrowed_below_the_major_this_server_runs_on():
     """<3 would be naukri's fix cargo-culted onto a repo that does not need it.
 
-    Measured 2026-08-21: `import linkedin_own_server.server` succeeds on fastmcp
+    Measured 2026-08-21: `import linkedin_server.server` succeeds on fastmcp
     3.4.2. Capping below that pins a working server to an older major for no
     reason anyone could point at. The bound belongs at the next UNTESTED major.
     """
@@ -187,7 +187,7 @@ def test_the_two_files_declare_the_same_dependencies():
     """A dependency in one file and not the other is a half-declared dependency.
 
     requirements.txt is what a developer installs; pyproject.toml is what `pip
-    install linkedin-own-mcp` resolves. A package listed in only one of them is
+    install linkedin-mcp` resolves. A package listed in only one of them is
     present on one of those paths and absent on the other, and nothing in the
     resulting failure says which path you took.
     """
@@ -226,7 +226,7 @@ def test_the_two_files_declare_the_same_bounds():
 def test_playwright_is_a_hard_dependency_and_not_an_extra():
     """The browser IS the data path here; an optional browser is an optional server.
 
-    This is the one place linkedin-own must NOT copy instahyre, where playwright
+    This is the one place linkedin must NOT copy instahyre, where playwright
     guards a login-only side path and every byte of data arrives over plain
     HTTP. Every tool in this server reads LinkedIn through a signed-in Chrome,
     and the playwright import is lazy, so demoting it to an extra would not fail

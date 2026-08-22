@@ -20,7 +20,7 @@ from pathlib import Path
 # Identity
 # ---------------------------------------------------------------------------
 
-SERVER_NAME = "linkedin-own"
+SERVER_NAME = "linkedin"
 SERVER_VERSION = "0.1.0"
 
 # ---------------------------------------------------------------------------
@@ -33,14 +33,14 @@ REPO_ROOT = PACKAGE_DIR.parent
 
 #: All local state lives under one gitignored directory.
 STATE_DIR = Path(
-    os.environ.get("LINKEDIN_OWN_STATE_DIR", str(REPO_ROOT / "_state"))
+    os.environ.get("LINKEDIN_STATE_DIR", str(REPO_ROOT / "_state"))
 ).resolve()
 
 #: The persistent Chrome profile. This is the ONLY place the operator's
 #: LinkedIn session is kept, it never leaves this machine, and this server
 #: never copies cookies out of it into a file, a log or a tool result.
 CHROME_PROFILE = Path(
-    os.environ.get("LINKEDIN_OWN_PROFILE_DIR", str(STATE_DIR / "chrome-profile"))
+    os.environ.get("LINKEDIN_PROFILE_DIR", str(STATE_DIR / "chrome-profile"))
 ).resolve()
 
 # ---------------------------------------------------------------------------
@@ -72,18 +72,18 @@ AUTHWALL_MARKERS = ("/login", "/authwall", "/uas/login", "/checkpoint/")
 #: recovery path (``cdp_bridge``) can attach to it. Distinct from the sibling
 #: Naukri server's 9223 on purpose: two servers on one port is a collision,
 #: and the second one to start would silently get no port at all.
-CDP_PORT = int(os.environ.get("LINKEDIN_OWN_CDP_PORT", "9224"))
+CDP_PORT = int(os.environ.get("LINKEDIN_CDP_PORT", "9224"))
 
 #: Literal ``127.0.0.1``, never ``localhost``. Measured on this machine:
 #: Chrome binds the DevTools port on IPv4 only, so ``localhost`` resolves to
 #: ``[::1]`` first, is refused, and falls back -- 2085 ms against 35 ms.
-CDP_HOST = os.environ.get("LINKEDIN_OWN_CDP_HOST", "127.0.0.1")
+CDP_HOST = os.environ.get("LINKEDIN_CDP_HOST", "127.0.0.1")
 
-#: Set ``LINKEDIN_OWN_CDP_ATTACH=1`` to run in ATTACH mode: instead of
+#: Set ``LINKEDIN_CDP_ATTACH=1`` to run in ATTACH mode: instead of
 #: launching its own browser, this server connects to a Chrome the operator
 #: started himself with ``--remote-debugging-port``. Recovery path only --
 #: see ``cdp_bridge.py`` for what it costs and what it requires.
-CDP_ATTACH = os.environ.get("LINKEDIN_OWN_CDP_ATTACH", "").strip().lower() in {
+CDP_ATTACH = os.environ.get("LINKEDIN_CDP_ATTACH", "").strip().lower() in {
     "1",
     "true",
     "yes",
@@ -116,7 +116,7 @@ LAUNCH_ARGS: tuple[str, ...] = (
 #: turn into a burst of page loads, and it is applied uniformly rather than
 #: jittered to look like anything.
 MIN_NAVIGATION_INTERVAL_S = float(
-    os.environ.get("LINKEDIN_OWN_MIN_INTERVAL_S", "3.0")
+    os.environ.get("LINKEDIN_MIN_INTERVAL_S", "3.0")
 )
 
 #: A data tool performs ONE page load. There is no scroll loop, no "next
@@ -129,7 +129,7 @@ MAX_NAVIGATIONS_PER_CALL = 2
 
 #: Close the browser after this long with no tool call, releasing the profile
 #: lock. A window left open for hours is a session left exposed for hours.
-IDLE_CLOSE_S = float(os.environ.get("LINKEDIN_OWN_IDLE_CLOSE_S", "300"))
+IDLE_CLOSE_S = float(os.environ.get("LINKEDIN_IDLE_CLOSE_S", "300"))
 
 # ---------------------------------------------------------------------------
 # Timeouts (milliseconds where Playwright wants ms)
@@ -168,13 +168,13 @@ MAX_TEXT_CHARS = 180
 # Logging
 # ---------------------------------------------------------------------------
 
-logger = logging.getLogger("linkedin_own")
+logger = logging.getLogger("linkedin")
 if not logger.handlers:  # pragma: no cover - wiring
     _handler = logging.StreamHandler()
     _handler.setFormatter(
         logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
     )
     logger.addHandler(_handler)
-logger.setLevel(os.environ.get("LINKEDIN_OWN_LOG_LEVEL", "INFO"))
+logger.setLevel(os.environ.get("LINKEDIN_LOG_LEVEL", "INFO"))
 #: stdio transport: logs MUST NOT go to stdout or they corrupt the protocol.
 logger.propagate = False

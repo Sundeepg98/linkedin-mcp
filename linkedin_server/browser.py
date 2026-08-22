@@ -39,7 +39,7 @@ TWO MODES, and the second is for recovery only:
 * **LAUNCH (default).** Playwright starts Chromium against the persistent
   profile at :data:`config.CHROME_PROFILE`. The session lives in that profile
   and survives restarts and reboots. This is the daily path.
-* **ATTACH.** With ``LINKEDIN_OWN_CDP_ATTACH=1`` this server launches nothing
+* **ATTACH.** With ``LINKEDIN_CDP_ATTACH=1`` this server launches nothing
   and connects over CDP to a Chrome the operator started himself. It takes no
   profile lock (it owns no profile), it opens its own tab rather than driving
   one of his, and on teardown it disconnects without closing his browser --
@@ -53,8 +53,8 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
-from linkedin_own_server import profile_lock
-from linkedin_own_server.config import (
+from linkedin_server import profile_lock
+from linkedin_server.config import (
     CDP_ATTACH,
     CHROME_PROFILE,
     IDLE_CLOSE_S,
@@ -64,13 +64,13 @@ from linkedin_own_server.config import (
     SETTLE_MS,
     logger,
 )
-from linkedin_own_server.errors import BrowserUnavailableError
-from linkedin_own_server.readonly import (
+from linkedin_server.errors import BrowserUnavailableError
+from linkedin_server.readonly import (
     assert_launch_flags_permitted,
     assert_read_url,
 )
 
-_HEADLESS_ENV = "LINKEDIN_OWN_HEADLESS"
+_HEADLESS_ENV = "LINKEDIN_HEADLESS"
 
 
 def _headless() -> bool:
@@ -174,7 +174,7 @@ class LinkedInBrowser:
 
     async def _start_attached(self) -> None:
         """Connect to a browser the operator started. Recovery path only."""
-        from linkedin_own_server import cdp_bridge
+        from linkedin_server import cdp_bridge
 
         pw, client, context = await cdp_bridge.attach()
         self._pw = pw

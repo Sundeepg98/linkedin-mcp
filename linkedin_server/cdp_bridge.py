@@ -32,7 +32,7 @@ WHAT IT REQUIRES, stated plainly because every one of these has bitten:
      running but is a DIFFERENT profile -- it is signed into nothing, so he
      has to sign in to LinkedIn inside that window once::
 
-         "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9224 --user-data-dir="%LOCALAPPDATA%\\linkedin-own-cdp"
+         "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9224 --user-data-dir="%LOCALAPPDATA%\\linkedin-cdp"
 
    Confirm either one worked before bothering with this server: open
    ``http://127.0.0.1:9224/json/version`` in any tab. JSON means the port is
@@ -59,8 +59,8 @@ import asyncio
 import json
 from typing import Any, Optional
 
-from linkedin_own_server.config import CDP_HOST, CDP_PORT, logger
-from linkedin_own_server.errors import BrowserUnavailableError
+from linkedin_server.config import CDP_HOST, CDP_PORT, logger
+from linkedin_server.errors import BrowserUnavailableError
 
 #: How long to wait for the CDP handshake before giving up.
 ATTACH_TIMEOUT_MS = 15_000
@@ -73,7 +73,7 @@ PROBE_TIMEOUT_S = 5.0
 CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 START_COMMAND = f'"{CHROME_PATH}" --remote-debugging-port={CDP_PORT}'
 START_COMMAND_SEPARATE_PROFILE = (
-    f'{START_COMMAND} --user-data-dir="%LOCALAPPDATA%\\linkedin-own-cdp"'
+    f'{START_COMMAND} --user-data-dir="%LOCALAPPDATA%\\linkedin-cdp"'
 )
 
 #: The one-paragraph version of the module docstring, for error messages.

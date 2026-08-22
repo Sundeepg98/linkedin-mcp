@@ -4,12 +4,12 @@
 
 # THE BROWSER IS THE DATA PATH. Every tool in server.py reads LinkedIn by
 # driving a persistent Chrome profile through playwright
-# (linkedin_own_server/browser.py); there is no signed-request API path to fall
+# (linkedin_server/browser.py); there is no signed-request API path to fall
 # back to, so playwright is a hard dependency rather than the `browser` extra it
 # is in instahyre. Declaring it optional would only move the failure from
 # install time to first tool call. Note that the import is LAZY -- measured
 # 2026-08-21, no playwright module is loaded by `import
-# linkedin_own_server.server` -- so a missing install stays invisible right up
+# linkedin_server.server` -- so a missing install stays invisible right up
 # until someone asks for data, which is the argument for the hard requirement,
 # not against it.
 #
@@ -35,7 +35,7 @@ playwright>=1.40
 #
 # THIS SERVER IS EXPOSED TO EXACTLY THAT MOVE, which was measured rather than
 # assumed, and the measurement came out the OPPOSITE way from instahyre's.
-# After `import linkedin_own_server.server` (2026-08-21) sys.modules holds 92
+# After `import linkedin_server.server` (2026-08-21) sys.modules holds 92
 # mcp.* submodules INCLUDING mcp.server.fastmcp -- the very module mcp 2.0.0
 # relocated. What keeps that safe is not luck but a transitive cap: `fastmcp`
 # 3.4.2 is a meta-package requiring `fastmcp-slim[client,server]==3.4.2`, which

@@ -34,7 +34,7 @@ from __future__ import annotations
 import re
 from typing import Iterable
 
-from linkedin_own_server.errors import WriteAttemptError
+from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------
 # 1. Navigation allowlist

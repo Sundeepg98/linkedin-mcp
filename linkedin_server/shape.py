@@ -18,7 +18,7 @@ from __future__ import annotations
 import re
 from typing import Any, Iterable, Optional
 
-from linkedin_own_server.config import MAX_TEXT_CHARS
+from linkedin_server.config import MAX_TEXT_CHARS
 
 # ---------------------------------------------------------------------------
 # Text hygiene

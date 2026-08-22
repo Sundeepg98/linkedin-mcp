@@ -39,7 +39,7 @@ an internal Chromium detail we shouldn't couple to).
 import os
 from pathlib import Path
 
-from linkedin_own_server.config import CHROME_PROFILE, logger
+from linkedin_server.config import CHROME_PROFILE, logger
 
 # Lock file sits beside the profile dir, e.g. ``.../chrome-profile.lock``.
 # Module-level so tests can ``patch.object(profile_lock, "_LOCK_FILE", tmp)``.
@@ -58,7 +58,7 @@ class ProfileLockedError(RuntimeError):
         self.holder_pid = holder_pid
         self.lock_file = lock_file
         super().__init__(
-            f"linkedin-own profile already in use by PID {holder_pid} "
+            f"linkedin profile already in use by PID {holder_pid} "
             f"(lock: {lock_file}) -- only one instance may use the persistent "
             f"Chrome profile. Stop the other instance (or, if PID {holder_pid} "
             f"is dead, delete the lock file) before starting another."

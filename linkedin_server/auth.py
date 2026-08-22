@@ -32,7 +32,7 @@ import json
 import time
 from typing import Any, Optional
 
-from linkedin_own_server.config import (
+from linkedin_server.config import (
     AUTHWALL_MARKERS,
     API_TIMEOUT_MS,
     FEED_URL,
@@ -43,7 +43,7 @@ from linkedin_own_server.config import (
     ME_API,
     logger,
 )
-from linkedin_own_server.errors import (
+from linkedin_server.errors import (
     AuthUnknownError,
     BrowserUnavailableError,
     NotAuthenticatedError,
@@ -115,7 +115,7 @@ async def _warm_session_cookies(page: Any, cookies: dict[str, str]) -> tuple[
     if CSRF_COOKIE in cookies:
         return cookies, None
 
-    from linkedin_own_server.browser import BROWSER
+    from linkedin_server.browser import BROWSER
 
     try:
         final_url = await BROWSER.goto(page, FEED_URL)
@@ -326,7 +326,7 @@ async def _maybe_corroborate(
     if known_final_url:
         final_url = known_final_url
     else:
-        from linkedin_own_server.browser import BROWSER
+        from linkedin_server.browser import BROWSER
 
         try:
             final_url = await BROWSER.goto(page, FEED_URL)
@@ -408,8 +408,8 @@ async def session_info(page: Any) -> dict[str, Any]:
     csrf_cookie = _cookie_expiry(by_name.get(CSRF_COOKIE))
     csrf_cookie["name"] = CSRF_COOKIE
 
-    from linkedin_own_server.browser import BROWSER
-    from linkedin_own_server.config import CHROME_PROFILE
+    from linkedin_server.browser import BROWSER
+    from linkedin_server.config import CHROME_PROFILE
 
     out: dict[str, Any] = {
         "authenticated": status.get("authenticated"),
@@ -526,7 +526,7 @@ async def login_via_browser(
             **{k: v for k, v in already.items() if k != "authenticated"},
         }
 
-    from linkedin_own_server.browser import BROWSER
+    from linkedin_server.browser import BROWSER
 
     await BROWSER.goto(page, LOGIN_URL)
     logger.info(

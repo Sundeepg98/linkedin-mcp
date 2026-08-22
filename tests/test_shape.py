@@ -1,4 +1,4 @@
-"""Tests for linkedin_own_server.shape -- the pure card-to-record layer.
+"""Tests for linkedin_server.shape -- the pure card-to-record layer.
 
 Every test states one property of the shapers, exercised against fixture text
 shaped like real LinkedIn card innerText: labels duplicated by screen-reader
@@ -11,9 +11,9 @@ in milliseconds and is where a parsing regression should be caught.
 
 import pytest
 
-from linkedin_own_server import shape
-from linkedin_own_server.config import MAX_TEXT_CHARS
-from linkedin_own_server.shape import (
+from linkedin_server import shape
+from linkedin_server.config import MAX_TEXT_CHARS
+from linkedin_server.shape import (
     absolute_url,
     clean_lines,
     content_lines,

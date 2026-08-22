@@ -26,8 +26,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from linkedin_own_server.config import logger
-from linkedin_own_server.errors import ExtractionFailedError
+from linkedin_server.config import logger
+from linkedin_server.errors import ExtractionFailedError
 
 # ---------------------------------------------------------------------------
 # Injected scripts (read-only: query, read text, return)

@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "linkedin-own-mcp"
+name = "linkedin-mcp"
 version = "0.1.0"
 description = "Strictly read-only MCP server for the operator's own LinkedIn account."
 requires-python = ">=3.10"
@@ -15,7 +15,7 @@ readme = "README.md"
 # The two files must AGREE -- tests/test_requirements_pins.py compares them
 # line by line, because a cap applied to one source of truth and not the other
 # protects nothing: requirements.txt is what a developer installs, pyproject
-# is what `pip install linkedin-own-mcp` resolves, and a bound that lands in
+# is what `pip install linkedin-mcp` resolves, and a bound that lands in
 # only one of them leaves the other path wide open with nothing afterwards to
 # say which of the two paths bit you.
 dependencies = ["fastmcp>=2.0,<4", "playwright>=1.40"]
@@ -24,17 +24,17 @@ dependencies = ["fastmcp>=2.0,<4", "playwright>=1.40"]
 # playwright is NOT an extra here, and that is the one real difference from the
 # sibling instahyre server, where it guards a login-only side path and every
 # byte of data arrives over plain HTTP. This server has no HTTP data path at
-# all: every tool drives a real signed-in Chrome (linkedin_own_server/browser.py),
+# all: every tool drives a real signed-in Chrome (linkedin_server/browser.py),
 # so an install without playwright is an install that cannot answer a single
 # call. Making it optional would only move that failure from install time to
 # first use, which is the worse place to find it.
 test = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 
 [project.scripts]
-linkedin-own-mcp = "linkedin_own_server.server:main"
+linkedin-mcp = "linkedin_server.server:main"
 
 [tool.setuptools.packages.find]
-include = ["linkedin_own_server*"]
+include = ["linkedin_server*"]
 
 # pytest configuration lives in pytest.ini (it needs pythonpath=.), deliberately
 # not duplicated here -- two sources of truth for test config is how a suite

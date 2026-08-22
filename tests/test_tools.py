@@ -27,8 +27,8 @@ from typing import Any, Optional
 
 import pytest
 
-from linkedin_own_server import browser as browser_module
-from linkedin_own_server.config import (
+from linkedin_server import browser as browser_module
+from linkedin_server.config import (
     DEFAULT_LIMIT,
     MAX_LIMIT,
     NOTIFICATIONS_DEFAULT_LIMIT,
@@ -36,7 +36,7 @@ from linkedin_own_server.config import (
     SEARCH_DEFAULT_LIMIT,
     SEARCH_MAX_LIMIT,
 )
-from linkedin_own_server.server import (
+from linkedin_server.server import (
     linkedin_my_applications,
     linkedin_my_profile,
     linkedin_notifications,

@@ -1,4 +1,4 @@
-# linkedin-own
+# linkedin
 
 A **strictly read-only** MCP server that shows you your own LinkedIn account data
 as structured tool results instead of pages you have to click through.
@@ -80,7 +80,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 ## Setup
 
 ```bash
-cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
+cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
 pip install -r requirements.txt
 playwright install chromium
 python -m pytest            # 576 passed
@@ -96,14 +96,14 @@ Confirm with `linkedin_auth_status` before trusting any read.
 
 ### Registering it
 
-stdio transport, entry point `linkedin_own.py`:
+stdio transport, entry point `linkedin.py`:
 
 ```json
 {
   "mcpServers": {
-    "linkedin-own": {
+    "linkedin": {
       "command": "python",
-      "args": ["D:\\Sundeep\\projects\\job-hunting\\mcp-servers\\linkedin-own\\linkedin_own.py"]
+      "args": ["D:\\Sundeep\\projects\\job-hunting\\mcp-servers\\linkedin\\linkedin.py"]
     }
   }
 }
@@ -113,7 +113,7 @@ stdio transport, entry point `linkedin_own.py`:
 
 ## How "read-only" is enforced rather than asserted
 
-`linkedin_own_server/readonly.py` holds four mechanisms, and the tests show
+`linkedin_server/readonly.py` holds four mechanisms, and the tests show
 each of them **failing on a planted violation** before trusting it on the real
 package. A check that cannot fail certifies nothing.
 
@@ -240,7 +240,7 @@ corroborating read, so it costs no extra request.
 
 **Not the daily path.** The persistent profile above is the answer; this is the
 fallback for the day that profile's session dies and a fresh sign-in is being
-refused. Enable it with `LINKEDIN_OWN_CDP_ATTACH=1` and this server launches
+refused. Enable it with `LINKEDIN_CDP_ATTACH=1` and this server launches
 nothing -- it attaches over CDP to a Chrome **you** started.
 
 Two things silently defeat this, both measured on this machine:
@@ -263,7 +263,7 @@ or give it a profile of its own, which works alongside your running Chrome but
 is signed into nothing, so you sign in to LinkedIn once inside that window:
 
 ```
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9224 --user-data-dir="%LOCALAPPDATA%\linkedin-own-cdp"
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9224 --user-data-dir="%LOCALAPPDATA%\linkedin-cdp"
 ```
 
 Confirm it worked by opening `http://127.0.0.1:9224/json/version` -- JSON means
@@ -324,8 +324,8 @@ raises rather than returning an empty list when it misses.
 ## Layout
 
 ```
-linkedin_own.py              entry point (stdio)
-linkedin_own_server/
+linkedin.py              entry point (stdio)
+linkedin_server/
   config.py                  paths, timeouts, caps, the rate floor,
                              the two launch flags
   readonly.py                the allowlist, the scanners, the verb list,

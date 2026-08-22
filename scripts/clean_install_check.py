@@ -31,7 +31,7 @@ THE TWO THINGS IT CATCHES THAT ARE SPECIFIC TO THIS SERVER
    playwright` installs the driver; the Chromium build arrives through a
    separate `playwright install chromium`. Because this server imports
    playwright LAZILY (measured 2026-08-21: no playwright module is loaded by
-   `import linkedin_own_server.server`), a venv missing either one still imports
+   `import linkedin_server.server`), a venv missing either one still imports
    perfectly and still passes this script's import probe. Step 4 therefore
    imports the playwright driver EXPLICITLY, and step 8 says out loud that the
    browser binaries were never fetched here, so nobody reads a PASS as "a tool
@@ -91,9 +91,9 @@ COPY_EXCLUDES = shutil.ignore_patterns(
 )
 
 IMPORT_PROBE = (
-    "import linkedin_own_server, linkedin_own_server.server; "
+    "import linkedin_server, linkedin_server.server; "
     "import importlib.metadata as md; "
-    "print('linkedin_own_server', linkedin_own_server.__version__, "
+    "print('linkedin_server', linkedin_server.__version__, "
     "'on fastmcp', md.version('fastmcp')); "
     # Imported explicitly because the server does NOT import it at module level.
     # Without this line a venv with no playwright at all would sail through the
@@ -136,7 +136,7 @@ def summary_line(output):
 def is_own_git_repo(path):
     """True only if `path` is the ROOT of a git work tree.
 
-    Measured 2026-08-21: linkedin-own is NOT one. Its files live under a
+    Measured 2026-08-21: linkedin is NOT one. Its files live under a
     `mcp-servers/` path that the parent job-hunting repo gitignores wholesale
     ("Standalone projects (each has/will have own git repo)"), so a clone of the
     parent would not contain this server either. The sibling instahyre server
