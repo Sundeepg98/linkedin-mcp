@@ -492,7 +492,11 @@ async def session_info(page: Any) -> dict[str, Any]:
 
 
 def session_info_offline(
-    profile_dir: Any, *, mode: str, why_no_live_check: str
+    profile_dir: Any,
+    *,
+    mode: str,
+    why_no_live_check: str,
+    attempted: bool = False,
 ) -> dict[str, Any]:
     """Report what the ON-DISK profile says, with no browser involved at all.
 
@@ -537,7 +541,10 @@ def session_info_offline(
     out: dict[str, Any] = {
         "authenticated": None,
         "live_check": {
-            "attempted": False,
+            # "I tried and the browser is broken" and "you asked me not to
+            # try" are different facts about the same null, and the operator
+            # acts differently on each. They do not share a field.
+            "attempted": attempted,
             "completed": False,
             "endpoint": AUTH_ENDPOINT_NOTE,
             "why_not": why_no_live_check,

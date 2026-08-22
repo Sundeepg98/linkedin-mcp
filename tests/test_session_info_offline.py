@@ -242,6 +242,11 @@ async def test_the_tool_falls_back_to_the_jar_when_no_browser_can_start(
 
     assert info["authenticated"] is None
     assert PREFLIGHT_MESSAGE in info["live_check"]["why_not"]
+    # It DID try. Reporting this as "not attempted" would describe the same
+    # null as a choice rather than as a failure, and the operator acts
+    # differently on each.
+    assert info["live_check"]["attempted"] is True
+    assert info["live_check"]["completed"] is False
     assert info["session_cookie"]["present"] is True
     assert info["session_cookie"]["expires_at"].endswith("Z")
     # It must not have degraded into the generic error blob, which carries
@@ -274,37 +279,57 @@ async def test_the_tool_still_measures_when_the_browser_does_work(
     assert info["live_check"]["attempted"] is True
 
 
+def _session_recorder(monkeypatch, error=None):
+    """Replace BROWSER.session with something that RECORDS being called.
+
+    Deliberately a recorder rather than a booby trap. A trap that raises
+    proves nothing here: the tool catches every exception from the browser
+    path on purpose, so an AssertionError raised inside it is swallowed into
+    the offline fallback and the test passes either way. Measured -- the
+    first version of this check passed against a mutation that removed the
+    verify_live branch entirely. An external record cannot be swallowed.
+    """
+    calls: list[str] = []
+
+    def session():
+        calls.append("session")
+        return _FailingSession(error or BrowserUnavailableError(PREFLIGHT_MESSAGE))
+
+    monkeypatch.setattr(server_module.BROWSER, "session", session)
+    return calls
+
+
 async def test_verify_live_false_does_not_touch_the_browser_at_all(
     tmp_path, monkeypatch
 ):
-    """The cheap path, and the proof that it is cheap: the browser is a trap."""
+    """The cheap path, and the proof that it is cheap."""
     monkeypatch.setattr(server_module, "CHROME_PROFILE", healthy_profile(tmp_path))
-
-    def explode():
-        raise AssertionError(
-            "verify_live=False asked for the browserless answer and the "
-            "browser was started anyway"
-        )
-
-    monkeypatch.setattr(server_module.BROWSER, "session", explode)
+    calls = _session_recorder(monkeypatch)
 
     info = await server_module.linkedin_session_info(verify_live=False)
 
+    assert calls == [], "the browser was started for a browserless answer"
     assert info["authenticated"] is None
     assert info["live_check"]["attempted"] is False
     assert "verify_live" in info["live_check"]["why_not"]
     assert info["session_cookie"]["present"] is True
 
 
-async def test_that_browser_trap_would_fire(tmp_path, monkeypatch):
-    """The control for the test above: prove the trap is armed, so that
-    'the browser was not started' is a finding and not a no-op."""
+async def test_the_default_does_reach_for_the_browser(tmp_path, monkeypatch):
+    """The control, and the one that gives the assertion above its teeth.
+
+    'calls == []' is only a finding if the SAME recorder fills up on the
+    default path. Without this, deleting the verify_live branch would leave
+    the test above green -- which is exactly what happened when this pair was
+    a raising trap instead of a recorder.
+    """
     monkeypatch.setattr(server_module, "CHROME_PROFILE", healthy_profile(tmp_path))
+    calls = _session_recorder(monkeypatch)
 
-    def explode():
-        raise AssertionError("trap fired")
+    info = await server_module.linkedin_session_info()
 
-    monkeypatch.setattr(server_module.BROWSER, "session", explode)
-
-    with pytest.raises(AssertionError, match="trap fired"):
-        server_module.BROWSER.session()
+    assert calls == ["session"]
+    # It reached for the browser, did not get one, and said so.
+    assert info["authenticated"] is None
+    assert info["live_check"]["attempted"] is True
+    assert PREFLIGHT_MESSAGE in info["live_check"]["why_not"]

@@ -339,6 +339,7 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
         return session_info_offline(
             CHROME_PROFILE,
             mode=BROWSER.mode,
+            attempted=True,
             why_no_live_check=(
                 f"no browser could be started, so the identity call could not "
                 f"be made: {_error(exc)['message']}"
