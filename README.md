@@ -83,7 +83,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin-own
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 519 passed
+python -m pytest            # 576 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -338,14 +338,14 @@ linkedin_own_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the eleven tools
   errors.py
-tests/                       519 tests, no network, no account
+tests/                       576 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **519 tests**, no network and no account. Most run with no
-browser at all; the two fixture-driven modules launch a local headless
+Built and tested: **576 tests**, no network and no account. Most run with no
+browser at all; the three fixture-driven modules launch a local headless
 Chromium to run the real injected harvester over frozen markup, which reaches
 nothing outside the machine.
 
@@ -381,7 +381,28 @@ are not on the profile page at all.** LinkedIn defers them until it is
 scrolled, and this server does not scroll. They are reported as UNKNOWN, never
 as zero, and `details_urls` gives you the page for each.
 
-`linkedin_search_jobs` is the one remaining **known defect**, unfixed: on rows
-for verified companies LinkedIn inserts a "<title> with verification" line,
-which lands in `company` and pushes the real company into `location`. Two of
-five rows in the last live run.
+**Third pass, 2026-08-22.** `linkedin_search_jobs` was the last broken tool.
+On a row for a verified employer LinkedIn adds a screen-reader line reading
+"<title> with verification"; read positionally, that line became the `company`
+and pushed the real company down into `location` -- 5 of 14 rows across two
+live searches.
+
+The fix is not a rule about that string. Fields are no longer read as "line 1,
+line 2, line 3", because any line LinkedIn inserts shifts every field after
+it, and the same two pages carried "Promoted", "Apply", "Viewed", "Actively
+reviewing applicants", a salary chip and an alumni line. Each field is now
+anchored on the thing that IDENTIFIES it: the **title** on the text of the
+link that makes the row a job row, with the page's own screen-reader copies
+subtracted by count; the **company** on the accessible name LinkedIn gives the
+employer's logo, which is an image and so cannot be moved by a line; the
+**location** on the metadata list inside the entity lockup, where the lockup
+is found without any class name as the smallest ancestor of the link that also
+holds that logo. A surface offering none of those -- the job tracker offers
+none -- falls back to reading lines in order, as before.
+
+Verified live on the same query: 7 of 7 rows agree with LinkedIn's own
+`artdeco-entity-lockup` elements, which the fix deliberately does not use, and
+3 of those 7 carried the verification decoration. The tests inject a
+decoration LinkedIn has **not** shipped at every position in every frozen row
+and require the answer not to move, with a control that shows the same
+injection breaking the fields once the anchors are taken away.

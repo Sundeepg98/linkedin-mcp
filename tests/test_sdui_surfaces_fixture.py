@@ -154,6 +154,14 @@ NEW_FIXTURES = [
 ALL_FIXTURES = [
     FIXTURE_DIR / "profile_views_analytics.html",
     FIXTURE_DIR / "profile_views_analytics_hydrated.html",
+    # The job-search captures. Their own module is
+    # ``test_job_search_fixture.py``; they are listed HERE because the privacy
+    # guards must cover every fixture in the repo rather than every fixture a
+    # module happens to remember, which is how two real member urns survived
+    # the last pass.
+    FIXTURE_DIR / "jobs_search.html",
+    FIXTURE_DIR / "jobs_search_hydrated.html",
+    FIXTURE_DIR / "jobs_search_salary.html",
 ] + NEW_FIXTURES
 
 

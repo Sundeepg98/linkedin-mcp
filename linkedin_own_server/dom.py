@@ -13,9 +13,13 @@ scripts query the DOM and read text, and nothing else. The Python side of
 each call carries a ``# readonly-ok`` waiver, which is what keeps a future
 ``evaluate`` from slipping in unreviewed.
 
-The harvesters return ``{"href": ..., "text": ...}`` records. Turning those
-into typed rows is ``shape.py``'s job, and it is pure, so the parsing can be
-tested without a browser.
+The harvesters return ``{"href": ..., "text": ...}`` records, plus a handful
+of OBSERVATIONS about where that text came from -- which strings the page
+marked screen-reader-only, what the matched link itself says, the accessible
+name of the entity's logo. They are observations rather than fields on
+purpose: deciding which one is the company and which is the location is
+``shape.py``'s job, and it is pure, so the parsing can be tested without a
+browser.
 """
 
 from __future__ import annotations
@@ -59,6 +63,31 @@ from linkedin_own_server.errors import ExtractionFailedError
 #: LinkedIn wraps the photo in its own link to the same person: the walk starts
 #: on that empty anchor, and a bare link-count stop would freeze there and drop
 #: the viewer entirely. Both fixtures pin that.
+#:
+#: Alongside the row's text this returns four OBSERVATIONS about where the
+#: text came from. They exist because reading a job card as "line 1, line 2,
+#: line 3" makes every field hostage to whatever LinkedIn inserts above it,
+#: and LinkedIn inserts plenty: a verified employer adds a screen-reader line
+#: reading "<title> with verification", which landed in ``company`` and pushed
+#: the real company down into ``location`` on 5 of 14 rows measured live on
+#: 2026-08-22. "Promoted", "Viewed", "Actively reviewing applicants", a salary
+#: chip and an alumni line were on the same page and are each capable of the
+#: same shift. So each field is anchored on the thing that IDENTIFIES it:
+#:
+#: * ``link_text`` / ``link_hidden`` -- the matched link's own text, and the
+#:   screen-reader copies inside it. The link is what MAKES this row a job
+#:   row, so its text is the title; subtracting its hidden copies is what
+#:   removes the decoration without knowing the phrase.
+#: * ``logo_name`` -- the accessible name LinkedIn gives the employer's logo,
+#:   "<Company> logo". An image is not a line, so no inserted line moves it.
+#: * ``meta_line`` -- the first entry of the metadata list inside the entity
+#:   LOCKUP, where the lockup is found without a class name: the smallest
+#:   ancestor of the link that also holds that logo. The insight line, the
+#:   footer chips and the dismiss button all sit OUTSIDE it.
+#:
+#: All four are absent when the surface does not offer them -- the job tracker
+#: has no logo and no metadata list -- and ``shape.parse_job_card`` falls back
+#: to reading lines in order, which is what it has always done.
 HARVEST_LINKED_CARDS_JS = """
 (cfg) => {
   const re = new RegExp(cfg.hrefPattern);
@@ -75,13 +104,16 @@ HARVEST_LINKED_CARDS_JS = """
     }
     return keys;
   };
-  const linkWithin = (node) => {
-    if (!node.querySelectorAll) return '';
+  const anchorWithin = (node) => {
+    if (!node || !node.querySelectorAll) return null;
     for (const link of node.querySelectorAll('a[href]')) {
-      const href = link.getAttribute('href') || '';
-      if (keyOf(href)) return href;
+      if (keyOf(link.getAttribute('href') || '')) return link;
     }
-    return '';
+    return null;
+  };
+  const linkWithin = (node) => {
+    const link = anchorWithin(node);
+    return link ? (link.getAttribute('href') || '') : '';
   };
   const linksWithin = (node) => {
     if (!node.querySelectorAll) return 0;
@@ -92,6 +124,42 @@ HARVEST_LINKED_CARDS_JS = """
     return count;
   };
   const hasText = (node) => !!(node && node.innerText && node.innerText.trim());
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const hiddenWithin = (node) => {
+    const out = [];
+    if (!node || !node.querySelectorAll || !cfg.hiddenSelector) return out;
+    let marked;
+    try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
+    for (const el of marked) {
+      const value = textOf(el);
+      if (value) out.push(value.slice(0, cfg.maxChars));
+      if (out.length >= cfg.maxHidden) break;
+    }
+    return out;
+  };
+  const LOGO = / logo$/i;
+  const logoNameIn = (node) => {
+    if (!node || !node.querySelectorAll) return '';
+    for (const img of node.querySelectorAll('img[alt]')) {
+      const alt = (img.getAttribute('alt') || '').trim();
+      if (LOGO.test(alt)) return alt.slice(0, alt.length - 5).trim();
+    }
+    return '';
+  };
+  // The entity lockup: the smallest ancestor of the link that also holds the
+  // employer's logo. Named by nothing -- no class, no id, no tag -- so it
+  // survives the generated class names LinkedIn ships.
+  const lockupOf = (anchor, row) => {
+    let node = anchor;
+    let hops = 0;
+    while (node && hops <= cfg.maxHops) {
+      if (logoNameIn(node)) return node;
+      if (node === row) return null;
+      node = node.parentElement;
+      hops += 1;
+    }
+    return null;
+  };
   const rowOf = (anchor) => {
     let node = anchor;
     let row = anchor;
@@ -112,10 +180,30 @@ HARVEST_LINKED_CARDS_JS = """
     }
     return row;
   };
-  const record = (href, node) => {
+  const record = (href, node, anchor) => {
     const text = (node.innerText || '').trim();
     if (!text) return null;
-    return { href: href, text: text.slice(0, cfg.maxChars) };
+    const out = {
+      href: href,
+      text: text.slice(0, cfg.maxChars),
+      hidden: hiddenWithin(node)
+    };
+    // Not a safety clause -- every helper below tolerates a null anchor. It
+    // keeps empty keys out of the payload for a sibling row that carries no
+    // link at all, which is what profile views are full of.
+    if (anchor) {
+      out.link_text = textOf(anchor).slice(0, cfg.maxChars);
+      out.link_hidden = hiddenWithin(anchor);
+      const lockup = lockupOf(anchor, node);
+      if (lockup) {
+        out.logo_name = logoNameIn(lockup).slice(0, cfg.maxChars);
+        const list = lockup.querySelector('ul, ol');
+        if (list && list.children.length) {
+          out.meta_line = textOf(list.children[0]).slice(0, cfg.maxChars);
+        }
+      }
+    }
+    return out;
   };
 
   const found = [];
@@ -125,7 +213,7 @@ HARVEST_LINKED_CARDS_JS = """
     const key = keyOf(href);
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    found.push({ href: href, row: rowOf(anchor) });
+    found.push({ href: href, row: rowOf(anchor), anchor: anchor });
   }
 
   if (cfg.siblingRows && found.length) {
@@ -154,7 +242,7 @@ HARVEST_LINKED_CARDS_JS = """
           if (own) keys.add(own);
         }
         if (keys.size > 1) { orderly = false; break; }
-        const item = record(linkWithin(child), child);
+        const item = record(linkWithin(child), child, anchorWithin(child));
         if (item) rows.push(item);
         if (rows.length >= cfg.maxItems) break;
       }
@@ -164,7 +252,7 @@ HARVEST_LINKED_CARDS_JS = """
 
   const out = [];
   for (const item of found) {
-    const rec = record(item.href, item.row);
+    const rec = record(item.href, item.row, item.anchor);
     if (rec) out.push(rec);
     if (out.length >= cfg.maxItems) break;
   }
@@ -308,8 +396,16 @@ async def harvest_linked_cards(
     max_chars: int = 1200,
     max_hops: int = 8,
     sibling_rows: bool = False,
+    max_hidden: int = 12,
 ) -> list[dict[str, Any]]:
-    """Return ``{href, text}`` for each card anchored on a matching link.
+    """Return one record per card anchored on a matching link.
+
+    Every record carries ``href`` and ``text``. A record whose card offered
+    them also carries ``hidden``, ``link_text``, ``link_hidden``, ``logo_name``
+    and ``meta_line`` -- the anchors described on
+    :data:`HARVEST_LINKED_CARDS_JS`. They are OBSERVATIONS, not fields: which
+    of them is the company and which is the location is decided in
+    ``shape.py``, where it can be tested without a browser.
 
     Args:
         sibling_rows: also return the rows that carry NO link, by reading
@@ -320,6 +416,8 @@ async def harvest_linked_cards(
             all, so a harvest anchored only on links cannot see one of them
             and silently reports a shorter list than the page shows. Six of
             ten viewers were invisible this way when it was measured.
+        max_hidden: cap on the screen-reader strings returned per card, so a
+            page that marks half of itself hidden cannot inflate a result.
     """
     cfg = {
         "hrefPattern": href_pattern,
@@ -327,6 +425,8 @@ async def harvest_linked_cards(
         "maxChars": int(max_chars),
         "maxHops": int(max_hops),
         "siblingRows": bool(sibling_rows),
+        "hiddenSelector": CARD_HIDDEN_SELECTOR,
+        "maxHidden": int(max_hidden),
     }
     try:
         records = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
@@ -444,6 +544,19 @@ JOB_HREF = r"/jobs/view/(?:[^/?#]*-)?(\d{6,})"
 #: built from one of these hrefs is refused before the allowlist is even
 #: consulted.
 SKILL_HREF = r"/details/skills/edit/forms/(\d+)"
+
+#: Where LinkedIn parks text meant only for a screen reader, across surfaces.
+#: A job card's verification decoration lives in the first of these; the header
+#: toggles use the second. The selector is passed to ``querySelectorAll`` in a
+#: try/catch, so an entry a browser cannot parse costs nothing.
+#:
+#: These strings are CSS classes, which this package otherwise refuses to lean
+#: on because LinkedIn generates them. These are the exception and the reason
+#: is that they are not layout classes: they are the page DECLARING which of
+#: its own text is a duplicate, and there is no other way to be told. Losing
+#: them costs the decoration removal and nothing else -- the parse falls back
+#: to reading lines in order.
+CARD_HIDDEN_SELECTOR = ".visually-hidden, .a11y-text, .sr-only, .screen-reader-text"
 
 #: Notification cards mark their screen-reader-only text with this class, carry
 #: their timestamp in this element, and wear this class while unread.

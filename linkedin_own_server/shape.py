@@ -393,20 +393,94 @@ _JOB_STATUS_LINE = re.compile(
 )
 
 
+def lines_after(lines: list[str], value: Optional[str]) -> list[str]:
+    """The lines FOLLOWING the first one that is exactly ``value``.
+
+    Finding a field by its own text rather than by its index is what lets the
+    NEXT field survive a line inserted above it. When ``value`` is not among
+    the lines -- LinkedIn spells a company one way in the logo's alt text and
+    another in the card body, say -- the caller gets everything after the
+    first line, which is the old positional behaviour and no worse than it.
+    """
+    if value:
+        needle = value.casefold()
+        for index, line in enumerate(lines):
+            if line.casefold() == needle:
+                return lines[index + 1 :]
+    return lines[1:]
+
+
+def anchored_title(record: dict[str, Any]) -> Optional[str]:
+    """The title, read off the link that MAKES this row a job row.
+
+    Accepted only when the link's text reduces to exactly ONE line, because
+    that is the test for "this link names one thing". On a search card it
+    does: LinkedIn draws the title twice inside the anchor, once for sight and
+    once for a screen reader, and subtracting the hidden copy leaves the title
+    alone. On the job tracker the whole card sits inside a single anchor, so
+    its text is several lines, and this returns ``None`` -- the caller falls
+    back to reading lines in order, which is what that surface has always
+    needed.
+
+    The subtraction is what makes this render-independent. With LinkedIn's
+    stylesheet the hidden copy is absolutely positioned and arrives as a line
+    of its own; without it the two copies arrive welded into one line.
+    :func:`strip_screen_reader_copies` removes exactly one occurrence either
+    way, so the answer is the same on both.
+    """
+    text = record.get("link_text")
+    if not text:
+        return None
+    reduced = [
+        line
+        for line in strip_screen_reader_copies(text, record.get("link_hidden") or ())
+        if not is_chrome(line)
+    ]
+    if len(reduced) != 1:
+        return None
+    return reduced[0]
+
+
 def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     """Shape one job row (saved, applied, or a search result).
 
-    The first three content lines of a LinkedIn job card are title, company
-    and location in that order. Anything matching a status or a relative
-    timestamp is lifted out first so it cannot be mistaken for one of them.
+    Each field is ANCHORED on the thing that identifies it, and only falls
+    back to "the next line" when the card did not offer the anchor:
 
-    On the job tracker the second and third are ONE line -- "Ashgrove Systems
-    <dot> Fairhaven (Remote)" -- so the company slot is split on the separator
-    when, and only when, it yields exactly two parts. Without that the location
-    is whatever line happened to come next, which on a tracker row is the
-    column header "Notes".
+    * **title** -- the text of the job link (:func:`anchored_title`).
+    * **company** -- ``logo_name``, the accessible name LinkedIn gives the
+      employer's logo. An image is not a line.
+    * **location** -- ``meta_line``, the first entry of the metadata list
+      inside the entity lockup.
+
+    That matters because reading a card as "line 1, line 2, line 3" makes
+    every field hostage to whatever LinkedIn inserts above it. A verified
+    employer inserts a screen-reader line reading "<title> with verification":
+    on 5 of 14 rows measured live on 2026-08-22 it became the ``company`` and
+    pushed the real company down into ``location``. "Promoted", "Viewed",
+    "Actively reviewing applicants", a salary chip and an alumni line were on
+    the same page, and each is capable of the same shift.
+
+    Two subtractions run before any of it. The card's own screen-reader copies
+    are removed by COUNT, so a decoration the page declared hidden is gone
+    without this module knowing the phrase; and anything matching a status or
+    a relative timestamp is lifted out so it cannot be mistaken for a field.
+
+    On the job tracker the company and location are ONE line -- "Ashgrove
+    Systems <dot> Fairhaven (Remote)" -- so the company slot is split on the
+    separator when, and only when, it yields exactly two parts. Without that
+    the location is whatever line happened to come next, which on a tracker
+    row is the column header "Notes".
     """
-    lines = content_lines(record.get("text", ""))
+    lines = [
+        line
+        for line in drop_consecutive_repeats(
+            strip_screen_reader_copies(
+                record.get("text", ""), record.get("hidden") or ()
+            )
+        )
+        if not is_chrome(line)
+    ]
     if not lines:
         return None
 
@@ -428,18 +502,33 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     if not remaining:
         return None
 
-    title = remaining[0]
-    rest = remaining[1:]
+    # Matching is done on the FULL value and trimming only on the way out. A
+    # title long enough to be cut would otherwise no longer equal the line it
+    # came from, and every field after it would silently go positional again.
+    title = anchored_title(record) or remaining[0]
+
+    rest = lines_after(remaining, title)
     if rest:
         halves = split_on_middle_dot(rest[0])
         if halves:
             rest = [halves[0], halves[1]] + rest[1:]
 
+    company = record.get("logo_name") or (rest[0] if rest else None)
+
+    location = record.get("meta_line") or None
+    if location and location in (title, company):
+        # The lockup's first list held something that is already reported. Its
+        # order has moved; the lines are the better answer.
+        location = None
+    if not location:
+        tail = lines_after(rest, company)
+        location = tail[0] if tail else None
+
     job_id = job_id_from(record.get("href", ""))
     out: dict[str, Any] = {
         "title": trim(title, 120),
-        "company": trim(rest[0], 100) if rest else None,
-        "location": trim(rest[1], 100) if len(rest) > 1 else None,
+        "company": trim(company, 100),
+        "location": trim(location, 100),
     }
     if status:
         out["status"] = status
