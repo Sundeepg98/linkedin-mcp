@@ -3,7 +3,7 @@
 #
 # Canonical source:
 #     D:\Sundeep\projects\job-hunting\mcp-servers\jobcore\src\jobcore${mod}.py
-# Vendored from jobcore commit: d1720c3
+# Vendored from jobcore commit: 998baf1
 #
 # WHY A COPY AND NOT A DEPENDENCY. This server does not depend on jobcore and
 # must not start. Adding the dependency for a debug field would turn
@@ -75,6 +75,7 @@ from typing import Any, Mapping, Optional
 __all__ = [
     "BuildStamp",
     "ProcessClock",
+    "self_stamp",
     "GIT_TIMEOUT_SECONDS",
     "SHORT_HASH_LENGTH",
     "resolve",
@@ -109,6 +110,7 @@ class BuildStamp:
     committed_at: Optional[str] = None
     dirty: Optional[bool] = None
     dirty_files: Optional[int] = None
+    version: Optional[str] = None
     resolved_at: str = ""
     source: str = "unknown"
     detail: Optional[str] = None
@@ -179,16 +181,54 @@ def _run_git(cwd: Path, *args: str) -> Optional[str]:
     return proc.stdout
 
 
-def resolve(start: Any) -> BuildStamp:
+def _installed_version(distribution: Optional[str]) -> Optional[str]:
+    """The version of an INSTALLED distribution, or ``None``.
+
+    Not a guess and not a fallback for git: a different, real fact about a
+    different situation. A dependency installed from a wheel or a git URL has
+    no work tree to interrogate, so "which commit" has no answer there -- but
+    "which release" does, and it is the answer that identifies the code.
+    """
+    if not distribution:
+        return None
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+
+        return version(distribution)
+    except Exception:
+        return None
+
+
+def resolve(start: Any, distribution: Optional[str] = None) -> BuildStamp:
     """Read the working tree's git state NOW. Not memoised -- see :func:`stamp`.
 
     Public because it is the honest counterpart in the staleness test: compare
     a held :func:`stamp` against a fresh :func:`resolve` and a stale process is
     visible as a disagreement. Servers should not call it on a request path.
+
+    ``distribution`` names the installed package this path belongs to, and it
+    is what keeps the answer useful off a developer box. CI found the hole on
+    2026-08-22: a consumer installs jobcore from a git URL into site-packages,
+    which is NOT a work tree, so the stamp was correctly ``unknown`` and
+    therefore useless in exactly the deployment the hosting plan targets. With
+    a distribution name the same call reports ``source="package"`` and the
+    installed version. The name is REQUIRED rather than inferred from the path,
+    because mapping a file back to the distribution that shipped it is a guess
+    and this module does not guess.
     """
     now = datetime.now(timezone.utc).isoformat()
 
     def unknown(detail: str) -> BuildStamp:
+        """No git answer. Report the installed version if there is one."""
+        ver = _installed_version(distribution)
+        if ver is not None:
+            return BuildStamp(
+                version=ver,
+                resolved_at=now,
+                source="package",
+                detail="%s; reporting the installed %s version instead"
+                % (detail, distribution),
+            )
         return BuildStamp(resolved_at=now, source="unknown", detail=detail)
 
     cwd = _git_dir(start)
@@ -240,6 +280,7 @@ def resolve(start: Any) -> BuildStamp:
         committed_at=committed_at,
         dirty=dirty,
         dirty_files=dirty_files,
+        version=_installed_version(distribution),
         resolved_at=now,
         source="git",
         detail=detail,
@@ -250,7 +291,7 @@ _CACHE: dict[str, BuildStamp] = {}
 _CACHE_LOCK = threading.Lock()
 
 
-def stamp(start: Any) -> BuildStamp:
+def stamp(start: Any, distribution: Optional[str] = None) -> BuildStamp:
     """The import-time stamp for ``start``'s repository. Resolved at most once.
 
     THE CONTRACT: the first call shells out to git; every later call for the
@@ -265,6 +306,9 @@ def stamp(start: Any) -> BuildStamp:
         key = str(Path(start).resolve())
     except (OSError, ValueError, TypeError):
         key = repr(start)
+    # The distribution is part of the identity: the same path asked with and
+    # without one has two different right answers off a developer box.
+    key = "%s#%s" % (key, distribution or "")
     cached = _CACHE.get(key)
     if cached is not None:
         return cached
@@ -273,7 +317,7 @@ def stamp(start: Any) -> BuildStamp:
         if cached is not None:
             return cached
         try:
-            result = resolve(start)
+            result = resolve(start, distribution)
         except Exception as exc:  # pragma: no cover - resolve catches its own
             result = BuildStamp(
                 resolved_at=datetime.now(timezone.utc).isoformat(),
@@ -282,6 +326,18 @@ def stamp(start: Any) -> BuildStamp:
             )
         _CACHE[key] = result
         return result
+
+
+def self_stamp() -> BuildStamp:
+    """jobcore's own stamp, correct in BOTH of the ways it gets installed.
+
+    A consumer that hardcodes ``stamp(jobcore.__file__)`` gets a useful answer
+    on the operator's box, where jobcore is an editable install from a sibling
+    checkout, and ``unknown`` everywhere else -- which is how a version echo
+    ends up silent in the only environment where nobody can just run
+    ``git log``. Call this instead.
+    """
+    return stamp(__file__, distribution="jobcore")
 
 
 def invalidate_cache() -> None:
