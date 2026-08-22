@@ -198,3 +198,186 @@ def test_release_is_safe_when_nothing_was_ever_acquired(temp_lock):
     profile_lock.release()
     profile_lock.release()
     assert profile_lock.held_by() is None
+
+
+# ---------------------------------------------------------------------------
+# The browser preflight, at the launch boundary
+# ---------------------------------------------------------------------------
+#
+# What is pinned here is ORDER, and it is not cosmetic. On 2026-08-22 every
+# tool in this server died at browser launch and the traceback was
+# misdiagnosed, because it carried the resolved path and nothing else. If the
+# missing-executable check ran AFTER the profile lock, a machine with no
+# browser installed would report "the profile is locked by pid N" instead --
+# a true statement about the wrong problem, sending the operator somewhere
+# else entirely. So: preflight, then flags, then lock, then launch.
+
+
+class _FakeContext:
+    def __init__(self) -> None:
+        self.pages: list = []
+        self.timeout_set_to = None
+        self.closed = False
+
+    def set_default_timeout(self, ms) -> None:
+        self.timeout_set_to = ms
+
+    async def close(self) -> None:
+        self.closed = True
+
+
+class _FakeChromium:
+    def __init__(self, executable_path, launch_error=None) -> None:
+        self._path = executable_path
+        self._launch_error = launch_error
+        self.launches = 0
+
+    @property
+    def executable_path(self):
+        return self._path
+
+    async def launch_persistent_context(self, **kwargs):
+        self.launches += 1
+        if self._launch_error is not None:
+            raise self._launch_error
+        return _FakeContext()
+
+
+class _FakePlaywright:
+    def __init__(self, chromium) -> None:
+        self.chromium = chromium
+        self.stopped = False
+
+    async def stop(self) -> None:
+        self.stopped = True
+
+
+class _FakeAsyncPlaywright:
+    def __init__(self, pw) -> None:
+        self._pw = pw
+
+    async def start(self):
+        return self._pw
+
+
+@pytest.fixture
+def launch_harness(monkeypatch, tmp_path):
+    """A launch path with no Chromium, no profile and no real lock behind it.
+
+    Returns a callable taking the executable path Playwright should resolve
+    and an optional launch error, and handing back the browser plus a record
+    of whether the profile lock was ever claimed.
+    """
+    monkeypatch.setattr(browser_module, "CDP_ATTACH", False)
+    monkeypatch.setattr(browser_module, "CHROME_PROFILE", tmp_path / "profile")
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(tmp_path / "browsers"))
+
+    claimed: list[str] = []
+    monkeypatch.setattr(
+        browser_module.profile_lock, "acquire", lambda: claimed.append("acquire")
+    )
+    monkeypatch.setattr(
+        browser_module.profile_lock, "release", lambda: claimed.append("release")
+    )
+
+    def build(executable_path, launch_error=None):
+        chromium = _FakeChromium(executable_path, launch_error)
+        pw = _FakePlaywright(chromium)
+        monkeypatch.setattr(
+            "playwright.async_api.async_playwright",
+            lambda: _FakeAsyncPlaywright(pw),
+        )
+        return LinkedInBrowser(), pw, chromium, claimed
+
+    return build
+
+
+async def test_a_missing_browser_is_reported_before_the_profile_lock_is_taken(
+    launch_harness, tmp_path
+):
+    missing = str(tmp_path / "browsers" / "chromium-1234" / "chrome.exe")
+    browser, pw, chromium, claimed = launch_harness(missing)
+
+    with pytest.raises(BrowserUnavailableError) as excinfo:
+        await browser.start()
+
+    message = str(excinfo.value)
+    assert missing in message
+    assert "PLAYWRIGHT_BROWSERS_PATH" in message
+    # The whole point of the ordering.
+    assert claimed == [], claimed
+    assert chromium.launches == 0
+    # And no driver is left running behind the failure.
+    assert pw.stopped is True
+    assert browser.running is False
+
+
+async def test_a_present_browser_does_take_the_profile_lock(
+    launch_harness, tmp_path
+):
+    """The control. Without it the assertion above would pass on a lock that
+    is never taken at all, which would be a very quiet way to lose it."""
+    real = tmp_path / "chrome.exe"
+    real.write_text("x")
+    browser, pw, chromium, claimed = launch_harness(str(real))
+
+    await browser.start()
+    try:
+        assert claimed == ["acquire"], claimed
+        assert chromium.launches == 1
+        assert browser.running is True
+    finally:
+        await browser.stop()
+    assert claimed == ["acquire", "release"], claimed
+
+
+async def test_a_launch_that_dies_on_a_missing_executable_is_translated(
+    launch_harness, tmp_path
+):
+    """The headless-shell case: the preflight passes and the launch still dies.
+
+    Playwright resolves and publishes ONE path, the headful chrome.exe. A
+    headless launch uses a separate chrome-headless-shell binary it does not
+    publish a path for -- measured on this machine. So the preflight cannot
+    catch this one, and the launch's own error has to be translated instead.
+    """
+    real = tmp_path / "chrome.exe"
+    real.write_text("x")
+    shell = str(tmp_path / "chromium_headless_shell-1234" / "shell.exe")
+    browser, pw, chromium, claimed = launch_harness(
+        str(real),
+        launch_error=RuntimeError(
+            "BrowserType.launch_persistent_context: Executable doesn't exist "
+            "at " + shell
+        ),
+    )
+
+    with pytest.raises(BrowserUnavailableError) as excinfo:
+        await browser.start()
+
+    message = str(excinfo.value)
+    assert shell in message
+    assert "PLAYWRIGHT_BROWSERS_PATH" in message
+    # It got far enough to take the lock, so it must have given it back.
+    assert claimed == ["acquire", "release"], claimed
+
+
+async def test_an_unrelated_launch_failure_is_not_dressed_up_as_a_missing_browser(
+    launch_harness, tmp_path
+):
+    """The control for the translation, and the more important half of it.
+
+    A translator that reshaped everything would tell the operator to
+    reinstall Chromium when what actually happened was a crash or a timeout.
+    """
+    real = tmp_path / "chrome.exe"
+    real.write_text("x")
+    boom = RuntimeError("Target page, context or browser has been closed")
+    browser, pw, chromium, claimed = launch_harness(str(real), launch_error=boom)
+
+    with pytest.raises(RuntimeError) as excinfo:
+        await browser.start()
+
+    assert excinfo.value is boom
+    assert "PLAYWRIGHT_BROWSERS_PATH" not in str(excinfo.value)
+    assert claimed == ["acquire", "release"], claimed

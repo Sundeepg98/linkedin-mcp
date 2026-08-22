@@ -390,12 +390,58 @@ def _cookie_expiry(record: Optional[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _durability(mode: str) -> dict[str, Any]:
+    """Where the session is kept and what it survives. Shared by both paths."""
+    from linkedin_server.config import CHROME_PROFILE
+
+    return {
+        "stored_in": str(CHROME_PROFILE) if mode == "launch" else (
+            "the browser this server is attached to, not a profile it owns"
+        ),
+        "survives_server_restart": mode == "launch",
+        "survives_machine_reboot": mode == "launch",
+        "why": (
+            "the session lives in an on-disk Chrome profile, not in this "
+            "process, so stopping the server or rebooting the machine "
+            "leaves it exactly where it was. What ends it is LinkedIn "
+            "expiring it, a sign-out, or the profile directory being "
+            "deleted."
+            if mode == "launch"
+            else
+            "in attach mode the session belongs to the browser the "
+            "operator started. It lasts as long as that browser's own "
+            "profile does, and this server neither owns nor preserves it."
+        ),
+        "measured_here": (
+            "LinkedIn's own year-long cookies in this profile carry a "
+            "365-day expiry (issued 2026-08-21, expiring 2027-08-21). "
+            "The li_at figure above is read live from the jar and is the "
+            "only one that governs the login."
+        ),
+    }
+
+
+#: Said in both results, in the same words, because it is the one sentence
+#: this whole module exists to enforce.
+COOKIE_IS_NOT_A_SESSION = (
+    "a cookie in the jar is NOT a session. li_at being present and unexpired "
+    "means the login has not lapsed on its own; it does not mean LinkedIn "
+    "still honours it. Only the live identity call establishes that."
+)
+
+
 async def session_info(page: Any) -> dict[str, Any]:
     """Report the live session's state and how long it has left.
 
     Runs the ordinary identity measurement first (so ``authenticated`` here
     means exactly what it means everywhere else in this server), then reads
     the cookie jar for expiry dates. Cookie values are never returned.
+
+    Two facts, two fields, never blurred into one: ``authenticated`` is the
+    round-trip's verdict, and ``live_check`` says whether that round-trip
+    actually happened. :func:`session_info_offline` reports the same shape
+    when no browser could be started, with ``authenticated`` null rather than
+    a cookie's presence quietly promoted into a verdict.
     """
     status = await check_auth(page, corroborate=True)
 
@@ -409,39 +455,29 @@ async def session_info(page: Any) -> dict[str, Any]:
     csrf_cookie["name"] = CSRF_COOKIE
 
     from linkedin_server.browser import BROWSER
-    from linkedin_server.config import CHROME_PROFILE
 
+    authenticated = status.get("authenticated")
     out: dict[str, Any] = {
-        "authenticated": status.get("authenticated"),
+        "authenticated": authenticated,
         "checked_against": status.get("checked_against"),
+        "live_check": {
+            "attempted": True,
+            "completed": authenticated is not None,
+            "endpoint": AUTH_ENDPOINT_NOTE,
+            "what_it_means": (
+                "the identity endpoint was asked and answered, so "
+                "'authenticated' above is a measurement"
+                if authenticated is not None
+                else
+                "the identity endpoint was asked and did not answer either "
+                "way, so 'authenticated' is null rather than guessed"
+            ),
+        },
+        "cookie_source": "the live browser's own cookie jar",
         "session_cookie": session_cookie,
         "csrf_cookie": csrf_cookie,
         "browser_mode": BROWSER.mode,
-        "durability": {
-            "stored_in": str(CHROME_PROFILE) if BROWSER.mode == "launch" else (
-                "the browser this server is attached to, not a profile it owns"
-            ),
-            "survives_server_restart": BROWSER.mode == "launch",
-            "survives_machine_reboot": BROWSER.mode == "launch",
-            "why": (
-                "the session lives in an on-disk Chrome profile, not in this "
-                "process, so stopping the server or rebooting the machine "
-                "leaves it exactly where it was. What ends it is LinkedIn "
-                "expiring it, a sign-out, or the profile directory being "
-                "deleted."
-                if BROWSER.mode == "launch"
-                else
-                "in attach mode the session belongs to the browser the "
-                "operator started. It lasts as long as that browser's own "
-                "profile does, and this server neither owns nor preserves it."
-            ),
-            "measured_here": (
-                "LinkedIn's own year-long cookies in this profile carry a "
-                "365-day expiry (issued 2026-08-21, expiring 2027-08-21). "
-                "The li_at figure above is read live from the jar and is the "
-                "only one that governs the login."
-            ),
-        },
+        "durability": _durability(BROWSER.mode),
         "on_expiry": (
             "tools report 'not_authenticated' with the reason, never an empty "
             "result. Recover by calling linkedin_login_browser and signing in "
@@ -452,6 +488,86 @@ async def session_info(page: Any) -> dict[str, Any]:
     for key in ("member", "public_identifier", "profile", "reason", "http_status"):
         if key in status:
             out[key] = status[key]
+    return out
+
+
+def session_info_offline(
+    profile_dir: Any, *, mode: str, why_no_live_check: str
+) -> dict[str, Any]:
+    """Report what the ON-DISK profile says, with no browser involved at all.
+
+    This is the answer to "did my session survive?" on the day the browser is
+    the thing that is broken -- which is exactly when the question is worth
+    asking, and exactly when the ordinary path cannot answer it. The expiry
+    dates live in the profile's own SQLite cookie jar, so they are read from
+    there (see ``cookie_jar.py``: a COPY is read, the live file is never
+    opened, and no cookie value is ever fetched).
+
+    What it deliberately does NOT do is call the login authenticated.
+    ``authenticated`` is null here and stays null. Three login bugs in this
+    family of servers came from substituting "a session cookie exists" for "a
+    session works", the two are indistinguishable from the jar, and a
+    year-long li_at sitting in a profile whose session LinkedIn revoked this
+    morning looks exactly like a healthy one. So the jar facts are reported
+    as jar facts, under their own labels, next to a live_check block that
+    says in plain words that the verdict could not be obtained and why.
+
+    Never raises. A jar that cannot be read is reported in ``cookie_source``
+    alongside the browser's own failure, because "both routes failed, here is
+    each reason" is more use than either error on its own.
+    """
+    from linkedin_server import cookie_jar
+
+    session_cookie: dict[str, Any] = {"present": False}
+    csrf_cookie: dict[str, Any] = {"present": False}
+    jar_error: Optional[str] = None
+    try:
+        records = cookie_jar.read_jar(profile_dir, [SESSION_COOKIE, CSRF_COOKIE])
+        by_name = {r.get("name", ""): r for r in records}
+        session_cookie = _cookie_expiry(by_name.get(SESSION_COOKIE))
+        csrf_cookie = _cookie_expiry(by_name.get(CSRF_COOKIE))
+    except cookie_jar.CookieJarUnavailableError as exc:
+        jar_error = str(exc)
+    except Exception as exc:  # pragma: no cover - defensive
+        jar_error = f"{type(exc).__name__}: {exc}"
+
+    session_cookie["name"] = SESSION_COOKIE
+    csrf_cookie["name"] = CSRF_COOKIE
+
+    out: dict[str, Any] = {
+        "authenticated": None,
+        "live_check": {
+            "attempted": False,
+            "completed": False,
+            "endpoint": AUTH_ENDPOINT_NOTE,
+            "why_not": why_no_live_check,
+            "what_it_means": (
+                "'authenticated' is null because the live identity call could "
+                "not be made, NOT because LinkedIn said no. The cookie facts "
+                "below are the only thing measured here, and "
+                + COOKIE_IS_NOT_A_SESSION
+            ),
+        },
+        "cookie_source": (
+            f"the profile's on-disk cookie jar, read without launching a "
+            f"browser -- and it could not be read: {jar_error}"
+            if jar_error
+            else
+            "the profile's on-disk cookie jar, read without launching a "
+            "browser (a copy is read; no cookie value is ever fetched)"
+        ),
+        "session_cookie": session_cookie,
+        "csrf_cookie": csrf_cookie,
+        "browser_mode": mode,
+        "durability": _durability(mode),
+        "on_expiry": (
+            "tools report 'not_authenticated' with the reason, never an empty "
+            "result. Recover by calling linkedin_login_browser and signing in "
+            "yourself in the window it opens."
+        ),
+    }
+    if jar_error:
+        out["jar_error"] = jar_error
     return out
 
 

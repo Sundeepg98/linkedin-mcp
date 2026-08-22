@@ -135,10 +135,15 @@ class FakeContext:
 class FakeChromium:
     """``pw.chromium`` -- records the launch kwargs, hands back a context."""
 
-    def __init__(self, context: FakeContext) -> None:
+    def __init__(self, context: FakeContext, executable_path: str = "") -> None:
         self.context = context
         self.launch_kwargs: dict = {}
         self.launches = 0
+        #: What ``browser.start()``'s preflight asks for before it launches
+        #: anything. The real ``pw.chromium`` publishes this, so the fake has
+        #: to as well: a fake missing it would make every test in this module
+        #: fail on a missing browser rather than on the boundary under test.
+        self.executable_path = executable_path
 
     async def launch_persistent_context(self, **kwargs):
         self.launches += 1
@@ -186,7 +191,13 @@ def recorded_launch(tmp_path, monkeypatch) -> FakeChromium:
     """
     import playwright.async_api
 
-    chromium = FakeChromium(FakeContext())
+    # A stand-in for the browser binary. It only has to EXIST: the preflight
+    # in start() checks that Playwright's resolved executable is on disk, and
+    # this module is about launch flags rather than about the install.
+    fake_executable = tmp_path / "chrome.exe"
+    fake_executable.write_text("stand-in for the chromium binary")
+
+    chromium = FakeChromium(FakeContext(), executable_path=str(fake_executable))
     pw = FakePlaywright(chromium)
     monkeypatch.setattr(
         playwright.async_api,

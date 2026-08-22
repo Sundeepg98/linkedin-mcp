@@ -20,12 +20,13 @@ from urllib.parse import urlencode
 
 from fastmcp import FastMCP
 
-from linkedin_server import cdp_bridge, dom, shape
+from linkedin_server import cdp_bridge, dom, preflight, shape
 from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
     login_via_browser,
     session_info,
+    session_info_offline,
 )
 from linkedin_server.browser import BROWSER
 from linkedin_server.config import (
@@ -281,30 +282,68 @@ async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, 
 
 
 @mcp.tool()
-async def linkedin_session_info() -> dict[str, Any]:
+async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
     """Report whether the session is live and how long it has left.
 
     This is the question that comes up after a week away: is the sign-in still
     good, and when does it lapse? The verdict is the same measured one
     linkedin_auth_status gives -- an authenticated call to the identity
     endpoint, never a cookie's presence -- and alongside it comes the expiry
-    date read straight out of the browser's own cookie jar.
+    date read from the browser profile's own cookie jar.
 
     The sign-in lives in an on-disk Chrome profile rather than in this
     process, so it survives this server restarting and the machine rebooting.
     What ends it is LinkedIn expiring it, a sign-out, or the profile directory
     going away.
 
+    When no browser can be started at all -- Chromium missing, another process
+    holding the profile -- this tool does not die with it. It falls back to
+    reading the expiry dates out of that profile's cookie jar on disk, which
+    is precisely the moment you most want to know whether the login survived.
+    Then 'authenticated' is null and the live_check block says why in plain
+    words: a cookie in the jar is not a session, and reporting one as the
+    other is a lie this server refuses to tell. Two labelled fields, never one
+    blurred one.
+
     Cookie values are never returned. Only the name, whether it is there, and
     when it lapses. When it has lapsed every read tool says so with a reason
     rather than handing back nothing, and linkedin_login_browser is the way
     back.
+
+    (Everything below this point is dropped from the description a caller
+    sees: FastMCP cuts a docstring at Args: and renders the rest into the
+    argument schema. Prose that has to reach a caller goes ABOVE it.)
+
+    Args:
+        verify_live: put the question to the identity endpoint for a real
+            verdict, which requires a working browser. Pass False for the
+            free, browserless answer -- jar facts only, 'authenticated' null.
+            Default True.
     """
+    if not verify_live:
+        return session_info_offline(
+            CHROME_PROFILE,
+            mode=BROWSER.mode,
+            why_no_live_check=(
+                "not attempted: this call asked for the browserless answer "
+                "(verify_live false), so no identity call was made."
+            ),
+        )
     try:
         async with BROWSER.session() as page:
             return await session_info(page)
     except Exception as exc:
-        return _error(exc)
+        # The browser is the thing that broke, so the jar is read straight
+        # off disk instead. The verdict is NOT downgraded to "a cookie is
+        # there" -- it goes to null, and the reason travels with it.
+        return session_info_offline(
+            CHROME_PROFILE,
+            mode=BROWSER.mode,
+            why_no_live_check=(
+                f"no browser could be started, so the identity call could not "
+                f"be made: {_error(exc)['message']}"
+            ),
+        )
 
 
 @mcp.tool()
@@ -893,7 +932,17 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "profile_lock_held_by_pid": held_by(),
                 "idle_close_seconds": IDLE_CLOSE_S,
                 "mode": BROWSER.mode,
+                "headless": BROWSER.headless,
                 "session_survives_restart_and_reboot": True,
+                # Answers "is there a browser to launch at all" WITHOUT
+                # launching one, so a broken install is diagnosable from the
+                # one tool that still works when every other tool is dying at
+                # browser launch. Carries the resolved path and the value of
+                # PLAYWRIGHT_BROWSERS_PATH, which is the pair that decides
+                # whether the fix is a config line or a download.
+                "preflight": await preflight.report(
+                    headless=BROWSER.headless, playwright=BROWSER.playwright
+                ),
             },
             # Declared as fields rather than prose so it can be asserted on.
             # One flag is passed that touches automation visibility, it is

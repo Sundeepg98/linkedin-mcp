@@ -38,7 +38,11 @@ TWO MODES, and the second is for recovery only:
 
 * **LAUNCH (default).** Playwright starts Chromium against the persistent
   profile at :data:`config.CHROME_PROFILE`. The session lives in that profile
-  and survives restarts and reboots. This is the daily path.
+  and survives restarts and reboots. This is the daily path. Before it takes
+  the profile lock, ``preflight`` asks Playwright whether a browser
+  executable is actually there, so a missing install fails with one
+  actionable line naming the resolved path and ``PLAYWRIGHT_BROWSERS_PATH``
+  rather than a raw traceback that has already been misdiagnosed once.
 * **ATTACH.** With ``LINKEDIN_CDP_ATTACH=1`` this server launches nothing
   and connects over CDP to a Chrome the operator started himself. It takes no
   profile lock (it owns no profile), it opens its own tab rather than driving
@@ -53,7 +57,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
-from linkedin_server import profile_lock
+from linkedin_server import preflight, profile_lock
 from linkedin_server.config import (
     CDP_ATTACH,
     CHROME_PROFILE,
@@ -116,6 +120,21 @@ class LinkedInBrowser:
         """``"attach"`` or ``"launch"`` -- what the NEXT start() would do."""
         return "attach" if CDP_ATTACH else "launch"
 
+    @property
+    def headless(self) -> bool:
+        """Whether the NEXT launch would be headless."""
+        return _headless()
+
+    @property
+    def playwright(self) -> Any:
+        """The live Playwright driver, or ``None``.
+
+        Exposed so a diagnostic can run the browser preflight against the
+        driver that is ALREADY up instead of starting a second one. Read
+        only: nothing outside this class drives it.
+        """
+        return self._pw
+
     async def start(self) -> None:
         """Bring up a browser context. Idempotent.
 
@@ -141,22 +160,40 @@ class LinkedInBrowser:
                 "playwright install chromium"
             ) from exc
 
-        # Refuse to launch if another process owns the profile. Raising here
-        # is the point -- corrupting the profile costs the operator his
-        # session, which is far worse than a failed tool call.
-        profile_lock.acquire()
-        self._holds_profile_lock = True
+        # The driver first, and deliberately before the profile lock. Starting
+        # it opens a local node process; it launches no browser, reads no
+        # profile and touches no network, and it is what lets the preflight
+        # below ask Playwright itself where the browser is.
+        self._pw = await async_playwright().start()
 
+        headless = _headless()
         try:
-            # The launch boundary, enforced at runtime and not only in the
-            # test suite: a flag added here never reaches Chromium unless it
-            # is one the operator sanctioned.
+            # Three gates, in this order, and the order is the design.
+            #
+            # FIRST the launch boundary, enforced at runtime and not only in
+            # the test suite: a flag added here never reaches Chromium unless
+            # it is one the operator sanctioned. It goes first because it is
+            # the only one of the three that is a SECURITY invariant, it
+            # depends on nothing outside this process, and it must therefore
+            # hold identically on a machine with no browser installed at all.
             assert_launch_flags_permitted(LAUNCH_ARGS)
+            # THEN, is there a browser to launch? Before the lock on purpose:
+            # a missing executable that had already taken the profile lock
+            # would be reported to the operator as a locked profile, sending
+            # him after the wrong problem. See preflight.py for the day this
+            # cost a wrong diagnosis and nearly 150 MB onto a full drive.
+            preflight.assert_ready(self._pw, headless=headless)
+            # LAST, refuse to launch if another process owns the profile.
+            # Raising here is the point -- corrupting the profile costs the
+            # operator his session, which is far worse than a failed tool
+            # call -- and it is last because it is the only gate of the three
+            # that changes anything on disk.
+            profile_lock.acquire()
+            self._holds_profile_lock = True
             CHROME_PROFILE.mkdir(parents=True, exist_ok=True)
-            self._pw = await async_playwright().start()
             self._context = await self._pw.chromium.launch_persistent_context(
                 user_data_dir=str(CHROME_PROFILE),
-                headless=_headless(),
+                headless=headless,
                 viewport={"width": 1400, "height": 900},
                 args=list(LAUNCH_ARGS),
             )
@@ -164,13 +201,22 @@ class LinkedInBrowser:
             logger.info(
                 "browser started (profile=%s, headless=%s, args=%s)",
                 CHROME_PROFILE,
-                _headless(),
+                headless,
                 list(LAUNCH_ARGS),
             )
-        except Exception:
-            # Never hold the lock for a browser that did not come up.
+        except Exception as exc:
+            # Never hold the lock, or a driver, for a browser that did not
+            # come up.
             await self._teardown()
-            raise
+            # The preflight cannot cover a headless launch (Playwright does
+            # not publish that binary's path), so the launch's OWN failure is
+            # translated with the path Playwright named. Anything that is not
+            # a missing executable comes back unchanged -- a translator that
+            # reshaped every error would turn a timeout into a confident lie.
+            translated = preflight.translate_launch_failure(exc, headless=headless)
+            if translated is exc:
+                raise
+            raise translated from exc
 
     async def _start_attached(self) -> None:
         """Connect to a browser the operator started. Recovery path only."""
