@@ -37,6 +37,23 @@ htmlcov/
 # Scratch
 *.log
 
+# The two artefacts CI's own recipe produces, and which anyone reproducing a
+# CI run locally therefore produces too: `pytest --junitxml=` and the
+# `--collect-only` output that `scripts/ci_full_run_check.py` compares against
+# it. Same reasoning as uv.lock above -- an untracked, un-ignored artefact
+# sitting in the tree is one `git add -A` away from being committed by an agent
+# sweeping unowned files, and the moment to notice is not afterwards.
+#
+# NOT extended to `_audit/_slice-*.md`, deliberately, even though four of those
+# are currently untracked and un-ignored in exactly the same way. Two of them
+# are TRACKED (`_slice-cookie-jar.md`, `_slice-parity-census.md`), so a blanket
+# pattern would be a rule its own set already contradicts, and ignoring a path
+# that has tracked members is how a file silently stops being updated. That one
+# needs a decision about which slice reports are artefacts and which are the
+# record, not a pattern.
+junit*.xml
+collected*.txt
+
 # Environment files -- never commit. Secrets land in .env by default, and a
 # tracked .env means the next key added to it commits without anyone noticing.
 .env
