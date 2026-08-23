@@ -328,21 +328,78 @@ WRITE_VERBS: tuple[str, ...] = (
     "archive",
     "accept",
     "decline",
+    # Added 2026-08-23 with the negation prefixes below: without the base verb
+    # on this list, "unsubscribe" cannot be reached by stripping "un".
+    "subscribe",
 )
+
+#: Prefixes that NEGATE a verb without stopping it being a write.
+#:
+#: MEASURED 2026-08-23. ``name_implies_write`` split a tool name into segments
+#: and looked each up in :data:`WRITE_VERBS`, which holds ``save`` and
+#: ``follow`` but held no negated form at all. So every one of these read as
+#: NOT-A-WRITE:
+#:
+#:     linkedin_unsave_job   linkedin_unfollow   linkedin_unlike
+#:     linkedin_unsubscribe  linkedin_disconnect
+#:
+#: **Undoing a write is still a write.** They were caught only because somebody
+#: had hand-listed two of them in the tool-surface test's ``FORBIDDEN_TOOLS``,
+#: which is the failure this module exists to avoid: a literal list sees the
+#: instances someone remembered, and the generalising check cannot see the
+#: CLASS.
+#:
+#: Verified against every live tool when this landed: all five are now caught
+#: and NONE of the thirteen read tools became a false positive.
+NEGATION_PREFIXES: tuple[str, ...] = ("un", "dis", "de")
+
+#: THE RESIDUE, stated rather than left for someone to rediscover.
+#:
+#: 1. ``re`` is NOT in the set above, and that is a judgement rather than an
+#:    oversight. It would correctly catch ``reset``, ``resend``, ``reapply``,
+#:    ``repost`` and ``reconnect`` -- all genuine writes -- but it also turns
+#:    ``remark`` into ``re`` + ``mark``, and a guard that cries wolf on an
+#:    ordinary English word is a guard somebody switches off. Revisit only with
+#:    a real ``re``-prefixed tool to justify it.
+#: 2. This rule generalises over NEGATIONS OF KNOWN VERBS, not over unknown
+#:    verbs. ``linkedin_boost_profile`` or ``linkedin_publish`` would still
+#:    pass, because ``boost`` and ``publish`` are on no list. :data:`WRITE_VERBS`
+#:    remains a hand-kept list at its root and the only honest fix for that is
+#:    to keep adding to it.
+
+
+def _segments_that_are_write_verbs(text: str) -> set[str]:
+    """Every segment of ``text`` that is a write verb, negated or plain.
+
+    One implementation shared by the name check and the docstring check, so the
+    two can never drift into disagreeing about what a write verb is.
+    """
+    found: set[str] = set()
+    for segment in re.split(r"[^a-z]+", text.lower()):
+        if not segment:
+            continue
+        if segment in WRITE_VERBS:
+            found.add(segment)
+            continue
+        for prefix in NEGATION_PREFIXES:
+            if segment.startswith(prefix) and segment[len(prefix) :] in WRITE_VERBS:
+                found.add(segment)
+                break
+    return found
 
 
 def name_implies_write(name: str) -> bool:
-    """True if a tool name contains a write verb as a whole word segment."""
-    parts = re.split(r"[^a-z]+", name.lower())
-    return any(part in WRITE_VERBS for part in parts if part)
+    """True if a tool name contains a write verb as a whole word segment.
+
+    A NEGATED write verb counts: ``linkedin_unsave_job`` advertises a mutation
+    exactly as loudly as ``linkedin_save_job`` does.
+    """
+    return bool(_segments_that_are_write_verbs(name))
 
 
 def iter_write_verbs_in(text: str) -> Iterable[str]:
-    """Yield write verbs appearing as whole words in ``text``."""
-    words = set(re.findall(r"[a-z]+", text.lower()))
-    for verb in WRITE_VERBS:
-        if verb in words:
-            yield verb
+    """Yield write verbs appearing as whole words in ``text``, negations too."""
+    yield from sorted(_segments_that_are_write_verbs(text))
 
 
 #: Words that turn a write verb into a boundary statement rather than a claim.
@@ -372,6 +429,25 @@ _NEGATORS = (
 #: How far back to look for a negator, in characters.
 _NEGATION_WINDOW = 80
 
+#: Every spelling a docstring could make a write claim in: the plain verbs and
+#: their negated forms. ``\bsubscribe\b`` does not match inside
+#: ``unsubscribe`` -- there is no word boundary between the two halves -- so
+#: without this the docstring check carried the same blind spot the NAME check
+#: did, and "this tool will unfollow the company" read as a claim about
+#: nothing. Sorted longest-first so a negated form is reported as itself rather
+#: than as the bare verb hiding inside it.
+_CLAIMABLE_VERBS: tuple[str, ...] = tuple(
+    sorted(
+        set(WRITE_VERBS)
+        | {
+            prefix + verb
+            for verb in WRITE_VERBS
+            for prefix in NEGATION_PREFIXES
+        },
+        key=lambda word: (-len(word), word),
+    )
+)
+
 
 def docstring_write_claims(text: str) -> list[tuple[str, str]]:
     """Return ``(verb, context)`` for write verbs used as an AFFIRMATIVE claim.
@@ -384,7 +460,7 @@ def docstring_write_claims(text: str) -> list[tuple[str, str]]:
     """
     lowered = (text or "").lower()
     claims: list[tuple[str, str]] = []
-    for verb in WRITE_VERBS:
+    for verb in _CLAIMABLE_VERBS:
         for match in re.finditer(rf"\b{re.escape(verb)}\b", lowered):
             window_start = max(0, match.start() - _NEGATION_WINDOW)
             window = lowered[window_start : match.start()]

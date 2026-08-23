@@ -87,6 +87,100 @@ def test_the_name_check_catches_a_write_tool():
     assert not readonly.name_implies_write("linkedin_my_applications")
 
 
+# ---------------------------------------------------------------------------
+# Undoing a write is still a write
+# ---------------------------------------------------------------------------
+#
+# MEASURED 2026-08-23 while building the write boundary. WRITE_VERBS held
+# "save" and "follow" but no negated form at all, so every name below read as
+# NOT-A-WRITE and the check would have waved through a tool whose whole job is
+# to mutate. They were caught only because somebody had hand-listed two of them
+# in FORBIDDEN_TOOLS above -- the literal list seeing the instances someone
+# remembered while the generalising check could not see the CLASS.
+
+#: The five that were blind, each with the reason it was.
+_NEGATED_WRITES = (
+    ("linkedin_unsave_job", "un + a verb already on the list"),
+    ("linkedin_unfollow", "un + a verb already on the list"),
+    ("linkedin_unlike", "un + a verb already on the list"),
+    ("linkedin_unsubscribe", "un + a verb that had to be ADDED to the list"),
+    ("linkedin_disconnect", "a dis prefix, not un at all"),
+)
+
+
+@pytest.mark.parametrize("name,why", _NEGATED_WRITES, ids=lambda v: v.split()[0])
+def test_a_negated_write_verb_still_reads_as_a_write(name, why):
+    assert readonly.name_implies_write(name), (name, why)
+
+
+def test_the_fix_did_not_start_seeing_writes_that_are_not_there():
+    """The other direction, and the reason the prefix set is three and not ten.
+
+    A guard that fires on ordinary nouns is one somebody switches off, so the
+    read tools this server actually ships are the control.
+    """
+    for name in (
+        "linkedin_saved_jobs",
+        "linkedin_my_applications",
+        "linkedin_session_info",
+        "linkedin_who_viewed_me",
+        "linkedin_job_detail",
+        "linkedin_search_jobs",
+    ):
+        assert not readonly.name_implies_write(name), name
+
+
+def test_the_residue_is_what_the_source_says_it_is():
+    """The stated limits, pinned so the claim stays honest.
+
+    ``readonly.NEGATION_PREFIXES`` documents two things it deliberately does
+    NOT catch. A residue that is written down but never checked drifts into
+    being wrong, and then the comment is worse than nothing.
+    """
+    # 1. "re" is excluded on purpose: it would catch five real writes and also
+    #    turn "remark" into re + mark. So these stay uncaught, by decision.
+    assert "re" not in readonly.NEGATION_PREFIXES
+    # Names whose ONLY write signal would be the re prefix. Isolating that is
+    # fiddlier than it looks and took two goes: the first draft used
+    # "linkedin_resend_invite_note" and the second "linkedin_repost_update",
+    # and BOTH are caught -- by the plain verbs "invite" and "update" sitting
+    # inside them. A residue test that does not isolate the residue is just
+    # measuring something else and calling it a limit.
+    assert not readonly.name_implies_write("linkedin_resend_note")
+    assert not readonly.name_implies_write("linkedin_repost")
+    # ...and the collision that decision was made to avoid is real.
+    assert not readonly.name_implies_write("linkedin_remark")
+
+    # 2. The rule generalises over NEGATIONS of known verbs, not over unknown
+    #    verbs. WRITE_VERBS is still a hand-kept list at its root.
+    assert not readonly.name_implies_write("linkedin_boost_profile")
+    assert not readonly.name_implies_write("linkedin_publish")
+
+
+def test_a_docstring_cannot_claim_a_negated_write_either():
+    """The same blind spot lived in the DOCSTRING check and is closed with it.
+
+    ``\\bsubscribe\\b`` does not match inside "unsubscribe" -- there is no word
+    boundary between the halves -- so "this will unfollow the company" used to
+    read as a claim about nothing at all.
+    """
+    claims = readonly.docstring_write_claims(
+        "This will unfollow the company and unsave the posting."
+    )
+    verbs = {verb for verb, _ in claims}
+    assert {"unfollow", "unsave"} <= verbs, claims
+
+
+def test_a_denial_of_a_negated_write_is_still_a_denial():
+    """The negation window must keep working on the new spellings, or every
+    honest boundary sentence becomes a violation."""
+    denial = readonly.docstring_write_claims(
+        "Lists what you saved. It has no way to unsave anything, and it never "
+        "unfollows a company."
+    )
+    assert denial == [], denial
+
+
 async def test_no_docstring_claims_a_write(tools):
     """A docstring may say what a tool cannot do; it may not claim it does."""
     offenders: dict[str, list] = {}

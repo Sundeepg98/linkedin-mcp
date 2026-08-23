@@ -18,7 +18,6 @@ unconditionally, the paired tests go red.
 from __future__ import annotations
 
 import ast
-import re
 import time
 from pathlib import Path
 
@@ -279,57 +278,6 @@ def test_nothing_is_both_forbidden_and_sanctioned_by_accident():
     assert overlap == {"linkedin_save_job", "linkedin_unsave_job"}, overlap
 
 
-def _write_verbs(name: str) -> set[str]:
-    """``readonly.iter_write_verbs_in``, plus the one line it is missing.
-
-    This is THE PROPOSED FIX, written here as executable evidence rather than
-    applied to ``readonly.py`` (see ``_SHAPE_CHECK_BLIND_TO`` below for why it
-    is not applied). All it adds is: strip a leading "un" before looking a
-    segment up, because undoing a write is still a write.
-
-    Kept deliberately tiny so the diff it argues for is easy to judge.
-    """
-    verbs = set(readonly.iter_write_verbs_in(name))
-    for segment in re.split(r"[^a-z]+", name.lower()):
-        if segment.startswith("un") and segment[2:] in readonly.WRITE_VERBS:
-            verbs.add(segment[2:])
-    return verbs
-
-
-#: What the one-line fix DOES close: "un" + a verb already on the list.
-_CLOSED_BY_THE_FIX = ("linkedin_unsave_job", "linkedin_unfollow", "linkedin_unlike")
-
-#: What it does NOT close, measured rather than assumed. A SECOND and separate
-#: gap: here the base verb is absent from ``WRITE_VERBS`` altogether
-#: (``subscribe``) or the prefix is not ``un`` at all (``dis``). Stripping
-#: "un" cannot reach either, so anyone applying the small fix should know it
-#: leaves these standing rather than believe the class is closed.
-_NOT_CLOSED_BY_THE_FIX = ("linkedin_unsubscribe", "linkedin_disconnect")
-
-
-@pytest.mark.parametrize("name", _CLOSED_BY_THE_FIX)
-def test_the_proposed_fix_would_close_the_common_case(name):
-    """The fix, shown working, so the ruling is on a measured thing."""
-    assert _write_verbs(name), name
-
-
-@pytest.mark.parametrize("name", _NOT_CLOSED_BY_THE_FIX)
-def test_the_proposed_fix_is_honest_about_what_it_leaves_open(name):
-    """The half of the finding that is easy to leave out and shouldn't be.
-
-    A fix reported as closing "the undo gap" that actually closes three names
-    out of five is the kind of overclaim this project keeps paying for.
-    """
-    assert _write_verbs(name) == set(), name
-
-
-def test_the_fix_adds_sight_without_widening_anything():
-    """It must not start seeing writes where there are none."""
-    assert _write_verbs("linkedin_save_job") == {"save"}
-    assert _write_verbs("linkedin_session_info") == set()
-    assert _write_verbs("linkedin_who_viewed_me") == set()
-
-
 def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
     """A LOOPHOLE IN MY OWN CONSERVATION LAW, found while reviewing it, closed.
 
@@ -347,66 +295,18 @@ def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
     """
     original_verbs: set[str] = set()
     for forbidden in _ORIGINAL_FORBIDDEN:
-        original_verbs |= _write_verbs(forbidden)
+        original_verbs |= set(readonly.iter_write_verbs_in(forbidden))
 
     for name in SANCTIONED_WRITES:
-        # Caught by the name SHAPE, or named explicitly on the forbidden list.
-        # The second clause is not a softening: it is there because the shape
-        # check has a measured hole, pinned in the next test.
-        caught = readonly.name_implies_write(name) or name in FORBIDDEN_TOOLS
-        assert caught, f"{name} reads as neither a write nor a forbidden name"
-        assert _write_verbs(name) & original_verbs, (name, sorted(_write_verbs(name)))
+        # The shape check alone is enough now. Until readonly.py learned that
+        # undoing a write is still a write, this needed an "or it is on the
+        # forbidden list" fallback to pass at all, because linkedin_unsave_job
+        # read as not-a-write. The fallback is gone because the hole is.
+        assert readonly.name_implies_write(name), f"{name} does not read as a write"
+        verbs = set(readonly.iter_write_verbs_in(name))
+        assert verbs & original_verbs, (name, sorted(verbs))
 
 
-#: MEASURED 2026-08-23, while writing the test above -- it went red on
-#: ``linkedin_unsave_job`` and the cause was not in the new code.
-#:
-#: ``readonly.name_implies_write`` splits a tool name into segments and looks
-#: each up in ``WRITE_VERBS``. ``WRITE_VERBS`` contains ``save`` and ``follow``
-#: but NOT ``unsave`` or ``unfollow``, and it holds no ``un``-prefixed verb at
-#: all. So the entire class of UNDO writes is invisible to the shape check.
-#:
-#: Undoing a write is still a write. These names are caught today only because
-#: somebody listed two of them in ``FORBIDDEN_TOOLS`` by hand -- which is the
-#: same defect this whole pass has been about, one level up: the literal list
-#: sees the instances someone remembered, and the generalising check cannot
-#: see the CLASS.
-#:
-#: NOT FIXED HERE ON PURPOSE. ``readonly.py`` is under a standing zero-line-diff
-#: constraint for this wave, and quietly editing the read-only guard while
-#: shipping a write module is precisely the move that would deserve suspicion.
-#: It is one line -- teaching the splitter to strip a leading ``un`` -- and it
-#: is flagged for a ruling instead.
-_SHAPE_CHECK_BLIND_TO = (
-    "linkedin_unsave_job",
-    "linkedin_unfollow",
-    "linkedin_unlike",
-    "linkedin_unsubscribe",
-    "linkedin_disconnect",
-)
-
-
-@pytest.mark.parametrize("name", _SHAPE_CHECK_BLIND_TO)
-def test_the_name_shape_check_is_blind_to_undo_verbs(name):
-    """Pins a KNOWN GAP so it stays visible and cannot silently widen.
-
-    This asserts the bug, not the fix. If someone teaches the splitter to strip
-    a leading "un", this test goes red -- and that redness is the signal to
-    delete it, not to work around it. A gap nobody can see is the thing that
-    made the last three findings in this repo expensive.
-    """
-    assert readonly.name_implies_write(name) is False, (
-        f"{name} is now caught by the shape check -- the gap this test pins "
-        "has been fixed. Delete this test and the note above it."
-    )
-
-
-def test_the_shape_check_does_still_catch_the_plain_verbs():
-    """The control. The gap above is specific to undo verbs, not the whole
-    check being broken -- and saying which is the difference between a finding
-    and an alarm."""
-    for name in ("linkedin_save_job", "linkedin_follow", "linkedin_apply"):
-        assert readonly.name_implies_write(name) is True, name
 
 
 def test_that_loophole_check_would_catch_a_smuggled_verb():
