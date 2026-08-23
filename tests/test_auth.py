@@ -11,6 +11,7 @@ return the right answer for the wrong reason, and that is the bug.
 from __future__ import annotations
 
 import json
+import logging
 
 import pytest
 
@@ -24,6 +25,7 @@ from linkedin_server.auth import (
 from linkedin_server.config import ME_API
 from linkedin_server.errors import AuthUnknownError, NotAuthenticatedError
 from tests.conftest import FakePage, FakeResponse, me_response
+from tests.leakwalk import PLANTED_JSESSIONID, PLANTED_LI_AT, assert_no_leak
 
 
 # ---------------------------------------------------------------------------
@@ -265,28 +267,50 @@ async def test_the_wait_caps_how_many_requests_it_will_spend(
 # ---------------------------------------------------------------------------
 # Nothing sensitive leaks out
 # ---------------------------------------------------------------------------
+#
+# These three assertions used to be one line each -- ``assert "live" not in
+# json.dumps(result)`` -- and that shape was MEASURED failing to notice a
+# build echoing the entire session cookie: base64'd, hex-encoded, split across
+# two fields, or written to a log instead of returned. 34 of 54 cells green,
+# ``scripts/leak_matrix.py``, first run.
+#
+# Two things changed. The plant is now credential-LENGTH and credential-
+# CHARSET, because a redaction bug that only fires on a long high-entropy
+# value was never presented with one by a four-letter marker like "live". And
+# the hunt is ``leakwalk.assert_no_leak``, which reads every encoding, every
+# 12-character run, the whole object rather than a json string, and the LOG.
 
 
-async def test_no_cookie_value_ever_reaches_a_tool_result(signed_in_page):
+def planted_cookie_page(**kwargs) -> FakePage:
+    """A page carrying the planted credential instead of a readable word."""
+    return FakePage(
+        cookies={"li_at": PLANTED_LI_AT, "JSESSIONID": PLANTED_JSESSIONID},
+        **kwargs,
+    )
+
+
+async def test_no_cookie_value_ever_reaches_a_tool_result(caplog):
     """Cookie VALUES are credentials. Only their presence may be reported."""
-    result = await check_auth(signed_in_page)
-    blob = json.dumps(result)
-    assert "live" not in blob
-    assert "ajax:99" not in blob
+    page = planted_cookie_page(responses=[me_response()])
+
+    with caplog.at_level(logging.DEBUG):
+        result = await check_auth(page)
+
     assert result["session_cookie_present"] is True
+    assert_no_leak(result, PLANTED_LI_AT, caplog=caplog)
+    assert_no_leak(result, PLANTED_JSESSIONID, caplog=caplog)
 
 
 async def test_no_cookie_value_leaks_from_the_login_result(
-    patched_navigation, fast_polling
+    patched_navigation, fast_polling, caplog
 ):
-    page = FakePage(
-        cookies={"li_at": "secret-token-value", "JSESSIONID": '"ajax:55"'},
-        responses=[FakeResponse(401, ""), me_response()],
-    )
-    result = await login_via_browser(page, wait_seconds=5)
-    blob = json.dumps(result)
-    assert "secret-token-value" not in blob
-    assert "ajax:55" not in blob
+    page = planted_cookie_page(responses=[FakeResponse(401, ""), me_response()])
+
+    with caplog.at_level(logging.DEBUG):
+        result = await login_via_browser(page, wait_seconds=5)
+
+    assert_no_leak(result, PLANTED_LI_AT, caplog=caplog)
+    assert_no_leak(result, PLANTED_JSESSIONID, caplog=caplog)
 
 
 # ---------------------------------------------------------------------------
@@ -514,17 +538,22 @@ async def test_session_info_flags_an_expired_cookie_as_expired(patched_navigatio
     assert info["authenticated"] is False
 
 
-async def test_session_info_never_returns_a_cookie_value(patched_navigation):
+async def test_session_info_never_returns_a_cookie_value(patched_navigation, caplog):
     """An expiry date is a fact about the session. The token is the session."""
-    page = FakePage(
-        cookies={"li_at": "secret-token-value", "JSESSIONID": '"ajax:55"'},
+    page = planted_cookie_page(
         expiries={"li_at": _in_days(300)},
         responses=[me_response()],
     )
-    blob = json.dumps(await auth_module.session_info(page))
 
-    assert "secret-token-value" not in blob
-    assert "ajax:55" not in blob
+    with caplog.at_level(logging.DEBUG):
+        result = await auth_module.session_info(page)
+
+    # The expiry it DOES report is the point of the tool, so it is asserted
+    # present here: a guard passing because the result is empty would be the
+    # cheapest possible way to be green.
+    assert result["credential"]["expires_at"] is not None
+    assert_no_leak(result, PLANTED_LI_AT, caplog=caplog)
+    assert_no_leak(result, PLANTED_JSESSIONID, caplog=caplog)
 
 
 async def test_session_info_does_not_guess_when_the_endpoint_will_not_say(

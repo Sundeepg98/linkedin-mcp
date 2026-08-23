@@ -52,6 +52,7 @@ from linkedin_server import profile_lock as profile_lock_module
 from linkedin_server import server as server_module
 from linkedin_server.errors import BrowserUnavailableError
 from tests.conftest import FakePage, FakeResponse, me_response
+from tests.leakwalk import PLANTED_JSESSIONID, assert_no_leak, find_leaks
 from tests.test_cookie_jar import PLANTED_SECRET, cookie_row, make_profile
 from tests.test_session_info_offline import (
     PREFLIGHT_MESSAGE,
@@ -614,25 +615,25 @@ def test_durability_keeps_its_fields_and_its_measured_note(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-def test_the_offline_result_carries_no_cookie_value(tmp_path):
-    blob = json.dumps(
-        auth_module.session_info_offline(
+def test_the_offline_result_carries_no_cookie_value(tmp_path, caplog):
+    with caplog.at_level("DEBUG"):
+        result = auth_module.session_info_offline(
             healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
         )
-    )
-    assert PLANTED_SECRET not in blob
+    assert_no_leak(result, PLANTED_SECRET, caplog=caplog)
 
 
-async def test_the_live_result_carries_no_cookie_value(patched_navigation):
+async def test_the_live_result_carries_no_cookie_value(patched_navigation, caplog):
     page = FakePage(
-        cookies={"li_at": PLANTED_SECRET, "JSESSIONID": '"ajax:55"'},
+        cookies={"li_at": PLANTED_SECRET, "JSESSIONID": PLANTED_JSESSIONID},
         expiries={"li_at": time.time() + 300 * 86400},
         responses=[me_response()],
     )
-    blob = json.dumps(await auth_module.session_info(page))
+    with caplog.at_level("DEBUG"):
+        result = await auth_module.session_info(page)
 
-    assert PLANTED_SECRET not in blob
-    assert "ajax:55" not in blob
+    assert_no_leak(result, PLANTED_SECRET, caplog=caplog)
+    assert_no_leak(result, PLANTED_JSESSIONID, caplog=caplog)
 
 
 def test_a_logout_result_carries_no_cookie_value(tmp_path, monkeypatch, caplog):
@@ -645,13 +646,30 @@ def test_a_logout_result_carries_no_cookie_value(tmp_path, monkeypatch, caplog):
         result = auth_module.logout(profile, confirm=True)
 
     assert result["cleared"] is True
-    assert PLANTED_SECRET not in json.dumps(result)
-    assert PLANTED_SECRET not in caplog.text
+    assert_no_leak(result, PLANTED_SECRET, caplog=caplog)
 
 
 def test_that_leak_check_can_actually_fail():
-    """The control for the three assertions above, at input they must reject."""
-    assert PLANTED_SECRET in json.dumps({"credential": {"value": PLANTED_SECRET}})
+    """The control for the three assertions above, at input they must reject.
+
+    The version this replaced planted the credential VERBATIM, which is the
+    one case the old substring hunt already handled -- so it certified the
+    only thing that was never broken. These two are the cases that were
+    measured GREEN on a leaking build: the whole credential base64'd, and the
+    whole credential split across two sibling fields.
+    """
+    import base64
+
+    encoded = base64.b64encode(PLANTED_SECRET.encode()).decode()
+    half = len(PLANTED_SECRET) // 2
+
+    for payload in (
+        {"credential": {"value": PLANTED_SECRET}},
+        {"credential": {"fingerprint": encoded}},
+        {"credential": {"head": PLANTED_SECRET[:half],
+                        "tail": PLANTED_SECRET[half:]}},
+    ):
+        assert find_leaks(payload, PLANTED_SECRET), payload
 
 
 # ---------------------------------------------------------------------------

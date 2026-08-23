@@ -118,6 +118,17 @@ def test_no_fixture_has_a_stop_the_walk_can_lean_on(which):
 
 @pytest.mark.parametrize("which", BOTH)
 def test_the_fixture_carries_no_session_material(which):
+    """Kept, but it is the WEAKEST of the three guards over these files.
+
+    Every entry below is a NAME. A credential is a VALUE, so this check cannot
+    catch a fixture that carries a real li_at under any other label -- which is
+    exactly how this repo pushed session material once already. The two guards
+    that CAN see a value both cover these same files:
+    ``test_sdui_surfaces_fixture.py`` hunts opaque LinkedIn ids by shape across
+    the whole fixture glob, and ``test_no_committed_credential.py`` sweeps every
+    git-tracked file for a credential shape. This one stays because a header
+    name appearing in a capture is still worth knowing about.
+    """
     html = FIXTURES[which].read_text(encoding="utf-8")
     for token in ("li_at", "JSESSIONID", "csrfToken", "urn:li:member", "Bearer "):
         assert token not in html, token

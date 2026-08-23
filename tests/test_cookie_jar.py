@@ -27,6 +27,7 @@ import pytest
 
 from linkedin_server import cookie_jar
 from linkedin_server.cookie_jar import CookieJarUnavailableError, read_jar
+from tests.leakwalk import PLANTED_LI_AT, find_leaks
 
 # ---------------------------------------------------------------------------
 # The numbers, hand-computed once so the assertions do not re-derive them
@@ -49,9 +50,16 @@ LI_AT_UTC_DATE = "2027-08-21"
 #: has to be shown to avoid: it is still a valid-looking date, in 2396.
 NAIVE_UNIX_US_READING_S = LI_AT_WEBKIT_US / 1000000.0
 
-#: Planted in the ``value`` column of every synthetic row. If this string ever
-#: turns up in a returned record, a session token has leaked.
-PLANTED_SECRET = "AQEDATEST_SESSION_TOKEN_MUST_NOT_LEAK"
+#: Planted in the ``value`` column of every synthetic row. If any RUN of this
+#: string, in any of its encodings, turns up in a returned record, a session
+#: token has leaked.
+#:
+#: It is imported rather than written here so there is exactly one plant in the
+#: package, and it is credential-LENGTH and credential-CHARSET rather than a
+#: readable phrase. The previous value -- a 37-character sentence -- was
+#: neither: a redaction bug that only fires on a long high-entropy value was
+#: never presented with one. See ``tests/leakwalk.py`` for the measurement.
+PLANTED_SECRET = PLANTED_LI_AT
 
 LINKEDIN_HOST = ".www.linkedin.com"
 
@@ -189,11 +197,14 @@ def find_value_leaks(records: list[dict[str, Any]]) -> list[str]:
     """
     leaks: list[str] = []
     for i, rec in enumerate(records):
-        for key, val in rec.items():
+        for key in rec:
             if str(key).lower() in VALUE_LIKE_KEYS:
                 leaks.append(f"record {i} carries a value-like key {key!r}")
-            elif isinstance(val, str) and PLANTED_SECRET in val:
-                leaks.append(f"record {i} key {key!r} contains the secret")
+        # Not ``PLANTED_SECRET in val``. That hunt was measured green against
+        # a build echoing the whole credential base64'd, hex'd, or split
+        # across two fields -- see ``tests/leakwalk.py``. This one hunts every
+        # encoding and every 12-character run, through the whole record.
+        leaks += [f"record {i} {complaint}" for complaint in find_leaks(rec, PLANTED_SECRET)]
         extra = set(rec) - {"name", "expires"}
         if extra:
             leaks.append(f"record {i} has unexpected keys {sorted(extra)}")
