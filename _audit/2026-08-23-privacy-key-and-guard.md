@@ -184,3 +184,24 @@ pushing. Sweep **0 hits across 89 files**.
 **Instrument law, from this wave's most repeated failure:** *a check that skips has not run, and a
 suite that counts skips as passes cannot tell you what it verified.* Local green failed three ways
 here -- a skip counted as a pass, history CI lacks, and a gitignored file CI never sees.
+
+### The boundary digest pinned the interpreter, not the boundary (`oldsha20`)
+
+`oldsha11` went red in **one cell** -- ubuntu / Python 3.10 -- with **1245 passed and no other
+failure**. Both 3.13 cells were green. The digest hashed `ast.dump()` output, which is a
+**serialisation of the parser's own nodes**; its fields move between interpreter versions, so what it
+actually pinned was *"readonly.py as parsed by the Python I happened to run"*. The boundary had not
+moved.
+
+Rebuilt from **values**: the allowlist's regexes as strings, the forbidden substrings as strings, the
+scanner's `(label, pattern)` pairs, and each function's token stream with `COMMENT` tokens dropped.
+Every input to a hash is now a string literal or a token taken out of the source. Measured rather
+than assumed: the one remaining version-sensitive path (`ast.unparse` for regex flags) is **never
+exercised** -- zero keyword arguments across all four structures. The rendered form is also readable,
+which the dump was not: a failure now shows the patterns.
+
+**That is the fourth distinct way "green locally" was not green in this wave** -- a skip counted as a
+pass, history CI lacks, a gitignored file CI never sees, and now an interpreter version CI runs that I
+do not. The first three were caught by the repo's gates or by a deliberate reproduction; this one only
+by the matrix. **A single-version local run cannot verify a version-independent claim**, and the fix
+is not to add interpreters locally but to build digests that cannot depend on one.
