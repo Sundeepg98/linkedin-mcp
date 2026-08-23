@@ -2,6 +2,13 @@
 
 ## Verdict first: the leak walker was blind, and it is measured blind
 
+**Read this before the numbers.** *The server was not leaking.* The finding is that the
+TESTS were incapable of noticing if it ever started. Every measurement below is against a
+DELIBERATELY leaking build injected by a control plugin, so "34 of 54 green" means "34 ways a
+future leak would have gone unnoticed", never "34 leaks shipped". The proof of the
+distinction is the diff: this wave changed **zero lines of `linkedin_server/`**. It is
+entirely tests and instruments.
+
 1. The naukri warning transfers to this repo EXACTLY, and it is worse here: the credential
    is a 365-day one. Every leak assertion was `assert SECRET not in json.dumps(result)`.
 2. MEASURED with `scripts/credential_echo_control.py` (a pytest plugin that echoes the
