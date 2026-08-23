@@ -26,7 +26,9 @@ entirely tests and instruments.
    `prefix12`'s one red was an artifact: `"live"[:12]` still contains `"live"`.
 6. The weakest thing in the package was the CONTROL. `test_that_leak_check_can_actually_fail`
    planted the credential verbatim -- the one case the old hunt already handled -- so it
-   certified the only thing that was never broken.
+   certified the only thing that was never broken. **This generalises past leak walkers and
+   is the most portable thing in this document: a control that exercises only the working
+   path is not a control.**
 7. FIXED. `tests/leakwalk.py`: 13 renderings, every 12-char RUN (so a truncating redaction
    or a split value counts), a total object WALK (dict keys, bytes, exception args, unknown
    types via repr), plus the LOG. And `find_credential_shaped`, which hunts the SHAPE of a
@@ -47,6 +49,74 @@ entirely tests and instruments.
 12. 786 -> 911 passed, 0 skipped. Commits `oldsha16`, `oldsha09`, `oldsha25`, `+1`.
     CI **success** on `oldsha25`, run id **32616918805**.
 13. **A second writer was live in this tree the whole time** -- see the last section.
+
+---
+
+## BUILT 2026-08-23, after the operator's ruling: the cage, not the animal
+
+The operator **cut apply, connect and InMail** and approved **save/unsave, follow, Open To
+Work** behind an off-by-default flag. `linkedin_server/writes.py` + `tests/test_writes.py`
+(76 tests) land the boundary those three will pass through, and deliberately **do not land the
+click**.
+
+**Why no click, and why that is the deliverable rather than a gap.** The permission classifier
+still refuses LinkedIn writes, so a click authored today could not be exercised even once. The
+standing rule is that anything unexercisable does not ship -- and the click is *precisely* the
+unexercisable part. `writes.perform()` raises. Everything around it is real and tested.
+
+The happy consequence: **no mutating Playwright call enters the package**, so
+`scan_source_for_mutations` still reports zero for every file including the new one, and
+`readonly.py` / `test_readonly.py` / `test_launch_boundary.py` keep their zero-line diffs. The
+read-only guarantee is not degraded by a single line to make room for a write that cannot
+happen yet.
+
+**Shipped and exercised:** the grant (one action, one target, single-use, 120s TTL, never
+persisted -- a grant that outlived the process is one a scheduler could pick up); the separate
+url door that *rebuilds* the target from the grant so a caller has nothing to influence; the
+forbidden list unshortened with per-action `==` exemptions (all three currently exempt
+**nothing**); the conservation law; and `render_preview`, which **enforces** the
+measured-reversibility rule rather than documenting it. All three specs are unmeasured today,
+so all three print `UNMEASURED` plus the procedure that would settle them. That is the rule
+biting its own author.
+
+**Open To Work was NOT specced, and the omission is deliberate:** there is no capture of it at
+any hydration state, its surface is not on the navigation allowlist, and its recruiters-only
+vs all-members choice is visible to a current employer -- the single setting where a blind toggle is
+least acceptable.
+
+### Two findings while building it, both against my own work
+
+1. **A loophole in my own conservation law.** It says a name leaves `FORBIDDEN_TOOLS` only by
+   arriving in `SANCTIONED_WRITES` -- but says nothing about a name that was *never* forbidden.
+   `linkedin_follow_company` is exactly that: it sanctions a follow while `linkedin_follow`
+   sits on the forbidden list looking untouched. Quiet widening by renaming. **Closed.**
+
+2. **`readonly.name_implies_write` is BLIND TO UNDO VERBS -- needs a ruling.** `WRITE_VERBS`
+   holds `save` and `follow` but **no `un`-prefixed verb at all**, so `linkedin_unsave_job`,
+   `linkedin_unfollow`, `linkedin_unlike`, `linkedin_unsubscribe` and `linkedin_disconnect`
+   all read as **not a write**. Undoing a write is still a write. They are caught today only
+   because somebody hand-listed two of them -- *this pass's whole theme, one level up: the
+   literal list sees the instances someone remembered, the generalising check cannot see the
+   class.*
+
+   **Not fixed here on purpose.** `readonly.py` is under a zero-line-diff constraint, and
+   quietly editing the read-only guard while shipping a write module is exactly the move that
+   should draw suspicion. The gap is **pinned** by a test that asserts the bug and instructs
+   its own deletion when fixed, and the proposed one-line fix ships as executable evidence in
+   `_write_verbs()`. **Its limits are measured too:** it closes `unsave`/`unfollow`/`unlike`
+   and does **not** close `unsubscribe` or `disconnect`, where the base verb is absent from the
+   list or the prefix is not `un`. Reported that way because a fix announced as closing "the
+   undo gap" that closes three names of five is the overclaim this project keeps paying for.
+
+### The future click's anchor, pinned now so it is not a guess later
+
+`button[aria-label="Save the job"]` and `button[aria-label="Follow"]`, both **frozen at both
+hydration states**, anchored on the accessible name -- never `data-view-name` (absent
+pre-hydration) and never a class (a build hash). With the blocker recorded where it will be
+hit: **both are TOGGLES and the captures only ever show the OFF state**, so nothing can yet
+tell Save from Unsave, and a gate that cannot say which way it moves a toggle is not a gate.
+Solvable for save through the existing `linkedin_saved_jobs` read; **not** solvable for follow,
+which is why follow needs a follow-state read before it ships.
 
 ---
 
