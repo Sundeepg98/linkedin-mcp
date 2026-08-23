@@ -164,9 +164,9 @@ class FakePage:
 
 
 def me_response(
-    first: str = "Sundeep",
-    last: str = "G",
-    public_id: str = "sundeep-g",
+    first: str = "Alex",
+    last: str = "R",
+    public_id: str = "alex-r",
 ) -> FakeResponse:
     """A 200 from /voyager/api/me shaped the way LinkedIn shapes it."""
     return FakeResponse(

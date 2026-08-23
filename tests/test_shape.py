@@ -392,7 +392,7 @@ def test_job_card_carries_job_id_and_canonical_url_from_href():
 
 
 def test_profile_slug_from_public_identifier_url():
-    assert profile_slug_from("/in/sundeep-g-12ab34/") == "sundeep-g-12ab34"
+    assert profile_slug_from("/in/alex-r-12ab34/") == "alex-r-12ab34"
 
 
 def test_profile_slug_from_me_returns_none():

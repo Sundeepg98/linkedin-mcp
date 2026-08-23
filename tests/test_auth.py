@@ -37,7 +37,7 @@ async def test_a_live_session_is_confirmed_by_the_identity_endpoint(signed_in_pa
     result = await check_auth(signed_in_page)
     assert result["authenticated"] is True
     assert result["member"] == "Alex R"
-    assert result["public_identifier"] == "sundeep-g"
+    assert result["public_identifier"] == "alex-r"
     assert result["checked_against"] == f"GET {ME_API}"
 
 

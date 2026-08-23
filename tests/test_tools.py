@@ -89,8 +89,8 @@ TRACKER_ALL_EMPTY = "\n".join(
 )
 NOTIFICATIONS_URL = "https://www.linkedin.com/notifications/"
 PROFILE_ME_URL = "https://www.linkedin.com/in/me/"
-PROFILE_RESOLVED_URL = "https://www.linkedin.com/in/sundeep-g/"
-SKILLS_URL = "https://www.linkedin.com/in/sundeep-g/details/skills/"
+PROFILE_RESOLVED_URL = "https://www.linkedin.com/in/alex-r/"
+SKILLS_URL = "https://www.linkedin.com/in/alex-r/details/skills/"
 AUTHWALL_URL = "https://www.linkedin.com/login?session_redirect=%2Ffeed"
 
 
@@ -343,28 +343,28 @@ PROFILE_FIELDS = {
 #: the three filter pills and this tool reported them as his skills.
 SKILL_CARDS = [
     {
-        "href": "/in/sundeep-g/details/skills/edit/forms/11/",
+        "href": "/in/alex-r/details/skills/edit/forms/11/",
         "text": "Node.js\nNode.js\n15 endorsements",
     },
     {
-        "href": "/in/sundeep-g/details/skills/edit/forms/12/",
+        "href": "/in/alex-r/details/skills/edit/forms/12/",
         "text": "TypeScript\nTypeScript\nEndorsed by 3 colleagues",
     },
     {
-        "href": "/in/sundeep-g/details/skills/edit/forms/13/",
+        "href": "/in/alex-r/details/skills/edit/forms/13/",
         "text": "PostgreSQL\nPostgreSQL",
     },
     # The same skill again: the skills page repeats entries across its
     # sections, and a repeat must not become a second row.
     {
-        "href": "/in/sundeep-g/details/skills/edit/forms/14/",
+        "href": "/in/alex-r/details/skills/edit/forms/14/",
         "text": "Node.js\nNode.js\n15 endorsements",
     },
     # A structural entry holding no text at all.
-    {"href": "/in/sundeep-g/details/skills/edit/forms/15/", "text": "   \n  "},
-    {"href": "/in/sundeep-g/details/skills/edit/forms/16/", "text": "AWS\nAWS"},
-    {"href": "/in/sundeep-g/details/skills/edit/forms/17/", "text": "Docker\nDocker"},
-    {"href": "/in/sundeep-g/details/skills/edit/forms/18/", "text": "Redis\nRedis"},
+    {"href": "/in/alex-r/details/skills/edit/forms/15/", "text": "   \n  "},
+    {"href": "/in/alex-r/details/skills/edit/forms/16/", "text": "AWS\nAWS"},
+    {"href": "/in/alex-r/details/skills/edit/forms/17/", "text": "Docker\nDocker"},
+    {"href": "/in/alex-r/details/skills/edit/forms/18/", "text": "Redis\nRedis"},
 ]
 
 
@@ -1019,7 +1019,7 @@ async def test_the_profile_loads_one_page_when_skills_are_not_asked_for(drive):
     assert result["name"] == "Alex R"
     assert result["headline"] == "Senior Node.js Engineer | TypeScript | AWS"
     assert result["location"] == "Riverton, Fairhaven, United States"
-    assert result["public_identifier"] == "sundeep-g"
+    assert result["public_identifier"] == "alex-r"
     assert result["profile_url"] == PROFILE_RESOLVED_URL
 
 

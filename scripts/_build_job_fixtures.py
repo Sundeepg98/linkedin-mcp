@@ -21,35 +21,86 @@ Three renders are kept, and the test module says why each is there:
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 SRC = Path("_audit")
 OUT = Path("tests/fixtures")
 
-SUBS = [
-    ("Ashgrove Systems", "Ashgrove Systems"),
-    ("ashgrove-systems", "ashgrove-systems"),
-    ("4600000042", "4600000042"),
+#: THE INVENTED SIDE ONLY. The real side of both tables lives in
+#: :data:`KEY_PATH`, gitignored, paired BY INDEX -- the same split as
+#: ``_build_follow_fixtures.py``, for the same reason.
+#:
+#: THIS IS THE SECOND SANITISATION SCRIPT IN THIS REPO TO HAVE SHIPPED ITS OWN
+#: KEY, and the way it was found is the point. A cold review swept every
+#: tracked file against a list of real strings and did NOT flag this file --
+#: not through carelessness, but because its list was built from the
+#: Manage-Pages capture and a value list cannot name a value nobody has seen.
+#: It was found by ``tests/test_no_committed_identity.py``, which hunts the
+#: SHAPE of a key -- a table pairing fixture content with something absent
+#: from every fixture -- and therefore needs to know nothing about what it is
+#: looking for.
+KEY_PATH = Path("_audit/_sanitisation_key.json")
+
+SUBS_INVENTED = [
+    'Ashgrove Systems',
+    'ashgrove-systems',
+    '4600000042',
 ]
 
 
-#: Real employers the captured page names in passing -- the "More jobs" rail
-#: and the company blurb both list them -- and the invented ones that replace
-#: them. Renaming only the subject of the capture would leave a fixture that
-#: is anonymous exactly where somebody remembered to look.
-OTHER_EMPLOYERS = [
-    ("Northwind Capital", "Northwind Capital"),
-    ("Larkspur Travel", "Larkspur Travel"),
-    ("Draywood Motors", "Draywood Motors"),
-    ("Pennyfield Foods", "Pennyfield Foods"),
-    ("Halloway Insure", "Halloway Insure"),
-    ("Tessellate Labs", "Tessellate Labs"),
-    ("Bracken Storage", "Bracken Storage"),
-    ("Windmere Software", "Windmere Software"),
-    ("Aldermill Learning", "Aldermill Learning"),
-    ("Quillon Tech", "Quillon Tech"),
+#: Employers the captured page names in passing -- the "More jobs" rail and
+#: the company blurb both list them. Renaming only the subject of a capture
+#: leaves a fixture that is anonymous exactly where somebody remembered to
+#: look.
+OTHER_EMPLOYERS_INVENTED = [
+    'Northwind Capital',
+    'Larkspur Travel',
+    'Draywood Motors',
+    'Pennyfield Foods',
+    'Halloway Insure',
+    'Tessellate Labs',
+    'Bracken Storage',
+    'Windmere Software',
+    'Aldermill Learning',
+    'Quillon Tech',
 ]
+
+
+def _load_key() -> dict:
+    if not KEY_PATH.exists():
+        raise SystemExit(
+            "\n".join(
+                (
+                    f"the sanitisation key is missing: {KEY_PATH}",
+                    "It is gitignored on purpose -- it is what reverses the",
+                    "committed fixtures. Without it this script cannot say what",
+                    "it removes, and a sanitiser that cannot name what it",
+                    "removes passes everything.",
+                )
+            )
+        )
+    return json.loads(KEY_PATH.read_text(encoding="utf-8"))
+
+
+def _pair(real: list, invented: list, what: str) -> list:
+    if len(real) != len(invented):
+        raise SystemExit(
+            f"the {what} table has {len(invented)} invented entries and the "
+            f"key has {len(real)} real ones. They are paired BY INDEX, so a "
+            "mismatch means one side was edited alone."
+        )
+    return list(zip(real, invented))
+
+
+_KEY = _load_key()
+SUBS = _pair(_KEY["job_fixture_subs"], SUBS_INVENTED, "job_fixture_subs")
+OTHER_EMPLOYERS = _pair(
+    _KEY["job_fixture_other_employers"],
+    OTHER_EMPLOYERS_INVENTED,
+    "job_fixture_other_employers",
+)
 
 
 def cut_trailing_rail(html: str) -> str:
@@ -142,9 +193,23 @@ def sanitise(html: str) -> str:
     return html
 
 
+def _only(matches) -> Path:
+    """The single capture matching a glob, or a refusal naming the count."""
+    found = sorted(matches)
+    if len(found) != 1:
+        raise SystemExit(
+            f"expected exactly one capture, found {len(found)}: "
+            f"{[p.name for p in found]}"
+        )
+    return found[0]
+
+
 def main() -> None:
-    raw_hyd = (SRC / "_probe-job-4600000042-hyd.html").read_text(encoding="utf-8")
-    raw_pre = (SRC / "_probe-job-4600000042-pre.html").read_text(encoding="utf-8")
+    # Globbed rather than named: the capture filenames spell the REAL job
+    # id, which is one of the values this script exists to remove. A
+    # sanitiser is not allowed to carry its own input's identity either.
+    raw_hyd = _only(SRC.glob("_probe-job-*-hyd.html")).read_text(encoding="utf-8")
+    raw_pre = _only(SRC.glob("_probe-job-*-pre.html")).read_text(encoding="utf-8")
 
     hyd = to_ascii(sanitise(scrub(strip(cut_trailing_rail(region(raw_hyd))))))
     shell = to_ascii(sanitise(scrub(strip(cut_trailing_rail(region(raw_pre))))))
@@ -164,4 +229,7 @@ def main() -> None:
         )
 
 
-main()
+if __name__ == "__main__":
+    # Guarded: main() WRITES tests/fixtures/, so a bare call meant that
+    # importing this module rebuilt three committed fixtures.
+    main()
