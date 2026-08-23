@@ -156,13 +156,29 @@ All at `5a69147` unless stated.
 | tools | 14 -> **16** |
 | live writes executed | **0** |
 
-**The one deliverable NOT produced: a CI run id.** It needs a push to `origin/master`, which is
-outward-facing and spends metered runner minutes on a private repo (`ci.yml`'s own header notes a
-Windows minute bills at 2x). That is the operator's to trigger, not something a task assignment
-authorises, so the branch sits 6 commits ahead of `origin/master` un-pushed. What CI would check
-was run locally instead: the whole suite on both interpreters plus the completeness gate that
-refuses a skip or a deselection. **The gap is the OS axis only** -- both local runs are win32,
-where CI's 3.10 cell is ubuntu.
+## CI: run `32661307599`, **success on all three cells**
+
+<https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32661307599> at `76c34dc`.
+
+| cell | suite | completeness gate | tools |
+|---|---|---|---|
+| ubuntu / 3.10 | **1300 passed** in 174s | `collected 1300 \| reported 1300 \| executed 1300 \| skipped 0 \| failed 0 \| errors 0` | 16 |
+| ubuntu / 3.13 | **1300 passed** in 173s | same | 16 |
+| windows / 3.13 | **1300 passed** in 255s | same | 16 |
+
+All three print `OK: all 1300 collected tests ran, none skipped, none deselected`. The conclusion
+is therefore backed by the counts rather than by the colour: a green run with a silent skip or a
+deselection would fail that step, which is what it exists for.
+
+**THE OS AXIS IS NOW COVERED.** Every local run on this box was win32; CI's 3.10 cell is ubuntu,
+and it is the cell that went red three times on `readonly.py`'s digest the previous day. It is
+green here, so the version-independence of the re-frozen digest holds on the interpreter AND the
+operating system that actually caught the earlier defects.
+
+**I did not push.** A push is outward-facing and spends metered runner minutes on a private repo
+(`ci.yml`'s own header notes a Windows minute bills at 2x); the wave lead pushed
+`ae34c7c..76c34dc` as a fast-forward after verifying it independently. Recorded because the gap
+existed for eight commits and was named in a commit title rather than quietly omitted.
 
 ## A FIFTH way local green is not green, and it is about the MEASUREMENT rather than the code
 
