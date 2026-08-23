@@ -149,7 +149,7 @@ All at `5a69147` unless stated.
 |---|---|
 | suite, CPython 3.13.14 (win32) | **1300 collected, 1300 passed, 0 skipped, 0 failed, 0 errors**, 356s |
 | `scripts/ci_full_run_check.py` | **exit 0** -- collected 1300, executed 1300, none skipped, none deselected |
-| suite, CPython 3.10.19 (win32) | 1282 passed / 0 skipped / gate exit 0 **at `026359e`**; the digest re-verified at `5a69147` |
+| suite, CPython 3.10.19 (win32) | **1300 collected, 1300 passed, 0 skipped, 0 failed, 0 errors**, 304s, gate **exit 0**, at `5a69147`; digests re-measured at `3d55dd6` and again at `94600de`, identical both times |
 | boundary digests | 6, **identical under 3.13.14 and 3.10.19**; independently re-confirmed at `5a69147` by the lead via `mcp-servers/_audit/_instruments/boundary_digest_option2_probe.py` -- 13 of 13 functions match, 0 mismatches |
 | mutants | 20 applied, **17 killed** first pass, 3 closed, all 3 re-killed; 3 more re-killed after the refactor |
 | package mutating calls | **1** (sanctioned), **0** unsanctioned |
@@ -163,6 +163,40 @@ authorises, so the branch sits 6 commits ahead of `origin/master` un-pushed. Wha
 was run locally instead: the whole suite on both interpreters plus the completeness gate that
 refuses a skip or a deselection. **The gap is the OS axis only** -- both local runs are win32,
 where CI's 3.10 cell is ubuntu.
+
+## A FIFTH way local green is not green, and it is about the MEASUREMENT rather than the code
+
+The four known mechanisms are: a skip counted as a pass; history CI lacks; a gitignored file CI
+never sees; an interpreter version CI runs that this box does not. Here is a fifth, found twice
+independently on this wave -- once by me and once by the 3.10 slice, which diagnosed it further
+than I did.
+
+**THE TREE MOVED UNDER THE MEASUREMENT.** `ci_full_run_check.py` compares a COLLECTION against a
+JUNIT REPORT, and those are two passes over the tree ~6 minutes apart. Both of my "FAIL: 2 tests
+were DESELECTED" readings were this, not a defect:
+
+1. **A commit landed mid-window.** `3d55dd6` added a tracked file between the collect and the run,
+   and TWO modules parametrise over `git ls-files`, so one file is two tests. Collected 1298,
+   reported 1296.
+2. **Worse, and the part I got wrong.** I concluded "a settled HEAD fixes it". It does not. The
+   3.10 slice froze HEAD at `3d55dd6` for a whole run and the count STILL moved 1298 -> 1300,
+   because I had UNCOMMITTED edits live in the tree adding two tests. **A stable HEAD is not
+   sufficient; a stable WORKING TREE is what is required.**
+3. And a third of my own making: I read a junit file that a still-running background job was about
+   to overwrite, so I compared a fresh collection against a stale report and called it a failure.
+
+**The gate is not broken -- it is a TREE-STABILITY detector as much as a completeness detector**,
+and it did its job on every run. But it means a local "measured before push" claim has a short
+shelf life on a box with a live writer. To make a certification run mean anything: freeze writes
+for its window, or run it on a clean clone at a fixed SHA. CI cannot reproduce this at all -- it
+clones one SHA into a tree nobody else writes to -- so this is a LOCAL-ONLY failure mode, which is
+exactly why it is worth writing down.
+
+**The id names the mechanism.** A deselected id that is a parametrised tracked-file guard means a
+COMMIT landed; a plain new test id means an UNCOMMITTED EDIT landed. The 3.10 slice left a
+differ at `<scratchpad>\find_deselected.py` that names them in seconds. It is outside the repo and
+is therefore NOT a harvested instrument -- if this recurs, that script is worth promoting into
+`scripts/`.
 
 **A caveat on the two "green locally is not green" mechanisms this wave could still hit.** The
 skip-counted-as-a-pass one is closed (gate exit 0, `skipped=0`). The interpreter one is closed for
