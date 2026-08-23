@@ -25,12 +25,20 @@ the one that bit.
 
 RE-DERIVING THE BASELINE, in any full clone::
 
-    git show oldsha14:linkedin_server/readonly.py
+    git show 5277dfc:linkedin_server/readonly.py
 
 and re-run :func:`ast_digest` over it. If a future change to the boundary is
 DELIBERATE, update the digests in the same commit that changes the behaviour --
 that is the review moment this file exists to create, and it should feel like
 one.
+
+IT HAS BEEN ONE, ONCE. On 2026-08-23 the package acquired its first mutating
+call and the baseline moved from ``oldsha14`` to ``5277dfc``. Two digests moved
+and four did not, and the four are the ones that matter: the navigation
+allowlist, the forbidden-substring list, the mutation scanner's patterns and
+the JS token list are byte-identical across the change. That is asserted below
+against the old values rather than left as a claim, because "the write widened
+nothing" is exactly the sentence a reader most needs to be able to check.
 """
 
 from __future__ import annotations
@@ -48,17 +56,51 @@ REPO = Path(__file__).resolve().parent.parent
 READONLY = REPO / "linkedin_server" / "readonly.py"
 
 #: The structures whose meaning IS the read-only guarantee.
+#:
+#: ``SANCTIONED_MUTATIONS`` JOINED THIS LIST on 2026-08-23, with the write. It
+#: is the newest of the five and the only one that GRANTS rather than refuses,
+#: which is exactly why it belongs here: the other four are worth freezing
+#: because widening them lets something through, and this one is worth freezing
+#: because ADDING TO IT lets something through. A boundary made of four
+#: denylists and one allowlist is only as frozen as its allowlist.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
     "_MUTATION_CALL_PATTERNS",
     "JS_MUTATION_TOKENS",
+    "SANCTIONED_MUTATIONS",
 )
 
-#: Digests of ``linkedin_server/readonly.py`` at ``oldsha14`` -- the commit the
-#: zero-line-diff freeze was declared against. Frozen rather than fetched (CI
-#: checks out shallow), and computed from VALUES rather than from
-#: ``ast.dump`` output.
+#: Digests of ``linkedin_server/readonly.py`` at ``5277dfc``.
+#:
+#: RE-FROZEN 2026-08-23, DELIBERATELY, and this is the review moment the file's
+#: own docstring promised. The previous baseline was ``oldsha14``, the commit
+#: the zero-line-diff freeze was declared against, and every digest below moved
+#: except one. WHAT CHANGED AND WHY, so a reader does not have to diff two
+#: commits to find out:
+#:
+#: * ``SANCTIONED_MUTATIONS`` is NEW. The package acquired its first mutating
+#:   call -- one click, in ``writes.perform`` -- and this is the list that
+#:   admits it. It is pinned from birth.
+#: * ``<functions>`` MOVED, because ``readonly.py`` gained two:
+#:   ``enclosing_function`` and ``partition_mutation_hits``. Neither weakens
+#:   anything; the scan itself is byte-for-byte what it was.
+#: * ``_ALLOWED_URL_PATTERNS``, ``_FORBIDDEN_URL_SUBSTRINGS``,
+#:   ``_MUTATION_CALL_PATTERNS`` and ``JS_MUTATION_TOKENS`` are UNCHANGED, and
+#:   that is the load-bearing half of this re-freeze. The write did not widen
+#:   the navigation allowlist, did not shorten the forbidden list, did not
+#:   remove a detector from the scanner and did not drop a JS token. Their
+#:   digests are identical to the ``oldsha14`` values, which are kept below so
+#:   the claim is checkable rather than asserted::
+#:
+#:       _ALLOWED_URL_PATTERNS      ae3977e43da53d26
+#:       _FORBIDDEN_URL_SUBSTRINGS  0b857f0637cdaaad
+#:       _MUTATION_CALL_PATTERNS    23aece1483afdee9
+#:       JS_MUTATION_TOKENS         d47e30b67c583c1b
+#:       <functions>                fd79a6a7c02c3e34   (moved)
+#:
+#: Frozen rather than fetched (CI checks out shallow), and computed from VALUES
+#: rather than from ``ast.dump`` output.
 #:
 #: THREE ATTEMPTS, and the first two failed the same way. v1 hashed
 #: ``ast.dump``; v2 hashed a TOKEN STREAM. Both are THE PARSER DESCRIBING
@@ -72,12 +114,23 @@ PINNED = (
 #: stable -- and hashes the remaining source text. VERIFIED rather than
 #: argued: computed under 3.13.14 and 3.10.19 on the same file, all five
 #: digests identical.
-READONLY_AST_AT_A76FE32 = {
+READONLY_AST_AT_5277DFC = {
     "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
     "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
-    "<functions>": "fd79a6a7c02c3e34",
+    "SANCTIONED_MUTATIONS": "033a34fbbc538d8c",
+    "<functions>": "9f0a86dafffc2299",
+}
+
+#: The four denylist digests as they stood at ``oldsha14``, kept so that "the
+#: write widened nothing" is CHECKABLE rather than a sentence in a comment.
+#: ``test_the_write_did_not_touch_any_of_the_four_denylists`` compares them.
+DENYLISTS_AT_A76FE32 = {
+    "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
+    "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
+    "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
+    "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
 
 
@@ -190,10 +243,53 @@ def ast_digest(source: str) -> dict[str, str]:
     return out
 
 
-def test_the_read_only_boundary_has_not_moved_since_oldsha14():
+def test_the_read_only_boundary_is_where_it_was_re_frozen():
     """THE FREEZE, as the invariant it was always standing in for."""
     live = ast_digest(READONLY.read_text(encoding="ascii"))
-    assert live == READONLY_AST_AT_A76FE32
+    assert live == READONLY_AST_AT_5277DFC
+
+
+def test_the_write_did_not_touch_any_of_the_four_denylists():
+    """THE HALF OF THE RE-FREEZE THAT IS A CLAIM ABOUT THE WRITE.
+
+    Re-freezing a boundary is only honest if somebody can see WHAT moved. Two
+    digests moved -- a new allowlist, and two new functions. These four did
+    not, and they are the four that would have to move for the write to have
+    weakened anything: a widened navigation allowlist, a shortened forbidden
+    list, a detector removed from the scanner, a JS token dropped.
+
+    Compared against the values from ``oldsha14``, the baseline BEFORE the
+    write, so this is a statement about the change and not a restatement of the
+    new map.
+    """
+    live = ast_digest(READONLY.read_text(encoding="ascii"))
+    for name, digest in DENYLISTS_AT_A76FE32.items():
+        assert live[name] == digest, (
+            f"{name} moved across the write. It is one of the four structures "
+            "the write was not supposed to touch."
+        )
+
+
+def test_adding_a_second_sanctioned_mutation_moves_the_digest():
+    """SHOWN FAILING on the edit this new pin exists to catch.
+
+    The other three weakening cases below delete or widen a REFUSAL. This one
+    is the opposite shape and is the reason SANCTIONED_MUTATIONS was pinned at
+    all: it grows a PERMISSION. A second entry -- here, a click in dom.py --
+    has to move the digest, or the allowlist is frozen in name only.
+    """
+    source = READONLY.read_text(encoding="ascii")
+    widened = source.replace(
+        '    ("linkedin_server/writes.py", "perform", "click"),\n',
+        '    ("linkedin_server/writes.py", "perform", "click"),\n'
+        '    ("linkedin_server/dom.py", "read_job", "click"),\n',
+        1,
+    )
+    assert widened != source, "the edit did not apply"
+    assert (
+        ast_digest(widened)["SANCTIONED_MUTATIONS"]
+        != READONLY_AST_AT_5277DFC["SANCTIONED_MUTATIONS"]
+    )
 
 
 def test_every_pinned_structure_was_actually_found():
@@ -255,7 +351,7 @@ def test_a_real_weakening_does_move_the_digest(name, edit):
     source = READONLY.read_text(encoding="ascii")
     weakened = edit(source)
     assert weakened != source, f"the edit for {name} did not apply"
-    assert ast_digest(weakened)[name] != READONLY_AST_AT_A76FE32[name]
+    assert ast_digest(weakened)[name] != READONLY_AST_AT_5277DFC[name]
 
 
 def test_the_launch_boundary_is_still_a_zero_line_diff():
