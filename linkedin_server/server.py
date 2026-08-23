@@ -843,8 +843,89 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["job_id"] = digits
             out["company_url"] = identity.get("company_url")
             out["url"] = f"{BASE_URL}/jobs/view/{digits}"
+
+            # Whether this employer is already followed, read off the page that
+            # is ALREADY open. No second load, no second surface: the control
+            # is on the posting, which is also the only place a follow would
+            # ever be performed from, so the state and the action are read from
+            # and applied to the same rendering. Three-valued -- see
+            # shape.follow_state for why "we could not tell" has to be one of
+            # the three.
+            control = await dom.read_follow_control(page)
+            out["company_follow_state"] = shape.follow_state(
+                control.get("label"), count=int(control.get("count") or 0)
+            )
+
             out["pages_loaded"] = 1
             out["source_url"] = final_url
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_followed_companies(
+    company: str | None = None, limit: int = 50
+) -> dict[str, Any]:
+    """The company Pages LinkedIn records you as following.
+
+    A read, and the exact counterpart of linkedin_saved_jobs: it answers "is
+    this Page already on the list?". This server cannot follow or unfollow
+    anything and ships no tool that could.
+
+    THE ONE THING TO READ BEFORE TRUSTING AN ANSWER. LinkedIn draws only the
+    first rows of this list and fetches the rest on scroll; this server opens
+    one page and reads whatever had drawn. So `complete` is normally false --
+    measured 2026-08-23, twenty rows under a heading saying 58 Pages -- and a
+    Page missing from `pages` comes back as UNKNOWN, never as not-followed.
+    Three-valued on purpose: "absent from the rows I was shown" and "you are
+    not following them" are different facts, and reporting the first as the
+    second is how a confirm gate ends up pointing the wrong way.
+
+    For a SINGLE employer whose posting you already have, linkedin_job_detail
+    is the better read: it reports company_follow_state off the posting page
+    itself, at no extra page load, and that answer is never partial.
+
+    Args:
+        company: a Page name or numeric Page id to ask about. Leave it out to
+            get the whole rendered list.
+        limit: how many rows to return.
+    """
+    try:
+        url = f"{BASE_URL}/mynetwork/network-manager/company/"
+        async with BROWSER.session() as page:
+            final_url = await BROWSER.goto(page, url)
+            assert_not_authwall(final_url, surface="followed companies")
+            parsed = shape.parse_followed_pages(
+                await dom.harvest_followed_pages(page),
+                await dom.read_main_text(page),
+            )
+
+            if not parsed["pages"] and parsed["total_followed"]:
+                raise ExtractionFailedError(
+                    "the Manage Pages surface loaded and says you follow "
+                    f"{parsed['total_followed']} Pages, but not one row could "
+                    "be read from it. An empty list here would be "
+                    "indistinguishable from you following nothing, so it is "
+                    "reported as a failure instead.",
+                    url=final_url,
+                    hint="open the url yourself and compare with what this reports",
+                )
+
+            out: dict[str, Any] = {
+                "pages": parsed["pages"][:limit],
+                "rendered": parsed["rendered"],
+                "returned": min(parsed["rendered"], limit),
+                "total_followed": parsed["total_followed"],
+                "complete": parsed["complete"],
+                "pages_loaded": 1,
+                "source_url": final_url,
+            }
+            if parsed["why_incomplete"]:
+                out["why_incomplete"] = parsed["why_incomplete"]
+            if company:
+                out["query"] = company
+                out["follow_state"] = shape.followed_page_state(company, parsed)
             return out
     except Exception as exc:
         return _error(exc)
@@ -915,8 +996,21 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
             # on the page and held nothing.
             has_about = bool(about) if "about" in folded else None
 
+            # Open To Work, off the topcard lines that were already read.
+            # LinkedIn prints the AUDIENCE verbatim next to it ("Open to work
+            # <dot> Recruiters only"), and the audience is the half that
+            # matters to someone job-hunting while employed: one setting is
+            # invisible to a current employer and the other draws a green frame on
+            # his photo for everyone including a current employer. Reported as read,
+            # never inferred -- on=None means the card did not draw, which is
+            # not the same as it being off.
+            open_to_work = shape.parse_open_to_work(
+                (topcard or {}).get("lines") or []
+            )
+
             slug = shape.profile_slug_from(final_url)
             out: dict[str, Any] = {
+                "open_to_work": open_to_work,
                 "name": identity["name"],
                 "headline": identity["headline"],
                 "location": identity["location"],

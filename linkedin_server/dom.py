@@ -569,6 +569,130 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Follow state
+# ---------------------------------------------------------------------------
+
+#: The two accessible names the company-follow control on a JOB POSTING wears,
+#: MEASURED on 2026-08-23 against his live account rather than guessed:
+#:
+#:   not following -> ``<button ... aria-label="Follow">``
+#:   following     -> ``<button ... aria-label="Following">``
+#:
+#: Both bare -- no company name, unlike every other follow control LinkedIn
+#: draws (``Follow EXL`` on a profile rail, ``Click to stop following X`` on
+#: Manage Pages, ``Following, click to unfollow X`` in Interests). Four
+#: conventions for one concept, which is why the ON state had to be captured
+#: on THIS control rather than inferred from a sibling.
+#:
+#: THE CLASS ATTRIBUTE IS NOT A SIGNAL AND THIS IS MEASURED, not assumed: the
+#: two buttons carry BYTE-IDENTICAL class lists, and ``aria-pressed`` appears
+#: nowhere on the page. The accessible name is the whole of the difference,
+#: which is the entire case for anchoring on it.
+FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
+
+
+async def read_follow_control(page: Any) -> dict[str, Any]:
+    """Return the company-follow control's accessible name, and how sure we are.
+
+    Three outcomes, and keeping them three rather than two is the point:
+
+    * ``label`` set, ``count`` 1 -- the state is known.
+    * ``count`` 0 -- the control did not render. On a job posting that means
+      the page has not hydrated yet, NOT that he is not following: measured
+      2026-08-23, the same posting showed no follow control at all before it
+      settled and ``Following`` after. A reader that treated absence as "not
+      following" would hand a confirm gate the wrong direction, silently.
+    * ``count`` above 1 -- ambiguous. More than one follow control means the
+      page is drawing something besides the posting's own employer, and
+      picking the first would be picking by position.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    try:
+        controls = page.locator(FOLLOW_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("follow control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("follow label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
+
+
+#: One row of LinkedIn's "Manage Pages" list. Anchored on the accessible name
+#: of its button, which states the inverse action outright -- ``Click to stop
+#: following Ashgrove Systems``.
+FOLLOWED_PAGE_BUTTON = 'button[aria-label^="Click to stop following "]'
+
+#: The row a followed-Page button belongs to, as pure XPath rather than an
+#: injected script.
+#:
+#: WHY NO ``page.evaluate`` HERE, when the three harvesters above all use one.
+#: Every injected script in this package has to be declared in
+#: ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
+#: scanner, and ``test_readonly.py`` is under a standing zero-line-diff
+#: constraint. A locator chain needs no declaration because it injects nothing,
+#: so the read-only boundary is not asked to grow a new entry to accommodate a
+#: read. That is the cheaper side of the trade and it was taken deliberately.
+#:
+#: The predicate is THE ROW RULE stated literally: the row is the LARGEST
+#: ancestor containing exactly ONE of these buttons. ``ancestor::`` is a
+#: reverse axis, so ``[last()]`` is the outermost such ancestor. Nothing counts
+#: children, indexes a list or names a class -- a restyled or reordered row
+#: still reads, and a build-hash class change cannot break it.
+_FOLLOWED_PAGE_ROW = (
+    "xpath=ancestor::*["
+    "count(.//button[starts-with(@aria-label,'Click to stop following ')])=1"
+    "][last()]"
+)
+
+#: The Page link inside a row. Kept separate so a row that has none still
+#: yields its NAME, which is the field the follow question is actually asked
+#: in; the id is corroboration, not the answer.
+_FOLLOWED_PAGE_LINK = 'a[href*="/company/"]'
+
+
+async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
+    """Every followed-Page row LinkedIn has rendered, in document order.
+
+    Plain Playwright locators throughout: an attribute read per row and an
+    XPath hop to its enclosing row. No script is injected and nothing is
+    evaluated.
+    """
+    try:
+        buttons = page.locator(FOLLOWED_PAGE_BUTTON)
+        count = int(await buttons.count())
+    except Exception as exc:
+        logger.debug("followed pages unreadable: %s: %s", type(exc).__name__, exc)
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for index in range(count):
+        button = buttons.nth(index)
+        try:
+            label = await button.get_attribute("aria-label")
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("row %d label unreadable: %s", index, exc)
+            continue
+        href = None
+        try:
+            link = button.locator(_FOLLOWED_PAGE_ROW).locator(_FOLLOWED_PAGE_LINK)
+            if await link.count():
+                href = await link.first.get_attribute("href")
+        except Exception as exc:
+            # A row with no readable link is still a row. Losing the id costs
+            # corroboration; dropping the row would lose the follow itself.
+            logger.debug("row %d link unreadable: %s", index, exc)
+        rows.append({"label": str(label or ""), "href": href})
+    return rows
+
+
 async def read_main_text(page: Any) -> str:
     """Return the rendered text of ``main``, or an empty string if there is none.
 

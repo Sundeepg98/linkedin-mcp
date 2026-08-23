@@ -93,6 +93,28 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/details/"
         r"(skills|experience|education)/?(\?[^#]*)?$"
     ),
+    # The company Pages he follows -- LinkedIn calls the surface "Manage
+    # Pages". Added 2026-08-23. A pure read, and the ONLY one LinkedIn offers
+    # for this list: the profile's Interests section renders a Companies tab,
+    # but that tab is a client-side radio with no url of its own and no href
+    # anywhere in the DOM -- the same shape as the jobs-tracker tab strip,
+    # except that this one has no ``?stage=``-style escape hatch. Measured by
+    # loading the Interests page and finding zero candidate hrefs on it.
+    #
+    # No query string, for the same reason as the job posting below: nothing
+    # builds one, so nothing needs to be preserved.
+    #
+    # RECORD THE SIBLING THAT IS NOT HERE, because the obvious later "fix" is
+    # to reach for it. The PEOPLE he follows live at
+    # ``/mynetwork/network-manager/people-follow/following/``, which contains
+    # the substring ``/follow`` and is therefore refused by
+    # :data:`_FORBIDDEN_URL_SUBSTRINGS` below before this list is even
+    # consulted. The company url happens not to contain it. That is luck, not
+    # design -- and the right response to the luck running out is to leave the
+    # people list unread, never to shorten the forbidden list.
+    re.compile(
+        r"^https://www\.linkedin\.com/mynetwork/network-manager/company/?$"
+    ),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.

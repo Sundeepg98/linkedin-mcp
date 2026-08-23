@@ -951,6 +951,231 @@ def job_detail_is_believable(detail: dict[str, Any]) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Follow state
+# ---------------------------------------------------------------------------
+
+#: The accessible name of the job-posting follow control in each state, and
+#: what each one MEANS. Measured 2026-08-23; see ``dom.FOLLOW_CONTROL`` for
+#: how, and for why the class attribute carries nothing.
+FOLLOW_LABELS: dict[str, str] = {
+    "Follow": "not_following",
+    "Following": "following",
+}
+
+#: Returned instead of a guess. Kept as a named constant because three callers
+#: have to agree that "we could not tell" is a real answer and not a falsy
+#: stand-in for "no".
+FOLLOW_UNKNOWN = "unknown"
+
+
+def follow_state(label: Optional[str], *, count: int) -> dict[str, Any]:
+    """Turn what the control said into a direction, or into an honest refusal.
+
+    The gate this feeds may not proceed on ``unknown``. That is the whole
+    reason the function returns a reason as well as a verdict: a caller that
+    gets ``unknown`` has to be able to say WHY it stopped, and "the control had
+    not rendered" and "there were three of them" want different answers from
+    whoever reads it.
+    """
+    if count == 0:
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                "no follow control rendered. On a job posting that means the "
+                "page had not hydrated yet -- measured 2026-08-23, the same "
+                "posting drew no control before it settled and Following "
+                "after -- so this is NOT evidence that the company is "
+                "unfollowed."
+            ),
+        }
+    if count > 1:
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                f"{count} follow controls rendered, so it is not possible to "
+                "say which one belongs to this posting's employer. Choosing "
+                "the first would be choosing by position."
+            ),
+        }
+    known = FOLLOW_LABELS.get(str(label or "").strip())
+    if known is None:
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                f"the control is labelled {label!r}, which is neither of the "
+                f"two measured states {sorted(FOLLOW_LABELS)}. LinkedIn has "
+                "either relabelled it or drawn a control this reader has never "
+                "seen, and guessing a direction from an unrecognised label is "
+                "exactly the failure this returns instead of."
+            ),
+        }
+    return {"state": known, "why": f"the control is labelled {label!r}"}
+
+
+#: ``Click to stop following Ashgrove Systems`` -> ``Ashgrove Systems``. The
+#: accessible name states the inverse action, which is where the reversibility
+#: evidence for a follow comes from as well as the name.
+_STOP_FOLLOWING = re.compile(r"^\s*Click to stop following\s+(.+?)\s*$", re.I)
+
+#: ``58 Pages`` -- LinkedIn's own total, printed above a list it only partially
+#: renders.
+_PAGES_TOTAL = re.compile(r"\b([\d,]+)\s+Pages?\b")
+
+
+def parse_followed_pages(
+    rows: Iterable[dict[str, Any]], main_text: str
+) -> dict[str, Any]:
+    """Shape the Manage-Pages read, and refuse to overstate what it covers.
+
+    THE HAZARD THIS EXISTS FOR, measured 2026-08-23: LinkedIn renders TWENTY
+    rows under a heading that says ``58 Pages``, and only TEN before the page
+    settles. So "not in the list" means "not followed" only when the list is
+    complete, and on this surface it never is. A reader that skipped the
+    reconciliation would answer "you do not follow them" about thirty-eight
+    companies it had simply not been shown -- and would answer it to a confirm
+    gate, which would then offer to follow a company he already follows.
+    """
+    pages: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        match = _STOP_FOLLOWING.match(str(row.get("label") or ""))
+        if not match:
+            continue
+        name = match.group(1).strip()
+        if not name or name.casefold() in seen:
+            continue
+        seen.add(name.casefold())
+        page_id = None
+        found = re.search(r"/company/([A-Za-z0-9\-_%]+)", str(row.get("href") or ""))
+        if found:
+            page_id = found.group(1)
+        pages.append({"name": name, "id": page_id})
+
+    total: Optional[int] = None
+    found_total = _PAGES_TOTAL.search(str(main_text or ""))
+    if found_total:
+        try:
+            total = int(found_total.group(1).replace(",", ""))
+        except ValueError:  # pragma: no cover - the regex already forbids this
+            total = None
+
+    complete = total is not None and len(pages) >= total
+    return {
+        "pages": pages,
+        "rendered": len(pages),
+        "total_followed": total,
+        "complete": complete,
+        "why_incomplete": None
+        if complete
+        else (
+            "LinkedIn renders only the first rows of this list and loads the "
+            "rest on scroll, which this server does not do -- one page load, "
+            "whatever had drawn by then. "
+            + (
+                f"It says {total} Pages and rendered {len(pages)}."
+                if total is not None
+                else "Its own total could not be read at all."
+            )
+            + " A name missing from `pages` is therefore NOT evidence that the "
+            "Page is unfollowed."
+        ),
+    }
+
+
+def followed_page_state(query: str, parsed: dict[str, Any]) -> dict[str, Any]:
+    """Answer "do I follow this Page?" in three values, never in two."""
+    wanted = str(query or "").strip().casefold()
+    for page in parsed.get("pages", []):
+        if str(page.get("name", "")).casefold() == wanted or (
+            page.get("id") and str(page["id"]).casefold() == wanted
+        ):
+            return {
+                "state": "following",
+                "why": f"{page['name']!r} is in the rendered list",
+                "matched": page,
+            }
+    if parsed.get("complete"):
+        return {
+            "state": "not_following",
+            "why": (
+                f"{query!r} is absent from a list this read covers completely "
+                f"({parsed.get('rendered')} of {parsed.get('total_followed')})"
+            ),
+            "matched": None,
+        }
+    return {
+        "state": FOLLOW_UNKNOWN,
+        "why": (
+            f"{query!r} is absent from the rows that rendered, but the read "
+            "does not cover the whole list. " + str(parsed.get("why_incomplete"))
+        ),
+        "matched": None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Open To Work
+# ---------------------------------------------------------------------------
+
+#: ``Open to work `` + MIDDLE_DOT + `` Recruiters only``. The audience is the
+#: half that matters and LinkedIn prints it verbatim, which is the only reason
+#: a confirm gate can name it rather than describe it.
+_OPEN_TO_WORK = re.compile(
+    r"^\s*Open to work\s*" + re.escape(MIDDLE_DOT) + r"\s*(.+?)\s*$", re.I
+)
+
+#: What each audience string MEANS for someone job-hunting while employed. The
+#: point of the mapping is that a gate has to state WHO CAN SEE IT rather than
+#: repeat LinkedIn's four words back at him.
+OPEN_TO_WORK_AUDIENCES: dict[str, str] = {
+    "recruiters only": (
+        "visible only to recruiters using LinkedIn Recruiter. No badge is drawn "
+        "on your photo and your current employer does not see it -- though "
+        "LinkedIn itself states it cannot guarantee that recruiters at your own "
+        "company are excluded."
+    ),
+    "all linkedin members": (
+        "PUBLIC. A green #OpenToWork frame is drawn on your profile photo and "
+        "everyone who can see your profile can see it, INCLUDING YOUR CURRENT "
+        "EMPLOYER AND colleagues."
+    ),
+}
+
+
+def parse_open_to_work(lines: Iterable[str]) -> dict[str, Any]:
+    """Read the Open To Work state and its AUDIENCE off the profile topcard.
+
+    Returns ``on=None`` when nothing could be read, which is not the same as
+    ``on=False``: the second is a claim that he is not sharing, and this reader
+    is not entitled to make it from a page that may simply not have drawn the
+    card.
+    """
+    for line in lines:
+        match = _OPEN_TO_WORK.match(str(line or ""))
+        if not match:
+            continue
+        audience = match.group(1).strip()
+        return {
+            "on": True,
+            "audience": audience,
+            "who_can_see_it": OPEN_TO_WORK_AUDIENCES.get(
+                audience.casefold(),
+                "UNRECOGNISED audience string -- this reader has only ever seen "
+                f"{sorted(OPEN_TO_WORK_AUDIENCES)}, so it will not say who can "
+                "see it.",
+            ),
+        }
+    return {
+        "on": None,
+        "audience": None,
+        "who_can_see_it": (
+            "not readable: no 'Open to work' line rendered. That is not the "
+            "same as it being off -- the card may not have drawn."
+        ),
+    }
+
+
+# ---------------------------------------------------------------------------
 # The operator's own profile
 # ---------------------------------------------------------------------------
 

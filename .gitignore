@@ -36,3 +36,13 @@ htmlcov/
 .env
 .env.*
 !.env.example
+
+# Raw page captures taken from his live signed-in LinkedIn session.
+# These are the INPUT to fixtures, never the fixture: full PII, live
+# tracking tokens and urn:li ids. They sat untracked but UN-IGNORED while
+# two agents swept unowned files into commits elsewhere in this project on
+# the same day, which is one `git add -A` away from a leak. The scrubbed
+# fixtures under tests/fixtures/ are the committed artefact; these are not.
+_audit/_probe-*.html
+_audit/*_raw.html
+_audit/_fixture_sanitisation_check.txt

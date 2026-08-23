@@ -1,4 +1,4 @@
-"""The tool surface: thirteen tools, and not one of them writes to LinkedIn.
+"""The tool surface: fourteen tools, and not one of them writes to LinkedIn.
 
 The brief for this server drew a hard line -- no writes, not now, not stubbed,
 not "for later". This file is that line expressed as assertions, including on
@@ -33,6 +33,7 @@ EXPECTED_TOOLS = {
     "linkedin_session_info",
     "linkedin_logout",
     "linkedin_cdp_status",
+    "linkedin_followed_companies",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -62,9 +63,30 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirteen_tools(tools):
+async def test_the_surface_is_exactly_the_fourteen_tools(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 13
+    assert len(tools) == 14
+
+
+def test_the_read_that_was_nearly_named_a_write():
+    """A NEAR MISS, recorded rather than quietly designed around.
+
+    The fourteenth tool was going to be ``linkedin_follow_state``, and
+    ``name_implies_write`` REJECTS that name -- ``follow`` is a write verb and
+    the check does not care that the tool only reads. Renaming until a guard
+    stops complaining is the exact move the conservation law in
+    ``test_writes.py`` exists to stop, so the rename is pinned here with its
+    reason instead of being invisible in a diff.
+
+    The reason it is not that move: ``linkedin_followed_companies`` is a
+    PAST-PARTICIPLE NOUN PHRASE, the same grammar as ``linkedin_saved_jobs``
+    and ``linkedin_my_applications``, which this file already blesses two tests
+    below. It describes a list, not an act. The rejected name is asserted to
+    still be rejected, so the guard is shown holding rather than assumed to.
+    """
+    assert readonly.name_implies_write("linkedin_follow_state") is True
+    assert readonly.name_implies_write("linkedin_unfollow") is True
+    assert readonly.name_implies_write("linkedin_followed_companies") is False
 
 
 async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):
