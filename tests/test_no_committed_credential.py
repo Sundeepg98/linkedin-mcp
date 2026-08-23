@@ -70,6 +70,24 @@ def scan(text: str) -> list[str]:
 
 TRACKED = tracked_files()
 
+#: What actually gets swept. The plant's home is removed HERE, at list-build
+#: time, rather than skipped inside the test: this workflow treats any skip as
+#: a failure on purpose (``scripts/ci_full_run_check.py``), because a suite
+#: that is allowed to skip is a suite that can quietly stop checking.
+SCANNED = [relative for relative in TRACKED if relative != _PLANT_HOME]
+
+
+def test_exactly_one_file_is_exempt_and_every_other_one_is_on_disk():
+    """No file may leave the sweep quietly.
+
+    Two ways that could happen and both are closed here: an exemption growing
+    past the single deliberate one, and a tracked path that is not in the
+    working tree, which would drop out of the walk with nothing said.
+    """
+    assert set(TRACKED) - set(SCANNED) == {_PLANT_HOME}
+    missing = [relative for relative in SCANNED if not (REPO / relative).is_file()]
+    assert missing == [], missing
+
 
 def test_there_are_files_to_scan():
     """A sweep over nothing passes forever. This is what stops that.
@@ -86,14 +104,9 @@ def test_there_are_files_to_scan():
         assert name in TRACKED, name
 
 
-@pytest.mark.parametrize("relative", TRACKED, ids=lambda p: p)
+@pytest.mark.parametrize("relative", SCANNED, ids=lambda p: p)
 def test_no_tracked_file_carries_a_session_credential(relative):
-    if relative == _PLANT_HOME:
-        pytest.skip("the module that defines the plant")
-    path = REPO / relative
-    if not path.is_file():
-        pytest.skip("not present in the working tree")
-    text = path.read_text(encoding="utf-8", errors="replace")
+    text = (REPO / relative).read_text(encoding="utf-8", errors="replace")
     assert not scan(text), (relative, scan(text))
 
 

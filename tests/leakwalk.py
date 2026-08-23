@@ -92,9 +92,18 @@ PLANTED_LI_AT = (
     "23456789-_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_ZZ"
 )
 
-#: The csrf cookie's shape, quoted the way Chrome stores it. Short by nature,
-#: so it is guarded by SHAPE rather than hunted as a run.
-PLANTED_JSESSIONID = '"ajax:1234567890123456789"'
+#: The csrf cookie's shape, quoted the way Chrome stores it.
+#:
+#: The digits are deliberately NOT sequential. A run-based hunt over
+#: ``ajax:1234567890...`` would be looking for 12-character windows like
+#: ``123456789012``, which is the kind of string that turns up inside an epoch
+#: timestamp or a page of markup by coincidence -- and a leak detector that
+#: cries wolf is one somebody switches off. A random-looking token cannot
+#: collide, which is also what the real cookie looks like.
+#: It is also kept at or past :data:`MIN_SECRET`, which the hunt enforces: a
+#: 23-character version of this line was refused outright rather than hunted
+#: badly, which is the check doing its job on its own author.
+PLANTED_JSESSIONID = '"ajax:739105284617039428"'
 
 
 # ---------------------------------------------------------------------------

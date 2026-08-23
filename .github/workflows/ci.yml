@@ -1,22 +1,25 @@
 name: CI
 
-# This suite has 786 tests and has never run anywhere but one Windows laptop.
+# This suite has 902 tests and has never run anywhere but one Windows laptop.
 # It also holds the read-only guarantees this server is built around -- the
 # navigation allowlist, the AST scan for write-shaped JS, the launch-flag
 # boundary, the tool-surface check -- so "green when someone remembers" is not
 # a gate for it.
 #
 # THE ONE DESIGN DECISION, and it was measured rather than argued. With the
-# browser binary absent, 87 of the 786 fail, all with the identical error:
+# browser binary absent, 87 of the 902 fail, all with the identical error:
 #
 #     BrowserType.launch: Executable doesn't exist at ...
 #
-# Re-measured 2026-08-23 rather than adjusted: the suite was run in full with
-# PLAYWRIGHT_BROWSERS_PATH pointed at an empty directory, which is exactly
-# what a runner with no binary looks like. It came back `87 failed, 699
-# passed`. The previous figures here (684 / 77 / three modules) had gone stale
-# across several waves, and a count nobody re-measures is how a reader ends up
-# trusting the wrong number in the first file he opens.
+# Re-measured 2026-08-23 rather than adjusted, twice on that date: the suite was
+# run in full with PLAYWRIGHT_BROWSERS_PATH pointed at an empty directory, which
+# is exactly what a runner with no binary looks like. The second run, after the
+# leak-walker wave, came back `87 failed, 815 passed`. The FAILING 87 and their
+# per-module split are byte-for-byte what the first run found; only the passes
+# moved, which is the expected result for a wave that added 116 tests none of
+# which touch a browser. The figures before that (684 / 77 / three modules) had
+# gone stale across several waves, and a count nobody re-measures is how a
+# reader ends up trusting the wrong number in the first file he opens.
 #
 # They live in tests/test_profile_views_fixture.py (18),
 # test_job_search_fixture.py (27), test_sdui_surfaces_fixture.py (32) and
