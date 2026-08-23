@@ -372,9 +372,20 @@ async def test_the_auth_tool_documents_that_a_cookie_is_not_a_verdict(tools):
     assert "proves nothing" in text or "never treated as an answer" in text
 
 
-async def test_server_info_declares_the_boundary_and_lists_no_writes():
-    from linkedin_server.server import linkedin_server_info
+async def test_server_info_reports_writes_off_when_the_flag_is_unset(monkeypatch):
+    """The DEFAULT posture, and the one a fresh clone is in.
 
+    This test used to assert ``read_only is True`` flat, and after the write
+    landed it still passed -- because the flag is unset in a test process, so
+    the computed value is True for the right reason. That is exactly the shape
+    of a check that has quietly stopped testing what it says: it would have
+    gone on passing if the field had been hardcoded back to a literal. Both
+    halves of the computation are now exercised, here and below.
+    """
+    from linkedin_server.server import linkedin_server_info
+    from linkedin_server.writes import WRITES_FLAG
+
+    monkeypatch.delenv(WRITES_FLAG, raising=False)
     info = await linkedin_server_info()
     assert info["read_only"] is True
     assert info["writes_available"] == []
@@ -385,10 +396,68 @@ async def test_server_info_declares_the_boundary_and_lists_no_writes():
     assert "badge" in joined and "recent-search history" in joined
 
 
-async def test_the_server_instructions_tell_a_caller_not_to_look_for_writes():
+async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypatch):
+    """A SERVER THAT CAN WRITE AND SAYS IT CANNOT IS WORSE THAN ONE THAT NEVER
+    COULD, because the claim is what a caller trusts INSTEAD of reading the
+    source.
+
+    This is the control for the test above: hardcoding either field back to its
+    old literal passes that one and fails this one.
+    """
+    from linkedin_server.server import linkedin_server_info
+    from linkedin_server.writes import WRITES_FLAG
+
+    monkeypatch.setenv(WRITES_FLAG, "1")
+    info = await linkedin_server_info()
+    assert info["read_only"] is False
+    assert info["writes_available"] == ["save_job", "unsave_job"]
+
+
+async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
+    """``writes_sanctioned`` is about the CODE and never about the process.
+
+    Without it, a reader of a default process would see read_only true and an
+    empty writes list and conclude this package has no write path. It has one.
+    The capability may not hide behind an unset environment variable.
+    """
+    from linkedin_server.server import linkedin_server_info
+    from linkedin_server.writes import WRITES_FLAG
+
+    monkeypatch.delenv(WRITES_FLAG, raising=False)
+    info = await linkedin_server_info()
+    assert info["writes_sanctioned"] == ["save_job", "unsave_job"]
+    assert "OFF" in info["writes_note"]
+    assert "unsave_job" in info["writes_note"]
+
+
+async def test_saving_is_no_longer_claimed_to_be_out_of_scope():
+    """A stale entry on this list is a lie a caller acts on."""
+    from linkedin_server.server import linkedin_server_info
+
+    scope = " ".join((await linkedin_server_info())["out_of_scope_by_design"])
+    assert "saving or unsaving jobs" not in scope
+    # ...and the things that ARE still refused are still named, including the
+    # one whose absence would otherwise read as an oversight.
+    assert "applying to jobs" in scope
+    assert "following or unfollowing a company" in scope
+
+
+async def test_the_server_instructions_tell_a_caller_what_the_two_writes_are():
+    """The instructions are the first thing a client model reads.
+
+    They used to say "Every tool reads; none of them changes anything on
+    LinkedIn. There is no apply, no save..." -- which was true, and which the
+    write made into the most load-bearing false sentence in the package.
+    """
     text = (mcp.instructions or "").lower()
-    assert "read-only" in text
+    assert "two write" in text
+    assert "linkedin_save_job" in text
+    assert "performs nothing" in text
+    assert "never confirm on his behalf" in text
+    # The refusals that are still refusals.
     assert "no apply" in text
+    # And it must not still be calling itself read-only.
+    assert "read-only window" not in text
 
 
 # ---------------------------------------------------------------------------

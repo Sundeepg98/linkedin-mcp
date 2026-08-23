@@ -110,11 +110,17 @@ JOBCORE_STAMP_NOTE = (
 mcp = FastMCP(
     name=SERVER_NAME,
     instructions=(
-        "Read-only window onto the operator's OWN LinkedIn account, driven by "
-        "his own signed-in browser on his own machine. Every tool reads; none "
-        "of them changes anything on LinkedIn. There is no apply, no save, no "
-        "message, no connection request, no profile edit -- those are out of "
-        "scope by design, so do not look for them or suggest they exist. "
+        "A window onto the operator's OWN LinkedIn account, driven by his own "
+        "signed-in browser on his own machine. Fourteen of the sixteen tools "
+        "read and change nothing. TWO WRITE: linkedin_save_job and "
+        "linkedin_unsave_job. Call either without a confirm_token and it "
+        "performs NOTHING -- it reads the posting and his saved list live and "
+        "returns a block for HIM to read; only a token from that block, used "
+        "once within two minutes, actually acts. Never confirm on his behalf. "
+        "linkedin_unsave_job currently refuses to act at all and says why. "
+        "There is no apply, no message, no connection request, no profile "
+        "edit, no follow -- those are out of scope by design, so do not look "
+        "for them or suggest they exist. "
         "Start with linkedin_auth_status; if it says false, the operator must "
         "call linkedin_login_browser and sign in himself in the window it "
         "opens -- this server never handles a password. That sign-in is a "

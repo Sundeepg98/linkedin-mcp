@@ -1,10 +1,33 @@
 # linkedin
 
-A **strictly read-only** MCP server that shows you your own LinkedIn account data
-as structured tool results instead of pages you have to click through.
+An MCP server that shows you your own LinkedIn account data as structured tool
+results instead of pages you have to click through.
 
-It reads. That is all it does. There is no write path in this repository -- not
-disabled, not stubbed, not behind a flag.
+**Fourteen of its sixteen tools read and change nothing. Two write.**
+
+Until 2026-08-23 this paragraph said *"It reads. That is all it does. There is
+no write path in this repository -- not disabled, not stubbed, not behind a
+flag."* That was true, it was enforced rather than asserted, and it stopped
+being true the day `linkedin_save_job` shipped. A README that keeps the
+comfortable sentence is the first thing a reader trusts and the first thing
+that misleads them.
+
+What is true now:
+
+- The package contains **exactly one** call that can change anything on
+  LinkedIn: a single anchored click in `writes.perform`. The source scanner
+  still reports it -- it was not taught to stop looking -- and it is admitted by
+  path, function and kind in a one-line allowlist that the tests fail if it
+  widens.
+- **Writes are off unless you turn them on.** `LINKEDIN_ENABLE_WRITES=1`, per
+  process. A fresh clone cannot write to LinkedIn at all.
+- **Every write is two calls.** The first performs nothing and hands you a
+  block to read; the second redeems a single-use token from it. The token is
+  bound to one action on one target and dies in 120 seconds, which makes a
+  scheduled or unattended write structurally impossible rather than merely
+  discouraged.
+- `linkedin_unsave_job` is built, gated and **refuses to act**. See
+  [The one that refuses](#the-one-that-refuses).
 
 ---
 
@@ -48,20 +71,57 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 
+## The two that write
+
+| Tool | What it does |
+|---|---|
+| `linkedin_save_job` | Bookmarks one posting. Call it with no `confirm_token` and it performs nothing: it reads the posting and your saved list live and returns a block naming the job by title and employer, which way the toggle would move, where each fact came from, and how to undo it. Call it again with the token from that block to act. |
+| `linkedin_unsave_job` | Same shape, same gates, and **it refuses**. See below. |
+
+After the click, the result is confirmed from a **different surface** -- your
+saved list, with LinkedIn's own per-tab count -- rather than from the button
+that was just pressed. `performed` comes back `true`, `false`, or `"unknown"`.
+On `"unknown"`, do not retry: a retry on a toggle that did land performs the
+opposite action.
+
+### The one that refuses
+
+LinkedIn identifies the save control by its accessible name. Every capture this
+repo holds -- four postings, both hydration states, two different days -- shows
+`aria-label="Save the job"`, the **unsaved** state. The name it wears when a
+posting **is** saved has never been observed, and it cannot be observed by
+reading: there is nothing saved on the account to observe it on.
+
+So `linkedin_unsave_job` has no anchor, and this server does not guess one.
+`"Saved"` and `"Unsave the job"` are both plausible and it has seen neither.
+The refusal names that reason rather than saying "not implemented", because
+"not implemented" invites somebody to implement it by picking a string.
+
+**The fix is one measured line.** The first supervised save produces it:
+`perform` reads back the label the control changed into and reports it. Write
+that into `shape.SAVE_LABELS` and `unsave_job` acquires its anchor. It is one
+row of a table, not a missing code path.
+
 ## What it deliberately cannot do
 
-Applying to jobs. Saving or unsaving. Messaging, InMail, connection invitations.
-Profile edits. Open To Work. Posting, liking, commenting, endorsing. Marking
-notifications read. Collecting data about other members.
+Applying to jobs. Messaging, InMail, connection invitations. Profile edits.
+Open To Work. Following or unfollowing a company. Posting, liking, commenting,
+endorsing. Marking notifications read. Collecting data about other members.
 
-These are not missing features. If a tool would change anything on LinkedIn's
-servers, it is out of scope, and `tests/test_readonly.py` fails the build if one
-appears.
+These are not missing features. Following is the interesting one on that list:
+it **is** designed and gated in `writes.py` and it is deliberately not
+performable, because no unfollow is sanctioned -- this server could create that
+state and could not clear it. An action whose undo is hand-only does not go
+first.
+
+Anything else that would change something on LinkedIn's servers is out of
+scope, and `tests/test_readonly.py` fails the build if a second mutating call
+appears anywhere in the package.
 
 One tool changes something on **this machine**: `linkedin_logout(confirm=True)`
-erases the local cookie jar. It issues no request, so the boundary above --
-which is about LinkedIn -- is intact, and `linkedin_server_info` names it under
-`local_state_writes` rather than folding it into `read_only: true`.
+erases the local cookie jar. It issues no request, so LinkedIn is never told,
+and `linkedin_server_info` names it under `local_state_writes` rather than
+folding it into the `read_only` field.
 
 ### The two side effects, stated rather than hidden
 
@@ -137,10 +197,24 @@ package. A check that cannot fail certifies nothing.
 
 2. **A source scanner.** The package is grepped for calls that could change
    state -- `click`, `fill`, `type`, `press`, `select_option`, `set_input_files`,
-   form submission, and any non-GET request. It finds none. `evaluate` is
-   flagged too: the three read-only DOM harvesters waive it with a trailing
-   `# readonly-ok`, so any new `evaluate` fails the build until somebody waives
-   it in a reviewable diff.
+   form submission, and any non-GET request. It finds **exactly one**: the click
+   in `writes.perform`.
+
+   The scanner was **not** relaxed to accommodate it. It still reports every
+   mutating call unconditionally, and what admits this one is a separate
+   one-line allowlist, `readonly.SANCTIONED_MUTATIONS`, keyed on
+   `(path, function, kind)`. All three parts refuse something real: a click in
+   `dom.py`, a click in a different function of `writes.py`, and a `fill` inside
+   `perform` are each rejected -- and so is a click buried in a closure one scope
+   down, because attribution is to the innermost enclosing function. Those five
+   near-misses are each **shown failing**. The package is separately asserted to
+   contain exactly as many mutating calls as the list has entries, which is what
+   catches a *second* click inside `perform` that the triple alone cannot
+   distinguish from the first.
+
+   `evaluate` is flagged too: the three read-only DOM harvesters waive it with a
+   trailing `# readonly-ok`, so any new `evaluate` fails the build until somebody
+   waives it in a reviewable diff.
 
 3. **A tool-surface check.** No tool name contains a write verb, and no tool
    docstring makes an affirmative write claim. Docstrings may still say what a
