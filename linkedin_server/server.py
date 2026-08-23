@@ -374,6 +374,10 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
         re-mints its own credential shows hours there while its session holds
         for months. On LinkedIn the two coincide, because nothing here can
         carry the session past the cookie, and session_lapses_source says so.
+        uses_browser is null rather than false -- there is no renewal here to
+        characterise, and a false would claim one exists and happens to need
+        no browser -- while mechanism spells out what recovery actually
+        costs: a real window and your own hands, never a background refresh.
       * durability -- where the sign-in is kept and what it survives.
 
     Cookie values are never returned. Only the name, whether it is there, and

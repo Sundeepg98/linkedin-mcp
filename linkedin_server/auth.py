@@ -518,6 +518,19 @@ def _renewal(credential: dict[str, Any]) -> dict[str, Any]:
     moment the sign-in has to be done again by hand.
     ``session_lapses_source`` says exactly that, naming the credential that
     governs -- and when there is no date, why there is none.
+
+    ``uses_browser`` is ``None`` here, and the reason is the same
+    three-valued discipline this module applies to ``authenticated``. There is
+    no renewal mechanism on this platform to characterise, so a ``False``
+    would assert something about a thing that does not exist: "a renew exists
+    and happens not to need a browser". Absence of a mechanism is not a
+    mechanism that costs nothing, and the two servers in this family that DO
+    ship a reauth both drive a browser -- which is exactly the cost the field
+    was added to stop "silent renew" from hiding.
+
+    ``mechanism`` therefore answers in its own words rather than pointing at
+    ``why``. A caller comparing ``mechanism`` across four servers deserves a
+    straight answer from each without following a cross-reference.
     """
     lapses_at = credential.get("expires_at")
     lapses_in_days = credential.get("expires_in_days")
@@ -565,6 +578,20 @@ def _renewal(credential: dict[str, Any]) -> dict[str, Any]:
         "session_lapses_at": lapses_at,
         "session_lapses_in_days": lapses_in_days,
         "session_lapses_source": source,
+        # None, not False. False would characterise a renewal that does not
+        # exist. See the docstring above.
+        "uses_browser": None,
+        "mechanism": (
+            "none -- there is no renewal mechanism here to describe, which is "
+            "why uses_browser is null rather than false. Recovery is not a "
+            "renewal at all: linkedin_login_browser opens a real Chrome "
+            "window and waits for the operator to sign in with his own hands. "
+            "That is a HUMAN action, not a background one -- it cannot be "
+            "scheduled, it cannot run while he is away from the machine, and "
+            "this server never sees, types, stores or transmits the password "
+            "he types into that window. The sign-in it replaces took him a "
+            "full day to establish."
+        ),
     }
 
 

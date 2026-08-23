@@ -518,6 +518,68 @@ def test_a_profile_never_signed_in_to_yields_nulls_with_its_own_reason(tmp_path)
     assert "no li_at in the jar" in renewal["session_lapses_source"]
 
 
+def test_the_renewal_mechanism_is_declared_as_absent_not_as_free(tmp_path):
+    """``uses_browser`` is None, and ``is None`` is the only check worth making.
+
+    ``assert not renewal["uses_browser"]`` would pass on ``False`` too, and
+    ``False`` is precisely the wrong answer: it asserts that a renewal exists
+    and happens not to need a browser. There is no renewal here at all.
+    Absence of a mechanism is not a mechanism that costs nothing -- and the
+    two servers in this family that DO ship a reauth both drive a browser,
+    which is the cost this field exists to stop "silent renew" from hiding.
+    """
+    renewal = auth_module.session_info_offline(
+        healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
+    )["renewal"]
+
+    assert renewal["uses_browser"] is None
+    assert renewal["uses_browser"] is not False
+    assert renewal["mechanism"].strip()
+
+
+async def test_the_mechanism_declaration_is_on_the_live_path_too(
+    patched_navigation,
+):
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": time.time() + 300 * 86400},
+        responses=[me_response()],
+    )
+    renewal = (await auth_module.session_info(page))["renewal"]
+
+    assert renewal["uses_browser"] is None
+    assert renewal["uses_browser"] is not False
+    assert renewal["mechanism"].strip()
+
+
+def test_the_mechanism_answers_in_its_own_words(tmp_path):
+    """A caller comparing mechanism across four servers must get a straight
+    answer from each, without following a cross-reference into renewal.why."""
+    mechanism = auth_module.session_info_offline(
+        healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
+    )["renewal"]["mechanism"]
+
+    assert "linkedin_login_browser" in mechanism
+    assert "HUMAN action" in mechanism
+    assert "full day" in mechanism
+    assert "never sees, types, stores or transmits" in mechanism
+    # Self-contained: it says WHY the bool is null without making the reader
+    # go and read another field to find out.
+    assert "null rather than false" in mechanism
+
+
+def test_the_two_new_keys_survive_an_unreadable_jar(tmp_path):
+    """They describe the RENEWAL PATH, not the credential, so a jar that
+    cannot be read must not turn them into nulls-by-accident. There is still
+    no renewal here, and that is still knowable."""
+    renewal = auth_module.session_info_offline(
+        tmp_path / "no-such-profile", mode="launch", why_no_live_check="no browser"
+    )["renewal"]
+
+    assert renewal["uses_browser"] is None
+    assert "linkedin_login_browser" in renewal["mechanism"]
+
+
 def test_silent_renew_stays_false_whatever_the_lapse_date_says(tmp_path):
     """The new keys must not have turned the renewal block into a promise.
 
