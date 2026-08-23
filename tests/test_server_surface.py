@@ -1,13 +1,20 @@
-"""The tool surface: fourteen tools, and not one of them writes to LinkedIn.
+"""The tool surface: sixteen tools, fourteen of which read LinkedIn.
 
-The brief for this server drew a hard line -- no writes, not now, not stubbed,
-not "for later". This file is that line expressed as assertions, including on
-the docstrings, because a tool that merely SOUNDS like it can apply to a job
-will be called as though it can.
+WHAT THIS FILE USED TO ASSERT, AND WHY IT NO LONGER CAN. The brief for this
+server drew a hard line -- no writes, not now, not stubbed, not "for later" --
+and this file was that line expressed as assertions. On 2026-08-23 the operator
+authorised two: ``linkedin_save_job`` and ``linkedin_unsave_job``.
 
-The thirteenth tool, ``linkedin_logout``, writes to LOCAL DISK and to nothing
-else: it erases this machine's cookie jar and issues no request, so the line
-above is about the platform and is intact. It gets its own assertions at the
+The line did not move; it acquired a gate. Every check below still runs against
+every tool, and the two writes are exempted BY NAME through
+``writes.SANCTIONED_WRITES`` rather than by loosening the check -- so a third
+write-shaped tool, or a read tool that grows a write-shaped docstring, still
+fails exactly as before. Each exemption is paired with a positive control
+asserting the check DOES fire on the exempted names, because an exemption that
+silently covered everything would leave a file full of tests that cannot fail.
+
+``linkedin_logout`` writes to LOCAL DISK and to nothing else: it erases this
+machine's cookie jar and issues no request. It gets its own assertions at the
 bottom of this file, because "performs nothing without confirm" is a promise
 somebody has to hold to.
 """
@@ -18,6 +25,16 @@ import pytest
 
 from linkedin_server import readonly
 from linkedin_server.server import mcp
+from linkedin_server.writes import SANCTIONED_WRITES
+
+#: The two tools that write, resolved from the module that gates them rather
+#: than typed again here. A name cannot appear on this exemption without
+#: appearing in the sanctioned set, and the sanctioned set is what
+#: ``test_writes.py``'s conservation law polices.
+SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
+    "linkedin_save_job",
+    "linkedin_unsave_job",
+}
 
 EXPECTED_TOOLS = {
     "linkedin_auth_status",
@@ -34,16 +51,24 @@ EXPECTED_TOOLS = {
     "linkedin_logout",
     "linkedin_cdp_status",
     "linkedin_followed_companies",
+    # The two writes, authorised 2026-08-23.
+    "linkedin_save_job",
+    "linkedin_unsave_job",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
 #: failing test rather than a code review someone might skim.
+#:
+#: ``linkedin_save_job`` and ``linkedin_unsave_job`` LEFT THIS SET on
+#: 2026-08-23. That is the only sanctioned way off it: the conservation law in
+#: ``test_writes.py`` asserts every originally-forbidden name is still
+#: accounted for by ``FORBIDDEN_TOOLS | SANCTIONED_WRITES``, so a name may MOVE
+#: across the boundary and may never simply be deleted from it. The frozen
+#: original set lives in that file precisely so this one cannot shrink quietly.
 FORBIDDEN_TOOLS = {
     "linkedin_apply",
     "linkedin_apply_job",
     "linkedin_easy_apply",
-    "linkedin_save_job",
-    "linkedin_unsave_job",
     "linkedin_send_message",
     "linkedin_send_inmail",
     "linkedin_connect",
@@ -63,9 +88,17 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fourteen_tools(tools):
+async def test_the_surface_is_exactly_the_sixteen_tools(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 14
+    assert len(tools) == 16
+    # And the split is asserted, not just the total: fourteen reads and the
+    # two named writes. A future tool arriving as a write would otherwise only
+    # have to bump a number.
+    assert set(tools) & SANCTIONED_WRITE_TOOLS == {
+        "linkedin_save_job",
+        "linkedin_unsave_job",
+    }
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 14
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -95,8 +128,43 @@ async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):
 
 
 async def test_no_tool_name_implies_a_write(tools):
-    offenders = [name for name in tools if readonly.name_implies_write(name)]
+    """No tool name implies a write EXCEPT the two whose names should.
+
+    The exemption is a set difference against the sanctioned names, not a
+    relaxed check: ``name_implies_write`` still runs on all sixteen, and a
+    seventeenth tool called ``linkedin_apply_job`` still lands in ``offenders``.
+    """
+    offenders = [
+        name
+        for name in tools
+        if readonly.name_implies_write(name) and name not in SANCTIONED_WRITE_TOOLS
+    ]
     assert offenders == [], offenders
+
+
+async def test_the_two_exempted_names_do_in_fact_trip_the_name_check(tools):
+    """THE CONTROL for the exemption above.
+
+    Without it, ``name_implies_write`` could be broken so that it returns False
+    for everything and the check would pass on a surface full of writes. These
+    two names are exempted BECAUSE they announce themselves; assert that they
+    still do.
+    """
+    for name in sorted(SANCTIONED_WRITE_TOOLS):
+        assert name in tools, name
+        assert readonly.name_implies_write(name) is True, name
+
+
+async def test_the_exemption_covers_only_those_two(tools):
+    """A third write-shaped tool would not be covered by it."""
+    assert SANCTIONED_WRITE_TOOLS == {"linkedin_save_job", "linkedin_unsave_job"}
+    pretend = set(tools) | {"linkedin_apply_job"}
+    offenders = [
+        name
+        for name in pretend
+        if readonly.name_implies_write(name) and name not in SANCTIONED_WRITE_TOOLS
+    ]
+    assert offenders == ["linkedin_apply_job"], offenders
 
 
 def test_the_name_check_catches_a_write_tool():
@@ -204,13 +272,56 @@ def test_a_denial_of_a_negated_write_is_still_a_denial():
 
 
 async def test_no_docstring_claims_a_write(tools):
-    """A docstring may say what a tool cannot do; it may not claim it does."""
+    """A docstring may say what a tool cannot do; it may not claim it does.
+
+    Unless it is one of the two that DO. The exemption is by name, so a read
+    tool whose docstring drifts into claiming a write still fails here.
+    """
     offenders: dict[str, list] = {}
     for name, tool in tools.items():
+        if name in SANCTIONED_WRITE_TOOLS:
+            continue
         claims = readonly.docstring_write_claims(tool.description or "")
         if claims:
             offenders[name] = claims
     assert offenders == {}, offenders
+
+
+async def test_the_two_write_docstrings_do_claim_a_write(tools):
+    """THE CONTROL. The exemption above must be covering something real.
+
+    If these two stopped claiming a write -- because somebody softened the
+    prose into sounding like a read -- the exemption would be silently
+    unnecessary and the surface would be advertising a write as a read. That
+    is the failure this pins.
+    """
+    for name in sorted(SANCTIONED_WRITE_TOOLS):
+        claims = readonly.docstring_write_claims(tools[name].description or "")
+        assert claims, f"{name} does not describe itself as a write"
+
+
+async def test_the_docstring_exemption_does_not_cover_the_reads(tools):
+    """Plant a write claim in a READ tool's docstring; the loop must catch it.
+
+    Runs the EXACT loop from ``test_no_docstring_claims_a_write`` over a
+    descriptions map in which one read tool has been given a write-claiming
+    description. If the exemption had been written as "skip anything that
+    claims a write" -- the tempting shape -- this would come back empty.
+    """
+    descriptions = {name: tool.description or "" for name, tool in tools.items()}
+    victim = "linkedin_saved_jobs"
+    assert victim in descriptions and victim not in SANCTIONED_WRITE_TOOLS
+    descriptions[victim] = (
+        "This tool will apply to the job and send the recruiter a note."
+    )
+
+    offenders = {
+        name: readonly.docstring_write_claims(text)
+        for name, text in descriptions.items()
+        if name not in SANCTIONED_WRITE_TOOLS
+        and readonly.docstring_write_claims(text)
+    }
+    assert set(offenders) == {victim}, offenders
 
 
 def test_the_docstring_check_catches_an_affirmative_write_claim():

@@ -32,15 +32,188 @@ def test_there_are_modules_to_scan():
 
 
 @pytest.mark.parametrize("module", MODULES, ids=lambda p: p.name)
-def test_no_module_contains_a_mutating_call(module: Path):
+def test_no_module_contains_an_UNSANCTIONED_mutating_call(module: Path):
+    """Every mutating call in the package is one of the ones named in advance.
+
+    THIS CHECK CHANGED SHAPE ON 2026-08-23 AND DID NOT WEAKEN. It used to assert
+    the scan came back EMPTY for every module. The package now contains exactly
+    one mutating call -- the click in ``writes.perform`` -- so an empty-scan
+    assertion could only have been kept by teaching the scanner to stop seeing
+    it, which would have destroyed the only instrument that can see the next
+    one.
+
+    So the SCAN is untouched and unconditional, and what is asserted is the
+    partition: nothing outside ``readonly.SANCTIONED_MUTATIONS``. The tests
+    below hold that list to being complete, exact, and narrow.
+    """
     source = module.read_text(encoding="utf-8")
-    hits = readonly.scan_source_for_mutations(source)
-    assert hits == [], (
-        f"{module.name} contains calls that could change state: {hits}. "
-        "This package has no write path; if the call is genuinely a read, "
-        "waive that single line with a trailing '# readonly-ok' so the waiver "
-        "shows up in the diff."
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        f"linkedin_server/{module.name}", source
     )
+    assert unsanctioned == [], (
+        f"{module.name} contains calls that could change state and are not "
+        f"sanctioned: {unsanctioned}. If the call is genuinely a read, waive "
+        "that single line with a trailing '# readonly-ok' so the waiver shows "
+        "up in the diff. If it is genuinely a write, it needs an entry in "
+        "readonly.SANCTIONED_MUTATIONS and the operator's say-so -- adding "
+        "one is the review moment this check exists to create."
+    )
+
+
+def test_the_sanctioned_list_is_exactly_one_click_in_one_function():
+    """The allowlist, read out loud, so widening it is visible in a diff.
+
+    A guard whose allowlist is checked only for "does it cover what we found"
+    grows by one entry at a time and nobody notices. This pins the CONTENTS.
+    """
+    assert readonly.SANCTIONED_MUTATIONS == (
+        ("linkedin_server/writes.py", "perform", "click"),
+    )
+    assert len(readonly.SANCTIONED_MUTATIONS) == 1
+
+
+def test_every_sanctioned_entry_is_actually_present():
+    """The other direction: a stale entry is as bad as a missing one.
+
+    An allowlist keyed on a function that no longer exists, or on a call that
+    was removed, quietly grants permission to a future edit that recreates the
+    name. Both halves are asserted, so the list cannot rot either way.
+    """
+    found: set[tuple[str, str, str]] = set()
+    for module in MODULES:
+        rel = f"linkedin_server/{module.name}"
+        source = module.read_text(encoding="utf-8")
+        for lineno, kind, _line in readonly.scan_source_for_mutations(source):
+            found.add((rel, readonly.enclosing_function(source, lineno), kind))
+    assert set(readonly.SANCTIONED_MUTATIONS) == found, (
+        "the sanctioned list and what the scanner actually finds have "
+        f"diverged. list={sorted(readonly.SANCTIONED_MUTATIONS)} "
+        f"found={sorted(found)}"
+    )
+
+
+def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
+    """COUNT, not just membership -- and this closes a real hole.
+
+    ``test_every_sanctioned_entry_is_actually_present`` compares SETS, so it
+    cannot see a duplicate: a SECOND click added inside ``perform`` is the same
+    ``(path, function, kind)`` triple as the first and passes a set comparison
+    unchanged. That is the hardest case, because it is in the sanctioned file,
+    in the sanctioned function, of the sanctioned kind -- and it must still
+    fail, because the list admits ONE call and not a licence.
+
+    Shown failing on exactly that edit in
+    ``test_writes.py::test_a_second_click_inside_perform_is_still_caught``.
+    """
+    total = sum(
+        len(readonly.scan_source_for_mutations(m.read_text(encoding="utf-8")))
+        for m in MODULES
+    )
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 1, total
+
+
+def test_the_partition_conserves_every_hit():
+    """Nothing is dropped on the way through the filter.
+
+    The failure this prevents is a partition that quietly swallows a hit --
+    which would look identical to a clean package from every caller's side.
+    """
+    for module in MODULES:
+        source = module.read_text(encoding="utf-8")
+        sanctioned, unsanctioned = readonly.partition_mutation_hits(
+            f"linkedin_server/{module.name}", source
+        )
+        assert (
+            sorted(sanctioned + unsanctioned)
+            == sorted(readonly.scan_source_for_mutations(source))
+        ), module.name
+
+
+@pytest.mark.parametrize(
+    "label, path, source",
+    [
+        # The sanctioned call, but in the wrong FILE.
+        (
+            "wrong file",
+            "linkedin_server/dom.py",
+            "async def perform(page, grant):\n    await page.click('b')\n",
+        ),
+        # The sanctioned file and kind, but the wrong FUNCTION.
+        (
+            "wrong function",
+            "linkedin_server/writes.py",
+            "async def _helper(page, grant):\n    await page.click('b')\n",
+        ),
+        # The sanctioned file and function, but the wrong KIND.
+        (
+            "wrong kind",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n    await page.fill('#note', 'x')\n",
+        ),
+        # The sanctioned triple in every respect EXCEPT that the call is
+        # buried one scope down. Attribution is innermost, so the closure is
+        # named as itself and inherits nothing.
+        (
+            "nested inside the sanctioned function",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n"
+            "    async def _go():\n"
+            "        await page.click('b')\n"
+            "    return _go\n",
+        ),
+        # Module level, inside the sanctioned file. No enclosing function at
+        # all, so nothing to match.
+        (
+            "module level",
+            "linkedin_server/writes.py",
+            "page.click('b')\n",
+        ),
+    ],
+)
+def test_the_exception_does_not_widen(label, path, source):
+    """SHOWN FAILING on the five ways this exemption could be stretched.
+
+    Each of these is one edit away from the real entry, and every one of them
+    has to come back UNSANCTIONED. Without this the triple could be reduced to
+    "a click somewhere in writes.py" and no test would notice.
+    """
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(path, source)
+    assert sanctioned == [], (label, sanctioned)
+    assert unsanctioned, (label, "the scanner did not even see it")
+
+
+def test_the_real_entry_IS_admitted():
+    """THE POSITIVE CONTROL for all five refusals above.
+
+    Five tests asserting "not sanctioned" pass perfectly on a partition that
+    sanctions nothing at all. This is the one that would fail if it did.
+    """
+    source = "async def perform(page, grant):\n    await page.click('b')\n"
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py", source
+    )
+    assert len(sanctioned) == 1, sanctioned
+    assert unsanctioned == []
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        "linkedin_server/writes.py",
+        "linkedin_server\\writes.py",
+        "./linkedin_server/writes.py",
+    ],
+)
+def test_the_path_is_matched_in_every_spelling_a_checkout_produces(spelling):
+    """Windows separators and a leading ./ must not silently un-sanction it.
+
+    Three CI cells, two of them posix and one Windows. A path comparison that
+    worked on one and not the others would turn this check into a test that
+    passes for the wrong reason on two thirds of the matrix.
+    """
+    source = "async def perform(page, grant):\n    await page.click('b')\n"
+    sanctioned, _ = readonly.partition_mutation_hits(spelling, source)
+    assert len(sanctioned) == 1, spelling
 
 
 def test_the_mutation_scanner_catches_a_planted_write():

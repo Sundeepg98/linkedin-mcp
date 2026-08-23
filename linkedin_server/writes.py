@@ -1,7 +1,12 @@
 """The write boundary: a grant, not a mode.
 
-NOTHING IN THIS MODULE CAN CHANGE ANYTHING ON LINKEDIN TODAY, and that is
-deliberate rather than unfinished. See "WHAT IS NOT HERE" at the bottom.
+THIS MODULE CAN CHANGE ONE THING ON LINKEDIN, as of 2026-08-23: it can save a
+job posting, and it can unsave one the day the unsave anchor has been measured.
+It could change nothing at all until that date, and the sentence that used to
+stand here said so. Both sentences were true when written; only one of them is
+true now, and a boundary module that keeps the comfortable one is the exact
+failure this design exists to refuse. See "WHAT IS HERE, AND WHAT STILL IS NOT"
+at the bottom.
 
 WHY A GRANT AND NOT A FLAG
 --------------------------
@@ -110,20 +115,34 @@ not exist on this account to be photographed. A different source, not a weaker
 one; and the second can answer "I could not tell", which the first never has
 to.
 
-WHAT IS NOT HERE, AND WHY
--------------------------
-There is no ``page.click``. No mutating Playwright call of any kind appears in
-this module, so ``readonly.scan_source_for_mutations`` still reports ZERO hits
-for every file in the package and ``test_readonly.py`` keeps its zero-line
-diff.
+WHAT IS HERE, AND WHAT STILL IS NOT
+-----------------------------------
+ONE mutating call exists in this package and it is in :func:`perform`: a single
+anchored click. ``readonly.scan_source_for_mutations`` still finds it -- the
+scanner was not taught to stop looking -- and it is admitted by name, path and
+kind in ``readonly.SANCTIONED_MUTATIONS``, which is one line long and which
+``tests/test_readonly.py`` fails if it widens or goes stale. Every other module
+in the package still scans clean.
 
-That is the design, not a gap. The operator's harness still refuses LinkedIn
-writes at the permission classifier, so a click authored today could not be
-exercised even once -- and an unexercised write against the least
-automation-tolerant platform in the family, on his only account, is the worst
-available outcome. So the CAGE is built and exercised now; the animal arrives
-the day the classifier rule exists and a supervised save/unsave round trip can
-be watched. :func:`perform` is that seam, and it refuses to act.
+WHAT A CALLER CAN DO: preview a save, read the block, and confirm it. That is
+two round trips through this module, and between them sit the flag, the live
+read, the single-use receipt, the 30-second observation TTL, the 120-second
+grant, the rebuilt url, the unrelaxed forbidden list, and a re-read of the very
+control about to be pressed.
+
+WHAT STILL CANNOT HAPPEN WITHOUT THE OPERATOR PRESENT: anything at all. The
+flag is off in a fresh process; a grant exists only after a human has been
+shown a gate built from a live read; the grant dies in two minutes and works
+once, which makes an unattended or scheduled write structurally impossible
+rather than merely discouraged.
+
+WHAT IS STILL NOT HERE, and it is one row of a table rather than a code path:
+``unsave_job`` is built, gated and tested on exactly the same path as
+``save_job``, and it REFUSES, because the accessible name LinkedIn gives the
+save control when a posting IS saved has never been observed -- there is
+nothing saved on the account to observe it on. See :data:`shape.SAVE_LABELS`
+and :func:`anchor_label_for`. The first supervised save is the measurement that
+lifts it.
 """
 
 from __future__ import annotations
@@ -1497,69 +1516,349 @@ async def preview(
 
 
 # ---------------------------------------------------------------------------
-# 7. The seam where the click will go, and does not yet
+# 7. The click
+# ---------------------------------------------------------------------------
+
+#: The two actions :func:`perform` will act on. NOT the sanctioned set: the
+#: sanctioned set is what may hold a grant, this is what may be executed, and
+#: they differ by two on purpose.
+#:
+#: ``follow_company`` is sanctioned and is NOT here. It is genuinely reversible
+#: -- three surfaces write the inverse action into the control's own accessible
+#: name -- but reversible BY HIM, BY HAND: no unfollow is sanctioned, so a
+#: follow performed here is one this server cannot take back. An action whose
+#: undo is hand-only does not go first, and the operator cut it from this round
+#: on that ground rather than on a technical one.
+#:
+#: ``set_open_to_work`` is not here either, and could not be: its editor is a
+#: modal that has never loaded in any capture, it holds no ``url_template``, and
+#: :func:`mint` already refuses it a grant at issue. Its residue is also the one
+#: irreversibility in this design that is measured in AUDIENCE rather than in
+#: state -- a badge taken down is not a badge un-seen.
+PERFORMABLE: frozenset[str] = frozenset({"save_job", "unsave_job"})
+
+#: How long to wait for the anchor to be actionable. Generous, because the
+#: alternative to waiting is clicking early, and a click that lands on a
+#: control that has not settled is the failure mode with no error message.
+CLICK_TIMEOUT_MS = 10_000
+
+
+def anchor_label_for(spec: WriteSpec) -> Optional[str]:
+    """The label the control must be wearing before this action may click it.
+
+    Derived from :data:`shape.SAVE_LABELS` rather than written down twice, and
+    that indirection is the whole mechanism by which ``unsave_job`` refuses
+    today and works tomorrow WITHOUT A CODE CHANGE. The table maps a measured
+    accessible name to the state it means; this reads it backwards, from the
+    state an action is valid FROM to the name it would have to see.
+
+        save_job    valid from ``not_saved`` -> "Save the job"  (MEASURED)
+        unsave_job  valid from ``saved``     -> nothing         (NEVER SEEN)
+
+    Add the observed ON label to ``shape.SAVE_LABELS`` and unsave acquires its
+    anchor. Until somebody has actually seen it, this returns ``None`` and
+    :func:`perform` refuses -- which is the correct behaviour and not a
+    limitation to be worked around by picking a plausible string.
+    """
+    for label, state in shape.SAVE_LABELS.items():
+        if state == spec.from_state:
+            return label
+    return None
+
+
+def _refuse_unperformable(spec: WriteSpec) -> None:
+    """Raise unless this action is one :func:`perform` may execute at all."""
+    if spec.action in PERFORMABLE:
+        return
+    if spec.action == "follow_company":
+        raise WriteAttemptError(
+            "follow_company is sanctioned but is not performed by this server. "
+            "It is reversible only BY HIM, BY HAND -- no unfollow is "
+            "sanctioned, so a follow made here is one this server cannot take "
+            "back. An action whose undo is hand-only does not go first."
+        )
+    raise WriteAttemptError(
+        f"{spec.action!r} is not performable. The complete performable set is "
+        f"{sorted(PERFORMABLE)}, and it is deliberately smaller than the "
+        "sanctioned set."
+    )
+
+
+async def perform(
+    navigator: Any, page: Any, grant: WriteGrant
+) -> dict[str, Any]:
+    """Perform the ONE action this grant is permission for. THE ONLY WRITER.
+
+    This is the only function in this package that changes anything on
+    LinkedIn, and the only one named in ``readonly.SANCTIONED_MUTATIONS``. The
+    scanner still reports its click; what changed on 2026-08-23 is that the
+    report is now expected, by path and function and kind, and a second one
+    anywhere would fail ``tests/test_readonly.py``.
+
+    FIVE GATES BEFORE ANYTHING MOVES, and they are not redundant -- each
+    refuses something the others let through:
+
+    1. **The flag.** Writes are off per process unless deliberately enabled.
+    2. **The grant, REDEEMED.** ``perform`` does not redeem its own permission;
+       it requires a grant that :func:`consume` has already burned. So the
+       token check -- single use, right action, right target, not expired --
+       has provably happened before this function is entered, and a caller
+       cannot skip it by handing over a fresh grant object.
+    3. **The write door**, :func:`assert_write_url`: the url is REBUILT from
+       the grant, never accepted, and the forbidden list is not shortened.
+    4. **The read door**, ``readonly.assert_read_url``, on the same navigation,
+       plus the auth-wall check. The grant is permission; the url check is the
+       door; a navigation passes both or it does not happen.
+    5. **THE LIVE LABEL.** The control about to be clicked is re-read ON THE
+       PAGE, and must be wearing exactly the accessible name that means the
+       state this action is valid from.
+
+    WHY GATE 5 REPLACED THE THING THIS DOCSTRING USED TO PROMISE. It said the
+    click would "re-check the observation's age before it moves anything". That
+    cannot work as stated, and the arithmetic says so: an observation dies in
+    30 seconds while a grant lives for 120, because one is a reading of
+    LinkedIn and the other is a human deciding. Enforcing the 30 would refuse
+    every confirmation a person actually took time over; enforcing the 120
+    would be the grant check wearing a second name. So the age is REPORTED --
+    the operator sees how stale the preview he read was -- and the real
+    precondition is a fresh read of the very control, which is strictly
+    stronger than an age bound and costs nothing, since the page has to be open
+    to be clicked. For ``save_job`` it is also an INDEPENDENT corroboration: the
+    preview took its direction from the saved LIST, and this takes it from the
+    BUTTON.
+
+    NOTHING RAISES AFTER THE CLICK, and that is deliberate rather than sloppy.
+    Once the button has been pressed, the single most important fact in the
+    world is that it was pressed; an exception thrown on the way home would
+    replace that fact with a stack trace, and the operator would retry and
+    toggle it back. Every post-click outcome comes back as a field.
+
+    VERIFICATION IS FROM A DIFFERENT SURFACE, always. The click happens on the
+    posting; the confirmation is read off ``/jobs-tracker/?stage=saved``, the
+    same corroborated list the preview used, because a control that redraws
+    itself is the weakest possible witness to its own effect.
+
+    Returns a block whose ``performed`` field has THREE values, not two:
+    ``True``, ``False``, and ``"unknown"`` -- the third for a click that raised
+    on the way out, where whether it dispatched is exactly what nobody knows.
+    """
+    _refuse_unperformable(spec_for_action(grant.action))
+    spec = spec_for_action(grant.action)
+
+    if not writes_enabled():
+        raise WriteAttemptError(
+            f"writes are disabled: set {WRITES_FLAG}=1 to enable them."
+        )
+    if not isinstance(grant, WriteGrant):
+        raise WriteAttemptError("perform takes a WriteGrant and nothing else")
+    if not grant.consumed:
+        raise WriteAttemptError(
+            "this grant has not been redeemed. A write is performed against a "
+            "grant that consume() has already burned, so the token checks -- "
+            "single use, this action, this target, not expired -- have "
+            "provably run. perform does not redeem its own permission."
+        )
+
+    observation = grant.observation
+    if observation is None:
+        raise WriteAttemptError(
+            "this grant carries no reading. A grant is minted only by a "
+            "preview that re-read the target live, so one without an "
+            "observation was not built by preview and will not be acted on."
+        )
+
+    anchor = anchor_label_for(spec)
+    if anchor is None:
+        raise WriteAttemptError(
+            f"{spec.action!r} has no measured anchor and will not be "
+            f"performed. It is valid from {spec.from_state!r}, and the "
+            "accessible name the save control wears in that state has NEVER "
+            "BEEN OBSERVED -- every capture this repo holds shows the OFF "
+            f"state {sorted(shape.SAVE_LABELS)}, because there is nothing "
+            "saved on the account to photograph the other one on. A selector "
+            "cannot be guessed here: 'Saved' and 'Unsave the job' are both "
+            "plausible and neither has been seen. THE SUPERVISED SAVE IS THE "
+            "MEASUREMENT -- this function reports the label the control "
+            "changes into, and writing that one line into shape.SAVE_LABELS "
+            "is what lifts this refusal."
+        )
+
+    # Gates 3 and 4: the write door, then the read door, on the same url.
+    url = assert_write_url(
+        str(spec.url_template or "").format(target=grant.target), grant
+    )
+    landed = await _load(navigator, page, url, surface="job posting")
+
+    # We must be on the posting the grant names. LinkedIn serves a slug form of
+    # the same posting, so the ID is compared rather than the whole string --
+    # a landed url that carries no job id at all, or a different one, means the
+    # navigation went somewhere this grant is not permission for.
+    landed_id = re.search(dom.JOB_HREF, str(landed))
+    if not landed_id or landed_id.group(1) != grant.target:
+        raise WriteAttemptError(
+            f"refusing to click: the grant is for job {grant.target} and the "
+            f"browser landed on {landed!r}, which is not that posting."
+        )
+
+    # Gate 5: the control itself, read live, on the page about to be clicked.
+    control = await dom.read_save_control(page)
+    verdict = shape.save_state(
+        control.get("label"), count=int(control.get("count") or 0)
+    )
+    live_state = str(verdict.get("state") or UNKNOWN)
+    if live_state != spec.from_state:
+        raise WriteAttemptError(
+            f"refusing to click: {spec.action!r} is valid only from "
+            f"{spec.from_state!r} and the control on the page reads "
+            f"{live_state!r}. {verdict.get('why')} On a toggle, acting from "
+            "the wrong state performs the OPPOSITE action, so this stops "
+            "rather than treating it as a no-op. This reading is fresher than "
+            "the one in the preview and it wins."
+        )
+    selector = dom.save_control_selector(anchor)
+
+    # ---- everything above may raise; nothing below does --------------------
+    click_error: Optional[str] = None
+    try:
+        await page.click(selector, timeout=CLICK_TIMEOUT_MS)
+    except Exception as exc:  # noqa: BLE001 - reported, never re-raised
+        click_error = f"{type(exc).__name__}: {exc}"
+
+    # The label the control changed INTO. Read for a human, never branched on:
+    # this is the one measurement that can settle the missing half of
+    # shape.SAVE_LABELS, and it can only be taken here, immediately after a
+    # real save on a real account.
+    became: Optional[str] = None
+    try:
+        became = await dom.read_any_save_control_label(page)
+    except Exception:  # noqa: BLE001 - a measurement, not a gate
+        became = None
+
+    verified_state = UNKNOWN
+    verified_why = ""
+    try:
+        state_landed = await _load(
+            navigator, page, SAVED_LIST_URL, surface="saved jobs"
+        )
+        verified_state, verified_why = await _read_saved_state(page, grant.target)
+    except Exception as exc:  # noqa: BLE001 - the click already happened
+        state_landed = SAVED_LIST_URL
+        verified_why = (
+            f"the verification read itself failed ({type(exc).__name__}: "
+            f"{exc}), so this says nothing about whether the click landed. "
+            "Open your saved jobs and look."
+        )
+
+    verified = verified_state == spec.to_state
+    if verified:
+        performed: Any = True
+    elif verified_state == spec.from_state:
+        performed = False
+    elif click_error is None:
+        performed = UNKNOWN
+    else:
+        performed = UNKNOWN
+
+    return {
+        "action": spec.action,
+        "what": spec.summary,
+        "target": {
+            "job_id": grant.target,
+            "title": observation.facts.get("title"),
+            "company": observation.facts.get("company"),
+            "url": url,
+        },
+        "performed": performed,
+        "clicked": {
+            "selector": selector,
+            "on": landed,
+            "state_before": live_state,
+            "read_from": "the control itself, immediately before the click",
+            "error": click_error,
+        },
+        "verified": verified,
+        "verification": {
+            "expected_state": spec.to_state,
+            "observed_state": verified_state,
+            "read_from": state_landed,
+            "why": verified_why,
+            "surface": (
+                "a DIFFERENT surface from the one clicked. A control that "
+                "redraws itself is the weakest possible witness to its own "
+                "effect, so the confirmation comes from LinkedIn's own saved "
+                "list with its own per-tab count."
+            ),
+        },
+        "preview_age_seconds": round(observation.age(), 3),
+        "to_undo": spec.reversible_by,
+        "newly_observed_save_label": became,
+        "what_that_label_is_for": (
+            "the accessible name the save control wears NOW. It is recorded "
+            "for a human and nothing branches on it. If it is not "
+            f"{anchor!r}, it is the state this repo has never been able to "
+            "photograph -- write it into shape.SAVE_LABELS and unsave_job "
+            "acquires its anchor."
+        ),
+        "read_this_if_unsure": (
+            "performed is 'unknown' when the click may or may not have "
+            "dispatched. Do NOT retry on 'unknown': a retry on a toggle that "
+            "did land performs the opposite action. Open your saved jobs and "
+            "look first."
+        ),
+    }
+
+
+# ---------------------------------------------------------------------------
+# 7b. The history of this seam, kept because the reasoning is the deliverable
 # ---------------------------------------------------------------------------
 
 
-async def perform(page: Any, grant: WriteGrant) -> dict[str, Any]:
-    """The one function that will ever act. It refuses.
+TOGGLE_MEASUREMENT_RECORD = """The toggle problem IS SOLVED, and it was solved by reading.
 
-    Everything above is exercised by ``tests/test_writes.py``. THIS is the part
-    that cannot be exercised: the operator's permission classifier still
-    refuses LinkedIn writes, so a click authored here could not be run even
-    once before shipping -- against the least automation-tolerant platform in
-    the family, on his only account.
+WHAT THIS RECORD REPLACED. Until 2026-08-23 :func:`perform` was a ``raise`` and
+this text was its docstring, explaining why the refusal was the deliverable: the
+operator's permission classifier refused LinkedIn writes, so a click authored
+then could not have been exercised even once -- against the least
+automation-tolerant platform in the family, on his only account. The classifier
+now permits it. The click exists. This is kept as a module constant rather than
+deleted because the REASONING is the deliverable and a docstring on a function
+that no longer refuses would read as a description of what it does.
 
-    So it raises, and the refusal is the deliverable. When the rule exists, the
-    body becomes a single anchored click and this docstring becomes its
-    history. The anchor is already known and already frozen at BOTH hydration
-    states in ``tests/fixtures/job_detail*.html``:
+THE ANCHORS, frozen at BOTH hydration states in ``tests/fixtures/job_detail*.html``:
 
-        button[aria-label="Save the job"]   -- present pre- and post-hydration
-        button[aria-label="Follow"]         -- present pre- and post-hydration
+    button[aria-label="Save the job"]   -- present pre- and post-hydration
+    button[aria-label="Follow"]         -- present pre- and post-hydration
 
-    Anchored on the accessible name, never on ``data-view-name`` (which is
-    absent before hydration) and never on a class (which is a build hash).
+Anchored on the accessible name, never on ``data-view-name`` (absent before
+hydration, and GONE ENTIRELY from a posting captured one day later) and never on
+a class (a build hash, byte-identical between the two follow states).
 
-    THE TOGGLE PROBLEM, WHICH WAS THE STATED BLOCKER, IS SOLVED -- and it was
-    solved by reading, which is the part worth carrying to the next platform.
-    Both anchors are TOGGLES and every capture frozen before 2026-08-23 showed
-    only their OFF state, so nothing could tell Save from Unsave or Follow from
-    Unfollow. That was recorded as something a write would have to establish.
-    It was not: it was a READ nobody had performed.
+THE TOGGLE PROBLEM, WHICH WAS THE STATED BLOCKER. Both anchors are TOGGLES and
+every capture frozen before 2026-08-23 showed only their OFF state, so nothing
+could tell Save from Unsave or Follow from Unfollow. That was recorded as
+something a write would have to establish. It was not: it was a READ nobody had
+performed.
 
-        follow, MEASURED 2026-08-23 by loading a posting from a company he
-        already follows:
-            not following -> button[aria-label="Follow"]
-            following     -> button[aria-label="Following"]
-        The two carry BYTE-IDENTICAL class attributes and the page has no
-        aria-pressed anywhere, so the accessible name is the entire signal.
-        Frozen at both renders in ``job_detail_following*.html``.
+    follow, MEASURED 2026-08-23 by loading a posting from a company he
+    already follows:
+        not following -> button[aria-label="Follow"]
+        following     -> button[aria-label="Following"]
+    The two carry BYTE-IDENTICAL class attributes and the page has no
+    aria-pressed anywhere, so the accessible name is the entire signal.
+    Frozen at both renders in ``job_detail_following*.html``.
 
-        save: the ON state of the save control has NOT been observed, and
-        cannot be -- he has no saved posting on the account to observe it on.
-        Direction for save therefore comes from ``linkedin_saved_jobs``, the
-        list read, which is corroborated by LinkedIn's own per-tab count. That
-        is a different source, not a weaker one, and it is named in the spec.
+    save: the ON state of the save control has NOT been observed, and cannot
+    be by reading -- he has no saved posting on the account to observe it on.
+    Direction for save therefore comes from ``linkedin_saved_jobs``, the list
+    read, which is corroborated by LinkedIn's own per-tab count. That is a
+    different source, not a weaker one, and it is named in the spec.
 
-    :func:`_direction` REFUSES to render a gate without the measured state,
-    refuses on ``unknown``, and refuses when the state is not the one the
-    action is valid from -- because on a toggle, acting from the wrong state
-    performs the opposite action. And since 2026-08-23 that state is one the
-    gate READ rather than one it was handed: see section 5.
-
-    WHAT THIS FUNCTION WILL CHECK ON THE DAY IT ACTS, recorded now while the
-    reasoning is fresh. ``grant.observation`` carries the reading the preview
-    performed. A grant is allowed to be two minutes old because a human was
-    reading it; the READING is not, because anything else touching the account
-    invalidates it. So the click, when it exists, re-checks the observation's
-    age before it moves anything -- a fresh confirmation of a stale reading is
-    still a write aimed at a page that has changed.
-    """
-    raise WriteAttemptError(
-        "no write is implemented. The grant machinery, the narrowed url door, "
-        "the confirm gate and the sanctioned set are all built and tested; the "
-        "action itself is deliberately absent until the permission classifier "
-        "allows a supervised round trip to exercise it. Nothing about this "
-        "server can change LinkedIn today."
-    )
+THAT REMAINING HALF IS NOW THE ONLY THING BETWEEN THIS SERVER AND A ROUND TRIP.
+``save_job`` has its anchor and performs. ``unsave_job`` is built on the same
+path and refuses at one named point -- :func:`anchor_label_for` returns None,
+because ``shape.SAVE_LABELS`` has no entry for the saved state. The supervised
+save is the measurement that fills it: :func:`perform` reads the label the
+control changes into and reports it for a human to write down. One line, and it
+must be measured rather than guessed -- "Saved" and "Unsave the job" are both
+plausible and this server has seen neither.
+"""

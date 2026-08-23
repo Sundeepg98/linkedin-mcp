@@ -570,6 +570,113 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Save state
+# ---------------------------------------------------------------------------
+
+#: The accessible names the job-SAVE control has been SEEN wearing. One of
+#: them, and the singular is the point -- see ``shape.SAVE_LABELS`` for why
+#: the ON state cannot be photographed on this account.
+#:
+#: MEASURED across all four frozen postings at BOTH hydration states:
+#:
+#:   not saved -> ``<button type="button" ... aria-label="Save the job">``
+#:
+#: Anchored on the accessible name, and the alternatives are ruled out by
+#: measurement rather than by preference. ``data-view-name="job-save-button"``
+#: is on the 2026-08-22 hydrated capture and GONE from the 2026-08-23 one --
+#: same surface, same account, one day, the whole instrumenting layer removed.
+#: The class list is a build hash and is byte-identical to the follow button's
+#: neighbours. ``componentkey`` is a per-posting uuid. The accessible name is
+#: the only handle that survived the day it was tested on.
+SAVE_LABELS_SEEN: tuple[str, ...] = ("Save the job",)
+
+#: Matches the save control in any state this reader recognises -- which today
+#: is one state, so a posting that IS saved matches nothing here and
+#: ``read_save_control`` reports count 0. That reading is deliberately
+#: ambiguous rather than falsely negative: see ``shape.save_state``.
+SAVE_CONTROL = ", ".join(
+    f'button[aria-label="{label}"]' for label in SAVE_LABELS_SEEN
+)
+
+
+def save_control_selector(label: str) -> str:
+    """A selector for the save control wearing exactly ``label``.
+
+    GUARDED, because this is the one string in this package that a click is
+    built from. The label may only be one this reader has actually seen
+    LinkedIn render, so the selector cannot be assembled out of a value that
+    arrived from somewhere else -- the same discipline ``writes.assert_write_url``
+    applies to a url, applied to the other half of the click.
+    """
+    if label not in SAVE_LABELS_SEEN:
+        raise ExtractionFailedError(
+            f"refusing to build a save-control selector for {label!r}: this "
+            f"reader has only ever seen {list(SAVE_LABELS_SEEN)}. A selector "
+            "assembled from an unmeasured label is a guess pointed at a "
+            "button."
+        )
+    return f'button[aria-label="{label}"]'
+
+
+async def read_save_control(page: Any) -> dict[str, Any]:
+    """Return the save control's accessible name, and how sure we are.
+
+    Same three outcomes as :func:`read_follow_control`, and the same reason for
+    keeping them three: ``count`` 0 means the control did not render IN A STATE
+    THIS READER KNOWS, which on a posting that is already saved is exactly what
+    would happen. Absence is not a state.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    try:
+        controls = page.locator(SAVE_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("save control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("save label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
+
+
+async def read_any_save_control_label(page: Any) -> Optional[str]:
+    """The accessible name of whatever save-shaped control the page now draws.
+
+    UNANCHORED ON PURPOSE, and used for exactly one thing: after a supervised
+    save, reading back what the control changed INTO. :data:`SAVE_CONTROL`
+    cannot do that job -- it only matches labels already known, so it would
+    report the very absence the click was supposed to cause.
+
+    It is a MEASUREMENT INSTRUMENT, never a decision input. Nothing branches on
+    what this returns; ``writes.perform`` prints it so the ON-state label can be
+    written into ``shape.SAVE_LABELS`` by a human who saw it. Locating "the
+    save control" without knowing its name means locating it by POSITION, which
+    is precisely what this package refuses to decide on -- so the value comes
+    back for a person to read and for nothing else.
+    """
+    try:
+        controls = page.locator("main button[aria-label]")
+        total = int(await controls.count())
+    except Exception as exc:
+        logger.debug("post-click sweep failed: %s: %s", type(exc).__name__, exc)
+        return None
+    for index in range(min(total, 60)):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # pragma: no cover - defensive
+            continue
+        text = str(label or "").strip()
+        if text and "sav" in text.casefold():
+            return text
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Follow state
 # ---------------------------------------------------------------------------
 

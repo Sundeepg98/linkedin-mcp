@@ -1012,6 +1012,86 @@ def follow_state(label: Optional[str], *, count: int) -> dict[str, Any]:
     return {"state": known, "why": f"the control is labelled {label!r}"}
 
 
+# ---------------------------------------------------------------------------
+# Save state
+# ---------------------------------------------------------------------------
+
+#: The accessible name of the job-posting SAVE control in each state it has
+#: been SEEN in, and what each one means. Deliberately shaped like
+#: :data:`FOLLOW_LABELS` above, and deliberately HALF THE SIZE.
+#:
+#: ONE ENTRY, and the missing one is the honest centre of this whole feature.
+#: Every capture this repo holds -- four postings, both hydration states, taken
+#: on two different days -- renders ``aria-label="Save the job"``, the OFF
+#: state. The ON state has never been observed and CANNOT be observed by
+#: reading: he has nothing saved on the account, so there is no posting
+#: anywhere that would draw it. The follow pair could be measured because a
+#: company he already follows exists to load; the save pair has no equivalent.
+#:
+#: WHAT THAT COSTS, stated where the gap is rather than in a docstring
+#: somewhere else: ``writes.perform`` anchors on the label for the state its
+#: action is valid FROM, so ``save_job`` has an anchor and ``unsave_job`` does
+#: not, and unsave refuses until this table gains its second row. THE FIRST
+#: SUPERVISED SAVE IS THE MEASUREMENT -- ``perform`` re-reads the control after
+#: it clicks and reports what it now says, precisely so that observation can be
+#: written here. It is one line, and it is a line that must be MEASURED and not
+#: guessed: ``"Saved"`` and ``"Unsave the job"`` are both plausible and this
+#: server has seen neither.
+SAVE_LABELS: dict[str, str] = {
+    "Save the job": "not_saved",
+}
+
+#: Same contract as :data:`FOLLOW_UNKNOWN`: "could not tell" is an answer.
+SAVE_UNKNOWN = "unknown"
+
+
+def save_state(label: Optional[str], *, count: int) -> dict[str, Any]:
+    """Turn what the SAVE control said into a state, or an honest refusal.
+
+    Read this beside :func:`follow_state`, because the asymmetry between them
+    is a measurement rather than an oversight. Follow knows both of its labels,
+    so an unrecognised one means LinkedIn changed something. Save knows ONE, so
+    an unrecognised label is ambiguous in a way follow's never is -- it could
+    equally be the ON state finally being seen for the first time. This says
+    so instead of collapsing the two into one word.
+    """
+    if count == 0:
+        return {
+            "state": SAVE_UNKNOWN,
+            "why": (
+                "no save control rendered in a state this reader recognises. "
+                "That is NOT evidence the posting is unsaved, and it is not "
+                "evidence it is saved either: with only the OFF label "
+                "measured, 'the page has not hydrated' and 'the control is in "
+                "the one state nobody has photographed' look identical from "
+                "here."
+            ),
+        }
+    if count > 1:
+        return {
+            "state": SAVE_UNKNOWN,
+            "why": (
+                f"{count} save controls rendered, so which one belongs to this "
+                "posting cannot be settled. Choosing the first would be "
+                "choosing by position."
+            ),
+        }
+    known = SAVE_LABELS.get(str(label or "").strip())
+    if known is None:
+        return {
+            "state": SAVE_UNKNOWN,
+            "why": (
+                f"the control is labelled {label!r}, which is not the one "
+                f"measured state {sorted(SAVE_LABELS)}. This is the reading "
+                "that most deserves a human: it is either LinkedIn relabelling "
+                "the control, or it is the SAVED state being rendered for the "
+                "first time on this account. Those want opposite responses, so "
+                "this reader will not pick one."
+            ),
+        }
+    return {"state": known, "why": f"the control is labelled {label!r}"}
+
+
 #: ``Click to stop following Ashgrove Systems`` -> ``Ashgrove Systems``. The
 #: accessible name states the inverse action, which is where the reversibility
 #: evidence for a follow comes from as well as the name.

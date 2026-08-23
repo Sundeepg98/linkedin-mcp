@@ -49,7 +49,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import readonly, writes
+from linkedin_server import dom, readonly, shape, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import (
     GRANT_TTL_SECONDS,
@@ -511,17 +511,42 @@ def test_the_conservation_law_would_notice_a_quiet_deletion():
 def test_nothing_is_both_forbidden_and_sanctioned_by_accident():
     """A name in both lists is ambiguous, and ambiguity in a boundary is a hole.
 
-    Today all three sanctioned names are STILL in FORBIDDEN_TOOLS, which is the
-    correct state: they are designed and gated but NOT shipped, because the
-    action cannot be exercised. This asserts that reading, so the day one ships
-    the mismatch is a failing test rather than a silent divergence.
+    THIS IS THE ASSERTION THAT MOVED ON 2026-08-23, and it moved by exactly the
+    amount the operator authorised. It used to read all THREE sanctioned names,
+    with a comment saying they were designed and gated but not shipped, and
+    that the day one shipped the mismatch would be a failing test rather than a
+    silent divergence. That day came, it was a failing test, and this is the
+    edit it demanded.
+
+    Two names left ``FORBIDDEN_TOOLS`` and are now registered. One did not:
+    ``linkedin_set_open_to_work`` stays in both, because it stays designed and
+    unshipped -- its editor has never been loaded and :func:`mint` refuses it a
+    grant at issue. ``linkedin_follow_company`` was never on the forbidden list
+    (it is the rename loophole the check below covers) and is sanctioned but
+    not performable.
     """
     overlap = set(FORBIDDEN_TOOLS) & set(SANCTIONED_WRITES)
-    assert overlap == {
-        "linkedin_save_job",
-        "linkedin_unsave_job",
-        "linkedin_set_open_to_work",
-    }, overlap
+    assert overlap == {"linkedin_set_open_to_work"}, overlap
+
+
+def test_what_ships_is_narrower_than_what_is_sanctioned():
+    """Three sets, each smaller than the last, and none of them the same thing.
+
+    Conflating any two of these is how a boundary widens without anybody
+    editing a boundary: ``SANCTIONED_WRITES`` is what may hold a GRANT,
+    ``PERFORMABLE`` is what :func:`perform` will EXECUTE, and the registered
+    tool names are what a CALLER can reach. Asserted as a chain so a future
+    edit that grows one has to grow it visibly.
+    """
+    sanctioned_actions = {spec.action for spec in SANCTIONED_WRITES.values()}
+    assert sanctioned_actions == {
+        "save_job",
+        "unsave_job",
+        "follow_company",
+        "set_open_to_work",
+    }
+    assert writes.PERFORMABLE == {"save_job", "unsave_job"}
+    assert writes.PERFORMABLE < sanctioned_actions
 
 
 def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
@@ -566,13 +591,24 @@ def test_that_loophole_check_would_catch_a_smuggled_verb():
     assert set(readonly.iter_write_verbs_in(smuggled)) & original_verbs == set()
 
 
-async def test_no_write_tool_is_registered_on_the_surface_today():
-    """The claim the whole pass rests on: the MCP surface is unchanged."""
+async def test_exactly_the_two_authorised_writes_are_registered():
+    """WHAT THIS TEST USED TO ASSERT: that the surface carried no write at all.
+
+    It carries two. So the assertion is now the exact pair rather than the
+    empty set -- and the second half, that nothing still on ``FORBIDDEN_TOOLS``
+    is registered, is UNCHANGED and is the half that still does the work. A
+    third write appearing fails it.
+    """
     from linkedin_server.server import mcp
 
     names = {t.name for t in await mcp.list_tools()}
-    assert names & set(SANCTIONED_WRITES) == set()
+    assert names & set(SANCTIONED_WRITES) == {
+        "linkedin_save_job",
+        "linkedin_unsave_job",
+    }
     assert names & FORBIDDEN_TOOLS == set()
+    # linkedin_follow_company is sanctioned and must NOT be reachable.
+    assert "linkedin_follow_company" not in names
 
 
 # ---------------------------------------------------------------------------
@@ -816,31 +852,461 @@ def test_every_sanctioned_spec_carries_a_procedure_that_would_settle_it():
 
 
 # ---------------------------------------------------------------------------
-# 6. Nothing can actually act
+# 6. What CAN act, and everything that has to be true first
 # ---------------------------------------------------------------------------
+#
+# THIS SECTION WAS CALLED "Nothing can actually act" AND ASSERTED EXACTLY THAT.
+# On 2026-08-23 the operator authorised save and unsave, ``perform`` gained a
+# body, and the old assertions became the thing they were guarding against: a
+# suite claiming a property the code no longer had.
+#
+# NOT ONE CLICK IN THIS SECTION REACHES LINKEDIN. Every one lands on a frozen
+# capture loaded into a local headless Chromium by ``set_content``. Measured
+# before any of it was written, with every request intercepted and aborted so
+# that an attempt would have been recorded even if it could not complete: the
+# four posting fixtures contain ZERO script tags, attempt ZERO requests on load
+# and ZERO on click, do not navigate, and do not move the DOM. The click is
+# real, dispatches in ~20ms, and provably cannot leave the machine.
+#
+# THAT LAST PROPERTY IS ALSO THE LIMIT OF WHAT THESE TESTS CAN SAY, and it is
+# stated here rather than left for a reader to infer: because the fixture DOM
+# does not move, a test can prove the machinery clicks the right thing under
+# the right conditions and can never prove that clicking it saves a job. That
+# is a claim only a supervised run against a real account settles, and none has
+# happened.
 
 
-async def test_the_one_function_that_could_act_refuses(writes_on):
-    grant = _bare_grant()
+async def _granted(
+    page,
+    action: str,
+    *,
+    target: str,
+    posting: str = "job_detail",
+    saved: str = "jobs_tracker_empty",
+) -> writes.WriteGrant:
+    """A real, redeemed grant, produced the way the tool produces one.
+
+    Deliberately the long way round -- preview, then consume the token it
+    printed -- rather than constructing a grant. ``perform`` requires a grant
+    that has already been burned, so a test that fabricated one would be
+    testing a path no caller can take.
+    """
+    block, _nav = await _gate(page, action, target=target, posting=posting, saved=saved)
+    return consume(block["to_confirm"], action=action, target=target)
+
+
+async def _perform(
+    page,
+    grant: writes.WriteGrant,
+    *,
+    posting: str = "job_detail",
+    saved=None,
+):
+    """Run the real ``perform`` over frozen captures. Returns ``(block, nav)``.
+
+    The saved list served here is usually DIFFERENT from the one the preview
+    saw, and that is the point: it models the world having changed because the
+    click changed it. The navigator is per-call, so "before" and "after" are
+    two separate frozen worlds rather than one mutable fake.
+    """
+    nav = FixtureNavigator(
+        _pages(target=grant.target, posting=posting, saved=saved)
+    )
+    return await writes.perform(nav, page, grant), nav
+
+
+#: The tracker capture with LinkedIn's own Saved count edited 0 -> 1 AND the
+#: row's job id rewritten to the posting these tests act on. DERIVED, twice
+#: over, and labelled as such everywhere it is used: a self-consistent saved
+#: list containing a chosen posting cannot be photographed on an account with
+#: nothing saved. It exercises THE READER'S LOGIC and measures nothing about
+#: LinkedIn.
+SAVED_LIST_CONTAINING = SAVED_LIST_OF_ONE
+
+
+async def test_a_save_runs_end_to_end_and_is_verified_from_the_other_surface(
+    writes_on, browser_page
+):
+    """THE POSITIVE CASE, and it goes first.
+
+    Everything else in this section asserts a refusal, and a section full of
+    refusals passes perfectly on a ``perform`` that raises unconditionally --
+    which is exactly what this one used to do. This is the test that fails if
+    the body goes back to being a stub.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    block, nav = await _perform(
+        browser_page, grant, saved=SAVED_LIST_CONTAINING
+    )
+
+    assert block["performed"] is True
+    assert block["verified"] is True
+    assert block["clicked"]["selector"] == 'button[aria-label="Save the job"]'
+    assert block["clicked"]["error"] is None
+    assert block["clicked"]["state_before"] == "not_saved"
+    assert block["verification"]["expected_state"] == "saved"
+    assert block["verification"]["observed_state"] == "saved"
+
+    # TWO loads, in this order: the posting it clicks on, then the DIFFERENT
+    # surface it confirms from.
+    assert nav.gotos == [
+        f"https://www.linkedin.com/jobs/view/{SAVED_JOB}/",
+        writes.SAVED_LIST_URL,
+    ]
+
+
+async def test_the_confirmation_comes_from_a_surface_other_than_the_button(
+    writes_on, browser_page
+):
+    """A control that redraws itself is the weakest witness to its own effect.
+
+    Pins that the verification read is the saved LIST and not the posting, so
+    a later "optimisation" that saves a page load by believing the button
+    fails here.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    block, _nav = await _perform(
+        browser_page, grant, saved=SAVED_LIST_CONTAINING
+    )
+    assert block["verification"]["read_from"] == writes.SAVED_LIST_URL
+    assert block["verification"]["read_from"] != block["clicked"]["on"]
+
+
+async def test_a_click_that_did_not_take_reports_false_and_does_not_raise(
+    writes_on, browser_page
+):
+    """THE CONTROL THAT MATTERS MOST IN THIS FILE.
+
+    A post-write verification that always says "verified" is worth nothing, and
+    it is the single easiest thing to write by accident. Here the saved list
+    AFTER the click is still empty -- the click did not take -- and the block
+    has to say so.
+
+    It must also NOT raise. Once the button has been pressed, the most
+    important fact in the world is that it was pressed; an exception on the way
+    home replaces that fact with a stack trace and the operator retries,
+    toggling it back.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    block, _nav = await _perform(
+        browser_page, grant, saved="jobs_tracker_empty"
+    )
+    assert block["performed"] is False
+    assert block["verified"] is False
+    assert block["verification"]["observed_state"] == "not_saved"
+    # The click itself still happened, and the block still says so.
+    assert block["clicked"]["error"] is None
+
+
+async def test_an_unreadable_saved_list_reports_unknown_not_success(
+    writes_on, browser_page
+):
+    """The third outcome, kept separate from the second.
+
+    A saved list that is a fraction of itself cannot settle whether the save
+    landed. That is neither success nor failure, and collapsing it into either
+    would be the same defect in opposite directions -- reporting success would
+    hide a failure, reporting failure invites a retry that double-toggles.
+
+    THE TARGET HERE IS ``JOB`` AND NOT ``SAVED_JOB``, and the first draft of
+    this test got that wrong in a way worth recording. It performed on the
+    posting the partial list DOES render, expected ``unknown``, and got
+    ``True`` -- correctly. Absence from a partial list is not absence; PRESENCE
+    in one is still presence. The ambiguity is one-directional, and a test that
+    had been written to match a wrong expectation would have pinned the reader
+    into treating a perfectly good confirmation as unreadable.
+    """
+    grant = await _granted(browser_page, "save_job", target=JOB)
+    block, _nav = await _perform(
+        browser_page, grant, saved=SAVED_LIST_PARTIAL
+    )
+    assert block["performed"] == "unknown"
+    assert block["verified"] is False
+    assert block["verification"]["observed_state"] == "unknown"
+    assert "below the fold" in block["verification"]["why"]
+    assert "Do NOT retry" in block["read_this_if_unsure"]
+
+
+async def test_presence_in_a_partial_list_still_confirms_the_save(
+    writes_on, browser_page
+):
+    """THE OTHER HALF, and the one the test above was written against by
+    mistake.
+
+    The ambiguity in a partial list runs one way only. If the posting IS among
+    the rows that rendered, it is saved -- however many rows are still below
+    the fold. Pinned so a later "be more careful about partial lists" edit
+    cannot make a good confirmation unreadable.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    block, _nav = await _perform(
+        browser_page, grant, saved=SAVED_LIST_PARTIAL
+    )
+    assert block["performed"] is True
+    assert block["verified"] is True
+    assert block["verification"]["observed_state"] == "saved"
+
+
+async def test_unsave_refuses_because_its_anchor_has_never_been_measured(
+    writes_on, browser_page
+):
+    """THE HONEST GAP, asserted so it cannot be quietly closed with a guess.
+
+    ``unsave_job`` is built on the same path as save and gated the same way. It
+    refuses at exactly one point: the accessible name the save control wears on
+    a SAVED posting has never been observed, because there has never been a
+    saved posting on this account to observe it on.
+
+    The refusal must name the reason. A generic "not implemented" would invite
+    somebody to implement it by choosing a plausible selector, which is the one
+    thing that must not happen.
+    """
+    spec = spec_for_action("unsave_job")
+    assert writes.anchor_label_for(spec) is None
+
+    grant = writes.WriteGrant(
+        action="unsave_job",
+        target=SAVED_JOB,
+        token="x",
+        minted_at=time.monotonic(),
+        consumed=True,
+        observation=await _observe(
+            browser_page, "unsave_job", target=SAVED_JOB, saved=SAVED_LIST_CONTAINING
+        ),
+    )
     with pytest.raises(WriteAttemptError) as excinfo:
-        await writes.perform(object(), grant)
-    assert "no write is implemented" in str(excinfo.value)
+        await writes.perform(object(), object(), grant)
+    message = str(excinfo.value)
+    assert "NEVER" in message and "OBSERVED" in message
+    assert "SUPERVISED SAVE IS THE MEASUREMENT" in message
 
 
-def test_the_write_module_contains_no_mutating_call_at_all():
-    """The reason readonly.py and test_readonly.py keep their zero-line diffs.
+def test_the_anchor_table_is_what_gates_unsave_and_one_row_lifts_it():
+    """The gap is one row of a table, not a missing code path.
 
-    This module could have been the package's first exception to the source
-    scanner. It is not one: the scanner still reports zero for every file,
-    including this one, because the click does not exist yet.
+    Proven by adding the row: with a saved-state label present,
+    ``anchor_label_for`` returns it and the refusal above has nothing to fire
+    on. Nothing is monkeypatched into the module -- the lookup is run against a
+    copy -- so this asserts the MECHANISM without loosening the real table.
+    """
+    spec = spec_for_action("unsave_job")
+    assert spec.from_state == "saved"
+    assert writes.anchor_label_for(spec) is None
+
+    pretend = dict(shape.SAVE_LABELS)
+    pretend["Saved"] = "saved"
+    resolved = [
+        label for label, state in pretend.items() if state == spec.from_state
+    ]
+    assert resolved == ["Saved"]
+    # And the real table is untouched by that experiment.
+    assert set(shape.SAVE_LABELS) == {"Save the job"}
+
+
+async def test_follow_is_sanctioned_and_still_will_not_be_performed(writes_on):
+    """The operator's cut, made structural rather than remembered.
+
+    A follow is genuinely reversible and this server still will not do one,
+    because the undo is HAND-ONLY: no unfollow is sanctioned. The refusal has
+    to say that, or the next reader files it as an unfinished feature.
+    """
+    grant = _bare_grant(action="follow_company", target=JOB)
+    grant.consumed = True
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    message = str(excinfo.value)
+    assert "hand-only" in message
+    assert "no unfollow is sanctioned" in message.casefold()
+
+
+async def test_open_to_work_is_not_performable_either(writes_on):
+    grant = _bare_grant(action="set_open_to_work", target="self")
+    grant.consumed = True
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    assert "not performable" in str(excinfo.value)
+
+
+async def test_an_unredeemed_grant_performs_nothing(writes_on, browser_page):
+    """``perform`` does not redeem its own permission.
+
+    Requiring an already-consumed grant is what makes "the token was checked"
+    a fact rather than a convention: single use, this action, this target, not
+    expired -- all of it provably ran before this function was entered.
+    """
+    block, _nav = await _gate(browser_page, "save_job", target=SAVED_JOB)
+    grant = writes._GRANTS[block["to_confirm"]]
+    assert grant.consumed is False
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    assert "not been redeemed" in str(excinfo.value)
+
+
+async def test_a_grant_with_no_reading_behind_it_performs_nothing(writes_on):
+    """A grant that preview did not build carries no observation, and stops."""
+    grant = _bare_grant()
+    grant.consumed = True
+    assert grant.observation is None
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    assert "carries no reading" in str(excinfo.value)
+
+
+async def test_writes_off_stops_perform_even_with_a_valid_grant(
+    monkeypatch, browser_page
+):
+    """The flag is checked in ``perform`` too, not only on the way in.
+
+    A grant minted while writes were on must not survive the flag being turned
+    off -- otherwise "writes are disabled" is a statement about the past.
+    """
+    monkeypatch.setenv(WRITES_FLAG, "1")
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    monkeypatch.setenv(WRITES_FLAG, "0")
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    assert "disabled" in str(excinfo.value)
+    writes.discard_all()
+
+
+async def test_a_control_in_the_wrong_state_is_not_clicked(writes_on, browser_page):
+    """GATE 5, and it is the one the preview cannot provide.
+
+    The posting served to ``perform`` renders no save control this reader
+    recognises, so the live read comes back ``unknown`` and the click does not
+    happen -- even though the grant is valid and the preview said not_saved.
+    On a toggle, acting from the wrong state performs the OPPOSITE action.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    stripped = markup("job_detail").replace(
+        'aria-label="Save the job"', 'aria-label="Something Else Entirely"'
+    )
+    nav = FixtureNavigator(
+        {f"https://www.linkedin.com/jobs/view/{grant.target}/": stripped}
+    )
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(nav, browser_page, grant)
+    message = str(excinfo.value)
+    assert "refusing to click" in message
+    assert "'unknown'" in message
+    # And the verification surface was never even asked for: it stopped first.
+    assert nav.gotos == [f"https://www.linkedin.com/jobs/view/{grant.target}/"]
+
+
+async def test_landing_on_a_different_posting_is_not_clicked(writes_on, browser_page):
+    """The browser going somewhere the grant is not permission for.
+
+    ``assert_write_url`` checks the url this server BUILT; this checks where it
+    actually ARRIVED, which is a different fact and the one that matters after
+    a redirect.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+
+    class Redirecting(FixtureNavigator):
+        async def goto(self, page, url: str) -> str:
+            await super().goto(page, url)
+            return "https://www.linkedin.com/jobs/view/4600000099/"
+
+    nav = Redirecting(_pages(target=grant.target, posting="job_detail"))
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(nav, browser_page, grant)
+    assert "is not that posting" in str(excinfo.value)
+
+
+async def test_the_click_selector_cannot_be_built_from_an_unmeasured_label():
+    """The other half of the click, held to the same rule as the url.
+
+    ``assert_write_url`` refuses a url that did not come from the grant. This
+    refuses a SELECTOR that did not come from a measured observation, so the
+    two halves of the click are gated by the same discipline.
+    """
+    from linkedin_server.errors import ExtractionFailedError
+
+    assert dom.save_control_selector("Save the job") == (
+        'button[aria-label="Save the job"]'
+    )
+    with pytest.raises(ExtractionFailedError) as excinfo:
+        dom.save_control_selector("Saved")
+    assert "only ever seen" in str(excinfo.value)
+
+
+async def test_perform_reports_the_label_the_control_became(
+    writes_on, browser_page
+):
+    """The measurement that unblocks unsave, taken at the only moment it can be.
+
+    Nothing branches on it -- asserted by the fact that this save succeeds
+    while the reported label is still the OFF one, because a frozen capture's
+    DOM does not move when it is clicked. On a live account it would be the
+    ON-state label, which is the one line missing from ``shape.SAVE_LABELS``.
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+    block, _nav = await _perform(
+        browser_page, grant, saved=SAVED_LIST_CONTAINING
+    )
+    assert "newly_observed_save_label" in block
+    assert "shape.SAVE_LABELS" in block["what_that_label_is_for"]
+    # It did not gate anything: the save is still reported as performed.
+    assert block["performed"] is True
+
+
+def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
+    """WHAT THIS TEST USED TO ASSERT: that the scanner found nothing here.
+
+    It finds one thing, in ``perform``, of kind ``click``, and that is the
+    complete list. The scanner was NOT taught to stop seeing it -- the raw scan
+    below still reports it -- which is why it can still see a second.
     """
     source = Path(writes.__file__).read_text(encoding="utf-8")
-    assert readonly.scan_source_for_mutations(source) == []
+    raw = readonly.scan_source_for_mutations(source)
+    assert len(raw) == 1, raw
+    assert raw[0][1] == "click"
+
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py", source
+    )
+    assert unsanctioned == []
+    assert len(sanctioned) == 1
+    assert readonly.enclosing_function(source, sanctioned[0][0]) == "perform"
+
+
+def test_a_second_click_inside_perform_is_still_caught():
+    """THE CONTROL, on the real file, at the hardest possible edit.
+
+    A second click inside ``perform`` is in the sanctioned file, the sanctioned
+    function and of the sanctioned kind -- so it matches the allowlist entry
+    exactly and the PARTITION cannot see it. Asserted here, because a control
+    that hid that would be worse than none.
+
+    What catches it is the COUNT: the package is asserted to contain exactly as
+    many mutating calls as the list has entries, and the list has one. This
+    reproduces that check against the doubled source and shows it going red.
+    """
+    source = Path(writes.__file__).read_text(encoding="utf-8")
+    doubled = source.replace(
+        "await page.click(selector, timeout=CLICK_TIMEOUT_MS)",
+        "await page.click(selector, timeout=CLICK_TIMEOUT_MS)\n"
+        "        await page.click(selector, timeout=CLICK_TIMEOUT_MS)",
+        1,
+    )
+    assert doubled != source
+
+    # The partition is BLIND to it, and that is asserted rather than hidden.
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py", doubled
+    )
+    assert unsanctioned == [], "the partition sees a duplicate -- update this test"
+
+    # The count is not.
+    raw = readonly.scan_source_for_mutations(doubled)
+    assert len(raw) == 2
+    assert len(raw) != len(readonly.SANCTIONED_MUTATIONS), (
+        "the count check would not fire on a doubled click"
+    )
 
 
 def test_the_scanner_would_have_caught_it_if_it_did():
-    """The control for the assertion above, at the exact code that will one day
-    be written -- so the check is known to be capable of seeing it."""
+    """The scanner, shown seeing the exact code that was eventually written."""
     future = (
         "async def perform(page, grant):\n"
         "    await page.click('button[aria-label=\"Save the job\"]')\n"
@@ -991,8 +1457,15 @@ def test_the_toggle_problem_is_solved_and_the_solution_is_recorded():
     The one honestly unmeasured half stays named: the SAVE control's ON state
     has never been seen, because there is no saved posting on the account to
     see it on, so save takes its direction from the list read instead.
+
+    WHERE IT MOVED TO. This used to read ``writes.perform.__doc__``. That
+    docstring described a function that refused; the function now acts, and its
+    docstring describes what it does. The record was moved to a module constant
+    rather than deleted, because the reasoning is the deliverable -- and a
+    history kept inside the docstring of the thing it is the history OF is a
+    history that gets edited away the next time the thing changes.
     """
-    doc = writes.perform.__doc__ or ""
+    doc = writes.TOGGLE_MEASUREMENT_RECORD
     assert "IS SOLVED" in doc
     assert 'aria-label="Following"' in doc
     assert "linkedin_saved_jobs" in doc
@@ -1002,12 +1475,13 @@ def test_the_toggle_problem_is_solved_and_the_solution_is_recorded():
     # The measured pair is what the reader actually uses, so assert THAT
     # rather than the docstring alone -- a docstring cannot be wrong in a way
     # a caller notices.
-    from linkedin_server import shape
-
     assert shape.FOLLOW_LABELS == {
         "Follow": "not_following",
         "Following": "following",
     }
+    # And the half that is NOT a measured pair, for the same reason. One entry,
+    # and its singularity is the whole reason unsave refuses.
+    assert shape.SAVE_LABELS == {"Save the job": "not_saved"}
 
 
 # ---------------------------------------------------------------------------

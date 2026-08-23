@@ -1,12 +1,27 @@
-"""The tool surface: thirteen tools, every one of them a read of LinkedIn.
+"""The tool surface: sixteen tools, fourteen of which read LinkedIn.
 
-There is no write path TO LINKEDIN in this package. Not a disabled one, not a
-stubbed one, not one behind a flag. Nothing here applies to a job, saves a
-job, sends a message, edits the profile, toggles Open To Work, or marks
-anything read on purpose. ``readonly.py`` holds the machinery that keeps that
-true, and ``tests/test_readonly.py`` runs it against this file.
+THE OTHER TWO WRITE, and this paragraph used to say the opposite. Until
+2026-08-23 it read *"There is no write path TO LINKEDIN in this package. Not a
+disabled one, not a stubbed one, not one behind a flag."* That was true, it was
+enforced rather than asserted, and it is now false: ``linkedin_save_job`` and
+``linkedin_unsave_job`` are registered below.
 
-Two documented exceptions, and neither of them crosses that line:
+What remains true, and is what ``readonly.py`` still enforces against this
+file:
+
+* Nothing here applies to a job, sends a message, edits the profile, toggles
+  Open To Work, follows a company, or marks anything read on purpose.
+* The package contains exactly ONE mutating call, in ``writes.perform``,
+  admitted by path and function and kind in ``readonly.SANCTIONED_MUTATIONS``.
+  A second one anywhere fails ``tests/test_readonly.py``.
+* Both write tools perform NOTHING without a single-use token from their own
+  preview, and nothing at all unless the process was started with writes
+  deliberately enabled.
+* ``linkedin_unsave_job`` is registered and refuses: the selector it would
+  need has never been measured. See its docstring.
+
+Two documented exceptions on the READ side, and neither of them crosses that
+line:
 
 * A SIDE EFFECT rather than an action: opening the notifications page clears
   LinkedIn's unread badge, exactly as it would if the operator opened the
@@ -27,7 +42,7 @@ from urllib.parse import urlencode
 
 from fastmcp import FastMCP
 
-from linkedin_server import buildinfo, cdp_bridge, dom, preflight, shape
+from linkedin_server import buildinfo, cdp_bridge, dom, preflight, shape, writes
 from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
@@ -1188,6 +1203,131 @@ async def linkedin_notifications(
         return _error(exc)
 
 
+# ---------------------------------------------------------------------------
+# The two writes
+# ---------------------------------------------------------------------------
+#
+# EVERYTHING ABOVE THIS LINE READS. These two do not, and they are the only two
+# in the package. Both are two-step by construction: called without a
+# ``confirm_token`` they perform NOTHING and return a block for a human to read;
+# called with one they redeem it, once, for that action on that target.
+#
+# They are registered unconditionally rather than hidden behind the flag, and
+# that is a deliberate choice against the obvious alternative. A tool that
+# appears and disappears with an environment variable is a tool an MCP client
+# caches wrongly and a reader discovers by accident; one that is always visible
+# and says plainly why it will not act is discoverable and honest. The flag
+# still governs BEHAVIOUR -- with it unset these refuse before touching a
+# browser -- it just no longer governs visibility.
+
+
+def _writes_off(action: str) -> dict[str, Any]:
+    """The refusal a disabled write returns, with the reason and the remedy."""
+    return {
+        "error": "writes_disabled",
+        "message": (
+            f"{action} performs nothing: writes are off in this process. Set "
+            f"{writes.WRITES_FLAG}=1 in the server's environment and restart "
+            "it. This is per-process and off by default, so a fresh clone of "
+            "this repo cannot write to LinkedIn at all."
+        ),
+        "performed": False,
+    }
+
+
+async def _write_tool(action: str, job_id: Any, confirm_token: str) -> dict[str, Any]:
+    """Preview or perform, for both of the save tools.
+
+    ONE implementation, because save and unsave differ only in their spec and
+    a second copy is a second place for the gates to drift apart.
+    """
+    if not writes.writes_enabled():
+        return _writes_off(action)
+    spec = writes.spec_for_action(action)
+    async with BROWSER.session() as page:
+        if not str(confirm_token or "").strip():
+            return await writes.preview(
+                spec, target=job_id, navigator=BROWSER, page=page
+            )
+        grant = writes.consume(
+            str(confirm_token).strip(),
+            action=action,
+            target=str(job_id if job_id is not None else "").strip(),
+        )
+        return await writes.perform(BROWSER, page, grant)
+
+
+@mcp.tool()
+async def linkedin_save_job(job_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Bookmark one job posting on LinkedIn. Two steps, and the first is free.
+
+    THIS TOOL CHANGES SOMETHING ON LINKEDIN, which no other tool in this server
+    does. It is the reason ``linkedin_server_info`` no longer reports
+    ``read_only: true``.
+
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is done: the posting and
+    your own saved list are read live, and you get back a block naming the job
+    by title and employer, saying which way the toggle would move, where each
+    fact was read from, and how the action can be undone. Read it, then call
+    again with the ``confirm_token`` it hands you.
+
+    The token works ONCE, only for this posting, only for this verb, and it
+    expires in two minutes -- so a scheduled or unattended caller can never
+    hold a live one. That is the intended consequence and not a side effect.
+
+    After the click the result is confirmed from a DIFFERENT surface: your
+    saved list, with LinkedIn's own per-tab count, rather than from the button
+    that was just pressed. ``performed`` comes back ``true``, ``false``, or
+    ``"unknown"``; on ``"unknown"`` do not retry, because a retry on a toggle
+    that did land performs the opposite action -- look at your saved jobs
+    instead.
+
+    Args:
+        job_id: the numeric LinkedIn job id, as it appears in /jobs/view/<id>.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually save.
+    """
+    try:
+        return await _write_tool("save_job", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unsave_job(job_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Remove one job posting from your saved list. Built, gated, and refusing.
+
+    Same two-step shape as ``linkedin_save_job`` and the same gates, with ONE
+    honest difference that this docstring will not bury: THIS TOOL CANNOT
+    PERFORM ANYTHING TODAY, and it is not because the code is missing.
+
+    LinkedIn labels the save control by its accessible name, and the name it
+    wears when a posting IS saved has never been observed on this account --
+    there has been nothing saved on it to observe. Every capture this repo
+    holds shows the unsaved state. So the selector an unsave would click is
+    unknown, and this server will not guess one: "Saved" and "Unsave the job"
+    are both plausible spellings and it has seen neither.
+
+    THE FIX IS ONE MEASURED LINE, and the first supervised save produces it --
+    ``linkedin_save_job`` reads back the label the control changes into and
+    reports it. Until that label is written down, this refuses with that
+    explanation rather than clicking something it hopes is the right button.
+
+    A preview may also be unrenderable for a second and unrelated reason: an
+    unsave is only valid on a posting that is currently saved, so with an empty
+    saved list there is nothing to preview it against. The preview says so.
+
+    Args:
+        job_id: the numeric LinkedIn job id, as it appears in /jobs/view/<id>.
+        confirm_token: leave empty to preview. A token is accepted but the
+            action behind it will refuse until its anchor has been measured.
+    """
+    try:
+        return await _write_tool("unsave_job", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
 @mcp.tool()
 async def linkedin_server_info() -> dict[str, Any]:
     """Describe this server: what it can do, what it deliberately cannot.
@@ -1228,16 +1368,50 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "process": CLOCK.as_dict(),
                 "jobcore": JOBCORE_STAMP_NOTE,
             },
-            "read_only": True,
-            "writes_available": [],
-            # Both fields above are about LINKEDIN: no request this server
-            # issues changes anything on the platform, and that is what the
-            # allowlist, the source scanner and the launch boundary enforce.
-            # ONE tool changes something on THIS MACHINE, and a boundary claim
-            # that quietly omitted it would be exactly the kind of claim this
-            # server exists in order not to make. So it gets its own named
-            # field rather than being folded into a "read_only: True" a reader
-            # would take as covering everything.
+            # THESE TWO FIELDS WERE LITERALS -- `True` and `[]` -- until
+            # 2026-08-23, and they were true for as long as this package had
+            # no write path. It has one now, and a server that can write while
+            # reporting that it cannot is worse than one that never could: the
+            # claim is the thing a caller trusts INSTEAD of reading the source.
+            #
+            # They are COMPUTED rather than flipped to a new pair of literals,
+            # because "this server has a write path" and "this process can
+            # perform a write" are different facts and flattening them would
+            # be the same error in the other direction. With the flag unset --
+            # the default, and the state of a fresh clone -- nothing here can
+            # write, and saying otherwise would frighten a reader off a
+            # capability he does not have. So:
+            #
+            #   read_only        -- about THIS PROCESS, right now.
+            #   writes_available -- what THIS PROCESS would actually perform.
+            #   writes_sanctioned -- what the CODE can ever perform, flag or
+            #                        no flag. Never empty, so the capability
+            #                        cannot hide behind an unset variable.
+            "read_only": not writes.writes_enabled(),
+            "writes_available": (
+                sorted(writes.PERFORMABLE) if writes.writes_enabled() else []
+            ),
+            "writes_sanctioned": sorted(writes.PERFORMABLE),
+            "writes_note": (
+                "Every write is two calls: one that performs nothing and "
+                "returns a block to read, and one that redeems a single-use "
+                "token from it. The token is bound to one action on one "
+                "target and expires in "
+                f"{writes.GRANT_TTL_SECONDS:.0f}s, which makes an unattended "
+                "or scheduled write structurally impossible. Writes are off "
+                f"per process unless {writes.WRITES_FLAG} is set; they are "
+                f"currently {'ON' if writes.writes_enabled() else 'OFF'}. "
+                "unsave_job is sanctioned and gated but REFUSES to act: the "
+                "accessible name LinkedIn gives the save control on a saved "
+                "posting has never been observed on this account, and this "
+                "server will not guess a selector."
+            ),
+            # The fields above are about LINKEDIN. ONE tool changes something
+            # on THIS MACHINE, and a boundary claim that quietly omitted it
+            # would be exactly the kind of claim this server exists in order
+            # not to make. So it gets its own named field rather than being
+            # folded into a read_only a reader would take as covering
+            # everything.
             "local_state_writes": [
                 "linkedin_logout(confirm=True) erases this machine's Chrome "
                 "cookie jar, which ends the local sign-in. It issues no "
@@ -1254,11 +1428,20 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "notifications",
                 "session status",
             ],
+            # "saving or unsaving jobs" LEFT THIS LIST on 2026-08-23, because
+            # it stopped being true and a stale entry here is a lie a caller
+            # acts on. Everything still on it is still refused by design, and
+            # following a company -- which IS sanctioned in writes.py -- is
+            # named explicitly rather than left off, because it is the one
+            # thing on this list whose absence a reader might otherwise take
+            # as an oversight.
             "out_of_scope_by_design": [
                 "applying to jobs",
-                "saving or unsaving jobs",
                 "messaging, InMail, connection invitations",
                 "profile edits and Open To Work",
+                "following or unfollowing a company: designed and gated, but "
+                "not performed -- no unfollow is sanctioned, so this server "
+                "could create that state and not clear it",
                 "posting, liking, commenting, endorsing",
                 "marking notifications read",
                 "collecting data about other members",

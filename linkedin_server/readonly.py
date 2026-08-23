@@ -14,6 +14,16 @@ in four parts:
    module in the package AND over a deliberately bad sample, so the check is
    shown catching something rather than merely passing.
 
+   Since 2026-08-23 the package contains exactly ONE mutating call, and the
+   scanner still reports it. What changed is not the SCANNER but the POLICY
+   applied to what it finds: :data:`SANCTIONED_MUTATIONS` enumerates, by
+   ``(path, function, kind)``, the calls that are permitted, and
+   :func:`partition_mutation_hits` splits a scan into the sanctioned and the
+   rest. The measurement was deliberately left exact -- a scanner taught to
+   stop seeing ``page.click`` is worth nothing, and the whole value of this
+   one is that its finding is unconditional and its ALLOWLIST is the thing a
+   reviewer reads.
+
 3. **A verb list.** :data:`WRITE_VERBS` is what the tool-surface test uses to
    assert that no tool name or docstring implies a mutation.
 
@@ -23,16 +33,35 @@ in four parts:
    pulled in through the back door. ``browser.py`` runs the first of those
    before every launch, so it binds at runtime and not only in the tests.
 
-The guarantee those four buy: this server can open a fixed set of LinkedIn's
-own read pages in the operator's browser and read what rendered. It has no
-code path that clicks, types, submits a form, or issues a non-GET request,
-and it reaches LinkedIn as the ordinary Chrome it is.
+WHAT THIS MODULE GUARANTEED UNTIL 2026-08-23, AND WHAT IT GUARANTEES NOW.
+The old sentence was: *this server has no code path that clicks, types,
+submits a form, or issues a non-GET request.* It was true, it was proven here
+rather than asserted, and IT IS NO LONGER TRUE. Leaving it in place would have
+made this module the first thing a reader trusts and the first thing that
+lies to them.
+
+What is true now, and is what the four parts above enforce:
+
+* This server can open a fixed set of LinkedIn's own read pages in the
+  operator's browser and read what rendered.
+* It contains **exactly one** call that can change anything on LinkedIn: the
+  click in ``writes.perform``, named in :data:`SANCTIONED_MUTATIONS`. It does
+  not run unless a per-process flag is set, a human has read a confirm gate
+  built from a live read, and a single-use grant is redeemed against it. See
+  ``writes.py``.
+* It still types nothing, submits no form, issues no non-GET request, and
+  reaches LinkedIn as the ordinary Chrome it is.
+
+The list in :data:`SANCTIONED_MUTATIONS` is the whole of the difference, which
+is why it is one line long and why widening it is a test failure rather than a
+judgement call.
 """
 
 from __future__ import annotations
 
+import ast
 import re
-from typing import Iterable
+from typing import Iterable, Optional
 
 from linkedin_server.errors import WriteAttemptError
 
@@ -272,6 +301,97 @@ def scan_source_for_mutations(source: str) -> list[tuple[int, str, str]]:
                 hits.append((lineno, kind, stripped))
                 break
     return hits
+
+
+# ---------------------------------------------------------------------------
+# 2a. The one sanctioned mutation, named
+# ---------------------------------------------------------------------------
+
+#: THE COMPLETE LIST of mutating calls this package is permitted to contain,
+#: as ``(path, function, kind)``. Anything the scanner finds that is not on
+#: this list is a defect, and anything on this list that the scanner does NOT
+#: find is a stale entry -- ``tests/test_readonly.py`` asserts both directions,
+#: so the list cannot rot in either.
+#:
+#: WHY A LIST AND NOT A RELAXED RULE. The scanner's value is that it is
+#: unconditional: it reports every mutating call in the package, INCLUDING the
+#: sanctioned one, and it would report a second. Teaching it to ignore clicks
+#: in ``writes.py``, or to ignore a line wearing some new waiver comment, would
+#: convert a measurement into an opinion -- and the very next click would
+#: arrive wearing the same clothes as this one. So the SCAN is untouched and
+#: the POLICY is this tuple, which a reviewer reads in full in one breath.
+#:
+#: THE TRIPLE IS THE POINT, and each of its three parts refuses something real:
+#:
+#: * the PATH, so a click cannot appear in ``dom.py`` or ``browser.py`` under
+#:   this exemption;
+#: * the FUNCTION, so a click cannot appear in a helper elsewhere in
+#:   ``writes.py`` -- ``perform`` is the only function that redeems a grant --
+#:   and attribution is to the INNERMOST enclosing function, so burying one in
+#:   a closure inside ``perform`` does not inherit the exemption either;
+#: * the KIND, so this entry buys a ``click`` and nothing else. A ``fill`` or
+#:   an ``http_post`` inside ``perform`` is refused by the very list that
+#:   permits the click.
+SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
+    ("linkedin_server/writes.py", "perform", "click"),
+)
+
+
+def enclosing_function(source: str, lineno: int) -> Optional[str]:
+    """Name the INNERMOST function containing ``lineno``, or ``None``.
+
+    Innermost rather than outermost, deliberately: a nested helper is reported
+    as ITSELF, so a mutating call hidden one scope down inside a sanctioned
+    function does not inherit that function's exemption. Module-level code has
+    no enclosing function and comes back ``None``, which no entry in
+    :data:`SANCTIONED_MUTATIONS` can match.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return None
+    best: Optional[tuple[int, str]] = None
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        end = getattr(node, "end_lineno", None)
+        if end is None or not node.lineno <= lineno <= end:
+            continue
+        # Innermost == the enclosing candidate that starts latest.
+        if best is None or node.lineno > best[0]:
+            best = (node.lineno, node.name)
+    return None if best is None else best[1]
+
+
+def partition_mutation_hits(
+    module_path: str, source: str
+) -> tuple[list[tuple[int, str, str]], list[tuple[int, str, str]]]:
+    """Split one module's scan into ``(sanctioned, unsanctioned)``.
+
+    ``module_path`` is the module's path RELATIVE TO THE REPO ROOT in posix
+    spelling -- ``linkedin_server/writes.py``. Relative and normalised because
+    an absolute path differs between this machine and each of the three CI
+    cells, and an allowlist keyed on something that varies per checkout is an
+    allowlist that silently stops matching.
+
+    THE CONSERVATION PROPERTY, which is what makes this safe to introduce at
+    all: ``sanctioned + unsanctioned`` is exactly what
+    :func:`scan_source_for_mutations` returned, partitioned -- nothing is
+    dropped and nothing is invented, so a caller can check the union. A filter
+    that quietly consumed a hit would be the same defect as a scanner that
+    stopped seeing one.
+    """
+    sanctioned: list[tuple[int, str, str]] = []
+    unsanctioned: list[tuple[int, str, str]] = []
+    normalised = str(module_path).replace("\\", "/").lstrip("./")
+    for hit in scan_source_for_mutations(source):
+        lineno, kind, _line = hit
+        function = enclosing_function(source, lineno)
+        if (normalised, function, kind) in SANCTIONED_MUTATIONS:
+            sanctioned.append(hit)
+        else:
+            unsanctioned.append(hit)
+    return sanctioned, unsanctioned
 
 
 # ---------------------------------------------------------------------------
