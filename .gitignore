@@ -20,6 +20,12 @@ browser_profile/
 venv/
 .venv/
 __pycache__/
+# uv is not used here, but any agent that runs it writes uv.lock into the
+# checkout. An untracked, un-ignored artifact appearing mid-history-rewrite
+# is the wrong moment to notice; ignoring it costs nothing and removes the
+# chance. Remove this line if the project ever adopts uv, since the lock
+# file is then a thing you WANT committed.
+uv.lock
 *.py[cod]
 *.egg-info/
 build/
