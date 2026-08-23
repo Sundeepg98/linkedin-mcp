@@ -69,3 +69,15 @@ from here.
 **Measured.** Suite 1092 -> **1188 passed, 2 skipped**. Sweep **0 hits across 87 tracked files**, 191
 spellings, 10 classes. Reviewer's independent sweep: 6 files -> **2**, both denylists. CI `32632258303`
 **success** at `oldsha10`.
+
+**Final.** `oldsha23`: suite **1190 passed, 0 skipped**; CI run **32633922350 success** on all three cells.
+The run before it was red with `failed 0 | errors 0` -- two SKIPS, both mine, refused by
+`scripts/ci_full_run_check.py`. A local run cannot see that: pytest reports a skip as a pass.
+The guard now excludes its two shape-defining modules by NAME when the parametrised set is built,
+which is what they always were -- out of scope, not unexaminable.
+
+**Shown failing on the real artefact, not a synthetic.** Run against the pre-scrub files from
+history, the key-shape detector fires on `_build_follow_fixtures.py` (`FOLLOWED_PAGES` 21 paired
+rows, `SLUGS` 4, `OPERATOR` 4, `POSTING` 7, `OTHER_EMPLOYERS` 3) and on `_build_job_fixtures.py`
+(`SUBS` 3, `OTHER_EMPLOYERS` 3); both are clean after. A planted member id in `linkedin_server/paths.py`
+fails the repo-wide sweep.
