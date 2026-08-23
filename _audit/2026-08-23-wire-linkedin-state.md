@@ -52,3 +52,6 @@ and untouched here; 4 still stands (`complete` accepts `rendered > total`). Sepa
 header comment is stale -- I measured 1083 collected and, with `PLAYWRIGHT_BROWSERS_PATH` pointed at
 an empty directory, **105 failed / 940 passed / 38 errors**; I did not edit it because `ci-for-newest`
 may own that file.
+
+**Sequel, same day:** the cold review re-ranked a MUST-FIX above this seam -- the de-anonymisation
+key for the fixtures was committed and pushed. See [2026-08-23-privacy-key-and-guard.md](2026-08-23-privacy-key-and-guard.md).
