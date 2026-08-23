@@ -60,19 +60,24 @@ PINNED = (
 #: checks out shallow), and computed from VALUES rather than from
 #: ``ast.dump`` output.
 #:
-#: THE SECOND VERSION OF THESE NUMBERS. The first hashed ``ast.dump``, passed
-#: on Python 3.13 -- both 3.13 cells green -- and failed on 3.10, because the
-#: dump is a serialisation of the PARSER'S OWN NODES and its fields move
-#: between interpreter versions. That pins the interpreter as much as the
-#: code. A regex is a string on every version of Python there has ever been,
-#: so the digest is built from the extracted strings and from comment-stripped
-#: source tokens, and from nothing else.
+#: THREE ATTEMPTS, and the first two failed the same way. v1 hashed
+#: ``ast.dump``; v2 hashed a TOKEN STREAM. Both are THE PARSER DESCRIBING
+#: ITSELF, and both split along the interpreter matrix -- green on the two
+#: 3.13 cells, red on 3.10, with the four CONSTANT digests matching every time
+#: because a regex is a string on every Python. v2's failure named its own
+#: cause precisely: four of eleven functions differed and every one contained
+#: an f-string (PEP 701, 3.12).
+#:
+#: v3 asks the tokenizer only WHERE THE COMMENTS ARE -- a position question,
+#: stable -- and hashes the remaining source text. VERIFIED rather than
+#: argued: computed under 3.13.14 and 3.10.19 on the same file, all five
+#: digests identical.
 READONLY_AST_AT_A76FE32 = {
     "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
     "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
-    "<functions>": "0756358b9c160e83",
+    "<functions>": "fd79a6a7c02c3e34",
 }
 
 
@@ -107,24 +112,50 @@ def _literal(node: ast.AST):
     return ["<unhandled>", type(node).__name__]
 
 
-def _function_tokens(source: str, node: ast.FunctionDef) -> str:
-    """One function's code as a token stream, with comments dropped.
+def _function_source(source: str, node: ast.FunctionDef) -> str:
+    """One function's code with comments removed.
 
-    Tokenised rather than dumped, for the same version-independence reason,
-    and comment tokens are discarded so a remark cannot move the digest while
-    a changed condition always does.
+    ``tokenize`` is used ONLY to LOCATE comments, never to render structure,
+    and that distinction is the whole correction. A ``COMMENT`` is one token on
+    every version of Python; how the tokenizer decomposes a STRING is not --
+    **PEP 701 splits an f-string into FSTRING_START/MIDDLE/END on 3.12+** where
+    3.10 emits a single ``STRING``. ``readonly.py``'s refusal messages are
+    f-strings, so a digest built from the token STREAM split exactly along the
+    interpreter matrix: four of eleven functions differed, and every one of the
+    four contained an f-string.
+
+    Asking the tokenizer WHERE a comment is, is a position question and stable.
+    Asking it WHAT a string is made of is a structure question and moved. The
+    first two attempts at this digest -- ``ast.dump`` and then the token stream
+    -- were both the parser describing ITSELF, which is exactly what the
+    ``_literal`` docstring above warns against. The four value digests were
+    safe throughout precisely because a regex is a string on every Python.
+
+    ONE DELIBERATE CONSEQUENCE: trailing whitespace is stripped and blank lines
+    dropped, so REFORMATTING a function moves the digest where a token stream
+    would have ignored it. That is the conservative direction for a boundary
+    invariant -- it fires more readily, never less -- and it is chosen rather
+    than inherited.
     """
-    lines = source.splitlines(keepends=True)[node.lineno - 1 : node.end_lineno]
-    stream = io.StringIO("".join(lines))
-    kept = []
-    for token in tokenize.generate_tokens(stream.readline):
-        if token.type in (
-            tokenize.COMMENT, tokenize.NL, tokenize.NEWLINE,
-            tokenize.INDENT, tokenize.DEDENT, tokenize.ENDMARKER,
-        ):
-            continue
-        kept.append(token.string)
-    return repr(kept)
+    segment = "".join(
+        source.splitlines(keepends=True)[node.lineno - 1 : node.end_lineno]
+    )
+    spans = []
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(segment).readline):
+            if token.type == tokenize.COMMENT:
+                spans.append((token.start, token.end))
+    except (tokenize.TokenError, IndentationError):  # pragma: no cover
+        pass
+    lines = segment.splitlines()
+    for (start_row, start_col), (end_row, end_col) in reversed(spans):
+        if start_row == end_row and 1 <= start_row <= len(lines):
+            lines[start_row - 1] = (
+                lines[start_row - 1][:start_col] + lines[start_row - 1][end_col:]
+            )
+    return "\n".join(
+        line for line in (raw.rstrip() for raw in lines) if line.strip()
+    )
 
 
 def ast_digest(source: str) -> dict[str, str]:
@@ -149,7 +180,7 @@ def ast_digest(source: str) -> dict[str, str]:
             out[target] = hashlib.sha256(rendered.encode()).hexdigest()[:16]
 
     functions = {
-        node.name: _function_tokens(source, node)
+        node.name: _function_source(source, node)
         for node in tree.body
         if isinstance(node, ast.FunctionDef)
     }

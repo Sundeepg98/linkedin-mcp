@@ -205,3 +205,35 @@ pass, history CI lacks, a gitignored file CI never sees, and now an interpreter 
 do not. The first three were caught by the repo's gates or by a deliberate reproduction; this one only
 by the matrix. **A single-version local run cannot verify a version-independent claim**, and the fix
 is not to add interpreters locally but to build digests that cannot depend on one.
+
+### Three attempts at one digest, and the answer on the six ids
+
+The boundary invariant took **three** goes, and the first two failed identically: **v1 hashed
+`ast.dump`, v2 hashed a token stream, and both are the parser describing itself.** Each was green on
+both 3.13 cells and red on 3.10, with all four CONSTANT digests matching every time -- because a regex
+is a string on every Python. v2's failure named its own cause: four of eleven functions differed and
+every one contained an f-string (**PEP 701**, 3.12, which splits an f-string into
+`FSTRING_START/MIDDLE/END`).
+
+**v3 asks the tokenizer only WHERE THE COMMENTS ARE** -- a position question, stable across versions --
+and hashes the remaining source. **Verified rather than argued**: computed under **3.13.14 and
+3.10.19** on the same file, all five digests identical, and the invariant's seven tests pass under
+both. A deliberate consequence, chosen not inherited: reformatting a function now moves the digest.
+That is the conservative direction for a boundary invariant -- it fires more readily, never less.
+
+**THE SIX `currentCompany=` IDS WERE SCRUBBED**, in `oldsha11`, and the question is worth recording
+because the measurement that raised it was correct and still could not see the answer. `currentCompany=`
+occurrences stay at 24 and distinct values stay at 6 **because six real ids were replaced by six
+invented ones** -- a count cannot distinguish a scrub from a no-op. The evidence that can: **zero
+overlap** between the distinct values before `oldsha11` and after, and all six now in the invented
+`53000xx` family. Same-length replacements, so both fixtures are byte-stable.
+
+**The phone-shaped value in `job_detail.html` is RESOLVED, not deferred.** It is not a phone: it sits
+inside `id="ab7dc03f-6282-46a6-a3b9-XXXXXXXXXXe2"`, a ten-digit run in a UUID's tail. Encoded as a
+UUID-context rule in the phone check rather than an allowlisted value, so the next UUID is covered too.
+
+**"Local green is not green" now has four distinct mechanisms**, which is what makes it a class rather
+than an anecdote: a skip counted as a pass; history CI lacks; a gitignored file CI never sees; and an
+interpreter version CI runs that this box does not. The fourth is the one to generalise from -- **a
+single-version local run cannot verify a version-independent claim**, and the fix was not to argue
+more carefully but to install the other interpreter and measure.
