@@ -200,3 +200,26 @@ fix an attribution problem. Instead I pinned the remainder immediately as `oldsh
 provenance note, and did not open a single tracked file until the tree had been clean and HEAD
 still for eight minutes. Escalated to the lead twice; only the operator can kill a live
 duplicate.
+
+**`oldsha19`'S TEST COUNT CANNOT BE ATTRIBUTED -- do not reconstruct history from it.** Its
+message reads *"782 -> 786 tests, all green"*. That tree already contained my `leakwalk.py`,
+`credential_echo_control.py` and `leak_matrix.py`, so the four are not cleanly that agent's
+four: they are some mixture of its work and mine, and nobody can now say which. It is the same
+defect family as a query publishing its `LIMIT` as a total -- a number that means something
+other than what it says. The first count in this repo that is cleanly attributable again is
+`oldsha25`'s.
+
+**A METHOD NOTE AGAINST MYSELF.** Four of my five commits staged with `git add -A`. Audited
+afterwards, all ten files across all five commits are mine and nothing alien was swept -- I had
+checked `git status` before each -- but checking status and then running `add -A` leaves a race
+window that naming the paths would have closed outright. Two agents swept files they did not
+own this way within one hour today, one of them pushing real third-party PII. The outcome here
+was verified, not protected. Explicit paths from here.
+
+**FOUR-SERVER SHAPE PARITY: PASSED**, re-run at this HEAD before pushing rather than left for
+CI. `_audit/auth_shape_parity.py` asked all four servers `session_info(verify_live=False)` in
+their own venvs: **3 named differences, 0 unnamed** (linkedin `browser_mode` + `supporting.note`,
+naukri `supporting.why_unknown`). Its `--self-test` came back **FAILED with 6 violations**, so
+the checker is shown rejecting rather than merely passing. This wave could not have moved that
+result -- it changed zero lines of `linkedin_server/` -- which makes the run a confirmation
+rather than a near miss.
