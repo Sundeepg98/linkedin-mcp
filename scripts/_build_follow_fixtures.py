@@ -47,18 +47,22 @@ employers the posting names in passing, urns, member ids, tracking tokens,
 media urls, and every non-ASCII byte.
 
 FOLLOWER COUNTS ARE NEUTRALISED, and the reasoning is worth keeping because
-the obvious argument points the wrong way. The instinct is consistency: the
-already-committed ``job_detail_hydrated.html`` carries "5,288,656 followers",
-so redacting only these four looks like an inconsistent bar. It is not the
-same axis. The risk here is not per-item, it is in the SET. One count on one
-page is a weak identifier with nothing to cross it against; twenty exact
-counts standing together -- 1,730,001 and 4,594,604 and 6,541,445 and 988 and
-404 among them -- are a JOINT KEY that reconstructs the real follow list even
-with every name replaced, which is precisely the thing this sanitisation
-exists to hide. So ``scrub()`` replaces the digits with a fixed placeholder
-and keeps the word, because the line's presence is part of the row structure
-a parser reads; and ``check`` asserts ZERO real counts rather than reporting
-them as a residual.
+the obvious argument points the wrong way. The instinct is consistency: an
+already-committed job fixture carries a single follower count, so redacting
+only these looks like an inconsistent bar. It is not the same axis. The risk
+here is not per-item, it is in the SET. One count on one page is a weak
+identifier with nothing to cross it against; TWENTY EXACT COUNTS STANDING
+TOGETHER are a JOINT KEY that reconstructs the real follow list even with
+every name replaced, which is precisely what this sanitisation exists to
+hide. So ``scrub()`` replaces the digits with a fixed placeholder and keeps
+the word, because the line's presence is part of the row structure a parser
+reads; and ``check`` asserts ZERO real counts rather than reporting them as a
+residual.
+
+That paragraph used to make its case by PRINTING five of the real counts. It
+was arguing that twenty exact counts are a joint key, inside a tracked file,
+while quoting five of them. The argument was right and the file was the
+counter-example.
 
 The older job_detail fixtures still carry one count each. That was DECIDED,
 not overlooked: they are frozen, other tests assert against them, and a lone
@@ -80,144 +84,220 @@ fail it.
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tests.leakwalk import url_spellings  # noqa: E402
 
 SRC = Path("_audit")
 OUT = Path("tests/fixtures")
 
 
-#: The Pages he actually follows, and the invented Pages that replace them.
-#: (real name, invented name, real company id, invented company id).
-#: The list is consumed LONGEST-REAL-NAME-FIRST -- "Codeharbor.com" and
-#: "Kestrel Software Services" share a word and "Norvale" is five characters, so a
-#: careless order leaves half-substituted wreckage rather than a clean rename.
-#: ``_assert_substitution_is_safe`` proves the order is enough instead of
-#: assuming it.
+# --------------------------------------------------------------------------
+# The substitution tables: INVENTED side tracked, REAL side outside the repo
+# --------------------------------------------------------------------------
+#
+# WHY THE REAL SIDE IS NOT HERE ANY MORE. It used to be, and it was committed
+# and pushed. This file shipped the complete before->after mapping: twenty
+# real Pages paired with their real numeric company ids, thirteen real slugs,
+# his real name and vanity, the posting's real title, requisition id, ATS
+# account and job id, his real city in two spellings and an employer's real
+# office campus.
+#
+# THE FOUR FIXTURES IT PRODUCES ARE CLEAN. Every check below passes on them --
+# 86/86 forbidden strings absent, 0 of 181 url spellings present, 0 real
+# follower counts. The sanitisation worked. The KEY was published beside it,
+# and that is worse than either half alone: a clean fixture plus its key is
+# not a sanitised fixture, it is a sanitised fixture and the instructions for
+# reversing it.
+#
+# The same commit taught the lesson and did not apply it to itself. It
+# extended .gitignore to exclude _fixture_sanitisation_check.txt *because that
+# file enumerates the strings it removed* -- while this file enumerated the
+# same strings and stayed tracked.
+#
+# So the real side now lives in :data:`KEY_PATH`, gitignored, and only the
+# INVENTED side is tracked. The invented side is not a secret: it is the
+# literal content of the committed fixtures, readable by anyone who opens
+# one. Splitting the pair is the whole of what removes the reversal.
+#
+# This costs nothing that was not already the case. The script ALREADY cannot
+# run without untracked input -- it reads the raw captures out of
+# _audit/_probe-*.html, gitignored for exactly this reason -- so needing one
+# more untracked file takes away no capability that existed.
+
+#: The de-anonymisation key. Gitignored. Absent means this tool REFUSES to
+#: run, loudly, rather than running with an empty forbidden list -- a
+#: sanitiser that cannot name what it removes would pass everything.
+KEY_PATH = Path("_audit/_sanitisation_key.json")
+
+
+def _load_key() -> dict:
+    if not KEY_PATH.exists():
+        raise SystemExit(
+            f"the sanitisation key is missing: {KEY_PATH}\n"
+            "It is gitignored on purpose -- it is the only thing that reverses\n"
+            "the committed fixtures, so it is the one file in this repo that\n"
+            "must never be tracked. Without it this script cannot say what it\n"
+            "is removing, and a sanitiser that cannot name what it removes\n"
+            "would report every file clean. Restore it from wherever you keep\n"
+            "it beside the raw captures, which are gitignored too."
+        )
+    return json.loads(KEY_PATH.read_text(encoding="utf-8"))
+
+
+def _pair(real: list, invented: list, what: str) -> list:
+    """Zip the two halves by INDEX, refusing a length mismatch.
+
+    Index-pairing is what makes the split safe to maintain: reorder one side
+    without the other and the tables silently rename the wrong company, so the
+    lengths are checked and the caller is told which table drifted.
+    """
+    if len(real) != len(invented):
+        raise SystemExit(
+            f"the {what} table has {len(invented)} invented entries and the "
+            f"key has {len(real)} real ones. They are paired BY INDEX, so a "
+            "mismatch means one side was edited alone."
+        )
+    return [(r, i) for r, i in zip(real, invented)]
+
+
+#: The Pages he follows, as the fixtures name them: (invented name,
+#: invented company id). Paired by index with key['followed_pages'].
+#: The list is consumed LONGEST-REAL-NAME-FIRST, so its ORDER is
+#: load-bearing -- two real names share a word and one is five characters,
+#: and a careless order leaves half-substituted wreckage rather than a
+#: clean rename. ``_assert_substitution_is_safe`` proves the order is
+#: enough instead of assuming it.
+FOLLOWED_PAGES_INVENTED = [
+    ('Marrowfield Media - A Creator Marketing Platform Co.', '5820114'),
+    ('Thornbury Management Consultants', '4471905'),
+    ('Kestrel Software Services', '27419063'),
+    ('Fernhollow Technology', '26105338'),
+    ('Bastionwood Ventures', '27553102'),
+    ('Codeharbor.com', '84120775'),
+    ('Lanternfly Media', '61903442'),
+    ('Coinferry', '20387164'),
+    ('Farfield Labs', '43902517'),
+    ('Keelstone', '88410926'),
+    ('Gridwell', '902611'),
+    ('Verityne', '66208431'),
+    ('Talentcove', '29604118'),
+    ('Wayfarely', '508933'),
+    ('Vantagara', '87332095'),
+    ('Vantrex Systems', '610427'),
+    ('Brightloom', '28871450'),
+    ('Forgevault', '3067452'),
+    ('Recruix', '80215647'),
+    ('Norvale', '79004613'),
+    ('Coinferry', '20387164'),
+]
+
+
+#: The invented slugs. A slug is a second, quieter spelling of a company
+#: name -- the posting links its employer by slug and the logo urls spell
+#: it out -- so a table that renamed only the display names would leave
+#: the fixture anonymous exactly where somebody remembered to look.
+SLUGS_INVENTED = [
+    'brightloom-labs',
+    'veritynelabs',
+    'thelanternflymedia',
+    'fernhollow-technology',
+    'gridwell-com',
+    'codeharborcom',
+    'keelstone',
+    'vantrex-systems',
+    'recruixinc',
+    'brightmoor-consulting',
+    'hollingsworth-global',
+    'redlark-digital',
+    'forgevault',
+]
+
+
+#: Him. None of these survive in the extracted regions today -- the nav
+#: that carries his name sits outside <main> -- but they stay in the table
+#: because "the region happened not to include it" is a property of one
+#: capture, not a property of the script.
+OPERATOR_INVENTED = [
+    'alex-rivera-8c21',
+    'Alex Rivera',
+    'Rivera',
+    'Alex R',
+    'Alex',
+]
+
+
+#: The posting: title in both its spaced and its hyphenated ATS spelling,
+#: the requisition id, the ATS account and the job id. The hyphenated
+#: spelling is the one that leaked past a check reporting 69/69 absent,
+#: because that list held only the spaced form.
+POSTING_INVENTED = [
+    'Settlement-Platform-Analyst---Card-Rails--Terminals---Digital-Wallets',
+    'JR9900001',
+    'VantrexSystemsCareers',
+    'Settlement Platform Analyst',
+    'Card Rails, Terminals &amp; Digital Wallets',
+    'Platform Analyst',
+    '4600000117',
+]
+
+
+#: The location, keeping the SHAPE -- city, region, country -- because it
+#: is part of the structure the posting parser reads. It borrows the
+#: invented geography the committed profile fixtures already use rather
+#: than inventing a second one.
+LOCATION_INVENTED = [
+    'Riverton, Fairhaven, United States',
+    'Riverton---North-Gateway-campus',
+]
+
+
+#: Employers the captured posting names in passing, in its competitor
+#: paragraph. Renaming only the subject of a capture leaves a fixture that
+#: is anonymous exactly where somebody remembered to look.
+OTHER_EMPLOYERS_INVENTED = [
+    'Hollingsworth Global',
+    'Brightmoor Consulting',
+    'Redlark Digital',
+]
+
+
+#: The diversity statement renders the employer with its first letter in
+#: its own <em>, so the name is split across tags and a plain replacement
+#: walks straight past it. Spelled as exact bytes rather than a clever
+#: regex, because the only thing that makes it correct is that it matches
+#: this capture.
+SPLIT_CAPS_INVENTED = [
+    '<strong><em>V </em></strong><strong><em>ANTREX SYSTEMS\u2019S',
+]
+
+_KEY = _load_key()
+
 FOLLOWED_PAGES = [
-    ("Marrowfield Media - A Creator Marketing Platform Co.",
-     "Marrowfield Media - A Creator Marketing Platform Co.", "5820114", "5820114"),
-    ("Thornbury Management Consultants", "Thornbury Management Consultants", "4471905", "4471905"),
-    ("Kestrel Software Services", "Kestrel Software Services", "27419063", "27419063"),
-    ("Fernhollow Technology", "Fernhollow Technology", "26105338", "26105338"),
-    ("Bastionwood Ventures", "Bastionwood Ventures", "27553102", "27553102"),
-    ("Codeharbor.com", "Codeharbor.com", "84120775", "84120775"),
-    ("Lanternfly Media", "Lanternfly Media", "61903442", "61903442"),
-    # The trademark sign is part of the captured accessible name, so the entry
-    # carries it and is applied before the bare spelling. Dropping it here is
-    # what leaves a stray non-ASCII byte for the encoder to choke on later.
-    ("Coinferry\u2122", "Coinferry", "20387164", "20387164"),
-    ("Farfield Labs", "Farfield Labs", "43902517", "43902517"),
-    ("Keelstone", "Keelstone", "88410926", "88410926"),
-    ("Gridwell", "Gridwell", "902611", "902611"),
-    ("Verityne", "Verityne", "66208431", "66208431"),
-    ("Talentcove", "Talentcove", "29604118", "29604118"),
-    ("Wayfarely", "Wayfarely", "508933", "508933"),
-    ("Vantagara", "Vantagara", "87332095", "87332095"),
-    ("Vantrex Systems", "Vantrex Systems", "610427", "610427"),
-    ("Brightloom", "Brightloom", "28871450", "28871450"),
-    ("GitHub", "Forgevault", "3067452", "3067452"),
-    ("Recruix", "Recruix", "80215647", "80215647"),
-    ("Norvale", "Norvale", "79004613", "79004613"),
-    ("Coinferry", "Coinferry", "20387164", "20387164"),
+    (real_name, invented_name, real_id, invented_id)
+    for (real_name, real_id), (invented_name, invented_id) in _pair(
+        _KEY["followed_pages"], FOLLOWED_PAGES_INVENTED, "followed_pages"
+    )
 ]
-
-
-#: Vanity slugs. The rows themselves link by numeric id, but the posting links
-#: its employer by slug (/company/vantrex-systems/life/) and the logo urls spell the
-#: slug out, so the slug is a second, quieter spelling of the same name.
-#: fernhollow-technology is not in the brief's list; it is in the capture, and a
-#: slug that names a Page he follows belongs here whether or not it was named.
-SLUGS = [
-    ("brightloom-labs", "brightloom-labs"),
-    ("veritynelabs", "veritynelabs"),
-    ("thelanternflymedia", "thelanternflymedia"),
-    ("fernhollow-technology", "fernhollow-technology"),
-    ("gridwell-com", "gridwell-com"),
-    ("codeharborcom", "codeharborcom"),
-    ("keelstone", "keelstone"),
-    ("vantrex-systems", "vantrex-systems"),
-    ("recruixinc", "recruixinc"),
-    ("brightmoor-consulting", "brightmoor-consulting"),
-    ("hollingsworth-global", "hollingsworth-global"),
-    ("redlark-digital", "redlark-digital"),
-    ("github", "forgevault"),
-]
-
-
-#: Him. None of these survive in the extracted regions today -- the nav that
-#: carries his name sits outside <main> -- but they stay in the table because
-#: "the region happened not to include it" is a property of one capture, not
-#: a property of the script.
-OPERATOR = [
-    ("alex-rivera-8c21", "alex-rivera-8c21"),
-    ("Alex Rivera", "Alex Rivera"),
-    ("Rivera", "Rivera"),
-    ("Alex R", "Alex R"),
-    ("Sundeep", "Alex"),
-]
-
-
-#: The posting itself: employer is handled by FOLLOWED_PAGES (its employer is
-#: one of the Pages he follows, which is exactly why this posting was picked),
-#: so what is left is the title and the job id.
-POSTING = [
-    # The ATS apply link spells the title with hyphens for spaces and carries
-    # the employer's own requisition id. Both are the REAL posting and both
-    # survived a check that reported 69/69 forbidden strings absent, because
-    # the list held only the spaced spelling. Kept ABOVE the spaced entries so
-    # the longest form is consumed first.
-    ("Settlement-Platform-Analyst---Card-Rails--Terminals---Digital-Wallets",
-     "Settlement-Platform-Analyst---Card-Rails--Terminals---Digital-Wallets"),
-    ("JR9900001", "JR9900001"),
-    ("VantrexSystemsCareers", "VantrexSystemsCareers"),
-    ("Settlement Platform Analyst", "Settlement Platform Analyst"),
-    ("Card Rails, Terminals &amp; Digital Wallets",
-     "Card Rails, Terminals &amp; Digital Wallets"),
-    ("Platform Analyst", "Platform Analyst"),
-    ("4600000117", "4600000117"),
-]
-
-
-#: His real city, in both spellings the capture uses: the posting's metadata
-#: line and the ATS apply path, where it is glued to the employer's real
-#: office campus. The replacement keeps the SHAPE -- city, region, country --
-#: because the location is part of the structure the posting parser reads, and
-#: it borrows the invented geography the committed profile fixtures already
-#: use rather than inventing a second one.
-LOCATION = [
-    ("Riverton, Fairhaven, United States", "Riverton, Fairhaven, United States"),
-    ("Riverton---North-Gateway-campus", "Riverton---North-Gateway-campus"),
-]
-
-
-#: Real employers the captured posting names in passing -- the competitor
-#: paragraph in the company insights lists them. Same reasoning as the job
-#: fixtures: renaming only the subject of the capture leaves a fixture that is
-#: anonymous exactly where somebody remembered to look.
-OTHER_EMPLOYERS = [
-    ("Hollingsworth Global", "Hollingsworth Global"),
-    ("Brightmoor Consulting", "Brightmoor Consulting"),
-    ("Redlark Digital", "Redlark Digital"),
-]
-
-
-#: The posting's diversity statement renders the employer with its first
-#: letter in its own <em>, so "SANTREX SYSTEMS'S" is split across tags and a plain
-#: name replacement walks straight past it. The repair is spelled out as the
-#: exact captured bytes rather than as a clever regex, because the only thing
-#: that makes it correct is that it matches this capture.
-SPLIT_CAPS = [
-    ("<strong><em>S </em></strong><strong><em>ANTREX SYSTEMS\u2019S",
-     "<strong><em>V </em></strong><strong><em>ANTREX SYSTEMS\u2019S"),
-]
+SLUGS = _pair(_KEY["slugs"], SLUGS_INVENTED, "slugs")
+OPERATOR = _pair(_KEY["operator"], OPERATOR_INVENTED, "operator")
+POSTING = _pair(_KEY["posting"], POSTING_INVENTED, "posting")
+LOCATION = _pair(_KEY["location"], LOCATION_INVENTED, "location")
+OTHER_EMPLOYERS = _pair(
+    _KEY["other_employers"], OTHER_EMPLOYERS_INVENTED, "other_employers"
+)
+SPLIT_CAPS = _pair(_KEY["split_caps"], SPLIT_CAPS_INVENTED, "split_caps")
 
 
 #: What a follower count is replaced with. Fixed, not shape-preserving:
-#: rendering "404" as "NNN" and "6,541,445" as "N,NNN,NNN" would leak the
-#: magnitude, and an order of magnitude is itself a partial key across twenty
-#: rows. The comma is kept so the string still looks like the number a parser
+#: rendering a three-digit count as "NNN" and a seven-digit one as
+#: "N,NNN,NNN" would leak the MAGNITUDE, and an order of magnitude is itself a
+#: partial key across twenty rows. The comma is kept so the string still looks like the number a parser
 #: expects to find there.
 FOLLOWER_PLACEHOLDER = "NNN,NNN followers"
 
@@ -375,7 +455,7 @@ FORBIDDEN = (
     + [old for old, _ in POSTING]
     + [real for real, _ in OTHER_EMPLOYERS]
     + [old for old, _ in LOCATION]
-    + ["ANTREX SYSTEMS", "Fairhaven"]
+    + list(_KEY.get("extra_forbidden", []))
     # Verbatim from tests/test_sdui_surfaces_fixture.py, which parametrises
     # over EVERY file in tests/fixtures/ and therefore over these four. It is
     # copied rather than referenced so this script stays standalone, and it is
@@ -385,10 +465,10 @@ FORBIDDEN = (
     # and the one this script did not know about is the one that failed.
     + BANNED_BY_THE_FIXTURE_TEST
 )
-# De-duplicated, order preserved: the Coinferry entry appears twice in
-# FOLLOWED_PAGES (with and without its trademark sign) and shares a company id
-# with itself, so without this the denominator counts one string twice and the
-# "N/N absent" line quietly overstates what was checked.
+# De-duplicated, order preserved: one Page appears twice in the table (with
+# and without its trademark sign) and shares a company id with itself, so
+# without this the denominator counts one string twice and the "N/N absent"
+# line quietly overstates what was checked.
 FORBIDDEN = list(dict.fromkeys(FORBIDDEN))
 
 #: Spelled as constants so the check compares the EXACT accessible name,
@@ -403,23 +483,17 @@ EXPECTED_ROWS = {
 
 
 def variants(needle: str) -> set[str]:
-    """The URL and slug spellings of ``needle`` that mean the same thing.
+    """The url and slug spellings of ``needle`` that mean the same thing.
 
-    A committed fixture leaked the real job title for exactly this reason: the
-    forbidden list held "Settlement Platform Analyst" and the ATS apply link
-    spelled it "Acquiring-Solution-Designer---Merchant-Payments--...". The
-    check said 69/69 absent and was telling the truth about the wrong strings.
-
-    Short results are dropped: two-character fragments match everything and
-    would turn the sweep into noise nobody reads.
+    Now a thin call into ``tests.leakwalk``, which is where the instrument
+    lives so that the fixture check and the repo-wide sweep expand spellings
+    the SAME way. Two independent expanders would be the same defect this
+    script already carries a scar from, one layer up: a committed fixture
+    leaked the real job title because the forbidden list held the spaced
+    spelling and the ATS apply link used the hyphenated one. The check said
+    69/69 absent and was telling the truth about the wrong strings.
     """
-    out = {needle}
-    for sep in ("-", "--", "---", "%20", "+", "_", ""):
-        out.add(needle.replace(" ", sep))
-    out.add(needle.replace(".", "%2E"))
-    out.add(needle.replace(",", "%2C"))
-    out.add(needle.replace("&", "%26"))
-    return {v for v in out if len(v) >= 5}
+    return url_spellings(needle)
 
 
 def _assert_substitution_is_safe() -> None:
@@ -577,4 +651,8 @@ def main() -> None:
         raise SystemExit(1)
 
 
-main()
+if __name__ == "__main__":
+    # Guarded. ``main()`` WRITES tests/fixtures/, so a bare call here meant
+    # that merely importing this module -- to read one table, to test one
+    # helper -- rebuilt four committed fixtures as a side effect.
+    main()

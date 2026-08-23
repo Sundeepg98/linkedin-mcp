@@ -148,7 +148,7 @@ ANONYMOUS_NAME_LINES = [
     ("Someone at Acme Corp", "someone at"),
     ("Anonymous LinkedIn Member", "anonymous linkedin member"),
     ("Private mode viewer", "private mode"),
-    ("Viewer from redacted, India", "viewer from"),
+    ("Viewer from Riverton, United States", "viewer from"),
 ]
 
 
@@ -185,9 +185,9 @@ def test_duplicate_lines_do_not_become_the_company():
 
 
 def test_clean_lines_collapses_duplicates_case_insensitively():
-    assert clean_lines("Acme Corp\nACME CORP\nBengaluru") == [
+    assert clean_lines("Acme Corp\nACME CORP\nRiverton") == [
         "Acme Corp",
-        "redacted",
+        "Riverton",
     ]
 
 

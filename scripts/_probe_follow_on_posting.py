@@ -31,10 +31,28 @@ from linkedin_server.readonly import assert_read_url  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
 
-#: Vantrex Systems, id 610427 -- read out of the Manage-Pages capture, one of the
-#: twenty pages he follows. Chosen for posting volume, nothing else.
-FOLLOWED_COMPANY_ID = "610427"
-FOLLOWED_COMPANY_NAME = "Vantrex Systems"
+#: WHICH Page to probe is an ARGUMENT, not a constant. It used to be a real
+#: company name and its real numeric id, written into a tracked, pushed file
+#: as a comment explaining where they came from -- "read out of the
+#: Manage-Pages capture, one of the twenty pages he follows", which is the
+#: sentence that turns an id into a fact ABOUT HIM rather than a fact about
+#: LinkedIn. The probe never needed a particular company; it needed A company
+#: he follows, and only the person running it knows one.
+USAGE = "\n".join(
+    (
+        "usage: python scripts/_probe_follow_on_posting.py <company_id> <name>",
+        "  Pick any Page you follow. The id is the number in its /company/<id>/",
+        "  url. Both are arguments rather than constants because a real company",
+        "  id in a tracked file is a fact about whoever runs this, not about",
+        "  LinkedIn.",
+    )
+)
+
+if len(sys.argv) != 3:
+    raise SystemExit(USAGE)
+FOLLOWED_COMPANY_ID, FOLLOWED_COMPANY_NAME = sys.argv[1], sys.argv[2]
+if not FOLLOWED_COMPANY_ID.isdigit():
+    raise SystemExit(USAGE)
 
 
 async def load(page, url: str, name: str) -> str:

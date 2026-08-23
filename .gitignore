@@ -46,3 +46,9 @@ htmlcov/
 _audit/_probe-*.html
 _audit/*_raw.html
 _audit/_fixture_sanitisation_check.txt
+
+# The de-anonymisation KEY for tests/fixtures/*. The fixtures themselves are
+# clean -- this is the only thing that reverses them, so it is the one file in
+# this repo that must never be committed. It was tracked once, inside the
+# sanitisation script itself, which is the leak this line exists to prevent.
+_audit/_sanitisation_key.json

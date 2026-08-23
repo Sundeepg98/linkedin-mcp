@@ -20,13 +20,17 @@ from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
-VANITY = "alex-rivera-8c21"
+#: ``/in/me/`` redirects to whoever is signed in, so this surface needs no
+#: identity at all. It used to be a literal vanity slug -- his -- in a tracked,
+#: pushed file. The slug was not needed to reach the page; it was needed to
+#: reach HIS page, which is what /in/me/ already means.
+ME = "me"
 
 
 async def main() -> None:
     async with BROWSER.session() as page:
         for name, url in (
-            ("interests", f"{BASE_URL}/in/{VANITY}/details/interests/"),
+            ("interests", f"{BASE_URL}/in/{ME}/details/interests/"),
         ):
             print(f"\n=== UNLISTED SURFACE PROBE: {url}")
             await BROWSER.wait_for_rate_slot()

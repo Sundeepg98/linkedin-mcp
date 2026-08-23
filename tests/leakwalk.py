@@ -156,6 +156,38 @@ def renderings(secret: str) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 
 
+def url_spellings(needle: str) -> set[str]:
+    """Every url and slug spelling of ``needle`` that means the same thing.
+
+    THE SCAR THIS CARRIES. A committed fixture leaked a real job title while
+    its own check reported ``69/69 forbidden strings absent``. The check was
+    telling the truth about the wrong strings: the forbidden list held the
+    SPACED spelling of the title and the ATS apply link in the same file
+    spelled it with hyphens for spaces, with a real requisition id and a
+    signed redirect token glued on behind it.
+
+    The two spellings are NOT quoted here, and that is not squeamishness --
+    the first draft of this docstring quoted both, which put the real title
+    into a tracked file in order to explain why real titles get into tracked
+    files. A guard is not exempt from what it guards.
+
+    A LIST OF LITERALS ONLY CATCHES THE SPELLING SOMEBODY TYPED. That is the
+    same defect as hunting a credential by NAME rather than by SHAPE, which is
+    what the rest of this module exists to fix -- one layer up, in the
+    identifiers rather than the secrets.
+
+    Short results are dropped: two-character fragments match everything and
+    would turn a sweep into noise nobody reads.
+    """
+    out = {needle}
+    for separator in ("-", "--", "---", "%20", "+", "_", ""):
+        out.add(needle.replace(" ", separator))
+    out.add(needle.replace(".", "%2E"))
+    out.add(needle.replace(",", "%2C"))
+    out.add(needle.replace("&", "%26"))
+    return {spelling for spelling in out if len(spelling) >= 5}
+
+
 def walk(obj: Any, path: str = "$") -> Iterator[tuple[str, str]]:
     """Yield ``(path, text)`` for every readable leaf under ``obj``.
 

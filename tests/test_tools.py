@@ -932,7 +932,7 @@ async def test_the_search_url_carries_the_linkedin_filter_parameters(drive):
 
     result = await linkedin_search_jobs(
         keywords="senior node.js engineer",
-        location="redacted",
+        location="Riverton",
         remote="remote",
         date_posted="past_24h",
         experience_level="mid_senior",
@@ -944,7 +944,7 @@ async def test_the_search_url_carries_the_linkedin_filter_parameters(drive):
     url = navigations[0]
     assert url.startswith("https://www.linkedin.com/jobs/search/?")
     assert "keywords=senior+node.js+engineer" in url
-    assert "location=redacted" in url
+    assert "location=Riverton" in url
     assert "f_WT=2" in url, "remote"
     assert "f_TPR=r86400" in url, "past 24 hours"
     assert "f_E=4" in url, "mid-senior"
@@ -984,12 +984,12 @@ async def test_the_search_echoes_back_the_query_it_actually_ran(drive):
     drive(page)
 
     result = await linkedin_search_jobs(
-        keywords="  node.js engineer  ", location="  redacted  ", start=50
+        keywords="  node.js engineer  ", location="  Riverton  ", start=50
     )
 
     assert result["query"] == {
         "keywords": "node.js engineer",
-        "location": "redacted",
+        "location": "Riverton",
         "remote": "any",
         "date_posted": "any",
         "experience_level": None,
