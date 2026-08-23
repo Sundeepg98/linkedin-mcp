@@ -40,10 +40,11 @@ HOW TO RUN IT
         tests/test_auth_lifecycle.py tests/test_session_info_offline.py `
         -p presence_is_auth_control
 
-MEASURED 2026-08-23, and RE-MEASURED the same day after ``renewal`` gained
-the three ``session_lapses_*`` keys. The failing twelve are unchanged by that
-addition, which is the expected result: it added shape, not verdict. Verbatim
-tail of the second run::
+MEASURED 2026-08-23, and RE-MEASURED twice the same day as ``renewal`` grew
+-- first the three ``session_lapses_*`` keys, then ``uses_browser`` and
+``mechanism``. The failing twelve are unchanged by both additions, which is the
+expected result: they added shape, not verdict. Verbatim tail of the latest
+run::
 
     FAILED tests/test_auth_lifecycle.py::test_the_offline_path_still_answers_null_and_not_false
     FAILED tests/test_auth_lifecycle.py::test_the_browser_failed_path_still_answers_null
@@ -57,12 +58,12 @@ tail of the second run::
     FAILED tests/test_session_info_offline.py::test_the_tool_falls_back_to_the_jar_when_no_browser_can_start
     FAILED tests/test_session_info_offline.py::test_verify_live_false_does_not_touch_the_browser_at_all
     FAILED tests/test_session_info_offline.py::test_the_default_does_reach_for_the_browser
-    12 failed, 54 passed in 2.21s
+    12 failed, 58 passed in 3.17s
 
-The same two files run 66 passed with the plugin off, so every one of those
+The same two files run 70 passed with the plugin off, so every one of those
 twelve is a real flip and none of them is a collection error.
 
-The 54 that survive are supposed to survive, and reading the list is as much
+The 58 that survive are supposed to survive, and reading the list is as much
 the point as the failures:
 
 * ``test_the_live_path_does_still_say_true`` stays green. It is the POSITIVE
@@ -73,7 +74,8 @@ the point as the failures:
   verdict, so this bug cannot reach it, and a control that broke it would be
   measuring blast radius rather than the guard.
 * the shape tests -- credential, supporting, renewal (including every
-  ``session_lapses_*`` assertion), durability, and
+  ``session_lapses_*`` assertion and both mechanism-declaration tests),
+  durability, and
   ``test_expiry_source_says_why_when_there_is_no_date`` -- stay green,
   because the permissive build still returns the RIGHT SHAPE. Only the
   verdict inside it is wrong. That asymmetry is the whole lesson: a wrong

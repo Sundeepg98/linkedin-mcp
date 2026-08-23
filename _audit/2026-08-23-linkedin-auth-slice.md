@@ -353,3 +353,91 @@ real `_state` profile. No browser launched against the real profile - the
 browser-absent measurement only pointed `PLAYWRIGHT_BROWSERS_PATH` at an empty
 temp directory for one pytest process, which makes `chromium.launch` fail and
 touches no profile at all. Strict ASCII across `.py`, `.md` and `.yml`.
+
+---
+
+# Third pass - 2026-08-23 (`renewal.uses_browser` + `renewal.mechanism`)
+
+Tree verified at `oldsha01`, clean, `origin/master` identical, and
+`grep -rn uses_browser --include=*.py` empty before any edit - matching the
+wave lead's 08:50 sample.
+
+## The change
+
+`linkedin_server/auth.py:494` - `_renewal` gains two more keys:
+
+| key | value on linkedin |
+|---|---|
+| `uses_browser` | `None` |
+| `mechanism` | self-contained prose naming `linkedin_login_browser`, the human action, and the full-day cost |
+
+`uses_browser` is `None` and NOT `False`, on the same three-valued argument
+this module already makes about `authenticated`. There is no renewal mechanism
+on this platform to characterise, so `False` would assert a fact about a thing
+that does not exist - "a renew exists and happens not to need a browser".
+Absence of a mechanism is not a mechanism that costs nothing, which is exactly
+what the field was added to stop "silent renew" from hiding on the two
+siblings that DO drive a browser to renew.
+
+`mechanism` answers in its own words rather than pointing at `renewal.why`, so
+a caller comparing `mechanism` across four servers gets a straight answer from
+each without following a cross-reference:
+
+    "none -- there is no renewal mechanism here to describe, which is why
+     uses_browser is null rather than false. Recovery is not a renewal at all:
+     linkedin_login_browser opens a real Chrome window and waits for the
+     operator to sign in with his own hands. That is a HUMAN action, not a
+     background one -- it cannot be scheduled, it cannot run while he is away
+     from the machine, and this server never sees, types, stores or transmits
+     the password he types into that window. The sign-in it replaces took him
+     a full day to establish."
+
+The `linkedin_session_info` docstring carries the same two facts, so what a
+caller reads still matches what the tool returns.
+
+## Tests
+
+| point | count |
+|---|---|
+| start of this pass | 782 passed |
+| end of this pass | **786 passed** |
+
+Four added, all in `tests/test_auth_lifecycle.py`:
+
+* `test_the_renewal_mechanism_is_declared_as_absent_not_as_free` - offline
+  path, asserting `is None` AND `is not False`. A falsy check would pass on
+  `False`, which is the exact confusion the field exists to prevent, and the
+  test says so in its docstring.
+* `test_the_mechanism_declaration_is_on_the_live_path_too` - same, live path.
+* `test_the_mechanism_answers_in_its_own_words` - pins that `mechanism` is
+  self-contained (`linkedin_login_browser`, `HUMAN action`, `full day`,
+  `never sees, types, stores or transmits`, `null rather than false`) rather
+  than deferring to `renewal.why`.
+* `test_the_two_new_keys_survive_an_unreadable_jar` - these two describe the
+  RENEWAL PATH, not the credential, so an unreadable jar must not turn them
+  into nulls-by-accident. There is still no renewal here and that is still
+  knowable.
+
+## Counts re-measured, not adjusted
+
+* Control: **`12 failed, 58 passed in 3.17s`** (same two files, `70 passed`
+  with the plugin off). The failing twelve are unchanged by this addition too
+  - it is shape, not verdict - and the docstring now records both
+  re-measurements.
+* Browser-absent: re-ran the whole suite with `PLAYWRIGHT_BROWSERS_PATH` at an
+  empty directory rather than assuming the four new tests need no browser.
+  **`87 failed, 699 passed`** - the 87 is genuinely unchanged, the passes moved
+  695 -> 699. `ci.yml` updated to 786 / 87 / 699; README 782 -> 786 in three
+  places.
+
+## Guards
+
+`readonly.py`, `test_readonly.py` and `test_launch_boundary.py` remain
+zero-line diffs across ALL THREE passes. Nothing in this pass went near a tool
+name, a docstring claim, the allowlist or the launch boundary.
+
+## Constraints
+
+`linkedin_notifications` never called. `linkedin_logout` never run against the
+real `_state` profile. No browser launched against the real profile. Strict
+ASCII across `.py`, `.md` and `.yml`.
