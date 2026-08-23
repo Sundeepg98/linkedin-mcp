@@ -1,6 +1,6 @@
 name: CI
 
-# This suite has 989 tests and has never run anywhere but one Windows laptop.
+# This suite has 986 tests and has never run anywhere but one Windows laptop.
 # It also holds the read-only guarantees this server is built around -- the
 # navigation allowlist, the AST scan for write-shaped JS, the launch-flag
 # boundary, the tool-surface check -- so "green when someone remembers" is not
@@ -13,7 +13,7 @@ name: CI
 # here is stale prose in a comment, never a red build.
 #
 # THE ONE DESIGN DECISION, and it was measured rather than argued. With the
-# browser binary absent, 87 of the 989 fail, all with the identical error:
+# browser binary absent, 87 of the 986 fail, all with the identical error:
 #
 #     BrowserType.launch: Executable doesn't exist at ...
 #
