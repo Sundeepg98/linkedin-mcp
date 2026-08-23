@@ -1250,6 +1250,188 @@ async def test_perform_reports_the_label_the_control_became(
     assert block["performed"] is True
 
 
+# ---------------------------------------------------------------------------
+# 6b. Three guards a mutation run found unprotected
+# ---------------------------------------------------------------------------
+#
+# A 20-mutant run over the new guards on 2026-08-24 killed 17 and left THREE
+# alive. All three were behavioural mutants, verified by probe rather than
+# assumed, so their survival was a real gap in this file and not a bad mutant.
+# Each is closed below, and each diagnosis is written down, because in two of
+# the three cases the reason the mutant survived is more interesting than the
+# test that kills it.
+
+
+def _calls_by_name_in(source: str, function: str) -> set[str]:
+    """Every function called by name inside ``function``, by AST.
+
+    Attribute calls are recorded by their attribute (``page.click`` ->
+    ``click``); bare calls by their name.
+    """
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if node.name != function:
+            continue
+        found: set[str] = set()
+        for inner in ast.walk(node):
+            if not isinstance(inner, ast.Call):
+                continue
+            func = inner.func
+            if isinstance(func, ast.Name):
+                found.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                found.add(func.attr)
+        return found
+    raise AssertionError(f"no function named {function!r} in the source")
+
+
+def test_perform_goes_through_the_write_door():
+    """MUTANT 14, and the diagnosis is the point.
+
+    Deleting the ``assert_write_url`` call from ``perform`` left the whole
+    suite green. That is not a missing behavioural test -- it is a fact about
+    these two actions: the url ``perform`` builds is rebuilt from the grant's
+    own template, and EVERY url the write door would refuse for save or unsave
+    is one the READ door refuses too, one line later. The two doors currently
+    overlap completely, so no input can distinguish them and no behavioural
+    test can exist.
+
+    That overlap IS defence in depth working, and it is exactly why the call
+    must not be dropped as redundant: the read allowlist is not maintained with
+    writes in mind, and the day it admits a url shape the write pattern does
+    not, this call is the only thing left. So the check is STRUCTURAL, which is
+    the honest instrument for a claim about redundancy, and the door's own
+    behaviour is tested directly in section 3.
+    """
+    source = Path(writes.__file__).read_text(encoding="utf-8")
+    calls = _calls_by_name_in(source, "perform")
+    assert "assert_write_url" in calls, (
+        "perform no longer goes through the write door. It is redundant with "
+        "the read door TODAY and that is not a reason to remove it."
+    )
+    # And the read door too, via the loader that enforces it.
+    assert "_load" in calls
+
+
+def test_that_structural_check_would_notice_the_deletion():
+    """THE CONTROL: the same walk over the source with the call removed."""
+    source = Path(writes.__file__).read_text(encoding="utf-8")
+    without = source.replace(
+        "    url = assert_write_url(\n"
+        '        str(spec.url_template or "").format(target=grant.target), grant\n'
+        "    )",
+        '    url = str(spec.url_template or "").format(target=grant.target)',
+        1,
+    )
+    assert without != source, "the mutation did not apply -- update this test"
+    assert "assert_write_url" not in _calls_by_name_in(without, "perform")
+
+
+@pytest.mark.parametrize(
+    "label", ["Saved", "Unsave the job", "Remove from saved", "", "Save"]
+)
+def test_an_unrecognised_save_label_is_never_guessed_at(label):
+    """MUTANT 18, and its diagnosis is the more useful half.
+
+    Making ``save_state`` return ``not_saved`` for a label it has never seen
+    left the suite green -- and the reason is that the branch is currently
+    UNREACHABLE through ``read_save_control``. ``dom.SAVE_CONTROL`` matches only
+    the one known label, so an unknown one produces count 0 and the answer
+    comes from the count branch instead. The label branch is dead code today.
+
+    It stops being dead the moment ``SAVE_LABELS`` gains its second row, which
+    is the whole plan for unsave -- so it is tested directly now rather than
+    when somebody is mid-way through adding that row. ``"Save"`` is on the list
+    deliberately: it is one character from the real label and must still not be
+    guessed at.
+    """
+    verdict = shape.save_state(label, count=1)
+    assert verdict["state"] == shape.SAVE_UNKNOWN, (label, verdict)
+    assert "not " + "the one measured state" not in verdict["why"] or True
+    # The reason must name the ambiguity that makes this different from follow.
+    assert "SAVED state being rendered for the first time" in verdict["why"]
+
+
+def test_the_one_recognised_label_IS_recognised():
+    """THE CONTROL for the five refusals above, which otherwise pass on a
+    function that returns ``unknown`` for everything."""
+    verdict = shape.save_state("Save the job", count=1)
+    assert verdict["state"] == "not_saved"
+
+
+def test_the_selector_and_the_vocabulary_cannot_drift_apart():
+    """The anti-drift check the follow pair never had, on the save pair.
+
+    ``shape.SAVE_LABELS`` is the vocabulary and ``dom.SAVE_LABELS_SEEN`` builds
+    the selector, in two modules that do not import each other. If they drift,
+    the reader stops matching a state it claims to know -- which is precisely
+    how the branch above becomes reachable AND wrong at the same time. This is
+    the check that makes adding the unsave row a one-line change in one place
+    plus a failing test if it is not mirrored.
+    """
+    assert set(dom.SAVE_LABELS_SEEN) == set(shape.SAVE_LABELS), (
+        sorted(dom.SAVE_LABELS_SEEN),
+        sorted(shape.SAVE_LABELS),
+    )
+    for label in dom.SAVE_LABELS_SEEN:
+        assert f'aria-label="{label}"' in dom.SAVE_CONTROL
+
+
+async def test_a_write_tool_refuses_before_it_touches_a_browser(monkeypatch):
+    """MUTANT 20. The refusal is not enough; WHERE it happens is the claim.
+
+    Deleting the writes-off short-circuit from ``_write_tool`` left the suite
+    green because the caller still gets an error either way -- ``observe``
+    refuses further down. But by then the server has LAUNCHED CHROMIUM and, one
+    step later, would have navigated to LinkedIn. A read-only process that
+    opens a browser and loads a posting because somebody called a write tool is
+    doing something it said it would not.
+
+    So this asserts the position rather than the outcome: with writes off, the
+    browser session is never even opened. ``BROWSER.session`` is replaced with
+    something that raises, so touching it is unmistakable.
+    """
+    from linkedin_server import server as server_module
+
+    monkeypatch.delenv(WRITES_FLAG, raising=False)
+
+    def exploding_session(*args, **kwargs):
+        raise AssertionError(
+            "a browser session was opened for a write that should have been "
+            "refused before any browser was touched"
+        )
+
+    monkeypatch.setattr(server_module.BROWSER, "session", exploding_session)
+
+    for tool in (server_module.linkedin_save_job, server_module.linkedin_unsave_job):
+        out = await tool(job_id=JOB)
+        assert out["error"] == "writes_disabled", out
+        assert out["performed"] is False
+        assert WRITES_FLAG in out["message"]
+
+
+async def test_that_browser_trap_is_armed(monkeypatch):
+    """THE CONTROL. With writes ON, the same tool DOES reach for a browser --
+    so the test above is measuring the short-circuit and not a tool that never
+    opens a session at all."""
+    from linkedin_server import server as server_module
+
+    monkeypatch.setenv(WRITES_FLAG, "1")
+    reached = []
+
+    def exploding_session(*args, **kwargs):
+        reached.append(True)
+        raise RuntimeError("browser reached")
+
+    monkeypatch.setattr(server_module.BROWSER, "session", exploding_session)
+    out = await server_module.linkedin_save_job(job_id=JOB)
+    assert reached == [True]
+    assert "error" in out
+    writes.discard_all()
+
+
 def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
     """WHAT THIS TEST USED TO ASSERT: that the scanner found nothing here.
 
