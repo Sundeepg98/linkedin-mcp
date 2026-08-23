@@ -1077,6 +1077,17 @@ def _stated_total(main_text: str) -> Optional[int]:
     return seen.pop()
 
 
+def _pages(count: int) -> str:
+    """``58 Pages``, but ``1 Page``.
+
+    LinkedIn's own heading agrees to the singular, and these strings quote that
+    heading back at the operator as the evidence for a refusal. "says 1 Pages"
+    reads as a string the server assembled rather than a number it read, which
+    is the one impression a refusal cannot afford to give.
+    """
+    return f"{count} Page" if count == 1 else f"{count} Pages"
+
+
 def _why_incomplete(rendered: int, total: Optional[int]) -> str:
     """Say WHICH way the reconciliation failed, because they are not one thing."""
     if total is None:
@@ -1090,7 +1101,7 @@ def _why_incomplete(rendered: int, total: Optional[int]) -> str:
     if rendered > total:
         return (
             f"THE READ CONTRADICTS ITSELF: {rendered} rows were read while "
-            f"LinkedIn's own heading says {total} Pages. More rows than the "
+            f"LinkedIn's own heading says {_pages(total)}. More rows than the "
             "page claims means one of those two numbers is not what this "
             "reader took it for -- either something that is not a followed "
             "Page is being parsed as one, or the heading that was read is not "
@@ -1102,7 +1113,7 @@ def _why_incomplete(rendered: int, total: Optional[int]) -> str:
     return (
         "LinkedIn renders only the first rows of this list and loads the rest "
         "on scroll, which this server does not do -- one page load, whatever "
-        f"had drawn by then. It says {total} Pages and rendered {rendered}. A "
+        f"had drawn by then. It says {_pages(total)} and rendered {rendered}. A "
         "name missing from `pages` is therefore NOT evidence that the Page is "
         "unfollowed."
     )
