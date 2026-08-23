@@ -1,6 +1,6 @@
 name: CI
 
-# This suite has 986 tests and has never run anywhere but one Windows laptop.
+# This suite has 1092 tests and has never run anywhere but one Windows laptop.
 # It also holds the read-only guarantees this server is built around -- the
 # navigation allowlist, the AST scan for write-shaped JS, the launch-flag
 # boundary, the tool-surface check -- so "green when someone remembers" is not
@@ -13,25 +13,41 @@ name: CI
 # here is stale prose in a comment, never a red build.
 #
 # THE ONE DESIGN DECISION, and it was measured rather than argued. With the
-# browser binary absent, 87 of the 986 fail, all with the identical error:
+# browser binary absent, 150 of the 1092 do not pass, all for the same reason:
 #
 #     BrowserType.launch: Executable doesn't exist at ...
 #
-# Re-measured 2026-08-23 rather than adjusted, twice on that date: the suite was
-# run in full with PLAYWRIGHT_BROWSERS_PATH pointed at an empty directory, which
-# is exactly what a runner with no binary looks like. The second run, after the
-# leak-walker wave, came back `87 failed, 815 passed`. The FAILING 87 and their
-# per-module split are byte-for-byte what the first run found; only the passes
-# moved, which is the expected result for a wave that added 116 tests none of
-# which touch a browser. The figures before that (684 / 77 / three modules) had
-# gone stale across several waves, and a count nobody re-measures is how a
-# reader ends up trusting the wrong number in the first file he opens.
+# READ THAT NUMBER CAREFULLY, BECAUSE THE SUMMARY LINE SPLITS IT IN TWO:
 #
-# They live in tests/test_profile_views_fixture.py (18),
-# test_job_search_fixture.py (27), test_sdui_surfaces_fixture.py (32) and
-# test_job_detail_fixture.py (10) -- the fourth joined at oldsha07 -- and every
-# one of them does `chromium.launch(headless=True)` followed by
-# `page.set_content(html)` over frozen local markup. Not one calls page.goto().
+#     112 failed, 936 passed, 6 skipped, 38 errors
+#
+# THIRTY-EIGHT OF THEM ARE ERRORS, NOT FAILURES. A reader who greps the run for
+# "failed" -- or who reads only the first number of that line -- undercounts the
+# browser-dependent tests by 38 and concludes the binary matters less than it
+# does. The split is not arbitrary and it is not noise: pytest calls it a
+# FAILURE when the launch happens in the test body, and a SETUP ERROR when it
+# happens in a fixture the test depends on. tests/test_writes.py launches inside
+# an `@pytest.fixture` (its line 135), so all 38 of its browser tests arrive as
+# errors; every other browser module launches inline and arrives as failures.
+# Same missing binary, same message, two words for it. Any gate or eyeball that
+# counts only one of the two words is reading a third of this off the page.
+#
+# Re-measured 2026-08-23 at oldsha24 rather than adjusted, and measured in a
+# CLEAN CLONE of that commit rather than in the working tree, because a second
+# agent was writing to the tree at the time and the tree's own count moved by 98
+# mid-measurement. In the clone it reconciles exactly -- 936 + 112 + 6 + 38 =
+# 1092 -- which is the property to re-check first if these numbers ever stop
+# adding up. The figures before this (986 total, 87 absent-binary, four modules,
+# no mention of errors at all) had gone stale across several waves, and a count
+# nobody re-measures is how a reader ends up trusting the wrong number in the
+# first file he opens.
+#
+# The 112 FAILURES live in tests/test_sdui_surfaces_fixture.py (32),
+# test_job_search_fixture.py (27), test_follow_state_fixture.py (25),
+# test_profile_views_fixture.py (18) and test_job_detail_fixture.py (10). The 38
+# ERRORS are all tests/test_writes.py. Every one of the 150 does
+# `chromium.launch(headless=True)` followed by `page.set_content(html)` over
+# frozen local markup or markup built in the test. Not one calls page.goto().
 # So they need a BROWSER BINARY and nothing else: no network, no cookie, no
 # LinkedIn session. The operator's li_at never has to leave his disk for these
 # to run, which is what makes installing chromium here the right call instead
@@ -47,7 +63,7 @@ name: CI
 #
 # Note that test_browser.py, test_launch_boundary.py and test_preflight.py
 # only TALK about the browser -- they fake the driver and launch nothing. They
-# pass with no chromium present and are not part of the 87.
+# pass with no chromium present and are not part of the 150.
 
 on:
   push:
@@ -73,7 +89,8 @@ jobs:
         # An explicit list, not a cross product, because the cells are not
         # equally priced: this is a PRIVATE repository, so runner minutes come
         # out of the account's free allowance and a Windows minute is billed
-        # at 2x a Linux one. The suite takes ~1m45s plus a chromium download.
+        # at 2x a Linux one. The suite takes ~3m30s plus a chromium download
+        # (207s measured at oldsha24, up from ~1m45s as the browser modules grew).
         #
         #   3.10  -- the floor pyproject.toml declares (requires-python
         #            ">=3.10"). A floor nobody runs is a claim, not a fact, and
@@ -149,8 +166,8 @@ jobs:
 
       - name: Install the Chromium binary
         # `pip install playwright` installs the DRIVER only. The browser is a
-        # separate download, and skipping it is what produces the 87 failures
-        # described at the top of this file.
+        # separate download, and skipping it is what produces the 112 failures
+        # AND 38 errors described at the top of this file.
         run: python -m playwright install --with-deps chromium
 
       - name: The server imports and registers its tools
