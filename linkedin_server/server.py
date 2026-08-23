@@ -901,13 +901,29 @@ async def linkedin_followed_companies(
                 await dom.read_main_text(page),
             )
 
-            if not parsed["pages"] and parsed["total_followed"]:
+            # A ZERO IS ONLY REPORTED WHEN LINKEDIN'S OWN COUNT SAYS ZERO.
+            # This is `_read_tracker`'s rule applied to a second surface, and
+            # it is here because the first version of this tool got it half
+            # right: it raised when the heading said a positive number and no
+            # row read, but returned a cheerful empty list when the page drew
+            # NOTHING AT ALL -- no rows and no heading either. Those are the
+            # two failure shapes, not one, and the second is the more likely:
+            # a page that never rendered has no count to contradict.
+            if not parsed["pages"] and parsed["total_followed"] != 0:
                 raise ExtractionFailedError(
-                    "the Manage Pages surface loaded and says you follow "
-                    f"{parsed['total_followed']} Pages, but not one row could "
-                    "be read from it. An empty list here would be "
-                    "indistinguishable from you following nothing, so it is "
-                    "reported as a failure instead.",
+                    (
+                        "the Manage Pages surface loaded and says you follow "
+                        f"{parsed['total_followed']} Pages, but not one row "
+                        "could be read from it."
+                        if parsed["total_followed"]
+                        else "the Manage Pages surface loaded but neither a "
+                        "single row NOR its own 'N Pages' heading could be "
+                        "read from it, so there is nothing to corroborate a "
+                        "zero with."
+                    )
+                    + " An empty list here would be indistinguishable from you "
+                    "following nothing, so it is reported as a failure "
+                    "instead.",
                     url=final_url,
                     hint="open the url yourself and compare with what this reports",
                 )

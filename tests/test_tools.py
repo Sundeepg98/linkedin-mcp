@@ -40,6 +40,7 @@ from linkedin_server.server import (
     linkedin_my_applications,
     linkedin_my_profile,
     linkedin_notifications,
+    linkedin_followed_companies,
     linkedin_saved_jobs,
     linkedin_search_jobs,
     linkedin_who_viewed_me,
@@ -485,6 +486,70 @@ async def test_an_uncorroborated_empty_list_is_still_an_error(drive):
     assert "Applied tab says 2" in result["message"]
     assert "results" not in result
     assert "count" not in result
+
+
+async def test_followed_companies_reports_a_failed_read_as_a_failure(drive):
+    """THE SAME RULE ON A SECOND SURFACE, and the half the first cut got wrong.
+
+    The first version of this tool raised when LinkedIn's heading said a
+    positive number and no row parsed -- and returned a cheerful empty list
+    when the page drew NOTHING AT ALL, no rows and no heading either. That is
+    the more likely failure of the two, because a page that never rendered has
+    no count left to contradict. An empty list there is indistinguishable from
+    him following nobody, which is the exact confusion `_read_tracker` exists
+    to prevent one surface over.
+    """
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = ""
+    drive(page)
+
+    result = await linkedin_followed_companies()
+
+    assert result["error"] == "extraction_failed", result
+    assert "NOR its own" in result["message"]
+    assert "pages" not in result
+
+
+async def test_followed_companies_reports_a_corroborated_zero_as_an_answer(drive):
+    """THE CONTROL. Without it the refusal above passes on a tool that has
+    simply lost the ability to return an empty list at all -- and following
+    nobody is a real state, not an error."""
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = "Manage Pages 0 Pages"
+    drive(page)
+
+    result = await linkedin_followed_companies(company="Ashgrove Systems")
+
+    assert "error" not in result, result
+    assert result["pages"] == []
+    assert result["rendered"] == 0
+    assert result["total_followed"] == 0
+    # A zero LinkedIn itself STATES is a complete list, so a question about any
+    # Page can now be answered "no" rather than "unknown". This is the only
+    # shape of empty result in which that is true, which is why the two tests
+    # around it are worth having separately.
+    assert result["complete"] is True
+    assert result["follow_state"]["state"] == "not_following"
+    assert "why_incomplete" not in result
+
+
+async def test_followed_companies_says_unknown_not_no_off_a_partial_list(drive):
+    """The partial-list hazard, at the TOOL boundary rather than the parser's.
+
+    LinkedIn renders twenty rows under a heading saying 58. Asking about a Page
+    that is not among the twenty must come back `unknown`: he may well follow
+    them, on a row this read was never shown.
+    """
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = "Manage Pages 58 Pages"
+    drive(page)
+
+    # No rows parse off a FakePage, so this exercises the strictest case: a
+    # heading that says 58 with nothing under it is a FAILED read, not a "no".
+    result = await linkedin_followed_companies(company="Ashgrove Systems")
+
+    assert result["error"] == "extraction_failed", result
+    assert "58 Pages" in result["message"] or "58" in result["message"]
 
 
 async def test_an_empty_list_with_no_readable_tab_strip_is_an_error(drive):

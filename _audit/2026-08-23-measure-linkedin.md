@@ -80,7 +80,11 @@ went on top. Nine live page loads, one at a time, nothing clicked.
 
 8. **PRIVACY, and one live hole found.** `_audit/` was **not gitignored** while ~14 MB of raw
    captures with his name, member ids and live tracking tokens sat there untracked -- one
-   `git add -A` from a public remote. Now ignored; nothing was ever committed. Fixtures replace
+   `git add -A` from the remote. Now ignored; nothing was ever committed. **Correction: that remote is
+   PRIVATE** -- `gh repo view --json visibility` says so, and `oldsha04`'s message calls it public. Three
+   agents including me inferred "public" from a remote existing and a push working, which is not
+   evidence of anything; visibility comes from that command alone. Every alarm ran in the safe
+   direction and the scrubbing was right on its merits either way. Fixtures replace
    20 company names, ids, slugs, his name and his city, and **neutralise follower counts**: an
    exact count is close to a unique key for a Page and twenty side by side reconstruct the real
    follow list even with every name changed. The risk is in the SET, not the item, which is why
