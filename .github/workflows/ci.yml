@@ -1,6 +1,9 @@
 name: CI
 
-# This suite has 1092 tests and has never run anywhere but one Windows laptop.
+# This suite had 1092 tests at oldsha24 and has never run anywhere but one
+# Windows laptop. That figure is stamped with a commit rather than stated flat
+# because it MOVES BY DESIGN -- see below -- and it moved by a hundred within
+# the hour this line was last edited.
 # It also holds the read-only guarantees this server is built around -- the
 # navigation allowlist, the AST scan for write-shaped JS, the launch-flag
 # boundary, the tool-surface check -- so "green when someone remembers" is not
