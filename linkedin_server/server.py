@@ -1,15 +1,22 @@
-"""The tool surface: eleven tools, every one of them a read.
+"""The tool surface: thirteen tools, every one of them a read of LinkedIn.
 
-There is no write path in this package. Not a disabled one, not a stubbed one,
-not one behind a flag. Nothing here applies to a job, saves a job, sends a
-message, edits the profile, toggles Open To Work, or marks anything read on
-purpose. ``readonly.py`` holds the machinery that keeps that true, and
-``tests/test_readonly.py`` runs it against this file.
+There is no write path TO LINKEDIN in this package. Not a disabled one, not a
+stubbed one, not one behind a flag. Nothing here applies to a job, saves a
+job, sends a message, edits the profile, toggles Open To Work, or marks
+anything read on purpose. ``readonly.py`` holds the machinery that keeps that
+true, and ``tests/test_readonly.py`` runs it against this file.
 
-One documented exception, and it is a side effect rather than an action:
-opening the notifications page clears LinkedIn's unread badge, exactly as it
-would if the operator opened the page himself. It is called out in that
-tool's docstring because a read that changes something has to say so.
+Two documented exceptions, and neither of them crosses that line:
+
+* A SIDE EFFECT rather than an action: opening the notifications page clears
+  LinkedIn's unread badge, exactly as it would if the operator opened the
+  page himself. It is called out in that tool's docstring because a read that
+  changes something has to say so.
+* ``linkedin_logout`` writes to LOCAL DISK -- it erases this machine's own
+  Chrome cookie jar. It issues no request, so LinkedIn never hears about it
+  and the account is untouched; the read-only guarantee is about the
+  platform, and that guarantee is intact. It is still the one destructive
+  thing here, which is why it performs nothing at all without ``confirm``.
 """
 
 from __future__ import annotations
@@ -25,6 +32,7 @@ from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
     login_via_browser,
+    logout,
     session_info,
     session_info_offline,
 )
@@ -346,6 +354,22 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
     other is a lie this server refuses to tell. Two labelled fields, never one
     blurred one.
 
+    What comes back, block by block, so a caller is never guessing:
+
+      * credential -- li_at, the one cookie that authenticates here. Its
+        name, whether it is there, its expiry, and expiry_source naming which
+        route produced that date: the live browser's jar, or the on-disk jar
+        read with no browser.
+      * supporting -- JSESSIONID, role csrf. Not a second credential: it
+        cannot sign anything in, it only governs whether the identity call
+        can be made at all. It dies with the browser and a fresh one arrives
+        on the next page load, so it having lapsed means nothing on its own.
+      * renewal -- silent_renew_available is false here, and why says what
+        the four servers in this family were ruled on: there is one
+        credential layer, so a linkedin_reauth would be linkedin_login_browser
+        wearing a different name and it is deliberately not shipped.
+      * durability -- where the sign-in is kept and what it survives.
+
     Cookie values are never returned. Only the name, whether it is there, and
     when it lapses. When it has lapsed every read tool says so with a reason
     rather than handing back nothing, and linkedin_login_browser is the way
@@ -386,6 +410,45 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
                 f"be made: {_error(exc)['message']}"
             ),
         )
+
+
+@mcp.tool()
+async def linkedin_logout(confirm: bool = False) -> dict[str, Any]:
+    """End the local LinkedIn session by erasing this profile's cookie jar.
+
+    THE ONE DESTRUCTIVE TOOL IN THIS SERVER, and the most expensive thing it
+    can do to you. The sign-in it throws away took a full day to establish,
+    and there is no automated way to put it back: linkedin_login_browser
+    opens a window and you type into it yourself, exactly as you did the
+    first time.
+
+    So confirm is False by default and an unconfirmed call performs NOTHING
+    AT ALL -- no file is opened, no file is even stat-ed, no browser starts,
+    the profile is not read. It hands back a preview naming the exact files a
+    confirmed call would erase, what the sign-in cost, and how you get back
+    in. Read that first; nothing about this is reversible afterwards.
+
+    Nothing here reaches LinkedIn. This server stays read-only towards the
+    platform: no request goes out, no session is ended on LinkedIn's side,
+    your account is untouched, and any other browser signed in to it stays
+    signed in. What lapses is purely local -- the cookie jar on this machine.
+
+    A profile another process is using is never touched. If the cross-process
+    lock is held, the answer is cleared false naming the holder's PID, because
+    erasing a jar out from under a live Chromium is how a profile gets
+    corrupted -- which costs the same day this tool is asking about.
+
+    Args:
+        confirm: False -- the default -- previews and performs nothing. True
+            erases the jar.
+    """
+    try:
+        return logout(CHROME_PROFILE, confirm=bool(confirm))
+    except Exception as exc:  # pragma: no cover - logout is written not to
+        # Belt to auth.logout's braces. That function catches its own
+        # failures and returns them as a reason; if one ever escapes anyway,
+        # a destructive tool must still answer rather than raise.
+        return _error(exc)
 
 
 @mcp.tool()
@@ -1047,6 +1110,20 @@ async def linkedin_server_info() -> dict[str, Any]:
             },
             "read_only": True,
             "writes_available": [],
+            # Both fields above are about LINKEDIN: no request this server
+            # issues changes anything on the platform, and that is what the
+            # allowlist, the source scanner and the launch boundary enforce.
+            # ONE tool changes something on THIS MACHINE, and a boundary claim
+            # that quietly omitted it would be exactly the kind of claim this
+            # server exists in order not to make. So it gets its own named
+            # field rather than being folded into a "read_only: True" a reader
+            # would take as covering everything.
+            "local_state_writes": [
+                "linkedin_logout(confirm=True) erases this machine's Chrome "
+                "cookie jar, which ends the local sign-in. It issues no "
+                "request, so LinkedIn is never told and the account is "
+                "untouched. Without confirm it performs nothing at all."
+            ],
             "capabilities": [
                 "profile views (365-day depth where the account has Premium Career)",
                 "applied jobs and their status",

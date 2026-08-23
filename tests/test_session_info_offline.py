@@ -94,10 +94,10 @@ def test_a_perfectly_healthy_cookie_is_still_not_called_authenticated(tmp_path):
     )
 
     assert info["authenticated"] is None
-    assert info["session_cookie"]["present"] is True
-    assert info["session_cookie"]["persistent"] is True
-    assert info["session_cookie"]["expired"] is False
-    assert 299 <= info["session_cookie"]["expires_in_days"] <= 301
+    assert info["credential"]["present"] is True
+    assert info["credential"]["format"] == "cookie"
+    assert info["credential"]["expired"] is False
+    assert 299 <= info["credential"]["expires_in_days"] <= 301
 
 
 async def test_the_online_path_does_still_say_true(patched_navigation):
@@ -117,7 +117,7 @@ async def test_the_online_path_does_still_say_true(patched_navigation):
     assert info["authenticated"] is True
     assert info["live_check"]["attempted"] is True
     assert info["live_check"]["completed"] is True
-    assert info["cookie_source"] == "the live browser's own cookie jar"
+    assert info["credential_source"] == "the live browser's own cookie jar"
 
 
 def test_the_offline_result_says_in_words_that_a_cookie_is_not_a_session(
@@ -153,8 +153,12 @@ def test_the_offline_path_labels_where_the_cookies_came_from(tmp_path):
     offline = auth_module.session_info_offline(
         healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
     )
-    assert "on-disk" in offline["cookie_source"]
-    assert "without launching a browser" in offline["cookie_source"]
+    assert "on-disk" in offline["credential_source"]
+    assert "without launching a browser" in offline["credential_source"]
+    # ...and the credential's own expiry_source names the same route, so a
+    # date can never be read as having come from a live browser it did not.
+    assert "on-disk" in offline["credential"]["expiry_source"]
+    assert "no browser launched" in offline["credential"]["expiry_source"]
 
 
 def test_the_offline_path_never_returns_a_cookie_value(tmp_path):
@@ -176,8 +180,8 @@ def test_an_expired_cookie_is_reported_expired_without_a_browser(tmp_path):
         mode="launch",
         why_no_live_check="no browser",
     )
-    assert info["session_cookie"]["expired"] is True
-    assert info["session_cookie"]["expires_in_days"] < 0
+    assert info["credential"]["expired"] is True
+    assert info["credential"]["expires_in_days"] < 0
     # Still not a verdict. An expired cookie is strong evidence, not a
     # measurement, and this path does not upgrade evidence into one.
     assert info["authenticated"] is None
@@ -188,8 +192,9 @@ def test_a_missing_login_reads_as_missing_rather_than_as_an_error(tmp_path):
     info = auth_module.session_info_offline(
         profile, mode="launch", why_no_live_check="no browser"
     )
-    assert info["session_cookie"]["present"] is False
-    assert info["csrf_cookie"]["name"] == "JSESSIONID"
+    assert info["credential"]["present"] is False
+    assert info["supporting"][0]["name"] == "JSESSIONID"
+    assert info["supporting"][0]["role"] == "csrf"
 
 
 def test_both_routes_failing_reports_both_reasons(tmp_path):
@@ -204,7 +209,12 @@ def test_both_routes_failing_reports_both_reasons(tmp_path):
     assert PREFLIGHT_MESSAGE in info["live_check"]["why_not"]
     assert "jar_error" in info
     assert "does not exist" in info["jar_error"]
-    assert info["session_cookie"]["present"] is False
+    assert info["credential"]["present"] is False
+    # "I could not look" and "there is no cookie" are different facts and the
+    # credential block says which one this is, rather than showing an absence
+    # that reads like a signed-out profile.
+    assert "no date could be read" in info["credential"]["expiry_source"]
+    assert "does not exist" in info["credential"]["expiry_source"]
 
 
 def test_the_durability_block_survives_the_offline_path(tmp_path):
@@ -247,8 +257,8 @@ async def test_the_tool_falls_back_to_the_jar_when_no_browser_can_start(
     # differently on each.
     assert info["live_check"]["attempted"] is True
     assert info["live_check"]["completed"] is False
-    assert info["session_cookie"]["present"] is True
-    assert info["session_cookie"]["expires_at"].endswith("Z")
+    assert info["credential"]["present"] is True
+    assert info["credential"]["expires_at"].endswith("Z")
     # It must not have degraded into the generic error blob, which carries
     # none of the jar facts this tool is for.
     assert "error" not in info
@@ -312,7 +322,7 @@ async def test_verify_live_false_does_not_touch_the_browser_at_all(
     assert info["authenticated"] is None
     assert info["live_check"]["attempted"] is False
     assert "verify_live" in info["live_check"]["why_not"]
-    assert info["session_cookie"]["present"] is True
+    assert info["credential"]["present"] is True
 
 
 async def test_the_default_does_reach_for_the_browser(tmp_path, monkeypatch):

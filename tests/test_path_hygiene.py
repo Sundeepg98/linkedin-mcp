@@ -29,7 +29,7 @@ import re
 import pytest
 
 from linkedin_server import preflight
-from linkedin_server.auth import session_info_offline
+from linkedin_server.auth import logout, session_info_offline
 from linkedin_server.config import CHROME_PROFILE, REPO_ROOT, display, scrub
 from linkedin_server.server import _error, linkedin_server_info
 
@@ -190,6 +190,34 @@ async def test_server_info_carries_no_absolute_path():
 
 def test_the_offline_session_result_carries_no_absolute_path():
     assert_clean(offline_result())
+
+
+def test_the_logout_preview_names_files_without_publishing_the_layout():
+    """The preview's whole job is naming files, which makes it the one payload
+    in this server that is MADE of paths -- and therefore the easiest place to
+    reintroduce the leak this file exists to stop.
+
+    Nothing is erased here: confirm is not given, so the call performs nothing
+    at all -- and the path it is handed is a probe under ``_state``, never the
+    real profile.
+    """
+    # A profile path rooted in this checkout but NOT the operator's real one.
+    # It exercises the relativiser against the exact prefix the primary
+    # detector hunts for, while keeping every test in this suite away from the
+    # one directory whose loss costs a day. Nothing is read or written either
+    # way: an unconfirmed logout makes no filesystem call at all.
+    probe = REPO_ROOT / "_state" / "chrome-profile-hygiene-probe"
+
+    result = logout(probe, confirm=False)
+    assert_clean(result)
+
+    would_erase = result["preview"]["would_erase"]
+    assert len(would_erase) == 4, would_erase
+    # ...and still an ANSWER. A relativised path nobody can act on would be
+    # the same defect wearing different clothes.
+    for name in would_erase:
+        assert probe.name in name, name
+        assert "Cookies" in name, name
 
 
 def test_an_oserror_carrying_an_absolute_path_is_scrubbed_from_the_error_payload():

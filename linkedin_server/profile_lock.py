@@ -222,3 +222,24 @@ def release() -> None:
 def held_by() -> "int | None":
     """Return the PID currently recorded in the lock file, or None. (Diagnostics.)"""
     return _read_lock_pid()
+
+
+def live_holder() -> "int | None":
+    """Return the PID of a LIVE process holding the lock, or None.
+
+    The difference from :func:`held_by` is the whole reason this exists: a
+    lock left behind by a crashed instance records a PID that reads exactly
+    like a live one, and ``held_by`` cannot tell them apart. :func:`acquire`
+    already makes that distinction internally so it can reclaim a corpse's
+    lock; anything about to touch the profile DESTRUCTIVELY needs the same
+    answer without acquiring anything.
+
+    Fail-safe in the opposite direction to :func:`acquire`'s reclaim: a PID
+    this process cannot introspect is reported as alive by
+    :func:`_pid_is_alive` on Windows, so an unreadable holder blocks a
+    destructive caller rather than being waved through.
+    """
+    pid = _read_lock_pid()
+    if pid is None:
+        return None
+    return pid if _pid_is_alive(pid) else None

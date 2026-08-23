@@ -430,16 +430,29 @@ async def test_session_info_reports_the_expiry_it_reads_from_the_jar(
     info = await auth_module.session_info(page)
 
     assert info["authenticated"] is True
-    assert info["session_cookie"]["name"] == "li_at"
-    assert info["session_cookie"]["present"] is True
-    assert info["session_cookie"]["persistent"] is True
-    assert 299 <= info["session_cookie"]["expires_in_days"] <= 301
-    assert info["session_cookie"]["expired"] is False
-    assert info["session_cookie"]["expires_at"].endswith("Z")
+    assert info["server"] == "linkedin"
+    credential = info["credential"]
+    assert credential["kind"] == "cookie"
+    assert credential["name"] == "li_at"
+    assert credential["present"] is True
+    assert credential["format"] == "cookie"
+    assert 299 <= credential["expires_in_days"] <= 301
+    assert credential["expired"] is False
+    assert credential["expires_at"].endswith("Z")
+    assert credential["expiry_is_authoritative"] is True
+    # Which of the two routes produced that date. Both read the same jar and
+    # a reader holding one result cannot otherwise tell which one he has.
+    assert "live browser" in credential["expiry_source"]
 
 
 async def test_session_info_calls_the_csrf_cookie_what_it_is(patched_navigation):
-    """JSESSIONID has no expiry date because it has no life past the browser."""
+    """JSESSIONID has no expiry date because it has no life past the browser.
+
+    And it is SUPPORTING, not the credential. It signs nothing in; it only
+    decides whether the identity call can be put at all. Filing it beside
+    li_at under one heading would invite a reader to treat its expiry as the
+    session's, and its expiry is "the moment this browser closes".
+    """
     page = FakePage(
         cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
         expiries={"li_at": _in_days(300)},
@@ -447,9 +460,15 @@ async def test_session_info_calls_the_csrf_cookie_what_it_is(patched_navigation)
     )
     info = await auth_module.session_info(page)
 
-    assert info["csrf_cookie"]["present"] is True
-    assert info["csrf_cookie"]["persistent"] is False
-    assert info["csrf_cookie"]["expires_at"] is None
+    assert [entry["name"] for entry in info["supporting"]] == ["JSESSIONID"]
+    csrf = info["supporting"][0]
+    assert csrf["role"] == "csrf"
+    assert csrf["present"] is True
+    assert csrf["expires_at"] is None
+    assert csrf["expires_in_days"] is None
+    # Not False. There is no date, so "has it lapsed" cannot be answered.
+    assert csrf["expired"] is None
+    assert "session cookie" in csrf["note"]
 
 
 async def test_session_info_says_the_login_outlives_a_restart(patched_navigation):
@@ -475,8 +494,11 @@ async def test_session_info_reports_a_missing_login_as_missing(patched_navigatio
     info = await auth_module.session_info(page)
 
     assert info["authenticated"] is False
-    assert info["session_cookie"]["present"] is False
-    assert "expires_at" not in info["session_cookie"]
+    assert info["credential"]["present"] is False
+    assert info["credential"]["format"] == "absent"
+    assert info["credential"]["expires_at"] is None
+    assert info["credential"]["expired"] is None
+    assert "no li_at in the jar" in info["credential"]["expiry_source"]
 
 
 async def test_session_info_flags_an_expired_cookie_as_expired(patched_navigation):
@@ -487,8 +509,8 @@ async def test_session_info_flags_an_expired_cookie_as_expired(patched_navigatio
     )
     info = await auth_module.session_info(page)
 
-    assert info["session_cookie"]["expired"] is True
-    assert info["session_cookie"]["expires_in_days"] < 0
+    assert info["credential"]["expired"] is True
+    assert info["credential"]["expires_in_days"] < 0
     assert info["authenticated"] is False
 
 
@@ -519,4 +541,6 @@ async def test_session_info_does_not_guess_when_the_endpoint_will_not_say(
     assert info["authenticated"] is None
     assert "999" in info["reason"]
     # The expiry is still reported: it is read from the jar, not from LinkedIn.
-    assert info["session_cookie"]["persistent"] is True
+    assert info["credential"]["expires_at"] is not None
+    # And the null carries its reason in live_check as well as at top level.
+    assert "999" in info["live_check"]["why_not"]

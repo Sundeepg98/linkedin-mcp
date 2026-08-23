@@ -30,6 +30,7 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+from pathlib import Path
 from typing import Any, Optional
 
 from linkedin_server.config import (
@@ -71,6 +72,23 @@ CSRF_COOKIE = "JSESSIONID"
 LOGIN_MAX_CHECKS = 40
 
 AUTH_ENDPOINT_NOTE = f"GET {ME_API}"
+
+#: This server's name inside the shared auth-lifecycle shape, carried as a
+#: FIELD rather than left to be inferred from a tool prefix. Four servers in
+#: this family return this shape, and a reader holding two results at once
+#: should not have to parse a tool name to tell them apart.
+SERVER_ID = "linkedin"
+
+#: Which route produced an expiry date. Both routes read the SAME jar, by two
+#: different means, and the difference is not cosmetic: a date read off disk
+#: means the browser could not be started, so it arrives next to a null
+#: verdict, while a date read out of a live context arrives next to a real
+#: one. Naming the route keeps a reader from having to work that out.
+LIVE_EXPIRY_SOURCE = "the live browser context's cookie jar, read through Playwright"
+DISK_EXPIRY_SOURCE = (
+    "the profile's on-disk cookie jar (Default/Network/Cookies), read from a "
+    "copy with no browser launched"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -390,6 +408,117 @@ def _cookie_expiry(record: Optional[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _credential(
+    facts: dict[str, Any],
+    *,
+    expiry_source: str,
+    unreadable: Optional[str] = None,
+) -> dict[str, Any]:
+    """Render ``li_at`` as the shared shape's ``credential`` block.
+
+    ``facts`` is a :func:`_cookie_expiry` record. ``unreadable`` carries the
+    reason the jar could not be read AT ALL, when that is what happened -- an
+    absent cookie and an unreadable jar are different facts and they do not
+    share a field. The first says "you are signed out"; the second says "I
+    could not look", and an operator acts differently on each.
+
+    Only derived facts appear here. The cookie's value is not among them and
+    is not available to this function: :func:`_cookie_expiry` never carried
+    one out of the record it was handed.
+    """
+    present = bool(facts.get("present"))
+    persistent = bool(facts.get("persistent"))
+    dated = present and persistent and facts.get("expires_at") is not None
+
+    if dated:
+        source = expiry_source
+    elif unreadable:
+        source = f"no date could be read: {unreadable}"
+    elif not present:
+        source = (
+            f"there is no {SESSION_COOKIE} in the jar, so there is no date to "
+            "read. That is what a profile nobody has signed in to looks like."
+        )
+    else:
+        source = (
+            f"{SESSION_COOKIE} is in the jar but carries no expiry, which "
+            "makes it a session cookie that dies with the browser rather than "
+            "the year-long persistent one a signed-in profile holds."
+        )
+
+    return {
+        "kind": "cookie",
+        "name": SESSION_COOKIE,
+        "present": present,
+        "format": "cookie" if present else "absent",
+        "expires_at": facts.get("expires_at") if dated else None,
+        "expires_in_days": facts.get("expires_in_days") if dated else None,
+        # Never False as a stand-in for "unknown". No readable date means the
+        # question cannot be answered from here, and that is a null.
+        "expired": facts.get("expired") if dated else None,
+        "expiry_source": source,
+        # LinkedIn honours the date it stamped on the cookie, so as an answer
+        # to "when does this lapse on its own" the date is the real one. It is
+        # NOT a promise that the session lasts that long -- a sign-out
+        # elsewhere ends it early and leaves the jar untouched -- which is why
+        # every tool still measures instead of reading this field.
+        "expiry_is_authoritative": True,
+    }
+
+
+def _supporting(facts: dict[str, Any]) -> list[dict[str, Any]]:
+    """Render ``JSESSIONID`` as the shared shape's ``supporting`` list.
+
+    One entry, because there is exactly one. It is not a second credential:
+    it carries no authority and cannot sign anything in. What it governs is
+    whether the identity call can be MADE -- LinkedIn's own web app copies
+    its value into the ``csrf-token`` header and the endpoint will not answer
+    without one -- so it belongs beside the credential rather than inside it.
+    """
+    present = bool(facts.get("present"))
+    dated = present and facts.get("expires_at") is not None
+    entry: dict[str, Any] = {
+        "name": CSRF_COOKIE,
+        "role": "csrf",
+        "present": present,
+        "expires_at": facts.get("expires_at") if dated else None,
+        "expires_in_days": facts.get("expires_in_days") if dated else None,
+        "expired": facts.get("expired") if dated else None,
+    }
+    note = facts.get("note")
+    if note:
+        entry["note"] = note
+    return [entry]
+
+
+def _renewal() -> dict[str, Any]:
+    """Why no ``linkedin_reauth`` exists, carried in the payload.
+
+    The three sibling servers in this family were ruled on the same day and
+    two of them DO ship a silent renew, so "there isn't one here" is a fact a
+    caller needs stated rather than a gap it has to notice. Stating it in the
+    result rather than only in a design note is the difference between a
+    caller reporting the boundary and a caller hunting for a tool that was
+    never built.
+    """
+    return {
+        "silent_renew_available": False,
+        "tool": None,
+        "why": (
+            "there is one credential layer here, so there is nothing a renew "
+            f"could refresh. {SESSION_COOKIE} is read live out of the Chrome "
+            "profile on every call -- this server keeps no cached copy that "
+            "could go stale independently of the profile -- and LinkedIn "
+            "issues no refresh token beside it. A linkedin_reauth would "
+            "therefore be linkedin_login_browser wearing a different name, so "
+            "it is deliberately not shipped. Recovery is "
+            "linkedin_login_browser: it opens a window and waits for the "
+            "operator to sign in himself, and this server never sees, types, "
+            "stores or transmits a password."
+        ),
+    }
+
+
 def _durability(mode: str) -> dict[str, Any]:
     """Where the session is kept and what it survives. Shared by both paths."""
     from linkedin_server.config import CHROME_PROFILE, display
@@ -432,6 +561,15 @@ COOKIE_IS_NOT_A_SESSION = (
     "still honours it. Only the live identity call establishes that."
 )
 
+#: What happens when the session does lapse, and the way back, BY NAME.
+#: Rendered once because both paths say it and a reader comparing two results
+#: should never have to wonder whether two spellings mean two things.
+ON_EXPIRY = (
+    "tools report 'not_authenticated' with the reason, never an empty result. "
+    "Recover by calling linkedin_login_browser and signing in yourself in the "
+    "window it opens."
+)
+
 
 async def session_info(page: Any) -> dict[str, Any]:
     """Report the live session's state and how long it has left.
@@ -445,47 +583,56 @@ async def session_info(page: Any) -> dict[str, Any]:
     actually happened. :func:`session_info_offline` reports the same shape
     when no browser could be started, with ``authenticated`` null rather than
     a cookie's presence quietly promoted into a verdict.
+
+    The shape is the family's shared auth-lifecycle one: ``credential`` is
+    the thing that authenticates (``li_at``), ``supporting`` is everything
+    that merely governs whether the question can be PUT (``JSESSIONID``), and
+    ``renewal`` says whether a silent renew exists here. It does not, and the
+    field says why rather than leaving a caller to hunt for a tool that was
+    never built.
     """
     status = await check_auth(page, corroborate=True)
 
     records = await _cookie_records(page)
     by_name = {c.get("name", ""): c for c in records}
 
-    session_cookie = _cookie_expiry(by_name.get(SESSION_COOKIE))
-    session_cookie["name"] = SESSION_COOKIE
-
-    csrf_cookie = _cookie_expiry(by_name.get(CSRF_COOKIE))
-    csrf_cookie["name"] = CSRF_COOKIE
-
     from linkedin_server.browser import BROWSER
 
     authenticated = status.get("authenticated")
+    live_check: dict[str, Any] = {
+        "attempted": True,
+        "completed": authenticated is not None,
+        "endpoint": AUTH_ENDPOINT_NOTE,
+    }
+    if authenticated is None:
+        live_check["why_not"] = str(
+            status.get("reason")
+            or "the identity endpoint returned neither an identity nor a refusal."
+        )
+    live_check["what_it_means"] = (
+        "the identity endpoint was asked and answered, so 'authenticated' "
+        "above is a measurement"
+        if authenticated is not None
+        else
+        "the identity endpoint was asked and did not answer either way, so "
+        "'authenticated' is null rather than guessed. A null is not a 'no'."
+    )
+
     out: dict[str, Any] = {
+        "server": SERVER_ID,
         "authenticated": authenticated,
         "checked_against": status.get("checked_against"),
-        "live_check": {
-            "attempted": True,
-            "completed": authenticated is not None,
-            "endpoint": AUTH_ENDPOINT_NOTE,
-            "what_it_means": (
-                "the identity endpoint was asked and answered, so "
-                "'authenticated' above is a measurement"
-                if authenticated is not None
-                else
-                "the identity endpoint was asked and did not answer either "
-                "way, so 'authenticated' is null rather than guessed"
-            ),
-        },
-        "cookie_source": "the live browser's own cookie jar",
-        "session_cookie": session_cookie,
-        "csrf_cookie": csrf_cookie,
+        "live_check": live_check,
+        "credential": _credential(
+            _cookie_expiry(by_name.get(SESSION_COOKIE)),
+            expiry_source=LIVE_EXPIRY_SOURCE,
+        ),
+        "supporting": _supporting(_cookie_expiry(by_name.get(CSRF_COOKIE))),
+        "credential_source": "the live browser's own cookie jar",
         "browser_mode": BROWSER.mode,
         "durability": _durability(BROWSER.mode),
-        "on_expiry": (
-            "tools report 'not_authenticated' with the reason, never an empty "
-            "result. Recover by calling linkedin_login_browser and signing in "
-            "yourself in the window it opens."
-        ),
+        "renewal": _renewal(),
+        "on_expiry": ON_EXPIRY,
     }
 
     for key in ("member", "public_identifier", "profile", "reason", "http_status"):
@@ -519,9 +666,10 @@ def session_info_offline(
     as jar facts, under their own labels, next to a live_check block that
     says in plain words that the verdict could not be obtained and why.
 
-    Never raises. A jar that cannot be read is reported in ``cookie_source``
-    alongside the browser's own failure, because "both routes failed, here is
-    each reason" is more use than either error on its own.
+    Never raises. A jar that cannot be read is reported in
+    ``credential_source`` alongside the browser's own failure, because "both
+    routes failed, here is each reason" is more use than either error on its
+    own.
     """
     from linkedin_server import cookie_jar
     from linkedin_server.config import scrub
@@ -541,11 +689,10 @@ def session_info_offline(
     except Exception as exc:  # pragma: no cover - defensive
         jar_error = scrub(f"{type(exc).__name__}: {exc}")
 
-    session_cookie["name"] = SESSION_COOKIE
-    csrf_cookie["name"] = CSRF_COOKIE
-
     out: dict[str, Any] = {
+        "server": SERVER_ID,
         "authenticated": None,
+        "checked_against": AUTH_ENDPOINT_NOTE,
         "live_check": {
             # "I tried and the browser is broken" and "you asked me not to
             # try" are different facts about the same null, and the operator
@@ -561,7 +708,13 @@ def session_info_offline(
                 + COOKIE_IS_NOT_A_SESSION
             ),
         },
-        "cookie_source": (
+        "credential": _credential(
+            session_cookie,
+            expiry_source=DISK_EXPIRY_SOURCE,
+            unreadable=jar_error,
+        ),
+        "supporting": _supporting(csrf_cookie),
+        "credential_source": (
             f"the profile's on-disk cookie jar, read without launching a "
             f"browser -- and it could not be read: {jar_error}"
             if jar_error
@@ -569,19 +722,233 @@ def session_info_offline(
             "the profile's on-disk cookie jar, read without launching a "
             "browser (a copy is read; no cookie value is ever fetched)"
         ),
-        "session_cookie": session_cookie,
-        "csrf_cookie": csrf_cookie,
         "browser_mode": mode,
         "durability": _durability(mode),
-        "on_expiry": (
-            "tools report 'not_authenticated' with the reason, never an empty "
-            "result. Recover by calling linkedin_login_browser and signing in "
-            "yourself in the window it opens."
-        ),
+        "renewal": _renewal(),
+        "on_expiry": ON_EXPIRY,
     }
     if jar_error:
         out["jar_error"] = jar_error
     return out
+
+
+# ---------------------------------------------------------------------------
+# Ending the LOCAL session -- the one destructive thing in this package
+# ---------------------------------------------------------------------------
+
+#: What a confirmed logout takes away, worded ONCE so the preview a caller
+#: reads and the result he gets afterwards cannot drift into two claims.
+#:
+#: The jar file, not the profile directory. LinkedIn's session IS one row of
+#: that jar, so erasing the jar ends the session; erasing the whole profile
+#: would also take history, preferences and every other site's state, which
+#: nobody asked to lose. The journal / WAL / SHM siblings go with it because
+#: sqlite would otherwise replay a journal over a jar that is no longer there.
+LOGOUT_SCOPE = (
+    "the Chrome profile's on-disk cookie jar at Default/Network/Cookies, "
+    "together with any -journal / -wal / -shm sibling beside it. Every cookie "
+    "in that jar goes, which in this profile means the LinkedIn session and "
+    "nothing else -- the profile exists for this server alone. The profile "
+    "directory itself stays where it is."
+)
+
+#: What the operator loses, in the terms he cares about rather than in files.
+LOGOUT_WHAT_IS_LOST = (
+    "the signed-in LinkedIn session in this profile. It took a full day to "
+    "establish, it is the only reason no tool here asks for a password, and "
+    "there is no copy of it anywhere else on this machine."
+)
+
+#: The way back, BY NAME.
+LOGOUT_RECOVER_BY = "linkedin_login_browser"
+
+#: Said on every outcome. A logout that quietly implied it had signed the
+#: operator out of LinkedIn would be describing something this server has no
+#: code path for, and he would act on it.
+LOGOUT_IS_LOCAL_ONLY = (
+    "nothing here reaches LinkedIn. No request is issued and no session is "
+    "ended on LinkedIn's side; the account is untouched and any other browser "
+    "signed in to it stays signed in. What lapses is purely local."
+)
+
+
+def _logout_targets(profile_dir: Any) -> list[Any]:
+    """The exact files a confirmed logout erases, in the order it erases them.
+
+    Pure path arithmetic -- it stats nothing and opens nothing, which is what
+    lets the unconfirmed preview name them without touching the profile at
+    all.
+    """
+    from linkedin_server import cookie_jar
+
+    jar = Path(profile_dir).joinpath(*cookie_jar.JAR_RELPATH)
+    return [jar] + [
+        jar.with_name(jar.name + suffix)
+        for suffix in cookie_jar.JAR_SIBLING_SUFFIXES
+    ]
+
+
+def _erase(path: Any) -> bool:
+    """Erase one file. True if it was there, False if it never was.
+
+    A named function rather than an inline unlink, so a test can replace it
+    with a trap and prove the unconfirmed path never REACHES it. "Nothing
+    changed on disk" is the weaker claim; "the erasing step was never
+    entered" is the one worth having for a tool this expensive, and only a
+    seam can carry it.
+    """
+    try:
+        Path(path).unlink()
+        return True
+    except FileNotFoundError:
+        return False
+
+
+def logout(profile_dir: Any, *, confirm: bool = False) -> dict[str, Any]:
+    """End the LOCAL session by erasing this profile's cookie jar.
+
+    Args:
+        profile_dir: the Chrome user-data dir holding the session.
+        confirm: False -- the default -- performs NOTHING. No file is opened,
+            no file is stat-ed, no browser starts, the profile is not read.
+            The result carries a ``preview`` naming what a confirmed call
+            would take and what it would cost. True erases the jar.
+
+    Returns:
+        The family's shared logout shape. ``authenticated`` is ``false`` ONLY
+        where the credential is provably gone, which is what makes that false
+        provable rather than measured; on every other outcome -- an
+        unconfirmed call, a locked profile, a failed erase -- the credential
+        is still sitting there, so ``authenticated`` is ``null`` with the
+        reason, exactly as it is everywhere else in this module. A false
+        nobody could act on is worse than a null somebody can.
+
+    Never raises. Not for a missing profile, not for a locked one, not for a
+    file the OS refuses to give up: each of those comes back as ``cleared``
+    false carrying its own reason.
+    """
+    from linkedin_server import profile_lock
+    from linkedin_server.config import display, scrub
+
+    targets = _logout_targets(profile_dir)
+    named = [display(target) for target in targets]
+
+    if not confirm:
+        return {
+            "cleared": False,
+            "scope": LOGOUT_SCOPE,
+            # Not false: nothing was taken, so the session is exactly as live
+            # (or as dead) as it was a moment ago, and this call did not ask.
+            "authenticated": None,
+            "reason": (
+                "nothing was done. confirm was not given, so this call read "
+                "no file, erased no file and started no browser."
+            ),
+            "what_is_lost": "nothing -- this was a preview.",
+            "recover_by": LOGOUT_RECOVER_BY,
+            "preview": {
+                "would_erase": named,
+                "would_lose": LOGOUT_WHAT_IS_LOST,
+                "cost_to_re_establish": (
+                    "a full day. That is what the sign-in in this profile "
+                    "took the operator, and it is the reason this tool asks "
+                    "twice."
+                ),
+                "recovery_is_by_hand": (
+                    "there is no automated way back. Getting in again means "
+                    f"{LOGOUT_RECOVER_BY} and a sign-in the operator performs "
+                    "himself in the window it opens -- this server never "
+                    "sees, types, stores or transmits a password."
+                ),
+                "linkedin_side": LOGOUT_IS_LOCAL_ONLY,
+                "to_proceed": "call linkedin_logout(confirm=True).",
+            },
+        }
+
+    holder = profile_lock.live_holder()
+    if holder is not None:
+        return {
+            "cleared": False,
+            "scope": LOGOUT_SCOPE,
+            "authenticated": None,
+            "reason": (
+                f"refused: PID {holder} holds the cross-process profile lock, "
+                "so a browser is on this profile right now. Erasing a jar out "
+                "from under a live Chromium is how a profile gets corrupted, "
+                "and a corrupted profile costs the same day this tool is "
+                "asking about. Nothing was touched. Stop that process (or "
+                "let this server's own browser close on its idle timer) and "
+                "call again."
+            ),
+            "what_is_lost": "nothing -- the erase did not run.",
+            "recover_by": LOGOUT_RECOVER_BY,
+            "holder_pid": holder,
+        }
+
+    erased: list[str] = []
+    failures: list[str] = []
+    for target, name in zip(targets, named):
+        try:
+            if _erase(target):
+                erased.append(name)
+        except Exception as exc:
+            failures.append(f"{name}: {scrub(f'{type(exc).__name__}: {exc}')}")
+
+    if failures:
+        return {
+            "cleared": bool(erased),
+            "scope": LOGOUT_SCOPE,
+            "authenticated": None,
+            "reason": (
+                "the erase did not finish, so whether a usable credential is "
+                "left cannot be stated from here: "
+                + "; ".join(failures)
+            ),
+            "what_is_lost": (
+                LOGOUT_WHAT_IS_LOST if erased else "nothing was taken."
+            ),
+            "recover_by": LOGOUT_RECOVER_BY,
+            "erased": erased,
+            "failed": failures,
+            "linkedin_side": LOGOUT_IS_LOCAL_ONLY,
+        }
+
+    if not erased:
+        return {
+            "cleared": False,
+            "scope": LOGOUT_SCOPE,
+            "authenticated": None,
+            "reason": (
+                "there was no cookie jar at that path, so there was nothing "
+                "to take. That is what a profile nobody has signed in to "
+                "looks like -- it is not a failure, and it is not a verdict "
+                "on a session either."
+            ),
+            "what_is_lost": "nothing -- there was nothing there.",
+            "recover_by": LOGOUT_RECOVER_BY,
+            "erased": [],
+            "linkedin_side": LOGOUT_IS_LOCAL_ONLY,
+        }
+
+    return {
+        "cleared": True,
+        "scope": LOGOUT_SCOPE,
+        # The one place in this module where a false is not a measurement,
+        # and it is provable rather than guessed: li_at is gone, every tool
+        # here authenticates with li_at and nothing else, so no authenticated
+        # request can be made at all. There is no endpoint to ask.
+        "authenticated": False,
+        "reason": (
+            f"{SESSION_COOKIE} is gone with the jar that held it. Every tool "
+            "in this server authenticates with that cookie and nothing else, "
+            "so no authenticated request can be made from here -- which is "
+            "why this false is provable without asking LinkedIn."
+        ),
+        "what_is_lost": LOGOUT_WHAT_IS_LOST,
+        "recover_by": LOGOUT_RECOVER_BY,
+        "erased": erased,
+        "linkedin_side": LOGOUT_IS_LOCAL_ONLY,
+    }
 
 
 def assert_not_authwall(final_url: str, *, surface: str) -> None:

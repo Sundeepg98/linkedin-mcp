@@ -43,7 +43,8 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_notifications` | Your notification list. |
 | `linkedin_auth_status` | Whether there is a live session, measured by an authenticated request. |
 | `linkedin_login_browser` | Opens a window for you to sign in yourself. |
-| `linkedin_session_info` | Whether the session is live and **when it lapses**, read from the browser's own cookie jar. |
+| `linkedin_session_info` | Whether the session is live and **when it lapses**, read from the browser's own cookie jar. Reports the credential, the csrf cookie that supports it, durability, and why no silent reauth exists here. |
+| `linkedin_logout` | Ends the **local** sign-in by erasing this machine's cookie jar. The one destructive tool here: `confirm=False` (the default) performs nothing and previews what would go. Issues no request, so LinkedIn is never told. |
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 
@@ -56,6 +57,11 @@ notifications read. Collecting data about other members.
 These are not missing features. If a tool would change anything on LinkedIn's
 servers, it is out of scope, and `tests/test_readonly.py` fails the build if one
 appears.
+
+One tool changes something on **this machine**: `linkedin_logout(confirm=True)`
+erases the local cookie jar. It issues no request, so the boundary above --
+which is about LinkedIn -- is intact, and `linkedin_server_info` names it under
+`local_state_writes` rather than folding it into `read_only: true`.
 
 ### The two side effects, stated rather than hidden
 
@@ -342,7 +348,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the three read-only harvesters
   shape.py                   pure parsers and the result envelope
-  server.py                  the eleven tools
+  server.py                  the thirteen tools
   errors.py
 tests/                       576 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

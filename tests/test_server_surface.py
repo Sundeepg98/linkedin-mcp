@@ -1,9 +1,15 @@
-"""The tool surface: twelve tools, and not one of them offers a write.
+"""The tool surface: thirteen tools, and not one of them writes to LinkedIn.
 
 The brief for this server drew a hard line -- no writes, not now, not stubbed,
 not "for later". This file is that line expressed as assertions, including on
 the docstrings, because a tool that merely SOUNDS like it can apply to a job
 will be called as though it can.
+
+The thirteenth tool, ``linkedin_logout``, writes to LOCAL DISK and to nothing
+else: it erases this machine's cookie jar and issues no request, so the line
+above is about the platform and is intact. It gets its own assertions at the
+bottom of this file, because "performs nothing without confirm" is a promise
+somebody has to hold to.
 """
 
 from __future__ import annotations
@@ -25,6 +31,7 @@ EXPECTED_TOOLS = {
     "linkedin_notifications",
     "linkedin_server_info",
     "linkedin_session_info",
+    "linkedin_logout",
     "linkedin_cdp_status",
 }
 
@@ -55,9 +62,9 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_twelve_reads(tools):
+async def test_the_surface_is_exactly_the_thirteen_tools(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 12
+    assert len(tools) == 13
 
 
 async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):
