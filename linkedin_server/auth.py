@@ -491,8 +491,8 @@ def _supporting(facts: dict[str, Any]) -> list[dict[str, Any]]:
     return [entry]
 
 
-def _renewal() -> dict[str, Any]:
-    """Why no ``linkedin_reauth`` exists, carried in the payload.
+def _renewal(credential: dict[str, Any]) -> dict[str, Any]:
+    """Why no ``linkedin_reauth`` exists, and WHEN the operator must sign in.
 
     The three sibling servers in this family were ruled on the same day and
     two of them DO ship a silent renew, so "there isn't one here" is a fact a
@@ -500,7 +500,49 @@ def _renewal() -> dict[str, Any]:
     result rather than only in a design note is the difference between a
     caller reporting the boundary and a caller hunting for a tool that was
     never built.
+
+    ``session_lapses_at`` is the second half of that, and it answers a
+    DIFFERENT question from ``credential.expires_at``. The credential's date
+    says when that cookie dies. This one says when the SESSION dies -- the
+    point past which no silent renew can help and the operator signs in by
+    hand. Across four servers those are not the same number and can differ by
+    orders of magnitude: naukri's ``nauk_at`` was measured live at +0.02 days
+    while the server was silently re-minting it from a refresh cookie good for
+    +188. A client comparing ``expires_at`` across the family would read that
+    server as half an hour from death and this one as a year of headroom, when
+    the honest comparison is 188 days against 364.
+
+    Here the two dates COINCIDE, and that is a finding about LinkedIn rather
+    than a field left unfilled: one credential layer, no refresh token beside
+    it, nothing for a renew to refresh. So the moment ``li_at`` lapses is the
+    moment the sign-in has to be done again by hand.
+    ``session_lapses_source`` says exactly that, naming the credential that
+    governs -- and when there is no date, why there is none.
     """
+    lapses_at = credential.get("expires_at")
+    lapses_in_days = credential.get("expires_in_days")
+
+    if lapses_at is None:
+        # Null, never a zero and never a False. "No date is available" and
+        # "the session ends now" are opposite readings of the same field, and
+        # a zero would be read as the second one.
+        source = (
+            f"{SESSION_COOKIE} governs, and nothing else can: with one "
+            "credential layer and no refresh token there is no other expiry "
+            "that could stand in for it. No date is available here -- "
+            + str(credential.get("expiry_source"))
+        )
+    else:
+        source = (
+            f"{SESSION_COOKIE}, and it governs ALONE. Because no silent renew "
+            "exists on this platform, nothing can carry the session past the "
+            "date the cookie itself carries, so this is EQUAL to "
+            "credential.expires_at rather than derived from something else. "
+            "That equality is a fact about LinkedIn, not a placeholder: on a "
+            "server that can re-mint its credential the two dates come apart, "
+            "and this is the one to compare across servers."
+        )
+
     return {
         "silent_renew_available": False,
         "tool": None,
@@ -516,6 +558,13 @@ def _renewal() -> dict[str, Any]:
             "operator to sign in himself, and this server never sees, types, "
             "stores or transmits a password."
         ),
+        # The date past which no silent renew can help and the operator must
+        # sign in by hand. Same route as the credential's own expiry, so it is
+        # populated on the browserless path too and null when the jar could
+        # not be read.
+        "session_lapses_at": lapses_at,
+        "session_lapses_in_days": lapses_in_days,
+        "session_lapses_source": source,
     }
 
 
@@ -618,20 +667,25 @@ async def session_info(page: Any) -> dict[str, Any]:
         "'authenticated' is null rather than guessed. A null is not a 'no'."
     )
 
+    # Built before the payload rather than inline: _renewal derives the
+    # session's own lapse date FROM this block, so the two can never disagree
+    # about a date they are both reporting.
+    credential = _credential(
+        _cookie_expiry(by_name.get(SESSION_COOKIE)),
+        expiry_source=LIVE_EXPIRY_SOURCE,
+    )
+
     out: dict[str, Any] = {
         "server": SERVER_ID,
         "authenticated": authenticated,
         "checked_against": status.get("checked_against"),
         "live_check": live_check,
-        "credential": _credential(
-            _cookie_expiry(by_name.get(SESSION_COOKIE)),
-            expiry_source=LIVE_EXPIRY_SOURCE,
-        ),
+        "credential": credential,
         "supporting": _supporting(_cookie_expiry(by_name.get(CSRF_COOKIE))),
         "credential_source": "the live browser's own cookie jar",
         "browser_mode": BROWSER.mode,
         "durability": _durability(BROWSER.mode),
-        "renewal": _renewal(),
+        "renewal": _renewal(credential),
         "on_expiry": ON_EXPIRY,
     }
 
@@ -689,6 +743,14 @@ def session_info_offline(
     except Exception as exc:  # pragma: no cover - defensive
         jar_error = scrub(f"{type(exc).__name__}: {exc}")
 
+    # Same reason as on the live path: _renewal reads its lapse date out of
+    # this block, so one route produces both and they cannot drift apart.
+    credential = _credential(
+        session_cookie,
+        expiry_source=DISK_EXPIRY_SOURCE,
+        unreadable=jar_error,
+    )
+
     out: dict[str, Any] = {
         "server": SERVER_ID,
         "authenticated": None,
@@ -708,11 +770,7 @@ def session_info_offline(
                 + COOKIE_IS_NOT_A_SESSION
             ),
         },
-        "credential": _credential(
-            session_cookie,
-            expiry_source=DISK_EXPIRY_SOURCE,
-            unreadable=jar_error,
-        ),
+        "credential": credential,
         "supporting": _supporting(csrf_cookie),
         "credential_source": (
             f"the profile's on-disk cookie jar, read without launching a "
@@ -724,7 +782,7 @@ def session_info_offline(
         ),
         "browser_mode": mode,
         "durability": _durability(mode),
-        "renewal": _renewal(),
+        "renewal": _renewal(credential),
         "on_expiry": ON_EXPIRY,
     }
     if jar_error:

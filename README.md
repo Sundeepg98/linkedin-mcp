@@ -43,7 +43,7 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_notifications` | Your notification list. |
 | `linkedin_auth_status` | Whether there is a live session, measured by an authenticated request. |
 | `linkedin_login_browser` | Opens a window for you to sign in yourself. |
-| `linkedin_session_info` | Whether the session is live and **when it lapses**, read from the browser's own cookie jar. Reports the credential, the csrf cookie that supports it, durability, and why no silent reauth exists here. |
+| `linkedin_session_info` | Whether the session is live and **when it lapses**, read from the browser's own cookie jar. Reports the credential, the csrf cookie that supports it, durability, and why no silent reauth exists here. `renewal.session_lapses_at` is the date past which no renew can help and you sign in by hand -- the field to compare across servers, and on LinkedIn it equals the cookie's own expiry because nothing here can carry the session past it. |
 | `linkedin_logout` | Ends the **local** sign-in by erasing this machine's cookie jar. The one destructive tool here: `confirm=False` (the default) performs nothing and previews what would go. Issues no request, so LinkedIn is never told. |
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
@@ -90,7 +90,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 576 passed
+python -m pytest            # 782 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -350,13 +350,13 @@ linkedin_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the thirteen tools
   errors.py
-tests/                       576 tests, no network, no account
+tests/                       782 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **576 tests**, no network and no account. Most run with no
+Built and tested: **782 tests**, no network and no account. Most run with no
 browser at all; the three fixture-driven modules launch a local headless
 Chromium to run the real injected harvester over frozen markup, which reaches
 nothing outside the machine.

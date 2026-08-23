@@ -232,3 +232,124 @@ been worse.
   `linkedin_logout(confirm=False)` were rendered against a temp profile built
   by the test helpers and eyeballed for shape; the live-verdict path is
   covered by fakes only, as the rest of this suite is.
+
+---
+
+# Follow-up pass - 2026-08-23 (wave lead's rulings + `renewal.session_lapses_*`)
+
+Tree verified at `oldsha13`, clean, `origin/master` identical, before any edit.
+
+## Rulings applied
+
+1. **`authenticated: false` only on a proven clear** - already shipped that
+   way; now the family rule. No change needed here.
+2. **Logout scope stays the cookie jar and its siblings** - kept. No change.
+3. **Stale prose counts fixed** - see below. Three things were wrong, not two.
+
+## The addition: `renewal.session_lapses_*`
+
+`linkedin_server/auth.py:494` - `_renewal` now takes the rendered
+`credential` block and returns three more keys:
+
+| key | value on linkedin |
+|---|---|
+| `session_lapses_at` | `credential.expires_at`, ISO8601 `...Z` |
+| `session_lapses_in_days` | `credential.expires_in_days`, `round(s/86400, 1)` |
+| `session_lapses_source` | names `li_at` and why it governs ALONE |
+
+Both `session_info` (`auth.py:688`) and `session_info_offline`
+(`auth.py:785`) now build the credential into a local before the payload and
+hand it to `_renewal`, so ONE route produces both dates and they cannot drift
+apart. That also means the keys are populated on the browserless path and go
+null - never `0`, never `false` - when the jar cannot be read, with the
+source carrying the jar's own reason.
+
+The equality with `credential.expires_at` is asserted as a derivation, not a
+fixture: `test_the_lapse_date_equals_the_credentials_own_on_this_platform` is
+parametrised over +364.2 / +12.5 / -3.0 days, plus a live-path twin.
+
+Rendered on a healthy temp jar:
+
+    "session_lapses_at": "2027-08-22T08:00:52Z",
+    "session_lapses_in_days": 364.2,
+    "session_lapses_source": "li_at, and it governs ALONE. Because no silent
+      renew exists on this platform, nothing can carry the session past the
+      date the cookie itself carries, so this is EQUAL to
+      credential.expires_at rather than derived from something else..."
+
+...and on an unreadable jar:
+
+    "session_lapses_at": null,
+    "session_lapses_in_days": null,
+    "session_lapses_source": "li_at governs, and nothing else can: with one
+      credential layer and no refresh token there is no other expiry that
+      could stand in for it. No date is available here -- no date could be
+      read: chrome profile directory does not exist: ..."
+
+The `linkedin_session_info` docstring gained the same explanation, including
+that this is the field to compare across servers and `credential.expires_at`
+is not.
+
+## Tests
+
+| point | count |
+|---|---|
+| start of this pass | 772 passed |
+| end of this pass | **782 passed** |
+
+Ten added, all in `tests/test_auth_lifecycle.py` section 2b: keys present on
+both paths; dates equal to the credential's (parametrised x3 plus a live
+twin); the source naming `li_at`, `ALONE`, `no silent renew` and
+`credential.expires_at`; an unreadable jar giving nulls with explicit
+`is not False` / `!= 0` assertions; a never-signed-in profile giving nulls
+with its own different reason; and `silent_renew_available` staying False
+whatever the date says, so a date next to it can never read as a promise.
+
+## Control re-measured
+
+The `session_lapses_*` addition is shape, not verdict, so the twelve reds are
+unchanged. Verbatim:
+
+    12 failed, 54 passed in 2.21s
+
+(same two files: `66 passed` with the plugin off). Docstring in
+`scripts/presence_is_auth_control.py` updated to the re-measured figures and
+notes that every `session_lapses_*` assertion stays green under it - correctly,
+since the bug it reproduces cannot reach them.
+
+## Stale prose - measured, not adjusted
+
+`README.md`: `576` -> `782` in three places.
+
+`.github/workflows/ci.yml`: the header comment was wrong in THREE ways, not
+one. Rather than scaling the numbers I re-measured by running the whole suite
+with `PLAYWRIGHT_BROWSERS_PATH` pointed at an empty directory - exactly what a
+runner with no binary looks like:
+
+    87 failed, 695 passed in 103.04s
+
+So `684` -> `782` and `77` -> `87` (in both places it appears). The module
+list was also stale: the comment named three fixture modules, and there are
+now four - `test_job_detail_fixture.py` (10) joined at `oldsha07`, alongside
+`test_profile_views_fixture.py` (18), `test_job_search_fixture.py` (27) and
+`test_sdui_surfaces_fixture.py` (32). Per-file counts are now written in, and
+the comment records that the old figures were stale and how the new ones were
+obtained, so the next reader knows which are measured.
+
+The "18 browser tests alongside 25 that need no browser" line in the same
+comment was off by one against a 42-test module; corrected to 24.
+
+## Guards, again
+
+`linkedin_server/readonly.py`, `tests/test_readonly.py` and
+`tests/test_launch_boundary.py` are still zero-line diffs across BOTH passes.
+Nothing in this pass touched a tool name, a docstring claim, the allowlist or
+the launch boundary.
+
+## Constraints
+
+`linkedin_notifications` never called. `linkedin_logout` never run against the
+real `_state` profile. No browser launched against the real profile - the
+browser-absent measurement only pointed `PLAYWRIGHT_BROWSERS_PATH` at an empty
+temp directory for one pytest process, which makes `chromium.launch` fail and
+touches no profile at all. Strict ASCII across `.py`, `.md` and `.yml`.

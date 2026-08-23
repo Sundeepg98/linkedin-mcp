@@ -398,6 +398,143 @@ async def test_the_live_path_carries_renewal_too(patched_navigation):
     assert "linkedin_login_browser" in info["renewal"]["why"]
 
 
+# ---------------------------------------------------------------------------
+# 2b. session_lapses_* -- when the OPERATOR must sign in, not when the cookie
+#     dies. On this platform they coincide, and that is a finding.
+# ---------------------------------------------------------------------------
+
+
+def test_the_session_lapse_keys_are_on_the_offline_path(tmp_path):
+    renewal = auth_module.session_info_offline(
+        healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
+    )["renewal"]
+
+    assert set(renewal) >= {
+        "session_lapses_at",
+        "session_lapses_in_days",
+        "session_lapses_source",
+    }
+    assert renewal["session_lapses_at"].endswith("Z")
+    assert 299 <= renewal["session_lapses_in_days"] <= 301
+
+
+async def test_the_session_lapse_keys_are_on_the_live_path_too(patched_navigation):
+    """A block that only appears on the fallback is a block nobody reads."""
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": time.time() + 300 * 86400},
+        responses=[me_response()],
+    )
+    renewal = (await auth_module.session_info(page))["renewal"]
+
+    assert renewal["session_lapses_at"].endswith("Z")
+    assert 299 <= renewal["session_lapses_in_days"] <= 301
+    assert renewal["session_lapses_source"]
+
+
+@pytest.mark.parametrize("days", [364.2, 12.5, -3.0])
+def test_the_lapse_date_equals_the_credentials_own_on_this_platform(
+    tmp_path, days
+):
+    """Equal because there is nothing that could carry the session past it.
+
+    This is the whole reason the field exists separately. On a server that can
+    re-mint its credential the two dates come apart -- naukri measured
+    ``nauk_at`` at +0.02 days while the session behind it held +188 -- so a
+    client comparing ``credential.expires_at`` across the family compares the
+    wrong number. Here they coincide, and the parametrisation pins that it is
+    a real derivation rather than one lucky fixture.
+    """
+    info = auth_module.session_info_offline(
+        healthy_profile(tmp_path, days=days),
+        mode="launch",
+        why_no_live_check="no browser",
+    )
+
+    assert info["renewal"]["session_lapses_at"] == info["credential"]["expires_at"]
+    assert (
+        info["renewal"]["session_lapses_in_days"]
+        == info["credential"]["expires_in_days"]
+    )
+
+
+async def test_the_lapse_date_equals_the_credentials_own_on_the_live_path(
+    patched_navigation,
+):
+    page = FakePage(
+        cookies={"li_at": "live", "JSESSIONID": '"ajax:99"'},
+        expiries={"li_at": time.time() + 300 * 86400},
+        responses=[me_response()],
+    )
+    info = await auth_module.session_info(page)
+
+    assert info["renewal"]["session_lapses_at"] == info["credential"]["expires_at"]
+    assert (
+        info["renewal"]["session_lapses_in_days"]
+        == info["credential"]["expires_in_days"]
+    )
+
+
+def test_the_lapse_source_names_li_at_and_why_it_governs_alone(tmp_path):
+    """The source has to carry the REASON, or the equality above reads as a
+    field somebody forgot to populate."""
+    source = auth_module.session_info_offline(
+        healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
+    )["renewal"]["session_lapses_source"]
+
+    assert "li_at" in source
+    assert "ALONE" in source
+    assert "no silent renew" in source
+    assert "credential.expires_at" in source
+
+
+def test_an_unreadable_jar_yields_nulls_and_never_a_zero(tmp_path):
+    """A zero here would read as "the session ends now", which is the exact
+    opposite of "I could not find out". Never a zero, never a False."""
+    renewal = auth_module.session_info_offline(
+        tmp_path / "no-such-profile", mode="launch", why_no_live_check="no browser"
+    )["renewal"]
+
+    assert renewal["session_lapses_at"] is None
+    assert renewal["session_lapses_in_days"] is None
+    assert renewal["session_lapses_in_days"] is not False
+    assert renewal["session_lapses_in_days"] != 0
+    # ...and the source says WHY there is no date, carrying the jar's reason.
+    assert "li_at" in renewal["session_lapses_source"]
+    assert "No date is available" in renewal["session_lapses_source"]
+    assert "does not exist" in renewal["session_lapses_source"]
+
+
+def test_a_profile_never_signed_in_to_yields_nulls_with_its_own_reason(tmp_path):
+    """The other way to have no date, and it is a different fact."""
+    renewal = auth_module.session_info_offline(
+        make_profile(tmp_path, [cookie_row("JSESSIONID")]),
+        mode="launch",
+        why_no_live_check="no browser",
+    )["renewal"]
+
+    assert renewal["session_lapses_at"] is None
+    assert renewal["session_lapses_in_days"] is None
+    assert "no li_at in the jar" in renewal["session_lapses_source"]
+
+
+def test_silent_renew_stays_false_whatever_the_lapse_date_says(tmp_path):
+    """The new keys must not have turned the renewal block into a promise.
+
+    An expiry date is not a renewal path. A reader who sees a date next to
+    ``silent_renew_available`` has to still be told, on the same object, that
+    nothing will renew this for him.
+    """
+    for days in (364.2, -3.0):
+        renewal = auth_module.session_info_offline(
+            healthy_profile(tmp_path / f"d{days}", days=days),
+            mode="launch",
+            why_no_live_check="no browser",
+        )["renewal"]
+        assert renewal["silent_renew_available"] is False
+        assert renewal["tool"] is None
+
+
 def test_durability_keeps_its_fields_and_its_measured_note(tmp_path):
     durability = auth_module.session_info_offline(
         healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"

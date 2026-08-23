@@ -1,36 +1,44 @@
 name: CI
 
-# This suite has 684 tests and has never run anywhere but one Windows laptop.
+# This suite has 782 tests and has never run anywhere but one Windows laptop.
 # It also holds the read-only guarantees this server is built around -- the
 # navigation allowlist, the AST scan for write-shaped JS, the launch-flag
 # boundary, the tool-surface check -- so "green when someone remembers" is not
 # a gate for it.
 #
 # THE ONE DESIGN DECISION, and it was measured rather than argued. With the
-# browser binary absent, 77 of the 684 fail, all with the identical error:
+# browser binary absent, 87 of the 782 fail, all with the identical error:
 #
 #     BrowserType.launch: Executable doesn't exist at ...
 #
-# They live in tests/test_profile_views_fixture.py, test_job_search_fixture.py
-# and test_sdui_surfaces_fixture.py, and every one of them does
-# `chromium.launch(headless=True)` followed by `page.set_content(html)` over
-# frozen local markup. Not one calls page.goto(). So they need a BROWSER
-# BINARY and nothing else: no network, no cookie, no LinkedIn session. The
-# operator's li_at never has to leave his disk for these to run, which is what
-# makes installing chromium here the right call instead of marking them and
-# deselecting them.
+# Re-measured 2026-08-23 rather than adjusted: the suite was run in full with
+# PLAYWRIGHT_BROWSERS_PATH pointed at an empty directory, which is exactly
+# what a runner with no binary looks like. It came back `87 failed, 695
+# passed`. The previous figures here (684 / 77 / three modules) had gone stale
+# across several waves, and a count nobody re-measures is how a reader ends up
+# trusting the wrong number in the first file he opens.
 #
-# The coverage argument settles it. Those three modules are the ONLY tests
-# that caught the profile-views heading duplication, the job-search field
-# shift, and the tracker row walk -- three bugs that shipped while every pure
-# test in the repo passed. Deselecting them on CI would deselect precisely the
-# class of test the pure ones provably cannot substitute for. Marking would
-# also not be clean at file granularity: test_profile_views_fixture.py holds
-# 18 browser tests alongside 25 that need no browser at all.
+# They live in tests/test_profile_views_fixture.py (18),
+# test_job_search_fixture.py (27), test_sdui_surfaces_fixture.py (32) and
+# test_job_detail_fixture.py (10) -- the fourth joined at oldsha07 -- and every
+# one of them does `chromium.launch(headless=True)` followed by
+# `page.set_content(html)` over frozen local markup. Not one calls page.goto().
+# So they need a BROWSER BINARY and nothing else: no network, no cookie, no
+# LinkedIn session. The operator's li_at never has to leave his disk for these
+# to run, which is what makes installing chromium here the right call instead
+# of marking them and deselecting them.
+#
+# The coverage argument settles it. Those modules are the ONLY tests that
+# caught the profile-views heading duplication, the job-search field shift,
+# and the tracker row walk -- three bugs that shipped while every pure test in
+# the repo passed. Deselecting them on CI would deselect precisely the class of
+# test the pure ones provably cannot substitute for. Marking would also not be
+# clean at file granularity: test_profile_views_fixture.py holds 18 browser
+# tests alongside 24 that need no browser at all.
 #
 # Note that test_browser.py, test_launch_boundary.py and test_preflight.py
 # only TALK about the browser -- they fake the driver and launch nothing. They
-# pass with no chromium present and are not part of the 77.
+# pass with no chromium present and are not part of the 87.
 
 on:
   push:
@@ -132,7 +140,7 @@ jobs:
 
       - name: Install the Chromium binary
         # `pip install playwright` installs the DRIVER only. The browser is a
-        # separate download, and skipping it is what produces the 77 failures
+        # separate download, and skipping it is what produces the 87 failures
         # described at the top of this file.
         run: python -m playwright install --with-deps chromium
 

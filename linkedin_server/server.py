@@ -367,7 +367,13 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
       * renewal -- silent_renew_available is false here, and why says what
         the four servers in this family were ruled on: there is one
         credential layer, so a linkedin_reauth would be linkedin_login_browser
-        wearing a different name and it is deliberately not shipped.
+        wearing a different name and it is deliberately not shipped. It also
+        carries session_lapses_at / _in_days: the date past which no silent
+        renew can help and you sign in by hand. THAT is the number to compare
+        against a sibling server, not credential.expires_at -- a server that
+        re-mints its own credential shows hours there while its session holds
+        for months. On LinkedIn the two coincide, because nothing here can
+        carry the session past the cookie, and session_lapses_source says so.
       * durability -- where the sign-in is kept and what it survives.
 
     Cookie values are never returned. Only the name, whether it is there, and
