@@ -1018,8 +1018,94 @@ def follow_state(label: Optional[str], *, count: int) -> dict[str, Any]:
 _STOP_FOLLOWING = re.compile(r"^\s*Click to stop following\s+(.+?)\s*$", re.I)
 
 #: ``58 Pages`` -- LinkedIn's own total, printed above a list it only partially
-#: renders.
-_PAGES_TOTAL = re.compile(r"\b([\d,]+)\s+Pages?\b")
+#: renders. Anchored to the END OF A LINE rather than floating anywhere in
+#: ``main``, and read through ``_stated_total``, which insists it be the only
+#: total the page states.
+#:
+#: WHAT WAS WRONG WITH IT. This was ``\b([\d,]+)\s+Pages?\b`` and its caller
+#: took ``.search()`` -- the FIRST hit anywhere in ``main``, chosen by
+#: position. ``Pages?`` matches the singular too, so an incidental ``1 Page``
+#: above the heading became the total with a value of one, and one is a number
+#: that twenty rendered rows clear. Downstream that is not a cosmetic misread:
+#: it is a definite ``not_following`` about a Page he may well follow, printed
+#: beside its own refutation -- "covers completely (20 of 1)".
+#:
+#: WHICH HALF OF THE FIX DOES THE WORK, measured rather than argued. The
+#: UNIQUENESS RULE in ``_stated_total`` is what closes the hole. Every case in
+#: the review's table carries a competing ``N Page(s)`` alongside the real
+#: heading, so each comes back ambiguous and therefore unreadable EVEN UNDER
+#: THE OLD PATTERN. The anchoring is a second bound, not the first one.
+#:
+#: WHY END-OF-LINE AND NOT WHOLE-LINE, which was written first and then
+#: withdrawn. Whole-line is more PRECISE: it can dismiss ``You manage 2
+#: Pages`` as not-a-heading and still recover the 58. End-of-line is more
+#: CONSERVATIVE: it reads that same line as a competing claim and declines to
+#: choose between them. This module is permitted to be wrong in exactly one
+#: way -- by declining to answer -- so where the two disagree, the one that
+#: declines is the one that belongs here. If LinkedIn grows a second phrase
+#: stating a count, "I cannot tell which of these is this list's heading" is a
+#: truer report than "I will take the one that owns its line".
+#:
+#: Verified against the surface rather than reasoned about: rendered and read,
+#: all four Manage-Pages artefacts -- the two raw captures in ``_audit/`` and
+#: the two sanitised fixtures -- put ``58 Pages`` alone on line 0 of ``main``'s
+#: text and yield exactly one match under this pattern.
+_PAGES_TOTAL = re.compile(r"([\d,]+)[ \t]+Pages?[ \t]*$", re.M)
+
+
+def _stated_total(main_text: str) -> Optional[int]:
+    """LinkedIn's own follow count, or nothing -- never a number off a phrase.
+
+    Two lines stating DIFFERENT totals is not a tie to be broken by position.
+    It means the reader cannot tell which heading it is looking at, and the
+    honest total for a list whose own heading is ambiguous is no total at all.
+    Taking the first, which is what ``.search()`` did, is choosing by position
+    -- the same move ``follow_state`` already refuses when two follow controls
+    render.
+
+    Returning ``None`` costs an ``unknown`` downstream. That is the answer
+    this module is built to be able to give.
+    """
+    seen: set[int] = set()
+    for found in _PAGES_TOTAL.finditer(str(main_text or "")):
+        try:
+            seen.add(int(found.group(1).replace(",", "")))
+        except ValueError:  # pragma: no cover - the regex already forbids this
+            return None
+    if len(seen) != 1:
+        return None
+    return seen.pop()
+
+
+def _why_incomplete(rendered: int, total: Optional[int]) -> str:
+    """Say WHICH way the reconciliation failed, because they are not one thing."""
+    if total is None:
+        return (
+            "LinkedIn renders only the first rows of this list and loads the "
+            "rest on scroll, which this server does not do -- one page load, "
+            "whatever had drawn by then. Its own total could not be read at "
+            "all. A name missing from `pages` is therefore NOT evidence that "
+            "the Page is unfollowed."
+        )
+    if rendered > total:
+        return (
+            f"THE READ CONTRADICTS ITSELF: {rendered} rows were read while "
+            f"LinkedIn's own heading says {total} Pages. More rows than the "
+            "page claims means one of those two numbers is not what this "
+            "reader took it for -- either something that is not a followed "
+            "Page is being parsed as one, or the heading that was read is not "
+            "this list's. A list that disagrees with itself settles a "
+            "direction in NEITHER direction, so this read covers nothing and "
+            "a name missing from `pages` is NOT evidence that the Page is "
+            "unfollowed."
+        )
+    return (
+        "LinkedIn renders only the first rows of this list and loads the rest "
+        "on scroll, which this server does not do -- one page load, whatever "
+        f"had drawn by then. It says {total} Pages and rendered {rendered}. A "
+        "name missing from `pages` is therefore NOT evidence that the Page is "
+        "unfollowed."
+    )
 
 
 def parse_followed_pages(
@@ -1051,34 +1137,26 @@ def parse_followed_pages(
             page_id = found.group(1)
         pages.append({"name": name, "id": page_id})
 
-    total: Optional[int] = None
-    found_total = _PAGES_TOTAL.search(str(main_text or ""))
-    if found_total:
-        try:
-            total = int(found_total.group(1).replace(",", ""))
-        except ValueError:  # pragma: no cover - the regex already forbids this
-            total = None
+    total = _stated_total(main_text)
+    rendered = len(pages)
 
-    complete = total is not None and len(pages) >= total
+    # EQUALITY, NOT `>=`, AND THAT IS THE WHOLE OF THE SECOND HAZARD. `>=`
+    # cannot tell "we were shown everything" from "the number we read is not
+    # this list's", and it resolves the second into the FIRST -- the reading
+    # that licenses a definite `not_following`. Twenty rows against a total of
+    # one used to come back complete, printing its own refutation as the
+    # reason: "covers completely (20 of 1)". A human might notice that; the
+    # confirm gate downstream reads `state` and never sees it. So more rows
+    # than the stated total is a CONTRADICTION and covers nothing, which is
+    # the same reconciliation `writes._read_saved_state` already applies to
+    # the tracker in both directions.
+    complete = total is not None and rendered == total
     return {
         "pages": pages,
-        "rendered": len(pages),
+        "rendered": rendered,
         "total_followed": total,
         "complete": complete,
-        "why_incomplete": None
-        if complete
-        else (
-            "LinkedIn renders only the first rows of this list and loads the "
-            "rest on scroll, which this server does not do -- one page load, "
-            "whatever had drawn by then. "
-            + (
-                f"It says {total} Pages and rendered {len(pages)}."
-                if total is not None
-                else "Its own total could not be read at all."
-            )
-            + " A name missing from `pages` is therefore NOT evidence that the "
-            "Page is unfollowed."
-        ),
+        "why_incomplete": None if complete else _why_incomplete(rendered, total),
     }
 
 

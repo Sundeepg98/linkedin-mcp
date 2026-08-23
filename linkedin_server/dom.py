@@ -630,8 +630,8 @@ async def read_follow_control(page: Any) -> dict[str, Any]:
 #: following Ashgrove Systems``.
 FOLLOWED_PAGE_BUTTON = 'button[aria-label^="Click to stop following "]'
 
-#: The row a followed-Page button belongs to, as pure XPath rather than an
-#: injected script.
+#: The scope a followed-Page row's OWN company link lives in, as pure XPath
+#: rather than an injected script.
 #:
 #: WHY NO ``page.evaluate`` HERE, when the three harvesters above all use one.
 #: Every injected script in this package has to be declared in
@@ -641,29 +641,67 @@ FOLLOWED_PAGE_BUTTON = 'button[aria-label^="Click to stop following "]'
 #: so the read-only boundary is not asked to grow a new entry to accommodate a
 #: read. That is the cheaper side of the trade and it was taken deliberately.
 #:
-#: The predicate is THE ROW RULE stated literally: the row is the LARGEST
-#: ancestor containing exactly ONE of these buttons. ``ancestor::`` is a
-#: reverse axis, so ``[last()]`` is the outermost such ancestor. Nothing counts
-#: children, indexes a list or names a class -- a restyled or reordered row
-#: still reads, and a build-hash class change cannot break it.
-_FOLLOWED_PAGE_ROW = (
+#: WHY "NEAREST" AND NOT "LARGEST", WHICH IS WHAT THIS USED TO SAY. The rule
+#: was THE ROW RULE stated literally -- the LARGEST ancestor containing
+#: exactly ONE of these buttons, which on the reverse ``ancestor::`` axis is
+#: ``[last()]``. That rule is UNBOUNDED ABOVE whenever a single row has
+#: rendered, because then the whole document contains exactly one button and
+#: the document is an ancestor. Measured 2026-08-23 in headless Chromium, on
+#: one genuine row inside ``main`` plus one unrelated ``/company/`` link in
+#: the nav: the hop resolved to ``html``, the link search under it then took
+#: the first company link in DOCUMENT order, and the harvest returned a
+#: single record wearing one company's NAME beside another company's ID --
+#: ``{'name': 'Really Followed Co', 'id': 'unrelated-nav-corp'}``. Downstream
+#: that is a confident ``following`` for a Page he does not follow AND a
+#: confident ``not_following`` for the one he does. Neither came back
+#: ``unknown``, which is the one wrong answer this reader is allowed.
+#:
+#: THE REPLACEMENT, and why it cannot degenerate the same way. The button
+#: count only GROWS as you climb, so the ancestors containing exactly one of
+#: them are a contiguous run starting at the button; ``[last()]`` took the top
+#: of that run and the top is the document. This takes the LOWEST member of
+#: the run that carries a company link at all, so the search stops at the
+#: first enclosing scope that can answer and can never widen past it. Three
+#: conditions, each closing one way of being wrong:
+#:
+#: * ``[1]`` on the reverse axis -- NEAREST, so no climb out of the row.
+#: * a scope must not BE a document landmark, so a row whose own link has not
+#:   drawn yields no id rather than the page's first unrelated one.
+#: * exactly one button, so a scope straddling two rows yields no id rather
+#:   than the neighbouring row's.
+#:
+#: Nothing here counts children, indexes a list or names a class, so the
+#: property the original was written for survives intact: a restyled or
+#: reordered row still reads, and a build-hash class change cannot break it.
+_FOLLOWED_PAGE_ID_SCOPE = (
     "xpath=ancestor::*["
-    "count(.//button[starts-with(@aria-label,'Click to stop following ')])=1"
-    "][last()]"
+    "not(self::html or self::body or self::main or self::nav"
+    " or self::header or self::footer or @role='main' or @role='navigation'"
+    " or @role='banner' or @role='contentinfo')"
+    "][.//a[contains(@href,'/company/')]]"
+    "[count(.//button[starts-with(@aria-label,'Click to stop following ')])=1]"
+    "[1]"
 )
 
-#: The Page link inside a row. Kept separate so a row that has none still
+#: The Page link inside that scope. Kept separate so a row that has none still
 #: yields its NAME, which is the field the follow question is actually asked
-#: in; the id is corroboration, not the answer.
+#: in; the id is corroboration, not the answer. Which is also why NO ID is a
+#: perfectly good outcome here and a NEIGHBOUR'S id is not: one loses the
+#: corroboration, the other corroborates the wrong thing.
 _FOLLOWED_PAGE_LINK = 'a[href*="/company/"]'
 
 
 async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
     """Every followed-Page row LinkedIn has rendered, in document order.
 
-    Plain Playwright locators throughout: an attribute read per row and an
-    XPath hop to its enclosing row. No script is injected and nothing is
-    evaluated.
+    Plain Playwright locators throughout: an attribute read per row and a
+    BOUNDED XPath hop to the scope holding that row's own Page link. No script
+    is injected and nothing is evaluated.
+
+    The name comes off the button's own accessible name, so it is anchored to
+    the row by construction and cannot be another row's. The id is the field
+    that has to be hopped for, and the hop is the part that used to be able to
+    leave the row -- see ``_FOLLOWED_PAGE_ID_SCOPE``.
     """
     try:
         buttons = page.locator(FOLLOWED_PAGE_BUTTON)
@@ -682,7 +720,9 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
             continue
         href = None
         try:
-            link = button.locator(_FOLLOWED_PAGE_ROW).locator(_FOLLOWED_PAGE_LINK)
+            link = button.locator(_FOLLOWED_PAGE_ID_SCOPE).locator(
+                _FOLLOWED_PAGE_LINK
+            )
             if await link.count():
                 href = await link.first.get_attribute("href")
         except Exception as exc:

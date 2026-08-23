@@ -138,6 +138,18 @@ async def _follow_button_class(which: str):
 
 async def _followed_pages(which: str) -> dict:
     """The Manage-Pages read, exactly as the tool assembles it."""
+    return await _followed_pages_of(markup(which))
+
+
+async def _followed_pages_of(html: str) -> dict:
+    """The same read, over markup built here instead of loaded from a fixture.
+
+    The renders that go wrong on this surface are SPARSE ones, and no capture
+    of a sparse render exists -- by the time a capture is taken the page has
+    settled. So the markup for those cases is built in the test, which is also
+    what keeps it readable: the whole hazard is four elements and their
+    nesting, and a 57 KB fixture would bury that.
+    """
 
     async def work(page):
         return shape.parse_followed_pages(
@@ -145,7 +157,7 @@ async def _followed_pages(which: str) -> dict:
             await dom.read_main_text(page),
         )
 
-    return await _with_html(markup(which), work)
+    return await _with_html(html, work)
 
 
 async def _open_to_work(which: str) -> dict:
@@ -344,7 +356,7 @@ async def test_a_page_that_did_render_is_answered_following(which):
     The name is lifted out of the parse rather than typed in, because the
     fixtures' company names are invented and may be reinvented.
     """
-    parsed = await _followed_pages(which)
+    parsed = await _followed_pages("pages")
     name = parsed["pages"][0]["name"]
     verdict = shape.followed_page_state(name, parsed)
     assert verdict["state"] == "following"
@@ -434,6 +446,277 @@ async def test_every_row_yields_a_name_and_some_row_yields_an_id(which):
         "no row produced an id, so the XPath hop to the enclosing row found "
         "no company link on any of them"
     )
+
+
+# ---------------------------------------------------------------------------
+# 2a. The SPARSE render, where the row hop used to leave the row
+# ---------------------------------------------------------------------------
+
+#: The name the button carries, and the Page the row is really about.
+ROW_COMPANY = "Really Followed Co"
+ROW_SLUG = "really-followed-co"
+
+#: A company that appears ONLY in the page chrome, never in a row. He does not
+#: follow it; nothing on this page says he does.
+CHROME_SLUG = "unrelated-nav-corp"
+
+
+def _sparse_render(*headings: str) -> str:
+    """ONE followed-Page row in ``main``, one unrelated company link in the nav.
+
+    This is the shape that broke the reader, and it is not contrived: this
+    wave measured TEN rows before Manage Pages settles and twenty after, so a
+    render that has drawn one row is a hydration state on the way to those,
+    not an invented one. Everything else here is the minimum that makes the
+    row a row -- a list, an item, the Page's own link, and the button whose
+    accessible name states the inverse action.
+
+    Every heading given is drawn, so a caller can hand the page two of them
+    and ask what the reader does with a total it cannot pin down.
+    """
+    drawn = "".join(f"<h2>{heading}</h2>" for heading in (headings or ("1 Page",)))
+    return (
+        "<html><body>"
+        f'<nav><a href="https://www.linkedin.com/company/{CHROME_SLUG}/">'
+        "Unrelated Nav Corp</a></nav>"
+        f'<main>{drawn}<ul role="list"><li>'
+        f'<a href="https://www.linkedin.com/company/{ROW_SLUG}/">{ROW_COMPANY}</a>'
+        f'<button aria-label="Click to stop following {ROW_COMPANY}">Following'
+        "</button>"
+        "</li></ul></main>"
+        "</body></html>"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_lone_row_is_never_given_another_companys_id():
+    """THE ROW HOP MAY NOT LEAVE THE ROW, and once it could.
+
+    The hop used to be "the LARGEST ancestor containing exactly one follow
+    button". With one row rendered that is the whole DOCUMENT, because the
+    document contains exactly one button -- so the link search under it took
+    the first company link in document order, which is the nav's. Measured
+    2026-08-23 before the fix, this markup harvested
+
+        {'name': 'Really Followed Co', 'id': 'unrelated-nav-corp'}
+
+    one company's name beside another company's id, in one record. What makes
+    that the worst available failure rather than a cosmetic one is the pair of
+    answers it produces, both asserted below: a confident `following` for a
+    Page he does NOT follow, and a confident `not_following` for the one he
+    does. Neither is `unknown`, so neither trips the refusal every other test
+    in this file is arranged around, and a follow gate handed either one
+    performs the opposite of what it offers.
+    """
+    parsed = await _followed_pages_of(_sparse_render())
+
+    assert parsed["rendered"] == 1
+    row = parsed["pages"][0]
+    assert row["name"] == ROW_COMPANY
+    assert row["id"] == ROW_SLUG, (
+        "the row was given an id from outside itself: the hop left the row "
+        f"and took the page's first company link instead -- {row}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_sparse_render_answers_both_companies_correctly():
+    """The two verdicts the bad id produced, each one now the right way round.
+
+    Asserted at the verdict rather than at the harvest because the harvest is
+    not what a gate reads. `followed_page_state` matches on name OR id, and a
+    gate holds the SLUG -- `linkedin_job_detail` returns `company_url`, not a
+    display name -- so the id is the field the question actually arrives in.
+    """
+    parsed = await _followed_pages_of(_sparse_render())
+
+    chrome = shape.followed_page_state(CHROME_SLUG, parsed)
+    assert chrome["state"] != "following", (
+        "a company that appears only in the page chrome was reported as "
+        f"followed: {chrome}"
+    )
+
+    row = shape.followed_page_state(ROW_SLUG, parsed)
+    assert row["state"] == "following", (
+        f"the one Page that DID render was reported as {row['state']!r}"
+    )
+    assert row["matched"]["name"] == ROW_COMPANY
+
+
+# ---------------------------------------------------------------------------
+# 2b. The reconciliation: what "complete" is allowed to mean
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_a_list_that_matches_its_own_total_does_say_not_following():
+    """THE CONTROL for every refusal in this section, and it runs the PARSER.
+
+    Without it, all the `unknown`s above pass just as well on a reader that
+    can only ever say `unknown` -- which fails the other way round: he is
+    never told he does not follow somebody and the gate is as stuck as if it
+    had been lied to. The sibling control further up hand-builds its parsed
+    dict, so it cannot catch a `complete` that the parser is no longer able to
+    reach. This one goes through `parse_followed_pages` itself: one row, a
+    heading that says one, so the read genuinely covers the list.
+    """
+    parsed = await _followed_pages_of(_sparse_render("1 Page"))
+
+    assert parsed["complete"] is True, parsed
+    assert parsed["total_followed"] == 1
+    assert parsed["why_incomplete"] is None
+
+    verdict = shape.followed_page_state(ABSENT_PAGE, parsed)
+    assert verdict["state"] == "not_following"
+    assert "covers completely" in verdict["why"].casefold()
+
+
+@pytest.mark.asyncio
+async def test_more_rows_than_the_stated_total_is_a_contradiction_not_a_cover():
+    """`rendered > total` used to read as complete, and it is the opposite.
+
+    The test was `len(pages) >= total`, so a total the reader had misread as
+    smaller than the truth did not look like a misreading -- it looked like
+    the list had been covered twice over, which is the reading that licenses a
+    definite `not_following`. The `why` it printed refuted its own verdict in
+    the same breath, "covers completely (20 of 1)", but only a human reads
+    `why`; a confirm gate reads `state`.
+
+    A row is rendered under a heading that states a total of ZERO. There is no
+    reading of that page on which the list has been covered.
+    """
+    parsed = await _followed_pages_of(_sparse_render("0 Pages"))
+
+    assert parsed["rendered"] == 1
+    assert parsed["total_followed"] == 0
+    assert parsed["complete"] is False, (
+        "one rendered row against a stated total of zero was accepted as a "
+        f"complete cover of the list: {parsed}"
+    )
+
+    why = parsed["why_incomplete"]
+    assert "contradicts itself" in why.casefold(), why
+    assert "not evidence" in why.casefold(), why
+
+    verdict = shape.followed_page_state(ABSENT_PAGE, parsed)
+    assert verdict["state"] == "unknown", verdict
+
+
+@pytest.mark.asyncio
+async def test_a_second_stated_total_makes_the_total_unreadable():
+    """The total is not the first number of that shape on the page.
+
+    It was `.search()` over the whole of `main` -- first hit wins, chosen by
+    position -- and `Pages?` matches the singular, so an incidental `1 Page`
+    above the heading became the total. Here the page states two different
+    totals. Neither is picked: a list whose own heading is ambiguous has no
+    readable total, which costs an `unknown` and is the answer this module is
+    built to be able to give.
+    """
+    parsed = await _followed_pages_of(_sparse_render("1 Page", "58 Pages"))
+
+    assert parsed["total_followed"] is None, (
+        "one of two competing totals was picked anyway, by position: "
+        f"{parsed['total_followed']}"
+    )
+    assert parsed["complete"] is False
+    assert "could not be read at all" in parsed["why_incomplete"]
+
+    verdict = shape.followed_page_state(ABSENT_PAGE, parsed)
+    assert verdict["state"] == "unknown", verdict
+
+
+# ---------------------------------------------------------------------------
+# 2c. Two properties nothing held, found by mutation rather than by reading
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_a_name_that_merely_contains_the_query_is_not_a_match():
+    """The name match is EQUALITY, and nothing pinned that it was.
+
+    A 12-mutant battery over the read side left this alive: `==` loosened to
+    `in` survives the whole suite green. The loosening is the natural helpful
+    one -- so that `Acme` finds `Acme, Inc.` -- and it is exactly wrong here,
+    because the answer feeds a gate. A substring hit would report `following`
+    for a Page whose name merely CONTAINS what was asked about, which is a
+    different company.
+
+    Both directions, because `in` can be written either way round and only one
+    of them is caught by a prefix.
+    """
+    parsed = await _followed_pages("pages")
+    name = parsed["pages"][0]["name"]
+
+    shorter = name[: max(1, len(name) - 2)]
+    assert shorter != name
+    verdict = shape.followed_page_state(shorter, parsed)
+    assert verdict["state"] != "following", (
+        f"{shorter!r} was reported as followed off the rendered name {name!r}: "
+        "the match is a substring test, not equality"
+    )
+
+    longer = name + " Holdings International"
+    verdict = shape.followed_page_state(longer, parsed)
+    assert verdict["state"] != "following", (
+        f"{longer!r} was reported as followed off the rendered name {name!r}: "
+        "the match tests the query for the name rather than comparing them"
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_id_match_is_equality_too():
+    """The same property on the other field, and this is the one a gate uses.
+
+    A gate holds the slug, so an id loosened to a substring test is the
+    reachable half: Page ids are numeric and short, and `2611` is a substring
+    of `902611`.
+    """
+    parsed = await _followed_pages_of(_sparse_render())
+    page_id = parsed["pages"][0]["id"]
+
+    for probe in (page_id[:-3], page_id + "-plc"):
+        assert probe != page_id
+        verdict = shape.followed_page_state(probe, parsed)
+        assert verdict["state"] != "following", (
+            f"{probe!r} was reported as followed off the rendered id "
+            f"{page_id!r}: the id match is not equality"
+        )
+
+
+def test_a_repeated_row_is_counted_once():
+    """Dedup is load-bearing for the reconciliation, and nothing pinned it.
+
+    The second survivor of the same mutant battery: delete the `seen` set and
+    the suite stays green. It is not a tidiness feature. `rendered` is one
+    half of the comparison that decides whether absence means anything, so a
+    duplicated row inflates the cover -- it walks `rendered` toward `total`,
+    and the closer those two get the closer an absent Page gets to a definite
+    `not_following` off a list that never contained it.
+
+    Driven at the parser with rows built here rather than through the browser,
+    because a repeated row is a thing LinkedIn's virtualised list does on
+    scroll, and this read does not scroll -- so no capture of it exists.
+    """
+    rows = [
+        {"label": "Click to stop following Aldergate Works", "href": "/company/11/"},
+        {"label": "Click to stop following Brightloom", "href": "/company/22/"},
+        {"label": "Click to stop following Aldergate Works", "href": "/company/11/"},
+    ]
+    parsed = shape.parse_followed_pages(rows, "2 Pages")
+
+    assert parsed["rendered"] == 2, (
+        "a repeated row was counted twice, so the read overstates how much of "
+        f"the list it covers: {parsed['pages']}"
+    )
+    assert [page["name"] for page in parsed["pages"]] == [
+        "Aldergate Works",
+        "Brightloom",
+    ]
+    assert parsed["complete"] is True
+
+    # And the dedup did not cost the row its id, which is the corroboration.
+    assert parsed["pages"][0]["id"] == "11"
 
 
 # ---------------------------------------------------------------------------
