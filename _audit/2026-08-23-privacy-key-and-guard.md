@@ -106,3 +106,23 @@ found another -- the full form, the bare city, then the bare city inside an asse
 the input the previous pass had just changed.
 
 **Final: 1211 passed, 0 skipped.** Sweep 0 hits across 88 swept files.
+
+### Correction: the import-safety rule went red twice before it went green
+
+`oldsha15` and `oldsha12` both failed **all three cells** -- and **zero of those failures were about the
+rule**. `test_it_fires_on_this_repos_own_history` ran `git show oldsha22:<path>`, which passes here
+because a full clone has the object. **CI checks out SHALLOW**: `fatal: invalid object name`,
+`2 failed, 1211 passed`. A test that proves something about history may not DEPEND on the history
+being present -- a shallow clone is the normal case, not the exception. The evidence is now frozen in
+the test with its sha and a one-line re-verification command.
+
+**Then the fix was wrong too, and a shallow clone caught it before CI did.** The first frozen tails
+were verbatim FRAGMENTS beginning mid-indentation, so `ast.parse` raised `IndentationError` -- the two
+tests failed for a reason unrelated to the rule they exercise. Each entry is now the module-level shape
+with bodies elided and the load-bearing `main()` line verbatim, plus a test asserting the frozen
+evidence parses at all. Verified in a `--depth 1` clone with the history genuinely absent:
+**1211 passed**.
+
+**The lesson I keep re-learning this wave, now three times over:** green locally is not green. Local
+has history CI lacks, local counts a skip as a pass, and local had a key file CI never sees. The
+repo's own gates caught the first two; a deliberate shallow-clone reproduction caught the third.
