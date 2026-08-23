@@ -41,7 +41,6 @@ actually occurred twice.
 from __future__ import annotations
 
 import ast
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -223,30 +222,70 @@ def test_reading_and_path_setup_at_import_are_accepted():
     assert module_level_effects(benign) == []
 
 
-@pytest.mark.parametrize(
-    "rel",
-    ["scripts/_build_follow_fixtures.py", "scripts/_build_job_fixtures.py"],
-)
+#: The tail of each build script AS IT STOOD AT ``oldsha22``, verbatim, ending
+#: in the bare ``main()`` that wrote ``tests/fixtures/`` on import.
+#:
+#: FROZEN HERE RATHER THAN FETCHED, and that is a correction. The first version
+#: of this test ran ``git show oldsha22:<path>`` and passed on this machine
+#: because a full clone has the object. CI checks out SHALLOW, so the object
+#: does not exist there and the test failed on all three cells with
+#: ``fatal: invalid object name`` -- 2 failed, 1211 passed. A test that proves
+#: something about history may not DEPEND on the history being present; a
+#: shallow clone is the normal case, not the exception. So the evidence travels
+#: with the test.
+#:
+#: Provenance was verified against the real object when this was frozen, and is
+#: re-verifiable in any full clone with:
+#:     git show oldsha22:scripts/_build_follow_fixtures.py | tail -5
+#: A tail is a FRAGMENT, and a fragment starting mid-indentation is not a
+#: module: the first frozen version began with ``    if not check(...)`` and
+#: ``ast.parse`` raised IndentationError. Caught in a shallow clone before it
+#: reached CI, which is the only reason this is a note and not a third red run.
+#: So each entry is the file's MODULE-LEVEL SHAPE with function bodies elided.
+#: The load-bearing line -- ``main()`` at column 0, as the file's final
+#: statement -- is verbatim; the elision is marked.
+_HISTORICAL_TAILS = {
+    "scripts/_build_follow_fixtures.py": (
+        "def main() -> None:\n"
+        "    ...  # body elided; it ends: if not check(out_paths): SystemExit(1)\n"
+        "\n"
+        "\n"
+        "main()\n"
+    ),
+    "scripts/_build_job_fixtures.py": (
+        "def main() -> None:\n"
+        "    ...  # body elided; it wrote three fixtures then printed a report\n"
+        "\n"
+        "\n"
+        "main()\n"
+    ),
+}
+
+
+@pytest.mark.parametrize("rel", sorted(_HISTORICAL_TAILS))
+def test_the_frozen_evidence_is_a_parseable_module(rel):
+    """Because the first frozen version was not, and only a shallow clone said so.
+
+    Evidence that cannot be parsed proves nothing about a parser, and the two
+    tests below would then fail for a reason that has nothing to do with the
+    rule they exist to exercise.
+    """
+    ast.parse(_HISTORICAL_TAILS[rel])
+
+
+@pytest.mark.parametrize("rel", sorted(_HISTORICAL_TAILS))
 def test_it_fires_on_this_repos_own_history(rel):
-    """THE STRONGEST FORM: run the rule at the commit before it was fixed.
+    """THE STRONGEST FORM: run the rule at the shape that actually shipped.
 
     Both scripts ended in a bare ``main()`` at ``oldsha22``, and both wrote
     ``tests/fixtures/`` from it. A checker proven only against source written
-    to be caught proves less than one proven against the thing that actually
-    happened.
+    to be caught proves less than one proven against the thing that happened.
     """
-    before = subprocess.run(
-        ["git", "show", f"oldsha22:{rel}"],
-        cwd=str(REPO),
-        capture_output=True,
-        text=True,
-    )
-    assert before.returncode == 0, before.stderr
-    offences = module_level_effects(before.stdout)
+    offences = module_level_effects(_HISTORICAL_TAILS[rel])
     assert any("calls main()" in reason for _, reason in offences), (rel, offences)
 
-    # ...and the same file today is clean, so this is a fix rather than a
-    # tolerated finding.
-    assert module_level_effects(
-        (REPO / rel).read_text(encoding="utf-8")
-    ) == []
+
+@pytest.mark.parametrize("rel", sorted(_HISTORICAL_TAILS))
+def test_and_the_same_file_is_clean_today(rel):
+    """So the pair above records a FIX rather than a tolerated finding."""
+    assert module_level_effects((REPO / rel).read_text(encoding="utf-8")) == []
