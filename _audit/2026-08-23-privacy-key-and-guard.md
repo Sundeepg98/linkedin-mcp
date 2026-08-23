@@ -81,3 +81,28 @@ history, the key-shape detector fires on `_build_follow_fixtures.py` (`FOLLOWED_
 rows, `SLUGS` 4, `OPERATOR` 4, `POSTING` 7, `OTHER_EMPLOYERS` 3) and on `_build_job_fixtures.py`
 (`SUBS` 3, `OTHER_EMPLOYERS` 3); both are clean after. A planted member id in `linkedin_server/paths.py`
 fails the repo-wide sweep.
+
+---
+
+## The landmine underneath it (`oldsha15`)
+
+`tests/test_scripts_are_import_safe.py`: **importing a script must not DO anything.** Both build
+scripts ended in a bare module-scope `main()`, and `main()` writes `tests/fixtures/` -- so importing
+either one to read a table rebuilt committed fixtures. Guarding the two was the fix; this is the rule.
+Static on purpose: the dynamic version would have to EXECUTE the thing it is proving safe. Refused --
+a bare call to a plain NAME, any statement containing a write-shaped call (assignment or not), `open()`
+in a writing mode. Accepted -- attribute calls (`sys.path.insert` writes nothing), reads, and anything
+under `if __name__ == "__main__"`. **Shown failing at `oldsha22`** on both real files, clean today.
+
+**The instrument caught me twice, and that is the finding.** The first draft of the spelling expander
+quoted the real job title in both spellings inside the docstring explaining why real job titles reach
+tracked files. Then, writing the paragraph recording THAT, I named the real city in two of its three
+forms. Both caught by re-running the sweep against my own change, neither by reading it back. **A guard
+is not exempt from what it guards** -- now stated in the identity guard's own docstring.
+
+**The pass count, because it is the whole argument for shape over literals:** the exact-value scrub of
+ONE city took **three passes**. Each replaced the spelling it could see and reported clean; the next
+found another -- the full form, the bare city, then the bare city inside an assertion written to match
+the input the previous pass had just changed.
+
+**Final: 1211 passed, 0 skipped.** Sweep 0 hits across 88 swept files.
