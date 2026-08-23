@@ -1642,15 +1642,19 @@ async def perform(
     ``True``, ``False``, and ``"unknown"`` -- the third for a click that raised
     on the way out, where whether it dispatched is exactly what nobody knows.
     """
-    _refuse_unperformable(spec_for_action(grant.action))
-    spec = spec_for_action(grant.action)
-
+    # ORDER MATTERS HERE, and it is the order of how fundamental each refusal
+    # is rather than the order they were written in. The flag governs whether
+    # this process may write AT ALL, so it answers before anything about which
+    # action was asked for -- otherwise an unperformable action with writes off
+    # reports "not performable", which is true and is not the reason.
     if not writes_enabled():
         raise WriteAttemptError(
             f"writes are disabled: set {WRITES_FLAG}=1 to enable them."
         )
     if not isinstance(grant, WriteGrant):
         raise WriteAttemptError("perform takes a WriteGrant and nothing else")
+    spec = spec_for_action(grant.action)
+    _refuse_unperformable(spec)
     if not grant.consumed:
         raise WriteAttemptError(
             "this grant has not been redeemed. A write is performed against a "
@@ -1749,13 +1753,22 @@ async def perform(
             "Open your saved jobs and look."
         )
 
+    # THREE OUTCOMES, DECIDED BY THE VERIFICATION AND NOT BY THE CLICK.
+    #
+    # An earlier draft of this branched on ``click_error`` as well, and both of
+    # its last two arms returned UNKNOWN -- a distinction that read as
+    # meaningful and computed nothing. Worse than redundant: it implied the
+    # click's own success was evidence, and it is not. A click that raised on
+    # the way out may still have dispatched, and a click that returned cleanly
+    # may still have changed nothing. The saved list is the witness; the click
+    # is the thing being witnessed. ``click_error`` is REPORTED, in the
+    # ``clicked`` block, where a reader can weigh it -- it just does not get a
+    # vote here.
     verified = verified_state == spec.to_state
     if verified:
         performed: Any = True
     elif verified_state == spec.from_state:
         performed = False
-    elif click_error is None:
-        performed = UNKNOWN
     else:
         performed = UNKNOWN
 

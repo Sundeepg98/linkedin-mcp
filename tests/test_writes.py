@@ -1432,6 +1432,84 @@ async def test_that_browser_trap_is_armed(monkeypatch):
     writes.discard_all()
 
 
+async def test_the_tool_previews_without_a_token_and_redeems_with_one(
+    writes_on, browser_page, monkeypatch
+):
+    """THE TWO-STEP CONTRACT, at the level a caller actually meets it.
+
+    Everything else in this file drives ``preview`` and ``perform`` directly.
+    Nothing pinned the ONE LINE that chooses between them -- and that line is
+    the whole of what the tool's docstring promises: no token performs nothing,
+    a token redeems. A mutant that always previewed would leave a caller
+    confirming forever with nothing happening and every other test green.
+
+    The browser session is replaced with the frozen-fixture page this module
+    already uses, so the tool runs its real body against real markup and still
+    touches nothing.
+    """
+    from contextlib import asynccontextmanager
+
+    from linkedin_server import server as server_module
+
+    nav = FixtureNavigator(
+        _pages(target=SAVED_JOB, posting="job_detail", saved="jobs_tracker_empty")
+    )
+
+    @asynccontextmanager
+    async def fake_session(*args, **kwargs):
+        yield browser_page
+
+    monkeypatch.setattr(server_module.BROWSER, "session", fake_session)
+    monkeypatch.setattr(server_module.BROWSER, "goto", nav.goto)
+
+    # Step one: no token. Nothing is performed, and a token comes back.
+    block = await server_module.linkedin_save_job(job_id=SAVED_JOB)
+    assert block["performed"] is False
+    assert block["to_confirm"]
+    assert block["where"]["job_id"] == SAVED_JOB
+
+    # Step two: that token. Now it acts -- against the same frozen world, so
+    # the saved list still reads empty and the honest answer is "did not take".
+    result = await server_module.linkedin_save_job(
+        job_id=SAVED_JOB, confirm_token=block["to_confirm"]
+    )
+    assert "to_confirm" not in result
+    assert result["clicked"]["selector"] == 'button[aria-label="Save the job"]'
+    assert result["performed"] is False
+    assert result["verified"] is False
+
+
+async def test_a_token_from_one_tool_will_not_redeem_at_the_other(
+    writes_on, browser_page, monkeypatch
+):
+    """THE CONTROL. The token is bound to its verb at the tool boundary too.
+
+    Without this, the test above passes on a ``_write_tool`` that ignored
+    ``action`` entirely and redeemed anything.
+    """
+    from contextlib import asynccontextmanager
+
+    from linkedin_server import server as server_module
+
+    nav = FixtureNavigator(
+        _pages(target=SAVED_JOB, posting="job_detail", saved="jobs_tracker_empty")
+    )
+
+    @asynccontextmanager
+    async def fake_session(*args, **kwargs):
+        yield browser_page
+
+    monkeypatch.setattr(server_module.BROWSER, "session", fake_session)
+    monkeypatch.setattr(server_module.BROWSER, "goto", nav.goto)
+
+    block = await server_module.linkedin_save_job(job_id=SAVED_JOB)
+    out = await server_module.linkedin_unsave_job(
+        job_id=SAVED_JOB, confirm_token=block["to_confirm"]
+    )
+    assert "error" in out, out
+    assert "save_job" in out["message"]
+
+
 def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
     """WHAT THIS TEST USED TO ASSERT: that the scanner found nothing here.
 
