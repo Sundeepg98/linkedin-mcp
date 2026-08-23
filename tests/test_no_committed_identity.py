@@ -39,6 +39,27 @@ So this file hunts two things that need no real values at all:
    re-run here over everything git tracks, for the same reason the credential
    sweep enumerates ``git ls-files`` rather than a list somebody maintains.
 
+A GUARD IS NOT EXEMPT FROM WHAT IT GUARDS. The first draft of the shared
+spelling expander in ``tests/leakwalk.py`` quoted the real job title, in both
+of its spellings, inside the docstring explaining why real job titles end up
+in tracked files. It was caught by pointing the reviewer's sweep at the change
+that introduced it -- not by reading it back, which had already happened
+twice. So this file's own module and its sibling are swept like everything
+else; they are excluded from the member-id parametrisation by name, and from
+nothing else.
+
+AND THE REASON THE SHAPE HUNT EXISTS AT ALL, measured rather than argued. The
+exact-value scrub of ONE city took THREE passes to converge. Each pass replaced
+the spelling it could see and reported clean; the next pass found another --
+the full "city, region, country" form, then the bare city on its own, then the
+same bare city inside a query-string assertion that had been written to match
+the input the pass before had just changed. A list of literals only ever
+catches the spelling somebody typed. A shape does not have spellings.
+
+The three spellings are NOT quoted here. Writing them down to illustrate the
+lesson is the lesson: an earlier draft of this very paragraph named the city
+in two of its three forms.
+
 WHAT THIS DELIBERATELY DOES NOT COVER, stated so the gap is not mistaken for
 coverage. An invented company id and a real one are the same shape, so no
 value-free guard can tell them apart in isolation; only the PAIRING gives it
