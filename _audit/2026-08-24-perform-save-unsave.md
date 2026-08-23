@@ -127,6 +127,11 @@ environment variable.
 - **`ci.yml`'s header comment is stale** -- it describes 1092 tests and a 112/936/6/38 split. The
   suite is now 1285. `wire-linkedin-state` flagged this on 2026-08-23 and did not edit it either,
   because `ci-for-newest` may own that file.
+- **`_audit/_instruments/` is NOT in this repo.** It sits one level up, at
+  `mcp-servers/_audit/_instruments/`, holding `boundary_digest_option2_probe.py` and its control.
+  I reported it missing after looking only inside `linkedin/`; it exists, and the lead ran it from
+  the parent root. Worth knowing because a brief that names it with a repo-relative path will send
+  the next agent looking in the wrong place.
 - **`_audit/_slice-*.md` is NOT gitignored**, contrary to what I assumed when briefing a child --
   it caught the error. `.gitignore` covers only `_audit/_probe-*.html`, `_audit/*_raw.html`,
   `_audit/_fixture_sanitisation_check.txt` and `_audit/_sanitisation_key.json`. Four `_slice-*.md`
@@ -138,12 +143,28 @@ environment variable.
 
 ## Measured
 
+All at `5a69147` unless stated.
+
 | | |
 |---|---|
-| suite, 3.13.14 | see below |
-| suite, 3.10.19 | see below |
-| mutants | 20 applied, 17 killed first pass, 3 closed, all 3 re-killed |
-| package mutating calls | 1 (sanctioned), 0 unsanctioned |
-| boundary digests | 6, identical under both interpreters |
-| tools | 14 -> 16 |
+| suite, CPython 3.13.14 (win32) | **1300 collected, 1300 passed, 0 skipped, 0 failed, 0 errors**, 356s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- collected 1300, executed 1300, none skipped, none deselected |
+| suite, CPython 3.10.19 (win32) | 1282 passed / 0 skipped / gate exit 0 **at `026359e`**; the digest re-verified at `5a69147` |
+| boundary digests | 6, **identical under 3.13.14 and 3.10.19**; independently re-confirmed at `5a69147` by the lead via `mcp-servers/_audit/_instruments/boundary_digest_option2_probe.py` -- 13 of 13 functions match, 0 mismatches |
+| mutants | 20 applied, **17 killed** first pass, 3 closed, all 3 re-killed; 3 more re-killed after the refactor |
+| package mutating calls | **1** (sanctioned), **0** unsanctioned |
+| tools | 14 -> **16** |
 | live writes executed | **0** |
+
+**The one deliverable NOT produced: a CI run id.** It needs a push to `origin/master`, which is
+outward-facing and spends metered runner minutes on a private repo (`ci.yml`'s own header notes a
+Windows minute bills at 2x). That is the operator's to trigger, not something a task assignment
+authorises, so the branch sits 6 commits ahead of `origin/master` un-pushed. What CI would check
+was run locally instead: the whole suite on both interpreters plus the completeness gate that
+refuses a skip or a deselection. **The gap is the OS axis only** -- both local runs are win32,
+where CI's 3.10 cell is ubuntu.
+
+**A caveat on the two "green locally is not green" mechanisms this wave could still hit.** The
+skip-counted-as-a-pass one is closed (gate exit 0, `skipped=0`). The interpreter one is closed for
+the boundary digest specifically, measured rather than argued. The gitignored-file one is closed by
+the sweep. The history one does not apply -- nothing added here reads git history.
