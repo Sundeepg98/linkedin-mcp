@@ -126,3 +126,61 @@ evidence parses at all. Verified in a `--depth 1` clone with the history genuine
 **The lesson I keep re-learning this wave, now three times over:** green locally is not green. Local
 has history CI lacks, local counts a skip as a pass, and local had a key file CI never sees. The
 repo's own gates caught the first two; a deliberate shallow-clone reproduction caught the third.
+
+---
+
+## A real member URN was at HEAD, and why three guards walked past it (`oldsha11`)
+
+`tests/test_sdui_surfaces_fixture.py` carried **four real values** -- a member URN, an activity urn,
+a `ugcPost` id and a per-impression tracking token -- as the inputs to its own can-it-fail control.
+Its docstring said so: *"the real ids that WERE in these files before they were pseudonymised."* The
+fixtures were scrubbed and the scrubbed-out values were kept in the file beside them. **A control
+needs the SHAPE, not the VALUE.**
+
+**WHY NEITHER GUARD CAUGHT IT. Three independent blindnesses, all measured, none of them the one I
+first assumed.**
+
+1. **The word boundary.** `\bACoAA[A-Za-z0-9_-]{20,}` cannot match `%3AACoAA...`: the trailing `A`
+   of the percent-encoded colon is a word character, so `\b` never fires -- and percent-encoded is
+   the form LinkedIn actually serves. Bare id matches, raw-colon urn matches, percent-encoded does
+   not. This was the load-bearing one.
+2. **I had dropped the urn prefix** from the repo-wide sweep as too noisy. True of the bare prefix,
+   false once a six-digit floor is required of the id behind it.
+3. **The file was excluded**, because it defines the allowlist. An exclusion is a promise that
+   nothing in the file needs checking, and the real values were inside the excluded file.
+
+The key-shape detector was never going to see it, and that is a **class**: it hunts a PAIRING, and a
+lone literal has no partner column. Keys were covered and known values were covered; **an unknown
+real value arriving alone was covered by neither.** Nothing is skipped now -- files that deliberately
+carry a violation are **pinned by count**, so a new real id changes the count and goes red, and every
+pin is exercised.
+
+**Closed loop:** run against HEAD, the merged guard reports exactly the three values it previously
+walked past, redacted -- `member token AC..uY <39 chars>`, two `urn id`. After the scrub: only the
+one declared plant.
+
+**Resolved rather than scrubbed:** the phone-shaped value a sibling sweep left UNRESOLVED is **not a
+phone**. It sits inside `id="ab7dc03f-6282-46a6-a3b9-XXXXXXXXXXe2"` -- a ten-digit run inside a
+UUID's tail. Encoded as a UUID-context rule, not an allowlisted value.
+
+**The freeze is now an invariant, not a line count** (operator ruling): AST digests of the four
+boundary structures and every function body of `readonly.py`, pinned against `oldsha14`, **frozen not
+fetched** because CI checks out shallow. A comment or an identity swap cannot move it; deleting
+`/messaging`, widening the allowlist to the whole domain, or removing the click detector all do --
+shown failing on those three.
+
+**Stated at the top of the merged guard, because it is the gap most likely to be misread:** NONE OF
+THESE CHECKS DETECTS A PERSONAL NAME. NAMES HAVE NO SHAPE. Green means no third-party IDENTIFIERS of
+these shapes. Every real name in this family's sweep was found by a human reading fields.
+
+**Accepted residuals, operator-ratified:** the denylists keep their real strings (a denylist must
+name what it denies; these are unpaired lone tokens, and a PAIRING is what makes a key), and his
+username in workspace paths is structural -- the real fix would be configurable paths, which is a
+refactor, not a privacy action.
+
+**Measured:** 1211 -> **1244 passed, 0 skipped**; **1240 passed in a `--depth 1` clone** before
+pushing. Sweep **0 hits across 89 files**.
+
+**Instrument law, from this wave's most repeated failure:** *a check that skips has not run, and a
+suite that counts skips as passes cannot tell you what it verified.* Local green failed three ways
+here -- a skip counted as a pass, history CI lacks, and a gitignored file CI never sees.
