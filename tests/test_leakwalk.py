@@ -283,6 +283,93 @@ def test_the_shape_hunt_does_not_fire_on_ordinary_result_prose():
     ) == []
 
 
+# ---------------------------------------------------------------------------
+# 5. The guarded tests are still WIRED to the walker
+# ---------------------------------------------------------------------------
+#
+# Everything above proves the INSTRUMENT works. None of it proves the six real
+# assertions still USE it -- and that is a live decay path, because reverting
+# one of them to `assert SECRET not in json.dumps(result)` leaves the whole
+# suite green while putting the credential back at risk. The 0-of-54
+# measurement would silently become historical.
+#
+# scripts/leak_matrix.py re-measures the property properly and is the right
+# tool when the question is open. This is the cheap continuous version of the
+# same question, so the decay cannot go unnoticed between runs of it.
+
+GUARDED = {
+    "tests/test_auth.py": (
+        "test_no_cookie_value_ever_reaches_a_tool_result",
+        "test_no_cookie_value_leaks_from_the_login_result",
+        "test_session_info_never_returns_a_cookie_value",
+    ),
+    "tests/test_auth_lifecycle.py": (
+        "test_the_offline_result_carries_no_cookie_value",
+        "test_the_live_result_carries_no_cookie_value",
+        "test_a_logout_result_carries_no_cookie_value",
+    ),
+}
+
+REPO = Path(__file__).resolve().parent.parent
+
+
+def calls_made_in(source: str, function: str) -> set[str]:
+    """Every function name called inside one named function, via AST.
+
+    AST rather than a substring search on purpose: a grep for
+    "assert_no_leak" would be satisfied by the word appearing in a comment,
+    which is precisely the kind of check that passes on a broken thing.
+    """
+    import ast
+
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if node.name != function:
+            continue
+        names: set[str] = set()
+        for inner in ast.walk(node):
+            if isinstance(inner, ast.Call):
+                func = inner.func
+                if isinstance(func, ast.Name):
+                    names.add(func.id)
+                elif isinstance(func, ast.Attribute):
+                    names.add(func.attr)
+        return names
+    raise AssertionError(f"{function} not found -- was it renamed or deleted?")
+
+
+@pytest.mark.parametrize(
+    "relative,function",
+    [(path, fn) for path, names in GUARDED.items() for fn in names],
+    ids=lambda v: v if "/" not in str(v) else str(v).split("/")[-1],
+)
+def test_each_guarded_test_still_runs_through_the_walker(relative, function):
+    source = (REPO / relative).read_text(encoding="utf-8")
+    assert "assert_no_leak" in calls_made_in(source, function), (relative, function)
+
+
+def test_the_wiring_check_can_tell_a_reverted_guard_from_a_wired_one():
+    """The control. Both bodies below mention the credential; only one hunts it
+    in a way that survives an encoding, and the check has to tell them apart."""
+    reverted = (
+        "def guard():\n"
+        "    # assert_no_leak was here\n"
+        "    assert SECRET not in json.dumps(result)\n"
+    )
+    wired = "def guard():\n    assert_no_leak(result, SECRET, caplog=caplog)\n"
+
+    assert "assert_no_leak" not in calls_made_in(reverted, "guard")
+    assert "assert_no_leak" in calls_made_in(wired, "guard")
+
+
+def test_the_wiring_check_notices_a_guarded_test_that_vanished():
+    """A renamed or deleted guard must be a failure, not a silent pass."""
+    with pytest.raises(AssertionError) as excinfo:
+        calls_made_in("def other(): pass\n", "test_that_is_not_here")
+    assert "not found" in str(excinfo.value)
+
+
 def test_assert_no_leak_reports_the_channel_and_the_encoding():
     """A complaint has to be actionable: WHERE it leaked and AS WHAT."""
     payload = {"credential": {"fingerprint": renderings(SECRET)["hex"]}}

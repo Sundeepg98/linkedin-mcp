@@ -33,8 +33,13 @@
    be the only one and to still hold a plant.
 10. Read-only boundary untouched: `readonly.py`, `test_readonly.py`, `test_launch_boundary.py`
     are **zero-line diffs** against oldsha01 and in the working tree.
-11. 786 -> 902 passed, 0 skipped. Commits `oldsha16`, `oldsha09`.
-12. **A second writer was live in this tree the whole time** -- see the last section.
+11. A guard that is right today can be reverted tomorrow and the suite stays green, so
+    `test_each_guarded_test_still_runs_through_the_walker` reads the six guarded tests by AST
+    and fails if one stops calling the walker. Driven at a REAL revert of a real test: it
+    fired and named it, while `test_auth.py` itself still passed -- which is the decay.
+12. 786 -> 911 passed, 0 skipped. Commits `oldsha16`, `oldsha09`, `oldsha25`, `+1`.
+    CI **success** on `oldsha25`, run id **32616918805**.
+13. **A second writer was live in this tree the whole time** -- see the last section.
 
 ---
 

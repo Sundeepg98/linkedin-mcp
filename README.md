@@ -90,7 +90,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 902 passed
+python -m pytest            # 911 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
@@ -350,13 +350,13 @@ linkedin_server/
   shape.py                   pure parsers and the result envelope
   server.py                  the thirteen tools
   errors.py
-tests/                       902 tests, no network, no account
+tests/                       911 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **902 tests**, no network and no account. Most run with no
+Built and tested: **911 tests**, no network and no account. Most run with no
 browser at all; the four fixture-driven modules launch a local headless
 Chromium to run the real injected harvester over frozen markup, which reaches
 nothing outside the machine.
