@@ -249,7 +249,26 @@ def test_no_fixture_carries_a_real_opaque_linkedin_id(path):
 
 @pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
 def test_no_fixture_names_a_real_person_or_employer(path):
-    """These files are committed. Nobody real may be identifiable in one."""
+    """These files are committed. Nobody real may be identifiable in one.
+
+    THE TOKENS BELOW ARE REAL, AND THEY ARE DELIBERATELY KEPT. Do not "fix"
+    this list by replacing them with invented values -- that would delete the
+    check. A denylist must name what it denies; there is no way to write this
+    test without the string, and the same is true of the copy in
+    ``scripts/_build_follow_fixtures.py``.
+
+    WHY THAT IS NOT THE THING THAT WAS JUST REMOVED FROM THIS REPO. The leak
+    was a MAPPING -- a real name paired with the invented one that replaced it,
+    which reverses a sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.**
+    These are unpaired: a lone token, with nothing to substitute it back into.
+    They are also already-public facts about the OPERATOR -- his surname is the
+    author of every commit in this repo, his city and former employers are on
+    the LinkedIn profile this server reads -- and they are his own, not a third
+    party's. Ratified by the operator on 2026-08-23 as an accepted residual.
+
+    Hashing them would buy obscurity, not secrecy: they are dictionary words
+    and they are already in this repository's history.
+    """
     lowered = path.read_text(encoding="utf-8").lower()
     for token in (
         "sundeep",
@@ -272,15 +291,29 @@ def test_no_fixture_names_a_real_person_or_employer(path):
 def test_the_opaque_id_guard_can_actually_fail():
     """The control. This guard has twice been unable to see a real leak.
 
-    Runs the same check over the real ids that WERE in these files before they
-    were pseudonymised -- two viewers' member urns and three content urns --
-    and requires every one to be caught.
+    THE INPUTS ARE SYNTHETIC, AND THAT IS THE THIRD THING THIS TEST HAS HAD TO
+    LEARN. Until 2026-08-23 it ran over the REAL ids that were in these files
+    before they were pseudonymised -- a real member urn, a real activity urn, a
+    real post urn and a real per-impression tracking token, all four of them
+    naming real third parties, pasted into a tracked and pushed file in order
+    to prove that real values get caught.
+
+    That is the sanitisation script's own mistake one layer up: the fixtures
+    were scrubbed and the scrubbed-out values were kept next to them. A CONTROL
+    NEEDS THE SHAPE, NOT THE VALUE. These four trip all three patterns and are
+    absent from the allowlist, which is the entire property under test, and no
+    real person is named to establish it.
+
+    It is also why the identity sweep did not find them: this module was
+    EXCLUDED from the repo-wide member-id sweep because it defines the
+    allowlist, and the real ids were sitting inside the excluded file. See
+    ``tests/test_no_committed_identity.py``, which no longer excludes it.
     """
     leaks = (
-        "urn%3Ali%3Afsd_profile%3AACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7",
-        "urn%3Ali%3Aactivity%3A7496511672837246977",
+        "urn%3Ali%3Afsd_profile%3AACoAAQ1w2E3r4T5y6U7i8O9p0A1s2D3f4G5h6J7",
+        "urn%3Ali%3Aactivity%3A7490000000000000001",
         "urn:li:ugcPost:7490000000000000002",
-        "highlightedUpdateTrackingId=FKZM68XkSbul4YFGPd7nRQ%3D%3D",
+        "highlightedUpdateTrackingId=Zz9Yy8Xx7Ww6Vv5Uu4Tt3Q%3D%3D",
     )
     for leak in leaks:
         caught = False

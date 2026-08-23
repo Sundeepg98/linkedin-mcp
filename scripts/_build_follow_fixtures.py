@@ -438,6 +438,19 @@ def sanitise(html: str) -> str:
 
 #: The token list enforced by tests/test_sdui_surfaces_fixture.py, verbatim.
 #: If that test's list grows, this one must grow with it.
+#:
+#: THESE ARE REAL, AND THEY ARE DELIBERATELY KEPT. Do not "fix" this list by
+#: replacing them with invented values -- that deletes the check. A denylist
+#: must name what it denies.
+#:
+#: WHY THIS IS NOT THE THING THAT WAS REMOVED FROM THE TABLES ABOVE. Those were
+#: a MAPPING: each real value paired with the invented one that replaced it,
+#: which is what reverses a sanitised fixture. **A PAIRING IS WHAT MAKES A
+#: KEY.** These are unpaired -- lone tokens with nothing to substitute them
+#: back into -- and they are already-public facts about the OPERATOR (his
+#: surname authors every commit here; his city and former employers are on the
+#: profile this server reads), not about a third party. Operator-ratified
+#: 2026-08-23 as an accepted residual.
 BANNED_BY_THE_FIXTURE_TEST = [
     "sundeep", "redacted", "redacted", "redacted", "redacted", "redacted",
     "redacted", "redacted", "redacted", "redacted", "redacted", "redacted",
