@@ -275,7 +275,11 @@ def test_nothing_is_both_forbidden_and_sanctioned_by_accident():
     the mismatch is a failing test rather than a silent divergence.
     """
     overlap = set(FORBIDDEN_TOOLS) & set(SANCTIONED_WRITES)
-    assert overlap == {"linkedin_save_job", "linkedin_unsave_job"}, overlap
+    assert overlap == {
+        "linkedin_save_job",
+        "linkedin_unsave_job",
+        "linkedin_set_open_to_work",
+    }, overlap
 
 
 def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
@@ -337,7 +341,9 @@ async def test_no_write_tool_is_registered_on_the_surface_today():
 def test_the_gate_names_the_target_in_words_a_person_can_check(writes_on):
     spec = spec_for_action("save_job")
     grant = mint("save_job", JOB, {})
-    preview = render_preview(spec, target=JOB, facts=FACTS, token=grant.token)
+    preview = render_preview(
+        spec, target=JOB, facts=FACTS, token=grant.token, state="not_saved"
+    )
 
     assert preview["performed"] is False
     assert preview["where"]["title"] == "Senior Node Engineer"
@@ -352,38 +358,92 @@ def test_the_gate_refuses_to_render_without_a_live_reread(writes_on):
     spec = spec_for_action("save_job")
     for facts in ({}, {"title": "x"}, {"company": "y"}, {"title": "", "company": ""}):
         with pytest.raises(WriteAttemptError) as excinfo:
-            render_preview(spec, target=JOB, facts=facts, token="t")
+            render_preview(
+                spec, target=JOB, facts=facts, token="t", state="not_saved"
+            )
         assert "live re-read" in str(excinfo.value)
 
 
-def test_the_gate_will_not_print_an_unmeasured_reversibility_claim(writes_on):
-    """THE RULE, ratified 2026-08-23, enforced rather than documented.
+def test_the_gate_prints_every_measured_verdict_with_its_evidence(writes_on):
+    """THE RULE, ratified 2026-08-23, and what happened to it.
 
-    All three specs are unmeasured today, so all three must print UNMEASURED
-    and name what would settle it -- not a confident sentence nobody checked.
+    When it landed, all three specs printed UNMEASURED, and the rule was
+    described as "biting its own author". The measurement was then performed --
+    on 2026-08-23, entirely through READS -- so all four now print a verdict.
+    That is the rule being satisfied, not relaxed, and this test is the half
+    that says so: a verdict must arrive with its EVIDENCE, its OWNER and its
+    RESIDUE, because a bare "reversible" is the confident string the rule
+    exists to stop whether or not somebody has since done the measuring.
     """
+    states = {
+        "save_job": ("not_saved", None),
+        "unsave_job": ("saved", None),
+        "follow_company": ("not_following", None),
+        "set_open_to_work": ("Recruiters only", "All LinkedIn members"),
+    }
+    assert set(states) == {spec.action for spec in SANCTIONED_WRITES.values()}
+
     for spec in SANCTIONED_WRITES.values():
-        preview = render_preview(spec, target=JOB, facts=FACTS, token="t")
-        assert spec.reversibility_measured is False
-        assert preview["reversibility_measured"] is False
-        assert preview["reversibility"].startswith("UNMEASURED")
-        assert spec.reversibility_procedure in preview["reversibility"]
-        # And the confident version must NOT appear.
-        assert not preview["reversibility"].startswith("reversible")
+        state, to_state = states[spec.action]
+        preview = render_preview(
+            spec,
+            target=JOB,
+            facts=FACTS,
+            token="t",
+            state=state,
+            to_state=to_state,
+        )
+        assert spec.reversibility_measured is True, spec.action
+        assert preview["reversibility_measured"] is True
+        assert "UNMEASURED" not in preview["reversibility"]
+        assert preview["reversibility_class"] in {
+            "REVERSIBLE",
+            "IRREVERSIBLE",
+            "STILL-UNKNOWN",
+        }
+        # A verdict with no evidence line is the thing this rule forbids.
+        assert "MEASURED 2026-08-23" in preview["reversibility_evidence"], spec.action
+        assert len(preview["reversible_by"]) > 40, spec.action
+        assert len(preview["what_it_cannot_undo"]) > 40, spec.action
 
 
-def test_the_gate_does_print_the_claim_once_it_is_measured(writes_on):
-    """The control, and the reason the rule is a rule rather than a ban.
+def test_the_gate_still_refuses_to_print_an_unmeasured_claim(writes_on):
+    """THE CONTROL, and it matters more now than when it was written.
 
-    A measured claim IS printed. Without this the assertion above would pass on
-    a renderer that had simply lost the ability to say anything.
+    Every real spec is measured today, so the assertion above would pass on a
+    renderer that had lost the ability to say UNMEASURED at all -- which is
+    precisely how a rule dies: not repealed, just never exercised again. So the
+    refusal is driven against a spec that is unmeasured by construction.
     """
-    spec = spec_for_action("save_job")
-    measured = writes.WriteSpec(**{**spec.__dict__, "reversibility_measured": True})
-    preview = render_preview(measured, target=JOB, facts=FACTS, token="t")
-    assert preview["reversibility"] == spec.reversibility
-    assert preview["reversibility_measured"] is True
-    assert "UNMEASURED" not in preview["reversibility"]
+    unmeasured = writes.WriteSpec(
+        **{
+            **spec_for_action("save_job").__dict__,
+            "reversibility_measured": False,
+        }
+    )
+    preview = render_preview(
+        unmeasured, target=JOB, facts=FACTS, token="t", state="not_saved"
+    )
+    assert preview["reversibility_measured"] is False
+    assert preview["reversibility"].startswith("UNMEASURED")
+    assert unmeasured.reversibility_procedure in preview["reversibility"]
+    assert not preview["reversibility"].startswith("reversible")
+
+
+def test_a_follow_says_plainly_that_this_server_cannot_take_it_back(writes_on):
+    """The field most likely to mislead, asserted rather than trusted.
+
+    "Reversible" reads as "this tool can undo it". For ``follow_company`` that
+    is FALSE -- no unfollow is sanctioned, so a follow performed here is one
+    only he can reverse, by hand. Two of the four are undoable by this server
+    and two are not, and the gate has to say which it is holding.
+    """
+    by_server = spec_for_action("save_job").reversible_by
+    assert "this server" in by_server
+
+    for action in ("follow_company", "set_open_to_work"):
+        by_hand = spec_for_action(action).reversible_by
+        assert "NOT this server" in by_hand or "Not this server" in by_hand, action
 
 
 def test_every_sanctioned_spec_carries_a_procedure_that_would_settle_it():
@@ -524,11 +584,252 @@ def test_the_anchors_the_future_click_will_use_are_frozen_at_both_renders():
             assert 'data-view-name="job-save-button"' not in html
 
 
-def test_the_toggle_problem_is_recorded_where_it_will_be_hit():
-    """The blocker found while pinning those anchors: both are TOGGLES and the
-    captures only ever show the OFF state, so nothing here can yet tell 'Save'
-    from 'Unsave'. Recorded in the module so it cannot be rediscovered the
-    expensive way."""
+def test_the_instrumentation_that_must_not_be_relied_on_did_in_fact_vanish():
+    """The ban on ``data-view-name`` was a rule; on 2026-08-23 it became a
+    measurement.
+
+    ``job_detail_hydrated.html`` was captured on 2026-08-22 carrying fifteen
+    ``data-view-name`` attributes. A posting loaded live the NEXT DAY carried
+    ZERO -- and the fixtures frozen from that capture carry zero, which is what
+    this asserts. Same surface, same account, one day, the whole instrumenting
+    layer gone. A reader anchored there would have returned nothing that
+    morning with every test still green.
+
+    It is surface-specific rather than a platform-wide removal: Manage Pages,
+    loaded minutes later, carried thirty-one. That is the honest form of the
+    claim and it is why the fixtures are asserted rather than LinkedIn's
+    behaviour.
+    """
+    fixtures = Path(__file__).parent / "fixtures"
+    yesterday = (fixtures / "job_detail_hydrated.html").read_text(encoding="ascii")
+    today = (fixtures / "job_detail_following_hydrated.html").read_text(
+        encoding="ascii"
+    )
+    assert yesterday.count("data-view-name") > 0
+    assert today.count("data-view-name") == 0
+    # The accessible names survived the change in both. That is the point.
+    assert 'aria-label="Save the job"' in yesterday
+    assert 'aria-label="Save the job"' in today
+
+
+def test_the_toggle_problem_is_solved_and_the_solution_is_recorded():
+    """WHAT THIS TEST USED TO SAY, and why it now says the opposite.
+
+    It used to pin a blocker: both anchors are TOGGLES, the captures only ever
+    showed the OFF state, so nothing could tell Save from Unsave, and a gate
+    that cannot say which way it moves a toggle is not a gate. All true. The
+    inference drawn from it was wrong -- that the write had to come first.
+
+    Measuring a toggle's ON state is a READ. It cost one page load on a posting
+    from a company he already follows. So the module now records the measured
+    labels rather than the blocker, and the direction rule is enforced in
+    ``_direction`` rather than described in prose.
+
+    The one honestly unmeasured half stays named: the SAVE control's ON state
+    has never been seen, because there is no saved posting on the account to
+    see it on, so save takes its direction from the list read instead.
+    """
     doc = writes.perform.__doc__ or ""
-    assert "TOGGLES" in doc
+    assert "IS SOLVED" in doc
+    assert 'aria-label="Following"' in doc
     assert "linkedin_saved_jobs" in doc
+    # And it must not have quietly dropped the half that is still open.
+    assert "has NOT been observed" in doc
+
+    # The measured pair is what the reader actually uses, so assert THAT
+    # rather than the docstring alone -- a docstring cannot be wrong in a way
+    # a caller notices.
+    from linkedin_server import shape
+
+    assert shape.FOLLOW_LABELS == {
+        "Follow": "not_following",
+        "Following": "following",
+    }
+
+
+# ---------------------------------------------------------------------------
+# 9. The toggle-direction rule
+# ---------------------------------------------------------------------------
+
+
+def test_the_gate_refuses_to_render_without_the_targets_measured_state(writes_on):
+    """"A gate that cannot say which way it moves a toggle is not a gate."
+
+    This was recorded as a blocker on the write and it was not one: it was a
+    READ nobody had performed. Now that both directions are measured, the gate
+    REFUSES rather than defaulting, because a default here is a guess wearing a
+    measurement's clothes.
+    """
+    for action in ("save_job", "unsave_job", "follow_company"):
+        with pytest.raises(WriteAttemptError) as excinfo:
+            render_preview(
+                spec_for_action(action), target=JOB, facts=FACTS, token="t"
+            )
+        assert "TOGGLES" in str(excinfo.value), action
+
+
+def test_the_gate_refuses_when_the_state_came_back_unknown(writes_on):
+    """``unknown`` is a real answer from the read and must stay one here.
+
+    ``dom.read_follow_control`` returns it when the control had not rendered,
+    when several rendered, or when LinkedIn labelled it something never seen.
+    Proceeding on any of those is proceeding on a guess.
+    """
+    with pytest.raises(WriteAttemptError) as excinfo:
+        render_preview(
+            spec_for_action("follow_company"),
+            target=JOB,
+            facts=FACTS,
+            token="t",
+            state="unknown",
+        )
+    assert "unknown" in str(excinfo.value)
+
+
+def test_acting_from_the_wrong_state_would_perform_the_opposite_and_is_refused(
+    writes_on,
+):
+    """The refusal most likely to be argued with, and the one that earns most.
+
+    Confirming a save on an ALREADY-SAVED posting does not do nothing. On a
+    toggle it UNSAVES it -- the opposite of what the gate said. So the mismatch
+    is refused rather than treated as a harmless no-op.
+    """
+    cases = {
+        "save_job": "saved",
+        "unsave_job": "not_saved",
+        "follow_company": "following",
+    }
+    for action, wrong in cases.items():
+        with pytest.raises(WriteAttemptError) as excinfo:
+            render_preview(
+                spec_for_action(action),
+                target=JOB,
+                facts=FACTS,
+                token="t",
+                state=wrong,
+            )
+        assert "OPPOSITE" in str(excinfo.value), action
+
+
+def test_the_right_state_does_render_and_names_both_ends(writes_on):
+    """THE CONTROL for the three refusals above.
+
+    Without it they all pass on a ``_direction`` that raises unconditionally,
+    which is the same shape of dead gate this whole module is arranged against.
+    """
+    pairs = {
+        "save_job": ("not_saved", "saved"),
+        "unsave_job": ("saved", "not_saved"),
+        "follow_company": ("not_following", "following"),
+    }
+    for action, (before, after) in pairs.items():
+        preview = render_preview(
+            spec_for_action(action),
+            target=JOB,
+            facts=FACTS,
+            token="t",
+            state=before,
+        )
+        assert preview["direction"]["currently"] == before, action
+        assert preview["direction"]["after"] == after, action
+        # And it names the TOOL the reading came from, so he can run it
+        # himself rather than taking the gate's word for the state.
+        assert "linkedin_" in preview["direction"]["read_from"], action
+
+
+# ---------------------------------------------------------------------------
+# 10. Open To Work: three states, an audience, and no surface
+# ---------------------------------------------------------------------------
+
+
+def test_open_to_work_will_not_derive_a_destination_it_was_not_given(writes_on):
+    """It is not a binary toggle -- off, recruiters-only, all-members -- so
+    there is no "the other one" to flip to, and inventing one would be the
+    gate choosing his audience for him."""
+    with pytest.raises(WriteAttemptError) as excinfo:
+        render_preview(
+            spec_for_action("set_open_to_work"),
+            target=JOB,
+            facts=FACTS,
+            token="t",
+            state="Recruiters only",
+        )
+    assert "more than two states" in str(excinfo.value)
+
+
+def test_open_to_work_refuses_a_setting_it_has_never_seen_linkedin_render(writes_on):
+    """A gate that cannot say who can see a setting must not offer it."""
+    with pytest.raises(WriteAttemptError) as excinfo:
+        render_preview(
+            spec_for_action("set_open_to_work"),
+            target=JOB,
+            facts=FACTS,
+            token="t",
+            state="Recruiters only",
+            to_state="Only my dog",
+        )
+    assert "ever seen LinkedIn render" in str(excinfo.value)
+
+
+def test_open_to_work_names_the_audience_of_the_destination_in_the_gate(writes_on):
+    """THE POINT OF SPECCING IT AT ALL.
+
+    Someone job-hunting while employed. This is the single setting in the whole
+    design a current employer can read, so the gate does not repeat LinkedIn's four
+    words back at him -- it says who will be able to see the change, and says
+    it about the DESTINATION rather than the current state.
+    """
+    preview = render_preview(
+        spec_for_action("set_open_to_work"),
+        target=JOB,
+        facts=FACTS,
+        token="t",
+        state="Recruiters only",
+        to_state="All LinkedIn members",
+    )
+    seen = preview["who_can_see_it"]
+    assert "PUBLIC" in seen
+    assert "EMPLOYER" in seen.upper()
+    assert preview["direction"]["currently"] == "Recruiters only"
+    assert preview["direction"]["after"] == "All LinkedIn members"
+    # ...and the quieter setting must NOT be described as public.
+    quiet = preview["direction"]["who_can_see_it_now"]
+    assert "PUBLIC" not in quiet
+    assert "does not see it" in quiet.casefold()
+
+
+def test_open_to_work_has_no_measured_surface_and_the_door_says_so(writes_on):
+    """A GATE MAY NOT NAME A TARGET SURFACE NOBODY HAS OPENED.
+
+    The state is read off the profile topcard, which is allowlisted. The
+    EDITOR is a modal nothing has ever loaded, so there is no url, no anchor
+    and no capture -- and the honest response is a refusal, not a plausible
+    path. Inventing one would be the same failure as printing an unmeasured
+    reversibility claim, one field over.
+    """
+    spec = spec_for_action("set_open_to_work")
+    assert spec.url_template is None and spec.url_pattern is None
+
+    grant = mint("set_open_to_work", JOB, {})
+    with pytest.raises(WriteAttemptError) as excinfo:
+        assert_write_url("https://www.linkedin.com/in/me/", grant)
+    assert "no measured surface" in str(excinfo.value)
+
+    preview = render_preview(
+        spec,
+        target=JOB,
+        facts=FACTS,
+        token="t",
+        state="Recruiters only",
+        to_state="off",
+    )
+    assert preview["where"]["url"].startswith("UNMEASURED")
+
+
+def test_the_measured_surfaces_still_pass_their_own_door(writes_on):
+    """THE CONTROL. Without it the refusal above passes on a door that has
+    stopped letting anything through at all."""
+    grant = mint("save_job", JOB, {})
+    url = f"https://www.linkedin.com/jobs/view/{JOB}/"
+    assert assert_write_url(url, grant) == url
