@@ -71,6 +71,33 @@ MIN_SECRET = 24
 
 
 # ---------------------------------------------------------------------------
+# The plant
+# ---------------------------------------------------------------------------
+
+#: The one fake credential every test in this package plants, defined ONCE so
+#: no test can quietly weaken it back into a four-letter word.
+#:
+#: It is deliberately the LENGTH and CHARSET of a real ``li_at`` -- 190
+#: base64url characters behind an ``AQEDAT`` prefix -- because the markers this
+#: replaced (``"live"``, ``"x"``, ``"secret-token-value"``) were none of those
+#: things, and a redaction bug that only fires on long high-entropy values
+#: cannot be caught with a short readable one. ``test_leakwalk.py`` asserts it
+#: matches :data:`LI_AT_SHAPE`, so it cannot drift back.
+#:
+#: It also reads as an obvious plant at a glance, which matters the one time
+#: it shows up somewhere it should not.
+PLANTED_LI_AT = (
+    "AQEDATEST0THIS1IS2A3PLANTED4FAKE5SESSION6TOKEN7AND8MUST9NEVER0LEAK1"
+    "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_AbCdEfGhIjKlMnOpQrStUvWxYz01"
+    "23456789-_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_ZZ"
+)
+
+#: The csrf cookie's shape, quoted the way Chrome stores it. Short by nature,
+#: so it is guarded by SHAPE rather than hunted as a run.
+PLANTED_JSESSIONID = '"ajax:1234567890123456789"'
+
+
+# ---------------------------------------------------------------------------
 # 1. Renderings -- the same credential, spelled every way it escapes
 # ---------------------------------------------------------------------------
 
