@@ -3,7 +3,7 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fourteen of its sixteen tools read and change nothing. Two write.**
+**Fourteen of its seventeen tools read and change nothing. Three write.**
 
 Until 2026-08-23 this paragraph said *"It reads. That is all it does. There is
 no write path in this repository -- not disabled, not stubbed, not behind a
@@ -28,6 +28,12 @@ What is true now:
   discouraged.
 - `linkedin_unsave_job` is built, gated and **refuses to act**. See
   [The one that refuses](#the-one-that-refuses).
+- **It does not submit applications, and that is not a shrug.**
+  `linkedin_job_detail` reports `apply_path`: whether a posting applies on
+  LinkedIn or hands you to an outside applicant-tracking system, and names
+  that system. The identifying half ships as a read. The submitting half is
+  refused for a measured reason -- see
+  [Applying: the half that ships](#applying-the-half-that-ships-and-the-half-that-does-not).
 
 ---
 
@@ -45,7 +51,7 @@ What this design does is minimise exposure rather than pretend it away:
 | Your own session, your own machine, your own IP | No cookie is exported to any third party. No proxy, no datacentre IP, no headless farm. |
 | An ordinary browser, one flag | No stealth plugin, no user-agent or platform spoofing, no fingerprint patching, no proxy, no timing engineered to imitate a human. One Chromium flag is passed -- `--disable-blink-features=AutomationControlled`, which stops Blink setting `navigator.webdriver` -- because LinkedIn checks it at sign-in and refuses one without it. That is the whole of it, it is enforced at launch by `readonly.assert_launch_flags_permitted`, and `tests/test_launch_boundary.py` fails the build if a third flag appears. |
 | Your data only | Your profile views, your applications, your saved jobs, your profile, your notifications. No enumerating or harvesting other members. |
-| Reads only | Nothing is applied to, saved, sent, posted, endorsed, invited or edited. |
+| Reads, except for three named writes | Nothing is applied to, sent, posted, endorsed, invited or edited. Saving, unsaving and unfollowing are the exceptions: off by default, one at a time, each one confirmed by you against a block built from a live read, with a token that works once and dies in two minutes. This row said "Reads only" until 2026-08-23 and the sentence is corrected rather than quietly widened. |
 
 **This lowers exposure. It does not eliminate it.** Automated access can still
 result in a rate limit, a challenge, or account action, and that risk is yours
@@ -61,7 +67,8 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_saved_jobs` | Jobs you bookmarked. |
 | `linkedin_search_jobs` | Job search with keywords, location, remote, date posted, experience level. |
-| `linkedin_job_detail` | One posting in full -- pay range, LinkedIn's applicant count, workplace and employment type, hiring status, and the description. None of these is on a search or saved-jobs card. |
+| `linkedin_job_detail` | One posting in full -- pay range, LinkedIn's applicant count, workplace and employment type, hiring status, and the description. None of these is on a search or saved-jobs card. Also `apply_path`: which of the two apply routes this posting uses, and for the off-site route, whose applicant-tracking system it would send you to. |
+| `linkedin_followed_companies` | The company Pages you follow, with the numeric id of each -- which is what `linkedin_unfollow_company` is addressed by. LinkedIn renders about twenty rows of however many you follow and offers no way to page through the rest, so this reports what it covered rather than implying it covered everything. |
 | `linkedin_my_profile` | Your own profile: headline, about, skills, and which sections rendered. Experience/Education/Skills are deferred by LinkedIn until the page is scrolled, so they read UNKNOWN rather than zero. |
 | `linkedin_notifications` | Your notification list. |
 | `linkedin_auth_status` | Whether there is a live session, measured by an authenticated request. |
@@ -71,12 +78,13 @@ to accept. Decide that deliberately before you register the server.
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 
-## The two that write
+## The three that write
 
 | Tool | What it does |
 |---|---|
 | `linkedin_save_job` | Bookmarks one posting. Call it with no `confirm_token` and it performs nothing: it reads the posting and your saved list live and returns a block naming the job by title and employer, which way the toggle would move, where each fact came from, and how to undo it. Call it again with the token from that block to act. |
 | `linkedin_unsave_job` | Same shape, same gates, and **it refuses**. See below. |
+| `linkedin_unfollow_company` | Stops following one company Page. Same shape and the same five gates. Addressed by the **numeric company id**, never by name -- names collide, change, and are not yours to rely on, and the click is anchored to the row carrying the id, so what you name and what gets pressed are the same row by construction. |
 
 After the click, the result is confirmed from a **different surface** -- your
 saved list, with LinkedIn's own per-tab count -- rather than from the button
@@ -102,17 +110,86 @@ The refusal names that reason rather than saying "not implemented", because
 that into `shape.SAVE_LABELS` and `unsave_job` acquires its anchor. It is one
 row of a table, not a missing code path.
 
+### Applying: the half that ships, and the half that does not
+
+**`linkedin_job_detail` tells you how a posting is applied to.** LinkedIn draws
+the apply control as a link rather than a button, so its destination is legible
+without touching it, and `apply_path` reports one of three answers:
+
+- `linkedin_apply` -- the application is filled in and submitted on LinkedIn.
+- `offsite` -- LinkedIn hands you to the employer's own applicant-tracking
+  system. The destination is decoded out of LinkedIn's outbound wrapper **by
+  string alone**: no redirect is followed and no third-party host is contacted.
+  You get the host, so you know whose form you are about to fill in.
+- `unknown` -- it would not say. This is a real answer and it is the important
+  one; see below.
+
+That is the useful half, it costs no extra page load, and it is a pure read.
+
+**It does not submit.** Not because applying is beneath this server's remit,
+but for reasons that were measured:
+
+1. **The apply FLOW has never been captured.** Across thirteen job captures
+   there are zero forms, zero file inputs, zero dialogs, zero screening
+   questions and zero controls that submit anything. Nothing here has seen what
+   would be filled in or pressed. This is the same standard `unsave_job` is
+   held to, applied to the action that deserves it most.
+2. **An application cannot be undone from here**, at any confirm level, in any
+   circumstances. Withdrawing is permanently forbidden.
+3. **The off-site half is not this server's to do at all**, however good a
+   capture got. Driving somebody else's form, on somebody else's domain, under
+   their terms, is a different piece of software.
+
+`apply_job` is therefore fully specced and gated in `writes.py`, registers no
+tool, and holds no url, so a grant for it is refused at issue rather than at
+use. What would change that is written down in the spec.
+
+**Why the classifier demands several fields agree**, when one obvious field
+looks sufficient. Each candidate was measured and each fails alone:
+`data-view-name="job-apply-button"` is present on one capture in thirteen and
+absent from a fully hydrated off-site posting, so its absence carries no
+information at all. The outbound wrapper is generic -- one capture holds two of
+them and only one is the apply control. The accessible name is the strongest
+single field and is the one LinkedIn has already changed: **the string "Easy
+Apply" appears in zero accessible names**, and twice in prose on the same page,
+so a parser keyed on the name everybody knows the feature by matches nothing.
+And the pre-hydration payload is worse than useless -- an off-site posting was
+measured carrying the on-site flow's own marker, for the same job id, because
+LinkedIn ships the whole apply state machine as a per-posting template.
+
 ## What it deliberately cannot do
 
-Applying to jobs. Messaging, InMail, connection invitations. Profile edits.
-Open To Work. Following or unfollowing a company. Posting, liking, commenting,
-endorsing. Marking notifications read. Collecting data about other members.
+Messaging, InMail, connection invitations. Profile edits. Open To Work.
+Following a company. Posting, liking, commenting, endorsing. Marking
+notifications read. Collecting data about other members. Submitting
+applications, per the section above.
 
-These are not missing features. Following is the interesting one on that list:
-it **is** designed and gated in `writes.py` and it is deliberately not
-performable, because no unfollow is sanctioned -- this server could create that
-state and could not clear it. An action whose undo is hand-only does not go
-first.
+These are not missing features, and they are not all the same kind of "no".
+`linkedin_server_info` labels each one POLICY, MEASURED or UNMEASURED, because
+"we refuse this on principle", "we looked and it will not work" and "nobody has
+looked" are three different statements and a list that flattens them is how an
+unexamined gap comes to read as a design decision.
+
+**Following is the interesting one**, and its reason changed on 2026-08-24
+without its answer changing. It used to be blocked because no unfollow existed
+-- this server could create a state it could not clear. One exists now. It is
+still not performable, because **the undo cannot be aimed**: a job posting names
+its employer by slug, the unfollow surface addresses rows by numeric company id,
+and no capture in this repo carries both for one company on a surface either
+action uses. That surface also renders about twenty rows of fifty-eight with no
+pagination control, so most of the list is unreachable in one page load. The
+refusal names both, and names what would lift them.
+
+**Reading your own inbox is UNMEASURED, not refused.** The read boundary blocks
+`/messaging`, and every written rationale for that block is phrased against
+*sending*. Whether reading is even possible has never been tested.
+`scripts/_probe_messaging.py` exists to test it, and to test something the
+question usually skips: LinkedIn's desktop messaging view opens a conversation
+on arrival, so a "read" of the inbox may mark a thread read -- which would be
+the notifications objection arriving through a tool that calls itself a read.
+The probe measures that by reading the nav badge from `/feed/` before and after,
+a surface the load does not touch. **It has not been run**, and the forbidden
+list is unchanged until it is: a boundary does not move on an unmeasured claim.
 
 Anything else that would change something on LinkedIn's servers is out of
 scope, and `tests/test_readonly.py` fails the build if a second mutating call
@@ -420,20 +497,25 @@ linkedin_server/
   browser.py                 persistent context, single-flight, idle close
   auth.py                    the login gate, session lifetime, cold start
   cdp_bridge.py              the recovery path: attach to a running Chrome
-  dom.py                     the three read-only harvesters
+  dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the thirteen tools
+  server.py                  the seventeen tools
   errors.py
-tests/                       986 tests, no network, no account
+tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
 ```
 
 ## Status
 
-Built and tested: **986 tests**, no network and no account. Most run with no
-browser at all; the four fixture-driven modules launch a local headless
-Chromium to run the real injected harvester over frozen markup, which reaches
-nothing outside the machine.
+Built and tested: **1393 tests**, no network and no account. Most run with no
+browser at all; the fixture-driven modules launch a local headless Chromium to
+run the real readers over frozen markup, which reaches nothing outside the
+machine.
+
+These counts are the ones this file has most often had wrong. They said 986 for
+three waves after the suite passed a thousand, which is harmless on its own and
+is the same habit that let four documents go on saying this server could not
+write. They are re-measured at each wave now rather than carried forward.
 
 **First live run: 2026-08-21.** Sign-in succeeded and the session persisted,
 so the flag above is now **verified sufficient** on this machine, and
