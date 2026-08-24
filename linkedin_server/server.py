@@ -61,6 +61,7 @@ from linkedin_server.config import (
     LOGIN_WAIT_S,
     MAX_LIMIT,
     MAX_NAVIGATIONS_PER_CALL,
+    ME_API,
     MIN_NAVIGATION_INTERVAL_S,
     NOTIFICATIONS_DEFAULT_LIMIT,
     NOTIFICATIONS_MAX_LIMIT,
@@ -1592,6 +1593,33 @@ async def linkedin_server_info() -> dict[str, Any]:
             # not to make. So it gets its own named field rather than being
             # folded into a read_only a reader would take as covering
             # everything.
+            # ONE REQUEST THIS SERVER MAKES THAT IS NOT A PAGE LOAD, declared
+            # 2026-08-24 because until then nothing said it existed.
+            #
+            # The read boundary is described everywhere in this repo as the
+            # door every read goes through. That is precise and slightly
+            # narrower than it reads: assert_read_url is the only door to
+            # page.goto, and this call is not a navigation, so it never
+            # reaches it. Measured: readonly.is_read_url(ME_API) is False --
+            # the endpoint this server has always used to answer "am I signed
+            # in" would be REFUSED by its own allowlist if that allowlist were
+            # consulted.
+            #
+            # Nothing is wrong with the request. It is one hardcoded constant,
+            # GET only, to LinkedIn's own identity endpoint, and no caller can
+            # redirect it -- tests/test_api_call_sites.py enumerates every
+            # direct HTTP call site in the package by AST and fails if a
+            # second one appears or this one moves. What was wrong was that a
+            # reader of this block could not have known the path existed.
+            "direct_api_reads": [
+                f"{ME_API} -- GET, once per auth check, to answer whether "
+                "there is a live session. A page load cannot answer that "
+                "honestly, which is why this call exists. It is NOT covered "
+                "by the read allowlist: that allowlist gates navigations, and "
+                "this is not one. It is covered instead by an enumerated "
+                "call-site list that fails if the package grows a second "
+                "direct request."
+            ],
             "local_state_writes": [
                 "linkedin_logout(confirm=True) erases this machine's Chrome "
                 "cookie jar, which ends the local sign-in. It issues no "

@@ -765,3 +765,56 @@ async def test_that_irreversibility_report_would_notice_a_performable_one(
     block = (await linkedin_server_info())["irreversible"]
     assert "save_job" in block["performable_and_irreversible"]
     assert "save_job" in block["sanctioned_and_irreversible"]
+
+
+async def test_server_info_declares_the_request_that_is_not_a_page_load():
+    """The boundary block covered NAVIGATIONS and read as though it covered
+    everything.
+
+    ``assert_read_url`` is the only door to ``page.goto`` -- precise, and
+    narrower than the prose around it suggests. ``auth.py`` issues one
+    ``page.request.get`` that never reaches it, and the endpoint it uses is
+    NOT on the read allowlist, so this server's own boundary would refuse the
+    call it has always made.
+
+    Nothing is wrong with the request; what was wrong is that a reader of
+    ``linkedin_server_info`` could not have known the path existed. Declared
+    now, and pinned here so the declaration cannot quietly go away while the
+    call stays.
+    """
+    from linkedin_server import readonly
+    from linkedin_server.config import ME_API
+    from linkedin_server.server import linkedin_server_info
+
+    declared = (await linkedin_server_info())["direct_api_reads"]
+    assert declared, "the path exists; the block must say so"
+
+    text = " ".join(declared)
+    assert ME_API in text
+    # It must say the allowlist does NOT cover it -- the whole point of the
+    # entry. A declaration that named the endpoint and implied it was gated
+    # would be worse than none.
+    assert "NOT covered" in text
+    assert readonly.is_read_url(ME_API) is False
+
+
+async def test_that_declaration_is_not_a_hardcoded_string():
+    """THE CONTROL. The field must describe the package, not repeat a
+    sentence somebody typed once.
+
+    If the enumerated call-site list and the declaration disagree, one of them
+    is stale -- and the dangerous direction is a declaration surviving after
+    the call it describes has moved. Cross-checked against the AST
+    enumeration that ``test_api_call_sites.py`` owns.
+    """
+    from linkedin_server.server import linkedin_server_info
+    from tests.test_api_call_sites import SANCTIONED_API_CALLS, _api_call_sites
+
+    declared = " ".join((await linkedin_server_info())["direct_api_reads"])
+    sites = _api_call_sites()
+
+    assert len(sites) == len(SANCTIONED_API_CALLS) == 1
+    # One call site, one declared entry. A second call site with no second
+    # entry is the failure this pins.
+    assert len((await linkedin_server_info())["direct_api_reads"]) == len(sites)
+    assert "GET" in declared
