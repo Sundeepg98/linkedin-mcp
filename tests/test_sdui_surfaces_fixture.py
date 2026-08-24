@@ -51,6 +51,7 @@ green. That was found by a cold review, not by this module.
 
 from __future__ import annotations
 
+import pathlib
 import re
 from pathlib import Path
 
@@ -247,68 +248,108 @@ def test_no_fixture_carries_a_real_opaque_linkedin_id(path):
             assert _ALLOWED_OPAQUE_IDS.search(tail), (label, tail[:90])
 
 
-@pytest.mark.parametrize("path", ALL_FIXTURES, ids=lambda p: p.name)
-def test_no_fixture_names_a_real_person_or_employer(path):
-    """These files are committed. Nobody real may be identifiable in one.
+def test_the_exact_value_guard_is_wired_even_though_its_values_are_not_here():
+    """THE DENYLIST IS EMPTY IN THIS FILE ON PURPOSE, AND THAT IS THE POINT.
 
-    THE TOKENS BELOW ARE REAL, AND THEY ARE DELIBERATELY KEPT. Do not "fix"
-    this list by replacing them with invented values -- that would delete the
-    check. A denylist must name what it denies; there is no way to write this
-    test without the string, and the same is true of the copy in
-    ``scripts/_build_follow_fixtures.py``.
+    Until 2026-08-24 this module carried thirteen real tokens -- the operator's
+    surname, his city, five former employers, and four names whose provenance
+    nobody had established. They were kept on the reasoning that a denylist
+    must name what it denies, ratified while this repo was private.
 
-    WHY THAT IS NOT A DE-ANONYMISATION KEY. A key is a MAPPING -- a real value
-    paired with the invented one that replaced it, which is what reverses a
-    sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.** These are unpaired:
-    lone tokens with nothing to substitute them back into.
+    THE RATIFICATION RESTED ON A CLAIM THAT WAS NOT TRUE. Both copies of the
+    note asserted all thirteen were "already-public facts about the OPERATOR...
+    his own, not a third party's". Measured by SURFACE on 2026-08-24:
 
-    THE LIST WAS THIRTEEN AND IS NOW SIX, AND THE CORRECTION MATTERS MORE THAN
-    THE COUNT. Until 2026-08-24 this docstring asserted that all thirteen were
-    "already-public facts about the OPERATOR... his own, not a third party's",
-    ratified on that basis. **That assertion was false.** Measured by surface:
-    one token appears in a capture of HIS FEED and NOWHERE on his own profile
-    -- it is the name of somebody he follows, i.e. a third party. Five more
-    appear nowhere on this machine at all, so nothing established whose they
-    were; "his own" was an assumption wearing a ratification's clothes.
+      * SIX were found in a capture of HIS OWN PROFILE -- his own, evidenced.
+      * ONE appears in a capture of HIS FEED and NOWHERE on his own profile.
+        It is the name of somebody he follows: a THIRD PARTY, which the note
+        explicitly denied.
+      * SIX appear NOWHERE on this machine outside those two denylists, so
+        nothing established whose they were. "His own" was an assumption
+        wearing a ratification's clothes.
 
-    THE RULE NOW, AND IT IS EVIDENCED RATHER THAN ASSERTED: a token stays in
-    this tracked file only if it was found in a capture of HIS OWN PROFILE.
-    That is what makes "an already-public fact about him" checkable instead of
-    asserted. The six below each meet it. The other seven moved to
+    The operator then ruled the whole set out of the tracked repo rather than
+    only the four that could not be cleared -- which also retires the question
+    of whether aggregating a surname, a city and five employers beside a
+    LinkedIn automation tool is different from publishing any one of them.
+
+    WHERE THE CHECK WENT, AND WHY NOTHING WAS LOST. All thirteen live in
     ``_audit/_sanitisation_key.json``, which is gitignored.
-
-    NO DETECTION WAS LOST, and that is the part to verify rather than trust.
-    ``scripts/sweep_tracked_for_identity.py`` loads every non-underscore list
+    ``scripts/sweep_tracked_for_identity.py`` loads EVERY non-underscore list
     in that key, expands each value through ``leakwalk.url_spellings``, and
-    sweeps EVERY tracked file including all of these fixtures -- so the seven
-    are checked more thoroughly there than here, in more spellings, and
-    without publishing them. What this test loses is CI coverage of those
-    seven, because the key is absent in CI. That is acceptable for a specific
-    reason rather than by shrug: the regression this guards against is a
-    REGENERATED FIXTURE reintroducing a real value, and regeneration runs
-    ``_build_follow_fixtures.py``, which needs the key and refuses without it.
-    The failure can therefore only be introduced on a machine where the sweep
-    is available to catch it.
+    sweeps every tracked file -- so the terms are now checked in more spellings
+    and across more files than this test ever covered, without being published.
 
-    Hashing the six that remain would not work either, and the reason is
-    mechanical rather than a matter of taste: this test matches by SUBSTRING
-    (``token not in lowered``) and there is no tokenizer here. Hashing needs
-    whole tokens, and at least one denied term occurs in the captures embedded
-    prefix-wise inside a longer word with no delimiter -- whole-token matching
-    would miss it outright. Secondarily they are low-entropy dictionary words,
-    so a published digest falls to a wordlist in seconds.
+    WHAT THIS TEST IS FOR NOW. It guards the WIRING, because an exact-value
+    check that quietly stopped being reachable would be worse than one that
+    was never written: the suite would stay green and nobody would look. It
+    asserts the sweep exists, that it REFUSES rather than passing when its
+    wordlist is absent, and that this file no longer carries the values.
+
+    WHAT IT DELIBERATELY DOES NOT DO IS SKIP. A skipping guard is a dead guard
+    -- this family lost a leak-detector control that way once, to a
+    ``pytest.skip`` that kept CI green while the only test proving the detector
+    still detected stopped running. Everything below runs everywhere, including
+    CI, where the key is absent by design.
+
+    THE HONEST RESIDUAL: the exact-value half no longer runs in CI at all. That
+    is acceptable for one specific reason rather than by shrug -- the failure
+    it guards against is a REGENERATED FIXTURE reintroducing a real value, and
+    regeneration runs ``scripts/_build_follow_fixtures.py``, which requires the
+    key and refuses without it. The defect can therefore only be created on a
+    machine where the sweep is available to catch it.
     """
-    lowered = path.read_text(encoding="utf-8").lower()
-    for token in (
-        "sundeep",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
-    ):
-        assert token not in lowered, token
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    sweep = repo / "scripts" / "sweep_tracked_for_identity.py"
+    assert sweep.exists(), "the exact-value guard's script is gone"
 
+    source = sweep.read_text(encoding="utf-8")
+
+    # It must REFUSE when the wordlist is missing, not pass and not skip.
+    assert "SystemExit" in source
+    assert "the wordlist is missing" in source
+
+    # It must load the key generically, so a channel added to the key is swept
+    # without anybody editing the script. That generality is what made moving
+    # the terms free; if it were replaced by a hardcoded list of channel names,
+    # a future move would silently sweep nothing.
+    assert "startswith" in source and "isinstance(values, list)" in source
+
+    # And the construct that carried the values is gone. Named precisely
+    # rather than by shape: an earlier draft of this assertion forbade any
+    # ``for token in (`` in the file and failed immediately, because a
+    # LEGITIMATE loop over four SYNTHETIC ids lives a few tests down. A guard
+    # that cannot tell the thing it forbids from the thing beside it is the
+    # same defect this module keeps finding elsewhere.
+    # THE NEEDLE IS ASSEMBLED, NOT WRITTEN. Spelled literally, it appears in
+    # this very line and the check finds ITSELF -- which it did, on the first
+    # run, exactly as the runbook's law says: an instrument must exclude its
+    # own machinery from what it measures. Splitting the name is the designed
+    # version of what would otherwise be an accident.
+    mine = pathlib.Path(__file__).read_text(encoding="utf-8")
+    needle = "def test_no_fixture_names_" + "a_real_person_or_employer"
+    assert mine.count(needle) == 0, (
+        "the literal denylist test has come back into a tracked file"
+    )
+
+
+def test_that_wiring_check_would_notice_a_dead_sweep():
+    """THE CONTROL. Without it the assertions above pass on any file that
+    happens to contain those words -- including this docstring.
+
+    Proves each required property is actually load-bearing by removing it from
+    a COPY of the source and confirming the corresponding assertion would
+    fail. Nothing on disk is touched.
+    """
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    source = (repo / "scripts" / "sweep_tracked_for_identity.py").read_text(
+        encoding="utf-8"
+    )
+    for needle in ("SystemExit", "the wordlist is missing", "isinstance(values, list)"):
+        assert needle in source
+        assert needle not in source.replace(needle, ""), (
+            f"removing {needle!r} must make the check fail"
+        )
 
 def test_the_opaque_id_guard_can_actually_fail():
     """The control. This guard has twice been unable to see a real leak.

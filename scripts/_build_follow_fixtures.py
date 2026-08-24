@@ -439,38 +439,36 @@ def sanitise(html: str) -> str:
 #: The token list enforced by tests/test_sdui_surfaces_fixture.py, verbatim.
 #: If that test's list grows, this one must grow with it.
 #:
-#: THESE ARE REAL, AND THEY ARE DELIBERATELY KEPT. Do not "fix" this list by
-#: replacing them with invented values -- that deletes the check. A denylist
-#: must name what it denies.
+#: EMPTY, AND THAT IS THE FINDING RATHER THAN AN OVERSIGHT.
 #:
-#: WHY THIS IS NOT A DE-ANONYMISATION KEY. A key is a MAPPING: each real value
-#: paired with the invented one that replaced it, which is what reverses a
-#: sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.** These are unpaired --
-#: lone tokens with nothing to substitute them back into.
-#:
-#: THIRTEEN BECAME SIX ON 2026-08-24, AND THE REASON IS A CORRECTION RATHER
-#: THAN A TIDY-UP. The note that stood here claimed all thirteen were
+#: This list held thirteen real tokens, copied verbatim from
+#: tests/test_sdui_surfaces_fixture.py, on the reasoning that a denylist must
+#: name what it denies. The note that stood here asserted all thirteen were
 #: "already-public facts about the OPERATOR... not about a third party",
-#: operator-ratified on that basis. **It was false.** Measured by surface: one
-#: token appears in a capture of HIS FEED and nowhere on his own profile --
-#: the name of somebody he follows. Five more appear nowhere on this machine,
-#: so nothing established whose they were.
+#: operator-ratified while this repo was private.
 #:
-#: The rule now is evidenced rather than asserted: a token stays in a TRACKED
-#: file only if a capture of HIS OWN PROFILE contains it. The other seven live
-#: in ``_audit/_sanitisation_key.json``, gitignored, where
-#: ``sweep_tracked_for_identity.py`` picks them up automatically -- it loads
-#: every non-underscore list in that key -- and sweeps them across every
-#: tracked file in every url spelling. More detection, not less, and none of
-#: it published.
+#: THE ASSERTION WAS FALSE. Measured by SURFACE on 2026-08-24: six were found
+#: in a capture of HIS OWN PROFILE and are his own as claimed; ONE appears in
+#: a capture of HIS FEED and nowhere on his profile -- the name of somebody he
+#: follows, i.e. the third party the note explicitly denied; and SIX appear
+#: nowhere on this machine at all, so nothing established whose they were.
+#:
+#: The operator then ruled the whole set out of the tracked repo rather than
+#: only the ones that could not be cleared, which also retires the separate
+#: question of whether aggregating a surname, a city and five employers beside
+#: a LinkedIn automation tool differs from publishing any one of them.
+#:
+#: NOTHING WAS LOST, and that is checkable rather than asserted. All thirteen
+#: live in ``_audit/_sanitisation_key.json`` under two channels, and FORBIDDEN
+#: below already folds in ``_KEY`` -- so this script still refuses to write a
+#: fixture containing any of them, using more spellings than the literal list
+#: ever had. What changed is that the values are no longer published.
+#:
+#: The list itself is KEPT, empty, rather than deleted: FORBIDDEN references
+#: it, and a reader who finds the reference needs to land on this explanation
+#: rather than on a NameError.
 BANNED_BY_THE_FIXTURE_TEST = [
-    
-    "sundeep",
-    "redacted",
-    "redacted",
-    "redacted",
-    "redacted",
-    "redacted",
+    # Empty by ruling. See the note above; the values live in the key.
 ]
 
 
@@ -484,7 +482,21 @@ FORBIDDEN = (
     + [old for old, _ in POSTING]
     + [real for real, _ in OTHER_EMPLOYERS]
     + [old for old, _ in LOCATION]
-    + list(_KEY.get("extra_forbidden", []))
+    # EVERY denied-term channel in the key, found generically rather than by
+    # name. This read `_KEY.get("extra_forbidden", [])` until 2026-08-24, and
+    # when thirteen terms moved into the key under two NEW channel names this
+    # line would have kept returning an empty list -- detection moved to a
+    # place nothing read, while the note above claimed nothing was lost. The
+    # sweep script already loads the key generically; this now matches it, so
+    # a channel added to the key is honoured by both without an edit here.
+    + [
+        value
+        for name, values in _KEY.items()
+        if not name.startswith("_") and isinstance(values, list)
+        for item in values
+        for value in (item if isinstance(item, list) else [item])
+        if isinstance(value, str) and len(value) >= 5
+    ]
     # Verbatim from tests/test_sdui_surfaces_fixture.py, which parametrises
     # over EVERY file in tests/fixtures/ and therefore over these four. It is
     # copied rather than referenced so this script stays standalone, and it is
