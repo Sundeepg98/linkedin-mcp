@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `ce6b174`
+# The eight refusals, worked -- `445c7a0` .. `f351edf`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -385,12 +385,12 @@ wrong-action warning, and now the unplumbed field.
 
 ## Measured
 
-All at `ce6b174`, CPython 3.13.14 (win32), on a settled working tree.
+All at `f351edf`, CPython 3.13.14 (win32), on a settled working tree.
 
 | | |
 |---|---|
-| suite | **1423 collected, 1423 passed, 0 skipped, 0 failed, 0 errors**, 324s |
-| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1423 \| reported 1423 \| executed 1423 \| skipped 0 \| failed 0 \| errors 0` |
+| suite | **1425 collected, 1425 passed, 0 skipped, 0 failed, 0 errors**, 299s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1425 \| reported 1425 \| executed 1425 \| skipped 0 \| failed 0 \| errors 0` |
 | boundary digests | 13 functions + aggregate `7a48ca1e8dd14ec1`, **identical under 3.10.19 and 3.13.14**, re-measured at HEAD |
 | `readonly.py` vs pre-wave `a1360d1` | **0 changed lines** |
 | tools registered | 16 -> **17** (reads unchanged at **14**) |
@@ -398,6 +398,13 @@ All at `ce6b174`, CPython 3.13.14 (win32), on a settled working tree.
 | package mutating calls | **1** sanctioned, **0** unsanctioned |
 | identity sweep | **0 hits across 100 swept files**, 191 spellings, 10 classes |
 | **live writes executed** | **0** |
+
+### The probe that never ran, verified rather than asserted
+
+`_audit/` holds **no `_probe-messaging-*.html`**, which is what the messaging probe writes on its first
+successful load. Its output is gitignored (`_audit/_probe-*.html`), so absence would be expected either
+way -- checking the working directory rather than the index is the only way to tell, and it is empty.
+The claim that reading his inbox is UNMEASURED is therefore checkable, not merely stated.
 
 ### A correction to `445c7a0`'s own commit message
 
@@ -419,7 +426,8 @@ one.
 | **32688677004** | `063c9b7` | **success on all three cells** -- ubuntu/3.10, ubuntu/3.13, windows/3.13 |
 | **32689900525** | `6e11109` | the click-path tests and the wrong-surface fix |
 | **32690453627** | `0979ed8` | **success on all three cells** -- the apply warning written for the wrong action |
-| **(final, below)** | `ce6b174` | the wiring tests, and the sibling gap they closed |
+| **32691280559** | `460d800` | **success on all three cells** -- the wiring tests and the sibling gap |
+| **32700770298** | `f351edf` | **success on all three cells** -- the irreversibility report |
 
 <https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32688677004>
 
