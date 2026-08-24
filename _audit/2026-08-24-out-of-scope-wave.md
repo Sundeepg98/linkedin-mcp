@@ -242,9 +242,9 @@ would have found.
 
 It was caught by a slice that **instrumented the scope resolution instead of reading the comment**, and
 that same slice then **refused to write the safety test I had specified**, because building its markup
-the natural way -- flat, link and button as siblings -- makes it PASS against a selector that matches
-nothing on the real page. The brief called that test "the most important in the module"; as specified it
-was a control that could not fail.
+the natural way -- flat, link and button as siblings -- made it PASS against the DEFECTIVE selector
+while the nested form failed. The brief called that test "the most important in the module"; as
+specified it was a control that could not fail.
 
 Both fixes are structural rather than textual:
 
@@ -254,6 +254,24 @@ Both fixes are structural rather than textual:
   RELATIONSHIP, not the two strings separately -- pinning them separately would not have caught this.
 - **Both markup shapes are tests**, named as a pair, with the flat one documented as the control that
   could not fail.
+
+**A CORRECTION TO MY OWN FRAMING, from the slice that wrote the module, verified here before it was
+accepted.** I described the flat form in the present tense -- one that "passes against a selector that
+matches nothing on the real page" -- and wrote that into `445c7a0`'s commit message as though it
+described the shipped code. **It describes the DEFECTIVE code.** Measured against the REPAIRED
+selector, FLAT and NESTED both return count 1 and both reject the member row, because the fixed
+predicate climbs to a scope carrying the company link either way. So the flat test cannot hold that
+claim as a live assertion, and the slice did not let it: it moved the historical measurement into the
+docstrings and gave the flat test an assertion that is true NOW -- a cross-check that fails on
+DIVERGENCE between the two shapes, which makes the pair a standing tripwire for nesting-sensitivity
+rather than a commemorative plaque. Its mutation run shows the pair still working: with the original
+defect restored, the flat twin's own assertions PASS and it goes red only through the cross-check.
+
+**The general point, and it is the one this wave keeps re-teaching:** a test written to reproduce a bug
+describes the BUG'S world, and the moment the bug is fixed that description becomes history. Leaving it
+in the present tense is how a suite acquires assertions that read as guarantees and check nothing --
+the same failure as a comment claiming two strings are identical, arriving through the tense of a
+sentence instead of through its content.
 
 **A comment asserting that two strings are the same is worth nothing; being the same string is worth
 what the comment claimed.** That is the same defect class as a gate printing an unmeasured
@@ -385,6 +403,128 @@ thing this wave found by looking at the OUTPUT rather than at the code: the wron
 wrong-action warning, and now the unplumbed field.
 
 ---
+
+---
+
+## The paged read: the contract is real, and it does not unblock follow
+
+The lead read the unfollow census's set-aside affordance -- *"the Rest.li `start`/`count` contract via
+`voyagerSearchDashClusters`, not a route this server can take as built"* -- and directed me to build the
+paged READ instead of asking the operator to follow a company by hand. The reasoning was that if the
+list is pageable to all 58, sort order stops mattering, because a newly followed company is reachable
+wherever it lands.
+
+**The contract is real.** It is not a schema node, which was worth checking because the same captures
+carry a GraphQL type registry that made `followedAt` look like a field when it was a type. This is a
+recorded request with its response status:
+
+```
+GET /voyager/api/graphql?includeWebMetadata=true
+    &variables=(start:0,count:10,origin:CurationHub,
+                query:(flagshipSearchIntent:MYNETWORK_CURATION_HUB,
+                       includeFiltersInResponse:true,
+                       queryParameters:List((key:resultType,value:List(PAGES)))))
+    &queryId=voyagerSearchDashClusters.<32-hex persisted-query hash>
+  -> status 200
+```
+
+`start:0,count:10` is right there, in a call LinkedIn's own page made. One correction to the census's
+framing: the path is **`/voyager/api/graphql`**, not a plain Rest.li resource -- `voyagerSearchDash
+Clusters` is the `queryId`, not a url segment. There is no `/voyager/api/voyagerSearchDashClusters` in
+any capture; the six voyager paths present are graphql, me, premium/featureAccess, launchpad,
+notifications badging and chameleon config.
+
+### And it still does not unblock `follow_company`
+
+**MEASURED, and this is the finding that decides it.** A company id taken from the PAYLOAD of the very
+same capture -- present in the graphql response, absent from the rendered rows:
+
+```
+id <rendered row 1>        -> read_unfollow_control count 1
+id <another rendered row>  -> read_unfollow_control count 1
+id <in payload, not drawn> -> read_unfollow_control count 0
+```
+
+**The unfollow CLICKS A DOM CONTROL.** `perform` calls `page.click(selector)`, and a selector that
+resolves to zero nodes cannot be clicked -- gate 5 refuses before it tries. Enumerating all 58 company
+ids over the API tells the server the company EXISTS. It does not put that company's button on the
+page.
+
+So the lead's inference holds for READING and fails for CLICKING, and the difference is the whole
+question. A paged read turns *"20 of 58, and I cannot tell you about the rest"* into a complete list --
+real value for a reader, and no help at all to an unfollow.
+
+**That is a third answer**, and it is neither branch the directive offered: the route is not refused,
+not capped, and does not need a token the server cannot mint. It works, and it is aimed at the wrong
+half of the problem.
+
+### What WOULD close the loop, and why it is not mine to take
+
+Exactly one thing: **an unfollow performed through the API rather than through the control.** Then
+enumeration would be sufficient, because knowing the id would be knowing how to act on it.
+
+The cost is not incremental. It is a `POST`, which `readonly._MUTATION_CALL_PATTERNS` catches as
+`http_post` and which would need its own `SANCTIONED_MUTATIONS` entry -- and more importantly it moves
+this design from *"click the control the operator was shown"* to *"synthesise the request LinkedIn's
+own JavaScript would have made"*. Every gate in `writes.py` is built on the first of those. The confirm
+block names a control; gate 5 re-reads that control; the click is anchored to a row a human could point
+at. An API write has none of that to anchor to. **This is a decision about what kind of program this
+is, not a feature, and it is flagged rather than taken.**
+
+### A separate finding, and it bears on the directive's own constraint
+
+The directive said the paged read *"must go through `assert_read_url` like every other read."*
+**It would not be like every other read, because the existing API read is not gated either.**
+
+Measured: `assert_read_url` is called in exactly **two** places -- `browser.py:387`, the `goto` path,
+and `writes.py:1149`, the write preview's loader. `auth.py:241` calls
+`page.request.get(ME_API, ...)` with **no gate at all**, and:
+
+```
+readonly.is_read_url(ME_API)        -> False
+readonly.is_read_url(<graphql url>) -> False
+```
+
+The identity endpoint this server has always used **would be refused by its own read boundary if that
+boundary were consulted.** The design never lied -- its claim is precisely that `assert_read_url` is
+the only door to `page.goto`, and an API call is not a `goto` -- but the gap is real and undocumented,
+and `server_info` does not mention it. Blast radius today is nil: one hardcoded constant, GET only, no
+caller-supplied url. **The point is that a paged read built on `page.request.get` would land on that
+same ungated path**, so satisfying the constraint means first deciding what gates API reads at all.
+
+### The other costs, named rather than discovered later
+
+- **`auto_paging: False` and `max_page_loads_per_call: 2` are ASSERTED FIELDS** in
+  `server_info.rate_discipline`, and the README sells the risk posture on *"One page load per tool
+  call. No scroll loops, no auto-paging, no fan-out."* Six paged calls to cover 58 rows contradicts
+  all three. That is a posture change to be made deliberately and declared, not absorbed.
+- **The `queryId` is a build-tied hash.** It is a content hash of a persisted query document, so it
+  moves when LinkedIn redeploys the frontend. Whether it rotates is UNMEASURED here -- one capture set
+  from one day cannot show rotation -- but this repo has already measured LinkedIn changing
+  instrumentation on this account inside 24 hours: `data-view-name="job-save-button"` was present on
+  the 2026-08-22 capture and gone from the 2026-08-23 one. A hardcoded hash is that failure one layer
+  deeper and less visible. Harvesting it from the page's own payload would be the fix, and costs a page
+  load, which is the thing paging was meant to save.
+- **`count:10` is what was observed.** The DOM holds 20, so the page made at least two calls. Whether
+  `count:` can be raised is unmeasured.
+
+### What I could not do
+
+**Prove any of it live.** The permission classifier refused the browser probe twice earlier in this
+wave, so no request was issued and none of the above is certified against LinkedIn. Every claim here
+is from captures on disk and from the package's own source. The contract's shape is measured; its
+behaviour under a different `start` is not.
+
+### Recommendation
+
+`follow_company` stays gated, and its reason is now **stronger and different** -- not *"nobody can tell
+which order the list is in"* but *"reading further down the list does not make a row clickable"*. That
+reason survives every sort order, so the census's proposed manual experiment is not needed either:
+even its best case, newest-first, gives only a window that decays as roughly twenty further follows
+push the row out, which the census itself flagged as not a symmetric pair.
+
+The paged read is worth building **for `linkedin_followed_companies`**, on its own merits, with the
+posture costs above declared. It is not worth building to unblock follow, because it does not.
 
 ## Measured
 
