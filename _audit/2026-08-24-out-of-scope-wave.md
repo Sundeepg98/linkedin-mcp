@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `f351edf`
+# The eight refusals, worked -- `445c7a0` .. `6ea78ce`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -385,12 +385,12 @@ wrong-action warning, and now the unplumbed field.
 
 ## Measured
 
-All at `f351edf`, CPython 3.13.14 (win32), on a settled working tree.
+All at `6ea78ce`, CPython 3.13.14 (win32), on a settled working tree.
 
 | | |
 |---|---|
-| suite | **1425 collected, 1425 passed, 0 skipped, 0 failed, 0 errors**, 299s |
-| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1425 \| reported 1425 \| executed 1425 \| skipped 0 \| failed 0 \| errors 0` |
+| suite | **1429 collected, 1429 passed, 0 skipped, 0 failed, 0 errors**, 400s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1429 \| reported 1429 \| executed 1429 \| skipped 0 \| failed 0 \| errors 0` |
 | boundary digests | 13 functions + aggregate `7a48ca1e8dd14ec1`, **identical under 3.10.19 and 3.13.14**, re-measured at HEAD |
 | `readonly.py` vs pre-wave `a1360d1` | **0 changed lines** |
 | tools registered | 16 -> **17** (reads unchanged at **14**) |
@@ -428,6 +428,7 @@ one.
 | **32690453627** | `0979ed8` | **success on all three cells** -- the apply warning written for the wrong action |
 | **32691280559** | `460d800` | **success on all three cells** -- the wiring tests and the sibling gap |
 | **32700770298** | `f351edf` | **success on all three cells** -- the irreversibility report |
+| **32701736950** | `6ea78ce` | the two defensive branches and their reachability |
 
 <https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32688677004>
 
