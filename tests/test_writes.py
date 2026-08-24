@@ -2933,3 +2933,130 @@ async def test_the_unfollow_reads_back_no_label_and_says_why(
     )
     assert block["newly_observed_save_label"] is None
     assert "not applicable" in block["what_that_label_is_for"]
+
+
+# ---------------------------------------------------------------------------
+# 9b. Two defensive branches, and an honest account of whether they can fire
+# ---------------------------------------------------------------------------
+#
+# THE PATTERN THIS SECTION EXISTS FOR was recorded on 2026-08-23, when a
+# mutation survived because ``save_state`` guessing a state for an unseen label
+# sat behind a branch that answers first -- dead code that looked live, tested
+# by nothing, and green either way. ``_live_control``'s unfollow arm has two
+# branches with the same smell, and rather than leaving a reader to work out
+# which are real, they are exercised DIRECTLY and their reachability through
+# the real selector is stated.
+
+
+class _StubLocator:
+    """Answers the two questions ``read_unfollow_control`` asks, and no more."""
+
+    def __init__(self, count: int, label):
+        self._count = count
+        self._label = label
+
+    async def count(self) -> int:
+        return self._count
+
+    @property
+    def first(self):
+        return self
+
+    async def get_attribute(self, name: str):
+        assert name == "aria-label"
+        return self._label
+
+
+class _StubPage:
+    def __init__(self, count: int, label):
+        self._loc = _StubLocator(count, label)
+        self.asked: list[str] = []
+
+    def locator(self, selector: str):
+        self.asked.append(selector)
+        return self._loc
+
+
+async def _live(count: int, label):
+    """Run gate 5's unfollow arm against a stubbed page."""
+    spec = spec_for_action("unfollow_company")
+    grant = _bare_grant(action="unfollow_company", target=FOLLOWED_COMPANY)
+    page = _StubPage(count, label)
+    state, why, selector = await writes._live_control(
+        page, spec, grant, writes.UNFOLLOW_ANCHOR_PREFIX
+    )
+    return state, why, selector, page
+
+
+async def test_two_rows_for_one_company_id_is_unknown_rather_than_a_guess(
+    writes_on,
+):
+    """REACHABLE IN PRINCIPLE, and the reason it is worth guarding.
+
+    The selector keys on a ``/company/<id>/`` link, and nothing stops LinkedIn
+    rendering two rows that both carry one -- a duplicate, or a row nested
+    inside another it did not expect. Two matches means the id did not select a
+    row, and clicking either would be clicking by position, which is the one
+    thing this package refuses everywhere.
+    """
+    state, why, selector, _page = await _live(2, "Click to stop following X")
+    assert state == writes.UNKNOWN
+    assert selector == ""
+    assert "exactly one row" in why
+    assert "position" in why
+
+
+async def test_an_unrecognised_label_is_unknown_and_the_branch_is_a_race_guard(
+    writes_on,
+):
+    """UNREACHABLE THROUGH THE REAL SELECTOR TODAY, and said so rather than
+    left looking load-bearing.
+
+    ``dom.unfollow_control_selector`` matches on ``starts-with(@aria-label,
+    'Click to stop following ')``, so any button it finds already wears the
+    prefix -- the check below cannot fail from a mismatched selector. What it
+    CAN catch is a race: the count and the attribute are two separate reads
+    over the wire, and LinkedIn may relabel the control between them. That is a
+    narrow window and a cheap guard, and the honest description of it is
+    "defence against a race", not "validation".
+
+    Exercised directly here BECAUSE it is unreachable the normal way. A branch
+    that no test can enter through the front door is one a future refactor
+    deletes as dead, and this one stops being dead the moment somebody widens
+    the selector.
+    """
+    state, why, selector, _page = await _live(1, "Following")
+    assert state == writes.UNKNOWN
+    assert selector == ""
+    assert "'Following'" in why
+    assert "prefix" in why
+
+
+async def test_the_selector_itself_is_why_that_branch_cannot_fire_normally(
+    writes_on,
+):
+    """THE CONTROL for the claim in the docstring above.
+
+    Asserts the property rather than restating it: the selector the live read
+    uses CONTAINS the prefix it then checks for. If somebody widens the
+    selector -- matching on the row alone, say -- this fails, which is exactly
+    when the branch above stops being a race guard and starts being a real
+    validation.
+    """
+    selector = dom.unfollow_control_selector(FOLLOWED_COMPANY)
+    assert writes.UNFOLLOW_ANCHOR_PREFIX in selector
+    assert "starts-with(@aria-label" in selector
+
+
+async def test_the_happy_arm_of_that_same_function_still_answers(writes_on):
+    """Without this, the three above pass on a ``_live_control`` that returns
+    unknown for everything -- which would refuse every unfollow forever and
+    look, from the tests, like a very careful gate."""
+    state, why, selector, page = await _live(
+        1, "Click to stop following " + FOLLOWED_COMPANY_NAME
+    )
+    assert state == "following"
+    assert selector == dom.unfollow_control_selector(FOLLOWED_COMPANY)
+    assert FOLLOWED_COMPANY_NAME in why
+    # And it asked the page for the id-keyed selector, not a label-only one.
+    assert page.asked == [dom.unfollow_control_selector(FOLLOWED_COMPANY)]
