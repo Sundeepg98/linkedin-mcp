@@ -1,17 +1,27 @@
-"""The tool surface: sixteen tools, fourteen of which read LinkedIn.
+"""The tool surface: seventeen tools, fourteen of which read LinkedIn.
 
 WHAT THIS FILE USED TO ASSERT, AND WHY IT NO LONGER CAN. The brief for this
 server drew a hard line -- no writes, not now, not stubbed, not "for later" --
 and this file was that line expressed as assertions. On 2026-08-23 the operator
-authorised two: ``linkedin_save_job`` and ``linkedin_unsave_job``.
+authorised two: ``linkedin_save_job`` and ``linkedin_unsave_job``. On
+2026-08-24 a third arrived, ``linkedin_unfollow_company``, and the counts in
+this docstring are re-measured rather than carried -- they were wrong for a day
+before anybody noticed, which is the smallest possible version of the failure
+this whole file is about.
 
 The line did not move; it acquired a gate. Every check below still runs against
-every tool, and the two writes are exempted BY NAME through
-``writes.SANCTIONED_WRITES`` rather than by loosening the check -- so a third
+every tool, and the writes are exempted BY NAME through
+``writes.SANCTIONED_WRITES`` rather than by loosening the check -- so a fourth
 write-shaped tool, or a read tool that grows a write-shaped docstring, still
 fails exactly as before. Each exemption is paired with a positive control
 asserting the check DOES fire on the exempted names, because an exemption that
 silently covered everything would leave a file full of tests that cannot fail.
+
+AND NOTE WHAT IS NOT ON THE SURFACE. ``apply_job`` is a fully specced,
+sanctioned action that registers NO TOOL and stays on ``FORBIDDEN_TOOLS``,
+because its flow has never been captured. Being sanctioned in ``writes.py``
+does not by itself exempt a name here; the two boundaries are separate, and
+``test_the_exemption_covers_only_those_two`` is where that is shown.
 
 ``linkedin_logout`` writes to LOCAL DISK and to nothing else: it erases this
 machine's cookie jar and issues no request. It gets its own assertions at the
@@ -27,7 +37,7 @@ from linkedin_server import readonly
 from linkedin_server.server import mcp
 from linkedin_server.writes import SANCTIONED_WRITES
 
-#: The two tools that write, resolved from the module that gates them rather
+#: The tools that write, resolved from the module that gates them rather
 #: than typed again here. A name cannot appear on this exemption without
 #: appearing in the sanctioned set, and the sanctioned set is what
 #: ``test_writes.py``'s conservation law polices.
@@ -686,3 +696,72 @@ async def test_the_instructions_tell_a_caller_the_sign_in_is_one_time():
     text = (mcp.instructions or "").lower()
     assert "one-time" in text
     assert "linkedin_session_info" in text
+
+
+async def test_server_info_reports_irreversibility_before_a_caller_commits(
+    monkeypatch,
+):
+    """A preview names irreversibility for the ONE action being confirmed, and
+    by then the caller has decided to try. This answers it beforehand.
+
+    TWO LISTS, AND BOTH ARE PRINTED EVEN WHEN ONE IS EMPTY. "Nothing this
+    process can perform is irreversible" is the reassuring half, and on its own
+    it is indistinguishable from "we have no actions at all" -- an empty list
+    is evidence of a check having run only when something else shows the check
+    can produce a result. So the second list must be non-empty for the first
+    one's emptiness to mean anything, and that relationship is what is
+    asserted here rather than the two values separately.
+    """
+    from linkedin_server import writes
+    from linkedin_server.server import linkedin_server_info
+
+    info = await linkedin_server_info()
+    block = info["irreversible"]
+
+    # Derived from the specs, so a new irreversible action shows up here
+    # without anybody remembering to add it.
+    expected = sorted(
+        spec.action
+        for spec in writes.SANCTIONED_WRITES.values()
+        if spec.irreversible
+    )
+    assert block["sanctioned_and_irreversible"] == expected
+    assert expected, "the second list must not be empty or the first says nothing"
+
+    # Nothing performable is irreversible, and that is a real property of this
+    # design rather than an accident of which specs exist: every action
+    # perform() will execute names its own inverse.
+    assert block["performable_and_irreversible"] == []
+    for action in writes.PERFORMABLE:
+        assert writes.spec_for_action(action).irreversible is False, action
+
+    # And the irreversible one is genuinely unreachable, not merely absent from
+    # a list -- checked against the OTHER field rather than trusting this one.
+    for action in block["sanctioned_and_irreversible"]:
+        assert action in info["writes_sanctioned_but_not_performed"], action
+        assert (
+            info["writes_sanctioned_but_not_performed"][action]["irreversible"]
+            is True
+        ), action
+
+
+async def test_that_irreversibility_report_would_notice_a_performable_one(
+    monkeypatch,
+):
+    """THE CONTROL. Without it the assertion above passes on a field hardcoded
+    to two empty lists, or on one that filters by the wrong predicate.
+
+    Flips the one performable action whose spec is nearest to hand into an
+    irreversible one and re-reads the report: it must move into BOTH lists.
+    Nothing on LinkedIn changes; this edits a frozen dataclass in memory.
+    """
+    from linkedin_server import writes
+    from linkedin_server.server import linkedin_server_info
+
+    save = writes.spec_for_action("save_job")
+    flipped = writes.WriteSpec(**{**save.__dict__, "irreversible": True})
+    monkeypatch.setitem(writes.SANCTIONED_WRITES, "linkedin_save_job", flipped)
+
+    block = (await linkedin_server_info())["irreversible"]
+    assert "save_job" in block["performable_and_irreversible"]
+    assert "save_job" in block["sanctioned_and_irreversible"]

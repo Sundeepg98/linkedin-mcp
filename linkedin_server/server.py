@@ -1530,11 +1530,43 @@ async def linkedin_server_info() -> dict[str, Any]:
                     "why_not": _WHY_NOT_PERFORMED[spec.action],
                     "has_a_measured_surface": spec.url_template is not None,
                     "can_hold_a_grant": spec.url_template is not None,
+                    "irreversible": spec.irreversible,
                 }
                 for spec in sorted(
                     writes.SANCTIONED_WRITES.values(), key=lambda s: s.action
                 )
                 if spec.action not in writes.PERFORMABLE
+            },
+            # IRREVERSIBILITY, REPORTED HERE RATHER THAN ONLY IN A PREVIEW.
+            # A confirm block names it for the one action being confirmed, and
+            # by then the caller has already decided to try. This answers the
+            # question BEFORE that: is there anything here that cannot be
+            # taken back?
+            #
+            # Both lists are computed and BOTH are printed even when one is
+            # empty, because "nothing performable is irreversible" is the
+            # reassuring half and it means nothing without the other half
+            # beside it -- an empty list on its own reads as "we checked" when
+            # it could equally mean "we have no such actions to check".
+            "irreversible": {
+                "performable_and_irreversible": sorted(
+                    spec.action
+                    for spec in writes.SANCTIONED_WRITES.values()
+                    if spec.irreversible and spec.action in writes.PERFORMABLE
+                ),
+                "sanctioned_and_irreversible": sorted(
+                    spec.action
+                    for spec in writes.SANCTIONED_WRITES.values()
+                    if spec.irreversible
+                ),
+                "note": (
+                    "Every action this process could actually perform is "
+                    "REVERSIBLE, and its inverse is named in the preview "
+                    "block. The irreversible one is sanctioned and is NOT "
+                    "performable -- see writes_sanctioned_but_not_performed. "
+                    "Read the two lists together: the first being empty means "
+                    "something only because the second is not."
+                ),
             },
             "writes_note": (
                 "Every write is two calls: one that performs nothing and "
