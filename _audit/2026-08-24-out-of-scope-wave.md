@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `0979ed8`
+# The eight refusals, worked -- `445c7a0` .. `1e0e1a0`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -350,20 +350,53 @@ moved from the fields into the sentences around them.
 
 ---
 
-## Measured
+## Sixty-eight tests about a feature, and none about whether it is plugged in
 
-All at `0979ed8`, CPython 3.13.14 (win32), on a settled working tree.
+Checked at the end, after CI was already green twice: **nothing asserted that
+`linkedin_job_detail` RETURNS `apply_path`.** The DOM reader is covered, the pure classifier is covered
+by 68 tests, and the four lines in `server.py` that put the answer into the result a caller sees were
+covered by nothing. `apply_path` appeared in the test suite exactly twice, **both times inside an
+assertion about a docstring.**
+
+**The sibling field had the same hole and it is not mine.** `company_follow_state` was added by an
+earlier wave in exactly the same shape, and appeared **zero** times in the tests outside the source. It
+is covered now too, because the gap is a property of the SEAM rather than of either feature, and
+closing half of it would leave the next person believing the seam is tested.
+
+**Shown failing on the real file, and the numbers are the whole argument.** One mutant: the assignment
+changed so the field is computed and dropped on the floor -- exactly what "wired wrong" looks like.
 
 | | |
 |---|---|
-| suite | **1416 collected, 1416 passed, 0 skipped, 0 failed, 0 errors**, 289s |
-| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1416 \| reported 1416 \| executed 1416 \| skipped 0 \| failed 0 \| errors 0` |
+| `tests/test_apply_fixture.py` | 68 tests, **all 68 still passed** |
+| `tests/test_job_detail_wiring.py` | 5 tests, **3 failed** |
+
+**Sixty-eight tests about the feature agreed it was fine.** The two that stayed green are the two not
+about `apply_path` -- the sibling field and the shell control -- which is the right shape for a mutant
+that removed one thing. Mutant reverted; `server.py` byte-identical to its commit.
+
+**The class, stated because it will recur:** a field computed correctly, tested correctly, and never
+plumbed is invisible to unit tests BY CONSTRUCTION -- a unit test of a computation passes whether or not
+anything calls it. Only exercising the surface a caller touches can catch it. This is the third distinct
+thing this wave found by looking at the OUTPUT rather than at the code: the wrong-surface advice, the
+wrong-action warning, and now the unplumbed field.
+
+---
+
+## Measured
+
+All at `1e0e1a0`, CPython 3.13.14 (win32), on a settled working tree.
+
+| | |
+|---|---|
+| suite | **1423 collected, 1423 passed, 0 skipped, 0 failed, 0 errors**, 324s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1423 \| reported 1423 \| executed 1423 \| skipped 0 \| failed 0 \| errors 0` |
 | boundary digests | 13 functions + aggregate `7a48ca1e8dd14ec1`, **identical under 3.10.19 and 3.13.14**, re-measured at HEAD |
 | `readonly.py` vs pre-wave `a1360d1` | **0 changed lines** |
 | tools registered | 16 -> **17** (reads unchanged at **14**) |
 | sanctioned actions | 4 -> **6**; performable 2 -> **3** |
 | package mutating calls | **1** sanctioned, **0** unsanctioned |
-| identity sweep | **0 hits across 99 swept files**, 191 spellings, 10 classes |
+| identity sweep | **0 hits across 100 swept files**, 191 spellings, 10 classes |
 | **live writes executed** | **0** |
 
 ### A correction to `445c7a0`'s own commit message
@@ -385,7 +418,8 @@ one.
 |---|---|---|
 | **32688677004** | `063c9b7` | **success on all three cells** -- ubuntu/3.10, ubuntu/3.13, windows/3.13 |
 | **32689900525** | `6e11109` | the click-path tests and the wrong-surface fix |
-| **32690453627** | `0979ed8` | the apply warning written for the wrong action |
+| **32690453627** | `0979ed8` | **success on all three cells** -- the apply warning written for the wrong action |
+| **(final)** | `1e0e1a0` | the wiring tests, and the sibling gap they closed |
 
 <https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32688677004>
 
