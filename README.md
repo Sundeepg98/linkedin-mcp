@@ -111,7 +111,7 @@ design, the boundary, the gates and the audit trail; that is what it is for.
 
 | Tool | Reads |
 |---|---|
-| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career, this reaches back 365 days -- the highest-intent signal in a job search. |
+| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. |
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_saved_jobs` | Jobs you bookmarked. |
 | `linkedin_search_jobs` | Job search with keywords, location, remote, date posted, experience level. |

@@ -2399,8 +2399,8 @@ async def test_open_to_work_names_the_audience_of_the_destination_in_the_gate(
     """THE POINT OF SPECCING IT AT ALL, and THE CONTROL for the two refusals
     above.
 
-    Someone job-hunting while employed. This is the single setting in the whole
-    design a current employer can read, so the gate does not repeat LinkedIn's four
+    SOMEONE job-hunting WHILE EMPLOYED faces a setting an employer can read --
+    the single one in the whole design -- so the gate does not repeat LinkedIn's four
     words back at him -- it says who will be able to see the change, and says
     it about the DESTINATION rather than the current state.
     """

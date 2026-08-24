@@ -1549,20 +1549,22 @@ _OPEN_TO_WORK = re.compile(
     r"^\s*Open to work\s*" + re.escape(MIDDLE_DOT) + r"\s*(.+?)\s*$", re.I
 )
 
-#: What each audience string MEANS for someone job-hunting while employed. The
+#: What each audience string MEANS when a profile change would be visible to
+#: a current employer. The
 #: point of the mapping is that a gate has to state WHO CAN SEE IT rather than
 #: repeat LinkedIn's four words back at him.
 OPEN_TO_WORK_AUDIENCES: dict[str, str] = {
     "recruiters only": (
         "visible only to recruiters using LinkedIn Recruiter. No badge is drawn "
-        "on your photo and your current employer does not see it -- though "
+        "on the photo, so an employer browsing the profile does not see it -- "
+        "though "
         "LinkedIn itself states it cannot guarantee that recruiters at your own "
         "company are excluded."
     ),
     "all linkedin members": (
         "PUBLIC. A green #OpenToWork frame is drawn on your profile photo and "
         "everyone who can see your profile can see it, INCLUDING YOUR CURRENT "
-        "EMPLOYER AND colleagues."
+        "EMPLOYER AND COLLEAGUES."
     ),
 }
 

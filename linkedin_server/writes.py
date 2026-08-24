@@ -680,9 +680,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "all linkedin members": (
                 "PUBLIC. A green #OpenToWork frame is drawn on your profile "
                 "photo and everyone who can see your profile can see it, "
-                "INCLUDING YOUR CURRENT EMPLOYER AND colleagues. You are "
-                "job-hunting while employed; this is the one setting in this "
-                "whole design that a current employer can read."
+                "INCLUDING A CURRENT EMPLOYER AND COLLEAGUES. If you are "
+                "job-hunting while employed, this is the one setting in this "
+                "whole design an employer can read."
             ),
             "off": (
                 "no signal is shared with anyone, and recruiters filtering "

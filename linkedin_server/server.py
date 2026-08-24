@@ -142,7 +142,8 @@ mcp = FastMCP(
         "ONE-TIME step: it lives in an on-disk Chrome profile and survives "
         "both a server restart and a reboot, and linkedin_session_info says "
         "when it lapses. The highest-signal tool is linkedin_who_viewed_me: "
-        "where the account has Premium Career, so it reaches back 365 days. Each call "
+        "where the account has Premium Career it reaches back 365 days. "
+        "Each call "
         "loads exactly one page, so ask for one thing at a time rather than "
         "sweeping."
     ),
@@ -542,7 +543,8 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
     The highest-intent signal in a job search: someone who opened your profile
-    has already spent attention on you. Where the account has Premium Career, this list reaches
+    has already spent attention on you. Where the account has Premium
+    Career, this list reaches
     back 365 days rather than the free tier's five viewers.
 
     Rows carry name, headline, when the view happened, and a profile link.
@@ -1074,9 +1076,9 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
             # Open To Work, off the topcard lines that were already read.
             # LinkedIn prints the AUDIENCE verbatim next to it ("Open to work
             # <dot> Recruiters only"), and the audience is the half that
-            # matters to someone job-hunting while employed: one setting is
-            # invisible to a current employer and the other draws a green frame on
-            # his photo for everyone including a current employer. Reported as read,
+            # matters when job-hunting while employed: one setting is
+            # invisible to a current employer and the other draws a green frame
+            # on the photo for everyone including that employer. Reported as read,
             # never inferred -- on=None means the card did not draw, which is
             # not the same as it being off.
             open_to_work = shape.parse_open_to_work(

@@ -154,8 +154,8 @@ old sentence is quoted verbatim in the field so the mistake stays legible.
 **Consequence for the capture procedure, and why it was not taken:** `Show details` first (a Navigate,
 no ServerRequest, safe), then `Edit` -- and that single click is simultaneously the first step that
 SHOWS the editor and the first that could CHANGE it. The RPC is literally named `saveAndFetchNextStep`.
-Its residue is irreversible in AUDIENCE and a current employer can see it. **No capture of his live profile
-was taken. That one needs him watching.**
+Its residue is irreversible in AUDIENCE and a current employer can see it. **No capture of the live
+profile was taken. That one needs him watching.**
 
 Also measured, and useful later: a real DOM discriminator for the public badge exists --
 `profile-framedphoto` vs `profile-displayphoto` in the img src, plus an `alt` naming it. His topcard is
