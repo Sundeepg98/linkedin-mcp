@@ -545,6 +545,52 @@ push the row out, which the census itself flagged as not a symmetric pair.
 The paged read is worth building **for `linkedin_followed_companies`**, on its own merits, with the
 posture costs above declared. It is not worth building to unblock follow, because it does not.
 
+---
+
+## CI STOPPED WORKING MID-SESSION, AND THE THREE RED RUNS ARE NOT ABOUT THIS CODE
+
+Read this before drawing any conclusion from the run list. Three runs at the end of this wave are RED
+and **not one of them executed a single test.**
+
+```
+07:19  c90469c  success
+07:29  6ea78ce  success
+07:31  04abadb  success
+07:40  4b34c64  success
+07:44  eae1740  success   <- last green
+08:04  844f5a3  FAILURE
+08:14  56e03b0  FAILURE
+08:15  4057a6b  FAILURE
+```
+
+**MEASURED: all NINE cells of all three red runs report ZERO STEPS.** Two of the three runs completed
+in **three seconds**. One of the failing commits, `844f5a3`, changed a single markdown file and nothing
+else. The workflow file is unchanged and was green forty minutes earlier. Logs return `BlobNotFound`
+and the step arrays are empty, because the jobs were rejected before they started -- there is nothing
+to read and nothing ran.
+
+**PROBABLE CAUSE, LABELLED AS PROBABLE.** The Actions allowance on this private repo. August
+month-to-date for the account is **3426 Linux + 2363 Windows + 52 macOS minutes** -- roughly **8.7k
+Linux-equivalent** once Windows is doubled and macOS multiplied by ten -- every line currently
+discounted to `netAmount: 0.0`. This wave alone added about thirteen runs across three cells.
+
+**It is NOT confirmed and it is not mine to confirm.** The billing endpoint that reported a remaining
+balance has moved, and the replacement exposes usage rather than headroom, so nothing readable from
+here distinguishes "allowance exhausted" from another account-level block. The spending-limit page is
+the operator's to look at.
+
+**WHAT IS THEREFORE UNCERTIFIED:** `844f5a3`, `56e03b0`, `4057a6b` -- the paging analysis, the API
+call-site guard, and this record. Everything up to and including `eae1740` is green on all three cells,
+which covers the whole of the wave as originally reported.
+
+**THIS IS NOT A CLAIM THAT THEY ARE FINE.** Local green is not green, and this wave has catalogued six
+distinct mechanisms for that. The honest statement is narrower: those three commits pass everything
+this box can run, and the thing preventing certification is not inside them. A green run with a silent
+skip would fail the completeness gate; a run that never starts tells you nothing either way, which is
+exactly why it is written down here rather than left as three red marks a future reader would take for
+a broken suite.
+
+
 ## Measured
 
 All at `6ea78ce`, CPython 3.13.14 (win32), on a settled working tree.
