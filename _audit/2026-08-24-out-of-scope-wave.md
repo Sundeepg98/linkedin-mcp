@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `1e0e1a0`
+# The eight refusals, worked -- `445c7a0` .. `ce6b174`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -385,7 +385,7 @@ wrong-action warning, and now the unplumbed field.
 
 ## Measured
 
-All at `1e0e1a0`, CPython 3.13.14 (win32), on a settled working tree.
+All at `ce6b174`, CPython 3.13.14 (win32), on a settled working tree.
 
 | | |
 |---|---|
@@ -419,7 +419,7 @@ one.
 | **32688677004** | `063c9b7` | **success on all three cells** -- ubuntu/3.10, ubuntu/3.13, windows/3.13 |
 | **32689900525** | `6e11109` | the click-path tests and the wrong-surface fix |
 | **32690453627** | `0979ed8` | **success on all three cells** -- the apply warning written for the wrong action |
-| **(final)** | `1e0e1a0` | the wiring tests, and the sibling gap they closed |
+| **(final, below)** | `ce6b174` | the wiring tests, and the sibling gap they closed |
 
 <https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32688677004>
 
