@@ -75,3 +75,42 @@ _audit/_fixture_sanitisation_check.txt
 # this repo that must never be committed. It was tracked once, inside the
 # sanitisation script itself, which is the leak this line exists to prevent.
 _audit/_sanitisation_key.json
+
+# --- Publish-readiness hardening, 2026-08-24 -------------------------------
+# Added while auditing this repo for going public. Each line closes a way a
+# session artefact could reach a public commit; none of them is hypothetical
+# tidiness. The rules above are anchored to _audit/, so a capture written
+# anywhere else was unprotected -- these are anchored on the ARTEFACT instead.
+
+# HTTP archives. A .har of a signed-in session is the single richest leak
+# available in this project: every request, every cookie header, every token.
+# There was no rule for it at all.
+*.har
+*.har.gz
+
+# Playwright storage-state exports. One JSON file that IS the session -- it
+# carries li_at and JSESSIONID in plaintext and restores a login anywhere.
+storage_state*.json
+*storage-state*.json
+auth_state*.json
+
+# Chrome/Chromium profile artefacts, wherever they land rather than only
+# under _state/. A profile directory is a cookie jar with extra steps.
+**/Cookies
+**/Cookies-journal
+**/Local State
+**/Login Data*
+**/Web Data*
+**/DevToolsActivePort
+*.pma
+
+# SQLite databases. Chrome's cookie jar is one, and so is anything that
+# caches a session or an application history.
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Raw captures written outside _audit/. Same content, same risk, and the
+# existing rules would not have caught them.
+*_probe-*.html
+*_capture*.html

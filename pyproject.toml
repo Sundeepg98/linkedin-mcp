@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "linkedin-mcp"
 version = "0.1.0"
-description = "MCP server for the operator's own LinkedIn account: fourteen read tools and two gated, confirm-only writes."
+description = "MCP server for the operator's own LinkedIn account: fourteen read tools and three gated, confirm-only writes."
 requires-python = ">=3.10"
 license = { text = "Proprietary" }
 authors = [{ name = "Sundeep" }]

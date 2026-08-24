@@ -824,8 +824,19 @@ async def test_that_declaration_is_not_a_hardcoded_string():
     declared = " ".join((await linkedin_server_info())["direct_api_reads"])
     sites = _api_call_sites()
 
-    assert len(sites) == len(SANCTIONED_API_CALLS) == 1
-    # One call site, one declared entry. A second call site with no second
-    # entry is the failure this pins.
+    # DERIVED, NEVER LITERAL. This line read `== 1` until 2026-08-24 and that
+    # was the very defect the test exists to catch, committed inside the test
+    # itself: a hardcoded count that agreed with the world until the world
+    # moved, then failed for the right reason and looked like a regression.
+    # The invariant is that the three views AGREE, not that any of them is a
+    # particular number.
+    assert len(sites) == len(SANCTIONED_API_CALLS)
     assert len((await linkedin_server_info())["direct_api_reads"]) == len(sites)
     assert "GET" in declared
+
+    # Every enumerated call site's MODULE must be named somewhere in the
+    # declaration, so a second call added with a copied-and-pasted entry that
+    # describes the first one still fails.
+    for module, _verb, _arg in sites:
+        stem = module.replace(".py", "")
+        assert stem in declared or stem.replace("_", " ") in declared, module

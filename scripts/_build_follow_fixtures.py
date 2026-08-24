@@ -443,17 +443,33 @@ def sanitise(html: str) -> str:
 #: replacing them with invented values -- that deletes the check. A denylist
 #: must name what it denies.
 #:
-#: WHY THIS IS NOT THE THING THAT WAS REMOVED FROM THE TABLES ABOVE. Those were
-#: a MAPPING: each real value paired with the invented one that replaced it,
-#: which is what reverses a sanitised fixture. **A PAIRING IS WHAT MAKES A
-#: KEY.** These are unpaired -- lone tokens with nothing to substitute them
-#: back into -- and they are already-public facts about the OPERATOR (his
-#: surname authors every commit here; his city and former employers are on the
-#: profile this server reads), not about a third party. Operator-ratified
-#: 2026-08-23 as an accepted residual.
+#: WHY THIS IS NOT A DE-ANONYMISATION KEY. A key is a MAPPING: each real value
+#: paired with the invented one that replaced it, which is what reverses a
+#: sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.** These are unpaired --
+#: lone tokens with nothing to substitute them back into.
+#:
+#: THIRTEEN BECAME SIX ON 2026-08-24, AND THE REASON IS A CORRECTION RATHER
+#: THAN A TIDY-UP. The note that stood here claimed all thirteen were
+#: "already-public facts about the OPERATOR... not about a third party",
+#: operator-ratified on that basis. **It was false.** Measured by surface: one
+#: token appears in a capture of HIS FEED and nowhere on his own profile --
+#: the name of somebody he follows. Five more appear nowhere on this machine,
+#: so nothing established whose they were.
+#:
+#: The rule now is evidenced rather than asserted: a token stays in a TRACKED
+#: file only if a capture of HIS OWN PROFILE contains it. The other seven live
+#: in ``_audit/_sanitisation_key.json``, gitignored, where
+#: ``sweep_tracked_for_identity.py`` picks them up automatically -- it loads
+#: every non-underscore list in that key -- and sweeps them across every
+#: tracked file in every url spelling. More detection, not less, and none of
+#: it published.
 BANNED_BY_THE_FIXTURE_TEST = [
-    "sundeep", "redacted", "redacted", "redacted", "redacted", "redacted",
-    "redacted", "redacted", "redacted", "redacted", "redacted", "redacted",
+    
+    "sundeep",
+    "redacted",
+    "redacted",
+    "redacted",
+    "redacted",
     "redacted",
 ]
 

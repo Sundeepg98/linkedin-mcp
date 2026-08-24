@@ -257,28 +257,50 @@ def test_no_fixture_names_a_real_person_or_employer(path):
     test without the string, and the same is true of the copy in
     ``scripts/_build_follow_fixtures.py``.
 
-    WHY THAT IS NOT THE THING THAT WAS JUST REMOVED FROM THIS REPO. The leak
-    was a MAPPING -- a real name paired with the invented one that replaced it,
-    which reverses a sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.**
-    These are unpaired: a lone token, with nothing to substitute it back into.
-    They are also already-public facts about the OPERATOR -- his surname is the
-    author of every commit in this repo, his city and former employers are on
-    the LinkedIn profile this server reads -- and they are his own, not a third
-    party's. Ratified by the operator on 2026-08-23 as an accepted residual.
+    WHY THAT IS NOT A DE-ANONYMISATION KEY. A key is a MAPPING -- a real value
+    paired with the invented one that replaced it, which is what reverses a
+    sanitised fixture. **A PAIRING IS WHAT MAKES A KEY.** These are unpaired:
+    lone tokens with nothing to substitute them back into.
 
-    Hashing them would buy obscurity, not secrecy: they are dictionary words
-    and they are already in this repository's history.
+    THE LIST WAS THIRTEEN AND IS NOW SIX, AND THE CORRECTION MATTERS MORE THAN
+    THE COUNT. Until 2026-08-24 this docstring asserted that all thirteen were
+    "already-public facts about the OPERATOR... his own, not a third party's",
+    ratified on that basis. **That assertion was false.** Measured by surface:
+    one token appears in a capture of HIS FEED and NOWHERE on his own profile
+    -- it is the name of somebody he follows, i.e. a third party. Five more
+    appear nowhere on this machine at all, so nothing established whose they
+    were; "his own" was an assumption wearing a ratification's clothes.
+
+    THE RULE NOW, AND IT IS EVIDENCED RATHER THAN ASSERTED: a token stays in
+    this tracked file only if it was found in a capture of HIS OWN PROFILE.
+    That is what makes "an already-public fact about him" checkable instead of
+    asserted. The six below each meet it. The other seven moved to
+    ``_audit/_sanitisation_key.json``, which is gitignored.
+
+    NO DETECTION WAS LOST, and that is the part to verify rather than trust.
+    ``scripts/sweep_tracked_for_identity.py`` loads every non-underscore list
+    in that key, expands each value through ``leakwalk.url_spellings``, and
+    sweeps EVERY tracked file including all of these fixtures -- so the seven
+    are checked more thoroughly there than here, in more spellings, and
+    without publishing them. What this test loses is CI coverage of those
+    seven, because the key is absent in CI. That is acceptable for a specific
+    reason rather than by shrug: the regression this guards against is a
+    REGENERATED FIXTURE reintroducing a real value, and regeneration runs
+    ``_build_follow_fixtures.py``, which needs the key and refuses without it.
+    The failure can therefore only be introduced on a machine where the sweep
+    is available to catch it.
+
+    Hashing the six that remain would not work either, and the reason is
+    mechanical rather than a matter of taste: this test matches by SUBSTRING
+    (``token not in lowered``) and there is no tokenizer here. Hashing needs
+    whole tokens, and at least one denied term occurs in the captures embedded
+    prefix-wise inside a longer word with no delimiter -- whole-token matching
+    would miss it outright. Secondarily they are low-entropy dictionary words,
+    so a published digest falls to a wordlist in seconds.
     """
     lowered = path.read_text(encoding="utf-8").lower()
     for token in (
         "sundeep",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
-        "redacted",
         "redacted",
         "redacted",
         "redacted",

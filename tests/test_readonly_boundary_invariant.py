@@ -114,13 +114,26 @@ PINNED = (
 #: stable -- and hashes the remaining source text. VERIFIED rather than
 #: argued: computed under 3.13.14 and 3.10.19 on the same file, all five
 #: digests identical.
-READONLY_AST_AT_5277DFC = {
+#: RE-FROZEN 2026-08-24, and the shape of the move is the argument. A false
+#: sentence was removed from ``assert_read_url``'s error message -- it told a
+#: live caller "This server has no write path" while three write tools ship.
+#: ONLY ``<functions>`` moved (9f0a86dafffc2299 -> 199939f7998e8d48); all four
+#: CONSTANT digests are byte-identical across the change, which is what proves
+#: the correction touched prose and widened no boundary. Verified under 3.13.14
+#: AND 3.10.19 -- a single-version run cannot verify a version-independent
+#: claim, and this file has three red CI runs in its history saying so.
+#:
+#: RENAMED at the same time: the constant was called ...AT_5277DFC while
+#: holding a value re-frozen twice since. A name that asserts a provenance it
+#: no longer has is the same defect as a docstring that denies a capability
+#: that ships, one layer down.
+READONLY_AST_AT_LAST_REFREEZE = {
     "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
     "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "033a34fbbc538d8c",
-    "<functions>": "9f0a86dafffc2299",
+    "<functions>": "199939f7998e8d48",
 }
 
 #: The four denylist digests as they stood at ``oldsha14``, kept so that "the
@@ -246,7 +259,7 @@ def ast_digest(source: str) -> dict[str, str]:
 def test_the_read_only_boundary_is_where_it_was_re_frozen():
     """THE FREEZE, as the invariant it was always standing in for."""
     live = ast_digest(READONLY.read_text(encoding="ascii"))
-    assert live == READONLY_AST_AT_5277DFC
+    assert live == READONLY_AST_AT_LAST_REFREEZE
 
 
 def test_the_write_did_not_touch_any_of_the_four_denylists():
@@ -288,7 +301,7 @@ def test_adding_a_second_sanctioned_mutation_moves_the_digest():
     assert widened != source, "the edit did not apply"
     assert (
         ast_digest(widened)["SANCTIONED_MUTATIONS"]
-        != READONLY_AST_AT_5277DFC["SANCTIONED_MUTATIONS"]
+        != READONLY_AST_AT_LAST_REFREEZE["SANCTIONED_MUTATIONS"]
     )
 
 
@@ -351,7 +364,7 @@ def test_a_real_weakening_does_move_the_digest(name, edit):
     source = READONLY.read_text(encoding="ascii")
     weakened = edit(source)
     assert weakened != source, f"the edit for {name} did not apply"
-    assert ast_digest(weakened)[name] != READONLY_AST_AT_5277DFC[name]
+    assert ast_digest(weakened)[name] != READONLY_AST_AT_LAST_REFREEZE[name]
 
 
 def test_the_launch_boundary_is_still_a_zero_line_diff():

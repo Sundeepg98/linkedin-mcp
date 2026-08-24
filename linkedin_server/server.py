@@ -1,10 +1,12 @@
-"""The tool surface: sixteen tools, fourteen of which read LinkedIn.
+"""The tool surface: seventeen tools, fourteen of which read LinkedIn.
 
-THE OTHER TWO WRITE, and this paragraph used to say the opposite. Until
-2026-08-23 it read *"There is no write path TO LINKEDIN in this package. Not a
-disabled one, not a stubbed one, not one behind a flag."* That was true, it was
-enforced rather than asserted, and it is now false: ``linkedin_save_job`` and
-``linkedin_unsave_job`` are registered below.
+THE OTHER THREE WRITE, and this paragraph has now been wrong in both
+directions. Until 2026-08-23 it read *"There is no write path TO LINKEDIN in
+this package"*, which was true and then was not. It was corrected to "sixteen
+tools, two writes" -- and stayed there through the arrival of a third, so for
+a day it understated the surface it exists to describe. ``linkedin_save_job``,
+``linkedin_unsave_job`` and ``linkedin_unfollow_company`` are registered
+below. Counts in this docstring are re-measured per wave, not carried.
 
 What remains true, and is what ``readonly.py`` still enforces against this
 file:
@@ -1628,12 +1630,27 @@ async def linkedin_server_info() -> dict[str, Any]:
             "direct_api_reads": [
                 f"{ME_API} -- GET, once per auth check, to answer whether "
                 "there is a live session. A page load cannot answer that "
-                "honestly, which is why this call exists. It is NOT covered "
+                "honestly, which is why this call exists. Issued by auth. It is "
+                "NOT covered "
                 "by the read allowlist: that allowlist gates navigations, and "
-                "this is not one. It is covered instead by an enumerated "
-                "call-site list that fails if the package grows a second "
-                "direct request."
+                "this is not one.",
+                f"http://127.0.0.1:{CDP_PORT}/json/version -- GET, LOOPBACK "
+                "ONLY, issued by cdp_bridge for linkedin_cdp_status. It asks a "
+                "Chrome running on "
+                "this machine whether it is attachable. It never leaves the "
+                "host and reaches no third party. LISTED SECOND HERE FROM "
+                "2026-08-24: this field previously presented a complete list "
+                "naming only the call above, because the enumerator matched "
+                "one call shape and was blind to a bare urlopen. The list was "
+                "wrong, not merely short.",
             ],
+            "direct_api_reads_note": (
+                "Both are GET and neither is gated by the read allowlist, "
+                "which covers navigations only -- see read_boundary_scope. "
+                "They are covered instead by an enumerated call-site list in "
+                "tests/test_api_call_sites.py that hunts BOTH call shapes and "
+                "fails if the package grows a third direct request."
+            ),
             "local_state_writes": [
                 "linkedin_logout(confirm=True) erases this machine's Chrome "
                 "cookie jar, which ends the local sign-in. It issues no "

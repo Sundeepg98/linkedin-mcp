@@ -61,12 +61,47 @@ _VERBS = frozenset(
 #: a different url -- or at something a caller could supply -- fails here even
 #: though the verb and the module are unchanged.
 SANCTIONED_API_CALLS: frozenset[tuple[str, str, str]] = frozenset(
-    {("auth.py", "get", "ME_API")}
+    {
+        ("auth.py", "get", "ME_API"),
+        # ADDED 2026-08-24, AND THE OMISSION IS THE FINDING. This entry was
+        # missing while the docstring above and ``server_info`` both presented
+        # a COMPLETE list naming one call. The walker matched
+        # ``<x>.request.<verb>`` and was structurally blind to a bare-name
+        # ``urlopen(...)``, so the enumeration returned the set the METHOD
+        # expected rather than the set the repo HAS -- which is the first law
+        # in the rewrite runbook, committed here by the person quoting it.
+        # Loopback only: it asks a local Chrome whether it is attachable.
+        ("cdp_bridge.py", "urlopen", "f'{endpoint()}/json/version'"),
+    }
 )
 
 
+#: Callables that fetch over HTTP by NAME rather than through a request
+#: object. Kept separate from :data:`_VERBS` because they are found a
+#: different way: ``urlopen`` is a bare Name, or an Attribute on ``urllib``,
+#: and no amount of looking for ``.request.<verb>`` will ever see one.
+_FETCH_NAMES = frozenset({"urlopen", "urlretrieve", "urlretrieve"})
+
+
 def _api_call_sites() -> list[tuple[str, str, str]]:
-    """Every ``<x>.request.<verb>(...)`` in the package, found by AST."""
+    """Every direct HTTP call in the package, found by AST. TWO SHAPES.
+
+    THE SECOND SHAPE WAS MISSING UNTIL 2026-08-24, and its absence is the
+    reason this docstring is longer than the function. The walker looked only
+    for ``<x>.request.<verb>(...)`` -- so it saw the identity call and was
+    structurally incapable of seeing ``cdp_bridge``'s bare ``urlopen(...)``,
+    while this module and ``linkedin_server_info`` both advertised a COMPLETE
+    list of one. An enumeration that reports the set its method expects rather
+    than the set the repo has is the exact failure the rewrite runbook opens
+    with, and it shipped here anyway.
+
+    So both shapes are hunted now:
+
+    * ``<x>.request.<verb>(...)`` -- a Playwright APIRequestContext call.
+    * a call to a FETCH NAME -- ``urlopen(...)`` bare, or as an attribute on
+      any receiver, which covers ``urllib.request.urlopen`` without needing to
+      know the import spelling.
+    """
     found: list[tuple[str, str, str]] = []
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -74,15 +109,19 @@ def _api_call_sites() -> list[tuple[str, str, str]]:
             if not isinstance(node, ast.Call):
                 continue
             func = node.func
-            if not isinstance(func, ast.Attribute) or func.attr not in _VERBS:
-                continue
-            receiver = func.value
-            if not (
-                isinstance(receiver, ast.Attribute) and receiver.attr == "request"
-            ):
+            verb = None
+            if isinstance(func, ast.Attribute) and func.attr in _VERBS:
+                receiver = func.value
+                if isinstance(receiver, ast.Attribute) and receiver.attr == "request":
+                    verb = func.attr
+            elif isinstance(func, ast.Name) and func.id in _FETCH_NAMES:
+                verb = func.id
+            elif isinstance(func, ast.Attribute) and func.attr in _FETCH_NAMES:
+                verb = func.attr
+            if verb is None:
                 continue
             first = ast.unparse(node.args[0]) if node.args else "<none>"
-            found.append((path.name, func.attr, first))
+            found.append((path.name, verb, first))
     return found
 
 
@@ -102,7 +141,21 @@ def test_no_mutating_verb_is_used_against_the_api():
     package; this says the same thing about the API surface specifically, so
     the claim does not rest on the scanner's pattern list alone."""
     for _module, verb, _arg in _api_call_sites():
-        assert verb in {"get", "head", "options"}, verb
+        assert verb in {"get", "head", "options"} | _FETCH_NAMES, verb
+    # And a fetch-name call is GET by construction -- urlopen without a data=
+    # argument issues a GET, so the claim holds for both shapes rather than
+    # only the one with the verb in its name.
+    for path in sorted(PACKAGE.glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            f = node.func
+            name = getattr(f, "id", None) or getattr(f, "attr", None)
+            if name in _FETCH_NAMES:
+                kwargs = {k.arg for k in node.keywords}
+                assert "data" not in kwargs, (path.name, "urlopen with data= is a POST")
+                assert len(node.args) < 2, (path.name, "positional data= is a POST")
 
 
 def test_the_identity_endpoint_is_not_on_the_read_allowlist_and_that_is_recorded():

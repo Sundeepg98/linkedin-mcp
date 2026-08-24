@@ -240,8 +240,9 @@ def assert_read_url(url: str) -> str:
         if bad in lowered:
             raise WriteAttemptError(
                 f"navigation blocked: {url!r} contains {bad!r}, which is not a "
-                "read surface. This server has no write path; if you reached "
-                "this, a url was built wrong."
+                "read surface. This is the READ door and it refuses; a write "
+                "goes through assert_write_url, which is narrower still. If "
+                "you reached this, a url was built wrong."
             )
 
     for pattern in _ALLOWED_URL_PATTERNS:
