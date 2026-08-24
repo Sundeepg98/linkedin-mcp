@@ -2441,11 +2441,21 @@ async def perform(
                 "for one would report a neighbouring row's."
             )
         ),
+        # THE SURFACE IS NAMED PER ACTION, and it was not until a test caught
+        # it: an unfollow whose outcome was unknown told him to go and look at
+        # his SAVED JOBS. The advice not to retry is the same for both and is
+        # the important half; sending him to the wrong page to check is how a
+        # correct instruction becomes useless.
         "read_this_if_unsure": (
             "performed is 'unknown' when the click may or may not have "
             "dispatched. Do NOT retry on 'unknown': a retry on a toggle that "
-            "did land performs the opposite action. Open your saved jobs and "
-            "look first."
+            "did land performs the opposite action. Open "
+            + (
+                "your followed companies"
+                if spec.action == "unfollow_company"
+                else "your saved jobs"
+            )
+            + " and look first."
         ),
     }
 

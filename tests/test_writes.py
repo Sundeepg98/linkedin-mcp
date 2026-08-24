@@ -1117,6 +1117,7 @@ async def _granted(
     target: str,
     posting: str = "job_detail",
     saved: str = "jobs_tracker_empty",
+    followed: str = "manage_pages_following_hydrated",
 ) -> writes.WriteGrant:
     """A real, redeemed grant, produced the way the tool produces one.
 
@@ -1125,7 +1126,9 @@ async def _granted(
     that has already been burned, so a test that fabricated one would be
     testing a path no caller can take.
     """
-    block, _nav = await _gate(page, action, target=target, posting=posting, saved=saved)
+    block, _nav = await _gate(
+        page, action, target=target, posting=posting, saved=saved, followed=followed
+    )
     return consume(block["to_confirm"], action=action, target=target)
 
 
@@ -2586,3 +2589,333 @@ def test_that_walk_would_notice_a_second_writer():
         "_record",
         "helpful_shortcut",
     }
+
+
+# ---------------------------------------------------------------------------
+# 9. The click, on the LIST surface
+# ---------------------------------------------------------------------------
+#
+# WHY THIS SECTION EXISTS SEPARATELY FROM THE SAVE ONE. Everything above tests
+# perform() against a POSTING: one id in a url, a control whose state is a
+# label, and a confirmation read from a genuinely different surface. The
+# unfollow is none of those. It lands on a LIST whose url carries no target at
+# all, its control is found by a row predicate rather than by a name, and its
+# confirmation has nowhere else to come from. Three branches in perform() turn
+# on that difference and none of them was exercised by a save test.
+
+
+def _manage_pages(*, without=None, total: int = 58) -> str:
+    """The Manage-Pages capture, with one row optionally cut and a new total.
+
+    MODELS THE WORLD AFTER A CLICK, and the two knobs are independent ON
+    PURPOSE. LinkedIn's rendered rows and LinkedIn's own stated total are two
+    separate readings and the whole verification rests on them agreeing -- so a
+    helper that could only move them together could not tell a real unfollow
+    from a row that scrolled out of a partial list.
+
+    ``without`` names the company whose entire ``<li>`` is removed, located
+    from its button and bounded by COUNTING tags rather than by a regex over
+    ``<li>.*?</li>``: these rows nest lists, and a lazy match would cut the
+    wrong element and quietly hand every test below a shorter page than it
+    asked for.
+    """
+    html = markup("manage_pages_following_hydrated")
+    if without is not None:
+        needle = 'aria-label="Click to stop following ' + without + '"'
+        at = html.index(needle)
+        start = html.rindex("<li", 0, at)
+        depth, cursor = 0, start
+        while True:
+            nxt_open = html.find("<li", cursor + 1)
+            nxt_close = html.find("</li>", cursor + 1)
+            if nxt_close == -1:
+                raise AssertionError("unterminated <li> in the fixture")
+            if nxt_open != -1 and nxt_open < nxt_close:
+                depth += 1
+                cursor = nxt_open
+                continue
+            if depth == 0:
+                html = html[:start] + html[nxt_close + len("</li>") :]
+                break
+            depth -= 1
+            cursor = nxt_close
+        assert needle not in html, without
+    if total != 58:
+        assert "58 Pages" in html
+        html = html.replace("58 Pages", str(total) + " Pages", 1)
+    return html
+
+
+class SequencedNavigator:
+    """Serves a DIFFERENT page each time the SAME url is asked for.
+
+    ``FixtureNavigator`` maps one url to one frozen page, which is exactly
+    right for the save pair: it clicks on a posting and confirms from the saved
+    list, two urls, so "before" and "after" are two separate frozen worlds by
+    construction.
+
+    An unfollow loads ONE url TWICE -- the page it clicks on, then the reload
+    that confirms the click -- across a world the click just changed. A
+    one-page-per-url fake cannot represent that at all: it either serves the
+    before-world to the verification (which then always reports failure) or the
+    after-world to the click (which then always refuses at gate 5, because the
+    row it was about to press is not there). Both were observed while writing
+    these tests, and both look like a code defect rather than a fixture that
+    cannot express the situation.
+
+    So this pops from a per-url queue and RECORDS every ask. The last entry
+    repeats if the queue runs dry, which keeps a test that loads once from
+    having to describe a second load it does not make.
+    """
+
+    def __init__(self, pages: dict):
+        self.pages = {url: list(seq) for url, seq in pages.items()}
+        self.gotos: list[str] = []
+
+    async def goto(self, page, url: str) -> str:
+        self.gotos.append(url)
+        queue = self.pages.get(url)
+        if not queue:
+            raise AssertionError(
+                f"the write asked for {url!r}, which this test did not freeze. "
+                f"It froze {sorted(self.pages)}."
+            )
+        html = queue.pop(0) if len(queue) > 1 else queue[0]
+        await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
+        return url
+
+
+async def _unfollow(page, grant, *, before: str, after: str):
+    """Perform an unfollow across a world that changed between the two loads.
+
+    ``before`` is what the click lands on and ``after`` is what the
+    verification reload sees. Naming them separately is the point: the
+    verification is a claim about the SECOND reading, and a test that could
+    only supply one page would be asserting that a page equals itself.
+    """
+    nav = SequencedNavigator({writes.FOLLOWED_PAGES_URL: [before, after]})
+    return await writes.perform(nav, page, grant), nav
+
+
+async def test_the_after_world_helper_actually_removes_the_row_it_names():
+    """THE CONTROL FOR THE HELPER, before anything is concluded from it.
+
+    Every unfollow test below distinguishes its outcome by what this function
+    produced. If the cut silently failed -- and a lazy regex over nested lists
+    is exactly how it would -- then the "row is gone" world and the "row is
+    still there" world would be the same string, three tests would agree with
+    each other, and all three would be measuring nothing.
+    """
+    before = _manage_pages()
+    after = _manage_pages(without=FOLLOWED_COMPANY_NAME, total=57)
+
+    assert "Click to stop following " + FOLLOWED_COMPANY_NAME in before
+    assert "Click to stop following " + FOLLOWED_COMPANY_NAME not in after
+    assert "58 Pages" in before
+    assert "57 Pages" in after
+    # Exactly ONE row left, and every other row untouched.
+    assert before.count("Click to stop following ") == 20
+    assert after.count("Click to stop following ") == 19
+    assert "/company/" + FOLLOWED_COMPANY + "/" not in after
+
+
+async def test_an_unfollow_that_took_reports_true_and_names_both_totals(
+    writes_on, browser_page
+):
+    """The happy path, end to end, on the surface nothing else here tests.
+
+    Pins the three things that differ from a save: the click is aimed by the
+    ID-KEYED selector rather than by a label, the landing check compares the
+    whole list url rather than a job id, and the verdict is carried by
+    LinkedIn's own count.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+    block, nav = await _unfollow(
+        browser_page,
+        grant,
+        before=_manage_pages(),
+        after=_manage_pages(without=FOLLOWED_COMPANY_NAME, total=57),
+    )
+
+    assert block["performed"] is True
+    assert block["verified"] is True
+    assert block["clicked"]["error"] is None
+    assert block["clicked"]["state_before"] == "following"
+    assert block["verification"]["expected_state"] == "not_following"
+    assert block["verification"]["observed_state"] == "not_following"
+    # The count is the evidence, and the block SHOWS both readings rather than
+    # printing the conclusion and keeping the arithmetic to itself.
+    assert "58" in block["verification"]["why"]
+    assert "57" in block["verification"]["why"]
+
+    # Aimed by id, not by label. A label-only selector would match all twenty.
+    assert block["clicked"]["selector"] == dom.unfollow_control_selector(
+        FOLLOWED_COMPANY
+    )
+    assert FOLLOWED_COMPANY in block["clicked"]["selector"]
+
+    # The company he can CHECK is named; the id he cannot check is beside it.
+    assert block["target"]["company"] == FOLLOWED_COMPANY_NAME
+    assert block["target"]["company_id"] == FOLLOWED_COMPANY
+    assert "job_id" not in block["target"]
+
+    # TWO loads of the SAME url -- the page it clicks on, then the reload that
+    # confirms it. Asserted because it is the honest weakness of this action:
+    # a later "optimisation" that believed the redrawn button instead would
+    # show up here as one load.
+    assert nav.gotos == [writes.FOLLOWED_PAGES_URL, writes.FOLLOWED_PAGES_URL]
+    assert block["verification"]["read_from"] == writes.FOLLOWED_PAGES_URL
+    assert "RELOADED" in block["verification"]["surface"]
+
+
+async def test_an_unfollow_that_did_not_take_reports_false_and_does_not_raise(
+    writes_on, browser_page
+):
+    """The row is still there afterwards. That is a real outcome, not an error.
+
+    Nothing may raise after the click: once the button has been pressed, THAT
+    is the most important fact there is, and an exception on the way home
+    replaces it with a stack trace the operator answers by retrying -- which on
+    a toggle performs the opposite action.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+    block, _nav = await _unfollow(
+        browser_page, grant, before=_manage_pages(), after=_manage_pages()
+    )
+
+    assert block["performed"] is False
+    assert block["verified"] is False
+    assert block["verification"]["observed_state"] == "following"
+    assert "still on the page" in block["verification"]["why"]
+
+
+async def test_a_vanished_row_with_an_unchanged_total_is_unknown_not_success(
+    writes_on, browser_page
+):
+    """THE TEST THAT MAKES THE OTHER TWO MEAN SOMETHING.
+
+    This surface renders about twenty rows of fifty-eight and offers no way to
+    page through the rest, so a row being absent from the rows that drew is the
+    NORMAL condition for most of the list -- it is not evidence of anything. A
+    verification that concluded "gone, therefore unfollowed" would pass the
+    happy-path test above AND the failure test above it, and would report
+    success every time the list merely reordered.
+
+    So the verdict rests on LinkedIn's own stated total moving by exactly one.
+    Here the row is gone and the total held: the honest answer is that nobody
+    knows, and the block says to go and look.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+    block, _nav = await _unfollow(
+        browser_page,
+        grant,
+        before=_manage_pages(),
+        after=_manage_pages(without=FOLLOWED_COMPANY_NAME, total=58),
+    )
+
+    assert block["performed"] == "unknown"
+    assert block["verified"] is False
+    assert block["verification"]["observed_state"] == "unknown"
+    assert "does not corroborate" in block["verification"]["why"]
+    assert "look" in block["verification"]["why"]
+    # And it does not tell him to retry, which on a toggle is the one
+    # instruction that could make it worse -- nor send him to the wrong page
+    # to check, which is what it did until this assertion was written: an
+    # unknown UNFOLLOW pointed him at his saved jobs.
+    advice = block["read_this_if_unsure"]
+    assert "Do NOT retry" in advice
+    assert "followed companies" in advice
+    assert "saved jobs" not in advice
+
+
+async def test_perform_refuses_when_the_row_is_not_on_the_page_it_landed_on(
+    writes_on, browser_page
+):
+    """GATE 5 on the list surface: the row must be there at CLICK time.
+
+    The preview saw the row; between preview and confirm the list may have
+    reordered it out of the rendered window. Absence is not "already
+    unfollowed" -- it is "cannot tell" -- so this refuses BEFORE clicking,
+    rather than clicking at something that is not there or concluding the work
+    was already done.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await _unfollow(
+            browser_page,
+            grant,
+            before=_manage_pages(without=FOLLOWED_COMPANY_NAME),
+            after=_manage_pages(),
+        )
+    message = str(excinfo.value)
+    assert "refusing to click" in message
+    assert "NOT evidence" in message
+    assert "no pagination control" in message
+
+
+async def test_a_list_write_refuses_a_landing_that_is_not_its_own_list(
+    writes_on, browser_page
+):
+    """The landing check, on the branch a job id cannot exercise.
+
+    A posting is identified by the id inside its url; a list has one address
+    and no id, so the url is compared whole. Without a separate branch the
+    check would be vacuous for every list write -- ``dom.JOB_HREF`` finds no
+    job id in a network-manager url, so the POSTING branch would refuse every
+    unfollow outright, and the tempting fix at that point is to skip the check
+    for lists entirely.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+
+    class Elsewhere:
+        """Serves the right page and reports a url that is not its own."""
+
+        def __init__(self):
+            self.gotos = []
+
+        async def goto(self, page, url):
+            self.gotos.append(url)
+            await page.set_content(
+                _manage_pages(), wait_until="domcontentloaded"
+            )
+            return "https://www.linkedin.com/feed/"
+
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(Elsewhere(), browser_page, grant)
+    message = str(excinfo.value)
+    assert "refusing to click" in message
+    assert "anchored to a row on one page" in message
+
+
+async def test_the_unfollow_reads_back_no_label_and_says_why(
+    writes_on, browser_page
+):
+    """The post-click sweep is SAVE-ONLY, and the block says so rather than
+    reporting null and leaving a reader to guess which it meant.
+
+    An unfollow removes its own row, so there is no control left to read back;
+    sweeping for one would report whichever neighbouring row redrew first,
+    which is the "choosing by position" failure this package refuses
+    everywhere else.
+    """
+    grant = await _granted(
+        browser_page, "unfollow_company", target=FOLLOWED_COMPANY
+    )
+    block, _nav = await _unfollow(
+        browser_page,
+        grant,
+        before=_manage_pages(),
+        after=_manage_pages(without=FOLLOWED_COMPANY_NAME, total=57),
+    )
+    assert block["newly_observed_save_label"] is None
+    assert "not applicable" in block["what_that_label_is_for"]
