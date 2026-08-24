@@ -114,3 +114,18 @@ auth_state*.json
 # existing rules would not have caught them.
 *_probe-*.html
 *_capture*.html
+
+# --- Working notes need a home that is not this tree, 2026-08-24 -----------
+# Four slice notes sat here untracked and UN-IGNORED for a day, which is one
+# `git add -A` away from a commit nobody reviewed. They have been moved out of
+# the repo entirely rather than committed or ignored.
+#
+# WHY NOT A BLANKET `_audit/_slice-*.md` RULE: six such files are already
+# TRACKED, so a rule forbidding the pattern would be contradicted by its own
+# set on the day it was written -- and a rule that its own repo violates gets
+# deleted by the next person who notices, taking the protection with it.
+#
+# So future working notes get a designated quarantine directory instead. It is
+# ignored unconditionally, it contradicts nothing, and a slice that lands here
+# cannot be swept into a commit by accident.
+_audit/_scratch/
