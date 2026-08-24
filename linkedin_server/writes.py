@@ -244,6 +244,14 @@ class WriteSpec:
     #: names its own fix instead of sitting as a caveat.
     reversibility_procedure: str
     reversibility_class: str = "STILL-UNKNOWN"
+    #: What to say when the live read lands on a state this action is NOT
+    #: valid from. Empty means the TOGGLE sentence, which is the right one for
+    #: save, unsave and follow and is FALSE for apply: applying from the wrong
+    #: state does not perform the opposite action, it performs an irreversible
+    #: one somewhere nobody meant. A generic refusal that misdescribes the
+    #: danger is the same species of confident string as an unmeasured
+    #: reversibility claim, so each action gets to say its own.
+    wrong_state_note: str = ""
     reversibility_evidence: str = ""
     #: WHO can undo it. "this server" and "him, by hand" are not the same
     #: promise and a gate that blurs them is lying by omission.
@@ -359,6 +367,153 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "the list and false of its ordering."
         ),
     ),
+    "linkedin_unfollow_company": WriteSpec(
+        action="unfollow_company",
+        tool_name="linkedin_unfollow_company",
+        # NO ``{target}`` IN THE URL, and that is not an oversight. This action
+        # is performed on a LIST, and the list has one address; the target
+        # selects a ROW within it. ``str.format`` ignores an unused keyword, so
+        # ``assert_write_url`` rebuilds this constant from the grant exactly as
+        # it rebuilds an interpolated one, and the target is enforced instead
+        # at the only place it can be -- the row the click is anchored to.
+        url_template="https://www.linkedin.com/mynetwork/network-manager/company/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/network-manager/company/$"
+        ),
+        exempt_substring=None,
+        summary="Stop following one company Page.",
+        from_state="following",
+        to_state="not_following",
+        target_kind="company_id",
+        state_from="followed_pages",
+        direction_source=(
+            "linkedin_followed_companies, which reads LinkedIn's Manage Pages "
+            "list at /mynetwork/network-manager/company/. The direction is "
+            "read off the SAME page the click lands on, at no extra page load "
+            "-- the ideal shape, and the second action in this design to have "
+            "it. The reading is reconciled against LinkedIn's own stated total "
+            "and answers 'unknown' rather than 'not following' whenever the "
+            "rendered rows are a fraction of that total, which on this surface "
+            "is the usual case."
+        ),
+        reversibility="reversible by following the company again",
+        reversibility_measured=True,
+        reversibility_class="REVERSIBLE",
+        reversibility_evidence=(
+            "MEASURED 2026-08-24 by observation. LinkedIn writes the inverse "
+            'action into this control\'s own accessible name -- "Click to stop '
+            'following <Page>" -- across 80 rows in five independent captures '
+            "at both hydration states. The undo direction is corroborated on a "
+            "second surface: a company he does NOT follow renders "
+            'aria-label="Follow" on its job postings, which is the state an '
+            "unfollow returns him to."
+        ),
+        reversible_by=(
+            "HIM, by hand, in LinkedIn's own interface. NOT this server: "
+            "linkedin_follow_company is sanctioned but is not performed, so a "
+            "re-follow through this server does not exist. The pair is "
+            "deliberately ASYMMETRIC and neither half pretends the other "
+            "covers it -- this server can stop a follow and cannot start one. "
+            "Read that before reading the word 'reversible' above."
+        ),
+        residue=(
+            "STILL-UNKNOWN, and unmeasurable by reading: whether the company "
+            "is told. A Page's admin sees a follower count, so the number "
+            "moves; nothing on any readable surface reports whether an "
+            "individual departure is surfaced to anyone. Second, smaller: "
+            "LinkedIn may or may not restore the original follow DATE on a "
+            "re-follow, and nothing distinguishes that from a fresh one."
+        ),
+        reversibility_procedure=(
+            "SETTLED 2026-08-24 by reading rather than by a round trip: the "
+            "control names its own inverse. What a supervised round trip would "
+            "add is only the residue above, which no read can reach."
+        ),
+    ),
+    "linkedin_apply_job": WriteSpec(
+        action="apply_job",
+        tool_name="linkedin_apply_job",
+        # NEVER LOADED, exactly as for set_open_to_work, and for a reason that
+        # is measured rather than assumed: thirteen job captures contain the
+        # apply CONTROL and not one contains what appears after it is
+        # activated. Zero forms, zero file inputs, zero dialogs, zero
+        # Submit/Review/Next controls, zero rendered apply pages. So there is
+        # no url here, no anchor, and assert_write_url refuses this action
+        # outright. Specced rather than omitted, because the operator asked for
+        # apply by name and an omission would read as nobody having looked.
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="Submit an application to one job posting.",
+        from_state="linkedin_apply",
+        to_state="applied",
+        target_kind="job_id",
+        state_from="apply_control",
+        wrong_state_note=(
+            "This is not a toggle and the danger is not that it would do the "
+            "opposite. THE OFF-SITE ROUTE IS NOT THIS SERVER'S TO PERFORM: the "
+            "application would be filled in and submitted on a third party's "
+            "applicant-tracking system, on their domain, under their terms, "
+            "with their fields -- and this server has no business driving a "
+            "form it has never seen on a site it was not built for. An "
+            "'unknown' route is refused for the plainer reason that nobody "
+            "could say where the application would go."
+        ),
+        direction_source=(
+            "linkedin_job_detail's apply_path, read off the SAME posting page "
+            "the action would act on, at no extra page load. LinkedIn draws "
+            "the apply control as an ANCHOR, so its destination is readable "
+            "before anything is activated -- which is why the route can be "
+            "identified without touching it. Two routes have been measured: "
+            'aria-label="LinkedIn Apply to this job" pointing at the posting\'s '
+            'own apply url, and aria-label="Apply on company website" wrapping '
+            "a third-party ATS in LinkedIn's outbound interstitial. Neither "
+            "the label nor the href classifies alone; both must agree."
+        ),
+        reversibility="STILL-UNKNOWN whether an application can be withdrawn",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED, and it cannot be measured by reading on this "
+            "account. The surface that would show a withdraw affordance is his "
+            "applied list, and that list is EMPTY -- both captures of "
+            "/jobs-tracker/?stage=applied read a count of zero with no job "
+            "rows at all. The absence of a withdraw control in an empty list "
+            "is not evidence about anything. What IS certain is narrower and "
+            "is stated in reversible_by."
+        ),
+        reversible_by=(
+            "NOBODY, through this server, in either direction. Withdrawing is "
+            "in PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
+            "covers, at any confirm level') and /withdraw is on the read "
+            "boundary's forbidden list. So whatever LinkedIn's product may "
+            "allow, an application this server sent is one it can never take "
+            "back, and it must be treated as irreversible on that ground alone."
+        ),
+        residue=(
+            "IRREVERSIBLE IN AUDIENCE, and that half is certain even though "
+            "the state half is not. An application is READ BY A HUMAN at the "
+            "employer, usually within a day. Withdrawing it later -- if "
+            "LinkedIn even permits it -- removes a row from a list; it does "
+            "not un-read what a recruiter has already read, and it does not "
+            "un-send the notification that told them it arrived. There is no "
+            "readable surface anywhere that reports whether it was seen."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "load /jobs-tracker/?stage=applied on an account that HAS an "
+            "application and look for a withdraw control on a row. That "
+            "requires an application to exist, which requires performing the "
+            "very action whose reversibility is in question -- so this "
+            "measurement cannot be taken before the first apply, only after "
+            "it, and the first apply must therefore be made on the assumption "
+            "that it is permanent. THE FLOW ITSELF IS THE LARGER GAP: no "
+            "capture in this repo shows the LinkedIn apply form at all, so "
+            "before any apply could be attempted there would have to be a "
+            "capture containing the form, its fields, its resume selection, "
+            "any screening questions, and the control that submits it."
+        ),
+    ),
     "linkedin_follow_company": WriteSpec(
         action="follow_company",
         tool_name="linkedin_follow_company",
@@ -400,16 +555,33 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "is not somewhere else in the product; it is the same button."
         ),
         reversible_by=(
-            "HIM, by hand, in LinkedIn's own interface. NOT this server: no "
-            "unfollow is sanctioned, so a follow performed here is one this "
-            "server cannot take back. Read that before reading the word "
-            "'reversible' above."
+            "HIM, by hand, in LinkedIn's own interface. NOT this server -- and "
+            "the reason changed on 2026-08-24 without the answer changing. An "
+            "unfollow IS sanctioned and performable now, so the old reason "
+            "('nothing here can unfollow') is gone. The new one is that the "
+            "undo CANNOT BE AIMED at what a follow creates: a posting names "
+            "its employer by slug, the unfollow surface addresses rows by "
+            "numeric company id, and nothing resolves one to the other. Read "
+            "that before reading the word 'reversible' above; see the residue "
+            "below for the measurement."
         ),
         residue=(
             "STILL-UNKNOWN, and unmeasurable by reading: WHO SAW IT. A follow "
             "can surface in his network's feed, so the data is restorable and "
             "the impression is not. Nothing on any readable surface reports "
-            "whether it was shown to anyone."
+            "whether it was shown to anyone. "
+            "SECOND, AND IT IS WHY THIS ACTION IS STILL NOT PERFORMED: THE "
+            "UNDO CANNOT BE AIMED. A posting identifies its employer by SLUG "
+            "(/company/<slug>/); the unfollow surface identifies rows by "
+            "NUMERIC ID (/company/<digits>/); and a census of every capture in "
+            "this repo on 2026-08-24 found zero postings carrying a numeric id "
+            "and zero Manage-Pages rows carrying a slug, with no in-page "
+            "resolution between them anywhere. THIRD: even given the id, "
+            "Manage Pages renders 20 rows of a stated 58 with no pagination "
+            "control of any kind in five captures, so roughly two thirds of "
+            "the list cannot be reached in one page load. A follow performed "
+            "here could therefore be one this server cannot point its own "
+            "unfollow at."
         ),
         reversibility_procedure=(
             "SETTLED 2026-08-23, and it was settled by a read rather than the "
@@ -455,8 +627,22 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "MEASURED 2026-08-23: the current setting is readable before a "
             "change and would be readable after, off the same card, at both "
             "hydration states -- which is what makes a change checkable at "
-            "all. The control that edits it sits on that card and is present "
-            "in both frozen renders as aria-label=\"Open to\"."
+            "all. "
+            "CORRECTION, 2026-08-24, AND THE OLD SENTENCE IS QUOTED SO THE "
+            "MISTAKE IS LEGIBLE. This field used to end: \"The control that "
+            "edits it sits on that card and is present in both frozen renders "
+            "as aria-label=\\\"Open to\\\".\" THAT WAS FALSE. A census of all "
+            "five profile captures measured the \"Open to\" button's menu "
+            "resolving to exactly three items -- Hiring, Providing services, "
+            "Finding volunteer opportunities -- and NONE of them is the "
+            "audience editor; the entry LinkedIn would have used is absent "
+            "precisely BECAUSE the setting is already on. The real entry point "
+            "is a control whose accessible name is \"Edit\", on the "
+            "open-to-work card itself, and it is pinned in both frozen renders "
+            "-- so the evidence survives, attached to the right control. A "
+            "capture attempt that had started from \"Open to\" would have "
+            "failed silently, which is what a gate printing an unverified "
+            "evidence line buys."
         ),
         reversible_by=(
             "HIM, in LinkedIn's own interface. Not this server: the editor's "
@@ -500,7 +686,18 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "seen while it was up. What would have to be measured before this "
             "action could ever be performed is the SURFACE -- the editor has "
             "never been loaded, so there is no url, no anchor, and no capture "
-            "of the audience control at any hydration state."
+            "of the audience control at any hydration state. "
+            "THE ABSENCE OF A URL IS NOW A MEASUREMENT RATHER THAN AN "
+            "ADMISSION, taken 2026-08-24: 237 distinct urls and 37 payload "
+            "paths were enumerated across all five profile captures and ZERO "
+            "reach an open-to-work editor, a job-preferences page or a "
+            "career-interests page; the strings 'opentowork' and "
+            "'open-to-work' occur zero times anywhere. The editor is not "
+            "url-addressed AT ALL -- its screens are addressed by an internal "
+            "screen id, and its entry control fires a request whose own name "
+            "is saveAndFetchNextStep. So the one click that would first REVEAL "
+            "the editor is also the first click that could CHANGE it, which is "
+            "why no capture of it may be taken except with him watching."
         ),
     ),
 }
@@ -532,7 +729,17 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
-        "act is server-side on page serve so it cannot even be confirmed first"
+        "act is server-side on page serve so it cannot even be confirmed "
+        "first. SECOND GROUND, MEASURED 2026-08-24 and independent of the "
+        "first: THERE IS NOTHING TO CLICK AND NOTHING TO AIM AT. A census of "
+        "the notifications surface found 34 activatable controls across 6 "
+        "cards and not one of them changes read state; the per-card overflow "
+        "menu is present in the DOM before activation and holds exactly three "
+        "distinct items (change preferences, delete, show less like this). No "
+        "notification carries an id of any kind, so even a hypothetical "
+        "control would have no target. THIRD: the read tool ALREADY has the "
+        "full effect -- opening the page clears the badge -- so a write here "
+        "could only ever run after its own consequence had landed"
     ),
     "auto_accept_or_auto_reply": (
         "a reply in his name that he did not read is a message from a stranger "
@@ -814,6 +1021,18 @@ UNKNOWN = "unknown"
 #: same discipline :func:`assert_write_url` applies to a write url.
 SAVED_LIST_URL = "https://www.linkedin.com/jobs-tracker/?stage=saved"
 PROFILE_URL = "https://www.linkedin.com/in/me/"
+#: Manage Pages. The one surface in this design where the state is read off the
+#: SAME page the click lands on AND the click is anchored to a row rather than
+#: to the whole page.
+FOLLOWED_PAGES_URL = "https://www.linkedin.com/mynetwork/network-manager/company/"
+
+#: ONE job posting, as a READ. Named separately from any spec's
+#: ``url_template`` and used by exactly one action -- ``apply_job``, which has
+#: NO write surface at all and must still be able to look at the posting in
+#: order to say why it will not act. Keeping it distinct is the whole point: a
+#: read url borrowed as a write template is how an action with no measured
+#: surface acquires one by accident.
+JOB_POSTING_URL = "https://www.linkedin.com/jobs/view/{target}/"
 
 #: Rows to harvest from the saved list. Generous on purpose: this is not a
 #: display limit, it is how much of the list the reconciliation gets to see,
@@ -886,6 +1105,22 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 "which is why it may not be a string a caller chose."
             )
         return raw
+    if spec.target_kind == "company_id":
+        # THE NUMERIC ID AND NOT THE NAME, though the name is what the control
+        # this acts on says out loud. A display name is chosen by somebody
+        # else, collides, and changes; the id is the only stable key the
+        # surface offers, and the row must carry it for the click to be
+        # anchored at all. The gate still PRINTS the name -- an id is not
+        # something a person can check.
+        if not raw.isdigit() or len(raw) < 4:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by the numeric LinkedIn company "
+                f"id, got {target!r}. Call linkedin_followed_companies to read "
+                "the id beside each Page you follow. A name is not accepted "
+                "here: names collide and are not yours to rely on, and the "
+                "click is anchored to the row carrying the id."
+            )
+        return raw
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -950,6 +1185,58 @@ async def _read_follow_state(page: Any) -> tuple[str, str]:
         control.get("label"), count=int(control.get("count") or 0)
     )
     return str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
+
+
+async def _read_followed_state(
+    page: Any, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """Does he follow company ``target``, and what is that company CALLED?
+
+    Returns the facts as well as the state because on this surface they come
+    from the same read: the row's own button says ``Click to stop following
+    <Page>``, so the name a human can check arrives attached to the id the
+    click is anchored to, and neither can be another row's.
+
+    THE RECONCILIATION IS THE POINT, and it is inherited rather than
+    reimplemented -- ``shape.parse_followed_pages`` already refuses to call a
+    partial list complete, and this surface is never complete: measured across
+    five captures, LinkedIn renders 20 rows under a heading stating 58, with
+    no pagination control of any kind. So "his Page is not in the rows that
+    drew" is ``unknown`` and not ``not_following``, which for an UNFOLLOW is
+    the safe direction twice over -- it refuses rather than clicking, and it
+    refuses rather than telling him he does not follow somebody he does.
+    """
+    rows = await dom.harvest_followed_pages(page)
+    parsed = shape.parse_followed_pages(rows, await dom.read_main_text(page))
+    verdict = shape.followed_page_state(target, parsed)
+    matched = verdict.get("matched") or {}
+    facts = {
+        "company": matched.get("name"),
+        "company_id": matched.get("id"),
+        "rendered": parsed.get("rendered"),
+        "total_followed": parsed.get("total_followed"),
+    }
+    return facts, str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
+
+
+async def _read_apply_route(page: Any, target: str) -> tuple[str, str]:
+    """Which way this posting is applied to, off the posting already open.
+
+    Not a toggle state -- a ROUTE. The gate's ``from_state`` for apply is the
+    route it is willing to act on, so the same machinery that refuses to save
+    an already-saved posting refuses to apply through a path nobody has
+    identified. See ``shape.apply_route`` for why the classification demands
+    several fields agreeing rather than the one obvious one.
+    """
+    control = await dom.read_apply_control(page)
+    verdict = shape.apply_route(
+        control.get("label"),
+        control.get("href"),
+        count=int(control.get("count") or 0),
+        job_id=target,
+        link_target=control.get("link_target"),
+    )
+    return str(verdict.get("route") or UNKNOWN), str(verdict.get("why") or "")
 
 
 async def _read_saved_state(page: Any, target: str) -> tuple[str, str]:
@@ -1147,6 +1434,46 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "apply_control":
+        # ONE load, and the facts and the route come off the same page. The
+        # route is read from the CONTROL rather than from the payload, which
+        # is not a stylistic choice: an off-site posting was measured carrying
+        # the on-site apply flow's own marker inside its pre-hydration payload,
+        # for the same job id, so a payload search classifies nothing.
+        url = str(spec.url_template or JOB_POSTING_URL).format(target=target)
+        landed = await _load(navigator, page, url, surface="job posting")
+        facts = await _read_posting_facts(page, target)
+        state, why = await _read_apply_route(page, target)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
+    if spec.state_from == "followed_pages":
+        # ONE load, and the click lands on this very page. The facts come from
+        # the row's own button, so the name printed in the gate and the row the
+        # click is anchored to are the same DOM element by construction.
+        landed = await _load(
+            navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
+        )
+        facts, state, why = await _read_followed_state(page, target)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "saved_list":
         # TWO loads, and the gate says so. The facts come off the posting; the
         # direction comes off his saved list, because the save control's ON
@@ -1327,11 +1654,19 @@ def _direction(
     if state != spec.from_state:
         raise WriteAttemptError(
             f"{spec.action!r} is valid only from {spec.from_state!r} and this "
-            f"target reads {state!r}. On a toggle, performing an action from "
-            "the wrong state performs its OPPOSITE -- confirming a save on an "
-            "already-saved posting would UNSAVE it -- so this is refused "
-            "rather than treated as a harmless no-op. You may have wanted the "
-            "inverse action."
+            f"target reads {state!r}. "
+            + (
+                spec.wrong_state_note
+                or (
+                    "On a toggle, performing an action from the wrong state "
+                    "performs its OPPOSITE -- confirming a save on an "
+                    "already-saved posting would UNSAVE it -- so this is "
+                    "refused rather than treated as a harmless no-op. You may "
+                    "have wanted the inverse action."
+                )
+            )
+            + " "
+            + observation.state_why
         )
     out = dict(read_from)
     out.update({"currently": state, "after": spec.to_state})
@@ -1416,6 +1751,20 @@ def _render(
         where["job_id"] = observation.target
         where["title"] = observation.facts.get("title")
         where["company"] = observation.facts.get("company")
+    elif spec.target_kind == "company_id":
+        # THE NAME IS THE FIELD HE CAN CHECK; the id is what the click is
+        # anchored to. Both are printed, and the coverage numbers with them --
+        # this list is never complete, so the block says how much of it was
+        # actually seen rather than leaving him to assume all of it.
+        where["company_id"] = observation.target
+        where["company"] = observation.facts.get("company")
+        where["read_from_the_rows_own_button"] = True
+        where["list_coverage"] = (
+            f"{observation.facts.get('rendered')} rows rendered of "
+            f"{observation.facts.get('total_followed')} LinkedIn says you "
+            "follow. This surface has no pagination control, so the rest were "
+            "not shown and could not have been."
+        )
     else:
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
@@ -1535,12 +1884,32 @@ async def preview(
 #: :func:`mint` already refuses it a grant at issue. Its residue is also the one
 #: irreversibility in this design that is measured in AUDIENCE rather than in
 #: state -- a badge taken down is not a badge un-seen.
-PERFORMABLE: frozenset[str] = frozenset({"save_job", "unsave_job"})
+#:
+#: ``apply_job`` is not here and is the one whose absence needs saying plainly,
+#: because it is the action that was asked for by name. Its CONTROL is measured
+#: -- two routes, positively distinguishable, and the identification half ships
+#: as a read. Its FLOW is not: thirteen job captures contain zero forms, zero
+#: file inputs, zero dialogs and zero submit controls, so nothing in this repo
+#: has ever seen what a caller would have to fill in or press. It also holds no
+#: ``url_template``, so :func:`mint` refuses it a grant at issue exactly as it
+#: refuses Open To Work. An apply cannot be taken back by this server under any
+#: circumstances, which makes it the last action in the design that should ever
+#: be performed on a guessed selector.
+PERFORMABLE: frozenset[str] = frozenset(
+    {"save_job", "unsave_job", "unfollow_company"}
+)
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
 #: control that has not settled is the failure mode with no error message.
 CLICK_TIMEOUT_MS = 10_000
+
+
+#: The accessible-name PREFIX the unfollow control wears. A prefix rather than
+#: an exact label because LinkedIn writes the Page's own name into it, which is
+#: the same property that makes it the best anchor in this package and an
+#: unusable dictionary key.
+UNFOLLOW_ANCHOR_PREFIX = "Click to stop following "
 
 
 def anchor_label_for(spec: WriteSpec) -> Optional[str]:
@@ -1559,7 +1928,18 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     anchor. Until somebody has actually seen it, this returns ``None`` and
     :func:`perform` refuses -- which is the correct behaviour and not a
     limitation to be worked around by picking a plausible string.
+
+    TWO FAMILIES, AND THE DIFFERENCE IS STATED RATHER THAN FLATTENED. The
+    save pair is anchored on an EXACT accessible name. ``unfollow_company``
+    is anchored on a PREFIX, because LinkedIn writes the Page's own name into
+    the label -- ``Click to stop following <Page>``. That is what makes it the
+    strongest anchor in this package (the control states its own inverse
+    action) and simultaneously unusable as a table key, so it does not live in
+    a table. The row is pinned separately, by company id; see
+    ``dom.unfollow_control_selector``.
     """
+    if spec.action == "unfollow_company":
+        return UNFOLLOW_ANCHOR_PREFIX
     for label, state in shape.SAVE_LABELS.items():
         if state == spec.from_state:
             return label
@@ -1567,20 +1947,238 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
 
 
 def _refuse_unperformable(spec: WriteSpec) -> None:
-    """Raise unless this action is one :func:`perform` may execute at all."""
+    """Raise unless this action is one :func:`perform` may execute at all.
+
+    Each refusal names its OWN reason. The generic sentence at the bottom is a
+    backstop for a future spec, not the answer for any action that exists
+    today: "not performable" is true of all three and explains none of them,
+    and three different gaps that print the same sentence teach a reader that
+    the sentence carries no information.
+    """
     if spec.action in PERFORMABLE:
         return
     if spec.action == "follow_company":
         raise WriteAttemptError(
-            "follow_company is sanctioned but is not performed by this server. "
-            "It is reversible only BY HIM, BY HAND -- no unfollow is "
-            "sanctioned, so a follow made here is one this server cannot take "
-            "back. An action whose undo is hand-only does not go first."
+            "follow_company is sanctioned but is not performed by this server, "
+            "and the reason CHANGED on 2026-08-24 rather than going away. It "
+            "used to be that no unfollow existed. One does now -- "
+            "linkedin_unfollow_company is performable -- and the objection it "
+            "was built to remove has been replaced by a measured one: THE UNDO "
+            "CANNOT BE AIMED AT WHAT THIS WOULD CREATE. A follow is performed "
+            "from a job posting, which names its employer by SLUG; the unfollow "
+            "surface addresses rows by NUMERIC COMPANY ID; a census of every "
+            "capture in this repo found no posting carrying an id, no "
+            "Manage-Pages row carrying a slug, and no way to resolve one to "
+            "the other without a network call this server does not make. And "
+            "even given the id, that surface renders 20 rows of a stated 58 "
+            "with no pagination control at all, so about two thirds of the "
+            "list is unreachable in the one page load this server performs. "
+            "WHAT WOULD LIFT THIS: a measured slug-to-id resolution on a "
+            "surface already on the read allowlist, or evidence that a newly "
+            "followed Page sorts into the rendered window."
+        )
+    if spec.action == "apply_job":
+        raise WriteAttemptError(
+            "apply_job is sanctioned and is NOT performed, and this is the "
+            "refusal least likely to be lifted by trying harder. The apply "
+            "CONTROL is measured: two routes, positively distinguishable, and "
+            "linkedin_job_detail reports which one a posting uses. THE APPLY "
+            "FLOW IS NOT MEASURED AT ALL. Thirteen job captures in this repo "
+            "contain zero forms, zero file inputs, zero dialogs, zero "
+            "screening questions and zero controls that submit anything -- "
+            "nothing here has ever seen what a caller would have to fill in or "
+            "press. An application cannot be withdrawn by this server under "
+            "any circumstances (withdrawal is permanently forbidden), so it is "
+            "the last action in this design that may be attempted on a guessed "
+            "selector. AND HALF OF IT IS NOT THIS SERVER'S TO PERFORM EVEN "
+            "THEN: the off-site route submits on a third party's applicant- "
+            "tracking system, which this server was not built for and has no "
+            "business driving."
+        )
+    if spec.action == "set_open_to_work":
+        raise WriteAttemptError(
+            "set_open_to_work is sanctioned and cannot be performed: its "
+            "editor is not addressed by a url at all. Measured 2026-08-24 -- "
+            "237 distinct urls and 37 payload paths across five profile "
+            "captures, zero of which reach it. It opens as a modal from a "
+            "control on his own profile, and the single click that would first "
+            "SHOW that editor is also the first click that could CHANGE it. "
+            "This is the one action in the design a current employer can see."
         )
     raise WriteAttemptError(
         f"{spec.action!r} is not performable. The complete performable set is "
         f"{sorted(PERFORMABLE)}, and it is deliberately smaller than the "
         "sanctioned set."
+    )
+
+
+#: Which surface each target kind's write lands on. Named for the auth-wall
+#: check's message, which is read by a human at the worst possible moment.
+_WRITE_SURFACE: dict[str, str] = {
+    "job_id": "job posting",
+    "company_id": "followed companies",
+}
+
+
+def _assert_landed_on_target(
+    spec: WriteSpec, grant: WriteGrant, landed: str
+) -> None:
+    """Refuse unless the browser is on the page this grant is permission for.
+
+    Two shapes, because the two surfaces are identified differently and
+    pretending otherwise would make one of the checks vacuous. A POSTING is
+    identified by the id inside its url, and LinkedIn also serves a slug form
+    of the same posting, so the id is compared rather than the whole string. A
+    LIST has one address and no id at all; the target selects a row, so the url
+    is compared whole and the row is enforced by the selector the click is
+    built from -- which is the only place it can be.
+    """
+    if spec.target_kind == "job_id":
+        landed_id = re.search(dom.JOB_HREF, str(landed))
+        if not landed_id or landed_id.group(1) != grant.target:
+            raise WriteAttemptError(
+                f"refusing to click: the grant is for job {grant.target} and "
+                f"the browser landed on {landed!r}, which is not that posting."
+            )
+        return
+    expected = str(spec.url_template or "").format(target=grant.target)
+    if str(landed).rstrip("/") != expected.rstrip("/"):
+        raise WriteAttemptError(
+            f"refusing to click: this action is performed on {expected!r} and "
+            f"the browser landed on {landed!r}. A list write is anchored to a "
+            "row on one page, so landing anywhere else means the row this "
+            "grant names is not on the screen."
+        )
+
+
+async def _live_control(
+    page: Any, spec: WriteSpec, grant: WriteGrant, anchor: str
+) -> tuple[str, str, str]:
+    """GATE 5, per family: re-read the very control, and build its selector.
+
+    Returns ``(state, why, selector)``. The state comes from the CONTROL, on
+    the page, right now -- never from the preview -- and the selector is built
+    from a label this reader has measured rather than from anything a caller
+    supplied.
+
+    For the save pair this is an INDEPENDENT corroboration, because the preview
+    took its direction from the saved list and this takes it from the button.
+    For ``unfollow_company`` it is not independent -- the preview read the same
+    page -- and saying so matters: what it adds there is FRESHNESS and ROW
+    IDENTITY, confirming that the row keyed to this company id still exists and
+    still carries exactly one unfollow button, which is the precondition a
+    click needs and a list read does not.
+    """
+    if spec.action == "unfollow_company":
+        control = await dom.read_unfollow_control(page, grant.target)
+        count = int(control.get("count") or 0)
+        label = str(control.get("label") or "")
+        if count == 0:
+            return (
+                UNKNOWN,
+                f"no unfollow control for company {grant.target} is on this "
+                "page. That is NOT evidence he has stopped following them: "
+                "this surface renders part of the list and has no pagination "
+                "control, so a row that is not drawn and a Page that is not "
+                "followed look identical from here.",
+                "",
+            )
+        if count > 1:
+            return (
+                UNKNOWN,
+                f"{count} unfollow controls resolved for company "
+                f"{grant.target}. A company id must select exactly one row; "
+                "more than one means the row scoping matched across rows, and "
+                "picking either would be picking by position.",
+                "",
+            )
+        if not label.startswith(anchor):
+            return (
+                UNKNOWN,
+                f"the control is labelled {label!r}, which does not begin "
+                f"{anchor!r}. That prefix is the whole of the evidence that "
+                "pressing it stops a follow rather than starting one, so an "
+                "unrecognised label is refused rather than interpreted.",
+                "",
+            )
+        return (
+            "following",
+            f"the row for company {grant.target} draws exactly one control and "
+            f"it is labelled {label!r}, which states the inverse action.",
+            dom.unfollow_control_selector(grant.target),
+        )
+
+    control = await dom.read_save_control(page)
+    verdict = shape.save_state(
+        control.get("label"), count=int(control.get("count") or 0)
+    )
+    return (
+        str(verdict.get("state") or UNKNOWN),
+        str(verdict.get("why") or ""),
+        dom.save_control_selector(anchor),
+    )
+
+
+async def _verify_after(
+    navigator: Any,
+    page: Any,
+    spec: WriteSpec,
+    grant: WriteGrant,
+    observation: Observation,
+) -> tuple[str, str, str]:
+    """Read whether it landed, and read it somewhere the click did not reach.
+
+    Returns ``(state, why, read_from_url)``.
+
+    THE SAVE PAIR gets the ideal shape: the click happens on the posting and
+    the confirmation is read off the saved list, a different surface entirely,
+    carrying LinkedIn's own per-tab count.
+
+    THE UNFOLLOW DOES NOT, AND THIS SAYS SO INSTEAD OF IMPLYING OTHERWISE.
+    There is exactly one surface that lists followed Pages, so the
+    confirmation comes from RELOADING it -- a fresh navigation and a fresh
+    render from LinkedIn, which is materially stronger than reading a button
+    that redrew itself in place, and weaker than an independent surface. To
+    stop the row's mere absence from carrying the verdict on a list that is
+    never complete, the evidence is LINKEDIN'S OWN STATED TOTAL: the row must
+    be gone AND the count must have dropped by exactly one. A row that vanished
+    while the total held is a row that scrolled out of a partial list, and it
+    is reported as unknown.
+    """
+    if spec.action != "unfollow_company":
+        landed = await _load(navigator, page, SAVED_LIST_URL, surface="saved jobs")
+        state, why = await _read_saved_state(page, grant.target)
+        return state, why, landed
+
+    landed = await _load(
+        navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
+    )
+    facts, state, why = await _read_followed_state(page, grant.target)
+    if state == "following":
+        return (
+            "following",
+            "the row for this company is still on the page after the click, so "
+            "the unfollow did not take effect. " + why,
+            landed,
+        )
+    before = observation.facts.get("total_followed")
+    after = facts.get("total_followed")
+    if isinstance(before, int) and isinstance(after, int) and after == before - 1:
+        return (
+            "not_following",
+            f"the row is gone AND LinkedIn's own total dropped from {before} "
+            f"to {after}. The count is the evidence here; on a list that "
+            "renders part of itself, an absent row alone would not be.",
+            landed,
+        )
+    return (
+        UNKNOWN,
+        "the row is not on the page, but LinkedIn's own total does not "
+        f"corroborate a departure (it read {before!r} before and {after!r} "
+        "after). This surface renders part of the list, so an absent row is "
+        "not by itself evidence of anything. Open your followed companies and "
+        "look. " + why,
+        landed,
     )
 
 
@@ -1691,35 +2289,35 @@ async def perform(
     url = assert_write_url(
         str(spec.url_template or "").format(target=grant.target), grant
     )
-    landed = await _load(navigator, page, url, surface="job posting")
+    landed = await _load(
+        navigator,
+        page,
+        url,
+        surface=_WRITE_SURFACE.get(spec.target_kind, "linkedin"),
+    )
 
-    # We must be on the posting the grant names. LinkedIn serves a slug form of
-    # the same posting, so the ID is compared rather than the whole string --
-    # a landed url that carries no job id at all, or a different one, means the
-    # navigation went somewhere this grant is not permission for.
-    landed_id = re.search(dom.JOB_HREF, str(landed))
-    if not landed_id or landed_id.group(1) != grant.target:
-        raise WriteAttemptError(
-            f"refusing to click: the grant is for job {grant.target} and the "
-            f"browser landed on {landed!r}, which is not that posting."
-        )
+    # We must be on the page the grant names -- compared by job id for a
+    # posting, and whole for a list. See :func:`_assert_landed_on_target`.
+    _assert_landed_on_target(spec, grant, landed)
 
     # Gate 5: the control itself, read live, on the page about to be clicked.
-    control = await dom.read_save_control(page)
-    verdict = shape.save_state(
-        control.get("label"), count=int(control.get("count") or 0)
-    )
-    live_state = str(verdict.get("state") or UNKNOWN)
-    if live_state != spec.from_state:
+    live_state, live_why, selector = await _live_control(page, spec, grant, anchor)
+    if live_state != spec.from_state or not selector:
         raise WriteAttemptError(
             f"refusing to click: {spec.action!r} is valid only from "
             f"{spec.from_state!r} and the control on the page reads "
-            f"{live_state!r}. {verdict.get('why')} On a toggle, acting from "
-            "the wrong state performs the OPPOSITE action, so this stops "
-            "rather than treating it as a no-op. This reading is fresher than "
-            "the one in the preview and it wins."
+            f"{live_state!r}. {live_why} "
+            + (
+                spec.wrong_state_note
+                or (
+                    "On a toggle, acting from the wrong state performs the "
+                    "OPPOSITE action, so this stops rather than treating it "
+                    "as a no-op."
+                )
+            )
+            + " This reading is fresher than the one in the preview and it "
+            "wins."
         )
-    selector = dom.save_control_selector(anchor)
 
     # ---- everything above may raise; nothing below does --------------------
     click_error: Optional[str] = None
@@ -1731,26 +2329,32 @@ async def perform(
     # The label the control changed INTO. Read for a human, never branched on:
     # this is the one measurement that can settle the missing half of
     # shape.SAVE_LABELS, and it can only be taken here, immediately after a
-    # real save on a real account.
+    # real save on a real account. SAVE FAMILY ONLY -- an unfollow's row is
+    # expected to LEAVE the page, so there is no control left to read back and
+    # sweeping for one would report whichever neighbouring row redrew first.
     became: Optional[str] = None
-    try:
-        became = await dom.read_any_save_control_label(page)
-    except Exception:  # noqa: BLE001 - a measurement, not a gate
-        became = None
+    if spec.target_kind == "job_id":
+        try:
+            became = await dom.read_any_save_control_label(page)
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            became = None
 
     verified_state = UNKNOWN
     verified_why = ""
     try:
-        state_landed = await _load(
-            navigator, page, SAVED_LIST_URL, surface="saved jobs"
+        verified_state, verified_why, state_landed = await _verify_after(
+            navigator, page, spec, grant, observation
         )
-        verified_state, verified_why = await _read_saved_state(page, grant.target)
     except Exception as exc:  # noqa: BLE001 - the click already happened
-        state_landed = SAVED_LIST_URL
+        state_landed = (
+            FOLLOWED_PAGES_URL
+            if spec.action == "unfollow_company"
+            else SAVED_LIST_URL
+        )
         verified_why = (
             f"the verification read itself failed ({type(exc).__name__}: "
             f"{exc}), so this says nothing about whether the click landed. "
-            "Open your saved jobs and look."
+            f"Open {state_landed} and look."
         )
 
     # THREE OUTCOMES, DECIDED BY THE VERIFICATION AND NOT BY THE CLICK.
@@ -1772,15 +2376,19 @@ async def perform(
     else:
         performed = UNKNOWN
 
+    target_block: dict[str, Any] = {"url": url}
+    if spec.target_kind == "job_id":
+        target_block["job_id"] = grant.target
+        target_block["title"] = observation.facts.get("title")
+        target_block["company"] = observation.facts.get("company")
+    else:
+        target_block["company_id"] = grant.target
+        target_block["company"] = observation.facts.get("company")
+
     return {
         "action": spec.action,
         "what": spec.summary,
-        "target": {
-            "job_id": grant.target,
-            "title": observation.facts.get("title"),
-            "company": observation.facts.get("company"),
-            "url": url,
-        },
+        "target": target_block,
         "performed": performed,
         "clicked": {
             "selector": selector,
@@ -1796,21 +2404,42 @@ async def perform(
             "read_from": state_landed,
             "why": verified_why,
             "surface": (
-                "a DIFFERENT surface from the one clicked. A control that "
-                "redraws itself is the weakest possible witness to its own "
-                "effect, so the confirmation comes from LinkedIn's own saved "
-                "list with its own per-tab count."
+                (
+                    "THE SAME PAGE, RELOADED, and there is no other: LinkedIn "
+                    "lists followed Pages on exactly one surface. A fresh "
+                    "navigation is a fresh render from LinkedIn rather than a "
+                    "control that redrew itself in place -- stronger than "
+                    "reading the button just pressed, weaker than an "
+                    "independent surface, and said plainly rather than "
+                    "implied. The verdict rests on LinkedIn's own stated "
+                    "total, not on the row's absence."
+                )
+                if spec.action == "unfollow_company"
+                else (
+                    "a DIFFERENT surface from the one clicked. A control that "
+                    "redraws itself is the weakest possible witness to its own "
+                    "effect, so the confirmation comes from LinkedIn's own "
+                    "saved list with its own per-tab count."
+                )
             ),
         },
         "preview_age_seconds": round(observation.age(), 3),
         "to_undo": spec.reversible_by,
         "newly_observed_save_label": became,
         "what_that_label_is_for": (
-            "the accessible name the save control wears NOW. It is recorded "
-            "for a human and nothing branches on it. If it is not "
-            f"{anchor!r}, it is the state this repo has never been able to "
-            "photograph -- write it into shape.SAVE_LABELS and unsave_job "
-            "acquires its anchor."
+            (
+                "the accessible name the save control wears NOW. It is "
+                "recorded for a human and nothing branches on it. If it is not "
+                f"{anchor!r}, it is the state this repo has never been able to "
+                "photograph -- write it into shape.SAVE_LABELS and unsave_job "
+                "acquires its anchor."
+            )
+            if spec.target_kind == "job_id"
+            else (
+                "not applicable to this action: an unfollow removes its own "
+                "row, so there is no control left to read back and sweeping "
+                "for one would report a neighbouring row's."
+            )
         ),
         "read_this_if_unsure": (
             "performed is 'unknown' when the click may or may not have "

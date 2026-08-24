@@ -677,6 +677,73 @@ async def read_any_save_control_label(page: Any) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Apply route
+# ---------------------------------------------------------------------------
+
+#: The accessible names the APPLY control has been SEEN wearing, MEASURED
+#: 2026-08-24 across thirteen job captures. Two, and they are two ROUTES rather
+#: than two states of one thing -- see ``shape.APPLY_LABELS``.
+#:
+#: BOTH ARE ANCHORS, NOT BUTTONS. Every apply control in every capture is an
+#: ``<a href=...>``; there are zero apply ``<button>`` elements anywhere. So
+#: activating one is a NAVIGATION, and the destination is readable BEFORE
+#: anything is activated. That is the single most useful property this surface
+#: has: the route can be identified, and the third-party site named, without
+#: touching the control at all.
+APPLY_LABELS_SEEN: tuple[str, ...] = (
+    "LinkedIn Apply to this job",
+    "Apply on company website",
+)
+
+#: Matches the apply control in either route this reader recognises. An
+#: already-applied posting is NOT known to match -- that state has never been
+#: observed, because the applied list on this account is empty -- so count 0
+#: here is genuinely ambiguous and ``shape.apply_route`` says so.
+APPLY_CONTROL = ", ".join(
+    f'a[aria-label="{label}"]' for label in APPLY_LABELS_SEEN
+)
+
+
+async def read_apply_control(page: Any) -> dict[str, Any]:
+    """Return the apply control's name, destination and target attribute.
+
+    Reads THREE fields rather than one, because ``shape.apply_route`` refuses
+    to classify on any single one of them: the accessible name has already been
+    changed once by LinkedIn on this control, and the outbound href is a
+    generic wrapper that also carries links which have nothing to do with
+    applying. Same three-outcome discipline as :func:`read_follow_control`;
+    count 0 and count above 1 are both reported rather than resolved.
+    """
+    out: dict[str, Any] = {
+        "label": None,
+        "href": None,
+        "link_target": None,
+        "count": 0,
+    }
+    try:
+        controls = page.locator(APPLY_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("apply control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    control = controls.first
+    for field, attribute in (
+        ("label", "aria-label"),
+        ("href", "href"),
+        ("link_target", "target"),
+    ):
+        try:
+            value = await control.get_attribute(attribute)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("apply %s unreadable: %s", attribute, exc)
+            continue
+        out[field] = str(value or "").strip() or None
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Follow state
 # ---------------------------------------------------------------------------
 
@@ -692,10 +759,22 @@ async def read_any_save_control_label(page: Any) -> Optional[str]:
 #: conventions for one concept, which is why the ON state had to be captured
 #: on THIS control rather than inferred from a sibling.
 #:
-#: THE CLASS ATTRIBUTE IS NOT A SIGNAL AND THIS IS MEASURED, not assumed: the
-#: two buttons carry BYTE-IDENTICAL class lists, and ``aria-pressed`` appears
-#: nowhere on the page. The accessible name is the whole of the difference,
-#: which is the entire case for anchoring on it.
+#: THE CLASS ATTRIBUTE IS NOT A SIGNAL ON THIS SURFACE AND THIS IS MEASURED,
+#: not assumed: on ``/jobs/view/`` the two buttons carry BYTE-IDENTICAL class
+#: lists and ``aria-pressed`` appears nowhere on the page, so the accessible
+#: name is the whole of the difference and that is the entire case for
+#: anchoring on it.
+#:
+#: THE SURFACE QUALIFIER IS LOAD-BEARING AND IT WAS MISSING UNTIL 2026-08-24,
+#: when a census found a capture IN THIS REPO refuting the universal form of
+#: the sentence. ``/jobs/search/`` renders a different, older control --
+#: ``class="follow is-following ..." aria-pressed="true"`` -- so on THAT
+#: surface the class and ``aria-pressed`` do both carry the state. The reader
+#: below is unaffected, because it is only ever pointed at a posting page and
+#: measured count 1 on both. The correction is recorded rather than quietly
+#: applied: a comment claiming something universal that one of this repo's own
+#: files disproves is the same defect class as a gate printing an unmeasured
+#: reversibility claim, one layer down.
 FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
 
 
@@ -780,8 +859,22 @@ FOLLOWED_PAGE_BUTTON = 'button[aria-label^="Click to stop following "]'
 #: Nothing here counts children, indexes a list or names a class, so the
 #: property the original was written for survives intact: a restyled or
 #: reordered row still reads, and a build-hash class change cannot break it.
-_FOLLOWED_PAGE_ID_SCOPE = (
-    "xpath=ancestor::*["
+#: The row predicate itself, WITHOUT the ``xpath=`` prefix, so it can be spliced
+#: into a longer expression. Defined once and consumed twice -- by the reader
+#: below and by :func:`unfollow_control_selector` -- because the READ and the
+#: WRITE agreeing about what a row is cannot be left to two copies of a string.
+#:
+#: THIS SHARING IS A REPAIR, NOT A TIDY-UP. The write path shipped its own copy
+#: on 2026-08-24 with a comment claiming it was "reused verbatim", and it was
+#: not: it had dropped the ``[.//a[contains(@href,'/company/')]]`` condition.
+#: Measured consequence on the real capture -- ALL TWENTY rows resolved to a
+#: bare wrapping ``<div>`` holding zero company links, so the selector matched
+#: NOTHING and every unfollow would have refused. Caught by a slice that
+#: instrumented the scope resolution instead of trusting the comment. A comment
+#: asserting that two strings are the same is worth exactly nothing; being the
+#: same string is worth what the comment claimed.
+_ROW_SCOPE = (
+    "ancestor::*["
     "not(self::html or self::body or self::main or self::nav"
     " or self::header or self::footer or @role='main' or @role='navigation'"
     " or @role='banner' or @role='contentinfo')"
@@ -789,6 +882,8 @@ _FOLLOWED_PAGE_ID_SCOPE = (
     "[count(.//button[starts-with(@aria-label,'Click to stop following ')])=1]"
     "[1]"
 )
+
+_FOLLOWED_PAGE_ID_SCOPE = "xpath=" + _ROW_SCOPE
 
 #: The Page link inside that scope. Kept separate so a row that has none still
 #: yields its NAME, which is the field the follow question is actually asked
@@ -838,6 +933,76 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
             logger.debug("row %d link unreadable: %s", index, exc)
         rows.append({"label": str(label or ""), "href": href})
     return rows
+
+
+def unfollow_control_selector(company_id: str) -> str:
+    """A selector for the unfollow button of ONE company, keyed by its id.
+
+    GUARDED, like :func:`save_control_selector`, and for the same reason: this
+    is a string a click is built from. ``company_id`` must be digits, so
+    nothing a caller supplies can escape the quoting or widen the predicate.
+
+    WHY THE ID AND NOT THE NAME, even though the name is right there in the
+    accessible name this anchors on. The label states the inverse action --
+    ``Click to stop following <Page>`` -- which is what makes it the strongest
+    anchor in this package. It is also the WEAKEST KEY: display names collide,
+    change, and are chosen by somebody else. So the button is found by its
+    label and the ROW is found by its company id, and both must agree.
+
+    WHY THE ROW MUST CARRY A ``/company/`` LINK AT ALL, which is the part that
+    is a safety property rather than a nicety. A census on 2026-08-24 measured
+    LinkedIn rendering the IDENTICAL label template -- ``Click to stop
+    following <name>`` -- over PEOPLE on ``/feed/following/``: twenty rows,
+    ``urn:li:member:`` urns, and no company link anywhere in them. A selector
+    anchored on the label alone matched all twenty. This server cannot reach
+    that surface (it is not on the read allowlist), so nothing was ever at
+    risk; the requirement is here because the day the selector meets a page
+    nobody predicted is the day the requirement has to already be in it.
+    Requiring the company link discriminates 80 company rows from 20 member
+    rows with no exceptions in either direction.
+    """
+    identifier = str(company_id or "").strip()
+    if not identifier.isdigit() or len(identifier) < 4:
+        raise ExtractionFailedError(
+            f"refusing to build an unfollow selector for {company_id!r}: a "
+            "followed Page is addressed by its numeric LinkedIn company id. A "
+            "selector assembled from anything else is a guess pointed at "
+            "whichever row happens to match."
+        )
+    return (
+        "xpath=//button[starts-with(@aria-label,'Click to stop following ')]["
+        + _ROW_SCOPE
+        + f"/descendant::a[contains(@href,'/company/{identifier}/')]]"
+    )
+
+
+async def read_unfollow_control(page: Any, company_id: str) -> dict[str, Any]:
+    """The unfollow button belonging to ONE company row, and how sure we are.
+
+    Same three outcomes as every other control reader here, and the middle one
+    is not theoretical on this surface: LinkedIn renders twenty rows of a
+    larger list, so count 0 means "that company's row is not on the page",
+    which is emphatically NOT "he does not follow them". The caller reconciles
+    that against LinkedIn's own stated total -- see
+    ``shape.followed_page_state`` -- and this reader does not pretend to.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    selector = unfollow_control_selector(company_id)
+    try:
+        controls = page.locator(selector)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("unfollow control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("unfollow label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
 
 
 async def read_main_text(page: Any) -> str:

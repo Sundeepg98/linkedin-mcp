@@ -111,16 +111,28 @@ mcp = FastMCP(
     name=SERVER_NAME,
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
-        "signed-in browser on his own machine. Fourteen of the sixteen tools "
-        "read and change nothing. TWO WRITE: linkedin_save_job and "
-        "linkedin_unsave_job. Call either without a confirm_token and it "
-        "performs NOTHING -- it reads the posting and his saved list live and "
-        "returns a block for HIM to read; only a token from that block, used "
-        "once within two minutes, actually acts. Never confirm on his behalf. "
-        "linkedin_unsave_job currently refuses to act at all and says why. "
-        "There is no apply, no message, no connection request, no profile "
-        "edit, no follow -- those are out of scope by design, so do not look "
-        "for them or suggest they exist. "
+        "signed-in browser on his own machine. Fourteen of the seventeen "
+        "tools read and change nothing. THREE WRITE: linkedin_save_job, "
+        "linkedin_unsave_job and linkedin_unfollow_company. Call any of them "
+        "without a confirm_token and it performs NOTHING -- it reads the "
+        "target live and returns a block for HIM to read; only a token from "
+        "that block, used once within two minutes, actually acts. NEVER "
+        "CONFIRM ON HIS BEHALF. linkedin_unsave_job currently refuses to act "
+        "at all and says why. linkedin_unfollow_company takes the NUMERIC "
+        "company id from linkedin_followed_companies, never a name. "
+        "ON APPLYING, because it is the thing most often asked for: this "
+        "server does NOT submit applications, and that is not a shrug. "
+        "linkedin_job_detail reports apply_path, which tells you whether a "
+        "posting applies on LinkedIn or hands you to an outside "
+        "applicant-tracking system, and names that system -- which is the "
+        "half worth having when deciding what to open. The submitting half is "
+        "refused because the apply form has never been captured and an "
+        "application cannot be withdrawn from here. Tell him that if he asks, "
+        "rather than describing applying as something this server declines on "
+        "principle -- it does not. "
+        "There is no message, no connection request, no InMail, no profile "
+        "edit, no post, and no follow -- do not look for them or suggest they "
+        "exist. "
         "Start with linkedin_auth_status; if it says false, the operator must "
         "call linkedin_login_browser and sign in himself in the window it "
         "opens -- this server never handles a password. That sign-in is a "
@@ -877,6 +889,29 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
                 control.get("label"), count=int(control.get("count") or 0)
             )
 
+            # HOW THIS POSTING IS APPLIED TO, off the same open page and at no
+            # extra load. The single most decision-relevant fact a card cannot
+            # carry: whether applying happens inside LinkedIn or hands you to
+            # somebody else's applicant-tracking system, and if so, WHOSE.
+            #
+            # A pure READ. LinkedIn draws the apply control as an anchor rather
+            # than a button, so the destination is legible without touching it,
+            # and the off-site wrapper decodes by string alone -- no redirect is
+            # followed and no third-party host is contacted.
+            #
+            # Three-valued for the same reason every other reader here is, and
+            # the third value carries more weight on this one than anywhere
+            # else: it feeds the from_state of an IRREVERSIBLE action, so an
+            # unidentified route has to be a refusal rather than a default.
+            apply_control = await dom.read_apply_control(page)
+            out["apply_path"] = shape.apply_route(
+                apply_control.get("label"),
+                apply_control.get("href"),
+                count=int(apply_control.get("count") or 0),
+                job_id=digits,
+                link_target=apply_control.get("link_target"),
+            )
+
             out["pages_loaded"] = 1
             out["source_url"] = final_url
             return out
@@ -1227,6 +1262,42 @@ async def linkedin_notifications(
 # browser -- it just no longer governs visibility.
 
 
+#: WHY each sanctioned-but-unperformed action is not performed, in one line
+#: each. Keyed by action so a new spec that is not performable has to say why
+#: here or fail the surface test -- the alternative is a fourth action quietly
+#: joining a list of three that a reader takes as complete.
+#:
+#: Kept SHORT here on purpose. The full reasoning lives in
+#: ``writes._refuse_unperformable``, which is what a caller actually hits, and
+#: two long copies of one argument drift.
+_WHY_NOT_PERFORMED: dict[str, str] = {
+    "apply_job": (
+        "the apply CONTROL is measured and linkedin_job_detail reports which "
+        "of the two routes a posting uses; the apply FLOW is not measured at "
+        "all -- no capture of this server's holds a form, a file input, a "
+        "screening question or a control that submits anything. An "
+        "application also cannot be withdrawn by this server in any "
+        "circumstances. And the off-site route would submit on a third "
+        "party's applicant-tracking system, which is not this server's to do "
+        "however well the flow were captured."
+    ),
+    "follow_company": (
+        "an unfollow now exists, but it cannot be aimed at what a follow "
+        "creates: a posting names its employer by slug, the unfollow surface "
+        "addresses rows by numeric company id, and nothing resolves one to "
+        "the other. That surface also renders about 20 rows of 58 with no "
+        "pagination."
+    ),
+    "set_open_to_work": (
+        "its editor is not addressed by a url at all -- 237 urls and 37 "
+        "payload paths measured across five profile captures, zero of which "
+        "reach it. It opens as a modal, and the click that would first show "
+        "it is also the first that could change it. This is the one setting "
+        "here that a current employer can see."
+    ),
+}
+
+
 def _writes_off(action: str) -> dict[str, Any]:
     """The refusal a disabled write returns, with the reason and the remedy."""
     return {
@@ -1241,11 +1312,15 @@ def _writes_off(action: str) -> dict[str, Any]:
     }
 
 
-async def _write_tool(action: str, job_id: Any, confirm_token: str) -> dict[str, Any]:
-    """Preview or perform, for both of the save tools.
+async def _write_tool(action: str, target: Any, confirm_token: str) -> dict[str, Any]:
+    """Preview or perform, for EVERY write tool on this surface.
 
-    ONE implementation, because save and unsave differ only in their spec and
-    a second copy is a second place for the gates to drift apart.
+    ONE implementation, because the writes differ only in their spec and a
+    second copy is a second place for the gates to drift apart. ``target`` is
+    whatever the spec's ``target_kind`` says it is -- a job id for the save
+    pair, a numeric company id for the unfollow -- and it is normalised by
+    ``writes._target_for`` rather than here, so a tool cannot accept a shape
+    its own action does not address.
     """
     if not writes.writes_enabled():
         return _writes_off(action)
@@ -1253,12 +1328,12 @@ async def _write_tool(action: str, job_id: Any, confirm_token: str) -> dict[str,
     async with BROWSER.session() as page:
         if not str(confirm_token or "").strip():
             return await writes.preview(
-                spec, target=job_id, navigator=BROWSER, page=page
+                spec, target=target, navigator=BROWSER, page=page
             )
         grant = writes.consume(
             str(confirm_token).strip(),
             action=action,
-            target=str(job_id if job_id is not None else "").strip(),
+            target=str(target if target is not None else "").strip(),
         )
         return await writes.perform(BROWSER, page, grant)
 
@@ -1335,6 +1410,51 @@ async def linkedin_unsave_job(job_id: str, confirm_token: str = "") -> dict[str,
 
 
 @mcp.tool()
+async def linkedin_unfollow_company(
+    company_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Stop following one company Page. Two steps, and the first is free.
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``. What
+    differs is worth reading before you use it, because two of the differences
+    change what an answer from this tool means.
+
+    IT IS ADDRESSED BY THE NUMERIC COMPANY ID, NOT BY NAME. Call
+    ``linkedin_followed_companies`` first: it prints the id beside each Page.
+    A name is refused outright -- names collide, they change, and they belong
+    to somebody else -- and the click is anchored to the row carrying the id,
+    so the thing you name and the thing that gets pressed are the same row by
+    construction. The preview still prints the NAME, because an id is not
+    something a person can check.
+
+    THE LIST IS NEVER COMPLETE, AND THAT IS THE IMPORTANT ONE. LinkedIn renders
+    about twenty rows of however many you follow, and offers no way to page
+    through the rest. So a Page that is not in the rendered rows comes back
+    "unknown" rather than "not followed", and the preview refuses rather than
+    guessing. If the company you want is not reachable, this tool will say so
+    instead of doing nothing quietly.
+
+    Confirmation after the click is read by RELOADING the same list -- there is
+    no second surface that lists followed Pages -- and the verdict rests on
+    LinkedIn's own stated total dropping by one, not on the row having
+    vanished. On a partial list an absent row is not evidence.
+
+    THE PAIR IS ASYMMETRIC ON PURPOSE: this server can stop a follow and cannot
+    start one. ``linkedin_follow_company`` is specced and is not performed.
+
+    Args:
+        company_id: the numeric LinkedIn company id, as printed by
+            ``linkedin_followed_companies``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually unfollow.
+    """
+    try:
+        return await _write_tool("unfollow_company", company_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
 async def linkedin_server_info() -> dict[str, Any]:
     """Describe this server: what it can do, what it deliberately cannot.
 
@@ -1398,6 +1518,24 @@ async def linkedin_server_info() -> dict[str, Any]:
                 sorted(writes.PERFORMABLE) if writes.writes_enabled() else []
             ),
             "writes_sanctioned": sorted(writes.PERFORMABLE),
+            # A THIRD LAYER, ADDED 2026-08-24, because two fields could not
+            # hold three facts. There are actions this server has SPECCED and
+            # GATED and will never execute, and before this field they were
+            # invisible from here -- so "applying is not offered" and "applying
+            # was examined in detail and refused for a measured reason" looked
+            # identical to a caller. They are not the same, and the second is
+            # the one that tells him what would change it.
+            "writes_sanctioned_but_not_performed": {
+                spec.action: {
+                    "why_not": _WHY_NOT_PERFORMED[spec.action],
+                    "has_a_measured_surface": spec.url_template is not None,
+                    "can_hold_a_grant": spec.url_template is not None,
+                }
+                for spec in sorted(
+                    writes.SANCTIONED_WRITES.values(), key=lambda s: s.action
+                )
+                if spec.action not in writes.PERFORMABLE
+            },
             "writes_note": (
                 "Every write is two calls: one that performs nothing and "
                 "returns a block to read, and one that redeems a single-use "
@@ -1410,7 +1548,11 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "unsave_job is sanctioned and gated but REFUSES to act: the "
                 "accessible name LinkedIn gives the save control on a saved "
                 "posting has never been observed on this account, and this "
-                "server will not guess a selector."
+                "server will not guess a selector. unfollow_company is "
+                "addressed by NUMERIC COMPANY ID, not by name, and refuses "
+                "when the Page is not among the rows LinkedIn rendered -- that "
+                "surface shows part of the list and offers no way to page "
+                "through the rest."
             ),
             # The fields above are about LINKEDIN. ONE tool changes something
             # on THIS MACHINE, and a boundary claim that quietly omitted it
@@ -1441,16 +1583,61 @@ async def linkedin_server_info() -> dict[str, Any]:
             # named explicitly rather than left off, because it is the one
             # thing on this list whose absence a reader might otherwise take
             # as an oversight.
+            # REVIEWED IN FULL ON 2026-08-24, when the scope restriction that
+            # produced most of this list was lifted and each entry had to
+            # re-earn its place. Three kinds of entry now live here and they
+            # are NOT the same kind of "no", so they are labelled:
+            #
+            #   POLICY   -- refused because it should be, whatever gets
+            #               measured. These do not expire.
+            #   MEASURED -- examined, and refused for a reason somebody took a
+            #               reading to establish. These name what would lift
+            #               them, and the detail is in
+            #               writes_sanctioned_but_not_performed above.
+            #   UNMEASURED -- nobody has looked. Kept separate from the other
+            #               two, because presenting an unexamined gap as a
+            #               design decision is the exact claim this server had
+            #               to retract about its own write path.
             "out_of_scope_by_design": [
-                "applying to jobs",
-                "messaging, InMail, connection invitations",
-                "profile edits and Open To Work",
-                "following or unfollowing a company: designed and gated, but "
-                "not performed -- no unfollow is sanctioned, so this server "
-                "could create that state and not clear it",
-                "posting, liking, commenting, endorsing",
-                "marking notifications read",
-                "collecting data about other members",
+                "POLICY: collecting data about other members",
+                "POLICY: posting, liking, commenting, endorsing, recommending",
+                "POLICY: sending messages, InMail or connection invitations "
+                "-- a message in your name that you did not read is a message "
+                "from a stranger wearing your face",
+                "POLICY: withdrawing or deleting anything, at any confirm "
+                "level",
+                "POLICY: applying through an off-site applicant-tracking "
+                "system. Half of all postings apply there rather than on "
+                "LinkedIn, and driving somebody else's form on somebody "
+                "else's domain is not this server's to do",
+                "MEASURED: submitting a LinkedIn-hosted application. The apply "
+                "CONTROL is read and reported -- see apply_path on "
+                "linkedin_job_detail, which tells you which of the two routes "
+                "a posting uses and, for the off-site route, whose site it "
+                "would send you to. The apply FLOW has never been captured, "
+                "so there is no form and no submit control this server has "
+                "seen. An application also cannot be undone from here",
+                "MEASURED: following a company. Specced and gated; not "
+                "performed, because the unfollow cannot be aimed at what a "
+                "follow would create",
+                "MEASURED: profile edits and Open To Work. The setting is "
+                "READ and reported; its editor has no url and opens as a modal "
+                "whose first reveal is also its first chance to change "
+                "something",
+                "MEASURED: marking notifications read. There is no control for "
+                "it on the surface, no notification carries an id to aim one "
+                "at, and opening the page already clears the badge -- so a "
+                "write here could only run after its own effect had landed",
+                "UNMEASURED: READING your own message inbox. Blocked by the "
+                "read boundary's forbidden list, which is correct for SENDING "
+                "and was never argued for reading -- every written rationale "
+                "for that entry is about messages going out. Whether the inbox "
+                "can be read at all has not been established, and there is a "
+                "specific reason to establish it before permitting it: "
+                "LinkedIn's desktop messaging view opens a conversation on "
+                "arrival, so a 'read' of the inbox may mark a thread read. "
+                "scripts/_probe_messaging.py is written and measures exactly "
+                "that; it has not been run",
             ],
             "known_side_effects": [
                 "opening the notifications page clears the unread badge",

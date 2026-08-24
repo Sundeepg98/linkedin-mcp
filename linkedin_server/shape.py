@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Iterable, Optional
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from linkedin_server.config import MAX_TEXT_CHARS
 
@@ -1090,6 +1091,261 @@ def save_state(label: Optional[str], *, count: int) -> dict[str, Any]:
             ),
         }
     return {"state": known, "why": f"the control is labelled {label!r}"}
+
+
+# ---------------------------------------------------------------------------
+# Apply route
+# ---------------------------------------------------------------------------
+
+#: The accessible name of the APPLY control in each route it has been SEEN in,
+#: and which route each one means. Measured 2026-08-24 across thirteen job
+#: captures; see ``dom.APPLY_LABELS_SEEN`` for the selector side.
+#:
+#: TWO ROUTES, AND THEY ARE DIFFERENT PROBLEMS. ``linkedin_apply`` keeps the
+#: whole application inside LinkedIn; ``offsite`` hands the applicant to a
+#: third-party ATS on somebody else's domain. Only the first could ever be
+#: this server's to perform, and neither is performed today -- see
+#: ``writes.SANCTIONED_WRITES['linkedin_apply_job']``.
+#:
+#: THE STRING "EASY APPLY" APPEARS IN ZERO ACCESSIBLE NAMES, and that is worth
+#: stating because it is the name everybody knows the feature by. LinkedIn
+#: renamed it: the control says "LinkedIn Apply to this job". A parser keyed on
+#: "Easy Apply" matches nothing at all, which is the quiet kind of wrong.
+APPLY_LABELS: dict[str, str] = {
+    "LinkedIn Apply to this job": "linkedin_apply",
+    "Apply on company website": "offsite",
+}
+
+#: Same contract as :data:`FOLLOW_UNKNOWN` and :data:`SAVE_UNKNOWN`: "could not
+#: tell" is an answer, and here it is the answer that matters most, because the
+#: action gated on it cannot be taken back.
+APPLY_UNKNOWN = "unknown"
+
+#: LinkedIn's outbound interstitial. NOT an apply-specific url: the same
+#: wrapper carries any external link on the page, so a capture holding two of
+#: them has one that is an apply and one that is not. That is exactly why the
+#: href alone may not classify -- it is corroboration for a label, never a
+#: substitute for one.
+_SAFETY_GO = re.compile(r"^https://www\.linkedin\.com/safety/go/\?", re.I)
+
+#: The LinkedIn-hosted apply flow, addressed off the posting's own id.
+_LINKEDIN_APPLY_HREF = re.compile(
+    r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/apply/(?:\?|$)", re.I
+)
+
+#: Hosts that are LinkedIn itself. An "off-site" destination that resolves back
+#: here is not off-site, and calling it so would name the wrong owner for the
+#: application.
+_LINKEDIN_HOSTS = ("linkedin.com", "www.linkedin.com", "lnkd.in")
+
+
+def decode_safety_go(href: Optional[str]) -> Optional[str]:
+    """Recover the real destination from LinkedIn's outbound interstitial.
+
+    Pure string work -- no network, no redirect followed. The wrapper carries
+    the destination percent-encoded in its ``url`` parameter, including the
+    dots of the hostname (``%2E``), so a naive split on ``.`` finds nothing and
+    a naive read of the raw parameter yields a string that is not a url.
+
+    Returns ``None`` rather than a guess when the parameter is missing or does
+    not decode to an absolute http(s) url. A destination that cannot be named
+    is one the operator cannot check, and an apply gate that cannot say WHOSE
+    site it is sending him to has not identified the route.
+    """
+    raw = str(href or "")
+    if not _SAFETY_GO.match(raw):
+        return None
+    query = urlsplit(raw).query
+    values = parse_qs(query, keep_blank_values=True).get("url") or []
+    for value in values:
+        candidate = unquote(str(value or "")).strip()
+        parts = urlsplit(candidate)
+        if parts.scheme in {"http", "https"} and parts.netloc:
+            return candidate
+    return None
+
+
+def _host_of(url: Optional[str]) -> Optional[str]:
+    netloc = urlsplit(str(url or "")).netloc.strip().casefold()
+    return netloc.split("@")[-1].split(":")[0] or None
+
+
+def apply_route(
+    label: Optional[str],
+    href: Optional[str],
+    *,
+    count: int,
+    job_id: Optional[str] = None,
+    link_target: Optional[str] = None,
+) -> dict[str, Any]:
+    """Classify how one posting is applied to, or refuse to classify it.
+
+    THREE ANSWERS, and the third is the one this function exists for.
+    ``linkedin_apply`` and ``offsite`` are POSITIVE IDENTIFICATIONS, each
+    requiring several independent fields to agree; anything else is
+    :data:`APPLY_UNKNOWN`, with the reason. An apply is irreversible, so the
+    standard here is higher than for a toggle: a route guessed wrong is an
+    application sent to the wrong place, or an application sent at all when
+    nobody could tell whether one would be.
+
+    WHY A CONJUNCTION AND NOT THE OBVIOUS SINGLE FIELD. Each candidate
+    discriminator was measured across thirteen captures and each fails alone:
+
+    * ``data-view-name="job-apply-button"`` is present on ONE capture and
+      absent from a fully hydrated off-site posting, so its absence carries no
+      information whatever. It is not used here at all.
+    * The ``/safety/go/`` href is a GENERIC outbound wrapper -- one capture
+      holds two of them and only one is the apply control -- so href shape
+      alone false-positives on an unrelated external link.
+    * The accessible name is the strongest single field and is still not
+      enough on its own: it is the one thing LinkedIn has already changed once
+      on this surface (the feature is not called "Easy Apply" in the DOM).
+    * The pre-hydration PAYLOAD is worse than useless: an off-site posting's
+      own payload was measured carrying ``openSDUIApplyFlow=true`` on an
+      ``OnsiteApplying`` state variant for the SAME job id. LinkedIn ships the
+      whole apply state machine as a per-posting template, so a substring
+      search over the payload classifies nothing. Only the RENDERED control
+      answers, which is why this takes a label and an href rather than a page.
+
+      WHERE THAT ONE WAS MEASURED, because a reader will look for it and not
+      find it: in the RAW capture ``_audit/_probe-job-followed-company-pre.html``,
+      which is gitignored. The tracked fixtures cannot corroborate it -- the
+      sanitiser strips script payloads, so both following fixtures contain zero
+      occurrences of either string and NO TEST IN THIS REPO GUARDS THIS
+      PARAGRAPH. It is evidence for the design, not an asserted invariant, and
+      it is labelled as such rather than left to look like the others. What IS
+      guarded, from the tracked fixtures: the hydrated off-site posting carries
+      TWO ``/safety/go/`` urls of which only one is the apply control, which is
+      the same argument made from a file anybody can open.
+    """
+    if count == 0:
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                "no apply control rendered in a route this reader recognises. "
+                "A posting that has not hydrated and a posting whose apply "
+                "route is one nobody has seen look identical from here, so "
+                "this is not evidence that the job cannot be applied to."
+            ),
+            "destination": None,
+            "destination_host": None,
+        }
+    if count > 1:
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                f"{count} apply controls rendered, so which one belongs to "
+                "this posting cannot be settled. Choosing the first would be "
+                "choosing by position, on the one action that cannot be undone."
+            ),
+            "destination": None,
+            "destination_host": None,
+        }
+
+    name = str(label or "").strip()
+    known = APPLY_LABELS.get(name)
+    if known is None:
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                f"the apply control is labelled {name!r}, which is neither of "
+                f"the two measured routes {sorted(APPLY_LABELS)}. LinkedIn has "
+                "either relabelled it -- which it has done to this control "
+                "before -- or drawn a third route this reader has never seen."
+            ),
+            "destination": None,
+            "destination_host": None,
+        }
+
+    raw_href = str(href or "").strip()
+
+    if known == "linkedin_apply":
+        match = _LINKEDIN_APPLY_HREF.match(raw_href)
+        if not match:
+            return {
+                "route": APPLY_UNKNOWN,
+                "why": (
+                    "the control claims the LinkedIn-hosted route but its href "
+                    f"is {raw_href!r}, which is not this posting's own apply "
+                    "url. The label and the destination must agree before a "
+                    "route counts as identified."
+                ),
+                "destination": None,
+                "destination_host": None,
+            }
+        found = match.group(1)
+        if job_id is not None and str(job_id).strip() != found:
+            return {
+                "route": APPLY_UNKNOWN,
+                "why": (
+                    f"the apply control points at job {found}, and the posting "
+                    f"being read is job {str(job_id).strip()}. A control that "
+                    "belongs to a different posting is the clearest possible "
+                    "reason to stop."
+                ),
+                "destination": None,
+                "destination_host": None,
+            }
+        return {
+            "route": "linkedin_apply",
+            "why": (
+                f"the control is labelled {name!r} and points at this "
+                f"posting's own LinkedIn apply url ({raw_href!r}). The "
+                "application would be filled in and submitted on LinkedIn."
+            ),
+            "destination": raw_href,
+            "destination_host": _host_of(raw_href),
+        }
+
+    destination = decode_safety_go(raw_href)
+    if destination is None:
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                "the control claims the off-site route but its href "
+                f"({raw_href!r}) is not LinkedIn's outbound wrapper carrying a "
+                "decodable destination. A gate that cannot name whose site an "
+                "application would be sent to has not identified the route."
+            ),
+            "destination": None,
+            "destination_host": None,
+        }
+    host = _host_of(destination)
+    if host is None or host in _LINKEDIN_HOSTS or host.endswith(".linkedin.com"):
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                f"the off-site control decodes to {host!r}, which is LinkedIn "
+                "itself. An off-site route that resolves back here is not "
+                "off-site, and this reader will not name the wrong owner for "
+                "an application."
+            ),
+            "destination": destination,
+            "destination_host": host,
+        }
+    if str(link_target or "").strip() != "_blank":
+        return {
+            "route": APPLY_UNKNOWN,
+            "why": (
+                "the control claims the off-site route and decodes to "
+                f"{host!r}, but it does not carry target=\"_blank\". Every "
+                "off-site apply control measured does, and the outbound "
+                "wrapper alone is not specific to applying -- the same wrapper "
+                "carries unrelated external links on the same page."
+            ),
+            "destination": destination,
+            "destination_host": host,
+        }
+    return {
+        "route": "offsite",
+        "why": (
+            f"the control is labelled {name!r} and its outbound wrapper "
+            f"decodes to {host!r}. The application would be made on that "
+            "company's own applicant-tracking system, not on LinkedIn."
+        ),
+        "destination": destination,
+        "destination_host": host,
+    }
 
 
 #: ``Click to stop following Ashgrove Systems`` -> ``Ashgrove Systems``. The

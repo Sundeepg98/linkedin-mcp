@@ -34,6 +34,10 @@ from linkedin_server.writes import SANCTIONED_WRITES
 SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_save_job",
     "linkedin_unsave_job",
+    # 2026-08-24. The intersection is the mechanism and it still is: a name
+    # written here that is NOT in SANCTIONED_WRITES buys nothing, so this list
+    # cannot exempt a tool the write boundary has not admitted.
+    "linkedin_unfollow_company",
 }
 
 EXPECTED_TOOLS = {
@@ -54,6 +58,12 @@ EXPECTED_TOOLS = {
     # The two writes, authorised 2026-08-23.
     "linkedin_save_job",
     "linkedin_unsave_job",
+    # The third, 2026-08-24. NOT accompanied by linkedin_apply_job: apply is
+    # sanctioned and specced and registers NO TOOL, because its flow has never
+    # been captured -- exactly the condition linkedin_set_open_to_work is in.
+    # A tool that could only ever refuse would have moved a name off the
+    # forbidden list to buy nothing.
+    "linkedin_unfollow_company",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -88,16 +98,21 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixteen_tools(tools):
+async def test_the_surface_is_exactly_the_seventeen_tools(tools):
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 16
+    assert len(tools) == 17
     # And the split is asserted, not just the total: fourteen reads and the
-    # two named writes. A future tool arriving as a write would otherwise only
-    # have to bump a number.
+    # three named writes. A future tool arriving as a write would otherwise
+    # only have to bump a number.
     assert set(tools) & SANCTIONED_WRITE_TOOLS == {
         "linkedin_save_job",
         "linkedin_unsave_job",
+        "linkedin_unfollow_company",
     }
+    # THE READ COUNT IS UNCHANGED AT FOURTEEN, and that is the half worth
+    # asserting separately: this wave added a write and added a FIELD to an
+    # existing read (job_detail's apply_path) rather than a new read tool, so a
+    # fourteen here is evidence the read surface did not quietly grow too.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 14
 
 
@@ -156,8 +171,21 @@ async def test_the_two_exempted_names_do_in_fact_trip_the_name_check(tools):
 
 
 async def test_the_exemption_covers_only_those_two(tools):
-    """A third write-shaped tool would not be covered by it."""
-    assert SANCTIONED_WRITE_TOOLS == {"linkedin_save_job", "linkedin_unsave_job"}
+    """A write-shaped tool OUTSIDE the set is not covered by it.
+
+    ``linkedin_apply_job`` is the right probe for this and got MORE apt on
+    2026-08-24, not less: apply is now a sanctioned ACTION with a full spec,
+    and it still registers no tool. So this asserts something real -- that
+    being sanctioned in ``writes.py`` does not by itself exempt a NAME on the
+    tool surface. The two boundaries are separate and this is where they are
+    shown to be.
+    """
+    assert SANCTIONED_WRITE_TOOLS == {
+        "linkedin_save_job",
+        "linkedin_unsave_job",
+        "linkedin_unfollow_company",
+    }
+    assert "linkedin_apply_job" not in set(tools)
     pretend = set(tools) | {"linkedin_apply_job"}
     offenders = [
         name
@@ -410,7 +438,11 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     monkeypatch.setenv(WRITES_FLAG, "1")
     info = await linkedin_server_info()
     assert info["read_only"] is False
-    assert info["writes_available"] == ["save_job", "unsave_job"]
+    assert info["writes_available"] == [
+        "save_job",
+        "unfollow_company",
+        "unsave_job",
+    ]
 
 
 async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
@@ -425,37 +457,124 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
 
     monkeypatch.delenv(WRITES_FLAG, raising=False)
     info = await linkedin_server_info()
-    assert info["writes_sanctioned"] == ["save_job", "unsave_job"]
+    assert info["writes_sanctioned"] == [
+        "save_job",
+        "unfollow_company",
+        "unsave_job",
+    ]
     assert "OFF" in info["writes_note"]
     assert "unsave_job" in info["writes_note"]
 
+    # AND THE THIRD LAYER, which is the one a caller needs to tell "not
+    # offered" from "examined and refused". Every sanctioned action that is
+    # not performable must appear here with a reason, or the field is a subset
+    # pretending to be a list.
+    not_performed = info["writes_sanctioned_but_not_performed"]
+    assert set(not_performed) == {
+        "apply_job",
+        "follow_company",
+        "set_open_to_work",
+    }
+    for action, entry in not_performed.items():
+        assert len(entry["why_not"]) > 80, action
+    # The two with no measured surface cannot even hold a grant, and the field
+    # says so rather than leaving a reader to infer it from a missing url.
+    assert not_performed["apply_job"]["can_hold_a_grant"] is False
+    assert not_performed["set_open_to_work"]["can_hold_a_grant"] is False
+    assert not_performed["follow_company"]["can_hold_a_grant"] is True
 
-async def test_saving_is_no_longer_claimed_to_be_out_of_scope():
-    """A stale entry on this list is a lie a caller acts on."""
+
+async def test_no_stale_entry_survives_on_the_out_of_scope_list():
+    """A stale entry on this list is a lie a caller acts on.
+
+    REWRITTEN 2026-08-24, and the rewrite is the point. This test used to
+    assert the literal phrase "applying to jobs", which had exactly the wrong
+    effect the moment applying was examined: it pinned the SHAPE of a refusal
+    rather than its truth, so the honest new entry -- which distinguishes the
+    measured apply control from the uncaptured apply flow -- failed a test
+    whose job was to stop the list going stale.
+
+    So it asserts the two properties that actually matter and neither of them
+    is a phrase. First, nothing on the list is contradicted by what the server
+    reports elsewhere. Second, EVERY entry declares which KIND of no it is,
+    because "we refuse this on principle", "we measured it and it will not
+    work", and "nobody has looked" are three different statements and a list
+    that flattens them is how an unexamined gap comes to read as a design
+    decision. That is the exact claim this server had to retract about its own
+    write path across four documents.
+    """
     from linkedin_server.server import linkedin_server_info
 
-    scope = " ".join((await linkedin_server_info())["out_of_scope_by_design"])
+    info = await linkedin_server_info()
+    entries = info["out_of_scope_by_design"]
+    scope = " ".join(entries)
+
+    # The things this server DOES do may not appear as things it does not.
     assert "saving or unsaving jobs" not in scope
-    # ...and the things that ARE still refused are still named, including the
-    # one whose absence would otherwise read as an oversight.
-    assert "applying to jobs" in scope
-    assert "following or unfollowing a company" in scope
+    for performed in info["writes_available"] or info["writes_sanctioned"]:
+        assert f"{performed}:" not in scope, performed
+
+    # Every entry is classified, and all three classes are represented -- a
+    # list where every entry wore the same label would pass a "has a label"
+    # check while carrying no information.
+    classes = {entry.split(":", 1)[0] for entry in entries}
+    assert classes == {"POLICY", "MEASURED", "UNMEASURED"}, classes
+    for entry in entries:
+        assert entry.split(":", 1)[0] in classes, entry
+
+    # The two refusals most likely to be quietly dropped are still named, by
+    # subject rather than by wording.
+    assert "collecting data about other members" in scope
+    assert "off-site applicant-tracking system" in scope
+    # Following is still refused, and applying is still not performed -- but
+    # neither is claimed to be unexamined any more.
+    assert "following a company" in scope
+    assert "submitting a LinkedIn-hosted application" in scope
+
+    # THE UNMEASURED ENTRY MUST NAME WHAT WOULD MEASURE IT. An honest "we have
+    # not looked" that does not say how to look is just a nicer-sounding
+    # version of the claim it replaced.
+    unmeasured = [e for e in entries if e.startswith("UNMEASURED")]
+    assert len(unmeasured) == 1
+    assert "_probe_messaging.py" in unmeasured[0]
 
 
-async def test_the_server_instructions_tell_a_caller_what_the_two_writes_are():
+async def test_the_server_instructions_name_every_write_that_ships():
     """The instructions are the first thing a client model reads.
 
     They used to say "Every tool reads; none of them changes anything on
     LinkedIn. There is no apply, no save..." -- which was true, and which the
     write made into the most load-bearing false sentence in the package.
+
+    COUNTED RATHER THAN SPELLED, from 2026-08-24. The old assertion looked for
+    the words "two write", which meant the instructions and the tool registry
+    could disagree while the test stayed green -- a third write would only have
+    to leave the sentence alone. It now derives the number from
+    ``writes.PERFORMABLE`` and requires every performable action's TOOL NAME to
+    appear, so a write that ships without being announced fails here.
+
+    It also pins the apply paragraph, and that is not decoration: this file is
+    read INSTEAD of the source by every client model, so "applying is out of
+    scope" living here would recreate, in the worst possible place, the exact
+    claim four documents had to retract.
     """
+    from linkedin_server import writes
+
     text = (mcp.instructions or "").lower()
-    assert "two write" in text
-    assert "linkedin_save_job" in text
+    words = {2: "two", 3: "three", 4: "four", 5: "five"}
+    assert f"{words[len(writes.PERFORMABLE)]} write" in text
+    for action in writes.PERFORMABLE:
+        tool = writes.spec_for_action(action).tool_name
+        assert tool.lower() in text, tool
     assert "performs nothing" in text
     assert "never confirm on his behalf" in text
-    # The refusals that are still refusals.
-    assert "no apply" in text
+
+    # The apply paragraph: it must offer the half that ships and refuse the
+    # half that does not, WITHOUT calling the refusal a scoping decision.
+    assert "apply_path" in text
+    assert "does not submit applications" in text or "not submit" in text
+    assert "out of scope" not in text
+
     # And it must not still be calling itself read-only.
     assert "read-only window" not in text
 

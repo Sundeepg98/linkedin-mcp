@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import re
 import time
 from pathlib import Path
 
@@ -71,6 +72,15 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures"
 JOB = "4600000042"
 #: The id of the one job row ``jobs_tracker_row.html`` actually renders.
 SAVED_JOB = "4011223344"
+
+#: A company the frozen Manage-Pages capture shows him following, and the id
+#: its row is keyed on. Both halves matter: the id is what the click is
+#: anchored to and the name is what the gate prints for him to check, so a
+#: test that used one without the other would not notice them drifting apart.
+FOLLOWED_COMPANY = "902611"
+FOLLOWED_COMPANY_NAME = "Gridwell"
+#: A well-formed company id that is on no row of that capture.
+UNFOLLOWED_COMPANY = "7777777"
 
 
 def markup(name: str) -> str:
@@ -119,7 +129,9 @@ class FixtureNavigator:
         return url
 
 
-def _pages(*, target, posting=None, saved=None, profile=None) -> dict[str, str]:
+def _pages(
+    *, target, posting=None, saved=None, profile=None, followed=None
+) -> dict[str, str]:
     out: dict[str, str] = {}
     if posting is not None:
         out[f"https://www.linkedin.com/jobs/view/{target}/"] = markup(posting)
@@ -129,6 +141,10 @@ def _pages(*, target, posting=None, saved=None, profile=None) -> dict[str, str]:
         )
     if profile is not None:
         out[writes.PROFILE_URL] = markup(profile)
+    if followed is not None:
+        out[writes.FOLLOWED_PAGES_URL] = (
+            followed if followed.lstrip().startswith("<") else markup(followed)
+        )
     return out
 
 
@@ -161,12 +177,19 @@ async def _gate(
     posting: str = "job_detail",
     saved: str = "jobs_tracker_empty",
     profile: str = "profile_topcard",
+    followed: str = "manage_pages_following_hydrated",
     to_state=None,
 ):
     """Run the real gate over frozen captures. Returns ``(block, navigator)``."""
     spec = spec_for_action(action)
     nav = FixtureNavigator(
-        _pages(target=target, posting=posting, saved=saved, profile=profile)
+        _pages(
+            target=target,
+            posting=posting,
+            saved=saved,
+            profile=profile,
+            followed=followed,
+        )
     )
 
     block = await preview(
@@ -183,11 +206,18 @@ async def _observe(
     posting: str = "job_detail",
     saved: str = "jobs_tracker_empty",
     profile: str = "profile_topcard",
+    followed: str = "manage_pages_following_hydrated",
 ):
     """One live reading, receipt still live. The only way to reach ``mint``."""
     spec = spec_for_action(action)
     nav = FixtureNavigator(
-        _pages(target=target, posting=posting, saved=saved, profile=profile)
+        _pages(
+            target=target,
+            posting=posting,
+            saved=saved,
+            profile=profile,
+            followed=followed,
+        )
     )
 
     return await writes.observe(nav, page, spec, target)
@@ -524,9 +554,25 @@ def test_nothing_is_both_forbidden_and_sanctioned_by_accident():
     grant at issue. ``linkedin_follow_company`` was never on the forbidden list
     (it is the rename loophole the check below covers) and is sanctioned but
     not performable.
+
+    IT MOVED AGAIN ON 2026-08-24, BY ONE NAME, AND THE MOVE IS THE SMALLER OF
+    THE TWO AVAILABLE. ``linkedin_apply_job`` is now SANCTIONED -- it has a
+    spec, a measured route classifier, and a gate -- and it STAYS ON THE
+    FORBIDDEN LIST, because it is in exactly the condition
+    ``set_open_to_work`` is in: no ``url_template``, so :func:`mint` refuses it
+    a grant at issue, and no tool registers it. The apply CONTROL is measured;
+    the apply FLOW is not, in any capture this repo holds. The alternative --
+    registering a tool that always refuses -- would have moved a name off the
+    forbidden list to buy nothing, and this list is the one place where "we
+    thought about it" and "a caller can reach it" must not blur.
     """
     overlap = set(FORBIDDEN_TOOLS) & set(SANCTIONED_WRITES)
-    assert overlap == {"linkedin_set_open_to_work"}, overlap
+    assert overlap == {"linkedin_set_open_to_work", "linkedin_apply_job"}, overlap
+    # And the pair is not interchangeable with the pair being non-empty: BOTH
+    # of them must be surface-less, which is the property that earns the
+    # overlap rather than the fact of being listed twice.
+    for name in overlap:
+        assert SANCTIONED_WRITES[name].url_template is None, name
 
 
 def test_what_ships_is_narrower_than_what_is_sanctioned():
@@ -543,10 +589,33 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "save_job",
         "unsave_job",
         "follow_company",
+        "unfollow_company",
+        "apply_job",
         "set_open_to_work",
     }
-    assert writes.PERFORMABLE == {"save_job", "unsave_job"}
+    assert writes.PERFORMABLE == {"save_job", "unsave_job", "unfollow_company"}
     assert writes.PERFORMABLE < sanctioned_actions
+
+    # THE GAP IS THE INTERESTING SET, so it is named rather than left as an
+    # arithmetic consequence. Three actions may hold a spec and will never be
+    # executed, and each is here for a DIFFERENT measured reason -- see
+    # writes._refuse_unperformable, which prints a distinct one for each.
+    assert sanctioned_actions - writes.PERFORMABLE == {
+        "follow_company",
+        "apply_job",
+        "set_open_to_work",
+    }
+    # Two of the three cannot even hold a grant: no surface has ever been
+    # loaded, so mint() refuses at issue rather than leaving the write door as
+    # the only thing in the way. follow_company is the one that COULD be
+    # granted and still is not performed, which is why its refusal is the one
+    # most likely to be argued with later.
+    surfaceless = {
+        spec.action
+        for spec in SANCTIONED_WRITES.values()
+        if spec.url_template is None
+    }
+    assert surfaceless == {"apply_job", "set_open_to_work"}
 
 
 def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
@@ -575,7 +644,52 @@ def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
         # read as not-a-write. The fallback is gone because the hole is.
         assert readonly.name_implies_write(name), f"{name} does not read as a write"
         verbs = set(readonly.iter_write_verbs_in(name))
-        assert verbs & original_verbs, (name, sorted(verbs))
+        assert _verb_is_admissible(verbs, original_verbs), (name, sorted(verbs))
+
+
+def _verb_is_admissible(verbs: set[str], original_verbs: set[str]) -> bool:
+    """Is every verb in a sanctioned name one the original list already knew?
+
+    THE CARVE-OUT AND WHY IT IS THIS NARROW. ``linkedin_unfollow_company``
+    arrived on 2026-08-24 and failed the plain rule, correctly: ``unfollow`` is
+    not on the original forbidden list. It is not a smuggled capability, it is
+    the UNDO of one that is (``linkedin_follow``), and the original list simply
+    predates anybody contemplating an unfollow -- ``linkedin_unsave_job`` is on
+    it only because whoever wrote it happened to think of the inverse that day.
+    The list is the frozen conservation baseline and is not edited.
+
+    So the rule admits ``un`` + an original verb, AND NOTHING ELSE. It does not
+    admit a new verb, and it does not admit ``un`` + a new verb -- which is the
+    escape a looser reading would open, since anything can be prefixed. The
+    control below is written at exactly that shape.
+    """
+    if verbs & original_verbs:
+        return True
+    return bool(verbs) and all(
+        verb.startswith("un") and verb[2:] in original_verbs for verb in verbs
+    )
+
+
+def test_the_inverse_carve_out_admits_an_undo_and_nothing_else():
+    """THE CONTROL for the carve-out above, at the shape it must reject.
+
+    Without this, "un + an original verb" reads as a rule and behaves as a
+    doorway: a genuinely new capability could walk in wearing an ``un``. Three
+    cases, and the third is the one that matters -- ``unboost`` is the inverse
+    of a verb nobody sanctioned, which makes it a new verb with a prefix, not
+    an undo.
+    """
+    original = {"follow", "save", "apply", "connect"}
+    assert _verb_is_admissible({"unfollow"}, original) is True
+    assert _verb_is_admissible({"save"}, original) is True
+    assert _verb_is_admissible({"boost"}, original) is False
+    assert _verb_is_admissible({"unboost"}, original) is False
+    # And a name carrying one admissible verb beside one that is not gets no
+    # credit for the admissible half.
+    assert _verb_is_admissible({"unfollow", "boost"}, original) is False
+    # A name with no verb at all reads as a read, and a read is not sanctioned
+    # through this door.
+    assert _verb_is_admissible(set(), original) is False
 
 
 
@@ -591,24 +705,38 @@ def test_that_loophole_check_would_catch_a_smuggled_verb():
     assert set(readonly.iter_write_verbs_in(smuggled)) & original_verbs == set()
 
 
-async def test_exactly_the_two_authorised_writes_are_registered():
+async def test_exactly_the_performable_writes_are_registered():
     """WHAT THIS TEST USED TO ASSERT: that the surface carried no write at all.
 
-    It carries two. So the assertion is now the exact pair rather than the
-    empty set -- and the second half, that nothing still on ``FORBIDDEN_TOOLS``
-    is registered, is UNCHANGED and is the half that still does the work. A
-    third write appearing fails it.
+    It carried two, then three. The literal pair became a literal triple on
+    2026-08-24 and then stopped being a literal at all, which is the real fix:
+    THE REGISTERED WRITES MUST EQUAL ``PERFORMABLE``, derived rather than
+    listed. A tool registered for an action ``perform`` will not execute is a
+    button that cannot do anything, and an action ``perform`` WILL execute with
+    no tool is a capability nobody can reach or audit. Both are failures and a
+    hand-written list catches neither.
+
+    The second half -- that nothing still on ``FORBIDDEN_TOOLS`` is registered
+    -- is UNCHANGED and is the half that has always done the work.
     """
     from linkedin_server.server import mcp
 
     names = {t.name for t in await mcp.list_tools()}
-    assert names & set(SANCTIONED_WRITES) == {
-        "linkedin_save_job",
-        "linkedin_unsave_job",
+    performable_tools = {
+        spec.tool_name
+        for spec in SANCTIONED_WRITES.values()
+        if spec.action in writes.PERFORMABLE
     }
+    assert names & set(SANCTIONED_WRITES) == performable_tools
     assert names & FORBIDDEN_TOOLS == set()
-    # linkedin_follow_company is sanctioned and must NOT be reachable.
+
+    # The three sanctioned actions that are NOT performable must be
+    # unreachable, and they are named individually rather than as a set
+    # difference: each is here for a different measured reason and a reader
+    # who sees only the arithmetic learns none of them.
     assert "linkedin_follow_company" not in names
+    assert "linkedin_apply_job" not in names
+    assert "linkedin_set_open_to_work" not in names
 
 
 # ---------------------------------------------------------------------------
@@ -626,7 +754,29 @@ REVERSIBILITY_CLASS = {
     "save_job": "REVERSIBLE",
     "unsave_job": "REVERSIBLE",
     "follow_company": "REVERSIBLE",
+    "unfollow_company": "REVERSIBLE",
+    # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
+    # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
+    # surface that would settle it -- his applied list -- is empty, so there is
+    # nothing there to look for a withdraw control on. It carries
+    # irreversible=True regardless, on the separate and certain ground that
+    # withdrawing is permanently forbidden here in either direction.
+    "apply_job": "STILL-UNKNOWN",
     "set_open_to_work": "REVERSIBLE",
+}
+
+#: Which actions have had their reversibility MEASURED. Split out from the
+#: class table because the two say different things and one spec now
+#: distinguishes them: a class of STILL-UNKNOWN with measured=False is the
+#: honest pairing, and a class of STILL-UNKNOWN with measured=True would be a
+#: contradiction the renderer refuses.
+REVERSIBILITY_MEASURED = {
+    "save_job": True,
+    "unsave_job": True,
+    "follow_company": True,
+    "unfollow_company": True,
+    "apply_job": False,
+    "set_open_to_work": True,
 }
 
 
@@ -691,12 +841,18 @@ async def test_the_gate_prints_every_measured_verdict_with_its_evidence(
         "save_job": {},
         "unsave_job": {"target": SAVED_JOB, "saved": SAVED_LIST_OF_ONE},
         "follow_company": {},
+        "unfollow_company": {"target": FOLLOWED_COMPANY},
         "set_open_to_work": {
             "target": "self",
             "to_state": "All LinkedIn members",
         },
     }
-    assert set(cases) == {spec.action for spec in SANCTIONED_WRITES.values()}
+    # apply_job is the one sanctioned action deliberately NOT here: its
+    # reversibility is unmeasured, so it belongs to the sibling test below
+    # rather than being quietly dropped out of the coverage assertion.
+    assert set(cases) | {"apply_job"} == {
+        spec.action for spec in SANCTIONED_WRITES.values()
+    }
 
     for action, kwargs in cases.items():
         spec = spec_for_action(action)
@@ -705,10 +861,54 @@ async def test_the_gate_prints_every_measured_verdict_with_its_evidence(
         assert block["reversibility_measured"] is True
         assert "UNMEASURED" not in block["reversibility"]
         assert block["reversibility_class"] == REVERSIBILITY_CLASS[action], action
-        # A verdict with no evidence line is the thing this rule forbids.
-        assert "MEASURED 2026-08-23" in block["reversibility_evidence"], action
+        # A verdict with no evidence line is the thing this rule forbids. The
+        # DATE is matched as a shape rather than as a literal: pinning one
+        # day's date meant the next measurement had to either lie about when it
+        # was taken or fail a test about evidence, which is the wrong pressure
+        # to put on the field that records when something was measured.
+        assert re.search(
+            r"MEASURED 20\d\d-\d\d-\d\d", block["reversibility_evidence"]
+        ), (action, block["reversibility_evidence"][:120])
         assert len(block["reversible_by"]) > 40, action
         assert len(block["what_it_cannot_undo"]) > 40, action
+
+
+async def test_an_unmeasured_verdict_prints_as_unmeasured_and_names_its_fix(
+    writes_on,
+    browser_page,
+):
+    """THE OTHER HALF OF THE RULE, and until 2026-08-24 nothing exercised it.
+
+    The rule is not "print a verdict"; it is "do not print a verdict you have
+    not measured". Every spec carried a measured one, so the branch that
+    renders ``UNMEASURED`` was live code with no live spec behind it -- it
+    could have been deleted and the suite would have stayed green.
+    ``apply_job`` is now the spec that goes down it, which is fitting: the
+    action with the largest consequence is the one whose reversibility nobody
+    has established.
+
+    What the block must do is say so LOUDLY and then name what would settle it,
+    because a caveat that does not name its own fix reads as an apology.
+    """
+    spec = spec_for_action("apply_job")
+    assert spec.reversibility_measured is False
+    block, _nav = await _gate(browser_page, "apply_job")
+
+    assert block["reversibility_measured"] is False
+    assert "UNMEASURED" in block["reversibility"]
+    assert block["reversibility_class"] == "STILL-UNKNOWN"
+    # It names its own fix, in the rendered block rather than only in source.
+    assert "What would settle it" in block["reversibility"]
+    assert len(block["reversibility"]) > 200
+
+    # And the separate, CERTAIN half is not softened by the uncertain one: this
+    # server can never undo an application whatever LinkedIn permits.
+    assert block["irreversible"] is True
+    assert "NOBODY" in block["reversible_by"]
+
+    # No surface, so no grant. The warning is not an offer.
+    assert block["to_confirm"] is None
+    assert "NO CONFIRM TOKEN IS ISSUED" in block["what_happens_next"]
 
 
 def test_every_verdict_is_pinned_to_ITS_ACTION_not_to_the_set_of_verdicts():
@@ -723,6 +923,17 @@ def test_every_verdict_is_pinned_to_ITS_ACTION_not_to_the_set_of_verdicts():
     assert set(REVERSIBILITY_CLASS) == {s.action for s in SANCTIONED_WRITES.values()}
     for spec in SANCTIONED_WRITES.values():
         assert spec.reversibility_class == REVERSIBILITY_CLASS[spec.action], spec.action
+        assert (
+            spec.reversibility_measured is REVERSIBILITY_MEASURED[spec.action]
+        ), spec.action
+
+    # THE TABLE MUST NOT BE UNIFORM, which is a property of the ASSERTION and
+    # not of the specs. When every action carried the same verdict, pinning
+    # per action and pinning the set were indistinguishable, and a mutation
+    # that flipped all of them was invisible. One action now disagrees, so
+    # this check has something to lose.
+    assert len(set(REVERSIBILITY_CLASS.values())) > 1
+    assert len(set(REVERSIBILITY_MEASURED.values())) > 1
 
 
 async def test_a_verdict_that_contradicts_its_own_sentence_will_not_render(
@@ -835,6 +1046,29 @@ async def test_a_follow_says_plainly_that_this_server_cannot_take_it_back(
     for action in ("follow_company", "set_open_to_work"):
         by_hand = spec_for_action(action).reversible_by
         assert "NOT this server" in by_hand or "Not this server" in by_hand, action
+
+    # 2026-08-24: follow_company nearly LOST this assertion, and the near-miss
+    # is worth recording because it is the exact failure mode the field exists
+    # to catch. Building unfollow made it tempting to soften the sentence to
+    # "possibly by this server", which would have been a capability claim
+    # resting on a resolution step nobody has. The answer is unchanged -- not
+    # this server -- and only the REASON moved. So the reason is asserted too,
+    # or the field could drift back to a comfortable sentence at the next edit.
+    follow_by = spec_for_action("follow_company").reversible_by
+    assert "slug" in follow_by
+    assert "numeric company id" in follow_by
+
+    # apply_job is stronger than either: not undoable by anybody through this
+    # server, in either direction, and the field must not blur that into the
+    # by-hand case.
+    apply_by = spec_for_action("apply_job").reversible_by
+    assert "NOBODY" in apply_by
+
+    # unfollow_company is performable, so its own undo -- a follow -- is the
+    # one this server does NOT do. The pair must not both claim to cover each
+    # other; that would be a cycle of two half-truths reading as one whole one.
+    unfollow_by = spec_for_action("unfollow_company").reversible_by
+    assert "NOT this server" in unfollow_by or "not performed" in unfollow_by
 
     # And the distinction survives into the block he actually reads, which is
     # the only place it can do him any good.
@@ -1106,25 +1340,108 @@ def test_the_anchor_table_is_what_gates_unsave_and_one_row_lifts_it():
 async def test_follow_is_sanctioned_and_still_will_not_be_performed(writes_on):
     """The operator's cut, made structural rather than remembered.
 
-    A follow is genuinely reversible and this server still will not do one,
-    because the undo is HAND-ONLY: no unfollow is sanctioned. The refusal has
-    to say that, or the next reader files it as an unfinished feature.
+    THE REASON CHANGED ON 2026-08-24 AND THE ANSWER DID NOT, which is why this
+    test changed shape rather than being deleted. It used to assert the refusal
+    said the undo was HAND-ONLY because no unfollow was sanctioned. One is
+    sanctioned now and performable, so that sentence would be false -- and the
+    tempting move at that point is to let follow through, since the objection
+    it was blocked on has been removed.
+
+    It is still blocked, on a NEW and measured objection: the undo cannot be
+    AIMED. A follow is performed from a posting, which names its employer by
+    slug; the unfollow surface addresses rows by numeric company id; no capture
+    in this repo carries both for one company on a surface either action uses.
+    So the refusal must now name the aiming problem, and the assertions are on
+    the measured facts rather than on a phrase, so a refusal that decays into
+    "not supported" fails here.
     """
     grant = _bare_grant(action="follow_company", target=JOB)
     grant.consumed = True
     with pytest.raises(WriteAttemptError) as excinfo:
         await writes.perform(object(), object(), grant)
     message = str(excinfo.value)
-    assert "hand-only" in message
-    assert "no unfollow is sanctioned" in message.casefold()
+    lowered = message.casefold()
+    assert "slug" in lowered
+    assert "numeric company id" in lowered
+    # The old reason must NOT still be claimed: an unfollow does exist.
+    assert "no unfollow is sanctioned" not in lowered
+    # And the refusal names what would lift it, so it is a gap with an address
+    # rather than a policy nobody can act on.
+    assert "what would lift this" in lowered
+
+
+async def test_the_follow_refusal_and_the_spec_tell_the_same_story(writes_on):
+    """2b applied to a refusal rather than to a field.
+
+    The refusal message and ``follow_company.residue`` are written in different
+    places and are the same claim. Two copies of one claim drift, and the way
+    they drift is that one gets updated when the world changes and the other
+    keeps reassuring somebody. Pinned to the same two measured numbers.
+    """
+    grant = _bare_grant(action="follow_company", target=JOB)
+    grant.consumed = True
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    message = str(excinfo.value)
+    residue = spec_for_action("follow_company").residue
+    for number in ("20", "58"):
+        assert number in message, number
+        assert number in residue, number
 
 
 async def test_open_to_work_is_not_performable_either(writes_on):
+    """Unperformable, and the refusal says WHICH KIND of unperformable.
+
+    Sharpened 2026-08-24. It used to assert the generic sentence "not
+    performable", which three different actions would print for three
+    unrelated reasons -- a message that cannot distinguish them teaches a
+    reader that it carries no information. Open To Work's reason is that its
+    editor has no url AT ALL, which is now a measurement (237 urls and 37
+    payload paths across five profile captures, zero hits) rather than an
+    admission that nobody looked.
+    """
     grant = _bare_grant(action="set_open_to_work", target="self")
     grant.consumed = True
     with pytest.raises(WriteAttemptError) as excinfo:
         await writes.perform(object(), object(), grant)
-    assert "not performable" in str(excinfo.value)
+    message = str(excinfo.value)
+    assert "not addressed by a url" in message
+    assert "237" in message
+
+
+async def test_apply_is_sanctioned_and_refuses_for_the_flow_it_has_never_seen(
+    writes_on,
+):
+    """The action the operator asked for by name, refusing, and saying why.
+
+    Two halves, and conflating them is how this would ship wrong. The apply
+    CONTROL is measured -- two routes, positively distinguishable, reported by
+    ``linkedin_job_detail``. The apply FLOW is not: no capture in this repo
+    shows a form, a file input, a dialog or a control that submits anything.
+    So the refusal must be about the FLOW, and it must not read as "applying is
+    out of scope", which is the claim this server spent four documents making
+    and then had to retract.
+
+    The off-site half is refused on a different ground entirely and that ground
+    does not expire with a better capture: submitting on a third party's ATS is
+    not this server's to do at all.
+    """
+    grant = _bare_grant(action="apply_job", target=JOB)
+    grant.consumed = True
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(object(), object(), grant)
+    message = str(excinfo.value)
+    lowered = message.casefold()
+
+    assert "flow" in lowered
+    assert "zero" in lowered
+    # It distinguishes the measured half from the unmeasured half rather than
+    # refusing wholesale.
+    assert "control" in lowered
+    # It names the off-site ground, which no capture will ever lift.
+    assert "third party" in lowered or "third-party" in lowered
+    # And it never claims applying is out of scope by design.
+    assert "out of scope" not in lowered
 
 
 async def test_an_unredeemed_grant_performs_nothing(writes_on, browser_page):
