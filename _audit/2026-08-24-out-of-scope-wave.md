@@ -199,9 +199,12 @@ It was refused by the permission classifier on two attempts -- once via bash, on
 **has not been run**. I did not work around the refusal.
 
 The probe is worth reading even unrun, because it measures **two** things and the second is the one the
-question usually skips. **LinkedIn's desktop messaging view opens a conversation on arrival, and opening
-a conversation marks it read.** If that is what happens, a "read-only" inbox tool destroys unread state
-on every call -- the exact objection that keeps `mark_notifications_read` forbidden, arriving through a
+question usually skips. **THE HYPOTHESIS, AND IT IS A HYPOTHESIS -- I HAVE NOT VERIFIED IT ON THIS
+ACCOUNT OR ANY OTHER:** LinkedIn's desktop messaging view is understood to open a conversation on
+arrival, and opening a conversation marks it read. That is exactly the shape of claim this wave spent
+its day correcting elsewhere, so it is labelled rather than asserted -- and it is the reason the probe
+measures the cost instead of assuming it either way. If it holds, a "read-only" inbox tool destroys
+unread state on every call -- the exact objection that keeps `mark_notifications_read` forbidden, arriving through a
 tool that calls itself a read. Asking the inbox about itself would be circular, so the probe reads the
 messaging badge from `/feed/` (already an allowed surface) BEFORE the load and again AFTER, and treats an
 absent badge as INCONCLUSIVE rather than as a clean run.

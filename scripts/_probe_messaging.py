@@ -18,9 +18,13 @@ TWO QUESTIONS, NOT ONE. The first is obvious and the second is the one that
 decides the answer:
 
 1. Does the inbox render for a signed-in read at all?
-2. WHAT DOES LOADING IT COST? LinkedIn's desktop messaging view auto-selects a
-   conversation, and opening a conversation marks it read. If that is what
-   happens, then a "read-only" inbox tool destroys unread state on every call
+2. WHAT DOES LOADING IT COST? THE HYPOTHESIS, UNVERIFIED: LinkedIn's desktop
+   messaging view is understood to auto-select a conversation, and opening a
+   conversation marks it read. Nobody here has watched it happen, which is
+   precisely why this measures rather than assumes -- an unverified belief
+   about a side effect is no better a basis for opening a boundary than an
+   unverified belief that there is none. If it holds, a "read-only" inbox tool
+   destroys unread state on every call
    -- the same objection that keeps ``mark_notifications_read`` permanently
    forbidden, arriving through a tool that calls itself a read.
 

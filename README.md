@@ -184,9 +184,10 @@ refusal names both, and names what would lift them.
 `/messaging`, and every written rationale for that block is phrased against
 *sending*. Whether reading is even possible has never been tested.
 `scripts/_probe_messaging.py` exists to test it, and to test something the
-question usually skips: LinkedIn's desktop messaging view opens a conversation
-on arrival, so a "read" of the inbox may mark a thread read -- which would be
-the notifications objection arriving through a tool that calls itself a read.
+question usually skips. The hypothesis -- **unverified, which is the point** --
+is that LinkedIn's desktop messaging view opens a conversation on arrival, so a
+"read" of the inbox would mark a thread read, which would be the notifications
+objection arriving through a tool that calls itself a read.
 The probe measures that by reading the nav badge from `/feed/` before and after,
 a surface the load does not touch. **It has not been run**, and the forbidden
 list is unchanged until it is: a boundary does not move on an unmeasured claim.
