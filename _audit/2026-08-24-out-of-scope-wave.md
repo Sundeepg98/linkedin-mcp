@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `6ea78ce`
+# The eight refusals, worked -- `445c7a0` .. `5bc0181`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -406,6 +406,96 @@ wrong-action warning, and now the unplumbed field.
 
 ---
 
+## After the lead's rulings: build nothing, state the scope, give apply an address
+
+Three rulings came back and two of them changed what shipped.
+
+**BUILD NO PAGED READ.** Ruled on the cost I raised rather than on the gain: the `queryId` is a
+build-tied content hash, and this repo has already measured LinkedIn dropping
+`data-view-name="job-save-button"` inside 24 hours on this account. A hardcoded persisted-query hash
+is that failure one layer deeper, and it fails SILENTLY -- a 4xx reads as "no results" rather than
+"your contract expired". Against that, the gain is 58-of-58 instead of 20-of-58, and the tool already
+reports `total: 58`, so it is **already honest about what it cannot see**. An honest partial answer
+beats a complete one that will quietly become wrong.
+
+**UNFOLLOW VIA API: NO**, on the ground I flagged it under -- every gate in `writes.py` rests on the
+click being anchored to a control the operator was shown, and synthesising LinkedIn's own request
+discards that anchor entirely. The safety story would become "we constructed a plausible request"
+rather than "we pressed the button he saw."
+
+**STATE THE SCOPE, DO NOT INVENT A GATE.** Done, and it cost nothing -- which was measured rather
+than hoped for.
+
+### The scope statement, and why it was free
+
+`readonly.py`'s opening claim -- *"`assert_read_url` is the only door to `page.goto`"* -- was always
+exact and always read as broader than it is. **Exactness is not clarity:** a reader who takes it for
+full coverage has not misunderstood the sentence, they have understood a different sentence that the
+true one is easily mistaken for. The closing bullet made it worse by enumerating what the server does
+NOT do (*"issues no non-GET request"*) without naming the one thing it does. **Enumerating absences
+without naming the presence is how a true list misleads.**
+
+Both now say it outright: the module docstring states NAVIGATION-ONLY, names `ME_API`, says the
+allowlist would REFUSE it if consulted, points at the enumeration that does cover it, and records why
+the pattern list was not widened. `server_info` gained `read_boundary_scope` beside
+`direct_api_reads`, because *"there is one uncovered path"* and *"the boundary covers navigations"*
+are different facts -- the first is an exception a reader files away, the second tells them how to
+reason about the next thing somebody adds.
+
+**MEASURED TWO WAYS:**
+
+| | |
+|---|---|
+| digest probe | `7a48ca1e8dd14ec1` before and after, identical under 3.10.19 and 3.13.14, 13/13 functions |
+| AST comparison | the module body EXCLUDING its docstring parses **identical** to the previous commit |
+
+The second is the stronger claim, and it is the one pinned in a test: a digest matching proves the
+hashed things did not move; this proves **nothing but prose did**. The freeze hashes the four constant
+structures as values and each function's token stream with `COMMENT` tokens dropped -- a MODULE
+docstring is neither, so the AST invariant never fired and no re-freeze was needed.
+
+**The asymmetry is worth knowing and is pinned:** a FUNCTION docstring is a string token inside a
+function body and WOULD move that function's digest. Only the module docstring is free. A future edit
+that tidies this paragraph into `assert_read_url`'s own docstring fires the invariant -- correctly.
+So `readonly.py` is no longer a zero-line diff for the wave; it is a **docstring-only diff, +32/-1,
+with the body proven AST-identical**.
+
+### Apply: the refusal now has an address
+
+Apply's refusal was correct and had a shape I did not like on re-reading. It said the flow has never
+been captured and said nothing about how a capture is taken. Open To Work got an exact procedure out
+of its census; apply did not -- which left a MEASURED gap reading like a SETTLED decision. The next
+person who wants apply then either gives up or improvises a selector, and on the one action this
+server can never undo that is precisely what must not happen.
+
+`scripts/_probe_apply_flow.py` is that procedure, and the thing that makes it reasonable to ask him to
+run it is structural rather than promised:
+
+- **It navigates, it does not click.** LinkedIn draws the apply control as an `<a href>`, so the flow
+  is reachable without pressing anything. Verified with the package's own scanner:
+  `readonly.scan_source_for_mutations` finds **zero** mutating calls in it, asserted in a test rather
+  than claimed in a comment.
+- **It refuses to guess which posting to open.** The job id is a required argument, never a default,
+  because which posting acquires a draft is not a decision a default should make. It also stops with
+  an explanation if the posting draws the off-site control instead.
+- **The side effect is measured, and labelled a hypothesis.** LinkedIn shows "in progress"
+  applications, which suggests opening an Easy Apply flow may create a draft. **Nobody here has
+  verified that.** Same class of claim as the messaging auto-open, same treatment: read the applied-tab
+  count BEFORE and AFTER on a surface the apply navigation does not touch, and report INCONCLUSIVE
+  when it cannot be read rather than reporting a clean run. That lesson was applied *before* the
+  mistake this time instead of after it.
+- **Guarded** with `if __name__ == "__main__"`, for the reason established earlier today.
+
+Wired so it is discoverable from the CODE and not only from the file tree: the refusal and the spec
+both name it, both say it has NOT been run, and tests pin that the refusal names it and that the file
+exists, scans clean, is guarded, and requires its argument. **A procedure named but absent is worse
+than no procedure, because it reads as completed work.**
+
+**It has not been run.** Zero live writes stands for the whole wave.
+
+
+---
+
 ## The paged read: the contract is real, and it does not unblock follow
 
 The lead read the unfollow census's set-aside affordance -- *"the Rest.li `start`/`count` contract via
@@ -593,18 +683,18 @@ a broken suite.
 
 ## Measured
 
-All at `6ea78ce`, CPython 3.13.14 (win32), on a settled working tree.
+All at `5bc0181`, CPython 3.13.14 (win32), on a settled working tree.
 
 | | |
 |---|---|
-| suite | **1429 collected, 1429 passed, 0 skipped, 0 failed, 0 errors**, 400s |
-| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1429 \| reported 1429 \| executed 1429 \| skipped 0 \| failed 0 \| errors 0` |
+| suite | **1446 collected, 1446 passed, 0 skipped, 0 failed, 0 errors**, 391s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1446 \| reported 1446 \| executed 1446 \| skipped 0 \| failed 0 \| errors 0` |
 | boundary digests | 13 functions + aggregate `7a48ca1e8dd14ec1`, **identical under 3.10.19 and 3.13.14**, re-measured at HEAD |
-| `readonly.py` vs pre-wave `a1360d1` | **0 changed lines** |
+| `readonly.py` vs pre-wave `a1360d1` | **docstring only**, +32/-1, module body proven **AST-identical** |
 | tools registered | 16 -> **17** (reads unchanged at **14**) |
 | sanctioned actions | 4 -> **6**; performable 2 -> **3** |
 | package mutating calls | **1** sanctioned, **0** unsanctioned |
-| identity sweep | **0 hits across 100 swept files**, 191 spellings, 10 classes |
+| identity sweep | **0 hits across 102 swept files**, 191 spellings, 10 classes |
 | **live writes executed** | **0** |
 
 ### The probe that never ran, verified rather than asserted
