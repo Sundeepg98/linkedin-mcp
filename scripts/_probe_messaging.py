@@ -149,4 +149,19 @@ async def main() -> None:
     await BROWSER.stop()
 
 
-asyncio.run(main())
+# GUARDED, WHICH THE FOUR SIBLING PROBES ARE NOT, AND THE DIFFERENCE MATTERS
+# MORE HERE THAN ANYWHERE. ``tests/test_scripts_are_import_safe.py`` exists
+# because importing a script must not DO anything -- two build scripts ended in
+# a bare ``main()`` and importing either one to read a single table rebuilt the
+# committed fixtures. That rule accepts an ATTRIBUTE call at module scope
+# (``sys.path.insert`` writes nothing), and ``asyncio.run(...)`` is an
+# attribute call, so a probe ending in one passes the guard while doing the
+# most side-effecting thing in this repo on import: launching a browser and
+# navigating his signed-in session.
+#
+# For the sibling probes that is a real hole and it is not mine to close here.
+# For THIS one it would mean an import driving a browser to a surface the read
+# boundary forbids, which is the accident this file is written to avoid causing
+# rather than to demonstrate. So it runs only when run.
+if __name__ == "__main__":
+    asyncio.run(main())
