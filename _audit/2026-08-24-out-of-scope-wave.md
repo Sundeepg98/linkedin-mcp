@@ -487,10 +487,29 @@ readonly.is_read_url(<graphql url>) -> False
 
 The identity endpoint this server has always used **would be refused by its own read boundary if that
 boundary were consulted.** The design never lied -- its claim is precisely that `assert_read_url` is
-the only door to `page.goto`, and an API call is not a `goto` -- but the gap is real and undocumented,
-and `server_info` does not mention it. Blast radius today is nil: one hardcoded constant, GET only, no
+the only door to `page.goto`, and an API call is not a `goto` -- but the gap was real and undocumented,
+and `server_info` did not mention it. Blast radius is nil: one hardcoded constant, GET only, no
 caller-supplied url. **The point is that a paged read built on `page.request.get` would land on that
 same ungated path**, so satisfying the constraint means first deciding what gates API reads at all.
+
+**CLOSED AT `56e03b0`, in the half that needed no boundary move.** `tests/test_api_call_sites.py`
+enumerates every direct HTTP call site in the package **by AST** and pins the set to one entry, as
+`(module, verb, first-argument-as-written)` -- the shape of `readonly.SANCTIONED_MUTATIONS`, and one
+line long. The first argument is pinned as SOURCE TEXT, so aiming the call at a different url, or at
+something a caller supplies, fails even with module and verb unchanged. It also pins that
+`assert_read_url` has exactly two callers, and that `ME_API` is NOT on the allowlist -- so adding it
+later is a failing test somebody has to come and justify. `server_info` gained `direct_api_reads`,
+which names the endpoint, says GET, says why the call exists, and says plainly that the allowlist does
+not cover it; a declaration naming the endpoint while implying it was gated would be worse than none.
+
+**AST rather than text, with its own test:** this repo's guard modules are full of prose naming the
+calls they hunt -- `readonly.py`'s tables are made of the strings it scans for -- so a text search for
+`request.get` counts a docstring. Three can-it-fail controls cover the shapes somebody could really
+add: a url from an argument, a verb that writes, and a second endpoint beside the sanctioned one.
+
+**What was deliberately NOT done:** adding `/voyager/api/me` to the read allowlist. That moves a frozen
+boundary structure and fires the AST invariant, to authorise something already a constant nobody can
+redirect. `readonly.py` stays a zero-line diff for the entire wave.
 
 ### The other costs, named rather than discovered later
 
