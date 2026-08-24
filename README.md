@@ -57,6 +57,54 @@ What this design does is minimise exposure rather than pretend it away:
 result in a rate limit, a challenge, or account action, and that risk is yours
 to accept. Decide that deliberately before you register the server.
 
+### This is not an anti-detection tool, and here is the evidence rather than the assurance
+
+The one Chromium flag above is the sort of thing that makes a repository *look*
+like an evasion project. It is worth saying plainly what was measured, because
+the claim is checkable and the reader should not have to take it on tone.
+
+Audited 2026-08-24 across all 105 tracked files:
+
+- **Fingerprint shaping: zero.** No user-agent, platform, locale, timezone,
+  geolocation, viewport-spoofing, device-scale, WebGL or canvas patching; no
+  `page.route` interception, no injected init script, no extra headers, no
+  proxy. Each was searched for by name across the package and each returned
+  **zero call sites**. One caveat so a reader who greps is not misled:
+  `add_init_script` appears twice in `readonly.py`, both times as the
+  *scanner's own pattern* for detecting such a call. The scanner names the
+  things it forbids, which is why its source contains them and the rest of the
+  package does not -- `partition_mutation_hits` confirms it independently, at
+  one sanctioned mutating call and zero unsanctioned.
+- **No stealth dependency.** Four dependencies, none of them an anti-detection
+  library, and `readonly.scan_source_for_evasion` returns zero hits across the
+  package -- its only hits anywhere are a deliberately planted control in a
+  test.
+- **Timing is fixed, not humanised.** Every delay is a constant. `import
+  random` appears **0 times**. The 3-second gap between page loads is
+  `MIN_INTERVAL - elapsed`, slept exactly -- machine-regular. Randomised jitter
+  is what a tool imitating a human does; a flat interval is throttling.
+- **The flag itself is bounded by a gate**, not by good intentions:
+  `readonly.assert_launch_flags_permitted` runs at every launch and
+  `tests/test_launch_boundary.py` fails the build if a third flag appears.
+
+The flag stops Blink advertising `navigator.webdriver`, which LinkedIn checks
+at sign-in and which makes an automated browser unusable for the account's own
+owner. That is the whole of it. **Making an automated browser work and evading
+detection are different activities, and only the first one is here.**
+
+### The licence follows from that, and it is deliberately not permissive
+
+This repository is **proprietary: all rights reserved, provided for reference,
+with no permission to use, copy, modify or distribute it.**
+
+That is not an oversight or a placeholder. This server drives an authenticated
+LinkedIn session under a User Agreement that prohibits automation. A permissive
+licence would invite strangers to point it at their own accounts -- or at other
+people's -- with the author's name on the repository that told them how.
+
+**It is a portfolio artifact. It is meant to be read, not deployed.** Read the
+design, the boundary, the gates and the audit trail; that is what it is for.
+
 ---
 
 ## What it can do
