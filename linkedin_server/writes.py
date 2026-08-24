@@ -1806,13 +1806,21 @@ def _render(
     if token is None:
         # No surface, so no grant at all. See :func:`mint`.
         out["to_confirm"] = None
+        # WRITTEN FOR BOTH SURFACE-LESS ACTIONS, which it was not until
+        # 2026-08-24: it said "its EDITOR has never been loaded" and closed
+        # with "change it yourself if you want it changed". True of Open To
+        # Work, which is a setting behind an editor; nonsense on an APPLY,
+        # which has no editor and is not a change. A block whose prose fits
+        # one of the two actions it serves is the same defect as an unknown
+        # unfollow telling him to open his saved jobs -- correct advice
+        # pointed at the wrong thing.
         out["what_happens_next"] = (
             "NOTHING has been done, and nothing can be: NO CONFIRM TOKEN IS "
-            "ISSUED for this action. Its editor has never been loaded by this "
-            "server, so there is no page to act on and a grant would be "
-            "permission to do something unreachable. What you are reading is "
-            "the WARNING, not an offer -- change it yourself in LinkedIn if "
-            "you want it changed."
+            "ISSUED for this action. The surface it would have to act on has "
+            "never been loaded by this server, so there is no page to act on "
+            "and a grant would be permission to do something unreachable. "
+            "What you are reading is the WARNING, not an offer -- do it "
+            "yourself in LinkedIn if you want it done."
         )
     else:
         out["to_confirm"] = token

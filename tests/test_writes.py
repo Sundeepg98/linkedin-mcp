@@ -908,7 +908,21 @@ async def test_an_unmeasured_verdict_prints_as_unmeasured_and_names_its_fix(
 
     # No surface, so no grant. The warning is not an offer.
     assert block["to_confirm"] is None
-    assert "NO CONFIRM TOKEN IS ISSUED" in block["what_happens_next"]
+    nxt = block["what_happens_next"]
+    assert "NO CONFIRM TOKEN IS ISSUED" in nxt
+
+    # AND THE WARNING IS WRITTEN FOR THIS ACTION, not inherited from the other
+    # one that shares this branch. It said "its EDITOR has never been loaded"
+    # and closed with "change it yourself if you want it CHANGED" -- true of a
+    # profile setting behind an editor, nonsense on an application, which has
+    # no editor and is not a change. Both surface-less actions render this
+    # string, so it is asserted to fit both rather than to fit the one whose
+    # wording it was written in.
+    assert "editor" not in nxt
+    assert "changed" not in nxt
+    for other in ("apply_job", "set_open_to_work"):
+        spec_other = spec_for_action(other)
+        assert spec_other.url_template is None, other
 
 
 def test_every_verdict_is_pinned_to_ITS_ACTION_not_to_the_set_of_verdicts():
