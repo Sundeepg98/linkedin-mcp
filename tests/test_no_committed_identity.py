@@ -213,6 +213,17 @@ DECLARED_PLANTS = {
     # The fixture guard's can-it-fail control, whose synthetic member token is
     # deliberately absent from the allowlist -- that IS the property it tests.
     ("tests/test_sdui_surfaces_fixture.py", "member token"): 1,
+    # The messaging probe's redaction test needs a urn-SHAPED literal to feed
+    # its redactor. THIS ENTRY WAS EARNED THE HARD WAY: that file first shipped
+    # with the REAL member urn the probe had printed, and this guard caught it
+    # between commit and push. The literal there now is invented (nine digits
+    # that are nobody's), which is the rule -- a self-test needs a shape-VALID
+    # literal, never a TRUE one. The count is pinned at 1 so a second urn
+    # appearing in that file still fails, and declaring it here keeps this
+    # guard live on every OTHER shape in the file rather than assembling the
+    # urn at runtime to hide it, which would blind the guard to a real value
+    # pasted in later.
+    ("tests/test_probe_redaction.py", "urn id"): 1,
     # A planted session cookie, by exact path, in the module that defines it.
     ("tests/test_no_committed_credential.py", "credential"): 1,
 }

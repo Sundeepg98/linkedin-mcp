@@ -56,7 +56,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, FEED_URL, SETTLE_MS  # noqa: E402
 
-OUT = Path(__file__).resolve().parents[1] / "_audit"
+# NO OUTPUT DIRECTORY. This probe writes no file, so it holds no path to write
+# one to. That is deliberate: the version that had an ``OUT`` used it, and the
+# captures had to be destroyed by hand afterwards.
 
 #: The inbox list. No thread id, no ``?`` -- the narrowest form of the surface.
 INBOX_URL = f"{BASE_URL}/messaging/"
@@ -73,10 +75,90 @@ _BADGE_PATTERNS = (
 )
 
 
-def _strip(html: str) -> str:
-    text = re.sub(r"<(script|style)\b.*?</\1>", " ", html, flags=re.S | re.I)
-    text = re.sub(r"<[^>]+>", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
+#: Patterns that turn a live value into a SHAPE. Applied to everything this
+#: probe prints, in this order.
+#:
+#: WHY THIS EXISTS, stated bluntly because the lesson cost something: the first
+#: version of this probe printed every aria-label on the page and a 900
+#: character slice of the inbox text, and wrote three full-page captures to
+#: disk. Running it therefore published eleven real people's names and a live
+#: member urn into a transcript, and left 2.1 MB of somebody's private inbox on
+#: disk -- **the instrument built to answer a privacy question captured the
+#: data it was asking about.** Nothing it needed to establish required a single
+#: name: "eleven conversations, one auto-opened" is the entire finding.
+_REDACTIONS = (
+    # Opaque conversation identifiers. These are NOT caught by the digit rule
+    # below -- a thread id is base64, so it survived the first version of this
+    # redactor entirely. It named a specific private conversation.
+    (re.compile(r'(/messaging/thread/)[^/"?\s]+'), r'\1<THREAD-ID>'),
+    (re.compile(r'(?i)\b(urn:li:[a-z_]+):[A-Za-z0-9_%\-=]+'), r'\1:<ID>'),
+    (re.compile(r'(?i)\b(conversation with|message from)\s+.+$'), r'\1 <NAME>'),
+    (re.compile(r'\d{3,}'), '<N>'),
+)
+
+#: Words that make a capitalised run a UI STRING rather than a person. Without
+#: this, the name collapse below turned "Conversation List" into "<NAME>" and
+#: destroyed the structure the probe exists to report -- over-redaction is a
+#: real failure too, just a cheaper one than the alternative.
+_UI_WORDS = frozenset("""
+conversation conversations list messaging navigation global primary footer
+content search toast more options star select open close skip main linkedin
+premium menu dropdown message messages new unread filter sort settings help
+home jobs network notifications me business learning you are on the press
+enter to overlay compose keyboard shortcuts jump back next previous view all
+show hide sponsored inmail archived spam other focused date posted
+""".split())
+
+#: Runs of two or more LETTER words. Deliberately not spelled ``[A-Z][a-z]+``:
+#: that version missed "Jane Q Public" (a one-letter initial breaks the run)
+#: and would equally have missed the accented names actually present in this
+#: account's inbox, since ``[a-z]`` does not match ``u`` with an umlaut. The
+#: capitalisation test is done in code below, where it can be unicode-aware.
+_NAME_RUN = re.compile(r"\b[^\W\d_][^\W\d_'\-]*(?:\s+[^\W\d_][^\W\d_'\-]*\.?)+")
+
+
+def _collapse_names(text: str) -> str:
+    """Replace capitalised runs that are not made only of UI words.
+
+    KNOWN GAP, written down rather than left to be discovered: a SINGLE
+    capitalised token is not collapsed, because at one word a person and a UI
+    label are genuinely indistinguishable ("Messaging" and a one-word company
+    name have the same shape). Names of two or more tokens are the case this
+    handles, and the templates above catch the rest.
+    """
+    def repl(match: "re.Match[str]") -> str:
+        run = match.group(0)
+        words = run.split()
+        if not all(w[:1].isupper() for w in words):
+            return run
+        if all(w.lower().strip("'-.") in _UI_WORDS for w in words):
+            return run
+        return "<NAME>"
+    return _NAME_RUN.sub(repl, text)
+
+
+def _redact(value: str) -> str:
+    """Reduce one string to its shape. Never returns an identity.
+
+    Errs toward over-redaction: a shape that has lost a little structure is a
+    recoverable problem, and a name in a transcript is not. Both directions
+    are nonetheless checked, because a redactor that flattens everything to
+    <NAME> reports nothing and would look like it was working.
+    """
+    out = value
+    for pattern, replacement in _REDACTIONS:
+        out = pattern.sub(replacement, out)
+    return _collapse_names(out)
+
+
+def _label_shapes(html: str, limit: int = 25) -> list[str]:
+    """aria-label TEMPLATES and their counts -- never the labels themselves."""
+    counts: dict[str, int] = {}
+    for raw in re.findall(r'aria-label="([^"]{0,80})"', html):
+        shape = _redact(raw)
+        counts[shape] = counts.get(shape, 0) + 1
+    ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [f"{shape} x{n}" for shape, n in ordered[:limit]]
 
 
 def _badges(html: str) -> dict[str, list[str]]:
@@ -97,9 +179,14 @@ async def _load(page, url: str, *, label: str) -> str:
     except Exception:
         await page.wait_for_timeout(SETTLE_MS)
     html = await page.content()
-    (OUT / f"_probe-messaging-{label}.html").write_text(html, encoding="utf-8")
+    # NO CAPTURE IS WRITTEN. Not for the inbox, and not for the feed either --
+    # both render other people. An earlier version wrote three of these and
+    # they had to be destroyed by hand afterwards; a file that must be deleted
+    # after every run is a file that should never have been written. Everything
+    # this probe concludes is derivable from counts, and counts are computed
+    # here and thrown away with the page.
     print(f"\n=== {label}: asked {url}")
-    print(f"    landed  {page.url}")
+    print(f"    landed  {_redact(page.url)}")
     print(f"    {len(html)} chars")
     return html
 
@@ -119,10 +206,28 @@ async def main() -> None:
             "    thread links:  ",
             len(set(re.findall(r'href="(/messaging/thread/[^"]+)"', html))),
         )
-        print(
-            "    aria-labels:   ",
-            sorted({m for m in re.findall(r'aria-label="([^"]{0,60})"', html)})[:40],
+        # THE COUNT THAT IS THE FINDING. How many conversations the list holds
+        # is the whole structural answer; WHO they are with is never needed and
+        # is never read.
+        conversations = len(
+            set(re.findall(r'aria-label="Select conversation with ([^"]+)"', html))
         )
+        print(f"    conversations listed: {conversations}")
+        print(f"    auth-wall?            {'/login' in landed or '/checkpoint' in landed}")
+
+        # Compose surfaces. If reading ever put a send control on the page,
+        # this is where it would show, so it is counted explicitly rather than
+        # left to be noticed.
+        for what, pattern in (
+            ("contenteditable nodes", r'contenteditable="true"'),
+            ("send controls", r'(?i)aria-label="[^"]*\bsend\b[^"]*"'),
+            ("form elements", r"<form\b"),
+        ):
+            print(f"    {what:<21} {len(re.findall(pattern, html))}")
+
+        print("    aria-label SHAPES (identities redacted):")
+        for shape in _label_shapes(html):
+            print(f"      {shape}")
         print(
             "    conversation-ish class tokens:",
             sorted({m for m in re.findall(r'(msg-[a-z0-9-]{3,40})', html)})[:30],
@@ -131,7 +236,8 @@ async def main() -> None:
             "    unread markers:",
             sorted({m for m in re.findall(r'([a-z-]*unread[a-z-]*)', html, re.I)})[:20],
         )
-        print("    text head:", _strip(html)[:900])
+        # The page text is NOT printed. It is a live inbox: its head carried a
+        # member urn and a slab of payload json the one time it was printed.
 
         # --- 3. the badge AFTER, same surface as step 1 ----------------------
         after = await _load(page, FEED_URL, label="feed-after")

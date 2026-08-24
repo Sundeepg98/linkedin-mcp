@@ -1209,11 +1209,17 @@ def apply_route(
 
       WHERE THAT ONE WAS MEASURED, because a reader will look for it and not
       find it: in the RAW capture ``_audit/_probe-job-followed-company-pre.html``,
-      which is gitignored. The tracked fixtures cannot corroborate it -- the
-      sanitiser strips script payloads, so both following fixtures contain zero
-      occurrences of either string and NO TEST IN THIS REPO GUARDS THIS
-      PARAGRAPH. It is evidence for the design, not an asserted invariant, and
-      it is labelled as such rather than left to look like the others. What IS
+      which was gitignored and has since been DESTROYED -- it carried third
+      parties' member urns and had no ongoing purpose once its counts were
+      written down. So the claim is no longer re-verifiable from anything in
+      this repo, by anyone, including its author. That was already half true:
+      the file was never published, so no reader outside this machine could
+      ever have checked it. The tracked fixtures cannot corroborate it either
+      -- the sanitiser strips script payloads, so both following fixtures
+      contain zero occurrences of either string and NO TEST IN THIS REPO
+      GUARDS THIS PARAGRAPH. It is evidence for the design, not an asserted
+      invariant, and it is labelled as such rather than left to look like the
+      others. To re-establish it, re-capture: ``scripts/_probe_following.py``. What IS
       guarded, from the tracked fixtures: the hydrated off-site posting carries
       TWO ``/safety/go/`` urls of which only one is the apply control, which is
       the same argument made from a file anybody can open.
@@ -1386,6 +1392,12 @@ _STOP_FOLLOWING = re.compile(r"^\s*Click to stop following\s+(.+?)\s*$", re.I)
 #: all four Manage-Pages artefacts -- the two raw captures in ``_audit/`` and
 #: the two sanitised fixtures -- put ``58 Pages`` alone on line 0 of ``main``'s
 #: text and yield exactly one match under this pattern.
+#:
+#: The two RAW captures have since been destroyed (they carried third parties'
+#: member urns). The two SANITISED fixtures are tracked and still carry the
+#: shape, so unlike the payload claim above, this one remains guarded by tests
+#: -- which is the difference between provenance and dependency, and the
+#: reason destroying the raw half cost nothing here.
 _PAGES_TOTAL = re.compile(r"([\d,]+)[ \t]+Pages?[ \t]*$", re.M)
 
 

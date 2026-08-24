@@ -188,31 +188,68 @@ is **UNVERIFIED, not disproven**.
 
 ---
 
-## 6. READING HIS INBOX -- UNMEASURED, and blocked by the permission system
+## 6. READING HIS INBOX -- MEASURED 2026-08-24. Reading works, and the finding STRENGTHENS the ban
 
 The brief was right about the asymmetry: `/messaging` is on `_FORBIDDEN_URL_SUBSTRINGS`, and **every
-written rationale for that entry is phrased against SENDING.** Nobody has measured whether reading is
-possible.
+written rationale for that entry is phrased against SENDING.** Whether READING is possible was never
+separately argued.
 
-**I could not measure it either.** `scripts/_probe_messaging.py` is written, committed and reviewable.
-It was refused by the permission classifier on two attempts -- once via bash, once via PowerShell -- and
-**has not been run**. I did not work around the refusal.
+It has now been measured, on two independent runs (mine, and the lead's after the operator granted the
+permission). **This section previously said UNMEASURED and blocked by the permission system. That is
+no longer true and the section is rewritten rather than annotated.**
 
-The probe is worth reading even unrun, because it measures **two** things and the second is the one the
-question usually skips. **THE HYPOTHESIS, AND IT IS A HYPOTHESIS -- I HAVE NOT VERIFIED IT ON THIS
-ACCOUNT OR ANY OTHER:** LinkedIn's desktop messaging view is understood to open a conversation on
-arrival, and opening a conversation marks it read. That is exactly the shape of claim this wave spent
-its day correcting elsewhere, so it is labelled rather than asserted -- and it is the reason the probe
-measures the cost instead of assuming it either way. If it holds, a "read-only" inbox tool destroys
-unread state on every call -- the exact objection that keeps `mark_notifications_read` forbidden, arriving through a
-tool that calls itself a read. Asking the inbox about itself would be circular, so the probe reads the
-messaging badge from `/feed/` (already an allowed surface) BEFORE the load and again AFTER, and treats an
-absent badge as INCONCLUSIVE rather than as a clean run.
+### What was measured
 
-**The forbidden list is unchanged.** A boundary does not move on an unmeasured claim, and `server_info`
-now files this under its own `UNMEASURED` label rather than among the design decisions.
+1. **Reading IS possible.** No auth wall. The conversation list renders and is enumerable. VERIFIED.
 
-**To take the measurement**, with the profile lock free and no other agent holding a browser:
+2. **THE AUTO-OPEN HYPOTHESIS IS CONFIRMED.** This section previously carried it in capitals as a
+   thing nobody had verified on this account or any other. Asked for `/messaging/`, the browser landed
+   on `/messaging/thread/<THREAD-ID>/`. **LinkedIn's desktop messaging opens a specific conversation on
+   arrival.** Both runs agree. VERIFIED on the landed url.
+
+3. **The side-effect measurement is INCONCLUSIVE, and must not be upgraded.** The two runs failed to
+   measure it for two different reasons, and the second reason is the sharper one:
+   - my run: no badge was readable BEFORE, so a drop could not have been observed;
+   - the lead's run: the badge read `Messaging, 0 new notifications` before AND after -- **it was
+     already at zero, so the control could not fire.** A check that cannot fail certifies nothing.
+
+   The probe reported this correctly rather than reporting a clean run, which is the only reason its
+   output is worth anything.
+
+### What it does to the boundary
+
+**It strengthens the forbidden entry, and now on a measurement rather than an argument.** A tool named
+`read_inbox` would not return an inbox; it would land inside one correspondent's thread. If opening a
+thread marks it read, then an inbox tool MUTATES ON EVERY CALL -- the precise objection that keeps
+`mark_notifications_read` forbidden, arriving through something calling itself a read.
+
+**The forbidden list is unchanged, and no guard was loosened.** The remaining unknown is narrow and
+specific, and worth stating exactly so nobody re-opens the whole question to answer it:
+
+> **Does opening a thread clear its unread state?** Answerable only with a genuinely unread
+> conversation present, so that the badge has somewhere to fall from.
+
+### A count that differs between runs, recorded rather than resolved
+
+My run enumerated **10** conversations; the lead's enumerated **11**. Different times, and both captures
+have since been destroyed, so neither can be re-checked. The likeliest explanation is simply that a
+message arrived in between. It is recorded as two measurements rather than reconciled into one, because
+there is no evidence left that would settle it.
+
+### The probe leaked, and has been fixed
+
+The first version printed every aria-label and a slice of the inbox text, and wrote three full-page
+captures to `_audit/`. Running it therefore published real people's names and a live member urn into a
+transcript. **The instrument built to answer a privacy question captured the data it was asking about.**
+The captures were gitignored and have been destroyed. The probe now:
+
+- writes **no file at all** -- it holds no output path, so there is nothing to forget to delete;
+- prints aria-label **templates with counts** (`Select conversation with <NAME> x11`), never labels;
+- redacts thread ids, member urns and names, with a redactor guarded by
+  `tests/test_probe_redaction.py` in **both** directions -- a redactor that flattened everything to
+  `<NAME>` would pass a leak-only test while reporting nothing.
+
+**To re-take the measurement**, with the profile lock free and no other agent holding a browser:
 
 ```
 D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\venv\Scripts\python.exe scripts\_probe_messaging.py
@@ -697,12 +734,25 @@ All at `5bc0181`, CPython 3.13.14 (win32), on a settled working tree.
 | identity sweep | **0 hits across 102 swept files**, 191 spellings, 10 classes |
 | **live writes executed** | **0** |
 
-### The probe that never ran, verified rather than asserted
+### The probe that never ran -- SUPERSEDED, and the check itself no longer works
 
-`_audit/` holds **no `_probe-messaging-*.html`**, which is what the messaging probe writes on its first
-successful load. Its output is gitignored (`_audit/_probe-*.html`), so absence would be expected either
-way -- checking the working directory rather than the index is the only way to tell, and it is empty.
-The claim that reading his inbox is UNMEASURED is therefore checkable, not merely stated.
+**As written, this said:** `_audit/` holds no `_probe-messaging-*.html`, which is what the messaging
+probe writes on its first successful load; its output is gitignored, so checking the working directory
+rather than the index was the only way to tell, and it was empty. The claim that reading his inbox was
+UNMEASURED was therefore checkable rather than merely stated.
+
+**Both halves are now dead, and it is worth being precise about which died how.**
+
+1. The probe HAS run -- twice. See section 6.
+2. **The check would not work even if it had not.** The probe was hardened after it leaked, and it
+   now writes no file under any circumstances. So an empty `_audit/` no longer distinguishes "never
+   ran" from "ran and wrote nothing", which is every run from now on.
+
+This is a small example of a general hazard worth naming, since this package leans on file-presence
+checks in several places: **a check whose signal is the ABSENCE of a side effect silently stops working
+the moment the side effect is removed**, and it keeps passing while it does. It does not fail; it just
+stops meaning anything. Nothing replaces it here, because the thing it was guarding -- the claim that
+reading was unmeasured -- is no longer true.
 
 ### A correction to `445c7a0`'s own commit message
 

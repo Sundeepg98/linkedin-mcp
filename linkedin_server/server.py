@@ -1691,6 +1691,15 @@ async def linkedin_server_info() -> dict[str, Any]:
             #               two, because presenting an unexamined gap as a
             #               design decision is the exact claim this server had
             #               to retract about its own write path.
+            #
+            # THE UNMEASURED CATEGORY IS CURRENTLY EMPTY, and that is a fact
+            # worth reading rather than an omission: as of 2026-08-24 every
+            # refusal below has actually been examined. Its last member was
+            # inbox reading, which was measured and moved to MEASURED. The
+            # label stays defined because the honest thing to do with the next
+            # unexamined gap is to add it here rather than to dress it as a
+            # decision -- an empty category is cheap, and the alternative is
+            # the failure this taxonomy exists to prevent.
             "out_of_scope_by_design": [
                 "POLICY: collecting data about other members",
                 "POLICY: posting, liking, commenting, endorsing, recommending",
@@ -1721,16 +1730,20 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "it on the surface, no notification carries an id to aim one "
                 "at, and opening the page already clears the badge -- so a "
                 "write here could only run after its own effect had landed",
-                "UNMEASURED: READING your own message inbox. Blocked by the "
-                "read boundary's forbidden list, which is correct for SENDING "
-                "and was never argued for reading -- every written rationale "
-                "for that entry is about messages going out. Whether the inbox "
-                "can be read at all has not been established, and there is a "
-                "specific reason to establish it before permitting it: "
-                "LinkedIn's desktop messaging view opens a conversation on "
-                "arrival, so a 'read' of the inbox may mark a thread read. "
-                "scripts/_probe_messaging.py is written and measures exactly "
-                "that; it has not been run",
+                "MEASURED: READING your own message inbox. The forbidden-list "
+                "entry was written for SENDING and never argued for reading, "
+                "so reading was measured on 2026-08-24 -- and the measurement "
+                "argues for keeping the block rather than lifting it. Asking "
+                "for /messaging/ does not land on the inbox: LinkedIn "
+                "redirects it to one specific conversation thread. So a tool "
+                "called 'read my inbox' would not return an inbox, it would "
+                "open somebody's conversation, on every call. Reading itself "
+                "works and puts no send control on the page (zero "
+                "contenteditable nodes, zero send controls, zero forms). The "
+                "one thing still open is narrow: whether opening a thread "
+                "clears its unread state, which could not be measured because "
+                "the unread badge was already at zero and so had nowhere to "
+                "fall from. scripts/_probe_messaging.py re-takes it",
             ],
             "known_side_effects": [
                 "opening the notifications page clears the unread badge",
