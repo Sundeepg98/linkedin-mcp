@@ -1611,6 +1611,20 @@ async def linkedin_server_info() -> dict[str, Any]:
             # direct HTTP call site in the package by AST and fails if a
             # second one appears or this one moves. What was wrong was that a
             # reader of this block could not have known the path existed.
+            # WHAT THE READ BOUNDARY COVERS, said in the block a caller reads
+            # rather than left to be inferred from readonly.py's source. The
+            # claim there -- "the only door to page.goto" -- is exact and
+            # reads as broader than it is, and a reader who takes it for full
+            # coverage has understood a different sentence that the true one
+            # is easily mistaken for.
+            "read_boundary_scope": (
+                "NAVIGATION-ONLY. readonly.assert_read_url gates every "
+                "page.goto this server performs and nothing else. A request "
+                "issued with page.request.get is not a navigation and does "
+                "not reach it -- see direct_api_reads below for the one such "
+                "request that exists, which is covered by an enumerated "
+                "call-site list instead of by a url pattern."
+            ),
             "direct_api_reads": [
                 f"{ME_API} -- GET, once per auth check, to answer whether "
                 "there is a live session. A page load cannot answer that "

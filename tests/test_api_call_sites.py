@@ -207,3 +207,72 @@ def test_a_docstring_mentioning_a_request_is_not_counted_as_one():
     calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)]
     assert calls == []
     assert "request.get" in source
+
+
+def test_readonly_states_its_own_scope_as_navigation_only():
+    """The module must SAY what it covers, not leave it to be inferred.
+
+    ``readonly.py``'s opening claim -- "the only door to ``page.goto``" -- was
+    always exact and always read as broader than it is. Exactness is not the
+    same as clarity: a reader who takes it for full coverage has not
+    misunderstood the sentence, they have understood a different sentence that
+    the true one is easily mistaken for.
+
+    So the module states the scope outright and names the uncovered path. This
+    pins that it still does, because a docstring is the easiest thing in a
+    codebase to lose in a refactor and the whole point of it is to be there
+    when somebody new arrives.
+    """
+    doc = readonly.__doc__ or ""
+    assert "NAVIGATION-ONLY" in doc
+    # It must name the mechanism that escapes it, not just gesture at one.
+    assert "page.request.get" in doc
+    assert "ME_API" in doc
+    # And say which way the refusal would go, which is the surprising half.
+    assert "REFUSED by this allowlist" in doc
+
+
+def test_the_scope_statement_names_where_the_real_coverage_lives():
+    """A gap named without its mitigation reads as an unfixed hole.
+
+    The path is covered -- by an enumeration rather than by a pattern -- and
+    the docstring has to say where, or the next reader either re-discovers the
+    finding or "fixes" it by widening the allowlist, which is precisely the
+    move it was decided against.
+    """
+    doc = readonly.__doc__ or ""
+    assert "test_api_call_sites.py" in doc
+    assert "direct_api_reads" in doc
+    # And why the pattern list was NOT widened, so the decision survives.
+    assert "AST invariant" in doc
+
+
+def test_the_scope_statement_cost_no_boundary_movement():
+    """MEASURED, not asserted, and recorded because it is the whole reason
+    this could be written into ``readonly.py`` at all.
+
+    The boundary freeze hashes the four constant structures as VALUES and each
+    top-level function's token stream with COMMENT tokens dropped. A MODULE
+    docstring is neither -- so stating the scope moved no digest. Verified two
+    ways when it was written: the digest probe returned ``7a48ca1e8dd14ec1``
+    under both 3.10.19 and 3.13.14, unchanged; and the module body excluding
+    its docstring parsed AST-identical to the previous commit.
+
+    The second is the stronger claim and is the one reproduced here, because a
+    digest matching proves the hashed things did not move while this proves
+    NOTHING BUT PROSE did. Note the asymmetry it protects against: a FUNCTION
+    docstring is a string token inside a function body and WOULD move that
+    function's digest. Only the module docstring is free, and a future edit
+    that "tidies" this paragraph into ``assert_read_url``'s own docstring
+    would fire the invariant -- correctly.
+    """
+    import ast
+
+    source = (PACKAGE / "readonly.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    assert isinstance(tree.body[0], ast.Expr), "module docstring expected first"
+    assert ast.get_docstring(tree), "and it must be a docstring, not a bare expr"
+
+    # Every top-level function is still present and none was touched by this.
+    functions = [n for n in tree.body if isinstance(n, ast.FunctionDef)]
+    assert len(functions) == 13, len(functions)

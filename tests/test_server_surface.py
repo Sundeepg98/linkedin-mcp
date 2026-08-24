@@ -797,6 +797,17 @@ async def test_server_info_declares_the_request_that_is_not_a_page_load():
     assert "NOT covered" in text
     assert readonly.is_read_url(ME_API) is False
 
+    # AND THE SCOPE IS STATED IN ITS OWN FIELD, not only inferable from the
+    # entry beside it. "There is one uncovered path" and "the boundary covers
+    # navigations" are different facts: the first is an exception a reader
+    # files away, the second tells them how to reason about the NEXT thing
+    # somebody adds. A caller who only saw the exception would assume any new
+    # read is gated.
+    scope = (await linkedin_server_info())["read_boundary_scope"]
+    assert "NAVIGATION-ONLY" in scope
+    assert "page.request.get" in scope
+    assert "assert_read_url" in scope
+
 
 async def test_that_declaration_is_not_a_hardcoded_string():
     """THE CONTROL. The field must describe the package, not repeat a

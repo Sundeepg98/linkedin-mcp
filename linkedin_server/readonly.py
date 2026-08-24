@@ -8,6 +8,33 @@ in four parts:
    pattern. A keyword the operator types cannot become a navigation to an
    action url, because the built url has to match one of these first.
 
+   **THIS ALLOWLIST IS NAVIGATION-ONLY, AND THAT IS A SCOPE RATHER THAN AN
+   OVERSIGHT.** Stated here explicitly on 2026-08-24 because the sentence
+   above is exact and reads as broader than it is: "the only door to
+   ``page.goto``" is a claim about NAVIGATIONS, and a request issued with
+   ``page.request.get`` is not one. It never reaches this function.
+
+   There is exactly one such request in the package -- ``auth.py`` asks
+   ``config.ME_API`` whether the session is live, because a page load cannot
+   answer that honestly -- and **it would be REFUSED by this allowlist if this
+   allowlist were consulted**: ``is_read_url(ME_API)`` is ``False``. Nothing is
+   wrong with the request. It is one hardcoded module constant, GET only, with
+   no url a caller can influence. What was wrong until this paragraph existed
+   is that a reader of this module had no way to know the path was there.
+
+   It is covered instead by an ENUMERATION rather than by a pattern:
+   ``tests/test_api_call_sites.py`` walks the package's syntax tree, pins the
+   set of direct HTTP call sites to that one entry -- with its first argument
+   pinned AS SOURCE TEXT -- and fails if a second appears or this one moves.
+   ``linkedin_server_info`` reports it as ``direct_api_reads``.
+
+   **Why the path was not simply added to the patterns below.** Doing that
+   would move a frozen boundary structure and fire the AST invariant in
+   ``tests/test_readonly_boundary_invariant.py``, in order to authorise a
+   constant nobody can redirect -- buying a widened allowlist to solve a
+   problem that is really a documentation gap. A boundary that states its own
+   edge is worth more than one that implies a coverage it does not have.
+
 2. **A source scanner.** :func:`scan_source_for_mutations` greps this package
    for the Playwright calls that could change something -- clicking, typing,
    submitting, non-GET requests. ``tests/test_readonly.py`` runs it over every
@@ -50,7 +77,11 @@ What is true now, and is what the four parts above enforce:
   built from a live read, and a single-use grant is redeemed against it. See
   ``writes.py``.
 * It still types nothing, submits no form, issues no non-GET request, and
-  reaches LinkedIn as the ordinary Chrome it is.
+  reaches LinkedIn as the ordinary Chrome it is. Read that list as what it
+  says: "no non-GET request" is not "no request outside the allowlist". One
+  GET goes to ``ME_API`` without passing :func:`assert_read_url` -- see part 1
+  -- and enumerating what this server does not do, without naming the one
+  thing it does, is how a true list misleads.
 
 The list in :data:`SANCTIONED_MUTATIONS` is the whole of the difference, which
 is why it is one line long and why widening it is a test failure rather than a
