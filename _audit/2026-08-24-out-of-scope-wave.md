@@ -1,4 +1,4 @@
-# The eight refusals, worked -- `445c7a0` .. `1ea41c8`
+# The eight refusals, worked -- `445c7a0` .. `0979ed8`
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -334,21 +334,36 @@ both actions and is the important half; sending him to the wrong page to check i
 instruction becomes useless. The surface is now named per action, and the test pins that the unfollow
 block does not mention saved jobs at all.
 
+**Then the same defect turned up a second time, in the other new block** (`0979ed8`). Both surface-less
+actions render the same no-token warning, and its prose fitted only one of them: *"its EDITOR has never
+been loaded"*, closing with *"change it yourself in LinkedIn if you want it CHANGED"*. True of a profile
+setting sitting behind an editor; **nonsense on an application, which has no editor and is not a
+change.** Found by rendering the block and reading it, not by a failing test -- so the test came second
+and asserts the PROPERTY (the string must fit both actions that reach the branch) rather than the
+sentence.
+
+**Two instances in one afternoon makes it a class rather than a slip:** when one code path serves two
+actions, its PROSE silently keeps the shape of whichever action it was written for, and no type, no
+assertion and no reviewer's eye catches it -- only rendering the thing and reading it does. Both are
+now pinned by property. It is the same failure as a gate printing an unmeasured reversibility claim,
+moved from the fields into the sentences around them.
+
 ---
 
 ## Measured
 
-All at `88aad0b`, CPython 3.13.14 (win32), on a settled working tree.
+All at `0979ed8`, CPython 3.13.14 (win32), on a settled working tree.
 
 | | |
 |---|---|
-| suite | **1414 collected, 1414 passed, 0 skipped, 0 failed, 0 errors**, 328s |
-| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1414 \| reported 1414 \| executed 1414 \| skipped 0 \| failed 0 \| errors 0` |
-| boundary digests | 13 functions + aggregate, **identical under 3.10.19 and 3.13.14** |
+| suite | **1416 collected, 1416 passed, 0 skipped, 0 failed, 0 errors**, 289s |
+| `scripts/ci_full_run_check.py` | **exit 0** -- `collected 1416 \| reported 1416 \| executed 1416 \| skipped 0 \| failed 0 \| errors 0` |
+| boundary digests | 13 functions + aggregate `7a48ca1e8dd14ec1`, **identical under 3.10.19 and 3.13.14**, re-measured at HEAD |
+| `readonly.py` vs pre-wave `a1360d1` | **0 changed lines** |
 | tools registered | 16 -> **17** (reads unchanged at **14**) |
 | sanctioned actions | 4 -> **6**; performable 2 -> **3** |
 | package mutating calls | **1** sanctioned, **0** unsanctioned |
-| identity sweep | **0 hits across 98 tracked files**, 191 spellings, 10 classes |
+| identity sweep | **0 hits across 99 swept files**, 191 spellings, 10 classes |
 | **live writes executed** | **0** |
 
 ### A correction to `445c7a0`'s own commit message
@@ -369,7 +384,8 @@ one.
 | run | at | result |
 |---|---|---|
 | **32688677004** | `063c9b7` | **success on all three cells** -- ubuntu/3.10, ubuntu/3.13, windows/3.13 |
-| **(run id below)** | `1ea41c8` | see below -- the click-path tests and the wrong-surface fix |
+| **32689900525** | `6e11109` | the click-path tests and the wrong-surface fix |
+| **32690453627** | `0979ed8` | the apply warning written for the wrong action |
 
 <https://github.com/Sundeepg98/linkedin-mcp/actions/runs/32688677004>
 
