@@ -511,7 +511,16 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "capture in this repo shows the LinkedIn apply form at all, so "
             "before any apply could be attempted there would have to be a "
             "capture containing the form, its fields, its resume selection, "
-            "any screening questions, and the control that submits it."
+            "any screening questions, and the control that submits it. "
+            "THAT CAPTURE NOW HAS A PROCEDURE, which is the difference "
+            "between an unmeasured gap and a permanent one: "
+            "scripts/_probe_apply_flow.py. It reaches the flow by NAVIGATION "
+            "rather than by a click, contains no mutating call, takes the job "
+            "id as a required argument so no default chooses a posting, and "
+            "reads LinkedIn's own applied-tab count before and after -- "
+            "because opening an Easy Apply flow MAY create a draft, which is "
+            "a hypothesis nobody here has verified and is labelled as one. It "
+            "has not been run."
         ),
     ),
     "linkedin_follow_company": WriteSpec(
@@ -2001,7 +2010,16 @@ def _refuse_unperformable(spec: WriteSpec) -> None:
             "selector. AND HALF OF IT IS NOT THIS SERVER'S TO PERFORM EVEN "
             "THEN: the off-site route submits on a third party's applicant- "
             "tracking system, which this server was not built for and has no "
-            "business driving."
+            "business driving. "
+            "WHAT WOULD LIFT THE FIRST HALF, so this reads as UNMEASURED "
+            "rather than as permanent: scripts/_probe_apply_flow.py captures "
+            "the LinkedIn-hosted flow and inventories exactly the controls "
+            "every existing capture lacks. It NAVIGATES rather than clicks -- "
+            "LinkedIn draws the apply control as a link, so the flow is "
+            "reachable without pressing anything -- and the package's own "
+            "scanner finds zero mutating calls in it. It has NOT been run. "
+            "Run it with him present, on a posting whose apply_path reads "
+            "'linkedin_apply'."
         )
     if spec.action == "set_open_to_work":
         raise WriteAttemptError(

@@ -1460,6 +1460,43 @@ async def test_apply_is_sanctioned_and_refuses_for_the_flow_it_has_never_seen(
     # And it never claims applying is out of scope by design.
     assert "out of scope" not in lowered
 
+    # IT NAMES WHAT WOULD LIFT IT, which is the difference between an
+    # unmeasured gap and a permanent one. A refusal that states a missing
+    # capture without saying how the capture is taken reads as a decision
+    # nobody can act on, and the next person who wants apply either gives up
+    # or improvises a selector -- which on this action is the one thing that
+    # must not happen.
+    assert "_probe_apply_flow.py" in message
+    assert "has not been run" in lowered
+    # And it says the probe reaches the flow WITHOUT clicking, because that is
+    # the property that makes running it a reasonable thing to ask of him.
+    assert "navigates rather than clicks" in lowered
+
+
+def test_the_apply_capture_procedure_exists_and_clicks_nothing():
+    """The refusal points at a file. The file must exist, and must be the kind
+    of thing the refusal claims it is.
+
+    A procedure named but absent is worse than no procedure: it reads as
+    completed work. And a capture script that clicked something would be
+    exactly the risk the refusal exists to avoid, so that claim is checked
+    with the package's own scanner rather than by reading the file.
+    """
+    from linkedin_server import readonly
+
+    probe = Path(__file__).resolve().parents[1] / "scripts" / "_probe_apply_flow.py"
+    assert probe.exists(), probe
+    source = probe.read_text(encoding="utf-8")
+
+    assert readonly.scan_source_for_mutations(source) == []
+    # Guarded, so importing it cannot launch a browser -- the sibling probes'
+    # standing hole, closed on the two files that would navigate somewhere
+    # consequential.
+    assert 'if __name__ == "__main__":' in source
+    # The job id is required, never defaulted: which posting this opens is not
+    # a decision a default should make.
+    assert "usage:" in source
+
 
 async def test_an_unredeemed_grant_performs_nothing(writes_on, browser_page):
     """``perform`` does not redeem its own permission.

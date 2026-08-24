@@ -142,7 +142,21 @@ but for reasons that were measured:
 
 `apply_job` is therefore fully specced and gated in `writes.py`, registers no
 tool, and holds no url, so a grant for it is refused at issue rather than at
-use. What would change that is written down in the spec.
+use.
+
+**And the gap has an address, which is what makes it unmeasured rather than
+permanent.** `scripts/_probe_apply_flow.py` captures the LinkedIn-hosted flow
+and inventories exactly the controls every existing capture lacks -- forms,
+file inputs, dialogs, screening questions, the control that submits. It reaches
+the flow by **navigation, not by a click** (LinkedIn draws the apply control as
+a link), the package's own mutation scanner finds **zero** mutating calls in
+it, and it takes the job id as a required argument so no default picks a
+posting for you. It also reads LinkedIn's own applied-tab count **before and
+after**, because opening an Easy Apply flow may create a draft -- a hypothesis
+nobody has verified, labelled as one, and measured rather than assumed.
+
+**It has not been run.** Run it with somebody watching, on a posting whose
+`apply_path` reads `linkedin_apply`.
 
 **Why the classifier demands several fields agree**, when one obvious field
 looks sufficient. Each candidate was measured and each fails alone:
