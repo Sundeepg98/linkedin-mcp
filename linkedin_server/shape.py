@@ -1147,6 +1147,62 @@ LINKEDIN_APPLY_PREFIX = "LinkedIn Apply to "
 #: action gated on it cannot be taken back.
 APPLY_UNKNOWN = "unknown"
 
+#: The global-nav messaging badge, as LinkedIn spells it. Measured
+#: 2026-08-24: ``aria-label="Messaging, 0 new notifications"``.
+#:
+#: THIS IS THE HALF OF "CHECK MY MESSAGES" THAT COSTS NOTHING. It renders in
+#: the nav on ``/feed/``, which is already an allowed read surface, so reading
+#: it needs no boundary change and -- the point -- opens NOBODY'S
+#: conversation. Asking ``/messaging/`` for the inbox does not stay on an
+#: inbox; it lands in one specific thread that LinkedIn, not the caller,
+#: chose. So "do I have messages waiting" is answerable honestly here, and
+#: "show me my inbox" is a different question with a different cost.
+_MESSAGING_BADGE = re.compile(
+    r'aria-label="Messaging,\s*([\d,]+)\s+new notification', re.I
+)
+
+
+def messaging_badge(html: str) -> dict[str, Any]:
+    """How many unread message threads the nav badge claims. Three outcomes.
+
+    ZERO IS A REAL ANSWER AND IS NOT THE SAME AS UNREADABLE, which is the
+    whole reason this returns a dict rather than an int. A badge reading 0 and
+    a badge that never rendered look identical to any caller that collapses
+    them, and this package has already been bitten once by exactly that: two
+    separate attempts to measure whether reading a thread marks it read were
+    INCONCLUSIVE because the badge was at 0 and so had nowhere to fall from --
+    a check that cannot fail. A reader that reported ``0`` for both would have
+    turned those into false clean runs.
+    """
+    match = _MESSAGING_BADGE.search(html or "")
+    if not match:
+        return {
+            "unread": None,
+            "state": "unreadable",
+            "why": (
+                "no messaging badge rendered in the global nav. That is NOT "
+                "the same as zero unread: the nav may not have hydrated, and "
+                "this reader will not report a count it did not see."
+            ),
+        }
+    raw = match.group(1).replace(",", "")
+    try:
+        count = int(raw)
+    except ValueError:  # pragma: no cover - defensive
+        return {
+            "unread": None,
+            "state": "unreadable",
+            "why": f"the badge read {raw!r}, which is not a number.",
+        }
+    return {
+        "unread": count,
+        "state": "read",
+        "why": (
+            f"LinkedIn's own global-nav badge reads {count} new. Read off "
+            "/feed/, which opens no conversation."
+        ),
+    }
+
 #: LinkedIn's outbound interstitial. NOT an apply-specific url: the same
 #: wrapper carries any external link on the page, so a capture holding two of
 #: them has one that is an apply and one that is not. That is exactly why the

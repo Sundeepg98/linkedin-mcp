@@ -58,6 +58,7 @@ from linkedin_server.config import (
     BASE_URL,
     CDP_PORT,
     DEFAULT_LIMIT,
+    FEED_URL,
     IDLE_CLOSE_S,
     LAUNCH_ARGS,
     LOGIN_WAIT_S,
@@ -644,6 +645,44 @@ async def linkedin_my_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]
             limit=limit,
             surface="applied jobs",
         )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unread_messages() -> dict[str, Any]:
+    """How many unread conversations are waiting for you. Nothing is opened.
+
+    This never sends a message, never opens a conversation, and never loads
+    the messaging surface at all. It reads LinkedIn's own global-nav badge off
+    your feed, which this server already loads. One page.
+
+    WHY A COUNT AND NOT AN INBOX READER, because the difference is the whole
+    design: asking LinkedIn for ``/messaging/`` does not stay on an inbox. It
+    redirects into ONE SPECIFIC CONVERSATION THREAD, and the caller does not
+    choose which -- LinkedIn does. So "is anything waiting" is answerable
+    honestly and cheaply, while "show me my inbox" is a different question
+    with a different cost that this server does not answer. See
+    ``linkedin_server_info``.
+
+    THREE OUTCOMES, and the third is why this is not just an integer.
+    ``unread`` is a number when the badge was read, and ``null`` when the
+    badge did not render -- which is NOT the same as zero and is never
+    reported as zero. A badge at 0 and a nav that failed to hydrate look
+    identical to any reader that collapses them, and this package has already
+    lost two measurements to exactly that confusion.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, FEED_URL)
+            html = await page.content()
+        verdict = shape.messaging_badge(html)
+        return {
+            **verdict,
+            "source_url": landed,
+            "opened_a_conversation": False,
+            "pages_loaded": 1,
+        }
     except Exception as exc:
         return _error(exc)
 

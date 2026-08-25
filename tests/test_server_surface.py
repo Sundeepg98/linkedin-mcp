@@ -1,4 +1,4 @@
-"""The tool surface: eighteen tools, fourteen of which read LinkedIn.
+"""The tool surface: nineteen tools, fifteen of which read LinkedIn.
 
 WHAT THIS FILE USED TO ASSERT, AND WHY IT NO LONGER CAN. The brief for this
 server drew a hard line -- no writes, not now, not stubbed, not "for later" --
@@ -82,7 +82,14 @@ EXPECTED_TOOLS = {
     "linkedin_unsave_job",
     # The third, 2026-08-24.
     "linkedin_unfollow_company",
-    # The fourth, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
+    # A READ, added 2026-08-25, and it is the reason the read count moves off
+    # fourteen for the first time in three waves. It answers "do I have
+    # messages waiting" off the global-nav badge on /feed/ -- a surface
+    # already loaded -- which opens nobody's conversation. It is deliberately
+    # NOT an inbox reader: /messaging/ does not stay on an inbox, it redirects
+    # into one thread LinkedIn picks.
+    "linkedin_unread_messages",
+    # The fourth WRITE, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
     # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
     # specced and registers NO TOOL, because its flow has never been captured
     # -- exactly the condition linkedin_set_open_to_work is in. A tool that
@@ -139,17 +146,18 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_eighteen_tools(tools):
-    """RENAMED 2026-08-25, from ``..._seventeen_tools``, and the rename is the
+async def test_the_surface_is_exactly_the_nineteen_tools(tools):
+    """RENAMED TWICE ON 2026-08-25, from ``..._seventeen_tools`` then
+    ``..._eighteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
 
-    This test has been renamed once before -- it shipped as
+    This test has now been renamed three times -- it shipped as
     ``..._nine_reads`` -- and the rule it follows is that a test name is a
-    CLAIM like any other: a name saying seventeen over a body asserting
-    eighteen is the exact species of stale claim this file exists to catch.
+    CLAIM like any other: a name saying eighteen over a body asserting
+    nineteen is the exact species of stale claim this file exists to catch.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 18
+    assert len(tools) == 19
     # And the split is asserted, not just the total: fourteen reads and the
     # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
@@ -159,13 +167,17 @@ async def test_the_surface_is_exactly_the_eighteen_tools(tools):
         "linkedin_unfollow_company",
         "linkedin_apply_job",
     }
-    # THE READ COUNT IS UNCHANGED AT FOURTEEN, and that is the half worth
-    # asserting separately: this wave added a write and added a FIELD to an
-    # existing read (job_detail's apply_path) rather than a new read tool, so a
-    # fourteen here is evidence the read surface did not quietly grow too. It
-    # has now survived two write-adding waves unmoved, which is the only kind
-    # of evidence this line was ever going to produce.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 14
+    # THE READ COUNT MOVES OFF FOURTEEN, for the first time in three waves,
+    # and the comment it replaces was the evidence that made that meaningful:
+    # "this wave added a write and added a FIELD to an existing read rather
+    # than a new read tool, so a fourteen here is evidence the read surface
+    # did not quietly grow too. It has now survived two write-adding waves
+    # unmoved." It moved deliberately on the third: linkedin_unread_messages
+    # is a genuinely new READ, added because "do I have messages waiting" is
+    # answerable off an already-loaded surface at no cost, while "show me my
+    # inbox" is not. The number is asserted rather than dropped precisely so
+    # the NEXT quiet growth still fails here.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 15
 
 
 def test_the_read_that_was_nearly_named_a_write():
