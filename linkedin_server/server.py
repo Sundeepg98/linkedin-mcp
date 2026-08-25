@@ -1666,8 +1666,78 @@ async def linkedin_unfollow_company(
         return _error(exc)
 
 
+
+#: Fields that answer "what is running and what can it do". Everything else in
+#: server_info is REASONING -- why a thing is refused, what would measure it,
+#: who ruled and when -- which is worth having and is not worth paying for on
+#: every routine call.
+#:
+#: MEASURED BEFORE IT WAS SPLIT, because the whole point is a number: the full
+#: block was ~3136 tokens, and one field (not_yet_measured, the twelve-item
+#: roadmap with each entry naming its instrument) was 772 of them -- 24.6% of
+#: a call that a client makes to find out what version is running.
+#:
+#: WHAT DELIBERATELY STAYS IN THE DEFAULT, because a short answer that drops
+#: a hazard is not an improvement:
+#:   * irreversible -- names what cannot be undone. 149 tokens, and the one
+#:     thing a caller must not have to ask twice for.
+#:   * known_side_effects -- reading the notifications page clears a badge.
+#:   * recovery_path and rate_discipline -- both small and both operational.
+#:   * writes_available / writes_sanctioned -- the capability answer itself.
+_INFO_CORE: frozenset[str] = frozenset(
+    {
+        "name",
+        "version",
+        "build",
+        "read_only",
+        "capabilities",
+        "writes_available",
+        "writes_sanctioned",
+        "irreversible",
+        "known_side_effects",
+        "recovery_path",
+        "rate_discipline",
+        "browser",
+    }
+)
+
+
+def _trim_info(full: dict[str, Any], verbose: bool) -> dict[str, Any]:
+    """The lean view, plus a pointer saying exactly what was left out.
+
+    THE POINTER IS NOT DECORATION. A caller handed a short dict with no note
+    cannot tell a lean default from a server that has stopped reporting its
+    boundary -- and this package spent a day on the difference between an
+    absence and a decision. omitted lists the field NAMES, so the answer to
+    "is the reasoning still there" is visible without a second call.
+    """
+    if verbose:
+        return full
+    lean = {k: v for k, v in full.items() if k in _INFO_CORE}
+    omitted = sorted(k for k in full if k not in _INFO_CORE)
+    lean["omitted"] = {
+        "fields": omitted,
+        "why": (
+            "These carry the server's REASONING -- what it refuses and why, "
+            "what has never been measured and what would settle it, who ruled "
+            "on what and when. All of it is still here; none of it is needed "
+            "to find out what is running. Call "
+            "linkedin_server_info(verbose=True) for the full block."
+        ),
+        "nothing_about_safety_was_omitted": (
+            "irreversible, known_side_effects and recovery_path are in the "
+            "default above. Reversibility text also stays inline on every "
+            "tool that writes -- linkedin_apply_job's own docstring carries "
+            "the finding that nobody has established LinkedIn offers a "
+            "withdraw at all, and that reaches a caller at confirm time "
+            "rather than behind this flag."
+        ),
+    }
+    return lean
+
+
 @mcp.tool()
-async def linkedin_server_info() -> dict[str, Any]:
+async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
     """Describe this server: what it can do, what it deliberately cannot.
 
     Useful for confirming the read-only boundary and the rate settings without
@@ -1695,7 +1765,7 @@ async def linkedin_server_info() -> dict[str, Any]:
     ``build.process.started_at`` dates the answer.
     """
     try:
-        return {
+        full = {
             "name": SERVER_NAME,
             "version": SERVER_VERSION,
             # Read from module constants; never re-resolved here. A per-call
@@ -2160,6 +2230,7 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "check_with": "linkedin_cdp_status",
             },
         }
+        return _trim_info(full, verbose)
     except Exception as exc:
         return _error(exc)
 

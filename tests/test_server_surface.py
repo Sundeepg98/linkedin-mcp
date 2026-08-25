@@ -47,6 +47,8 @@ somebody has to hold to.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from linkedin_server import readonly
@@ -610,7 +612,7 @@ async def test_server_info_reports_writes_off_when_the_flag_is_unset(monkeypatch
     from linkedin_server.writes import WRITES_FLAG
 
     monkeypatch.delenv(WRITES_FLAG, raising=False)
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
     assert info["read_only"] is True
     assert info["writes_available"] == []
     assert info["rate_discipline"]["auto_paging"] is False
@@ -632,7 +634,7 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     from linkedin_server.writes import WRITES_FLAG
 
     monkeypatch.setenv(WRITES_FLAG, "1")
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
     assert info["read_only"] is False
     # apply_job JOINED THIS LIST ON 2026-08-25. It is listed rather than
     # derived on purpose: the whole value of this assertion is that a write
@@ -657,7 +659,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     from linkedin_server.writes import WRITES_FLAG
 
     monkeypatch.delenv(WRITES_FLAG, raising=False)
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
     assert info["writes_sanctioned"] == [
         "apply_job",
         "save_job",
@@ -698,6 +700,65 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     assert "apply_job" in info["writes_sanctioned"]
 
 
+async def test_server_info_is_cheap_by_default_and_complete_on_request():
+    """The routine call should not cost what the full explanation costs.
+
+    MEASURED BEFORE THE SPLIT, because a context-budget claim without a number
+    is just a feeling: the whole block was ~3136 tokens, of which
+    ``not_yet_measured`` alone -- the twelve-item roadmap, each entry naming
+    the instrument that would settle it -- was 772. That is 24.6% of a call a
+    client makes to find out what version is running.
+
+    The default now answers "what is running and what can it do"; the
+    reasoning is behind ``verbose=True``. Nothing was deleted.
+    """
+    from linkedin_server.server import linkedin_server_info
+
+    lean = await linkedin_server_info()
+    full = await linkedin_server_info(verbose=True)
+
+    def size(block):
+        return len(json.dumps(block, default=str))
+
+    # A real reduction, not a rounding one. Pinned as a ratio rather than a
+    # literal token count so that adding a field to either view does not fail
+    # this for the wrong reason.
+    assert size(lean) < size(full) / 2, (size(lean), size(full))
+
+    # Verbose is a superset: the split may not lose a field.
+    assert set(full) - set(lean) == set(lean["omitted"]["fields"])
+    assert set(lean) - {"omitted"} <= set(full)
+
+
+async def test_the_lean_view_never_drops_a_hazard():
+    """A shorter answer that omits a warning is not an improvement.
+
+    THIS IS THE ASSERTION THAT MATTERS in the context-budget work. Trimming a
+    payload is a mechanical change with one dangerous failure mode -- the
+    thing trimmed away being the thing a caller needed in order to be careful.
+    These three stay in the DEFAULT view, and a future edit that moves any of
+    them behind the flag fails here rather than being noticed by somebody
+    reading a diff.
+
+    Reversibility text also stays inline on the tools that WRITE, which is a
+    separate guarantee asserted elsewhere: linkedin_apply_job's own docstring
+    carries the finding that nobody has established LinkedIn offers a withdraw
+    at all, and that has to reach a caller at confirm time.
+    """
+    from linkedin_server.server import linkedin_server_info
+
+    lean = await linkedin_server_info()
+    for hazard in ("irreversible", "known_side_effects", "recovery_path"):
+        assert hazard in lean, f"{hazard} was trimmed out of the default view"
+
+    # And the caller is TOLD what is missing, by name. A short dict with no
+    # note is indistinguishable from a server that stopped reporting its
+    # boundary -- which is the exact absence-versus-decision confusion this
+    # package spent a day removing from its own refusal list.
+    assert lean["omitted"]["fields"], "omitted must name what it left out"
+    assert "verbose=True" in lean["omitted"]["why"]
+
+
 async def test_each_kind_of_refusal_is_reported_in_its_own_field():
     """A wall and a decision may not share a bucket.
 
@@ -724,7 +785,7 @@ async def test_each_kind_of_refusal_is_reported_in_its_own_field():
     """
     from linkedin_server.server import linkedin_server_info
 
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
 
     fields = (
         "cannot_be_done",
@@ -822,7 +883,7 @@ async def test_the_refused_by_choice_field_is_the_one_that_should_empty():
     """
     from linkedin_server.server import linkedin_server_info
 
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
     for entry in info["can_be_done_and_is_refused"]:
         assert "Measured" in entry or "measured" in entry, (
             "an entry here claims something WORKS and is refused anyway, so it "
@@ -915,7 +976,7 @@ async def test_server_info_names_the_one_flag_and_denies_every_other_technique()
     from linkedin_server.config import LAUNCH_ARGS
     from linkedin_server.server import linkedin_server_info
 
-    posture = (await linkedin_server_info())["automation_posture"]
+    posture = (await linkedin_server_info(verbose=True))["automation_posture"]
 
     assert posture["launch_args"] == list(LAUNCH_ARGS)
     assert posture["navigator_webdriver_disabled"] is True
@@ -940,7 +1001,7 @@ async def test_the_flags_server_info_reports_are_flags_it_is_allowed_to_pass():
     """
     from linkedin_server.server import linkedin_server_info
 
-    posture = (await linkedin_server_info())["automation_posture"]
+    posture = (await linkedin_server_info(verbose=True))["automation_posture"]
     assert readonly.assert_launch_flags_permitted(posture["launch_args"]) is None
 
 
@@ -995,7 +1056,7 @@ async def test_the_recovery_tool_states_its_two_hard_requirements(tools):
 async def test_server_info_points_at_the_recovery_path_without_promoting_it():
     from linkedin_server.server import linkedin_server_info
 
-    recovery = (await linkedin_server_info())["recovery_path"]
+    recovery = (await linkedin_server_info(verbose=True))["recovery_path"]
     assert recovery["is_the_daily_path"] is False
     assert recovery["check_with"] == "linkedin_cdp_status"
     assert "--remote-debugging-port" in recovery["requires"]
@@ -1042,7 +1103,7 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     from linkedin_server import writes
     from linkedin_server.server import linkedin_server_info
 
-    info = await linkedin_server_info()
+    info = await linkedin_server_info(verbose=True)
     block = info["irreversible"]
 
     # Derived from the specs, so a new irreversible action shows up here
@@ -1111,7 +1172,7 @@ async def test_that_irreversibility_report_would_notice_a_performable_one(
     flipped = writes.WriteSpec(**{**save.__dict__, "irreversible": True})
     monkeypatch.setitem(writes.SANCTIONED_WRITES, "linkedin_save_job", flipped)
 
-    block = (await linkedin_server_info())["irreversible"]
+    block = (await linkedin_server_info(verbose=True))["irreversible"]
     assert "save_job" in block["performable_and_irreversible"]
     assert "save_job" in block["sanctioned_and_irreversible"]
 
@@ -1135,7 +1196,7 @@ async def test_server_info_declares_the_request_that_is_not_a_page_load():
     from linkedin_server.config import ME_API
     from linkedin_server.server import linkedin_server_info
 
-    declared = (await linkedin_server_info())["direct_api_reads"]
+    declared = (await linkedin_server_info(verbose=True))["direct_api_reads"]
     assert declared, "the path exists; the block must say so"
 
     text = " ".join(declared)
@@ -1152,7 +1213,7 @@ async def test_server_info_declares_the_request_that_is_not_a_page_load():
     # files away, the second tells them how to reason about the NEXT thing
     # somebody adds. A caller who only saw the exception would assume any new
     # read is gated.
-    scope = (await linkedin_server_info())["read_boundary_scope"]
+    scope = (await linkedin_server_info(verbose=True))["read_boundary_scope"]
     assert "NAVIGATION-ONLY" in scope
     assert "page.request.get" in scope
     assert "assert_read_url" in scope
@@ -1170,7 +1231,7 @@ async def test_that_declaration_is_not_a_hardcoded_string():
     from linkedin_server.server import linkedin_server_info
     from tests.test_api_call_sites import SANCTIONED_API_CALLS, _api_call_sites
 
-    declared = " ".join((await linkedin_server_info())["direct_api_reads"])
+    declared = " ".join((await linkedin_server_info(verbose=True))["direct_api_reads"])
     sites = _api_call_sites()
 
     # DERIVED, NEVER LITERAL. This line read `== 1` until 2026-08-24 and that
@@ -1180,7 +1241,7 @@ async def test_that_declaration_is_not_a_hardcoded_string():
     # The invariant is that the three views AGREE, not that any of them is a
     # particular number.
     assert len(sites) == len(SANCTIONED_API_CALLS)
-    assert len((await linkedin_server_info())["direct_api_reads"]) == len(sites)
+    assert len((await linkedin_server_info(verbose=True))["direct_api_reads"]) == len(sites)
     assert "GET" in declared
 
     # Every enumerated call site's MODULE must be named somewhere in the
