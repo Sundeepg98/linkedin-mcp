@@ -354,3 +354,81 @@ def test_scrub_leaves_text_that_holds_no_known_path_untouched():
 
     assert scrub(text) is text
     assert preflight.BROWSERS_PATH_ENV in scrub(preflight.BROWSERS_PATH_ENV)
+
+
+# ---------------------------------------------------------------------------
+# The cookie-jar error paths, forced rather than waited for
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "failure,where",
+    [
+        (OSError(13, "being used by another process"), "_copy_jar"),
+        (OSError(2, "No such file or directory"), "_copy_jar"),
+    ],
+    ids=["jar locked by a live Chrome", "jar vanished mid-read"],
+)
+def test_a_cookie_jar_failure_never_returns_an_absolute_path(
+    monkeypatch, failure, where
+):
+    """FORCED, because waiting for this condition is how it went unnoticed.
+
+    ``cookie_jar`` builds its errors as ``f"...{jar}...{exc}"``, and an
+    ``OSError`` STRINGIFIES WITH THE FILENAME it failed on -- so a path
+    reaches a caller through the exception text even when every interpolation
+    of this server's own is relativised.
+
+    THE GUARD THAT EXISTED WAS INTERMITTENT, and that is the real defect being
+    fixed here. ``test_the_offline_session_result_carries_no_absolute_path``
+    can only see this leak when something ELSE holds the jar's SQLite lock,
+    which in practice means a live Chrome during the test run. It passed for a
+    long time, then failed once a browser happened to be open, then passed
+    again the moment the browser closed. A check whose firing depends on
+    whether an unrelated process is running is not a check.
+
+    So this forces the failure instead of hoping for it: the same class fires
+    on every run, on every machine, with no browser involved.
+    """
+    from linkedin_server import cookie_jar
+
+    def boom(*args, **kwargs):
+        raise failure
+
+    monkeypatch.setattr(cookie_jar, where, boom)
+
+    with pytest.raises(cookie_jar.CookieJarUnavailableError) as excinfo:
+        cookie_jar.read_jar(CHROME_PROFILE, ["li_at"])
+
+    message = str(excinfo.value)
+    assert DRIVE_LETTER.search(message) is None, message
+    assert str(CHROME_PROFILE) not in message, message
+    assert str(REPO_ROOT) not in message, message
+    # The REASON has to survive the scrubbing -- a message stripped of both
+    # its path and its explanation would be hygienic and useless.
+    assert "cookie jar" in message.lower()
+
+
+def test_that_forced_failure_can_actually_fail(monkeypatch):
+    """The control. An unscrubbed message must trip the same assertion.
+
+    Without this, the test above would pass just as happily against a build
+    where scrubbing had been removed entirely -- it would simply never see a
+    path, because it never checked that it COULD.
+    """
+    from linkedin_server import cookie_jar
+
+    def boom(*args, **kwargs):
+        raise OSError(13, "being used by another process")
+
+    monkeypatch.setattr(cookie_jar, "_copy_jar", boom)
+    # Neuter the scrubber the way a regression would.
+    monkeypatch.setattr(cookie_jar, "scrub", lambda text: text)
+
+    with pytest.raises(cookie_jar.CookieJarUnavailableError) as excinfo:
+        cookie_jar.read_jar(CHROME_PROFILE, ["li_at"])
+
+    assert DRIVE_LETTER.search(str(excinfo.value)) is not None, (
+        "the unscrubbed message carried no drive letter, so the assertion "
+        "above proves nothing on this platform"
+    )

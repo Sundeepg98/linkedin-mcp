@@ -49,6 +49,10 @@ import tempfile
 from pathlib import Path
 from typing import Any, Iterable
 
+# config IS IMPORTED LATE, inside scrub() below, rather than at module level:
+# this module is imported by config's own consumers, so a module-level import
+# would risk a cycle. The indirection is deliberate rather than untidy.
+
 #: Seconds between 1601-01-01 UTC (the WebKit epoch Chrome counts from) and
 #: 1970-01-01 UTC (the POSIX epoch everything else counts from): 134774 days
 #: of exactly 86400 seconds. Both epochs are proleptic and neither counts
@@ -93,6 +97,44 @@ class CookieJarUnavailableError(Exception):
     three ways this fails: no profile directory, no jar file, or sqlite
     refusing the copy.
     """
+
+
+def scrub(text: str) -> str:
+    """Relativise this server's own paths inside an error message.
+
+    A thin wrapper so ``cookie_jar`` need not import ``config`` at module
+    level. The work is ``config.scrub``, whose docstring already names the
+    case that made this necessary: several messages here are built as
+    ``f"...{path}...{exc}"`` and an OSError STRINGIFIES WITH THE FILENAME it
+    failed on, so a path reaches a caller through the exception text even when
+    every interpolation of its own is relativised.
+
+    WHY THIS WAS UNCAUGHT FOR SO LONG. Every message below is on an ERROR
+    path, and the one that finally leaked -- "could not be given a copy" --
+    only runs when something else holds the jar's SQLite lock. That needs a
+    live Chrome. So the guard was correct and simply never exercised until a
+    browser was running during a test run, which is the same shape as the
+    other defects found on this module today: right mechanism, wrong blast
+    radius, and a check that only fires in a state the suite rarely reaches.
+    """
+    from linkedin_server.config import scrub as _scrub
+
+    # A BLANKET REGEX WAS TRIED HERE AND REMOVED, because it fixed the leak by
+    # destroying the diagnosis. Replacing every drive-letter run with <path>
+    # also ate the JAR PATH THIS MESSAGE EXISTS TO NAME -- the class docstring
+    # promises "the message always names the path that was tried", and two
+    # tests assert it. In production the jar sits under the repo, so
+    # config.scrub relativises it to _state/chrome-profile\... which is both
+    # clean and useful; under pytest the profile is a tmp_path that scrub
+    # cannot know, so the blanket rule erased it there and only there.
+    #
+    # The actual leak was never the jar. It was the TEMP DIRECTORY the copy
+    # goes into, which stringifies as C:\Users\<name>\AppData\Local\Temp\...
+    # and hands over a home directory, hence an account name. That path is an
+    # implementation detail no caller can use, so it is no longer interpolated
+    # into any message at all -- which fixes the leak at the source instead of
+    # scrubbing it downstream.
+    return str(_scrub(text))
 
 
 def _is_linkedin_host(host_key: Any) -> bool:
@@ -197,9 +239,12 @@ def read_jar(profile_dir: Path, names: Iterable[str]) -> list[dict[str, Any]]:
     jar = profile_dir.joinpath(*JAR_RELPATH)
     if not jar.is_file():
         raise CookieJarUnavailableError(
-            f"cookie jar file does not exist: {jar} -- the profile directory "
-            f"{profile_dir} is there but holds no cookie database yet, which "
-            "is what a profile that has never been signed in to looks like."
+            scrub(
+                f"cookie jar file does not exist: {jar} -- the profile "
+                f"directory {profile_dir} is there but holds no cookie "
+                "database yet, which is what a profile that has never "
+                "been signed in to looks like."
+            )
         )
 
     tmp_dir = Path(tempfile.mkdtemp(prefix="linkedin-cookie-jar-"))
@@ -208,9 +253,12 @@ def read_jar(profile_dir: Path, names: Iterable[str]) -> list[dict[str, Any]]:
             copy = _copy_jar(jar, tmp_dir)
         except OSError as e:
             raise CookieJarUnavailableError(
-                f"sqlite could not be given a copy of the cookie jar {jar}: "
-                f"copying it to {tmp_dir} failed ({e}). The live jar is never "
-                "opened directly, so this is where the read stops."
+                scrub(
+                    f"sqlite could not be given a copy of the cookie jar "
+                    f"{jar}: copying it to a temporary directory failed ({e}). The live "
+                    "jar is never opened directly, so this is where the "
+                    "read stops."
+                )
             ) from e
 
         try:
@@ -219,16 +267,20 @@ def read_jar(profile_dir: Path, names: Iterable[str]) -> list[dict[str, Any]]:
             con = sqlite3.connect(str(copy))
         except sqlite3.Error as e:
             raise CookieJarUnavailableError(
-                f"sqlite could not open the copy of the cookie jar {jar} "
-                f"(copy at {copy}): {e}"
+                scrub(
+                    f"sqlite could not open the copy of the cookie jar "
+                    f"{jar}: {e}"
+                )
             ) from e
         try:
             rows = con.execute(_JAR_QUERY).fetchall()
         except sqlite3.Error as e:
             raise CookieJarUnavailableError(
-                f"sqlite could not query the copy of the cookie jar {jar} "
-                f"(copy at {copy}): {e}. The file exists but does not look "
-                "like a Chrome cookie database."
+                scrub(
+                    f"sqlite could not query the copy of the cookie jar "
+                    f"{jar}: {e}. The file exists but does "
+                    "not look like a Chrome cookie database."
+                )
             ) from e
         finally:
             con.close()
