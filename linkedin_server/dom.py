@@ -27,6 +27,7 @@ from __future__ import annotations
 import re
 from typing import Any, Optional
 
+from linkedin_server import shape
 from linkedin_server.config import logger
 from linkedin_server.errors import ExtractionFailedError
 
@@ -699,8 +700,27 @@ APPLY_LABELS_SEEN: tuple[str, ...] = (
 #: already-applied posting is NOT known to match -- that state has never been
 #: observed, because the applied list on this account is empty -- so count 0
 #: here is genuinely ambiguous and ``shape.apply_route`` says so.
+#:
+#: THE LINKEDIN-HOSTED ARM IS A PREFIX MATCH, and it had to become one: the
+#: exact-equality version of this selector carried the SAME defect that was
+#: found in ``shape.APPLY_LABELS`` on 2026-08-24, one layer down. LinkedIn
+#: serves that control as "LinkedIn Apply to this job" while the page is
+#: hydrating and as "LinkedIn Apply to <TITLE> at <COMPANY>" once it settles,
+#: so an ``[aria-label="..."]`` selector finds ZERO controls on a fully
+#: rendered posting -- and count 0 reads as "no apply control here", which is
+#: indistinguishable from a posting that genuinely has none.
+#:
+#: Fixing the classifier without fixing the selector would have left the bug
+#: exactly where it was: the classifier would simply never have been handed
+#: anything to classify. ``^=`` is CSS prefix matching, and it is deliberately
+#: NOT used for the off-site arm, whose label has never been observed varying.
 APPLY_CONTROL = ", ".join(
-    f'a[aria-label="{label}"]' for label in APPLY_LABELS_SEEN
+    (
+        f'a[aria-label^="{shape.LINKEDIN_APPLY_PREFIX}"]'
+        if label.startswith(shape.LINKEDIN_APPLY_PREFIX)
+        else f'a[aria-label="{label}"]'
+    )
+    for label in APPLY_LABELS_SEEN
 )
 
 

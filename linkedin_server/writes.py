@@ -433,16 +433,23 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_apply_job": WriteSpec(
         action="apply_job",
         tool_name="linkedin_apply_job",
-        # NEVER LOADED, exactly as for set_open_to_work, and for a reason that
-        # is measured rather than assumed: thirteen job captures contain the
-        # apply CONTROL and not one contains what appears after it is
-        # activated. Zero forms, zero file inputs, zero dialogs, zero
-        # Submit/Review/Next controls, zero rendered apply pages. So there is
-        # no url here, no anchor, and assert_write_url refuses this action
-        # outright. Specced rather than omitted, because the operator asked for
-        # apply by name and an omission would read as nobody having looked.
-        url_template=None,
-        url_pattern=None,
+        # ADDRESSED FROM 2026-08-25, and the address is the POSTING page
+        # rather than the apply url. That is not a workaround; it is what the
+        # measurement showed. Navigating to
+        # /jobs/view/<id>/apply/?openSDUIApplyFlow=true LANDS BACK ON
+        # /jobs/view/<id>/ with the flow drawn as a modal over the posting --
+        # so the posting page IS the apply surface. This is why apply needs no
+        # new allowlist entry and no shortening of any denylist: the four
+        # frozen denylists are byte-identical across this change.
+        #
+        # WHAT THIS COMMENT USED TO SAY, kept because the reversal is the
+        # point: "NEVER LOADED ... thirteen job captures contain the apply
+        # CONTROL and not one contains what appears after it is activated."
+        # True when written, false now. The flow was captured on 2026-08-24:
+        # 2 forms, 1 file input, 1 dialog, 43 buttons, and one enabled
+        # "Submit application" with no Next beside it.
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
         exempt_substring=None,
         summary="Submit an application to one job posting.",
         from_state="linkedin_apply",
@@ -501,26 +508,31 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "load /jobs-tracker/?stage=applied on an account that HAS an "
-            "application and look for a withdraw control on a row. That "
-            "requires an application to exist, which requires performing the "
-            "very action whose reversibility is in question -- so this "
-            "measurement cannot be taken before the first apply, only after "
-            "it, and the first apply must therefore be made on the assumption "
-            "that it is permanent. THE FLOW ITSELF IS THE LARGER GAP: no "
-            "capture in this repo shows the LinkedIn apply form at all, so "
-            "before any apply could be attempted there would have to be a "
-            "capture containing the form, its fields, its resume selection, "
-            "any screening questions, and the control that submits it. "
-            "THAT CAPTURE NOW HAS A PROCEDURE, which is the difference "
-            "between an unmeasured gap and a permanent one: "
-            "scripts/_probe_apply_flow.py. It reaches the flow by NAVIGATION "
-            "rather than by a click, contains no mutating call, takes the job "
-            "id as a required argument so no default chooses a posting, and "
-            "reads LinkedIn's own applied-tab count before and after -- "
-            "because opening an Easy Apply flow MAY create a draft, which is "
-            "a hypothesis nobody here has verified and is labelled as one. It "
-            "has not been run."
+            "NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL, "
+            "and that is a worse sentence than 'this server cannot withdraw "
+            "it' -- which would invite you to assume LinkedIn can. It might. "
+            "It has not been measured. "
+            "The measurement is: load /jobs-tracker/?stage=applied on an "
+            "account that HAS an application and look for a withdraw control "
+            "on a row. That requires an application to exist, which requires "
+            "performing the very action whose reversibility is in question. "
+            "Measured 2026-08-25, this account's Applied tab reads 0 with "
+            "LinkedIn's own 'No matches' empty state, so there is no row to "
+            "read. The loop resolves in one direction only: the first "
+            "application made here is the one that settles the question, and "
+            "if the answer is no, it will have been settled by an "
+            "application nobody can take back. "
+            "THE FLOW ITSELF IS NO LONGER A GAP, and this sentence used to "
+            "say the opposite -- 'no capture in this repo shows the LinkedIn "
+            "apply form at all'. It was captured on 2026-08-24 by "
+            "scripts/_probe_apply_flow.py, which reaches the flow by "
+            "NAVIGATION rather than by a click and contains no mutating "
+            "call: 2 forms, 1 file input, 1 dialog, 43 buttons, and one "
+            "enabled 'Submit application' with no Next beside it. That same "
+            "run also metered LinkedIn's own tracker before and after and "
+            "saw NO counter move, which contradicted the expectation that "
+            "opening a flow creates a draft -- read as 'nothing COUNTED "
+            "changed' on one posting, not as proof that nothing was created."
         ),
     ),
     "linkedin_follow_company": WriteSpec(
@@ -1913,8 +1925,14 @@ async def preview(
 #: circumstances, which makes it the last action in the design that should ever
 #: be performed on a guessed selector.
 PERFORMABLE: frozenset[str] = frozenset(
-    {"save_job", "unsave_job", "unfollow_company"}
+    {"save_job", "unsave_job", "unfollow_company", "apply_job"}
 )
+
+#: Actions whose flow takes TWO clicks with a GATE between them. Only apply,
+#: and it is named here rather than special-cased inside perform() so the
+#: exception is visible from the top of the file instead of buried in a
+#: branch. See :func:`_apply_submit_gate` for what the gate requires.
+TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
@@ -2208,6 +2226,99 @@ async def _verify_after(
     )
 
 
+async def _apply_submit_gate(page: Any) -> dict[str, Any]:
+    """THE GATE BETWEEN THE TWO CLICKS, and the reason apply may be performed.
+
+    The first click opens the modal and submits nothing. This decides whether
+    the second one may happen, by READING the modal that just opened rather
+    than trusting that it resembles the one that was measured.
+
+    WHY THIS IS THE WHOLE SAFETY ARGUMENT. Exactly ONE posting's apply flow has
+    ever been observed: a single screen, one enabled "Submit application", no
+    Next. Generalising from one observation to every posting on LinkedIn would
+    be a guess, and the thing guessed about cannot be taken back. So the
+    generalisation is not made -- the shape is re-checked live, and anything
+    that is not the measured shape STOPS.
+
+    An abort here is cheap, which is why this is the right place to stop: the
+    first click opened a modal and may leave a draft in his job tracker, and a
+    draft is not an application. Stopping costs a draft. Being wrong costs an
+    application nobody can withdraw.
+
+    FIVE CONDITIONS, all required:
+
+    1. the modal rendered at all;
+    2. exactly one control carries LinkedIn's own submit test hook;
+    3. that control is visible and not disabled;
+    4. its accessible name corroborates the hook -- both fields must agree,
+       because the hook still says "easy-apply" while the name says "Submit",
+       and each has its own way of being wrong;
+    5. **ZERO advance controls are visible.** This is the condition that
+       catches the case nobody has measured -- a multi-step posting. A flow
+       with a Next in it is a shape this package has never seen finish, and it
+       will not be walked on the assumption that it resembles the one that was.
+    """
+    modal: dict[str, Any] = {}
+    for _ in range(15):
+        modal = await dom.read_apply_modal(page)
+        if modal.get("modal_present") and modal.get("submit_present"):
+            break
+        await page.wait_for_timeout(1_000)
+
+    out: dict[str, Any] = {
+        "proceed": False,
+        "selector": dom.APPLY_SUBMIT_SELECTOR,
+        "modal": modal,
+        "why": "",
+    }
+    if not modal.get("modal_present"):
+        out["why"] = (
+            "the apply modal never rendered after the control was clicked, so "
+            "nothing was submitted. This is the same non-hydration that makes "
+            "postings read as having no apply control at all."
+        )
+        return out
+    if not modal.get("submit_present"):
+        out["why"] = modal.get("why") or (
+            "the modal rendered but carries no submit control this reader "
+            "recognises."
+        )
+        return out
+    if modal.get("advance_names"):
+        out["why"] = (
+            "THIS FLOW HAS MORE THAN ONE STEP -- it draws "
+            f"{modal['advance_names']} alongside its submit. Only a "
+            "single-screen flow has ever been measured, so a multi-step one "
+            "is refused rather than walked: filling in steps nobody has seen, "
+            "to reach a submit that cannot be withdrawn, is exactly the guess "
+            "this server does not make. Apply on the posting yourself."
+        )
+        return out
+    if not modal.get("submit_enabled"):
+        out["why"] = (
+            "the submit control is present but disabled, which means the form "
+            "wants something it has not got. What that something is has never "
+            "been measured, and supplying it would be guessing at required "
+            "fields on an irreversible action."
+        )
+        return out
+    name = str(modal.get("submit_name") or "")
+    if "submit" not in name.lower():
+        out["why"] = (
+            f"the control carrying {dom.APPLY_SUBMIT_HOOK} is named {name!r}, "
+            "which does not corroborate the hook. Both fields have to agree "
+            "before an irreversible control is pressed."
+        )
+        return out
+
+    out["proceed"] = True
+    out["why"] = (
+        f"single-screen flow: one enabled control named {name!r} carrying "
+        f"{dom.APPLY_SUBMIT_HOOK}, and zero advance controls."
+    )
+    return out
+
+
 async def perform(
     navigator: Any, page: Any, grant: WriteGrant
 ) -> dict[str, Any]:
@@ -2346,9 +2457,31 @@ async def perform(
         )
 
     # ---- everything above may raise; nothing below does --------------------
+    #
+    # THIS ONE CALL SITE FIRES TWICE FOR APPLY, stated in capitals because
+    # readonly.SANCTIONED_MUTATIONS says "one click in writes.perform" and a
+    # reader would otherwise reasonably conclude that one click HAPPENS.
+    #
+    # The allowlist is keyed by (path, function, kind) and the scanner counts
+    # CALL SITES, so draining a queue keeps exactly the guarantee that list was
+    # written to give -- there is one place in this package that clicks, and a
+    # reviewer reads it -- where a second literal page.click would create a
+    # second place to audit. The queue is also what makes the SECOND GATE
+    # possible: the follow-up click is appended only if a fresh read of the
+    # modal says it should be, so the decision to submit is taken AFTER the
+    # modal exists rather than planned before it does.
     click_error: Optional[str] = None
+    clicks_made = 0
+    apply_gate: Optional[dict[str, Any]] = None
+    click_plan: list[str] = [selector]
     try:
-        await page.click(selector, timeout=CLICK_TIMEOUT_MS)
+        while click_plan:
+            await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
+            clicks_made += 1
+            if spec.action in TWO_CLICK_ACTIONS and clicks_made == 1:
+                apply_gate = await _apply_submit_gate(page)
+                if apply_gate["proceed"]:
+                    click_plan.append(apply_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
         click_error = f"{type(exc).__name__}: {exc}"
 

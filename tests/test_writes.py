@@ -555,24 +555,43 @@ def test_nothing_is_both_forbidden_and_sanctioned_by_accident():
     (it is the rename loophole the check below covers) and is sanctioned but
     not performable.
 
-    IT MOVED AGAIN ON 2026-08-24, BY ONE NAME, AND THE MOVE IS THE SMALLER OF
-    THE TWO AVAILABLE. ``linkedin_apply_job`` is now SANCTIONED -- it has a
-    spec, a measured route classifier, and a gate -- and it STAYS ON THE
-    FORBIDDEN LIST, because it is in exactly the condition
-    ``set_open_to_work`` is in: no ``url_template``, so :func:`mint` refuses it
-    a grant at issue, and no tool registers it. The apply CONTROL is measured;
-    the apply FLOW is not, in any capture this repo holds. The alternative --
-    registering a tool that always refuses -- would have moved a name off the
-    forbidden list to buy nothing, and this list is the one place where "we
-    thought about it" and "a caller can reach it" must not blur.
+    IT MOVED AGAIN ON 2026-08-24, BY ONE NAME, AND THE MOVE WAS THE SMALLER OF
+    THE TWO AVAILABLE. The paragraph that stood here read: "``linkedin_apply_job``
+    is now SANCTIONED -- it has a spec, a measured route classifier, and a gate
+    -- and it STAYS ON THE FORBIDDEN LIST, because it is in exactly the
+    condition ``set_open_to_work`` is in: no ``url_template``, so :func:`mint`
+    refuses it a grant at issue, and no tool registers it. The apply CONTROL is
+    measured; the apply FLOW is not, in any capture this repo holds. The
+    alternative -- registering a tool that always refuses -- would have moved a
+    name off the forbidden list to buy nothing."
+
+    THEN IT TOOK THE LARGER MOVE, ON 2026-08-25. The apply flow was captured on
+    2026-08-24 -- 2 forms, 1 file input, 1 dialog, and one enabled "Submit
+    application" with no Next beside it -- which removed the single premise the
+    paragraph above rested on. Apply has a ``url_template`` (the posting page,
+    because that is where LinkedIn draws the modal), :func:`mint` issues it
+    grants, ``linkedin_apply_job`` registers, and the name LEFT
+    ``FORBIDDEN_TOOLS`` by the only route out: arriving in ``SANCTIONED_WRITES``
+    with a spec that gates it. The last clause of the old paragraph is the one
+    that survived and is why the move was allowed at all -- the tool no longer
+    only ever refuses, so the name buys something.
+
+    ``linkedin_set_open_to_work`` is now ALONE in the overlap, still for its
+    original reason: its editor is a modal nothing has ever loaded.
     """
     overlap = set(FORBIDDEN_TOOLS) & set(SANCTIONED_WRITES)
-    assert overlap == {"linkedin_set_open_to_work", "linkedin_apply_job"}, overlap
-    # And the pair is not interchangeable with the pair being non-empty: BOTH
-    # of them must be surface-less, which is the property that earns the
-    # overlap rather than the fact of being listed twice.
+    assert overlap == {"linkedin_set_open_to_work"}, overlap
+    # And the overlap is not interchangeable with the overlap being non-empty:
+    # every name in it must be surface-less, which is the property that earns
+    # the double listing rather than the fact of being listed twice.
     for name in overlap:
         assert SANCTIONED_WRITES[name].url_template is None, name
+    # THE CONTROL FOR THE DEPARTURE, because "apply is not in the overlap" is
+    # satisfied just as well by apply having been deleted from either list.
+    # It must be in exactly one of them, and it must be the sanctioned one.
+    assert "linkedin_apply_job" in SANCTIONED_WRITES
+    assert "linkedin_apply_job" not in FORBIDDEN_TOOLS
+    assert SANCTIONED_WRITES["linkedin_apply_job"].url_template is not None
 
 
 def test_what_ships_is_narrower_than_what_is_sanctioned():
@@ -583,8 +602,18 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     ``PERFORMABLE`` is what :func:`perform` will EXECUTE, and the registered
     tool names are what a CALLER can reach. Asserted as a chain so a future
     edit that grows one has to grow it visibly.
+
+    THE MIDDLE SET GREW ON 2026-08-25 AND THE OUTER ONE DID NOT, which is the
+    chain working rather than failing. ``apply_job`` was already sanctioned; it
+    crossed into ``PERFORMABLE`` and onto the registered surface in one move,
+    and every line below had to be edited by hand for that to be true here --
+    which is the whole design of this test. The counts that moved are recorded
+    beside the sets they moved in, so a reader can see which boundary widened.
     """
     sanctioned_actions = {spec.action for spec in SANCTIONED_WRITES.values()}
+    # UNCHANGED AT SIX. Apply did not enter here on 2026-08-25; it entered on
+    # 2026-08-24 and sat unperformed for a day, which is precisely why this set
+    # and the next are separate assertions.
     assert sanctioned_actions == {
         "save_job",
         "unsave_job",
@@ -593,29 +622,45 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "apply_job",
         "set_open_to_work",
     }
-    assert writes.PERFORMABLE == {"save_job", "unsave_job", "unfollow_company"}
+    # THREE UNTIL 2026-08-25, four since. This line read
+    # ``{"save_job", "unsave_job", "unfollow_company"}``.
+    assert writes.PERFORMABLE == {
+        "save_job",
+        "unsave_job",
+        "unfollow_company",
+        "apply_job",
+    }
     assert writes.PERFORMABLE < sanctioned_actions
 
     # THE GAP IS THE INTERESTING SET, so it is named rather than left as an
-    # arithmetic consequence. Three actions may hold a spec and will never be
-    # executed, and each is here for a DIFFERENT measured reason -- see
-    # writes._refuse_unperformable, which prints a distinct one for each.
+    # arithmetic consequence. Two actions may hold a spec and will never be
+    # executed -- it was three until apply left -- and each is here for a
+    # DIFFERENT measured reason: see writes._refuse_unperformable, which prints
+    # a distinct one for each.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "follow_company",
-        "apply_job",
         "set_open_to_work",
     }
-    # Two of the three cannot even hold a grant: no surface has ever been
-    # loaded, so mint() refuses at issue rather than leaving the write door as
-    # the only thing in the way. follow_company is the one that COULD be
-    # granted and still is not performed, which is why its refusal is the one
-    # most likely to be argued with later.
+    # ONE OF THE TWO cannot even hold a grant: no surface has ever been loaded,
+    # so mint() refuses at issue rather than leaving the write door as the only
+    # thing in the way. This set held apply_job as well until its surface was
+    # measured -- and the surface that measurement found is the POSTING page,
+    # not an apply url, because navigating to the apply url lands back on the
+    # posting with the flow drawn over it. follow_company is the one that COULD
+    # be granted and still is not performed, which is why its refusal is the
+    # one most likely to be argued with later.
     surfaceless = {
         spec.action
         for spec in SANCTIONED_WRITES.values()
         if spec.url_template is None
     }
-    assert surfaceless == {"apply_job", "set_open_to_work"}
+    assert surfaceless == {"set_open_to_work"}
+    # And apply is on the other side of that line now, asserted rather than
+    # left as an absence: a surface it can be granted against, and a pattern
+    # that will only ever match a posting page.
+    apply_spec = spec_for_action("apply_job")
+    assert apply_spec.url_template == "https://www.linkedin.com/jobs/view/{target}/"
+    assert apply_spec.url_pattern is not None
 
 
 def test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed():
@@ -708,16 +753,21 @@ def test_that_loophole_check_would_catch_a_smuggled_verb():
 async def test_exactly_the_performable_writes_are_registered():
     """WHAT THIS TEST USED TO ASSERT: that the surface carried no write at all.
 
-    It carried two, then three. The literal pair became a literal triple on
-    2026-08-24 and then stopped being a literal at all, which is the real fix:
-    THE REGISTERED WRITES MUST EQUAL ``PERFORMABLE``, derived rather than
-    listed. A tool registered for an action ``perform`` will not execute is a
-    button that cannot do anything, and an action ``perform`` WILL execute with
-    no tool is a capability nobody can reach or audit. Both are failures and a
-    hand-written list catches neither.
+    It carried two, then three, and four from 2026-08-25. The literal pair
+    became a literal triple on 2026-08-24 and then stopped being a literal at
+    all, which is the real fix and is why the derived assertion below needed no
+    edit when apply shipped: THE REGISTERED WRITES MUST EQUAL ``PERFORMABLE``,
+    derived rather than listed. A tool registered for an action ``perform``
+    will not execute is a button that cannot do anything, and an action
+    ``perform`` WILL execute with no tool is a capability nobody can reach or
+    audit. Both are failures and a hand-written list catches neither.
 
     The second half -- that nothing still on ``FORBIDDEN_TOOLS`` is registered
-    -- is UNCHANGED and is the half that has always done the work.
+    -- is UNCHANGED and is the half that has always done the work. It is worth
+    saying that it did not go green here by being loosened: apply left
+    ``FORBIDDEN_TOOLS`` in ``test_server_surface.py``, visibly, under the
+    conservation law, and this line is one of the things that forced that to
+    happen in the open rather than by exception.
     """
     from linkedin_server.server import mcp
 
@@ -730,13 +780,20 @@ async def test_exactly_the_performable_writes_are_registered():
     assert names & set(SANCTIONED_WRITES) == performable_tools
     assert names & FORBIDDEN_TOOLS == set()
 
-    # The three sanctioned actions that are NOT performable must be
-    # unreachable, and they are named individually rather than as a set
-    # difference: each is here for a different measured reason and a reader
-    # who sees only the arithmetic learns none of them.
+    # The sanctioned actions that are NOT performable must be unreachable, and
+    # they are named individually rather than as a set difference: each is here
+    # for a different measured reason and a reader who sees only the arithmetic
+    # learns none of them.
+    #
+    # THERE WERE THREE UNTIL 2026-08-25 and the third line read
+    # ``assert "linkedin_apply_job" not in names``. Apply is performed now, so
+    # that assertion inverts -- and it is kept as its inverse rather than
+    # deleted, because "reachable" is the claim that now needs pinning: a
+    # performable action with no registered tool is the failure the derived
+    # assertion above catches only if somebody reads it.
     assert "linkedin_follow_company" not in names
-    assert "linkedin_apply_job" not in names
     assert "linkedin_set_open_to_work" not in names
+    assert "linkedin_apply_job" in names
 
 
 # ---------------------------------------------------------------------------
@@ -889,6 +946,22 @@ async def test_an_unmeasured_verdict_prints_as_unmeasured_and_names_its_fix(
 
     What the block must do is say so LOUDLY and then name what would settle it,
     because a caveat that does not name its own fix reads as an apology.
+
+    THE TAIL OF THIS TEST INVERTED ON 2026-08-25 AND GOT SHARPER FOR IT. It
+    used to close with "No surface, so no grant. The warning is not an offer",
+    asserting ``to_confirm is None`` and ``"NO CONFIRM TOKEN IS ISSUED"`` in
+    the block -- true while apply had no ``url_template``. Apply has one now
+    (the posting page), so the warning IS an offer, and the situation this
+    test covers is strictly more dangerous than the one it was written for: an
+    UNMEASURED reversibility verdict on an IRREVERSIBLE action that a caller
+    can actually confirm. The loud half is therefore unchanged and the quiet
+    half is asserted the other way round -- a token IS issued, and it is issued
+    behind, not instead of, the warning.
+
+    The surface-less branch did not lose its coverage when apply left it:
+    ``set_open_to_work`` still renders it and
+    ``test_open_to_work_has_no_measured_surface_and_issues_no_token`` still
+    pins every string this test used to.
     """
     spec = spec_for_action("apply_job")
     assert spec.reversibility_measured is False
@@ -906,23 +979,32 @@ async def test_an_unmeasured_verdict_prints_as_unmeasured_and_names_its_fix(
     assert block["irreversible"] is True
     assert "NOBODY" in block["reversible_by"]
 
-    # No surface, so no grant. The warning is not an offer.
-    assert block["to_confirm"] is None
-    nxt = block["what_happens_next"]
-    assert "NO CONFIRM TOKEN IS ISSUED" in nxt
+    # A SURFACE, SO A GRANT -- and the grant is real, checked in the registry
+    # rather than believed from a string that looks like a token.
+    assert spec.url_template is not None
+    token = block["to_confirm"]
+    assert token and token in writes._GRANTS
+    # It is still a PREVIEW: nothing has been submitted by getting this far.
+    assert block["performed"] is False
 
-    # AND THE WARNING IS WRITTEN FOR THIS ACTION, not inherited from the other
-    # one that shares this branch. It said "its EDITOR has never been loaded"
-    # and closed with "change it yourself if you want it CHANGED" -- true of a
-    # profile setting behind an editor, nonsense on an application, which has
-    # no editor and is not a change. Both surface-less actions render this
-    # string, so it is asserted to fit both rather than to fit the one whose
-    # wording it was written in.
-    assert "editor" not in nxt
-    assert "changed" not in nxt
-    for other in ("apply_job", "set_open_to_work"):
-        spec_other = spec_for_action(other)
-        assert spec_other.url_template is None, other
+    nxt = block["what_happens_next"]
+    # THE REFUSAL BRANCH MUST NOT BE THE ONE THAT RAN. Asserted as an absence
+    # because the dangerous regression here is silent: if apply ever fell back
+    # to the surface-less path it would print a reassuring refusal while the
+    # tool that calls it goes on believing it can apply.
+    assert "NO CONFIRM TOKEN IS ISSUED" not in nxt
+    assert "confirm_token" in nxt
+    assert "once" in nxt
+
+    # AND THE TWO ACTIONS HAVE PARTED, which is the fact the old version of
+    # this stanza asserted in its opposite form. It ran over
+    # ``("apply_job", "set_open_to_work")`` requiring BOTH to be surface-less,
+    # under a comment about the refusal wording having to fit both -- it had
+    # said "its EDITOR has never been loaded" and "change it yourself if you
+    # want it CHANGED", true of a profile setting behind an editor and nonsense
+    # on an application. Apply no longer renders that string at all, so the
+    # constraint retires and what replaces it is the split itself.
+    assert spec_for_action("set_open_to_work").url_template is None
 
 
 def test_every_verdict_is_pinned_to_ITS_ACTION_not_to_the_set_of_verdicts():
@@ -1426,51 +1508,157 @@ async def test_open_to_work_is_not_performable_either(writes_on):
     assert "237" in message
 
 
-async def test_apply_is_sanctioned_and_refuses_for_the_flow_it_has_never_seen(
-    writes_on,
-):
-    """The action the operator asked for by name, refusing, and saying why.
+class _FakePage:
+    """Just enough page for the gate: it sleeps, and that is all it is asked."""
 
-    Two halves, and conflating them is how this would ship wrong. The apply
-    CONTROL is measured -- two routes, positively distinguishable, reported by
-    ``linkedin_job_detail``. The apply FLOW is not: no capture in this repo
-    shows a form, a file input, a dialog or a control that submits anything.
-    So the refusal must be about the FLOW, and it must not read as "applying is
-    out of scope", which is the claim this server spent four documents making
-    and then had to retract.
+    async def wait_for_timeout(self, _ms: int) -> None:
+        return None
 
-    The off-site half is refused on a different ground entirely and that ground
-    does not expire with a better capture: submitting on a third party's ATS is
-    not this server's to do at all.
+
+def _fake_modal(reading: dict):
+    """Hand the gate a fixed modal reading.
+
+    The gate is tested through ``dom.read_apply_modal`` rather than through a
+    fake DOM on purpose: what is under test is the DECISION -- which readings
+    are safe to press a submit on -- not Playwright's selector engine. A fake
+    DOM would test both at once and tell you less about either.
     """
-    grant = _bare_grant(action="apply_job", target=JOB)
-    grant.consumed = True
-    with pytest.raises(WriteAttemptError) as excinfo:
-        await writes.perform(object(), object(), grant)
-    message = str(excinfo.value)
-    lowered = message.casefold()
 
-    assert "flow" in lowered
-    assert "zero" in lowered
-    # It distinguishes the measured half from the unmeasured half rather than
-    # refusing wholesale.
-    assert "control" in lowered
-    # It names the off-site ground, which no capture will ever lift.
-    assert "third party" in lowered or "third-party" in lowered
-    # And it never claims applying is out of scope by design.
-    assert "out of scope" not in lowered
+    async def _read(_page):
+        return dict(reading)
 
-    # IT NAMES WHAT WOULD LIFT IT, which is the difference between an
-    # unmeasured gap and a permanent one. A refusal that states a missing
-    # capture without saying how the capture is taken reads as a decision
-    # nobody can act on, and the next person who wants apply either gives up
-    # or improvises a selector -- which on this action is the one thing that
-    # must not happen.
-    assert "_probe_apply_flow.py" in message
-    assert "has not been run" in lowered
-    # And it says the probe reaches the flow WITHOUT clicking, because that is
-    # the property that makes running it a reasonable thing to ask of him.
-    assert "navigates rather than clicks" in lowered
+    return _read
+
+
+#: Every way the apply modal can fail to be the shape that was measured, and
+#: the word the refusal must contain so a caller learns WHICH one happened.
+#:
+#: The first entry is the one that matters most and is the reason this gate
+#: exists at all: exactly ONE apply flow has ever been observed on this
+#: account -- a single screen, one enabled Submit, no Next. A posting drawing a
+#: Next is a multi-step flow nobody here has watched finish, and walking it
+#: would mean filling in steps that have never been seen to reach a control
+#: that cannot be un-pressed.
+_GATE_REFUSALS = [
+    (
+        {
+            "modal_present": True,
+            "submit_present": True,
+            "submit_enabled": True,
+            "submit_name": "Submit application",
+            "advance_names": ["next"],
+        },
+        "more than one step",
+        "a multi-step flow",
+    ),
+    (
+        {
+            "modal_present": True,
+            "submit_present": True,
+            "submit_enabled": False,
+            "submit_name": "Submit application",
+            "advance_names": [],
+        },
+        "disabled",
+        "a form wanting something it has not got",
+    ),
+    (
+        {
+            "modal_present": True,
+            "submit_present": True,
+            "submit_enabled": True,
+            "submit_name": "Continue to next step",
+            "advance_names": [],
+        },
+        "corroborate",
+        "the hook and the accessible name disagreeing",
+    ),
+    (
+        {
+            "modal_present": False,
+            "submit_present": False,
+            "submit_enabled": False,
+            "submit_name": None,
+            "advance_names": [],
+        },
+        "never rendered",
+        "the modal not drawing at all",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "modal,needle,what", _GATE_REFUSALS, ids=[c[2] for c in _GATE_REFUSALS]
+)
+async def test_the_second_gate_refuses_a_flow_it_cannot_confirm(
+    monkeypatch, modal, needle, what
+):
+    """REWRITTEN 2026-08-25, because the behaviour it pinned was deliberately
+    changed and the old assertions had become false claims.
+
+    It used to assert that apply refuses ALWAYS, and that the refusal names a
+    missing capture ("no capture in this repo shows a form ... it has not been
+    run"). The capture was taken on 2026-08-24 and apply became performable, so
+    every one of those strings is now something this server would be lying to
+    say. Repointed rather than deleted: the invariant worth keeping was never
+    "apply refuses", it was "apply refuses when it cannot confirm what it is
+    about to press".
+
+    That is what this asserts now, one failure mode at a time. The gate sits
+    BETWEEN the two clicks: the first opened the modal and submitted nothing,
+    so refusing here costs at most a draft, while being wrong costs an
+    application nobody can withdraw.
+    """
+    monkeypatch.setattr(dom, "read_apply_modal", _fake_modal(modal))
+    verdict = await writes._apply_submit_gate(_FakePage())
+    assert verdict["proceed"] is False, what
+    assert needle in verdict["why"].casefold(), (what, verdict["why"])
+
+
+async def test_the_second_gate_proceeds_only_on_the_measured_shape(monkeypatch):
+    """The positive case, without which every assertion above is vacuous.
+
+    A gate that refused unconditionally would pass all four refusal cases
+    perfectly while making apply unbuildable -- the same defect class as a
+    redactor that flattens every input, or a check that cannot fail. This is
+    the control on the controls.
+    """
+    monkeypatch.setattr(
+        dom,
+        "read_apply_modal",
+        _fake_modal(
+            {
+                "modal_present": True,
+                "submit_present": True,
+                "submit_enabled": True,
+                "submit_name": "Submit application",
+                "advance_names": [],
+            }
+        ),
+    )
+    verdict = await writes._apply_submit_gate(_FakePage())
+    assert verdict["proceed"] is True, verdict["why"]
+    assert verdict["selector"] == dom.APPLY_SUBMIT_SELECTOR
+    # It says WHY it was satisfied, not merely that it was.
+    assert "zero advance controls" in verdict["why"].casefold()
+
+
+def test_the_offsite_ground_is_stated_and_does_not_expire():
+    """The half of the old refusal that a better capture never lifts.
+
+    Applying on a third party's applicant-tracking system is refused on a
+    different ground from anything measurable: it is somebody else's form on
+    somebody else's domain. That ground survived apply becoming performable,
+    and it lives on the spec rather than in a message, so it is asserted where
+    it lives.
+    """
+    spec = writes.SANCTIONED_WRITES["linkedin_apply_job"]
+    note = spec.wrong_state_note.casefold()
+    assert "third party" in note or "third-party" in note
+    assert "applicant-tracking" in note or "applicant tracking" in note
+    # And it still must not read as "applying is out of scope by design",
+    # which is the claim this server spent four documents making and retracted.
+    assert "out of scope" not in note
 
 
 def test_the_apply_capture_procedure_exists_and_clicks_nothing():
@@ -1914,10 +2102,29 @@ def test_a_second_click_inside_perform_is_still_caught():
     reproduces that check against the doubled source and shows it going red.
     """
     source = Path(writes.__file__).read_text(encoding="utf-8")
+    # THE LITERAL BELOW MUST TRACK THE REAL CALL SITE, and the assertion after
+    # the replace is what makes that self-enforcing. On 2026-08-25 the call
+    # site changed from click(selector, ...) to click(click_plan.pop(0), ...):
+    # apply needs TWO clicks with a gate between them, so the argument became a
+    # queue rather than a variable. The old literal stopped matching, the
+    # replace silently became a no-op, and THIS TEST WENT RED rather than
+    # passing vacuously. That is precisely why `assert doubled != source` is
+    # here -- a can-it-fail control that cannot verify its own setup is not a
+    # control, it is decoration.
+    #
+    # Note what did NOT change: the package still has exactly ONE mutating call
+    # site. Draining a queue fires it twice for apply without adding a second
+    # place to audit, which is the property SANCTIONED_MUTATIONS exists to
+    # police.
+    call_site = "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)"
+    assert call_site in source, (
+        "the mutating call site has been rewritten again. Update this literal "
+        "to match it -- and do NOT relax the assertion below, which is the "
+        "only thing stopping this control from testing nothing at all."
+    )
     doubled = source.replace(
-        "await page.click(selector, timeout=CLICK_TIMEOUT_MS)",
-        "await page.click(selector, timeout=CLICK_TIMEOUT_MS)\n"
-        "        await page.click(selector, timeout=CLICK_TIMEOUT_MS)",
+        call_site,
+        f"{call_site}\n            {call_site}",
         1,
     )
     assert doubled != source

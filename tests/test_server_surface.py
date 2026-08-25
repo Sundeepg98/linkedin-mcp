@@ -1,27 +1,33 @@
-"""The tool surface: seventeen tools, fourteen of which read LinkedIn.
+"""The tool surface: eighteen tools, fourteen of which read LinkedIn.
 
 WHAT THIS FILE USED TO ASSERT, AND WHY IT NO LONGER CAN. The brief for this
 server drew a hard line -- no writes, not now, not stubbed, not "for later" --
 and this file was that line expressed as assertions. On 2026-08-23 the operator
 authorised two: ``linkedin_save_job`` and ``linkedin_unsave_job``. On
-2026-08-24 a third arrived, ``linkedin_unfollow_company``, and the counts in
-this docstring are re-measured rather than carried -- they were wrong for a day
-before anybody noticed, which is the smallest possible version of the failure
-this whole file is about.
+2026-08-24 a third arrived, ``linkedin_unfollow_company``. On 2026-08-25 a
+fourth, ``linkedin_apply_job``. The counts in this docstring are re-measured
+rather than carried -- they were wrong for a day before anybody noticed, which
+is the smallest possible version of the failure this whole file is about.
 
 The line did not move; it acquired a gate. Every check below still runs against
 every tool, and the writes are exempted BY NAME through
-``writes.SANCTIONED_WRITES`` rather than by loosening the check -- so a fourth
+``writes.SANCTIONED_WRITES`` rather than by loosening the check -- so a fifth
 write-shaped tool, or a read tool that grows a write-shaped docstring, still
 fails exactly as before. Each exemption is paired with a positive control
 asserting the check DOES fire on the exempted names, because an exemption that
 silently covered everything would leave a file full of tests that cannot fail.
 
-AND NOTE WHAT IS NOT ON THE SURFACE. ``apply_job`` is a fully specced,
-sanctioned action that registers NO TOOL and stays on ``FORBIDDEN_TOOLS``,
-because its flow has never been captured. Being sanctioned in ``writes.py``
-does not by itself exempt a name here; the two boundaries are separate, and
-``test_the_exemption_covers_only_those_two`` is where that is shown.
+AND NOTE WHAT IS NOT ON THE SURFACE. This paragraph named ``apply_job`` until
+2026-08-25 and said it "registers NO TOOL and stays on ``FORBIDDEN_TOOLS``,
+because its flow has never been captured". The flow was captured on 2026-08-24,
+apply is now performed, and its name has MOVED off ``FORBIDDEN_TOOLS`` into
+``SANCTIONED_WRITE_TOOLS`` -- which is the only sanctioned way off that list
+and is exactly the route save and unsave took. ``set_open_to_work`` is now the
+name in the condition apply used to be in: fully specced, sanctioned, and
+registering no tool, because its EDITOR has never been loaded. Being sanctioned
+in ``writes.py`` still does not by itself exempt a name here; the two
+boundaries are separate, and ``test_the_exemption_covers_only_those_two`` is
+where that is shown -- with ``set_open_to_work`` as the probe apply used to be.
 
 ``linkedin_logout`` writes to LOCAL DISK and to nothing else: it erases this
 machine's cookie jar and issues no request. It gets its own assertions at the
@@ -48,6 +54,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # written here that is NOT in SANCTIONED_WRITES buys nothing, so this list
     # cannot exempt a tool the write boundary has not admitted.
     "linkedin_unfollow_company",
+    # 2026-08-25, and it is the intersection doing its job rather than being
+    # waved past: apply was ALREADY in SANCTIONED_WRITES on 2026-08-24 and
+    # adding its name here then would still have exempted nothing that shipped,
+    # because no tool registered it. What changed is not this line, it is that
+    # writes.PERFORMABLE admitted apply_job and server.py registered a tool.
+    "linkedin_apply_job",
 }
 
 EXPECTED_TOOLS = {
@@ -68,26 +80,45 @@ EXPECTED_TOOLS = {
     # The two writes, authorised 2026-08-23.
     "linkedin_save_job",
     "linkedin_unsave_job",
-    # The third, 2026-08-24. NOT accompanied by linkedin_apply_job: apply is
-    # sanctioned and specced and registers NO TOOL, because its flow has never
-    # been captured -- exactly the condition linkedin_set_open_to_work is in.
-    # A tool that could only ever refuse would have moved a name off the
-    # forbidden list to buy nothing.
+    # The third, 2026-08-24.
     "linkedin_unfollow_company",
+    # The fourth, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
+    # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
+    # specced and registers NO TOOL, because its flow has never been captured
+    # -- exactly the condition linkedin_set_open_to_work is in. A tool that
+    # could only ever refuse would have moved a name off the forbidden list to
+    # buy nothing." Every clause of that was true when written and the first
+    # one is now false: the apply flow WAS captured, on 2026-08-24, and the
+    # tool registered here does not only ever refuse -- it performs, behind the
+    # same two-call gate as the other three plus a second gate that re-reads
+    # the modal before the submit is pressed. The last clause still holds and
+    # is why this name could move at all: it buys something now.
+    #
+    # linkedin_set_open_to_work is STILL in that condition and still registers
+    # no tool, so the sentence above did not lose its subject -- it lost apply.
+    "linkedin_apply_job",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
 #: failing test rather than a code review someone might skim.
 #:
 #: ``linkedin_save_job`` and ``linkedin_unsave_job`` LEFT THIS SET on
-#: 2026-08-23. That is the only sanctioned way off it: the conservation law in
-#: ``test_writes.py`` asserts every originally-forbidden name is still
-#: accounted for by ``FORBIDDEN_TOOLS | SANCTIONED_WRITES``, so a name may MOVE
-#: across the boundary and may never simply be deleted from it. The frozen
-#: original set lives in that file precisely so this one cannot shrink quietly.
+#: 2026-08-23, and ``linkedin_apply_job`` on 2026-08-25. That is the only
+#: sanctioned way off it: the conservation law in ``test_writes.py`` asserts
+#: every originally-forbidden name is still accounted for by
+#: ``FORBIDDEN_TOOLS | SANCTIONED_WRITES``, so a name may MOVE across the
+#: boundary and may never simply be deleted from it. The frozen original set
+#: lives in that file precisely so this one cannot shrink quietly, and
+#: ``linkedin_apply_job`` is still in it -- the move is visible there rather
+#: than being an absence here.
+#:
+#: ``linkedin_apply`` and ``linkedin_easy_apply`` STAY. They are not the name
+#: that moved: nothing is sanctioned under either spelling, and a write that
+#: got itself registered under a shorter alias would be exactly the rename
+#: loophole ``test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed``
+#: exists to close.
 FORBIDDEN_TOOLS = {
     "linkedin_apply",
-    "linkedin_apply_job",
     "linkedin_easy_apply",
     "linkedin_send_message",
     "linkedin_send_inmail",
@@ -108,21 +139,32 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventeen_tools(tools):
+async def test_the_surface_is_exactly_the_eighteen_tools(tools):
+    """RENAMED 2026-08-25, from ``..._seventeen_tools``, and the rename is the
+    honest half of the edit rather than noise in a diff.
+
+    This test has been renamed once before -- it shipped as
+    ``..._nine_reads`` -- and the rule it follows is that a test name is a
+    CLAIM like any other: a name saying seventeen over a body asserting
+    eighteen is the exact species of stale claim this file exists to catch.
+    """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 17
+    assert len(tools) == 18
     # And the split is asserted, not just the total: fourteen reads and the
-    # three named writes. A future tool arriving as a write would otherwise
+    # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
     assert set(tools) & SANCTIONED_WRITE_TOOLS == {
         "linkedin_save_job",
         "linkedin_unsave_job",
         "linkedin_unfollow_company",
+        "linkedin_apply_job",
     }
     # THE READ COUNT IS UNCHANGED AT FOURTEEN, and that is the half worth
     # asserting separately: this wave added a write and added a FIELD to an
     # existing read (job_detail's apply_path) rather than a new read tool, so a
-    # fourteen here is evidence the read surface did not quietly grow too.
+    # fourteen here is evidence the read surface did not quietly grow too. It
+    # has now survived two write-adding waves unmoved, which is the only kind
+    # of evidence this line was ever going to produce.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 14
 
 
@@ -153,11 +195,18 @@ async def test_no_write_tool_exists_under_any_of_its_obvious_names(tools):
 
 
 async def test_no_tool_name_implies_a_write(tools):
-    """No tool name implies a write EXCEPT the two whose names should.
+    """No tool name implies a write EXCEPT the ones whose names should.
 
     The exemption is a set difference against the sanctioned names, not a
-    relaxed check: ``name_implies_write`` still runs on all sixteen, and a
-    seventeenth tool called ``linkedin_apply_job`` still lands in ``offenders``.
+    relaxed check: ``name_implies_write`` still runs on every tool, and a
+    write-shaped name that is not on the exemption still lands in ``offenders``.
+
+    THE EXAMPLE IN THIS DOCSTRING WAS ``linkedin_apply_job`` UNTIL 2026-08-25
+    -- "a seventeenth tool called ``linkedin_apply_job`` still lands in
+    ``offenders``". That stopped being an example of anything the day apply was
+    registered and exempted, so the probe moved to ``linkedin_set_open_to_work``
+    and lives in ``test_the_exemption_covers_only_those_two``, which is where it
+    is actually executed rather than merely described.
     """
     offenders = [
         name
@@ -183,26 +232,42 @@ async def test_the_two_exempted_names_do_in_fact_trip_the_name_check(tools):
 async def test_the_exemption_covers_only_those_two(tools):
     """A write-shaped tool OUTSIDE the set is not covered by it.
 
-    ``linkedin_apply_job`` is the right probe for this and got MORE apt on
+    THE PROBE MOVED ON 2026-08-25 AND THE MOVE IS THE POINT. This test used to
+    run on ``linkedin_apply_job`` and its docstring said apply "got MORE apt on
     2026-08-24, not less: apply is now a sanctioned ACTION with a full spec,
-    and it still registers no tool. So this asserts something real -- that
-    being sanctioned in ``writes.py`` does not by itself exempt a NAME on the
-    tool surface. The two boundaries are separate and this is where they are
-    shown to be.
+    and it still registers no tool." The second half of that stopped being true
+    the moment apply was registered, and a probe that is on the surface cannot
+    prove anything about a name that is off it -- it would assert that the
+    exemption fails to cover a name the exemption now names, which is not a
+    check, it is a contradiction.
+
+    ``linkedin_set_open_to_work`` inherits the job because it inherits the
+    CONDITION, unchanged: a sanctioned action with a full spec in
+    ``writes.py``, no ``url_template``, no registered tool. So what is asserted
+    here is what was always asserted -- that being sanctioned in ``writes.py``
+    does not by itself exempt a NAME on the tool surface. The two boundaries
+    are separate and this is where they are shown to be.
     """
     assert SANCTIONED_WRITE_TOOLS == {
         "linkedin_save_job",
         "linkedin_unsave_job",
         "linkedin_unfollow_company",
+        "linkedin_apply_job",
     }
-    assert "linkedin_apply_job" not in set(tools)
-    pretend = set(tools) | {"linkedin_apply_job"}
+    # The probe has to be genuinely sanctioned for this to test the thing it
+    # claims to. A name nobody ever specced would only show that made-up names
+    # are not exempt, which no reader doubted.
+    probe = "linkedin_set_open_to_work"
+    assert probe in SANCTIONED_WRITES, probe
+    assert probe not in SANCTIONED_WRITE_TOOLS, probe
+    assert probe not in set(tools)
+    pretend = set(tools) | {probe}
     offenders = [
         name
         for name in pretend
         if readonly.name_implies_write(name) and name not in SANCTIONED_WRITE_TOOLS
     ]
-    assert offenders == ["linkedin_apply_job"], offenders
+    assert offenders == [probe], offenders
 
 
 def test_the_name_check_catches_a_write_tool():
@@ -448,7 +513,12 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     monkeypatch.setenv(WRITES_FLAG, "1")
     info = await linkedin_server_info()
     assert info["read_only"] is False
+    # apply_job JOINED THIS LIST ON 2026-08-25. It is listed rather than
+    # derived on purpose: the whole value of this assertion is that a write
+    # arriving on the surface has to be typed in here by whoever added it, so
+    # deriving it from PERFORMABLE would make the test agree with any change.
     assert info["writes_available"] == [
+        "apply_job",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -468,6 +538,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     monkeypatch.delenv(WRITES_FLAG, raising=False)
     info = await linkedin_server_info()
     assert info["writes_sanctioned"] == [
+        "apply_job",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -479,19 +550,31 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # offered" from "examined and refused". Every sanctioned action that is
     # not performable must appear here with a reason, or the field is a subset
     # pretending to be a list.
+    #
+    # APPLY_JOB LEFT THIS FIELD ON 2026-08-25. The line below used to read
+    # ``{"apply_job", "follow_company", "set_open_to_work"}`` and the two lines
+    # under it used to assert that apply could not even hold a grant, "no
+    # measured surface" being the reason. Apply now has a measured surface --
+    # the posting page, which is where LinkedIn draws the apply modal -- so it
+    # mints grants and is performed, and an entry here would now be the field
+    # lying in the one direction that matters: telling a caller a capability is
+    # refused when it is not.
     not_performed = info["writes_sanctioned_but_not_performed"]
     assert set(not_performed) == {
-        "apply_job",
         "follow_company",
         "set_open_to_work",
     }
     for action, entry in not_performed.items():
         assert len(entry["why_not"]) > 80, action
-    # The two with no measured surface cannot even hold a grant, and the field
+    # The one with no measured surface cannot even hold a grant, and the field
     # says so rather than leaving a reader to infer it from a missing url.
-    assert not_performed["apply_job"]["can_hold_a_grant"] is False
     assert not_performed["set_open_to_work"]["can_hold_a_grant"] is False
     assert not_performed["follow_company"]["can_hold_a_grant"] is True
+    # AND THE DEPARTURE IS ASSERTED FROM BOTH SIDES, because "absent from a
+    # refusal list" and "present as a capability" are different claims and only
+    # the pair rules out apply having simply been dropped from the report.
+    assert "apply_job" not in not_performed
+    assert "apply_job" in info["writes_sanctioned"]
 
 
 async def test_each_kind_of_refusal_is_reported_in_its_own_field():
@@ -629,6 +712,16 @@ async def test_the_server_instructions_name_every_write_that_ships():
     read INSTEAD of the source by every client model, so "applying is out of
     scope" living here would recreate, in the worst possible place, the exact
     claim four documents had to retract.
+
+    THE APPLY HALF OF THIS TEST INVERTED ON 2026-08-25 and the inversion is
+    recorded rather than overwritten. It used to assert ``"does not submit
+    applications" in text or "not submit" in text`` -- the server's refusal,
+    pinned so it could not quietly disappear. Apply now ships, so that sentence
+    would be the most load-bearing false claim in the package for the second
+    time, and the assertion is flipped to catch it coming BACK: the old wording
+    is now asserted ABSENT. What has not changed is the shape of the check --
+    the paragraph must offer what ships and refuse what does not, and must
+    still not call either one a scoping decision.
     """
     from linkedin_server import writes
 
@@ -644,7 +737,22 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # The apply paragraph: it must offer the half that ships and refuse the
     # half that does not, WITHOUT calling the refusal a scoping decision.
     assert "apply_path" in text
-    assert "does not submit applications" in text or "not submit" in text
+    # THE HALF THAT SHIPS, and its one irreducible warning. A paragraph that
+    # announced the capability without the warning would be worse than the old
+    # refusal, because a refusal cannot be acted on by mistake.
+    assert "can now submit an application" in text
+    assert "cannot be taken back" in text
+    # THE HALVES THAT DO NOT SHIP, both of them, because each is a different
+    # refusal and a caller who heard only one would assume the other works:
+    # somebody else's applicant-tracking system, and a flow nobody has watched
+    # finish.
+    assert "reported and not driven" in text
+    assert "applicant-tracking system" in text
+    assert "multi-step one is refused" in text
+    # AND THE RETRACTED CLAIM MAY NOT COME BACK. This is the assertion that
+    # used to be the positive one; keeping it as a negative is what makes the
+    # retraction enforceable instead of merely done once.
+    assert "does not submit applications" not in text
     assert "out of scope" not in text
 
     # And it must not still be calling itself read-only.
@@ -766,13 +874,30 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     """A preview names irreversibility for the ONE action being confirmed, and
     by then the caller has decided to try. This answers it beforehand.
 
-    TWO LISTS, AND BOTH ARE PRINTED EVEN WHEN ONE IS EMPTY. "Nothing this
-    process can perform is irreversible" is the reassuring half, and on its own
-    it is indistinguishable from "we have no actions at all" -- an empty list
-    is evidence of a check having run only when something else shows the check
-    can produce a result. So the second list must be non-empty for the first
-    one's emptiness to mean anything, and that relationship is what is
-    asserted here rather than the two values separately.
+    THE PROPERTY THIS TEST PINNED WAS REVERSED ON 2026-08-25, ON PURPOSE, AND
+    THAT IS EXACTLY WHY THE TEST STILL MATTERS. It used to assert
+    ``performable_and_irreversible == []`` and then walk ``PERFORMABLE``
+    asserting every spec's ``irreversible is False``, under a docstring saying
+    that was "a real property of this design rather than an accident of which
+    specs exist: every action perform() will execute names its own inverse."
+
+    It was a real property, and it is now false. ``apply_job`` became
+    performable and it carries ``irreversible=True`` -- not because its
+    reversibility was measured and came back no, but because it was never
+    measurable at all and withdrawing is permanently forbidden here in either
+    direction. So this server can now do something it cannot undo.
+
+    The old docstring's argument inverted with it and is worth stating in its
+    new form rather than deleting. It ran: an empty
+    ``performable_and_irreversible`` says "nothing you can do here is
+    permanent", which on its own is indistinguishable from "there is nothing
+    here at all", so the second list had to be non-empty for the first one's
+    emptiness to mean anything. THE FIRST LIST IS NOW THE NON-EMPTY ONE, and
+    the burden of proof moves with it: an entry claiming an action is permanent
+    means nothing unless the same action is reported as permanent in every
+    other field that mentions it. So what is asserted is no longer a value but
+    AGREEMENT ACROSS FIELDS -- which is the check that would have caught this
+    change silently half-landing.
     """
     from linkedin_server import writes
     from linkedin_server.server import linkedin_server_info
@@ -788,23 +913,45 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         if spec.irreversible
     )
     assert block["sanctioned_and_irreversible"] == expected
-    assert expected, "the second list must not be empty or the first says nothing"
+    assert expected, "an irreversible action exists; the report must name it"
 
-    # Nothing performable is irreversible, and that is a real property of this
-    # design rather than an accident of which specs exist: every action
-    # perform() will execute names its own inverse.
-    assert block["performable_and_irreversible"] == []
-    for action in writes.PERFORMABLE:
-        assert writes.spec_for_action(action).irreversible is False, action
+    # THE SECOND LIST IS DERIVED THE SAME WAY, and it is the one a caller acts
+    # on: sanctioned-and-irreversible includes things nobody can reach, while
+    # performable-and-irreversible is the set of permanent things this process
+    # will actually do if a token is redeemed.
+    expected_performable = sorted(
+        action
+        for action in writes.PERFORMABLE
+        if writes.spec_for_action(action).irreversible
+    )
+    assert block["performable_and_irreversible"] == expected_performable
+    assert expected_performable == ["apply_job"], (
+        "apply is the only permanent thing this server performs; a second one "
+        "arriving must be typed in here by whoever added it"
+    )
+    # A performable irreversible action is a SUBSET of the sanctioned ones, and
+    # the two lists disagreeing would mean one of them is computed off the
+    # wrong predicate -- the failure that would make either list unreadable.
+    assert set(expected_performable) <= set(expected)
 
-    # And the irreversible one is genuinely unreachable, not merely absent from
-    # a list -- checked against the OTHER field rather than trusting this one.
+    # EVERY IRREVERSIBLE ACTION IS REPORTED IRREVERSIBLE WHEREVER IT APPEARS.
+    # This loop used to require each of them to be UNREACHABLE, checked against
+    # writes_sanctioned_but_not_performed. That is now true of none of them, so
+    # the check splits by which side of the boundary the action is on -- and
+    # keeps a real assertion on both sides rather than dropping the arm that
+    # went empty.
+    not_performed = info["writes_sanctioned_but_not_performed"]
     for action in block["sanctioned_and_irreversible"]:
-        assert action in info["writes_sanctioned_but_not_performed"], action
-        assert (
-            info["writes_sanctioned_but_not_performed"][action]["irreversible"]
-            is True
-        ), action
+        if action in writes.PERFORMABLE:
+            # Reachable AND permanent: it must be advertised as a capability
+            # rather than hidden, and it must appear in the list a caller reads
+            # before committing.
+            assert action in info["writes_sanctioned"], action
+            assert action in block["performable_and_irreversible"], action
+            assert action not in not_performed, action
+        else:
+            assert action in not_performed, action
+            assert not_performed[action]["irreversible"] is True, action
 
 
 async def test_that_irreversibility_report_would_notice_a_performable_one(

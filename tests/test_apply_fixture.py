@@ -706,9 +706,31 @@ async def test_both_renders_of_a_posting_classify_identically(pair, job_id):
 # ---------------------------------------------------------------------------
 
 
+def _selector_would_match(selector: str, label: str) -> bool:
+    """Would this CSS selector actually match an anchor with this aria-label?
+
+    Written because the assertion it replaces did not ask that. It asked
+    whether the literal text ``aria-label="<label>"`` APPEARED IN the selector
+    string, which is a different question and a weaker one -- it passes for a
+    selector that happens to contain the right characters and fails for a
+    correct selector spelled another way. Both of those are wrong answers.
+    """
+    prefix_form = 'a[aria-label^="'
+    exact_form = 'a[aria-label="'
+    for clause in selector.split(", "):
+        if not clause.endswith('"]'):
+            continue
+        if clause.startswith(prefix_form):
+            if label.startswith(clause[len(prefix_form):-2]):
+                return True
+        elif clause.startswith(exact_form):
+            if label == clause[len(exact_form):-2]:
+                return True
+    return False
+
+
 def test_the_selector_and_the_vocabulary_cannot_drift_apart():
-    """``dom`` builds the selector, ``shape`` owns the meaning, neither imports
-    the other.
+    """``dom`` builds the selector, ``shape`` owns the meaning.
 
     If they drift, the reader stops matching a route it claims to know: a
     label added to ``shape.APPLY_LABELS`` alone is a meaning nothing can ever
@@ -717,6 +739,20 @@ def test_the_selector_and_the_vocabulary_cannot_drift_apart():
     suite that tests each module on its own, and both are one-line edits. The
     duplicate check is here because a repeated entry would keep the sets equal
     while making the selector list a label twice.
+
+    AMENDED 2026-08-25, twice over, and the docstring used to open "neither
+    imports the other". That is no longer true: ``dom`` now imports ``shape``
+    for ``LINKEDIN_APPLY_PREFIX``, so the prefix itself cannot drift -- there
+    is one of it. The LABEL SETS still can, which is what this still guards.
+
+    The per-label assertion also changed from a substring check to a real
+    match test. It had to: the LinkedIn-hosted arm of the selector is now a
+    PREFIX match, because the exact-equality version carried the same
+    hydration defect found in ``shape.APPLY_LABELS`` -- LinkedIn serves that
+    control as "LinkedIn Apply to this job" mid-hydration and "LinkedIn Apply
+    to <TITLE> at <COMPANY>" once settled, so an exact selector finds ZERO
+    controls on a rendered posting. A substring assertion cannot express
+    "matches this label"; it can only express "contains these characters".
     """
     assert set(dom.APPLY_LABELS_SEEN) == set(shape.APPLY_LABELS), (
         sorted(dom.APPLY_LABELS_SEEN),
@@ -724,7 +760,31 @@ def test_the_selector_and_the_vocabulary_cannot_drift_apart():
     )
     assert len(dom.APPLY_LABELS_SEEN) == len(set(dom.APPLY_LABELS_SEEN))
     for label in dom.APPLY_LABELS_SEEN:
-        assert f'aria-label="{label}"' in dom.APPLY_CONTROL
+        assert _selector_would_match(dom.APPLY_CONTROL, label), label
+
+    # AND the settled spelling, which is the whole reason the prefix exists.
+    # Without this line the selector could quietly go back to exact matching
+    # and every assertion above would still pass.
+    settled = f"{shape.LINKEDIN_APPLY_PREFIX}Staff Engineer at Northwind"
+    assert _selector_would_match(dom.APPLY_CONTROL, settled), settled
+
+    # The off-site arm is deliberately NOT a prefix -- its label has never been
+    # observed varying, and a prefix there would widen what counts as off-site
+    # for no measured reason.
+    assert not _selector_would_match(dom.APPLY_CONTROL, "Apply on company website x")
+
+
+def test_the_drift_check_can_fail():
+    """The matcher above is only worth having if it rejects things.
+
+    A selector helper that returned True unconditionally would make every
+    assertion in the test above vacuous while leaving it green -- the exact
+    shape of defect this suite has already found twice in its own guards.
+    """
+    assert not _selector_would_match('a[aria-label="Apply on company website"]', "Nope")
+    assert not _selector_would_match('a[aria-label^="LinkedIn Apply to "]', "Apply now")
+    assert _selector_would_match('a[aria-label^="LinkedIn Apply to "]', "LinkedIn Apply to x")
+    assert not _selector_would_match("", "anything")
 
 
 def test_no_label_is_spelled_easy_apply():

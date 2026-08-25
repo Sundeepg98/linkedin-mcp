@@ -114,28 +114,37 @@ mcp = FastMCP(
     name=SERVER_NAME,
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
-        "signed-in browser on his own machine. Fourteen of the seventeen "
-        "tools read and change nothing. THREE WRITE: linkedin_save_job, "
-        "linkedin_unsave_job and linkedin_unfollow_company. Call any of them "
+        "signed-in browser on his own machine. Fourteen of the eighteen "
+        "tools read and change nothing. FOUR WRITE: linkedin_save_job, "
+        "linkedin_unsave_job, linkedin_unfollow_company and "
+        "linkedin_apply_job. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
         "CONFIRM ON HIS BEHALF. linkedin_unsave_job currently refuses to act "
         "at all and says why. linkedin_unfollow_company takes the NUMERIC "
         "company id from linkedin_followed_companies, never a name. "
-        "ON APPLYING, because it is the thing most often asked for: this "
-        "server does NOT submit applications, and that is not a shrug. "
-        "linkedin_job_detail reports apply_path, which tells you whether a "
-        "posting applies on LinkedIn or hands you to an outside "
-        "applicant-tracking system, and names that system -- which is the "
-        "half worth having when deciding what to open. The submitting half is "
-        "refused because the apply form has never been captured and an "
-        "application cannot be withdrawn from here. Tell him that if he asks, "
-        "rather than describing applying as something this server declines on "
-        "principle -- it does not. "
+        "ON APPLYING, because it is the thing most often asked for and "
+        "because this paragraph said the OPPOSITE until 2026-08-25: this "
+        "server CAN now submit an application, to a LinkedIn-hosted posting, "
+        "through linkedin_apply_job and only behind the same two-step gate. "
+        "Three things about it are worth carrying into any answer you give "
+        "him. FIRST, it cannot be taken back, and the honest form of that is "
+        "stronger than it sounds: nobody has established that LINKEDIN offers "
+        "a withdraw at all -- not that this server lacks one. It has never "
+        "been measurable, because measuring it needs an application to exist "
+        "and his Applied tab reads zero. SECOND, off-site postings are "
+        "reported and NOT driven: about half of all postings apply on the "
+        "employer's own applicant-tracking system, and for those "
+        "linkedin_job_detail's apply_path names the destination host and the "
+        "tool stops. THIRD, it will sometimes refuse a posting that looks "
+        "fine, because only a single-screen apply flow has ever been observed "
+        "and a multi-step one is refused rather than walked. That is the tool "
+        "working, not a gap; it says what it saw. "
         "There is no message, no connection request, no InMail, no profile "
-        "edit, no post, and no follow -- do not look for them or suggest they "
-        "exist. "
+        "edit, and no post -- do not look for them or suggest they exist. "
+        "Following a company is sanctioned but not performed: the unfollow "
+        "cannot be aimed at what a follow would create. "
         "Start with linkedin_auth_status; if it says false, the operator must "
         "call linkedin_login_browser and sign in himself in the window it "
         "opens -- this server never handles a password. That sign-in is a "
@@ -1275,17 +1284,75 @@ async def linkedin_notifications(
 #: Kept SHORT here on purpose. The full reasoning lives in
 #: ``writes._refuse_unperformable``, which is what a caller actually hits, and
 #: two long copies of one argument drift.
+def _irreversible_block() -> dict[str, Any]:
+    """What cannot be undone, with a note DERIVED from the lists beside it.
+
+    THE NOTE USED TO BE A HARDCODED STRING and it went false without anyone
+    noticing, which is why it is computed now. It read:
+
+        "Every action this process could actually perform is REVERSIBLE ...
+         The irreversible one is sanctioned and is NOT performable."
+
+    All four of its clauses were true when written and all four were false the
+    moment apply became performable on 2026-08-25 -- while the two LISTS above
+    it, which are comprehensions, stayed correct. So the block printed a
+    confident reassurance directly beside the accurate data that contradicted
+    it, and a reader who trusted the prose over the lists would have been told
+    the opposite of the truth about the only action here that cannot be undone.
+
+    Correcting the words would have left the mechanism intact and the next
+    drift just as silent. The note is therefore derived from the same
+    comprehensions it describes: it cannot now disagree with them, because
+    there is nothing left to disagree with.
+    """
+    performable = sorted(
+        spec.action
+        for spec in writes.SANCTIONED_WRITES.values()
+        if spec.irreversible and spec.action in writes.PERFORMABLE
+    )
+    sanctioned = sorted(
+        spec.action
+        for spec in writes.SANCTIONED_WRITES.values()
+        if spec.irreversible
+    )
+    if performable:
+        note = (
+            f"THIS PROCESS CAN PERFORM {len(performable)} ACTION(S) THAT "
+            f"CANNOT BE UNDONE: {', '.join(performable)}. Each is still "
+            "two calls behind a single-use token, but the token is the only "
+            "thing between a call and a permanent effect -- there is no "
+            "inverse to name in the preview, because there is no inverse. "
+            "For apply specifically: nobody has established that LinkedIn "
+            "offers a withdraw at all, which is a stronger statement than "
+            "this server lacking one. See the reversibility field on the "
+            "preview block before confirming anything."
+        )
+    else:
+        note = (
+            "Every action this process could actually perform is REVERSIBLE, "
+            "and its inverse is named in the preview block. Read the two "
+            "lists together: the first being empty means something only "
+            "because the second is not."
+        )
+    return {
+        "performable_and_irreversible": performable,
+        "sanctioned_and_irreversible": sanctioned,
+        "note": note,
+    }
+
+
 _WHY_NOT_PERFORMED: dict[str, str] = {
-    "apply_job": (
-        "the apply CONTROL is measured and linkedin_job_detail reports which "
-        "of the two routes a posting uses; the apply FLOW is not measured at "
-        "all -- no capture of this server's holds a form, a file input, a "
-        "screening question or a control that submits anything. An "
-        "application also cannot be withdrawn by this server in any "
-        "circumstances. And the off-site route would submit on a third "
-        "party's applicant-tracking system, which is not this server's to do "
-        "however well the flow were captured."
-    ),
+    # apply_job WAS HERE UNTIL 2026-08-25. Its entry read: "the apply FLOW is
+    # not measured at all -- no capture of this server's holds a form, a file
+    # input, a screening question or a control that submits anything." True
+    # when written; the flow was captured on 2026-08-24 and the sentence
+    # became false. It is REMOVED rather than reworded, because this dict is
+    # for actions that are sanctioned and NOT performed, and apply is now
+    # performed. Two halves of that old reason survive where they belong:
+    # the off-site refusal moved INSIDE the action, since the route is a
+    # per-posting fact rather than a property of the verb, and the
+    # irreversibility moved into linkedin_apply_job's docstring, sharpened --
+    # nobody has established LinkedIn offers a withdraw at all.
     "follow_company": (
         "an unfollow now exists, but it cannot be aimed at what a follow "
         "creates: a posting names its employer by slug, the unfollow surface "
@@ -1410,6 +1477,65 @@ async def linkedin_unsave_job(job_id: str, confirm_token: str = "") -> dict[str,
     """
     try:
         return await _write_tool("unsave_job", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_apply_job(job_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Submit an application to one LinkedIn-hosted job posting.
+
+    THIS ONE CANNOT BE TAKEN BACK, and the usual reassurance is not available
+    here, so read the next sentence rather than the shape of it.
+
+    **NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL.** That is
+    a stronger and worse statement than "this server cannot withdraw it",
+    which would invite you to assume LinkedIn can. It might. It has not been
+    measured, and it could not be: measuring a withdraw means enumerating the
+    controls on an APPLIED row, this account's Applied tab reads zero, and
+    getting a row there means applying. So the first application made through
+    this tool is the one that settles the question -- and if the answer turns
+    out to be no, it will be settled by an application that cannot be undone.
+
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is submitted. The posting
+    is read live and you get back a block naming the job by title and
+    employer, which of the two apply routes it uses, where that was read from,
+    and the exact control that would be pressed. Read it, then call again with
+    the token it hands you.
+
+    The token works ONCE, only for this posting, only for this verb, and it
+    expires in two minutes, so an unattended caller cannot hold a live one.
+
+    OFF-SITE POSTINGS ARE REPORTED, NOT DRIVEN. About half of all postings
+    apply on the employer's own applicant-tracking system rather than on
+    LinkedIn. For those this names the destination host and stops. Driving a
+    form on somebody else's domain, under their terms, is not this server's to
+    do at any capture quality -- ``linkedin_job_detail``'s ``apply_path``
+    tells you where to go and you apply there yourself.
+
+    WHAT HAPPENS WHEN YOU CONFIRM, because the shape matters. The apply
+    control is opened, which draws LinkedIn's apply form as a modal over the
+    posting and submits nothing. The modal is then RE-READ, and the submit is
+    only pressed if all of: it rendered; exactly one control carries
+    LinkedIn's own submit hook; that control is visible and enabled; its name
+    corroborates the hook; and **zero advance controls are present**.
+
+    THAT LAST CONDITION WILL SOMETIMES REFUSE A PERFECTLY GOOD POSTING, and
+    that is the tool working rather than a gap. Exactly one apply flow has
+    ever been observed on this account -- a single screen with one enabled
+    "Submit application" and no Next. A posting that draws a Next is a
+    multi-step flow nobody here has watched finish, and filling in steps that
+    have never been seen, to reach a submit that cannot be withdrawn, is the
+    one guess this server does not make. When that happens it says so and
+    names what it saw; apply on the posting yourself.
+
+    Args:
+        job_id: the numeric LinkedIn job id, as it appears in /jobs/view/<id>.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually submit the application.
+    """
+    try:
+        return await _write_tool("apply_job", job_id, confirm_token)
     except Exception as exc:
         return _error(exc)
 
@@ -1553,26 +1679,7 @@ async def linkedin_server_info() -> dict[str, Any]:
             # reassuring half and it means nothing without the other half
             # beside it -- an empty list on its own reads as "we checked" when
             # it could equally mean "we have no such actions to check".
-            "irreversible": {
-                "performable_and_irreversible": sorted(
-                    spec.action
-                    for spec in writes.SANCTIONED_WRITES.values()
-                    if spec.irreversible and spec.action in writes.PERFORMABLE
-                ),
-                "sanctioned_and_irreversible": sorted(
-                    spec.action
-                    for spec in writes.SANCTIONED_WRITES.values()
-                    if spec.irreversible
-                ),
-                "note": (
-                    "Every action this process could actually perform is "
-                    "REVERSIBLE, and its inverse is named in the preview "
-                    "block. The irreversible one is sanctioned and is NOT "
-                    "performable -- see writes_sanctioned_but_not_performed. "
-                    "Read the two lists together: the first being empty means "
-                    "something only because the second is not."
-                ),
-            },
+            "irreversible": _irreversible_block(),
             "writes_note": (
                 "Every write is two calls: one that performs nothing and "
                 "returns a block to read, and one that redeems a single-use "
@@ -1752,16 +1859,17 @@ async def linkedin_server_info() -> dict[str, Any]:
             # server would rather not" is not one -- it is his account. Both
             # entries below are pending wiring, not standing refusals.
             "can_be_done_and_is_refused": [
-                "APPLYING to a LinkedIn-hosted posting. Measured 2026-08-24: "
-                "the flow is ONE screen carrying an enabled 'Submit "
-                "application' control and no Next, so it is drivable. NOT A "
-                "REFUSAL ANY MORE -- the operator has ruled it should be "
-                "built, and it is pending wiring behind the confirm gate.",
+                # APPLYING LEFT THIS LIST ON 2026-08-25, and that is what the
+                # field is for. Its entry named something measured to work
+                # that was not being done, and the answer to an entry here is
+                # to build it rather than to justify it. linkedin_apply_job
+                # now ships, gated, and the list got shorter by one.
                 "READING the message inbox. Measured 2026-08-24: it renders, "
                 "the conversation list is enumerable, no auth wall. Pending "
                 "wiring. The COST is documented rather than hidden: asking for "
                 "/messaging/ does not stay on the inbox, LinkedIn redirects it "
-                "into one specific conversation thread.",
+                "into one specific conversation thread, so a 'read' opens "
+                "somebody's conversation on every call.",
             ],
 
             # Nobody has looked. Kept apart from both of the above, because an
