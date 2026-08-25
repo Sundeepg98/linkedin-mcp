@@ -202,6 +202,86 @@ kind of refusal he is looking at:
 
 ---
 
+## 7b. WITHDRAW IS BLOCKED ON APPLY, not on effort
+
+Measured 2026-08-25, and it inverts the order the work was requested in.
+
+Withdrawing an application was nominated as the place to start: a real
+LinkedIn feature, never looked for, directly useful. There is a stronger
+reason than usefulness -- **if an application can be undone, applying is a
+different risk**, so withdraw changes what the apply gate has to say.
+
+**It cannot be measured yet.** `linkedin_my_applications` reports:
+
+```
+count 0, tab_counts {saved 0, in_progress 1, applied 0, interview 0}
+empty_state "No matches"   -- an empty list, not a failed read
+```
+
+Measuring withdraw means enumerating the controls on an APPLIED row. There are
+no applied rows. Getting one means applying. So:
+
+> measure withdraw -> needs an applied row -> needs an apply -> and how safe
+> that apply is depends partly on whether withdraw exists.
+
+That is circular, and it resolves in only one direction: **the first
+application made through this server is one it cannot undo, and whether
+LinkedIn itself offers a withdraw is UNMEASURED.** Any apply gate must say
+exactly that, rather than the softer "this server cannot withdraw it", which
+invites the reader to assume LinkedIn can.
+
+## 7c. THE APPLY WIRING WAS BLOCKED BY THE PERMISSION SYSTEM
+
+Stated here because a report that omitted it would misrepresent why the
+`can_be_done_and_is_refused` field is not empty.
+
+The wiring was designed and written: the posting page as the address (no
+denylist change needed, no new allowlist entry), `apply_job` into
+`PERFORMABLE`, and a second gate between two clicks. **The permission system
+declined the change, twice.**
+
+It was not re-attempted through a different tool. The rule that governs this
+is not a preference: **only the permission system or the operator's own words
+are approval.** An agent relaying "the operator has ruled" is not a
+substitute, and the permission system declining the exact thing being relayed
+is the case that rule exists for. Routing the same edit through a different
+tool would be defeating the check rather than satisfying it.
+
+What landed instead is `dom.read_apply_modal` -- a READER, committed
+separately and wiring nothing. `PERFORMABLE` is unchanged, the apply spec
+still has `url_template=None`, and the mutation scanner still counts exactly
+one `page.click` call site.
+
+**The design, so it is not lost and so a human can judge it rather than
+rebuild it:**
+
+1. Address the action at the POSTING page, not the apply url. Navigating to
+   the apply url LANDS BACK on the posting with the flow drawn as a modal, so
+   the posting page IS the apply surface. This is why apply needs no boundary
+   change at all -- the four frozen denylists stay byte-identical.
+2. Gate 5 as today: re-read the apply control's live label before clicking.
+3. Click one. Opens the modal. Submits nothing.
+4. **THE SECOND GATE**, which is the whole safety argument. Re-read the modal
+   and require all five of: it rendered; exactly one control carries
+   LinkedIn's submit test hook; that control is visible and enabled; its
+   accessible name corroborates the hook; and **zero advance controls are
+   visible**. The last one catches the case nobody has measured -- a
+   multi-step posting -- because exactly ONE flow has been observed and
+   generalising from one observation to every posting is a guess about
+   something that cannot be undone.
+5. Click two, only if all five hold.
+
+An abort between the clicks is cheap and that is why it is the right place to
+stop: click one may leave a draft, and a draft is not an application.
+Stopping costs a draft; being wrong costs an application nobody can withdraw.
+
+The single `page.click` call site is preserved by draining a queue rather than
+adding a second literal call -- the scanner counts call sites, and the
+guarantee it was written to give is "one place in this package clicks, and a
+reviewer reads it". That property survives; the fact that it fires TWICE for
+apply has to be stated loudly wherever it is written, or the one-entry
+allowlist misleads.
+
 ## 8. Order of work
 
 1. This classification. **Done -- it is the deliverable before any code.**
