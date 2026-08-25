@@ -378,6 +378,43 @@ reviewer reads it". That property survives; the fact that it fires TWICE for
 apply has to be stated loudly wherever it is written, or the one-entry
 allowlist misleads.
 
+## 7d. THE 12 UNMEASURED, RANKED -- and the tail is named
+
+Ranked against the operator's measured bottleneck, which is **conversion, not
+discovery**. He does not need more postings found; he needs the ones already
+in motion to move.
+
+**The shape worth copying** comes from a sibling server: the most valuable
+route built in this family recorded what replies **ASKED FOR** rather than
+that they arrived, and surfaced two that were waiting on something specific
+from him. So the ranking question for each item below is not "is this a
+capability" but **"does this surface something that is waiting on him?"**
+
+| # | capability | why here |
+|---|---|---|
+| 1 | **read the inbox** | The direct analogue of that shape. A recruiter message asking him something IS a thing waiting on him, and it is the only surface here that holds one. Already a CAN. |
+| 2 | **pending connection invitations** | Incoming invites are literally queued on his decision. Unmeasured, and the cheapest of the network items to check. |
+| 3 | **set Open To Work** | The strongest passive recruiter signal LinkedIn offers, and the census already names the safe first click. Employer-visible, so a loud gate. |
+| 4 | **look up ONE member** | Research before an interview or before answering a recruiter. Supports conversion rather than producing it. |
+| 5 | **withdraw an application** | Changes how safe applying is, which is worth more than the action itself. Blocked on a real applied row -- do not manufacture one. |
+| 6 | **follow a company** | Weak signal, but the obstacle is understood: the slug/id join. Solvable engineering rather than a measurement. |
+| 7 | **send InMail** | Outbound and it spends credits. Real, but it costs something and the surface is uncaptured. |
+| 8 | **endorse a skill** | A gift, and relationship maintenance rather than conversion. Cheap once the control is measured. |
+
+**THE TAIL, NAMED RATHER THAN LEFT TO TRAIL OFF -- items 9 to 12, and I am
+deprioritising all four:**
+
+| # | capability | why it is last |
+|---|---|---|
+| 9 | edit other profile fields | Nothing is waiting on him here, and the profile that matters (Open To Work) is item 3. |
+| 10 | change account settings | Same, and `/settings/` is the least-explored surface in the package -- highest measurement cost, lowest return. |
+| 11 | post / share an update | Broadcasting. It reaches nobody in particular and converts no conversation already in motion. |
+| 12 | comment / react on a post | The furthest from a job of anything on this list. Cheap to build and worth almost nothing to him. |
+
+If the ranking is wrong it is most likely wrong about item 2: pending
+invitations are a guess about volume, since nobody has looked at that surface
+and it may simply be empty.
+
 ## 8. Order of work
 
 1. This classification. **Done -- it is the deliverable before any code.**
