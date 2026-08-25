@@ -50,10 +50,76 @@ class FakeContext:
 
 
 def jar(*names):
+    """A jar shaped the way Playwright actually returns one.
+
+    DOMAIN AND PATH ARE NOT DECORATION HERE. ``add_cookies`` requires them, so
+    a cookie without them cannot be restored -- and the first version of this
+    module stored such cookies happily. See
+    ``test_a_cookie_that_cannot_be_restored_is_never_stored``.
+    """
     return [
         {"name": n, "value": f"value-of-{n}", "domain": ".linkedin.com", "path": "/"}
         for n in names
     ]
+
+
+# -- THE CASE THE MODULE EXISTS FOR ----------------------------------------
+
+
+async def test_an_emptied_profile_plus_a_populated_store_is_a_session(store):
+    """THE ROUND TRIP. Harvest, lose the profile, restore, signed in again.
+
+    Every other test here checks a rule. This checks the PURPOSE: that the
+    store can actually put a session back into a context Chrome has emptied.
+
+    It is written deliberately because the restore path only ever runs in the
+    rare case -- a profile that still has its session is left alone, which is
+    correct -- so without a test built for it, the one path that justifies the
+    whole module would never execute in the suite at all.
+    """
+    signed_in = FakeContext(jar(SESSION_COOKIE, "JSESSIONID", "bcookie"))
+    assert (await store.save_from_context(signed_in, method="login"))["saved"] is True
+
+    # What Chrome leaves behind after its downgrade migration.
+    wiped = FakeContext([])
+    assert SESSION_COOKIE not in {c["name"] for c in await wiped.cookies()}
+
+    out = await store.restore_into_context(wiped)
+
+    assert out["restored"] is True
+    names = {c["name"] for c in await wiped.cookies()}
+    assert SESSION_COOKIE in names, "the session did not come back"
+    assert names == {SESSION_COOKIE, "JSESSIONID", "bcookie"}
+
+    # And what came back is USABLE -- full value, domain and path, not a stub.
+    restored = {c["name"]: c for c in wiped.added}
+    assert restored[SESSION_COOKIE]["domain"] == ".linkedin.com"
+    assert restored[SESSION_COOKIE]["path"] == "/"
+    assert restored[SESSION_COOKIE]["value"]
+
+
+async def test_a_cookie_that_cannot_be_restored_is_never_stored(store):
+    """THE DEFECT THAT SHIPPED, pinned so it cannot ship twice.
+
+    A test's FakePage returns cookies as ``{"li_at": "pending"}`` -- a name
+    and a seven-character value, no domain, no path. The first version of this
+    module stored that into the operator's REAL session file. It looked like a
+    populated store and could never have restored anything, because
+    ``add_cookies`` cannot use a cookie without a domain.
+
+    WHY IT WENT UNNOTICED IS THE PART WORTH KEEPING. The degrade rules are
+    good: every restore path returns ``restored: false`` with a reason. So a
+    store that can NEVER work is indistinguishable from a store that is not
+    needed yet -- and the day it is needed is the day the profile was
+    discarded, which is the one day it matters. Graceful degradation hides a
+    broken mechanism perfectly. The validation therefore lives at the WRITE.
+    """
+    stub = FakeContext([{"name": SESSION_COOKIE, "value": "pending"}])
+    out = await store.save_from_context(stub, method="login_via_browser")
+
+    assert out["saved"] is False
+    assert out["rejected_unrestorable"] == 1
+    assert not store.path.exists(), "an unrestorable jar reached the disk"
 
 
 @pytest.fixture

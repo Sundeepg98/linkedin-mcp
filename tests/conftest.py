@@ -25,6 +25,36 @@ from typing import Any, Optional
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _never_write_the_real_session_store(tmp_path, monkeypatch):
+    """No test may touch the operator's session file. Enforced, not asked.
+
+    THIS EXISTS BECAUSE IT ALREADY HAPPENED. ``login_via_browser`` harvests
+    cookies into a module-level ``SESSION_STORE`` pointed at the real
+    ``_state/session.json``. Tests drive that function with a ``FakePage``
+    whose cookies are ``{"li_at": "pending"}`` -- so the suite wrote a
+    seven-character fake credential into the operator's live state directory,
+    and it sat there looking like a real stored session.
+
+    An autouse fixture rather than a convention: the failure was not that
+    somebody forgot to patch it, it is that nothing MADE them. Redirecting the
+    path for every test means a future harvest added anywhere is caught by
+    construction rather than by whoever reviews it noticing.
+
+    Belt and braces -- the store object is redirected AND the module constant,
+    because code may resolve either.
+    """
+    from linkedin_server import browser as browser_module
+    from linkedin_server import session_store as store_module
+
+    sandbox = tmp_path / "session.json"
+    monkeypatch.setattr(store_module, "SESSION_PATH", sandbox, raising=False)
+    monkeypatch.setattr(
+        browser_module.SESSION_STORE, "path", sandbox, raising=False
+    )
+    yield sandbox
+
+
 class FakeResponse:
     """A Playwright APIResponse stand-in."""
 

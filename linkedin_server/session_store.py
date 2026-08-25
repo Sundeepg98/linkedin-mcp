@@ -135,7 +135,37 @@ class SessionStore:
             logger.debug("cookie harvest failed: %s", type(exc).__name__)
             return {"saved": False, "why": f"could not read cookies ({type(exc).__name__})"}
 
-        keep = [c for c in cookies if isinstance(c, dict) and c.get("name")]
+        # ONLY STORE WHAT CAN ACTUALLY BE PUT BACK.
+        #
+        # THIS GUARD EXISTS BECAUSE ITS ABSENCE SHIPPED. The first version
+        # kept any dict with a name, and a test's FakePage -- whose cookies
+        # are {"li_at": "pending"} -- wrote a 7-character value with no
+        # domain into the real store. `add_cookies` cannot use a cookie
+        # without a domain and a path, so that jar was unrestorable: the
+        # store looked populated and could never have worked.
+        #
+        # It was invisible precisely BECAUSE the degrade rules are good. Every
+        # restore path returns restored:false with a reason, and a store that
+        # always declines is indistinguishable from a store that is not needed
+        # yet. Graceful degradation hides a broken mechanism perfectly, which
+        # is why the thing being degraded to has to be validated at the point
+        # it is WRITTEN rather than trusted at the point it is read.
+        keep = [
+            c
+            for c in cookies
+            if isinstance(c, dict)
+            and c.get("name")
+            and c.get("domain")
+            and c.get("path")
+            and isinstance(c.get("value"), str)
+        ]
+        rejected = len(cookies) - len(keep)
+        if rejected:
+            logger.debug(
+                "session store: %d cookie(s) lack domain/path and cannot be "
+                "restored, so they are not stored",
+                rejected,
+            )
         names = sorted({c["name"] for c in keep})
         if SESSION_COOKIE not in names:
             # Refusing to write is the right move: a jar with no session
@@ -144,10 +174,13 @@ class SessionStore:
             # session.
             return {
                 "saved": False,
+                "rejected_unrestorable": rejected,
                 "why": (
-                    f"the live context has no {SESSION_COOKIE}, so there is no "
-                    "session to store. The existing store, if any, is left "
-                    "alone rather than replaced with a signed-out jar."
+                    f"no restorable {SESSION_COOKIE} in the live context, so "
+                    "there is no session to store. The existing store, if any, "
+                    "is left alone rather than replaced with a useless jar. "
+                    f"({rejected} cookie(s) were dropped for lacking the "
+                    "domain and path that add_cookies requires.)"
                 ),
             }
 
