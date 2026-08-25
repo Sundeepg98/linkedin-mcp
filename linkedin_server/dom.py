@@ -1132,3 +1132,126 @@ def parse_all(
         else:
             dropped += 1
     return rows, dropped
+
+
+# ---------------------------------------------------------------------------
+# The apply modal
+# ---------------------------------------------------------------------------
+
+#: LinkedIn's own test hook on the control that SUBMITS an application.
+#: Measured 2026-08-24 on a live posting: exactly one occurrence, on
+#: ``<button aria-label="Submit application" ... type="button">``.
+#:
+#: PREFERRED OVER THE ACCESSIBLE NAME, which is the opposite of the choice
+#: made for every other control in this package, so the reason matters: an
+#: apply cannot be withdrawn by this server, and the accessible name is the
+#: field LinkedIn has already been measured changing WITHIN a single page load
+#: (see ``shape.LINKEDIN_APPLY_PREFIX``). A hook LinkedIn maintains for its own
+#: tests is the more stable of the two, and the name is checked as well rather
+#: than instead -- both must agree before anything is pressed.
+#:
+#: Note it still says ``easy-apply``, the retired product name, while the
+#: aria-label says "LinkedIn Apply". A parser keyed on the visible product name
+#: and one keyed on this hook disagree about what this surface is called.
+APPLY_SUBMIT_HOOK = "data-live-test-easy-apply-submit-button"
+APPLY_SUBMIT_SELECTOR = f"button[{APPLY_SUBMIT_HOOK}]"
+
+#: The modal root. Measured: exactly 1 ``role="dialog"`` on the rendered flow,
+#: and 0 ``aria-modal`` -- so this is the only usable root and aria-modal must
+#: NOT be required.
+APPLY_MODAL_SELECTOR = "[role=dialog]"
+
+#: Words that mean "this control advances the flow rather than ending it".
+#: Their PRESENCE is what makes a posting unsafe to drive: the one flow
+#: measured had zero of them and a single Submit, and a posting that renders a
+#: Next is a shape nobody here has ever seen finish.
+APPLY_ADVANCE_WORDS = ("next", "continue", "review")
+
+
+async def read_apply_modal(page: Any) -> dict[str, Any]:
+    """Read the apply modal WITHOUT touching it.
+
+    Returns what the caller needs to decide whether this flow is the one that
+    was measured, and refuses to summarise: every field is reported so a
+    surprise shows up as a surprise rather than as a False.
+
+    THE ADVANCE COUNT IS THE SAFETY FIELD. One posting was measured, and it was
+    a single screen carrying one enabled Submit and no Next. Another posting
+    may well be a multi-step flow. Rather than assume it is not, this reports
+    the advance controls it can see, and the caller refuses when there are any
+    -- so a shape nobody has measured stops the action instead of being driven
+    on a guess.
+    """
+    out: dict[str, Any] = {
+        "modal_present": False,
+        "submit_present": False,
+        "submit_enabled": False,
+        "submit_name": None,
+        "advance_names": [],
+        "why": "",
+    }
+    try:
+        out["modal_present"] = int(await page.locator(APPLY_MODAL_SELECTOR).count()) > 0
+    except Exception:
+        out["modal_present"] = False
+
+    try:
+        submit = page.locator(APPLY_SUBMIT_SELECTOR)
+        count = int(await submit.count())
+    except Exception as exc:
+        out["why"] = f"the submit control could not be read ({type(exc).__name__})"
+        return out
+
+    if count != 1:
+        out["why"] = (
+            f"expected exactly one {APPLY_SUBMIT_HOOK} control and found "
+            f"{count}. One is the measured shape; anything else is a flow "
+            "this reader has never seen."
+        )
+        return out
+
+    out["submit_present"] = True
+    for key, coro in (
+        ("submit_name", submit.get_attribute("aria-label")),
+        ("_disabled", submit.get_attribute("disabled")),
+        ("_aria_disabled", submit.get_attribute("aria-disabled")),
+    ):
+        try:
+            out[key] = await coro
+        except Exception:
+            out[key] = None
+    try:
+        visible = bool(await submit.is_visible())
+    except Exception:
+        visible = False
+    out["submit_enabled"] = (
+        visible
+        and out.pop("_disabled", None) is None
+        and out.pop("_aria_disabled", None) != "true"
+    )
+    out.pop("_disabled", None)
+    out.pop("_aria_disabled", None)
+
+    # Advance controls anywhere in the modal.
+    names: list[str] = []
+    try:
+        buttons = page.locator(f"{APPLY_MODAL_SELECTOR} button")
+        total = int(await buttons.count())
+        for i in range(min(total, 40)):
+            node = buttons.nth(i)
+            try:
+                if not await node.is_visible():
+                    continue
+                label = (await node.get_attribute("aria-label")) or ""
+                text = (await node.inner_text()) or ""
+            except Exception:
+                continue
+            name = " ".join(f"{label} {text}".split()).lower()
+            if not name:
+                continue
+            if any(w in name for w in APPLY_ADVANCE_WORDS):
+                names.append(name[:60])
+    except Exception:
+        pass
+    out["advance_names"] = sorted(set(names))
+    return out
