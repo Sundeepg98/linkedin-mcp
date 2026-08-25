@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import re
 from typing import Any, Iterable, Optional
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
 from linkedin_server.config import MAX_TEXT_CHARS
 
@@ -638,6 +638,58 @@ def parse_notification(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     link = absolute_url(record.get("href", ""))
     if link:
         out["link"] = link
+        # TURN THE URL INTO SOMETHING THE CALLER CAN ACT ON.
+        #
+        # A bare link is an identifier that no tool on this server accepts:
+        # there is nothing here that takes a url. So a caller who wants to do
+        # anything with a notification has to parse the link themselves, or
+        # make a round trip to find the key. Both of the keys below are
+        # already accepted by tools that ship, and both are sitting in the
+        # href unread.
+        #
+        # This ADDS tokens per row, which is the opposite of the size pass,
+        # and it is the right trade for the reason that pass named: noise
+        # costs context, but a missing field costs a whole ROUND TRIP. A
+        # keyword a caller can pass straight to linkedin_search_jobs is worth
+        # more than the dozen tokens it occupies.
+        out.update(notification_handles(link))
+    return out
+
+
+#: The two keys a notification link can carry that some tool here accepts.
+#: Measured against the tracked notifications fixture, whose links are job
+#: ALERTS (a saved search), feed posts, member profiles and one company.
+#:
+#: NOT job postings -- and that is worth writing down, because it is the
+#: obvious guess and it is wrong. No notification link in the fixture is a
+#: /jobs/view/<id> url, so there is no job_id to extract here and a reader
+#: that tried would find nothing and report nothing, which looks identical to
+#: a notification that has no job.
+_ALERT_KEYWORDS = re.compile(r"[?&]keywords=([^&]+)")
+_COMPANY_LINK = re.compile(r"/company/(\d{4,})")
+
+
+def notification_handles(link: str) -> dict[str, Any]:
+    """Keys from a notification url that a tool on this server will take.
+
+    ``search_keywords`` goes to ``linkedin_search_jobs``; ``company_id`` goes
+    to ``linkedin_unfollow_company`` and to ``linkedin_followed_companies``'s
+    output shape. Absent when the link carries neither, which is most of them
+    -- a feed post or a member profile has no key this server can use, and
+    saying nothing is the honest answer rather than inventing one.
+    """
+    out: dict[str, Any] = {}
+    if not link:
+        return out
+    match = _ALERT_KEYWORDS.search(link)
+    if match:
+        raw = unquote_plus(match.group(1))
+        cleaned = _WS.sub(" ", raw).strip()
+        if cleaned:
+            out["search_keywords"] = trim(cleaned, 120)
+    company = _COMPANY_LINK.search(link)
+    if company:
+        out["company_id"] = company.group(1)
     return out
 
 
