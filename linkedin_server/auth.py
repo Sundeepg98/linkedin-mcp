@@ -199,6 +199,39 @@ def _identity_from(payload: Any) -> dict[str, Any]:
     return {}
 
 
+async def _arm_session_store(page: Any) -> None:
+    """Opportunistically fill the session store from a confirmed live session.
+
+    Called ONLY from the 200-with-identity branch of :func:`check_auth`, so
+    the evidence is the same live identity check the login path uses. A cookie
+    being present is never enough; LinkedIn agreeing it is a session is.
+
+    THREE PROPERTIES, and each one is a rule this must not break:
+
+    * **SILENT AND NON-FATAL.** A harvest is a side errand during a read. It
+      may never turn a working ``auth_status`` into an error, so every failure
+      is swallowed to the log. The caller gets its auth answer regardless.
+    * **NOT ON EVERY CALL.** A write per read is wasteful and multiplies the
+      chances of damaging a good store. It writes only when the store has no
+      session to lose -- absent, unreadable, or holding no session cookie.
+    * **NEVER OVER A GOOD STORE.** A populated store is left exactly alone.
+      Refreshing it would trade a known-good jar for a newer one on no
+      evidence that the newer one is better.
+    """
+    try:
+        from linkedin_server.browser import SESSION_STORE
+
+        existing = SESSION_STORE.describe()
+        if existing.get("present") and existing.get("has_session_cookie"):
+            return
+        context = getattr(page, "context", None)
+        if context is None:
+            return
+        await SESSION_STORE.save_from_context(context, method="check_auth")
+    except Exception as exc:  # noqa: BLE001 - an errand, never a gate
+        logger.debug("session store not armed (%s): %s", type(exc).__name__, exc)
+
+
 async def check_auth(
     page: Any, *, corroborate: bool = False, warm: bool = True
 ) -> dict[str, Any]:
@@ -272,6 +305,23 @@ async def check_auth(
             payload = {}
         identity = _identity_from(payload)
         if identity or payload:
+            # ARM THE NET FROM ANY LIVE SESSION, not only from a fresh login.
+            #
+            # THE DEFECT THIS FIXES: the harvest used to sit only in
+            # login_via_browser, so the store could be filled ONLY by the
+            # interactive sign-in -- which is the event it exists to spare him.
+            # If Chrome discarded the profile tomorrow the store would be
+            # empty, he would sign in, and only THEN would it fill. It
+            # protected the second failure and never the first. Measured: he
+            # restarted three times on working code and the store stayed
+            # empty throughout, because a working profile never signs in.
+            #
+            # The rule that justified the original placement is unchanged and
+            # is what licenses this: harvest only from a LIVE 200 against the
+            # identity endpoint, never from a cookie's mere presence. This IS
+            # that same 200. Nothing is loosened; the same evidence is simply
+            # believed at a second call site.
+            await _arm_session_store(page)
             return {"authenticated": True, **base, **identity}
         return await _maybe_corroborate(
             page,

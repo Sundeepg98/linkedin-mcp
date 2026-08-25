@@ -98,6 +98,85 @@ async def test_an_emptied_profile_plus_a_populated_store_is_a_session(store):
     assert restored[SESSION_COOKIE]["value"]
 
 
+async def test_a_live_auth_check_arms_an_empty_store(monkeypatch, tmp_path):
+    """THE NET MUST NOT NEED THE DISASTER IN ORDER TO EXIST.
+
+    The harvest originally lived only in ``login_via_browser``, so the store
+    could be filled ONLY by the interactive sign-in -- which is the event it
+    exists to spare him. If Chrome discarded the profile, the store would be
+    empty, he would sign in, and only THEN would it fill: it protected the
+    second failure and never the first.
+
+    It was invisible for the same reason the previous defect was. A working
+    profile never signs in, so the store simply stayed empty and empty looks
+    exactly like not-yet-needed. Measured: three restarts on correct code,
+    store empty throughout.
+
+    So a confirmed live session now arms it, and this asserts that -- because
+    like the restore path, this fires only in a condition the suite will never
+    wander into on its own.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    store = SessionStore(tmp_path / "armed.json")
+    monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
+    assert not store.path.exists()
+
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "bcookie"))})()
+    await auth_module._arm_session_store(page)
+
+    assert store.path.exists(), "a live session did not arm the store"
+    info = store.describe()
+    assert info["has_session_cookie"] is True
+    assert info["method"] == "check_auth"
+
+
+async def test_arming_never_overwrites_a_store_that_already_has_a_session(
+    monkeypatch, tmp_path
+):
+    """A populated store is left exactly alone.
+
+    Refreshing it on every read would trade a known-good jar for a newer one
+    on no evidence the newer one is better, and would multiply the chances of
+    damaging the thing being protected.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    store = SessionStore(tmp_path / "armed.json")
+    monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
+    await store.save_from_context(FakeContext(jar(SESSION_COOKIE)), method="login")
+    before = store.path.read_text(encoding="utf-8")
+
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "extra"))})()
+    await auth_module._arm_session_store(page)
+
+    assert store.path.read_text(encoding="utf-8") == before
+
+
+async def test_arming_never_breaks_the_auth_answer(monkeypatch, tmp_path):
+    """A harvest is an errand during a read and may never fail the read.
+
+    If a broken store could turn a working auth_status into an error, the
+    safety net would have become a new way to lose access -- the exact
+    inversion this module must not perform.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    class Exploding:
+        path = tmp_path / "boom.json"
+
+        def describe(self):
+            raise RuntimeError("store is on fire")
+
+    monkeypatch.setattr(browser_module, "SESSION_STORE", Exploding(), raising=False)
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE))})()
+
+    await auth_module._arm_session_store(page)  # must not raise
+
+
 async def test_a_cookie_that_cannot_be_restored_is_never_stored(store):
     """THE DEFECT THAT SHIPPED, pinned so it cannot ship twice.
 
