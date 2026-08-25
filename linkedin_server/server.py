@@ -692,25 +692,36 @@ async def linkedin_my_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]
 
 
 @mcp.tool()
-async def linkedin_unread_messages() -> dict[str, Any]:
-    """How many unread conversations are waiting for you. Nothing is opened.
+async def linkedin_new_messages() -> dict[str, Any]:
+    """Has anything ARRIVED since you last opened Messaging? Nothing is opened.
+
+    **THIS IS NOT AN UNREAD COUNT, and it was called one until 2026-08-26.**
+    LinkedIn's nav badge counts NEW-SINCE-LAST-VISIT and **resets the moment
+    you open the Messaging tab**. Measured with a genuinely unread recruiter
+    InMail on screen, the badge read 0 -- because he was sitting in Messaging.
+    Every conversation there was still unread. The old name,
+    ``linkedin_unread_messages``, returned a true number under a false
+    heading, and it is gone rather than aliased: a name that asserts something
+    false should not keep working.
+
+    So a 0 here means "nothing has landed since your last look". It does NOT
+    mean your inbox is clear.
+
+    THE UNREAD COUNT IS NOT AVAILABLE, and not for want of trying. The
+    per-conversation unread markers live on the messaging list, and reaching
+    that list means loading ``/messaging/`` -- which does not stay on a list.
+    It redirects into ONE SPECIFIC CONVERSATION that LinkedIn chooses, so
+    counting unread conversations would require opening somebody's thread,
+    which is the very act that changes what is being counted.
 
     This never sends a message, never opens a conversation, and never loads
-    the messaging surface at all. It reads LinkedIn's own global-nav badge off
-    your feed, which this server already loads. One page.
-
-    WHY A COUNT AND NOT AN INBOX READER, because the difference is the whole
-    design: asking LinkedIn for ``/messaging/`` does not stay on an inbox. It
-    redirects into ONE SPECIFIC CONVERSATION THREAD, and the caller does not
-    choose which -- LinkedIn does. So "is anything waiting" is answerable
-    honestly and cheaply, while "show me my inbox" is a different question
-    with a different cost that this server does not answer. See
-    ``linkedin_server_info``.
+    the messaging surface at all. It reads the badge off your feed, which this
+    server already loads. One page.
 
     THREE OUTCOMES, and the third is why this is not just an integer.
-    ``unread`` is a number when the badge was read, and ``null`` when the
-    badge did not render -- which is NOT the same as zero and is never
-    reported as zero. A badge at 0 and a nav that failed to hydrate look
+    ``new_since_last_visit`` is a number when the badge was read, and ``null``
+    when the badge did not render -- which is NOT the same as zero and is
+    never reported as zero. A badge at 0 and a nav that failed to hydrate look
     identical to any reader that collapses them, and this package has already
     lost two measurements to exactly that confusion.
     """

@@ -1202,34 +1202,46 @@ APPLY_UNKNOWN = "unknown"
 #: The global-nav messaging badge, as LinkedIn spells it. Measured
 #: 2026-08-24: ``aria-label="Messaging, 0 new notifications"``.
 #:
-#: THIS IS THE HALF OF "CHECK MY MESSAGES" THAT COSTS NOTHING. It renders in
-#: the nav on ``/feed/``, which is already an allowed read surface, so reading
-#: it needs no boundary change and -- the point -- opens NOBODY'S
-#: conversation. Asking ``/messaging/`` for the inbox does not stay on an
-#: inbox; it lands in one specific thread that LinkedIn, not the caller,
-#: chose. So "do I have messages waiting" is answerable honestly here, and
-#: "show me my inbox" is a different question with a different cost.
+#: It renders in the nav on ``/feed/``, an already-allowed read surface, so
+#: reading it needs no boundary change and opens NOBODY'S conversation.
+#:
+#: **NEW IS NOT UNREAD, AND THIS FIELD SHIPPED CALLING IT UNREAD.** Measured
+#: 2026-08-26 with a genuinely unread recruiter InMail on screen: the badge
+#: read 0. The two quantities differ because the badge counts
+#: NEW-SINCE-LAST-VISIT and RESETS WHEN THE MESSAGING TAB IS OPENED -- so
+#: sitting in Messaging zeroes it while every conversation there stays
+#: unread. It answers "has anything arrived since I last looked", which is a
+#: real question and not the one the old name asked.
 _MESSAGING_BADGE = re.compile(
     r'aria-label="Messaging,\s*([\d,]+)\s+new notification', re.I
 )
 
 
 def messaging_badge(html: str) -> dict[str, Any]:
-    """How many unread message threads the nav badge claims. Three outcomes.
+    """How many messages arrived SINCE HE LAST OPENED MESSAGING. Not unread.
 
-    ZERO IS A REAL ANSWER AND IS NOT THE SAME AS UNREADABLE, which is the
-    whole reason this returns a dict rather than an int. A badge reading 0 and
-    a badge that never rendered look identical to any caller that collapses
-    them, and this package has already been bitten once by exactly that: two
-    separate attempts to measure whether reading a thread marks it read were
-    INCONCLUSIVE because the badge was at 0 and so had nowhere to fall from --
-    a check that cannot fail. A reader that reported ``0`` for both would have
-    turned those into false clean runs.
+    THE DISTINCTION IS THE WHOLE POINT AND IT COST A WRONG ANSWER. This
+    shipped returning ``unread``, and with an unread recruiter InMail visibly
+    on screen it returned 0 -- because the badge had already reset when he
+    opened the Messaging tab. A true statement ("the badge reads 0") wearing a
+    false one ("you have no unread messages").
+
+    THE DOCSTRING WAS ALREADY HONEST AND IT DID NOT HELP. It said "0 new" in
+    the reason text, and the reviewer still read ``unread: 0`` as "nothing
+    waiting" -- which is what any caller would do. **A field name is read far
+    more often than the prose beside it**, so the fix had to be the name.
+
+    ZERO IS A REAL ANSWER AND IS NOT THE SAME AS UNREADABLE, which is why this
+    returns a dict rather than an int. A badge reading 0 and a badge that
+    never rendered look identical to a caller that collapses them, and this
+    package has already been bitten by exactly that: two attempts to measure
+    whether reading a thread marks it read were INCONCLUSIVE because the badge
+    sat at 0 with nowhere to fall -- a check that could not fail.
     """
     match = _MESSAGING_BADGE.search(html or "")
     if not match:
         return {
-            "unread": None,
+            "new_since_last_visit": None,
             "state": "unreadable",
             "why": (
                 "no messaging badge rendered in the global nav. That is NOT "
@@ -1242,12 +1254,12 @@ def messaging_badge(html: str) -> dict[str, Any]:
         count = int(raw)
     except ValueError:  # pragma: no cover - defensive
         return {
-            "unread": None,
+            "new_since_last_visit": None,
             "state": "unreadable",
             "why": f"the badge read {raw!r}, which is not a number.",
         }
     return {
-        "unread": count,
+        "new_since_last_visit": count,
         "state": "read",
         "why": (
             f"LinkedIn's own global-nav badge reads {count} new. Read off "

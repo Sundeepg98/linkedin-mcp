@@ -1,4 +1,12 @@
-"""The unread-message badge: zero and unreadable are different answers.
+"""The messaging badge: NEW is not UNREAD, and zero is not unreadable.
+
+THE FIELD SHIPPED CALLED "unread" AND THAT WAS WRONG. Measured 2026-08-26
+with a genuinely unread recruiter InMail on screen, the badge read 0 -- it
+counts NEW-SINCE-LAST-VISIT and RESETS when the Messaging tab is opened, so
+sitting in Messaging zeroes it while every conversation stays unread. The
+docstring beside the field was already honest and it did not help: a reviewer
+still read "unread: 0" as "nothing waiting", which is what any caller would
+do. A FIELD NAME IS READ FAR MORE OFTEN THAN THE PROSE BESIDE IT.
 
 WHY THIS READER EXISTS AT ALL. "Check my messages" splits into two questions
 with very different costs. *Do I have messages waiting* is answerable off the
@@ -35,7 +43,7 @@ BADGE = 'aria-label="Messaging, {} new notifications"'
 )
 def test_a_rendered_badge_is_read_as_its_number(rendered, expected):
     verdict = shape.messaging_badge(f"<nav>{rendered}</nav>")
-    assert verdict["unread"] == expected
+    assert verdict["new_since_last_visit"] == expected
     assert verdict["state"] == "read"
 
 
@@ -43,7 +51,7 @@ def test_zero_is_a_read_answer_and_not_an_unreadable_one():
     """The distinction the whole reader exists for."""
     verdict = shape.messaging_badge(f"<nav>{BADGE.format('0')}</nav>")
     assert verdict["state"] == "read"
-    assert verdict["unread"] == 0
+    assert verdict["new_since_last_visit"] == 0
 
 
 @pytest.mark.parametrize(
@@ -65,7 +73,7 @@ def test_an_absent_badge_is_unreadable_and_never_zero(html):
     worse than one that declines.
     """
     verdict = shape.messaging_badge(html)
-    assert verdict["unread"] is None
+    assert verdict["new_since_last_visit"] is None
     assert verdict["state"] == "unreadable"
     assert verdict["why"]
 

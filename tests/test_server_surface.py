@@ -109,13 +109,14 @@ EXPECTED_TOOLS = {
     "linkedin_unsave_job",
     # The third, 2026-08-24.
     "linkedin_unfollow_company",
-    # A READ, added 2026-08-25, and it is the reason the read count moves off
-    # fourteen for the first time in three waves. It answers "do I have
-    # messages waiting" off the global-nav badge on /feed/ -- a surface
-    # already loaded -- which opens nobody's conversation. It is deliberately
-    # NOT an inbox reader: /messaging/ does not stay on an inbox, it redirects
-    # into one thread LinkedIn picks.
-    "linkedin_unread_messages",
+    # A READ, added 2026-08-25 and RENAMED 2026-08-26. It shipped as
+    # linkedin_unread_messages, which was a false heading over a true number:
+    # the nav badge counts NEW-SINCE-LAST-VISIT and resets when the Messaging
+    # tab is opened, so it read 0 with an unread recruiter InMail on screen.
+    # The old name is GONE rather than aliased -- a deprecated alias is right
+    # for a name that merely got better, and wrong for one that asserted
+    # something false.
+    "linkedin_new_messages",
     # The fourth WRITE, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
     # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
     # specced and registers NO TOOL, because its flow has never been captured
