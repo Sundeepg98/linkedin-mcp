@@ -1700,50 +1700,153 @@ async def linkedin_server_info() -> dict[str, Any]:
             # unexamined gap is to add it here rather than to dress it as a
             # decision -- an empty category is cheap, and the alternative is
             # the failure this taxonomy exists to prevent.
-            "out_of_scope_by_design": [
-                "POLICY: collecting data about other members",
-                "POLICY: posting, liking, commenting, endorsing, recommending",
-                "POLICY: sending messages, InMail or connection invitations "
-                "-- a message in your name that you did not read is a message "
-                "from a stranger wearing your face",
-                "POLICY: withdrawing or deleting anything, at any confirm "
-                "level",
-                "POLICY: applying through an off-site applicant-tracking "
-                "system. Half of all postings apply there rather than on "
-                "LinkedIn, and driving somebody else's form on somebody "
-                "else's domain is not this server's to do",
-                "MEASURED: submitting a LinkedIn-hosted application. The apply "
-                "CONTROL is read and reported -- see apply_path on "
-                "linkedin_job_detail, which tells you which of the two routes "
-                "a posting uses and, for the off-site route, whose site it "
-                "would send you to. The apply FLOW has never been captured, "
-                "so there is no form and no submit control this server has "
-                "seen. An application also cannot be undone from here",
-                "MEASURED: following a company. Specced and gated; not "
-                "performed, because the unfollow cannot be aimed at what a "
-                "follow would create",
-                "MEASURED: profile edits and Open To Work. The setting is "
-                "READ and reported; its editor has no url and opens as a modal "
-                "whose first reveal is also its first chance to change "
-                "something",
-                "MEASURED: marking notifications read. There is no control for "
-                "it on the surface, no notification carries an id to aim one "
-                "at, and opening the page already clears the badge -- so a "
-                "write here could only run after its own effect had landed",
-                "MEASURED: READING your own message inbox. The forbidden-list "
-                "entry was written for SENDING and never argued for reading, "
-                "so reading was measured on 2026-08-24 -- and the measurement "
-                "argues for keeping the block rather than lifting it. Asking "
-                "for /messaging/ does not land on the inbox: LinkedIn "
-                "redirects it to one specific conversation thread. So a tool "
-                "called 'read my inbox' would not return an inbox, it would "
-                "open somebody's conversation, on every call. Reading itself "
-                "works and puts no send control on the page (zero "
-                "contenteditable nodes, zero send controls, zero forms). The "
-                "one thing still open is narrow: whether opening a thread "
-                "clears its unread state, which could not be measured because "
-                "the unread badge was already at zero and so had nowhere to "
-                "fall from. scripts/_probe_messaging.py re-takes it",
+            # FOUR FIELDS, NOT ONE, FROM 2026-08-25, and the operator is the
+            # reason. He said, of the single list this replaces:
+            #
+            #   "If something is not technically possible, then refusing it is
+            #    a different story. If something is technically possible and
+            #    still you are refusing it, I don't know why."
+            #
+            # He was right, and the old list could not answer him: a wall and a
+            # decision sat in the same bucket wearing the same label, so the
+            # only way to tell them apart was to go and read the audit
+            # documents. That is not a thing a caller should have to do.
+            #
+            # So the kinds are now SEPARATE KEYS rather than prefixes on one
+            # list, because a prefix is easy to skim past and a field name is
+            # not. The full classification, with the measurement behind every
+            # entry, is _audit/2026-08-25-cannot-vs-will-not.md.
+            #
+            # APPLYING HIS RULING SHRANK THE POLICY LIST FROM FIVE ENTRIES TO
+            # TWO, and that is the substantive change rather than the renaming.
+            # Posting, liking, commenting, messaging, InMail, invitations and
+            # withdrawing were all filed as POLICY. They are not policy. They
+            # are things he might want to do with his own account, refused on
+            # somebody else's judgement about his job search -- which is
+            # exactly what he objected to. They moved to not_yet_measured,
+            # because nobody has looked at any of them.
+            #
+            # What stayed under policy is the pair that protects SOMEBODY OTHER
+            # THAN HIM. That is the whole test, and it is why those two are not
+            # his to overrule.
+
+            # Measured, and the measurement shows there is nothing to drive.
+            # The only honest permanent refusals, each stating the measurement
+            # rather than the decision.
+            "cannot_be_done": [
+                "MARKING NOTIFICATIONS READ. 34 activatable controls were "
+                "enumerated on the notifications surface and not one of them "
+                "names read, unread, seen or a badge; the 14 menu items were "
+                "fully enumerated and none changes read state; and no "
+                "notification carries a per-item id, so there would be nothing "
+                "to aim an action at even if a control existed. LinkedIn marks "
+                "the list seen SERVER-SIDE when the page is served. There is "
+                "no control and no target. AND THE THING YOU ACTUALLY WANT "
+                "ALREADY HAPPENS: the badge clears when the page is read, "
+                "which linkedin_notifications does. This is not a withheld "
+                "feature, it is an automatic one."
+            ],
+
+            # Measured POSSIBLE, and not performed anyway. THIS FIELD IS MEANT
+            # TO BE EMPTY. Every entry needs a named human reason, and "the
+            # server would rather not" is not one -- it is his account. Both
+            # entries below are pending wiring, not standing refusals.
+            "can_be_done_and_is_refused": [
+                "APPLYING to a LinkedIn-hosted posting. Measured 2026-08-24: "
+                "the flow is ONE screen carrying an enabled 'Submit "
+                "application' control and no Next, so it is drivable. NOT A "
+                "REFUSAL ANY MORE -- the operator has ruled it should be "
+                "built, and it is pending wiring behind the confirm gate.",
+                "READING the message inbox. Measured 2026-08-24: it renders, "
+                "the conversation list is enumerable, no auth wall. Pending "
+                "wiring. The COST is documented rather than hidden: asking for "
+                "/messaging/ does not stay on the inbox, LinkedIn redirects it "
+                "into one specific conversation thread.",
+            ],
+
+            # Nobody has looked. Kept apart from both of the above, because an
+            # unexamined gap presented as a decision is the exact claim this
+            # server had to retract about its own write path -- and filing it
+            # as "possible, refused by choice" would be the same error pointing
+            # the other way. Each entry names what would settle it. This list
+            # is meant to EMPTY, not to sit.
+            "not_yet_measured": [
+                "SENDING a message or InMail -- no capture of a compose "
+                "surface exists. Blocked on measurement, not on choice.",
+                "SENDING a connection invitation -- no capture of an invite "
+                "control exists either. Both this and InMail need one profile "
+                "loaded to measure the control, which touches the policy line "
+                "below; the resolution is that a recipient is always supplied "
+                "by the caller and never discovered by the server.",
+                "SETTING Open To Work. 237 urls and 37 payload paths across "
+                "five profile captures, zero of which reach an editor -- but "
+                "that proves it is not reachable BY NAVIGATION, not that it "
+                "cannot be done. It opens as a modal, and modals open by "
+                "clicking. The OTW census already nominates the safe first "
+                "click: a Show details control whose action list holds one "
+                "Navigate and no ServerRequest. Note this is the one setting "
+                "here a current employer can see, which argues for a loud gate "
+                "rather than for refusing.",
+                "FOLLOWING a company. The obstacle is measured and the "
+                "solution is not: a posting names its employer by SLUG, the "
+                "follow surface addresses rows by NUMERIC id, and nothing "
+                "measured resolves one to the other. Solvable engineering.",
+                "EDITING other profile fields. Settle it the same way "
+                "Open To Work will be settled, on the same page: load "
+                "/in/<his handle>/ and enumerate every control whose "
+                "action opens an editor, recording for each whether it "
+                "carries a url or only a modal. The OTW census already "
+                "did this for one setting; nobody widened it.",
+                "CHANGING account settings. /settings/ is on the "
+                "forbidden substring list and has never been loaded, so "
+                "nothing is known about it -- not which settings are "
+                "url-addressed, not which are modal, not which are "
+                "visible to anyone else. Settle it by loading the "
+                "settings index read-only and enumerating its sections.",
+                "WITHDRAWING an application. A real LinkedIn feature, and "
+                "the one that would most change how safe applying is -- "
+                "an apply that can be undone is a different risk from one "
+                "that cannot. Settle it on /jobs-tracker/?stage=applied, "
+                "by enumerating the controls on an applied row. Note that "
+                "tab currently reads zero, so a measurement needs an "
+                "application to exist first.",
+                "POSTING or sharing an update. Settle it by enumerating "
+                "the composer controls on /feed/, which this server "
+                "already loads as a corroborating auth check and has "
+                "never read for this purpose.",
+                "COMMENTING on a post. Needs one post rendered to "
+                "enumerate its comment control. A comment is public and "
+                "attributed to him, so if it is ever built the preview "
+                "must show the exact text before anything is posted.",
+                "LIKING or reacting to a post. Same surface as commenting "
+                "and settled by the same capture. Cheaper to build than "
+                "commenting because there is no free text to preview, and "
+                "it is reversible, which almost nothing else here is.",
+                "ENDORSING a member's skill. Never looked for, and it "
+                "needs one profile loaded to enumerate the control. This "
+                "one WRITES TO A THIRD PARTY'S PROFILE rather than to "
+                "his, so the policy line below governs whether it may be "
+                "built at all -- that is a different question from "
+                "whether it is possible, and it is not settled by "
+                "measuring.",
+            ],
+
+            # Possible, and refused anyway. TWO ENTRIES, and what they share is
+            # the only thing that earns a place here: each protects somebody
+            # who is not the operator. That is why these are not his to
+            # overrule, and each entry says who it protects.
+            "refused_as_policy": [
+                "COLLECTING DATA ABOUT OTHER MEMBERS. Protects: the members "
+                "whose data it would be. This is the one refusal on this "
+                "server that is not the operator's to lift, because the person "
+                "it protects is not him. A tool may act on ONE person he "
+                "names; it may not discover, search, enumerate or scrape "
+                "people.",
+                "DRIVING AN OFF-SITE APPLICANT-TRACKING SYSTEM. Protects: the "
+                "third party whose form and domain it is. linkedin_job_detail "
+                "already reports apply_path and names the destination host, so "
+                "a caller learns where the application would go; reporting and "
+                "stopping is the behaviour, and it is not a gap.",
             ],
             "known_side_effects": [
                 "opening the notifications page clears the unread badge",

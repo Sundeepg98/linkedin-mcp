@@ -494,90 +494,120 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     assert not_performed["follow_company"]["can_hold_a_grant"] is True
 
 
-async def test_no_stale_entry_survives_on_the_out_of_scope_list():
-    """A stale entry on this list is a lie a caller acts on.
+async def test_each_kind_of_refusal_is_reported_in_its_own_field():
+    """A wall and a decision may not share a bucket.
 
-    REWRITTEN 2026-08-24, and the rewrite is the point. This test used to
-    assert the literal phrase "applying to jobs", which had exactly the wrong
-    effect the moment applying was examined: it pinned the SHAPE of a refusal
-    rather than its truth, so the honest new entry -- which distinguishes the
-    measured apply control from the uncaptured apply flow -- failed a test
-    whose job was to stop the list going stale.
+    REWRITTEN 2026-08-25, on the operator's instruction, and the rewrite is
+    the point twice over.
 
-    So it asserts the two properties that actually matter and neither of them
-    is a phrase. First, nothing on the list is contradicted by what the server
-    reports elsewhere. Second, EVERY entry declares which KIND of no it is,
-    because "we refuse this on principle", "we measured it and it will not
-    work", and "nobody has looked" are three different statements and a list
-    that flattens them is how an unexamined gap comes to read as a design
-    decision. That is the exact claim this server had to retract about its own
-    write path across four documents.
+    WHAT HE SAID: "If something is not technically possible, then refusing it
+    is a different story. If something is technically possible and still you
+    are refusing it, I don't know why." The single list this replaces could
+    not answer that -- three kinds of no wore three prefixes on one list, and
+    a prefix is easy to skim past.
+
+    So the KIND IS NOW THE FIELD NAME, and this test no longer has to police
+    labels at all. That whole job disappeared into the data structure, which
+    is why the two assertions that kept breaking are gone rather than fixed
+    again. Their history is worth keeping though, because they failed the same
+    way twice: one required all three labels to be present, so measuring the
+    last unexamined gap broke the suite for the offence of the list becoming
+    MORE honest; the other checked each entry's label against a set built from
+    those same entries, so it was true by construction and could not fail for
+    any input at all.
+
+    What is asserted now is what each FIELD has to prove about itself.
     """
     from linkedin_server.server import linkedin_server_info
 
     info = await linkedin_server_info()
-    entries = info["out_of_scope_by_design"]
-    scope = " ".join(entries)
+
+    fields = (
+        "cannot_be_done",
+        "can_be_done_and_is_refused",
+        "not_yet_measured",
+        "refused_as_policy",
+    )
+    for field in fields:
+        assert field in info, f"{field} is missing from server_info"
+        assert isinstance(info[field], list), field
+
+    # The old single field is GONE, not deprecated. A caller who still reads it
+    # gets a KeyError rather than a silently stale list, which is the failure
+    # mode this whole change exists to remove.
+    assert "out_of_scope_by_design" not in info
+
+    everything = " ".join(sum((info[f] for f in fields), []))
 
     # The things this server DOES do may not appear as things it does not.
-    assert "saving or unsaving jobs" not in scope
     for performed in info["writes_available"] or info["writes_sanctioned"]:
-        assert f"{performed}:" not in scope, performed
+        assert f"{performed}:" not in everything, performed
 
-    # Every entry is classified with a KNOWN label, and more than one label is
-    # in play -- a list where every entry wore the same one would pass a "has a
-    # label" check while carrying no information.
-    #
-    # AMENDED 2026-08-24, and for the second time this test has made the same
-    # mistake in a new costume. It previously required the set of labels to
-    # equal all three, which made "UNMEASURED must appear" an invariant -- so
-    # the moment the last unexamined gap was actually measured (inbox reading),
-    # this test failed for the offence of the list becoming MORE honest. That
-    # is the same defect the docstring above describes: pinning the shape of
-    # the list rather than the property that makes it worth having. An empty
-    # UNMEASURED category is a legitimate and good state, and a test may not
-    # demand that an unexamined gap exist forever.
-    #
-    # The second loop below was also replaced. It asserted that each entry's
-    # label was in `classes` -- a set built from those same entries one line
-    # earlier -- so it was TRUE BY CONSTRUCTION and could not fail for any
-    # input whatsoever, including an entry labelled "BANANA". It now checks
-    # against the known vocabulary, which is what it was always meant to say.
-    known = {"POLICY", "MEASURED", "UNMEASURED"}
-    classes = {entry.split(":", 1)[0] for entry in entries}
-    assert classes <= known, f"unknown label(s): {classes - known}"
-    assert len(classes) > 1, f"every entry wears the same label: {classes}"
-    for entry in entries:
-        assert entry.split(":", 1)[0] in known, entry
+    # CANNOT must carry its MEASUREMENT, not its decision. An entry here claims
+    # the strongest thing this server ever says -- that a capability does not
+    # exist -- so it has to show the counting behind it.
+    assert info["cannot_be_done"], "something is always impossible; say what"
+    for entry in info["cannot_be_done"]:
+        assert any(ch.isdigit() for ch in entry), (
+            "a CANNOT entry must cite the measurement that proves it, not "
+            f"merely assert it: {entry}"
+        )
 
-    # The two refusals most likely to be quietly dropped are still named, by
-    # subject rather than by wording.
-    assert "collecting data about other members" in scope
-    assert "off-site applicant-tracking system" in scope
-    # Following is still refused, and applying is still not performed -- but
-    # neither is claimed to be unexamined any more.
-    assert "following a company" in scope
-    assert "submitting a LinkedIn-hosted application" in scope
+    # NOT-YET-MEASURED must say what would settle it. An honest "nobody has
+    # looked" that does not say how to look is a nicer-sounding excuse.
+    #
+    # THIS IS A STUB FLOOR, NOT A SEMANTIC CHECK, and saying so is the point:
+    # a length bound cannot tell whether an entry names its instrument, and a
+    # sixty-one character entry saying nothing would sail through. What it DOES
+    # catch is the one-line back-reference, which is the real failure mode here
+    # -- it caught "SENDING a connection invitation -- same missing surface",
+    # an entry that only meant anything if you had just read the one above it.
+    # Entries are read one at a time, out of a json blob, by a model. Each has
+    # to stand alone.
+    for entry in info["not_yet_measured"]:
+        assert len(entry) > 60, f"unmeasured entry is a stub: {entry}"
+        assert not entry.lower().startswith("same "), entry
 
-    # EVERY UNMEASURED ENTRY MUST NAME WHAT WOULD MEASURE IT. An honest "we
-    # have not looked" that does not say how to look is just a nicer-sounding
-    # version of the claim it replaced.
-    #
-    # CONDITIONAL, from 2026-08-24, and for the same reason as the label-set
-    # assertion above: this required EXACTLY ONE unmeasured entry, so measuring
-    # the last one broke it. The requirement was never "an unexamined gap must
-    # exist" -- it was "an unexamined gap must be actionable". Zero of them
-    # satisfies that vacuously and correctly.
-    #
-    # Note what this does NOT do: it does not name _probe_messaging.py. Pinning
-    # the instrument for a specific entry is what made this assertion die when
-    # that entry graduated. Any entry claiming nobody has looked must point at
-    # something runnable; which script that is, is not this test's business.
-    unmeasured = [e for e in entries if e.startswith("UNMEASURED")]
-    for entry in unmeasured:
-        assert ".py" in entry or "scripts/" in entry, (
-            "an UNMEASURED refusal must name the instrument that would settle "
-            f"it, otherwise it is an excuse rather than a gap: {entry}"
+    # POLICY must name WHO IT PROTECTS. That is the entire test for belonging
+    # here: these are the refusals that are not the operator's to lift, and the
+    # only thing that earns that status is protecting somebody who is not him.
+    assert info["refused_as_policy"], "policy refusals may not silently vanish"
+    for entry in info["refused_as_policy"]:
+        assert "Protects:" in entry, (
+            "a policy refusal must name who it protects, otherwise it is a "
+            f"preference wearing a policy label: {entry}"
+        )
+
+    # The two most likely to be quietly dropped, named by subject.
+    policy = " ".join(info["refused_as_policy"])
+    assert "OTHER MEMBERS" in policy
+    assert "APPLICANT-TRACKING SYSTEM" in policy
+
+
+async def test_the_refused_by_choice_field_is_the_one_that_should_empty():
+    """The operator's field, and it is meant to shrink to nothing.
+
+    ``can_be_done_and_is_refused`` is the only field on this server that is a
+    standing embarrassment by design: every entry is something measured to
+    WORK that is not being done anyway. His ruling was that this list should
+    not exist, so the test asserts the property that makes each entry
+    accountable rather than asserting a count -- pinning a count is what made
+    two earlier versions of this test break when the list got better.
+
+    An entry must say WHY, in words a person chose. "The server would rather
+    not" is not a reason; it is his account.
+    """
+    from linkedin_server.server import linkedin_server_info
+
+    info = await linkedin_server_info()
+    for entry in info["can_be_done_and_is_refused"]:
+        assert "Measured" in entry or "measured" in entry, (
+            "an entry here claims something WORKS and is refused anyway, so it "
+            f"must cite the measurement that established it works: {entry}"
+        )
+        assert "pending" in entry.lower() or "because" in entry.lower(), (
+            "an entry here must say why it is not done -- a status or a "
+            f"reason, never a bare refusal: {entry}"
         )
 
 
