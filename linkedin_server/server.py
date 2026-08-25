@@ -1863,13 +1863,24 @@ async def linkedin_server_info() -> dict[str, Any]:
                 # field is for. Its entry named something measured to work
                 # that was not being done, and the answer to an entry here is
                 # to build it rather than to justify it. linkedin_apply_job
-                # now ships, gated, and the list got shorter by one.
-                "READING the message inbox. Measured 2026-08-24: it renders, "
-                "the conversation list is enumerable, no auth wall. Pending "
-                "wiring. The COST is documented rather than hidden: asking for "
-                "/messaging/ does not stay on the inbox, LinkedIn redirects it "
-                "into one specific conversation thread, so a 'read' opens "
-                "somebody's conversation on every call.",
+                # now ships, gated.
+                #
+                # READING THE INBOX left it the same day, but the other way:
+                # it was RECLASSIFIED to refused_as_policy rather than built.
+                # The sentence above still holds -- an entry here gets built,
+                # not justified -- which is exactly why that one could not
+                # stay. See refused_as_policy for the reasoning; the short
+                # version is that the caller does not choose whose
+                # conversation opens, so the cost lands on a third party.
+                "READING THE UNREAD MESSAGE COUNT. Measured 2026-08-24: the "
+                "messaging badge renders in the global nav on /feed/, which "
+                "is ALREADY an allowed read surface -- so this needs no "
+                "boundary change, opens nobody's conversation, and costs "
+                "nothing. It is the part of 'check my messages' that can be "
+                "answered honestly. Pending wiring, and pending a live "
+                "session to verify it against: the profile's session lapsed "
+                "on 2026-08-25 and shipping a reader that has never been run "
+                "against the real surface is how selectors get guessed.",
             ],
 
             # Nobody has looked. Kept apart from both of the above, because an
@@ -1950,6 +1961,24 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "it protects is not him. A tool may act on ONE person he "
                 "names; it may not discover, search, enumerate or scrape "
                 "people.",
+                "READING THE MESSAGE INBOX. Protects: the correspondent whose "
+                "conversation gets opened. This was filed as a capability gap "
+                "until 2026-08-25 and the reclassification is the honest "
+                "outcome, not a way of retiring it. THE MEASUREMENT: asking "
+                "for /messaging/ does not stay on an inbox. LinkedIn "
+                "redirects it into ONE SPECIFIC CONVERSATION THREAD, and the "
+                "caller does not choose which -- LinkedIn does. So a tool "
+                "named 'read my inbox' would not return an inbox; it would "
+                "open a named person's conversation, on every call, chosen by "
+                "somebody other than the person calling it. That cost lands "
+                "on a third party, which is the whole test for this list. "
+                "WHAT IS NOT CLAIMED: whether opening a thread sends that "
+                "person a read receipt is UNMEASURED -- it would make this "
+                "worse, and the refusal does not rest on it. Two attempts to "
+                "settle it failed because the unread badge was already at "
+                "zero and so had nowhere to fall from. "
+                "WHAT REMAINS AVAILABLE: the unread COUNT, off the feed, "
+                "which opens nothing -- see can_be_done_and_is_refused.",
                 "DRIVING AN OFF-SITE APPLICANT-TRACKING SYSTEM. Protects: the "
                 "third party whose form and domain it is. linkedin_job_detail "
                 "already reports apply_path and names the destination host, so "

@@ -46,10 +46,21 @@ features. `action=` is a guard and is not counted as a capability.
 | bucket | count |
 |---|---|
 | **CANNOT** -- proven impossible | **1** |
-| **CAN** -- measured possible | **5** (3 shipped, 2 measured and not yet built) |
+| **CAN** -- measured possible | **5** (**4 shipped**, 1 measured and not yet built) |
 | **UNMEASURED** | **11** |
-| **POLICY** -- possible, refused to protect third parties | **2** |
-| total | **19** |
+| **POLICY** -- possible, refused to protect third parties | **3** |
+| total | **20** |
+
+**UPDATED 2026-08-25 (second revision).** Two things moved and the total grew
+by one because a capability SPLIT:
+
+- **apply SHIPPED** -- `linkedin_apply_job` is a registered, gated tool. It
+  left `can_be_done_and_is_refused`, which is what that field is for.
+- **reading the inbox moved to POLICY** and did not get built. See 5.3.
+- **reading the unread COUNT is a new CAN**, and it is the half of "check my
+  messages" that survives: the badge renders on `/feed/`, already an allowed
+  surface, so it opens nobody's conversation and needs no boundary change.
+  One capability turned out to be two, which is why 19 became 20.
 
 **Exactly ONE refusal in this entire server is proven impossible.** That is the
 headline, and it vindicates the operator's suspicion more sharply than a
@@ -89,11 +100,20 @@ say that, instead of sitting in a refusal list looking like a withheld thing.
 | save a job | **SHIPPED**, gated | performable |
 | unsave a job | **SHIPPED**, gated | performable |
 | unfollow a company | **SHIPPED**, gated | performable |
-| **apply to a LinkedIn-hosted posting** | **measured possible, NOT built** | one screen, one `Submit application`, enabled on arrival, stable test hook |
-| **read the message inbox** | **measured possible, NOT built** | renders, 10-11 conversations enumerable, no auth wall |
+| **apply to a LinkedIn-hosted posting** | **SHIPPED 2026-08-25**, gated | one screen, one `Submit application`, enabled on arrival, stable test hook |
+| **read the unread message count** | measured possible, NOT built | the badge renders on `/feed/`, already an allowed surface |
 
-The last two are the ones the operator's ruling bites on hardest, because they
-were measured POSSIBLE and then refused anyway -- by me, in writing, yesterday.
+Apply was the entry the operator's ruling bit on hardest -- measured POSSIBLE
+and then refused anyway, by me, in writing. It ships.
+
+The unread count is not a consolation prize for the inbox refusal, it is a
+different capability that happens to answer most of the same question. "Do I
+have messages waiting" is answerable at zero cost off a surface this server
+already loads. "Show me my inbox" is not -- see 5.3.
+
+It is NOT built yet for a reason that is about verification rather than
+scope: the profile's session lapsed on 2026-08-25, and a reader that has
+never been run against the live surface is how selectors get guessed.
 
 ---
 
@@ -147,7 +167,7 @@ employer can see.** That argues for the gate being loud, not for refusing.
 
 ---
 
-## 5. POLICY -- 2 items, and these stay
+## 5. POLICY -- 3 items, and these stay
 
 Possible, and refused anyway. Both protect somebody other than him, which is
 what distinguishes them from everything above.
@@ -157,6 +177,42 @@ what distinguishes them from everything above.
 2. **Driving an off-site applicant-tracking system.** A third party's form on a
    third party's domain. `apply_path` already reports the route and names the
    destination host; reporting and stopping is the correct behaviour.
+
+### 5.3 Reading the message inbox -- RECLASSIFIED here 2026-08-25
+
+**It was in CAN, measured possible and unbuilt, which under this document's
+own rule meant "build it rather than justify it". It could not stay there, and
+it did not get built. This is the argument for the third option.**
+
+Protects: **the correspondent whose conversation gets opened.**
+
+THE MEASUREMENT, and it is the whole case: asking for `/messaging/` does not
+stay on an inbox. LinkedIn redirects it into ONE SPECIFIC CONVERSATION THREAD
+-- verified twice, on two runs by two different actors. **And the caller does
+not choose which. LinkedIn does.**
+
+So a tool named `linkedin_read_inbox` would not return an inbox. It would open
+a named person's conversation, on every call, selected by somebody other than
+the person calling it. That is a cost landing on a third party, which is the
+only test for belonging on this list -- the same test that keeps
+member-data collection here and that let posting, liking, InMail and
+invitations OFF it.
+
+**Why this is not the convenient answer.** The obvious objection is that an
+inbox is his own correspondence, so no third party is involved and this fails
+the test. That objection is right about the INBOX and wrong about what
+`/messaging/` actually does. If the surface returned a list, this would be a
+CAN and it would get built. It returns a thread.
+
+**WHAT IS NOT CLAIMED.** Whether opening a thread sends that person a READ
+RECEIPT is **UNMEASURED**. It would make this materially worse and it is the
+first thing to establish if anyone reopens the question -- but the refusal
+does not rest on it, and stating it as though it were measured would be the
+same error this document exists to correct. Two attempts to settle it failed
+because the unread badge was already at zero and had nowhere to fall from.
+
+**WHAT SURVIVES.** The unread COUNT, read off `/feed/` -- an already-allowed
+surface, no boundary change, nobody's conversation opened. Section 3.
 
 ---
 
