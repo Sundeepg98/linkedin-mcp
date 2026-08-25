@@ -506,7 +506,19 @@ async def test_session_info_says_the_login_outlives_a_restart(patched_navigation
     assert info["durability"]["survives_server_restart"] is True
     assert info["durability"]["survives_machine_reboot"] is True
     assert "chrome-profile" in info["durability"]["stored_in"].lower()
-    assert "linkedin_login_browser" in info["on_expiry"]
+    # THE NAME MOVED ON 2026-08-25 and this line used to read
+    # ``"linkedin_login_browser" in info["on_expiry"]``. The login tool is now
+    # spelled ``linkedin_login``, matching its three sibling servers, and the
+    # old spelling survives as a registered deprecated alias -- but the way
+    # BACK that a lapsed session prints has to name the canonical one, or it
+    # teaches every reader the name being retired.
+    #
+    # Both halves, because the old name CONTAINS the new one: a lone
+    # ``"linkedin_login" in ...`` would still pass against the old string, so
+    # repointing the positive check alone would have quietly turned this into
+    # an assertion that cannot tell the two spellings apart.
+    assert "linkedin_login" in info["on_expiry"]
+    assert "linkedin_login_browser" not in info["on_expiry"]
 
 
 async def test_session_info_reports_a_missing_login_as_missing(patched_navigation):

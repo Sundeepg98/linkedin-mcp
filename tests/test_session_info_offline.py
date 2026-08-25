@@ -225,7 +225,16 @@ def test_the_durability_block_survives_the_offline_path(tmp_path):
     )
     assert info["durability"]["survives_server_restart"] is True
     assert info["durability"]["survives_machine_reboot"] is True
-    assert "linkedin_login_browser" in info["on_expiry"]
+    # Repointed 2026-08-25, from ``linkedin_login_browser`` to the canonical
+    # ``linkedin_login``; the old spelling is now a registered deprecated
+    # alias. The negative half is not decoration: the retired name contains
+    # the new one, so the positive check alone would pass on either string and
+    # would no longer be measuring which name the fallback path prints. Both
+    # paths render the same ``ON_EXPIRY`` constant, which is why the same pair
+    # is asserted in ``test_auth.py`` -- two spellings here would mean the two
+    # paths had drifted.
+    assert "linkedin_login" in info["on_expiry"]
+    assert "linkedin_login_browser" not in info["on_expiry"]
 
 
 # ---------------------------------------------------------------------------

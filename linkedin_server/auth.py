@@ -293,7 +293,7 @@ async def check_auth(
             **base,
             "reason": (
                 "LinkedIn refused the identity call, so there is no live "
-                "session. Call linkedin_login_browser and sign in yourself in "
+                "session. Call linkedin_login and sign in yourself in "
                 "the window it opens."
                 + (
                     " A li_at cookie is present but it is not a valid session; "
@@ -361,7 +361,7 @@ async def _maybe_corroborate(
         result["reason"] = (
             "the identity call was inconclusive, but loading the feed landed on "
             f"{final_url}, which is LinkedIn's signed-out wall. Call "
-            "linkedin_login_browser and sign in yourself."
+            "linkedin_login and sign in yourself."
         )
     return result
 
@@ -559,15 +559,30 @@ def _renewal(credential: dict[str, Any]) -> dict[str, Any]:
     return {
         "silent_renew_available": False,
         "tool": None,
+        # THE ABSENCE, MADE READABLE WITHOUT READING SOURCE. Three sibling
+        # servers ship a reauth and two do not, and until 2026-08-25 a caller
+        # could not tell a PRINCIPLED absence from a missing feature -- both
+        # look like a tool that is not in the list. The reasoning was already
+        # here in `why`, but prose is not something a client can branch on,
+        # and "is there a reauth" is exactly the question a client asks when
+        # a session lapses.
+        #
+        # reauth_absence_is_deliberate is the load-bearing one. A bare false
+        # on silent_renew_available invites somebody to ship the decoy reauth
+        # next quarter -- a tool that calls login and reports success, which
+        # is worse than no tool because it implies a refresh happened.
+        "reauth_tool": None,
+        "reauth_absence_is_deliberate": True,
+        "call_instead": "linkedin_login",
         "why": (
             "there is one credential layer here, so there is nothing a renew "
             f"could refresh. {SESSION_COOKIE} is read live out of the Chrome "
             "profile on every call -- this server keeps no cached copy that "
             "could go stale independently of the profile -- and LinkedIn "
             "issues no refresh token beside it. A linkedin_reauth would "
-            "therefore be linkedin_login_browser wearing a different name, so "
+            "therefore be linkedin_login wearing a different name, so "
             "it is deliberately not shipped. Recovery is "
-            "linkedin_login_browser: it opens a window and waits for the "
+            "linkedin_login: it opens a window and waits for the "
             "operator to sign in himself, and this server never sees, types, "
             "stores or transmits a password."
         ),
@@ -584,7 +599,7 @@ def _renewal(credential: dict[str, Any]) -> dict[str, Any]:
         "mechanism": (
             "none -- there is no renewal mechanism here to describe, which is "
             "why uses_browser is null rather than false. Recovery is not a "
-            "renewal at all: linkedin_login_browser opens a real Chrome "
+            "renewal at all: linkedin_login opens a real Chrome "
             "window and waits for the operator to sign in with his own hands. "
             "That is a HUMAN action, not a background one -- it cannot be "
             "scheduled, it cannot run while he is away from the machine, and "
@@ -642,7 +657,7 @@ COOKIE_IS_NOT_A_SESSION = (
 #: should never have to wonder whether two spellings mean two things.
 ON_EXPIRY = (
     "tools report 'not_authenticated' with the reason, never an empty result. "
-    "Recover by calling linkedin_login_browser and signing in yourself in the "
+    "Recover by calling linkedin_login and signing in yourself in the "
     "window it opens."
 )
 
@@ -845,7 +860,7 @@ LOGOUT_WHAT_IS_LOST = (
 )
 
 #: The way back, BY NAME.
-LOGOUT_RECOVER_BY = "linkedin_login_browser"
+LOGOUT_RECOVER_BY = "linkedin_login"
 
 #: Said on every outcome. A logout that quietly implied it had signed the
 #: operator out of LinkedIn would be describing something this server has no
@@ -1049,7 +1064,7 @@ def assert_not_authwall(final_url: str, *, surface: str) -> None:
         raise NotAuthenticatedError(
             f"loading the {surface} page landed on {final_url}, which is "
             "LinkedIn's signed-out wall -- there is no live session. Call "
-            "linkedin_login_browser and sign in yourself in the window it "
+            "linkedin_login and sign in yourself in the window it "
             "opens."
         )
 
@@ -1062,7 +1077,7 @@ async def require_auth(page: Any) -> dict[str, Any]:
     if status.get("authenticated") is False:
         raise NotAuthenticatedError(
             status.get("reason")
-            or "no live LinkedIn session. Call linkedin_login_browser first."
+            or "no live LinkedIn session. Call linkedin_login first."
         )
     raise AuthUnknownError(
         status.get("reason")

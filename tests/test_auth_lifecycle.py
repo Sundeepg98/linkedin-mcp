@@ -364,6 +364,48 @@ def test_expiry_source_says_why_when_there_is_no_date(tmp_path):
     assert absent["expiry_source"] != unreadable["expiry_source"]
 
 
+def test_the_reauth_absence_is_machine_readable_not_just_prose(tmp_path):
+    """A client should not have to parse English to learn there is no reauth.
+
+    ADDED 2026-08-25, after a review pointed out that the three keys this
+    asserts had shipped with NO test at all -- so ``call_instead`` could have
+    been dropped or reverted and nothing would have gone red. A field added
+    for legibility that nothing guards is a field that quietly stops being
+    true, which is the failure this whole package keeps finding in its own
+    prose.
+
+    WHY THESE KEYS EXIST. Two of the four servers in this family ship a
+    silent renew and two do not. From outside, a principled absence and a
+    missing feature look identical: a tool that is not in the list. The
+    reasoning was already in ``why``, but prose is not something a client can
+    branch on, and "is there a reauth" is precisely the question a client asks
+    at the moment a session lapses.
+
+    ``reauth_absence_is_deliberate`` is the load-bearing one. A bare
+    ``silent_renew_available: false`` invites somebody to ship the decoy
+    reauth next quarter -- a tool that calls login and reports success, which
+    is worse than no tool because it implies a refresh happened that did not.
+    """
+    renewal = auth_module.session_info_offline(
+        healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
+    )["renewal"]
+
+    assert renewal["reauth_tool"] is None
+    assert renewal["reauth_absence_is_deliberate"] is True
+    assert renewal["call_instead"] == "linkedin_login"
+
+    # And the canonical name, not the deprecated alias. Asserted as an
+    # EQUALITY rather than a substring for a reason worth writing down: the
+    # retired spelling ``linkedin_login_browser`` CONTAINS the canonical
+    # ``linkedin_login``, so a substring check here would pass against the
+    # old value and could not fail for the regression it exists to catch.
+    assert renewal["call_instead"] != "linkedin_login_browser"
+
+    # uses_browser stays None, not False. False would characterise a renewal
+    # that does not exist; None says there is nothing here to characterise.
+    assert renewal["uses_browser"] is None
+
+
 def test_renewal_says_there_is_no_silent_renew_and_says_why(tmp_path):
     """The gap has to be stated, not left to be noticed.
 
@@ -381,7 +423,20 @@ def test_renewal_says_there_is_no_silent_renew_and_says_why(tmp_path):
     assert len(renewal["why"]) > 80, renewal["why"]
     # The real reason, not a shrug: one layer, and the recovery path by name.
     assert "one credential layer" in renewal["why"]
-    assert "linkedin_login_browser" in renewal["why"]
+    # THE RECOVERY NAME CHANGED ON 2026-08-25. This asserted
+    # ``linkedin_login_browser``, which was the login tool's only spelling
+    # until the family was made consistent -- the siblings call it
+    # ``naukri_login``, ``instahyre_login`` and ``uplers_login``, and this one
+    # is now ``linkedin_login`` with the old spelling kept as a registered
+    # deprecated alias. What the test holds is unchanged: ``why`` must name the
+    # recovery path, and it must name the one a caller should actually reach
+    # for.
+    #
+    # The negative half exists because the retired name has the new one inside
+    # it. Without it this assertion would pass on the pre-rename string and
+    # would have stopped distinguishing the thing it was repointed to check.
+    assert "linkedin_login" in renewal["why"]
+    assert "linkedin_login_browser" not in renewal["why"]
     assert "linkedin_reauth" in renewal["why"]
 
 
@@ -396,7 +451,10 @@ async def test_the_live_path_carries_renewal_too(patched_navigation):
 
     assert info["renewal"]["silent_renew_available"] is False
     assert info["renewal"]["tool"] is None
-    assert "linkedin_login_browser" in info["renewal"]["why"]
+    # Repointed to the canonical name 2026-08-25; see the test above for why
+    # the absence of the old spelling is asserted rather than assumed.
+    assert "linkedin_login" in info["renewal"]["why"]
+    assert "linkedin_login_browser" not in info["renewal"]["why"]
 
 
 # ---------------------------------------------------------------------------
@@ -560,7 +618,13 @@ def test_the_mechanism_answers_in_its_own_words(tmp_path):
         healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
     )["renewal"]["mechanism"]
 
-    assert "linkedin_login_browser" in mechanism
+    # Canonical name since 2026-08-25, was ``linkedin_login_browser``. The
+    # cross-server comparison this test is about is exactly why the spelling
+    # had to move: a caller reading ``mechanism`` on all four servers now finds
+    # the same ``<platform>_login`` shape on each, instead of three of one kind
+    # and this one wearing a name of its own.
+    assert "linkedin_login" in mechanism
+    assert "linkedin_login_browser" not in mechanism
     assert "HUMAN action" in mechanism
     assert "full day" in mechanism
     assert "never sees, types, stores or transmits" in mechanism
@@ -578,7 +642,10 @@ def test_the_two_new_keys_survive_an_unreadable_jar(tmp_path):
     )["renewal"]
 
     assert renewal["uses_browser"] is None
-    assert "linkedin_login_browser" in renewal["mechanism"]
+    # Canonical name since 2026-08-25; the old spelling is a deprecated alias
+    # and must not be what an unreadable-jar answer sends somebody to.
+    assert "linkedin_login" in renewal["mechanism"]
+    assert "linkedin_login_browser" not in renewal["mechanism"]
 
 
 def test_silent_renew_stays_false_whatever_the_lapse_date_says(tmp_path):
@@ -766,7 +833,10 @@ def test_the_preview_says_what_the_sign_in_cost_and_how_to_get_back(tmp_path):
 
     assert "full day" in preview["cost_to_re_establish"]
     assert "full day" in preview["would_lose"]
-    assert "linkedin_login_browser" in preview["recovery_is_by_hand"]
+    # Canonical name since 2026-08-25. A prompt about to erase a day's work is
+    # the last place to print a name that is on its way out.
+    assert "linkedin_login" in preview["recovery_is_by_hand"]
+    assert "linkedin_login_browser" not in preview["recovery_is_by_hand"]
     assert "himself" in preview["recovery_is_by_hand"]
     assert "confirm=True" in preview["to_proceed"]
 
@@ -810,7 +880,14 @@ def test_an_unconfirmed_logout_does_not_claim_a_verdict(tmp_path):
     assert result["cleared"] is False
     assert result["authenticated"] is None
     assert result["authenticated"] is not False
-    assert result["recover_by"] == "linkedin_login_browser"
+    # ``recover_by`` is a MACHINE-READABLE tool name, not prose, which is what
+    # makes this an equality rather than a substring -- and is why the rename
+    # of 2026-08-25 had to reach it. It read ``linkedin_login_browser`` until
+    # then; that name still resolves, as a registered deprecated alias, but a
+    # field whose whole job is "call this next" has to hand back the canonical
+    # spelling. Unlike the prose assertions in this file, the equality needs no
+    # companion negative: it already fails on the old value.
+    assert result["recover_by"] == "linkedin_login"
 
 
 # ---------------------------------------------------------------------------
@@ -842,7 +919,10 @@ def test_a_confirmed_logout_states_the_scope_the_loss_and_the_way_back(
     assert "-journal" in result["scope"] and "-wal" in result["scope"]
     assert "profile directory itself stays" in result["scope"]
     assert "full day" in result["what_is_lost"]
-    assert result["recover_by"] == "linkedin_login_browser"
+    # Canonical name since 2026-08-25; see the unconfirmed-logout test above.
+    # Both paths read the same ``LOGOUT_RECOVER_BY`` constant, so asserting it
+    # on each is what would catch one of them growing a spelling of its own.
+    assert result["recover_by"] == "linkedin_login"
 
 
 def test_the_false_a_confirmed_logout_returns_is_a_provable_one(
@@ -972,7 +1052,10 @@ def test_a_logout_never_raises_on_a_path_that_is_not_a_profile(
     for target in (tmp_path / "missing", tmp_path):
         result = auth_module.logout(target, confirm=True)
         assert result["cleared"] is False
-        assert result["recover_by"] == "linkedin_login_browser"
+        # Canonical name since 2026-08-25. The way back is asserted on the
+        # FAILING path too, because that is the path where a caller most needs
+        # a name that works.
+        assert result["recover_by"] == "linkedin_login"
 
 
 # ---------------------------------------------------------------------------

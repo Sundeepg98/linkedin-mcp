@@ -771,7 +771,19 @@ async def test_an_auth_wall_bounce_is_not_authenticated_not_an_empty_list(drive,
     result = await _call(AUTHWALL_TOOLS[name])
 
     assert result["error"] == "not_authenticated", result
-    assert "linkedin_login_browser" in result["message"]
+    # THE NAME IN THAT REFUSAL CHANGED ON 2026-08-25, from
+    # ``linkedin_login_browser`` to ``linkedin_login``. The old spelling is
+    # still a registered tool -- a deprecated alias that forwards, covered in
+    # ``test_server_surface.py`` -- so this is not a dead name; it is the wrong
+    # one to print. A refusal is the moment a caller is most likely to copy a
+    # tool name straight out of the message, which is why the six read tools
+    # above are all held to naming the canonical one.
+    #
+    # Asserted in both directions because ``linkedin_login`` is a substring of
+    # ``linkedin_login_browser``: the positive check alone cannot fail on the
+    # pre-rename message and would certify nothing.
+    assert "linkedin_login" in result["message"]
+    assert "linkedin_login_browser" not in result["message"]
     assert AUTHWALL_URL in result["message"]
     assert "results" not in result, "a refusal must not look like a result set"
     assert len(navigations) == 1, "the bounce must stop the call, not retry it"

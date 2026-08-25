@@ -1,24 +1,35 @@
-"""The tool surface: seventeen tools, fourteen of which read LinkedIn.
+"""The tool surface: twenty tools, four of which write to LinkedIn.
 
-THE OTHER THREE WRITE, and this paragraph has now been wrong in both
-directions. Until 2026-08-23 it read *"There is no write path TO LINKEDIN in
-this package"*, which was true and then was not. It was corrected to "sixteen
-tools, two writes" -- and stayed there through the arrival of a third, so for
-a day it understated the surface it exists to describe. ``linkedin_save_job``,
-``linkedin_unsave_job`` and ``linkedin_unfollow_company`` are registered
-below. Counts in this docstring are re-measured per wave, not carried.
+THIS PARAGRAPH HAS NOW BEEN WRONG THREE TIMES, in both directions, and the
+count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
+write path TO LINKEDIN in this package"* -- true, then not. It was corrected
+to "sixteen tools, two writes", stayed there through the arrival of a third,
+and then said "seventeen tools, fourteen reads, THE OTHER THREE WRITE" while
+the live surface was twenty and four.
+
+It carried the sentence *"Counts in this docstring are re-measured per wave,
+not carried"* through every one of those. A docstring that states its own
+discipline and then breaks it is worse than one that never claimed the
+discipline, because a reader trusts it more. **The counts here are prose and
+nothing tests them** -- ``tests/test_server_surface.py`` pins the real
+numbers, and that file is the one to believe when the two disagree.
+
+The four writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
+``linkedin_unfollow_company`` and ``linkedin_apply_job``, all registered
+below and all behind the same two-call gate.
 
 What remains true, and is what ``readonly.py`` still enforces against this
 file:
 
-* Nothing here applies to a job, sends a message, edits the profile, toggles
+* Nothing here sends a message, edits the profile, toggles
   Open To Work, follows a company, or marks anything read on purpose.
 * The package contains exactly ONE mutating call, in ``writes.perform``,
   admitted by path and function and kind in ``readonly.SANCTIONED_MUTATIONS``.
   A second one anywhere fails ``tests/test_readonly.py``.
-* Both write tools perform NOTHING without a single-use token from their own
+* EVERY write tool performs NOTHING without a single-use token from its own
   preview, and nothing at all unless the process was started with writes
-  deliberately enabled.
+  deliberately enabled. (This said "Both write tools" while there were four
+  of them -- the same carried-count rot as the headline.)
 * ``linkedin_unsave_job`` is registered and refuses: the selector it would
   need has never been measured. See its docstring.
 
@@ -147,7 +158,7 @@ mcp = FastMCP(
         "Following a company is sanctioned but not performed: the unfollow "
         "cannot be aimed at what a follow would create. "
         "Start with linkedin_auth_status; if it says false, the operator must "
-        "call linkedin_login_browser and sign in himself in the window it "
+        "call linkedin_login and sign in himself in the window it "
         "opens -- this server never handles a password. That sign-in is a "
         "ONE-TIME step: it lives in an on-disk Chrome profile and survives "
         "both a server restart and a reboot, and linkedin_session_info says "
@@ -353,8 +364,15 @@ async def linkedin_auth_status() -> dict[str, Any]:
 
 
 @mcp.tool()
-async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, Any]:
-    """Open LinkedIn's sign-in page and wait for you to sign in yourself.
+async def linkedin_login(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, Any]:
+    """Sign in to LinkedIn. A browser opens and YOU type; nothing is automated.
+
+    THE CANONICAL NAME, from 2026-08-25. Its sibling servers in this family
+    spell it ``naukri_login``, ``instahyre_login`` and ``uplers_login``, and
+    this one spelled it ``linkedin_login_browser`` -- the odd name out. That is
+    a papercut for somebody who has met the others and a wall for a stranger
+    who clones this repository and reaches for the name every other server
+    uses. ``linkedin_login_browser`` still works and is now an alias.
 
     This server never sees, types, stores or transmits a password. It opens a
     browser window at linkedin.com/login; you type into that window; the
@@ -367,6 +385,12 @@ async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, 
     timeout the result is authenticated false with a reason, never an
     optimistic success.
 
+    THERE IS NO REAUTH HERE, and that is deliberate rather than missing.
+    LinkedIn issues this server no refresh token, so a ``linkedin_reauth``
+    would be this tool wearing a different name. ``linkedin_session_info``
+    reports that absence as a field rather than leaving a caller to infer it
+    from a tool that is not there.
+
     Args:
         wait_seconds: how long to leave the window open for you. Default 300.
     """
@@ -375,6 +399,24 @@ async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, 
             return await login_via_browser(page, wait_seconds=int(wait_seconds))
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_login_browser(wait_seconds: int = LOGIN_WAIT_S) -> dict[str, Any]:
+    """DEPRECATED ALIAS. Call ``linkedin_login`` instead; this forwards to it.
+
+    Kept working because things already call it, and removing a name that
+    used to work is a worse failure than carrying one. It behaves identically
+    -- same browser window, same one-time sign-in, same never-handles-a-
+    password property -- and there is no plan to remove it.
+
+    The canonical name is ``linkedin_login``, which is what the other three
+    servers in this family are called.
+
+    Args:
+        wait_seconds: how long to leave the window open for you. Default 300.
+    """
+    return await linkedin_login(wait_seconds=wait_seconds)
 
 
 @mcp.tool()
@@ -413,7 +455,7 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
         on the next page load, so it having lapsed means nothing on its own.
       * renewal -- silent_renew_available is false here, and why says what
         the four servers in this family were ruled on: there is one
-        credential layer, so a linkedin_reauth would be linkedin_login_browser
+        credential layer, so a linkedin_reauth would be linkedin_login
         wearing a different name and it is deliberately not shipped. It also
         carries session_lapses_at / _in_days: the date past which no silent
         renew can help and you sign in by hand. THAT is the number to compare
@@ -429,7 +471,7 @@ async def linkedin_session_info(verify_live: bool = True) -> dict[str, Any]:
 
     Cookie values are never returned. Only the name, whether it is there, and
     when it lapses. When it has lapsed every read tool says so with a reason
-    rather than handing back nothing, and linkedin_login_browser is the way
+    rather than handing back nothing, and linkedin_login is the way
     back.
 
     (Everything below this point is dropped from the description a caller
@@ -475,7 +517,7 @@ async def linkedin_logout(confirm: bool = False) -> dict[str, Any]:
 
     THE ONE DESTRUCTIVE TOOL IN THIS SERVER, and the most expensive thing it
     can do to you. The sign-in it throws away took a full day to establish,
-    and there is no automated way to put it back: linkedin_login_browser
+    and there is no automated way to put it back: linkedin_login
     opens a window and you type into it yourself, exactly as you did the
     first time.
 

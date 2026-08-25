@@ -1,4 +1,14 @@
-"""The tool surface: nineteen tools, fifteen of which read LinkedIn.
+"""The tool surface: twenty tools, sixteen of which do not write.
+
+THE HEADLINE SAID "nineteen tools, fifteen of which read LinkedIn" UNTIL
+2026-08-25, and both halves of that sentence changed for the same small
+reason. The count moved because the login tool was renamed to
+``linkedin_login`` -- the spelling its three sibling servers use -- and the old
+``linkedin_login_browser`` was KEPT as a registered deprecated alias rather
+than deleted, so the surface grew a name without growing a capability. And
+"read LinkedIn" was never quite what the second number counted: login, logout,
+``linkedin_cdp_status`` and ``linkedin_server_info`` were always inside it and
+none of them reads a LinkedIn page. It counts NON-WRITES, and now says so.
 
 WHAT THIS FILE USED TO ASSERT, AND WHY IT NO LONGER CAN. The brief for this
 server drew a hard line -- no writes, not now, not stubbed, not "for later" --
@@ -64,6 +74,21 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
 
 EXPECTED_TOOLS = {
     "linkedin_auth_status",
+    # THE LOGIN TOOL ANSWERS TO TWO NAMES from 2026-08-25, and BOTH belong on
+    # this list because both are registered. ``linkedin_login`` is canonical --
+    # the sibling servers spell it ``naukri_login``, ``instahyre_login`` and
+    # ``uplers_login``, and this one being the odd name out was a wall for
+    # anybody who had met the others. ``linkedin_login_browser`` is a
+    # DEPRECATED ALIAS that forwards to it, kept because things already call
+    # it and breaking a name that used to work is the worse failure.
+    #
+    # This is the only pair on the surface, and the only reason a name may
+    # appear here without a capability behind it. A second alias arriving
+    # would land as a set-equality failure below and should have to argue for
+    # itself the same way. ``test_both_login_names_are_registered_and_the_old_
+    # one_forwards`` is where the pair is shown actually behaving as one tool
+    # rather than merely being listed twice.
+    "linkedin_login",
     "linkedin_login_browser",
     "linkedin_who_viewed_me",
     "linkedin_my_applications",
@@ -146,19 +171,28 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_nineteen_tools(tools):
-    """RENAMED TWICE ON 2026-08-25, from ``..._seventeen_tools`` then
-    ``..._eighteen_tools``, and the rename is the
+async def test_the_surface_is_exactly_the_twenty_tools(tools):
+    """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
+    ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
 
-    This test has now been renamed three times -- it shipped as
+    This test has now been renamed four times -- it shipped as
     ``..._nine_reads`` -- and the rule it follows is that a test name is a
-    CLAIM like any other: a name saying eighteen over a body asserting
-    nineteen is the exact species of stale claim this file exists to catch.
+    CLAIM like any other: a name saying nineteen over a body asserting
+    twenty is the exact species of stale claim this file exists to catch.
+
+    THE FOURTH RENAME IS NOT LIKE THE FIRST THREE and the difference is worth
+    more than the number. Each of those moved because a tool arrived: a write
+    was authorised, or a read was built. This one moved because a tool that
+    was already here was RENAMED and its old name kept working --
+    ``linkedin_login_browser`` became an alias for ``linkedin_login``. The
+    surface is twenty NAMES over nineteen capabilities, which is why the count
+    alone would be a misleading thing to read off this file, and why the
+    comment beside the pair in ``EXPECTED_TOOLS`` says which two they are.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 19
-    # And the split is asserted, not just the total: fourteen reads and the
+    assert len(tools) == 20
+    # And the split is asserted, not just the total: sixteen non-writes and the
     # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
     assert set(tools) & SANCTIONED_WRITE_TOOLS == {
@@ -167,17 +201,22 @@ async def test_the_surface_is_exactly_the_nineteen_tools(tools):
         "linkedin_unfollow_company",
         "linkedin_apply_job",
     }
-    # THE READ COUNT MOVES OFF FOURTEEN, for the first time in three waves,
-    # and the comment it replaces was the evidence that made that meaningful:
-    # "this wave added a write and added a FIELD to an existing read rather
-    # than a new read tool, so a fourteen here is evidence the read surface
-    # did not quietly grow too. It has now survived two write-adding waves
-    # unmoved." It moved deliberately on the third: linkedin_unread_messages
-    # is a genuinely new READ, added because "do I have messages waiting" is
-    # answerable off an already-loaded surface at no cost, while "show me my
-    # inbox" is not. The number is asserted rather than dropped precisely so
-    # the NEXT quiet growth still fails here.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 15
+    # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
+    # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
+    # FOURTEEN, for the first time in three waves... It moved deliberately on
+    # the third: linkedin_unread_messages is a genuinely new READ, added
+    # because 'do I have messages waiting' is answerable off an already-loaded
+    # surface at no cost, while 'show me my inbox' is not." That was a real
+    # capability arriving and the number earned its move.
+    #
+    # This move is the cheap kind and must not be mistaken for the other:
+    # nothing new can be done with this server since fifteen. ``linkedin_login``
+    # is the login tool's canonical name and ``linkedin_login_browser`` is the
+    # same function under its retired one, so a reader treating sixteen as
+    # sixteen distinct things would be wrong by one. The number is still
+    # asserted rather than dropped, because the next quiet growth -- an actual
+    # one -- still has to fail here.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 16
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -477,8 +516,78 @@ async def test_the_search_history_side_effect_is_disclosed(tools):
 
 
 async def test_the_login_tool_promises_never_to_touch_a_credential(tools):
-    text = (tools["linkedin_login_browser"].description or "").lower()
+    """THE PROMISE FOLLOWED THE CANONICAL NAME on 2026-08-25.
+
+    This read ``tools["linkedin_login_browser"]`` until the rename. It is the
+    one tool a password is typed anywhere near, so its description carrying
+    the promise verbatim is the point of the test, and after the rename that
+    description is ``linkedin_login``'s -- the alias's own docstring says the
+    property is the same but does not repeat the sentence, so leaving the
+    lookup on the old name would have been asserting the promise against the
+    wrong text.
+
+    The alias is not left uncovered by the move: it is asserted registered in
+    ``EXPECTED_TOOLS``, its description is held to the same minimum length as
+    every other tool's by ``test_every_tool_documents_itself``, and the test
+    below drives it to prove it forwards.
+    """
+    text = (tools["linkedin_login"].description or "").lower()
     assert "never sees, types, stores or transmits a password" in text
+
+
+async def test_both_login_names_are_registered_and_the_old_one_forwards(
+    tools, monkeypatch
+):
+    """THE ALIAS, SHOWN WORKING -- not merely shown listed.
+
+    ``linkedin_login_browser`` was the login tool's only name until 2026-08-25.
+    Keeping it registered is a promise to everything that already calls it, and
+    a promise a set-membership check cannot verify: a name can sit in
+    ``mcp.list_tools()`` while the function behind it has quietly rotted, and
+    nothing else in this suite would notice, because every other assertion
+    about login now looks at the canonical name.
+
+    So this drives the deprecated name and measures where the call LANDS.
+    ``login_via_browser`` is the one step that opens a window and waits for a
+    human, and it is stubbed here because the promise being tested is about
+    routing, not about signing in: the alias must reach the same sign-in with
+    the same argument and hand back its answer unchanged. A stub that recorded
+    nothing, or an alias that grew its own copy of the login logic, both fail.
+    """
+    from contextlib import asynccontextmanager
+
+    from linkedin_server import browser as browser_module
+    from linkedin_server import server as server_module
+
+    assert "linkedin_login" in tools
+    assert "linkedin_login_browser" in tools
+
+    waits: list[int] = []
+
+    @asynccontextmanager
+    async def fake_session():
+        yield object()
+
+    async def fake_login(page, wait_seconds):
+        waits.append(wait_seconds)
+        return {"authenticated": True, "waited_for": wait_seconds}
+
+    monkeypatch.setattr(browser_module.BROWSER, "session", fake_session)
+    monkeypatch.setattr(server_module, "login_via_browser", fake_login)
+
+    from_alias = await server_module.linkedin_login_browser(wait_seconds=7)
+
+    assert waits == [7], "the alias never reached the sign-in it forwards to"
+    assert from_alias == {"authenticated": True, "waited_for": 7}
+
+    # THE CONTROL. Without it the assertions above would also pass on an alias
+    # that had drifted into its own implementation -- what makes them mean
+    # "forwards" is that the canonical name is measured doing the identical
+    # thing through the identical stub.
+    from_canonical = await server_module.linkedin_login(wait_seconds=7)
+
+    assert waits == [7, 7]
+    assert from_alias == from_canonical
 
 
 async def test_the_auth_tool_documents_that_a_cookie_is_not_a_verdict(tools):
