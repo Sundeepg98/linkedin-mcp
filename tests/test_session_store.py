@@ -177,6 +177,105 @@ async def test_arming_never_breaks_the_auth_answer(monkeypatch, tmp_path):
     await auth_module._arm_session_store(page)  # must not raise
 
 
+#: A jar shaped like the real one that shipped: LinkedIn rows mixed with the
+#: whole rest of the browser, because ``context.cookies()`` returns everything.
+FOREIGN = [
+    {"name": "SID", "value": "x" * 70, "domain": ".google.com", "path": "/"},
+    {"name": "LSID", "value": "x" * 70, "domain": "accounts.google.com", "path": "/"},
+    {"name": "__Secure-1PSID", "value": "x" * 70, "domain": ".google.com", "path": "/"},
+    {"name": "fr", "value": "x" * 30, "domain": ".facebook.com", "path": "/"},
+    {"name": "MUID", "value": "x" * 30, "domain": ".bing.com", "path": "/"},
+    {"name": "uuid2", "value": "x" * 30, "domain": ".adnxs.com", "path": "/"},
+]
+
+
+async def test_another_sites_cookies_never_reach_the_disk(store):
+    """THE CONTROL FOR THE WORST DEFECT THIS MODULE HAS HAD.
+
+    ``context.cookies()`` returns the WHOLE browser jar. The first working
+    harvest wrote 92 cookies of which 68 were foreign -- 17 ``.google.com``,
+    8 ``accounts.google.com``, 11 ``.youtube.com``, plus facebook, bing and a
+    dozen ad networks. The Google rows were ``SID``, ``LSID`` and the
+    ``__Host-`` prefixed ones: live authentication for his Google account.
+
+    Chrome keeps that jar encrypted under AES-256-GCM. This file is plaintext
+    JSON. So the harvest took credentials Chrome deliberately seals and wrote
+    them out in the clear.
+
+    A rule in a comment would not have caught it. This goes red.
+    """
+    mixed = FakeContext(jar(SESSION_COOKIE, "JSESSIONID") + FOREIGN)
+    out = await store.save_from_context(mixed, method="test")
+
+    assert out["saved"] is True
+    written = store.path.read_text(encoding="utf-8")
+
+    # Not one foreign cookie, by name OR by domain, anywhere in the file.
+    for cookie in FOREIGN:
+        assert cookie["name"] not in written, cookie["name"]
+        assert cookie["domain"] not in written, cookie["domain"]
+
+    stored = json.loads(written)["cookies"]
+    assert {c["name"] for c in stored} == {SESSION_COOKIE, "JSESSIONID"}
+    assert all(c["domain"].endswith("linkedin.com") for c in stored)
+
+
+@pytest.mark.parametrize(
+    "domain,belongs",
+    [
+        (".linkedin.com", True),
+        ("www.linkedin.com", True),
+        (".www.linkedin.com", True),
+        ("linkedin.com", True),
+        (".google.com", False),
+        ("accounts.google.com", False),
+        # Lookalikes. A substring match on "linkedin.com" would admit both.
+        ("evil-linkedin.com", False),
+        ("linkedin.com.attacker.net", False),
+        ("", False),
+    ],
+)
+def test_the_domain_test_is_not_a_substring_match(domain, belongs):
+    """Matching on the registrable domain, not on whether the text appears.
+
+    ``linkedin.com.attacker.net`` contains ``linkedin.com``. A substring check
+    would hand that site's cookies straight into the store.
+    """
+    from linkedin_server.session_store import is_linkedin_cookie
+
+    assert is_linkedin_cookie({"domain": domain}) is belongs
+
+
+async def test_restore_refuses_foreign_rows_from_an_older_file(store):
+    """The belt. The write filter is the fix; this covers a file that predates
+    it, or one edited by hand.
+
+    Injecting somebody's Google session into a browser context is not
+    something this server should be capable of even from a bad input.
+    """
+    store.path.parent.mkdir(parents=True, exist_ok=True)
+    store.path.write_text(
+        json.dumps(
+            {
+                "saved_at": __import__("time").time(),
+                "method": "old version",
+                "cookies": jar(SESSION_COOKIE) + FOREIGN,
+                "has_session": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    ctx = FakeContext([])
+    out = await store.restore_into_context(ctx)
+
+    assert out["restored"] is True
+    injected = {c["name"] for c in ctx.added}
+    assert injected == {SESSION_COOKIE}
+    for cookie in FOREIGN:
+        assert cookie["name"] not in injected
+
+
 async def test_a_cookie_that_cannot_be_restored_is_never_stored(store):
     """THE DEFECT THAT SHIPPED, pinned so it cannot ship twice.
 
@@ -197,8 +296,16 @@ async def test_a_cookie_that_cannot_be_restored_is_never_stored(store):
     out = await store.save_from_context(stub, method="login_via_browser")
 
     assert out["saved"] is False
-    assert out["rejected_unrestorable"] == 1
     assert not store.path.exists(), "an unrestorable jar reached the disk"
+
+    # WHICH guard catches it changed on 2026-08-26 and the assertion is
+    # written not to care. The fixture cookie has no domain, so the
+    # linkedin-only filter now rejects it BEFORE the restorability check ever
+    # runs -- it counts as foreign rather than as unrestorable. Both are
+    # correct rejections, and pinning one counter would make this test fail
+    # the next time a guard is added in front of it. What must hold is that it
+    # is refused and that nothing reaches disk.
+    assert out["dropped_foreign"] + out["rejected_unrestorable"] == 1
 
 
 @pytest.fixture

@@ -70,6 +70,41 @@ SESSION_PATH = Path(CHROME_PROFILE).parent / "session.json"
 MAX_AGE_S = 60 * 60 * 24 * 30
 
 
+def is_linkedin_cookie(cookie: Any) -> bool:
+    """Does this cookie belong to LinkedIn? Everything else is not ours.
+
+    THIS GUARD EXISTS BECAUSE ITS ABSENCE SHIPPED, and it is the most serious
+    of the four defects this module has had. ``context.cookies()`` returns the
+    WHOLE browser jar, not this site's rows. The first working harvest wrote
+    92 cookies, of which 68 were foreign:
+
+        17  .google.com          17  .linkedin.com
+        11  .youtube.com         10  .google.co.in
+         8  accounts.google.com   6  .www.linkedin.com
+        + rubiconproject, adnxs, demdex, doubleclick, facebook, bing, ...
+
+    The ``.google.com`` and ``accounts.google.com`` rows include ``SID``,
+    ``LSID`` and the ``__Host-`` prefixed ones -- live authentication for his
+    Google account, not analytics.
+
+    AND CHROME KEEPS THOSE ENCRYPTED. It seals its cookie store with
+    AES-256-GCM; this file is plaintext JSON. So the harvest was taking
+    credentials Chrome deliberately protects and writing them out in the
+    clear, in a project directory, on a machine that runs agents all day.
+
+    The filter is at the WRITE, so a foreign cookie never reaches disk at all.
+    The restore path filters too, as a belt: an older or hand-edited file may
+    still carry rows this version would never have written.
+
+    Matching is on the registrable domain rather than a substring, so
+    ``evil-linkedin.com`` and ``linkedin.com.attacker.net`` do not qualify.
+    """
+    if not isinstance(cookie, dict):
+        return False
+    domain = str(cookie.get("domain") or "").strip().lstrip(".").lower()
+    return domain == "linkedin.com" or domain.endswith(".linkedin.com")
+
+
 def _restrict(path: Path) -> None:
     """Owner-only where the platform supports it. Never fatal."""
     try:
@@ -150,16 +185,25 @@ class SessionStore:
         # yet. Graceful degradation hides a broken mechanism perfectly, which
         # is why the thing being degraded to has to be validated at the point
         # it is WRITTEN rather than trusted at the point it is read.
+        # LINKEDIN ROWS ONLY, decided before anything is written. See
+        # is_linkedin_cookie: the whole browser jar arrives here, and it
+        # contains his Google, YouTube and Facebook sessions.
+        ours = [c for c in cookies if is_linkedin_cookie(c)]
+        foreign = len(cookies) - len(ours)
+
         keep = [
             c
-            for c in cookies
-            if isinstance(c, dict)
-            and c.get("name")
-            and c.get("domain")
+            for c in ours
+            if c.get("name")
             and c.get("path")
             and isinstance(c.get("value"), str)
         ]
-        rejected = len(cookies) - len(keep)
+        rejected = len(ours) - len(keep)
+        if foreign:
+            logger.debug(
+                "session store: dropped %d cookie(s) belonging to other sites",
+                foreign,
+            )
         if rejected:
             logger.debug(
                 "session store: %d cookie(s) lack domain/path and cannot be "
@@ -174,13 +218,14 @@ class SessionStore:
             # session.
             return {
                 "saved": False,
+                "dropped_foreign": foreign,
                 "rejected_unrestorable": rejected,
                 "why": (
                     f"no restorable {SESSION_COOKIE} in the live context, so "
                     "there is no session to store. The existing store, if any, "
                     "is left alone rather than replaced with a useless jar. "
-                    f"({rejected} cookie(s) were dropped for lacking the "
-                    "domain and path that add_cookies requires.)"
+                    f"Dropped {foreign} cookie(s) belonging to other sites and "
+                    f"{rejected} that lacked the path add_cookies requires."
                 ),
             }
 
@@ -189,6 +234,7 @@ class SessionStore:
             "method": method,
             "cookies": keep,
             "has_session": True,
+            "scope": "linkedin.com only",
         }
         tmp = self.path.with_suffix(".json.tmp")
         try:
@@ -245,7 +291,17 @@ class SessionStore:
                 ),
             }
 
-        cookies = self.read().get("cookies") or []
+        # THE BELT. The write filter is the fix; this is here because a file
+        # written by an older version -- or edited by hand -- may still carry
+        # rows for other sites, and injecting somebody's Google session into a
+        # browser context is not something this server should be capable of
+        # even from a bad input.
+        cookies = [c for c in (self.read().get("cookies") or []) if is_linkedin_cookie(c)]
+        if not cookies:
+            return {
+                "restored": False,
+                "why": "the stored jar holds no linkedin.com cookies",
+            }
         try:
             await context.add_cookies(cookies)
         except Exception as exc:  # noqa: BLE001
