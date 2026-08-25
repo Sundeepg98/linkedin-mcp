@@ -1167,12 +1167,36 @@ async def login_via_browser(
             checks += 1
             last_status = await check_auth(page, warm=False)
             if last_status.get("authenticated") is True:
+                # HARVEST THE SESSION INTO A FILE THE SERVER OWNS.
+                #
+                # Only here, and only on a LIVE 200 -- a jar harvested from a
+                # cookie's mere presence would store a session LinkedIn has
+                # not agreed is one. This is the single moment a good jar is
+                # known to exist, so it is the only moment worth saving from.
+                #
+                # It changes nothing about how this function behaves. The
+                # profile keeps the session as before and is untouched; the
+                # file is a second copy, for the case Chrome discards this
+                # profile on a later launch. See session_store.py.
+                stored: dict[str, Any] = {"saved": False, "why": "not attempted"}
+                try:
+                    from linkedin_server.browser import SESSION_STORE
+
+                    stored = await SESSION_STORE.save_from_context(
+                        page.context, method="login_via_browser"
+                    )
+                except Exception as exc:  # noqa: BLE001 - never fails a login
+                    stored = {
+                        "saved": False,
+                        "why": f"harvest raised {type(exc).__name__}",
+                    }
                 return {
                     "authenticated": True,
                     "already_signed_in": False,
                     "elapsed_seconds": round(time.time() - started, 1),
                     "checks_run": checks,
                     "verified_by": AUTH_ENDPOINT_NOTE,
+                    "session_stored": stored,
                     **{
                         k: v
                         for k, v in last_status.items()

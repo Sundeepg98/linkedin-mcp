@@ -58,6 +58,7 @@ from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
 from linkedin_server import preflight, profile_lock
+from linkedin_server.session_store import SessionStore
 from linkedin_server.config import (
     CDP_ATTACH,
     CHROME_PROFILE,
@@ -204,6 +205,28 @@ class LinkedInBrowser:
                 headless,
                 list(LAUNCH_ARGS),
             )
+            # PUT THE SESSION BACK IF CHROME THREW IT AWAY.
+            #
+            # This profile carries a NEWER Chrome's version stamp than
+            # playwright's chromium -- his own Chrome 151 opened it once --
+            # so Chrome runs its downgrade migration on launch, moves the
+            # profile aside and starts clean. Measured 2026-08-25: that is
+            # what made him sign in over and over while naukri, whose profile
+            # carries playwright's own stamp, held a session for days.
+            #
+            # ADDITIVE AND CONDITIONAL. The profile is untouched and remains
+            # the primary source; this injects the stored jar ONLY into a
+            # context that has no session cookie, so a working profile is
+            # never overwritten with an older one. Every failure path returns
+            # "restored: False" and leaves the launch exactly as it was.
+            try:
+                outcome = await SESSION_STORE.restore_into_context(self._context)
+                if outcome.get("restored"):
+                    logger.info("session store: %s", outcome.get("why"))
+            except Exception as exc:  # noqa: BLE001 - a net, never a gate
+                logger.debug(
+                    "session restore skipped (%s): %s", type(exc).__name__, exc
+                )
         except Exception as exc:
             # Never hold the lock, or a driver, for a browser that did not
             # come up.
@@ -414,4 +437,11 @@ class LinkedInBrowser:
 
 
 #: Module-level singleton. One server process, one browser, one profile.
+#: The server's OWN copy of the session, beside the profile rather than in it.
+#: See session_store.py: the profile is still the primary source and is never
+#: written to or deleted by this: the store is a net for the case Chrome
+#: discards the profile on launch, which this profile provokes because it
+#: carries a newer Chrome's version stamp than playwright's chromium.
+SESSION_STORE = SessionStore()
+
 BROWSER = LinkedInBrowser()
