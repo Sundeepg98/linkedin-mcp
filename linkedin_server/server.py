@@ -1989,35 +1989,68 @@ async def linkedin_server_info() -> dict[str, Any]:
                 "measuring.",
             ],
 
-            # Possible, and refused anyway. TWO ENTRIES, and what they share is
-            # the only thing that earns a place here: each protects somebody
-            # who is not the operator. That is why these are not his to
-            # overrule, and each entry says who it protects.
+            # THE POLICY BUCKET WAS DISSOLVED BY THE OPERATOR ON 2026-08-25.
+            # Recorded here rather than quietly dropped, because a refusal
+            # list that shrinks without a name on it is indistinguishable
+            # from drift.
+            #
+            # He read the three entries back -- reading his own inbox,
+            # endorsing a member's skill, and looking up one member -- and
+            # ruled: "if they're technically possible via the MCP, why should
+            # we not do that? Let's do them also."
+            #
+            # WHAT THE BUCKET GOT WRONG, which is worth being exact about
+            # because "the operator overruled a safety line" would be the
+            # wrong lesson. Its test was sound: an entry belongs here only if
+            # the cost lands on somebody who is not him. Its MEMBERSHIP was
+            # not. Reading his own inbox is his own correspondence -- those
+            # people wrote to HIM. An endorsement is a gift to the person
+            # receiving it, not an extraction from them. And looking up ONE
+            # named member is what the product is for; the thing that ever
+            # deserved refusing was BULK COLLECTION, which is a different act
+            # rather than a bigger version of the same one.
+            #
+            # SO THE PROTECTION DID NOT DISAPPEAR, IT MOVED INTO THE CODE.
+            # The limit that mattered is now a hard cap inside the lookup
+            # tool -- one member per call, no enumeration, no walking a
+            # connection graph, no iterating search results into profile
+            # fetches, and nothing about another member persisted past the
+            # response. A line in a bucket relies on a caller's restraint; a
+            # line in the tool does not.
+            "policy_dissolved": (
+                "TWO OF THE THREE entries were dissolved by the operator on "
+                "2026-08-25: reading his own inbox, and looking up a member. "
+                "This field records who did it and when, so a future reader "
+                "can tell a deliberate dissolution from a list that quietly "
+                "lost entries. "
+                "ONE REMAINS, AND IT WAS NOT PART OF THAT RULING: driving an "
+                "off-site applicant-tracking system. He was asked about three "
+                "LinkedIn capabilities and ruled on those; the ATS refusal is "
+                "a different kind of thing -- not a LinkedIn capability at "
+                "all, but somebody else's form on somebody else's domain -- "
+                "and a ruling is not extended past what it covered, least of "
+                "all to remove a protection. "
+                "THE LIMIT THAT SURVIVED THE LOOKUP is no longer a refusal, "
+                "it is a cap inside the tool: ONE member per call, no "
+                "enumeration, no persistence. Bulk collection is what "
+                "LinkedIn's detection actually hunts, the account it would "
+                "cost is the one his referrals run through, and this "
+                "repository is public under his real name -- a harvester here "
+                "is a durable public artifact in a way a lookup is not."
+            ),
             "refused_as_policy": [
-                "COLLECTING DATA ABOUT OTHER MEMBERS. Protects: the members "
-                "whose data it would be. This is the one refusal on this "
-                "server that is not the operator's to lift, because the person "
-                "it protects is not him. A tool may act on ONE person he "
-                "names; it may not discover, search, enumerate or scrape "
-                "people.",
-                "READING THE MESSAGE INBOX. Protects: the correspondent whose "
-                "conversation gets opened. This was filed as a capability gap "
-                "until 2026-08-25 and the reclassification is the honest "
-                "outcome, not a way of retiring it. THE MEASUREMENT: asking "
-                "for /messaging/ does not stay on an inbox. LinkedIn "
-                "redirects it into ONE SPECIFIC CONVERSATION THREAD, and the "
-                "caller does not choose which -- LinkedIn does. So a tool "
-                "named 'read my inbox' would not return an inbox; it would "
-                "open a named person's conversation, on every call, chosen by "
-                "somebody other than the person calling it. That cost lands "
-                "on a third party, which is the whole test for this list. "
-                "WHAT IS NOT CLAIMED: whether opening a thread sends that "
-                "person a read receipt is UNMEASURED -- it would make this "
-                "worse, and the refusal does not rest on it. Two attempts to "
-                "settle it failed because the unread badge was already at "
-                "zero and so had nowhere to fall from. "
-                "WHAT REMAINS AVAILABLE: the unread COUNT, off the feed, "
-                "which opens nothing -- see can_be_done_and_is_refused.",
+                # TWO ENTRIES LEFT THIS LIST ON 2026-08-25, dissolved by the
+                # operator -- reading his own inbox, and looking up a member.
+                # See policy_dissolved above for who ruled and why the bucket
+                # was wrong in its MEMBERSHIP rather than in its test.
+                #
+                # THIS ONE WAS NOT PART OF THAT RULING and is not the same
+                # kind of thing. He was asked about three LinkedIn
+                # capabilities; driving a third party's applicant-tracking
+                # system is not a LinkedIn capability at all. It is somebody
+                # else's form on somebody else's domain, under their terms,
+                # and a ruling is not extended past what it covered -- least
+                # of all to remove a protection nobody was asked about.
                 "DRIVING AN OFF-SITE APPLICANT-TRACKING SYSTEM. Protects: the "
                 "third party whose form and domain it is. linkedin_job_detail "
                 "already reports apply_path and names the destination host, so "

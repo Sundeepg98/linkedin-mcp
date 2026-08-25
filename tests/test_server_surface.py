@@ -673,10 +673,29 @@ async def test_each_kind_of_refusal_is_reported_in_its_own_field():
             f"preference wearing a policy label: {entry}"
         )
 
-    # The two most likely to be quietly dropped, named by subject.
+    # A POLICY ENTRY MAY ONLY LEAVE WITH A RECORDED DISSOLUTION.
+    #
+    # AMENDED 2026-08-25. This used to assert that "OTHER MEMBERS" and
+    # "APPLICANT-TRACKING SYSTEM" both appear -- pinning two entries by
+    # subject, on the reasoning that those were the two most likely to be
+    # quietly dropped. The operator then dissolved the member-lookup entry
+    # deliberately, and pinning a subject cannot tell a deliberate
+    # dissolution from a quiet drop; it fails identically for both, which
+    # makes it useless for the case it was written for.
+    #
+    # So the invariant moved up one level: entries may come and go, but the
+    # bucket may never shrink SILENTLY. If it holds fewer than the three it
+    # was created with, something has to say who removed one and when.
     policy = " ".join(info["refused_as_policy"])
-    assert "OTHER MEMBERS" in policy
-    assert "APPLICANT-TRACKING SYSTEM" in policy
+    assert "APPLICANT-TRACKING SYSTEM" in policy, (
+        "the off-site ATS refusal was never part of any ruling -- it is not a "
+        "LinkedIn capability at all -- and may not vanish with the others"
+    )
+    if len(info["refused_as_policy"]) < 3:
+        note = info.get("policy_dissolved", "")
+        assert note, "policy entries disappeared with no dissolution recorded"
+        assert "2026-08-25" in note, note
+        assert "operator" in note.casefold(), note
 
 
 async def test_the_refused_by_choice_field_is_the_one_that_should_empty():

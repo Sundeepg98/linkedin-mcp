@@ -39,24 +39,51 @@ down as "we decided against it".
 
 ## 1. THE COUNTS
 
-Counting CAPABILITIES (19 distinct things this server does, could do, or
+Counting CAPABILITIES (20 distinct things this server does, could do, or
 refuses to do), not the 20 url substrings, which are guards rather than
 features. `action=` is a guard and is not counted as a capability.
 
 | bucket | count |
 |---|---|
 | **CANNOT** -- proven impossible | **1** |
-| **CAN** -- measured possible | **5** (**4 shipped**, 1 measured and not yet built) |
-| **UNMEASURED** | **11** |
-| **POLICY** -- possible, refused to protect third parties | **3** |
+| **CAN** -- measured possible | **6** (**5 shipped**, 1 measured and not yet built) |
+| **UNMEASURED** | **12** |
+| **POLICY** -- possible, refused to protect third parties | **1** |
 | total | **20** |
+
+**UPDATED 2026-08-25 (third revision) -- THE POLICY BUCKET WAS DISSOLVED BY
+THE OPERATOR.** He read its three entries back and ruled: *"if they're
+technically possible via the MCP, why should we not do that? Let's do them
+also."* Total is unchanged at 20 because nothing appeared or vanished --
+entries MOVED:
+
+| capability | from | to |
+|---|---|---|
+| reading the message inbox | POLICY | **CAN** (to build) |
+| looking up one member | POLICY (as "collecting member data") | **UNMEASURED** -- no third-party profile has ever been captured |
+| driving an off-site ATS | POLICY | **POLICY, unchanged -- see 5.4** |
+| reading the unread count | CAN (to build) | **CAN, SHIPPED** |
+
+**What the bucket got wrong, stated exactly, because "the operator overruled
+a safety line" would be the wrong lesson.** Its TEST was sound: an entry
+belongs there only if the cost lands on somebody who is not him. Its
+MEMBERSHIP was not. His inbox is his own correspondence -- those people wrote
+to HIM. An endorsement is a gift to the person receiving it, not an
+extraction from them. And looking up ONE named member is what the product is
+for; the thing that ever deserved refusing was BULK COLLECTION, which is a
+different act rather than a bigger version of the same one.
+
+**The protection did not disappear, it moved into the code** as a hard cap on
+the lookup: one member per call, no enumeration, no graph-walking, no
+iterating search results into fetches, nothing persisted past the response. A
+line in a bucket relies on a caller's restraint; a line in the tool does not.
 
 **UPDATED 2026-08-25 (second revision).** Two things moved and the total grew
 by one because a capability SPLIT:
 
 - **apply SHIPPED** -- `linkedin_apply_job` is a registered, gated tool. It
   left `can_be_done_and_is_refused`, which is what that field is for.
-- **reading the inbox moved to POLICY** and did not get built. See 5.3.
+- **reading the inbox moved to POLICY** and did not get built. SUPERSEDED HOURS LATER by the third revision above: the operator dissolved that entry and it is a CAN again. Kept rather than deleted so the reversal is legible.
 - **reading the unread COUNT is a new CAN**, and it is the half of "check my
   messages" that survives: the badge renders on `/feed/`, already an allowed
   surface, so it opens nobody's conversation and needs no boundary change.
@@ -93,7 +120,7 @@ say that, instead of sitting in a refusal list looking like a withheld thing.
 
 ---
 
-## 3. CAN -- 5 items
+## 3. CAN -- 6 items
 
 | capability | status | evidence |
 |---|---|---|
@@ -101,7 +128,8 @@ say that, instead of sitting in a refusal list looking like a withheld thing.
 | unsave a job | **SHIPPED**, gated | performable |
 | unfollow a company | **SHIPPED**, gated | performable |
 | **apply to a LinkedIn-hosted posting** | **SHIPPED 2026-08-25**, gated | one screen, one `Submit application`, enabled on arrival, stable test hook |
-| **read the unread message count** | measured possible, NOT built | the badge renders on `/feed/`, already an allowed surface |
+| **read the unread message count** | **SHIPPED 2026-08-25** | the badge renders on `/feed/`, already an allowed surface |
+| **read the message inbox** | measured possible, NOT built | renders, conversations enumerable, no auth wall -- moved here from POLICY by the operator's ruling |
 
 Apply was the entry the operator's ruling bit on hardest -- measured POSSIBLE
 and then refused anyway, by me, in writing. It ships.
@@ -111,13 +139,15 @@ different capability that happens to answer most of the same question. "Do I
 have messages waiting" is answerable at zero cost off a surface this server
 already loads. "Show me my inbox" is not -- see 5.3.
 
-It is NOT built yet for a reason that is about verification rather than
-scope: the profile's session lapsed on 2026-08-25, and a reader that has
-never been run against the live surface is how selectors get guessed.
+The unread count SHIPPED as `linkedin_unread_messages`. Its badge
+pattern comes from a real capture, but the tool has not yet been
+exercised end to end against the live surface -- the session lapsed
+again the same day -- and the commit says so rather than implying a
+verification that did not happen.
 
 ---
 
-## 4. UNMEASURED -- 11 items
+## 4. UNMEASURED -- 12 items
 
 These have never been examined. Each is listed with what would settle it.
 
@@ -133,7 +163,8 @@ These have never been examined. Each is listed with what would settle it.
 | 8 | post / share an update | never looked for |
 | 9 | comment on a post | never looked for |
 | 10 | like / react to a post | never looked for |
-| 11 | endorse a member's skill | never looked for. Acts on a third party's profile, so if it is ever built the POLICY line in section 5 governs it, not his preference |
+| 11 | endorse a member's skill | never looked for. THE POLICY CAVEAT THAT WAS HERE IS GONE -- the operator ruled on 2026-08-25 that it gets built, gated, one member and one skill per call. It still needs the control measured on a real profile |
+| 12 | look up ONE named member | moved here from POLICY by the same ruling. No third-party profile has ever been captured, so the parser is unproven against one -- `linkedin_my_profile`'s topcard reader is the obvious starting point and may or may not transfer |
 
 ### 4.1 Open To Work -- I am OVERTURNING the pre-classification
 
@@ -167,7 +198,7 @@ employer can see.** That argues for the gate being loud, not for refusing.
 
 ---
 
-## 5. POLICY -- 3 items, and these stay
+## 5. POLICY -- 1 item after the operator dissolved the other two
 
 Possible, and refused anyway. Both protect somebody other than him, which is
 what distinguishes them from everything above.
@@ -178,7 +209,16 @@ what distinguishes them from everything above.
    third party's domain. `apply_path` already reports the route and names the
    destination host; reporting and stopping is the correct behaviour.
 
-### 5.3 Reading the message inbox -- RECLASSIFIED here 2026-08-25
+### 5.4 What remains, and why it was not dissolved with the rest
+
+**Driving an off-site applicant-tracking system stays, and it was NOT part of
+the ruling.** The operator was asked about three LINKEDIN capabilities and
+ruled on those. This is not a LinkedIn capability at all -- it is somebody
+else's form on somebody else's domain, under their terms. A ruling is not
+extended past what it covered, least of all to remove a protection nobody was
+asked about. If it should go too, that is a separate question to put to him.
+
+### 5.3 Reading the message inbox -- DISSOLVED 2026-08-25, and my call was wrong
 
 **It was in CAN, measured possible and unbuilt, which under this document's
 own rule meant "build it rather than justify it". It could not stay there, and
