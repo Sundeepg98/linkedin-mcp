@@ -1116,6 +1116,32 @@ APPLY_LABELS: dict[str, str] = {
     "Apply on company website": "offsite",
 }
 
+#: The LinkedIn-hosted control's name is a PREFIX, not a fixed string, and this
+#: was a live defect rather than a precaution.
+#:
+#: MEASURED 2026-08-24 on one posting, at two points in the SAME page load:
+#:
+#:     partially hydrated   "LinkedIn Apply to this job"
+#:     fully settled        "LinkedIn Apply to <TITLE> at <COMPANY>"
+#:
+#: The dict above matches by exact equality, so once a posting finished
+#: rendering, ``apply_route`` returned ``unknown`` for a perfectly ordinary
+#: LinkedIn Apply posting. It failed SAFE -- refusing to classify rather than
+#: misclassifying -- which is exactly why nobody noticed, and why the whole
+#: test suite stayed green with the bug in it: every fixture carries the
+#: partially-hydrated spelling, so no test ever showed the classifier the
+#: string LinkedIn actually ends up serving.
+#:
+#: A prefix rather than a wider guess. It is the same shape as
+#: ``writes.UNFOLLOW_ANCHOR_PREFIX``, and for the same reason: LinkedIn writes
+#: variable content (there a Page's name, here the job title and employer) into
+#: the tail of an otherwise fixed label. The tail is unpredictable; the head is
+#: not. Everything that made this a CONJUNCTION still applies unchanged -- the
+#: href must still be the posting's own apply url and the job id in it must
+#: still match the posting's -- so widening the name test does not widen what
+#: gets positively identified.
+LINKEDIN_APPLY_PREFIX = "LinkedIn Apply to "
+
 #: Same contract as :data:`FOLLOW_UNKNOWN` and :data:`SAVE_UNKNOWN`: "could not
 #: tell" is an answer, and here it is the answer that matters most, because the
 #: action gated on it cannot be taken back.
@@ -1250,12 +1276,18 @@ def apply_route(
 
     name = str(label or "").strip()
     known = APPLY_LABELS.get(name)
+    if known is None and name.startswith(LINKEDIN_APPLY_PREFIX):
+        # The settled spelling, which carries the job title and employer in its
+        # tail. See LINKEDIN_APPLY_PREFIX: the exact-match dict above misses
+        # this, and missed it in production.
+        known = "linkedin_apply"
     if known is None:
         return {
             "route": APPLY_UNKNOWN,
             "why": (
                 f"the apply control is labelled {name!r}, which is neither of "
-                f"the two measured routes {sorted(APPLY_LABELS)}. LinkedIn has "
+                f"the two measured routes {sorted(APPLY_LABELS)} nor a "
+                f"{LINKEDIN_APPLY_PREFIX!r} name. LinkedIn has "
                 "either relabelled it -- which it has done to this control "
                 "before -- or drawn a third route this reader has never seen."
             ),

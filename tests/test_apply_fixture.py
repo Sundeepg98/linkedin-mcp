@@ -316,6 +316,56 @@ def test_an_unrecognised_label_is_refused_and_the_label_is_quoted(label):
     assert verdict["destination"] is None
 
 
+def test_the_settled_label_carrying_title_and_employer_is_still_the_linkedin_route():
+    """THE SPELLING THAT SHIPPED BROKEN, and the coverage gap that hid it.
+
+    LinkedIn serves this control under TWO names during a single page load:
+    ``LinkedIn Apply to this job`` while it is still hydrating, and
+    ``LinkedIn Apply to <TITLE> at <COMPANY>`` once it settles. Measured
+    2026-08-24 on a live posting.
+
+    ``APPLY_LABELS`` matched by exact equality, so ``apply_route`` returned
+    ``unknown`` for an ordinary LinkedIn Apply posting as soon as the page
+    finished rendering -- and ``linkedin_job_detail`` reported that to callers.
+
+    WHY THE WHOLE SUITE STAYED GREEN WITH IT. Every fixture in this repo was
+    captured mid-hydration and carries the SHORT spelling, so no test ever
+    handed the classifier the string LinkedIn actually ends up serving. The
+    suite could not fail on this. That is the reason this case is built from a
+    LITERAL rather than from a fixture: the fixtures are exactly what missed
+    it, so asserting against them again would reproduce the blind spot.
+    """
+    settled = "LinkedIn Apply to Senior Backend Engineer at Northwind Systems"
+    assert settled.startswith(shape.LINKEDIN_APPLY_PREFIX)
+    verdict = shape.apply_route(settled, LI_APPLY_HREF, count=1, job_id=LI_JOB_ID)
+    assert verdict["route"] == "linkedin_apply", verdict["why"]
+    assert verdict["destination"] == LI_APPLY_HREF
+
+
+def test_the_prefix_did_not_widen_what_gets_identified():
+    """Accepting a prefix must not turn the conjunction into a name check.
+
+    The href and job-id agreement still have to hold. Without this, the fix
+    above would be indistinguishable from deleting the guard.
+    """
+    settled = "LinkedIn Apply to Senior Backend Engineer at Northwind Systems"
+    wrong_posting = shape.apply_route(
+        settled, LI_APPLY_HREF, count=1, job_id="4600009999"
+    )
+    assert wrong_posting["route"] == shape.APPLY_UNKNOWN, wrong_posting["why"]
+
+    # And a name that merely CONTAINS the prefix later in the string is not it.
+    assert (
+        shape.apply_route(
+            "Tailor my resume for LinkedIn Apply to this job",
+            LI_APPLY_HREF,
+            count=1,
+            job_id=LI_JOB_ID,
+        )["route"]
+        == shape.APPLY_UNKNOWN
+    )
+
+
 def test_the_linkedin_route_needs_its_label_and_the_postings_own_apply_url():
     """The first positive identification, and what it takes to earn it.
 
