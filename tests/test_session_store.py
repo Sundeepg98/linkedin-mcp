@@ -25,7 +25,12 @@ import json
 
 import pytest
 
-from linkedin_server.session_store import MAX_AGE_S, SESSION_COOKIE, SessionStore
+from linkedin_server.session_store import (
+    MAX_AGE_S,
+    REARM_AFTER_S,
+    SESSION_COOKIE,
+    SessionStore,
+)
 
 
 class FakeContext:
@@ -61,6 +66,19 @@ def jar(*names):
         {"name": n, "value": f"value-of-{n}", "domain": ".linkedin.com", "path": "/"}
         for n in names
     ]
+
+
+def age_the_jar(store, seconds):
+    """Rewrite the stored timestamp so the jar reads as ``seconds`` old.
+
+    The same move ``test_restore_refuses_a_stale_jar`` used to make inline. It
+    is a helper now because the jar's AGE is load-bearing on BOTH sides -- the
+    restore refusal and the re-arm -- and two tests that age a jar by two
+    different routes stop being about the same clock.
+    """
+    data = json.loads(store.path.read_text(encoding="utf-8"))
+    data["saved_at"] = data["saved_at"] - seconds
+    store.path.write_text(json.dumps(data), encoding="utf-8")
 
 
 # -- THE CASE THE MODULE EXISTS FOR ----------------------------------------
@@ -147,6 +165,135 @@ async def test_arming_never_overwrites_a_store_that_already_has_a_session(
     store = SessionStore(tmp_path / "armed.json")
     monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
     await store.save_from_context(FakeContext(jar(SESSION_COOKIE)), method="login")
+    before = store.path.read_text(encoding="utf-8")
+
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "extra"))})()
+    await auth_module._arm_session_store(page)
+
+    assert store.path.read_text(encoding="utf-8") == before
+
+
+# -- THE DEADLOCK BETWEEN THE TWO AGE RULES --------------------------------
+
+
+async def test_a_jar_too_old_to_restore_is_not_too_good_to_replace(
+    monkeypatch, tmp_path
+):
+    """THE DEFECT. Two correct rules met on day 31 and killed the mechanism.
+
+    ``restore_into_context`` refuses any jar older than ``MAX_AGE_S``, which
+    is right -- a jar from a machine state nobody remembers should not be
+    resurrected. ``_arm_session_store`` refuses to write over a store that is
+    present and holds a session cookie, which is also right -- a known-good
+    jar should not be traded for a newer one on no evidence.
+
+    Neither rule looked at the other. Past thirty days a stored jar was
+    SIMULTANEOUSLY too old to restore and too present to replace, so the store
+    sat there inert and reported nothing wrong: ``describe`` said present,
+    ``has_session_cookie`` said true, and the one thing it could never do
+    again was the thing it exists for.
+
+    Nothing was bricked -- ``login_via_browser`` harvests with no guard at
+    all, so a sign-in still re-armed it. The cost was exactly one sign-in,
+    which is the single event this whole module exists to spare him.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    store = SessionStore(tmp_path / "armed.json")
+    monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
+    await store.save_from_context(FakeContext(jar(SESSION_COOKIE)), method="login")
+    age_the_jar(store, MAX_AGE_S + 1)
+
+    assert store.describe()["stale"] is True
+    assert (await store.restore_into_context(FakeContext([])))["restored"] is False
+
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "bcookie"))})()
+    await auth_module._arm_session_store(page)
+
+    after = store.describe()
+    assert after["stale"] is False, (
+        "a live session did not replace a jar that had gone past the restore "
+        "ceiling -- the store is inert and says nothing about it"
+    )
+    assert after["method"] == "check_auth"
+
+
+async def test_a_jar_is_replaced_while_it_is_still_good_not_after_it_dies(
+    monkeypatch, tmp_path
+):
+    """THE MARGIN. A re-arm that waits for expiry re-arms only corpses.
+
+    If the re-arm threshold equalled ``MAX_AGE_S``, a jar would become
+    eligible for replacement at the exact moment it stopped working -- and the
+    replacement needs a LIVE session to harvest from, which is precisely what
+    the disaster this store exists for takes away. A profile Chrome has
+    emptied produces no 200, so no re-arm, so the jar is never refreshed in
+    the one situation that matters.
+
+    The jar is therefore refreshed while it is still restorable. This pins a
+    jar at 80% of the ceiling -- comfortably alive, refusing nothing -- and
+    requires that a live check replaces it anyway.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    store = SessionStore(tmp_path / "armed.json")
+    monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
+    await store.save_from_context(FakeContext(jar(SESSION_COOKIE)), method="login")
+    age_the_jar(store, int(MAX_AGE_S * 0.8))
+
+    before = store.describe()
+    assert before["stale"] is False, "the fixture must be a jar that still works"
+    assert (await store.restore_into_context(FakeContext([])))["restored"] is True
+
+    page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "bcookie"))})()
+    await auth_module._arm_session_store(page)
+
+    after = store.describe()
+    assert after["age_seconds"] < before["age_seconds"], (
+        "a jar four fifths of the way to the ceiling was not refreshed, so its "
+        "remaining life is whatever is left rather than a full term"
+    )
+    assert after["method"] == "check_auth"
+
+def test_the_rearm_margin_is_derived_and_leaves_real_headroom():
+    """The two controls on the margin, stated as relationships not literals.
+
+    Pinning ``REARM_AFTER_S == 1296000`` would pass for the wrong reasons and
+    would have to be edited by anyone re-ruling the number, which makes it a
+    speed bump rather than a check. What must hold is:
+
+    * STRICTLY SHORTER than the restore ceiling. Equality is the defect --
+      a jar would become replaceable only once it had stopped working, and a
+      re-arm needs the live session the disaster removes.
+    * A re-arm at least DOUBLES the remaining restorable life. This is the
+      evidence that justifies overwriting a store the module otherwise calls
+      good: not "newer", but a jar of identical provenance with strictly more
+      term than the one it replaces. It also forbids the other failure --
+      a margin so close to the ceiling that the doubling argument is gone.
+    """
+    assert 0 < REARM_AFTER_S < MAX_AGE_S
+    assert MAX_AGE_S - REARM_AFTER_S >= REARM_AFTER_S
+
+
+async def test_a_jar_well_inside_the_margin_is_still_left_exactly_alone(
+    monkeypatch, tmp_path
+):
+    """The guard must have gained a threshold, not lost a rule.
+
+    The sibling test uses a jar written moments ago, which would survive even a
+    margin of one second -- so it cannot tell a real margin from a collapsed
+    guard. This one is a quarter of the way to the ceiling: old enough that
+    "always re-arm" would rewrite it, young enough that it must not be.
+    """
+    from linkedin_server import auth as auth_module
+    from linkedin_server import browser as browser_module
+
+    store = SessionStore(tmp_path / "armed.json")
+    monkeypatch.setattr(browser_module, "SESSION_STORE", store, raising=False)
+    await store.save_from_context(FakeContext(jar(SESSION_COOKIE)), method="login")
+    age_the_jar(store, int(MAX_AGE_S * 0.25))
     before = store.path.read_text(encoding="utf-8")
 
     page = type("P", (), {"context": FakeContext(jar(SESSION_COOKIE, "extra"))})()

@@ -217,12 +217,31 @@ async def _arm_session_store(page: Any) -> None:
     * **NEVER OVER A GOOD STORE.** A populated store is left exactly alone.
       Refreshing it would trade a known-good jar for a newer one on no
       evidence that the newer one is better.
+
+    THAT LAST RULE USED TO READ THE STORE'S AGE WRONG, and the way it failed is
+    worth keeping. "Good" was spelled ``present and has_session_cookie`` --
+    which never asked how old the jar was, while ``restore_into_context``
+    refused anything past ``MAX_AGE_S``. Past thirty days a jar was therefore
+    too old to restore AND too present to replace, and neither side said so:
+    the store reported present, holding a session, and was inert. The rule
+    itself was never wrong; it just had no way to notice that the jar it was
+    protecting had stopped being good.
+
+    So "good" now includes "not near expiry", at ``REARM_AFTER_S`` -- half the
+    restore ceiling, so a replacement at least doubles the jar's remaining
+    life, which is the evidence the rule always demanded. The staleness verdict
+    is READ from ``describe()`` rather than recomputed here, because a second
+    age computation is how a guard and its ceiling drift apart.
     """
     try:
         from linkedin_server.browser import SESSION_STORE
 
         existing = SESSION_STORE.describe()
-        if existing.get("present") and existing.get("has_session_cookie"):
+        if (
+            existing.get("present")
+            and existing.get("has_session_cookie")
+            and not existing.get("due_for_rearm")
+        ):
             return
         context = getattr(page, "context", None)
         if context is None:

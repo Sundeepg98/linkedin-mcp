@@ -69,6 +69,35 @@ SESSION_PATH = Path(CHROME_PROFILE).parent / "session.json"
 #: resurrecting a jar from a machine state nobody remembers.
 MAX_AGE_S = 60 * 60 * 24 * 30
 
+#: Older than this and a saved jar is REPLACED by a live harvest, rather than
+#: left alone as a good store. Derived from MAX_AGE_S, never typed as its own
+#: number, because the whole point is a fixed relationship between the two.
+#:
+#: IT MUST BE STRICTLY SHORTER THAN MAX_AGE_S, and that is the defect this
+#: constant exists to close. The re-arm errand used to skip any store that was
+#: present and held a session cookie, full stop -- so a jar became eligible for
+#: replacement only once it was ALREADY past the restore ceiling. Both rules
+#: were individually right and together they were a deadlock: too old to
+#: restore, too present to replace. Worse, a re-arm needs a LIVE session to
+#: harvest from, and the disaster this store exists for -- Chrome discarding
+#: the profile -- is exactly the thing that takes the live session away. Waiting
+#: for expiry means re-arming only in the window where there is nothing left to
+#: re-arm from.
+#:
+#: HALF, and half specifically. At the half-way mark the replacement jar has a
+#: full term against the old one's remaining half, so a re-arm at least DOUBLES
+#: the jar's remaining restorable life. That is the evidence the "never over a
+#: good store" rule was written to demand: not a vague preference for newer,
+#: but a jar of identical provenance -- harvested from a session LinkedIn has
+#: just answered 200-with-identity for -- carrying strictly more life. Below
+#: half the trade buys less than a doubling and is not worth touching a working
+#: store for. Above half it buys more, at the cost of leaving less headroom.
+#:
+#: The write cost is one harvest per 15 days at most, since a successful
+#: re-arm resets the age to zero. That is nowhere near the "not on every call"
+#: rule the errand also has to keep.
+REARM_AFTER_S = MAX_AGE_S // 2
+
 
 def is_linkedin_cookie(cookie: Any) -> bool:
     """Does this cookie belong to LinkedIn? Everything else is not ours.
@@ -149,6 +178,20 @@ class SessionStore:
             "saved_at": saved_at,
             "age_seconds": int(age) if age is not None else None,
             "stale": bool(age is not None and age > MAX_AGE_S),
+            # BOTH AGE VERDICTS COME OFF THE SAME `age`, deliberately. The
+            # re-arm guard needs a different threshold from the restore
+            # refusal, and the obvious way to give it one is a second age
+            # computed at the call site -- which is how the guard and the
+            # message it prints drift apart. There is one clock here and it
+            # publishes both answers.
+            #
+            # An UNDATABLE jar (`age is None`: no saved_at, or a saved_at that
+            # is not a number) reads as due. It is not stale -- nothing says it
+            # is old -- but nothing bounds its remaining life either, and a jar
+            # whose life cannot be bounded is exactly what the re-arm is for.
+            # Replacing it from a confirmed live session also gives it the
+            # timestamp it was missing.
+            "due_for_rearm": bool(age is None or age > REARM_AFTER_S),
             "method": data.get("method"),
         }
 
