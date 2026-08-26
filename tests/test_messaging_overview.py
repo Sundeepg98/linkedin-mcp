@@ -44,7 +44,7 @@ def test_names_are_placeholders_unless_the_caller_asks():
     out = shape.messaging_overview(HTML, THREAD_URL)
 
     assert out["conversations"] == 2, "duplicate rows should collapse"
-    assert out["participants"] == [shape.NAME_PLACEHOLDER] * 2
+    assert [r["name"] for r in out["rows"]] == [shape.NAME_PLACEHOLDER] * 2
     assert out["names_included"] is False
     for real in ("Dana", "Whitfield", "Ivo", "Karlsson"):
         assert real not in str(out), real
@@ -55,7 +55,7 @@ def test_opting_in_returns_the_real_names():
     tool useless for the one thing he opens it for."""
     out = shape.messaging_overview(HTML, THREAD_URL, include_names=True)
 
-    assert out["participants"] == ["Dana Whitfield", "Ivo Karlsson"]
+    assert [r["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
     assert out["names_included"] is True
 
 
@@ -126,3 +126,75 @@ def test_the_boundary_still_refuses_the_composer():
         )
         is False
     )
+
+
+# ---------------------------------------------------------------------------
+# Unread paired to the row -- the refinement he asked for directly
+# ---------------------------------------------------------------------------
+
+PAIRED = (
+    '<div aria-label="Select conversation with Dana Whitfield">'
+    '<span class="messaging-remove-unread-blue-background">Unread</span></div>'
+    '<div aria-label="Select conversation with Ivo Karlsson">read</div>'
+    '<div aria-label="Select conversation with Mo Chen"><i>UNREAD</i></div>'
+)
+
+
+def test_unread_is_attached_to_the_conversation_not_counted_beside_it():
+    """"Four are waiting" without saying WHICH four is barely better than
+    nothing -- he still has to open LinkedIn, which is the trip this exists to
+    save. The marker and the name are on the same row, so they come back
+    together."""
+    out = shape.messaging_overview(PAIRED, THREAD_URL)
+
+    assert out["conversations"] == 3
+    assert out["unread"] == 2
+    assert [(r["position"], r["unread"]) for r in out["rows"]] == [
+        (1, True),
+        (2, False),
+        (3, True),
+    ]
+
+
+def test_the_pairing_survives_redaction():
+    """Position plus unread state is actionable with no identities at all --
+    which is why the default stays redacted rather than being forced open to
+    make the tool useful."""
+    out = shape.messaging_overview(PAIRED, THREAD_URL)
+
+    assert all(r["name"] == shape.NAME_PLACEHOLDER for r in out["rows"])
+    unread_positions = [r["position"] for r in out["rows"] if r["unread"]]
+    assert unread_positions == [1, 3]
+
+
+def test_a_marker_does_not_bleed_into_the_next_conversation():
+    """The row boundary has to hold or every row below an unread one reads
+    unread too -- a wrong answer that would look plausible and inflate every
+    count this tool produces."""
+    out = shape.messaging_overview(PAIRED, THREAD_URL)
+    assert out["rows"][1]["unread"] is False
+
+
+def test_the_last_row_is_not_marked_unread_by_the_page_footer():
+    """The tail row has no next-label to stop at, so its span is BOUNDED. A
+    naive slice-to-end-of-document would hand it every 'unread' string in the
+    footer, scripts and analytics payload below the list."""
+    html = (
+        '<div aria-label="Select conversation with Solo Person">quiet</div>'
+        + "<footer>" + ("x" * 5000) + "unread</footer>"
+    )
+    out = shape.messaging_overview(html, THREAD_URL)
+    assert out["rows"][0]["unread"] is False, "the footer marked the last row"
+
+
+def test_the_result_says_the_count_is_a_floor():
+    """A recruiter InMail was seen in the product that did not appear in these
+    rows. Either it sits below this page or InMails are a separate surface --
+    UNMEASURED, and reported as such rather than guessed. A tool whose whole
+    credibility rests on its numbers must not present a floor as a total.
+    """
+    out = shape.messaging_overview(PAIRED, THREAD_URL)
+    completeness = out["completeness"]
+    assert "floor" in completeness
+    assert "UNMEASURED" in completeness
+    assert "InMail" in completeness

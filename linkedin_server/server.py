@@ -761,9 +761,21 @@ async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]
     person who wrote to you can see read receipts, they may see one. That is
     reported as an honest unknown rather than smoothed over.
 
-    NAMES ARE OFF BY DEFAULT. You get counts and shapes -- how many
-    conversations, how many carry unread markers -- which answers "is anything
-    waiting and how much". Pass ``include_names=True`` when you have decided
+    UNREAD IS PAIRED TO THE ROW. Each conversation comes back with its
+    position and its own unread flag, not as a count beside a separate list of
+    names. An earlier version returned "10 conversations, 4 unread markers",
+    which told him four people were waiting without telling him WHICH four --
+    so he still had to open LinkedIn, which is most of what this exists to
+    spare him. The pairing survives redaction: "rows 1 and 4 of 10 are unread"
+    is actionable without any identities at all.
+
+    THE COUNT IS A FLOOR, NOT A TOTAL, and the result says so. This is one
+    page of the list, and whether LinkedIn files InMails here or on a separate
+    surface is UNMEASURED -- a recruiter InMail was seen in the product that
+    did not appear in these rows. Do not report this number as everything
+    waiting on you.
+
+    NAMES ARE OFF BY DEFAULT. Pass ``include_names=True`` when you have decided
     to look. Your inbox is yours; the reason for the default is that this
     output lands in a model's context and in transcripts, where a name
     outlives the question that fetched it. The thread identifier in the landed

@@ -1999,7 +1999,53 @@ _SEND_SURFACES = (
 NAME_PLACEHOLDER = "<NAME>"
 
 
-def messaging_overview(html: str, landed_url: str, *, include_names: bool = False) -> dict[str, Any]:
+def _conversation_rows(html: str) -> list[dict[str, Any]]:
+    """One record per conversation, with its unread state ATTACHED.
+
+    WHY THIS IS SEGMENTED RATHER THAN COUNTED. The first version counted names
+    and unread markers separately and returned "10 conversations, 4 unread
+    markers" -- true, and useless: it told him four people were waiting
+    without telling him WHICH four, so he still had to open LinkedIn to find
+    out, which is most of what this tool exists to spare him.
+
+    The marker and the name sit on the same row, so they are read together.
+    The row boundary is taken as the span between one conversation label and
+    the next -- LinkedIn nests these deeply and by hashed class names, so
+    slicing on the labels themselves is stabler than guessing a container
+    selector that changes with every redeploy.
+
+    ORDER IS PRESERVED, and that is load-bearing even when names are redacted:
+    "rows 1 and 4 of 10 are unread" is actionable in a way that "4 unread" is
+    not.
+    """
+    text = html or ""
+    marks = list(_CONVERSATION_ROW.finditer(text))
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for i, match in enumerate(marks):
+        name = match.group(1).strip()
+        if name in seen:
+            continue
+        seen.add(name)
+        # The row runs from this label to the next one. The tail row runs to
+        # a bounded distance rather than to the end of the document, so the
+        # page footer cannot mark the last conversation unread.
+        start = match.start()
+        end = marks[i + 1].start() if i + 1 < len(marks) else min(len(text), match.end() + 4000)
+        segment = text[start:end]
+        rows.append(
+            {
+                "position": len(rows) + 1,
+                "name": name,
+                "unread": bool(_UNREAD_MARKER.search(segment)),
+            }
+        )
+    return rows
+
+
+def messaging_overview(
+    html: str, landed_url: str, *, include_names: bool = False
+) -> dict[str, Any]:
     """What the messaging surface holds, and what opening it cost.
 
     THE COST IS A FIELD, NOT A FOOTNOTE. Asking LinkedIn for ``/messaging/``
@@ -2013,25 +2059,34 @@ def messaging_overview(html: str, landed_url: str, *, include_names: bool = Fals
     counts NEW-SINCE-LAST-VISIT and resets when the tab is opened, so it
     cannot witness a read; the per-row unread markers live on this very page,
     which cannot be reached without the redirect. **The only signal that would
-    settle it requires performing the act being measured.** That is reported
-    as an honest unknown rather than a reassurance.
+    settle it requires performing the act being measured.**
 
-    NAMES ARE OFF BY DEFAULT. Counts and shapes answer "is anything waiting
-    and how much of it", which is the question that gets asked; the names only
-    matter once he has decided to look. His inbox is his, but this output
-    lands in a model's context and in transcripts, where a name outlives the
-    question that fetched it.
+    UNREAD IS PAIRED TO THE ROW, not counted beside it. An earlier version
+    returned a conversation count and a separate marker count, which told him
+    four people were waiting without telling him which four -- so he still had
+    to open LinkedIn, which is most of what this exists to spare him.
+
+    NAMES ARE OFF BY DEFAULT and the pairing survives the redaction: position
+    plus unread state is actionable even without identities.
     """
     text = html or ""
-    names = _CONVERSATION_ROW.findall(text)
-    unique = list(dict.fromkeys(names))
-
+    rows = _conversation_rows(text)
     sends = {label: len(pattern.findall(text)) for label, pattern in _SEND_SURFACES}
     on_a_thread = "/messaging/thread/" in (landed_url or "")
 
-    out: dict[str, Any] = {
-        "conversations": len(unique),
-        "unread_markers": len(_UNREAD_MARKER.findall(text)),
+    conversations = [
+        {
+            "position": row["position"],
+            "name": row["name"] if include_names else NAME_PLACEHOLDER,
+            "unread": row["unread"],
+        }
+        for row in rows
+    ]
+
+    return {
+        "conversations": len(rows),
+        "unread": sum(1 for r in rows if r["unread"]),
+        "rows": conversations,
         "send_surfaces": sends,
         "thread_opened": {
             "opened": on_a_thread,
@@ -2052,11 +2107,14 @@ def messaging_overview(html: str, landed_url: str, *, include_names: bool = Fals
             ),
         },
         "names_included": bool(include_names),
+        "completeness": (
+            "This is ONE PAGE of the conversation list, and whether LinkedIn "
+            "lists InMails here or on a separate surface is UNMEASURED -- a "
+            "recruiter InMail was seen in the product that did not appear in "
+            "these rows. So this count is a floor, not a total. Pass a filter "
+            "to narrow it; do not read it as everything waiting."
+        ),
     }
-    out["participants"] = (
-        unique if include_names else [NAME_PLACEHOLDER] * len(unique)
-    )
-    return out
 
 
 def redact_thread_id(url: Optional[str]) -> Optional[str]:
