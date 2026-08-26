@@ -1,4 +1,4 @@
-"""The tool surface: twenty-two tools, eighteen of which do not write.
+"""The tool surface: twenty-three tools, nineteen of which do not write.
 
 THE HEADLINE SAID "nineteen tools, fifteen of which read LinkedIn" UNTIL
 2026-08-25, and both halves of that sentence changed for the same small
@@ -125,6 +125,12 @@ EXPECTED_TOOLS = {
     # ``draft`` is on no write-verb list, so nothing here is a rename dodging
     # a guard. What it reads is the tab LinkedIn labels "In Progress".
     "linkedin_draft_applications",
+    # 2026-08-26. NOT A JOB-SEARCH TOOL, and the only name on this list that
+    # is not: linkedin_surface_census measures what controls a page carries so
+    # that the capabilities this server refuses can be costed from a reading
+    # instead of a guess. It reads one page, clicks nothing, and reports
+    # SHAPES rather than names -- see its own docstring and test_surface_census.py.
+    "linkedin_surface_census",
     # THE MESSAGING SURFACE ITSELF, 2026-08-26, on the operator's ruling that
     # reading his own inbox is his to do. Named for what it DOES rather than
     # what the path suggests: /messaging/ does not stay on a list, LinkedIn
@@ -188,7 +194,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_twentytwo_tools(tools):
+async def test_the_surface_is_exactly_the_twentythree_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -212,9 +218,16 @@ async def test_the_surface_is_exactly_the_twentytwo_tools(tools):
     In Progress list, which no tool could reach because the navigation
     allowlist enumerated two stages and this is a third. So twenty-two names
     over twenty-one capabilities; the login pair is still the only pair.
+
+    THE SIXTH RENAME, 2026-08-26, is the same kind again and the tool is an
+    odd one: ``linkedin_surface_census`` is an INSTRUMENT, not a capability
+    the operator would ever call for its own sake. It is counted here anyway,
+    because this file counts what is REGISTERED -- a tool that is exempt from
+    the surface count because somebody classified it as internal is exactly
+    the hole this set-equality exists to close.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 22
+    assert len(tools) == 23
     # And the split is asserted, not just the total: sixteen non-writes and the
     # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
@@ -245,7 +258,7 @@ async def test_the_surface_is_exactly_the_twentytwo_tools(tools):
     # do before it. The write count is unmoved at four, which is the half of
     # this line worth checking -- a read arriving must not be able to hide a
     # write arriving beside it.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 18
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 19
 
 
 def test_the_read_that_was_nearly_named_a_write():

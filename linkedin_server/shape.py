@@ -2284,3 +2284,290 @@ def messaging_filters(html: str) -> dict[str, Any]:
             )
         ),
     }
+
+
+# ---------------------------------------------------------------------------
+# The surface census: SHAPES, never names
+# ---------------------------------------------------------------------------
+#
+# WHAT THIS SECTION IS FOR. ``linkedin_surface_census`` measures what controls
+# a LinkedIn page carries, so that the capabilities this server has never
+# measured can be costed without guessing. The feed is the surface worth
+# measuring and the feed is made almost entirely OF OTHER MEMBERS: LinkedIn
+# writes their names into the accessible name of nearly every control on it --
+# "React Like to Jane Doe's post", "Reply to Jane Doe", "Jane Doe's profile".
+#
+# So the census may not report control NAMES. It reports SHAPES: the name with
+# every identifying part substituted out, then identical shapes merged with a
+# count. That is a STRUCTURAL property rather than a filter -- there is no code
+# path from a raw accessible name to a tool result, because
+# ``dom.read_surface_census`` shapes every name and every href before it
+# returns, and this module is where that happens.
+#
+# THE ORDER OF THE SUBSTITUTIONS IS LOAD-BEARING and is not alphabetical:
+# urns first (they carry both digits and colons, so a later digit rule would
+# chew them up), then the two path forms, then the possessive, then digit
+# runs. Changing the order changes the output, which is why the table in
+# ``tests/test_surface_census.py`` pins it.
+#
+# AND THE GATE IS POSITIVE, not a blocklist. A name is emitted verbatim only
+# if it SURVIVES shaping, matches a conservative character class, and is
+# short. A blocklist of known name-shaped phrases would be a list of the names
+# somebody thought of; this refuses everything it does not recognise. The cost
+# is over-redaction -- ``<opaque>`` where a harmless control had an em-dash in
+# it -- and that is the direction to be wrong in.
+
+#: The curly quotes, normalised to their ASCII forms before anything else
+#: runs. MEASURED, not tidiness: LinkedIn serves U+2019 in "Jane Doe's post",
+#: and with the glyph left in place the possessive rule fired correctly and
+#: the CHARACTER GATE then refused the result anyway -- every reaction control
+#: on the feed collapsed to ``<opaque>`` and the census reported nothing about
+#: the surface it exists to measure. Normalising first keeps the shape.
+_CENSUS_CURLY = re.compile(r"[\u2018\u2019]")
+
+#: An entity urn. First, because it carries digits and colons that every later
+#: rule would otherwise bite into.
+_CENSUS_URN = re.compile(r"urn:li:[A-Za-z0-9_.:%@-]+")
+
+#: A member path segment. The slug IS the identity, so nothing of it survives.
+_CENSUS_IN_PATH = re.compile(r"/in/[A-Za-z0-9\-_%.]+/?")
+
+#: A company path segment.
+_CENSUS_COMPANY_PATH = re.compile(r"/company/[A-Za-z0-9\-_%.]+/?")
+
+#: Six or more consecutive digits: a job id, an activity id, a member id.
+#: Six rather than four so that a year, a count, or "500+" survives -- those
+#: identify nobody and are worth keeping in a shape.
+_CENSUS_LONG_DIGITS = re.compile(r"\d{6,}")
+
+#: THE POSSESSIVE, which is how LinkedIn actually leaks a name into a control.
+#: Matches the run of capitalised tokens immediately before ``'s``, and the
+#: CURLY apostrophe as well as the straight one -- LinkedIn serves U+2019, and
+#: a rule that only knew the ASCII form would pass "Jane Doe" through intact on
+#: the real page while every test written with a typed quote passed. Spelled
+#: ``\u2019`` rather than as the character so this file stays ASCII; ``re``
+#: interprets the escape itself, so the pattern still matches the real glyph.
+_CENSUS_POSSESSIVE = re.compile(
+    r"(?:[A-Z][A-Za-z0-9.'\u2019-]*)(?:\s+[A-Z][A-Za-z0-9.'\u2019-]*)*"
+    r"(['\u2019]s)\b"
+)
+
+#: A lowercase possessive -- "the company's page". Replaced too, because the
+#: rule is about the POSITION and not about whether somebody happened to
+#: capitalise. Over-redaction in the safe direction.
+_CENSUS_POSSESSIVE_LOWER = re.compile(
+    r"\b[A-Za-z0-9.'\u2019-]+(['\u2019]s)\b"
+)
+
+#: TWO or more consecutive capitalised words, in a shape seen exactly once.
+#:
+#: THE BRIEF SAID THREE AND THIS SAYS TWO. Flagged here rather than changed
+#: quietly, because it is a deliberate departure from the specification.
+#:
+#: Three does not hold. Both of the brief's OWN examples of a leaked name
+#: survive a three-word rule: ``Reply to Jane Doe`` shaped to itself, and a
+#: profile link named ``Jane Doe`` shaped to itself -- two capitalised words
+#: each, inside the character class, under the length limit, so the gate
+#: passed them and the cap never fired. Measured on this implementation before
+#: the rule moved, not reasoned about.
+#:
+#: What makes two safe to use is the COUNT, not the string. This fires only
+#: where ``count == 1``, and a shape seen once is the least informative row in
+#: a census anyway -- the signal a capability measurement is built on is the
+#: REPEATED control ("React Like to <member>'s post", twelve of them), and
+#: those are untouched. So the aggressive rule lands exactly where the value is
+#: lowest and the risk is highest.
+#:
+#: The cost is real and is accepted: a genuinely unique two-word heading is
+#: blanked too.
+_CENSUS_CAPS_RUN = re.compile(
+    r"[A-Z][A-Za-z0-9.'\u2019-]*(?:\s+[A-Z][A-Za-z0-9.'\u2019-]*)+"
+)
+
+#: The placeholders this module writes. Removed before the character gate
+#: runs, because they are the one source of ``<`` and ``>`` that is allowed.
+_CENSUS_PLACEHOLDER = re.compile(r"<(?:member|company|id|urn|redacted|opaque)>")
+
+#: The ONLY characters a name may contain and still be emitted verbatim.
+#: Deliberately narrow: no letters outside ASCII, so a name in any other
+#: script is refused BY THE GATE rather than by a rule somebody remembered to
+#: write for it.
+_CENSUS_SAFE_CHARS = re.compile(r"^[A-Za-z0-9 ,.:!?&()/'-]*$")
+
+#: Longest accessible name emitted verbatim. A control label is short; a
+#: sentence on a feed card is somebody's words.
+CENSUS_NAME_LIMIT = 60
+
+#: What a name becomes when it fails the gate. ONE marker for both reasons --
+#: too long, or a character outside the safe class -- because naming which
+#: rule refused it is itself a fact about the string.
+CENSUS_OPAQUE = "<opaque>"
+
+#: What a capitalised run in a one-off shape becomes.
+CENSUS_REDACTED = "<redacted>"
+
+
+def census_shape(text: Optional[str]) -> str:
+    """Reduce one accessible name or href to a shape that identifies nobody.
+
+    Pure, and the whole privacy property of ``linkedin_surface_census`` rests
+    on it, so it is tested against a table of ADVERSARIAL inputs rather than
+    clean ones -- a shaper shown only the names it already handles certifies
+    nothing.
+
+    Returns ``""`` for empty input, :data:`CENSUS_OPAQUE` for anything that
+    fails the character or length gate, and otherwise the shaped string.
+    """
+    if text is None:
+        return ""
+    shaped = _WS.sub(" ", str(text)).strip()
+    if not shaped:
+        return ""
+
+    shaped = _CENSUS_CURLY.sub("'", shaped)
+    shaped = _CENSUS_URN.sub("<urn>", shaped)
+    shaped = _CENSUS_IN_PATH.sub("/in/<member>/", shaped)
+    shaped = _CENSUS_COMPANY_PATH.sub("/company/<company>/", shaped)
+    shaped = _CENSUS_POSSESSIVE.sub(lambda m: "<member>" + m.group(1), shaped)
+    shaped = _CENSUS_POSSESSIVE_LOWER.sub(
+        lambda m: "<member>" + m.group(1), shaped
+    )
+    shaped = _CENSUS_LONG_DIGITS.sub("<id>", shaped)
+
+    # The gate runs on what is LEFT once the placeholders are taken out, since
+    # they are the one legitimate source of angle brackets.
+    if len(shaped) > CENSUS_NAME_LIMIT:
+        return CENSUS_OPAQUE
+    residue = _CENSUS_PLACEHOLDER.sub("", shaped)
+    if not _CENSUS_SAFE_CHARS.match(residue):
+        return CENSUS_OPAQUE
+    return shaped
+
+
+def census_redact_rare(shape: str, count: int) -> str:
+    """Blank a run of 3+ capitalised words in a shape seen exactly ONCE.
+
+    THE COUNT IS THE DISCRIMINATOR, and it is why this cannot live inside
+    :func:`census_shape`. "Start A Post" appears on the feed once and is
+    furniture; "Jane Elizabeth Doe" appears once and is a person. Nothing
+    about the STRING separates them. What separates them is that page
+    furniture repeats across a surface and a member does not, so a capitalised
+    run in a shape with ``count == 1`` is treated as a name.
+
+    The run length is TWO, not the three the brief specified, and the reason
+    is on :data:`_CENSUS_CAPS_RUN`: both of the brief's own example leaks
+    survive a three-word rule. Two is safe to use only because this fires on
+    singletons alone.
+
+    Over-redacts by construction: a genuinely unique two-word heading is
+    blanked too. That is the direction to be wrong in.
+    """
+    if count != 1:
+        return shape
+    return _CENSUS_CAPS_RUN.sub(CENSUS_REDACTED, shape)
+
+
+#: Href shapes that IDENTIFY AN ENTITY by construction. A control pointing at
+#: one of these is a link to a person or a company, so its accessible name IS
+#: that person's or company's name -- whatever the string happens to look like.
+_CENSUS_ENTITY_HREFS = ("/in/<member>", "/company/<company>")
+
+
+def census_href_identifies_entity(href_shape: Optional[str]) -> bool:
+    """True if this href shape makes its control a link to a named entity.
+
+    THIS CLOSES THE HOLE THE COUNT RULE CANNOT SEE. ``census_redact_rare``
+    rests on "furniture repeats and a person does not", and that premise
+    fails for the commonest control on a feed: a member who appears twice --
+    posts twice, or is linked from both a card header and a comment -- merges
+    to ``count == 2``, the singleton cap never fires, and the name ships
+    verbatim. Measured on this implementation, not imagined.
+
+    The href does not depend on that premise. A control whose destination is
+    ``/in/<member>/`` is a link to a member no matter how many of them there
+    are, so the name is refused on the STRUCTURE of the control rather than on
+    a property of the string or of the tally.
+    """
+    if not href_shape:
+        return False
+    # CONTAINMENT, not startswith. MEASURED: LinkedIn writes its member links
+    # both ways on one page -- "/in/<slug>/" on some cards and the absolute
+    # "https://www.linkedin.com/in/<slug>/" on others -- so an anchored check
+    # caught the relative form and let the absolute one through with the
+    # member's name still on it. The marker is what identifies the control,
+    # and where it sits in the string is LinkedIn's choice, not a property
+    # worth depending on.
+    shaped = str(href_shape)
+    return any(marker in shaped for marker in _CENSUS_ENTITY_HREFS)
+
+
+def census_aggregate(
+    records: Iterable[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Merge already-shaped control records into counted shapes.
+
+    Returns ``(control_shapes, href_shapes)``. ``control_shapes`` is sorted by
+    count descending, then by shape, so two runs over the same page produce
+    the same list -- a census whose row order moved between runs would be
+    unreadable as a measurement.
+
+    The merge key is the WHOLE record, not just the name: two controls reading
+    "Follow" are the same shape only if they are also the same tag, role and
+    disabled state. Collapsing them on the name alone would report one shape
+    where the page carries two different controls.
+
+    Redaction happens HERE rather than in :func:`census_shape` because it
+    needs the count -- see :func:`census_redact_rare` -- and the redacted
+    shapes are then RE-MERGED. That second merge is not tidying: "Reply to
+    <redacted>" arriving twice from two different one-off names is a count of
+    two, and reporting it as two singletons would publish that there were two
+    distinct people where the merged form publishes nothing.
+    """
+    tally: dict[tuple, int] = {}
+    hrefs: dict[str, int] = {}
+
+    for record in records:
+        # A link to a member is refused BEFORE it is counted, which is what
+        # makes this structural rather than a filter over the output.
+        shaped_name = str(record.get("shape") or "")
+        if census_href_identifies_entity(record.get("href_shape")):
+            shaped_name = CENSUS_REDACTED
+        key = (
+            shaped_name,
+            str(record.get("tag") or ""),
+            record.get("role"),
+            record.get("name_source"),
+            bool(record.get("has_href")),
+            record.get("href_shape"),
+            record.get("aria_expanded"),
+            bool(record.get("disabled")),
+        )
+        tally[key] = tally.get(key, 0) + 1
+        href_shape = record.get("href_shape")
+        if href_shape:
+            hrefs[href_shape] = hrefs.get(href_shape, 0) + 1
+
+    # Pass two: redact the singletons, then merge AGAIN on the redacted key.
+    merged: dict[tuple, int] = {}
+    for key, count in tally.items():
+        redacted = (census_redact_rare(key[0], count),) + key[1:]
+        merged[redacted] = merged.get(redacted, 0) + count
+
+    control_shapes = [
+        {
+            "shape": key[0],
+            "count": count,
+            "tag": key[1],
+            "role": key[2],
+            "name_source": key[3],
+            "has_href": key[4],
+            "href_shape": key[5],
+            "aria_expanded": key[6],
+            "disabled": key[7],
+        }
+        for key, count in merged.items()
+    ]
+    control_shapes.sort(key=lambda row: (-row["count"], row["shape"]))
+    return control_shapes, dict(
+        sorted(hrefs.items(), key=lambda kv: (-kv[1], kv[0]))
+    )

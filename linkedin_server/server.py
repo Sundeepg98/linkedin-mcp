@@ -1508,6 +1508,143 @@ async def linkedin_notifications(
 
 
 # ---------------------------------------------------------------------------
+# The surface census -- an instrument, not a feature
+# ---------------------------------------------------------------------------
+
+#: THE SURFACES THIS INSTRUMENT MAY READ, as a CLOSED SET of keys.
+#:
+#: A caller passes a KEY. A url never arrives as an argument and is never built
+#: from one: an unknown key is refused with the valid keys named, and the
+#: refusal RETURNS rather than falling through to a navigation. That is the
+#: difference between a tool that reads three pages and a tool that reads
+#: whatever it is handed, and it is worth more than the allowlist behind it --
+#: ``BROWSER.goto`` puts every one of these through
+#: ``readonly.assert_read_url`` as it does for every other read, and all of
+#: them were already on that allowlist before this tool existed. Nothing in
+#: ``readonly.py`` was touched to add this.
+#:
+#: NOTIFICATIONS IS DELIBERATELY ABSENT, and its absence is the one thing here
+#: worth explaining, because it is the obvious third surface and the next
+#: person will reach for it. Loading ``/notifications/`` CLEARS LINKEDIN'S
+#: UNREAD BADGE -- measured, irreversible, and documented on
+#: ``linkedin_notifications``, which is the tool that pays that cost knowingly
+#: because reading the list is the whole point of it. A CENSUS of that page
+#: would pay the same cost to learn what controls a notification row carries,
+#: which is not worth one destroyed badge on the operator's own account. If
+#: that surface ever has to be measured, do it by censusing a page that is
+#: already being loaded for another reason, not by adding a key here.
+CENSUS_SURFACES: dict[str, str] = {
+    "feed": FEED_URL,
+    "profile": f"{BASE_URL}/in/me/",
+}
+
+
+@mcp.tool()
+async def linkedin_surface_census(surface: str) -> dict[str, Any]:
+    """Measure what controls a LinkedIn page carries. An instrument, not a feature.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    THIS IS A MEASUREMENT INSTRUMENT FOR EXTENDING THIS SERVER. It is not a
+    job-search tool and it will never help you find, compare or track a job.
+    If you are working on the operator's job hunt, no answer you need is in
+    here; use one of the other tools. It exists so that the capabilities this
+    server has never measured -- publishing to a feed, replying under a
+    colleague's item, reacting to one, changing a profile field, the two
+    network-graph gestures, skill endorsement -- can be costed from what the
+    page really carries, instead of from a guessed selector that is found to
+    be wrong at the moment it would fire.
+    =================================================================
+
+    IT LOADS EXACTLY ONE PAGE AND CLICKS NOTHING. There is no typing, no form
+    submission, no scrolling and no request other than the page load itself.
+    It reads the rendered DOM and returns counts.
+
+    A CONTROL BEING PRESENT IS NOT EVIDENCE THAT ACTIVATING IT IS SAFE. This
+    reports that a page carries, say, a button whose accessible name is about
+    reacting to a feed item. It does not establish what happens when that button
+    is used, whether the result can be undone, or whether this server should
+    ever be permitted to touch it. Those are separate questions and none of
+    them is answered here.
+
+    THE CENSUS REPORTS SHAPES, NEVER NAMES. The feed is made of other members,
+    and LinkedIn writes their names into the accessible name of nearly every
+    control on it. So each name and each href is reduced to a shape before it
+    is counted -- a member path becomes /in/<member>/, an id becomes <id>, a
+    possessive becomes <member>'s -- and identical shapes are merged into one
+    row with a count. A COUNT OF 1 THEREFORE IDENTIFIES NOBODY: a shape seen
+    once has any run of capitalised words blanked, and any control that links
+    to a member is blanked whatever its count. Collecting data about other
+    members is out of scope for this server and this tool is built so that it
+    cannot, rather than filtered afterwards so that it does not.
+
+    ON COMPLETENESS -- ABSENT MEANS UNKNOWN, NEVER ZERO. LinkedIn defers most
+    of a feed until the page is SCROLLED and this server does not scroll, so
+    what is reported is the FIRST RENDER and nothing below the fold. A control
+    that does not appear here may be one screen further down, may need a menu
+    opened, or may need a state this account is not in. Read a zero as "not
+    seen on the first render", never as "the page has none".
+
+    Args:
+        surface: which page to measure. One of "feed" or "profile" -- a KEY,
+            never a url. Notifications is deliberately not offered: loading
+            that page clears the unread badge, and a census is not worth that.
+    """
+    key = str(surface or "").strip().lower()
+    if key not in CENSUS_SURFACES:
+        # A refusal that RETURNS. The unknown key must not reach a navigation,
+        # so this is deliberately not an exception routed through _error --
+        # there is no failure to report, only a question this tool will not be
+        # asked.
+        return {
+            "error": "unknown_surface",
+            "message": (
+                f"{surface!r} is not a surface this instrument measures. It "
+                "takes one of a fixed set of KEYS and never a url."
+            ),
+            "valid_surfaces": sorted(CENSUS_SURFACES),
+        }
+
+    try:
+        async with BROWSER.session() as page:
+            final_url = await BROWSER.goto(page, CENSUS_SURFACES[key])
+            assert_not_authwall(final_url, surface=key)
+            census = await dom.read_surface_census(page)
+            control_shapes, href_shapes = shape.census_aggregate(
+                census["controls"]
+            )
+            out: dict[str, Any] = {
+                "surface": key,
+                "source_url": final_url,
+                "counts": census["counts"],
+                "control_shapes": control_shapes,
+                "href_shapes": href_shapes,
+                "controls_read": census["controls_read"],
+                "pages_loaded": 1,
+                "note": (
+                    "SHAPES, not names: every accessible name and href here "
+                    "has had member slugs, company slugs, long ids and urns "
+                    "substituted out before being counted, so a row identifies "
+                    "a KIND of control and never a person. FIRST RENDER ONLY: "
+                    "this loads one page and does not scroll, so a control "
+                    "that is absent is UNKNOWN, not zero. And presence is not "
+                    "permission -- that a control is on the page says nothing "
+                    "about whether using it would be safe or reversible."
+                ),
+            }
+            if census["truncated"]:
+                out["truncated"] = True
+                out["truncated_note"] = (
+                    f"the page carried more than {dom.CENSUS_MAX_CONTROLS} "
+                    "controls and the tail was not read. The counts block is "
+                    "a whole-page count and is unaffected; control_shapes is "
+                    "the distribution over what was read."
+                )
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---------------------------------------------------------------------------
 # The two writes
 # ---------------------------------------------------------------------------
 #

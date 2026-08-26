@@ -271,7 +271,12 @@ def test_only_dom_module_waives_evaluate():
         if count:
             waived_in[module.name] = count
     assert set(waived_in) <= {"dom.py"}, waived_in
-    assert waived_in.get("dom.py", 0) <= 3, waived_in
+    # FOUR FROM 2026-08-26, up from three. The budget is what stops an
+    # evaluate() waiver spreading: every one of them is a place where "we
+    # only call read methods in Python" stops being a sufficient argument,
+    # so the number is pinned and a new one has to move it in a reviewable
+    # diff. The fourth is CENSUS_JS, read by dom.read_surface_census.
+    assert waived_in.get("dom.py", 0) <= 4, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -282,6 +287,11 @@ INJECTED_SCRIPTS = {
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
     "READ_PROFILE_JS": dom.READ_PROFILE_JS,
+    # 2026-08-26. The surface census reads the CONTROLS on a page rather than
+    # its content, which means it is the one script here that goes looking at
+    # buttons -- so it is the one whose scan matters most, and it is scanned by
+    # exactly the same check as the other three rather than by a special case.
+    "CENSUS_JS": dom.CENSUS_JS,
 }
 
 
@@ -371,7 +381,7 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     """No script runs that this module does not know the name of."""
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 3, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 4, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

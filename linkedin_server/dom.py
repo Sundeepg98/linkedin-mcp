@@ -1422,3 +1422,194 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
 #: after it. Short: this is a client-side filter, not a page load.
 FILTER_CLICK_TIMEOUT_MS = 10_000
 FILTER_SETTLE_MS = 2_000
+
+
+# ---------------------------------------------------------------------------
+# The surface census (measurement instrument, not a job-search reader)
+# ---------------------------------------------------------------------------
+
+#: Enumerate the CONTROLS on a rendered page, with no interpretation.
+#:
+#: THE FOURTH SCRIPT, and it is the only one here that is not in service of a
+#: job-search feature. It exists so that the capabilities this server has never
+#: measured -- and therefore refuses -- can be costed by READING what a page
+#: actually carries, rather than by guessing a selector and finding out at the
+#: moment it fires. ``tests/test_readonly.py`` scans it like the other three.
+#:
+#: It reads and returns. There is no click, no focus, no attribute write, no
+#: request, and no scroll: the tokens that would do any of those are refused by
+#: :data:`readonly.JS_MUTATION_TOKENS`, and this script is scanned against that
+#: list by name.
+#:
+#: WHAT IT RETURNS IS RAW AND IS NOT SAFE TO PUBLISH. Accessible names on a
+#: feed contain other members' names, so every name and every href leaving this
+#: script goes through ``shape.census_shape`` in the wrapper below, BEFORE it
+#: reaches any caller. This script is the only place raw names exist and its
+#: only caller shapes them.
+#:
+#: THE NAME IS RESOLVED IN THE ORDER A SCREEN READER WOULD, which is the whole
+#: reason to read the accessible name rather than the text: LinkedIn labels its
+#: reaction buttons with ``aria-label`` and leaves their text as an icon, so a
+#: text-only census reports a page of nameless buttons.
+CENSUS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const countOf = (selector) => {
+    try { return document.querySelectorAll(selector).length; } catch (e) { return 0; }
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const body = textOf(el);
+    if (body) return { name: body, source: 'text' };
+    return { name: '', source: 'none' };
+  };
+
+  const controls = [];
+  let nodes;
+  try { nodes = document.querySelectorAll(cfg.controlSelector); } catch (e) { nodes = []; }
+  for (const el of nodes) {
+    const named = nameOf(el);
+    const href = attrOf(el, 'href');
+    const expanded = attrOf(el, 'aria-expanded');
+    const ariaDisabled = attrOf(el, 'aria-disabled');
+    controls.push({
+      tag: (el.tagName || '').toLowerCase(),
+      role: attrOf(el, 'role') || null,
+      name: named.name,
+      name_source: named.source,
+      has_href: !!href,
+      href: href,
+      aria_expanded: expanded ? expanded : null,
+      disabled: el.disabled === true || ariaDisabled === 'true'
+    });
+    if (controls.length >= cfg.maxControls) break;
+  }
+
+  return {
+    url: document.location.href,
+    title: document.title || '',
+    truncated: controls.length >= cfg.maxControls,
+    counts: {
+      forms: countOf('form'),
+      buttons: countOf('button, [role="button"]'),
+      links: countOf('a[href]'),
+      contenteditable: countOf('[contenteditable]:not([contenteditable="false"])'),
+      file_inputs: countOf('input[type="file"]'),
+      dialogs: countOf('[role="dialog"], dialog')
+    },
+    controls: controls
+  };
+}
+"""
+
+#: What counts as a control worth censusing. Roles as well as tags, because
+#: LinkedIn builds plenty of its buttons out of divs.
+CENSUS_CONTROL_SELECTOR = (
+    'button, a[href], input, textarea, select, '
+    '[role="button"], [role="link"], [role="textbox"], [role="combobox"], '
+    '[contenteditable]:not([contenteditable="false"])'
+)
+
+#: Ceiling on controls returned from one page. A feed carries hundreds and the
+#: census is a distribution, not a list, so the tail costs nothing to lose --
+#: but it is REPORTED as truncated rather than silently cut.
+CENSUS_MAX_CONTROLS = 400
+
+
+async def read_surface_census(
+    page: Any,
+    *,
+    max_controls: int = CENSUS_MAX_CONTROLS,
+    max_chars: int = 300,
+) -> dict[str, Any]:
+    """Return the control census of the rendered page, ALREADY SHAPED.
+
+    The shaping is done here, in the only caller of :data:`CENSUS_JS`, so that
+    a raw accessible name has nowhere to go: this function returns records
+    whose ``shape`` and ``href_shape`` have been through
+    ``shape.census_shape``, and the raw strings are discarded inside it.
+
+    That placement is the privacy property. Shaping in the tool instead would
+    leave a function on this module returning other members' names to anyone
+    who called it later, which is precisely the shape of defect that gets
+    found a release after it is introduced.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+    }
+    try:
+        data = await page.evaluate(CENSUS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    shaped: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        href_shape = shape.census_shape(control.get("href")) or None
+        # A control that POINTS AT a member or a company is a link to a named
+        # entity, so its accessible name is that entity's name whatever the
+        # string looks like. Refused here, at the earliest point the two
+        # fields exist together, rather than left for the aggregation pass --
+        # the aggregation pass still checks it, and neither is redundant: this
+        # one keeps a raw name out of THIS function's return value, which is
+        # what lets its docstring claim what it claims.
+        name_shape = shape.census_shape(control.get("name"))
+        if shape.census_href_identifies_entity(href_shape):
+            name_shape = shape.CENSUS_REDACTED
+        shaped.append(
+            {
+                "shape": name_shape,
+                "tag": str(control.get("tag") or ""),
+                "role": control.get("role"),
+                "name_source": control.get("name_source"),
+                "has_href": bool(control.get("has_href")),
+                "href_shape": href_shape,
+                "aria_expanded": control.get("aria_expanded"),
+                "disabled": bool(control.get("disabled")),
+            }
+        )
+
+    counts = {
+        key: int((data.get("counts") or {}).get(key) or 0)
+        for key in (
+            "forms",
+            "buttons",
+            "links",
+            "contenteditable",
+            "file_inputs",
+            "dialogs",
+        )
+    }
+    return {
+        "counts": counts,
+        "controls": shaped,
+        "controls_read": len(shaped),
+        "truncated": bool(data.get("truncated")),
+    }
