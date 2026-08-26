@@ -128,6 +128,12 @@ ME_API = f"{BASE_URL}/voyager/api/me"
 #: read of the same question.
 FEED_URL = f"{BASE_URL}/feed/"
 
+#: His own message surface. NOT a list url despite how it reads: LinkedIn
+#: redirects it into one specific conversation thread of its own choosing,
+#: measured twice. linkedin_open_messaging is named for that rather than for
+#: what the path suggests.
+MESSAGING_URL = f"{BASE_URL}/messaging/"
+
 LOGIN_URL = f"{BASE_URL}/login"
 
 #: Signed-out landing pages. A final url matching any of these means "not

@@ -70,6 +70,7 @@ from linkedin_server.config import (
     CDP_PORT,
     DEFAULT_LIMIT,
     FEED_URL,
+    MESSAGING_URL,
     IDLE_CLOSE_S,
     LAUNCH_ARGS,
     LOGIN_WAIT_S,
@@ -736,6 +737,59 @@ async def linkedin_new_messages() -> dict[str, Any]:
             "opened_a_conversation": False,
             "pages_loaded": 1,
         }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]:
+    """Open your LinkedIn messages and report what is there. OPENS A THREAD.
+
+    **THE COST IS IN THE NAME BECAUSE IT IS UNAVOIDABLE.** Asking LinkedIn for
+    ``/messaging/`` does not stay on a list -- it redirects into ONE SPECIFIC
+    CONVERSATION, and LinkedIn chooses which, not you and not this tool.
+    Measured twice. So every call to this opens somebody's thread. It is
+    called ``open_messaging`` rather than ``read_inbox`` because ``read_inbox``
+    would describe something LinkedIn does not offer.
+
+    WHETHER OPENING MARKS THAT MESSAGE READ IS UNMEASURED, and after three
+    attempts it is believed unmeasurable from outside. The nav badge counts
+    new-since-last-visit and resets when the tab is opened, so it cannot
+    witness a read. The per-conversation unread markers live on this very
+    page, which cannot be reached without the redirect. **The only signal that
+    would settle it requires performing the act being measured.** If the
+    person who wrote to you can see read receipts, they may see one. That is
+    reported as an honest unknown rather than smoothed over.
+
+    NAMES ARE OFF BY DEFAULT. You get counts and shapes -- how many
+    conversations, how many carry unread markers -- which answers "is anything
+    waiting and how much". Pass ``include_names=True`` when you have decided
+    to look. Your inbox is yours; the reason for the default is that this
+    output lands in a model's context and in transcripts, where a name
+    outlives the question that fetched it. The thread identifier in the landed
+    url is always redacted: nothing here accepts one, so it is of no use to a
+    caller and every use to a leak.
+
+    THIS NEVER SENDS ANYTHING, and that is enforced rather than merely
+    documented: LinkedIn's compose surface is on the read boundary's forbidden
+    list, checked before the allowlist, so no navigation from here can reach
+    it. The result also COUNTS what it found on the page it did load: editable
+    nodes, form elements, and controls whose names match the vocabulary this
+    server refuses. So "reading put no composer in front of you" is a number
+    you can check rather than a promise you have to take.
+
+    Args:
+        include_names: return correspondents' names instead of placeholders.
+            Default False.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, MESSAGING_URL)
+            html = await page.content()
+        verdict = shape.messaging_overview(
+            html, landed, include_names=bool(include_names)
+        )
+        return {**verdict, "pages_loaded": 1}
     except Exception as exc:
         return _error(exc)
 

@@ -1,4 +1,4 @@
-"""The tool surface: twenty tools, sixteen of which do not write.
+"""The tool surface: twenty-one tools, seventeen of which do not write.
 
 THE HEADLINE SAID "nineteen tools, fifteen of which read LinkedIn" UNTIL
 2026-08-25, and both halves of that sentence changed for the same small
@@ -117,6 +117,12 @@ EXPECTED_TOOLS = {
     # for a name that merely got better, and wrong for one that asserted
     # something false.
     "linkedin_new_messages",
+    # THE MESSAGING SURFACE ITSELF, 2026-08-26, on the operator's ruling that
+    # reading his own inbox is his to do. Named for what it DOES rather than
+    # what the path suggests: /messaging/ does not stay on a list, LinkedIn
+    # redirects it into one conversation of its own choosing, so a tool called
+    # read_inbox would describe an operation the product does not offer.
+    "linkedin_open_messaging",
     # The fourth WRITE, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
     # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
     # specced and registers NO TOOL, because its flow has never been captured
@@ -174,7 +180,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_twenty_tools(tools):
+async def test_the_surface_is_exactly_the_twentyone_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -194,7 +200,7 @@ async def test_the_surface_is_exactly_the_twenty_tools(tools):
     comment beside the pair in ``EXPECTED_TOOLS`` says which two they are.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 20
+    assert len(tools) == 21
     # And the split is asserted, not just the total: sixteen non-writes and the
     # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
@@ -219,7 +225,7 @@ async def test_the_surface_is_exactly_the_twenty_tools(tools):
     # sixteen distinct things would be wrong by one. The number is still
     # asserted rather than dropped, because the next quiet growth -- an actual
     # one -- still has to fail here.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 16
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 17
 
 
 def test_the_read_that_was_nearly_named_a_write():

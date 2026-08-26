@@ -1971,3 +1971,101 @@ def envelope(
         out.update(extra)
     out["results"] = trimmed
     return out
+
+
+# ---------------------------------------------------------------------------
+# The messaging surface
+# ---------------------------------------------------------------------------
+
+#: How LinkedIn labels each row of the conversation list. Measured on the live
+#: surface: ``aria-label="Select conversation with <NAME>"``.
+_CONVERSATION_ROW = re.compile(r'aria-label="Select conversation with ([^"]+)"')
+
+#: Words LinkedIn uses to mark a row unread. Measured: ``UNREAD``, ``Unread``,
+#: ``unread`` and the class token ``messaging-remove-unread-blue-background``.
+_UNREAD_MARKER = re.compile(r"\bunread\b", re.I)
+
+#: Anything that would let a caller send. Counted so the answer to "did
+#: reading put a compose box on the page" is a NUMBER rather than a promise.
+_SEND_SURFACES = (
+    ("contenteditable", re.compile(r'contenteditable="true"')),
+    ("send_controls", re.compile(r'(?i)aria-label="[^"]*\bsend\b[^"]*"')),
+    ("forms", re.compile(r"<form\b")),
+)
+
+#: Names are replaced with this unless the caller opts in. His own inbox, his
+#: own correspondents -- but the output lands in a model's context and in
+#: transcripts, and a name there outlives the question that fetched it.
+NAME_PLACEHOLDER = "<NAME>"
+
+
+def messaging_overview(html: str, landed_url: str, *, include_names: bool = False) -> dict[str, Any]:
+    """What the messaging surface holds, and what opening it cost.
+
+    THE COST IS A FIELD, NOT A FOOTNOTE. Asking LinkedIn for ``/messaging/``
+    does not stay on a list: it redirects into ONE SPECIFIC CONVERSATION that
+    LinkedIn, not the caller, chooses. So every call opens somebody's thread,
+    and ``thread_opened`` says so with the evidence -- the landed url -- rather
+    than leaving a caller to discover it.
+
+    WHETHER THAT MARKS THE MESSAGE READ IS UNMEASURED, and after three
+    attempts it is believed to be unmeasurable from outside. The nav badge
+    counts NEW-SINCE-LAST-VISIT and resets when the tab is opened, so it
+    cannot witness a read; the per-row unread markers live on this very page,
+    which cannot be reached without the redirect. **The only signal that would
+    settle it requires performing the act being measured.** That is reported
+    as an honest unknown rather than a reassurance.
+
+    NAMES ARE OFF BY DEFAULT. Counts and shapes answer "is anything waiting
+    and how much of it", which is the question that gets asked; the names only
+    matter once he has decided to look. His inbox is his, but this output
+    lands in a model's context and in transcripts, where a name outlives the
+    question that fetched it.
+    """
+    text = html or ""
+    names = _CONVERSATION_ROW.findall(text)
+    unique = list(dict.fromkeys(names))
+
+    sends = {label: len(pattern.findall(text)) for label, pattern in _SEND_SURFACES}
+    on_a_thread = "/messaging/thread/" in (landed_url or "")
+
+    out: dict[str, Any] = {
+        "conversations": len(unique),
+        "unread_markers": len(_UNREAD_MARKER.findall(text)),
+        "send_surfaces": sends,
+        "thread_opened": {
+            "opened": on_a_thread,
+            "landed_url": redact_thread_id(landed_url),
+            "why": (
+                "LinkedIn redirected the request into one specific conversation. "
+                "The caller did not choose which -- LinkedIn did."
+                if on_a_thread
+                else "the surface stayed on the list this time, which is not "
+                "the measured behaviour and is worth noticing."
+            ),
+            "marks_it_read": (
+                "UNMEASURED, and believed unmeasurable from outside. The nav "
+                "badge counts new-since-last-visit and resets on tab open, so "
+                "it cannot witness a read; the per-row unread markers are on "
+                "this page, which cannot be reached without this redirect. "
+                "Settling it requires performing the act being measured."
+            ),
+        },
+        "names_included": bool(include_names),
+    }
+    out["participants"] = (
+        unique if include_names else [NAME_PLACEHOLDER] * len(unique)
+    )
+    return out
+
+
+def redact_thread_id(url: Optional[str]) -> Optional[str]:
+    """A messaging url with the conversation identifier removed.
+
+    The thread id names one private conversation. It is of no use to a caller
+    -- nothing here accepts it -- and it is exactly the kind of value that
+    should not sit in a transcript.
+    """
+    if not url:
+        return url
+    return re.sub(r"(/messaging/thread/)[^/?#]+", r"\1<THREAD-ID>", url)
