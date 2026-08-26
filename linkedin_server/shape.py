@@ -2116,6 +2116,40 @@ def messaging_overview(
             )
         ),
         "send_surfaces": sends,
+        # THE COUNT IS THE POINT, AND IT STOPPED BEING ZERO. Every default-view
+        # call returned 0/0/0; filtering to inmail returned a page carrying a
+        # composer (1 editable node, 1 form). Nothing was typed and nothing
+        # sent -- and this is exactly why it is COUNTED rather than asserted:
+        # "reading put no composer in front of you" was true on one path and
+        # is false on another, and only a number could have shown that.
+        #
+        # WHAT THE URL GUARD DOES AND DOES NOT COVER, stated because the
+        # difference matters more than the feature. The forbidden-substring
+        # check fires on NAVIGATION to a compose url and still does -- verified.
+        # It was never consulted here, because nothing navigated: LinkedIn
+        # rendered the composer by client-side state on a url that is allowed.
+        # So the guard's true claim is "this server will not GO to a compose
+        # surface", not "a composer will never be on screen". Those were the
+        # same sentence until this call, and they are not any more.
+        #
+        # WHAT STILL HOLDS, and is why this is a disclosure rather than an
+        # incident: rendering a composer is not sending. There is no typing
+        # call site anywhere in the package, and the mutation allowlist holds
+        # exactly two clicks -- the gated write, and this filter -- neither of
+        # which can reach a send control.
+        "composer_present": {
+            "on_this_page": bool(sends.get("contenteditable") or sends.get("forms")),
+            "note": (
+                "a composer rendered on the page this call loaded. Nothing was "
+                "typed and nothing sent: this server has no typing call site, "
+                "and its two sanctioned clicks are the gated write and this "
+                "filter. The url guard blocks NAVIGATING to a compose surface "
+                "and was not consulted, because nothing navigated -- the "
+                "composer arrived as client-side state."
+            )
+            if (sends.get("contenteditable") or sends.get("forms"))
+            else "no editable node or form on the page this call loaded",
+        },
         "thread_opened": {
             "opened": on_a_thread,
             "landed_url": redact_thread_id(landed_url),
@@ -2136,11 +2170,13 @@ def messaging_overview(
         },
         "names_included": bool(include_names),
         "completeness": (
-            "This is ONE PAGE of the conversation list, and whether LinkedIn "
-            "lists InMails here or on a separate surface is UNMEASURED -- a "
-            "recruiter InMail was seen in the product that did not appear in "
-            "these rows. So this count is a floor, not a total. Pass a filter "
-            "to narrow it; do not read it as everything waiting."
+            "This is ONE PAGE of ONE surface. MEASURED 2026-08-26: InMails are "
+            "a SEPARATE SURFACE, not a pagination boundary -- filtering to "
+            "inmail returned ten entirely different people from the default "
+            "view, including a recruiter InMail that never appears here. So "
+            "the default view is not everything waiting on you, and neither "
+            "is any single filter. Ask for both: the default view and "
+            "message_filter='inmail'. This count remains a floor."
         ),
     }
 
@@ -2210,10 +2246,19 @@ def messaging_filters(html: str) -> dict[str, Any]:
                 href = _HREF.search(attrs or "")
                 found[name] = {
                     "tag": tag.lower(),
-                    # The label AS THE PAGE CARRIES IT, so a future
-                    # disagreement is visible in the payload rather than
-                    # having to be reproduced.
-                    "aria_label": aria_label or None,
+                    # THE ACCESSIBLE NAME, not one attribute of it. This field
+                    # reported `aria_label` and came back null for every pill
+                    # on his live page while the activator located and clicked
+                    # them by name -- which read as the enumerator/activator
+                    # split all over again. It was not. His pills carry
+                    # VISIBLE TEXT and no aria-label, so null was correct and
+                    # the FIELD NAME was the defect: it named one attribute
+                    # while the matching uses the accessible name, which is
+                    # aria-label OR text. name_source says which, so the next
+                    # reader does not have to guess whether null means absent
+                    # or unread.
+                    "accessible_name": (aria_label or (inner or "").strip()) or None,
+                    "name_source": "aria-label" if aria_label else "text",
                     "href": href.group(1) if href else None,
                     "navigable": bool(href),
                 }

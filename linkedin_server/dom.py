@@ -1390,9 +1390,16 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
             ),
         }
 
+    # THE ACCESSIBLE NAME, which is what the locator matched on. Reading
+    # aria-label alone reported empty for every successful activation on his
+    # live page -- his pills carry visible TEXT and no aria-label -- and an
+    # empty label beside activated:true reads like a contradiction when it is
+    # only a field looking in the wrong place.
     label = ""
     try:
-        label = str(await pills.first.get_attribute("aria-label") or "")
+        label = str(await pills.first.get_attribute("aria-label") or "").strip()
+        if not label:
+            label = str(await pills.first.inner_text() or "").strip()
     except Exception:  # pragma: no cover - a report, not a gate
         label = ""
 

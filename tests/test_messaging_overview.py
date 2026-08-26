@@ -187,17 +187,66 @@ def test_the_last_row_is_not_marked_unread_by_the_page_footer():
     assert out["rows"][0]["unread"] is False, "the footer marked the last row"
 
 
-def test_the_result_says_the_count_is_a_floor():
-    """A recruiter InMail was seen in the product that did not appear in these
-    rows. Either it sits below this page or InMails are a separate surface --
-    UNMEASURED, and reported as such rather than guessed. A tool whose whole
-    credibility rests on its numbers must not present a floor as a total.
+def test_the_result_says_the_count_is_a_floor_and_names_the_other_surface():
+    """MEASURED 2026-08-26, and the text was updated in the same breath.
+
+    It used to say the InMail question was UNMEASURED. Filtering to inmail
+    then returned TEN ENTIRELY DIFFERENT PEOPLE from the default view,
+    including a recruiter InMail that never appears in it -- so InMails are a
+    SEPARATE SURFACE, not a pagination boundary, and the sentence claiming
+    otherwise was falsified by the very call that answered it.
+
+    The floor language stays: one filter is still not everything.
     """
-    out = shape.messaging_overview(PAIRED, THREAD_URL)
-    completeness = out["completeness"]
+    completeness = shape.messaging_overview(PAIRED, THREAD_URL)["completeness"]
+
     assert "floor" in completeness
-    assert "UNMEASURED" in completeness
-    assert "InMail" in completeness
+    assert "SEPARATE SURFACE" in completeness
+    assert "UNMEASURED" not in completeness, "the stale claim came back"
+    # And it tells the caller what to do about it rather than only warning.
+    assert "message_filter" in completeness
+
+
+def test_a_composer_on_the_page_is_disclosed_rather_than_left_to_be_noticed():
+    """send_surfaces STOPPED BEING ZERO, and that is why it is counted.
+
+    Every default-view call returned 0/0/0. Filtering to inmail returned a
+    page carrying a composer. Nothing was typed and nothing sent -- but
+    "reading put no composer in front of you" was true on one path and false
+    on another, and only a NUMBER could have shown that. An assurance would
+    have gone on being repeated.
+    """
+    with_composer = shape.messaging_overview(
+        '<div contenteditable="true"></div><form></form>', THREAD_URL
+    )
+    assert with_composer["composer_present"]["on_this_page"] is True
+    note = with_composer["composer_present"]["note"]
+    # It says what did NOT happen, and why the url guard was silent.
+    assert "nothing sent" in note
+    assert "client-side state" in note
+
+    without = shape.messaging_overview("<p>quiet</p>", THREAD_URL)
+    assert without["composer_present"]["on_this_page"] is False
+
+
+def test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted():
+    """The guard's claim is narrower than it looked, and both halves matter.
+
+    It blocks NAVIGATING to a compose surface -- still true, asserted here.
+    It was never consulted on the filtered page because nothing navigated:
+    LinkedIn rendered the composer as client-side state on an allowed url.
+    Those were the same sentence until that call and are not any more.
+
+    What still holds is why this is a disclosure and not an incident:
+    rendering a composer is not sending. There is no typing call site, and the
+    mutation allowlist holds exactly two clicks, neither of which is a send.
+    """
+    from linkedin_server import readonly
+
+    assert readonly.is_read_url("https://www.linkedin.com/messaging/compose/?body=hi") is False
+    assert readonly.is_read_url("https://www.linkedin.com/messaging/") is True
+    assert len(readonly.SANCTIONED_MUTATIONS) == 2
+    assert all(kind == "click" for _, _, kind in readonly.SANCTIONED_MUTATIONS)
 
 
 # ---------------------------------------------------------------------------
@@ -406,11 +455,32 @@ def test_the_shared_rule_still_says_no_to_a_different_pill():
     assert dom.filter_name_matches("Starred", "unread") is False
 
 
-def test_the_enumerator_reports_the_label_the_page_actually_carries():
-    """So a future divergence shows up in the payload instead of having to be
-    reproduced against a live account."""
-    out = shape.messaging_filters('<button aria-label="InMail messages">x</button>')
-    assert out["detail"]["inmail"]["aria_label"] == "InMail messages"
+@pytest.mark.parametrize(
+    "html,name,source",
+    [
+        ('<button aria-label="InMail messages">x</button>', "InMail messages", "aria-label"),
+        ('<button class="pill">InMail</button>', "InMail", "text"),
+    ],
+    ids=["labelled", "text only"],
+)
+def test_the_enumerator_reports_the_ACCESSIBLE_NAME_and_says_where_it_came_from(
+    html, name, source
+):
+    """A NULL THAT LOOKED LIKE A BUG AND WAS NOT.
+
+    On his live page every pill reported ``aria_label: null`` while the
+    activator located and clicked them by name -- which read as the
+    enumerator/activator split all over again, in a third component. It was
+    not. His pills carry VISIBLE TEXT and no aria-label, so null was correct
+    and the FIELD NAME was the defect: it named one attribute while the
+    matching uses the ACCESSIBLE NAME, which is aria-label or text.
+
+    ``name_source`` is here so nobody has to ask that question twice: a reader
+    can tell "this pill has no aria-label" from "the reader failed".
+    """
+    out = shape.messaging_filters(html)
+    assert out["detail"]["inmail"]["accessible_name"] == name
+    assert out["detail"]["inmail"]["name_source"] == source
 
 
 def test_the_verdict_no_longer_claims_inmails_are_unreachable():
