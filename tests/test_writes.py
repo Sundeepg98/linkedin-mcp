@@ -2147,10 +2147,35 @@ def test_a_second_click_inside_perform_is_still_caught():
     )
     assert unsanctioned == [], "the partition sees a duplicate -- update this test"
 
-    # The count is not.
-    raw = readonly.scan_source_for_mutations(doubled)
-    assert len(raw) == 2
-    assert len(raw) != len(readonly.SANCTIONED_MUTATIONS), (
+    # The count is not -- but it has to be counted the way the REAL check
+    # counts, which is across the whole package rather than this one file.
+    #
+    # AMENDED 2026-08-26, and the control caught its own flaw before I did.
+    # It used to scan the doubled writes.py alone (2 hits) and compare that
+    # against len(SANCTIONED_MUTATIONS). That worked only while both numbers
+    # happened to be 1. The allowlist gained a second entry -- the messaging
+    # filter click, in dom.py -- so the doubled file's 2 equalled the
+    # allowlist's 2 and the inequality stopped holding. Its own guard fired
+    # with "the count check would not fire on a doubled click", which is
+    # exactly what a can-it-fail control is for and the third one on this repo
+    # to do it.
+    #
+    # THE PRODUCTION CHECK WAS NEVER BROKEN: it sums every module and compares
+    # to the allowlist length, so a doubled click there gives 3 against 2 and
+    # fails. This now reproduces that arithmetic instead of approximating it.
+    from tests.test_readonly import MODULES
+
+    package_total = 0
+    for module in MODULES:
+        text = (
+            doubled
+            if module.name == "writes.py"
+            else module.read_text(encoding="utf-8")
+        )
+        package_total += len(readonly.scan_source_for_mutations(text))
+
+    assert package_total == len(readonly.SANCTIONED_MUTATIONS) + 1, package_total
+    assert package_total != len(readonly.SANCTIONED_MUTATIONS), (
         "the count check would not fire on a doubled click"
     )
 

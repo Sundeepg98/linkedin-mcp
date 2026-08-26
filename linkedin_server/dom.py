@@ -1275,3 +1275,105 @@ async def read_apply_modal(page: Any) -> dict[str, Any]:
         pass
     out["advance_names"] = sorted(set(names))
     return out
+
+
+# ---------------------------------------------------------------------------
+# Messaging filters
+# ---------------------------------------------------------------------------
+
+#: The ONLY controls this server may activate on the messaging surface, by
+#: accessible name. A closed set, matched exactly, refusing everything else --
+#: the same shape as ``config.PERMITTED_LAUNCH_FLAGS`` allowing exactly two
+#: Chromium flags and refusing a third.
+#:
+#: WHY A CLICK IS PERMITTED HERE AT ALL, since this is a READ path.
+#:
+#: The measurement first: all six pills are ``<button>`` with no href, so the
+#: filter surface is not reachable by navigation. Reading their destinations
+#: rather than guessing a ``?filter=`` parameter is what established that.
+#:
+#: Then the argument, which the operator made and which is right. A filter
+#: pill SENDS NOTHING and CHANGES NOTHING on LinkedIn's servers -- it alters
+#: which rows are displayed. Counted by EFFECT rather than by verb, which is
+#: how this family classifies everything else, a view filter is a read.
+#:
+#: And the part that settles it: ``linkedin_open_messaging`` ALREADY opens
+#: somebody's conversation and may fire a read receipt, and ships with that
+#: stated as an accepted cost. Refusing the lesser act while performing the
+#: greater one is backwards. The previous refusal was a convention wearing the
+#: costume of a limit -- the server's own verdict said InMails were
+#: unreachable "without interacting with the page, which it does not do", and
+#: that clause was a decision, not a wall.
+MESSAGING_FILTERS: tuple[str, ...] = (
+    "focused",
+    "other",
+    "unread",
+    "jobs",
+    "connections",
+    "inmail",
+    "starred",
+)
+
+
+def messaging_filter_selector(name: str) -> str:
+    """The selector for one named filter pill, or raise.
+
+    The name is matched against the closed set above BEFORE any selector is
+    built, so an arbitrary string can never become a click target. This is the
+    whole of the narrowing: the permission is not "may click on the messaging
+    page", it is "may activate one of these seven named pills".
+    """
+    wanted = str(name or "").strip().lower()
+    if wanted not in MESSAGING_FILTERS:
+        raise ValueError(
+            f"{name!r} is not a messaging filter this server may activate. "
+            f"The permitted set is {list(MESSAGING_FILTERS)} and it is closed: "
+            "a control outside it is refused rather than clicked, because the "
+            "permission granted here is to filter a view, not to press things "
+            "on a page."
+        )
+    return f'button[aria-label="{wanted.capitalize()}"], button[aria-label="InMail"]' if wanted == "inmail" else f'button[aria-label="{wanted.capitalize()}"]'
+
+
+async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
+    """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
+
+    Returns what happened, including the url before and after, because the
+    caller has to be able to tell a FILTER from a NAVIGATION. If activating a
+    pill turns out to move the page, that is a finding rather than a detail:
+    it would mean the control does more than filter, and the read
+    classification above would no longer hold.
+    """
+    selector = messaging_filter_selector(name)
+    before = page.url
+    try:
+        count = int(await page.locator(selector).count())
+    except Exception as exc:  # noqa: BLE001 - reported, never fatal
+        return {"activated": False, "why": f"pill unreadable ({type(exc).__name__})"}
+    if count != 1:
+        return {
+            "activated": False,
+            "why": (
+                f"expected exactly one {name!r} pill and found {count}. One is "
+                "the measured shape; anything else is a page this reader has "
+                "not seen, and it is not clicked on speculation."
+            ),
+        }
+    await page.click(selector, timeout=FILTER_CLICK_TIMEOUT_MS)
+    try:
+        await page.wait_for_timeout(FILTER_SETTLE_MS)
+    except Exception:  # pragma: no cover - a settle, not a gate
+        pass
+    return {
+        "activated": True,
+        "filter": name.strip().lower(),
+        "url_before": before,
+        "url_after": page.url,
+        "navigated": page.url != before,
+    }
+
+
+#: How long to wait for a pill to be actionable, and for the list to redraw
+#: after it. Short: this is a client-side filter, not a page load.
+FILTER_CLICK_TIMEOUT_MS = 10_000
+FILTER_SETTLE_MS = 2_000

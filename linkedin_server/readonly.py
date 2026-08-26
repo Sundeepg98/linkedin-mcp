@@ -400,6 +400,30 @@ def scan_source_for_mutations(source: str) -> list[tuple[int, str, str]]:
 #:   permits the click.
 SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     ("linkedin_server/writes.py", "perform", "click"),
+    # THE SECOND ENTRY, added 2026-08-26, and it is on a READ path -- which is
+    # why it is here rather than being waved through. The list is what a
+    # reviewer reads, so a click that is not on it does not exist, and one
+    # that is on it has to argue for itself in this comment.
+    #
+    # WHAT IT DOES: activates one of seven named filter pills on the messaging
+    # surface. dom.MESSAGING_FILTERS is a CLOSED SET matched before any
+    # selector is built, so an arbitrary string can never become a click
+    # target. The permission is not "may click on that page", it is "may
+    # activate one of these seven pills".
+    #
+    # WHY A READ PATH MAY CLICK AT ALL. Measured: all six pills are <button>
+    # with no href, so the filter surface is not reachable by navigation --
+    # established by READING their destinations rather than guessing a
+    # ?filter= parameter. A pill SENDS NOTHING and CHANGES NOTHING on
+    # LinkedIn's servers; it alters which rows are displayed. Counted by
+    # EFFECT rather than by verb, which is how this family classifies
+    # everything, a view filter is a read.
+    #
+    # And the argument that settles it: linkedin_open_messaging ALREADY opens
+    # somebody's conversation and may fire a read receipt, and ships with that
+    # stated as an accepted cost. Refusing the lesser act while performing the
+    # greater one is backwards.
+    ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
 )
 
 

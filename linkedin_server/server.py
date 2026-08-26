@@ -742,7 +742,9 @@ async def linkedin_new_messages() -> dict[str, Any]:
 
 
 @mcp.tool()
-async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]:
+async def linkedin_open_messaging(
+    include_names: bool = False, message_filter: str = ""
+) -> dict[str, Any]:
     """Open your LinkedIn messages and report what is there. OPENS A THREAD.
 
     **THE COST IS IN THE NAME BECAUSE IT IS UNAVOIDABLE.** Asking LinkedIn for
@@ -790,13 +792,42 @@ async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]
     server refuses. So "reading put no composer in front of you" is a number
     you can check rather than a promise you have to take.
 
+    REACHING INMAILS TAKES A CLICK, and this tool now does it. The filter
+    pills were READ rather than guessed: all six are buttons with no href, so
+    that surface is not reachable by navigation, and a ``?filter=`` parameter
+    would have been an invention. Pass ``message_filter="inmail"`` and the
+    pill is activated.
+
+    THAT CLICK IS SANCTIONED AND NARROW. Only seven named pills can be
+    activated -- focused, other, unread, jobs, connections, inmail, starred --
+    checked against a fixed list before any selector is built, so an arbitrary
+    string can never become a click target. It is the second and only other
+    entry in ``readonly.SANCTIONED_MUTATIONS``. A filter sends nothing and
+    changes nothing on LinkedIn's servers; counted by effect it is a read, and
+    it is strictly less invasive than the conversation this tool opens anyway.
+
+    ``active_filter`` comes back in the result so a filtered page can never be
+    mistaken for the whole list, and the send-surface counts are taken AFTER
+    the filter is applied.
+
     Args:
         include_names: return correspondents' names instead of placeholders.
             Default False.
+        message_filter: activate one filter pill before reading -- one of
+            focused, other, unread, jobs, connections, inmail, starred. Empty
+            for the default view. Anything else is refused, not clicked.
     """
     try:
+        wanted = str(message_filter or "").strip().lower()
         async with BROWSER.session() as page:
             landed = await BROWSER.goto(page, MESSAGING_URL)
+            applied: dict[str, Any] = {"activated": False, "why": "no filter asked for"}
+            if wanted:
+                # Raises for a name outside the closed set, BEFORE any click.
+                applied = await dom.activate_messaging_filter(page, wanted)
+                landed = page.url
+            # Read AFTER the filter, so every count -- including the
+            # send-surface counts -- describes the page the caller was given.
             html = await page.content()
         verdict = shape.messaging_overview(
             html, landed, include_names=bool(include_names)
@@ -808,6 +839,10 @@ async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]
         # navigation at all. Either answer is a finding; guessing between them
         # would make every count above untrustworthy.
         verdict["filters"] = shape.messaging_filters(html)
+        verdict["active_filter"] = {
+            "requested": wanted or None,
+            **applied,
+        }
         return {**verdict, "pages_loaded": 1}
     except Exception as exc:
         return _error(exc)

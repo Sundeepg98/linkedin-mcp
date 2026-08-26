@@ -282,3 +282,71 @@ def test_the_filter_pills_are_read_not_guessed(html, seen, navigable):
         assert "MEASURED" in out["verdict"]
     else:
         assert "client-side" in out["verdict"] or "did not render" in out["verdict"]
+
+
+# ---------------------------------------------------------------------------
+# The filter click: narrow, sanctioned, and refusing everything else
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "name", ["focused", "other", "unread", "jobs", "connections", "inmail", "starred"]
+)
+def test_every_permitted_pill_builds_a_selector(name):
+    from linkedin_server import dom
+
+    assert dom.messaging_filter_selector(name).startswith("button[aria-label=")
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["delete", "archive", "send", "report", "block", "", "  ", "button", "*"],
+    ids=[
+        "delete", "archive", "send", "report", "block",
+        "empty", "whitespace", "any button", "wildcard",
+    ],
+)
+def test_anything_outside_the_named_set_is_refused_before_a_selector_exists(name):
+    """THE WHOLE OF THE NARROWING. The permission granted is not "may click on
+    the messaging page" -- it is "may activate one of these seven pills".
+
+    The name is checked against the fixed list BEFORE any selector is built,
+    so an arbitrary string cannot become a click target even in principle.
+    Same shape as the launch boundary permitting exactly two Chromium flags
+    and refusing a third.
+    """
+    from linkedin_server import dom
+
+    with pytest.raises(ValueError) as excinfo:
+        dom.messaging_filter_selector(name)
+    assert "not a messaging filter" in str(excinfo.value)
+
+
+def test_the_click_is_on_the_sanctioned_list_and_the_list_is_still_short():
+    """A click that is not on the allowlist does not exist; one that is has to
+    be readable there. The COUNT stays pinned so a third has to argue for
+    itself rather than arriving quietly."""
+    from linkedin_server import readonly
+
+    assert (
+        "linkedin_server/dom.py",
+        "activate_messaging_filter",
+        "click",
+    ) in readonly.SANCTIONED_MUTATIONS
+    assert len(readonly.SANCTIONED_MUTATIONS) == 2
+
+
+def test_the_compose_surface_is_still_refused_after_all_of_this():
+    """The boundary that must survive every widening in this file.
+
+    Filtering became permitted; SENDING did not. Compose stays on the
+    forbidden substring list, which is checked BEFORE the allowlist.
+    """
+    from linkedin_server import readonly
+
+    assert (
+        readonly.is_read_url(
+            "https://www.linkedin.com/messaging/compose/?body=hi&interop=msgOverlay"
+        )
+        is False
+    )

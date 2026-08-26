@@ -60,16 +60,34 @@ def test_no_module_contains_an_UNSANCTIONED_mutating_call(module: Path):
     )
 
 
-def test_the_sanctioned_list_is_exactly_one_click_in_one_function():
+def test_the_sanctioned_list_is_exactly_these_two_clicks():
     """The allowlist, read out loud, so widening it is visible in a diff.
 
     A guard whose allowlist is checked only for "does it cover what we found"
     grows by one entry at a time and nobody notices. This pins the CONTENTS.
+
+    IT GREW BY ONE ON 2026-08-26, from one entry to two, which is precisely
+    the event this test exists to make visible. The second is on a READ path,
+    which is why it had to argue for itself rather than being waved through:
+
+    * ``writes.perform`` -- the write click, behind the two-call token gate;
+    * ``dom.activate_messaging_filter`` -- activates one of seven NAMED filter
+      pills on the messaging surface. All six were measured as buttons with no
+      href, so that surface is unreachable by navigation. A pill sends nothing
+      and changes nothing on LinkedIn's servers, so counted by EFFECT -- which
+      is how this family classifies everything -- a view filter is a read. And
+      ``linkedin_open_messaging`` already opens somebody's conversation and may
+      fire a read receipt: refusing the lesser act while performing the greater
+      one is backwards.
+
+    THE COUNT IS STILL PINNED, which is the part that matters. A THIRD click
+    fails here whatever its justification, and has to come and write one.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
+        ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 1
+    assert len(readonly.SANCTIONED_MUTATIONS) == 2
 
 
 def test_every_sanctioned_entry_is_actually_present():
@@ -109,7 +127,10 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
         len(readonly.scan_source_for_mutations(m.read_text(encoding="utf-8")))
         for m in MODULES
     )
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 1, total
+    # TWO from 2026-08-26. The equality against the allowlist LENGTH is the
+    # load-bearing half and is unchanged -- an unlisted click still fails --
+    # while the literal is what makes growth visible in a diff.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 2, total
 
 
 def test_the_partition_conserves_every_hit():

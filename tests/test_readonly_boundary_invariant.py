@@ -152,7 +152,18 @@ READONLY_AST_AT_LAST_REFREEZE = {
     "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
-    "SANCTIONED_MUTATIONS": "033a34fbbc538d8c",
+    # RE-FROZEN AGAIN 2026-08-26, and this one moved for a different reason
+    # from the pair above it. The allowlist gained its SECOND entry:
+    # dom.activate_messaging_filter, a click on a READ path, permitted because
+    # the messaging filter pills are buttons with no href (measured) and a
+    # filter sends nothing and changes nothing on LinkedIn -- a read by
+    # effect. The argument in full is on the entry itself in readonly.py.
+    #
+    # ONLY THIS DIGEST MOVED. The other five are byte-identical across the
+    # change, which is the evidence that sanctioning a new click did not
+    # quietly loosen a url list or a mutation pattern on the way past.
+    # Verified under Python 3.13.14 and 3.10.19: identical, all six.
+    "SANCTIONED_MUTATIONS": "b84365077cba813b",
     "<functions>": "199939f7998e8d48",
 }
 
