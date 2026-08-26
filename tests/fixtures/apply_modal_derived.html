@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  DERIVED. LINKEDIN DID NOT SERVE THIS MARKUP, and nothing below is a capture.
+
+  WHAT IT IS DERIVED FROM, which is the whole of the surviving evidence: the
+  apply flow was opened once, on 2026-08-24, on one posting, and what was
+  written down was a set of COUNTS -- 2 forms, 1 file input, 1 dialog, 43
+  buttons, one enabled "Submit application", and no Next. The capture itself
+  went to a gitignored path and no longer exists. Those six numbers, plus the
+  submit control's aria-label and LinkedIn's own test hook already recorded in
+  dom.APPLY_SUBMIT_HOOK, are everything this file could honestly be built from.
+
+  IT DOES NOT PROVE A LIVE LINKEDIN APPLY MODAL HAS THIS SHAPE. It cannot. It
+  is markup written to answer to six remembered numbers, and a reader who takes
+  it as evidence about LinkedIn has taken a fixture for a photograph. Its only
+  job is to EXECUTE dom.read_apply_modal over a real parsed DOM, so that the
+  reader which decides whether an irreversible submit may be pressed has been
+  run at least once instead of only ever monkeypatched away.
+
+  Same standing as tests/test_writes.py's SAVED_LIST_CONTAINING, and labelled
+  the same way wherever it is used.
+
+  WHAT IS MEASURED AND WHAT IS INVENTED, separated rather than blurred:
+
+  * MEASURED (page-level counts, 2026-08-24): 2 forms, 1 file input,
+    1 [role=dialog], 43 buttons, one enabled submit named "Submit application",
+    zero advance controls.
+  * NOT MEASURED -- WHERE ANY OF IT SAT. The counts are page-level. Nobody
+    wrote down how the 43 buttons split between the modal and the page chrome,
+    nor whether the forms were inside the dialog. This file puts exactly ONE
+    button in the dialog (the submit) and the other 42 outside it, because one
+    is the most conservative claim available: it asserts no modal chrome that
+    was never seen. The forms and the file input are placed in the dialog and
+    the reader NEVER LOOKS AT THEM -- dom.read_apply_modal reads dialogs,
+    buttons and their attributes and nothing else -- so their placement is
+    inert here and is present only so the file answers to the recorded counts.
+  * INVENTED OUTRIGHT: the job title, the employer, and every "Page control NN"
+    label. No real name appears anywhere in this file.
+
+  ASCII ONLY. tests/test_apply_modal_fixture.py reads it with encoding="ascii"
+  and a single non-ASCII byte fails at read time.
+-->
+<html lang="en">
+<head><title>Apply to Staff Engineer at Hollowfield</title></head>
+<body>
+
+<div role="dialog" aria-label="Apply to Staff Engineer">
+  <h2>Apply to Staff Engineer</h2>
+
+  <form id="resume-form">
+    <label for="resume">Resume</label>
+    <input id="resume" type="file" name="resume">
+  </form>
+
+  <form id="contact-form">
+    <label for="phone">Phone</label>
+    <input id="phone" type="text" name="phone">
+  </form>
+
+  <button data-live-test-easy-apply-submit-button
+          aria-label="Submit application"
+          type="button">Submit application</button>
+</div>
+
+<div id="page-chrome">
+  <button type="button">Page control 01</button>
+  <button type="button">Page control 02</button>
+  <button type="button">Page control 03</button>
+  <button type="button">Page control 04</button>
+  <button type="button">Page control 05</button>
+  <button type="button">Page control 06</button>
+  <button type="button">Page control 07</button>
+  <button type="button">Page control 08</button>
+  <button type="button">Page control 09</button>
+  <button type="button">Page control 10</button>
+  <button type="button">Page control 11</button>
+  <button type="button">Page control 12</button>
+  <button type="button">Page control 13</button>
+  <button type="button">Page control 14</button>
+  <button type="button">Page control 15</button>
+  <button type="button">Page control 16</button>
+  <button type="button">Page control 17</button>
+  <button type="button">Page control 18</button>
+  <button type="button">Page control 19</button>
+  <button type="button">Page control 20</button>
+  <button type="button">Page control 21</button>
+  <button type="button">Page control 22</button>
+  <button type="button">Page control 23</button>
+  <button type="button">Page control 24</button>
+  <button type="button">Page control 25</button>
+  <button type="button">Page control 26</button>
+  <button type="button">Page control 27</button>
+  <button type="button">Page control 28</button>
+  <button type="button">Page control 29</button>
+  <button type="button">Page control 30</button>
+  <button type="button">Page control 31</button>
+  <button type="button">Page control 32</button>
+  <button type="button">Page control 33</button>
+  <button type="button">Page control 34</button>
+  <button type="button">Page control 35</button>
+  <button type="button">Page control 36</button>
+  <button type="button">Page control 37</button>
+  <button type="button">Page control 38</button>
+  <button type="button">Page control 39</button>
+  <button type="button">Page control 40</button>
+  <button type="button">Page control 41</button>
+  <button type="button">Page control 42</button>
+</div>
+
+</body>
+</html>
