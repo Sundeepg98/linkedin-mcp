@@ -418,12 +418,21 @@ ALLOWED = [
     # One job posting, addressed by its numeric id and nothing else.
     "https://www.linkedin.com/jobs/view/4600000042",
     "https://www.linkedin.com/jobs/view/4600000042/",
+    # HIS OWN MESSAGE SURFACE, allowed 2026-08-26 on the operator's ruling.
+    # Both forms, because asking for the first LANDS on the second: LinkedIn
+    # redirects /messaging/ into a conversation it chooses, measured twice.
+    "https://www.linkedin.com/messaging/",
+    "https://www.linkedin.com/messaging/thread/2-abc/",
 ]
 
 BLOCKED = [
     # Actions on LinkedIn.
     "https://www.linkedin.com/jobs/application/12345",
-    "https://www.linkedin.com/messaging/thread/2-abc/",
+    # SENDING. The messaging READ surface left this list on 2026-08-26 when
+    # the operator ruled that reading his own inbox is his to do; the composer
+    # did not, and it is the entry that keeps sending impossible. It is the
+    # pre-filled compose overlay LinkedIn opens from a job page.
+    "https://www.linkedin.com/messaging/compose/?body=hello&interop=msgOverlay",
     "https://www.linkedin.com/mynetwork/invitation-manager/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",

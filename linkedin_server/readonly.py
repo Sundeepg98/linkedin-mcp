@@ -104,6 +104,21 @@ from linkedin_server.errors import WriteAttemptError
 #: Query strings are allowed only where a read surface genuinely needs them
 #: (job search filters, the saved/applied card type).
 _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
+    # HIS OWN MESSAGE SURFACE, added 2026-08-26 on the operator's ruling.
+    #
+    # Both forms are here deliberately. Asking for the first lands on the
+    # second: LinkedIn redirects /messaging/ into one specific conversation
+    # thread of its own choosing, measured twice. Listing only the first would
+    # have meant the server routinely sitting on a url its own allowlist does
+    # not cover -- true today because the landed url is not re-checked, and a
+    # trap the moment anybody adds that check.
+    #
+    # SENDING IS STILL IMPOSSIBLE: /messaging/compose remains on the forbidden
+    # substring list, which is checked BEFORE this one.
+    re.compile(r"^https://www\.linkedin\.com/messaging/?(\?[^#]*)?$"),
+    re.compile(
+        r"^https://www\.linkedin\.com/messaging/thread/[A-Za-z0-9%\-_=]+/?(\?[^#]*)?$"
+    ),
     # Own profile views (Premium analytics view, and the classic one).
     re.compile(r"^https://www\.linkedin\.com/analytics/profile-views/?(\?[^#]*)?$"),
     re.compile(r"^https://www\.linkedin\.com/me/profile-views/?(\?[^#]*)?$"),
@@ -190,7 +205,26 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     "/jobs/application",
     "easyapply",
     "easy-apply",
-    "/messaging",
+    # NARROWED 2026-08-26 from the blanket "/messaging", on the operator's
+    # ruling that reading his own inbox is his to do. SENDING stays forbidden
+    # and this is the entry that keeps it so: /messaging/compose is the
+    # pre-filled composer LinkedIn opens from a job page, and nothing here may
+    # reach it.
+    #
+    # WHY THE BLANKET ENTRY COULD NOT SIMPLY BE DROPPED, and why this is not
+    # the smaller change it looks like: /messaging/ DOES NOT STAY ON A LIST.
+    # Measured twice -- LinkedIn redirects it into one specific conversation
+    # thread that LinkedIn, not the caller, chooses. And assert_read_url gates
+    # the REQUESTED url only; the landed url is never re-checked. So leaving
+    # "/messaging/thread" forbidden while permitting "/messaging/" would have
+    # produced a guard that forbids a destination it knowingly delivers you
+    # to -- a fiction, and a worse one than an honest permission, because the
+    # next reader would trust it.
+    #
+    # So the thread surface is ALLOWED and the cost is stated where a caller
+    # meets it, in linkedin_open_messaging's own name and docstring, rather
+    # than being denied by a list that cannot enforce it.
+    "/messaging/compose",
     "/invite",
     "invitation",
     "/connect",

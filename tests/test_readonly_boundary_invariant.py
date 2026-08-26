@@ -128,8 +128,28 @@ PINNED = (
 #: no longer has is the same defect as a docstring that denies a capability
 #: that ships, one layer down.
 READONLY_AST_AT_LAST_REFREEZE = {
-    "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
-    "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
+    # RE-FROZEN 2026-08-26, deliberately, in the commit that moved them.
+    #
+    # WHAT MOVED AND WHY. The operator ruled that reading his own inbox is his
+    # to do, so the blanket "/messaging" denylist entry was NARROWED to
+    # "/messaging/compose" -- sending stays impossible -- and the messaging
+    # read surface was added to the allowlist. Two structures, two digests,
+    # and the other four are byte-identical across the change, which is the
+    # evidence that nothing else on the boundary was touched while these were.
+    #
+    # VERIFIED UNDER BOTH INTERPRETERS before being written down, because a
+    # digest that differs by Python version would freeze nothing:
+    #     Python 3.13.14  and  Python 3.10.19  ->  identical, all six.
+    #
+    # BOTH FORMS OF THE MESSAGING URL ARE ON THE ALLOWLIST, and that is not
+    # belt-and-braces. Asking for /messaging/ LANDS on /messaging/thread/...:
+    # LinkedIn redirects it into a conversation it chooses. Listing only the
+    # first would leave the server sitting on a url its own allowlist does not
+    # cover -- harmless today because assert_read_url gates the REQUESTED url
+    # and never re-checks the landed one, and a trap the moment anyone adds
+    # that check.
+    "_ALLOWED_URL_PATTERNS": "20224a18ccb46283",
+    "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "033a34fbbc538d8c",
@@ -140,8 +160,20 @@ READONLY_AST_AT_LAST_REFREEZE = {
 #: write widened nothing" is CHECKABLE rather than a sentence in a comment.
 #: ``test_the_write_did_not_touch_any_of_the_four_denylists`` compares them.
 DENYLISTS_AT_A76FE32 = {
-    "_ALLOWED_URL_PATTERNS": "ae3977e43da53d26",
-    "_FORBIDDEN_URL_SUBSTRINGS": "0b857f0637cdaaad",
+    # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
+    #
+    # This dict answers "did the WRITE widen anything", and the answer is
+    # still no -- the write did not touch these. What touched two of them was
+    # a separate, later, deliberate boundary change: the operator's ruling on
+    # inbox reading. Leaving the old values here would have made this test
+    # fail for a change it was never written to police, and updating them
+    # without saying so would have quietly retired the check.
+    #
+    # The name is kept even though the sha no longer describes the contents,
+    # because renaming it would break the link to the write it was created
+    # for. What it now means: the last values anyone deliberately froze.
+    "_ALLOWED_URL_PATTERNS": "20224a18ccb46283",
+    "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
@@ -341,7 +373,13 @@ def test_a_comment_or_an_identity_swap_does_not_move_the_digest():
     [
         (
             "_FORBIDDEN_URL_SUBSTRINGS",
-            lambda s: s.replace('    "/messaging",\n', "", 1),
+            # REPOINTED 2026-08-26. This removed '    "/messaging",' until the
+            # blanket entry was narrowed to "/messaging/compose" -- so the edit
+            # stopped applying, and the control CAUGHT ITSELF: its
+            # `assert weakened != source` refused to run vacuously rather than
+            # reporting a pass it had not earned. Exactly what a can-it-fail
+            # control is for, and the second one on this repo to do it today.
+            lambda s: s.replace('    "/messaging/compose",\n', "", 1),
         ),
         (
             "_ALLOWED_URL_PATTERNS",

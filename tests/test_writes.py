@@ -484,10 +484,22 @@ def test_the_forbidden_list_is_not_shortened_for_writes():
 def test_the_read_door_is_untouched_by_any_of_this():
     """The read-only guarantee is the thing that made this server safe to point
     at his live account. A write module that quietly widened it would be the
-    whole failure this design exists to avoid."""
+    whole failure this design exists to avoid.
+
+    AMENDED 2026-08-26, and the distinction matters more than the edit. The
+    messaging THREAD url left this list because the operator ruled that
+    reading his own inbox is his to do -- a deliberate boundary change, made
+    in its own commit, with the frozen digests re-verified under both
+    interpreters. It did NOT leave because writes.py widened anything, which
+    is what this test polices and what it still polices.
+
+    ``/messaging/compose`` takes its place, and is the better probe for this
+    test's actual question: it is the SENDING surface, so a write module that
+    reached it would be exactly the failure named above.
+    """
     for url in (
         "https://www.linkedin.com/jobs/application/123/",
-        "https://www.linkedin.com/messaging/thread/1/",
+        "https://www.linkedin.com/messaging/compose/?body=hi",
         "https://www.linkedin.com/in/someone/edit/",
     ):
         assert readonly.is_read_url(url) is False
