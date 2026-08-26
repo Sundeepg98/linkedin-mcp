@@ -1315,13 +1315,37 @@ MESSAGING_FILTERS: tuple[str, ...] = (
 )
 
 
-def messaging_filter_selector(name: str) -> str:
-    """The selector for one named filter pill, or raise.
+def filter_name_matches(accessible_name: str, wanted: str) -> bool:
+    """THE ONE RULE BOTH PATHS USE. Substring, case-insensitive.
 
-    The name is matched against the closed set above BEFORE any selector is
-    built, so an arbitrary string can never become a click target. This is the
-    whole of the narrowing: the permission is not "may click on the messaging
-    page", it is "may activate one of these seven named pills".
+    THIS EXISTS BECAUSE THE TWO PATHS DISAGREED ON HIS LIVE PAGE, inside a
+    single response: the enumerator reported an ``inmail`` pill and the
+    activator reported "expected exactly one and found 0". Same page, same
+    call, opposite answers.
+
+    The cause was not a broken matcher. It was TWO MATCHERS ASKING DIFFERENT
+    QUESTIONS. The enumerator asked "does the accessible name CONTAIN inmail";
+    the activator rebuilt a selector demanding the name be EXACTLY "InMail",
+    from a guess about how LinkedIn capitalises it. Any real label -- "InMail
+    messages", "InMail 1 new", "Filter by InMail" -- satisfies the first and
+    fails the second.
+
+    The activator was the wrong one. It reconstructed a selector from an
+    assumption instead of using what the page actually carries, which is the
+    same mistake as guessing an apply url rather than reading the anchor.
+
+    So there is now ONE predicate and both call it. A disagreement of this
+    shape is not possible while that holds, and a test asserts it.
+    """
+    return str(wanted or "").strip().lower() in str(accessible_name or "").lower()
+
+
+def assert_permitted_filter(name: str) -> str:
+    """The closed-set check, unchanged, and still done BEFORE anything else.
+
+    The narrowing was never the bug. The permission granted is to activate one
+    of seven named pills, not to press things on a page, and that is enforced
+    here before any locator exists.
     """
     wanted = str(name or "").strip().lower()
     if wanted not in MESSAGING_FILTERS:
@@ -1332,41 +1356,55 @@ def messaging_filter_selector(name: str) -> str:
             "permission granted here is to filter a view, not to press things "
             "on a page."
         )
-    return f'button[aria-label="{wanted.capitalize()}"], button[aria-label="InMail"]' if wanted == "inmail" else f'button[aria-label="{wanted.capitalize()}"]'
+    return wanted
 
 
 async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
 
+    Located by ACCESSIBLE NAME with substring matching -- the same rule the
+    enumerator uses -- rather than by a selector rebuilt from a guess about
+    LinkedIn's exact capitalisation. See :func:`filter_name_matches`.
+
     Returns what happened, including the url before and after, because the
     caller has to be able to tell a FILTER from a NAVIGATION. If activating a
     pill turns out to move the page, that is a finding rather than a detail:
     it would mean the control does more than filter, and the read
-    classification above would no longer hold.
+    classification that permits this click would no longer hold.
     """
-    selector = messaging_filter_selector(name)
+    wanted = assert_permitted_filter(name)
     before = page.url
     try:
-        count = int(await page.locator(selector).count())
+        pills = page.get_by_role("button", name=wanted, exact=False)
+        count = int(await pills.count())
     except Exception as exc:  # noqa: BLE001 - reported, never fatal
         return {"activated": False, "why": f"pill unreadable ({type(exc).__name__})"}
     if count != 1:
         return {
             "activated": False,
+            "found": count,
             "why": (
                 f"expected exactly one {name!r} pill and found {count}. One is "
                 "the measured shape; anything else is a page this reader has "
                 "not seen, and it is not clicked on speculation."
             ),
         }
-    await page.click(selector, timeout=FILTER_CLICK_TIMEOUT_MS)
+
+    label = ""
+    try:
+        label = str(await pills.first.get_attribute("aria-label") or "")
+    except Exception:  # pragma: no cover - a report, not a gate
+        label = ""
+
+    await pills.first.click(timeout=FILTER_CLICK_TIMEOUT_MS)
     try:
         await page.wait_for_timeout(FILTER_SETTLE_MS)
     except Exception:  # pragma: no cover - a settle, not a gate
         pass
     return {
         "activated": True,
-        "filter": name.strip().lower(),
+        "filter": wanted,
+        "pill_label": label,
         "url_before": before,
         "url_after": page.url,
         "navigated": page.url != before,

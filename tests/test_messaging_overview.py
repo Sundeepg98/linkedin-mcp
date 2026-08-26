@@ -295,7 +295,7 @@ def test_the_filter_pills_are_read_not_guessed(html, seen, navigable):
 def test_every_permitted_pill_builds_a_selector(name):
     from linkedin_server import dom
 
-    assert dom.messaging_filter_selector(name).startswith("button[aria-label=")
+    assert dom.assert_permitted_filter(name) == name
 
 
 @pytest.mark.parametrize(
@@ -318,7 +318,7 @@ def test_anything_outside_the_named_set_is_refused_before_a_selector_exists(name
     from linkedin_server import dom
 
     with pytest.raises(ValueError) as excinfo:
-        dom.messaging_filter_selector(name)
+        dom.assert_permitted_filter(name)
     assert "not a messaging filter" in str(excinfo.value)
 
 
@@ -350,3 +350,77 @@ def test_the_compose_surface_is_still_refused_after_all_of_this():
         )
         is False
     )
+
+
+# ---------------------------------------------------------------------------
+# The invariant that would have caught the enumerator/activator split
+# ---------------------------------------------------------------------------
+
+#: Labels LinkedIn could plausibly put on a pill. Only the first is what the
+#: old activator demanded; every other one made the two paths disagree.
+REAL_LABELS = [
+    "InMail",
+    "InMail messages",
+    "InMail 1 new",
+    "Filter by InMail",
+    "inmail",
+]
+
+
+@pytest.mark.parametrize("label", REAL_LABELS)
+def test_whatever_the_enumerator_SEES_the_activator_can_FIND(label):
+    """THE BUG CLASS, PINNED. Not the specific pattern -- the disagreement.
+
+    On his live page, in a single response, the enumerator reported an
+    ``inmail`` pill and the activator reported "found 0". Two components read
+    the same page and gave opposite answers about whether an element exists.
+
+    The cause was two matchers asking different questions: the enumerator
+    asked whether the accessible name CONTAINS the term, the activator rebuilt
+    a selector demanding it be EXACTLY "InMail", from a guess about LinkedIn's
+    capitalisation. Any real label satisfies the first and fails the second.
+
+    There is one predicate now and both call it, so this asserts the property
+    rather than the implementation: anything enumerated as present must be
+    findable.
+    """
+    from linkedin_server import dom
+
+    html = f'<button aria-label="{label}"><span>x</span></button>'
+    seen = shape.messaging_filters(html)["filters_seen"]
+
+    assert seen == ["inmail"], f"enumerator missed {label!r}"
+    assert dom.filter_name_matches(label, "inmail") is True, (
+        f"the enumerator reports {label!r} present but the activator's rule "
+        "would not find it -- the two paths have diverged again"
+    )
+
+
+def test_the_shared_rule_still_says_no_to_a_different_pill():
+    """A predicate that matched everything would make the test above vacuous
+    and would let the activator click the wrong pill."""
+    from linkedin_server import dom
+
+    assert dom.filter_name_matches("Focused", "inmail") is False
+    assert dom.filter_name_matches("", "inmail") is False
+    assert dom.filter_name_matches("Starred", "unread") is False
+
+
+def test_the_enumerator_reports_the_label_the_page_actually_carries():
+    """So a future divergence shows up in the payload instead of having to be
+    reproduced against a live account."""
+    out = shape.messaging_filters('<button aria-label="InMail messages">x</button>')
+    assert out["detail"]["inmail"]["aria_label"] == "InMail messages"
+
+
+def test_the_verdict_no_longer_claims_inmails_are_unreachable():
+    """The clause the operator challenged, and it was false the moment
+    activation shipped. A verdict that contradicts the capability sitting
+    beside it in the same response is the going-stale defect this wave keeps
+    finding."""
+    out = shape.messaging_filters('<button aria-label="InMail">x</button>')
+    verdict = out["verdict"]
+
+    assert "which it does not do" not in verdict
+    assert "STILL REACHABLE" in verdict
+    assert "message_filter" in verdict

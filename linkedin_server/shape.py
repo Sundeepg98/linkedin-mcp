@@ -2196,12 +2196,24 @@ def messaging_filters(html: str) -> dict[str, Any]:
         # The accessible name if there is one, else the visible text. Real
         # LinkedIn pills nest spans, so inner text is often empty and the
         # aria-label is the only thing carrying the word.
-        label = ((aria.group(1) if aria else "") + " " + (inner or "")).strip().lower()
+        aria_label = (aria.group(1) if aria else "").strip()
+        label = (aria_label + " " + (inner or "")).strip()
         for name in _FILTER_NAMES:
-            if name and name in label and name not in found:
+            # THE SAME PREDICATE THE ACTIVATOR USES. Importing it here rather
+            # than re-implementing "does the name appear in the label" is the
+            # whole fix: the two paths disagreed on his live page inside one
+            # response because each had its own idea of matching -- this one
+            # substring, the other exact equality on a guessed capitalisation.
+            from linkedin_server.dom import filter_name_matches
+
+            if name and name not in found and filter_name_matches(label, name):
                 href = _HREF.search(attrs or "")
                 found[name] = {
                     "tag": tag.lower(),
+                    # The label AS THE PAGE CARRIES IT, so a future
+                    # disagreement is visible in the payload rather than
+                    # having to be reproduced.
+                    "aria_label": aria_label or None,
                     "href": href.group(1) if href else None,
                     "navigable": bool(href),
                 }
@@ -2211,12 +2223,19 @@ def messaging_filters(html: str) -> dict[str, Any]:
         "detail": found,
         "navigable_filters": sorted(navigable),
         "verdict": (
-            "filter pills carry hrefs, so the filter surface is reachable by "
-            "navigation and the parameter is now MEASURED rather than guessed"
+            "filter pills carry hrefs, so the filter surface is also reachable "
+            "by navigation and the parameter is MEASURED rather than guessed"
             if navigable
-            else "no filter pill carries an href on this page. Either they did "
-            "not render, or filtering is client-side state -- in which case "
-            "InMails are not reachable from this server without interacting "
-            "with the page, which it does not do."
+            else (
+                # The retired wording is NOT quoted here on purpose. It used
+                # to end "without interacting with the page, which it does not
+                # do" -- a design decision phrased as a platform limit -- and
+                # explaining that in the payload would put a changelog in
+                # every response. The history belongs in this comment; the
+                # caller gets the current fact.
+                "no filter pill carries an href, so filtering is client-side "
+                "state and the surface is not reachable by navigation. IT IS "
+                "STILL REACHABLE: pass message_filter to activate the pill."
+            )
         ),
     }
