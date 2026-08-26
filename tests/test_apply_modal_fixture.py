@@ -68,6 +68,51 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures"
 VIEWPORT = {"width": 1280, "height": 720}
 
 
+class _NoWaitPage:
+    """A page for gate tests whose modal dict is fixed, not read from a DOM.
+
+    ``_apply_submit_gate`` polls up to fifteen times with a one-second
+    ``wait_for_timeout`` between attempts. Every dict handed to it below has
+    ``modal_present`` and ``submit_present`` both true, so it breaks on the
+    first pass and this never sleeps -- but the method has to EXIST, and it
+    records its calls so a future edit that starts sleeping fails loudly here
+    rather than adding fifteen seconds to the suite in silence.
+    """
+
+    def __init__(self) -> None:
+        self.waits: list[int] = []
+
+    async def wait_for_timeout(self, ms: int) -> None:
+        self.waits.append(ms)
+
+
+async def _gate_over_modal(modal: dict) -> dict:
+    """Drive the REAL gate over one fixed modal reading.
+
+    Swaps the reader rather than building a DOM, because what is under test
+    here is the GATE'S RESPONSE to a reading -- specifically to one that says
+    it did not finish, which is a state no fixture can produce without also
+    building a two-hundred-button page for every case. The reader's own
+    behaviour over real markup is covered above, on real markup.
+
+    Restored in a ``finally`` so a failure cannot leak the patch into the next
+    test; ``monkeypatch`` is not used because these tests take no fixture.
+    """
+    original = dom.read_apply_modal
+
+    async def _fixed(_page):
+        return dict(modal)
+
+    dom.read_apply_modal = _fixed
+    page = _NoWaitPage()
+    try:
+        verdict = await writes._apply_submit_gate(page)
+    finally:
+        dom.read_apply_modal = original
+    assert page.waits == [], "the gate slept on a dict that satisfies it"
+    return verdict
+
+
 def markup() -> str:
     """The DERIVED base fixture, read the way the rest of the suite reads one.
 
@@ -231,6 +276,11 @@ async def test_the_measured_shape_reads_as_the_measured_shape(over):
     assert reading["submit_name"] == "Submit application"
     assert reading["advance_names"] == []
     assert reading["why"] == ""
+    # ADDED 2026-08-26 with the ceiling fix. "No advance controls" is only
+    # worth something next to "and the search finished", so the reader now
+    # reports both and this pins both on the shape it was derived from.
+    assert reading["advance_scan_complete"] is True
+    assert reading["buttons_total"] > 0
 
     # THE SCRATCH KEYS MUST NOT SURVIVE. The reader stashes the disabled and
     # aria-disabled attributes under private names and pops them again, and it
@@ -245,6 +295,8 @@ async def test_the_measured_shape_reads_as_the_measured_shape(over):
         "submit_enabled",
         "submit_name",
         "advance_names",
+        "buttons_total",
+        "advance_scan_complete",
         "why",
     }
 
@@ -527,33 +579,27 @@ async def test_an_advance_control_outside_the_dialog_is_not_collected(over):
     assert reading["advance_names"] == []
 
 
-async def test_an_advance_control_past_the_fortieth_button_is_not_seen(over):
-    """FINDING, PINNED RATHER THAN FIXED. THE SAFETY FIELD HAS A CEILING.
+async def test_an_advance_control_past_the_fortieth_button_is_now_seen(over):
+    """THE DEFECT THIS TEST WAS WRITTEN TO PIN IS FIXED, so it now pins the fix.
 
-    The advance scan walks ``range(min(total, 40))``. A modal with more than
-    forty buttons has its tail read by nobody, and an advance control in that
-    tail is reported as absent -- which the gate reads as "single-screen flow"
-    and allows.
+    IT USED TO ASSERT THE OPPOSITE. The advance scan walked
+    ``range(min(total, 40))``, so a "Next" past the fortieth button in the
+    dialog came back as ``advance_names: []`` -- and the gate reads an empty
+    list as "single-screen flow" and proceeds to submit. The one modal ever
+    observed was recorded at 43 buttons, so the margin was three.
 
-    THE NUMBER MATTERS. The one apply modal ever observed was recorded as
-    having 43 buttons. Whether all 43 sat inside the dialog was never written
-    down, so this is not a claim that the live flow trips the cap -- it is the
-    observation that the only number anybody recorded is ABOVE THE CEILING,
-    which makes the margin somewhere between three buttons and unknown.
+    The old assertions are kept in this docstring rather than deleted, because
+    the reversal is the point: ``assert hidden["advance_names"] == []`` was a
+    true statement about this reader on 2026-08-26 and is a false one now.
 
-    Both halves are asserted, because the first alone would not distinguish a
-    cap from a reader that never sees anything:
+    WHAT IS ASSERTED NOW, and it is still a PAIR so that a reader which sees
+    nothing anywhere would fail it:
 
-      * a "Next" placed after 41 filler buttons is NOT collected;
-      * THE SAME "Next", on a page with THE SAME button count, placed first,
-        IS collected.
+      * a "Next" placed after 41 filler buttons IS collected;
+      * THE SAME "Next", same button count, placed first, is ALSO collected.
 
-    One edit apart, opposite answers. That is the cap, isolated.
-
-    NOT FIXED HERE. Raising or removing the bound is a production change and a
-    decision for whoever owns dom.py; this module adds coverage only. What
-    would settle the risk is a recount of the live modal that records how many
-    buttons are inside the dialog rather than on the page.
+    Position no longer decides. That is the fix, isolated the same way the
+    defect was.
 
     DERIVED: the base fixture with 41 filler buttons and one "Next" inserted
     into the dialog, in two orders.
@@ -575,10 +621,91 @@ async def test_an_advance_control_past_the_fortieth_button_is_not_seen(over):
     hidden = await over(buried, dom.read_apply_modal)
     seen = await over(leading, dom.read_apply_modal)
 
-    # THE FINDING: the same control, past the cap, vanishes.
-    assert hidden["advance_names"] == []
-    # THE CONTROL ON THE FINDING: it is the position, not the reader.
+    assert hidden["advance_names"] == ["next"], "the tail is read now"
     assert seen["advance_names"] == ["next"]
+    # And both scans FINISHED -- 42 buttons is well inside the tripwire, so
+    # neither of these is the incomplete case covered below.
+    assert hidden["advance_scan_complete"] is True
+    assert seen["advance_scan_complete"] is True
+
+
+async def test_a_modal_past_the_tripwire_reports_incomplete_rather_than_empty(
+    over,
+):
+    """AN EMPTY RESULT AND AN UNFINISHED SCAN MUST NOT BE THE SAME VALUE.
+
+    This is the rule the old ceiling broke, and it is the same rule this server
+    already applies to a nav badge that did not render: absent is not zero.
+
+    A dialog carrying more buttons than ``dom.APPLY_ADVANCE_SCAN_LIMIT`` is not
+    sampled. It is not scanned AT ALL -- walking hundreds of controls would
+    spend round trips to reach an answer the reader already has -- and it
+    reports ``advance_scan_complete: False``.
+
+    THE DISCRIMINATION IS THE ASSERTION. ``advance_names`` is ``[]`` here and
+    ``[]`` on a genuinely single-screen modal, and those two pages MUST be
+    distinguishable by something. They are, by exactly one field.
+    """
+    over_limit = dom.APPLY_ADVANCE_SCAN_LIMIT + 1
+    fillers = "".join(
+        f'<button type="button">Filler {i:03d}</button>' for i in range(over_limit)
+    )
+    crowded = derive(markup(), _IN_DIALOG, f"{_IN_DIALOG}{fillers}")
+
+    swamped = await over(crowded, dom.read_apply_modal)
+    ordinary = await over(markup(), dom.read_apply_modal)
+
+    # Both report no advance controls ...
+    assert swamped["advance_names"] == []
+    assert ordinary["advance_names"] == []
+    # ... and they are NOT the same answer.
+    assert swamped["advance_scan_complete"] is False
+    assert ordinary["advance_scan_complete"] is True
+    assert swamped["buttons_total"] > dom.APPLY_ADVANCE_SCAN_LIMIT
+
+
+async def test_the_gate_refuses_a_scan_that_did_not_finish():
+    """The half that matters: the gate ACTS on the distinction.
+
+    A reader that reports incompleteness into a gate that ignores it has moved
+    the defect rather than fixed it. So this drives the real gate over a modal
+    dict whose scan did not finish and asserts it stops -- and that the reason
+    it gives is the scan, not a missing submit or a disabled one.
+    """
+    modal = {
+        "modal_present": True,
+        "submit_present": True,
+        "submit_enabled": True,
+        "submit_name": "Submit application",
+        "advance_names": [],
+        "buttons_total": dom.APPLY_ADVANCE_SCAN_LIMIT + 7,
+        "advance_scan_complete": False,
+    }
+    verdict = await _gate_over_modal(modal)
+    assert verdict["proceed"] is False
+    why = verdict["why"].casefold()
+    assert "did not finish" in why, verdict["why"]
+    assert "absent is not zero" in why, verdict["why"]
+
+
+async def test_an_older_modal_dict_without_the_field_refuses():
+    """THE DEFAULT REFUSES, which is the only safe direction for a new field.
+
+    Anything handing the gate a dict that predates ``advance_scan_complete``
+    -- a stale fake in a future test, a partially-built payload -- must stop
+    rather than proceed. ``.get`` returning None has to read as "did not
+    finish", never as "finished and found nothing".
+    """
+    modal = {
+        "modal_present": True,
+        "submit_present": True,
+        "submit_enabled": True,
+        "submit_name": "Submit application",
+        "advance_names": [],
+    }
+    verdict = await _gate_over_modal(modal)
+    assert verdict["proceed"] is False
+    assert "did not finish" in verdict["why"].casefold()
 
 
 # ---------------------------------------------------------------------------

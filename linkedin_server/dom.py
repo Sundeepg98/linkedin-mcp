@@ -1187,6 +1187,19 @@ APPLY_MODAL_SELECTOR = "[role=dialog]"
 #: Next is a shape nobody here has ever seen finish.
 APPLY_ADVANCE_WORDS = ("next", "continue", "review")
 
+#: How many buttons inside the dialog the advance scan will walk. A TRIPWIRE,
+#: NOT A BUDGET, and the difference is the whole point of this constant: when
+#: a modal draws more than this, the scan does NOT run and does NOT truncate --
+#: it reports itself INCOMPLETE and the gate refuses. Silently walking the
+#: first N and reporting "no advance controls" is how a multi-step flow reads
+#: as single-screen, which is precisely the failure this number used to cause
+#: at 40 against a modal recorded with 43 buttons.
+#:
+#: 200 because an apply dialog carrying more controls than that is not a shape
+#: this reader has ever seen, and the right response to an unrecognised shape
+#: here is to stop rather than to sample it.
+APPLY_ADVANCE_SCAN_LIMIT = 200
+
 
 async def read_apply_modal(page: Any) -> dict[str, Any]:
     """Read the apply modal WITHOUT touching it.
@@ -1208,6 +1221,11 @@ async def read_apply_modal(page: Any) -> dict[str, Any]:
         "submit_enabled": False,
         "submit_name": None,
         "advance_names": [],
+        # DEFAULTS THAT REFUSE. Every early return below leaves these as they
+        # are, and an unscanned modal must never read as one with no advance
+        # controls -- so "complete" starts false and is earned, not assumed.
+        "buttons_total": 0,
+        "advance_scan_complete": False,
         "why": "",
     }
     try:
@@ -1253,27 +1271,54 @@ async def read_apply_modal(page: Any) -> dict[str, Any]:
     out.pop("_aria_disabled", None)
 
     # Advance controls anywhere in the modal.
+    #
+    # AN EMPTY LIST AND AN UNFINISHED SCAN ARE NOT THE SAME VALUE, and until
+    # 2026-08-26 they were. This loop walked ``min(total, 40)`` and reported
+    # whatever it found; a Next past the fortieth button came back as
+    # ``advance_names: []``, which the gate reads as a single-screen flow and
+    # proceeds to submit on. The one modal ever observed was recorded at 43
+    # buttons. The margin was three.
+    #
+    # THREE WAYS THIS SCAN CAN COME UP SHORT, and all three now say so instead
+    # of returning a tidy empty list:
+    #   * more controls than the tripwire  -- not scanned at all, see below;
+    #   * one control that would not read  -- a button this reader could not
+    #     read is a button it cannot RULE OUT;
+    #   * the locator itself raising       -- previously ``pass``, which
+    #     turned a failed scan into "no advance controls found".
     names: list[str] = []
+    total = 0
+    complete = False
     try:
         buttons = page.locator(f"{APPLY_MODAL_SELECTOR} button")
         total = int(await buttons.count())
-        for i in range(min(total, 40)):
-            node = buttons.nth(i)
-            try:
-                if not await node.is_visible():
+        if total > APPLY_ADVANCE_SCAN_LIMIT:
+            # DELIBERATELY NOT SCANNED. The gate refuses an incomplete scan, so
+            # walking hundreds of controls would spend the round trips to reach
+            # the answer it already has. Reporting the count is what matters.
+            complete = False
+        else:
+            complete = True
+            for i in range(total):
+                node = buttons.nth(i)
+                try:
+                    if not await node.is_visible():
+                        continue
+                    label = (await node.get_attribute("aria-label")) or ""
+                    text = (await node.inner_text()) or ""
+                except Exception:
+                    complete = False
                     continue
-                label = (await node.get_attribute("aria-label")) or ""
-                text = (await node.inner_text()) or ""
-            except Exception:
-                continue
-            name = " ".join(f"{label} {text}".split()).lower()
-            if not name:
-                continue
-            if any(w in name for w in APPLY_ADVANCE_WORDS):
-                names.append(name[:60])
+                name = " ".join(f"{label} {text}".split()).lower()
+                if not name:
+                    continue
+                if any(w in name for w in APPLY_ADVANCE_WORDS):
+                    names.append(name[:60])
     except Exception:
-        pass
+        complete = False
     out["advance_names"] = sorted(set(names))
+    out["buttons_total"] = total
+    out["advance_scan_complete"] = complete
     return out
 
 

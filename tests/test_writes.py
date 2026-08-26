@@ -1559,6 +1559,8 @@ _GATE_REFUSALS = [
             "submit_enabled": True,
             "submit_name": "Submit application",
             "advance_names": ["next"],
+            "buttons_total": 12,
+            "advance_scan_complete": True,
         },
         "more than one step",
         "a multi-step flow",
@@ -1570,6 +1572,8 @@ _GATE_REFUSALS = [
             "submit_enabled": False,
             "submit_name": "Submit application",
             "advance_names": [],
+            "buttons_total": 12,
+            "advance_scan_complete": True,
         },
         "disabled",
         "a form wanting something it has not got",
@@ -1581,9 +1585,28 @@ _GATE_REFUSALS = [
             "submit_enabled": True,
             "submit_name": "Continue to next step",
             "advance_names": [],
+            "buttons_total": 12,
+            "advance_scan_complete": True,
         },
         "corroborate",
         "the hook and the accessible name disagreeing",
+    ),
+    (
+        {
+            "modal_present": True,
+            "submit_present": True,
+            "submit_enabled": True,
+            "submit_name": "Submit application",
+            "advance_names": [],
+            # The shape the ceiling used to produce SILENTLY. Before
+            # 2026-08-26 the reader walked min(total, 40) and returned this
+            # same empty list with no way to say it had stopped early, so a
+            # Next past the fortieth button read as a single-screen flow.
+            "buttons_total": 207,
+            "advance_scan_complete": False,
+        },
+        "did not finish",
+        "a scan that stopped early reporting an empty list",
     ),
     (
         {
@@ -1592,6 +1615,8 @@ _GATE_REFUSALS = [
             "submit_enabled": False,
             "submit_name": None,
             "advance_names": [],
+            "buttons_total": 12,
+            "advance_scan_complete": True,
         },
         "never rendered",
         "the modal not drawing at all",
@@ -1645,6 +1670,8 @@ async def test_the_second_gate_proceeds_only_on_the_measured_shape(monkeypatch):
                 "submit_enabled": True,
                 "submit_name": "Submit application",
                 "advance_names": [],
+            "buttons_total": 12,
+            "advance_scan_complete": True,
             }
         ),
     )

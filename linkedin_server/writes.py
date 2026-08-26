@@ -2284,6 +2284,19 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
             "recognises."
         )
         return out
+    if not modal.get("advance_scan_complete"):
+        out["why"] = (
+            "THE SCAN FOR ADVANCE CONTROLS DID NOT FINISH, so the empty list "
+            "beside it means UNKNOWN and not none. This modal draws "
+            f"{modal.get('buttons_total')} buttons and the reader walks at "
+            f"most {dom.APPLY_ADVANCE_SCAN_LIMIT} of them, refusing rather "
+            "than sampling; a control it could not read, or a locator that "
+            "raised, lands here too. Condition 5 asks whether this flow has a "
+            "Next in it, and an unfinished scan cannot answer that -- so the "
+            "answer is no submit, on the same rule this server applies to a "
+            "badge that did not render: absent is not zero."
+        )
+        return out
     if modal.get("advance_names"):
         out["why"] = (
             "THIS FLOW HAS MORE THAN ONE STEP -- it draws "
@@ -2314,7 +2327,10 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
     out["proceed"] = True
     out["why"] = (
         f"single-screen flow: one enabled control named {name!r} carrying "
-        f"{dom.APPLY_SUBMIT_HOOK}, and zero advance controls."
+        f"{dom.APPLY_SUBMIT_HOOK}, and zero advance controls out of "
+        f"{modal.get('buttons_total')} buttons ALL of which were read. The "
+        "count is here because 'none found' is only worth anything alongside "
+        "'and the search finished'."
     )
     return out
 
