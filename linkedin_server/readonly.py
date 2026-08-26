@@ -132,15 +132,22 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # way to reach the applied list without clicking -- which is exactly why
     # this pattern exists rather than a click.
     #
-    # The two stages are ENUMERATED rather than left as ``?[^#]*``. LinkedIn's
-    # own payload also names interview, archived, draft and clicked_apply, and
-    # a wildcard would have admitted all of them plus ``?stage=withdraw`` and
-    # ``?apply=1`` -- unreachable today, since the stage is a literal in
-    # server.py and never a tool argument, but an allowlist should permit what
-    # is opened rather than what happens to be harmless. A third stage needs a
-    # deliberate edit here, which is the point.
+    # The stages are ENUMERATED rather than left as ``?[^#]*``. LinkedIn's own
+    # payload also names interview, archived and clicked_apply, and a wildcard
+    # would have admitted all of them plus ``?stage=withdraw`` and ``?apply=1``
+    # -- unreachable today, since the stage is a literal in server.py and never
+    # a tool argument, but an allowlist should permit what is opened rather
+    # than what happens to be harmless. A third stage needs a deliberate edit
+    # here, which is the point, and on 2026-08-26 ``draft`` was given one. Its
+    # token was READ off LinkedIn's own anchors rather than guessed from the
+    # tab: tests/fixtures/jobs_tracker_row.html -- tracked, so the evidence
+    # survives a clone -- carries href=".../jobs-tracker/?stage=draft". The
+    # two disagree, and that is the trap: the tab is LABELLED "In Progress"
+    # and ADDRESSED as ``?stage=draft``, so the word on the tab is the one
+    # guess that does not work. interview, archived and clicked_apply remain
+    # deliberately absent -- nothing builds them.
     re.compile(
-        r"^https://www\.linkedin\.com/jobs-tracker/\?stage=(saved|applied)$"
+        r"^https://www\.linkedin\.com/jobs-tracker/\?stage=(saved|applied|draft)$"
     ),
     # Job search results.
     re.compile(r"^https://www\.linkedin\.com/jobs/search/?(\?[^#]*)?$"),

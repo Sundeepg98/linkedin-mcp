@@ -148,7 +148,25 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # cover -- harmless today because assert_read_url gates the REQUESTED url
     # and never re-checks the landed one, and a trap the moment anyone adds
     # that check.
-    "_ALLOWED_URL_PATTERNS": "20224a18ccb46283",
+    #
+    # RE-FROZEN AGAIN 2026-08-26, and this is the narrowest move this file has
+    # recorded: ONE alternative added to ONE pattern. The jobs-tracker
+    # allowlist admitted a THIRD stage, ``?stage=draft`` -- the tab LinkedIn
+    # labels "In Progress" -- so that the one row in the operator's tracker
+    # became readable at all. The token was READ off LinkedIn's own anchors
+    # rather than guessed from the label, and the label and the token differ;
+    # the argument in full is on the pattern itself in readonly.py.
+    #
+    # ONLY THIS DIGEST MOVED, 20224a18ccb46283 -> 6542383b4619c935. The other
+    # five are byte-identical across the change, and that is the load-bearing
+    # half: admitting a third READ surface did not shorten the forbidden list,
+    # did not drop a detector from the scanner, did not lose a JS token and
+    # did not sanction a mutation on the way past.
+    #
+    # VERIFIED UNDER BOTH INTERPRETERS, because a digest that differs by
+    # Python version freezes nothing:
+    #     Python 3.13.14  and  Python 3.10.19  ->  identical, all six.
+    "_ALLOWED_URL_PATTERNS": "6542383b4619c935",
     "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -183,7 +201,14 @@ DENYLISTS_AT_A76FE32 = {
     # The name is kept even though the sha no longer describes the contents,
     # because renaming it would break the link to the write it was created
     # for. What it now means: the last values anyone deliberately froze.
-    "_ALLOWED_URL_PATTERNS": "20224a18ccb46283",
+    #
+    # ONE OF THEM MOVED AGAIN ON 2026-08-26, for a third-stage READ on the
+    # jobs tracker (``?stage=draft``). Same reasoning as the entry above it:
+    # this dict answers "did the WRITE widen anything", the answer is still
+    # no, and what moved the value was a later deliberate boundary change that
+    # this check was never written to police. The other three are untouched,
+    # which is the half of the sentence worth reading.
+    "_ALLOWED_URL_PATTERNS": "6542383b4619c935",
     "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",

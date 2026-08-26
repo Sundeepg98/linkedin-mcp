@@ -1,4 +1,4 @@
-"""The tool surface: twenty-one tools, seventeen of which do not write.
+"""The tool surface: twenty-two tools, eighteen of which do not write.
 
 THE HEADLINE SAID "nineteen tools, fifteen of which read LinkedIn" UNTIL
 2026-08-25, and both halves of that sentence changed for the same small
@@ -117,6 +117,14 @@ EXPECTED_TOOLS = {
     # for a name that merely got better, and wrong for one that asserted
     # something false.
     "linkedin_new_messages",
+    # A READ, added 2026-08-26. The third of the tracker's stages to get a
+    # tool, and the one nothing could reach until the navigation allowlist was
+    # deliberately widened by one alternative to admit ``?stage=draft``. Its
+    # NAME is the past-participle noun phrase this file blesses two tests
+    # below -- it describes a list of drafts, not the act of drafting -- and
+    # ``draft`` is on no write-verb list, so nothing here is a rename dodging
+    # a guard. What it reads is the tab LinkedIn labels "In Progress".
+    "linkedin_draft_applications",
     # THE MESSAGING SURFACE ITSELF, 2026-08-26, on the operator's ruling that
     # reading his own inbox is his to do. Named for what it DOES rather than
     # what the path suggests: /messaging/ does not stay on a list, LinkedIn
@@ -180,7 +188,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_twentyone_tools(tools):
+async def test_the_surface_is_exactly_the_twentytwo_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -198,9 +206,15 @@ async def test_the_surface_is_exactly_the_twentyone_tools(tools):
     surface is twenty NAMES over nineteen capabilities, which is why the count
     alone would be a misleading thing to read off this file, and why the
     comment beside the pair in ``EXPECTED_TOOLS`` says which two they are.
+
+    THE FIFTH RENAME, 2026-08-26, is back to the first kind: a tool arrived.
+    ``linkedin_draft_applications`` is a genuinely new READ -- the tracker's
+    In Progress list, which no tool could reach because the navigation
+    allowlist enumerated two stages and this is a third. So twenty-two names
+    over twenty-one capabilities; the login pair is still the only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 21
+    assert len(tools) == 22
     # And the split is asserted, not just the total: sixteen non-writes and the
     # four named writes. A future tool arriving as a write would otherwise
     # only have to bump a number.
@@ -225,7 +239,13 @@ async def test_the_surface_is_exactly_the_twentyone_tools(tools):
     # sixteen distinct things would be wrong by one. The number is still
     # asserted rather than dropped, because the next quiet growth -- an actual
     # one -- still has to fail here.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 17
+    #
+    # AND EIGHTEEN, 2026-08-26, is the expensive kind again rather than the
+    # cheap one: linkedin_draft_applications does something no name here could
+    # do before it. The write count is unmoved at four, which is the half of
+    # this line worth checking -- a read arriving must not be able to hide a
+    # write arriving beside it.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 18
 
 
 def test_the_read_that_was_nearly_named_a_write():

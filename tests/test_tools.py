@@ -28,6 +28,7 @@ from typing import Any, Optional
 import pytest
 
 from linkedin_server import browser as browser_module
+from linkedin_server import shape
 from linkedin_server.config import (
     DEFAULT_LIMIT,
     MAX_LIMIT,
@@ -37,6 +38,7 @@ from linkedin_server.config import (
     SEARCH_MAX_LIMIT,
 )
 from linkedin_server.server import (
+    linkedin_draft_applications,
     linkedin_my_applications,
     linkedin_my_profile,
     linkedin_notifications,
@@ -60,6 +62,13 @@ CLASSIC_VIEWS_URL = "https://www.linkedin.com/me/profile-views/"
 #: is the only address a given list has.
 APPLIED_URL = "https://www.linkedin.com/jobs-tracker/?stage=applied"
 SAVED_URL = "https://www.linkedin.com/jobs-tracker/?stage=saved"
+#: The tab LinkedIn LABELS "In Progress" is ADDRESSED as ``?stage=draft``. The
+#: token is LinkedIn's own: ``tests/fixtures/jobs_tracker_row.html`` carries
+#: href=".../jobs-tracker/?stage=draft" straight out of LinkedIn's markup, and
+#: it is TRACKED, so the evidence for that word is in the repo rather than in
+#: somebody's memory of a probe. ``?stage=in_progress`` renders no <main> at
+#: all, so the word on the tab is the one guess that does not work.
+DRAFT_URL = "https://www.linkedin.com/jobs-tracker/?stage=draft"
 
 #: The tracker's tab strip, as ``page.inner_text("main")`` returns it. The
 #: counts are what let an empty list be told apart from a failed read, so a
@@ -85,6 +94,47 @@ TRACKER_ALL_EMPTY = "\n".join(
         "Archived",
         "Date posted",
         "No jobs here",
+    ]
+)
+#: The SAME strip, as it renders on ``?stage=draft``: the In Progress tab is
+#: RELABELLED "Draft". Measured 2026-08-26 across four captures, two of them
+#: tracked: ``jobs_tracker_row.html`` reads "Draft <dot> 1" and contains "In
+#: Progress" nowhere, while ``jobs_tracker_empty.html`` reads "In Progress
+#: <dot> 1" and contains "Draft" nowhere. The two untracked stage probes agree
+#: -- the draft one says "Draft", the saved one says "In Progress".
+#:
+#: THAT RELABEL IS LOAD-BEARING, not a curiosity, and it is the reason this
+#: constant exists rather than reusing TRACKER_TABS. ``_read_tracker`` looks
+#: the count up by the STAGE it was handed; ``shape.parse_tracker_tabs`` keys
+#: the strip by the LABEL it read. For saved and applied those two words are
+#: the same word and nothing notices the difference. For this stage they are
+#: not, and the ONLY reason ``tab_counts["draft"]`` resolves is that LinkedIn
+#: renames the tab on the url the tool actually opens. If that ever stops, the
+#: count comes back None and a genuinely empty draft list turns into a
+#: permanent ExtractionFailedError -- which is asserted below rather than left
+#: as a coincidence nobody wrote down.
+DRAFT_TABS = "\n".join(
+    [
+        "Job tracker",
+        "Saved " + chr(0xB7) + " 3",
+        "Draft " + chr(0xB7) + " 1",
+        "Applied " + chr(0xB7) + " 2",
+        "Interview " + chr(0xB7) + " 0",
+        "Archived",
+        "Date posted",
+    ]
+)
+DRAFT_TABS_EMPTY = "\n".join(
+    [
+        "Job tracker",
+        "Saved " + chr(0xB7) + " 3",
+        "Draft " + chr(0xB7) + " 0",
+        "Applied " + chr(0xB7) + " 2",
+        "Interview " + chr(0xB7) + " 0",
+        "Archived",
+        "Date posted",
+        # The stage-selected wording, not the default tab's "No jobs here".
+        "No matches",
     ]
 )
 NOTIFICATIONS_URL = "https://www.linkedin.com/notifications/"
@@ -228,6 +278,20 @@ SAVED_CARD = {
         "Riverton, Fairhaven, United States (Remote)\n"
         "Easy Apply\n"
         "2 weeks ago"
+    ),
+}
+
+#: A row on the In Progress tab. Synthetic, like every card above it -- what
+#: is measured about this surface is the URL TOKEN and the TAB RELABEL, and
+#: neither is a property of a card.
+DRAFT_CARD = {
+    "href": "/jobs/view/platform-engineer-at-acme-4155555555?refId=Dr",
+    "text": (
+        "Platform Engineer\n"
+        "Platform Engineer\n"
+        "Acme Corp\n"
+        "Riverton, Fairhaven, United States (Remote)\n"
+        "3 days ago"
     ),
 }
 
@@ -694,6 +758,97 @@ async def test_cards_that_could_not_be_parsed_are_counted_not_hidden(drive):
     # parsed (2). Counting only the parsed ones would let a full page report
     # capped: false and read as "you have reached the end of the list".
     assert result["page_had"] == 3
+
+
+# ---------------------------------------------------------------------------
+# 1c. The third stage, and the word it is addressed by
+# ---------------------------------------------------------------------------
+#
+# The tracker's In Progress list had no tool until 2026-08-26 and could not
+# have had one: the navigation allowlist enumerated ``saved`` and ``applied``,
+# so any url for a third stage was refused before Chromium saw it. What made
+# the third stage awkward is not the allowlist, it is that this tab is the one
+# place on the surface where LinkedIn's LABEL and LinkedIn's TOKEN are
+# different words -- "In Progress" against ``?stage=draft`` -- and every layer
+# below has to agree about which of the two it is using.
+
+
+async def test_the_draft_list_is_read_from_the_stage_draft_url(drive):
+    """The token is ``draft``, and the tool has to build exactly that url."""
+    page = FakePage(evaluate_result=[DRAFT_CARD])
+    page.inner_text_result = DRAFT_TABS
+    navigations = drive(page)
+
+    result = await linkedin_draft_applications(limit=25)
+
+    assert "error" not in result, result
+    assert navigations == [DRAFT_URL]
+    assert result["count"] == 1
+    assert result["tab"] == "Draft"
+    assert result["linkedin_count"] == 1
+    row = result["results"][0]
+    assert row["title"] == "Platform Engineer"
+    assert row["job_id"] == "4155555555"
+
+
+async def test_a_corroborated_empty_draft_list_is_a_result_not_an_error(drive):
+    """No drafts, and LinkedIn's own relabelled tab agrees. That is an answer.
+
+    The operator's real tracker held ONE row here when this shipped, so the
+    empty case is the one that would otherwise never be exercised until the
+    day he cleared it -- which is exactly the day an error would be worst.
+    """
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = DRAFT_TABS_EMPTY
+    drive(page)
+
+    result = await linkedin_draft_applications(limit=25)
+
+    assert "error" not in result, result
+    assert result["results"] == []
+    assert result["empty"] is True
+    assert result["linkedin_count"] == 0
+    assert result["empty_state"] == "No matches"
+    assert "not a failed read" in result["note"]
+
+
+async def test_the_draft_count_resolves_only_because_linkedin_relabels_the_tab(
+    drive,
+):
+    """THE MECHANISM, PINNED, AND SHOWN FAILING WITHOUT IT.
+
+    ``_read_tracker`` looks the count up by the STAGE string it was handed --
+    ``tab_counts.get("draft")`` -- while ``shape.parse_tracker_tabs`` keys the
+    strip by the LABEL it read off the page. Those two agree for ``saved`` and
+    ``applied`` because the tab and the token are the same word there, and the
+    coincidence is invisible until a stage arrives where they differ.
+
+    This one does. It works ONLY because LinkedIn renames the tab to "Draft"
+    on the ``?stage=draft`` url, which is measured rather than assumed. So the
+    counterfactual is asserted too: hand the tool the DEFAULT strip, the one
+    saying "In Progress", and the count no longer resolves -- and because an
+    unresolvable count cannot corroborate a zero, an empty list stops being an
+    answer and becomes an error.
+
+    That is the conservative direction, and it is worth knowing it is the
+    behaviour: if LinkedIn ever stops relabelling, this tool goes loud rather
+    than reporting "you have no drafts" to somebody who has some.
+    """
+    # The strip as the DEFAULT view draws it: "In Progress", not "Draft".
+    assert "In Progress" in TRACKER_TABS and "Draft" not in TRACKER_TABS
+    assert "Draft" in DRAFT_TABS and "In Progress" not in DRAFT_TABS
+
+    page = FakePage(evaluate_result=[])
+    page.inner_text_result = TRACKER_ALL_EMPTY
+    drive(page)
+
+    result = await linkedin_draft_applications(limit=25)
+
+    assert result["error"] == "extraction_failed", result
+    assert "count could not be read" in result["message"]
+    # And the count IS there under the other key, which is what makes this a
+    # naming mismatch rather than a page that failed to render.
+    assert shape.parse_tracker_tabs(TRACKER_ALL_EMPTY)["in_progress"] == 1
 
 
 # ---------------------------------------------------------------------------

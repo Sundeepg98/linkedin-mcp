@@ -430,6 +430,11 @@ ALLOWED = [
     "https://www.linkedin.com/me/profile-views/",
     "https://www.linkedin.com/jobs-tracker/?stage=saved",
     "https://www.linkedin.com/jobs-tracker/?stage=applied",
+    # THE THIRD STAGE, allowed 2026-08-26. The tab LinkedIn labels "In
+    # Progress" is addressed as ``?stage=draft`` -- the token read off
+    # LinkedIn's own anchors in the tracked fixture jobs_tracker_row.html,
+    # not guessed from the label, which is a different word.
+    "https://www.linkedin.com/jobs-tracker/?stage=draft",
     "https://www.linkedin.com/jobs/search/?keywords=node&f_WT=2",
     "https://www.linkedin.com/in/me/",
     "https://www.linkedin.com/in/alex-r/details/skills/",
@@ -468,11 +473,16 @@ BLOCKED = [
     "javascript:alert(1)",
     "file:///C:/Users/Dell/.claude/.credentials.json",
     "",
-    # The job tracker, which the allowlist admits at exactly two addresses.
+    # The job tracker, which the allowlist admits at exactly three addresses.
     # A wildcard query would have let every one of these through.
     "https://www.linkedin.com/jobs-tracker/",
     "https://www.linkedin.com/jobs-tracker/?stage=withdraw",
     "https://www.linkedin.com/jobs-tracker/?stage=archived",
+    # The stages LinkedIn's own payload names and this server still refuses,
+    # listed since 2026-08-26 because that is the day the enumeration grew and
+    # a widening is only narrow if the things it did NOT admit are asserted.
+    "https://www.linkedin.com/jobs-tracker/?stage=interview",
+    "https://www.linkedin.com/jobs-tracker/?stage=clicked_apply",
     "https://www.linkedin.com/jobs-tracker/?apply=1",
     "https://www.linkedin.com/jobs-tracker/?stage=saved&save=1",
     "https://www.linkedin.com/jobs-tracker/?a%63tion=delete",
@@ -529,6 +539,44 @@ def test_write_and_foreign_urls_are_blocked(url: str):
         readonly.assert_read_url(url)
 
 
+def test_the_tracker_allowlist_admits_three_stages_and_no_more():
+    """THE THIRD STAGE, and the evidence that admitting it stayed narrow.
+
+    ``?stage=draft`` was added on 2026-08-26 so the In Progress list could be
+    read at all. The hazard in that edit is not the stage it names -- it is
+    the shape the NEXT person reaches for: one ``[a-z_]+`` where the
+    alternation is, and every stage LinkedIn has becomes openable, including
+    the ones this server has no business on.
+
+    So both halves are pinned. The permitted set is asserted EXACTLY, and each
+    refused stage is named rather than left to a wildcard's absence: a test
+    that only checked the three permitted ones would pass unchanged against
+    ``(saved|applied|draft|interview|archived|clicked_apply)``.
+    """
+    from linkedin_server.config import BASE_URL
+
+    permitted = {"saved", "applied", "draft"}
+    refused = {"interview", "archived", "clicked_apply", "withdraw", "in_progress"}
+    assert permitted & refused == set()
+
+    for stage in sorted(permitted):
+        url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
+        assert readonly.is_read_url(url), stage
+
+    for stage in sorted(refused):
+        url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
+        assert not readonly.is_read_url(url), stage
+
+    # SHOWN NOT PASSING VACUOUSLY, which for a refusal test is the whole
+    # question. Every refused url above matches the wildcard somebody might
+    # reach for, so the ENUMERATION is the only thing standing between this
+    # server and all five -- and the loop above is what fails on the day it
+    # stops being an enumeration.
+    wildcard = re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=[a-z_]+$")
+    for stage in sorted(refused):
+        assert wildcard.match(f"{BASE_URL}/jobs-tracker/?stage={stage}"), stage
+
+
 def test_a_keyword_cannot_smuggle_a_forbidden_path_into_a_search_url():
     """Tool arguments reach the url builder; the allowlist is what stops them."""
     hostile = (
@@ -553,6 +601,7 @@ def test_the_urls_the_server_actually_builds_all_pass_the_allowlist():
         f"{BASE_URL}/me/profile-views/",
         f"{BASE_URL}/jobs-tracker/?stage=applied",
         f"{BASE_URL}/jobs-tracker/?stage=saved",
+        f"{BASE_URL}/jobs-tracker/?stage=draft",
         f"{BASE_URL}/in/me/",
         f"{BASE_URL}/in/alex-r/details/skills/",
         f"{BASE_URL}/notifications/",

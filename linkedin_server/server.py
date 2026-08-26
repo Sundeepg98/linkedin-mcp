@@ -693,6 +693,54 @@ async def linkedin_my_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]
 
 
 @mcp.tool()
+async def linkedin_draft_applications(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
+    """List the job applications you STARTED on LinkedIn and never sent.
+
+    Reads the In Progress tab of your own job tracker. The tab is LABELLED "In
+    Progress" and ADDRESSED as ``?stage=draft`` -- and LinkedIn renames it to
+    "Draft" once you are on that url, which is why anything below about a
+    "Draft" tab is what you will see if you open the link yourself. Each row
+    carries title, company, location and how long ago, plus the job id and
+    link, exactly as the applied list does.
+
+    A DRAFT IS NOT AN APPLICATION. It is a distinct state that LinkedIn counts
+    on a tab of its own: you opened a form, stopped, and nothing went anywhere.
+    An application never has to pass through this state, so a row here is not a
+    stalled application, and an empty list here is not evidence about anything
+    you did send.
+
+    AND THIS TOOL DOES NOT ANSWER WHETHER AN APPLICATION CAN BE WITHDRAWN.
+    That question is open, it is recorded on linkedin_apply_job, and a draft is
+    not the answer to it: discarding one of these is not the same act, because
+    there is nothing on the far end to take back.
+
+    The row's own controls were read off a capture on 2026-08-24, and this
+    server performs none of them: a per-row checkbox ("Select <job title>"), a
+    "Select all", an "Overflow menu", and -- never pressed from here -- a
+    "Delete" control, behind a dialog this server does not act on either,
+    reading "Discard draft application and remove this job?". This tool reads
+    the list.
+
+    An empty result says so explicitly and carries LinkedIn's own count for the
+    tab, so "you have no drafts" and "this could not be read" are never the
+    same answer.
+
+    Args:
+        limit: maximum rows to return (default 25, max 100).
+    """
+    limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
+    try:
+        return await _read_tracker(
+            "draft",
+            tab_label="Draft",
+            limit=limit,
+            surface="draft applications",
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
 async def linkedin_new_messages() -> dict[str, Any]:
     """Has anything ARRIVED since you last opened Messaging? Nothing is opened.
 
@@ -861,8 +909,9 @@ async def linkedin_saved_jobs(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     An empty result says so explicitly and carries LinkedIn's own count for the
     tab, so an empty list can never be mistaken for a read that failed.
 
-    The tracker also holds In Progress, Interview and Archived tabs. They are
-    not exposed as tools: this reads the two lists it names and nothing else.
+    The tracker also holds Interview and Archived tabs, and they are not
+    exposed as tools. Its In Progress tab is, since 2026-08-26:
+    linkedin_draft_applications reads it, and this one reads Saved.
 
     Args:
         limit: maximum rows to return (default 25, max 100).
