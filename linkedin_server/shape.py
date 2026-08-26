@@ -2072,6 +2072,8 @@ def messaging_overview(
     text = html or ""
     rows = _conversation_rows(text)
     sends = {label: len(pattern.findall(text)) for label, pattern in _SEND_SURFACES}
+    in_document = len(_UNREAD_MARKER.findall(text))
+    in_rows = sum(1 for r in rows if r["unread"])
     on_a_thread = "/messaging/thread/" in (landed_url or "")
 
     conversations = [
@@ -2085,8 +2087,34 @@ def messaging_overview(
 
     return {
         "conversations": len(rows),
-        "unread": sum(1 for r in rows if r["unread"]),
+        "unread": in_rows,
         "rows": conversations,
+        # BOTH COUNTS, AND THE DISAGREEMENT NAMED. An earlier version counted
+        # the word "unread" across the WHOLE document and reported 4; scoping
+        # it to conversation rows reports 0 on the same account. Rather than
+        # pick which is right, both are shown -- because the honest answer is
+        # that they measure different things and only one of them answers
+        # "who is waiting".
+        #
+        # The document count is knowingly LOOSE: the filter pill above the
+        # list is itself labelled "Unread", class names contain the word, and
+        # so does the payload. So a document count above the row count is
+        # expected and is NOT evidence of missed conversations. It is evidence
+        # the word appears in furniture.
+        "unread_markers_in_document": in_document,
+        "marker_reconciliation": (
+            "row-scoped and document-wide counts agree"
+            if in_document == in_rows
+            else (
+                f"{in_document} occurrences of 'unread' in the page, "
+                f"{in_rows} on conversation ROWS. The gap is expected: the "
+                "filter pill is labelled Unread, and the word appears in "
+                "class names and payload. The ROW count is the one that "
+                "answers who is waiting. If a conversation you can SEE marked "
+                "unread in the product reads false here, that is a real "
+                "under-count and the row scoping is wrong -- report it."
+            )
+        ),
         "send_surfaces": sends,
         "thread_opened": {
             "opened": on_a_thread,
@@ -2127,3 +2155,68 @@ def redact_thread_id(url: Optional[str]) -> Optional[str]:
     if not url:
         return url
     return re.sub(r"(/messaging/thread/)[^/?#]+", r"\1<THREAD-ID>", url)
+
+
+#: The filter pills LinkedIn draws above the conversation list. Their names
+#: are taken from the product UI; what each one DOES is read off the page
+#: rather than assumed, exactly as apply_route reads the apply anchor instead
+#: of guessing the apply url.
+_FILTER_NAMES = ("focused", "other", "unread", "jobs", "connections", "inmail", "starred")
+
+#: Any element carrying one of those names, with whatever destination it has.
+#: Deliberately broad: a control that turns out to be a <button> with no href
+#: is a FINDING (the filter is client-side state, so InMails are unreachable
+#: without interacting), not a parse failure to be hidden.
+_LABELLED_CONTROL = re.compile(r"<(a|button)([^>]*)>([^<]{0,60})", re.I)
+_ARIA = re.compile(r'aria-label="([^"]*)"')
+_HREF = re.compile(r'href="([^"]*)"')
+
+
+def messaging_filters(html: str) -> dict[str, Any]:
+    """What the filter pills are, and where each one actually goes.
+
+    THE INMAIL QUESTION THIS EXISTS TO SETTLE. A recruiter InMail was visible
+    in the product under its Unread filter and did not appear in the rows this
+    server reads. Either it sits below the page, or InMails are filed on a
+    surface of their own. Those are different findings and guessing between
+    them would make every count this tool prints untrustworthy.
+
+    So the controls are READ. If a pill is an anchor, its href names the
+    surface and the filter parameter is measured rather than invented. If it
+    is a button with no href, the filtering is client-side state and InMails
+    are NOT reachable by navigation at all -- which is equally a finding, and
+    the honest answer is then that this server cannot see them without
+    interacting with the page.
+    """
+    text = html or ""
+    found: dict[str, dict[str, Any]] = {}
+    for match in _LABELLED_CONTROL.finditer(text):
+        tag, attrs, inner = match.groups()
+        aria = _ARIA.search(attrs or "")
+        # The accessible name if there is one, else the visible text. Real
+        # LinkedIn pills nest spans, so inner text is often empty and the
+        # aria-label is the only thing carrying the word.
+        label = ((aria.group(1) if aria else "") + " " + (inner or "")).strip().lower()
+        for name in _FILTER_NAMES:
+            if name and name in label and name not in found:
+                href = _HREF.search(attrs or "")
+                found[name] = {
+                    "tag": tag.lower(),
+                    "href": href.group(1) if href else None,
+                    "navigable": bool(href),
+                }
+    navigable = [n for n, v in found.items() if v["navigable"]]
+    return {
+        "filters_seen": sorted(found),
+        "detail": found,
+        "navigable_filters": sorted(navigable),
+        "verdict": (
+            "filter pills carry hrefs, so the filter surface is reachable by "
+            "navigation and the parameter is now MEASURED rather than guessed"
+            if navigable
+            else "no filter pill carries an href on this page. Either they did "
+            "not render, or filtering is client-side state -- in which case "
+            "InMails are not reachable from this server without interacting "
+            "with the page, which it does not do."
+        ),
+    }

@@ -198,3 +198,87 @@ def test_the_result_says_the_count_is_a_floor():
     assert "floor" in completeness
     assert "UNMEASURED" in completeness
     assert "InMail" in completeness
+
+
+# ---------------------------------------------------------------------------
+# Reconciling 4 -> 0, and settling the InMail surface by READING it
+# ---------------------------------------------------------------------------
+
+
+def test_both_unread_counts_are_reported_and_the_gap_is_explained():
+    """4 became 0 between two versions and neither number was wrong.
+
+    The old code counted the word "unread" across the WHOLE document; the new
+    code counts it on conversation ROWS. They measure different things, and
+    only the row count answers who is waiting -- the page's own filter pill is
+    LABELLED "Unread", so the document count sees furniture.
+
+    Both are reported rather than one being chosen, because a tool that
+    silently swapped 4 for 0 would leave a reader unable to tell a fixed
+    over-count from a new under-count.
+    """
+    html = (
+        '<a aria-label="Unread" href="/messaging/?filter=unread">pill</a>'
+        '<div aria-label="Select conversation with A B"><i>UNREAD</i></div>'
+        '<div aria-label="Select conversation with C D">quiet</div>'
+    )
+    out = shape.messaging_overview(html, THREAD_URL)
+
+    assert out["unread"] == 1, "the row count is the one that answers the question"
+    assert out["unread_markers_in_document"] > out["unread"]
+    assert "furniture" not in out["marker_reconciliation"]  # plain words, not jargon
+    assert "ROW count" in out["marker_reconciliation"]
+    # And it tells the reader how to report the dangerous direction.
+    assert "under-count" in out["marker_reconciliation"]
+
+
+def test_the_detector_returns_true_on_an_unread_row():
+    """A DETECTOR ONLY EVER OBSERVED RETURNING FALSE HAS NOT BEEN SHOWN TO
+    WORK. A false zero says "nothing waiting", which he would believe, and it
+    is a worse failure than the over-count it replaced.
+    """
+    for marker in (
+        "<i>UNREAD</i>",
+        "<span>Unread</span>",
+        '<span class="messaging-remove-unread-blue-background"></span>',
+    ):
+        html = f'<div aria-label="Select conversation with A B">{marker}</div>'
+        out = shape.messaging_overview(html, THREAD_URL)
+        assert out["unread"] == 1, marker
+        assert out["rows"][0]["unread"] is True, marker
+
+
+@pytest.mark.parametrize(
+    "html,seen,navigable",
+    [
+        (
+            '<a href="/messaging/?filter=unread" aria-label="Unread">x</a>',
+            ["unread"],
+            ["unread"],
+        ),
+        ('<button aria-label="InMail"><span>InMail</span></button>', ["inmail"], []),
+        ("<div>no pills rendered</div>", [], []),
+    ],
+    ids=["anchor carries the parameter", "button is client-side", "nothing rendered"],
+)
+def test_the_filter_pills_are_read_not_guessed(html, seen, navigable):
+    """SETTLING THE INMAIL QUESTION BY READING, the way apply_route reads the
+    apply anchor instead of guessing the apply url.
+
+    A recruiter InMail was visible in the product and absent from the rows
+    this server reads. Either it is below the page or InMails are a separate
+    surface. Hardcoding a ``?filter=`` guess to chase it would break
+    never-ship-a-guessed-body for the sake of looking thorough.
+
+    So the controls are read. An anchor MEASURES the parameter. A button with
+    no href means filtering is client-side state and InMails are not reachable
+    by navigation at all -- equally a finding, and one the tool states rather
+    than hiding behind an empty result.
+    """
+    out = shape.messaging_filters(html)
+    assert out["filters_seen"] == seen
+    assert out["navigable_filters"] == navigable
+    if navigable:
+        assert "MEASURED" in out["verdict"]
+    else:
+        assert "client-side" in out["verdict"] or "did not render" in out["verdict"]

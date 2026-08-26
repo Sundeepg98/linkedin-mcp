@@ -801,6 +801,13 @@ async def linkedin_open_messaging(include_names: bool = False) -> dict[str, Any]
         verdict = shape.messaging_overview(
             html, landed, include_names=bool(include_names)
         )
+        # The filter pills, READ rather than assumed. This is what settles
+        # whether InMails are a separate surface: if a pill is an anchor its
+        # href names the filter parameter, and if it is a button with no href
+        # then filtering is client-side state and InMails are unreachable by
+        # navigation at all. Either answer is a finding; guessing between them
+        # would make every count above untrustworthy.
+        verdict["filters"] = shape.messaging_filters(html)
         return {**verdict, "pages_loaded": 1}
     except Exception as exc:
         return _error(exc)
