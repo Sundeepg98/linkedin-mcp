@@ -1914,16 +1914,29 @@ async def preview(
 #: irreversibility in this design that is measured in AUDIENCE rather than in
 #: state -- a badge taken down is not a badge un-seen.
 #:
-#: ``apply_job`` is not here and is the one whose absence needs saying plainly,
-#: because it is the action that was asked for by name. Its CONTROL is measured
-#: -- two routes, positively distinguishable, and the identification half ships
-#: as a read. Its FLOW is not: thirteen job captures contain zero forms, zero
-#: file inputs, zero dialogs and zero submit controls, so nothing in this repo
-#: has ever seen what a caller would have to fill in or press. It also holds no
-#: ``url_template``, so :func:`mint` refuses it a grant at issue exactly as it
-#: refuses Open To Work. An apply cannot be taken back by this server under any
-#: circumstances, which makes it the last action in the design that should ever
-#: be performed on a guessed selector.
+#: ``apply_job`` IS HERE, since 2026-08-25, and this paragraph said the exact
+#: opposite until 2026-08-26 -- every clause of it overtaken and none of them
+#: corrected: "its FLOW is not [measured]" (captured 2026-08-24), "thirteen job
+#: captures contain zero forms" (true of those captures, irrelevant once the
+#: flow itself was opened), "it holds no ``url_template``, so :func:`mint`
+#: refuses it a grant" (it holds one, and mint issues grants for it). A comment
+#: describing a capability as absent, sitting beside the set that contains it,
+#: is the going-stale defect this wave keeps finding -- so the correction is
+#: recorded rather than the sentences quietly swapped.
+#:
+#: What is TRUE, and is the part worth carrying: an apply cannot be taken back
+#: by this server under any circumstances, and nobody has established that
+#: LINKEDIN offers a withdraw at all. That makes it the last action in the
+#: design that should ever be performed on a guessed selector -- which is why
+#: it is the only member of :data:`TWO_CLICK_ACTIONS`, why the gate between
+#: those clicks re-reads the modal live rather than trusting the preview, and
+#: why an unfinished scan for advance controls refuses instead of proceeding.
+#: The actions whose control is the SAVE button, and therefore the only ones
+#: the save-specific "no measured anchor" refusal in :func:`perform` describes.
+#: Named here rather than tested inline so that the guard and the message it
+#: guards cannot drift apart.
+_SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
+
 PERFORMABLE: frozenset[str] = frozenset(
     {"save_job", "unsave_job", "unfollow_company", "apply_job"}
 )
@@ -1975,6 +1988,20 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     """
     if spec.action == "unfollow_company":
         return UNFOLLOW_ANCHOR_PREFIX
+    if spec.action == "apply_job":
+        # ADDED 2026-08-26, and its absence was not a subtlety: apply fell
+        # through to the SAVE_LABELS lookup below, matched nothing, and
+        # perform refused every apply with a sentence about the save
+        # control's unphotographed ON state. The action was registered,
+        # listed in PERFORMABLE, and reported by server_info as performable
+        # and irreversible -- and could not run.
+        #
+        # The apply control's accessible name is a PREFIX because LinkedIn
+        # writes the posting's title and employer into it. Measured, not
+        # guessed: shape.LINKEDIN_APPLY_PREFIX is the same constant
+        # dom.APPLY_CONTROL and shape.apply_route are built from, so the
+        # anchor, the classifier and the selector cannot drift apart.
+        return shape.LINKEDIN_APPLY_PREFIX
     for label, state in shape.SAVE_LABELS.items():
         if state == spec.from_state:
             return label
@@ -2012,33 +2039,19 @@ def _refuse_unperformable(spec: WriteSpec) -> None:
             "surface already on the read allowlist, or evidence that a newly "
             "followed Page sorts into the rendered window."
         )
-    if spec.action == "apply_job":
-        raise WriteAttemptError(
-            "apply_job is sanctioned and is NOT performed, and this is the "
-            "refusal least likely to be lifted by trying harder. The apply "
-            "CONTROL is measured: two routes, positively distinguishable, and "
-            "linkedin_job_detail reports which one a posting uses. THE APPLY "
-            "FLOW IS NOT MEASURED AT ALL. Thirteen job captures in this repo "
-            "contain zero forms, zero file inputs, zero dialogs, zero "
-            "screening questions and zero controls that submit anything -- "
-            "nothing here has ever seen what a caller would have to fill in or "
-            "press. An application cannot be withdrawn by this server under "
-            "any circumstances (withdrawal is permanently forbidden), so it is "
-            "the last action in this design that may be attempted on a guessed "
-            "selector. AND HALF OF IT IS NOT THIS SERVER'S TO PERFORM EVEN "
-            "THEN: the off-site route submits on a third party's applicant- "
-            "tracking system, which this server was not built for and has no "
-            "business driving. "
-            "WHAT WOULD LIFT THE FIRST HALF, so this reads as UNMEASURED "
-            "rather than as permanent: scripts/_probe_apply_flow.py captures "
-            "the LinkedIn-hosted flow and inventories exactly the controls "
-            "every existing capture lacks. It NAVIGATES rather than clicks -- "
-            "LinkedIn draws the apply control as a link, so the flow is "
-            "reachable without pressing anything -- and the package's own "
-            "scanner finds zero mutating calls in it. It has NOT been run. "
-            "Run it with him present, on a posting whose apply_path reads "
-            "'linkedin_apply'."
-        )
+    # apply_job WAS HERE UNTIL 2026-08-26, and it was DEAD as well as false.
+    # Dead because apply entered PERFORMABLE and the guard at the top of this
+    # function returns before reaching it. False because its two load-bearing
+    # sentences had both been overtaken: "THE APPLY FLOW IS NOT MEASURED AT
+    # ALL" (it was captured 2026-08-24) and "It has NOT been run" (it was run
+    # that same day). Twenty-eight unreachable lines asserting two things that
+    # had stopped being true.
+    #
+    # Removed rather than reworded, because this function is for actions that
+    # are sanctioned and NOT performed, and apply is performed. The half that
+    # SURVIVES any better capture -- that the off-site route submits on a third
+    # party's applicant-tracking system and is none of this server's business
+    # -- lives on the spec, in wrong_state_note, where the gate reads it out.
     if spec.action == "set_open_to_work":
         raise WriteAttemptError(
             "set_open_to_work is sanctioned and cannot be performed: its "
@@ -2151,6 +2164,29 @@ async def _live_control(
             f"it is labelled {label!r}, which states the inverse action.",
             dom.unfollow_control_selector(grant.target),
         )
+
+    if spec.action == "apply_job":
+        # WITHOUT THIS BRANCH APPLY READ THE SAVE BUTTON. The fall-through
+        # below is the save family's, and gate 5 is supposed to re-read THE
+        # VERY CONTROL the click will land on -- so for apply it has to be the
+        # apply control or the gate is corroborating the wrong element.
+        control = await dom.read_apply_control(page)
+        verdict = shape.apply_route(
+            control.get("label"),
+            control.get("href"),
+            count=int(control.get("count") or 0),
+            job_id=grant.target,
+            link_target=control.get("link_target"),
+        )
+        route = str(verdict.get("route") or UNKNOWN)
+        why = str(verdict.get("why") or "")
+        if route != "linkedin_apply":
+            # Includes the OFF-SITE route, and that refusal is the important
+            # one: an off-site posting hands the application to a third party
+            # on their domain under their terms. Returning no selector is what
+            # stops it, since the caller requires one.
+            return (route, why, "")
+        return ("linkedin_apply", why, dom.LINKEDIN_APPLY_CONTROL)
 
     control = await dom.read_save_control(page)
     verdict = shape.save_state(
@@ -2423,6 +2459,23 @@ async def perform(
         )
 
     anchor = anchor_label_for(spec)
+    if anchor is None and spec.action not in _SAVE_FAMILY:
+        # A WRONG ERROR IS WORSE THAN NO ERROR. The message below is written
+        # for the save family and names the save control by name; it fired on
+        # an APPLY until 2026-08-26 and sent its reader off to photograph a
+        # save label while the real gap was a missing branch in
+        # anchor_label_for. Guarded rather than reworded, so the accurate,
+        # specific text survives where it is accurate and cannot be borrowed
+        # by an action it does not describe.
+        raise WriteAttemptError(
+            f"{spec.action!r} has no measured anchor and will not be "
+            "performed. Every action perform can execute names the accessible "
+            "name its control must be wearing before it may be clicked, and "
+            f"anchor_label_for has no branch for {spec.action!r} -- so there "
+            "is no measured label to match and a selector would have to be "
+            "guessed. That is not a thing this function does on a write. Add "
+            "the branch, with the label a capture actually shows."
+        )
     if anchor is None:
         raise WriteAttemptError(
             f"{spec.action!r} has no measured anchor and will not be "

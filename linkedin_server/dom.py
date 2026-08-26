@@ -724,6 +724,19 @@ APPLY_CONTROL = ", ".join(
 )
 
 
+#: The LINKEDIN-ROUTE apply control alone, and deliberately NOT
+#: :data:`APPLY_CONTROL`, which matches both routes because it exists to FIND
+#: whichever control a posting draws. This one exists to be CLICKED, and the
+#: whole off-site refusal rests on never driving the other one -- so the
+#: selector that a click is built from must be incapable of matching it,
+#: rather than merely unlikely to.
+#:
+#: A prefix, for the same reason ``APPLY_CONTROL`` uses one: LinkedIn writes
+#: the posting's own title and employer into this label, so there is no exact
+#: string to match. See ``shape.LINKEDIN_APPLY_PREFIX``.
+LINKEDIN_APPLY_CONTROL = f'a[aria-label^="{shape.LINKEDIN_APPLY_PREFIX}"]'
+
+
 async def read_apply_control(page: Any) -> dict[str, Any]:
     """Return the apply control's name, destination and target attribute.
 

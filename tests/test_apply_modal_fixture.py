@@ -47,7 +47,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import dom, writes
+from linkedin_server import dom, shape, writes
 from linkedin_server.errors import WriteAttemptError
 from tests.test_writes import (  # noqa: F401 - fixtures are used by injection
     JOB,
@@ -821,51 +821,182 @@ async def test_a_save_never_consults_the_apply_gate(writes_on, browser_page,
     )
 
 
-async def test_perform_cannot_reach_the_apply_gate_at_all(writes_on, browser_page):
-    """BLOCKER, PINNED. ``perform`` refuses ``apply_job`` BEFORE the click loop.
+async def test_an_apply_now_reaches_the_gate(writes_on, browser_page, monkeypatch):
+    """THE MIRROR OF THE SAVE ABOVE, and the test that replaced a blocker pin.
 
-    THIS IS THE TEST THAT WAS MEANT TO BE THE END-TO-END APPLY, and it cannot
-    be, because the path does not reach that far. Measured 2026-08-26 by
-    driving the real path -- preview, consume, perform -- with a real redeemed
-    grant:
+    IT USED TO ASSERT THE OPPOSITE, under the name
+    ``test_perform_cannot_reach_the_apply_gate_at_all``. ``anchor_label_for``
+    answered only from ``shape.SAVE_LABELS``; ``apply_job`` is valid from
+    ``linkedin_apply``, which is not a save state, so the lookup fell through
+    to None and perform raised -- explaining itself, on an APPLY, in terms of
+    the save control's unphotographed ON state. The two-click loop,
+    ``TWO_CLICK_ACTIONS``, ``_apply_submit_gate`` and ``dom.read_apply_modal``
+    were all unreachable from ``perform``.
 
-        anchor_label_for(spec) returns None for apply_job, and perform raises
-        "'apply_job' has no measured anchor and will not be performed".
+    That old test said it was "EXPECTED TO GO RED the moment that decision is
+    taken -- at which point it should be replaced by the real end-to-end apply,
+    not relaxed". This is that replacement.
 
-    WHY. ``anchor_label_for`` answers from ``shape.SAVE_LABELS``, which maps
-    accessible names to SAVE states and holds exactly one row,
-    ``{"Save the job": "not_saved"}``. ``apply_job`` is valid from
-    ``linkedin_apply``, which is not a save state and is not in that table, so
-    the lookup falls through to ``None`` and perform takes the branch written
-    for ``unsave_job`` -- whose message then explains, on an APPLY, that the
-    save control's ON state has never been photographed.
+    ``save_job`` is not in ``TWO_CLICK_ACTIONS`` and leaves the recorder empty;
+    ``apply_job`` is, and reaches it. One pair, opposite answers, both by
+    execution rather than by a string match on the source.
 
-    WHAT IS THEREFORE UNREACHABLE FROM ``perform`` TODAY: the two-click loop,
-    ``TWO_CLICK_ACTIONS``, ``_apply_submit_gate``, and ``dom.read_apply_modal``
-    -- the entire subsystem this module tests. Every one of those is exercised
-    above by calling it directly, which is worth having and is NOT the same
-    claim as "apply works end to end". Nobody should read this file as saying
-    that.
-
-    NOT FIXED HERE, and deliberately so. Whether apply should get an anchor,
-    or be exempted from the anchor gate the way it is already exempted from the
-    save family everywhere else, is a production change and a decision for
-    whoever owns writes.py. This test exists so the dead subsystem cannot be
-    forgotten, and it is EXPECTED TO GO RED the moment that decision is taken
-    -- at which point it should be replaced by the real end-to-end apply, not
-    relaxed.
+    The gate is replaced by a recorder that REFUSES, so nothing beyond the
+    first click is attempted here -- the proceeding case is the test below.
     """
+    calls: list[object] = []
+
+    async def _recording_gate(page):
+        calls.append(page)
+        return {"proceed": False, "selector": "", "modal": {}, "why": "recorded"}
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _recording_gate)
+
     grant = await _granted(browser_page, "apply_job", target=JOB)
     assert grant.consumed is True
     assert grant.observation is not None
 
-    with pytest.raises(WriteAttemptError) as excinfo:
-        await _perform(browser_page, grant)
+    block, _nav = await _perform(browser_page, grant)
 
-    message = str(excinfo.value)
-    assert "no measured anchor" in message, message
-    assert "linkedin_apply" in message, message
-    # The message a caller gets is the SAVE family's, on an apply. Pinned
-    # because it is part of the finding: the refusal is not merely early, it
-    # explains itself in terms of a control this action never touches.
-    assert "the save control wears" in message, message
+    assert len(calls) == 1, (
+        "an apply did not reach the apply gate. This is the blocker this test "
+        "replaced coming back: perform refused before the click loop."
+    )
+    # ``performed`` IS THREE-VALUED and "unknown" is the honest answer here:
+    # the gate refused, so no submit was pressed, and _verify_after then could
+    # not read an "applied" state to confirm anything either way. What must
+    # never appear is True -- that would be a claim an application was sent.
+    assert block["performed"] is not True, block
+    assert block["performed"] in (False, "unknown"), block["performed"]
+
+
+async def test_a_proceeding_gate_appends_the_second_click(
+    writes_on, browser_page, monkeypatch
+):
+    """The second half of the two-click loop, observed rather than assumed.
+
+    ``TWO_CLICK_ACTIONS`` only matters if a PROCEED actually appends a second
+    click, and until now nothing had ever run that line. The second click is
+    aimed at a selector that matches nothing, so the attempt FAILS -- and the
+    failure is the observation: ``clicked.error`` naming that selector can only
+    be produced by a second ``page.click`` having been issued.
+
+    Nothing is submitted. A selector matching nothing cannot press anything,
+    which is why this is the safe way to prove the branch runs.
+    """
+    sentinel = "#no-such-control-this-test-invented"
+
+    async def _proceeding_gate(page):
+        return {"proceed": True, "selector": sentinel, "modal": {}, "why": "test"}
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _proceeding_gate)
+
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    block, _nav = await _perform(browser_page, grant)
+
+    error = str((block.get("clicked") or {}).get("error") or "")
+    assert sentinel in error, (
+        "the gate said proceed and no second click was attempted, so the "
+        f"append in the click loop did not run. clicked.error was {error!r}"
+    )
+    # The click failed, so nothing was pressed. ``performed`` reports
+    # "unknown" rather than False, and that is the design rather than a
+    # shortfall: a click that raised on the way out MAY still have dispatched,
+    # so the verification -- not the click -- decides, and it could not read an
+    # applied state off a fixture. True is the only forbidden value.
+    assert block["performed"] is not True, block
+
+
+def test_the_apply_anchor_is_the_apply_control_and_not_a_save_label():
+    """The one-line cause of the blocker, pinned where it lived.
+
+    ``anchor_label_for`` must answer for apply from the apply control's own
+    measured prefix -- the same constant ``dom.APPLY_CONTROL`` and
+    ``shape.apply_route`` are built from, so the anchor, the classifier and
+    the selector cannot drift apart -- and it must NOT answer from a save
+    label, which is what falling through to ``SAVE_LABELS`` produced.
+    """
+    spec = writes.SANCTIONED_WRITES["linkedin_apply_job"]
+    anchor = writes.anchor_label_for(spec)
+
+    assert anchor == shape.LINKEDIN_APPLY_PREFIX
+    assert anchor is not None, "the blocker is back"
+    assert anchor not in shape.SAVE_LABELS, (
+        "apply is anchored on a SAVE label, which is the fall-through that "
+        "caused the blocker rather than a fix for it."
+    )
+
+
+async def test_gate_five_re_reads_the_apply_control_not_the_save_button(
+    writes_on, browser_page
+):
+    """Gate 5 must re-read THE VERY CONTROL the click will land on.
+
+    Without an apply branch, ``_live_control`` fell through to
+    ``dom.read_save_control`` -- so on an apply it corroborated the SAVE
+    button, which is the wrong element and would have built the wrong
+    selector.
+
+    The selector it returns is ``dom.LINKEDIN_APPLY_CONTROL``, which is
+    narrower than ``dom.APPLY_CONTROL`` on purpose: the off-site refusal rests
+    on never driving the other route's control, and a selector that CANNOT
+    match it is worth more than one that merely does not today.
+    """
+    spec = writes.SANCTIONED_WRITES["linkedin_apply_job"]
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+
+    state, why, selector = await writes._live_control(
+        browser_page, spec, grant, writes.anchor_label_for(spec)
+    )
+
+    assert state == "linkedin_apply", why
+    assert selector == dom.LINKEDIN_APPLY_CONTROL
+    assert selector != dom.APPLY_CONTROL, (
+        "gate 5 handed back the two-route finder as a click target. That "
+        "selector also matches 'Apply on company website'."
+    )
+
+
+async def test_gate_five_refuses_an_offsite_posting_and_hands_back_no_selector(
+    writes_on, browser_page, over
+):
+    """THE MOST IMPORTANT PROPERTY OF THE NEW APPLY BRANCH IN GATE 5.
+
+    An off-site posting submits on a third party's applicant-tracking system,
+    on their domain, under their terms. That refusal does not rest on anything
+    that a better capture could lift -- it is not this server's form to drive
+    -- so gate 5 must refuse it, and must refuse it by returning NO SELECTOR,
+    since a selector is what the caller requires before it clicks.
+
+    Written because the branch is new: before 2026-08-26 ``_live_control``
+    fell through to the save control for apply, so this path did not exist to
+    be got wrong. A new branch that decides whether an irreversible action may
+    proceed gets its refusal tested on the first day, not the second.
+
+    The state is asserted as ``offsite`` specifically rather than merely "not
+    linkedin_apply", because a job-id mismatch between the grant and the
+    fixture would ALSO refuse -- and would refuse for a reason that has nothing
+    to do with the route, leaving this test passing while testing nothing.
+    """
+    spec = writes.SANCTIONED_WRITES["linkedin_apply_job"]
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    offsite = (FIXTURE_DIR / "job_detail_following_hydrated.html").read_text(
+        encoding="ascii"
+    )
+
+    async def work(page):
+        return await writes._live_control(
+            page, spec, grant, writes.anchor_label_for(spec)
+        )
+
+    state, why, selector = await over(offsite, work)
+
+    assert selector == "", (
+        "gate 5 handed back a click target for an OFF-SITE posting. The "
+        f"caller clicks whatever this returns. why={why!r}"
+    )
+    assert state != "linkedin_apply", why
+    assert state == "offsite", (
+        "refused, but not as an off-site posting -- so this test is not "
+        f"measuring the route refusal. state={state!r} why={why!r}"
+    )
