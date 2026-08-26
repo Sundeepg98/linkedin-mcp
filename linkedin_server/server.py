@@ -2129,28 +2129,45 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
             # server would rather not" is not one -- it is his account. Both
             # entries below are pending wiring, not standing refusals.
             "can_be_done_and_is_refused": [
-                # APPLYING LEFT THIS LIST ON 2026-08-25, and that is what the
-                # field is for. Its entry named something measured to work
-                # that was not being done, and the answer to an entry here is
-                # to build it rather than to justify it. linkedin_apply_job
-                # now ships, gated.
+                # EMPTY, AND THAT IS THE POINT OF THE FIELD. Everything that
+                # was ever listed here has been built:
                 #
-                # READING THE INBOX left it the same day, but the other way:
-                # it was RECLASSIFIED to refused_as_policy rather than built.
-                # The sentence above still holds -- an entry here gets built,
-                # not justified -- which is exactly why that one could not
-                # stay. See refused_as_policy for the reasoning; the short
-                # version is that the caller does not choose whose
-                # conversation opens, so the cost lands on a third party.
-                "READING THE UNREAD MESSAGE COUNT. Measured 2026-08-24: the "
-                "messaging badge renders in the global nav on /feed/, which "
-                "is ALREADY an allowed read surface -- so this needs no "
-                "boundary change, opens nobody's conversation, and costs "
-                "nothing. It is the part of 'check my messages' that can be "
-                "answered honestly. Pending wiring, and pending a live "
-                "session to verify it against: the profile's session lapsed "
-                "on 2026-08-25 and shipping a reader that has never been run "
-                "against the real surface is how selectors get guessed.",
+                #   applying              -> linkedin_apply_job    2026-08-25
+                #   the unread count      -> linkedin_new_messages 2026-08-25
+                #   reading the inbox     -> linkedin_open_messaging
+                #
+                # The field stays, and stays empty, because an entry here is a
+                # standing embarrassment by design -- something measured to
+                # WORK that is not being done -- and the answer to one is to
+                # build it rather than to justify it. Keeping the field means
+                # the next such thing has somewhere to be visible instead of
+                # being quietly reasoned away.
+            ],
+
+            # CONVENTIONS THAT DID NOT SURVIVE A QUESTION. Kept as a record
+            # because all three were refusals this server presented as though
+            # they were limits, and in each case the operator asked why and
+            # there was no answer that held.
+            "conventions_lifted": [
+                "READING HIS OWN INBOX, 2026-08-25. Filed as POLICY on the "
+                "reasoning that opening a conversation costs a third party "
+                "something. It does not: those people wrote to HIM. The test "
+                "for that list is whether the cost lands on somebody who is "
+                "not him, and this failed it.",
+                "APPLYING, ENDORSING, LOOKING UP ONE MEMBER, 2026-08-25. Filed "
+                "as POLICY alongside genuine third-party protections. Bulk "
+                "collection deserved refusing; a single named lookup is what "
+                "the product is for, and an endorsement is a gift rather than "
+                "an extraction. The limit that mattered moved INTO the code as "
+                "a per-call cap.",
+                "REACHING INMAILS, 2026-08-26. This server's own verdict said "
+                "they were unreachable 'without interacting with the page, "
+                "which it does not do' -- a design decision written as if it "
+                "were a platform limit, and read as one. It can click; a "
+                "filter pill sends nothing and changes nothing on LinkedIn, so "
+                "by effect it is a read; and this server already opens a "
+                "conversation and may fire a read receipt. Refusing the lesser "
+                "act while performing the greater one is backwards.",
             ],
 
             # Nobody has looked. Kept apart from both of the above, because an
