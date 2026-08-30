@@ -224,6 +224,26 @@ DECLARED_PLANTS = {
     # urn at runtime to hide it, which would blind the guard to a real value
     # pasted in later.
     ("tests/test_probe_redaction.py", "urn id"): 1,
+    # THE SECOND URN-SHAPED LITERAL, 2026-08-30, and it is here for the same
+    # reason as the one above and by the same remedy: the file fired, the value
+    # is already synthetic, so the ALLOWLIST WIDENS.
+    #
+    # tests/test_writes_nine.py certifies that ``writes._target_for`` declines
+    # to validate the SHAPE of a feed-item urn -- this server has never read
+    # one unshaped, because linkedin_surface_census substitutes ``<urn>`` out
+    # before counting, so enforcing ``urn:li:activity:<digits>`` would be
+    # asserting a shape nobody has seen. Demonstrating "no shape is enforced"
+    # requires feeding it a urn-SHAPED string beside a string that is nothing
+    # like one and showing the two treated identically. A shape-valid literal
+    # is the test, so it cannot be paraphrased away.
+    #
+    # The literal there is nineteen ZEROES, which is nobody's -- the same
+    # all-zeroes convention SYNTHETIC_PHONES already carries. Pinned at 1 so a
+    # SECOND urn appearing in that file still fails, and declared here rather
+    # than assembled at runtime for the reason spelled out directly above:
+    # hiding a shape from the scanner blinds it to a real value pasted in
+    # later, which is the failure this whole file exists to catch.
+    ("tests/test_writes_nine.py", "urn id"): 1,
     # A planted session cookie, by exact path, in the module that defines it.
     ("tests/test_no_committed_credential.py", "credential"): 1,
 }
