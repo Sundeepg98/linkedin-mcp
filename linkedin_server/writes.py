@@ -2122,7 +2122,92 @@ _SAVE_FILTER_NOTE = (
 )
 
 
-def _save_candidates_note(reading: dict[str, Any]) -> str:
+def _save_readiness_note(
+    reading: dict[str, Any], waited: dict[str, Any]
+) -> str:
+    """WHICH OF THE TWO FAILURES THIS IS, said before anything is enumerated.
+
+    A refusal that lists what it found is an improvement on one that does not,
+    and it is still not a diagnosis: "no save control here" is produced BOTH by
+    a control that was renamed and by a page whose button layer had not
+    attached when the reader looked. Those want opposite responses -- one is a
+    vocabulary problem, the other is a timing problem, and widening the
+    vocabulary to cure a timing problem points a click at a guess.
+
+    THE DISCRIMINATOR IS ``main_buttons_total`` AND IT IS MEASURED, not argued:
+    the un-hydrated shell capture draws ZERO buttons under ``<main>`` while
+    every posting capture that actually rendered draws between two and twelve.
+    So no buttons at all is a page that has not attached, and buttons without a
+    save control among them is a page that has.
+
+    ``waited`` has NO DEFAULT on purpose. It is the outcome of the wait, it
+    cannot be inferred from the reading, and a caller that forgot it would
+    otherwise print a confident diagnosis built on a default nobody chose.
+    """
+    buttons = reading.get("main_buttons_total")
+    # THE NUMBERS THAT HAPPENED, not the constant that was supposed to. A
+    # refusal quoting a timeout it did not actually spend is a small lie that
+    # costs a reader an afternoon.
+    spent = f"{waited.get('waited_ms')}ms of a {waited.get('timeout_ms')}ms wait"
+
+    if waited.get("ready"):
+        # The control attached, so this is not a timing failure at all. Reached
+        # when more than one save control resolved -- ``save_state`` refuses a
+        # count it cannot scope, and that refusal is not about hydration.
+        return (
+            f"THE CONTROL LAYER IS READY: the save control attached after "
+            f"{spent}, so nothing below is a timing artefact and re-running "
+            "will not change it."
+        )
+
+    # A LOCATOR THAT COULD NOT BE ASKED IS NOT A PAGE THAT SAID NO. Playwright
+    # reports a genuine expiry as TimeoutError; anything else means the
+    # question never reached the page, and reading it as "not ready" would
+    # invent a hydration finding out of a broken instrument.
+    failure = waited.get("failure")
+    if failure and failure != "TimeoutError":
+        return (
+            f"THE READINESS CHECK ITSELF FAILED after {spent}, with "
+            f"{failure}. That is not evidence the page was unready and not "
+            "evidence it was ready -- the question never got an answer. "
+            "Nothing below should be read as a finding about LinkedIn."
+        )
+
+    if buttons is None:
+        return (
+            f"WHETHER THE PAGE WAS READY IS UNKNOWN: the save control did not "
+            f"attach in {spent}, and the button count that would say whether "
+            "ANY control layer had rendered could not be taken either. Do not "
+            "read the list below as evidence about LinkedIn's vocabulary; it "
+            "is not established that the page had finished drawing."
+        )
+
+    if buttons == 0:
+        return (
+            f"THE PAGE NEVER BECAME READY: the save control did not attach in "
+            f"{spent} and <main> carries ZERO buttons of any kind. Measured "
+            "across every capture in this repo, an un-hydrated shell draws "
+            "zero and a posting that rendered draws between two and twelve -- "
+            "so this is a page whose interactive layer had not attached, NOT a "
+            "control that was renamed. DO NOT WIDEN shape.SAVE_LABELS on this "
+            "reading: there is no label here to widen it with. Any text that "
+            "WAS read (a title, an employer) arrives in the server-rendered "
+            "document and says nothing about whether the controls had drawn."
+        )
+
+    return (
+        f"THE PAGE WAS READY AND THE CONTROL WAS NOT THERE: <main> carries "
+        f"{buttons} buttons, so the interactive layer HAD attached, and the "
+        f"save control still did not appear in {spent}. That makes this a "
+        "vocabulary finding rather than a timing one -- the control is "
+        "renamed, moved, or genuinely absent from this posting. It is still "
+        "not licence to guess a label; see below for what was actually read."
+    )
+
+
+def _save_candidates_note(
+    reading: dict[str, Any], *, waited: dict[str, Any]
+) -> str:
     """Turn the wider reading into the sentence the refusal used to lack.
 
     FOUR OUTCOMES, KEPT FOUR. The distinction this function exists to protect
@@ -2133,7 +2218,13 @@ def _save_candidates_note(reading: dict[str, Any]) -> str:
     Defensive about its input on purpose -- ``.get`` with a refusing default,
     so a payload that predates a field reads as "did not finish" rather than as
     "finished and found nothing".
+
+    THE READINESS VERDICT LEADS, because it decides how everything after it
+    should be read: the same candidate list means "LinkedIn renamed the
+    control" on a page that had drawn and means nothing at all on one that had
+    not. See :func:`_save_readiness_note`.
     """
+    lead = _save_readiness_note(reading, waited)
     total = reading.get("buttons_total")
     candidates = list(reading.get("candidates") or [])
     # NOT DEFAULTED TO len(candidates), which is the tempting wrong answer:
@@ -2143,6 +2234,18 @@ def _save_candidates_note(reading: dict[str, Any]) -> str:
     # scope. A count that is missing says so rather than being reconstructed.
     matched = reading.get("matched_total", None)
     matched = "unreported" if matched is None else matched
+
+    # The split, printed everywhere the total is printed. A page whose button
+    # layer has not attached still draws its ANCHORS, so "2 labelled controls"
+    # means something entirely different depending on which kind they were --
+    # and it was the undifferentiated total that made the live 2-then-1 reading
+    # ambiguous in the first place.
+    split = (
+        f"{reading.get('labelled_buttons')} button(s) and "
+        f"{reading.get('labelled_links')} link(s), with "
+        f"{reading.get('main_buttons_total')} button(s) of any kind under "
+        "<main>"
+    )
 
     if not reading.get("scan_complete"):
         if isinstance(total, int) and total > dom.SAVE_SCAN_LIMIT:
@@ -2156,27 +2259,27 @@ def _save_candidates_note(reading: dict[str, Any]) -> str:
             head = (
                 f"WHAT WAS ON THE PAGE IS ONLY PARTLY KNOWN: the sweep over "
                 f"{total} labelled controls DID NOT FINISH, so the list below "
-                f"is a floor and not an inventory -- {candidates}."
+                f"is a floor and not an inventory -- {candidates}. The part "
+                f"that WAS counted: {split}."
             )
-        return f"{head} {_SAVE_FILTER_NOTE}"
+        return f"{lead} {head} {_SAVE_FILTER_NOTE}"
 
     if not candidates:
         return (
-            f"WHAT WAS ON THE PAGE: {total} labelled controls, ALL of them "
-            "read, and NOT ONE carries a save word. So this is not a save "
-            "control wearing a new name -- either the posting renders no save "
-            "control at all, or it renders one worded in a way no rule here "
-            f"anticipated. {_SAVE_FILTER_NOTE}"
+            f"{lead} WHAT WAS ON THE PAGE: {total} labelled controls -- "
+            f"{split} -- ALL of them read, and NOT ONE carries a save word. "
+            f"{_SAVE_FILTER_NOTE}"
         )
 
     return (
-        f"WHAT WAS ON THE PAGE: {total} labelled controls, ALL of them read. "
-        f"Save-worded controls: {matched}, reading {candidates}. THAT IS "
-        "THE MEASUREMENT THIS REFUSAL EXISTS TO PRODUCE -- and it is not yet "
-        "the fix. Which state such a label MEANS has to be established before "
-        "it is written into shape.SAVE_LABELS, because a label mapped to the "
-        "wrong state points a click at the opposite action; a name that does "
-        f"not say its own direction is not a measurement. {_SAVE_FILTER_NOTE}"
+        f"{lead} WHAT WAS ON THE PAGE: {total} labelled controls -- {split} "
+        f"-- ALL of them read. Save-worded controls: {matched}, reading "
+        f"{candidates}. THAT IS THE MEASUREMENT THIS REFUSAL EXISTS TO "
+        "PRODUCE -- and it is not yet the fix. Which state such a label MEANS "
+        "has to be established before it is written into shape.SAVE_LABELS, "
+        "because a label mapped to the wrong state points a click at the "
+        "opposite action; a name that does not say its own direction is not a "
+        f"measurement. {_SAVE_FILTER_NOTE}"
     )
 
 
@@ -2260,6 +2363,15 @@ async def _live_control(
             return (route, why, "")
         return ("linkedin_apply", why, dom.LINKEDIN_APPLY_CONTROL)
 
+    # GATE 5a: WAIT FOR THE CONTROL, DO NOT BET ON A DURATION.
+    #
+    # Until 2026-08-30 this read fired whenever the navigation's flat settle
+    # happened to end, and two live redemptions ninety seconds apart read
+    # 2 then 1 labelled controls on a posting that renders seven -- a count
+    # that MOVED, which a renamed control cannot do. Costs nothing on a page
+    # that is already drawn: an attached element satisfies the wait at once.
+    waited = await dom.wait_for_save_control(page, dom.SAVE_READY_TIMEOUT_MS)
+
     control = await dom.read_save_control(page)
     verdict = shape.save_state(
         control.get("label"), count=int(control.get("count") or 0)
@@ -2277,7 +2389,8 @@ async def _live_control(
         # ON THE UNKNOWN BRANCH ONLY. A state that came back KNOWN and merely
         # wrong was read off a label the message already names, and paying for
         # a second sweep to repeat it would be spending round trips on prose.
-        why = f"{why} {_save_candidates_note(await dom.read_save_candidates(page))}"
+        reading = await dom.read_save_candidates(page)
+        why = f"{why} {_save_candidates_note(reading, waited=waited)}"
     return (state, why, dom.save_control_selector(anchor))
 
 

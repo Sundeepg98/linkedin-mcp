@@ -25,6 +25,7 @@ browser.
 from __future__ import annotations
 
 import re
+import time
 from typing import Any, Optional
 
 from linkedin_server import shape
@@ -673,6 +674,43 @@ _SAVE_WORD = re.compile(r"\b(?:un)?saved?\b", re.IGNORECASE)
 #: shape worth being able to SEE rather than one worth being blind to.
 SAVE_SWEEP_SELECTOR = "main button[aria-label], main a[aria-label]"
 
+#: Every ``<button>`` under ``<main>``, labelled or not. THE ONE COUNT THAT
+#: SEPARATES "NOT READY" FROM "RENAMED", and it earns that job by measurement
+#: rather than by argument.
+#:
+#: Measured 2026-08-30 across every job capture in this repo:
+#:
+#:   job_detail_shell               0 buttons   (the un-hydrated shell)
+#:   job_detail_following           2
+#:   job_detail                     8
+#:   job_detail_hydrated            8
+#:   job_detail_following_hydrated 12
+#:
+#: Zero on the shell, never fewer than two on a posting that actually drew.
+#: WHY NOT THE APPLY CONTROL, which was the obvious candidate and was tried
+#: first: the apply control is an ``<a>`` in every capture, and an anchor
+#: survives in a document whose BUTTON layer has not attached -- a derived page
+#: with every ``<button>`` stripped still reports one apply control and a
+#: believable title and employer. Apply therefore cannot tell the two states
+#: apart, and a readiness signal that cannot fail is not one.
+MAIN_BUTTONS = "main button"
+
+#: The labelled half of :data:`MAIN_BUTTONS`. Reported beside the sweep total
+#: so that "labelled controls" can be split into buttons and anchors -- the
+#: anchors are what remain when the button layer has not attached.
+SAVE_LABELLED_BUTTONS = "main button[aria-label]"
+
+#: How long :func:`wait_for_save_control` will wait for the control to attach.
+#:
+#: ON TOP OF ``config.SETTLE_MS`` (3500ms), which every navigation already
+#: spends -- and which is a FLAT TIMER, not a condition: ``browser.goto`` tries
+#: ``networkidle`` first and LinkedIn's long-poll connections mean it "rarely
+#: settles", so in practice every read falls through to the flat wait. That
+#: timer is the bet this constant exists to stop making. A save is a supervised
+#: write behind a token that expires in two minutes, so ten seconds of WAITING
+#: FOR A NAMED THING is affordable where another blind 3500ms is not.
+SAVE_READY_TIMEOUT_MS = 10_000
+
 
 async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
     """Every save-WORDED control on the page, plus the scan's own receipts.
@@ -689,6 +727,12 @@ async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
         # control must not reach a reader as the same pair of values.
         "names": [],
         "buttons_total": 0,
+        "labelled_buttons": 0,
+        # UNREPORTED, NOT ZERO. Zero is a measurement that says the button
+        # layer never attached, and it is the whole discriminator -- so it may
+        # only ever be set by a count that actually ran. None is what an
+        # unread page says, and the note prints the two differently.
+        "main_buttons_total": None,
         "scan_complete": False,
     }
     try:
@@ -697,6 +741,19 @@ async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
     except Exception as exc:
         logger.debug("save sweep failed: %s: %s", type(exc).__name__, exc)
         return out
+
+    # The two counts that separate an unattached page from a renamed control.
+    # Read BEFORE the walk, and each in its own try, because a sweep that comes
+    # back empty is exactly when they matter most -- these must not be lost to
+    # the same failure that emptied it.
+    try:
+        out["labelled_buttons"] = int(await page.locator(SAVE_LABELLED_BUTTONS).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("labelled-button count failed: %s", type(exc).__name__)
+    try:
+        out["main_buttons_total"] = int(await page.locator(MAIN_BUTTONS).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("main-button count failed: %s", type(exc).__name__)
 
     out["buttons_total"] = total
     if total > SAVE_SCAN_LIMIT:
@@ -798,8 +855,71 @@ async def read_save_candidates(page: Any) -> dict[str, Any]:
         # is looking at a rename or at a page it cannot scope.
         "matched_total": len(names),
         "buttons_total": swept["buttons_total"],
+        "labelled_buttons": swept["labelled_buttons"],
+        # Derived rather than counted, because the two selectors are disjoint
+        # by construction: a node is a button or an anchor, never both.
+        "labelled_links": swept["buttons_total"] - swept["labelled_buttons"],
+        "main_buttons_total": swept["main_buttons_total"],
         "scan_complete": swept["scan_complete"],
     }
+
+
+async def wait_for_save_control(page: Any, timeout_ms: int) -> dict[str, Any]:
+    """Wait for the save control to ATTACH. Reports what happened, not a verdict.
+
+    Returns ``{"ready", "waited_ms", "timeout_ms", "failure"}`` and refuses to
+    summarise, the same contract :func:`read_apply_modal` keeps: a caller that
+    gets a bare ``False`` cannot tell a page that was asked and said no from a
+    page that could not be asked at all, and those are different findings. The
+    numbers are the ones that ACTUALLY happened rather than the constant that
+    was meant to apply, so a refusal cannot quote a duration it did not spend.
+
+    A POSITIVE CONDITION AND NOT A SLEEP, and the difference is the point of
+    the function. ``browser.goto`` already spends ``config.SETTLE_MS`` on every
+    navigation, but it spends it as a FLAT TIMER -- ``networkidle`` is tried
+    first and LinkedIn's long-poll connections mean it rarely settles, so the
+    read lands wherever 3500ms happens to put it. That is a bet on a duration.
+    This waits for a NAMED ELEMENT and returns the moment it exists, so a page
+    that is ready in 200ms costs 200ms and a page that never becomes ready
+    costs the ceiling and SAYS SO.
+
+    ONE BOUNDED WAIT, ONE VERDICT. There is no retry loop here, deliberately:
+    re-reading until the answer changes is how a racy reader is made to look
+    reliable while staying racy, and it would also make the timeout meaningless.
+
+    ``attached`` rather than ``visible``: the question is whether the control
+    layer has rendered this control at all. Whether it is scrolled into view is
+    a different question, and ``page.click`` waits on actionability itself.
+
+    Never raises. ``ready`` is False on timeout AND on any locator failure,
+    because the caller refuses on False and an exception that came back True
+    would be a failure that opened the gate. ``failure`` is what separates the
+    two for a human reading the refusal.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT REFUSES. Nothing below sets ready True except the wait
+        # actually returning.
+        "ready": False,
+        "waited_ms": 0,
+        "timeout_ms": int(timeout_ms),
+        "failure": None,
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(SAVE_CONTROL).first.wait_for(
+            state="attached", timeout=timeout_ms
+        )
+        out["ready"] = True
+    except Exception as exc:
+        out["failure"] = type(exc).__name__
+        logger.debug(
+            "save control did not attach in %dms: %s: %s",
+            timeout_ms,
+            type(exc).__name__,
+            exc,
+        )
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
 
 
 # ---------------------------------------------------------------------------

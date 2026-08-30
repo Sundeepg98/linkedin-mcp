@@ -40,6 +40,7 @@ labelled DERIVED where it is used.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -68,6 +69,19 @@ SAVE_ATTR = 'aria-label="Save the job"'
 #: Invented; it names nobody, and the assertion that it beats the old rule is
 #: made in the test rather than asserted here.
 MEMBER_NAME = "Savita Krishnan"
+
+#: A readiness reading standing for "the control layer HAD attached". Used by
+#: every enumeration test below, because those are about what the sweep reports
+#: on a page that drew -- not about hydration, which has its own section.
+READY = {"ready": True, "waited_ms": 12, "timeout_ms": 10_000, "failure": None}
+
+#: The opposite, as Playwright actually reports a genuine expiry.
+TIMED_OUT = {
+    "ready": False,
+    "waited_ms": 10_004,
+    "timeout_ms": 10_000,
+    "failure": "TimeoutError",
+}
 
 
 def base() -> str:
@@ -233,8 +247,8 @@ async def test_an_empty_list_and_an_unfinished_scan_do_not_look_alike(over):
     assert crowded["buttons_total"] > dom.SAVE_SCAN_LIMIT
     assert ordinary["buttons_total"] < dom.SAVE_SCAN_LIMIT
 
-    crowded_note = writes._save_candidates_note(crowded)
-    ordinary_note = writes._save_candidates_note(ordinary)
+    crowded_note = writes._save_candidates_note(crowded, waited=READY)
+    ordinary_note = writes._save_candidates_note(ordinary, waited=READY)
     assert crowded_note != ordinary_note
     assert "UNKNOWN" in crowded_note
     assert "not run at all" in crowded_note
@@ -289,7 +303,7 @@ async def test_a_control_that_would_not_read_makes_the_scan_incomplete():
         "finished -- so 'Saved' reads as the only save-worded control on the "
         "page when it is merely the only one that could be read."
     )
-    assert "ONLY PARTLY KNOWN" in writes._save_candidates_note(reading)
+    assert "ONLY PARTLY KNOWN" in writes._save_candidates_note(reading, waited=READY)
 
 
 def test_a_reading_that_predates_a_field_refuses():
@@ -299,7 +313,9 @@ def test_a_reading_that_predates_a_field_refuses():
     future test, a half-built dict -- must read as "did not finish", never as
     "finished and found nothing".
     """
-    note = writes._save_candidates_note({"candidates": [], "buttons_total": 7})
+    note = writes._save_candidates_note(
+        {"candidates": [], "buttons_total": 7}, waited=READY
+    )
     assert "ONLY PARTLY KNOWN" in note
     assert "DID NOT FINISH" in note
 
@@ -331,7 +347,7 @@ async def test_a_member_name_containing_sav_is_not_reported(over):
         await over(RELABELLED, dom.read_save_candidates)
     )["buttons_total"]
     # ... and did not come back.
-    assert MEMBER_NAME not in writes._save_candidates_note(reading)
+    assert MEMBER_NAME not in writes._save_candidates_note(reading, waited=READY)
 
     # The same guard on the OTHER path that publishes a raw label: the
     # post-click read-back, whose value is printed for a human to copy.
@@ -354,7 +370,7 @@ async def test_a_save_worded_label_is_still_reduced_before_it_is_printed(over):
 
     assert reading["matched_total"] == 1, "the word filter passed it"
     assert reading["candidates"] == [shape.CENSUS_OPAQUE], reading["candidates"]
-    assert "x" * 20 not in writes._save_candidates_note(reading)
+    assert "x" * 20 not in writes._save_candidates_note(reading, waited=READY)
 
 
 def test_the_diagnostic_says_that_it_filtered():
@@ -372,7 +388,7 @@ def test_the_diagnostic_says_that_it_filtered():
         {"candidates": [], "matched_total": 0, "buttons_total": 9_999,
          "scan_complete": False},
     ):
-        note = writes._save_candidates_note(reading)
+        note = writes._save_candidates_note(reading, waited=READY)
         assert "Filtered, and deliberately" in note, reading
         assert "hiring team" in note, reading
 
@@ -393,3 +409,300 @@ async def test_a_recognised_control_still_reads_not_saved_and_costs_no_sweep(ove
     verdict = shape.save_state(reading["label"], count=reading["count"])
     assert verdict["state"] == "not_saved"
     assert verdict["why"] == "the control is labelled 'Save the job'"
+
+
+# ---------------------------------------------------------------------------
+# 6. Readiness -- the second wave
+# ---------------------------------------------------------------------------
+#
+# WHAT THE LIVE MEASUREMENT SAID, and why it changed the diagnosis. The
+# diagnostic above shipped, and two live redemptions of a confirm token against
+# one posting, roughly forty seconds apart, returned:
+#
+#     attempt 1: 2 labelled controls, ALL of them read, and NOT ONE carries a
+#                save word
+#     attempt 2: 1 labelled controls, ALL of them read, and NOT ONE carries a
+#                save word
+#
+# THE COUNT MOVED. A renamed control gives a STABLE count, so 2-then-1 is not a
+# vocabulary problem -- it is the reader arriving before the page has finished
+# drawing. And the sentence the refusal printed on that reading was actively
+# wrong: "So this is not a save control wearing a new name -- either the
+# posting renders no save control at all, or it renders one worded in a way no
+# rule here anticipated" states a conclusion about LINKEDIN'S VOCABULARY that a
+# page which never rendered cannot support.
+#
+# THE DISCRIMINATOR IS MEASURED, and the first test below pins it: the
+# un-hydrated shell capture draws ZERO buttons under <main>, and every posting
+# capture that actually rendered draws between two and twelve.
+
+#: DERIVED: the hydrated posting with every ``<button>`` removed and everything
+#: else left alone. Models the state the live measurement is consistent with --
+#: server-rendered text and anchors present, the BUTTON layer not attached.
+#: What SURVIVES is the interesting half: a believable title, a believable
+#: employer, and the apply control, which is an ``<a>``. That is why apply
+#: cannot be the readiness signal, and a test below asserts it.
+UNATTACHED = re.sub(r"<button\b[^>]*>.*?</button>", "", base(), flags=re.S)
+assert UNATTACHED != base(), "the button-stripping derivation matched nothing"
+
+
+def test_the_hydration_discriminator_is_measured_not_argued():
+    """THE PREMISE THE WHOLE DIAGNOSIS RESTS ON, pinned as a number.
+
+    Every readiness sentence this module prints claims that zero buttons under
+    ``<main>`` means the control layer did not attach. That claim is worth
+    something only while the captures say so. If a future capture of a
+    genuinely rendered posting draws zero or one button, the diagnosis is
+    unfounded -- and this test is where that should be found, not in a live
+    refusal telling somebody the page never rendered.
+    """
+    from html.parser import HTMLParser
+
+    class _Buttons(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.count = 0
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "button":
+                self.count += 1
+
+    def buttons(name: str) -> int:
+        parser = _Buttons()
+        parser.feed((FIXTURE_DIR / f"{name}.html").read_text(encoding="ascii"))
+        return parser.count
+
+    shell = buttons("job_detail_shell")
+    rendered = {
+        name: buttons(name)
+        for name in (
+            "job_detail",
+            "job_detail_hydrated",
+            "job_detail_following",
+            "job_detail_following_hydrated",
+        )
+    }
+
+    assert shell == 0, (
+        f"the un-hydrated shell draws {shell} buttons, not zero -- and the "
+        "whole 'zero buttons means unattached' reading is built on this."
+    )
+    assert min(rendered.values()) >= 2, rendered
+    assert shell < min(rendered.values()), (shell, rendered)
+
+
+async def test_a_ready_page_costs_the_wait_nothing(over):
+    """THE HAPPY PATH MUST NOT PAY FOR THE FIX.
+
+    A readiness condition that charged every save ten seconds would be traded
+    away the first time somebody was in a hurry. An already-attached element
+    satisfies the wait at once, so this asserts the cost is a small fraction of
+    the ceiling rather than pinning a wall-clock number.
+    """
+
+    async def work(page):
+        return await dom.wait_for_save_control(page, 5_000)
+
+    waited = await over(base(), work)
+    assert waited["ready"] is True
+    assert waited["failure"] is None
+    assert waited["waited_ms"] < 1_000, waited
+
+
+async def test_an_unattached_page_and_a_renamed_control_are_diagnosed_apart(over):
+    """THE DISCRIMINATION, WHICH IS THE WHOLE POINT OF THIS WAVE.
+
+    Both pages refuse and both find no save word. The question that matters is
+    not what was found, it is whether the page had DRAWN: one of these is a
+    vocabulary finding and the other is a timing one, they want opposite
+    responses, and before this wave they printed the same verdict.
+    """
+
+    async def work(page):
+        waited = await dom.wait_for_save_control(page, 900)
+        return waited, await dom.read_save_candidates(page)
+
+    ready_waited, ready_reading = await over(RENAMED_AWAY, work)
+    unready_waited, unready_reading = await over(UNATTACHED, work)
+
+    # Neither is ready by the save control's own measure ...
+    assert ready_waited["ready"] is False
+    assert unready_waited["ready"] is False
+    # ... and both find no save word ...
+    assert ready_reading["candidates"] == []
+    assert unready_reading["candidates"] == []
+    # ... so the ONLY thing that can tell them apart is the button layer.
+    assert ready_reading["main_buttons_total"] >= 2, ready_reading
+    assert unready_reading["main_buttons_total"] == 0, unready_reading
+
+    ready_note = writes._save_candidates_note(ready_reading, waited=ready_waited)
+    unready_note = writes._save_candidates_note(unready_reading, waited=unready_waited)
+    assert "THE PAGE WAS READY" in ready_note, ready_note
+    assert "NEVER BECAME READY" in unready_note, unready_note
+    assert "DO NOT WIDEN" in unready_note
+    assert "DO NOT WIDEN" not in ready_note
+
+
+async def test_the_unattached_page_still_reads_a_believable_title(over):
+    """WHY A CORRECT TITLE AND EMPLOYER WERE NOT CORROBORATION.
+
+    The live refusals came back alongside the posting's real title and
+    employer, which reads as proof the page was fine. It is not. A page with NO
+    buttons at all still yields a believable title, a believable employer AND
+    an apply control -- all three survive because they are server-rendered or
+    are anchors. Only the buttons are missing, and the buttons are what a save
+    needs.
+    """
+
+    async def work(page):
+        identity = await dom.read_job_identity(page)
+        detail = shape.parse_job_detail(
+            await dom.read_main_text(page),
+            company=identity.get("company"),
+            document_title=identity.get("document_title"),
+        )
+        return (
+            shape.job_detail_is_believable(detail),
+            detail.get("company"),
+            int(await page.locator(dom.APPLY_CONTROL).count()),
+            int(await page.locator(dom.MAIN_BUTTONS).count()),
+        )
+
+    believable, company, apply_n, buttons = await over(UNATTACHED, work)
+    assert believable is True, "a page with no buttons still reads as a posting"
+    assert company
+    assert apply_n == 1, (
+        "the apply control survives with the button layer gone, which is why "
+        "it cannot be the readiness signal"
+    )
+    assert buttons == 0
+
+
+async def test_the_split_makes_the_live_two_interpretable(over):
+    """THE FIELD THAT WAS MISSING WHEN THE LIVE READING CAME BACK.
+
+    "2 labelled controls" was uninterpretable because the total merged buttons
+    and anchors. Split, the same page says: zero labelled BUTTONS, two labelled
+    LINKS, zero buttons of any kind -- a page whose anchors drew and whose
+    buttons did not, rather than a page with two mysterious controls on it.
+    """
+    reading = await over(UNATTACHED, dom.read_save_candidates)
+    assert reading["buttons_total"] == 2, reading
+    assert reading["labelled_buttons"] == 0, reading
+    assert reading["labelled_links"] == 2, reading
+    assert reading["main_buttons_total"] == 0, reading
+
+    note = writes._save_candidates_note(reading, waited=TIMED_OUT)
+    assert "0 button(s) and 2 link(s)" in note, note
+
+
+async def test_a_readiness_check_that_could_not_run_is_not_a_finding():
+    """A BROKEN INSTRUMENT MUST NOT MANUFACTURE A HYDRATION FINDING.
+
+    ``ready: False`` arrives from two different worlds: the page was asked and
+    had not drawn, or the question never reached the page. Collapsing them
+    would let a detached frame print "THE PAGE NEVER BECAME READY", which is a
+    claim about LinkedIn assembled out of a local failure.
+    """
+
+    class _Exploding:
+        def locator(self, _selector):
+            raise RuntimeError("target closed")
+
+    waited = await dom.wait_for_save_control(_Exploding(), 50)
+    assert waited["ready"] is False, "a failure must never open the gate"
+    assert waited["failure"] == "RuntimeError"
+
+    note = writes._save_readiness_note({"main_buttons_total": 0}, waited)
+    assert "READINESS CHECK ITSELF FAILED" in note, note
+    assert "NEVER BECAME READY" not in note, (
+        "a locator that could not be asked was reported as a page that had "
+        "not drawn -- a finding about LinkedIn invented from a local error."
+    )
+
+
+async def test_a_button_count_that_failed_is_reported_as_unreported():
+    """THE DISCRIMINATOR'S OWN DEFAULT, driven where it is actually set.
+
+    Written after a mutation exposed the gap: flipping the sweep's
+    ``main_buttons_total`` default from None to 0 left every test green,
+    because the note tests all hand-build their own dict and never reach the
+    sweep. A default nothing exercises is a default nobody is defending, and
+    THIS one decides whether a page gets told it never rendered.
+    """
+
+    class _Ok:
+        async def count(self):
+            return 0
+
+    class _Broken:
+        async def count(self):
+            raise RuntimeError("detached")
+
+        def nth(self, index):  # pragma: no cover - never reached
+            raise AssertionError("must not walk a locator that would not count")
+
+    class _Page:
+        """Counts the sweep and the labelled buttons; FAILS on main buttons."""
+
+        def locator(self, selector):
+            return _Broken() if selector == dom.MAIN_BUTTONS else _Ok()
+
+    reading = await dom.read_save_candidates(_Page())
+    assert reading["main_buttons_total"] is None, (
+        "the button count failed and came back as 0, which is the value that "
+        "means 'the page drew nothing' -- so a broken count would print the "
+        "strongest sentence this module has."
+    )
+    assert "IS UNKNOWN" in writes._save_readiness_note(reading, TIMED_OUT)
+
+
+def test_an_unreported_button_count_is_not_a_count_of_zero():
+    """ABSENT IS NOT ZERO, applied to the discriminator itself.
+
+    Zero buttons is the evidence for the strongest sentence this module
+    prints. A count that could not be TAKEN must never reach that sentence, or
+    the diagnosis is asserted from a measurement nobody made.
+    """
+    unknown = writes._save_readiness_note({"main_buttons_total": None}, TIMED_OUT)
+    zero = writes._save_readiness_note({"main_buttons_total": 0}, TIMED_OUT)
+
+    assert "IS UNKNOWN" in unknown, unknown
+    assert "NEVER BECAME READY" not in unknown
+    assert "NEVER BECAME READY" in zero
+    assert unknown != zero
+
+
+async def test_an_unready_page_still_refuses_and_still_clicks_nothing(
+    writes_on, browser_page, monkeypatch
+):
+    """BEHAVIOUR IS UNCHANGED: the fix makes the refusal right, not permissive.
+
+    The readiness apparatus must not become a route to proceeding. A posting
+    whose control layer never attached is refused, the click never happens, and
+    the message says which of the two failures it was.
+    """
+    monkeypatch.setattr(dom, "SAVE_READY_TIMEOUT_MS", 700)
+    grant = await _granted(browser_page, "save_job", target=JOB)
+    nav = FixtureNavigator({f"https://www.linkedin.com/jobs/view/{JOB}/": UNATTACHED})
+
+    with pytest.raises(WriteAttemptError) as caught:
+        await writes.perform(nav, browser_page, grant)
+
+    message = str(caught.value)
+    assert "refusing to click" in message
+    assert "NEVER BECAME READY" in message, message
+    assert "DO NOT WIDEN" in message, message
+    # Never reached the post-click verification, so nothing was pressed.
+    assert nav.gotos == [f"https://www.linkedin.com/jobs/view/{JOB}/"]
+
+
+def test_the_production_timeout_is_bounded_and_named():
+    """A READINESS WAIT WITHOUT A CEILING IS A HANG.
+
+    Pinned because the monkeypatch above proves the mechanism at 700ms and
+    would go on passing if the real constant were deleted or set to something
+    no human would wait through.
+    """
+    assert isinstance(dom.SAVE_READY_TIMEOUT_MS, int)
+    assert 1_000 <= dom.SAVE_READY_TIMEOUT_MS <= 30_000, dom.SAVE_READY_TIMEOUT_MS
