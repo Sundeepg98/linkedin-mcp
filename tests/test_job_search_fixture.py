@@ -496,6 +496,124 @@ def test_the_tracker_row_still_splits_on_the_middle_dot():
 
 
 # ---------------------------------------------------------------------------
+# 2b. A card that lost the lockup: one line after the title
+# ---------------------------------------------------------------------------
+#
+# Section 2's defect shifts fields DOWN by inserting a line. This one is the
+# opposite shape: a card with nothing to shift, where the positional fallback
+# has one line to work with and hands it to the wrong field.
+#
+# The two anchors are lost TOGETHER. ``dom.harvest_linked_cards`` finds the
+# entity lockup by an ``img[alt]`` whose alt ends in " logo", and reads
+# ``logo_name`` and ``meta_line`` only inside ``if (lockup)`` -- so a card
+# LinkedIn draws with any other alt arrives with neither. ``link_text`` is read
+# off the anchor whether the lockup was found or not, so the title survives.
+
+#: The row measured live on 2026-08-30, in this module's invented vocabulary.
+#: The place name is swapped for the one the fixtures use; the SHAPE -- a title
+#: line, one content line, no lockup -- is the row's own.
+LONE_LINE_TITLE = "Senior Software Engineer"
+LONE_LINE_LOCATION = "Fairhaven, Riverton, Westland (On-site)"
+
+
+def lockup_less_record(**overrides) -> dict:
+    """A search row whose logo alt did not end in " logo"."""
+    record = {
+        "href": "/jobs/view/4600000031/",
+        "text": f"{LONE_LINE_TITLE}\n{LONE_LINE_LOCATION}",
+        "link_text": LONE_LINE_TITLE,
+    }
+    record.update(overrides)
+    return record
+
+
+def test_a_lone_line_after_the_title_is_the_location_not_the_company():
+    """The defect, stated as the two values it got wrong.
+
+    Measured live on 2026-08-30, ``linkedin_search_jobs`` returned a row whose
+    ``company`` was the LOCATION and whose ``location`` was null. With no
+    ``logo_name`` the company falls back to ``rest[0]``; with one line after
+    the title that IS ``rest[0]``, and nothing is left for the location.
+
+    :func:`shape.lines_after` says of its own fallback that the caller "gets
+    everything after the first line, which is the old positional behaviour and
+    no worse than it". On a one-line card it is worse than it: the field does
+    not go missing, it goes WRONG, and a wrong company is the one answer a
+    reader cannot tell from a right one.
+    """
+    row = shape.parse_job_card(lockup_less_record())
+    assert row is not None
+    assert row["title"] == LONE_LINE_TITLE
+    assert row["location"] is not None
+    assert row["location"] == LONE_LINE_LOCATION
+    assert row["company"] != LONE_LINE_LOCATION
+    assert row["company"] is None
+
+
+def test_the_logo_anchor_is_never_refused_for_having_nothing_after_it():
+    """The guard is on the POSITIONAL read only. An anchor is not a line.
+
+    Same one-line card with the lockup found. "Nothing follows it" is a
+    question about a LINE, and the company here is the accessible name of an
+    image, so the question does not apply to it -- the anchor wins exactly as
+    it did before.
+    """
+    row = shape.parse_job_card(
+        lockup_less_record(logo_name="Northwind Labs", meta_line=LONE_LINE_LOCATION)
+    )
+    assert row is not None
+    assert row["title"] == LONE_LINE_TITLE
+    assert row["company"] == "Northwind Labs"
+    assert row["location"] == LONE_LINE_LOCATION
+
+
+def test_a_three_line_card_with_no_anchors_still_reads_company_then_location():
+    """The shape the positional fallback was written for, and still gets right.
+
+    A company line with a location line after it. The guard asks only whether
+    anything follows the candidate, so on this card it asks and the answer is
+    yes; nothing about the walk changes.
+    """
+    row = shape.parse_job_card(
+        {
+            "href": "/jobs/view/4600000032/",
+            "text": f"{LONE_LINE_TITLE}\nNorthwind Labs\n{LONE_LINE_LOCATION}",
+            "link_text": LONE_LINE_TITLE,
+        }
+    )
+    assert row is not None
+    assert (row["title"], row["company"], row["location"]) == (
+        LONE_LINE_TITLE,
+        "Northwind Labs",
+        LONE_LINE_LOCATION,
+    )
+
+
+def test_a_positional_company_that_repeats_the_metadata_line_is_refused():
+    """The mirror of :func:`test_a_metadata_line_that_repeats_a_field_is_refused`.
+
+    That one is the lockup's list holding something the lines already
+    reported. This one is the other direction: the lockup named a string the
+    location, and the line walk arrived at the SAME string. An anchor beats a
+    position, so this is not a second opinion about the company -- the walk
+    reached the location, and the company was never on the card.
+
+    The card keeps a third line on purpose. Without it the guard above would
+    refuse the candidate anyway for having nothing after it, and this test
+    would pass without ever reaching the clause it exists for.
+    """
+    row = shape.parse_job_card(
+        lockup_less_record(
+            meta_line=LONE_LINE_LOCATION,
+            text=f"{LONE_LINE_TITLE}\n{LONE_LINE_LOCATION}\n{UNKNOWN_DECORATION}",
+        )
+    )
+    assert row is not None
+    assert row["company"] is None
+    assert row["location"] == LONE_LINE_LOCATION
+
+
+# ---------------------------------------------------------------------------
 # 3. The harvester, over the frozen pages, on every render
 # ---------------------------------------------------------------------------
 
@@ -532,6 +650,43 @@ async def test_no_company_is_a_title_a_location_or_a_decoration(which, styled):
         assert VERIFICATION_SUFFIX not in row["company"], row
         assert VERIFICATION_SUFFIX not in row["title"], row
         assert VERIFICATION_SUFFIX not in (row["location"] or ""), row
+
+
+@pytest.mark.parametrize("styled", LAYOUTS, ids=lambda s: LAYOUT_IDS[s])
+@pytest.mark.parametrize("which", ALL_RENDERS)
+async def test_a_lost_lockup_costs_no_captured_row_its_company(which, styled):
+    """The regularity section 2b's guard rests on, over every captured row.
+
+    The guard accepts a positional company only when a line follows it, so it
+    would drop a real company off any card whose company IS the last content
+    line. Measured 2026-08-30 over the three tracked fixtures in both layouts
+    -- 21 rows, 42 parses -- there is no such card: every company line has its
+    location after it, and every one of these rows still reads correctly with
+    the lockup gone.
+
+    Dropping ``logo_name`` and ``meta_line`` while leaving ``link_text`` alone
+    is not an arbitrary mutilation. It is the live failure replayed over real
+    markup: the harvester reads those two inside ``if (lockup)`` and neither
+    outside it, and reads ``link_text`` off the anchor either way.
+    """
+    records = await _records(which, styled=styled)
+    assert records, "an empty harvest would make this loop vacuous"
+    for record in records:
+        job_id = shape.job_id_from(record["href"])
+        title, company, location = EXPECTED[which][job_id]
+        lockup_less = {
+            key: value
+            for key, value in record.items()
+            if key not in ("logo_name", "meta_line")
+        }
+        row = shape.parse_job_card(lockup_less)
+        assert row is not None, job_id
+        assert (row["title"], row["company"], row["location"]) == (
+            title,
+            company,
+            location,
+        ), (job_id, row)
+
 
 
 @pytest.mark.parametrize("which", ALL_RENDERS)

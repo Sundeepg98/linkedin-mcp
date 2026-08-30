@@ -472,6 +472,22 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     separator when, and only when, it yields exactly two parts. Without that
     the location is whatever line happened to come next, which on a tracker
     row is the column header "Notes".
+
+    One thing the positional fallback still got wrong, and it is not a
+    degraded answer but a WRONG one. A card that loses the entity lockup loses
+    BOTH anchors in one step -- ``harvest_linked_cards`` reads ``logo_name``
+    and ``meta_line`` only inside ``if (lockup)``, and finds the lockup by an
+    ``img[alt]`` ending in " logo" -- so a card LinkedIn draws with any other
+    alt falls back to reading lines for both fields at once. On 2026-08-30
+    ``linkedin_search_jobs`` returned a row whose only content line after the
+    title was its LOCATION: that line became the ``company`` and ``location``
+    came back null. :func:`lines_after` calls its own fallback "the old
+    positional behaviour and no worse than it"; on a one-line card it is worse
+    than it, because a missing field announces itself and a wrong one does
+    not. So a positional company is accepted only when something follows it
+    that could be the location. Measured 2026-08-30 across 42 parses of the
+    three tracked search fixtures, the company line is never the last content
+    line of a card, so the guard refuses nothing a real card offers.
     """
     lines = [
         line
@@ -514,16 +530,39 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         if halves:
             rest = [halves[0], halves[1]] + rest[1:]
 
-    company = record.get("logo_name") or (rest[0] if rest else None)
+    # An ANCHOR beats a POSITION. ``logo_name`` is the accessible name of an
+    # image, never a line, so nothing is ever asked about what follows it.
+    # ``rest[0]`` IS a line, and a line with nothing after it is the signature
+    # of a location standing alone -- see the last paragraph of the docstring
+    # for the row that measured it.
+    company = record.get("logo_name") or None
+    meta_line = record.get("meta_line") or None
+    #: The refused candidate: the card's only content line after the title.
+    lone_line = None
+    if company is None and rest:
+        candidate = rest[0]
+        # A candidate the lockup has already named the location is not a
+        # second opinion about the company -- the walk arrived back at the
+        # first field. Otherwise it is a company only if the card kept going,
+        # and if it did not, that single line is the location.
+        if candidate != meta_line:
+            if lines_after(rest, candidate):
+                company = candidate
+            else:
+                lone_line = candidate
 
-    location = record.get("meta_line") or None
+    location = meta_line
     if location and location in (title, company):
         # The lockup's first list held something that is already reported. Its
         # order has moved; the lines are the better answer.
         location = None
     if not location:
         tail = lines_after(rest, company)
-        location = tail[0] if tail else None
+        # Falling back to ``lone_line`` is what keeps a refusal from costing
+        # the row BOTH fields: the guard above decided that line is not a
+        # company, which on a card holding one content line makes it the
+        # location by elimination.
+        location = tail[0] if tail else lone_line
 
     job_id = job_id_from(record.get("href", ""))
     out: dict[str, Any] = {
