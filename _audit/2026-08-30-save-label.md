@@ -328,3 +328,196 @@ change and `1732 + 10 = 1742` holds. No file is touched by both commits. Recorde
 than assumed away, because the arithmetic would have been wrong had it carried tests.
 
 No `_TEAM_LEAD_*.md` ruling was present at the worktree root or its parent at freeze.
+
+---
+---
+
+# Part 2 -- the measurement arrived, and it was not a label
+
+**Commit:** `08c8936`, on `master`, not pushed. **Suite: 1746 -> 1756.** `_state/` unchanged.
+
+The lead redeemed a token twice against `4456021840`, forty seconds apart, and got:
+
+```
+attempt 1: 2 labelled controls, ALL of them read, and NOT ONE carries a save word.
+attempt 2: 1 labelled controls, ALL of them read, and NOT ONE carries a save word.
+```
+
+Running it twice is what produced the finding. **A renamed control gives a stable
+count.** A count that moves is a page in a different state of readiness each time.
+
+## What Part 1 got wrong, stated plainly
+
+The sentence my own diagnostic printed on that reading was not merely uninformative.
+**It asserted a false conclusion:**
+
+> *"So this is not a save control wearing a new name -- either the posting renders no
+> save control at all, or it renders one worded in a way no rule here anticipated."*
+
+Both branches of that sentence are claims about **LinkedIn's vocabulary**, and a page
+that never finished drawing supports neither. Part 1 fixed a refusal that said nothing;
+it replaced it with one that said something wrong, with more confidence. That is the
+worse of the two failures, and it is the one the lead's second run caught.
+
+## The hypothesis survives, with one correction to its evidence
+
+The lead's reading -- *the interactive layer has not attached* -- is **verified**. But one
+plank of its support has to be removed, because it points the other way:
+
+> *"the SAME call read the posting's real title and employer off the page"*
+
+That is not corroboration. Measured on a derived page with every `<button>` stripped and
+nothing else touched:
+
+| what survives with zero buttons | value |
+|---|---|
+| `job_detail_is_believable` | **True** |
+| company read | `Ashgrove Systems` |
+| apply controls | **1** |
+| buttons under `<main>` | **0** |
+
+Title, employer and the apply control all survive the exact state we are trying to
+detect -- the first two because LinkedIn server-renders them, the third because the apply
+control is an `<a>` and anchors attach before buttons. So reading them correctly says
+nothing at all about whether the controls had drawn. The hypothesis is right; this
+particular reason for believing it was not a reason.
+
+## The refutation attempt, and what it killed
+
+The lead named the refutation: if the count is small and unstable even on a definitely
+rendered page, the inference is worthless. So the discriminator must **not** be the total
+count. Measured across every job capture in the repo, counting `<button>` under `<main>`:
+
+| capture | buttons |
+|---|---|
+| `job_detail_shell` (un-hydrated) | **0** |
+| `job_detail_following` | 2 |
+| `job_detail` | 8 |
+| `job_detail_hydrated` | 8 |
+| `job_detail_following_hydrated` | 12 |
+
+Zero on the shell; never fewer than two on a posting that drew. That is the signal, and
+`test_the_hydration_discriminator_is_measured_not_argued` pins it, so a future capture
+breaking the premise fails in the suite rather than in a live refusal telling somebody
+their page never rendered.
+
+**The obvious candidate was tried first and it failed.** The apply control is present in
+all four rendered captures and is measured across thirteen -- and it is an `<a>`, so it
+survives on an unattached page (table above). A readiness signal that cannot fail in the
+state it exists to detect is not a signal. That is now an assertion in a test rather than
+a preference in a comment.
+
+**Honest limit:** five captures of two postings. I cannot rule out a real posting that
+renders one or two buttons -- which is exactly why the count is a **reported
+discriminator** and never a gate. The gate waits for the save control itself.
+
+## The design
+
+The existing settle is the root cause and deserves naming: `browser.goto` tries
+`networkidle`, LinkedIn's long-poll connections mean it "rarely settles" (its own
+comment), so **every read falls through to a flat `SETTLE_MS = 3500` timer**. The read
+lands wherever 3.5 seconds happens to put it. The 2-then-1 reading is that bet losing
+twice in a row.
+
+`dom.wait_for_save_control` waits for the control to **attach** -- a named element, not a
+duration -- bounded at `SAVE_READY_TIMEOUT_MS = 10_000`, **one wait and one verdict, no
+retry loop**. Measured cost on a ready page: **27ms**. On timeout it REFUSES, and the
+refusal now leads with which failure it was:
+
+| evidence | verdict |
+|---|---|
+| control attached | `THE CONTROL LAYER IS READY` -- not a timing artefact |
+| timeout, `main_buttons_total == 0` | `THE PAGE NEVER BECAME READY` + **`DO NOT WIDEN shape.SAVE_LABELS`** |
+| timeout, `main_buttons_total >= 1` | `THE PAGE WAS READY AND THE CONTROL WAS NOT THERE` -- a vocabulary finding |
+| non-`TimeoutError` failure | `THE READINESS CHECK ITSELF FAILED` -- evidence for neither |
+| count unavailable | `WHETHER THE PAGE WAS READY IS UNKNOWN` |
+
+The sweep also splits its total into buttons and links, which is what makes the live
+reading legible: **2 labelled controls = 0 buttons + 2 anchors**, on a page carrying zero
+buttons of any kind. Not two mysterious controls -- the anchor layer, alone.
+
+`shape.SAVE_LABELS` is untouched. One row. No label has been observed and there is
+nothing to widen it with.
+
+## The red
+
+Against the shipped Part 1 build, the two states produce verdicts differing by **one
+digit**, both carrying the same false conclusion:
+
+```
+BUTTON LAYER NEVER ATTACHED : WHAT WAS ON THE PAGE: 2 labelled controls, ALL of them
+                              read, and NOT ONE carries a save word. So this is not a
+                              save control wearing a new name -- either ...
+READY, CONTROL RENAMED AWAY : WHAT WAS ON THE PAGE: 7 labelled controls, ALL of them
+                              read, and NOT ONE carries a save word. So this is not a
+                              save control wearing a new name -- either ...
+
+DIFFERENCE BETWEEN THE TWO VERDICTS:
+    -WHAT WAS ON THE PAGE: 2 labelled controls ...
+    +WHAT WAS ON THE PAGE: 7 labelled controls ...
+```
+
+Through the real gate, with the wait stubbed out as always-ready:
+
+```
+E  AssertionError: refusing to click: ... THE CONTROL LAYER IS READY: the save control
+E  attached after 0ms of a 0ms wait ... WHAT WAS ON THE PAGE: 2 labelled controls --
+E  0 button(s) and 2 link(s), with 0 button(s) of any kind under <main> ...
+E  assert 'NEVER BECAME READY' in "refusing to click: ..."
+```
+
+**Two mutations came back GREEN on the first pass, and both were real:**
+
+1. *"readiness failure opens the gate"* was **mis-aimed** -- `if state == UNKNOWN:`
+   appears twice in `writes.py` and my script hit the wrong one. Re-run against the right
+   anchor: red.
+2. *"an unreported button count defaults to zero"* was correctly aimed at code **no test
+   reached** -- every note test hand-builds its own dict and never drives the sweep. A
+   genuine gap, and it sat on the discriminator's own default: the value that decides
+   whether a page gets told it never rendered. Closed by
+   `test_a_button_count_that_failed_is_reported_as_unreported`, which goes red at that
+   mutation with `assert 0 is None`.
+
+Ten new tests (20 in the module). Every guard shown failing at its own mutation: the wait
+deleted, the discriminator ignored, a locator failure relabelled as a timeout, the wait
+re-raising, the button/anchor split collapsed, the diagnostic dropped from the refusal,
+the wait never called.
+
+## Question 4: `linkedin_job_detail` -- a SEPARATE wave, and here is why
+
+The lead's two `extraction_failed` results are the **same root cause and a different
+layer**, so the same condition will not serve.
+
+- The save gate fails when the **button layer** has not attached. The text layer was
+  fine -- `_read_posting_facts` passed, which is why a confirm gate was rendered at all.
+- `linkedin_job_detail` fails at `server.py:1124` when the **text layer** has not
+  rendered: `job_detail_is_believable` is false. A wait for the save control would not
+  help it, and a wait for body text would not help the save gate.
+
+Two further reasons to keep it separate rather than widen this wave: it is a **read**
+path, carrying none of this one's click risk and none of its urgency; and it has a defect
+of its own that wants its own measurement. Its message says:
+
+> *"Either the page had not finished rendering, or the posting is no longer there."*
+
+That is **two failures wearing one sentence** -- the identical defect this wave just fixed
+for save, still live on the read path. Separating them needs a capture of a removed
+posting, which this repo does not hold and nobody has taken. That is a wave with a
+measurement in it, not a patch.
+
+**Recommendation:** a follow-up wave covering both -- a readiness condition on the
+`job_detail` text layer, and a discriminator between "not rendered" and "posting gone".
+Not started, and not silently begun.
+
+## Receipts, part 2
+
+- **Suite:** `1756 passed in 321.73s`, zero failures, on the committed tree. Previous was
+  1746, **not 1742** -- that figure predates Part 1's own audit commits, and the
+  parametrized identity and path-hygiene guards grow with the tracked-file count.
+- **`_state/session.json` byte-identical**, still `sha256 f0892e35688868fa...`, 7813
+  bytes, mtime Aug 26 00:41. The Chrome profile was never launched from a script; every
+  reading here was taken by the test suite's local headless Chromium over frozen local
+  HTML.
+- **No `confirm_token` was passed by me at any point.** The live measurement is the
+  lead's; every state reproduced above is a local derived fixture.
+- **Commit** `08c8936` on `master`, not pushed, no `Co-Authored-By`. All files ASCII-clean.
