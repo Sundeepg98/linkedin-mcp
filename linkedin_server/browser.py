@@ -98,6 +98,10 @@ class LinkedInBrowser:
         self._context: Any = None
         self._call_lock = asyncio.Lock()
         self._last_navigation_at: float = 0.0
+        #: Evidence about how the most recent navigation SETTLED. Written by
+        #: goto, read by diagnostics, never by control flow here. See the
+        #: ``last_settle`` property for why a caller wants it.
+        self._last_settle: dict[str, Any] = {}
         self._idle_task: Optional[asyncio.Task] = None
         self._holds_profile_lock = False
         #: Set only in ATTACH mode: the CDP client we must disconnect, and the
@@ -125,6 +129,30 @@ class LinkedInBrowser:
     def headless(self) -> bool:
         """Whether the NEXT launch would be headless."""
         return _headless()
+
+    @property
+    def last_settle(self) -> dict[str, Any]:
+        """How the MOST RECENT navigation settled. Empty before the first one.
+
+        WHY A CALLER WANTS THIS. ``goto``'s settle has exactly two outcomes and
+        they are seven seconds apart -- see the comment in ``goto`` -- so a
+        reader that found nothing on the page has no way, from the page alone,
+        to tell "LinkedIn did not send it" from "I looked one second after
+        DOMContentLoaded and it had not arrived yet". Those want opposite
+        responses: the first is a finding, the second is a re-read. This is the
+        field that separates them, and it costs nothing -- it is measured
+        during a wait that was happening anyway.
+
+        Three keys: ``branch`` (``networkidle_resolved``,
+        ``networkidle_timed_out`` or ``settle_failed``), ``settled_ms`` (what
+        the settle actually cost) and ``settle_ms_configured``. A copy, so a
+        caller cannot edit the record.
+
+        NOT a readiness check and never to be used as one. It reports how long
+        this navigation waited, not whether what you wanted had drawn. A
+        reader that needs a specific element must wait for that element.
+        """
+        return dict(self._last_settle)
 
     @property
     def playwright(self) -> Any:
@@ -420,15 +448,42 @@ class LinkedInBrowser:
 
         # One bounded wait for the single-page app to fill the list in. Not a
         # poll loop, and not a scroll -- whatever rendered by now is the result.
+        #
+        # IT HAS TWO OUTCOMES AND THEY ARE SEVEN SECONDS APART. If networkidle
+        # resolves, the read that follows is taken ~0 ms from here. If it times
+        # out, the flat wait runs as well and the read is taken 2 x settle_ms
+        # from here. Which one happens is decided by whether the page found a
+        # 500 ms lull, so it is a race, and it is why ``last_settle`` exists.
+        #
+        # THE COMMENT THAT USED TO SIT HERE SAID "networkidle rarely settles on
+        # LinkedIn (long-poll connections)". Measured 2026-08-30 against the MCP
+        # client's own call log, that is true of ONE surface and false of
+        # another: /jobs/search resolved early in 0 of 10 recorded loads and has
+        # never failed, while /jobs/view/<id> resolved early in 28 of 37. Across
+        # the 15 reads whose outcome was recorded, the split is total -- 13 of 13
+        # early reads refused for a missing description, 2 of 2 timed-out reads
+        # drew the posting in full, over four different postings. One of them
+        # drew 22 s after the same url had been refused; another drew after
+        # failing about twelve times, every one of those on the early branch.
+        # Believing the old comment is what kept this hidden for a day.
+        # _audit/2026-08-30-jobs-view-reliability.md carries the probe log.
+        settle_started = time.monotonic()
+        branch = "networkidle_resolved"
         try:
             await page.wait_for_load_state("networkidle", timeout=settle_ms)
         except Exception:
-            # networkidle rarely settles on LinkedIn (long-poll connections).
             # Falling through with a flat wait is expected, not an error.
+            branch = "networkidle_timed_out"
             try:
                 await page.wait_for_timeout(settle_ms)
             except Exception as exc:  # pragma: no cover
+                branch = "settle_failed"
                 logger.debug("settle wait raised %s: %s", type(exc).__name__, exc)
+        self._last_settle = {
+            "branch": branch,
+            "settled_ms": round((time.monotonic() - settle_started) * 1000),
+            "settle_ms_configured": settle_ms,
+        }
 
         try:
             return page.url
