@@ -945,3 +945,238 @@ Files: `linkedin_server/dom.py`, `linkedin_server/shape.py`, `linkedin_server/se
 | **No capture of a populated SAVED tab** | every tracker fixture is the DRAFT tab with a row or the SAVED tab empty. A capture of the failing page would settle section 22 without a restart, and would be the artefact this surface has been missing for three parts of this audit | a capture run |
 | **Pre-existing count rot in the prose, NOT caused by this work** | README and `server.py` say three/four writes where five ship. Flagged in Part 2, still open | lead's call |
 | **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
+
+---
+---
+
+# Part 4 -- neither the walk nor the parser: the premise under the subtraction
+
+**Commits:** `8573b8b`, `005626e` on `master`, **not pushed**.
+**Baseline in:** 2001 passed. **Baseline out:** 2008 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 25. The answer, and it is not either of the two things we were choosing between
+
+The lead's instruction was "fix the parser", on the strength of `records=1, dropped=1`. That
+number is correct and the conclusion drawn from it is not:
+
+**`shape.parse_job_card` was right to reject the row. It was handed a record with nothing in
+it, and it refused to invent a job from nothing.** The defect is upstream of both the walk and
+the parser -- it is the PREMISE under `shape.strip_screen_reader_copies`, and the record was
+emptied before the parser ever saw it.
+
+### The mechanism, measured
+
+That function subtracts **by count**: each hidden element removes ONE occurrence of its own
+text from the card. Its docstring states the premise it rests on --
+
+> ``innerText`` includes visually-hidden text
+
+-- and that is **true of the CLIP pattern and false of `display:none`**. Clip leaves the
+element rendered, so `innerText` really does carry a second copy and removing one is right.
+`display:none` is not rendered, so its text was never in `innerText` at all.
+
+But `hiddenWithin` read each hidden element with `innerText`, and **`innerText` on a
+NON-RENDERED element falls back to `textContent`**. So the budget was charged for a duplicate
+that did not exist in the card, and the subtraction paid for it out of the **visible** copy.
+
+Driven over one derived row under each pattern:
+
+| hidden duplicate | `hidden` collected | outcome |
+|---|---|---|
+| clip (rendered) | `['<title>']` | title survives -- **correct** |
+| `display:none` | `['<title>']` | **title eaten** |
+
+### And it reproduces the live signature exactly
+
+The first version of this reproduction did NOT, and that is worth recording because it nearly
+shipped as a claim. A row carrying title AND company loses only its title and comes back
+**corrupted** -- `records=1, dropped=0`, `title: 'Sprinto'`. Reaching the live `dropped=1`
+needs the eaten line to be the row's WHOLE content. Measured against the pre-fix walk restored
+in memory (no source edit):
+
+```
+title-only row, pre-fix   records=1  parsed=0  dropped=1   <- the live numbers
+title-only row, fixed     records=1  parsed=1  dropped=0
+```
+
+Both faces are now pinned, because they are one defect and **the corrupting one is the more
+dangerous**: a confidently wrong row is harder to notice than a missing one. Driven pre-fix on
+the two-line shape it returns `title: 'Job tracker', company: '0 selected'` -- which is the
+**exact historical signature** `jobs_tracker_row.html`'s own docstring records from
+2026-08-21. The same failure, arriving by a route nobody had found.
+
+---
+
+## 26. The fix, and what it deliberately does not touch
+
+One guard: `hiddenWithin` skips an element that is not being rendered, so only duplicates
+`innerText` actually carried are charged.
+
+```js
+if (!isRendered(el)) { skippedHidden += 1; continue; }
+```
+
+`checkVisibility({contentVisibilityAuto: true, visibilityProperty: true})`, and **UNKNOWN
+COUNTS AS RENDERED** -- an engine without the API keeps the old behaviour rather than silently
+halving every subtraction on every surface.
+
+### The lead's constraint, discharged with a correction
+
+> a fix that makes Saved parse must not change what Draft relies on.
+
+**It does not, and the test I wrote to prove that could not have.** An earlier docstring
+claimed `jobs_tracker_row.html`'s screen-reader elements are "RENDERED in this fixture", so the
+over-broad mutation -- skip EVERY hidden element -- would change it. Measured: that fixture
+contains **zero** elements matching `dom.CARD_HIDDEN_SELECTOR`, so `hiddenWithin` walks an
+empty list and the guard line never executes on it. The test cannot fail there and no longer
+claims to; it earns its place pinning the draft row **field by field**, which catches any
+reshaping of the one tracker surface working live.
+
+**The over-broad mutation IS caught, and loudly, just not there**: it takes
+`tests/test_job_search_fixture.py` to **19 failures**, because search results DO carry rendered
+screen-reader lines and depend on their being subtracted. `test_sdui_surfaces_fixture.py` and
+`test_profile_views_fixture.py` stay silent. That is the honest map of what protects what.
+
+### What is NOT touched, and why
+
+`HARVEST_BLOCK_CARDS_JS` has the same latent defect in its own `hiddenWithin`. It is left
+alone: notifications are its only caller, no fixture exercises a non-rendered duplicate there,
+and changing a surface I cannot verify on the strength of an argument is the thing this wave
+exists to avoid. It is listed as debt with its address.
+
+---
+
+## 27. The self-contradicting refusal, closed
+
+The lead quoted the instrument naming two culprits four sentences apart -- "that is the
+PARSER", then "a walk that returned nothing stopped short of it -- that is a defect in the
+walk". The second reasons from a premise the first has already refuted.
+
+`_tracker_row_shape_sentence` now takes `records` and offers the "stopped short" reading **only
+when the walk returned nothing**. When it returned rows, the same numbers are still printed --
+suppressed blame, not suppressed evidence -- as a statement about which text the parser was
+handed.
+
+**And the test that pins it named the wrong mutation at first.** Removing the `records`
+ARGUMENT changes nothing: the parameter defaults to `None`, `None == 0` is False, so the call
+falls through to the same branch byte-identically. What does the work is the `records == 0`
+guard. A docstring naming the wrong line sends the next reader to the wrong place, which is the
+same class of error as the contradiction it was written about.
+
+---
+
+## 28. Two parts of the fix that no test can reach, recorded rather than kept quietly
+
+Found by asking the mutation slice for the honest answer rather than a reassuring one.
+
+* **`isRendered`'s `return true` fallback is DEAD in this engine.** Probed in the same
+  Chromium 151 the suite runs: `checkVisibility` exists and does not throw, so the line never
+  evaluates. It is KEPT, because the alternative default -- false -- would silently halve every
+  subtraction on every surface in an engine lacking the API. A fallback that is wrong in the
+  safe direction is worth more than a line count.
+* **`visibilityProperty` changes no subtraction at all.** A `visibility:hidden` element yields
+  no `innerText`, so `textOf()` returns `''` and it is never pushed either way. Measured,
+  dropping the option moves `hidden_not_rendered` 2 -> 0 and leaves the budget identical. It
+  buys counter accuracy, not correctness, and that is now what it claims to buy.
+
+Both are stated in the source rather than in this file alone.
+
+---
+
+## 29. Is this what the live page does? Not established, and the number that will say
+
+**Proven:** the mechanism is real, it is in the code path the Saved tab uses, and it produces
+the live signature exactly -- `records=1, dropped=1` -- on a derived row.
+
+**Not proven:** that the live Saved row carries `display:none` duplicates. That needs a
+restart. The live page holds **163 characters present and not rendered**, which is consistent
+and is not a measurement of this.
+
+`census.hidden_not_rendered` was added for exactly that question. **Non-zero on the Saved tab
+means the page carries such duplicates**; zero means this fix, however real, is not what was
+wrong there and the search continues. It counts skipped READS rather than elements -- the walk
+reads each card's hidden set twice, once for the row and once for the anchor -- and says so
+rather than deduping into a number that would claim more than it knows.
+
+### The call that settles it
+
+Restart, confirm `linkedin_server_info`'s `build.code.commit` matches `git rev-parse
+--short=12 HEAD`, then, paired with `linkedin_search_jobs` and repeated twice:
+
+```
+linkedin_saved_jobs()
+```
+
+* **It returns the Sprinto row** -> fixed, and `unsave_job` becomes previewable in the same
+  moment (see below).
+* **It still refuses, with `hidden_not_rendered` non-zero** -> the duplicates are there and
+  something else is also wrong; the refusal now carries the harvest counts to say what.
+* **It still refuses, with `hidden_not_rendered` zero** -> this fix is real and was not the
+  live cause. Say so and keep going.
+
+---
+
+## 30. Does `unsave_job` become previewable?
+
+**Yes, if and only if the Saved tab now reads -- and not by anything in this commit directly.**
+
+`unsave_job` declares `state_from="saved_list"`. `observe` reads the Saved tab for its
+DIRECTION, `_read_saved_state` returns `unknown` while that read fails, and `_direction`
+refuses on an unknown origin before any token is minted. Its anchor has been in place since
+Part 2; the list read is the only thing between it and a rendered confirm block.
+
+So the chain is: Saved tab parses -> `_read_saved_state` finds job `4423880462` among the rows
+-> returns `saved` -> `_direction` matches `from_state` -> a preview renders and mints a token.
+
+**I have not verified that end to end and will not**: verifying it means holding a token for an
+action on the operator's only saved job, and the tool was denied to me by the permission
+classifier in Part 2 in exactly this form. The offline test
+`test_unsave_cannot_be_PREVIEWED_while_the_saved_list_cannot_be_read` pins the current
+blocking behaviour; the unblocked half is his to see.
+
+---
+
+## 31. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **2001 passed** (Part 3's close-out, re-measured).
+* Out: **2008 passed, 0 failed**, in 578.06 s.
+* The delta is 7: 6 new tests in `tests/test_tracker_harvest_census.py` (the clip control, the
+  `display:none` budget, the title-only drop, the corruption face, and the two contradiction
+  tests), plus 1 from the draft-row guard being split out. No file became newly tracked, so
+  the parametrized identity guards are unchanged.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41.
+
+**No write performed or attempted.** No `confirm_token` reached any tool. `unsave_job` was not
+fired. The Chrome profile was never launched from a script -- every reading in this part came
+from the suite's own local headless Chromium over frozen local HTML, including the two
+"pre-fix" runs, which restored the old walk **in memory only** and left the source untouched.
+
+**Commits**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `8573b8b` | `fix(harvest): a duplicate innerText never carried may not be subtracted` |
+| `005626e` | `test(harvest): reproduce the live signature, and correct three false receipts` |
+
+Files: `linkedin_server/dom.py`, `linkedin_server/shape.py`,
+`tests/test_tracker_harvest_census.py`. **All ASCII-clean**, verified by byte scan.
+
+---
+
+## 32. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **Whether this fix is the LIVE cause** | one `linkedin_saved_jobs` after a restart. `hidden_not_rendered` non-zero confirms the page carries the duplicates; zero says keep looking | one call |
+| **`unsave_job` previewable** | follows from the row above, and is the operator's to exercise. Not verified from here, deliberately | his call |
+| **`HARVEST_BLOCK_CARDS_JS` has the same defect** | notifications are its only caller and no fixture exercises a non-rendered duplicate there. A capture that does, or a live notification read after the same guard is added, would settle it. NOT changed on argument alone | small, needs evidence |
+| **No capture of a populated SAVED tab** | still the artefact this surface has lacked for four parts. It would have made every part of this shorter | a capture run |
+| **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship. Flagged in Part 2, still open | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
