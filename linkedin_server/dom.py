@@ -145,6 +145,20 @@ HARVEST_LINKED_CARDS_JS = """
   // and the row was dropped. UNKNOWN COUNTS AS RENDERED -- an engine without
   // checkVisibility keeps the old behaviour rather than silently halving the
   // subtraction.
+  // TWO PARTS OF THIS ARE NOT REACHED BY ANY TEST, measured 2026-08-30 rather
+  // than assumed, and both are recorded instead of being quietly kept:
+  //
+  //   * the `return true` fallback is DEAD in this engine. Chromium 151 has
+  //     checkVisibility and it does not throw, so the line never evaluates.
+  //     It is kept as the answer for an engine that lacks the API, where the
+  //     alternative -- defaulting to false -- would silently halve every
+  //     subtraction on every surface. A fallback that is wrong in the safe
+  //     direction is worth more than a line count.
+  //   * `visibilityProperty` changes no SUBTRACTION. A visibility:hidden
+  //     element yields no innerText, so textOf() returns '' and it is never
+  //     pushed either way; the option only makes the skip COUNTER accurate.
+  //     Measured: dropping it moves hidden_not_rendered 2 -> 0 and leaves the
+  //     budget identical.
   const isRendered = (el) => {
     try {
       if (el && el.checkVisibility) {

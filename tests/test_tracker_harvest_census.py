@@ -520,17 +520,54 @@ async def test_a_display_none_duplicate_is_not_charged_to_the_card():
     assert census["hidden_not_rendered"] == 2, census
 
 
+def row_title_only(style: str) -> str:
+    """DERIVED: a row whose ONLY visible line is its title, duplicated hidden.
+
+    THE SHAPE THAT REPRODUCES THE LIVE SIGNATURE, and the reason it is a
+    separate builder from ``row_with_screen_reader`` is measured rather than
+    tidy. A row carrying title AND company loses only the title to the bad
+    subtraction, so the parser still finds a line and returns a CORRUPTED row
+    (``title: 'Sprinto'``). Only when the eaten line is the row's whole content
+    does the parser have nothing left, return None, and produce the live
+    ``records=1, dropped=1``.
+
+    The second anchor to the same job is what makes ``rowOf``'s second stop
+    fire, so the walk does not climb into page chrome -- chrome lines would
+    keep ``lines`` non-empty and mask the drop.
+    """
+    shell = derive(markup("jobs_tracker_empty"), ">No jobs here</h2>", "></h2>")
+    shell = derive(shell, "Saved &#183; 0", "Saved &#183; 1", count=-1)
+    frag = (
+        f'<div><div><a href="{SR_HREF}">'
+        f'<span class="visually-hidden" style="{style}">{SR_TITLE}</span>'
+        f"<span>{SR_TITLE}</span></a>"
+        f'<a href="{SR_HREF}"></a></div></div>'
+    )
+    return derive(shell, "</main>", frag + "</main>")
+
+
 async def test_the_visible_title_survives_a_display_none_duplicate():
     """The consequence, end to end, through the real parser.
 
     This is the assertion that actually matters: the row parses, and its title
     is the title rather than nothing.
 
+    IT REPRODUCES THE LIVE SIGNATURE, which is why the fixture is a title-only
+    row. Measured against the pre-fix walk restored in memory:
+
+        pre-fix   records=1  parsed=0  dropped=1   <- the live numbers
+        fixed     records=1  parsed=1  dropped=0
+
     SHOWN FAILING by removing the ``isRendered`` guard::
 
         AssertionError: assert 0 == 1
         -- the row was dropped, which is the live signature: records=1,
         dropped=1
+
+    An earlier draft of this test used a title-AND-company row and claimed the
+    same failure. It does not produce it: that row loses only its title and
+    comes back CORRUPTED (``title: 'Sprinto'``) rather than dropped. The
+    docstring was corrected after a mutation run measured it.
     """
 
     async def work(page):
@@ -538,13 +575,39 @@ async def test_the_visible_title_survives_a_display_none_duplicate():
         rows, dropped = dom.parse_all(records, shape.parse_job_card)
         return records, rows, dropped
 
-    records, rows, dropped = await _with_html(
-        row_with_screen_reader("display:none"), work
-    )
+    records, rows, dropped = await _with_html(row_title_only("display:none"), work)
     assert len(records) == 1, records
     assert len(rows) == 1, (rows, dropped)
     assert dropped == 0, dropped
-    assert SR_TITLE in rows[0]["title"], rows[0]
+    assert rows[0]["title"] == SR_TITLE, rows[0]
+
+
+async def test_a_row_with_other_lines_is_corrupted_rather_than_dropped():
+    """The SAME defect, one line richer, and it fails differently.
+
+    Worth pinning because the two look like different bugs and are one. When
+    the eaten line is not the row's whole content, the parser finds what is
+    left and returns a row that is confidently WRONG rather than absent --
+    which is the more dangerous of the two outcomes and the harder to notice.
+
+    SHOWN FAILING by removing the ``isRendered`` guard::
+
+        AssertionError: assert 'Sprinto' == 'Senior Full-stack Engineer -
+        Remote' -- the company line was promoted to title after the real
+        title was subtracted away
+    """
+
+    async def work(page):
+        records, _census = await _budget(page)
+        rows, dropped = dom.parse_all(records, shape.parse_job_card)
+        return rows, dropped
+
+    rows, dropped = await _with_html(
+        row_with_screen_reader("display:none"), work
+    )
+    assert dropped == 0, dropped
+    assert len(rows) == 1, rows
+    assert rows[0]["title"].startswith(SR_TITLE), rows[0]
 
 
 async def test_the_draft_row_still_parses_and_for_the_same_reason():
@@ -555,14 +618,28 @@ async def test_the_draft_row_still_parses_and_for_the_same_reason():
     "it still returns something" -- because a fix that left it parsing by
     coincidence would pass a weaker check.
 
-    Its screen-reader elements are RENDERED in this fixture, so the budget is
-    unchanged for it and the row is built from the same lines by the same
-    route as before.
+    WHAT THIS TEST DOES AND DOES NOT GUARD, corrected after a mutation run.
+    An earlier docstring claimed its screen-reader elements are "RENDERED in
+    this fixture", so that the over-broad mutation -- skip EVERY hidden
+    element -- would change it. That is false: ``jobs_tracker_row.html``
+    contains ZERO elements matching ``dom.CARD_HIDDEN_SELECTOR``, so
+    ``hiddenWithin`` walks an empty list and the guard line never executes on
+    it. This test CANNOT fail at that mutation and no longer claims to.
 
-    SHOWN FAILING by skipping every hidden element regardless of rendering,
-    which is the over-broad version of this wave's fix::
+    What it does hold is worth keeping on its own: the draft row's fields,
+    exactly, so any change to the walk or the parser that reshapes the one
+    tracker surface working live fails here.
 
-        AssertionError: the draft row changed shape
+    THE OVER-BROAD MUTATION IS CAUGHT ELSEWHERE, and loudly -- measured, it
+    takes ``tests/test_job_search_fixture.py`` to 19 failures, because search
+    results DO carry rendered screen-reader lines and depend on their being
+    subtracted. That is the guard; this is not.
+
+    SHOWN FAILING by any change that reshapes the draft row -- for example
+    dropping the middle-dot split in ``parse_job_card``::
+
+        AssertionError: assert [{'title': ..., 'company': 'Ashgrove Systems
+        <dot> Fairhaven (Remote)', 'location': None, ...}] == [...]
     """
 
     async def work(page):
@@ -604,11 +681,18 @@ async def test_the_shape_sentence_does_not_blame_the_walk_that_returned_rows():
     reached the same caller. An instrument that names two culprits at once can
     be quoted either way, which is worse than naming none.
 
-    SHOWN FAILING by taking the ``records`` argument back off the shape
-    sentence, which is the state this was found in::
+    SHOWN FAILING by deleting the ``records == 0`` guard on that branch --
+    ``elif records == 0:`` -> ``elif True:``::
 
         AssertionError: 'defect in the walk' in '...' -- the refusal blames
         the walk in the same breath as clearing it
+
+    NOT reproducible by removing the ``records`` ARGUMENT from the call, and
+    that was this docstring's first claim. Measured: the parameter defaults to
+    ``None``, ``None == 0`` is False, so the call falls through to the same
+    safe branch and the output is byte-identical. The argument makes the guard
+    POSSIBLE; the guard is what does the work, and a docstring naming the
+    wrong one sends the next reader to the wrong line.
     """
     ladder = [
         [
