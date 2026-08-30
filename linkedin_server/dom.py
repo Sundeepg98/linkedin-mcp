@@ -2440,3 +2440,202 @@ async def read_settings_surface(page: Any) -> dict[str, Any]:
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("settings controls unreadable: %s: %s", type(exc).__name__, exc)
     return out
+
+
+# ---------------------------------------------------------------------------
+# Job tracker readiness
+# ---------------------------------------------------------------------------
+
+#: A drawn row on the job tracker, as a SELECTOR rather than as the regex the
+#: harvest matches. The two are deliberately different instruments over the
+#: same fact: ``JOB_HREF`` decides which harvested card is a job, this decides
+#: whether any such card has ATTACHED yet, and only the second can be waited
+#: on. Measured over the two tracker captures -- zero hits on
+#: ``jobs_tracker_empty``, two on ``jobs_tracker_row`` (LinkedIn draws the row
+#: twice, once per layout, both anchored at the same job id).
+TRACKER_ROW_LINK = 'main a[href*="/jobs/view/"]'
+
+#: The ceiling the wait below may spend, matching its two siblings. It costs
+#: almost nothing on a tab that has drawn -- either half of the disjunction
+#: satisfies it at once -- and a tab that never resolves costs this much ONCE
+#: and then SAYS SO, rather than producing a confident claim about an empty
+#: list.
+TRACKER_LIST_TIMEOUT_MS = 10_000
+
+
+def tracker_list_selector() -> str:
+    """WHAT "THE LIST RESOLVED" MEANS, assembled from what ``shape`` owns.
+
+    A DISJUNCTION rather than one element, because the tracker has two
+    legitimate finished states and a reader that waits only for the first
+    hangs for the full bound on every empty tab.
+
+    The disjunction is EXACTLY the condition the refusal tests.
+    ``_read_tracker`` raises when it has neither rows NOR a corroborated empty
+    state, so this waits for whichever of those two arrives and returns the
+    moment one does. Waiting for the same condition the caller is about to
+    judge is the whole reason this cannot drift into waiting for something
+    irrelevant.
+
+    THE EMPTY HALF IS DERIVED FROM ``shape.TRACKER_EMPTY_MARKERS``, never
+    written down a second time -- the same discipline
+    ``writes.anchor_label_for`` runs on ``shape.SAVE_LABELS``. A marker added
+    there is waited on here automatically, and one renamed there cannot leave a
+    stale copy behind.
+
+    WHY THIS ANCHOR CAN FAIL IN THE STATE IT DETECTS, which is the law the
+    description anchor was chosen under. The tab strip is NOT part of it, and
+    that is measured rather than preferred: on 2026-08-30 the live Saved tab
+    reported LinkedIn's own count of 1 -- so the strip HAD drawn -- while no
+    row and no empty state had. An anchor on the strip would have reported
+    READY in precisely the state this wait exists to detect. The strip's own
+    links are ``/jobs-tracker/?stage=...``, which ``TRACKER_ROW_LINK`` does not
+    match.
+
+    AND THE EMPTY HALF SURVIVES THE SAME TEST, which matters because a marker
+    that LinkedIn always draws -- hidden until needed -- would satisfy this
+    wait on an undrawn page and be the same mistake in the other half. It does
+    not: the six live Saved-tab failures on 2026-08-30 each reported that no
+    empty state had been drawn, read out of the same ``<main>`` text
+    :func:`shape.tracker_empty_state` matches on. So the marker is absent in
+    exactly the state this wait must fail in.
+    """
+    parts = [TRACKER_ROW_LINK]
+    parts += ['main :text-is("%s")' % marker for marker in shape.TRACKER_EMPTY_MARKERS]
+    return ", ".join(parts)
+
+
+async def wait_for_tracker_list(page: Any) -> dict[str, Any]:
+    """Wait for the tracker's LIST to resolve. Three outcomes, none a verdict.
+
+    The third sibling of :func:`wait_for_save_control` and
+    :func:`wait_for_job_description`, and it keeps their contract exactly: ONE
+    bounded wait, ONE verdict, NO retry loop. Re-reading until the answer
+    changes is how a racy reader is made to LOOK reliable while staying racy.
+
+    THREE-VALUED, and the third value is not decoration:
+
+    ======================  ==================================================
+    ``attached`` is True    a job row or an empty state attached. It drew.
+    ``attached`` is False   the wait ran its full course and found neither.
+                            THIS IS A FINDING about the page.
+    ``attached`` is None    the readiness check ITSELF failed -- a locator
+                            error, a closed page. Evidence for NEITHER.
+    ======================  ==================================================
+
+    ``attached`` is the key name both siblings use for the same idea, so a
+    caller holding any of the three reads out through one timing note.
+
+    WHAT THIS DOES AND DOES NOT CLAIM TO FIX, because the difference is the
+    finding of the wave that added it. It closes the read-too-early failure on
+    this surface, which the posting page had and has since had fixed. It is NOT
+    established as the cause of the Saved tab failing on 2026-08-30: measured
+    that afternoon through this same loader, inside one ten-minute window,
+    Saved failed 6 of 6 while Draft succeeded 2 of 2 and Applied 2 of 2. A
+    settle race does not produce 6-0 against 4-0. That is why
+    :func:`read_tracker_evidence` ships beside this and why the refusal reports
+    both: the wait removes one candidate cause, the evidence names the next.
+
+    Never raises. The caller decides what to do with all three.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT IS THE INSTRUMENT-FAILED VALUE, not the finding, so a
+        # path nobody thought about cannot arrive claiming to have measured
+        # LinkedIn.
+        "attached": None,
+        "waited_ms": 0,
+        "timeout_ms": int(TRACKER_LIST_TIMEOUT_MS),
+        "failure": None,
+        "why": "the readiness check did not run",
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(tracker_list_selector()).first.wait_for(
+            state="attached", timeout=TRACKER_LIST_TIMEOUT_MS
+        )
+        out["attached"] = True
+        out["why"] = "a job row or an empty state attached"
+    except Exception as exc:  # noqa: BLE001 - classified below, never re-raised
+        # CLASSIFIED BY NAME, the same idiom wait_for_job_description runs and
+        # for the same reason: only a timeout is the page answering "not here"
+        # for the whole bounded period. Every other exception is this function
+        # failing to ask.
+        name = type(exc).__name__
+        out["failure"] = name
+        if name == "TimeoutError":
+            out["attached"] = False
+            out["why"] = (
+                "neither a job row nor an empty state attached within the "
+                "bound, so the list had not resolved"
+            )
+        else:
+            out["why"] = (
+                "the readiness check itself failed (%s), so this says nothing "
+                "about the page" % name
+            )
+            logger.debug("tracker readiness check failed: %s: %s", name, exc)
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
+#: Cap on the anchor walk below. The tracker draws each row twice and carries a
+#: tab strip and a footer, so a healthy page is tens of links; this exists so a
+#: page that has gone wrong cannot turn a diagnostic into a sweep.
+TRACKER_LINK_SCAN_LIMIT = 400
+
+
+async def read_tracker_evidence(page: Any) -> dict[str, Any]:
+    """WHAT THE TRACKER PAGE ACTUALLY HELD, counted and never quoted.
+
+    WHY THIS EXISTS, and it is the same lesson twice. The save refusal was
+    rebuilt on 2026-08-30 because it "made a correct decision and then threw
+    away the evidence for it"; the tracker refusal has the identical shape --
+    it reports LinkedIn's tab count and its own zero, and nothing whatever
+    about the page those two disagree over. So a reader cannot tell three
+    causes apart, and they want completely different responses:
+
+      * the list never drew            -> re-read; the readiness wait says so
+      * the list drew and is empty     -> an empty state nobody matched
+      * the list drew rows the harvest -> the row's link shape changed, and the
+        does not match                    fix is to re-measure, not to re-read
+
+    THE THIRD IS THE LIVE SUSPECT AND THIS REPO CANNOT CURRENTLY SEE IT. Every
+    tracker capture on disk is either the DRAFT tab carrying a row or the SAVED
+    tab carrying nothing; a POPULATED SAVED tab has never been captured, so the
+    shape of a saved row is unmeasured. ``rows_matching`` set against
+    ``anchors_total`` is what separates that case from a page that never drew:
+    many anchors and zero matching rows is a rename, few anchors is a page that
+    did not render.
+
+    COUNTS, NEVER TEXT. A tracker row names a company and a job, and this
+    package does not hand page bodies around for diagnostics -- the save sweep
+    took the same ruling, for the same reason.
+    """
+    out: dict[str, Any] = {
+        # UNREPORTED, NOT ZERO. Zero is a measurement; None is what an unread
+        # page says, and the note prints the two differently.
+        "main_present": None,
+        "main_chars": None,
+        "anchors_total": None,
+        "rows_matching": None,
+        "scan_complete": False,
+    }
+    try:
+        out["main_present"] = int(await page.locator("main").count()) > 0
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker main presence unreadable: %s", type(exc).__name__)
+        return out
+
+    out["main_chars"] = len(await read_main_text(page))
+
+    try:
+        anchors = page.locator("main a[href]")
+        total = int(await anchors.count())
+        out["anchors_total"] = min(total, TRACKER_LINK_SCAN_LIMIT)
+        out["rows_matching"] = int(await page.locator(TRACKER_ROW_LINK).count())
+        # OVER-LIMIT IS NOT A COMPLETE SCAN, said out loud rather than by a
+        # silent min(). That silent cap was itself a defect in the save sweep.
+        out["scan_complete"] = total <= TRACKER_LINK_SCAN_LIMIT
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker anchor scan failed: %s", type(exc).__name__)
+    return out

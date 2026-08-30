@@ -1973,7 +1973,9 @@ async def _read_apply_route(page: Any, target: str) -> tuple[str, str]:
     return str(verdict.get("route") or UNKNOWN), str(verdict.get("why") or "")
 
 
-async def _read_saved_state(page: Any, target: str) -> tuple[str, str]:
+async def _read_saved_state(
+    page: Any, target: str, *, navigator: Any = None
+) -> tuple[str, str]:
     """Is THIS posting in his saved list? Three answers, and the third is real.
 
     This is the Manage-Pages discipline applied to a second surface, and it is
@@ -1986,7 +1988,14 @@ async def _read_saved_state(page: Any, target: str) -> tuple[str, str]:
     count means the rest are below the fold; MORE rows than the stated count
     means something that is not a saved job is being read as one, and a list
     that disagrees with itself cannot settle a direction either way.
+
+    THE GATE INHERITS THE TRACKER'S READINESS WAIT, and on this surface it
+    matters more than on the read tool: ``unsave_job`` takes its DIRECTION from
+    this function, so a list read before it drew does not merely produce an
+    empty answer, it produces ``unknown`` and the gate refuses. Measured
+    2026-08-30, that is exactly what the operator met.
     """
+    list_wait = await dom.wait_for_tracker_list(page)
     main_text = await dom.read_main_text(page)
     stated = shape.parse_tracker_tabs(main_text).get("saved")
     empty_state = shape.tracker_empty_state(main_text)
@@ -2034,7 +2043,12 @@ async def _read_saved_state(page: Any, target: str) -> tuple[str, str]:
             "no saved rows could be read AND the page does not corroborate an "
             f"empty list: the Saved tab count reads {stated!r} and the empty "
             f"state ({empty_state!r}) is what would have to show. Nothing here "
-            "distinguishes an empty list from a read that failed.",
+            "distinguishes an empty list from a read that failed. "
+            + shape.tracker_read_note(
+                await dom.read_tracker_evidence(page),
+                list_wait,
+                dict(getattr(navigator, "last_settle", None) or {}),
+            ),
         )
     if len(rows) == stated:
         return (
@@ -2482,7 +2496,7 @@ async def observe(
         state_landed = await _load(
             navigator, page, SAVED_LIST_URL, surface="saved jobs"
         )
-        state, why = await _read_saved_state(page, target)
+        state, why = await _read_saved_state(page, target, navigator=navigator)
         return _record(
             spec,
             target=target,

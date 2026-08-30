@@ -284,6 +284,16 @@ async def _read_tracker(
         final_url = await BROWSER.goto(page, url)
         assert_not_authwall(final_url, surface=surface)
 
+        # THE READINESS WAIT RUNS FIRST, AND THE ORDER IS THE WHOLE OF ITS
+        # VALUE -- the same argument that put dom.wait_for_job_description at
+        # the top of dom.read_job_posting. After the text has been read and the
+        # cards harvested, waiting for the list changes nothing about what was
+        # read; it would spend up to ten seconds to produce a field describing
+        # a page that had already been parsed. Every read below therefore
+        # happens on a page that has either resolved its list or spent the
+        # bound failing to, and list_wait says which.
+        list_wait = await dom.wait_for_tracker_list(page)
+
         main_text = await dom.read_main_text(page)
         tab_counts = shape.parse_tracker_tabs(main_text)
         empty_state = shape.tracker_empty_state(main_text)
@@ -312,7 +322,17 @@ async def _read_tracker(
                 )
                 + ". Reporting nothing here would be indistinguishable from "
                 "you genuinely having none, so it is reported as a failure "
-                "instead.",
+                "instead. "
+                # THE EVIDENCE IS READ HERE AND NOWHERE ELSE -- on the branch
+                # that is about to refuse, exactly as the save diagnostic is.
+                # A read that succeeded has no use for it, and spending two
+                # extra locator calls on every healthy tab to print a field
+                # nobody reads is how a diagnostic becomes a tax.
+                + shape.tracker_read_note(
+                    await dom.read_tracker_evidence(page),
+                    list_wait,
+                    BROWSER.last_settle,
+                ),
                 url=final_url,
                 hint="open the url yourself and compare with what this reports",
             )

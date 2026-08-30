@@ -798,6 +798,147 @@ def empty_is_believable(
     return linkedin_count == 0 and bool(empty_state)
 
 
+def tracker_read_note(
+    evidence: dict[str, Any],
+    list_wait: dict[str, Any],
+    settle: dict[str, Any],
+) -> str:
+    """WHY the tracker read came back empty, out of what was actually there.
+
+    The sibling of :func:`job_detail_failure_note`, built after the same defect
+    was found one surface over. The sentence this extends reported LinkedIn's
+    own tab count and this reader's own zero and NOTHING about the page the two
+    disagree over -- so the three causes below were indistinguishable, and they
+    want completely different responses.
+
+    THE DISCRIMINATOR IS ``rows_matching`` AGAINST ``anchors_total``, not
+    either alone. A page that never drew has few anchors and no rows; a page
+    that drew a list whose row link this reader no longer matches has MANY
+    anchors and no rows. Reporting only "zero rows" collapses them, which is
+    exactly how a Saved tab that fails 6 times out of 6 could sit beside two
+    siblings succeeding and still be blamed on timing.
+    """
+    return " ".join(
+        part
+        for part in (
+            _tracker_evidence_sentence(evidence),
+            _tracker_timing_sentence(list_wait, settle),
+        )
+        if part
+    )
+
+
+def _tracker_evidence_sentence(evidence: dict[str, Any]) -> str:
+    """What the page held, in counts. Never the text of a row."""
+    main_present = evidence.get("main_present")
+    if main_present is None:
+        return (
+            "WHAT WAS ON THE PAGE IS UNKNOWN: whether it drew a <main> at all "
+            "could not be established, so nothing below rests on anything."
+        )
+    if not main_present:
+        return (
+            "WHAT WAS ON THE PAGE: no <main> element at all, so there was "
+            "nothing to parse. This is a page that did not render, not a "
+            "harvest that failed."
+        )
+
+    chars = evidence.get("main_chars")
+    anchors = evidence.get("anchors_total")
+    rows = evidence.get("rows_matching")
+    scanned = (
+        ""
+        if evidence.get("scan_complete")
+        else (
+            " The anchor scan did NOT finish, so the counts above are a floor "
+            "and not an inventory."
+        )
+    )
+
+    if anchors is None or rows is None:
+        return (
+            "WHAT WAS ON THE PAGE: a <main> carrying %s characters. Its links "
+            "could not be counted, so whether the list drew is unsettled."
+            % chars
+        ) + scanned
+
+    if rows:
+        # Reached when rows ATTACHED but the harvest still produced none, which
+        # is a walk or a parse problem and never a timing one.
+        return (
+            "WHAT WAS ON THE PAGE: a <main> carrying %s characters, %s links, "
+            "and %s of them ARE job-row links. So the rows drew and the "
+            "harvest still returned none -- that is the card walk or the row "
+            "parser, not the page and not the timing." % (chars, anchors, rows)
+        ) + scanned
+
+    return (
+        "WHAT WAS ON THE PAGE: a <main> carrying %s characters and %s links, "
+        "NOT ONE of which is a job-row link (%s). THAT IS THE MEASUREMENT THIS "
+        "REFUSAL EXISTS TO PRODUCE, and it is to be read AGAINST THE READINESS "
+        "VERDICT BELOW rather than on its own -- no threshold on a link count "
+        "has been measured, and one invented here would be a number that "
+        "sounds safe. If the list never resolved, this is a page that did not "
+        "draw and a re-read is the response. If the list DID resolve and this "
+        "still reads zero, re-reading will never help: the row's link shape "
+        "has changed and the anchor has to be re-measured against a fresh "
+        "capture. NOTE what this repo can and cannot check -- every tracker "
+        "capture on disk is either the DRAFT tab with a row in it or the SAVED "
+        "tab with nothing in it, so the shape of a SAVED row has never been "
+        "captured here at all." % (chars, anchors, TRACKER_ROW_LINK_NOTE)
+    ) + scanned
+
+
+#: Named rather than imported so ``shape`` keeps its rule of importing no
+#: sibling module; ``dom.TRACKER_ROW_LINK`` is the live selector and
+#: ``tests/test_tracker_readiness.py`` asserts the two have not drifted.
+TRACKER_ROW_LINK_NOTE = 'main a[href*="/jobs/view/"]'
+
+
+def _tracker_timing_sentence(
+    list_wait: dict[str, Any], settle: dict[str, Any]
+) -> str:
+    """WHEN the read happened, and whether the list had resolved by then."""
+    attached = list_wait.get("attached")
+    waited = list_wait.get("waited_ms")
+    when = _settle_sentence(settle)
+
+    # ANYTHING THAT IS NOT A DEFINITE True OR False IS UNKNOWN, not just None.
+    # The last branch here says "the list drew fine", and a stray value falling
+    # into it would be a confident claim manufactured by a typo.
+    if attached is not True and attached is not False:
+        return (
+            "%s, and THE READINESS CHECK ITSELF DID NOT COMPLETE (%s), so "
+            "nothing here is evidence about LinkedIn -- not that the list "
+            "failed, and not that it drew. Read the tab again. If this "
+            "repeats, the fault is in this server rather than on the page."
+            % (when, list_wait.get("failure"))
+        )
+
+    if attached is False:
+        return (
+            "%s, and THE LIST WAS THEN WAITED FOR AND NEVER RESOLVED (%sms, "
+            "the full bound). That is not a read taken too early -- the wait "
+            "ran its course after the settle, whichever branch it took. Run "
+            "linkedin_search_jobs as the control before concluding anything "
+            "about the session: measured 2026-08-30, it returned full results "
+            "seconds either side of six consecutive failures on this one tab, "
+            "so this surface can fail while the account is entirely healthy. "
+            "And read the other tabs -- linkedin_my_applications and "
+            "linkedin_draft_applications load the SAME page through the SAME "
+            "reader, so a failure on one tab while the others answer is a "
+            "finding about that tab and not about the tracker."
+            % (when, waited)
+        )
+
+    return (
+        "%s, and the list DID resolve (%sms), so the page had drawn by the "
+        "time it was harvested. This is therefore a HARVEST problem rather "
+        "than a timing one, and re-reading will return the same answer."
+        % (when, waited)
+    )
+
+
 # ---------------------------------------------------------------------------
 # One job posting
 # ---------------------------------------------------------------------------
@@ -1177,6 +1318,22 @@ def job_detail_failure_note(
 SETTLE_EARLY = "networkidle_resolved"
 
 
+def _settle_sentence(settle: dict[str, Any]) -> str:
+    """WHEN the navigation stopped waiting, in one clause.
+
+    Factored out when the tracker acquired the same two pieces of evidence the
+    posting page already had. Two callers rendering this clause separately is
+    how one of them ends up quoting a duration the other has stopped
+    reporting -- and both of them exist precisely because a refusal that cannot
+    say when it looked is a refusal nobody can act on.
+    """
+    branch = str(settle.get("branch") or "unrecorded")
+    settled = settle.get("settled_ms")
+    if settled is None:
+        return f"The navigation settle was not recorded (branch {branch!r})"
+    return f"The navigation settled on the {branch!r} branch after {settled}ms"
+
+
 def job_read_timing_note(
     description_wait: dict[str, Any], settle: dict[str, Any]
 ) -> str:
@@ -1196,13 +1353,7 @@ def job_read_timing_note(
     attached = description_wait.get("attached")
     waited = description_wait.get("waited_ms")
     branch = str(settle.get("branch") or "unrecorded")
-    settled = settle.get("settled_ms")
-
-    when = (
-        f"The navigation settled on the {branch!r} branch after {settled}ms"
-        if settled is not None
-        else f"The navigation settle was not recorded (branch {branch!r})"
-    )
+    when = _settle_sentence(settle)
 
     # ANYTHING THAT IS NOT A DEFINITE True OR False IS UNKNOWN, not just None.
     # The only producer sets the three values, but this function's LAST branch
