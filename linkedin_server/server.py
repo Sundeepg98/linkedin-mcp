@@ -30,8 +30,11 @@ file:
   preview, and nothing at all unless the process was started with writes
   deliberately enabled. (This said "Both write tools" while there were four
   of them -- the same carried-count rot as the headline.)
-* ``linkedin_unsave_job`` is registered and refuses: the selector it would
-  need has never been measured. See its docstring.
+* ``linkedin_unsave_job`` is registered and PERFORMABLE since 2026-08-30. It
+  refused for a month because the selector it would need had never been
+  measured; the operator's first save produced that label and a read-only
+  route re-measured it three times. It still refuses from any state it does
+  not recognise. See its docstring.
 
 Two documented exceptions on the READ side, and neither of them crosses that
 line:
@@ -135,9 +138,22 @@ mcp = FastMCP(
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
-        "CONFIRM ON HIS BEHALF. linkedin_unsave_job currently refuses to act "
-        "at all and says why. linkedin_unfollow_company takes the NUMERIC "
+        "CONFIRM ON HIS BEHALF. linkedin_unfollow_company takes the NUMERIC "
         "company id from linkedin_followed_companies, never a name. "
+        "ON UNSAVING, and this paragraph said the OPPOSITE until 2026-08-30 "
+        "-- it read 'linkedin_unsave_job currently refuses to act at all and "
+        "says why.' It refused because the accessible name LinkedIn gives the "
+        "save control on a saved posting had never been observed: he had "
+        "nothing saved to observe it on. He saved a posting that evening, the "
+        "label was measured four times across two independent routes, and it "
+        "is now in the table. So the anchor exists and the click is real. "
+        "TWO THINGS TO CARRY INTO ANY ANSWER. FIRST, it is still gated "
+        "exactly like the others -- no token, no action -- and an unsave is "
+        "not free to him: it drops a posting he chose to keep, and this "
+        "server cannot tell him what was in the list before. SECOND, it can "
+        "still refuse, and the refusal is now narrow rather than total: it "
+        "acts only from a state it RECOGNISES, so a posting whose control it "
+        "cannot read is refused rather than clicked. "
         "ON APPLYING, because it is the thing most often asked for and "
         "because this paragraph said the OPPOSITE until 2026-08-25: this "
         "server CAN now submit an application, to a LinkedIn-hosted posting, "
@@ -1123,10 +1139,15 @@ async def _read_save_control_state(page: Any) -> dict[str, Any]:
     """Is THIS posting saved, read off the control on the page already open.
 
     The exact counterpart of the follow reading beside it, and three-valued for
-    the same reason: "we could not tell" has to be one of the three answers,
-    because on this control it is the COMMON one. ``shape.SAVE_LABELS`` holds a
-    single measured row -- the OFF state -- so a posting in any other state
-    comes back ``unknown`` rather than being guessed at.
+    the same reason: "we could not tell" has to be one of the three answers.
+
+    IT USED TO BE THE COMMON ANSWER AND IS NOT ANY MORE. ``shape.SAVE_LABELS``
+    held one row -- the OFF state -- so every saved posting came back
+    ``unknown`` by construction. This function is why it no longer does: the
+    three read-only observations that let the ON row be written were taken
+    through it. ``unknown`` now means what it says, a control this reader
+    cannot name, and is worth a human's attention rather than being the
+    expected reading.
 
     WHY THIS IS NOT A DUPLICATE OF ``linkedin_saved_jobs``. That tool reads the
     Saved TAB, a second page, and reconciles a list against LinkedIn's own
@@ -1178,13 +1199,16 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
 
     save_state says whether the posting is already in your saved list, read off
     the control on this same page rather than off the Saved tab, so it costs no
-    extra page load. It does not change that list in either direction. It is
-    three-valued, and 'unknown' is a real answer you will meet: only the
-    not-yet-bookmarked label has ever been measured on this account, so a
-    posting in any other state comes back unknown WITH the accessible names
-    that were actually on the page, under 'observed', rather than being guessed
-    at. Those names are REPORTED and nothing more -- no state is inferred from
-    one, and no click can be aimed by one.
+    extra page load. It does not change that list in either direction. Both
+    states LinkedIn draws are now measured, so a posting normally comes back
+    as one of them.
+
+    'unknown' remains a real third answer and is not a synonym for no. It means
+    the page drew no control this reader recognises -- most often that the page
+    had not finished drawing, sometimes that LinkedIn renamed something. In
+    that case you also get 'observed': the accessible names that were actually
+    on the page. Those are REPORTED and nothing more -- no state is inferred
+    from one, and no click can be aimed by one.
 
     A field the page did not carry comes back null rather than blank. If the
     page did not render the posting at all the call FAILS instead of
@@ -1268,21 +1292,23 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             # very page. Added 2026-08-30, and the reason it did not exist
             # before is worth stating because it is the reason it exists now.
             #
-            # THIS IS THE ONLY READ-ONLY ROUTE TO THE SAVE CONTROL'S LABEL.
-            # shape.SAVE_LABELS holds one row, the OFF state, because the ON
-            # state could not be observed: nothing was saved on the account.
-            # That made unsave_job's anchor unobtainable and the situation
-            # circular. It stopped being circular on 2026-08-30, when the
-            # operator performed the first save -- but the only instrument that
-            # could see the ON label lived inside writes.perform, behind a
-            # confirm token, so RE-MEASURING it cost another supervised write.
-            # A toggle whose ON label can only be read by toggling it is a
-            # measurement nobody should have to pay twice for.
+            # THIS IS THE ONLY READ-ONLY ROUTE TO THE SAVE CONTROL'S LABEL,
+            # and it is the reason shape.SAVE_LABELS has two rows instead of
+            # one. The ON label could not be observed while nothing was saved
+            # on the account; the operator's first save produced it, but the
+            # only instrument that could SEE it lived inside writes.perform,
+            # behind a confirm token -- so re-measuring cost another supervised
+            # write. A toggle whose ON label can only be read by toggling it is
+            # a measurement nobody should have to pay twice for. This route
+            # took the other three readings, and the row was written from all
+            # four.
             #
-            # It changes no vocabulary. dom.save_control_selector still refuses
-            # every label outside dom.SAVE_LABELS_SEEN, so a name REPORTED here
-            # cannot become a click by having been reported -- the same
-            # property the refusal diagnostic was built under.
+            # IT STILL ADDS NOTHING TO THE VOCABULARY. The sweep below reports
+            # names; dom.save_control_selector accepts only what is in
+            # dom.SAVE_LABELS_SEEN, so a name REPORTED here cannot become a
+            # click by having been reported. That property is what made it safe
+            # to publish the label before anybody had decided what it meant,
+            # and it is unchanged by the label since being written down.
             out["save_state"] = await _read_save_control_state(page)
 
             # HOW THIS POSTING IS APPLIED TO, off the same open page and at no
@@ -2070,32 +2096,45 @@ async def linkedin_save_job(job_id: str, confirm_token: str = "") -> dict[str, A
 
 @mcp.tool()
 async def linkedin_unsave_job(job_id: str, confirm_token: str = "") -> dict[str, Any]:
-    """Remove one job posting from your saved list. Built, gated, and refusing.
+    """Remove one job posting from your saved list. Two calls, and a real one.
 
-    Same two-step shape as ``linkedin_save_job`` and the same gates, with ONE
-    honest difference that this docstring will not bury: THIS TOOL CANNOT
-    PERFORM ANYTHING TODAY, and it is not because the code is missing.
+    Same two-step shape as ``linkedin_save_job`` and the same gates: no
+    confirm_token, no action -- you get a block to read and a token that works
+    once, within two minutes.
 
-    LinkedIn labels the save control by its accessible name, and the name it
-    wears when a posting IS saved has never been observed on this account --
-    there has been nothing saved on it to observe. Every capture this repo
-    holds shows the unsaved state. So the selector an unsave would click is
-    unknown, and this server will not guess one: "Saved" and "Unsave the job"
-    are both plausible spellings and it has seen neither.
+    THIS DOCSTRING SAID THE OPPOSITE UNTIL 2026-08-30, and the reversal is
+    worth stating rather than quietly editing away. It read "THIS TOOL CANNOT
+    PERFORM ANYTHING TODAY", because LinkedIn names the save control by what
+    it will DO, and the name it wears on a saved posting had never been
+    observed -- there was nothing saved on this account to observe it on. That
+    was true, and it was circular: the only way to see the label was to save
+    something. A save was performed, the label was measured four times across
+    two independent routes, and it is now in the table. The anchor is real.
 
-    THE FIX IS ONE MEASURED LINE, and the first supervised save produces it --
-    ``linkedin_save_job`` reads back the label the control changes into and
-    reports it. Until that label is written down, this refuses with that
-    explanation rather than clicking something it hopes is the right button.
+    IT STILL REFUSES, and the refusal is now NARROW rather than total: it acts
+    only from a state it recognises. A posting whose control it cannot read,
+    or reads under a name nobody has measured, is refused rather than clicked.
+    On a toggle that is the difference that matters, because acting from the
+    wrong state performs the opposite action -- an unsave fired on an unsaved
+    posting saves it.
 
-    A preview may also be unrenderable for a second and unrelated reason: an
-    unsave is only valid on a posting that is currently saved, so with an empty
-    saved list there is nothing to preview it against. The preview says so.
+    A SECOND BLOCKER IS LIVE AS OF 2026-08-30 AND IT IS NOT THIS TOOL'S FAULT.
+    The preview takes its DIRECTION from your Saved tab, and that list cannot
+    currently be read: the rows draw, and the harvest returns none of them.
+    Until that is fixed the preview refuses with "the current state of this
+    target came back 'unknown'" and mints no token. So this tool is capable and
+    not yet reachable end to end. ``linkedin_saved_jobs`` fails the same way
+    and prints what it saw.
+
+    WHAT AN UNSAVE COSTS YOU, since the gate will ask. It drops a posting you
+    chose to keep, and this server has no record of what your list held before
+    -- so "undo" means finding the posting again and saving it, which is only
+    easy while you still know which one it was.
 
     Args:
         job_id: the numeric LinkedIn job id, as it appears in /jobs/view/<id>.
-        confirm_token: leave empty to preview. A token is accepted but the
-            action behind it will refuse until its anchor has been measured.
+        confirm_token: leave empty to preview. A token from that preview, used
+            once within two minutes, performs the unsave.
     """
     try:
         return await _write_tool("unsave_job", job_id, confirm_token)
@@ -2385,8 +2424,11 @@ async def linkedin_react_to_item(
     would move.
 
     WHAT IS NOT: the ON-state label has never been seen, because nothing on
-    either surface had been reacted to -- so the undo has no anchor, which is
-    precisely where ``linkedin_unsave_job`` has been since August. And the
+    either surface had been reacted to -- so the undo has no anchor. That is
+    precisely where ``linkedin_unsave_job`` sat from August until 2026-08-30,
+    and how it got out is the template: one supervised write produced the
+    label, and a read-only route was built so the re-measurement cost nothing.
+    Neither has been done here. And the
     target cannot be aimed: the item permalink is on the forbidden-url list,
     and several items render at once, so choosing one from the feed would be
     choosing by position.
@@ -2757,10 +2799,15 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "or scheduled write structurally impossible. Writes are off "
                 f"per process unless {writes.WRITES_FLAG} is set; they are "
                 f"currently {'ON' if writes.writes_enabled() else 'OFF'}. "
-                "unsave_job is sanctioned and gated but REFUSES to act: the "
-                "accessible name LinkedIn gives the save control on a saved "
-                "posting has never been observed on this account, and this "
-                "server will not guess a selector. unfollow_company is "
+                "unsave_job became performable on 2026-08-30 and this field "
+                "said it REFUSED to act until that day: the accessible name "
+                "LinkedIn gives the save control on a saved posting had never "
+                "been observed on this account. The operator's first save "
+                "produced it, three read-only re-measurements agreed, and it "
+                "is in the table. It still refuses from any state it does not "
+                "recognise, and its preview is separately blocked while the "
+                "Saved tab cannot be read -- direction comes from that list. "
+                "unfollow_company is "
                 "addressed by NUMERIC COMPANY ID, not by name, and refuses "
                 "when the Page is not among the rows LinkedIn rendered -- that "
                 "surface shows part of the list and offers no way to page "

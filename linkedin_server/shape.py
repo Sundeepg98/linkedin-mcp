@@ -1490,27 +1490,50 @@ def follow_state(label: Optional[str], *, count: int) -> dict[str, Any]:
 
 #: The accessible name of the job-posting SAVE control in each state it has
 #: been SEEN in, and what each one means. Deliberately shaped like
-#: :data:`FOLLOW_LABELS` above, and deliberately HALF THE SIZE.
+#: :data:`FOLLOW_LABELS` above, and -- since 2026-08-30 -- the same size.
 #:
-#: ONE ENTRY, and the missing one is the honest centre of this whole feature.
-#: Every capture this repo holds -- four postings, both hydration states, taken
-#: on two different days -- renders ``aria-label="Save the job"``, the OFF
-#: state. The ON state has never been observed and CANNOT be observed by
-#: reading: he has nothing saved on the account, so there is no posting
-#: anywhere that would draw it. The follow pair could be measured because a
-#: company he already follows exists to load; the save pair has no equivalent.
+#: BOTH ROWS ARE MEASURED, and the second one took a month to get, which is why
+#: its provenance is written here rather than summarised. Until 2026-08-30 this
+#: table held one entry and said so at length: the OFF label was on every
+#: capture in the repo, and the ON label "has never been observed and CANNOT be
+#: observed by reading" because nothing was saved on the account to draw it.
+#: That was true, and it was circular -- the state could only be reached by
+#: performing the write whose inverse it gated.
 #:
-#: WHAT THAT COSTS, stated where the gap is rather than in a docstring
-#: somewhere else: ``writes.perform`` anchors on the label for the state its
-#: action is valid FROM, so ``save_job`` has an anchor and ``unsave_job`` does
-#: not, and unsave refuses until this table gains its second row. THE FIRST
-#: SUPERVISED SAVE IS THE MEASUREMENT -- ``perform`` re-reads the control after
-#: it clicks and reports what it now says, precisely so that observation can be
-#: written here. It is one line, and it is a line that must be MEASURED and not
-#: guessed: ``"Saved"`` and ``"Unsave the job"`` are both plausible and this
-#: server has seen neither.
+#: WHAT BROKE THE CIRCLE. The operator authorised the first save in this
+#: server's life on 2026-08-30, on job 4423880462, and ``perform``'s post-click
+#: re-read reported the control's new name. That is ONE reading, taken by the
+#: write path, and one reading is not what this row rests on. It rests on FOUR
+#: observations across TWO independent routes:
+#:
+#:   1. ~18:30  ``writes.perform`` post-click sweep, on the redeemed save
+#:   2. 21:03   ``linkedin_job_detail`` -- a pure READ, no token
+#:   3. ~21:04  the same read, repeated
+#:   4. 21:36   the same read again, on a page reporting 32 buttons drawn
+#:
+#: Readings 2-4 come from ``server._read_save_control_state``, which exists
+#: precisely so this label never has to be bought with a second write. All four
+#: agree, and the read repeats on a fully drawn page rather than a racing one.
+#:
+#: WHY THIS LABEL AND NOT THE OTHER PLAUSIBLE ONE. The earlier comment named
+#: ``"Saved"`` and ``"Unsave the job"`` as equally plausible. They are not
+#: equally SAFE, and the difference is the reason this row could be written the
+#: day it was measured: the OFF row establishes that this control is named for
+#: the ACTION it performs, not for the state it is in. ``"Unsave the job"``
+#: obeys that convention and names its own inverse. ``"Saved"`` would not have
+#: -- it reads equally as a state and as an imperative, and a label mapped to
+#: the wrong state points a click at the OPPOSITE action. Had the measurement
+#: come back ``"Saved"``, this row would still be missing.
+#:
+#: WIDEN THIS TABLE AND ``dom.SAVE_LABELS_SEEN`` TOGETHER, always. The selector
+#: is built from the second and the meaning from the first, so widening one
+#: alone makes ``save_state``'s unrecognised-label branch reachable with a
+#: control the reader can see and cannot name.
+#: ``test_the_selector_and_the_vocabulary_cannot_drift_apart`` catches it, and
+#: it is the one test in this suite that was written FOR this edit.
 SAVE_LABELS: dict[str, str] = {
     "Save the job": "not_saved",
+    "Unsave the job": "saved",
 }
 
 #: Same contract as :data:`FOLLOW_UNKNOWN`: "could not tell" is an answer.
@@ -1520,12 +1543,18 @@ SAVE_UNKNOWN = "unknown"
 def save_state(label: Optional[str], *, count: int) -> dict[str, Any]:
     """Turn what the SAVE control said into a state, or an honest refusal.
 
-    Read this beside :func:`follow_state`, because the asymmetry between them
-    is a measurement rather than an oversight. Follow knows both of its labels,
-    so an unrecognised one means LinkedIn changed something. Save knows ONE, so
-    an unrecognised label is ambiguous in a way follow's never is -- it could
-    equally be the ON state finally being seen for the first time. This says
-    so instead of collapsing the two into one word.
+    Read this beside :func:`follow_state`. The two were ASYMMETRIC until
+    2026-08-30 and are not any longer: save knew one of its two labels, so an
+    unrecognised one could equally have been LinkedIn renaming the control or
+    the ON state being seen for the first time, and this function said so
+    rather than collapsing the two. Both labels are now measured, so an
+    unrecognised label here means what it means on follow -- something changed
+    on LinkedIn's side.
+
+    WHAT THAT DOES NOT COLLAPSE. ``count == 0`` is still three-ways ambiguous
+    and still refuses, because a page that has not drawn its controls matches
+    nothing whichever labels are known. Widening the vocabulary removed one of
+    the readings that branch had to hold open; it did not remove the branch.
     """
     if count == 0:
         return {
@@ -1533,10 +1562,11 @@ def save_state(label: Optional[str], *, count: int) -> dict[str, Any]:
             "why": (
                 "no save control rendered in a state this reader recognises. "
                 "That is NOT evidence the posting is unsaved, and it is not "
-                "evidence it is saved either: with only the OFF label "
-                "measured, 'the page has not hydrated' and 'the control is in "
-                "the one state nobody has photographed' look identical from "
-                "here."
+                "evidence it is saved either: BOTH labels are measured now, so "
+                "matching neither means either the page has not drawn its "
+                "controls, or LinkedIn has renamed one. Those want opposite "
+                "responses -- re-read, or re-measure the selector -- and this "
+                "reading cannot tell them apart on its own."
             ),
         }
     if count > 1:
@@ -1553,12 +1583,14 @@ def save_state(label: Optional[str], *, count: int) -> dict[str, Any]:
         return {
             "state": SAVE_UNKNOWN,
             "why": (
-                f"the control is labelled {label!r}, which is not the one "
-                f"measured state {sorted(SAVE_LABELS)}. This is the reading "
-                "that most deserves a human: it is either LinkedIn relabelling "
-                "the control, or it is the SAVED state being rendered for the "
-                "first time on this account. Those want opposite responses, so "
-                "this reader will not pick one."
+                f"the control is labelled {label!r}, which is not one of the "
+                f"measured states {sorted(SAVE_LABELS)}. Both of those were "
+                "measured on this account, so this is no longer the ambiguous "
+                "reading it was until 2026-08-30 -- it is not a state waiting "
+                "to be photographed for the first time. LINKEDIN HAS RENAMED "
+                "THE CONTROL, or this is not the control. Either way the fix "
+                "is to re-measure the selector against a fresh capture, and "
+                "NOT to add this name to the table because it turned up here."
             ),
         }
     return {"state": known, "why": f"the control is labelled {label!r}"}

@@ -103,6 +103,34 @@ _TRACKER_RAW = markup("jobs_tracker_row")
 SAVED_LIST_OF_ONE = _TRACKER_RAW.replace("Saved &#183; 0", "Saved &#183; 1")
 SAVED_LIST_PARTIAL = _TRACKER_RAW.replace("Saved &#183; 0", "Saved &#183; 9")
 
+#: DERIVED, and for the same reason the tracker markup above is: no capture in
+#: this repo shows a SAVED posting, because every one predates the operator's
+#: first save on 2026-08-30. The label itself is NOT derived -- it was measured
+#: four times that evening, across two independent routes -- but a page wearing
+#: it has to be built here.
+#:
+#: THE ASSERTION IS NOT DECORATION. A ``replace`` whose anchor has drifted is a
+#: silent no-op, and a toggle-hazard test running against an UNSAVED posting
+#: would pass while proving nothing at all.
+_SAVE_ATTR = 'aria-label="Save the job"'
+SAVED_POSTING = markup("job_detail").replace(
+    _SAVE_ATTR, 'aria-label="Unsave the job"', 1
+)
+assert SAVED_POSTING != markup("job_detail"), (
+    "the saved-posting derivation anchored on "
+    f"{_SAVE_ATTR!r} and changed nothing, so every toggle-direction test below "
+    "would run against an UNSAVED page. Repoint the anchor; do NOT delete this."
+)
+
+#: DERIVED: the control renamed off the measured vocabulary entirely. This is
+#: what an unrecognised state looks like now that BOTH real states are known,
+#: and it is the page that separates "unsave refuses always" -- which it did
+#: until 2026-08-30 -- from "unsave refuses on a state it cannot read".
+RENAMED_POSTING = markup("job_detail").replace(
+    _SAVE_ATTR, 'aria-label="Bookmark this job"', 1
+)
+assert RENAMED_POSTING != markup("job_detail")
+
 
 class FixtureNavigator:
     """Serves frozen captures where LinkedIn would be, and RECORDS the asks.
@@ -134,7 +162,13 @@ def _pages(
 ) -> dict[str, str]:
     out: dict[str, str] = {}
     if posting is not None:
-        out[f"https://www.linkedin.com/jobs/view/{target}/"] = markup(posting)
+        # RAW MARKUP IS ACCEPTED HERE, exactly as it already is for ``saved``
+        # and ``followed``, and for the same reason: no fixture in this repo
+        # shows a SAVED posting. Every capture predates the operator's first
+        # save on 2026-08-30, so the ON state has to be DERIVED.
+        out[f"https://www.linkedin.com/jobs/view/{target}/"] = (
+            posting if posting.lstrip().startswith("<") else markup(posting)
+        )
     if saved is not None:
         out[writes.SAVED_LIST_URL] = (
             saved if saved.lstrip().startswith("<") else markup(saved)
@@ -1604,60 +1638,250 @@ async def test_presence_in_a_partial_list_still_confirms_the_save(
     assert block["verification"]["observed_state"] == "saved"
 
 
-async def test_unsave_refuses_because_its_anchor_has_never_been_measured(
-    writes_on, browser_page
-):
-    """THE HONEST GAP, asserted so it cannot be quietly closed with a guess.
+def test_unsave_has_its_anchor_now_and_the_row_is_what_supplied_it():
+    """THE SUCCESSOR to ``test_unsave_refuses_because_its_anchor_has_never_been_measured``.
 
-    ``unsave_job`` is built on the same path as save and gated the same way. It
-    refuses at exactly one point: the accessible name the save control wears on
-    a SAVED posting has never been observed, because there has never been a
-    saved posting on this account to observe it on.
+    That test asserted the honest gap so it could not be quietly closed with a
+    guess: ``anchor_label_for`` returned None for unsave, and ``perform``
+    refused with a message naming NEVER OBSERVED and THE SUPERVISED SAVE IS THE
+    MEASUREMENT. It was correct for as long as the label rested on nothing, and
+    it is retired here rather than deleted, because a suite that still pinned
+    that refusal would be pinning a claim the evidence no longer supports.
 
-    The refusal must name the reason. A generic "not implemented" would invite
-    somebody to implement it by choosing a plausible selector, which is the one
-    thing that must not happen.
-    """
-    spec = spec_for_action("unsave_job")
-    assert writes.anchor_label_for(spec) is None
+    WHAT REPLACED THE GAP. The operator saved a posting on 2026-08-30;
+    ``perform``'s post-click sweep reported ``"Unsave the job"``; three
+    read-only readings through ``linkedin_job_detail`` agreed. The row went in.
+    No code changed -- which is the property the old test's sibling was
+    asserting all along.
 
-    grant = writes.WriteGrant(
-        action="unsave_job",
-        target=SAVED_JOB,
-        token="x",
-        minted_at=time.monotonic(),
-        consumed=True,
-        observation=await _observe(
-            browser_page, "unsave_job", target=SAVED_JOB, saved=SAVED_LIST_CONTAINING
-        ),
-    )
-    with pytest.raises(WriteAttemptError) as excinfo:
-        await writes.perform(object(), object(), grant)
-    message = str(excinfo.value)
-    assert "NEVER" in message and "OBSERVED" in message
-    assert "SUPERVISED SAVE IS THE MEASUREMENT" in message
+    SHOWN FAILING by removing the row from ``shape.SAVE_LABELS``::
 
-
-def test_the_anchor_table_is_what_gates_unsave_and_one_row_lifts_it():
-    """The gap is one row of a table, not a missing code path.
-
-    Proven by adding the row: with a saved-state label present,
-    ``anchor_label_for`` returns it and the refusal above has nothing to fire
-    on. Nothing is monkeypatched into the module -- the lookup is run against a
-    copy -- so this asserts the MECHANISM without loosening the real table.
+        AssertionError: assert None == 'Unsave the job'
     """
     spec = spec_for_action("unsave_job")
     assert spec.from_state == "saved"
-    assert writes.anchor_label_for(spec) is None
+    assert writes.anchor_label_for(spec) == "Unsave the job"
+    # Its measured sibling is unchanged, so this is a table that GAINED a row
+    # rather than one that was rewritten.
+    assert writes.anchor_label_for(spec_for_action("save_job")) == "Save the job"
 
-    pretend = dict(shape.SAVE_LABELS)
-    pretend["Saved"] = "saved"
+
+#: DERIVED: the Saved tab drawing its strip and NOT its list -- LinkedIn's own
+#: count says 1, no row is present, and no empty state is either. This is the
+#: shape the live Saved tab was measured in on 2026-08-30, reproduced so the
+#: consequence for the write gate can be asserted offline.
+_TRACKER_EMPTY_RAW = markup("jobs_tracker_empty")
+SAVED_LIST_UNREADABLE = _TRACKER_EMPTY_RAW.replace(
+    ">No jobs here</h2>", "></h2>", 1
+).replace("Saved &#183; 0", "Saved &#183; 1")
+assert SAVED_LIST_UNREADABLE != _TRACKER_EMPTY_RAW
+
+
+async def test_unsave_cannot_be_PREVIEWED_while_the_saved_list_cannot_be_read(
+    writes_on, browser_page
+):
+    """THE BLOCKER THAT OUTLIVED THE ANCHOR, and it is not in this module.
+
+    ``unsave_job`` acquired its anchor on 2026-08-30 and is performable. It is
+    still not reachable end to end, and the reason is worth pinning because it
+    is easy to mistake for the old refusal: the preview takes its DIRECTION
+    from the Saved tab, and that list currently cannot be read -- measured live
+    the same day, its rows draw and the harvest returns none of them.
+
+    ``_direction`` refuses on an ``unknown`` origin, before any token is
+    minted. So the gate stops one step EARLIER than the anchor gate it used to
+    stop at, and a reader who sees this refusal should go and fix the tracker
+    read rather than go looking for a label.
+
+    SHOWN FAILING by letting ``_direction`` proceed on ``unknown``::
+
+        Failed: DID NOT RAISE WriteAttemptError
+        -- a confirm gate was rendered for a toggle whose current state nobody
+        had established
+    """
+    with pytest.raises(WriteAttemptError) as caught:
+        await _gate(
+            browser_page,
+            "unsave_job",
+            target=SAVED_JOB,
+            saved=SAVED_LIST_UNREADABLE,
+        )
+
+    message = str(caught.value)
+    assert "came back 'unknown'" in message, message
+    assert "guessing" in message, message
+    # It must name the SURFACE that failed, so the reader fixes the right one.
+    assert "Saved tab" in message, message
+    # And NO TOKEN MAY EXIST. _direction runs before mint, so a refusal here
+    # must leave nothing redeemable behind -- a gate that refused and minted
+    # anyway would hand out a token for an action it had just declined.
+    assert writes._GRANTS == {}
+    assert writes._OBSERVED == {}
+
+
+async def test_save_refuses_on_a_posting_that_is_ALREADY_saved(
+    writes_on, browser_page
+):
+    """THE TOGGLE HAZARD, and it became reachable for the first time on
+    2026-08-30.
+
+    THIS IS THE MOST IMPORTANT TEST IN THIS FILE and it could not exist before
+    the ON label was measured. On a toggle, performing an action from the wrong
+    state performs its OPPOSITE: a save confirmed on an already-saved posting
+    UNSAVES it. Gate 5 is what stops that, by re-reading the control and
+    refusing when what it reads is not the state the action is valid from.
+
+    Until the ON label was in the table, that gate could not be tested against
+    a real wrong state -- a saved posting read as ``unknown``, so the gate
+    refused for want of a reading rather than because of one. It now refuses
+    on a MEASURED state, which is a different and much stronger claim, and it
+    is asserted rather than assumed to follow by symmetry.
+
+    SHOWN FAILING by dropping the state comparison in ``perform``, which is the
+    edit that makes the whole design a formality::
+
+        Failed: DID NOT RAISE WriteAttemptError
+        -- a save was performed on an already-saved posting, which unsaves it
+    """
+    grant = await _granted(browser_page, "save_job", target=SAVED_JOB)
+
+    with pytest.raises(WriteAttemptError) as caught:
+        # DERIVED: the world changed between the preview and the click -- the
+        # posting is now saved. That is exactly the race gate 5 exists for.
+        await _perform(
+            browser_page, grant, posting=SAVED_POSTING, saved=SAVED_LIST_CONTAINING
+        )
+
+    message = str(caught.value)
+    assert "refusing to click" in message, message
+    assert "'save_job' is valid only from 'not_saved'" in message, message
+    # And it must name what it actually READ, not merely that it disagreed.
+    assert "'saved'" in message, message
+
+
+async def test_unsave_refuses_from_a_state_it_cannot_read(writes_on, browser_page):
+    """The refusal NARROWED on 2026-08-30; it did not disappear.
+
+    ``unsave_job`` refused unconditionally for a month, for want of an anchor.
+    It now has one, so the interesting question is whether it still refuses
+    where it should -- on a control wearing a name nobody has measured. A tool
+    that went from "always refuses" to "always acts" would have traded one
+    unsafe absolute for a worse one.
+
+    SHOWN FAILING by letting ``_live_control`` fall back to the anchor when the
+    live read comes back ``unknown``::
+
+        Failed: DID NOT RAISE WriteAttemptError
+    """
+    grant = await _granted(
+        browser_page, "unsave_job", target=SAVED_JOB, saved=SAVED_LIST_CONTAINING
+    )
+
+    with pytest.raises(WriteAttemptError) as caught:
+        await _perform(
+            browser_page,
+            grant,
+            posting=RENAMED_POSTING,
+            saved=SAVED_LIST_CONTAINING,
+        )
+
+    message = str(caught.value)
+    assert "refusing to click" in message, message
+    assert "'unsave_job' is valid only from 'saved'" in message, message
+    assert "unknown" in message, message
+    # And the diagnostic must still report what the page actually drew, so the
+    # reader is not left guessing at the new name.
+    assert "WHAT WAS ON THE PAGE" in message, message
+
+
+async def test_the_anchor_refusal_is_reachable_and_says_what_it_now_means(
+    writes_on, browser_page, monkeypatch
+):
+    """The guard no shipped action can reach, FIRED -- not asserted about.
+
+    ``perform``'s save-family ``anchor is None`` branch became structurally
+    unreachable on 2026-08-30: both save-family actions resolve an anchor, and
+    every other performable action returns from its own branch above the table
+    lookup. This repo's rule is that a check which cannot fail certifies
+    nothing, so the guard-versus-delete call was made deliberately -- it stays,
+    and it is fired here.
+
+    WHAT IT NOW CATCHES is a REGRESSION rather than a missing measurement, so
+    that is what this reproduces: the grant is minted while the table is
+    intact, and the row is then removed underneath it. An edit to
+    ``shape.SAVE_LABELS``, or a bad merge, looks exactly like this.
+
+    THE REFUSAL MUST NOT SAY THE OLD THING. Its previous text sent the reader
+    off to photograph a label nobody had seen. That label has been seen, so a
+    reader meeting this today has a broken table rather than a missing
+    measurement, and the message has to point at the right one.
+
+    SHOWN FAILING by deleting the branch::
+
+        Failed: DID NOT RAISE WriteAttemptError
+    """
+    grant = await _granted(
+        browser_page, "unsave_job", target=SAVED_JOB, saved=SAVED_LIST_CONTAINING
+    )
+
+    # THE REGRESSION, applied AFTER the grant exists: the vocabulary loses the
+    # row unsave anchors on. anchor_label_for reads the table live, so this is
+    # the same state a bad edit would produce.
+    monkeypatch.setattr(shape, "SAVE_LABELS", {"Save the job": "not_saved"})
+    assert writes.anchor_label_for(spec_for_action("unsave_job")) is None
+
+    with pytest.raises(WriteAttemptError) as caught:
+        await _perform(
+            browser_page,
+            grant,
+            posting=SAVED_POSTING,
+            saved=SAVED_LIST_CONTAINING,
+        )
+
+    message = str(caught.value)
+    assert "has no measured anchor" in message, message
+    assert "maps no accessible name to that state" in message, message
+    assert "regression" in message, message
+    # The retired sentence must not come back: it told the reader to go and
+    # photograph a label that has been photographed.
+    assert "NEVER BEEN OBSERVED" not in message, message
+    assert "SUPERVISED SAVE IS THE MEASUREMENT" not in message, message
+
+
+def test_the_anchor_table_is_still_the_only_thing_gating_the_save_family():
+    """The mechanism the old gap proved by ABSENCE, now proved by presence.
+
+    Its predecessor added a pretend row to a COPY of the table and showed the
+    lookup would resolve. The real row now exists, so the same claim is made
+    the other way round: take the row away and the anchor goes with it, with no
+    code path involved either time.
+
+    SHOWN FAILING by hardcoding the anchor in ``anchor_label_for`` instead of
+    reading it out of the table::
+
+        AssertionError: 'Unsave the job' is not None -- the anchor survived
+        the row being removed, so it is not coming from the table
+    """
+    spec = spec_for_action("unsave_job")
+
+    # Run the real lookup against a table with the row taken out. Nothing is
+    # monkeypatched into the module: the lookup is re-derived here exactly as
+    # anchor_label_for derives it, so the real table stays untouched.
+    without = {
+        label: state
+        for label, state in shape.SAVE_LABELS.items()
+        if state != spec.from_state
+    }
     resolved = [
-        label for label, state in pretend.items() if state == spec.from_state
+        label for label, state in without.items() if state == spec.from_state
     ]
-    assert resolved == ["Saved"]
-    # And the real table is untouched by that experiment.
-    assert set(shape.SAVE_LABELS) == {"Save the job"}
+    assert resolved == []
+
+    # And the real table still holds exactly the two measured rows.
+    assert shape.SAVE_LABELS == {
+        "Save the job": "not_saved",
+        "Unsave the job": "saved",
+    }
 
 
 async def test_follow_ships_and_the_aiming_problem_ships_with_it(writes_on):
@@ -2171,35 +2395,56 @@ def test_that_structural_check_would_notice_the_deletion():
 
 
 @pytest.mark.parametrize(
-    "label", ["Saved", "Unsave the job", "Remove from saved", "", "Save"]
+    "label", ["Saved", "Remove from saved", "", "Save", "Unsave", "unsave the job"]
 )
 def test_an_unrecognised_save_label_is_never_guessed_at(label):
     """MUTANT 18, and its diagnosis is the more useful half.
 
     Making ``save_state`` return ``not_saved`` for a label it has never seen
-    left the suite green -- and the reason is that the branch is currently
-    UNREACHABLE through ``read_save_control``. ``dom.SAVE_CONTROL`` matches only
-    the one known label, so an unknown one produces count 0 and the answer
-    comes from the count branch instead. The label branch is dead code today.
+    left the suite green -- because the branch was UNREACHABLE through
+    ``read_save_control``: ``dom.SAVE_CONTROL`` matched only the one known
+    label, so an unknown one produced count 0 and the answer came from the
+    count branch. It was tested directly rather than waiting for the day
+    somebody was mid-way through adding the second row.
 
-    It stops being dead the moment ``SAVE_LABELS`` gains its second row, which
-    is the whole plan for unsave -- so it is tested directly now rather than
-    when somebody is mid-way through adding that row. ``"Save"`` is on the list
-    deliberately: it is one character from the real label and must still not be
+    THAT DAY CAME, 2026-08-30, and the branch is still unreachable -- because
+    both tables were widened together, which is what
+    ``test_the_selector_and_the_vocabulary_cannot_drift_apart`` exists to
+    enforce. It becomes reachable if and only if one table is widened and the
+    other is not, which is exactly the accident worth having a live test for.
+
+    ``"Unsave the job"`` LEFT this list on that date, because it is now
+    measured; four labels one edit away from it took its place. ``"Save"`` and
+    ``"Unsave"`` are the sharp ones -- each is a prefix of a real label -- and
+    ``"unsave the job"`` differs from a real label only in case. None may be
     guessed at.
     """
     verdict = shape.save_state(label, count=1)
     assert verdict["state"] == shape.SAVE_UNKNOWN, (label, verdict)
-    assert "not " + "the one measured state" not in verdict["why"] or True
-    # The reason must name the ambiguity that makes this different from follow.
-    assert "SAVED state being rendered for the first time" in verdict["why"]
+    # The reason must send the reader to re-measure the selector, and must NOT
+    # invite them to add whatever name turned up to the table.
+    assert "LINKEDIN HAS RENAMED" in verdict["why"], verdict
+    assert "re-measure the selector" in verdict["why"], verdict
 
 
-def test_the_one_recognised_label_IS_recognised():
-    """THE CONTROL for the five refusals above, which otherwise pass on a
-    function that returns ``unknown`` for everything."""
-    verdict = shape.save_state("Save the job", count=1)
-    assert verdict["state"] == "not_saved"
+@pytest.mark.parametrize(
+    "label,expected", [("Save the job", "not_saved"), ("Unsave the job", "saved")]
+)
+def test_both_measured_labels_ARE_recognised(label, expected):
+    """THE CONTROL for the refusals above, which otherwise pass on a function
+    that returns ``unknown`` for everything.
+
+    Both rows since 2026-08-30. The predecessor asserted one, and asserting
+    only one now would let the new row be silently dropped while this file
+    stayed green.
+
+    SHOWN FAILING by removing either row from ``shape.SAVE_LABELS``::
+
+        AssertionError: assert 'unknown' == 'saved'
+    """
+    verdict = shape.save_state(label, count=1)
+    assert verdict["state"] == expected, verdict
+    assert repr(label) in verdict["why"], verdict
 
 
 def test_the_selector_and_the_vocabulary_cannot_drift_apart():
@@ -2615,9 +2860,19 @@ def test_the_toggle_problem_is_solved_and_the_solution_is_recorded():
     labels rather than the blocker, and the direction rule is enforced in
     ``_direction`` rather than described in prose.
 
-    The one honestly unmeasured half stays named: the SAVE control's ON state
-    has never been seen, because there is no saved posting on the account to
-    see it on, so save takes its direction from the list read instead.
+    THE LAST UNMEASURED HALF CLOSED ON 2026-08-30, and it closed the OTHER way
+    -- which is why this docstring now argues with itself and should. The SAVE
+    control's ON state could not be reached by a read: there was no saved
+    posting on the account to read it off, so no page load anybody had failed
+    to perform would have produced it. It took the write. That is the one case
+    where "measuring a toggle's ON state is a READ" did not hold, and the
+    record says so rather than smoothing it.
+
+    AND ONE READING FROM THE WRITE PATH WAS NOT ENOUGH TO ACT ON. A label
+    reached by performing its own inverse can only be re-measured by performing
+    it again, so the row waited for a read-only route and three further
+    agreeing observations. The record now carries that as its general lesson,
+    which is what this test's last assertion pins.
 
     WHERE IT MOVED TO. This used to read ``writes.perform.__doc__``. That
     docstring described a function that refused; the function now acts, and its
@@ -2625,24 +2880,41 @@ def test_the_toggle_problem_is_solved_and_the_solution_is_recorded():
     rather than deleted, because the reasoning is the deliverable -- and a
     history kept inside the docstring of the thing it is the history OF is a
     history that gets edited away the next time the thing changes.
+
+    SHOWN FAILING by restoring the retired sentence to the record::
+
+        AssertionError: 'has NOT been observed' is still in the record, which
+        now carries the measured ON label two paragraphs above it
     """
     doc = writes.TOGGLE_MEASUREMENT_RECORD
     assert "IS SOLVED" in doc
     assert 'aria-label="Following"' in doc
     assert "linkedin_saved_jobs" in doc
-    # And it must not have quietly dropped the half that is still open.
-    assert "has NOT been observed" in doc
+    # The half this used to guard as OPEN is now measured, and the record must
+    # carry the measurement rather than the old blocker.
+    assert 'aria-label="Unsave the job"' in doc
+    assert "has NOT been observed" not in doc, (
+        "the record has been reverted to the pre-2026-08-30 claim; the ON "
+        "label is measured and the table carries it"
+    )
+    # AND THE LESSON, not just the label. The expensive half of this episode
+    # was not measuring the label once -- it was needing a way to measure it
+    # AGAIN without a second irreversible act.
+    assert "irreversible act" in doc
 
-    # The measured pair is what the reader actually uses, so assert THAT
+    # The measured pairs are what the reader actually uses, so assert THOSE
     # rather than the docstring alone -- a docstring cannot be wrong in a way
     # a caller notices.
     assert shape.FOLLOW_LABELS == {
         "Follow": "not_following",
         "Following": "following",
     }
-    # And the half that is NOT a measured pair, for the same reason. One entry,
-    # and its singularity is the whole reason unsave refuses.
-    assert shape.SAVE_LABELS == {"Save the job": "not_saved"}
+    # Two entries since 2026-08-30, and the SECOND one is what lets unsave
+    # resolve an anchor at all.
+    assert shape.SAVE_LABELS == {
+        "Save the job": "not_saved",
+        "Unsave the job": "saved",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -2788,12 +3060,18 @@ async def test_the_save_direction_comes_from_a_different_surface_and_says_so(
 ):
     """The other shape, kept visibly different rather than flattened into it.
 
-    The save control's ON state has never been observed and cannot be: he has
-    no saved posting to observe it on. So the direction comes from the LIST --
-    LinkedIn's own per-tab count with a distinguishable empty state. A
-    different source, not a weaker one, and it costs a second page load. A gate
-    that reported this as "read off the button" would be describing a
-    measurement it did not make.
+    The direction comes from the LIST -- LinkedIn's own per-tab count with a
+    distinguishable empty state. A different source, not a weaker one, and it
+    costs a second page load. A gate that reported this as "read off the
+    button" would be describing a measurement it did not make.
+
+    THE ORIGINAL REASON FOR THE SPLIT IS GONE AND THE SPLIT IS NOT. This
+    docstring used to justify it with "the save control's ON state has never
+    been observed and cannot be: he has no saved posting to observe it on."
+    That stopped being true on 2026-08-30. The list read stays because it
+    answers the question a save actually changes -- MEMBERSHIP of the list --
+    where the button answers what a click would do. So the page-load count
+    below is unchanged, and it is now a design choice rather than a necessity.
     """
     block, nav = await _gate(browser_page, "save_job", saved="jobs_tracker_empty")
     assert nav.gotos == [

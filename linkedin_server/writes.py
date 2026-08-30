@@ -1,11 +1,15 @@
 """The write boundary: a grant, not a mode.
 
-THIS MODULE CAN CHANGE ONE THING ON LINKEDIN, as of 2026-08-23: it can save a
-job posting, and it can unsave one the day the unsave anchor has been measured.
-It could change nothing at all until that date, and the sentence that used to
-stand here said so. Both sentences were true when written; only one of them is
-true now, and a boundary module that keeps the comfortable one is the exact
-failure this design exists to refuse. See "WHAT IS HERE, AND WHAT STILL IS NOT"
+THIS MODULE CAN CHANGE LINKEDIN, and the list has only ever grown. It could
+change nothing until 2026-08-23; then it could save a job posting; since
+2026-08-30 it can also unsave one, follow a company, unfollow one, and submit
+an application. Every one of those sentences stood here in its turn, and each
+was true when written. A boundary module that keeps the most comfortable of
+its past sentences is the exact failure this design exists to refuse, so this
+paragraph is rewritten whenever the answer changes rather than softened. The
+count itself is NOT pinned by a test and the prose here has been wrong about
+it before -- ``writes.PERFORMABLE`` is the authority. See "WHAT IS HERE, AND
+WHAT STILL IS NOT"
 at the bottom.
 
 WHY A GRANT AND NOT A FLAG
@@ -109,11 +113,20 @@ than confirming the wrong posting.
 
 The two toggles do NOT read the same way, and the gate says which it used.
 Follow is read off the posting page -- the same page the action would act on,
-at no extra load. Save is read off ``linkedin_saved_jobs``, a different
-surface, because he has nothing saved and so the save control's ON state does
-not exist on this account to be photographed. A different source, not a weaker
-one; and the second can answer "I could not tell", which the first never has
-to.
+at no extra load. Save takes its DIRECTION from ``linkedin_saved_jobs``, a
+different surface, and its ANCHOR from the control on the posting. A different
+source, not a weaker one; and the second can answer "I could not tell", which
+the first never has to.
+
+THE ORIGINAL REASON FOR THE SPLIT IS GONE AND THE SPLIT IS NOT. Save read off
+the list because the control's ON state could not be photographed on this
+account; that stopped being true on 2026-08-30 when the ON label was measured
+four times. The list read stays because it answers a question the control
+cannot: membership of the list is what an unsave acts on, and a control tells
+you what the button will do rather than what the list contains. It is now
+also, measurably, the weaker of the two -- the Saved tab's rows draw and the
+harvest returns none of them, which blocks the save-family previews at
+``_direction`` while the control beside them reads perfectly well.
 
 WHAT IS HERE, AND WHAT STILL IS NOT
 -----------------------------------
@@ -136,13 +149,20 @@ shown a gate built from a live read; the grant dies in two minutes and works
 once, which makes an unattended or scheduled write structurally impossible
 rather than merely discouraged.
 
-WHAT IS STILL NOT HERE, and it is one row of a table rather than a code path:
-``unsave_job`` is built, gated and tested on exactly the same path as
-``save_job``, and it REFUSES, because the accessible name LinkedIn gives the
-save control when a posting IS saved has never been observed -- there is
-nothing saved on the account to observe it on. See :data:`shape.SAVE_LABELS`
-and :func:`anchor_label_for`. The first supervised save is the measurement that
-lifts it.
+WHAT WAS STILL NOT HERE, until 2026-08-30, and it was one row of a table
+rather than a code path: ``unsave_job`` was built, gated and tested on exactly
+the same path as ``save_job``, and it REFUSED, because the accessible name
+LinkedIn gives the save control when a posting IS saved had never been
+observed -- there was nothing saved on the account to observe it on. The first
+supervised save was the measurement that lifted it, exactly as this paragraph
+predicted, and three read-only re-measurements confirmed the label before the
+row was written. See :data:`shape.SAVE_LABELS` and :func:`anchor_label_for`.
+
+WHAT IS STILL NOT HERE is now one surface rather than one row, and it is not
+in this module: ``unsave_job`` has its anchor and cannot be PREVIEWED, because
+:func:`_direction` refuses on an ``unknown`` origin and the Saved tab that
+supplies that origin cannot currently be read. The capability is real; the
+route to it runs through a broken list read.
 """
 
 from __future__ import annotations
@@ -289,12 +309,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         direction_source=(
             "linkedin_saved_jobs, which reads /jobs-tracker/?stage=saved. The "
             "direction for save comes from the LIST rather than from the "
-            "button, and that is not a shortcut: he has no saved job on the "
-            "account, so the save control's ON state has never been observed "
-            "anywhere and could not be read even if the gate wanted to. The "
-            "list read is corroborated -- it reports LinkedIn's own per-tab "
-            "count and its empty state, and raises rather than returning [] "
-            "when the two disagree."
+            "button. That began as a necessity -- the save control's ON state "
+            "had never been observed, so the button could not answer -- and "
+            "since 2026-08-30 it is a CHOICE: the ON label is measured, and "
+            "the list is still the right source because membership of the "
+            "list is what a save changes, while the button reports what a "
+            "click would do. The list read is corroborated -- it reports "
+            "LinkedIn's own per-tab count and its empty state, and raises "
+            "rather than returning [] when the two disagree. Measured "
+            "2026-08-30, it is also currently FAILING that way: the Saved "
+            "tab's rows draw and the harvest returns none, so this direction "
+            "source reports 'unknown' and the gate refuses."
         ),
         reversibility="reversible by unsaving the same posting",
         reversibility_measured=True,
@@ -309,8 +334,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "thing."
         ),
         reversible_by=(
-            "this server, once writes ship: linkedin_unsave_job is sanctioned "
-            "alongside this one, so the undo is inside the same boundary."
+            "this server: linkedin_unsave_job is sanctioned alongside this "
+            "one AND performable since 2026-08-30, so the undo is inside the "
+            "same boundary rather than promised by it. One caveat that is not "
+            "this action's fault: the undo's own preview reads the Saved tab "
+            "for its direction, and that read is currently failing, so the "
+            "undo may have to be done by hand until it is fixed."
         ),
         residue=(
             "STILL-UNKNOWN: whether re-saving restores the original saved "
@@ -351,14 +380,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "posting itself."
         ),
         reversible_by=(
-            "this server, once writes ship: linkedin_save_job is sanctioned."
+            "this server: linkedin_save_job is sanctioned and performable."
         ),
         residue=(
-            "the same ordering question as save_job, and one more: the ON "
-            "state of the save control has never been seen, because there is "
-            "no saved posting on the account to see it on. If the direction "
-            "ever moves off the list read and onto the button, THAT is the "
-            "unmeasured step."
+            "the same ordering question as save_job. The second residue this "
+            "field used to carry is DISCHARGED: it read 'the ON state of the "
+            "save control has never been seen', and on 2026-08-30 it was "
+            "seen -- once by the write path on his first save, then three "
+            "times by a read-only route that costs no write. So moving the "
+            "direction off the list and onto the button is no longer an "
+            "unmeasured step. It is simply not the right question to ask a "
+            "button, which is why the list read stays."
         ),
         reversibility_procedure=(
             "the same round trip as save_job, driven in the other order. Note "
@@ -1559,12 +1591,14 @@ def spec_for_action(action: str) -> WriteSpec:
 #              The state and the action share a rendering. That is the ideal
 #              shape and it is available for exactly one of the four.
 #   SAVE    -- the state comes from ``linkedin_saved_jobs``, a DIFFERENT
-#              surface, because the save control's ON state does not exist on
-#              this account to read: he has nothing saved. A different source,
-#              not a weaker one -- it is LinkedIn's own per-tab count with a
-#              distinguishable empty state -- but it costs a second page load
-#              and it can answer "I could not tell", which the button never
-#              needs to.
+#              surface. Originally because the save control's ON state did not
+#              exist on this account to read; since 2026-08-30 both labels are
+#              measured and the split is a choice -- LIST MEMBERSHIP is what a
+#              save changes, and the button reports what a click would do. It
+#              costs a second page load and it can answer "I could not tell",
+#              which the button never needs to. Measured 2026-08-30, that is
+#              no longer hypothetical: the list read is the failing half while
+#              the button reads cleanly.
 #   OPEN TO WORK -- a third surface again, his own profile topcard.
 
 #: How long an observation stays redeemable. Much shorter than the grant TTL,
@@ -3023,18 +3057,24 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     """The label the control must be wearing before this action may click it.
 
     Derived from :data:`shape.SAVE_LABELS` rather than written down twice, and
-    that indirection is the whole mechanism by which ``unsave_job`` refuses
-    today and works tomorrow WITHOUT A CODE CHANGE. The table maps a measured
-    accessible name to the state it means; this reads it backwards, from the
-    state an action is valid FROM to the name it would have to see.
+    that indirection did exactly what it was built to do. The table maps a
+    measured accessible name to the state it means; this reads it backwards,
+    from the state an action is valid FROM to the name it would have to see.
 
-        save_job    valid from ``not_saved`` -> "Save the job"  (MEASURED)
-        unsave_job  valid from ``saved``     -> nothing         (NEVER SEEN)
+        save_job    valid from ``not_saved`` -> "Save the job"    (MEASURED)
+        unsave_job  valid from ``saved``     -> "Unsave the job"  (MEASURED)
 
-    Add the observed ON label to ``shape.SAVE_LABELS`` and unsave acquires its
-    anchor. Until somebody has actually seen it, this returns ``None`` and
-    :func:`perform` refuses -- which is the correct behaviour and not a
-    limitation to be worked around by picking a plausible string.
+    THE SECOND ROW ARRIVED ON 2026-08-30 AND NO CODE CHANGED. This docstring
+    used to read "unsave_job valid from saved -> nothing (NEVER SEEN)" and
+    promised that adding the observed label would give unsave its anchor
+    WITHOUT A CODE EDIT. That is what happened: one row in ``shape.SAVE_LABELS``
+    plus its mirror in ``dom.SAVE_LABELS_SEEN``, and this function started
+    returning a real label. The indirection is left exactly as it was, because
+    the same property applies to the next state nobody has photographed.
+
+    It returns ``None`` when the table maps nothing to ``spec.from_state``, and
+    :func:`perform` refuses on that -- still the correct behaviour, and still
+    not a limitation to be worked around by picking a plausible string.
 
     TWO FAMILIES, AND THE DIFFERENCE IS STATED RATHER THAN FLATTENED. The
     save pair is anchored on an EXACT accessible name. ``unfollow_company``
@@ -3151,8 +3191,12 @@ _NINE_REFUSALS: dict[str, str] = {
         "profile, every one in the OFF state. So the OFF-to-ON anchor is "
         "MEASURED. THE ON-STATE LABEL HAS NEVER BEEN SEEN, because nothing on "
         "either surface had been reacted to -- the identical position "
-        "unsave_job is in, and it takes the identical answer: the missing "
-        "half is not guessed. NO SURFACE: aiming at one item needs its "
+        "unsave_job was in until 2026-08-30, and it takes the identical "
+        "answer: the missing half is not guessed. How unsave got out is the "
+        "template rather than a precedent for guessing: one supervised write "
+        "produced the label, then a READ-ONLY route re-measured it three "
+        "times before the row was written. NO SURFACE: aiming at one item "
+        "needs its "
         "permalink, /feed/update/<urn>/, which is on the forbidden list; and "
         "the feed renders several items at once, so choosing one there would "
         "be choosing by position, which this package refuses everywhere else. "
@@ -3965,18 +4009,34 @@ async def perform(
             "the branch, with the label a capture actually shows."
         )
     if anchor is None:
+        # UNREACHABLE THROUGH ANY SHIPPED ACTION SINCE 2026-08-30, and kept
+        # DELIBERATELY rather than by inertia -- this repo's own rule is that a
+        # check which cannot fail certifies nothing, so the call has to be made
+        # out loud. Both save-family actions now resolve an anchor because
+        # shape.SAVE_LABELS holds both states; every other performable action
+        # returns from its own branch in anchor_label_for above the table
+        # lookup. So nothing in PERFORMABLE can arrive here today.
+        #
+        # It stays because what it now catches is a REGRESSION rather than a
+        # missing measurement: a save-family action lands here if and only if
+        # shape.SAVE_LABELS loses the row for the state that action is valid
+        # from. That is a real way to break this package -- an edit to the
+        # table, a bad merge -- and the failure it would otherwise produce is a
+        # None anchor reaching save_control_selector.
+        #
+        # It is REACHABLE ON PURPOSE from the suite, with a synthetic spec
+        # whose from_state is in no table, so it is a guard that has been shown
+        # failing rather than an assertion nobody has ever fired.
         raise WriteAttemptError(
             f"{spec.action!r} has no measured anchor and will not be "
-            f"performed. It is valid from {spec.from_state!r}, and the "
-            "accessible name the save control wears in that state has NEVER "
-            "BEEN OBSERVED -- every capture this repo holds shows the OFF "
-            f"state {sorted(shape.SAVE_LABELS)}, because there is nothing "
-            "saved on the account to photograph the other one on. A selector "
-            "cannot be guessed here: 'Saved' and 'Unsave the job' are both "
-            "plausible and neither has been seen. THE SUPERVISED SAVE IS THE "
-            "MEASUREMENT -- this function reports the label the control "
-            "changes into, and writing that one line into shape.SAVE_LABELS "
-            "is what lifts this refusal."
+            f"performed. It is valid from {spec.from_state!r}, and "
+            f"shape.SAVE_LABELS maps no accessible name to that state -- it "
+            f"currently holds {sorted(shape.SAVE_LABELS)}. THIS DOES NOT MEAN "
+            "THE LABEL IS UNMEASURED, and it did until 2026-08-30, when the "
+            "ON state was observed four times and written down. It means the "
+            "table no longer carries the row this action needs, which for a "
+            "shipped action is a regression rather than a gap: check what "
+            "removed it. A selector is not guessed here under either reading."
         )
 
     # Gates 3 and 4: the write door, then the read door, on the same url.
@@ -4042,10 +4102,15 @@ async def perform(
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
         click_error = f"{type(exc).__name__}: {exc}"
 
-    # The label the control changed INTO. Read for a human, never branched on:
-    # this is the one measurement that can settle the missing half of
-    # shape.SAVE_LABELS, and it can only be taken here, immediately after a
-    # real save on a real account. SAVE FAMILY ONLY -- an unfollow's row is
+    # The label the control changed INTO. Read for a human, never branched on.
+    # This settled the missing half of shape.SAVE_LABELS on 2026-08-30 -- it
+    # reported "Unsave the job" on the operator's first save -- and it is kept
+    # because the NEXT rename lands the same way: the anchored reader goes to
+    # count 0 and says nothing, and this says what the page drew. Note it is no
+    # longer the ONLY route to that label: server._read_save_control_state
+    # reports it off any posting already open, for no write, which is how the
+    # row was corroborated three times before being written. SAVE FAMILY ONLY
+    # -- an unfollow's row is
     # expected to LEAVE the page, so there is no control left to read back and
     # sweeping for one would report whichever neighbouring row redrew first.
     became: Optional[str] = None
@@ -4145,10 +4210,14 @@ async def perform(
         "what_that_label_is_for": (
             (
                 "the accessible name the save control wears NOW. It is "
-                "recorded for a human and nothing branches on it. If it is not "
-                f"{anchor!r}, it is the state this repo has never been able to "
-                "photograph -- write it into shape.SAVE_LABELS and unsave_job "
-                "acquires its anchor."
+                "recorded for a human and nothing branches on it. Both states "
+                "are in shape.SAVE_LABELS since 2026-08-30, so the expected "
+                "reading is the OTHER one from " + repr(anchor) + " -- this "
+                "field said 'write it into shape.SAVE_LABELS and unsave_job "
+                "acquires its anchor' while that row was missing, and this is "
+                "the field that produced it. A name in NEITHER state is now a "
+                "rename on LinkedIn's side and wants the selector re-measured, "
+                "not the table widened to whatever turned up here."
             )
             if spec.target_kind == "job_id"
             else (
@@ -4215,18 +4284,36 @@ performed.
     aria-pressed anywhere, so the accessible name is the entire signal.
     Frozen at both renders in ``job_detail_following*.html``.
 
-    save: the ON state of the save control has NOT been observed, and cannot
-    be by reading -- he has no saved posting on the account to observe it on.
-    Direction for save therefore comes from ``linkedin_saved_jobs``, the list
-    read, which is corroborated by LinkedIn's own per-tab count. That is a
-    different source, not a weaker one, and it is named in the spec.
+    save, MEASURED 2026-08-30 and the last of the four to fall:
+        not saved -> button[aria-label="Save the job"]
+        saved     -> button[aria-label="Unsave the job"]
+    The ON label could NOT be reached by reading, and that is the one place
+    this record's own thesis did not hold: there was no saved posting on the
+    account to read it off, so no read anybody had failed to perform would
+    have produced it. It took the write. The operator authorised a save on
+    2026-08-30 and :func:`perform`'s post-click sweep reported the new name.
+    NO FIXTURE CARRIES IT -- every capture predates the save -- so offline
+    tests DERIVE a saved posting by relabelling the control.
 
-THAT REMAINING HALF IS NOW THE ONLY THING BETWEEN THIS SERVER AND A ROUND TRIP.
-``save_job`` has its anchor and performs. ``unsave_job`` is built on the same
-path and refuses at one named point -- :func:`anchor_label_for` returns None,
-because ``shape.SAVE_LABELS`` has no entry for the saved state. The supervised
-save is the measurement that fills it: :func:`perform` reads the label the
-control changes into and reports it for a human to write down. One line, and it
-must be measured rather than guessed -- "Saved" and "Unsave the job" are both
-plausible and this server has seen neither.
+    Direction for save still comes from ``linkedin_saved_jobs``, the list
+    read, corroborated by LinkedIn's own per-tab count. That is a different
+    source, not a weaker one, and it is named in the spec.
+
+THE ROUND TRIP IS CLOSED, AND THE LESSON REVERSED ITSELF ONCE MORE ON THE WAY.
+This section used to end: "unsave_job is built on the same path and refuses at
+one named point -- anchor_label_for returns None ... 'Saved' and 'Unsave the
+job' are both plausible and this server has seen neither." Every clause was
+true. The measurement arrived by write, as predicted, and read "Unsave the
+job".
+
+But ONE READING FROM THE WRITE PATH WAS NOT ENOUGH TO WRITE IT DOWN, and that
+is the part worth carrying. A label reached by performing its own inverse can
+only be re-measured by performing it again, which is a measurement nobody can
+afford to repeat and therefore one nobody can check. So the row waited for a
+READ-ONLY route -- ``server._read_save_control_state``, reporting the control
+off a posting already open -- and was written only after three further
+observations through it agreed. Four readings, two independent routes, zero
+extra writes. THE GENERAL FORM: when a measurement can only be bought with an
+irreversible act, the next thing to build is not the row, it is the cheap way
+to take that measurement again.
 """

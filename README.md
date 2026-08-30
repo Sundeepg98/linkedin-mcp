@@ -26,8 +26,9 @@ What is true now:
   bound to one action on one target and dies in 120 seconds, which makes a
   scheduled or unattended write structurally impossible rather than merely
   discouraged.
-- `linkedin_unsave_job` is built, gated and **refuses to act**. See
-  [The one that refuses](#the-one-that-refuses).
+- `linkedin_unsave_job` is built, gated and **performable since 2026-08-30**.
+  It refused for a month for want of one measured label; see
+  [The one that refused, and how it stopped](#the-one-that-refused-and-how-it-stopped).
 - **It does not submit applications, and that is not a shrug.**
   `linkedin_job_detail` reports `apply_path`: whether a posting applies on
   LinkedIn or hands you to an outside applicant-tracking system, and names
@@ -131,7 +132,7 @@ design, the boundary, the gates and the audit trail; that is what it is for.
 | Tool | What it does |
 |---|---|
 | `linkedin_save_job` | Bookmarks one posting. Call it with no `confirm_token` and it performs nothing: it reads the posting and your saved list live and returns a block naming the job by title and employer, which way the toggle would move, where each fact came from, and how to undo it. Call it again with the token from that block to act. |
-| `linkedin_unsave_job` | Same shape, same gates, and **it refuses**. See below. |
+| `linkedin_unsave_job` | Same shape, same gates, and it **acts** -- since 2026-08-30, when the label its click anchors on was finally measured. It still refuses from any state it does not recognise, and its preview is currently blocked by a separate defect in the Saved-tab read. See below. |
 | `linkedin_unfollow_company` | Stops following one company Page. Same shape and the same five gates. Addressed by the **numeric company id**, never by name -- names collide, change, and are not yours to rely on, and the click is anchored to the row carrying the id, so what you name and what gets pressed are the same row by construction. |
 
 After the click, the result is confirmed from a **different surface** -- your
@@ -140,23 +141,50 @@ that was just pressed. `performed` comes back `true`, `false`, or `"unknown"`.
 On `"unknown"`, do not retry: a retry on a toggle that did land performs the
 opposite action.
 
-### The one that refuses
+### The one that refused, and how it stopped
+
+**This section described a permanent-looking refusal for a month. It is kept as
+the worked example, because how it ended is more useful than that it ended.**
 
 LinkedIn identifies the save control by its accessible name. Every capture this
 repo holds -- four postings, both hydration states, two different days -- shows
 `aria-label="Save the job"`, the **unsaved** state. The name it wears when a
-posting **is** saved has never been observed, and it cannot be observed by
-reading: there is nothing saved on the account to observe it on.
+posting **is** saved had never been observed, and it could not be observed by
+reading: there was nothing saved on the account to observe it on. So
+`linkedin_unsave_job` had no anchor, and this server would not guess one --
+`"Saved"` and `"Unsave the job"` were both plausible and it had seen neither.
 
-So `linkedin_unsave_job` has no anchor, and this server does not guess one.
-`"Saved"` and `"Unsave the job"` are both plausible and it has seen neither.
-The refusal names that reason rather than saying "not implemented", because
-"not implemented" invites somebody to implement it by picking a string.
+That was circular: the only way to see the label was to perform the action its
+inverse gated.
 
-**The fix is one measured line.** The first supervised save produces it:
-`perform` reads back the label the control changed into and reports it. Write
-that into `shape.SAVE_LABELS` and `unsave_job` acquires its anchor. It is one
-row of a table, not a missing code path.
+**What broke it, on 2026-08-30.** The operator authorised a save. `perform`
+read back the label the control changed into and reported `"Unsave the job"`.
+The prediction held exactly -- one row of a table, not a missing code path.
+
+**And one reading was not enough to write it down.** A label reached by
+performing its own inverse can only be re-measured by performing it again,
+which makes it a measurement nobody can afford to check. So the row waited for
+a **read-only route**: `linkedin_job_detail` now reports `save_state` off the
+control on a posting it has already loaded, for no write and no extra page
+load. Three further readings through it agreed with the first. The row went in
+on four observations across two independent routes.
+
+**Which label it was mattered too.** `"Unsave the job"` names its own inverse;
+the measured OFF row establishes that this control is named for the ACTION it
+performs, not the state it is in. `"Saved"` would have been ambiguous between
+the two readings, and a label mapped to the wrong state points a click at the
+opposite action. Had the measurement come back `"Saved"`, the row would still
+be missing.
+
+**What still refuses.** The refusal narrowed rather than disappearing:
+`unsave_job` acts only from a state it recognises. And it is not yet reachable
+end to end -- its preview takes its direction from your Saved tab, and that
+list currently cannot be read (the rows draw; the harvest returns none of
+them). The capability is real; the route to it runs through a broken read.
+
+**The general form**, which is the reason this section survives: when a
+measurement can only be bought with an irreversible act, the next thing to
+build is not the row -- it is the cheap way to take that measurement again.
 
 ### Applying: the half that ships, and the half that does not
 

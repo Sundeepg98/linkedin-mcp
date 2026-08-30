@@ -575,13 +575,24 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
 # Save state
 # ---------------------------------------------------------------------------
 
-#: The accessible names the job-SAVE control has been SEEN wearing. One of
-#: them, and the singular is the point -- see ``shape.SAVE_LABELS`` for why
-#: the ON state cannot be photographed on this account.
+#: The accessible names the job-SAVE control has been SEEN wearing. TWO of
+#: them since 2026-08-30, and the pairing is the point -- see
+#: ``shape.SAVE_LABELS`` for what each one MEANS and for the four observations
+#: the second one rests on.
 #:
-#: MEASURED across all four frozen postings at BOTH hydration states:
+#: MEASURED. The OFF label across all four frozen postings at BOTH hydration
+#: states; the ON label on the live posting the operator saved, read three
+#: times through ``linkedin_job_detail`` after the write path reported it once:
 #:
 #:   not saved -> ``<button type="button" ... aria-label="Save the job">``
+#:   saved     -> ``<button type="button" ... aria-label="Unsave the job">``
+#:
+#: NO FIXTURE CARRIES THE ON LABEL. Every capture in ``tests/fixtures`` was
+#: taken while the account had nothing saved, so every offline test that needs
+#: a saved posting DERIVES one by relabelling the control. That is stated here
+#: because it is the one asymmetry left between the two rows: the OFF label is
+#: reproducible from disk, the ON label is reproducible only from the live
+#: account. A capture of a saved posting would close it.
 #:
 #: Anchored on the accessible name, and the alternatives are ruled out by
 #: measurement rather than by preference. ``data-view-name="job-save-button"``
@@ -590,12 +601,14 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
 #: The class list is a build hash and is byte-identical to the follow button's
 #: neighbours. ``componentkey`` is a per-posting uuid. The accessible name is
 #: the only handle that survived the day it was tested on.
-SAVE_LABELS_SEEN: tuple[str, ...] = ("Save the job",)
+SAVE_LABELS_SEEN: tuple[str, ...] = ("Save the job", "Unsave the job")
 
-#: Matches the save control in any state this reader recognises -- which today
-#: is one state, so a posting that IS saved matches nothing here and
-#: ``read_save_control`` reports count 0. That reading is deliberately
-#: ambiguous rather than falsely negative: see ``shape.save_state``.
+#: Matches the save control in any state this reader recognises -- which since
+#: 2026-08-30 is BOTH states, so a saved posting now matches and reports its
+#: label instead of reporting count 0. Count 0 has correspondingly narrowed in
+#: meaning: it no longer covers "the state nobody has photographed", only "the
+#: page has not drawn its controls" or "LinkedIn renamed one". Still ambiguous,
+#: still refuses, one fewer reading to hold open: see ``shape.save_state``.
 SAVE_CONTROL = ", ".join(
     f'button[aria-label="{label}"]' for label in SAVE_LABELS_SEEN
 )
@@ -625,8 +638,13 @@ async def read_save_control(page: Any) -> dict[str, Any]:
 
     Same three outcomes as :func:`read_follow_control`, and the same reason for
     keeping them three: ``count`` 0 means the control did not render IN A STATE
-    THIS READER KNOWS, which on a posting that is already saved is exactly what
-    would happen. Absence is not a state.
+    THIS READER KNOWS. Absence is not a state.
+
+    WHAT CHANGED ON 2026-08-30. Until the ON label was measured, an
+    already-saved posting was the commonest way to reach count 0 -- the
+    selector held one name and a saved posting wore the other. It now matches
+    both, so a saved posting reports ``"Unsave the job"`` and count 0 means
+    what it says: nothing this reader recognises is on the page.
     """
     out: dict[str, Any] = {"label": None, "count": 0}
     try:
@@ -800,12 +818,19 @@ async def read_any_save_control_label(page: Any) -> Optional[str]:
     """The accessible name of whatever save-shaped control the page now draws.
 
     UNANCHORED ON PURPOSE, and used for exactly one thing: after a supervised
-    save, reading back what the control changed INTO. :data:`SAVE_CONTROL`
-    cannot do that job -- it only matches labels already known, so it would
-    report the very absence the click was supposed to cause.
+    write, reading back what the control changed INTO. :data:`SAVE_CONTROL`
+    cannot be trusted with that job even now that it knows both labels -- the
+    whole point of the read-back is to catch a name NOBODY has written down,
+    and an anchored selector can only ever confirm the names it already holds.
+
+    IT DID ITS JOB ONCE AND IS STILL HERE. This is what reported
+    ``"Unsave the job"`` on the operator's first save, 2026-08-30, which is the
+    row ``shape.SAVE_LABELS`` gained that evening. It is kept, not retired,
+    because the next rename lands the same way: the anchored reader goes to
+    count 0 and says nothing, and this is what says what the page drew.
 
     It is a MEASUREMENT INSTRUMENT, never a decision input. Nothing branches on
-    what this returns; ``writes.perform`` prints it so the ON-state label can be
+    what this returns; ``writes.perform`` prints it so a new label can be
     written into ``shape.SAVE_LABELS`` by a human who saw it. Locating "the
     save control" without knowing its name means locating it by POSITION, which
     is precisely what this package refuses to decide on -- so the value comes
@@ -2207,8 +2232,16 @@ COMMENT_CONTROL_NAME = "Comment"
 #: convention as the follow control and the unfollow row, and it means the
 #: OFF-to-ON direction has a measured anchor. THE ON-STATE LABEL HAS NEVER
 #: BEEN SEEN, because nothing on either surface had been reacted to -- exactly
-#: the position ``unsave_job`` is in, and it gets the same answer: the missing
+#: the position ``unsave_job`` WAS in, and it gets the same answer: the missing
 #: half is not guessed.
+#:
+#: AND THE SAVE PAIR IS NOW THE WORKED EXAMPLE OF HOW IT GETS UNSTUCK, which
+#: is worth more here than the analogy was. Its ON label was measured on
+#: 2026-08-30 by a supervised write, and then RE-measured three times through a
+#: read-only route built so the measurement never had to be bought twice. The
+#: same shape applies here: one supervised reaction produces the ON label, and
+#: a reader that reports the reaction control's name off a page already open
+#: makes it re-measurable for nothing. Neither exists yet.
 REACTION_STATE_PREFIX = "Reaction button state:"
 REACTION_OFF_LABEL = "Reaction button state: no reaction"
 REACTION_CONTROL = 'button[aria-label^="Reaction button state:"]'

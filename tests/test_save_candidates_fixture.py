@@ -211,15 +211,32 @@ async def test_a_reported_label_still_cannot_become_a_click():
     The diagnostic publishes an accessible name into a message a caller reads.
     If that name could be fed back in and turned into a selector, the whole
     refusal would be a formality. It cannot: the selector builder is anchored
-    on ``SAVE_LABELS_SEEN`` and refuses everything else, unchanged by any of
-    this.
+    on ``SAVE_LABELS_SEEN`` and refuses everything else.
+
+    THIS PROPERTY IS WHY THE 2026-08-30 ROW WAS SAFE TO ADD. The vocabulary
+    grew that day -- ``"Unsave the job"`` was measured four times and written
+    into both tables -- and it grew because a HUMAN read the diagnostic and
+    decided, not because the diagnostic fed itself back in. Reporting a name
+    still does not authorise clicking it; the labels below have all been
+    reported by this sweep at some point and none of them is clickable.
+
+    SHOWN FAILING by widening ``dom.SAVE_LABELS_SEEN`` with a reported name::
+
+        Failed: DID NOT RAISE ExtractionFailedError
     """
     from linkedin_server.errors import ExtractionFailedError
 
-    with pytest.raises(ExtractionFailedError):
-        dom.save_control_selector("Saved")
-    assert set(dom.SAVE_LABELS_SEEN) == {"Save the job"}
-    assert shape.SAVE_LABELS == {"Save the job": "not_saved"}
+    for reported in ("Saved", "Bookmark this job", "Unsave", "Save"):
+        with pytest.raises(ExtractionFailedError):
+            dom.save_control_selector(reported)
+
+    # The vocabulary is exactly the two MEASURED labels -- no more, and the
+    # second one is not a guess: see shape.SAVE_LABELS for its four readings.
+    assert set(dom.SAVE_LABELS_SEEN) == {"Save the job", "Unsave the job"}
+    assert shape.SAVE_LABELS == {
+        "Save the job": "not_saved",
+        "Unsave the job": "saved",
+    }
 
 
 # ---------------------------------------------------------------------------
