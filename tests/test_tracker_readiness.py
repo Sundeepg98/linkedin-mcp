@@ -106,13 +106,67 @@ def shell() -> str:
     return derive(out, SAVED_TAB_ZERO, "Saved &#183; 1", count=-1)
 
 
+def outside_main() -> str:
+    """DERIVED: the row capture plus a job link in a nav, OUTSIDE ``<main>``.
+
+    WHY IT HAD TO BE ADDED. The scoping on both instruments -- ``main a[href]``
+    for the count and ``main a[href*=...]`` for the rows -- was UNGUARDED, and
+    that was found by mutation rather than by reading: dropping ``main `` from
+    the anchor walk left every test in this file green. Measured, the reason is
+    the corpus and not the code -- every anchor in both tracker captures
+    already sits inside the single ``<main>``, so the two selectors cannot
+    disagree over them and the scope is a no-op against this fixture set.
+
+    A real LinkedIn page is not like that: it carries a global nav and a
+    footer, and the nav links to jobs. So this page is the more faithful one,
+    and a fixture set that cannot express the difference is the thing that was
+    unrepresentative.
+    """
+    return derive(
+        markup("jobs_tracker_row"),
+        "<main>",
+        '<nav><a href="https://www.linkedin.com/jobs/view/9999999999/">Jobs</a>'
+        "</nav><main>",
+    )
+
+
+def renamed_rows() -> str:
+    """DERIVED: rows that DREW, under a link shape this reader does not match.
+
+    THE LIVE SUSPECT, modelled. Every tracker capture on disk is either the
+    DRAFT tab with a row or the SAVED tab with nothing, so the shape of a saved
+    row has never been captured -- and a saved row whose link is not
+    ``/jobs/view/<id>`` would produce precisely the 2026-08-30 symptom: the tab
+    strip reads 1, the harvest returns nothing, and no empty state is drawn.
+
+    It is also the only page here that reaches the THIRD branch of
+    ``shape._tracker_evidence_sentence`` while real row text is on the page,
+    which is why the leak guard below is driven over it. That branch is the one
+    the operator's real refusal rendered, and it was uncovered.
+    """
+    return derive(
+        markup("jobs_tracker_row"),
+        "/jobs/view/4011223344/",
+        "/jobs/tracked/4011223344/",
+        count=-1,
+    )
+
+
 #: The three states, in the order every table below reports them.
 STATES = ["shell", "empty", "row"]
 
+#: The derived variants, by name, so ``page_html`` stays one lookup.
+DERIVED = {
+    "shell": shell,
+    "outside_main": outside_main,
+    "renamed_rows": renamed_rows,
+}
+
 
 def page_html(which: str) -> str:
-    if which == "shell":
-        return shell()
+    builder = DERIVED.get(which)
+    if builder is not None:
+        return builder()
     return markup(f"jobs_tracker_{which}")
 
 
@@ -223,7 +277,7 @@ async def test_the_tracker_anchor_separates_a_drawn_list_from_a_shell():
     SHOWN FAILING by swapping the anchor to the tab strip, which is the
     mistake a reader would make from the markup alone::
 
-        AssertionError: [1, 1, 4] != [0, 1, 2]
+        AssertionError: [1, 2, 4] != [0, 1, 2]
         the tab strip is present on the SHELL, whose list never drew
 
     That is the dangerous direction: it reports READY in precisely the state
@@ -392,10 +446,14 @@ async def test_the_evidence_counts_what_was_actually_there():
     is exactly why the note refuses to read one without the readiness verdict
     beside it, and why no threshold on this number is asserted anywhere.
 
-    SHOWN FAILING by counting all anchors on the document instead of under
-    <main>::
+    THIS TEST CANNOT CATCH A SCOPING MUTATION and does not claim to -- see
+    ``test_the_walk_is_scoped_to_main`` below, which was added after mutation
+    testing found that dropping ``main `` from the anchor walk left this file
+    entirely green.
 
-        AssertionError: ('row', 8, 2) != ('row', 6, 2)
+    SHOWN FAILING by counting only anchors that are job rows::
+
+        AssertionError: ('empty', 0, 0) != ('empty', 2, 0)
     """
     for which in STATES:
 
@@ -408,6 +466,38 @@ async def test_the_evidence_counts_what_was_actually_there():
         assert (got["anchors_total"], got["rows_matching"]) == EXPECTED_EVIDENCE[
             which
         ], (which, got)
+
+
+async def test_the_walk_is_scoped_to_main():
+    """A job link in the page's NAV is not a row and is not counted.
+
+    ADDED AFTER A SURVIVED MUTATION. Dropping ``main `` from either instrument
+    -- the anchor count or the row selector -- was invisible to every other
+    test in this file, because both tracker captures happen to keep every
+    anchor inside ``<main>``. A real page does not; this derived one does not
+    either.
+
+    SHOWN FAILING by counting document-wide, which is the exact mutation that
+    used to survive::
+
+        AssertionError: (7, 2) != (6, 2)
+        a job link in the nav was counted as page content
+
+    and, for the row selector, by dropping ``main `` from
+    ``dom.TRACKER_ROW_LINK``::
+
+        AssertionError: (6, 3) != (6, 2)
+        a job link in the nav was counted as a drawn row
+    """
+
+    async def work(page):
+        return await dom.read_tracker_evidence(page)
+
+    got = await _with_html(page_html("outside_main"), work)
+    # IDENTICAL to the unmodified row capture. The nav link is outside <main>,
+    # so neither instrument may see it -- and it is a /jobs/view/ link
+    # precisely so that a dropped scope shows up in BOTH numbers.
+    assert (got["anchors_total"], got["rows_matching"]) == EXPECTED_EVIDENCE["row"], got
 
 
 async def test_the_evidence_reports_unknown_rather_than_zero_when_it_cannot_look():
@@ -495,11 +585,21 @@ async def test_the_refusal_the_operator_saw_now_says_when_it_looked(monkeypatch)
     real zero. The sentence the operator met is reproduced first, so this fails
     at the defect rather than at a missing attribute.
 
-    SHOWN FAILING against the unfixed production code, which produced the
-    first two assertions and not the third::
+    SHOWN FAILING by deleting the ``+ shape.tracker_read_note(...)`` term from
+    the raise in ``server._read_tracker`` -- which is the pre-fix refusal
+    exactly, and is the narrow mutation rather than reverting the commit.
+    Reverting the whole commit is NOT the reproduction and this docstring used
+    to claim it was: the revert removes ``dom.TRACKER_LIST_TIMEOUT_MS``, so the
+    test dies in its own ``monkeypatch.setattr`` line before the tool is ever
+    called, and none of the assertions below is reached. Corrected after a
+    mutation run measured it.
+
+    With the note deleted, the first three assertions pass and the fourth is
+    the red::
 
         assert "no saved jobs could be read" in message      # passes
         assert "Saved tab says 1" in message                 # passes
+        assert "no empty state was drawn" in message         # passes
     >   assert "WHAT WAS ON THE PAGE" in message, message
     E   AssertionError: no saved jobs could be read, and the page does not
     E   corroborate an empty list: LinkedIn's own Saved tab says 1, and no
@@ -588,7 +688,12 @@ async def test_the_saved_state_read_carries_the_evidence_too(monkeypatch):
     for the gate -- it produces ``unknown``, and the gate refuses. Measured
     2026-08-30, that is exactly what the operator met.
 
-    SHOWN FAILING before ``_read_saved_state`` was given the note::
+    SHOWN FAILING by deleting the ``+ shape.tracker_read_note(...)`` term from
+    the no-rows branch of ``writes._read_saved_state``. As with the tool test
+    above, reverting the whole commit is NOT this reproduction -- it removes
+    ``dom.TRACKER_LIST_TIMEOUT_MS`` and the test dies in its own
+    ``monkeypatch.setattr`` before ``state`` is ever computed. Corrected after
+    a mutation run measured it::
 
         assert state == "unknown"                           # passes
     >   assert "WHAT WAS ON THE PAGE" in why, why
@@ -610,16 +715,36 @@ async def test_the_saved_state_read_carries_the_evidence_too(monkeypatch):
     assert "NEVER RESOLVED" in why, why
 
 
-async def test_the_refusal_never_quotes_a_row(monkeypatch):
+#: Both pages carrying real-shaped member-facing text, and they reach DIFFERENT
+#: branches of ``shape._tracker_evidence_sentence``: the row capture has rows,
+#: the renamed one does not. Parametrized because driving only the first left
+#: the second branch unguarded -- found by mutation, not by reading -- and the
+#: unguarded one is the branch the operator's real 2026-08-30 refusal rendered.
+@pytest.mark.parametrize("which", ["row", "renamed_rows"])
+async def test_the_refusal_never_quotes_a_row(which):
     """COUNTS, NEVER TEXT. A tracker row names a company and a job.
 
-    The row capture carries a real-shaped employer and title; neither may
+    Both pages carry a real-shaped employer, title and location; none of it may
     reach a diagnostic. The save sweep took the same ruling, for the same
-    reason.
+    reason -- a job page draws a hiring team and a "people also viewed" rail,
+    and a tracker row draws an employer.
 
-    SHOWN FAILING by adding the harvested row texts to the evidence payload::
+    WHY IT IS PARAMETRIZED, and this is the whole reason the test was rewritten.
+    ``_tracker_evidence_sentence`` has three returns. Driven over the row
+    capture alone it only ever reached the ``rows_matching > 0`` one, so a leak
+    planted in the ``rows_matching == 0`` branch was invisible -- and that is
+    the branch a real failing Saved tab renders. ``renamed_rows`` is a page with
+    rows drawn under a link shape this reader does not match, which is the only
+    way to have real row text on the page AND a zero row count.
+
+    SHOWN FAILING by appending a harvested row's text to the evidence payload
+    and rendering it in the sentence. Planted in the ``rows_matching > 0``
+    branch it takes ``row`` red; planted in the final branch it takes
+    ``renamed_rows`` red, and before this was parametrized the second planting
+    was caught by nothing::
 
         AssertionError: 'Ashgrove Systems' leaked into the refusal note
+        assert 'Ashgrove Systems' not in 'WHAT WAS ON...same answer.'
     """
 
     async def work(page):
@@ -629,6 +754,38 @@ async def test_the_refusal_never_quotes_a_row(monkeypatch):
             SETTLED_EARLY,
         )
 
-    note = await _with_html(markup("jobs_tracker_row"), work)
+    note = await _with_html(page_html(which), work)
     for secret in ("Ashgrove Systems", "Platform Integration Engineer", "Fairhaven"):
         assert secret not in note, f"{secret!r} leaked into the refusal note"
+
+
+async def test_rows_drawn_under_another_link_shape_are_not_a_page_that_never_drew():
+    """The live suspect, and the one reading that would tell it apart.
+
+    If LinkedIn draws a saved row whose link is not ``/jobs/view/<id>``, the
+    tab count, the empty harvest and the missing empty state are IDENTICAL to a
+    page that never rendered. What separates them is that the page still drew
+    its content: characters and anchors are there, and only the ROW match is
+    zero.
+
+    This does not claim that is what happened on 2026-08-30 -- nothing in this
+    repo can see the live saved row. It pins the discriminator so that the next
+    live refusal carries the reading that would settle it.
+
+    SHOWN FAILING by having ``read_tracker_evidence`` report ``rows_matching``
+    as ``len(anchors)`` rather than as its own count::
+
+        AssertionError: 6 != 0
+        a page whose rows drew under another link shape was reported as having
+        drawn rows this reader matched
+    """
+
+    async def work(page):
+        return await dom.read_tracker_evidence(page)
+
+    got = await _with_html(page_html("renamed_rows"), work)
+    assert got["main_present"] is True, got
+    # The page DREW: same characters, same anchors as the row capture.
+    assert got["anchors_total"] == EXPECTED_EVIDENCE["row"][0], got
+    # And not one of them is a row this reader recognises.
+    assert got["rows_matching"] == 0, got
