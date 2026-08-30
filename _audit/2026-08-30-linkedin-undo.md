@@ -1180,3 +1180,223 @@ Files: `linkedin_server/dom.py`, `linkedin_server/shape.py`,
 | **No capture of a populated SAVED tab** | still the artefact this surface has lacked for four parts. It would have made every part of this shorter | a capture run |
 | **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship. Flagged in Part 2, still open | lead's call |
 | **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
+
+---
+---
+
+# Part 5 -- the prediction lost, and half the contradiction was mine
+
+**Commits:** `5903948`, `d58bda3` on `master`, **not pushed**.
+**Baseline in:** 2008 passed. **Baseline out:** 2013 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 33. The prediction, and its result
+
+Part 4 named three outcomes before the measurement. **The third fired.**
+
+> **It still refuses, with `hidden_not_rendered` zero** -> this fix is real and was not the
+> live cause. Say so and keep going.
+
+`hidden_not_rendered` came back **0** on the live Saved tab. The lead's build evidence is what
+makes that readable rather than ambiguous: `git log -S` puts the census and the
+self-contradiction fix in the SAME commit, `8573b8b`, and the contradiction fix is visibly
+live in the returned message -- the shape sentence now reads *"the parser was handed only the
+rendered part"* where it previously said *"a defect in the walk"*. So the census is loaded in
+that process, and `shape.py`'s `if not skipped: return ""` makes its absence a measurement of
+zero rather than a missing feature.
+
+**So: the `display:none` subtraction bug is real, is in the code path the Saved tab uses, and
+is not what is wrong there.** Recorded as a result. It was written as a falsifiable prediction
+before the measurement and it lost, which is the only way a prediction is worth writing.
+
+What it bought is not nothing: a real defect is fixed, it produced the exact live signature on
+a derived row, and the number that ruled it out did not exist before Part 4 built it.
+
+---
+
+## 34. The contradiction the lead could not reconcile -- one half was mine
+
+The lead quoted Part 4 saying the parser "was handed a record with nothing in it" against the
+live message saying it "was handed only the rendered part -- 231 characters", and declined to
+theorise. Correctly: **the two cannot both describe that call, and the error is in my
+sentence.**
+
+**Settled by arithmetic, no instrument needed.** `record()` returns `null` when the row's text
+is empty -- that is the only thing it returns null for. So `records=1` **already proves the
+record was not empty.** Part 4's "nothing in it" was a description of the reproduction I had
+built, and I applied it to a live call where it was false.
+
+**The second half is a conflation, also mine.** The row-shape ladder describes the DOM climb
+from the anchor. The record is ONE node from that climb, chosen by `rowOf`, read with
+`innerText`. The ladder never described what the parser received, and I read it as though it
+did.
+
+So the honest state after correction: **the record has text, and `parse_job_card` rejects it.**
+Which is the lead's outcome (b), reached without a measurement because the logic settles it.
+
+---
+
+## 35. What could not be settled by logic, and the instrument for it
+
+`parse_job_card` returns `None` from **two different lines**, and a caller sees the same `None`
+either way:
+
+```python
+if not lines:      return None     # the text was REMOVED (subtraction, or is_chrome)
+...
+if not remaining:  return None     # the text SURVIVED and was classified as
+                                   # a status or a time-ago
+```
+
+They are one line of `shape.py` apart and want **opposite** repairs. The first says something
+ate the title; the second says a classifier is matching it. Nothing in this package could say
+which.
+
+**`shape.parse_job_card_trace`** reports the record through every stage -- raw lines, after the
+screen-reader subtraction, after de-duplication, after chrome, after status -- plus a per-line
+label and a character count.
+
+**Labels from a CLOSED four-word vocabulary** (`chrome`, `status`, `time_ago`, `content`), never
+the line. A tracker row names a company and a job; the same ruling the save sweep took. The
+guard is not decorative -- driven with the leak restored it reports the employer, the title, the
+location and a free-text dialog prompt.
+
+**It re-runs the same helpers in the same order rather than being spliced into the parser**, so
+the agreement is guarded rather than hoped for -- see the next section for how badly the first
+version of that guard did its job.
+
+### Also restored: `links` in the row ladder
+
+`rowOf`'s second stop tests `linksWithin(node) > 1` -- the **raw** count of keyed anchors, not
+the deduped one. I printed only distinct keys, so on the live page every level reported one key
+while four job-row anchors sat on the page, and **which level first held two of them was
+exactly the question the ladder could not answer**. Dropping that field was a real loss and it
+is back.
+
+---
+
+## 36. The guard I wrote to protect the trace was blind to the trace's whole point
+
+Three defects, found by mutation, all mine.
+
+**The agreement assertion collapsed a three-valued verdict to a boolean.**
+`(trace["verdict"] == "parsed") == parsed` maps both refusals to `False`, so **swapping
+`no_lines` and `no_remaining` passed** -- a trace naming the wrong line of `parse_job_card`,
+which is the one thing it exists to name.
+
+Closed by checking the verdict against the trace's **own counts**: `no_lines` requires
+`lines_after_chrome == 0`; `no_remaining` requires it above zero with `remaining` at zero.
+Derived from numbers the trace already reports, so it is not a second parser. Measured, the
+swap now fails in three places including that one.
+
+**The corpus never reached one of the three verdicts.** The record named `"chrome only"` read
+`"Date posted"` -- which `shape.is_chrome` does **not** match -- so it came back `parsed`, and
+**nothing in the file covered `no_lines` reached via the chrome filter**. Repointed at two
+strings that are in `_CHROME`, plus a new assertion that all three verdicts must occur:
+without it the corroboration block above is satisfied by a corpus that only ever parses, which
+is what this one was.
+
+**Two docstring claims were unreachable.** The anti-drift test credited itself with catching
+both the verdict swap and a filter reordering. It caught neither. The swap is caught by its two
+siblings; **the reordering is not catchable at all**, and that is a property rather than a hole
+-- the three predicates are pure and `remaining` requires all three false, so the set reaching
+it is order-invariant. Stated rather than papered over.
+
+**And one named mutation was inert.** The subtraction test claimed `len(after_repeats)` in the
+post-subtraction slot would drive it red. Measured across all 13 records the file drives,
+`drop_consecutive_repeats` removes nothing, so the two counts are equal everywhere and the
+substitution changes no output. A mutation that changes nothing tests nothing. The docstring
+now names `len(raw)`, which drives it red with the text it quotes.
+
+### What the corpus actually covers, measured
+
+`len(checks) = 13` -- 8 from real fixtures, 5 synthetic. `jobs_tracker_row` 1,
+`jobs_tracker_empty` 0 (the walk correctly yields nothing), `jobs_search` **7**. My worry that
+`jobs_search` might silently not exist did not materialise; the fixture is there. But **reach
+is thinner than 13 looks**: the 7 `jobs_search` records are identical in every traced dimension,
+so they add count rather than coverage. That is recorded so nobody reads 13 as 13 distinct
+shapes.
+
+---
+
+## 37. The new falsifiable prediction
+
+**The next call settles which of `parse_job_card`'s two refusals fires, and the answer picks
+the repair. I do not know which, and I am not guessing.**
+
+| the trace reports | what it means | where the repair is |
+|---|---|---|
+| `if not lines`, with the drop at the **subtraction** step | the screen-reader budget took the row's lines, by some route other than the one fixed in Part 4 | `strip_screen_reader_copies` / the hidden budget |
+| `if not lines`, with the drop at the **chrome** step | `shape.is_chrome` is matching the row's own content | `_CHROME`, and it is a one-word question |
+| `if not remaining` | the title survived and was classified as a **status or a time-ago** | `_JOB_STATUS_LINE` or `has_time_ago` matching a title |
+| `parsed` | the trace disagrees with the row count, and the defect is in the trace | here |
+
+**The fourth row is the one I would bet against and it is on the list anyway**, because the
+whole point of the last two parts is that my bets have been losing and the instruments have
+not.
+
+### The call
+
+Restart, confirm `linkedin_server_info`'s `build.code.commit` matches `git rev-parse
+--short=12 HEAD`, then, paired with `linkedin_search_jobs` and repeated twice:
+
+```
+linkedin_saved_jobs()
+```
+
+Read the sentence beginning **`PARSE TRACE`**. It names the line and the tally says which
+filter claimed each of the record's lines. The ladder beside it now carries `L` counts, so
+where `rowOf`'s second stop should have fired is readable in the same message.
+
+---
+
+## 38. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **2008 passed** (Part 4's close-out, re-measured).
+* Out: **2013 passed, 0 failed**, in 572.63 s.
+* The delta is 5, all new tests in `tests/test_tracker_harvest_census.py`: the anti-drift
+  agreement check, the two refusal-naming tests, the privacy guard, and the ladder's `links`
+  field. `d58bda3` added assertions to existing tests rather than tests, so the count is
+  unchanged across it.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41.
+
+**No write performed or attempted.** No `confirm_token` reached any tool. `unsave_job` was not
+fired. The Chrome profile was never launched from a script. The one source mutation I ran
+myself -- swapping the verdict strings to confirm the strengthened guard bites -- was reverted
+from a byte copy and `git status` verified clean afterwards.
+
+**Commits**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `5903948` | `diag(parser): which of parse_job_card's two refusals fired, and on what` |
+| `d58bda3` | `test(trace): the anti-drift guard could not tell the two refusals apart` |
+
+Files: `linkedin_server/shape.py`, `linkedin_server/server.py`, `linkedin_server/writes.py`,
+`tests/test_tracker_harvest_census.py`. **All ASCII-clean**, verified by byte scan.
+
+**One environmental note, no action taken.** `core.autocrlf=true` and there is no
+`.gitattributes`, so `git checkout --` normalises a reverted file to CRLF. `tests/test_tracker_harvest_census.py`
+was LF on disk and is CRLF after the mutation runs. The committed blob is unchanged and
+`git diff` against HEAD is empty; only the working-file bytes moved, into git's canonical form
+for this repo.
+
+---
+
+## 39. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **Why `parse_job_card` rejects the live record** | one `linkedin_saved_jobs` after a restart. The `PARSE TRACE` sentence names the line and the tally names the filter; section 37 maps each answer to its repair | one call |
+| **`unsave_job` previewable** | still downstream of the Saved tab reading. Anchor in place since Part 2, direction blocked since then | follows |
+| **The trace corpus is 13 records but fewer shapes** | 7 of them are identical `jobs_search` rows. A record set chosen for shape rather than provenance would be a better guard | small |
+| **`HARVEST_BLOCK_CARDS_JS` has the Part 4 defect** | notifications are its only caller, no fixture exercises it. Unchanged on argument alone | small, needs evidence |
+| **No capture of a populated SAVED tab** | five parts in, still the artefact that would have shortened every one of them | a capture run |
+| **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
