@@ -1341,6 +1341,136 @@ async def read_main_text(page: Any) -> str:
         return ""
 
 
+# ---------------------------------------------------------------------------
+# Job description readiness
+# ---------------------------------------------------------------------------
+
+#: The description section, as LinkedIn's SDUI layer marks it FILLED.
+#: MEASURED 2026-08-30 over the five job captures in tests/fixtures, and
+#: re-counted independently before this shipped:
+#:
+#:   capture                         this anchor   id="JobDetails_AboutTheJob_<id>"
+#:   job_detail_shell                     0                  0
+#:   job_detail_following                 0                  1   <-- description ABSENT
+#:   job_detail                           1                  1
+#:   job_detail_hydrated                  1                  1
+#:   job_detail_following_hydrated        1                  1
+#:
+#: THE OBVIOUS ANCHOR IS THE WRONG ONE, AND WRONG IN THE DANGEROUS DIRECTION.
+#: ``id="JobDetails_AboutTheJob_<id>"`` is the SLOT and is drawn before its
+#: content; it is PRESENT on ``job_detail_following``, the capture whose
+#: description is missing, so a wait anchored on it reports READY in precisely
+#: the state this wait exists to detect. The ``data-sdui-component`` attribute
+#: marks the slot FILLED. Measured, not preferred -- and the difference is a
+#: whole column of the table above.
+JOB_DESCRIPTION_SLOT = (
+    'main [data-sdui-component='
+    '"com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheJob"]'
+)
+
+#: The ceiling this wait may spend. Generous, and it costs nothing on a page
+#: that has drawn -- the sibling wait, ``wait_for_save_control``, was measured
+#: at 27 ms on a ready page, because an attached element satisfies the wait at
+#: once. What the bound buys is that a page which never draws costs this much
+#: ONCE and then SAYS SO, instead of producing a confident refusal about
+#: LinkedIn from a read taken before LinkedIn had answered.
+JOB_DESCRIPTION_TIMEOUT_MS = 10_000
+
+
+async def wait_for_job_description(page: Any) -> dict[str, Any]:
+    """Wait for the description to ATTACH. Three outcomes, and none is a verdict.
+
+    WHY THIS EXISTS, and it is a defect in this package rather than in
+    LinkedIn. ``browser.goto`` settles a navigation with ``networkidle`` and
+    falls back to a flat timer, and those two branches are SEVEN SECONDS APART
+    -- roughly 1 s if networkidle resolves, roughly 7 s if it does not.
+    Measured across 37 recorded ``/jobs/view/<id>`` loads, the fast branch ran
+    28 times; across 15 reads whose outcome was recorded the split was total,
+    13 of 13 early reads refusing for a missing description and 2 of 2
+    late reads drawing the posting in full. The page was fine. The read was
+    early.
+
+    A DURATION IS THE WRONG FIX AND IS NOT TAKEN HERE. Raising the settle, or
+    flooring it, would tax every surface for one surface's missing readiness
+    check -- and nothing measured through the shipped build can distinguish
+    "2 s would be enough" from "6 s would be enough", because the settle is
+    binary by construction and every candidate number sits inside an unmeasured
+    bracket. This waits for the NAMED ELEMENT and returns the moment it exists,
+    so a drawn page costs almost nothing and an undrawn one costs the ceiling
+    and reports that it did.
+
+    ONE BOUNDED WAIT, ONE VERDICT, NO RETRY LOOP -- the same contract as
+    :func:`wait_for_save_control`. Re-reading until the answer changes is how a
+    racy reader is made to LOOK reliable while staying racy, and it would make
+    the timeout mean nothing.
+
+    THREE-VALUED, AND THE THIRD VALUE IS NOT DECORATION:
+
+    ======================  ==================================================
+    ``attached`` is True    the anchor attached. The description is drawn.
+    ``attached`` is False   the wait ran its full course and found nothing.
+                            THIS IS A FINDING about the page.
+    ``attached`` is None    the readiness check ITSELF failed -- a locator
+                            error, a closed page. Evidence for NEITHER.
+    ======================  ==================================================
+
+    Collapsing None into False would report a broken instrument as a finding
+    about LinkedIn, which is the same class of error as a gate printing an
+    unmeasured reversibility claim. It is also not hypothetical: that exact
+    mutation came back green on first pass in the save wave.
+
+    ``attached`` rather than ``visible``: the question is whether the content
+    layer has rendered this section at all, not whether it is scrolled into
+    view.
+
+    Never raises. The caller decides what to do with all three.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT IS THE INSTRUMENT-FAILED VALUE, not the finding. Nothing
+        # below sets True except the wait returning, and nothing sets False
+        # except a timeout specifically -- so a path nobody thought about
+        # cannot arrive claiming to have measured LinkedIn.
+        "attached": None,
+        "waited_ms": 0,
+        "timeout_ms": int(JOB_DESCRIPTION_TIMEOUT_MS),
+        "failure": None,
+        "why": "the readiness check did not run",
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(JOB_DESCRIPTION_SLOT).first.wait_for(
+            state="attached", timeout=JOB_DESCRIPTION_TIMEOUT_MS
+        )
+        out["attached"] = True
+        out["why"] = "the description section attached"
+    except Exception as exc:  # noqa: BLE001 - classified below, never re-raised
+        # CLASSIFIED BY NAME, which is this package's own idiom rather than a
+        # shortcut -- writes.py already tells a genuine expiry from an
+        # instrument failure the same way, and it avoids importing playwright
+        # into a module that has never needed it. Python's builtin TimeoutError,
+        # asyncio's, and playwright's all carry the name and all mean the same
+        # thing here: the wait ran its course.
+        name = type(exc).__name__
+        out["failure"] = name
+        if name == "TimeoutError":
+            # THE ONLY PATH THAT MAY REPORT A FINDING. A timeout is the page
+            # answering "not here" for the whole bounded period; every other
+            # exception is this function failing to ask.
+            out["attached"] = False
+            out["why"] = (
+                "the description section did not attach within the bound, so "
+                "the page had not drawn it"
+            )
+        else:
+            out["why"] = (
+                f"the readiness check itself failed ({name}), so this says "
+                "nothing about the page"
+            )
+            logger.debug("description readiness check failed: %s: %s", name, exc)
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
 async def read_job_posting(page: Any) -> dict[str, Any]:
     """THE reader for a job posting. Both job-detail paths call this one.
 
@@ -1362,7 +1492,15 @@ async def read_job_posting(page: Any) -> dict[str, Any]:
     Character counts, never the text: a job page carries a hiring team and a
     "people also viewed" rail, so the body is not this server's to hand around
     for diagnostics.
+
+    THE READINESS WAIT RUNS FIRST, AND THE ORDER IS THE WHOLE OF ITS VALUE.
+    Added 2026-08-30. After the text has been read, waiting for the description
+    changes nothing about what was read -- it would spend up to ten seconds to
+    produce a field describing a page that had already been parsed. Every read
+    below it therefore happens on a page that has either drawn its description
+    or spent the bound failing to, and ``description_wait`` says which.
     """
+    description_wait = await wait_for_job_description(page)
     identity = await read_job_identity(page)
     main_text = await read_main_text(page)
     try:
@@ -1381,6 +1519,7 @@ async def read_job_posting(page: Any) -> dict[str, Any]:
         ),
         "main_present": main_present,
         "main_chars": len(main_text),
+        "description_wait": description_wait,
     }
 
 

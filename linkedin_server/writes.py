@@ -1862,7 +1862,9 @@ async def _load(navigator: Any, page: Any, url: str, *, surface: str) -> str:
     return landed
 
 
-async def _read_posting_facts(page: Any, target: str) -> dict[str, Any]:
+async def _read_posting_facts(
+    page: Any, target: str, *, navigator: Any = None
+) -> dict[str, Any]:
     """The title and employer of one posting, off the posting itself.
 
     Held to the SAME believability standard as ``linkedin_job_detail``: a
@@ -1896,6 +1898,15 @@ async def _read_posting_facts(page: Any, target: str) -> dict[str, Any]:
                 missing,
                 main_present=reading["main_present"],
                 main_chars=reading["main_chars"],
+                # THE GATE INHERITS THE READINESS FIX FOR FREE, which is the
+                # half of it that matters most: the apply and save confirm
+                # gates read the SAME page through the SAME reader, so a gate
+                # refusing here now says whether it looked too early or
+                # whether the page really never drew. ``navigator`` is
+                # optional only so a test may drive this without a browser;
+                # in production it is BROWSER and it is always passed.
+                description_wait=reading["description_wait"],
+                settle=dict(getattr(navigator, "last_settle", None) or {}),
             )
         )
     return {"title": detail.get("title"), "company": detail.get("company")}
@@ -2408,7 +2419,7 @@ async def observe(
         # cannot drift apart.
         url = str(spec.url_template or "").format(target=target)
         landed = await _load(navigator, page, url, surface="job posting")
-        facts = await _read_posting_facts(page, target)
+        facts = await _read_posting_facts(page, target, navigator=navigator)
         state, why = await _read_follow_state(page)
         return _record(
             spec,
@@ -2429,7 +2440,7 @@ async def observe(
         # for the same job id, so a payload search classifies nothing.
         url = str(spec.url_template or JOB_POSTING_URL).format(target=target)
         landed = await _load(navigator, page, url, surface="job posting")
-        facts = await _read_posting_facts(page, target)
+        facts = await _read_posting_facts(page, target, navigator=navigator)
         state, why = await _read_apply_route(page, target)
         return _record(
             spec,
@@ -2467,7 +2478,7 @@ async def observe(
         # state does not exist on this account to be read.
         url = str(spec.url_template or "").format(target=target)
         landed = await _load(navigator, page, url, surface="job posting")
-        facts = await _read_posting_facts(page, target)
+        facts = await _read_posting_facts(page, target, navigator=navigator)
         state_landed = await _load(
             navigator, page, SAVED_LIST_URL, surface="saved jobs"
         )

@@ -1095,6 +1095,8 @@ def job_detail_failure_note(
     *,
     main_present: Optional[bool],
     main_chars: int,
+    description_wait: dict[str, Any],
+    settle: dict[str, Any],
 ) -> str:
     """Say WHICH field was absent and WHETHER the page drew anything.
 
@@ -1109,6 +1111,31 @@ def job_detail_failure_note(
     required fields were missing, whether ``<main>`` existed at all, and how
     much text it held. Those three separate the cases a caller actually has to
     tell apart.
+
+    TWO MORE PIECES OF EVIDENCE ARRIVED 2026-08-30, and they are the two that
+    turn this from a list of possibilities into an answer. Both are REQUIRED
+    keyword arguments rather than optional ones, because a caller that forgets
+    them silently produces the weaker note this rewrite exists to retire.
+
+    ``description_wait`` -- the readiness verdict from
+    ``dom.wait_for_job_description``. Three-valued: attached, not attached
+    after a full bounded wait, or the check itself failed.
+
+    ``settle`` -- ``browser.BROWSER.last_settle``, which says HOW LONG the
+    navigation waited before anything was read. It has two branches seven
+    seconds apart, and until this argument existed a refusal could not tell
+    "I looked one second after DOMContentLoaded" from "I waited the whole
+    settle and it still was not there". THOSE WANT OPPOSITE RESPONSES -- the
+    first is a re-read, the second is a finding -- and a whole table of false
+    per-posting conclusions was built on the afternoon nobody could tell them
+    apart.
+
+    THE CASE THIS IS MOST CAREFUL ABOUT is the one that looks like a LinkedIn
+    outage and is not: an anchor that never matches on ANY posting fails
+    identically to a dead page. So when the description wait times out, the
+    note says a component RENAME is a live possibility, because the response
+    to that is to re-measure the selector rather than to conclude anything
+    about the account.
     """
     fields = ", ".join(missing) or "none"
 
@@ -1141,15 +1168,88 @@ def job_detail_failure_note(
 
     return (
         f"missing required field(s): {fields}. And {drew}. "
-        "THREE THINGS PRODUCE THIS AND THEY WANT DIFFERENT RESPONSES: the page "
-        "had not finished drawing (re-read it); the posting is gone (check the "
-        "url by hand); or this one surface is failing while the session is "
-        "fine (measured 2026-08-30 -- linkedin_search_jobs rendered full "
-        "results in the same session, seconds after this read failed on two "
-        "different postings). Run linkedin_search_jobs as the control before "
-        "concluding anything about the account, and repeat this call before "
-        "concluding anything about the posting: single readings of this "
-        "surface have been measured disagreeing with themselves an hour apart."
+        + job_read_timing_note(description_wait, settle)
+    )
+
+
+#: The two settle branches ``browser.goto`` can take, named here so this
+#: module can describe one without importing the module that produces it.
+SETTLE_EARLY = "networkidle_resolved"
+
+
+def job_read_timing_note(
+    description_wait: dict[str, Any], settle: dict[str, Any]
+) -> str:
+    """WHEN the read happened, and whether the page had answered by then.
+
+    Split out from :func:`job_detail_failure_note` so it can be tested against
+    the four combinations directly, and so a future caller with the same two
+    pieces of evidence -- the write gate is one -- reads out the same sentence
+    rather than a second copy of it.
+
+    THE SENTENCE THIS REPLACED listed three theories and gave a reader no way
+    to choose between them: "the page had not finished drawing (re-read it);
+    the posting is gone (check the url by hand); or this one surface is failing
+    while the session is fine." All three were real. Which one applied was the
+    question, and the note answered it with a list.
+    """
+    attached = description_wait.get("attached")
+    waited = description_wait.get("waited_ms")
+    branch = str(settle.get("branch") or "unrecorded")
+    settled = settle.get("settled_ms")
+
+    when = (
+        f"The navigation settled on the {branch!r} branch after {settled}ms"
+        if settled is not None
+        else f"The navigation settle was not recorded (branch {branch!r})"
+    )
+
+    # ANYTHING THAT IS NOT A DEFINITE True OR False IS UNKNOWN, not just None.
+    # The only producer sets the three values, but this function's LAST branch
+    # says "the page drew fine", and a stray value falling into it would be a
+    # confident claim manufactured by a typo -- which is the exact failure
+    # class this whole change exists to close, one level down.
+    if attached is not True and attached is not False:
+        return (
+            f"{when}, and THE READINESS CHECK ITSELF DID NOT COMPLETE "
+            f"({description_wait.get('failure')}), so nothing here is evidence "
+            "about LinkedIn -- not that the page failed, and not that it "
+            "rendered. Read the posting again. If this repeats, the fault is "
+            "in this server rather than on the page."
+        )
+
+    if attached is False:
+        return (
+            f"{when}, and THE DESCRIPTION WAS THEN WAITED FOR AND NEVER "
+            f"ARRIVED ({waited}ms, the full bound). That is not a read taken "
+            "too early -- the wait ran its course after the settle, whichever "
+            "branch it took. TWO THINGS PRODUCE IT AND THEY WANT OPPOSITE "
+            "RESPONSES. Either the posting genuinely did not render (open the "
+            "url by hand and compare), or LINKEDIN HAS RENAMED THE COMPONENT "
+            "this server waits on, in which case every posting will fail "
+            "identically and the fix is to re-measure the selector, not to "
+            "conclude anything about the account. Call linkedin_job_detail on "
+            "a second posting: if that fails the same way, it is the selector. "
+            "And run linkedin_search_jobs as the control before concluding "
+            "anything about the session -- measured 2026-08-30, it returned "
+            "full results in the same session seconds after this read failed "
+            "on two different postings, so this one surface can fail while the "
+            "account is entirely healthy. A reader who does not know that "
+            "debugs their session."
+        )
+
+    early = branch == SETTLE_EARLY
+    return (
+        f"{when}, and the description DID attach ({waited}ms), so the page had "
+        "drawn by the time it was parsed. The fields above are therefore "
+        "missing from a page that rendered, which is a PARSER problem rather "
+        "than a timing one"
+        + (
+            " -- and note the settle took the early branch, so this is not the "
+            "read-too-early failure that branch used to cause."
+            if early
+            else "."
+        )
     )
 
 

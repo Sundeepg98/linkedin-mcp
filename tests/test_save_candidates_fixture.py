@@ -885,17 +885,36 @@ async def test_the_control_layer_and_the_text_layer_are_independent(over):
 
 def test_a_failure_note_separates_the_three_page_states():
     """THREE STATES, THREE SENTENCES. Absent is not empty is not unparsed."""
+    # THE TWO TIMING ARGUMENTS ARE HELD CONSTANT ACROSS ALL FOUR, and that is
+    # the point of this test rather than an inconvenience: what is under test
+    # is that the MAIN-element evidence produces four distinct sentences. They
+    # became required on 2026-08-30 -- see test_job_description_readiness.py --
+    # so the note can no longer be built without saying when it looked.
+    timing = dict(
+        description_wait={
+            "attached": False,
+            "waited_ms": 10000,
+            "timeout_ms": 10000,
+            "failure": "TimeoutError",
+            "why": "not attached",
+        },
+        settle={
+            "branch": "networkidle_timed_out",
+            "settled_ms": 7003,
+            "settle_ms_configured": 3500,
+        },
+    )
     no_main = shape.job_detail_failure_note(
-        ["description"], main_present=False, main_chars=0
+        ["description"], main_present=False, main_chars=0, **timing
     )
     empty_main = shape.job_detail_failure_note(
-        ["title", "description"], main_present=True, main_chars=0
+        ["title", "description"], main_present=True, main_chars=0, **timing
     )
     full_main = shape.job_detail_failure_note(
-        ["description"], main_present=True, main_chars=5_648
+        ["description"], main_present=True, main_chars=5_648, **timing
     )
     unknown = shape.job_detail_failure_note(
-        ["description"], main_present=None, main_chars=0
+        ["description"], main_present=None, main_chars=0, **timing
     )
 
     assert "drew NO <main>" in no_main
@@ -952,6 +971,8 @@ async def test_a_main_presence_check_that_failed_is_not_a_missing_main():
         ["description"],
         main_present=reading["main_present"],
         main_chars=reading["main_chars"],
+        description_wait=reading["description_wait"],
+        settle={},
     )
     assert "could not be established" in note, note
     assert "drew NO <main>" not in note
@@ -968,14 +989,53 @@ def test_a_failure_note_names_the_control_that_separates_page_from_session():
     session.
     """
     note = shape.job_detail_failure_note(
-        ["description"], main_present=True, main_chars=1_092
+        ["description"],
+        main_present=True,
+        main_chars=1_092,
+        description_wait={
+            "attached": False,
+            "waited_ms": 10000,
+            "timeout_ms": 10000,
+            "failure": "TimeoutError",
+            "why": "not attached",
+        },
+        settle={
+            "branch": "networkidle_timed_out",
+            "settled_ms": 7003,
+            "settle_ms_configured": 3500,
+        },
     )
     assert "linkedin_search_jobs" in note, note
     assert "control" in note
-    assert "repeat this call" in note, (
-        "the note must ask for a repeat: the disagreement that started this "
-        "wave was built entirely out of single readings."
+    # THE REPEAT ASSERTION WAS RETIRED 2026-08-30 AND THE REASON IS THE FIX.
+    # It read:
+    #
+    #     assert "repeat this call" in note, (
+    #         "the note must ask for a repeat: the disagreement that started
+    #         this wave was built entirely out of single readings.")
+    #
+    # It was right, and it was right BECAUSE a single reading of this surface
+    # could not be trusted -- browser.goto settled on one of two branches seven
+    # seconds apart, and a read on the fast branch landed before LinkedIn had
+    # sent the description. That is now fixed at the source:
+    # dom.wait_for_job_description spends a bounded wait on the description
+    # itself, so a note built on attached=False is one where the full bound WAS
+    # spent. Asking for a repeat of a reading that already waited is asking the
+    # reader to pay ten seconds to learn nothing.
+    #
+    # WHAT REPLACED IT is a better instruction, and it is asserted here rather
+    # than merely described: try a DIFFERENT posting, because a component
+    # rename fails identically to a dead page and only a second posting tells
+    # them apart.
+    assert "repeat this call" not in note
+    assert "a second posting" in note, (
+        "the note must name the one action that separates a renamed selector "
+        "from a posting that genuinely did not draw."
     )
+    # And the search-jobs control SURVIVES the rewrite. It answers a different
+    # question from the readiness wait -- whether the SESSION is healthy, not
+    # whether this page drew -- and dropping it would have been a real loss.
+    assert "entirely healthy" in note
 
 
 def test_the_readiness_verdict_carries_the_count_it_passed_on():

@@ -1163,6 +1163,14 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
                         missing,
                         main_present=reading["main_present"],
                         main_chars=reading["main_chars"],
+                        # THE TWO PIECES OF EVIDENCE THAT SAY *WHEN*. Added
+                        # 2026-08-30. BROWSER.last_settle costs nothing -- it
+                        # reports a wait goto was already performing -- and it
+                        # is the difference between "I looked one second after
+                        # DOMContentLoaded" and "I waited the full settle and
+                        # the field still was not there".
+                        description_wait=reading["description_wait"],
+                        settle=BROWSER.last_settle,
                     ),
                     url=final_url,
                     hint="open the url yourself and compare with what this reports",
