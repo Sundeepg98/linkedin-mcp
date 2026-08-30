@@ -276,14 +276,21 @@ face, so the next reader gets the caveat without needing this document.
   reporting what I measured.
 - After the code change, before committing: `1742 passed in 437.08s` -- 1732 + the 10
   new tests, zero regressions.
-- **Final, on the committed tree: `1749 passed`.**
+- **Final, on the committed tree: `1746 passed in 399.50s`, zero failures.**
 
-**The total is not a constant, and the extra seven are not new tests I wrote.**
+**The total is not a constant, and the extra four above the ten are not tests I wrote.**
 `test_no_committed_identity` and `test_path_hygiene` are parametrized over TRACKED
-files, so committing a file adds a test. Between the middle run and the last one, three
-files became tracked (this audit, the test module, and the concurrent writer's audit)
-across two guards, plus the module's own 10. Anyone re-deriving 1732 -> 1749 by
-subtraction should expect that gap and not read it as coverage appearing from nowhere.
+files, so committing a file adds test cases. `1732 -> 1746` is the 10 new tests plus 4
+parametrized entries for files that became tracked during the wave -- this audit, the
+test module, and the concurrent writer's audit. Anyone re-deriving the delta by
+subtraction should expect that gap rather than read it as coverage from nowhere.
+
+**One red on the way, and it was the repo catching me.** The first committed draft of
+this file failed `test_no_committed_identity`: the full `session.json` digest I pasted
+as a receipt contains a ten-digit decimal run that matches the Indian-mobile shape. The
+fix was to shorten the receipt, twice -- the second time because the sentence explaining
+the first fix quoted the offending run. The guard was not touched and no allowance was
+declared for it.
 
 **`_state/` untouched.** `_state/session.json` is byte-identical, same size and same
 mtime as at wave start:
