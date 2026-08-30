@@ -68,10 +68,14 @@ def derive(src: str, old: str, new: str, *, count: int = 1) -> str:
     return out
 
 
-def hidden_rows() -> str:
-    """DERIVED: the row capture with its whole body inside a hidden element."""
-    out = derive(markup("jobs_tracker_row"), "<main>", '<main><div style="display:none">')
+def wrapped_rows(style: str) -> str:
+    """DERIVED: the row capture with its whole body inside a styled element."""
+    out = derive(markup("jobs_tracker_row"), "<main>", f'<main><div style="{style}">')
     return derive(out, "</main>", "</div></main>")
+
+
+def hidden_rows() -> str:
+    return wrapped_rows("display:none")
 
 
 def bare_anchors() -> str:
@@ -141,6 +145,54 @@ async def test_a_hidden_row_still_harvests():
     records, rows, dropped = await _with_html(hidden_rows(), work)
     assert len(records) == 1, (records, rows, dropped)
     assert len(rows) == 1, (records, rows, dropped)
+
+
+async def test_a_visibility_hidden_row_is_what_ACTUALLY_breaks_the_harvest():
+    """The other kind of hidden, and the two are opposite here.
+
+    THE MOST USEFUL FACT THIS MODULE ESTABLISHES, and it is the difference
+    between the two CSS ways of hiding something:
+
+        display: none       the element is NOT rendered, so innerText falls
+                            back to textContent and the walk reads it fine.
+        visibility: hidden  the element IS rendered -- it still has a box --
+                            and the rendered-text collection skips it, so
+                            innerText is EMPTY and record() drops the row.
+
+    Measured, not reasoned, over the same capture under each wrapper:
+
+        no wrapper           records=1  dropped_empty=0
+        display:none         records=1  dropped_empty=0
+        visibility:hidden    records=0  dropped_empty=1
+
+    WHY IT MATTERS TO THE LIVE DEFECT. The Saved tab produces exactly the
+    right-hand signature -- job-row anchors present, zero records -- and this
+    is one of the two states that produce it. The other is a row carrying no
+    text at all. ``dom.read_tracker_row_shape`` is what separates them: within
+    the row, 0 rendered against 0 present is an empty row, and 0 rendered
+    against N present is this.
+
+    SHOWN FAILING by wrapping in ``display:none`` instead, which is the whole
+    point of the pair::
+
+        AssertionError: assert 1 == 0
+        -- display:none does not break the harvest, so this proves nothing
+    """
+
+    async def work(page):
+        records, rows, dropped = await _harvest(page)
+        census = await dom.harvest_census(
+            page, href_pattern=dom.JOB_HREF, max_items=75
+        )
+        return records, rows, census
+
+    records, rows, census = await _with_html(
+        wrapped_rows("visibility:hidden"), work
+    )
+    assert len(records) == 0, records
+    assert len(rows) == 0, rows
+    assert census["anchors_keyed"] == 1, census
+    assert census["dropped_empty_text"] == 1, census
 
 
 # ---------------------------------------------------------------------------
