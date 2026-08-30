@@ -294,11 +294,12 @@ after   sha256 f0892e35688868fa...  7813 bytes  Aug 26 00:41
 ```
 
 (The digest is printed as a 16-hex-character prefix, not in full, and that is not
-tidiness. `test_no_committed_identity` refused the first draft of this file: the full
-digest contains the run `9605770562`, ten digits opening `96`, which is the shape of an
-Indian mobile number. The guard cannot tell that run from a real one and should not try,
-so the receipt got shorter rather than the guard weaker. Re-derive in full with
-`sha256sum _state/session.json`.)
+tidiness. `test_no_committed_identity` refused the first draft of this file: further
+into the digest sits a run of ten consecutive decimal digits opening `9`, which is the
+shape of an Indian mobile number. The guard cannot tell that run from a real one and
+should not try, so the receipt got shorter rather than the guard weaker -- and this
+sentence names the shape without reproducing it, which is the second half of the same
+lesson. Re-derive in full with `sha256sum _state/session.json`.)
 
 The Chrome profile was never launched from a script; every reading in this wave was
 taken by the test suite's own local headless Chromium over frozen local HTML, which
