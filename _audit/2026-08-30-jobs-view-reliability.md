@@ -634,3 +634,39 @@ Fifteen reads, four postings, still perfect separation and still no counterexamp
 finding stands; my explanation of *which* branch gets chosen does not, and I have not
 substituted another one.
 
+---
+
+## Appendix F -- the consolidated time series
+
+Every live call this wave made, in one place. `gap` is seconds since the previous call to
+this server from any agent. Every url is `https://www.linkedin.com/jobs/view/<id>` except
+the control. `branch` is inferred from duration and the inference is sound in one
+direction absolutely: **a timed-out settle cannot finish in under 7 s**, because the flat
+wait alone is 2 x 3500 ms and runs to completion.
+
+| # | time IST | gap | tool | job id | dur | branch | outcome | main |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 14:50:26 | 17 | job_detail | 4448301715 Fivetran | 1s | early | FAIL `description` | 1348 |
+| 2 | 14:50:48 | 22 | job_detail | 4448301715 Fivetran | 8s | **timed out** | **DREW** | -- |
+| 3 | 14:52:03 | 75 | job_detail | 4448301715 Fivetran | 1s | early | FAIL `description` | 1348 |
+| 4 | 14:54:30 | 147 | **search_jobs** | (control) | 9s | timed out | 7 rows, full | -- |
+| 5 | 14:54:42 | 12 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 6 | 14:54:50 | 8 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 7 | 14:54:59 | 9 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 8 | 14:56:49 | 110 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 9 | 14:58:03 | 74 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 10 | 15:01:50 | 227 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 11 | 15:05:30 | 220 | job_detail | 4456021840 Gunpowder | 1s | early | FAIL `description` | 1315 |
+| 12 | 15:05:57 | 27 | job_detail | 4448301715 Fivetran | 1s | early | FAIL `description` | 1348 |
+| 13 | 15:06:05 | 8 | job_detail | 4454627766 MeridianSquare | 2s | early | FAIL `description` | 1323 |
+| 14 | 15:11:42 | 337 | job_detail | 4456021840 Gunpowder | 8s | **timed out** | **DREW** | -- |
+| 15 | 15:17:57 | 375 | job_detail | 4454627766 MeridianSquare | 3s | early | FAIL `description` | 1323 |
+
+**Spacing:** minimum gap 8 s, well above the enforced 3 s floor; median 74 s; two gaps
+over 300 s taken deliberately to force a browser idle-close. Fifteen job-page loads over
+27 minutes. Nothing was hammered, and the two long gaps are experiments, not politeness.
+
+**Every failure is `missing required field(s): description`** -- never `title`, on any of
+the fifteen. **Every `main` count is byte-stable per posting** across up to seven repeats.
+
+Commit: `90e1936` on `master`, not pushed, `linkedin_server/browser.py` and this file only.
