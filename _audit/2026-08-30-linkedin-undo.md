@@ -666,3 +666,282 @@ ASCII-clean**, verified by byte scan.
 | **No capture of a populated SAVED tab, and none of a SAVED posting** | Every fixture predates the first save, so BOTH the ON label and a saved row are modelled by derivation rather than capture. The label is measured live four times, so this is not a correctness gap -- it is the reason offline tests cannot prove the live shape | a capture run |
 | **Pre-existing count rot in the prose, NOT caused by this change** | `README.md:5` and its "The three that write" header, `server.py:1` and its module docstring, and `linkedin_server/__init__.py:8` all say three or four writes where **five** ship. `tests/test_server_surface.py` pins the real numbers and derives the word "five" from `writes.PERFORMABLE`. Flagged rather than fixed: out of this wave's scope, and the fix means writing two accurate new table rows | lead's call |
 | **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | Found while mutation-testing something else. Its multi-state branch returns before the wrong-state comparison, so the unknown gate is the only thing between an unreadable origin and a rendered confirm block for that action. No test exercises it | small |
+
+---
+---
+
+# Part 3 -- the harvest is not fixed, and the theory that said it would be is dead
+
+**Commits:** `043b193`, `83bddcb` on `master`, **not pushed**.
+**Baseline in:** 1986 passed. **Baseline out:** 2001 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 14. The headline, stated before the detail
+
+**I did not fix the harvest.** I killed my own theory about it, established the one
+mechanism that genuinely does break it, and built the three instruments that name the live
+cause in a single call. The theory was mine, from Part 2, so it goes first.
+
+The lead's framing also needs one correction, and it changes what the asymmetry means.
+
+---
+
+## 15. The hypothesis that died
+
+Part 2 proposed: the Saved rows are drawn but not painted, and
+``HARVEST_LINKED_CARDS_JS``'s ``record()`` -- which returns null for a row whose
+``innerText`` is empty -- is discarding them.
+
+**Measured offline, that is FALSE.** Per the HTML specification, ``innerText`` on an element
+that is *not being rendered* returns the same value as ``textContent``. So a
+``display:none`` row harvests perfectly:
+
+```
+no wrapper           records=1  parsed=1  dropped_empty=0
+display:none         records=1  parsed=1  dropped_empty=0
+```
+
+**The obvious repair would have been actively wrong.** Falling back to ``textContent`` in
+``record()`` -- the fix that follows from the dead theory -- would have changed behaviour
+every other surface depends on, to cure a disease this page does not have. It is exactly the
+shape of fix the lead warned about: one that makes Saved work by changing something the
+other tabs rely on. ``test_a_hidden_row_still_harvests`` now pins the refutation so nobody
+re-derives it.
+
+### What DOES break it, and the two kinds of hidden are opposite
+
+```
+visibility:hidden    records=0  parsed=0  dropped_empty=1
+```
+
+| CSS | rendered? | ``innerText`` | the walk |
+|---|---|---|---|
+| ``display: none`` | no | falls back to ``textContent`` | **reads the row fine** |
+| ``visibility: hidden`` | YES -- it still has a box | **empty** | **drops the row** |
+
+That is the most useful fact this wave produced, and it is now
+``test_a_visibility_hidden_row_is_what_ACTUALLY_breaks_the_harvest`` rather than a sentence.
+The live Saved tab produces precisely the right-hand signature.
+
+---
+
+## 16. The lead's asymmetry, corrected
+
+> "Three tabs, one function, and only ONE of them fails. Saved failed 6/6 while Draft and
+> Applied passed 2/2 through the same path."
+
+**Applied is not evidence about the harvest at all.** Its count is 0, it draws its empty
+state, and it has no rows to harvest -- it exercises the corroborated-empty path and never
+reaches the card walk with anything. Counting it as a passing witness for the walk
+overstates the evidence by one tab.
+
+So the real asymmetry is **Saved against Draft only**, and it is now **8 failures to 0**
+against **2 successes to 0**. Draft's row carries readable text; Saved's rows produce none.
+That is a narrower and more useful statement than the three-way one, and it survives the
+correction rather than being weakened by it.
+
+**Why Draft works is therefore already answered**: its row is rendered and its text is
+readable, which is the state the walk is built for. What is NOT yet answered is why Saved's
+is not -- and that is a fact about the page, not about the code, which is why no amount of
+reading the walk settles it.
+
+---
+
+## 17. The refusal could not choose, and the caller already held the number
+
+The Part 2 note said "that is the card walk or the row parser" and could not choose between
+them. That is **one integer's worth of ignorance, and ``_read_tracker`` was throwing it
+away**: it computes ``rows, dropped = dom.parse_all(records, ...)`` and reported neither
+``len(records)`` nor ``dropped``.
+
+```
+records 0                  -> the WALK lost them. The parser was never handed anything.
+records N, dropped N       -> the walk found them, the PARSER rejected every one.
+```
+
+Different files, different repairs. Both numbers now reach the refusal.
+
+---
+
+## 18. Three instruments, none of which decides anything
+
+**``dom.harvest_census``** re-runs ``HARVEST_LINKED_CARDS_JS`` under a flag and reports
+``anchors_keyed`` (distinct keyed anchors considered) and ``dropped_empty_text`` (how many
+produced a row the walk refused for empty text -- the only way it discards anything, and
+until now it discarded them silently).
+
+*The same script, deliberately.* A separate counting routine would be free to disagree with
+the walk it counts, which is how a diagnostic starts lying.
+
+**``dom.read_tracker_row_shape``** climbs from each row anchor exactly as ``rowOf`` does and
+reports every level as a tag name and two character counts -- rendered against present:
+
+```
+A(0c,0k) 0/0 < DIV(2c,2k) 0/0 < DIV(1c,2k) 0/0 < MAIN(2c,2k) 310/288 < ...
+```
+
+**This is the reading that separates the two remaining candidates**, and it is the whole
+reason it exists:
+
+| within the row | means |
+|---|---|
+| 0 rendered / 0 present | the row is an addressable link around NOTHING. LinkedIn drew the link and not its contents. |
+| 0 rendered / N present | the text is there and not being rendered -- the ``visibility:hidden`` case above. |
+| M rendered / N present | the text is readable and the walk stopped short of it. A defect in the walk. |
+
+**Tag names and integers only.** No text and no attribute value leaves it: a tracker row
+names a company and a job, which is the ruling the save sweep already took. Guarded by
+``test_the_row_shape_reports_no_text_of_its_own``, shown failing with a real leak.
+
+**Plus** ``main``'s ``textContent`` length beside its ``innerText`` length, and
+``rows_visible`` beside ``rows_matching``.
+
+### The verdict is bounded at the row, and the first draft was not
+
+Every ladder ends at ``<main>``, ``<body>`` and ``<html>``, which always carry the page's own
+chrome. A verdict computed over the whole climb therefore reported the **tab strip** as the
+row's text and concluded the walk had "stopped short" -- confidently, and wrongly. A level
+holding more than one distinct job key is the container rather than the row, which is the
+same boundary ``rowOf`` itself stops on. The mutation that restores the bug is pinned:
+
+```
+>       assert "NO LEVEL WITHIN THE ROW" in note, note
+E       AssertionError: ... MAIN(2c,2k) 310/288 < BODY(1c,2k) 310/288 <
+E       HTML(2c,2k) 310/310. the row holds 310 characters and renders 310. The text
+E       exists and is readable, so a walk that returned nothing stopped short of it
+E       -- that is a defect in the walk.
+```
+
+---
+
+## 19. The read-only boundary caught this work twice, and both catches were right
+
+1. **An undeclared injected script.** ``tests/test_readonly.py`` pins the set of ``*_JS``
+   constants and fails on any addition. ``TRACKER_ROW_SHAPE_JS`` is now declared and scanned
+   by the same check as the other four.
+2. **The ``evaluate()`` waiver budget**, deliberately pinned so each injection has to move a
+   number in a reviewable diff. It goes **4 -> 6**, with each new site named in the comment.
+
+**A third waiver was proposed and NOT spent.** ``main``'s ``textContent`` length is read
+through ``locator.text_content()`` -- Playwright's own API -- rather than through a one-line
+``page.evaluate``. A waiver that a plain API call replaces is a waiver nobody should be asked
+to review.
+
+---
+
+## 20. Mutation testing, and the difference between a bad mutation and a weak guard
+
+Ten mutations run by a child; **C1-C8 all went red at the signature their docstrings name.**
+Transcript: `mutations5.md` in this session's scratchpad.
+
+**C9 did not go red, and it was a badly specified mutation rather than a surviving guard** --
+a distinction I asked for explicitly and got. My brief's mutation tested
+``node.style.display``, which is inline-only and does not inherit, so it could never fire on a
+row nested below the wrapper. The child re-ran it against ``node.closest('[style*="display:none"]')``,
+labelled the variant as outside the brief, and it went red with the documented signature. The
+guard is meaningful.
+
+**C10 was non-green for the wrong reason and the child said so**: renaming the constant makes
+``test_readonly.py`` fail at *import*, because its module-level dict reads the symbol by name,
+so neither boundary assertion is reached. The declaration is proven anchored to the real
+symbol; the boundary itself was not exercised.
+
+One method note worth carrying out of the slice: ``sed -i`` silently rewrote CRLF files to LF
+while ``git diff --stat`` still showed a clean one-line change. Every mutation was applied
+instead with a helper that refuses to write unless the occurrence count matches.
+
+---
+
+## 21. Where the live defect stands
+
+Read again on 2026-08-30 at 22:5x, on a **restarted process** (pid 26964, `7512b41`), paired
+with a search control either side:
+
+```
+WHAT WAS ON THE PAGE: a <main> carrying 256 characters, 8 links, and 4 of them ARE
+job-row links. [...] settled on 'networkidle_timed_out' after 7011ms, and the list DID
+resolve (88ms) [...] re-reading will return the same answer.
+```
+
+**Eight failures out of eight, across two processes and two hours, byte-identical.** Stability
+is itself a measurement and this one is as stable as they come -- which also means it is not a
+race, and the settle branch was the SLOW one on every reading.
+
+**What is settled:** it is not timing, not the settle, not the readiness wait, not a renamed
+row link, and not the ``display:none`` case.
+
+**What is not:** whether the rows carry no text at all, or carry text that is rendered-hidden.
+Those are one live call apart now and were not before.
+
+---
+
+## 22. The exact call that finishes this
+
+The running process is at `7512b41`; the instruments are at `83bddcb`. **A restart is
+required** -- confirm with ``linkedin_server_info`` that ``build.code.commit`` matches
+``git rev-parse --short=12 HEAD`` before believing any reading.
+
+Then, paired with ``linkedin_search_jobs`` as the control and repeated at least twice:
+
+```
+linkedin_saved_jobs()
+```
+
+Read `THE ROW'S SHAPE` in the refusal. Within the row -- the levels before the first one
+holding more than one distinct job key:
+
+* **0/0 at every level** -> the row is an addressable link around nothing. The repair is not
+  in the walk. Next question is where LinkedIn puts that text, which needs a capture.
+* **0/N** -> rendered-hidden, the ``visibility:hidden`` case. The repair is a readiness wait
+  that anchors on **visible** rather than **attached** for this surface, and
+  ``test_a_visibility_hidden_row_is_what_ACTUALLY_breaks_the_harvest`` already models it.
+* **M/N with M > 0** -> the text is readable and the walk stopped short. The repair is in
+  ``rowOf``.
+
+Three different repairs, and the ladder picks one.
+
+---
+
+## 23. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **1986 passed** (Part 2's close-out, re-measured).
+* Out: **2001 passed, 0 failed**, in 589.91 s.
+* The delta is 15: 11 new tests in ``tests/test_tracker_harvest_census.py``, plus 2
+  parametrized cases in ``test_readonly.py`` (it parametrizes over executed script sites, and
+  there are two more), plus 2 for the newly tracked test file picked up by
+  ``test_no_committed_identity`` and ``test_path_hygiene``.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41.
+
+**No write performed or attempted.** No `confirm_token` reached any tool. `unsave_job` was
+not fired. The Chrome profile was never launched from a script -- every offline reading came
+from the suite's own local headless Chromium over frozen local HTML, and every live reading
+went through the already-running MCP server.
+
+**Commits**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `043b193` | `diag(tracker): the walk's own account, and where a row's text is` |
+| `83bddcb` | `test(tracker): visibility:hidden is what breaks the harvest, not display:none` |
+
+Files: `linkedin_server/dom.py`, `linkedin_server/shape.py`, `linkedin_server/server.py`,
+`linkedin_server/writes.py`, `tests/test_readonly.py`,
+`tests/test_tracker_harvest_census.py`. **All ASCII-clean**, verified by byte scan.
+
+---
+
+## 24. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **The Saved tab still cannot be read, and it still blocks `unsave_job`** | one live `linkedin_saved_jobs` after a restart, read as section 22 sets out. Three candidate repairs, and the row-shape ladder picks one | one call, then a small fix |
+| **The readiness wait anchors on `attached`, which cannot exclude a rendered-hidden row** | if the ladder says 0/N, this surface needs `state="visible"`. NOT a general change -- the description wait's `attached` reasoning is correct for content existence, and only a surface whose consumer is `innerText` needs the stronger condition | small, and conditional on the reading |
+| **No capture of a populated SAVED tab** | every tracker fixture is the DRAFT tab with a row or the SAVED tab empty. A capture of the failing page would settle section 22 without a restart, and would be the artefact this surface has been missing for three parts of this audit | a capture run |
+| **Pre-existing count rot in the prose, NOT caused by this work** | README and `server.py` say three/four writes where five ship. Flagged in Part 2, still open | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
