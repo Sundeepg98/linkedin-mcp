@@ -1119,6 +1119,46 @@ async def linkedin_search_jobs(
         return _error(exc)
 
 
+async def _read_save_control_state(page: Any) -> dict[str, Any]:
+    """Is THIS posting saved, read off the control on the page already open.
+
+    The exact counterpart of the follow reading beside it, and three-valued for
+    the same reason: "we could not tell" has to be one of the three answers,
+    because on this control it is the COMMON one. ``shape.SAVE_LABELS`` holds a
+    single measured row -- the OFF state -- so a posting in any other state
+    comes back ``unknown`` rather than being guessed at.
+
+    WHY THIS IS NOT A DUPLICATE OF ``linkedin_saved_jobs``. That tool reads the
+    Saved TAB, a second page, and reconciles a list against LinkedIn's own
+    count; this reads the CONTROL, on a page that is already open, and costs no
+    navigation. They can also disagree, and the disagreement is informative
+    rather than a bug: the tab is authoritative about membership, the control
+    is authoritative about what the page will do if it is clicked, and
+    ``writes`` takes its direction from the first and its ANCHOR from the
+    second.
+
+    THE SECOND, WIDER LOOK RUNS ONLY ON ``unknown``, which is the rule
+    ``writes._live_control`` already runs on and not a new one. A state that
+    came back KNOWN was read off a label the verdict already names, so sweeping
+    there would be a round trip spent on repetition. On ``unknown`` there is
+    nothing to repeat -- ``read_save_control`` asks one CSS question and a page
+    that answers no leaves it holding nothing at all -- so the sweep is the
+    only thing that can say what was actually drawn.
+
+    NOTHING HERE BRANCHES ON THE ANSWER and no selector is built from it.
+    ``dom.save_control_selector`` still refuses every label outside
+    ``dom.SAVE_LABELS_SEEN``, so a name reported here cannot become a click by
+    having been reported.
+    """
+    control = await dom.read_save_control(page)
+    verdict = dict(
+        shape.save_state(control.get("label"), count=int(control.get("count") or 0))
+    )
+    if verdict.get("state") == shape.SAVE_UNKNOWN:
+        verdict["observed"] = await dom.read_save_candidates(page)
+    return verdict
+
+
 @mcp.tool()
 async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     """Read one job posting in full, including the description and the pay.
@@ -1135,6 +1175,16 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     it, and has no way to change anything about the posting. Nobody else on
     the page is collected either -- LinkedIn draws a hiring team and a
     "people also viewed" rail beside a job, and neither is read here.
+
+    save_state says whether the posting is already in your saved list, read off
+    the control on this same page rather than off the Saved tab, so it costs no
+    extra page load. It does not change that list in either direction. It is
+    three-valued, and 'unknown' is a real answer you will meet: only the
+    not-yet-bookmarked label has ever been measured on this account, so a
+    posting in any other state comes back unknown WITH the accessible names
+    that were actually on the page, under 'observed', rather than being guessed
+    at. Those names are REPORTED and nothing more -- no state is inferred from
+    one, and no click can be aimed by one.
 
     A field the page did not carry comes back null rather than blank. If the
     page did not render the posting at all the call FAILS instead of
@@ -1212,6 +1262,28 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["company_follow_state"] = shape.follow_state(
                 control.get("label"), count=int(control.get("count") or 0)
             )
+
+            # AND WHETHER IT IS SAVED, off the same rendering, for the same
+            # reason -- the save control sits beside the follow control on this
+            # very page. Added 2026-08-30, and the reason it did not exist
+            # before is worth stating because it is the reason it exists now.
+            #
+            # THIS IS THE ONLY READ-ONLY ROUTE TO THE SAVE CONTROL'S LABEL.
+            # shape.SAVE_LABELS holds one row, the OFF state, because the ON
+            # state could not be observed: nothing was saved on the account.
+            # That made unsave_job's anchor unobtainable and the situation
+            # circular. It stopped being circular on 2026-08-30, when the
+            # operator performed the first save -- but the only instrument that
+            # could see the ON label lived inside writes.perform, behind a
+            # confirm token, so RE-MEASURING it cost another supervised write.
+            # A toggle whose ON label can only be read by toggling it is a
+            # measurement nobody should have to pay twice for.
+            #
+            # It changes no vocabulary. dom.save_control_selector still refuses
+            # every label outside dom.SAVE_LABELS_SEEN, so a name REPORTED here
+            # cannot become a click by having been reported -- the same
+            # property the refusal diagnostic was built under.
+            out["save_state"] = await _read_save_control_state(page)
 
             # HOW THIS POSTING IS APPLIED TO, off the same open page and at no
             # extra load. The single most decision-relevant fact a card cannot

@@ -451,9 +451,10 @@ async def test_the_evidence_counts_what_was_actually_there():
     testing found that dropping ``main `` from the anchor walk left this file
     entirely green.
 
-    SHOWN FAILING by counting only anchors that are job rows::
+    SHOWN FAILING by counting only anchors that are job rows. The loop dies on
+    the FIRST state, which is the shell::
 
-        AssertionError: ('empty', 0, 0) != ('empty', 2, 0)
+        AssertionError: ('shell', 0, 0) != ('shell', 2, 0)
     """
     for which in STATES:
 
