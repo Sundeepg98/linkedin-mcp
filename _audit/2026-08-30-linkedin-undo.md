@@ -409,3 +409,260 @@ canonical working form for this repo.
 **On the third row.** If the lead wants gap 2 genuinely closed rather than instrumented, that
 capture is the shortest path, and it is worth more than any further reasoning from here: every
 theory in section 1 is a theory precisely because nothing in this repo has ever seen a saved row.
+
+---
+---
+
+# Part 2 -- the row went in, and one gap closed while another was named
+
+**Commits:** `75d27ae`, `b9b55ec` on `master`, **not pushed**.
+**Baseline in:** 1979 passed. **Baseline out:** 1986 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 7. The re-measurement Part 1 said was missing
+
+The lead restarted the server onto `b710b1d` -- the build carrying the read-only route
+Part 1 shipped -- and called `linkedin_job_detail(4423880462)` twice, sixty seconds apart. I
+then read it a third time, later, and confirmed the process was the same one throughout
+(pid 17900, `build.code.commit b710b1d36991`, `dirty: false`).
+
+| # | when | route | reading |
+|---|---|---|---|
+| 1 | ~18:30 | `writes.perform` gate-5 sweep, on the redeemed save | `newly_observed_save_label: "Unsave the job"` |
+| 2 | 21:03 | `linkedin_job_detail` -- pure read, no token | `candidates: ["Unsave the job"]` |
+| 3 | ~21:04 | same route, repeated | identical |
+| 4 | 21:36 | same route, mine | identical, `main_buttons_total: 32`, `scan_complete: true` |
+
+**Four observations, two independent routes, three of them costing no write.** Reading 4
+matters for a reason beyond repetition: 32 buttons drawn against the 1-3 this surface was
+returning earlier that afternoon, so it is not a reading taken off a page that had barely
+rendered.
+
+**That was the condition Part 1 set, and it is met.** `shape.SAVE_LABELS` gains
+`"Unsave the job" -> saved`; `dom.SAVE_LABELS_SEEN` gains the mirror. Both, together -- the
+selector is built from the second and the meaning from the first, and widening one alone
+makes `save_state`'s unrecognised-label branch reachable with a control the reader can see
+and cannot name. `test_the_selector_and_the_vocabulary_cannot_drift_apart` is the one test
+in this suite written FOR this edit, and it was left untouched.
+
+### Which label it was mattered as much as that one was measured
+
+The measured OFF row establishes that this control is named for the ACTION it performs, not
+the state it is in. `"Unsave the job"` obeys that convention and names its own inverse.
+`"Saved"` -- the other spelling this repo named as plausible -- would not: it reads equally
+as a state and as an imperative, and a label mapped to the wrong state points a click at the
+opposite action. **Had the measurement come back `"Saved"`, the row would still be missing.**
+
+That is not a remark. It is `test_an_ambiguous_label_is_reported_without_being_resolved`,
+which still drives a page wearing `"Saved"`, still gets `unknown`, and asserts that the
+string is not in the table.
+
+---
+
+## 8. What the row actually unlocked -- measured, not assumed by symmetry
+
+The lead asked for this to be tested deliberately rather than inferred. It was worth it: two
+of the four answers are not what symmetry predicts.
+
+| claim | verdict |
+|---|---|
+| `anchor_label_for` resolves for `unsave_job` | **YES.** Returns `"Unsave the job"`. No code changed -- the indirection absorbed it, exactly as its docstring had promised for a month. |
+| `unsave_job` goes from always-refusing to refusing-only-on-an-unrecognised-state | **YES.** Pinned by `test_unsave_refuses_from_a_state_it_cannot_read`, driven over a control renamed off the vocabulary. |
+| `save_job` REFUSES on an already-saved posting | **YES, and this could not be tested before today.** |
+| `unsave_job` is now reachable end to end | **NO. It is capable and still blocked, and not for its own reason.** |
+
+### The toggle hazard, reachable for the first time
+
+`test_save_refuses_on_a_posting_that_is_ALREADY_saved` is the most important test added by
+this wave, and it is worth being precise about why it is NEW rather than a rename.
+
+Until the ON label was in the table, a saved posting read as `unknown`, so gate 5 refused a
+save on it **for want of a reading** rather than because of one. The refusal looked right and
+rested on nothing. It now refuses on a MEASURED state -- `'saved'` against a spec valid only
+from `'not_saved'` -- which is a materially stronger claim.
+
+Shown failing by neutralising the one comparison that carries it, `writes.py:4059`
+(`if live_state != spec.from_state or not selector:` becomes `if not selector:`):
+
+```
+>       with pytest.raises(WriteAttemptError) as caught:
+E       Failed: DID NOT RAISE WriteAttemptError
+```
+
+`perform` ran to completion with nothing downstream catching it. **That single comparison is
+the whole of what stands between a confirmed save and an unsave.**
+
+### The blocker that outlived the anchor
+
+`unsave_job` has its anchor and still cannot be previewed. Its spec declares
+`state_from="saved_list"`, so `observe` reads the Saved tab for its DIRECTION -- and that read
+is the one measured broken in section 1. `_read_saved_state` returns `unknown`, and
+`_direction` refuses on an unknown origin before any token is minted.
+
+So the refusal moved one gate EARLIER, and a reader who meets it should go and fix the tracker
+read rather than go looking for a label. Pinned by
+`test_unsave_cannot_be_PREVIEWED_while_the_saved_list_cannot_be_read`, which also asserts that
+nothing redeemable was left behind (`writes._GRANTS == {}`).
+
+**I attempted to confirm this live and was denied**, as the lead predicted: a token-free
+`linkedin_unsave_job` preview -- a read by construction -- was refused by the permission
+classifier. Not worked around. The fact is pinned offline instead, which is the more durable
+place for it.
+
+---
+
+## 9. Gap 2 named its own cause, for free
+
+The lead's instruction was not to chase this unless the row work surfaced it. It surfaced on
+the first call: the instrument Part 1 built printed the answer.
+
+```
+WHAT WAS ON THE PAGE: a <main> carrying 256 characters, 8 links, and 4 of them ARE job-row
+links. So the rows drew and the harvest still returned none -- that is the card walk or the
+row parser, not the page and not the timing. The navigation settled on the
+'networkidle_timed_out' branch after 7012ms, and the list DID resolve (102ms), so the page
+had drawn by the time it was harvested. This is therefore a HARVEST problem rather than a
+timing one, and re-reading will return the same answer.
+```
+
+Read twice, minutes apart, byte-identical but for the settle timing (7012ms/7015ms, list
+resolved 102ms/70ms).
+
+**Three things are now settled that were open at the end of Part 1:**
+
+1. **It is not timing, and it is not the settle.** The navigation took the SLOW branch -- seven
+   seconds -- and the list resolved in under 102ms. The readiness wait fired and passed.
+2. **The rows DRAW, and their links are `/jobs/view/` links.** Four of them. This **kills the
+   leading suspect from Part 1** -- the renamed-row-link theory -- outright. `rows_matching`
+   was built to separate exactly these two cases and it did.
+3. **`harvest_linked_cards` returns nothing from a page carrying four matching anchors.** That
+   is the defect, and it is one function further in than anywhere this investigation had
+   looked.
+
+A supporting oddity, unexplained and recorded: `<main>` carries only **256 characters** while
+holding 8 links. The empty capture carries 323 and the row capture 559. So the tab strip's text
+is present and the row's text is not, on a page whose row anchors ARE present -- consistent
+with rows attached but not laid out, which `innerText` would not return and
+`state="attached"` would not exclude. **That is a hypothesis, not a finding, and it is the
+first thing the next wave should test.**
+
+**What my own instrument cannot do**, stated because it is the limit of what section 9
+establishes: the note says "the card walk or the row parser" and it cannot separate the two.
+It reports DOM anchors, not how many records the harvest returned or how many the parser
+dropped. The next increment is `records_harvested` and `dropped` beside `rows_matching`.
+
+Per the lead's instruction the cause was not chased further and nothing was built for it.
+
+---
+
+## 10. The prose sweep, and why it was one commit
+
+A census over the whole repo found **61 sites** the new row falsified or misled: 52 that became
+FALSE, 9 that became misleading. They are corrected in the same commit as the table, and that
+is a deliberate sequencing call rather than a large diff: four assertions couple a production
+message to a test that asserts its text, so moving prose and test separately would leave an
+intermediate commit that reads as a regression.
+
+**Every reversal QUOTES the sentence it replaces.** That is the convention already in force in
+this repo -- the apply paragraph took it on 2026-08-25, the seven-that-refuse paragraph on
+2026-08-30 -- and it exists because the alternative is a codebase that has always said the
+comfortable thing.
+
+The highest-leverage one is not in a docstring. It is the `instructions=` block on the
+`FastMCP` constructor, which a client renders as the whole server's description and which an
+assistant answers questions FROM. It read *"linkedin_unsave_job currently refuses to act at
+all and says why."* A stale denial there is repeated to the operator as fact.
+
+**Historical prose in `_audit/*.md` was deliberately NOT rewritten** -- 16 sites, correctly
+past-tense, describing what was true on a date.
+
+---
+
+## 11. Mutation testing, and three more docstrings that lied
+
+Ten mutations, **18 test executions, 18 failures, zero survivals.** Full transcript:
+`mutations4.md` in this session's scratchpad. Three docstrings named a red their mutation does
+not produce, and were corrected in `b9b55ec`. That is the third time this wave, and the pattern
+is worth naming: **a docstring predicting a failure is itself an unverified claim until the
+mutation is run.**
+
+**The one worth reading is the `_direction` unknown gate.** Its test claimed
+`DID NOT RAISE WriteAttemptError`. Wrong -- the refusal survives, raised by the wrong-state
+comparison one gate down catching `'unknown' != 'saved'` on the way past. What the unknown gate
+actually defends is the **accuracy** of the refusal: without it, the gate stops saying "the
+state came back unknown, go fix the tracker read" and starts saying "you may have wanted the
+inverse action", pointing a reader at exactly the wrong repair.
+
+**And the backstop is not general.** `set_open_to_work` takes the multi-state branch, which
+returns BEFORE the wrong-state comparison, so for that action the unknown gate is the only
+thing between an unreadable origin and a rendered confirm block. No test exercises that; it is
+recorded in the docstring so nobody removes the gate on the strength of one action's backstop.
+
+Likewise the `anchor is None` branch does not fail as "DID NOT RAISE": deleting it lets a
+`None` anchor reach `dom.save_control_selector`, which refuses it one frame deeper. **The
+block's own comment predicted that traceback by function name, in advance, and claimed
+diagnostic altitude rather than last-stop status.** Both halves were right, which is the reason
+it is kept rather than deleted as redundant now that no shipped action can reach it.
+
+### The guard-versus-dead-code call, made out loud
+
+`perform`'s save-family `anchor is None` branch became **structurally unreachable** by this
+change: both save-family actions resolve an anchor, and every other performable action returns
+from its own branch above the table lookup. This repo's rule is that a check which cannot fail
+certifies nothing, so the call was made deliberately. It stays, its message now describes what
+it actually catches -- a table that LOST a row, which is a regression rather than a missing
+measurement -- and it is **fired in the suite** by removing the row under a live grant.
+
+---
+
+## 12. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **1979 passed** (Part 1's close-out, re-measured).
+* Out: **1986 passed, 0 failed**, in 676.94 s.
+* The delta is exactly 7 and every one is accounted for: 4 new tests in `test_writes.py`
+  (preview blocker, toggle hazard, unsave-on-unrecognised, anchor refusal fired), +1 from the
+  unrecognised-label parametrisation going 5 to 6, +1 from the single-label control test
+  becoming a two-parameter `test_both_measured_labels_ARE_recognised`, +1 from the ON-label
+  test splitting into a saved reading and an inverse check. Retired guards were REPLACED
+  one-for-one, so they net zero.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41. (Prefix only; `test_no_committed_identity` refused a full digest in
+an earlier wave. Re-derive with `sha256sum _state/session.json`.)
+
+**No write was performed or attempted.** No `confirm_token` reached any tool. The one write-tool
+call made -- a token-free `linkedin_unsave_job` preview, a read by construction -- was denied by
+the permission classifier and **not worked around**. `unsave_job` was not fired at the
+operator's saved posting, and nothing in this wave touched it.
+
+**The Chrome profile was never launched from a script.** Every offline reading came from the test
+suite's own local headless Chromium over frozen local HTML. Every live reading went through the
+already-running MCP server, one process (pid 17900, `b710b1d`, clean).
+
+**Commits**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `75d27ae` | `feat(unsave): the measured row, and everything that said it was missing` |
+| `b9b55ec` | `test(unsave): three docstrings that predicted the wrong red` |
+
+Files: `linkedin_server/dom.py`, `linkedin_server/shape.py`, `linkedin_server/server.py`,
+`linkedin_server/writes.py`, `README.md`, `tests/test_writes.py`,
+`tests/test_job_detail_save_state.py`, `tests/test_save_candidates_fixture.py`. **All
+ASCII-clean**, verified by byte scan.
+
+---
+
+## 13. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **The Saved tab cannot be read, and it blocks `unsave_job` end to end** | The cause is now NAMED: rows draw, four `/jobs/view/` anchors are present, and `harvest_linked_cards` returns nothing from them. Leading hypothesis: rows attached but not laid out, so `innerText` is empty where `state="attached"` was satisfied. Needs its own wave with a probe log | a wave |
+| **The tracker diagnostic cannot separate the card walk from the row parser** | add `records_harvested` and `dropped` beside `rows_matching`. It currently says "the card walk or the row parser" and means it | small |
+| **No capture of a populated SAVED tab, and none of a SAVED posting** | Every fixture predates the first save, so BOTH the ON label and a saved row are modelled by derivation rather than capture. The label is measured live four times, so this is not a correctness gap -- it is the reason offline tests cannot prove the live shape | a capture run |
+| **Pre-existing count rot in the prose, NOT caused by this change** | `README.md:5` and its "The three that write" header, `server.py:1` and its module docstring, and `linkedin_server/__init__.py:8` all say three or four writes where **five** ship. `tests/test_server_surface.py` pins the real numbers and derives the word "five" from `writes.PERFORMABLE`. Flagged rather than fixed: out of this wave's scope, and the fix means writing two accurate new table rows | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | Found while mutation-testing something else. Its multi-state branch returns before the wrong-state comparison, so the unknown gate is the only thing between an unreadable origin and a rendered confirm block for that action. No test exercises it | small |
