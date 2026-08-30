@@ -359,6 +359,13 @@ async def _read_tracker(
                         page, href_pattern=dom.JOB_HREF, max_items=limit * 3
                     ),
                     row_shape=await dom.read_tracker_row_shape(page),
+                    # WHAT THE PARSER ACTUALLY RECEIVED. The refusal could
+                    # say the parser rejected the record and not WHICH of
+                    # its two None-returns fired, which is where this
+                    # investigation stalled. Counts and labels, never lines.
+                    traces=[
+                        shape.parse_job_card_trace(rec) for rec in records[:3]
+                    ],
                 ),
                 url=final_url,
                 hint="open the url yourself and compare with what this reports",

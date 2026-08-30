@@ -734,3 +734,179 @@ async def test_the_shape_sentence_DOES_blame_the_walk_when_it_returned_nothing()
         records=0, row_shape=ladder,
     )
     assert "defect in the walk" in note, note
+
+
+# ---------------------------------------------------------------------------
+# 7. WHICH filter ate the row -- the parse trace
+# ---------------------------------------------------------------------------
+
+#: Records chosen to reach each of ``parse_job_card``'s outcomes, including
+#: both of its two separate ``return None`` lines. Synthetic, and none of them
+#: names a real person or employer.
+TRACE_RECORDS = {
+    "ordinary row": {"text": "Senior Engineer\n\nSprinto", "hidden": []},
+    "every line a status": {
+        "text": "No longer accepting applications",
+        "hidden": [],
+    },
+    "subtraction takes the only line": {
+        "text": "Senior Engineer",
+        "hidden": ["Senior Engineer"],
+    },
+    "empty": {"text": "", "hidden": []},
+    "chrome only": {"text": "Date posted", "hidden": []},
+}
+
+
+async def test_the_trace_agrees_with_the_parser_it_describes():
+    """THE ANTI-DRIFT GUARD, and the reason the trace is allowed to exist.
+
+    ``parse_job_card_trace`` re-runs the same helpers in the same order as
+    ``parse_job_card`` rather than being spliced into it, which buys a
+    diagnostic that costs nothing on the healthy path and risks saying
+    something the parser would not. So the agreement is asserted, over every
+    record the tracked fixtures actually produce PLUS the synthetic ones that
+    reach the edges -- a trace that disagreed with its subject would be worse
+    than no trace at all.
+
+    SHOWN FAILING by swapping the trace's two refusal branches::
+
+        AssertionError: ('every line a status', 'no_lines', 'rejected')
+        -- the trace named the wrong line of parse_job_card
+
+    and by reordering its filters so chrome is applied after status::
+
+        AssertionError: ('chrome only', 'no_remaining', 'parsed')
+    """
+    checks: list[tuple] = []
+
+    async def work(page):
+        return await dom.harvest_linked_cards(
+            page, href_pattern=dom.JOB_HREF, max_items=75
+        )
+
+    # Every record the real fixtures produce, through the real walk.
+    for which in ("jobs_tracker_row", "jobs_tracker_empty", "jobs_search"):
+        try:
+            html = markup(which)
+        except FileNotFoundError:  # pragma: no cover - fixture set may differ
+            continue
+        for record in await _with_html(html, work):
+            checks.append(("fixture:" + which, record))
+
+    for name, record in TRACE_RECORDS.items():
+        checks.append((name, record))
+
+    assert len(checks) >= 4, checks
+
+    for name, record in checks:
+        trace = shape.parse_job_card_trace(record)
+        parsed = shape.parse_job_card(record) is not None
+        assert (trace["verdict"] == "parsed") == parsed, (
+            name,
+            trace["verdict"],
+            "parsed" if parsed else "rejected",
+        )
+        assert trace["verdict"] in shape.PARSE_VERDICTS, trace
+
+
+async def test_the_trace_names_the_status_classifier_when_that_is_what_ate_it():
+    """``if not remaining`` -- a title classified as a status or a time-ago.
+
+    One of ``parse_job_card``'s two refusals, and the one that means a
+    CLASSIFIER is wrong rather than the text being absent.
+
+    SHOWN FAILING by returning a single generic sentence for both refusals::
+
+        AssertionError: 'if not remaining' not in "... IT RETURNED None AT
+        'if not lines' ..."
+    """
+    trace = shape.parse_job_card_trace(TRACE_RECORDS["every line a status"])
+    assert trace["verdict"] == "no_remaining", trace
+    assert trace["lines_after_chrome"] == 1, trace
+    assert trace["remaining_after_status"] == 0, trace
+    assert trace["labels"] == ["status"], trace
+
+    note = shape.parse_trace_note([trace])
+    assert "if not remaining" in note, note
+    assert "CLASSIFIER problem" in note, note
+    assert "if not lines" not in note, note
+
+
+async def test_the_trace_names_the_subtraction_when_that_is_what_ate_it():
+    """``if not lines`` -- and the counts say whether it was chrome or the
+    screen-reader budget.
+
+    SHOWN FAILING by reporting only the final count, which is the state the
+    refusal was in before this::
+
+        AssertionError: assert 1 == 0 -- the line count before the
+        subtraction was not reported, so which step took the line is unknown
+    """
+    trace = shape.parse_job_card_trace(
+        TRACE_RECORDS["subtraction takes the only line"]
+    )
+    assert trace["verdict"] == "no_lines", trace
+    # THE PAIR IS THE POINT: one line went in, none survived the subtraction,
+    # so the budget took it and the chrome filter never saw it.
+    assert trace["lines_raw"] == 1, trace
+    assert trace["lines_after_screen_reader"] == 0, trace
+    assert trace["hidden_count"] == 1, trace
+
+    note = shape.parse_trace_note([trace])
+    assert "if not lines" in note, note
+    assert "if not remaining" not in note, note
+
+
+async def test_the_trace_reports_no_line_text():
+    """LABELS AND COUNTS ONLY. A tracker row names a company and a job.
+
+    Every label is drawn from a CLOSED vocabulary, so the trace cannot leak a
+    line by deriving a label from it.
+
+    SHOWN FAILING by putting the line itself in the label list::
+
+        AssertionError: 'Ashgrove' leaked out of the parse trace
+    """
+
+    async def work(page):
+        return await dom.harvest_linked_cards(
+            page, href_pattern=dom.JOB_HREF, max_items=75
+        )
+
+    records = await _with_html(markup("jobs_tracker_row"), work)
+    assert records, records
+    trace = shape.parse_job_card_trace(records[0])
+    rendered = str(trace) + shape.parse_trace_note([trace])
+    for secret in ("Ashgrove", "Platform Integration", "Fairhaven"):
+        assert secret not in rendered, f"{secret!r} leaked out of the parse trace"
+    for label in trace["labels"]:
+        assert label in shape.PARSE_LINE_LABELS, label
+
+
+async def test_the_ladder_reports_keyed_links_as_well_as_keys():
+    """``rowOf``'s second stop tests LINKS, so a ladder without them is blind.
+
+    The stop is ``hasText(row) && linksWithin(node) > 1`` -- the raw count of
+    keyed anchors, not the deduped one. Printing only distinct keys made the
+    live ladder unable to say where that stop should have fired, on a page
+    carrying four job-row anchors under one job id.
+
+    SHOWN FAILING by dropping ``links`` from the printed ladder, which is the
+    state it shipped in::
+
+        AssertionError: '2L' not in "... DIV(1c,1k) 75/75 ..."
+    """
+    ladder = [
+        [
+            {"tag": "A", "children": 1, "keys": 0, "links": 0,
+             "text_chars": 75, "content_chars": 75},
+            {"tag": "DIV", "children": 2, "keys": 1, "links": 2,
+             "text_chars": 75, "content_chars": 75},
+        ]
+    ]
+    note = shape.tracker_read_note(
+        {}, {"attached": True, "waited_ms": 5}, {}, records=1, row_shape=ladder
+    )
+    assert "2L" in note, note
+    assert "keyed Links" in note, note

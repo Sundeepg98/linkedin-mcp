@@ -2088,6 +2088,9 @@ async def _read_saved_state(
                     page, href_pattern=dom.JOB_HREF, max_items=SAVED_LIST_MAX_ROWS
                 ),
                 row_shape=await dom.read_tracker_row_shape(page),
+                traces=[
+                    shape.parse_job_card_trace(rec) for rec in records[:3]
+                ],
             ),
         )
     if len(rows) == stated:

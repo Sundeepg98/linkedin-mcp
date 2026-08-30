@@ -798,6 +798,164 @@ def empty_is_believable(
     return linkedin_count == 0 and bool(empty_state)
 
 
+#: The closed vocabulary a traced line may be labelled with. CLOSED so the
+#: trace can never leak a member's name by deriving a label from the line
+#: itself -- every value returned is one of these four strings.
+#:
+#: Lines removed by the screen-reader subtraction or by de-duplication are not
+#: labelled at all: they are gone before the labelling loop, and the counts
+#: above the labels are what account for them.
+PARSE_LINE_LABELS = ("chrome", "status", "time_ago", "content")
+
+#: What :func:`parse_job_card_trace` concluded, matching what
+#: :func:`parse_job_card` actually returns. Three values, and the two refusals
+#: are DIFFERENT LINES of that function wanting different repairs.
+PARSE_VERDICTS = ("parsed", "no_lines", "no_remaining")
+
+
+def parse_job_card_trace(record: dict[str, Any]) -> dict[str, Any]:
+    """WHICH FILTER ATE THE ROW, in counts and labels and no text at all.
+
+    WHY THIS EXISTS. ``parse_job_card`` returns ``None`` from two different
+    lines -- ``if not lines`` and ``if not remaining`` -- and a caller sees the
+    same ``None`` either way. On 2026-08-30 the Saved tab produced
+    ``records=1, dropped=1``: the walk built a record, the parser rejected it,
+    and nothing in this package could say WHICH refusal fired or what the
+    record held when it did.
+
+    AND ONE THING IT SETTLES BY ARITHMETIC ALONE. ``record()`` returns null for
+    an empty row, so ``records=1`` already proves the record was NOT empty.
+    The row-shape ladder describes the DOM climb, not the record; conflating
+    the two is what let an audit say the parser "was handed nothing" about a
+    call in which it demonstrably was handed something.
+
+    IT REPORTS LABELS, NEVER LINES. A tracker row names a company and a job,
+    so each line comes back as one of :data:`PARSE_LINE_LABELS` and a
+    character count. Enough to see a title classified as chrome or as a
+    status, which is the failure this is looking for; not enough to identify
+    anybody.
+
+    IT RE-RUNS THE SAME HELPERS IN THE SAME ORDER as ``parse_job_card``, which
+    is the closest a separate function gets to not drifting from it -- and the
+    drift is GUARDED rather than hoped for:
+    ``test_the_trace_agrees_with_the_parser_it_describes`` asserts this
+    verdict matches what ``parse_job_card`` actually returned, over every
+    record the fixtures produce. A trace that disagreed with its subject would
+    be worse than no trace.
+    """
+    text = record.get("text", "")
+    hidden = list(record.get("hidden") or ())
+
+    raw = split_lines(text)
+    after_sr = strip_screen_reader_copies(text, hidden)
+    after_repeats = drop_consecutive_repeats(after_sr)
+
+    labels: list[str] = []
+    sizes: list[int] = []
+    kept: list[str] = []
+    remaining: list[str] = []
+    # THE SAME ORDER parse_job_card runs: chrome first, then status, then
+    # time-ago. Written as one pass so the two cannot fall out of step.
+    for line in after_repeats:
+        sizes.append(len(line))
+        if is_chrome(line):
+            labels.append("chrome")
+            continue
+        kept.append(line)
+        if _JOB_STATUS_LINE.match(line):
+            labels.append("status")
+            continue
+        if has_time_ago(line):
+            labels.append("time_ago")
+            continue
+        labels.append("content")
+        remaining.append(line)
+
+    if not kept:
+        verdict = "no_lines"
+    elif not remaining:
+        verdict = "no_remaining"
+    else:
+        verdict = "parsed"
+
+    return {
+        "text_chars": len(text),
+        "hidden_count": len(hidden),
+        "lines_raw": len(raw),
+        "lines_after_screen_reader": len(after_sr),
+        "lines_after_repeats": len(after_repeats),
+        "lines_after_chrome": len(kept),
+        "remaining_after_status": len(remaining),
+        "labels": labels,
+        "line_chars": sizes,
+        "has_anchored_title": bool(anchored_title(record)),
+        "verdict": verdict,
+    }
+
+
+def parse_trace_note(traces: Optional[list]) -> str:
+    """The trace, read out for somebody looking at a refusal.
+
+    Names the LINE of ``parse_job_card`` that returned None, because "the
+    parser rejected it" is exactly where this investigation stalled.
+    """
+    if not traces:
+        return ""
+    trace = traces[0]
+    counts = (
+        "PARSE TRACE, on the record the walk actually handed the parser: "
+        "%s characters, %s line(s) raw -> %s after the screen-reader "
+        "subtraction (%s hidden element(s) charged) -> %s after "
+        "de-duplication -> %s after chrome was removed -> %s left once status "
+        "and time-ago lines were lifted out."
+        % (
+            trace.get("text_chars"),
+            trace.get("lines_raw"),
+            trace.get("lines_after_screen_reader"),
+            trace.get("hidden_count"),
+            trace.get("lines_after_repeats"),
+            trace.get("lines_after_chrome"),
+            trace.get("remaining_after_status"),
+        )
+    )
+
+    labels = trace.get("labels") or []
+    census = ""
+    if labels:
+        tally: dict[str, int] = {}
+        for label in labels:
+            tally[label] = tally.get(label, 0) + 1
+        census = " Lines by what claimed them: " + ", ".join(
+            f"{name} {count}" for name, count in sorted(tally.items())
+        ) + f". The record {'DID' if trace.get('has_anchored_title') else 'did NOT'} "
+        census += "carry an anchored title."
+
+    verdict = trace.get("verdict")
+    if verdict == "no_lines":
+        why = (
+            " IT RETURNED None AT 'if not lines': every line the record held "
+            "was removed as CHROME, or by the screen-reader subtraction before "
+            "it. The repair is in whichever of those two took the title, and "
+            "the counts above say which -- a drop at the subtraction step is "
+            "the budget, a drop at the chrome step is shape.is_chrome."
+        )
+    elif verdict == "no_remaining":
+        why = (
+            " IT RETURNED None AT 'if not remaining': lines survived the chrome "
+            "filter and then EVERY ONE was lifted out as a status or a "
+            "time-ago. The row's own title was classified as one of those two. "
+            "That is a CLASSIFIER problem -- shape._JOB_STATUS_LINE or "
+            "shape.has_time_ago matching a title -- and not a missing-text one."
+        )
+    else:
+        why = (
+            " The trace says this record PARSES, which disagrees with the row "
+            "count above. A trace that disagrees with its subject is a defect "
+            "in the trace, not a finding about LinkedIn."
+        )
+    return counts + census + why
+
+
 def tracker_read_note(
     evidence: dict[str, Any],
     list_wait: dict[str, Any],
@@ -807,6 +965,7 @@ def tracker_read_note(
     dropped: Optional[int] = None,
     census: Optional[dict[str, Any]] = None,
     row_shape: Optional[list] = None,
+    traces: Optional[list] = None,
 ) -> str:
     """WHY the tracker read came back empty, out of what was actually there.
 
@@ -829,6 +988,7 @@ def tracker_read_note(
             _tracker_evidence_sentence(evidence),
             _tracker_harvest_sentence(records, dropped),
             _tracker_census_sentence(census),
+            parse_trace_note(traces),
             _tracker_row_shape_sentence(row_shape, records),
             _tracker_rendered_sentence(evidence),
             _tracker_timing_sentence(list_wait, settle),
@@ -968,12 +1128,20 @@ def _tracker_row_shape_sentence(
     first = row_shape[0]
     if not first:
         return ""
+    # LINKS ARE PRINTED AS WELL AS KEYS, and dropping them was a real loss.
+    # ``rowOf``'s second stop tests ``linksWithin(node) > 1`` -- the RAW count
+    # of keyed anchors, not the deduped one -- so a ladder showing only keys
+    # cannot say where that stop should have fired. Measured on the live Saved
+    # tab: every level reported one distinct key while four job-row anchors
+    # were on the page, and which level first held two of them was exactly the
+    # question the ladder could not answer.
     ladder = " < ".join(
-        "%s(%sc,%sk) %s/%s"
+        "%s(%sc,%sk,%sL) %s/%s"
         % (
             level.get("tag"),
             level.get("children"),
             level.get("keys"),
+            level.get("links"),
             level.get("text_chars"),
             level.get("content_chars"),
         )
@@ -1040,7 +1208,8 @@ def _tracker_row_shape_sentence(
     )
     return (
         "THE ROW'S SHAPE, anchor first, as TAG(child elements, distinct job "
-        f"keys) rendered chars/present chars: {ladder}. {verdict}{more}"
+        "keys, keyed Links) rendered chars/present chars: "
+        f"{ladder}. {verdict}{more}"
     )
 
 
