@@ -1693,11 +1693,30 @@ async def test_unsave_cannot_be_PREVIEWED_while_the_saved_list_cannot_be_read(
     stop at, and a reader who sees this refusal should go and fix the tracker
     read rather than go looking for a label.
 
-    SHOWN FAILING by letting ``_direction`` proceed on ``unknown``::
+    SHOWN FAILING by letting ``_direction`` proceed on ``unknown`` -- and what
+    that measured is worth more than the red. The refusal does NOT disappear:
+    ``_direction``'s NEXT gate, the wrong-state comparison, catches
+    ``'unknown' != 'saved'`` on the way past and raises anyway. What the
+    unknown gate actually defends is the ACCURACY of the refusal, not its
+    existence::
 
-        Failed: DID NOT RAISE WriteAttemptError
-        -- a confirm gate was rendered for a toggle whose current state nobody
-        had established
+        AssertionError: 'unsave_job' is valid only from 'saved' and this
+        target reads 'unknown'. On a toggle, performing an action from the
+        wrong state performs its OPPOSITE [...] You may have wanted the
+        inverse action.
+        assert "came back 'unknown'" in "'unsave_job' is valid only from ..."
+
+    That message points a reader at the wrong repair -- it suggests they meant
+    to SAVE, when what actually happened is that the Saved tab could not be
+    read. This test catches the difference only because it asserts on the
+    message text rather than merely on the raise.
+
+    AND THE BACKSTOP DOES NOT COVER EVERY ACTION, which is why the unknown gate
+    is not redundant. ``set_open_to_work`` takes the multi-state branch, which
+    returns BEFORE the wrong-state comparison, so for that action the unknown
+    gate is the only thing between an unreadable origin and a rendered confirm
+    block. Not exercised here; recorded so nobody removes the gate on the
+    strength of this one action's backstop.
     """
     with pytest.raises(WriteAttemptError) as caught:
         await _gate(
@@ -1816,9 +1835,21 @@ async def test_the_anchor_refusal_is_reachable_and_says_what_it_now_means(
     reader meeting this today has a broken table rather than a missing
     measurement, and the message has to point at the right one.
 
-    SHOWN FAILING by deleting the branch::
+    SHOWN FAILING by deleting the branch. It does NOT produce a click on a
+    guessed selector -- ``dom.save_control_selector`` is a second line of
+    defence and it holds, refusing a ``None`` label one frame deeper. What is
+    lost is the ALTITUDE of the explanation::
 
-        Failed: DID NOT RAISE WriteAttemptError
+        linkedin_server\\writes.py:4028: in perform
+            live_state, live_why, selector = await _live_control(...)
+        linkedin_server\\dom.py:627: ExtractionFailedError: refusing to build a
+        save-control selector for None: this reader has only ever seen
+        ['Save the job', 'Unsave the job'].
+
+    The deleted block's own comment predicted that traceback by function name
+    before it was measured, and claimed diagnostic quality rather than being
+    the last stop. Both halves of that turned out to be right, which is the
+    reason it is kept rather than deleted as redundant.
     """
     grant = await _granted(
         browser_page, "unsave_job", target=SAVED_JOB, saved=SAVED_LIST_CONTAINING

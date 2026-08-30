@@ -194,9 +194,13 @@ async def test_the_unsaved_and_saved_readings_are_each_other_s_inverse():
     separate tests would not catch a reader that had collapsed them.
 
     SHOWN FAILING by mapping both labels to the same state in
-    ``shape.SAVE_LABELS``::
+    ``shape.SAVE_LABELS``. Measured, it dies on the FIRST assertion rather than
+    on the comparison -- collapsing the table makes the unsaved reading wrong
+    before the two are ever set against each other::
 
-        AssertionError: assert 'saved' != 'saved'
+        AssertionError: {'state': 'saved', 'why': "the control is labelled
+        'Save the job'"}
+        assert 'saved' == 'not_saved'
     """
     off = await read(base())
     on = await read(derive(SAVE_ATTR, f'aria-label="{MEASURED_ON_LABEL}"'))
