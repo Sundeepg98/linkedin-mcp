@@ -16,7 +16,7 @@ Two properties the shapers hold to:
 from __future__ import annotations
 
 import re
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Sequence
 from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
 from linkedin_server.config import MAX_TEXT_CHARS
@@ -990,6 +990,130 @@ def parse_job_detail(
     return out
 
 
+#: The fields a reading must carry before it counts as a posting that was
+#: READ. Named as data rather than spelled into a boolean, because two call
+#: sites test this and a refusal that cannot say WHICH field was absent is the
+#: defect this package keeps paying for.
+JOB_DETAIL_REQUIRED: tuple[str, ...] = ("title", "description")
+
+#: What ``linkedin_save_job``'s confirm gate additionally demands.
+#:
+#: TODAY THIS IS IMPLIED RATHER THAN INDEPENDENT, and saying so is the point of
+#: the constant. ``job_title_from_document_title`` returns None when the
+#: employer is unknown, so ``company`` absent forces ``title`` absent and the
+#: base requirement already fails -- measured, not reasoned: for company None,
+#: "", and "   " the title comes back None every time. The write gate carried
+#: this as an extra ``or not detail.get("company")`` clause that COULD NEVER
+#: DECIDE ANYTHING, and its presence was read by two people as evidence that
+#: the two read paths had different strictness. They do not.
+#:
+#: Kept, as a named requirement rather than a dead clause, because the INTENT
+#: is real and outlives the coupling: a confirm block that names the job the
+#: operator is authorising is worthless without the employer, and if title
+#: extraction ever stops depending on company this requirement must still bind.
+JOB_DETAIL_REQUIRED_FOR_GATE: tuple[str, ...] = JOB_DETAIL_REQUIRED + ("company",)
+
+#: How much text ``<main>`` carries, measured 2026-08-30 across every job
+#: capture in this repo, so a refusal can hand a reader a number they can place
+#: instead of one they have to go and calibrate.
+#:
+#:   job_detail_shell               1092   title and description both missing
+#:   job_detail_following           1358   description missing
+#:   job_detail                     5648   complete
+#:   job_detail_hydrated            5648   complete
+#:   job_detail_following_hydrated 18440   complete
+#:
+#: A PAGE THAT HAS NOT DRAWN IS NOT AN EMPTY PAGE, which is the trap in the low
+#: numbers: the shell still renders an aside, a footer and a language picker,
+#: so ``main_chars`` is never zero and "it rendered something" is true of a
+#: page carrying no posting at all.
+#:
+#: AND THE SECOND ROW IS THE FINDING. ``job_detail_following`` carries a save
+#: control and an apply control while its DESCRIPTION has not arrived -- so the
+#: control layer and the text layer render on independent schedules, and
+#: neither one being present is evidence about the other.
+JOB_MAIN_CHARS_UNDRAWN = "roughly 1100-1400"
+JOB_MAIN_CHARS_DRAWN = "5600-18400"
+
+
+def job_detail_missing(
+    detail: dict[str, Any], *, require: Sequence[str] = JOB_DETAIL_REQUIRED
+) -> list[str]:
+    """Which required fields this reading did NOT carry, in order.
+
+    The whole point is that the answer is a LIST and not a boolean. An
+    unrendered shell and a parse that found a body but no employer both
+    produce "not believable", and they are different problems: one is a page
+    that never drew, the other is a page that drew something this parser could
+    not read. A caller that can only say "no posting could be read" sends its
+    reader to look for the wrong thing.
+    """
+    return [name for name in require if not detail.get(name)]
+
+
+def job_detail_failure_note(
+    missing: Sequence[str],
+    *,
+    main_present: Optional[bool],
+    main_chars: int,
+) -> str:
+    """Say WHICH field was absent and WHETHER the page drew anything.
+
+    The sentence this replaces offered a reader two alternatives -- "either the
+    page had not finished rendering, or the posting is no longer there" -- and
+    no way whatever to choose between them. It was also, measured on
+    2026-08-30, wrong about a third possibility it did not mention: the page
+    can render perfectly and the account be entirely healthy while this ONE
+    surface fails, which no wording about postings expiring would ever suggest.
+
+    So this reports the evidence instead of listing the theories: which
+    required fields were missing, whether ``<main>`` existed at all, and how
+    much text it held. Those three separate the cases a caller actually has to
+    tell apart.
+    """
+    fields = ", ".join(missing) or "none"
+
+    if main_present is None:
+        drew = (
+            "whether the page drew a <main> at all could not be established, "
+            "so the reading below rests on nothing"
+        )
+    elif not main_present:
+        drew = (
+            "the page drew NO <main> element, so nothing was there to parse -- "
+            "this is a page that did not render, not a parse that failed"
+        )
+    elif main_chars == 0:
+        drew = (
+            "the page drew an EMPTY <main>: the element exists and carries no "
+            "text, which is the shell state, not a parse failure"
+        )
+    else:
+        drew = (
+            f"the page drew a <main> carrying {main_chars} characters. Place "
+            f"that against the captures, measured 2026-08-30: a posting that "
+            f"had NOT drawn carries {JOB_MAIN_CHARS_UNDRAWN} characters of "
+            f"pure page furniture -- an aside, a footer, a language picker -- "
+            f"while one that HAD drawn carries {JOB_MAIN_CHARS_DRAWN}. A count "
+            "in the low range is a page still showing its own chrome; one in "
+            "the high range is a drawn page whose fields this parser could not "
+            "find, which is a different bug entirely"
+        )
+
+    return (
+        f"missing required field(s): {fields}. And {drew}. "
+        "THREE THINGS PRODUCE THIS AND THEY WANT DIFFERENT RESPONSES: the page "
+        "had not finished drawing (re-read it); the posting is gone (check the "
+        "url by hand); or this one surface is failing while the session is "
+        "fine (measured 2026-08-30 -- linkedin_search_jobs rendered full "
+        "results in the same session, seconds after this read failed on two "
+        "different postings). Run linkedin_search_jobs as the control before "
+        "concluding anything about the account, and repeat this call before "
+        "concluding anything about the posting: single readings of this "
+        "surface have been measured disagreeing with themselves an hour apart."
+    )
+
+
 def job_detail_is_believable(detail: dict[str, Any]) -> bool:
     """Is this a posting that was READ, or a page that did not render?
 
@@ -999,8 +1123,13 @@ def job_detail_is_believable(detail: dict[str, Any]) -> bool:
     posting with nothing in it. A title with no body, and a body with no
     title, are both failures: LinkedIn sets the document title server-side, so
     the title survives on a page that never drew the job.
+
+    Expressed through :func:`job_detail_missing` so there is ONE definition of
+    "believable" rather than a boolean here and a field list somewhere else,
+    which is exactly how the two job-detail readers came to look different
+    while behaving identically.
     """
-    return bool(detail.get("title")) and bool(detail.get("description"))
+    return not job_detail_missing(detail)
 
 
 # ---------------------------------------------------------------------------

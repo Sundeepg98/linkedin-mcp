@@ -1115,22 +1115,24 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             final_url = await BROWSER.goto(page, url)
             assert_not_authwall(final_url, surface="job posting")
 
-            identity = await dom.read_job_identity(page)
-            detail = shape.parse_job_detail(
-                await dom.read_main_text(page),
-                company=identity.get("company"),
-                document_title=identity.get("document_title"),
-            )
+            reading = await dom.read_job_posting(page)
+            identity = reading["identity"]
+            detail = reading["detail"]
 
-            if not shape.job_detail_is_believable(detail):
+            missing = shape.job_detail_missing(detail)
+            if missing:
                 raise ExtractionFailedError(
                     "the job page loaded but no posting could be read from it. "
                     "Reporting the fields that did arrive would be worse than "
                     "reporting nothing: LinkedIn sets the document title on the "
                     "server, so a posting that never rendered still has a title, "
                     "and a result carrying one with no body reads as a real job "
-                    "with an empty description. Either the page had not finished "
-                    "rendering, or the posting is no longer there.",
+                    "with an empty description. "
+                    + shape.job_detail_failure_note(
+                        missing,
+                        main_present=reading["main_present"],
+                        main_chars=reading["main_chars"],
+                    ),
                     url=final_url,
                     hint="open the url yourself and compare with what this reports",
                 )

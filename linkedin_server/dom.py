@@ -695,6 +695,20 @@ SAVE_SWEEP_SELECTOR = "main button[aria-label], main a[aria-label]"
 #: apart, and a readiness signal that cannot fail is not one.
 MAIN_BUTTONS = "main button"
 
+#: What the captures actually draw, carried as data so the refusal can quote
+#: them instead of a reader having to go and look. Measured 2026-08-30 over
+#: every job capture in this repo, counting ``<button>`` under ``<main>``.
+#:
+#: THE SECOND NUMBER IS THE INTERESTING ONE. ``job_detail_following`` draws
+#: only two buttons and is plainly a PARTIAL render beside its own hydrated
+#: sibling (167 nodes under the primary-content section against 715) -- and it
+#: still carries exactly one save control, as do all four rendered captures.
+#: So a low button count does not by itself mean the save control is absent,
+#: and that is precisely why the readiness verdict must report the count
+#: rather than merely pass or fail on it.
+SAVE_CAPTURE_BUTTONS_FULL = "8-12"
+SAVE_CAPTURE_BUTTONS_MIN = 2
+
 #: The labelled half of :data:`MAIN_BUTTONS`. Reported beside the sweep total
 #: so that "labelled controls" can be split into buttons and anchors -- the
 #: anchors are what remain when the button layer has not attached.
@@ -1297,6 +1311,49 @@ async def read_main_text(page: Any) -> str:
     except Exception as exc:
         logger.debug("main text unreadable: %s: %s", type(exc).__name__, exc)
         return ""
+
+
+async def read_job_posting(page: Any) -> dict[str, Any]:
+    """THE reader for a job posting. Both job-detail paths call this one.
+
+    WHY IT EXISTS, and the history is the argument. ``linkedin_job_detail`` and
+    ``writes._read_posting_facts`` each held their own copy of the same three
+    calls -- ``read_job_identity``, ``read_main_text``, ``shape.parse_job_detail``
+    -- in the same order with the same arguments. Two copies of one sequence is
+    how "the two readers must be using different strategies" becomes a
+    plausible theory about a disagreement they cannot possibly have caused.
+    They cannot drift apart now because there is one of them.
+
+    THE RENDER EVIDENCE IS THE OTHER HALF. ``read_main_text`` returns ``""``
+    both when ``<main>`` is missing and when it is empty, so a caller could
+    never tell "the page drew nothing" from "the page drew something this
+    parser could not read". Those want completely different responses -- one is
+    a page to re-read, the other is a parser to fix -- so the presence of
+    ``<main>`` and the SIZE of its text are reported alongside the parse.
+
+    Character counts, never the text: a job page carries a hiring team and a
+    "people also viewed" rail, so the body is not this server's to hand around
+    for diagnostics.
+    """
+    identity = await read_job_identity(page)
+    main_text = await read_main_text(page)
+    try:
+        main_present = int(await page.locator("main").count()) > 0
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("main presence unreadable: %s", type(exc).__name__)
+        # UNKNOWN, NOT ABSENT. False here would say "the page drew no main",
+        # which is the strongest thing this evidence can claim.
+        main_present = None
+    return {
+        "identity": identity,
+        "detail": shape.parse_job_detail(
+            main_text,
+            company=identity.get("company"),
+            document_title=identity.get("document_title"),
+        ),
+        "main_present": main_present,
+        "main_chars": len(main_text),
+    }
 
 
 def _url_of(page: Any) -> str:

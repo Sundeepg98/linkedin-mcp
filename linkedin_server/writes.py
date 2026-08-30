@@ -1181,20 +1181,33 @@ async def _read_posting_facts(page: Any, target: str) -> dict[str, Any]:
     title, so a title with no body is not a posting. A gate built on one would
     name a job that was not on the page.
     """
-    identity = await dom.read_job_identity(page)
-    detail = shape.parse_job_detail(
-        await dom.read_main_text(page),
-        company=identity.get("company"),
-        document_title=identity.get("document_title"),
+    reading = await dom.read_job_posting(page)
+    detail = reading["detail"]
+
+    # THE SAME READER AS ``linkedin_job_detail``, and that is now enforced by
+    # there being one of it. What differs here is the REQUIREMENT, declared as
+    # data: this gate additionally needs the employer, because a confirm block
+    # that cannot name the company is a block he cannot check the job against.
+    #
+    # That extra requirement is currently IMPLIED rather than independent --
+    # see shape.JOB_DETAIL_REQUIRED_FOR_GATE -- and it used to be written here
+    # as ``or not detail.get("company")``, a clause that could never decide
+    # anything and was twice mistaken for evidence that the two read paths had
+    # different strictness. Declaring it is honest; the dead clause was not.
+    missing = shape.job_detail_missing(
+        detail, require=shape.JOB_DETAIL_REQUIRED_FOR_GATE
     )
-    if not shape.job_detail_is_believable(detail) or not detail.get("company"):
+    if missing:
         raise WriteAttemptError(
             f"refusing to render a confirm gate for job {target}: the posting "
-            "page loaded but no posting could be read from it. LinkedIn sets "
-            "the document title on the server, so a title with nothing behind "
-            "it is what an unrendered shell looks like -- and a gate naming a "
+            "page loaded but no posting could be read from it. A gate naming a "
             "job it did not actually read is the failure this section exists "
-            "to stop."
+            "to stop. "
+            + shape.job_detail_failure_note(
+                missing,
+                main_present=reading["main_present"],
+                main_chars=reading["main_chars"],
+            )
         )
     return {"title": detail.get("title"), "company": detail.get("company")}
 
@@ -2198,9 +2211,19 @@ def _save_readiness_note(
     return (
         f"THE PAGE WAS READY AND THE CONTROL WAS NOT THERE: <main> carries "
         f"{buttons} buttons, so the interactive layer HAD attached, and the "
-        f"save control still did not appear in {spent}. That makes this a "
-        "vocabulary finding rather than a timing one -- the control is "
-        "renamed, moved, or genuinely absent from this posting. It is still "
+        f"save control still did not appear in {spent}. "
+        # THE COUNT TRAVELS WITH THE VERDICT, because "ready" is a threshold
+        # answer and a threshold answer hides how close it came. Flagged on
+        # 2026-08-30 by a live reading of THREE buttons, which passes and sits
+        # far below the 8-12 that fully drawn captures carry.
+        f"CAUTION ON HOW STRONG THAT IS: the captures in this repo draw "
+        f"{dom.SAVE_CAPTURE_BUTTONS_FULL} buttons when fully drawn and "
+        f"{dom.SAVE_CAPTURE_BUTTONS_MIN} on the one partially drawn capture -- "
+        f"and ALL FOUR carried exactly one save control regardless of count. A "
+        f"page drawing {buttons} buttons and NO save control therefore matches "
+        "no capture on record, so 'ready' here is the button test passing, not "
+        "a page anybody has seen behave this way. That makes this a vocabulary "
+        "finding rather than a timing one, and a weakly evidenced one. It is "
         "not licence to guess a label; see below for what was actually read."
     )
 

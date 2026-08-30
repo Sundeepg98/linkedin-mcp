@@ -706,3 +706,291 @@ def test_the_production_timeout_is_bounded_and_named():
     """
     assert isinstance(dom.SAVE_READY_TIMEOUT_MS, int)
     assert 1_000 <= dom.SAVE_READY_TIMEOUT_MS <= 30_000, dom.SAVE_READY_TIMEOUT_MS
+
+
+# ---------------------------------------------------------------------------
+# 7. The two read paths -- the third wave
+# ---------------------------------------------------------------------------
+#
+# WHAT WAS BELIEVED. `linkedin_job_detail` and the save gate's own facts read
+# were observed disagreeing about the same postings IN BOTH DIRECTIONS, minutes
+# apart in one session, and the natural reading was that two code paths were
+# using different strategies and failing on disjoint sets.
+#
+# THEY WERE NOT TWO STRATEGIES. Both called dom.read_job_identity, then
+# dom.read_main_text, then shape.parse_job_detail, with the same arguments in
+# the same order, behind the same navigation and the same flat settle. The only
+# textual difference was an extra `or not detail.get("company")` on the write
+# side, and that clause COULD NEVER FIRE: shape.job_title_from_document_title
+# returns None when the employer is unknown, so company absent forces title
+# absent and the base requirement has already failed. The two readers were
+# behaviourally identical and were mistaken for two implementations because
+# there were, textually, two of them.
+#
+# WHAT THE DISAGREEMENT ACTUALLY WAS. Measured live 2026-08-30: posting
+# 4448301715 returned a full detail 2/2 for one caller and extraction_failed
+# 3/3 an hour later, same reader, same url, same build -- while
+# linkedin_search_jobs rendered full results in the same session seconds after.
+# The cell is not a property of the posting or of the reader. It moves with
+# TIME.
+#
+# So there is now ONE reader, dom.read_job_posting, and the requirement that
+# differs between its two callers is declared as data rather than hidden in a
+# clause. The tests below pin both halves.
+
+
+def test_the_write_gates_extra_company_clause_could_never_decide():
+    """THE DEAD CLAUSE, pinned as the reason the theory was believable.
+
+    The write gate read ``not job_detail_is_believable(detail) or not
+    detail.get("company")``. For the second half ever to be the deciding term,
+    a reading would have to be believable AND carry no company. This drives the
+    real parser across every falsy employer and asserts no such reading exists
+    -- which is what makes the two paths identical in effect, and what made a
+    whole afternoon's theory about "different strategies" plausible.
+    """
+    body = (
+        "Backend Engineer | Remote\nAshgrove Systems\nAbout the job\n"
+        "We need someone to build things, and here is a body long enough to "
+        "parse as one."
+    )
+    document_title = "Backend Engineer | Remote | Ashgrove Systems | LinkedIn"
+
+    for company in (None, "", "   ", "\t"):
+        detail = shape.parse_job_detail(
+            body, company=company, document_title=document_title
+        )
+        believable = shape.job_detail_is_believable(detail)
+        assert not (believable and not detail.get("company")), (
+            f"company={company!r} produced a believable reading with no "
+            "company, so the write gate's extra clause CAN decide and the "
+            "two read paths are not equivalent after all."
+        )
+        # And the mechanism, so a future edit that decouples them is visible.
+        assert detail["title"] is None, (
+            "title no longer depends on company -- the extra requirement has "
+            "become independent and shape.JOB_DETAIL_REQUIRED_FOR_GATE is now "
+            "load-bearing rather than implied. Update its comment."
+        )
+
+    # The control: with an employer, everything resolves.
+    ok = shape.parse_job_detail(
+        body, company="Ashgrove Systems", document_title=document_title
+    )
+    assert shape.job_detail_is_believable(ok)
+    assert ok["company"] == "Ashgrove Systems"
+
+
+async def test_the_two_read_paths_agree_on_every_captured_state(over):
+    """ONE READER MEANS ONE ANSWER, asserted over the states that exist.
+
+    The disagreement that started this wave would require the two requirement
+    sets to differ in effect on some page. Across every job capture in the repo
+    plus two derived failure states, they never do -- so no page in evidence
+    can produce the both-directions table, and the explanation has to be
+    somewhere other than the readers.
+    """
+    derived = {
+        "no main at all": re.sub(r"</?main[^>]*>", "", base()),
+        "main with text, no body heading": base().replace(
+            "About the job", "About the weather"
+        ),
+    }
+    assert derived["no main at all"] != base()
+    assert derived["main with text, no body heading"] != base()
+
+    pages = {
+        name: (FIXTURE_DIR / f"{name}.html").read_text(encoding="ascii")
+        for name in (
+            "job_detail_shell",
+            "job_detail_following",
+            "job_detail",
+            "job_detail_hydrated",
+            "job_detail_following_hydrated",
+        )
+    }
+    pages.update(derived)
+
+    disagreements = []
+    for name, html in pages.items():
+        reading = await over(html, dom.read_job_posting)
+        detail = reading["detail"]
+        read_path = shape.job_detail_missing(detail)
+        gate_path = shape.job_detail_missing(
+            detail, require=shape.JOB_DETAIL_REQUIRED_FOR_GATE
+        )
+        if bool(read_path) != bool(gate_path):
+            disagreements.append((name, read_path, gate_path))
+
+    assert not disagreements, (
+        "the read path and the write gate reached opposite verdicts on "
+        f"{disagreements}, so they are NOT equivalent and the both-directions "
+        "table has a code-level explanation after all."
+    )
+
+
+async def test_a_page_that_never_drew_is_not_an_empty_page(over):
+    """THE TRAP IN THE LOW NUMBERS, and the reason a note quotes a range.
+
+    "The page had not finished rendering" suggests emptiness. The shell capture
+    renders an aside, a footer and a language picker, so its ``<main>`` carries
+    over a thousand characters while containing no posting whatsoever. A
+    diagnostic that said "it rendered something" without a scale would send its
+    reader looking for a parser bug.
+    """
+    shell = await over(
+        (FIXTURE_DIR / "job_detail_shell.html").read_text(encoding="ascii"),
+        dom.read_job_posting,
+    )
+    drawn = await over(base(), dom.read_job_posting)
+
+    assert shell["main_present"] is True, "the shell DOES draw a main"
+    assert shell["main_chars"] > 1_000, shell["main_chars"]
+    assert shape.job_detail_missing(shell["detail"]) == ["title", "description"]
+
+    assert drawn["main_chars"] > 4 * shell["main_chars"], (
+        f"a drawn posting carried {drawn['main_chars']} against the shell's "
+        f"{shell['main_chars']}; the ranges the refusal quotes are no longer "
+        "separated and the number it prints is not actionable."
+    )
+    assert shape.job_detail_missing(drawn["detail"]) == []
+
+
+async def test_the_control_layer_and_the_text_layer_are_independent(over):
+    """THE FINDING THAT REFRAMES THE SAVE INVESTIGATION.
+
+    ``job_detail_following`` carries a save control AND an apply control while
+    its description has not arrived. So the two layers render on schedules that
+    do not track each other, and neither one being present is evidence about
+    the other -- which is why "the save control is missing" and "the posting
+    could not be read" have never been two views of one fact.
+    """
+
+    async def work(page):
+        reading = await dom.read_job_posting(page)
+        return (
+            shape.job_detail_missing(reading["detail"]),
+            int(await page.locator(dom.SAVE_CONTROL).count()),
+            int(await page.locator(dom.APPLY_CONTROL).count()),
+        )
+
+    missing, saves, applies = await over(
+        (FIXTURE_DIR / "job_detail_following.html").read_text(encoding="ascii"),
+        work,
+    )
+    assert "description" in missing, missing
+    assert saves == 1, "the save control is present on a page with no readable body"
+    assert applies == 1
+
+
+def test_a_failure_note_separates_the_three_page_states():
+    """THREE STATES, THREE SENTENCES. Absent is not empty is not unparsed."""
+    no_main = shape.job_detail_failure_note(
+        ["description"], main_present=False, main_chars=0
+    )
+    empty_main = shape.job_detail_failure_note(
+        ["title", "description"], main_present=True, main_chars=0
+    )
+    full_main = shape.job_detail_failure_note(
+        ["description"], main_present=True, main_chars=5_648
+    )
+    unknown = shape.job_detail_failure_note(
+        ["description"], main_present=None, main_chars=0
+    )
+
+    assert "drew NO <main>" in no_main
+    assert "EMPTY <main>" in empty_main
+    assert "5648 characters" in full_main
+    assert "could not be established" in unknown
+    assert len({no_main, empty_main, full_main, unknown}) == 4
+
+    # Every one of them names the missing field rather than only the symptom.
+    assert "description" in no_main
+    assert "title, description" in empty_main
+
+
+async def test_a_main_presence_check_that_failed_is_not_a_missing_main():
+    """ABSENT IS NOT UNKNOWN, on the field that carries the strongest sentence.
+
+    Written after a mutation exposed the gap: flipping ``read_job_posting``'s
+    presence default from None to False left every note test green, because
+    they all hand-build their inputs and none drives the reader. False here
+    makes the refusal say "the page drew NO <main>" -- a definite claim about
+    LinkedIn -- on the strength of a local locator error.
+    """
+
+    class _Stub:
+        """Stands in for any locator the identity read asks for."""
+
+        first = property(lambda self: self)
+
+        async def count(self):
+            return 0
+
+        async def get_attribute(self, _name):
+            return None
+
+    class _Page:
+        async def title(self):
+            return "Backend Engineer | Remote | Ashgrove Systems | LinkedIn"
+
+        async def inner_text(self, _selector):
+            return "some text"
+
+        def locator(self, selector):
+            if selector == "main":
+                raise RuntimeError("detached")
+            return _Stub()
+
+    reading = await dom.read_job_posting(_Page())
+    assert reading["main_present"] is None, (
+        "a locator error was reported as a page that drew no main, which is "
+        "the strongest claim this diagnostic can make and it would be made "
+        "out of a local failure."
+    )
+    note = shape.job_detail_failure_note(
+        ["description"],
+        main_present=reading["main_present"],
+        main_chars=reading["main_chars"],
+    )
+    assert "could not be established" in note, note
+    assert "drew NO <main>" not in note
+
+
+def test_a_failure_note_names_the_control_that_separates_page_from_session():
+    """THE THIRD POSSIBILITY THE OLD SENTENCE DID NOT MENTION.
+
+    It offered two theories -- not finished rendering, or the posting is gone --
+    and both are about the POSTING. Measured 2026-08-30: both readings failed
+    on two different postings while linkedin_search_jobs returned full results
+    in the same session seconds later, so the surface can fail while the
+    account is entirely healthy. A reader who does not know that debugs their
+    session.
+    """
+    note = shape.job_detail_failure_note(
+        ["description"], main_present=True, main_chars=1_092
+    )
+    assert "linkedin_search_jobs" in note, note
+    assert "control" in note
+    assert "repeat this call" in note, (
+        "the note must ask for a repeat: the disagreement that started this "
+        "wave was built entirely out of single readings."
+    )
+
+
+def test_the_readiness_verdict_carries_the_count_it_passed_on():
+    """A THRESHOLD ANSWER HIDES HOW CLOSE IT CAME.
+
+    Three buttons passes the button test and sits far below the 8-12 a fully
+    drawn capture carries. The verdict has to travel with that, or "READY"
+    reads as a clean bill of health on the weakest possible pass.
+    """
+    weak = writes._save_readiness_note({"main_buttons_total": 3}, TIMED_OUT)
+    strong = writes._save_readiness_note({"main_buttons_total": 11}, TIMED_OUT)
+
+    for note in (weak, strong):
+        assert "THE PAGE WAS READY" in note
+        assert dom.SAVE_CAPTURE_BUTTONS_FULL in note, note
+        assert "matches no capture on record" in note, note
+    assert "3 buttons" in weak
+    assert "11 buttons" in strong
