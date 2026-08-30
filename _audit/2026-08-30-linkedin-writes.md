@@ -23,7 +23,7 @@ it is HIS decision and the gate is what defers it to him.
 | new click call sites | **ZERO**. `SANCTIONED_MUTATIONS` is the two entries it was |
 | live census runs performed | **THREE** (`feed`, `profile`, `settings`), plus one search and one job read |
 | defects found and fixed | **THREE** -- the job-card parser, a wrong enumeration in a refusal, a name that under-declared a write |
-| full suite | **1920 passed, 0 failed** |
+| full suite | **1924 passed, 0 failed** on the final tree (1920 before the last two commits) |
 | writes performed | **NONE.** No `confirm_token` was passed to anything, by anyone, at any point |
 
 **`_state/session.json` is byte-identical.** Proof in section 8.
@@ -579,17 +579,26 @@ the paragraph used to say.
 
 ## 8. Run record
 
-**Full suite: 1920 passed, 0 failed.** `venv\Scripts\python.exe -m pytest -q`,
-Python 3.13.14, with all code and test files committed.
+**Full suite: 1924 passed, 0 failed** on the final tree.
+`venv\Scripts\python.exe -m pytest -q`, Python 3.13.14.
 
-Baseline at `000e87f` was **1766** (measured by collection, not carried). The
-delta is +154, of which 10 are the job-card parser slice and 144 are the
-capability wave -- 137 of those in the new `tests/test_writes_nine.py`.
+Baseline at `000e87f` was **1766** (measured by collection, not carried).
 
-Note the mechanism this repo already documented: some checks parametrise over
-`git ls-files`, so **committing this document adds test cases**. The number
-above is the tree before it; the docs commit's own count is recorded in section
-9.
+```
+1766  baseline at 000e87f
+ +10  the job-card parser slice                      -> 1776  (measured)
++144  the capability wave, 137 of them in the new
+      tests/test_writes_nine.py                      -> 1920  (measured)
+  +4  cases that exist BECAUSE two more files are
+      tracked                                        -> 1924  (measured)
+```
+
+The last +4 is the mechanism this repo already documented and it is worth
+keeping visible: several checks parametrise over `git ls-files` -- the
+credential and identity scanners run one case per TRACKED FILE -- so **adding a
+tracked file adds test cases**. 1920 was measured with the two code commits in
+and this document still untracked; 1924 is the state of the tree at
+`30faa2d`. Both were run, neither is derived.
 
 ### `_state/` -- byte-identical
 
@@ -644,14 +653,21 @@ only the target is missing.
 
 ```
 f57c184   fix(job-card): a lone line after the title is a location, never a company
-          2 files, shape.py + tests/test_job_search_fixture.py
+          2 files: shape.py + tests/test_job_search_fixture.py
 
 050349f   feat(writes): the seven that refuse, and follow_company that does not
-          8 files: dom.py, readonly.py, server.py, writes.py and four test files,
-          including the new tests/test_writes_nine.py
+          8 files: dom.py, readonly.py, server.py, writes.py, and four test
+          files including the new tests/test_writes_nine.py
+          Tree collects and passes 1920.
 
-<this document's own commit follows immediately>
+e6e8ed9   test(identity): declare the synthetic urn test_writes_nine.py needs
+          1 file. The privacy guard fired on the new test file between
+          commit and suite; the allowlist widened, per that file's own rule,
+          and the count was shown failing on a second urn.
+
+30faa2d   <this document>
+          Tree collects and passes 1924.
 ```
 
-**Neither is pushed.** This repository is PUBLIC and the push is the lead's,
+**None is pushed.** This repository is PUBLIC and the push is the lead's,
 after a PII scan.
