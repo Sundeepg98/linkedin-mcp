@@ -346,10 +346,13 @@ changed; the guard was not touched and no exemption was declared.**
 **Suite.** `venv\Scripts\python.exe -m pytest -q`
 
 * In: **1944 passed** (the brief's number, and what I measured).
-* Out: **1977 passed, 0 failed**, in 540.59 s.
-* The delta is 33, not 29, and the extra four are not tests I wrote:
+* At `1b09fbd`, before this audit was tracked: **1977 passed, 0 failed**, in 540.59 s.
+* **At final HEAD, with this audit tracked: 1979 passed, 0 failed**, in 532.88 s.
+* The delta is 35, not 29, and the extra six are not tests I wrote:
   `test_no_committed_identity` and `test_path_hygiene` are parametrized over TRACKED files, so
-  committing two test modules adds two cases each. 29 + 4 = 33.
+  each newly committed file adds two cases. Three files (two test modules + this audit) x 2 = 6.
+  29 + 6 = 35. Anyone re-deriving the delta by subtraction should expect that gap rather than
+  read it as coverage from nowhere.
 
 **`_state/` untouched.** Byte-identical at wave open and close:
 
