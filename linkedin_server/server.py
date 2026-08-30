@@ -127,9 +127,10 @@ mcp = FastMCP(
     name=SERVER_NAME,
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
-        "signed-in browser on his own machine. Fourteen of the eighteen "
-        "tools read and change nothing. FOUR WRITE: linkedin_save_job, "
-        "linkedin_unsave_job, linkedin_unfollow_company and "
+        "signed-in browser on his own machine. Most tools read and change "
+        "nothing. FIVE WRITE: linkedin_save_job, "
+        "linkedin_unsave_job, linkedin_unfollow_company, "
+        "linkedin_follow_company and "
         "linkedin_apply_job. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
@@ -154,10 +155,40 @@ mcp = FastMCP(
         "fine, because only a single-screen apply flow has ever been observed "
         "and a multi-step one is refused rather than walked. That is the tool "
         "working, not a gap; it says what it saw. "
-        "There is no message, no connection request, no InMail, no profile "
-        "edit, and no post -- do not look for them or suggest they exist. "
-        "Following a company is sanctioned but not performed: the unfollow "
-        "cannot be aimed at what a follow would create. "
+        "THE SEVEN THAT REFUSE, and this paragraph said the OPPOSITE until "
+        "2026-08-30 -- it read 'There is no message, no connection request, "
+        "no InMail, no profile edit, and no post -- do not look for them or "
+        "suggest they exist.' Every one of those now EXISTS as a tool: "
+        "linkedin_publish_post, linkedin_comment_on_item, "
+        "linkedin_react_to_item, linkedin_update_profile_field, "
+        "linkedin_update_setting, linkedin_send_invitation and "
+        "linkedin_send_message. NONE OF THEM CAN ACT. Each reads the relevant "
+        "surface live, then refuses and names what it saw, what is missing, "
+        "and the one measurement that would complete it -- and no confirm "
+        "token is ever issued for any of them, so there is nothing to "
+        "confirm. Answer questions about them from what the tool itself "
+        "returns rather than from a stored belief: the reason they are the "
+        "opposite of a silence is that a silence conflates 'this server will "
+        "not' with 'LinkedIn cannot'. Two of them are worth knowing in "
+        "advance. linkedin_send_message DOES NOT OPEN MESSAGING -- loading it "
+        "is measured to redirect into a stranger's conversation, so the "
+        "preview reads the nav badge and stops; if the surface must be "
+        "measured, HE calls linkedin_open_messaging, which pays that cost "
+        "knowingly. And linkedin_send_invitation DOES NOT OPEN /mynetwork/, "
+        "because that load spends his pending-invitation badge; it reads the "
+        "invitation controls on his own profile instead. "
+        "Following a company IS now performed, through "
+        "linkedin_follow_company and behind the same gate -- with one "
+        "asymmetry to carry into any answer: this server can start a follow "
+        "and cannot aim its own unfollow at what a follow creates, because a "
+        "posting names its employer by SLUG and the unfollow surface "
+        "addresses rows by NUMERIC ID. Reversible in LinkedIn, by hand; not "
+        "by this server. "
+        "Endorsing a skill is IMPOSSIBLE AS SPECIFIED and is the one "
+        "capability with no tool: zero endorse controls across 13 fixtures "
+        "and across 222 controls read live on his own profile, and the only "
+        "surface that would carry one is a third party's profile, which this "
+        "server may not load for a measurement. "
         "Start with linkedin_auth_status; if it says false, the operator must "
         "call linkedin_login and sign in himself in the window it "
         "opens -- this server never handles a password. That sign-in is a "
@@ -1777,19 +1808,86 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # per-posting fact rather than a property of the verb, and the
     # irreversibility moved into linkedin_apply_job's docstring, sharpened --
     # nobody has established LinkedIn offers a withdraw at all.
-    "follow_company": (
-        "an unfollow now exists, but it cannot be aimed at what a follow "
-        "creates: a posting names its employer by slug, the unfollow surface "
-        "addresses rows by numeric company id, and nothing resolves one to "
-        "the other. That surface also renders about 20 rows of 58 with no "
-        "pagination."
-    ),
+    # follow_company WAS HERE UNTIL 2026-08-30. Its line was accurate and it
+    # is now in the wrong place: the slug-to-id gap it described is real, was
+    # re-measured that day, and belongs on the SPEC in reversible_by, which
+    # the confirm block prints. Deciding for him on a ground he can read for
+    # himself is what moved.
     "set_open_to_work": (
-        "its editor is not addressed by a url at all -- 237 urls and 37 "
-        "payload paths measured across five profile captures, zero of which "
-        "reach it. It opens as a modal, and the click that would first show "
-        "it is also the first that could change it. This is the one setting "
-        "here that a current employer can see."
+        # NARROWED 2026-08-30, and the old sentence is quoted because it is the
+        # exact failure mode this dict keeps producing. It read: "its editor is
+        # not addressed by a url at all -- 237 urls and 37 payload paths
+        # measured across five profile captures, zero of which reach it."
+        #
+        # THE EVIDENCE WAS TRUE OF THE CAPTURES AND IS FALSE OF THE SITE. A
+        # live census of his profile on 2026-08-30 found THREE editors carried
+        # as ordinary anchors -- /in/<member>/edit/intro/,
+        # /in/<member>/edit/forms/summary/new/ and
+        # /in/<member>/overlay/contact-info/ -- plus 2 forms where the fixtures
+        # carry none. So "a profile editor is not url-addressed" is refuted.
+        #
+        # WHAT SURVIVES, and it is narrower and still decisive: NONE of those
+        # three anchors, and no other href on the page, reaches the OPEN TO
+        # WORK audience editor. That one remains modal-only.
+        "no url reaches its editor. NARROWED 2026-08-30 after a live census "
+        "refuted the wider claim this entry used to make: profile editors ARE "
+        "url-addressed -- three of them are plain anchors on his own profile, "
+        "and the live page carries 2 forms where every frozen fixture here "
+        "carries none. What survives is specific to this setting: none of "
+        "those anchors, and no other href on the page, reaches the Open To "
+        "Work audience editor. It opens as a modal, and the click that would "
+        "first show it is also the first that could change it. This is the "
+        "one setting here a current employer can see."
+    ),
+    # THE SEVEN, added 2026-08-30. Kept to one line each on purpose: the full
+    # argument for every one of them lives in ``writes._NINE_REFUSALS``, which
+    # is what a caller actually hits when it refuses, and two long copies of
+    # one argument drift apart. What each line has to carry is the SHAPE of
+    # the blocker, because "no control has been observed" and "the address is
+    # forbidden" want completely different work to lift them.
+    "publish_post": (
+        "the composer is a modal and its editor has never been observed -- "
+        "zero contenteditable nodes on the feed. The two url-addressed "
+        "publish routes that DO exist, /article/new/ and /preload/sharebox/, "
+        "are not on the read allowlist. A capture of the opened composer "
+        "lifts it."
+    ),
+    "comment_on_item": (
+        "the item permalink /feed/update/<urn>/ is on the forbidden-url list, "
+        "so the target cannot be opened; and the comment box has never been "
+        "observed. Two blockers, and a boundary ruling only clears one."
+    ),
+    "react_to_item": (
+        "the anchor IS measured -- LinkedIn writes the toggle state into the "
+        "control's name -- and the target is not: the item permalink is on "
+        "the forbidden-url list, and the feed renders several items at once "
+        "so picking one there would be picking by position. The ON-state "
+        "label is also still unseen, so the undo has no anchor."
+    ),
+    "update_profile_field": (
+        "'/edit/' is on the forbidden-url list, so the three editor addresses "
+        "measured live on 2026-08-30 are refused before the allowlist is "
+        "consulted; and no field inside any editor has been observed."
+    ),
+    "update_setting": (
+        "every setting is url-addressed and every one of those addresses is "
+        "forbidden here, by '/mypreferences/d/categories/' or '/settings/'. "
+        "No toggle has ever been observed. Note before ruling on the family: "
+        "'Close and delete account' and 'Hibernate account' are in it."
+    ),
+    "send_invitation": (
+        "a route exists that costs no badge -- the control is on his own "
+        "profile, 9 of them, not on /mynetwork/ -- and it still cannot be "
+        "aimed: the label is the other person's NAME, which this server will "
+        "not read, so the measurable suffix selects all nine. '/invite', "
+        "'invitation' and '/connect' are also forbidden urls."
+    ),
+    "send_message": (
+        "'/messaging/compose' is on the forbidden-url list and no composer "
+        "has ever been observed, because observing one costs opening a "
+        "stranger's thread. This preview does not pay that -- it reads the "
+        "nav badge and stops. linkedin_open_messaging is the tool that pays "
+        "it knowingly."
     ),
 }
 
@@ -2005,6 +2103,382 @@ async def linkedin_unfollow_company(
     """
     try:
         return await _write_tool("unfollow_company", company_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_follow_company(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Follow the company that posted one job, from the posting page itself.
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``.
+    PERFORMED FROM 2026-08-30, and this tool did not exist before that date --
+    the action was specced in August and deliberately not offered.
+
+    READ THE ASYMMETRY BEFORE YOU USE IT, because it is the whole reason this
+    was held back. A follow IS reversible -- LinkedIn writes the inverse into
+    the control's own accessible name, ``Following``, and into two other
+    surfaces besides -- but THIS SERVER CANNOT AIM THE UNDO. A posting names
+    its employer by SLUG; ``linkedin_unfollow_company`` addresses rows by
+    NUMERIC COMPANY ID; and nothing resolves one to the other. That was
+    re-measured on 2026-08-30 by the cheapest available route:
+    ``linkedin_job_detail`` on a live posting returns
+    ``company_url: .../company/<slug>/``, a slug and not an id. Manage Pages
+    also renders about twenty rows of however many you follow with no
+    pagination, so a newly followed Page may not even appear there.
+
+    So: reversible in LinkedIn, and by hand. Not by this server. The preview
+    says exactly that in ``reversible_by`` and it is why you are reading it
+    here as well.
+
+    THE DIRECTION IS READ OFF THE POSTING, at no extra page load -- the state
+    and the action share a page, which is the best shape a gate can have. The
+    control is measured: ``aria-label="Follow"`` when not following and
+    ``"Following"`` when following. A posting that has not hydrated draws
+    neither, and the preview refuses on ``unknown`` rather than clicking.
+
+    Verification after the click is the WEAKEST in this server: the control
+    redraws in place and is re-read there, because a follow's preview reads
+    the posting rather than a list that could be counted before and after.
+    ``performed`` may come back ``"unknown"``; open your followed companies
+    and look rather than retrying, since a retry on a toggle that did land
+    performs the opposite.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose employer you want to follow.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually follow.
+    """
+    try:
+        return await _write_tool("follow_company", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---------------------------------------------------------------------------
+# The seven that are built, gated, and refuse
+# ---------------------------------------------------------------------------
+#
+# ADDED 2026-08-30 on the standing ruling that whatever is technically possible
+# should be achieved. Each is a full spec behind the SAME two-call gate as the
+# writes above -- one target normaliser, one live read, one reversibility
+# verdict, one refusal in its own words -- and NONE of them can act.
+#
+# WHY THEY ARE REGISTERED AT ALL RATHER THAN LEFT OUT. The server's own
+# instructions said until this morning: "There is no message, no connection
+# request, no InMail, no profile edit, and no post -- do not look for them or
+# suggest they exist." That sentence was true and it was also the worst
+# possible answer to give somebody who wants to know whether LinkedIn can be
+# posted to from here, because it conflates "this server will not" with "you
+# cannot". A tool that appears, reads the surface live, and says precisely
+# which measurement is missing is discoverable and honest; a silence is
+# neither. It is the same argument that keeps the write tools registered when
+# LINKEDIN_ENABLE_WRITES is unset.
+#
+# NONE OF THEM WIDENED THE READ BOUNDARY. Each previews by loading a page that
+# was already allowed -- the feed, his own profile, the settings index -- and
+# the four frozen denylists are byte-identical across the change that added
+# them.
+
+
+@mcp.tool()
+async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str, Any]:
+    """Publish a post to your feed. BUILT, GATED, AND REFUSING.
+
+    Call it and it reads the feed live, then tells you what it found and why it
+    will not act. It cannot publish anything today and the reason is not that
+    the code is missing.
+
+    WHAT IS MEASURED: the feed carries one composer control, accessible name
+    ``Start a post``, drawn as a div with role=button and no href -- so the
+    composer is a MODAL, not a page. Two publish routes ARE addressed by url
+    and both are real anchors: ``Write article`` at /article/new/ and
+    ``Create a post`` at /preload/sharebox/.
+
+    WHAT IS NOT: the same census counted ZERO contenteditable nodes on the
+    page, so the editor itself, and whatever control publishes, have never
+    been observed. This server does not click a control it has not seen. And
+    neither publish address is on its read allowlist.
+
+    WHAT IT WOULD COST IF IT COULD. A post is a BROADCAST under your own name
+    -- your profile reports 275 followers and LinkedIn's own analytics show
+    past posts reaching 103, 308 and 1,284 impressions. Whether a post can be
+    deleted at all is UNMEASURED here: the per-post overflow menu renders
+    collapsed and its items have never been read, and deletion is permanently
+    forbidden in this server in any case. It is also the one artefact here a
+    current employer sees without looking for it.
+
+    WHAT WOULD LIFT THE REFUSAL: a capture of the opened composer -- the
+    accessible name of its editable node and of its publish control. The click
+    that first SHOWS the composer publishes nothing; only the second one does.
+
+    Args:
+        text: the exact words that would be posted. They are part of the
+            target, so a confirm token is bound to them and cannot be redeemed
+            against different words.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool("publish_post", {"text": text}, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_comment_on_item(
+    item: str, text: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Comment under one feed item. BUILT, GATED, AND REFUSING.
+
+    Reads the feed live, then refuses and says what it saw.
+
+    WHAT IS MEASURED: the comment affordance, in both of its two shapes, and
+    they are not the same control. On the feed it is a text-named button that
+    opens a composer in place. On a profile it is an ANCHOR pointing at the
+    item's permalink, /feed/update/<urn>/ -- which is the only place a target
+    key for a feed item has ever been seen.
+
+    WHAT IS NOT, and there are three: the permalink family is on this server's
+    forbidden-url list, so the item cannot be opened; the comment box is a
+    contenteditable node and the census counted zero of them, so it has never
+    been observed; and the exact form of a feed urn is unmeasured, because the
+    census substitutes ``<urn>`` out before counting so that it cannot publish
+    an identifier.
+
+    WHAT IT WOULD COST. A comment is PUBLIC, ATTRIBUTED TO YOU, and sits under
+    SOMEBODY ELSE'S item -- published to their audience rather than to your
+    followers, and it notifies them. Whether it can be deleted is unmeasured
+    here and this server could not delete it either way.
+
+    Args:
+        item: which feed item, by whatever identifier you have. This server has
+            never read one unshaped, so it does not pretend to validate the
+            form -- and it also cannot act on it.
+        text: the exact words. Part of the target, so a token binds to them.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool(
+            "comment_on_item", {"item": item, "text": text}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_react_to_item(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """React to one feed item. BUILT, GATED, AND REFUSING -- the closest of them.
+
+    Reads the feed live, then refuses. It is worth knowing why this one is
+    closer than the others.
+
+    WHAT IS MEASURED, and it is the strongest string found on this surface:
+    LinkedIn writes the TOGGLE STATE INTO THE CONTROL'S OWN ACCESSIBLE NAME --
+    ``aria-label="Reaction button state: no reaction"``. Eleven of those were
+    read on 2026-08-30, three on the feed and eight on your own profile, every
+    one in the off state. That is the same convention as the follow control,
+    and it means the direction can be read off the very button a reaction
+    would move.
+
+    WHAT IS NOT: the ON-state label has never been seen, because nothing on
+    either surface had been reacted to -- so the undo has no anchor, which is
+    precisely where ``linkedin_unsave_job`` has been since August. And the
+    target cannot be aimed: the item permalink is on the forbidden-url list,
+    and several items render at once, so choosing one from the feed would be
+    choosing by position.
+
+    WHAT IT WOULD COST. A reaction notifies the author and can surface in your
+    own network's feed. Taking it back later removes the row, not the
+    notification.
+
+    WHAT WOULD LIFT THE REFUSAL: a ruling on the item permalink. The anchor is
+    already in hand, which is not true of any of the other six.
+
+    Args:
+        item: which feed item. Unvalidated, for the reason
+            ``linkedin_comment_on_item`` gives, and unusable either way.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool("react_to_item", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_update_profile_field(
+    field: str, value: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Change one field on your own profile. BUILT, GATED, AND REFUSING.
+
+    Reads your profile live, then refuses and says what it found.
+
+    WHAT IS MEASURED, and it CONTRADICTS what this server used to say. Profile
+    editors ARE addressed by url. Three are ordinary anchors on your own
+    profile -- ``/in/<member>/edit/intro/``,
+    ``/in/<member>/edit/forms/summary/new/`` and
+    ``/in/<member>/overlay/contact-info/`` -- and the live page carries 2
+    forms where every frozen fixture in this repo carries none. This server
+    reported for a week that the profile editor "is not addressed by a url at
+    all"; that was true of the captures and false of the site.
+
+    WHAT IS NOT: ``/edit/`` is on the forbidden-url list, so those addresses
+    are refused before the allowlist is even consulted, and no field inside
+    any editor has ever been observed -- so even given the address there is
+    nothing measured to type into.
+
+    WHAT IT WOULD COST. Your profile is what recruiters read, continuously
+    rather than at a moment you choose -- it reports 29 profile views. An edit
+    reverted an hour later was still live for an hour, and LinkedIn notifies a
+    network about some profile changes, which this server has not measured and
+    would not control.
+
+    Args:
+        field: which field. Named freely; nothing here validates it against a
+            list of fields, because no editor has been opened to enumerate one.
+        value: the new value. Part of the target, so a token binds to it.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool(
+            "update_profile_field", {"field": field, "value": value}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_update_setting(
+    setting: str, value: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Change one account setting. BUILT, GATED, AND REFUSING.
+
+    Reads the settings index live, then refuses.
+
+    WHAT IS MEASURED: every individual setting IS its own address --
+    ``/mypreferences/d/settings/language``, ``/mypreferences/d/dark-mode``,
+    ``/mypreferences/d/categories/privacy``, 33 links in all -- and the page
+    that lists them carries ZERO forms and ONE button. It hands out addresses
+    and switches nothing.
+
+    WHAT IS NOT: no page below that index has ever been loaded, so no toggle
+    has ever been observed; and ``/mypreferences/d/categories/`` and
+    ``/settings/`` are both on the forbidden-url list, which between them
+    refuse every page that carries a value.
+
+    READ THIS BEFORE ASKING FOR THE REFUSAL TO BE LIFTED. Two of the 33
+    addresses in that family are ``Close and delete account`` and
+    ``Hibernate account``. A permission written for the FAMILY would carry
+    those with it, so a setting has to be admitted by name or not at all.
+
+    Args:
+        setting: which setting, by name. Not validated against a list -- no
+            setting page has been loaded to build one from.
+        value: the new value. Part of the target, so a token binds to it.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool(
+            "update_setting", {"setting": setting, "value": value}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_send_invitation(
+    member: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Send one connection invitation. BUILT, GATED, AND REFUSING.
+
+    IT DOES NOT OPEN /mynetwork/, AND THAT IS THE POINT OF HOW IT PREVIEWS.
+    Loading that page consumes LinkedIn's pending-invitation badge -- signal
+    you have not seen yet -- which is why this server refuses to census it at
+    all. So the preview reads YOUR OWN PROFILE instead, a page it already
+    loads and which carries no such counter, and the invitation control is
+    there: 9 of them were measured on 2026-08-30, buttons whose accessible
+    name ends `` to connect``. The capability has a route that costs no badge.
+
+    WHAT STOPS IT ANYWAY, and both halves are real. THE LABEL IS THE OTHER
+    PERSON'S NAME: LinkedIn writes it into the aria-label, this server's
+    census blanks a name before counting it, and reading the full label in
+    order to aim a click would mean collecting a stranger's identity to fill
+    in a confirmation block. The suffix is all that may be known without
+    paying that, and a suffix selects all nine controls rather than one. And
+    ``/invite``, ``invitation`` and ``/connect`` are all on the forbidden-url
+    list.
+
+    WHAT IT WOULD COST. An invitation is a REQUEST TO A REAL PERSON and lands
+    as a notification with your name on it. Whether it can be withdrawn is
+    unmeasured here -- the sent-invitations manager is itself on the forbidden
+    list -- and withdrawing would not un-notify. There is a quieter cost too:
+    LinkedIn restricts accounts whose invitations are frequently ignored, so
+    this is the one action here whose repetition has a consequence for the
+    account itself.
+
+    WHAT WOULD LIFT IT: a decision, not a measurement -- whether this server
+    may hold one named person's identity long enough to show it to you and aim
+    one click. That is about you and a stranger, and it is yours to make.
+
+    Args:
+        member: who to invite. Unvalidated: this server has never read a member
+            slug unshaped, deliberately.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool("send_invitation", member, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_send_message(
+    member: str, text: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Send a message or InMail. BUILT, GATED, AND REFUSING.
+
+    THIS PREVIEW DOES NOT OPEN MESSAGING, and that is deliberate rather than
+    incidental. Loading /messaging/ is MEASURED TWICE to redirect into one
+    specific conversation of LinkedIn's own choosing -- so the load itself
+    OPENS SOMEBODY'S THREAD, and whether that fires them a read receipt is an
+    honest unknown believed unmeasurable from outside. The nav badge also
+    counts new-since-last-visit and resets when the tab is opened. A gate that
+    opened messaging in order to describe that cost would have spent it, on a
+    third party, to produce a sentence.
+
+    So it reads the BADGE off a page already open -- that number is the
+    counter a load would consume -- and stops. If you want the surface
+    measured, call ``linkedin_open_messaging`` yourself: it pays that cost
+    knowingly and its own name says so.
+
+    WHAT IS NOT MEASURED: any composer. ``/messaging/compose`` is on this
+    server's forbidden-url list -- it is the entry that SURVIVED when the
+    blanket messaging ban was narrowed in August so you could read your own
+    inbox, and it was kept for exactly this.
+
+    WHAT IT WOULD COST. A message is read by a person, usually within a day,
+    and arrives as an email as well as a notification; it is the most
+    irreversible-in-audience action in this whole design, and unlike an
+    application it is addressed to a named individual rather than a company's
+    process. It MAY ALSO SPEND AN INMAIL CREDIT, which is unmeasured rather
+    than denied: messaging outside your network uses InMail, that allowance is
+    finite on Premium Career, and this server has never read your balance
+    because the page carrying it is not on the read allowlist.
+
+    Args:
+        member: who to message. Unvalidated, for the same reason as
+            ``linkedin_send_invitation``.
+        text: the exact words. Part of the target, so a token binds to them.
+        confirm_token: accepted, and no token is ever issued for this action.
+    """
+    try:
+        return await _write_tool(
+            "send_message", {"member": member, "text": text}, confirm_token
+        )
     except Exception as exc:
         return _error(exc)
 
@@ -2541,9 +3015,30 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "a caller learns where the application would go; reporting and "
                 "stopping is the behaviour, and it is not a gap.",
             ],
+            # SIDE EFFECTS THIS SERVER PAYS, and the two it REFUSES to pay.
+            # The refused pair is listed here rather than only in a document
+            # because a caller meets this field and does not meet the audit:
+            # the whole design of linkedin_send_message and
+            # linkedin_send_invitation is that they DO NOT incur these, and a
+            # cost that is never named cannot be weighed.
             "known_side_effects": [
                 "opening the notifications page clears the unread badge",
                 "running a job search adds to your own recent-search history",
+                "opening messaging clears the messaging badge AND opens one "
+                "conversation LinkedIn chooses -- measured twice. Only "
+                "linkedin_open_messaging and linkedin_new_messages can incur "
+                "this, and only when called. linkedin_send_message "
+                "deliberately does NOT open messaging: it reads the nav badge "
+                "off a page already loaded and refuses.",
+                "loading /mynetwork/ would consume the pending-invitation "
+                "badge, which is why no tool here loads it at all. "
+                "linkedin_send_invitation reads the invitation controls on "
+                "your own profile instead, a surface carrying no such counter.",
+                "loading another member's profile leaves them a durable "
+                "record -- linkedin_who_viewed_me reads the receiving end of "
+                "exactly that signal, 365 days back. No tool here loads a "
+                "third party's profile, which is also why endorsing a skill "
+                "cannot be measured from this server.",
             ],
             "rate_discipline": {
                 "min_seconds_between_page_loads": MIN_NAVIGATION_INTERVAL_S,

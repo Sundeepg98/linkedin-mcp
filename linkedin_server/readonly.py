@@ -624,7 +624,46 @@ WRITE_VERBS: tuple[str, ...] = (
     # Added 2026-08-23 with the negation prefixes below: without the base verb
     # on this list, "unsubscribe" cannot be reached by stripping "un".
     "subscribe",
+    # ADDED 2026-08-30, and it was SHOWN MISSING before it was added: on the
+    # day linkedin_react_to_item was registered as a sanctioned write,
+    # name_implies_write("linkedin_react_to_item") returned False. A write
+    # tool whose name the write-verb guard does not recognise is the exact
+    # hole this list exists to close, and it was invisible until a tool wore
+    # the verb.
+    #
+    # MEASURED BEFORE ADDING, because this list feeds the DOCSTRING check too
+    # and a verb that is also ordinary prose turns a guard into noise: across
+    # every registered tool description, "react" appears as a whole word in
+    # exactly ONE -- the tool named for it. Zero false positives.
+    "react",
 )
+
+#: A THIRD RESIDUE, measured the same day, and the record of what was done
+#: INSTEAD of widening this list -- because the first instinct was to widen it
+#: and that instinct was wrong.
+#:
+#: ``linkedin_change_setting`` was registered on 2026-08-30 as a sanctioned
+#: write, and ``name_implies_write`` returned False for it: "change" is on no
+#: list. The obvious fix was to add "change" here. MEASURED FIRST: across every
+#: registered tool description, "change" appears as a whole word in SIX, and
+#: three of those are READS using it to describe the boundary ("has no way to
+#: change anything about the posting"). Adding it would have fired the
+#: DOCSTRING check -- which shares this list -- on three tools behaving
+#: correctly, and a guard that cries wolf is a guard somebody switches off.
+#:
+#: SO THE TOOL WAS RENAMED INSTEAD, to ``linkedin_update_setting``. "update" is
+#: already here, it is on the frozen conservation baseline in test_writes.py,
+#: and the new name announces the write that the old one concealed. That is
+#: the OPPOSITE of the rename loophole
+#: ``test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed`` exists to
+#: close: that one is renaming so a write passes as a read, this is renaming so
+#: a write stops passing as one. The guard found an under-declaring name and
+#: the name was corrected, which is the guard working.
+#:
+#: The residue that remains is the general one, unchanged: a verb that is also
+#: ordinary English cannot join this list while the name check and the
+#: docstring check share it. Revisit with a segmenter that tells a verb in a
+#: tool NAME from a verb in prose.
 
 #: Prefixes that NEGATE a verb without stopping it being a write.
 #:

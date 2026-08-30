@@ -907,3 +907,82 @@ def test_the_docstring_makes_no_write_claim():
 
 def test_the_tool_name_does_not_imply_a_write():
     assert readonly.name_implies_write("linkedin_surface_census") is False
+
+
+# ---------------------------------------------------------------------------
+# The settings redirect: the second gate is a gate on what is ASKED FOR
+# ---------------------------------------------------------------------------
+#
+# MEASURED LIVE 2026-08-30. ``linkedin_surface_census(surface="settings")`` was
+# run against the operator's account and came back
+#
+#     "source_url": "https://www.linkedin.com/mypreferences/d/categories/account"
+#
+# having been asked for ``https://www.linkedin.com/mypreferences/d/``. LinkedIn
+# REDIRECTS the settings index onto a category page -- and the category family
+# is precisely what was added to ``_FORBIDDEN_URL_SUBSTRINGS`` that same
+# morning, as the "second, independent gate" behind the newly widened
+# allowlist.
+#
+# SO THE CENSUS LANDED ON A URL ITS OWN DENYLIST REFUSES. Nothing was breached:
+# the page it read is the settings index's own account section, which is what
+# the ruling intended to permit, and the census clicks nothing. What is false
+# is a sentence somebody could reasonably infer from readonly.py -- that the
+# forbidden list keeps this server OFF those addresses. It keeps this server
+# from ASKING for them. ``assert_read_url`` gates the requested url and the
+# landed url is never re-checked, which readonly.py already states in the
+# messaging comment and which is now measured a second time on a second family.
+#
+# WHY THIS IS PINNED RATHER THAN FIXED. Re-checking the landed url would break
+# two working tools deliberately: ``linkedin_open_messaging`` is DESIGNED to
+# land on a thread url, and this census is designed to land wherever the
+# settings index sends it. Both are documented, both were ruled on. A guard
+# added here would refuse them, and quietly widening the allowlist to admit the
+# category page instead would undo the ruling that put it on the denylist. The
+# honest artefact is this test.
+
+
+def test_the_settings_index_is_permitted_and_its_landing_page_is_not():
+    """The requested url passes the read door; the url LinkedIn serves does not.
+
+    Both halves are asserted because either alone is a different, weaker
+    claim. That the index is allowed is what makes the census possible; that
+    the destination is forbidden is what makes the redirect a finding.
+    """
+    requested = CENSUS_SURFACES["settings"]
+    assert requested == "https://www.linkedin.com/mypreferences/d/"
+    assert readonly.is_read_url(requested) is True
+
+    # The url the live run actually landed on, 2026-08-30.
+    landed = "https://www.linkedin.com/mypreferences/d/categories/account"
+    assert readonly.is_read_url(landed) is False
+    # And it is the DENYLIST that refuses it, not merely the allowlist -- which
+    # is the whole point of the entry added that morning. Checked by finding
+    # the substring rather than by trusting the refusal's wording.
+    assert any(
+        bad in landed.lower() for bad in readonly._FORBIDDEN_URL_SUBSTRINGS
+    )
+
+
+def test_the_read_door_is_documented_as_gating_the_request_and_not_the_landing():
+    """The property that makes the redirect reachable, asserted on the guard.
+
+    ``assert_read_url`` takes a url and returns it. There is no landed-url
+    parameter and no post-navigation hook, so a redirect cannot be caught by
+    it -- and that is a fact about the signature rather than about any caller.
+    Pinned so that somebody adding such a check has to come here and read why
+    two shipped tools would break.
+    """
+    import inspect
+
+    signature = inspect.signature(readonly.assert_read_url)
+    assert list(signature.parameters) == ["url"]
+    # The other measured redirect in this package, kept beside it so the two
+    # are read as one class rather than as two curiosities.
+    assert readonly.is_read_url("https://www.linkedin.com/messaging/") is True
+    assert (
+        readonly.is_read_url(
+            "https://www.linkedin.com/messaging/thread/2-abcdef123456/"
+        )
+        is True
+    )

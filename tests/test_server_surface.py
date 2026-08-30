@@ -36,7 +36,7 @@ and is exactly the route save and unsave took. ``set_open_to_work`` is now the
 name in the condition apply used to be in: fully specced, sanctioned, and
 registering no tool, because its EDITOR has never been loaded. Being sanctioned
 in ``writes.py`` still does not by itself exempt a name here; the two
-boundaries are separate, and ``test_the_exemption_covers_only_those_two`` is
+boundaries are separate, and ``test_the_exemption_covers_only_the_names_on_it`` is
 where that is shown -- with ``set_open_to_work`` as the probe apply used to be.
 
 ``linkedin_logout`` writes to LOCAL DISK and to nothing else: it erases this
@@ -72,7 +72,59 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # because no tool registered it. What changed is not this line, it is that
     # writes.PERFORMABLE admitted apply_job and server.py registered a tool.
     "linkedin_apply_job",
+    # THE FIFTH PERFORMABLE WRITE, 2026-08-30. follow_company had been
+    # sanctioned since August and registered no tool, on the ground that this
+    # server cannot aim its own unfollow at what a follow creates. That fact
+    # is unchanged and was re-measured the same day; what moved is that it now
+    # lives on the SPEC, in reversible_by, which the confirm block prints --
+    # rather than here, deciding for him on a ground he can read.
+    "linkedin_follow_company",
+    # SIX TOOLS THAT ARE REGISTERED AND CANNOT ACT, added 2026-08-30. They are
+    # on this exemption for one reason only: their NAMES announce a write, and
+    # the check below is about names. It is not a claim that any of them can
+    # perform anything -- none is in writes.PERFORMABLE, none holds a
+    # url_template, and writes.mint refuses them a grant at issue, so no
+    # confirm token exists for any of them to redeem.
+    #
+    # THE INTERSECTION IS STILL THE MECHANISM: every name here is also a key
+    # in writes.SANCTIONED_WRITES, so this list cannot exempt a tool the write
+    # boundary has not admitted.
+    #
+    # ``linkedin_update_setting`` IS DELIBERATELY ABSENT and its absence is a
+    # finding rather than an omission. It is a sanctioned write and
+    # ``readonly.name_implies_write`` returns False for it, because "change" is
+    # on no write-verb list -- and it was measured on 2026-08-30 that adding it
+    # would fire the docstring check on three READ tools that use the word to
+    # describe the boundary. So the verb was left off, the residue is written
+    # down in readonly.py beside WRITE_VERBS, and this name is not put on an
+    # exemption it does not need: doing so would break
+    # ``test_the_exempted_names_do_in_fact_trip_the_name_check``, which is the
+    # control that stops this set from being a way to wave a name through.
+    "linkedin_publish_post",
+    "linkedin_comment_on_item",
+    "linkedin_react_to_item",
+    "linkedin_update_profile_field",
+    "linkedin_update_setting",
+    "linkedin_send_invitation",
+    "linkedin_send_message",
 }
+
+#: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
+#: one wrong turn on 2026-08-30 to establish that it should be.
+#:
+#: A separate ``DOCSTRING_WRITE_TOOLS`` was built that day for exactly one
+#: name. ``linkedin_change_setting`` was a sanctioned write whose docstring
+#: necessarily claims a write -- it warns that two of the 33 settings addresses
+#: are "Close and delete account" and "Hibernate account", the most important
+#: sentence in it -- while its NAME did not trip ``name_implies_write``,
+#: because "change" is on no write-verb list.
+#:
+#: THE SECOND SET WAS THE WRONG FIX AND THE RIGHT FIX WAS SMALLER: rename the
+#: tool. ``linkedin_update_setting`` uses a verb the frozen conservation
+#: baseline already knows, announces the write the old name concealed, and is
+#: no less accurate. One exemption set again, and the machinery that had been
+#: built to accommodate an under-declaring name went with the name.
+DOCSTRING_WRITE_TOOLS = SANCTIONED_WRITE_TOOLS
 
 EXPECTED_TOOLS = {
     "linkedin_auth_status",
@@ -137,6 +189,37 @@ EXPECTED_TOOLS = {
     # redirects it into one conversation of its own choosing, so a tool called
     # read_inbox would describe an operation the product does not offer.
     "linkedin_open_messaging",
+    # THE EIGHT ADDED 2026-08-30, on the standing ruling that whatever is
+    # technically possible should be achieved. ONE of them can act --
+    # linkedin_follow_company, the fifth performable write. The other seven
+    # are BUILT, GATED AND REFUSING: each holds a full spec, reads its own
+    # surface live when previewed, and refuses with what it just saw plus the
+    # one measurement that would complete it. None holds a url_template, so
+    # writes.mint refuses each a grant at ISSUE and no confirm token for any of
+    # them can exist.
+    #
+    # WHY THEY ARE ON THE SURFACE AT ALL, since a tool that can only refuse
+    # looks like a name bought for nothing -- which is exactly the argument
+    # this file used against registering apply in August. The difference is
+    # what the alternative was. The server's instructions said "There is no
+    # message, no connection request, no InMail, no profile edit, and no post
+    # -- do not look for them or suggest they exist", and that sentence
+    # conflates "this server will not" with "LinkedIn cannot". A tool that
+    # reads the surface and names the missing measurement is discoverable and
+    # correctable; a silence is neither, and a silence is what went stale.
+    #
+    # NOT ONE OF THEM WIDENED THE READ BOUNDARY. Each previews on a page that
+    # was already allowed, and all six frozen AST digests in
+    # test_readonly_boundary_invariant.py are unchanged across the commit that
+    # added them -- which is checkable, and is the load-bearing half.
+    "linkedin_follow_company",
+    "linkedin_publish_post",
+    "linkedin_comment_on_item",
+    "linkedin_react_to_item",
+    "linkedin_update_profile_field",
+    "linkedin_update_setting",
+    "linkedin_send_invitation",
+    "linkedin_send_message",
     # The fourth WRITE, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
     # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
     # specced and registers NO TOOL, because its flow has never been captured
@@ -172,10 +255,37 @@ EXPECTED_TOOLS = {
 #: got itself registered under a shorter alias would be exactly the rename
 #: loophole ``test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed``
 #: exists to close.
+#:
+#: WHAT THIS LIST STOPPED MEANING ON 2026-08-30, said plainly because a list
+#: nobody re-reads is how a claim goes stale. It forbids SPELLINGS, and on that
+#: date seven capabilities arrived under spellings that are not on it --
+#: ``linkedin_publish_post`` beside ``linkedin_post``,
+#: ``linkedin_send_invitation`` beside ``linkedin_invite`` and
+#: ``linkedin_connect``, ``linkedin_update_profile_field`` beside
+#: ``linkedin_update_profile``. So "no write tool exists under any of its
+#: obvious names" is still exactly true and is no longer a summary of what the
+#: server does: posting, commenting, reacting, profile editing, settings,
+#: invitations and messaging all EXIST here now, as specs behind the gate, and
+#: every one of them refuses. The name that MOVED is ``linkedin_send_message``,
+#: because the tool is registered under that very spelling.
+#:
+#: ``linkedin_endorse`` STAYS AND IS THE ONE ENTRY THAT STILL MEANS WHAT IT
+#: ALWAYS DID: there is no endorsement capability under any spelling, because
+#: measuring one requires loading a third party's profile and that is
+#: permanently refused. It is the only one of the nine with no tool at all.
 FORBIDDEN_TOOLS = {
     "linkedin_apply",
     "linkedin_easy_apply",
-    "linkedin_send_message",
+    # ``linkedin_send_message`` WAS HERE UNTIL 2026-08-30 and has MOVED into
+    # SANCTIONED_WRITE_TOOLS, which is the only sanctioned way off this list
+    # and is the route save, unsave, unfollow and apply all took. Note what
+    # the move does and does not mean: the tool is registered and it CANNOT
+    # SEND ANYTHING -- '/messaging/compose' is still on the read boundary's
+    # forbidden substrings, no composer has ever been observed, and the tool
+    # holds no url_template so no grant can be minted for it. What changed is
+    # that a caller asking about messaging now meets a tool that reads the
+    # nav badge, states the measured cost of opening messaging, and refuses --
+    # instead of meeting nothing.
     "linkedin_send_inmail",
     "linkedin_connect",
     "linkedin_invite",
@@ -225,17 +335,50 @@ async def test_the_surface_is_exactly_the_twentythree_tools(tools):
     because this file counts what is REGISTERED -- a tool that is exempt from
     the surface count because somebody classified it as internal is exactly
     the hole this set-equality exists to close.
+
+    THE SEVENTH RENAME, 2026-08-30, is the largest single move this file has
+    recorded and it is the FIRST of the expensive kind that is mostly made of
+    refusals. Eight tools arrived. One of them, ``linkedin_follow_company``,
+    can act -- it was specced in August and deliberately unregistered, and what
+    changed is not a measurement but who decides: the slug-to-id gap that held
+    it back is a REVERSIBILITY fact, and the gate prints reversibility to him.
+    The other seven are BUILT, GATED AND REFUSING, and counting them here is
+    not a courtesy. This file counts what is REGISTERED, and it says so two
+    paragraphs up about the census instrument: a tool exempt from the count
+    because somebody classified it as not-really-a-capability is the hole this
+    set-equality exists to close, and "it only refuses" is exactly that
+    classification wearing a modest face.
+
+    THIRTY-ONE NAMES OVER THIRTY CAPABILITIES; the login pair is still the only
+    pair.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 23
-    # And the split is asserted, not just the total: sixteen non-writes and the
-    # four named writes. A future tool arriving as a write would otherwise
-    # only have to bump a number.
+    assert len(tools) == 31
+    # And the split is asserted, not just the total. A future tool arriving as
+    # a write would otherwise only have to bump a number.
+    #
+    # THE WRITE-SHAPED SET MOVED FROM FOUR TO TWELVE ON 2026-08-30, which is
+    # the largest jump this line has taken, and the number on its own would
+    # be alarming in the wrong direction. FIVE of the twelve can actually
+    # perform anything -- writes.PERFORMABLE -- and the other seven hold no
+    # url_template at all, so writes.mint refuses them a grant at issue. The
+    # split that matters is asserted separately below, against
+    # writes.PERFORMABLE rather than against this name list, because a name is
+    # not a capability and this file has twice been the place that confused
+    # them.
     assert set(tools) & SANCTIONED_WRITE_TOOLS == {
         "linkedin_save_job",
         "linkedin_unsave_job",
         "linkedin_unfollow_company",
         "linkedin_apply_job",
+        "linkedin_follow_company",
+        "linkedin_publish_post",
+        "linkedin_comment_on_item",
+        "linkedin_react_to_item",
+        "linkedin_update_profile_field",
+        "linkedin_update_setting",
+        "linkedin_send_invitation",
+        "linkedin_send_message",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -258,6 +401,15 @@ async def test_the_surface_is_exactly_the_twentythree_tools(tools):
     # do before it. The write count is unmoved at four, which is the half of
     # this line worth checking -- a read arriving must not be able to hide a
     # write arriving beside it.
+    #
+    # AND NINETEEN, 2026-08-30, which is the number BARELY MOVING while the
+    # surface grew by eight -- it went up by one, and the one is the
+    # deprecated login alias being counted, not a capability. That is the
+    # whole shape of the wave: not one new READ shipped, and every one of
+    # the eight new names is write-shaped and on the exemption. Seven of
+    # them cannot act at all -- see the grant-incapability assertions in
+    # test_writes.py -- so a reader must not take the pair of numbers on
+    # this page as twelve things that write. FIVE things write.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 19
 
 
@@ -298,7 +450,7 @@ async def test_no_tool_name_implies_a_write(tools):
     -- "a seventeenth tool called ``linkedin_apply_job`` still lands in
     ``offenders``". That stopped being an example of anything the day apply was
     registered and exempted, so the probe moved to ``linkedin_set_open_to_work``
-    and lives in ``test_the_exemption_covers_only_those_two``, which is where it
+    and lives in ``test_the_exemption_covers_only_the_names_on_it``, which is where it
     is actually executed rather than merely described.
     """
     offenders = [
@@ -309,8 +461,14 @@ async def test_no_tool_name_implies_a_write(tools):
     assert offenders == [], offenders
 
 
-async def test_the_two_exempted_names_do_in_fact_trip_the_name_check(tools):
+async def test_the_exempted_names_do_in_fact_trip_the_name_check(tools):
     """THE CONTROL for the exemption above.
+
+    RENAMED 2026-08-30 from ``..._the_two_exempted_names_...``. The set has
+    held more than two names since 2026-08-24 and the name said two for six
+    days, which is the smallest possible version of the stale claim this
+    whole file is about. It now says nothing about the count, so it cannot
+    go stale again.
 
     Without it, ``name_implies_write`` could be broken so that it returns False
     for everything and the check would pass on a surface full of writes. These
@@ -322,7 +480,7 @@ async def test_the_two_exempted_names_do_in_fact_trip_the_name_check(tools):
         assert readonly.name_implies_write(name) is True, name
 
 
-async def test_the_exemption_covers_only_those_two(tools):
+async def test_the_exemption_covers_only_the_names_on_it(tools):
     """A write-shaped tool OUTSIDE the set is not covered by it.
 
     THE PROBE MOVED ON 2026-08-25 AND THE MOVE IS THE POINT. This test used to
@@ -346,6 +504,14 @@ async def test_the_exemption_covers_only_those_two(tools):
         "linkedin_unsave_job",
         "linkedin_unfollow_company",
         "linkedin_apply_job",
+        "linkedin_follow_company",
+        "linkedin_publish_post",
+        "linkedin_comment_on_item",
+        "linkedin_react_to_item",
+        "linkedin_update_profile_field",
+        "linkedin_update_setting",
+        "linkedin_send_invitation",
+        "linkedin_send_message",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -361,6 +527,92 @@ async def test_the_exemption_covers_only_those_two(tools):
         if readonly.name_implies_write(name) and name not in SANCTIONED_WRITE_TOOLS
     ]
     assert offenders == [probe], offenders
+
+
+def test_the_open_to_work_reason_no_longer_makes_the_claim_the_live_page_refutes():
+    """A LOAD-BEARING CLAIM THAT WENT FALSE, corrected rather than deleted.
+
+    ``server._WHY_NOT_PERFORMED["set_open_to_work"]`` said, in full: "its
+    editor is not addressed by a url at all -- 237 urls and 37 payload paths
+    measured across five profile captures, zero of which reach it."
+
+    EVERY NUMBER IN THAT SENTENCE IS STILL TRUE OF THE CAPTURES AND THE
+    CONCLUSION IS FALSE OF THE SITE. A live census of his own profile on
+    2026-08-30 found three profile editors carried as ordinary anchors --
+    /in/<member>/edit/intro/, /in/<member>/edit/forms/summary/new/ and
+    /in/<member>/overlay/contact-info/ -- and 2 forms where every frozen
+    fixture in this repo carries none. That is the exact failure mode of
+    measuring once and never re-measuring, and it is why this test asserts the
+    SHAPE of the claim rather than a phrase: the entry must not say a profile
+    editor is unreachable by url, and it must still say what remains true --
+    that none of those anchors reaches the OPEN TO WORK editor specifically.
+
+    The wider claim is what a reader would have acted on. The narrower one is
+    what was measured.
+    """
+    from linkedin_server.server import _WHY_NOT_PERFORMED
+
+    reason = _WHY_NOT_PERFORMED["set_open_to_work"]
+    lowered = reason.lower()
+    # THE REFUTED CLAIM, asserted absent. Its old wording is the thing that
+    # must not come back, so it is matched as the words a rewrite would reuse
+    # rather than as one exact sentence.
+    assert "not addressed by a url at all" not in lowered
+    # AND THE CORRECTION MUST BE PRESENT, or "absent" would be satisfied by
+    # somebody simply deleting the entry's evidence.
+    assert "url-addressed" in lowered or "url addressed" in lowered
+    assert "narrowed" in lowered
+    # WHAT SURVIVED, which is the whole point of narrowing rather than
+    # deleting: this setting's editor is still not reachable.
+    assert "open to work" in lowered
+    assert "modal" in lowered
+    # And the sibling capability that the same measurement UNBLOCKED is a
+    # registered tool, so the correction is not merely textual.
+    assert "linkedin_update_profile_field" in {
+        spec.tool_name for spec in SANCTIONED_WRITES.values()
+    }
+
+
+def test_the_rename_that_closed_a_write_verb_gap_rather_than_widening_one():
+    """WHY ``linkedin_update_setting`` is not called ``linkedin_change_setting``.
+
+    THIS TEST WAS FIRST WRITTEN AS A RESIDUE and the residue was then removed,
+    so it is now the record of the removal. It read
+    ``test_a_sanctioned_write_can_sit_outside_the_name_check`` and asserted
+    that ``linkedin_change_setting`` was a sanctioned write which
+    ``name_implies_write`` did not recognise -- a real hole, pinned so it could
+    not be mistaken for an oversight.
+
+    THE HOLE HAD TWO POSSIBLE FIXES AND THE MEASUREMENT CHOSE BETWEEN THEM.
+    Adding "change" to WRITE_VERBS would also arm the DOCSTRING check, which
+    shares that list, and across every registered tool description "change"
+    appears as a whole word in six -- three of them READS using it to describe
+    the boundary. Renaming the tool onto "update" cost nothing, uses a verb the
+    frozen conservation baseline in test_writes.py already knows, and makes the
+    name announce the write it was concealing.
+
+    READ THE DIRECTION OF THIS RENAME BEFORE READING IT AS A DODGE. The move
+    ``test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed`` exists to
+    stop is renaming until a write passes as a read. This is the opposite: the
+    guard reported an under-declaring name and the name was corrected to
+    declare more. What is asserted below is both halves -- the new name trips
+    the check, and the REJECTED spelling still would not, so the judgement
+    about "change" is preserved rather than forgotten.
+    """
+    assert readonly.name_implies_write("linkedin_update_setting") is True
+    assert readonly.name_implies_write("linkedin_update_profile_field") is True
+    # The rejected spellings, kept as the record of what was measured. Neither
+    # is a live tool; both are what the guard would still miss, so a future
+    # linkedin_change_* or linkedin_edit_* has to meet this comment first.
+    assert readonly.name_implies_write("linkedin_change_setting") is False
+    # "edit" IS a write verb, so the old profile name announced itself fine --
+    # it was rejected for a different reason: "edit" is not on the frozen
+    # conservation baseline, and test_writes.py's rename law refuses a verb the
+    # original forbidden list never named.
+    assert readonly.name_implies_write("linkedin_edit_profile_field") is True
+    # And the verb that WAS added that day is shown working, so this test is
+    # not only a record of something not happening.
+    assert readonly.name_implies_write("linkedin_react_to_item") is True
 
 
 def test_the_name_check_catches_a_write_tool():
@@ -475,7 +727,7 @@ async def test_no_docstring_claims_a_write(tools):
     """
     offenders: dict[str, list] = {}
     for name, tool in tools.items():
-        if name in SANCTIONED_WRITE_TOOLS:
+        if name in DOCSTRING_WRITE_TOOLS:
             continue
         claims = readonly.docstring_write_claims(tool.description or "")
         if claims:
@@ -483,7 +735,7 @@ async def test_no_docstring_claims_a_write(tools):
     assert offenders == {}, offenders
 
 
-async def test_the_two_write_docstrings_do_claim_a_write(tools):
+async def test_every_exempted_docstring_does_claim_a_write(tools):
     """THE CONTROL. The exemption above must be covering something real.
 
     If these two stopped claiming a write -- because somebody softened the
@@ -491,7 +743,7 @@ async def test_the_two_write_docstrings_do_claim_a_write(tools):
     unnecessary and the surface would be advertising a write as a read. That
     is the failure this pins.
     """
-    for name in sorted(SANCTIONED_WRITE_TOOLS):
+    for name in sorted(DOCSTRING_WRITE_TOOLS):
         claims = readonly.docstring_write_claims(tools[name].description or "")
         assert claims, f"{name} does not describe itself as a write"
 
@@ -506,7 +758,7 @@ async def test_the_docstring_exemption_does_not_cover_the_reads(tools):
     """
     descriptions = {name: tool.description or "" for name, tool in tools.items()}
     victim = "linkedin_saved_jobs"
-    assert victim in descriptions and victim not in SANCTIONED_WRITE_TOOLS
+    assert victim in descriptions and victim not in DOCSTRING_WRITE_TOOLS
     descriptions[victim] = (
         "This tool will apply to the job and send the recruiter a note."
     )
@@ -514,7 +766,7 @@ async def test_the_docstring_exemption_does_not_cover_the_reads(tools):
     offenders = {
         name: readonly.docstring_write_claims(text)
         for name, text in descriptions.items()
-        if name not in SANCTIONED_WRITE_TOOLS
+        if name not in DOCSTRING_WRITE_TOOLS
         and readonly.docstring_write_claims(text)
     }
     assert set(offenders) == {victim}, offenders
@@ -682,6 +934,7 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     # deriving it from PERFORMABLE would make the test agree with any change.
     assert info["writes_available"] == [
         "apply_job",
+        "follow_company",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -702,6 +955,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     info = await linkedin_server_info(verbose=True)
     assert info["writes_sanctioned"] == [
         "apply_job",
+        "follow_company",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -722,17 +976,44 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # mints grants and is performed, and an entry here would now be the field
     # lying in the one direction that matters: telling a caller a capability is
     # refused when it is not.
+    #
+    # FOLLOW_COMPANY LEFT THIS FIELD ON 2026-08-30 and SEVEN NAMES ARRIVED, so
+    # the same line moved in both directions at once. Follow left because it
+    # became performable; the blocker it carried -- that this server cannot aim
+    # its own unfollow at what a follow creates -- is unchanged, was
+    # re-measured that day, and now lives on the spec in ``reversible_by``,
+    # which the confirm block prints to him. The seven arrived because the
+    # capabilities the operator asked for were built as specs that refuse, and
+    # a capability that is built and refuses is precisely what this field
+    # exists to distinguish from one that was never considered.
+    #
+    # NOTE THE SHAPE OF THE NEW ENTRIES: every one of the seven reports
+    # ``can_hold_a_grant: False``. None holds a url_template, so writes.mint
+    # refuses each a grant at ISSUE -- there is no confirm token for any of
+    # them anywhere in the process, which is a stronger statement than "the
+    # tool declines to act".
     not_performed = info["writes_sanctioned_but_not_performed"]
     assert set(not_performed) == {
-        "follow_company",
         "set_open_to_work",
+        "publish_post",
+        "comment_on_item",
+        "react_to_item",
+        "update_profile_field",
+        "update_setting",
+        "send_invitation",
+        "send_message",
     }
     for action, entry in not_performed.items():
         assert len(entry["why_not"]) > 80, action
+        # EVERY refusal must name its own fix or the field is a wall of
+        # "cannot" that nobody can act on. Checked as a class rather than
+        # per-action, so an eighth entry has to satisfy it too.
+        assert entry["can_hold_a_grant"] is False, action
     # The one with no measured surface cannot even hold a grant, and the field
     # says so rather than leaving a reader to infer it from a missing url.
     assert not_performed["set_open_to_work"]["can_hold_a_grant"] is False
-    assert not_performed["follow_company"]["can_hold_a_grant"] is True
+    assert "follow_company" not in not_performed
+    assert "follow_company" in info["writes_sanctioned"]
     # AND THE DEPARTURE IS ASSERTED FROM BOTH SIDES, because "absent from a
     # refusal list" and "present as a capability" are different claims and only
     # the pair rules out apply having simply been dropped from the report.
@@ -974,6 +1255,48 @@ async def test_the_server_instructions_name_every_write_that_ships():
         assert tool.lower() in text, tool
     assert "performs nothing" in text
     assert "never confirm on his behalf" in text
+
+    # THE SEVEN THAT REFUSE, added to this check on 2026-08-30 and the reason
+    # is the sentence it replaced. The instructions ended: "There is no
+    # message, no connection request, no InMail, no profile edit, and no post
+    # -- do not look for them or suggest they exist." Every clause of that was
+    # true when written and every one became false the moment those tools were
+    # registered. Worse than false: it is the paragraph an assistant answers
+    # FROM, so a stale denial there is repeated to him as fact.
+    #
+    # Asserted at two shapes, because either alone can be satisfied wrongly.
+    # The old sentence must be ABSENT -- a check that only looked for the new
+    # names would pass on a paragraph that says both things. And every one of
+    # the seven must be NAMED, so a tool cannot ship unmentioned.
+    #
+    # THE OLD SENTENCE IS PRESENT AND MUST BE, which is not the assertion that
+    # was first written here. "not in text" was tried and is RED, because this
+    # package quotes a claim it is correcting rather than swapping it silently
+    # -- the convention that makes every earlier reversal in these files
+    # legible. So the check is the stronger one that ask was reaching for: it
+    # may appear ONCE, and only inside a frame that says it is what the
+    # paragraph used to say.
+    denial = "do not look for them or suggest they exist"
+    assert text.count(denial) == 1
+    quoted_at = text.index(denial)
+    frame = text[max(0, quoted_at - 400):quoted_at]
+    assert "said the opposite until 2026-08-30" in frame
+    assert "it read" in frame
+    # And the correction must follow it, not merely precede it.
+    assert "every one of those now exists as a tool" in text
+    for spec in writes.SANCTIONED_WRITES.values():
+        if spec.action in writes.PERFORMABLE or spec.url_template is not None:
+            continue
+        if spec.tool_name == "linkedin_set_open_to_work":
+            continue  # registers no tool; nothing to name.
+        assert spec.tool_name.lower() in text, spec.tool_name
+    # AND THE PARAGRAPH MUST SAY THEY CANNOT ACT, or naming them is worse than
+    # silence: it would advertise capabilities that refuse.
+    assert "none of them can act" in text
+    # The two whose refusal has a COST attached must say so where an assistant
+    # reads it, not only in the tool's own docstring.
+    assert "does not open messaging" in text
+    assert "mynetwork" in text
 
     # The apply paragraph: it must offer the half that ships and refuse the
     # half that does not, WITHOUT calling the refusal a scoping decision.

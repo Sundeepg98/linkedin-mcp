@@ -623,9 +623,14 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     beside the sets they moved in, so a reader can see which boundary widened.
     """
     sanctioned_actions = {spec.action for spec in SANCTIONED_WRITES.values()}
-    # UNCHANGED AT SIX. Apply did not enter here on 2026-08-25; it entered on
-    # 2026-08-24 and sat unperformed for a day, which is precisely why this set
-    # and the next are separate assertions.
+    # SIX UNTIL 2026-08-30, THIRTEEN SINCE, and this is by far the largest move
+    # the outer set has made. Seven capabilities the operator asked for were
+    # built as specs: publishing, commenting, reacting, a profile field, a
+    # setting, an invitation and a message. Being here means only that an
+    # action MAY HOLD A GRANT and has somewhere for its refusal to be written
+    # down -- and none of the seven can hold one, because none has a
+    # url_template and writes.mint refuses at issue. The chain below is what
+    # says so.
     assert sanctioned_actions == {
         "save_job",
         "unsave_job",
@@ -633,26 +638,59 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "unfollow_company",
         "apply_job",
         "set_open_to_work",
+        "publish_post",
+        "comment_on_item",
+        "react_to_item",
+        "update_profile_field",
+        "update_setting",
+        "send_invitation",
+        "send_message",
     }
-    # THREE UNTIL 2026-08-25, four since. This line read
+    # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
+    #
+    # follow_company entered on 2026-08-30 and it is the one entry here whose
+    # move was NOT a new measurement. The objection it was held on -- that this
+    # server cannot aim its own unfollow at what a follow creates -- is
+    # unchanged and was re-measured that day (linkedin_job_detail returns a
+    # SLUG company_url, not an id). What moved is that a reversibility fact
+    # belongs in the gate the operator reads, not in a list that decides for
+    # him.
     assert writes.PERFORMABLE == {
         "save_job",
         "unsave_job",
         "unfollow_company",
         "apply_job",
+        "follow_company",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
     # THE GAP IS THE INTERESTING SET, so it is named rather than left as an
-    # arithmetic consequence. Two actions may hold a spec and will never be
-    # executed -- it was three until apply left -- and each is here for a
-    # DIFFERENT measured reason: see writes._refuse_unperformable, which prints
-    # a distinct one for each.
+    # arithmetic consequence. These actions may hold a spec and will never be
+    # executed, and each is here for a DIFFERENT measured reason: see
+    # writes._NINE_REFUSALS and writes._refuse_unperformable, which print a
+    # distinct one for each. Two until 2026-08-30; eight since, follow_company
+    # having left in the same wave that brought seven in.
     assert sanctioned_actions - writes.PERFORMABLE == {
-        "follow_company",
         "set_open_to_work",
+        "publish_post",
+        "comment_on_item",
+        "react_to_item",
+        "update_profile_field",
+        "update_setting",
+        "send_invitation",
+        "send_message",
     }
+    # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
+    # action, so a ninth spec that is not performable and writes no refusal
+    # fails here rather than falling through perform()'s generic backstop --
+    # which says "not performable" and explains nothing.
+    for action in sanctioned_actions - writes.PERFORMABLE:
+        if action == "set_open_to_work":
+            continue  # its refusal predates this dict and lives inline.
+        assert action in writes._NINE_REFUSALS, action
+        reason = writes._NINE_REFUSALS[action]
+        assert "WHAT WOULD LIFT IT" in reason.upper(), action
     # ONE OF THE TWO cannot even hold a grant: no surface has ever been loaded,
     # so mint() refuses at issue rather than leaving the write door as the only
     # thing in the way. This set held apply_job as well until its surface was
@@ -666,7 +704,23 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         for spec in SANCTIONED_WRITES.values()
         if spec.url_template is None
     }
-    assert surfaceless == {"set_open_to_work"}
+    # ONE UNTIL 2026-08-30, EIGHT SINCE, and the growth is the mechanism
+    # rather than a regression. Every one of the seven capabilities added that
+    # day would act on an address readonly._FORBIDDEN_URL_SUBSTRINGS refuses,
+    # or on a control nobody has photographed, or both -- so none of them may
+    # name a write surface, and writes.mint refuses each a grant at ISSUE. That
+    # is a stronger guarantee than "perform declines to run them": there is no
+    # confirm token for any of them anywhere in the process.
+    assert surfaceless == {
+        "set_open_to_work",
+        "publish_post",
+        "comment_on_item",
+        "react_to_item",
+        "update_profile_field",
+        "update_setting",
+        "send_invitation",
+        "send_message",
+    }
     # And apply is on the other side of that line now, asserted rather than
     # left as an absence: a surface it can be granted against, and a pattern
     # that will only ever match a posting page.
@@ -722,9 +776,39 @@ def _verb_is_admissible(verbs: set[str], original_verbs: set[str]) -> bool:
     """
     if verbs & original_verbs:
         return True
+    if verbs and verbs <= _VERBS_ADMITTED_BY_RULING:
+        return True
     return bool(verbs) and all(
         verb.startswith("un") and verb[2:] in original_verbs for verb in verbs
     )
+
+
+#: THE SECOND CARVE-OUT, added 2026-08-30, and it is a different KIND from the
+#: first. The ``un`` rule is derived -- it admits the inverse of something
+#: already sanctioned, and nothing else. This one is not derivable from
+#: anything: it is an ENUMERATED pair of verbs admitted by an operator ruling,
+#: and each has to argue for itself here or it does not belong.
+#:
+#: WHY IT COULD NOT BE AVOIDED. ``linkedin_comment_on_item`` and
+#: ``linkedin_react_to_item`` were registered on 2026-08-30, and neither
+#: ``comment`` nor ``react`` is on the frozen baseline in
+#: ``_ORIGINAL_FORBIDDEN``. Two of the four names in that wave were fixed by
+#: RENAMING instead -- ``linkedin_change_setting`` became
+#: ``linkedin_update_setting`` and ``linkedin_edit_profile_field`` became
+#: ``linkedin_update_profile_field``, both onto ``update``, which the baseline
+#: already knew and which announces the write that "change" concealed. That is
+#: the preferred fix and it was taken wherever it did not distort the name.
+#: For these two it would have: a comment is not an update and a reaction is
+#: not a post, and a name that misdescribes what a tool does to satisfy a
+#: verb list is worse than a list that grew visibly.
+#:
+#: WHAT THIS DOES NOT ADMIT, which is the whole reason it is a frozen set of
+#: two rather than a rule. It does not admit ``un`` + either verb -- the
+#: existing carve-out is checked against ``original_verbs`` alone, so
+#: ``uncomment`` and ``unreact`` still fail. It does not admit a third verb.
+#: And it does not admit a name mixing one of these with a verb that is
+#: inadmissible on its own, because the test is a SUBSET test.
+_VERBS_ADMITTED_BY_RULING = frozenset({"comment", "react"})
 
 
 def test_the_inverse_carve_out_admits_an_undo_and_nothing_else():
@@ -747,6 +831,30 @@ def test_the_inverse_carve_out_admits_an_undo_and_nothing_else():
     # A name with no verb at all reads as a read, and a read is not sanctioned
     # through this door.
     assert _verb_is_admissible(set(), original) is False
+
+
+def test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative():
+    """THE CONTROL for the second carve-out, at the shapes it must reject.
+
+    An enumerated exception is only as good as the doorway it refuses to
+    become. The first carve-out is a RULE and generalises; this one is a LIST
+    and must not. So: the two named verbs pass, a third does not, prefixing one
+    of them does not, and a name pairing an admitted verb with an inadmissible
+    one gets no credit for the admitted half.
+    """
+    original = {"follow", "save", "apply", "connect"}
+    assert _VERBS_ADMITTED_BY_RULING == {"comment", "react"}
+    assert _verb_is_admissible({"comment"}, original) is True
+    assert _verb_is_admissible({"react"}, original) is True
+    # A third verb from the same family is NOT admitted by association.
+    assert _verb_is_admissible({"reply"}, original) is False
+    assert _verb_is_admissible({"repost"}, original) is False
+    # The un-rule is checked against the ORIGINAL baseline only, so an inverse
+    # of an admitted verb does not inherit its admission.
+    assert _verb_is_admissible({"uncomment"}, original) is False
+    assert _verb_is_admissible({"unreact"}, original) is False
+    # And it is a subset test, not an intersection test.
+    assert _verb_is_admissible({"comment", "boost"}, original) is False
 
 
 
@@ -789,7 +897,38 @@ async def test_exactly_the_performable_writes_are_registered():
         for spec in SANCTIONED_WRITES.values()
         if spec.action in writes.PERFORMABLE
     }
-    assert names & set(SANCTIONED_WRITES) == performable_tools
+    # WIDENED 2026-08-30, and the widening is a REFINEMENT of this rule rather
+    # than a relaxation of it -- so the sentence it replaces is quoted. It read
+    # ``names & set(SANCTIONED_WRITES) == performable_tools``, on the argument
+    # that "a tool registered for an action perform will not execute is a
+    # button that cannot do anything".
+    #
+    # THAT ARGUMENT WAS RIGHT ABOUT ITS HAZARD AND WRONG ABOUT ITS SCOPE, and
+    # the difference is whether a grant can exist. A tool for an action that
+    # COULD hold a grant and that perform then refuses is exactly the button
+    # the old line describes: a token is minted, the operator confirms, and
+    # nothing happens. A tool for an action with NO url_template cannot reach
+    # that state at all -- writes.mint refuses it at issue, so no token is ever
+    # printed and there is nothing to confirm. It is not a button; when called
+    # it loads a page, counts what bears on the capability, and returns the
+    # measurement with the reason it will not act.
+    #
+    # The other thing that changed is the alternative. When this line was
+    # written, not registering meant the server said nothing, and saying
+    # nothing was fine. It stopped being fine when the instructions ended up
+    # asserting "there is no message, no connection request, no InMail, no
+    # profile edit, and no post -- do not look for them or suggest they exist",
+    # which conflates "this server will not" with "LinkedIn cannot".
+    #
+    # BOTH HALVES OF THE ORIGINAL GUARANTEE SURVIVE and are asserted below:
+    # every performable action still has a tool, and no registered write tool
+    # can act unless it is performable.
+    assert performable_tools <= names & set(SANCTIONED_WRITES)
+    for name in (names & set(SANCTIONED_WRITES)) - performable_tools:
+        spec = SANCTIONED_WRITES[name]
+        assert spec.action not in writes.PERFORMABLE, name
+        assert spec.url_template is None, name
+        assert spec.url_pattern is None, name
     assert names & FORBIDDEN_TOOLS == set()
 
     # The sanctioned actions that are NOT performable must be unreachable, and
@@ -803,9 +942,30 @@ async def test_exactly_the_performable_writes_are_registered():
     # deleted, because "reachable" is the claim that now needs pinning: a
     # performable action with no registered tool is the failure the derived
     # assertion above catches only if somebody reads it.
-    assert "linkedin_follow_company" not in names
+    # FOLLOW INVERTED ON 2026-08-30 for the same reason apply did on 08-25,
+    # and it is kept as its inverse rather than deleted. The line read
+    # ``assert "linkedin_follow_company" not in names``.
+    assert "linkedin_follow_company" in names
     assert "linkedin_set_open_to_work" not in names
     assert "linkedin_apply_job" in names
+    # AND THE SEVEN THAT ARE REACHABLE AND CANNOT ACT. Being registered is not
+    # the claim here -- being GRANT-INCAPABLE is. Each is asserted on the
+    # property that makes it safe rather than on the fact that perform()
+    # declines, because perform() declining is a runtime behaviour and this is
+    # a structural one: with no url_template, mint() refuses at issue and no
+    # confirm token for these exists anywhere in the process.
+    for tool in (
+        "linkedin_publish_post",
+        "linkedin_comment_on_item",
+        "linkedin_react_to_item",
+        "linkedin_update_profile_field",
+        "linkedin_update_setting",
+        "linkedin_send_invitation",
+        "linkedin_send_message",
+    ):
+        assert tool in names, tool
+        assert SANCTIONED_WRITES[tool].url_template is None, tool
+        assert SANCTIONED_WRITES[tool].action not in writes.PERFORMABLE, tool
 
 
 # ---------------------------------------------------------------------------
@@ -819,11 +979,40 @@ async def test_exactly_the_performable_writes_are_registered():
 #: while the gate printed IRREVERSIBLE beside "reversible by unsaving the same
 #: posting". A check that cannot distinguish a verdict from its opposite is
 #: not checking the verdict.
+#: The sanctioned actions whose reversibility is NOT measured. Named here once
+#: and used by both the coverage assertion above and the tables below, so the
+#: two cannot disagree about which half of the split an action is in.
+#:
+#: SEVEN ARRIVED ON 2026-08-30 AND EVERY ONE OF THEM IS UNMEASURED, which is
+#: the honest shape rather than a gap to be tidied. Each would act on a surface
+#: this server has never opened, so nothing about undoing any of them has been
+#: observed -- and the most tempting of the seven to call reversible is
+#: react_to_item, where LinkedIn writes the state into the control's own name.
+#: A control whose name reports a state is almost certainly a toggle; almost
+#: certainly is not a measurement, and the ON-state label has never been seen.
+_UNMEASURED_REVERSIBILITY = {
+    "apply_job",
+    "publish_post",
+    "comment_on_item",
+    "react_to_item",
+    "update_profile_field",
+    "update_setting",
+    "send_invitation",
+    "send_message",
+}
+
 REVERSIBILITY_CLASS = {
     "save_job": "REVERSIBLE",
     "unsave_job": "REVERSIBLE",
     "follow_company": "REVERSIBLE",
     "unfollow_company": "REVERSIBLE",
+    "publish_post": "STILL-UNKNOWN",
+    "comment_on_item": "STILL-UNKNOWN",
+    "react_to_item": "STILL-UNKNOWN",
+    "update_profile_field": "STILL-UNKNOWN",
+    "update_setting": "STILL-UNKNOWN",
+    "send_invitation": "STILL-UNKNOWN",
+    "send_message": "STILL-UNKNOWN",
     # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
     # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
     # surface that would settle it -- his applied list -- is empty, so there is
@@ -846,7 +1035,26 @@ REVERSIBILITY_MEASURED = {
     "unfollow_company": True,
     "apply_job": False,
     "set_open_to_work": True,
+    "publish_post": False,
+    "comment_on_item": False,
+    "react_to_item": False,
+    "update_profile_field": False,
+    "update_setting": False,
+    "send_invitation": False,
+    "send_message": False,
 }
+
+def test_the_two_reversibility_tables_agree_with_each_other():
+    """A THIRD TABLE WOULD DRIFT, so the two that exist are reconciled here.
+
+    ``REVERSIBILITY_MEASURED`` and ``_UNMEASURED_REVERSIBILITY`` are the same
+    fact written twice, in opposite polarity, for two different callers. The
+    renderer refuses to print a measured class over an unmeasured claim; this
+    refuses to let the TEST FILE hold the contradiction the renderer would
+    catch at runtime.
+    """
+    unmeasured = {a for a, m in REVERSIBILITY_MEASURED.items() if not m}
+    assert unmeasured == _UNMEASURED_REVERSIBILITY
 
 
 async def test_the_gate_names_the_target_in_words_a_person_can_check(
@@ -916,10 +1124,14 @@ async def test_the_gate_prints_every_measured_verdict_with_its_evidence(
             "to_state": "All LinkedIn members",
         },
     }
-    # apply_job is the one sanctioned action deliberately NOT here: its
-    # reversibility is unmeasured, so it belongs to the sibling test below
-    # rather than being quietly dropped out of the coverage assertion.
-    assert set(cases) | {"apply_job"} == {
+    # THE UNMEASURED ACTIONS ARE DELIBERATELY NOT HERE: their reversibility is
+    # unmeasured, so they belong to the sibling test below rather than being
+    # quietly dropped out of the coverage assertion. It was one name until
+    # 2026-08-30 (apply_job) and is eight since, and the eight are LISTED
+    # rather than derived from the specs -- a derived set would be satisfied by
+    # somebody flipping a spec to unmeasured, which is the move this coverage
+    # assertion exists to make visible.
+    assert set(cases) | _UNMEASURED_REVERSIBILITY == {
         spec.action for spec in SANCTIONED_WRITES.values()
     }
 
@@ -1448,56 +1660,87 @@ def test_the_anchor_table_is_what_gates_unsave_and_one_row_lifts_it():
     assert set(shape.SAVE_LABELS) == {"Save the job"}
 
 
-async def test_follow_is_sanctioned_and_still_will_not_be_performed(writes_on):
-    """The operator's cut, made structural rather than remembered.
+async def test_follow_ships_and_the_aiming_problem_ships_with_it(writes_on):
+    """THE OPERATOR'S CUT, LIFTED 2026-08-30 -- and the fact it rested on kept.
 
-    THE REASON CHANGED ON 2026-08-24 AND THE ANSWER DID NOT, which is why this
-    test changed shape rather than being deleted. It used to assert the refusal
-    said the undo was HAND-ONLY because no unfollow was sanctioned. One is
-    sanctioned now and performable, so that sentence would be false -- and the
-    tempting move at that point is to let follow through, since the objection
-    it was blocked on has been removed.
+    THIS TEST INVERTED, and inverting it is the honest edit rather than
+    deleting it. It read ``test_follow_is_sanctioned_and_still_will_not_be_
+    performed`` and asserted that perform() refused a follow, naming the
+    aiming problem: a follow is performed from a posting, which identifies its
+    employer by SLUG; the unfollow surface addresses rows by NUMERIC COMPANY
+    ID; nothing resolves one to the other.
 
-    It is still blocked, on a NEW and measured objection: the undo cannot be
-    AIMED. A follow is performed from a posting, which names its employer by
-    slug; the unfollow surface addresses rows by numeric company id; no capture
-    in this repo carries both for one company on a surface either action uses.
-    So the refusal must now name the aiming problem, and the assertions are on
-    the measured facts rather than on a phrase, so a refusal that decays into
-    "not supported" fails here.
+    EVERY WORD OF THAT IS STILL TRUE and it was re-measured the day follow
+    shipped, by the cheapest route the previous audit named:
+    ``linkedin_job_detail`` on a live posting returned
+    ``company_url: .../company/<slug>/``, a slug and not an id. What changed is
+    not the measurement, it is WHO THE MEASUREMENT IS FOR. "The undo cannot be
+    aimed" is a REVERSIBILITY fact, and this design has a place for one -- the
+    ``reversible_by`` field, which the confirm gate prints in full before he
+    decides. Keeping the action back as WELL amounts to deciding for him on a
+    ground he can read.
+
+    So the assertions MOVED rather than went: the numbers and the slug/id
+    problem must still be somewhere he meets them, and this is where that is
+    checked. A refusal that decays into "not supported" used to fail here; now
+    a permission that decays into silence does.
     """
-    grant = _bare_grant(action="follow_company", target=JOB)
-    grant.consumed = True
-    with pytest.raises(WriteAttemptError) as excinfo:
-        await writes.perform(object(), object(), grant)
-    message = str(excinfo.value)
-    lowered = message.casefold()
-    assert "slug" in lowered
-    assert "numeric company id" in lowered
-    # The old reason must NOT still be claimed: an unfollow does exist.
-    assert "no unfollow is sanctioned" not in lowered
-    # And the refusal names what would lift it, so it is a gap with an address
-    # rather than a policy nobody can act on.
-    assert "what would lift this" in lowered
+    assert "follow_company" in writes.PERFORMABLE
+    spec = spec_for_action("follow_company")
+    # The claim has to survive in the field the gate PRINTS, not in a comment.
+    reversible_by = spec.reversible_by.casefold()
+    assert "slug" in reversible_by
+    assert "numeric company id" in reversible_by
+    assert "not this server" in reversible_by
+    # And the verdict beside it must not be a bare "reversible": a follow is
+    # reversible in LinkedIn and not by this server, and the block says both.
+    assert spec.reversibility_class == "REVERSIBLE"
+    assert spec.reversibility_measured is True
 
 
-async def test_the_follow_refusal_and_the_spec_tell_the_same_story(writes_on):
-    """2b applied to a refusal rather than to a field.
+async def test_follow_has_the_anchor_and_the_branch_a_click_needs(writes_on):
+    """THE PREREQUISITE THAT MADE THE MOVE SAFE, asserted rather than assumed.
 
-    The refusal message and ``follow_company.residue`` are written in different
-    places and are the same claim. Two copies of one claim drift, and the way
-    they drift is that one gets updated when the world changes and the other
-    keeps reassuring somebody. Pinned to the same two measured numbers.
+    Adding an action to PERFORMABLE is one line, and on its own it would have
+    been a defect: gate 5 (``_live_control``) had no branch for follow, so it
+    would have fallen through to the SAVE family's -- re-reading the save
+    button on a posting and calling that a corroboration of the follow
+    control. That is precisely the bug apply carried until 2026-08-26, and it
+    is invisible from the outside because the fall-through returns a plausible
+    answer about the wrong element.
+
+    Two things are asserted, because either alone would let it back in: the
+    anchor exists and is a MEASURED label, and it is not the save anchor.
     """
-    grant = _bare_grant(action="follow_company", target=JOB)
-    grant.consumed = True
-    with pytest.raises(WriteAttemptError) as excinfo:
-        await writes.perform(object(), object(), grant)
-    message = str(excinfo.value)
-    residue = spec_for_action("follow_company").residue
+    spec = spec_for_action("follow_company")
+    anchor = writes.anchor_label_for(spec)
+    assert anchor == "Follow"
+    # Derived from the measured table rather than typed twice, which is what
+    # makes the anchor unguessable: an unmeasured label has no entry to find.
+    assert shape.FOLLOW_LABELS[anchor] == spec.from_state
+    assert anchor not in shape.SAVE_LABELS
+    # And the selector builder refuses anything the reader has not seen.
+    assert dom.follow_control_selector(anchor) == 'button[aria-label="Follow"]'
+    with pytest.raises(Exception):
+        dom.follow_control_selector("Follow this company")
+
+
+async def test_the_follow_spec_still_carries_the_two_measured_numbers(writes_on):
+    """2b applied to a field rather than to a refusal.
+
+    THE OTHER HALF OF THE INVERSION ABOVE. This used to compare the refusal
+    MESSAGE against ``follow_company.residue`` and require both to carry the
+    same two measured numbers -- 20 rows rendered of a stated 58 -- so the two
+    copies of one claim could not drift. The message is gone; the claim is not,
+    and it is now the reason the gate gives him for why a follow he makes here
+    may be one this server cannot point its own unfollow at.
+
+    Pinned on the spec alone, which is the copy that survives.
+    """
+    spec = spec_for_action("follow_company")
     for number in ("20", "58"):
-        assert number in message, number
-        assert number in residue, number
+        assert number in spec.residue, number
+    assert "slug" in spec.residue.casefold()
 
 
 async def test_open_to_work_is_not_performable_either(writes_on):
@@ -2287,9 +2530,25 @@ def test_every_permanent_refusal_carries_its_reason():
 @pytest.mark.parametrize(
     "cut", ["apply", "connect", "send_inmail", "post", "endorse", "mark_read"]
 )
-def test_the_cut_actions_are_not_reachable_by_any_route(writes_on, cut):
-    """apply, connect and InMail were cut by the operator on 2026-08-23. This is
-    that decision made structural rather than remembered."""
+def test_these_exact_action_spellings_reach_nothing(writes_on, cut):
+    """RENAMED 2026-08-30, because the name asserted a history that has ended.
+
+    It read ``test_the_cut_actions_are_not_reachable_by_any_route`` over a
+    docstring saying "apply, connect and InMail were cut by the operator on
+    2026-08-23. This is that decision made structural rather than remembered."
+    Every clause of that is now false: apply is performed, and an invitation
+    and a message are sanctioned specs behind the gate.
+
+    WHAT THE TEST STILL DOES, unchanged and worth keeping, is narrower than
+    what its name claimed. These are SPELLINGS, and none of them is the name of
+    anything: the capabilities that arrived are ``send_invitation``,
+    ``send_message``, ``publish_post`` and ``apply_job``. So this asserts that
+    a bare, unqualified action string reaches no spec and mints no grant --
+    which stops a caller reaching a capability by guessing a short name, and
+    stops a future spec being registered under one.
+
+    ``endorse`` is the only member that still means what the old name meant.
+    """
     assert cut not in {s.action for s in SANCTIONED_WRITES.values()}
     with pytest.raises(WriteAttemptError):
         mint(cut, JOB, receipt="anything")

@@ -721,6 +721,485 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "why no capture of it may be taken except with him watching."
         ),
     ),
+    # -----------------------------------------------------------------
+    # THE SEVEN ADDED 2026-08-30, on the standing ruling that whatever is
+    # technically possible should be achieved. Each is SANCTIONED -- it may
+    # hold a spec, render a gate and refuse in its own words -- and NONE is
+    # in PERFORMABLE. That is not a soft version of building them. A spec is
+    # what makes an action expressible at all: without one there is no
+    # target normalisation, no live read, no reversibility verdict and no
+    # place for a refusal to be written down, which is the state all seven
+    # were in this morning and is why the server's own instructions said
+    # they did not exist.
+    #
+    # EVERY ONE PERFORMS A REAL LIVE READ. Not a stored sentence: the
+    # preview loads a page that is ALREADY on the read allowlist, counts the
+    # controls that bear on the capability, and refuses with what it just
+    # saw. No boundary was widened to build these -- the four frozen
+    # denylists are byte-identical across this change, and that is checkable
+    # rather than asserted.
+    #
+    # WHY NONE OF THEM CARRIES A ``url_template``. Every one of the seven
+    # would act on an address that ``readonly._FORBIDDEN_URL_SUBSTRINGS``
+    # refuses, or on a control nobody has photographed, or both. ``mint``
+    # refuses a grant at ISSUE for a spec with no url, so these cannot hold
+    # a confirm token at all -- the operator reads a WARNING rather than an
+    # offer, which is exactly what ``set_open_to_work`` has done since
+    # August. The blockers are itemised per action in ``_NINE_REFUSALS``.
+    "linkedin_publish_post": WriteSpec(
+        action="publish_post",
+        tool_name="linkedin_publish_post",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="Publish a post to your LinkedIn feed, under your own name.",
+        from_state="composer_present",
+        to_state="post_published",
+        target_kind="post_text",
+        state_from="feed_composer",
+        direction_source=(
+            "linkedin_surface_census(feed), taken live by this gate. It reads "
+            "three things off the feed and none of them from memory: how many "
+            "controls named 'Start a post' are drawn, how many contenteditable "
+            "nodes exist, and whether the two url-addressed publish routes are "
+            "present. MEASURED 2026-08-30: one composer control, ZERO "
+            "contenteditable, and both routes present as real anchors -- "
+            "'Write article' pointing at /article/new/ and 'Create a post' at "
+            "/preload/sharebox/. The zero is the load-bearing number: the "
+            "editor is inside a modal and has never been seen."
+        ),
+        wrong_state_note=(
+            "This is not a toggle and the danger is not the opposite action. "
+            "If the composer control is not on the feed, the page either did "
+            "not hydrate or LinkedIn has moved it -- and in both cases the "
+            "honest answer is that nothing here knows where a post would go."
+        ),
+        reversibility="STILL-UNKNOWN whether a published post can be deleted",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED, and the shape of the gap is worth stating because "
+            "it is the same one the notifications census hit. Each post draws "
+            "an overflow control -- 'Open control menu for post by <him>', "
+            "measured 8 times on his own profile -- and it renders "
+            "aria-expanded='false'. Its ITEMS have never been read. So "
+            "whether LinkedIn offers Delete on a post is something this "
+            "server has not established, and the notifications precedent is "
+            "that an unopened overflow menu is not evidence about what is "
+            "inside it."
+        ),
+        reversible_by=(
+            "NOBODY, through this server. Deleting is in "
+            "PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
+            "covers, at any confirm level') and '/delete' is on the read "
+            "boundary's forbidden list. Whatever LinkedIn's product allows, a "
+            "post published here is one this server can never take down."
+        ),
+        residue=(
+            "IRREVERSIBLE IN AUDIENCE, and this half is certain even though "
+            "the state half is not. A post is BROADCAST: his profile reports "
+            "275 followers and LinkedIn's own analytics on that page show "
+            "past posts reaching 103, 308 and 1,284 impressions. Deleting a "
+            "post -- if it can be deleted -- removes a row; it does not "
+            "un-read what several hundred people have already read, and it "
+            "does not recall the notification that told them it existed. "
+            "SECOND, AND IT IS THE ONE A JOB HUNT SHOULD WEIGH: a post is the "
+            "one artefact here a CURRENT EMPLOYER sees without looking."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Open the overflow menu on one of his own posts and read its "
+            "items -- the same measurement that settled what the "
+            "notifications overflow holds, on a surface already allowed. That "
+            "establishes whether a delete affordance exists AT ALL, which is "
+            "the question, and it costs one click on his own content with "
+            "nothing published. It has not been taken because this wave "
+            "performed nothing."
+        ),
+    ),
+    "linkedin_comment_on_item": WriteSpec(
+        action="comment_on_item",
+        tool_name="linkedin_comment_on_item",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Publish a comment under one feed item, under your own name."
+        ),
+        from_state="comment_control_present",
+        to_state="comment_published",
+        target_kind="item_and_text",
+        state_from="feed_item",
+        direction_source=(
+            "linkedin_surface_census(feed), taken live by this gate, reading "
+            "the comment affordance and the item permalinks beside it. "
+            "MEASURED 2026-08-30 in BOTH of its shapes, which are not the "
+            "same control: a text-named button on /feed/ (count 3) that opens "
+            "an inline composer, and an ANCHOR on his profile (count 8) "
+            "pointing at /feed/update/<urn>/. The anchor is the only place a "
+            "target key has been seen."
+        ),
+        wrong_state_note=(
+            "Not a toggle. A comment is added, never flipped -- so a wrong "
+            "reading here does not mean the opposite would happen, it means "
+            "nothing on the page tells this gate where the comment would go."
+        ),
+        reversibility="STILL-UNKNOWN whether a published comment can be deleted",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. No comment has ever been opened by this server and "
+            "no comment's own overflow menu has been read, so whether "
+            "LinkedIn offers a delete on one is unestablished -- the same gap "
+            "as publish_post and for the same reason."
+        ),
+        reversible_by=(
+            "NOBODY, through this server: deletion is permanently forbidden "
+            "here and '/delete' is on the read boundary's forbidden list."
+        ),
+        residue=(
+            "IRREVERSIBLE IN AUDIENCE, and worse than a post's in one "
+            "specific way: A COMMENT SITS UNDER SOMEBODY ELSE'S ITEM. It is "
+            "published to that item's audience rather than to his followers, "
+            "it notifies the author, and it stays attached to their content. "
+            "Deleting it later -- if that is even possible -- removes it from "
+            "the thread and not from the notification the author already "
+            "received."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Two things, and the first is the cheap one: open the overflow "
+            "menu on one of his OWN existing comments and read its items. "
+            "That settles whether a delete exists without publishing "
+            "anything. The second is the boundary question -- whether this "
+            "server may load /feed/update/<urn>/ at all -- which is a ruling "
+            "and not a measurement."
+        ),
+    ),
+    "linkedin_react_to_item": WriteSpec(
+        action="react_to_item",
+        tool_name="linkedin_react_to_item",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="React to one feed item, under your own name.",
+        from_state="no_reaction",
+        to_state="reacted",
+        target_kind="item_urn",
+        state_from="feed_item",
+        direction_source=(
+            "The CONTROL'S OWN ACCESSIBLE NAME, which on this surface carries "
+            "the toggle state: aria-label='Reaction button state: no "
+            "reaction'. MEASURED 2026-08-30 across eleven controls -- 3 on "
+            "/feed/ and 8 on his profile -- every one of them in the OFF "
+            "state. That is the same convention as the follow control and the "
+            "unfollow row, and it is the strongest direction source of the "
+            "seven: the state and the button are the same object. The gate "
+            "reads it live and refuses unless EVERY rendered control agrees, "
+            "because a mixed page cannot say which item a direction belongs "
+            "to."
+        ),
+        reversibility="STILL-UNKNOWN whether a reaction can be taken back here",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED, and the distinction is worth keeping sharp because "
+            "this one is TEMPTING to call reversible. A control whose "
+            "accessible name reports a STATE is almost certainly a toggle, "
+            "and almost certainly is not a measurement. THE ON-STATE LABEL "
+            "HAS NEVER BEEN SEEN -- all eleven controls read 'no reaction', "
+            "because nothing on either surface had been reacted to. This is "
+            "the identical position unsave_job has been in since August: the "
+            "OFF label is measured, the ON label is not, and the missing half "
+            "is not guessed. 'Reaction button state: like' and 'Reaction "
+            "button state: liked' are both plausible and neither has been "
+            "observed."
+        ),
+        reversible_by=(
+            "UNKNOWN, and not this server in any case: with the ON label "
+            "unmeasured there is no selector for the inverse, so nothing here "
+            "could aim an un-react even if LinkedIn offers one."
+        ),
+        residue=(
+            "A reaction NOTIFIES THE AUTHOR and can surface in his own "
+            "network's feed. Removing it later -- if that is possible -- "
+            "takes back the row and not the notification, and not whatever "
+            "was shown to whoever saw it. The data is restorable; the "
+            "impression is not. That is the same residue the follow action "
+            "carries, and it is the reason 'reversible' would be a "
+            "half-truth here even once the ON label is known."
+        ),
+        reversibility_procedure=(
+            "React to one item and READ THE LABEL THE CONTROL CHANGES INTO. "
+            "That single string settles both halves at once -- it is the "
+            "anchor for the inverse action and the evidence that an inverse "
+            "exists -- and it can only be taken immediately after a real "
+            "reaction on a real account, exactly as the missing half of "
+            "shape.SAVE_LABELS can only be taken after a real save. Note the "
+            "asymmetry with save: an unreacted item is his to experiment on "
+            "only if it is HIS OWN item, and 8 of the 11 measured controls "
+            "are on his own posts."
+        ),
+    ),
+    "linkedin_update_profile_field": WriteSpec(
+        action="update_profile_field",
+        tool_name="linkedin_update_profile_field",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="Change one field on your own LinkedIn profile.",
+        from_state="editor_addressed",
+        to_state="field_changed",
+        target_kind="field_and_value",
+        state_from="profile_editors",
+        direction_source=(
+            "His own profile, read live by this gate, counting the editor "
+            "ANCHORS on it and the forms the page carries. MEASURED "
+            "2026-08-30: three editors addressed by ordinary hrefs -- "
+            "/in/<member>/edit/intro/, "
+            "/in/<member>/edit/forms/summary/new/ and "
+            "/in/<member>/overlay/contact-info/ -- and 2 forms where every "
+            "tracked profile fixture carries 0. The gate refuses unless at "
+            "least one editor anchor is actually on the page, because a "
+            "profile that drew no editor is one this server cannot describe "
+            "an edit to."
+        ),
+        wrong_state_note=(
+            "Not a toggle. If no editor anchor rendered, either the page did "
+            "not hydrate or LinkedIn has moved the editors again -- and the "
+            "second is exactly what happened between the fixtures and the "
+            "live page, which is why this reads rather than remembers."
+        ),
+        reversibility="STILL-UNKNOWN whether an edit made here could be undone",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. The editors have never been OPENED, so no field, "
+            "no save control and no previous-value affordance has been "
+            "observed. What is measured is only that the editors have "
+            "addresses. An address is not an undo."
+        ),
+        reversible_by=(
+            "HIM, by hand, in LinkedIn's own interface -- and only if he "
+            "still knows the previous value, which nothing here records. NOT "
+            "this server: '/edit/' is on the read boundary's forbidden list, "
+            "so it cannot reach the editor in either direction."
+        ),
+        residue=(
+            "HIS PROFILE IS WHAT RECRUITERS READ, and it is read continuously "
+            "rather than at a moment he chooses -- his own profile reports 29 "
+            "profile views. An edit that is reverted an hour later was still "
+            "live for an hour. And LinkedIn notifies a network about some "
+            "profile changes, which is a broadcast this server has not "
+            "measured and would not control."
+        ),
+        reversibility_procedure=(
+            "Open one editor and census it: whether it renders the CURRENT "
+            "value in its field (which is what makes an edit revertible by "
+            "hand at all), what its save control is called, and whether a "
+            "cancel exists. That requires loading an address the read "
+            "boundary currently forbids, so it is a ruling before it is a "
+            "measurement."
+        ),
+    ),
+    "linkedin_update_setting": WriteSpec(
+        action="update_setting",
+        tool_name="linkedin_update_setting",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="Change one LinkedIn account setting.",
+        from_state="setting_addressed",
+        to_state="setting_changed",
+        target_kind="setting_and_value",
+        state_from="settings_index",
+        direction_source=(
+            "The settings surface, read live by this gate, counting how many "
+            "settings it ADDRESSES and how many it can switch. MEASURED "
+            "2026-08-30: 33 links, ZERO forms, ONE button, and zero "
+            "checkboxes, selects or switches. Every setting is its own "
+            "address -- /mypreferences/d/settings/language, "
+            "/mypreferences/d/dark-mode, /mypreferences/d/categories/privacy. "
+            "So this page hands out addresses and switches nothing, and the "
+            "value lives one page further down where nothing has looked."
+        ),
+        wrong_state_note=(
+            "Not a toggle at this level. A settings index that drew no links "
+            "is a page that did not render, not a signal about any setting."
+        ),
+        reversibility="STILL-UNKNOWN, and it differs by setting",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED, and a single verdict for 'a setting' would be "
+            "false whatever it said. The 33 addresses on that index are not "
+            "one kind of thing: 'Dark mode' is a display preference and "
+            "'Close and delete account' and 'Hibernate account' are on the "
+            "same list. No page below the index has been loaded, so no "
+            "control and no confirmation flow has been observed for any of "
+            "them."
+        ),
+        reversible_by=(
+            "HIM, in LinkedIn's own interface. NOT this server: "
+            "'/mypreferences/d/categories/' and '/settings/' are both on the "
+            "read boundary's forbidden list, so the pages carrying the values "
+            "are unreachable in either direction."
+        ),
+        residue=(
+            "TWO OF THE THIRTY-THREE ADDRESSES ARE ACCOUNT DESTRUCTION -- "
+            "'Close and delete account' and 'Hibernate account' -- and they "
+            "sit in the same url family as 'Dark mode'. That is the fact that "
+            "should govern any future ruling here: a permission written for "
+            "the family would carry those two with it, so a setting has to be "
+            "admitted BY NAME or not at all. Separately: some settings "
+            "(profile visibility, open-to-work) have an AUDIENCE, and an "
+            "audience once shown is not un-shown."
+        ),
+        reversibility_procedure=(
+            "Census ONE NAMED setting page -- not the family -- and read "
+            "whether it renders the current value, what the control is, and "
+            "whether changing it is confirmed. That needs a boundary ruling "
+            "on that one address first."
+        ),
+    ),
+    "linkedin_send_invitation": WriteSpec(
+        action="send_invitation",
+        tool_name="linkedin_send_invitation",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary="Send one connection invitation to another LinkedIn member.",
+        from_state="invite_control_present",
+        to_state="invitation_sent",
+        target_kind="member",
+        state_from="profile_invitations",
+        direction_source=(
+            "HIS OWN PROFILE, and choosing that surface is the finding rather "
+            "than a detail. The obvious surface for this is /mynetwork/, "
+            "which is REFUSED because loading it consumes the "
+            "pending-invitation badge -- a cost measured twice in this "
+            "package on the two sibling badges. MEASURED 2026-08-30 instead: "
+            "9 invitation controls on his own profile, a page this server "
+            "already loads and which carries no such counter. So the "
+            "capability has a route that costs no badge, and this gate uses "
+            "it. The controls are COUNTED and their labels are never read -- "
+            "see _NINE_REFUSALS for why that is a rule and not a limitation."
+        ),
+        wrong_state_note=(
+            "Not a toggle. No invitation control on the page means the rail "
+            "did not render, not that there is nobody to invite."
+        ),
+        reversibility="STILL-UNKNOWN whether an invitation can be withdrawn",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED, and it cannot be measured from here. The surface "
+            "that would show a withdraw affordance is the sent-invitations "
+            "manager, whose address contains 'invitation' and is on the read "
+            "boundary's forbidden list -- so this server has never seen it "
+            "and holds no evidence either way."
+        ),
+        reversible_by=(
+            "NOBODY, through this server. Withdrawing is destruction, which "
+            "is in PERMANENTLY_FORBIDDEN, and '/withdraw' and 'invitation' "
+            "are both on the read boundary's forbidden list."
+        ),
+        residue=(
+            "AN INVITATION IS A REQUEST TO A REAL PERSON, and it lands as a "
+            "notification with his name on it. Withdrawing one later -- if "
+            "LinkedIn permits it, which is unestablished -- removes it from a "
+            "pending list; it does not un-notify. There is a second, quieter "
+            "cost: LinkedIn restricts accounts whose invitations are "
+            "frequently ignored or marked 'I don't know this person', so this "
+            "is the one action here whose repetition has a consequence for "
+            "the account itself. Nothing readable reports that limit."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Load the sent-invitations manager and look for a withdraw "
+            "control on a pending row. That address is forbidden here, so it "
+            "is a boundary ruling first; and it needs a pending invitation to "
+            "exist, which means the question resolves in one direction only, "
+            "exactly as it does for apply."
+        ),
+    ),
+    "linkedin_send_message": WriteSpec(
+        action="send_message",
+        tool_name="linkedin_send_message",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Send one message or InMail to another LinkedIn member."
+        ),
+        from_state="composer_unmeasured",
+        to_state="message_sent",
+        target_kind="member_and_text",
+        state_from="messaging_badge",
+        direction_source=(
+            "THE NAV BADGE, READ OFF A PAGE ALREADY OPEN, and the restraint "
+            "is the point. This gate does NOT load messaging. Loading it is "
+            "measured to redirect into one specific conversation of "
+            "LinkedIn's choosing -- so the load itself opens somebody's "
+            "thread -- and the nav badge counts new-since-last-visit and "
+            "resets when the tab is opened. A gate that opened messaging in "
+            "order to describe the cost would have spent exactly the thing it "
+            "is warning about, on a third party. So it reads the badge, which "
+            "IS the counter that would be consumed, and stops. Measured "
+            "2026-08-30: 'Messaging, 0 new notifications'. If the surface is "
+            "to be measured, he calls linkedin_open_messaging himself."
+        ),
+        wrong_state_note=(
+            "Not a toggle and not a state this gate can improve on. The "
+            "composer has never been observed because observing it costs a "
+            "stranger's thread, and that cost is his to spend rather than "
+            "this gate's."
+        ),
+        reversibility="STILL-UNKNOWN whether a sent message can be recalled",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. No thread has been opened by this server for this "
+            "purpose and no message control has ever been read, so whether "
+            "LinkedIn offers a delete-for-everyone on a sent message is "
+            "unestablished here."
+        ),
+        reversible_by=(
+            "NOBODY, through this server: deletion is permanently forbidden "
+            "here and '/messaging/compose' is on the read boundary's "
+            "forbidden list, so nothing here can reach a composer in either "
+            "direction."
+        ),
+        residue=(
+            "A MESSAGE IS READ BY A PERSON, usually within a day, and it "
+            "arrives as an email as well as a notification. Recalling it -- "
+            "if LinkedIn permits that -- removes it from a thread; it does "
+            "not un-send the email and it does not un-read what somebody has "
+            "read. This is the most irreversible-in-audience action in the "
+            "whole design, and unlike an application it is addressed to a "
+            "named individual rather than to a company's process."
+        ),
+        irreversible=True,
+        spends=(
+            "POSSIBLY AN INMAIL CREDIT, and that is UNMEASURED rather than "
+            "denied. Messaging a member outside his network uses InMail, "
+            "which is a metered allowance on Premium Career. This server has "
+            "never read his balance: /premium/my-premium/ is not on the read "
+            "allowlist and no tool here reports a credit count. So a send "
+            "could consume a finite resource whose size is unknown to the "
+            "thing spending it, which is its own reason not to perform this "
+            "unattended."
+        ),
+        reversibility_procedure=(
+            "He calls linkedin_open_messaging -- the tool that pays the "
+            "opened-thread cost knowingly and says so in its own name -- and "
+            "the send-surface counts it already returns answer whether a "
+            "composer is rendered at all. Then linkedin_open_messaging("
+            "message_filter='inmail') for the InMail half. Neither call was "
+            "made by this wave, deliberately: the cost lands on somebody who "
+            "is not him."
+        ),
+    ),
 }
 
 
@@ -730,23 +1209,74 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
 
 #: No grant is ever minted for these, and each carries its reason so a later
 #: reader does not mistake the omission for something nobody got round to.
+#
+# THREE ENTRIES WERE REWRITTEN OR REMOVED ON 2026-08-30 AND THE OLD TEXT IS
+# QUOTED IN EACH, because the reason they went is the point. The operator
+# dissolved the POLICY bucket: a refusal survives here only if the thing is
+# IMPOSSIBLE with a measurement behind it, or if performing it would be
+# unattended -- taste and discomfort are not grounds, and three of these were
+# nothing else.
 PERMANENTLY_FORBIDDEN: dict[str, str] = {
-    "post_or_comment_or_like_or_share": (
-        "public speech in his name, unbounded blast radius, no job-hunt value"
+    "repost_or_share": (
+        "NARROWED 2026-08-30 from an entry that read 'post_or_comment_or_like_"
+        "or_share: public speech in his name, unbounded blast radius, no "
+        "job-hunt value'. Three quarters of that entry is gone because its "
+        "ground was TASTE and the operator dissolved that bucket: posting, "
+        "commenting and reacting are now sanctioned specs behind the gate, "
+        "each refusing on a measured blocker rather than on distaste. What "
+        "survives is the fourth: a repost republishes SOMEBODY ELSE'S item to "
+        "his network under his name, so the thing broadcast is not his and "
+        "the audience is. Measured beside the others -- 'Repost' is a button "
+        "with aria-expanded='false', 3 on the feed and 8 on his profile, and "
+        "its menu has never been opened, so what a repost even offers is "
+        "unobserved. It was not among the capabilities asked for, and it is "
+        "not quietly added here"
     ),
     "endorse_or_recommend": (
-        "a statement ABOUT ANOTHER PERSON, which is not his to automate"
+        "REASON REPLACED 2026-08-30. It used to read 'a statement ABOUT "
+        "ANOTHER PERSON, which is not his to automate' -- which was POLICY, "
+        "and was overtaken by the operator's own 2026-08-25 ruling that an "
+        "endorsement is a gift to the person receiving it rather than an "
+        "extraction from them. The refusal survives on a MEASUREMENT instead, "
+        "and the measurement was re-taken the day the reason changed: zero "
+        "endorse controls across 13 tracked fixtures with zero shaping "
+        "blindness, zero on his own skills surface, and zero among the 222 "
+        "controls read live on his own profile on 2026-08-30. You cannot "
+        "endorse yourself, so the only surface that would carry the control "
+        "is a THIRD PARTY'S PROFILE -- and loading one leaves them a durable "
+        "record, which this package measures from the receiving end with "
+        "linkedin_who_viewed_me. IMPOSSIBLE AS SPECIFIED, not unwanted"
     ),
     "deanonymise_a_viewer": (
         "six of ten profile viewers chose anonymity; the row LinkedIn renders "
         "him is the whole of what he is entitled to"
     ),
-    "profile_edit_beyond_open_to_work": (
-        "his profile is a document he owns; silently editing it is a category "
-        "error, not a feature"
+    "load_a_third_partys_profile_to_measure_a_control": (
+        "ADDED 2026-08-30, and it is the rule the endorsement ruling above "
+        "rests on rather than a restatement of it. A profile view is an "
+        "EMISSION, and this server can read the receiving end of that signal: "
+        "linkedin_who_viewed_me returns rows, reaching 365 days back on his "
+        "Premium Career account, and every row is somebody who loaded a "
+        "profile and left a record its owner can still read most of a year "
+        "later. So loading a stranger's profile in order to find out what "
+        "controls it carries spends THEIR privacy on OUR measurement, and the "
+        "cost lands entirely on somebody who is not him. Whether HE chooses "
+        "to open a profile is his own affair; this server may not do it for a "
+        "measurement"
     ),
     "delete_or_withdraw_anything": (
-        "destruction is not a write this design covers, at any confirm level"
+        "destruction is not a write this design covers, at any confirm level. "
+        "NOTE WHAT NOW DEPENDS ON THIS ENTRY, added 2026-08-30 and CORRECTED "
+        "the same day after a review counted it: FIVE of the specs above cite "
+        "it in reversible_by -- an application, a post, a comment, an "
+        "invitation and a message all say NOBODY can take them back through "
+        "this server, and this line is the reason. Shortening it would "
+        "silently make five reversibility claims wrong at once. The list first "
+        "written here named a REACTION and omitted an APPLICATION, which was "
+        "wrong in both directions at once; react_to_item does not lean on this "
+        "entry at all, because its reversible_by rests on a different gap -- "
+        "the ON-state label has never been observed, so there is no selector "
+        "for the inverse whatever this list says"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
@@ -774,6 +1304,20 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "performing a confirmed action and evading detection are different "
         "activities; the launch boundary never moves for a write"
     ),
+    # REMOVED 2026-08-30: "profile_edit_beyond_open_to_work: his profile is a
+    # document he owns; silently editing it is a category error, not a
+    # feature." Every word of that is about TASTE, and the word doing the work
+    # is "silently" -- which describes an unattended edit, not this design. An
+    # edit here is two calls, the second carrying a single-use token minted
+    # from a preview that printed the field and the value. It is the opposite
+    # of silent. So the entry was not merely dissolved along with the policy
+    # bucket; it was arguing against something this server does not do.
+    #
+    # The capability is now the ``update_profile_field`` spec above, sanctioned
+    # and NOT performable, refusing on two measured blockers: '/edit/' is on
+    # the read boundary's forbidden list, and no field inside any editor has
+    # ever been observed. That is a refusal with a fix attached, which the
+    # entry it replaced was not.
 }
 
 
@@ -1047,6 +1591,24 @@ PROFILE_URL = "https://www.linkedin.com/in/me/"
 #: to the whole page.
 FOLLOWED_PAGES_URL = "https://www.linkedin.com/mynetwork/network-manager/company/"
 
+#: The two surfaces the seven sanctioned-and-refusing actions read, both
+#: ALREADY on the read allowlist before this wave and neither widened for it.
+#: The feed is loaded here for the same reason ``linkedin_auth_status`` loads
+#: it -- it is the cheapest signed-in page -- and the settings index is the one
+#: admitted on 2026-08-30's side-effect ruling.
+#:
+#: WHAT THE SETTINGS URL ACTUALLY REACHES, measured 2026-08-30 and recorded
+#: because it surprised the ruling that admitted it: LinkedIn REDIRECTS
+#: ``/mypreferences/d/`` to ``/mypreferences/d/categories/account``, which is a
+#: url ``readonly._FORBIDDEN_URL_SUBSTRINGS`` refuses. ``assert_read_url``
+#: gates the REQUESTED url and the landed url is never re-checked, so the
+#: forbidden entry added that same day does not stop this. That is the same
+#: shape as the ``/messaging/`` redirect this package already documents, and
+#: it is reported rather than papered over: the second gate is a gate on what
+#: is ASKED FOR, not on where LinkedIn takes you.
+FEED_URL = "https://www.linkedin.com/feed/"
+SETTINGS_URL = "https://www.linkedin.com/mypreferences/d/"
+
 #: ONE job posting, as a READ. Named separately from any spec's
 #: ``url_template`` and used by exactly one action -- ``apply_job``, which has
 #: NO write surface at all and must still be able to look at the posting in
@@ -1109,6 +1671,129 @@ class Observation:
 _OBSERVED: dict[str, Observation] = {}
 
 
+#: The longest target string this module will normalise. THIS SERVER'S cap and
+#: not LinkedIn's -- LinkedIn's own limits on a post, a comment and an InMail
+#: have never been measured here, and citing one would be inventing a number.
+#: What the ceiling is actually for is bounding a string that ends up inside a
+#: grant, a confirm block and several error messages.
+MAX_TARGET_CHARS = 3000
+
+#: How a two-part target is spelled once it is canonical. The separator has to
+#: be stable, printable and the same on both calls, because the WHOLE canonical
+#: string is what ``consume`` compares -- which is how content gets bound to a
+#: token without a second mechanism being invented for it. Change this and
+#: every live grant stops matching, which is the correct failure.
+TARGET_JOIN = " :: "
+
+#: Targets that are ONE opaque string this server has never measured the shape
+#: of, and says so rather than validating a guessed one.
+_OPAQUE_TARGET_KINDS: frozenset[str] = frozenset({"item_urn", "member"})
+
+#: Targets made of a SUBJECT and the CONTENT that would be published or set.
+#: Mapped to the two argument names each takes, so the error a caller reads
+#: names its own fields rather than a generic pair.
+_COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
+    "post_text": ("text", ""),
+    "item_and_text": ("item", "text"),
+    "field_and_value": ("field", "value"),
+    "setting_and_value": ("setting", "value"),
+    "member_and_text": ("member", "text"),
+}
+
+
+def _clean_target_part(spec: WriteSpec, name: str, value: Any) -> str:
+    """One component of a target, checked for the things that ARE checkable."""
+    text = str(value if value is not None else "").strip()
+    if not text:
+        raise WriteAttemptError(
+            f"{spec.action!r} needs {name!r} and got {value!r}. An empty "
+            "component would make two different targets canonicalise to the "
+            "same string, and the whole canonical string is what binds a "
+            "confirm token to what it was minted for."
+        )
+    if len(text) > MAX_TARGET_CHARS:
+        raise WriteAttemptError(
+            f"{spec.action!r} was given {len(text)} characters for {name!r} "
+            f"and this server normalises at most {MAX_TARGET_CHARS}. The cap "
+            "is this server's, not LinkedIn's -- nobody here has measured "
+            "LinkedIn's."
+        )
+    if TARGET_JOIN in text:
+        raise WriteAttemptError(
+            f"{spec.action!r} was given {TARGET_JOIN!r} inside {name!r}. That "
+            "is the separator a two-part target is canonicalised with, so a "
+            "component containing it could make two different targets produce "
+            "one canonical string -- and a token bound to an ambiguous target "
+            "is bound to nothing."
+        )
+    if any(character in text for character in "\r\n\t"):
+        raise WriteAttemptError(
+            f"{spec.action!r} was given a control character inside {name!r}. A "
+            "target ends up inside a confirm block a human reads and inside "
+            "an error message, and a newline in either is how a reader is "
+            "shown one thing while another is bound."
+        )
+    return text
+
+
+def _opaque_target(spec: WriteSpec, raw: str) -> str:
+    """A single-component target whose SHAPE this server has never measured.
+
+    THIS DECLINES TO VALIDATE, AND THAT IS THE HONEST ANSWER RATHER THAN A
+    GAP. A feed item is addressed by a urn and a member by a slug, and this
+    server has read NEITHER unshaped: ``linkedin_surface_census`` substitutes
+    ``<urn>`` and ``<member>`` out before anything is counted, deliberately,
+    so that a census cannot publish an identifier. So the exact form is
+    unmeasured, and a normaliser that enforced ``urn:li:activity:<digits>``
+    would be doing precisely what this package refuses to do with a selector:
+    asserting a shape nobody has seen.
+
+    WHY ACCEPTING IT IS SAFE TODAY. Both actions that use this hold no
+    ``url_template``, so :func:`mint` refuses them a grant at ISSUE and no
+    target of this kind can ever reach a navigation or a click. If either is
+    ever made performable, THIS FUNCTION IS THE FIRST THING THAT MUST CHANGE,
+    and the measurement that would let it is one unshaped read of a permalink
+    href.
+    """
+    return _clean_target_part(spec, spec.target_kind, raw)
+
+
+def _composite_target(spec: WriteSpec, target: Any) -> str:
+    """A target made of a subject and the content that would be published.
+
+    CONTENT IS PART OF THE TARGET, and that is the whole mechanism by which a
+    confirm token is bound to the words it was shown for. There is no second
+    gate: :func:`consume` already refuses a token whose ``target`` does not
+    match, and the tool rebuilds the same canonical string from the same
+    arguments on both calls -- so changing the text between the preview and
+    the confirmation produces "token was minted for target X, not Y" for free.
+
+    Without this, a caller could read a preview of one comment and confirm a
+    different one, which is the same class of hole as a boolean standing in
+    for a token: the thing the human approved and the thing that happens would
+    be joined by nothing but good intentions.
+    """
+    first, second = _COMPOSITE_TARGET_KINDS[spec.target_kind]
+    if not second:
+        value = target
+        if isinstance(target, dict):
+            value = target.get(first)
+        return _clean_target_part(spec, first, value)
+    if not isinstance(target, dict):
+        raise WriteAttemptError(
+            f"{spec.action!r} is addressed by {first!r} AND {second!r} "
+            f"together, so its target is a mapping of the two, not "
+            f"{type(target).__name__}. The content is part of the target on "
+            "purpose: it is what binds a confirm token to the exact words the "
+            "preview showed."
+        )
+    return (
+        _clean_target_part(spec, first, target.get(first))
+        + TARGET_JOIN
+        + _clean_target_part(spec, second, target.get(second))
+    )
+
+
 def _target_for(spec: WriteSpec, target: Any) -> str:
     """Normalise ``target`` to the shape THIS action is addressed by, or raise.
 
@@ -1149,6 +1834,10 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 f"{target!r} names nothing. Pass 'self'."
             )
         return "self"
+    if spec.target_kind in _OPAQUE_TARGET_KINDS:
+        return _opaque_target(spec, raw)
+    if spec.target_kind in _COMPOSITE_TARGET_KINDS:
+        return _composite_target(spec, target)
     raise WriteAttemptError(
         f"{spec.action!r} declares target_kind {spec.target_kind!r}, which "
         "this module has no way to address."
@@ -1404,6 +2093,270 @@ async def _read_profile_state(
     )
 
 
+# ---------------------------------------------------------------------------
+# 5b. The live reads the SEVEN refusing actions perform for themselves
+# ---------------------------------------------------------------------------
+#
+# EACH OF THESE EXISTS SO A REFUSAL CAN BE A MEASUREMENT RATHER THAN A MEMORY.
+# The seven capabilities added on 2026-08-30 are sanctioned and not
+# performable, and the lazy way to build that is a constant string saying so.
+# The failure mode of the lazy way is already documented three times in this
+# package: a stored "cannot" outlives the reason for it and is then read as
+# current. So each of these loads the surface, counts what bears on the
+# capability, and hands the gate a state it read seconds ago.
+#
+# EVERY URL BELOW WAS ALREADY ON THE READ ALLOWLIST. No pattern was added and
+# no forbidden substring was shortened to make these possible; the four frozen
+# denylists are byte-identical across the change that introduced them.
+#
+# NONE OF THEM READS A THIRD PARTY'S NAME. The invitation reader is the one
+# that could -- LinkedIn writes a member's name into that control's accessible
+# name -- and it returns a count and nothing else. See
+# ``dom.read_invitation_surface``.
+
+
+async def _read_feed_composer(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """Is there a composer on this page, and is its editor rendered?"""
+    reading = await dom.read_composer_surface(page)
+    controls = int(reading.get("composer_controls") or 0)
+    editors = int(reading.get("editors") or 0)
+    facts = dict(reading)
+    if controls < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "no control named "
+            f"{dom.COMPOSER_CONTROL_NAME!r} rendered on the feed. That is NOT "
+            "evidence that publishing is unavailable -- this loads one page "
+            "and does not scroll, and the feed hydrates after it lands -- so "
+            "nothing here can tell 'LinkedIn moved it' from 'it had not drawn "
+            "yet'.",
+        )
+    return (
+        facts,
+        "composer_present",
+        f"{controls} composer control(s) named {dom.COMPOSER_CONTROL_NAME!r} "
+        f"and {editors} contenteditable node(s) on the page. The second "
+        "number is the one that decides this: a composer's EDITOR is a "
+        "contenteditable node, and at zero the editor is behind a modal that "
+        "has never been opened. "
+        f"{reading.get('article_routes')} anchor(s) to "
+        f"{dom.ARTICLE_COMPOSER_HREF} and "
+        f"{reading.get('sharebox_routes')} to {dom.SHAREBOX_COMPOSER_HREF} "
+        "were also counted -- publishing IS url-addressed, on two addresses "
+        "the read boundary does not permit.",
+    )
+
+
+async def _read_feed_item(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """The comment and reaction controls on the feed, and the states worn.
+
+    ONE READER, TWO VERDICTS, and they are computed differently on purpose.
+    A comment is ADDED, so the question is only whether the affordance is
+    there. A reaction is a TOGGLE whose state is written into its own
+    accessible name, so the question is whether every rendered control agrees
+    -- a page carrying a mix of states cannot say which item a direction
+    belongs to, and picking one would be picking by position.
+    """
+    reading = await dom.read_reaction_surface(page)
+    facts = dict(reading)
+    controls = int(reading.get("controls") or 0)
+    off_state = int(reading.get("off_state") or 0)
+    comments = int(reading.get("comment_controls") or 0)
+    permalinks = int(reading.get("permalinks") or 0)
+    tail = (
+        f" {permalinks} item permalink(s) were counted on the page; that "
+        "address family is /feed/update/<urn>/, which the read boundary "
+        "forbids, so a key exists on the page and cannot be followed."
+    )
+
+    if spec.action == "comment_on_item":
+        if comments < 1:
+            return (
+                facts,
+                UNKNOWN,
+                "no control named "
+                f"{dom.COMMENT_CONTROL_NAME!r} rendered. The feed hydrates "
+                "after it lands and this does not scroll, so absence here is "
+                "unknown rather than zero." + tail,
+            )
+        return (
+            facts,
+            "comment_control_present",
+            f"{comments} comment control(s) and "
+            f"{reading.get('editors', 0)} contenteditable node(s). The "
+            "composer opens in place when the control is pressed, so a zero "
+            "for editors is the expected reading and is also why the comment "
+            "box itself has never been observed." + tail,
+        )
+
+    if controls < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "no reaction control rendered. Absence on a first render is "
+            "unknown, not zero." + tail,
+        )
+    if off_state != controls:
+        return (
+            facts,
+            UNKNOWN,
+            f"{controls} reaction control(s) rendered and only {off_state} of "
+            f"them read {dom.REACTION_OFF_LABEL!r}. The rest are wearing a "
+            "state this reader has never seen, and the labels found were "
+            f"{reading.get('labels')}. A mixed page cannot settle a direction "
+            "for any single item, and an unrecognised label is refused rather "
+            "than interpreted -- that unseen string is exactly the ON-state "
+            "label this action is waiting for." + tail,
+        )
+    return (
+        facts,
+        "no_reaction",
+        f"all {controls} reaction control(s) on the page read "
+        f"{dom.REACTION_OFF_LABEL!r}. LinkedIn writes the toggle state into "
+        "the accessible name, so this is read off the very control a reaction "
+        "would move -- the strongest direction source in this design. It "
+        "settles the STATE and not the TARGET: several items are on the page "
+        "and none of them can be selected from here." + tail,
+    )
+
+
+async def _read_profile_editors(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """Which profile editors this page addresses by url."""
+    reading = await dom.read_profile_editor_surface(page)
+    editors = reading.get("editors") or {}
+    found = sorted(key for key, count in editors.items() if int(count or 0) > 0)
+    facts = dict(reading)
+    if not found:
+        return (
+            facts,
+            UNKNOWN,
+            "none of the three measured editor addresses "
+            f"({list(dom.PROFILE_EDITOR_HREFS)}) is anchored on the page. "
+            "Either it had not hydrated or LinkedIn has moved the editors "
+            "again -- and the second is what happened between this repo's "
+            "profile fixtures and the live page, which is the reason this "
+            "reads instead of remembering.",
+        )
+    return (
+        facts,
+        "editor_addressed",
+        f"{len(found)} of the three measured editor addresses are anchored on "
+        f"the page ({found}), and it carries {reading.get('forms')} form(s). "
+        "Both numbers contradict the fixtures, which carry no editor anchor "
+        "and no form at all: a profile editor IS url-addressed. What stops "
+        "this action is the boundary, not the address -- '/edit/' is on the "
+        "read boundary's forbidden list -- and the fact that no field inside "
+        "any editor has ever been observed.",
+    )
+
+
+async def _read_settings_index(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """How many settings this surface addresses, and how many it can switch."""
+    reading = await dom.read_settings_surface(page)
+    links = int(reading.get("links") or 0)
+    facts = dict(reading)
+    if links < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "the settings surface drew no setting links at all, so it did not "
+            "render. LinkedIn also interposes a re-auth challenge in front of "
+            "parts of settings; when it does the landed url carries "
+            "'/checkpoint/' and the auth-wall check reports it rather than "
+            "letting a half-read pass.",
+        )
+    return (
+        facts,
+        "setting_addressed",
+        f"{links} setting(s) are addressed by url from this surface, which "
+        f"itself carries {reading.get('forms')} form(s) and "
+        f"{reading.get('controls')} switch-like control(s). A settings index "
+        "that hands out addresses and switches nothing is the measurement: "
+        "every VALUE lives one page further down, on an address the read "
+        "boundary forbids, and no page below this one has ever been loaded.",
+    )
+
+
+async def _read_profile_invitations(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """How many invitation controls his own profile draws. A COUNT ONLY."""
+    reading = await dom.read_invitation_surface(page)
+    controls = int(reading.get("controls") or 0)
+    facts = dict(reading)
+    if controls < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "no control whose accessible name ends "
+            f"{dom.INVITE_CONTROL_SUFFIX!r} rendered on this page. The rail "
+            "that carries them is a suggestion rail and need not be drawn, so "
+            "this is unknown rather than zero.",
+        )
+    return (
+        facts,
+        "invite_control_present",
+        f"{controls} invitation control(s) on HIS OWN PROFILE -- a page this "
+        "server already loads, and one carrying no pending-invitation "
+        "counter. That is the finding: the capability has a route which does "
+        "NOT cost the badge that /mynetwork/ would. Only the count was read. "
+        "The label is the other person's name and is never fetched, which is "
+        "also why a suffix selects all "
+        f"{controls} of these controls and cannot select one.",
+    )
+
+
+async def _read_messaging_badge(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """The messaging badge, read WITHOUT opening messaging."""
+    reading = await dom.read_messaging_badge(page)
+    facts = dict(reading)
+    if int(reading.get("links") or 0) < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "no messaging link is on this page, so not even the badge could "
+            "be read. Nothing was opened to find that out.",
+        )
+    return (
+        facts,
+        "composer_unmeasured",
+        "the messaging nav badge currently reads "
+        f"{reading.get('label')!r}, read off a page that was already open. "
+        "THAT NUMBER IS THE COST: LinkedIn's messaging badge counts "
+        "new-since-last-visit and resets when the tab is opened, and "
+        "/messaging/ does not stay on a list -- it redirects into one "
+        "specific conversation of LinkedIn's choosing, so the load opens "
+        "somebody's thread. This gate did not pay either cost to tell you "
+        "that. The composer itself remains unobserved, which is a separate "
+        "fact from the badge and is why this action refuses.",
+    )
+
+
+#: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
+#: ``state_from`` rather than by anything a caller passes -- the same rule the
+#: four original actions follow. Each entry is (url, surface name for the
+#: auth-wall message, reader).
+_SURFACE_READS: dict[str, tuple[str, str, Any]] = {
+    "feed_composer": (FEED_URL, "feed", _read_feed_composer),
+    "feed_item": (FEED_URL, "feed", _read_feed_item),
+    "profile_editors": (PROFILE_URL, "profile", _read_profile_editors),
+    "settings_index": (SETTINGS_URL, "settings", _read_settings_index),
+    "profile_invitations": (PROFILE_URL, "profile", _read_profile_invitations),
+    "messaging_badge": (FEED_URL, "feed", _read_messaging_badge),
+}
+
+
 def _record(
     spec: WriteSpec,
     *,
@@ -1533,6 +2486,27 @@ async def observe(
     if spec.state_from == "profile_topcard":
         landed = await _load(navigator, page, PROFILE_URL, surface="profile")
         facts, state, why = await _read_profile_state(page, spec)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=False,
+        )
+
+    if spec.state_from in _SURFACE_READS:
+        # THE SEVEN. One load each, of a page ALREADY on the read allowlist,
+        # and the state is whatever the page says right now -- which is the
+        # difference between a refusal that looked and a refusal that
+        # remembers. Every one of them then fails to mint, because none holds
+        # a url_template; what the operator gets back is the warning block
+        # with a fresh measurement inside it.
+        url, surface, reader = _SURFACE_READS[spec.state_from]
+        landed = await _load(navigator, page, url, surface=surface)
+        facts, state, why = await reader(page, spec)
         return _record(
             spec,
             target=target,
@@ -1799,10 +2773,27 @@ def _render(
             "follow. This surface has no pagination control, so the rest were "
             "not shown and could not have been."
         )
-    else:
+    elif spec.target_kind == "self":
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
         where["headline"] = observation.facts.get("headline")
+    else:
+        # THE SEVEN. Their target is a subject, or a subject AND the content
+        # that would be published, and the content is PRINTED IN FULL rather
+        # than summarised or truncated. That is the point of showing him a
+        # block at all: a comment, a post and a message are published under
+        # his name, and "he approved a post" means nothing unless he was shown
+        # the words. The canonical string is printed beside them because it is
+        # what a confirm token binds to -- if the two ever disagree, the
+        # canonical one is what would act.
+        where["target_kind"] = spec.target_kind
+        where["target"] = observation.target
+        if TARGET_JOIN in observation.target:
+            first, second = _COMPOSITE_TARGET_KINDS[spec.target_kind]
+            subject, _, content = observation.target.partition(TARGET_JOIN)
+            where[first] = subject
+            where[second] = content
+        where["what_the_page_showed"] = observation.facts
     where["url"] = (
         spec.url_template.format(target=observation.target)
         if spec.url_template
@@ -1914,12 +2905,36 @@ async def preview(
 #: sanctioned set is what may hold a grant, this is what may be executed, and
 #: they differ by two on purpose.
 #:
-#: ``follow_company`` is sanctioned and is NOT here. It is genuinely reversible
-#: -- three surfaces write the inverse action into the control's own accessible
-#: name -- but reversible BY HIM, BY HAND: no unfollow is sanctioned, so a
-#: follow performed here is one this server cannot take back. An action whose
-#: undo is hand-only does not go first, and the operator cut it from this round
-#: on that ground rather than on a technical one.
+#: ``follow_company`` IS HERE SINCE 2026-08-30, and this paragraph said the
+#: opposite. Quoted, because the reversal is the point: "``follow_company`` is
+#: sanctioned and is NOT here ... An action whose undo is hand-only does not go
+#: first, and the operator cut it from this round on that ground rather than on
+#: a technical one."
+#:
+#: Every FACT in that sentence still holds. A follow performed here is still
+#: one this server cannot aim its own unfollow at -- the posting names its
+#: employer by SLUG and the unfollow surface addresses rows by NUMERIC ID, and
+#: that gap was RE-MEASURED on 2026-08-30 by the cheapest route the previous
+#: audit named: ``linkedin_job_detail`` on a live posting returned
+#: ``company_url: https://www.linkedin.com/company/<slug>/``, a slug and not an
+#: id. So route one is now settled and it fails.
+#:
+#: WHAT CHANGED IS WHO DECIDES. "The undo is hand-only" is a REVERSIBILITY
+#: FACT, and this design already has a place for a reversibility fact: the
+#: ``reversible_by`` field, which the gate prints in full before he confirms
+#: anything. Holding the action back as well amounts to deciding for him on a
+#: ground he can read for himself -- and the standing ruling is that a refusal
+#: survives only where the thing is IMPOSSIBLE with a measurement, or where the
+#: gate is what defers the decision to him. This one is neither impossible nor
+#: undeferrable. The anchor is measured (``aria-label="Follow"``), the surface
+#: is already on the read allowlist, and the gate refuses on an unhydrated page
+#: rather than clicking, which is the failure mode that actually mattered.
+#:
+#: THE PREREQUISITE THAT WAS MISSING AND IS NOW SUPPLIED. Adding this action to
+#: this set alone would have been a defect, not a feature: ``_live_control``
+#: had no branch for it, so gate 5 would have fallen through to the SAVE branch
+#: and corroborated the wrong element -- the identical bug apply carried until
+#: 2026-08-26. A branch was written for it first.
 #:
 #: ``set_open_to_work`` is not here either, and could not be: its editor is a
 #: modal that has never loaded in any capture, it holds no ``url_template``, and
@@ -1951,7 +2966,13 @@ async def preview(
 _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
-    {"save_job", "unsave_job", "unfollow_company", "apply_job"}
+    {
+        "save_job",
+        "unsave_job",
+        "unfollow_company",
+        "apply_job",
+        "follow_company",
+    }
 )
 
 #: Actions whose flow takes TWO clicks with a GATE between them. Only apply,
@@ -2001,6 +3022,21 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     """
     if spec.action == "unfollow_company":
         return UNFOLLOW_ANCHOR_PREFIX
+    if spec.action == "follow_company":
+        # READ BACKWARDS OUT OF ``shape.FOLLOW_LABELS``, exactly as the save
+        # pair is read backwards out of ``shape.SAVE_LABELS``, rather than the
+        # string "Follow" being written here a third time. The table maps a
+        # measured accessible name to the state it means; this asks it which
+        # name the state this action is valid FROM would be wearing.
+        #
+        # Unlike the save pair, BOTH halves of this table have been measured
+        # -- ``Follow`` and ``Following``, on a live posting from a company he
+        # already follows -- so there is no missing state here and no refusal
+        # waiting on a capture.
+        for label, state in shape.FOLLOW_LABELS.items():
+            if state == spec.from_state:
+                return label
+        return None
     if spec.action == "apply_job":
         # ADDED 2026-08-26, and its absence was not a subtlety: apply fell
         # through to the SAVE_LABELS lookup below, matched nothing, and
@@ -2021,6 +3057,157 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     return None
 
 
+#: WHY EACH OF THE SEVEN IS SANCTIONED AND STILL WILL NOT RUN, in the words a
+#: caller meets when it refuses. Added 2026-08-30, when the seven capabilities
+#: the operator asked for were BUILT -- built as specs behind the existing
+#: gate, with a live read each, and none of them performable.
+#:
+#: EVERY ENTRY ENDS WITH THE ONE MEASUREMENT THAT WOULD LIFT IT. That is the
+#: format rather than a preference: a refusal that does not name its own fix is
+#: indistinguishable from a refusal nobody intends to lift, and this package
+#: has now twice found a stale "cannot" sitting beside a capability that could.
+#:
+#: TWO SHAPES OF BLOCKER APPEAR BELOW AND THEY ARE NOT THE SAME, so neither is
+#: allowed to stand in for the other:
+#:
+#:   NO CONTROL     -- the thing that would be clicked has never been observed.
+#:                     A capture lifts it.
+#:   NO SURFACE     -- the address the action would act on is refused by
+#:                     ``readonly._FORBIDDEN_URL_SUBSTRINGS``, which is checked
+#:                     before the allowlist and is NOT shortened for a write.
+#:                     Only a deliberate boundary ruling lifts it, and this
+#:                     wave did not take one.
+_NINE_REFUSALS: dict[str, str] = {
+    "publish_post": (
+        "publish_post is sanctioned and cannot be performed. WHAT IS "
+        "MEASURED: the feed carries one composer control, accessible name "
+        "'Start a post', drawn as a div with role=button and NO href -- so "
+        "the composer opens as a modal and is not reachable by navigation. "
+        "Two publish routes ARE url-addressed and both were measured as real "
+        "anchors: 'Write article' -> /article/new/ and 'Create a post' -> "
+        "/preload/sharebox/. NO CONTROL: the same census measured "
+        "contenteditable == 0 across the whole page, so THE EDITOR HAS NEVER "
+        "BEEN OBSERVED and neither has whatever control publishes. Clicking "
+        "'Start a post' and then guessing at what appears is the one thing "
+        "this server does not do on a write. NO SURFACE either: neither "
+        "/article/new/ nor /preload/sharebox/ is on the read allowlist. WHAT "
+        "WOULD LIFT IT: a capture of the opened composer -- the accessible "
+        "name of its editable node and of its publish control, at both "
+        "hydration states. That capture requires a click, and the click that "
+        "would first SHOW the composer is harmless; it is the second one that "
+        "publishes. So this is measurable with him watching, unlike the "
+        "endorsement question, and it has simply not been measured."
+    ),
+    "comment_on_item": (
+        "comment_on_item is sanctioned and cannot be performed. WHAT IS "
+        "MEASURED: the comment affordance, in both of its two shapes -- a "
+        "text-named button on /feed/ (count 3) and an ANCHOR on the profile "
+        "pointing at the item's permalink (count 8). The second is where a "
+        "target key would come from: a feed item is addressed by its urn. NO "
+        "SURFACE: that permalink is /feed/update/<urn>/ and '/feed/update' is "
+        "on readonly._FORBIDDEN_URL_SUBSTRINGS, which is checked before the "
+        "allowlist and is not shortened for a write. NO CONTROL either: "
+        "contenteditable == 0 on both surfaces, so the comment box itself has "
+        "never been observed. AND A THIRD THING, which is the one that would "
+        "still matter if the other two were fixed: a comment is PUBLIC AND "
+        "ATTRIBUTED TO HIM under somebody else's item, so the exact text must "
+        "be shown before anything is posted -- which is why the target this "
+        "action is addressed by carries the text, not just the item. WHAT "
+        "WOULD LIFT IT: a boundary ruling on /feed/update/<urn>/, and a "
+        "capture of the opened comment box."
+    ),
+    "react_to_item": (
+        "react_to_item is sanctioned and cannot be performed, and it is the "
+        "closest of the seven. WHAT IS MEASURED, and it is the strongest "
+        "single string found on 2026-08-30: LinkedIn writes the toggle state "
+        "into the control's own accessible name -- aria-label='Reaction "
+        "button state: no reaction' -- exactly as it does on the follow "
+        "control. Eleven of them were read, 3 on the feed and 8 on the "
+        "profile, every one in the OFF state. So the OFF-to-ON anchor is "
+        "MEASURED. THE ON-STATE LABEL HAS NEVER BEEN SEEN, because nothing on "
+        "either surface had been reacted to -- the identical position "
+        "unsave_job is in, and it takes the identical answer: the missing "
+        "half is not guessed. NO SURFACE: aiming at one item needs its "
+        "permalink, /feed/update/<urn>/, which is on the forbidden list; and "
+        "the feed renders several items at once, so choosing one there would "
+        "be choosing by position, which this package refuses everywhere else. "
+        "WHAT WOULD LIFT IT: a boundary ruling on the item permalink. The "
+        "anchor is already in hand."
+    ),
+    "update_profile_field": (
+        "update_profile_field is sanctioned and cannot be performed. WHAT IS "
+        "MEASURED, live on 2026-08-30 and CONTRADICTING WHAT THIS SERVER USED "
+        "TO SAY: profile editors ARE addressed by url. Three of them are "
+        "ordinary anchors on his own profile -- /in/<member>/edit/intro/, "
+        "/in/<member>/edit/forms/summary/new/ and "
+        "/in/<member>/overlay/contact-info/ -- and the live page carries 2 "
+        "forms where every tracked profile fixture carries 0. NO SURFACE: "
+        "'/edit/' is on readonly._FORBIDDEN_URL_SUBSTRINGS, checked before "
+        "the allowlist and not shortened for a write, so the two edit "
+        "addresses are refused twice over. NO CONTROL: contenteditable == 0 "
+        "and no field inside any editor has ever been observed, so even given "
+        "the address there is nothing measured to type into. WHAT WOULD LIFT "
+        "IT: a boundary ruling on the /in/<member>/edit/ family, and a census "
+        "of one opened editor."
+    ),
+    "update_setting": (
+        "update_setting is sanctioned and cannot be performed. WHAT IS "
+        "MEASURED, live on 2026-08-30: every individual setting IS its own "
+        "address -- /mypreferences/d/settings/language, "
+        "/mypreferences/d/dark-mode, /mypreferences/d/categories/privacy and "
+        "so on, 33 links in total -- and the surface that lists them carries "
+        "ZERO forms and ONE button. So settings are url-addressed and the "
+        "page that lists them switches nothing. NO CONTROL: no page below the "
+        "index has ever been loaded, so no toggle has ever been observed. NO "
+        "SURFACE: '/mypreferences/d/categories/' and '/settings/' are both on "
+        "the forbidden list, which between them refuse the category pages and "
+        "the /mypreferences/d/settings/<name> family. WHAT WOULD LIFT IT: a "
+        "boundary ruling on ONE named setting page, and a census of it. Note "
+        "which settings sit in that family before ruling: 'Close and delete "
+        "account' and 'Hibernate account' are two of the 33."
+    ),
+    "send_invitation": (
+        "send_invitation is sanctioned and cannot be performed. WHAT IS "
+        "MEASURED, and it answers the question that mattered most here: THERE "
+        "IS A ROUTE THAT COSTS NO BADGE. The invitation control was found on "
+        "his OWN PROFILE -- 9 buttons whose accessible name ends ' to "
+        "connect' -- a page this server already loads and which carries no "
+        "pending-invitation counter. So this action never needs /mynetwork/, "
+        "whose load is refused precisely because it consumes that counter. "
+        "WHAT STOPS IT ANYWAY, and both halves are real. FIRST, THE LABEL IS "
+        "THE OTHER PERSON'S NAME: LinkedIn writes it into the aria-label, the "
+        "census blanks a name before counting it, and reading the full label "
+        "in order to aim a click would mean collecting a third party's "
+        "identity to populate a confirm block. The suffix is the whole of "
+        "what may be known without paying that, and a suffix selects nine "
+        "controls, not one. SECOND, NO SURFACE: '/invite', 'invitation' and "
+        "'/connect' are all on the forbidden list. WHAT WOULD LIFT IT: a "
+        "ruling that this server may hold ONE named person's identity long "
+        "enough to show it to him and aim one click -- which is a question "
+        "about him and a stranger, not a measurement, and is his to answer."
+    ),
+    "send_message": (
+        "send_message is sanctioned and cannot be performed. NO SURFACE: "
+        "'/messaging/compose' is on readonly._FORBIDDEN_URL_SUBSTRINGS -- it "
+        "is the entry that SURVIVED when the blanket '/messaging' ban was "
+        "narrowed on 2026-08-26 so he could read his own inbox, and it was "
+        "kept for exactly this. NO CONTROL: no composer has ever been "
+        "observed, because measuring one costs something this gate will not "
+        "spend on his behalf. THE COST, STATED PRECISELY AND MEASURED "
+        "TWICE: /messaging/ DOES NOT STAY ON A LIST -- LinkedIn redirects it "
+        "into one specific conversation of its own choosing, so loading it "
+        "OPENS SOMEBODY'S THREAD, and whether that fires them a read receipt "
+        "is an honest unknown believed unmeasurable from outside. The nav "
+        "badge also counts new-since-last-visit and resets when the tab is "
+        "opened. THIS PREVIEW THEREFORE DOES NOT LOAD MESSAGING. It reads the "
+        "badge off a page already open and stops. If the surface is to be "
+        "measured, HE calls linkedin_open_messaging -- the tool that pays that "
+        "cost knowingly, and whose own name says so. WHAT WOULD LIFT IT: that "
+        "call, plus a boundary ruling on the composer."
+    ),
+}
+
+
 def _refuse_unperformable(spec: WriteSpec) -> None:
     """Raise unless this action is one :func:`perform` may execute at all.
 
@@ -2032,26 +3219,21 @@ def _refuse_unperformable(spec: WriteSpec) -> None:
     """
     if spec.action in PERFORMABLE:
         return
-    if spec.action == "follow_company":
-        raise WriteAttemptError(
-            "follow_company is sanctioned but is not performed by this server, "
-            "and the reason CHANGED on 2026-08-24 rather than going away. It "
-            "used to be that no unfollow existed. One does now -- "
-            "linkedin_unfollow_company is performable -- and the objection it "
-            "was built to remove has been replaced by a measured one: THE UNDO "
-            "CANNOT BE AIMED AT WHAT THIS WOULD CREATE. A follow is performed "
-            "from a job posting, which names its employer by SLUG; the unfollow "
-            "surface addresses rows by NUMERIC COMPANY ID; a census of every "
-            "capture in this repo found no posting carrying an id, no "
-            "Manage-Pages row carrying a slug, and no way to resolve one to "
-            "the other without a network call this server does not make. And "
-            "even given the id, that surface renders 20 rows of a stated 58 "
-            "with no pagination control at all, so about two thirds of the "
-            "list is unreachable in the one page load this server performs. "
-            "WHAT WOULD LIFT THIS: a measured slug-to-id resolution on a "
-            "surface already on the read allowlist, or evidence that a newly "
-            "followed Page sorts into the rendered window."
-        )
+    if spec.action in _NINE_REFUSALS:
+        raise WriteAttemptError(_NINE_REFUSALS[spec.action])
+    # follow_company WAS HERE UNTIL 2026-08-30 and is now DEAD as well as
+    # superseded -- follow entered PERFORMABLE, so the guard at the top of this
+    # function returns before reaching it. Its argument was that THE UNDO
+    # CANNOT BE AIMED: a posting names its employer by slug, the unfollow
+    # surface addresses rows by numeric id, and nothing resolves one to the
+    # other. THAT REMAINS TRUE and was re-measured the day it was removed --
+    # linkedin_job_detail on a live posting returned a slug company_url, which
+    # settles the cheapest of the two routes the previous audit named. What
+    # changed is that the fact belongs on the SPEC, in reversible_by, where the
+    # gate reads it out to him before he confirms, rather than here where it
+    # decided for him. Removed rather than reworded, because this function is
+    # for actions that are sanctioned and NOT performed.
+    #
     # apply_job WAS HERE UNTIL 2026-08-26, and it was DEAD as well as false.
     # Dead because apply entered PERFORMABLE and the guard at the top of this
     # function returns before reaching it. False because its two load-bearing
@@ -2363,6 +3545,35 @@ async def _live_control(
             dom.unfollow_control_selector(grant.target),
         )
 
+    if spec.action == "follow_company":
+        # WITHOUT THIS BRANCH FOLLOW WOULD READ THE SAVE BUTTON, which is the
+        # exact defect apply carried until 2026-08-26 and the reason this was
+        # written BEFORE follow_company was added to PERFORMABLE rather than
+        # after. Gate 5 exists to re-read THE VERY CONTROL the click will land
+        # on; corroborating a different button on the same page is not a
+        # weaker version of that, it is a different check wearing its name.
+        #
+        # NOT INDEPENDENT of the preview, and saying so matters. The preview
+        # read this same control on this same page -- ``state_from`` is
+        # ``posting_page`` -- so what this adds is FRESHNESS, not a second
+        # source. It is still worth taking: a posting hydrates after it lands,
+        # and the follow control is measured to be absent before it settles
+        # and present after, so the reading at click time is the one that
+        # describes the button about to be pressed.
+        control = await dom.read_follow_control(page)
+        verdict = shape.follow_state(
+            control.get("label"), count=int(control.get("count") or 0)
+        )
+        state = str(verdict.get("state") or UNKNOWN)
+        why = str(verdict.get("why") or "")
+        if state != spec.from_state:
+            # No selector, so the caller stops. Returning the state and the
+            # reason rather than raising keeps the refusal in one place --
+            # perform() prints spec.wrong_state_note beside it.
+            return (state, why, "")
+        label = anchor_label_for(spec) or ""
+        return (state, why, dom.follow_control_selector(label))
+
     if spec.action == "apply_job":
         # WITHOUT THIS BRANCH APPLY READ THE SAVE BUTTON. The fall-through
         # below is the save family's, and gate 5 is supposed to re-read THE
@@ -2443,6 +3654,40 @@ async def _verify_after(
     while the total held is a row that scrolled out of a partial list, and it
     is reported as unknown.
     """
+    if spec.action == "follow_company":
+        # THE WEAKEST WITNESS CLASS IN THIS DESIGN, and it is labelled as such
+        # in the text it returns rather than quietly presented as equal to the
+        # other two. The control redraws itself in place, so it is testifying
+        # about its own effect.
+        #
+        # WHY THE STRONGER READ IS NOT AVAILABLE HERE, which is a fact about
+        # this action and not a shortcut. The unfollow's verification works
+        # because its preview read Manage Pages and therefore holds a BEFORE
+        # count to compare against. A follow's preview reads the POSTING -- one
+        # page load, the state and the action sharing a rendering, which is the
+        # better shape for a gate -- so no before-count exists. Loading Manage
+        # Pages now would produce an after-count with nothing to subtract from,
+        # and that surface renders about 20 rows of a stated 58 with no
+        # pagination, so a newly followed Page may not appear in it at all.
+        # An absent row on a partial list is not evidence, which is the same
+        # rule the unfollow path already applies in the other direction.
+        control = await dom.read_follow_control(page)
+        verdict = shape.follow_state(
+            control.get("label"), count=int(control.get("count") or 0)
+        )
+        state = str(verdict.get("state") or UNKNOWN)
+        why = (
+            str(verdict.get("why") or "")
+            + " READ OFF THE CONTROL THAT WAS JUST CLICKED, on the page it was "
+            "clicked on. That is the weakest verification in this design -- "
+            "the save pair is confirmed from a different surface and the "
+            "unfollow from a reloaded list with LinkedIn's own total -- and it "
+            "is what this action has, because its direction came from the "
+            "posting rather than from a list that could be counted before and "
+            "after. Open your followed companies if you want a second opinion."
+        )
+        return state, why, str(observation.facts_url or "")
+
     if spec.action != "unfollow_company":
         landed = await _load(navigator, page, SAVED_LIST_URL, surface="saved jobs")
         state, why = await _read_saved_state(page, grant.target)

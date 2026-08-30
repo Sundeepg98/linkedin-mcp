@@ -1070,6 +1070,34 @@ async def read_apply_control(page: Any) -> dict[str, Any]:
 FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
 
 
+def follow_control_selector(label: str) -> str:
+    """A selector for the follow control wearing exactly ``label``.
+
+    The twin of :func:`save_control_selector`, and guarded for the same
+    reason: this is a string a CLICK is built from, so the label may only be
+    one ``shape.FOLLOW_LABELS`` has actually seen LinkedIn render. Added
+    2026-08-30, when ``follow_company`` moved into ``writes.PERFORMABLE`` --
+    before that there was no follow click and therefore no follow selector,
+    and the gap was invisible precisely because nothing called it.
+
+    NOTE WHAT THIS DELIBERATELY DOES NOT DO. It never returns the two-state
+    :data:`FOLLOW_CONTROL` union. That constant exists to READ a state and
+    matches the control in either one; a click built from it would press
+    whichever of the two happened to be on the page, which on a toggle is how
+    an action performs its opposite.
+    """
+    from linkedin_server import shape as _shape
+
+    if label not in _shape.FOLLOW_LABELS:
+        raise ExtractionFailedError(
+            f"refusing to build a follow-control selector for {label!r}: this "
+            f"reader has only ever seen {sorted(_shape.FOLLOW_LABELS)}. A "
+            "selector assembled from an unmeasured label is a guess pointed "
+            "at a button."
+        )
+    return f'button[aria-label="{label}"]'
+
+
 async def read_follow_control(page: Any) -> dict[str, Any]:
     """Return the company-follow control's accessible name, and how sure we are.
 
@@ -1973,3 +2001,303 @@ async def read_surface_census(
         "controls_read": len(shaped),
         "truncated": bool(data.get("truncated")),
     }
+
+
+# ---------------------------------------------------------------------------
+# The nine surfaces
+# ---------------------------------------------------------------------------
+#
+# READERS FOR THE CAPABILITIES THAT ARE SANCTIONED AND REFUSE. Every constant
+# below is a string MEASURED on the operator's live account on 2026-08-30 by
+# ``linkedin_surface_census``, and the census that produced it is named beside
+# it. None was inferred from a sibling, a screenshot or a plausible
+# convention -- which is the whole reason this block exists rather than the
+# selectors being written inline where they are used.
+#
+# WHY THESE READ AND NEVER CLICK. The seven actions they serve are sanctioned
+# and NOT performable; what each reader exists to do is let the confirm gate
+# refuse with a FRESH measurement instead of a stored sentence. "I looked just
+# now and here is what was there" is a different artefact from "somebody
+# looked once in August", and the second is what goes stale silently.
+#
+# WHY NO ``page.evaluate`` ANYWHERE BELOW. The same trade as
+# ``FOLLOWED_PAGE_ROW_SCOPE`` above: an injected script has to be declared in
+# ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
+# scanner, and a locator chain injects nothing. Seven readers that need no new
+# entry on the read-only boundary is the cheaper side of that trade.
+
+#: The feed composer's entry control. MEASURED on ``/feed/`` 2026-08-30 as
+#: ``shape "Start a post", tag div, role button, name_source text,
+#: has_href false``, count 1.
+#:
+#: A ``div`` with ``role=button`` and NO href, so the composer is not reachable
+#: by navigation -- it opens as a MODAL. The same run measured
+#: ``contenteditable: 0`` across the whole page, and that is the finding which
+#: matters more than the control: THE EDITOR ITSELF HAS NEVER BEEN OBSERVED.
+#: What is measured here is the door, not the room behind it.
+COMPOSER_CONTROL_NAME = "Start a post"
+
+#: The two URL-ADDRESSABLE publish routes, both MEASURED as real anchors:
+#: ``Write article`` -> ``/article/new/`` on ``/feed/``, and ``Create a post``
+#: -> ``/preload/sharebox/`` on ``/in/me/``. Recorded because "a post cannot be
+#: reached by navigation" would be FALSE if anybody wrote it. It can. Neither
+#: address is on the read allowlist and neither editor has ever been loaded,
+#: which are different objections and both are stated.
+ARTICLE_COMPOSER_HREF = "/article/new/"
+SHAREBOX_COMPOSER_HREF = "/preload/sharebox/"
+
+#: The comment affordance, MEASURED in both of its shapes -- and they are not
+#: the same control:
+#:
+#:   ``/feed/``   shape "Comment", tag button, name_source text,
+#:                has_href false, count 3 -- an inline composer.
+#:   ``/in/me/``  shape "Comment", tag a, name_source text, href_shape
+#:                ``https://www.linkedin.com/feed/update/<urn>/``, count 8 --
+#:                a LINK to the item's permalink.
+#:
+#: The second is where the target key lives: a feed item is addressed by its
+#: urn, in a url this server's read boundary forbids (``/feed/update``).
+COMMENT_CONTROL_NAME = "Comment"
+
+#: The reaction control, and the most informative string measured that day.
+#: MEASURED ``aria-label="Reaction button state: no reaction"``: count 3 on
+#: ``/feed/`` and count 8 on ``/in/me/``. Eleven controls, every one of them in
+#: the OFF state.
+#:
+#: LINKEDIN WRITES THE TOGGLE STATE INTO THE ACCESSIBLE NAME. That is the same
+#: convention as the follow control and the unfollow row, and it means the
+#: OFF-to-ON direction has a measured anchor. THE ON-STATE LABEL HAS NEVER
+#: BEEN SEEN, because nothing on either surface had been reacted to -- exactly
+#: the position ``unsave_job`` is in, and it gets the same answer: the missing
+#: half is not guessed.
+REACTION_STATE_PREFIX = "Reaction button state:"
+REACTION_OFF_LABEL = "Reaction button state: no reaction"
+REACTION_CONTROL = 'button[aria-label^="Reaction button state:"]'
+
+#: The reaction PICKER, measured beside the toggle: ``aria-label="Open
+#: reactions menu"``, ``aria-expanded="false"``, count 3 and 8. Its contents
+#: have never been observed, so WHICH reactions exist is unknown.
+REACTIONS_MENU_LABEL = "Open reactions menu"
+
+#: The invitation control, and the finding that gives the invitation
+#: capability a route costing no badge. MEASURED on ``/in/me/`` 2026-08-30:
+#: 9 controls shaped ``"<redacted> to connect"``, tag button, name_source
+#: aria-label.
+#:
+#: THE PREFIX IS REDACTED AND THAT IS NOT A HOLE IN THE MEASUREMENT, it is the
+#: measurement working. LinkedIn writes the other person's NAME into this
+#: label and the census blanks a name before counting it. So the suffix is the
+#: whole of what may be known about this control without collecting a third
+#: party's identity, and a suffix is what a selector may be built from.
+INVITE_CONTROL_SUFFIX = " to connect"
+INVITE_CONTROL = 'button[aria-label$=" to connect"]'
+
+#: The profile editors, MEASURED as ordinary anchors on ``/in/me/``
+#: 2026-08-30 -- each a single ``<a href>`` with an aria-label, count 1.
+#:
+#: THIS IS THE MEASUREMENT THAT REFUTES A SENTENCE THIS SERVER WAS SHIPPING.
+#: The live page carries 2 forms where every tracked profile fixture carries
+#: 0, and it carries these three anchors where the fixtures carry none. A
+#: profile editor IS url-addressed. See ``server._WHY_NOT_PERFORMED``, where
+#: the claim is narrowed to the one thing that survived rather than deleted.
+PROFILE_EDITOR_HREFS = (
+    "/edit/intro/",
+    "/edit/forms/summary/new/",
+    "/overlay/contact-info/",
+)
+
+#: Where a settings VALUE lives. MEASURED 2026-08-30: the settings surface
+#: renders 33 links and ZERO forms, and every individual setting is its own
+#: address -- ``/mypreferences/d/settings/language``,
+#: ``/mypreferences/d/dark-mode``, ``/mypreferences/d/categories/privacy``. So
+#: a setting IS url-addressed and its CONTROL has never been observed, because
+#: no page below the index has ever been loaded.
+SETTINGS_LINK_PREFIX = "/mypreferences/d/"
+
+
+async def _count_by_role(page, name):
+    """How many controls carry EXACTLY the accessible name ``name``.
+
+    ``get_by_role`` rather than a CSS selector because both controls this is
+    pointed at are named by their TEXT and not by an aria-label, and CSS
+    cannot match text. It injects nothing, so the read-only boundary is not
+    asked to grow an entry to accommodate a read.
+    """
+    try:
+        return int(await page.get_by_role("button", name=name, exact=True).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("role count unreadable: %s: %s", type(exc).__name__, exc)
+        return 0
+
+
+async def _count_links_with(page, fragment):
+    """How many anchors carry ``fragment`` inside their href."""
+    try:
+        return int(await page.locator('a[href*="' + fragment + '"]').count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("href count unreadable: %s: %s", type(exc).__name__, exc)
+        return 0
+
+
+async def read_composer_surface(page: Any) -> dict[str, Any]:
+    """What this page offers for publishing, and what it does not.
+
+    ``editors`` is the field that decides the question. A LinkedIn composer is
+    a ``contenteditable`` node; the census measured ZERO of them on the first
+    render of both the feed and the profile, so a non-zero count here would be
+    a finding and a zero is the expected reading. Either way it is taken
+    afresh rather than asserted from a run in August.
+    """
+    out: dict[str, Any] = {
+        "composer_controls": await _count_by_role(page, COMPOSER_CONTROL_NAME),
+        "article_routes": await _count_links_with(page, ARTICLE_COMPOSER_HREF),
+        "sharebox_routes": await _count_links_with(page, SHAREBOX_COMPOSER_HREF),
+        "editors": 0,
+    }
+    try:
+        out["editors"] = int(await page.locator("[contenteditable]").count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("editor count unreadable: %s: %s", type(exc).__name__, exc)
+    return out
+
+
+async def read_reaction_surface(page: Any) -> dict[str, Any]:
+    """The reaction and comment controls on this page, and the states worn.
+
+    ``labels`` holds the DISTINCT accessible names found, sorted, each put
+    through ``shape.census_shape`` on the way out. Not decoration: if LinkedIn
+    ever writes a member's name into this label -- which it already does on
+    the neighbouring ``Hide post by <name>`` control -- an unshaped read would
+    publish it into a confirm block. The measured label carries no name and
+    survives shaping unchanged, so nothing is lost while that stays true.
+    """
+    out: dict[str, Any] = {
+        "controls": 0,
+        "off_state": 0,
+        "menus": 0,
+        "comment_controls": await _count_by_role(page, COMMENT_CONTROL_NAME),
+        "permalinks": await _count_links_with(page, "/feed/update/"),
+        "labels": [],
+    }
+    try:
+        controls = page.locator(REACTION_CONTROL)
+        out["controls"] = int(await controls.count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("reaction controls unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    try:
+        out["menus"] = int(
+            await page.locator(
+                'button[aria-label="' + REACTIONS_MENU_LABEL + '"]'
+            ).count()
+        )
+        out["off_state"] = int(
+            await page.locator(
+                'button[aria-label="' + REACTION_OFF_LABEL + '"]'
+            ).count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("reaction menus unreadable: %s: %s", type(exc).__name__, exc)
+    seen = set()
+    for index in range(min(int(out["controls"]), CENSUS_MAX_CONTROLS)):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            continue
+        shaped = shape.census_shape(str(label or "").strip())
+        if shaped:
+            seen.add(shaped)
+    out["labels"] = sorted(seen)
+    return out
+
+
+async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
+    """Which profile editors this page addresses by url. COUNTS ONLY.
+
+    No href is returned and no accessible name is read. The addresses carry
+    his own member slug, the question being asked is "is there an anchor at
+    all", and a count answers it without carrying a slug into a tool result.
+    """
+    out: dict[str, Any] = {"forms": 0, "editors": {}}
+    for fragment in PROFILE_EDITOR_HREFS:
+        out["editors"][fragment] = await _count_links_with(page, fragment)
+    try:
+        out["forms"] = int(await page.locator("form").count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("form count unreadable: %s: %s", type(exc).__name__, exc)
+    return out
+
+
+async def read_invitation_surface(page: Any) -> dict[str, Any]:
+    """How many invitation controls this page draws. A COUNT AND NOTHING ELSE.
+
+    Deliberately narrower than every other reader here, and the narrowness is
+    the point. This control's accessible name IS another person's name. A
+    reader that returned the label would be collecting third-party identity in
+    order to populate a confirm block, which is the cost this whole family of
+    rulings refuses to pay. So the label is never read -- not read and then
+    shaped, not read and then dropped. The count establishes that the control
+    exists on a surface costing no badge, and that is the only question asked.
+    """
+    out: dict[str, Any] = {"controls": 0}
+    try:
+        out["controls"] = int(await page.locator(INVITE_CONTROL).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("invite controls unreadable: %s: %s", type(exc).__name__, exc)
+    return out
+
+
+async def read_messaging_badge(page: Any) -> dict[str, Any]:
+    """The messaging nav badge, read WITHOUT opening messaging.
+
+    This is the whole of what the send-a-message gate is allowed to look at,
+    and the restraint is the design rather than a limitation of it. Loading
+    /messaging/ is MEASURED to redirect into one specific conversation of
+    LinkedIn's choosing and to reset this very badge -- so a gate that opened
+    it in order to describe it would spend, on a stranger and on his own
+    unread count, exactly what it is supposed to be warning him about.
+
+    The nav link is present on every signed-in page. Its accessible name
+    carries the count LinkedIn would consume: measured 2026-08-30 as
+    ``Messaging, 0 new notifications`` on both the feed and the profile. The
+    label is shaped on the way out for the usual reason -- it is a nav label
+    today and nothing guarantees it stays one.
+    """
+    out: dict[str, Any] = {"links": 0, "label": None}
+    try:
+        links = page.locator('a[href*="/messaging/"]')
+        out["links"] = int(await links.count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("messaging link unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["links"] < 1:
+        return out
+    try:
+        label = await links.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("messaging label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = shape.census_shape(str(label or "").strip()) or None
+    return out
+
+
+async def read_settings_surface(page: Any) -> dict[str, Any]:
+    """How many settings this page addresses by url, and how many it toggles.
+
+    ``controls`` reading zero while ``links`` is large IS the measurement: the
+    settings surface hands out ADDRESSES, not switches. Every value lives one
+    page further down, and no page below the index has ever been loaded by
+    this server.
+    """
+    out: dict[str, Any] = {"links": 0, "forms": 0, "controls": 0}
+    out["links"] = await _count_links_with(page, SETTINGS_LINK_PREFIX)
+    try:
+        out["forms"] = int(await page.locator("form").count())
+        out["controls"] = int(
+            await page.locator(
+                'input[type="checkbox"], select, [role="switch"]'
+            ).count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("settings controls unreadable: %s: %s", type(exc).__name__, exc)
+    return out
