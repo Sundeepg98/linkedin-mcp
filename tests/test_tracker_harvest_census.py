@@ -754,7 +754,12 @@ TRACE_RECORDS = {
         "hidden": ["Senior Engineer"],
     },
     "empty": {"text": "", "hidden": []},
-    "chrome only": {"text": "Date posted", "hidden": []},
+    # REPOINTED after a mutation run: this record used to read "Date posted",
+    # which ``shape.is_chrome`` does NOT match -- measured -- so the record
+    # meant to exercise the chrome path came back ``parsed`` and nothing in
+    # this file covered ``no_lines`` reached via the chrome filter. Both
+    # strings below are in ``shape._CHROME``.
+    "chrome only": {"text": "Promoted\n\nDismiss", "hidden": []},
 }
 
 
@@ -769,14 +774,27 @@ async def test_the_trace_agrees_with_the_parser_it_describes():
     reach the edges -- a trace that disagreed with its subject would be worse
     than no trace at all.
 
-    SHOWN FAILING by swapping the trace's two refusal branches::
+    SHOWN FAILING by making the trace report ``parsed`` for a record the
+    parser rejects -- delete its ``elif not remaining:`` branch::
 
-        AssertionError: ('every line a status', 'no_lines', 'rejected')
-        -- the trace named the wrong line of parse_job_card
+        AssertionError: ('every line a status', 'parsed', 'rejected')
 
-    and by reordering its filters so chrome is applied after status::
+    WHAT THIS TEST DOES NOT CATCH ON ITS OWN, corrected after a mutation run
+    measured it. Swapping the two refusal VALUES is invisible to the agreement
+    assertion, because ``verdict == "parsed"`` collapses both of them to the
+    same boolean. That swap is caught by the two sibling tests below, which
+    pin a specific verdict on a specific record -- so the coverage exists, and
+    this docstring used to claim credit for it wrongly.
 
-        AssertionError: ('chrome only', 'no_remaining', 'parsed')
+    The second assertion block closes the gap here as well: it checks the
+    verdict against the trace's OWN counts, which distinguishes the two
+    refusals without re-implementing the parser.
+
+    AND REORDERING THE FILTERS IS NOT CATCHABLE HERE AT ALL -- that is a
+    property rather than a hole. The three predicates are pure and
+    ``remaining`` requires all three to be false, so the set of lines reaching
+    it is order-invariant and no reordering can move ``verdict``. It moves
+    LABELS, which is what the label assertions in the siblings hold.
     """
     checks: list[tuple] = []
 
@@ -799,6 +817,7 @@ async def test_the_trace_agrees_with_the_parser_it_describes():
 
     assert len(checks) >= 4, checks
 
+    seen: set = set()
     for name, record in checks:
         trace = shape.parse_job_card_trace(record)
         parsed = shape.parse_job_card(record) is not None
@@ -808,6 +827,26 @@ async def test_the_trace_agrees_with_the_parser_it_describes():
             "parsed" if parsed else "rejected",
         )
         assert trace["verdict"] in shape.PARSE_VERDICTS, trace
+        seen.add(trace["verdict"])
+
+        # THE VERDICT AGAINST THE TRACE'S OWN COUNTS. This is what separates
+        # the two refusals, which the boolean above cannot: swapping the two
+        # verdict strings passes the agreement check and fails here.
+        # Derived from the numbers the trace already reports, so it is not a
+        # second implementation of the parser.
+        if trace["verdict"] == "no_lines":
+            assert trace["lines_after_chrome"] == 0, (name, trace)
+        elif trace["verdict"] == "no_remaining":
+            assert trace["lines_after_chrome"] > 0, (name, trace)
+            assert trace["remaining_after_status"] == 0, (name, trace)
+        else:
+            assert trace["remaining_after_status"] > 0, (name, trace)
+
+    # AND ALL THREE VERDICTS MUST ACTUALLY OCCUR. Without this the block above
+    # is satisfied by a corpus that only ever parses -- which is what this
+    # file's was until the "chrome only" record was repointed at a string
+    # shape.is_chrome actually matches.
+    assert seen == set(shape.PARSE_VERDICTS), sorted(seen)
 
 
 async def test_the_trace_names_the_status_classifier_when_that_is_what_ate_it():
@@ -837,11 +876,18 @@ async def test_the_trace_names_the_subtraction_when_that_is_what_ate_it():
     """``if not lines`` -- and the counts say whether it was chrome or the
     screen-reader budget.
 
-    SHOWN FAILING by reporting only the final count, which is the state the
-    refusal was in before this::
+    SHOWN FAILING by reporting the RAW line count in the post-subtraction
+    slot -- ``"lines_after_screen_reader": len(raw)``::
 
-        AssertionError: assert 1 == 0 -- the line count before the
-        subtraction was not reported, so which step took the line is unknown
+        AssertionError: assert 1 == 0 -- the count after the subtraction was
+        not the count after the subtraction, so which step took the line is
+        unknowable from the trace
+
+    NOT reproducible by reporting ``len(after_repeats)`` there, and that was
+    this docstring's first claim. Measured across all 13 records this file
+    drives, ``drop_consecutive_repeats`` removes nothing, so the two counts
+    are equal everywhere and the substitution has no observable effect. A
+    mutation that changes no output is not a test of anything.
     """
     trace = shape.parse_job_card_trace(
         TRACE_RECORDS["subtraction takes the only line"]
