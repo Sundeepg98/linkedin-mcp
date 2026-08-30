@@ -645,6 +645,86 @@ async def read_save_control(page: Any) -> dict[str, Any]:
     return out
 
 
+#: How many labelled controls the unanchored save sweep will walk before it
+#: stops walking. The same number and the same reasoning as
+#: :data:`APPLY_ADVANCE_SCAN_LIMIT`: a posting drawing more labelled controls
+#: than this is not a shape this reader has seen, and REPORTING the count is
+#: worth more than sampling past it.
+#:
+#: IT REPLACES A SILENT 60. ``read_any_save_control_label`` walked
+#: ``min(total, 60)`` and told nobody when it stopped early -- the exact defect
+#: this section now exists to fix, sitting inside the one instrument that was
+#: supposed to fix it.
+SAVE_SCAN_LIMIT = 200
+
+#: What an accessible name must contain before this reader will REPORT it.
+#:
+#: A WHOLE WORD, AND THE WORD BOUNDARY IS LOAD-BEARING. The substring test this
+#: replaces -- ``"sav" in text.casefold()`` -- also matches the member names
+#: Savita and Savannah, and a job posting draws a hiring team and a "people
+#: also viewed" rail, so the substring rule was a member-name filter that let
+#: member names through. ``\b(?:un)?saved?\b`` matches save, saved, unsave and
+#: unsaved and matches neither of those names.
+_SAVE_WORD = re.compile(r"\b(?:un)?saved?\b", re.IGNORECASE)
+
+#: Both element kinds the save control could be wearing. Every capture this
+#: repo holds draws a ``<button>``; the APPLY control sitting beside it is an
+#: ``<a>`` in every capture, so a save control that had become an anchor is a
+#: shape worth being able to SEE rather than one worth being blind to.
+SAVE_SWEEP_SELECTOR = "main button[aria-label], main a[aria-label]"
+
+
+async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
+    """Every save-WORDED control on the page, plus the scan's own receipts.
+
+    Returns RAW accessible names, in document order, and nothing here is fit to
+    publish: :func:`read_save_candidates` is the one that reduces them. The two
+    callers want different things from the same walk -- one wants the raw
+    string to write into a table, the other wants a shaped string to print in a
+    refusal -- so the walk is shared and the OUTPUT is not.
+    """
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE, the same discipline ``read_apply_modal`` runs
+        # on: a page that was never scanned and a page carrying no save
+        # control must not reach a reader as the same pair of values.
+        "names": [],
+        "buttons_total": 0,
+        "scan_complete": False,
+    }
+    try:
+        controls = page.locator(SAVE_SWEEP_SELECTOR)
+        total = int(await controls.count())
+    except Exception as exc:
+        logger.debug("save sweep failed: %s: %s", type(exc).__name__, exc)
+        return out
+
+    out["buttons_total"] = total
+    if total > SAVE_SCAN_LIMIT:
+        # DELIBERATELY NOT SCANNED, and reported as not scanned. The count is
+        # the answer at this point; walking past the limit would spend the
+        # round trips to reach one that is already known to be incomplete.
+        return out
+
+    names: list[str] = []
+    complete = True
+    for index in range(total):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # pragma: no cover - defensive
+            # A control that would not read is a control that cannot be RULED
+            # OUT, so this makes the scan incomplete rather than merely
+            # shorter. ``continue`` alone was what turned a failed read into
+            # "nothing found here".
+            complete = False
+            continue
+        text = str(label or "").strip()
+        if text and _SAVE_WORD.search(text):
+            names.append(text)
+    out["names"] = names
+    out["scan_complete"] = complete
+    return out
+
+
 async def read_any_save_control_label(page: Any) -> Optional[str]:
     """The accessible name of whatever save-shaped control the page now draws.
 
@@ -659,22 +739,67 @@ async def read_any_save_control_label(page: Any) -> Optional[str]:
     save control" without knowing its name means locating it by POSITION, which
     is precisely what this package refuses to decide on -- so the value comes
     back for a person to read and for nothing else.
+
+    RAW, AND THAT IS THE POINT OF IT: the string here is the one a human copies
+    into ``shape.SAVE_LABELS``, so reducing it would hand them ``<opaque>`` to
+    write down. What protects the value instead is :data:`_SAVE_WORD` -- and
+    tightening that from a substring to a whole word closed a leak on THIS
+    path, not only on the diagnostic one, because a hiring-team control named
+    "Savita ..." satisfied the old rule and would have been printed as the
+    label the save control changed into.
     """
-    try:
-        controls = page.locator("main button[aria-label]")
-        total = int(await controls.count())
-    except Exception as exc:
-        logger.debug("post-click sweep failed: %s: %s", type(exc).__name__, exc)
-        return None
-    for index in range(min(total, 60)):
-        try:
-            label = await controls.nth(index).get_attribute("aria-label")
-        except Exception:  # pragma: no cover - defensive
-            continue
-        text = str(label or "").strip()
-        if text and "sav" in text.casefold():
-            return text
-    return None
+    names = (await _sweep_save_shaped(page))["names"]
+    return names[0] if names else None
+
+
+async def read_save_candidates(page: Any) -> dict[str, Any]:
+    """What the page ACTUALLY draws, for a refusal that found no known control.
+
+    THE POINT OF THIS FUNCTION IS THAT A REFUSAL SHOULD TEACH SOMETHING, and
+    the reason it has to be a SECOND reading is worth stating exactly.
+    :func:`read_save_control` asks the page ONE question -- is there a
+    ``button[aria-label="Save the job"]`` -- and a page that answers no leaves
+    it holding ``{"label": None, "count": 0}``. There is nothing to salvage
+    from that reading, because nothing was ever read: the other controls on the
+    posting were walked past by a CSS selector, not measured and then
+    discarded. So the diagnostic cannot be a matter of printing what the first
+    read already had. It has to go and look again, wider.
+
+    A MEASUREMENT INSTRUMENT, NEVER A DECISION INPUT, exactly as
+    :func:`read_any_save_control_label` is. Nothing branches on what comes
+    back and no selector is built from it: :func:`save_control_selector` still
+    refuses every label outside :data:`SAVE_LABELS_SEEN`, so a name cannot
+    become a click by having been reported here.
+
+    WHAT IS WITHHELD, AND WHY IT IS WITHHELD RATHER THAN TRUSTED. A job posting
+    renders a hiring team and a "people also viewed" rail, so its accessible
+    names include real members'. TWO gates run, in this order:
+
+    1. the name must carry a save WORD (:data:`_SAVE_WORD`) -- the filter, and
+       a word rather than a substring because "Savita" contains "sav";
+    2. whatever survives is reduced by ``shape.census_shape``, the same
+       function the whole privacy property of ``linkedin_surface_census`` rests
+       on, which returns ``<opaque>`` for anything over 60 characters or
+       outside a narrow ASCII class.
+
+    ``shape.census_redact_rare`` is deliberately NOT applied, and that is a
+    decision rather than an omission: it blanks a run of two capitalised words
+    in any shape seen ONCE, and the save control is drawn once. A genuine ON
+    label reading "Saved Job" would come back ``<redacted>`` -- the instrument
+    would destroy the exact measurement it was called to take.
+    """
+    swept = await _sweep_save_shaped(page)
+    names = swept["names"]
+    return {
+        "candidates": sorted({shape.census_shape(name) for name in names}),
+        # KEPT SEPARATE FROM len(candidates) BECAUSE THE SET LOSES A CASE.
+        # Two controls both labelled "Saved" dedupe to one shape, and "two
+        # save controls rendered" is the fact that decides whether the reader
+        # is looking at a rename or at a page it cannot scope.
+        "matched_total": len(names),
+        "buttons_total": swept["buttons_total"],
+        "scan_complete": swept["scan_complete"],
+    }
 
 
 # ---------------------------------------------------------------------------

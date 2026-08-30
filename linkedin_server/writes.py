@@ -2108,6 +2108,78 @@ def _assert_landed_on_target(
         )
 
 
+#: Said at the end of every save diagnostic, because a filtered list that does
+#: not say it is filtered reads as a complete one -- and a reader who believes
+#: he has seen every control will conclude the save control is absent when it
+#: is merely differently worded.
+_SAVE_FILTER_NOTE = (
+    "Filtered, and deliberately: only controls under <main> whose accessible "
+    "name carries the whole word save/saved/unsave/unsaved are reported, and "
+    "each is reduced by shape.census_shape. A job posting names its hiring "
+    "team and a 'people also viewed' rail, so the full control list is never "
+    "printed. A rename to a word outside that set therefore shows up here as "
+    "zero candidates against a non-zero scan, which is itself the finding."
+)
+
+
+def _save_candidates_note(reading: dict[str, Any]) -> str:
+    """Turn the wider reading into the sentence the refusal used to lack.
+
+    FOUR OUTCOMES, KEPT FOUR. The distinction this function exists to protect
+    is the one the apply scan already pays for: an empty list and an unfinished
+    scan are not the same answer, and a reader handed ``[]`` for both learns
+    the opposite of the truth in one of the two cases.
+
+    Defensive about its input on purpose -- ``.get`` with a refusing default,
+    so a payload that predates a field reads as "did not finish" rather than as
+    "finished and found nothing".
+    """
+    total = reading.get("buttons_total")
+    candidates = list(reading.get("candidates") or [])
+    # NOT DEFAULTED TO len(candidates), which is the tempting wrong answer:
+    # the candidate list is a SET of shapes, so two controls both labelled
+    # "Saved" collapse to one entry -- and "the page drew two save controls"
+    # is the fact that separates a rename from a page this reader cannot
+    # scope. A count that is missing says so rather than being reconstructed.
+    matched = reading.get("matched_total", None)
+    matched = "unreported" if matched is None else matched
+
+    if not reading.get("scan_complete"):
+        if isinstance(total, int) and total > dom.SAVE_SCAN_LIMIT:
+            head = (
+                f"WHAT WAS ON THE PAGE IS UNKNOWN: it drew {total} labelled "
+                f"controls, past the {dom.SAVE_SCAN_LIMIT} this reader will "
+                "walk, so the sweep was not run at all. That count is itself "
+                "unlike any posting this repo has captured."
+            )
+        else:
+            head = (
+                f"WHAT WAS ON THE PAGE IS ONLY PARTLY KNOWN: the sweep over "
+                f"{total} labelled controls DID NOT FINISH, so the list below "
+                f"is a floor and not an inventory -- {candidates}."
+            )
+        return f"{head} {_SAVE_FILTER_NOTE}"
+
+    if not candidates:
+        return (
+            f"WHAT WAS ON THE PAGE: {total} labelled controls, ALL of them "
+            "read, and NOT ONE carries a save word. So this is not a save "
+            "control wearing a new name -- either the posting renders no save "
+            "control at all, or it renders one worded in a way no rule here "
+            f"anticipated. {_SAVE_FILTER_NOTE}"
+        )
+
+    return (
+        f"WHAT WAS ON THE PAGE: {total} labelled controls, ALL of them read. "
+        f"Save-worded controls: {matched}, reading {candidates}. THAT IS "
+        "THE MEASUREMENT THIS REFUSAL EXISTS TO PRODUCE -- and it is not yet "
+        "the fix. Which state such a label MEANS has to be established before "
+        "it is written into shape.SAVE_LABELS, because a label mapped to the "
+        "wrong state points a click at the opposite action; a name that does "
+        f"not say its own direction is not a measurement. {_SAVE_FILTER_NOTE}"
+    )
+
+
 async def _live_control(
     page: Any, spec: WriteSpec, grant: WriteGrant, anchor: str
 ) -> tuple[str, str, str]:
@@ -2192,11 +2264,21 @@ async def _live_control(
     verdict = shape.save_state(
         control.get("label"), count=int(control.get("count") or 0)
     )
-    return (
-        str(verdict.get("state") or UNKNOWN),
-        str(verdict.get("why") or ""),
-        dom.save_control_selector(anchor),
-    )
+    state = str(verdict.get("state") or UNKNOWN)
+    why = str(verdict.get("why") or "")
+    if state == UNKNOWN:
+        # A REFUSAL THAT REPORTS NOTHING IT SAW MAKES GUESSING THE ONLY WAY
+        # FORWARD, and on a toggle a guessed label performs the opposite
+        # action -- which is the failure this whole gate exists to prevent.
+        # So the reading that is about to refuse goes and looks again, wider,
+        # and prints what is there. See dom.read_save_candidates for why a
+        # second read is required rather than a better print of the first.
+        #
+        # ON THE UNKNOWN BRANCH ONLY. A state that came back KNOWN and merely
+        # wrong was read off a label the message already names, and paying for
+        # a second sweep to repeat it would be spending round trips on prose.
+        why = f"{why} {_save_candidates_note(await dom.read_save_candidates(page))}"
+    return (state, why, dom.save_control_selector(anchor))
 
 
 async def _verify_after(
