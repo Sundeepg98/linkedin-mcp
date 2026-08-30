@@ -1533,9 +1533,40 @@ async def linkedin_notifications(
 #: which is not worth one destroyed badge on the operator's own account. If
 #: that surface ever has to be measured, do it by censusing a page that is
 #: already being loaded for another reason, not by adding a key here.
+#:
+#: THREE MORE SURFACES WERE PUT THROUGH THAT SAME TEST ON 2026-08-30 and only
+#: one of them is below. The test is not "is this page interesting" -- every
+#: one of them is -- it is "does merely LOADING it cost him something". Recorded
+#: here in one line each so the next person does not re-open a settled refusal;
+#: the rulings and their evidence are in ``_audit/2026-08-30-linkedin-nine.md``.
+#:
+#: * ``/mypreferences/d/`` -- ADMITTED, below. No badge to consume, nothing a
+#:   third party observes, no value changed by the load. The INDEX only: the
+#:   toggles live on ``/mypreferences/d/categories/<name>`` and those are now on
+#:   the forbidden substring list.
+#: * ``/mynetwork/`` -- REFUSED, on the same ground as notifications. It carries
+#:   the pending-invitation badge, and this package has MEASURED that family of
+#:   badge resetting on load twice: notifications (documented on
+#:   ``linkedin_notifications``) and messaging (documented on
+#:   ``linkedin_open_messaging`` -- "counts new-since-last-visit and resets when
+#:   the tab is opened"). A third member of a family whose other two members
+#:   both cost a badge does not get admitted on the hope that it is the
+#:   exception, and the cost of being wrong lands partly on the people whose
+#:   invitations would be marked seen.
+#: * MESSAGING -- REFUSED, and this one is the strongest refusal of the four
+#:   because none of it is inference. ``/messaging/`` DOES NOT STAY ON A LIST:
+#:   LinkedIn redirects it into one specific conversation of its own choosing,
+#:   measured twice and stated on ``linkedin_open_messaging``. So a census of
+#:   that key would open somebody's thread, and whether that sends them a read
+#:   receipt is recorded on that tool as an honest unknown. A measurement is
+#:   not worth a stranger's read receipt. It also does not need one: that tool
+#:   ALREADY loads the page for a reason the operator chose, and already counts
+#:   the send surface it finds there -- which is exactly the "census a page
+#:   already being loaded for another reason" route named above.
 CENSUS_SURFACES: dict[str, str] = {
     "feed": FEED_URL,
     "profile": f"{BASE_URL}/in/me/",
+    "settings": f"{BASE_URL}/mypreferences/d/",
 }
 
 
@@ -1585,9 +1616,14 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
     seen on the first render", never as "the page has none".
 
     Args:
-        surface: which page to measure. One of "feed" or "profile" -- a KEY,
-            never a url. Notifications is deliberately not offered: loading
-            that page clears the unread badge, and a census is not worth that.
+        surface: which page to measure. One of "feed", "profile" or
+            "settings" -- a KEY, never a url. "settings" is the settings
+            INDEX and nothing below it; the pages carrying the actual toggles
+            are refused by the read boundary. Notifications, /mynetwork/ and
+            messaging are deliberately not offered, each for the same reason:
+            loading them costs a badge or opens somebody's conversation, and a
+            census is not worth a side effect. See CENSUS_SURFACES for the
+            ruling on each.
     """
     key = str(surface or "").strip().lower()
     if key not in CENSUS_SURFACES:
@@ -2389,12 +2425,24 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "action opens an editor, recording for each whether it "
                 "carries a url or only a modal. The OTW census already "
                 "did this for one setting; nobody widened it.",
-                "CHANGING account settings. /settings/ is on the "
-                "forbidden substring list and has never been loaded, so "
-                "nothing is known about it -- not which settings are "
-                "url-addressed, not which are modal, not which are "
-                "visible to anyone else. Settle it by loading the "
-                "settings index read-only and enumerating its sections.",
+                "CHANGING account settings. Still unmeasured, but the "
+                "obstacle named here until 2026-08-30 was NOT REAL and the "
+                "correction is worth carrying: this entry used to say "
+                "/settings/ is on the forbidden substring list. It is -- and "
+                "that substring was measured on 2026-08-30 to match NOTHING "
+                "LinkedIn serves. The surface is /mypreferences/d/, and the "
+                "legacy address /psettings/ does not contain '/settings/' "
+                "either, because the character before 'settings/' is a 'p'. "
+                "Both were refused, but by the allowlist alone, with no "
+                "second gate behind it. WHAT CHANGED: the settings INDEX is "
+                "now a census surface (linkedin_surface_census "
+                "surface='settings') on a written side-effect ruling, the "
+                "category pages that carry the toggles are now genuinely on "
+                "the forbidden substring list, and nobody has run the census "
+                "yet. So what is missing is the MEASUREMENT and no longer the "
+                "means of taking it: run that census and enumerate the "
+                "sections, recording for each whether it is url-addressed or "
+                "a modal.",
                 "WITHDRAWING an application. A real LinkedIn feature, and "
                 "the one that would most change how safe applying is -- "
                 "an apply that can be undone is a different risk from one "

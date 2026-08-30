@@ -197,6 +197,32 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
         r"^https://www\.linkedin\.com/mynetwork/network-manager/company/?$"
     ),
+    # THE SETTINGS INDEX, AND ONLY THE INDEX. Added 2026-08-30 so that
+    # linkedin_surface_census can measure it; nothing else in this package
+    # builds this url.
+    #
+    # NO QUERY STRING AND NO SUB-PATH, and the anchoring is the whole of the
+    # permission. ``/mypreferences/d/`` renders a LIST OF SECTIONS. The
+    # toggles live one level down, on ``/mypreferences/d/categories/<name>``,
+    # and those are refused twice over: they fail this anchored pattern, and
+    # they now also contain a FORBIDDEN SUBSTRING (below). A census wants the
+    # index -- which sections exist, and whether a section is url-addressed or
+    # a modal -- and the index is exactly what this admits.
+    #
+    # THE SIDE-EFFECT RULING THAT PRECEDED THIS ENTRY, since a read surface is
+    # admitted here only after one. Loading the index consumes no unread
+    # counter (this surface carries no badge -- unlike notifications and
+    # messaging, whose badges are MEASURED to reset on load, which is why
+    # neither is a census key), emits nothing another person can observe, and
+    # changes no value the account holds. Where LinkedIn interposes a re-auth
+    # challenge instead of serving the page, the landing url carries
+    # ``/checkpoint/`` and ``config.AUTHWALL_MARKERS`` already turns that into
+    # a reported failure rather than a silent half-read. Recorded in full in
+    # ``_audit/2026-08-30-linkedin-nine.md``.
+    #
+    # WHY NOT ``/psettings/``: it is the legacy address for the same surface
+    # and nothing builds it, so it is on the forbidden list instead of here.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/?$"),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.
@@ -244,6 +270,34 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     "/settings/",
     "opentowork",
     "open-to-work",
+    # THE TWO SETTINGS ENTRIES BELOW WERE ADDED 2026-08-30, and they were
+    # added because ``"/settings/"`` above was MEASURED NOT TO COVER THE
+    # SURFACE IT IS NAMED FOR.
+    #
+    # The measurement, run against this very function rather than reasoned
+    # about: ``is_read_url("https://www.linkedin.com/mypreferences/d/")`` and
+    # ``is_read_url("https://www.linkedin.com/psettings/")`` were both False
+    # -- but both were refused BY THE ALLOWLIST, not here. ``"/settings/"``
+    # matched neither. LinkedIn moved its settings to ``/mypreferences/d/``,
+    # and the legacy address is ``/psettings/``, which does not contain
+    # ``"/settings/"`` because the character before ``settings/`` is a ``p``.
+    # The only address the old entry ever caught is a ``/settings/`` LinkedIn
+    # no longer serves.
+    #
+    # WHY THAT MATTERED ENOUGH TO FIX. The net refusal held, so nothing was
+    # ever reachable that should not have been. What did not hold is this
+    # list's stated job: it is documented above as a "second, independent
+    # gate" and as "belt and braces: a future pattern edited too loosely still
+    # cannot reach these". For the settings family there was no second gate at
+    # all, and the allowlist has now been deliberately loosened -- the index is
+    # admitted, one line up -- which is exactly the situation the backstop
+    # exists for. The category pages carry the toggles; they are the part that
+    # must stay unreachable however the allowlist is edited later.
+    #
+    # ``"/settings/"`` IS KEPT rather than replaced. It costs nothing, and an
+    # address LinkedIn stopped serving is one it can start serving again.
+    "/mypreferences/d/categories/",
+    "/psettings/",
     "/edit/",
     "action=",
     "/delete",

@@ -639,3 +639,141 @@ def test_that_list_is_the_urls_the_server_really_builds():
     assert "/my-items/saved-jobs/" not in built_paths, (
         "server.py still builds the retired saved-jobs url"
     )
+
+# ---------------------------------------------------------------------------
+# 6. The denylist's DIRECTION, and the addresses it is supposed to catch
+# ---------------------------------------------------------------------------
+#
+# WHY THESE LIVE HERE AND NOT IN test_readonly_boundary_invariant.py, where
+# they were first written. That file freezes the boundary by reading
+# readonly.py AS TEXT and hashing its AST -- deliberately, so the freeze does
+# not depend on importing the thing it is policing. These two checks need the
+# opposite: the live tuple and the live function. They are behaviour, and
+# behaviour is what this file is for.
+
+#: Every substring that has EVER been on ``_FORBIDDEN_URL_SUBSTRINGS``.
+#:
+#: A ROSTER, NOT A SNAPSHOT, and the difference is the point. The digests
+#: above answer "did this list change"; they cannot answer "did it change in
+#: the safe direction", and for a denylist that is the only question worth
+#: asking. This one is a SUBSET assertion, so a growing list keeps passing
+#: without an edit and a shrinking one cannot.
+#:
+#: An entry leaves this roster only if somebody deliberately deletes it here,
+#: in the same commit that deletes it from the boundary, having written down
+#: why an address this repository once refused should now be reachable.
+FORBIDDEN_SUBSTRINGS_EVER = (
+    "/jobs/application",
+    "easyapply",
+    "easy-apply",
+    # NARROWED 2026-08-26 from a blanket "/messaging" to the compose surface
+    # alone, on the operator's ruling that reading his own inbox is his to do.
+    # That narrowing PREDATES this roster, so the blanket entry is not on it;
+    # what is on it is the entry that survived, which is the one that keeps
+    # sending impossible.
+    "/messaging/compose",
+    "/invite",
+    "invitation",
+    "/connect",
+    "/follow",
+    "/unfollow",
+    "/endorse",
+    "/post/",
+    "/feed/update",
+    "sharing/share",
+    "/settings/",
+    "opentowork",
+    "open-to-work",
+    # Added 2026-08-30 with the settings-index census. See readonly.py.
+    "/mypreferences/d/categories/",
+    "/psettings/",
+    "/edit/",
+    "action=",
+    "/delete",
+    "/withdraw",
+)
+
+#: Addresses that must stay unreadable, whatever the two lists look like.
+#:
+#: THE ROSTER ABOVE IS ABOUT STRINGS; THIS IS ABOUT BEHAVIOUR, and it is the
+#: one that would have caught the defect measured on 2026-08-30. ``/settings/``
+#: sat on the forbidden list for the whole life of this repository and matched
+#: NOTHING LinkedIn serves -- so a roster check on that string passed every
+#: day while the surface it was named for had no second gate at all. A list of
+#: strings cannot notice that; a list of ADDRESSES can.
+#:
+#: Each entry is a real address, put through the real guard.
+MUST_STAY_UNREADABLE = (
+    "https://www.linkedin.com/mypreferences/d/categories/account",
+    "https://www.linkedin.com/psettings/",
+    "https://www.linkedin.com/settings/",
+    "https://www.linkedin.com/messaging/compose/",
+    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    "https://www.linkedin.com/mynetwork/",
+    "https://www.linkedin.com/company/example-co/",
+    "https://www.linkedin.com/feed/following/",
+    "https://www.linkedin.com/in/me/edit/",
+)
+
+
+
+
+
+def test_the_forbidden_list_has_only_ever_grown():
+    """THE DIRECTION, which no digest above can report.
+
+    A digest says the forbidden list is not what it was. It says nothing about
+    which way, and the two directions are not remotely equivalent: adding a
+    substring refuses more, removing one makes an address reachable that this
+    repository had decided was not. Re-baselining a digest is the same edit in
+    both cases.
+
+    So the roster is asserted as a SUBSET. Growth needs no edit here; a
+    deletion cannot pass without one, and making that edit means writing down
+    why an address once refused should now be readable.
+    """
+    live = set(readonly._FORBIDDEN_URL_SUBSTRINGS)
+    lost = [entry for entry in FORBIDDEN_SUBSTRINGS_EVER if entry not in live]
+    assert not lost, (
+        f"these substrings left the forbidden list: {lost}. Each one was a "
+        "refusal somebody wrote deliberately. Removing one is a boundary "
+        "change, not a tidy-up."
+    )
+
+
+def test_that_roster_check_can_fail_on_a_deletion():
+    """SHOWN FAILING, on the exact edit it exists to catch.
+
+    Without this the test above is a subset assertion that a list which never
+    shrinks would pass forever without anyone knowing whether it CAN fail.
+    """
+    weakened = tuple(
+        entry
+        for entry in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if entry != "/messaging/compose"
+    )
+    assert len(weakened) == len(readonly._FORBIDDEN_URL_SUBSTRINGS) - 1
+    lost = [
+        entry for entry in FORBIDDEN_SUBSTRINGS_EVER if entry not in set(weakened)
+    ]
+    assert lost == ["/messaging/compose"], lost
+
+
+@pytest.mark.parametrize("url", MUST_STAY_UNREADABLE)
+def test_no_previously_forbidden_address_became_readable(url):
+    """THE BEHAVIOURAL FREEZE, and it exists because the string freeze missed
+    something for the entire life of this repository.
+
+    ``"/settings/"`` has been on the forbidden list since the beginning. On
+    2026-08-30 it was measured against LinkedIn's actual settings addresses --
+    ``/mypreferences/d/`` and ``/psettings/`` -- and matched NEITHER. The
+    roster check above would have passed every single day of that, because the
+    string was present; what was absent was any address it caught.
+
+    A boundary is a set of addresses that cannot be opened, not a set of
+    strings that appear in a tuple. This asserts the addresses.
+    """
+    assert not readonly.is_read_url(url), (
+        f"{url} became readable. Every url here is one this repository has "
+        "decided it will not open, and each is refused today."
+    )

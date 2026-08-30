@@ -166,8 +166,46 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # VERIFIED UNDER BOTH INTERPRETERS, because a digest that differs by
     # Python version freezes nothing:
     #     Python 3.13.14  and  Python 3.10.19  ->  identical, all six.
-    "_ALLOWED_URL_PATTERNS": "6542383b4619c935",
-    "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
+    #
+    # RE-FROZEN AGAIN 2026-08-30, and this is the first re-freeze where TWO
+    # url structures moved at once. They moved in OPPOSITE DIRECTIONS, which
+    # is the only reason the pair is one change rather than two:
+    #
+    #   _ALLOWED_URL_PATTERNS      6542383b4619c935 -> 0edd01ead91a89ea
+    #   _FORBIDDEN_URL_SUBSTRINGS  92b02ca73055330f -> fcb931b0eaee5b84
+    #
+    # * THE ALLOWLIST WIDENED, by exactly one anchored pattern:
+    #   ``^https://www\.linkedin\.com/mypreferences/d/?$`` -- the settings
+    #   INDEX, no query, no sub-path -- so that
+    #   ``linkedin_surface_census(surface="settings")`` can measure it. Every
+    #   census surface before this one was already on the allowlist for
+    #   another reason; this is the first that was not, and it was admitted
+    #   only after a written side-effect ruling
+    #   (``_audit/2026-08-30-linkedin-nine.md``): the settings index consumes
+    #   no unread badge, emits nothing another person observes, and changes no
+    #   value the account holds. /mynetwork/ and messaging were put through
+    #   the SAME test on the same day and REFUSED; they are not here.
+    # * THE FORBIDDEN LIST NARROWED, by two substrings --
+    #   ``/mypreferences/d/categories/`` and ``/psettings/`` -- and it did so
+    #   BECAUSE OF the widening. It is documented in readonly.py as a second,
+    #   independent gate, and on 2026-08-30 it was measured NOT TO COVER THE
+    #   SETTINGS FAMILY AT ALL: ``"/settings/"`` matches neither address
+    #   LinkedIn serves. The category pages carry the toggles, and they are
+    #   now refused twice rather than once.
+    #
+    # A DIGEST CANNOT TELL A LIST THAT GREW FROM ONE THAT SHRANK, which is the
+    # whole hazard in re-baselining a denylist. So this re-freeze ships with
+    # ``test_the_forbidden_list_has_only_ever_grown``, which pins the roster
+    # itself and is not retired by the next re-baseline.
+    #
+    # VERIFIED UNDER 3.13.14. The two that moved are VALUE digests, which this
+    # file's ``_literal`` docstring establishes as interpreter-independent (a
+    # regex and a string literal are the same on every Python); ``<functions>``
+    # -- the one digest that HAS split along the interpreter matrix -- did not
+    # move at all here, so the 3.10 cell has nothing new to disagree about. CI
+    # runs that cell and is the check.
+    "_ALLOWED_URL_PATTERNS": "0edd01ead91a89ea",
+    "_FORBIDDEN_URL_SUBSTRINGS": "fcb931b0eaee5b84",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # RE-FROZEN AGAIN 2026-08-26, and this one moved for a different reason
@@ -208,12 +246,28 @@ DENYLISTS_AT_A76FE32 = {
     # no, and what moved the value was a later deliberate boundary change that
     # this check was never written to police. The other three are untouched,
     # which is the half of the sentence worth reading.
-    "_ALLOWED_URL_PATTERNS": "6542383b4619c935",
-    "_FORBIDDEN_URL_SUBSTRINGS": "92b02ca73055330f",
+    #
+    # TWO OF THEM MOVED ON 2026-08-30, for the settings-index census -- the
+    # allowlist widened by one anchored pattern and the forbidden list gained
+    # two substrings. The reasoning is on the dict above; what belongs HERE is
+    # the honest note that this dict is now carrying its third re-baseline and
+    # is answering a smaller question each time.
+    #
+    # THAT EROSION IS WHY THE ROSTER TEST BELOW EXISTS. A dict of digests that
+    # gets rewritten whenever the boundary legitimately changes cannot, by
+    # itself, distinguish a legitimate change from a weakening -- and the
+    # weakening it most needs to catch is a DELETION from the forbidden list,
+    # which looks exactly like an addition from here. So the two structures
+    # whose direction matters are now ALSO pinned by their contents:
+    # ``test_the_forbidden_list_has_only_ever_grown`` and
+    # ``test_no_previously_forbidden_address_became_readable``. Those two do
+    # not need re-baselining when the boundary grows, only when it shrinks,
+    # and a re-baseline of THEM is a much louder edit to have to make.
+    "_ALLOWED_URL_PATTERNS": "0edd01ead91a89ea",
+    "_FORBIDDEN_URL_SUBSTRINGS": "fcb931b0eaee5b84",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
-
 
 def _literal(node: ast.AST):
     """The VALUE a boundary structure holds, as ordinary Python.
@@ -349,6 +403,7 @@ def test_the_write_did_not_touch_any_of_the_four_denylists():
             f"{name} moved across the write. It is one of the four structures "
             "the write was not supposed to touch."
         )
+
 
 
 def test_adding_a_second_sanctioned_mutation_moves_the_digest():

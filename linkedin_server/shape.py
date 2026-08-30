@@ -2380,8 +2380,50 @@ _CENSUS_POSSESSIVE_LOWER = re.compile(
 #:
 #: The cost is real and is accepted: a genuinely unique two-word heading is
 #: blanked too.
+#:
+#: THEN TWO WAS NOT ENOUGH EITHER, 2026-08-30, and the second alternative
+#: below is what a MEASUREMENT added. The rule went three -> two because names
+#: survived; it now takes a SINGLE capitalised word as well, because a name
+#: survived again, and the shape it survived in is one this package pins a
+#: selector against.
+#:
+#: THE LEAK, reproduced before it was fixed. ``dom.FOLLOWED_PAGE_BUTTON`` is
+#: ``button[aria-label^="Click to stop following "]``, so the label LinkedIn
+#: writes for a followed Page is ``Click to stop following <name>``. Where the
+#: name is ONE capitalised word the run rule cannot see it: the only other
+#: capital is ``Click``, four lowercase words away, so there is no run of two
+#: anywhere in the string and the whole label shipped verbatim::
+#:
+#:     census_redact_rare("Click to stop following Acme", 1)
+#:         -> "Click to stop following Acme"      # before
+#:         -> "Click to stop following <redacted>"  # after
+#:
+#: ``Connect with Prince`` leaked identically. Note what does NOT leak and why
+#: that hid it: ``Follow Acme`` and ``Message Madonna`` are two ADJACENT
+#: capitals, so the run rule always caught those, and every example anybody
+#: wrote by hand happened to be one of them.
+#:
+#: WHY THE SECOND ALTERNATIVE IS ANCHORED ON A PRECEDING SPACE. A capitalised
+#: word at the START of a shape is the control's VERB -- ``Follow``,
+#: ``Following``, ``Save`` -- and blanking it would empty the census of the
+#: one thing it exists to report. A capitalised word that arrives mid-string,
+#: after lowercase words, is not a verb. That split is what lets the rule go
+#: to one word without destroying the instrument, and it is why the run
+#: alternative is listed FIRST: at a position where both could match, the run
+#: wins and consumes the whole name rather than its first word.
+#:
+#: THE RESIDUAL GAP, STATED RATHER THAN IMPLIED. A shape that is EXACTLY one
+#: capitalised word and nothing else -- a control whose entire accessible name
+#: is ``Gridwell`` -- still survives, because it is indistinguishable from
+#: ``Follow`` by any property of the string, and ``Follow`` is a row the
+#: census is built to report. Such a control is caught instead by
+#: :func:`census_href_identifies_entity` whenever it links to the entity it
+#: names, which is the usual case; a bare one-word button with no href is the
+#: case neither rule covers, and it is pinned as known in
+#: ``tests/test_surface_census.py`` rather than left to be rediscovered.
 _CENSUS_CAPS_RUN = re.compile(
     r"[A-Z][A-Za-z0-9.'\u2019-]*(?:\s+[A-Z][A-Za-z0-9.'\u2019-]*)+"
+    r"|(?<=\s)[A-Z][A-Za-z0-9.'\u2019-]*"
 )
 
 #: The placeholders this module writes. Removed before the character gate

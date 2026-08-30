@@ -44,12 +44,15 @@ from typing import Any
 import pytest
 
 from linkedin_server import browser as browser_module
-from linkedin_server import dom, readonly, shape
+from linkedin_server import dom, errors, readonly, shape
 from linkedin_server.server import CENSUS_SURFACES, linkedin_surface_census
 from tests.conftest import FakePage
 
 FEED_URL = "https://www.linkedin.com/feed/"
 PROFILE_URL = "https://www.linkedin.com/in/me/"
+#: The settings INDEX. The trailing slash is load-bearing: the tests below
+#: append to this string to build the category pages that must stay refused.
+SETTINGS_URL = "https://www.linkedin.com/mypreferences/d/"
 
 #: Invented, and drawn from the families ``test_no_committed_identity.py``
 #: already sanctions, so this file's own fixtures cannot read as real data.
@@ -233,9 +236,82 @@ def test_the_cap_fires_at_two_words_not_three():
     """
     assert shape.census_redact_rare("Jane Elizabeth Doe", 1) == "<redacted>"
     assert shape.census_redact_rare("Jane Doe", 1) == "<redacted>"
-    # One capitalised word is a label, not a name, and survives.
+    # One capitalised word AT THE START of a shape is the control's verb, not
+    # a name, and survives. See the two tests below for the case where one
+    # capitalised word arrives mid-string, which does not.
     assert shape.census_redact_rare("Follow", 1) == "Follow"
     assert shape.census_redact_rare("Start a post", 1) == "Start a post"
+
+
+#: The labels that leaked, as ``(shape, the identity that must not survive)``.
+#:
+#: MEASURED ON THIS IMPLEMENTATION on 2026-08-30, not imagined. The first is
+#: the exact template ``dom.FOLLOWED_PAGE_BUTTON`` anchors on -- LinkedIn
+#: writes ``Click to stop following <Page>`` -- and it leaked whenever the
+#: Page name was a SINGLE capitalised word.
+ONE_WORD_LEAKS = [
+    ("Click to stop following Acme", "Acme"),
+    ("Connect with Prince", "Prince"),
+    ("Message from Madonna today", "Madonna"),
+]
+
+
+@pytest.mark.parametrize(
+    "raw,identity", ONE_WORD_LEAKS, ids=[row[1] for row in ONE_WORD_LEAKS]
+)
+def test_the_cap_removes_a_one_word_name_the_run_rule_cannot_see(raw, identity):
+    """REGRESSION, and the rule moved from two words to one because of it.
+
+    A run of two capitalised words was the rule, and it has a blind spot that
+    is not obvious from reading it: a name is only caught when it sits BESIDE
+    another capital. ``Follow Acme`` was always caught. ``Click to stop
+    following Acme`` was not -- its only other capital is ``Click``, four
+    lowercase words away, so no run of two exists anywhere in the string and
+    the label shipped with the Page name on it.
+
+    That template is not hypothetical. It is the one
+    ``dom.FOLLOWED_PAGE_BUTTON`` selects on, so it is the label this package
+    is most certain to meet.
+    """
+    shaped = shape.census_redact_rare(shape.census_shape(raw), 1)
+    assert identity not in shaped, f"{identity!r} survived as {shaped!r}"
+    assert shape.CENSUS_REDACTED in shaped
+
+
+def test_that_one_word_rule_would_notice_a_cap_that_stopped_firing():
+    """THE CONTROL. Without it the table above passes against a cap that has
+    been switched off, because ``census_shape`` alone leaves all three strings
+    untouched -- none carries a path, an id or a possessive to substitute.
+
+    So the assertion is the INVERSE of the one being certified: at any count
+    other than one the cap does not fire, and every planted name survives.
+    """
+    survived = [
+        identity
+        for raw, identity in ONE_WORD_LEAKS
+        if identity in shape.census_redact_rare(shape.census_shape(raw), 2)
+    ]
+    assert len(survived) == len(ONE_WORD_LEAKS), survived
+
+
+def test_a_one_word_shape_with_no_href_is_a_KNOWN_residual():
+    """PINNED AS KNOWN rather than fixed, so it is not rediscovered as a bug.
+
+    A shape that is EXACTLY one capitalised word still survives. It has to:
+    ``Follow`` is that shape, and it is the single most useful row a follow
+    census can return. Nothing about the STRING separates ``Follow`` from
+    ``Gridwell``.
+
+    What separates them in practice is structure, and that is where the cover
+    comes from -- a control naming an entity almost always LINKS to it, and
+    :func:`shape.census_href_identifies_entity` blanks those on the href
+    whatever the name looks like. The uncovered case is a bare one-word button
+    with no href at all. This test asserts the current behaviour so that a
+    future reader meets a decision instead of a hole.
+    """
+    assert shape.census_redact_rare("Gridwell", 1) == "Gridwell"
+    # And the structural rule that covers the usual form of it.
+    assert shape.census_href_identifies_entity("/company/<company>/")
 
 
 # ---------------------------------------------------------------------------
@@ -559,10 +635,32 @@ def drive(monkeypatch):
     return install
 
 
-def test_the_surface_table_is_a_closed_set_of_two():
-    assert set(CENSUS_SURFACES) == {"feed", "profile"}
+def test_the_surface_table_is_a_closed_set_of_three():
+    assert set(CENSUS_SURFACES) == {"feed", "profile", "settings"}
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
+    assert CENSUS_SURFACES["settings"] == SETTINGS_URL
+
+
+@pytest.mark.parametrize(
+    "surface",
+    ["mynetwork", "network", "messaging", "messages", "inbox", "invitations"],
+)
+def test_the_three_surfaces_refused_on_a_side_effect_ruling_are_absent(surface):
+    """THE GATE, as something that can fail rather than as a paragraph.
+
+    Each of these was considered on 2026-08-30 and refused because LOADING the
+    page costs something: /mynetwork/ carries the pending-invitation badge, and
+    /messaging/ does not stay on a list at all -- LinkedIn redirects it into
+    one specific conversation, measured twice, so a census there opens a
+    stranger's thread. Notifications is the older member of the same set and
+    has its own test above.
+
+    A refusal that lives only in a comment is one refactor from being an
+    oversight, so it is asserted on the KEY and on every url in the table.
+    """
+    assert surface not in CENSUS_SURFACES
+    assert not any(surface in url for url in CENSUS_SURFACES.values())
 
 
 def test_notifications_is_deliberately_not_a_surface():
@@ -574,11 +672,59 @@ def test_notifications_is_deliberately_not_a_surface():
     assert not any("notifications" in url for url in CENSUS_SURFACES.values())
 
 
-def test_every_surface_is_already_a_permitted_read_url():
-    """The tool adds no url that ``readonly.py`` did not already allow, which
-    is why building it needed no edit to the navigation allowlist."""
+def test_every_surface_is_a_permitted_read_url():
+    """Every key resolves to a url the read boundary admits.
+
+    THE SENTENCE THIS DOCSTRING USED TO CARRY IS NO LONGER TRUE, and saying so
+    is the point of rewriting it rather than deleting it. It read: "the tool
+    adds no url that readonly.py did not already allow, which is why building
+    it needed no edit to the navigation allowlist." That held for two surfaces
+    and stopped holding on 2026-08-30, when ``settings`` was added and the
+    navigation allowlist was deliberately widened by exactly one anchored
+    pattern to admit it. The widening is recorded where it happened -- on the
+    pattern in ``readonly.py`` and in the re-freeze note in
+    ``test_readonly_boundary_invariant.py`` -- and a stale claim of "no edit
+    was needed" sitting here would have been the one place a reader could have
+    checked and been told the wrong thing.
+    """
     for key, url in CENSUS_SURFACES.items():
         assert readonly.is_read_url(url), f"{key}: {url}"
+
+
+def test_the_settings_key_reaches_the_index_and_not_the_toggles():
+    """SHOWN FAILING on the widening this pattern exists to keep narrow.
+
+    The value of a settings census is the INDEX -- which sections exist, and
+    whether a section is url-addressed or opens as a modal. The COST would be
+    the category pages, which is where the switches are. So the permission is
+    anchored to the index and the pages below it are refused twice: they miss
+    the anchored pattern, and they carry a forbidden substring.
+
+    Both halves are asserted, because either one alone would pass against a
+    boundary that had lost the other.
+    """
+    assert readonly.is_read_url(SETTINGS_URL)
+    for below in (
+        SETTINGS_URL + "categories/account",
+        SETTINGS_URL + "categories/privacy",
+        SETTINGS_URL + "?tab=account",
+        "https://www.linkedin.com/psettings/",
+    ):
+        assert not readonly.is_read_url(below), below
+
+    # And the SECOND gate specifically, since the anchored pattern alone would
+    # already refuse these -- what is being certified here is that the
+    # substring list now covers the settings family, which it did not before
+    # 2026-08-30. Measured then: "/settings/" matched neither
+    # /mypreferences/d/ nor /psettings/, so the "belt and braces" this list
+    # documents itself as was not engaged for this surface at all.
+    for below in (
+        SETTINGS_URL + "categories/account",
+        "https://www.linkedin.com/psettings/",
+    ):
+        with pytest.raises(errors.WriteAttemptError) as caught:
+            readonly.assert_read_url(below)
+        assert "contains" in str(caught.value), str(caught.value)
 
 
 @pytest.mark.parametrize(
@@ -605,7 +751,9 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
     navigations = drive(page)
     result = await linkedin_surface_census(bad)
     assert result["error"] == "unknown_surface"
-    assert result["valid_surfaces"] == ["feed", "profile"]
+    # Spelled out rather than derived from CENSUS_SURFACES: comparing the
+    # answer against the same dict that produced it could not fail.
+    assert result["valid_surfaces"] == ["feed", "profile", "settings"]
     assert navigations == []
     assert page.evaluations == []
 
