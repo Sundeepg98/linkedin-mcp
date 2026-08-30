@@ -295,3 +295,12 @@ only the audit file.
 (622 insertions, 20 deletions).
 
 **All files ASCII-clean**, verified by byte scan.
+
+**A second writer was in this tree.** `f2b9a3c docs(audit): five of the nine, measured
+live` landed at 11:16, between the baseline run and this commit, and is now the parent
+of `3aa1e32`. It is **docs-only** -- one new file, `_audit/2026-08-30-nine-live-census.md`,
+87 lines, no code and no tests -- so the 1732 baseline is still a baseline for this
+change and `1732 + 10 = 1742` holds. No file is touched by both commits. Recorded rather
+than assumed away, because the arithmetic would have been wrong had it carried tests.
+
+No `_TEAM_LEAD_*.md` ruling was present at the worktree root or its parent at freeze.
