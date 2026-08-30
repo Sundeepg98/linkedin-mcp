@@ -272,17 +272,33 @@ face, so the next reader gets the caveat without needing this document.
 
 **Suite.** `venv\Scripts\python.exe -m pytest -q`
 
-- Before: `1732 passed in 444.07s`. The brief's 1730 was stale by two; reporting what I
-  measured.
-- After: `1742 passed in 437.08s` -- 1732 + the 10 new, zero regressions.
+- Before, at `21d9ba0`: `1732 passed in 444.07s`. The brief's 1730 was stale by two;
+  reporting what I measured.
+- After the code change, before committing: `1742 passed in 437.08s` -- 1732 + the 10
+  new tests, zero regressions.
+- **Final, on the committed tree: `1749 passed`.**
+
+**The total is not a constant, and the extra seven are not new tests I wrote.**
+`test_no_committed_identity` and `test_path_hygiene` are parametrized over TRACKED
+files, so committing a file adds a test. Between the middle run and the last one, three
+files became tracked (this audit, the test module, and the concurrent writer's audit)
+across two guards, plus the module's own 10. Anyone re-deriving 1732 -> 1749 by
+subtraction should expect that gap and not read it as coverage appearing from nowhere.
 
 **`_state/` untouched.** `_state/session.json` is byte-identical, same size and same
 mtime as at wave start:
 
 ```
-before  f0892e35688868faef6a3525e54b93e4fd9605770562bc5540d0b133b3165152  7813  Aug 26 00:41
-after   f0892e35688868faef6a3525e54b93e4fd9605770562bc5540d0b133b3165152  7813  Aug 26 00:41
+before  sha256 f0892e35688868fa...  7813 bytes  Aug 26 00:41
+after   sha256 f0892e35688868fa...  7813 bytes  Aug 26 00:41
 ```
+
+(The digest is printed as a 16-hex-character prefix, not in full, and that is not
+tidiness. `test_no_committed_identity` refused the first draft of this file: the full
+digest contains the run `9605770562`, ten digits opening `96`, which is the shape of an
+Indian mobile number. The guard cannot tell that run from a real one and should not try,
+so the receipt got shorter rather than the guard weaker. Re-derive in full with
+`sha256sum _state/session.json`.)
 
 The Chrome profile was never launched from a script; every reading in this wave was
 taken by the test suite's own local headless Chromium over frozen local HTML, which
