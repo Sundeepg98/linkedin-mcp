@@ -128,12 +128,42 @@ HARVEST_LINKED_CARDS_JS = """
   };
   const hasText = (node) => !!(node && node.innerText && node.innerText.trim());
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  // IS THIS ELEMENT'S TEXT ACTUALLY IN innerText? That is the only question
+  // the hidden budget may ask, and asking a different one was a live defect.
+  //
+  // shape.strip_screen_reader_copies subtracts BY COUNT: each hidden element
+  // removes ONE occurrence of its own text from the card. That is correct for
+  // the CLIP pattern, where the element IS rendered and innerText therefore
+  // carries a second copy. It is WRONG for display:none and
+  // visibility:hidden, whose text innerText never returned -- and textOf()
+  // still reads them, because innerText on a NON-RENDERED element falls back
+  // to textContent. So the budget charged the card for a duplicate that was
+  // never there, and the subtraction paid for it out of the VISIBLE copy.
+  //
+  // Measured 2026-08-30: a row whose title was duplicated in a display:none
+  // span lost its title entirely, parse_job_card then had nothing to read,
+  // and the row was dropped. UNKNOWN COUNTS AS RENDERED -- an engine without
+  // checkVisibility keeps the old behaviour rather than silently halving the
+  // subtraction.
+  const isRendered = (el) => {
+    try {
+      if (el && el.checkVisibility) {
+        return el.checkVisibility({
+          contentVisibilityAuto: true,
+          visibilityProperty: true
+        });
+      }
+    } catch (e) { /* fall through to the permissive answer */ }
+    return true;
+  };
+  let skippedHidden = 0;
   const hiddenWithin = (node) => {
     const out = [];
     if (!node || !node.querySelectorAll || !cfg.hiddenSelector) return out;
     let marked;
     try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
     for (const el of marked) {
+      if (!isRendered(el)) { skippedHidden += 1; continue; }
       const value = textOf(el);
       if (value) out.push(value.slice(0, cfg.maxChars));
       if (out.length >= cfg.maxHidden) break;
@@ -274,6 +304,7 @@ HARVEST_LINKED_CARDS_JS = """
     return {
       rows: out,
       anchors_keyed: found.length,
+      hidden_not_rendered: skippedHidden,
       dropped_empty_text: droppedEmpty
     };
   }
@@ -508,6 +539,7 @@ async def harvest_census(
         "rows": [],
         "anchors_keyed": None,
         "dropped_empty_text": None,
+        "hidden_not_rendered": None,
     }
     try:
         result = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
@@ -518,6 +550,7 @@ async def harvest_census(
         out["rows"] = list(result.get("rows") or [])
         out["anchors_keyed"] = result.get("anchors_keyed")
         out["dropped_empty_text"] = result.get("dropped_empty_text")
+        out["hidden_not_rendered"] = result.get("hidden_not_rendered")
     return out
 
 

@@ -829,7 +829,7 @@ def tracker_read_note(
             _tracker_evidence_sentence(evidence),
             _tracker_harvest_sentence(records, dropped),
             _tracker_census_sentence(census),
-            _tracker_row_shape_sentence(row_shape),
+            _tracker_row_shape_sentence(row_shape, records),
             _tracker_rendered_sentence(evidence),
             _tracker_timing_sentence(list_wait, settle),
         )
@@ -899,7 +899,7 @@ def _tracker_census_sentence(census: Optional[dict[str, Any]]) -> str:
         return (
             f"THE WALK CENSUS: {keyed} keyed anchor(s) considered, {empty} "
             "discarded for carrying no text."
-        )
+        ) + _hidden_budget_sentence(census)
     return (
         "THE WALK CENSUS: it considered NO keyed anchor at all, which "
         "disagrees with the row count above -- the two look at the same page "
@@ -908,14 +908,60 @@ def _tracker_census_sentence(census: Optional[dict[str, Any]]) -> str:
     )
 
 
-def _tracker_row_shape_sentence(row_shape: Optional[list]) -> str:
+def _hidden_budget_sentence(census: dict[str, Any]) -> str:
+    """How many screen-reader elements were NOT charged to the card's text.
+
+    ADDED 2026-08-30 with the fix it measures. ``strip_screen_reader_copies``
+    subtracts one occurrence per hidden element, which is right only when that
+    element's text is actually IN the card's ``innerText``. A ``display:none``
+    duplicate is not -- and was still being charged, so the subtraction paid
+    for it out of the visible copy and could empty a row entirely.
+
+    A non-zero count here means the page carries hidden duplicates of that
+    kind. It is the number that says whether this defect is present on the
+    page being refused, rather than merely present in the codebase.
+    """
+    skipped = census.get("hidden_not_rendered")
+    if not skipped:
+        return ""
+    # SKIPPED READS, not distinct elements: the walk reads a card's hidden set
+    # once for the row and once for the anchor, so one offending element is
+    # counted twice. Said plainly rather than deduped, because the question
+    # this number answers is "does this page carry non-rendered duplicates at
+    # all", and a count that is high by a constant factor answers it -- while
+    # a count that CLAIMED to be elements would be wrong.
+    return (
+        f" {skipped} screen-reader read(s) were NOT charged to the card's "
+        "text because the element is not rendered, so innerText never carried "
+        "it (this counts reads, and the walk reads each card's hidden set "
+        "twice). "
+        "Before 2026-08-30 they were charged, and the subtraction took the "
+        "VISIBLE copy instead -- a row whose title was duplicated that way "
+        "lost its title and was dropped by the parser."
+    )
+
+
+def _tracker_row_shape_sentence(
+    row_shape: Optional[list], records: Optional[int] = None
+) -> str:
     """WHERE the row's text is, climbing from the anchor. Integers only.
 
-    Prints the first row's climb as ``TAG(children,links) rendered/present``,
+    Prints the first row's climb as ``TAG(children,keys) rendered/present``,
     which is enough to see at a glance whether the text appears at some level,
     appears only as ``textContent``, or never appears at all. The other rows
     are summarised rather than printed: they are the same shape, and a refusal
     that prints three identical ladders buries its own finding.
+
+    ``records`` IS TAKEN SO THIS CANNOT CONTRADICT THE SENTENCE ABOVE IT, and
+    it could, measured on a live refusal 2026-08-30: the harvest sentence said
+    "the ROW PARSER REJECTED ALL 1 ... that is the PARSER" and four sentences
+    later this one said "a walk that returned nothing stopped short of it --
+    that is a defect in the walk". Both printed to the same caller, naming two
+    different components in one breath, and one of them was reasoning from a
+    premise the other had already refuted. An instrument that names two
+    culprits at once can be quoted either way, which is worse than naming
+    none: the "stopped short" reading is only available when the walk actually
+    returned nothing.
     """
     if not row_shape:
         return ""
@@ -965,11 +1011,27 @@ def _tracker_row_shape_sentence(row_shape: Optional[list]) -> str:
             "Present and unrendered -- so it is in the DOM, and innerText "
             "reports it only where it falls back to textContent."
         )
-    else:
+    elif records == 0:
         verdict = (
             f"the row holds {present} characters and renders {rendered}. The "
             "text exists and is readable, so a walk that returned nothing "
             "stopped short of it -- that is a defect in the walk."
+        )
+    else:
+        # THE WALK DID RETURN SOMETHING, so it did not stop short and this
+        # sentence must not say it did. What the numbers describe instead is
+        # WHICH text the parser was handed: a row rendering less than it holds
+        # gives the parser only the visible part.
+        verdict = (
+            f"the row holds {present} characters and renders {rendered}"
+            + (
+                ", so the parser was handed only the rendered part -- the "
+                "difference is text present in the DOM that innerText does "
+                "not return."
+                if rendered < present
+                else " -- all of it readable, so the parser saw everything "
+                "the row holds."
+            )
         )
     more = (
         f" ({len(row_shape)} rows sampled; they climb alike.)"

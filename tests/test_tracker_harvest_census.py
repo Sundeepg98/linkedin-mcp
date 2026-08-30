@@ -416,3 +416,237 @@ async def test_the_note_is_silent_about_a_harvest_it_was_not_told_about():
     note = shape.tracker_read_note({}, {"attached": True, "waited_ms": 5}, {})
     assert "CARD WALK" not in note, note
     assert "WALK CENSUS" not in note, note
+
+
+# ---------------------------------------------------------------------------
+# 5. The screen-reader budget, and the premise under it
+# ---------------------------------------------------------------------------
+
+#: The CLIP pattern: the element IS rendered, just clipped to nothing. Its text
+#: therefore appears in innerText, and a subtraction that removes one copy is
+#: correct.
+CLIP = (
+    "position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);"
+    "height:1px;width:1px;overflow:hidden"
+)
+
+SR_TITLE = "Senior Full-stack Engineer - Remote"
+SR_COMPANY = "Sprinto"
+SR_HREF = "https://www.linkedin.com/jobs/view/4423880462/"
+
+
+def row_with_screen_reader(style: str) -> str:
+    """DERIVED: a saved-shaped row whose title is duplicated for a reader."""
+    shell = derive(markup("jobs_tracker_empty"), ">No jobs here</h2>", "></h2>")
+    shell = derive(shell, "Saved &#183; 0", "Saved &#183; 1", count=-1)
+    frag = (
+        f'<div><div><a href="{SR_HREF}">'
+        f'<span class="visually-hidden" style="{style}">{SR_TITLE}</span>'
+        f"<span>{SR_TITLE}</span><span>{SR_COMPANY}</span></a></div></div>"
+    )
+    return derive(shell, "</main>", frag + "</main>")
+
+
+async def _budget(page):
+    records = await dom.harvest_linked_cards(
+        page, href_pattern=dom.JOB_HREF, max_items=75
+    )
+    census = await dom.harvest_census(
+        page, href_pattern=dom.JOB_HREF, max_items=75
+    )
+    return records, census
+
+
+async def test_a_clipped_duplicate_is_still_charged_to_the_card():
+    """THE CONTROL, and the behaviour that must NOT change.
+
+    The clip pattern leaves the element rendered, so ``innerText`` really does
+    carry a second copy and removing one is correct. This is the case the
+    subtraction was built for, and every surface that depends on it -- search
+    results with a verified-employer line, notifications -- depends on it
+    still working.
+
+    SHOWN FAILING by skipping every hidden element regardless of rendering::
+
+        AssertionError: assert [] == ['Senior Full-stack Engineer - Remote']
+        -- a rendered duplicate stopped being subtracted, so it will now be
+        read as content
+    """
+
+    async def work(page):
+        return await _budget(page)
+
+    records, census = await _with_html(row_with_screen_reader(CLIP), work)
+    assert records, records
+    assert records[0]["hidden"] == [SR_TITLE], records[0]
+    assert census["hidden_not_rendered"] == 0, census
+
+
+async def test_a_display_none_duplicate_is_not_charged_to_the_card():
+    """THE FIX. A duplicate innerText never returned may not be subtracted.
+
+    ``strip_screen_reader_copies`` subtracts BY COUNT, one occurrence per
+    hidden element. Its docstring's premise -- "innerText includes
+    visually-hidden text" -- is true of the clip pattern and FALSE of
+    ``display:none``. But the sweep read each hidden element with
+    ``innerText``, which on a NON-RENDERED element falls back to
+    ``textContent``, so the budget was charged for a copy that was never in
+    the card. The subtraction then paid for it out of the VISIBLE copy.
+
+    Measured 2026-08-30: the title vanished, and with it the only line
+    ``parse_job_card`` could have read.
+
+    SHOWN FAILING by removing the ``isRendered`` guard::
+
+        AssertionError: assert ['Senior Full-stack Engineer - Remote'] == []
+        -- a duplicate that innerText never carried was charged to the card
+    """
+
+    async def work(page):
+        return await _budget(page)
+
+    records, census = await _with_html(
+        row_with_screen_reader("display:none"), work
+    )
+    assert records, records
+    assert records[0]["hidden"] == [], records[0]
+    # TWO, NOT ONE, and the number is honest rather than deduped: the walk
+    # reads a card's hidden set TWICE -- once for the row and once for the
+    # anchor, which fill `hidden` and `link_hidden` -- so one offending
+    # element is skipped on both passes. The field counts SKIPPED READS. It
+    # exists to answer "does this page carry non-rendered duplicates at all",
+    # and for that a count that is high by a constant factor is fine; what
+    # would not be fine is calling it a count of elements.
+    assert census["hidden_not_rendered"] == 2, census
+
+
+async def test_the_visible_title_survives_a_display_none_duplicate():
+    """The consequence, end to end, through the real parser.
+
+    This is the assertion that actually matters: the row parses, and its title
+    is the title rather than nothing.
+
+    SHOWN FAILING by removing the ``isRendered`` guard::
+
+        AssertionError: assert 0 == 1
+        -- the row was dropped, which is the live signature: records=1,
+        dropped=1
+    """
+
+    async def work(page):
+        records, _census = await _budget(page)
+        rows, dropped = dom.parse_all(records, shape.parse_job_card)
+        return records, rows, dropped
+
+    records, rows, dropped = await _with_html(
+        row_with_screen_reader("display:none"), work
+    )
+    assert len(records) == 1, records
+    assert len(rows) == 1, (rows, dropped)
+    assert dropped == 0, dropped
+    assert SR_TITLE in rows[0]["title"], rows[0]
+
+
+async def test_the_draft_row_still_parses_and_for_the_same_reason():
+    """THE CONSTRAINT: fixing Saved must not change what Draft relies on.
+
+    ``jobs_tracker_row.html`` is the DRAFT tab, and it is the one tracker
+    surface that works live. Its fields are asserted EXACTLY -- not merely
+    "it still returns something" -- because a fix that left it parsing by
+    coincidence would pass a weaker check.
+
+    Its screen-reader elements are RENDERED in this fixture, so the budget is
+    unchanged for it and the row is built from the same lines by the same
+    route as before.
+
+    SHOWN FAILING by skipping every hidden element regardless of rendering,
+    which is the over-broad version of this wave's fix::
+
+        AssertionError: the draft row changed shape
+    """
+
+    async def work(page):
+        records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.JOB_HREF, max_items=75
+        )
+        return dom.parse_all(records, shape.parse_job_card)
+
+    rows, dropped = await _with_html(markup("jobs_tracker_row"), work)
+    assert dropped == 0, dropped
+    assert rows == [
+        {
+            "title": "Platform Integration Engineer",
+            "company": "Ashgrove Systems",
+            "location": "Fairhaven (Remote)",
+            "status": "no longer accepting applications",
+            "job_id": "4011223344",
+            "url": "https://www.linkedin.com/jobs/view/4011223344",
+        }
+    ], rows
+
+
+# ---------------------------------------------------------------------------
+# 6. The refusal must not name two culprits at once
+# ---------------------------------------------------------------------------
+
+
+async def test_the_shape_sentence_does_not_blame_the_walk_that_returned_rows():
+    """A REFUSAL MAY NOT NAME TWO COMPONENTS IN ONE BREATH.
+
+    Measured on a live refusal 2026-08-30, four sentences apart:
+
+        "THE CARD WALK RETURNED 1 RECORD(S) AND THE ROW PARSER REJECTED ALL 1
+         ... that is the PARSER"
+        "The text exists and is readable, so a walk that returned nothing
+         stopped short of it -- that is a defect in the walk."
+
+    The second reasons from a premise the first has already refuted, and both
+    reached the same caller. An instrument that names two culprits at once can
+    be quoted either way, which is worse than naming none.
+
+    SHOWN FAILING by taking the ``records`` argument back off the shape
+    sentence, which is the state this was found in::
+
+        AssertionError: 'defect in the walk' in '...' -- the refusal blames
+        the walk in the same breath as clearing it
+    """
+    ladder = [
+        [
+            {"tag": "A", "children": 1, "keys": 0, "text_chars": 75,
+             "content_chars": 75},
+            {"tag": "DIV", "children": 1, "keys": 1, "text_chars": 231,
+             "content_chars": 396},
+        ]
+    ]
+    note = shape.tracker_read_note(
+        {}, {"attached": True, "waited_ms": 5}, {},
+        records=1, dropped=1, row_shape=ladder,
+    )
+    # The walk returned something, so it did not stop short.
+    assert "defect in the walk" not in note, note
+    assert "stopped short" not in note, note
+    # And the parser sentence must still be there, alone.
+    assert "REJECTED ALL 1" in note, note
+    assert "that is the PARSER" in note, note
+    # The shape numbers are still reported -- suppressed blame, not evidence.
+    assert "renders 231" in note, note
+
+
+async def test_the_shape_sentence_DOES_blame_the_walk_when_it_returned_nothing():
+    """The control. Suppressing the sentence always would be the other error.
+
+    SHOWN FAILING by dropping the ``records == 0`` branch entirely::
+
+        AssertionError: 'defect in the walk' not in '...'
+    """
+    ladder = [
+        [
+            {"tag": "A", "children": 1, "keys": 0, "text_chars": 75,
+             "content_chars": 75},
+        ]
+    ]
+    note = shape.tracker_read_note(
+        {}, {"attached": True, "waited_ms": 5}, {},
+        records=0, row_shape=ladder,
+    )
+    assert "defect in the walk" in note, note
