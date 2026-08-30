@@ -521,3 +521,199 @@ Not started, and not silently begun.
 - **No `confirm_token` was passed by me at any point.** The live measurement is the
   lead's; every state reproduced above is a local derived fixture.
 - **Commit** `08c8936` on `master`, not pushed, no `Co-Authored-By`. All files ASCII-clean.
+
+---
+---
+
+# Part 3 -- the reader-difference theory is wrong, and the table is not stable
+
+**Commit:** `13bd75a`, on `master`, not pushed. **Suite: 1756 -> 1764.** `_state/` unchanged.
+
+The lead asked me to kill this theory if it was wrong rather than let it be inherited.
+**It is wrong.** Both halves of it are wrong, and each for a different reason.
+
+## 1. There is no second implementation. There is one reader, written out twice
+
+`linkedin_job_detail` (`server.py`) and `writes._read_posting_facts` do this:
+
+```python
+identity = await dom.read_job_identity(page)
+detail = shape.parse_job_detail(
+    await dom.read_main_text(page),
+    company=identity.get("company"),
+    document_title=identity.get("document_title"),
+)
+```
+
+Character for character the same, in the same order, behind the same navigation
+(`BROWSER.goto`, `wait_until="domcontentloaded"`, then the same flat `SETTLE_MS = 3500`).
+
+| | `linkedin_job_detail` | the save gate's facts read |
+|---|---|---|
+| selectors | `read_job_identity` + `read_main_text` | **identical** |
+| wait strategy | `BROWSER.goto`, networkidle-then-flat 3500ms | **identical** |
+| readiness condition | **none** | **none** |
+| treats as "rendered" | `title` and `description` | `title`, `description`, **and `company`** |
+| url | `/jobs/view/<id>` | `/jobs/view/<id>/` |
+
+Only two things differ, and neither can produce the observed table.
+
+## 2. The one difference that looked like strictness is DEAD CODE
+
+The write gate read `if not job_detail_is_believable(detail) or not detail.get("company")`.
+For that second term ever to be the deciding one, a reading would have to be believable
+**and** carry no company. **No such reading exists**, because
+`shape.job_title_from_document_title` returns `None` when the employer is unknown:
+
+```
+company     believable  title                         company       extra clause decides
+None        False       None                          None          False
+''          False       None                          None          False
+'   '       False       None                          None          False
+'Ashgrove'  True        'Backend Engineer | Remote'   'Ashgrove'    False
+```
+
+Company absent forces title absent, so the base requirement has already failed. **The two
+readers are behaviourally identical.** I asserted the opposite in Part 2 -- I wrote that
+the write gate "is STRICTLY STRICTER" -- and that was wrong in effect, though right in
+text. It is corrected here rather than quietly.
+
+Empirically confirmed as well: across all five job captures plus two derived failure
+states, the two requirement sets never reach opposite verdicts
+(`test_the_two_read_paths_agree_on_every_captured_state`).
+
+## 3. The cells are not stable -- I flipped one myself
+
+The disagreement table treats each cell as a property of (posting x reader). Measured
+live today, one session, reads only, no tokens:
+
+| call | lead, ~1h earlier | me |
+|---|---|---|
+| `linkedin_job_detail(4456021840)` Gunpowder | failed ~4/4 | **failed** 1/1 |
+| `linkedin_job_detail(4448301715)` Fivetran | **succeeded 2/2** | **failed 3/3** |
+| `linkedin_search_jobs` | rendered fine | **rendered fine** -- 7 results, full data |
+
+**The Fivetran cell has now produced both outcomes.** Same reader, same url, same build,
+one hour apart. And `linkedin_search_jobs` returned complete results in the same session
+seconds after the failures, so the session, the auth and the browser were all healthy --
+the failure is specific to the standalone `/jobs/view/<id>` surface.
+
+That is the answer to "the variable is the reader": **it is not.** The variable is time,
+and the table was assembled from single readings of a surface that disagrees with itself.
+
+Two smaller facts fell out of the same run:
+
+- LinkedIn **does not redirect** `/jobs/view/<id>` to the trailing-slash form -- the
+  error payload's `url` (which is the post-redirect `final_url`) comes back without the
+  slash. So the url difference is real but inert: two different urls, both served, same
+  page.
+- I could not run the save-gate side myself. `linkedin_save_job` was **denied by the
+  permission classifier**, even in its preview form. I did not work around it. So the
+  write-side column of the table above is the lead's measurement only, and the code
+  argument in sections 1-2 is what carries that half.
+
+## 4. The ruling
+
+**They must keep different requirements; they must not keep different implementations.**
+The lead's prior was half right, and the half that was wrong matters.
+
+- *Different requirements, deliberately.* `linkedin_job_detail` hands a posting to a
+  human; a missing employer is a degraded but honest result. The save gate renders a
+  confirm block the operator reads before authorising an irreversible action; a block
+  that cannot name the employer is one he cannot check the job against. Collapsing them
+  would either weaken the gate or break the read tool on postings with no parseable
+  employer.
+- *Same implementation, now enforced.* `dom.read_job_posting` is the single reader.
+  `shape.JOB_DETAIL_REQUIRED` and `JOB_DETAIL_REQUIRED_FOR_GATE` declare the thresholds
+  as data. The dead clause is gone -- replaced by the named requirement, kept because
+  the intent outlives the coupling: if title extraction ever stops depending on company,
+  the gate must still demand it. A test fires if that day comes.
+
+## 5. What the refusal says now
+
+The old sentence offered two theories and no way to choose:
+
+> *"Either the page had not finished rendering, or the posting is no longer there."*
+
+Both are about the posting, and today's measurement shows a third possibility neither
+covers -- the surface failing while the account is fine. So it now reports evidence:
+which fields were missing, whether `<main>` existed, and how much text it carried,
+against measured ranges.
+
+**A page that has not drawn is not an empty page**, and that is the trap the numbers had
+to close. Measured across the captures:
+
+| capture | `main` chars | missing |
+|---|---|---|
+| `job_detail_shell` | 1092 | title, description |
+| `job_detail_following` | 1358 | description |
+| `job_detail` | 5648 | -- |
+| `job_detail_hydrated` | 5648 | -- |
+| `job_detail_following_hydrated` | 18440 | -- |
+
+The shell renders an aside, a footer and a language picker, so "it rendered something"
+is true of a page carrying no posting at all. The refusal now quotes both ranges so the
+number it prints is placeable. It also names `linkedin_search_jobs` as the control that
+separates a broken session from a broken surface, and asks for a repeat before anything
+is concluded -- because every wrong theory in this investigation, mine included, was
+built out of single readings.
+
+## 6. The finding that reframes the save question
+
+`job_detail_following` **carries a save control and an apply control while its
+description has not arrived.** So the control layer and the text layer render on
+independent schedules, and neither one being present is evidence about the other.
+
+That retires the last shape of the hydration story: "the save control is missing" and
+"the posting could not be read" were never two views of one fact, and a page can be
+ahead on either axis. It also means the Gunpowder observation the lead flagged --
+`job_detail` failing while the save gate's facts read succeeded -- needs no reader
+difference to explain it at all. One reader, one page, two moments.
+
+## 7. On the readiness floor (ask 4)
+
+The verdict boundary is `0` vs `>= 1` buttons, not `>= 2` -- the `>= 2` was only ever an
+assertion about the captures. The lead is right that three is a weak pass. But a floor
+would be the wrong instrument: `job_detail_following` draws **two** buttons and still
+carries a save control, so a low count does not by itself mean the control is absent.
+
+What IS true of every capture: **all four rendered captures carried exactly one save
+control regardless of button count.** So "3 buttons and no save control" matches no
+capture on record. The verdict now says exactly that, and carries the count and the
+observed ranges with it, so a weak pass is visible to the caller as a weak pass rather
+than as READY. No floor invented.
+
+## 8. Receipts, part 3
+
+- **Suite:** `1764 passed in 425.49s`, zero failures, on the committed tree. Previous
+  1756, which matches the lead's figure.
+- **Eight new tests** (28 in the module), each shown failing at its own mutation: the
+  dead clause becoming live, the two requirement sets genuinely diverging, `main_chars`
+  collapsed to zero, no-main and empty-main sharing a sentence, the control sentence
+  dropped, the readiness caution dropped, and a presence-check failure reported as an
+  absent `<main>`. **Two mutations came back green first and both were mine:** one
+  changed both requirement sets together and therefore proved nothing, and one found a
+  real gap -- a presence default no test drove, closed by
+  `test_a_main_presence_check_that_failed_is_not_a_missing_main`.
+- **Live calls: reads only.** Five `linkedin_job_detail`, one `linkedin_search_jobs`, one
+  `linkedin_auth_status`. **No `confirm_token` was passed.** `linkedin_save_job` was
+  denied by the permission classifier and was not worked around.
+- **`_state/session.json` byte-identical**, `sha256 f0892e35688868fa...`, 7813 bytes,
+  mtime Aug 26 00:41. The Chrome profile was never launched from a script.
+- **Commit** `13bd75a` on `master`, not pushed, no `Co-Authored-By`. All files ASCII-clean.
+
+## 9. What I would measure next, and what I would not
+
+**Would not:** anything built on a single reading of `/jobs/view/<id>`. That surface has
+now been measured disagreeing with itself, and three theories have died on it.
+
+**Would:** the paired control. Every future job-page reading should be taken with a
+`linkedin_search_jobs` call beside it and repeated at least twice. The refusal now says
+so on its own face, so the next person does not need this document.
+
+**Still open, and I am not guessing at it:** why `/jobs/view/<id>` renders its body
+sometimes and not others while the search surface never fails. Candidates not yet
+separated -- LinkedIn throttling the standalone posting route after repeated automated
+loads; the two live server processes contending for one profile; a genuine client-side
+render race that the flat settle sometimes wins. Separating them needs a run that varies
+one thing at a time, which is a wave with a measurement in it. **Not started.**
