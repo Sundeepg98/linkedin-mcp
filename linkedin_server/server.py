@@ -348,6 +348,17 @@ async def _read_tracker(
                     await dom.read_tracker_evidence(page),
                     list_wait,
                     BROWSER.last_settle,
+                    # THE TWO NUMBERS THE CALLER ALREADY HELD AND WAS THROWING
+                    # AWAY. The note used to say "the card walk or the row
+                    # parser" and could not choose between them; these are what
+                    # chooses. records is what the walk built, dropped is what
+                    # the parser then rejected.
+                    records=len(records),
+                    dropped=dropped,
+                    census=await dom.harvest_census(
+                        page, href_pattern=dom.JOB_HREF, max_items=limit * 3
+                    ),
+                    row_shape=await dom.read_tracker_row_shape(page),
                 ),
                 url=final_url,
                 hint="open the url yourself and compare with what this reports",

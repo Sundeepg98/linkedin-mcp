@@ -271,12 +271,23 @@ def test_only_dom_module_waives_evaluate():
         if count:
             waived_in[module.name] = count
     assert set(waived_in) <= {"dom.py"}, waived_in
-    # FOUR FROM 2026-08-26, up from three. The budget is what stops an
+    # SIX FROM 2026-08-30, up from four. The budget is what stops an
     # evaluate() waiver spreading: every one of them is a place where "we
     # only call read methods in Python" stops being a sufficient argument,
     # so the number is pinned and a new one has to move it in a reviewable
     # diff. The fourth is CENSUS_JS, read by dom.read_surface_census.
-    assert waived_in.get("dom.py", 0) <= 4, waived_in
+    #
+    # THE FIFTH AND SIXTH were added to diagnose a tracker read returning zero
+    # rows from a page carrying four job-row anchors, eight times out of eight.
+    # dom.harvest_census re-runs HARVEST_LINKED_CARDS_JS under a flag -- the
+    # SAME script, so the diagnostic cannot drift from the walk it describes --
+    # and dom.read_tracker_row_shape runs TRACKER_ROW_SHAPE_JS, which reports
+    # tag names and character counts and no text at all.
+    #
+    # A THIRD WAS PROPOSED AND NOT SPENT: main's textContent length is read
+    # through locator.text_content(), Playwright's own API, because a waiver
+    # that a plain call replaces is a waiver nobody should be asked to review.
+    assert waived_in.get("dom.py", 0) <= 6, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -292,6 +303,13 @@ INJECTED_SCRIPTS = {
     # buttons -- so it is the one whose scan matters most, and it is scanned by
     # exactly the same check as the other three rather than by a special case.
     "CENSUS_JS": dom.CENSUS_JS,
+    # 2026-08-30. The row-shape reader, which climbs from a job-row anchor and
+    # reports each level as a tag name and two character counts. It exists
+    # purely to describe a page this package could not read, and it is held to
+    # the same scan as the rest. It also carries the strictest privacy rule in
+    # the module: no text and no attribute value leaves it, because a tracker
+    # row names a company and a job.
+    "TRACKER_ROW_SHAPE_JS": dom.TRACKER_ROW_SHAPE_JS,
 }
 
 
@@ -378,10 +396,23 @@ def test_every_script_this_package_executes_cannot_mutate(name: str):
 
 
 def test_the_scripts_executed_are_exactly_the_ones_declared():
-    """No script runs that this module does not know the name of."""
+    """No script runs that this module does not know the name of.
+
+    TWO COUNTS, AND THEY ARE DIFFERENT QUESTIONS. The NAMES must match the
+    declaration exactly -- an undeclared script is the thing this file exists
+    to catch. The number of CALL SITES is pinned separately, and it is allowed
+    to exceed the number of scripts: one script may legitimately run from more
+    than one place.
+
+    SIX FROM 2026-08-30, up from four, and both additions are one script run a
+    second time rather than new surface area. ``dom.harvest_census`` runs
+    ``HARVEST_LINKED_CARDS_JS`` -- the SAME script the harvest runs, under a
+    flag, precisely so a diagnostic cannot drift from the walk it describes --
+    and ``dom.read_tracker_row_shape`` runs ``TRACKER_ROW_SHAPE_JS``.
+    """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 4, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 6, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

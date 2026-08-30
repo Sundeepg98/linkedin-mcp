@@ -2037,7 +2037,7 @@ async def _read_saved_state(
     records = await dom.harvest_linked_cards(
         page, href_pattern=dom.JOB_HREF, max_items=SAVED_LIST_MAX_ROWS
     )
-    rows, _dropped = dom.parse_all(records, shape.parse_job_card)
+    rows, dropped = dom.parse_all(records, shape.parse_job_card)
     ids = {str(row.get("job_id")) for row in rows if row.get("job_id")}
 
     if stated is None:
@@ -2082,6 +2082,12 @@ async def _read_saved_state(
                 await dom.read_tracker_evidence(page),
                 list_wait,
                 dict(getattr(navigator, "last_settle", None) or {}),
+                records=len(records),
+                dropped=dropped,
+                census=await dom.harvest_census(
+                    page, href_pattern=dom.JOB_HREF, max_items=SAVED_LIST_MAX_ROWS
+                ),
+                row_shape=await dom.read_tracker_row_shape(page),
             ),
         )
     if len(rows) == stated:

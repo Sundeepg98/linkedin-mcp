@@ -254,10 +254,28 @@ HARVEST_LINKED_CARDS_JS = """
   }
 
   const out = [];
+  let droppedEmpty = 0;
   for (const item of found) {
     const rec = record(item.href, item.row, item.anchor);
-    if (rec) out.push(rec);
+    if (rec) {
+      out.push(rec);
+    } else {
+      // A DROP THAT NOBODY COUNTED, until 2026-08-30. record() returns null
+      // for a row whose innerText is empty, and a walk that discards rows
+      // without saying how many is indistinguishable from a page that had
+      // none -- which is precisely the ambiguity that cost this repo a day on
+      // the Saved tab. Counted here, reported by harvest_census, and NOT
+      // acted on: an untitled row is still not a row.
+      droppedEmpty += 1;
+    }
     if (out.length >= cfg.maxItems) break;
+  }
+  if (cfg.census) {
+    return {
+      rows: out,
+      anchors_keyed: found.length,
+      dropped_empty_text: droppedEmpty
+    };
   }
   return out;
 }
@@ -439,6 +457,171 @@ async def harvest_linked_cards(
             url=_url_of(page),
         ) from exc
     return list(records or [])
+
+
+async def harvest_census(
+    page: Any, *, href_pattern: str, max_items: int
+) -> dict[str, Any]:
+    """The same walk, reporting WHAT IT THREW AWAY as well as what it kept.
+
+    WHY THIS EXISTS, and it is the same lesson this package has now learned on
+    three surfaces. ``harvest_linked_cards`` returns a list. A list of length
+    zero is returned both when the page offered no keyed anchor at all and
+    when it offered several and the walk discarded every one -- and those want
+    completely different repairs. On 2026-08-30 the Saved tab produced FOUR
+    job-row anchors and zero rows, and nothing in this package could say which
+    of the two had happened, or whether the row parser had even been reached.
+
+    Two numbers close that:
+
+    ``anchors_keyed``       how many DISTINCT keyed anchors the walk considered
+                            (deduped by key, which is what the walk itself does)
+    ``dropped_empty_text``  how many of those produced a row the walk refused
+                            because its ``innerText`` was empty
+
+    NOT A SECOND IMPLEMENTATION. It runs the identical script under a flag, so
+    it cannot drift from the walk it is describing -- a separate counting
+    routine would be free to disagree with the thing it counts, which is how a
+    diagnostic starts lying.
+
+    ``sibling_rows`` IS NOT AVAILABLE HERE and that is deliberate rather than
+    an omission: that path returns early with its own list, so a census over it
+    would report the tail's counters for the head's rows. The tracker, which is
+    what this was built for, does not use it.
+
+    A DIAGNOSTIC, NEVER A DECISION INPUT. Nothing branches on either number.
+    An untitled row is still not a row, and this does not make one.
+    """
+    cfg = {
+        "hrefPattern": href_pattern,
+        "maxItems": int(max_items),
+        "maxChars": 1200,
+        "maxHops": 8,
+        "siblingRows": False,
+        "hiddenSelector": CARD_HIDDEN_SELECTOR,
+        "maxHidden": 12,
+        "census": True,
+    }
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE. A census that could not run must not come back
+        # looking like a page that offered nothing.
+        "rows": [],
+        "anchors_keyed": None,
+        "dropped_empty_text": None,
+    }
+    try:
+        result = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
+        logger.debug("harvest census failed: %s: %s", type(exc).__name__, exc)
+        return out
+    if isinstance(result, dict):
+        out["rows"] = list(result.get("rows") or [])
+        out["anchors_keyed"] = result.get("anchors_keyed")
+        out["dropped_empty_text"] = result.get("dropped_empty_text")
+    return out
+
+
+#: How many row anchors :func:`read_tracker_row_shape` will describe, and how
+#: far up from each it will climb. The climb matches ``rowOf``'s own
+#: ``maxHops`` so the report describes the walk the harvest actually performs
+#: rather than a deeper one nobody runs.
+TRACKER_SHAPE_ROWS = 3
+TRACKER_SHAPE_HOPS = 8
+
+#: The shape reader's script. TAG NAMES AND LENGTHS ONLY -- never text, never
+#: an attribute value. A tracker row names a company and a job, so the same
+#: ruling the save sweep took applies here: the question is WHERE the text is,
+#: and that is answerable in integers.
+TRACKER_ROW_SHAPE_JS = """
+(cfg) => {
+  const re = new RegExp(cfg.hrefPattern);
+  const out = [];
+  const anchors = document.querySelectorAll(cfg.rowSelector);
+  const seen = new Set();
+  for (const anchor of anchors) {
+    const m = (anchor.getAttribute('href') || '').match(re);
+    const key = m ? (m[1] || '') : '';
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const keysIn = (node) => {
+      const keys = new Set();
+      if (!node.querySelectorAll) return keys;
+      for (const link of node.querySelectorAll('a[href]')) {
+        const hit = (link.getAttribute('href') || '').match(re);
+        if (hit) keys.add(hit[1] || '');
+      }
+      return keys;
+    };
+    const climb = [];
+    let node = anchor;
+    let hops = 0;
+    while (node && hops <= cfg.maxHops) {
+      // DISTINCT KEYS, not link count, and it is the same test rowOf stops on
+      // (keysWithin(node).size > 1). It is what separates "still inside this
+      // row" from "climbed out into the container holding the others", and
+      // without it a verdict about the ROW's text ends up measuring the whole
+      // page's chrome -- which is what the first draft of this did.
+      climb.push({
+        tag: node.tagName,
+        children: node.childElementCount,
+        text_chars: (node.innerText || '').trim().length,
+        content_chars: (node.textContent || '').trim().length,
+        keys: keysIn(node).size,
+        links: node.querySelectorAll ? node.querySelectorAll('a[href]').length : 0
+      });
+      node = node.parentElement;
+      hops += 1;
+    }
+    out.push(climb);
+    if (out.length >= cfg.maxRows) break;
+  }
+  return out;
+}
+"""
+
+
+async def read_tracker_row_shape(page: Any) -> list[list[dict[str, Any]]]:
+    """WHERE a tracker row's text lives, in integers and tag names.
+
+    THE QUESTION THIS ANSWERS. ``harvest_census`` says the walk discarded rows
+    for carrying no text. It cannot say whether the text is somewhere the walk
+    did not climb to, present but unrendered, or absent from the document
+    altogether -- and those are three different repairs. This climbs from each
+    row anchor exactly as ``rowOf`` does and reports, at every level, how many
+    characters are RENDERED against how many are merely PRESENT.
+
+    Read the two columns against each other:
+
+    ``text_chars`` 0 and ``content_chars`` 0 at every level
+        the row genuinely holds no text. LinkedIn drew the link and not its
+        contents, and no reader keyed on text can find one.
+    ``text_chars`` 0 with ``content_chars`` non-zero
+        the text is in the DOM and not being rendered. ``innerText`` reports
+        nothing for a rendered ancestor whose subtree is hidden -- note this
+        is NOT true of a node that is itself unrendered, which returns its
+        ``textContent`` instead, so the level at which the two diverge is
+        the level that is hidden.
+    both non-zero at some level above the anchor
+        the text exists and the walk stopped short of it.
+
+    TAG NAMES, COUNTS AND LENGTHS ONLY. No text and no attribute value leaves
+    this function. A tracker row names a company and a job, and the save sweep
+    already took this ruling for the same reason.
+
+    Never raises; an empty list means the shape could not be read.
+    """
+    cfg = {
+        "hrefPattern": JOB_HREF,
+        "rowSelector": TRACKER_ROW_LINK,
+        "maxRows": TRACKER_SHAPE_ROWS,
+        "maxHops": TRACKER_SHAPE_HOPS,
+    }
+    try:
+        result = await page.evaluate(TRACKER_ROW_SHAPE_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
+        logger.debug("tracker row shape failed: %s: %s", type(exc).__name__, exc)
+        return []
+    return list(result or [])
 
 
 async def harvest_block_cards(
@@ -2649,8 +2832,10 @@ async def read_tracker_evidence(page: Any) -> dict[str, Any]:
         # page says, and the note prints the two differently.
         "main_present": None,
         "main_chars": None,
+        "main_content_chars": None,
         "anchors_total": None,
         "rows_matching": None,
+        "rows_visible": None,
         "scan_complete": False,
     }
     try:
@@ -2660,6 +2845,30 @@ async def read_tracker_evidence(page: Any) -> dict[str, Any]:
         return out
 
     out["main_chars"] = len(await read_main_text(page))
+
+    # RENDERED TEXT AGAINST TEXT THAT IS MERELY PRESENT, and this pair is the
+    # measurement the 2026-08-30 refusal could not take. ``read_main_text`` is
+    # ``inner_text``, which returns what is RENDERED; ``textContent`` returns
+    # what is in the DOM whether painted or not. The whole harvest is built on
+    # ``innerText`` -- ``HARVEST_LINKED_CARDS_JS``'s ``record`` drops any row
+    # whose ``innerText`` is empty -- so a list drawn into the DOM and not
+    # painted is INVISIBLE to it while being plainly present to a selector.
+    #
+    # Those two readings being far apart is the signature of exactly that, and
+    # nothing else in this payload can distinguish it from a page that drew no
+    # text at all.
+    #
+    # ``locator.text_content()`` RATHER THAN AN INJECTED SCRIPT, deliberately:
+    # it is Playwright's own first-class read of ``textContent`` and needs no
+    # ``readonly-ok`` waiver, where the obvious one-line ``page.evaluate``
+    # would have spent one to learn the same integer. The waiver budget exists
+    # to make each injection reviewable, so an injection that a plain API call
+    # replaces does not get to spend it.
+    try:
+        content = await page.locator("main").first.text_content()
+        out["main_content_chars"] = len(str(content or "").strip())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker main content unreadable: %s", type(exc).__name__)
 
     try:
         anchors = page.locator("main a[href]")
@@ -2671,4 +2880,16 @@ async def read_tracker_evidence(page: Any) -> dict[str, Any]:
         out["scan_complete"] = total <= TRACKER_LINK_SCAN_LIMIT
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("tracker anchor scan failed: %s", type(exc).__name__)
+
+    # THE SAME QUESTION ASKED OF THE ROWS THEMSELVES. Its own try, because
+    # ``:visible`` is a Playwright pseudo-class rather than CSS and a future
+    # engine that rejects it must cost this ONE number rather than the four
+    # above it. rows_matching against rows_visible says whether the anchors a
+    # selector can see are anchors a reader could have read.
+    try:
+        out["rows_visible"] = int(
+            await page.locator(f"{TRACKER_ROW_LINK}:visible").count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker visible scan failed: %s", type(exc).__name__)
     return out

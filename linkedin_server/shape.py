@@ -802,6 +802,11 @@ def tracker_read_note(
     evidence: dict[str, Any],
     list_wait: dict[str, Any],
     settle: dict[str, Any],
+    *,
+    records: Optional[int] = None,
+    dropped: Optional[int] = None,
+    census: Optional[dict[str, Any]] = None,
+    row_shape: Optional[list] = None,
 ) -> str:
     """WHY the tracker read came back empty, out of what was actually there.
 
@@ -822,10 +827,216 @@ def tracker_read_note(
         part
         for part in (
             _tracker_evidence_sentence(evidence),
+            _tracker_harvest_sentence(records, dropped),
+            _tracker_census_sentence(census),
+            _tracker_row_shape_sentence(row_shape),
+            _tracker_rendered_sentence(evidence),
             _tracker_timing_sentence(list_wait, settle),
         )
         if part
     )
+
+
+def _tracker_harvest_sentence(
+    records: Optional[int], dropped: Optional[int]
+) -> str:
+    """WHICH of the two stages between anchors and rows lost them.
+
+    ADDED 2026-08-30, and the previous note named this gap on its own face: it
+    said "the card walk or the row parser" and could not choose. That is one
+    integer's worth of ignorance -- how many records the walk RETURNED -- and
+    the caller already had it and was throwing it away.
+
+    They fail in completely different places and want different repairs, so a
+    refusal that cannot separate them sends its reader to the wrong file.
+    """
+    if records is None:
+        return ""
+    if records == 0:
+        return (
+            "THE CARD WALK RETURNED NOTHING. Anchors were found and no record "
+            "was built from any of them, so the loss is in the WALK "
+            "(dom.HARVEST_LINKED_CARDS_JS) and not in the row parser -- the "
+            "parser was never handed anything to reject. The census beside "
+            "this says how many keyed anchors the walk considered and how "
+            "many it discarded for carrying no text, which is the only way it "
+            "discards anything."
+        )
+    if dropped is not None and dropped >= records:
+        return (
+            f"THE CARD WALK RETURNED {records} RECORD(S) AND THE ROW PARSER "
+            f"REJECTED ALL {dropped}. So the walk found the rows and "
+            "shape.parse_job_card could not read them -- that is the PARSER, "
+            "and re-reading the page will not change it."
+        )
+    return (
+        f"the card walk returned {records} record(s), {dropped} of which the "
+        "row parser dropped."
+    )
+
+
+def _tracker_census_sentence(census: Optional[dict[str, Any]]) -> str:
+    """The walk's own account of what it considered and what it discarded."""
+    if not census:
+        return ""
+    keyed = census.get("anchors_keyed")
+    empty = census.get("dropped_empty_text")
+    if keyed is None or empty is None:
+        return (
+            "THE WALK CENSUS DID NOT RUN, so how many anchors it considered is "
+            "unknown and the sentence above rests on the record count alone."
+        )
+    if keyed and empty >= keyed:
+        return (
+            f"THE WALK CENSUS: it considered {keyed} keyed anchor(s) and "
+            f"discarded ALL {empty} for carrying no text. So the rows are "
+            "addressable and EMPTY -- LinkedIn drew the links and not their "
+            "contents. Re-reading is the response only if this is a skeleton "
+            "still being filled; if it repeats, the row's text lives somewhere "
+            "this walk does not look."
+        )
+    if keyed:
+        return (
+            f"THE WALK CENSUS: {keyed} keyed anchor(s) considered, {empty} "
+            "discarded for carrying no text."
+        )
+    return (
+        "THE WALK CENSUS: it considered NO keyed anchor at all, which "
+        "disagrees with the row count above -- the two look at the same page "
+        "through different instruments, so a disagreement is a defect in one "
+        "of them rather than a fact about LinkedIn."
+    )
+
+
+def _tracker_row_shape_sentence(row_shape: Optional[list]) -> str:
+    """WHERE the row's text is, climbing from the anchor. Integers only.
+
+    Prints the first row's climb as ``TAG(children,links) rendered/present``,
+    which is enough to see at a glance whether the text appears at some level,
+    appears only as ``textContent``, or never appears at all. The other rows
+    are summarised rather than printed: they are the same shape, and a refusal
+    that prints three identical ladders buries its own finding.
+    """
+    if not row_shape:
+        return ""
+    first = row_shape[0]
+    if not first:
+        return ""
+    ladder = " < ".join(
+        "%s(%sc,%sk) %s/%s"
+        % (
+            level.get("tag"),
+            level.get("children"),
+            level.get("keys"),
+            level.get("text_chars"),
+            level.get("content_chars"),
+        )
+        for level in first
+    )
+
+    # THE VERDICT IS TAKEN OVER THE ROW, NOT OVER THE CLIMB. Every ladder ends
+    # at <main>, <body> and <html>, which always carry the page's own chrome --
+    # so a verdict computed over all of it reports the tab strip as the row's
+    # text and says the walk "stopped short". That was the first draft, and it
+    # was confidently wrong. A level holding more than ONE distinct job key is
+    # the container, not the row, which is the same boundary rowOf stops on.
+    within = [lvl for lvl in first if int(lvl.get("keys") or 0) <= 1]
+    present = max((int(lvl.get("content_chars") or 0) for lvl in within), default=0)
+    rendered = max((int(lvl.get("text_chars") or 0) for lvl in within), default=0)
+
+    if not within:
+        verdict = (
+            "EVERY level of that climb already holds more than one job key, so "
+            "the row could not be bounded and nothing about its text can be "
+            "claimed from here."
+        )
+    elif present == 0:
+        verdict = (
+            f"NO LEVEL WITHIN THE ROW ({len(within)} of {len(first)} levels "
+            "climbed before the container) HOLDS ANY TEXT AT ALL, rendered or "
+            "otherwise. The row is an addressable link around nothing. No "
+            "reader keyed on text can build a row from that, so the repair is "
+            "NOT in the walk -- it is in finding where LinkedIn put the text, "
+            "or in accepting that this row has none yet."
+        )
+    elif rendered == 0:
+        verdict = (
+            f"the row holds {present} characters and renders NONE of them. "
+            "Present and unrendered -- so it is in the DOM, and innerText "
+            "reports it only where it falls back to textContent."
+        )
+    else:
+        verdict = (
+            f"the row holds {present} characters and renders {rendered}. The "
+            "text exists and is readable, so a walk that returned nothing "
+            "stopped short of it -- that is a defect in the walk."
+        )
+    more = (
+        f" ({len(row_shape)} rows sampled; they climb alike.)"
+        if len(row_shape) > 1
+        else ""
+    )
+    return (
+        "THE ROW'S SHAPE, anchor first, as TAG(child elements, distinct job "
+        f"keys) rendered chars/present chars: {ladder}. {verdict}{more}"
+    )
+
+
+def _tracker_rendered_sentence(evidence: dict[str, Any]) -> str:
+    """Whether the page's text is PAINTED or merely present.
+
+    THE ONE READING THAT SEPARATES the two ways a card walk built on
+    ``innerText`` can come back empty, and neither is a timing failure in the
+    sense the settle branch means:
+
+      * the rows carry no text at all -- a genuinely empty list;
+      * the rows carry text the browser is not RENDERING -- hidden, collapsed,
+        or not yet painted -- which ``innerText`` reports as nothing and
+        ``textContent`` reports in full.
+
+    The second is invisible to every other number in this payload, and it is
+    the state ``dom.wait_for_tracker_list`` cannot exclude either: that wait
+    anchors on ``state="attached"``, which a display:none node satisfies.
+    """
+    text_chars = evidence.get("main_chars")
+    content_chars = evidence.get("main_content_chars")
+    rows_matching = evidence.get("rows_matching")
+    rows_visible = evidence.get("rows_visible")
+
+    parts: list[str] = []
+    if isinstance(text_chars, int) and isinstance(content_chars, int):
+        unrendered = content_chars - text_chars
+        if unrendered > 0:
+            parts.append(
+                f"THE PAGE HOLDS {unrendered} CHARACTERS IT IS NOT RENDERING "
+                f"(textContent {content_chars} against innerText "
+                f"{text_chars}). The card walk reads innerText, so text in "
+                "that gap is present to a selector and invisible to the "
+                "harvest."
+            )
+        else:
+            parts.append(
+                f"Rendered and present text agree ({text_chars} characters), "
+                "so nothing is being hidden from the harvest -- what is not "
+                "in innerText is not in the DOM either."
+            )
+
+    if isinstance(rows_matching, int) and isinstance(rows_visible, int):
+        if rows_matching and not rows_visible:
+            parts.append(
+                f"AND NOT ONE of the {rows_matching} job-row links is "
+                "VISIBLE. Several things produce that -- a hidden ancestor, a "
+                "zero-size box, a link wrapping nothing -- and the row shape "
+                "above is what tells them apart. Worth knowing either way: "
+                "the readiness wait cannot exclude this state, because it "
+                "anchors on 'attached' and an unpainted node is attached."
+            )
+        elif rows_matching:
+            parts.append(
+                f"{rows_visible} of the {rows_matching} job-row links are "
+                "visible."
+            )
+    return " ".join(parts)
 
 
 def _tracker_evidence_sentence(evidence: dict[str, Any]) -> str:
