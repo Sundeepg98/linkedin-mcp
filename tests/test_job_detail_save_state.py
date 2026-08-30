@@ -172,11 +172,24 @@ async def test_an_ambiguous_label_is_reported_without_being_resolved():
     be read as a state or as an imperative, and a label mapped to the wrong
     state points a click at the opposite action.
 
-    SHOWN FAILING by having ``shape.save_state`` fall back to the reported
-    name::
+    SHOWN FAILING by promoting a lone observed candidate to a state at the end
+    of ``_read_save_control_state`` -- which is the shortcut a future session
+    is likeliest to reach for, having just been handed the name::
+
+        if len(verdict["observed"]["candidates"]) == 1:
+            verdict["state"] = "saved"
 
         AssertionError: 'saved' != 'unknown' -- a name was promoted to a state
         by having been observed
+
+    NOT reproducible by mutating ``shape.save_state``'s ``known is None``
+    branch, and that was measured rather than assumed. ``dom.SAVE_CONTROL`` is
+    built from ``SAVE_LABELS_SEEN``, which holds one string, so a page wearing
+    any other label matches ZERO elements and ``save_state`` returns from its
+    ``count == 0`` guard without ever reaching the unrecognised-label branch.
+    That branch is unreachable through this route today -- it needs
+    ``SAVE_LABELS_SEEN`` to hold a name ``SAVE_LABELS`` does not map -- so
+    nothing here guards it and this docstring does not pretend otherwise.
     """
     verdict = await read(derive(SAVE_ATTR, f'aria-label="{AMBIGUOUS_ON_LABEL}"'))
     assert verdict["state"] == shape.SAVE_UNKNOWN, verdict
