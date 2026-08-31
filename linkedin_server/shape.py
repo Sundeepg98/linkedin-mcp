@@ -3662,14 +3662,35 @@ def census_aggregate(
     role and disabled state. Collapsing them on the name alone would report
     one shape where the page carries two different controls.
 
+    THE KEY IS THESE TEN, IN THIS ORDER, and it is written out rather than
+    counted because the sentence below is what happens when a reader trusts a
+    summary of it: shaped name, tag, role, ``name_source``, ``has_href``,
+    ``href_shape``, ``aria_expanded``, ``disabled``, ``checked``,
+    ``checked_source``. Every one of them also comes back on the row, so the
+    key is inspectable from the output rather than only from here.
+
     THAT SENTENCE SAID "the WHOLE record" UNTIL 2026-08-31 AND IT WAS FALSE,
     which matters more than the wording: the key is ENUMERATED below, so a
     field added to a record and not added to the key is dropped SILENTLY, and
     the docstring was the reason nobody looked. That is exactly what happened
     to ``container`` on the day it was added -- measured, not supposed.
 
+    ``checked`` AND ``checked_source`` ARE IN THE KEY, added 2026-08-31, and
+    the axis is what decides it. ``checked`` is a control STATE -- the same
+    axis as ``disabled`` and ``aria_expanded``, and BOTH of those were already
+    in the key. Two controls with the same name in different states are two
+    different controls: merging them would report one row where
+    ``/mypreferences/d/dark-mode`` carries three same-shaped radios of which
+    exactly one is on, which destroys the only thing the field was added to
+    report. ``checked_source`` rides with it because a ``true`` read off a
+    native radio and a ``true`` read off an ``aria-checked`` attribute are
+    different-quality answers, and merging them would publish the weaker one
+    under the stronger one's count.
+
     ``container`` IS DELIBERATELY NOT IN THE KEY, and the choice was made on a
-    measurement rather than a preference. Putting it in would split "Submit in
+    measurement rather than a preference. The contrast with the paragraph
+    above is the whole rule: a container is a PLACE and a checked flag is a
+    STATE. Putting it in would split "Submit in
     dialog#1" from "Submit in dialog#2" into two rows of count 1 each -- and
     :func:`census_redact_rare` fires at exactly ``count == 1``, so a readable
     shape seen twice in two containers would become two ``<redacted>`` rows.
@@ -3707,6 +3728,15 @@ def census_aggregate(
             record.get("href_shape"),
             record.get("aria_expanded"),
             bool(record.get("disabled")),
+            # UNCOERCED, and the two lines differ for a reason. ``checked``
+            # keeps its four values apart -- ``True``, ``False``, ``"mixed"``,
+            # ``None`` -- because ``bool()`` would merge "not a checkable
+            # control" into "checkable and off". ``checked_source`` takes the
+            # ``or "none"`` default the reader gives it, so a record built by
+            # hand or by an older script is counted rather than keyed on
+            # ``None``.
+            record.get("checked"),
+            str(record.get("checked_source") or "none"),
         )
         tally[key] = tally.get(key, 0) + 1
         where = str(record.get("container") or "none")
@@ -3741,6 +3771,8 @@ def census_aggregate(
             "href_shape": key[5],
             "aria_expanded": key[6],
             "disabled": key[7],
+            "checked": key[8],
+            "checked_source": key[9],
             "containers": dict(
                 sorted(
                     merged_containers.get(key, {}).items(),

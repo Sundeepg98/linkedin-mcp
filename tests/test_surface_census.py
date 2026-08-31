@@ -417,7 +417,9 @@ def test_the_structural_rule_is_keyed_on_the_href_and_can_be_asked_directly():
 
 
 def test_controls_differing_only_in_state_stay_separate_rows():
-    """The merge key is the whole record, not the name.
+    """The merge key is a NAMED SET OF FIELDS, not the name -- and not the
+    whole record either, which is what this docstring claimed until
+    2026-08-31 and what let two added fields be dropped in silence.
 
     Two controls reading "Follow" are the same shape only if they are also the
     same tag, role and disabled state. Merging on the name alone would report
@@ -882,6 +884,13 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
     }
     assert isinstance(result["control_shapes"], list)
     assert isinstance(result["href_shapes"], dict)
+    # THE ROW'S WHOLE KEY SET, and the reason it is asserted as an equality
+    # rather than a subset: this is the promise a caller reads, and a field
+    # that reaches the merge key but not this assertion would be a column
+    # nobody was told about. ``checked`` and ``checked_source`` arrived
+    # 2026-08-31 and this test is where their arrival at the TOOL is pinned --
+    # it went red on the edit that added them, which is how it was confirmed
+    # that the merge key is what carries a field the last step out.
     for row in result["control_shapes"]:
         assert set(row) == {
             "shape",
@@ -893,6 +902,8 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
             "href_shape",
             "aria_expanded",
             "disabled",
+            "checked",
+            "checked_source",
             "containers",
         }
 
@@ -1547,12 +1558,14 @@ async def test_that_sweep_can_detect_movement(census_over):
 # name in through all four of those routes at once.
 #
 # WHY EVERY READING BELOW IS TAKEN OFF THE RAW SCRIPT rather than through
-# ``read_surface_census`` like section 8's are. The reader shapes its rows by
-# building a dict literal that ENUMERATES eight keys, so a ninth field emitted
-# by the script is dropped there and never reaches a caller. That boundary is
-# measured rather than assumed -- see
-# ``test_the_shaped_reader_still_drops_the_container_descriptor`` at the end of
-# this section, which is a pin on a KNOWN GAP and says what closing it costs.
+# ``read_surface_census`` like sections 8 and 8f are. WHEN THIS SECTION WAS
+# WRITTEN the reader's dict literal named eight keys and dropped the ninth the
+# script had just started emitting, so the raw script was the only place the
+# descriptor existed at all. THAT GAP IS CLOSED: the literal names ten keys
+# now and ``test_the_container_descriptor_reaches_the_caller`` at the end of
+# this section pins the descriptor arriving at a caller. The readings below
+# stay raw because they are assertions about the SCRIPT's walk, and taking
+# them through the shaper would make each one an assertion about two things.
 
 #: EIGHT controls in six containers, in document order. INVENTED, and kept out
 #: of ``tests/fixtures/`` for the reason :data:`LABEL_FORM_HTML` is: invented
@@ -1755,7 +1768,8 @@ async def test_the_descriptor_population_is_not_the_counts_block(census_over):
 #
 # The risk this edit carries is the same one section 8b measured for the label
 # routes, and it is not that the walk fails: it is that adding a field to every
-# control row quietly disturbs one of the eight already there, at which point
+# control row quietly disturbs one of the fields already there -- eight of
+# them when this was measured, ten as of the ``checked`` edit -- at which point
 # every census in ``_audit/`` describes an instrument that no longer exists and
 # nothing in the diff says so.
 #
@@ -2023,11 +2037,13 @@ async def test_the_container_descriptor_reaches_the_caller(census_over):
     view because of how it hid.
 
     The descriptor used to stop at ``CENSUS_JS``'s own return value. Two sites
-    dropped it, both enumerating: ``dom.read_surface_census`` shapes each
+    dropped it, both enumerating: ``dom.read_surface_census`` WAS shaping each
     control by building a dict literal with eight named keys, and
-    ``shape.census_aggregate`` merges on an explicit eight-field tuple. The
-    aggregate's docstring said "the merge key is the WHOLE record", which was
-    FALSE and was the sentence that made the drop invisible. Both are fixed.
+    ``shape.census_aggregate`` WAS merging on an explicit eight-field tuple.
+    The aggregate's docstring said "the merge key is the WHOLE record", which
+    was FALSE and was the sentence that made the drop invisible. Both are
+    fixed, and both literals have since taken a further two fields --
+    ``checked`` and ``checked_source`` -- through the same deliberate edit.
 
     THE CHOICE THE OLD PIN EXISTED TO FORCE, made and recorded here. Merging
     is what makes the field worth anything: ``Submit`` in one dialog and
@@ -2220,3 +2236,952 @@ async def test_that_reader_comparison_can_detect_a_changed_row(
         if new != old
     ]
     assert len(moved) == 12
+
+
+# ---------------------------------------------------------------------------
+# 8f. WHETHER A CONTROL IS CHECKED
+# ---------------------------------------------------------------------------
+#
+# THE GAP, and it was named exactly rather than noticed vaguely. The census of
+# ``/mypreferences/d/dark-mode`` was taken twice on 2026-08-31 and both
+# readings were identical: ``forms 0, buttons 1, links 16``, and three
+# controls reading ``Always off``, ``Always on`` and ``Device settings`` --
+# tag ``input``, ``name_source aria-labelledby``, all three. So the three
+# DESTINATIONS were measured and WHICH ONE THE ACCOUNT IS ON was not. The
+# census reported ``disabled`` and had no field for ``checked``, and the
+# preview gate for that capability refuses to render without a measured
+# current state -- correctly, because a gate that cannot say which way it
+# moves a control is not a gate. One missing reading, one blocked capability.
+#
+# NATIVE BEFORE ARIA, and the ordering is the decision in this section rather
+# than a detail of it. It is DELIBERATELY THE OPPOSITE of ``nameOf``, which
+# tries ``aria-label`` first: for a native radio or checkbox ``el.checked`` is
+# the state the browser holds and the state a click would move, while an
+# ``aria-checked`` written on the same element is redundant markup that can go
+# stale against it; for a control with no native state ARIA is the only truth
+# there is. On well-formed markup the two never compete. Where they do
+# compete -- row 8 below, a checked radio also carrying
+# ``aria-checked="false"`` -- the native property is the one that describes
+# what a click would do, and the ARIA-first ordering is derived and shown
+# giving that row the wrong answer.
+#
+# THE TYPE GATE IS THE POINT. ``HTMLInputElement.checked`` is defined for
+# EVERY input type and reads ``false`` on a text box, so an ungated read would
+# report a control that cannot be checked at all as one that is checkable and
+# off. That is measured across this repo rather than argued: the real script
+# finds 29 non-null readings in the 19 committed fixtures and the ungated
+# derivation finds 37, and the 8 extra are all ``input`` controls that are not
+# checkable. It is also the SAME conflation this instrument was caught in
+# earlier the same day, when ``name_source: "none"`` was reading as "this
+# control carries no name" where it meant "this instrument cannot read one".
+# So ``null`` means NOT A CHECKABLE CONTROL and ``false`` means CHECKABLE AND
+# OFF, and no test below lets those two share an answer.
+#
+# WHAT THE CENSUS CANNOT SEE, pinned here because it is a limit of the
+# SELECTOR rather than of this field and a reader costing the dark-mode
+# capability needs it. ``CENSUS_CONTROL_SELECTOR`` has no ``[role="checkbox"]``
+# and no ``[role="radio"]`` arm, so a ``div`` built as either is not censused
+# at all and no ``checked`` reading exists for it. Measured, not assumed --
+# the fixture below ends with such a div and the row count excludes it. The
+# ARIA route is still reachable and is exercised twice below, because it fires
+# on any element the selector DOES admit: a ``button`` or a
+# ``div[role="button"]`` carrying ``aria-checked``.
+#
+# EVERY READING IN THIS SECTION IS TAKEN THROUGH ``read_surface_census``,
+# unlike section 8c's, and the difference is the point: the two fields were
+# added to the reader's dict literal and to the aggregate's merge key in the
+# same edit as the script, so what these tests assert on is what a caller
+# actually receives.
+
+#: TEN censused controls, in document order, each a different route to a
+#: checked state -- plus an eleventh element that is deliberately NOT censused.
+#:
+#: INVENTED, and deliberately not written into ``tests/fixtures/`` for the
+#: reason :data:`LABEL_FORM_HTML` is not: invented markup filed beside real
+#: captures is how invented markup starts being read as evidence. It carries
+#: no slug, no urn, no address and no id shape -- ``test_no_committed_identity``
+#: reads this file. The three radio labels echo the strings measured live on
+#: the dark-mode page so the fixture's purpose is legible; nothing else here
+#: was ever served by LinkedIn, and the markup around them is not a capture of
+#: that page.
+CHECKED_FORM_HTML = (
+    "<!doctype html><html><body><form>"
+    # 0, 1, 2 -- A RADIO GROUP OF THREE with exactly one checked: the dark-mode
+    # shape, which is the whole reason this field exists. Each carries a
+    # ``<label for>`` as well, so the group is named as well as stated and a
+    # row that lost its name would not be mistaken for one that lost its state.
+    '<label for="c-theme-off">Always off</label>'
+    '<input id="c-theme-off" type="radio" name="c-theme">'
+    '<label for="c-theme-on">Always on</label>'
+    '<input id="c-theme-on" type="radio" name="c-theme" checked>'
+    '<label for="c-theme-device">Device settings</label>'
+    '<input id="c-theme-device" type="radio" name="c-theme">'
+    # 3 -- a checkbox, ON.
+    '<label for="c-digest">Weekly digest</label>'
+    '<input id="c-digest" type="checkbox" checked>'
+    # 4 -- a checkbox, OFF. Paired with the one above so "false" is shown
+    # being a reading rather than the default of a field nobody set.
+    '<label for="c-mentions">Mention alerts</label>'
+    '<input id="c-mentions" type="checkbox">'
+    # 5 -- THE TYPE GATE. A text input, which HAS an ``el.checked`` property
+    # reading false. It must come back ``None``.
+    '<label for="c-headline">Headline</label>'
+    '<input id="c-headline" type="text">'
+    # 6 -- THE ARIA ROUTE, on an element with no native checked state at all.
+    # A ``button[role=switch]`` rather than the ``div[role=checkbox]`` the
+    # shape suggests, because the census selector does not admit that div --
+    # see the limit test below, which pins it.
+    '<button role="switch" aria-checked="true">Weekly summary</button>'
+    # 7 -- the third ARIA value. A tri-state "select all" is the canonical
+    # carrier of ``mixed`` and it is the value most likely to be flattened by
+    # a well-meaning ``bool()`` somewhere downstream.
+    '<button role="checkbox" aria-checked="mixed">Select all</button>'
+    # 8 -- THE CONFLICT, and the only row where the ordering can be observed:
+    # a natively checked radio that also carries ``aria-checked="false"``.
+    # Native wins, so this reads true.
+    '<label for="c-conflict">Conflict row</label>'
+    '<input id="c-conflict" type="radio" checked aria-checked="false">'
+    # 9 -- a control with no checked state of either kind. The residue that
+    # makes ``None`` an answer about the control rather than about the reader.
+    "<button>Refresh</button>"
+    # NOT CENSUSED, and it is here to be counted as absent. A div built as a
+    # checkbox matches no arm of CENSUS_CONTROL_SELECTOR, so it yields no row
+    # at all -- it is LAST in document order so that it cannot move any ROW_
+    # index if the selector ever grows an arm that admits it.
+    '<div role="checkbox" aria-checked="true">Div checkbox</div>'
+    "</form></body></html>"
+)
+
+ROW_RADIO_OFF = 0
+ROW_RADIO_ON = 1
+ROW_RADIO_DEVICE = 2
+ROW_CHECKBOX_ON = 3
+ROW_CHECKBOX_OFF = 4
+ROW_TEXT_INPUT = 5
+ROW_ARIA_TRUE = 6
+ROW_ARIA_MIXED = 7
+ROW_NATIVE_BEATS_ARIA = 8
+ROW_NOT_CHECKABLE = 9
+
+#: The three radios of the group, so the "exactly one is on" assertion reads
+#: as a group rather than as three separate rows.
+ROW_THEME_GROUP = (ROW_RADIO_OFF, ROW_RADIO_ON, ROW_RADIO_DEVICE)
+
+#: Every value ``checked_source`` may take. THREE, and this is the
+#: enumeration itself rather than a claim about one -- the sweep at the end of
+#: this section checks the whole fixture directory against it.
+CHECKED_SOURCES = {"native", "aria-checked", "none"}
+
+
+async def _checked_form_rows(census_over) -> list[dict[str, Any]]:
+    """The SHAPED census of :data:`CHECKED_FORM_HTML`, read the production way.
+
+    Through ``read_surface_census`` rather than a bare ``evaluate``: these two
+    fields reach a caller, so the rows asserted on below are the rows a caller
+    receives.
+    """
+
+    async def work(page):
+        return await dom.read_surface_census(page)
+
+    census = await census_over(CHECKED_FORM_HTML, work)
+    rows = census["controls"]
+    assert len(rows) == 10, (
+        f"the fixture yielded {len(rows)} controls, not 10 -- every ROW_ index "
+        "in this section is now pointing at the wrong control."
+    )
+    return rows
+
+
+async def test_exactly_one_radio_of_a_three_state_group_reads_checked(
+    census_over,
+):
+    """THE BLOCKED CAPABILITY, in one assertion.
+
+    Three same-shaped radios, one of them on. Before this field the census
+    could say the dark-mode page carried three destinations and could not say
+    which one the account was set to, and the preview gate for that capability
+    refuses to render without a measured current state.
+    """
+    rows = await _checked_form_rows(census_over)
+    group = [rows[index] for index in ROW_THEME_GROUP]
+    assert [row["checked"] for row in group] == [False, True, False]
+    assert [row["shape"] for row in group] == [
+        "Always off",
+        "Always on",
+        "Device settings",
+    ]
+    # And the state is a reading rather than a default: the two that are off
+    # say ``False``, not ``None``.
+    assert all(row["checked"] is not None for row in group)
+
+
+async def test_a_checkbox_reports_both_of_its_states(census_over):
+    """The other native carrier. Both directions, so ``False`` is shown being
+    read off a checkbox rather than being what the field says when it has
+    nothing to report."""
+    rows = await _checked_form_rows(census_over)
+    assert rows[ROW_CHECKBOX_ON]["checked"] is True
+    assert rows[ROW_CHECKBOX_OFF]["checked"] is False
+
+
+async def test_a_text_input_is_not_checkable_and_says_so_rather_than_false(
+    census_over,
+):
+    """THE TYPE GATE, and the most load-bearing assertion in this section.
+
+    ``HTMLInputElement.checked`` exists on a text input and reads ``false``.
+    Reporting that would say "this control is checkable and it is off" about a
+    control that cannot be checked at all -- the same conflation that made
+    ``name_source: "none"`` mean two different things until it was split. So
+    ``None`` and ``False`` are asserted as DIFFERENT answers here, with ``is``
+    rather than ``==``, because it is ``bool(None)`` that collapses them.
+    """
+    rows = await _checked_form_rows(census_over)
+    text = rows[ROW_TEXT_INPUT]
+    assert text["tag"] == "input"
+    assert text["shape"] == "Headline", (
+        "the premise moved: this row is no longer the text input, so what it "
+        "reports about the type gate proves nothing."
+    )
+    assert text["checked"] is None
+    assert text["checked"] is not False
+    assert text["checked_source"] == "none"
+    # The row that IS a checkable input and off, quoted beside it so the two
+    # answers are visibly different rather than a file apart.
+    assert rows[ROW_CHECKBOX_OFF]["checked"] is False
+
+
+async def test_the_source_says_where_each_reading_came_from(census_over):
+    """``checked_source`` exists for the reason ``name_source`` does: a caller
+    can cost a capability off "this is a native radio" and cannot cost one off
+    "something said it was off". Three values, reported distinctly, on one
+    page."""
+    rows = await _checked_form_rows(census_over)
+    assert rows[ROW_RADIO_ON]["checked_source"] == "native"
+    assert rows[ROW_ARIA_TRUE]["checked_source"] == "aria-checked"
+    assert rows[ROW_NOT_CHECKABLE]["checked_source"] == "none"
+    assert {row["checked_source"] for row in rows} == CHECKED_SOURCES
+
+
+async def test_a_native_state_beats_an_aria_attribute_that_disagrees(
+    census_over,
+):
+    """THE ORDERING, on the only row where it can be observed.
+
+    A radio that is natively checked and also carries ``aria-checked="false"``
+    is a page contradicting itself. The native property wins because it is the
+    one that describes what a click would do; the ARIA-first ordering is
+    derived below and shown reading this row ``False``.
+    """
+    rows = await _checked_form_rows(census_over)
+    row = rows[ROW_NATIVE_BEATS_ARIA]
+    assert row["checked"] is True
+    assert row["checked_source"] == "native"
+
+
+def test_that_conflict_row_really_does_carry_both_states():
+    """THE CONTROL for the test above, which markup carrying only the native
+    state would also pass. Both halves of the contradiction have to be in the
+    fixture or the ordering is not being exercised at all."""
+    assert 'type="radio" checked aria-checked="false"' in CHECKED_FORM_HTML
+
+
+async def test_a_mixed_control_survives_as_the_string_and_is_not_coerced(
+    census_over,
+):
+    """``mixed`` is a third state and it reaches the caller as a string.
+
+    ``bool()`` anywhere on this path would turn it into ``True``, which is a
+    tri-state control reported as fully on. Asserted on the shaped row, which
+    is where such a coercion would most naturally be written.
+    """
+    rows = await _checked_form_rows(census_over)
+    row = rows[ROW_ARIA_MIXED]
+    assert row["checked"] == "mixed"
+    assert isinstance(row["checked"], str)
+    assert row["checked"] is not True
+    assert row["checked_source"] == "aria-checked"
+
+
+async def test_a_control_with_no_checked_state_reports_none(census_over):
+    """The residue. A plain button is not a checkable control and the field
+    says so with the same ``None`` the text input gets -- because they are the
+    same answer: this is not a thing that can be checked."""
+    rows = await _checked_form_rows(census_over)
+    assert rows[ROW_NOT_CHECKABLE]["checked"] is None
+    assert rows[ROW_NOT_CHECKABLE]["checked_source"] == "none"
+
+
+async def test_a_div_built_as_a_checkbox_is_not_censused_at_all(census_over):
+    """A MEASURED LIMIT OF THE SELECTOR, not of this field, and it is pinned
+    because a reader costing the dark-mode capability will otherwise assume
+    the census sees every checkable thing on a page.
+
+    ``CENSUS_CONTROL_SELECTOR`` admits ``input`` and a list of roles that does
+    NOT include ``checkbox`` or ``radio``. So a ``div[role="checkbox"]`` --
+    the shape a framework emits when it builds its own controls -- produces no
+    row, and therefore no ``checked`` reading either. The fixture ends with
+    one and the census returns ten rows, not eleven. Widening the selector is
+    a separate change with its own blast radius on every count already
+    written down.
+    """
+    assert 'role="checkbox" aria-checked="true">Div checkbox' in (
+        CHECKED_FORM_HTML
+    ), "the fixture no longer carries the div, so this limit is untested"
+    assert '[role="checkbox"]' not in dom.CENSUS_CONTROL_SELECTOR
+    assert '[role="radio"]' not in dom.CENSUS_CONTROL_SELECTOR
+    rows = await _checked_form_rows(census_over)
+    assert len(rows) == 10
+    assert "Div checkbox" not in json.dumps(rows)
+
+
+async def test_the_reader_passes_checked_through_untouched(census_over):
+    """WHAT THE READER DOES TO THIS FIELD: nothing.
+
+    Every other string on a control row is shaped and every boolean is
+    coerced. ``checked`` is neither, and the way to show it is to read the raw
+    script and the shaped reader over one page and assert the values are
+    IDENTICAL row for row -- including the ``None`` that a ``bool()`` would
+    turn into ``False`` and the ``"mixed"`` it would turn into ``True``.
+    """
+
+    async def work(page):
+        return (
+            await page.evaluate(dom.CENSUS_JS, _census_cfg()),
+            await dom.read_surface_census(page),
+        )
+
+    raw, shaped = await census_over(CHECKED_FORM_HTML, work)
+    before = [row["checked"] for row in raw["controls"]]
+    after = [row["checked"] for row in shaped["controls"]]
+    assert before == after
+    # Not vacuously: the page carries all four values, so an identity that
+    # held only for booleans would not pass this.
+    assert before == [
+        False,
+        True,
+        False,
+        True,
+        False,
+        None,
+        True,
+        "mixed",
+        True,
+        None,
+    ]
+    # ``checked_source`` is the one of the two that IS defaulted, and the
+    # default only fires on a record that never carried the key -- so on a
+    # live reading it passes through as well.
+    assert [row["checked_source"] for row in raw["controls"]] == [
+        row["checked_source"] for row in shaped["controls"]
+    ]
+
+
+async def test_a_reader_record_with_no_checked_field_still_reads():
+    """The absent-is-a-value discipline, at the reader. A control dict from an
+    older script carries neither key: ``checked`` stays ``None``, which is the
+    honest answer -- nothing was measured, so nothing checkable is claimed --
+    and ``checked_source`` reads the string ``"none"`` rather than ``None``."""
+    shaped = await dom.read_surface_census(
+        FakePage(url=FEED_URL, evaluate_result=_payload([{"tag": "button"}]))
+    )
+    row = shaped["controls"][0]
+    assert row["checked"] is None
+    assert row["checked_source"] == "none"
+
+
+# ---------------------------------------------------------------------------
+# 8g. The three derivations, and what each one gets wrong
+# ---------------------------------------------------------------------------
+#
+# Every claim in 8f rests on one of three decisions -- that the field is read
+# at all, that the native read is gated on the input TYPE, and that native is
+# tried before ARIA. Each is derived here and shown producing a different and
+# WRONG reading, so none of the assertions above is a test that could not have
+# failed.
+
+#: The two record fields, exactly as ``CENSUS_JS`` spells them and INCLUDING
+#: the comma before them, so the derived object literal is still valid JS.
+#: The helper stays defined and its result assigned-and-unused, which is the
+#: minimal neutralisation: the derived script differs from the real one in the
+#: keys on the record and in nothing else.
+CHECKED_CALL = (
+    ",\n      checked: state.checked,\n      checked_source: state.source"
+)
+
+#: The type gate, and the ungated read that replaces it. Same return, same
+#: source string, one condition fewer -- so what the derived script changes is
+#: WHICH inputs get a native reading and nothing else.
+CHECKED_TYPE_GATE = (
+    "      const type = String(el.type || '').toLowerCase();\n"
+    "      if (type === 'radio' || type === 'checkbox') {\n"
+    "        return { checked: el.checked === true, source: 'native' };\n"
+    "      }\n"
+)
+CHECKED_UNGATED = (
+    "        return { checked: el.checked === true, source: 'native' };\n"
+)
+
+#: The native branch's gate, and the ARIA-FIRST spelling of it. Standing the
+#: native branch down wherever an ``aria-checked`` exists is what an ARIA-first
+#: chain does, and it is one line rather than a re-ordered copy of the helper
+#: -- so the derivation cannot drift away from the real script without the
+#: assertion below catching it.
+CHECKED_NATIVE_GATE = "if (tag === 'input') {"
+CHECKED_ARIA_FIRST_GATE = (
+    "if (tag === 'input' && !attrOf(el, 'aria-checked').trim()) {"
+)
+
+
+def _census_without_checked() -> str:
+    derived = dom.CENSUS_JS.replace(CHECKED_CALL, "", 1)
+    assert derived != dom.CENSUS_JS, (
+        "CHECKED_CALL no longer appears in CENSUS_JS, so this derivation is "
+        "the real script wearing another name and every comparison below "
+        "certifies nothing. Repoint the anchor at the checked call site."
+    )
+    return derived
+
+
+def _census_without_the_type_gate() -> str:
+    derived = dom.CENSUS_JS.replace(CHECKED_TYPE_GATE, CHECKED_UNGATED, 1)
+    assert derived != dom.CENSUS_JS, (
+        "CHECKED_TYPE_GATE no longer appears in CENSUS_JS, so the gate cannot "
+        "be removed by this derivation and the test below is no longer "
+        "showing an ungated read getting a text input wrong."
+    )
+    return derived
+
+
+def _census_reading_aria_first() -> str:
+    derived = dom.CENSUS_JS.replace(
+        CHECKED_NATIVE_GATE, CHECKED_ARIA_FIRST_GATE, 1
+    )
+    assert derived != dom.CENSUS_JS, (
+        "CHECKED_NATIVE_GATE no longer appears in CENSUS_JS, so the ordering "
+        "cannot be inverted by this derivation and native-before-aria is no "
+        "longer shown mattering."
+    )
+    return derived
+
+
+async def test_deleting_the_checked_call_site_takes_the_readings_with_it(
+    census_over,
+):
+    """MUTATION CHECK, first of three. With the call site gone both keys are
+    gone entirely, so every assertion in 8f rests on the field and not on
+    something the browser would have returned anyway."""
+    derived = _census_without_checked()
+
+    async def work(page):
+        return await page.evaluate(derived, _census_cfg())
+
+    raw = await census_over(CHECKED_FORM_HTML, work)
+    assert len(raw["controls"]) == 10
+    assert all("checked" not in row for row in raw["controls"])
+    assert all("checked_source" not in row for row in raw["controls"])
+
+
+async def test_an_ungated_native_read_reports_a_text_input_as_unchecked(
+    census_over,
+):
+    """MUTATION CHECK, second of three, AND THE EVIDENCE THE GATE EARNS ITS
+    PLACE.
+
+    ``el.checked`` on a text input is ``false``, so the ungated derivation
+    reports the ``Headline`` field as a checkable control that is off. The
+    real script reports ``None``. The two readings are quoted side by side
+    because the difference between them is the whole argument for the gate,
+    and it is a difference a reader costing a capability would act on.
+    """
+    derived = _census_without_the_type_gate()
+
+    async def work(page):
+        return await page.evaluate(derived, _census_cfg())
+
+    raw = await census_over(CHECKED_FORM_HTML, work)
+    ungated = raw["controls"][ROW_TEXT_INPUT]
+    assert ungated["checked"] is False
+    assert ungated["checked_source"] == "native"
+    live = (await _checked_form_rows(census_over))[ROW_TEXT_INPUT]
+    assert live["checked"] is None
+
+
+async def test_reading_aria_first_gets_the_conflict_row_wrong(census_over):
+    """MUTATION CHECK, third of three, and the one that matters most.
+
+    An ARIA-first ordering passes every other test in 8f -- the radio group,
+    the checkboxes, the type gate, ``mixed``, the sources -- because only one
+    control in the fixture carries both states. Here it is shown reading that
+    control ``False`` off a stale attribute where the real script reads
+    ``True`` off the property a click would move.
+    """
+    derived = _census_reading_aria_first()
+
+    async def work(page):
+        return await page.evaluate(derived, _census_cfg())
+
+    raw = await census_over(CHECKED_FORM_HTML, work)
+    row = raw["controls"][ROW_NATIVE_BEATS_ARIA]
+    assert row["checked"] is False
+    assert row["checked_source"] == "aria-checked"
+    live = (await _checked_form_rows(census_over))[ROW_NATIVE_BEATS_ARIA]
+    assert live["checked"] is True
+    assert live["checked_source"] == "native"
+
+
+# ---------------------------------------------------------------------------
+# 8h. The merge key, and why this field is in it where ``container`` is not
+# ---------------------------------------------------------------------------
+#
+# ``census_aggregate`` merges control records into counted rows on an
+# ENUMERATED key, so a field that is not named in it is dropped in silence --
+# which is exactly what happened to ``container`` on the day that was added.
+# The choice for ``checked`` went the other way from ``container`` and the
+# axis is the reason: a container is a PLACE and a checked flag is a STATE.
+# ``disabled`` and ``aria_expanded`` are states and were already in the key,
+# so state was never the axis the key collapsed; two controls with the same
+# name in different states are two different controls, and merging them
+# destroys the only thing this field was added to report.
+#
+# The hazard that kept ``container`` out was measured for this field too and
+# did not appear: keying on the container would have split a readable shape
+# seen once per container into two rows of count 1, and ``census_redact_rare``
+# fires at exactly ``count == 1``, so the field would have turned readable
+# output into ``<redacted>`` in order to report itself. The sweep in 8i checks
+# every committed fixture for exactly that and finds none.
+
+#: THREE RADIOS THAT DIFFER ONLY IN THEIR STATE -- same tag, same role, same
+#: label text, so the same shape and the same eight pre-existing key fields.
+#: Without the state in the key they are one row of count 3, which is the page
+#: reported as "three identical radios" when what it carries is a choice with
+#: one option taken. INVENTED, same rule as the fixture above.
+CHECKED_MERGE_HTML = (
+    "<!doctype html><html><body><form>"
+    '<label for="c-pick-a">Theme choice</label>'
+    '<input id="c-pick-a" type="radio" name="c-pick" checked>'
+    '<label for="c-pick-b">Theme choice</label>'
+    '<input id="c-pick-b" type="radio" name="c-pick">'
+    '<label for="c-pick-c">Theme choice</label>'
+    '<input id="c-pick-c" type="radio" name="c-pick">'
+    "</form></body></html>"
+)
+
+
+def _without_checked(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The same records with both new keys lifted off.
+
+    ``census_aggregate`` reads them with ``.get``, so records that lack them
+    key on ``None``/``"none"`` for every row -- which makes those two slots
+    CONSTANT and the aggregation identical to the eight-field key that ran
+    before this edit. That is what makes it a usable stand-in for "before".
+    """
+    return [
+        {k: v for k, v in row.items() if k not in ("checked", "checked_source")}
+        for row in rows
+    ]
+
+
+async def _merge_fixture_rows(census_over) -> list[dict[str, Any]]:
+    async def work(page):
+        return await dom.read_surface_census(page)
+
+    census = await census_over(CHECKED_MERGE_HTML, work)
+    rows = census["controls"]
+    assert len(rows) == 3, f"the fixture yielded {len(rows)} controls, not 3"
+    assert {row["shape"] for row in rows} == {"Theme choice"}, (
+        "the premise moved: the three radios no longer share one shape, so "
+        "keeping them apart proves nothing about the state field."
+    )
+    return rows
+
+
+async def test_three_same_shaped_radios_do_not_merge_into_one_row(census_over):
+    """THE TEST THAT JUSTIFIES THE KEY CHANGE.
+
+    Three controls identical in every field the key held before -- shape, tag,
+    role, ``name_source``, ``has_href``, ``href_shape``, ``aria_expanded``,
+    ``disabled`` -- and different in exactly one: which of them is on. They
+    come back as two rows, and the counts say one is on and two are off. That
+    is the dark-mode page's answer, and without the state in the key it is a
+    single row of count 3.
+    """
+    rows = await _merge_fixture_rows(census_over)
+    merged, _hrefs = shape.census_aggregate(rows)
+    assert len(merged) == 2, merged
+    by_state = {row["checked"]: row for row in merged}
+    assert set(by_state) == {True, False}
+    assert by_state[True]["count"] == 1
+    assert by_state[False]["count"] == 2
+    assert {row["shape"] for row in merged} == {"Theme choice"}
+    assert {row["checked_source"] for row in merged} == {"native"}
+
+
+async def test_without_the_state_in_the_key_they_are_one_row_of_three(
+    census_over,
+):
+    """THE CONTROL for the test above, and the "before" it is measured
+    against. The same three records with the two fields lifted off key on a
+    constant, which is what the eight-field tuple did to them, and they
+    collapse into the single row this edit exists to prevent."""
+    rows = await _merge_fixture_rows(census_over)
+    merged, _hrefs = shape.census_aggregate(_without_checked(rows))
+    assert len(merged) == 1, merged
+    assert merged[0]["count"] == 3
+    assert merged[0]["shape"] == "Theme choice"
+    assert merged[0]["checked"] is None
+    assert merged[0]["checked_source"] == "none"
+
+
+async def test_the_split_does_not_cost_the_row_its_name(census_over):
+    """THE HAZARD THAT KEPT ``container`` OUT OF THE KEY, checked on the
+    fixture that splits.
+
+    ``census_redact_rare`` fires at exactly ``count == 1``, so a split that
+    drops a readable shape to a count of one can blank it. Here the shape that
+    ends up at count 1 is still readable afterwards -- because the cap looks
+    for a run of capitalised words and a sentence-case label is not one. This
+    is the property the 19-fixture sweep below asserts across the repo; it is
+    asserted on the splitting fixture too, because the sweep would also pass
+    if nothing in the repo split at all.
+    """
+    rows = await _merge_fixture_rows(census_over)
+    merged, _hrefs = shape.census_aggregate(rows)
+    singleton = [row for row in merged if row["count"] == 1]
+    assert len(singleton) == 1
+    assert singleton[0]["shape"] == "Theme choice"
+    assert singleton[0]["shape"] != shape.CENSUS_REDACTED
+
+
+def test_the_merge_key_carries_both_fields_onto_the_row():
+    """Both fields come back ON the row, which is what makes the key
+    inspectable from the output rather than only from the source. Asserted on
+    hand-built records so it does not depend on a browser."""
+    rows, _hrefs = shape.census_aggregate(
+        [
+            _control(shape="Follow", checked=True, checked_source="native"),
+            _control(shape="Follow", checked=False, checked_source="native"),
+            _control(shape="Follow", checked=False, checked_source="native"),
+        ]
+    )
+    assert len(rows) == 2
+    assert {(row["checked"], row["count"]) for row in rows} == {
+        (True, 1),
+        (False, 2),
+    }
+    assert all(row["checked_source"] == "native" for row in rows)
+
+
+def test_two_readings_of_the_same_state_from_different_sources_stay_apart():
+    """``checked_source`` is in the key as well as ``checked``, and this is
+    what that buys: a ``True`` read off a native radio and a ``True`` read off
+    an ``aria-checked`` attribute are different-quality answers, and merging
+    them would publish the weaker one under the stronger one's count."""
+    rows, _hrefs = shape.census_aggregate(
+        [
+            _control(shape="Toggle", checked=True, checked_source="native"),
+            _control(
+                shape="Toggle", checked=True, checked_source="aria-checked"
+            ),
+        ]
+    )
+    assert len(rows) == 2
+    assert {row["checked_source"] for row in rows} == {
+        "native",
+        "aria-checked",
+    }
+
+
+def test_a_record_with_no_checked_field_at_all_still_aggregates():
+    """A record from an older script -- or any caller building one by hand --
+    carries neither key. It is counted as ``None``/``"none"``, which is the
+    honest answer: nothing was measured, so nothing is claimed."""
+    rows, _hrefs = shape.census_aggregate([{"shape": "Edit", "tag": "button"}])
+    assert rows[0]["checked"] is None
+    assert rows[0]["checked_source"] == "none"
+    assert rows[0]["count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# 8i. What the field does to the whole repo, measured
+# ---------------------------------------------------------------------------
+#
+# The risk is the one sections 8b and 8d measured for the two edits before
+# this: not that the field fails to fire, but that it disturbs a reading
+# already written into ``_audit/``, at which point those captures describe an
+# instrument that no longer exists and nothing in the diff says so. This edit
+# carries a SECOND risk the other two did not, because it touches the merge
+# key -- a split can drop a row to ``count == 1``, where
+# ``census_redact_rare`` blanks capitalised runs, so the field could destroy
+# readable output in order to report itself. Both are measured over all 19
+# committed fixtures, 537 controls, on 2026-08-31.
+#
+# WHAT THE SWEEP FOUND:
+#
+#   * ZERO pre-existing fields move. Same names, same sources, same counts.
+#   * 29 of the 537 controls carry a non-null ``checked``, all of them
+#     ``native``, all of them on ``input`` controls, in five files: one
+#     unchecked input in each of three job-detail captures, twelve in the
+#     empty job tracker and fourteen in the tracker row.
+#   * TWO fixtures gain a row when the key changes, and both gain exactly
+#     one. In each, a single ``<opaque>`` row of count 8 -- the tracker's
+#     filter checkboxes, indistinguishable before -- splits by state: 6 off
+#     and 2 on in the empty tracker, 4 and 4 in the row capture. That split
+#     IS the capability, on a real committed capture rather than on invented
+#     markup.
+#   * NOT ONE readable shape becomes ``<redacted>`` in any fixture. That is
+#     the hazard that kept ``container`` out of the key, and it does not
+#     appear for this field.
+
+#: The two readings the fixtures carry, named so the map below reads as two
+#: kinds of control rather than as twenty-nine rows.
+CHECKBOX_ON = ("input", True, "native")
+CHECKBOX_OFF = ("input", False, "native")
+
+#: EVERY control in the fixture directory that carries a checked state, file
+#: by file and in document order, measured 2026-08-31. Pinned as the sequence
+#: rather than as a tally, so the field cannot stop firing in one place and
+#: start in another while a count stays flat.
+FIXTURE_CHECKED = {
+    "job_detail.html": [CHECKBOX_OFF],
+    "job_detail_following_hydrated.html": [CHECKBOX_OFF],
+    "job_detail_hydrated.html": [CHECKBOX_OFF],
+    "jobs_tracker_empty.html": (
+        [CHECKBOX_ON] + [CHECKBOX_OFF] * 5 + [CHECKBOX_ON] + [CHECKBOX_OFF] * 5
+    ),
+    "jobs_tracker_row.html": (
+        [CHECKBOX_ON] * 2
+        + [CHECKBOX_OFF] * 4
+        + [CHECKBOX_ON] * 2
+        + [CHECKBOX_OFF] * 6
+    ),
+}
+
+#: Controls carrying a non-null ``checked`` across the whole directory, and
+#: the denominator it is 29 OUT OF. Both pinned: a sweep whose size nobody
+#: recorded can shrink, and a count with no denominator cannot be read.
+FIXTURE_CHECKED_TOTAL = 29
+
+#: What the ungated derivation reads instead, over the same 537 controls. The
+#: EIGHT-control gap is the type gate's whole value, expressed as a number
+#: rather than as an argument: eight ``input`` controls in this repo are not
+#: checkable and would be reported as checkable-and-off without it.
+FIXTURE_CHECKED_UNGATED_TOTAL = 37
+
+#: EVERY aggregate row the new key splits, file by file. The key is
+#: ``(shape, count before)`` and the value is the counts by state after.
+#: Pinned rather than summarised because the split is the capability: before,
+#: one row said the tracker carried eight identical filter checkboxes; after,
+#: two rows say how many of them are on.
+FIXTURE_KEY_SPLIT = {
+    "jobs_tracker_empty.html": {(shape.CENSUS_OPAQUE, 8): {False: 6, True: 2}},
+    "jobs_tracker_row.html": {(shape.CENSUS_OPAQUE, 8): {True: 4, False: 4}},
+}
+
+
+def _readable(rows: list[dict[str, Any]]) -> set:
+    """The shapes in an aggregate that actually say something."""
+    return {
+        row["shape"]
+        for row in rows
+        if row["shape"] not in ("", shape.CENSUS_REDACTED)
+    }
+
+
+def _key_identity(row: dict[str, Any]) -> tuple:
+    """A row's key WITHOUT the two new fields, so a row from each side of the
+    edit can be matched against the other."""
+    return (
+        row["shape"],
+        row["tag"],
+        row["role"],
+        row["name_source"],
+        row["has_href"],
+        row["href_shape"],
+        row["aria_expanded"],
+        row["disabled"],
+    )
+
+
+def _key_split(rows: list[dict[str, Any]]) -> tuple[dict, set]:
+    """Aggregate one page's records twice -- with the new key and without it --
+    and report what changed.
+
+    Returns the split rows, keyed ``(shape, count before)``, and the set of
+    readable shapes that the split LOST to redaction. The second value is the
+    hazard check and it is empty everywhere in this repo.
+    """
+    after, _after_hrefs = shape.census_aggregate(rows)
+    before, _before_hrefs = shape.census_aggregate(_without_checked(rows))
+    grouped: dict[tuple, list[dict[str, Any]]] = {}
+    for row in after:
+        grouped.setdefault(_key_identity(row), []).append(row)
+    split = {}
+    for row in before:
+        mates = grouped.get(_key_identity(row), [])
+        if len(mates) == 1 and mates[0]["count"] == row["count"]:
+            continue
+        split[(row["shape"], row["count"])] = {
+            mate["checked"]: mate["count"] for mate in mates
+        }
+    return split, _readable(before) - _readable(after)
+
+
+async def _checked_sweep(census_over) -> dict[str, Any]:
+    """Run every measurement in this section over every committed fixture.
+
+    Returns the pre-existing field movers, the number of controls read -- so a
+    shrinking sweep is visible -- the checked readings file by file, the key
+    splits, and any readable shape lost to redaction. Never a name: a sweep
+    that printed accessible names would put them in a CI log, which is what
+    this whole file exists to prevent.
+    """
+    fixtures = sorted(FIXTURE_DIR.glob("*.html"))
+    assert len(fixtures) >= 19, "the fixture directory shrank; this proof did too"
+    derived = _census_without_checked()
+    moved_files: dict[str, list[dict[str, Any]]] = {}
+    readings: dict[str, list[tuple]] = {}
+    splits: dict[str, dict] = {}
+    lost: dict[str, set] = {}
+    sources: set = set()
+    total = 0
+
+    async def shaped(page):
+        return await dom.read_surface_census(page)
+
+    for path in fixtures:
+        html = _fixture_text(path)
+        moved, live = await _pre_existing_field_movement(
+            census_over, html, derived
+        )
+        if moved:
+            moved_files[path.name] = moved
+        total += len(live["controls"])
+        rows = await census_over(html, shaped)
+        found = [
+            (row["tag"], row["checked"], row["checked_source"])
+            for row in rows["controls"]
+            if row["checked"] is not None
+        ]
+        sources.update(row["checked_source"] for row in rows["controls"])
+        if found:
+            readings[path.name] = found
+        split, blanked = _key_split(rows["controls"])
+        if split:
+            splits[path.name] = split
+        if blanked:
+            lost[path.name] = blanked
+    return {
+        "moved": moved_files,
+        "total": total,
+        "readings": readings,
+        "splits": splits,
+        "lost": lost,
+        "sources": sources,
+    }
+
+
+async def test_no_committed_fixture_moves_a_pre_existing_field_under_checked(
+    census_over,
+):
+    """THE INVARIANT THAT DECIDES WHETHER OLD CAPTURES ARE STILL TRUE.
+
+    Every field a census already published reads identically with the checked
+    read and without it, on every control of every committed fixture, and the
+    counts block is compared too inside the comparator. Nothing already
+    written down is contradicted by this edit; two fields were added.
+    """
+    swept = await _checked_sweep(census_over)
+    assert swept["moved"] == {}
+    assert swept["total"] == FIXTURE_CONTROLS, (
+        f"the sweep read {swept['total']} controls, not {FIXTURE_CONTROLS}. A "
+        "fixture changed, so every number pinned in this section was measured "
+        "against a directory that no longer exists -- re-measure them rather "
+        "than moving this one."
+    )
+
+
+async def test_what_the_checked_field_reads_across_the_repo_is_pinned(
+    census_over,
+):
+    """The receipt: what carries a state, where, and how much of the repo was
+    read to find out. Pinned per file and in document order rather than
+    totalled, so the field cannot stop firing on the tracker and start firing
+    somewhere new while a count stays flat."""
+    swept = await _checked_sweep(census_over)
+    assert swept["readings"] == FIXTURE_CHECKED
+    assert (
+        sum(len(rows) for rows in swept["readings"].values())
+        == FIXTURE_CHECKED_TOTAL
+    )
+    assert swept["total"] == FIXTURE_CONTROLS
+    # And every source in the repo is one of the three this section
+    # enumerates, which is the completeness claim made checkable rather than
+    # asserted in prose.
+    assert swept["sources"] <= CHECKED_SOURCES
+
+
+async def test_the_key_split_is_pinned_and_costs_no_readable_shape(
+    census_over,
+):
+    """THE SECOND HALF OF THE SWEEP, and the one the key change had to earn.
+
+    Two fixtures gain exactly one row, and in both the row that splits is the
+    tracker's block of eight indistinguishable filter checkboxes coming apart
+    by state. NOT ONE readable shape is lost to ``<redacted>`` anywhere in the
+    directory -- which is the hazard that kept ``container`` out of the key,
+    checked for this field and absent.
+    """
+    swept = await _checked_sweep(census_over)
+    assert swept["lost"] == {}
+    assert swept["splits"] == FIXTURE_KEY_SPLIT
+
+
+async def test_that_checked_sweep_can_detect_movement(census_over):
+    """THE CONTROL. A sweep that could not have failed proves nothing, and
+    this one makes three claims that each need a way of going red.
+
+    It is run over a COMMITTED fixture rather than invented markup, on the
+    same file the sweep gives a clean bill of health. ``jobs_tracker_empty``
+    is where section 8b measured twelve inputs moving under the label routes
+    and where this section measures twelve checked readings.
+    """
+    html = _fixture_text(FIXTURE_DIR / "jobs_tracker_empty.html")
+    # 1. The comparator can see a moved field: silent for the checked
+    #    derivation, twelve rows for the label derivation.
+    quiet, _live = await _pre_existing_field_movement(
+        census_over, html, _census_without_checked()
+    )
+    assert quiet == []
+    loud, _live = await _pre_existing_field_movement(
+        census_over, html, _census_without_label_routes()
+    )
+    assert len(loud) == 12
+
+    # 2. The count of 29 is a measurement of the TYPE GATE and not of nothing.
+    #    The ungated derivation reads a native state off eight more controls
+    #    across the directory, every one of them an input that cannot be
+    #    checked.
+    async def ungated(page):
+        raw = await page.evaluate(
+            _census_without_the_type_gate(), _census_cfg()
+        )
+        return sum(1 for row in raw["controls"] if row["checked"] is not None)
+
+    total = 0
+    for path in sorted(FIXTURE_DIR.glob("*.html")):
+        total += await census_over(_fixture_text(path), ungated)
+    assert total == FIXTURE_CHECKED_UNGATED_TOTAL
+    assert total - FIXTURE_CHECKED_TOTAL == 8
+
+    # 3. The split detector can see a split. The merge fixture in 8h splits
+    #    one row into two; a detector that returned {} everywhere would give
+    #    the sweep above the same clean answer it gives now.
+    async def shaped(page):
+        return await dom.read_surface_census(page)
+
+    rows = await census_over(CHECKED_MERGE_HTML, shaped)
+    split, blanked = _key_split(rows["controls"])
+    assert split == {("Theme choice", 3): {True: 1, False: 2}}
+    assert blanked == set()

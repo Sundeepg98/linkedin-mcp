@@ -2400,14 +2400,23 @@ FILTER_SETTLE_MS = 2_000
 #: names, same ``name_source``, same counts, same order. Captures already in
 #: ``_audit/`` are therefore still true readings of this instrument.
 #:
-#: WHAT IT DOES NOT YET REACH, stated here because the gap is invisible from
-#: the call site. ``read_surface_census`` below shapes each row by building a
-#: dict literal that ENUMERATES eight keys, and ``shape.census_aggregate``
-#: merges rows on an explicit eight-field tuple whose docstring calls itself
-#: "the WHOLE record". Both drop an unknown ninth field in silence, so this
-#: descriptor stops at this script's own return value and no tool output
-#: carries it yet. Closing that is two edits in two files this comment does
-#: not own; until they land, the field is readable only by running the script.
+#: WHERE A NEW FIELD GOES, and this paragraph said the OPPOSITE until
+#: 2026-08-31: it read "WHAT IT DOES NOT YET REACH ... this descriptor stops
+#: at this script's own return value and no tool output carries it yet". That
+#: was true of ``container`` for as long as it took to close and is true of
+#: nothing here now -- but the MECHANISM it described is permanent, which is
+#: why the paragraph is corrected rather than deleted. BOTH DOWNSTREAM SITES
+#: ENUMERATE THEIR FIELDS: ``read_surface_census`` below shapes each row by
+#: building a dict literal that NAMES TEN KEYS, and ``shape.census_aggregate``
+#: merges rows on an explicit TEN-FIELD tuple. A field this script emits and
+#: neither of those names is dropped in SILENCE -- which is exactly what
+#: happened to ``container`` on the day it was added, with the aggregate's
+#: docstring calling itself "the WHOLE record" as the sentence that made the
+#: drop invisible. ``checked`` and ``checked_source`` were added to both sites
+#: in the same edit as this one, so the census tool's rows carry them. THE TWO
+#: COUNTS IN THIS PARAGRAPH ARE THE THING TO RE-CHECK when the next field is
+#: added here; a stale count in the comment a reader consults to learn how
+#: many fields there are is this module's most-repeated defect.
 CENSUS_JS = """
 (cfg) => {
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
@@ -2485,6 +2494,31 @@ CENSUS_JS = """
     return containerKind(found) + '#' + index;
   };
 
+  // NATIVE BEFORE ARIA, and the order is deliberate rather than incidental:
+  // it is the OPPOSITE of nameOf above, which tries aria-label first. On a
+  // native radio or checkbox el.checked is the state the browser holds and
+  // the state a click would move, and an aria-checked written beside it is
+  // redundant markup that can go stale; on a div[role="radio"] there is no
+  // native state and ARIA is the only truth. THE TYPE GATE is the point, not
+  // a detail: HTMLInputElement.checked is defined for every input type and
+  // reads false on a text box, so an ungated read would report every text
+  // field as "unchecked" -- not-checkable reported as checkable-and-off.
+  // null means NOT A CHECKABLE CONTROL; false means CHECKABLE AND OFF.
+  const checkedOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const type = String(el.type || '').toLowerCase();
+      if (type === 'radio' || type === 'checkbox') {
+        return { checked: el.checked === true, source: 'native' };
+      }
+    }
+    const aria = attrOf(el, 'aria-checked').trim().toLowerCase();
+    if (aria === 'true') return { checked: true, source: 'aria-checked' };
+    if (aria === 'false') return { checked: false, source: 'aria-checked' };
+    if (aria === 'mixed') return { checked: 'mixed', source: 'aria-checked' };
+    return { checked: null, source: 'none' };
+  };
+
   const controls = [];
   let nodes;
   try { nodes = document.querySelectorAll(cfg.controlSelector); } catch (e) { nodes = []; }
@@ -2493,6 +2527,7 @@ CENSUS_JS = """
     const href = attrOf(el, 'href');
     const expanded = attrOf(el, 'aria-expanded');
     const ariaDisabled = attrOf(el, 'aria-disabled');
+    const state = checkedOf(el);
     controls.push({
       tag: (el.tagName || '').toLowerCase(),
       role: attrOf(el, 'role') || null,
@@ -2502,7 +2537,9 @@ CENSUS_JS = """
       href: href,
       aria_expanded: expanded ? expanded : null,
       disabled: el.disabled === true || ariaDisabled === 'true',
-      container: containerOf(el)
+      container: containerOf(el),
+      checked: state.checked,
+      checked_source: state.source
     });
     if (controls.length >= cfg.maxControls) break;
   }
@@ -2593,14 +2630,31 @@ async def read_surface_census(
                 "href_shape": href_shape,
                 "aria_expanded": control.get("aria_expanded"),
                 "disabled": bool(control.get("disabled")),
-                # WHICH CONTAINER, as a SHAPE. Carried from 2026-08-31, and
-                # the dict literal above is why it needed a deliberate edit:
-                # eight named keys carry eight fields and silently drop a
-                # ninth. ``str()`` with a ``none`` default rather than the raw
+                # WHICH CONTAINER, as a SHAPE. Carried from 2026-08-31,
+                # and this literal is why it needed a deliberate edit: the
+                # keys are NAMED, so a field the script emits and this dict
+                # does not name is dropped in silence -- which is what
+                # happened to this one on the day it was added. Ten keys are
+                # named now. ``str()`` with a ``none`` default rather than the
                 # value, so a control from an older script that never emitted
                 # the field reads ``none`` instead of ``None`` -- the same
                 # absent-is-a-value discipline the rest of this reader keeps.
                 "container": str(control.get("container") or "none"),
+                # WHETHER IT IS CHECKED, carried from 2026-08-31, and it
+                # passes through UNSHAPED AND UNCOERCED on purpose. The value
+                # is ``True``, ``False``, the string ``"mixed"`` or ``None``,
+                # and ``bool()`` here would turn the ``None`` into ``False``
+                # -- which is the conflation the field was built to refuse:
+                # ``None`` means the control is NOT CHECKABLE and ``False``
+                # means it is checkable and OFF. A shaper would also flatten
+                # ``"mixed"`` to ``True``.
+                "checked": control.get("checked"),
+                # The SOURCE gets the same ``str(... or "none")`` default
+                # ``container`` uses, for the same reason: a record from an
+                # older script that never emitted the key reads ``"none"``
+                # rather than ``None``, so absent and unknown wear one string
+                # instead of two.
+                "checked_source": str(control.get("checked_source") or "none"),
             }
         )
 
