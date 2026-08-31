@@ -2,7 +2,7 @@
 # mutation class still refuses
 
 Date 2026-08-31. Repo `linkedin`, branch `master`. Baseline `fbe2aef`, suite
-2267 passed / 1 failed. Final `7e7c728`+, suite **2301 passed, 0 failed**.
+2267 passed / 1 failed. Final `64e655c`, suite **2306 passed, 0 failed**.
 
 **No `confirm_token` was used, by anyone, at any point. No write was
 performed. No third party's profile was loaded. The messaging badge was not
@@ -392,17 +392,48 @@ both are measured:**
    this server. A gate that can name a field and cannot restore it is not a
    gate this design opens.
 
-**AND ONE DEFECT FOUND IN THAT INSTRUMENT, worth its own line.** The tool
+**AND ONE DEFECT FOUND IN THAT INSTRUMENT, FIXED IN `58f69ec`.** The tool
 promises **"LABELS, NEVER VALUES"** and it published a VALUE: the headline
-control is a `div[role=textbox]` whose accessible name is derived from its own
-text content, so the answer carried his headline verbatim. The three layers
-the previous wave built -- a script scan for `el.value`, the field dict's
-named keys, a JSON sweep -- **none of them covers a control whose NAME IS ITS
-CONTENT.** The harm here is nil (it is his own headline, already public on his
-profile) and the CLAIM is false, which is exactly the class of finding this
-repository keeps making about its own docstrings. **NOT FIXED IN THIS WAVE**
-and named here rather than left: the fix is to report a contenteditable's name
-as a shape rather than verbatim, and it wants its own slice.
+control is a `div[role=textbox]` with no aria-label, no label-for and no
+title, so its accessible name resolved through the LAST route in the name
+chain -- the element's own text. For a contenteditable that text IS the value,
+and the answer carried his headline verbatim.
+
+**WHY THREE LAYERS OF GUARD ALL PASSED, and it is the transferable half.**
+Each was built against the PROPERTY route: a scan of the injected script for a
+value read, the field dict's named keys, and a JSON sweep of the whole answer.
+A control whose NAME IS ITS CONTENT is a fourth route none of them covers --
+and **no fixture in that suite had a contenteditable in it**, so there was
+nothing for any of the three to catch. The JSON sweep in particular could only
+ever look for values it had itself planted.
+
+The harm is nil -- his own headline, already public on his profile -- and the
+CLAIM was false, which is the class of finding this repository keeps making
+about its own docstrings.
+
+**REFUSED IN THE PAGE, not shaped in Python**, for the reason
+`INVITE_NEEDLE_JS` does its comparison there: a value that reaches this
+process can reach a traceback or a log line. The control now returns
+`<content>` with `name_source: "content"` -- a DIFFERENT answer from `none`,
+which means no name was found; this one HAS a name and it is withheld.
+
+**GATED ON EDITABLE, NOT ON THE `text` ROUTE**, and the control for that
+shipped with it: a `<button>` is named by its own text too, and for a button
+that text is a LABEL. Gating the route would have blanked every one of them
+and taken the ANCHOR with it, since the container is found by the control
+named `Save`. The over-gating mutation fails with `no_anchor`, which is that
+exactly.
+
+**THE CENSUS SHARES THAT NAME CHAIN AND WAS DELIBERATELY NOT CHANGED.** Its
+contract is SHAPES rather than labels and its gate is ON, so an editable's
+content there already meets `census_shape`. Changing it would move published
+shapes without keeping a promise that was made.
+
+**AND WHAT IT COSTS IS THE INTERESTING HALF:** a field's current value is
+exactly what would make a change REVERTIBLE, which is one of the two things
+still blocking #4. Withholding it keeps the promise and leaves that blocker
+standing. Returning it would widen this tool's contract -- and this tool
+exists BECAUSE the operator ruled one narrow widening, so a second is his.
 
 ### #2: the item-key gap and the comment box
 
@@ -661,10 +692,16 @@ missing.
 
     baseline   fbe2aef   suite 2267 passed, 1 failed (theirs -- since fixed
                          by jobcore-paths at dcf0a68/76667d4/2367b83)
-    3b78dd6    feat(writes): update_setting performs
+    3b78dd6    feat(writes): update_setting performs -- the first of the eight
+                             to get a surface
     0729201    fix(grants): the TTL bounded use, not holding
-    7e7c728    fix(activity): the live profile names its owner in the title
-    final      suite 2301 passed, 0 failed
+    7e7c728    fix(activity): the live profile names its owner in the title,
+                              and in nothing else
+    58f69ec    fix(editor): "LABELS, NEVER VALUES" was false on the one
+                            control it mattered on  (+ this audit)
+    64e655c    docs(readme): the cannot-do list named four capabilities that
+                              ship
+    final      suite 2306 passed, 0 failed
 
     _state/session.json
       sha256(first 32)  f0892e35688868faef6a3525e54b93e4
@@ -684,10 +721,35 @@ missing.
     tools refused by the harness  2 (census article_composer,
                                   census messaging_compose) -- recorded,
                                   NOT routed around
-    mutations run                 22, every new check shown failing at the
-                                  one it catches
+    mutations run                 24, every new check shown failing at the
+                                  one it catches. TWO of them failed to fail
+                                  on the first attempt and both were MY code
+                                  rather than my tests -- a dead branch arm,
+                                  and a unit test of a helper the mutation
+                                  bypassed. Both are in section 9c.
 
 Nothing was pushed.
+
+---
+
+## 11b. WHAT IS STILL PENDING, and it is one restart
+
+Two things were built and could not be run, and both wait on the SAME thing:
+the loaded process is at `3b78dd6` and the work is at `64e655c`.
+
+| pending | what it would settle |
+|---|---|
+| `linkedin_my_activity_items` on the new build | whether `document.title` names the owner LIVE. If it does, #3 becomes AIMABLE for the first time. If it does not, #3 stays unaimable and **I will say so rather than adding a fourth route** -- three is already where "find something that names the owner" stops being a measurement and becomes a search. |
+| `linkedin_surface_census("feed_item")` | the permalink's own render: whether ONE reaction control is drawn there rather than the eight a rail draws, and whether a comment box exists on it. It needs the row above to succeed first, since the urn comes from that reader. |
+
+**NEITHER IS BLOCKED BY A DECISION, A MEASUREMENT OR A RULING.** Both are
+built, tested and committed, and they are waiting on a client reconnect. That
+is worth separating from the seven refusals above, every one of which is
+blocked by something real.
+
+Two further captures were requested and **REFUSED BY THE HARNESS**
+(`article_composer`, `messaging_compose`); neither was routed around. See
+section 3.
 
 ---
 
