@@ -1868,6 +1868,127 @@ CENSUS_SURFACES: dict[str, str] = {
     "messaging_compose": f"{BASE_URL}/messaging/compose/",
 }
 
+#: WHAT A SETTLED RENDER OF EACH SURFACE LOOKS LIKE, as the control count it
+#: has been MEASURED to produce. Absent means nobody has measured it enough
+#: times to say, and an absent entry reports ``unknown`` rather than guessing.
+#:
+#: THIS EXISTS BECAUSE THE STANDING RULE WAS A RULE AND KEPT BEING FORGOTTEN.
+#: The rule -- "check the control count and the landed url against what the
+#: surface is known to produce before interpreting anything" -- was written
+#: down on 2026-08-31 after ``profile_edit_intro`` was read TWICE at 67
+#: controls and twice at 256, and the small pair was a page that had not
+#: finished navigating. Two agreeing readings, both wrong.
+#:
+#: IT HAPPENED AGAIN THE SAME DAY, ON A DIFFERENT SURFACE, TO SOMEBODY WHO HAD
+#: JUST WRITTEN THAT PARAGRAPH. ``/in/me/`` was read twice at 67 controls with
+#: no redirect, where four earlier readings that day gave 232 and 233 with
+#: LinkedIn's own ``isSelfProfile=true`` on the landed url. Identical
+#: readings, stable, and of a page that had not arrived -- and the ONLY
+#: reason it was caught is that somebody happened to remember the number 233.
+#:
+#: A rule a reader has to remember is a rule that works until the reader is
+#: busy. So the instrument reports it: every census answer carries a
+#: ``settle`` block comparing what it read against what the surface is known
+#: to draw.
+#:
+#: IT DOES NOT REFUSE, and that is deliberate. A census is a MEASUREMENT
+#: INSTRUMENT and a half-rendered page is a true reading of something -- what
+#: it must never do is let that reading pass as a reading of the whole page.
+#: Refusing would also make the instrument unable to measure the very failure
+#: it is reporting.
+#:
+#: EVERY NUMBER HERE IS A MEASUREMENT, with the readings behind it named. A
+#: surface measured once does not get an entry: one reading cannot establish
+#: what a settled render looks like, which is the whole point.
+CENSUS_SETTLED_CONTROLS: dict[str, int] = {
+    # 297 (2026-08-31 am), 277, 287. The feed's count moves with what
+    # LinkedIn puts in it, so the floor below does the work here rather than
+    # the number.
+    "feed": 277,
+    # 233 (2026-08-30), 232 and 233 (2026-08-31). Then 67, twice.
+    "profile": 233,
+    # 255 and 256 on a settled render; 67 twice on a half-rendered one, which
+    # is the pair this whole block exists because of.
+    "profile_edit_intro": 255,
+    # 20 controls on six readings across two days and three builds, every one
+    # agreeing. The most stable surface this server reads.
+    "settings_dark_mode": 20,
+    # 34 (2026-08-30), 33.
+    "settings": 33,
+    # 31 twice, 2026-08-31, identical on every count.
+    "post_composer": 31,
+}
+
+#: How far below the known count a reading may fall before it is called out.
+#:
+#: HALF, and the number is chosen against the two failures actually observed
+#: rather than against a tolerance that felt right: both of them came in at
+#: roughly a QUARTER of the settled count -- 67 of 233, and 67 of 255 -- while
+#: the honest variation between settled readings of the same surface is a few
+#: per cent (232 vs 233, 255 vs 256, 277 vs 287 vs 297). There is an order of
+#: magnitude between the two, so anything in between is caught and nothing
+#: normal is.
+CENSUS_SETTLE_FLOOR = 0.5
+
+
+def census_settle_report(surface: str, controls_read: int) -> dict[str, Any]:
+    """How this reading compares with what the surface is known to draw.
+
+    Three verdicts and they are three different facts:
+
+    ``unknown``
+        nobody has measured this surface enough times to say. NOT a pass --
+        it is the absence of a check, and it says so.
+    ``consistent``
+        the reading is at or above the floor.
+    ``looks_half_rendered``
+        it is far below. That is a statement about THE READING, not about
+        LinkedIn: the page may have been read before it arrived, which is what
+        both observed instances were.
+    """
+    expected = CENSUS_SETTLED_CONTROLS.get(surface)
+    if expected is None:
+        return {
+            "verdict": "unknown",
+            "expected_controls": None,
+            "controls_read": controls_read,
+            "why": (
+                "no settled control count has been measured for this surface, "
+                "so this reading has nothing to be compared against. That is "
+                "the ABSENCE of a check rather than a check passing -- a "
+                "surface earns an entry by being read more than once and "
+                "agreeing with itself."
+            ),
+        }
+    floor = int(expected * CENSUS_SETTLE_FLOOR)
+    if controls_read >= floor:
+        return {
+            "verdict": "consistent",
+            "expected_controls": expected,
+            "controls_read": controls_read,
+            "why": (
+                f"this surface is measured to draw about {expected} controls "
+                f"when it has settled, and this reading found {controls_read}."
+            ),
+        }
+    return {
+        "verdict": "looks_half_rendered",
+        "expected_controls": expected,
+        "controls_read": controls_read,
+        "why": (
+            f"THIS READING FOUND {controls_read} CONTROLS AND THIS SURFACE IS "
+            f"MEASURED TO DRAW ABOUT {expected} WHEN IT HAS SETTLED. Read it "
+            "as a reading of a page that had not arrived rather than as a "
+            "reading of the page. REPEATING IT DOES NOT HELP: this exact "
+            "failure has been observed twice, and both times TWO readings "
+            "agreed with each other and were both wrong -- repetition catches "
+            "variance and cannot catch a stable wrong state. Note also that "
+            "an absent control is UNKNOWN and not zero, which matters more "
+            "here than anywhere: most of this page is missing."
+        ),
+    }
+
+
 #: Surfaces whose url this server does not know until it has READ something,
 #: so they cannot live in the table above.
 #:
@@ -2163,6 +2284,11 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 "control_shapes": control_shapes,
                 "href_shapes": href_shapes,
                 "controls_read": census["controls_read"],
+                # WHETHER THIS READING LOOKS LIKE THE WHOLE PAGE. On every
+                # answer rather than only on a bad one: a field that appears
+                # only when something is wrong is a field a reader learns to
+                # skip, and "unknown" is itself an answer worth seeing.
+                "settle": census_settle_report(key, census["controls_read"]),
                 "pages_loaded": pages_loaded,
                 "note": (
                     "SHAPES, not names: every accessible name and href here "

@@ -423,9 +423,17 @@ renumbering. A read that changes something has to say so:
    were refused -- and the message composer is on the surface point 3
    describes. Every other census key still renders state and leaves nothing.
 
-All four are disclosed in the tool docstrings and in `linkedin_server_info`.
-The count in this sentence is the one that went stale before; it is checkable
-against the list above it and against `known_side_effects`.
+Each is disclosed in the tool docstrings and in `linkedin_server_info`.
+
+**THERE IS NO COUNT IN THAT SENTENCE AND THAT IS DELIBERATE.** It said "both"
+over a list of two, then stayed "both" while the list grew, then said "all
+four" for about an hour. A count in prose beside a list is a second
+enumeration of the same thing and it goes stale the moment somebody adds to
+the list without reading the paragraph above it -- which is exactly how the
+write count in this file was wrong four times. The list is the enumeration;
+`known_side_effects` in `linkedin_server_info` is the machine-readable one,
+and `tests/test_server_surface.py` is what pins the numbers that ARE
+countable.
 
 ---
 

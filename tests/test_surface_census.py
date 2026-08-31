@@ -55,7 +55,9 @@ from linkedin_server import dom, errors, readonly, shape
 from linkedin_server import server as server_module
 from linkedin_server.server import (
     CENSUS_RESOLVED_SURFACES,
+    CENSUS_SETTLED_CONTROLS,
     CENSUS_SURFACES,
+    census_settle_report,
     census_surface_keys,
     linkedin_surface_census,
 )
@@ -3456,3 +3458,167 @@ async def test_that_checked_sweep_can_detect_movement(census_over):
     split, blanked = _key_split(rows["controls"])
     assert split == {("Theme choice", 3): {True: 1, False: 2}}
     assert blanked == set()
+
+
+# ---------------------------------------------------------------------------
+# THE SETTLE PRECONDITION, MOVED INTO THE INSTRUMENT
+# ---------------------------------------------------------------------------
+#
+# The rule -- check the control count against what the surface is known to
+# produce before interpreting anything -- was written down on 2026-08-31 after
+# profile_edit_intro was read TWICE at 67 controls and twice at 256, and the
+# small pair was a page that had not finished navigating.
+#
+# IT HAPPENED AGAIN THE SAME DAY, ON A DIFFERENT SURFACE, TO SOMEBODY WHO HAD
+# JUST WRITTEN THAT PARAGRAPH: /in/me/ read twice at 67 controls with no
+# redirect, where four earlier readings gave 232 and 233. The only reason it
+# was caught is that somebody happened to remember 233.
+
+
+#: Every SETTLED reading this server has taken, and every HALF-RENDER. Each
+#: number was measured; none is a tolerance somebody chose.
+#:
+#: SPLIT BY VERDICT RATHER THAN CARRYING ONE, and the reason is a guard in
+#: ``tests/test_no_committed_identity.py`` that fires on a table whose rows
+#: pair a string PRESENT in a committed fixture with one that is ABSENT --
+#: the shape a de-anonymisation table has. A single table of
+#: ``(surface, count, verdict)`` has exactly that shape by accident:
+#: ``"profile"`` is in the fixtures and ``"consistent"`` is not.
+#:
+#: The shape is REMOVED rather than declared an exception, which is this
+#: repository's standing preference -- a declared exception is a hole in that
+#: guard for the whole file, and it should be earned rather than spent on a
+#: table that had another way to be written. Split like this each row carries
+#: ONE string, so the guard has no pair to consider at all.
+SETTLED_READINGS = (
+    ("profile", 233),
+    ("profile", 232),
+    ("profile_edit_intro", 256),
+    ("profile_edit_intro", 255),
+    ("settings_dark_mode", 20),
+    ("post_composer", 31),
+    ("feed", 297),
+    ("feed", 277),
+)
+
+#: THE TWO HALF-RENDERS ACTUALLY OBSERVED, both at 67 controls, on two
+#: different surfaces, on the same day.
+HALF_RENDERS = (
+    ("profile", 67),
+    ("profile_edit_intro", 67),
+)
+
+
+@pytest.mark.parametrize(
+    "surface,read,verdict",
+    [(s, n, "consistent") for s, n in SETTLED_READINGS]
+    + [(s, n, "looks_half_rendered") for s, n in HALF_RENDERS],
+)
+def test_the_settle_report_calls_every_observed_reading_correctly(
+    surface, read, verdict
+):
+    """EVERY READING THIS SERVER HAS ACTUALLY TAKEN, against the report.
+
+    Both halves matter and the second is the one that makes the first worth
+    anything: the settled readings must come back ``consistent``, or the check
+    would be an alarm that fires on everything and gets ignored.
+    """
+    assert census_settle_report(surface, read)["verdict"] == verdict
+
+
+def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
+    """THE ABSENCE OF A CHECK IS NOT A CHECK PASSING, and the three verdicts
+    keep that distinction.
+
+    A surface nobody has measured twice cannot say what a settled render looks
+    like. Reporting ``consistent`` there would be the loudest possible version
+    of this module's standing error: an unmeasured thing wearing a measured
+    answer.
+    """
+    for surface in ("messaging_compose", "article_composer", "feed_item"):
+        assert surface not in CENSUS_SETTLED_CONTROLS, surface
+        report = census_settle_report(surface, 5)
+        assert report["verdict"] == "unknown"
+        assert report["expected_controls"] is None
+        assert "ABSENCE of a check" in report["why"]
+
+
+def test_the_floor_separates_the_two_things_it_has_to_separate():
+    """THE NUMBER, CHECKED AGAINST THE DATA IT WAS CHOSEN FROM.
+
+    Both observed half-renders came in around a QUARTER of the settled count
+    -- 67 of 233 and 67 of 255 -- while honest variation between settled
+    readings is a few per cent: 232 vs 233, 255 vs 256, 277 vs 287 vs 297.
+    There is an order of magnitude between them.
+
+    This asserts the gap rather than the constant, so a future tolerance
+    change has to keep both properties rather than merely stay a number.
+    """
+    for surface, expected in CENSUS_SETTLED_CONTROLS.items():
+        # A reading a tenth under the known count is NORMAL variation.
+        assert (
+            census_settle_report(surface, int(expected * 0.9))["verdict"]
+            == "consistent"
+        ), surface
+        # A reading at a quarter of it is what both observed failures were.
+        assert (
+            census_settle_report(surface, int(expected * 0.25))["verdict"]
+            == "looks_half_rendered"
+        ), surface
+
+
+def test_the_report_says_repeating_it_will_not_help():
+    """THE SENTENCE THAT MAKES THIS ACTIONABLE, and it is the counter-intuitive
+    half.
+
+    The instinct on a suspect reading is to take another one. Both observed
+    instances were TWO AGREEING READINGS -- repetition catches variance and
+    cannot catch a stable wrong state -- so a report that flagged the reading
+    without saying that would send a reader to do the one thing that does not
+    work.
+    """
+    why = census_settle_report("profile", 67)["why"]
+    assert "REPEATING IT DOES NOT HELP" in why
+    assert "233" in why and "67" in why
+    # And it repeats the absent-is-not-zero rule, which matters more on a
+    # half-rendered page than anywhere: most of it is missing.
+    assert "UNKNOWN and not zero" in why
+
+
+async def test_every_census_answer_carries_the_settle_block(drive):
+    """ON EVERY ANSWER, not only on a bad one.
+
+    A field that appears only when something is wrong is a field a reader
+    learns to skip -- and ``unknown`` is itself worth seeing, since it means
+    this instrument cannot tell.
+    """
+    page = _raw_page(RAW_CONTROLS)
+    drive(page)
+    result = await linkedin_surface_census("feed")
+    assert "settle" in result, result
+    assert set(result["settle"]) == {
+        "verdict",
+        "expected_controls",
+        "controls_read",
+        "why",
+    }
+    assert result["settle"]["controls_read"] == result["controls_read"]
+
+
+def test_a_surface_earns_its_entry_by_being_measured_more_than_once():
+    """THE TABLE'S OWN RULE, asserted so an entry cannot be added on one
+    reading.
+
+    Every key here must be a surface the census can actually reach. The
+    converse is deliberately NOT asserted -- a surface with no entry is the
+    normal state for one nobody has read twice, and that is what ``unknown``
+    is for.
+    """
+    reachable = set(CENSUS_SURFACES) | set(CENSUS_RESOLVED_SURFACES)
+    unknown = sorted(set(CENSUS_SETTLED_CONTROLS) - reachable)
+    assert not unknown, (
+        f"{unknown} have settled counts and are not surfaces this instrument "
+        "measures, so nothing can ever be compared against them."
+    )
+    for surface, expected in CENSUS_SETTLED_CONTROLS.items():
+        assert expected > 0, surface
