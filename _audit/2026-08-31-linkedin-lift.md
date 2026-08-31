@@ -726,3 +726,428 @@ measured to remove them.** That is an operator-level decision and it is named he
 rather than attempted.
 
 ---
+
+## 10. #2 and #3 -- THE ITEM-KEY GAP IS CLOSED
+
+**The ruling.** These are unaimable: the feed carries 0 item permalinks and the
+census shapes every urn out, so no tool can hand him an item key. **Build a
+reader over his own activity that returns item keys for HIS OWN items only.**
+Establish authorship, do not infer it from placement. Never return another
+member's item urn, and that must be a test.
+
+### 10a. The reader -- `linkedin_my_activity_items`
+
+**It reads `/in/me/` and NOTHING ELSE, so the read boundary is untouched.** The
+ruling named `/in/<member>/recent-activity/all/`, which is measured present as
+an href -- but it is NOT on the allowlist, and admitting it would be a
+boundary widening to buy a surface his own profile already carries. The profile
+renders 8 activity items and 20 item permalinks and is already loaded by three
+other tools. **Zero widening, and the recent-activity page stays a separate
+ruling nobody needs to make yet.**
+
+**Authorship is established by THREE conjunctive conditions**, all computed
+inside the page, all reported, and all required:
+
+1. **LinkedIn's own `isSelfProfile=true`** on the landed url.
+2. **UNANIMITY.** Every control whose name starts `Open control menu for post
+   by ` carries the SAME author, and there is at least one. This is the rule
+   `_read_feed_item` already applies to reaction state -- *a mixed page cannot
+   say which item a direction belongs to* -- and it is what makes the pairing
+   safe: **if every overflow control on the page names one author, no pairing
+   can attribute an item to the wrong person.**
+3. **That author is the page owner**, by a stated prefix relation against the
+   `h1`, because LinkedIn writes a SHORTENED form of his name into the overflow
+   label while the heading carries the full one. The weakness of a prefix rule
+   is written into the code rather than hidden: it would also accept a member
+   whose name is a prefix of his, which cannot arise once (1) and (2) hold.
+
+**No author string, heading text or member segment ever leaves the page.**
+
+**THE MEASUREMENT THIS RESTS ON is the asymmetry between the two surfaces**, and
+it was already in the record without being read as evidence:
+
+    /in/me/   "Open control menu for post by <his name>"  count 8   readable
+    /feed/    "Open control menu for post by <redacted>"  count 8   redacted
+
+The profile row came back READABLE at count 8 because eight controls carried
+ONE author string; the feed row came back `<redacted>` at the same count
+because eight controls carried EIGHT DIFFERENT ones, each blanked as a
+singleton and then re-merged. **The profile rail is unanimous and the feed is
+not**, and that is measured rather than assumed.
+
+### 10b. The test the ruling demanded, and its failure text
+
+A rail with two authors -- one item his, one another member's, each with its
+own urn -- yields **no `items` key at all**. The mutation that removes the
+unanimity check in BOTH gates produces a failure whose text carries the other
+member's key, which is the whole point:
+
+    E  AssertionError: {'authorship': {'established': True, ..., 'authors_found': 2, ...},
+       'items': ['urn:li:activity:...001', 'urn:li:activity:...003'], ...}
+    E  assert None == 'mixed_authors'
+
+`...003` is the OTHER member's item. Unmutated it is in no part of the answer.
+
+Two further mutations were run and are worth more than the first:
+
+* **Relaxing unanimity in the SCRIPT ONLY did not produce emission** -- the
+  reader's own Python check caught it. Defence in depth that was designed in
+  and then demonstrated, rather than claimed.
+* **Dropping the requirement that a urn be paired to an item root carrying an
+  overflow control** leaves the refusal intact and publishes nothing, but
+  `distinct_urns` goes 2 -> 3 as a stray rail-footer permalink is swept in.
+  The test asserts the pairing COUNTS as well as the absence, because without
+  them a refusal would hide the fact that the pairing rule had stopped running.
+
+### 10c. AND NEITHER #2 NOR #3 LIFTS -- see section 12
+
+The item-key gap is closed and it turns out not to have been the binding
+constraint. Both actions hold `url_template=None`, so no token can exist for
+either. #2 additionally has never had its comment box observed
+(`contenteditable == 0` on both surfaces); #3 additionally has never seen its
+ON label, and the supervised act that would produce it is the operator's to
+choose and is **not scheduled**.
+
+---
+
+## 11. #4 -- CLOSED, and the blocker is the plumbing
+
+The instrument is built, committed, and LOADED in the server process. **It is
+unreachable from this agent, and a `/mcp` reconnect did not change that.**
+
+The operator ran `/mcp`. Afterwards the harness delivered a fresh enumeration
+of every available tool: **it lists 31 `linkedin` tools, and both tools added
+this wave are absent from it**, while `linkedin_surface_census` and
+`linkedin_react_to_item` resolve normally. Six `ToolSearch` queries across the
+wave, none resolving.
+
+> **THE FINDING, and it is worth more than the capture would have been: a tool
+> registered AFTER a subagent spawns is unreachable to that subagent,
+> regardless of client reconnects.** The tool registry is snapshotted at spawn.
+> A server restart refreshes the CODE; a client reconnect refreshes the
+> PARENT's registry; neither reaches a subagent already running.
+
+That is a real constraint on how this project runs waves: **an agent cannot
+exercise an instrument it builds during the same wave.** Building the
+instrument and capturing with it have to be different agents, or the capture
+belongs to whoever spawned the builder.
+
+**#4 therefore refuses, and the reason is neither measurement nor ruling.** It
+is that the instrument cannot be delivered to the process that would run it.
+And the second blocker recorded in section 4d survives regardless: nothing
+records a field's PREVIOUS VALUE, so an edit is still not revertible by this
+server.
+
+---
+
+## 12. THE STRUCTURAL FINDING: no token can exist for ANY of the seven
+
+Measured across `SANCTIONED_WRITES`, and it reframes this whole wave:
+
+| | actions |
+|---|---|
+| holds a `url_template` -- CAN mint | `apply_job`, `follow_company`, `save_job`, `unfollow_company`, `unsave_job` |
+| `url_template is None` -- CANNOT mint | **all seven refusing capabilities**, plus `set_open_to_work` |
+
+`writes.mint` refuses at ISSUE for any action with no `url_template`:
+
+> *"no grant is minted for {action}: its surface has never been loaded by this
+> server, so there is no page for a grant to be permission to act on. Refused
+> at ISSUE rather than only at use, because an invariant a future click has to
+> remember to check is not an invariant."*
+
+**So no `confirm_token` can exist for any of the six capabilities this wave was
+sent to lift -- for me, for the lead, or for the operator.** Not one of them
+could have been made performable by any measurement or any ruling reachable
+from here, because performing requires a WRITE SURFACE THAT HAS BEEN LOADED,
+and none has been. Making one performable needs a new entry in
+`SANCTIONED_MUTATIONS` -- a new click call site -- which this wave was
+forbidden to add and which nobody has ruled on.
+
+**THE NEVER-FIRE RULE WAS NEVER THE BINDING CONSTRAINT ON ANY OF THEM.** That
+is not an argument for relaxing it; it is the observation that the architecture
+had already made these actions unperformable, and the rule and the architecture
+agreed. What the rulings and instruments could change is **what the gate can
+SAY** -- and on that measure the wave moved four of the six.
+
+---
+
+## 13. THE GUARD PORT, AND THE RULE-SET DIFF
+
+### 13a. What landed
+
+Three rules, in `tests/test_no_committed_identity.py`: **drive root**,
+**Windows user path**, **POSIX home path**. Semantics ported from the naukri
+sibling rather than reinvented, because two guards sharing a filename and
+differing in coverage is how the asymmetry arose in the first place.
+
+Two predicates, and their asymmetry is deliberate:
+
+* `_drive_root_ok` allows a first segment that is a GENERIC PLACE -- `users`,
+  `windows`, `workspace`, `dev-cache`, `temp`, `repo` -- or a placeholder.
+* `_account_path_ok` has **no generic list at all**. The segment after
+  `Users/` or `/home/` is an ACCOUNT NAME by construction, so there is no
+  benign vocabulary for it and only a visible placeholder may sit there.
+
+### 13b. The corpus was cleaned first, because the guard could not land otherwise
+
+**49 replacements across 20 files**, each anchored to the PATH SHAPE rather
+than to the bare name, so the GitHub handle in urls is untouched -- rewriting
+that would break real links and would be pretending to fix something that is
+not a leak.
+
+Re-measured afterwards with the controlled instrument: **drive root 0 hits,
+Windows user path 0 hits.**
+
+The six non-audit sites were inert: two vendoring-provenance comments, one
+`cd` example in the README, and three literals in `tests/test_path_hygiene.py`.
+**That last one is the sharpest instance in the whole finding** -- the file
+whose entire job is keeping absolute paths out of this server's output was
+proving it detects real paths BY CARRYING ONE. A synthetic name does that job
+strictly better: a hygiene test that demonstrates itself with the thing it
+forbids is the same self-refuting shape as a guard that cannot match a
+backslash.
+
+### 13c. THE CONTROL, and it is worth more than the rules
+
+`test_the_path_rules_can_match_a_backslash_at_all` asserts, from `chr(92)`
+rather than from an escape, that each rule matches the thing it exists to
+match -- **before** the sweep is allowed to certify that it matched nothing.
+
+It earned its place three times over in one afternoon. Every one of these
+reported this repository CLEAN and every one was broken:
+
+| broken check | how |
+|---|---|
+| a `git grep` | the pattern never reached the engine intact |
+| a rewrite of it | a backslash before `+` made the plus a literal, matching nothing |
+| a correct pattern, run twice through a shell heredoc | `[\/]` collapsed to `[\/]` -- the SLASH only |
+
+**And the guard then caught the test that proves the guard works.** The
+slash-spelling assertion was first written as a literal and the file's own
+sweep failed on it: *"1 unallowed drive root hit(s), 0 declared"*. That is the
+most direct demonstration available that these rules are not inert.
+
+Shown failing at the mutation they catch -- the `SHAPES` entry removed:
+
+    FAILED test_every_shape_can_actually_fail[drive root-<the composed plant>]
+    FAILED test_the_drive_root_rule_catches_what_the_user_path_rule_cannot
+
+### 13d. `DECLARED_PLANTS` IS UNTOUCHED, and how
+
+Every other plant in that file is a literal with a declared count. The path
+plants are **composed from `chr(92)` and string concatenation**, so no
+drive-root or home-path shape exists in the file's TEXT and no new entry is
+needed.
+
+That deviates from the file's own stated preference -- it argues against
+assembling shapes at runtime -- so the reason is written in beside it and is
+specific to this shape: **hiding a plant of mine does not blind the sweep to a
+REAL path pasted into this file later**, which is the property the urn entries
+were protecting; and a backslash does not survive transport reliably, so
+composing from the code point is the only way to write a backslash-bearing
+test value that is certainly the value intended. The composition buys
+correctness and the absent allowlist entry is a consequence rather than the
+goal.
+
+### 13e. THE DIFF: ten classes naukri catches that this repo did not
+
+| class | hits here | disposition |
+|---|---|---|
+| drive root | **31 / 13 files** | **PORTED** -- the live leak |
+| user path (Windows) | **18 / 9 files** | **PORTED** -- same class |
+| user path (POSIX) | 0 | **PORTED** -- free, and completes the family |
+| hex32 id | 5 / 4 files | **DELIBERATELY NOT PORTED -- see below** |
+| hex64 id | 2 / 1 file | not ported, same reason |
+| account id `key=value` | 2 / 2 files | named, not taken |
+| credential assign | 2 / 2 files | named; both hits are in the guards' own test files |
+| AWS key | 0 | named, cheap, worth a later wave |
+| GitHub token | 0 | named, cheap, worth a later wave |
+| PEM private key block | 0 | named, cheap, worth a later wave |
+
+**SOME OF THE ASYMMETRY IS FIT, NOT GAP, and hex32 is the case that proves
+it.** Naukri's rule would fire on this repo's deliberate `sha256(first 32)`
+convention -- adopted here precisely so the identity guard would STOP firing
+on full hashes, and now present in four audit files. Porting it would break a
+convention that exists for a reason. **Two guards sharing a filename are not
+supposed to converge to one rule set**; they are supposed to cover their own
+corpus, and flattening them would have been the wrong move dressed as
+consistency.
+
+This repo also carries five classes naukri lacks -- LinkedIn slug, company id,
+`ACoAA` member token, urn id, cookie shape -- all correctly platform-specific.
+
+---
+
+## 14. #6 UPDATED: the wiring landed, and section 3c is superseded
+
+Section 3c said the refusal did not lift **yet** and named four wiring steps.
+All four are done, so that paragraph is superseded rather than deleted:
+
+1. `_read_dark_mode` -- calls `dom.read_surface_census`, so **no new script and
+   no new `evaluate` waiver**. Exactly one checked is the only readable state;
+   zero and two-or-more are both refused, the second because choosing between
+   them would be choosing by position.
+2. `_SURFACE_READS` gained `setting_dark_mode` **and lost `settings_index`**.
+   The swap is the point: the old entry pointed at a page that hands out
+   ADDRESSES and switches nothing, so the only state it could report was how
+   many settings exist. `_read_settings_index` went with it -- this spec was
+   its only caller.
+3. The spec moved to `from_state=None` with the three measured destinations.
+4. **`to_state` is plumbed through `_write_tool`**, which closes the finding
+   section 3c raised: `_direction`'s multi-state branch had NO LIVE CALLER for
+   any action. The `KeyError` fix `dacf76d` landed on it that morning guarded
+   code nothing could reach. It is reachable and exercised now.
+
+**A GUARD AT THE TOOL, because the reader cannot have one.** `writes.observe`
+picks its surface from the SPEC's `state_from` and never from an argument --
+that is the property stopping a caller aiming this server at a page of its
+choosing, and its consequence is that the reader opens the dark-mode page
+whatever setting was asked about. Without a check at the tool, a question about
+"language" would come back describing dark mode's state under the label of the
+setting asked for: **a gate confidently reporting a measurement of the wrong
+thing, which is worse than one that refuses.** `linkedin_update_setting` now
+refuses any other setting and **loads nothing at all** doing it.
+
+**AND THE `audiences` DOCSTRING WAS CORRECTED, because it was false in a way
+that mattered.** It read *"For a setting with an audience: who can see each
+destination"* -- while `_direction` validates BOTH the destination AND the
+measured origin against `sorted(spec.audiences)` and refuses anything absent
+from it. **The keys ARE the enumeration of legal states.** A reader taking the
+old sentence literally would leave it empty for an action with no audience,
+which makes `_direction` refuse every destination there is. Dark mode's three
+values say "NOBODY" in words rather than being blank, because a blank is
+indistinguishable from nobody having filled it in.
+
+### #6's final position
+
+**The refusal STANDS, and it stands on section 12's structural ground rather
+than on a missing measurement.** `update_setting` holds no `url_template`, so
+`mint` refuses it a grant at issue and no `confirm_token` can exist for it.
+What changed is real and is smaller than "lifted": **the gate went from
+refusing to render at all, to rendering a true current state and a named
+direction with no token attached.** Its refusal text now says so, and names
+what would lift it -- a measured write surface and a deliberate
+`SANCTIONED_MUTATIONS` entry, which is a decision about this account rather
+than a measurement.
+
+---
+
+## 15. THE TRANSPORT TRAP CAUGHT ME A THIRD TIME, in the fix for it
+
+Recorded because it is the same lesson and because leaving it out would make
+section 9b read as a problem I had solved.
+
+After the guard landed, its sweep failed on **this document** -- I had pasted
+a mutation's failure text carrying a drive-rooted plant. I wrote a redaction
+for it, ran it, and it reported success. **It had changed nothing:** my
+replacement string was written with DOUBLED backslashes and the file contained
+single ones, so the match never fired and the assertion that would have caught
+it was the one I had just written to skip. The guard failed again on the next
+run, in the same place.
+
+Three lessons, and the third is the one worth carrying:
+
+* The fix for an escaping bug is itself written in the language that has the
+  escaping bug.
+* **A replacement that reports "done" without asserting it changed something
+  is the same defect as a guard that reports zero without asserting it can
+  match** -- and I had just written a whole section about the second while
+  committing the first.
+* What caught it both times was not care. It was **an instrument that fails
+  loudly on the file it is pointed at**, running in a suite I could not talk
+  past. The audit and the guard were written by the same process; only one of
+  them was checkable, and that is the one that found the error.
+
+---
+
+# 16. THE CLOSE
+
+## 16.1 The ledger
+
+| # | capability | outcome |
+|---|---|---|
+| 1 | publish a post | **REFUSES.** No content-draft surface is reachable -- 17 of 17 candidate addresses refused by the read boundary, which makes the href enumeration's incompleteness irrelevant. **The composer was NOT opened**, per the ruling's own stop condition. |
+| 2 | comment on an item | **REFUSES.** The item-key gap is CLOSED. Still no comment box observed on either surface, and no token can exist. |
+| 3 | react to an item | **REFUSES.** The item-key gap is CLOSED. The ON label is still unmeasured; the supervised act is the operator's, and it is not scheduled. No token can exist. |
+| 4 | edit a profile field | **REFUSES.** The instrument is built, tested and LOADED -- and undeliverable to the process that would run it. Reversibility remains unmeasured independently. |
+| 5 | endorse a skill | **IMPOSSIBLE.** Unchanged: the control lives only on a third party's profile and loading one is a measured emission. |
+| 6 | change a setting | **REFUSES.** The reading was TAKEN -- `Always off`, six agreeing readings across two days and three builds. The gate now renders a true direction. No token can exist. |
+| 7 | send an invitation | **REFUSES.** Untouched this wave, and refused by the harness classifier as well. |
+| 9 | send a message | **REFUSED BY RULING.** The badge check PASSED at zero; the lead declined to narrow `/messaging/compose` on the stop condition #1 established. |
+
+**ZERO REFUSALS LIFTED, and section 12 is why that was never available.** All
+seven hold `url_template=None`, so `writes.mint` refuses a grant at issue and
+**no `confirm_token` can exist for any of them, for anyone**. Not one could
+have been made performable by a measurement or by any ruling reachable from
+here. **The never-fire rule was never the binding constraint** -- the
+architecture had already made these unperformable, and the rule and the
+architecture agreed.
+
+**FIVE REFUSALS CHANGED THEIR REASON**, which is the axis that was available:
+
+| # | from | to |
+|---|---|---|
+| 1 | "opening might leave a draft we cannot see" -- an objection | 17 addresses refused, measured |
+| 2, 3 | "unaimable; no route to an item key" | a route exists and is tested |
+| 6 | "the census reports disabled, not checked" | `Always off`, and a rendering gate |
+| 9 | "deferred by ruling" | the composer address is forbidden, and opening messaging does not reach it |
+
+## 16.2 What was delivered
+
+* **Four instruments**: a `checked` reading on the census; a self-owned
+  container reader publishing names the document-wide gate withholds; an
+  own-activity reader returning item keys for his items only; and three path
+  rules in the identity guard.
+* **A live PII leak found, measured and cleaned** -- 49 absolute paths across
+  20 tracked, pushed files, including in the test whose job is preventing
+  exactly that.
+* **Two false claims corrected in code**: `audiences`' docstring, which
+  under-described the field `_direction` validates against; and
+  `_direction`'s multi-state branch, which had no live caller at all.
+
+## 16.3 What was NOT done, deliberately
+
+**No `confirm_token` was issued to anything, by anyone, at any point. No write
+was performed. No third party's profile was loaded. No badge was spent** --
+messaging read zero at the start and at the end. **The composer was not
+opened. `_state/` was not touched.**
+
+**THE READ BOUNDARY IS BYTE-IDENTICAL.** `linkedin_server/readonly.py` is
+UNCHANGED across the entire wave: 17 allowlist patterns, 24 forbidden
+substrings, one exemption, none added and none removed. `SANCTIONED_MUTATIONS`
+is the 2 entries it was; `PERFORMABLE` is the same 5. **Zero new click call
+sites.** Three capabilities were closed out without widening anything, and the
+one instrument that could have justified a widening -- the activity reader --
+was deliberately built on a surface already admitted.
+
+    _state/session.json
+      sha256(first 32)  f0892e35688868faef6a3525e54b93e4
+      bytes             7813
+      mtime             2026-08-26 00:41:24
+      -- identical to the value recorded at the end of the previous wave.
+
+    baseline   4f45781   suite 2132
+    final      9a9d65c   suite 2267 passed, 0 failed
+    34 files changed
+
+Nothing was pushed. The push and its PII scan are the lead's -- and this wave
+is the reason to run the repository's own committed guard rather than a
+hand-rolled scan, because a hand-rolled scan is exactly what missed this.
+
+## 16.4 The three findings worth carrying past this repo
+
+1. **Repetition through one broken channel is not repetition.** Two agreeing
+   readings were wrong twice in one day -- once because a PAGE had not
+   settled, once because a TRANSPORT ate an escape. The at-least-twice rule
+   catches variance and cannot catch a stable wrong state, and the stable
+   wrong state can live in the instrument's delivery rather than in the thing
+   measured.
+2. **A guard that can silently match nothing must assert that it matches
+   something.** Reporting zero and being broken are indistinguishable from
+   the outside. Three checks reported this repository clean in ten minutes and
+   all three were broken.
+3. **An agent cannot exercise an instrument it builds in the same wave.** A
+   tool registered after a subagent spawns is unreachable to it regardless of
+   server restarts or client reconnects. Building and capturing have to be
+   different agents -- or the capture belongs to whoever spawned the builder.
