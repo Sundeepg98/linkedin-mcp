@@ -16,11 +16,35 @@ values fixed below remain in both repositories' pushed history; a clean tree is
 not a clean history, and only delete-and-recreate was ever measured to remove
 retained objects. That is the operator's call and he has not made it.
 
-**TWO THINGS NEED YOUR DECISION, neither taken here** (detail in section 6):
+**PUSH ORDER IS NOT FREE: jobcore MUST GO FIRST.** `linkedin`'s CI clones
+`Sundeepg98/jobcore` at **master** (full clone, deliberately not a pinned sha)
+and compares the vendored body against it. Pushing `linkedin` alone turns its
+CI red -- the remote's `paths.py` still carries the leaked line, so the bodies
+differ. Measured against `origin/master` locally, which is exactly what CI
+clones:
 
-1. **`ats-jobs` still carries two leaks of this exact class**, measured, at
-   `ats_buildinfo.py:5` and `tests/test_no_path_leaks.py:93`. Outside the two
-   repos in scope; separately public. Every other sibling repo measured zero.
+```
+origin/master   what CI clones TODAY (jobcore unpushed)   -> body match: FAIL
+HEAD            after jobcore is pushed                   -> body match: PASS
+
+is the pinned commit b2f5d16 on origin/master?  NO -- unpushed
+```
+
+The header-pin test would additionally SKIP rather than fail, because
+`git show b2f5d16:...` cannot resolve in a clone of the remote -- so the
+failure you would actually see is
+`test_the_vendored_body_is_identical_to_canonical[paths]`, and the pin check
+would go quiet at the same time. **Push jobcore, then linkedin.**
+
+**TWO MORE THINGS NEED YOUR DECISION, neither taken here** (detail in section 6):
+
+1. **`ats-jobs` carries THREE leaks of this class and they are ALREADY
+   PUBLISHED** -- two drive roots at the given name and, in the same file, a
+   Windows ACCOUNT name. Its tree is clean and it is **0 commits ahead of
+   `origin/master`** (`fe21292`, remote `Sundeepg98/ats-jobs-mcp`), so unlike
+   jobcore and linkedin these are live on the public remote right now rather
+   than sitting in a local commit. Outside the two repos in scope. Every other
+   sibling repo measured zero.
 2. **`linkedin`'s own backslash control has the defect found in jobcore's**
    (section 3.3): it asserts a character class that matches a slash too, so it
    cannot detect a `BACKSLASH` that stopped being one. One line fixes it.
@@ -177,6 +201,18 @@ The `<11 chars>` / `<10 chars>` difference is the doubled and single spellings
 of the same value -- direct evidence the rule sees both. The failure never
 prints the path: a CI log is a publication channel.
 
+**And the regression property, checked in memory against the fixed file**: the
+exact historical line re-introduced in each of its three spellings is caught
+every time, so the guard protects against the leak coming back in a form other
+than the one it was written from --
+
+```
+current paths.py:        CLEAN
+doubled (the original)   -> [('drive root', 'D:..ep <11 chars>')]
+single                   -> [('drive root', 'D:..ep <10 chars>')]
+slash                    -> [('drive root', 'D:..ep <10 chars>')]
+```
+
 ### 3.2 Rules 2 and 3 -- no real hits in this repo, so each broken at the defect that matters
 
 Each rule's separator was reduced from a run to a single character -- the exact
@@ -298,15 +334,27 @@ header claims.
 | linkedin | `dcf0a68` | re-vendored body + pin bump |
 | linkedin | this document | the audit |
 
-Neither repo was pushed. jobcore is 2 commits ahead of `origin/master`,
-linkedin 2 (this document included).
+Neither repo was pushed. **jobcore is 2 commits ahead of `origin/master`, all
+of them this wave's. linkedin is 15 ahead, of which 2 are this wave's** -- the
+other 13 are earlier waves' unpushed work, untouched here. Worth knowing
+before the push: pushing `linkedin` publishes those 13 as well, and this wave
+did not review them.
 
 Suites:
 
 | repo | before | after |
 |---|---|---|
-| jobcore | 707 passed, 0 failed | **759 passed, 0 failed** |
-| linkedin | **1 failed**, 2267 passed | **2268 passed, 0 failed** |
+| jobcore | 707 passed, 0 failed | **759 passed, 0 failed** (at `fff1438`, clean tree) |
+| linkedin | **1 failed**, 2267 passed | **2268 passed, 0 failed** (the code state, at `dcf0a68`) |
+
+One bookkeeping note so the numbers reconcile. The linkedin figure was measured
+BEFORE this document was committed. The identity guard is parametrised over
+tracked files, so adding this file adds exactly one case: tracked files go
+153 -> 154 across `dcf0a68` -> `76667d4`, and the guard alone goes **187 -> 188
+passed**, measured, with this document swept and green. A full-suite run at
+`76667d4` is therefore 2269, of which 2268 is measured directly and the +1 is
+this file's own sweep case, measured separately. No test was removed or
+skipped to reach any of these numbers.
 
 The two checks that could not both be green are now green together
 (`test_vendored_buildinfo.py` + `test_no_committed_identity.py`: 195 passed).
@@ -405,28 +453,79 @@ repo clean.
 
    | repo | path-shaped leaks |
    |---|---|
-   | **ats-jobs** | **2** |
+   | **ats-jobs** | **3** (see the correction below) |
    | instahyre, jobcore, jobspy, linkedin, naukri, unipile, uplers | 0 |
+
+   **AND THE SCAN THAT PRODUCED THAT TABLE WAS ITSELF ONE-TOKEN BLIND.** It
+   reported 2, because it matched only where the path segment IS the given
+   name -- the same defect this document spends section 1.6 describing. Re-run
+   through the COMMITTED GUARD instead of a purpose-built scan, `ats-jobs`
+   reports **7 hits, of which 3 are identity**:
+
+   | file:line | hit | verdict |
+   |---|---|---|
+   | `ats_buildinfo.py:5` | drive root at the given name | **REAL** |
+   | `tests/test_no_path_leaks.py:93` | drive root at the given name | **REAL** |
+   | `tests/test_no_path_leaks.py:94` | **a Windows ACCOUNT name** under `Users/` | **REAL -- missed by the token scan entirely** |
+   | `test_no_path_leaks.py:95,107,108` | an `E:` drive rooted at `boards` | generic; names nobody |
+   | `test_no_path_leaks.py:142` | a `D:` drive rooted at `certs` | generic; names nobody |
+
+   The third is the one worth the paragraph. A scan looking for a GIVEN NAME
+   cannot see an ACCOUNT NAME: different token, same class of leak, and it sat
+   one line below a hit the scan did find. The four generic roots are not
+   leaks -- they would simply be added to that repo's `GENERIC_DRIVE_ROOTS`,
+   which is a tuning decision, not a redaction.
 
    `linkedin` is the ONLY repo carrying a vendored copy of jobcore's
    `paths.py` (`instahyre`'s same-named file is its own, with no vendor
    header), so the re-vendor in section 4 covers the vendoring completely.
 
-   **But `ats-jobs` carries two of the same class, and this wave did not touch
-   it** -- it is outside the two repos in scope, it is separately public, and
-   the push is not this wave's to make:
+   **This wave did not touch `ats-jobs`** -- it is outside the two repos in
+   scope, it is separately public, and the push is not this wave's to make.
+   What is there:
 
    * `ats_buildinfo.py:5` -- a comment quoting the machine's full absolute
-     path, introduced to say where the sibling checkout sits "on this box"
+     path, written to say where the sibling checkout sits "on this box"
    * `tests/test_no_path_leaks.py:93` -- the full absolute path as test data,
      **in a file named `test_no_path_leaks.py`**
+   * `tests/test_no_path_leaks.py:94` -- the operator's Windows account name,
+     one line below it, in the same fixture list
 
-   Both are the single-separator spelling. The second is the third instance
-   today of the self-refuting fixture: a check proving it detects path leaks
-   by carrying one. That shape has now appeared in `jobcore`, in `linkedin`
-   (per the previous wave), and here -- it is a pattern in how these guards
-   get written, not three coincidences.
+   All single-separator. The second and third are the third and fourth
+   instances today of the self-refuting fixture: a check proving it detects
+   path leaks by carrying real ones. That shape has now appeared in `jobcore`,
+   in `linkedin` (per the previous wave), and twice here -- it is a pattern in
+   how these guards get written, not a run of coincidences. **A fixture list
+   is where a redaction sweep stops looking**, because the file's name says it
+   is already about the problem.
+
+   **`ats-jobs` already HAS a file called `tests/test_no_path_leaks.py`, and
+   it is the file carrying two of the three leaks.** That is the same false
+   friend as jobcore's two guards (section 1.1): it tests a runtime SCRUBBER
+   -- that a function strips drive paths out of a payload -- and nothing in it
+   sweeps the REPOSITORY. A repo can hold a passing path-leak suite and a
+   published path leak at once, and this one does. Measured, not asserted:
+
+   ```
+   $ python -m pytest tests/test_no_path_leaks.py -q
+   33 passed in 1.57s
+   ```
+
+   Thirty-three green assertions about path leaking, in the file that is
+   itself leaking two paths. **The suite is not wrong -- it answers a
+   different question than its name suggests it does**, which is the same
+   defect as jobcore's `test_stamp_identity.py`, and it is why "does this repo
+   have a path-leak test?" is not a question worth asking. The question is
+   what the test READS: a payload, or the tree.
+
+   Its tree is clean at `fe21292` and **0 commits ahead of `origin/master`**,
+   so these are already on the public remote -- the one place in this family
+   where the leak is published rather than pending. Cleaning the tree will not
+   remove them from history; that is the same delete-and-recreate question the
+   operator has open for the other two repos, now with a third repo attached
+   to it.
 
    **Recommended as its own slice**, with the same two rules this wave used:
-   replace the value rather than the escaping, and port the guard so the
-   repo can never regress. Not taken here.
+   replace the value rather than the escaping, and port the sweep so the repo
+   guards itself and not only its scrubber. Not taken here -- out of scope,
+   and the push is not this wave's to make.
