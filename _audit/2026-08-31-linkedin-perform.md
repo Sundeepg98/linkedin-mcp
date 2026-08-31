@@ -1059,3 +1059,86 @@ report honestly.** Every refusal names a measured blocker.
     writes performed by me   0
 
 Nothing was pushed.
+
+
+---
+
+# PART THREE: the four captures
+
+The operator granted the two captures the harness had refused -- **surfaced to
+him as a permission decision rather than routed around** -- and a genuinely
+fresh reconnect (pid 8748, `82313a8`) made the fourth reachable. All four
+taken. **Badge 0 before and 0 after. Nothing of anybody's was spent.**
+
+## 20. What each capture settled
+
+| capture | landed | the finding |
+|---|---|---|
+| `feed_item` | `/feed/update/<urn>/`, **no redirect** | ONE reaction control and ONE comment affordance, where the feed and profile draw eight. **`contenteditable: 1` and `Text editor for creating comment` NAMED** -- every previous census of every readable surface reported zero. |
+| `post_composer` | `/preload/sharebox/`, no redirect, **twice identical** | `contenteditable: 2`, `Text editor for creating content` and `Post` (DISABLED while empty), both in `dialog#0`. |
+| `article_composer` | `/article/new/`, no redirect | Editor and `Title` named; **the publish control comes back `<redacted>`** -- blanked as a singleton. **This route is WORSE measured than the sharebox one.** Two routes was never a requirement. |
+| `messaging_compose` | `/messaging/compose/`, **NO REDIRECT** | **The cost this refusal was built around does not exist.** It stayed at the composer, 77 controls, ZERO dialogs, opened nobody's thread -- the opposite of `/messaging/`, measured twice to redirect into a conversation. Controls named; `Send` disabled while empty. |
+
+**AND THE INMAIL BALANCE IS NOT ON THE COMPOSER.** The control named `InMail`
+is a conversation-list FILTER PILL carrying `aria-checked=false`, beside
+`Focused`, `Unread`, `Starred` and `Connections`. A balance needs
+`/premium/my-premium/`, which is admitted and unread.
+
+## 21. WHAT THE COMPOSERS LEFT BEHIND -- in the two sentences, uncollapsed
+
+**WHAT I COULD SEE:** his activity rail was 8 items / 20 permalinks before and
+after; `Post impressions` moved 61 to 62, which is analytics drift and not a
+post; the messaging badge read 0 before and 0 after; and the messaging
+composer did not redirect, so no thread was opened.
+
+**WHAT I COULD NOT SEE:** whether any composer saved a DRAFT. 17 of 17
+candidate draft-listing addresses are refused by this module's own read
+boundary, so there is no reachable surface on which one could be detected or
+removed. **"Nothing appears to have been left" is a statement about my
+instruments, not about what happened.**
+
+## 22. A CORRECTION TO PART TWO, AND IT IS MINE
+
+Part Two reported the profile going dark after the composer loads, and my
+message to the lead called it a "reproduced correlation" after it recurred
+following the second batch of composer loads.
+
+**ONE READING LATER IT DID NOT REPRODUCE.** The profile came back at 233
+controls with `?isSelfProfile=true` present, same session, no restart.
+
+So the honest finding is **simpler and weaker than the one I reported**:
+`/in/me/` renders INTERMITTENTLY -- sometimes 233 controls with LinkedIn's
+self-assertion, sometimes 67 with no redirect at all -- and the two
+self-owned readers refuse correctly on the bad ones. The clustering after
+composer loads is not established, and I am withdrawing that claim rather
+than leaving it to be believed.
+
+**It does not weaken the instrument built for it.** The settle report flags a
+bad reading without needing a causal story, which is exactly why reporting the
+comparison beats reporting a theory.
+
+## 23. THE LEDGER AFTER THE CAPTURES
+
+| # | blocker before | blocker after |
+|---|---|---|
+| 1 `publish_post` | no surface, no control | **must TYPE**, and its only verification surface renders intermittently |
+| 2 `comment_on_item` | no surface, no control, unaimable | **must TYPE.** All three closed. |
+| 3 `react_to_item` | unaimable, no permalink, ON label, which reaction | **which reaction it applies, and the ON label.** Two closed, both remaining are one supervised act of his. |
+| 9 `send_message` | surface forbidden, cost unknown | **must TYPE**, and the balance unread. The redirect cost turned out not to exist. |
+
+**THREE OF THE FOUR NOW REFUSE ON ONE MEASURED THING: typing is not a
+sanctioned mutation anywhere in this package.** That is the finding Part One
+opened with, arriving where it was predicted to.
+
+## 24. RECEIPTS, PART THREE
+
+    117a5a9  docs(refusals)  four captures land, three blockers close
+
+    suite                 2340 passed, 0 failed
+    badge before / after  0 / 0
+    threads opened        0 -- /messaging/compose/ does not redirect
+    SANCTIONED_MUTATIONS  2, unchanged all wave
+    confirm_tokens used   0
+    writes performed      0
+
+Nothing was pushed.
