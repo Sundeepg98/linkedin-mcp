@@ -1400,3 +1400,217 @@ for this repo.
 | **No capture of a populated SAVED tab** | five parts in, still the artefact that would have shortened every one of them | a capture run |
 | **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship | lead's call |
 | **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
+
+---
+---
+
+# Part 6 -- the classifier, and a lesson this module had already written down
+
+**Commit:** `cef81b8` on `master`, **not pushed**.
+**Baseline in:** 2013 passed. **Baseline out:** 2017 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 40. Which classifier, established rather than inherited
+
+The lead asked me not to take the `time_ago` label as the answer. It is the answer, and the
+reason is structural rather than a reading of the word.
+
+`parse_job_card_trace` assigns labels **in the parser's own order** -- chrome, then status,
+then time-ago -- and stops at the first match. So a label of `time_ago` means
+**`_JOB_STATUS_LINE` was tried first and did not match**, and `has_time_ago` did. The label is
+a record of which branch fired, not a description someone chose.
+
+**It is `shape.has_time_ago`.**
+
+---
+
+## 41. The defect, and this module had already named it for another surface
+
+`has_time_ago` answers *does this line CONTAIN a timestamp*. `parse_job_card` used it as a
+**whole-line discard**:
+
+```python
+if has_time_ago(line):
+    continue          # the entire line is dropped
+```
+
+Twenty lines above it in the same file sits the function written for exactly this distinction,
+whose docstring is the argument:
+
+> `is_timestamp_line` -- **True when a line is a timestamp and essentially nothing else.**
+> *Distinct from "contains a timestamp" on purpose. A notification body like "Your application
+> was viewed today by Acme" carries its time INLINE, and dropping that whole line to avoid
+> repeating the time would throw away the notification.*
+
+**The notification parser learned that lesson. The job-card parser never did.**
+
+Live, the Saved row arrives as **one line, 75 characters**, carrying the anchored title with a
+relative timestamp welded into it. `has_time_ago` sees the timestamp, the line is discarded
+whole, `remaining` empties, and `parse_job_card` returns `None` -- `records=1, dropped=1`,
+which is the signature this file has been chasing since Part 3.
+
+---
+
+## 42. The obvious repair is wrong, and the measurement is why
+
+The obvious fix is to swap the predicate: use `is_timestamp_line` for the discard. **It fixes
+the Saved row and breaks one that works.**
+
+Measured across **all 25 records** the fixtures produce, comparing the surviving lines under
+each predicate:
+
+| candidate repair | fixes the live shape | records changed, of 25 |
+|---|---|---|
+| swap to `is_timestamp_line` | yes | **1** |
+| spare the ANCHORED TITLE from the time-ago discard | yes | **0** |
+| spare the anchored title from time-ago AND status | yes | 0 |
+
+The one it changes is `job_detail_following_hydrated`, where
+`"Riverton, ... - 1 week ago - 33 people clicked apply"` goes from discarded to content -- a
+location-and-time line promoted into the field sequence. That is the lead's warning exactly:
+a fix that makes Saved parse by loosening a rule the other surfaces depend on.
+
+**So the repair is the exemption, not the predicate**, and it is also the structurally right
+place. The anchored title is the one line KNOWN to be the title; a classifier that can consume
+it and leave nothing is wrong in shape rather than in its regex. That was the lead's third
+bullet and the measurement agrees with it.
+
+```python
+if has_time_ago(line) and line != anchor:
+    continue
+```
+
+**Sparing it from `_JOB_STATUS_LINE` as well costs nothing measurable and is NOT done.** The
+structural argument extends there; the evidence does not. An exemption should grow one measured
+step at a time, and the day a status-shaped title appears is the day that step has a reason.
+Recorded rather than taken.
+
+### Draft, specifically
+
+The lead asked for proof rather than a formality, since Draft rows genuinely carry a time-ago.
+**Zero of 25 records change**, and that set includes every record `jobs_tracker_row.html`
+produces -- the DRAFT tab. Its parse is additionally pinned field by field by
+`test_the_draft_row_still_parses_and_for_the_same_reason`, and 359 fixture tests across every
+surface using this parser are unchanged. Draft parses today for the same reason it did
+yesterday: nothing about its lines meets the exemption, so nothing about its handling moved.
+
+### `when` is not lost
+
+`find_time_ago` runs over every line **before** the discard loop. Sparing the line changes
+which lines survive, not which timestamp is reported. Measured on the live shape:
+`when: '3 days ago'`, from the same line that is now also the title.
+
+---
+
+## 43. The fix drifted the trace immediately, and the guard caught it
+
+The parser gained the exemption; `parse_job_card_trace` had not. On **the very record the fix
+was written for** the two disagreed -- the parser returned a row, the trace said
+`no_remaining`.
+
+`test_the_trace_agrees_with_the_parser_it_describes` is what caught it, one commit after Part 5
+strengthened it. The trace now mirrors the exemption, and the live shape is **in the corpus**
+so it stays caught. Removing the exemption from the trace alone now fails with:
+
+```
+E   AssertionError: ('live welded row', 'no_remaining', 'parsed')
+E   assert ('no_remaining' == 'parsed') == True
+```
+
+That is the anti-drift guard earning its place within a day of being written -- and it is worth
+noting it only worked because Part 5's mutation run found it collapsing a three-valued verdict
+to a boolean. Fixed one part, used the next.
+
+---
+
+## 44. Does `linkedin_saved_jobs` return the row? Not confirmed, and here is the prediction
+
+**Designed and unconfirmed.** The mechanism is measured on a derived record of the live shape;
+that the live row is that shape is inferred from the trace -- 75 characters, one line,
+`has_anchored_title` true, claimed by `time_ago` -- which is strong but is not the same as
+having seen the row come back.
+
+### What I expect, stated before the measurement
+
+**The Saved tab returns one row: job `4423880462`, Sprinto.** Its `when` should read a relative
+timestamp. **Its `title` will be the whole welded line** -- title, employer, location and the
+saved-time run together -- because that is what the row offers as a single line, and nothing in
+this fix splits it. `company` and `location` will be `null`.
+
+That is a row rather than a refusal, and it is honest about being ugly. Splitting a welded line
+into fields is a separate problem and would be guessing at a boundary nobody has measured.
+
+**If it still refuses**, the `PARSE TRACE` sentence will say which line fired and the labels
+will say what claimed the record's lines. A verdict of `parsed` in the trace beside a refusal
+would mean the trace and the parser have drifted again, and the corpus above says that is
+catchable.
+
+### And what it unblocks
+
+`unsave_job` becomes previewable **if and only if the Saved tab now reads**. Its anchor has been
+in place since Part 2; `_read_saved_state` needs to find `4423880462` among the rows to return
+`saved`, and `_direction` refuses on `unknown` before minting. The chain is: the tab parses ->
+the row's `job_id` is `4423880462` -> direction resolves -> a preview renders.
+
+**I have not verified that and will not.** Verifying it means holding a token for an action on
+the operator's only saved job. The offline test pins the blocking behaviour; the unblocked half
+is his to see.
+
+### The call
+
+Restart, confirm `linkedin_server_info`'s `build.code.commit` matches
+`git rev-parse --short=12 HEAD`, then, paired with `linkedin_search_jobs` and repeated twice:
+
+```
+linkedin_saved_jobs()
+```
+
+---
+
+## 45. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **2013 passed** (Part 5's close-out, re-measured).
+* Out: **2017 passed, 0 failed**, in 587.64 s.
+* The delta is 4, all in `tests/test_tracker_harvest_census.py`: the fix, the one-line-wide
+  proof that a bare timestamp line is still discarded, the executable record of why the wide
+  repair was rejected, and the trace-mirrors-the-exemption guard.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41.
+
+**No write performed or attempted.** No `confirm_token` reached any tool. `unsave_job` was not
+fired. The Chrome profile was never launched from a script. The one source mutation I ran
+myself -- removing the exemption from the trace to confirm the corpus catches the drift -- was
+reverted from a byte copy with `git diff --stat` verified afterwards.
+
+**Privacy held.** Nothing about the offending string is reported as a line: the trace's
+vocabulary is still the closed four words, and the test fixtures model the shape with invented
+text naming no real employer.
+
+**Commit**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `cef81b8` | `fix(parser): a title that carries a timestamp is still a title` |
+
+Files: `linkedin_server/shape.py`, `tests/test_tracker_harvest_census.py`. **ASCII-clean**,
+verified by byte scan.
+
+---
+
+## 46. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **Whether the Saved tab now returns the row** | one `linkedin_saved_jobs` after a restart, against the prediction in section 44 | one call |
+| **The welded line becomes the whole title** | the row parses, and its title carries employer, location and the saved-time run together. Splitting it needs a measured boundary, and the tracker's own captures do not show one -- a populated SAVED capture would | needs the capture |
+| **`unsave_job` previewable** | follows from the Saved tab reading. Anchor in place since Part 2 | his call |
+| **The status classifier could take a title the same way** | the exemption covers time-ago only, deliberately. A status-shaped title would need it, and none has been seen | recorded, not taken |
+| **`HARVEST_BLOCK_CARDS_JS` has the Part 4 defect** | notifications are its only caller; no fixture exercises a non-rendered duplicate | small, needs evidence |
+| **No capture of a populated SAVED tab** | six parts in. It would have shortened every one of them, and it is now also what the title-splitting question needs | a capture run |
+| **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
