@@ -1836,3 +1836,113 @@ def test_consume_normalises_its_target_the_way_mint_did(writes_on):
     )
     assert redeemed.target == canonical
     assert redeemed.consumed is True
+
+
+# ---------------------------------------------------------------------------
+# 9. THE GRANT SWEEPER
+# ---------------------------------------------------------------------------
+
+
+def test_an_expired_grant_is_dropped_rather_than_held_for_the_process(
+    writes_on, monkeypatch
+):
+    """THE TTL BOUNDED WHEN A GRANT COULD BE USED, NOT HOW LONG IT WAS HELD.
+
+    A grant was written at ``mint`` and removed only by ``consume`` or
+    ``discard_all`` -- no timer, no task, no ``atexit`` -- so a minted and
+    never-confirmed grant kept its target in process memory for the life of
+    the process, long after the token had stopped working.
+
+    IT MATTERS MORE FROM 2026-08-31 THAN IT DID BEFORE, which is why it is
+    fixed now rather than noted again. Until today no composite action could
+    be granted at all, so every held target was a job id or a company id.
+    ``update_setting`` is performable, so a PREVIEW mints -- and previews are
+    the common case while confirmations are the rare one. Held targets are
+    about to be the normal state.
+    """
+    writes.discard_all()
+    stale = _bare_grant(action="save_job", target="4600000042")
+    writes._GRANTS[stale.token] = stale
+    assert stale.token in writes._GRANTS
+
+    # Age it past the TTL by moving the clock, not by sleeping.
+    now = [stale.minted_at + writes.GRANT_TTL_SECONDS + 1.0]
+    monkeypatch.setattr(writes.time, "monotonic", lambda: now[0])
+    assert stale.expired()
+    # STILL HELD until something sweeps: this is the state the fix is about.
+    assert stale.token in writes._GRANTS
+
+    assert writes._sweep_expired_grants() == 1
+    assert stale.token not in writes._GRANTS
+    # AND IT IS NOT A CLEAR-ALL. A live grant beside a dead one survives, or
+    # the "sweeper" is just discard_all wearing a gentler name.
+    live = _bare_grant(action="save_job", target="4600000043")
+    live.minted_at = now[0]
+    writes._GRANTS[live.token] = live
+    assert writes._sweep_expired_grants() == 0
+    assert live.token in writes._GRANTS
+    writes.discard_all()
+
+
+def test_minting_sweeps_what_previous_previews_left_behind(
+    writes_on, monkeypatch
+):
+    """THE SWEEP RUNS ON A PATH THAT ALREADY RUNS, rather than on a timer.
+
+    A timer is a background task, and a background task holding write grants
+    is exactly what ``GRANT_TTL_SECONDS`` exists to make impossible. So the
+    sweep happens on mint and on consume, and this asserts the first -- on the
+    call that CREATES the pressure, since one preview per confirmation is the
+    optimistic ratio and the real one is worse.
+    """
+    writes.discard_all()
+    stale = _bare_grant(action="save_job", target="4600000042")
+    writes._GRANTS[stale.token] = stale
+    now = [stale.minted_at + writes.GRANT_TTL_SECONDS + 1.0]
+    monkeypatch.setattr(writes.time, "monotonic", lambda: now[0])
+
+    spec = spec_for_action("save_job")
+    observation = writes._record(
+        spec,
+        target="4600000099",
+        facts={"title": "A posting", "company": "A company"},
+        facts_url="https://www.linkedin.com/jobs/view/4600000099/",
+        state="not_saved",
+        state_why="read off the list",
+        state_url=writes.SAVED_LIST_URL,
+        same_page_as_action=False,
+    )
+    fresh = mint("save_job", "4600000099", receipt=observation.receipt)
+
+    assert stale.token not in writes._GRANTS, "the stale grant survived a mint"
+    assert fresh.token in writes._GRANTS, "the new grant was swept by its own mint"
+    writes.discard_all()
+
+
+def test_the_expired_token_keeps_its_own_answer_rather_than_the_sweepers(
+    writes_on, monkeypatch
+):
+    """AND THE SWEEP DOES NOT EAT THE MESSAGE, which it did at first.
+
+    Sweeping before the lookup in ``consume`` was the obvious placement and it
+    cost something real: an expired token stopped getting "this confirm token
+    expired after 120s -- run the preview again and read it before confirming"
+    and started getting "unknown or already-discarded confirm token". Both
+    refuse. Only one tells him what to do, and the difference lands on
+    somebody who has just taken too long over a block this design asked him to
+    read carefully.
+    """
+    writes.discard_all()
+    grant = _bare_grant(action="save_job", target="4600000042")
+    writes._GRANTS[grant.token] = grant
+    monkeypatch.setattr(
+        writes.time,
+        "monotonic",
+        lambda: grant.minted_at + writes.GRANT_TTL_SECONDS + 1.0,
+    )
+    with pytest.raises(WriteAttemptError) as excinfo:
+        consume(grant.token, action="save_job", target="4600000042")
+    message = str(excinfo.value)
+    assert "expired" in message, message
+    assert "Run the preview again" in message, message
+    writes.discard_all()

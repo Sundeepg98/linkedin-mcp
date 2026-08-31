@@ -1504,6 +1504,37 @@ class WriteGrant:
 _GRANTS: dict[str, WriteGrant] = {}
 
 
+def _sweep_expired_grants() -> int:
+    """Drop every grant past its TTL. Returns how many went.
+
+    THE TTL BOUNDED WHEN A GRANT COULD BE USED AND NOT HOW LONG IT WAS HELD,
+    which is a different property and the one that was missing. A grant was
+    written at :func:`mint` and removed only by :func:`consume` or
+    :func:`discard_all` -- no timer, no task, no ``atexit`` -- so a
+    minted-but-never-confirmed grant kept its target in process memory for the
+    life of the process, long after the token itself had stopped working.
+
+    WHY IT MATTERS MORE FROM 2026-08-31 THAN IT DID BEFORE. Until today no
+    composite action could be granted at all, so every held target was a job
+    id or a company id. ``update_setting`` is performable now, so a PREVIEW
+    mints -- and previews are the common case, while confirmations are the
+    rare one. Held targets are about to be the normal state rather than the
+    exception, and the specs whose targets carry CONTENT (a comment, a post, a
+    message) are the ones a future wave would add next.
+
+    SWEPT ON EVERY MINT AND EVERY CONSUME rather than on a timer. A timer is a
+    background task, and a background task holding write grants is exactly the
+    thing ``GRANT_TTL_SECONDS`` exists to make impossible; sweeping on the
+    paths that already run keeps this synchronous and gives it no schedule of
+    its own. The cost is bounded by how many grants a process can hold, which
+    is small by construction.
+    """
+    dead = [token for token, grant in _GRANTS.items() if grant.expired()]
+    for token in dead:
+        _GRANTS.pop(token, None)
+    return len(dead)
+
+
 def mint(action: str, target: str, *, receipt: str) -> WriteGrant:
     """Issue a single-use grant, and ONLY against a live read receipt.
 
@@ -1556,6 +1587,9 @@ def mint(action: str, target: str, *, receipt: str) -> WriteGrant:
         observation=observation,
     )
     _GRANTS[grant.token] = grant
+    # AFTER the insert, never before: sweeping first would leave this grant
+    # unswept for its whole life and make the sweep one call behind forever.
+    _sweep_expired_grants()
     return grant
 
 
@@ -1619,6 +1653,16 @@ def consume(token: str, *, action: str, target: str) -> WriteGrant:
         )
     grant.consumed = True
     _GRANTS.pop(token, None)
+    # SWEPT LAST, AND THAT PLACEMENT IS A CORRECTION. Sweeping before the
+    # lookup was the obvious spot and it cost something real: an expired token
+    # stopped getting "this confirm token expired after 120s -- run the
+    # preview again and read it before confirming" and started getting
+    # "unknown or already-discarded confirm token". Both refuse; only one
+    # tells him what to do, and the difference lands on somebody who has just
+    # taken too long reading a block this design asked him to read carefully.
+    # So THIS token keeps its own specific answer and every OTHER expired
+    # grant is dropped here.
+    _sweep_expired_grants()
     return grant
 
 
@@ -3795,24 +3839,56 @@ _NINE_REFUSALS: dict[str, str] = {
     # update_profile_field, send_message -- needs a mutation CLASS sanctioned,
     # which is a different and larger decision than a url.
     "send_invitation": (
-        "send_invitation is sanctioned and cannot be performed. WHAT IS "
+        "send_invitation is sanctioned and cannot be performed, and ON "
+        "2026-08-31 ITS BLOCKER CHANGED FROM A DECISION HE HAD NOT MADE TO A "
+        "STRUCTURAL OPPOSITION THIS SERVER CAN STATE EXACTLY. WHAT IS "
         "MEASURED, and it answers the question that mattered most here: THERE "
         "IS A ROUTE THAT COSTS NO BADGE. The invitation control was found on "
         "his OWN PROFILE -- 9 buttons whose accessible name ends ' to "
-        "connect' -- a page this server already loads and which carries no "
-        "pending-invitation counter. So this action never needs /mynetwork/, "
-        "whose load is refused precisely because it consumes that counter. "
-        "WHAT STOPS IT ANYWAY, and both halves are real. FIRST, THE LABEL IS "
-        "THE OTHER PERSON'S NAME: LinkedIn writes it into the aria-label, the "
-        "census blanks a name before counting it, and reading the full label "
-        "in order to aim a click would mean collecting a third party's "
-        "identity to populate a confirm block. The suffix is the whole of "
-        "what may be known without paying that, and a suffix selects nine "
-        "controls, not one. SECOND, NO SURFACE: '/invite', 'invitation' and "
-        "'/connect' are all on the forbidden list. WHAT WOULD LIFT IT: a "
-        "ruling that this server may hold ONE named person's identity long "
-        "enough to show it to him and aim one click -- which is a question "
-        "about him and a stranger, not a measurement, and is his to answer."
+        "connect', counted identically on three separate days -- a page this "
+        "server already loads and which carries no pending-invitation "
+        "counter. So this action never needs /mynetwork/, whose load is "
+        "refused precisely because it consumes that counter. THE AIMING WORKS "
+        "TOO: a needle is handed INTO the page, the comparison runs there, "
+        "and three integers come back -- total, matches, index. Exactly one "
+        "match is aimable; zero and two-or-more both refuse, the second "
+        "because choosing between indistinguishable controls is choosing by "
+        "position. WHAT NOW STOPS IT is not the boundary and not a "
+        "measurement. IT IS THAT THE CONFIRM BLOCK CANNOT NAME THE PERSON. "
+        "The label on that control IS a third party's name, and the whole "
+        "reason the aiming is safe is that no label ever enters this process; "
+        "the moment one does it can reach a traceback, an exception message, "
+        "a cache key or an audit line, and no care downstream un-rings that. "
+        "So the block this design would show him before he confirmed could "
+        "say a COUNT and a POSITION -- 'exactly one of nine controls carries "
+        "the word you gave, at position 3' -- and could not say WHO. Every "
+        "other action here names its target in terms he can check: a job "
+        "title and an employer, a company name, his own name and headline. "
+        "THIS PACKAGE HAS ALREADY DECIDED THAT QUESTION TWICE IN THE SAME "
+        "DIRECTION -- unsave_job refused until the label on the control it "
+        "would press had been photographed, and react_to_item is refused in "
+        "part because 'a gate that cannot say what it is about to express "
+        "under his name is not a gate'. An invitation is a request to a real "
+        "person, sent under his name, and it is less recoverable than either. "
+        "AND THE PRIVACY DESIGN AND THE CONFIRMABILITY REQUIREMENT ARE IN "
+        "DIRECT OPPOSITION, which is why this is not a gap somebody can close "
+        "with more care: they are the same tension the census's own gate has "
+        "with update_profile_field, and here the container is NOT self-owned "
+        "-- those nine names belong to nine other people. THE IDENTITY IS "
+        "DELIBERATELY NOT ROUTED THROUGH THE TARGET, and that was the "
+        "alternative: a grant's target reaches consume()'s mismatch message, "
+        "_render's block and grant.preview, so routing a name through it "
+        "would trade a structural guarantee for three handling promises. Not "
+        "routing it makes a leak impossible; closing those three sites would "
+        "only make one less likely. WHAT WOULD LIFT IT is now a much narrower "
+        "ruling than 'may this server hold an identity': may it read the "
+        "accessible name of THE ONE control his own needle has already "
+        "uniquely selected, print it in the block for him to check, and "
+        "discard it -- one label, chosen by his word rather than by this "
+        "server, never stored and never returned to a caller. That is the "
+        "exact shape of the relaxation he granted for the self-owned editor "
+        "container, applied one door along, and it is his to rule rather "
+        "than this server's to assume."
     ),
     "send_message": (
         "send_message is sanctioned and cannot be performed. NO SURFACE: "
