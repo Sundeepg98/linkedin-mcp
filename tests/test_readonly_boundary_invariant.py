@@ -32,7 +32,13 @@ DELIBERATE, update the digests in the same commit that changes the behaviour --
 that is the review moment this file exists to create, and it should feel like
 one.
 
-IT HAS BEEN ONE, ONCE. On 2026-08-23 the package acquired its first mutating
+IT HAS BEEN ONE FIVE TIMES, and this sentence said "ONCE" until 2026-08-31 --
+count rot in the file whose whole job is to notice when something moved, which
+is worth correcting here rather than anywhere else. The re-freezes are dated in
+the comments on PINNED below; read those for what moved each time. The first is
+described next because it is the one that established the format.
+
+On 2026-08-23 the package acquired its first mutating
 call and the baseline moved from ``oldsha14`` to ``5277dfc``. Two digests moved
 and four did not, and the four are the ones that matter: the navigation
 allowlist, the forbidden-substring list, the mutation scanner's patterns and

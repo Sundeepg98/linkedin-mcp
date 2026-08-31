@@ -3398,8 +3398,19 @@ _NINE_REFUSALS: dict[str, str] = {
         "opened. THIS PREVIEW THEREFORE DOES NOT LOAD MESSAGING. It reads the "
         "badge off a page already open and stops. If the surface is to be "
         "measured, HE calls linkedin_open_messaging -- the tool that pays that "
-        "cost knowingly, and whose own name says so. WHAT WOULD LIFT IT: that "
-        "call, plus a boundary ruling on the composer."
+        "cost knowingly, and whose own name says so. AND AS OF 2026-08-31 THIS "
+        "IS DEFERRED BY RULING RATHER THAN UNMEASURED, which is a different "
+        "kind of refusal and the stronger one. Asked to rule on the "
+        "messaging composer alongside five other surfaces, the operator "
+        "ruled the other five and DEFERRED this one deliberately, on the "
+        "ground stated above: opening messaging opens a conversation "
+        "LinkedIn chooses and can mark a real person's InMail read, and that "
+        "is a cost paid by somebody who is not him. So the missing thing is "
+        "no longer a decision nobody has taken. It is a decision taken the "
+        "other way, and it stands until he revisits it. WHAT WOULD LIFT IT: "
+        "him revisiting that deferral -- and then, still, his own "
+        "linkedin_open_messaging call, because the ruling deferred the "
+        "composer and did not make the thread load free."
     ),
 }
 
