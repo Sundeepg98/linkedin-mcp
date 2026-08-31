@@ -3231,6 +3231,70 @@ async def test_open_to_work_refuses_an_ORIGIN_it_could_not_read(
         assert expected in str(excinfo.value)
 
 
+def test_open_to_work_refuses_an_ORIGIN_IT_CANNOT_NAME_AN_AUDIENCE_FOR():
+    """THE BACKSTOP BEHIND THE UNKNOWN GATE, and it is a SHAPE-CLOSER rather
+    than a bug anybody has hit.
+
+    Everything the multi-state branch validates, it validates about the
+    DESTINATION: that a ``to_state`` was named, that it is one of the three
+    audiences, and that it is not the state already in force. The ORIGIN gets
+    two checks and both are about emptiness -- truthy, and not ``unknown``.
+    Then the block is built, and building it subscripts
+    ``spec.audiences[state.strip().casefold()]``.
+
+    So a state string the spec has never seen -- a relabelled audience, a
+    translated one, a fourth setting -- came out of that subscript as a raw
+    ``KeyError``. Not a refusal: an unhandled crash, saying nothing about what
+    was read, on the one action this module documents as IRREVERSIBLE IN
+    AUDIENCE. Every other refusal in ``_direction`` is a sentence the operator
+    reads. The binary-toggle path below has exactly this backstop
+    (``if state != spec.from_state``) and returns before the multi-state
+    branch can reach it, which is the whole reason the gap existed.
+
+    NO REAL LINKEDIN STRING IS KNOWN TO REACH IT, and that is stated rather
+    than implied. ``_read_profile_state`` already casefold-checks the audience
+    against ``spec.audiences`` and returns ``UNKNOWN`` when it misses, so
+    through :func:`preview` an unrecognised audience is caught one layer up --
+    which is what ``test_open_to_work_refuses_an_ORIGIN_it_could_not_read``
+    pins. This test therefore drives ``_direction`` DIRECTLY, which is the
+    only way in, and the guard it demands is the same species as refusal 1 in
+    that function's own docstring: unreachable today, kept because it is what
+    would catch a future edit routing round the read.
+
+    SHOWN FAILING by deleting the guard from the multi-state branch::
+
+        E       KeyError: 'anyone on linkedin'
+    """
+    spec = spec_for_action("set_open_to_work")
+    # A string LinkedIn could genuinely render -- it is their own audience
+    # wording elsewhere in the product -- rather than obvious garbage. The
+    # failure this guards is a RENAME, not a corruption.
+    observation = writes.Observation(
+        target="self",
+        target_kind="self",
+        facts={"name": "Sundeep", "headline": ""},
+        facts_url=writes.PROFILE_URL,
+        state="Anyone on LinkedIn",
+        state_why="the topcard printed it verbatim beside the label",
+        state_url=writes.PROFILE_URL,
+        same_page_as_action=False,
+        receipt="not-redeemable",
+        observed_at=time.monotonic(),
+    )
+
+    with pytest.raises(WriteAttemptError) as excinfo:
+        writes._direction(spec, observation, "off")
+    message = str(excinfo.value)
+    # It names WHAT WAS READ, so the reader can go and look at the same card.
+    assert "Anyone on LinkedIn" in message, message
+    # ...and the permitted set, so the rename is legible as a rename.
+    assert "recruiters only" in message, message
+    # It must be the ORIGIN being refused, not the destination: the
+    # destination refusal already exists and passing on its message would
+    # leave this branch untested.
+    assert "ever seen LinkedIn render" not in message, message
+
+
 async def test_open_to_work_names_the_audience_of_the_destination_in_the_gate(
     writes_on,
     browser_page,

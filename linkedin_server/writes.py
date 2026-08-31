@@ -2714,6 +2714,33 @@ def _direction(
             raise WriteAttemptError(
                 f"the setting is already {state!r}. Nothing to change."
             )
+        if state.strip().casefold() not in spec.audiences:
+            # THE ORIGIN GETS THE SAME CHECK THE DESTINATION ALREADY HAD.
+            # Above this line the state has only been tested for emptiness and
+            # for ``unknown``; the block below then subscripts
+            # ``spec.audiences[...]`` with it. A relabelled or translated
+            # audience -- anything LinkedIn renders that this spec has not met
+            # -- came out of that subscript as a raw KeyError rather than a
+            # sentence, on the one action whose residue is IRREVERSIBLE IN
+            # AUDIENCE. Measured 2026-08-31: state 'Anyone on LinkedIn' raised
+            # ``KeyError: 'anyone on linkedin'`` at writes.py:2722.
+            #
+            # It refuses rather than defaulting, and that is the load-bearing
+            # half. A fallback string would let the gate print WHO CAN SEE IT
+            # NOW for a setting it cannot identify, which is the exact claim
+            # ``_read_profile_state`` already declines to make one layer up.
+            #
+            # UNREACHABLE THROUGH ``preview`` TODAY, like refusal 1 above:
+            # ``_read_profile_state`` casefold-checks the audience itself and
+            # returns ``unknown`` on a miss. Kept for the same reason -- it is
+            # the guard that catches a future edit routing round that read.
+            raise WriteAttemptError(
+                f"the current setting reads {state!r}, which is not one this "
+                f"server has seen LinkedIn render. The known ones are "
+                f"{sorted(spec.audiences)}, and a gate that cannot say who "
+                "can see the setting he is in must not offer to change it. "
+                + observation.state_why
+            )
         out = dict(read_from)
         out.update(
             {
