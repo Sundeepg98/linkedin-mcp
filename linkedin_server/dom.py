@@ -6,12 +6,14 @@ of a link: a person is behind ``/in/<slug>``, a job is behind
 ``/jobs/view/<id>``. Every list surface here is harvested by finding those
 links and taking the text of the card around them.
 
-Three small scripts are injected, and only three. Each is a module-level
-constant so it can be read in one place and scanned by
-``tests/test_readonly.py`` against :data:`readonly.JS_MUTATION_TOKENS` -- the
-scripts query the DOM and read text, and nothing else. The Python side of
-each call carries a ``# readonly-ok`` waiver, which is what keeps a future
-``evaluate`` from slipping in unreviewed.
+Six small scripts are injected, and only six -- this sentence said "three" for
+long enough to survive three additions, so the count is now stated as a count
+somebody has to change. Each is a module-level constant so it can be read in
+one place and scanned by ``tests/test_readonly.py`` against
+:data:`readonly.JS_MUTATION_TOKENS` -- the scripts query the DOM and return
+text, tag names, character counts or, in the newest one, nothing but integers.
+The Python side of each call carries a ``# readonly-ok`` waiver, which is what
+keeps a future ``evaluate`` from slipping in unreviewed.
 
 The harvesters return ``{"href": ..., "text": ...}`` records, plus a handful
 of OBSERVATIONS about where that text came from -- which strings the page
@@ -2472,11 +2474,21 @@ async def read_surface_census(
 # now and here is what was there" is a different artefact from "somebody
 # looked once in August", and the second is what goes stale silently.
 #
-# WHY NO ``page.evaluate`` ANYWHERE BELOW. The same trade as
-# ``FOLLOWED_PAGE_ROW_SCOPE`` above: an injected script has to be declared in
-# ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
-# scanner, and a locator chain injects nothing. Seven readers that need no new
-# entry on the read-only boundary is the cheaper side of that trade.
+# WHY ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE. This comment
+# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31 and it is
+# quoted rather than deleted, because the trade it describes is still the
+# right one for six of these seven readers: an injected script has to be
+# declared in ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the
+# JS mutation scanner, and a locator chain injects nothing.
+#
+# ``INVITE_NEEDLE_JS`` is the exception and it BUYS something the other six do
+# not need. Their readers count controls; this one has to COMPARE a label
+# against a needle, and the label is a third party's name. A locator chain
+# doing that comparison in Python would have to fetch the label into this
+# process first, which is the exact thing the ruling on this capability
+# forbids -- so here the cheap side of the trade is the unacceptable one. The
+# script pays a boundary declaration in order to keep a name out of Python
+# entirely. See the constant for what it returns, which is three numbers.
 
 #: The feed composer's entry control. MEASURED on ``/feed/`` 2026-08-30 as
 #: ``shape "Start a post", tag div, role button, name_source text,
@@ -2551,6 +2563,61 @@ REACTIONS_MENU_LABEL = "Open reactions menu"
 #: party's identity, and a suffix is what a selector may be built from.
 INVITE_CONTROL_SUFFIX = " to connect"
 INVITE_CONTROL = 'button[aria-label$=" to connect"]'
+
+#: AIMING ONE OF THOSE NINE, AND THE REASON THIS IS A SCRIPT RATHER THAN A
+#: LOCATOR CHAIN. Every other reader in the block below deliberately injects
+#: nothing; this one injects, and the trade runs the other way here for one
+#: reason: A NAME THAT REACHES PYTHON CANNOT BE TAKEN BACK. It can reach an
+#: exception message, a log line, a cache key, a traceback, a rendered confirm
+#: block -- and no care downstream un-rings that. So the comparison happens
+#: INSIDE THE PAGE, where the label already lives, and what crosses back is
+#: arithmetic.
+#:
+#: WHAT GOES IN is a needle THE OPERATOR TYPED at call time, handed over as a
+#: script ARGUMENT rather than spliced into source -- so the script is a
+#: constant that ``test_readonly.py`` can read whole, and no caller string ever
+#: becomes executable text.
+#:
+#: WHAT COMES OUT IS THREE NUMBERS AND NOTHING ELSE: how many controls wear the
+#: suffix, how many of those contain the needle, and -- only when that is
+#: exactly one -- which position in the suffix-matched list it sits at. No
+#: label, no fragment of one, no href, not even truncated. The prefix of these
+#: labels has never been read by this server and is not read here either: the
+#: suffix is matched AS A SUFFIX with ``endsWith``, never by rebuilding a whole
+#: label from a prefix nobody has seen.
+#:
+#: ``index`` IS ``null`` AND NOT ``-1`` when there is no aim, deliberately. A
+#: sentinel integer is an index, and ``-1`` handed to Playwright's ``nth``
+#: means THE LAST CONTROL -- so the sentinel for "do not aim" would aim, at a
+#: stranger, which is the one failure this whole reader exists to prevent.
+INVITE_NEEDLE_JS = """
+(cfg) => {
+  const needle = String(cfg.needle).toLowerCase();
+  const nodes = document.querySelectorAll(cfg.selector);
+  let total = 0;
+  let matches = 0;
+  let index = null;
+  for (const node of nodes) {
+    const label = node.getAttribute('aria-label') || '';
+    // MATCHED AS A SUFFIX, and re-checked here even though cfg.selector is
+    // itself a suffix selector. The two predicates are written in different
+    // languages over the same fact, so a CSS engine that ever matched more
+    // loosely than endsWith would be narrowed by this line rather than
+    // followed by it.
+    if (!label.endsWith(cfg.suffix)) continue;
+    const position = total;
+    total += 1;
+    if (label.toLowerCase().indexOf(needle) !== -1) {
+      matches += 1;
+      // The FIRST match records where it sits; a SECOND erases the aim rather
+      // than keeping either. Choosing between two would be choosing by
+      // position, which is what the caller is refused for doing.
+      index = (matches === 1) ? position : null;
+    }
+  }
+  return {total: total, matches: matches, index: index};
+}
+"""
 
 #: The profile editors, MEASURED as ordinary anchors on ``/in/me/``
 #: 2026-08-30 -- each a single ``<a href>`` with an aria-label, count 1.
@@ -2688,22 +2755,74 @@ async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
     return out
 
 
-async def read_invitation_surface(page: Any) -> dict[str, Any]:
-    """How many invitation controls this page draws. A COUNT AND NOTHING ELSE.
+async def read_invitation_surface(
+    page: Any, needle: Optional[str] = None
+) -> dict[str, Any]:
+    """How many invitation controls this page draws, and -- if asked -- which.
 
-    Deliberately narrower than every other reader here, and the narrowness is
-    the point. This control's accessible name IS another person's name. A
-    reader that returned the label would be collecting third-party identity in
-    order to populate a confirm block, which is the cost this whole family of
-    rulings refuses to pay. So the label is never read -- not read and then
-    shaped, not read and then dropped. The count establishes that the control
-    exists on a surface costing no badge, and that is the only question asked.
+    STILL NUMBERS AND NOTHING ELSE, WHICHEVER QUESTION IS ASKED. This control's
+    accessible name IS another person's name. A reader that returned the label
+    would be collecting third-party identity in order to populate a confirm
+    block, which is the cost this whole family of rulings refuses to pay. So
+    the label is never returned -- not shaped, not truncated, not dropped after
+    a peek in Python.
+
+    ``needle`` IS THE OPERATOR'S OWN WORD, NOT A STORED ONE. Ruled 2026-08-31:
+    this server may RECEIVE a person's identity per call and must not persist
+    it. That is why the needle is a parameter and not a field: it arrives, it
+    is handed into the page, and it leaves with the frame. It is not written
+    into the result, not into a log line, and not into any exception message
+    raised below.
+
+    WHY THE COMPARISON HAPPENS IN THE PAGE. It is what makes "never stored"
+    ENFORCEABLE rather than promised. Doing it in Python would require the
+    label here first, and a name that reaches this process can reach a
+    traceback, a cache key or a rendered block, where no downstream care
+    retrieves it. See :data:`INVITE_NEEDLE_JS`.
+
+    THE THREE FIELDS, and the difference between two of them is the whole
+    aiming rule:
+
+    * ``controls`` -- how many controls wear :data:`INVITE_CONTROL_SUFFIX`.
+    * ``matches`` -- ``None`` when NO needle was asked for, which is a
+      different answer from ``0``. Zero means the question was put and nobody
+      on this surface carries that word; ``None`` means nobody asked.
+    * ``index`` -- the position within the suffix-matched list, set ONLY when
+      ``matches`` is exactly 1. Two matches erase it rather than picking one.
+
+    AN EMPTY NEEDLE IS NOT A NEEDLE. A blank string is a substring of every
+    label, so passing one through would report a match on all nine controls --
+    true, useless, and indistinguishable from a real ambiguity. It is treated
+    as "nothing was asked" instead, so the two honest answers stay separable
+    and no branch silently matches everybody.
     """
-    out: dict[str, Any] = {"controls": 0}
+    out: dict[str, Any] = {"controls": 0, "matches": None, "index": None}
+    wanted = "" if needle is None else str(needle).strip()
+    if not wanted:
+        try:
+            out["controls"] = int(await page.locator(INVITE_CONTROL).count())
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("invite controls unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    cfg = {
+        "selector": INVITE_CONTROL,
+        "suffix": INVITE_CONTROL_SUFFIX,
+        "needle": wanted,
+    }
     try:
-        out["controls"] = int(await page.locator(INVITE_CONTROL).count())
+        reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("invite controls unreadable: %s: %s", type(exc).__name__, exc)
+        # THE EXCEPTION IS NOT STRINGIFIED HERE, and every other reader in this
+        # module does stringify its own. The needle was handed to that call;
+        # a driver that echoes an argument back inside its error text would be
+        # publishing the operator's word into a log through this line. The
+        # type alone says which failure happened and carries nothing.
+        logger.debug("invite needle unreadable: %s", type(exc).__name__)
+        return out
+    out["controls"] = int(reading.get("total") or 0)
+    out["matches"] = int(reading.get("matches") or 0)
+    position = reading.get("index")
+    out["index"] = None if position is None else int(position)
     return out
 
 

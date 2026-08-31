@@ -1716,12 +1716,20 @@ async def linkedin_notifications(
 #: A caller passes a KEY. A url never arrives as an argument and is never built
 #: from one: an unknown key is refused with the valid keys named, and the
 #: refusal RETURNS rather than falling through to a navigation. That is the
-#: difference between a tool that reads three pages and a tool that reads
-#: whatever it is handed, and it is worth more than the allowlist behind it --
-#: ``BROWSER.goto`` puts every one of these through
-#: ``readonly.assert_read_url`` as it does for every other read, and all of
-#: them were already on that allowlist before this tool existed. Nothing in
-#: ``readonly.py`` was touched to add this.
+#: difference between a tool that reads a fixed set of pages and a tool that
+#: reads whatever it is handed, and it is worth more than the allowlist behind
+#: it -- ``BROWSER.goto`` puts every one of these through
+#: ``readonly.assert_read_url`` as it does for every other read.
+#:
+#: THE SENTENCE THAT USED TO CLOSE THAT PARAGRAPH IS GONE, and saying so is
+#: why this replaces it rather than deleting it quietly. It read: "all of them
+#: were already on that allowlist before this tool existed. Nothing in
+#: ``readonly.py`` was touched to add this." That was true of the first two
+#: keys and stopped being true on 2026-08-30, when ``settings`` was admitted by
+#: a deliberate widening, and it is now false three times over. THE COUNT WAS
+#: WRONG TOO -- the paragraph said "three pages" while five keys sit below.
+#: A stale count in the one comment a reader consults to learn how many
+#: surfaces there are is this repo's most-repeated defect.
 #:
 #: NOTIFICATIONS IS DELIBERATELY ABSENT, and its absence is the one thing here
 #: worth explaining, because it is the obvious third surface and the next
@@ -1763,10 +1771,50 @@ async def linkedin_notifications(
 #:   ALREADY loads the page for a reason the operator chose, and already counts
 #:   the send surface it finds there -- which is exactly the "census a page
 #:   already being loaded for another reason" route named above.
+#:
+#: TWO MORE WERE ADMITTED ON 2026-08-31, on the operator's ruling, and each
+#: gets its ruling here in the same terms the four above are judged by -- what
+#: it is for, whose data it is, what LOADING it costs, and what it changes.
+#:
+#: * ``profile_edit_intro`` -- ``/in/me/edit/intro/``, the intro editor on HIS
+#:   OWN profile. WHAT IT IS FOR: the ``update_profile_field`` capability is
+#:   specced and refusing, and what it refuses on is a guessed form. This is
+#:   the page that says which fields the editor really carries and how they
+#:   are addressed. HIS OWN DATA, and only ever his: ``/in/me/`` redirects to
+#:   whoever is signed in, and no member-slug form is on the allowlist,
+#:   deliberately -- ``linkedin_who_viewed_me`` has MEASURED that loading a
+#:   third party's profile leaves them a durable record, so a key that could
+#:   address anybody else is refused on that ground before any other. IT
+#:   CONSUMES NO BADGE and emits nothing another member can observe: an editor
+#:   opened is not an activity, nothing is broadcast to a feed, and no
+#:   notification reaches anyone. AND IT CHANGES NO VALUE -- the page RENDERS
+#:   the fields the profile already holds. A census reads the rendered DOM and
+#:   returns counts; it types nothing and submits nothing, so no draft, no
+#:   revision and no artefact of any kind is left behind by loading it.
+#: * ``settings_dark_mode`` -- ``/mypreferences/d/dark-mode``, ONE NAMED
+#:   settings page. The ruling was explicit about the shape: one named page at
+#:   a time, never the family and never a wildcard, so this is one key naming
+#:   one page and a second needs a second ruling. WHAT IT IS FOR: the settings
+#:   index says which sections exist; it does not say what a section page is
+#:   made of, and ``update_setting`` refuses on that gap. HIS OWN DATA -- a
+#:   per-account display preference with no audience and no third party
+#:   anywhere in it. IT CONSUMES NO BADGE: this surface carries none, which is
+#:   the same finding that admitted the index one day earlier. AND IT CHANGES
+#:   NO VALUE: the page RENDERS the preference the account already holds, and
+#:   a census does not touch the control that would set it.
+#:   WHY THIS PAGE AND NOT ANOTHER: it is the only candidate that needed NO
+#:   NARROWING OF ANY FORBIDDEN SUBSTRING. ``/mypreferences/d/settings/
+#:   language`` and ``.../settings/autoplay-videos`` would each have required
+#:   ``"/settings/"`` to be weakened to buy one read, and a ``categories/``
+#:   page would have required weakening the entry that keeps the toggles
+#:   unreachable. All three are deliberately absent. The full argument is on
+#:   the pattern itself in ``readonly.py``.
 CENSUS_SURFACES: dict[str, str] = {
     "feed": FEED_URL,
     "profile": f"{BASE_URL}/in/me/",
+    "profile_edit_intro": f"{BASE_URL}/in/me/edit/intro/",
     "settings": f"{BASE_URL}/mypreferences/d/",
+    "settings_dark_mode": f"{BASE_URL}/mypreferences/d/dark-mode",
 }
 
 
@@ -1816,14 +1864,21 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
     seen on the first render", never as "the page has none".
 
     Args:
-        surface: which page to measure. One of "feed", "profile" or
-            "settings" -- a KEY, never a url. "settings" is the settings
-            INDEX and nothing below it; the pages carrying the actual toggles
-            are refused by the read boundary. Notifications, /mynetwork/ and
-            messaging are deliberately not offered, each for the same reason:
-            loading them costs a badge or opens somebody's conversation, and a
-            census is not worth a side effect. See CENSUS_SURFACES for the
-            ruling on each.
+        surface: which page to measure. A KEY, never a url, and one of these
+            five: "feed", "profile", "profile_edit_intro", "settings" or
+            "settings_dark_mode". Two of them are one page out of a family
+            whose other members stay unreachable, and the enumeration is the
+            whole of that -- "settings" is the settings INDEX and nothing
+            below it, and "settings_dark_mode" is one named page below it,
+            while the pages carrying the actual toggles are refused by the
+            read boundary. "profile_edit_intro" is the intro editor on HIS OWN
+            profile, in the /in/me/ spelling that resolves to whoever is
+            signed in; no other member's is reachable, because opening one
+            would leave that person a durable record. Notifications,
+            /mynetwork/ and messaging are deliberately not offered, each for
+            the same reason: loading them costs a badge or opens somebody's
+            conversation, and a census is not worth a side effect. See
+            CENSUS_SURFACES for the ruling on each.
     """
     key = str(surface or "").strip().lower()
     if key not in CENSUS_SURFACES:

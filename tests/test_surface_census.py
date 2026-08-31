@@ -54,6 +54,19 @@ PROFILE_URL = "https://www.linkedin.com/in/me/"
 #: append to this string to build the category pages that must stay refused.
 SETTINGS_URL = "https://www.linkedin.com/mypreferences/d/"
 
+#: The intro editor on HIS OWN profile, added 2026-08-31 on the operator's
+#: ruling. The ``/in/me/`` spelling is the whole of the permission: it
+#: redirects to whoever is signed in, so it can only ever reach him, and this
+#: server has MEASURED on ``linkedin_who_viewed_me`` that loading a third
+#: party's profile leaves them a durable record.
+PROFILE_EDIT_INTRO_URL = "https://www.linkedin.com/in/me/edit/intro/"
+
+#: ONE NAMED SETTINGS PAGE, added the same day and by the same ruling: one
+#: page at a time, never the family and never a wildcard. Deliberately NOT
+#: ``/mypreferences/d/settings/language`` or ``.../autoplay-videos``, each of
+#: which would have needed the forbidden substring ``"/settings/"`` narrowed.
+DARK_MODE_URL = "https://www.linkedin.com/mypreferences/d/dark-mode"
+
 #: Invented, and drawn from the families ``test_no_committed_identity.py``
 #: already sanctions, so this file's own fixtures cannot read as real data.
 MEMBER_SLUG = "alex-r-12ab34"
@@ -635,11 +648,58 @@ def drive(monkeypatch):
     return install
 
 
-def test_the_surface_table_is_a_closed_set_of_three():
-    assert set(CENSUS_SURFACES) == {"feed", "profile", "settings"}
+def test_the_surface_table_is_a_closed_set_of_five():
+    """FIVE SINCE 2026-08-31, and the count is in the name so a sixth arriving
+    quietly is impossible: the set equality is what a new key has to get past,
+    and the name is what a reader compares against the ruling block above the
+    table in server.py."""
+    assert set(CENSUS_SURFACES) == {
+        "feed",
+        "profile",
+        "profile_edit_intro",
+        "settings",
+        "settings_dark_mode",
+    }
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
+    assert CENSUS_SURFACES["profile_edit_intro"] == PROFILE_EDIT_INTRO_URL
+    assert CENSUS_SURFACES["settings_dark_mode"] == DARK_MODE_URL
+
+
+def test_the_two_surfaces_ruled_on_2026_08_31_reach_one_page_each():
+    """THE NARROWNESS OF THE RULING, asserted rather than described.
+
+    The operator ruled two things: the profile editors are his to open, and
+    ONE NAMED settings page at a time -- never the family, never a wildcard.
+    A census key is the place that ruling is easiest to widen by accident,
+    because a key is just a string beside a url.
+
+    So both keys are pinned to their exact url, and the addresses each key
+    would grow into are asserted refused by the read boundary. The
+    account-ending pair is the reason this matters at all:
+    ``/mypreferences/d/close-accounts`` and
+    ``/mypreferences/d/hibernate-account`` are one wildcard away from a key
+    like ``settings_dark_mode``.
+    """
+    assert readonly.is_read_url(PROFILE_EDIT_INTRO_URL) is True
+    assert readonly.is_read_url(DARK_MODE_URL) is True
+
+    for refused in (
+        # The rest of his own editor family.
+        "https://www.linkedin.com/in/me/edit/",
+        "https://www.linkedin.com/in/me/edit/topcard/",
+        # Another member's, which no pattern here may ever address.
+        "https://www.linkedin.com/in/" + MEMBER_SLUG + "/edit/intro/",
+        # The rest of the settings family, including the two that end an
+        # account and the two named pages deliberately NOT admitted.
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+        "https://www.linkedin.com/mypreferences/d/settings/language",
+        "https://www.linkedin.com/mypreferences/d/settings/autoplay-videos",
+        SETTINGS_URL + "categories/account",
+    ):
+        assert readonly.is_read_url(refused) is False, refused
 
 
 @pytest.mark.parametrize(
@@ -753,7 +813,13 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
     assert result["error"] == "unknown_surface"
     # Spelled out rather than derived from CENSUS_SURFACES: comparing the
     # answer against the same dict that produced it could not fail.
-    assert result["valid_surfaces"] == ["feed", "profile", "settings"]
+    assert result["valid_surfaces"] == [
+        "feed",
+        "profile",
+        "profile_edit_intro",
+        "settings",
+        "settings_dark_mode",
+    ]
     assert navigations == []
     assert page.evaluations == []
 

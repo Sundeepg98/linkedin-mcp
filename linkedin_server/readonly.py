@@ -175,6 +175,37 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/details/"
         r"(skills|experience|education)/?(\?[^#]*)?$"
     ),
+    # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
+    # ruling: the profile editors are his own profile, no third party, and
+    # therefore his to open.
+    #
+    # THE ``/in/me/`` FORM ONLY, AND THAT IS THE WHOLE OF THE PERMISSION.
+    # The obvious generalisation -- ``/in/[A-Za-z0-9-]+/edit/intro/`` -- is
+    # the one shape that must never be written here, and the reason is
+    # MEASURED rather than cautious: ``linkedin_who_viewed_me`` establishes
+    # that loading a third party's profile leaves them a durable record in
+    # their own "who viewed your profile" list. So a pattern that can address
+    # anybody but him is refused on that ground alone, whatever the page
+    # underneath is for. ``/in/me/`` redirects to whoever is signed in and can
+    # therefore only ever reach his own profile.
+    #
+    # No query string, for the same reason as the job posting above: nothing
+    # builds one, so nothing needs to be preserved.
+    #
+    # IT IS ADMITTED HERE AND STILL REFUSED ONE GATE EARLIER, unless it is
+    # named. ``/edit/`` is on :data:`_FORBIDDEN_URL_SUBSTRINGS`, which is
+    # checked BEFORE this list, and that entry is deliberately untouched: it
+    # must keep refusing the whole rest of the family. What lets this ONE url
+    # through is :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS`, an EXACT-url table,
+    # below.
+    #
+    # ONE RESIDUE, recorded rather than left to be tripped over. The pattern
+    # ends ``intro/?$``, so the slashless spelling matches it; the exemption
+    # is keyed on the exact url ``server.py`` builds, which carries the
+    # trailing slash. ``/in/me/edit/intro`` is therefore still refused by the
+    # forbidden gate. The exemption being NARROWER than the pattern is the
+    # conservative direction, and it is the direction chosen.
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/intro/?$"),
     # The company Pages he follows -- LinkedIn calls the surface "Manage
     # Pages". Added 2026-08-23. A pure read, and the ONLY one LinkedIn offers
     # for this list: the profile's Interests section renders a Companies tab,
@@ -223,6 +254,31 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # WHY NOT ``/psettings/``: it is the legacy address for the same surface
     # and nothing builds it, so it is on the forbidden list instead of here.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/?$"),
+    # ONE NAMED SETTINGS PAGE BELOW THE INDEX. Added 2026-08-31 on the
+    # operator's ruling, and the ruling's own words are the constraint: ONE
+    # NAMED PAGE AT A TIME, NEVER THE FAMILY, NEVER A WILDCARD. So this is an
+    # anchored pattern naming one page, not ``/mypreferences/d/[a-z-]+``, and
+    # a second page needs a second deliberate edit here.
+    #
+    # WHY ``dark-mode`` AND NOT ONE OF THE OTHERS, because three were on the
+    # table and two were refused:
+    #
+    # * It is a pure PER-ACCOUNT DISPLAY PREFERENCE. It has no audience, it
+    #   names no third party, and rendering it emits nothing another member
+    #   can observe. The page RENDERS the value the account already holds; it
+    #   changes none of them.
+    # * And the part that actually decided it: IT REQUIRES NO NARROWING OF ANY
+    #   FORBIDDEN SUBSTRING. ``/mypreferences/d/dark-mode`` contains none of
+    #   them, so the second gate is untouched and stays fully intact for the
+    #   ``categories/`` family. ``/mypreferences/d/settings/language`` and
+    #   ``/mypreferences/d/settings/autoplay-videos`` would each have required
+    #   ``"/settings/"`` to be narrowed to buy one page, which is trading a
+    #   standing refusal for a single read. They are deliberately NOT
+    #   admitted, and neither is any ``categories/`` page.
+    #
+    # No query string and no sub-path: nothing builds either, and the
+    # anchoring is what keeps this one page from becoming the family.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$"),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.
@@ -298,11 +354,69 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     # address LinkedIn stopped serving is one it can start serving again.
     "/mypreferences/d/categories/",
     "/psettings/",
+    # THE TWO ENTRIES BELOW WERE ADDED 2026-08-31, and they correct a claim
+    # this module made about itself rather than adding a new caution.
+    #
+    # The settings audit assumed "Close and delete account" and "Hibernate
+    # account" -- the two most destructive addresses on the account, and the
+    # only two on it that are not undoable by re-running the opposite tool --
+    # were covered by the ``/mypreferences/d/categories/`` entry three lines
+    # up. THEY ARE NOT. Measured off a live census 2026-08-31, their real
+    # addresses are ``/mypreferences/d/close-accounts`` and
+    # ``/mypreferences/d/hibernate-account``, and NEITHER CONTAINS
+    # ``categories/``. The only thing that had ever refused them was the
+    # anchored allowlist.
+    #
+    # WHY THAT MATTERED ENOUGH TO FIX, in the same terms as the 2026-08-30
+    # entry above it: the net refusal held, so neither was ever reachable.
+    # What did not hold is this list's stated job. It is documented at the top
+    # of this tuple as a "second, independent gate" and as "belt and braces: a
+    # future pattern edited too loosely still cannot reach these" -- and for
+    # the two worst addresses on the account there was no second gate at all.
+    # The allowlist has now been deliberately widened twice in two days, which
+    # is exactly the situation a backstop exists for. Now there is one.
+    "/close-accounts",
+    "/hibernate-account",
     "/edit/",
     "action=",
     "/delete",
     "/withdraw",
 )
+
+#: The ONE url permitted to carry a forbidden substring, and WHICH substring.
+#:
+#: Added 2026-08-31, with the intro editor on the allowlist above.
+#: ``/in/me/edit/intro/`` contains ``/edit/``, which is on the tuple above and
+#: is checked BEFORE the allowlist, so admitting the page needed either this
+#: table or a narrowed ``/edit/`` entry. Narrowing was refused: ``/edit/`` must
+#: keep refusing the whole rest of that family, on his own profile and on
+#: everybody else's, and buying one page by weakening a standing refusal is
+#: the trade this module exists to make somebody argue for.
+#:
+#: THE SEMANTICS, and each of the three is load-bearing:
+#:
+#: * THE KEY IS AN EXACT, COMPLETE URL, compared with ``==`` against the whole
+#:   lowercased url -- never a prefix, never a pattern, never ``startswith``.
+#:   The dict lookup below IS that equality. This mirrors
+#:   ``writes.WriteSpec.exempt_substring``, whose docstring states the
+#:   discipline for the write door one level down: "Compared with ``==``
+#:   against the entry in the forbidden list -- never as a shape, because a
+#:   loose exemption is how a real write hides." A url that merely BEGINS with
+#:   the key -- ``.../in/me/edit/intro/../../evil`` -- finds nothing here and
+#:   is refused by ``/edit/`` like the rest of the family.
+#: * THE EXEMPTION IS PER-SUBSTRING, which is why the value is a substring and
+#:   not a ``True``. A url exempted for ``/edit/`` that also contained
+#:   ``/delete`` is still refused, by ``/delete``. The check runs INSIDE the
+#:   forbidden loop for exactly that reason.
+#: * IT BUYS PAST ONE GATE, NEVER BOTH. The url still has to match an anchored
+#:   pattern in :data:`_ALLOWED_URL_PATTERNS` afterwards. An entry here is
+#:   permission to carry a forbidden substring, not permission to be opened.
+#:
+#: One entry, and a second is a boundary change rather than a maintenance
+#: edit. ``tests/test_readonly.py`` pins the contents.
+_FORBIDDEN_SUBSTRING_EXEMPTIONS: dict[str, str] = {
+    "https://www.linkedin.com/in/me/edit/intro/": "/edit/",
+}
 
 
 def assert_read_url(url: str) -> str:
@@ -331,8 +445,19 @@ def assert_read_url(url: str) -> str:
         )
 
     lowered = url.lower()
+    # The ONE substring this exact url may carry, or None. A dict lookup is an
+    # equality test, which is the whole of the discipline: a url that merely
+    # begins with an exempted one matches nothing here. See
+    # :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS`.
+    exempted = _FORBIDDEN_SUBSTRING_EXEMPTIONS.get(lowered)
     for bad in _FORBIDDEN_URL_SUBSTRINGS:
         if bad in lowered:
+            # PER-SUBSTRING, so an exemption for /edit/ does not survive a
+            # /delete appearing in the same url. The loop continues rather
+            # than returning: the remaining substrings still get their say,
+            # and the allowlist below still has to admit the url.
+            if exempted is not None and exempted == bad:
+                continue
             raise WriteAttemptError(
                 f"navigation blocked: {url!r} contains {bad!r}, which is not a "
                 "read surface. This is the READ door and it refuses; a write "

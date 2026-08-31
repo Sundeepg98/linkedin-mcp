@@ -287,7 +287,30 @@ def test_only_dom_module_waives_evaluate():
     # A THIRD WAS PROPOSED AND NOT SPENT: main's textContent length is read
     # through locator.text_content(), Playwright's own API, because a waiver
     # that a plain call replaces is a waiver nobody should be asked to review.
-    assert waived_in.get("dom.py", 0) <= 6, waived_in
+    #
+    # SEVEN FROM 2026-08-31, and this is the first waiver on this list spent to
+    # buy a PRIVACY guarantee rather than a reading. INVITE_NEEDLE_JS, run by
+    # dom.read_invitation_surface.
+    #
+    # The other six count controls, and every one of them could in principle
+    # have been a locator chain -- which is the test the paragraph above
+    # applies, and it is why the third was refused. THIS ONE FAILS THAT TEST IN
+    # THE OTHER DIRECTION. It has to COMPARE an aria-label against a needle,
+    # and on this surface the label IS A THIRD PARTY'S NAME. A locator chain
+    # doing that comparison in Python would have to fetch the label into this
+    # process first, and the operator's 2026-08-31 ruling on invitation
+    # targeting is that this server may RECEIVE one identity per call and must
+    # not persist it -- no identity in any file, log, cache or audit. A name
+    # that reaches Python can reach a traceback, an exception message, a cache
+    # key or an audit line, and no care downstream un-rings that.
+    #
+    # So the waiver is what makes "never stored" ENFORCEABLE rather than
+    # promised: the comparison happens in the page and the script returns three
+    # numbers -- total, matches, index -- and no label, no name, and no
+    # fragment of either. The cheap side of the usual trade is the unacceptable
+    # one here, which is the argument, and it is the only reason this number
+    # moved.
+    assert waived_in.get("dom.py", 0) <= 7, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -310,6 +333,18 @@ INJECTED_SCRIPTS = {
     # the module: no text and no attribute value leaves it, because a tracker
     # row names a company and a job.
     "TRACKER_ROW_SHAPE_JS": dom.TRACKER_ROW_SHAPE_JS,
+    # 2026-08-31. The invitation needle. It is declared here for the ordinary
+    # reason -- every script this package executes is scanned, and one that is
+    # not declared is one nobody reviewed -- and declaring it ENROLS it in
+    # test_every_script_this_package_executes_cannot_mutate, which is the
+    # point of the list rather than a side effect of joining it.
+    #
+    # It is also the only script here whose OUTPUT shape is part of the
+    # boundary rather than only its input. It reads aria-labels carrying real
+    # people's names and returns three integers, so the privacy property is
+    # structural: there is no string in the return value to leak. The test that
+    # certifies THAT lives with the reader, not here.
+    "INVITE_NEEDLE_JS": dom.INVITE_NEEDLE_JS,
 }
 
 
@@ -409,10 +444,18 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     ``HARVEST_LINKED_CARDS_JS`` -- the SAME script the harvest runs, under a
     flag, precisely so a diagnostic cannot drift from the walk it describes --
     and ``dom.read_tracker_row_shape`` runs ``TRACKER_ROW_SHAPE_JS``.
+
+    SEVEN FROM 2026-08-31, and unlike the two before it this one IS new
+    surface area: ``INVITE_NEEDLE_JS``, run once from
+    ``dom.read_invitation_surface``. The argument for spending an evaluate
+    waiver on it is with the budget in
+    ``test_only_dom_module_waives_evaluate`` -- in short, it is the only
+    script here that exists to keep a value OUT of this process rather than to
+    bring one in.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 6, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 7, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
@@ -490,6 +533,14 @@ ALLOWED = [
     # redirects /messaging/ into a conversation it chooses, measured twice.
     "https://www.linkedin.com/messaging/",
     "https://www.linkedin.com/messaging/thread/2-abc/",
+    # THE TWO ADDRESSES THE OPERATOR RULED ON 2026-08-31, and each is ONE url
+    # rather than a family. The intro editor on HIS OWN profile, in the
+    # ``/in/me/`` spelling only -- that spelling redirects to whoever is signed
+    # in, so it can only ever reach him -- and ONE NAMED settings page. The
+    # rest of both families is in BLOCKED below, which is where the narrowness
+    # of this pair is actually asserted.
+    "https://www.linkedin.com/in/me/edit/intro/",
+    "https://www.linkedin.com/mypreferences/d/dark-mode",
 ]
 
 BLOCKED = [
@@ -550,6 +601,49 @@ BLOCKED = [
     "https://www.linkedin.com/jobs-tracker/?stage=saved\n",
     "https://www.linkedin.com/notifications/?x=1\r\nX: y",
     " https://www.linkedin.com/feed/",
+    # THE TWO MOST DESTRUCTIVE ADDRESSES ON THE ACCOUNT. Measured off a live
+    # census 2026-08-31: LinkedIn's own settings index links to "Close and
+    # delete account" at ``/mypreferences/d/close-accounts`` and to "Hibernate
+    # account" at ``/mypreferences/d/hibernate-account``. NEITHER contains
+    # ``categories/``, so until that day the only thing refusing them was the
+    # anchored allowlist -- for a list that documents itself as a second,
+    # independent gate, the two worst addresses had no second gate at all.
+    # Which gate refuses them now is asserted in
+    # ``test_the_two_account_destroying_addresses_are_refused_by_the_denylist``;
+    # here they are simply refused.
+    "https://www.linkedin.com/mypreferences/d/close-accounts",
+    "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    # THE REST OF THE /edit/ FAMILY, which is the whole family bar one url.
+    # ``/in/me/edit/intro/`` is exempted from the ``/edit/`` substring by
+    # NAME and by EXACT MATCH; nothing else in the family is, and a prefix is
+    # not a match.
+    "https://www.linkedin.com/in/me/edit/",
+    "https://www.linkedin.com/in/me/edit/topcard/",
+    "https://www.linkedin.com/in/me/edit/forms/next-action/",
+    "https://www.linkedin.com/in/me/edit/intro/../../evil",
+    "https://www.linkedin.com/in/me/edit/intro/?action=delete",
+    # ANOTHER MEMBER'S INTRO EDITOR, and the reason no member-slug pattern was
+    # written: ``linkedin_who_viewed_me`` has MEASURED that loading a third
+    # party's profile leaves them a durable record, so a pattern that can
+    # address anybody but him is refused on that ground alone.
+    "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+    # THE SPELLING THE ALLOWLIST PATTERN ADMITS AND THE EXEMPTION DOES NOT,
+    # recorded rather than left for somebody to trip over. The pattern ends
+    # ``intro/?$`` so the slashless form matches it; the exemption is keyed on
+    # the EXACT url the census builds, which carries the trailing slash. So
+    # this one is refused by the forbidden gate. That is the conservative
+    # direction -- a narrower exemption than the pattern, never a wider one.
+    "https://www.linkedin.com/in/me/edit/intro",
+    # THE REST OF /mypreferences/d/. ``dark-mode`` is ONE named page and the
+    # family is not admitted with it: the two settings pages that were
+    # considered and refused would each have needed ``"/settings/"`` narrowed,
+    # and the category pages carry the toggles.
+    "https://www.linkedin.com/mypreferences/d/settings/language",
+    "https://www.linkedin.com/mypreferences/d/settings/autoplay-videos",
+    "https://www.linkedin.com/mypreferences/d/categories/account",
+    "https://www.linkedin.com/mypreferences/d/dark-mode/extra",
+    "https://www.linkedin.com/mypreferences/d/dark-mode?theme=dark",
+    "https://www.linkedin.com/mypreferences/d/data-privacy",
 ]
 
 
@@ -618,6 +712,212 @@ def test_the_tracker_allowlist_admits_three_stages_and_no_more():
         assert wildcard.match(f"{BASE_URL}/jobs-tracker/?stage={stage}"), stage
 
 
+def test_the_two_ruled_surfaces_are_admitted_and_their_families_are_not():
+    """THE 2026-08-31 RULING, and the evidence that admitting it stayed narrow.
+
+    Two urls were ruled readable: the intro editor on his own profile, and ONE
+    named settings page. The hazard in both is the same one the tracker stages
+    have -- the shape the next person reaches for. For the editor it is
+    ``/in/[A-Za-z0-9-]+/edit/intro/``, which reads like the neighbourly
+    generalisation and is the one thing that must never be written: this
+    server has MEASURED, on ``linkedin_who_viewed_me``, that loading a third
+    party's profile leaves them a durable record. ``/in/me/`` redirects to
+    whoever is signed in, so it can only ever reach him. For the settings page
+    it is ``/mypreferences/d/[a-z-]+``, which would admit the two addresses in
+    the BLOCKED list above that can end an account.
+
+    So both halves are pinned: the pair is admitted, and each family member
+    that is not is named rather than left to a wildcard's absence.
+    """
+    assert readonly.is_read_url("https://www.linkedin.com/in/me/edit/intro/")
+    assert readonly.is_read_url("https://www.linkedin.com/mypreferences/d/dark-mode")
+
+    for refused in (
+        "https://www.linkedin.com/in/me/edit/",
+        "https://www.linkedin.com/in/me/edit/topcard/",
+        "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+        "https://www.linkedin.com/mypreferences/d/settings/language",
+        "https://www.linkedin.com/mypreferences/d/settings/autoplay-videos",
+        "https://www.linkedin.com/mypreferences/d/categories/account",
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    ):
+        assert not readonly.is_read_url(refused), refused
+
+    # SHOWN NOT PASSING VACUOUSLY, which for a refusal test is the whole
+    # question. Every refused address above matches the pattern somebody would
+    # reach for, so the loop is what fails on the day one of them is written.
+    tempting = (
+        re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/edit/intro/?$"),
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/[a-z\-/]+$"),
+    )
+    for refused in (
+        "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+        "https://www.linkedin.com/mypreferences/d/settings/language",
+    ):
+        assert any(pattern.match(refused) for pattern in tempting), refused
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    ],
+)
+def test_the_two_account_destroying_addresses_are_refused_by_the_denylist(url):
+    """WHICH GATE REFUSES, because the refusal itself never changed.
+
+    Both addresses were refused before 2026-08-31 and both are refused now, so
+    a test that only checked for a raise would pass identically across the
+    change and certify nothing about it. What changed is the GATE. The
+    settings audit assumed "Close and delete account" and "Hibernate account"
+    were covered by the ``/mypreferences/d/categories/`` entry; measured off a
+    live census that day, their real addresses are
+    ``/mypreferences/d/close-accounts`` and
+    ``/mypreferences/d/hibernate-account`` and NEITHER contains ``categories/``.
+    The only thing that had ever refused them was the anchored allowlist.
+
+    ``readonly.py`` documents its substring list as a "second, independent
+    gate ... belt and braces", and for the two most destructive addresses on
+    the account there was no second gate at all. This asserts that there is
+    one, by the message -- which is the only thing that tells the two gates
+    apart.
+    """
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(url)
+    message = str(caught.value)
+    assert "not a read surface" in message, message
+    assert "not on the read-only allowlist" not in message, message
+    # And the substring itself, so the test cannot pass on some other entry
+    # happening to match.
+    expected = "/close-accounts" if "close" in url else "/hibernate-account"
+    assert repr(expected) in message, message
+    assert expected in readonly._FORBIDDEN_URL_SUBSTRINGS
+
+
+def test_the_exemption_table_is_exactly_one_url_for_exactly_one_substring():
+    """The allowlist inside the denylist, read out loud.
+
+    ``_FORBIDDEN_SUBSTRING_EXEMPTIONS`` is the second structure in this module
+    that GRANTS rather than refuses, and a granting list that is only checked
+    for "does it cover what we needed" grows an entry at a time with nobody
+    noticing. So the CONTENTS are pinned here, the way
+    ``SANCTIONED_MUTATIONS`` is pinned above: one url, one substring, both
+    spelled out.
+
+    The value is checked too, not just the key. An entry mapped to ``/delete``
+    would buy past a different gate entirely while looking identical in a
+    listing of keys.
+    """
+    assert readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS == {
+        "https://www.linkedin.com/in/me/edit/intro/": "/edit/",
+    }
+    # The exempted substring must really be on the forbidden list; an
+    # exemption for a substring nobody forbids is a dead entry that reads like
+    # a live permission.
+    for substring in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS.values():
+        assert substring in readonly._FORBIDDEN_URL_SUBSTRINGS, substring
+    # And the key must be stored lowercased, because that is what it is
+    # compared against.
+    for key in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS:
+        assert key == key.lower(), key
+
+
+def test_an_exemption_buys_past_one_substring_and_not_a_second(monkeypatch):
+    """THE PER-SUBSTRING PROPERTY, shown on a url that carries two.
+
+    The real table has one entry and that url contains one forbidden
+    substring, so the property cannot be demonstrated on live data -- and a
+    property that cannot be demonstrated is one a later refactor can drop
+    without a single test going red. So the table is replaced with a hostile
+    one: a url exempted for ``/edit/`` that ALSO contains ``/delete``.
+
+    The exemption is per-substring, so ``/delete`` still refuses it. An
+    implementation that exempted the URL rather than the PAIR would let this
+    through, which is the whole reason the value in that dict is a substring
+    and not a ``True``.
+    """
+    hostile = "https://www.linkedin.com/in/me/edit/intro/delete"
+    monkeypatch.setattr(
+        readonly,
+        "_FORBIDDEN_SUBSTRING_EXEMPTIONS",
+        {hostile: "/edit/"},
+    )
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(hostile)
+    message = str(caught.value)
+    assert "'/delete'" in message, message
+    assert "not a read surface" in message, message
+
+
+def test_the_exemption_does_not_buy_past_the_allowlist(monkeypatch):
+    """ONE GATE, NEVER BOTH.
+
+    An exemption is permission to carry a forbidden substring. It is not
+    permission to be opened -- the anchored allowlist still has to admit the
+    url afterwards. Shown on a third party's intro editor, which is exactly
+    the url an over-broad exemption would reach: with the substring gate
+    bought past, the refusal has to come from the allowlist, and the message
+    is what proves it did.
+    """
+    stranger = "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/"
+    monkeypatch.setattr(
+        readonly,
+        "_FORBIDDEN_SUBSTRING_EXEMPTIONS",
+        {stranger: "/edit/"},
+    )
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(stranger)
+    assert "not on the read-only allowlist" in str(caught.value), str(caught.value)
+
+
+def test_the_exemption_is_matched_with_equality_and_never_as_a_prefix():
+    """``==``, and the control that shows what ``startswith`` would have cost.
+
+    ``writes.WriteSpec.exempt_substring`` states the discipline this mirrors:
+    "Compared with ``==`` against the entry in the forbidden list -- never as
+    a shape, because a loose exemption is how a real write hides." The same
+    applies one level up, to the url.
+
+    Every url below has the exempted url as a PREFIX and is a different
+    address. Each is refused -- but so is every one of them under a
+    ``startswith`` lookup, because the allowlist pattern is anchored and no
+    suffix can match it. A test that only asserted the refusal would therefore
+    pass identically against both implementations and certify nothing.
+
+    WHAT DISTINGUISHES THEM IS WHICH GATE REFUSES. Under ``==`` none of these
+    is exempted, so the ``/edit/`` entry stops all four and says so. Under a
+    prefix lookup all four would be waved past ``/edit/`` and would be stopped
+    later or elsewhere -- by the allowlist, or by ``action=``, or by
+    ``/delete``. So the message is the instrument, exactly as it is for the
+    two account-ending addresses above.
+    """
+    exempted = "https://www.linkedin.com/in/me/edit/intro/"
+    assert readonly.is_read_url(exempted)
+
+    escapes = (
+        exempted + "../../evil",
+        exempted + "?action=delete",
+        exempted + "delete",
+        exempted + "forms/next-action/",
+    )
+    for url in escapes:
+        with pytest.raises(WriteAttemptError) as caught:
+            readonly.assert_read_url(url)
+        assert "'/edit/'" in str(caught.value), (url, str(caught.value))
+
+    # AND THE PREFIX RELATION HOLDS, so the paragraph above is about this code
+    # and not about four urls that happen not to be prefixes at all.
+    for url in escapes:
+        assert any(
+            url.lower().startswith(key)
+            for key in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
+        ), url
+
+
 def test_a_keyword_cannot_smuggle_a_forbidden_path_into_a_search_url():
     """Tool arguments reach the url builder; the allowlist is what stops them."""
     hostile = (
@@ -646,6 +946,11 @@ def test_the_urls_the_server_actually_builds_all_pass_the_allowlist():
         f"{BASE_URL}/in/me/",
         f"{BASE_URL}/in/alex-r/details/skills/",
         f"{BASE_URL}/notifications/",
+        f"{BASE_URL}/mypreferences/d/",
+        # THE TWO CENSUS SURFACES ADDED 2026-08-31. Both are built in
+        # server.py's CENSUS_SURFACES and both had to be admitted deliberately.
+        f"{BASE_URL}/in/me/edit/intro/",
+        f"{BASE_URL}/mypreferences/d/dark-mode",
         FEED_URL,
         LOGIN_URL,
     ]
@@ -722,6 +1027,15 @@ FORBIDDEN_SUBSTRINGS_EVER = (
     "action=",
     "/delete",
     "/withdraw",
+    # ADDED 2026-08-31, and they join the roster on the day they join the
+    # boundary because they close a hole rather than tidy one. The settings
+    # audit assumed the two account-ending pages were covered by
+    # ``/mypreferences/d/categories/``; measured off a live census, they are
+    # at ``/mypreferences/d/close-accounts`` and
+    # ``/mypreferences/d/hibernate-account`` and neither contains
+    # ``categories/``. They had no second gate at all.
+    "/close-accounts",
+    "/hibernate-account",
 )
 
 #: Addresses that must stay unreadable, whatever the two lists look like.
@@ -744,6 +1058,17 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/company/example-co/",
     "https://www.linkedin.com/feed/following/",
     "https://www.linkedin.com/in/me/edit/",
+    # ADDED 2026-08-31, in the commit that admitted ONE url out of each of two
+    # families. These are the addresses that must not travel with it -- the
+    # two that can end the account, the rest of his own editor, another
+    # member's editor, and the escape that proves the exemption is an
+    # equality and not a prefix.
+    "https://www.linkedin.com/mypreferences/d/close-accounts",
+    "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    "https://www.linkedin.com/mypreferences/d/settings/language",
+    "https://www.linkedin.com/in/me/edit/topcard/",
+    "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+    "https://www.linkedin.com/in/me/edit/intro/../../evil",
 )
 
 

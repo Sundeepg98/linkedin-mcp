@@ -204,8 +204,71 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # -- the one digest that HAS split along the interpreter matrix -- did not
     # move at all here, so the 3.10 cell has nothing new to disagree about. CI
     # runs that cell and is the check.
-    "_ALLOWED_URL_PATTERNS": "0edd01ead91a89ea",
-    "_FORBIDDEN_URL_SUBSTRINGS": "fcb931b0eaee5b84",
+    #
+    # RE-FROZEN AGAIN 2026-08-31, on the operator's ruling that admitted TWO
+    # NAMED URLS -- one out of each of two families that stay refused. THREE
+    # digests moved and THREE did not:
+    #
+    #   _ALLOWED_URL_PATTERNS      0edd01ead91a89ea -> 72bc5d4a88b5325b
+    #   _FORBIDDEN_URL_SUBSTRINGS  fcb931b0eaee5b84 -> 5e26ec3a8b29c38c
+    #   <functions>                199939f7998e8d48 -> eb16cd07f5cf369d
+    #
+    #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
+    #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #
+    # A DIGEST CANNOT TELL A LIST THAT GREW FROM ONE THAT SHRANK. That is the
+    # whole hazard in re-baselining, it is why the roster tests in
+    # test_readonly.py exist, and it is why the direction of each move is
+    # written out here rather than left to whoever diffs two commits:
+    #
+    # * THE ALLOWLIST GREW, by exactly two anchored patterns, and each admits
+    #   ONE url rather than a family:
+    #     ``^https://www\.linkedin\.com/in/me/edit/intro/?$``
+    #     ``^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$``
+    #   No pattern was widened, relaxed or removed. The ``/in/me/`` spelling is
+    #   the whole of the first permission: no member-slug form was written,
+    #   because ``linkedin_who_viewed_me`` has MEASURED that loading a third
+    #   party's profile leaves them a durable record.
+    # * THE FORBIDDEN LIST ALSO GREW, by two substrings -- ``/close-accounts``
+    #   and ``/hibernate-account``. Nothing left it. This is the rarer and more
+    #   important half: the settings audit had assumed the two account-ending
+    #   pages were covered by ``/mypreferences/d/categories/`` and a live
+    #   census that day showed their real addresses contain no ``categories/``
+    #   at all, so the only thing that had ever refused them was the anchored
+    #   allowlist. So the same commit that widened the allowlist twice also
+    #   gave the two most destructive addresses on the account their first
+    #   second gate.
+    # * ``<functions>`` MOVED because ``assert_read_url`` gained four lines:
+    #   an equality lookup into a new EXACT-URL table,
+    #   ``_FORBIDDEN_SUBSTRING_EXEMPTIONS``, consulted INSIDE the forbidden
+    #   loop so that an exemption is per-substring and buys past one gate
+    #   only. Nothing was deleted from that function and no refusal was
+    #   loosened.
+    #
+    # ONE THING THIS RE-FREEZE DOES NOT PIN, stated because the next reader
+    # will look for it: ``_FORBIDDEN_SUBSTRING_EXEMPTIONS`` is NOT in
+    # ``PINNED``. It GRANTS rather than refuses, which is the property that
+    # earned ``SANCTIONED_MUTATIONS`` its place here, so it belongs -- but
+    # ``_literal`` above has no ``ast.Dict`` branch and would digest every
+    # possible dict as ``['<unhandled>', 'Dict']``, i.e. a pin that cannot
+    # fail. Adding it means teaching ``_literal`` to render a dict first. The
+    # contents are pinned meanwhile by
+    # ``test_the_exemption_table_is_exactly_one_url_for_exactly_one_substring``
+    # in test_readonly.py, which asserts the key, the value, and that the
+    # exempted substring is really on the forbidden list.
+    #
+    # VERIFIED UNDER 3.13.14 ONLY -- no 3.10 interpreter is installed on this
+    # box, and the previous note's escape hatch does not apply here because
+    # ``<functions>`` is exactly the digest that DID move this time. What
+    # carries it is construction rather than a second run: ``_function_source``
+    # asks the tokenizer only WHERE the comments are, which is a position
+    # question and stable, and hashes the remaining source TEXT -- the v3 fix
+    # that was measured identical under 3.13.14 and 3.10.19 when it landed.
+    # The 3.10 CI cell is the check, and it is the right place for this claim
+    # to be settled.
+    "_ALLOWED_URL_PATTERNS": "72bc5d4a88b5325b",
+    "_FORBIDDEN_URL_SUBSTRINGS": "5e26ec3a8b29c38c",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # RE-FROZEN AGAIN 2026-08-26, and this one moved for a different reason
@@ -220,7 +283,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # quietly loosen a url list or a mutation pattern on the way past.
     # Verified under Python 3.13.14 and 3.10.19: identical, all six.
     "SANCTIONED_MUTATIONS": "b84365077cba813b",
-    "<functions>": "199939f7998e8d48",
+    "<functions>": "eb16cd07f5cf369d",
 }
 
 #: The four denylist digests as they stood at ``oldsha14``, kept so that "the
@@ -263,8 +326,17 @@ DENYLISTS_AT_A76FE32 = {
     # ``test_no_previously_forbidden_address_became_readable``. Those two do
     # not need re-baselining when the boundary grows, only when it shrinks,
     # and a re-baseline of THEM is a much louder edit to have to make.
-    "_ALLOWED_URL_PATTERNS": "0edd01ead91a89ea",
-    "_FORBIDDEN_URL_SUBSTRINGS": "fcb931b0eaee5b84",
+    #
+    # THE SAME TWO MOVED AGAIN ON 2026-08-31, for the two ruled urls. This is
+    # the fourth re-baseline of this dict and the question it answers is
+    # smaller again; what belongs here is the DIRECTION, which the roster
+    # tests now police independently: BOTH LISTS GREW. The allowlist gained
+    # two anchored patterns naming two urls, and the forbidden list gained
+    # ``/close-accounts`` and ``/hibernate-account``. Nothing left either one.
+    # The other two entries are untouched, which is the half of the sentence
+    # worth reading.
+    "_ALLOWED_URL_PATTERNS": "72bc5d4a88b5325b",
+    "_FORBIDDEN_URL_SUBSTRINGS": "5e26ec3a8b29c38c",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }

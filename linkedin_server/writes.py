@@ -2354,6 +2354,97 @@ async def _read_settings_index(
     )
 
 
+#: THE FOUR ANSWERS A NEEDLE CAN PRODUCE, and only the last is aimable.
+#: Written as constants because three of them are REFUSALS and a refusal
+#: compared against a typo'd string literal is a refusal that stops refusing.
+INVITE_UNASKED = "no_needle"
+INVITE_NO_MATCH = "no_match"
+INVITE_AMBIGUOUS = "ambiguous"
+INVITE_AIMED = "aimed"
+
+
+def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
+    """Which ONE invitation control a needle picked out, or why none.
+
+    EXACTLY ONE MATCH IS THE ONLY AIMABLE STATE, and the two refusals either
+    side of it are refusing different things:
+
+    * **none** -- nobody drawn on this surface carries that word. Not "try
+      again with a click"; there is nothing here to aim at.
+    * **two or more** -- AMBIGUOUS, and this is the refusal that matters. The
+      controls are indistinguishable to this function; picking one would be
+      picking BY POSITION, which is how a request lands on a stranger who
+      merely sorted earlier. ``unfollow_company`` refuses on exactly this
+      ground when a company id resolves more than one row, and an invitation
+      is less recoverable than an unfollow, not more.
+    * **one** -- aimable, and the index IS the aim.
+
+    THIS FUNCTION NEVER SEES THE NEEDLE, which is not an accident of the
+    signature -- it is the signature doing the work. Its inputs are three
+    integers and its ``why`` strings are built from counts, so there is no
+    branch on which a person's name could reach the text a caller reads,
+    stores or logs. The needle lives in :func:`dom.read_invitation_surface`'s
+    argument list and nowhere downstream of it.
+
+    AN INDEX IS NOT A PROMISE. It describes the list AS READ. Anything that
+    would act on it must re-resolve it against the page immediately before
+    acting, because a rail that re-renders between a preview and a
+    confirmation renumbers everything on it. Nothing acts on it today.
+    """
+    matches = reading.get("matches")
+    controls = int(reading.get("controls") or 0)
+    if matches is None:
+        return (
+            INVITE_UNASKED,
+            f"{controls} invitation control(s) are drawn and no needle was "
+            "given, so none of them was picked out. A count is not an aim.",
+            None,
+        )
+    matches = int(matches)
+    if matches < 1:
+        return (
+            INVITE_NO_MATCH,
+            f"none of the {controls} invitation control(s) on this surface "
+            "carries the word given. The comparison ran inside the page and "
+            "what came back was a count of zero -- no label was read here, so "
+            "this cannot say who IS drawn, only that nobody matched.",
+            None,
+        )
+    if matches > 1:
+        return (
+            INVITE_AMBIGUOUS,
+            f"{matches} of the {controls} invitation control(s) match, and "
+            "that is a refusal rather than a shortlist. Nothing here "
+            "distinguishes them, so choosing one would be choosing by "
+            "position -- which is how an invitation reaches somebody who was "
+            "merely drawn first. Narrow the word until exactly one matches.",
+            None,
+        )
+    position = reading.get("index")
+    if position is None:
+        # UNREACHABLE FROM THE SCRIPT, and kept because a check that cannot
+        # fail certifies nothing while THIS one can: it fires if the reader
+        # ever reports a single match without a position -- a partial read, a
+        # hand-built dict, a future reader that forgets the field. The safe
+        # answer to "one match, no index" is the ambiguous refusal, never a
+        # guess at 0.
+        return (
+            INVITE_AMBIGUOUS,
+            "exactly one control matched and the reader returned no position "
+            "for it. That combination should not occur, and an aim cannot be "
+            "invented from a missing index, so this refuses.",
+            None,
+        )
+    position = int(position)
+    return (
+        INVITE_AIMED,
+        f"exactly 1 of the {controls} invitation control(s) matches, at "
+        f"position {position} in the suffix-matched list. The match was made "
+        "inside the page; no label crossed into this process.",
+        position,
+    )
+
+
 async def _read_profile_invitations(
     page: Any, spec: WriteSpec
 ) -> tuple[dict[str, Any], str, str]:
