@@ -760,6 +760,15 @@ TRACE_RECORDS = {
     # this file covered ``no_lines`` reached via the chrome filter. Both
     # strings below are in ``shape._CHROME``.
     "chrome only": {"text": "Promoted\n\nDismiss", "hidden": []},
+    # THE LIVE SHAPE the anchored-title exemption was written for: one line
+    # carrying the title with a timestamp welded into it. In the corpus so the
+    # trace and the parser are held to agreeing about it -- they did NOT when
+    # the exemption was added to only one of them.
+    "live welded row": {
+        "text": "Senior Engineer - Remote Acme India Saved 3 days ago",
+        "link_text": "Senior Engineer - Remote Acme India Saved 3 days ago",
+        "hidden": [],
+    },
 }
 
 
@@ -956,3 +965,111 @@ async def test_the_ladder_reports_keyed_links_as_well_as_keys():
     )
     assert "2L" in note, note
     assert "keyed Links" in note, note
+
+
+# ---------------------------------------------------------------------------
+# 8. The classifier that ate the title
+# ---------------------------------------------------------------------------
+
+#: THE LIVE SHAPE, modelled from the trace the Saved tab returned on
+#: 2026-08-30: ONE line, carrying the anchored title with a relative timestamp
+#: welded into it. Invented text of the right shape -- it names no real
+#: employer -- and the two fields are equal because on that row the whole card
+#: sat inside a single anchor.
+WELDED = "Senior Full-stack Engineer - Remote Sprinto India (Remote) Saved 3 days ago"
+WELDED_RECORD = {"text": WELDED, "link_text": WELDED, "hidden": []}
+
+
+async def test_a_title_with_an_inline_timestamp_is_not_discarded():
+    """THE FIX. ``has_time_ago`` asks whether a line CONTAINS a timestamp, and
+    ``parse_job_card`` discarded the WHOLE line on a yes.
+
+    That pairing is a defect this module had already documented for another
+    surface -- ``is_timestamp_line``'s docstring says a notification body
+    carrying its time inline must not be thrown away to avoid repeating the
+    time. The job-card parser never learned it.
+
+    Measured live: the Saved row arrived as one 75-character line carrying the
+    anchored title and a relative timestamp. The line was discarded whole,
+    ``remaining`` emptied, and the row dropped -- records=1, dropped=1.
+
+    SHOWN FAILING by removing the ``and line != anchor`` exemption::
+
+        AssertionError: assert None is not None
+        -- the row is dropped, which is the live signature
+    """
+    parsed = shape.parse_job_card(WELDED_RECORD)
+    assert parsed is not None, "the row was dropped"
+    assert parsed["title"] == WELDED, parsed
+    # THE TIMESTAMP IS STILL REPORTED. find_time_ago runs over every line
+    # before the discard loop, so sparing the line does not lose the time.
+    assert parsed["when"] == "3 days ago", parsed
+
+
+async def test_the_timestamp_is_still_lifted_when_it_is_NOT_the_title():
+    """The exemption is one line wide. Everything else is discarded as before.
+
+    A card whose timestamp sits on its own line must still lose that line --
+    otherwise "3 days ago" becomes a content field.
+
+    SHOWN FAILING by sparing every line instead of the anchored one::
+
+        AssertionError: assert '3 days ago' != 'Senior Engineer'
+        -- a bare timestamp line survived and could be read as a field
+    """
+    record = {
+        "text": "Senior Engineer\n\n3 days ago\n\nSprinto",
+        "link_text": "Senior Engineer",
+        "hidden": [],
+    }
+    parsed = shape.parse_job_card(record)
+    assert parsed is not None, record
+    assert parsed["title"] == "Senior Engineer", parsed
+    assert parsed["when"] == "3 days ago", parsed
+    # The bare timestamp line is gone, so it cannot have become the company.
+    assert parsed.get("company") != "3 days ago", parsed
+
+
+async def test_the_narrow_repair_was_chosen_over_the_wide_one():
+    """``is_timestamp_line`` would fix this row and break one that works.
+
+    Recorded as an executable statement rather than a paragraph, because the
+    wide repair is the obvious one and the next reader will reach for it.
+
+    Measured across all 25 records the fixtures produce: swapping the
+    predicate promotes a location-and-time line from discarded to content on
+    ``job_detail_following_hydrated``. Sparing the anchored title changes
+    NOTHING -- zero of 25.
+
+    SHOWN FAILING by making ``is_timestamp_line`` agree with ``has_time_ago``
+    on this line, which is what the wide repair assumes::
+
+        AssertionError: assert True is False
+    """
+    welded_location = (
+        "Riverton, Fairhaven, United States - 1 week ago - 33 people clicked apply"
+    )
+    # has_time_ago says yes -- it CONTAINS a timestamp -- and that is why the
+    # line is discarded today.
+    assert shape.has_time_ago(welded_location) is True
+    # is_timestamp_line says no -- it is not ONLY a timestamp -- which is why
+    # swapping the predicate would keep it and change that card.
+    assert shape.is_timestamp_line(welded_location) is False
+
+
+async def test_the_trace_mirrors_the_anchored_title_exemption():
+    """The trace and the parser must agree on the record the fix was FOR.
+
+    When the parser gained the exemption this function had not, and the two
+    disagreed immediately -- the trace said ``no_remaining`` while the parser
+    returned a row. That is the drift the agreement test exists to catch, and
+    it caught it.
+
+    SHOWN FAILING by removing ``and line != anchor`` from the trace only::
+
+        AssertionError: ('live welded row', 'no_remaining', 'parsed')
+    """
+    trace = shape.parse_job_card_trace(WELDED_RECORD)
+    assert trace["verdict"] == "parsed", trace
+    assert trace["labels"] == ["content"], trace
+    assert trace["has_anchored_title"] is True, trace

@@ -504,6 +504,11 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     status = None
     when = find_time_ago(lines)
     remaining: list[str] = []
+    #: THE ONE LINE THAT IS KNOWN TO BE THE TITLE. Computed here rather than
+    #: below so the loop can refuse to discard it -- see the comment on the
+    #: time-ago branch. ``None`` on any card whose link does not name exactly
+    #: one thing, which is most tracker rows, and then nothing is spared.
+    anchor = anchored_title(record)
     for line in lines:
         match = _JOB_STATUS_LINE.match(line)
         if match:
@@ -512,7 +517,31 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
             if status is None:
                 status = match.group(1).lower()
             continue
-        if has_time_ago(line):
+        if has_time_ago(line) and line != anchor:
+            # ``has_time_ago`` asks whether a line CONTAINS a timestamp, and
+            # this discards the WHOLE line on a yes. That pairing is the defect
+            # this module already documented for a different surface -- see
+            # :func:`is_timestamp_line`, whose docstring says a notification
+            # body carrying its time inline must not be thrown away to avoid
+            # repeating the time. The job-card parser never learned it.
+            #
+            # MEASURED 2026-08-30 on the live Saved tab: the row arrived as ONE
+            # line, 75 characters, carrying the anchored title AND a relative
+            # timestamp welded into it. The line was discarded whole,
+            # ``remaining`` emptied, and the row was dropped -- records=1,
+            # dropped=1, with the parse trace naming this branch.
+            #
+            # WHY THE EXEMPTION AND NOT ``is_timestamp_line`` HERE. Swapping the
+            # predicate outright fixes this row and CHANGES ANOTHER THAT WORKS:
+            # measured across all 25 records the fixtures produce, it promotes
+            # "Riverton, ... 1 week ago 33 people clicked apply" from discarded
+            # to content on ``job_detail_following_hydrated``. Sparing the
+            # anchored title instead fixes this row and changes NOTHING -- zero
+            # of 25. The narrower repair is the one with evidence.
+            #
+            # ``when`` is unaffected: ``find_time_ago`` ran over every line
+            # above, so the timestamp is still reported even though the line
+            # carrying it now survives.
             continue
         remaining.append(line)
 
@@ -522,7 +551,10 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     # Matching is done on the FULL value and trimming only on the way out. A
     # title long enough to be cut would otherwise no longer equal the line it
     # came from, and every field after it would silently go positional again.
-    title = anchored_title(record) or remaining[0]
+    # ``anchor`` rather than a second ``anchored_title(record)`` call: two
+    # calls is two chances for the line the loop spared and the line reported
+    # as the title to stop being the same string.
+    title = anchor or remaining[0]
 
     rest = lines_after(remaining, title)
     if rest:
@@ -856,6 +888,13 @@ def parse_job_card_trace(record: dict[str, Any]) -> dict[str, Any]:
     remaining: list[str] = []
     # THE SAME ORDER parse_job_card runs: chrome first, then status, then
     # time-ago. Written as one pass so the two cannot fall out of step.
+    #
+    # AND THE SAME ANCHORED-TITLE EXEMPTION, which is not optional. When the
+    # parser gained it, this function had not, and the two immediately
+    # disagreed on the very record the exemption was written for -- the trace
+    # said no_remaining while the parser returned a row.
+    # ``test_the_trace_agrees_with_the_parser_it_describes`` is what caught it.
+    anchor = anchored_title(record)
     for line in after_repeats:
         sizes.append(len(line))
         if is_chrome(line):
@@ -865,9 +904,13 @@ def parse_job_card_trace(record: dict[str, Any]) -> dict[str, Any]:
         if _JOB_STATUS_LINE.match(line):
             labels.append("status")
             continue
-        if has_time_ago(line):
+        if has_time_ago(line) and line != anchor:
             labels.append("time_ago")
             continue
+        # A SPARED LINE IS LABELLED FOR WHAT IT IS. "content" here can mean
+        # "carries a timestamp and was kept anyway", and the label
+        # deliberately does not distinguish those: the vocabulary is closed at
+        # four words, and what a reader needs is which lines SURVIVED.
         labels.append("content")
         remaining.append(line)
 
