@@ -630,6 +630,11 @@ ALLOWED = [
     # ``/messaging/compose`` by an EXACT-url exemption, so the trailing-slash
     # spelling opens and nothing else in that family does -- see BLOCKED.
     "https://www.linkedin.com/messaging/compose/",
+    # HIS OWN SUBSCRIPTION PAGE, 2026-09-01. One named address, admitted to
+    # answer one question -- whether an InMail balance is countable -- and
+    # its neighbours are in BLOCKED below, which is where the narrowness is
+    # actually asserted. /premium/ carries purchase and upgrade flows.
+    "https://www.linkedin.com/premium/my-premium/",
 ]
 
 BLOCKED = [
@@ -657,6 +662,12 @@ BLOCKED = [
     "https://www.linkedin.com/feed/update/urn%3Ali%3Aactivity%3A7400000000000000001/",
     # And the two composers' neighbours, for the same reason.
     "https://www.linkedin.com/preload/sharebox/publish",
+    # THE SUBSCRIPTION PAGE'S NEIGHBOURS. /premium/ has purchase and upgrade
+    # flows under it and this admission is ONE page: the family root, a
+    # sub-path, and a query string all refuse.
+    "https://www.linkedin.com/premium/",
+    "https://www.linkedin.com/premium/my-premium/upgrade",
+    "https://www.linkedin.com/premium/products/",
     "https://www.linkedin.com/article/edit/7400000000000000001/",
     "https://www.linkedin.com/mynetwork/invitation-manager/",
     "https://www.linkedin.com/in/someone/edit/topcard/",

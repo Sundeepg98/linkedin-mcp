@@ -334,7 +334,38 @@ READONLY_AST_AT_LAST_REFREEZE = {
     #   url is a CONSTANT, so an exact-url exemption can hold it and the
     #   substring stays, refusing every other spelling in that family exactly
     #   as before. A url with a variable segment has no such option.
-    "_ALLOWED_URL_PATTERNS": "ea0fe246a3818bb9",
+    #
+    # RE-FROZEN 2026-09-01, on the operator's ruling admitting ONE more named
+    # url. ONE digest moved and FIVE did not:
+    #
+    #   _ALLOWED_URL_PATTERNS      ea0fe246a3818bb9 -> 6ae718fcbdbfc3ae
+    #
+    #   _FORBIDDEN_URL_SUBSTRINGS  afcb7f0d14c481a0   UNCHANGED
+    #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
+    #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #   <functions>                eb16cd07f5cf369d   UNCHANGED
+    #
+    # THE DIRECTION: THE ALLOWLIST GREW BY ONE ANCHORED PATTERN and nothing
+    # else moved at all -- no substring left the forbidden list this time, no
+    # gate was reordered, and ``assert_read_url`` is byte-identical again.
+    #
+    #     ``^https://www\.linkedin\.com/premium/my-premium/?$``
+    #
+    # WHAT IT BUYS, and it is one question rather than a capability:
+    # ``send_message`` may spend a finite InMail credit whose size this server
+    # does not know, and a gate that cannot say what an action COSTS is not
+    # fully a gate. The composer was captured on 2026-08-31 and does NOT carry
+    # a balance -- the control named ``InMail`` there is a conversation-list
+    # FILTER PILL with aria-checked=false -- so the balance is either on this
+    # page or nowhere, and that is worth knowing whether or not #9 ever ships.
+    #
+    # IT NAMES NO THIRD PARTY: his own subscription state, found as an
+    # ordinary href on his own feed and profile rather than guessed. And
+    # ``/premium/`` has purchase and upgrade flows under it, NONE of which is
+    # admitted -- the anchoring is the whole of that, and
+    # ``tests/test_readonly.py`` puts three of them through the real guard.
+    "_ALLOWED_URL_PATTERNS": "6ae718fcbdbfc3ae",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -412,7 +443,12 @@ DENYLISTS_AT_A76FE32 = {
     # ``FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED`` -- an edit somebody
     # reviews -- rather than absorbed by re-baking a hash here. The other two
     # entries are untouched.
-    "_ALLOWED_URL_PATTERNS": "ea0fe246a3818bb9",
+    #
+    # AND THE ALLOWLIST ALONE MOVED AGAIN ON 2026-09-01, for one named
+    # subscription page. Sixth re-baseline; the forbidden list did NOT move
+    # this time, which is the direction that matters and the one the roster
+    # tests police independently.
+    "_ALLOWED_URL_PATTERNS": "6ae718fcbdbfc3ae",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",

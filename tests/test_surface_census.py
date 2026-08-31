@@ -54,6 +54,7 @@ from linkedin_server import browser as browser_module
 from linkedin_server import dom, errors, readonly, shape
 from linkedin_server import server as server_module
 from linkedin_server.server import (
+    CENSUS_ITEM_RULES,
     CENSUS_RESOLVED_SURFACES,
     CENSUS_SETTLED_CONTROLS,
     CENSUS_SURFACES,
@@ -689,8 +690,13 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
         "post_composer",
         "article_composer",
         "messaging_compose",
+        "premium",
     }
-    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
+    # EVERY RESOLVED SURFACE NAMES ITS SELECTION RULE. A resolved key with no
+    # rule would fall through to a KeyError at call time, on a path that has
+    # already loaded a page.
+    assert set(CENSUS_ITEM_RULES) == CENSUS_RESOLVED_SURFACES
     # THE TWO SETS ARE DISJOINT AND THEIR UNION IS WHAT A CALLER IS OFFERED.
     # Without this a key could be in both and the refusal branch would never
     # be reached for it.
@@ -698,7 +704,7 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
     assert census_surface_keys() == sorted(
         set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES
     )
-    assert len(census_surface_keys()) == 9
+    assert len(census_surface_keys()) == 11
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
@@ -830,7 +836,7 @@ def test_every_surface_is_a_permitted_read_url():
     # dom.ACTIVITY_ITEMS_JS refuses to publish a key that does not match
     # ``urn:li:<type>:<digits>``, so a urn this url could be built from is
     # necessarily one this pattern admits.
-    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
     synthetic = server_module.ITEM_PERMALINK_URL.format(
         urn="urn:li:activity:" + ACTIVITY_ID
     )
@@ -911,8 +917,10 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
         "article_composer",
         "feed",
         "feed_item",
+        "feed_item_commented",
         "messaging_compose",
         "post_composer",
+        "premium",
         "profile",
         "profile_edit_intro",
         "settings",
@@ -3536,6 +3544,16 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     answer.
     """
     for surface in ("messaging_compose", "article_composer", "feed_item"):
+        # ``premium`` and ``feed_item_commented`` join them: read once each at
+        # most, so neither has a settled count and both must report unknown.
+        pass
+    for surface in (
+        "messaging_compose",
+        "article_composer",
+        "feed_item",
+        "feed_item_commented",
+        "premium",
+    ):
         assert surface not in CENSUS_SETTLED_CONTROLS, surface
         report = census_settle_report(surface, 5)
         assert report["verdict"] == "unknown"

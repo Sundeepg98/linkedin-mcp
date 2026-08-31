@@ -360,6 +360,29 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # 1, on ``/feed/`` and on his profile, 2026-08-31. With no unread message
     # there is no stranger's InMail to spend.
     re.compile(r"^https://www\.linkedin\.com/messaging/compose/?$"),
+    # HIS OWN SUBSCRIPTION PAGE. Admitted 2026-09-01 on the operator's
+    # ruling, as ONE named address, and it exists to answer ONE question:
+    # whether an InMail balance is a countable thing this server can read.
+    #
+    # WHY IT IS NEEDED AT ALL. ``send_message`` may spend a finite credit
+    # whose size this server does not know, and a gate that cannot tell him
+    # what an action COSTS is not fully a gate -- every other write here names
+    # its cost. The composer itself was captured on 2026-08-31 and DOES NOT
+    # carry a balance: the control there named ``InMail`` is a
+    # conversation-list FILTER PILL with aria-checked=false, sitting beside
+    # Focused, Unread, Starred and Connections. So the balance is either here
+    # or nowhere.
+    #
+    # IT NAMES NO THIRD PARTY. This is his own subscription state -- what he
+    # pays for and what it includes -- and it appeared as an ordinary href on
+    # his own feed and profile ("<redacted> features"), which is how it was
+    # found rather than guessed.
+    #
+    # No query string and no sub-path: nothing builds either, and the
+    # anchoring is what keeps this one page from becoming the family. In
+    # particular ``/premium/`` has purchase and upgrade flows under it and
+    # NONE of them is admitted here.
+    re.compile(r"^https://www\.linkedin\.com/premium/my-premium/?$"),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.

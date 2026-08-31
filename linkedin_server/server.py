@@ -1866,6 +1866,10 @@ CENSUS_SURFACES: dict[str, str] = {
     "post_composer": f"{BASE_URL}/preload/sharebox/",
     "article_composer": f"{BASE_URL}/article/new/",
     "messaging_compose": f"{BASE_URL}/messaging/compose/",
+    # HIS OWN SUBSCRIPTION PAGE, added 2026-09-01. One question: is an InMail
+    # balance a countable thing this server can read? The composer capture
+    # settled that it is not on the composer.
+    "premium": f"{BASE_URL}/premium/my-premium/",
 }
 
 #: WHAT A SETTLED RENDER OF EACH SURFACE LOOKS LIKE, as the control count it
@@ -2003,7 +2007,31 @@ def census_settle_report(surface: str, controls_read: int) -> dict[str, Any]:
 #: The resolved url still goes through the same door -- ``BROWSER.goto`` calls
 #: ``assert_read_url`` like every other read -- and the shape it can take is
 #: pinned by its own test against a synthetic urn.
-CENSUS_RESOLVED_SURFACES: frozenset[str] = frozenset({"feed_item"})
+CENSUS_RESOLVED_SURFACES: frozenset[str] = frozenset(
+    {"feed_item", "feed_item_commented"}
+)
+
+#: How ``feed_item`` and ``feed_item_commented`` choose which of his items to
+#: open. Both are MEASUREMENTS OF A SURFACE rather than aims for a write, and
+#: the answer says which rule it used.
+#:
+#: ``feed_item`` takes the first in document order. That is choosing by
+#: position, which this package refuses for a WRITE and which is fine here:
+#: the question is what a permalink page draws, and any of his items answers
+#: it equally.
+#:
+#: ``feed_item_commented`` takes the one with the MOST permalink anchors, and
+#: it exists because the first item turned out to have no comments on it. An
+#: item's anchor count is the measured signal for extra links -- his rail
+#: carries six items at 2 anchors and two at 4 -- so the richest item is the
+#: one most likely to render a comment count. IT IS A HEURISTIC AND SAYS SO:
+#: it selects the item most likely to answer the question, and if that item
+#: still draws no comment affordance the answer is that the surface does not
+#: carry one, which is exactly the finding being sought.
+CENSUS_ITEM_RULES: dict[str, str] = {
+    "feed_item": "first",
+    "feed_item_commented": "most_anchors",
+}
 
 
 def census_surface_keys() -> list[str]:
@@ -2066,7 +2094,7 @@ ITEM_PERMALINK_URL = BASE_URL + dom.ACTIVITY_PERMALINK_MARKER + "{urn}/"
 
 
 async def _resolve_own_item_permalink(
-    page: Any,
+    page: Any, rule: str = "first"
 ) -> tuple[dict[str, Any], Optional[str]]:
     """One of HIS item permalinks, or a refusal explaining why not.
 
@@ -2130,14 +2158,28 @@ async def _resolve_own_item_permalink(
             None,
         )
     items = list(reading["items"])
+    per_item = dict(reading.get("anchors_per_item") or {})
+    if rule == "most_anchors":
+        # THE RICHEST ITEM, and ties break on document order so the choice is
+        # deterministic across runs -- a census whose subject moved between
+        # readings could not be compared with itself.
+        items.sort(key=lambda urn: (-int(per_item.get(urn) or 0), items.index(urn)))
     return (
         {
             # THE URN ITSELF IS NOT REPORTED HERE. It is a real identifier and
             # it is already in the landed ``source_url`` this census returns,
             # which is one place rather than two. What this block reports is
             # HOW the aim was taken, which is the part a reader has to judge.
-            "chosen_by": "first item in document order on his own activity rail",
+            "chosen_by": (
+                "first item in document order on his own activity rail"
+                if rule == "first"
+                else "the item on his own activity rail carrying the MOST "
+                "permalink anchors, ties broken by document order -- a "
+                "heuristic for the item most likely to render a comment "
+                "count, not a claim that it has one"
+            ),
             "items_available": len(items),
+            "anchors_on_the_chosen_item": int(per_item.get(items[0]) or 0),
             "authorship": _authorship_block(
                 established=True, self_assertion=True, facts=facts
             ),
@@ -2250,7 +2292,7 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
         async with BROWSER.session() as page:
             pages_loaded = 1
             aimed_at: Optional[dict[str, Any]] = None
-            if key == "feed_item":
+            if key in CENSUS_RESOLVED_SURFACES:
                 # THE ONE SURFACE WHOSE URL THIS SERVER DOES NOT KNOW UNTIL IT
                 # HAS READ SOMETHING. A permalink is addressed by a urn, and
                 # the ONLY route to one here is the same reader
@@ -2265,7 +2307,9 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 # server never read, and the read boundary would then be the
                 # only thing standing between a census and an arbitrary
                 # member's item.
-                aimed_at, item_url = await _resolve_own_item_permalink(page)
+                aimed_at, item_url = await _resolve_own_item_permalink(
+                    page, CENSUS_ITEM_RULES[key]
+                )
                 if item_url is None:
                     return aimed_at
                 pages_loaded = 2
