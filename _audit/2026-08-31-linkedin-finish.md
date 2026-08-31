@@ -448,6 +448,78 @@ it is named here rather than attempted.
 
 ---
 
+## 2g. #4 RULED, on containment measured rather than guessed
+
+Restart on `272e771`, `build.code.commit` verified before reading. Census taken
+TWICE. Both readings settled -- 255 and 256 controls, the slugged landed url,
+`dialogs: 5`, `contenteditable: 1` -- so neither is the 67-control half-render
+that produced the wrong answer earlier. The one-control jitter is in the nav
+(`buttons` 90 vs 91) and touches nothing below.
+
+### The containment answer
+
+| control | container | disabled |
+|---|---|---|
+| **`Save`** | **`dialog#0`** | **false** |
+| `Additional name`, `City`, `Month` | `dialog#0` | |
+| `<opaque>` x6, incl. the one `div[role=textbox]` | `dialog#0` | |
+| 2 unnamed `input` | `dialog#0` | |
+| `Write with <redacted>` | `dialog#0` | |
+| **`Submit` x2** | **`form#3`, `form#6`** | **true** |
+| `Report this ad`, `I've seen the same ad too often` | `form#3`, `form#6` | |
+| `Comments`, `Posts`, `Select language` | **`none`** | |
+
+**THE BLOCKER WAS WHAT WE BOTH SUSPECTED, AND IT IS NOW MEASURED.** `Save`
+sits in `dialog#0` with the editor's fields and is ENABLED. The two disabled
+`Submit`s sit in `form#3` and `form#6` beside `Report this ad` -- they are the
+ad-report forms and were never the editor's commit control. `Comments` and
+`Posts` report `none`: page furniture, not profile fields.
+
+**Both of us had reached that from adjacency in a flat list, and both of us
+were right.** That is worth stating plainly because it is the least
+instructive possible outcome for the method: two readers pattern-matching to
+the same correct answer is indistinguishable, from the inside, from two
+readers pattern-matching to the same wrong one. The measurement is what makes
+it knowledge. It cost one instrument feature and it settles the question for
+every future surface, not just this one.
+
+### And #4 still REFUSES -- on the narrowest ground it has ever had
+
+Four things are now established: the editor is `dialog#0`; its commit control
+is `Save`, enabled; eleven controls sit inside it; and three of them are
+named -- `Additional name`, `City`, `Month`.
+
+**None of those three is a field this capability would target.** A first name,
+a last name, a headline: not among them. Those are among the six `<opaque>`
+controls and the two unnamed inputs inside `dialog#0`.
+
+**AND `<opaque>` IS NOT A BLIND SPOT. IT IS THE PRIVACY GATE WORKING.**
+`shape.census_shape` returns `<opaque>` for any name that fails its LENGTH or
+CHARACTER-CLASS test. So the census read those names and DECLINED TO PUBLISH
+THEM. That is categorically different from the `label-for` gap, which was the
+instrument failing to read at all.
+
+So the refusal now rests on a real design tension rather than a gap:
+
+> **The census's privacy gate and this capability's need are in direct
+> opposition, and the privacy gate wins.** The instrument cannot hand over a
+> field name without weakening the property that makes it safe to point at a
+> page full of other people's names.
+
+**AND ONE THING IT CANNOT DISTINGUISH, stated rather than glossed.** Whether
+the targeted fields are among the `<opaque>` set, or simply not rendered on
+first paint, is NOT established -- the census reports both as an absence of a
+usable name and cannot tell them apart.
+
+**WHAT WOULD COMPLETE IT is a question, not a measurement.** `dialog#0` on his
+own profile editor contains only HIS data; the privacy gate exists because a
+feed is made of other people, and inside that dialog there are none. A reader
+scoped to one self-owned container, with the gate relaxed on that ground,
+would settle it. **That is a new capability needing its own ruling and it is
+named here rather than built.**
+
+---
+
 ## 3. The six capabilities
 
 Read every row with the census's own caveat: **presence is not permission, and
@@ -1061,3 +1133,104 @@ Both are built, tested and green. Neither has run.
                                      around; the census was used instead)
 
 Nothing was pushed. The push and its PII scan are the lead's.
+
+
+---
+
+# 10. The close
+
+Three things the lead asked to be prominent rather than buried, and they are
+the transferable part of this wave. Then the ledger.
+
+## 10.1 THE CENSUS TABLE IS ONLY AS GOOD AS ITS SAMPLE
+
+**Read this before reading the landed-url table in section 2d.**
+
+That table marks thirteen surfaces PASS or FAIL on two or more readings each.
+**One of its PASS rows was wrong.** `profile_edit_intro` passed twice, on two
+readings that agreed with each other, and then failed twice on two later ones
+-- because the first pair had caught a page that had not finished navigating.
+67 controls against 256.
+
+Nothing distinguishes the rows that still say PASS from that row, except that
+a code change happened to force a third look at one of them. **Every remaining
+verdict in that table carries the same exposure**, and I cannot tell you which
+are solid. The table is evidence, not a certificate.
+
+The design constraint that follows, for anyone who revives the landed-url
+gate: a gate that pinned a url spelling would refuse a legitimate read
+intermittently, which is the worst failure available to a boundary. But the
+stronger requirement is that **a landed url read before the page settles is
+not a measurement of anything.**
+
+## 10.2 THREE FALSE DOCSTRINGS IN ONE WAVE, and the pattern is the finding
+
+Each is an instrument's own documentation asserting something the code did not
+do. Each hid a real limit. None was found by reading the docstring -- every one
+was found by pointing the instrument at a surface that exposed it.
+
+| where | what it claimed | what was true |
+|---|---|---|
+| `linkedin_notifications` | *"It is the ONE server-side change any tool here causes"* | Five writes ship, messaging opens a conversation, a job search writes to his search history. The sentence was a SAFETY claim in a docstring an assistant answers from. |
+| `shape.census_aggregate` | *"The merge key is the WHOLE record"* | The key is an enumerated eight-field tuple. A field added to a record and not to the key is dropped SILENTLY -- which is exactly what happened to `container` on the day it was added. |
+| `CENSUS_JS` / `name_source` | `"none"` read as *this control has no name* | It meant *this instrument cannot read one*. The chain never followed `<label for>`. 26 inputs across three committed fixtures had been mis-reported for weeks. |
+
+**What they have in common.** Each docstring described an INTENT and was read
+as a MEASUREMENT. Each was written by someone who knew what the code was for
+and not what it did on an input they had not tried. And in each case the
+sentence was the reason nobody looked -- a check that says "this covers
+everything" stops the next reader from asking what it covers.
+
+The rule this wave would add: **a docstring that makes a completeness claim --
+"the whole record", "the ONE change", "every X" -- is a claim requiring a
+test, or it should be written as the enumeration it actually is.**
+
+## 10.3 THE "AT LEAST TWICE" RULE HAS A LIMIT, and it should be on the record
+
+The standing discipline is that no single reading of a page is a measurement.
+It earned itself twice in this wave: `job_detail` landed with and without a
+trailing slash on a row already marked PASS, and both settings-index readings
+agreed across two processes.
+
+**And it was not enough for `profile_edit_intro`.** Two readings agreed with
+each other and both were wrong. The third came from a code change forcing a
+re-run, not from the discipline calling for one.
+
+So the limit, stated as a limit rather than absorbed as a success: **repetition
+catches VARIANCE and does not catch a STABLE WRONG STATE.** Two reads of a
+page that consistently has not finished rendering agree perfectly. What would
+have caught it is not a third reading -- it is a precondition on the reading:
+check the control count and the landed url against what the surface is known
+to produce before interpreting anything else. That is cheap and it is now
+written down.
+
+## 10.4 The ledger
+
+| # | capability | outcome |
+|---|---|---|
+| 1 | publish a post | REFUSES. Ruling handed back: opening the composer may leave a draft artefact this server cannot detect or remove. |
+| 2 | comment on an item | REFUSES. Permalink ruled readable; **no route to an item key exists** -- 20 permalink hrefs on his profile, all shaped to `<urn>` by design, 0 on the feed. |
+| 3 | react to an item | REFUSES. OFF anchor measured twice; ON label unmeasured, so verification cannot say what happened; which reaction the toggle applies never observed; and unaimable for the same reason as #2. |
+| 4 | edit a profile field | REFUSES. Editor identified as `dialog#0`, commit control `Save` enabled inside it, eleven fields located -- and the targeted ones are `<opaque>`, withheld by the census's own privacy gate. |
+| 5 | endorse a skill | IMPOSSIBLE. Unchanged: the control lives only on a third party's profile and loading one is a measured emission. |
+| 6 | change a setting | REFUSES. Anchor measured: a THREE-STATE radio group, `Always off` / `Always on` / `Device settings`. Which is SELECTED is not measured -- the census reports `disabled`, not `checked`. |
+| 7 | send an invitation | REFUSES. Ruling implemented -- the needle matches inside the page and the script returns three integers. Blocker is now the confirm-token target channel, which would persist an identity the moment the action became grantable. |
+| 9 | send a message | REFUSES, **deferred by ruling** rather than unmeasured. |
+
+**Zero lifted, and that is the result rather than a shortfall.** Every refusal
+now names an exact next measurement instead of a vague one, and two of those
+next measurements turned out to be instrument work rather than LinkedIn work
+-- a `checked` reader for #6, and a ruling on a relaxed privacy gate inside a
+self-owned container for #4. That is the healthier place for them to sit.
+
+**What was actually delivered:** four defects fixed, one read-boundary hole
+closed that had never been defended, three false docstrings corrected, two
+instrument blind spots found and closed, seven Part-7 debts closed, and a
+landed-url census whose verdict is that the gate it was built to justify
+should not be built.
+
+**And what was not done, deliberately:** no write was performed, no
+`confirm_token` was issued to anything by anyone at any point, no third
+party's profile was loaded, no badge was spent on a measurement, and the read
+boundary is narrower than it was -- two anchored patterns added for two named
+pages, two forbidden substrings added, none removed.
