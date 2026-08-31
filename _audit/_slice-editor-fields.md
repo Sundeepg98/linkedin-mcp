@@ -1,9 +1,12 @@
 # Slice: `linkedin_profile_editor_fields` -- names, from inside one measured container
 
-**Status:** built, tested, UNCOMMITTED. Tree left dirty for review.
-**Branch:** `master`, on top of `08e846a`. Nothing committed, nothing pushed, no
-`mcp__linkedin__*` tool called, `_state/` untouched, `readonly._ALLOWED_URL_PATTERNS`
-and `_FORBIDDEN_URL_SUBSTRINGS` untouched.
+**Status:** built and tested. Left UNCOMMITTED by this slice as instructed --
+**then committed by another writer in this tree while the final suite run was still
+in flight.** See section 0b; nothing was lost and nothing here did the committing.
+**Branch:** `master`. Written on top of `08e846a`; landed as `3940f72`, whose parent is
+`826efe7` -- a docs commit from a sibling that arrived under this work. Nothing pushed,
+no `mcp__linkedin__*` tool called, `_state/` untouched,
+`readonly._ALLOWED_URL_PATTERNS` and `_FORBIDDEN_URL_SUBSTRINGS` untouched.
 
 ---
 
@@ -28,8 +31,12 @@ kind of premise that turns into a "you broke two tests" bounce three waves later
 | | count |
 |---|---|
 | `08e846a`, measured | **2158** |
-| this tree, `venv\Scripts\python.exe -m pytest -q` | **2205 passed in 746.18s** |
+| this tree, `venv\Scripts\python.exe -m pytest -q` | **2205 passed in 764.45s** |
 | delta | **+47** |
+
+That 764.45s run is the LAST one, taken after the prose-count corrections in section 1.
+An earlier identical-content run of the code alone gave 2205 passed in 746.18s; both
+are recorded so nobody has to wonder which edit a number predates.
 
 The +47 decomposes exactly, with no residue:
 
@@ -40,6 +47,95 @@ The +47 decomposes exactly, with no residue:
 Derived by collecting three ways with the two git-dependent modules excluded from all
 three: HEAD 1834, this tree 1881, this tree with `--ignore=tests/test_editor_fields.py`
 1835.
+
+## 0b. A SECOND WRITER MOVED THIS TREE MID-RUN, and the number above needs its timestamp
+
+The 2205 was measured on a tree that no longer exists, and the reason is not a mistake
+in it -- it is that **this repository had two writers during this slice.** Recorded here
+because a suite number without the tree it was taken on is exactly the kind of claim
+this repo keeps having to correct.
+
+| when | what |
+|---|---|
+| 15:10:03 | this slice's final `pytest -q` starts and COLLECTS -- 2205 tests |
+| 15:11:36 | a sibling commits `826efe7`, adding one tracked file, `_audit/2026-08-31-linkedin-lift.md` |
+| 15:17:39 | a sibling commits `3940f72` -- **this slice's eight files, committed by somebody other than this slice** |
+| 15:22:48 | the run ends: **2205 passed in 764.45s**, on the file set it collected at 15:10 |
+
+**Nothing was lost and nothing here did the committing.** The brief said leave the tree
+uncommitted for review, and this slice did; the commit was made by another actor with
+the operator's git identity, six minutes after the run began.
+
+**The count is now 2211, and the +6 decomposes exactly.** Three files became TRACKED
+across those two commits -- `_audit/2026-08-31-linkedin-lift.md` from the sibling, and
+`tests/test_editor_fields.py` plus `_audit/_slice-editor-fields.md` from this slice's
+own commit. Two checks are parametrised per tracked file, measured off the collection
+rather than assumed:
+
+```
+3 tests/test_no_committed_identity.py::test_no_tracked_file_carries_a_real_identifier
+3 tests/test_no_committed_credential.py::test_no_tracked_file_carries_a_session_credential
+```
+
+Three files times two sweeps is six, with no residue. **Both sweeps PASS on this
+slice's two newly tracked files** -- run explicitly, since being committed is what first
+subjected this file and the test module to the identity scan, and both carry invented
+slugs and a urn:
+
+```
+tests/test_no_committed_identity.py tests/test_no_committed_credential.py tests/test_path_hygiene.py
+349 passed in 7.45s
+```
+
+`_audit/2026-08-31-linkedin-lift.md` was still being edited by its own writer while
+this was measured, so the tree was not quiescent and no number taken here should be
+read as one taken on a still repository.
+
+### The sibling is BUILDING ON this slice, not colliding with it -- measured
+
+By the time this was written the working tree carried another 857 uncommitted lines
+across `dom.py`, `server.py`, `test_readonly.py` and `test_server_surface.py`: a
+sibling's next slice (`read_own_activity_items`, `ACTIVITY_REFUSALS`,
+`ACTIVITY_PERMALINK_MARKER`). Sampled rather than assumed, because uncommitted
+interleaved edits are the one unrecoverable state:
+
+* **This slice's symbols are all still present** -- `EDITOR_FIELDS_JS`,
+  `read_self_owned_editor_fields`, `EDITOR_ANCHOR_NAME`,
+  `linkedin_profile_editor_fields`, `SELF_PROFILE_EDIT_INTRO_URL`,
+  `_self_assertion_on`.
+* **The sibling's diff is additive.** Across all four files it removes FIVE lines, and
+  they are exactly the five counts this slice had just moved, being moved again for
+  their tool: `waived_in.get("dom.py", 0) <= 8`, `len(EXECUTED_SCRIPTS) == 8`,
+  `test_the_surface_is_exactly_the_thirtytwo_tools`, `len(tools) == 32`, and the
+  non-write `== 20`. Nothing of this slice's was overwritten.
+* Their new prose CITES this slice -- `shape.census_substitute`, `EDITOR_FIELDS_JS`,
+  `read_self_owned_editor_fields` -- so the coupling is deliberate.
+
+### Three suite runs, and which one is this slice's number
+
+| tree | result |
+|---|---|
+| **this slice, in the real repo, before either commit** | **2205 passed in 764.45s** -- the number for this slice |
+| commit `3940f72` alone, in an isolated `git archive` copy | 2 failed, 2203 passed, 6 skipped in 1026.51s |
+| working tree = `3940f72` + the sibling's in-flight edits | 1 failed, 2210 passed in 880.87s |
+
+**Neither failure is this slice's, and both are shown so rather than asserted.**
+
+The isolated copy's two failures are
+`test_path_hygiene.py::test_a_cookie_jar_failure_never_returns_an_absolute_path`, on
+both its parameters. THE CONTROL: the same two tests were run in the OTHER scratch copy
+-- the one archived from `08e846a`, containing none of this work -- and they fail there
+identically (`2 failed, 17 passed in 8.02s`). They are artefacts of running from a
+directory that is not the repo root, which is what a path-scrubbing test would be
+expected to notice. The 6 skips are the same class: `test_vendored_buildinfo.py`
+skipping because the `jobcore` checkout is not beside a scratch copy. 2203 + 2 + 6 =
+2211, with no residue.
+
+The working tree's one failure is
+`test_writes.py::test_a_second_click_inside_perform_is_still_caught` -- a file this
+slice does not touch, on a tree carrying the sibling's half-finished edits. It passed
+in this slice's own run and did not fail in the isolated copy of `3940f72`, which is
+the pair of readings that places it.
 
 ---
 
