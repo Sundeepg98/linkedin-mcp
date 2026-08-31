@@ -19,11 +19,12 @@ was performed.** `_state/session.json` is byte-identical -- proof in section 9.
 | refusals LIFTED | **0** |
 | refusals whose REASON changed | **4** |
 | Part 7 debts closed | **6 of 7**, the seventh checked and correctly left recorded |
+| further stale claims found | **3**, one of them a false SAFETY claim in a docstring |
 | defects found and fixed | **3** -- a `KeyError` gate, a subtraction premise, a PII leak in my own fixture |
 | read-boundary hole found and closed | **1**, and it was real |
 | new click call sites | **ZERO**. `SANCTIONED_MUTATIONS` is the two entries it was |
 | new injected scripts | **ONE**, declared and scanned |
-| suite | **2023 -> 2090**, 0 failed |
+| suite | **2023 -> 2096**, 0 failed |
 | writes performed | **NONE** |
 
 **Zero refusals lifted is the finding, not a shortfall.** Each of the six was
@@ -582,11 +583,33 @@ Both are built, tested and green. Neither has run.
    rather than unmeasured. One line in `writes._NINE_REFUSALS`.
 8. The `/mypreferences/d/` redirect finding in section 5 is recorded and
    unresolved.
-9. `tests/test_readonly_boundary_invariant.py:35` says a re-freeze "HAS BEEN
-   ONE, ONCE" of something that has now happened five times -- count rot of
-   exactly the kind section 4 debt 5 corrected elsewhere.
-10. The README's read table lists 14 rows for 19 registered reads. That is a
-    table to write, not a number to change, and it was left.
+9. ~~`tests/test_readonly_boundary_invariant.py:35`~~ **CLOSED.** It said a
+   re-freeze "HAS BEEN ONE, ONCE" of something that has happened five times --
+   count rot in the one file whose job is noticing when something moved.
+10. ~~The README's read table lists 14 rows for 19 reads.~~ **CLOSED.** All
+    nineteen are there, verified set-equal to `mcp.list_tools()` minus the
+    twelve write-shaped names rather than counted by eye. It had also been
+    leading with `linkedin_login_browser`, the DEPRECATED ALIAS, while the
+    canonical `linkedin_login` was absent entirely.
+11. **A FALSE SAFETY CLAIM, found while doing 10 and corrected.**
+    `linkedin_notifications`' docstring said: *"It is the ONE server-side
+    change any tool here causes. Everything else in this package leaves
+    LinkedIn exactly as it found it."* True when written; now false several
+    times over -- five writes ship, messaging opens somebody's conversation
+    and resets a badge, and a job search adds to his recent-search history.
+    **This is the worst of the rot found in this wave**, because it is a
+    docstring an assistant answers from, and that sentence is exactly the kind
+    a caller repeats verbatim to somebody deciding whether to run something.
+    The narrower true claim is kept: it is the only server-side change any
+    READ causes WITHOUT BEING ASKED FOR IT.
+12. **STILL OPEN, and it needs a rewrite rather than a patch.** README's
+    "What it deliberately cannot do" carries five stale claims: it still lists
+    following and applying as impossible when both ship, still says inbox
+    reading is unmeasured and "has NOT been run", and still heads "The two
+    side effects" over three. Left deliberately -- patching individual
+    sentences in a section whose premise has moved produces a section that
+    contradicts itself in more places, which is what the write-count history
+    in `server.py` demonstrates.
 
 **CANNOT BE CLOSED FROM HERE AT ALL:**
 
@@ -605,7 +628,7 @@ Both are built, tested and green. Neither has run.
 ## 9. Receipts
 
     baseline            77ecd2b44b48   suite 2023 passed
-    final               0d543f433d6c   suite 2090 passed, 0 failed
+    final               bf9ac08        suite 2096 passed, 0 failed
 
     dacf76d  fix(gate)      set_open_to_work's origin gets the check its destination had
     958a98d  fix(harvest)   port the non-rendered-duplicate guard to the block walk
@@ -614,6 +637,10 @@ Both are built, tested and green. Neither has run.
     b364744  fix(fixture)   the identity guard fired on my own notification card
     0d543f4  feat(boundary) the three surfaces the operator ruled, and a name that
                             never enters Python
+    b0c3d0a  docs(refusal)  send_message is deferred by ruling, not unmeasured
+    24cba07  docs(audit)    this document
+    bf9ac08  docs           the read table listed 14 of 19, and a safety claim
+                            that was no longer true
 
     _state/session.json
       sha256(first 32)  f0892e35688868faef6a3525e54b93e4
@@ -624,8 +651,10 @@ Both are built, tested and green. Neither has run.
     confirm_tokens issued        0
     writes performed             0
     third-party profiles loaded  0
-    live page loads this wave    5  (saved tab, job detail, job search,
-                                     settings census, and one server_info that
-                                     loads nothing)
+    live page loads this wave    7  (saved tab, job detail, job search,
+                                     settings census, profile census, and the
+                                     feed read inside react_to_item's refusal)
+    tools refused by the harness 1  (linkedin_send_invitation -- not routed
+                                     around; the census was used instead)
 
 Nothing was pushed. The push and its PII scan are the lead's.
