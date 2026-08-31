@@ -158,7 +158,7 @@ class FixtureNavigator:
 
 
 def _pages(
-    *, target, posting=None, saved=None, profile=None, followed=None
+    *, target, posting=None, saved=None, applied=None, profile=None, followed=None
 ) -> dict[str, str]:
     out: dict[str, str] = {}
     if posting is not None:
@@ -172,6 +172,14 @@ def _pages(
     if saved is not None:
         out[writes.SAVED_LIST_URL] = (
             saved if saved.lstrip().startswith("<") else markup(saved)
+        )
+    if applied is not None:
+        # THE APPLIED TAB, added 2026-08-31 with apply's verification fix.
+        # Raw markup accepted for the same reason ``saved`` accepts it: no
+        # capture in this repo shows an APPLIED posting, because the Applied
+        # tab has read zero on every reading anybody has taken.
+        out[writes.APPLIED_LIST_URL] = (
+            applied if applied.lstrip().startswith("<") else markup(applied)
         )
     if profile is not None:
         out[writes.PROFILE_URL] = markup(profile)
@@ -1526,6 +1534,7 @@ async def _perform(
     *,
     posting: str = "job_detail",
     saved=None,
+    applied=None,
 ):
     """Run the real ``perform`` over frozen captures. Returns ``(block, nav)``.
 
@@ -1535,7 +1544,7 @@ async def _perform(
     two separate frozen worlds rather than one mutable fake.
     """
     nav = FixtureNavigator(
-        _pages(target=grant.target, posting=posting, saved=saved)
+        _pages(target=grant.target, posting=posting, saved=saved, applied=applied)
     )
     return await writes.perform(nav, page, grant), nav
 

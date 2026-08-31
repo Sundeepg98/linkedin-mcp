@@ -298,6 +298,24 @@ class WriteSpec:
     audiences: dict[str, str] = field(default_factory=dict)
     irreversible: bool = False
     spends: Optional[str] = None
+    #: THE STATE THAT MEANS "IT DID NOT HAPPEN", when that is not the state
+    #: the action is valid FROM. Added 2026-08-31 for apply.
+    #:
+    #: ``perform`` decides between False and "unknown" by comparing the
+    #: verification against ``from_state``, which works for a TOGGLE because a
+    #: toggle that did not move is still in the state it was valid from. Apply
+    #: is not a toggle: its ``from_state`` is ``"linkedin_apply"``, a claim
+    #: about which ROUTE the posting's control takes, and the surface that
+    #: verifies an apply -- the tracker's Applied tab -- establishes nothing
+    #: about a control on a posting. It can say an application exists or,
+    #: when LinkedIn's own count corroborates the whole list was drawn, that
+    #: none does. That second answer is what this names.
+    #:
+    #: Without it, "no application exists" fell through to ``"unknown"``, and
+    #: ``"unknown"`` on this action is the one answer a caller cannot resolve
+    #: by retrying -- the docstring forbids the retry, because a retry on an
+    #: act that may have half-landed is the failure being guarded against.
+    not_performed_state: Optional[str] = None
 
 
 #: The complete set of writes this server may ever perform without a new,
@@ -501,6 +519,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         summary="Submit an application to one job posting.",
         from_state="linkedin_apply",
         to_state="applied",
+        # THE VERIFICATION'S "it did not happen" ANSWER. See the field's own
+        # comment: a tracker read cannot report ``linkedin_apply``, so without
+        # this every apply that did NOT submit reported "unknown" -- on the
+        # one action where "unknown" is unresolvable by retrying.
+        not_performed_state="not_applied",
         target_kind="job_id",
         state_from="apply_control",
         wrong_state_note=(
@@ -1797,6 +1820,25 @@ UNKNOWN = "unknown"
 #: own url template -- never from anything a caller passed -- which is the
 #: same discipline :func:`assert_write_url` applies to a write url.
 SAVED_LIST_URL = "https://www.linkedin.com/jobs-tracker/?stage=saved"
+
+#: The tracker tab that answers "did an application submit". Added 2026-08-31,
+#: after an apply was performed live and its verification read the SAVED tab.
+#:
+#: THE DEFECT WAS NOT A WRONG STRING, IT WAS A CHECK THAT COULD NOT PASS.
+#: ``apply_job``'s ``to_state`` is ``"applied"`` and ``_read_saved_state``
+#: returns ``"saved"``, ``"not_saved"`` or ``"unknown"`` -- so the comparison
+#: ``verified_state == "applied"`` was FALSE on every possible reading, and
+#: every apply this server can ever perform was going to report
+#: ``performed: "unknown"``. It reported that the posting is still in his
+#: Saved list, which was true and is not evidence about an application.
+#:
+#: WHY THAT MATTERS MORE HERE THAN ANYWHERE ELSE. The verification block is
+#: what a human reads to decide whether an IRREVERSIBLE act landed, and
+#: ``"unknown"`` on this action is the one answer he cannot resolve by
+#: retrying -- the docstring forbids it, because a retry on something that may
+#: have half-landed is the failure being guarded against. Pointing the read at
+#: the tab that carries the answer makes ``"unknown"`` mean what it says.
+APPLIED_LIST_URL = "https://www.linkedin.com/jobs-tracker/?stage=applied"
 PROFILE_URL = "https://www.linkedin.com/in/me/"
 #: Manage Pages. The one surface in this design where the state is read off the
 #: SAME page the click lands on AND the click is anchored to a row rather than
@@ -2234,6 +2276,54 @@ async def _read_apply_route(page: Any, target: str) -> tuple[str, str]:
     return str(verdict.get("route") or UNKNOWN), str(verdict.get("why") or "")
 
 
+@dataclass(frozen=True)
+class _TrackerStage:
+    """One tab of the jobs tracker, described completely enough to read it.
+
+    ADDED 2026-08-31 SO THAT A SECOND TAB COULD BE READ WITHOUT A SECOND COPY
+    OF THE RECONCILIATION. That reconciliation is the subtle part -- absence
+    from a partial list is not absence, and it refuses in BOTH directions --
+    and two copies of it are two things that can drift. The alternative was
+    duplicating ninety lines for the Applied tab, which is how the two would
+    have ended up disagreeing about what an empty list means.
+    """
+
+    url: str
+    #: The key ``shape.parse_tracker_tabs`` returns this tab's count under.
+    tab_key: str
+    #: What LinkedIn calls the tab, for the sentences a human reads.
+    tab_label: str
+    #: The state when the posting IS one of the rows.
+    present: str
+    #: The state when the list is READ WHOLE and the posting is not in it.
+    absent: str
+
+
+SAVED_STAGE = _TrackerStage(
+    url=SAVED_LIST_URL,
+    tab_key="saved",
+    tab_label="Saved",
+    present="saved",
+    absent="not_saved",
+)
+
+#: THE ABSENT STATE HERE IS NOT ``apply_job``'s ``from_state``, and that is
+#: deliberate rather than an oversight. ``from_state`` is ``"linkedin_apply"``,
+#: which is a claim about the CONTROL on the posting -- which route the apply
+#: takes -- and a tracker read establishes nothing about that. What a
+#: corroborated absence from this tab establishes is narrower and is exactly
+#: what the caller needs: no application exists. It gets its own name, and
+#: ``WriteSpec.not_performed_state`` is what tells ``perform`` to read it as
+#: "it did not happen" rather than as "nobody could tell".
+APPLIED_STAGE = _TrackerStage(
+    url=APPLIED_LIST_URL,
+    tab_key="applied",
+    tab_label="Applied",
+    present="applied",
+    absent="not_applied",
+)
+
+
 async def _read_saved_state(
     page: Any, target: str, *, navigator: Any = None
 ) -> tuple[str, str]:
@@ -2255,10 +2345,43 @@ async def _read_saved_state(
     this function, so a list read before it drew does not merely produce an
     empty answer, it produces ``unknown`` and the gate refuses. Measured
     2026-08-30, that is exactly what the operator met.
+
+    A THIN WRAPPER SINCE 2026-08-31, and the name is kept because it is what
+    every caller and every test already says. The reconciliation moved to
+    :func:`_read_tracker_membership` so the Applied tab could be read by the
+    same rules rather than by a second copy of them.
     """
+    return await _read_tracker_membership(
+        page, target, SAVED_STAGE, navigator=navigator
+    )
+
+
+async def _read_applied_state(
+    page: Any, target: str, *, navigator: Any = None
+) -> tuple[str, str]:
+    """Does an application for THIS posting exist? Same rules, other tab.
+
+    IT IS THE SAME QUESTION AS THE SAVED READ AND IT CARRIES MORE WEIGHT.
+    Absence from a partial Saved list means a save cannot be confirmed;
+    absence from a partial APPLIED list, read as an answer, would mean telling
+    him an irreversible act did not happen when the row may simply be below
+    the fold. So the same refusal applies and it is the more important
+    instance of it: this returns ``"not_applied"`` only when LinkedIn's own
+    count for the tab corroborates that the whole list was drawn.
+    """
+    return await _read_tracker_membership(
+        page, target, APPLIED_STAGE, navigator=navigator
+    )
+
+
+async def _read_tracker_membership(
+    page: Any, target: str, stage: _TrackerStage, *, navigator: Any = None
+) -> tuple[str, str]:
+    """Is ``target`` one of the rows in this tracker tab? See the two wrappers
+    above for what the question means on each of them."""
     list_wait = await dom.wait_for_tracker_list(page)
     main_text = await dom.read_main_text(page)
-    stated = shape.parse_tracker_tabs(main_text).get("saved")
+    stated = shape.parse_tracker_tabs(main_text).get(stage.tab_key)
     empty_state = shape.tracker_empty_state(main_text)
 
     records = await dom.harvest_linked_cards(
@@ -2270,39 +2393,43 @@ async def _read_saved_state(
     if stated is None:
         return (
             UNKNOWN,
-            "LinkedIn's own Saved tab count could not be read, so the rows "
-            "that did render have nothing to be reconciled against and a "
-            "posting absent from them may simply be one that was not drawn.",
+            f"LinkedIn's own {stage.tab_label} tab count could not be read, "
+            "so the rows that did render have nothing to be reconciled "
+            "against and a posting absent from them may simply be one that "
+            "was not drawn.",
         )
     if len(rows) > stated:
         return (
             UNKNOWN,
-            f"{len(rows)} rows were read while LinkedIn's own Saved tab says "
-            f"{stated}. More rows than the page claims means something that is "
-            "not a saved job is being parsed as one, and a list that disagrees "
-            "with itself cannot settle a direction.",
+            f"{len(rows)} rows were read while LinkedIn's own "
+            f"{stage.tab_label} tab says {stated}. More rows than the page "
+            "claims means something that is not a job row is being parsed as "
+            "one, and a list that disagrees with itself cannot settle a "
+            "direction.",
         )
     if target in ids:
         return (
-            "saved",
+            stage.present,
             f"this posting is one of the {len(rows)} rows LinkedIn rendered in "
-            f"the Saved tab, whose own count for that tab is {stated}.",
+            f"the {stage.tab_label} tab, whose own count for that tab is "
+            f"{stated}.",
         )
     if not rows:
         if shape.empty_is_believable(
             linkedin_count=stated, empty_state=empty_state
         ):
             return (
-                "not_saved",
-                "the Saved tab is EMPTY and corroborated empty: LinkedIn's own "
-                f"count for it reads {stated} and the page drew its empty state "
-                f"({empty_state!r}). An empty list contains nothing, so this "
-                "posting is not in it.",
+                stage.absent,
+                f"the {stage.tab_label} tab is EMPTY and corroborated empty: "
+                f"LinkedIn's own count for it reads {stated} and the page drew "
+                f"its empty state ({empty_state!r}). An empty list contains "
+                "nothing, so this posting is not in it.",
             )
         return (
             UNKNOWN,
-            "no saved rows could be read AND the page does not corroborate an "
-            f"empty list: the Saved tab count reads {stated!r} and the empty "
+            "no rows could be read AND the page does not corroborate an "
+            f"empty list: the {stage.tab_label} tab count reads {stated!r} "
+            "and the empty "
             f"state ({empty_state!r}) is what would have to show. Nothing here "
             "distinguishes an empty list from a read that failed. "
             + shape.tracker_read_note(
@@ -2322,16 +2449,16 @@ async def _read_saved_state(
         )
     if len(rows) == stated:
         return (
-            "not_saved",
-            f"all {stated} rows LinkedIn counts in the Saved tab were read, and "
-            "this posting is not among them.",
+            stage.absent,
+            f"all {stated} rows LinkedIn counts in the {stage.tab_label} tab "
+            "were read, and this posting is not among them.",
         )
     return (
         UNKNOWN,
-        f"{len(rows)} of the {stated} rows LinkedIn counts in the Saved tab "
-        "were read -- this loads one page and does not scroll, so the rest are "
-        "below the fold rather than missing. Absence from a list that is a "
-        "fraction of itself is not absence.",
+        f"{len(rows)} of the {stated} rows LinkedIn counts in the "
+        f"{stage.tab_label} tab were read -- this loads one page and does not "
+        "scroll, so the rest are below the fold rather than missing. Absence "
+        "from a list that is a fraction of itself is not absence.",
     )
 
 
@@ -4431,6 +4558,16 @@ async def _verify_after(
     the confirmation is read off the saved list, a different surface entirely,
     carrying LinkedIn's own per-tab count.
 
+    APPLY GETS THE SAME SHAPE ON A DIFFERENT TAB, since 2026-08-31, and until
+    then it got the saved one. That was not a wrong string but a check that
+    could not pass: apply's ``to_state`` is ``"applied"`` and the saved read
+    returns ``saved`` / ``not_saved`` / ``unknown``, so the comparison was
+    false on every reading it could take. It reads ``?stage=applied`` now, by
+    the same reconciliation -- absence counts only when LinkedIn's own tab
+    count says the whole list was drawn, which matters more here than on the
+    saved tab: reporting an unreconciled absence would be telling him an
+    IRREVERSIBLE act did not happen when the row is merely below the fold.
+
     THE UNFOLLOW DOES NOT, AND THIS SAYS SO INSTEAD OF IMPLYING OTHERWISE.
     There is exactly one surface that lists followed Pages, so the
     confirmation comes from RELOADING it -- a fresh navigation and a fresh
@@ -4500,6 +4637,30 @@ async def _verify_after(
             "after. Open your followed companies if you want a second opinion."
         )
         return state, why, str(observation.facts_url or "")
+
+    if spec.action == "apply_job":
+        # THE TAB THAT CARRIES THE ANSWER, and until 2026-08-31 this fell
+        # through to the SAVED read below.
+        #
+        # THAT WAS NOT A WRONG STRING, IT WAS A CHECK THAT COULD NOT PASS.
+        # ``to_state`` is ``"applied"`` and the saved read returns ``saved`` /
+        # ``not_saved`` / ``unknown``, so ``verified_state == "applied"`` was
+        # FALSE on every reading it could ever take -- every apply this server
+        # performs was going to report ``performed: "unknown"``. Measured on a
+        # live apply: it reported the posting is still in his Saved list,
+        # which was true and is not evidence about an application.
+        #
+        # A DIFFERENT SURFACE FROM THE ONE CLICKED, which is the ideal shape
+        # and the one the save pair already has: the click happens on the
+        # posting and the confirmation comes off the tracker, with LinkedIn's
+        # own per-tab count reconciling it.
+        landed = await _load(
+            navigator, page, APPLIED_LIST_URL, surface="applied jobs"
+        )
+        state, why = await _read_applied_state(
+            page, grant.target, navigator=navigator
+        )
+        return state, why, landed
 
     if spec.action != "unfollow_company":
         landed = await _load(navigator, page, SAVED_LIST_URL, surface="saved jobs")
@@ -4582,8 +4743,26 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
         "selector": dom.APPLY_SUBMIT_SELECTOR,
         "modal": modal,
         "why": "",
+        # WHICH OF THE FIVE REFUSED, as a code rather than only as prose.
+        # ``None`` on the proceed path.
+        #
+        # ADDED 2026-08-31, AFTER AN APPLY WAS PERFORMED LIVE AND STOPPED
+        # HERE. The gate held, on an irreversible action, on a real posting
+        # with a real employer at the other end -- that is the design working.
+        # What it could not do is say WHICH condition stopped it: this dict
+        # was assigned inside ``perform`` and never read again, so every
+        # sentence below reached nobody.
+        #
+        # It is the same defect this package has fixed three times elsewhere
+        # -- ``save_job``'s refusal that would not say what it saw,
+        # ``_read_tracker`` discarding its own counts, ``parse_job_card``'s
+        # two indistinguishable ``None``s -- and APPLY IS WHERE IT MATTERS
+        # MOST, because the caller cannot re-run to learn more: a retry on an
+        # action that may have half-landed is what the docstring forbids.
+        "refused_condition": None,
     }
     if not modal.get("modal_present"):
+        out["refused_condition"] = "1_modal_absent"
         out["why"] = (
             "the apply modal never rendered after the control was clicked, so "
             "nothing was submitted. This is the same non-hydration that makes "
@@ -4591,12 +4770,14 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
         )
         return out
     if not modal.get("submit_present"):
+        out["refused_condition"] = "2_no_submit_control"
         out["why"] = modal.get("why") or (
             "the modal rendered but carries no submit control this reader "
             "recognises."
         )
         return out
     if not modal.get("advance_scan_complete"):
+        out["refused_condition"] = "5_advance_scan_incomplete"
         out["why"] = (
             "THE SCAN FOR ADVANCE CONTROLS DID NOT FINISH, so the empty list "
             "beside it means UNKNOWN and not none. This modal draws "
@@ -4610,6 +4791,7 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
         )
         return out
     if modal.get("advance_names"):
+        out["refused_condition"] = "5_multi_step_flow"
         out["why"] = (
             "THIS FLOW HAS MORE THAN ONE STEP -- it draws "
             f"{modal['advance_names']} alongside its submit. Only a "
@@ -4620,6 +4802,7 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
         )
         return out
     if not modal.get("submit_enabled"):
+        out["refused_condition"] = "3_submit_disabled"
         out["why"] = (
             "the submit control is present but disabled, which means the form "
             "wants something it has not got. What that something is has never "
@@ -4629,6 +4812,7 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
         return out
     name = str(modal.get("submit_name") or "")
     if "submit" not in name.lower():
+        out["refused_condition"] = "4_name_does_not_corroborate"
         out["why"] = (
             f"the control carrying {dom.APPLY_SUBMIT_HOOK} is named {name!r}, "
             "which does not corroborate the hook. Both fields have to agree "
@@ -4696,14 +4880,26 @@ async def perform(
     replace that fact with a stack trace, and the operator would retry and
     toggle it back. Every post-click outcome comes back as a field.
 
-    VERIFICATION IS FROM A DIFFERENT SURFACE, always. The click happens on the
-    posting; the confirmation is read off ``/jobs-tracker/?stage=saved``, the
-    same corroborated list the preview used, because a control that redraws
-    itself is the weakest possible witness to its own effect.
+    VERIFICATION IS FROM A DIFFERENT SURFACE WHERE ONE EXISTS. The click
+    happens on the posting; the confirmation is read off the tracker, because
+    a control that redraws itself is the weakest possible witness to its own
+    effect. WHICH TAB depends on the action, and this sentence named only one
+    of them until 2026-08-31: the save pair is confirmed from
+    ``?stage=saved`` and an APPLY from ``?stage=applied``. Apply fell through
+    to the saved read, whose three answers do not include ``"applied"``, so
+    the comparison could not pass and every apply this server performed was
+    going to report ``"unknown"``. ``update_setting`` has no second surface at
+    all and says so rather than implying one.
 
     Returns a block whose ``performed`` field has THREE values, not two:
-    ``True``, ``False``, and ``"unknown"`` -- the third for a click that raised
-    on the way out, where whether it dispatched is exactly what nobody knows.
+    ``True``, ``False``, and ``"unknown"``. The third is for a click whose
+    effect nobody could establish -- a verification read that raised, or a
+    list too partial to settle it. IT IS NOT THE ANSWER FOR "it did not
+    happen": that is ``False``, and an action whose "did not happen" state is
+    not the state it was valid FROM names it in
+    ``WriteSpec.not_performed_state``. Apply is the one that needs it, and it
+    is the one where the distinction matters most, because the docstring
+    forbids retrying to find out.
     """
     # ORDER MATTERS HERE, and it is the order of how fundamental each refusal
     # is rather than the order they were written in. The flag governs whether
@@ -4877,9 +5073,16 @@ async def perform(
             navigator, page, spec, grant, observation
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
+        # WHERE TO GO AND LOOK, when the verification read itself failed.
+        # This is the sentence a human follows after an irreversible act, so
+        # it must name the surface that carries the answer -- it said SAVED
+        # for an apply until 2026-08-31, sending him to a tab that cannot
+        # settle it.
         state_landed = (
             FOLLOWED_PAGES_URL
             if spec.action == "unfollow_company"
+            else APPLIED_LIST_URL
+            if spec.action == "apply_job"
             else SAVED_LIST_URL
         )
         verified_why = (
@@ -4912,7 +5115,7 @@ async def perform(
     # returned that. So this compares two strings LinkedIn produced rather
     # than one of LinkedIn's and one of a caller's.
     expected_after = spec.to_state or anchor
-    unchanged_state = spec.from_state or live_state
+    unchanged_state = spec.not_performed_state or spec.from_state or live_state
     verified = bool(expected_after) and verified_state == expected_after
     if verified:
         performed: Any = True
@@ -4941,7 +5144,53 @@ async def perform(
             "state_before": live_state,
             "read_from": "the control itself, immediately before the click",
             "error": click_error,
+            # HOW MANY CLICKS ACTUALLY HAPPENED, which for a two-click action
+            # is the difference between "the flow opened" and "it submitted".
+            "clicks_made": clicks_made,
         },
+        # WHAT THE SUBMIT GATE SAW, for the one action that has one.
+        #
+        # THIS BLOCK IS THE FIX FOR A DEFECT MEASURED ON A LIVE APPLY. The
+        # gate produced a specific sentence for whichever of its five
+        # conditions refused, and ``perform`` assigned it to a local and NEVER
+        # READ IT AGAIN -- so the caller got ``performed: "unknown"`` with no
+        # way to learn why, on the single action where re-running to find out
+        # is exactly what the docstring forbids.
+        #
+        # It reports the READING rather than a verdict about the posting: how
+        # many buttons the modal drew, whether the advance scan finished,
+        # which advance controls it found. An unfinished scan is why=UNKNOWN
+        # and not why=none, and the field says which.
+        "submit_gate": (
+            None
+            if apply_gate is None
+            else {
+                "proceeded": bool(apply_gate.get("proceed")),
+                "refused_condition": apply_gate.get("refused_condition"),
+                "why": apply_gate.get("why"),
+                "observed": {
+                    key: (apply_gate.get("modal") or {}).get(key)
+                    for key in (
+                        "modal_present",
+                        "submit_present",
+                        "submit_enabled",
+                        "submit_name",
+                        "advance_names",
+                        "advance_scan_complete",
+                        "buttons_total",
+                    )
+                },
+                "scan_limit": dom.APPLY_ADVANCE_SCAN_LIMIT,
+                "what_this_is_not": (
+                    "a verdict about the posting. It says which condition "
+                    "stopped this attempt and what was on the screen when it "
+                    "did. One reading of a modal is not evidence that this "
+                    "posting cannot be applied to -- establish which "
+                    "condition failed before concluding anything about the "
+                    "job."
+                ),
+            }
+        ),
         "verified": verified,
         "verification": {
             # THE DESTINATION AS IT WAS COMPARED, which for a multi-state
@@ -4977,6 +5226,15 @@ async def perform(
                     "other two report themselves unchecked to pass this."
                 )
                 if spec.action == "update_setting"
+                else (
+                    "a DIFFERENT surface from the one clicked -- the tracker's "
+                    "APPLIED tab, with LinkedIn's own per-tab count "
+                    "reconciling it. Until 2026-08-31 this read the SAVED tab, "
+                    "whose three answers do not include 'applied', so the "
+                    "comparison could not pass and every apply reported "
+                    "'unknown'."
+                )
+                if spec.action == "apply_job"
                 else (
                     "a DIFFERENT surface from the one clicked. A control that "
                     "redraws itself is the weakest possible witness to its own "

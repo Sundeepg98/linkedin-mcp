@@ -60,6 +60,12 @@ from tests.test_writes import (  # noqa: F401 - fixtures are used by injection
     writes_on,
 )
 
+# ALIASED, because this module already has a zero-argument ``markup`` FIXTURE
+# of its own and the two are different things: that one is this file's apply
+# modal, this one loads any fixture by name. Importing it unaliased would
+# shadow the fixture, and every test taking it would receive a function.
+from tests.test_writes import markup as fixture_markup
+
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
 #: Fixed so that a visibility answer is reproducible. ``read_apply_modal``
@@ -856,18 +862,31 @@ async def test_an_apply_now_reaches_the_gate(writes_on, browser_page, monkeypatc
     assert grant.consumed is True
     assert grant.observation is not None
 
-    block, _nav = await _perform(browser_page, grant)
+    block, _nav = await _perform(
+        browser_page, grant, applied="jobs_tracker_empty"
+    )
 
     assert len(calls) == 1, (
         "an apply did not reach the apply gate. This is the blocker this test "
         "replaced coming back: perform refused before the click loop."
     )
-    # ``performed`` IS THREE-VALUED and "unknown" is the honest answer here:
-    # the gate refused, so no submit was pressed, and _verify_after then could
-    # not read an "applied" state to confirm anything either way. What must
-    # never appear is True -- that would be a claim an application was sent.
+    # THIS COMMENT SAID "unknown" WAS THE HONEST ANSWER HERE, and it was --
+    # while the verification read the SAVED tab, whose three answers do not
+    # include "applied", so nothing it could return would ever confirm or deny
+    # an application. The read moved to ``?stage=applied`` on 2026-08-31 and
+    # the honest answer got better: the tab reads zero and corroborates it, so
+    # this is FALSE. It did not happen, and he is told so rather than told to
+    # go and look.
+    #
+    # The Applied tab is served explicitly for that reason. Without it the
+    # navigator has no page for that url, the verification read RAISES, and
+    # ``unknown`` comes back for a reason that has nothing to do with the
+    # gate -- which would be this test passing on the wrong mechanism.
+    assert block["performed"] is False, block
+    # AND NEVER True, which is the assertion that actually matters: the gate
+    # refused, so no submit was pressed, and a True here would be a claim that
+    # an irreversible act happened.
     assert block["performed"] is not True, block
-    assert block["performed"] in (False, "unknown"), block["performed"]
 
 
 async def test_a_proceeding_gate_appends_the_second_click(
@@ -1000,3 +1019,304 @@ async def test_gate_five_refuses_an_offsite_posting_and_hands_back_no_selector(
         "refused, but not as an off-site posting -- so this test is not "
         f"measuring the route refusal. state={state!r} why={why!r}"
     )
+
+
+# ---------------------------------------------------------------------------
+# THE TWO DEFECTS A LIVE APPLY EXPOSED, 2026-08-31
+# ---------------------------------------------------------------------------
+#
+# The operator authorised his first apply and it was performed. It did NOT
+# submit -- the gate held, on an irreversible action, on a real posting with a
+# real employer at the other end, and that is the design working. What it
+# could not do was explain itself, and what it DID say was read off the wrong
+# surface entirely.
+
+
+#: The tracker with an APPLIED count of one and a row on it. DERIVED, and
+#: labelled as such: the Applied tab has read ZERO on every reading anybody
+#: has taken, so a page showing an application cannot be photographed and has
+#: to be built. The row's job id is the one these tests act on.
+#:
+#: THE ASSERTIONS ARE NOT DECORATION. A ``replace`` whose anchor has drifted is
+#: a silent no-op, and a verification test running against a tracker that
+#: still says zero would pass while proving nothing.
+#:
+#: DERIVED TWICE, and both halves are labelled. The frozen row carries
+#: ``SAVED_JOB`` and the posting fixture an apply is previewed against is
+#: ``JOB``, and the gate REFUSES a control belonging to a different posting --
+#: measured, by writing this test the other way round first. So the id is
+#: rewritten as well as the count.
+APPLIED_LIST_OF_ONE = (
+    fixture_markup("jobs_tracker_row")
+    .replace("Applied &#183; 0", "Applied &#183; 1")
+    .replace(SAVED_JOB, JOB)
+)
+assert APPLIED_LIST_OF_ONE != fixture_markup("jobs_tracker_row")
+assert "Applied &#183; 1" in APPLIED_LIST_OF_ONE
+assert JOB in APPLIED_LIST_OF_ONE and SAVED_JOB not in APPLIED_LIST_OF_ONE, (
+    "the id rewrite anchored on something that has drifted, so the positive "
+    "verification test would assert a MISS and pass while proving nothing."
+)
+
+#: The tracker as the LIVE ACCOUNT READS IT: Applied 0, corroborated empty.
+#: Used unmodified, because this one IS the measured shape -- the lead read
+#: exactly this on 2026-08-31 after the live apply.
+APPLIED_LIST_EMPTY = "jobs_tracker_empty"
+
+
+async def test_an_apply_is_verified_against_the_applied_tab(
+    writes_on, browser_page, monkeypatch
+):
+    """DEFECT 1: it was verified against the SAVED tab.
+
+    NOT A WRONG STRING -- A CHECK THAT COULD NOT PASS. ``apply_job``'s
+    ``to_state`` is ``"applied"`` and ``_read_saved_state`` returns
+    ``"saved"``, ``"not_saved"`` or ``"unknown"``, so ``verified_state ==
+    "applied"`` was FALSE on every reading it could ever take. Every apply this
+    server can perform was going to report ``performed: "unknown"``, and the
+    live one did -- while reporting that the posting is still in his Saved
+    list, which is true and is not evidence about an application.
+
+    Reading ``?stage=applied`` answers it outright. The lead did exactly that
+    by hand, in one call, and got a corroborated zero.
+    """
+
+    async def _proceeding_gate(page):
+        return {
+            "proceed": True,
+            "selector": "#nothing",
+            "modal": {},
+            "why": "test",
+            "refused_condition": None,
+        }
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _proceeding_gate)
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    block, nav = await _perform(browser_page, grant, applied=APPLIED_LIST_OF_ONE)
+
+    assert block["verification"]["read_from"] == writes.APPLIED_LIST_URL, block[
+        "verification"
+    ]
+    assert writes.SAVED_LIST_URL not in nav.gotos, (
+        "the verification loaded the Saved tab, which cannot answer this "
+        f"question. gotos={nav.gotos}"
+    )
+    assert writes.APPLIED_LIST_URL in nav.gotos, nav.gotos
+    assert block["verification"]["observed_state"] == "applied"
+    assert block["performed"] is True, block
+
+
+async def test_an_apply_that_did_not_submit_reports_false_not_unknown(
+    writes_on, browser_page, monkeypatch
+):
+    """THE LIVE CASE, and the answer it should have given.
+
+    The gate refused, nothing was submitted, and the Applied tab reads zero
+    and corroborates it. That is not "nobody could tell" -- it is "it did not
+    happen", and the difference is the whole value of the field on an action
+    the caller MUST NOT retry to find out.
+
+    ``"not_applied"`` is a state of its own rather than ``from_state``,
+    because ``from_state`` is ``"linkedin_apply"`` -- a claim about which
+    ROUTE the posting's control takes, which a tracker read establishes
+    nothing about. ``WriteSpec.not_performed_state`` is what maps it.
+    """
+
+    async def _refusing_gate(page):
+        return {
+            "proceed": False,
+            "selector": "",
+            "modal": {},
+            "why": "test refusal",
+            "refused_condition": "3_submit_disabled",
+        }
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _refusing_gate)
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    block, _nav = await _perform(browser_page, grant, applied=APPLIED_LIST_EMPTY)
+
+    assert block["verification"]["observed_state"] == "not_applied", block[
+        "verification"
+    ]
+    assert block["performed"] is False, block
+    # AND NEVER True. Everything else here is about precision; this is about
+    # not telling him an irreversible act happened when it did not.
+    assert block["performed"] is not True
+
+
+async def test_a_partial_applied_tab_is_unknown_rather_than_not_applied(
+    writes_on, browser_page, monkeypatch
+):
+    """ABSENCE FROM A PARTIAL LIST IS NOT ABSENCE, and it matters more here.
+
+    On the Saved tab that rule means a save cannot be confirmed. On the
+    APPLIED tab, read as an answer, it would mean telling him an irreversible
+    act did not happen when the row is merely below the fold. So a tab whose
+    own count disagrees with the rows drawn comes back ``unknown``, and
+    ``unknown`` is the honest answer there.
+    """
+
+    async def _refusing_gate(page):
+        return {
+            "proceed": False,
+            "selector": "",
+            "modal": {},
+            "why": "test refusal",
+            "refused_condition": "1_modal_absent",
+        }
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _refusing_gate)
+    partial = fixture_markup("jobs_tracker_row").replace(
+        "Applied &#183; 0", "Applied &#183; 9"
+    )
+    assert "Applied &#183; 9" in partial
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    block, _nav = await _perform(browser_page, grant, applied=partial)
+
+    assert block["verification"]["observed_state"] == writes.UNKNOWN, block[
+        "verification"
+    ]
+    assert block["performed"] == writes.UNKNOWN
+    assert "fraction of itself" in block["verification"]["why"]
+
+
+async def test_the_submit_gates_refusal_reaches_the_caller(
+    writes_on, browser_page, monkeypatch
+):
+    """DEFECT 2: the gate named its condition and nobody was told.
+
+    ``_apply_submit_gate`` produces a specific sentence for whichever of its
+    five conditions refused. ``perform`` assigned that dict to a local and
+    NEVER READ IT AGAIN, so the caller received ``performed`` and no way to
+    learn why -- on the one action where re-running to find out is exactly
+    what the docstring forbids, because a retry on something that may have
+    half-landed is the failure being guarded against.
+    """
+    observed = {
+        "modal_present": True,
+        "submit_present": True,
+        "submit_enabled": False,
+        "submit_name": "Submit application",
+        "advance_names": [],
+        "advance_scan_complete": True,
+        "buttons_total": 4,
+    }
+
+    async def _refusing_gate(page):
+        return {
+            "proceed": False,
+            "selector": "",
+            "modal": dict(observed),
+            "why": "the submit control is present but disabled",
+            "refused_condition": "3_submit_disabled",
+        }
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _refusing_gate)
+    grant = await _granted(browser_page, "apply_job", target=JOB)
+    block, _nav = await _perform(browser_page, grant, applied=APPLIED_LIST_EMPTY)
+
+    gate = block["submit_gate"]
+    assert gate is not None, block
+    assert gate["proceeded"] is False
+    assert gate["refused_condition"] == "3_submit_disabled"
+    assert "disabled" in gate["why"]
+    # THE READING, not just the verdict. An unfinished advance scan is why
+    # "no advance controls" can mean UNKNOWN rather than none, so the caller
+    # needs the scan's own completion flag beside the list.
+    assert gate["observed"] == observed
+    assert gate["scan_limit"] == dom.APPLY_ADVANCE_SCAN_LIMIT
+    # AND IT DOES NOT OVERSTATE ITSELF. One reading of a modal is not evidence
+    # that the posting cannot be applied to.
+    assert gate["what_this_is_not"].startswith("a verdict about the posting")
+    assert "establish which condition failed" in gate["what_this_is_not"]
+
+
+async def test_an_action_with_no_submit_gate_carries_none(
+    writes_on, browser_page
+):
+    """THE FIELD IS ALWAYS PRESENT AND IS ``None`` WHERE THERE WAS NO GATE.
+
+    A key that appears only sometimes is a key a caller learns to guess at.
+    ``save_job`` has one click and no gate between two, so the honest value is
+    ``None`` -- distinct from a gate that ran and refused.
+    """
+    grant = await _granted(browser_page, "save_job", target=JOB)
+    block, _nav = await _perform(browser_page, grant, saved=SAVED_LIST_CONTAINING)
+    assert "submit_gate" in block
+    assert block["submit_gate"] is None
+
+
+@pytest.mark.parametrize(
+    "modal,expected",
+    [
+        ({"modal_present": False}, "1_modal_absent"),
+        ({"modal_present": True, "submit_present": False}, "2_no_submit_control"),
+        (
+            {
+                "modal_present": True,
+                "submit_present": True,
+                "advance_scan_complete": False,
+                "buttons_total": 40,
+            },
+            "5_advance_scan_incomplete",
+        ),
+        (
+            {
+                "modal_present": True,
+                "submit_present": True,
+                "advance_scan_complete": True,
+                "advance_names": ["Next"],
+            },
+            "5_multi_step_flow",
+        ),
+        (
+            {
+                "modal_present": True,
+                "submit_present": True,
+                "advance_scan_complete": True,
+                "advance_names": [],
+                "submit_enabled": False,
+            },
+            "3_submit_disabled",
+        ),
+        (
+            {
+                "modal_present": True,
+                "submit_present": True,
+                "advance_scan_complete": True,
+                "advance_names": [],
+                "submit_enabled": True,
+                "submit_name": "Continue",
+            },
+            "4_name_does_not_corroborate",
+        ),
+    ],
+    ids=lambda v: str(v)[:32],
+)
+async def test_each_of_the_five_conditions_names_itself(
+    monkeypatch, modal, expected
+):
+    """ALL FIVE, EACH REACHED, EACH NAMING ITSELF.
+
+    The docstring has listed five conditions since apply shipped and the
+    result named none of them. Naming them in prose only would leave a caller
+    parsing sentences; a code is branchable, and the prose stays beside it.
+
+    Condition 5 has TWO codes because it has two ways of failing and they are
+    not the same fact: a flow that HAS a Next, and a scan that could not
+    finish and therefore cannot say whether one exists. Absent is not zero,
+    which is the rule the whole reader is built on.
+    """
+
+    async def _reading(page):
+        return dict(modal)
+
+    class _NoWait:
+        async def wait_for_timeout(self, _ms):
+            return None
+
+    monkeypatch.setattr(dom, "read_apply_modal", _reading)
+    out = await writes._apply_submit_gate(_NoWait())
+    assert out["proceed"] is False
+    assert out["refused_condition"] == expected, out["why"]
+    assert out["why"], "a refusal with no sentence beside its code"
