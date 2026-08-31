@@ -639,3 +639,90 @@ instrument that would -- loading `/notifications/` -- destroys the very thing
 it would measure. So the honest record is two labels and no number.
 
 ---
+
+## 9. THE IDENTITY GUARD: a gap, a live leak, and a near-miss of my own
+
+The lead asked me to port the naukri sibling's drive-root rule into this
+repo's `tests/test_no_committed_identity.py`, on the premise that **this repo
+is clean and the port is therefore cheap insurance.**
+
+**The premise is false. The leak is live here, in tracked and pushed files.**
+
+### 9a. What is actually in the corpus
+
+Measured over all 151 tracked files:
+
+| rule | hits | files | segment |
+|---|---|---|---|
+| drive root (non-generic) | **31** | **13** | one distinct, 7 chars -- his GIVEN NAME |
+| Windows user path | **18** | **9** | one distinct, 4 chars -- the Windows account name |
+| POSIX home path | 0 | 0 | -- |
+
+The drive-root hits are not confined to audit prose. They are in `README.md`,
+in `linkedin_server/paths.py` and `linkedin_server/buildinfo.py` (vendoring
+provenance comments), and three times in `tests/test_path_hygiene.py` -- the
+file whose entire job is keeping absolute paths out of this server's output,
+and which was using his REAL path as its "a real path looks like this" datum.
+
+### 9b. HOW BOTH OF US MEASURED IT CLEAN, and it is a transport bug
+
+**A shell heredoc collapses the doubled backslash.** Written as `[\/]` and
+passed through one, the character class reaches Python as `[\/]` -- an escaped
+slash, matching the SLASH ONLY. The check then runs, finds the forward-slash
+paths, reports the backslash ones as absent, and exits clean.
+
+The one-line proof, run under that transport:
+
+    re.match(r'[\/]', chr(92))   ->   False
+
+**AND IT ALMOST TOOK ME WITH IT.** My first measurement was a Python FILE, where
+the backslashes survive, and it reported 31/13 correctly. I then "corrected" it
+twice using shell heredocs and got ZERO both times. **Two agreeing readings, both
+wrong, and they looked exactly like a clean result** -- I was one step from
+reporting the lead's premise back to them as confirmed.
+
+What stopped it was not a third reading. It was that the two runs DISAGREED with
+the first and I refused to report either until I knew which was broken.
+
+> **This is the `profile_edit_intro` limit again, one layer down.** That surface
+> produced two agreeing readings that were both wrong because the PAGE had not
+> settled. This produced two agreeing readings that were both wrong because the
+> TRANSPORT ate an escape. Repetition catches variance; it does not catch a
+> stable wrong state, and the stable wrong state can live in the instrument's
+> delivery rather than in the thing measured.
+
+**THE RULE THAT FOLLOWS, and it is cheap: a guard whose regex can silently match
+nothing must assert that it matches something.** Every rule landed here carries a
+CONTROL that fails loudly if the class stops matching a backslash. A PII guard
+reporting zero is indistinguishable from a PII guard that is broken, and this one
+was broken three times in twenty minutes.
+
+### 9c. SEVERITY -- real, and bounded. Stated both ways
+
+**The given name is already public in this repo by construction.** The GitHub
+account is the given name plus digits, it is in the repository URL, and it is the
+author name on every commit. The committer email is the GitHub `noreply` form, so
+no personal address is exposed.
+
+**So what the path leak ADDS is the local directory layout, not the identity.**
+That is operational detail, and it is a materially smaller thing than this shape
+was in the sibling repo. It is still worth fixing -- the next absolute path
+committed may root at something the handle does not already publish -- but
+reporting it as a fresh disclosure of his name would be wrong.
+
+### 9d. The split: what a tree fix does and does not reach
+
+**Cleaning the working tree is mechanical and changes no behaviour.** All six
+non-audit sites are inert -- two provenance comments, one `cd` example, three test
+data literals whose meaning survives a synthetic name exactly. 49 replacements
+across 20 files, each anchored to the PATH SHAPE rather than to the bare name, so
+the GitHub handle in urls is untouched: rewriting that would break real links and
+would be pretending to fix something that is not a leak.
+
+**It does not reach pushed history, and that is not mine.** This project's own
+record is explicit: a force-push makes history unreachable but not unserved,
+retained objects stay resolvable by SHA, and **only delete-and-recreate was
+measured to remove them.** That is an operator-level decision and it is named here
+rather than attempted.
+
+---
