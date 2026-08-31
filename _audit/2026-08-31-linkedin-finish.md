@@ -16,15 +16,17 @@ was performed.** `_state/session.json` is byte-identical -- proof in section 9.
 | what | outcome |
 |---|---|
 | rulings implemented | **3 of 6** as capability; 1 declined back to him; 2 unreachable |
-| refusals LIFTED | **0** |
-| refusals whose REASON changed | **4** |
+| ruled surfaces CAPTURED | **2 of 2**, twice each, after the restart landed |
+| reads landing on a forbidden substring | **1**, measured three times |
+| refusals LIFTED | **0** -- see below, and it is the finding |
+| refusals whose REASON changed | **6** |
 | Part 7 debts closed | **6 of 7**, the seventh checked and correctly left recorded |
 | further stale claims found | **3**, one of them a false SAFETY claim in a docstring |
-| defects found and fixed | **3** -- a `KeyError` gate, a subtraction premise, a PII leak in my own fixture |
+| defects found and fixed | **4** -- a `KeyError` gate, a subtraction premise, a PII leak in my own fixture, and a blind spot in my own census |
 | read-boundary hole found and closed | **1**, and it was real |
 | new click call sites | **ZERO**. `SANCTIONED_MUTATIONS` is the two entries it was |
 | new injected scripts | **ONE**, declared and scanned |
-| suite | **2023 -> 2096**, 0 failed |
+| suite | **2023 -> 2109**, 0 failed |
 | writes performed | **NONE** |
 
 **Zero refusals lifted is the finding, not a shortfall.** Each of the six was
@@ -38,21 +40,28 @@ exactly the class of thing this server hands back rather than spends.
 ## 1. The constraint that shaped this wave, stated first
 
 `linkedin_server_info` reports `build.code.commit` for the process that is
-actually loaded. It read `77ecd2b44b48` at the start of this wave and **still
-read it at the end**: same pid, uptime climbing. Every commit below is on disk
-and none of it is in the running process.
+actually loaded. **It read `77ecd2b44b48` for most of this wave** -- same pid,
+uptime climbing past two hours, nine commits behind the tree -- so for most of
+it the captures could not be taken at all, and every capability was reported
+as **BUILT, NOT CAPTURED** rather than measured.
 
-**So the live captures this wave was commissioned to take could not be taken.**
-The two new census keys exist, are tested, and are unreachable until the MCP
-client restarts the server. A restart was requested with the commit sha and
-had not landed when this was written.
+**THE RESTART THEN LANDED, mid-call**, announced by a `Connection closed` on
+an unrelated read. The new process reported `b9d739c1767d`, this wave's own
+HEAD, and the commit was verified BEFORE anything was read. Section 2c is what
+that bought.
 
-What this means for every claim below, and it is applied consistently: a
-capability whose capture has not happened is reported as **BUILT, NOT
-CAPTURED**, never as measured. The one thing this wave refused to do is let a
-built capture stand in for a taken one -- which is the exact failure mode the
+THE DISCIPLINE THAT HELD WHILE IT WAS STALE IS THE POINT, and it is kept here
+rather than deleted now that the captures exist: a built capture was never
+allowed to stand in for a taken one. That is the exact failure mode the
 `_WHY_NOT_PERFORMED` claim exhibited in August, when a statement true of the
-fixtures was shipped as a statement about the site.
+fixtures shipped as a statement about the site -- and this wave went most of a
+day with two finished, tested, unrunnable census keys without once describing
+them as measured.
+
+Two things remain BUILT, NOT CAPTURED for the same reason, one restart later:
+the `<label for>` census fix (`93ccd61`) landed after this restart, so the
+`profile_edit_intro` re-run that would name the editor's fields needs another
+one.
 
 ---
 
@@ -161,6 +170,144 @@ across two days.
 3. **His unread notification count moved 1 -> 3 between yesterday and today.**
    Recorded because section 8 lists that badge as a cost, and the cost is now
    demonstrably larger than when it was priced.
+
+---
+
+## 2c. THE RESTART LANDED. The two captures, taken twice each
+
+`linkedin_server_info` reported `build.code.commit b9d739c1767d` -- this
+wave's own HEAD, new pid, clean tree. Verified BEFORE anything was read. Both
+captures below were then taken TWICE and were identical both times.
+
+### #6 settings -- the anchor is MEASURED, and it is not a toggle
+
+    linkedin_surface_census("settings_dark_mode")
+    source_url  https://www.linkedin.com/mypreferences/d/dark-mode   <- NO REDIRECT
+    counts      forms 0   buttons 1   links 16   contenteditable 0   dialogs 0
+
+    shape "Always off"        tag input   name_source aria-labelledby
+    shape "Always on"         tag input   name_source aria-labelledby
+    shape "Device settings"   tag input   name_source aria-labelledby
+
+**Dark mode is a THREE-STATE radio group, not a binary toggle**, and all three
+destinations are named. That maps onto the `from_state=None` multi-state
+branch -- the same shape as `set_open_to_work` -- rather than onto the
+save/follow toggle machinery.
+
+**THE REFUSAL STAYS, and the gap is now exact.** The three DESTINATIONS are
+measured; **which one is currently SELECTED is not.** The census reports
+`disabled` and does not report `checked`. `_direction` refuses to render a
+gate without a measured current state, and that refusal is correct: a gate
+that cannot say which way it moves a control is not a gate.
+
+So the next measurement is a single named thing: **a reader that reports which
+of the three inputs is checked.** That is the whole of what stands between
+this capability and a working preview.
+
+One incidental confirmation: this is exactly the shape the `set_open_to_work`
+backstop committed this morning (`dacf76d`) protects -- a multi-state setting
+whose current value could come back as a string the spec has never seen.
+
+### #4 profile edit -- REFUSES, and it caught a defect in my own instrument
+
+    linkedin_surface_census("profile_edit_intro")
+    source_url  https://www.linkedin.com/in/me/edit/intro/          <- NO REDIRECT
+    counts      forms 1   buttons 28   links 35   contenteditable 0   dialogs 2
+
+    shape ""          count 3   tag input    name_source "none"
+    shape "<opaque>"  count 1   tag select   name_source text
+    shape "Submit"    count 1   tag button   name_source text   DISABLED
+
+Note the asymmetry, because it matters for section 5: **`/in/me/` redirects to
+the slugged form and `/in/me/edit/intro/` does not.** The editor is reached at
+exactly the address requested.
+
+The editor IS a form -- `forms: 1` where the profile page carries 2 and every
+frozen fixture carries 0 -- and `contenteditable` is still 0, so the fields
+are ordinary inputs rather than rich-text nodes.
+
+**AND THE THREE UNNAMED INPUTS WERE NOT A FINDING ABOUT THE PAGE.** They were
+a finding about the census. `CENSUS_JS` resolved a name from `aria-label`,
+`aria-labelledby`, then `title` -- and **never followed `<label for>` or an
+ancestor `<label>`**, which are the two standard ways a FORM CONTROL is named.
+Every surface censused before today was made of buttons and anchors, which
+LinkedIn labels with `aria-label`. This is the first one made of form fields.
+
+So `name_source: "none"` had been reading as *"this control carries no name"*
+when it meant *"this instrument cannot read one"* -- the exact conflation this
+package exists to refuse, sitting inside my own instrument. Fixed in
+`93ccd61`, and the fix found that **the blind spot was already in the record**:
+run over all 19 committed fixtures, 26 inputs move from `none` to `label-for`,
+in the Easy Apply capture and both job-tracker captures. Nobody had noticed
+because nobody had asked a form-shaped surface a name question. **No control
+whose published shape was a readable name changed**, so no census already
+written down is contradicted -- a non-answer became an answer.
+
+**THE REFUSAL STAYS, on two grounds and only one of them may dissolve.**
+`Submit` renders DISABLED on first paint, which is measured and unexplained.
+And the field names are pending a re-run of this capture on the fixed census,
+which needs another restart. Until that runs, no field can be aimed and this
+server will not type into an input it cannot name.
+
+---
+
+## 2d. The landed-url census
+
+The lead asked for this by name: for every read, the requested url and the
+landed url, repeated, with a `linkedin_search_jobs` control in the window. The
+question it exists to answer is whether any read LANDS somewhere the forbidden
+list names.
+
+| read | landed url | verdict |
+|---|---|---|
+| `saved_jobs` x2 | `/jobs-tracker/?stage=saved` | PASS |
+| `my_applications` | `/jobs-tracker/?stage=applied` | PASS |
+| `draft_applications` | `/jobs-tracker/?stage=draft` | PASS |
+| `job_detail` | `/jobs/view/<id>/` | PASS |
+| `search_jobs` x2 (the control) | `/jobs/search/?currentJobId=<id>&keywords=...` | PASS |
+| `who_viewed_me` | `/analytics/profile-views/`, and `/me/profile-views/` on its fallback | PASS, both |
+| `followed_companies` | `/mynetwork/network-manager/company/` | PASS |
+| `new_messages` | `/feed/` | PASS |
+| census `feed` | `/feed/` | PASS |
+| census `settings_dark_mode` x2 | `/mypreferences/d/dark-mode` | PASS |
+| census `profile_edit_intro` x2 | `/in/me/edit/intro/` | PASS |
+| `my_profile` / census `profile` x3 | **`/in/<member>/?isSelfProfile=true`** | **FAILS THE ALLOWLIST** |
+| census `settings` x3 | **`/mypreferences/d/categories/account`** | **HITS A FORBIDDEN SUBSTRING** |
+
+### The answer, and it is not "nothing"
+
+**ONE READ LANDS ON A FORBIDDEN SUBSTRING.** The settings census requests
+`/mypreferences/d/` and lands on `/mypreferences/d/categories/account`, which
+contains `/mypreferences/d/categories/` -- an entry added on 2026-08-30
+specifically to keep that family unreachable. Observed THREE times, across two
+different server processes.
+
+So this server has been reading a page its own forbidden list names, once per
+settings census, since that census key was added. The forbidden entry has been
+inert against it the whole time, because only the requested url is ever
+checked.
+
+**What the exposure actually is, measured rather than assumed: nil.** The
+census of that very page proves it carries 33 links, 0 forms, and no toggle of
+any kind -- it is an index, and the pages holding values are one level further
+down and are not reached. The BOUNDARY CLAIM was false; the harm was zero.
+Both halves belong in the record.
+
+**The other divergence is benign.** `/in/me/` redirecting to the member's own
+slugged url with `?isSelfProfile=true` fails the allowlist on the query string
+alone and hits no forbidden substring. It is LinkedIn resolving "me" to him.
+
+### Two reads were deliberately NOT measured
+
+* **`linkedin_notifications`** -- loading it clears his unread badge, and the
+  count moved 1 -> 3 during this wave. A landed-url data point is not worth
+  destroying signal he has not seen.
+* **`linkedin_open_messaging`** -- loading it opens a conversation LinkedIn
+  chooses and may fire a read receipt on a third party.
+
+Both are recorded as UNMEASURED-BY-CHOICE with the cost named, rather than
+counted as clean. A census that spent somebody else's read receipt to fill in
+a table would be the exact trade this server refuses everywhere else.
 
 ---
 
