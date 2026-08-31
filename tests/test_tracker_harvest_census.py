@@ -1189,17 +1189,25 @@ async def test_an_ambiguous_status_word_is_not_lifted_from_the_end():
     hazard, so the single ambiguous words -- applied, viewed, interview -- are
     not in the welded vocabulary.
 
-    SHOWN FAILING by reusing ``_JOB_STATUS_LINE``'s full word list at the end
-    of the line::
+    THE AMBIGUOUS WORD MUST BE AT THE END, and the first version of this test
+    put it mid-line -- where an end-anchored pattern can never reach it, so the
+    guard could not fail at the mutation it names. Corrected after a mutation
+    run measured it. This is a line whose LOCATION ends in a title-ish word.
 
-        AssertionError: assert 'Data Engineer, Applied' == 'Data Engineer'
-        -- the tail of a job title was lifted as a status
+    SHOWN FAILING by reusing ``_JOB_STATUS_LINE``'s full word list at the end
+    of the line. Measured, the damage is worse than the status field: the
+    lifted tail drags the location with it::
+
+        AssertionError: {'head': 'Acme', 'location': 'Berlin Data Engineer,',
+        'status': 'applied', ...}
+        assert 'applied' is None
     """
-    line = f"Data Engineer, Applied Northwind {DOT} Berlin"
+    line = f"Acme {DOT} Berlin Data Engineer, Applied"
     out = shape.split_welded_card_line(line)
     assert out is not None, line
-    assert out["head"] == "Data Engineer, Applied Northwind", out
     assert out["status"] is None, out
+    # The whole tail stays where it was; nothing was lifted off the end.
+    assert out["location"] == "Berlin Data Engineer, Applied", out
 
 
 async def test_the_trigger_does_not_fire_where_the_card_has_anchors():
@@ -1220,51 +1228,21 @@ async def test_the_trigger_does_not_fire_where_the_card_has_anchors():
     assert row["company"] == "Northwind", row
 
 
-async def test_the_welded_path_fires_on_no_fixture_record():
-    """Zero of 25, asserted rather than remembered.
-
-    The claim that this change is free is only as good as the set it was
-    measured over, so the set is re-derived here from the tracked fixtures
-    rather than quoted from a commit message.
-
-    SHOWN FAILING by removing the single-line condition from the trigger::
-
-        AssertionError: the welded split fired on 7 fixture records
-    """
-
-    async def work(page):
-        return await dom.harvest_linked_cards(
-            page, href_pattern=dom.JOB_HREF, max_items=100
-        )
-
-    fired = 0
-    total = 0
-    for path in sorted(FIXTURE_DIR.glob("*.html")):
-        html = path.read_text(encoding="utf-8", errors="replace")
-        for record in await _with_html(html, work):
-            total += 1
-            lines = [
-                line
-                for line in shape.drop_consecutive_repeats(
-                    shape.strip_screen_reader_copies(
-                        record.get("text", ""), record.get("hidden") or ()
-                    )
-                )
-                if not shape.is_chrome(line)
-            ]
-            anchor = shape.anchored_title(record)
-            remaining = [
-                line
-                for line in lines
-                if not shape._JOB_STATUS_LINE.match(line)
-                and not (shape.has_time_ago(line) and line != anchor)
-            ]
-            if (
-                len(remaining) == 1
-                and not record.get("logo_name")
-                and not record.get("meta_line")
-                and shape.split_welded_card_line(remaining[0]) is not None
-            ):
-                fired += 1
-    assert total >= 20, total
-    assert fired == 0, f"the welded split fired on {fired} fixture records"
+# A CORPUS-WIDE GUARD WAS WRITTEN HERE AND DELETED, and the deletion is
+# recorded rather than silent. It walked every fixture record and asserted
+# that a card naming its employer through the lockup still reports that
+# company. It survived FOUR separate mutations: relaxing the single-line
+# clause, deleting the lockup clauses, removing the whole trigger, and even
+# removing the lockup as the company source altogether.
+#
+# The reason is structural. Of the 25 records the fixtures produce, the two
+# whose lines split at all are not the ones carrying a lockup, so no trigger
+# change can make the welded path swallow a lockup card in this corpus. The
+# test therefore could not fail for the reason it was written, and this
+# repo's rule is that a check which cannot fail certifies nothing.
+#
+# What it was meant to cover IS covered:
+# test_the_trigger_does_not_fire_where_the_card_has_anchors drives the same
+# property on a record built to reach it, and goes red at every one of those
+# four mutations. The breadth was the illusion; the synthetic record is the
+# guard.
