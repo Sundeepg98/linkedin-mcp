@@ -442,6 +442,110 @@ def anchored_title(record: dict[str, Any]) -> Optional[str]:
     return reduced[0]
 
 
+#: The status phrases that are safe to recognise at the END of a welded line.
+#:
+#: A DELIBERATE SUBSET of :data:`_JOB_STATUS_LINE`'s vocabulary, and the
+#: omissions are the point. That pattern is anchored at ``^`` because, in its
+#: own words, "'Applied Scientist' is a job title, and a substring match would
+#: eat it as the status and shift every other field up by one." Recognising a
+#: status at the END of a line is a weaker version of the same hazard, so the
+#: single ambiguous words -- ``applied``, ``viewed``, ``interview`` -- are NOT
+#: here. Every phrase below is multi-word and is not the tail of any job title
+#: anybody has seen.
+_WELDED_STATUS = re.compile(
+    r"(application (?:viewed|sent|submitted)|resume downloaded|"
+    r"no longer accepting applications|not selected|in review)\s*$",
+    re.I,
+)
+
+#: A posting date welded onto the end of a card, e.g. ``Reposted 4d ago``.
+#:
+#: MEASURED ON ANOTHER SURFACE RATHER THAN GUESSED FROM THIS ONE.
+#: ``linkedin_job_detail`` has been reporting ``posted: "Reposted 3 days ago"``
+#: for the same posting, so ``Reposted``/``Posted`` followed by a relative time
+#: is a shape this package already reads elsewhere. Without the optional word
+#: the time-ago patterns alone leave ``Reposted`` welded to the location, which
+#: would put a WRONG value in a field -- and a missing field announces itself
+#: where a wrong one does not.
+_WELDED_POSTED = re.compile(
+    r"(?:re)?posted\s*$",
+    re.I,
+)
+
+
+def split_welded_card_line(line: str) -> Optional[dict[str, Any]]:
+    """Pull a one-line card apart on the only boundaries it actually has.
+
+    THE SURFACE THIS EXISTS FOR. A job-tracker row arrives as ONE line with
+    everything run together::
+
+        <title> <company> <dot> <location><trailing>
+
+    and the trailing run carries no delimiter at all. Measured live on
+    2026-08-30, both the Saved and the Draft tab produce exactly that shape,
+    and the whole thing landed in ``title`` with ``company`` and ``location``
+    null.
+
+    WHAT IT RECOVERS, and only what the line can actually support:
+
+    * the trailing STATUS or POSTED run, lifted by shape from the end;
+    * the LOCATION, split off at the middle dot.
+
+    WHAT IT DOES NOT RECOVER, and will not guess at: **the boundary between
+    the title and the company.** There is no delimiter there, and on this
+    surface there is no second source either -- the tracker's card carries no
+    employer logo (measured: its only ``<img>`` has an empty ``alt``), so
+    ``logo_name`` is null and the lockup cannot name the company. The head is
+    returned whole and the caller reports ``company`` as absent. An absence
+    announces itself; a company guessed out of a title does not.
+
+    Returns ``None`` unless the line splits cleanly -- exactly one middle dot
+    once the trailing run is off, and both halves non-empty. A line this
+    cannot account for is left entirely alone.
+    """
+    text = str(line or "").strip()
+    if not text:
+        return None
+
+    status: Optional[str] = None
+    trailing: Optional[str] = None
+
+    # THE TRAILING RUN, FROM THE END. Status first: it is an exact phrase, so
+    # its span is certain, where a time-ago has to be located by pattern.
+    match = _WELDED_STATUS.search(text)
+    if match:
+        status = match.group(1).strip().lower()
+        trailing = text[match.start():].strip()
+        text = text[: match.start()].strip()
+    else:
+        for pattern in (_TIME_AGO, _TIME_AGO_COMPACT):
+            found = pattern.search(text)
+            if not found or found.end() != len(text):
+                continue
+            head = text[: found.start()]
+            # ``Reposted``/``Posted`` sits between the location and the time
+            # with no separator. Lift it too, or it stays welded to the
+            # location and becomes a wrong value in a real field.
+            word = _WELDED_POSTED.search(head)
+            cut = word.start() if word else found.start()
+            trailing = text[cut:].strip()
+            text = text[:cut].strip()
+            break
+
+    halves = split_on_middle_dot(text)
+    if not halves:
+        return None
+    head, location = halves
+    if not head or not location:
+        return None
+    return {
+        "head": head,
+        "location": location,
+        "status": status,
+        "trailing": trailing,
+    }
+
+
 def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     """Shape one job row (saved, applied, or a search result).
 
@@ -556,6 +660,46 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     # as the title to stop being the same string.
     title = anchor or remaining[0]
 
+    # THE ONE-LINE CARD, pulled apart before the positional reader sees it.
+    #
+    # A job-tracker row arrives as a SINGLE line with title, company, location
+    # and a trailing status or posting-date run all welded together. Every
+    # branch below reads LINES, so on that shape there is nothing to read: the
+    # whole card lands in ``title`` and company and location come back null.
+    # Measured live 2026-08-30 on both the Saved and the Draft tab.
+    #
+    # THE TRIGGER IS DELIBERATELY NARROW -- one content line, and no lockup.
+    # A card that offered ``logo_name`` or ``meta_line`` has ANCHORS, and an
+    # anchor beats anything recovered by splitting a string; a card with more
+    # than one line has the lines this parser was built for. Measured across
+    # all 25 records the fixtures produce, this fires on NONE of them.
+    welded = None
+    if (
+        len(remaining) == 1
+        and not record.get("logo_name")
+        and not record.get("meta_line")
+    ):
+        welded = split_welded_card_line(remaining[0])
+    if welded:
+        # The head is NOT split further. There is no delimiter between the
+        # title and the company on this surface and no second source for it,
+        # so the head is reported as the title and the company as ABSENT.
+        # Guessing a boundary here would put a wrong value in a real field.
+        title = welded["head"]
+        if status is None and welded["status"]:
+            status = welded["status"]
+        # ``when`` is untouched on purpose: find_time_ago already ran over the
+        # original lines, so the timestamp is reported from where it always
+        # came from rather than from this split.
+        return _job_card_out(
+            record,
+            title=title,
+            company=None,
+            location=welded["location"],
+            status=status,
+            when=when,
+        )
+
     rest = lines_after(remaining, title)
     if rest:
         halves = split_on_middle_dot(rest[0])
@@ -596,6 +740,30 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         # location by elimination.
         location = tail[0] if tail else lone_line
 
+    return _job_card_out(
+        record,
+        title=title,
+        company=company,
+        location=location,
+        status=status,
+        when=when,
+    )
+
+
+def _job_card_out(
+    record: dict[str, Any],
+    *,
+    title: Optional[str],
+    company: Optional[str],
+    location: Optional[str],
+    status: Optional[str],
+    when: Optional[str],
+) -> dict[str, Any]:
+    """The row, shaped and trimmed. ONE construction, two callers.
+
+    Factored out when the one-line card gained its own path: two copies of a
+    field list is how one of them quietly stops carrying ``status``.
+    """
     job_id = job_id_from(record.get("href", ""))
     out: dict[str, Any] = {
         "title": trim(title, 120),

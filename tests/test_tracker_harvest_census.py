@@ -1073,3 +1073,198 @@ async def test_the_trace_mirrors_the_anchored_title_exemption():
     assert trace["verdict"] == "parsed", trace
     assert trace["labels"] == ["content"], trace
     assert trace["has_anchored_title"] is True, trace
+
+
+# ---------------------------------------------------------------------------
+# 9. The one-line card, pulled apart on the boundaries it actually has
+# ---------------------------------------------------------------------------
+
+DOT = shape.MIDDLE_DOT
+
+#: THE TWO LIVE SHAPES, measured 2026-08-30 -- Saved and Draft. Both arrive as
+#: ONE line with everything welded. The employer names are invented; the SHAPE
+#: is what was measured, and it is the shape under test.
+SAVED_LINE = f"Senior Full-stack Engineer - Remote Acme {DOT} India (Remote)Reposted 4d ago"
+DRAFT_LINE = (
+    f"ServiceNow Application Developer Northwind {DOT} "
+    "India (Remote)No longer accepting applications"
+)
+
+
+def welded_record(line: str) -> dict:
+    """A tracker-shaped record: one line, inside one anchor, no lockup."""
+    return {
+        "text": line,
+        "link_text": line,
+        "hidden": [],
+        "href": "https://www.linkedin.com/jobs/view/4423880462/",
+    }
+
+
+async def test_the_saved_row_splits_into_title_and_location():
+    """The live Saved shape, end to end.
+
+    Before this, the WHOLE line landed in ``title`` with company and location
+    null -- measured on the live tab after the Part 6 fix made the row parse
+    at all.
+
+    SHOWN FAILING by narrowing the trigger to cards with a lockup, which is
+    the guard that keeps this off every other surface::
+
+        AssertionError: assert 'Senior Full-stack Engineer - Remote Acme
+        <dot> India (Remote)Reposted 4d ago' == 'Senior Full-stack Engineer -
+        Remote Acme'
+    """
+    row = shape.parse_job_card(welded_record(SAVED_LINE))
+    assert row is not None
+    assert row["title"] == "Senior Full-stack Engineer - Remote Acme", row
+    assert row["location"] == "India (Remote)", row
+    # AND THE TIMESTAMP IS UNTOUCHED. find_time_ago ran over the original
+    # lines, so ``when`` comes from where it always came from -- not from the
+    # split. That is the thing most easily broken by this change.
+    assert row["when"] == "4 days ago", row
+
+
+async def test_the_draft_row_splits_and_recovers_its_status():
+    """The live Draft shape. Same defect, and it also hid the status.
+
+    ``_JOB_STATUS_LINE`` is anchored at ``^``, so a status welded onto the end
+    of a line never matched and never reached the ``status`` field.
+
+    SHOWN FAILING by dropping the status branch from
+    ``split_welded_card_line``::
+
+        AssertionError: 'status' not in {'title': ..., 'location': 'India
+        (Remote)No longer accepting applications', ...}
+    """
+    row = shape.parse_job_card(welded_record(DRAFT_LINE))
+    assert row is not None
+    assert row["title"] == "ServiceNow Application Developer Northwind", row
+    assert row["location"] == "India (Remote)", row
+    assert row["status"] == "no longer accepting applications", row
+
+
+async def test_the_company_is_reported_ABSENT_rather_than_guessed():
+    """There is no delimiter between the title and the company, so there is no
+    company.
+
+    THE HEAD IS NOT SPLIT FURTHER, deliberately. On this surface the card
+    carries no employer logo -- measured, ``jobs_tracker_row.html``'s only
+    ``<img>`` has an empty ``alt`` -- so ``logo_name`` is null and the lockup
+    cannot name the company either. Every rule for finding that boundary in
+    the string would be a guess, and a wrong value in a real field does not
+    announce itself the way a missing one does.
+
+    SHOWN FAILING by splitting the head on its last space, which is the
+    obvious guess::
+
+        AssertionError: assert 'Acme' is None -- a company was invented out
+        of the title
+    """
+    for line in (SAVED_LINE, DRAFT_LINE):
+        row = shape.parse_job_card(welded_record(line))
+        assert row["company"] is None, row
+
+
+async def test_a_line_it_cannot_account_for_is_left_alone():
+    """No middle dot, or two of them, and the split refuses entirely.
+
+    SHOWN FAILING by falling back to splitting on the first dot found::
+
+        AssertionError: assert {'head': 'a', ...} is None
+    """
+    assert shape.split_welded_card_line("no separator at all") is None
+    assert shape.split_welded_card_line(f"a {DOT} b {DOT} c") is None
+    assert shape.split_welded_card_line("") is None
+    assert shape.split_welded_card_line(f"{DOT} only a location") is None
+
+
+async def test_an_ambiguous_status_word_is_not_lifted_from_the_end():
+    """"Applied Scientist" is a job title. The end-anchored vocabulary is a
+    DELIBERATE SUBSET of the status one.
+
+    ``_JOB_STATUS_LINE`` is anchored at ``^`` because, in its own words, a
+    substring match "would eat it as the status and shift every other field up
+    by one". Recognising a status at the END is a weaker form of the same
+    hazard, so the single ambiguous words -- applied, viewed, interview -- are
+    not in the welded vocabulary.
+
+    SHOWN FAILING by reusing ``_JOB_STATUS_LINE``'s full word list at the end
+    of the line::
+
+        AssertionError: assert 'Data Engineer, Applied' == 'Data Engineer'
+        -- the tail of a job title was lifted as a status
+    """
+    line = f"Data Engineer, Applied Northwind {DOT} Berlin"
+    out = shape.split_welded_card_line(line)
+    assert out is not None, line
+    assert out["head"] == "Data Engineer, Applied Northwind", out
+    assert out["status"] is None, out
+
+
+async def test_the_trigger_does_not_fire_where_the_card_has_anchors():
+    """A card with a lockup keeps its anchors. An anchor beats a split.
+
+    This is the guard that kept the change off every other surface -- measured,
+    the welded path fires on ZERO of the 25 records the fixtures produce.
+
+    SHOWN FAILING by removing the ``logo_name``/``meta_line`` condition from
+    the trigger::
+
+        AssertionError: assert None == 'Northwind' -- a card that named its
+        employer through the lockup had that answer discarded
+    """
+    record = welded_record(f"Senior Engineer Northwind {DOT} Berlin")
+    record["logo_name"] = "Northwind"
+    row = shape.parse_job_card(record)
+    assert row["company"] == "Northwind", row
+
+
+async def test_the_welded_path_fires_on_no_fixture_record():
+    """Zero of 25, asserted rather than remembered.
+
+    The claim that this change is free is only as good as the set it was
+    measured over, so the set is re-derived here from the tracked fixtures
+    rather than quoted from a commit message.
+
+    SHOWN FAILING by removing the single-line condition from the trigger::
+
+        AssertionError: the welded split fired on 7 fixture records
+    """
+
+    async def work(page):
+        return await dom.harvest_linked_cards(
+            page, href_pattern=dom.JOB_HREF, max_items=100
+        )
+
+    fired = 0
+    total = 0
+    for path in sorted(FIXTURE_DIR.glob("*.html")):
+        html = path.read_text(encoding="utf-8", errors="replace")
+        for record in await _with_html(html, work):
+            total += 1
+            lines = [
+                line
+                for line in shape.drop_consecutive_repeats(
+                    shape.strip_screen_reader_copies(
+                        record.get("text", ""), record.get("hidden") or ()
+                    )
+                )
+                if not shape.is_chrome(line)
+            ]
+            anchor = shape.anchored_title(record)
+            remaining = [
+                line
+                for line in lines
+                if not shape._JOB_STATUS_LINE.match(line)
+                and not (shape.has_time_ago(line) and line != anchor)
+            ]
+            if (
+                len(remaining) == 1
+                and not record.get("logo_name")
+                and not record.get("meta_line")
+                and shape.split_welded_card_line(remaining[0]) is not None
+            ):
+                fired += 1
+    assert total >= 20, total
+    assert fired == 0, f"the welded split fired on {fired} fixture records"
