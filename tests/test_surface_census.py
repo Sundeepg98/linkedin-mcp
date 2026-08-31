@@ -32,13 +32,19 @@ Every non-ASCII fixture below is written as an escape rather than as the
 glyph, because this repo is ASCII throughout and ``test_path_hygiene.py``
 reads these files as ascii.
 
-Nothing here launches Chromium or reaches LinkedIn.
+Nothing here reaches LinkedIn or an account. ONE section launches a browser
+and it is section 8: a LOCAL headless Chromium over invented markup, because
+name resolution lives in the injected script and only a laid-out document can
+answer what it asks. Its header says why a fake page cannot stand in, and the
+line it replaced -- "nothing here launches Chromium" -- was true for as long
+as the census had never been asked to name a form field.
 """
 
 from __future__ import annotations
 
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -1052,3 +1058,457 @@ def test_the_read_door_is_documented_as_gating_the_request_and_not_the_landing()
         )
         is True
     )
+# ---------------------------------------------------------------------------
+# 8. Name resolution over a REAL DOM: the two label routes
+# ---------------------------------------------------------------------------
+#
+# WHY THIS SECTION LAUNCHES A BROWSER when nothing else in this file does.
+# Everything above tests Python -- the shaper, the cap, the reader's contract,
+# the tool's wiring -- and every one of those can be driven from a FakePage
+# because the thing under test is Python. NAME RESOLUTION IS NOT PYTHON. It
+# lives in the injected script and it asks questions only a laid-out document
+# can answer (``el.labels``, ``closest('label')``). A FakePage handing back a
+# payload somebody typed would certify the payload, which is precisely how the
+# gap below survived five surfaces without anyone noticing.
+#
+# THE GAP, MEASURED LIVE 2026-08-31. ``linkedin_surface_census(
+# "profile_edit_intro")`` was run twice against ``/in/me/edit/intro/`` and both
+# runs came back identical: 67 controls, ``forms: 1``, and three ``input``
+# controls at ``name_source: "none"`` with an empty shape. The sibling capture
+# on ``settings_dark_mode`` resolved its three inputs through
+# ``aria-labelledby``, so the instrument was not simply broken.
+#
+# It was BLIND, and blind in a way that read as a finding: every surface
+# censused before that day was made of buttons and anchors, which LinkedIn
+# labels with ``aria-label``. The profile editor is the first surface made of
+# FORM FIELDS, and a form field is named by a ``<label>`` -- the one route the
+# chain never tried. ``name_source: "none"`` was being read as "this control
+# carries no name" when what it meant was "this instrument cannot read one",
+# which is the conflation this package exists to refuse.
+#
+# The harness is the one in ``test_apply_modal_fixture.py``, copied rather than
+# imported for the same reason that file copied ``test_apply_fixture.py``: one
+# browser per test, one ISOLATED CONTEXT per reading, and ``window.innerWidth``
+# asserted on every measurement rather than once at setup, so no answer below
+# was taken at a width nobody recorded.
+
+CENSUS_VIEWPORT = {"width": 1280, "height": 720}
+
+#: SIX form controls, in document order, each a different route to a name.
+#:
+#: INVENTED, and deliberately not written into ``tests/fixtures/``: nothing
+#: here was ever served by LinkedIn, and invented markup filed beside real
+#: captures is how invented markup starts being read as evidence. It carries
+#: no slug, no urn, no address and no id shape -- ``test_no_committed_identity``
+#: reads this file.
+LABEL_FORM_HTML = (
+    "<!doctype html><html><body><form>"
+    # 0 -- a SIBLING label pointing at the input by id. The ordinary profile
+    # editor shape, and the route the chain did not have.
+    '<label for="c-headline">Headline</label>'
+    '<input id="c-headline" type="text">'
+    # 1 -- an ANCESTOR label wrapping the input. No id anywhere, so the route
+    # above cannot reach it and the wrapper is the only name it has.
+    '<label>Current company<input type="text"></label>'
+    # 2 -- BOTH, and aria-label has to win. That is the ARIA order, and it is
+    # also the compatibility constraint: every surface already measured was
+    # named through aria-label, so a label route that outranked it would
+    # silently rename controls in captures already in the audit record.
+    '<label for="c-pronouns">Pronouns</label>'
+    '<input id="c-pronouns" type="text" aria-label="Pronouns, choose one">'
+    # 3 -- title AND a label, and title has to win. This is NARROWER than the
+    # accessible-name spec, which puts a native label ahead of title; the
+    # narrow order is chosen so that no control that already resolved through
+    # title on a measured surface can change its name under this edit. Pinned
+    # here so the deviation is reviewable instead of discovered.
+    '<label for="c-industry">Industry</label>'
+    '<input id="c-industry" type="text" title="Industry, start typing">'
+    # 4 -- a label carrying a PERSON'S NAME, with the curly apostrophe
+    # LinkedIn actually serves. Labels are a NEW source of page text into the
+    # census and the shaping was written when there were three sources, so the
+    # fourth is shown going through it.
+    '<label for="c-note">Reply to Jane Doe' + CURLY + 's message</label>'
+    '<input id="c-note" type="text">'
+    # 5 -- named by nothing at all. The residue: a fall-through that invented
+    # a name for this one would be worse than the blind spot it replaced.
+    '<input id="c-bare" type="text">'
+    "</form></body></html>"
+)
+
+ROW_LABEL_FOR = 0
+ROW_LABEL_ANCESTOR = 1
+ROW_ARIA_BEATS_LABEL = 2
+ROW_TITLE_BEATS_LABEL = 3
+ROW_LABEL_CARRYING_A_NAME = 4
+ROW_NAMED_BY_NOTHING = 5
+
+
+@pytest.fixture
+async def census_over():
+    """Run ``work(page)`` over frozen markup. One browser, a context per read.
+
+    ``window.innerWidth`` is asserted on EVERY measurement. Name resolution
+    does not depend on layout, but ``innerText`` does -- an ancestor label's
+    name IS its rendered text -- so a reading taken at an unknown width is a
+    reading whose conditions were not recorded.
+    """
+    playwright = pytest.importorskip("playwright.async_api")
+    async with playwright.async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+
+        async def _run(html: str, work):
+            context = await browser.new_context(viewport=dict(CENSUS_VIEWPORT))
+            try:
+                page = await context.new_page()
+                await page.set_content(
+                    html, wait_until="domcontentloaded", timeout=60_000
+                )
+                width = await page.evaluate("window.innerWidth")
+                assert width == CENSUS_VIEWPORT["width"], (
+                    f"the page laid out at {width}px, not "
+                    f"{CENSUS_VIEWPORT['width']}px. Every name read below came "
+                    "off a document whose conditions were not recorded."
+                )
+                return await work(page)
+            finally:
+                await context.close()
+
+        try:
+            yield _run
+        finally:
+            await browser.close()
+
+
+def _census_cfg() -> dict[str, Any]:
+    """The config ``read_surface_census`` passes, built from ``dom``'s own
+    constants so a change there drags these readings with it."""
+    return {
+        "controlSelector": dom.CENSUS_CONTROL_SELECTOR,
+        "maxControls": dom.CENSUS_MAX_CONTROLS,
+        "maxChars": 300,
+    }
+
+
+async def _label_form_rows(census_over) -> list[dict[str, Any]]:
+    """The SHAPED census of :data:`LABEL_FORM_HTML`, read the production way.
+
+    Deliberately through ``read_surface_census`` and not through a bare
+    ``evaluate``: the rows below are what a caller would actually receive,
+    shaping included, so nothing here can pass on a raw name a caller never
+    sees.
+    """
+
+    async def work(page):
+        return await dom.read_surface_census(page)
+
+    census = await census_over(LABEL_FORM_HTML, work)
+    rows = census["controls"]
+    assert len(rows) == 6, (
+        f"the fixture yielded {len(rows)} controls, not 6 -- every ROW_ index "
+        "below is now pointing at the wrong control."
+    )
+    # The shape the live capture had, so the fixture is answering the same
+    # question the profile editor asked.
+    assert census["counts"]["forms"] == 1
+    assert census["counts"]["contenteditable"] == 0
+    return rows
+
+
+async def test_a_sibling_label_for_names_the_input_it_points_at(census_over):
+    """THE BLIND SPOT, red before the fall-through existed.
+
+    An ``<input id=x>`` with a ``<label for="x">`` beside it is the single
+    most ordinary named form control on the web, and this census reported it
+    as nameless.
+    """
+    row = (await _label_form_rows(census_over))[ROW_LABEL_FOR]
+    assert row["name_source"] == "label-for"
+    assert row["shape"] == "Headline"
+
+
+async def test_a_label_wrapping_an_input_names_it(census_over):
+    """The second standard route, and the one no id can reach: the control is
+    named by the element it sits inside."""
+    row = (await _label_form_rows(census_over))[ROW_LABEL_ANCESTOR]
+    assert row["name_source"] == "label-ancestor"
+    assert row["shape"] == "Current company"
+
+
+async def test_the_two_label_routes_are_reported_separately(census_over):
+    """They are not collapsed into one ``label`` source, and that is the whole
+    value of ``name_source``: it says WHERE the string came from, so a reader
+    costing a capability can tell a labelled field from a wrapped one without
+    going back to the page."""
+    rows = await _label_form_rows(census_over)
+    assert (
+        rows[ROW_LABEL_FOR]["name_source"]
+        != rows[ROW_LABEL_ANCESTOR]["name_source"]
+    )
+    sources = {row["name_source"] for row in rows}
+    assert {"label-for", "label-ancestor"} <= sources
+
+
+async def test_aria_label_still_beats_a_label_element(census_over):
+    """PRECEDENCE, and it is a compatibility contract rather than a taste.
+
+    Every control on every surface measured before 2026-08-31 was named
+    through ``aria-label``. A label route that outranked it would rename
+    controls in captures already written into the audit record, which would
+    make those captures wrong without anything in the diff saying so.
+    """
+    row = (await _label_form_rows(census_over))[ROW_ARIA_BEATS_LABEL]
+    assert row["name_source"] == "aria-label"
+    assert row["shape"] == "Pronouns, choose one"
+
+
+async def test_title_still_beats_a_label_element(census_over):
+    """The same argument one step down the chain, and the deviation from the
+    accessible-name spec is deliberate: the spec ranks a native label ABOVE
+    title, and adopting that order here would move any already-measured
+    control that resolved through title. The narrow order moves nothing."""
+    row = (await _label_form_rows(census_over))[ROW_TITLE_BEATS_LABEL]
+    assert row["name_source"] == "title"
+    assert row["shape"] == "Industry, start typing"
+
+
+async def test_a_name_in_a_label_is_shaped_like_a_name_in_an_aria_label(
+    census_over,
+):
+    """THE PRIVACY RULE, applied to the new source of text.
+
+    Shapes, never names. A label is a fourth way for page text to enter the
+    census and the shaping was written when there were three, so this drives
+    a person's name in through the new route and asserts it comes out shaped
+    -- through the same ``census_shape`` call, in the same place, with no
+    branch of its own.
+    """
+    row = (await _label_form_rows(census_over))[ROW_LABEL_CARRYING_A_NAME]
+    assert row["name_source"] == "label-for"
+    assert row["shape"] == "Reply to <member>'s message"
+    assert "Jane Doe" not in json.dumps(row)
+
+
+async def test_that_redaction_check_would_notice_a_reader_that_stopped_shaping(
+    census_over,
+):
+    """THE CONTROL for the test above, which a script returning nothing at all
+    would also pass. The RAW script is run over the same markup and has to be
+    caught carrying the name, so the assertion above is not vacuous."""
+
+    async def work(page):
+        return await page.evaluate(dom.CENSUS_JS, _census_cfg())
+
+    raw = await census_over(LABEL_FORM_HTML, work)
+    name = raw["controls"][ROW_LABEL_CARRYING_A_NAME]["name"]
+    assert "Jane Doe" in name
+    assert shape.census_shape(name) == "Reply to <member>'s message"
+
+
+async def test_an_input_named_by_nothing_is_still_reported_as_nothing(
+    census_over,
+):
+    """The fall-through does not invent. A control with no label, no aria and
+    no title stays ``none`` with an empty shape -- which is what
+    ``name_source: "none"`` is now allowed to mean."""
+    row = (await _label_form_rows(census_over))[ROW_NAMED_BY_NOTHING]
+    assert row["name_source"] == "none"
+    assert row["shape"] == ""
+
+
+# ---------------------------------------------------------------------------
+# 8b. What ELSE moved, measured over every committed fixture
+# ---------------------------------------------------------------------------
+#
+# The risk this edit carries is not that the label routes fail to fire. It is
+# that they fire somewhere they did not before and quietly RENAME a control on
+# a surface already captured, at which point the readings in ``_audit/``
+# describe an instrument that no longer exists and nothing says so.
+#
+# So it was measured rather than argued. Both scripts -- the real one, and one
+# with the label call site deleted -- were run over all 19 committed fixtures,
+# 537 controls, on 2026-08-31. TWENTY-EIGHT controls move, and the shape of the
+# movement is the whole finding:
+#
+#   * 26 ``input`` controls go from ``none`` to ``label-for``. Their published
+#     shape was the empty string. These ARE the blind spot -- and they sit in
+#     ``apply_modal_derived.html`` and both job-tracker captures, which means
+#     the gap was already committed to this repo in captures of the Easy Apply
+#     modal and the tracker, not only on the profile editor that found it.
+#   * 2 ``select`` controls go from ``text`` to ``label-for``, and both are the
+#     same language picker in a page footer. Its ``text`` name was the whole
+#     option list -- 36 languages in a dozen scripts -- which the shaper
+#     refused as ``<opaque>``. Through the label route it reads
+#     ``Select language``, which is what a screen reader says.
+#
+# NOT ONE control whose published shape was a READABLE NAME changed. That is
+# the invariant the first test below asserts and it is the one that decides
+# whether captures already taken are still true: every mover was previously
+# either nameless or unreadable, so no earlier reading is contradicted. A
+# non-answer became an answer.
+
+FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
+
+#: The label call site, exactly as ``CENSUS_JS`` spells it. Deleting it is the
+#: minimal neutralisation: the resolver stays defined and unreferenced, so the
+#: derived script differs from the real one in one behaviour and nothing else.
+LABEL_ROUTE_CALL = (
+    "    const labelled = labelRoutes(el);\n"
+    "    if (labelled) return labelled;\n"
+)
+
+#: The two transitions the sweep found, named so the map below reads as two
+#: kinds of movement rather than as twenty-eight rows.
+INPUT_NAMED = ("input", "none", "label-for")
+SELECT_RENAMED = ("select", "text", "label-for")
+
+#: EVERY control that moves, file by file, measured 2026-08-31. Pinned rather
+#: than summarised: a count alone would go on passing if the routes stopped
+#: firing on the tracker and started firing somewhere new.
+FIXTURE_MOVEMENT = {
+    "apply_modal_derived.html": [INPUT_NAMED] * 2,
+    "job_detail_following.html": [SELECT_RENAMED],
+    "job_detail_shell.html": [SELECT_RENAMED],
+    "jobs_tracker_empty.html": [INPUT_NAMED] * 12,
+    "jobs_tracker_row.html": [INPUT_NAMED] * 12,
+}
+
+#: Controls read across the whole fixture directory, and the denominator of
+#: "28 moved". Pinned because a sweep whose size nobody recorded can shrink.
+FIXTURE_CONTROLS = 537
+
+
+def _census_without_label_routes() -> str:
+    derived = dom.CENSUS_JS.replace(LABEL_ROUTE_CALL, "", 1)
+    assert derived != dom.CENSUS_JS, (
+        "LABEL_ROUTE_CALL no longer appears in CENSUS_JS, so this derivation "
+        "is the real script wearing another name and the comparison below "
+        "certifies nothing. Repoint the anchor at the label call site."
+    )
+    return derived
+
+
+def _fixture_text(path: Path) -> str:
+    """utf-8, and the difference from the rest of the suite is deliberate.
+
+    ``test_apply_fixture.py`` reads ITS fixture as ascii because that fixture
+    is DERIVED and this repo writes derived markup as ASCII bytes. The sweep
+    below reads all nineteen, and the profile-views pair are captures carrying
+    raw non-ASCII. Reading those as ascii fails on a property of the capture
+    rather than of this edit, which is a worse failure than none.
+    """
+    return path.read_text(encoding="utf-8")
+
+
+async def _label_route_movement(census_over, html: str) -> list[dict[str, Any]]:
+    """Every control the two scripts disagree about, reported SHAPED.
+
+    Each row carries the tag, the two ``name_source`` values and the two
+    SHAPED names -- never the raw ones. A failure message quoting a raw
+    accessible name would put one into a CI log, which is the thing this whole
+    file exists to prevent.
+    """
+    derived = _census_without_label_routes()
+    cfg = _census_cfg()
+
+    async def work(page):
+        return (
+            await page.evaluate(dom.CENSUS_JS, cfg),
+            await page.evaluate(derived, cfg),
+        )
+
+    live, without = await census_over(html, work)
+    after, before = live["controls"], without["controls"]
+    assert len(after) == len(before)
+    return [
+        {
+            "index": index,
+            "tag": new["tag"],
+            "before": old["name_source"],
+            "after": new["name_source"],
+            "before_shape": shape.census_shape(old["name"]),
+            "after_shape": shape.census_shape(new["name"]),
+        }
+        for index, (new, old) in enumerate(zip(after, before))
+        if new != old
+    ]
+
+
+async def _sweep(census_over) -> tuple[dict[str, list[dict[str, Any]]], int]:
+    """Run the comparison over every committed fixture. Returns the movers and
+    the number of controls read, so a shrinking sweep is visible."""
+    fixtures = sorted(FIXTURE_DIR.glob("*.html"))
+    assert len(fixtures) >= 19, "the fixture directory shrank; this proof did too"
+    found: dict[str, list[dict[str, Any]]] = {}
+    total = 0
+
+    async def count(page):
+        return len((await page.evaluate(dom.CENSUS_JS, _census_cfg()))["controls"])
+
+    for path in fixtures:
+        html = _fixture_text(path)
+        moved = await _label_route_movement(census_over, html)
+        total += await census_over(html, count)
+        if moved:
+            found[path.name] = moved
+    return found, total
+
+
+async def test_no_committed_fixture_loses_a_readable_name_to_the_label_routes(
+    census_over,
+):
+    """THE INVARIANT THAT DECIDES WHETHER OLD CAPTURES ARE STILL TRUE.
+
+    A control that moves is fine if what it moved FROM said nothing -- an
+    empty shape, or ``<opaque>``. A control that moves away from a readable
+    name is a rename, and a rename means every census already written down
+    reported a name this instrument no longer reports. That is a much larger
+    change than this one and it would have to be argued on its own; here it
+    must simply not happen.
+    """
+    found, _total = await _sweep(census_over)
+    renamed = [
+        (name, row["index"], row["before_shape"], row["after_shape"])
+        for name, rows in found.items()
+        for row in rows
+        if row["before_shape"] not in ("", shape.CENSUS_OPAQUE)
+    ]
+    assert renamed == [], renamed
+
+
+async def test_the_movement_the_label_routes_cause_is_pinned_file_by_file(
+    census_over,
+):
+    """The receipt for the paragraph above: what moved, where, and how much of
+    the repo was read to find out. Pinned per file rather than totalled, so
+    the routes cannot stop firing in one place and start in another while a
+    count stays flat."""
+    found, total = await _sweep(census_over)
+    summary = {
+        name: [(row["tag"], row["before"], row["after"]) for row in rows]
+        for name, rows in found.items()
+    }
+    assert summary == FIXTURE_MOVEMENT
+    assert sum(len(rows) for rows in summary.values()) == 28
+    assert total == FIXTURE_CONTROLS, (
+        f"the sweep read {total} controls, not {FIXTURE_CONTROLS}. A fixture "
+        "changed, so FIXTURE_MOVEMENT above was measured against a directory "
+        "that no longer exists -- re-measure it rather than moving this number."
+    )
+
+
+async def test_that_sweep_can_detect_movement(census_over):
+    """THE CONTROL. The same comparison over the label fixture has to find the
+    three controls the routes were added for -- otherwise the sweep above is a
+    sweep that could not have failed."""
+    moved = await _label_route_movement(census_over, LABEL_FORM_HTML)
+    assert [row["index"] for row in moved] == [
+        ROW_LABEL_FOR,
+        ROW_LABEL_ANCESTOR,
+        ROW_LABEL_CARRYING_A_NAME,
+    ]
+    assert [row["before"] for row in moved] == ["none", "none", "none"]
+    assert [row["after"] for row in moved] == [
+        "label-for",
+        "label-ancestor",
+        "label-for",
+    ]

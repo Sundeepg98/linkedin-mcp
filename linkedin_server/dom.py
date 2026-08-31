@@ -2293,6 +2293,59 @@ FILTER_SETTLE_MS = 2_000
 #: reason to read the accessible name rather than the text: LinkedIn labels its
 #: reaction buttons with ``aria-label`` and leaves their text as an icon, so a
 #: text-only census reports a page of nameless buttons.
+#:
+#: THE CHAIN, AND THE DAY IT GREW. In order: ``aria-label``,
+#: ``aria-labelledby``, ``title``, ``<label for=id>``, an ancestor ``<label>``,
+#: then the element's own text. The two label routes were added 2026-08-31, and
+#: they were added because the instrument was caught being BLIND rather than
+#: because a spec says so. ``linkedin_surface_census("profile_edit_intro")``
+#: was run twice against ``/in/me/edit/intro/`` and came back identical both
+#: times: 67 controls, ``forms: 1``, and three ``input`` controls at
+#: ``name_source: "none"`` with an empty shape -- while the same day's
+#: ``settings_dark_mode`` capture resolved its three inputs through
+#: ``aria-labelledby``. Every surface censused before that day was made of
+#: buttons and anchors, which LinkedIn labels with ``aria-label``; the profile
+#: editor is the first one made of FORM FIELDS, and a form field is named by a
+#: ``<label>``. So ``name_source: "none"`` had been reading as "this control
+#: carries no name" when what it meant was "this instrument cannot read one",
+#: which is the conflation this package exists to refuse.
+#:
+#: TWO ROUTES, REPORTED SEPARATELY -- ``label-for`` and ``label-ancestor`` --
+#: and not collapsed into one ``label`` source. The whole value of
+#: ``name_source`` is that it says WHERE the string came from; a reader costing
+#: a capability off a census can act on "this field is labelled by a sibling"
+#: and cannot act on "something labelled it".
+#:
+#: THE GATE IS ``el.labels``, chosen over a ``document.querySelector`` on an
+#: escaped id, and the reason is blast radius rather than escaping. ``.labels``
+#: exists only on the elements HTML lets a ``<label>`` name -- input, button,
+#: select, textarea, and the meter/output/progress family -- so an anchor or a
+#: ``div[role="button"]`` that happens to sit inside a label cannot be renamed
+#: by one. A querySelector would have had to be TOLD that rule; this way the
+#: browser holds it, and ``CSS.escape`` never enters the script. It also
+#: settles the ``<label for="other">`` case for free: HTML drops the implicit
+#: association when the wrapper points elsewhere, so ``.labels`` is empty and
+#: no name is invented.
+#:
+#: PRECEDENCE IS DELIBERATELY NARROWER THAN THE ACCESSIBLE-NAME SPEC, which
+#: ranks a native label ABOVE ``title``. Here ``title`` still wins, and
+#: ``aria-label`` wins over everything. The constraint is not correctness in
+#: the abstract: captures taken with the three-route chain are already in the
+#: audit record, and a new route that outranked an existing one would rename
+#: controls inside them with nothing in the diff saying so.
+#:
+#: WHAT THE FALL-THROUGH ACTUALLY REACHES WAS MEASURED, not reasoned about.
+#: This script and one with the label call site deleted were both run over all
+#: 19 committed fixtures -- 537 controls -- and 28 controls move. 26 are
+#: ``input`` controls going from ``none`` to ``label-for``, which is the blind
+#: spot, and they are in the Easy Apply and job-tracker captures as well as on
+#: the profile editor that found it. The other 2 are one ``select`` -- a footer
+#: language picker -- going from ``text`` to ``label-for``: its ``text`` name
+#: was the entire option list in a dozen scripts, which the shaper refused as
+#: ``<opaque>``, and its label reads ``Select language``. NOT ONE control whose
+#: published shape was a readable name changed, so no census already written
+#: down is contradicted by this edit; a non-answer became an answer. The sweep
+#: is pinned in ``tests/test_surface_census.py`` rather than described here.
 CENSUS_JS = """
 (cfg) => {
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
@@ -2316,6 +2369,27 @@ CENSUS_JS = """
     }
     return parts.join(' ').trim();
   };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
   const nameOf = (el) => {
     const aria = attrOf(el, 'aria-label');
     if (aria) return { name: aria, source: 'aria-label' };
@@ -2323,6 +2397,8 @@ CENSUS_JS = """
     if (referenced) return { name: referenced, source: 'aria-labelledby' };
     const title = attrOf(el, 'title');
     if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
     const body = textOf(el);
     if (body) return { name: body, source: 'text' };
     return { name: '', source: 'none' };
