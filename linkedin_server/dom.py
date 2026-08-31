@@ -3329,6 +3329,23 @@ ACTIVITY_OVERFLOW_PREFIX = "Open control menu for post by "
 #: the profile and no argument selects a surface.
 ACTIVITY_PERMALINK_MARKER = "/feed/update/"
 
+#: How short an author string may be before the TITLE route refuses to use it.
+#:
+#: A BOUND, NOT A FIX, and it is written as one. The heading routes compare by
+#: a bidirectional PREFIX; the title route can only compare by CONTAINMENT,
+#: because a browser title carries decoration a prefix cannot survive -- an
+#: unread count in front of it and " | LinkedIn" behind. Containment is looser,
+#: and the way it is loosest is a very short author string being a coincidental
+#: substring of some other word in the title.
+#:
+#: Four characters is chosen against the shape LinkedIn actually writes into
+#: the overflow label, which is a given name plus an initial -- ``Ada L`` is
+#: five. It is not chosen against a threat model, because there is not one to
+#: choose against: what this bound does is stop the DEGENERATE case, where a
+#: one- or two-character author matches almost any title, from reading as an
+#: established authorship claim.
+ACTIVITY_MIN_AUTHOR_CHARS = 4
+
 #: Ceiling on the ancestor climb used to find an item root when LinkedIn has
 #: labelled none. Twelve, and it is a REFUSAL bound rather than a performance
 #: one: a climb that runs out reports the anchor as UNPAIRED rather than
@@ -3523,17 +3540,63 @@ ACTIVITY_ITEMS_JS = """
     ? 'h1-innertext'
     : (contained.length ? 'h1-textcontent' : null);
 
+  // THE THIRD ROUTE, AND IT EXISTS BECAUSE THE FIRST TWO BOTH ANSWERED ZERO
+  // ON THE LIVE PAGE. Measured 2026-08-31, after the textContent route
+  // shipped: ``owner_headings_rendered: 0`` AND ``owner_headings_contained:
+  // 0``, on a page the census measured at 233 controls with
+  // ``isSelfProfile=true`` and one unanimous author. The CSS hypothesis the
+  // second route was built on is REFUTED -- the profile has no h1 carrying
+  // text by any route. Reporting both counts is what settled that in one
+  // call instead of leaving it to be argued.
+  //
+  // ``document.title`` IS LINKEDIN'S OWN MARKUP NAMING THE PAGE, which is the
+  // same class of assertion as ``isSelfProfile=true`` on the url and is what
+  // C3 has always been asking for. It is consulted LAST, so a page with a
+  // real heading is still judged on the heading.
+  //
+  // CONTAINMENT, NOT THE PREFIX RULE, and the difference is forced by the
+  // string rather than chosen: a browser title carries decoration a prefix
+  // cannot survive -- an unread count in front, " | LinkedIn" behind -- so
+  // the question asked is whether the ONE author every overflow control names
+  // appears INSIDE it.
+  //
+  // WHAT THAT STILL REFUSES, which is the whole point of keeping C3 at all:
+  // a rail of eight reshares by one OTHER member is unanimous and passes C2,
+  // and its author does not appear in the title of HIS profile, so it refuses
+  // here exactly as it would have on a heading.
+  //
+  // THE WEAKNESS, WRITTEN DOWN RATHER THAN HIDDEN, as the prefix rule's is:
+  // containment is looser than a prefix, so a very short author string could
+  // be a coincidental substring. A minimum length is required below for that
+  // reason, and it is a bound rather than a fix.
+  let pageTitle = '';
+  try { pageTitle = norm(document.title || ''); } catch (e) { pageTitle = ''; }
+  let titleMatch = null;
+  if (unanimous && owners.length !== 1 && pageTitle && soleAuthor
+      && soleAuthor.length >= cfg.minAuthorChars) {
+    titleMatch = pageTitle.toLowerCase().indexOf(soleAuthor.toLowerCase()) !== -1;
+  }
+
   // null means NOT COMPARED -- there was no single author, or no single
   // heading. false means compared and different. Collapsing the two would be
   // the absent-is-not-zero conflation this module keeps paying for.
   let ownerMatch = null;
+  let namedBy = null;
   if (unanimous && owners.length === 1) {
     const owner = owners[0];
     ownerMatch = !!(soleAuthor && owner)
       && (soleAuthor.indexOf(owner) === 0 || owner.indexOf(soleAuthor) === 0);
+    namedBy = ownerSource;
+  } else if (titleMatch !== null) {
+    ownerMatch = titleMatch;
+    namedBy = 'document-title';
   }
 
-  const established = unanimous && owners.length === 1 && ownerMatch === true;
+  // ESTABLISHED IS NOW "C3 ANSWERED AND AGREED", whichever route answered,
+  // rather than "there was exactly one heading". The heading count is still
+  // what decides WHICH route runs; it is no longer what decides whether the
+  // question can be asked at all.
+  const established = unanimous && ownerMatch === true;
 
   const out = {
     overflow_controls: overflowControls,
@@ -3547,7 +3610,9 @@ ACTIVITY_ITEMS_JS = """
     // either direction is visible in the reading instead of in a refusal.
     owner_headings_rendered: rendered.length,
     owner_headings_contained: contained.length,
-    owner_source: ownerSource,
+    owner_source: namedBy,
+    owner_heading_source: ownerSource,
+    owner_title_present: pageTitle ? 1 : 0,
     owner_match: ownerMatch,
     established: established,
     permalink_anchors: 0,
@@ -3725,17 +3790,32 @@ async def read_own_activity_items(
       unanimity rule becomes a rubber stamp.
     * ``mixed_authors`` -- two or more distinct authors. The feed's shape, and
       the reason no argument selects a surface.
-    * ``no_page_owner_heading`` -- no ``h1`` carrying text by EITHER route, so
-      there is nothing to compare the one author against. TWO ROUTES since
-      2026-08-31: ``innerText`` first, then ``textContent``. The live profile
-      returned ZERO by the first route on two identical readings -- LinkedIn
-      draws the heading and CSS takes it out of layout, which ``innerText``
-      reports as no text at all -- and this reader refused a page whose
-      authorship its other two conditions had already established. What C3
-      asks is whether LinkedIn's own markup names the owner, which is a claim
-      about the DOCUMENT; making it depend on CSS was the defect. Both counts
-      come back on every answer, so a caller sees which route named the owner
-      rather than inferring it.
+    * ``no_page_owner_heading`` -- NOTHING ON THE PAGE NAMES ITS OWNER, by any
+      of the three routes. The name is kept from when there was one route,
+      because a refusal code a caller branches on is not worth renaming; what
+      it MEANS has widened twice in one day and both widenings were forced by
+      a live reading rather than chosen.
+
+      THREE ROUTES, IN ORDER: an ``h1``'s ``innerText``, the same ``h1``'s
+      ``textContent``, then ``document.title``. The second was added when the
+      live profile answered ZERO by the first on two identical readings, on
+      the hypothesis that LinkedIn draws a heading CSS hides -- ``innerText``
+      is a RENDERED-text reading and C3 asks a question about the DOCUMENT, so
+      making it depend on CSS was a real defect whatever the live page turned
+      out to do. THE LIVE PAGE THEN ANSWERED ZERO BY BOTH: it has no ``h1``
+      carrying text at all, which REFUTED the hypothesis and is exactly what
+      reporting both counts was for -- it settled in one call what would
+      otherwise have been argued. The third route is the page's own title,
+      which is LinkedIn's markup naming the page in the same sense
+      ``isSelfProfile=true`` is LinkedIn's url naming it.
+
+      Compared by CONTAINMENT rather than by prefix, and that is forced by the
+      string: a browser title carries an unread count in front and
+      " | LinkedIn" behind. Looser, so a minimum author length applies --
+      ``ACTIVITY_MIN_AUTHOR_CHARS``, a bound and not a fix. What it still
+      refuses is the case C3 exists for: a rail of reshares by one OTHER
+      member is unanimous, passes C2, and its author is not in the title of
+      HIS profile.
     * ``ambiguous_page_owner_heading`` -- two or more, so the comparison would
       have to choose one by document order.
     * ``author_is_not_the_page_owner`` -- C1 and C2 both held and the strings
@@ -3757,6 +3837,7 @@ async def read_own_activity_items(
         "maxAnchors": int(max_anchors),
         "maxHops": int(max_hops),
         "maxChars": int(max_chars),
+        "minAuthorChars": ACTIVITY_MIN_AUTHOR_CHARS,
     }
     try:
         data = await page.evaluate(ACTIVITY_ITEMS_JS, cfg)  # readonly-ok
@@ -3771,6 +3852,7 @@ async def read_own_activity_items(
     authors = int(data.get("authors_found") or 0)
     headings = int(data.get("owner_headings") or 0)
     owner_match = data.get("owner_match")
+    owner_source = data.get("owner_source")
 
     facts = {
         "authors_found": authors,
@@ -3788,8 +3870,16 @@ async def read_own_activity_items(
         # whole contract is that the claim is established rather than
         # inferred. ``"h1-innertext"`` is the rendered heading;
         # ``"h1-textcontent"`` is a heading LinkedIn draws for assistive
-        # readers and CSS hides.
+        # readers and CSS hides. ``"document-title"`` is the page's own title,
+        # consulted last and only when no heading named anybody -- which is
+        # what the LIVE profile turned out to require, both heading routes
+        # having answered zero on it.
         "owner_source": data.get("owner_source"),
+        # WHICH HEADING ROUTE WOULD HAVE ANSWERED, separately from which route
+        # actually did. ``None`` here beside a non-null ``owner_source`` is
+        # exactly the live profile's shape, and reporting the two apart is
+        # what makes that visible rather than inferable.
+        "owner_heading_source": data.get("owner_heading_source"),
     }
     counts = {
         "overflow_controls": overflow,
@@ -3804,6 +3894,12 @@ async def read_own_activity_items(
         "owner_headings_contained": int(
             data.get("owner_headings_contained") or 0
         ),
+        # WHETHER THE PAGE HAS A TITLE AT ALL, as a count rather than the
+        # string. It is the third owner route's raw material and an empty one
+        # is a different refusal from a title that simply does not carry the
+        # author -- the same absent-is-not-zero distinction the two heading
+        # counts keep.
+        "owner_title_present": int(data.get("owner_title_present") or 0),
         "permalink_anchors": int(data.get("permalink_anchors") or 0),
         "distinct_urns": int(data.get("distinct_urns") or 0),
         "unrecognised": int(data.get("unrecognised") or 0),
@@ -3840,31 +3936,41 @@ async def read_own_activity_items(
             "be picking by position. None of the names is reported here; that "
             "they differ is the whole of the answer.",
         )
-    if headings == 0:
-        return refusal(
-            "no_page_owner_heading",
-            "the page draws no h1 carrying text by EITHER route -- neither "
-            f"rendered ({counts['owner_headings_rendered']}) nor contained "
-            f"({counts['owner_headings_contained']}) -- so the one author "
-            "found has nothing to be compared against. Authorship is not "
-            "inferred from the address this reader was pointed at.",
-        )
+    # THE HEADING COUNT DECIDES WHICH ROUTE RUNS; IT NO LONGER DECIDES WHETHER
+    # C3 CAN BE ASKED. Two headings is still ambiguous and still refuses --
+    # picking one would be picking by document order. ZERO headings is no
+    # longer a refusal by itself, because a third route exists: the page's own
+    # title. Both refusals below fire only when NO route named an owner.
     if headings > 1:
         return refusal(
             "ambiguous_page_owner_heading",
             f"the page draws {headings} h1 elements with text in them, so "
             "there is no unambiguous page owner to compare the one author "
             "against. Choosing one of them would be choosing by document "
-            "order.",
+            "order -- and falling through to the title route instead would be "
+            "resolving an ambiguity by changing the question.",
+        )
+    if owner_source is None:
+        return refusal(
+            "no_page_owner_heading",
+            "NOTHING ON THIS PAGE NAMES ITS OWNER, by any of the three routes "
+            "this reader consults. No h1 carries text -- neither rendered "
+            f"({counts['owner_headings_rendered']}) nor contained "
+            f"({counts['owner_headings_contained']}) -- and the page title "
+            f"{'is empty' if not counts['owner_title_present'] else 'does not carry the one author found, or that author is too short to compare by containment'}"
+            ". So the one author found has nothing to be compared against, "
+            "and authorship is not inferred from the address this reader was "
+            "pointed at.",
         )
     if owner_match is not True:
         return refusal(
             "author_is_not_the_page_owner",
-            "the page carries exactly one author and exactly one h1 (named "
-            f"through {facts['owner_source']!r}), and neither string is a "
-            "prefix of the other. The comparison happened inside the page and "
-            "neither string is reported here; that they do not match is the "
-            "whole of the answer.",
+            "the page carries exactly one author and an owner named through "
+            f"{owner_source!r}, and the two do not match -- by prefix for a "
+            "heading, by containment for the title, which is what a browser "
+            "title's decoration forces. The comparison happened inside the "
+            "page and NEITHER STRING is reported here; that they do not match "
+            "is the whole of the answer.",
         )
 
     items = [str(value) for value in (data.get("items") or [])]

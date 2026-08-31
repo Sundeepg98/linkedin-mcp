@@ -2567,6 +2567,18 @@ def _authorship_block(
         # asserting the field on the tool's output rather than the reader's,
         # which is the only place it could have been caught.
         "owner_source": facts.get("owner_source"),
+        # WHICH HEADING ROUTE WOULD HAVE ANSWERED, separately from which route
+        # DID. ``None`` here beside a non-null ``owner_source`` is the live
+        # profile's exact shape -- no heading names anybody, the title does --
+        # and reporting the two apart is what makes that visible rather than
+        # inferable.
+        #
+        # THE FOURTH FIELD THIS DICT HAS DROPPED IN SILENCE, counting
+        # ``container`` in the census reader, the census row's mislabelled
+        # columns, ``role`` in the dark-mode projection and ``owner_source``
+        # here yesterday. It is why the test below stopped asserting fields
+        # one at a time and started asserting the SET.
+        "owner_heading_source": facts.get("owner_heading_source"),
     }
 
 

@@ -532,6 +532,11 @@ async def test_an_all_his_rail_yields_exactly_his_item_keys_deduped(run_tool):
         # a page where it happens, and the fixture below is that page.
         "owner_headings_rendered": 1,
         "owner_headings_contained": 1,
+        # ZERO because the harness serves a fragment with no <title>. That is
+        # the fixture's shape and not a claim about LinkedIn -- and it is the
+        # right shape here, because a page WITH a heading must be judged on
+        # the heading whatever its title says.
+        "owner_title_present": 0,
         "permalink_anchors": 3,
         "distinct_urns": 2,
         "unrecognised": 0,
@@ -1372,3 +1377,242 @@ def test_the_tool_warns_that_its_output_must_not_be_committed():
     assert "real identifier" in text
     assert "tracked file" in text
     assert "test_no_committed_identity" in text
+
+
+# ---------------------------------------------------------------------------
+# C3's THIRD ROUTE: the page's own title
+# ---------------------------------------------------------------------------
+#
+# THE LIVE PROFILE HAS NO h1 CARRYING TEXT, by either route. Measured
+# 2026-08-31 after the textContent route shipped: owner_headings_rendered 0
+# AND owner_headings_contained 0, on a page the census measured at 233
+# controls with isSelfProfile=true and one unanimous author. That REFUTED the
+# CSS hypothesis the second route was built on, and reporting both counts is
+# what settled it in one call rather than leaving it to be argued.
+#
+# So C3 consults a third thing, last: document.title, which is LinkedIn's own
+# markup naming the page in the same sense isSelfProfile=true is LinkedIn's
+# url naming it.
+
+
+def titled(html: str, title: str) -> str:
+    """The same markup with a ``<title>``. The harness serves fragments, so a
+    title has to be put there deliberately -- which is the right default: a
+    fixture that accidentally carried one would let the third route answer
+    tests written about the first two."""
+    assert "<title>" not in html
+    return html.replace("<body>", f"<head><title>{title}</title></head><body>", 1)
+
+
+#: HIS profile, no heading of any kind, titled the way a browser tab is --
+#: an unread count in front and " | LinkedIn" behind. The decoration is the
+#: whole reason this route compares by containment rather than by prefix.
+TITLE_ONLY_HTML = titled(
+    HIS_RAIL_HTML.replace(H1_OWNER, ""), f"(3) {OWNER_FULL} | LinkedIn"
+)
+
+
+async def test_the_page_title_names_the_owner_when_no_heading_does(run_tool):
+    """THE ROUTE THE LIVE PAGE REQUIRES, on markup shaped like it.
+
+    No h1 at all, so both heading routes answer zero -- which is the live
+    profile's measured shape, not a contrivance. The title carries the owner,
+    the one author on the rail is inside it, and authorship is established
+    through ``document-title``.
+    """
+    result, _navigations, _scripts = await run_tool(TITLE_ONLY_HTML)
+
+    assert result["counts"]["owner_headings_rendered"] == 0
+    assert result["counts"]["owner_headings_contained"] == 0
+    assert result["counts"]["owner_title_present"] == 1
+    assert result.get("refused") is None, result
+    assert result["authorship"]["established"] is True
+    assert result["authorship"]["owner_source"] == "document-title"
+    # WHICH HEADING ROUTE WOULD HAVE ANSWERED, reported separately: None here,
+    # beside a non-null owner_source. That pair IS the live page's shape and
+    # reporting the two apart is what makes it visible rather than inferable.
+    assert result["authorship"]["owner_heading_source"] is None
+    assert result["items"] == [HIS_ITEM_ONE, HIS_ITEM_TWO], result["items"]
+
+
+async def test_a_heading_still_wins_over_the_title(run_tool):
+    """THE ORDER, asserted rather than assumed.
+
+    The title route is consulted LAST. A page WITH a heading is judged on the
+    heading, so adding a title cannot change a verdict -- which matters
+    because a title is the loosest of the three comparisons and would
+    otherwise be able to rescue a page the strict rule refused.
+    """
+    result, _navigations, _scripts = await run_tool(
+        titled(HIS_RAIL_HTML, f"(3) {OWNER_FULL} | LinkedIn")
+    )
+    assert result["authorship"]["owner_source"] == "h1-innertext"
+    assert result["authorship"]["established"] is True
+
+    # AND THE CASE THAT PROVES IT IS AN ORDER AND NOT A PREFERENCE: a heading
+    # naming somebody else, beside a title naming him. The heading refuses and
+    # the title does not get to overturn it.
+    wrong = titled(WRONG_OWNER_HTML, f"(3) {OWNER_FULL} | LinkedIn")
+    result, _navigations, _scripts = await run_tool(wrong)
+    assert result["refused"] == "author_is_not_the_page_owner", result
+    assert "items" not in result
+
+
+async def test_the_title_route_still_refuses_somebody_elses_rail(run_tool):
+    """THE CASE C3 EXISTS FOR, and it must survive the widening.
+
+    A rail of items by one OTHER member is UNANIMOUS -- it passes C2 -- and it
+    is exactly what an activity rail full of reshares looks like. The title of
+    HIS profile does not carry that member's name, so this refuses. If it did
+    not, the third route would have turned C3 into a formality.
+    """
+    others = titled(
+        HIS_RAIL_HTML.replace(H1_OWNER, "").replace(AUTHOR_SHORT, OTHER_AUTHOR),
+        f"(3) {OWNER_FULL} | LinkedIn",
+    )
+    assert OTHER_AUTHOR in others
+    result, _navigations, _scripts = await run_tool(others)
+    assert result["counts"]["owner_title_present"] == 1
+    assert result["refused"] == "author_is_not_the_page_owner", result
+    assert "items" not in result
+    # AND NO NAME LEAVES, on this path as on every other.
+    blob = json.dumps(result)
+    for secret in (OTHER_AUTHOR, OWNER_FULL, AUTHOR_SHORT):
+        assert secret not in blob, secret
+
+
+async def test_two_headings_do_not_fall_through_to_the_title(run_tool):
+    """AMBIGUITY IS NOT RESOLVED BY CHANGING THE QUESTION.
+
+    Two headings has no unambiguous owner and choosing one would be choosing
+    by document order. Falling through to the title instead would answer a
+    DIFFERENT question and call it the same one -- so the ambiguous refusal is
+    asserted to survive a title that would have answered.
+    """
+    two = titled(TWO_HEADING_HTML, f"(3) {OWNER_FULL} | LinkedIn")
+    result, _navigations, _scripts = await run_tool(two)
+    assert result["refused"] == "ambiguous_page_owner_heading", result
+    assert "items" not in result
+
+
+async def test_a_page_naming_nobody_at_all_refuses_and_says_so(run_tool):
+    """THE REFUSAL THAT SURVIVES ALL THREE ROUTES, and it now means something
+    stronger than it did with one: nothing on this page names its owner by any
+    route this reader consults. The reason prints all three counts, so the
+    claim is checkable from the answer rather than from the source."""
+    result, _navigations, _scripts = await run_tool(
+        HIS_RAIL_HTML.replace(H1_OWNER, "")
+    )
+    assert result["refused"] == "no_page_owner_heading", result
+    assert result["counts"]["owner_headings_rendered"] == 0
+    assert result["counts"]["owner_headings_contained"] == 0
+    assert result["counts"]["owner_title_present"] == 0
+    assert result["authorship"]["owner_source"] is None
+    assert "NAMES ITS OWNER" in result["reason"]
+    assert "items" not in result
+
+
+async def test_a_title_that_does_not_carry_the_author_refuses(run_tool):
+    """A TITLE IS NOT A PASS. The page has one, it simply does not name the
+    author -- which is what a mislabelled or non-profile page looks like, and
+    it must read as a refusal rather than as an absence."""
+    result, _navigations, _scripts = await run_tool(
+        titled(HIS_RAIL_HTML.replace(H1_OWNER, ""), "Feed | LinkedIn")
+    )
+    assert result["counts"]["owner_title_present"] == 1
+    assert result["refused"] == "author_is_not_the_page_owner", result
+    assert "items" not in result
+
+
+async def test_a_degenerate_author_is_too_short_to_compare_by_containment(
+    run_tool,
+):
+    """THE BOUND ON THE LOOSER COMPARISON, shown doing something.
+
+    Containment is looser than a prefix and the way it is loosest is a very
+    short author string being a coincidental substring. ``ACTIVITY_MIN_AUTHOR_CHARS``
+    stops the degenerate case from reading as an established authorship claim.
+    It is a bound, not a fix, and it is asserted so that removing it fails
+    here rather than passing quietly.
+
+    ``"In"`` is inside ``"LinkedIn"``, which is in every one of these titles --
+    so without the bound this page would establish authorship on a coincidence
+    in LinkedIn's own suffix.
+    """
+    assert dom.ACTIVITY_MIN_AUTHOR_CHARS > len("In")
+    short = titled(
+        HIS_RAIL_HTML.replace(H1_OWNER, "").replace(AUTHOR_SHORT, "In"),
+        f"(3) {OWNER_FULL} | LinkedIn",
+    )
+    result, _navigations, _scripts = await run_tool(short)
+    assert result["counts"]["owner_title_present"] == 1
+    assert result["refused"] == "no_page_owner_heading", result
+    assert result["authorship"]["owner_source"] is None
+    assert "items" not in result
+
+
+# ---------------------------------------------------------------------------
+# THE ENUMERATE-AND-DROP CLASS
+# ---------------------------------------------------------------------------
+
+
+async def test_every_authorship_fact_the_reader_produces_reaches_the_caller(
+    run_tool, monkeypatch
+):
+    """THE DEFECT CLASS, GUARDED -- not its fourth instance.
+
+    ``server._authorship_block`` builds its answer by NAMING keys. So does
+    ``dom.read_own_activity_items``'s facts dict, and so did the census
+    reader's row, and the census aggregate's merge key, and
+    ``writes._read_dark_mode``'s projection. Every one of them has now dropped
+    a field that the layer below it produced, SILENTLY, with no error and no
+    test going red:
+
+        ``container``          census reader -> aggregate, the day it was added
+        the census row itself  built by INDEX, so a field renamed the columns
+                               after it rather than going missing
+        ``role``               _read_dark_mode's projection -> dom.aria_role_of,
+                               which reads it FIRST
+        ``owner_source``       this reader -> this block, 2026-08-31
+        ``owner_heading_source``  the same pair, the same day, again
+
+    Five instances of one shape. Each was found by a different accident and
+    none by reading the code, which is what makes a per-field assertion the
+    wrong instrument: it can only ever catch the field somebody thought of.
+
+    SO THIS ASSERTS THE SET. Every key the reader puts in
+    ``authorship_facts`` must appear in the block the tool returns. The block
+    may carry MORE -- ``established`` and ``how`` are the tool's own -- but it
+    may not carry LESS, and a sixth field added to the reader fails here
+    without anybody adding a line.
+    """
+    seen: dict[str, object] = {}
+    real = dom.read_own_activity_items
+
+    async def spy(page, **kwargs):
+        reading = await real(page, **kwargs)
+        seen.update(reading.get("authorship_facts") or {})
+        return reading
+
+    monkeypatch.setattr(dom, "read_own_activity_items", spy)
+    result, _navigations, _scripts = await run_tool(HIS_RAIL_HTML)
+
+    assert seen, "the reader produced no authorship facts at all"
+    missing = sorted(set(seen) - set(result["authorship"]))
+    assert not missing, (
+        f"the reader produced {missing} and the tool's block does not carry "
+        "them. Both sides enumerate their keys, so a field added to one and "
+        "not the other is dropped in silence -- five fields have gone that "
+        "way in this package already."
+    )
+    # AND THE REFUSAL PATH TOO, which is the one a caller reads when it
+    # matters most: a refusal is where the counts and the routes are the whole
+    # of the answer, so a field dropped there is a field dropped exactly when
+    # somebody is trying to work out why.
+    seen.clear()
+    refused, _navigations, _scripts = await run_tool(
+        HIS_RAIL_HTML.replace(H1_OWNER, "")
+    )
+    assert refused.get("refused")
+    missing = sorted(set(seen) - set(refused["authorship"]))
+    assert not missing, missing
