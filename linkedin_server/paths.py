@@ -3,7 +3,7 @@
 #
 # Canonical source:
 #     D:\workspace\projects\job-hunting\mcp-servers\jobcore\src\jobcore\paths.py
-# Vendored from jobcore commit: 6acc7e6
+# Vendored from jobcore commit: b2f5d16
 #
 # WHY A COPY AND NOT A DEPENDENCY. This server does not depend on jobcore and
 # must not start. Adding the dependency for a path-rendering helper would turn
@@ -23,7 +23,7 @@
 # --- END VENDOR HEADER; everything below is verbatim from jobcore ---
 """Paths a caller can act on, that are not this machine's absolute layout.
 
-A live sweep on 2026-08-20 found ``D:\\Sundeep\\projects\\...`` inside MCP tool
+A live sweep on 2026-08-20 found ``D:\\<given-name>\\projects\\...`` inside MCP tool
 results. That is wrong twice over: it publishes the machine's directory layout
 into any shared transcript or future public release, and it is paid for in
 tokens on every response that carries it.
