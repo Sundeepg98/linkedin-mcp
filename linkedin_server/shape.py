@@ -3553,16 +3553,32 @@ CENSUS_OPAQUE = "<opaque>"
 CENSUS_REDACTED = "<redacted>"
 
 
-def census_shape(text: Optional[str]) -> str:
-    """Reduce one accessible name or href to a shape that identifies nobody.
+def census_substitute(text: Optional[str]) -> str:
+    """The SUBSTITUTION half of :func:`census_shape`, with no gate on the end.
 
-    Pure, and the whole privacy property of ``linkedin_surface_census`` rests
-    on it, so it is tested against a table of ADVERSARIAL inputs rather than
-    clean ones -- a shaper shown only the names it already handles certifies
-    nothing.
+    WHY THIS IS A FUNCTION RATHER THAN SEVEN LINES INSIDE THE ONE BELOW.
+    ``dom.read_self_owned_editor_fields`` publishes control labels from inside
+    ONE container that has been measured to be the operator's own, so it runs
+    WITHOUT the length/character gate -- see that reader for the ruling and
+    for what establishes the ownership. It still needs every substitution:
+    a urn, a member path, a company path, a possessive and a long digit run
+    identify somebody whichever container they were read in, and the relaxation
+    that was ruled on was the GATE, never the substitutions.
 
-    Returns ``""`` for empty input, :data:`CENSUS_OPAQUE` for anything that
-    fails the character or length gate, and otherwise the shaped string.
+    So there are two callers with two different second halves and ONE first
+    half. The alternative -- a second copy of the seven substitutions in
+    ``dom.py`` -- is the thing this repo has already been bitten by twice: two
+    implementations of one rule are two things to keep in sync, and the copy is
+    the one that goes stale, silently, because nothing compares them.
+
+    THE ORDER IS STILL LOAD-BEARING and is unchanged by the move: urns first
+    (they carry both digits and colons, so a later digit rule would chew them
+    up), then the two path forms, then the possessives, then digit runs. The
+    table in ``tests/test_surface_census.py`` pins it.
+
+    Returns ``""`` for ``None``, for the empty string and for whitespace. No
+    substitution here can empty a non-empty string -- every replacement writes
+    a non-empty placeholder -- so the empty return is only ever the input's.
     """
     if text is None:
         return ""
@@ -3579,6 +3595,41 @@ def census_shape(text: Optional[str]) -> str:
         lambda m: "<member>" + m.group(1), shaped
     )
     shaped = _CENSUS_LONG_DIGITS.sub("<id>", shaped)
+    return shaped
+
+
+def census_shape(text: Optional[str]) -> str:
+    """Reduce one accessible name or href to a shape that identifies nobody.
+
+    Pure, and the whole privacy property of ``linkedin_surface_census`` rests
+    on it, so it is tested against a table of ADVERSARIAL inputs rather than
+    clean ones -- a shaper shown only the names it already handles certifies
+    nothing.
+
+    Returns ``""`` for empty input, :data:`CENSUS_OPAQUE` for anything that
+    fails the character or length gate, and otherwise the shaped string.
+
+    THE SUBSTITUTIONS MOVED OUT ON 2026-08-31 and the two early returns this
+    body used to open with went with them. It read::
+
+        if text is None:
+            return ""
+        shaped = _WS.sub(" ", str(text)).strip()
+        if not shaped:
+            return ""
+        ... seven substitutions ...
+
+    and the empty-string branch is now absent rather than relocated, because
+    the gate ALREADY answers ``""`` correctly: zero is under the length limit,
+    the placeholder strip leaves ``""``, and ``_CENSUS_SAFE_CHARS`` is a
+    ``*`` pattern that matches the empty string. So the branch was doing
+    nothing an equality test would have noticed. That claim is not an argument
+    in a comment -- ``tests/test_editor_fields.py`` runs the adversarial table
+    from ``tests/test_surface_census.py`` plus the empty, whitespace, ``None``,
+    at-the-limit and over-the-limit cases through this function and compares
+    against outputs CAPTURED BEFORE the move.
+    """
+    shaped = census_substitute(text)
 
     # The gate runs on what is LEFT once the placeholders are taken out, since
     # they are the one legitimate source of angle brackets.

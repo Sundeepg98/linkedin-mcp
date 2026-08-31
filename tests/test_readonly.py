@@ -310,7 +310,24 @@ def test_only_dom_module_waives_evaluate():
     # fragment of either. The cheap side of the usual trade is the unacceptable
     # one here, which is the argument, and it is the only reason this number
     # moved.
-    assert waived_in.get("dom.py", 0) <= 7, waived_in
+    #
+    # EIGHT FROM 2026-08-31, and it is the SECOND waiver spent on privacy
+    # rather than on a reading -- EDITOR_FIELDS_JS, run by
+    # dom.read_self_owned_editor_fields. It is the inverse of the seventh: that
+    # one keeps a name OUT of this process, this one lets a name IN, and both
+    # need the work done in the page for the same structural reason.
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT. The read is "every control inside the
+    # nearest dialog ancestor of the one control named Save". Playwright can
+    # find descendants of a known element and it cannot walk UP from one --
+    # there is no locator for closest(). Doing it in Python would mean
+    # enumerating every dialog on the page, reading each one's controls, and
+    # deciding containment from the two lists, which is the adjacency-guessing
+    # that the container measurement was taken to end. And the counting rule
+    # this reader lives by -- exactly one anchor or it refuses -- has to be
+    # decided over the whole document at one instant, not across a series of
+    # separate locator calls against a page that is still settling.
+    assert waived_in.get("dom.py", 0) <= 8, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -345,6 +362,19 @@ INJECTED_SCRIPTS = {
     # structural: there is no string in the return value to leak. The test that
     # certifies THAT lives with the reader, not here.
     "INVITE_NEEDLE_JS": dom.INVITE_NEEDLE_JS,
+    # 2026-08-31. The self-owned editor reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # It is the one script here whose OUTPUT is deliberately LESS shaped than
+    # the census's: it publishes accessible names ungated, on the operator's
+    # 2026-08-31 ruling that a container measured to be his own holds no third
+    # party. That makes the mutation scan more load-bearing rather than less --
+    # a script that both reads labels and could touch the page would be the
+    # worst combination available here -- and it is why the scan is asserted a
+    # second time in tests/test_editor_fields.py rather than only from this
+    # list.
+    "EDITOR_FIELDS_JS": dom.EDITOR_FIELDS_JS,
 }
 
 
@@ -452,10 +482,17 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     ``test_only_dom_module_waives_evaluate`` -- in short, it is the only
     script here that exists to keep a value OUT of this process rather than to
     bring one in.
+
+    EIGHT FROM 2026-08-31, new surface area again: ``EDITOR_FIELDS_JS``, run
+    once from ``dom.read_self_owned_editor_fields``. It is the mirror of the
+    seventh -- that one keeps an identity out of this process, this one lets
+    accessible names in, ungated, from inside a container measured to be the
+    operator's own. Its waiver argument is with the budget in
+    ``test_only_dom_module_waives_evaluate``.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 7, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 8, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

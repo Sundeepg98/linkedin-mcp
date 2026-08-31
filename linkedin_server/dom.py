@@ -2678,6 +2678,391 @@ async def read_surface_census(
 
 
 # ---------------------------------------------------------------------------
+# The self-owned editor: NAMES, inside ONE measured container
+# ---------------------------------------------------------------------------
+#
+# WHAT THIS IS AND WHY IT IS NOT THE CENSUS. ``linkedin_surface_census``
+# reports SHAPES and never names, and that gate is what makes it safe to point
+# at a page made of other members. It is also why
+# ``linkedin_update_profile_field`` cannot name a field to type into: the
+# 2026-08-31 capture of ``/in/me/edit/intro/`` found the editor at ``dialog#0``
+# with ``Save`` enabled inside it and ELEVEN controls in there, of which the
+# ones that capability would target came back ``<opaque>`` -- read by the
+# census and deliberately not published. Section 2g of
+# ``_audit/2026-08-31-linkedin-finish.md`` carries the table.
+#
+# THE OPERATOR RULED on that measurement: a reader scoped to ONE container,
+# MEASURED to be self-owned, may publish names the document-wide gate would
+# redact, because ``dialog#0`` on his own profile editor holds only his data
+# and there is no third party inside it to protect. This is that reader. The
+# census is NOT changed by any of it -- nothing already published changes
+# meaning, and there is no argument a caller can pass to
+# ``linkedin_surface_census`` that reaches this behaviour.
+#
+# THE RELAXATION IS EXACTLY ONE THING WIDE, and the two halves are worth
+# separating because only one of them moved:
+#
+# * DROPPED -- the ``<opaque>`` length/character gate, and the singleton
+#   blanking in ``shape.census_redact_rare``. Both exist to stop a STRANGER'S
+#   name being published, and the containment measurement is what removes the
+#   stranger.
+# * KEPT -- the substitutions, which are these five rules: urn,
+#   ``/in/<member>/``, ``/company/<company>/``, the two possessives, and long
+#   digit runs. A urn identifies somebody whichever container it was read in.
+#   This reader calls ``shape.census_substitute``, which is the SAME code
+#   ``shape.census_shape`` runs as its first half; the move that created it is
+#   recorded in that function and pinned against pre-move outputs in
+#   ``tests/test_editor_fields.py``.
+#
+# WHAT IT STILL MAY NOT DO. It reads control LABELS. It does not read or return
+# any control's VALUE -- ``.value`` appears nowhere in the script below, and
+# that is asserted rather than described. A label is "First name"; a value is
+# his first name, and nothing this reader serves needs one. It returns no href
+# either, only whether there was one: the container's controls can link out.
+#
+# THE NAME CHAIN BELOW IS A COPY OF THE ONE IN :data:`CENSUS_JS`, and the
+# duplication is forced rather than chosen. ``CENSUS_JS`` is document-wide and
+# returns raw names for the whole page -- running it here would bring every
+# stranger's name on the profile render into this process, which is the thing
+# being avoided. Assembling this script from a shared fragment is also not
+# available: ``tests/test_readonly.py`` resolves injected scripts from the
+# ``evaluate`` CALL SITE and every ``_JS`` attribute of this module has to be
+# declared, so a fragment constant would join the declaration list as a script
+# that never runs. So the chain is written twice and the two copies are held to
+# agreeing by ``test_the_editor_chain_resolves_the_same_names_as_the_census``,
+# which runs both scripts over one document and compares.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request: the tokens that would do any of those are refused by
+# ``readonly.JS_MUTATION_TOKENS``, and this script is scanned against that list
+# by name.
+#
+# TEN FIELDS PER CONTROL, enumerated rather than summarised because this module
+# has already dropped a field by describing a dict instead of listing it --
+# ``container`` on the day it was added: ``name``, ``name_source``, ``tag``,
+# ``type``, ``role``, ``disabled``, ``checked``, ``checked_source``,
+# ``required``, ``has_href``. The count and the names are pinned in
+# ``tests/test_editor_fields.py`` rather than trusted to this comment.
+EDITOR_FIELDS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
+    const body = textOf(el);
+    if (body) return { name: body, source: 'text' };
+    return { name: '', source: 'none' };
+  };
+
+  // NATIVE BEFORE ARIA, the same order and for the same reason as the census:
+  // el.checked is the state the browser holds, and the TYPE GATE is what stops
+  // a text box reporting as checkable-and-off. null means NOT CHECKABLE.
+  const checkedOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const kind = String(el.type || '').toLowerCase();
+      if (kind === 'radio' || kind === 'checkbox') {
+        return { checked: el.checked === true, source: 'native' };
+      }
+    }
+    const aria = attrOf(el, 'aria-checked').trim().toLowerCase();
+    if (aria === 'true') return { checked: true, source: 'aria-checked' };
+    if (aria === 'false') return { checked: false, source: 'aria-checked' };
+    if (aria === 'mixed') return { checked: 'mixed', source: 'aria-checked' };
+    return { checked: null, source: 'none' };
+  };
+
+  // THE SAME TRI-STATE DISCIPLINE checkedOf keeps, for the same reason. A
+  // native form control always answers the question, so it gets true or false;
+  // a button or an anchor cannot be required at all, so it gets null unless it
+  // wears an aria-required saying otherwise. false there would have meant
+  // "this one is optional", which is a claim nobody measured.
+  const requiredOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+      return el.required === true;
+    }
+    const aria = attrOf(el, 'aria-required').trim().toLowerCase();
+    if (aria === 'true') return true;
+    if (aria === 'false') return false;
+    return null;
+  };
+
+  const out = {
+    anchor_controls: 0,
+    container_kind: null,
+    controls_inside: 0,
+    truncated: false,
+    controls: []
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // THE ANCHOR IS COUNTED ACROSS THE WHOLE DOCUMENT, not within a container,
+  // and that is the strict direction: a second control wearing the anchor name
+  // anywhere on the page means the aim is ambiguous, and choosing between them
+  // would be choosing by position -- which is the defect the container
+  // descriptor was added to end.
+  const anchors = [];
+  for (const el of all) {
+    if (nameOf(el).name.trim() === cfg.anchorName) anchors.push(el);
+  }
+  out.anchor_controls = anchors.length;
+  if (anchors.length !== 1) return out;
+
+  let container = null;
+  try { container = anchors[0].closest(cfg.containerSelector); }
+  catch (e) { container = null; }
+  if (!container) return out;
+
+  // The selector admits exactly two things, so the kind is total rather than a
+  // lookup: the tag, or else it matched on the role.
+  const containerTag = (container.tagName || '').toLowerCase();
+  out.container_kind = containerTag === 'dialog' ? 'dialog' : 'role=dialog';
+
+  let inside;
+  try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { inside = []; }
+  out.controls_inside = inside.length;
+
+  for (const el of inside) {
+    if (out.controls.length >= cfg.maxControls) break;
+    const named = nameOf(el);
+    const tag = (el.tagName || '').toLowerCase();
+    const state = checkedOf(el);
+    out.controls.push({
+      name: named.name,
+      name_source: named.source,
+      tag: tag,
+      type: tag === 'input' ? String(el.type || '').toLowerCase() : null,
+      role: attrOf(el, 'role') || null,
+      disabled: el.disabled === true
+        || attrOf(el, 'aria-disabled').trim().toLowerCase() === 'true',
+      checked: state.checked,
+      checked_source: state.source,
+      required: requiredOf(el),
+      // WHETHER, never WHICH. The address itself stays in the page: a control
+      // in this container can link out, and an href is the one field here that
+      // could carry an identity out of a container measured to hold none.
+      has_href: !!attrOf(el, 'href')
+    });
+  }
+  out.truncated = out.controls.length < inside.length;
+  return out;
+}
+"""
+
+#: The accessible name of the intro editor's commit control, and the ONLY
+#: structural handle this reader has on the container.
+#:
+#: MEASURED, not chosen: ``Save``, ``disabled: false``, in ``dialog#0`` beside
+#: the editor's own fields, read twice on 2026-08-31 and recorded in
+#: ``_audit/2026-08-31-linkedin-finish.md`` section 2g. The two DISABLED
+#: ``Submit`` controls on the same render sit in ``form#3`` and ``form#6``
+#: beside "Report this ad" -- they are the ad-report forms and were never this
+#: editor's commit control.
+#:
+#: WHY A NAME AND NOT ``dialog#0``. That descriptor is an INDEX assigned in
+#: document order over whatever containers the page happens to draw, and the
+#: same capture found five dialogs. Which one is first is LinkedIn's business
+#: and can change without anything here being wrong. The anchor is the one
+#: property of the container that means something.
+EDITOR_ANCHOR_NAME = "Save"
+
+#: What counts as the container. Deliberately NARROWER than the container
+#: selector inside :data:`CENSUS_JS`, which also admits ``form`` and
+#: ``[role="form"]``: the ruling was about a DIALOG on his own profile editor,
+#: and a form is the wrong shape to inherit it -- the same render draws two
+#: ad-report forms.
+EDITOR_CONTAINER_SELECTOR = 'dialog, [role="dialog"]'
+
+#: Ceiling on controls returned from one container. The measured container held
+#: eleven, so this is not a limit anybody is near; it exists so that a page
+#: that changes shape cannot hand this reader an unbounded list, and it is
+#: REPORTED as truncated rather than silently cut.
+EDITOR_MAX_CONTROLS = 200
+
+
+async def read_self_owned_editor_fields(
+    page: Any,
+    *,
+    max_controls: int = EDITOR_MAX_CONTROLS,
+    max_chars: int = 300,
+) -> dict[str, Any]:
+    """Label every control inside the editor dialog, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED SELF-OWNERSHIP BEFORE THIS RUNS. This
+    function reads a container; it does not and cannot establish whose page it
+    is on. ``server.linkedin_profile_editor_fields`` is the only caller and it
+    does that first, from LinkedIn's own ``isSelfProfile=true`` assertion plus
+    a same-member comparison across two landed urls. Pointing this at an
+    arbitrary page would publish names off it, which is precisely what the
+    census's gate exists to prevent -- so it is not exposed as a tool and takes
+    no argument selecting a surface.
+
+    TWO RETURN SHAPES, AND THEY DO NOT OVERLAP.
+
+    * Success carries ``container`` and ``fields``.
+    * A refusal carries ``refused`` and ``reason`` and CARRIES NO ``fields``
+      KEY AT ALL. Not an empty list: a caller must not be able to read "this
+      reader would not aim" as "the container has no fields in it". That is the
+      absent-is-not-zero rule the rest of this module keeps, applied to the one
+      place where the wrong reading would be acted on.
+
+    THE THREE REFUSALS, and each is the anchor rule rather than a policy:
+
+    * ``no_anchor`` -- nothing on the page is named :data:`EDITOR_ANCHOR_NAME`.
+    * ``ambiguous_anchor`` -- two or more are. Choosing between them would be
+      choosing by position, which is what this reader exists not to do. Note
+      the count is DOCUMENT-WIDE: a second one outside any dialog still makes
+      it ambiguous, because "the one in the dialog" is itself a rule about
+      position.
+    * ``anchor_outside_a_container`` -- exactly one, with no
+      ``dialog, [role="dialog"]`` ancestor. There is no container to scope to,
+      and the whole permission is the scope.
+
+    NAMES COME BACK UNGATED AND SUBSTITUTED. See the block above this script
+    for the ruling and for the half of the shaping that survives it.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "containerSelector": EDITOR_CONTAINER_SELECTOR,
+        "anchorName": EDITOR_ANCHOR_NAME,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+    }
+    try:
+        data = await page.evaluate(EDITOR_FIELDS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the editor container: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    anchors = int(data.get("anchor_controls") or 0)
+    if anchors == 0:
+        return {
+            "refused": "no_anchor",
+            "reason": (
+                f"no control on this page is named {EDITOR_ANCHOR_NAME!r}, so "
+                "there is nothing to identify the editor container by. This "
+                "reader does not fall back to a position."
+            ),
+            "anchor_controls": anchors,
+        }
+    if anchors > 1:
+        return {
+            "refused": "ambiguous_anchor",
+            "reason": (
+                f"{anchors} controls on this page are named "
+                f"{EDITOR_ANCHOR_NAME!r}. Picking one of them would be picking "
+                "by document order, which is not containment."
+            ),
+            "anchor_controls": anchors,
+        }
+    kind = data.get("container_kind")
+    if not kind:
+        return {
+            "refused": "anchor_outside_a_container",
+            "reason": (
+                f"the one control named {EDITOR_ANCHOR_NAME!r} has no "
+                f"{EDITOR_CONTAINER_SELECTOR} ancestor, so there is no "
+                "container to scope this read to -- and the scope is the whole "
+                "of the permission."
+            ),
+            "anchor_controls": anchors,
+        }
+
+    fields: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        fields.append(
+            {
+                # THE UNGATED NAME. ``census_substitute`` and not
+                # ``census_shape``: the substitutions run, the <opaque> gate
+                # does not. That one-word difference IS the capability.
+                "name": shape.census_substitute(control.get("name")),
+                "name_source": str(control.get("name_source") or "none"),
+                "tag": str(control.get("tag") or ""),
+                "type": control.get("type"),
+                "role": control.get("role"),
+                "disabled": bool(control.get("disabled")),
+                # UNCOERCED, exactly as the census carries it: None means NOT
+                # CHECKABLE and False means checkable and off, and bool() here
+                # would collapse the two.
+                "checked": control.get("checked"),
+                "checked_source": str(control.get("checked_source") or "none"),
+                # Same tri-state, same reason -- None is "no required marker is
+                # readable on this kind of control", never "optional".
+                "required": control.get("required"),
+                "has_href": bool(control.get("has_href")),
+            }
+        )
+
+    out: dict[str, Any] = {
+        "container": {
+            "kind": str(kind),
+            "anchor": EDITOR_ANCHOR_NAME,
+            "controls_inside": int(data.get("controls_inside") or 0),
+        },
+        "fields": fields,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the container carried more than {max_controls} controls and the "
+            "tail was not read. controls_inside is the whole-container count."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # The nine surfaces
 # ---------------------------------------------------------------------------
 #

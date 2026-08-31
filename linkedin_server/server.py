@@ -1,23 +1,37 @@
-"""The tool surface: thirty-one tools, five of which write to LinkedIn.
+"""The tool surface: thirty-two tools, five of which write to LinkedIn.
 
-THIS PARAGRAPH HAS NOW BEEN WRONG FOUR TIMES, in both directions, and the
+THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
 write path TO LINKEDIN in this package"* -- true, then not. It was corrected
 to "sixteen tools, two writes", stayed there through the arrival of a third,
 and then said "seventeen tools, fourteen reads, THE OTHER THREE WRITE" while
 the live surface was twenty and four. It then said "twenty tools, four of
 which write" while the live surface was THIRTY-ONE and FIVE, which is the
-fourth time and the one corrected here on 2026-08-31.
+fourth time.
 
-THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-one is
-``len(await mcp.list_tools())``, pinned at ``test_server_surface.py`` line
-356; five is ``len(writes.PERFORMABLE)``, pinned at line 1252 of the same
-file. The surface splits three ways and the split is the part a reader
-actually needs: NINETEEN read (pinned at line 413), FIVE write, and SEVEN are
-write-shaped, registered, gated and cannot act at all -- none is in
-``writes.PERFORMABLE``, none holds a ``url_template``, and ``writes.mint``
-refuses each of them a grant at issue, so no confirm token for any of them
-can exist. Nineteen plus seven plus five is thirty-one.
+THE FIFTH IS THE CHEAPEST AND IS RECORDED ANYWAY, because a number that rots
+by one is the number a reader stops checking. It said "thirty-one tools ...
+NINETEEN read" for as long as it took ``linkedin_profile_editor_fields`` to
+arrive later the same day, 2026-08-31. One READ was added and no write was;
+the correction is thirty-one -> thirty-two and nineteen -> twenty.
+
+THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-two is
+``len(await mcp.list_tools())``, pinned in ``test_server_surface.py`` by
+``test_the_surface_is_exactly_the_thirtytwo_tools``; five is
+``len(writes.PERFORMABLE)``, pinned in the same file. The surface splits three
+ways and the split is the part a reader actually needs: TWENTY read, FIVE
+write, and SEVEN are write-shaped, registered, gated and cannot act at all --
+none is in ``writes.PERFORMABLE``, none holds a ``url_template``, and
+``writes.mint`` refuses each of them a grant at issue, so no confirm token for
+any of them can exist. Twenty plus seven plus five is thirty-two.
+
+THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
+correction rather than tidying. It read "pinned at ``test_server_surface.py``
+line 356 ... pinned at line 1252 ... pinned at line 413", and all three were
+wrong by the time this paragraph was next read: the assertions moved when the
+comments above them grew. A citation that rots faster than the claim it
+supports is worse than no citation, so the pins are named by TEST NAME, which
+a grep finds and an edit does not silently move.
 
 It carried the sentence *"Counts in this docstring are re-measured per wave,
 not carried"* through every one of those. A docstring that states its own
@@ -76,8 +90,9 @@ line:
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Optional
-from urllib.parse import urlencode
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 from fastmcp import FastMCP
 
@@ -1951,6 +1966,314 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                     "a whole-page count and is unaffected; control_shapes is "
                     "the distribution over what was read."
                 )
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---------------------------------------------------------------------------
+# The one reader that publishes names, and what buys it the right to
+# ---------------------------------------------------------------------------
+#
+# THE TENSION, STATED BEFORE THE CODE. The census above reports SHAPES and
+# never names, because a LinkedIn page is made of other members and LinkedIn
+# writes their names into control labels. That gate is what makes it safe to
+# point the census at a page full of strangers, and it is ALSO why
+# ``linkedin_update_profile_field`` refuses: the controls it would target came
+# back ``<opaque>`` from the 2026-08-31 capture of the intro editor -- read by
+# the instrument and deliberately not published.
+#
+# THE OPERATOR RULED that a reader scoped to ONE container, MEASURED to be
+# self-owned, may publish what the document-wide gate would redact. The ruling
+# is narrow and its constraints are the code below rather than a note beside
+# it:
+#
+# 1. SELF-OWNERSHIP IS ESTABLISHED PER CALL, never assumed from the fact that
+#    the url said ``/in/me/``. The anchor is LinkedIn's OWN
+#    ``isSelfProfile=true`` on the landed url -- an EXTERNAL assertion, which
+#    is the whole reason it is the anchor rather than this server's reasoning
+#    about what ``/in/me/`` ought to mean. It is measured: four landings across
+#    two days, section 2d of ``_audit/2026-08-31-linkedin-finish.md``.
+# 2. THE SAME MEMBER ON BOTH LANDED URLS, so the editor being read is on the
+#    profile whose self-assertion was seen.
+# 3. THE SEGMENT IS COMPARED AND DISCARDED. It is his member slug. It reaches
+#    no return value, no log line, no exception message and no file. The tool
+#    answers ``same_member: true`` and never the value, and it returns no url
+#    -- only landed PATHS with the segment substituted out. The census's
+#    ``source_url`` already carries his slug and that is the status quo; a
+#    second place it lives is not.
+# 4. THE CENSUS IS NOT TOUCHED. ``linkedin_surface_census`` and
+#    ``shape.census_shape`` behave exactly as they did, so nothing already
+#    published changes meaning, and no argument to the census reaches this.
+
+#: The two pages this tool loads, spelled here as LITERALS and reachable by no
+#: argument. They are the same two strings ``CENSUS_SURFACES`` holds under
+#: ``profile`` and ``profile_edit_intro`` -- both already on the read
+#: allowlist, and the editor already exempted for ``/edit/`` -- and
+#: ``tests/test_editor_fields.py`` pins the pairs equal so the two tools can
+#: never drift onto different pages while claiming the same measurement.
+SELF_PROFILE_URL = f"{BASE_URL}/in/me/"
+SELF_PROFILE_EDIT_INTRO_URL = f"{BASE_URL}/in/me/edit/intro/"
+
+#: The member segment of a landed profile path. Anchored, and the trailing
+#: slash is REQUIRED rather than optional: it is what makes one pattern read
+#: both measured landings -- ``/in/<member>/`` on the profile, which arrives
+#: with ``?isSelfProfile=true`` behind it, and ``/in/<member>/edit/intro`` on
+#: the editor, which arrives with NO trailing slash of its own (section 2e of
+#: the 2026-08-31 audit, where two earlier readings that said otherwise were
+#: caught having sampled the page mid-flight).
+_MEMBER_SEGMENT = re.compile(r"^/in/([^/?#]+)/")
+
+#: LinkedIn's own claim that the profile just loaded is the viewer's.
+_SELF_ASSERTION_PARAM = "isSelfProfile"
+
+
+def _landed_path(landed_url: str) -> str:
+    """The path of a landed url, with no query and no fragment."""
+    return urlsplit(str(landed_url or "")).path
+
+
+def _member_segment_of(landed_url: str) -> Optional[str]:
+    """The ``<segment>`` of a landed ``/in/<segment>/`` path, or None.
+
+    None means the path was not of that shape, which is a REFUSAL and not a
+    fallback: every branch that reads this treats a missing segment as
+    self-ownership having failed to establish.
+    """
+    match = _MEMBER_SEGMENT.match(_landed_path(landed_url))
+    return match.group(1) if match else None
+
+
+def _self_assertion_on(landed_url: str) -> bool:
+    """True when LinkedIn's ``isSelfProfile=true`` rides on the landed url."""
+    query = parse_qs(urlsplit(str(landed_url or "")).query)
+    return any(
+        str(value).strip().lower() == "true"
+        for value in query.get(_SELF_ASSERTION_PARAM, [])
+    )
+
+
+def _path_without_member(landed_url: str, segment: Optional[str]) -> str:
+    """A landed path safe to return: the member segment substituted out.
+
+    TWO PASSES, DELIBERATELY, and the second is not decoration. The first is
+    ``shape.census_substitute``, which is the same rule the census runs and
+    turns ``/in/<slug>/edit/intro`` into ``/in/<member>/edit/intro``. The
+    second is a LITERAL replacement of the segment this call actually captured,
+    which cannot miss whatever the first pass's character class does or does
+    not cover. Over-redaction is the direction to be wrong in here, and a slug
+    escaping into a return value is the one failure this whole tool is built
+    around.
+    """
+    redacted = shape.census_substitute(_landed_path(landed_url))
+    if segment:
+        redacted = redacted.replace(segment, "<member>")
+    return redacted
+
+
+def _ownership_block(
+    *, established: bool, self_assertion: bool, same_member: Optional[bool]
+) -> dict[str, Any]:
+    """The self-ownership report, in one shape whether it held or not.
+
+    ``how`` is present on a refusal too, and that is the point of building it
+    here: a caller reading a refusal is told what WOULD have established
+    ownership, so "established: false" is a statement about this call rather
+    than about what the tool is able to check.
+    """
+    return {
+        "established": established,
+        "how": (
+            "LinkedIn's own isSelfProfile=true assertion on /in/me/, plus the "
+            "same member segment on both landed urls"
+        ),
+        "self_assertion_present": self_assertion,
+        "same_member": same_member,
+    }
+
+
+@mcp.tool()
+async def linkedin_profile_editor_fields() -> dict[str, Any]:
+    """Name the controls inside the intro editor on HIS OWN profile.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    A MEASUREMENT INSTRUMENT FOR EXTENDING THIS SERVER, as
+    linkedin_surface_census is. It is not a job-search tool and no answer about
+    a job is in here. It exists because linkedin_update_profile_field cannot
+    name a field to type into: the census reports SHAPES and never names, so
+    the controls that capability would target come back as <opaque> -- read by
+    the instrument and deliberately not published.
+    =================================================================
+
+    IT LOADS TWO PAGES AND CLICKS NOTHING. Nothing is typed, nothing is
+    submitted, and no request is made beyond the two page loads themselves.
+    This server does not change anything about the profile here, and there is
+    no argument that would let it: the tool takes none, and the two addresses
+    are literals.
+
+    IT PUBLISHES CONTROL LABELS, which the census will not do. That is a
+    DELIBERATE RELAXATION of the census's privacy gate and it rests on one
+    ground: self-ownership is established PER CALL -- from LinkedIn's own
+    isSelfProfile=true assertion on the landed profile url, plus the same
+    member segment on both landed urls -- and the container it then reads is
+    the operator's own editor, holding no third party. The census itself is
+    unchanged, and nothing a caller passes to it reaches this behaviour.
+
+    IF SELF-OWNERSHIP DOES NOT HOLD, THE ANSWER CARRIES NO FIELD DATA AT ALL.
+    Not an empty list beside a warning: there is no "fields" key on a refusal,
+    so a refusal cannot be misread as "the container has none".
+
+    LABELS, AND NEVER VALUES. A label is "First name"; a value is his first
+    name. The second is not read: ".value" appears nowhere in the injected
+    script, and no href is returned either -- only whether a control had one.
+
+    THE CONTAINER IS FOUND STRUCTURALLY. Its anchor is not an index but the
+    control whose accessible name is Save, and the container is that control's
+    nearest dialog ancestor. Two such controls, or none, is a refusal rather
+    than a choice, because choosing between them would be choosing by document
+    order -- which is not containment.
+
+    HIS MEMBER SLUG IS COMPARED AND DISCARDED. It is not in this answer, which
+    is why the ownership block reports same_member rather than the value, and
+    why the landed paths come back with the segment substituted out.
+
+    Returns:
+        pages_loaded: 2, a self_ownership block, the container descriptor and
+        one record per control inside it -- or refused/reason with the same
+        ownership block and no field data.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed_profile = await BROWSER.goto(page, SELF_PROFILE_URL)
+            assert_not_authwall(landed_profile, surface="profile")
+
+            # THE EXTERNAL ASSERTION FIRST. If LinkedIn does not say the
+            # profile is the viewer's own, nothing further is loaded -- the
+            # editor page is not fetched at all, so a call that cannot
+            # establish ownership costs one page load and reads no editor.
+            self_assertion = _self_assertion_on(landed_profile)
+            if not self_assertion:
+                return {
+                    "refused": "no_self_assertion",
+                    "reason": (
+                        "the landed profile url carries no "
+                        f"{_SELF_ASSERTION_PARAM}=true, which is LinkedIn's own "
+                        "way of saying the profile is the viewer's. Without it "
+                        "this tool has only its own reasoning about what "
+                        "/in/me/ ought to mean, and that is not what the "
+                        "relaxed gate was granted on."
+                    ),
+                    "self_ownership": _ownership_block(
+                        established=False,
+                        self_assertion=False,
+                        same_member=None,
+                    ),
+                    "pages_loaded": 1,
+                }
+
+            profile_segment = _member_segment_of(landed_profile)
+            if not profile_segment:
+                return {
+                    "refused": "profile_path_unreadable",
+                    "reason": (
+                        "the landed profile path is not of the form "
+                        "/in/<member>/, so there is no member segment to "
+                        "compare against the editor's."
+                    ),
+                    "self_ownership": _ownership_block(
+                        established=False,
+                        self_assertion=True,
+                        same_member=None,
+                    ),
+                    "pages_loaded": 1,
+                }
+
+            landed_editor = await BROWSER.goto(
+                page, SELF_PROFILE_EDIT_INTRO_URL
+            )
+            assert_not_authwall(landed_editor, surface="profile_edit_intro")
+            editor_segment = _member_segment_of(landed_editor)
+
+            paths = {
+                "profile": _path_without_member(
+                    landed_profile, profile_segment
+                ),
+                "editor": _path_without_member(landed_editor, editor_segment),
+            }
+
+            if not editor_segment:
+                return {
+                    "refused": "editor_path_unreadable",
+                    "reason": (
+                        "the landed editor path is not of the form "
+                        "/in/<member>/..., so it cannot be shown to be the "
+                        "same member's."
+                    ),
+                    "self_ownership": _ownership_block(
+                        established=False,
+                        self_assertion=True,
+                        same_member=None,
+                    ),
+                    "landed_paths": paths,
+                    "pages_loaded": 2,
+                }
+            if editor_segment != profile_segment:
+                return {
+                    "refused": "different_member",
+                    "reason": (
+                        "the two landed urls name different members, so the "
+                        "editor being read is not the profile whose "
+                        f"{_SELF_ASSERTION_PARAM}=true was seen. Neither "
+                        "segment is reported here; that they differ is the "
+                        "whole of the answer."
+                    ),
+                    "self_ownership": _ownership_block(
+                        established=False,
+                        self_assertion=True,
+                        same_member=False,
+                    ),
+                    "landed_paths": paths,
+                    "pages_loaded": 2,
+                }
+
+            ownership = _ownership_block(
+                established=True, self_assertion=True, same_member=True
+            )
+            reading = await dom.read_self_owned_editor_fields(page)
+            if "fields" not in reading:
+                # The reader's own refusal, forwarded WHOLE. It knows why it
+                # would not aim and this tool would only paraphrase it; the
+                # ownership block is attached because ownership DID hold and a
+                # caller must be able to tell that failure apart from this one.
+                out = dict(reading)
+                out["self_ownership"] = ownership
+                out["landed_paths"] = paths
+                out["pages_loaded"] = 2
+                return out
+
+            out = {
+                "self_ownership": ownership,
+                "landed_paths": paths,
+                "container": reading["container"],
+                "fields": reading["fields"],
+                "pages_loaded": 2,
+                "note": (
+                    "LABELS, NEVER VALUES: each name here is a control's "
+                    "accessible name, not what is in the control. Names are "
+                    "published UNGATED -- the census's <opaque> length and "
+                    "character gate is deliberately off -- because "
+                    "self-ownership was established on this call and the "
+                    "container holds no third party. The substitutions still "
+                    "ran: a urn, a member path, a company path, a possessive "
+                    "or a long digit run in a label is replaced whatever "
+                    "container it was read in. FIRST RENDER ONLY: this loads "
+                    "the page and does not scroll, so a control that is "
+                    "absent is UNKNOWN, not zero."
+                ),
+            }
+            if reading.get("truncated"):
+                out["truncated"] = True
+                out["truncated_note"] = reading["truncated_note"]
             return out
     except Exception as exc:
         return _error(exc)

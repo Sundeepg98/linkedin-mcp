@@ -235,6 +235,33 @@ EXPECTED_TOOLS = {
     # linkedin_set_open_to_work is STILL in that condition and still registers
     # no tool, so the sentence above did not lose its subject -- it lost apply.
     "linkedin_apply_job",
+    # 2026-08-31. A READ, and the SECOND instrument on this list rather than a
+    # capability the operator would call for its own sake --
+    # linkedin_surface_census is the first, and this one exists because of what
+    # that one refuses to publish.
+    #
+    # IT IS THE ONE TOOL HERE THAT PUBLISHES NAMES. The census reports SHAPES
+    # and never names, so the controls linkedin_update_profile_field would
+    # target came back <opaque> from the 2026-08-31 capture of the intro
+    # editor: read by the instrument and deliberately not published. The
+    # operator ruled that a reader scoped to ONE container, MEASURED to be his
+    # own, may publish what the document-wide gate would redact -- and the
+    # measurement is per call, from LinkedIn's own isSelfProfile=true assertion
+    # plus the same member segment on both landed urls.
+    #
+    # THE CENSUS IS UNTOUCHED, which is the half worth checking in a diff:
+    # shape.census_shape behaves exactly as it did, CENSUS_SURFACES is still
+    # five keys, and tests/test_editor_fields.py reads server.py's source to
+    # assert the census's body has no path into the relaxed reader. A caller
+    # cannot reach this behaviour through the instrument it relaxes.
+    #
+    # ITS NAME CARRIES "editor" AND THAT IS NOT A DODGE. "edit" is a write verb
+    # on readonly.WRITE_VERBS and "editor" is not it -- name_implies_write
+    # splits on non-letters and looks up whole segments, so the two are
+    # different words to the guard as well as to a reader. The tool is a noun
+    # phrase describing a list of fields, in the same family as
+    # linkedin_draft_applications, and it loads two pages and touches nothing.
+    "linkedin_profile_editor_fields",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -304,7 +331,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_twentythree_tools(tools):
+async def test_the_surface_is_exactly_the_thirtytwo_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -351,9 +378,20 @@ async def test_the_surface_is_exactly_the_twentythree_tools(tools):
 
     THIRTY-ONE NAMES OVER THIRTY CAPABILITIES; the login pair is still the only
     pair.
+
+    THE EIGHTH RENAME, 2026-08-31, is the smallest kind and the test name has
+    now moved five times for a tool arriving and twice for other reasons -- so
+    the number in the name is doing exactly the job it was given, which is to
+    make a quiet addition impossible. ``linkedin_profile_editor_fields`` is a
+    genuinely new READ: it names the controls inside the intro editor on his
+    own profile, which nothing here could do, because the census that reads
+    that page reports shapes and refuses to publish those particular names.
+
+    THIRTY-TWO NAMES OVER THIRTY-ONE CAPABILITIES; the login pair is still the
+    only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 31
+    assert len(tools) == 32
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -410,7 +448,17 @@ async def test_the_surface_is_exactly_the_twentythree_tools(tools):
     # them cannot act at all -- see the grant-incapability assertions in
     # test_writes.py -- so a reader must not take the pair of numbers on
     # this page as twelve things that write. FIVE things write.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 19
+    #
+    # AND TWENTY, 2026-08-31, the expensive kind: linkedin_profile_editor_fields
+    # answers a question no name here could answer, and the write count is
+    # unmoved at twelve -- which is the half of this line worth checking, since
+    # a read arriving must not be able to hide a write arriving beside it. It
+    # is also the one addition on this line that widened a PRIVACY boundary
+    # rather than the read boundary: no new url, no new navigation pattern, and
+    # one container's worth of accessible names now published where the census
+    # publishes none. tests/test_editor_fields.py is where that trade is held
+    # to its measurement.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 20
 
 
 def test_the_read_that_was_nearly_named_a_write():
