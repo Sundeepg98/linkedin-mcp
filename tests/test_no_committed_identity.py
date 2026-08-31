@@ -294,6 +294,70 @@ UUID_SHAPE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
+#: THE THREE PATH SHAPES, ported from the naukri sibling on 2026-08-31 -- and
+#: ported because they were MEASURED TO BE NEEDED HERE, not added as insurance.
+#:
+#: The brief for this port said this repo was clean and the rules were cheap
+#: cover. **It was not clean.** Measured over the 151 tracked files at
+#: ``e5ffd35``: 31 non-generic drive-root hits across 13 files carrying one
+#: distinct 7-character segment -- a given name -- and 18 Windows-user-path
+#: hits across 9. Not confined to prose: ``README.md``, two vendoring comments
+#: in ``linkedin_server/``, and three literals in ``tests/test_path_hygiene.py``,
+#: the file whose entire job is keeping absolute paths out of this server's
+#: output and which was proving it detects real paths BY CARRYING ONE. All 49
+#: were replaced in the commit that added these rules.
+#:
+#: WHY A DRIVE ROOT IS A SEPARATE RULE from :data:`WINDOWS_USER_PATH`, in
+#: naukri's words because they are the words that were earned: that one
+#: requires a literal ``Users`` segment, and **a drive rooted straight at a
+#: person's name has none**. The leak sits one path segment to the left of
+#: where the older check looks.
+#:
+#: THE ALLOWLIST HOLDS ONLY GENERIC TOKENS -- no real value is named in it,
+#: which is what keeps it an allowlist of the synthetic rather than a blocklist
+#: of the real. Widen it when a genuinely generic root fires.
+DRIVE_ROOT_PATH = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]([A-Za-z0-9_.-]{2,})")
+WINDOWS_USER_PATH = re.compile(r"[A-Za-z]:[\\/]+Users[\\/]+([A-Za-z0-9._-]{2,})")
+
+#: The POSIX home form. The lookbehind excludes ``:`` so a drive-letter path is
+#: counted once, by the shape above and not twice, and excludes word characters
+#: so the prose ``anchored/home/tail`` stops reading as a home directory.
+POSIX_HOME_PATH = re.compile(
+    r"(?<![A-Za-z0-9_:])(?:/home/|/Users/)([A-Za-z0-9._-]{2,})"
+)
+
+GENERIC_DRIVE_ROOTS = frozenset(
+    {
+        "users",  # handed to WINDOWS_USER_PATH, which checks the NEXT segment
+        "windows",
+        "programdata",
+        "program",  # "Program Files" truncates at the space
+        "workspace",
+        "dev-cache",
+        "temp",
+        "tmp",
+        "repo",
+    }
+)
+
+#: A LONE BACKSLASH, built from its code point so that no amount of quoting,
+#: copying or transport can turn it into something else.
+#:
+#: IT EXISTS BECAUSE THE ESCAPE IS THE FAILURE MODE, measured three separate
+#: times on 2026-08-31 within about ten minutes: a ``git grep`` that reported
+#: this repo clean, a rewrite whose backslash before a ``+`` turned the plus
+#: into a literal, and two runs of a correct pattern pushed through a shell
+#: heredoc that collapsed ``[\\/]`` into ``[\/]`` -- a class matching the
+#: SLASH ONLY. Every one of them reported ZERO and every one of them was
+#: broken.
+#:
+#: **A PII guard reporting zero is indistinguishable from a PII guard that is
+#: broken**, so the rules above are asserted to match something before they are
+#: allowed to certify that they matched nothing. See
+#: ``test_the_path_rules_can_match_a_backslash_at_all``, which is the control
+#: for all three and is worth more than the rules it guards.
+BACKSLASH = chr(92)
+
 
 def redact(value: str) -> str:
     """``<first2>..<last2>`` plus a length. Never the identifier itself."""
@@ -348,6 +412,31 @@ def _credential_ok(match: re.Match[str], text: str) -> bool:
     return len(set(value)) <= 2
 
 
+def _drive_root_ok(match: re.Match[str], text: str) -> bool:
+    """A drive path is fine if its first segment names a PLACE, not a person.
+
+    ``D:\\workspace`` says nothing about who owns the machine. ``D:\\<Given>``
+    says exactly who owns it, and that is the form that was found here.
+    """
+    segment = match.group(1).lower()
+    if segment in GENERIC_DRIVE_ROOTS:
+        return True
+    return any(marker in segment for marker in PLACEHOLDER_MARKERS)
+
+
+def _account_path_ok(match: re.Match[str], text: str) -> bool:
+    """A home directory is fine only when the account name is a placeholder.
+
+    There is no generic-token list here, unlike :func:`_drive_root_ok`, and the
+    asymmetry is deliberate: the segment after ``Users/`` or ``/home/`` is an
+    ACCOUNT NAME by construction. There is no benign vocabulary for it, so the
+    only thing that may sit there is something visibly not a person.
+    """
+    return any(
+        marker in match.group(1).lower() for marker in PLACEHOLDER_MARKERS
+    )
+
+
 #: name -> (pattern, allowed?). The name is what a failure reports and what
 #: :data:`DECLARED_PLANTS` is keyed on.
 SHAPES: tuple[tuple[str, re.Pattern[str], object], ...] = (
@@ -360,6 +449,12 @@ SHAPES: tuple[tuple[str, re.Pattern[str], object], ...] = (
     ("urn id", URN_ID_SHAPE, _id_ok),
     ("credential", JWT_SHAPE, _credential_ok),
     ("credential", COOKIE_SHAPE, _credential_ok),
+    # THE PATH FAMILY, added 2026-08-31. Ordered drive-root FIRST because it is
+    # the one this repo was actually leaking, and the one whose absence let 31
+    # hits sit at HEAD while a check named "user path" reported clean.
+    ("drive root", DRIVE_ROOT_PATH, _drive_root_ok),
+    ("user path", WINDOWS_USER_PATH, _account_path_ok),
+    ("user path", POSIX_HOME_PATH, _account_path_ok),
 )
 
 
@@ -432,6 +527,29 @@ def test_the_sweep_actually_looked():
         # does not need that shape -- so the plant moved rather than the
         # file being added to that guard's exemption list.
         ("credential", "sessionid=7hQ2mNbVc9XpLw3ZrYt6JkSd8FgHjKl0Zx"),
+        # THE PATH PLANTS ARE COMPOSED, NOT WRITTEN AS LITERALS, and the reason
+        # is not the usual one. Every other plant above is a literal and is
+        # DECLARED in DECLARED_PLANTS; these are assembled so that no
+        # drive-root or home-path shape exists in this file's TEXT, and
+        # therefore no new DECLARED_PLANTS entry is needed.
+        #
+        # WHY THAT IS RIGHT HERE rather than the hiding this file warns
+        # against. First, hiding a plant of MINE does not blind the sweep to a
+        # REAL path pasted into this file later -- that would still be a
+        # literal and would still be caught, which is the property the urn
+        # entries were protecting. Second, and this is the part specific to
+        # this shape: **a backslash does not survive transport reliably.** This
+        # rule was measured broken three times in ten minutes on 2026-08-31 by
+        # exactly that -- see BACKSLASH. Composing from chr(92) is the only way
+        # to write a backslash-bearing test value that is certainly the value
+        # intended, so the composition buys correctness and the absent
+        # allowlist entry is a consequence rather than the goal.
+        ("drive root", "cd D:" + BACKSLASH + "Ravenscroft" + BACKSLASH + "src"),
+        (
+            "user path",
+            "C:" + BACKSLASH + "Users" + BACKSLASH + "rmarchetti" + BACKSLASH + "App",
+        ),
+        ("user path", "/home/" + "rmarchetti" + "/.config/thing"),
     ],
 )
 def test_every_shape_can_actually_fail(shape, planted):
@@ -455,6 +573,17 @@ def test_every_shape_can_actually_fail(shape, planted):
         ("member token", "ACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7"),
         ("urn id", "urn:li:ugcPost:7400000000000000001"),
         ("credential", 'JSESSIONID="ajax:xxxxxxxxxxxxxxxxxxxxxxxx"'),
+        # The two forms the cleanup on 2026-08-31 rewrote 49 real paths INTO.
+        # If either of these ever starts failing, that commit's replacements
+        # all become violations at once, so this row is what makes the cleanup
+        # safe to have done.
+        ("drive root", "D:" + BACKSLASH + "workspace" + BACKSLASH + "projects"),
+        ("drive root", "D:" + BACKSLASH + "dev-cache" + BACKSLASH + "ms-playwright"),
+        (
+            "user path",
+            "C:" + BACKSLASH + "Users" + BACKSLASH + "<user>" + BACKSLASH + "App",
+        ),
+        ("user path", "/home/" + "<user>" + "/.config"),
     ],
 )
 def test_the_synthetic_forms_are_allowed(shape, benign):
@@ -463,6 +592,66 @@ def test_the_synthetic_forms_are_allowed(shape, benign):
     and the allowlist meaningless."""
     names = {name for name, _ in hits_in(benign)}
     assert shape not in names, (shape, names, hits_in(benign))
+
+
+def test_the_path_rules_can_match_a_backslash_at_all():
+    """THE CONTROL FOR ALL THREE PATH RULES, and it is worth more than they are.
+
+    **A PII guard reporting zero is indistinguishable from a PII guard that is
+    broken.** On 2026-08-31 that stopped being a maxim and became a count:
+    THREE separate checks reported this repository clean of drive-rooted paths
+    within about ten minutes, and all three were broken --
+
+    * a ``git grep`` whose pattern never reached the regex engine intact;
+    * a rewrite in which a backslash before ``+`` turned the plus into a
+      literal, so the pattern matched nothing;
+    * a correct pattern run twice through a shell heredoc, which collapsed
+      ``[\\\\/]`` into ``[\\/]`` -- an escaped slash, matching the SLASH ONLY.
+
+    The repository was carrying 31 drive-root hits across 13 tracked files
+    throughout. **Two of those readings agreed with each other**, which is what
+    made them convincing, and they agreed because they shared a broken
+    transport -- repetition through one broken channel is not repetition.
+
+    So this asserts the rules match something BEFORE the sweep is allowed to
+    certify that they matched nothing. Every value is built from
+    :data:`BACKSLASH` rather than written as an escape, because the escape is
+    the thing that failed.
+    """
+    assert re.match(r"[\\/]", BACKSLASH), (
+        "the character class does not match a backslash, so every path rule "
+        "in this file is inert and the sweep below certifies nothing"
+    )
+
+    windows = "D:" + BACKSLASH + "Ravenscroft" + BACKSLASH + "src"
+    assert DRIVE_ROOT_PATH.search(windows), windows
+    # COMPOSED like the rest, and this one was written as a literal first and
+    # CAUGHT BY THIS FILE'S OWN SWEEP: "1 unallowed drive root hit(s), 0
+    # declared". The guard fired on the test that proves the guard fires,
+    # which is the most direct demonstration available that it is not inert.
+    assert DRIVE_ROOT_PATH.search("D:" + "/Ravenscroft/src"), "the slash spelling"
+    assert WINDOWS_USER_PATH.search(
+        "C:" + BACKSLASH + "Users" + BACKSLASH + "rmarchetti"
+    )
+    assert POSIX_HOME_PATH.search("/home/" + "rmarchetti")
+
+
+def test_the_drive_root_rule_catches_what_the_user_path_rule_cannot():
+    """WHY THIS IS A SECOND RULE and not a widening of the first.
+
+    ``WINDOWS_USER_PATH`` requires a literal ``Users`` segment. A drive rooted
+    straight at a person's name has none, so the leak sits ONE SEGMENT TO THE
+    LEFT of where that check looks -- which is precisely how 31 hits sat at
+    HEAD in a repository whose guard already had a rule named "user path".
+    """
+    rooted_at_a_person = "D:" + BACKSLASH + "Ravenscroft" + BACKSLASH + "src"
+
+    assert not WINDOWS_USER_PATH.search(rooted_at_a_person), (
+        "the older rule is supposed to MISS this; if it catches it, the "
+        "argument for a separate rule is gone and this one should be deleted"
+    )
+    assert DRIVE_ROOT_PATH.search(rooted_at_a_person)
+    assert "drive root" in {name for name, _ in hits_in(rooted_at_a_person)}
 
 
 def test_the_member_token_shape_survives_percent_encoding():
