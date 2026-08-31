@@ -3063,6 +3063,612 @@ async def read_self_owned_editor_fields(
 
 
 # ---------------------------------------------------------------------------
+# His OWN activity rail: ITEM KEYS, and only for items he wrote
+# ---------------------------------------------------------------------------
+#
+# WHAT PROBLEM THIS SOLVES. ``linkedin_comment_on_item`` and
+# ``linkedin_react_to_item`` are specced, registered and REFUSING, and the
+# blocker was never the read boundary or the click anchor -- both are in hand.
+# They are UNAIMABLE: no tool in this package returns an item key. The census
+# cannot publish one by construction (``shape.census_substitute`` turns every
+# ``urn:li:...`` into ``<urn>`` before a count is taken, which is the whole
+# reason it is safe to point at a page of strangers), and
+# ``shape.notification_handles`` deliberately yields ``{}`` for a feed urn --
+# pinned in ``tests/test_notification_handles.py`` under
+# ``test_a_link_with_no_usable_key_says_nothing``.
+#
+# THE OPERATOR RULED on 2026-08-31: build a reader over HIS OWN activity that
+# returns item keys FOR HIS OWN ITEMS ONLY, and establish authorship rather
+# than infer it from placement. This is that reader.
+#
+# THE MEASUREMENT THIS RESTS ON, taken live 2026-08-31 by
+# ``linkedin_surface_census`` on the two surfaces this server may read. The two
+# rows below differ in a way that IS the finding:
+#
+#     /in/me/   232 controls, landed .../in/<member>/?isSelfProfile=true
+#       shape "Open control menu for post by <his name, in full>"  count 8
+#       shape "Reaction button state: no reaction"                 count 8
+#       shape "Comment"  count 8, a, href_shape .../feed/update/<urn>/
+#       href_shape "https://www.linkedin.com/feed/update/<urn>/"   20 hrefs
+#
+#     /feed/    297 controls
+#       shape "Open control menu for post by <redacted>"           count 8
+#       href_shape ".../feed/update/<urn>/"                        ZERO
+#
+# On the profile the shape came back with a READABLE NAME at count 8, because
+# ``shape.census_redact_rare`` blanks a shape only at ``count == 1`` -- so
+# eight controls carried ONE author string. On the feed the same shape came
+# back ``<redacted>`` at count 8, because eight controls carried EIGHT
+# DIFFERENT author strings, each redacted as a singleton and then re-merged.
+# THE PROFILE ACTIVITY RAIL IS UNANIMOUS IN ITS AUTHOR AND THE FEED IS NOT,
+# and that asymmetry is the whole design.
+#
+# THREE CONJUNCTIVE CONDITIONS, ALL REQUIRED, ALL REPORTED. Two of them live
+# in this script; the first lives in the caller because it is a fact about a
+# url rather than about a document.
+#
+# * C1 -- LinkedIn's own self-assertion. ``isSelfProfile=true`` on the landed
+#   url of ``/in/me/``. ``server._self_assertion_on``, the same helper
+#   ``linkedin_profile_editor_fields`` uses. Not in this script.
+# * C2 -- UNANIMITY. Every control whose accessible name starts with
+#   :data:`ACTIVITY_OVERFLOW_PREFIX` must carry the SAME remainder, and there
+#   must be at least one. Two different authors anywhere on the page is MIXED
+#   and is a refusal.
+# * C3 -- that one author is the PAGE OWNER, compared against the page's own
+#   ``h1``.
+#
+# C2 IS THE SAME RULE ``writes._read_feed_item`` ALREADY APPLIES to reaction
+# state -- "a mixed page cannot settle a direction for any single item", and
+# picking one would be picking by position. It is also what makes the pairing
+# in C4 safe: IF EVERY OVERFLOW CONTROL ON THE PAGE NAMES ONE AUTHOR, NO
+# PAIRING CAN ATTRIBUTE AN ITEM TO THE WRONG PERSON. The pairing rule below
+# still has to hold, and it is separately tested, but its failure mode under
+# C2 is "his item is missed", never "somebody else's item is published".
+#
+# NO NAME AND NO HEADING TEXT LEAVES THE PAGE. The C3 comparison happens
+# INSIDE the document and only booleans come out -- the same discipline
+# :data:`INVITE_NEEDLE_JS` keeps, and for the same reason: a string that
+# reaches Python can reach a traceback, a cache key or a log line. The author
+# string and the ``h1`` text are read, compared and discarded in the page;
+# neither is in this script's return value, and there is nothing for the
+# reader below to redact because there is nothing to redact.
+#
+# THE PREFIX RULE IS WEAKER THAN EQUALITY AND THIS COMMENT SAYS SO RATHER THAN
+# LETTING A LATER READER ASSUME OTHERWISE. C3 accepts when either string is a
+# prefix of the other, because LinkedIn is MEASURED to write a shortened form
+# of his name into the overflow label while the ``h1`` carries the full one --
+# exact equality would refuse a page that is entirely his. The cost is that a
+# prefix rule would also accept a DIFFERENT member whose display name is a
+# prefix of the owner's. That cannot arise here, because C2 has already
+# established there is exactly one author on the page and C1 has established
+# the page is his -- but the rule on its own is weaker than equality, and a
+# future reader who drops either of the other two conditions inherits a hole
+# rather than an inconvenience.
+#
+# THE NAME CHAIN IS THE THIRD COPY IN THIS MODULE and the duplication is
+# forced for the reason recorded above :data:`EDITOR_FIELDS_JS`: ``CENSUS_JS``
+# is document-wide and returns RAW NAMES for the whole page, so running it here
+# would bring every stranger's name on the render into this process, which is
+# the thing being avoided; and a script assembled from a shared fragment cannot
+# be certified by ``tests/test_readonly.py``, which resolves injected scripts
+# from the ``evaluate`` CALL SITE. So the chain is written a third time and
+# held to agreeing with the census's by
+# ``test_the_activity_chain_resolves_the_same_names_as_the_census``.
+#
+# IT MATCHES ON THE UNION, NOT ON THE CHAIN'S WINNER, and that difference is
+# deliberate and is the safety direction. ``CENSUS_JS`` resolves ONE name per
+# control -- the first route that answers. This script asks whether ANY of the
+# five routes yields a name carrying the overflow prefix. A control whose
+# ``aria-label`` is generic while its ``title`` names an author would be
+# invisible to the chain, and an author this script cannot see is an author
+# C2 cannot count: unanimity would hold over a page that is not unanimous,
+# which is exactly the failure A1 exists to catch. The union can only ever
+# find MORE authors than the chain, so it can only ever refuse more.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request: the tokens that would do any of those are refused by
+# ``readonly.JS_MUTATION_TOKENS``, and this script is scanned against that
+# list by name in ``tests/test_readonly.py`` and a second time in
+# ``tests/test_activity_items.py``.
+#
+# IT READS NO CONTROL'S VALUE. ``.value`` appears nowhere below, and that is
+# asserted rather than described.
+#
+# THE ONE THING IT PUBLISHES IS A REAL IDENTIFIER. Every other reader in this
+# module hands its output to ``shape.census_shape`` or at least to
+# ``shape.census_substitute``; this one deliberately does neither for the urn
+# list, because the urn IS the deliverable. Everything else it returns is a
+# NUMBER or a BOOLEAN. That is the complete enumeration of what crosses this
+# boundary: one list of urn strings, one mapping of those same urns to
+# integers, and otherwise integers and booleans.
+
+#: The accessible-name prefix of the item overflow control. MEASURED, not
+#: chosen: ``Open control menu for post by <name>``, ``button``, ``aria-label``,
+#: ``aria_expanded=false``, count 8 on his own profile and count 8 on the feed,
+#: 2026-08-31. ``writes.py`` already quotes the same string in the aiming
+#: preview for ``comment_on_item``.
+#:
+#: THE TRAILING SPACE IS LOAD-BEARING. Without it the remainder of every label
+#: would begin with a space, which ``norm`` would strip anyway -- but the
+#: prefix would also match a control named ``Open control menu for post byline``
+#: and hand back ``line`` as an author. The space is what makes the match a
+#: word boundary.
+ACTIVITY_OVERFLOW_PREFIX = "Open control menu for post by "
+
+#: The substring that marks an item permalink. MEASURED as the ``href_shape``
+#: ``https://www.linkedin.com/feed/update/<urn>/``, 20 hrefs on his profile and
+#: ZERO on the feed -- which is the second half of why this reader points at
+#: the profile and no argument selects a surface.
+ACTIVITY_PERMALINK_MARKER = "/feed/update/"
+
+#: Ceiling on the ancestor climb used to find an item root when LinkedIn has
+#: labelled none. Twelve, and it is a REFUSAL bound rather than a performance
+#: one: a climb that runs out reports the anchor as UNPAIRED rather than
+#: pairing it to something further away.
+#:
+#: IT IS NOT WHAT STOPS THE CLIMB REACHING ``body``, and this comment said it
+#: was until the fixtures were written. ``body`` contains every overflow
+#: control on the page, so a climb that stopped there would pair every urn to
+#: the whole render -- and a shallow document reaches ``body`` in TWO hops,
+#: well inside twelve. The script refuses ``body`` and ``documentElement`` by
+#: name; see ``isDocumentLevel`` in it. The two bounds do different jobs and
+#: neither replaces the other.
+ACTIVITY_MAX_HOPS = 12
+
+#: Ceiling on permalink anchors walked. The measured page carried 20; this is
+#: not a limit anybody is near, and it is REPORTED as truncated rather than
+#: silently cut. ``permalink_anchors`` counts every one found, so the count and
+#: the walk can disagree and say so.
+ACTIVITY_MAX_ANCHORS = 200
+
+ACTIVITY_ITEMS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+
+  // EVERY route that answers, in the census's order -- not the first one that
+  // does. nameOf() below reproduces the census's single answer and exists so
+  // the two can be compared; candidatesOf() is what the prefix match runs
+  // over, because a control naming an author through a LATER route than the
+  // one that wins is an author C2 must still count.
+  const candidatesOf = (el) => {
+    const found = [];
+    const aria = attrOf(el, 'aria-label');
+    if (aria) found.push({ name: aria, source: 'aria-label' });
+    const referenced = labelledBy(el);
+    if (referenced) found.push({ name: referenced, source: 'aria-labelledby' });
+    const title = attrOf(el, 'title');
+    if (title) found.push({ name: title, source: 'title' });
+    const labelled = labelRoutes(el);
+    if (labelled) found.push(labelled);
+    const body = textOf(el);
+    if (body) found.push({ name: body, source: 'text' });
+    return found;
+  };
+  const nameOf = (el) => {
+    const found = candidatesOf(el);
+    return found.length ? found[0] : { name: '', source: 'none' };
+  };
+
+  // WHITESPACE-NORMALISED ON BOTH SIDES of every comparison. A label wrapped
+  // across two source lines and a heading with a trailing newline are the same
+  // name to a reader and different strings to ===, and the C3 comparison is
+  // the one place in this package where that difference would be read as
+  // "a different member".
+  const norm = (value) => String(
+    value === null || value === undefined ? '' : value
+  ).replace(/\\s+/g, ' ').trim();
+
+  const prefix = String(cfg.overflowPrefix);
+
+  // null means NOT AN OVERFLOW CONTROL. The empty string means it IS one and
+  // carries no author behind the prefix -- a distinction C3 needs, because an
+  // empty author must never satisfy a prefix rule.
+  const overflowAuthorOf = (el) => {
+    const found = candidatesOf(el);
+    for (const candidate of found) {
+      const named = norm(candidate.name);
+      if (named.indexOf(prefix) === 0) return norm(named.slice(prefix.length));
+    }
+    return null;
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // C2. The author strings live in this array and NOWHERE ELSE -- they are
+  // counted, compared and dropped, and the array is not part of the return.
+  const distinct = [];
+  let overflowControls = 0;
+  for (const el of all) {
+    const author = overflowAuthorOf(el);
+    if (author === null) continue;
+    overflowControls += 1;
+    if (distinct.indexOf(author) === -1) distinct.push(author);
+  }
+  const unanimous = distinct.length === 1;
+  const soleAuthor = unanimous ? distinct[0] : null;
+
+  // C3. EXACTLY ONE non-empty h1, never "the first one". A page drawing two
+  // headings has no unambiguous owner, and choosing between them would be
+  // choosing by document order -- the same defect the container descriptor was
+  // added to end. Zero and two are different refusals and are reported as a
+  // COUNT so the caller can tell them apart.
+  let headings;
+  try { headings = Array.from(document.querySelectorAll('h1')); }
+  catch (e) { headings = []; }
+  const owners = [];
+  for (const node of headings) {
+    const named = norm(textOf(node));
+    if (named) owners.push(named);
+  }
+
+  // null means NOT COMPARED -- there was no single author, or no single
+  // heading. false means compared and different. Collapsing the two would be
+  // the absent-is-not-zero conflation this module keeps paying for.
+  let ownerMatch = null;
+  if (unanimous && owners.length === 1) {
+    const owner = owners[0];
+    ownerMatch = !!(soleAuthor && owner)
+      && (soleAuthor.indexOf(owner) === 0 || owner.indexOf(soleAuthor) === 0);
+  }
+
+  const established = unanimous && owners.length === 1 && ownerMatch === true;
+
+  const out = {
+    overflow_controls: overflowControls,
+    authors_found: distinct.length,
+    unanimous: unanimous,
+    owner_headings: owners.length,
+    owner_match: ownerMatch,
+    established: established,
+    permalink_anchors: 0,
+    distinct_urns: 0,
+    unrecognised: 0,
+    unpaired: 0,
+    item_root_source: { 'data-urn': 0, 'data-id': 0, 'climb': 0 },
+    truncated: false
+  };
+
+  // C4. ANCHORED, so a malformed href cannot smuggle a string out. The shape
+  // is the one MEASURED in the census's href_shape column and nothing wider:
+  // a percent-encoded urn does not match and is counted unrecognised, because
+  // the encoded spelling has never been observed in this position and a shape
+  // nobody has seen is not a shape to admit.
+  const urnShape = /^urn:li:[A-Za-z]+:[0-9]+$/;
+
+  const hasOverflowInside = (root) => {
+    if (!root || !root.querySelectorAll) return false;
+    let inside;
+    try { inside = Array.from(root.querySelectorAll(cfg.controlSelector)); }
+    catch (e) { inside = []; }
+    for (const el of inside) {
+      if (overflowAuthorOf(el) !== null) return true;
+    }
+    return false;
+  };
+
+  // THREE ROUTES, IN ORDER, AND WHICH ONE FIRED IS REPORTED. The first two ask
+  // LinkedIn where the item boundary is; the third is this script guessing,
+  // and a caller has to be able to tell those apart -- the same name_source
+  // discipline the rest of this module keeps. The attribute VALUE is never
+  // read: [data-urn] is used as a MARKER of a boundary, and the urn that gets
+  // published is always the one parsed out of the href.
+  //
+  // THE DOCUMENT IS NOT AN ITEM. body and documentElement contain every
+  // overflow control on the page, so a route that landed on either would
+  // "pair" any urn on the render to the whole render -- which is not pairing,
+  // it is giving up while reporting success. THE HOP CEILING DOES NOT CLOSE
+  // THIS ON ITS OWN and the tempting reading that it does is wrong: a shallow
+  // page reaches body in two hops, well inside twelve. So both are here, and
+  // they bound different things -- the ceiling bounds how far a deep page is
+  // walked, this bounds where the walk is allowed to stop.
+  const isDocumentLevel = (node) => (
+    !node || node === document.body || node === document.documentElement
+  );
+  const rootOf = (el) => {
+    let node = null;
+    try { node = el.closest('[data-urn]'); } catch (e) { node = null; }
+    if (node && !isDocumentLevel(node)) {
+      return { root: node, source: 'data-urn' };
+    }
+    try { node = el.closest('[data-id]'); } catch (e) { node = null; }
+    if (node && !isDocumentLevel(node)) {
+      return { root: node, source: 'data-id' };
+    }
+    let hop = el.parentElement;
+    let hops = 0;
+    while (hop && !isDocumentLevel(hop) && hops < cfg.maxHops) {
+      if (hasOverflowInside(hop)) return { root: hop, source: 'climb' };
+      hop = hop.parentElement;
+      hops += 1;
+    }
+    return { root: null, source: 'none' };
+  };
+
+  const marker = String(cfg.permalinkMarker);
+  let anchors;
+  try { anchors = Array.from(document.querySelectorAll('a[href]')); }
+  catch (e) { anchors = []; }
+
+  const seen = [];
+  const perItem = [];
+  let walked = 0;
+  for (const el of anchors) {
+    // THE RAW ATTRIBUTE, uncapped, unlike every other read in this script. The
+    // cap on attrOf exists so a huge string cannot be RETURNED; an href is
+    // never returned from here, only searched, and a cap would silently cut a
+    // long tracking url mid-segment and report a real urn as unrecognised.
+    let href = '';
+    try {
+      const raw = el.getAttribute('href');
+      href = raw === null ? '' : String(raw);
+    } catch (e) { href = ''; }
+    const at = href.indexOf(marker);
+    if (at === -1) continue;
+    out.permalink_anchors += 1;
+    if (walked >= cfg.maxAnchors) { out.truncated = true; continue; }
+    walked += 1;
+    let segment = href.slice(at + marker.length);
+    const stop = segment.search(/[\\/?#]/);
+    if (stop !== -1) segment = segment.slice(0, stop);
+    if (!urnShape.test(segment)) { out.unrecognised += 1; continue; }
+    const paired = rootOf(el);
+    if (!paired.root || !hasOverflowInside(paired.root)) {
+      out.unpaired += 1;
+      continue;
+    }
+    out.item_root_source[paired.source] += 1;
+    const index = seen.indexOf(segment);
+    if (index === -1) { seen.push(segment); perItem.push(1); }
+    else { perItem[index] += 1; }
+  }
+  out.distinct_urns = seen.length;
+
+  // THE GATE IS HERE, IN THE PAGE, and not only in the reader below. The
+  // counts above are numbers and cross the boundary on every path; the urn
+  // LIST crosses it on one path only. A caller that has not established
+  // authorship never receives an identifier, whatever the Python half does or
+  // stops doing.
+  if (established) {
+    out.items = seen;
+    out.anchors_per_item = {};
+    for (let i = 0; i < seen.length; i += 1) {
+      out.anchors_per_item[seen[i]] = perItem[i];
+    }
+  }
+  return out;
+}
+"""
+
+
+#: The refusal codes, enumerated because a caller branching on them needs the
+#: whole set and because "the reader refuses when authorship does not hold" is
+#: a completeness claim this module is not allowed to make without listing what
+#: it means. C1 is not here: it is the caller's, and it never reaches this
+#: reader.
+ACTIVITY_REFUSALS = (
+    "no_overflow_controls",
+    "mixed_authors",
+    "no_page_owner_heading",
+    "ambiguous_page_owner_heading",
+    "author_is_not_the_page_owner",
+)
+
+
+async def read_own_activity_items(
+    page: Any,
+    *,
+    max_anchors: int = ACTIVITY_MAX_ANCHORS,
+    max_hops: int = ACTIVITY_MAX_HOPS,
+    max_chars: int = 300,
+) -> dict[str, Any]:
+    """Item keys for items the page owner wrote, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED C1 BEFORE THIS RUNS. This function reads a
+    document; it cannot see a url's query string and does not try.
+    ``server.linkedin_my_activity_items`` is the only caller and it checks
+    LinkedIn's own ``isSelfProfile=true`` first, with the same
+    ``server._self_assertion_on`` ``linkedin_profile_editor_fields`` uses. This
+    reader is not exposed as a tool and takes no argument selecting a surface,
+    for the reason ``read_self_owned_editor_fields`` is not: pointed at an
+    arbitrary page it would publish item keys off it.
+
+    TWO RETURN SHAPES, AND THEY DO NOT OVERLAP.
+
+    * Success carries ``items`` and ``anchors_per_item``.
+    * A refusal carries ``refused`` and ``reason`` and CARRIES NO ``items`` KEY
+      AT ALL. Not an empty list: a caller must not be able to read "this reader
+      would not aim" as "he has no items". That is the absent-is-not-zero rule
+      this module keeps, applied to the one place where the wrong reading is a
+      claim about him rather than about a page.
+
+    BOTH SHAPES CARRY ``counts`` AND ``item_root_source``, and that is
+    deliberate. Every field in them is an integer or a boolean, so a refusal
+    can say what it saw -- eight overflow controls, two authors, four
+    permalinks -- without publishing anything. The one thing that changes
+    between the two shapes is whether any urn string is present.
+
+    THE FIVE REFUSALS, enumerated in :data:`ACTIVITY_REFUSALS`:
+
+    * ``no_overflow_controls`` -- nothing on the page is named with
+      :data:`ACTIVITY_OVERFLOW_PREFIX`. An empty rail is not an authorship
+      claim, and treating "no author found" as "no author disagrees" is how a
+      unanimity rule becomes a rubber stamp.
+    * ``mixed_authors`` -- two or more distinct authors. The feed's shape, and
+      the reason no argument selects a surface.
+    * ``no_page_owner_heading`` -- no ``h1`` with text in it, so there is
+      nothing to compare the one author against.
+    * ``ambiguous_page_owner_heading`` -- two or more, so the comparison would
+      have to choose one by document order.
+    * ``author_is_not_the_page_owner`` -- C1 and C2 both held and the strings
+      do not satisfy the prefix rule. This is the only refusal that says
+      something about WHOSE items are on the page rather than about whether the
+      page can be read.
+
+    NOTHING THIS RETURNS IS SHAPED, AND NOTHING NEEDS TO BE. The author string
+    and the heading text never leave the document -- see the block above the
+    script -- so there is no name here for ``shape.census_substitute`` to act
+    on. The urns are returned RAW and on purpose: a substituted urn is
+    ``<urn>``, which is exactly the useless answer this reader exists to
+    replace.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "overflowPrefix": ACTIVITY_OVERFLOW_PREFIX,
+        "permalinkMarker": ACTIVITY_PERMALINK_MARKER,
+        "maxAnchors": int(max_anchors),
+        "maxHops": int(max_hops),
+        "maxChars": int(max_chars),
+    }
+    try:
+        data = await page.evaluate(ACTIVITY_ITEMS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the activity rail: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    overflow = int(data.get("overflow_controls") or 0)
+    authors = int(data.get("authors_found") or 0)
+    headings = int(data.get("owner_headings") or 0)
+    owner_match = data.get("owner_match")
+
+    facts = {
+        "authors_found": authors,
+        # RE-DERIVED IN PYTHON from the count rather than carried over from the
+        # script's own boolean. The two agree, and a test asserts they do; the
+        # point of deriving it here is that ``authors_found`` is the primitive
+        # a reader can check by eye against ``overflow_controls``, and a
+        # boolean that disagreed with its own count would otherwise be
+        # invisible.
+        "unanimous": authors == 1,
+        "matches_page_owner": owner_match,
+    }
+    counts = {
+        "overflow_controls": overflow,
+        "owner_headings": headings,
+        "permalink_anchors": int(data.get("permalink_anchors") or 0),
+        "distinct_urns": int(data.get("distinct_urns") or 0),
+        "unrecognised": int(data.get("unrecognised") or 0),
+        "unpaired": int(data.get("unpaired") or 0),
+    }
+    routes = dict(data.get("item_root_source") or {})
+    item_root_source = {
+        key: int(routes.get(key) or 0) for key in ("data-urn", "data-id", "climb")
+    }
+
+    def refusal(code: str, reason: str) -> dict[str, Any]:
+        return {
+            "refused": code,
+            "reason": reason,
+            "authorship_facts": facts,
+            "counts": counts,
+            "item_root_source": item_root_source,
+        }
+
+    if overflow == 0:
+        return refusal(
+            "no_overflow_controls",
+            f"no control on this page is named with "
+            f"{ACTIVITY_OVERFLOW_PREFIX!r}, so nothing on it asserts an "
+            "author. An empty rail is not an authorship claim, and this "
+            "reader does not treat 'nobody disagreed' as agreement.",
+        )
+    if authors != 1:
+        return refusal(
+            "mixed_authors",
+            f"{overflow} control(s) on this page name an author and "
+            f"{authors} distinct names are among them. A mixed page cannot "
+            "say whose item any single urn belongs to, and picking one would "
+            "be picking by position. None of the names is reported here; that "
+            "they differ is the whole of the answer.",
+        )
+    if headings == 0:
+        return refusal(
+            "no_page_owner_heading",
+            "the page draws no h1 with text in it, so the one author found "
+            "has nothing to be compared against. Authorship is not inferred "
+            "from the address this reader was pointed at.",
+        )
+    if headings > 1:
+        return refusal(
+            "ambiguous_page_owner_heading",
+            f"the page draws {headings} h1 elements with text in them, so "
+            "there is no unambiguous page owner to compare the one author "
+            "against. Choosing one of them would be choosing by document "
+            "order.",
+        )
+    if owner_match is not True:
+        return refusal(
+            "author_is_not_the_page_owner",
+            "the page carries exactly one author and exactly one h1, and "
+            "neither string is a prefix of the other. The comparison happened "
+            "inside the page and neither string is reported here; that they "
+            "do not match is the whole of the answer.",
+        )
+
+    items = [str(value) for value in (data.get("items") or [])]
+    per_item_raw = dict(data.get("anchors_per_item") or {})
+    out: dict[str, Any] = {
+        "authorship_facts": facts,
+        "items": items,
+        "anchors_per_item": {
+            key: int(per_item_raw.get(key) or 0) for key in items
+        },
+        "counts": counts,
+        "item_root_source": item_root_source,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the page carried more than {max_anchors} permalink anchors and "
+            "the tail was not walked. counts.permalink_anchors is the "
+            "whole-page count, so it and the walk can disagree and say so."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # The nine surfaces
 # ---------------------------------------------------------------------------
 #

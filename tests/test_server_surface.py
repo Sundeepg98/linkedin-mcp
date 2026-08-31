@@ -262,6 +262,27 @@ EXPECTED_TOOLS = {
     # phrase describing a list of fields, in the same family as
     # linkedin_draft_applications, and it loads two pages and touches nothing.
     "linkedin_profile_editor_fields",
+    # 2026-08-31, AND IT IS THE FIRST NAME ON THIS LIST THAT PUBLISHES A REAL
+    # IDENTIFIER. linkedin_my_activity_items returns item urns -- the keys
+    # linkedin_comment_on_item and linkedin_react_to_item have been refusing
+    # for want of, since neither was ever blocked by the read boundary or by
+    # the click anchor. It is a READ: one page load, no click, no argument.
+    #
+    # WHY A THIRD INSTRUMENT-SHAPED TOOL IS NOT A THIRD RELAXATION. The
+    # census refuses to publish names DOCUMENT-WIDE;
+    # linkedin_profile_editor_fields relaxes that inside ONE container
+    # measured to be his. This one relaxes NOTHING about names -- no author
+    # string and no h1 text leaves the page at all, and the comparison that
+    # decides authorship happens inside the document. What it publishes is a
+    # different KIND of thing: an identifier the census substitutes out by
+    # design, for items measured to be his.
+    #
+    # ITS NAME CARRIES NO WRITE VERB and that is checked rather than assumed:
+    # "my", "activity" and "items" are on no list in readonly.WRITE_VERBS,
+    # and name_implies_write splits on non-letters and looks up whole
+    # segments. It is a noun phrase describing a list, in the same family as
+    # linkedin_draft_applications and linkedin_saved_jobs.
+    "linkedin_my_activity_items",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -331,7 +352,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtytwo_tools(tools):
+async def test_the_surface_is_exactly_the_thirtythree_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -389,9 +410,19 @@ async def test_the_surface_is_exactly_the_thirtytwo_tools(tools):
 
     THIRTY-TWO NAMES OVER THIRTY-ONE CAPABILITIES; the login pair is still the
     only pair.
+
+    THE NINTH RENAME, 2026-08-31, is the smallest kind for the second time in
+    one day -- one READ arrived and no write did. ``linkedin_my_activity_items``
+    is genuinely new: it returns ITEM KEYS, which nothing here could, because
+    the census substitutes every urn out before it counts and
+    ``shape.notification_handles`` deliberately yields nothing for a feed urn.
+    Two registered tools have been refusing for want of exactly this.
+
+    THIRTY-THREE NAMES OVER THIRTY-TWO CAPABILITIES; the login pair is still
+    the only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 32
+    assert len(tools) == 33
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -458,7 +489,18 @@ async def test_the_surface_is_exactly_the_thirtytwo_tools(tools):
     # one container's worth of accessible names now published where the census
     # publishes none. tests/test_editor_fields.py is where that trade is held
     # to its measurement.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 20
+    #
+    # AND TWENTY-ONE, 2026-08-31, the same expensive kind and the same day:
+    # linkedin_my_activity_items answers a question no name here could
+    # answer, and the write count is unmoved at twelve -- which is the half
+    # of this line worth checking, since a read arriving must not be able to
+    # hide a write arriving beside it. Unlike the twentieth it widened NO
+    # boundary: not the read boundary (it loads /in/me/, already admitted and
+    # already loaded by several tools) and not the privacy boundary on names
+    # (no name of any kind leaves the page). It publishes a different KIND of
+    # value instead -- an item urn -- and tests/test_activity_items.py is
+    # where the conditions on that are held to their measurement.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 21
 
 
 def test_the_read_that_was_nearly_named_a_write():

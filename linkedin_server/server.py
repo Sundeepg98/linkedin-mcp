@@ -1,4 +1,4 @@
-"""The tool surface: thirty-two tools, five of which write to LinkedIn.
+"""The tool surface: thirty-three tools, five of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -15,15 +15,22 @@ NINETEEN read" for as long as it took ``linkedin_profile_editor_fields`` to
 arrive later the same day, 2026-08-31. One READ was added and no write was;
 the correction is thirty-one -> thirty-two and nineteen -> twenty.
 
-THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-two is
+THE SIXTH IS THE SAME SHAPE AS THE FIFTH, ON THE SAME DAY, and it is written
+out rather than folded into the paragraph above because two corrections of
+the same kind in one day is the evidence that this docstring's numbers are
+the part to distrust. ``linkedin_my_activity_items`` arrived after the fifth
+correction had been made: another READ, no write, thirty-two -> thirty-three
+and twenty -> twenty-one.
+
+THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-three is
 ``len(await mcp.list_tools())``, pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtytwo_tools``; five is
+``test_the_surface_is_exactly_the_thirtythree_tools``; five is
 ``len(writes.PERFORMABLE)``, pinned in the same file. The surface splits three
-ways and the split is the part a reader actually needs: TWENTY read, FIVE
+ways and the split is the part a reader actually needs: TWENTY-ONE read, FIVE
 write, and SEVEN are write-shaped, registered, gated and cannot act at all --
 none is in ``writes.PERFORMABLE``, none holds a ``url_template``, and
 ``writes.mint`` refuses each of them a grant at issue, so no confirm token for
-any of them can exist. Twenty plus seven plus five is thirty-two.
+any of them can exist. Twenty-one plus seven plus five is thirty-three.
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -2269,6 +2276,216 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
                     "container it was read in. FIRST RENDER ONLY: this loads "
                     "the page and does not scroll, so a control that is "
                     "absent is UNKNOWN, not zero."
+                ),
+            }
+            if reading.get("truncated"):
+                out["truncated"] = True
+                out["truncated_note"] = reading["truncated_note"]
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+def _authorship_block(
+    *,
+    established: bool,
+    self_assertion: bool,
+    facts: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """The authorship report, in one shape whether it held or not.
+
+    THE SIBLING OF :func:`_ownership_block`, and written beside it rather than
+    folded into it. The two answer different questions and their middle fields
+    are not the same fields: ownership compares a member segment across TWO
+    landed urls, authorship compares an author string against a heading INSIDE
+    ONE page. Merging them would have produced a block with two fields that are
+    null on every call, which is the shape a reader stops reading.
+
+    ``how`` is present on a refusal too, for the reason it is there: a caller
+    reading a refusal is told what WOULD have established authorship, so
+    ``established: false`` is a statement about this call rather than about
+    what the tool is able to check.
+
+    ``matches_page_owner`` is a TRI-STATE and not a boolean: ``None`` means the
+    comparison never happened -- there was no single author to compare, or no
+    single heading to compare it against -- and ``False`` means it happened and
+    the strings did not match. The brief for this slice wrote it as ``bool``;
+    it is Optional here for the same reason ``checked``, ``required`` and
+    ``_ownership_block``'s ``same_member`` are, and the reason is the one this
+    package keeps paying for: ``False`` for "not measured" is a claim nobody
+    made.
+    """
+    facts = dict(facts or {})
+    return {
+        "established": established,
+        "how": (
+            "LinkedIn's own isSelfProfile=true assertion on /in/me/, plus ONE "
+            "author string across every overflow control on the page, plus "
+            "that string and the page's h1 standing in a prefix relation. All "
+            "three are required and the comparison happens inside the page"
+        ),
+        "self_assertion_present": self_assertion,
+        "authors_found": facts.get("authors_found"),
+        "unanimous": facts.get("unanimous"),
+        "matches_page_owner": facts.get("matches_page_owner"),
+    }
+
+
+# THE TWO MEASURED LITERALS ARE NAMED IN THE DOCSTRING BELOW, NOT QUOTED, AND
+# THAT IS NOT STYLE. ``readonly.docstring_write_claims`` scans every tool
+# description for an unnegated write verb, and both strings carry one:
+# ``Open control menu for post by `` contains ``post`` and ``/feed/update/``
+# contains ``update``. Quoting either turns this READ into a tool whose
+# description claims a write, and ``test_no_docstring_claims_a_write`` fails --
+# MEASURED, not predicted: the first draft of this docstring quoted both and
+# the check reported exactly those two contexts, plus a third from the words
+# ``commit message``. The literals live in ``dom.ACTIVITY_OVERFLOW_PREFIX`` and
+# ``dom.ACTIVITY_PERMALINK_MARKER`` beside the census readings that measured
+# them, which is one grep away and is where a measured string belongs anyway.
+# Pasting them back here is a build failure, not a review comment.
+@mcp.tool()
+async def linkedin_my_activity_items() -> dict[str, Any]:
+    """Item keys for the posts on HIS OWN profile that HE wrote.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    THE AIMING READER. linkedin_comment_on_item and linkedin_react_to_item are
+    registered, specced and refusing, and the blocker was never the read
+    boundary or the click anchor -- both are in hand. They are UNAIMABLE: no
+    other tool here returns an item key. linkedin_surface_census substitutes
+    every urn out before it counts, by design, so a measurement cannot publish
+    an identifier; and the feed carries zero item permalinks. This tool returns
+    the keys, for his own items only.
+    =================================================================
+
+    DO NOT PASTE ITS OUTPUT INTO A TRACKED FILE IN THIS REPOSITORY. The urns
+    here are REAL identifiers for real posts, this repository is public, and
+    tests/test_no_committed_identity.py sweeps every tracked file for exactly
+    this shape -- urn:li:<type>:<six or more digits> -- and will fail the
+    build. Quoting one in a commit, a fixture, an audit note or a docstring
+    is the failure that guard exists to catch.
+
+    IT LOADS ONE PAGE AND CLICKS NOTHING. /in/me/, and no argument selects a
+    surface, because there is no other surface this could be pointed at: the
+    same census that measured this rail measured /feed/ carrying ZERO item
+    permalinks and EIGHT DIFFERENT authors, which is a page this tool would
+    refuse on both counts.
+
+    AUTHORSHIP IS ESTABLISHED, NOT INFERRED FROM PLACEMENT, and it takes all
+    three of these on every call:
+
+    1. LinkedIn's own isSelfProfile=true on the landed url of /in/me/.
+    2. UNANIMITY -- every control on the page whose accessible name starts
+       with the measured overflow prefix carries the SAME author, and there
+       is at least one. An activity rail carries reshares and other people's
+       items, so this is the condition that does the work: if every overflow
+       control names one person, no pairing can attribute an item to somebody
+       else. The prefix is the literal string LinkedIn writes and this server
+       does not choose; it is dom.ACTIVITY_OVERFLOW_PREFIX, quoted there
+       beside the census reading that measured it.
+    3. That one author is the PAGE OWNER, compared against the page's own h1.
+       Either string may be a prefix of the other, because LinkedIn is measured
+       to write a shortened form of his name into the overflow label while the
+       h1 carries the full one.
+
+    IF AUTHORSHIP CANNOT BE ESTABLISHED THE ANSWER CARRIES NO ITEM KEYS AT ALL.
+    There is no "items" key on a refusal -- not an empty list -- so a refusal
+    can never be read as "he has no items". The counts are still reported,
+    because every one of them is an integer.
+
+    NO NAME EVER LEAVES THE PAGE. The author string and the h1 text are read,
+    compared and discarded inside the document; only booleans and counts come
+    back. That is why the report says matches_page_owner rather than naming
+    either string, and it is the same discipline the invitation reader keeps.
+
+    A URN IS PUBLISHED ONLY IF IT IS ANCHORED-SHAPE AND PAIRED. The segment
+    between the permalink marker in an href and the next delimiter must match
+    urn:li:<letters>:<digits> exactly, or it is counted unrecognised and
+    dropped; and it must sit inside an item root that itself contains an
+    overflow control, or it is counted unpaired and dropped. The marker is
+    dom.ACTIVITY_PERMALINK_MARKER, quoted there beside its measurement.
+    item_root_source reports which route found each root -- LinkedIn's own
+    [data-urn] or [data-id] marker, or this server climbing ancestors until it
+    found one.
+
+    Returns:
+        An authorship block, counts, item_root_source and pages_loaded 1 --
+        plus items and anchors_per_item only when authorship was established.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, SELF_PROFILE_URL)
+            assert_not_authwall(landed, surface="profile")
+
+            # C1 FIRST, AND THE PAGE IS NOT READ IF IT FAILS. The same order
+            # linkedin_profile_editor_fields uses and the same helper: if
+            # LinkedIn does not say the profile is the viewer's own, no script
+            # is injected at all, so a call that cannot establish C1 reads no
+            # author string and no heading. The refusal it returns therefore
+            # carries no counts either, and that absence is the honest one --
+            # nothing was counted.
+            self_assertion = _self_assertion_on(landed)
+            if not self_assertion:
+                return {
+                    "refused": "no_self_assertion",
+                    "reason": (
+                        "the landed profile url carries no "
+                        f"{_SELF_ASSERTION_PARAM}=true, which is LinkedIn's own "
+                        "way of saying the profile is the viewer's. Without it "
+                        "this tool has only its own reasoning about what "
+                        "/in/me/ ought to mean, and an item key is not "
+                        "published on reasoning."
+                    ),
+                    "authorship": _authorship_block(
+                        established=False, self_assertion=False
+                    ),
+                    "pages_loaded": 1,
+                }
+
+            reading = await dom.read_own_activity_items(page)
+            facts = reading["authorship_facts"]
+
+            if "items" not in reading:
+                # The reader's own refusal, forwarded WHOLE. It knows which of
+                # C2 and C3 failed and this tool would only paraphrase it. The
+                # authorship block is rebuilt here because C1 DID hold and a
+                # caller must be able to tell that failure apart from this one.
+                return {
+                    "refused": reading["refused"],
+                    "reason": reading["reason"],
+                    "authorship": _authorship_block(
+                        established=False,
+                        self_assertion=True,
+                        facts=facts,
+                    ),
+                    "counts": reading["counts"],
+                    "item_root_source": reading["item_root_source"],
+                    "pages_loaded": 1,
+                }
+
+            out: dict[str, Any] = {
+                "authorship": _authorship_block(
+                    established=True, self_assertion=True, facts=facts
+                ),
+                "items": reading["items"],
+                "anchors_per_item": reading["anchors_per_item"],
+                "counts": reading["counts"],
+                "item_root_source": reading["item_root_source"],
+                "pages_loaded": 1,
+                "note": (
+                    "REAL IDENTIFIERS: every string in items addresses a real "
+                    "post and must never be pasted into a tracked file in this "
+                    "repository -- tests/test_no_committed_identity.py sweeps "
+                    "for exactly this shape and this repository is public. "
+                    "HIS ITEMS ONLY: a urn is here because every overflow "
+                    "control on the page named one author, that author and the "
+                    "page's h1 stand in a prefix relation, and the urn was "
+                    "paired to an item root carrying such a control. FIRST "
+                    "RENDER ONLY: this loads the page and does not scroll, so "
+                    "an item that is absent is UNKNOWN, not one he did not "
+                    "write. counts.unrecognised and counts.unpaired are urns "
+                    "this reader saw and would not publish, which is the "
+                    "difference between what is on the page and what is in "
+                    "this list."
                 ),
             }
             if reading.get("truncated"):

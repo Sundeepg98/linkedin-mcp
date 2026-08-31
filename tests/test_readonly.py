@@ -327,7 +327,16 @@ def test_only_dom_module_waives_evaluate():
     # this reader lives by -- exactly one anchor or it refuses -- has to be
     # decided over the whole document at one instant, not across a series of
     # separate locator calls against a page that is still settling.
-    assert waived_in.get("dom.py", 0) <= 8, waived_in
+    #
+    # NINE FROM 2026-08-31, and it is the second waiver on this list spent
+    # to buy a PRIVACY guarantee. ACTIVITY_ITEMS_JS, run by
+    # dom.read_own_activity_items, compares an author string against the
+    # page's own h1 and returns a BOOLEAN. A locator chain doing that
+    # comparison in Python would have to fetch both strings into this
+    # process, which is the one thing the ruling on that reader forbids --
+    # so it fails the cheap-alternative test in the same direction
+    # INVITE_NEEDLE_JS does, and for the same reason.
+    assert waived_in.get("dom.py", 0) <= 9, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -375,6 +384,22 @@ INJECTED_SCRIPTS = {
     # second time in tests/test_editor_fields.py rather than only from this
     # list.
     "EDITOR_FIELDS_JS": dom.EDITOR_FIELDS_JS,
+    # 2026-08-31. The own-activity item reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring
+    # it ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # It is the ninth, and it is the FIRST script here that publishes a REAL
+    # IDENTIFIER: item urns, unshaped, because a substituted urn is <urn> and
+    # that is the useless answer the reader exists to replace. Everything
+    # else it returns is an integer or a boolean, and the author strings it
+    # compares never leave the document -- so its privacy property, like
+    # INVITE_NEEDLE_JS's, is structural rather than a matter of shaping on
+    # the way out. The gate that decides whether the urn list crosses at all
+    # lives INSIDE this script, which is why the scan matters here: a script
+    # that both holds a privacy gate and could touch the page would be the
+    # worst combination available. Asserted a second time in
+    # tests/test_activity_items.py.
+    "ACTIVITY_ITEMS_JS": dom.ACTIVITY_ITEMS_JS,
 }
 
 
@@ -489,10 +514,17 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     accessible names in, ungated, from inside a container measured to be the
     operator's own. Its waiver argument is with the budget in
     ``test_only_dom_module_waives_evaluate``.
+
+    NINE FROM 2026-08-31, new surface area again: ``ACTIVITY_ITEMS_JS``, run
+    once from ``dom.read_own_activity_items``. It is the third of these three
+    that exists for a privacy reason rather than a reading reason, and it is
+    the only one that does BOTH halves at once -- it keeps two name strings out
+    of this process AND publishes a real identifier, and which of those two it
+    does is decided by a gate inside the script itself.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 8, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 9, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
