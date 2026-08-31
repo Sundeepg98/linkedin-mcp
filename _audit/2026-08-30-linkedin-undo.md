@@ -1614,3 +1614,212 @@ verified by byte scan.
 | **No capture of a populated SAVED tab** | six parts in. It would have shortened every one of them, and it is now also what the title-splitting question needs | a capture run |
 | **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship | lead's call |
 | **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | flagged in Part 2, still open | small |
+
+---
+---
+
+# Part 7 -- the split, the boundary that has no answer, and the close
+
+**Commits:** `294f9ef`, `6f49936` on `master`, **not pushed**.
+**Baseline in:** 2017 passed. **Baseline out:** 2023 passed, zero failures.
+**`_state/` unchanged.** No `confirm_token` passed to anything; no write performed.
+
+---
+
+## 47. The loop closed
+
+Before the detail, the thing this file was opened for. The lead's measurement:
+
+```
+linkedin_saved_jobs() -> count 1, job_id 4423880462, when "4 days ago"
+linkedin_unsave_job(4423880462)  [PREVIEW ONLY, not redeemed]
+   -> currently "saved", after "not_saved", token minted
+```
+
+**The operator can see the job he saved and take it back through this server.** The token was
+not redeemed; that posting is his.
+
+And the reversibility block discharged its own residue in the same breath -- the text a Part 2
+commit wrote into `unsave_job`'s spec, quoted back by the live gate: *"it read 'the ON state of
+the save control has never been seen', and on 2026-08-30 it was seen -- once by the write path
+on his first save, then three times by a read-only route that costs no write."* The file closed
+a debt it opened.
+
+---
+
+## 48. The last defect: a card that arrives as one line
+
+The row parsed and did not SPLIT. The whole 75-character line landed in `title`, with `company`
+and `location` null.
+
+The tracker's shape, measured on both tabs:
+
+```
+<title> <company> <dot> <location><trailing>
+```
+
+Every field branch in `parse_job_card` reads LINES. On a one-line card there is nothing to read,
+so the card became the title.
+
+### What is recovered
+
+* **The trailing run**, lifted by SHAPE from the end -- it carries no delimiter.
+* **The location**, split off at the middle dot.
+* **The status**, on the Draft row, for the first time: `_JOB_STATUS_LINE` is anchored at `^`,
+  so a status welded onto the END of a line never matched and never reached the field.
+
+### What is refused, and this is the more important half
+
+**The boundary between the title and the company.** There is no delimiter there, and on this
+surface no second source either: the tracker card carries no employer logo -- measured,
+`jobs_tracker_row.html`'s only `<img>` has an empty `alt` -- so `logo_name` is null and the
+lockup cannot name it.
+
+The head is reported whole and `company` comes back **absent**. Splitting on the last space is
+the obvious guess and it is not taken. Driven as a mutation it produces:
+
+```
+E   AssertionError: {'title': 'Senior Full-stack Engineer - Remote',
+E                    'company': 'Acme', 'location': 'India (Remote)', ...}
+E   assert 'Acme' is None
+```
+
+-- which invents a company AND truncates the title. One field wrong, one field lost, and neither
+announces itself. `parse_job_card`'s own docstring already states the rule this follows: *a
+missing field announces itself and a wrong one does not.*
+
+### Vocabulary is borrowed, not invented
+
+Two recognitions were needed and neither is a new guess:
+
+* The end-anchored status list is a **deliberate subset** of `_JOB_STATUS_LINE`'s own. The
+  single ambiguous words -- `applied`, `viewed`, `interview` -- are excluded, because that
+  pattern is anchored at `^` precisely so *"Applied Scientist"* is not eaten, and recognising a
+  status at the END is a weaker form of the same hazard. Measured, admitting them turns
+  `"Berlin Data Engineer, Applied"` into location `"Berlin Data Engineer,"` plus a status --
+  **the eaten tail drags the location with it.**
+* `Reposted <time>` is not guessed from two samples. `linkedin_job_detail` has been reporting
+  `posted: "Reposted 3 days ago"` for this same posting, so the shape is measured on another
+  surface. Without it, `Reposted` stays welded and the field reads `India (Remote)Reposted` --
+  the contaminated value, verbatim from the mutation run.
+
+### The cost, measured
+
+The trigger is one content line, no `logo_name`, no `meta_line`, and a line that splits cleanly.
+**It fires on zero of the 25 fixture records**, and 435 tests across every surface using this
+parser are unchanged. `when` is untouched: `find_time_ago` ran over the original lines before
+any of this.
+
+---
+
+## 49. A guard that survived four mutations, and was deleted
+
+The claim "zero of 25" wanted a test. Three versions of it were wrong, and the third is worth
+recording because the correction runs against the instinct to keep coverage.
+
+1. The first **re-derived the trigger inline** -- a second implementation of the thing it
+   guarded, so mutating the production condition was invisible by construction. That is the law
+   this file applies to the parse trace, broken in a test.
+2. The second asserted the **splitter** declines every fixture line. **False.** It accepts two:
+   a 50-character line in `job_detail_following_hydrated` and a 37-character one in
+   `jobs_tracker_row`. So the splitter's refusal is not what makes this change free.
+3. The third asserted the **outcome** -- no card loses the company its lockup named. It survived
+   relaxing the single-line clause, deleting the lockup clauses, removing the whole trigger, and
+   removing the lockup as the company source altogether.
+
+The reason is structural: of the 25 records, the two whose lines split are not the ones carrying
+a lockup, so no trigger change can make the welded path swallow a lockup card **in this corpus**.
+It could not fail for the reason it was written.
+
+**It was deleted**, with a comment standing where it was so the idea is not rediscovered and
+re-added. What it was meant to cover is covered by
+`test_the_trigger_does_not_fire_where_the_card_has_anchors`, which drives the same property on a
+record built to reach it and goes red at all four. **The breadth was the illusion; the synthetic
+record is the guard.**
+
+That also corrects a claim in this wave's own first commit message: **the lockup clause**, not
+the splitter, is what keeps the change free. 21 of 25 records carry a lockup.
+
+---
+
+## 50. What the tracker returns now, and what it still cannot
+
+**Returns**, on a one-line row: `title` (the head), `location`, `status` where the row carries
+one, `when`, `job_id`, `url`.
+
+**Cannot**: separate the employer from the title on that surface. Not a missing capability
+anywhere -- the same posting read through `linkedin_job_detail` gives `title: "Senior Full-stack
+Engineer - Remote"` and `company: "Sprinto"` correctly, because the posting page carries them as
+separate elements. It is the tracker ROW that welds them, with no delimiter and no logo. Closing
+it needs either a capture of a populated Saved tab showing a boundary this reader has not seen,
+or a second page load per row, which the rate discipline forbids.
+
+**Between the operator and a complete save / read / undo cycle: nothing.** Save works, the list
+reads, the posting reads, and unsave previews and would perform. The remaining item is a field
+on a list row, not a step in the cycle.
+
+---
+
+## 51. Receipts
+
+**Suite.** `venv\Scripts\python.exe -m pytest -q`
+
+* In: **2017 passed** (Part 6's close-out, re-measured).
+* Out: **2023 passed, 0 failed**, in 584.97 s.
+* The delta is 6: 7 tests added for the split, 1 deleted for surviving its own mutations.
+
+**`_state/` untouched.** Byte-identical at open and close: `sha256 f0892e35688868fa...`,
+7813 bytes, Aug 26 00:41 -- the same digest recorded at the top of Part 1.
+
+**No write performed or attempted across the whole investigation.** No `confirm_token` reached
+any tool in seven parts. `unsave_job` was never fired, including after it became capable. The
+Chrome profile was never launched from a script. Mutations run by me were reverted from byte
+copies with `git diff --stat` verified.
+
+**Commits**, on `master`, **not pushed**, no `Co-Authored-By`:
+
+| sha | what |
+|---|---|
+| `294f9ef` | `fix(job-card): pull a one-line tracker row apart, and refuse the boundary it has not got` |
+| `6f49936` | `test(split): delete a guard that survived four mutations, and say why` |
+
+Files: `linkedin_server/shape.py`, `tests/test_tracker_harvest_census.py`. **ASCII-clean.**
+
+---
+
+## 52. The close
+
+Seven parts, and the shape of it is worth one paragraph because it is the transferable part.
+
+**Six components were suspected and five were behaving correctly.** The settle, the readiness
+wait, the row-link shape, the card walk, and `parse_job_card` itself were each named as the
+cause and each exonerated by a measurement. The defect was in none of them: it was in the
+PREMISE under a subtraction, and then in a classifier asking *contains* where the caller meant
+*is*.
+
+**Nine theories died, and every one died to an instrument rather than an argument.** The pattern
+that produced them: each instrument was built at the exact point where a refusal could not say
+what it had seen -- the save label, the readiness verdict, the harvest census, the row shape, the
+parse trace. Every one of them cost less than the wave it replaced.
+
+**And the instruments needed guarding as badly as the code did.** Across the seven parts,
+mutation runs found **twelve** of my own checks that could not fail or named a mutation that did
+not reproduce -- including the anti-drift guard written to protect the trace, which was blind to
+the one thing the trace exists to say. The rule that a check enters only if it has been shown
+failing is not a formality; measured here, roughly one guard in three fails it on first writing.
+
+The remaining debts are listed below. None of them stands between the operator and the cycle.
+
+---
+
+## 53. What is still open
+
+| debt | what would close it | size |
+|---|---|---|
+| **The tracker row's title carries the employer** | a capture of a populated Saved tab, or a boundary this reader has not seen. Not closable from the row as it arrives | needs the capture |
+| **No capture of a populated SAVED tab** | seven parts in, and it would have shortened every one of them | a capture run |
+| **`HARVEST_BLOCK_CARDS_JS` has the Part 4 subtraction defect** | notifications are its only caller and no fixture exercises a non-rendered duplicate. Unchanged on argument alone | small, needs evidence |
+| **The status classifier could take a title the way the time-ago one did** | the exemption covers time-ago only, deliberately. A status-shaped title would need it and none has been seen | recorded, not taken |
+| **Pre-existing write-count rot in the prose** | README and `server.py` say three/four writes where five ship. `tests/test_server_surface.py` pins the real numbers | lead's call |
+| **`set_open_to_work` has no backstop behind `_direction`'s unknown gate** | its multi-state branch returns before the wrong-state comparison. Flagged in Part 2 | small |
+| **The trace corpus is 13 records but fewer shapes** | 7 are identical `jobs_search` rows | small |
