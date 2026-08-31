@@ -346,3 +346,121 @@ are kept apart deliberately rather than blended into a claim that the gate was
 seen working.
 
 ---
+
+## 4. #4 update_profile_field -- THE INSTRUMENT IS BUILT AND CANNOT YET BE RUN
+
+**The ruling.** A reader scoped to ONE container, measured to be self-owned,
+may publish names the document-wide gate would redact. Constraints: scoped to a
+single named container on a single self-owned surface; it must ESTABLISH
+self-ownership rather than assume it; a SEPARATE entry point from
+`linkedin_surface_census`; never reachable for `/feed/` or `/in/<other>/`.
+
+### 4a. The instrument -- `linkedin_profile_editor_fields`, at `3940f72`
+
+**Self-ownership is established per call, on an EXTERNAL assertion.** Load
+`/in/me/` and require **LinkedIn's own `isSelfProfile=true`** on the landed
+url. That is LinkedIn saying the profile is the viewer's, not this server
+reasoning about what `/in/me/` ought to mean -- and the distinction is the
+whole of why it is the anchor. Then load `/in/me/edit/intro/` and require the
+same member segment. **Fail the first and the editor page is never fetched at
+all.**
+
+Neither segment is ever reported. It is compared and discarded, and the landed
+paths are redacted TWICE -- once by `shape.census_substitute` and once by a
+literal replacement of the segment that call captured, so a slug cannot escape
+through whatever the first pass's character class does not cover.
+
+**The container is identified STRUCTURALLY: the nearest dialog ancestor of the
+one control named `Save`.** Not `dialog#0` -- that is document order, and
+document order is LinkedIn's business. **Two `Save` controls anywhere on the
+page is AMBIGUOUS and refuses**, document-wide rather than within the dialog,
+because "the one inside the dialog" is itself a rule about position and
+position is what this reader exists to refuse.
+
+**What comes off is only the `<opaque>` gate and the singleton blanking.**
+`census_substitute` was factored OUT of `census_shape` and is still run, so a
+urn, a member path, a company path, a possessive or a long digit run in a label
+is replaced whatever container it was read in. `census_shape`'s outputs are
+pinned unchanged against the pre-move code.
+
+**LABELS, NEVER VALUES.** A label is "First name"; a value is his first name.
+Three layers were shown holding, and the middle one was found by mutation
+rather than designed:
+
+| layer | what it caught |
+|---|---|
+| the JS mutation scan | `el.value` in the script |
+| **the field dict's NAMED KEYS** | a value read via `getAttribute` -- dropped silently because the dict enumerates its keys, the same discipline that once lost `container`, here working as a privacy backstop |
+| a JSON sweep of the whole answer | the edit that adds the key too, which is what somebody would really write |
+
+`linkedin_surface_census` and `shape.census_shape` are **unmodified in
+behaviour**, so nothing already published changes meaning. **The read boundary
+is untouched** -- no pattern added, no substring removed; both urls were
+already admitted.
+
+### 4b. THE CAPTURE HAS NOT BEEN TAKEN, and the blocker is not this server
+
+The restart landed and the process reports `3940f7278055`, so the tool IS
+loaded. **It is not reachable from the calling side:** the MCP tool LIST is
+cached a layer above the server process, and a server restart refreshes the
+CODE without refreshing the LIST. Confirmed by three separate `ToolSearch`
+queries returning no such tool while `linkedin_surface_census` and
+`linkedin_server_info` answer normally.
+
+**A `/mcp` reconnect is required and has been requested.** Recorded as a
+finding in its own right, because this wave has now hit the same class of
+staleness at two layers: **a fix on disk is not a fix in the running process,
+and a NEW TOOL in the running process is not a new tool in the client.** The
+previous wave's census runs are recorded as having happened "after a `/mcp`
+reconnect", which fits.
+
+**No route around it was taken, and two were available and refused.** Driving
+`dom.read_self_owned_editor_fields` from a script would mean launching the
+Chrome profile from a script, which is forbidden outright -- Chrome 151 runs a
+downgrade migration against the older Playwright chromium and DISCARDS the
+profile. The CDP bridge needs a Chrome the operator starts himself. Neither is
+this agent's to do.
+
+### 4c. `<opaque>` VERSUS NOT-RENDERED -- why it was not "fixed"
+
+The lead asked for this distinction to be fixed or for a reason. **It is
+already distinguished, and the pair named is not where the residual conflation
+lives.** Measured against `shape.census_shape` directly:
+
+    a readable name          -> the name                  (a row exists)
+    a name failing the gate  -> "<opaque>"                (a row exists)
+    a control with no name   -> "" + name_source "none"   (a row exists)
+    a control not rendered   -> NO ROW AT ALL
+
+So `<opaque>` **implies a row implies the control rendered.** The three
+absent-looking outcomes wear three different encodings and a caller can already
+tell them apart.
+
+What section 2g of the previous audit actually could not do was say WHICH FIELD
+an `<opaque>` row is -- a naming problem, not an encoding one, and precisely
+what 4a's reader closes inside the one container the ruling permits.
+
+**The residual conflation, stated rather than left:** `<opaque>` is returned
+for a name failing the LENGTH gate and for one failing the CHARACTER-CLASS
+gate, and those are different facts. It is not fixed here because inside the
+container the gate is off and the question does not arise, and outside it the
+distinction would tell a caller that a label is long or is in another script
+without naming it either way -- which moves no capability. Named so the next
+reader finds a decision rather than an oversight.
+
+### 4d. What the capture will and will not settle
+
+**Will:** whether the intro editor's own fields are among the `<opaque>` set or
+were simply not rendered -- the one thing section 2g said it could not
+distinguish -- and, if they are named, what they are called and how they are
+addressed.
+
+**Will not, and this is unchanged by anything in this wave:** REVERSIBILITY.
+Nothing here records a field's PREVIOUS VALUE, so an edit is still not
+revertible by this server -- and the reader is built to read labels and
+deliberately cannot read values, so it is not the thing that will close it.
+**That is a second, independent blocker on #4 and it survives a successful
+capture.** A gate that can name a field and cannot restore it is not a gate
+this design would open.
+
+---
