@@ -316,14 +316,38 @@ UUID_SHAPE = re.compile(
 #: THE ALLOWLIST HOLDS ONLY GENERIC TOKENS -- no real value is named in it,
 #: which is what keeps it an allowlist of the synthetic rather than a blocklist
 #: of the real. Widen it when a genuinely generic root fires.
-DRIVE_ROOT_PATH = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]([A-Za-z0-9_.-]{2,})")
+#: EVERY SEPARATOR RUN IS ``+``, NOT A SINGLE CHARACTER, and that quantifier is
+#: the whole difference between this rule working and this rule certifying.
+#:
+#: It was written ``[\\/]`` -- exactly one separator -- for about an hour on
+#: 2026-08-31, and in that hour it reported the repository CLEAN while three
+#: given-name drive roots sat in tracked files. All three were the DOUBLED
+#: spelling, which is not an edge case: ``\\`` is how a Windows path is written
+#: inside JSON, inside a Python string literal, and inside any prose quoting
+#: either. The cleanup that ran against the same one-character pattern removed
+#: the 46 occurrences it could see and left exactly the 3 it could not.
+#:
+#: TWO OF THOSE THREE WERE COMMENTS DOCUMENTING THIS VERY LEAK -- prose
+#: explaining that a sweep had found this path shape inside MCP configs, which
+#: quoted the real path in order to say so. That is the same self-refuting
+#: shape as ``tests/test_path_hygiene.py`` proving it detects real paths by
+#: carrying one, two files over and in prose.
+#:
+#: THE GENERALISATION, which is worth more than the quantifier: **a control
+#: must cover every spelling the value can be WRITTEN in, not just the one the
+#: author had in mind.** A guard asserting it can match ONE spelling is still a
+#: guard that reports zero without knowing whether it can see.
+DRIVE_ROOT_PATH = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]+([A-Za-z0-9_.-]{2,})")
 WINDOWS_USER_PATH = re.compile(r"[A-Za-z]:[\\/]+Users[\\/]+([A-Za-z0-9._-]{2,})")
 
 #: The POSIX home form. The lookbehind excludes ``:`` so a drive-letter path is
 #: counted once, by the shape above and not twice, and excludes word characters
-#: so the prose ``anchored/home/tail`` stops reading as a home directory.
+#: so the prose ``anchored/home/tail`` stops reading as a home directory. The
+#: trailing separator is ``+`` for the reason above, even though a forward
+#: slash needs no escaping and is therefore the least likely to be doubled --
+#: the rule should not depend on which spellings happen to be common.
 POSIX_HOME_PATH = re.compile(
-    r"(?<![A-Za-z0-9_:])(?:/home/|/Users/)([A-Za-z0-9._-]{2,})"
+    r"(?<![A-Za-z0-9_:])(?:/home|/Users)/+([A-Za-z0-9._-]{2,})"
 )
 
 GENERIC_DRIVE_ROOTS = frozenset(
@@ -545,6 +569,15 @@ def test_the_sweep_actually_looked():
         # intended, so the composition buys correctness and the absent
         # allowlist entry is a consequence rather than the goal.
         ("drive root", "cd D:" + BACKSLASH + "Ravenscroft" + BACKSLASH + "src"),
+        # THE DOUBLED SPELLING, and it is here because it is a REAL historical
+        # defect rather than a synthetic one: three of these sat in tracked
+        # files -- a JSON config example in the README and two comments
+        # DOCUMENTING this leak by quoting it -- invisible to a rule whose
+        # separator was one character rather than a run.
+        (
+            "drive root",
+            '"args": ["D:' + BACKSLASH * 2 + "Ravenscroft" + BACKSLASH * 2 + 'src"]',
+        ),
         (
             "user path",
             "C:" + BACKSLASH + "Users" + BACKSLASH + "rmarchetti" + BACKSLASH + "App",
@@ -623,17 +656,30 @@ def test_the_path_rules_can_match_a_backslash_at_all():
         "in this file is inert and the sweep below certifies nothing"
     )
 
-    windows = "D:" + BACKSLASH + "Ravenscroft" + BACKSLASH + "src"
-    assert DRIVE_ROOT_PATH.search(windows), windows
-    # COMPOSED like the rest, and this one was written as a literal first and
-    # CAUGHT BY THIS FILE'S OWN SWEEP: "1 unallowed drive root hit(s), 0
-    # declared". The guard fired on the test that proves the guard fires,
-    # which is the most direct demonstration available that it is not inert.
-    assert DRIVE_ROOT_PATH.search("D:" + "/Ravenscroft/src"), "the slash spelling"
-    assert WINDOWS_USER_PATH.search(
-        "C:" + BACKSLASH + "Users" + BACKSLASH + "rmarchetti"
-    )
-    assert POSIX_HOME_PATH.search("/home/" + "rmarchetti")
+    # EVERY SPELLING THE VALUE CAN BE WRITTEN IN, not just the one this file's
+    # author had in mind. The doubled forms are NOT edge cases: a Windows path
+    # inside JSON, inside a Python string literal, or quoted in prose about
+    # either is written with two backslashes, and for one hour on 2026-08-31
+    # this rule was blind to all of them while reporting the repository clean.
+    single = BACKSLASH
+    double = BACKSLASH + BACKSLASH
+
+    for sep in (single, double, "/", "//"):
+        rooted = "D:" + sep + "Ravenscroft" + sep + "src"
+        assert DRIVE_ROOT_PATH.search(rooted), (
+            "DRIVE_ROOT_PATH is blind to a separator run of "
+            f"{len(sep)}; that is how three of these sat at HEAD"
+        )
+        assert WINDOWS_USER_PATH.search("C:" + sep + "Users" + sep + "rmarchetti")
+
+    for sep in ("/", "//"):
+        assert POSIX_HOME_PATH.search("/home" + sep + "rmarchetti")
+
+    # AND THE GUARD ONCE FIRED ON THIS VERY TEST. The slash spelling above was
+    # written as a literal first and this file's own sweep failed on it -- "1
+    # unallowed drive root hit(s), 0 declared" -- which is the most direct
+    # demonstration available that these rules are not inert. Everything here
+    # is composed for that reason as well as for the escaping one.
 
 
 def test_the_drive_root_rule_catches_what_the_user_path_rule_cannot():

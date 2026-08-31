@@ -1151,3 +1151,149 @@ hand-rolled scan, because a hand-rolled scan is exactly what missed this.
    tool registered after a subagent spawns is unreachable to it regardless of
    server restarts or client reconnects. Building and capturing have to be
    different agents -- or the capture belongs to whoever spawned the builder.
+
+## 17. CORRECTION: "0 and 0" WAS WRONG, and the guard was blind to the doubled spelling
+
+**Section 13b's re-measurement, and section 16.3's clean bill, were both taken
+with an instrument that could not see what it was looking for.** The lead
+caught it. Three given-name drive roots survived in tracked files, and the
+guard I had just landed passed over all three.
+
+### 17a. The defect
+
+`DRIVE_ROOT_PATH` was `[A-Za-z]:[\/]([A-Za-z0-9_.-]{2,})`. **`[\/]` matches
+exactly ONE separator character.** Against a doubled separator, the class
+consumes the first backslash and the capture group must then start on the
+second -- which is not in `[A-Za-z0-9_.-]`. No match.
+
+Measured against the shipped rule, importing the compiled pattern rather than
+retyping it:
+
+    single separator    D:\<name>     matched, WOULD FAIL      (rule works)
+    DOUBLE separator    D:\<name>    no match -- BLIND
+
+**The doubled spelling is not an edge case.** It is how a Windows path is
+written inside JSON, inside a Python string literal, and inside any prose
+quoting either. So the cleanup removed the 46 occurrences the rule could see
+and left exactly the 3 it could not, and the re-measurement that reported zero
+shared the blindness.
+
+`_drive_root_ok` was correct throughout -- the segment is not generic and
+carries no placeholder, so it would have failed the file if the pattern had
+ever reached it. **The predicate was right and the pattern never got there.**
+
+### 17b. The three survivors, and what two of them were
+
+| file | what it was |
+|---|---|
+| `README.md` | a JSON config example, where `\` is CORRECT JSON |
+| `linkedin_server/paths.py` | a COMMENT describing the 2026-08-20 sweep |
+| `tests/test_path_hygiene.py` | a COMMENT describing the same sweep |
+
+**Two of the three were documentation of this very leak** -- prose explaining
+that a sweep found this path shape inside MCP configs, which quoted the real
+path in order to say so. That is the identical self-refuting shape as
+`test_path_hygiene.py:151` proving it detects real paths by carrying one: the
+instance I had already fixed, in prose, two files over, and I did not look for
+its siblings.
+
+The README case was fixed by **replacing the VALUE and not the escaping** -- a
+reader copying that config needs a real path there, and the doubled backslash
+is correct JSON.
+
+### 17c. The fix, and the generalisation that outranks it
+
+Every separator run in all three rules is now `+`. Shown failing by narrowing
+it back:
+
+    E  AssertionError: DRIVE_ROOT_PATH is blind to a separator run of 2;
+       that is how three of these sat at HEAD
+    FAILED test_every_shape_can_actually_fail[drive root-"args": [...]]
+    FAILED test_the_path_rules_can_match_a_backslash_at_all
+
+**That mutation is a REAL HISTORICAL DEFECT rather than a synthetic one**, and
+the doubled form is now a permanent plant in the can-fail table.
+
+> **THE GENERALISATION, and it is worth more than the quantifier: a control
+> must cover every spelling the value can be WRITTEN in, not just the one the
+> author had in mind.** Section 13c said a guard reporting zero without
+> asserting it can match is indistinguishable from a broken one. Mine asserted
+> it could match ONE spelling -- which is the same defect one level down, and I
+> committed it in the same breath as writing the rule against it.
+
+### 17d. The count
+
+**This was the FIFTH instance of the escaping trap in one day, and the first
+one committed and load-bearing:** a `git grep` that reported clean; a rewrite
+whose backslash escaped a `+`; two heredoc "corrections" that agreed with each
+other and were both wrong; a redaction that reported success and changed
+nothing; and now a shipped PII rule blind to half the spellings of the thing it
+exists to catch. **A sixth occurred while writing this section** -- the mutation
+script's anchor was collapsed by a heredoc and refused to apply, which it
+caught only because it asserts its replacement count before writing.
+
+Every instance has one shape: **the fix for an escaping bug is written in the
+language that has the escaping bug.** The two things that actually caught them
+were never care. They were an instrument that fails loudly on the file it is
+pointed at, and a second reader measuring independently.
+
+Re-measured after the fix, with the widened pattern and the control asserting
+both spellings: **survivors 0.** Stated with less confidence than last time,
+because last time was wrong.
+
+---
+
+## 18. THE THIRD SURVIVOR CANNOT BE FIXED FROM THIS REPO -- and the wave ends one test red
+
+`linkedin_server/paths.py` is a **VENDORED COPY**. Its own header says
+`DO NOT EDIT THIS FILE`, and `tests/test_vendored_buildinfo.py` enforces that
+by comparing its body against **jobcore at the pinned commit `6acc7e6`** --
+not against jobcore's working tree.
+
+**So the leak in that file is upstream, and the two guards are in direct
+conflict:**
+
+| action | vendoring pin | identity guard |
+|---|---|---|
+| fix the vendored copy | **FAILS** -- body diverges from the pinned commit | passes |
+| leave it | passes | **FAILS** -- a real given name in a tracked file |
+
+Both states were measured, not reasoned about. There is no third state
+reachable from inside this repository.
+
+**I edited jobcore's source to test the theory and REVERTED IT.** The edit
+proved the leak is at `jobcore/src/jobcore/paths.py` line 3 and that a
+working-tree fix there does not satisfy the pin, because the pin reads a
+COMMIT. jobcore is a separate repository with its own remote and its own
+history question; committing to it and then bumping this repo's vendor pin is a
+two-repo change with push implications, and it is not mine to make. **jobcore
+is left exactly as found: clean.**
+
+**THE WAVE THEREFORE CLOSES WITH ONE TEST RED, and it is red for the right
+reason.** `test_no_tracked_file_carries_a_real_identifier[linkedin_server/paths.py]`
+is not a broken test; it is the instrument reporting a leak that exists. Every
+other test passes.
+
+### What would close it, in order
+
+1. Fix the docstring in `jobcore/src/jobcore/paths.py` -- one comment line,
+   zero behaviour -- and commit it there.
+2. Bump `linkedin_server/paths.py`'s vendor header to the new jobcore commit
+   and re-vendor the body.
+3. Re-run both guards; the conflict dissolves because the copy and its source
+   agree again.
+
+**And a question worth asking before step 1:** jobcore is a pushed repository
+that nobody has swept. Its `paths.py` carries this shape at line 3 -- found
+incidentally, by following this one file. **Nothing here establishes that it is
+the only instance in that repo**, and the same guard does not exist there.
+
+### The alternative I did NOT take
+
+`DECLARED_PLANTS` would silence it. **It stays untouched.** The lead's ruling
+was that the fix is removing the real value rather than declaring it, and while
+this case is genuinely different -- the value cannot be removed from this repo
+at all -- that difference is an argument for a ruling, not for me assuming one.
+Declaring a real identifier to make a suite green is the exact trade this
+guard exists to refuse, and it should be somebody's explicit decision if it is
+made.

@@ -1,7 +1,7 @@
 """No tool result publishes this machine's directory layout.
 
 A live sweep across this family of servers on 2026-08-20 found
-``D:\\Sundeep\\projects\\...`` sitting inside MCP tool results. That is wrong
+``D:\\workspace\\projects\\...`` sitting inside MCP tool results. That is wrong
 twice over: it publishes the operator's directory layout into any transcript the
 result is pasted into, and it is paid for in tokens on every response carrying
 it.

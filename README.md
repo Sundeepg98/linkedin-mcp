@@ -404,7 +404,7 @@ stdio transport, entry point `linkedin.py`:
   "mcpServers": {
     "linkedin": {
       "command": "python",
-      "args": ["D:\\Sundeep\\projects\\job-hunting\\mcp-servers\\linkedin\\linkedin.py"]
+      "args": ["D:\\workspace\\projects\\job-hunting\\mcp-servers\\linkedin\\linkedin.py"]
     }
   }
 }
