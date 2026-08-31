@@ -610,6 +610,26 @@ ALLOWED = [
     # of this pair is actually asserted.
     "https://www.linkedin.com/in/me/edit/intro/",
     "https://www.linkedin.com/mypreferences/d/dark-mode",
+    # THE FOUR THE OPERATOR RULED ON 2026-08-31, each named individually and
+    # never as a family. The narrowness of every one of them is asserted in
+    # BLOCKED below, which is the half of this pair that does the work: an
+    # ALLOWED entry says a url opens, and only the refused neighbours say the
+    # permission stopped where it was supposed to.
+    #
+    # ONE ITEM PERMALINK, in both spellings LinkedIn serves. The urn shape is
+    # the anchored one dom.ACTIVITY_ITEMS_JS already requires before it will
+    # emit a key, so the only urns this server can build are the only ones the
+    # pattern admits.
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001",
+    # THE TWO PUBLISHING COMPOSERS. Both were measured as real anchors -- an
+    # <a> with an href, count 1 each -- before either was written down.
+    "https://www.linkedin.com/preload/sharebox/",
+    "https://www.linkedin.com/article/new/",
+    # THE MESSAGE COMPOSER, and this one url ONLY. It is bought past
+    # ``/messaging/compose`` by an EXACT-url exemption, so the trailing-slash
+    # spelling opens and nothing else in that family does -- see BLOCKED.
+    "https://www.linkedin.com/messaging/compose/",
 ]
 
 BLOCKED = [
@@ -620,10 +640,27 @@ BLOCKED = [
     # did not, and it is the entry that keeps sending impossible. It is the
     # pre-filled compose overlay LinkedIn opens from a job page.
     "https://www.linkedin.com/messaging/compose/?body=hello&interop=msgOverlay",
+    # THE COMPOSER'S NEIGHBOURS, added 2026-08-31 in the same commit that
+    # admitted ONE composer url. They are the whole of the evidence that the
+    # exemption is an EQUALITY rather than a prefix: the pre-filled overlay
+    # above still refuses, and so do these.
+    "https://www.linkedin.com/messaging/compose/?recipient=someone",
+    "https://www.linkedin.com/messaging/compose/new/",
+    # AND THE ITEM PERMALINK'S NEIGHBOURS. ``/feed/update`` left the forbidden
+    # tuple to buy the permalink, so these are what proves the family's
+    # DANGEROUS half is still refused -- by ``/edit/``, ``/delete``,
+    # ``action=`` and the anchored pattern respectively.
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/edit/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/delete",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/?action=delete",
+    "https://www.linkedin.com/feed/update/",
+    "https://www.linkedin.com/feed/update/urn%3Ali%3Aactivity%3A7400000000000000001/",
+    # And the two composers' neighbours, for the same reason.
+    "https://www.linkedin.com/preload/sharebox/publish",
+    "https://www.linkedin.com/article/edit/7400000000000000001/",
     "https://www.linkedin.com/mynetwork/invitation-manager/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",
-    "https://www.linkedin.com/feed/update/urn:li:activity:123/",
     "https://www.linkedin.com/voyager/api/relationships/invitations",
     "https://www.linkedin.com/notifications/?action=markAllRead",
     # Other people's data at scale, and other hosts entirely.
@@ -883,6 +920,12 @@ def test_the_exemption_table_is_exactly_one_url_for_exactly_one_substring():
     """
     assert readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS == {
         "https://www.linkedin.com/in/me/edit/intro/": "/edit/",
+        # THE SECOND ENTRY, 2026-08-31, on the operator's ruling admitting the
+        # message composer. It is here rather than being bought by shortening
+        # the forbidden tuple, which is the difference that matters: every
+        # other spelling under /messaging/compose is refused by the same gate
+        # it always was, because this key is an EQUALITY and not a prefix.
+        "https://www.linkedin.com/messaging/compose/": "/messaging/compose",
     }
     # The exempted substring must really be on the forbidden list; an
     # exemption for a substring nobody forbids is a dead entry that reads like
@@ -1107,6 +1150,36 @@ FORBIDDEN_SUBSTRINGS_EVER = (
     "/hibernate-account",
 )
 
+#: THE ONE SUBSTRING THAT HAS EVER LEFT THE FORBIDDEN LIST, and the reason.
+#:
+#: The roster above is asserted as a SUBSET of the live tuple, so a deletion
+#: cannot pass without an edit here. This is that edit, and it is DELIBERATELY
+#: SHAPED AS AN EXCEPTION RATHER THAN A DELETION: the entry stays in
+#: ``FORBIDDEN_SUBSTRINGS_EVER``, because a substring quietly removed from the
+#: roster is indistinguishable from one that was never on it, and the whole
+#: value of that roster is that it remembers.
+#:
+#: ``/feed/update`` was removed on 2026-08-31, on the operator's ruling
+#: admitting ONE NAMED ITEM PERMALINK PER CALL. It could not be kept, and the
+#: reason is mechanical rather than a matter of appetite: this gate matches
+#: SUBSTRINGS, so it cannot say "the permalink but nothing beneath it", and
+#: the exemption table is keyed on an EXACT url while the urn varies per call.
+#: Neither mechanism can express the ruling.
+#:
+#: WHAT WAS AND WAS NOT GIVEN UP, and it is asserted rather than argued --
+#: ``test_the_removed_substring_did_not_take_the_family_with_it`` below puts
+#: the dangerous members of that family through the real guard. ``/edit/``,
+#: ``/delete``, ``/withdraw`` and ``action=`` all remain and all still catch
+#: them. What was given up is a blanket refusal of a surface that renders one
+#: of HIS OWN items.
+#:
+#: An entry here is a boundary decision. Adding a second one means writing
+#: down the same three things: which ruling, why the substring could not be
+#: kept, and what still refuses the rest of its family.
+FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED = {
+    "/feed/update",
+}
+
 #: Addresses that must stay unreadable, whatever the two lists look like.
 #:
 #: THE ROSTER ABOVE IS ABOUT STRINGS; THIS IS ABOUT BEHAVIOUR, and it is the
@@ -1121,7 +1194,16 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/mypreferences/d/categories/account",
     "https://www.linkedin.com/psettings/",
     "https://www.linkedin.com/settings/",
-    "https://www.linkedin.com/messaging/compose/",
+    # ``https://www.linkedin.com/messaging/compose/`` WAS HERE UNTIL
+    # 2026-08-31 and is now READABLE, by the operator's ruling and by an
+    # exact-url exemption. It is recorded rather than silently dropped, and
+    # what replaces it is the set of neighbours the exemption must NOT have
+    # carried with it -- which is a stronger check than the single entry was,
+    # because the risk was never that one url opened. It was that a family
+    # did.
+    "https://www.linkedin.com/messaging/compose",
+    "https://www.linkedin.com/messaging/compose/new/",
+    "https://www.linkedin.com/messaging/compose/?recipient=someone",
     "https://www.linkedin.com/mynetwork/invitation-manager/",
     "https://www.linkedin.com/mynetwork/",
     "https://www.linkedin.com/company/example-co/",
@@ -1158,11 +1240,101 @@ def test_the_forbidden_list_has_only_ever_grown():
     why an address once refused should now be readable.
     """
     live = set(readonly._FORBIDDEN_URL_SUBSTRINGS)
-    lost = [entry for entry in FORBIDDEN_SUBSTRINGS_EVER if entry not in live]
+    lost = [
+        entry
+        for entry in FORBIDDEN_SUBSTRINGS_EVER
+        if entry not in live
+        and entry not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
+    ]
     assert not lost, (
         f"these substrings left the forbidden list: {lost}. Each one was a "
         "refusal somebody wrote deliberately. Removing one is a boundary "
-        "change, not a tidy-up."
+        "change, not a tidy-up -- if it was intended, record it in "
+        "FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED with the ruling, which is "
+        "an edit somebody reviews rather than a digest somebody re-bakes."
+    )
+    # AND THE EXCEPTION LIST CANNOT ROT INTO A BLANKET. Every entry in it must
+    # name a substring the roster remembers AND one that is really gone; an
+    # entry for a live substring would sit there granting nothing and hiding
+    # the next real removal behind a stale name.
+    for entry in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED:
+        assert entry in FORBIDDEN_SUBSTRINGS_EVER, entry
+        assert entry not in live, (
+            f"{entry!r} is recorded as deliberately removed and is on the "
+            "live forbidden list. One of the two is wrong."
+        )
+
+
+#: The members of the ``/feed/update`` family that must stay refused now that
+#: the substring guarding all of them is gone. Each is a real address put
+#: through the real guard, and each names the entry that is expected to catch
+#: it, so a refusal that started coming from somewhere else is visible.
+FEED_UPDATE_FAMILY_STILL_REFUSED = (
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/edit/", "/edit/"),
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/delete", "/delete"),
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/?action=delete", "action="),
+)
+
+
+@pytest.mark.parametrize(
+    "url,expected_gate", FEED_UPDATE_FAMILY_STILL_REFUSED, ids=lambda v: str(v)[:40]
+)
+def test_the_removed_substring_did_not_take_the_family_with_it(url, expected_gate):
+    """THE PRICE OF THE REMOVAL, PAID IN ASSERTIONS RATHER THAN IN PROSE.
+
+    ``/feed/update`` left the forbidden tuple so that ONE item permalink could
+    be admitted. The argument for that being acceptable is that the family's
+    DESTRUCTIVE members are caught by other entries which are all still there
+    -- and an argument of that shape is exactly the kind this repository has
+    twice found to be false when finally measured. ``/settings/`` sat on the
+    list for the life of the repo matching nothing LinkedIn served; the two
+    account-ending pages were assumed covered by a substring that does not
+    appear in either address.
+
+    So this does not reason about it. It puts each address through
+    ``assert_read_url`` and reads back WHICH substring refused it, so a
+    refusal that quietly started coming from the allowlist instead -- which is
+    a single loosened pattern away from not coming at all -- fails here.
+    """
+    with pytest.raises(readonly.WriteAttemptError) as excinfo:
+        readonly.assert_read_url(url)
+    message = str(excinfo.value)
+    assert expected_gate in message, message
+    # THE GATE, NOT MERELY THE ANSWER. The forbidden loop and the allowlist
+    # produce different sentences, and only the first is the second,
+    # independent gate this family now depends on entirely.
+    assert "is not a read surface" in message, message
+
+
+def test_the_permalink_that_bought_the_removal_is_the_only_thing_it_bought():
+    """AND THE NARROWNESS, from the other side.
+
+    One url shape opens. The bare family root does not, a percent-encoded urn
+    does not -- that spelling has never been observed in this position -- and
+    a query string does not, so LinkedIn's own tracking parameters cannot ride
+    in on it.
+    """
+    urn = "urn:li:activity:7400000000000000001"
+    base = "https://www.linkedin.com/feed/update/"
+    assert readonly.is_read_url(f"{base}{urn}/")
+    assert readonly.is_read_url(f"{base}{urn}")
+    assert not readonly.is_read_url(base)
+    assert not readonly.is_read_url(f"{base}{urn}/?trk=feed")
+    assert not readonly.is_read_url(
+        base + "urn%3Ali%3Aactivity%3A7400000000000000001/"
+    )
+    # THE SHAPE IS THE READER'S OWN, not a second spelling written here. The
+    # only urns this server can build a permalink from are the ones
+    # dom.ACTIVITY_ITEMS_JS will emit, and if that shape ever widened without
+    # this pattern following, a key would come back that no url could be built
+    # from -- which fails loudly rather than opening anything, and is still
+    # worth catching here.
+    assert "urn:li:[A-Za-z]+:[0-9]+" in dom.ACTIVITY_ITEMS_JS.replace(
+        "^urn:li:[A-Za-z]+:[0-9]+$", "urn:li:[A-Za-z]+:[0-9]+"
+    )
+    assert any(
+        "urn:li:[A-Za-z]+:[0-9]+" in pattern.pattern
+        for pattern in readonly._ALLOWED_URL_PATTERNS
     )
 
 
@@ -1179,9 +1351,16 @@ def test_that_roster_check_can_fail_on_a_deletion():
     )
     assert len(weakened) == len(readonly._FORBIDDEN_URL_SUBSTRINGS) - 1
     lost = [
-        entry for entry in FORBIDDEN_SUBSTRINGS_EVER if entry not in set(weakened)
+        entry
+        for entry in FORBIDDEN_SUBSTRINGS_EVER
+        if entry not in set(weakened)
+        and entry not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
     ]
     assert lost == ["/messaging/compose"], lost
+    # THE CONTROL ON THE EXCEPTION MECHANISM ITSELF, added with it. A recorded
+    # removal must silence EXACTLY its own entry and nothing else, or the list
+    # is an off switch rather than a ledger.
+    assert "/messaging/compose" not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
 
 
 @pytest.mark.parametrize("url", MUST_STAY_UNREADABLE)

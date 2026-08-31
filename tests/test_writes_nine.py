@@ -71,18 +71,58 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
     writes_on,
 )
 
-#: The seven, written out rather than derived from ``SANCTIONED_WRITES``. A
-#: derived list would be satisfied by somebody deleting a spec, which is the
-#: move these tests exist to make visible.
+#: The ones that are sanctioned and STILL REFUSE, written out rather than
+#: derived from ``SANCTIONED_WRITES``. A derived list would be satisfied by
+#: somebody deleting a spec, which is the move these tests exist to make
+#: visible.
+#:
+#: SEVEN UNTIL 2026-08-31, SIX NOW. ``update_setting`` left this tuple on the
+#: day it entered ``writes.PERFORMABLE``, and it LEFT rather than being kept
+#: with an exception, because every check below asserts that its subject
+#: CANNOT be performed -- an action in both places would be asserted to be two
+#: things at once, and one of the two assertions would have to be softened to
+#: let it pass. Softening a check to accommodate a shipped capability is how a
+#: check stops being one.
+#:
+#: The constant keeps its name so the link to the seven the operator asked
+#: about is not lost; ``LIFTED`` below is where the difference is recorded.
 SEVEN = (
     "publish_post",
     "comment_on_item",
     "react_to_item",
     "update_profile_field",
-    "update_setting",
     "send_invitation",
     "send_message",
 )
+
+#: What has left ``SEVEN``, and when. An action may only be here if it is in
+#: ``writes.PERFORMABLE``, which is asserted below -- so this cannot become a
+#: place to park something that merely stopped passing.
+LIFTED = {
+    "update_setting": "2026-08-31",
+}
+
+
+def test_nothing_left_the_refusing_set_except_by_shipping():
+    """THE LEDGER'S OWN GUARD, and it is the whole reason ``LIFTED`` is a dict
+    rather than a deleted line.
+
+    An action can leave ``SEVEN`` for two reasons that look identical in a
+    diff: it became performable, or its checks became inconvenient. This
+    asserts the first. Every name recorded as lifted must really be in
+    ``writes.PERFORMABLE``, no name may be in both, and the two together must
+    still account for every sanctioned action -- so a spec quietly deleted
+    goes missing from the total instead of going unnoticed.
+    """
+    for action, when in LIFTED.items():
+        assert action in writes.PERFORMABLE, action
+        assert action not in SEVEN, action
+        assert when
+    sanctioned = {spec.action for spec in SANCTIONED_WRITES.values()}
+    accounted = (
+        set(SEVEN) | set(LIFTED) | set(writes.PERFORMABLE) | {"set_open_to_work"}
+    )
+    assert sanctioned == accounted, sanctioned.symmetric_difference(accounted)
 
 #: A feed item key and a member key. Both are INVENTED, and inventing them is
 #: allowed here precisely because of what section 5 certifies: this server has
@@ -590,8 +630,18 @@ def test_a_confirm_token_bound_to_one_comment_is_refused_for_another(writes_on):
     grant = _bare_grant(action="comment_on_item", target=approved)
     writes._GRANTS[grant.token] = grant
 
+    # THE MAPPING, NOT THE CANONICAL STRING, and the change is what the tool
+    # actually does. ``consume`` normalises through ``_target_for`` since
+    # 2026-08-31, so it takes what the TOOL took -- which is the only way its
+    # normalisation and ``mint``'s can be the same one. This handed it a
+    # pre-canonicalised string until then, which is a shape no caller in this
+    # server produces: ``_write_tool`` passes the mapping straight through.
     with pytest.raises(WriteAttemptError) as excinfo:
-        consume(grant.token, action="comment_on_item", target=substituted)
+        consume(
+            grant.token,
+            action="comment_on_item",
+            target={"item": ITEM, "text": COMMENT_B},
+        )
     message = str(excinfo.value)
     assert "was minted for target" in message, message
     assert "already-discarded" not in message, message
@@ -599,7 +649,11 @@ def test_a_confirm_token_bound_to_one_comment_is_refused_for_another(writes_on):
 
     # THE POSITIVE CASE. Without it the refusal above passes on a consume that
     # refuses everything, which is the exact shape this file exists to avoid.
-    redeemed = consume(grant.token, action="comment_on_item", target=approved)
+    redeemed = consume(
+        grant.token,
+        action="comment_on_item",
+        target={"item": ITEM, "text": COMMENT_A},
+    )
     assert redeemed.target == approved
     assert redeemed.consumed is True
 
@@ -723,8 +777,16 @@ def test_every_surface_the_seven_read_is_already_on_the_read_boundary():
     nothing -- so the six surfaces are counted and reconciled against the
     ``state_from`` of the seven specs themselves.
     """
+    # SIX SURFACES AND SIX REFUSING ACTIONS PLUS THE LIFTED ONE, reconciled
+    # rather than counted. ``update_setting`` left ``SEVEN`` when it shipped
+    # and its surface did NOT leave ``_SURFACE_READS`` -- ``observe`` still
+    # reads that page at preview, so the claim being made here still has to
+    # hold for it. Dropping it from this reconciliation would have quietly
+    # stopped checking the read boundary for the one action that now performs
+    # on it, which is exactly backwards.
     assert len(writes._SURFACE_READS) == 6
-    assert {spec_for_action(a).state_from for a in SEVEN} == set(
+    covered = set(SEVEN) | set(LIFTED)
+    assert {spec_for_action(a).state_from for a in covered} == set(
         writes._SURFACE_READS
     )
     for state_from, (url, _surface, reader) in writes._SURFACE_READS.items():
@@ -1373,3 +1435,404 @@ def test_no_aiming_verdict_can_carry_a_name():
         for name in PLANTED_NAMES:
             assert name not in why
         assert why == why.strip()
+
+
+# ---------------------------------------------------------------------------
+# 8. THE ONE THAT LIFTED: update_setting, end to end
+# ---------------------------------------------------------------------------
+#
+# Everything above this line asserts a refusal, and a file of refusals passes
+# perfectly against a gate that raises unconditionally. This section is the
+# one that fails if the capability goes back to being a preview.
+#
+# IT PERFORMS NOTHING ON LINKEDIN. The navigator is a fixture server over
+# frozen markup and the page is a fake; what is being exercised is this
+# server's own gate chain -- observe, mint, consume, perform, verify -- over
+# markup shaped like the six agreeing readings of the live page.
+
+
+#: The same three radios with ``Always on`` CHECKED instead of ``Always off``:
+#: the world as it would be AFTER the click. Built by moving the attribute
+#: rather than by editing the whole string, and ASSERTED to have moved, so a
+#: fixture that silently failed to change could not pass for one that did.
+DARK_MODE_AFTER = DARK_MODE_MARKUP.replace(
+    '<input type="radio" name="dm" aria-labelledby="dm-off" checked>',
+    '<input type="radio" name="dm" aria-labelledby="dm-off">',
+).replace(
+    '<input type="radio" name="dm" aria-labelledby="dm-on">',
+    '<input type="radio" name="dm" aria-labelledby="dm-on" checked>',
+)
+assert DARK_MODE_AFTER != DARK_MODE_MARKUP
+assert DARK_MODE_AFTER.count("checked") == 1
+
+
+class _ClickRecordingPage:
+    """A page that records the selector it was clicked with, then swaps the
+    markup underneath it.
+
+    THE SWAP IS THE POINT. ``perform`` verifies from a FRESH NAVIGATION, so a
+    fake that kept serving the before-state would make a successful click
+    indistinguishable from one that changed nothing -- and the test would pass
+    either way.
+    """
+
+    def __init__(self, page, navigator, after: str):
+        self._page = page
+        self._navigator = navigator
+        self._after = after
+        self.clicks: list[str] = []
+
+    def __getattr__(self, name):
+        return getattr(self._page, name)
+
+    async def click(self, selector, **_kwargs):
+        self.clicks.append(selector)
+        self._navigator.pages[writes.DARK_MODE_URL] = self._after
+
+
+async def _setting_grant(nav, page, *, to_state: str = "Always on"):
+    """A real, redeemed grant for update_setting. The long way round --
+    preview, then consume the token it printed -- because ``perform`` requires
+    a grant ``consume`` has already burned."""
+    spec = spec_for_action("update_setting")
+    block = await preview(
+        spec,
+        target=TARGETS["update_setting"],
+        navigator=nav,
+        page=page,
+        to_state=to_state,
+    )
+    grant = consume(
+        block["to_confirm"],
+        action="update_setting",
+        target=TARGETS["update_setting"],
+    )
+    return block, grant
+
+
+async def test_update_setting_runs_end_to_end_and_is_verified_from_a_reload(
+    writes_on, browser_page
+):
+    """THE POSITIVE CASE for the first capability lifted in this wave.
+
+    Every gate in the chain is real: the direction is read off the page, the
+    token is minted only from that reading, ``consume`` burns it, ``perform``
+    re-reads the control before clicking, and the verification is a FRESH
+    NAVIGATION and a re-read of the group's own ``checked`` property.
+
+    WHAT MAKES THE VERDICT WORTH ANYTHING is the last of those. The fixture
+    served after the click has ``Always on`` checked and ``Always off`` not,
+    so ``performed: True`` is a statement about a re-read page rather than
+    about the click having returned without raising.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    block, grant = await _setting_grant(nav, browser_page)
+
+    # A TOKEN NOW EXISTS FOR THIS ACTION, which is the whole of what changed.
+    assert block["to_confirm"], block
+    assert block["direction"]["currently"] == "Always off"
+    assert block["direction"]["after"] == "Always on"
+    # The operator is shown the three controls and which one is on.
+    shown = block["where"]["what_the_page_showed"]["rows"]
+    assert {row["shape"] for row in shown} == set(writes.DARK_MODE_STATES)
+    assert [row["shape"] for row in shown if row["checked"]] == ["Always off"]
+    assert {row["input_type"] for row in shown} == {"radio"}
+    # ``role`` IS ON THE ROW, and it is asserted because it was MISSING when
+    # this projection was written -- dom.aria_role_of consults it first, so
+    # every control was being answered as though it had no role attribute.
+    # The mutation that narrows the role guard is what surfaced it.
+    assert {row["role"] for row in shown} == {None}
+
+    page = _ClickRecordingPage(browser_page, nav, DARK_MODE_AFTER)
+    result = await writes.perform(nav, page, grant)
+
+    # THE SELECTOR IS BUILT FROM THE ROLE THE PAGE REPORTED, not an assumed
+    # one. That is what ``input_type`` was added to the census for.
+    assert page.clicks == ['role=radio[name="Always on"][exact=true]'], page.clicks
+    assert result["performed"] is True, result
+    assert result["verified"] is True
+    assert result["verification"]["observed_state"] == "Always on"
+    assert result["verification"]["expected_state"] == "Always on"
+    assert writes.DARK_MODE_URL in result["verification"]["read_from"]
+    # AND THE BLOCK DOES NOT CLAIM A SECOND SURFACE IT DOES NOT HAVE. There is
+    # exactly one page for a setting; the sentence beside the verdict says so
+    # rather than borrowing the save pair's "a DIFFERENT surface", which it
+    # did until this action shipped.
+    assert "THE SAME PAGE, RELOADED" in result["verification"]["surface"]
+    assert "saved list" not in result["verification"]["surface"]
+
+
+async def test_a_setting_that_did_not_move_reports_false_rather_than_unknown(
+    writes_on, browser_page
+):
+    """THE NEGATIVE HALF, and it is the one that pins ``expected_after``.
+
+    A click that changed nothing must report ``performed: False`` -- he is
+    told it did not happen -- and not ``"unknown"``, which sends him off to
+    look at a page that is exactly as he left it. The two were the SAME answer
+    until 2026-08-31, because the comparison ran against ``spec.to_state``,
+    which is ``None`` for a multi-state action: every outcome fell through to
+    unknown, INCLUDING a change that landed perfectly.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    _block, grant = await _setting_grant(nav, browser_page)
+    # The world does NOT change: the after-markup is the before-markup.
+    page = _ClickRecordingPage(browser_page, nav, DARK_MODE_MARKUP)
+    result = await writes.perform(nav, page, grant)
+    assert result["performed"] is False, result
+    assert result["verified"] is False
+    assert result["verification"]["observed_state"] == "Always off"
+
+
+async def test_perform_refuses_a_destination_the_setting_is_already_in(
+    writes_on, browser_page
+):
+    """GATE 5 IS FRESHER THAN THE PREVIEW, on a setting where that matters.
+
+    The preview's reading may be up to two minutes old and he may have moved
+    the setting in another tab. So the origin is re-checked at click time, and
+    a grant whose destination is where the page now already sits is refused
+    rather than clicked -- a click there is not harmless, it is a click on a
+    control whose meaning changed after he was shown it.
+
+    Reached by minting against one world and performing against another, which
+    is the only way to model the gap the check exists to cover.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    _block, grant = await _setting_grant(nav, browser_page)
+    # Somebody else moved it in between.
+    nav.pages[writes.DARK_MODE_URL] = DARK_MODE_AFTER
+    page = _ClickRecordingPage(browser_page, nav, DARK_MODE_AFTER)
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(nav, page, grant)
+    assert "already reads" in str(excinfo.value), str(excinfo.value)
+    assert page.clicks == []
+
+
+async def test_an_unreadable_group_refuses_rather_than_choosing_by_position(
+    writes_on, browser_page
+):
+    """TWO CHECKED IS A REFUSAL AT CLICK TIME, not only at preview.
+
+    ``_read_dark_mode`` refuses zero and two-or-more, and gate 5 runs the same
+    reader -- so a group that stopped behaving as radios between the preview
+    and the click is refused there too. Without this the freshest reading in
+    the chain would be the one least able to say no.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    _block, grant = await _setting_grant(nav, browser_page)
+    both = DARK_MODE_MARKUP.replace(
+        '<input type="radio" name="dm" aria-labelledby="dm-on">',
+        '<input type="radio" name="dm" aria-labelledby="dm-on" checked>',
+    )
+    assert both.count("checked") == 2
+    nav.pages[writes.DARK_MODE_URL] = both
+    page = _ClickRecordingPage(browser_page, nav, both)
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(nav, page, grant)
+    assert "choosing by position" in str(excinfo.value)
+    assert page.clicks == []
+
+
+#: THE SAME THREE CONTROLS AS CHECKBOXES. Not a page LinkedIn is known to
+#: serve -- and that is the point rather than a weakness. Six readings
+#: establish three CHECKABLE inputs and none of them establishes which of the
+#: two checkable types they are, because the census's ``checked`` gate admits
+#: radio and checkbox alike. So "they are radios" is an assumption this server
+#: must not be making, and the only way to show it is not making one is to
+#: serve it the other type and watch the selector follow.
+DARK_MODE_AS_CHECKBOXES = DARK_MODE_MARKUP.replace(
+    '<input type="radio"', '<input type="checkbox"'
+)
+assert DARK_MODE_AS_CHECKBOXES.count('type="checkbox"') == 3
+assert 'type="radio"' not in DARK_MODE_AS_CHECKBOXES
+
+
+async def test_a_checkbox_group_is_clicked_as_a_checkbox_not_as_a_radio(
+    writes_on, browser_page
+):
+    """THE ROLE IS READ, AND THIS IS THE CHECK THAT CAN SAY SO.
+
+    ``test_the_role_is_read_off_the_row_and_never_assumed`` exercises
+    ``dom.aria_role_of`` directly, which a hardcoded ``role = "radio"`` in
+    ``_live_control`` sails straight past -- MEASURED: that mutation left the
+    whole file green. A unit test of a helper cannot certify that the helper
+    is the thing being called.
+
+    So this serves the same three controls as CHECKBOXES and asserts the
+    selector followed. On a radio fixture an assumed role and a read one are
+    the same string, and any test built on one alone is certifying nothing.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    nav.pages[writes.DARK_MODE_URL] = DARK_MODE_AS_CHECKBOXES
+    _block, grant = await _setting_grant(nav, browser_page)
+
+    after = DARK_MODE_AS_CHECKBOXES.replace(
+        '<input type="checkbox" name="dm" aria-labelledby="dm-off" checked>',
+        '<input type="checkbox" name="dm" aria-labelledby="dm-off">',
+    ).replace(
+        '<input type="checkbox" name="dm" aria-labelledby="dm-on">',
+        '<input type="checkbox" name="dm" aria-labelledby="dm-on" checked>',
+    )
+    assert after.count("checked") == 1
+    page = _ClickRecordingPage(browser_page, nav, after)
+    result = await writes.perform(nav, page, grant)
+
+    assert page.clicks == [
+        'role=checkbox[name="Always on"][exact=true]'
+    ], page.clicks
+    assert result["performed"] is True, result
+
+
+async def test_a_destination_wearing_an_unmapped_role_refuses_rather_than_raising(
+    writes_on, browser_page
+):
+    """AN UNMAPPED ROLE IS A GATE REFUSAL, not an exception on the way past.
+
+    THE FIRST VERSION OF THIS TEST COULD NOT FIRE THE BRANCH IT WAS WRITTEN
+    FOR, and finding that out is what the test was worth. It replaced the
+    destination with a TEXT input -- which ``_read_dark_mode`` filters out
+    before ``_live_control`` ever sees it, because a text box has no
+    ``checked`` at all, so the refusal came from "0 controls are named
+    'Always on'" one step earlier. The role branch was unreachable from an
+    input of any type: an input has a ``checked`` reading only when it is a
+    radio or a checkbox, and both are mapped.
+
+    WHAT CAN ACTUALLY ARRIVE is an element carrying ``aria-checked``. A
+    ``div[role=switch]`` named for the destination IS a checkable row whose
+    role this package maps nothing from -- so it reaches the branch, and
+    without the branch it would reach ``dom.named_role_selector``, which
+    RAISES. Safe, and the wrong shape: a raise skips the gate's own
+    ``wrong_state_note`` and reports an extraction failure for what is a
+    refusal to act.
+    """
+    nav = FixtureNavigator(_nine_pages())
+    _block, grant = await _setting_grant(nav, browser_page)
+    # The destination becomes a switch. The other two inputs still carry the
+    # group's state, so the reading still settles and the direction still
+    # renders -- this isolates the ROLE question and nothing else.
+    broken = DARK_MODE_MARKUP.replace(
+        '<input type="radio" name="dm" aria-labelledby="dm-on">',
+        # A BUTTON rather than a div, and that is not cosmetic: a bare
+        # ``div[role=switch]`` matches no arm of CENSUS_CONTROL_SELECTOR and
+        # so produces NO ROW AT ALL -- the first attempt at this test used one
+        # and refused at "0 controls are named 'Always on'", one step before
+        # the branch it was written for. A button is censused, carries
+        # aria-checked, and therefore arrives at the role check.
+        '<button role="switch" aria-checked="false" aria-labelledby="dm-on">'
+        "</button>",
+    )
+    assert 'role="switch"' in broken
+    nav.pages[writes.DARK_MODE_URL] = broken
+    page = _ClickRecordingPage(browser_page, nav, broken)
+    with pytest.raises(WriteAttemptError) as excinfo:
+        await writes.perform(nav, page, grant)
+    message = str(excinfo.value)
+    assert "not a shape this server has seen" in message, message
+    assert "switch" in message, message
+    assert page.clicks == []
+
+
+def test_the_anchor_is_the_destination_and_only_a_measured_one():
+    """``anchor_label_for`` GAINED A TARGET, and the guard came with it.
+
+    For every other action the anchor is a property of the SPEC. For this one
+    the control to click is the one named for the destination, which is
+    per-call -- so the parameter exists, and with it the risk that a caller's
+    string reaches a selector. It cannot: the destination is matched against
+    the three states this server has seen rendered, and anything else returns
+    ``None``, which ``perform`` refuses on.
+    """
+    spec = spec_for_action("update_setting")
+    for state in writes.DARK_MODE_STATES:
+        canonical = writes._target_for(
+            spec, {"setting": "dark-mode", "value": state}
+        )
+        assert writes.anchor_label_for(spec, canonical) == state
+    # Case and spacing normalise to the CANONICAL string, so what reaches the
+    # selector is LinkedIn's spelling rather than the caller's.
+    loose = writes._target_for(
+        spec, {"setting": "dark-mode", "value": "  always ON "}
+    )
+    assert writes.anchor_label_for(spec, loose) == "Always on"
+    # And anything else is refused rather than passed through.
+    invented = writes._target_for(
+        spec, {"setting": "dark-mode", "value": "Always sepia"}
+    )
+    assert writes.anchor_label_for(spec, invented) is None
+    assert writes.anchor_label_for(spec, "") is None
+
+
+def test_the_click_selector_refuses_an_unmeasured_role_and_an_unsafe_name():
+    """THE OTHER HALF OF THE CLICK, guarded the way the url is.
+
+    ``assert_write_url`` rebuilds the url from the grant so a caller cannot
+    influence it. This is the same discipline on the selector: the ROLE must
+    be one this package maps from a measured control type, and the NAME may
+    not carry a character that would end the selector's own quoting. Both
+    REFUSE rather than escape -- an escaping rule is a thing to get subtly
+    wrong, and what a wrong one produces here is a click on a different
+    control.
+    """
+    assert (
+        dom.named_role_selector("radio", "Always on")
+        == 'role=radio[name="Always on"][exact=true]'
+    )
+    for bad_role in ("button", "link", "", "RADIO"):
+        with pytest.raises(Exception):
+            dom.named_role_selector(bad_role, "Always on")
+    for bad_name in ('Always "on"', "Always on]", "", "Always\non"):
+        with pytest.raises(Exception):
+            dom.named_role_selector("radio", bad_name)
+
+
+def test_the_role_is_read_off_the_row_and_never_assumed():
+    """AN INPUT'S ROLE IS ITS TYPE'S, and an unmeasured type has none here.
+
+    Six readings of the live dark-mode page establish three checkable inputs
+    and NONE of them establishes which of the two checkable types they are --
+    the census's ``checked`` gate admits radio and checkbox alike. So the role
+    is read at click time, and a type this package has not mapped returns
+    ``None`` rather than a plausible default.
+    """
+    assert dom.aria_role_of({"tag": "input", "input_type": "radio"}) == "radio"
+    assert (
+        dom.aria_role_of({"tag": "input", "input_type": "checkbox"}) == "checkbox"
+    )
+    # An explicit role attribute wins, because it is what the browser honours.
+    assert (
+        dom.aria_role_of({"tag": "div", "role": "radio", "input_type": None})
+        == "radio"
+    )
+    # And the refusals. ``None`` means THIS READER WILL NOT NAME IT, which is
+    # not "this element has no role" -- every rendered element has one.
+    assert dom.aria_role_of({"tag": "input", "input_type": "text"}) is None
+    assert dom.aria_role_of({"tag": "input", "input_type": None}) is None
+    assert dom.aria_role_of({"tag": "button", "input_type": None}) is None
+
+
+def test_consume_normalises_its_target_the_way_mint_did(writes_on):
+    """ONE NORMALISER, BOTH DOORS -- and this is the defect it closed.
+
+    ``consume`` compared ``grant.target`` against ``str(target)``, raw, while
+    ``mint`` had stored a value put through ``_target_for``. For a job id the
+    two agree, because normalising one is a strip. FOR A COMPOSITE TARGET THEY
+    NEVER CAN: ``mint`` stores ``"dark-mode :: Always on"`` and the tool layer
+    hands ``consume`` a mapping, whose ``str()`` is its repr. Every composite
+    action's token was unredeemable BY CONSTRUCTION -- not refused for a
+    reason, just never equal -- and nothing caught it, because no composite
+    action could reach ``mint`` either.
+    """
+    spec = spec_for_action("update_setting")
+    canonical = writes._target_for(spec, TARGETS["update_setting"])
+    assert TARGET_JOIN in canonical
+    # The shape the TOOL passes, which is the one that used to fail.
+    assert str(TARGETS["update_setting"]) != canonical
+
+    grant = _bare_grant(action="update_setting", target=canonical)
+    writes._GRANTS[grant.token] = grant
+    redeemed = consume(
+        grant.token, action="update_setting", target=TARGETS["update_setting"]
+    )
+    assert redeemed.target == canonical
+    assert redeemed.consumed is True

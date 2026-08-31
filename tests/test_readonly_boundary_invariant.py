@@ -273,8 +273,69 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # that was measured identical under 3.13.14 and 3.10.19 when it landed.
     # The 3.10 CI cell is the check, and it is the right place for this claim
     # to be settled.
-    "_ALLOWED_URL_PATTERNS": "72bc5d4a88b5325b",
-    "_FORBIDDEN_URL_SUBSTRINGS": "5e26ec3a8b29c38c",
+    #
+    # RE-FROZEN AGAIN 2026-08-31 (SECOND TIME THAT DAY), on the operator's
+    # rulings admitting FOUR MORE NAMED URLS. TWO digests moved and FOUR did
+    # not:
+    #
+    #   _ALLOWED_URL_PATTERNS      72bc5d4a88b5325b -> ea0fe246a3818bb9
+    #   _FORBIDDEN_URL_SUBSTRINGS  5e26ec3a8b29c38c -> afcb7f0d14c481a0
+    #
+    #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
+    #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #   <functions>                eb16cd07f5cf369d   UNCHANGED
+    #
+    # ``<functions>`` NOT MOVING IS THE LOAD-BEARING LINE HERE. Four surfaces
+    # were admitted and ``assert_read_url`` is byte-identical: no gate was
+    # taught an exception, no check was reordered, no clause was relaxed. The
+    # whole change is DATA -- two patterns added, one substring removed, one
+    # exemption-table entry added -- which is the only shape of boundary
+    # change a reviewer can check by reading a list.
+    #
+    # AND THE DIRECTION, which is the thing a digest cannot say. For the first
+    # time in this file's history the two do not point the same way:
+    #
+    # * THE ALLOWLIST GREW, by exactly four anchored patterns, each admitting
+    #   ONE url or one url shape and never a family:
+    #     ``.../feed/update/urn:li:[A-Za-z]+:[0-9]+/?$``  (one item permalink;
+    #        the urn shape is dom.ACTIVITY_ITEMS_JS's own, so the only urns
+    #        this server can build are the only ones this admits)
+    #     ``.../preload/sharebox/?$``                     (the post composer)
+    #     ``.../article/new/?$``                          (the article
+    #        composer -- both measured as real anchors, count 1 each, before
+    #        either was written down)
+    #     ``.../messaging/compose/?$``                    (the message
+    #        composer)
+    #   No existing pattern was widened, relaxed or removed.
+    #
+    # * THE FORBIDDEN LIST SHRANK, AND THAT HAS NEVER HAPPENED BEFORE. It has
+    #   grown at every previous re-freeze and the roster test exists precisely
+    #   because a digest cannot tell the two apart. ``"/feed/update"`` was
+    #   REMOVED, on the ruling admitting one item permalink per call, and it
+    #   could not be kept for a mechanical reason rather than a matter of
+    #   appetite: this gate matches SUBSTRINGS and cannot say "the permalink
+    #   but nothing beneath it", while the exemption table is keyed on an
+    #   EXACT url and the urn varies per call. Neither mechanism can express
+    #   the ruling.
+    #
+    #   WHAT DID NOT GO WITH IT is asserted rather than asserted-in-prose:
+    #   ``test_the_removed_substring_did_not_take_the_family_with_it`` in
+    #   test_readonly.py puts that family's destructive members through the
+    #   real guard and reads back WHICH substring refused each --
+    #   ``/edit/``, ``/delete`` and ``action=``, all still present. The
+    #   removal is also recorded in
+    #   ``FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED`` rather than by deleting
+    #   the entry from the roster, because a substring quietly dropped from
+    #   the roster is indistinguishable from one that was never on it.
+    #
+    # * ``/messaging/compose`` WAS NOT REMOVED, and the contrast with the line
+    #   above is the reason each was handled the way it was. That composer's
+    #   url is a CONSTANT, so an exact-url exemption can hold it and the
+    #   substring stays, refusing every other spelling in that family exactly
+    #   as before. A url with a variable segment has no such option.
+    "_ALLOWED_URL_PATTERNS": "ea0fe246a3818bb9",
+    "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # RE-FROZEN AGAIN 2026-08-26, and this one moved for a different reason
@@ -341,8 +402,18 @@ DENYLISTS_AT_A76FE32 = {
     # ``/close-accounts`` and ``/hibernate-account``. Nothing left either one.
     # The other two entries are untouched, which is the half of the sentence
     # worth reading.
-    "_ALLOWED_URL_PATTERNS": "72bc5d4a88b5325b",
-    "_FORBIDDEN_URL_SUBSTRINGS": "5e26ec3a8b29c38c",
+    #
+    # AND THE SAME TWO MOVED AGAIN LATER ON 2026-08-31, for four more ruled
+    # urls. Fifth re-baseline, and THE FIRST WHERE THE TWO DIRECTIONS
+    # DISAGREE: the allowlist grew by four anchored patterns and the forbidden
+    # list SHRANK by one, ``"/feed/update"``. That is the exact move this
+    # dict cannot see and the roster tests can, which is why they exist and
+    # why the removal had to be written into
+    # ``FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED`` -- an edit somebody
+    # reviews -- rather than absorbed by re-baking a hash here. The other two
+    # entries are untouched.
+    "_ALLOWED_URL_PATTERNS": "ea0fe246a3818bb9",
+    "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }

@@ -3698,6 +3698,37 @@ def census_href_identifies_entity(href_shape: Optional[str]) -> bool:
     return any(marker in shaped for marker in _CENSUS_ENTITY_HREFS)
 
 
+#: THE MERGE KEY'S FIELDS, NAMED ONCE AND IN ORDER, and this constant is a
+#: defect-class removal rather than tidying.
+#:
+#: The published row used to be built by SUBSCRIPTING the key -- ``"tag":
+#: key[1], "role": key[2], ...`` -- so inserting a field anywhere but the end
+#: renamed every column after it, SILENTLY and with no assertion able to
+#: notice: every value is still a string or a None, so the row stays
+#: well-formed while ``role`` reports what ``name_source`` measured. That is
+#: the same silent-drop shape ``container`` was lost to on the day it was
+#: added, one step further along: there the field vanished, here it would have
+#: been MISLABELLED, which is worse because the output still looks complete.
+#:
+#: :func:`census_aggregate` now zips this against the key, so the names and
+#: the order cannot disagree by construction, and
+#: ``tests/test_surface_census.py`` pins the length against the key that is
+#: actually built.
+CENSUS_KEY_FIELDS: tuple[str, ...] = (
+    "shape",
+    "tag",
+    "input_type",
+    "role",
+    "name_source",
+    "has_href",
+    "href_shape",
+    "aria_expanded",
+    "disabled",
+    "checked",
+    "checked_source",
+)
+
+
 def census_aggregate(
     records: Iterable[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
@@ -3713,18 +3744,27 @@ def census_aggregate(
     role and disabled state. Collapsing them on the name alone would report
     one shape where the page carries two different controls.
 
-    THE KEY IS THESE TEN, IN THIS ORDER, and it is written out rather than
-    counted because the sentence below is what happens when a reader trusts a
-    summary of it: shaped name, tag, role, ``name_source``, ``has_href``,
-    ``href_shape``, ``aria_expanded``, ``disabled``, ``checked``,
-    ``checked_source``. Every one of them also comes back on the row, so the
-    key is inspectable from the output rather than only from here.
+    THE KEY IS THE FIELDS OF :data:`CENSUS_KEY_FIELDS`, IN THAT ORDER --
+    ELEVEN as of 2026-08-31, when ``input_type`` joined. It is not written out
+    a second time here, and that is the point rather than brevity: this
+    sentence USED to enumerate the fields, and an enumeration in prose beside
+    an enumeration in code is two things that go out of step. Every field also
+    comes back on the row -- the row is BUILT by zipping that constant against
+    the key -- so the key is inspectable from the output rather than only from
+    here.
 
     THAT SENTENCE SAID "the WHOLE record" UNTIL 2026-08-31 AND IT WAS FALSE,
     which matters more than the wording: the key is ENUMERATED below, so a
     field added to a record and not added to the key is dropped SILENTLY, and
     the docstring was the reason nobody looked. That is exactly what happened
     to ``container`` on the day it was added -- measured, not supposed.
+
+    ``input_type`` IS IN THE KEY, added 2026-08-31, and it is the same axis
+    argument as ``tag``: an input's type decides its ARIA ROLE, so a radio and
+    a checkbox are two different controls wearing one tag, and merging them
+    would report one row where the page carries two kinds. It is what lets
+    ``writes._live_control`` build a click selector from the role the control
+    ACTUALLY has instead of assuming one.
 
     ``checked`` AND ``checked_source`` ARE IN THE KEY, added 2026-08-31, and
     the axis is what decides it. ``checked`` is a control STATE -- the same
@@ -3773,6 +3813,11 @@ def census_aggregate(
         key = (
             shaped_name,
             str(record.get("tag") or ""),
+            # UNCOERCED, like ``checked`` below and for the same reason:
+            # ``None`` means NOT AN INPUT and the empty string is a value a
+            # real input type can never take, so defaulting one to the other
+            # would merge a ``<button>`` with an ``<input type="button">``.
+            record.get("input_type"),
             record.get("role"),
             record.get("name_source"),
             bool(record.get("has_href")),
@@ -3813,17 +3858,8 @@ def census_aggregate(
 
     control_shapes = [
         {
-            "shape": key[0],
+            **dict(zip(CENSUS_KEY_FIELDS, key)),
             "count": count,
-            "tag": key[1],
-            "role": key[2],
-            "name_source": key[3],
-            "has_href": key[4],
-            "href_shape": key[5],
-            "aria_expanded": key[6],
-            "disabled": key[7],
-            "checked": key[8],
-            "checked_source": key[9],
             "containers": dict(
                 sorted(
                     merged_containers.get(key, {}).items(),

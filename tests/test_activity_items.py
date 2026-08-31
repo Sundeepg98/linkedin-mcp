@@ -527,13 +527,155 @@ async def test_an_all_his_rail_yields_exactly_his_item_keys_deduped(run_tool):
     assert result["counts"] == {
         "overflow_controls": 2,
         "owner_headings": 1,
+        # BOTH ROUTES, and on this fixture they agree because its h1 is
+        # plainly rendered. The pair is what makes the disagreement visible on
+        # a page where it happens, and the fixture below is that page.
+        "owner_headings_rendered": 1,
+        "owner_headings_contained": 1,
         "permalink_anchors": 3,
         "distinct_urns": 2,
         "unrecognised": 0,
         "unpaired": 0,
     }
+    # AND THE ROUTE IS NAMED. On a rendered heading it must be the innerText
+    # one: the fallback exists for a heading innerText cannot see, and a
+    # reader that took the fallback here would be taking it always.
+    assert result["authorship"]["owner_source"] == "h1-innertext"
     assert result["pages_loaded"] == 1
     assert navigations == [SELF_PROFILE_URL], navigations
+
+
+#: THE LIVE REFUSAL, REPRODUCED -- and the construction was MEASURED rather
+#: than reached for, because the obvious one does not work.
+#:
+#: Nine constructions were run through a real Chromium on 2026-08-31, reading
+#: ``innerText`` and ``textContent`` off the same ``h1``. Only THREE produce
+#: the live symptom (rendered empty, contained non-empty):
+#:
+#:     h1 style="visibility:hidden"          ''            'Owner Name'
+#:     h1 > span style="display:none"        ''            'Owner Name'
+#:     h1 > span style="visibility:hidden"   ''            'Owner Name'
+#:
+#: and SIX do not, including the two a reader would reach for first:
+#:
+#:     h1 style="display:none"               'Owner Name'  'Owner Name'
+#:     h1 clip/absolute visually-hidden      'Owner Name'  'Owner Name'
+#:     h1 aria-hidden="true"                 'Owner Name'  'Owner Name'
+#:     h1 width:0;height:0;overflow:hidden   'Owner Name'  'Owner Name'
+#:     h1 plain                              'Owner Name'  'Owner Name'
+#:     h1 empty                              ''            ''
+#:
+#: ``display:none`` FAILS TO REPRODUCE IT because the spec says ``innerText``
+#: on an element that is NOT BEING RENDERED returns ``textContent`` -- the
+#: fallback is the whole point of that clause. The element has to be rendered
+#: and its TEXT not, which is what ``visibility:hidden`` and a hidden child
+#: do. And the clip-and-absolute pattern -- the standard "visually hidden"
+#: recipe, and the one LinkedIn is most likely to use -- reads NORMALLY, which
+#: is why this fixture is a reproduction of the CLASS and NOT evidence about
+#: what the live page does. What the live page does is unmeasured; the two
+#: counts this reader now reports are what will say.
+HIDDEN_H1_HTML = HIS_RAIL_HTML.replace(
+    H1_OWNER, f'<h1 style="visibility:hidden">{OWNER_FULL}</h1>'
+)
+
+
+async def test_a_heading_out_of_layout_used_to_refuse_and_now_names_the_owner(
+    run_tool,
+):
+    """THE DEFECT THIS ROUTE WAS ADDED FOR, reproduced rather than described.
+
+    On 2026-08-31 the live profile answered ``no_page_owner_heading`` TWICE,
+    identically, while the two conditions that do the real work both held --
+    LinkedIn's own ``isSelfProfile=true``, and one author across all eight
+    overflow controls. The census measured 233 controls on the same page in
+    the same session, so it was not a half-render: the reading was stable and
+    the reader still would not aim.
+
+    ``innerText`` IS A RENDERED-TEXT READING and C3 is not a question about
+    rendering. It asks whether LinkedIn's own markup names this page's owner
+    -- a claim about the DOCUMENT -- so making it depend on CSS was the
+    defect, and it is the same shape as ``name_source: "none"`` meaning "this
+    instrument cannot read one" while reading as "the control has none".
+
+    THE CONTROL THAT MAKES THIS A REPRODUCTION rather than an assertion about
+    the new code is the second half: the fixture is shown carrying the
+    heading, and the rendered route is shown answering zero on it. Without
+    that, a fixture with no h1 at all would pass this test.
+    """
+    assert OWNER_FULL in HIDDEN_H1_HTML
+    result, _navigations, _scripts = await run_tool(HIDDEN_H1_HTML)
+
+    # The rendered route sees NOTHING, which is the live symptom exactly.
+    assert result["counts"]["owner_headings_rendered"] == 0
+    # And the document says the owner is there.
+    assert result["counts"]["owner_headings_contained"] == 1
+
+    assert result.get("refused") is None, result
+    assert result["authorship"]["established"] is True
+    assert result["authorship"]["owner_source"] == "h1-textcontent"
+    assert result["items"] == [HIS_ITEM_ONE, HIS_ITEM_TWO], result["items"]
+
+
+async def test_the_fallback_route_does_not_relax_the_wrong_owner_refusal(
+    run_tool,
+):
+    """THE FALLBACK IS A SECOND ROUTE TO THE TEXT, NOT A WEAKER RULE.
+
+    The obvious way to get past a refusing C3 is to stop requiring the
+    comparison, and that is what this refuses to have done. A hidden heading
+    naming SOMEBODY ELSE must still refuse: the route changed where the string
+    is read from, and nothing about what is done with it.
+    """
+    wrong = WRONG_OWNER_HTML.replace(
+        f"<h1>{OTHER_AUTHOR}</h1>",
+        f'<h1 style="visibility:hidden">{OTHER_AUTHOR}</h1>',
+    )
+    assert OTHER_AUTHOR in wrong
+    result, _navigations, _scripts = await run_tool(wrong)
+
+    assert result["counts"]["owner_headings_rendered"] == 0
+    assert result["counts"]["owner_headings_contained"] == 1
+    assert result["refused"] == "author_is_not_the_page_owner", result
+    assert "items" not in result
+    # The refusal names the route it compared through, so a reader can tell a
+    # rendered mismatch from a contained one.
+    assert "h1-textcontent" in result["reason"]
+
+
+async def test_two_hidden_headings_are_ambiguous_rather_than_resolved(run_tool):
+    """AMBIGUITY SURVIVES THE FALLBACK. Two headings is two headings whichever
+    route reads them, and picking one would be picking by document order --
+    the rule this reader exists to keep. Written because a fallback that
+    silently took the first of two would look identical from the outside on
+    every page that has one."""
+    two = TWO_HEADING_HTML.replace("<h1>", '<h1 style="visibility:hidden">')
+    result, _navigations, _scripts = await run_tool(two)
+
+    assert result["counts"]["owner_headings_rendered"] == 0
+    assert result["counts"]["owner_headings_contained"] == 2
+    assert result["refused"] == "ambiguous_page_owner_heading", result
+    assert "items" not in result
+
+
+async def test_no_heading_at_all_still_refuses_and_says_both_routes_saw_zero(
+    run_tool,
+):
+    """AND THE REFUSAL THAT SURVIVES, now meaning something stronger.
+
+    Before the second route, ``no_page_owner_heading`` could mean either "no
+    heading" or "a heading this instrument cannot read". It now means only the
+    first, and the reason prints both counts so the claim is checkable from
+    the answer rather than from the source.
+    """
+    result, _navigations, _scripts = await run_tool(
+        HIS_RAIL_HTML.replace(H1_OWNER, "")
+    )
+    assert result["refused"] == "no_page_owner_heading", result
+    assert result["counts"]["owner_headings_rendered"] == 0
+    assert result["counts"]["owner_headings_contained"] == 0
+    assert "rendered (0)" in result["reason"]
+    assert "contained (0)" in result["reason"]
+    assert "items" not in result
 
 
 def test_the_his_rail_fixture_really_repeats_one_urn():

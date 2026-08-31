@@ -279,6 +279,87 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # No query string and no sub-path: nothing builds either, and the
     # anchoring is what keeps this one page from becoming the family.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$"),
+    # ONE ITEM PERMALINK. Added 2026-08-31 on the operator's ruling: ONE NAMED
+    # ITEM PERMALINK PER CALL. It is the write surface ``react_to_item`` acts
+    # on and the read surface ``linkedin_surface_census("feed_item")``
+    # measures, so it is admitted with two consumers rather than none.
+    #
+    # THE SHAPE IS NOT INVENTED HERE. ``urn:li:[A-Za-z]+:[0-9]+`` is the
+    # anchored shape ``dom.ACTIVITY_ITEMS_JS`` already requires before it will
+    # emit an item key at all, so the only urns this server can build a url
+    # from are the only urns this pattern admits, and the two cannot drift:
+    # ``tests/test_readonly.py`` pins them equal. A percent-encoded spelling
+    # matches NEITHER -- it has never been observed in this position, and a
+    # shape nobody has seen is not a shape to admit.
+    #
+    # NO QUERY STRING, so LinkedIn's tracking parameters do not come with it
+    # and neither does anything a caller appends.
+    #
+    # AND THE SECOND GATE THIS COST, STATED RATHER THAN GLOSSED.
+    # ``"/feed/update"`` WAS on :data:`_FORBIDDEN_URL_SUBSTRINGS` and has been
+    # REMOVED, because that list is substring-based and cannot express "this
+    # permalink but nothing else under it" -- and the exemption table cannot
+    # hold it either, since that table is keyed on an EXACT url and the urn
+    # varies per call. So this family now stands on the anchored pattern
+    # alone.
+    #
+    # WHAT THAT DOES AND DOES NOT GIVE UP, measured against the list rather
+    # than argued: the destructive members of this family are ``/edit/``,
+    # ``/delete``, ``/withdraw`` and ``action=``, and ALL FOUR are still on
+    # the forbidden list and still checked first. So the second gate is intact
+    # for everything under ``/feed/update/`` that could change anything; what
+    # was given up is a blanket refusal of a surface that RENDERS one of his
+    # own items. That is the trade the ruling made, and it is written here so
+    # the next reader sees a decision rather than an omission.
+    re.compile(
+        r"^https://www\.linkedin\.com/feed/update/"
+        r"urn:li:[A-Za-z]+:[0-9]+/?$"
+    ),
+    # THE TWO PUBLISHING COMPOSERS, admitted 2026-08-31 on the operator's
+    # ruling, BY NAME AND ONE AT A TIME.
+    #
+    # Both were MEASURED as real anchors before being written here, which is
+    # the whole of why they are addresses rather than guesses: ``Create a
+    # post`` is an ``<a>`` whose href shapes to ``/preload/sharebox/`` (count
+    # 1 on his profile, three readings across two days) and ``Write article``
+    # is an ``<a>`` to ``/article/new/`` (count 1 on the feed, same). The
+    # third composer route -- ``Start a post`` -- is a ``div[role=button]``
+    # with NO href and is deliberately NOT here: reaching it needs a click on
+    # a read path, which is a mutation this package does not sanction.
+    #
+    # THE COST THE OPERATOR CLEARED KNOWINGLY. A composer may AUTOSAVE, and
+    # this server has no reachable surface on which a resulting draft could be
+    # seen -- 17 candidate draft addresses were run against this very module
+    # on 2026-08-31 and all 17 were refused. So opening one may leave an
+    # artefact only he can find. He cleared that; the capture reports what it
+    # can see and does not claim what it cannot.
+    #
+    # NEITHER ADMITS THIS SERVER TO PUBLISHING. Publishing needs text entry,
+    # and ``fill``, ``type``, ``press`` and ``keyboard`` are on
+    # :data:`_MUTATION_CALL_PATTERNS` and on no entry of
+    # :data:`SANCTIONED_MUTATIONS`. An address is not a capability.
+    re.compile(r"^https://www\.linkedin\.com/preload/sharebox/?$"),
+    re.compile(r"^https://www\.linkedin\.com/article/new/?$"),
+    # THE MESSAGE COMPOSER. Admitted 2026-08-31 on the operator's ruling, and
+    # it is the narrowest admission on this list because it is the only one
+    # that had to be bought past the forbidden gate.
+    #
+    # IT IS NOT REACHED BY SHORTENING THE FORBIDDEN LIST.
+    # ``"/messaging/compose"`` STAYS on :data:`_FORBIDDEN_URL_SUBSTRINGS`
+    # exactly as it was -- it is the entry that survived when the blanket
+    # ``"/messaging"`` ban was narrowed on 2026-08-26 -- and this one url is
+    # let past it by :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS`, an EXACT-url
+    # table. So every other address in that family is refused by the same gate
+    # it always was, and a second one needs a second deliberate entry.
+    #
+    # THE PRECONDITION THAT WAS CHECKED BEFORE THIS WAS WRITTEN. Loading
+    # messaging can open a conversation LinkedIn chooses and mark a real
+    # person's InMail read -- a cost paid by somebody who is not him. The
+    # operator's ruling was conditioned on the messaging badge reading ZERO
+    # first, and it was read first: ``Messaging, 0 new notifications``, count
+    # 1, on ``/feed/`` and on his profile, 2026-08-31. With no unread message
+    # there is no stranger's InMail to spend.
+    re.compile(r"^https://www\.linkedin\.com/messaging/compose/?$"),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.
@@ -321,7 +402,21 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     "/unfollow",
     "/endorse",
     "/post/",
-    "/feed/update",
+    # ``"/feed/update"`` WAS HERE AND WAS REMOVED 2026-08-31, on the
+    # operator's ruling admitting ONE NAMED ITEM PERMALINK PER CALL. It is
+    # recorded rather than deleted because a substring that quietly leaves
+    # this tuple is indistinguishable from one that was never in it.
+    #
+    # WHY IT COULD NOT STAY. This gate is substring-based, so it cannot say
+    # "the permalink but nothing under it", and the exemption table below is
+    # keyed on an EXACT url while the urn varies per call. Neither mechanism
+    # can express the ruling, so the ruling costs this entry.
+    #
+    # WHAT STILL REFUSES THE DANGEROUS HALF OF THAT FAMILY: ``/edit/``,
+    # ``/delete``, ``/withdraw`` and ``action=`` are all still below and all
+    # still checked before the allowlist. The permalink itself is admitted by
+    # ONE anchored pattern requiring the literal ``urn:li:<type>:<digits>``
+    # shape and no query string.
     "sharing/share",
     "/settings/",
     "opentowork",
@@ -416,6 +511,17 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
 #: edit. ``tests/test_readonly.py`` pins the contents.
 _FORBIDDEN_SUBSTRING_EXEMPTIONS: dict[str, str] = {
     "https://www.linkedin.com/in/me/edit/intro/": "/edit/",
+    # THE MESSAGE COMPOSER, added 2026-08-31 on the operator's ruling. The
+    # second entry, and it uses this table for exactly what the table is for:
+    # the url is a CONSTANT with no variable part, so an equality key can hold
+    # it and ``"/messaging/compose"`` stays on the forbidden tuple, refusing
+    # every other spelling in that family as it always did.
+    #
+    # This is the contrast with ``/feed/update/<urn>/`` one gate up, and the
+    # contrast is the reason each was handled the way it was: a url with a
+    # variable segment cannot be an equality key, so admitting THAT one cost
+    # its forbidden entry, while admitting this one costs nothing.
+    "https://www.linkedin.com/messaging/compose/": "/messaging/compose",
 }
 
 

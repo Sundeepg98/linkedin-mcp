@@ -904,6 +904,95 @@ SAVE_CONTROL = ", ".join(
 )
 
 
+#: The ARIA role an ``<input>`` of a given type carries, for the two types
+#: this package builds a click from. DELIBERATELY NOT THE WHOLE HTML-AAM
+#: TABLE: a mapping is only here if a control of that kind has actually been
+#: measured on a page this server acts on, so an input type absent from this
+#: dict makes :func:`aria_role_of` return ``None`` and the caller refuse.
+#:
+#: WHY IT MATTERS AT ALL. ``radio`` and ``checkbox`` are two different roles
+#: wearing one tag, and Playwright's accessible-name selector engine is
+#: addressed BY ROLE -- so a selector built on the wrong one matches nothing.
+#: Six readings of the dark-mode page established three checkable inputs and
+#: NONE of them established which of the two types they are, because the
+#: census's ``checked`` gate admits both. The type is therefore read off the
+#: row at click time and mapped here.
+INPUT_TYPE_ROLES: dict[str, str] = {
+    "radio": "radio",
+    "checkbox": "checkbox",
+}
+
+
+def aria_role_of(row: dict[str, Any]) -> Optional[str]:
+    """The role a censused control carries, or ``None`` if it is not one this
+    package will build a click from.
+
+    THREE ROUTES, IN ORDER, AND THE LAST IS A REFUSAL. An explicit ``role``
+    attribute wins, because it is what the author wrote and what the browser
+    honours. Otherwise an ``<input>``'s type decides it, through
+    :data:`INPUT_TYPE_ROLES`. Anything else -- an input type nobody has
+    measured here, a tag with an implicit role this package has never needed
+    -- returns ``None``, and every caller treats that as a refusal rather
+    than falling back to a plausible role.
+
+    ``None`` IS NOT "no role". Every rendered element has one; this says THIS
+    READER WILL NOT NAME IT, which is the same distinction ``checked: None``
+    and ``name_source: "none"`` each cost this module once before it was
+    written down.
+    """
+    explicit = row.get("role")
+    if isinstance(explicit, str) and explicit.strip():
+        return explicit.strip().lower()
+    if str(row.get("tag") or "").lower() != "input":
+        return None
+    return INPUT_TYPE_ROLES.get(str(row.get("input_type") or "").lower())
+
+
+#: The characters a name may not contain if it is going into a role selector.
+#: A quote would end the quoted value early and a bracket would end the
+#: attribute clause, so either could turn one control's name into a selector
+#: matching something else entirely.
+_SELECTOR_UNSAFE = ('"', "'", "[", "]", "\\", "\n", "\r", "\t", ">", "<")
+
+
+def named_role_selector(role: str, name: str) -> str:
+    """A selector for the ONE control with this role and this accessible name.
+
+    Playwright's ``role=`` engine, because it is the only selector form that
+    computes an ACCESSIBLE NAME -- and the dark-mode radios are named through
+    ``aria-labelledby``, which no attribute selector can follow.
+    ``save_control_selector`` can use ``button[aria-label="..."]`` because its
+    control is named by the attribute itself; this one cannot.
+
+    ``exact=true`` because a substring match would let ``Always on`` select a
+    control named ``Always on, recommended``, and on a radio group the two
+    would be different destinations.
+
+    GUARDED THE SAME WAY :func:`save_control_selector` IS, and the guard has
+    to be here rather than at the call site: this is a string a CLICK is built
+    from. The role must be one this package maps, and the name must contain
+    none of the characters that would let it escape its own quotes. Both
+    refuse rather than escaping, because an escaping rule is a thing to get
+    subtly wrong and a refusal is not.
+    """
+    if role not in set(INPUT_TYPE_ROLES.values()):
+        raise ExtractionFailedError(
+            f"refusing to build a selector for role {role!r}: this package "
+            f"builds clicks only for {sorted(set(INPUT_TYPE_ROLES.values()))}. "
+            "A selector assembled for an unmeasured role is a guess pointed "
+            "at a control."
+        )
+    if not name or any(bad in name for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a selector from this name: it is empty or "
+            "carries a character that would end the selector's own quoting. "
+            "The name is not escaped and made to work -- an escaping rule is "
+            "a thing to get subtly wrong, and what a wrong one produces here "
+            "is a click on a different control."
+        )
+    return f'role={role}[name="{name}"][exact=true]'
+
+
 def save_control_selector(label: str) -> str:
     """A selector for the save control wearing exactly ``label``.
 
@@ -2407,16 +2496,23 @@ FILTER_SETTLE_MS = 2_000
 #: nothing here now -- but the MECHANISM it described is permanent, which is
 #: why the paragraph is corrected rather than deleted. BOTH DOWNSTREAM SITES
 #: ENUMERATE THEIR FIELDS: ``read_surface_census`` below shapes each row by
-#: building a dict literal that NAMES TEN KEYS, and ``shape.census_aggregate``
-#: merges rows on an explicit TEN-FIELD tuple. A field this script emits and
-#: neither of those names is dropped in SILENCE -- which is exactly what
-#: happened to ``container`` on the day it was added, with the aggregate's
-#: docstring calling itself "the WHOLE record" as the sentence that made the
-#: drop invisible. ``checked`` and ``checked_source`` were added to both sites
-#: in the same edit as this one, so the census tool's rows carry them. THE TWO
-#: COUNTS IN THIS PARAGRAPH ARE THE THING TO RE-CHECK when the next field is
-#: added here; a stale count in the comment a reader consults to learn how
-#: many fields there are is this module's most-repeated defect.
+#: building a dict literal that NAMES ITS KEYS, and ``shape.census_aggregate``
+#: merges rows on an explicit tuple whose field names are
+#: ``shape.CENSUS_KEY_FIELDS``. A field this script emits and neither of those
+#: names is dropped in SILENCE -- which is exactly what happened to
+#: ``container`` on the day it was added, with the aggregate's docstring
+#: calling itself "the WHOLE record" as the sentence that made the drop
+#: invisible. ``checked`` and ``checked_source`` were added to both sites in
+#: one edit, and ``input_type`` in another on 2026-08-31.
+#:
+#: THE COUNTS THAT USED TO BE IN THIS PARAGRAPH HAVE BEEN REMOVED, and the
+#: removal is the lesson rather than an omission. It read "NAMES TEN KEYS ...
+#: an explicit TEN-FIELD tuple" and told the reader those two numbers were the
+#: thing to re-check -- which is a comment asking to be kept in step with code
+#: by hand, and this module's most-repeated defect is exactly that going
+#: stale. ``shape.CENSUS_KEY_FIELDS`` is now the single place the field list
+#: exists, the published row is BUILT from it, and a test pins the tool's
+#: promised key set against it. There is no number here to rot.
 CENSUS_JS = """
 (cfg) => {
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
@@ -2519,6 +2615,30 @@ CENSUS_JS = """
     return { checked: null, source: 'none' };
   };
 
+  // THE INPUT'S TYPE, and it is read from the PROPERTY rather than the
+  // attribute on purpose: an <input> with no type attribute is a text box,
+  // and el.type reports the default the browser actually applies while
+  // getAttribute reports the empty string. A selector has to match what the
+  // browser applied.
+  //
+  // null MEANS NOT AN INPUT, and it is the same tri-state discipline
+  // checkedOf keeps one function up. A <button> and an <input type="button">
+  // are different elements with different ARIA roles, and reporting the
+  // second's type as "" would put them in one row.
+  //
+  // WHY IT IS HERE AT ALL, since the census counts controls rather than
+  // driving them: writes._live_control for update_setting builds its click
+  // selector from the ROLE the control actually has, and an input's role is
+  // decided by its type -- radio and checkbox are different roles wearing
+  // one tag. Without this the selector would have to assume one of them,
+  // which is exactly the guessed shape this package refuses on a write.
+  const inputTypeOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag !== 'input') return null;
+    const type = String(el.type || '').toLowerCase();
+    return type ? type : null;
+  };
+
   const controls = [];
   let nodes;
   try { nodes = document.querySelectorAll(cfg.controlSelector); } catch (e) { nodes = []; }
@@ -2530,6 +2650,7 @@ CENSUS_JS = """
     const state = checkedOf(el);
     controls.push({
       tag: (el.tagName || '').toLowerCase(),
+      input_type: inputTypeOf(el),
       role: attrOf(el, 'role') || null,
       name: named.name,
       name_source: named.source,
@@ -2624,6 +2745,13 @@ async def read_surface_census(
             {
                 "shape": name_shape,
                 "tag": str(control.get("tag") or ""),
+                # THE INPUT'S TYPE, or ``None`` for anything that is not an
+                # ``<input>``. UNCOERCED, for the same reason ``checked`` is:
+                # ``str(... or "")`` would turn "not an input" into the empty
+                # string, which is a value a real type could never take and
+                # would put a ``<button>`` and an ``<input type="button">`` in
+                # one row. Added 2026-08-31 with the eleventh key.
+                "input_type": control.get("input_type"),
                 "role": control.get("role"),
                 "name_source": control.get("name_source"),
                 "has_href": bool(control.get("has_href")),
@@ -3332,14 +3460,68 @@ ACTIVITY_ITEMS_JS = """
   // choosing by document order -- the same defect the container descriptor was
   // added to end. Zero and two are different refusals and are reported as a
   // COUNT so the caller can tell them apart.
+  //
+  // TWO ROUTES TO THE HEADING'S TEXT, AND THE SECOND EXISTS BECAUSE THE
+  // FIRST ANSWERED ZERO ON THE LIVE PAGE. Until 2026-08-31 the only route was
+  // ``innerText``, and it returned ZERO owner headings on the live profile --
+  // twice, identically, on a page the census measured at 233 controls, so not
+  // a half-render.
+  //
+  // WHAT IS MEASURED AND WHAT IS NOT, kept apart on purpose. MEASURED: the
+  // innerText route finds no heading there. NOT MEASURED: why. ``innerText``
+  // is a RENDERED-TEXT reading and returns '' for an element CSS has taken
+  // out of layout, so a heading LinkedIn draws for assistive readers and
+  // hides visually would produce exactly this -- but so would a heading
+  // inside a shadow root, and so would a page with no h1 at all. THIS CHANGE
+  // DOES NOT ASSUME WHICH. It adds the second route and reports BOTH counts,
+  // so the next live reading says which of the three it is instead of being
+  // interpreted. If ``textContent`` also answers zero, the refusal stands and
+  // means something stronger than it did.
+  //
+  // WHY TAKING THE SECOND ROUTE IS NOT A RELAXATION. What C3 is checking is
+  // whether LINKEDIN'S OWN MARKUP names this page's owner. That is a claim
+  // about the document, not about what a sighted viewer sees, so making it
+  // depend on CSS was the defect -- the same class as ``name_source: "none"``
+  // meaning "this instrument cannot read one" while reading as "the control
+  // has none". A visually-hidden h1 is still LinkedIn asserting whose page
+  // this is, and an assistive reader is told exactly that.
+  //
+  // ``innerText`` IS STILL PREFERRED AND BOTH COUNTS ARE REPORTED, so a
+  // caller can see which route answered and the reading stays falsifiable. If
+  // BOTH are zero the refusal stands and now means something stronger: there
+  // is no h1 element with any text in it at all.
   let headings;
   try { headings = Array.from(document.querySelectorAll('h1')); }
   catch (e) { headings = []; }
-  const owners = [];
+  const rendered = [];
+  const contained = [];
   for (const node of headings) {
-    const named = norm(textOf(node));
-    if (named) owners.push(named);
+    const shown = norm(textOf(node));
+    if (shown) rendered.push(shown);
+    let raw = '';
+    try { raw = norm(node && node.textContent ? node.textContent : ''); }
+    catch (e) { raw = ''; }
+    if (raw) contained.push(raw);
   }
+  // PREFER THE RENDERED ROUTE; FALL BACK ONLY WHEN IT FOUND NOTHING AT ALL.
+  //
+  // WRITTEN AS TWO EXPRESSIONS RATHER THAN A BRANCH CHAIN, and that is a
+  // correction rather than a style choice. The first draft was three arms --
+  // "exactly one rendered", "zero rendered and exactly one contained", and a
+  // catch-all -- and the CATCH-ALL ALREADY DID BOTH JOBS, so the middle arm
+  // was dead. It was caught by the mutation that deletes the fallback: the
+  // suite stayed green, because deleting a dead arm changes nothing. A check
+  // that cannot fail certifies nothing, and neither does the code shape that
+  // makes it unable to.
+  //
+  // NO ARITY TEST HERE ON PURPOSE. "Exactly one" is enforced downstream, on
+  // ``owners.length``, so two rendered headings refuse as ambiguous instead
+  // of falling through to the contained route and being resolved by it --
+  // which would be resolving an ambiguity by changing the question.
+  const owners = rendered.length ? rendered : contained;
+  const ownerSource = rendered.length
+    ? 'h1-innertext'
+    : (contained.length ? 'h1-textcontent' : null);
 
   // null means NOT COMPARED -- there was no single author, or no single
   // heading. false means compared and different. Collapsing the two would be
@@ -3358,6 +3540,14 @@ ACTIVITY_ITEMS_JS = """
     authors_found: distinct.length,
     unanimous: unanimous,
     owner_headings: owners.length,
+    // BOTH ROUTES' COUNTS, ALWAYS, and never only the one that answered. A
+    // caller that sees ``owner_headings_rendered: 0`` beside
+    // ``owner_headings_contained: 1`` is being shown the CSS-visibility
+    // finding directly rather than having to infer it, and a future drift in
+    // either direction is visible in the reading instead of in a refusal.
+    owner_headings_rendered: rendered.length,
+    owner_headings_contained: contained.length,
+    owner_source: ownerSource,
     owner_match: ownerMatch,
     established: established,
     permalink_anchors: 0,
@@ -3535,8 +3725,17 @@ async def read_own_activity_items(
       unanimity rule becomes a rubber stamp.
     * ``mixed_authors`` -- two or more distinct authors. The feed's shape, and
       the reason no argument selects a surface.
-    * ``no_page_owner_heading`` -- no ``h1`` with text in it, so there is
-      nothing to compare the one author against.
+    * ``no_page_owner_heading`` -- no ``h1`` carrying text by EITHER route, so
+      there is nothing to compare the one author against. TWO ROUTES since
+      2026-08-31: ``innerText`` first, then ``textContent``. The live profile
+      returned ZERO by the first route on two identical readings -- LinkedIn
+      draws the heading and CSS takes it out of layout, which ``innerText``
+      reports as no text at all -- and this reader refused a page whose
+      authorship its other two conditions had already established. What C3
+      asks is whether LinkedIn's own markup names the owner, which is a claim
+      about the DOCUMENT; making it depend on CSS was the defect. Both counts
+      come back on every answer, so a caller sees which route named the owner
+      rather than inferring it.
     * ``ambiguous_page_owner_heading`` -- two or more, so the comparison would
       have to choose one by document order.
     * ``author_is_not_the_page_owner`` -- C1 and C2 both held and the strings
@@ -3583,10 +3782,28 @@ async def read_own_activity_items(
         # invisible.
         "unanimous": authors == 1,
         "matches_page_owner": owner_match,
+        # WHICH ROUTE NAMED THE OWNER, or ``None`` when no heading did. Part
+        # of the authorship facts rather than of the counts because it is a
+        # statement about HOW the claim was established, and this reader's
+        # whole contract is that the claim is established rather than
+        # inferred. ``"h1-innertext"`` is the rendered heading;
+        # ``"h1-textcontent"`` is a heading LinkedIn draws for assistive
+        # readers and CSS hides.
+        "owner_source": data.get("owner_source"),
     }
     counts = {
         "overflow_controls": overflow,
         "owner_headings": headings,
+        # THE TWO ROUTES, SEPARATELY, so a refusal can be diagnosed from the
+        # answer instead of from the source. ``rendered`` is the innerText
+        # count -- what a sighted viewer sees -- and ``contained`` is the
+        # textContent count. They differ exactly when LinkedIn draws a heading
+        # CSS has taken out of layout, which is what it does on the live
+        # profile and what made this reader refuse for a day.
+        "owner_headings_rendered": int(data.get("owner_headings_rendered") or 0),
+        "owner_headings_contained": int(
+            data.get("owner_headings_contained") or 0
+        ),
         "permalink_anchors": int(data.get("permalink_anchors") or 0),
         "distinct_urns": int(data.get("distinct_urns") or 0),
         "unrecognised": int(data.get("unrecognised") or 0),
@@ -3626,9 +3843,11 @@ async def read_own_activity_items(
     if headings == 0:
         return refusal(
             "no_page_owner_heading",
-            "the page draws no h1 with text in it, so the one author found "
-            "has nothing to be compared against. Authorship is not inferred "
-            "from the address this reader was pointed at.",
+            "the page draws no h1 carrying text by EITHER route -- neither "
+            f"rendered ({counts['owner_headings_rendered']}) nor contained "
+            f"({counts['owner_headings_contained']}) -- so the one author "
+            "found has nothing to be compared against. Authorship is not "
+            "inferred from the address this reader was pointed at.",
         )
     if headings > 1:
         return refusal(
@@ -3641,10 +3860,11 @@ async def read_own_activity_items(
     if owner_match is not True:
         return refusal(
             "author_is_not_the_page_owner",
-            "the page carries exactly one author and exactly one h1, and "
-            "neither string is a prefix of the other. The comparison happened "
-            "inside the page and neither string is reported here; that they "
-            "do not match is the whole of the answer.",
+            "the page carries exactly one author and exactly one h1 (named "
+            f"through {facts['owner_source']!r}), and neither string is a "
+            "prefix of the other. The comparison happened inside the page and "
+            "neither string is reported here; that they do not match is the "
+            "whole of the answer.",
         )
 
     items = [str(value) for value in (data.get("items") or [])]

@@ -861,7 +861,20 @@ def test_the_census_has_no_path_into_this_reader():
     body = source.split("async def linkedin_surface_census", 1)[1]
     body = body.split("async def linkedin_profile_editor_fields", 1)[0]
     assert "read_self_owned_editor_fields" not in body
-    assert len(CENSUS_SURFACES) == 5, sorted(CENSUS_SURFACES)
+    # PINNED AS A SET RATHER THAN A COUNT, and the change is a strengthening.
+    # It read ``len(CENSUS_SURFACES) == 5``, which a key ADDED and a key
+    # REMOVED in one edit would satisfy -- and what this file is guarding
+    # against is a key pointing somewhere new, which is exactly that edit.
+    assert set(CENSUS_SURFACES) == {
+        "feed",
+        "profile",
+        "profile_edit_intro",
+        "settings",
+        "settings_dark_mode",
+        "post_composer",
+        "article_composer",
+        "messaging_compose",
+    }, sorted(CENSUS_SURFACES)
 
 
 def test_the_injected_script_only_reads():

@@ -1028,6 +1028,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         "save_job",
         "unfollow_company",
         "unsave_job",
+        # SIXTH, 2026-08-31. The first write here that acts on neither a job
+        # nor a company Page: one named account setting, on a page measured
+        # six times, by clicking the radio named for the destination.
+        "update_setting",
     ]
 
 
@@ -1049,6 +1053,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "save_job",
         "unfollow_company",
         "unsave_job",
+        "update_setting",
     ]
     assert "OFF" in info["writes_note"]
     assert "unsave_job" in info["writes_note"]
@@ -1082,6 +1087,14 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # refuses each a grant at ISSUE -- there is no confirm token for any of
     # them anywhere in the process, which is a stronger statement than "the
     # tool declines to act".
+    #
+    # EIGHT UNTIL 2026-08-31, SEVEN SINCE. ``update_setting`` left this field
+    # by BEING PERFORMED -- it holds a url_template now, so
+    # ``can_hold_a_grant`` would be True for it and the shape note above would
+    # stop being true of the set. That is the only way anything is meant to
+    # leave: this field distinguishes "built and refusing" from "never
+    # considered", and a third state -- built and SHIPPING -- belongs in
+    # ``writes_available``, which is asserted below.
     not_performed = info["writes_sanctioned_but_not_performed"]
     assert set(not_performed) == {
         "set_open_to_work",
@@ -1089,10 +1102,17 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "comment_on_item",
         "react_to_item",
         "update_profile_field",
-        "update_setting",
         "send_invitation",
         "send_message",
     }
+    assert "update_setting" not in set(not_performed)
+    # ``writes_available`` is EMPTY here -- this test runs with the write flag
+    # OFF, which is the whole of what it is about -- so the positive half is
+    # asserted against the two things that do not depend on the flag.
+    from linkedin_server import writes as writes_module
+
+    assert "update_setting" in info["writes_sanctioned"]
+    assert "update_setting" in writes_module.PERFORMABLE
     for action, entry in not_performed.items():
         assert len(entry["why_not"]) > 80, action
         # EVERY refusal must name its own fix or the field is a wall of
@@ -1338,7 +1358,7 @@ async def test_the_server_instructions_name_every_write_that_ships():
     from linkedin_server import writes
 
     text = (mcp.instructions or "").lower()
-    words = {2: "two", 3: "three", 4: "four", 5: "five"}
+    words = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven"}
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
         tool = writes.spec_for_action(action).tool_name

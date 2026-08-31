@@ -690,12 +690,22 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # SLUG company_url, not an id). What moved is that a reversibility fact
     # belongs in the gate the operator reads, not in a list that decides for
     # him.
+    #
+    # SIX SINCE 2026-08-31, and this entry is the first that is not about a
+    # job or a company Page. ``update_setting`` crossed on a measured surface
+    # (six agreeing readings of /mypreferences/d/dark-mode), a measured anchor
+    # (three inputs, exactly one checked, the ROLE read off the row) and a
+    # real verification (a fresh navigation and a re-read of the group's own
+    # checked property). NOTHING WAS PERMITTED TO LET IT CROSS:
+    # readonly.SANCTIONED_MUTATIONS is the two entries it has been since
+    # 2026-08-26, because the click it needs is perform()'s existing one.
     assert writes.PERFORMABLE == {
         "save_job",
         "unsave_job",
         "unfollow_company",
         "apply_job",
         "follow_company",
+        "update_setting",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -705,13 +715,14 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # writes._NINE_REFUSALS and writes._refuse_unperformable, which print a
     # distinct one for each. Two until 2026-08-30; eight since, follow_company
     # having left in the same wave that brought seven in.
+    # Eight until 2026-08-31, SEVEN since -- ``update_setting`` left by being
+    # performed, which is the only way anything is supposed to leave.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "set_open_to_work",
         "publish_post",
         "comment_on_item",
         "react_to_item",
         "update_profile_field",
-        "update_setting",
         "send_invitation",
         "send_message",
     }
@@ -745,16 +756,34 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # name a write surface, and writes.mint refuses each a grant at ISSUE. That
     # is a stronger guarantee than "perform declines to run them": there is no
     # confirm token for any of them anywhere in the process.
+    #
+    # SEVEN SINCE 2026-08-31. ``update_setting`` left this set by being GIVEN
+    # a surface -- /mypreferences/d/dark-mode, on the operator's ruling and
+    # after six agreeing readings -- which is the only way anything is meant
+    # to leave it. Everything still here would act on an address the read
+    # boundary refuses, or on a control nobody has photographed, or would have
+    # to TYPE, which is a mutation class this package sanctions nowhere.
     assert surfaceless == {
         "set_open_to_work",
         "publish_post",
         "comment_on_item",
         "react_to_item",
         "update_profile_field",
-        "update_setting",
         "send_invitation",
         "send_message",
     }
+    # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
+    # same treatment apply got when its surface was measured.
+    setting_spec = spec_for_action("update_setting")
+    assert setting_spec.url_template == (
+        "https://www.linkedin.com/mypreferences/d/dark-mode"
+    )
+    assert setting_spec.url_pattern is not None
+    # ITS TEMPLATE CARRIES NO ``{target}``, and that is a property worth
+    # pinning rather than an omission: the page is ONE fixed address and the
+    # destination is chosen by which control is clicked on it, so there is
+    # nothing for a target to influence in the url.
+    assert "{target}" not in setting_spec.url_template
     # And apply is on the other side of that line now, asserted rather than
     # left as an absence: a surface it can be granted against, and a pattern
     # that will only ever match a posting page.
@@ -982,6 +1011,12 @@ async def test_exactly_the_performable_writes_are_registered():
     assert "linkedin_follow_company" in names
     assert "linkedin_set_open_to_work" not in names
     assert "linkedin_apply_job" in names
+    # UPDATE_SETTING INVERTED ON 2026-08-31, for the same reason apply did on
+    # 08-25 and follow on 08-30, and it is kept as its inverse rather than
+    # deleted. It was in the grant-incapable list below and it is now the
+    # sixth performable write.
+    assert "linkedin_update_setting" in names
+    assert "update_setting" in writes.PERFORMABLE
     # AND THE SEVEN THAT ARE REACHABLE AND CANNOT ACT. Being registered is not
     # the claim here -- being GRANT-INCAPABLE is. Each is asserted on the
     # property that makes it safe rather than on the fact that perform()
@@ -993,7 +1028,6 @@ async def test_exactly_the_performable_writes_are_registered():
         "linkedin_comment_on_item",
         "linkedin_react_to_item",
         "linkedin_update_profile_field",
-        "linkedin_update_setting",
         "linkedin_send_invitation",
         "linkedin_send_message",
     ):

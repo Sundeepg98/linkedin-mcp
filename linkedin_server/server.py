@@ -47,13 +47,16 @@ discipline, because a reader trusts it more. **The counts here are prose and
 nothing tests them** -- ``tests/test_server_surface.py`` pins the real
 numbers, and that file is the one to believe when the two disagree.
 
-The five writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
-``linkedin_unfollow_company``, ``linkedin_apply_job`` and
-``linkedin_follow_company``, all registered below and all behind the same
-two-call gate. This sentence named FOUR of them and omitted
-``linkedin_follow_company`` until 2026-08-31; it is corrected here rather
-than quietly widened, because the omitted name is the one whose absence made
-the count wrong.
+The six writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
+``linkedin_unfollow_company``, ``linkedin_apply_job``,
+``linkedin_follow_company`` and ``linkedin_update_setting``, all registered
+below and all behind the same two-call gate. This sentence named FOUR of them
+and omitted ``linkedin_follow_company`` until 2026-08-31; it is corrected here
+rather than quietly widened, because the omitted name is the one whose absence
+made the count wrong. ``linkedin_update_setting`` joined it later that day,
+and it is the first write here that acts on neither a job nor a company Page:
+it moves ONE named account setting -- dark mode -- on a page measured six
+times, by clicking the radio named for the destination.
 
 What remains true, and is what ``readonly.py`` still enforces against this
 file:
@@ -176,10 +179,10 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. FIVE WRITE: linkedin_save_job, "
+        "nothing. SIX WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
-        "linkedin_follow_company and "
-        "linkedin_apply_job. Call any of them "
+        "linkedin_follow_company, "
+        "linkedin_apply_job and linkedin_update_setting. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -1858,7 +1861,168 @@ CENSUS_SURFACES: dict[str, str] = {
     "profile_edit_intro": f"{BASE_URL}/in/me/edit/intro/",
     "settings": f"{BASE_URL}/mypreferences/d/",
     "settings_dark_mode": f"{BASE_URL}/mypreferences/d/dark-mode",
+    # THREE ADDED 2026-08-31 on the operator's rulings, each named
+    # individually and never as a family.
+    "post_composer": f"{BASE_URL}/preload/sharebox/",
+    "article_composer": f"{BASE_URL}/article/new/",
+    "messaging_compose": f"{BASE_URL}/messaging/compose/",
 }
+
+#: Surfaces whose url this server does not know until it has READ something,
+#: so they cannot live in the table above.
+#:
+#: A SEPARATE SET RATHER THAN A PLACEHOLDER ENTRY, and the first attempt was
+#: the placeholder -- ``"feed_item": BASE_URL + "/feed/update/"`` -- which
+#: broke the one guard that matters most about that table:
+#: ``test_every_surface_is_a_permitted_read_url`` puts every value through the
+#: real read door, and a value nothing ever navigates to made that check
+#: answer a question about a string nobody uses. A table where one entry is
+#: not the url that gets loaded is a table a reader cannot trust the rest of.
+#:
+#: The resolved url still goes through the same door -- ``BROWSER.goto`` calls
+#: ``assert_read_url`` like every other read -- and the shape it can take is
+#: pinned by its own test against a synthetic urn.
+CENSUS_RESOLVED_SURFACES: frozenset[str] = frozenset({"feed_item"})
+
+
+def census_surface_keys() -> list[str]:
+    """Every key this instrument answers to, resolved and direct alike."""
+    return sorted(set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES)
+
+#: WHAT LOADING A SURFACE COSTS, for the surfaces where the answer is not
+#: "nothing". Returned ON THE ANSWER rather than only written in the
+#: docstring, and that placement is the whole point: a caller reads the
+#: answer, and a cost that lives only in prose is a cost the caller was not
+#: told about at the moment it was paid.
+#:
+#: THIS TABLE EXISTS BECAUSE THIS TOOL'S OWN PROPERTY CHANGED ON 2026-08-31.
+#: Every surface it measured until then RENDERED existing state and left
+#: nothing behind, and its docstring said so -- notifications, /mynetwork/ and
+#: messaging were refused as census keys on exactly that ground, "a census is
+#: not worth a side effect". The operator has now ruled three surfaces in
+#: whose load MAY leave something, knowing that. So the property is no longer
+#: uniform, and the honest response is to say WHICH surfaces still have it
+#: rather than to keep a sentence that is true of most of them.
+#:
+#: A surface absent from this table is one whose load is believed to cost
+#: nothing -- believed on the same evidence as before, which is that it
+#: renders state and carries no counter.
+CENSUS_SURFACE_COST: dict[str, str] = {
+    "post_composer": (
+        "A COMPOSER MAY AUTOSAVE. This loads the post composer, types "
+        "nothing and clicks nothing -- but if LinkedIn saves a draft on "
+        "open, this server cannot see it: 17 candidate draft-listing "
+        "addresses were run against the read boundary on 2026-08-31 and all "
+        "17 were refused, so there is no reachable surface on which such a "
+        "draft could be detected or removed. The operator cleared this cost "
+        "knowingly. What this answer reports is what the page DREW; it does "
+        "not and cannot report that nothing was left behind."
+    ),
+    "article_composer": (
+        "A COMPOSER MAY AUTOSAVE, exactly as for post_composer above, and "
+        "an article draft is the artefact most likely to persist. Same "
+        "ruling, same cleared cost, same limit on what this answer can "
+        "claim."
+    ),
+    "messaging_compose": (
+        "THIS OPENS A MESSAGING SURFACE. /messaging/ is MEASURED TWICE to "
+        "redirect into one conversation LinkedIn chooses, and whether the "
+        "composer address does the same is UNMEASURED -- which is the "
+        "question this key exists to answer. If it opens a thread it may "
+        "fire a read receipt on a real person and it resets the messaging "
+        "badge. The operator's ruling was conditioned on that badge reading "
+        "ZERO first, so that no unread message of anybody's is spent; read "
+        "it before and after through the feed or profile census, which "
+        "carries it as 'Messaging, N new notifications'."
+    ),
+}
+
+
+#: The permalink a urn is addressed by. ONE string, built from the marker the
+#: activity reader already measures against, so the address this server visits
+#: and the address it recognises cannot drift apart.
+ITEM_PERMALINK_URL = BASE_URL + dom.ACTIVITY_PERMALINK_MARKER + "{urn}/"
+
+
+async def _resolve_own_item_permalink(
+    page: Any,
+) -> tuple[dict[str, Any], Optional[str]]:
+    """One of HIS item permalinks, or a refusal explaining why not.
+
+    Returns ``(block, url)``. When ``url`` is ``None`` the block IS the
+    answer -- a refusal to be returned whole -- and when it is a string the
+    block is the ``aimed_at`` report that rides along with the census.
+
+    THE REFUSALS ARE NOT REWRITTEN HERE. This runs the same C1 check and the
+    same reader ``linkedin_my_activity_items`` runs, and forwards whatever
+    they say. A second, laxer copy of an authorship rule is how the strict one
+    stops being the rule -- and this caller wants a urn, which is precisely
+    the caller most tempted to take one on weaker evidence.
+
+    THE FIRST ITEM IN DOCUMENT ORDER, and the answer says so. For a WRITE that
+    would be choosing by position and is refused everywhere in this package;
+    for a MEASUREMENT OF THE SURFACE it is fine, because the question is what
+    a permalink page draws and any of his items answers it. The distinction is
+    the reason this helper lives here and not in ``writes``.
+    """
+    landed = await BROWSER.goto(page, SELF_PROFILE_URL)
+    assert_not_authwall(landed, surface="profile")
+    if not _self_assertion_on(landed):
+        return (
+            {
+                "surface": "feed_item",
+                "refused": "no_self_assertion",
+                "reason": (
+                    "the landed profile url carries no "
+                    f"{_SELF_ASSERTION_PARAM}=true, so this server has only "
+                    "its own reasoning about what /in/me/ ought to mean -- and "
+                    "an item permalink is not visited on reasoning. Nothing "
+                    "was read off the page and no second navigation happened."
+                ),
+                "authorship": _authorship_block(
+                    established=False, self_assertion=False
+                ),
+                "pages_loaded": 1,
+            },
+            None,
+        )
+    reading = await dom.read_own_activity_items(page)
+    facts = reading["authorship_facts"]
+    if "items" not in reading or not reading["items"]:
+        return (
+            {
+                "surface": "feed_item",
+                "refused": reading.get("refused") or "no_items",
+                "reason": (
+                    reading.get("reason")
+                    or "authorship held and the rail carried no item key to "
+                    "aim at. An empty rail is not an error and it is not a "
+                    "surface either."
+                ),
+                "authorship": _authorship_block(
+                    established=False, self_assertion=True, facts=facts
+                ),
+                "counts": reading["counts"],
+                "item_root_source": reading["item_root_source"],
+                "pages_loaded": 1,
+            },
+            None,
+        )
+    items = list(reading["items"])
+    return (
+        {
+            # THE URN ITSELF IS NOT REPORTED HERE. It is a real identifier and
+            # it is already in the landed ``source_url`` this census returns,
+            # which is one place rather than two. What this block reports is
+            # HOW the aim was taken, which is the part a reader has to judge.
+            "chosen_by": "first item in document order on his own activity rail",
+            "items_available": len(items),
+            "authorship": _authorship_block(
+                established=True, self_assertion=True, facts=facts
+            ),
+        },
+        ITEM_PERMALINK_URL.format(urn=items[0]),
+    )
 
 
 @mcp.tool()
@@ -1877,9 +2041,26 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
     be wrong at the moment it would fire.
     =================================================================
 
-    IT LOADS EXACTLY ONE PAGE AND CLICKS NOTHING. There is no typing, no form
-    submission, no scrolling and no request other than the page load itself.
-    It reads the rendered DOM and returns counts.
+    IT LOADS EXACTLY ONE PAGE, ON EVERY SURFACE BUT ONE, AND CLICKS NOTHING.
+    There is no typing, no form submission, no scrolling and no request other
+    than the page load. It reads the rendered DOM and returns counts. THE ONE
+    EXCEPTION IS "feed_item", WHICH LOADS EXACTLY TWO: a permalink is
+    addressed by a urn, and the only route to one is the same own-activity
+    read linkedin_my_activity_items performs, so that surface inherits every
+    authorship refusal that reader has. The count is on every answer, in
+    pages_loaded, rather than only here.
+
+    AND THE LOAD ITSELF IS NO LONGER FREE ON EVERY SURFACE. This paragraph
+    used to say a census "is not worth a side effect" and used that to explain
+    which pages were refused as keys. Three surfaces ruled in on 2026-08-31 --
+    the two publishing composers, and the one LinkedIn opens for a new
+    conversation -- may cost something merely by being opened: a composer can
+    autosave a draft this server has no reachable surface to detect, and a
+    /messaging/ address is measured to redirect into a real conversation. Each
+    of those keys returns a "cost" field saying exactly what it may have
+    spent, and the answer reports what the page DREW rather than claiming
+    nothing was left behind. Surfaces with no "cost" field are the ones that
+    still render state and leave nothing.
 
     A CONTROL BEING PRESENT IS NOT EVIDENCE THAT ACTIVATING IT IS SAFE. This
     reports that a page carries, say, a button whose accessible name is about
@@ -1908,23 +2089,29 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
     Args:
         surface: which page to measure. A KEY, never a url, and one of these
-            five: "feed", "profile", "profile_edit_intro", "settings" or
-            "settings_dark_mode". Two of them are one page out of a family
-            whose other members stay unreachable, and the enumeration is the
-            whole of that -- "settings" is the settings INDEX and nothing
-            below it, and "settings_dark_mode" is one named page below it,
+            nine: "feed", "profile", "profile_edit_intro", "settings",
+            "settings_dark_mode", "feed_item", "post_composer",
+            "article_composer" or "messaging_compose". Several are one page
+            out of a family whose other members stay unreachable, and the
+            enumeration is the whole of that -- "settings" is the settings
+            INDEX and nothing below it, and "settings_dark_mode" is one named
+            page below it,
             while the pages carrying the actual toggles are refused by the
             read boundary. "profile_edit_intro" is the intro editor on HIS OWN
             profile, in the /in/me/ spelling that resolves to whoever is
             signed in; no other member's is reachable, because opening one
-            would leave that person a durable record. Notifications,
-            /mynetwork/ and messaging are deliberately not offered, each for
-            the same reason: loading them costs a badge or opens somebody's
-            conversation, and a census is not worth a side effect. See
-            CENSUS_SURFACES for the ruling on each.
+            would leave that person a durable record. "feed_item" is ONE of
+            his own items, found by the own-activity reader and chosen as the
+            first on the rail; no argument selects it, and a rail whose
+            authorship cannot be established yields a refusal rather than a
+            census. The three composer keys each carry a "cost" field saying
+            what opening them may have spent. Notifications and /mynetwork/
+            are still deliberately not offered: loading them consumes a badge
+            he has not seen, which is a cost with nothing to show for it. See
+            CENSUS_SURFACES and CENSUS_SURFACE_COST for the ruling on each.
     """
     key = str(surface or "").strip().lower()
-    if key not in CENSUS_SURFACES:
+    if key not in CENSUS_SURFACES and key not in CENSUS_RESOLVED_SURFACES:
         # A refusal that RETURNS. The unknown key must not reach a navigation,
         # so this is deliberately not an exception routed through _error --
         # there is no failure to report, only a question this tool will not be
@@ -1935,12 +2122,35 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 f"{surface!r} is not a surface this instrument measures. It "
                 "takes one of a fixed set of KEYS and never a url."
             ),
-            "valid_surfaces": sorted(CENSUS_SURFACES),
+            "valid_surfaces": census_surface_keys(),
         }
 
     try:
         async with BROWSER.session() as page:
-            final_url = await BROWSER.goto(page, CENSUS_SURFACES[key])
+            pages_loaded = 1
+            aimed_at: Optional[dict[str, Any]] = None
+            if key == "feed_item":
+                # THE ONE SURFACE WHOSE URL THIS SERVER DOES NOT KNOW UNTIL IT
+                # HAS READ SOMETHING. A permalink is addressed by a urn, and
+                # the ONLY route to one here is the same reader
+                # linkedin_my_activity_items uses -- which publishes a key
+                # only for items it has established are his own. So this key
+                # inherits that reader's whole refusal set rather than
+                # weakening it: no authorship, no census.
+                #
+                # NO ARGUMENT SELECTS THE ITEM, and there is no parameter
+                # through which one could. That is deliberate: a caller
+                # handing in a urn would be handing in an identifier this
+                # server never read, and the read boundary would then be the
+                # only thing standing between a census and an arbitrary
+                # member's item.
+                aimed_at, item_url = await _resolve_own_item_permalink(page)
+                if item_url is None:
+                    return aimed_at
+                pages_loaded = 2
+                final_url = await BROWSER.goto(page, item_url)
+            else:
+                final_url = await BROWSER.goto(page, CENSUS_SURFACES[key])
             assert_not_authwall(final_url, surface=key)
             census = await dom.read_surface_census(page)
             control_shapes, href_shapes = shape.census_aggregate(
@@ -1953,7 +2163,7 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 "control_shapes": control_shapes,
                 "href_shapes": href_shapes,
                 "controls_read": census["controls_read"],
-                "pages_loaded": 1,
+                "pages_loaded": pages_loaded,
                 "note": (
                     "SHAPES, not names: every accessible name and href here "
                     "has had member slugs, company slugs, long ids and urns "
@@ -1965,6 +2175,19 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                     "about whether using it would be safe or reversible."
                 ),
             }
+            if key in CENSUS_SURFACE_COST:
+                # ON THE ANSWER, not only in the docstring. See
+                # CENSUS_SURFACE_COST: a cost written where the caller does
+                # not look is a cost the caller was not told about.
+                out["cost"] = CENSUS_SURFACE_COST[key]
+            if aimed_at is not None:
+                # HOW THE ITEM WAS CHOSEN, and it says "by position" out loud.
+                # The rail carries several of his items and this takes the
+                # FIRST in document order, which is choosing by position --
+                # acceptable for a MEASUREMENT OF A SURFACE, where any of his
+                # items answers the question equally, and stated rather than
+                # hidden because it would not be acceptable for a write.
+                out["aimed_at"] = aimed_at
             if census["truncated"]:
                 out["truncated"] = True
                 out["truncated_note"] = (
@@ -2322,12 +2545,28 @@ def _authorship_block(
             "LinkedIn's own isSelfProfile=true assertion on /in/me/, plus ONE "
             "author string across every overflow control on the page, plus "
             "that string and the page's h1 standing in a prefix relation. All "
-            "three are required and the comparison happens inside the page"
+            "three are required and the comparison happens inside the page. "
+            "The h1's text is read through innerText first and textContent "
+            "second, and owner_source says which answered -- a heading "
+            "LinkedIn draws and CSS hides is still LinkedIn naming the page's "
+            "owner, and the third condition is a question about the document "
+            "rather than about what is on screen"
         ),
         "self_assertion_present": self_assertion,
         "authors_found": facts.get("authors_found"),
         "unanimous": facts.get("unanimous"),
         "matches_page_owner": facts.get("matches_page_owner"),
+        # WHICH ROUTE READ THE HEADING, added 2026-08-31 with the second one.
+        # ``None`` when no heading was found by either.
+        #
+        # THIS DICT IS THE THIRD ENUMERATE-AND-DROP SITE IN THIS PACKAGE and
+        # it behaved exactly like the other two: the reader gained the field,
+        # this block did not name it, and the tool's answer simply did not
+        # carry it -- silently, with no error, in a block a caller reads to
+        # decide whether an item key is trustworthy. It was caught by a test
+        # asserting the field on the tool's output rather than the reader's,
+        # which is the only place it could have been caught.
+        "owner_source": facts.get("owner_source"),
     }
 
 
@@ -2746,7 +2985,15 @@ async def _write_tool(
         grant = writes.consume(
             str(confirm_token).strip(),
             action=action,
-            target=str(target if target is not None else "").strip(),
+            # THE RAW TARGET, NOT A STRING OF IT. It used to be
+            # ``str(target ... ).strip()``, which for a composite action is
+            # the repr of a mapping and can never equal what ``mint``
+            # canonicalised -- so a composite action's token was unredeemable
+            # by construction. ``consume`` now normalises through the same
+            # ``writes._target_for`` ``mint`` uses, which is the only way the
+            # two doors can agree, and it needs the value rather than a
+            # rendering of it.
+            target=target,
         )
         return await writes.perform(BROWSER, page, grant)
 
@@ -3215,28 +3462,41 @@ def _normalise_setting(name: str) -> str:
 async def linkedin_update_setting(
     setting: str, value: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """Change one account setting. BUILT, GATED, AND REFUSING.
+    """Change one account setting. Two calls, and the first is free.
 
-    Reads the dark-mode page live, reports which of its three states the
-    account is in, and refuses.
+    THIS DOCSTRING SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-08-31 and the
+    reversal is stated rather than quietly edited away, because a caller who
+    read the old text would decline to offer this and would be wrong.
 
-    WHAT IS MEASURED, and this is what changed on 2026-08-31: dark mode is a
-    THREE-STATE RADIO GROUP -- ``Always off``, ``Always on``, ``Device
-    settings`` -- and EXACTLY ONE of them reports checked. Six readings across
-    two days and three builds agree on every count: 20 controls, ZERO forms,
-    16 links, no dialogs, no redirect. So this gate can now say which state
-    the account is in and which way a change would move it. Until today it
-    read the settings INDEX instead, a page that hands out addresses and
-    switches nothing, and it refused because a gate that cannot name a
-    direction is not a gate.
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is done: the setting's
+    own page is read live and you get back a block naming which of its three
+    states the account is in, which way the change would move it, where that
+    was read from, and how it can be undone. Read it, then call again with the
+    ``confirm_token`` it hands you. The token works ONCE, only for this
+    setting AND this destination, and it expires in two minutes -- so a
+    scheduled or unattended caller can never hold a live one.
 
-    WHAT STILL STOPS IT IS NO LONGER A MEASUREMENT. This action has no write
-    surface, so no ``confirm_token`` can exist for it -- ``writes.mint``
-    refuses a grant at issue rather than only at use, on the ground that there
-    is no page for a grant to be permission to act on. That is true whoever
-    calls it.
+    WHAT IS MEASURED. Dark mode is a THREE-STATE RADIO GROUP -- ``Always
+    off``, ``Always on``, ``Device settings`` -- named through
+    aria-labelledby, and EXACTLY ONE of them reports checked. Six readings
+    across two days and three builds agree on every count: 20 controls, ZERO
+    forms, 16 links, no dialogs, and no redirect. The control that gets
+    clicked is the one named for the DESTINATION, and the selector is built
+    from the role that control actually carries rather than an assumed one.
 
-    ONE SETTING IS READABLE, AND ASKING ABOUT ANY OTHER LOADS NOTHING. The
+    THE VERIFICATION IS A FRESH NAVIGATION AND A RE-READ OF THE GROUP. Not the
+    control reporting on itself: the page is loaded again and the browser's
+    own checked property is read across all three, so a control that redrew
+    wrongly would have to report itself checked AND the other two report
+    themselves unchecked to pass. ``performed`` comes back ``true``, ``false``
+    or ``"unknown"``; on ``"unknown"`` do not retry -- open the page and look.
+
+    WHAT IT COSTS YOU, and it is the least of any write here: dark mode is a
+    per-account DISPLAY preference. It has no audience, no other member can
+    observe it, it is broadcast nowhere, and the same tool sets it back. That
+    is why it is the one settings page that was admitted.
+
+    ONE SETTING IS WRITABLE, AND ASKING ABOUT ANY OTHER LOADS NOTHING. The
     read allowlist admits exactly one page below the settings index, admitted
     BY NAME on the operator's ruling. ``/mypreferences/d/categories/`` and
     ``/settings/`` are both on the forbidden-url list.
@@ -3244,16 +3504,19 @@ async def linkedin_update_setting(
     READ THIS BEFORE ASKING FOR THE FAMILY TO BE OPENED. ``Close and delete
     account`` and ``Hibernate account`` are addresses in it. A permission
     written for the FAMILY would carry those with it, which is why a setting
-    is admitted by name or not at all.
+    is admitted by name or not at all -- and it is why this tool shipping does
+    NOT mean the next setting is a small step.
 
     Args:
         setting: which setting, by name. Matched case- and
-            punctuation-insensitively against the one readable setting; any
+            punctuation-insensitively against the one writable setting; any
             other name returns a refusal and opens no page at all.
         value: the destination, named rather than derived, because this
             setting has three states and no direction can be inferred from
-            two. Part of the target, so a token would bind to it.
-        confirm_token: accepted, and no token is ever issued for this action.
+            two. Part of the target, so the token binds to it: confirming with
+            a different value than the preview showed is refused.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually change the setting.
     """
     if _normalise_setting(setting) not in READABLE_SETTINGS:
         # A REFUSAL THAT RETURNS, AND THAT LOADS NOTHING, mirroring
@@ -3268,7 +3531,8 @@ async def linkedin_update_setting(
             "error": "unreadable_setting",
             "message": (
                 f"{setting!r} is not a setting this server can read a value "
-                "for, so it cannot say which way a change would move it. "
+                "for, so it cannot say which way a change would move it -- "
+                "and it will not act on one it cannot describe. "
                 "Nothing was loaded. Exactly one settings page below the "
                 "index is on the read allowlist, admitted BY NAME on the "
                 "operator's ruling that a setting is admitted by name or not "

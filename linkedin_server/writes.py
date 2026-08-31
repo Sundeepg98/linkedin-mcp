@@ -1052,8 +1052,39 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_update_setting": WriteSpec(
         action="update_setting",
         tool_name="linkedin_update_setting",
-        url_template=None,
-        url_pattern=None,
+        # A REAL SURFACE, 2026-08-31, and it is the FIRST of the eight
+        # surface-less actions to get one. Every clause of that sentence was
+        # earned by a measurement rather than by a ruling alone:
+        #
+        # * THE PAGE LOADS AND DOES NOT REDIRECT. Six readings across two days
+        #   and three builds, every one landing on this exact url and every
+        #   one reporting 20 controls, 0 forms, 1 button, 16 links, 0 dialogs.
+        #   That matters twice over: ``_assert_landed_on_target`` compares the
+        #   whole url for a non-posting target, so a surface that redirected
+        #   could not be performed on at all.
+        # * THE ANCHOR IS READ, NOT GUESSED. Three inputs named through
+        #   aria-labelledby, of which exactly one reports ``checked`` -- and
+        #   since ``input_type`` joined the census the ROLE those inputs carry
+        #   is read too, so the click selector is built from what the page
+        #   says rather than from an assumed ``radio``.
+        # * THERE IS NOTHING TO TYPE. This is the whole reason it is first:
+        #   the click is the entire action, and ``perform`` already holds the
+        #   only sanctioned click in this package. Nothing new was permitted
+        #   to make it performable -- ``readonly.SANCTIONED_MUTATIONS`` is the
+        #   two entries it has been since 2026-08-26.
+        #
+        # NO ``{target}`` IN THE TEMPLATE, deliberately. The target names a
+        # setting and a value, and NEITHER belongs in a url: the page is one
+        # fixed address and the destination is chosen by which control is
+        # clicked on it. ``.format(target=...)`` over a string with no
+        # placeholder returns it unchanged, so ``assert_write_url``'s
+        # rebuild-and-compare still runs and still refuses any url a caller
+        # could influence -- there is simply nothing for the target to
+        # influence.
+        url_template="https://www.linkedin.com/mypreferences/d/dark-mode",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$"
+        ),
         exempt_substring=None,
         summary="Change one LinkedIn account setting.",
         # NOT A BINARY TOGGLE, changed 2026-08-31. Dark mode has THREE
@@ -1109,23 +1140,49 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
                 "own light/dark preference rather than pinning a value."
             ),
         },
-        reversibility="STILL-UNKNOWN, and it differs by setting",
+        reversibility=(
+            "STILL-UNKNOWN as a VERDICT, and the structure is as good as it "
+            "gets short of one: the inverse of this action IS this action, "
+            "with a different destination named. The three states are all "
+            "measured to exist, all readable, and all reachable from each "
+            "other through the same three controls on the same page."
+        ),
+        # STILL FALSE, AND DELIBERATELY. Nobody has performed a dark-mode
+        # change and read it back, so the round trip is UNPERFORMED -- and
+        # ``_reversibility_disagreement`` enforces that an unmeasured claim
+        # may not wear a measured class. The structural argument above is
+        # strong and it is not a measurement, and this package's whole
+        # discipline is that the second does not become the first by being
+        # convincing.
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and a single verdict for 'a setting' would be "
-            "false whatever it said. The 33 addresses on that index are not "
-            "one kind of thing: 'Dark mode' is a display preference and "
-            "'Close and delete account' and 'Hibernate account' are on the "
-            "same list. No page below the index has been loaded, so no "
-            "control and no confirmation flow has been observed for any of "
-            "them."
+            "THE ROUND TRIP HAS NOT BEEN PERFORMED, which is what would make "
+            "this MEASURED. What IS measured: the page renders three radios, "
+            "exactly one reports checked, and this server can read which -- "
+            "six agreeing readings across two days and three builds. So the "
+            "state before and the state after are both readable, which is the "
+            "precondition for ever measuring reversibility here and is more "
+            "than follow_company has. What is NOT measured is whether "
+            "LinkedIn accepts the change, whether it confirms it, and whether "
+            "setting it back lands -- and none of those is knowable without "
+            "performing one, which is his call and not this server's. NOTE "
+            "the evidence for the FAMILY is unchanged and still governs any "
+            "future ruling: the 33 addresses on that index are not one kind "
+            "of thing, and two of them end the account."
         ),
         reversible_by=(
-            "HIM, in LinkedIn's own interface. NOT this server: "
-            "'/mypreferences/d/categories/' and '/settings/' are both on the "
-            "read boundary's forbidden list, so the pages carrying the values "
-            "are unreachable in either direction."
+            "THIS SERVER, by calling this same tool with a different "
+            "destination -- and that sentence is new on 2026-08-31. It read "
+            "'NOT this server: the pages carrying the values are unreachable "
+            "in either direction', which was true of every settings page when "
+            "it was written and is false of THIS one now: /mypreferences/d/"
+            "dark-mode is on the read allowlist and is this action's write "
+            "surface. The forbidden entries it cited -- "
+            "'/mypreferences/d/categories/' and '/settings/' -- are both "
+            "still there and still make every OTHER setting unreachable in "
+            "both directions, so the old sentence is narrowed rather than "
+            "deleted."
         ),
         residue=(
             "TWO OF THE THIRTY-THREE ADDRESSES ARE ACCOUNT DESTRUCTION -- "
@@ -1138,10 +1195,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "audience once shown is not un-shown."
         ),
         reversibility_procedure=(
-            "Census ONE NAMED setting page -- not the family -- and read "
-            "whether it renders the current value, what the control is, and "
-            "whether changing it is confirmed. That needs a boundary ruling "
-            "on that one address first."
+            "ONE ROUND TRIP, WATCHED. Read the state, change it to one of the "
+            "other two, read it back, change it back, read it again. Every "
+            "one of those five steps is available now -- the page is on the "
+            "read allowlist and this tool performs the change -- so what "
+            "stands between this claim and a MEASURED verdict is a decision "
+            "to spend one cosmetic, self-observable setting on his own "
+            "account. That is his to make and nothing here will make it for "
+            "him. The procedure used to read 'census one named setting page, "
+            "which needs a boundary ruling first'; the ruling was made and "
+            "the census was taken, so the procedure has moved on to what is "
+            "actually left."
         ),
     ),
     "linkedin_send_invitation": WriteSpec(
@@ -1529,9 +1593,29 @@ def consume(token: str, *, action: str, target: str) -> WriteGrant:
         raise WriteAttemptError(
             f"token was minted for {grant.action!r}, not {action!r}"
         )
-    if grant.target != str(target):
+    # NORMALISED THE SAME WAY ``mint`` NORMALISED IT, and this line closes a
+    # defect that would have gone live the moment any composite-target action
+    # became performable.
+    #
+    # It read ``grant.target != str(target)`` -- a RAW comparison against a
+    # value ``mint`` had put through :func:`_target_for` first. For a job id
+    # and a company id the two agree, because normalising those is a strip;
+    # for a COMPOSITE target they never can. ``mint`` stores
+    # ``"dark_mode :: Always on"`` and the tool layer handed ``consume`` a
+    # mapping, whose ``str()`` is its repr. So every composite action's token
+    # was unredeemable BY CONSTRUCTION -- not refused for a reason, just
+    # never equal -- and nothing caught it because no such action could reach
+    # ``mint`` either.
+    #
+    # ONE NORMALISER, BOTH DOORS. That is the property worth having rather
+    # than the bug worth fixing: a second spelling of "what this target is"
+    # is a second thing that can disagree with the first, and the whole job
+    # of a canonical target is to be the ONE string a token is bound to.
+    spec = spec_for_action(action)
+    wanted = _target_for(spec, target)
+    if grant.target != wanted:
         raise WriteAttemptError(
-            f"token was minted for target {grant.target!r}, not {str(target)!r}"
+            f"token was minted for target {grant.target!r}, not {wanted!r}"
         )
     grant.consumed = True
     _GRANTS.pop(token, None)
@@ -1888,6 +1972,30 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
         if isinstance(target, dict):
             value = target.get(first)
         return _clean_target_part(spec, first, value)
+    if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+        # THE CANONICAL FORM IS A VALID SPELLING OF THE TARGET, and accepting
+        # it is what makes this function IDEMPOTENT. It was not, and the
+        # consequence was structural rather than cosmetic: ``preview`` mints
+        # with ``observation.target``, which ``observe`` had already
+        # canonicalised, so ``mint`` re-normalised its own output -- and for a
+        # two-part kind that raised "its target is a mapping of the two, not
+        # str". THE FIRST COMPOSITE ACTION TO GET A URL_TEMPLATE COULD NOT BE
+        # PREVIEWED AT ALL, and nothing had caught it because until then
+        # ``mint`` refused every composite action one line earlier, on the
+        # missing surface.
+        #
+        # EXACTLY ONE SEPARATOR, and that is not a formality. Two would make
+        # the split ambiguous, and a target that can be read two ways is bound
+        # to neither -- which is the same property ``_clean_target_part``
+        # protects by refusing a component that CONTAINS the separator. A
+        # string with no separator stays refused by the message below, because
+        # for a two-part kind it names only half of what is being confirmed.
+        subject, _, content = target.partition(TARGET_JOIN)
+        return (
+            _clean_target_part(spec, first, subject)
+            + TARGET_JOIN
+            + _clean_target_part(spec, second, content)
+        )
     if not isinstance(target, dict):
         raise WriteAttemptError(
             f"{spec.action!r} is addressed by {first!r} AND {second!r} "
@@ -2446,6 +2554,44 @@ async def _read_dark_mode(
     off = [str(row.get("shape") or "") for row in rows if row.get("checked") is False]
     facts: dict[str, Any] = {
         "checkable_controls": len(rows),
+        # THE ROWS THEMSELVES, reduced to four fields, added 2026-08-31 when
+        # this action became performable. Two things need them and neither is
+        # decoration:
+        #
+        # * ``_live_control`` builds the click selector from the ROLE the
+        #   destination control actually carries, which is decided by
+        #   ``input_type``. Reading it here rather than taking a second census
+        #   in that function means the selector is built from the same reading
+        #   the direction was.
+        # * ``_render`` puts the whole facts dict in the confirm block under
+        #   ``what_the_page_showed`` for a composite target, so the operator
+        #   sees the three radios and which one is on before he confirms --
+        #   which is the thing he is actually being asked about.
+        #
+        # SHAPES, NOT NAMES: every ``shape`` here came through
+        # ``census_shape`` like any other census row. This page's three names
+        # pass its gate, which is a property of this page and is the same
+        # property that lets DARK_MODE_STATES be literals at all.
+        # ``role`` IS IN THIS LIST BECAUSE IT WAS LEFT OUT OF IT FIRST, and
+        # the omission is the third instance of one defect in this package:
+        # an enumerated projection that drops a field the next reader needs.
+        # ``container`` was lost that way on the day it was added, the census
+        # row was mislabelled by index, and this dropped ``role`` --
+        # ``dom.aria_role_of`` consults it FIRST, so every control here was
+        # answered as though it carried no role attribute at all. It produced
+        # the right refusal for a ``button[role=switch]`` by accident and
+        # would have refused a legitimate ``div[role=radio]`` for the wrong
+        # reason. Caught by a mutation, not by reading.
+        "rows": [
+            {
+                "shape": str(row.get("shape") or ""),
+                "tag": row.get("tag"),
+                "role": row.get("role"),
+                "input_type": row.get("input_type"),
+                "checked": row.get("checked"),
+            }
+            for row in rows
+        ],
         "checked": sorted(on),
         "unchecked": sorted(off),
         "checked_sources": sorted(
@@ -3318,6 +3464,27 @@ PERFORMABLE: frozenset[str] = frozenset(
         "unfollow_company",
         "apply_job",
         "follow_company",
+        # THE SIXTH, 2026-08-31, and the FIRST that is not about a job or a
+        # company Page. It is here because every clause the other five needed
+        # is now true of it and not because a rule was relaxed:
+        #
+        #   a measured surface   /mypreferences/d/dark-mode, six readings
+        #                        across two days and three builds, no redirect
+        #   a measured anchor    three inputs named through aria-labelledby,
+        #                        exactly one checked, the role read off the row
+        #   a readable origin    which of the three is on, in one call
+        #   a real verification  a fresh navigation and a re-read of the
+        #                        group's own checked property
+        #   no new permission    the click is perform()'s existing one;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # AND NOTHING TO TYPE, which is why this one and not another. Four of
+        # the seven capabilities beside it need TEXT ENTRY, and ``fill``,
+        # ``type``, ``press`` and ``keyboard`` are on
+        # readonly._MUTATION_CALL_PATTERNS and on no entry of
+        # readonly.SANCTIONED_MUTATIONS -- so for those the missing thing is a
+        # mutation class nobody has sanctioned, not a url.
+        "update_setting",
     }
 )
 
@@ -3340,7 +3507,74 @@ CLICK_TIMEOUT_MS = 10_000
 UNFOLLOW_ANCHOR_PREFIX = "Click to stop following "
 
 
-def anchor_label_for(spec: WriteSpec) -> Optional[str]:
+def destination_of(spec: WriteSpec, target: str) -> str:
+    """The VALUE half of a two-part target, or ``""``.
+
+    A composite target is ``"<subject> :: <value>"`` and the value is the
+    destination a multi-state action moves to -- the setting's new value, the
+    field's new content. Split here rather than in three call sites, because
+    the separator is what binds a token to what the preview showed and a
+    second spelling of the split is a second way to disagree with it.
+    """
+    if spec.target_kind not in _COMPOSITE_TARGET_KINDS:
+        return ""
+    _first, second = _COMPOSITE_TARGET_KINDS[spec.target_kind]
+    if not second:
+        return ""
+    parts = str(target).split(TARGET_JOIN)
+    return parts[1] if len(parts) == 2 else ""
+
+
+def valid_from(spec: WriteSpec, state: str, target: str) -> tuple[bool, str]:
+    """Is ``state`` a state this action may be performed FROM? And why not.
+
+    TWO SHAPES, because the specs have two and collapsing them made one of
+    them unperformable. A BINARY TOGGLE is valid from exactly one named
+    state, and ``perform``'s gate 5 has always compared against
+    ``spec.from_state`` directly. A MULTI-STATE action has ``from_state`` of
+    ``None`` -- there is no single origin -- so that same comparison refuses
+    EVERY real reading it could ever take, which is not a gate refusing
+    something, it is a gate that cannot pass.
+
+    For a multi-state action the question is the one ``_direction`` already
+    asks at preview: is the live state one this server has seen LinkedIn
+    render, and is it something OTHER than where we are going. Asked again
+    here because gate 5's whole job is that the reading at click time is the
+    one that counts -- the preview's reading is up to two minutes old, and on
+    a setting he may have changed in another tab in between.
+    """
+    if spec.from_state is not None:
+        if state == spec.from_state:
+            return True, ""
+        return False, (
+            f"{spec.action!r} is valid only from {spec.from_state!r} and the "
+            f"control on the page reads {state!r}."
+        )
+    destination = destination_of(spec, target)
+    if not destination:
+        return False, (
+            f"{spec.action!r} has more than two states and this grant names "
+            "no destination, so there is no direction to move in."
+        )
+    if state.strip().casefold() not in spec.audiences:
+        return False, (
+            f"the control on the page reads {state!r}, which is not a state "
+            f"this server has seen LinkedIn render. The known ones are "
+            f"{sorted(spec.audiences)}, and a state that cannot be named "
+            "cannot be moved from."
+        )
+    if state.strip().casefold() == destination.strip().casefold():
+        return False, (
+            f"the setting already reads {state!r}, which is where this grant "
+            "was going. Nothing to change -- and this reading is fresher than "
+            "the preview's, so it may have been changed elsewhere since."
+        )
+    return True, ""
+
+
+def anchor_label_for(
+    spec: WriteSpec, target: Optional[str] = None
+) -> Optional[str]:
     """The label the control must be wearing before this action may click it.
 
     Derived from :data:`shape.SAVE_LABELS` rather than written down twice, and
@@ -3372,6 +3606,23 @@ def anchor_label_for(spec: WriteSpec) -> Optional[str]:
     a table. The row is pinned separately, by company id; see
     ``dom.unfollow_control_selector``.
     """
+    if spec.action == "update_setting":
+        # THE ANCHOR IS PER-CALL, WHICH NO OTHER ACTION'S IS, and that is why
+        # this function grew a ``target`` parameter rather than a table entry.
+        # The control to be clicked is the one named for the DESTINATION --
+        # click ``Always on`` to get Always on -- so the label cannot be
+        # derived from the spec alone the way ``Save the job`` can.
+        #
+        # IT IS STILL NOT A CALLER'S STRING. The destination came through
+        # ``_target_for``, is bound into the grant the operator confirmed, and
+        # is checked HERE against the closed set of three states this server
+        # has actually seen rendered. Anything else returns None and
+        # ``perform`` refuses rather than building a selector from it.
+        destination = destination_of(spec, str(target or ""))
+        for known in DARK_MODE_STATES:
+            if destination.strip().casefold() == known.casefold():
+                return known
+        return None
     if spec.action == "unfollow_company":
         return UNFOLLOW_ANCHOR_PREFIX
     if spec.action == "follow_company":
@@ -3506,36 +3757,43 @@ _NINE_REFUSALS: dict[str, str] = {
         "IT: a boundary ruling on the /in/<member>/edit/ family, and a census "
         "of one opened editor."
     ),
-    "update_setting": (
-        "update_setting is sanctioned and cannot be performed, AND WHAT IT "
-        "REFUSES ON CHANGED ON 2026-08-31 -- the missing measurement was "
-        "taken. WHAT IS MEASURED, on six readings across two days and three "
-        "builds, every one agreeing: /mypreferences/d/dark-mode is a "
-        "THREE-STATE RADIO GROUP -- 'Always off', 'Always on', 'Device "
-        "settings' -- named through aria-labelledby, in a page carrying ZERO "
-        "forms, and EXACTLY ONE OF THEM REPORTS CHECKED. So the gate can now "
-        "say which state the setting is in and which way a change would move "
-        "it, which it could not before the census learned to read 'checked': "
-        "it was reading the settings INDEX, a page that hands out addresses "
-        "and switches nothing, and refusing because a gate that cannot name a "
-        "direction is not a gate. WHAT STILL STOPS IT is no longer a "
-        "measurement. This action holds NO url_template, so writes.mint "
-        "refuses it a grant AT ISSUE -- 'there is no page for a grant to be "
-        "permission to act on' -- and no confirm_token can exist for it, for "
-        "anyone. Performing it would need a measured write surface and a new "
-        "entry in SANCTIONED_MUTATIONS, which is a new click call site and a "
-        "decision nobody has taken. ONE SETTING IS READABLE AND THE FAMILY IS "
-        "NOT: '/mypreferences/d/categories/' and '/settings/' remain on the "
-        "forbidden list, and dark mode was admitted BY NAME precisely because "
-        "'Close and delete account' and 'Hibernate account' live in the same "
-        "address family. WHAT WOULD LIFT IT: a measured write surface for "
-        "this action -- the control that sets the value, observed rather than "
-        "assumed -- and then a deliberate entry in SANCTIONED_MUTATIONS, "
-        "which is a new click call site and a decision about this account "
-        "rather than a measurement. Nothing smaller reaches it, and no "
-        "further reading of the dark-mode page will, because the reading is "
-        "no longer the thing that is missing."
-    ),
+    # ``"update_setting"`` WAS HERE UNTIL 2026-08-31 AND IS GONE BECAUSE THE
+    # ACTION SHIPS. It is removed rather than reworded, on this function's own
+    # standing rule: ``_refuse_unperformable`` is for actions that are
+    # sanctioned and NOT performed, and ``follow_company`` and ``apply_job``
+    # were each removed from it on the day they entered PERFORMABLE. Text left
+    # behind for a shipped action is unreachable AND false, which is the pair
+    # this package has twice paid for.
+    #
+    # WHAT IT SAID AND WHY THAT STOPPED BEING TRUE, kept because the entry was
+    # specific and whoever comes looking for it deserves the answer rather
+    # than a silence. It said: this action holds NO url_template, so
+    # writes.mint refuses it a grant AT ISSUE and no confirm_token can exist
+    # for it, for anyone; performing it would need a measured write surface
+    # AND a new entry in SANCTIONED_MUTATIONS.
+    #
+    # THE FIRST HALF WAS TRUE AND IS NOW CLOSED: it holds a url_template, on a
+    # surface measured six times across two days and three builds.
+    #
+    # THE SECOND HALF WAS WRONG, and the error is worth carrying because it
+    # shaped a whole wave's conclusions. A NEW ENTRY IN SANCTIONED_MUTATIONS
+    # WAS NEVER REQUIRED. That list is keyed by (path, function, kind) and
+    # already carries ``("linkedin_server/writes.py", "perform", "click")``,
+    # so ``perform`` may click any control it can NAME -- what the list
+    # refuses is a click somewhere else, or a mutation of another KIND. The
+    # sentence read a permission scoped to a CALL SITE as though it were
+    # scoped to an ACTION. The audit that quoted it concluded that none of the
+    # seven capabilities could have been lifted by any measurement or ruling
+    # reachable from here; for this one, and for the two beside it that also
+    # need only a click, that was false.
+    #
+    # WHAT THE LIST DOES STILL REFUSE, and it is the real blocker for four of
+    # the remaining seven: ``fill``, ``type``, ``press`` and ``keyboard`` are
+    # all on ``readonly._MUTATION_CALL_PATTERNS`` and NONE of them is on
+    # ``SANCTIONED_MUTATIONS`` for any function in this package. So an action
+    # that has to TYPE something -- publish_post, comment_on_item,
+    # update_profile_field, send_message -- needs a mutation CLASS sanctioned,
+    # which is a different and larger decision than a url.
     "send_invitation": (
         "send_invitation is sanctioned and cannot be performed. WHAT IS "
         "MEASURED, and it answers the question that mattered most here: THERE "
@@ -3650,6 +3908,10 @@ def _refuse_unperformable(spec: WriteSpec) -> None:
 _WRITE_SURFACE: dict[str, str] = {
     "job_id": "job posting",
     "company_id": "followed companies",
+    # Added 2026-08-31 with update_setting. It is read by a human at the
+    # moment a write hit an auth wall, so "linkedin" -- the default this would
+    # otherwise fall back to -- tells him nothing about where to go and look.
+    "setting_and_value": "settings",
 }
 
 
@@ -3887,6 +4149,75 @@ async def _live_control(
     still carries exactly one unfollow button, which is the precondition a
     click needs and a list read does not.
     """
+    if spec.action == "update_setting":
+        # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE -- so this is
+        # FRESHNESS rather than a second source, and it is labelled that way
+        # here for the reason ``follow_company``'s branch is: a gate that
+        # implied two independent readings when it took one would be
+        # overstating its own evidence.
+        #
+        # NO NEW SCRIPT AND NO NEW WAIVER. ``_read_dark_mode`` calls
+        # ``dom.read_surface_census``, which is declared and scanned, and this
+        # calls ``_read_dark_mode``.
+        facts, state, why = await _read_dark_mode(page, spec)
+        if state == UNKNOWN:
+            return (UNKNOWN, why, "")
+        ok, refusal = valid_from(spec, state, grant.target)
+        if not ok:
+            # No selector, so ``perform`` stops. Returning the state and the
+            # reason rather than raising keeps the refusal in one place.
+            return (state, refusal + " " + why, "")
+        # THE ROLE IS READ, NOT ASSUMED, and this is what ``input_type`` was
+        # added to the census for. An ``<input>``'s ARIA role is decided by
+        # its type -- ``radio`` and ``checkbox`` are two different roles
+        # wearing one tag -- and the accessible-name selector engine needs the
+        # role spelled correctly or it matches nothing. Six readings of this
+        # page establish three checkable inputs; NONE of them establishes
+        # which of the two types they are, because the census's ``checked``
+        # gate admits both. So it is read here, off the row about to be
+        # clicked, and an unexpected type refuses rather than guessing.
+        rows = [
+            row
+            for row in facts.get("rows", [])
+            if str(row.get("shape") or "").strip().casefold()
+            == anchor.strip().casefold()
+        ]
+        if len(rows) != 1:
+            return (
+                state,
+                f"{len(rows)} controls on this page are named {anchor!r} and "
+                "exactly one is required: at zero the destination is not "
+                "rendered and at two or more choosing between them would be "
+                "choosing by position. " + why,
+                "",
+            )
+        role = dom.aria_role_of(rows[0])
+        # CHECKED AGAINST THE MAPPED SET, not merely against ``None``, and the
+        # difference is whether this branch can fire at all. ``_read_dark_mode``
+        # only ever yields rows whose ``checked`` is not ``None``, and an
+        # ``<input>`` gets one only when its type is radio or checkbox -- both
+        # mapped -- so a ``None`` role cannot arrive from an input and the
+        # branch would have been unreachable. WHAT CAN ARRIVE is an element
+        # carrying ``aria-checked``: a ``div[role=switch]`` named for the
+        # destination is a checkable row whose role this package maps nothing
+        # from. Without this it reaches ``named_role_selector``, which RAISES
+        # rather than refusing -- a safe failure wearing the wrong shape, and
+        # one that skips ``wrong_state_note``.
+        if role not in set(dom.INPUT_TYPE_ROLES.values()):
+            return (
+                state,
+                f"the control named {anchor!r} is a "
+                f"{str(rows[0].get('tag') or '?')!r} carrying role {role!r}, "
+                "which is not a shape this server has seen this setting "
+                "rendered as. Six readings of this page found three checkable "
+                "INPUTS; a control that is something else -- a switch, a "
+                "div wearing aria-checked -- is refused rather than clicked, "
+                "because what a wrong role produces here is a selector that "
+                "matches nothing or matches something else. " + why,
+                "",
+            )
+        return (state, why, dom.named_role_selector(role, anchor))
+
     if spec.action == "unfollow_company":
         control = await dom.read_unfollow_control(page, grant.target)
         count = int(control.get("count") or 0)
@@ -4035,6 +4366,31 @@ async def _verify_after(
     while the total held is a row that scrolled out of a partial list, and it
     is reported as unknown.
     """
+    if spec.action == "update_setting":
+        # A FRESH NAVIGATION AND A RE-READ OF THE GROUP, which is the
+        # strongest verification available to any action in this package and
+        # is worth saying plainly rather than leaving to be inferred.
+        #
+        # The save pair is confirmed from a DIFFERENT surface, which is the
+        # ideal shape and costs a second load of a list that renders part of
+        # itself. This is confirmed from the SAME surface -- there is only one
+        # -- but from a fresh render by LinkedIn, and what it reads is not a
+        # label the control chose to draw: it is the browser's own ``checked``
+        # property on a group of three, where exactly one being on is a
+        # structural fact rather than a string. A control that redrew itself
+        # wrongly would have to also report itself checked to fool this, and
+        # the other two would have to report themselves unchecked.
+        #
+        # AND IT REUSES ``_read_dark_mode``'s REFUSALS. Zero checked or two
+        # checked comes back ``unknown`` here exactly as it does at preview,
+        # so a group that stopped behaving as radios after the click is
+        # reported as unknown rather than resolved by position.
+        landed = await _load(
+            navigator, page, DARK_MODE_URL, surface="settings"
+        )
+        _facts, state, why = await _read_dark_mode(page, spec)
+        return state, why, landed
+
     if spec.action == "follow_company":
         # THE WEAKEST WITNESS CLASS IN THIS DESIGN, and it is labelled as such
         # in the text it returns rather than quietly presented as equal to the
@@ -4302,7 +4658,7 @@ async def perform(
             "observation was not built by preview and will not be acted on."
         )
 
-    anchor = anchor_label_for(spec)
+    anchor = anchor_label_for(spec, grant.target)
     if anchor is None and spec.action not in _SAVE_FAMILY:
         # A WRONG ERROR IS WORSE THAN NO ERROR. The message below is written
         # for the save family and names the save control by name; it fired on
@@ -4368,11 +4724,17 @@ async def perform(
 
     # Gate 5: the control itself, read live, on the page about to be clicked.
     live_state, live_why, selector = await _live_control(page, spec, grant, anchor)
-    if live_state != spec.from_state or not selector:
+    # THE ORIGIN CHECK GOES THROUGH ``valid_from`` NOW, and that is what makes
+    # a multi-state action performable at all. It was ``live_state !=
+    # spec.from_state``, which for an action whose ``from_state`` is ``None``
+    # -- there is no single origin -- refuses EVERY reading it could ever
+    # take. That is not a gate refusing something; it is a gate that cannot
+    # pass, and it was invisible while no such action was in PERFORMABLE.
+    origin_ok, origin_why = valid_from(spec, live_state, grant.target)
+    if not origin_ok or not selector:
         raise WriteAttemptError(
-            f"refusing to click: {spec.action!r} is valid only from "
-            f"{spec.from_state!r} and the control on the page reads "
-            f"{live_state!r}. {live_why} "
+            f"refusing to click: {origin_why or 'no selector was built.'} "
+            f"{live_why} "
             + (
                 spec.wrong_state_note
                 or (
@@ -4461,10 +4823,24 @@ async def perform(
     # is the thing being witnessed. ``click_error`` is REPORTED, in the
     # ``clicked`` block, where a reader can weigh it -- it just does not get a
     # vote here.
-    verified = verified_state == spec.to_state
+    # THE EXPECTED-AFTER AND THE UNCHANGED STATE, both of which a multi-state
+    # action carries on the GRANT rather than on the spec. ``spec.to_state``
+    # and ``spec.from_state`` are ``None`` for one, so this branch used to
+    # compare every outcome against ``None``: a change that landed perfectly
+    # reported ``performed: "unknown"``, which is the worst answer available
+    # here -- the operator is told to go and look at something that worked.
+    #
+    # ``anchor`` is the CANONICAL destination for a multi-state action, not
+    # the caller's spelling of it: ``anchor_label_for`` matched what was asked
+    # for against the closed set of states this server has seen rendered and
+    # returned that. So this compares two strings LinkedIn produced rather
+    # than one of LinkedIn's and one of a caller's.
+    expected_after = spec.to_state or anchor
+    unchanged_state = spec.from_state or live_state
+    verified = bool(expected_after) and verified_state == expected_after
     if verified:
         performed: Any = True
-    elif verified_state == spec.from_state:
+    elif verified_state == unchanged_state:
         performed = False
     else:
         performed = UNKNOWN
@@ -4492,7 +4868,11 @@ async def perform(
         },
         "verified": verified,
         "verification": {
-            "expected_state": spec.to_state,
+            # THE DESTINATION AS IT WAS COMPARED, which for a multi-state
+            # action is on the grant and not on the spec. Printing
+            # ``spec.to_state`` here would print ``None`` beside a verdict
+            # that was reached against a real string.
+            "expected_state": expected_after,
             "observed_state": verified_state,
             "read_from": state_landed,
             "why": verified_why,
@@ -4508,6 +4888,19 @@ async def perform(
                     "total, not on the row's absence."
                 )
                 if spec.action == "unfollow_company"
+                else (
+                    "THE SAME PAGE, RELOADED, and read through LinkedIn's own "
+                    "checked property on a group of three rather than through "
+                    "a label the control chose to draw. There is no second "
+                    "surface for a setting -- the page that renders the value "
+                    "is the page that sets it -- so this is a fresh render "
+                    "from LinkedIn rather than an independent witness, and "
+                    "saying which is the point. It is stronger than reading "
+                    "back the button just pressed: a control that redrew "
+                    "wrongly would have to report itself checked AND the "
+                    "other two report themselves unchecked to pass this."
+                )
+                if spec.action == "update_setting"
                 else (
                     "a DIFFERENT surface from the one clicked. A control that "
                     "redraws itself is the weakest possible witness to its own "

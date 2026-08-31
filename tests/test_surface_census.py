@@ -52,7 +52,13 @@ import pytest
 
 from linkedin_server import browser as browser_module
 from linkedin_server import dom, errors, readonly, shape
-from linkedin_server.server import CENSUS_SURFACES, linkedin_surface_census
+from linkedin_server import server as server_module
+from linkedin_server.server import (
+    CENSUS_RESOLVED_SURFACES,
+    CENSUS_SURFACES,
+    census_surface_keys,
+    linkedin_surface_census,
+)
 from tests.conftest import FakePage
 
 FEED_URL = "https://www.linkedin.com/feed/"
@@ -657,18 +663,40 @@ def drive(monkeypatch):
     return install
 
 
-def test_the_surface_table_is_a_closed_set_of_five():
-    """FIVE SINCE 2026-08-31, and the count is in the name so a sixth arriving
-    quietly is impossible: the set equality is what a new key has to get past,
-    and the name is what a reader compares against the ruling block above the
-    table in server.py."""
+def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
+    """EIGHT DIRECT KEYS AND ONE RESOLVED, and the count is in the name so a
+    tenth arriving quietly is impossible: the set equality is what a new key
+    has to get past, and the name is what a reader compares against the ruling
+    block above the table in server.py.
+
+    FIVE UNTIL 2026-08-31. Four surfaces were ruled in that day, each named
+    individually by the operator and never as a family, and one of them --
+    ``feed_item`` -- is NOT in this table at all: its url carries a urn that
+    only a live read can supply, so it lives in ``CENSUS_RESOLVED_SURFACES``
+    and is asserted separately below. The split exists because a table entry
+    that is not the url actually loaded makes every other guard on this table
+    weaker; the first draft used a placeholder and
+    ``test_every_surface_is_a_permitted_read_url`` caught it.
+    """
     assert set(CENSUS_SURFACES) == {
         "feed",
         "profile",
         "profile_edit_intro",
         "settings",
         "settings_dark_mode",
+        "post_composer",
+        "article_composer",
+        "messaging_compose",
     }
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
+    # THE TWO SETS ARE DISJOINT AND THEIR UNION IS WHAT A CALLER IS OFFERED.
+    # Without this a key could be in both and the refusal branch would never
+    # be reached for it.
+    assert not (set(CENSUS_SURFACES) & CENSUS_RESOLVED_SURFACES)
+    assert census_surface_keys() == sorted(
+        set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES
+    )
+    assert len(census_surface_keys()) == 9
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
@@ -729,7 +757,36 @@ def test_the_three_surfaces_refused_on_a_side_effect_ruling_are_absent(surface):
     oversight, so it is asserted on the KEY and on every url in the table.
     """
     assert surface not in CENSUS_SURFACES
-    assert not any(surface in url for url in CENSUS_SURFACES.values())
+    assert surface not in CENSUS_RESOLVED_SURFACES
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://www.linkedin.com/mynetwork/",
+        "https://www.linkedin.com/notifications/",
+        "https://www.linkedin.com/messaging/",
+        "https://www.linkedin.com/messaging/thread/2-abc/",
+    ],
+)
+def test_no_key_points_at_a_surface_refused_on_a_side_effect_ruling(url):
+    """THE URL HALF OF THE SAME GATE, and it had to be rewritten rather than
+    kept.
+
+    It used to read ``not any(surface in url for url in ...)`` -- a SUBSTRING
+    test over the table's values, with ``surface`` being the bare word
+    ``"messaging"``. That stopped working the day ``/messaging/compose/`` was
+    admitted by name, and the shape of the failure is worth recording: the
+    check was not wrong about the composer, it simply could not tell
+    ``/messaging/compose/`` (ruled in, one url, badge read zero first) from
+    ``/messaging/`` (never ruled in, redirects into somebody's conversation).
+    A substring cannot make that distinction and should not have been asked
+    to.
+
+    So the addresses are named in full and asserted absent as ADDRESSES. The
+    composer's neighbours are here for exactly the reason the composer is not.
+    """
+    assert url not in set(CENSUS_SURFACES.values())
 
 
 def test_notifications_is_deliberately_not_a_surface():
@@ -738,6 +795,7 @@ def test_notifications_is_deliberately_not_a_surface():
     for nothing. The refusal is worth a test because the next person to look
     will reach for it."""
     assert "notifications" not in CENSUS_SURFACES
+    assert "notifications" not in CENSUS_RESOLVED_SURFACES
     assert not any("notifications" in url for url in CENSUS_SURFACES.values())
 
 
@@ -758,6 +816,31 @@ def test_every_surface_is_a_permitted_read_url():
     """
     for key, url in CENSUS_SURFACES.items():
         assert readonly.is_read_url(url), f"{key}: {url}"
+
+    # AND THE RESOLVED SURFACE, whose url does not exist until a live read has
+    # produced a urn. It cannot be in the table -- a table entry that is not
+    # the url actually loaded makes the loop above answer a question about a
+    # string nobody uses, which is exactly what the first draft did -- so it
+    # is checked here against a SYNTHETIC urn of the shape the reader will
+    # only ever emit.
+    #
+    # THE SHAPE IS THE READER'S OWN, not a second spelling written here:
+    # dom.ACTIVITY_ITEMS_JS refuses to publish a key that does not match
+    # ``urn:li:<type>:<digits>``, so a urn this url could be built from is
+    # necessarily one this pattern admits.
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
+    synthetic = server_module.ITEM_PERMALINK_URL.format(
+        urn="urn:li:activity:" + ACTIVITY_ID
+    )
+    assert readonly.is_read_url(synthetic), synthetic
+    # And the shapes it must NOT be buildable into, so "the permalink opens"
+    # is not read as "that family opens".
+    for refused in (
+        server_module.ITEM_PERMALINK_URL.format(urn="urn:li:activity:1/edit"),
+        server_module.ITEM_PERMALINK_URL.format(urn="not-a-urn"),
+        server_module.ITEM_PERMALINK_URL.format(urn=""),
+    ):
+        assert not readonly.is_read_url(refused), refused
 
 
 def test_the_settings_key_reaches_the_index_and_not_the_toggles():
@@ -823,7 +906,11 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
     # Spelled out rather than derived from CENSUS_SURFACES: comparing the
     # answer against the same dict that produced it could not fail.
     assert result["valid_surfaces"] == [
+        "article_composer",
         "feed",
+        "feed_item",
+        "messaging_compose",
+        "post_composer",
         "profile",
         "profile_edit_intro",
         "settings",
@@ -896,6 +983,7 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
             "shape",
             "count",
             "tag",
+            "input_type",
             "role",
             "name_source",
             "has_href",
@@ -906,6 +994,14 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
             "checked_source",
             "containers",
         }
+    # AND THE SAME SET, DERIVED. The literal above is what a caller is
+    # promised; this says the promise is exactly the merge key plus the two
+    # fields that are not part of it. Written as a second assertion rather
+    # than replacing the first, because a pin that derives itself from the
+    # code it is pinning cannot catch a field arriving -- it is the literal
+    # that goes red, and it did, on the edit that added ``input_type``.
+    for row in result["control_shapes"]:
+        assert set(row) == set(shape.CENSUS_KEY_FIELDS) | {"count", "containers"}
 
 
 async def test_an_auth_wall_is_reported_as_a_failed_read_not_an_empty_census(drive):
@@ -951,9 +1047,28 @@ def test_the_docstring_says_it_is_an_instrument_and_not_a_feature():
 
 
 def test_the_docstring_says_it_loads_one_page_and_clicks_nothing():
+    """THE SAFETY CLAIM, AND ITS ONE EXCEPTION, both asserted.
+
+    The docstring said "IT LOADS EXACTLY ONE PAGE AND CLICKS NOTHING" and that
+    stopped being uniformly true on 2026-08-31, when ``feed_item`` arrived --
+    a surface whose url is a permalink this server has to READ before it can
+    build. Two loads, not one.
+
+    So this asserts the claim AND the exception by name. Deleting the
+    assertion would have been the wrong repair and quietly widening the claim
+    to "one or two pages" would have been worse: what makes a sentence like
+    this worth anything is that a reader can act on it, and "one page, except
+    on the surface that loads two, which says so in pages_loaded" is
+    actionable where a range is not.
+    """
     doc = _doc()
     assert "exactly one page" in doc
     assert "clicks nothing" in doc
+    # THE EXCEPTION, NAMED. A claim with an unstated exception is the shape
+    # this package keeps finding in its own docstrings.
+    assert "feed_item" in doc
+    assert "exactly two" in doc
+    assert "pages_loaded" in doc
 
 
 def test_the_docstring_refuses_to_let_presence_read_as_permission():
@@ -2344,6 +2459,14 @@ CHECKED_FORM_HTML = (
     # 9 -- a control with no checked state of either kind. The residue that
     # makes ``None`` an answer about the control rather than about the reader.
     "<button>Refresh</button>"
+    # 10 -- AN INPUT WITH NO type ATTRIBUTE, added 2026-08-31 with
+    # ``input_type``. It is the one row where reading the ATTRIBUTE and
+    # reading the PROPERTY give different answers: ``getAttribute('type')``
+    # returns nothing and ``el.type`` returns ``"text"``, which is the type
+    # the browser actually applied and therefore the one a selector has to
+    # match. Placed LAST among the censused controls so it cannot move any
+    # ROW_ index above it.
+    '<label for="c-untyped">Untyped box</label><input id="c-untyped">'
     # NOT CENSUSED, and it is here to be counted as absent. A div built as a
     # checkbox matches no arm of CENSUS_CONTROL_SELECTOR, so it yields no row
     # at all -- it is LAST in document order so that it cannot move any ROW_
@@ -2362,6 +2485,9 @@ ROW_ARIA_TRUE = 6
 ROW_ARIA_MIXED = 7
 ROW_NATIVE_BEATS_ARIA = 8
 ROW_NOT_CHECKABLE = 9
+#: Added 2026-08-31 with ``input_type``: an ``<input>`` carrying no ``type``
+#: attribute at all.
+ROW_UNTYPED_INPUT = 10
 
 #: The three radios of the group, so the "exactly one is on" assertion reads
 #: as a group rather than as three separate rows.
@@ -2386,8 +2512,8 @@ async def _checked_form_rows(census_over) -> list[dict[str, Any]]:
 
     census = await census_over(CHECKED_FORM_HTML, work)
     rows = census["controls"]
-    assert len(rows) == 10, (
-        f"the fixture yielded {len(rows)} controls, not 10 -- every ROW_ index "
+    assert len(rows) == 11, (
+        f"the fixture yielded {len(rows)} controls, not 11 -- every ROW_ index "
         "in this section is now pointing at the wrong control."
     )
     return rows
@@ -2532,8 +2658,149 @@ async def test_a_div_built_as_a_checkbox_is_not_censused_at_all(census_over):
     assert '[role="checkbox"]' not in dom.CENSUS_CONTROL_SELECTOR
     assert '[role="radio"]' not in dom.CENSUS_CONTROL_SELECTOR
     rows = await _checked_form_rows(census_over)
-    assert len(rows) == 10
+    assert len(rows) == 11
     assert "Div checkbox" not in json.dumps(rows)
+
+
+# ---------------------------------------------------------------------------
+# ``input_type``: the eleventh key, and what needs it
+# ---------------------------------------------------------------------------
+#
+# WHY A CENSUS THAT COUNTS CONTROLS CARRIES A FIELD ABOUT DRIVING ONE.
+# ``writes._live_control`` builds ``update_setting``'s click selector from the
+# ROLE the control actually has, and an ``<input>``'s role is decided by its
+# TYPE: radio and checkbox are two different roles wearing one tag. Without
+# this field the selector would have to assume one of them, and a selector
+# built on an assumed shape is the thing this package refuses on a write.
+#
+# The three dark-mode controls come back ``checked_source: "native"``, which
+# proves only that they are checkbox-OR-radio, because that is the whole of
+# what ``checkedOf``'s type gate distinguishes.
+
+
+async def test_a_radio_and_a_checkbox_of_one_name_do_not_merge(census_over):
+    """THE MERGE-KEY REQUIREMENT, shown as the thing it protects.
+
+    Two controls named the same, both ``<input>``, both ``checked: false``,
+    differing ONLY in type. Without ``input_type`` in the key every other
+    field agrees and they collapse to one row of count 2 -- a page carrying
+    two different kinds of control reported as carrying one kind twice, which
+    is the exact failure ``tag`` and ``role`` are already in the key to
+    prevent, one level finer.
+    """
+    rows, _hrefs = shape.census_aggregate(
+        [
+            _control(
+                shape="Weekly digest",
+                tag="input",
+                role=None,
+                input_type="radio",
+                checked=False,
+                checked_source="native",
+            ),
+            _control(
+                shape="Weekly digest",
+                tag="input",
+                role=None,
+                input_type="checkbox",
+                checked=False,
+                checked_source="native",
+            ),
+        ]
+    )
+    assert len(rows) == 2, rows
+    assert {row["input_type"] for row in rows} == {"radio", "checkbox"}
+    assert [row["count"] for row in rows] == [1, 1]
+
+
+def test_the_published_row_is_built_from_the_key_by_name_not_by_index():
+    """THE MISLABEL GUARD, and it pins a defect CLASS rather than an instance.
+
+    The row used to be assembled by SUBSCRIPTING the merge key -- ``"role":
+    key[2]`` and so on -- so inserting a field anywhere but the end renamed
+    every column after it. Silently: every value is still a string or a None,
+    so the row stays well-formed while ``role`` reports what ``name_source``
+    measured. That is worse than the silent DROP ``container`` suffered on the
+    day it was added, because the output still looks complete.
+
+    Asserted on a record whose fields are all DIFFERENT AND RECOGNISABLE, so a
+    one-place shift cannot land on an equal value and pass.
+    """
+    rows, _hrefs = shape.census_aggregate(
+        [
+            {
+                "shape": "Always on",
+                "tag": "input",
+                "input_type": "radio",
+                "role": "presentation",
+                "name_source": "aria-labelledby",
+                "has_href": False,
+                "href_shape": None,
+                "aria_expanded": "false",
+                "disabled": True,
+                "checked": True,
+                "checked_source": "native",
+            }
+        ]
+    )
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["shape"] == "Always on"
+    assert row["tag"] == "input"
+    assert row["input_type"] == "radio"
+    assert row["role"] == "presentation"
+    assert row["name_source"] == "aria-labelledby"
+    assert row["has_href"] is False
+    assert row["href_shape"] is None
+    assert row["aria_expanded"] == "false"
+    assert row["disabled"] is True
+    assert row["checked"] is True
+    assert row["checked_source"] == "native"
+    # AND THE NAMES ARE THE KEY'S OWN, so a field can never be in one and not
+    # the other.
+    assert set(row) - {"count", "containers"} == set(shape.CENSUS_KEY_FIELDS)
+
+
+async def test_input_type_is_the_type_the_browser_applied_not_the_attribute(
+    census_over,
+):
+    """THE PROPERTY, NEVER THE ATTRIBUTE, and the untyped box is why.
+
+    ``<input id="c-untyped">`` carries no ``type`` attribute, so
+    ``getAttribute('type')`` returns nothing -- and the browser applies
+    ``text``, which is what an ARIA role and a selector both follow. Reading
+    the attribute would report this control as having no type at all, which is
+    the same absent-is-not-zero conflation ``checked`` and ``name_source``
+    have each already cost this module once.
+    """
+    rows = await _checked_form_rows(census_over)
+    assert rows[ROW_UNTYPED_INPUT]["shape"] == "Untyped box"
+    assert rows[ROW_UNTYPED_INPUT]["input_type"] == "text"
+
+
+async def test_input_type_is_none_for_everything_that_is_not_an_input(
+    census_over,
+):
+    """``None`` MEANS NOT AN INPUT, and it is a third value rather than the
+    empty string.
+
+    A ``<button>`` and an ``<input type="button">`` are different elements
+    with different roles. Reporting the second's type as ``""`` -- or the
+    first's -- would put them in one row, and ``""`` is a value a real input
+    type can never take.
+    """
+    rows = await _checked_form_rows(census_over)
+    assert rows[ROW_NOT_CHECKABLE]["tag"] == "button"
+    assert rows[ROW_NOT_CHECKABLE]["input_type"] is None
+    for index in ROW_THEME_GROUP:
+        assert rows[index]["input_type"] == "radio", rows[index]
+    assert rows[ROW_CHECKBOX_ON]["input_type"] == "checkbox"
+    assert rows[ROW_TEXT_INPUT]["input_type"] == "text"
+    # THE ARIA ROUTE'S CARRIERS ARE BUTTONS, so they are not inputs either --
+    # which is the row where "checkable" and "is an input" come apart, and the
+    # reason the two fields are separate rather than one.
+    assert rows[ROW_ARIA_TRUE]["input_type"] is None
+    assert rows[ROW_ARIA_TRUE]["checked"] is True
 
 
 async def test_the_reader_passes_checked_through_untouched(census_over):
@@ -2568,6 +2835,10 @@ async def test_the_reader_passes_checked_through_untouched(census_over):
         True,
         "mixed",
         True,
+        None,
+        # ROW_UNTYPED_INPUT: an ``<input>`` with no type attribute is a TEXT
+        # box, so it is not checkable and reads ``None`` -- the type gate
+        # working on the control that has no type written down.
         None,
     ]
     # ``checked_source`` is the one of the two that IS defaulted, and the
@@ -2678,7 +2949,7 @@ async def test_deleting_the_checked_call_site_takes_the_readings_with_it(
         return await page.evaluate(derived, _census_cfg())
 
     raw = await census_over(CHECKED_FORM_HTML, work)
-    assert len(raw["controls"]) == 10
+    assert len(raw["controls"]) == 11
     assert all("checked" not in row for row in raw["controls"])
     assert all("checked_source" not in row for row in raw["controls"])
 
