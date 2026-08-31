@@ -1643,6 +1643,31 @@ FOLLOWED_PAGES_URL = "https://www.linkedin.com/mynetwork/network-manager/company
 FEED_URL = "https://www.linkedin.com/feed/"
 SETTINGS_URL = "https://www.linkedin.com/mypreferences/d/"
 
+#: ONE NAMED SETTINGS PAGE, and the only one below the index this server may
+#: reach. Admitted to ``readonly._ALLOWED_URL_PATTERNS`` on 2026-08-31 by an
+#: anchored pattern naming this page and nothing else, on the operator's ruling
+#: that a setting is admitted BY NAME or not at all -- ``Close and delete
+#: account`` and ``Hibernate account`` live in the same address family.
+#:
+#: WHY THIS IS A SEPARATE CONSTANT FROM :data:`SETTINGS_URL` rather than a
+#: format string over it. A template would make the family addressable from one
+#: place, which is exactly the shape the ruling refused; two literals cannot be
+#: pointed at a third page without somebody writing that page's name down.
+#:
+#: WHAT IT RENDERS, measured FOUR TIMES across two days -- twice on 2026-08-31
+#: in the previous wave, and twice today, the second of those the first reading
+#: ever taken with a ``checked`` field to read. All four agree: 20 controls,
+#: ``forms: 0``, ``buttons: 1``, ``links: 16``, ``dialogs: 0``, and NO
+#: REDIRECT. Three radios named through ``aria-labelledby``, none of them
+#: inside a container.
+DARK_MODE_URL = "https://www.linkedin.com/mypreferences/d/dark-mode"
+
+#: The three destinations dark mode has, EXACTLY as LinkedIn renders them and
+#: in the case it renders them in. Read off the live page rather than typed
+#: from memory, which is why they are here rather than inline: a destination
+#: this server has never seen rendered is one its gate may not offer.
+DARK_MODE_STATES: tuple[str, ...] = ("Always off", "Always on", "Device settings")
+
 #: ONE job posting, as a READ. Named separately from any spec's
 #: ``url_template`` and used by exactly one action -- ``apply_job``, which has
 #: NO write surface at all and must still be able to look at the posting in
@@ -2351,6 +2376,109 @@ async def _read_settings_index(
         "that hands out addresses and switches nothing is the measurement: "
         "every VALUE lives one page further down, on an address the read "
         "boundary forbids, and no page below this one has ever been loaded.",
+    )
+
+
+async def _read_dark_mode(
+    page: Any, spec: WriteSpec
+) -> tuple[dict[str, Any], str, str]:
+    """WHICH dark-mode setting is selected, off the page that carries it.
+
+    THE ONE READER HERE THAT REPORTS A VALUE RATHER THAN A COUNT, and the
+    difference is the whole point of it. Its six siblings answer "is the
+    control there", because for their capabilities that was the open question.
+    For this one the control was never in doubt -- three radios, measured four
+    times across two days -- and what was missing was WHICH of them is on.
+
+    NO NEW SCRIPT AND NO NEW ``evaluate`` WAIVER. This calls
+    ``dom.read_surface_census``, which already reads ``checked`` and
+    ``checked_source`` off every control and shapes every name before
+    returning it. A purpose-built reader here would have been a second
+    implementation of a chain that already exists, declared and scanned, to
+    answer a question the existing one answers.
+
+    THE SHAPES ARE SAFE TO COMPARE AGAINST LITERALS, which is not true of
+    every surface: these three names pass the census's own character and
+    length gate, so they arrive readable rather than as ``<opaque>``. That is
+    a property of THIS page and is why :data:`DARK_MODE_STATES` may be a tuple
+    of literals at all.
+
+    EXACTLY ONE CHECKED IS THE ONLY READABLE STATE, and the two refusals
+    either side of it refuse different things:
+
+    * ZERO checked -- the group rendered and nothing is selected. That is a
+      page this server has never seen and cannot describe, not a default.
+    * TWO OR MORE -- impossible for a radio group, reachable the moment
+      LinkedIn rebuilds these as checkboxes, and it must not be resolved by
+      picking the first. Picking one would be picking by position.
+
+    The state is also checked against :data:`DARK_MODE_STATES` HERE, one layer
+    above ``_direction``'s own check of it. That duplication is deliberate and
+    follows ``_read_profile_state``, which casefold-checks the audience itself
+    and returns ``unknown`` on a miss: the reader refusing a name it has never
+    seen rendered is what keeps the gate's backstop a backstop instead of the
+    only thing standing there.
+    """
+    census = await dom.read_surface_census(page)
+    rows = [row for row in census["controls"] if row.get("checked") is not None]
+    on = [str(row.get("shape") or "") for row in rows if row.get("checked") is True]
+    off = [str(row.get("shape") or "") for row in rows if row.get("checked") is False]
+    facts: dict[str, Any] = {
+        "checkable_controls": len(rows),
+        "checked": sorted(on),
+        "unchecked": sorted(off),
+        "checked_sources": sorted(
+            {str(row.get("checked_source") or "none") for row in rows}
+        ),
+        "controls_read": int(census.get("controls_read") or 0),
+        "forms": int((census.get("counts") or {}).get("forms") or 0),
+    }
+
+    if not rows:
+        return (
+            facts,
+            UNKNOWN,
+            "no checkable control rendered on the settings page at all, so "
+            "there is no state to read. Absence on a first render is unknown "
+            "rather than off -- and note that a control built as a div with "
+            "role=radio produces NO CENSUS ROW at all rather than a row with "
+            "no state, which is a limit of the control selector and is pinned "
+            "in tests/test_surface_census.py.",
+        )
+    if len(on) != 1:
+        return (
+            facts,
+            UNKNOWN,
+            f"{len(rows)} checkable control(s) rendered and {len(on)} of them "
+            "report checked. Exactly one is the only state this reader can "
+            "describe: at zero the group drew with nothing selected, which is "
+            "a page nobody has seen, and at two or more the group is not "
+            "behaving as radios and choosing between them would be choosing "
+            f"by position. The unchecked ones read {sorted(off)}.",
+        )
+
+    state = on[0]
+    if state not in DARK_MODE_STATES:
+        return (
+            facts,
+            UNKNOWN,
+            f"the selected control reads {state!r}, which is not one of the "
+            f"three this server has seen LinkedIn render ({list(DARK_MODE_STATES)}). "
+            "A relabelled, translated or reshaped setting is refused rather "
+            "than passed on, because a gate that cannot name the state it is "
+            "in must not offer to change it.",
+        )
+    return (
+        facts,
+        state,
+        f"the setting reads {state!r}, read off the radio group on "
+        f"{DARK_MODE_URL} -- the very control a change would move. "
+        f"{len(rows)} checkable control(s) were found and exactly one is "
+        f"selected; the other {len(off)} read {sorted(off)}. The page carries "
+        f"{facts['forms']} form(s) and {facts['controls_read']} control(s) in "
+        "total, which is the shape it has rendered on all four readings taken "
+        "across two days -- so this is not a half-rendered page reporting a "
+        "state it had not drawn yet.",
     )
 
 
