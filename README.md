@@ -174,14 +174,15 @@ reason.
 | `linkedin_profile_editor_fields` | **The second instrument, and the one tool here that publishes control NAMES.** It names the controls inside the intro editor on your own profile -- which `linkedin_surface_census` will not do, because the census reports shapes and returns `<opaque>` for any name failing its length or character gate. That gate is what makes the census safe to point at a page full of strangers, and it is why `linkedin_update_profile_field` cannot name a field to type into. This tool relaxes it on ONE ground and establishes that ground per call: it loads `/in/me/`, requires LinkedIn's own `isSelfProfile=true` on the landed url, loads the intro editor, and requires the same member segment on both -- and if either half fails it returns a refusal carrying no field data at all, so a refusal can never be read as "there are none". The container is found structurally, as the nearest dialog ancestor of the control named Save, never by an index; two such controls or none is a refusal rather than a guess. It takes NO ARGUMENT, so no caller can aim it at another page. Two page loads, and it clicks nothing. **LABELS, NEVER VALUES** -- a label is "First name", a value is your first name, and no value and no href leaves the page. Your member slug is compared and discarded: it is in no part of the answer. |
 | `linkedin_my_activity_items` | **The item keys, for your own posts only** -- which nothing else here returns, and which is why `linkedin_comment_on_item` and `linkedin_react_to_item` are registered and refusing: neither was ever blocked by the read boundary or by the click anchor, they simply had nothing to aim at. `linkedin_surface_census` cannot supply one by construction, since it substitutes every urn out before it counts, and the feed carries zero item permalinks. It reads `/in/me/` and takes NO ARGUMENT, so no caller can aim it at another page. **Authorship is established, not inferred from where an item sits**, and it takes all three of: LinkedIn's own `isSelfProfile=true` on the landed url; one single author name across every item overflow control on the page, so a rail carrying somebody else's item is refused outright; and that name standing in a prefix relation to the page's own `h1`. If any of the three fails there is no `items` key at all, so a refusal can never be read as "you have no posts". **No name ever leaves the page** -- the comparison happens inside the document and only booleans come back. A urn is published only if it matches the exact `urn:li:<type>:<digits>` shape and sits inside an item root that itself carries an overflow control; anything else is counted and dropped. **The output is real identifiers**: do not paste one into a tracked file in this repository, which is public and swept for exactly that shape. |
 
-## The five that write
+## The six that write
 
 **This heading said "The three that write" over a three-row table until
-2026-08-31.** Both were stale by two: `linkedin_apply_job` shipped 2026-08-25
-and `linkedin_follow_company` 2026-08-30, and neither had been added here. The
-count is `len(writes.PERFORMABLE)` and it is pinned against these tool names in
-`tests/test_server_surface.py`, so the table below cannot fall behind the
-server again without that test failing.
+2026-08-31**, stale by two: `linkedin_apply_job` shipped 2026-08-25 and
+`linkedin_follow_company` 2026-08-30, and neither had been added here. It went
+to five that day and to SIX later the same day, when `linkedin_update_setting`
+became performable. The count is `len(writes.PERFORMABLE)` and it is pinned
+against these tool names in `tests/test_server_surface.py`, so the table below
+cannot fall behind the server again without that test failing.
 
 | Tool | What it does |
 |---|---|
@@ -191,9 +192,11 @@ server again without that test failing.
 | `linkedin_apply_job` | Submits an application to one **LinkedIn-hosted** posting, since 2026-08-25. Same two-call gate plus a second one: the apply modal is re-read before the submit is pressed, and it is only pressed if exactly one control carries LinkedIn's own submit hook and zero advance controls are present. Off-site postings are reported, never driven. **This is the one write nobody has established LinkedIn can undo** -- the honest form is stronger than "this server cannot withdraw it". |
 | `linkedin_follow_company` | Follows the company that posted one job, from the posting page itself, since 2026-08-30. Same shape and the same five gates; the direction is read off the posting at no extra page load. A follow **is** reversible on LinkedIn, but this server cannot aim the undo: a posting names its employer by slug and `linkedin_unfollow_company` addresses rows by numeric id, with nothing resolving one to the other. The preview says exactly that in `reversible_by`. |
 
+| `linkedin_update_setting` | Changes ONE named account setting -- dark mode, and nothing else -- since 2026-08-31. The first write here that touches neither a job nor a company Page. Same two-call gate; the destination is NAMED rather than derived, because the setting has three states and no direction can be inferred from two, and the token binds to the destination as well as the setting. The control clicked is the radio named for where you are going, and the SELECTOR IS BUILT FROM THE ROLE THAT CONTROL ACTUALLY CARRIES rather than an assumed one. Verified by a fresh navigation and a re-read of the whole group's own `checked` property, which is the strongest verification in this package. **It is also the cheapest write here**: dark mode is a per-account display preference with no audience, observable by nobody, and the same tool sets it back. Asking about any other setting loads NOTHING. |
+
 **Seven more tools are write-shaped and cannot act at all**: `publish_post`,
-`comment_on_item`, `react_to_item`, `update_profile_field`, `update_setting`,
-`send_invitation` and `send_message`. Each holds a full spec and reads its own
+`comment_on_item`, `react_to_item`, `update_profile_field`,
+`set_open_to_work`, `send_invitation` and `send_message`. Each holds a full spec and reads its own
 surface live when previewed, then refuses with what it just saw and the one
 measurement that would complete it. None is in `writes.PERFORMABLE`, none
 holds a `url_template`, and `writes.mint` refuses each of them a grant at
@@ -315,51 +318,85 @@ LinkedIn ships the whole apply state machine as a per-posting template.
 
 ## What it deliberately cannot do
 
-Messaging, InMail, connection invitations. Profile edits. Open To Work.
-Following a company. Posting, liking, commenting, endorsing. Marking
-notifications read. Collecting data about other members. Submitting
-applications, per the section above.
+**THIS SECTION WAS REWRITTEN ON 2026-08-31 RATHER THAN PATCHED, and the reason
+is worth the two lines.** It listed *following a company* and *submitting
+applications* among the things this server deliberately cannot do, while both
+had shipped -- one six days earlier, one the day before -- and it said a follow
+"is still not performable" three paragraphs after a table row describing it
+performing. Patching individual sentences in a section whose premise has moved
+produces a section that contradicts itself in more places, which is what the
+last three attempts at it did. What follows is organised by WHY a thing is
+refused, because that is the axis that actually predicts whether it will ever
+change.
 
-These are not missing features, and they are not all the same kind of "no".
-`linkedin_server_info` labels each one POLICY, MEASURED or UNMEASURED, because
-"we refuse this on principle", "we looked and it will not work" and "nobody has
-looked" are three different statements and a list that flattens them is how an
-unexamined gap comes to read as a design decision.
+**Sending a message or an InMail. Publishing a post. Commenting. Reacting.
+Editing a profile field.** All five are registered, specced and refusing, and
+all five are blocked by the same measured thing: **they would have to TYPE.**
+`fill`, `type`, `press` and `keyboard` are all on
+`readonly._MUTATION_CALL_PATTERNS` and none of them is on
+`readonly.SANCTIONED_MUTATIONS` for any function in this package. `perform` may
+CLICK -- that is one entry, `(writes.py, perform, click)` -- and it may do
+nothing else. So no measurement and no url admits any of these five; a new
+mutation CLASS would have to be sanctioned, which is a deliberate boundary
+decision nobody has taken.
 
-**Following is the interesting one**, and its reason changed on 2026-08-24
-without its answer changing. It used to be blocked because no unfollow existed
--- this server could create a state it could not clear. One exists now. It is
-still not performable, because **the undo cannot be aimed**: a job posting names
-its employer by slug, the unfollow surface addresses rows by numeric company id,
-and no capture in this repo carries both for one company on a surface either
-action uses. That surface also renders about twenty rows of fifty-eight with no
-pagination control, so most of the list is unreachable in one page load. The
-refusal names both, and names what would lift them.
+**Endorsing a skill is IMPOSSIBLE rather than refused**, and it is the only one
+of these where the refusal is on somebody else's behalf. The control exists
+only on a third party's profile, and `linkedin_who_viewed_me` reads the
+RECEIVING end of exactly that signal: loading a stranger's profile leaves them
+a durable record, 365 days deep. That cost lands on a person who did not agree
+to it, so it is not the operator's to clear.
 
-**Reading your own inbox is UNMEASURED, not refused.** The read boundary blocks
-`/messaging`, and every written rationale for that block is phrased against
-*sending*. Whether reading is even possible has never been tested.
-`scripts/_probe_messaging.py` exists to test it, and to test something the
-question usually skips. The hypothesis -- **unverified, which is the point** --
-is that LinkedIn's desktop messaging view opens a conversation on arrival, so a
-"read" of the inbox would mark a thread read, which would be the notifications
-objection arriving through a tool that calls itself a read.
-The probe measures that by reading the nav badge from `/feed/` before and after,
-a surface the load does not touch. **It has not been run**, and the forbidden
-list is unchanged until it is: a boundary does not move on an unmeasured claim.
+**Sending a connection invitation is refused on something narrower than a
+boundary.** The route costs no badge -- the invitation controls are on his own
+profile -- and the aiming works: a word he supplies is handed INTO the page,
+the comparison happens there, and three integers come back, with exactly one
+match aimable and two or more refused as ambiguous. What stops it is that **the
+confirm block cannot name the person.** The aiming is safe precisely because no
+label enters this process, so the block can say "one of nine controls carries
+your word, at position three" and cannot say who. Every other write here names
+its target in terms you can check.
+
+**Marking notifications read** is not offered, and the honest form is that
+there is no way to avoid it rather than that it is refused: LinkedIn marks the
+list seen on the server when the page is served. See the side effects below.
+
+**Open To Work** has no url at all -- re-measured 2026-08-31, its control is a
+button with no href -- so its editor opens as a modal, and the single click
+that would first SHOW it is also the first click that could CHANGE it. It is
+the one setting here a current employer can see.
+
+**Collecting data about other members** is out of scope by construction rather
+than by policy. `linkedin_surface_census` reduces every accessible name and
+every href to a SHAPE before counting, so a row identifies a kind of control
+and never a person, and a shape seen exactly once has any run of capitalised
+words blanked.
+
+**Reading your own inbox is neither refused nor unmeasured any more**, and this
+paragraph said it was both. The boundary was narrowed on 2026-08-26 on the
+operator's ruling and `linkedin_open_messaging` and `linkedin_new_messages`
+ship. The hypothesis the old text called unverified has been MEASURED, twice,
+and it was right: `/messaging/` does not stay on a list -- LinkedIn redirects
+it into one conversation of its own choosing, so the load opens somebody's
+thread and resets the nav badge. That cost is now stated in the tools' own
+names and docstrings rather than denied by a list that could not enforce it.
+`/messaging/compose` stayed forbidden through that narrowing and is admitted
+today as ONE exact url, by an exemption, for a capture that has not been taken.
 
 Anything else that would change something on LinkedIn's servers is out of
-scope, and `tests/test_readonly.py` fails the build if a second mutating call
-appears anywhere in the package.
+scope, and `tests/test_readonly.py` fails the build if a mutating call appears
+anywhere in the package outside the two entries `SANCTIONED_MUTATIONS` names.
 
 One tool changes something on **this machine**: `linkedin_logout(confirm=True)`
 erases the local cookie jar. It issues no request, so LinkedIn is never told,
 and `linkedin_server_info` names it under `local_state_writes` rather than
 folding it into the `read_only` field.
 
-### The two side effects, stated rather than hidden
+### The side effects, stated rather than hidden
 
-A read that changes something has to say so:
+**This heading said "The two side effects" over a list that had grown**, which
+is the same rot as the write count and is worth naming rather than silently
+renumbering. A read that changes something has to say so:
 
 1. **Opening the notifications page clears LinkedIn's unread badge** -- exactly
    as it would if you opened the page yourself. Measured, not theorised: one
@@ -373,8 +410,22 @@ A read that changes something has to say so:
    reading -- the one fact the page load destroys.
 2. **Running a job search adds to your own recent-search history**, the same as
    typing the query on the site.
+3. **Opening messaging clears the messaging badge AND opens one conversation
+   LinkedIn chooses** -- measured twice. `/messaging/` does not stay on a
+   list. Only `linkedin_open_messaging` and `linkedin_new_messages` can incur
+   this, and only when called; `linkedin_send_message` deliberately does not
+   open messaging at all -- it reads the nav badge off a page already loaded,
+   and refuses.
+4. **Three census surfaces may cost something merely by being opened**, and
+   each returns a `cost` field saying what. The two publishing composers can
+   autosave a draft this server has NO REACHABLE SURFACE to detect -- 17
+   candidate draft addresses were run against the read boundary and all 17
+   were refused -- and the message composer is on the surface point 3
+   describes. Every other census key still renders state and leaves nothing.
 
-Both are disclosed in the tool docstrings and in `linkedin_server_info`.
+All four are disclosed in the tool docstrings and in `linkedin_server_info`.
+The count in this sentence is the one that went stale before; it is checkable
+against the list above it and against `known_side_effects`.
 
 ---
 
@@ -384,7 +435,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 cd D:\workspace\projects\job-hunting\mcp-servers\linkedin
 pip install -r requirements.txt
 playwright install chromium
-python -m pytest            # 986 passed
+python -m pytest            # 2304 passed
 ```
 
 Then, once the server is registered with a client, **call `linkedin_login_browser`
