@@ -541,3 +541,101 @@ this wave will fire the capability: no `confirm_token` is issued for it, by
 anyone, under any circumstances.
 
 ---
+
+## 6. #6 RULED, on my own readings
+
+The lead ran the dark-mode census once to verify the process had reloaded, and
+said so explicitly: *"I am telling you the instrument is live, not what it
+says."* These are my own readings, taken twice, with the settle precondition
+checked before either was interpreted.
+
+**Both readings are IDENTICAL, and they agree with the four that preceded
+them.**
+
+| reading | when | build | controls | forms | buttons | links | dialogs | redirect |
+|---|---|---|---|---|---|---|---|---|
+| 1-2 | 2026-08-31, previous wave | `b9d739c` | 20 | 0 | 1 | 16 | 0 | none |
+| 3 | today, pre-`checked` | `4f45781` | 20 | 0 | 1 | 16 | 0 | none |
+| 4 | today, post-restart | `3940f72` | 20 | 0 | 1 | 16 | 0 | none |
+| **5-6** | **today, mine, post-restart** | **`3940f72`** | **20** | **0** | **1** | **16** | **0** | **none** |
+
+**SIX READINGS ACROSS TWO DAYS AND THREE BUILDS, agreeing on every count.**
+This is the surface `profile_edit_intro` was not: there is no half-render here
+and no reading that had to be thrown away.
+
+    "Always off"        input  aria-labelledby  checked TRUE   source native
+    "Always on"         input  aria-labelledby  checked false  source native
+    "Device settings"   input  aria-labelledby  checked false  source native
+    the other 17                                checked null   source "none"
+
+### THE RULING
+
+**The current dark-mode setting is `Always off`.** Exactly one of three is
+checked, read through the native branch off the very control a change would
+move.
+
+**#6's NAMED BLOCKER IS CLOSED.** `_direction`'s first two refusals -- no
+state, and state `unknown` -- were the whole of why this gate would not render,
+and the state is now measurable in one call.
+
+**THE CAPABILITY DOES NOT LIFT, and the reason is structural rather than
+missing evidence.** `linkedin_update_setting` holds `url_template=None`, and
+`writes.mint` refuses at ISSUE for any such action:
+
+> *"no grant is minted for {action}: its surface has never been loaded by this
+> server, so there is no page for a grant to be permission to act on. Refused
+> at ISSUE rather than only at use, because an invariant a future click has to
+> remember to check is not an invariant."*
+
+So **no `confirm_token` can exist for this action**, whoever calls it. Making
+it performable would need a measured write surface and a new entry in
+`SANCTIONED_MUTATIONS` -- a new click call site, which this wave was forbidden
+to add and which nobody has ruled on.
+
+**The honest close: the gate goes from CANNOT DESCRIBE to CAN DESCRIBE, and the
+action stays unperformable.** That is a smaller claim than "the refusal
+lifted", and it is the true one.
+
+---
+
+## 7. #9 -- REFUSED BY RULING, with the reason measured
+
+The lead ruled after reading section 2: **`/messaging/compose` is not being
+narrowed.** The ruling's own ground, recorded because it is stronger than the
+deferral it replaces:
+
+**#9 lands on the identical stop condition set for #1.** A compose surface
+autosaves. A message draft lives inside the conversation it belongs to, so
+detecting one requires opening a thread -- which is exactly the cost the
+deferral existed to avoid. **No draft-detection route, no opening.** Narrowing
+`/messaging/compose` would mean lifting a boundary while blind to what passing
+through it leaves behind, on a surface that writes to another person.
+
+And the lead's closing argument, which is the transferable part: **that
+`/messaging/compose` was the ONE entry kept when the blanket `/messaging` ban
+was narrowed on 2026-08-26 is the strongest argument against lifting it now.**
+Somebody looked at this exact question with the same evidence and kept it.
+
+So #9's refusal now reads: the badge check PASSED (zero, twice, two surfaces),
+the deferral is lifted, and the action is refused on three measured grounds --
+the composer address is on the forbidden list; the two sanctioned messaging
+tools reach a THREAD and not the composer; and no draft-detection route exists
+on any reachable surface.
+
+---
+
+## 8. THE NOTIFICATION BADGE STAYS A DISAGREEMENT
+
+The lead had told the operator the badge moved 1 -> 4, and has corrected that
+to him after seeing this wave's reading. Recorded here in the form the lead
+asked for -- **as a disagreement, not resolved by picking the larger:**
+
+    Home, 1 new notification              both surfaces, both readings
+    Notifications, 0 new notifications    both surfaces, both readings
+
+Two nav controls on one page disagree, consistently. **This server has no
+reading that resolves which is the count LinkedIn would consume**, and the only
+instrument that would -- loading `/notifications/` -- destroys the very thing
+it would measure. So the honest record is two labels and no number.
+
+---
