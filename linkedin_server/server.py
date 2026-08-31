@@ -1,11 +1,23 @@
-"""The tool surface: twenty tools, four of which write to LinkedIn.
+"""The tool surface: thirty-one tools, five of which write to LinkedIn.
 
-THIS PARAGRAPH HAS NOW BEEN WRONG THREE TIMES, in both directions, and the
+THIS PARAGRAPH HAS NOW BEEN WRONG FOUR TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
 write path TO LINKEDIN in this package"* -- true, then not. It was corrected
 to "sixteen tools, two writes", stayed there through the arrival of a third,
 and then said "seventeen tools, fourteen reads, THE OTHER THREE WRITE" while
-the live surface was twenty and four.
+the live surface was twenty and four. It then said "twenty tools, four of
+which write" while the live surface was THIRTY-ONE and FIVE, which is the
+fourth time and the one corrected here on 2026-08-31.
+
+THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-one is
+``len(await mcp.list_tools())``, pinned at ``test_server_surface.py`` line
+356; five is ``len(writes.PERFORMABLE)``, pinned at line 1252 of the same
+file. The surface splits three ways and the split is the part a reader
+actually needs: NINETEEN read (pinned at line 413), FIVE write, and SEVEN are
+write-shaped, registered, gated and cannot act at all -- none is in
+``writes.PERFORMABLE``, none holds a ``url_template``, and ``writes.mint``
+refuses each of them a grant at issue, so no confirm token for any of them
+can exist. Nineteen plus seven plus five is thirty-one.
 
 It carried the sentence *"Counts in this docstring are re-measured per wave,
 not carried"* through every one of those. A docstring that states its own
@@ -14,15 +26,26 @@ discipline, because a reader trusts it more. **The counts here are prose and
 nothing tests them** -- ``tests/test_server_surface.py`` pins the real
 numbers, and that file is the one to believe when the two disagree.
 
-The four writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
-``linkedin_unfollow_company`` and ``linkedin_apply_job``, all registered
-below and all behind the same two-call gate.
+The five writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
+``linkedin_unfollow_company``, ``linkedin_apply_job`` and
+``linkedin_follow_company``, all registered below and all behind the same
+two-call gate. This sentence named FOUR of them and omitted
+``linkedin_follow_company`` until 2026-08-31; it is corrected here rather
+than quietly widened, because the omitted name is the one whose absence made
+the count wrong.
 
 What remains true, and is what ``readonly.py`` still enforces against this
 file:
 
-* Nothing here sends a message, edits the profile, toggles
-  Open To Work, follows a company, or marks anything read on purpose.
+* Nothing here sends a message, edits the profile, toggles Open To Work, or
+  marks anything read on purpose. THIS CLAUSE ALSO READ "follows a company"
+  until 2026-08-31 and that word is struck rather than the list quietly
+  reworded: ``linkedin_follow_company`` is the FIFTH performable write and
+  has been since 2026-08-30, so the sentence was asserting the absence of a
+  tool registered below it. The rest of the list still holds, and holds for a
+  reason worth stating: message, profile-edit and Open To Work all have
+  REGISTERED tools now, and every one of them refuses -- being named here is
+  a claim about what can be PERFORMED, not about what appears on the surface.
 * The package contains exactly ONE mutating call, in ``writes.perform``,
   admitted by path and function and kind in ``readonly.SANCTIONED_MUTATIONS``.
   A second one anywhere fails ``tests/test_readonly.py``.
@@ -1858,11 +1881,19 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# The two writes
+# The five writes
 # ---------------------------------------------------------------------------
 #
-# EVERYTHING ABOVE THIS LINE READS. These two do not, and they are the only two
-# in the package. Both are two-step by construction: called without a
+# THIS BANNER SAID "The two writes" over FIVE of them until 2026-08-31, and the
+# body under it said "they are the only two in the package" -- the same
+# carried-count rot the module docstring records, in the one place a reader
+# scrolling for the write boundary is most likely to stop. The count is
+# ``len(writes.PERFORMABLE)`` and it is pinned in
+# ``tests/test_server_surface.py``.
+#
+# EVERYTHING ABOVE THIS LINE READS. These five do not, and they are the only
+# five in the package: save_job, unsave_job, apply_job, unfollow_company and
+# follow_company. Each is two-step by construction: called without a
 # ``confirm_token`` they perform NOTHING and return a block for a human to read;
 # called with one they redeem it, once, for that action on that target.
 #

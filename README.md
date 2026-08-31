@@ -3,7 +3,17 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fourteen of its seventeen tools read and change nothing. Three write.**
+**Thirty-one tools ship. Nineteen read. Five write. The other seven are
+write-shaped, gated, and cannot act at all.**
+
+This line said *"Fourteen of its seventeen tools read and change nothing.
+Three write"* until 2026-08-31, and it is corrected rather than quietly
+widened: every one of those three numbers was stale, and the write count was
+stale in the direction that matters. The numbers above are derived rather
+than counted by hand -- thirty-one and nineteen are pinned in
+`tests/test_server_surface.py`, five is `len(writes.PERFORMABLE)`, and the
+seven that cannot act are what is left over. The five are named in
+[The five that write](#the-five-that-write).
 
 Until 2026-08-23 this paragraph said *"It reads. That is all it does. There is
 no write path in this repository -- not disabled, not stubbed, not behind a
@@ -52,7 +62,7 @@ What this design does is minimise exposure rather than pretend it away:
 | Your own session, your own machine, your own IP | No cookie is exported to any third party. No proxy, no datacentre IP, no headless farm. |
 | An ordinary browser, one flag | No stealth plugin, no user-agent or platform spoofing, no fingerprint patching, no proxy, no timing engineered to imitate a human. One Chromium flag is passed -- `--disable-blink-features=AutomationControlled`, which stops Blink setting `navigator.webdriver` -- because LinkedIn checks it at sign-in and refuses one without it. That is the whole of it, it is enforced at launch by `readonly.assert_launch_flags_permitted`, and `tests/test_launch_boundary.py` fails the build if a third flag appears. |
 | Your data only | Your profile views, your applications, your saved jobs, your profile, your notifications. No enumerating or harvesting other members. |
-| Reads, except for three named writes | Nothing is applied to, sent, posted, endorsed, invited or edited. Saving, unsaving and unfollowing are the exceptions: off by default, one at a time, each one confirmed by you against a block built from a live read, with a token that works once and dies in two minutes. This row said "Reads only" until 2026-08-23 and the sentence is corrected rather than quietly widened. |
+| Reads, except for five named writes | Nothing is sent, posted, endorsed, invited or edited. Saving, unsaving, unfollowing, following and applying are the exceptions: off by default, one at a time, each one confirmed by you against a block built from a live read, with a token that works once and dies in two minutes. This row said "Reads only" until 2026-08-23 and the sentence is corrected rather than quietly widened. It then said "three named writes", listed only saving, unsaving and unfollowing, and opened with "Nothing is applied to" until 2026-08-31 -- corrected the same way, because by then applying and following both shipped and that clause denied one of them outright. |
 
 **This lowers exposure. It does not eliminate it.** Automated access can still
 result in a rate limit, a challenge, or account action, and that risk is yours
@@ -127,13 +137,32 @@ design, the boundary, the gates and the audit trail; that is what it is for.
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 
-## The three that write
+## The five that write
+
+**This heading said "The three that write" over a three-row table until
+2026-08-31.** Both were stale by two: `linkedin_apply_job` shipped 2026-08-25
+and `linkedin_follow_company` 2026-08-30, and neither had been added here. The
+count is `len(writes.PERFORMABLE)` and it is pinned against these tool names in
+`tests/test_server_surface.py`, so the table below cannot fall behind the
+server again without that test failing.
 
 | Tool | What it does |
 |---|---|
 | `linkedin_save_job` | Bookmarks one posting. Call it with no `confirm_token` and it performs nothing: it reads the posting and your saved list live and returns a block naming the job by title and employer, which way the toggle would move, where each fact came from, and how to undo it. Call it again with the token from that block to act. |
 | `linkedin_unsave_job` | Same shape, same gates, and it **acts** -- since 2026-08-30, when the label its click anchors on was finally measured. It still refuses from any state it does not recognise, and its preview is currently blocked by a separate defect in the Saved-tab read. See below. |
 | `linkedin_unfollow_company` | Stops following one company Page. Same shape and the same five gates. Addressed by the **numeric company id**, never by name -- names collide, change, and are not yours to rely on, and the click is anchored to the row carrying the id, so what you name and what gets pressed are the same row by construction. |
+| `linkedin_apply_job` | Submits an application to one **LinkedIn-hosted** posting, since 2026-08-25. Same two-call gate plus a second one: the apply modal is re-read before the submit is pressed, and it is only pressed if exactly one control carries LinkedIn's own submit hook and zero advance controls are present. Off-site postings are reported, never driven. **This is the one write nobody has established LinkedIn can undo** -- the honest form is stronger than "this server cannot withdraw it". |
+| `linkedin_follow_company` | Follows the company that posted one job, from the posting page itself, since 2026-08-30. Same shape and the same five gates; the direction is read off the posting at no extra page load. A follow **is** reversible on LinkedIn, but this server cannot aim the undo: a posting names its employer by slug and `linkedin_unfollow_company` addresses rows by numeric id, with nothing resolving one to the other. The preview says exactly that in `reversible_by`. |
+
+**Seven more tools are write-shaped and cannot act at all**: `publish_post`,
+`comment_on_item`, `react_to_item`, `update_profile_field`, `update_setting`,
+`send_invitation` and `send_message`. Each holds a full spec and reads its own
+surface live when previewed, then refuses with what it just saw and the one
+measurement that would complete it. None is in `writes.PERFORMABLE`, none
+holds a `url_template`, and `writes.mint` refuses each of them a grant at
+issue -- so no confirm token for any of them can exist. They are on the
+surface because a tool that names its own missing measurement is correctable
+and a silence is not.
 
 After the click, the result is confirmed from a **different surface** -- your
 saved list, with LinkedIn's own per-tab count -- rather than from the button
@@ -590,7 +619,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventeen tools
+  server.py                  the thirty-one tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
