@@ -209,6 +209,33 @@ RELAXED_HTML = (
 )
 
 
+#: THE VALUE THAT IS ALSO A NAME. Invented, and deliberately shaped like the
+#: live one: LinkedIn draws the headline as a ``div[role=textbox]`` whose text
+#: content IS what has been typed into it, so its accessible name resolves
+#: through the LAST route in the name chain -- the element's own text.
+EDITABLE_VALUE = "Senior Widget Engineer | Node and TypeScript | Bengaluru"
+
+#: The editor dialog with the control that broke the promise.
+#:
+#: NO FIXTURE IN THIS FILE HAD A CONTENTEDITABLE IN IT UNTIL NOW, and that is
+#: the whole reason three layers of guard passed while the live tool published
+#: a value. Every value here was an ``<input value=...>``, which is the
+#: PROPERTY route -- the one the script scan, the named keys and the JSON sweep
+#: were all built against.
+EDITABLE_HTML = (
+    "<!doctype html><html><body>"
+    "<dialog open>"
+    '<label for="ed-additional">Additional name</label>'
+    '<input id="ed-additional" type="text" value="' + VALUE_BETA + '">'
+    # THE CONTROL. No aria-label, no label-for, no title -- exactly like the
+    # live one, so the name chain falls all the way through to its own text.
+    '<div role="textbox" contenteditable="true">' + EDITABLE_VALUE + "</div>"
+    "<button>Save</button>"
+    "</dialog>"
+    "</body></html>"
+)
+
+
 # ---------------------------------------------------------------------------
 # The harness
 # ---------------------------------------------------------------------------
@@ -899,3 +926,87 @@ def test_the_script_never_scrolls():
     honest while the script genuinely does not scroll."""
     for token in ("scrollIntoView", "window.scrollTo", "scrollBy", "scrollTop"):
         assert token not in dom.EDITOR_FIELDS_JS
+
+# ---------------------------------------------------------------------------
+# "LABELS, NEVER VALUES" -- the shape that was missing
+# ---------------------------------------------------------------------------
+
+
+async def test_an_editables_own_content_is_not_published_as_its_name(run_tool):
+    """THE PROMISE THIS TOOL MAKES, ON THE ONE SHAPE THAT BROKE IT.
+
+    MEASURED ON THE LIVE INTRO EDITOR, 2026-08-31: the headline control is a
+    ``div[role=textbox]`` with no aria-label, no label-for and no title, so
+    its accessible name resolves through the LAST route in the chain -- the
+    element's own text. For a contenteditable that text IS the value, and the
+    tool's answer carried his headline verbatim under a docstring promising
+    "LABELS, AND NEVER VALUES".
+
+    WHY THREE LAYERS OF GUARD ALL PASSED. Each was built against the PROPERTY
+    route: a scan of the script for a value read, the field dict's named keys,
+    and a JSON sweep of the whole answer for the fixture values. Every value in
+    every fixture in this file was an ``<input value=...>``. None of them was a
+    control whose NAME IS ITS CONTENT, so there was nothing for any of the
+    three to catch -- and the sweep in particular could only ever look for
+    values IT had planted.
+
+    The marker is not the same answer as ``none``: this control HAS a name.
+    """
+    result, _navigations = await run_tool(EDITABLE_HTML)
+    assert result["self_ownership"]["established"] is True, result
+
+    by_name = {field["name"]: field for field in result["fields"]}
+    assert "<content>" in by_name, result["fields"]
+    marked = by_name["<content>"]
+    assert marked["name_source"] == "content"
+    assert marked["tag"] == "div"
+    assert marked["role"] == "textbox"
+
+    # AND THE VALUE IS IN NO PART OF THE ANSWER, checked over the whole JSON
+    # rather than over the field that carried it -- the sweep this file
+    # already runs, pointed at the one value it could not have planted before.
+    blob = json.dumps(result)
+    assert EDITABLE_VALUE not in blob
+    for fragment in EDITABLE_VALUE.split(" | "):
+        assert fragment not in blob, fragment
+
+    # THE ORDINARY FIELD BESIDE IT IS UNAFFECTED. A gate that answered
+    # ``<content>`` for everything would pass every assertion above.
+    assert "Additional name" in by_name
+    assert by_name["Additional name"]["name_source"] == "label-for"
+    assert VALUE_BETA not in blob
+
+
+async def test_a_button_named_by_its_own_text_is_still_named(run_tool):
+    """THE CONTROL FOR THE CONTROL ABOVE, and it is the whole reason the gate
+    is on EDITABLE rather than on the ``text`` route.
+
+    A ``<button>`` is named by its own text too, and for a button that text is
+    a LABEL -- ``Save``, ``Learn more``. Gating the text route itself would
+    have blanked every one of them and taken the anchor with it, since the
+    container is found by the control named ``Save``.
+    """
+    result, _navigations = await run_tool(EDITABLE_HTML)
+    names = {field["name"] for field in result["fields"]}
+    assert "Save" in names, names
+    assert result["container"]["anchor"] == "Save"
+
+
+async def test_the_marker_is_not_the_same_answer_as_no_name(run_tool):
+    """``<content>`` AND ``none`` ARE DIFFERENT FACTS, and collapsing them is
+    the absent-is-not-zero conflation this package keeps paying for.
+
+    ``none`` means this instrument found no name. ``<content>`` means it found
+    one, the name is the control's own content, and it will not publish it. A
+    caller deciding whether a field can be AIMED at needs to tell those apart:
+    the first is a gap in the instrument, the second is a deliberate refusal.
+    """
+    unnamed = EDITABLE_HTML.replace(
+        '<div role="textbox" contenteditable="true">' + EDITABLE_VALUE + "</div>",
+        '<div role="textbox" contenteditable="true"></div>',
+    )
+    assert EDITABLE_VALUE not in unnamed
+    result, _navigations = await run_tool(unnamed)
+    sources = {field["name"]: field["name_source"] for field in result["fields"]}
+    assert "<content>" not in sources
+    assert "" in sources and sources[""] == "none"

@@ -2357,6 +2357,31 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
     name. The second is not read: ".value" appears nowhere in the injected
     script, and no href is returned either -- only whether a control had one.
 
+    AND THAT SENTENCE WAS FALSE UNTIL 2026-08-31, ON THE ONE CONTROL IT
+    MATTERED MOST ON. LinkedIn draws the headline as a div[role=textbox] with
+    no aria-label, no label-for and no title, so its accessible name resolved
+    through the LAST route in the name chain -- the element's own text. For a
+    contenteditable, that text IS the value, and this tool published his
+    headline verbatim underneath the promise above.
+
+    Three layers were built to keep values out and all three passed, because
+    every one of them was built against the PROPERTY route: a scan of the
+    script for a value read, the field dict's named keys, and a JSON sweep for
+    the fixture values. A control whose NAME IS ITS CONTENT is a fourth route
+    none of them covered, and no fixture in the suite had one in it.
+
+    A control whose name is its own content now comes back as "<content>",
+    with name_source "content", refused INSIDE THE PAGE so the value never
+    enters this process at all. That is a different answer from "none", which
+    means no name was found: this one HAS a name and it is being withheld.
+
+    WHAT IT COSTS, said plainly: a field's current value is exactly what would
+    make a CHANGE REVERTIBLE, and that is one of the two things still blocking
+    linkedin_update_profile_field. Withholding it keeps the promise and leaves
+    that blocker standing. Returning it would widen this tool's contract, and
+    this tool exists because the operator ruled ONE narrow widening -- so a
+    second one is his to rule, not a detail to settle here.
+
     THE CONTAINER IS FOUND STRUCTURALLY. Its anchor is not an index but the
     control whose accessible name is Save, and the container is that control's
     nearest dialog ancestor. Two such controls, or none, is a refusal rather

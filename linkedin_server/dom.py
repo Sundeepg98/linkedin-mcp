@@ -2912,6 +2912,18 @@ EDITOR_FIELDS_JS = """
     }
     return null;
   };
+  // WHETHER THIS CONTROL'S OWN TEXT IS ITS VALUE, which for exactly one kind
+  // of control it is. A contenteditable node HOLDS what has been typed into
+  // it, and its accessible name falls back to that content -- so the LAST
+  // route in nameOf below publishes a VALUE for these and a LABEL for
+  // everything else.
+  const isEditable = (el) => {
+    try { if (el.isContentEditable === true) return true; } catch (e) {}
+    const flag = attrOf(el, 'contenteditable').trim().toLowerCase();
+    if (flag && flag !== 'false') return true;
+    return attrOf(el, 'role').trim().toLowerCase() === 'textbox';
+  };
+
   const nameOf = (el) => {
     const aria = attrOf(el, 'aria-label');
     if (aria) return { name: aria, source: 'aria-label' };
@@ -2922,7 +2934,38 @@ EDITOR_FIELDS_JS = """
     const labelled = labelRoutes(el);
     if (labelled) return labelled;
     const body = textOf(el);
-    if (body) return { name: body, source: 'text' };
+    if (body) {
+      // THE ONE PLACE THIS TOOL'S "LABELS, NEVER VALUES" PROMISE WAS FALSE,
+      // and it was false on the field it matters most on.
+      //
+      // MEASURED 2026-08-31 on the live intro editor: the headline control is
+      // a div[role=textbox] whose accessible name resolves through THIS
+      // route, so the answer carried his headline VERBATIM. The three layers
+      // built to keep values out -- a script scan for the value property, the
+      // field dict's named keys, a JSON sweep of the whole answer -- all
+      // catch a value read through a PROPERTY, and NONE of them covers a
+      // control whose NAME IS ITS CONTENT.
+      //
+      // REFUSED HERE, IN THE PAGE, rather than shaped in Python, for the same
+      // reason INVITE_NEEDLE_JS does its comparison in the page: a value that
+      // reaches this process can reach a traceback or a log line, and no care
+      // downstream un-rings that.
+      //
+      // THE MARKER follows the census's <opaque>/<redacted> convention and
+      // means something specific: this control HAS a name, that name is its
+      // own content, and this instrument will not publish it. It is not the
+      // same answer as 'none', which means no name was found at all.
+      //
+      // WHAT THIS COSTS, stated because it is the interesting half: the
+      // current value of a field is exactly what would make an edit
+      // REVERTIBLE, which is one of the two things still blocking
+      // update_profile_field. Withholding it keeps the promise and leaves
+      // that blocker standing. Publishing it would widen this tool's stated
+      // contract -- and this tool exists BECAUSE the operator ruled a narrow
+      // widening, not because widenings are cheap. So it is a ruling.
+      if (isEditable(el)) return { name: '<content>', source: 'content' };
+      return { name: body, source: 'text' };
+    }
     return { name: '', source: 'none' };
   };
 
