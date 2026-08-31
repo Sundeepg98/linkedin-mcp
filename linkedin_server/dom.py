@@ -2346,6 +2346,68 @@ FILTER_SETTLE_MS = 2_000
 #: published shape was a readable name changed, so no census already written
 #: down is contradicted by this edit; a non-answer became an answer. The sweep
 #: is pinned in ``tests/test_surface_census.py`` rather than described here.
+#:
+#: WHICH CONTAINER EACH CONTROL SITS IN, added 2026-08-31 as ``container``,
+#: and added because the flat list had already been GUESSED AT TWICE.
+#: ``linkedin_surface_census("profile_edit_intro")`` was run four times; the
+#: two most recent agree exactly -- 256 controls, ``forms: 2``, ``dialogs:
+#: 5`` -- and among them sit ``Save`` (button, enabled), ``Submit`` (button,
+#: disabled, count 2), ``Additional name``, ``City``, ``Comments`` and
+#: ``Posts``. The editor is a DIALOG inside a full profile render and the same
+#: page draws an ad-report dialog and an activity rail, so nobody could say
+#: whether ``Save`` was the editor's commit control or whether
+#: ``Comments``/``Posts`` were profile fields or the rail's filters. Two
+#: readers answered it from ADJACENCY IN THE LIST. Adjacency here is
+#: ``querySelectorAll`` order, which is document order, and document order is
+#: not containment.
+#:
+#: THE DESCRIPTOR IS A SHAPE, NEVER A NAME, and that constraint is what makes
+#: it narrow rather than useful. A container is a NEW source of page text into
+#: this script -- a dialog is named by an ``aria-label``, a section by its
+#: heading -- and both of those can be a member; an id or a class can carry a
+#: member slug. So none of them is read. What is returned is the container's
+#: ROLE or TAG plus an INDEX, e.g. ``form#0``, ``dialog#3``, and ``none`` for
+#: a control with no such ancestor. ``none`` is a string and the key is always
+#: present, because a missing key and a null are two ways of saying "not
+#: measured" and this script already paid once for that conflation.
+#:
+#: ONE INDEX SEQUENCE OVER THE UNION, in document order, assigned once per
+#: run. Not one counter per kind: a single sequence makes the descriptor
+#: unique within the document, so ``dialog#3`` and ``form#3`` cannot be two
+#: names for different containers, and two controls in one container get a
+#: string a reader can GROUP BY -- which is the whole capability being bought.
+#:
+#: NEAREST ANCESTOR, via ``closest()``, and the nesting is not hypothetical:
+#: the intro editor is a FORM INSIDE A DIALOG, so nearest-versus-outermost is
+#: the difference between naming the editor and naming the page furniture
+#: around it. The outermost walk is derived and shown FAILING in the tests.
+#: ``closest()`` starts at the element itself; a control that also matched the
+#: container selector would therefore name itself, which no member of
+#: ``CENSUS_CONTROL_SELECTOR`` can do without a role a real page does not
+#: write, and which has never been observed -- documented rather than guarded.
+#:
+#: THE SELECTOR IS A LITERAL HERE, not a ``cfg`` entry like the control
+#: selector, because nothing in Python reads it. It is deliberately a
+#: SUPERSET of the counts block: ``counts.forms`` is ``form`` and
+#: ``counts.dialogs`` is ``[role="dialog"], dialog``, and neither counts
+#: ``[role="form"]``. A reader who adds those two counts and expects that many
+#: descriptors will be wrong; the mismatch is pinned in the tests.
+#:
+#: ADDITIVE, AND MEASURED TO BE. The key is appended last and no existing
+#: field is renamed, removed or reordered. This script and one with the
+#: container call site deleted were run over all 19 committed fixtures -- 537
+#: controls -- and NOT ONE pre-existing field moved on any control: same
+#: names, same ``name_source``, same counts, same order. Captures already in
+#: ``_audit/`` are therefore still true readings of this instrument.
+#:
+#: WHAT IT DOES NOT YET REACH, stated here because the gap is invisible from
+#: the call site. ``read_surface_census`` below shapes each row by building a
+#: dict literal that ENUMERATES eight keys, and ``shape.census_aggregate``
+#: merges rows on an explicit eight-field tuple whose docstring calls itself
+#: "the WHOLE record". Both drop an unknown ninth field in silence, so this
+#: descriptor stops at this script's own return value and no tool output
+#: carries it yet. Closing that is two edits in two files this comment does
+#: not own; until they land, the field is readable only by running the script.
 CENSUS_JS = """
 (cfg) => {
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
@@ -2404,6 +2466,25 @@ CENSUS_JS = """
     return { name: '', source: 'none' };
   };
 
+  const containerSelector = 'form, dialog, [role="dialog"], [role="form"]';
+  let containerNodes;
+  try {
+    containerNodes = Array.from(document.querySelectorAll(containerSelector));
+  } catch (e) { containerNodes = []; }
+  const containerKind = (node) => {
+    const role = attrOf(node, 'role').trim().toLowerCase();
+    if (role === 'dialog' || role === 'form') return role;
+    return (node.tagName || '').toLowerCase();
+  };
+  const containerOf = (el) => {
+    let found = null;
+    try { found = el.closest(containerSelector); } catch (e) { found = null; }
+    if (!found) return 'none';
+    const index = containerNodes.indexOf(found);
+    if (index < 0) return 'none';
+    return containerKind(found) + '#' + index;
+  };
+
   const controls = [];
   let nodes;
   try { nodes = document.querySelectorAll(cfg.controlSelector); } catch (e) { nodes = []; }
@@ -2420,7 +2501,8 @@ CENSUS_JS = """
       has_href: !!href,
       href: href,
       aria_expanded: expanded ? expanded : null,
-      disabled: el.disabled === true || ariaDisabled === 'true'
+      disabled: el.disabled === true || ariaDisabled === 'true',
+      container: containerOf(el)
     });
     if (controls.length >= cfg.maxControls) break;
   }
@@ -2511,6 +2593,14 @@ async def read_surface_census(
                 "href_shape": href_shape,
                 "aria_expanded": control.get("aria_expanded"),
                 "disabled": bool(control.get("disabled")),
+                # WHICH CONTAINER, as a SHAPE. Carried from 2026-08-31, and
+                # the dict literal above is why it needed a deliberate edit:
+                # eight named keys carry eight fields and silently drop a
+                # ninth. ``str()`` with a ``none`` default rather than the raw
+                # value, so a control from an older script that never emitted
+                # the field reads ``none`` instead of ``None`` -- the same
+                # absent-is-a-value discipline the rest of this reader keeps.
+                "container": str(control.get("container") or "none"),
             }
         )
 

@@ -3657,10 +3657,25 @@ def census_aggregate(
     the same list -- a census whose row order moved between runs would be
     unreadable as a measurement.
 
-    The merge key is the WHOLE record, not just the name: two controls reading
-    "Follow" are the same shape only if they are also the same tag, role and
-    disabled state. Collapsing them on the name alone would report one shape
-    where the page carries two different controls.
+    The merge key is a NAMED TUPLE OF FIELDS, not just the name: two controls
+    reading "Follow" are the same shape only if they are also the same tag,
+    role and disabled state. Collapsing them on the name alone would report
+    one shape where the page carries two different controls.
+
+    THAT SENTENCE SAID "the WHOLE record" UNTIL 2026-08-31 AND IT WAS FALSE,
+    which matters more than the wording: the key is ENUMERATED below, so a
+    field added to a record and not added to the key is dropped SILENTLY, and
+    the docstring was the reason nobody looked. That is exactly what happened
+    to ``container`` on the day it was added -- measured, not supposed.
+
+    ``container`` IS DELIBERATELY NOT IN THE KEY, and the choice was made on a
+    measurement rather than a preference. Putting it in would split "Submit in
+    dialog#1" from "Submit in dialog#2" into two rows of count 1 each -- and
+    :func:`census_redact_rare` fires at exactly ``count == 1``, so a readable
+    shape seen twice in two containers would become two ``<redacted>`` rows.
+    The field would have destroyed readable output to report itself. So the
+    merged row carries the SET of containers it was seen in, as a counted map,
+    and the count on the row still means what it always meant.
 
     Redaction happens HERE rather than in :func:`census_shape` because it
     needs the count -- see :func:`census_redact_rare` -- and the redacted
@@ -3671,6 +3686,11 @@ def census_aggregate(
     """
     tally: dict[tuple, int] = {}
     hrefs: dict[str, int] = {}
+    #: key -> {container descriptor: how many of that key sat in it}. Parallel
+    #: to ``tally`` rather than part of its key, for the reason in the
+    #: docstring. A counted map rather than a set: "8 of these are in dialog#2
+    #: and 1 is loose" is a different page from "some of each".
+    containers: dict[tuple, dict[str, int]] = {}
 
     for record in records:
         # A link to a member is refused BEFORE it is counted, which is what
@@ -3689,15 +3709,26 @@ def census_aggregate(
             bool(record.get("disabled")),
         )
         tally[key] = tally.get(key, 0) + 1
+        where = str(record.get("container") or "none")
+        seen = containers.setdefault(key, {})
+        seen[where] = seen.get(where, 0) + 1
         href_shape = record.get("href_shape")
         if href_shape:
             hrefs[href_shape] = hrefs.get(href_shape, 0) + 1
 
     # Pass two: redact the singletons, then merge AGAIN on the redacted key.
     merged: dict[tuple, int] = {}
+    merged_containers: dict[tuple, dict[str, int]] = {}
     for key, count in tally.items():
         redacted = (census_redact_rare(key[0], count),) + key[1:]
         merged[redacted] = merged.get(redacted, 0) + count
+        # The container map follows its row through the redaction merge. A
+        # descriptor is structural -- a tag or role plus an index -- so it
+        # carries nothing to redact, and two singletons that merge into one
+        # <redacted> row of count 2 report both of the places they came from.
+        into = merged_containers.setdefault(redacted, {})
+        for where, hits in containers.get(key, {}).items():
+            into[where] = into.get(where, 0) + hits
 
     control_shapes = [
         {
@@ -3710,6 +3741,12 @@ def census_aggregate(
             "href_shape": key[5],
             "aria_expanded": key[6],
             "disabled": key[7],
+            "containers": dict(
+                sorted(
+                    merged_containers.get(key, {}).items(),
+                    key=lambda kv: (-kv[1], kv[0]),
+                )
+            ),
         }
         for key, count in merged.items()
     ]

@@ -43,6 +43,7 @@ as the census had never been asked to name a form field.
 from __future__ import annotations
 
 import json
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -892,6 +893,7 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
             "href_shape",
             "aria_expanded",
             "disabled",
+            "containers",
         }
 
 
@@ -1512,3 +1514,709 @@ async def test_that_sweep_can_detect_movement(census_over):
         "label-ancestor",
         "label-for",
     ]
+
+
+# ---------------------------------------------------------------------------
+# 8c. WHICH CONTAINER a control sits in
+# ---------------------------------------------------------------------------
+#
+# THE GAP, and it is a gap in what the census can SAY rather than in what it
+# reads. ``linkedin_surface_census("profile_edit_intro")`` was run four times
+# against the intro editor and the two most recent agree exactly: 256
+# controls, ``forms: 2``, ``dialogs: 5``. The editor is a DIALOG drawn inside
+# a full profile render, and the same page draws an ad-report dialog and an
+# activity rail -- so the flat list carries ``Save`` (button, enabled),
+# ``Submit`` (button, disabled, count 2), ``Additional name``, ``City``,
+# ``Comments`` and ``Posts`` with nothing in it saying which of the five
+# dialogs or two forms any of them belongs to.
+#
+# TWO SEPARATE READERS then guessed at that FROM ADJACENCY IN THE FLAT LIST:
+# ``Comments``/``Posts`` sitting near profile fields read as profile fields,
+# and ``Save`` near them read as the editor's commit control. Adjacency in
+# this list is ``querySelectorAll`` order, which is document order, and
+# document order is not containment -- on that page the control after a
+# profile field can be a rail filter. Neither reading was measured, and one of
+# them decides whether a capability is reachable.
+#
+# WHAT THE DESCRIPTOR IS ALLOWED TO BE: A SHAPE, NEVER A NAME. Containers are
+# a NEW source of page text into this census -- a dialog is named by an
+# ``aria-label``, a section by its heading, and either can be a member -- so
+# the descriptor is built from STRUCTURE ONLY: the container's tag or role,
+# plus a per-document index in document order. No heading, no label, no id, no
+# class. The privacy test below is the certification, and it drives a person's
+# name in through all four of those routes at once.
+#
+# WHY EVERY READING BELOW IS TAKEN OFF THE RAW SCRIPT rather than through
+# ``read_surface_census`` like section 8's are. The reader shapes its rows by
+# building a dict literal that ENUMERATES eight keys, so a ninth field emitted
+# by the script is dropped there and never reaches a caller. That boundary is
+# measured rather than assumed -- see
+# ``test_the_shaped_reader_still_drops_the_container_descriptor`` at the end of
+# this section, which is a pin on a KNOWN GAP and says what closing it costs.
+
+#: EIGHT controls in six containers, in document order. INVENTED, and kept out
+#: of ``tests/fixtures/`` for the reason :data:`LABEL_FORM_HTML` is: invented
+#: markup filed beside real captures starts being read as evidence. No slug,
+#: no urn, no address, no id shape.
+CONTAINER_HTML = (
+    "<!doctype html><html><body>"
+    # 0 -- outside every container. The residue that makes "none" an answer a
+    # reader can act on rather than a hole.
+    "<button>Submit</button>"
+    # container #0, a form. Rows 1 and 2 share it, which is the property a
+    # reader needs in order to GROUP by the descriptor.
+    "<form>"
+    "<button>Submit</button>"
+    "<button>Cancel</button>"
+    "</form>"
+    # container #1, a dialog by ROLE, holding the same accessible name as the
+    # two above. The intro editor's question in miniature: three controls
+    # reading "Submit", three different answers.
+    '<div role="dialog"><button>Submit</button></div>'
+    # containers #2 and #3, NESTED: a form inside a dialog. "open" is
+    # load-bearing -- a closed dialog does not render, so innerText would be
+    # empty and both controls would come back nameless for a reason that has
+    # nothing to do with containment.
+    "<dialog open><button>Outer</button>"
+    "<form><button>Inner</button></form>"
+    "</dialog>"
+    # container #4, carrying a PERSON'S NAME four ways at once -- heading, id,
+    # class and aria-label. The descriptor may carry none of them.
+    '<section role="dialog" id="jane-doe-intro" class="jane-doe-intro-panel"'
+    ' aria-label="Jane Doe">'
+    "<h2>Jane Doe</h2><button>Message</button></section>"
+    # container #5, a form by ROLE. The arm of the selector that no entry in
+    # the counts block can see -- see the population test below.
+    '<section role="form"><button>Refresh</button></section>'
+    "</body></html>"
+)
+
+ROW_NO_CONTAINER = 0
+ROW_FORM_SUBMIT = 1
+ROW_FORM_CANCEL = 2
+ROW_DIALOG_SUBMIT = 3
+ROW_NESTED_OUTER = 4
+ROW_NESTED_INNER = 5
+ROW_NAMED_CONTAINER = 6
+ROW_ROLE_FORM = 7
+
+#: Every descriptor the fixture produces. Pinned as a SET rather than as a
+#: count so a walk that returned the right number of wrong answers is visible.
+CONTAINER_DESCRIPTORS = {
+    "none",
+    "form#0",
+    "dialog#1",
+    "dialog#2",
+    "form#3",
+    "dialog#4",
+    "form#5",
+}
+
+#: The name planted in container #4, in the spellings the markup uses.
+#: Committed because it is INVENTED -- a personal name has no shape, as the
+#: header of ``test_no_committed_identity.py`` says at length, and this one is
+#: already the literal content of the fixture above.
+PLANTED_NAME_TOKENS = ("Jane", "Doe", "jane-doe")
+
+
+async def _container_rows(census_over) -> list[dict[str, Any]]:
+    """The RAW census of :data:`CONTAINER_HTML`. See the section header for
+    why raw: the shaped reader enumerates its keys and drops this field."""
+
+    async def work(page):
+        return await page.evaluate(dom.CENSUS_JS, _census_cfg())
+
+    raw = await census_over(CONTAINER_HTML, work)
+    rows = raw["controls"]
+    assert len(rows) == 8, (
+        f"the fixture yielded {len(rows)} controls, not 8 -- every ROW_ index "
+        "in this section is now pointing at the wrong control."
+    )
+    return rows
+
+
+async def test_the_same_name_in_two_containers_is_two_different_answers(
+    census_over,
+):
+    """THE WHOLE SLICE, in one assertion.
+
+    Three controls whose accessible name is the same string sit in three
+    different places, and a flat list cannot tell them apart. This is the
+    ``Submit``/``Save`` question the intro-editor census could not answer and
+    that two readers then guessed at from adjacency.
+    """
+    rows = await _container_rows(census_over)
+    reading = [
+        rows[index]["name"]
+        for index in (ROW_NO_CONTAINER, ROW_FORM_SUBMIT, ROW_DIALOG_SUBMIT)
+    ]
+    assert reading == ["Submit", "Submit", "Submit"], (
+        "the premise moved: these three controls no longer share one "
+        "accessible name, so distinguishing them proves nothing."
+    )
+    assert rows[ROW_NO_CONTAINER]["container"] == "none"
+    assert rows[ROW_FORM_SUBMIT]["container"] == "form#0"
+    assert rows[ROW_DIALOG_SUBMIT]["container"] == "dialog#1"
+
+
+async def test_two_controls_in_one_container_share_a_descriptor(census_over):
+    """The other half of the same property, and the one that makes the field
+    usable: a reader GROUPS by this string. If it were unique per control it
+    would be an id, which is a different and much more dangerous field."""
+    rows = await _container_rows(census_over)
+    assert rows[ROW_FORM_SUBMIT]["container"] == "form#0"
+    assert rows[ROW_FORM_CANCEL]["container"] == "form#0"
+
+
+async def test_the_nearest_container_wins_when_containers_nest(census_over):
+    """A form inside a dialog is the LinkedIn shape exactly -- the intro
+    editor is a form drawn inside a dialog -- so which of the two the
+    descriptor names decides whether the field answers anything. NEAREST, and
+    the outermost walk is shown failing this in the mutation check below."""
+    rows = await _container_rows(census_over)
+    assert rows[ROW_NESTED_OUTER]["container"] == "dialog#2"
+    assert rows[ROW_NESTED_INNER]["container"] == "form#3"
+
+
+async def test_a_control_in_no_container_says_none_rather_than_nothing(
+    census_over,
+):
+    """``none`` is a string and it is always present. A missing key and a null
+    are two ways of saying "not measured", and this census exists to refuse
+    exactly that conflation -- ``name_source: "none"`` was read as "carries no
+    name" when it meant "cannot read one", and that cost the label routes."""
+    rows = await _container_rows(census_over)
+    assert all("container" in row for row in rows)
+    assert rows[ROW_NO_CONTAINER]["container"] == "none"
+    assert isinstance(rows[ROW_NO_CONTAINER]["container"], str)
+
+
+async def test_the_container_descriptor_carries_no_text_from_the_container(
+    census_over,
+):
+    """THE PRIVACY CERTIFICATION for a new source of page text.
+
+    Container #4 carries a person's name in its heading, its id, its class and
+    its aria-label -- four routes, each of them the obvious way to describe a
+    container to a reader, and all four refused. What comes out is a tag and
+    an index.
+    """
+    rows = await _container_rows(census_over)
+    descriptor = rows[ROW_NAMED_CONTAINER]["container"]
+    assert descriptor == "dialog#4"
+    for token in PLANTED_NAME_TOKENS:
+        assert token.lower() not in descriptor.lower()
+
+
+def test_that_privacy_check_is_reading_markup_that_carries_the_name():
+    """THE CONTROL for the test above, which markup with no name in it would
+    also pass. The name has to be there, in all four places, or the assertion
+    certifies nothing."""
+    assert 'id="jane-doe-intro"' in CONTAINER_HTML
+    assert 'class="jane-doe-intro-panel"' in CONTAINER_HTML
+    assert 'aria-label="Jane Doe"' in CONTAINER_HTML
+    assert "<h2>Jane Doe</h2>" in CONTAINER_HTML
+
+
+async def test_the_role_arm_of_the_container_selector_fires(census_over):
+    """``role="form"`` is a container and no entry in the counts block can see
+    it. Asserted so the arm is not carried untested, and so the population
+    mismatch below reads as measured rather than as a defect."""
+    rows = await _container_rows(census_over)
+    assert rows[ROW_ROLE_FORM]["container"] == "form#5"
+
+
+async def test_the_descriptor_population_is_not_the_counts_block(census_over):
+    """THE LIMIT, pinned rather than described.
+
+    A reader who adds ``counts.forms`` to ``counts.dialogs`` and expects that
+    many distinct descriptors will be wrong. The counts are two fixed
+    selectors -- ``form`` and ``[role="dialog"], dialog`` -- and the
+    descriptor's population is their union PLUS ``[role="form"]``, which
+    neither counts. On this fixture: two form TAGS, three ``form#``
+    containers.
+    """
+
+    async def work(page):
+        return await page.evaluate(dom.CENSUS_JS, _census_cfg())
+
+    raw = await census_over(CONTAINER_HTML, work)
+    descriptors = {row["container"] for row in raw["controls"]}
+    assert descriptors == CONTAINER_DESCRIPTORS
+    assert raw["counts"]["forms"] == 2
+    assert raw["counts"]["dialogs"] == 3
+    assert len({d for d in descriptors if d.startswith("form#")}) == 3
+    assert len({d for d in descriptors if d.startswith("dialog#")}) == 3
+
+
+# ---------------------------------------------------------------------------
+# 8d. What ELSE moved under the container walk, and what the walk is worth
+# ---------------------------------------------------------------------------
+#
+# The risk this edit carries is the same one section 8b measured for the label
+# routes, and it is not that the walk fails: it is that adding a field to every
+# control row quietly disturbs one of the eight already there, at which point
+# every census in ``_audit/`` describes an instrument that no longer exists and
+# nothing in the diff says so.
+#
+# So it is measured, not argued. Two scripts -- the real one, and one with the
+# container call site deleted -- are run over all 19 committed fixtures and
+# every pre-existing field of every control is compared. ZERO move. The
+# comparator is shown catching movement on the same files in the control test,
+# so "zero" is a reading rather than a comparison that could not fail.
+
+#: The container call site, exactly as ``CENSUS_JS`` spells it and INCLUDING
+#: the comma before it, so the derived object literal is still valid JS.
+CONTAINER_CALL = ",\n      container: containerOf(el)"
+
+#: The nearest-ancestor lookup, and the OUTERMOST lookup that replaces it in
+#: the mutation check. Both name ``containerNodes``, which is in scope there
+#: and holds every container in document order -- so the first container that
+#: contains an element is the outermost one containing it.
+CONTAINER_NEAREST = "el.closest(containerSelector)"
+CONTAINER_OUTERMOST = "(containerNodes.filter((n) => n.contains(el))[0] || null)"
+
+
+def _census_without_containers() -> str:
+    derived = dom.CENSUS_JS.replace(CONTAINER_CALL, "", 1)
+    assert derived != dom.CENSUS_JS, (
+        "CONTAINER_CALL no longer appears in CENSUS_JS, so this derivation is "
+        "the real script wearing another name and every comparison below "
+        "certifies nothing. Repoint the anchor at the container call site."
+    )
+    return derived
+
+
+def _census_walking_to_the_outermost_container() -> str:
+    derived = dom.CENSUS_JS.replace(CONTAINER_NEAREST, CONTAINER_OUTERMOST, 1)
+    assert derived != dom.CENSUS_JS, (
+        "CONTAINER_NEAREST no longer appears in CENSUS_JS, so the nearest "
+        "rule cannot be broken by this derivation and the nesting test below "
+        "is no longer shown failing under the wrong walk."
+    )
+    return derived
+
+
+async def _pre_existing_field_movement(
+    census_over, html: str, other_js: str
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Controls where a field the OTHER script also emits differs.
+
+    Reports the differing FIELD NAMES and never their values. A diff quoting
+    an accessible name would put one into a CI log, which is the thing this
+    file exists to prevent, and the field names alone answer the question.
+    """
+    cfg = _census_cfg()
+
+    async def work(page):
+        return (
+            await page.evaluate(dom.CENSUS_JS, cfg),
+            await page.evaluate(other_js, cfg),
+        )
+
+    live, other = await census_over(html, work)
+    after, before = live["controls"], other["controls"]
+    assert len(after) == len(before)
+    moved = [
+        {
+            "index": index,
+            "tag": new["tag"],
+            "fields": sorted(
+                key
+                for key in old
+                if key not in new or new[key] != old[key]
+            ),
+        }
+        for index, (new, old) in enumerate(zip(after, before))
+        if any(key not in new or new[key] != old[key] for key in old)
+    ]
+    assert live["counts"] == other["counts"]
+    return moved, live
+
+
+async def _container_sweep(
+    census_over,
+) -> tuple[dict[str, list[dict[str, Any]]], int, dict[str, list[tuple]]]:
+    """Run the comparison over every committed fixture.
+
+    Returns the movers, the number of controls read -- so a shrinking sweep is
+    visible -- and every CONTAINED control in the repo, file by file, as
+    ``(descriptor, tag, name_source)``. Never a name: the triple says where a
+    control sits and what kind of thing it is, which is the whole question,
+    and a sweep that printed accessible names would put them in a CI log.
+    """
+    fixtures = sorted(FIXTURE_DIR.glob("*.html"))
+    assert len(fixtures) >= 19, "the fixture directory shrank; this proof did too"
+    derived = _census_without_containers()
+    found: dict[str, list[dict[str, Any]]] = {}
+    total = 0
+    contained: dict[str, list[tuple]] = {}
+
+    for path in fixtures:
+        html = _fixture_text(path)
+        moved, live = await _pre_existing_field_movement(
+            census_over, html, derived
+        )
+        rows = live["controls"]
+        total += len(rows)
+        inside = [
+            (row["container"], row["tag"], row["name_source"])
+            for row in rows
+            if row["container"] != "none"
+        ]
+        if inside:
+            contained[path.name] = inside
+        if moved:
+            found[path.name] = moved
+    return found, total, contained
+
+
+#: EVERY control in the fixture directory that sits inside a container, file
+#: by file, measured 2026-08-31. THREE, out of 537 -- and all three are in the
+#: Easy Apply capture, which is the finding rather than a shortfall: it is the
+#: only committed fixture that captured a MODAL, and a modal is the shape this
+#: field exists to describe. The other 18 are page fragments with neither a
+#: dialog nor a form in them, so the corpus can certify the FORMAT of the
+#: descriptor across the repo and can certify its VALUES only here.
+#:
+#: Read the three together, because they are the intro editor's question
+#: answered on a real capture: ONE dialog holding TWO SEPARATE FORMS. A flat
+#: list says the modal has a Submit and two inputs; this says the Submit
+#: belongs to the modal itself and the two inputs belong to two different
+#: forms inside it.
+FIXTURE_CONTAINMENT = {
+    "apply_modal_derived.html": [
+        ("form#1", "input", "label-for"),
+        ("form#2", "input", "label-for"),
+        ("dialog#0", "button", "aria-label"),
+    ]
+}
+
+
+async def test_no_committed_fixture_moves_a_pre_existing_field(census_over):
+    """THE INVARIANT THAT DECIDES WHETHER OLD CAPTURES ARE STILL TRUE.
+
+    Every field a census already published -- name, name_source, tag, role,
+    href, aria_expanded, disabled, has_href -- reads identically with the
+    container walk and without it, on every control of every committed
+    fixture. The counts block is compared too, inside the comparator. Nothing
+    already written down is contradicted by this edit; a field was added.
+    """
+    found, total, _descriptors = await _container_sweep(census_over)
+    assert found == {}
+    assert total == FIXTURE_CONTROLS, (
+        f"the sweep read {total} controls, not {FIXTURE_CONTROLS}. A fixture "
+        "changed, so this proof was taken over a directory that no longer "
+        "exists -- re-measure it rather than moving this number."
+    )
+
+
+async def test_that_sweep_can_detect_a_moved_field(census_over):
+    """THE CONTROL, and it is run over a COMMITTED fixture rather than over
+    invented markup, so it certifies the comparator on the same input the
+    sweep gives a clean bill of health.
+
+    ``jobs_tracker_empty.html`` is where section 8b measured twelve inputs
+    moving under the label routes. The same comparator, the same file: the
+    container derivation reports nothing and the label derivation reports all
+    twelve. A comparator that reported nothing in both cases would be the way
+    the test above passes while seeing nothing at all.
+    """
+    html = _fixture_text(FIXTURE_DIR / "jobs_tracker_empty.html")
+    quiet, _live = await _pre_existing_field_movement(
+        census_over, html, _census_without_containers()
+    )
+    assert quiet == []
+    loud, _live = await _pre_existing_field_movement(
+        census_over, html, _census_without_label_routes()
+    )
+    assert len(loud) == 12
+    assert all("name_source" in row["fields"] for row in loud)
+
+
+#: Every descriptor shape the walk may emit. A container's own text can only
+#: get out through this string, so a value that does not match this pattern is
+#: the leak -- which is why the check is a WHITELIST of two forms rather than a
+#: search for names, and why it is applied to the whole fixture directory.
+CONTAINER_DESCRIPTOR_SHAPE = re.compile(r"^(?:none|(?:form|dialog)#[0-9]+)$")
+
+
+async def test_every_descriptor_in_every_committed_fixture_is_a_shape(
+    census_over,
+):
+    """THE PRIVACY RULE, applied across the repo rather than to one fixture.
+
+    A container's own text can only get out through this string, so the check
+    is a WHITELIST of two forms -- ``none``, or a tag-or-role and an integer --
+    rather than a search for names, which is the same argument the shaper
+    makes and for the same reason.
+
+    WHAT THIS DOES AND DOES NOT COVER, because the numbers are lopsided and a
+    reader should not take more from it than is there. All 537 controls are
+    checked, and 534 of them are in no container at all, so for those the
+    check only confirms the string is ``none``. THREE controls, all in the
+    Easy Apply capture, are the only real-capture evidence that a descriptor
+    built off LinkedIn's own ids, classes and headings carries none of them --
+    and that is why the invented markup in section 8c exists: it is the
+    fixture where the name is planted deliberately, four ways at once.
+    """
+    _found, total, contained = await _container_sweep(census_over)
+    descriptors = {row[0] for rows in contained.values() for row in rows}
+    bad = sorted(d for d in descriptors if not CONTAINER_DESCRIPTOR_SHAPE.match(d))
+    assert bad == []
+    # And not vacuously. The walk is shown FIRING on real captures rather than
+    # returning "none" everywhere and passing the pattern for free -- pinned as
+    # a COUNT and a place, because "some fixture has a container" would go on
+    # passing if the walk stopped firing on the modal and started firing on a
+    # page fragment.
+    assert contained == FIXTURE_CONTAINMENT
+    inside = sum(len(rows) for rows in contained.values())
+    assert (inside, total - inside) == (3, 534)
+
+
+async def test_deleting_the_container_walk_takes_the_readings_with_it(
+    census_over,
+):
+    """MUTATION CHECK, first half. With the call site gone the field is gone
+    entirely -- so every assertion in section 8c rests on the walk and not on
+    something the browser would have returned anyway."""
+    derived = _census_without_containers()
+
+    async def work(page):
+        return await page.evaluate(derived, _census_cfg())
+
+    raw = await census_over(CONTAINER_HTML, work)
+    assert len(raw["controls"]) == 8
+    assert all("container" not in row for row in raw["controls"])
+
+
+async def test_walking_to_the_outermost_container_breaks_the_nesting(
+    census_over,
+):
+    """MUTATION CHECK, second half, and the one that matters most.
+
+    A walk that returned the OUTERMOST container instead of the nearest would
+    pass every other test in section 8c -- the same-name test, the shared
+    descriptor, the ``none``, the privacy check, the format check -- because
+    only one control in the fixture is nested. Here it is shown giving the
+    nested control the wrong answer: ``dialog#2``, the page furniture, where
+    the real walk says ``form#3``, the editor.
+    """
+    derived = _census_walking_to_the_outermost_container()
+
+    async def work(page):
+        return await page.evaluate(derived, _census_cfg())
+
+    raw = await census_over(CONTAINER_HTML, work)
+    rows = raw["controls"]
+    assert rows[ROW_NESTED_INNER]["container"] == "dialog#2"
+    assert rows[ROW_NESTED_OUTER]["container"] == "dialog#2"
+    # The value the real walk reports for the same control, quoted so the two
+    # readings are side by side rather than a file apart.
+    assert (await _container_rows(census_over))[ROW_NESTED_INNER][
+        "container"
+    ] == "form#3"
+
+
+async def test_the_container_descriptor_reaches_the_caller(census_over):
+    """THIS TEST REPLACED A PIN ON THE GAP, and the gap is worth keeping in
+    view because of how it hid.
+
+    The descriptor used to stop at ``CENSUS_JS``'s own return value. Two sites
+    dropped it, both enumerating: ``dom.read_surface_census`` shapes each
+    control by building a dict literal with eight named keys, and
+    ``shape.census_aggregate`` merges on an explicit eight-field tuple. The
+    aggregate's docstring said "the merge key is the WHOLE record", which was
+    FALSE and was the sentence that made the drop invisible. Both are fixed.
+
+    THE CHOICE THE OLD PIN EXISTED TO FORCE, made and recorded here. Merging
+    is what makes the field worth anything: ``Submit`` in one dialog and
+    ``Submit`` in another would collapse to a single row of count 2 and
+    destroy the fact the field was added to establish. The two ways out were
+    to put the descriptor IN the merge key, or to have the merged row carry
+    the SET of containers.
+
+    THE SET WON, on a measurement rather than a preference:
+    :func:`shape.census_redact_rare` fires at exactly ``count == 1``, so
+    splitting a readable shape seen once per container into two rows of count
+    1 turns it into two ``<redacted>`` rows. Keying on the container would
+    have destroyed readable output in order to report itself.
+    """
+    rows, _ = shape.census_aggregate(
+        [
+            {"shape": "Submit", "tag": "button", "container": "form#0"},
+            {"shape": "Submit", "tag": "button", "container": "dialog#1"},
+            {"shape": "Submit", "tag": "button", "container": "dialog#1"},
+        ]
+    )
+    assert len(rows) == 1, rows
+    row = rows[0]
+    # ONE row, because the container is not in the key -- and the count still
+    # means what it always meant.
+    assert row["shape"] == "Submit"
+    assert row["count"] == 3
+    # And the row says WHERE, counted, most-populated first.
+    assert row["containers"] == {"dialog#1": 2, "form#0": 1}
+
+
+async def test_a_control_with_no_container_is_counted_as_none_not_dropped(
+    census_over,
+):
+    """``none`` is a place. A row whose controls were loose on the page must
+    say so rather than carry an empty map, which would read as "not measured"
+    -- the same absent-is-not-zero rule this instrument keeps everywhere."""
+    rows, _ = shape.census_aggregate(
+        [
+            {"shape": "Save", "tag": "button", "container": "none"},
+            {"shape": "Save", "tag": "button", "container": "form#0"},
+        ]
+    )
+    assert rows[0]["containers"] == {"form#0": 1, "none": 1}
+
+
+async def test_a_record_with_no_container_field_at_all_still_aggregates(
+    census_over,
+):
+    """SHOWN FAILING by removing the ``or "none"`` default, which raises
+    rather than counting::
+
+        TypeError: unhashable type / None used as a dict key
+
+    A record from an older script -- or any caller building one by hand --
+    carries no ``container`` at all, and the aggregate may not crash on it.
+    It is counted as ``none``, which is the honest answer: no container was
+    reported, so none is what is known."""
+    rows, _ = shape.census_aggregate([{"shape": "Edit", "tag": "button"}])
+    assert rows[0]["containers"] == {"none": 1}
+
+
+# ---------------------------------------------------------------------------
+# 8e. The same proof at the level the captures were written from
+# ---------------------------------------------------------------------------
+#
+# Section 8d diffs what the SCRIPT returns. Nothing in ``_audit/`` was written
+# from that: a capture is what ``read_surface_census`` returned, which is the
+# script's output with every name and href replaced by a shape. Those two
+# fields are computed by the reader and the script-level sweep cannot see
+# them, so the equality is asserted again one level up, over the same 19
+# fixtures, with the reader itself pointed at the pre-edit script.
+
+
+async def _reader_readings(census_over, monkeypatch, html: str, other_js: str):
+    """``read_surface_census`` run twice over one page: once as it stands, once
+    with the module's script swapped for ``other_js``. Returns both whole
+    return values, which is what a capture in ``_audit/`` is made of."""
+
+    async def work(page):
+        after = await dom.read_surface_census(page)
+        monkeypatch.setattr(dom, "CENSUS_JS", other_js)
+        try:
+            before = await dom.read_surface_census(page)
+        finally:
+            monkeypatch.undo()
+        return after, before
+
+    return await census_over(html, work)
+
+
+async def test_the_shaped_reader_returns_what_it_returned_before(
+    census_over, monkeypatch
+):
+    """THE SAME INVARIANT ONE LEVEL UP, and this is the level captures were
+    written from.
+
+    The sweep above diffs the SCRIPT's output. A census in ``_audit/`` was
+    written from the READER's output -- shaped names, shaped hrefs, the counts
+    block -- so that is what has to be shown unchanged. ``read_surface_census``
+    is pointed at the pre-edit script and its return value is compared over
+    every committed fixture, including ``shape`` and ``href_shape``, which the
+    script-level sweep never sees.
+
+    ONE FIELD IS NOW EXPECTED TO DIFFER, and the assertion is written so that
+    it is the ONLY one. ``container`` reaches the reader as of 2026-08-31, so
+    a bare equality would have to be either deleted or weakened; instead the
+    comparison strips exactly that key and asserts equality on everything
+    else, THEN asserts separately that the stripped key is present after and
+    absent before. Deleting the field from both sides and calling it equal
+    would prove nothing about the field, and weakening it to "mostly equal"
+    would stop catching the thing this test exists for -- that no capture
+    already written into ``_audit/`` is contradicted.
+    """
+    derived = _census_without_containers()
+    fixtures = sorted(FIXTURE_DIR.glob("*.html"))
+    assert len(fixtures) >= 19, "the fixture directory shrank; this proof did too"
+    total = 0
+    for path in fixtures:
+        after, before = await _reader_readings(
+            census_over, monkeypatch, _fixture_text(path), derived
+        )
+        # BOTH sides are stripped, because both sides HAVE the key. The
+        # pre-edit script emits no container at all, and the reader's
+        # ``or "none"`` default turns that absence into the string "none"
+        # rather than a None -- so the difference between the two readings is
+        # never PRESENCE, it is CONTENT, and stripping one side only would
+        # compare a missing key against "none" and fail for the wrong reason.
+        # Measured, after getting it wrong twice: before reads "none" on every
+        # row of every fixture.
+        assert _without_container(after) == _without_container(before), path.name
+        assert all(
+            row["container"] == "none" for row in before["controls"]
+        ), path.name
+        total += after["controls_read"]
+    assert total == FIXTURE_CONTROLS
+
+
+def _without_container(reading: dict) -> dict:
+    """The reading with the container descriptor lifted off every control."""
+    out = dict(reading)
+    out["controls"] = [
+        {k: v for k, v in row.items() if k != "container"}
+        for row in reading["controls"]
+    ]
+    return out
+
+
+async def test_the_container_sweep_can_tell_the_two_readings_apart(
+    census_over, monkeypatch
+):
+    """THE CONTROL for the test above, and it is the one that stops the
+    stripping from making the comparison vacuous.
+
+    Both sides have ``container`` stripped before they are compared, so an
+    edit that changed NOTHING BUT the container would pass silently. This
+    asserts the two readings really do differ on the field that was stripped
+    -- at least one control on this fixture reports a real container after the
+    edit, where before reports "none" everywhere.
+    """
+    after, before = await _reader_readings(
+        census_over,
+        monkeypatch,
+        CONTAINER_HTML,
+        _census_without_containers(),
+    )
+    assert any(row["container"] != "none" for row in after["controls"])
+    assert all(row["container"] == "none" for row in before["controls"])
+
+
+async def test_that_reader_comparison_can_detect_a_changed_row(
+    census_over, monkeypatch
+):
+    """THE CONTROL for the test above. The identical comparison, with the
+    label routes deleted instead of the container walk, has to come back
+    UNEQUAL on twelve rows -- otherwise the equality above is an equality
+    between two things that were never going to differ."""
+    after, before = await _reader_readings(
+        census_over,
+        monkeypatch,
+        _fixture_text(FIXTURE_DIR / "jobs_tracker_empty.html"),
+        _census_without_label_routes(),
+    )
+    assert after != before
+    moved = [
+        index
+        for index, (new, old) in enumerate(
+            zip(after["controls"], before["controls"])
+        )
+        if new != old
+    ]
+    assert len(moved) == 12
