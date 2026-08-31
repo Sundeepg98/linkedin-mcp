@@ -4177,6 +4177,7 @@ INVITE_NEEDLE_JS = """
   let total = 0;
   let matches = 0;
   let index = null;
+  let only = null;
   for (const node of nodes) {
     const label = node.getAttribute('aria-label') || '';
     // MATCHED AS A SUFFIX, and re-checked here even though cfg.selector is
@@ -4193,9 +4194,24 @@ INVITE_NEEDLE_JS = """
       // than keeping either. Choosing between two would be choosing by
       // position, which is what the caller is refused for doing.
       index = (matches === 1) ? position : null;
+      // THE LABEL RIDES THE SAME RULE AS THE INDEX, and it is erased by a
+      // second match for the same reason: it exists only to let him CHECK
+      // that the control his own word selected is the person he meant, and
+      // there is nothing to check if the word picked out two people.
+      only = (matches === 1) ? label : null;
     }
   }
-  return {total: total, matches: matches, index: index};
+  // GATED ON THE CALLER ASKING, ON TOP OF matches === 1. Two independent
+  // conditions rather than one, because this is the only line in this script
+  // that can emit a third party's name and a single condition is a single
+  // edit away from always being true.
+  const reveal = (cfg.revealSingleMatch === true) && (matches === 1);
+  return {
+    total: total,
+    matches: matches,
+    index: index,
+    label: reveal ? only : null
+  };
 }
 """
 
@@ -4336,7 +4352,10 @@ async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
 
 
 async def read_invitation_surface(
-    page: Any, needle: Optional[str] = None
+    page: Any,
+    needle: Optional[str] = None,
+    *,
+    reveal_single_match: bool = False,
 ) -> dict[str, Any]:
     """How many invitation controls this page draws, and -- if asked -- which.
 
@@ -4376,7 +4395,28 @@ async def read_invitation_surface(
     as "nothing was asked" instead, so the two honest answers stay separable
     and no branch silently matches everybody.
     """
-    out: dict[str, Any] = {"controls": 0, "matches": None, "index": None}
+    out: dict[str, Any] = {
+        "controls": 0,
+        "matches": None,
+        "index": None,
+        # THE ONE LABEL, and ``None`` unless the caller ASKED for it AND the
+        # needle picked out exactly one control.
+        #
+        # ADMITTED 2026-08-31, and the ruling turned on a distinction worth
+        # keeping in view: loading a stranger's PROFILE stays refused because
+        # it EMITS -- linkedin_who_viewed_me measures the receiving end, so
+        # the cost lands on somebody who did not agree to it. Reading one
+        # accessible name off a page already rendered on HIS OWN profile emits
+        # NOTHING. Nobody is notified, no record is created, and the person is
+        # not made aware. The cost to the third party is nil.
+        #
+        # AND HE ALREADY KNOWS THE NAME -- he supplied the needle. Reading the
+        # label back is not disclosing a stranger to him; it confirms that the
+        # control his own word uniquely selected belongs to the person he
+        # meant. That is verification of his input, which is the opposite of
+        # collection.
+        "label": None,
+    }
     wanted = "" if needle is None else str(needle).strip()
     if not wanted:
         try:
@@ -4388,6 +4428,7 @@ async def read_invitation_surface(
         "selector": INVITE_CONTROL,
         "suffix": INVITE_CONTROL_SUFFIX,
         "needle": wanted,
+        "revealSingleMatch": bool(reveal_single_match),
     }
     try:
         reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok
@@ -4403,6 +4444,13 @@ async def read_invitation_surface(
     out["matches"] = int(reading.get("matches") or 0)
     position = reading.get("index")
     out["index"] = None if position is None else int(position)
+    # THE THIRD GATE, IN PYTHON, over the two already applied in the page.
+    # Three conditions rather than one on the line that can carry a name, and
+    # they are written in two different languages so that a single edit
+    # cannot open all of them.
+    label = reading.get("label")
+    if reveal_single_match and out["matches"] == 1 and isinstance(label, str):
+        out["label"] = label
     return out
 
 

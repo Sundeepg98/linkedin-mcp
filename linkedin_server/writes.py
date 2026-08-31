@@ -2538,7 +2538,7 @@ async def _read_profile_state(
 
 
 async def _read_feed_composer(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
     """Is there a composer on this page, and is its editor rendered?"""
     reading = await dom.read_composer_surface(page)
@@ -2573,7 +2573,7 @@ async def _read_feed_composer(
 
 
 async def _read_feed_item(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
     """The comment and reaction controls on the feed, and the states worn.
 
@@ -2648,7 +2648,7 @@ async def _read_feed_item(
 
 
 async def _read_profile_editors(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
     """Which profile editors this page addresses by url."""
     reading = await dom.read_profile_editor_surface(page)
@@ -2680,7 +2680,7 @@ async def _read_profile_editors(
 
 
 async def _read_dark_mode(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
     """WHICH dark-mode setting is selected, off the page that carries it.
 
@@ -2912,12 +2912,29 @@ def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
 
 
 async def _read_profile_invitations(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
-    """How many invitation controls his own profile draws. A COUNT ONLY."""
-    reading = await dom.read_invitation_surface(page)
+    """Which ONE invitation control his needle picks out, or why none.
+
+    A COUNT ONLY UNTIL 2026-08-31, and the needle never reached it: ``observe``
+    handed its readers no target, so ``aim_invitation`` -- the matcher this
+    whole capability is built around -- had no caller in this package at all.
+    It aims now, and the aim is three integers.
+
+    THE LABEL IS NOT READ HERE, and that is structural rather than tidy. This
+    reader's answer becomes ``Observation.facts``, and an Observation is
+    RETAINED on the grant -- so anything it returns is held for the life of
+    that grant. The one label the operator's ruling admits is read by
+    :func:`preview` instead, off the page this call already opened, and it
+    reaches the confirm block and nothing else.
+    """
+    reading = await dom.read_invitation_surface(page, target or None)
     controls = int(reading.get("controls") or 0)
-    facts = dict(reading)
+    # THE LABEL KEY IS DROPPED BEFORE THE FACTS ARE BUILT, not merely left
+    # unset. This reader is never asked to reveal one, so the key is always
+    # None here -- and popping it means a future edit that flips the default
+    # cannot leak through this path without also changing this line.
+    facts = {key: value for key, value in reading.items() if key != "label"}
     if controls < 1:
         return (
             facts,
@@ -2927,21 +2944,37 @@ async def _read_profile_invitations(
             "that carries them is a suggestion rail and need not be drawn, so "
             "this is unknown rather than zero.",
         )
+    aim, aim_why, index = aim_invitation(reading)
+    facts["aim"] = aim
+    facts["aim_index"] = index
+    if aim != INVITE_AIMED:
+        # NOT AIMABLE IS NOT A STATE THIS ACTION IS VALID FROM. Zero matches
+        # and two-or-more are different failures and ``aim_why`` says which;
+        # both come back UNKNOWN, so ``_direction`` refuses to render a gate
+        # rather than rendering one aimed at nobody in particular.
+        return (
+            facts,
+            UNKNOWN,
+            f"{controls} invitation control(s) are on HIS OWN PROFILE -- a "
+            "page this server already loads, carrying no pending-invitation "
+            f"counter -- and the aim did not settle. {aim_why} The comparison "
+            "ran INSIDE the page and no label crossed into this process, "
+            "which is why this can say how many matched and not who they are.",
+        )
     return (
         facts,
         "invite_control_present",
-        f"{controls} invitation control(s) on HIS OWN PROFILE -- a page this "
-        "server already loads, and one carrying no pending-invitation "
-        "counter. That is the finding: the capability has a route which does "
-        "NOT cost the badge that /mynetwork/ would. Only the count was read. "
-        "The label is the other person's name and is never fetched, which is "
-        "also why a suffix selects all "
-        f"{controls} of these controls and cannot select one.",
+        f"exactly one of {controls} invitation control(s) on HIS OWN PROFILE "
+        f"carries the word given, at position {index} in the suffix-matched "
+        "list. That page is one this server already loads and it carries no "
+        "pending-invitation counter, so this route costs no badge -- which is "
+        "the finding /mynetwork/ was refused for. The match was made inside "
+        "the page and no label crossed into this reader.",
     )
 
 
 async def _read_messaging_badge(
-    page: Any, spec: WriteSpec
+    page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
     """The messaging badge, read WITHOUT opening messaging."""
     reading = await dom.read_messaging_badge(page)
@@ -3142,7 +3175,26 @@ async def observe(
         # with a fresh measurement inside it.
         url, surface, reader = _SURFACE_READS[spec.state_from]
         landed = await _load(navigator, page, url, surface=surface)
-        facts, state, why = await reader(page, spec)
+        # THE TARGET REACHES THE READER, added 2026-08-31, and it closes a gap
+        # that made a whole mechanism dead code.
+        #
+        # ``aim_invitation`` -- the needle matcher the previous wave built,
+        # with its exactly-one rule, its ambiguous refusal and its
+        # three-integer return -- HAD NO CALLER IN THIS PACKAGE. Only tests
+        # called it. ``_read_profile_invitations`` counted controls and never
+        # saw a needle, because this line handed the reader no target, so the
+        # aiming this design is built around had never run against a page.
+        #
+        # That is the same shape as ``_direction``'s multi-state branch, which
+        # was hardened in August against a KeyError nothing could reach: a
+        # mechanism can be built, tested and argued about at length while
+        # being unreachable from production, and the only thing that shows it
+        # is following the value.
+        #
+        # A KEYWORD WITH A DEFAULT, so a reader that has no use for it says so
+        # by ignoring it rather than by having a different signature. Five of
+        # the six do exactly that.
+        facts, state, why = await reader(page, spec, target=target)
         return _record(
             spec,
             target=target,
@@ -3554,10 +3606,103 @@ async def preview(
             token = grant.token
         block = _render(spec, observation, direction, token)
         if grant is not None:
+            # THE STORED BLOCK IS ASSIGNED BEFORE THE LABEL EXISTS, and the
+            # order is the enforcement rather than a convention. See
+            # :func:`_name_the_invitation_recipient` below: the label is added
+            # to a NEW dict afterwards, so the object retained on the grant
+            # provably never held it -- there is no scrubbing step to get
+            # wrong and no copy to forget.
             grant.preview = block
+        block = await _name_the_invitation_recipient(page, spec, observation, block)
         return block
     finally:
         _OBSERVED.pop(observation.receipt, None)
+
+
+async def _name_the_invitation_recipient(
+    page: Any,
+    spec: WriteSpec,
+    observation: Observation,
+    block: dict[str, Any],
+) -> dict[str, Any]:
+    """Print WHO one invitation would reach, in the confirm block and nowhere
+    else. Returns the block to hand back.
+
+    THE PROBLEM THIS SOLVES, and it is the one that kept ``send_invitation``
+    refusing after every boundary question had been answered. The aiming is
+    safe precisely BECAUSE no label enters this process -- the needle goes
+    into the page, three integers come back. So the block could say "exactly
+    one of nine controls carries the word you gave, at position 3" and could
+    not say WHO. Every other action here names its target in terms he can
+    check: a job title and an employer, a company name, his own name and
+    headline. A gate that fires an irreversible, third-party-visible act while
+    unable to say who receives it is a confirm prompt with the important word
+    missing.
+
+    THE RULING, 2026-08-31, and the distinction it turns on. Loading a
+    stranger's PROFILE stays refused because it EMITS -- ``who_viewed_me``
+    reads the receiving end of exactly that signal, so the cost lands on
+    somebody who did not agree to it. Reading one accessible name off a page
+    already rendered on HIS OWN profile emits NOTHING: nobody is notified, no
+    record is created, the person is not made aware. And he already knows the
+    name, because he supplied the needle -- so this CONFIRMS that the control
+    his own word selected is the person he meant, which is verification of his
+    input rather than collection of somebody's identity.
+
+    WHERE IT GOES AND WHERE IT MUST NOT, by construction and not by care:
+
+    * INTO the returned block, as prose he reads.
+    * NOT into ``grant.preview`` -- assigned above, before this runs, so the
+      retained object never held it.
+    * NOT into ``grant.target``, which stays HIS OWN NEEDLE. That is the
+      guarantee this design declined to trade away and it is untouched.
+    * NOT into the ``Observation`` -- which is why
+      ``_read_profile_invitations`` does not read the label at all: its answer
+      becomes ``observation.facts`` and an Observation is retained on a grant.
+      This reads it separately, here.
+    * NOT into ``consume``'s mismatch message, which interpolates targets.
+    * NOT into a log line: ``dom.read_invitation_surface`` deliberately does
+      not stringify its own exceptions, for exactly this reason.
+
+    NO SECOND PAGE LOAD. ``observe`` has just loaded his profile and left the
+    page on it. THAT IS CHECKED RATHER THAN ASSUMED, and the check is about
+    the RAIL rather than the url: this re-read must find the same number of
+    invitation controls the observation recorded, and the needle must still
+    pick out exactly one. A url comparison would have been the obvious guard
+    and it is the weaker one -- a page can be re-rendered at the same address,
+    and the thing that matters is whether the control the name is read off is
+    the control the aim was taken on.
+    """
+    if spec.action != "send_invitation":
+        return block
+    reading = await dom.read_invitation_surface(
+        page, observation.target, reveal_single_match=True
+    )
+    # THE SAME RAIL, STILL AIMING AT ONE. Either half failing means the page
+    # is not the one the observation describes, and a name read off some other
+    # page is a name nobody's needle selected.
+    if int(reading.get("controls") or 0) != int(
+        (observation.facts or {}).get("controls") or -1
+    ):
+        return block
+    if int(reading.get("matches") or 0) != 1:
+        return block
+    label = reading.get("label")
+    if not isinstance(label, str) or not label:
+        return block
+    # A NEW DICT. The one on the grant is not touched, and this adds a
+    # top-level key only -- so nothing nested is shared into.
+    out = dict(block)
+    out["who_this_would_reach"] = (
+        "LinkedIn labels the ONE control your word selected: "
+        f"{label!r}. That is read off your own profile, where it was already "
+        "rendered -- nobody is notified, no record is created, and this "
+        "server keeps no copy of it: it is printed here for you to check and "
+        "is in no grant, no log and no file. CHECK IT. Your word picked this "
+        "control out uniquely, and a word that uniquely picks out the WRONG "
+        "person is the one failure this gate cannot catch for you."
+    )
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -3966,56 +4111,55 @@ _NINE_REFUSALS: dict[str, str] = {
     # update_profile_field, send_message -- needs a mutation CLASS sanctioned,
     # which is a different and larger decision than a url.
     "send_invitation": (
-        "send_invitation is sanctioned and cannot be performed, and ON "
-        "2026-08-31 ITS BLOCKER CHANGED FROM A DECISION HE HAD NOT MADE TO A "
-        "STRUCTURAL OPPOSITION THIS SERVER CAN STATE EXACTLY. WHAT IS "
-        "MEASURED, and it answers the question that mattered most here: THERE "
-        "IS A ROUTE THAT COSTS NO BADGE. The invitation control was found on "
-        "his OWN PROFILE -- 9 buttons whose accessible name ends ' to "
-        "connect', counted identically on three separate days -- a page this "
-        "server already loads and which carries no pending-invitation "
-        "counter. So this action never needs /mynetwork/, whose load is "
-        "refused precisely because it consumes that counter. THE AIMING WORKS "
-        "TOO: a needle is handed INTO the page, the comparison runs there, "
-        "and three integers come back -- total, matches, index. Exactly one "
-        "match is aimable; zero and two-or-more both refuse, the second "
-        "because choosing between indistinguishable controls is choosing by "
-        "position. WHAT NOW STOPS IT is not the boundary and not a "
-        "measurement. IT IS THAT THE CONFIRM BLOCK CANNOT NAME THE PERSON. "
-        "The label on that control IS a third party's name, and the whole "
-        "reason the aiming is safe is that no label ever enters this process; "
-        "the moment one does it can reach a traceback, an exception message, "
-        "a cache key or an audit line, and no care downstream un-rings that. "
-        "So the block this design would show him before he confirmed could "
-        "say a COUNT and a POSITION -- 'exactly one of nine controls carries "
-        "the word you gave, at position 3' -- and could not say WHO. Every "
-        "other action here names its target in terms he can check: a job "
-        "title and an employer, a company name, his own name and headline. "
-        "THIS PACKAGE HAS ALREADY DECIDED THAT QUESTION TWICE IN THE SAME "
-        "DIRECTION -- unsave_job refused until the label on the control it "
-        "would press had been photographed, and react_to_item is refused in "
-        "part because 'a gate that cannot say what it is about to express "
-        "under his name is not a gate'. An invitation is a request to a real "
-        "person, sent under his name, and it is less recoverable than either. "
-        "AND THE PRIVACY DESIGN AND THE CONFIRMABILITY REQUIREMENT ARE IN "
-        "DIRECT OPPOSITION, which is why this is not a gap somebody can close "
-        "with more care: they are the same tension the census's own gate has "
-        "with update_profile_field, and here the container is NOT self-owned "
-        "-- those nine names belong to nine other people. THE IDENTITY IS "
-        "DELIBERATELY NOT ROUTED THROUGH THE TARGET, and that was the "
-        "alternative: a grant's target reaches consume()'s mismatch message, "
-        "_render's block and grant.preview, so routing a name through it "
-        "would trade a structural guarantee for three handling promises. Not "
-        "routing it makes a leak impossible; closing those three sites would "
-        "only make one less likely. WHAT WOULD LIFT IT is now a much narrower "
-        "ruling than 'may this server hold an identity': may it read the "
-        "accessible name of THE ONE control his own needle has already "
-        "uniquely selected, print it in the block for him to check, and "
-        "discard it -- one label, chosen by his word rather than by this "
-        "server, never stored and never returned to a caller. That is the "
-        "exact shape of the relaxation he granted for the self-owned editor "
-        "container, applied one door along, and it is his to rule rather "
-        "than this server's to assume."
+        "send_invitation is sanctioned and cannot be performed, AND ITS "
+        "BLOCKER MOVED TWICE ON 2026-08-31. WHAT IS MEASURED: the route costs "
+        "NO BADGE -- the invitation controls are on his OWN PROFILE, 9 of "
+        "them, accessible names ending ' to connect', counted identically on "
+        "three separate days, on a page this server already loads and which "
+        "carries no pending-invitation counter. So this action never needs "
+        "/mynetwork/, whose load is refused precisely because it consumes "
+        "that counter. THE AIMING WORKS AND NOW RUNS: a needle he supplies is "
+        "handed INTO the page, the comparison happens there, and three "
+        "integers come back. Exactly one match is aimable; zero and "
+        "two-or-more both refuse, the second because choosing between "
+        "indistinguishable controls is choosing by position. That matcher had "
+        "NO CALLER IN THIS PACKAGE until today -- observe handed its readers "
+        "no target, so the aiming this capability is built around had never "
+        "run against a page. It does now. AND THE CONFIRM BLOCK CAN NAME THE "
+        "PERSON, which was the blocker this refusal carried this morning. The "
+        "operator ruled that ONE label may be read -- the control his own "
+        "needle has already uniquely selected -- printed for him to check, "
+        "and discarded. It reaches the block and NOTHING else: not the grant, "
+        "not the retained preview, not the observation, not consume's "
+        "mismatch message, not a log. That is enforced by ORDER rather than "
+        "by scrubbing -- the block is stored on the grant BEFORE the label "
+        "exists -- and by the reader that feeds the observation not reading a "
+        "label at all. The ruling turned on a distinction worth carrying: "
+        "loading a stranger's PROFILE stays refused because it EMITS, and "
+        "linkedin_who_viewed_me reads the receiving end of exactly that "
+        "signal; reading one accessible name off a page already rendered on "
+        "his own profile emits nothing, notifies nobody, and creates no "
+        "record. WHAT STOPS IT NOW IS NARROWER AND IS ALSO MEASURED: NOTHING "
+        "CAN CONFIRM THE SEND. No post-click state of that control has ever "
+        "been observed -- the label it wears after an invitation goes is the "
+        "identical gap react_to_item has for its ON label and unsave_job had "
+        "until 2026-08-30. And the surface that WOULD settle it, the "
+        "sent-invitations manager, is on the forbidden list and would consume "
+        "the pending-invitation badge to read. So a performed invitation "
+        "could only ever report 'unknown'. THAT IS THE SHAPE THIS SERVER JUST "
+        "FIXED IN apply_job AND WILL NOT SHIP AGAIN: an irreversible act "
+        "whose verification cannot pass on any reading it could take, on the "
+        "one action where a caller must not retry to find out. It is a higher "
+        "bar than follow_company clears, deliberately -- a follow is "
+        "reversible and observable by him, while an invitation is a request "
+        "to a real person, sent under his name, that LinkedIn will not let "
+        "him take back and that counts against the account if it is ignored. "
+        "WHAT WOULD LIFT IT is one supervised act on his own terms, exactly "
+        "the shape that lifted unsave_job: he sends ONE invitation himself, "
+        "in his own browser, and this server re-reads that control by the "
+        "read-only route it already has. One act pays for the label, and the "
+        "re-measurement is then bought with reads rather than with a second "
+        "invitation. Nothing here will do that for him."
     ),
     "send_message": (
         "send_message is sanctioned and cannot be performed. NO SURFACE: "
