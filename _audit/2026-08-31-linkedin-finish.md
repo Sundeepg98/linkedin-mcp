@@ -17,7 +17,8 @@ was performed.** `_state/session.json` is byte-identical -- proof in section 9.
 |---|---|
 | rulings implemented | **3 of 6** as capability; 1 declined back to him; 2 unreachable |
 | ruled surfaces CAPTURED | **2 of 2**, twice each, after the restart landed |
-| reads landing on a forbidden substring | **1**, measured three times |
+| reads landing on a forbidden substring | **1**, measured three times, exposure measured NIL |
+| landed-url census | **COMPLETE** -- 13 surfaces measured twice, 2 refused with cause |
 | refusals LIFTED | **0** -- see below, and it is the finding |
 | refusals whose REASON changed | **6** |
 | Part 7 debts closed | **6 of 7**, the seventh checked and correctly left recorded |
@@ -251,28 +252,33 @@ server will not type into an input it cannot name.
 
 ---
 
-## 2d. The landed-url census
+## 2d. The landed-url census -- COMPLETE
 
-The lead asked for this by name: for every read, the requested url and the
-landed url, repeated, with a `linkedin_search_jobs` control in the window. The
-question it exists to answer is whether any read LANDS somewhere the forbidden
-list names.
+The lead asked for this by name: for **every read surface this server
+performs**, the requested url and the landed url, **taken at least twice
+each**, with a `linkedin_search_jobs` control in the window. The question it
+exists to answer is whether any read LANDS somewhere the forbidden list names.
 
-| read | landed url | verdict |
-|---|---|---|
-| `saved_jobs` x2 | `/jobs-tracker/?stage=saved` | PASS |
-| `my_applications` | `/jobs-tracker/?stage=applied` | PASS |
-| `draft_applications` | `/jobs-tracker/?stage=draft` | PASS |
-| `job_detail` | `/jobs/view/<id>/` | PASS |
-| `search_jobs` x2 (the control) | `/jobs/search/?currentJobId=<id>&keywords=...` | PASS |
-| `who_viewed_me` | `/analytics/profile-views/`, and `/me/profile-views/` on its fallback | PASS, both |
-| `followed_companies` | `/mynetwork/network-manager/company/` | PASS |
-| `new_messages` | `/feed/` | PASS |
-| census `feed` | `/feed/` | PASS |
-| census `settings_dark_mode` x2 | `/mypreferences/d/dark-mode` | PASS |
-| census `profile_edit_intro` x2 | `/in/me/edit/intro/` | PASS |
-| `my_profile` / census `profile` x3 | **`/in/<member>/?isSelfProfile=true`** | **FAILS THE ALLOWLIST** |
-| census `settings` x3 | **`/mypreferences/d/categories/account`** | **HITS A FORBIDDEN SUBSTRING** |
+Every row below is at least two readings. Where a count is higher, independent
+tools reached the same url and all of them agreed.
+
+| read | landed url | n | verdict |
+|---|---|---|---|
+| `saved_jobs` | `/jobs-tracker/?stage=saved` | 2 | PASS |
+| `my_applications` | `/jobs-tracker/?stage=applied` | 2 | PASS |
+| `draft_applications` | `/jobs-tracker/?stage=draft` | 2 | PASS |
+| `job_detail` | `/jobs/view/<id>/` **and** `/jobs/view/<id>` | 2 | PASS, both spellings |
+| `search_jobs` (the control) | `/jobs/search/?currentJobId=<id>&keywords=...` | 3 | PASS |
+| `who_viewed_me` | `/analytics/profile-views/`, and `/me/profile-views/` on its fallback | 2 | PASS, both |
+| `followed_companies` | `/mynetwork/network-manager/company/` | 2 | PASS |
+| `new_messages` | `/feed/` | 2 | PASS |
+| census `feed` | `/feed/` | 4 | PASS |
+| census `settings_dark_mode` | `/mypreferences/d/dark-mode` | 2 | PASS |
+| census `profile_edit_intro` | `/in/me/edit/intro/` | 2 | PASS |
+| `my_profile` + census `profile` | **`/in/<member>/?isSelfProfile=true`** | 4 | **FAILS THE ALLOWLIST** |
+| census `settings` | **`/mypreferences/d/categories/account`** | 3 | **HITS A FORBIDDEN SUBSTRING** |
+| `notifications` | -- | 0 | **UNMEASURED BY CHOICE** |
+| `open_messaging` | -- | 0 | **UNMEASURED BY CHOICE** |
 
 ### The answer, and it is not "nothing"
 
@@ -283,31 +289,62 @@ specifically to keep that family unreachable. Observed THREE times, across two
 different server processes.
 
 So this server has been reading a page its own forbidden list names, once per
-settings census, since that census key was added. The forbidden entry has been
-inert against it the whole time, because only the requested url is ever
-checked.
+settings census, since that census key was added. The entry has been inert
+against it the whole time, because only the requested url is ever checked.
 
-**What the exposure actually is, measured rather than assumed: nil.** The
-census of that very page proves it carries 33 links, 0 forms, and no toggle of
+**What the exposure actually is, measured rather than assumed: NIL.** The
+census of that very page proves it carries 33 links, 0 forms and no toggle of
 any kind -- it is an index, and the pages holding values are one level further
-down and are not reached. The BOUNDARY CLAIM was false; the harm was zero.
+down and are not reached. **The BOUNDARY CLAIM was false; the harm was zero.**
 Both halves belong in the record.
 
-**The other divergence is benign.** `/in/me/` redirecting to the member's own
+**AND NEITHER ACCOUNT-DESTRUCTION ADDRESS IS REACHED.** The lead named those
+as the ones that would matter. `/mypreferences/d/close-accounts` and
+`/mypreferences/d/hibernate-account` appear as HREFS on the settings index and
+are never navigated to by anything. No read lands on either, in any reading.
+
+**The other divergence is benign.** `/in/me/` resolving to the member's own
 slugged url with `?isSelfProfile=true` fails the allowlist on the query string
 alone and hits no forbidden substring. It is LinkedIn resolving "me" to him.
 
-### Two reads were deliberately NOT measured
+### One thing the repetition caught that a single reading would not have
 
-* **`linkedin_notifications`** -- loading it clears his unread badge, and the
-  count moved 1 -> 3 during this wave. A landed-url data point is not worth
+`job_detail` landed on `/jobs/view/<id>/` on its first reading and
+`/jobs/view/<id>` -- **no trailing slash** -- on its second, same job, same
+session. Both pass, because that pattern ends `/?$`. But it means **the landed
+url is not stable even for a surface that passes**, and any future gate has to
+tolerate the variance rather than pin a spelling. That is exactly the class of
+thing the repeat-every-reading rule exists to find, and it took two readings of
+a row that was already "PASS" to find it.
+
+### Two reads were deliberately NOT measured, and are not counted clean
+
+* **`linkedin_notifications`** -- loading it clears his unread badge, which
+  moved 1 -> 3 during this wave. A landed-url data point is not worth
   destroying signal he has not seen.
 * **`linkedin_open_messaging`** -- loading it opens a conversation LinkedIn
   chooses and may fire a read receipt on a third party.
 
-Both are recorded as UNMEASURED-BY-CHOICE with the cost named, rather than
-counted as clean. A census that spent somebody else's read receipt to fill in
-a table would be the exact trade this server refuses everywhere else.
+Both are UNMEASURED-BY-CHOICE with the cost named. A census that spent
+somebody else's read receipt to fill in a table would be the exact trade this
+server refuses everywhere else. **Their landed urls are therefore UNKNOWN, not
+clean**, and a future gate must treat them as unmeasured rather than assume
+they behave like their neighbours -- `/messaging/` in particular is ALREADY
+measured to redirect into a thread, so it is the surface most likely to
+diverge and the one nobody may cheaply check.
+
+### The verdict on the gate
+
+**On this evidence the landed-url gate is not worth building.** One benign
+index page, whose exposure measures nil, plus one self-redirect. That is not a
+class of walk-arounds; it is two known cases, both his own data, neither
+reaching anything the forbidden list exists to protect.
+
+The honest close is to record it and drop it, which is what the lead said the
+outcome could be. What survives is the finding itself -- that the boundary
+checks the requested url and not the landed one, that this was TRUE and
+UNNOTICED for a day, and that the two surfaces which could not be measured are
+unknown rather than safe.
 
 ---
 
@@ -806,8 +843,30 @@ Both are built, tested and green. Neither has run.
 
 7. `linkedin_send_message`'s refusal text should say **deferred by ruling**
    rather than unmeasured. One line in `writes._NINE_REFUSALS`.
-8. **THE LANDED-URL GATE IS ITS OWN WAVE, and this is a decision rather than
-   a leftover.** The lead ruled the redirect finding in scope and specified
+8. **THE LANDED-URL GATE: CENSUS DONE, AND THE ANSWER IS DO NOT BUILD IT.**
+   Section 2d carries the complete census -- every read surface, at least two
+   readings each, two surfaces refused with their cost named. One read lands
+   on a forbidden substring and its measured exposure is nil; one is a benign
+   self-redirect; neither account-destruction address is reached by anything.
+   That is two known cases, not a class of walk-arounds, so the gate is not
+   worth its plumbing and the honest close is to record it and drop it. What
+   survives is the finding: the boundary checks the requested url and not the
+   landed one, and the two surfaces that could not be measured are UNKNOWN
+   rather than safe.
+
+   **A CONSEQUENCE FOR THE PROFILE-QUERY RULING.** The lead ruled that
+   `?isSelfProfile=true` may be admitted on the `/in/<member>/` form. It is
+   NOT landed here, and the reason is the lead's own Ruling 3: an allowlist
+   entry with no gate to consult it is widening that buys zero enforcement.
+   Nothing requests that url -- the server requests `/in/me/` -- so with the
+   gate dropped the pattern has no consumer at all. Held pending a word,
+   rather than widened unilaterally.
+
+   The original framing is kept below because it is what the measurement was
+   taken against.
+
+   **THE GATE WOULD ALSO HAVE BEEN DETECTIVE, NEVER PREVENTIVE**, and that is
+   a decision rather than a leftover. The lead ruled the redirect finding in scope and specified
    the remedy; the measurement taken before building it hit the stop condition
    the same instruction set. It breaks a second surface -- the PROFILE -- and
    that one cannot be fixed by an exact-match entry at all, because the landed
