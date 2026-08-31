@@ -330,7 +330,12 @@ a second ruling.
 
 * It is a pure per-account display preference. No audience, no third party,
   nothing another member can observe.
-* **And the part that decided it: it needs NO narrowing of any forbidden
+* **The lead's ground, on ratifying the choice:** it is cosmetic, it is
+  reversible by the same control that sets it, and it is consequential to
+  nothing. If a settings write is ever exercised for the first time, that is
+  the page to do it on. Nothing in the ruling asks for wider and it should not
+  go wider.
+* **And the part that decided it here: it needs NO narrowing of any forbidden
   substring.** `/mypreferences/d/settings/language` and
   `.../settings/autoplay-videos` would each have required weakening
   `"/settings/"` to buy one read, and any `categories/` page would have
@@ -449,6 +454,14 @@ refuses them, because a test checking only the net answer could not have seen
 this: the net refusal held the whole time. What did not hold was the list's
 stated job as a "second, independent gate".
 
+**THIS IS A DEFENCE THAT WAS NEVER THERE, NOT HARDENING** -- the lead ruled on
+the wording and the distinction is the whole point. Nothing was strengthened.
+Two addresses the design believed sat behind two gates sat behind one, and the
+gate they sat behind is the allowlist, which this very wave widened twice in
+two days. That is a near-miss on the two most destructive addresses on his
+account, and the only reason it surfaced is that a live census printed the
+real hrefs beside the assumed ones.
+
 ### The exemption mechanism, and why it is shaped this way
 
 `/in/me/edit/intro/` contains `/edit/`, which is checked before the allowlist.
@@ -476,11 +489,76 @@ forbidden entry exists to block, and `assert_read_url` gates the REQUESTED url
 only.
 
 It is the same shape as the `/messaging/` finding from August: a guard that
-forbids a destination it knowingly delivers you to. It is recorded here and
-NOT resolved, because both available resolutions are wrong on today's evidence
--- widening the pattern to admit the landing url would enlarge the family, and
-re-checking landed urls is a change to every read in the package. It belongs
-to whoever next touches that gate.
+forbids a destination it knowingly delivers you to.
+
+**THE LEAD RULED THIS IN SCOPE and specified the remedy: gate the LANDED url
+as well as the requested one, admitting the one measured landing address by
+exact match. It was measured before it was built, and the measurement stopped
+it.** That instruction carried its own stop condition -- if gating the landed
+url breaks anything other than the settings index, stop and report rather than
+widen the exemption to make it pass. It breaks a second surface. So this is
+SPECIFIED BELOW AND NOT BUILT.
+
+### What was measured
+
+Every landed url observed live this session, checked against the read
+allowlist as it stands:
+
+    PASS  saved jobs       /jobs-tracker/?stage=saved
+    PASS  job detail       /jobs/view/<id>/
+    PASS  job search       /jobs/search/?currentJobId=<id>&keywords=...
+    PASS  feed             /feed/
+    FAIL  settings census  /mypreferences/d/categories/account
+    FAIL  profile census   /in/<member>/?isSelfProfile=true
+
+**Two of six, and the second is the PROFILE** -- the most-used read in this
+server. `/in/me/` redirects to the member's own slugged url WITH A QUERY
+STRING, and the `/in/<member>/` pattern permits no query string at all.
+Observed independently on 2026-08-30 and 2026-08-31.
+
+### Why the specified remedy cannot fix the second one
+
+For the settings index the exact-match entry is
+`/mypreferences/d/categories/account` and it is clean. **For the profile it is
+not, and not through any lack of care: the landed profile url CONTAINS HIS
+SLUG.** An exact-match entry for it puts his identity into `readonly.py` -- a
+tracked file, in a public repo, swept by `tests/test_no_committed_identity.py`,
+which would fire on it.
+
+The three ways out are each refused on today's evidence:
+
+* allow a query string on the `/in/<member>/` pattern -- widening a pattern to
+  make a gate pass, which is what the stop condition forbids;
+* normalise the landed url before checking -- stripping the query is exactly
+  the loosening that makes the gate advisory again;
+* exact-match the landed url -- his slug on disk, in public.
+
+### A property of the gate itself, which changes what it can be worth
+
+`browser.py:438` runs `assert_read_url(url)`. `browser.py:441` runs
+`page.goto`. **The landed url does not exist until after the navigation.** So
+a landed-url gate is necessarily DETECTIVE, never PREVENTIVE: by the time it
+can refuse, the page is loaded and any load-cost -- a badge, a read receipt --
+has already been paid.
+
+It would still be worth having. It turns a silent walk-around into a loud one
+and stops the content being used. But it does not close the hole the way the
+framing suggests, because a redirect cannot be prevented by anything
+downstream of the navigation that followed it. That should be priced in before
+the work is scheduled.
+
+### What a future wave needs
+
+1. A landed-url census over EVERY read the server performs, not the six that
+   happened to run today. Absent is unknown; other surfaces may redirect.
+2. A decision on the profile that keeps his slug off disk. The narrowest
+   candidate is a pattern admitting `?isSelfProfile=true` and nothing else on
+   the `/in/<member>/` form. That is a narrow widening rather than an open
+   one, but it IS a widening, and it is the lead's to rule on rather than mine
+   to slip in under a different heading.
+3. A decision on whether a detective gate REFUSES the read or REPORTS the
+   divergence and lets it stand. Those are two different products and only one
+   of them is safe to turn on without the census in (1).
 
 ---
 
@@ -581,8 +659,15 @@ Both are built, tested and green. Neither has run.
 
 7. `linkedin_send_message`'s refusal text should say **deferred by ruling**
    rather than unmeasured. One line in `writes._NINE_REFUSALS`.
-8. The `/mypreferences/d/` redirect finding in section 5 is recorded and
-   unresolved.
+8. **THE LANDED-URL GATE IS ITS OWN WAVE, and this is a decision rather than
+   a leftover.** The lead ruled the redirect finding in scope and specified
+   the remedy; the measurement taken before building it hit the stop condition
+   the same instruction set. It breaks a second surface -- the PROFILE -- and
+   that one cannot be fixed by an exact-match entry at all, because the landed
+   profile url carries his slug and this repo is public. Section 5 carries the
+   measurement, the three refused ways out, and the finding that the gate can
+   only ever be DETECTIVE because the landed url does not exist until after
+   the navigation. Nothing was built and nothing was widened.
 9. ~~`tests/test_readonly_boundary_invariant.py:35`~~ **CLOSED.** It said a
    re-freeze "HAS BEEN ONE, ONCE" of something that has happened five times --
    count rot in the one file whose job is noticing when something moved.
