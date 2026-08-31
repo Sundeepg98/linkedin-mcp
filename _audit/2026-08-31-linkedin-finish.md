@@ -274,7 +274,7 @@ tools reached the same url and all of them agreed.
 | `new_messages` | `/feed/` | 2 | PASS |
 | census `feed` | `/feed/` | 4 | PASS |
 | census `settings_dark_mode` | `/mypreferences/d/dark-mode` | 2 | PASS |
-| census `profile_edit_intro` | `/in/me/edit/intro/` | 2 | PASS |
+| census `profile_edit_intro` | `/in/me/edit/intro/` **then** `/in/<member>/edit/intro` | 4 | **BOTH -- see 2e** |
 | `my_profile` + census `profile` | **`/in/<member>/?isSelfProfile=true`** | 4 | **FAILS THE ALLOWLIST** |
 | census `settings` | **`/mypreferences/d/categories/account`** | 3 | **HITS A FORBIDDEN SUBSTRING** |
 | `notifications` | -- | 0 | **UNMEASURED BY CHOICE** |
@@ -303,9 +303,17 @@ as the ones that would matter. `/mypreferences/d/close-accounts` and
 `/mypreferences/d/hibernate-account` appear as HREFS on the settings index and
 are never navigated to by anything. No read lands on either, in any reading.
 
-**The other divergence is benign.** `/in/me/` resolving to the member's own
+**The other divergences are benign.** `/in/me/` resolving to the member's own
 slugged url with `?isSelfProfile=true` fails the allowlist on the query string
 alone and hits no forbidden substring. It is LinkedIn resolving "me" to him.
+The intro editor does the same thing without the query -- see 2e, where it is
+recorded as a CORRECTION to this table rather than a footnote, because this
+table called it PASS on two readings that had caught the page mid-flight.
+
+**THAT ROW IS THE ONE TO READ BEFORE TRUSTING ANY OTHER.** Two agreeing
+readings were not enough for it, and nothing distinguishes it from the rows
+that still say PASS except that a code change happened to force a third look.
+The verdicts above are as good as their sample and no better.
 
 ### One thing the repetition caught that a single reading would not have
 
@@ -345,6 +353,98 @@ outcome could be. What survives is the finding itself -- that the boundary
 checks the requested url and not the landed one, that this was TRUE and
 UNNOTICED for a day, and that the two surfaces which could not be measured are
 unknown rather than safe.
+
+---
+
+## 2e. CORRECTION: `profile_edit_intro` DOES redirect, and my census row was wrong
+
+A third restart loaded `ee61696`, so the `<label for>` fix went live and the
+`profile_edit_intro` capture was re-run twice. **Both re-runs disagree with
+both earlier ones**, and the disagreement is not subtle.
+
+| | readings 1-2 (on `b9d739c`) | readings 3-4 (on `ee61696`) |
+|---|---|---|
+| landed url | `/in/me/edit/intro/` | **`/in/<member>/edit/intro`** |
+| controls read | 67 | **256** |
+| forms | 1 | 2 |
+| contenteditable | 0 | **1** |
+| dialogs | 2 | 5 |
+
+**MY CENSUS ROW FOR THIS SURFACE WAS WRONG.** Section 2d marks
+`profile_edit_intro` PASS at n=2, on the strength of two readings that landed
+exactly where they asked. At n=3 and n=4 it lands on the SLUGGED form with no
+trailing slash, which **fails the allowlist** -- so under a landed-url gate
+this read would be refused.
+
+**The two earlier readings caught a page that had not finished navigating.**
+67 controls against 256 is not a naming difference and the `<label for>` fix
+cannot explain it -- that fix changes how a control is NAMED, never how many
+are found. The page was read mid-flight, before the redirect resolved and
+before the body drew. This repo has the identical failure documented for
+another surface in `_audit/2026-08-30-jobs-view-reliability.md`, where an
+early `networkidle` produced 13 of 13 incomplete reads of `/jobs/view/<id>`.
+
+**AND IT VINDICATES THE DESIGN CONSTRAINT AT FULL STRENGTH.** The lead asked
+that the unstable landed url land as a requirement rather than an anecdote.
+It is stronger than the `job_detail` trailing slash that prompted it: there,
+two spellings both passed. Here, **the same surface passes twice and fails
+twice**, and which answer you get depends on whether the page had settled.
+
+> **DESIGN CONSTRAINT for any future landed-url gate.** A gate that pinned a
+> spelling would refuse a legitimate read intermittently -- the worst failure
+> mode available to a boundary, because it is invisible until it is not. But
+> the stronger requirement is this: **a landed url read before the page
+> settles is not a measurement of anything.** Any such gate must sample after
+> the settle it already performs, and must be built knowing that "n=2 agreed"
+> was not enough here. Two readings agreed with each other and both were
+> wrong.
+
+**AND THE "at least twice" RULE WAS NOT ENOUGH.** It caught the `job_detail`
+variance and it did not catch this. The third reading happened only because a
+code change forced a re-run -- not because the discipline called for one.
+Recorded as a limit of the rule rather than a success of it.
+
+## 2f. What the fixed census bought for #4, and why it still refuses
+
+Both post-fix readings are IDENTICAL to each other, so this is measured rather
+than a single glimpse.
+
+**THE LABEL FIX WORKED.** Fields that read `name_source: "none"` now resolve:
+
+    "Additional name"   input    label-for
+    "City"              input    aria-label
+    "Comments"          input    label-for
+    "Posts"             input    label-for
+    "Month"             select   aria-label
+    "Select language"   select   label-for
+
+**AND MY EARLIER "Submit renders DISABLED" WAS ALMOST CERTAINLY THE WRONG
+CONTROL.** On the full render the two `Submit` buttons that carry
+`disabled: true` sit beside `Report this ad` and `Why am I seeing this ad?` --
+they are the ad-report dialogs. The editor's own control is **`Save`,
+`disabled: false`**. The half-rendered page had drawn the ad dialogs and not
+yet the editor's footer, and I reported the one I could see.
+
+**THE REFUSAL STILL STANDS, and the reason is now a second limit of the
+instrument rather than a fact about the page.**
+
+1. **The census counts the WHOLE DOCUMENT, not the editor.** The intro editor
+   is a dialog inside a full profile render -- `dialogs: 5`. So `Comments` and
+   `Posts` are almost certainly the activity rail's filter radios, not profile
+   fields, and nothing in the output says which controls are inside the form.
+   **A named control is not an aimable one if you cannot tell what it
+   belongs to.**
+2. **The fields #4 would actually target are not among the named ones.** No
+   control named for a first name, a last name or a headline appears. Those
+   are among the 3 inputs still at `name_source: "none"` and the several
+   reading `<opaque>`.
+3. Reversibility is untouched: nothing here records the previous value, so an
+   edit is still not revertible by this server.
+
+**WHAT WOULD COMPLETE IT is now one specific instrument change**: a census
+that can scope to a container -- the dialog or form subtree -- instead of the
+document. That is a real feature with its own design, not a one-line fix, and
+it is named here rather than attempted.
 
 ---
 
@@ -854,13 +954,25 @@ Both are built, tested and green. Neither has run.
    landed one, and the two surfaces that could not be measured are UNKNOWN
    rather than safe.
 
-   **A CONSEQUENCE FOR THE PROFILE-QUERY RULING.** The lead ruled that
-   `?isSelfProfile=true` may be admitted on the `/in/<member>/` form. It is
-   NOT landed here, and the reason is the lead's own Ruling 3: an allowlist
-   entry with no gate to consult it is widening that buys zero enforcement.
-   Nothing requests that url -- the server requests `/in/me/` -- so with the
-   gate dropped the pattern has no consumer at all. Held pending a word,
-   rather than widened unilaterally.
+   **THE PROFILE-QUERY RULING: RULED, THEN WITHDRAWN. NOT LANDED.** The lead
+   ruled on 2026-08-31 that `?isSelfProfile=true` may be admitted on the
+   `/in/<member>/` form, with tests pinning that a different query and
+   `isSelfProfile=false` both refuse. It was held rather than landed, and on
+   being shown the collision the lead withdrew it in the same terms:
+
+   > Ruling 1 admitted `?isSelfProfile=true`; Ruling 3 said an allowlist entry
+   > with no gate to consult it is widening that buys zero enforcement. I
+   > issued Ruling 1 while the gate was still a live possibility and did not
+   > revisit it when Ruling 3 killed the gate. With no gate, nothing requests
+   > `/in/<member>/?isSelfProfile=true` -- the server requests `/in/me/` -- so
+   > the entry has **no consumer**, and a read-boundary widening with no
+   > consumer is strictly negative: a permanently open door justified by a
+   > control that was never built.
+
+   **A RULING IS NOT A LICENCE WHEN THE REASON FOR IT HAS BEEN WITHDRAWN**,
+   which is the lead's own phrasing and is recorded here as the transferable
+   part. The read boundary is unchanged: no pattern was added, no substring
+   removed.
 
    The original framing is kept below because it is what the measurement was
    taken against.
