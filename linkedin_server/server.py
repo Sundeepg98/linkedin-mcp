@@ -1650,8 +1650,29 @@ async def linkedin_notifications(
     no mark-as-read call anywhere in this package. The only way not to clear
     the badge is not to call this tool.
 
-    It is the ONE server-side change any tool here causes. Everything else in
-    this package leaves LinkedIn exactly as it found it.
+    IT IS NOT THE ONLY SERVER-SIDE CHANGE THIS PACKAGE CAUSES, and this
+    paragraph claimed it was until 2026-08-31. The old text read: "It is the
+    ONE server-side change any tool here causes. Everything else in this
+    package leaves LinkedIn exactly as it found it." That was true when it was
+    written and is now false several times over -- FIVE writes ship and can
+    change something on LinkedIn behind the gate; linkedin_open_messaging
+    opens a conversation LinkedIn chooses and resets the messaging badge; and
+    linkedin_search_jobs adds to his own recent-search history.
+
+    It is corrected here rather than quietly softened, because of WHERE it
+    sits: this is a docstring, an assistant answers from it, and the sentence
+    it replaced is the kind a caller repeats verbatim to somebody deciding
+    whether to run something. A stale reassurance is worse than no
+    reassurance.
+
+    WHAT IS STILL TRUE, and it is the narrower claim worth keeping: this is
+    the only server-side change any READ in this package causes WITHOUT BEING
+    ASKED FOR IT. The writes are each behind a two-call gate that performs
+    nothing without a single-use token. Messaging costs what its own tool name
+    says it costs. The search history is named on linkedin_search_jobs. This
+    badge is the one that goes whether or not you wanted it, which is why the
+    compensation below exists. linkedin_server_info's known_side_effects
+    carries the full list and is the place to look rather than here.
 
     Partial compensation, since the badge is going either way: each row carries
     "unread": true/false as LinkedIn had it AT THE MOMENT OF READING -- which
