@@ -827,7 +827,15 @@ A11Y_NOISE = (
 )
 
 
-async def _notification_rows():
+async def _notifications_from(html: str):
+    """Harvest and parse notifications out of one page of markup.
+
+    Section 4c writes its own card rather than using a capture, so the harvest
+    configuration lives here once instead of twice: a selector changed in one
+    copy and not the other would leave the surface under test and the surface
+    being pinned quietly different.
+    """
+
     async def work(page):
         records = await dom.harvest_block_cards(
             page,
@@ -840,7 +848,11 @@ async def _notification_rows():
         rows, dropped = dom.parse_all(records, shape.parse_notification)
         return records, rows, dropped
 
-    return await _with_page(NOTIFICATIONS, work)
+    return await _with_html(html, work)
+
+
+async def _notification_rows():
+    return await _notifications_from(NOTIFICATIONS.read_text(encoding="utf-8"))
 
 
 async def test_the_notification_harvest_finds_every_card():
@@ -1015,6 +1027,164 @@ def test_the_two_time_readers_disagree_about_3m_on_purpose():
 def test_free_text_scanning_still_refuses_a_time_with_no_ago(text):
     """The guard the compact reader must not have loosened."""
     assert shape.find_time_ago([text]) is None
+
+
+# ---------------------------------------------------------------------------
+# 4c. The screen-reader budget's premise, on the surface left behind
+# ---------------------------------------------------------------------------
+#
+# 8573b8b fixed this in HARVEST_LINKED_CARDS_JS and deliberately did NOT touch
+# HARVEST_BLOCK_CARDS_JS, on the stated grounds that notifications are its only
+# caller, that no fixture exercised a non-rendered duplicate here, and that a
+# surface it could not verify may not be changed on the strength of an
+# argument. This section is the missing evidence, and it was written and run
+# RED before the guard was ported.
+#
+# THE PREMISE. strip_screen_reader_copies subtracts BY COUNT -- one occurrence
+# per hidden element -- and its docstring states what makes that allowed:
+# "innerText includes visually-hidden text". True of the CLIP pattern, where
+# the element IS rendered and innerText really does carry a second copy. FALSE
+# of display:none, whose copy innerText never returned -- and textOf() reads it
+# anyway, because innerText on a NON-RENDERED element falls back to
+# textContent. The budget is then charged for a duplicate that was never in the
+# card, and the subtraction pays for it out of the VISIBLE one.
+#
+# The card below is written by hand rather than captured, and that is exactly
+# why the hole survived: none of the six frozen notifications repeats its body
+# in a non-rendered element, so no assertion in section 4 could have gone red
+# no matter how the budget behaved.
+
+#: The CLIP pattern: the element IS rendered, only clipped to nothing, so its
+#: text really is in innerText and removing one copy is correct. Spelled
+#: exactly as in tests/test_tracker_harvest_census.py, where the sibling
+#: script's version of this guard is pinned, so the two surfaces are held to
+#: the same stylesheet rather than to two hand-written approximations of it.
+CLIP = (
+    "position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);"
+    "height:1px;width:1px;overflow:hidden"
+)
+
+DUPLICATED_BODY = (
+    "Priya Sharma commented on your post: Congratulations on the launch!"
+)
+DUPLICATED_LINK = (
+    "https://www.linkedin.com/feed/update/urn:li:activity:7000000000000000001/"
+)
+
+
+def notification_card(style: str) -> str:
+    """One notification card whose entire body is repeated in a hidden span.
+
+    The shape is the live one: an ``article.nt-card`` inside the card list, one
+    anchor, and the timestamp in its own ``p.nt-card__time-ago`` -- so the
+    selectors under test are the ones the notifications tool actually passes,
+    not a simplification that would let the walk succeed for the wrong reason.
+    """
+    return (
+        '<main><div class="nt-card-list">'
+        '<article class="nt-card">'
+        f'<a href="{DUPLICATED_LINK}">'
+        f'<span class="visually-hidden" style="{style}">{DUPLICATED_BODY}</span>'
+        f"<span>{DUPLICATED_BODY}</span></a>"
+        '<p class="nt-card__time-ago">2h</p>'
+        "</article></div></main>"
+    )
+
+
+async def test_a_body_repeated_in_a_display_none_span_is_not_eaten():
+    """THE DEFECT, reached through the notifications caller.
+
+    The card prints its body ONCE and hides a second copy in a display:none
+    span. innerText never carried that copy, so the card arrives with one body
+    -- but the hidden list arrives with one entry, the budget spends it on the
+    only copy there is, and the notification is left with no line at all.
+    parse_notification then has nothing to return and the row is DROPPED: the
+    same records=N, dropped=N signature the tracker showed.
+
+    SHOWN FAILING against dom.py before the isRendered guard was ported::
+
+        AssertionError: assert [] == ['Priya Sharma commented on your
+        post: Congratulations on the launch!']
+        Right contains one more item: 'Priya Sharma commented on your
+        post: Congratulations on the launch!'
+
+    -- and the record printed alongside it says why: hidden carried the
+    body while text carried it exactly ONCE, so the budget's one removal
+    was spent on the visible copy. rows == [], dropped == 1.
+    """
+    records, rows, dropped = await _notifications_from(
+        notification_card("display:none")
+    )
+
+    assert len(records) == 1, records
+    # The headline, asserted first, so a regression reports the lost body
+    # rather than the mechanism that lost it.
+    assert [row["text"] for row in rows] == [DUPLICATED_BODY], (records, rows)
+    assert dropped == 0, records
+    # The mechanism: a copy innerText never carried is never charged.
+    assert records[0]["hidden"] == [], records[0]
+    assert records[0]["text"].count(DUPLICATED_BODY) == 1, records[0]
+
+
+async def test_a_clipped_duplicate_is_still_charged_on_this_surface():
+    """THE CONTROL, and the behaviour the guard must NOT change.
+
+    Notifications are a surface the subtraction was built for: the live cards
+    weld "Unread notification." and a repeated body onto every innerText they
+    hand back, and section 4 pins six of them. A guard that stopped charging
+    the clip pattern would hand all of that straight back as content, which is
+    a regression wearing a fix's commit message.
+
+    SHOWN FAILING by skipping every hidden element regardless of rendering::
+
+        AssertionError: assert [] == ['Priya Sharma commented on your post:
+        Congratulations on the launch!'] -- a rendered duplicate stopped being
+        subtracted, so the body comes back printed twice.
+    """
+    records, rows, dropped = await _notifications_from(notification_card(CLIP))
+
+    assert len(records) == 1, records
+    # The card really does carry both copies. Without this the assertions
+    # below would also hold of a page that never had a duplicate to subtract.
+    assert records[0]["text"].count(DUPLICATED_BODY) == 2, records[0]
+    assert records[0]["hidden"] == [DUPLICATED_BODY], records[0]
+    assert dropped == 0, records
+    assert [row["text"] for row in rows] == [DUPLICATED_BODY], rows
+
+
+async def test_a_visibility_hidden_duplicate_was_never_charged_either_way():
+    """MEASURED, and deliberately NOT filed under the fix.
+
+    visibility:hidden is the case the guard looks like it should also be for,
+    and on this script it changes nothing: the element IS rendered, so
+    innerText runs its rendering algorithm and returns '' for it, textOf()
+    therefore yields an empty string, and it was never pushed onto the hidden
+    list to begin with. Measured 2026-08-31 against dom.py both before and
+    after the guard: hidden == [] in both, rows identical.
+
+    It is pinned anyway, because the reason it is safe is a property of
+    innerText rather than of anything in this package, and a rewrite of
+    textOf() that reached for textContent would silently turn this into the
+    display:none bug with no test to catch it.
+
+    The sibling script records the same measurement from the other side: there
+    the visibilityProperty option moves only its skip COUNTER, 2 -> 0, and
+    leaves the budget identical. HARVEST_BLOCK_CARDS_JS has no counter, so
+    here that option is observable in nothing at all -- MUTATION-CHECKED, not
+    inherited: dropping it from the ported guard leaves all three cases in
+    this section green. It is passed regardless, so the two scripts ask the
+    DOM the same question rather than drifting into two different ones, and
+    the fact that no test can tell is written down instead of implied.
+    """
+    records, rows, dropped = await _notifications_from(
+        notification_card("visibility:hidden")
+    )
+
+    assert len(records) == 1, records
+    assert records[0]["hidden"] == [], records[0]
+    assert records[0]["text"].count(DUPLICATED_BODY) == 1, records[0]
+    assert dropped == 0, records
+    assert [row["text"] for row in rows] == [DUPLICATED_BODY], rows
 
 
 # ---------------------------------------------------------------------------

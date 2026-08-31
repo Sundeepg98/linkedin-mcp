@@ -346,6 +346,63 @@ HARVEST_LINKED_CARDS_JS = """
 HARVEST_BLOCK_CARDS_JS = """
 (cfg) => {
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  // IS THIS ELEMENT'S TEXT ACTUALLY IN innerText? The hidden budget may ask
+  // nothing else, and asking a different question was a live defect on the
+  // sibling walk.
+  //
+  // PORTED FROM HARVEST_LINKED_CARDS_JS (8573b8b), which fixed it there and
+  // left this script alone for a stated reason: notifications are its only
+  // caller, no fixture exercised a non-rendered duplicate here, and a surface
+  // that cannot be verified may not be changed on the strength of an
+  // argument. That fixture now exists -- tests/test_sdui_surfaces_fixture.py
+  // section 4c -- and it was RED against this script before this guard.
+  //
+  // shape.strip_screen_reader_copies subtracts BY COUNT: each hidden element
+  // removes ONE occurrence of its own text from the card. Correct for the
+  // CLIP pattern, where the element IS rendered and innerText therefore
+  // carries a second copy. WRONG for display:none, whose copy innerText never
+  // returned -- and textOf() reads it anyway, because innerText on a
+  // NON-RENDERED element falls back to textContent. So the budget was charged
+  // for a duplicate that was never in the card, and the subtraction paid for
+  // it out of the VISIBLE one.
+  //
+  // Measured 2026-08-31, on a notification repeating its whole body in a
+  // display:none span: hidden=[body], the card's single visible copy spent,
+  // parse_notification left with no line at all, the row DROPPED --
+  // records=1, dropped=1. UNKNOWN COUNTS AS RENDERED, so an engine without
+  // checkVisibility keeps the old behaviour rather than silently halving
+  // every subtraction.
+  //
+  // TWO THINGS THIS SCRIPT DOES NOT GET, recorded rather than quietly
+  // omitted. There is no skip COUNTER: harvest_block_cards returns a bare
+  // list of cards, and widening that shape to carry a census field would
+  // change every caller for a diagnostic nothing has asked this surface for.
+  // And visibilityProperty is consequently observable in NOTHING here -- a
+  // visibility:hidden element yields no innerText, so textOf() returns '' and
+  // it was never pushed either way, measured both before and after this
+  // guard. It is passed regardless, so the two walks ask the DOM the same
+  // question instead of drifting into two different ones.
+  //
+  // TWO LINES BELOW ARE NOT REACHED BY ANY TEST, mutation-checked 2026-08-31
+  // rather than assumed, and recorded instead of quietly kept. Dropping
+  // visibilityProperty leaves all three of section 4c's cases green, and so
+  // does flipping the `return true` fallback to false: Chromium 151.0.7922.34
+  // has checkVisibility and does not throw, so that line never evaluates
+  // here. Both are kept anyway. The fallback is the answer for an engine that
+  // LACKS the API, where returning false would silently halve every
+  // subtraction on this surface -- a fallback wrong in the safe direction is
+  // worth more than a line count.
+  const isRendered = (el) => {
+    try {
+      if (el && el.checkVisibility) {
+        return el.checkVisibility({
+          contentVisibilityAuto: true,
+          visibilityProperty: true
+        });
+      }
+    } catch (e) { /* fall through to the permissive answer */ }
+    return true;
+  };
   for (const selector of cfg.selectors) {
     let nodes;
     try { nodes = document.querySelectorAll(selector); } catch (e) { continue; }
@@ -360,6 +417,7 @@ HARVEST_BLOCK_CARDS_JS = """
         let marked;
         try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
         for (const el of marked) {
+          if (!isRendered(el)) continue;
           const value = textOf(el);
           if (value) hidden.push(value.slice(0, cfg.maxChars));
         }
