@@ -2661,10 +2661,15 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "consulted; and no field inside any editor has been observed."
     ),
     "update_setting": (
-        "every setting is url-addressed and every one of those addresses is "
-        "forbidden here, by '/mypreferences/d/categories/' or '/settings/'. "
-        "No toggle has ever been observed. Note before ruling on the family: "
-        "'Close and delete account' and 'Hibernate account' are in it."
+        "the STATE is now measured -- dark mode is a three-state radio group "
+        "and exactly one reports checked, read off the page that carries the "
+        "value rather than the index that lists addresses -- so this no "
+        "longer refuses for want of a direction. It refuses because the "
+        "action has NO WRITE SURFACE: mint declines a grant at issue, so no "
+        "confirm_token can exist for it. The rest of the family stays "
+        "forbidden by '/mypreferences/d/categories/' and '/settings/'; note "
+        "before ruling on it that 'Close and delete account' and 'Hibernate "
+        "account' are in it."
     ),
     "send_invitation": (
         "a route exists that costs no badge -- the control is on his own "
@@ -2697,7 +2702,12 @@ def _writes_off(action: str) -> dict[str, Any]:
     }
 
 
-async def _write_tool(action: str, target: Any, confirm_token: str) -> dict[str, Any]:
+async def _write_tool(
+    action: str,
+    target: Any,
+    confirm_token: str,
+    to_state: Optional[str] = None,
+) -> dict[str, Any]:
     """Preview or perform, for EVERY write tool on this surface.
 
     ONE implementation, because the writes differ only in their spec and a
@@ -2706,6 +2716,20 @@ async def _write_tool(action: str, target: Any, confirm_token: str) -> dict[str,
     pair, a numeric company id for the unfollow -- and it is normalised by
     ``writes._target_for`` rather than here, so a tool cannot accept a shape
     its own action does not address.
+
+    ``to_state`` NAMES THE DESTINATION for an action that is not a binary
+    toggle, and it was ADDED 2026-08-31 to fix a gap rather than to extend a
+    feature. ``writes._direction`` has carried a multi-state branch since
+    August -- the one ``dacf76d`` hardened that morning against a ``KeyError``
+    on its origin -- and **nothing could reach it**: this function was the only
+    caller of ``preview`` and it passed no destination, so every multi-state
+    action refused with "the destination must be named rather than derived"
+    whatever it was asked. A guard on an unreachable branch is a guard nobody
+    can be sure of, and that branch is now reachable and exercised.
+
+    It stays ``None`` for the five binary toggles, and ``_direction`` ignores
+    it for them -- a destination handed to a two-state action would be a
+    caller choosing an outcome the state already determines.
     """
     if not writes.writes_enabled():
         return _writes_off(action)
@@ -2713,7 +2737,11 @@ async def _write_tool(action: str, target: Any, confirm_token: str) -> dict[str,
     async with BROWSER.session() as page:
         if not str(confirm_token or "").strip():
             return await writes.preview(
-                spec, target=target, navigator=BROWSER, page=page
+                spec,
+                target=target,
+                navigator=BROWSER,
+                page=page,
+                to_state=to_state,
             )
         grant = writes.consume(
             str(confirm_token).strip(),
@@ -3158,39 +3186,104 @@ async def linkedin_update_profile_field(
         return _error(exc)
 
 
+#: The settings whose VALUE this server can read, keyed by their normalised
+#: name. ONE, and a second needs a second ruling -- the operator's words were
+#: one named page at a time, never the family, never a wildcard.
+#:
+#: WHY THIS TABLE EXISTS AT THE TOOL rather than inside the reader.
+#: ``writes.observe`` chooses its surface from the SPEC's own ``state_from``
+#: and never from an argument, which is the property that stops a caller
+#: pointing this server at a page of its choosing. The consequence is that the
+#: reader opens the dark-mode page whatever ``setting`` was asked for, so
+#: without a guard HERE a question about "language" would be answered with
+#: dark mode's state wearing the label of the setting asked about.
+READABLE_SETTINGS: dict[str, str] = {"dark mode": writes.DARK_MODE_URL}
+
+
+def _normalise_setting(name: str) -> str:
+    """Lower-case, and every run of non-alphanumerics becomes one space.
+
+    So ``Dark Mode``, ``dark-mode`` and ``dark_mode`` all reach the same key,
+    while nothing that is not that setting is quietly admitted. Deliberately
+    NOT a fuzzy match: a gate that guesses which setting was meant is a gate
+    that can act on the wrong one.
+    """
+    return re.sub(r"[^a-z0-9]+", " ", str(name or "").lower()).strip()
+
+
 @mcp.tool()
 async def linkedin_update_setting(
     setting: str, value: str, confirm_token: str = ""
 ) -> dict[str, Any]:
     """Change one account setting. BUILT, GATED, AND REFUSING.
 
-    Reads the settings index live, then refuses.
+    Reads the dark-mode page live, reports which of its three states the
+    account is in, and refuses.
 
-    WHAT IS MEASURED: every individual setting IS its own address --
-    ``/mypreferences/d/settings/language``, ``/mypreferences/d/dark-mode``,
-    ``/mypreferences/d/categories/privacy``, 33 links in all -- and the page
-    that lists them carries ZERO forms and ONE button. It hands out addresses
-    and switches nothing.
+    WHAT IS MEASURED, and this is what changed on 2026-08-31: dark mode is a
+    THREE-STATE RADIO GROUP -- ``Always off``, ``Always on``, ``Device
+    settings`` -- and EXACTLY ONE of them reports checked. Six readings across
+    two days and three builds agree on every count: 20 controls, ZERO forms,
+    16 links, no dialogs, no redirect. So this gate can now say which state
+    the account is in and which way a change would move it. Until today it
+    read the settings INDEX instead, a page that hands out addresses and
+    switches nothing, and it refused because a gate that cannot name a
+    direction is not a gate.
 
-    WHAT IS NOT: no page below that index has ever been loaded, so no toggle
-    has ever been observed; and ``/mypreferences/d/categories/`` and
-    ``/settings/`` are both on the forbidden-url list, which between them
-    refuse every page that carries a value.
+    WHAT STILL STOPS IT IS NO LONGER A MEASUREMENT. This action has no write
+    surface, so no ``confirm_token`` can exist for it -- ``writes.mint``
+    refuses a grant at issue rather than only at use, on the ground that there
+    is no page for a grant to be permission to act on. That is true whoever
+    calls it.
 
-    READ THIS BEFORE ASKING FOR THE REFUSAL TO BE LIFTED. Two of the 33
-    addresses in that family are ``Close and delete account`` and
-    ``Hibernate account``. A permission written for the FAMILY would carry
-    those with it, so a setting has to be admitted by name or not at all.
+    ONE SETTING IS READABLE, AND ASKING ABOUT ANY OTHER LOADS NOTHING. The
+    read allowlist admits exactly one page below the settings index, admitted
+    BY NAME on the operator's ruling. ``/mypreferences/d/categories/`` and
+    ``/settings/`` are both on the forbidden-url list.
+
+    READ THIS BEFORE ASKING FOR THE FAMILY TO BE OPENED. ``Close and delete
+    account`` and ``Hibernate account`` are addresses in it. A permission
+    written for the FAMILY would carry those with it, which is why a setting
+    is admitted by name or not at all.
 
     Args:
-        setting: which setting, by name. Not validated against a list -- no
-            setting page has been loaded to build one from.
-        value: the new value. Part of the target, so a token binds to it.
+        setting: which setting, by name. Matched case- and
+            punctuation-insensitively against the one readable setting; any
+            other name returns a refusal and opens no page at all.
+        value: the destination, named rather than derived, because this
+            setting has three states and no direction can be inferred from
+            two. Part of the target, so a token would bind to it.
         confirm_token: accepted, and no token is ever issued for this action.
     """
+    if _normalise_setting(setting) not in READABLE_SETTINGS:
+        # A REFUSAL THAT RETURNS, AND THAT LOADS NOTHING, mirroring
+        # linkedin_surface_census's unknown-key branch. It has to live here
+        # rather than in the reader: writes.observe picks its surface from the
+        # SPEC's own state_from and never from an argument, so the reader
+        # opens the dark-mode page whatever setting was asked for. Without
+        # this, a call about "language" would come back describing dark mode's
+        # state as though it were the answer -- a gate confidently reporting a
+        # measurement of the wrong thing, which is worse than one that refuses.
+        return {
+            "error": "unreadable_setting",
+            "message": (
+                f"{setting!r} is not a setting this server can read a value "
+                "for, so it cannot say which way a change would move it. "
+                "Nothing was loaded. Exactly one settings page below the "
+                "index is on the read allowlist, admitted BY NAME on the "
+                "operator's ruling that a setting is admitted by name or not "
+                "at all -- the family also contains 'Close and delete "
+                "account' and 'Hibernate account'."
+            ),
+            "readable_settings": sorted(READABLE_SETTINGS),
+            "pages_loaded": 0,
+        }
     try:
         return await _write_tool(
-            "update_setting", {"setting": setting, "value": value}, confirm_token
+            "update_setting",
+            {"setting": setting, "value": value},
+            confirm_token,
+            to_state=value,
         )
     except Exception as exc:
         return _error(exc)

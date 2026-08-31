@@ -24,8 +24,10 @@ of the write suite worth stating. ``tests/test_writes.py`` drives its gate over
 FROZEN CAPTURES in ``tests/fixtures/``, and its ``_pages`` helper serves four
 of them: a posting, the saved list, the profile topcard and the Manage Pages
 list. Six of the seven specs read surfaces that helper does not serve -- the
-feed and the settings index have no capture in this repo at all -- so a
-minimal page is built here for each. Every selector in them is taken FROM
+feed and the dark-mode settings page have no capture in this repo at all -- so
+a minimal page is built here for each. (That clause said "the settings index"
+until 2026-08-31, when ``update_setting`` stopped reading the index and started
+reading the one page that carries a VALUE.) Every selector in them is taken FROM
 ``linkedin_server.dom``'s own measured constants rather than typed a second
 time, so a page here cannot drift away from the strings the readers look for;
 what these fakes exercise is THE GATE'S LOGIC, and they measure nothing about
@@ -131,11 +133,25 @@ PROFILE_MARKUP = (
     "</body></html>"
 )
 
-SETTINGS_MARKUP = (
+#: THE DARK-MODE PAGE, and it REPLACED a settings-INDEX markup on 2026-08-31.
+#: The old one carried a single anchor, because the old reader counted how
+#: many settings the index ADDRESSES -- a number that says nothing about any
+#: setting's value. This carries the three radios the live page carries, named
+#: the way the live page names them (``aria-labelledby``, not ``aria-label``),
+#: with exactly one checked, because "exactly one checked" is the only state
+#: ``_read_dark_mode`` will describe.
+#:
+#: No ``<form>``, deliberately: the live page measures ``forms: 0`` on all six
+#: readings, and a fixture that wrapped these in one would be testing a page
+#: LinkedIn does not serve.
+DARK_MODE_MARKUP = (
     "<html><body>"
-    '<a href="https://www.linkedin.com'
-    + dom.SETTINGS_LINK_PREFIX
-    + 'dark-mode">Dark mode</a>'
+    '<span id="dm-off">Always off</span>'
+    '<input type="radio" name="dm" aria-labelledby="dm-off" checked>'
+    '<span id="dm-on">Always on</span>'
+    '<input type="radio" name="dm" aria-labelledby="dm-on">'
+    '<span id="dm-dev">Device settings</span>'
+    '<input type="radio" name="dm" aria-labelledby="dm-dev">'
     "</body></html>"
 )
 
@@ -146,8 +162,21 @@ def _nine_pages() -> dict[str, str]:
     return {
         writes.FEED_URL: FEED_MARKUP,
         writes.PROFILE_URL: PROFILE_MARKUP,
-        writes.SETTINGS_URL: SETTINGS_MARKUP,
+        writes.DARK_MODE_URL: DARK_MODE_MARKUP,
     }
+
+
+#: THE DESTINATION a multi-state action requires, keyed by action. Only
+#: ``update_setting`` has one: ``_direction`` derives the destination for a
+#: binary toggle from the state it measured, and refuses to derive one for an
+#: action with three.
+#:
+#: ``Always on`` rather than ``Always off``, and that is load-bearing: the
+#: fixture above has ``Always off`` CHECKED, and ``_direction`` refuses a
+#: destination equal to the current state with "the setting is already X.
+#: Nothing to change." A test asking for the state it is already in would
+#: exercise that refusal instead of the gate.
+TO_STATES: dict[str, Optional[str]] = {"update_setting": "Always on"}
 
 
 #: A well-formed target for each of the seven, in the shape its own
@@ -157,7 +186,7 @@ TARGETS: dict[str, object] = {
     "comment_on_item": {"item": ITEM, "text": COMMENT_A},
     "react_to_item": ITEM,
     "update_profile_field": {"field": "headline", "value": "Node.js engineer"},
-    "update_setting": {"setting": "dark-mode", "value": "on"},
+    "update_setting": {"setting": "dark-mode", "value": "Always on"},
     "send_invitation": MEMBER,
     "send_message": {"member": MEMBER, "text": "Hello, are you hiring?"},
 }
@@ -233,7 +262,13 @@ async def _preview_the_refusal(page, action: str):
     """
     spec = spec_for_action(action)
     nav = FixtureNavigator(_nine_pages())
-    block = await preview(spec, target=TARGETS[action], navigator=nav, page=page)
+    block = await preview(
+        spec,
+        target=TARGETS[action],
+        navigator=nav,
+        page=page,
+        to_state=TO_STATES.get(action),
+    )
     return block, nav
 
 

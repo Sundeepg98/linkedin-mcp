@@ -278,8 +278,23 @@ class WriteSpec:
     reversible_by: str = ""
     #: What stays unknown even given the verdict.
     residue: str = ""
-    #: For a setting with an audience: who can see each destination. Empty for
-    #: actions that are nobody's business but his own.
+    #: THE DESTINATIONS A MULTI-STATE ACTION MAY TAKE, mapped to who can see
+    #: each. Empty for a binary toggle.
+    #:
+    #: THAT FIRST LINE SAID "For a setting with an audience: who can see each
+    #: destination" UNTIL 2026-08-31, and it under-described the field's real
+    #: job in a way that mattered. ``_direction`` validates BOTH the requested
+    #: destination AND the measured origin against ``sorted(spec.audiences)``
+    #: and refuses anything absent from it -- so THE KEYS ARE THE ENUMERATION
+    #: OF LEGAL STATES, and the audience text is what hangs off them. A reader
+    #: who took the old sentence literally would conclude that an action with
+    #: no audience should leave this empty, which for a multi-state action
+    #: makes ``_direction`` refuse every destination there is.
+    #:
+    #: The correction is not cosmetic: ``update_setting`` covers dark mode,
+    #: which HAS no audience and still needs its three states enumerated here.
+    #: Its values say "NOBODY" in words rather than being left blank, because
+    #: a blank would be indistinguishable from nobody having filled it in.
     audiences: dict[str, str] = field(default_factory=dict)
     irreversible: bool = False
     spends: Optional[str] = None
@@ -1041,24 +1056,59 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         url_pattern=None,
         exempt_substring=None,
         summary="Change one LinkedIn account setting.",
-        from_state="setting_addressed",
-        to_state="setting_changed",
+        # NOT A BINARY TOGGLE, changed 2026-08-31. Dark mode has THREE
+        # destinations, so the caller names one and it cannot be derived --
+        # the same shape as set_open_to_work.
+        from_state=None,
+        to_state=None,
         target_kind="setting_and_value",
-        state_from="settings_index",
+        # MOVED OFF THE INDEX, 2026-08-31, and this is the whole of what the
+        # census's new ``checked`` reading bought. It read ``settings_index``
+        # until today: a page that hands out ADDRESSES and switches nothing,
+        # so the "state" it produced was "this surface addresses 33 settings"
+        # -- true, and not a fact about any setting's VALUE. ``_direction``
+        # then refused to render, correctly, because a gate that cannot say
+        # which way it moves a control is not a gate.
+        state_from="setting_dark_mode",
         direction_source=(
-            "The settings surface, read live by this gate, counting how many "
-            "settings it ADDRESSES and how many it can switch. MEASURED "
-            "2026-08-30: 33 links, ZERO forms, ONE button, and zero "
-            "checkboxes, selects or switches. Every setting is its own "
-            "address -- /mypreferences/d/settings/language, "
-            "/mypreferences/d/dark-mode, /mypreferences/d/categories/privacy. "
-            "So this page hands out addresses and switches nothing, and the "
-            "value lives one page further down where nothing has looked."
+            "The dark-mode page itself -- /mypreferences/d/dark-mode -- read "
+            "live by this gate, reporting WHICH of its three radios is "
+            "checked. MEASURED on six readings across two days and three "
+            "builds, every one agreeing: 20 controls, ZERO forms, one button, "
+            "16 links, no dialogs, no redirect, and three inputs named "
+            "through aria-labelledby of which exactly one reports checked. "
+            "That is read off the very control a change would move, which is "
+            "the strongest direction source in this design -- and it replaced "
+            "a reading of the settings INDEX, which could only ever say how "
+            "many settings exist."
         ),
         wrong_state_note=(
-            "Not a toggle at this level. A settings index that drew no links "
-            "is a page that did not render, not a signal about any setting."
+            "Not a toggle. This setting has three destinations and the gate "
+            "refuses unless exactly one radio reports checked: at zero the "
+            "group drew with nothing selected, which is a page nobody has "
+            "seen, and at two or more choosing between them would be choosing "
+            "by position."
         ),
+        # THE THREE DESTINATIONS, and the field is doing the job its docstring
+        # now admits it does: it is the ENUMERATION ``_direction`` validates
+        # both the origin and the destination against, and only incidentally a
+        # map of audiences. Dark mode HAS no audience, and each value says so
+        # rather than leaving a caller to infer it from silence.
+        audiences={
+            "always off": (
+                "NOBODY. Dark mode is a per-account display preference: no "
+                "other member can observe it, it is broadcast nowhere, and it "
+                "appears in no feed and no notification."
+            ),
+            "always on": (
+                "NOBODY, for the same reason -- this setting has no audience "
+                "at all, which is why it was the one settings page admitted."
+            ),
+            "device settings": (
+                "NOBODY. This destination defers to the operating system's "
+                "own light/dark preference rather than pinning a value."
+            ),
+        },
         reversibility="STILL-UNKNOWN, and it differs by setting",
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
@@ -2350,35 +2400,6 @@ async def _read_profile_editors(
     )
 
 
-async def _read_settings_index(
-    page: Any, spec: WriteSpec
-) -> tuple[dict[str, Any], str, str]:
-    """How many settings this surface addresses, and how many it can switch."""
-    reading = await dom.read_settings_surface(page)
-    links = int(reading.get("links") or 0)
-    facts = dict(reading)
-    if links < 1:
-        return (
-            facts,
-            UNKNOWN,
-            "the settings surface drew no setting links at all, so it did not "
-            "render. LinkedIn also interposes a re-auth challenge in front of "
-            "parts of settings; when it does the landed url carries "
-            "'/checkpoint/' and the auth-wall check reports it rather than "
-            "letting a half-read pass.",
-        )
-    return (
-        facts,
-        "setting_addressed",
-        f"{links} setting(s) are addressed by url from this surface, which "
-        f"itself carries {reading.get('forms')} form(s) and "
-        f"{reading.get('controls')} switch-like control(s). A settings index "
-        "that hands out addresses and switches nothing is the measurement: "
-        "every VALUE lives one page further down, on an address the read "
-        "boundary forbids, and no page below this one has ever been loaded.",
-    )
-
-
 async def _read_dark_mode(
     page: Any, spec: WriteSpec
 ) -> tuple[dict[str, Any], str, str]:
@@ -2638,9 +2659,20 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     "feed_composer": (FEED_URL, "feed", _read_feed_composer),
     "feed_item": (FEED_URL, "feed", _read_feed_item),
     "profile_editors": (PROFILE_URL, "profile", _read_profile_editors),
-    "settings_index": (SETTINGS_URL, "settings", _read_settings_index),
     "profile_invitations": (PROFILE_URL, "profile", _read_profile_invitations),
     "messaging_badge": (FEED_URL, "feed", _read_messaging_badge),
+    # THE ONE ENTRY HERE THAT READS A VALUE RATHER THAN COUNTING CONTROLS,
+    # added 2026-08-31 when the census gained a ``checked`` reading and "which
+    # of the three is selected" became answerable for the first time.
+    #
+    # IT REPLACES ``settings_index`` RATHER THAN JOINING IT, and the swap is
+    # the point: that entry pointed at a page which hands out ADDRESSES and
+    # switches nothing, so the only state it could ever report was how many
+    # settings exist. ``_read_settings_index`` went with it -- this spec was
+    # its only caller, and a reader kept for a state nobody consults is a
+    # reader that goes stale unread. ``dom.read_settings_surface`` remains
+    # available and is now uncalled from this module.
+    "setting_dark_mode": (DARK_MODE_URL, "settings_dark_mode", _read_dark_mode),
 }
 
 
@@ -3475,20 +3507,34 @@ _NINE_REFUSALS: dict[str, str] = {
         "of one opened editor."
     ),
     "update_setting": (
-        "update_setting is sanctioned and cannot be performed. WHAT IS "
-        "MEASURED, live on 2026-08-30: every individual setting IS its own "
-        "address -- /mypreferences/d/settings/language, "
-        "/mypreferences/d/dark-mode, /mypreferences/d/categories/privacy and "
-        "so on, 33 links in total -- and the surface that lists them carries "
-        "ZERO forms and ONE button. So settings are url-addressed and the "
-        "page that lists them switches nothing. NO CONTROL: no page below the "
-        "index has ever been loaded, so no toggle has ever been observed. NO "
-        "SURFACE: '/mypreferences/d/categories/' and '/settings/' are both on "
-        "the forbidden list, which between them refuse the category pages and "
-        "the /mypreferences/d/settings/<name> family. WHAT WOULD LIFT IT: a "
-        "boundary ruling on ONE named setting page, and a census of it. Note "
-        "which settings sit in that family before ruling: 'Close and delete "
-        "account' and 'Hibernate account' are two of the 33."
+        "update_setting is sanctioned and cannot be performed, AND WHAT IT "
+        "REFUSES ON CHANGED ON 2026-08-31 -- the missing measurement was "
+        "taken. WHAT IS MEASURED, on six readings across two days and three "
+        "builds, every one agreeing: /mypreferences/d/dark-mode is a "
+        "THREE-STATE RADIO GROUP -- 'Always off', 'Always on', 'Device "
+        "settings' -- named through aria-labelledby, in a page carrying ZERO "
+        "forms, and EXACTLY ONE OF THEM REPORTS CHECKED. So the gate can now "
+        "say which state the setting is in and which way a change would move "
+        "it, which it could not before the census learned to read 'checked': "
+        "it was reading the settings INDEX, a page that hands out addresses "
+        "and switches nothing, and refusing because a gate that cannot name a "
+        "direction is not a gate. WHAT STILL STOPS IT is no longer a "
+        "measurement. This action holds NO url_template, so writes.mint "
+        "refuses it a grant AT ISSUE -- 'there is no page for a grant to be "
+        "permission to act on' -- and no confirm_token can exist for it, for "
+        "anyone. Performing it would need a measured write surface and a new "
+        "entry in SANCTIONED_MUTATIONS, which is a new click call site and a "
+        "decision nobody has taken. ONE SETTING IS READABLE AND THE FAMILY IS "
+        "NOT: '/mypreferences/d/categories/' and '/settings/' remain on the "
+        "forbidden list, and dark mode was admitted BY NAME precisely because "
+        "'Close and delete account' and 'Hibernate account' live in the same "
+        "address family. WHAT WOULD LIFT IT: a measured write surface for "
+        "this action -- the control that sets the value, observed rather than "
+        "assumed -- and then a deliberate entry in SANCTIONED_MUTATIONS, "
+        "which is a new click call site and a decision about this account "
+        "rather than a measurement. Nothing smaller reaches it, and no "
+        "further reading of the dark-mode page will, because the reading is "
+        "no longer the thing that is missing."
     ),
     "send_invitation": (
         "send_invitation is sanctioned and cannot be performed. WHAT IS "
