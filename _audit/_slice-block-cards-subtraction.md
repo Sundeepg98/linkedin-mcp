@@ -5,12 +5,12 @@ edits left in the working tree.
 
 Files changed (exactly the two owned):
 
-* `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\linkedin_server\dom.py`
+* `D:\workspace\projects\job-hunting\mcp-servers\linkedin\linkedin_server\dom.py`
   -- 58 lines added inside `HARVEST_BLOCK_CARDS_JS` only, `+0/-0` everywhere
   else. `HARVEST_LINKED_CARDS_JS` and `shape.py` untouched (confirmed by
   `git diff`: both hunks fall between line 346 and the loop at line 420, which
   is inside the string).
-* `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\tests\test_sdui_surfaces_fixture.py`
+* `D:\workspace\projects\job-hunting\mcp-servers\linkedin\tests\test_sdui_surfaces_fixture.py`
   -- new section 4c (line 1033), plus one refactor of the existing
   `_notification_rows` helper described below.
 

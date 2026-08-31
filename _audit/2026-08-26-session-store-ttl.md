@@ -1,7 +1,7 @@
 # The session store went inert on day 31, and nothing said so
 
 Wave: `auth-lifecycle` follow-up, one closed defect in
-`D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`.
+`D:\workspace\projects\job-hunting\mcp-servers\linkedin`.
 Baseline commit `8f5795e`, 1699 passing.
 
 ## The defect

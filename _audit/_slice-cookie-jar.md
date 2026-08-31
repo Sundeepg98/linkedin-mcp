@@ -6,9 +6,9 @@ commit, no git command, no full-suite run.
 
 ## Files written
 
-- `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\linkedin_server\cookie_jar.py`
+- `D:\workspace\projects\job-hunting\mcp-servers\linkedin\linkedin_server\cookie_jar.py`
   (255 lines, 11417 bytes, pure ASCII -- verified byte by byte)
-- `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\tests\test_cookie_jar.py`
+- `D:\workspace\projects\job-hunting\mcp-servers\linkedin\tests\test_cookie_jar.py`
   (27 tests, all passing)
 
 Public surface: `read_jar(profile_dir: Path, names: Iterable[str]) -> list[dict[str, Any]]`

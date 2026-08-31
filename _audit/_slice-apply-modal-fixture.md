@@ -1,6 +1,6 @@
 # Slice: the apply-modal reader gets a DERIVED fixture and real execution
 
-Worktree: `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\.claude\worktrees\agent-ad23e7e8fd9f722a8`
+Worktree: `D:\workspace\projects\job-hunting\mcp-servers\linkedin\.claude\worktrees\agent-ad23e7e8fd9f722a8`
 Base: `66f3a1d` on `master`. Python 3.13.14, no `venv/` in this worktree.
 Date: 2026-08-26.
 

@@ -252,7 +252,7 @@ The captures were gitignored and have been destroyed. The probe now:
 **To re-take the measurement**, with the profile lock free and no other agent holding a browser:
 
 ```
-D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\venv\Scripts\python.exe scripts\_probe_messaging.py
+D:\workspace\projects\job-hunting\mcp-servers\linkedin\venv\Scripts\python.exe scripts\_probe_messaging.py
 ```
 
 ---

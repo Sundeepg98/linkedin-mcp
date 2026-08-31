@@ -7,7 +7,7 @@ is deciding whether to download 150 MB onto a full drive.
 
 The scenario being pinned is real and is reproduced verbatim in
 ``test_the_exact_failure_of_2026_08_22``: Playwright resolved
-``C:\\Users\\Dell\\AppData\\Local\\ms-playwright\\...\\chrome.exe``, that path
+``C:\\Users\\<user>\\AppData\\Local\\ms-playwright\\...\\chrome.exe``, that path
 did not exist, ``chromium-1234`` was present at ``D:\\dev-cache\\ms-playwright``
 the whole time, and the only reason the two facts did not meet is that a
 stdio MCP client spawned the server without passing
@@ -30,7 +30,7 @@ from linkedin_server.errors import BrowserUnavailableError
 #: The path Playwright resolved on the day this module was written, when the
 #: environment variable did not reach the server process.
 DESKTOP_FALLBACK_PATH = (
-    r"C:\Users\Dell\AppData\Local\ms-playwright\chromium-1234"
+    r"C:\Users\<user>\AppData\Local\ms-playwright\chromium-1234"
     r"\chrome-win64\chrome.exe"
 )
 

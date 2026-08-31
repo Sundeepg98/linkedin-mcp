@@ -1,7 +1,7 @@
 # Slice -- the parse-trace corpus, measured and widened
 
 **File owned:** `tests/test_tracker_harvest_census.py` (only file touched).
-**Repo:** `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`, branch `master`, HEAD `77ecd2b`.
+**Repo:** `D:\workspace\projects\job-hunting\mcp-servers\linkedin`, branch `master`, HEAD `77ecd2b`.
 **Not committed, not staged.** `_state/` untouched. No live browser; every reading below comes
 from the fixture files through a local headless Chromium via `page.set_content`, which is what
 the suite itself does.

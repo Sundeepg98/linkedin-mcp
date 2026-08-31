@@ -8,7 +8,7 @@ reaches the operator's MCP client as an unhandled error, and it is one fact
 short of being diagnosable -- which is not a hypothetical:
 
     On 2026-08-22 every tool in this server died at browser launch. The
-    resolved path was ``C:\\Users\\Dell\\AppData\\Local\\ms-playwright\\
+    resolved path was ``C:\\Users\\<user>\\AppData\\Local\\ms-playwright\\
     chromium-1234\\chrome-win64\\chrome.exe``. The client read the traceback
     and concluded Playwright had been updated without re-running the browser
     download, and recommended ``playwright install chromium``. That was

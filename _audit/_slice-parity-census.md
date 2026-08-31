@@ -14,13 +14,13 @@ otherwise verbatim.
 ## TWO DEVIATIONS FROM THE BRIEF, reported rather than papered over
 
 **1. The skill is not where the brief said it is.** The brief located it "under
-`C:\Users\Dell\.claude\`, likely `C:\Users\Dell\.claude\skills\linkedin-jobs\SKILL.md`,
-else ... `C:\Users\Dell\.claude\plugins`". Both are wrong:
-`C:\Users\Dell\.claude\skills\` **does not exist**, and a recursive name search
-of the whole of `C:\Users\Dell\.claude` returns no `linkedin-jobs` directory --
+`C:\Users\<user>\.claude\`, likely `C:\Users\<user>\.claude\skills\linkedin-jobs\SKILL.md`,
+else ... `C:\Users\<user>\.claude\plugins`". Both are wrong:
+`C:\Users\<user>\.claude\skills\` **does not exist**, and a recursive name search
+of the whole of `C:\Users\<user>\.claude` returns no `linkedin-jobs` directory --
 only the memory file. The skill is **project-scoped**:
 
-    D:\Sundeep\projects\job-hunting\.claude\skills\linkedin-jobs\
+    D:\workspace\projects\job-hunting\.claude\skills\linkedin-jobs\
 
 holding `SKILL.md` (18071 bytes, 348 lines), `parse_digest.py`,
 `career_insights.py`, `referral_join.py`, `alert-tuning.md`,
@@ -37,9 +37,9 @@ appear in the repo as prose, and they disagree with each other.
 
 # 1. What the `linkedin-jobs` SKILL already covers
 
-Source of truth: `D:\Sundeep\projects\job-hunting\.claude\skills\linkedin-jobs\SKILL.md`
+Source of truth: `D:\workspace\projects\job-hunting\.claude\skills\linkedin-jobs\SKILL.md`
 (cited as `SKILL.md:N`) and
-`C:\Users\Dell\.claude\projects\D--Sundeep-projects-job-hunting\memory\linkedin-jobs-skill.md`
+`C:\Users\<user>\.claude\projects\D--Sundeep-projects-job-hunting\memory\linkedin-jobs-skill.md`
 (cited as `memory:N`).
 
 ## 1a. The data classes it OBTAINS from Gmail
@@ -245,7 +245,7 @@ Mechanical comparison only; no recommendation attached.
 
 # 2. Recorded DELIBERATE exclusions in the linkedin server
 
-All paths relative to `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\`.
+All paths relative to `D:\workspace\projects\job-hunting\mcp-servers\linkedin\`.
 
 ## 2.1 README.md -- "What it deliberately cannot do"
 
@@ -696,17 +696,17 @@ Suite config, `pytest.ini:1-4`: `testpaths = tests`, `pythonpath = .`,
 
 Every line quoted above was read from disk in this slice. Files opened:
 
-    D:\Sundeep\projects\job-hunting\.claude\skills\linkedin-jobs\SKILL.md
-    C:\Users\Dell\.claude\projects\D--Sundeep-projects-job-hunting\memory\linkedin-jobs-skill.md
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\README.md
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\linkedin_server\readonly.py
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\linkedin_server\server.py
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\tests\test_readonly.py
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\tests\test_server_surface.py
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\scripts\ci_full_run_check.py
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\.github\workflows\ci.yml
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\pytest.ini
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_audit\_slice-cookie-jar.md
-    D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_audit\2026-08-22-linkedin-preflight.md
+    D:\workspace\projects\job-hunting\.claude\skills\linkedin-jobs\SKILL.md
+    C:\Users\<user>\.claude\projects\D--Sundeep-projects-job-hunting\memory\linkedin-jobs-skill.md
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\README.md
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\linkedin_server\readonly.py
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\linkedin_server\server.py
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\tests\test_readonly.py
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\tests\test_server_surface.py
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\scripts\ci_full_run_check.py
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\.github\workflows\ci.yml
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\pytest.ini
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\_audit\_slice-cookie-jar.md
+    D:\workspace\projects\job-hunting\mcp-servers\linkedin\_audit\2026-08-22-linkedin-preflight.md
 
 Not run: pytest, any MCP tool, any browser, any git command.

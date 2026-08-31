@@ -632,7 +632,7 @@ BLOCKED = [
     "https://evil.example.com/steal",
     "http://www.linkedin.com/feed/",
     "javascript:alert(1)",
-    "file:///C:/Users/Dell/.claude/.credentials.json",
+    "file:///C:/Users/<user>/.claude/.credentials.json",
     "",
     # The job tracker, which the allowlist admits at exactly three addresses.
     # A wildcard query would have let every one of these through.

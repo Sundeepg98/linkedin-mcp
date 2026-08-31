@@ -607,7 +607,7 @@ in TOOL EXPOSURE rather than in the server.** That distinction is the actionable
 part, so it is stated precisely:
 
 * The server is CONFIGURED, at project scope in
-  `D:\Sundeep\projects\job-hunting\.mcp.json`, with `LINKEDIN_ENABLE_WRITES=1`.
+  `D:\workspace\projects\job-hunting\.mcp.json`, with `LINKEDIN_ENABLE_WRITES=1`.
 * The server is RUNNING. `python.exe` executing `linkedin.py` was found at pid
   **22188** -- note that `_state/chrome-profile.lock` still names **55992**, so
   the process has restarted since that pid was recorded, and any claim resting on

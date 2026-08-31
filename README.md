@@ -381,7 +381,7 @@ Both are disclosed in the tool docstrings and in `linkedin_server_info`.
 ## Setup
 
 ```bash
-cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
+cd D:\workspace\projects\job-hunting\mcp-servers\linkedin
 pip install -r requirements.txt
 playwright install chromium
 python -m pytest            # 986 passed

@@ -33,7 +33,7 @@ The seven that refuse: `linkedin_publish_post`, `linkedin_comment_on_item`,
 `linkedin_update_setting`, `linkedin_send_invitation`, `linkedin_send_message`.
 
 Derivation script (throwaway, not harvested):
-`C:\Users\Dell\AppData\Local\Temp\_derive.py`. Output reproduced above.
+`C:\Users\<user>\AppData\Local\Temp\_derive.py`. Output reproduced above.
 
 ---
 

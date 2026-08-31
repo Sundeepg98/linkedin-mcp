@@ -5,9 +5,9 @@ committed, nothing staged.
 
 Files touched (exactly two):
 
-* `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\linkedin_server\writes.py`
+* `D:\workspace\projects\job-hunting\mcp-servers\linkedin\linkedin_server\writes.py`
   -- +27 lines, the guard at lines 2717-2743.
-* `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\tests\test_writes.py`
+* `D:\workspace\projects\job-hunting\mcp-servers\linkedin\tests\test_writes.py`
   -- +64 lines, the test at line 3234.
 
 `git diff --stat` on the pair: `2 files changed, 91 insertions(+)`. No deletions,

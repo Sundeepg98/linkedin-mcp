@@ -49,7 +49,7 @@ unchanged, which is the invariant's stated design working (comments contribute n
 |---|---|---|
 | **3.13.14** (default `python`) | `python -m pytest tests/test_readonly_boundary_invariant.py -q` | **9 passed** |
 | **3.13.14** (`venv/Scripts/python.exe`) | `venv/Scripts/python.exe -m pytest tests/test_readonly_boundary_invariant.py -q` | **9 passed** |
-| **3.10.19** (`C:\Users\Dell\.local\bin\python3.10.exe`) | `ast_digest` driven directly (no pytest on that interpreter) | **identical, all six digests** |
+| **3.10.19** (`C:\Users\<user>\.local\bin\python3.10.exe`) | `ast_digest` driven directly (no pytest on that interpreter) | **identical, all six digests** |
 
 All six digests come out **byte-identical under 3.13.14 and 3.10.19**, and the frozen dicts match
 the live values under both. The freeze is version-independent, verified rather than asserted.
@@ -135,7 +135,7 @@ exists to prevent.
 A real 3.10 does exist on this box, just not where the brief says:
 
 ```
-C:\Users\Dell\.local\bin\python3.10.exe  ->  3.10.19
+C:\Users\<user>\.local\bin\python3.10.exe  ->  3.10.19
 ```
 
 That is the precise version the file's existing comments name. It has **no pytest installed**, so I
@@ -146,7 +146,7 @@ both before and after the change. The version-independence claim in the new comm
 earned; I have written it as verified under 3.13.14 and 3.10.19 and nothing stronger.
 
 **For the lead:** the brief's step-2 command pair should probably become
-`python` + `C:\Users\Dell\.local\bin\python3.10.exe` for future slices, or pytest should be
+`python` + `C:\Users\<user>\.local\bin\python3.10.exe` for future slices, or pytest should be
 installed into the 3.10. Also worth noting: `venv/pyvenv.cfg` records that the venv was created
 for a directory called `linkedin-own`, not `linkedin`.
 

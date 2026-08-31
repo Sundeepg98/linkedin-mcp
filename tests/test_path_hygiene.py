@@ -148,13 +148,13 @@ def test_the_loose_pattern_fires_on_an_https_url_and_the_tightened_one_does_not(
     assert LOOSE_DRIVE_LETTER.search(url), "control is inert; the point is lost"
     assert not DRIVE_LETTER.search(url)
 
-    for real in (r"D:\Sundeep\projects\linkedin", "C:/Users/Dell/AppData", " D:\\x"):
+    for real in (r"D:\workspace\projects\linkedin", "C:/Users/<user>/AppData", " D:\\x"):
         assert DRIVE_LETTER.search(real), real
 
 
 def test_the_second_opinion_can_fail_and_is_honest_about_where_it_cannot():
     """The regex detector, shown failing -- and its blind spot stated as a fact."""
-    planted = {"browser": {"profile_dir": r"D:\Sundeep\projects\x\_state\profile"}}
+    planted = {"browser": {"profile_dir": r"D:\workspace\projects\x\_state\profile"}}
     found = leaks(planted)
     assert found and found[0][0] == "browser.profile_dir", found
 
@@ -170,7 +170,7 @@ def test_the_preflight_exemption_is_bounded_to_preflight():
     planted = {
         "browser": {
             "preflight": {"resolved_path": r"D:\dev-cache\ms-playwright\chrome.exe"},
-            "profile_dir": r"D:\Sundeep\projects\x\_state\profile",
+            "profile_dir": r"D:\workspace\projects\x\_state\profile",
         }
     }
     found = dict(leaks(planted))

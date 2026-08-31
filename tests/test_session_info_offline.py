@@ -42,7 +42,7 @@ from tests.test_cookie_jar import PLANTED_SECRET, cookie_row, make_profile
 #: that make it actionable. It has to survive the whole way out to the tool
 #: result, or a broken browser is once again undiagnosable.
 PREFLIGHT_MESSAGE = (
-    r"No Playwright browser executable at C:\Users\Dell\AppData\Local"
+    r"No Playwright browser executable at C:\Users\<user>\AppData\Local"
     r"\ms-playwright\chromium-1234\chrome-win64\chrome.exe. "
     "PLAYWRIGHT_BROWSERS_PATH is unset in this server's own environment"
 )
