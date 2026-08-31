@@ -464,3 +464,80 @@ capture.** A gate that can name a field and cannot restore it is not a gate
 this design would open.
 
 ---
+
+## 5. #3's ON LABEL -- EXACTLY WHAT HE MUST DO, and one trap in the instrument
+
+The lead's instruction: #3 additionally needs its ON label, which is one
+supervised reaction on his own content -- his act, not mine. **Build up to that
+point and say exactly what he must do.**
+
+This is that instruction, and it carries a warning about the instrument that
+would otherwise waste the act.
+
+### 5a. Why it cannot be measured any other way
+
+`aria-label="Reaction button state: no reaction"` is the OFF state, measured 11
+times on 2026-08-30 and re-measured on two later days. LinkedIn writes toggle
+state into the accessible name, so the ON label exists and simply has never
+been rendered on this account -- nothing on either readable surface has been
+reacted to. It is the identical position `unsave_job` was in until 2026-08-30,
+and it takes the identical answer: **the missing half is not guessed.** How
+unsave got out is the template rather than a precedent for guessing -- one
+supervised write produced the label, then a READ-ONLY route re-measured it
+three times before the row was written down.
+
+### 5b. What he does
+
+1. **In his own browser, not through this server.** Open his own LinkedIn
+   profile and scroll to his activity.
+2. **React to TWO of his own posts** -- see 5c for why two rather than one.
+   His own posts, so no third party is notified by the act.
+3. **Press the reaction control itself, NOT the `Open reactions menu` control
+   beside it.** These are two different controls: the toggle carries
+   `Reaction button state: ...` and the menu carries `Open reactions menu` with
+   `aria-expanded="false"`.
+4. **Report which of these two things happened**, because it is the second
+   unmeasured thing and one press settles it: did the press apply a reaction
+   IMMEDIATELY, or did a picker open first? That is blocker (2) on #3 -- what
+   the toggle actually applies -- and a gate that cannot say what it is about
+   to express under his name is not a gate.
+5. **Leave both reactions in place** until this server has re-read the page.
+   After that they can go; the label will already be recorded.
+
+### 5c. THE TRAP, and it is in this server's own instrument
+
+**Two posts rather than one, because a reaction on exactly one post may be
+BLANKED by the census before it can be read.**
+
+`shape.census_redact_rare` blanks any run of two or more capitalised words in a
+shape seen EXACTLY ONCE. React to one post and the ON label appears exactly
+once, `count == 1`, and the rule fires. Whether it blanks anything depends on
+capitalisation nobody can know in advance: `Reaction button state: like` would
+survive, and something like `Liked Reaction Applied` would come back
+`<redacted>` -- and the act would have been spent for nothing.
+
+**Reacting to two posts puts the label at `count == 2`, past the singleton
+trigger entirely.** It costs one extra reaction on his own content and it
+removes the only way this measurement can fail.
+
+There is a second route that does not have this problem, recorded because it
+may be cheaper: `dom.read_reaction_surface` collects labels through
+`shape.census_shape` and **not** through `census_redact_rare`, so the reader
+behind `linkedin_react_to_item` would report the ON label at count 1. But that
+tool's name carries a write verb and this wave has had three such tools refused
+by the harness permission classifier, so it should not be relied on. **The
+two-post route works through `linkedin_surface_census`, which is not refused.**
+
+### 5d. What this server then does, and what it still will not do
+
+Re-read `linkedin_surface_census("profile")` MORE THAN ONCE and record the ON
+label. That is a read-only route and is the `unsave_job` template exactly: the
+supervised act is paid once, and the re-measurement is bought with reads.
+
+**It does not lift #3 on its own.** Even with the ON label and the toggle's
+behaviour settled, #3 still needs an item key to aim at, which is section 6's
+reader. Both are required and neither substitutes for the other. And nothing in
+this wave will fire the capability: no `confirm_token` is issued for it, by
+anyone, under any circumstances.
+
+---
