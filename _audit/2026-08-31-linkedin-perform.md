@@ -773,3 +773,289 @@ section 3.
    every fixture was one where the hardcoded answer was correct. The check
    that can fail is the one where the assumption is WRONG -- which had to be
    built, not found.
+
+
+---
+
+# PART TWO: the rulings that arrived after the first close
+
+Four more rulings landed and one live apply was performed. This part records
+what each bought. **Still no `confirm_token` used, no write performed by me,
+`_state/` byte-identical.**
+
+---
+
+## 13. `apply_job` -- TWO DEFECTS, FOUND BY FIRING IT ONCE
+
+The operator authorised his first apply; the lead performed it. **IT DID NOT
+SUBMIT.** The gate held, on an irreversible action, on a real posting with a
+real employer at the other end. Neither fix makes it more permissive.
+
+### 13a. DEFECT 1 was not a wrong string. It was a check that could not pass
+
+The verification read `/jobs-tracker/?stage=saved`. `apply_job`'s `to_state`
+is `"applied"` and `_read_saved_state` returns `saved` / `not_saved` /
+`unknown`, so **`verified_state == "applied"` was FALSE on every reading it
+could ever take.** Every apply this server can perform was going to report
+`performed: "unknown"`.
+
+**AND NOTHING CAUGHT IT BECAUSE NOTHING ASSERTED THE SURFACE** -- changing it
+broke no existing test. That absence is what let it ship, and it is now
+asserted both ways: the Applied tab is visited and the Saved tab is not.
+
+It reads `?stage=applied` through the **same reconciliation** rather than a
+second copy -- `_TrackerStage` describes a tab, `_read_saved_state` is now a
+thin wrapper. Two copies of "absence from a partial list is not absence" are
+two things that can drift, and that rule matters MORE here: reporting an
+unreconciled absence would tell him an irreversible act did not happen when
+the row is merely below the fold.
+
+**AND "IT DID NOT HAPPEN" IS NOW `False`, NOT `"unknown"`.** `perform` decided
+between them against `from_state`, which works for a TOGGLE -- one that did
+not move is still in the state it was valid from. Apply is not a toggle:
+`from_state` is `"linkedin_apply"`, a claim about which ROUTE the control
+takes, which a tracker read establishes nothing about. `WriteSpec.not_performed_state`
+names the state that means it did not happen. `"unknown"` on this action is
+the one answer a caller cannot resolve by retrying, because the docstring
+forbids the retry.
+
+### 13b. DEFECT 2 was not a missing reason. It was an unread one
+
+`_apply_submit_gate` produces a specific sentence for whichever of its five
+conditions refused. **`perform` assigned that dict to a local and never read
+it again.** Same shape as three defects this repo has already fixed --
+`save_job`'s refusal that would not say what it saw, `_read_tracker`
+discarding its own counts, `parse_job_card`'s two indistinguishable `None`s.
+
+The result carries `submit_gate` now: the condition as a **code** as well as
+prose, and the reading behind it -- modal present, submit present and enabled,
+its name, advance controls found, whether that scan COMPLETED, and the limit.
+An unfinished scan is why "no advance controls" can mean UNKNOWN rather than
+none. Condition 5 has two codes because it has two ways of failing.
+
+It also says what it is **not**: one reading of a modal is not evidence a
+posting cannot be applied to.
+
+Six mutations, each shown failing. The first reproduces the live block
+exactly: `expected_state "applied"`, `observed_state "unknown"`, `read_from
+?stage=saved`.
+
+---
+
+## 14. #7 -- THE NEEDLE HAD NEVER RUN, AND NOW THE GATE CAN NAME WHO
+
+### 14a. A mechanism that was never reachable
+
+**`aim_invitation` had NO CALLER in `linkedin_server/`.** Only tests called
+it. `observe` handed its surface readers no target, so
+`_read_profile_invitations` counted controls and never saw a needle -- the
+aiming this entire capability is built around had never run against a page.
+
+Same shape as `_direction`'s multi-state branch, hardened in August against a
+`KeyError` nothing could reach. **A mechanism can be built, tested, audited
+and argued about at length while being unreachable from production, and the
+only thing that shows it is following the value.**
+
+### 14b. The label, ruled and implemented
+
+The blocker this refusal carried was that the block could say a COUNT and a
+POSITION and not WHO. The operator ruled that ONE label may be read -- the
+control his own needle uniquely selected -- printed for him, discarded.
+
+**The distinction the ruling turned on, now recorded in the code:** loading a
+stranger's PROFILE stays refused because it EMITS, and `who_viewed_me` reads
+the receiving end of exactly that signal. Reading one accessible name off a
+page already rendered on HIS OWN profile notifies nobody and creates no
+record. And he already knows the name -- he typed the needle -- so this
+CONFIRMS his input rather than collecting somebody's identity.
+
+**THREE GATES IN TWO LANGUAGES**, so no single edit opens them all: the script
+requires the caller to have asked AND exactly one match; Python re-checks.
+
+**THE PYTHON GATE COULD NOT FAIL** when first written -- measured, by the
+mutation that deletes it, which left the suite green because the script's gate
+meant no two-match reading ever carried a label. Rather than delete it, it is
+now reached by simulating a script that stopped gating, which is what defence
+in depth is for.
+
+**IT REACHES THE BLOCK AND NOTHING ELSE, BY ORDER RATHER THAN BY SCRUBBING.**
+The block is stored on the grant BEFORE the label exists and added to a NEW
+dict after, so the retained object provably never held it. The reader feeding
+the Observation does not read a label at all, because an Observation is
+retained on a grant. The target stays HIS OWN NEEDLE.
+
+**And the settle precondition here is on the RAIL, not the url.** The first
+draft compared landed urls; a page can re-render at the same address, and what
+matters is whether the control the name is read off is the control the aim was
+taken on. It was also untestable through a fixture harness -- which is its own
+argument that it checked the wrong thing.
+
+### 14c. #7 still refuses, on a narrower and newly measured ground
+
+**NOTHING CAN CONFIRM THE SEND.** No post-click state of that control has ever
+been observed -- the identical gap `react_to_item` has for its ON label and
+`unsave_job` had until 2026-08-30 -- and the sent-invitations manager is on the
+forbidden list AND would consume the pending-invitation badge to read.
+
+So a performed invitation could only ever report `"unknown"`. **That is the
+shape just fixed in `apply_job`, and it will not ship again on an irreversible
+act.** A higher bar than `follow_company` clears, deliberately: a follow is
+reversible and observable by him; an invitation is a request to a real person
+that LinkedIn will not let him take back and that counts against the account
+if it is ignored.
+
+**WHAT WOULD LIFT IT** is the `unsave_job` template: one invitation he sends
+himself, then a read-only re-measurement. Nothing here will do that for him.
+
+---
+
+## 15. THE SETTLE FAILURE HAPPENED AGAIN, TO ME, HOURS AFTER I WROTE THE RULE
+
+This is the most useful thing in Part Two.
+
+### 15a. What happened
+
+    BEFORE the composer captures -- four readings, 2026-08-31
+      /in/me/ census      232 and 233 controls, source_url carries
+                          ?isSelfProfile=true
+      activity reader     C1 established, 8 overflow controls, 20 permalinks
+      editor fields       self-ownership established, 23 controls in dialog
+
+    TWO post-composer loads
+
+    AFTER -- seven readings
+      /in/me/ census      67 controls, TWICE, byte-identical.
+                          source_url still /in/me/. NO REDIRECT.
+      activity reader     no_self_assertion, five consecutive calls
+      editor fields       no_self_assertion
+
+**67 CONTROLS IS THE DOCUMENTED HALF-RENDER SIGNATURE**, and it is the same
+number `profile_edit_intro` produced when it was read mid-flight. The
+`isSelfProfile=true` the two self-owned readers require was absent **because
+the redirect had not resolved** -- so both readers refused correctly, read
+nothing, and the design worked.
+
+**AND THE ONLY REASON IT WAS CAUGHT IS THAT I HAPPENED TO REMEMBER 233.** The
+census reported 67 twice with no signal of any kind.
+
+### 15b. What is measured, and what is not
+
+**MEASURED:** the readings above, in that order.
+
+**NOT MEASURED: causation.** A clean before/after with a single intervening
+event is not a controlled test, and I am not claiming the composer load broke
+the profile read. What it is, precisely: **the operator asked what the
+composer capture left behind, and the honest answer includes this** -- not a
+draft, but a correlated change in this server's ability to read his profile,
+which I would not have seen had I not re-read afterwards.
+
+### 15c. So the rule became an instrument
+
+Every census answer now carries a `settle` block comparing what it read
+against what the surface is MEASURED to draw. Three verdicts: `consistent`,
+`looks_half_rendered`, and `unknown` for a surface nobody has read twice --
+which is the ABSENCE of a check rather than one passing.
+
+**IT DOES NOT REFUSE.** A census is a measurement instrument and a
+half-rendered page is a true reading of something; what it must never do is
+let that pass as a reading of the whole page.
+
+**THE FLOOR IS CHOSEN AGAINST THE DATA.** Both observed half-renders came in
+at roughly a QUARTER of the settled count -- 67 of 233, 67 of 255 -- while
+honest variation between settled readings is a few per cent: 232 vs 233, 255
+vs 256, 277 vs 287 vs 297. An order of magnitude apart, and the test asserts
+THE GAP rather than the constant.
+
+**AND THE REPORT SAYS REPEATING IT WILL NOT HELP.** The instinct on a suspect
+reading is to take another one. Both observed instances were TWO AGREEING
+READINGS.
+
+---
+
+## 16. `publish_post` -- NOT BUILT, AND THE REASON IS 15
+
+The typing ruling removes its mutation-class blocker, and its capture was
+already taken -- so it was the one capability that could have lifted on that
+ruling alone. **It was not built, and the decision is measured rather than
+cautious.**
+
+**THE SETTLE PRECONDITION WAS APPLIED FIRST, as instructed, and the composer
+passed it.** Two readings, identical on every count: 31 controls, `forms 0`,
+`buttons 20`, `links 7`, `contenteditable 2`, `dialogs 1`, no redirect. `Text
+editor for creating content` count 1 and `Post` count 1, both in `dialog#0`,
+`Post` disabled on an empty composer. That surface is settled.
+
+**WHAT IS NOT SETTLED IS THE VERIFICATION.** The only surface that could
+confirm a post exists is his own activity rail -- and section 15 is that
+surface failing to render, five readings running, immediately after the
+composer loads this capability would perform. To ship it I would have to
+assert that a new post appears on that rail, which **nobody has measured**,
+using an instrument that is currently returning nothing.
+
+**THAT IS THE EXACT DEFECT FIXED IN `apply_job` THIS MORNING** -- a
+verification that could not pass, shipped because nothing had asserted its
+surface. Shipping a second one hours later, on the most public action in the
+design, on a BROADCAST that reaches up to 1,287 impressions and whose deletion
+is unmeasured, would be the same mistake with a better excuse.
+
+**AND THE MUTATION CLASS WAS NOT ADDED EITHER.** `fill` in
+`SANCTIONED_MUTATIONS` with no call site is a permission with no consumer,
+which is the shape the lead's own withdrawn ruling condemns. The ruling stands
+and is unspent; it costs nothing to leave it so.
+
+`SANCTIONED_MUTATIONS` is **unchanged across this entire wave** -- the two
+entries it has held since 2026-08-26.
+
+---
+
+## 17. THE LEDGER, PART TWO
+
+| # | capability | after Part One | after Part Two |
+|---|---|---|---|
+| -- | `apply_job` | PERFORMS, verified against the wrong tab | **PERFORMS, and can now say what happened and why it stopped** |
+| 6 | `update_setting` | PERFORMS | PERFORMS |
+| 1 | `publish_post` | refuses -- must type | refuses. Mutation class RULED IN; **verification unmeasured**, and its surface is currently unreadable |
+| 2 | `comment_on_item` | refuses -- must type | refuses. Mutation class ruled in; no comment box observed, no capture taken |
+| 3 | `react_to_item` | refuses -- unaimable | refuses. Third owner route committed, **live verdict still pending a reconnect** |
+| 4 | `update_profile_field` | refuses | refuses. Fields nameable; **no previous value**, which the ruling explicitly does not lift |
+| 5 | endorse | IMPOSSIBLE | IMPOSSIBLE |
+| 7 | `send_invitation` | refuses -- cannot name who | **refuses -- cannot confirm the send.** The naming blocker is CLOSED and the aiming now runs |
+| 8 | `set_open_to_work` | refuses | refuses |
+| 9 | `send_message` | refuses -- must type | refuses. Mutation class ruled in; capture refused by the harness; InMail balance ruled readable and not yet read |
+
+**ONE OF EIGHT PERFORMS, and `apply_job` -- which already performed -- can now
+report honestly.** Every refusal names a measured blocker.
+
+---
+
+## 18. WHAT I DID NOT REACH, named rather than left
+
+| not reached | why |
+|---|---|
+| `feed_item` capture, #3's live verdict | the loaded process never advanced past `3b78dd6`; five commits behind at close |
+| `article_composer`, `messaging_compose` captures | REFUSED BY THE HARNESS classifier, not routed around |
+| the InMail balance | `/premium/my-premium/` is ruled admitted; the boundary entry and reader are NOT built, because #9 cannot lift regardless and a widening with nothing to consume it is the shape the lead's own withdrawn ruling condemns |
+| phase 2, all four items | not started. The slug/id gap, `set_open_to_work`'s `Show details` click, the profile-editor enumeration and the settings-section enumeration are all untouched |
+| withdrawing an application | blocked on an EVENT rather than a measurement -- the Applied tab reads zero |
+
+---
+
+## 19. RECEIPTS, PART TWO
+
+    eaf7f66  fix(apply)       the wrong tab, and a gate that named none
+    82313a8  feat(invitation) the needle reaches a page; the gate names who
+    2ad2ad8  feat(census)     the settle precondition, as an instrument
+
+    suite            2306 -> 2340 passed, 0 failed
+    mutations run    24 -> 41, every new check shown failing
+    checks that could NOT fail, found and fixed   3
+                     (a dead branch arm; a unit test the mutation bypassed;
+                      the Python half of the label gate)
+
+    _state/session.json  f0892e35688868faef6a3525e54b93e4, 7813 bytes,
+                         mtime 2026-08-26 -- UNCHANGED
+    SANCTIONED_MUTATIONS 2, unchanged all wave
+    confirm_tokens used  0
+    writes performed by me   0
+
+Nothing was pushed.
