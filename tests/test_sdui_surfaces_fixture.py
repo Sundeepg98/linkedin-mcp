@@ -1067,9 +1067,17 @@ CLIP = (
 DUPLICATED_BODY = (
     "Priya Sharma commented on your post: Congratulations on the launch!"
 )
-DUPLICATED_LINK = (
-    "https://www.linkedin.com/feed/update/urn:li:activity:7000000000000000001/"
-)
+#: The href is a PLACEHOLDER, not a shape-valid urn, and that is deliberate.
+#: Nothing here parses it -- the walk returns it untouched and every assertion
+#: below is about the card's TEXT -- so a urn-shaped literal would buy realism
+#: in a field no test reads, at the price of a standing entry in
+#: tests/test_no_committed_identity.py's DECLARED_PLANTS. That guard fired on
+#: the first version of this constant and it was right to: it cannot tell an
+#: invented urn from a real one, which is the whole of its value. The two files
+#: that DO hold urn-shaped literals earned their entries by needing the shape
+#: -- one feeds a redactor, one certifies that _target_for declines to validate
+#: the shape. This one does not, so the allowlist stays where it was.
+DUPLICATED_LINK = "https://www.linkedin.com/feed/update/<urn>/"
 
 
 def notification_card(style: str) -> str:

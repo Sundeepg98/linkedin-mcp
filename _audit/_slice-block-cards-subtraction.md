@@ -67,7 +67,7 @@ _____ test_a_body_repeated_in_a_display_none_span_is_not_eaten _____
         # The headline, asserted first, so a regression reports the lost body
         # rather than the mechanism that lost it.
 >       assert [row["text"] for row in rows] == [DUPLICATED_BODY], (records, rows)
-E       AssertionError: ([{'href': 'https://www.linkedin.com/feed/update/urn:li:activity:7000000000000000001/', 'text': 'Priya Sharma commented on your post: Congratulations on the launch!
+E       AssertionError: ([{'href': 'https://www.linkedin.com/feed/update/<urn>/', 'text': 'Priya Sharma commented on your post: Congratulations on the launch!
 E
 E         2h', 'hidden': ['Priya Sharma commented on your post: Congratulations on the launch!'], 'time': '2h', ...}], [])
 E       assert [] == ['Priya Sharma commented on your post: Congratulations on the launch!']
