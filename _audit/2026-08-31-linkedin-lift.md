@@ -28,6 +28,36 @@ verified BEFORE anything was interpreted.
 
 ---
 
+## 0b. THREE WRITE-SHAPED TOOLS ARE REFUSED BY THE HARNESS, and it shapes what
+## this wave could demonstrate
+
+Not by this server. By the Claude Code permission classifier, which sits
+outside it:
+
+    linkedin_send_invitation   refused 2026-08-31 (previous wave)
+    linkedin_send_message      refused 2026-08-31 (this wave)
+    linkedin_update_setting    refused 2026-08-31 (this wave)
+
+**None was routed around.** A tool whose name carries a write verb is exactly
+what a permission layer should stop, and the correct response to a denial is
+to stop rather than to find another door to the same act.
+
+**WHAT IT COSTS THIS WAVE, STATED PLAINLY.** All three of those tools are
+GATED PREVIEWS: called without a `confirm_token` they mint nothing, perform
+nothing, and return a warning block. So the thing being refused is a read --
+but it is refused on the NAME, which is the correct place for a permission
+layer to work and is not something this server should try to be clever about.
+
+The consequence for #6 is specific and is not hidden: **the lift can be shown
+in the instrument and in the test suite, and it cannot be shown by calling the
+tool.** What a live run establishes is the READING -- which of the three
+radios is checked -- and that comes from `linkedin_surface_census`, which is
+not refused. What the wiring then does with that reading is proved by test.
+Both halves are reported separately below rather than blended into a claim
+that the gate was seen rendering.
+
+---
+
 ## 1. #1 publish_post -- THE DETECTION WAS ENGINEERED, AND IT SAYS DO NOT OPEN
 
 **The ruling.** Build a CONTENT-DRAFT READER FIRST. With one, opening the
@@ -206,5 +236,113 @@ harness."
 single entry that has been kept through every other messaging relaxation. That
 is a larger question than the one the lead lifted, and it is named here rather
 than assumed.
+
+---
+
+## 3. #6 update_setting -- THE MISSING MEASUREMENT IS TAKEN
+
+**The ruling.** Pure instrument, no ruling needed. The refusal stands only
+because the census reports `disabled` and not `checked`, so `_direction` cannot
+read a current state. **Build a `checked` reader. This is the whole blocker.**
+
+### 3a. The instrument -- `08e846a`
+
+`CENSUS_JS` gained `checkedOf`, and two fields ride each control record:
+`checked` and `checked_source`. Both are plumbed through
+`dom.read_surface_census` and into `shape.census_aggregate`'s merge key, which
+went from eight fields to ten.
+
+**THE TYPE GATE IS THE FIELD, and it was shown failing.**
+`HTMLInputElement.checked` is defined for EVERY input type and reads `false` on
+a text box, so an ungated read reports a control that is not checkable as one
+that is checkable and off -- the same conflation `name_source: "none"` carried
+for weeks. The mutation that removes the gate produces:
+
+    assert False is None
+
+on a text field named `Headline`. Measured over the 19 committed fixtures, the
+ungated read gives 37 non-null readings against the gated 29, and **the eight
+it wrongly claims are all text inputs.**
+
+`null` means NOT CHECKABLE. `false` means CHECKABLE AND OFF. They are different
+answers and the instrument keeps them apart.
+
+`checked` and `checked_source` went INTO the merge key on an axis rule that is
+worth carrying: `checked` is a control STATE, the same axis as `disabled` and
+`aria_expanded`, and both of those were already in the key. `container` is a
+PLACE and stays out. Without the key change, three same-shaped radios of which
+one is on merge into a single row -- destroying the only thing the field was
+added to report. Sweep over all 19 fixtures: 537 controls unchanged, no
+pre-existing field moved, two fixtures gain one row each, and **no readable
+shape anywhere became `<redacted>`.**
+
+### 3b. The reading -- TAKEN LIVE, and it is the answer
+
+Restart landed on `3940f72`, commit verified before reading.
+
+    linkedin_surface_census("settings_dark_mode")
+    source_url  https://www.linkedin.com/mypreferences/d/dark-mode   <- NO REDIRECT
+    counts      forms 0   buttons 1   links 16   contenteditable 0   dialogs 0
+    controls_read  20
+
+    shape "Always off"        input  aria-labelledby  checked TRUE   native
+    shape "Always on"         input  aria-labelledby  checked false  native
+    shape "Device settings"   input  aria-labelledby  checked false  native
+
+    the other 17 controls        checked null   checked_source "none"
+
+**THE CURRENT SETTING IS `Always off`.** Exactly one of three is checked, read
+off the very control a change would move, through the native branch.
+
+**THE PRECONDITION WAS CHECKED BEFORE THE READING WAS INTERPRETED**, which is
+the rule `profile_edit_intro` earned the hard way. This is the FOURTH reading
+of this surface -- two on 2026-08-31 in the previous wave, one earlier today on
+the pre-`checked` build, and this one -- and all four agree on every count: 20
+controls, `forms: 0`, `buttons: 1`, `links: 16`, `dialogs: 0`, no redirect. It
+is not a half-render.
+
+**And the 17 nulls are the type gate working on a live page rather than on a
+fixture.** Sixteen anchors and one button, every one reported as NOT CHECKABLE.
+Under the ungated derivation none of them would have changed -- they are not
+inputs -- so the live page does not by itself exercise the gate; the fixture
+sweep is what does, and it is reported above rather than blended in here.
+
+### 3c. What is now true, and what is not
+
+**THE NAMED BLOCKER IS CLOSED.** `_direction`'s first two refusals -- no state,
+and state `unknown` -- were the whole of why this gate would not render, and
+the state they were missing is now measurable in one call.
+
+**THE REFUSAL DOES NOT LIFT YET, and the remaining gap is wiring rather than
+measurement.** `linkedin_update_setting`'s spec still declares
+`state_from="settings_index"` and `from_state="setting_addressed"`, so the gate
+still reads the INDEX -- a page that hands out addresses and switches nothing
+-- rather than the page carrying the value. Moving it onto the multi-state
+branch needs four things, none of which is a measurement:
+
+1. a reader that turns the census rows above into a state, which
+   `dom.read_surface_census` already supplies -- **no new script and no new
+   `evaluate` waiver**; proved offline against a page built to the measured
+   shape, where one-checked yields a single state and both none-checked and
+   two-checked yield a set the reader must refuse;
+2. `_SURFACE_READS` gaining the dark-mode page;
+3. the spec moving to `from_state=None` with the three measured destinations;
+4. `to_state` plumbed through `_write_tool`, which does not pass one today --
+   so `_direction`'s multi-state branch is currently unreachable in production
+   for every action, including `set_open_to_work`.
+
+Point 4 is a finding in its own right and is recorded rather than fixed in
+passing: **the multi-state branch that `dacf76d` hardened on 2026-08-31 has no
+live caller.** Its `KeyError` fix was correct and shape-closing, and nothing
+today can reach the code it protects.
+
+### 3d. AND THE TOOL CANNOT BE CALLED TO SHOW IT
+
+`linkedin_update_setting` is refused by the harness permission classifier (see
+0b). So the end-to-end demonstration -- "the gate rendered a direction" -- is
+not available to this wave by any route it should take. What IS available and
+is reported above: the READING, live, and the wiring proved by test. Those two
+are kept apart deliberately rather than blended into a claim that the gate was
+seen working.
 
 ---
