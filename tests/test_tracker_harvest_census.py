@@ -740,9 +740,30 @@ async def test_the_shape_sentence_DOES_blame_the_walk_when_it_returned_nothing()
 # 7. WHICH filter ate the row -- the parse trace
 # ---------------------------------------------------------------------------
 
+#: The Saved tab's line as it was measured on 2026-08-30, separator included.
+#: Section 9 takes the same string apart field by field as ``SAVED_LINE``;
+#: it is defined here because the trace corpus below needs it first, and one
+#: definition is what stops the two copies drifting. The employer name is
+#: invented -- the SHAPE is what was measured.
+SAVED_WELDED = (
+    "Senior Full-stack Engineer - Remote Acme "
+    + shape.MIDDLE_DOT
+    + " India (Remote)Reposted 4d ago"
+)
+
 #: Records chosen to reach each of ``parse_job_card``'s outcomes, including
 #: both of its two separate ``return None`` lines. Synthetic, and none of them
 #: names a real person or employer.
+#:
+#: CHOSEN FOR SHAPE, NOT FOR COUNT, and the difference was measured. The guard
+#: below walks these plus every record the three tracked fixtures produce --
+#: 16 records, of which 7 are the identical ``jobs_search`` row. Canonicalised
+#: by shape rather than identity (content-line count; lockup anchor present;
+#: ``hidden`` non-empty; ``href`` present; the text carrying a status, a
+#: time-ago, a middle dot) that is 9 DISTINCT SHAPES, so the record count
+#: overstates the work by nearly a factor of two. Two records were added
+#: against a measured gap rather than to raise the total, and each is
+#: annotated with the branch it newly reaches.
 TRACE_RECORDS = {
     "ordinary row": {"text": "Senior Engineer\n\nSprinto", "hidden": []},
     "every line a status": {
@@ -767,6 +788,35 @@ TRACE_RECORDS = {
     "live welded row": {
         "text": "Senior Engineer - Remote Acme India Saved 3 days ago",
         "link_text": "Senior Engineer - Remote Acme India Saved 3 days ago",
+        "hidden": [],
+    },
+    # THE SAME LIVE ROW WITH ITS SEPARATOR INTACT. The record above predates
+    # the split and carries no middle dot, so ``split_welded_card_line``
+    # refuses it: measured, the corpus ARMS the welded path once and FIRES it
+    # never. This record is the shape section 9 pulls apart, and adding it is
+    # what makes the corpus reach that branch at all -- with it the split
+    # runs, ``location`` comes back "India (Remote)" and ``when`` still reads
+    # off the original line.
+    "live welded row, separator intact": {
+        "text": SAVED_WELDED,
+        "link_text": SAVED_WELDED,
+        "href": "https://www.linkedin.com/jobs/view/4423880462/",
+        "hidden": [],
+    },
+    # THE MIRROR OF THE ANCHORED-TITLE EXEMPTION: a line that CONTAINS a
+    # timestamp and is NOT the anchored title, so it is discarded whole. That
+    # is the branch the Part 6 fix was written around, and until this record
+    # the corpus never reached it -- three of ``shape.PARSE_LINE_LABELS``'
+    # four words were the most it could produce, and the missing word was
+    # ``time_ago``. The line is the one measured on
+    # ``job_detail_following_hydrated``, quoted again in section 8 as the row
+    # the wide repair would have moved.
+    "a content line carrying its own timestamp": {
+        "text": (
+            "Senior Engineer\n\nRiverton, Fairhaven, United States - 1 week "
+            "ago - 33 people clicked apply"
+        ),
+        "link_text": "Senior Engineer",
         "hidden": [],
     },
 }
@@ -893,10 +943,22 @@ async def test_the_trace_names_the_subtraction_when_that_is_what_ate_it():
         unknowable from the trace
 
     NOT reproducible by reporting ``len(after_repeats)`` there, and that was
-    this docstring's first claim. Measured across all 13 records this file
+    this docstring's first claim. Measured across all 16 records this file
     drives, ``drop_consecutive_repeats`` removes nothing, so the two counts
     are equal everywhere and the substitution has no observable effect. A
     mutation that changes no output is not a test of anything.
+
+    THE COUNT SAID 13 AND WAS WRONG, corrected after a census walked the
+    corpus: 1 record from ``jobs_tracker_row``, 0 from ``jobs_tracker_empty``,
+    7 from ``jobs_search`` and 6 synthetic made 14 before this slice added
+    two. 13 was RIGHT when it was written and went stale in ``cef81b8``, the
+    commit that added the "live welded row" record -- the corpus above held
+    five synthetic records before it. A count in prose ages against the data
+    structure two hundred lines above it, and nothing was watching.
+
+    The claim itself survives re-measurement: the repeat filter removes
+    nothing on any of the 16, nor on any of the 25 records the whole fixture
+    set produces.
     """
     trace = shape.parse_job_card_trace(
         TRACE_RECORDS["subtraction takes the only line"]
@@ -1084,7 +1146,11 @@ DOT = shape.MIDDLE_DOT
 #: THE TWO LIVE SHAPES, measured 2026-08-30 -- Saved and Draft. Both arrive as
 #: ONE line with everything welded. The employer names are invented; the SHAPE
 #: is what was measured, and it is the shape under test.
-SAVED_LINE = f"Senior Full-stack Engineer - Remote Acme {DOT} India (Remote)Reposted 4d ago"
+#:
+#: Saved is ``SAVED_WELDED``, defined up in section 7 because the trace corpus
+#: needs it first. ONE definition on purpose: a second copy of a measured
+#: string is a second thing to forget to update.
+SAVED_LINE = SAVED_WELDED
 DRAFT_LINE = (
     f"ServiceNow Application Developer Northwind {DOT} "
     "India (Remote)No longer accepting applications"
