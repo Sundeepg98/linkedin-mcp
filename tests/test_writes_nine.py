@@ -317,6 +317,49 @@ OPAQUE_ACTIONS = tuple(
 )
 
 
+def test_the_refusing_corpus_is_derived_from_the_registry_not_typed():
+    """``SEVEN`` must EQUAL what the registry says still refuses.
+
+    ADDED 2026-09-01, after the suite shrank by four and nobody could see why.
+    The mechanism was legitimate -- ``comment_on_item`` shipped and left this
+    tuple -- but it cost **20 collected cases**, and the only reason anyone
+    noticed was a hand-diff of two totals.
+
+    WHAT THIS ASSERTS AND WHAT IT DELIBERATELY DOES NOT. It asserts MEMBERSHIP
+    against the registry, in both directions, so the corpus cannot drift
+    wrongly: an action that stops refusing and stays here fails, and one that
+    starts refusing and is missing fails.
+
+    IT DOES NOT PIN AN ABSOLUTE CASE COUNT, and that is a judgement rather than
+    an omission. A pinned total fires on every legitimate change, and this
+    package has watched exactly that train a reader to bump a number without
+    reading it -- the module docstring in server.py rotted SEVEN times while
+    carrying counts somebody re-typed each time. A check that cries wolf on
+    every commit is how the real signal gets ignored.
+
+    WHAT SERVES THE VISIBILITY INSTEAD is ``LIFTED``: one line per departure,
+    with its date and its reason. The gap on 2026-09-01 was not a missing test
+    -- the departure WAS recorded -- it was that the commit message stated the
+    membership change and never its consequence. That is a reporting habit,
+    and it is cheaper to fix than a noisy assertion.
+    """
+    refusing_with_a_tool = {
+        spec.action
+        for name, spec in SANCTIONED_WRITES.items()
+        if spec.action not in writes.PERFORMABLE and spec.tool_name == name
+    }
+    # set_open_to_work is sanctioned, refuses, and has NO registered tool, so
+    # it is not in this file's corpus and is accounted for separately by
+    # test_nothing_left_the_refusing_set_except_by_shipping.
+    refusing_with_a_tool.discard("set_open_to_work")
+    assert set(SEVEN) == refusing_with_a_tool, {
+        "typed here but no longer refusing": sorted(
+            set(SEVEN) - refusing_with_a_tool
+        ),
+        "refusing but not typed here": sorted(refusing_with_a_tool - set(SEVEN)),
+    }
+
+
 def test_no_parametrized_corpus_in_this_file_is_empty():
     """A parametrized test over an empty tuple SKIPS, and a skip reads as a pass.
 
