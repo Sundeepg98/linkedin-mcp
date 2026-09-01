@@ -5163,15 +5163,6 @@ PROFILE_EDITOR_HREFS = (
     "/overlay/contact-info/",
 )
 
-#: Where a settings VALUE lives. MEASURED 2026-08-30: the settings surface
-#: renders 33 links and ZERO forms, and every individual setting is its own
-#: address -- ``/mypreferences/d/settings/language``,
-#: ``/mypreferences/d/dark-mode``, ``/mypreferences/d/categories/privacy``. So
-#: a setting IS url-addressed and its CONTROL has never been observed, because
-#: no page below the index has ever been loaded.
-SETTINGS_LINK_PREFIX = "/mypreferences/d/"
-
-
 async def _count_by_role(page, name):
     """How many controls carry EXACTLY the accessible name ``name``.
 
@@ -5419,28 +5410,6 @@ async def read_messaging_badge(page: Any) -> dict[str, Any]:
         logger.debug("messaging label unreadable: %s: %s", type(exc).__name__, exc)
         return out
     out["label"] = shape.census_shape(str(label or "").strip()) or None
-    return out
-
-
-async def read_settings_surface(page: Any) -> dict[str, Any]:
-    """How many settings this page addresses by url, and how many it toggles.
-
-    ``controls`` reading zero while ``links`` is large IS the measurement: the
-    settings surface hands out ADDRESSES, not switches. Every value lives one
-    page further down, and no page below the index has ever been loaded by
-    this server.
-    """
-    out: dict[str, Any] = {"links": 0, "forms": 0, "controls": 0}
-    out["links"] = await _count_links_with(page, SETTINGS_LINK_PREFIX)
-    try:
-        out["forms"] = int(await page.locator("form").count())
-        out["controls"] = int(
-            await page.locator(
-                'input[type="checkbox"], select, [role="switch"]'
-            ).count()
-        )
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("settings controls unreadable: %s: %s", type(exc).__name__, exc)
     return out
 
 

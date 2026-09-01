@@ -2387,3 +2387,94 @@ BY writing would move the other number and would fail the split.
   value, or one value against two controls. **This reader gets the value; it
   does not conjure the control.** `update_profile_field` is still blocked on
   the aiming half, and the reconnect is what measures it.
+
+# PART EIGHT -- THE DELETE, AND A FAILURE CLASS OF ITS OWN
+
+## 62. `read_settings_surface` -- THE PRECONDITION, THEN THE DELETE
+
+The wave lead ruled DELETE, conditioned on one check, and named the risk
+precisely: **if `update_setting` turned out to have no settings reader at all,
+that would be a much more serious finding than dead code and would change the
+answer.**
+
+It has one. Measured, both halves:
+
+| half | what reads settings | through |
+|---|---|---|
+| preview / BEFORE | `writes._read_dark_mode`, reached via `_SURFACE_READS["setting_dark_mode"]` off the spec's own `state_from` | `dom.read_surface_census` on `/mypreferences/d/dark-mode` |
+| `_verify_after` / AFTER | an explicit `if spec.action == "update_setting"` branch: fresh navigation to the same url, then `_read_dark_mode` again | the same census |
+
+Neither reaches `dom.read_settings_surface`, and `_read_dark_mode`'s own
+docstring says why: *"This calls `dom.read_surface_census`... A purpose-built
+reader here would have been a second implementation of a chain that already
+exists, declared and scanned."* No test called the old reader either -- the
+only mentions anywhere were its definition, the comment in `writes.py`, and
+the allowlist entry.
+
+**Deleted:** the reader (21 lines) and `SETTINGS_LINK_PREFIX`, which had
+exactly one user and died with it. Uncalled since 2026-08-31, removed
+2026-09-02, recoverable from history and named in the commit.
+
+## 63. THE FAILURE CLASS, AND IT IS NOT THE ONE THE OTHER FOUR BELONG TO
+
+The four instances before it were **instruments failing silently** -- a reader
+nothing called, a tool never run, a check that could not fire. This one is
+different and the wave lead named it exactly:
+
+> **The fact was observed and the rule was stated and the two were never
+> connected, one sentence apart.**
+
+`writes.py` said, in one paragraph:
+
+    "a reader kept for a state nobody consults is a reader that goes stale
+     unread"
+    ...
+    "dom.read_settings_surface remains available and is now uncalled from
+     this module"
+
+Nothing was hidden. No check failed to fire. **The premise and the rule were
+both written down, by the same hand, in the same breath, and the conclusion
+was not drawn.** That is a class no guard in this package was watching for,
+because every guard here is built to catch something being INVISIBLE.
+
+What caught it was a **call graph**, which cannot be talked out of a
+conclusion the way a reader of that paragraph was. The corrected comment now
+carries the whole story in place, so the next reader meets the failure rather
+than a tidied-up module.
+
+## 64. THE ALLOWLIST IS NOW EMPTY, AND EMPTY IS THE TARGET STATE
+
+`UNREACHABLE_BY_DESIGN` held one entry for one day. The length pin tightened
+from `<= 1` to `== 0`: **a bound with room in it is a bound nothing has to
+argue with**, and zero means the next unreachable reader cannot be parked
+there without somebody deliberately widening the line.
+
+**Emptying it created the defect this file is about.** The three-rule entry
+validation and the allowlisted branch of the reachability parametrisation
+both became loops over nothing -- passing forever, certifying nothing. So
+`test_the_entry_validation_can_still_fail` re-runs all three rules against
+fabricated entries. The treatment for an empty list is not that nobody checks
+the rules any more.
+
+Three mutations, each shown failing:
+
+| mutation | what it printed |
+|---|---|
+| a dead reader reinstated in `dom.py` | `read_a_reader_nothing_calls is defined in dom.py and NOTHING calls it...` |
+| a REACHABLE reader put on the allowlist | `read_surface_census is on UNREACHABLE_BY_DESIGN but IS reachable -- the entry is stale` |
+| one genuinely-unreachable entry added | `AssertionError: ['read_job_identity']` -- the length pin |
+
+The first is the one that matters: it proves the deletion is **enforced going
+forward**, not merely done once.
+
+## 65. PUSH STATE, MEASURED BY `git fetch` RATHER THAN BY EITHER OF US
+
+The wave lead's fifth correction said the remote was at `c830b91` with
+`f2d612b` unpushed, and told me to use their count over mine. **A real
+`git fetch origin` says the remote is at `f2d612b`.** Their push landed and
+the message predates it.
+
+Recorded because the instruction was to trust a number over an instrument,
+and the instrument is cheap: `git fetch` costs nothing and settles it. Both
+of our counts were built from snapshots; only one of us could re-measure
+without asking, so I did.

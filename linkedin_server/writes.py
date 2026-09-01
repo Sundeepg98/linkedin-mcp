@@ -3275,8 +3275,21 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # switches nothing, so the only state it could ever report was how many
     # settings exist. ``_read_settings_index`` went with it -- this spec was
     # its only caller, and a reader kept for a state nobody consults is a
-    # reader that goes stale unread. ``dom.read_settings_surface`` remains
-    # available and is now uncalled from this module.
+    # reader that goes stale unread.
+    #
+    # AND ``dom.read_settings_surface`` WENT WITH IT TOO, on 2026-09-02,
+    # eighteen months of nothing later in reading time and two days later in
+    # real time. This comment used to end: "remains available and is now
+    # uncalled from this module" -- one sentence after stating the rule that
+    # condemns it. THE FACT WAS OBSERVED AND THE RULE WAS STATED AND THE TWO
+    # WERE NEVER CONNECTED, which is a different failure from every silent
+    # one this package has caught: nothing was hidden, nothing failed to
+    # fire, and the conclusion simply was not drawn.
+    #
+    # It was found by ``tests/test_reader_reachability.py``, whose call graph
+    # cannot be talked out of a conclusion the way a reader of this paragraph
+    # was. The reader is recoverable from history: 21 lines, deleted in the
+    # commit that added this note, uncalled since 2026-08-31.
     "setting_dark_mode": (DARK_MODE_URL, "settings_dark_mode", _read_dark_mode),
 }
 

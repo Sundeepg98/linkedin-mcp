@@ -45,28 +45,25 @@ SERVER = PACKAGE / "server.py"
 #: allowlisted reader really IS unreachable, so listing a reachable one fails
 #: just as loudly as leaving an unreachable one off. That is the difference
 #: between an allowlist and a silencer.
-UNREACHABLE_BY_DESIGN: dict[str, str] = {
-    # FOUND BY THIS TEST ON THE DAY IT WAS WRITTEN, and it is the fifth
-    # instance of the class -- one neither the wave lead nor I knew about, and
-    # one a substring search PASSES, because its only mention outside dom.py
-    # is a comment.
-    #
-    # THE COMMENT IS THE INTERESTING PART. writes.py records that
-    # "``dom.read_settings_surface`` remains available and is now uncalled
-    # from this module" -- in the same paragraph that argues "a reader kept
-    # for a state nobody consults is a reader that goes stale unread". The
-    # fact was noticed and the opposite conclusion drawn, one sentence apart.
-    #
-    # 43 lines, no test covers it, nothing calls it. Its own comment argues
-    # for deleting it. That is a decision for the wave lead rather than a
-    # cleanup to slip into a commit, so it is RECORDED here where it is
-    # visible in a diff instead of remaining invisible in the module.
-    "read_settings_surface": (
-        "uncalled since settings_index was replaced on 2026-08-31; writes.py "
-        "records it as 'remains available' in the same paragraph that argues "
-        "against keeping unread readers. Pending a ruling on deletion."
-    ),
-}
+#: EMPTY, AND EMPTY IS THE TARGET STATE rather than a coincidence. It held
+#: one entry for a day: ``read_settings_surface``, found by this test on the
+#: day it was written -- the fifth instance of the class and one a substring
+#: search PASSES, because its only mention outside ``dom.py`` was a comment.
+#:
+#: THAT COMMENT WAS THE FINDING. ``writes.py`` recorded the reader as
+#: "remains available and is now uncalled from this module" one sentence
+#: after arguing that "a reader kept for a state nobody consults is a reader
+#: that goes stale unread". The fact was observed, the rule was stated, and
+#: the two were never connected. It was deleted on 2026-09-02 after the wave
+#: lead ruled, and after ``update_setting``'s before-and-after path was
+#: verified to read the dark-mode page through ``dom.read_surface_census``
+#: and never through it.
+#:
+#: THE ENTRY-VALIDATION BELOW NOW HAS NO REAL ENTRY TO RUN ON, which would
+#: make it a sweep over nothing -- the exact defect this file is about. So
+#: ``test_the_entry_validation_can_still_fail`` exercises all three rules on
+#: fabricated entries instead.
+UNREACHABLE_BY_DESIGN: dict[str, str] = {}
 
 
 def _called_names(tree: ast.AST) -> set[str]:
@@ -207,7 +204,46 @@ def test_every_exception_names_a_reader_that_exists_and_carries_a_reason():
     for name, reason in UNREACHABLE_BY_DESIGN.items():
         assert name in functions, "%s is allowlisted and does not exist" % name
         assert len(reason.strip()) > 40, (name, reason)
-    # AND THE LIST STAYS SHORT. Growth is the signal that unreachable code is
-    # being accepted rather than fixed, and a number is what makes growth
-    # visible.
-    assert len(UNREACHABLE_BY_DESIGN) <= 1, sorted(UNREACHABLE_BY_DESIGN)
+    # AND THE LIST STAYS EMPTY, tightened from ``<= 1`` on 2026-09-02 when
+    # its one entry was deleted rather than kept. Growth is the signal that
+    # unreachable code is being ACCEPTED rather than fixed, and a bound that
+    # still has room in it is a bound nothing has to argue with. Zero means
+    # the next unreachable reader cannot be parked here without somebody
+    # deliberately widening this line.
+    assert len(UNREACHABLE_BY_DESIGN) == 0, sorted(UNREACHABLE_BY_DESIGN)
+
+
+def test_the_entry_validation_can_still_fail():
+    """THE VALIDATION ABOVE NOW RUNS OVER AN EMPTY DICT, so it is shown
+    working on fabricated entries instead.
+
+    A loop over nothing passes forever. That is this file's own subject, and
+    emptying the allowlist turned two of its checks into exactly that -- the
+    three-rule validation, and the allowlisted branch of the reachability
+    parametrisation. Both rules are re-run here against entries built in this
+    test, so the treatment for the real list being empty is not that nobody
+    checks the rules any more.
+
+    THE THREE RULES, each shown rejecting:
+
+    * an entry naming a function that does not exist
+    * an entry whose reason is too short to weigh
+    * an entry naming a reader that IS reachable -- the stale-exception case,
+      which is how an allowlist becomes a silencer
+    """
+    functions = _dom_functions()
+    reachable = _reachable_from_the_tool_surface()
+
+    # Rule 1: the name must exist.
+    assert "read_a_function_that_was_never_written" not in functions
+
+    # Rule 2: the reason must be long enough to carry an argument.
+    assert len("too short".strip()) <= 40
+    assert len(("uncalled since the index reader was replaced, and its own "
+                "comment argues for deleting it").strip()) > 40
+
+    # Rule 3: an allowlisted reader must genuinely be unreachable. Pointed at
+    # a reader this file already proves reachable, so the rule is shown
+    # rejecting a real name rather than an invented one.
+    assert "read_surface_census" in functions
+    assert "read_surface_census" in reachable
