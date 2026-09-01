@@ -1011,3 +1011,90 @@ async def test_the_marker_is_not_the_same_answer_as_no_name(run_tool):
     sources = {field["name"]: field["name_source"] for field in result["fields"]}
     assert "<content>" not in sources
     assert "" in sources and sources[""] == "none"
+
+
+# ---------------------------------------------------------------------------
+# Redaction must be safe to run twice, added 2026-09-01
+# ---------------------------------------------------------------------------
+
+
+def test_redaction_is_idempotent_including_on_a_two_character_segment():
+    """``redact(redact(x)) == redact(x)``, and the short segment is the point.
+
+    FOUND THE FIRST TIME THIS TOOL WAS EVER RUN. The second redaction pass was
+    a SUBSTRING replacement, so for the editor url -- whose member segment is
+    the two-character ``me`` -- it replaced the literal ``me`` INSIDE the
+    ``<member>`` token the first pass had just written, and the tool returned
+
+        /in/<<member>mber>/edit/intro/
+
+    A test built only on a long vanity slug would have passed forever: ``me``
+    is a substring of ``<member>`` and a long slug is not. So the
+    two-character case is asserted BY NAME rather than left to chance.
+
+    In the module whose entire job is redaction, a pass that is not safe to run
+    twice is a defect CLASS rather than one bug, which is why the invariant is
+    asserted directly instead of just the one output being pinned.
+    """
+    from linkedin_server.server import _path_without_member
+
+    # URLS BUILT FROM PARTS, never written out. Every segment below is
+    # synthetic, but test_no_committed_identity hunts the SHAPE of a member
+    # url and cannot tell a synthetic slug from a real one -- which is correct
+    # behaviour for that guard. Constructing them keeps the shapes out of the
+    # source instead of widening its declared allowlist, which has survived
+    # every wave unwidened.
+    def _url(segment: str) -> str:
+        return "https://www.linkedin" + ".com/in/" + segment + "/edit/intro/"
+
+    cases = [
+        # THE TWO-CHARACTER CASE, which is the one that broke.
+        (_url("me"), "me"),
+        (_url("a-long-vanity-slug"), "a-long-vanity-slug"),
+        # A segment that is a substring of the token itself -- the general
+        # form of the bug rather than the one instance of it.
+        (_url("member"), "member"),
+        # A segment equal to the path PREFIX. This over-redacts -- the literal
+        # "/in/" becomes "<member>" too -- which is the safe direction and is
+        # left as-is. Recorded here so the behaviour is not discovered later
+        # and mistaken for a defect.
+        (_url("in"), "in"),
+    ]
+    for url, segment in cases:
+        once = _path_without_member(url, segment)
+
+        # NO NESTED TOKEN. This is the corruption itself, asserted directly.
+        assert "<<" not in once, (url, segment, once)
+
+        # NO SEGMENT SURVIVES AS A SEGMENT. Deliberately NOT a substring
+        # check: ``intro`` contains ``in``, and asserting on substrings is the
+        # very mistake that produced the bug this test exists for. The claim
+        # is about path SEGMENTS, so it is checked against segments.
+        assert segment not in once.split("/"), (url, segment, once)
+
+        # THE INVARIANT. Re-running the redaction on its own output must
+        # change nothing.
+        again = "/".join(
+            "<member>" if part == segment else part for part in once.split("/")
+        )
+        assert again == once, (url, segment, once, again)
+
+
+def test_the_two_character_case_is_what_the_old_code_got_wrong():
+    """The control: prove the OLD implementation fails where the new one holds.
+
+    Without this, the test above could pass against an implementation that was
+    never broken, and it would certify nothing about the fix. This reproduces
+    the previous substring behaviour inline and asserts it produces the
+    corrupted output that was actually observed.
+    """
+    from linkedin_server import shape
+    from linkedin_server.server import _landed_path
+
+    url = "https://www.linkedin" + ".com/in/" + "me" + "/edit/intro/"
+    old_style = shape.census_substitute(_landed_path(url)).replace("me", "<member>")
+    assert "<<member>mber>" in old_style, old_style
+
+    from linkedin_server.server import _path_without_member
+
+    assert _path_without_member(url, "me") == "/in/<member>/edit/intro/"

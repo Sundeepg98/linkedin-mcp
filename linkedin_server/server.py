@@ -2554,7 +2554,30 @@ def _path_without_member(landed_url: str, segment: Optional[str]) -> str:
     """
     redacted = shape.census_substitute(_landed_path(landed_url))
     if segment:
-        redacted = redacted.replace(segment, "<member>")
+        # WHOLE SEGMENTS ONLY, corrected 2026-09-01. This was a SUBSTRING
+        # replacement and it corrupted its own first pass: for the editor url
+        # the segment is ``me``, pass 1 writes ``/in/<member>/edit/intro/``,
+        # and pass 2 then replaced the literal ``me`` INSIDE the ``<member>``
+        # token pass 1 had just written -- producing
+        # ``/in/<<member>mber>/edit/intro/``, which is what the tool actually
+        # returned the first time it was ever run.
+        #
+        # OVER-REDACTION IS STILL THE RIGHT DIRECTION TO BE WRONG IN and the
+        # two-pass intent above is kept. But corrupting the first pass's
+        # output is not over-redaction; it is a different defect wearing its
+        # clothes, and it mangles the diagnostic a reader needs at exactly the
+        # moment this tool refuses.
+        #
+        # Splitting on "/" makes the pass IDEMPOTENT: ``<member>`` is not
+        # equal to ``me`` as a whole segment, so it cannot be re-substituted.
+        # tests/test_editor_fields.py asserts redact(redact(x)) == redact(x)
+        # with a TWO-CHARACTER segment specifically -- short segments are what
+        # expose this, and a test built only on a long vanity slug would have
+        # passed forever.
+        redacted = "/".join(
+            "<member>" if part == segment else part
+            for part in redacted.split("/")
+        )
     return redacted
 
 
@@ -2729,15 +2752,43 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
                     "landed_paths": paths,
                     "pages_loaded": 2,
                 }
-            if editor_segment != profile_segment:
+            # SELF IS PROVEN TWO WAYS, EITHER OF WHICH IS SUFFICIENT, and this
+            # was a bare equality until 2026-09-01 -- when the tool was run for
+            # the first time and refused ITS OWN OPERATOR.
+            #
+            # /in/me/ REDIRECTS to the vanity slug; the editor address does
+            # not. So the segments were "sundeep-..." and "me", which differ as
+            # strings and name the SAME member.
+            #
+            # ``me`` IS NOT A WEAKER PROOF THAN A MATCHING SLUG, IT IS A
+            # STRONGER ONE. A slug is a string that happens to match. ``me`` is
+            # self BY CONSTRUCTION: /in/me/ cannot resolve to anyone but the
+            # signed-in member, which is the very reason the read boundary
+            # admits that spelling at all.
+            #
+            # THE SHAPE ASSERTION IS NOT OPTIONAL. Without it a redirect to a
+            # login wall, an interstitial or a 404 could pass on a segment
+            # coincidence, and the whole point of this gate is that it fails
+            # CLOSED on a surface it does not recognise. isSelfProfile=true on
+            # the profile remains the anchor: it is checked above, and nothing
+            # here can substitute for it.
+            editor_path = _landed_path(landed_editor)
+            editor_shape_ok = editor_path.startswith("/in/") and "/edit/" in editor_path
+            same_member = editor_segment == profile_segment or editor_segment == "me"
+            if not (editor_shape_ok and same_member):
                 return {
                     "refused": "different_member",
                     "reason": (
-                        "the two landed urls name different members, so the "
-                        "editor being read is not the profile whose "
-                        f"{_SELF_ASSERTION_PARAM}=true was seen. Neither "
-                        "segment is reported here; that they differ is the "
-                        "whole of the answer."
+                        "the editor page could not be shown to be this "
+                        "member's own. Self is accepted two ways and neither "
+                        "held: the landed editor segment did not match the "
+                        "profile's, and it was not the self-referential "
+                        "'me' spelling -- OR the landed editor path is not of "
+                        "the form /in/<member>/.../edit/..., which is checked "
+                        "so that a login wall, an interstitial or a 404 "
+                        "cannot pass on a segment coincidence. No segment is "
+                        "reported here; that it did not hold is the whole of "
+                        "the answer."
                     ),
                     "self_ownership": _ownership_block(
                         established=False,
