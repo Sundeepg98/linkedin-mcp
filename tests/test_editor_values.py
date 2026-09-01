@@ -261,7 +261,7 @@ async def run_values(monkeypatch):
                 async def fake_session():
                     yield page
 
-                async def fake_goto(target_page, url, **kwargs):
+                async def fake_goto(_page, url, **_kwargs):
                     navigations.append(url)
                     if url == SELF_PROFILE_URL:
                         await render(PROFILE_HTML)

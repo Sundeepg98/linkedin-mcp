@@ -2478,3 +2478,119 @@ Recorded because the instruction was to trust a number over an instrument,
 and the instrument is cheap: `git fetch` costs nothing and settles it. Both
 of our counts were built from snapshots; only one of us could re-measure
 without asking, so I did.
+
+# PART NINE -- THE AIMING PROBLEM DISSOLVES, AND WHAT IS ACTUALLY LEFT
+
+## 66. THE WAVE LEAD IS RIGHT, AND THE PROOF WAS ALREADY ON DISK
+
+I closed Part Seven with *"this gets the value; it does not conjure the
+control -- `update_profile_field` is still blocked on the aiming half."*
+**That sentence was wrong**, and the wave lead's correction is exact:
+
+> The mismatch only exists **if `update_profile_field` is aimed by
+> `my_profile`'s field names.** It does not have to be. Aim it at the control.
+
+The four-row gap table in section "Item 1" measured `my_profile`'s
+AGGREGATED fields against the editor's controls. Two of its four rows -- one
+value against two controls -- are **artefacts of the mapping and vanish when
+there is no mapping.** Nothing needs splitting because nothing is being split:
+the caller names `First name`, and `First name` is a control.
+
+**AND NO RECONNECT WAS NEEDED TO SETTLE THE REST.** The per-control reading
+was already recorded in section 5 of this file, taken live on 2026-08-31:
+
+    First name*        input  text  label-for  REQUIRED
+    Last name*         input  text  label-for  REQUIRED
+    Additional name    input  text  label-for
+    Industry*          input  text  aria-label
+    City               input  text  aria-label
+    Country/Region*    input  text  aria-label
+    School*            select       label-for  REQUIRED
+    Month              select       aria-label
+    Save               button       text       enabled
+
+**Every one of the eight is an `input type=text` or a `select`, and the value
+reader covers both natively** -- `el.value` for the inputs, the selected
+option's TEXT for the selects. There is no `[role="combobox"]` div anywhere in
+that container, which was the one shape that could have returned
+`value_source: "none"` and left a control with no readable previous value.
+
+I had that as an open worry before reading this table. It is closed by
+measurement, not by optimism, and the measurement cost nothing because
+somebody had already written it down. **The reload list does not grow.**
+
+**The `select` decision turns out to be load-bearing.** Returning the OPTION
+TEXT rather than `el.value` was argued from restore fidelity -- a human
+re-picks what the option SAYS. Two of the eight fields are selects, so that
+choice is the difference between a restore path existing for `School` and
+`Month` and not existing.
+
+**`headline` is the genuine casualty and the lead's reason is better than
+mine.** Its control is named `<content>` -- named BY ITS OWN CONTENT -- so
+**the anchor moves every time the value does.** An anchor that changes when
+you change the thing it anchors is not an anchor. That is a narrow, permanent,
+measured refusal, and it is a far better answer than "blocked on the aiming
+half."
+
+## 67. WHAT IS ACTUALLY LEFT, AND ONE ITEM IS NEW
+
+The aiming half is closed. Three things stand between here and a performable
+`update_profile_field`, and the third was not on anybody's list:
+
+1. **IT MUST TYPE, and the mechanism exists.** `SANCTIONED_MUTATIONS` holds a
+   `click` and, since 2026-09-01, a `fill` draining a `fill_plan` at a single
+   call site. Six of the eight fields are `input type=text` and are reachable
+   by that mechanism. This is design work, not a measurement.
+
+2. **THE RESTORE IS A SECOND GATED WRITE, not an automatic undo.** The value
+   is read at PREVIEW time; the restore is another two-call confirm carrying
+   the old string. "Undoable" means HE HOLDS THE STRING and can issue a second
+   approved call -- it does not mean this server can put it back on its own,
+   and the preview must not imply otherwise.
+
+3. **TWO OF THE EIGHT NEED A MUTATION KIND THAT DOES NOT EXIST.** `School*`
+   and `Month` are `<select>`. **`page.fill` does not work on a select** --
+   Playwright needs `select_option`, which is a THIRD entry in
+   `SANCTIONED_MUTATIONS` and therefore a third thing a reviewer has to read
+   and approve. So the eight split six/two, and a design that quietly assumed
+   one typing mechanism covers all of them would fail on exactly the two
+   fields whose previous value the reader works hardest to get right.
+
+**AND A REQUIRED-FIELD RULE FALLS OUT OF THE SAME TABLE.** Five of the eight
+are REQUIRED. A restore puts a value back, so it is safe; but a caller can
+pass an empty string, and a gate that fills `""` into a required field is
+asking LinkedIn to refuse a form the human already approved. The refusal
+belongs at the gate, from the `required` field the LABEL reader already
+returns.
+
+## 68. THE DIAGNOSTICS, CHECKED RATHER THAN ASSUMED
+
+The wave lead sent three and said explicitly not to conclude "probably
+benign", because that reasoning has been wrong five times this week.
+
+**`FILE_PATH_VALUE` is not undefined -- it does not exist.** `grep` returns
+zero hits for the name and three for `FILE_PLACEHOLDER`, which replaced it
+when `test_no_committed_identity` flagged the drive-rooted path it held. Both
+of its sites execute under the suite, so an undefined name there would raise
+rather than lint. The diagnostic is a stale snapshot from before the rename.
+
+**The unresolved imports are the known Pyright `pythonpath` gap**, unchanged.
+
+**The two unused names were fake-method parameters**, renamed `_page` and
+`**_kwargs`. Renamed **in both fixtures rather than only the new one**:
+`test_editor_fields.py` carries the byte-identical helper, and fixing one of
+two deliberately parallel files is how they stop being parallel.
+
+## 69. A STANDING RULE, PROMOTED OUT OF TWO COMMENTS
+
+> **Prose about a pattern contains the pattern. When a comment must name a
+> forbidden shape, DESCRIBE it -- never quote it.**
+
+Both instances were in this wave and both were comments explaining the very
+guard they tripped: one quoted the mutation-scanner's assignment token while
+explaining why the code avoids it; the other quoted the address shape while
+explaining why the markers are built from `chr(10)`. Neither was silenced --
+the prose was reworded both times.
+
+It belongs here rather than only beside those two comments, because the next
+instance will be in a file neither of them is in.
