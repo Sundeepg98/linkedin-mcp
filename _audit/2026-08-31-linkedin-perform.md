@@ -2029,10 +2029,61 @@ server to reload before it can be exercised against live LinkedIn.
 
 | # | what to run | what it settles | expected outcome |
 |---|---|---|---|
-| 1 | `linkedin_profile_editor_fields` | the four field names inside `/in/me/edit/intro/`, which `update_profile_field` needs to name a control to type into | should now SUCCEED  --  it refused its own operator until `1666dec` |
-| 2 | `dom.read_compose_fields` on `/messaging/compose/` | the two SEND-MODE radio labels, and whether either is an **InMail**  --  a metered allowance on Premium Career | **may REFUSE, see below** |
-| 3 | the same reading | the message body's `aria-label`, which the census reduces to `<opaque>` | should succeed if 2 does |
-| 4 | a second `premium` census | whether `/premium/my-premium/` has a settled control count at all | 73 and 80 disagree; a third reading either breaks the tie or confirms the surface is unstable |
+| 1 | `linkedin_profile_editor_fields` | the field names inside `/in/me/edit/intro/` | **DONE 2026-09-01 -- SUCCEEDED** |
+| 2 | `dom.read_compose_fields` on `/messaging/compose/` | the two SEND-MODE radio labels, and whether either is an **InMail** | **BLOCKED -- not reachable from any tool** |
+| 3 | the same reading | the message body's `aria-label`, which the census reduces to `<opaque>` | **BLOCKED -- same cause** |
+| 4 | a third `premium` census | whether `/premium/my-premium/` has a settled control count at all | **DONE 2026-09-01 -- no baseline, and no balance** |
+
+## Item 1 -- ANSWERED, and the answer refutes the premise the capability was re-adjudicated on
+
+    self_ownership  established TRUE, same_member TRUE
+    landed_paths    editor /in/<member>/edit/intro   (no <<member>mber>)
+    container       dialog, anchor "Save", 23 controls
+
+Both defects confirmed fixed against the live surface. Named controls:
+`First name*`, `Last name*`, `Additional name`, `Industry*`, `City`,
+`Country/Region*`, `School*`, `Month`, `Save`, and one `div[role=textbox]`
+whose name comes back as `<content>`.
+
+**`update_profile_field` now has exact-named controls and a readable previous
+value for NONE of them without a guess:**
+
+| what `linkedin_my_profile` returns | the editor's controls | the gap |
+|---|---|---|
+| `name` | `First name*` AND `Last name*` | one value, two controls -- splitting it is a guess |
+| `location` | `City` AND `Country/Region*` | one value, two controls -- same |
+| `headline` | `<content>` | readable value, **no named control** |
+| (nothing) | `Industry*`, `Additional name` | named control, **no readable value** |
+
+The re-adjudication held that recording the previous value was the FEATURE
+rather than the blocker, and it was right about the reasoning. What it could
+not know is that **this server has no value reader at all** -- "LABELS, NEVER
+VALUES" is the editor reader's entire design. The restore path needs an
+instrument that does not exist, and building it is a READ.
+
+## Item 4 -- ANSWERED. Third reading, and NO baseline recorded
+
+    73  (first)    80  (second)    80  (third)
+
+Two agree at 80 and **that is not enough here, because the variance is
+EXPLAINED**: the page carries a paginated carousel and drew `Page 1..6` at
+counts 3,3,3,2,2,1. The control count moves with how much of the carousel
+renders, so the surface has no single settled number and two agreeing readings
+would be a coincidence rather than a measurement.
+
+**And still no credit balance.** The complete numeric inventory is pagination
+and marketing offers plus nav badges. Third independent reading, same absence.
+
+## Items 2 and 3 -- BLOCKED ON ONE PIECE OF TOOL CODE, and that is my error
+
+`dom.read_compose_fields` was built, unit-tested and mutation-tested, and
+**never wired to a tool**. So neither item was answerable on the last
+reconnect regardless of which build was loaded.
+
+I should have checked REACHABILITY when writing this list. The list exists to
+make one reconnect sufficient, and **an item on it that no caller can invoke
+is the same defect as a check that cannot fail** -- it looks like coverage and
+is not.
 
 ## A prediction on file for item 2, before it is run
 
