@@ -135,10 +135,17 @@ def test_the_constraint_still_admits_a_real_target(action):
     """
     spec = writes.spec_for_action(action)
     if "{target}" not in spec.url_template:
-        pytest.skip("%s does not interpolate its target" % action)
-    # A SYNTHETIC URN. It must have the measured SHAPE and must not be one
-    # of his items: this repo is public under his real name, and
-    # test_no_committed_identity caught the real one here.
+        # NOT A SKIP, for the reason the sibling file records: a greyed-out
+        # line reads like a pass. Route two has the same "still usable" claim
+        # in a different shape -- the CONSTANT url must match its own
+        # pattern, or assert_write_url refuses every call this action could
+        # ever make. Asserted rather than skipped, so both routes leave a
+        # green line that means something.
+        assert spec.url_pattern.match(spec.url_template), (
+            action,
+            spec.url_template,
+        )
+        return
     # BUILT RATHER THAN WRITTEN OUT. It must have the measured SHAPE, and
     # test_no_committed_identity greps tracked SOURCE for urn-shaped
     # literals -- it caught the real one here, correctly, on a public repo

@@ -187,7 +187,23 @@ def test_a_tracker_verification_can_return_the_state_it_compares_against(action)
     spec = writes.spec_for_action(action)
     states = _stage_states_for(action)
     if states is None:
-        pytest.skip("%s does not verify through a tracker stage" % action)
+        # NOT A SKIP. It was one until 2026-09-01, and six of the nine actions
+        # took it -- so this test reported six greyed-out lines that read
+        # exactly like six passes in a 2385-test run. A case that does not
+        # apply should still ASSERT WHY it does not apply, or the file cannot
+        # tell "no tracker stage" from "the AST reader stopped finding
+        # branches".
+        #
+        # What must be true of an action reaching here: it verifies some other
+        # way, or it declares that it cannot. The pairing test above already
+        # requires exactly one of those; this asserts the same thing from the
+        # side that would notice the reader going blind.
+        assert _branch_for(action) is not None or spec.unverifiable is not None, (
+            "%s reaches neither a tracker stage nor a branch nor a "
+            "declaration -- which most likely means _stage_states_for stopped "
+            "resolving readers, not that this action is fine" % action
+        )
+        return
     assert spec.to_state in states, (
         "%s compares its outcome against to_state=%r, and the tracker stage "
         "its branch reads can only ever return %s. That comparison cannot "

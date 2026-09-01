@@ -173,7 +173,14 @@ def test_a_comments_text_survives_the_round_trip_beside_its_subject(text):
     and is why ``_clean_target_part`` refuses one that does.
     """
     spec = writes.spec_for_action("comment_on_item")
-    urn = "urn:li:activity:7320126261693935616"
+    # BUILT, NOT WRITTEN OUT. This held HIS REAL POST until 2026-09-01 --
+    # the permalink censused that morning -- and it reached a commit on a
+    # PUBLIC repo under his real name before test_no_committed_identity
+    # caught it. It could not catch it sooner: that guard sweeps TRACKED
+    # files, and this file was untracked until the commit that published
+    # it. Constructing the urn keeps the measured shape and puts no
+    # activity id in the source at all.
+    urn = "urn:li:" + "activity:" + ("1234567890" * 2)[:19]
     canonical = writes._target_for(spec, {"item": urn, "text": text})
     assert writes._text_component_of(spec, canonical) == text.strip(), text
     assert urn not in writes._text_component_of(spec, canonical)
