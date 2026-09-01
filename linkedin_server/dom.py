@@ -4189,6 +4189,152 @@ SHAREBOX_COMPOSER_HREF = "/preload/sharebox/"
 #: urn, in a url this server's read boundary forbids (``/feed/update``).
 COMMENT_CONTROL_NAME = "Comment"
 
+#: THE SDUI ACTION TOKENS, as LinkedIn writes them into the React flight
+#: payload. Counted, never returned as text.
+#:
+#: WHY THESE FOUR. ``ServerRequest`` is the one that decides: the operator
+#: ruled 2026-09-01 that a click measured to issue NO ServerRequest is by
+#: effect a READ. The other three are counted so that a reading of ZERO
+#: ServerRequest can be told apart from a reading of NOTHING AT ALL -- a
+#: parser that has stopped working reports zero of everything, and zero of
+#: everything is not a measurement.
+SDUI_ACTION_TOKENS: dict[str, str] = {
+    "server_request": "ServerRequest",
+    "navigate": "Navigate",
+    "set_state": "SetState",
+    "show_menu": "ShowMenu",
+}
+
+#: How far either side of a needle a component's actions are looked for.
+#: DELIBERATELY GENEROUS: an over-wide window counts a NEIGHBOUR's
+#: ServerRequest and refuses a click that would have been safe, where a
+#: too-narrow one misses this control's own and permits a click that sends.
+#: Those two errors are not symmetric, so the window errs at the safe end.
+SDUI_WINDOW_CHARS = 6000
+
+#: Read-only: sums the length of every script's text and counts token
+#: occurrences. It reads ``textContent`` and returns INTEGERS -- no payload
+#: string is ever returned, which is what keeps a megabyte of his profile out
+#: of this process.
+SDUI_ACTIONS_JS = """
+(cfg) => {
+  const tokens = cfg.tokens || {};
+  const out = {
+    script_blocks: 0,
+    payload_chars: 0,
+    needle_hits: 0,
+    global: {},
+    scoped: {},
+  };
+  for (const key of Object.keys(tokens)) { out.global[key] = 0; out.scoped[key] = 0; }
+  const texts = [];
+  for (const el of Array.from(document.scripts)) {
+    const t = el.textContent || '';
+    if (!t) continue;
+    out.script_blocks += 1;
+    out.payload_chars += t.length;
+    texts.push(t);
+  }
+  const countIn = (hay, token) => {
+    if (!token) return 0;
+    let n = 0, i = hay.indexOf(token);
+    while (i !== -1) { n += 1; i = hay.indexOf(token, i + token.length); }
+    return n;
+  };
+  for (const t of texts) {
+    for (const key of Object.keys(tokens)) {
+      out.global[key] += countIn(t, tokens[key]);
+    }
+  }
+  const needle = cfg.needle || '';
+  if (needle) {
+    const span = cfg.window || 6000;
+    for (const t of texts) {
+      let i = t.indexOf(needle);
+      while (i !== -1) {
+        out.needle_hits += 1;
+        const slice = t.slice(Math.max(0, i - span), i + needle.length + span);
+        for (const key of Object.keys(tokens)) {
+          out.scoped[key] += countIn(slice, tokens[key]);
+        }
+        i = t.indexOf(needle, i + needle.length);
+      }
+    }
+  }
+  return out;
+}
+"""
+
+
+async def read_sdui_actions(
+    page: Any, needle: str = "", *, window: int = SDUI_WINDOW_CHARS
+) -> dict[str, Any]:
+    """Count SDUI action types in the flight payload. COUNTS ONLY, never text.
+
+    THIS IS THE INSTRUMENT THE NO-ServerRequest RULING TURNS ON. The operator
+    ruled that a click measured to issue no ``ServerRequest`` is, by effect, a
+    read -- so something has to do the measuring, and this is it.
+
+    IT RETURNS INTEGERS AND A NEEDLE-HIT COUNT AND NOTHING ELSE. The profile's
+    flight payload was measured at 1,091,238 characters, 92.7% of the
+    document, and it is where his identity lives -- which is exactly why the
+    sanitised fixtures in this repo carry ZERO script characters. Returning
+    any of it would undo that. So the page counts and this function receives
+    numbers.
+
+    ``needle`` SCOPES THE COUNT and must be a STABLE, NON-IDENTIFYING string --
+    a payload ``viewName`` such as ``opento_preview_otw``, which names a
+    surface rather than a person. It is never a member name.
+
+    THE WINDOW ERRS TOWARD REFUSING. A component's actions are looked for
+    within :data:`SDUI_WINDOW_CHARS` either side of the needle, and multiple
+    needle hits are SUMMED rather than disambiguated. Both choices over-count:
+    an over-wide window attributes a neighbour's ``ServerRequest`` to this
+    control and refuses a click that would have been safe, where a too-narrow
+    one misses this control's own and permits a click that SENDS. Those errors
+    are not symmetric and this leans at the safe end deliberately.
+
+    WHAT A CALLER MUST DO WITH THE RESULT, because the numbers alone are not
+    the ruling: a zero ``scoped["server_request"]`` means nothing unless the
+    reader has been shown returning NON-ZERO on a control known to have one.
+    A parser that has stopped working returns zero for everything. See
+    ``writes`` for the gate that requires that negative control before it will
+    treat any zero as permission.
+    """
+    out: dict[str, Any] = {
+        "script_blocks": 0,
+        "payload_chars": 0,
+        "needle_hits": 0,
+        "global": {key: 0 for key in SDUI_ACTION_TOKENS},
+        "scoped": {key: 0 for key in SDUI_ACTION_TOKENS},
+        "readable": False,
+        "error": None,
+    }
+    cfg = {
+        "tokens": dict(SDUI_ACTION_TOKENS),
+        "needle": str(needle or ""),
+        "window": int(window),
+    }
+    try:
+        reading = await page.evaluate(SDUI_ACTIONS_JS, cfg)  # readonly-ok
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("sdui actions unreadable: %s", out["error"])
+        return out
+    for key in ("script_blocks", "payload_chars", "needle_hits"):
+        out[key] = int(reading.get(key) or 0)
+    for bucket in ("global", "scoped"):
+        got = reading.get(bucket) or {}
+        out[bucket] = {key: int(got.get(key) or 0) for key in SDUI_ACTION_TOKENS}
+    # READABLE means the payload was there AND carried recognisable actions.
+    # A page with script blocks but no action tokens is a page this reader
+    # cannot speak for, and it says so rather than reporting a comfortable
+    # row of zeroes.
+    out["readable"] = bool(
+        out["payload_chars"] > 0 and sum(out["global"].values()) > 0
+    )
+    return out
+
 #: The comment editor on an item permalink, MEASURED 2026-09-01: a div with
 #: role=textbox, named through aria-label, count 1, on a page reporting
 #: contenteditable == 1. Every previous census of every readable surface

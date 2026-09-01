@@ -2068,6 +2068,27 @@ CENSUS_ITEM_RULES: dict[str, str] = {
 }
 
 
+#: SURFACES WHOSE SDUI FLIGHT PAYLOAD IS WORTH COUNTING, and the STABLE,
+#: NON-IDENTIFYING needle each is scoped by.
+#:
+#: ADDED 2026-09-01 to make the operator's no-`ServerRequest` ruling
+#: MEASURABLE. He ruled that a click measured to issue no ServerRequest is by
+#: effect a read; `set_open_to_work`'s editor opens as a modal, and the census
+#: on 2026-08-24 found the entry control's action list carries one Navigate
+#: and no ServerRequest while the EDIT control carries a ServerRequest named
+#: saveAndFetchNextStep. Both of those were read from a capture that is NO
+#: LONGER ON DISK -- and could not be kept, because the payload is where his
+#: identity lives, which is the same reason the tracked fixtures carry zero
+#: script characters. So the measurement has to be retaken live, and this is
+#: the instrument for retaking it.
+#:
+#: THE NEEDLE NAMES A SURFACE, NEVER A PERSON. `opento_preview_otw` is the
+#: payload viewName of his own Open-To-Work card.
+CENSUS_SDUI_NEEDLES: dict[str, str] = {
+    "profile": "opento_preview_otw",
+}
+
+
 def census_surface_keys() -> list[str]:
     """Every key this instrument answers to, resolved and direct alike."""
     return sorted(set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES)
@@ -2404,6 +2425,13 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                     "about whether using it would be safe or reversible."
                 ),
             }
+            # THE SDUI ACTION COUNTS, for the surfaces that declare a needle.
+            # Counts only -- see dom.read_sdui_actions on why no payload text
+            # may leave the page.
+            if key in CENSUS_SDUI_NEEDLES:
+                out["sdui"] = await dom.read_sdui_actions(
+                    page, CENSUS_SDUI_NEEDLES[key]
+                )
             if key in CENSUS_SURFACE_COST:
                 # ON THE ANSWER, not only in the docstring. See
                 # CENSUS_SURFACE_COST: a cost written where the caller does

@@ -383,7 +383,14 @@ def test_only_dom_module_waives_evaluate():
     # process, which is the one thing the ruling on that reader forbids --
     # so it fails the cheap-alternative test in the same direction
     # INVITE_NEEDLE_JS does, and for the same reason.
-    assert waived_in.get("dom.py", 0) <= 9, waived_in
+    # TEN FROM 2026-09-01, up from nine. The tenth is SDUI_ACTIONS_JS, and it
+    # is the one waiver that exists to make a RULING measurable rather than to
+    # read a page: the operator ruled that a click issuing no `ServerRequest`
+    # is by effect a read, so something has to count them, and the counting
+    # can only happen inside the page. It returns INTEGERS -- the profile's
+    # flight payload is ~1.09 MB and is where his identity lives, which is why
+    # the sanitised fixtures here carry zero script characters.
+    assert waived_in.get("dom.py", 0) <= 10, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -406,6 +413,14 @@ INJECTED_SCRIPTS = {
     # the module: no text and no attribute value leaves it, because a tracker
     # row names a company and a job.
     "TRACKER_ROW_SHAPE_JS": dom.TRACKER_ROW_SHAPE_JS,
+    # 2026-09-01. The SDUI action counter. Declared here for the ordinary
+    # reason -- an executed script that is not declared is one nobody reviewed
+    # -- and it needs the scan more than most, because it is the only script
+    # in this module that reads the FLIGHT PAYLOAD rather than the DOM. That
+    # payload is ~1.09 MB of his profile, so the script returns integers and a
+    # hit count and nothing else; there is no path by which a payload string
+    # reaches this process.
+    "SDUI_ACTIONS_JS": dom.SDUI_ACTIONS_JS,
     # 2026-08-31. The invitation needle. It is declared here for the ordinary
     # reason -- every script this package executes is scanned, and one that is
     # not declared is one nobody reviewed -- and declaring it ENROLS it in
@@ -571,7 +586,7 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 9, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 10, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
