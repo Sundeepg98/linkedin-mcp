@@ -3534,6 +3534,62 @@ def test_the_settle_report_calls_every_observed_reading_correctly(
     assert census_settle_report(surface, read)["verdict"] == verdict
 
 
+async def test_the_richest_item_is_chosen_without_indexing_a_moving_list(
+    monkeypatch,
+):
+    """THE BUG THIS RESOLVER SHIPPED WITH, and it failed on first live use.
+
+    ``feed_item_commented`` picks the item carrying the most permalink
+    anchors. The first version broke ties with ``items.index(urn)`` INSIDE the
+    sort key -- which ``list.sort`` evaluates WHILE it is mutating the very
+    list being indexed, so a urn already moved by the partial sort was no
+    longer where ``index`` looked and the call raised ``ValueError: '<urn>' is
+    not in list``.
+
+    It failed LOUDLY on its first call, before the census had navigated
+    anywhere, which is the good version of that bug. This pins both halves:
+    the selection is correct, and ties keep DOCUMENT ORDER -- a census whose
+    subject moved between readings could not be compared with itself.
+    """
+    rail = {
+        "authorship_facts": {"authors_found": 1, "unanimous": True},
+        "items": ["urn:a", "urn:b", "urn:c", "urn:d"],
+        # Two items tie at the top; the earlier one must win.
+        "anchors_per_item": {"urn:a": 2, "urn:b": 4, "urn:c": 4, "urn:d": 2},
+        "counts": {},
+        "item_root_source": {},
+    }
+
+    async def _rail(page, **kwargs):
+        return dict(rail)
+
+    monkeypatch.setattr(dom, "read_own_activity_items", _rail)
+    monkeypatch.setattr(
+        server_module, "_self_assertion_on", lambda landed: True
+    )
+
+    class _Nav:
+        async def goto(self, page, url):
+            return url
+
+    monkeypatch.setattr(server_module, "BROWSER", _Nav())
+
+    aimed, url = await server_module._resolve_own_item_permalink(
+        object(), "most_anchors"
+    )
+    assert url is not None, aimed
+    assert url.endswith("urn:b/"), url
+    assert aimed["anchors_on_the_chosen_item"] == 4
+    assert "MOST" in aimed["chosen_by"]
+
+    # AND THE DEFAULT RULE IS UNTOUCHED: document order, first item.
+    aimed, url = await server_module._resolve_own_item_permalink(
+        object(), "first"
+    )
+    assert url.endswith("urn:a/"), url
+    assert "first item in document order" in aimed["chosen_by"]
+
+
 def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     """THE ABSENCE OF A CHECK IS NOT A CHECK PASSING, and the three verdicts
     keep that distinction.

@@ -2163,7 +2163,17 @@ async def _resolve_own_item_permalink(
         # THE RICHEST ITEM, and ties break on document order so the choice is
         # deterministic across runs -- a census whose subject moved between
         # readings could not be compared with itself.
-        items.sort(key=lambda urn: (-int(per_item.get(urn) or 0), items.index(urn)))
+        #
+        # THE ORIGINAL ORDER IS CAPTURED BEFORE THE SORT, and the first
+        # version did not do that. It read ``items.index(urn)`` INSIDE the key
+        # function, which ``list.sort`` evaluates while it is mutating the
+        # very list being indexed -- so a urn already moved by the partial
+        # sort was no longer where ``index`` looked, and the call raised
+        # ``ValueError: '<urn>' is not in list``. It failed on its first live
+        # use, which is the good version of that bug: loudly, before the
+        # census had navigated anywhere.
+        order = {urn: position for position, urn in enumerate(items)}
+        items.sort(key=lambda urn: (-int(per_item.get(urn) or 0), order[urn]))
     return (
         {
             # THE URN ITSELF IS NOT REPORTED HERE. It is a real identifier and
