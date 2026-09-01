@@ -2840,3 +2840,82 @@ a validator nothing calls, which is the defect
 **So both land WITH the capability, after the value reader has returned real
 values once.** Recorded here rather than settled silently, because declining
 an approved item is the wave lead's call to reverse.
+
+## 78. THE INSTRUMENT: PROVING A COMMIT IS PROSE-ONLY, AND THE RULE BEHIND IT
+
+Filed on the wave lead's ruling, and the ruling itself is the useful
+distinction: *"do not extend the audit" meant do not manufacture prose to fill
+an idle gap. It did not mean drop a reusable instrument on the floor.* **An
+instrument that exists only in a message thread is the amnesia pattern** --
+the next person to need it will not read that thread, and will reach for the
+weaker version because that is what is written down.
+
+### The instrument
+
+Claiming a commit is documentation-only, **structurally** rather than by
+reading it:
+
+    import ast, subprocess, sys
+
+    def strip_docstrings(tree):
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Module, ast.FunctionDef,
+                                     ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            body = node.body
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                node.body = body[1:]
+        return tree
+
+    def at(rev, path):
+        return subprocess.run(["git", "show", f"{rev}:{path}"],
+                              capture_output=True, text=True,
+                              check=True).stdout
+
+    path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
+    a = ast.dump(strip_docstrings(ast.parse(at(old, path))))
+    b = ast.dump(strip_docstrings(ast.parse(at(new, path))))
+    print(a == b)
+
+**RUN WITH ITS OWN NEGATIVE CONTROL before being written down here**, because
+filing an unmeasured claim about an instrument is the failure section 73a
+records:
+
+    linkedin_server/dom.py  add5212~1..add5212   True    (the prose-only commit)
+    linkedin_server/dom.py  866e34f~1..866e34f   False   (the selector fix)
+
+What it asserts is **"the module compiles to the same tree"**, not "no line
+that looked like code changed". The text heuristic it replaces -- filtering
+the diff hunk for non-comment lines -- is fooled by a changed line that
+happens to begin with `#`, by a docstring whose content is code-shaped, and by
+a reindent that moves executable lines without changing their text.
+
+**ITS FAILURE MODE, NAMED.** It proves the parsed trees match. It says nothing
+about whether the docstring change was CORRECT -- a docstring can be rewritten
+into something false and this still returns True, which is exactly what
+happened to `named_role_selector` for a day and a half. It answers "did
+anything executable move", and only that.
+
+### The rule, and it is worth more than the three instruments together
+
+> **READ THE STRUCTURE, NOT THE TEXT -- BECAUSE THE TEXT IS WHAT A MISTAKE
+> LOOKS LIKE.**
+
+Three different problems this week, and in every one the textual form was
+plausible, cheap, and wrong:
+
+| problem | textual form | structural form | what the textual form missed |
+|---|---|---|---|
+| is this reader reachable | grep for the name | call graph over `ast.Call` | passed a docstring mention; called a dom-internal caller dead |
+| are all selectors tested | an enumerated list | builders derived by AST | would have gone stale on the tenth builder |
+| is this commit prose-only | filter the hunk for non-comment lines | compare dumped ASTs | a `#`-prefixed change, a reindent, a code-shaped docstring |
+
+Each textual version would have shipped looking correct. The first passed the
+fifth dead reader while inventing a sixth; the second certifies exactly the
+surface that existed the day it was written; the third proves only that
+nothing *resembling* code changed.
+
+**Three instances is a pattern rather than a coincidence**, which is why the
+rule is filed and not just the three tools.
