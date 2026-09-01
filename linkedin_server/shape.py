@@ -3646,6 +3646,24 @@ def census_shape(text: Optional[str]) -> str:
     return shaped
 
 
+def looks_name_shaped(text: str) -> bool:
+    """Would :func:`census_redact_rare` blank any part of this string?
+
+    THE SAME RULE, EXPOSED AS A PREDICATE, so a caller that must REFUSE on a
+    name-shaped label asks the same question the redactor asks rather than
+    writing a second rule that drifts from it. Added 2026-09-01 for
+    ``dom.read_compose_fields``, which publishes raw labels from a self-owned
+    container and must stop rather than publish one that looks like a person.
+
+    IT IS DELIBERATELY THE REDACTOR'S RULE AND NOT A BETTER ONE. A second,
+    cleverer name detector would disagree with the redactor somewhere, and the
+    two disagreeing is worse than either being imperfect: the guard would
+    refuse things the redactor would have shaped, or -- the direction that
+    matters -- pass things the redactor would have blanked.
+    """
+    return bool(_CENSUS_CAPS_RUN.search(str(text or "")))
+
+
 def census_redact_rare(shape: str, count: int) -> str:
     """Blank a run of 3+ capitalised words in a shape seen exactly ONCE.
 

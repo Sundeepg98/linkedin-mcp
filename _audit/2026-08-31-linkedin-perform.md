@@ -2016,3 +2016,48 @@ absence as an obstacle would have missed that they are one fact.
     phase 2                untouched
 
 Nothing was fired. Nothing was pushed from this seat.
+
+---
+
+# NEEDS-RECONNECT  --  the live validations queued behind ONE server reload
+
+Written as it accumulates rather than reconstructed at the end, because this
+list is the thing that makes ONE reconnect sufficient instead of six. The
+loaded process holds the code it started with; a fix on disk is not a fix in
+the session. Everything here is code-complete and gated, and needs only the
+server to reload before it can be exercised against live LinkedIn.
+
+| # | what to run | what it settles | expected outcome |
+|---|---|---|---|
+| 1 | `linkedin_profile_editor_fields` | the four field names inside `/in/me/edit/intro/`, which `update_profile_field` needs to name a control to type into | should now SUCCEED  --  it refused its own operator until `1666dec` |
+| 2 | `dom.read_compose_fields` on `/messaging/compose/` | the two SEND-MODE radio labels, and whether either is an **InMail**  --  a metered allowance on Premium Career | **may REFUSE, see below** |
+| 3 | the same reading | the message body's `aria-label`, which the census reduces to `<opaque>` | should succeed if 2 does |
+| 4 | a second `premium` census | whether `/premium/my-premium/` has a settled control count at all | 73 and 80 disagree; a third reading either breaks the tie or confirms the surface is unstable |
+
+## A prediction on file for item 2, before it is run
+
+**I expect `read_compose_fields` to REFUSE with `name_shaped_label_present`.**
+
+The census reduced the two send-mode labels to `<redacted>` and `<redacted> to
+<redacted>`. The most likely raw text is *"<his name> will send message"* and
+*"<his name> to <someone> will send message"*  --  and the guard refuses any
+label carrying a run of capitalised words.
+
+**That refusal would be over-cautious, and the reason is worth stating before
+the fact rather than after.** The guard cannot tell WHOSE name it is. In a
+composer with no recipient selected, a name is almost certainly HIS OWN  --  and
+his own name is not a third-party disclosure. The self-ownership argument this
+whole reader rests on says the container is his.
+
+I have **built it to the ruling as given** rather than quietly loosening it,
+because a guard that publishes a name on the reasoning that it is *probably*
+his is exactly the shape this package refuses. If it refuses on his own name,
+that is a ruling to make with the evidence in hand, not a rule to soften in
+advance.
+
+## What is NOT on this list, and why
+
+`set_open_to_work` is not here. Its blocker is not a stale process: the SDUI
+flight payload is absent from a live load, measured twice, so no reconnect
+changes it. It refuses on measured ground and the fourth mutation entry stays
+unspent.

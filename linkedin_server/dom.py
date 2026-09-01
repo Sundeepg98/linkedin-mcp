@@ -3105,6 +3105,8 @@ async def read_self_owned_editor_fields(
     *,
     max_controls: int = EDITOR_MAX_CONTROLS,
     max_chars: int = 300,
+    anchor_name: str = EDITOR_ANCHOR_NAME,
+    container_selector: str = EDITOR_CONTAINER_SELECTOR,
 ) -> dict[str, Any]:
     """Label every control inside the editor dialog, or REFUSE and name why.
 
@@ -3141,10 +3143,17 @@ async def read_self_owned_editor_fields(
     NAMES COME BACK UNGATED AND SUBSTITUTED. See the block above this script
     for the ruling and for the half of the shaping that survives it.
     """
+    # THE ANCHOR AND CONTAINER ARE ARGUMENTS FROM 2026-09-01, defaulting to
+    # the profile editor's. EDITOR_FIELDS_JS was ALREADY fully parameterised
+    # on all three -- cfg.anchorName, cfg.containerSelector,
+    # cfg.controlSelector -- so a second surface needs no second script, no
+    # second `# readonly-ok` waiver and no budget bump. That was checked
+    # before one was written: the composer's send-mode question looked like it
+    # needed a new injected script and it needed a keyword argument.
     cfg = {
         "controlSelector": CENSUS_CONTROL_SELECTOR,
-        "containerSelector": EDITOR_CONTAINER_SELECTOR,
-        "anchorName": EDITOR_ANCHOR_NAME,
+        "containerSelector": container_selector,
+        "anchorName": anchor_name,
         "maxControls": int(max_controls),
         "maxChars": int(max_chars),
     }
@@ -3162,7 +3171,7 @@ async def read_self_owned_editor_fields(
         return {
             "refused": "no_anchor",
             "reason": (
-                f"no control on this page is named {EDITOR_ANCHOR_NAME!r}, so "
+                f"no control on this page is named {anchor_name!r}, so "
                 "there is nothing to identify the editor container by. This "
                 "reader does not fall back to a position."
             ),
@@ -3173,7 +3182,7 @@ async def read_self_owned_editor_fields(
             "refused": "ambiguous_anchor",
             "reason": (
                 f"{anchors} controls on this page are named "
-                f"{EDITOR_ANCHOR_NAME!r}. Picking one of them would be picking "
+                f"{anchor_name!r}. Picking one of them would be picking "
                 "by document order, which is not containment."
             ),
             "anchor_controls": anchors,
@@ -3183,8 +3192,8 @@ async def read_self_owned_editor_fields(
         return {
             "refused": "anchor_outside_a_container",
             "reason": (
-                f"the one control named {EDITOR_ANCHOR_NAME!r} has no "
-                f"{EDITOR_CONTAINER_SELECTOR} ancestor, so there is no "
+                f"the one control named {anchor_name!r} has no "
+                f"{container_selector} ancestor, so there is no "
                 "container to scope this read to -- and the scope is the whole "
                 "of the permission."
             ),
@@ -3219,7 +3228,7 @@ async def read_self_owned_editor_fields(
     out: dict[str, Any] = {
         "container": {
             "kind": str(kind),
-            "anchor": EDITOR_ANCHOR_NAME,
+            "anchor": anchor_name,
             "controls_inside": int(data.get("controls_inside") or 0),
         },
         "fields": fields,
@@ -4352,6 +4361,96 @@ COMMENT_EDITOR_LABEL = "Text editor for creating comment"
 #: an empty composer, the same transition signal as `Post`.
 MESSAGE_RECIPIENT_LABEL = "Enter message recipients"
 MESSAGE_SEND_NAME = "Send"
+
+#: The composer's own container. Measured: every composer control -- the body
+#: editor, both send-mode radios, Send and the two attach buttons -- reports
+#: ``form#0``, and the page draws exactly one form.
+MESSAGE_CONTAINER_SELECTOR = "form"
+
+
+async def read_compose_fields(page: Any) -> dict[str, Any]:
+    """Name the composer's controls, or REFUSE. Labels, never values.
+
+    WHY THIS EXISTS AND WHY IT IS NOT THE BODY'S NAME. The composer draws TWO
+    SEND-MODE RADIOS, one checked, and the census reduces both to
+    ``<redacted>`` and ``<redacted> to <redacted>``. **He is on Premium
+    Career, and one of those modes may be an InMail** -- a metered allowance,
+    not a free action. So the unreadable choice is potentially the difference
+    between sending a message and SPENDING ONE OF HIS CREDITS, and a gate that
+    cannot tell him whether an action costs him something is not a gate, it is
+    a formality. That makes this a hard precondition rather than a nicety.
+
+    IT REUSES :data:`EDITOR_FIELDS_JS` RATHER THAN ADDING A SCRIPT. That
+    script was already parameterised on anchor, container and control
+    selector, so this surface costs no new ``# readonly-ok`` waiver and no
+    budget bump -- checked before one was written.
+
+    TWO GUARDS, AND EITHER REFUSES.
+
+    **No recipient may be selected.** The self-ownership argument here is
+    stronger than the profile editor's -- a composer with nobody in it
+    contains no third party AT ALL, so there is nothing to disclose. That is
+    asserted rather than assumed: once a recipient is chosen the labels start
+    describing a conversation with a person in it and the argument evaporates.
+
+    **Nothing name-shaped is published.** Any label carrying a run of
+    capitalised words -- the same rule ``shape.census_redact_rare`` applies --
+    stops this reader. The second send-mode label came back from the census as
+    ``<redacted> to <redacted>``, two name-shaped tokens, which is exactly the
+    case that must stop it. A reader that guessed there would be publishing a
+    stranger's name to explain a radio button.
+
+    A REFUSAL CARRIES NO FIELD DATA, following the profile editor's rule:
+    there is no ``fields`` key on a refusal, so a refusal cannot be misread as
+    "the container has none".
+    """
+    out: dict[str, Any] = {"refused": None, "recipients_selected": None}
+    try:
+        chosen = int(
+            await page.locator(
+                'button[aria-label^="Remove"], [data-test-selected-recipient]'
+            ).count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        out["refused"] = "recipient_count_unreadable"
+        out["why"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["recipients_selected"] = chosen
+    if chosen:
+        out["refused"] = "recipient_already_selected"
+        out["why"] = (
+            f"{chosen} recipient(s) are already selected, so this composer "
+            "holds a third party and the self-ownership argument this reader "
+            "rests on does not apply. Nothing was read."
+        )
+        return out
+
+    reading = await read_self_owned_editor_fields(
+        page,
+        anchor_name=MESSAGE_SEND_NAME,
+        container_selector=MESSAGE_CONTAINER_SELECTOR,
+    )
+    if reading.get("refused"):
+        return dict(reading)
+
+    fields = list(reading.get("fields") or [])
+    named = [str(field.get("name") or "") for field in fields]
+    offending = [name for name in named if shape.looks_name_shaped(name)]
+    if offending:
+        # THE NAMES ARE NOT REPORTED, only that there were some. Reporting
+        # them is the disclosure this guard exists to prevent.
+        return {
+            "refused": "name_shaped_label_present",
+            "recipients_selected": chosen,
+            "why": (
+                f"{len(offending)} control label(s) in this container carry a "
+                "run of capitalised words, which is how a person's name looks "
+                "to every reader in this package. Publishing them to explain "
+                "a radio button is not a trade this server makes, so nothing "
+                "is returned. The labels themselves are not reported here."
+            ),
+        }
+    return dict(reading, recipients_selected=chosen)
 
 
 def comment_editor_selector() -> str:
