@@ -1256,6 +1256,20 @@ By the rule accepted before the capture was taken:
 `readonly.SANCTIONED_MUTATIONS` ends this wave at **2 entries**, exactly where
 it started. No `fill` entry was landed, standalone or with a call site.
 
+> **OVERTAKEN THE SAME DAY, 2026-09-01, and left standing because the reasoning
+> is what changed rather than the measurements.** The operator lifted the
+> VERIFICATION STANDARD within the hour of this being written: an unverifiable
+> outcome became a shippable outcome provided the gate says so. Every
+> measurement above survives that ruling intact -- there is still no comment
+> total, the rail still renders intermittently, the composer still carries no
+> countable balance. What changed is that those findings became the
+> DISCLOSURE the gate prints instead of the reason it refuses.
+>
+> All three ship now, and `SANCTIONED_MUTATIONS` ends the day at **3**. See
+> Part Five. Note what did NOT move: `send_message` still refuses, because its
+> recipient control was never measured -- and a ruling cannot photograph a
+> control.
+
 The server still cannot type. What changed is that all three refusals now name
 a measured ground instead of an inherited assumption.
 
@@ -1451,3 +1465,335 @@ its numbers were derived, and that sentence was the reason nobody derived them.
     phase 2                    untouched, as instructed
 
 Nothing was fired. Nothing was pushed.
+
+---
+
+# PART FIVE -- THE OPERATOR LIFTED THE STANDARD, AND SEVEN CAPABILITIES WERE ANSWERED (2026-09-01)
+
+Part Four closed with **none of the three shipping** and the typing ruling
+unspent. That close was correct on its evidence and was overtaken within the
+hour: the operator was shown exactly what he would be accepting -- a write that
+fires and cannot tell him whether it worked, and that for an invitation he
+would be checking after the fact, on a person -- and he took it.
+
+## 33. THE THREE RULINGS, AND WHAT EACH ONE DID NOT LIFT
+
+**RULING 1 -- an unverifiable outcome is a shippable outcome, PROVIDED IT SAYS
+SO.** `performed: "unknown"` stops being a reason to refuse and becomes an
+honest result, on condition that the gate names what surface would confirm the
+act, why this server cannot read it, and **what he must do himself**.
+
+**RULING 2** -- `update_profile_field` may overwrite without recording the
+previous value, provided the preview says it cannot report what it overwrites.
+
+**RULING 3** -- `react_to_item` may apply LinkedIn's default reaction, provided
+the preview states that nobody has measured which one that is.
+
+**WHAT NONE OF THEM LIFTED, and this is the line the whole wave turns on:**
+
+> **A check that CANNOT PASS may never ship as though it might.**
+
+That was `apply_job`'s defect. What is now permitted is the opposite: a write
+that declares its outcome unverifiable up front. Never compare against a reader
+that cannot return the value; if there is no surface, say there is none. The
+difference between those two is the entire content of Ruling 1, and the guard
+below is that sentence expressed as an assertion.
+
+**AND A RULING CANNOT MEASURE A CONTROL.** Three of the seven were blocked on
+MEASUREMENT rather than permission, and lifting a verification standard does
+not photograph anything. That distinction did most of the work this wave.
+
+## 34. `Unverifiable` -- THREE FIELDS, NOT A PARAGRAPH
+
+Ruling 1's three disclosures are a structured field on `WriteSpec`, printed in
+the preview **and repeated on the result**:
+
+    surface_that_would_confirm   what WOULD settle it, named
+    why_it_cannot                the MEASUREMENT, not a shrug
+    what_he_must_do              the instruction he can act on
+
+**A paragraph carrying all three is a paragraph that can lose one**, and the
+field that goes missing is always the third -- the first two are about the
+software and only the third is about him. It is repeated on the RESULT because
+the sentence he needs after acting is the one telling him where to look.
+
+`_verify_after` returns a declared-unverifiable action's answer **before any
+navigation, read or comparison**. That order is the safety property rather than
+an optimisation: a comparison that runs is a comparison somebody later reads as
+evidence.
+
+## 35. THE DEFECT FOUND WHILE BUILDING THE GUARD, AND IT WAS WORSE THAN THE ONE IT WAS FOR
+
+`_verify_after` ended in:
+
+    if spec.action != "unfollow_company":
+        <read the SAVED tab>
+
+**Every action that was not an unfollow silently adopted the save pair's
+verifier.** That is the actual mechanism behind `apply_job` comparing
+`"applied"` against a reader that could only ever say `saved` / `not_saved` /
+`unknown` -- not a typo in one comparison but a DEFAULT that hands one action's
+reader to every other. Falling through LOOKED like being handled.
+
+`unfollow_company` itself was reached by falling PAST that negative test, which
+made it invisible to any check asking *which actions are handled*. Both are
+explicit positive branches now, and an action reaching the end RAISES rather
+than borrowing somebody else's reader.
+
+### The guard: `tests/test_unverifiable_outcomes.py`
+
+* **EXACTLY ONE** of {a branch in `_verify_after`, a declared `unverifiable`}.
+  Neither is the apply shape. Both is worse -- a declaration used as cover for
+  a comparison that still runs.
+* Where a branch exists, the reader it calls must be able to RETURN the value
+  compared against. Derived by AST from the real `_TrackerStage` objects, not
+  from a list kept beside them.
+* A **behavioural** proof, because the other two are structural: `_verify_after`
+  is handed a navigator and page that raise on ANY attribute access.
+* The AST branch-reader has its own control -- a rename would otherwise empty
+  the file silently, and an empty corpus passes everything.
+
+Five mutations, all caught, including **`apply-verifies-against-the-saved-tab`,
+which reintroduces the original defect verbatim.**
+
+## 36. THE SEVEN, EACH ANSWERED
+
+| # | capability | outcome | what settled it |
+|---|---|---|---|
+| 1 | `react_to_item` | **PERFORMS** | three blockers measured away 2026-08-31; the fourth (which reaction) became a Ruling 3 disclosure in `residue` |
+| 2 | `send_invitation` | **PERFORMS** | the aim CLOSED by measurement (`aim_invitation` resolves his needle to exactly one, inside the page); the verification was declared under Ruling 1 |
+| 3 | `publish_post` | **PERFORMS** | typing granted; verification declared -- the activity rail is unreliable, not absent |
+| 4 | `comment_on_item` | **PERFORMS, expecting to refuse** | surface, editor and aim measured; the SUBMIT is not, so it is found by ARRIVAL and refuses with the observation |
+| 5 | `update_profile_field` | refuses | **measurement**: no field inside any editor has been observed. Ruling 2 lifted the previous-value requirement and cannot photograph a field |
+| 6 | `send_message` | refuses | **measurement**: `Send` is measured (disabled while empty) but the RECIPIENT control's name never reached disk |
+| 7 | `set_open_to_work` | refuses | **measured, and the ruling was deliberately not stretched** -- see section 40 |
+
+**Four shipped. Three refuse, and every one of the three refuses on a
+MEASUREMENT gap rather than on a permission the operator withheld.**
+
+## 37. THE SENTENCES THAT ARE NOW THE PRODUCT
+
+For each write that cannot confirm itself, the gate prints -- verbatim -- what
+he must do:
+
+| action | what he must do himself |
+|---|---|
+| `send_invitation` | *"open My Network, then Manage, then Sent, and look for the person. That is the only way to know whether this landed"* |
+| `publish_post` | *"open your profile and look at your recent activity. If the post is there it published; this server cannot tell you reliably either way"* |
+| `comment_on_item` | *"open the post and look at the comments. Yours will be attributed to you. AND IF THIS REFUSES AFTER TYPING: a comment draft may be left in the box, and whether that draft is local to this browser or saved to your account is UNMEASURED..."* |
+
+## 38. THE PACKAGE TYPES NOW, AND SAID IT DID NOT UNTIL TODAY
+
+`readonly.SANCTIONED_MUTATIONS` went from two entries to **three**, and the
+third is the first that is not a click:
+
+    ("linkedin_server/writes.py", "perform", "click")
+    ("linkedin_server/dom.py",    "activate_messaging_filter", "click")
+    ("linkedin_server/writes.py", "perform", "fill")        <- 2026-09-01
+
+**"It types nothing" was true, was printed in THREE places, and is now false.**
+All three were corrected in the commit that made them false -- `readonly.py`'s
+module docstring, `shape.py`'s composer disclosure, and the tool docstring. A
+reader who remembers the old guarantee meets the change where the guarantee
+was.
+
+**ONE FILL, ONE DRAIN POINT**, mirroring the click queue, because the scanner
+counts CALL SITES and one drain point is what keeps the allowlist readable.
+
+### What the boundary digests say this cost
+
+Re-frozen a third time, and **only `SANCTIONED_MUTATIONS` moved**.
+`<functions>` is byte-identical at `eb16cd07f5cf369d` -- `assert_read_url` and
+every gate function unchanged -- and all four denylists are unchanged.
+**Permitting a fill widened the allowlist DATA by one tuple and touched no
+gate, no url pattern, no mutation pattern.** That is a measurement, not a
+claim: a change that had loosened any of those on the way past would have moved
+a second digest.
+
+### The byte-identity test found its own weakness
+
+The operator's third typing condition -- *the exact text verbatim in the
+preview* -- is a promise about a string, so it is the one that could rot while
+everything still looked right. The first version of the check compared
+UNPARSED SOURCE against a substring, and this mutation **passed it**:
+
+    _text_component_of(spec, grant.target) + " #hiring"
+
+The substring is still in there. That mutation is precisely the "this server
+composes what it types" failure the condition forbids. The check is on the AST
+NODE TYPE now -- a BinOp, an f-string, a slice or any wrapper is a different
+node. Four mutations caught: appending, truncating, wrapping, typing a literal.
+
+## 39. THE EMPTY-STATE ASYMMETRY -- ONE MEASURED BOOLEAN, TWO DIFFERENT INSTRUMENTS
+
+This is the finding of the wave's second half and it is worth carrying alone,
+because anyone re-deriving it from control NAMES gets it wrong the same way.
+
+| surface | submit candidate | state while EMPTY | does a fill produce a signal? |
+|---|---|---|---|
+| `/preload/sharebox/` | `Post` | **disabled** | YES -- disabled to enabled |
+| `/messaging/compose/` | `Send` | **disabled** | YES -- same shape |
+| `/feed/update/<urn>/` | `Comment` | **ENABLED** | **NO** |
+
+`Post` being disabled while empty **is itself the evidence it is the submit**,
+and it is what makes a post-fill gate possible at all. The comment surface has
+no transition to observe, so *"present, visible and enabled, named Comment"* is
+satisfied BEFORE anything is typed -- a gate keyed on it presses the FOCUS
+AFFORDANCE and returns something indistinguishable from success.
+
+So `comment_on_item` identifies its submit by **ARRIVAL**: it did not exist
+until there was something to submit. Names censused before the fill and after;
+exactly one NEW NAME is aimable; a name whose COUNT merely grew means two
+controls share one name and only position separates them, which is refused.
+
+**It is expected to refuse on first use and its docstring leads with that.**
+Measuring the submit requires the fill, and the fill is the act the gate
+authorises -- so the refusal, carrying `arrived` and `grew`, IS the
+measurement. The same shape `unsave_job` took when its ON label could not be
+observed until one write produced it.
+
+Container scoping was checked and **does not survive**: the editor, the
+`Comment` control and all four `Reply` buttons report container `none`; the
+only container-bearing controls on that permalink are two ad dialogs and the
+ad-report form. The delta is whole-page with that noise named rather than
+hidden.
+
+## 40. `set_open_to_work` -- THE RULING ADMITTED THE DOOR AND NOT THE ROOM
+
+The operator ruled that **a click measured to issue no `ServerRequest` is, by
+effect, a READ** -- extending this package's own reasoning about the messaging
+filter pills. That ruling admits opening a modal.
+
+`_audit/_slice-otw-census.md` had already measured the procedure, statically,
+over five captures. Nine steps, and the danger is concentrated in exactly one:
+
+| step | control | action list | admitted? |
+|---|---|---|---|
+| 4 | `Show details` | **one `Navigate`, NO `ServerRequest`** | **YES** |
+| 7 | `Edit` | `SetState` x2 then **`ServerRequest ...saveAndFetchNextStepRequest`** | **NO** |
+
+And the audit's own two sentences, which settle it:
+
+> **First step that shows the editor's controls: step 7. First step that could
+> change state if mis-clicked: also step 7. The two are the same click.**
+
+**So the editor is not reachable by a click measured to send nothing**, and the
+ruling was not stretched to cover `Edit` -- whose request is named
+`saveAndFetchNextStep` by LinkedIn, and which writes two `SetState` values
+optimistically before the request leaves.
+
+One question stays genuinely open and is recorded rather than closed: nothing
+on disk says whether the AUDIENCE control lives in the step-5 detail modal or
+one level deeper. Settling it would cost a **FOURTH** entry in
+`SANCTIONED_MUTATIONS` -- a click on a read path -- to answer a question whose
+likely answer is *still refuses*. That widening outlives the wave, and it was
+surfaced as a decision rather than taken.
+
+## 41. THE GUARD THAT COULD NOT SEE A NEW FILE
+
+Found because it fired one commit late on a REAL activity id -- one of his own
+posts, on a public repo under his real name.
+
+> **THE CHECK A NEW FILE MOST NEEDS RAN ONLY AFTER THE FILE WAS PUBLISHED.**
+
+Both guards swept `git ls-files`. The file sat in the working tree through a
+full green suite; that run was green AND CORRECT, because the file was
+invisible to the question. It became visible in the same commit that put the id
+in history.
+
+`committable_files()` = tracked + untracked-not-ignored. `.gitignore` still
+keeps `_state/`, caches and build output out; what remains is exactly what a
+`git add` would pick up. **The credential guard now sweeps a strict SUPERSET**,
+asserted rather than argued -- nothing it measured before is unmeasured now.
+
+Shown blind at the mutation, with an untracked fixture carrying both plants:
+
+    widened sweep        credential RED    identity RED
+    untracked half cut   credential GREEN  identity GREEN   <- blind
+
+**The durable test is set-level and writes no plant**, which is a risk trade
+rather than a weaker check: a standing end-to-end version would leave a
+credential-shaped string in the working tree if pytest were killed mid-run,
+manufacturing on a schedule the exact condition this repo suffered that
+morning. The property is composed from two checks that each fail alone.
+
+**It proved itself four hours later, unprompted:** `test_comment_delta_gate.py`
+was untracked during a full suite run and was swept anyway.
+
+## 42. AND MY OWN REPORT WAS WRONG WHERE THE INSTRUMENT WAS RIGHT
+
+I reported that urn as already fixed. It was -- **in the other file.** Two
+files had the identical defect, one fix went in, and the report generalised
+from one instance to the class.
+
+> **I reported a fix by its class, not by its instances.**
+
+The guard disagreed with the summary and the guard was right, which is the
+whole argument for checks that fail loudly over reports that read well.
+
+## 43. THE THIRTEEN-ROW LEDGER
+
+| # | action | state | the ground, as measured |
+|---|---|---|---|
+| 1 | `save_job` | **PERFORMS** | anchor `Save the job`, verified against the Saved tab |
+| 2 | `unsave_job` | **PERFORMS** | anchor measured across two independent routes |
+| 3 | `follow_company` | **PERFORMS** | verified by re-reading the followed list |
+| 4 | `unfollow_company` | **PERFORMS** | numeric id; refuses when the Page is not among rendered rows |
+| 5 | `apply_job` | **PERFORMS**, irreversible | verification now reads the Applied tab; the submit gate names which of five conditions refused |
+| 6 | `update_setting` | **PERFORMS** | three-state radio group; role read off the row; verified by reload and re-read |
+| 7 | `react_to_item` | **PERFORMS** | OFF anchor on three surfaces; permalink draws exactly one control; verification returns `to_state`, and declines to say WHICH reaction |
+| 8 | `send_invitation` | **PERFORMS**, irreversible | needle resolved to exactly one control inside the page; outcome DECLARED unverifiable |
+| 9 | `publish_post` | **PERFORMS**, irreversible | `Post` disabled-while-empty gives a real post-fill gate; refuses to type over a restored draft; outcome declared unverifiable |
+| 10 | `comment_on_item` | **PERFORMS**, irreversible | submit found by ARRIVAL; expects to refuse and reports what it saw |
+| 11 | `send_message` | refuses | `Send` measured; the RECIPIENT control's name never reached disk. A measurement, not a permission |
+| 12 | `update_profile_field` | refuses | `/edit/` forbidden with one exact-url exemption; no field inside any editor observed |
+| 13 | `set_open_to_work` | refuses, **no tool** | the editor is behind a click that fires `ServerRequest saveAndFetchNextStep`; the no-`ServerRequest` ruling admits step 4 and not step 7 |
+
+**Ten perform. Three refuse, all three on measurement.**
+`performable_and_irreversible` is **four**: `apply_job`, `comment_on_item`,
+`publish_post`, `send_invitation`.
+
+## 44. THE FINDINGS THAT OUTLIVE THIS WORK
+
+The four from Part Four stand unchanged and are not repeated here. This wave
+added two.
+
+> *The check a new file most needs runs only after the file is published.*
+
+A guard against committing something must see what is ABOUT TO BE committed,
+not only what already was -- otherwise its first true answer always arrives one
+commit late, which is precisely too late for anything it protects. Its
+green runs before that are not wrong; they are answers to a narrower question
+than the one anybody was asking.
+
+> *One measured boolean can separate a trivial gate from an impossible one.*
+
+`Post` and `Send` are drawn DISABLED while empty; `Comment` is drawn ENABLED.
+Two of those surfaces can be gated on a state transition and the third cannot
+be gated that way at all -- and every one of the three carries a plausible,
+well-named submit control. **A design derived from control names alone gets
+this wrong**, confidently, and the resulting gate presses the wrong control
+while looking exactly like success.
+
+## 45. RECEIPTS, PART FIVE
+
+    commits                   fd9f49e  the Unverifiable mechanism + the catch-all fix
+                              d74178f  react_to_item performs
+                              bc7447a  send_invitation performs
+                              b6bf408  publish_post performs -- the package types
+                              051c518  the urn out; seven skips converted
+                              43a8d6b  the guards see untracked files
+                              1fb3c15  comment_on_item performs
+
+    suite                     2389 passed, 0 failed, 0 SKIPPED
+    tree                      identical at both ends of every gating run
+    SANCTIONED_MUTATIONS      3 (click, click, fill); both non-dom entries in perform
+    PERFORMABLE               10
+    irreversible+performable  4
+    boundary digests          only SANCTIONED_MUTATIONS moved; <functions> unchanged
+    confirm_tokens            0 minted, 0 used
+    writes performed          0
+    _state/session.json       untouched, f0892e35688868fa, 7813 bytes
+    phase 2                   untouched
+
+Nothing was fired. Nothing was pushed from this seat.
