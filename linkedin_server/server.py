@@ -1953,6 +1953,16 @@ CENSUS_SETTLED_CONTROLS: dict[str, int] = {
     "settings_dark_mode": 20,
     # 34 (2026-08-30), 33.
     "settings": 33,
+    # 31, 31, 31 -- three readings across two days, the third carrying this
+    # instrument's own "consistent" verdict. The composer is the most stable
+    # surface after the dark-mode page.
+    "post_composer": 31,
+    # 77 AND 77, two independent readings on 2026-09-01 separated by hours and
+    # by a server restart. EARNED RATHER THAN ASSUMED, and recorded because
+    # leaving the verdict at "unknown" when a baseline has been earned throws
+    # the measurement away -- a surface earns an entry by being read more than
+    # once and agreeing with itself, and this one has.
+    "messaging_compose": 77,
     # 31 twice, 2026-08-31, identical on every count.
     "post_composer": 31,
 }

@@ -3599,12 +3599,24 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     of this module's standing error: an unmeasured thing wearing a measured
     answer.
     """
-    for surface in ("messaging_compose", "article_composer", "feed_item"):
-        # ``premium`` and ``feed_item_commented`` join them: read once each at
-        # most, so neither has a settled count and both must report unknown.
-        pass
+    # THIS LIST SHRANK ON 2026-09-01 AND THAT IS THE MECHANISM WORKING, not a
+    # weakening. A surface earns a settled entry by being read more than once
+    # and AGREEING WITH ITSELF, and two did:
+    #
+    #   messaging_compose  77 and 77, two independent readings hours apart and
+    #                      across a server restart
+    #   post_composer      31, 31, 31, the third carrying the instrument's own
+    #                      "consistent" verdict
+    #
+    # WHAT DID NOT EARN ONE IS THE INTERESTING HALF, and ``premium`` is the
+    # case worth reading: it HAS been read twice -- 73 and 80 -- and the two
+    # readings DISAGREE. Two readings are not a baseline; two AGREEING
+    # readings are. So it stays here, and a finding drawn from it has to
+    # survive both numbers.
+    #
+    # ``article_composer``, ``feed_item`` and ``feed_item_commented`` are read
+    # once each at most.
     for surface in (
-        "messaging_compose",
         "article_composer",
         "feed_item",
         "feed_item_commented",

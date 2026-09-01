@@ -297,6 +297,45 @@ def test_the_mutation_scanner_catches_a_planted_write():
     assert {"click", "fill", "http_post"} <= kinds, hits
 
 
+def test_nothing_in_this_package_can_reach_a_file_input():
+    """The composer draws two file inputs. Nothing here may touch them.
+
+    MEASURED 2026-09-01 on /messaging/compose/: ``file_inputs: 2``, named
+    ``Attach a file for your draft conversation`` and ``Attach an image for
+    your draft conversation``, both in ``form#0``. They sit on a surface this
+    server now loads, beside a Send control it is being built to press.
+
+    ``set_input_files`` is on :data:`_MUTATION_CALL_PATTERNS` and is NOT on
+    ``SANCTIONED_MUTATIONS``, so the scanner would catch one. This asserts the
+    same thing from the other side and by NAME, because "nobody has written
+    that call" is a fact about today and this is a fact about the rule: a
+    control nothing reaches today is one refactor from being reachable.
+
+    UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words in
+    a box; a file input puts a FILE from this machine into somebody else's
+    inbox, chosen by a path string. Nothing in this package should be one edit
+    away from that, and the operator has never been asked about it.
+    """
+    for module in MODULES:
+        source = module.read_text(encoding="utf-8")
+        for lineno, kind, line in readonly.scan_source_for_mutations(source):
+            assert kind != "set_input_files", (module.name, lineno, line)
+
+    # AND THE PATTERN ITSELF MUST STILL BITE, or the loop above is a loop over
+    # nothing. A rule that cannot fire certifies nothing.
+    planted = (
+        "async def send(page):\n"
+        "    await page.set_input_files('#f', p)\n"
+    )
+    hits = readonly.scan_source_for_mutations(planted)
+    assert [kind for _line, kind, _src in hits] == ["set_input_files"], hits
+
+    # It is not on the allowlist, so even inside perform it would be refused.
+    assert not any(
+        kind == "set_input_files" for _p, _f, kind in readonly.SANCTIONED_MUTATIONS
+    )
+
+
 def test_evaluate_is_flagged_unless_explicitly_waived():
     """An unwaived evaluate() must trip the scanner; a waived one must not."""
     unwaived = "result = await page.evaluate(SOME_SCRIPT)\n"

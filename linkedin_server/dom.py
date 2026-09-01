@@ -4341,6 +4341,18 @@ async def read_sdui_actions(
 #: reported zero, so this is the first comment editor this server has seen.
 COMMENT_EDITOR_LABEL = "Text editor for creating comment"
 
+#: THE COMPOSER'S TWO NAMED CONTROLS, measured 2026-09-01 on
+#: /messaging/compose/ with the badge at 0 either side, no redirect and zero
+#: dialogs. Recorded here because they were paid for and are the half of
+#: send_message's first clause that IS met.
+#:
+#: THE OTHER HALF IS NOT: the message BODY's aria-label and the two SEND-MODE
+#: radio labels all come back reduced by the census, and reading them needs a
+#: script of its own -- see the note in writes.py. `Send` is drawn DISABLED on
+#: an empty composer, the same transition signal as `Post`.
+MESSAGE_RECIPIENT_LABEL = "Enter message recipients"
+MESSAGE_SEND_NAME = "Send"
+
 
 def comment_editor_selector() -> str:
     """The contenteditable a comment's text is typed into. NO ARGUMENT."""
