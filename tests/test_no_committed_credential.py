@@ -51,12 +51,62 @@ SHAPES = (("li_at", LI_AT_SHAPE), ("JSESSIONID", JSESSIONID_SHAPE))
 
 
 def tracked_files() -> list[str]:
-    """Every path git tracks, as repo-relative posix strings."""
+    """Every path git TRACKS, as repo-relative posix strings.
+
+    Kept narrow and kept in use: where the question really is "is this file in
+    the repository", this is the answer. It is NOT what the sweeps below use
+    -- see :func:`committable_files` for why.
+    """
     proc = subprocess.run(
         ["git", "ls-files"], cwd=str(REPO), capture_output=True, text=True
     )
     assert proc.returncode == 0, f"git ls-files failed: {proc.stderr}"
     return [line for line in proc.stdout.splitlines() if line.strip()]
+
+
+def untracked_files() -> list[str]:
+    """Every path git does NOT track and does NOT ignore.
+
+    ``--exclude-standard`` applies .gitignore, the global excludes and
+    .git/info/exclude, so build output, ``_state/`` and caches stay out. What
+    is left is exactly the set of files a ``git add`` would pick up.
+    """
+    proc = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        cwd=str(REPO),
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, f"git ls-files --others failed: {proc.stderr}"
+    return [line for line in proc.stdout.splitlines() if line.strip()]
+
+
+def committable_files() -> list[str]:
+    """Everything a commit could carry: TRACKED plus UNTRACKED-NOT-IGNORED.
+
+    THIS EXISTS BECAUSE THE SWEEPS WERE SWEEPING THE WRONG SET, and the way
+    that was found is the argument for it.
+
+    On 2026-09-01 a file was added carrying a REAL LinkedIn activity id -- one
+    of the operator's own posts -- in a repository that is public under his
+    real name. The identity guard would have caught it instantly, and did not,
+    because it swept ``git ls-files``: the file was UNTRACKED through every
+    run. The suite was green and CORRECT; the file was invisible to the
+    question. It became visible in the same commit that put the id in history.
+
+    **THE CHECK A NEW FILE MOST NEEDS RAN ONLY AFTER THE FILE WAS PUBLISHED.**
+    A guard against committing something must see what is ABOUT TO BE
+    committed, not only what already was -- otherwise its first true answer
+    always arrives one commit late, which is precisely too late for anything
+    it is protecting.
+
+    WHAT THIS COSTS: a stray untracked file in somebody's working tree is now
+    swept, and a plant in one fails the suite. That is the intended behaviour
+    rather than a side effect -- a file sitting in the tree is a file one
+    ``git add -A`` away from being published, and this repo's own history has
+    that exact mistake in it.
+    """
+    return sorted(set(tracked_files()) | set(untracked_files()))
 
 
 def scan(text: str) -> list[str]:
@@ -68,7 +118,14 @@ def scan(text: str) -> list[str]:
     ]
 
 
-TRACKED = tracked_files()
+#: WIDENED 2026-09-01 from ``tracked_files()``. The name changed with it,
+#: because "TRACKED" would now be a false description of the set and this
+#: package does not keep names that lie. See :func:`committable_files`.
+COMMITTABLE = committable_files()
+
+#: The old name, kept ONLY so that the widening is visible rather than
+#: silent: it is the same object, so nothing reads a narrower set by accident.
+TRACKED = COMMITTABLE
 
 #: What actually gets swept. The plant's home is removed HERE, at list-build
 #: time, rather than skipped inside the test: this workflow treats any skip as
@@ -87,6 +144,55 @@ def test_exactly_one_file_is_exempt_and_every_other_one_is_on_disk():
     assert set(TRACKED) - set(SCANNED) == {_PLANT_HOME}
     missing = [relative for relative in SCANNED if not (REPO / relative).is_file()]
     assert missing == [], missing
+
+
+def test_an_untracked_file_reaches_the_sweep_before_it_is_ever_committed():
+    """THE REGRESSION TEST FOR THE HOLE, at the level of the SET.
+
+    A probe is written into the repo, confirmed to be untracked, and required
+    to appear in ``committable_files()`` and NOT in ``tracked_files()``. That
+    is the whole of what changed on 2026-09-01, so narrowing the sweep back
+    fails here.
+
+    IT DOES NOT WRITE A PLANT, and that is a deliberate risk trade rather than
+    a weaker test. An end-to-end version -- untracked file, real plant, both
+    guards red -- WAS run before this landed and both guards caught it, and
+    both went blind when the untracked half of the sweep was removed. But as a
+    PERMANENT test it would leave a credential-shaped string in the working
+    tree if pytest were killed mid-run, and this repo's own history is a file
+    reaching a commit because somebody did not notice it sitting there. The
+    property is composed instead, from two checks that each fail on their own:
+    this one owns "the set includes untracked files", and
+    ``test_the_sweep_catches_a_credential_planted_in_a_file`` owns "the scan
+    catches a plant".
+    """
+    probe = REPO / "tests" / "fixtures" / "_sweep_membership_probe.txt"
+    assert not probe.exists(), "a previous run left this behind: %s" % probe
+    try:
+        probe.write_text("membership probe, no plant" + chr(10), encoding="utf-8")
+        relative = "tests/fixtures/_sweep_membership_probe.txt"
+
+        status = subprocess.run(
+            ["git", "status", "--porcelain", "--", relative],
+            cwd=str(REPO),
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        assert status.startswith("??"), (
+            "the probe is not untracked (%r), so this test is not measuring "
+            "what it claims to" % status
+        )
+
+        assert relative not in tracked_files(), relative
+        assert relative in untracked_files(), relative
+        assert relative in committable_files(), (
+            "an untracked file is NOT in the committable sweep, which is the "
+            "hole that let a real activity id reach a commit on a public repo"
+        )
+    finally:
+        if probe.exists():
+            probe.unlink()
+    assert not probe.exists()
 
 
 def test_there_are_files_to_scan():

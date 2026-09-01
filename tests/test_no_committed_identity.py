@@ -110,7 +110,7 @@ from pathlib import Path
 import pytest
 
 from tests.leakwalk import url_spellings
-from tests.test_no_committed_credential import tracked_files
+from tests.test_no_committed_credential import committable_files, tracked_files
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE_DIR = REPO / "tests" / "fixtures"
@@ -495,9 +495,25 @@ def hits_in(text: str, *, only: str | None = None) -> list[tuple[str, str]]:
 
 
 def sweepable() -> list[str]:
+    """Every file this guard walks: TRACKED **plus UNTRACKED-NOT-IGNORED**.
+
+    WIDENED 2026-09-01, and the incident is the argument. A file carrying a
+    real ``urn:li:activity`` id -- one of his own posts, on a public repo
+    under his real name -- sat in the working tree through a full green suite
+    and this guard never saw it, because it swept ``git ls-files`` and the
+    file was untracked. It became visible in the commit that published the id.
+
+    THE CHECK A NEW FILE MOST NEEDS RAN ONLY AFTER THE FILE WAS PUBLISHED.
+    A guard against committing an identity has to see what is ABOUT TO BE
+    committed; sweeping only what already was makes its first true answer
+    arrive one commit late, which is exactly too late.
+
+    ``committable_files`` is tracked + untracked-not-ignored, so .gitignore
+    still keeps ``_state/``, caches and build output out.
+    """
     return [
         rel
-        for rel in tracked_files()
+        for rel in committable_files()
         if Path(rel).suffix.lower() not in BINARY_SUFFIXES
     ]
 
