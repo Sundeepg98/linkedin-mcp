@@ -144,6 +144,11 @@ EXPECTED_TOOLS = {
     # rather than merely being listed twice.
     "linkedin_login",
     "linkedin_login_browser",
+    # ADDED 2026-09-01, a READ. A measurement instrument for the composer's
+    # control labels, wired because a reader nothing can call is a hypothesis
+    # rather than a capability -- see tests/test_reader_reachability.py, which
+    # exists because that had happened three times in one week.
+    "linkedin_compose_fields",
     "linkedin_who_viewed_me",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
@@ -352,7 +357,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtythree_tools(tools):
+async def test_the_surface_is_exactly_the_thirtyfour_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -422,7 +427,11 @@ async def test_the_surface_is_exactly_the_thirtythree_tools(tools):
     the only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
-    assert len(tools) == 33
+    # THIRTY-FOUR FROM 2026-09-01. The thirty-fourth is
+    # linkedin_compose_fields, a READ -- a measurement instrument for the
+    # composer's control labels, wired because a reader nothing can call is a
+    # hypothesis rather than a capability. No write was added.
+    assert len(tools) == 34
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -500,7 +509,10 @@ async def test_the_surface_is_exactly_the_thirtythree_tools(tools):
     # (no name of any kind leaves the page). It publishes a different KIND of
     # value instead -- an item urn -- and tests/test_activity_items.py is
     # where the conditions on that are held to their measurement.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 21
+    # TWENTY-TWO FROM 2026-09-01: linkedin_compose_fields, a READ. The write
+    # count is untouched at ten, which is the half that matters here -- a
+    # growing read surface is ordinary and a growing write surface is not.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 22
 
 
 def test_the_read_that_was_nearly_named_a_write():

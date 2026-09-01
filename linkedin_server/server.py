@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, ten of which write to LinkedIn.
+"""The tool surface: thirty-four tools, ten of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -39,15 +39,15 @@ it is the thing stopping somebody from checking.
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Thirty-three is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtythree_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_thirtyfour_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-ONE read, TEN write, and TWO are write-shaped, registered, gated
+needs: TWENTY-TWO read, TEN write, and TWO are write-shaped, registered, gated
 and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-one plus ten plus two is
-thirty-three.
+so no confirm token for any of them can exist. Twenty-two plus ten plus two is
+thirty-four.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
 THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
@@ -2610,6 +2610,56 @@ def _ownership_block(
         "self_assertion_present": self_assertion,
         "same_member": same_member,
     }
+
+
+@mcp.tool()
+async def linkedin_compose_fields() -> dict[str, Any]:
+    """Name the controls in the composer. LABELS, NEVER VALUES, and NEVER a write.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    A MEASUREMENT INSTRUMENT FOR EXTENDING THIS SERVER, as
+    linkedin_profile_editor_fields is. It is not a messaging tool: nothing is
+    typed, nothing is dispatched, and no answer about a conversation is here.
+    =================================================================
+
+    WHY IT EXISTS. That surface draws TWO DISPATCH-MODE RADIOS, one selected,
+    and the census reduces both to <redacted>. He is on Premium Career, and
+    one of those modes may be an InMail -- a metered allowance rather than a
+    free action. So an unreadable choice is potentially the difference between
+    an ordinary note and one that SPENDS one of his credits, and a gate that
+    cannot tell him whether an action costs him something is not a gate, it is
+    a formality.
+
+    IT LOADS ONE PAGE AND CLICKS NOTHING. That address is measured three times
+    not to redirect and to draw ZERO dialogs -- it stays put and opens nobody's
+    thread, which is the opposite of the messaging inbox. Nothing is typed,
+    nothing is dispatched, and no recipient is chosen.
+
+    TWO GUARDS, EITHER OF WHICH REFUSES:
+
+    * NO RECIPIENT MAY BE CHOSEN. A composer with nobody in it holds no third
+      party AT ALL -- that is what licenses reading its labels, and it is
+      asserted rather than assumed. With a recipient present the labels
+      describe a conversation with a person in it and the argument evaporates.
+    * NOTHING NAME-SHAPED IS PUBLISHED. A label carrying a run of capitalised
+      words stops it. That is not about hiding his name from him: a control
+      label becomes a COMMITTED CONSTANT, and a name in source is a name
+      committed. The SHAPE comes back instead -- how many capitalised runs,
+      whether they are joined by "to", and the name-free tail -- which tells
+      the two modes apart without carrying anybody's name.
+
+    THE BADGE. This loads a messaging surface, so read the nav badge before
+    and after through the profile census. It is measured at 0 either side
+    across three runs, and the operator's ruling was conditioned on that badge
+    reading zero first so that nobody's unread signal is spent.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, CENSUS_SURFACES["messaging_compose"])
+            reading = await dom.read_compose_fields(page)
+            return {**reading, "landed": landed, "pages_loaded": 1}
+    except Exception as exc:
+        return _error(exc)
 
 
 @mcp.tool()
