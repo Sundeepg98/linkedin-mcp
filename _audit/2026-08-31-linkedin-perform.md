@@ -1895,6 +1895,45 @@ payload would only settle whether the AUDIENCE control happens to sit one level
 shallower, in the step-5 detail modal. Recorded as a decision belonging to the
 operator, with a recommendation against.
 
+### The cheaper route was checked, and it is FORECLOSED
+
+The obvious move is to skip the browser: a plain authenticated **HTTP GET of
+the profile never hydrates**, so it would return the flight payload intact and
+restore exactly the measurement this precondition needs, with no interception
+at all.
+
+**It is the LARGER of the two changes, not the smaller.** `route` stays inside
+Playwright, which this server already is. An HTTP client is a **new data path
+in a server whose defining property is not having one** -- and the packaging
+says so in its own words:
+
+    dependencies = ["fastmcp>=2.0,<4", "playwright>=1.40"]
+
+> *"This server has no HTTP data path at all: every tool drives a real
+> signed-in Chrome, so an install without playwright is an install that cannot
+> answer a single call."*
+> -- `pyproject.toml`, on why playwright is not an optional extra
+
+Giving a browser-only server a raw HTTP path to fetch one payload is a louder
+change than the interception it would replace. Written down here so the next
+reader meets the reason rather than the idea.
+
+### Why even the SAFE click is unreachable -- the cleanest statement of the stuckness
+
+The wave lead announced he would spend the fourth entry on the census's step-4
+`Show details` click, and then corrected it. The correction is the sharpest
+form of this whole finding:
+
+**The census rates steps 1-6 PROVABLY SAFE, and that proof is drawn from the
+same flight payload that is absent from a live load.** So the safe first click
+is blocked by the IDENTICAL missing evidence as the dangerous one -- not by
+permission, and not by the ruling.
+
+**There is nothing to click, because there is nothing to measure.**
+
+That is why the fourth entry stays unspent. It was authorised, and the thing it
+would have authorised cannot be authorised by anything.
+
 ## 47. THE THIRTEEN-ROW LEDGER, FINAL
 
 | # | action | state | the ground, as measured |
