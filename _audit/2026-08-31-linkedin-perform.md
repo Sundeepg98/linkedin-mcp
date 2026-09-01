@@ -2612,3 +2612,131 @@ the prose was reworded both times.
 
 It belongs here rather than only beside those two comments, because the next
 instance will be in a file neither of them is in.
+
+# PART TEN -- THREE OF THE TEN COULD NOT CLICK
+
+## 70. THE DEFECT, FOUND WHILE BUILDING SOMETHING ELSE
+
+Three of `dom.py`'s selector builders emitted a string Playwright rejects:
+
+    role=radio[name="Always on"][exact=true]
+
+    Locator.count: Error: Unknown attribute "exact", must be one of
+    "checked", "disabled", "expanded", "include-hidden", "level", "name",
+    "pressed", "selected"
+
+`exact` is not an attribute the role engine has. Handed to any page, it
+raises.
+
+| builder | capability | what could not happen |
+|---|---|---|
+| `named_role_selector` | `update_setting` | its ONLY click. Nothing at all. |
+| `post_submit_selector` | `publish_post` | the submit AFTER the fill |
+| `comment_submit_selector` | `comment_on_item` | the submit AFTER the fill |
+
+**The two typing actions are the worse half.** The fill lands, the submit
+raises, `perform` catches it into `click_error` -- so the text sits in his
+composer with nothing posted, and the gate reports a failure. It fails SAFE.
+It also cannot succeed, which is the `apply_job` class the operator ruled
+against on 2026-09-01: *a check that cannot pass may never ship as though it
+might.*
+
+All nine selector builders were resolved against a real headless page. The
+other six -- `save_control_selector`, `post_editor_selector`,
+`comment_editor_selector`, `reaction_control_selector`,
+`invite_control_selector`, `tracker_list_selector` -- are CSS or xpath and
+each matched exactly one control.
+
+## 71. WHY NOTHING CAUGHT IT, WHICH IS THE PART THAT GENERALISES
+
+Every test compared the selector as a **string literal**:
+
+    assert dom.named_role_selector("radio", "Always on") == 'role=radio[name="Always on"][exact=true]'
+
+and `test_writes_nine.py`'s fake page records `page.clicks` as whatever string
+it is handed, so it accepts a selector no browser would.
+
+**NO TEST IN THIS SUITE HAD EVER GIVEN A ROLE SELECTOR TO A BROWSER.** A
+selector test that never resolves the selector is a check that cannot fail on
+the one thing a selector is for. Nothing had ever fired, which is exactly why
+it survived.
+
+`tests/test_selectors_resolve.py` closes it, and the half that keeps working
+after today is that the list is **derived by AST**: every `*_selector`
+function in `dom.py` must be resolved below or carry a checked reason on
+`NOT_RESOLVED_HERE`. Fixing three selectors is worth one commit; making the
+fourth impossible to add untested is worth the file.
+
+## 72. AND THE CLAUSE'S STATED REASON WAS ALSO WRONG
+
+The comment justified `[exact=true]` like this:
+
+> *a substring match would let `Always on` select a control named `Always on,
+> recommended`, and on a radio group the two would be different destinations*
+
+**MEASURED 2026-09-02, against a page drawing both controls:**
+
+| selector | matches |
+|---|---|
+| `role=radio[name="Always on"]` | 1 |
+| `role=radio[name="Always"]` | **0** |
+| `role=radio[name="always on"]` | **0** |
+| `role=radio[name="always on"i]` | 1 |
+
+The role engine matches a name **WHOLE, never as a substring**, with or
+without any suffix. The clause was defending against something the engine
+does not do -- spelled in a way that made every selector it built unusable.
+
+What the `s` suffix actually buys is **case sensitivity**, which is also this
+version's default. So it is the behaviour WRITTEN DOWN rather than inherited,
+and that is the honest size of the reason to keep it.
+
+**MY FIRST TEST ASSERTED THE WRONG PROPERTY** -- it pinned substring
+protection, because that is what the comment claimed -- and a mutation
+dropping the suffix PASSED it. The test now pins case sensitivity, which is
+what the suffix does.
+
+## 73. THE MUTATIONS, INCLUDING THE ONE THAT IS A GENUINE NO-OP
+
+| mutation | verdict |
+|---|---|
+| `[exact=true]` restored | **3 failed** -- `Unknown attribute "exact"` |
+| the `s` suffix changed to `i` | **1 failed** -- a lowercase name matched 1 control |
+| a new `*_selector` added to `dom.py` | **1 failed** -- covered-or-declared |
+| **the suffix dropped entirely** | **13 passed, and that is CORRECT** |
+
+The last row is recorded rather than hidden. Without a suffix the engine is
+already case-sensitive and whole-name in this version, so dropping `s` changes
+nothing observable and no test can fail on it. **A test cannot fail on a
+no-op, and writing one that appeared to would be manufacturing a check** --
+the disease this file has spent the whole wave naming. The suffix is kept for
+explicitness, and its docstring says exactly that rather than claiming the
+suffix is load-bearing.
+
+## 74. WHAT ELSE THE SAME PROBE SETTLED
+
+**No twelfth `evaluate` waiver is needed for the option-presence check.** I
+was about to write a script for it. A locator chain answers it and returns
+INTEGERS, with no option text crossing into this process:
+
+    page.locator(sel).get_by_role("option", name=wanted, exact=True).count()
+
+Measured: `Beta College` -> 1, `Beta` -> 0. The exactness the operator's
+condition requires is the engine's, not something this package has to
+implement.
+
+**The asterisk is unresolved and is not being guessed.** Section 5's table
+renders the control as `First name*` AND carries a separate REQUIRED column,
+so whether the `*` is part of the accessible name is unmeasured. The design
+does not need to know: the caller names a field, the gate matches it against
+the LIVE control list, and refuses -- naming the controls it did see -- unless
+it matches exactly one.
+
+## 75. WHAT THIS COSTS THE THREE CAPABILITIES
+
+Nothing has been un-shipped. The fix restores what their specs already
+claimed, and the previews were always honest about what they could not verify.
+But three of the ten had never been exercisable, and no reconnect was needed
+to discover it -- **a local headless page and nine strings were enough**. The
+reload list is unchanged at two READ tools; this was never a live-surface
+question.

@@ -1746,7 +1746,7 @@ async def test_update_setting_runs_end_to_end_and_is_verified_from_a_reload(
 
     # THE SELECTOR IS BUILT FROM THE ROLE THE PAGE REPORTED, not an assumed
     # one. That is what ``input_type`` was added to the census for.
-    assert page.clicks == ['role=radio[name="Always on"][exact=true]'], page.clicks
+    assert page.clicks == ['role=radio[name="Always on"s]'], page.clicks
     assert result["performed"] is True, result
     assert result["verified"] is True
     assert result["verification"]["observed_state"] == "Always on"
@@ -1877,7 +1877,7 @@ async def test_a_checkbox_group_is_clicked_as_a_checkbox_not_as_a_radio(
     result = await writes.perform(nav, page, grant)
 
     assert page.clicks == [
-        'role=checkbox[name="Always on"][exact=true]'
+        'role=checkbox[name="Always on"s]'
     ], page.clicks
     assert result["performed"] is True, result
 
@@ -1974,7 +1974,7 @@ def test_the_click_selector_refuses_an_unmeasured_role_and_an_unsafe_name():
     """
     assert (
         dom.named_role_selector("radio", "Always on")
-        == 'role=radio[name="Always on"][exact=true]'
+        == 'role=radio[name="Always on"s]'
     )
     for bad_role in ("button", "link", "", "RADIO"):
         with pytest.raises(Exception):

@@ -964,9 +964,29 @@ def named_role_selector(role: str, name: str) -> str:
     ``save_control_selector`` can use ``button[aria-label="..."]`` because its
     control is named by the attribute itself; this one cannot.
 
-    ``exact=true`` because a substring match would let ``Always on`` select a
-    control named ``Always on, recommended``, and on a radio group the two
-    would be different destinations.
+    THIS SAID ``[exact=true]`` UNTIL 2026-09-02, and that is not an attribute
+    Playwright's role engine has. It raises ``Unknown attribute "exact"`` on
+    any page, so this builder returned a string that could not resolve and
+    ``update_setting``'s only click could not land. Nothing caught it because
+    every test compared the STRING and no test ever handed one to a browser --
+    a selector test that never resolves the selector is a check that cannot
+    fail on the one thing the selector is for.
+    ``tests/test_selectors_resolve.py`` is the instrument that closes that,
+    and it is what found this.
+
+    AND THE REASON THE CLAUSE WAS THERE WAS ALSO WRONG. It read: *"a substring
+    match would let ``Always on`` select a control named ``Always on,
+    recommended``"*. MEASURED 2026-09-02 against this Playwright: the role
+    engine matches a name WHOLE, never as a substring, with or without any
+    suffix -- ``[name="Always"]`` matches nothing on a page drawing both of
+    those controls. The clause was defending against something the engine does
+    not do, spelled in a way that made every selector it built unusable.
+
+    WHAT THE ``s`` SUFFIX ACTUALLY BUYS, measured on the same page: CASE
+    SENSITIVITY. ``[name="always on"]`` matches 0 and ``[name="always on"i]``
+    matches 1. Case-sensitive is also this version's DEFAULT, so the suffix is
+    the behaviour written down rather than inherited -- which is the reason to
+    keep it, and the honest size of that reason.
 
     GUARDED THE SAME WAY :func:`save_control_selector` IS, and the guard has
     to be here rather than at the call site: this is a string a CLICK is built
@@ -990,7 +1010,7 @@ def named_role_selector(role: str, name: str) -> str:
             "a thing to get subtly wrong, and what a wrong one produces here "
             "is a click on a different control."
         )
-    return f'role={role}[name="{name}"][exact=true]'
+    return f'role={role}[name="{name}"s]'
 
 
 def save_control_selector(label: str) -> str:
@@ -4566,7 +4586,7 @@ def post_submit_selector() -> str:
             "POST_SUBMIT_NAME is empty or carries a character that would end "
             "the selector's own quoting."
         )
-    return 'role=button[name="' + POST_SUBMIT_NAME + '"][exact=true]' 
+    return 'role=button[name="' + POST_SUBMIT_NAME + '"s]'
 
 
 async def read_post_composer(page: Any) -> dict[str, Any]:
@@ -4936,7 +4956,7 @@ def comment_submit_selector(name: str) -> str:
             "own quoting. A shaped name containing '<' means the label held "
             "somebody's identity, and that is a refusal rather than a bug."
         )
-    return 'role=button[name="' + text + '"][exact=true]'
+    return 'role=button[name="' + text + '"s]'
 
 
 async def read_comment_surface(page: Any) -> dict[str, Any]:
