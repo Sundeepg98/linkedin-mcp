@@ -29,8 +29,6 @@ script was written -- the question looked like it needed one and it needed a
 keyword argument.
 """
 
-import pytest
-
 from linkedin_server import dom, shape
 
 
@@ -47,7 +45,7 @@ class _Page:
         self.raises = raises
         self.evaluated = False
 
-    def locator(self, selector):
+    def locator(self, _selector):
         page = self
 
         class _Loc:
@@ -58,7 +56,7 @@ class _Page:
 
         return _Loc()
 
-    async def evaluate(self, script, cfg=None):
+    async def evaluate(self, _script, cfg=None):
         self.evaluated = True
         self.cfg = cfg
         # THE RAW SCRIPT'S SHAPE, not the wrapper's. read_self_owned_editor_
@@ -119,7 +117,9 @@ async def test_ordinary_composer_labels_pass():
     # because the two shapes have different keys.
     assert "refused" not in out or out["refused"] is None
     assert out["recipients_selected"] == 0
-    assert [f["name"] for f in out["fields"]] == [
+    fields = out.get("fields")
+    assert fields is not None, out
+    assert [f["name"] for f in fields] == [
         "Send",
         "Open send options",
         "Enter message recipients",
@@ -134,17 +134,30 @@ async def test_it_anchors_on_send_inside_the_form():
     assert page.cfg["containerSelector"] == dom.MESSAGE_CONTAINER_SELECTOR == "form"
 
 
-async def test_an_upstream_refusal_is_passed_through_unchanged():
+async def test_an_upstream_refusal_reaches_the_caller_with_its_reason_intact():
     """``ambiguous_anchor`` and friends must not be flattened into success.
 
     The editor reader's refusals are about the CONTAINER -- two Send controls,
     or none, or one with no form around it -- and each is a real answer this
     wrapper has no business improving on.
+
+    THIS TEST WAS WEAKER THAN IT LOOKED AND A MUTATION PROVED IT. It used to
+    pair with an explicit passthrough branch in the wrapper, and deleting that
+    branch left the test GREEN -- because the fall-through handles a refusal
+    identically: no ``fields`` key means nothing to name-check, so the reading
+    is returned as it arrived. The branch was redundant, the test could not
+    fail, and the two facts were the same fact.
+
+    The branch is gone and this now asserts the property the REMAINING code
+    provides: the reason survives, unimproved, and no ``fields`` key is
+    invented for a container that was never read.
     """
     page = _Page(anchors=2, fields=["Send"])
     out = await dom.read_compose_fields(page)
     assert out["refused"] == "ambiguous_anchor"
     assert "fields" not in out
+    # The reason text is the upstream reader's, not a summary of it.
+    assert "Send" in str(out.get("reason", "")), out
 
 
 async def test_an_unreadable_recipient_count_refuses_rather_than_assuming_zero():
@@ -172,8 +185,24 @@ def test_the_guard_uses_the_redactors_own_rule():
     assert shape.looks_name_shaped("Enter message recipients") is False
     assert shape.looks_name_shaped("Open send options") is False
     assert shape.looks_name_shaped("InMail") is False
-    # And the predicate agrees with the redactor it was derived from.
-    for text in ("Ada Lovelace will send message", "Send", "InMail"):
+
+    # A BARE NAME, CARRYING NONE OF THE SURROUNDING PHRASE. This case was
+    # ADDED AFTER A MUTATION GOT THROUGH: replacing the redactor's rule with
+    # `" will send " in text` passed every assertion above, because every
+    # name-shaped example happened to contain that phrase. The cases agreed
+    # with the right answer without DISCRIMINATING between the two rules,
+    # which is the same defect as a corpus that cannot fail.
+    assert shape.looks_name_shaped("Ada Lovelace") is True
+
+    # And the predicate agrees with the redactor it was derived from, across
+    # cases that pull in both directions.
+    for text in (
+        "Ada Lovelace will send message",
+        "Ada Lovelace",
+        "Send",
+        "InMail",
+        "Enter message recipients",
+    ):
         blanked = shape.census_redact_rare(text, 1) != text
         assert blanked == shape.looks_name_shaped(text), text
 

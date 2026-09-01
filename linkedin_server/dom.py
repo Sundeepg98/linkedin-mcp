@@ -4430,9 +4430,13 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
         anchor_name=MESSAGE_SEND_NAME,
         container_selector=MESSAGE_CONTAINER_SELECTOR,
     )
-    if reading.get("refused"):
-        return dict(reading)
-
+    # NO EXPLICIT REFUSAL PASSTHROUGH, and its absence is deliberate. One was
+    # written here and REMOVED on 2026-09-01 after a mutation showed deleting
+    # it left the suite green: a refusal carries no ``fields``, so the walk
+    # below finds nothing to name-check and returns the reading as it arrived.
+    # The branch and the test guarding it were the same redundancy twice, and
+    # a branch that cannot be observed to matter is a branch that hides
+    # whether the code under it works.
     fields = list(reading.get("fields") or [])
     named = [str(field.get("name") or "") for field in fields]
     offending = [name for name in named if shape.looks_name_shaped(name)]
