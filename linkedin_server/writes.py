@@ -204,6 +204,61 @@ GRANT_TTL_SECONDS = 120.0
 
 
 @dataclass(frozen=True)
+class Unverifiable:
+    """THE DECLARATION THAT AN OUTCOME CANNOT BE CONFIRMED, in three parts.
+
+    Added 2026-09-01 on the operator's ruling that an unverifiable outcome is a
+    shippable outcome PROVIDED IT SAYS SO. He was shown what he was accepting
+    -- a write that fires and cannot tell him whether it worked, and that for
+    an invitation or a message he would be checking after the fact, on a person
+    -- and took it. This class is the "provided it says so".
+
+    WHY A STRUCTURE AND NOT A SENTENCE. Three separate things have to reach
+    him, and a paragraph that carries all three is a paragraph that can lose
+    one without anything noticing. The field that goes missing is always the
+    third, because the first two are about the software and only the third is
+    about him:
+
+    * ``surface_that_would_confirm`` -- WHAT would settle it, named.
+    * ``why_it_cannot`` -- why this server cannot read that surface. The
+      MEASUREMENT, not a shrug.
+    * ``what_he_must_do`` -- the instruction he can act on. "Open your Sent
+      Invitations and look" is the shape.
+
+    THE DISTINCTION THIS EXISTS TO PROTECT, and it is the whole content of the
+    ruling: A CHECK THAT CANNOT PASS MAY NEVER SHIP AS THOUGH IT MIGHT. That
+    was ``apply_job``'s defect -- a ``to_state`` compared against a reader that
+    could never return it, presented as a verification. What is permitted now
+    is the opposite: a write that declares up front that its outcome is
+    unverifiable and names why. Never compare against a reader that cannot
+    return the value. If there is no surface, say there is none.
+
+    ``tests/test_unverifiable_outcomes.py`` enforces that an action has EXACTLY
+    ONE of {a verification branch in ``_verify_after``, one of these} -- never
+    neither, and never both. Both would be the ``apply_job`` shape wearing a
+    disclosure as cover.
+    """
+
+    surface_that_would_confirm: str
+    why_it_cannot: str
+    what_he_must_do: str
+
+    def as_block(self) -> dict[str, str]:
+        """The three parts, for the preview AND for the result.
+
+        Both, deliberately. He reads the preview before deciding and the
+        result after acting, and the sentence he needs after acting is the one
+        telling him what to go and look at.
+        """
+        return {
+            "outcome_is_verifiable": "NO",
+            "what_would_confirm_it": self.surface_that_would_confirm,
+            "why_this_server_cannot": self.why_it_cannot,
+            "what_you_must_do_to_find_out": self.what_he_must_do,
+        }
+
+
+@dataclass(frozen=True)
 class WriteSpec:
     """One sanctioned action, described completely enough to gate it."""
 
@@ -316,6 +371,12 @@ class WriteSpec:
     #: by retrying -- the docstring forbids the retry, because a retry on an
     #: act that may have half-landed is the failure being guarded against.
     not_performed_state: Optional[str] = None
+    #: DECLARED WHEN NOTHING CAN CONFIRM THIS ACTION'S OUTCOME. See
+    #: :class:`Unverifiable`. ``None`` means this action HAS a verification,
+    #: and ``_verify_after`` must carry a branch that can actually return the
+    #: value it compares against -- the pairing is enforced, in both
+    #: directions, by ``tests/test_unverifiable_outcomes.py``.
+    unverifiable: Optional[Unverifiable] = None
 
 
 #: The complete set of writes this server may ever perform without a new,
@@ -3543,6 +3604,28 @@ def _render(
         "performed": False,
     }
 
+    # THE VERIFICATION DISCLOSURE, printed in the preview and again in the
+    # result. Ruling 1, 2026-09-01: an unverifiable outcome may ship PROVIDED
+    # IT SAYS SO, and this is the saying.
+    #
+    # NOTE WHICH SIDE IS THE DEFAULT. An action with no declaration gets the
+    # affirmative "YES", because the pairing test refuses a performable action
+    # that has neither a declaration nor a real branch -- so reaching this
+    # line without a declaration MEANS a branch exists. The block is never
+    # silent about verifiability: a preview that simply omitted the question
+    # is how "nobody checked" and "it checks out" become the same reading.
+    if spec.unverifiable is not None:
+        out["verification"] = spec.unverifiable.as_block()
+    else:
+        out["verification"] = {
+            "outcome_is_verifiable": "YES",
+            "what_would_confirm_it": spec.direction_source,
+            "read_after_the_act": (
+                "this server re-reads that surface after acting and reports "
+                "what it found, rather than reporting that it clicked."
+            ),
+        }
+
     if token is None:
         # No surface, so no grant at all. See :func:`mint`.
         out["to_confirm"] = None
@@ -4827,7 +4910,26 @@ async def _verify_after(
     be gone AND the count must have dropped by exactly one. A row that vanished
     while the total held is a row that scrolled out of a partial list, and it
     is reported as unknown.
+
+    A DECLARED-UNVERIFIABLE ACTION RETURNS BEFORE ANY OF THAT, added
+    2026-09-01. It does not navigate, does not read, and does not compare --
+    it returns ``UNKNOWN`` carrying the declaration's own words. THAT ORDER IS
+    THE SAFETY PROPERTY, not a shortcut: the failure this replaces was a
+    comparison that ran, could not pass, and reported its own failure as
+    though it were a finding. An action that has nothing to check must reach
+    NO comparison at all, because a comparison that exists is a comparison
+    somebody will later read as evidence.
     """
+    if spec.unverifiable is not None:
+        return (
+            UNKNOWN,
+            spec.unverifiable.why_it_cannot
+            + " This is a DECLARED unverifiable outcome, not a check that "
+            "failed: nothing was read and nothing was compared, because there "
+            "is nothing that could answer it. "
+            + spec.unverifiable.what_he_must_do,
+            "",
+        )
     if spec.action == "update_setting":
         # A FRESH NAVIGATION AND A RE-READ OF THE GROUP, which is the
         # strongest verification available to any action in this package and
@@ -4911,41 +5013,73 @@ async def _verify_after(
         )
         return state, why, landed
 
-    if spec.action != "unfollow_company":
+    if spec.action in ("save_job", "unsave_job"):
         landed = await _load(navigator, page, SAVED_LIST_URL, surface="saved jobs")
         state, why = await _read_saved_state(page, grant.target)
         return state, why, landed
 
-    landed = await _load(
-        navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
-    )
-    facts, state, why = await _read_followed_state(page, grant.target)
-    if state == "following":
+    if spec.action != "unfollow_company":
+        # NO CATCH-ALL. THIS LINE USED TO READ THE SAVED TAB FOR EVERY ACTION
+        # THAT WAS NOT AN UNFOLLOW, and that is precisely how apply_job spent
+        # months comparing "applied" against a reader that could only ever say
+        # saved / not_saved / unknown. The fallthrough was invisible because
+        # falling through LOOKED like being handled.
+        #
+        # An action that reaches here now is one somebody made performable
+        # without giving it either a branch or an ``unverifiable``
+        # declaration, and it RAISES rather than borrowing somebody else's
+        # reader. The raise is the point: a loud failure on an action nobody
+        # finished is strictly better than a quiet verification that cannot
+        # pass, because the quiet one gets read as evidence.
+        #
+        # tests/test_unverifiable_outcomes.py asserts the pairing statically
+        # so this raise should be unreachable; it exists because "should be
+        # unreachable" is what the last fallthrough was too.
+        raise WriteAttemptError(
+            f"{spec.action!r} is performable but _verify_after has no branch "
+            "for it and its spec declares no `unverifiable`. Refusing to "
+            "verify it with another action's reader -- that is the defect "
+            "apply_job carried until 2026-08-31. Give it a branch, or declare "
+            "the outcome unverifiable and say why."
+        )
+
+    if spec.action == "unfollow_company":
+        # AN EXPLICIT POSITIVE BRANCH, 2026-09-01. This body used to be
+        # reached by FALLING PAST a negative test, which made it invisible
+        # to any check asking "which actions does _verify_after handle?" --
+        # and that question is the one that would have caught apply_job.
+        # Being handled and being seen to be handled are different things,
+        # and only the second one survives somebody adding a seventh write.
+        landed = await _load(
+            navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
+        )
+        facts, state, why = await _read_followed_state(page, grant.target)
+        if state == "following":
+            return (
+                "following",
+                "the row for this company is still on the page after the click, so "
+                "the unfollow did not take effect. " + why,
+                landed,
+            )
+        before = observation.facts.get("total_followed")
+        after = facts.get("total_followed")
+        if isinstance(before, int) and isinstance(after, int) and after == before - 1:
+            return (
+                "not_following",
+                f"the row is gone AND LinkedIn's own total dropped from {before} "
+                f"to {after}. The count is the evidence here; on a list that "
+                "renders part of itself, an absent row alone would not be.",
+                landed,
+            )
         return (
-            "following",
-            "the row for this company is still on the page after the click, so "
-            "the unfollow did not take effect. " + why,
+            UNKNOWN,
+            "the row is not on the page, but LinkedIn's own total does not "
+            f"corroborate a departure (it read {before!r} before and {after!r} "
+            "after). This surface renders part of the list, so an absent row is "
+            "not by itself evidence of anything. Open your followed companies and "
+            "look. " + why,
             landed,
         )
-    before = observation.facts.get("total_followed")
-    after = facts.get("total_followed")
-    if isinstance(before, int) and isinstance(after, int) and after == before - 1:
-        return (
-            "not_following",
-            f"the row is gone AND LinkedIn's own total dropped from {before} "
-            f"to {after}. The count is the evidence here; on a list that "
-            "renders part of itself, an absent row alone would not be.",
-            landed,
-        )
-    return (
-        UNKNOWN,
-        "the row is not on the page, but LinkedIn's own total does not "
-        f"corroborate a departure (it read {before!r} before and {after!r} "
-        "after). This surface renders part of the list, so an absent row is "
-        "not by itself evidence of anything. Open your followed companies and "
-        "look. " + why,
-        landed,
-    )
 
 
 async def _apply_submit_gate(page: Any) -> dict[str, Any]:
@@ -5387,6 +5521,23 @@ async def perform(
         "what": spec.summary,
         "target": target_block,
         "performed": performed,
+        # THE SAME DISCLOSURE THE PREVIEW CARRIED, repeated on the result and
+        # not merely referenced. Ruling 1, 2026-09-01.
+        #
+        # REPEATED ON PURPOSE. He reads the preview to decide and the result
+        # to find out what happened, and the sentence he needs AFTER acting is
+        # the third one -- what to go and look at. A result that reported
+        # ``performed: "unknown"`` and left the instruction back in the
+        # preview would be handing him the worst field of the three and
+        # keeping the useful one.
+        "verification": (
+            spec.unverifiable.as_block()
+            if spec.unverifiable is not None
+            else {
+                "outcome_is_verifiable": "YES",
+                "read_from": state_landed or spec.direction_source,
+            }
+        ),
         "clicked": {
             "selector": selector,
             "on": landed,
