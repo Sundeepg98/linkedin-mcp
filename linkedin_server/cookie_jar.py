@@ -230,10 +230,34 @@ def read_jar(profile_dir: Path, names: Iterable[str]) -> list[dict[str, Any]]:
 
     profile_dir = Path(profile_dir)
     if not profile_dir.is_dir():
+        # SCRUBBED, from 2026-09-01, and it was the ONLY message in this
+        # function that was not. Every other branch below wraps its text in
+        # ``scrub`` and this one interpolated ``profile_dir`` raw.
+        #
+        # WHY IT SURVIVED SO LONG, and the answer is the finding rather than
+        # the bug: THIS BRANCH ONLY FIRES WHEN NO PROFILE DIRECTORY EXISTS,
+        # which is never true on a machine that has ever signed in -- which is
+        # every machine either developer had ever run the suite on. The shared
+        # working tree is green here BECAUSE it carries untracked runtime
+        # state a fresh clone does not.
+        #
+        # It was found by running the suite in a DETACHED WORKTREE at the
+        # commit: a pristine checkout has no ``_state/chrome-profile``, so
+        # this guard fires before ``_copy_jar`` is ever reached, and the
+        # forced-failure test below landed on it instead. For an MCP server
+        # that string goes to the CLIENT -- into transcripts and logs --
+        # carrying a home-directory path.
+        #
+        # AND IT IS THE SAME DEFECT THE TEST BELOW WAS WRITTEN ABOUT, one
+        # layer down. That docstring argues that "a check whose firing depends
+        # on whether an unrelated process is running is not a check". This one
+        # depended on whether a DIRECTORY EXISTS -- quieter, same shape.
         raise CookieJarUnavailableError(
-            f"chrome profile directory does not exist: {profile_dir} -- "
-            "there is no cookie jar to read. Check the profile path, or sign "
-            "in once so the profile gets created."
+            scrub(
+                f"chrome profile directory does not exist: {profile_dir} -- "
+                "there is no cookie jar to read. Check the profile path, or "
+                "sign in once so the profile gets created."
+            )
         )
 
     jar = profile_dir.joinpath(*JAR_RELPATH)

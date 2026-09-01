@@ -409,6 +409,50 @@ def test_a_cookie_jar_failure_never_returns_an_absolute_path(
     assert "cookie jar" in message.lower()
 
 
+def test_a_missing_profile_directory_never_returns_an_absolute_path():
+    """THE BRANCH A MACHINE THAT HAS SIGNED IN CAN NEVER REACH.
+
+    ``read_jar`` guards the profile directory BEFORE it touches the jar, and
+    that guard interpolated ``profile_dir`` raw -- the only message in the
+    function that was not scrubbed.
+
+    IT SURVIVED BECAUSE OF WHERE IT WAS TESTED, not because it was subtle.
+    The branch fires only when no profile directory exists, which is never
+    true on a machine that has ever signed in -- which is every machine this
+    suite had ever run on. The shared working tree is green here BECAUSE it
+    carries untracked runtime state a fresh clone does not.
+
+    It was found by running the suite in a DETACHED WORKTREE at the commit: a
+    pristine checkout has no ``_state/chrome-profile``, so this guard fired
+    before ``_copy_jar`` was reached and the forced-failure test above landed
+    on it instead of on the branch it was written for.
+
+    SO THE CONDITION IS FORCED HERE, exactly as that test's own docstring
+    argues for the other case: a directory that provably does not exist,
+    constructed rather than waited for. It fires on every machine, on a fresh
+    clone, and in a worktree -- the three places the old arrangement could not
+    all satisfy at once.
+    """
+    from linkedin_server import cookie_jar
+
+    absent = CHROME_PROFILE.parent / "chrome-profile-does-not-exist"
+    assert not absent.exists(), absent
+
+    with pytest.raises(cookie_jar.CookieJarUnavailableError) as excinfo:
+        cookie_jar.read_jar(absent, ["li_at"])
+
+    message = str(excinfo.value)
+    assert DRIVE_LETTER.search(message) is None, message
+    assert str(REPO_ROOT) not in message, message
+    # The REASON has to survive, as everywhere else in this file: a message
+    # stripped of both its path and its explanation is hygienic and useless.
+    assert "does not exist" in message
+    assert "sign in once" in message
+    # And it must still NAME the directory, relatively. The class docstring
+    # promises the message names the path that was tried.
+    assert "chrome-profile-does-not-exist" in message, message
+
+
 def test_that_forced_failure_can_actually_fail(monkeypatch):
     """The control. An unscrubbed message must trip the same assertion.
 
