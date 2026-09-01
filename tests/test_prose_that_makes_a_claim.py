@@ -49,6 +49,7 @@ _NUMBER_WORDS: dict[str, int] = {
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
     "twenty": 20, "twenty-one": 21, "twenty-two": 22, "twenty-three": 23,
     "thirty-one": 31, "thirty-two": 32, "thirty-three": 33, "thirty-four": 34,
+    "thirty-five": 35,
 }
 
 

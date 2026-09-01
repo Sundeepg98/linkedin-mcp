@@ -149,6 +149,17 @@ EXPECTED_TOOLS = {
     # rather than a capability -- see tests/test_reader_reachability.py, which
     # exists because that had happened three times in one week.
     "linkedin_compose_fields",
+    # ADDED 2026-09-01, a READ, and the widest disclosure on this list.
+    # linkedin_profile_editor_values returns what the intro editor's controls
+    # HOLD, not what they are called -- his headline, verbatim, unshaped. It
+    # is here because linkedin_update_profile_field overwrites a field and
+    # cannot say what it overwrote: code can make an action correct, it cannot
+    # make an irreversible outward-facing action undoable, and only the old
+    # value can. It clears the SAME self-ownership gate as
+    # linkedin_profile_editor_fields, and that is a fact about the code --
+    # both call server._establish_self_owned_editor and neither re-implements
+    # it. tests/test_editor_values.py is where that is held.
+    "linkedin_profile_editor_values",
     "linkedin_who_viewed_me",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
@@ -357,7 +368,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtyfour_tools(tools):
+async def test_the_surface_is_exactly_the_thirtyfive_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -425,13 +436,31 @@ async def test_the_surface_is_exactly_the_thirtyfour_tools(tools):
 
     THIRTY-THREE NAMES OVER THIRTY-TWO CAPABILITIES; the login pair is still
     the only pair.
+
+    THE TENTH AND ELEVENTH RENAMES ARE ONE DAY APART FROM THE NINTH, both
+    READS, and the second is the one to read carefully. ``linkedin_compose_
+    fields`` is an instrument, like the census. ``linkedin_profile_editor_
+    values`` is not: it publishes what a control HOLDS, which is the widest
+    thing anything on this list returns, and it is the second tool to widen a
+    PRIVACY boundary rather than the read boundary. No new url, no new
+    navigation pattern -- one container's worth of VALUES now published where
+    even the label reader refuses them, on the operator's ruling that the
+    previous value is what makes his own write undoable.
+
+    THIRTY-FIVE NAMES OVER THIRTY-FOUR CAPABILITIES; the login pair is still
+    the only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
     # THIRTY-FOUR FROM 2026-09-01. The thirty-fourth is
     # linkedin_compose_fields, a READ -- a measurement instrument for the
     # composer's control labels, wired because a reader nothing can call is a
     # hypothesis rather than a capability. No write was added.
-    assert len(tools) == 34
+    # THIRTY-FIVE FROM 2026-09-01, the second addition of the same day. The
+    # thirty-fifth is linkedin_profile_editor_values, a READ. No write was
+    # added -- which is the half of this line that matters, because the tool
+    # that arrived is the UNDO for a write, and an undo shipping as a write
+    # would be the exact confusion this split exists to catch.
+    assert len(tools) == 35
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -512,7 +541,13 @@ async def test_the_surface_is_exactly_the_thirtyfour_tools(tools):
     # TWENTY-TWO FROM 2026-09-01: linkedin_compose_fields, a READ. The write
     # count is untouched at ten, which is the half that matters here -- a
     # growing read surface is ordinary and a growing write surface is not.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 22
+    # TWENTY-THREE, later the same day: linkedin_profile_editor_values, a
+    # READ. The write count is untouched at ten for the second time in one
+    # day. Worth stating plainly because the tool's PURPOSE is a write: it
+    # exists to make linkedin_update_profile_field undoable, and it does that
+    # by reading. A tool that made the write undoable BY WRITING would be a
+    # write, would move the other number, and would fail here.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 23
 
 
 def test_the_read_that_was_nearly_named_a_write():

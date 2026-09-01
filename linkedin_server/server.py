@@ -1,4 +1,4 @@
-"""The tool surface: thirty-four tools, ten of which write to LinkedIn.
+"""The tool surface: thirty-five tools, ten of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -36,18 +36,29 @@ recording: A CHECK THAT COULD NOT FAIL IS INDISTINGUISHABLE FROM ONE THAT HAS
 NOT FAILED YET, and a claim of being checked is worth less than nothing when
 it is the thing stopping somebody from checking.
 
+THE EIGHTH IS TWO READS ARRIVING ON ONE DAY, 2026-09-01, and it is recorded
+as one correction because they are the same shape: ``linkedin_compose_fields``
+and ``linkedin_profile_editor_values``, thirty-three -> thirty-five and
+twenty-one -> twenty-three, with the write count untouched at ten through
+both. The second is the one worth a reader's attention: its PURPOSE is a
+write. It exists so ``linkedin_update_profile_field`` can be undone, and it
+does that by READING the old value -- a tool that made the write undoable by
+writing would belong in the other column, and would fail
+``test_the_surface_is_exactly_the_thirtyfive_tools``'s split rather than
+being argued about here.
+
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Thirty-three is ``len(await mcp.list_tools())``,
+than about an intention. Thirty-five is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtyfour_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_thirtyfive_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-TWO read, TEN write, and TWO are write-shaped, registered, gated
-and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
+needs: TWENTY-THREE read, TEN write, and TWO are write-shaped, registered,
+gated and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-two plus ten plus two is
-thirty-four.
+so no confirm token for any of them can exist. Twenty-three plus ten plus two
+is thirty-five.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
 THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
@@ -2612,6 +2623,166 @@ def _ownership_block(
     }
 
 
+async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
+    """Prove the intro editor on screen is the OPERATOR'S OWN, or refuse.
+
+    THE ONE PLACE EITHER EDITOR TOOL ANSWERS THAT QUESTION, and it is a
+    function rather than a paragraph of prose in two tools because the two
+    were about to be copies. ``linkedin_profile_editor_fields`` publishes
+    control LABELS off this container and ``linkedin_profile_editor_values``
+    publishes what those controls HOLD; the second is the wider disclosure by
+    some distance, and the promise made about it is that it clears exactly the
+    same bar as the first. Two copies of a gate make that a CLAIM, and a claim
+    that drifts is how the wider tool ends up with the weaker check.
+    ``tests/test_editor_values.py`` pins that neither tool re-implements this.
+
+    IT LOADS UP TO TWO PAGES AND CLICKS NOTHING. The profile first, because
+    LinkedIn's own ``isSelfProfile=true`` assertion is the anchor and a call
+    that cannot get it must not go on to fetch the editor at all.
+
+    TWO RETURN SHAPES AND THEY DO NOT OVERLAP:
+
+    * A REFUSAL carries ``refused``, ``reason``, a ``self_ownership`` block
+      reporting ``established: false`` and what would have established it, and
+      ``pages_loaded`` -- ONE if it stopped at the profile, two if it reached
+      the editor. It is returned to the caller's caller verbatim.
+    * SUCCESS carries ``self_ownership``, ``landed_paths`` and
+      ``pages_loaded: 2``, and NO ``refused`` key. ``"refused" in result`` is
+      the whole of the test a caller runs.
+
+    ``pages_loaded`` is reported BY THIS FUNCTION rather than by the tools,
+    because this is what does the loading. A tool counting its callee's page
+    loads is a number maintained by hand in two places.
+    """
+    landed_profile = await BROWSER.goto(page, SELF_PROFILE_URL)
+    assert_not_authwall(landed_profile, surface="profile")
+
+    # THE EXTERNAL ASSERTION FIRST. If LinkedIn does not say the
+    # profile is the viewer's own, nothing further is loaded -- the
+    # editor page is not fetched at all, so a call that cannot
+    # establish ownership costs one page load and reads no editor.
+    self_assertion = _self_assertion_on(landed_profile)
+    if not self_assertion:
+        return {
+            "refused": "no_self_assertion",
+            "reason": (
+                "the landed profile url carries no "
+                f"{_SELF_ASSERTION_PARAM}=true, which is LinkedIn's own "
+                "way of saying the profile is the viewer's. Without it "
+                "this tool has only its own reasoning about what "
+                "/in/me/ ought to mean, and that is not what the "
+                "relaxed gate was granted on."
+            ),
+            "self_ownership": _ownership_block(
+                established=False,
+                self_assertion=False,
+                same_member=None,
+            ),
+            "pages_loaded": 1,
+        }
+
+    profile_segment = _member_segment_of(landed_profile)
+    if not profile_segment:
+        return {
+            "refused": "profile_path_unreadable",
+            "reason": (
+                "the landed profile path is not of the form "
+                "/in/<member>/, so there is no member segment to "
+                "compare against the editor's."
+            ),
+            "self_ownership": _ownership_block(
+                established=False,
+                self_assertion=True,
+                same_member=None,
+            ),
+            "pages_loaded": 1,
+        }
+
+    landed_editor = await BROWSER.goto(
+        page, SELF_PROFILE_EDIT_INTRO_URL
+    )
+    assert_not_authwall(landed_editor, surface="profile_edit_intro")
+    editor_segment = _member_segment_of(landed_editor)
+
+    paths = {
+        "profile": _path_without_member(
+            landed_profile, profile_segment
+        ),
+        "editor": _path_without_member(landed_editor, editor_segment),
+    }
+
+    if not editor_segment:
+        return {
+            "refused": "editor_path_unreadable",
+            "reason": (
+                "the landed editor path is not of the form "
+                "/in/<member>/..., so it cannot be shown to be the "
+                "same member's."
+            ),
+            "self_ownership": _ownership_block(
+                established=False,
+                self_assertion=True,
+                same_member=None,
+            ),
+            "landed_paths": paths,
+            "pages_loaded": 2,
+        }
+    # SELF IS PROVEN TWO WAYS, EITHER OF WHICH IS SUFFICIENT, and this
+    # was a bare equality until 2026-09-01 -- when the tool was run for
+    # the first time and refused ITS OWN OPERATOR.
+    #
+    # /in/me/ REDIRECTS to the vanity slug; the editor address does
+    # not. So the segments were "sundeep-..." and "me", which differ as
+    # strings and name the SAME member.
+    #
+    # ``me`` IS NOT A WEAKER PROOF THAN A MATCHING SLUG, IT IS A
+    # STRONGER ONE. A slug is a string that happens to match. ``me`` is
+    # self BY CONSTRUCTION: /in/me/ cannot resolve to anyone but the
+    # signed-in member, which is the very reason the read boundary
+    # admits that spelling at all.
+    #
+    # THE SHAPE ASSERTION IS NOT OPTIONAL. Without it a redirect to a
+    # login wall, an interstitial or a 404 could pass on a segment
+    # coincidence, and the whole point of this gate is that it fails
+    # CLOSED on a surface it does not recognise. isSelfProfile=true on
+    # the profile remains the anchor: it is checked above, and nothing
+    # here can substitute for it.
+    editor_path = _landed_path(landed_editor)
+    editor_shape_ok = editor_path.startswith("/in/") and "/edit/" in editor_path
+    same_member = editor_segment == profile_segment or editor_segment == "me"
+    if not (editor_shape_ok and same_member):
+        return {
+            "refused": "different_member",
+            "reason": (
+                "the editor page could not be shown to be this "
+                "member's own. Self is accepted two ways and neither "
+                "held: the landed editor segment did not match the "
+                "profile's, and it was not the self-referential "
+                "'me' spelling -- OR the landed editor path is not of "
+                "the form /in/<member>/.../edit/..., which is checked "
+                "so that a login wall, an interstitial or a 404 "
+                "cannot pass on a segment coincidence. No segment is "
+                "reported here; that it did not hold is the whole of "
+                "the answer."
+            ),
+            "self_ownership": _ownership_block(
+                established=False,
+                self_assertion=True,
+                same_member=False,
+            ),
+            "landed_paths": paths,
+            "pages_loaded": 2,
+        }
+
+    return {
+        "self_ownership": _ownership_block(
+            established=True, self_assertion=True, same_member=True
+        ),
+        "landed_paths": paths,
+        "pages_loaded": 2,
+    }
+
+
 @mcp.tool()
 async def linkedin_compose_fields() -> dict[str, Any]:
     """Name the controls in the composer. LABELS, NEVER VALUES, and NEVER a write.
@@ -2739,129 +2910,11 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
     """
     try:
         async with BROWSER.session() as page:
-            landed_profile = await BROWSER.goto(page, SELF_PROFILE_URL)
-            assert_not_authwall(landed_profile, surface="profile")
-
-            # THE EXTERNAL ASSERTION FIRST. If LinkedIn does not say the
-            # profile is the viewer's own, nothing further is loaded -- the
-            # editor page is not fetched at all, so a call that cannot
-            # establish ownership costs one page load and reads no editor.
-            self_assertion = _self_assertion_on(landed_profile)
-            if not self_assertion:
-                return {
-                    "refused": "no_self_assertion",
-                    "reason": (
-                        "the landed profile url carries no "
-                        f"{_SELF_ASSERTION_PARAM}=true, which is LinkedIn's own "
-                        "way of saying the profile is the viewer's. Without it "
-                        "this tool has only its own reasoning about what "
-                        "/in/me/ ought to mean, and that is not what the "
-                        "relaxed gate was granted on."
-                    ),
-                    "self_ownership": _ownership_block(
-                        established=False,
-                        self_assertion=False,
-                        same_member=None,
-                    ),
-                    "pages_loaded": 1,
-                }
-
-            profile_segment = _member_segment_of(landed_profile)
-            if not profile_segment:
-                return {
-                    "refused": "profile_path_unreadable",
-                    "reason": (
-                        "the landed profile path is not of the form "
-                        "/in/<member>/, so there is no member segment to "
-                        "compare against the editor's."
-                    ),
-                    "self_ownership": _ownership_block(
-                        established=False,
-                        self_assertion=True,
-                        same_member=None,
-                    ),
-                    "pages_loaded": 1,
-                }
-
-            landed_editor = await BROWSER.goto(
-                page, SELF_PROFILE_EDIT_INTRO_URL
-            )
-            assert_not_authwall(landed_editor, surface="profile_edit_intro")
-            editor_segment = _member_segment_of(landed_editor)
-
-            paths = {
-                "profile": _path_without_member(
-                    landed_profile, profile_segment
-                ),
-                "editor": _path_without_member(landed_editor, editor_segment),
-            }
-
-            if not editor_segment:
-                return {
-                    "refused": "editor_path_unreadable",
-                    "reason": (
-                        "the landed editor path is not of the form "
-                        "/in/<member>/..., so it cannot be shown to be the "
-                        "same member's."
-                    ),
-                    "self_ownership": _ownership_block(
-                        established=False,
-                        self_assertion=True,
-                        same_member=None,
-                    ),
-                    "landed_paths": paths,
-                    "pages_loaded": 2,
-                }
-            # SELF IS PROVEN TWO WAYS, EITHER OF WHICH IS SUFFICIENT, and this
-            # was a bare equality until 2026-09-01 -- when the tool was run for
-            # the first time and refused ITS OWN OPERATOR.
-            #
-            # /in/me/ REDIRECTS to the vanity slug; the editor address does
-            # not. So the segments were "sundeep-..." and "me", which differ as
-            # strings and name the SAME member.
-            #
-            # ``me`` IS NOT A WEAKER PROOF THAN A MATCHING SLUG, IT IS A
-            # STRONGER ONE. A slug is a string that happens to match. ``me`` is
-            # self BY CONSTRUCTION: /in/me/ cannot resolve to anyone but the
-            # signed-in member, which is the very reason the read boundary
-            # admits that spelling at all.
-            #
-            # THE SHAPE ASSERTION IS NOT OPTIONAL. Without it a redirect to a
-            # login wall, an interstitial or a 404 could pass on a segment
-            # coincidence, and the whole point of this gate is that it fails
-            # CLOSED on a surface it does not recognise. isSelfProfile=true on
-            # the profile remains the anchor: it is checked above, and nothing
-            # here can substitute for it.
-            editor_path = _landed_path(landed_editor)
-            editor_shape_ok = editor_path.startswith("/in/") and "/edit/" in editor_path
-            same_member = editor_segment == profile_segment or editor_segment == "me"
-            if not (editor_shape_ok and same_member):
-                return {
-                    "refused": "different_member",
-                    "reason": (
-                        "the editor page could not be shown to be this "
-                        "member's own. Self is accepted two ways and neither "
-                        "held: the landed editor segment did not match the "
-                        "profile's, and it was not the self-referential "
-                        "'me' spelling -- OR the landed editor path is not of "
-                        "the form /in/<member>/.../edit/..., which is checked "
-                        "so that a login wall, an interstitial or a 404 "
-                        "cannot pass on a segment coincidence. No segment is "
-                        "reported here; that it did not hold is the whole of "
-                        "the answer."
-                    ),
-                    "self_ownership": _ownership_block(
-                        established=False,
-                        self_assertion=True,
-                        same_member=False,
-                    ),
-                    "landed_paths": paths,
-                    "pages_loaded": 2,
-                }
-
-            ownership = _ownership_block(
-                established=True, self_assertion=True, same_member=True
-            )
+            established = await _establish_self_owned_editor(page)
+            if "refused" in established:
+                return established
+            ownership = established["self_ownership"]
+            paths = established["landed_paths"]
             reading = await dom.read_self_owned_editor_fields(page)
             if "fields" not in reading:
                 # The reader's own refusal, forwarded WHOLE. It knows why it
@@ -2871,7 +2924,7 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
                 out = dict(reading)
                 out["self_ownership"] = ownership
                 out["landed_paths"] = paths
-                out["pages_loaded"] = 2
+                out["pages_loaded"] = established["pages_loaded"]
                 return out
 
             out = {
@@ -2879,7 +2932,7 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
                 "landed_paths": paths,
                 "container": reading["container"],
                 "fields": reading["fields"],
-                "pages_loaded": 2,
+                "pages_loaded": established["pages_loaded"],
                 "note": (
                     "LABELS, NEVER VALUES: each name here is a control's "
                     "accessible name, not what is in the control. Names are "
@@ -2892,6 +2945,136 @@ async def linkedin_profile_editor_fields() -> dict[str, Any]:
                     "container it was read in. FIRST RENDER ONLY: this loads "
                     "the page and does not scroll, so a control that is "
                     "absent is UNKNOWN, not zero."
+                ),
+            }
+            if reading.get("truncated"):
+                out["truncated"] = True
+                out["truncated_note"] = reading["truncated_note"]
+            return out
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_profile_editor_values() -> dict[str, Any]:
+    """Read what the intro editor's controls HOLD on HIS OWN profile. THE RESTORE PATH.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    THE UNDO FOR linkedin_update_profile_field, and it is a READ. That write
+    overwrites a field and cannot say what it overwrote; its preview says so.
+    This is the tool that gets him the old string BEFORE he decides, so that
+    an outward-facing change he cannot take back is one he can put back.
+
+    Nothing here writes. Nothing here previews, mints a token or touches the
+    gate. It hands him the value; typing it back is his own call through the
+    ordinary two-step confirm, and this server will not do it for him.
+    =================================================================
+
+    CODE CAN MAKE AN ACTION CORRECT; IT CANNOT MAKE AN IRREVERSIBLE
+    OUTWARD-FACING ACTION UNDOABLE. Only the old value can, and only if
+    somebody has it. That is the whole argument for this tool, and it is the
+    operator's 2026-09-01 refinement of his own earlier ruling -- the previous
+    value was being treated as the BLOCKER on the write, and it is the
+    FEATURE.
+
+    IT LOADS TWO PAGES AND CLICKS NOTHING. Nothing is typed, nothing is
+    submitted, and no request is made beyond the two page loads. The tool
+    takes no argument and both addresses are literals, so there is nothing a
+    caller can pass that aims it anywhere else.
+
+    IT CLEARS EXACTLY THE SAME BAR AS linkedin_profile_editor_fields, and that
+    is a fact about the code rather than a promise: both call
+    _establish_self_owned_editor, which is the only place either proves whose
+    page it is on -- LinkedIn's own isSelfProfile=true assertion on the landed
+    profile url, plus the same member on both landed urls. Neither tool
+    re-implements it, which is asserted in tests/test_editor_values.py,
+    because two copies of one gate is how the wider tool ends up with the
+    weaker check.
+
+    IF SELF-OWNERSHIP DOES NOT HOLD, THE ANSWER CARRIES NO FIELD DATA AT ALL.
+    Not an empty list beside a warning: there is no "fields" key on a refusal,
+    so a refusal cannot be misread as "the editor holds nothing".
+
+    VALUES COME BACK VERBATIM AND UNSUBSTITUTED, which is the one place this
+    package deliberately does not shape something it publishes. A urn, a
+    member path, a company path, a possessive and a long digit run are all
+    legal things to have in a headline, and a substituted value is not a
+    restore path -- it is a corrupted string he would paste back believing it
+    was his. The failure would be SILENT and this tool would have caused the
+    loss it exists to prevent. Names in the same record ARE substituted, on
+    the label reader's argument, which does not weaken because a value sits
+    beside them.
+
+    THREE KINDS OF CONTROL HAVE THEIR VALUE WITHHELD, inside the page, and
+    value_source says which rule applied:
+
+    * a file input -- its value is a path on his own disk.
+    * a password input -- a secret. No editor field is one, which is why it is
+      refused structurally rather than by nobody having met one.
+    * a checkbox or radio -- its value attribute is a submission token and not
+      the state. The state is "checked", which linkedin_profile_editor_fields
+      reports; answering a different question in the same slot is how a caller
+      restores the wrong thing.
+
+    A CONTROL WHOSE NAME IS ITS OWN CONTENT still comes back as "<content>",
+    exactly as it does from the label reader. The content is disclosed ONCE,
+    in the value slot where it is labelled as a value. LinkedIn draws the
+    headline that way, so this is the normal case rather than an edge one.
+
+    PAIRING TWO CALLS IS PAIRING TWO RENDERS. "index" is this control's
+    position inside the container and it lines up with the label reader's
+    record for the same control -- but the two tools each load the page, so
+    two calls read two renders and a control that moved between them pairs
+    wrongly. Nothing here can detect that; it is said rather than guarded.
+
+    A TRUNCATED VALUE IS A BROKEN RESTORE, NOT A SHORTER ONE. Values are
+    returned whole up to 3,000 characters, which is above the longest profile
+    field LinkedIn has (About, 2,600); past that, value_truncated is true and
+    value_chars carries the real length, so a prefix can never be mistaken for
+    the string.
+
+    Returns:
+        pages_loaded: 2, a self_ownership block, the container descriptor and
+        one record per control inside it -- name, name_source, tag, type,
+        role, index, value, value_source, value_chars, value_truncated -- or
+        refused/reason with the same ownership block and no field data.
+    """
+    try:
+        async with BROWSER.session() as page:
+            established = await _establish_self_owned_editor(page)
+            if "refused" in established:
+                return established
+            ownership = established["self_ownership"]
+            paths = established["landed_paths"]
+            reading = await dom.read_self_owned_editor_values(page)
+            if "fields" not in reading:
+                # The reader's own refusal, forwarded WHOLE, for the reason
+                # the label tool forwards it: it knows why it would not aim,
+                # and the ownership block is attached because ownership DID
+                # hold and a caller must be able to tell the two apart.
+                out = dict(reading)
+                out["self_ownership"] = ownership
+                out["landed_paths"] = paths
+                out["pages_loaded"] = established["pages_loaded"]
+                return out
+
+            out = {
+                "self_ownership": ownership,
+                "landed_paths": paths,
+                "container": reading["container"],
+                "fields": reading["fields"],
+                "pages_loaded": established["pages_loaded"],
+                "note": (
+                    "VALUES, VERBATIM: each value here is what the control "
+                    "holds, unshaped, because a substituted value is not a "
+                    "string he could put back. The NAMES beside them are "
+                    "substituted exactly as linkedin_profile_editor_fields "
+                    "substitutes them. Nothing was written, previewed or "
+                    "confirmed: this is the old value, for him to decide "
+                    "with. FIRST RENDER ONLY: this loads the page and does "
+                    "not scroll, so a control that is absent is UNKNOWN, not "
+                    "zero -- and a field this did not see is a field it "
+                    "cannot restore."
                 ),
             }
             if reading.get("truncated"):

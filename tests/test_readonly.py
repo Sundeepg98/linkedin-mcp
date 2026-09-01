@@ -429,7 +429,30 @@ def test_only_dom_module_waives_evaluate():
     # can only happen inside the page. It returns INTEGERS -- the profile's
     # flight payload is ~1.09 MB and is where his identity lives, which is why
     # the sanitised fixtures here carry zero script characters.
-    assert waived_in.get("dom.py", 0) <= 10, waived_in
+    # ELEVEN FROM 2026-09-01, and this one is spent on a PRIVACY GUARANTEE
+    # for the third time -- EDITOR_VALUES_JS, run by
+    # dom.read_self_owned_editor_values. It reads the editor container's
+    # VALUES, which is the widest thing this package publishes, and three
+    # kinds of control have their value withheld INSIDE THE PAGE: a file
+    # input (a path on his disk), a password input (a secret), and a checkbox
+    # or radio (whose value attribute is a submission token, not the state).
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT, and it is the same argument that
+    # bought the eighth plus one more. The containment read is still
+    # "everything inside the nearest dialog ancestor of the one control named
+    # Save", and Playwright has no locator for closest(). The additional
+    # reason is the withholding: a locator chain reading input_value() decides
+    # what to keep AFTER the string has crossed into this process, and a
+    # value that reaches this process can reach a traceback or a log line. The
+    # whole point of doing it in the page is that the withheld strings never
+    # exist here at all.
+    #
+    # WHY IT IS A SECOND SCRIPT rather than a flag on EDITOR_FIELDS_JS, which
+    # would have cost no waiver: EDITOR_FIELDS_JS is guarded by an
+    # UNCONDITIONAL assertion that it contains no value read, and a cfg flag
+    # would turn that into a claim about a branch. A waiver is the cheaper
+    # thing to spend than that guard.
+    assert waived_in.get("dom.py", 0) <= 11, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -485,6 +508,23 @@ INJECTED_SCRIPTS = {
     # second time in tests/test_editor_fields.py rather than only from this
     # list.
     "EDITOR_FIELDS_JS": dom.EDITOR_FIELDS_JS,
+    # 2026-09-01. The self-owned editor VALUE reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # IT IS THE WIDEST-PUBLISHING SCRIPT ON THIS LIST. EDITOR_FIELDS_JS gave
+    # up the census's <opaque> gate on NAMES; this one returns what the
+    # controls HOLD, unshaped and unsubstituted, because a substituted value
+    # is not a string he could restore. That makes the mutation scan more
+    # load-bearing than anywhere else here: a script that reads a man's
+    # profile verbatim AND could touch the page is the worst combination
+    # available in this package.
+    #
+    # ITS PRIVACY WORK IS STRUCTURAL and happens in the page: file inputs,
+    # password inputs, and the value attribute of checkboxes and radios never
+    # cross into this process at all. Asserted a second time in
+    # tests/test_editor_values.py rather than only from this list.
+    "EDITOR_VALUES_JS": dom.EDITOR_VALUES_JS,
     # 2026-08-31. The own-activity item reader. Declared for the ordinary
     # reason -- an undeclared script is one nobody reviewed -- and declaring
     # it ENROLS it in test_every_script_this_package_executes_cannot_mutate.
@@ -622,10 +662,19 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     the only one that does BOTH halves at once -- it keeps two name strings out
     of this process AND publishes a real identifier, and which of those two it
     does is decided by a gate inside the script itself.
+
+    ELEVEN FROM 2026-09-01, new surface area, and the count skips a paragraph:
+    the TENTH was ``SDUI_ACTIONS_JS`` and its argument is with the budget
+    rather than here. The eleventh is ``EDITOR_VALUES_JS``, run once from
+    ``dom.read_self_owned_editor_values``. It is the widest-publishing script
+    on the list -- the eighth gave up the census's gate on NAMES, this one
+    returns what the controls HOLD, verbatim -- and a second script rather
+    than a flag on the eighth precisely so that the eighth's "no value read"
+    assertion stays unconditional.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 10, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 11, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

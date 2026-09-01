@@ -3243,6 +3243,430 @@ async def read_self_owned_editor_fields(
 
 
 # ---------------------------------------------------------------------------
+# The SAME container, read for VALUES. The restore path.
+# ---------------------------------------------------------------------------
+#
+# WHY THIS EXISTS AND WHAT IT IS FOR. ``linkedin_update_profile_field``
+# overwrites a field and this server cannot say what it overwrote. The
+# operator ruled on 2026-08-31 that it may ship that way PROVIDED the preview
+# says so -- and then refined it on 2026-09-01, which is the ruling this
+# reader answers: the previous value is the FEATURE, not the blocker. It is
+# what makes the write UNDOABLE. Code can make an action correct; it cannot
+# make an irreversible outward-facing action undoable. Only the old value can,
+# and only if somebody has it.
+#
+# So this reads it. Nothing here writes, nothing here previews and nothing
+# here is wired into the gate: it hands the operator the string he would need
+# to type back, and the typing back is his own call through the ordinary
+# two-step gate.
+#
+# WHY A SECOND SCRIPT RATHER THAN A FLAG ON :data:`EDITOR_FIELDS_JS`. That
+# script is guarded by ``assert ".value" not in dom.EDITOR_FIELDS_JS``, which
+# is UNCONDITIONAL: there is no code path, no argument and no caller mistake
+# that reaches a value through it. Adding ``cfg.readValues`` would convert
+# that into a claim about a branch -- the narrowest, most-scrutinised reader
+# in this package would then be one flag-check away from publishing values,
+# and the whole reason it is trusted is that it is not. The cost of a second
+# script is a third copy of the name chain, and that cost is PAID rather than
+# waved at: ``test_the_three_name_chains_agree`` runs all three over one
+# document and compares name AND name_source.
+#
+# THE NAME HALF IS THE LABEL READER'S, UNCHANGED, and that is deliberate down
+# to the ``<content>`` marker. A contenteditable's accessible name IS its own
+# content, and the label reader refuses to publish it there. This reader keeps
+# that refusal -- so the content is disclosed EXACTLY ONCE, in the value slot,
+# where a reader knows what it is looking at. A tool that answered "the
+# control called <his headline> holds <his headline>" would be publishing the
+# same string twice under two different promises.
+#
+# VALUES COME BACK VERBATIM. NOT substituted, and this is the one place in
+# this module where ``shape.census_substitute`` is deliberately NOT called on
+# something published. The substitutions replace a urn, a member path, a
+# company path, a possessive and a long digit run -- and every one of those is
+# a legal thing to have in a headline. A substituted value is not a restore
+# path; it is a corrupted string that would be pasted back as-is. Anything
+# that is not exactly what the field holds is worse than nothing here, because
+# the failure is SILENT: he would restore the mangled version and the tool
+# would have caused the loss it was built to prevent.
+#
+# WHAT IS WITHHELD, IN THE PAGE, AND WHY EACH:
+#
+# * ``input[type=file]`` -- its value is a PATH ON HIS DISK. It names a
+#   directory layout and often a real filename, neither of which is a profile
+#   field and neither of which any restore needs.
+# * ``input[type=password]`` -- a secret. There is no editor field this is,
+#   which is exactly why it is withheld structurally rather than by noticing
+#   its absence: a surface that grows one must not start publishing it.
+# * checkbox and radio -- their ``value`` attribute is a submission token, not
+#   the state. The STATE is ``checked`` and that is the label reader's field.
+#   Publishing ``value`` here would answer a different question in the same
+#   slot, which is how a caller ends up restoring the wrong thing.
+#
+# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` does its
+# comparison there: a string that reaches this process can reach a traceback
+# or a log line, and no care downstream un-rings that.
+#
+# TEN FIELDS PER CONTROL, enumerated rather than summarised for the reason the
+# label reader's ten are -- this module has dropped a field by describing a
+# dict instead of listing it: ``name``, ``name_source``, ``tag``, ``type``,
+# ``role``, ``index``, ``value``, ``value_source``, ``value_chars``,
+# ``value_truncated``. ``index`` is the pairing key: both readers enumerate
+# the same container with the same control selector, so position within
+# ``controls_inside`` lines a value up with the label reader's record for the
+# same control. Across TWO CALLS that is pairing across two renders, and the
+# tool says so rather than implying the pairing is free.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request.
+EDITOR_VALUES_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+  const isEditable = (el) => {
+    try { if (el.isContentEditable === true) return true; } catch (e) {}
+    const flag = attrOf(el, 'contenteditable').trim().toLowerCase();
+    if (flag && flag !== 'false') return true;
+    return attrOf(el, 'role').trim().toLowerCase() === 'textbox';
+  };
+
+  // BYTE-FOR-BYTE THE LABEL READER'S CHAIN, the <content> marker included.
+  // The content is published ONCE, by valueOf below, in the slot that says
+  // what it is.
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
+    const body = textOf(el);
+    if (body) {
+      if (isEditable(el)) return { name: '<content>', source: 'content' };
+      return { name: body, source: 'text' };
+    }
+    return { name: '', source: 'none' };
+  };
+
+  // THE VALUE CHAIN. Every branch is total: a control either yields a string
+  // or says in source which rule withheld it, and 'none' means no route
+  // applied rather than 'the field is empty'. An empty string is a REAL
+  // ANSWER here -- a cleared headline is a thing he can have.
+  const valueOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const kind = String(el.type || '').toLowerCase();
+      if (kind === 'file' || kind === 'password') {
+        return { value: null, source: 'withheld_by_type' };
+      }
+      if (kind === 'checkbox' || kind === 'radio') {
+        return { value: null, source: 'state_not_value' };
+      }
+      // BOUND FIRST, and that is not a style choice. Comparing the
+      // property against null IN PLACE puts a dot-value immediately
+      // before an equals sign, and that sequence is one of
+      // ``readonly.JS_MUTATION_TOKENS`` -- so the scanner reads a
+      // COMPARISON as an assignment and refuses the whole script. The
+      // scanner is RIGHT to be crude in that direction and must not be
+      // taught about equality: a token list that starts making exceptions
+      // for things that only LOOK like writes is one an actual write can
+      // be dressed to slip past. So the SCRIPT is written not to look
+      // like one -- and this comment is worded around the sequence for
+      // the same reason, because the first draft of it tripped the
+      // scanner by quoting the token it was explaining.
+      const held = el.value;
+      return { value: held == null ? '' : String(held), source: 'native' };
+    }
+    if (tag === 'textarea') {
+      const held = el.value;
+      return { value: held == null ? '' : String(held), source: 'native' };
+    }
+    if (tag === 'select') {
+      // THE OPTION'S TEXT, not el.value. A select's value is the submission
+      // token behind the option; what he would have to re-pick is what the
+      // option SAYS. Restoring by token is not something a human can do in
+      // the editor, so the token is the wrong answer to the question asked.
+      let index = -1;
+      try { index = el.selectedIndex; } catch (e) { index = -1; }
+      if (index < 0) return { value: null, source: 'no_selection' };
+      let chosen = null;
+      try { chosen = el.options[index]; } catch (e) { chosen = null; }
+      if (!chosen) return { value: null, source: 'no_selection' };
+      const label = chosen.textContent == null ? '' : String(chosen.textContent);
+      return { value: label, source: 'selected_option' };
+    }
+    if (isEditable(el)) {
+      // NOT TRIMMED, unlike every name route above, and the difference is the
+      // point of this reader. A name is being read for a human to recognise;
+      // a value is being read for a human to put BACK. Trimming would return
+      // a string that is not what the field holds, and the restore would
+      // silently differ from the original.
+      const held = el.innerText;
+      return { value: held == null ? '' : String(held), source: 'content' };
+    }
+    return { value: null, source: 'none' };
+  };
+
+  const out = {
+    anchor_controls: 0,
+    container_kind: null,
+    controls_inside: 0,
+    truncated: false,
+    controls: []
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // THE SAME DOCUMENT-WIDE ANCHOR COUNT the label reader keeps, and it is the
+  // same rule for the same reason: a second control wearing the anchor name
+  // anywhere on the page means the aim is ambiguous, and choosing between
+  // them would be choosing by position.
+  const anchors = [];
+  for (const el of all) {
+    if (nameOf(el).name.trim() === cfg.anchorName) anchors.push(el);
+  }
+  out.anchor_controls = anchors.length;
+  if (anchors.length !== 1) return out;
+
+  let container = null;
+  try { container = anchors[0].closest(cfg.containerSelector); }
+  catch (e) { container = null; }
+  if (!container) return out;
+
+  const containerTag = (container.tagName || '').toLowerCase();
+  out.container_kind = containerTag === 'dialog' ? 'dialog' : 'role=dialog';
+
+  let inside;
+  try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { inside = []; }
+  out.controls_inside = inside.length;
+
+  for (let i = 0; i < inside.length; i += 1) {
+    if (out.controls.length >= cfg.maxControls) break;
+    const el = inside[i];
+    const named = nameOf(el);
+    const tag = (el.tagName || '').toLowerCase();
+    const held = valueOf(el);
+    const raw = held.value;
+    const full = raw === null ? null : raw.length;
+    out.controls.push({
+      name: named.name,
+      name_source: named.source,
+      tag: tag,
+      type: tag === 'input' ? String(el.type || '').toLowerCase() : null,
+      role: attrOf(el, 'role') || null,
+      // POSITION WITHIN THE CONTAINER, which is what pairs this record with
+      // the label reader's.
+      //
+      // AND IT IS THE SAME NUMBER AS out.controls.length UNDER THIS LOOP,
+      // which is worth saying because the comment here used to claim they
+      // diverge once maxControls truncates. THEY DO NOT: truncation cuts the
+      // TAIL, so every row that IS pushed has the same container position as
+      // row number. A mutation swapping one for the other was run and the
+      // test PASSED, which is how the false claim was found.
+      //
+      // The two would only diverge if this loop began SKIPPING a control
+      // inside the container without pushing a row -- which nothing here
+      // does, and which is exactly the change that would silently break the
+      // pairing with the label reader. Writing the container position is
+      // what keeps that change honest rather than invisible.
+      index: i,
+      value: raw === null ? null : raw.slice(0, cfg.maxValueChars),
+      value_source: held.source,
+      // THE FULL LENGTH, always, even when the string was cut. A count is not
+      // content, and a caller cannot otherwise tell a value that fitted from
+      // one that did not.
+      value_chars: full,
+      value_truncated: full !== null && full > cfg.maxValueChars
+    });
+  }
+  out.truncated = out.controls.length < inside.length;
+  return out;
+}
+"""
+
+#: Ceiling on ONE value's characters. Chosen against the surface rather than
+#: picked: LinkedIn's headline caps at 220 and the About section at 2,600, so
+#: 3,000 returns every profile field this reader can meet WHOLE. That is the
+#: number that matters -- a truncated value is a BROKEN restore path, not a
+#: shorter one, and the honest failure mode is to say so via
+#: ``value_truncated`` rather than to hand back a prefix that looks complete.
+EDITOR_VALUE_MAX_CHARS = 3000
+
+
+async def read_self_owned_editor_values(
+    page: Any,
+    *,
+    max_controls: int = EDITOR_MAX_CONTROLS,
+    max_chars: int = 300,
+    max_value_chars: int = EDITOR_VALUE_MAX_CHARS,
+    anchor_name: str = EDITOR_ANCHOR_NAME,
+    container_selector: str = EDITOR_CONTAINER_SELECTOR,
+) -> dict[str, Any]:
+    """Read what the editor's controls HOLD, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED SELF-OWNERSHIP BEFORE THIS RUNS, and the
+    bar is not merely the same as :func:`read_self_owned_editor_fields`'s -- it
+    is literally the same code. ``server._establish_self_owned_editor`` is the
+    one place either tool proves whose page it is on, and
+    ``tests/test_editor_values.py`` pins that neither tool re-implements it.
+    That matters more here than there: a label read off a stranger's page
+    publishes what LinkedIn already shows the viewer, and a VALUE read off one
+    publishes what they typed.
+
+    TWO RETURN SHAPES AND THEY DO NOT OVERLAP, the same rule the label reader
+    keeps: success carries ``container`` and ``fields``; a refusal carries
+    ``refused`` and ``reason`` and NO ``fields`` key at all, so "this reader
+    would not aim" can never be read as "the container holds nothing".
+
+    THE THREE REFUSALS ARE THE ANCHOR RULE, identical to the label reader's --
+    ``no_anchor``, ``ambiguous_anchor``, ``anchor_outside_a_container``.
+
+    VALUES ARE RETURNED VERBATIM AND UNSUBSTITUTED. See the block above
+    :data:`EDITOR_VALUES_JS` for why that is the only honest answer for a
+    restore path, and for the three kinds of control whose value is withheld
+    inside the page.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "containerSelector": container_selector,
+        "anchorName": anchor_name,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+        "maxValueChars": int(max_value_chars),
+    }
+    try:
+        data = await page.evaluate(EDITOR_VALUES_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the editor container: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    anchors = int(data.get("anchor_controls") or 0)
+    if anchors == 0:
+        return {
+            "refused": "no_anchor",
+            "reason": (
+                f"no control on this page is named {anchor_name!r}, so "
+                "there is nothing to identify the editor container by. This "
+                "reader does not fall back to a position."
+            ),
+            "anchor_controls": anchors,
+        }
+    if anchors > 1:
+        return {
+            "refused": "ambiguous_anchor",
+            "reason": (
+                f"{anchors} controls on this page are named "
+                f"{anchor_name!r}. Picking one of them would be picking "
+                "by document order, which is not containment."
+            ),
+            "anchor_controls": anchors,
+        }
+    kind = data.get("container_kind")
+    if not kind:
+        return {
+            "refused": "anchor_outside_a_container",
+            "reason": (
+                f"the one control named {anchor_name!r} has no "
+                f"{container_selector} ancestor, so there is no "
+                "container to scope this read to -- and the scope is the whole "
+                "of the permission."
+            ),
+            "anchor_controls": anchors,
+        }
+
+    fields: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        raw_value = control.get("value")
+        fields.append(
+            {
+                # THE NAME HALF IS THE LABEL READER'S, substitutions and all.
+                # A urn in a LABEL identifies somebody whichever container it
+                # was read in, and that argument does not weaken because the
+                # same record also carries a value.
+                "name": shape.census_substitute(control.get("name")),
+                "name_source": str(control.get("name_source") or "none"),
+                "tag": str(control.get("tag") or ""),
+                "type": control.get("type"),
+                "role": control.get("role"),
+                "index": int(control.get("index") or 0),
+                # THE VALUE HALF, AND census_substitute IS NOT CALLED ON IT.
+                # Deliberate, argued above the script, and pinned by
+                # test_a_value_that_looks_like_a_urn_is_not_substituted: a
+                # substituted value is a corrupted restore string, and the
+                # failure would be silent.
+                "value": None if raw_value is None else str(raw_value),
+                "value_source": str(control.get("value_source") or "none"),
+                # UNCOERCED. None means no value route applied at all, which
+                # is not the same as a zero-length value -- the
+                # absent-is-not-zero rule, on the field where confusing them
+                # would mean restoring an empty string over real content.
+                "value_chars": control.get("value_chars"),
+                "value_truncated": bool(control.get("value_truncated")),
+            }
+        )
+
+    out: dict[str, Any] = {
+        "container": {
+            "kind": str(kind),
+            "anchor": anchor_name,
+            "controls_inside": int(data.get("controls_inside") or 0),
+        },
+        "fields": fields,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the container carried more than {max_controls} controls and the "
+            "tail was not read. controls_inside is the whole-container count."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # His OWN activity rail: ITEM KEYS, and only for items he wrote
 # ---------------------------------------------------------------------------
 #

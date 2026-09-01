@@ -2152,3 +2152,238 @@ refusal names this list as what would lift it.
 flight payload is absent from a live load, measured twice, so no reconnect
 changes it. It refuses on measured ground and the fourth mutation entry stays
 unspent.
+
+# PART SEVEN -- THE VALUE READER, AND THE RESTORE PATH
+
+Batch item 2 of four. Items 1, 3 and 4 landed in `f2d612b`; this is the last
+one, and it is the one with an argument in it rather than a wiring.
+
+## 51. WHAT WAS BUILT, AND THE RULING IT ANSWERS
+
+`linkedin_update_profile_field` overwrites a field and cannot say what it
+overwrote. That shipped, deliberately, with the preview saying so. The ruling
+that produced this reader is the refinement of it:
+
+> **The previous value is the FEATURE, not the blocker.** Code can make an
+> action correct; it cannot make an irreversible outward-facing action
+> undoable. Only the old value can, and only if somebody has it.
+
+So this reads it, and nothing else. `linkedin_profile_editor_values` is a
+READ: it loads two pages, clicks nothing, types nothing, mints no token and
+does not touch the gate. It hands him the string he would need to type back.
+The typing back is his own call through the ordinary two-step confirm.
+
+**Nothing fired. No `confirm_token` for any of the ten.**
+
+| what | where |
+|---|---|
+| `dom.EDITOR_VALUES_JS` | the injected script, 8.4 kB |
+| `dom.EDITOR_VALUE_MAX_CHARS = 3000` | above About's 2,600 and headline's 220 |
+| `dom.read_self_owned_editor_values` | the reader |
+| `server._establish_self_owned_editor` | the shared ownership gate, NEW |
+| `server.linkedin_profile_editor_values` | the tool, 35th, 23rd read |
+| `tests/test_editor_values.py` | 28 tests, R1-R15 |
+
+## 52. THE SAME BAR IS NOW A FACT ABOUT THE CODE, NOT A CLAIM ABOUT IT
+
+The promise made about this tool is that it clears exactly the gate the label
+tool clears. Two copies of that gate would make it a claim, and a claim that
+drifts is precisely how the WIDER tool ends up with the WEAKER check --
+somebody strengthens one and does not know there are two.
+
+So the ~110 lines of ownership dance moved OUT of
+`linkedin_profile_editor_fields` and into `_establish_self_owned_editor`, and
+both tools call it. `test_neither_editor_tool_reimplements_the_ownership_gate`
+reads the source and asserts that neither tool body contains
+`_self_assertion_on`, `_member_segment_of`, `_ownership_block(` or
+`SELF_PROFILE_URL` -- scoped to the two BODIES, because other tools in
+`server.py` legitimately use those primitives.
+
+The structural check alone would pass on two tools that called one helper and
+then ignored what it said, so
+`test_the_two_tools_refuse_the_same_way_on_the_same_page` drives BOTH over two
+hostile landings and compares their refusal codes, page counts and navigation
+lists **to each other** rather than to a literal. A literal would be a number
+maintained in two places, which is the disease.
+
+`pages_loaded` now comes from the helper, because the helper is what loads the
+pages.
+
+## 53. WHY A SECOND SCRIPT AND NOT A FLAG ON THE LABEL READER
+
+The cheap design was `cfg.readValues` on `EDITOR_FIELDS_JS` -- one script, one
+copy of the name chain, no new `# readonly-ok` waiver.
+
+It was refused, and the reason is one assertion:
+
+    assert ".value" not in dom.EDITOR_FIELDS_JS
+
+That guard is **unconditional**. There is no code path, no argument and no
+caller mistake that reaches a value through the label reader. A `cfg` flag
+converts it into a claim about a branch, on the narrowest and most-scrutinised
+reader in this package -- the one whose whole standing is that it cannot do
+this. **A waiver is a cheaper thing to spend than that guard**, so the eleventh
+evaluate waiver was spent instead.
+
+The cost is a THIRD copy of the name chain, and it is paid rather than waved
+at: `test_the_three_name_chains_agree` runs `CENSUS_JS`, `EDITOR_FIELDS_JS` and
+`EDITOR_VALUES_JS` over one document and compares name AND `name_source`.
+`test_the_label_readers_no_value_assertion_is_still_unconditional` re-asserts
+the guard from the new file, so anyone merging the two scripts fails in the
+file that would have benefited from the merge.
+
+## 54. WHAT IS WITHHELD, AND WHERE
+
+Withheld **inside the page**, for the reason `INVITE_NEEDLE_JS` does its
+comparison there: a string that reaches this process can reach a traceback or
+a log line, and no care downstream un-rings that.
+
+| control | `value_source` | why |
+|---|---|---|
+| `input[type=file]` | `withheld_by_type` | its value is a path on his own disk |
+| `input[type=password]` | `withheld_by_type` | a secret; no editor field is one, which is why it is structural rather than noticed-absent |
+| checkbox / radio | `state_not_value` | the `value` attribute is a submission token, not the state. The state is `checked` and it is the LABEL tool's field |
+| a `select` | `selected_option` | the OPTION TEXT, not `el.value` -- restoring by submission token is not something a human can do in the editor |
+
+**A control whose name is its own content still comes back as `<content>`.**
+The name half of this reader is the label reader's, unchanged, so the content
+is disclosed EXACTLY ONCE, in the value slot where a reader knows what it is
+looking at. `test_the_editable_content_arrives_as_a_value_and_not_as_a_name`
+asserts the string appears exactly once in the serialised answer.
+
+## 55. VALUES COME BACK VERBATIM, AND THAT IS THE ONE DELIBERATE UNSHAPING
+
+`shape.census_substitute` is NOT called on a value. It is called on the name
+in the same record.
+
+A urn, a member path, a company path, a possessive and a long digit run are
+all legal things to have in a headline. Substituting one produces a string
+that LOOKS like his value and is not, and he would paste it back believing it
+was. **The failure would be silent, and the tool would have caused exactly the
+loss it exists to prevent.**
+
+R8 and R9 are the same urn in two slots, with two opposite answers, and each
+asserts the substitution WOULD have changed the string -- so neither is a
+value that happens to survive.
+
+A value is also **not trimmed**, unlike every name route. A name is read for a
+human to recognise; a value is read for a human to put back.
+
+## 56. TRUNCATION IS REPORTED, NEVER DISGUISED
+
+3,000 characters, chosen against the surface rather than picked: LinkedIn's
+headline caps at 220 and About at 2,600, so every profile field this reader
+can meet comes back WHOLE. Past that, `value_truncated` is true and
+`value_chars` carries the REAL length. **A truncated value is a broken restore,
+not a shorter one**, and a prefix that looks complete is the dishonest failure.
+
+`value_chars` is uncoerced: `None` means no value route applied at all, `0`
+means the control held an empty string. Both are in one answer in
+`test_an_empty_value_is_not_an_absent_one`, on the field where confusing them
+would mean restoring an empty string over real content.
+
+## 57. THE MUTATION TABLE -- 20 APPLIED, PLUS ONE PLANTED IN THE TEST
+
+Twenty were applied to the tree one at a time, each file restored
+byte-for-byte in a `finally` with the restore asserted. The last row is not
+one of them: the click is planted INSIDE the test, which is how the scanner's
+own control has always been written here. Assertion text as produced.
+
+| mutation | test | what it printed |
+|---|---|---|
+| `editable-value-dropped` | R1 (x2) | `assert None == 'PLANTED-EDITABLE-CONTENT-NOT-A-LABEL'` |
+| `ownership-gate-reimplemented` | R2 structural | `AssertionError: ('linkedin_profile_editor_values', '_self_assertion_on')` |
+| `helper-refusal-ignored` | R2 behavioural (x2) | refusal dict compared against a success shape |
+| `file-input-value-published` | R4 | `assert '' is None` |
+| `password-value-published` | R5 | `assert 'PLANTED-SECRET-NOT-A-PROFILE-FIELD' is None` |
+| `checkbox-token-published-as-a-value` | R6 | the record printed with a token in `value` |
+| `value-substituted-like-a-name` | R8 | `assert 'I wrote <urn> about it' == 'I wrote urn:...about it'` |
+| `name-left-unsubstituted` | R9 | the substituted label absent from the name list |
+| `truncation-never-reported` | R10 | `assert False is True` |
+| `truncation-always-reported` | R10 inverse | `assert True is False` |
+| `value-chars-coerced-to-zero` | R10 / absent-is-not-zero | `assert 0 is None` |
+| `index-off-by-one` | R12 | `assert [1, 2, 3, ...] == [0, 1, 2, ...]` |
+| `name-chain-reordered-in-the-third-copy` | R15 | the name list resolving through `label-for` where `aria-label` should win |
+| `content-marker-removed...` | R7 | `<content>` absent; the value published in the NAME slot |
+| `one-of-the-ten-fields-dropped` | R11 | nine keys where ten were pinned |
+| `refusal-carries-an-empty-field-list` (tool) | R3 (x3) | the refusal printed WITH `'fields': []` |
+| `container-scope-widened-to-the-document` | containment | `assert 'PLANTED-OUT...HE-CONTAINER' not in ...` |
+| `the-script-scrolls` | no-scroll | `assert 'scrollIntoView' not in ...` |
+| `the-two-scripts-merged-behind-a-flag` | R14 / merge guard | `assert 'readValues' not in ...` |
+| `the-census-reaches-the-value-reader` | census isolation | `assert 2 == 1` |
+| `a-click-planted-in-the-script` | mutation scan | `.click(` returned by the scanner |
+
+## 58. TWO CHECKS THAT COULD NOT FAIL, FOUND BY RUNNING THE MUTATIONS
+
+Both passed under a mutation that should have killed them. Both are the same
+class as the two found earlier this wave, and both are recorded because the
+mutation run is the only thing that finds them.
+
+**`index-counts-returned-rows-not-container-position` PASSED.** The mutation
+swapped `index: i` for `index: out.controls.length`, and the test did not
+notice -- because **the two are the same number under this loop**. Truncation
+cuts the TAIL, so every row that IS pushed has the same container position as
+row number. The comment beside the field claimed they "differ once maxControls
+truncates", and that claim was FALSE. The comment is corrected in place, and
+the mutation replaced with `index: i + 1`, which the test catches.
+
+**`name-chain-reordered-in-the-third-copy` PASSED.** Moving the label routes
+ahead of `aria-label` changed NO resolved name, because every control in the
+first draft of the fixture named itself through exactly one route. The
+three-way agreement test could not fail on that document. Fixed by adding one
+control with `aria-label` AND a `label for=` -- two competing routes -- and by
+asserting the fixture's precondition inside the test, so a future edit that
+removes it fails there rather than silently going vacuous.
+
+## 59. SIX GUARD HITS ON MY OWN WORK, AND TWICE THE COMMENT WAS THE HIT
+
+| guard | what it caught | what changed |
+|---|---|---|
+| `readonly.scan_js_for_mutations` | `el.value == null` contains the mutation token for an assignment | bound the property first; the scanner is RIGHT to be crude and must not learn about equality |
+| the same scanner, again | the COMMENT explaining that token quoted the token | reworded around the sequence |
+| `test_no_committed_identity` | a drive-rooted Windows path as a file-input placeholder | replaced; it also proved nothing extra, since a browser will not accept a value on a file input from markup |
+| `test_no_committed_identity` | an email shape -- a newline escape immediately before the tool decorator leaves a letter, an at-sign and a dotted word | built the markers from `chr(10)` |
+| the same guard, again | the COMMENT explaining THAT shape quoted the shape | reworded around it |
+| `test_no_committed_identity` | an invented activity urn | reused one already on `SYNTHETIC_IDS` rather than widening a privacy allowlist to buy nothing |
+
+**Twice in one file, a comment explaining a guard tripped the guard it was
+explaining.** That is not a coincidence: prose about a pattern contains the
+pattern. The rule that falls out is small and general -- *when a comment must
+name a forbidden shape, describe it, never quote it* -- and it is now written
+beside both comments rather than only here.
+
+Six hits across TWO guards -- the mutation scanner twice, the identity guard
+four times. None was silenced. In every case the source changed, not the
+guard, and the two allowlists this repo keeps (`SYNTHETIC_IDS`,
+`DECLARED_PLANTS`) grew by nothing.
+
+## 60. THE COUNTS THAT MOVED
+
+| pin | from | to |
+|---|---|---|
+| `len(await mcp.list_tools())` | 34 | 35 |
+| reads (`tools - SANCTIONED_WRITE_TOOLS`) | 22 | 23 |
+| **writes (`writes.PERFORMABLE`)** | **10** | **10** |
+| `dom.py` evaluate waivers | 10 | 11 |
+| declared injected scripts | 10 | 11 |
+| executed script call sites | 10 | 11 |
+| suite | 2455 | 2485 |
+
+The write count is the half that matters. **The tool that arrived is the UNDO
+for a write, and it does that by reading.** A tool that made the write undoable
+BY writing would move the other number and would fail the split.
+
+## 61. WHAT THIS DOES NOT DO
+
+* It does not restore anything. It reads. He types it back through the gate.
+* It cannot pair itself with the label tool across two calls without pairing
+  across two RENDERS -- `index` lines the two up, and a control that moved
+  between the calls pairs wrongly. Nothing here can detect that; the tool says
+  so rather than implying the pairing is free.
+* It reads the FIRST RENDER and does not scroll, so a field it did not see is
+  a field it cannot restore. Absent is UNKNOWN, not zero.
+* It does not answer item 1's finding. The live surface says every field has
+  either a value with no addressable control, a control with no readable
+  value, or one value against two controls. **This reader gets the value; it
+  does not conjure the control.** `update_profile_field` is still blocked on
+  the aiming half, and the reconnect is what measures it.
