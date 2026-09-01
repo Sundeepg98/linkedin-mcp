@@ -278,7 +278,17 @@ def test_no_refusal_calls_a_path_forbidden_that_is_not_forbidden():
     sources = dict(_every_refusal_a_caller_can_receive())
     for action, text in server._WHY_NOT_PERFORMED.items():
         sources["_WHY_NOT_PERFORMED[%s]" % action] = text
-    assert len(sources) > 10, len(sources)
+
+    # DERIVED, NOT A FLOOR. This read ``> 10`` and started failing on
+    # 2026-09-01 when the ninth write shipped -- because every action that
+    # becomes performable makes this corpus SMALLER, so a hardcoded minimum
+    # turns into a false alarm exactly as the work succeeds. What must be true
+    # is that the corpus accounts for every refusal that still exists, which
+    # fails when the collector breaks and stays quiet when an action ships.
+    expected = (
+        len(writes.SANCTIONED_WRITES) - len(writes.PERFORMABLE)
+    ) + len(server._WHY_NOT_PERFORMED)
+    assert len(sources) == expected, (len(sources), expected, sorted(sources))
 
     forbidden = readonly._FORBIDDEN_URL_SUBSTRINGS
     for where, text in sources.items():

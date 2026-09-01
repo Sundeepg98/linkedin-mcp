@@ -60,7 +60,7 @@ def test_no_module_contains_an_UNSANCTIONED_mutating_call(module: Path):
     )
 
 
-def test_the_sanctioned_list_is_exactly_these_two_clicks():
+def test_the_sanctioned_list_is_exactly_these_three_calls():
     """The allowlist, read out loud, so widening it is visible in a diff.
 
     A guard whose allowlist is checked only for "does it cover what we found"
@@ -80,14 +80,44 @@ def test_the_sanctioned_list_is_exactly_these_two_clicks():
       fire a read receipt: refusing the lesser act while performing the greater
       one is backwards.
 
-    THE COUNT IS STILL PINNED, which is the part that matters. A THIRD click
+    IT GREW BY ONE AGAIN ON 2026-09-01, from two to three, and this one is
+    NOT A CLICK. The previous version of this docstring ended "A THIRD click
+    fails here whatever its justification, and has to come and write one" --
+    so here it is, written.
+
+    * ``writes.perform`` -- ONE ``page.fill``, draining a queue exactly as the
+      click does. THE QUEUE IS THE DESIGN: the scanner counts CALL SITES, so
+      one drain point keeps the guarantee this list exists to give -- there is
+      one place in this package that types, and a reviewer reads it.
+
+    WHAT MAKES IT ARGUABLE RATHER THAN A WIDENING. The text is never composed
+    by this server: it is a slice of the GRANT's canonical target, the same
+    string the preview printed and the token was minted against, and
+    ``consume`` has already refused any token whose target did not match. And
+    a fill is not a publish -- typing into a composer sends nothing. The act
+    that reaches LinkedIn is the click after it, gated separately on a MEASURED
+    transition: the publish control is drawn disabled on an empty composer, so
+    a fill that worked is observable and one that did not is refused.
+
+    WHAT THE PACKAGE STOPPED BEING ABLE TO SAY. "It types nothing" was true,
+    was printed in three places, and is now false. Those places were corrected
+    in the same commit rather than left to be found.
+
+    THE COUNT IS STILL PINNED, which is the part that matters. A FOURTH entry
     fails here whatever its justification, and has to come and write one.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
         ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
+        ("linkedin_server/writes.py", "perform", "fill"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 2
+    assert len(readonly.SANCTIONED_MUTATIONS) == 3
+    # EXACTLY ONE non-click, asserted separately. The count alone would let a
+    # click be swapped for a fill without moving the number, and those are
+    # different capabilities: a click presses what is already there, a fill
+    # puts his words on a page.
+    kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
+    assert kinds == ["click", "click", "fill"], kinds
 
 
 def test_every_sanctioned_entry_is_actually_present():
@@ -127,10 +157,11 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
         len(readonly.scan_source_for_mutations(m.read_text(encoding="utf-8")))
         for m in MODULES
     )
-    # TWO from 2026-08-26. The equality against the allowlist LENGTH is the
-    # load-bearing half and is unchanged -- an unlisted click still fails --
-    # while the literal is what makes growth visible in a diff.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 2, total
+    # TWO from 2026-08-26, THREE from 2026-09-01 when one page.fill entered.
+    # The equality against the allowlist LENGTH is the load-bearing half and
+    # is unchanged -- an unlisted mutating call still fails whatever its kind
+    # -- while the literal is what makes growth visible in a diff.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 3, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -166,10 +197,26 @@ def test_the_partition_conserves_every_hit():
             "async def _helper(page, grant):\n    await page.click('b')\n",
         ),
         # The sanctioned file and function, but the wrong KIND.
+        #
+        # THIS CASE USED page.fill UNTIL 2026-09-01, when fill inside
+        # perform became sanctioned. It is RE-AIMED rather than deleted:
+        # the property under test is that the KIND half of the triple
+        # discriminates at all, and dropping the case because its example
+        # got promoted would remove the only proof of that half.
+        # page.type is what a future edit reaches for once typing is
+        # permitted in principle, which makes it the right example now.
         (
             "wrong kind",
             "linkedin_server/writes.py",
-            "async def perform(page, grant):\n    await page.fill('#note', 'x')\n",
+            "async def perform(page, grant):\n    await page.type('#n', 'x')\n",
+        ),
+        # A SECOND WRONG KIND, same day. Two of them, because the entry
+        # that arrived buys exactly fill -- and press and keyboard are the
+        # two verbs that would let somebody type without calling it typing.
+        (
+            "wrong kind, keyboard",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n    await page.press('#n', 'a')\n",
         ),
         # The sanctioned triple in every respect EXCEPT that the call is
         # buried one scope down. Attribution is innermost, so the closure is

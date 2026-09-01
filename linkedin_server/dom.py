@@ -4081,6 +4081,92 @@ async def read_own_activity_items(
 #: What is measured here is the door, not the room behind it.
 COMPOSER_CONTROL_NAME = "Start a post"
 
+#: THE POST COMPOSER'S OWN TWO CONTROLS, measured on /preload/sharebox/ across
+#: three settle-agreeing readings (31 controls each, verdict "consistent" on
+#: the third). Both sit in ``dialog#0``.
+#:
+#: THE SUBMIT'S EMPTY STATE IS THE LOAD-BEARING FACT and it is why this action
+#: can be gated at all: ``Post`` renders **disabled** on an empty composer. So
+#: a fill produces an OBSERVABLE TRANSITION -- disabled to enabled -- and a
+#: gate can require that transition before it presses anything.
+#:
+#: CONTRAST, because the same reasoning fails one surface over: the comment
+#: control on an item permalink is named ``Comment`` and is measured ENABLED
+#: while the box is empty, so no transition exists there and enabled-ness
+#: discriminates nothing. Same family, opposite outcome, one measured boolean
+#: apart. See ``writes._publish_submit_gate``.
+POST_EDITOR_LABEL = "Text editor for creating content"
+POST_SUBMIT_NAME = "Post"
+
+
+def post_editor_selector() -> str:
+    """The contenteditable a post's text is typed into. NO ARGUMENT.
+
+    Assembled from a module constant, like :func:`reaction_control_selector`,
+    so there is nothing a caller can influence about where a fill lands.
+    """
+    return 'div[role="textbox"][aria-label="' + POST_EDITOR_LABEL + '"]'
+
+
+def post_submit_selector() -> str:
+    """The control that publishes. NO ARGUMENT, for the same reason.
+
+    NOT BUILT THROUGH :func:`named_role_selector`, and the reason is a guard
+    worth leaving intact. That function refuses any role outside
+    ``INPUT_TYPE_ROLES`` -- checkbox and radio -- because it exists to address
+    a control whose ROLE was read off the row, and a role it has never
+    measured would be a guess. Widening it to admit ``button`` so that this
+    one call could use it would trade a measured restriction for a
+    convenience, and every other caller would inherit the widening.
+
+    So this builds its own, from a MODULE CONSTANT rather than any argument,
+    and re-runs the same unsafe-character check against that constant. The
+    check cannot fail today; it is here because the constant is a string
+    somebody may one day re-measure and re-type, and a name carrying a quote
+    would otherwise end the selector's own quoting.
+    """
+    if not POST_SUBMIT_NAME or any(
+        bad in POST_SUBMIT_NAME for bad in _SELECTOR_UNSAFE
+    ):
+        raise ExtractionFailedError(
+            "refusing to build the composer's submit selector: "
+            "POST_SUBMIT_NAME is empty or carries a character that would end "
+            "the selector's own quoting."
+        )
+    return 'role=button[name="' + POST_SUBMIT_NAME + '"][exact=true]' 
+
+
+async def read_post_composer(page: Any) -> dict[str, Any]:
+    """The composer's two controls and the SUBMIT'S ENABLED STATE.
+
+    Counts and one boolean, never text. It does NOT read what is in the
+    editor: the text this server would type is already known to it -- the
+    caller supplied it and the preview printed it -- so reading it back would
+    add nothing and would put a draft's contents into this process for no
+    purpose.
+
+    ``submit_enabled`` is ``None`` when the control is absent, which is a
+    different answer from ``False``. Absent means the page had not drawn it;
+    False means it is drawn and refusing. A gate that collapsed the two would
+    read a half-rendered page as a composer declining to publish.
+    """
+    out: dict[str, Any] = {
+        "editors": 0,
+        "submits": 0,
+        "submit_enabled": None,
+        "error": None,
+    }
+    try:
+        out["editors"] = int(await page.locator(post_editor_selector()).count())
+        submits = page.locator(post_submit_selector())
+        out["submits"] = int(await submits.count())
+        if out["submits"] == 1:
+            out["submit_enabled"] = bool(await submits.first.is_enabled())
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("post composer unreadable: %s", out["error"])
+    return out
+
 #: The two URL-ADDRESSABLE publish routes, both MEASURED as real anchors:
 #: ``Write article`` -> ``/article/new/`` on ``/feed/``, and ``Create a post``
 #: -> ``/preload/sharebox/`` on ``/in/me/``. Recorded because "a post cannot be

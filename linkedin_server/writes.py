@@ -880,14 +880,55 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_publish_post": WriteSpec(
         action="publish_post",
         tool_name="linkedin_publish_post",
-        url_template=None,
-        url_pattern=None,
+        # THE SHAREBOX, and the url carries NO ``{target}`` -- his text is the
+        # target here, and text never enters a navigation. Measured on three
+        # settle-agreeing readings of 31 controls, the third carrying the
+        # census's own "consistent" verdict.
+        #
+        # THE ARTICLE ROUTE IS DELIBERATELY NOT USED. /article/new/ is on the
+        # allowlist too and is WORSE measured: its publish control comes back
+        # <redacted>, blanked as a singleton, so that route has no measured
+        # anchor where this one does. Two routes was never a requirement.
+        url_template="https://www.linkedin.com/preload/sharebox/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/preload/sharebox/$"
+        ),
         exempt_substring=None,
         summary="Publish a post to your LinkedIn feed, under your own name.",
         from_state="composer_present",
         to_state="post_published",
         target_kind="post_text",
         state_from="feed_composer",
+        # RULING 1, 2026-09-01. This one is UNRELIABLE rather than absent, and
+        # the declaration says which -- a surface that answers on some
+        # readings and not others is not a verification, and calling it one is
+        # the apply_job defect wearing better clothes.
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "your own activity rail, which lists what you have posted and "
+                "is the only surface that would show a new post exists"
+            ),
+            why_it_cannot=(
+                "that rail RENDERS INTERMITTENTLY and this server has the "
+                "measurements: 233 controls with LinkedIn's own "
+                "isSelfProfile=true assertion on one reading, and 67 controls "
+                "with no redirect on another, in the same session minutes "
+                "apart. A check that answers nothing on some readings it can "
+                "take is not a verification, and shipping one as though it "
+                "were is exactly the defect apply_job carried until "
+                "2026-08-31. THE SCHEDULED-POSTS SURFACE WOULD HAVE FIXED "
+                "THIS and does not exist for this server: measured 2026-09-01 "
+                "on a settle-CONFIRMED composer render, the whole page draws "
+                "seven links and none reaches a scheduled or posted list -- "
+                "'Schedule post' is a BUTTON opening a modal, and a modal is "
+                "not an address"
+            ),
+            what_he_must_do=(
+                "open your profile and look at your recent activity. If the "
+                "post is there it published; this server cannot tell you "
+                "reliably either way"
+            ),
+        ),
         direction_source=(
             "linkedin_surface_census(feed), taken live by this gate. It reads "
             "three things off the feed and none of them from memory: how many "
@@ -2130,6 +2171,38 @@ def _clean_target_part(spec: WriteSpec, name: str, value: Any) -> str:
             "shown one thing while another is bound."
         )
     return text
+
+
+def _text_component_of(spec: WriteSpec, target: str) -> str:
+    """The part of a canonical target that would be TYPED. Never composed here.
+
+    A composite target is ``subject :: content`` and a ``post_text`` target is
+    content alone. This returns the content half and nothing else, so the
+    string handed to the one fill site is provably a slice of the very target
+    the preview printed and the token was minted against.
+
+    IT REFUSES RATHER THAN GUESSING. An action that types must declare a
+    target kind this function knows how to split; anything else raises, which
+    is a refusal before a fill rather than a fill of the wrong string.
+    """
+    kind = spec.target_kind
+    if kind not in _COMPOSITE_TARGET_KINDS:
+        raise WriteAttemptError(
+            f"{spec.action!r} is in TYPING_ACTIONS and its target_kind "
+            f"{kind!r} has no content component, so there is nothing measured "
+            "to type. A fill will not be built from a target this module "
+            "cannot split."
+        )
+    first, second = _COMPOSITE_TARGET_KINDS[kind]
+    if not second:
+        return target
+    if target.count(TARGET_JOIN) != 1:
+        raise WriteAttemptError(
+            f"{spec.action!r} holds a target that is not the canonical "
+            "two-part form, so its content half cannot be identified. "
+            "Refusing to type any part of it."
+        )
+    return target.split(TARGET_JOIN, 1)[1]
 
 
 def _opaque_target(spec: WriteSpec, raw: str) -> str:
@@ -3990,6 +4063,40 @@ PERFORMABLE: frozenset[str] = frozenset(
         #   profile, which draws nine of them and costs no badge, where
         #   /mynetwork/ would consume the pending-invitation counter.
         "send_invitation",
+        # THE NINTH, 2026-09-01, AND THE FIRST THAT TYPES. Everything above
+        # it presses a control that already exists; this one puts his words on
+        # a page. That is a different kind of capability and it cost the
+        # package its "it types nothing" guarantee, which was true, was
+        # printed in three places, and was corrected in the same commit.
+        #
+        #   a measured surface   /preload/sharebox/, three settle-agreeing
+        #                        readings at 31 controls, the third carrying
+        #                        the census's own "consistent" verdict
+        #   a measured anchor    'Text editor for creating content', and
+        #                        'Post' -- observed DISABLED on an empty
+        #                        composer, which is what makes a post-fill
+        #                        gate possible at all
+        #   the text             a slice of the GRANT, never composed here.
+        #                        One fill site, draining a queue, asserted by
+        #                        tests/test_typed_bytes.py on the AST NODE
+        #                        rather than on a substring -- because the
+        #                        substring version passed a mutation that
+        #                        appended a hashtag
+        #   a post-fill gate     four conditions, and the load-bearing one is
+        #                        the TRANSITION: disabled to enabled. A fill
+        #                        that did not land leaves the control disabled
+        #                        and this refuses
+        #   an empty-box guard   an ALREADY-enabled control means the composer
+        #                        is not empty, and page.fill replaces. It
+        #                        refuses rather than typing over a draft it
+        #                        cannot read back
+        #
+        # AND ITS OUTCOME IS UNVERIFIABLE, declared: the activity rail renders
+        # intermittently (233 controls once, 67 another, same session), and a
+        # check that answers nothing on some readings is not a check. The
+        # scheduled-posts surface that would have fixed this was measured on
+        # 2026-09-01 not to exist for this server.
+        "publish_post",
         # THE SIXTH, 2026-08-31, and the FIRST that is not about a job or a
         # company Page. It is here because every clause the other five needed
         # is now true of it and not because a rule was relaxed:
@@ -4132,6 +4239,15 @@ def anchor_label_for(
     a table. The row is pinned separately, by company id; see
     ``dom.unfollow_control_selector``.
     """
+    if spec.action == "publish_post":
+        # THE EDITOR, NOT THE SUBMIT, and that is the whole difference a
+        # typing action makes to this function. For a click action the anchor
+        # names the control that will be PRESSED. For a typing action it names
+        # the control that will be FILLED -- the submit is not addressed here
+        # at all, because it is not addressable until there is something to
+        # submit. _publish_submit_gate finds it after the fill, or refuses.
+        return dom.POST_EDITOR_LABEL
+
     if spec.action == "send_invitation":
         # THE SUFFIX, NOT A NAME, and this is the one anchor in the package
         # that is deliberately PARTIAL. LinkedIn labels these controls with
@@ -4227,46 +4343,18 @@ def anchor_label_for(
 #:                     Only a deliberate boundary ruling lifts it, and this
 #:                     wave did not take one.
 _NINE_REFUSALS: dict[str, str] = {
-    "publish_post": (
-        "publish_post is sanctioned and cannot be performed, AND BOTH OF ITS "
-        "ORIGINAL BLOCKERS ARE NOW CLOSED. WHAT IS MEASURED, on two identical "
-        "readings of /preload/sharebox/ taken 2026-08-31 after the operator "
-        "cleared the cost knowingly: the composer loads at that exact address "
-        "with NO REDIRECT, draws 31 controls, and reports contenteditable == "
-        "2 -- THE FIRST NON-ZERO THIS SERVER HAS EVER MEASURED ON ANY "
-        "SURFACE, where every previous census of every readable page reported "
-        "zero. Both controls are named and both sit in dialog#0: the editable "
-        "node is 'Text editor for creating content', a div with role=textbox "
-        "named through aria-label, and the publish control is 'Post', a "
-        "text-named button which renders DISABLED on an empty composer. So "
-        "'NO SURFACE' and 'NO CONTROL' are both answered. THE ARTICLE ROUTE "
-        "WAS ALSO CAPTURED and it is WORSE, which is worth recording so "
-        "nobody reaches for it: /article/new/ draws its editable node as "
-        "'Article editor content' and a 'Title' textarea, but its publish "
-        "control comes back <redacted> -- the census blanks a capitalised run "
-        "seen exactly once -- so that route's anchor is NOT measured while "
-        "the sharebox route's is. Two routes was never a requirement and the "
-        "second adds nothing here. WHAT STOPS IT NOW is one thing and it is "
-        "not a measurement: PUBLISHING MEANS TYPING. 'fill', 'type', 'press' "
-        "and 'keyboard' are all on readonly._MUTATION_CALL_PATTERNS and none "
-        "of them appears in readonly.SANCTIONED_MUTATIONS for any function in "
-        "this package -- perform holds a 'click' and nothing else. AND A "
-        "SECOND THING THAT SURVIVES A MUTATION RULING: NOTHING CAN VERIFY IT. "
-        "The only surface that could confirm a post exists is his own "
-        "activity rail, and that rail is measured to render INTERMITTENTLY -- "
-        "read at 233 controls with LinkedIn's self-assertion present, and at "
-        "67 with no redirect at all, on the same session within minutes. "
-        "Shipping a verification against a surface that answers nothing on "
-        "some readings is the defect apply_job carried until 2026-08-31, "
-        "where the check could not pass on any reading it could take. This "
-        "action is a BROADCAST -- 274 followers, and his own analytics show "
-        "past posts at 113, 319 and 1,287 impressions -- and whether a post "
-        "can be deleted is still unmeasured, because the per-post overflow "
-        "menu renders collapsed and has never been opened. WHAT WOULD LIFT "
-        "IT: a sanctioned text-entry mutation AND a verification whose "
-        "surface answers reliably. The first is a ruling; the second is a "
-        "measurement nobody has taken."
-    ),
+    # ``"publish_post"`` LEFT THIS TABLE ON 2026-09-01. Its refusal named two
+    # blockers and BOTH were real; they resolved differently.
+    #
+    # TYPING was a permission, and the operator granted it -- one page.fill,
+    # one drain point, text taken from the grant and never composed here.
+    #
+    # THE VERIFICATION did not close and was RULED ON. The activity rail is
+    # still intermittent and this action still cannot confirm itself; the
+    # difference is that the gate now DECLARES that in three parts instead of
+    # refusing over it. The declaration also records the thing that would have
+    # fixed it and does not exist: a scheduled-posts surface, measured absent
+    # on a settle-confirmed composer render the same day.
     "comment_on_item": (
         "comment_on_item is sanctioned and cannot be performed, AND ITS "
         "OLDEST BLOCKER CLOSED ON 2026-08-31. WHAT IS MEASURED: the item "
@@ -4828,6 +4916,58 @@ async def _live_control(
             )
         return (state, why, dom.named_role_selector(role, anchor))
 
+    if spec.action == "publish_post":
+        # THIS RETURNS THE FILL TARGET, not a click target. perform routes it
+        # into fill_plan rather than click_plan for anything in
+        # TYPING_ACTIONS, and the publish control is reached only through
+        # _publish_submit_gate afterwards.
+        reading = await dom.read_post_composer(page)
+        if reading.get("error"):
+            return (UNKNOWN, str(reading["error"]), "")
+        editors = int(reading.get("editors") or 0)
+        submits = int(reading.get("submits") or 0)
+        if editors != 1 or submits != 1:
+            return (
+                UNKNOWN,
+                f"the composer drew {editors} editor(s) and {submits} publish "
+                "control(s), where exactly one of each is the shape measured "
+                "on three agreeing readings. Zero of either is a page that "
+                "had not arrived, which is UNKNOWN and never an empty "
+                "composer.",
+                "",
+            )
+        if reading.get("submit_enabled") is not False:
+            # THE COMPOSER IS NOT EMPTY, AND THIS REFUSES RATHER THAN TYPING.
+            #
+            # page.fill REPLACES a field's contents. The publish control is
+            # measured DISABLED on an empty composer, so an ENABLED one means
+            # something is already in the box -- a draft LinkedIn restored,
+            # most likely his. Filling over it would destroy text this server
+            # never saw and cannot recover, and it would do so silently.
+            #
+            # There is no reachable surface on which such a draft could be
+            # inspected first: 17 candidate draft-listing addresses were run
+            # against the read boundary on 2026-08-31 and all 17 refused.
+            return (
+                UNKNOWN,
+                "the publish control is already ENABLED before anything was "
+                "typed, which on this surface means the composer is NOT "
+                "empty -- it is measured disabled when it is. Something is in "
+                "that box, most likely a draft LinkedIn restored, and this "
+                "gate will not type over content it cannot read back or "
+                "restore. Open the composer yourself and clear it.",
+                "",
+            )
+        return (
+            "composer_present",
+            "the composer drew exactly one editor named "
+            f"{dom.POST_EDITOR_LABEL!r} and exactly one publish control named "
+            f"{dom.POST_SUBMIT_NAME!r}, and that control is DISABLED -- which "
+            "on this surface is what an empty composer looks like, so there "
+            "is nothing here to type over.",
+            dom.post_editor_selector(),
+        )
+
     if spec.action == "send_invitation":
         # THE NEEDLE IS HANDED STRAIGHT INTO THE PAGE and the comparison
         # happens there. That is what makes "the label is never stored"
@@ -5280,6 +5420,102 @@ async def _verify_after(
         )
 
 
+#: THE ACTIONS THAT TYPE BEFORE THEY CLICK. Kept as a set rather than tested
+#: by target_kind, because "has a text component" and "types it into the page"
+#: are different claims -- ``update_setting``'s target has a value component
+#: and that value is a RADIO DESTINATION, clicked and never typed.
+TYPING_ACTIONS: frozenset[str] = frozenset({"publish_post"})
+
+
+async def _publish_submit_gate(page: Any) -> dict[str, Any]:
+    """THE GATE BETWEEN THE FILL AND THE CLICK, and the reason typing is safe.
+
+    The fill puts text in the composer and publishes nothing. This decides
+    whether the publish control may be pressed, by READING the composer that
+    the fill just changed rather than assuming it now looks the way it did in
+    a capture.
+
+    WHY A TRANSITION IS THE EVIDENCE, and why this action has one when its
+    nearest neighbour does not. ``Post`` is measured **disabled on an empty
+    composer**, on three settle-agreeing readings. So a fill that worked
+    produces something this server can SEE: the control becomes enabled. That
+    is not an inference about what the fill did to LinkedIn -- it is a reading
+    of the page after it.
+
+    THE COMMENT SURFACE HAS NO SUCH TRANSITION, which is why this gate is not
+    reusable there and why ``comment_on_item`` is not shipping on this
+    machinery. Its control is named ``Comment`` and is measured ENABLED while
+    the box is empty, count 1, on the same permalink. A gate asking "is a
+    control named Comment present and enabled" is satisfied by the page
+    BEFORE anything is typed, so it would press the focus affordance and
+    produce something indistinguishable from success. Same family, opposite
+    outcome, one measured boolean apart.
+
+    FOUR CONDITIONS, all required:
+
+    1. the editor is still there -- exactly one, so the fill landed somewhere
+       this gate can account for;
+    2. exactly one publish control is drawn;
+    3. it is ENABLED, which on this surface means the composer has content;
+    4. the read itself did not error.
+
+    An abort here is cheap and the cost is stated rather than implied: the
+    composer holds typed text that was never published, and whether LinkedIn
+    saves that as a draft is UNMEASURED -- 17 candidate draft-listing
+    addresses were run against the read boundary on 2026-08-31 and all 17 were
+    refused, so there is no surface on which one could be found or removed.
+    """
+    reading = await dom.read_post_composer(page)
+    out: dict[str, Any] = {
+        "proceed": False,
+        "selector": dom.post_submit_selector(),
+        "observed": reading,
+        "why": "",
+        "refused_condition": None,
+    }
+    if reading.get("error"):
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the composer could not be read after the fill, so nothing is "
+            f"known about whether it is ready to publish: {reading['error']}"
+        )
+        return out
+    if int(reading.get("editors") or 0) != 1:
+        out["refused_condition"] = "1_editor_absent"
+        out["why"] = (
+            f"{reading.get('editors')} post editor(s) are on the page after "
+            "the fill, where exactly one is the shape this was measured on. "
+            "Zero means the composer is gone, which is a page that changed "
+            "under the gate rather than a composer declining to publish."
+        )
+        return out
+    submits = int(reading.get("submits") or 0)
+    if submits != 1:
+        out["refused_condition"] = "2_no_submit_control"
+        out["why"] = (
+            f"{submits} publish control(s) named {dom.POST_SUBMIT_NAME!r} are "
+            "drawn, where exactly one is required. More than one and pressing "
+            "either would be picking by position."
+        )
+        return out
+    if reading.get("submit_enabled") is not True:
+        out["refused_condition"] = "3_submit_disabled"
+        out["why"] = (
+            "the publish control is drawn and NOT enabled after the fill. On "
+            "this surface it is measured disabled while the composer is "
+            "empty, so this reads as the text not having landed -- and a "
+            "disabled control is not pressed to find out."
+        )
+        return out
+    out["proceed"] = True
+    out["why"] = (
+        "the editor is present and the publish control went from the "
+        "disabled state this surface draws when empty to enabled, which is "
+        "the observable transition a fill produces here."
+    )
+    return out
+
+
 async def _apply_submit_gate(page: Any) -> dict[str, Any]:
     """THE GATE BETWEEN THE TWO CLICKS, and the reason apply may be performed.
 
@@ -5616,9 +5852,41 @@ async def perform(
     # modal exists rather than planned before it does.
     click_error: Optional[str] = None
     clicks_made = 0
+    fills_made = 0
     apply_gate: Optional[dict[str, Any]] = None
-    click_plan: list[str] = [selector]
+    publish_gate: Optional[dict[str, Any]] = None
+
+    # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
+    #
+    # readonly.SANCTIONED_MUTATIONS is keyed by (path, function, kind) and the
+    # scanner counts CALL SITES, so draining a queue keeps the guarantee that
+    # list exists to give: there is ONE place in this package that types, and a
+    # reviewer reads it. A second literal page.fill anywhere would be a second
+    # place to audit and a second entry to justify.
+    #
+    # THE TEXT IS NEVER COMPOSED HERE. It comes out of the GRANT, which is the
+    # canonical target the preview printed and the token was minted against --
+    # so the bytes typed are the bytes he read, and consume() already refused
+    # any token whose target did not match. That is the operator's "exact text
+    # verbatim in the preview" condition enforced by construction rather than
+    # by care, and tests/test_typed_bytes.py asserts the identity.
+    fill_plan: list[tuple[str, str]] = []
+    if spec.action in TYPING_ACTIONS:
+        fill_plan.append((selector, _text_component_of(spec, grant.target)))
+    click_plan: list[str] = [] if fill_plan else [selector]
+
     try:
+        while fill_plan:
+            fill_selector, fill_text = fill_plan.pop(0)
+            await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
+            fills_made += 1
+            # THE GATE BETWEEN THE FILL AND THE CLICK. The submit selector is
+            # appended only if a fresh read of the composer says it should be,
+            # so the decision to publish is taken AFTER the text is in the box
+            # rather than planned before it.
+            publish_gate = await _publish_submit_gate(page)
+            if publish_gate["proceed"]:
+                click_plan.append(publish_gate["selector"])
         while click_plan:
             await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
             clicks_made += 1

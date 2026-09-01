@@ -221,7 +221,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     #
     #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
     #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
-    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       063c5d28d2fd7499   MOVED 2026-09-01 (fill)
     #
     # A DIGEST CANNOT TELL A LIST THAT GREW FROM ONE THAT SHRANK. That is the
     # whole hazard in re-baselining, it is why the roster tests in
@@ -283,7 +283,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     #
     #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
     #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
-    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       063c5d28d2fd7499   MOVED 2026-09-01 (fill)
     #   <functions>                eb16cd07f5cf369d   UNCHANGED
     #
     # ``<functions>`` NOT MOVING IS THE LOAD-BEARING LINE HERE. Four surfaces
@@ -343,7 +343,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     #   _FORBIDDEN_URL_SUBSTRINGS  afcb7f0d14c481a0   UNCHANGED
     #   _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
     #   JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
-    #   SANCTIONED_MUTATIONS       b84365077cba813b   UNCHANGED
+    #   SANCTIONED_MUTATIONS       063c5d28d2fd7499   MOVED 2026-09-01 (fill)
     #   <functions>                eb16cd07f5cf369d   UNCHANGED
     #
     # THE DIRECTION: THE ALLOWLIST GREW BY ONE ANCHORED PATTERN and nothing
@@ -380,7 +380,24 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # change, which is the evidence that sanctioning a new click did not
     # quietly loosen a url list or a mutation pattern on the way past.
     # Verified under Python 3.13.14 and 3.10.19: identical, all six.
-    "SANCTIONED_MUTATIONS": "b84365077cba813b",
+    #
+    # RE-FROZEN A THIRD TIME, 2026-09-01, and this one is the largest change
+    # the allowlist has ever taken: a THIRD entry, and the first that is not a
+    # click. ``("linkedin_server/writes.py", "perform", "fill")`` -- one
+    # page.fill, draining a queue at a single call site, for the first action
+    # in this package that types. The argument in full is on the entry itself.
+    #
+    # AND ONLY THIS DIGEST MOVED AGAIN, which is the point of freezing them
+    # separately and is worth reading carefully here. ``<functions>`` is
+    # UNCHANGED at eb16cd07f5cf369d, so ``assert_read_url`` and every other
+    # gate function in that module is BYTE-IDENTICAL across the change that
+    # taught this package to type. The four denylists are unchanged too.
+    #
+    # That is the strongest available statement about this commit: permitting
+    # a fill widened the ALLOWLIST DATA by one tuple and touched no gate, no
+    # url pattern, and no mutation pattern. A change that had loosened any of
+    # those on the way past would have moved a second digest, and none moved.
+    "SANCTIONED_MUTATIONS": "063c5d28d2fd7499",
     "<functions>": "eb16cd07f5cf369d",
 }
 

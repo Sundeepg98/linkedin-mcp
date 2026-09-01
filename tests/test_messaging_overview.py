@@ -245,8 +245,26 @@ def test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted():
 
     assert readonly.is_read_url("https://www.linkedin.com/messaging/compose/?body=hi") is False
     assert readonly.is_read_url("https://www.linkedin.com/messaging/") is True
-    assert len(readonly.SANCTIONED_MUTATIONS) == 2
-    assert all(kind == "click" for _, _, kind in readonly.SANCTIONED_MUTATIONS)
+    # THREE SINCE 2026-09-01, when one page.fill entered for publish_post.
+    # The number is what this asserts; that none of them is reachable from
+    # a READ path is what it means. A fill inside the gated write cannot be
+    # reached by this call and the count moving does not change that.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 3
+    # NOT ALL CLICKS ANY MORE, and the assertion is re-aimed at the property
+    # this test is actually about rather than loosened. It read
+    # ``all(kind == "click" ...)`` until 2026-09-01, which was a true
+    # statement about the whole allowlist and a PROXY for the thing that
+    # matters here: that nothing on a READ path can type. The fill that
+    # arrived is inside writes.perform, behind the two-call token gate, and
+    # this call cannot reach it -- so the proxy broke while the property held.
+    #
+    # Asserted directly now: every entry that is NOT a click lives in
+    # writes.perform, so no read path owns one.
+    for path, function, kind in readonly.SANCTIONED_MUTATIONS:
+        if kind != "click":
+            assert (path, function) == ("linkedin_server/writes.py", "perform"), (
+                path, function, kind,
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -382,7 +400,11 @@ def test_the_click_is_on_the_sanctioned_list_and_the_list_is_still_short():
         "activate_messaging_filter",
         "click",
     ) in readonly.SANCTIONED_MUTATIONS
-    assert len(readonly.SANCTIONED_MUTATIONS) == 2
+    # THREE SINCE 2026-09-01, when one page.fill entered for publish_post.
+    # The number is what this asserts; that none of them is reachable from
+    # a READ path is what it means. A fill inside the gated write cannot be
+    # reached by this call and the count moving does not change that.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 3
 
 
 def test_the_compose_surface_is_still_refused_after_all_of_this():

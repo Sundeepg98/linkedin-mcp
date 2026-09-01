@@ -1025,6 +1025,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     assert info["writes_available"] == [
         "apply_job",
         "follow_company",
+        # NINTH, same day, and the first that TYPES. Typed here by hand like
+        # its eight siblings, because a derived list would admit the tenth
+        # silently.
+        "publish_post",
         # SEVENTH, 2026-09-01, and the first admitted with a blocker still
         # OPEN rather than measured away: which reaction the toggle applies
         # has never been established, and the operator ruled that it may ship
@@ -1060,6 +1064,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     assert info["writes_sanctioned"] == [
         "apply_job",
         "follow_company",
+        # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
+        # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
+        # entries to three, the first growth that is not a click.
+        "publish_post",
         # ADDED DELIBERATELY, 2026-09-01. This list is spelled out rather than
         # derived from writes.PERFORMABLE precisely so that a new write cannot
         # arrive by agreeing with whatever the code now says -- it has to be
@@ -1116,7 +1124,6 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     not_performed = info["writes_sanctioned_but_not_performed"]
     assert set(not_performed) == {
         "set_open_to_work",
-        "publish_post",
         "comment_on_item",
         "update_profile_field",
         "send_message",
@@ -1129,6 +1136,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # "examined and refused".
     assert "react_to_item" not in set(not_performed)
     assert "send_invitation" not in set(not_performed)
+    assert "publish_post" not in set(not_performed)
     # ``writes_available`` is EMPTY here -- this test runs with the write flag
     # OFF, which is the whole of what it is about -- so the positive half is
     # asserted against the two things that do not depend on the flag.
@@ -1625,7 +1633,11 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         if writes.spec_for_action(action).irreversible
     )
     assert block["performable_and_irreversible"] == expected_performable
-    assert expected_performable == ["apply_job", "send_invitation"], (
+    assert expected_performable == [
+        "apply_job",
+        "publish_post",
+        "send_invitation",
+    ], (
         "the permanent things this server performs are typed in here by "
         "whoever added one. A THIRD arriving is a decision, not a diff."
     )

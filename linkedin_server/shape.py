@@ -3237,17 +3237,22 @@ def messaging_overview(
         # same sentence until this call, and they are not any more.
         #
         # WHAT STILL HOLDS, and is why this is a disclosure rather than an
-        # incident: rendering a composer is not sending. There is no typing
-        # call site anywhere in the package, and the mutation allowlist holds
-        # exactly two clicks -- the gated write, and this filter -- neither of
-        # which can reach a send control.
+        # incident: rendering a composer is not sending. THIS COMMENT SAID
+        # "there is no typing call site anywhere in the package" UNTIL
+        # 2026-09-01 and that stopped being true: one page.fill entered the
+        # allowlist that day. It does not weaken this claim, and the reason is
+        # the gate rather than the absence -- that fill runs ONLY inside
+        # writes.perform, only against a redeemed single-use grant, and only
+        # for an action in TYPING_ACTIONS. Nothing on a READ path can reach
+        # it, and this call is a read.
         "composer_present": {
             "on_this_page": bool(sends.get("contenteditable") or sends.get("forms")),
             "note": (
                 "a composer rendered on the page this call loaded. Nothing was "
-                "typed and nothing sent: this server has no typing call site, "
-                "and its two sanctioned clicks are the gated write and this "
-                "filter. The url guard blocks NAVIGATING to a compose surface "
+                "typed and nothing sent BY THIS CALL: the one typing call site "
+                "in this package runs only inside the gated write, against a "
+                "redeemed single-use token, and no read path can reach it. "
+                "The url guard blocks NAVIGATING to a compose surface "
                 "and was not consulted, because nothing navigated -- the "
                 "composer arrived as client-side state."
             )

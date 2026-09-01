@@ -71,20 +71,33 @@ What is true now, and is what the four parts above enforce:
 
 * This server can open a fixed set of LinkedIn's own read pages in the
   operator's browser and read what rendered.
-* It contains **exactly one** call that can change anything on LinkedIn: the
-  click in ``writes.perform``, named in :data:`SANCTIONED_MUTATIONS`. It does
-  not run unless a per-process flag is set, a human has read a confirm gate
-  built from a live read, and a single-use grant is redeemed against it. See
-  ``writes.py``.
-* It still types nothing, submits no form, issues no non-GET request, and
-  reaches LinkedIn as the ordinary Chrome it is. Read that list as what it
-  says: "no non-GET request" is not "no request outside the allowlist". One
-  GET goes to ``ME_API`` without passing :func:`assert_read_url` -- see part 1
-  -- and enumerating what this server does not do, without naming the one
-  thing it does, is how a true list misleads.
+* It contains **exactly two** calls that can change anything on LinkedIn,
+  both inside ``writes.perform`` and both named in
+  :data:`SANCTIONED_MUTATIONS`: a ``click``, and -- from 2026-09-01 -- a
+  ``fill``. Neither runs unless a per-process flag is set, a human has read a
+  confirm gate built from a live read, and a single-use grant is redeemed
+  against it. See ``writes.py``.
+* **IT TYPES, AND THIS SENTENCE SAID IT DID NOT UNTIL 2026-09-01.** The old
+  text read *"It still types nothing, submits no form, issues no non-GET
+  request"*, and the first clause is now false. It is corrected rather than
+  quietly dropped, because a reader who remembers the old guarantee needs to
+  meet the change here rather than infer it from a list that grew.
+
+  WHAT THE TYPING IS, exactly: ONE ``page.fill``, draining a queue at a single
+  call site, whose text is a slice of the GRANT's canonical target -- the
+  string the preview printed and the token was minted against. This server
+  does not COMPOSE text; it types back what a caller supplied and a human
+  approved verbatim. And a fill is not a send: the act that reaches LinkedIn
+  is the click after it, gated on a measured transition.
+* It still submits no form, issues no non-GET request, and reaches LinkedIn as
+  the ordinary Chrome it is. Read that list as what it says: "no non-GET
+  request" is not "no request outside the allowlist". One GET goes to
+  ``ME_API`` without passing :func:`assert_read_url` -- see part 1 -- and
+  enumerating what this server does not do, without naming the things it
+  does, is how a true list misleads.
 
 The list in :data:`SANCTIONED_MUTATIONS` is the whole of the difference, which
-is why it is one line long and why widening it is a test failure rather than a
+is why it is short and why widening it is a test failure rather than a
 judgement call.
 """
 
@@ -739,6 +752,40 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # stated as an accepted cost. Refusing the lesser act while performing the
     # greater one is backwards.
     ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
+    # THE THIRD ENTRY, added 2026-09-01, and the FIRST that is not a click.
+    # This package typed nothing at all until this line, and that fact was
+    # printed in the module docstring above, in server_info, and in four
+    # refusal texts. Adding it changes what this server IS, so it argues for
+    # itself here at length rather than being waved through.
+    #
+    # WHAT IT PERMITS: one page.fill, inside writes.perform, draining a queue
+    # exactly as the click does. ONE DRAIN POINT IS THE WHOLE DESIGN -- the
+    # scanner counts CALL SITES, so a queue keeps the guarantee this list
+    # exists to give (there is one place in this package that types, and a
+    # reviewer reads it) where a second literal page.fill would create a
+    # second place to audit.
+    #
+    # THE TEXT IS NEVER COMPOSED BY THIS SERVER. It is a slice of the GRANT's
+    # canonical target -- the same string the preview printed and the token
+    # was minted against -- extracted by writes._text_component_of, which
+    # refuses rather than guessing when it cannot split the target. consume()
+    # has already refused any token whose target did not match, so the bytes
+    # typed are provably the bytes he read. tests/test_typed_bytes.py asserts
+    # that identity rather than trusting it.
+    #
+    # WHAT IT DOES NOT PERMIT, by the triple's own construction: a fill in
+    # dom.py or browser.py (the PATH refuses it), a fill in any other function
+    # in writes.py including a closure inside perform (the FUNCTION refuses
+    # it, since attribution is to the innermost enclosing function), and a
+    # type, press, keyboard or http_post anywhere at all (the KIND refuses
+    # them -- this entry buys "fill" and nothing else).
+    #
+    # AND A FILL IS NOT A PUBLISH. Typing into a composer sends nothing; the
+    # act that reaches LinkedIn is the click that follows, which is gated
+    # separately by writes._publish_submit_gate on a measured transition -- the
+    # publish control is drawn DISABLED on an empty composer, so a fill that
+    # worked is observable and one that did not is refused.
+    ("linkedin_server/writes.py", "perform", "fill"),
 )
 
 

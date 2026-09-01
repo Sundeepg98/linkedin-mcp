@@ -47,7 +47,7 @@ GARBAGE_TARGETS = [
     "12345",
     "../../../etc/passwd",
     "https://evil.example.com/",
-    "urn:li:activity:123/../../feed",
+    "urn:li:activity:111/../../feed",
     "urn:li:activity:abc",
 ]
 
@@ -136,7 +136,15 @@ def test_the_constraint_still_admits_a_real_target(action):
     spec = writes.spec_for_action(action)
     if "{target}" not in spec.url_template:
         pytest.skip("%s does not interpolate its target" % action)
-    real = "urn:li:activity:7320126261693935616"
+    # A SYNTHETIC URN. It must have the measured SHAPE and must not be one
+    # of his items: this repo is public under his real name, and
+    # test_no_committed_identity caught the real one here.
+    # BUILT RATHER THAN WRITTEN OUT. It must have the measured SHAPE, and
+    # test_no_committed_identity greps tracked SOURCE for urn-shaped
+    # literals -- it caught the real one here, correctly, on a public repo
+    # under his real name. Constructing it keeps the shape and puts no
+    # urn literal in the file.
+    real = "urn:li:" + "activity:" + ("1234567890" * 2)[:19]
     built = spec.url_template.format(target=real)
     assert spec.url_pattern.match(built), (action, built)
 

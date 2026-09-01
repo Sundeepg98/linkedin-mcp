@@ -78,7 +78,7 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 #: somebody deleting a spec, which is the move these tests exist to make
 #: visible.
 #:
-#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, FOUR FROM 2026-09-01. ``update_setting`` left this tuple on the
+#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, THREE FROM 2026-09-01. ``update_setting`` left this tuple on the
 #: day it entered ``writes.PERFORMABLE``, and it LEFT rather than being kept
 #: with an exception, because every check below asserts that its subject
 #: CANNOT be performed -- an action in both places would be asserted to be two
@@ -89,7 +89,6 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 #: The constant keeps its name so the link to the seven the operator asked
 #: about is not lost; ``LIFTED`` below is where the difference is recorded.
 SEVEN = (
-    "publish_post",
     "comment_on_item",
     "update_profile_field",
     "send_message",
@@ -114,6 +113,11 @@ LIFTED = {
     # limit; send_invitation has NO verification and ships on the declaration.
     # Both left by shipping, which is the only way out of this tuple.
     "send_invitation": "2026-09-01",
+    # THE FOURTH DEPARTURE, same day, and the one that changed what this
+    # package IS: publish_post is the first action that TYPES. Its typing was
+    # a permission the operator granted; its verification did not close and
+    # was declared instead.
+    "publish_post": "2026-09-01",
 }
 
 

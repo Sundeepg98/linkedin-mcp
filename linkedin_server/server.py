@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, eight of which write to LinkedIn.
+"""The tool surface: thirty-three tools, nine of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -43,10 +43,10 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-ONE read, EIGHT write, and FOUR are write-shaped, registered, gated
+needs: TWENTY-ONE read, NINE write, and THREE are write-shaped, registered, gated
 and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-one plus eight plus four is
+so no confirm token for any of them can exist. Twenty-one plus nine plus three is
 thirty-three.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
@@ -74,11 +74,15 @@ numbers, and that file is the one to believe when the two disagree.
 The eight writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
 ``linkedin_unfollow_company``, ``linkedin_apply_job``,
 ``linkedin_follow_company``, ``linkedin_update_setting``,
-``linkedin_react_to_item`` and ``linkedin_send_invitation``, all registered
-below and all behind the same two-call gate. The last is the first write here
-that reaches ANOTHER PERSON, and the first that cannot confirm its own
-outcome -- both facts are printed in its confirm block rather than left in
-this docstring, where only somebody reading source would meet them. This sentence named FOUR of them
+``linkedin_react_to_item``, ``linkedin_send_invitation`` and
+``linkedin_publish_post``, all registered below and all behind the same
+two-call gate. ``send_invitation`` is the first write here that reaches
+ANOTHER PERSON and the first that cannot confirm its own outcome;
+``publish_post`` is the FIRST THAT TYPES, which cost this package its "it
+types nothing" guarantee -- true until 2026-09-01, printed in three places,
+and corrected in the same commit that made it false. Each of those facts is
+printed in the relevant confirm block rather than left here, where only
+somebody reading source would meet it. This sentence named FOUR of them
 and omitted ``linkedin_follow_company`` until 2026-08-31; it is corrected here
 rather than quietly widened, because the omitted name is the one whose absence
 made the count wrong. ``linkedin_update_setting`` joined it later that day,
@@ -207,11 +211,11 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. EIGHT WRITE: linkedin_save_job, "
+        "nothing. NINE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
-        "linkedin_update_setting, linkedin_react_to_item and "
-        "linkedin_send_invitation. Call any of them "
+        "linkedin_update_setting, linkedin_react_to_item, "
+        "linkedin_send_invitation and linkedin_publish_post. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -3136,16 +3140,10 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # one argument drift apart. What each line has to carry is the SHAPE of
     # the blocker, because "no control has been observed" and "the address is
     # forbidden" want completely different work to lift them.
-    "publish_post": (
-        "the surface and the anchor are MEASURED as of 2026-08-31 and this "
-        "line said the opposite until 2026-09-01: /preload/sharebox/ is on "
-        "the read allowlist, loads with no redirect, draws contenteditable "
-        "== 2 and names its publish control 'Post'. What stops it is TYPING, "
-        "for which no mutation is sanctioned, AND the absence of a reliable "
-        "verification -- the only surface that could confirm a post exists "
-        "is his own activity rail, and that rail is measured to render "
-        "intermittently."
-    ),
+    # ``"publish_post"`` LEFT THIS TABLE ON 2026-09-01. Typing was a
+    # permission and was granted; the verification did not close and was
+    # ruled on, so the gate declares that the activity rail is unreliable
+    # rather than refusing over it.
     "comment_on_item": (
         "BOTH of the blockers this line named until 2026-09-01 are closed. "
         "The item permalink is on the read allowlist, and the comment box "
@@ -3535,40 +3533,65 @@ async def linkedin_follow_company(
 
 @mcp.tool()
 async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str, Any]:
-    """Publish a post to your feed. BUILT, GATED, AND REFUSING.
+    """Publish a post to your LinkedIn feed. PERFORMS, and IT TYPES.
 
-    Call it and it reads the feed live, then tells you what it found and why it
-    will not act. It cannot publish anything today and the reason is not that
-    the code is missing.
+    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01. It is the first
+    tool on this surface that puts your words on a page rather than pressing a
+    control that already exists, and the package's standing claim that it
+    "types nothing" -- true, and printed in three places -- was corrected in
+    the same change that made it false.
 
-    WHAT IS MEASURED: the feed carries one composer control, accessible name
-    ``Start a post``, drawn as a div with role=button and no href -- so the
-    composer is a MODAL, not a page. Two publish routes ARE addressed by url
-    and both are real anchors: ``Write article`` at /article/new/ and
-    ``Create a post`` at /preload/sharebox/.
+    WHAT TYPING MEANS HERE, exactly, because the phrase is doing a lot of
+    work. ONE ``page.fill``, at one call site, draining a queue. The text is a
+    slice of the GRANT's canonical target -- the same string the preview
+    printed and the confirm token was minted against -- so **this server never
+    composes what it types**; it types back what you supplied and read.
+    ``tests/test_typed_bytes.py`` asserts that on the syntax tree rather than
+    trusting it, because an earlier version of that check compared source text
+    and let a mutation appending a hashtag through.
 
-    WHAT IS NOT: the same census counted ZERO contenteditable nodes on the
-    page, so the editor itself, and whatever control publishes, have never
-    been observed. This server does not click a control it has not seen. And
-    neither publish address is on its read allowlist.
+    A FILL IS NOT A PUBLISH. Typing into the composer sends nothing. The act
+    that reaches LinkedIn is the click after it, and that click happens only
+    if a fresh read of the composer passes four conditions -- the editor still
+    present, exactly one publish control, that control ENABLED, and the read
+    itself clean.
 
-    WHAT IT WOULD COST IF IT COULD. A post is a BROADCAST under your own name
-    -- your profile reports 275 followers and LinkedIn's own analytics show
-    past posts reaching 103, 308 and 1,284 impressions. Whether a post can be
-    deleted at all is UNMEASURED here: the per-post overflow menu renders
-    collapsed and its items have never been read, and deletion is permanently
-    forbidden in this server in any case. It is also the one artefact here a
-    current employer sees without looking for it.
+    THE THIRD CONDITION IS THE INTERESTING ONE. ``Post`` is measured DISABLED
+    on an empty composer, so a fill that landed produces an observable
+    transition and a fill that did not leaves the control disabled and stops
+    everything. That transition is why this action can be gated at all -- and
+    why the comment surface one page over cannot use the same machinery: its
+    control is measured ENABLED while the box is empty, so there is nothing to
+    observe.
 
-    WHAT WOULD LIFT THE REFUSAL: a capture of the opened composer -- the
-    accessible name of its editable node and of its publish control. The click
-    that first SHOWS the composer publishes nothing; only the second one does.
+    IT REFUSES TO TYPE OVER A DRAFT. If the publish control is ALREADY enabled
+    before anything is typed, the composer is not empty -- LinkedIn has
+    restored something, most likely yours. ``page.fill`` replaces, so this
+    stops rather than destroying text it cannot read back. Clear the composer
+    yourself and call again.
+
+    **NOTHING CAN CONFIRM THIS RELIABLY**, and the gate says so rather than
+    implying otherwise. The only surface that lists what you have posted is
+    your own activity rail, and it renders INTERMITTENTLY -- 233 controls with
+    LinkedIn's own self-assertion on one reading, 67 with no redirect on
+    another, minutes apart in one session. A check that answers nothing on
+    some readings is not a check. A scheduled-posts surface would have fixed
+    this and does not exist for this server: measured on a settle-confirmed
+    composer render, the page draws seven links and none reaches a posted or
+    scheduled list. Open your profile and look.
+
+    WHAT IT COSTS. This is a BROADCAST under your own name -- 274 followers,
+    and past posts measured at 113, 319 and 1,287 impressions. Whether a post
+    can be deleted is UNMEASURED: the per-post overflow menu has never been
+    opened.
 
     Args:
-        text: the exact words that would be posted. They are part of the
-            target, so a confirm token is bound to them and cannot be redeemed
-            against different words.
-        confirm_token: accepted, and no token is ever issued for this action.
+        text: EXACTLY what will be published, verbatim. It is the target, so
+            the confirm token is bound to these bytes -- changing them between
+            the preview and the confirmation invalidates the token rather than
+            publishing something you did not read.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf.
     """
     try:
         return await _write_tool("publish_post", {"text": text}, confirm_token)

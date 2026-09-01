@@ -743,6 +743,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # It is also the SECOND performable action that cannot be undone, and
         # the first that lands on a person rather than a company.
         "send_invitation",
+        # THE NINTH, same day, AND THE FIRST THAT TYPES. One page.fill, one
+        # drain point, text taken from the grant. It cost the package its "it
+        # types nothing" guarantee and readonly.SANCTIONED_MUTATIONS grew from
+        # two entries to three -- the first growth that is not a click.
+        "publish_post",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -756,7 +761,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # performed, which is the only way anything is supposed to leave.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "set_open_to_work",
-        "publish_post",
         "comment_on_item",
         "update_profile_field",
         "send_message",
@@ -808,7 +812,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # different bar, and lifting it does not photograph a control.
     assert surfaceless == {
         "set_open_to_work",
-        "publish_post",
         "comment_on_item",
         "update_profile_field",
         "send_message",
@@ -1073,7 +1076,6 @@ async def test_exactly_the_performable_writes_are_registered():
     # registered writes must EQUAL PERFORMABLE -- so nothing goes unnoticed by
     # leaving here.
     for tool in (
-        "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_update_profile_field",
         "linkedin_send_message",
@@ -2718,15 +2720,30 @@ def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
     """
     source = Path(writes.__file__).read_text(encoding="utf-8")
     raw = readonly.scan_source_for_mutations(source)
-    assert len(raw) == 1, raw
-    assert raw[0][1] == "click"
+    # TWO SINCE 2026-09-01: the click, and the fill publish_post needed. The
+    # raw scan still reports BOTH -- it was not taught to stop seeing either,
+    # which is the whole reason it can still see a third.
+    assert len(raw) == 2, raw
+    # ORDER-FREE, and that is a correction rather than a loosening. This read
+    # ``raw[0][1] == "click"`` while there was one hit; with two, position in
+    # the scan is a fact about which call comes FIRST IN THE FILE, which is
+    # not a property worth asserting -- moving the fill above the click would
+    # have failed a check that is supposed to be about kinds.
+    assert sorted(hit[1] for hit in raw) == ["click", "fill"], raw
 
     sanctioned, unsanctioned = readonly.partition_mutation_hits(
         "linkedin_server/writes.py", source
     )
     assert unsanctioned == []
-    assert len(sanctioned) == 1
-    assert readonly.enclosing_function(source, sanctioned[0][0]) == "perform"
+    # TWO SINCE 2026-09-01, and BOTH IN ``perform``: the click, and the fill
+    # that publish_post needed. The count is asserted rather than derived, so
+    # a third mutating call in this module fails here whatever its kind -- and
+    # every one of them is required to be in ``perform``, which is the half
+    # that keeps the drain points auditable.
+    assert len(sanctioned) == 2, sanctioned
+    for hit in sanctioned:
+        assert readonly.enclosing_function(source, hit[0]) == "perform", hit
+    assert sorted(hit[1] for hit in sanctioned) == ["click", "fill"]
 
 
 def test_a_second_click_inside_perform_is_still_caught():
