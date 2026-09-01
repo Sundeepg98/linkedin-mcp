@@ -1025,6 +1025,12 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     assert info["writes_available"] == [
         "apply_job",
         "follow_company",
+        # SEVENTH, 2026-09-01, and the first admitted with a blocker still
+        # OPEN rather than measured away: which reaction the toggle applies
+        # has never been established, and the operator ruled that it may ship
+        # provided the gate says so. Typed here by hand, like its six
+        # siblings, because a derived list would admit the eighth silently.
+        "react_to_item",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -1050,6 +1056,11 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     assert info["writes_sanctioned"] == [
         "apply_job",
         "follow_company",
+        # ADDED DELIBERATELY, 2026-09-01. This list is spelled out rather than
+        # derived from writes.PERFORMABLE precisely so that a new write cannot
+        # arrive by agreeing with whatever the code now says -- a seventh
+        # write has to be typed here by somebody who meant it.
+        "react_to_item",
         "save_job",
         "unfollow_company",
         "unsave_job",
@@ -1100,12 +1111,17 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "set_open_to_work",
         "publish_post",
         "comment_on_item",
-        "react_to_item",
         "update_profile_field",
         "send_invitation",
         "send_message",
     }
     assert "update_setting" not in set(not_performed)
+    # AND THE SECOND DEPARTURE, 2026-09-01. Asserted ABSENT by name for the
+    # same reason update_setting is: a shipped action still listed as refusing
+    # would tell a caller the opposite of the truth, and the failure mode this
+    # field exists to prevent is a caller unable to tell "not offered" from
+    # "examined and refused".
+    assert "react_to_item" not in set(not_performed)
     # ``writes_available`` is EMPTY here -- this test runs with the write flag
     # OFF, which is the whole of what it is about -- so the positive half is
     # asserted against the two things that do not depend on the flag.

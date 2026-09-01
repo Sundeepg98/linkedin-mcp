@@ -707,6 +707,25 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # checked property). NOTHING WAS PERMITTED TO LET IT CROSS:
     # readonly.SANCTIONED_MUTATIONS is the two entries it has been since
     # 2026-08-26, because the click it needs is perform()'s existing one.
+    # SEVEN SINCE 2026-09-01, and ``react_to_item`` crossed differently from
+    # all six before it. Each of those crossed when its LAST BLOCKER WAS
+    # MEASURED AWAY. This one crossed with a blocker still open: which
+    # reaction the toggle applies has never been established, and the ON-state
+    # label has never been seen. The operator lifted the verification standard
+    # that day -- an unverifiable outcome is shippable PROVIDED THE GATE SAYS
+    # SO -- and admitted this one with the gap stated in the spec's
+    # ``residue``, which the confirm block prints.
+    #
+    # WHAT DID NOT MOVE, and the distinction is the whole ruling: this action
+    # HAS a real verification. A fresh render of the permalink, the control
+    # present and no longer wearing the off label, returns ``to_state``. It
+    # answers WHETHER it moved and declines to say WHAT TO. That is not the
+    # apply_job shape -- a check that could not pass on any reading it could
+    # take -- and tests/test_unverifiable_outcomes.py asserts the difference.
+    #
+    # NOTHING WAS PERMITTED TO LET IT CROSS: readonly.SANCTIONED_MUTATIONS is
+    # the two entries it has been since 2026-08-26, because the click it needs
+    # is perform()'s existing one.
     assert writes.PERFORMABLE == {
         "save_job",
         "unsave_job",
@@ -714,6 +733,7 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "apply_job",
         "follow_company",
         "update_setting",
+        "react_to_item",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -729,7 +749,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_open_to_work",
         "publish_post",
         "comment_on_item",
-        "react_to_item",
         "update_profile_field",
         "send_invitation",
         "send_message",
@@ -765,17 +784,24 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # is a stronger guarantee than "perform declines to run them": there is no
     # confirm token for any of them anywhere in the process.
     #
-    # SEVEN SINCE 2026-08-31. ``update_setting`` left this set by being GIVEN
-    # a surface -- /mypreferences/d/dark-mode, on the operator's ruling and
-    # after six agreeing readings -- which is the only way anything is meant
-    # to leave it. Everything still here would act on an address the read
-    # boundary refuses, or on a control nobody has photographed, or would have
-    # to TYPE, which is a mutation class this package sanctions nowhere.
+    # SEVEN SINCE 2026-08-31, SIX SINCE 2026-09-01. Each departure was by
+    # being GIVEN a surface, which is the only way anything is meant to leave
+    # this set. ``update_setting`` got /mypreferences/d/dark-mode after six
+    # agreeing readings; ``react_to_item`` got the item permalink, which was
+    # moved off readonly._FORBIDDEN_URL_SUBSTRINGS on 2026-08-31 -- the first
+    # removal that list has ever had -- and loaded four times since with no
+    # redirect.
+    #
+    # Everything still here would act on an address the read boundary
+    # refuses, or on a control nobody has photographed, or would have to TYPE,
+    # which is a mutation class this package sanctions nowhere. Note that the
+    # last of those three is now the ONLY thing stopping some of them: the
+    # operator lifted the VERIFICATION standard on 2026-09-01, which is a
+    # different bar, and lifting it does not photograph a control.
     assert surfaceless == {
         "set_open_to_work",
         "publish_post",
         "comment_on_item",
-        "react_to_item",
         "update_profile_field",
         "send_invitation",
         "send_message",
@@ -1031,10 +1057,17 @@ async def test_exactly_the_performable_writes_are_registered():
     # declines, because perform() declining is a runtime behaviour and this is
     # a structural one: with no url_template, mint() refuses at issue and no
     # confirm token for these exists anywhere in the process.
+    # ``linkedin_react_to_item`` LEFT THIS TUPLE ON 2026-09-01, by SHIPPING.
+    # It is removed rather than excepted, for the reason the loop below
+    # states: every line here asserts its subject has NO write surface, and an
+    # action that has one would need the assertion softened to pass. A check
+    # softened to accommodate a shipped capability has stopped being a check.
+    # Its departure is asserted positively by the derived test above -- the
+    # registered writes must EQUAL PERFORMABLE -- so nothing goes unnoticed by
+    # leaving here.
     for tool in (
         "linkedin_publish_post",
         "linkedin_comment_on_item",
-        "linkedin_react_to_item",
         "linkedin_update_profile_field",
         "linkedin_send_invitation",
         "linkedin_send_message",

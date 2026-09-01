@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, six of which write to LinkedIn.
+"""The tool surface: thirty-three tools, seven of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -43,10 +43,10 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-ONE read, SIX write, and SIX are write-shaped, registered, gated
+needs: TWENTY-ONE read, SEVEN write, and FIVE are write-shaped, registered, gated
 and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-one plus six plus six is
+so no confirm token for any of them can exist. Twenty-one plus seven plus five is
 thirty-three.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
@@ -71,10 +71,11 @@ discipline, because a reader trusts it more. **The counts here are prose and
 nothing tests them** -- ``tests/test_server_surface.py`` pins the real
 numbers, and that file is the one to believe when the two disagree.
 
-The six writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
+The seven writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
 ``linkedin_unfollow_company``, ``linkedin_apply_job``,
-``linkedin_follow_company`` and ``linkedin_update_setting``, all registered
-below and all behind the same two-call gate. This sentence named FOUR of them
+``linkedin_follow_company``, ``linkedin_update_setting`` and
+``linkedin_react_to_item``, all registered below and all behind the same
+two-call gate. This sentence named FOUR of them
 and omitted ``linkedin_follow_company`` until 2026-08-31; it is corrected here
 rather than quietly widened, because the omitted name is the one whose absence
 made the count wrong. ``linkedin_update_setting`` joined it later that day,
@@ -203,10 +204,10 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SIX WRITE: linkedin_save_job, "
+        "nothing. SEVEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
-        "linkedin_follow_company, "
-        "linkedin_apply_job and linkedin_update_setting. Call any of them "
+        "linkedin_follow_company, linkedin_apply_job, "
+        "linkedin_update_setting and linkedin_react_to_item. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -3150,15 +3151,12 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "one of them totals comments, on a page where the reactions total "
         "reads out fine."
     ),
-    "react_to_item": (
-        "the OFF anchor IS measured -- LinkedIn writes the toggle state "
-        "into the control's name -- and the target objection this line "
-        "carried until 2026-09-01 is gone: the item permalink is on the read "
-        "allowlist and draws EXACTLY ONE reaction control, so neither the "
-        "address nor picking-by-position blocks it now. What stops it: which "
-        "reaction the toggle would apply has never been observed, and the "
-        "ON-state label has never been seen, so the undo has no anchor."
-    ),
+    # ``"react_to_item"`` LEFT THIS TABLE ON 2026-09-01 BECAUSE THE ACTION
+    # SHIPS. Three of its four blockers closed on 2026-08-31; the fourth --
+    # which reaction the toggle applies -- did not close and was RULED ON
+    # instead. It is now a disclosure printed from the spec's ``residue``,
+    # which is where a fact he must read before confirming belongs, rather
+    # than here where it decided for him.
     "update_profile_field": (
         "'/edit/' is on the forbidden-url list, so the three editor "
         "addresses measured live on 2026-08-30 are refused before the "
@@ -3621,40 +3619,60 @@ async def linkedin_comment_on_item(
 async def linkedin_react_to_item(
     item: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """React to one feed item. BUILT, GATED, AND REFUSING -- the closest of them.
+    """React to one feed item, under your own name. PERFORMS, behind the gate.
 
-    Reads the feed live, then refuses. It is worth knowing why this one is
-    closer than the others.
+    THIS DOCSTRING SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01, which
+    would now be the most load-bearing false sentence on this surface -- a
+    caller reads this INSTEAD of the source. It refused on four grounds. Three
+    were measured away and the fourth was ruled on, and the difference between
+    those two ways of stopping refusing is the thing to carry out of here.
 
-    WHAT IS MEASURED, and it is the strongest string found on this surface:
-    LinkedIn writes the TOGGLE STATE INTO THE CONTROL'S OWN ACCESSIBLE NAME --
-    ``aria-label="Reaction button state: no reaction"``. Eleven of those were
-    read on 2026-08-30, three on the feed and eight on your own profile, every
-    one in the off state. That is the same convention as the follow control,
-    and it means the direction can be read off the very button a reaction
-    would move.
+    WHAT CLOSED BY MEASUREMENT, all on 2026-08-31:
 
-    WHAT IS NOT: the ON-state label has never been seen, because nothing on
-    either surface had been reacted to -- so the undo has no anchor. That is
-    precisely where ``linkedin_unsave_job`` sat from August until 2026-08-30,
-    and how it got out is the template: one supervised write produced the
-    label, and a read-only route was built so the re-measurement cost nothing.
-    Neither has been done here. And the
-    target cannot be aimed: the item permalink is on the forbidden-url list,
-    and several items render at once, so choosing one from the feed would be
-    choosing by position.
+      * THE ADDRESS. The item permalink ``/feed/update/<urn>/`` was on the
+        forbidden-url list and is now on the read allowlist, addressed by the
+        urn shape the activity reader emits and nothing wider.
+      * THE AIM. The permalink draws EXACTLY ONE reaction control where the
+        feed and your profile draw eight, so choosing one is no longer
+        choosing by position.
+      * THE TARGET. ``linkedin_my_activity_items`` returns keys for items
+        measured to be yours.
 
-    WHAT IT WOULD COST. A reaction notifies the author and can surface in your
-    own network's feed. Taking it back later removes the row, not the
-    notification.
+    WHAT DID NOT CLOSE, AND SHIPS ANYWAY BECAUSE HE RULED IT SO: **pressing
+    this control applies whatever LinkedIn's default reaction is, and nobody
+    has measured which one that is.** ``Open reactions menu`` is a separate
+    control beside the toggle and has never been opened. If pressing turns out
+    to open a picker rather than apply immediately, this gate REPORTS THAT and
+    chooses nothing from it. The confirm block prints all of this before you
+    confirm; it is in the spec's ``residue`` rather than here, so it reaches
+    the person deciding rather than only the person reading source.
 
-    WHAT WOULD LIFT THE REFUSAL: a ruling on the item permalink. The anchor is
-    already in hand, which is not true of any of the other six.
+    THE ANCHOR is the strongest in this package: LinkedIn writes the toggle
+    state into the control's own accessible name,
+    ``aria-label="Reaction button state: no reaction"``, read on the feed, on
+    your profile, and on the permalink itself. The control states its own
+    state, so the direction is not inferred from anything around it.
+
+    THE VERIFICATION IS REAL AND IT IS NARROW. After the click the permalink
+    is re-rendered and the control re-read: present and no longer wearing the
+    off label means it moved. It CANNOT say what it moved to, because the
+    ON-state label has still never been observed. That is a different question
+    from whether it moved, and it is named rather than blurred -- a check that
+    answers "whether" honestly is not the same as one that could not pass,
+    which is what ``apply_job`` carried until 2026-08-31.
+
+    WHAT IT COSTS. A reaction NOTIFIES THE AUTHOR and can surface in your own
+    network's feed. Taking it back later -- if that is possible, which is
+    still unmeasured -- removes the row and not the notification, and not
+    whatever was shown to whoever saw it.
 
     Args:
-        item: which feed item. Unvalidated, for the reason
-            ``linkedin_comment_on_item`` gives, and unusable either way.
-        confirm_token: accepted, and no token is ever issued for this action.
+        item: which feed item, as ``urn:li:activity:<digits>``. Get it from
+            ``linkedin_my_activity_items``, which returns keys only for items
+            established to be yours.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf: a token from that block, used once within two minutes, is
+            the only thing that acts.
     """
     try:
         return await _write_tool("react_to_item", item, confirm_token)

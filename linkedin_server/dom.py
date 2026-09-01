@@ -4126,6 +4126,26 @@ REACTION_STATE_PREFIX = "Reaction button state:"
 REACTION_OFF_LABEL = "Reaction button state: no reaction"
 REACTION_CONTROL = 'button[aria-label^="Reaction button state:"]'
 
+
+def reaction_control_selector() -> str:
+    """The ONE control a reaction would press, on an item permalink.
+
+    TAKES NO ARGUMENT, AND THAT IS THE SAFETY PROPERTY RATHER THAN a
+    simplification. Every other selector builder in this module is GUARDED
+    because a caller supplies part of it -- a numeric job id, a company id, an
+    index. This one is assembled from a module constant and nothing else, so
+    there is no input to escape, no predicate to widen, and no way for a
+    caller to influence what gets clicked.
+
+    IT ANCHORS ON THE OFF LABEL, not on the state PREFIX. ``REACTION_CONTROL``
+    matches any toggle state and is the right thing for COUNTING; a click must
+    land only on a control measured to be in the state the action is valid
+    from, so it anchors on the exact name that means "no reaction" and matches
+    nothing once that has stopped being true. Pressing a control whose state
+    has changed under the gate is the one thing gate 5 exists to prevent.
+    """
+    return 'button[aria-label="' + REACTION_OFF_LABEL + '"]'
+
 #: The reaction PICKER, measured beside the toggle: ``aria-label="Open
 #: reactions menu"``, ``aria-expanded="false"``, count 3 and 8. Its contents
 #: have never been observed, so WHICH reactions exist is unknown.

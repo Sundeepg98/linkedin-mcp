@@ -78,7 +78,7 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 #: somebody deleting a spec, which is the move these tests exist to make
 #: visible.
 #:
-#: SEVEN UNTIL 2026-08-31, SIX NOW. ``update_setting`` left this tuple on the
+#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, FIVE FROM 2026-09-01. ``update_setting`` left this tuple on the
 #: day it entered ``writes.PERFORMABLE``, and it LEFT rather than being kept
 #: with an exception, because every check below asserts that its subject
 #: CANNOT be performed -- an action in both places would be asserted to be two
@@ -91,7 +91,6 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 SEVEN = (
     "publish_post",
     "comment_on_item",
-    "react_to_item",
     "update_profile_field",
     "send_invitation",
     "send_message",
@@ -102,6 +101,15 @@ SEVEN = (
 #: place to park something that merely stopped passing.
 LIFTED = {
     "update_setting": "2026-08-31",
+    # THE SECOND DEPARTURE, and it left for a different reason from the first.
+    # ``update_setting`` left because its last blocker was MEASURED away.
+    # ``react_to_item`` left with one blocker still open -- which reaction the
+    # toggle applies, and the never-seen ON label -- because the operator
+    # lifted the standard on 2026-09-01 and admitted a write that applies
+    # something this server cannot name, provided the gate says so. The
+    # blocker did not close; it became a disclosure, and it is printed from
+    # the spec's ``residue``.
+    "react_to_item": "2026-09-01",
 }
 
 

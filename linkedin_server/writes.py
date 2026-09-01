@@ -1010,8 +1010,15 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_react_to_item": WriteSpec(
         action="react_to_item",
         tool_name="linkedin_react_to_item",
-        url_template=None,
-        url_pattern=None,
+        # THE ITEM PERMALINK, admitted to the read allowlist 2026-08-31 and
+        # given a write surface 2026-09-01. The pattern is the urn shape
+        # dom.ACTIVITY_ITEMS_JS emits and nothing wider -- a target that is
+        # not a urn cannot build a url at all.
+        url_template="https://www.linkedin.com/feed/update/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/feed/update/"
+            r"urn:li:[A-Za-z]+:[0-9]+/$"
+        ),
         exempt_substring=None,
         summary="React to one feed item, under your own name.",
         from_state="no_reaction",
@@ -1058,7 +1065,19 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "was shown to whoever saw it. The data is restorable; the "
             "impression is not. That is the same residue the follow action "
             "carries, and it is the reason 'reversible' would be a "
-            "half-truth here even once the ON label is known."
+            "half-truth here even once the ON label is known. "
+            "AND THE THING THE VERDICT ITSELF CANNOT SETTLE, which the "
+            "operator ruled on 2026-09-01 and which must be read before "
+            "confirming: PRESSING THIS CONTROL APPLIES WHATEVER LINKEDIN'S "
+            "DEFAULT REACTION IS, AND NOBODY HAS MEASURED WHICH ONE THAT IS. "
+            "'Open reactions menu' is a SEPARATE control beside this toggle "
+            "and its contents have never been opened, so whether the toggle "
+            "applies a default Like immediately or opens that picker is "
+            "unestablished. If it opens a picker, this gate REPORTS THAT and "
+            "chooses nothing from it -- a gate that cannot say what it is "
+            "about to express under his name does not get to guess. And the "
+            "ON label has still never been seen, so the check after the click "
+            "can say the control MOVED and cannot say what it moved to."
         ),
         reversibility_procedure=(
             "React to one item and READ THE LABEL THE CONTROL CHANGES INTO. "
@@ -3863,6 +3882,35 @@ PERFORMABLE: frozenset[str] = frozenset(
         "unfollow_company",
         "apply_job",
         "follow_company",
+        # THE SEVENTH, 2026-09-01, and the first admitted under the operator's
+        # ruling that a write may apply something this server cannot name.
+        # Every clause the other six needed is true of it:
+        #
+        #   a measured surface   /feed/update/<urn>/, the item permalink, on
+        #                        the read allowlist since 2026-08-31 and
+        #                        loaded four times since with no redirect
+        #   a measured anchor    'Reaction button state: no reaction', read on
+        #                        the feed, on his profile, and on the
+        #                        permalink itself -- LinkedIn writes the
+        #                        toggle state into the accessible name
+        #   an aimable target    the permalink draws EXACTLY ONE reaction
+        #                        control where the feed and profile draw
+        #                        eight, so the picking-by-position objection
+        #                        that blocked this action does not arise here
+        #   a real verification  a fresh render of the permalink; the control
+        #                        present and no longer wearing the OFF label
+        #                        returns to_state, which is the property
+        #                        apply_job lacked
+        #   no new permission    the click is perform()'s existing one;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # WHAT IT STILL CANNOT SAY is WHICH reaction, and that is disclosed in
+        # `residue` rather than fixed: the ON label has never been observed
+        # and the picker has never been opened. The operator ruled explicitly
+        # that this may ship with that stated. It is NOT the apply_job shape
+        # -- the check answers WHETHER and answers it honestly; what is
+        # unknown is a different question, and it is named.
+        "react_to_item",
         # THE SIXTH, 2026-08-31, and the FIRST that is not about a job or a
         # company Page. It is here because every clause the other five needed
         # is now true of it and not because a rule was relaxed:
@@ -4005,6 +4053,17 @@ def anchor_label_for(
     a table. The row is pinned separately, by company id; see
     ``dom.unfollow_control_selector``.
     """
+    if spec.action == "react_to_item":
+        # THE OFF LABEL, MEASURED ON THREE SURFACES -- the feed, his profile,
+        # and the item permalink itself. LinkedIn writes the toggle state into
+        # the accessible name, which makes this the most self-describing
+        # anchor in the package: the control says which state it is in.
+        #
+        # THE ON LABEL HAS STILL NEVER BEEN SEEN, and that gap is carried in
+        # `residue` rather than here, because it is about what the gate can
+        # say AFTERWARDS and not about what it may press.
+        return dom.REACTION_OFF_LABEL
+
     if spec.action == "update_setting":
         # THE ANCHOR IS PER-CALL, WHICH NO OTHER ACTION'S IS, and that is why
         # this function grew a ``target`` parameter rather than a table entry.
@@ -4172,54 +4231,19 @@ _NINE_REFUSALS: dict[str, str] = {
         "in hand; the mutation is a ruling and the verification is a "
         "measurement nobody has been able to take."
     ),
-    "react_to_item": (
-        "react_to_item is sanctioned and cannot be performed, and it is the "
-        "closest of the seven -- THREE of its four blockers closed on "
-        "2026-08-31. WHAT IS MEASURED. The OFF anchor: LinkedIn writes toggle "
-        "state into the accessible name, aria-label='Reaction button state: "
-        "no reaction', read on the feed, on his profile, and now on the item "
-        "permalink itself. THE PERMALINK IS READABLE: /feed/update/<urn>/ is on the allowlist, "
-        "addressed by the urn shape the activity reader will emit and nothing "
-        "wider, and it renders EXACTLY ONE reaction control where the feed "
-        "and profile draw eight -- so the choosing-by-position objection, "
-        "which was a real blocker on those surfaces, does not arise on the "
-        "one this action would act on. AND IT IS AIMABLE AT LAST: "
-        "linkedin_my_activity_items returns item keys for items measured to "
-        "be his, and it did so live for the first time on 2026-08-31 after "
-        "gaining a third route to the page owner -- the profile has NO h1 "
-        "carrying text by any route, so the page's own title is what names "
-        "him. WHAT STOPS IT, and both halves are about what the gate can SAY "
-        "rather than what it can reach. FIRST, WHICH REACTION IT WOULD "
-        "APPLY IS UNMEASURED. 'Open reactions menu' is a SEPARATE control "
-        "beside the toggle, aria-expanded='false', and its contents have "
-        "never been observed; whether pressing the "
-        "toggle applies a default Like or opens that picker has never been "
-        "established. THAT CONTROL WAS COUNTED AT 1 ON THE PERMALINK UNTIL "
-        "2026-09-01 AND THE NUMBER WAS AN ARTEFACT OF THE ITEM: the reading "
-        "it came from used the 'first on the rail' rule and landed on an item "
-        "WITH NO COMMENTS. A permalink resolved by the 'most anchors' rule "
-        "the same day drew FIVE, because every rendered comment carries its "
-        "own reaction menu. The POST's toggle is still unique on both "
-        "readings -- 'Reaction button state: no reaction', count 1 -- so the "
-        "aim survives; what does not survive is reading a property off one "
-        "item and calling it a property of the surface, which is the same "
-        "mistake as inheriting a refusal from a neighbouring address. A "
-        "gate that cannot say what it is about to express "
-        "under his name is not a gate, which is the same standard that keeps "
-        "send_invitation refusing. SECOND, THE ON LABEL HAS NEVER BEEN SEEN, "
-        "so after the click _verify_after could report only that the OFF "
-        "label is gone and never what replaced it -- weaker than "
-        "follow_company, whose verification is already the weakest in this "
-        "design. WHAT WOULD LIFT IT IS ONE ACT AND IT IS HIS: he reacts to "
-        "TWO of his own posts in his own browser -- two rather than one, "
-        "because shape.census_redact_rare blanks a capitalised run seen "
-        "exactly once and a single reaction could be erased before it could "
-        "be read -- presses the reaction control itself rather than the menu "
-        "beside it, and says which of the two things happened. That settles "
-        "the ON label and what the toggle applies together, and this server "
-        "then re-measures by a READ-ONLY route, which is exactly how "
-        "unsave_job got its missing half."
-    ),
+    # ``"react_to_item"`` WAS HERE UNTIL 2026-09-01 AND IS GONE BECAUSE THE
+    # ACTION SHIPS, on this function's standing rule that text left behind for
+    # a shipped action is unreachable AND false.
+    #
+    # WHAT IT SAID AND WHAT CLOSED IT. It refused on four grounds and three
+    # closed on 2026-08-31: the OFF anchor was measured, the permalink became
+    # readable, and the item became aimable. The FOURTH -- which reaction the
+    # toggle applies, and the never-seen ON label -- did NOT close. It was
+    # RULED ON instead: the operator lifted the verification standard on
+    # 2026-09-01 and admitted a write that applies LinkedIn's default provided
+    # the gate says nobody has measured which one that is. That sentence now
+    # lives in the spec's ``residue``, where the confirm block prints it,
+    # rather than here where it decided for him.
     "update_profile_field": (
         "update_profile_field is sanctioned and cannot be performed. WHAT IS "
         "MEASURED, live on 2026-08-30 and CONTRADICTING WHAT THIS SERVER USED "
@@ -4753,6 +4777,47 @@ async def _live_control(
             )
         return (state, why, dom.named_role_selector(role, anchor))
 
+    if spec.action == "react_to_item":
+        # THE PERMALINK DRAWS EXACTLY ONE, which is the whole reason this
+        # action is aimed at a permalink and not at the feed. The feed and his
+        # profile draw eight, and choosing among eight would be choosing by
+        # position -- the objection that blocked this action until the
+        # permalink was admitted.
+        reading = await dom.read_reaction_surface(page)
+        controls = int(reading.get("controls") or 0)
+        off = int(reading.get("off_state") or 0)
+        if controls != 1:
+            return (
+                UNKNOWN,
+                f"{controls} reaction control(s) rendered on this permalink "
+                "and exactly one is the only shape this gate can act on. Zero "
+                "means the page had not drawn the item -- an absent control "
+                "is UNKNOWN and never 'no reaction' -- and more than one means "
+                "this is not the single-item render it was measured to be, so "
+                "pressing either would be picking by position.",
+                "",
+            )
+        if off != 1:
+            return (
+                "reacted",
+                "the one reaction control on this permalink is NOT wearing "
+                f"{dom.REACTION_OFF_LABEL!r}, so this item already carries a "
+                "reaction. This action is valid only from the un-reacted "
+                "state, and the label that would say WHICH reaction is "
+                "already there has never been measured -- so it cannot even "
+                "report what it is declining to overwrite.",
+                "",
+            )
+        return (
+            "no_reaction",
+            "the one reaction control on this permalink reads "
+            f"{dom.REACTION_OFF_LABEL!r}, read off the very control the click "
+            "will land on, after the click url was loaded. LinkedIn writes "
+            "the toggle state into this name, so this is the control stating "
+            "its own state rather than an inference from anything around it.",
+            dom.reaction_control_selector(),
+        )
+
     if spec.action == "unfollow_company":
         control = await dom.read_unfollow_control(page, grant.target)
         count = int(control.get("count") or 0)
@@ -4930,6 +4995,62 @@ async def _verify_after(
             + spec.unverifiable.what_he_must_do,
             "",
         )
+    if spec.action == "react_to_item":
+        # A FRESH NAVIGATION AND A RE-READ OF THE CONTROL. Not an independent
+        # surface -- there is only one page that carries this item's reaction
+        # state -- so this is a fresh RENDER from LinkedIn rather than a
+        # second source, and it says so instead of implying otherwise.
+        #
+        # THIS BRANCH CAN RETURN ``to_state``, which is the property
+        # tests/test_unverifiable_outcomes.py exists to enforce and the one
+        # apply_job lacked. ``to_state`` is "reacted" and the reading below
+        # produces exactly that when the control is present and has stopped
+        # wearing the OFF label.
+        #
+        # WHAT IT STILL CANNOT SAY IS **WHICH** REACTION, because the ON label
+        # has never been observed. That is not a defect in this check -- the
+        # check answers whether, and answers it honestly -- so it lives in
+        # ``residue``, which the gate prints as what stays unknown even given
+        # the verdict.
+        landed = await _load(
+            navigator,
+            page,
+            spec.url_template.format(target=grant.target),
+            surface="the item permalink",
+        )
+        reading = await dom.read_reaction_surface(page)
+        controls = int(reading.get("controls") or 0)
+        off = int(reading.get("off_state") or 0)
+        if controls != 1:
+            return (
+                UNKNOWN,
+                f"{controls} reaction control(s) rendered on the re-read, "
+                "where the permalink is measured to draw exactly one. An "
+                "absent control is a page that had not arrived, NOT a "
+                "reaction: reporting it as either outcome would be reading a "
+                "half-rendered page as a result.",
+                landed,
+            )
+        if off == 0:
+            return (
+                "reacted",
+                "the one reaction control on this permalink has stopped "
+                f"wearing {dom.REACTION_OFF_LABEL!r}. LinkedIn writes the "
+                "toggle state into that name, so a control that is present "
+                "and no longer says 'no reaction' is the strongest statement "
+                "this surface makes. WHICH reaction it now carries is not "
+                "readable -- the ON label has never been observed -- so this "
+                "says that it moved and does not say what to.",
+                landed,
+            )
+        return (
+            "no_reaction",
+            "the one reaction control still reads "
+            f"{dom.REACTION_OFF_LABEL!r} after the click, so the reaction did "
+            "not take effect.",
+            landed,
+        )
+
     if spec.action == "update_setting":
         # A FRESH NAVIGATION AND A RE-READ OF THE GROUP, which is the
         # strongest verification available to any action in this package and
