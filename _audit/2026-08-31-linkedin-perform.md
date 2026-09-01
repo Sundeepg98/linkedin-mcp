@@ -1122,13 +1122,22 @@ comparison beats reporting a theory.
 | # | blocker before | blocker after |
 |---|---|---|
 | 1 `publish_post` | no surface, no control | **must TYPE**, and its only verification surface renders intermittently |
-| 2 `comment_on_item` | no surface, no control, unaimable | **must TYPE.** All three closed. |
+| 2 `comment_on_item` | no surface, no control, unaimable | **must TYPE**, and -- found on 2026-09-01, after this line was written -- **no comment total exists to verify against.** Three closed, a FOURTH found. See Part Four. |
 | 3 `react_to_item` | unaimable, no permalink, ON label, which reaction | **which reaction it applies, and the ON label.** Two closed, both remaining are one supervised act of his. |
 | 9 `send_message` | surface forbidden, cost unknown | **must TYPE**, and the balance unread. The redirect cost turned out not to exist. |
 
 **THREE OF THE FOUR NOW REFUSE ON ONE MEASURED THING: typing is not a
 sanctioned mutation anywhere in this package.** That is the finding Part One
 opened with, arriving where it was predicted to.
+
+> **AMENDED 2026-09-01, and the amendment matters more than the sentence it
+> qualifies.** Typing turned out NOT to be the last blocker for any of the
+> three. Each also lacks a surface that could verify what it did, and that was
+> established only by going to look -- the `comment_on_item` row above says
+> "All three closed" because the count had not been checked yet. Had the
+> typing ruling been spent on the strength of this section, the result would
+> have been three writes that could only ever report `unknown`. Part Four
+> carries the measurements.
 
 ## 24. RECEIPTS, PART THREE
 
@@ -1142,3 +1151,303 @@ opened with, arriving where it was predicted to.
     writes performed      0
 
 Nothing was pushed.
+
+---
+
+# PART FOUR -- THE CLOSE (2026-09-01)
+
+## 25. THE BUILD STAMP, FIRST, AS ALWAYS
+
+    build.code.commit      c2090d373027   == git rev-parse HEAD
+    build.code.dirty       false
+    process.pid            19840
+    process.started_at     2026-09-01T03:04:41Z  (08:34:41 IST)
+
+The process is younger than the commit it reports, so the capture below was
+taken against the code on disk. This is the second consecutive reconnect where
+that held; of the four announced before it, three did not.
+
+## 26. `feed_item_commented` -- THE CAPTURE THAT SETTLED THE QUESTION
+
+One call, two page loads: the activity rail to resolve an item, then the item.
+
+    surface        feed_item_commented
+    source_url     /feed/update/urn:li:activity:<id>/   (redacted here --
+                   test_no_committed_identity caught the raw id in this
+                   very file, on a public repo under his real name)
+    rule           most_anchors (8 items available, 4 anchors on the chosen one)
+    controls_read  91
+    forms 1   buttons 43   links 44   contenteditable 1   dialogs 2
+    authorship     established -- isSelfProfile=true, one author string,
+                   unanimous, owner_source=document-title
+
+### Two of the three blockers are gone, and that is worth stating before the refusal
+
+**The target opens.** The permalink loaded under the boundary ruling, no
+redirect. Until 2026-08-31 `/feed/update` was on `_FORBIDDEN_URL_SUBSTRINGS`.
+
+**The comment box exists and is now measured.** `contenteditable: 1` -- a
+`div[role=textbox]` whose aria-label is `Text editor for creating comment`,
+beside a text-named `Comment` button. The feed census of 2026-08-30 read
+**0 contenteditable across 286 controls**, and that zero was the whole of the
+"no control" half of this refusal for as long as it existed. This is the first
+comment editor ever observed on this account.
+
+### What stops it is the third thing, and it is measured rather than argued
+
+**There is no comment total on the page.** The complete numeric inventory of
+all 91 controls:
+
+| shape | tag | count | what it is |
+|---|---|---|---|
+| `0` | `div[role=button]` | 4 | one per rendered comment row, paired 1:1 with four `Reply` buttons -- per-comment, not a post total |
+| `33 reactions 33` | `a` -> `/feed/update/<urn>/` | 1 | the reactions total |
+| `1,287 impressions ... analytics` | `a` | 1 | this post's analytics link |
+| `Post impressions 58` | `a` | 1 | the Me-panel sidebar, a different post |
+| `Profile viewers 31` | `a` | 1 | the Me-panel sidebar |
+| `..., N new notification(s)` | `a` / `button` | 5 | nav badges |
+
+Nothing counts comments.
+
+### The instrument has its own control on that same reading
+
+This is why the absence is a fact about the page and not about my reader.
+`33 reactions 33` is lowercase, numeric and seen **exactly once** -- precisely
+the shape `shape.census_redact_rare` blanks when it blanks anything -- and it
+came through **intact**. A comment total of the form `2 comments` would have
+survived the same pipeline for the same reason. The control was in the reading
+itself; it did not have to be assumed.
+
+### The fallback fails on the same capture
+
+The tempting substitute is to count rendered comment controls: four `Reply`
+buttons become five. That is not a total, and the page says so. The comment
+list sits under a **`Most relevant`** control (`div[role=button]`,
+`aria-expanded=false`), so the list is relevance-ordered, and the census reads
+first render without scrolling. A comment posted seconds ago with no
+engagement has no guaranteed place in a relevance-ordered first page. Counting
+what rendered would be sampling a sorted, paginated list and calling it a
+count.
+
+### Holding the prediction
+
+The expectation was on the record before the page was opened: **count
+plausible, attribution expected to FAIL.** Half right, and the optimistic half
+is the half that was wrong -- the count is not plausible, it is absent, and
+attribution never got its turn because there is no total to attribute. No
+comment appeared during this reading, so the upgrade-a-count-into-an-
+attribution temptation was never available to resist; that is reported rather
+than claimed as restraint.
+
+## 27. THE RULING
+
+**`comment_on_item` REFUSES ON VERIFICATION.** Not on target, not on anchor --
+both were closed by this wave. On verification alone.
+
+By the rule accepted before the capture was taken:
+
+| action | verification surface | verdict |
+|---|---|---|
+| `publish_post` | the activity rail, measured at 233 controls once and 67 another time in the same session | **REFUSES** -- a check that answers nothing on some readings |
+| `send_message` | none. No countable total on the composer, none on `/premium/my-premium/` | **REFUSES** -- could only ever report `unknown` |
+| `comment_on_item` | none. No comment total among 91 controls | **REFUSES** |
+
+**None of the three ships. The typing ruling stays unspent.**
+`readonly.SANCTIONED_MUTATIONS` ends this wave at **2 entries**, exactly where
+it started. No `fill` entry was landed, standalone or with a call site.
+
+The server still cannot type. What changed is that all three refusals now name
+a measured ground instead of an inherited assumption.
+
+## 28. THE BALANCE, IN ITS NARROW FORM
+
+**There is no countable InMail balance on either surface this server MAY
+READ.** That sentence is deliberately narrower than the one it is tempting to
+write, and the narrowness is the finding.
+
+* **The messaging composer** carries no balance. The control named `InMail` on
+  that surface is a FILTER PILL, sibling to `Focused`, `Unread`, `Starred` and
+  `Connections`.
+* **`/premium/my-premium/`** was read twice, and the two readings **disagree**:
+  **73 controls today, 80 on 2026-08-31.** So this surface has no settled
+  count and neither reading is a measurement of the whole page. What survives
+  both readings is that no control on either carried a credit balance. The
+  numeric shapes present today are marketing offers (`Redeem 3 months free`,
+  `Claim 1 year free`, `Redeem 4 months free`, `Redeem 3 months on us`),
+  carousel pagination (`Page 1..3`, `Next`) and nav badges.
+
+**The unadmitted addresses that could still hold it**, named rather than
+gestured at, all measured on today's reading and none on the read allowlist:
+
+| address | links to it | reached from |
+|---|---|---|
+| `/premium/sb/explore/` | 9 | `See all features`, `Get hired faster`, `Work smarter`, `Network like a pro`, `Enhance profile` |
+| `/premium/premium-perks/` | 5 | the four redeem/claim offers |
+| `/premium/switcher/` | 1 | `Change plan` |
+| `<opaque>` href | 2 | `Manage subscription`, `Edit payment method` |
+
+An earlier note to the lead said "two unadmitted links"; today's reading
+enumerates four distinct destinations, so the earlier count is corrected here
+rather than repeated. **None of them was opened** -- each would need its own
+ruling, and there is nothing to consume the answer while `send_message`
+refuses for a separate reason.
+
+## 29. THE THIRTEEN-ROW LEDGER
+
+`writes.SANCTIONED_WRITES` holds thirteen actions. Twelve have a registered
+tool; `set_open_to_work` has none.
+
+| # | action | state | the ground, as measured |
+|---|---|---|---|
+| 1 | `save_job` | **PERFORMS** | anchor `Save the job`, verified against the Saved tab |
+| 2 | `unsave_job` | **PERFORMS** | anchor measured 2026-08-30 across two independent routes; refuses from any state it does not recognise |
+| 3 | `follow_company` | **PERFORMS** | verified by re-reading the followed list |
+| 4 | `unfollow_company` | **PERFORMS** | addressed by NUMERIC id; refuses when the Page is not among the rendered rows |
+| 5 | `apply_job` | **PERFORMS**, irreversible | two defects fixed this wave: verification pointed at the Saved tab and now reads the Applied tab; the five-condition submit gate named none of its conditions and now returns a `refused_condition` code |
+| 6 | `update_setting` | **PERFORMS** (new this wave) | dark mode is a three-state radio group read off `/mypreferences/d/dark-mode`; role read via `dom.aria_role_of`, refused if not a known input role; verified by reload and re-read |
+| 7 | `publish_post` | refuses | surface and anchor MEASURED (`/preload/sharebox/`, contenteditable==2, control `Post`). Stops on TYPING and on a verification surface that renders intermittently |
+| 8 | `comment_on_item` | refuses | surface and anchor MEASURED (permalink, contenteditable==1, `Text editor for creating comment`). Stops on TYPING and on **no comment total among 91 controls** |
+| 9 | `react_to_item` | refuses | OFF anchor measured on three surfaces; permalink readable; post toggle unique. Stops on which reaction the toggle applies, and on the ON label never having been seen |
+| 10 | `send_invitation` | refuses | nine controls on his own profile, costing no badge. Stops because the label IS the other person's name, which this server will not read, so the suffix selects all nine. `/invite`, `invitation`, `/connect` are on the forbidden list |
+| 11 | `send_message` | refuses | composer OBSERVED under an exact-url exemption. Stops on TYPING and on nothing being able to verify a send |
+| 12 | `update_profile_field` | refuses | `/edit/` is on the forbidden list (verified against the live tuple). No field inside any editor has been observed |
+| 13 | `set_open_to_work` | refuses, **and has no tool** | 237 urls and 37 payload paths across five profile captures reach no audience editor; it opens as a modal, and the first click that would show it is the first that could change it |
+
+Rows 7-12 are the six refusals a caller can reach through a tool. Row 13 is
+refused inside `_refuse_unperformable` with no tool registered, which is why
+thirteen actions present as twelve write-shaped tools.
+
+## 30. THREE DRIFTS FOUND WHILE CLOSING, AND THE GUARD THAT NOW CATCHES THEM
+
+None of these was the wave's subject. All three were found by reading what the
+server tells a caller, immediately after measuring what the server does.
+
+**One. `linkedin_server_info` carried a SECOND refusal table
+(`server._WHY_NOT_PERFORMED`) that was stale against the boundary work.** It
+told callers that `/feed/update/<urn>/` was forbidden -- removed 2026-08-31,
+the first removal this package has ever made -- that `/article/new/` and
+`/preload/sharebox/` were not on the allowlist (both added), and that no
+messaging composer had ever been observed (one had). The comment above that
+table shows the earlier mitigation: keep the duplicate to one line each *"and
+two long copies of one argument drift apart"*. **Shortening a duplicate does
+not stop it duplicating.** Five entries rewritten.
+
+**Two. The module docstring claimed its own numbers were checked, and nothing
+checked them.** It read *"THE NUMBERS ABOVE ARE DERIVED, not counted by
+hand"*, named two pins, and both pins were real -- one pinned `len(tools)` to
+the literal 33, the other pinned the INSTRUCTIONS string. Neither read the
+docstring. So when `update_setting` shipped on 2026-08-31 the instructions
+correctly said SIX and the docstring went on saying FIVE for a day and a half,
+under a sentence asserting it could not. Seventh rot of that paragraph; the
+first six were counted in it already.
+
+**Three. The census parameter description named the wrong set.** It said *"one
+of these five"* while eight keys existed, was corrected to a NINE that listed
+`feed_item` while omitting `feed_item_commented` and `premium`. **The count was
+right and the membership was wrong**, which is the version nobody catches: a
+reader counting nine names against a stated nine finds nothing to doubt.
+
+### The guard, and the eight mutations it was shown failing at
+
+New file `tests/test_prose_that_makes_a_claim.py`, five tests. Every one was
+shown RED at a mutation before being accepted, and each failure names its
+cause rather than printing two integers:
+
+| mutation | caught by | the failure it prints |
+|---|---|---|
+| `headline-count-rots-by-one` | docstring numbers | `the headline says five write, writes.PERFORMABLE has 6` |
+| `split-restates-the-pre-update_setting-shape` | docstring numbers | `docstring says FIVE write, writes.PERFORMABLE has 6` |
+| `sum-adds-up-and-disagrees-with-the-registry` | docstring numbers | `the sum sentence adds up and disagrees with the registry` |
+| `toolless-action-drops-out-of-the-prose` | toolless action | names `set_open_to_work` |
+| `census-lists-the-wrong-eleven` | census enumeration | `answered to but not named: ['premium']` |
+| `census-count-and-membership-disagree` | census enumeration | `the description says 'ten' and the instrument answers to 11` |
+| `refusal-inherits-a-boundary-that-moved` | forbidden-path guard | names `/feed/update/` and the sentence |
+| `collector-skips-the-inline-refusal` | corpus guard | `missing: ['set_open_to_work']` |
+
+Two of those mutations found real weaknesses in the checks themselves, which
+is the point of running them:
+
+* **`census-lists-the-wrong-eleven` initially passed.** Swapping `premium` out
+  of the enumeration left the test green, because a sentence added *in the
+  same commit as the test* names `"premium"` in prose. Searching the whole
+  paragraph tests whether a word appears somewhere; the check now scopes to
+  the enumeration clause and compares the quoted set against
+  `census_surface_keys()` in both directions.
+* **The corpus guard exists because a loop over nothing passes.** The
+  forbidden-path check iterates refusal texts; had the collector returned an
+  empty dict it would have been green forever. The collector reaches refusals
+  by CALLING `_refuse_unperformable`, not by reading `_NINE_REFUSALS`, so
+  `set_open_to_work` -- which has no table entry -- is covered like the rest.
+  A guard that read only the table would be blind to exactly the entry the
+  table forgot.
+
+### One more correction the capture forced
+
+`react_to_item`'s refusal stated that `Open reactions menu` had **count 1 on
+the permalink**. Today's permalink drew **five**, because every rendered
+comment carries its own reaction menu. The earlier number came from a reading
+that used the `first` rule and landed on an item with no comments. The post's
+own toggle is still unique on both readings (`Reaction button state: no
+reaction`, count 1), so the aim survives -- but reading a property off one item
+and calling it a property of the surface is the same error as inheriting a
+refusal from a neighbouring address, and the entry now says so.
+
+## 31. FOUR FINDINGS THAT OUTLIVE THIS WORK
+
+Carried verbatim, because each is shorter than the incident that produced it
+and would lose its edge in paraphrase.
+
+> *A refusal inherited from a neighbouring address is not a measurement of
+> that address.*
+
+`/messaging/compose/` was refused for as long as this server has existed, on
+`/messaging/`'s behaviour, and neither the original author nor the wave lead
+checked. The same shape then repeated inside this wave: three refusal texts
+kept citing `/feed/update` as forbidden for a day and a half after it was
+deliberately admitted. A refusal is the text nobody re-reads, which is exactly
+why it rots without being noticed.
+
+> *Typing without a verification surface reproduces the defect apply carried
+> for months.*
+
+A write that can only ever report `"unknown"`. `apply_job` compared its
+`to_state` against a reader that could never return it. All three typing
+candidates in this wave were tested against this rule before any mutation was
+sanctioned, and all three failed it. The rule is what kept the ruling unspent.
+
+> *A reading taken while the thing is still moving is not a measurement of it.*
+
+One finding, two instruments. On the page: `settle`, born after
+`profile_edit_intro` was read TWICE at 67 controls and twice at 256 -- two
+agreeing readings, both of a page that had not arrived. On the repository:
+`git status`, after three suite runs against a moving tree and a push gated on
+one of them. `/premium/my-premium/` in this very close is a live instance --
+73 controls today against 80 on 2026-08-31, so neither reading is settled and
+the finding drawn from them had to be narrowed to what both agree on.
+
+> *A check that could not pass is indistinguishable from one that has not
+> passed yet.*
+
+`apply_job`'s `to_state` was compared against a reader that could never return
+it, and nothing caught it because nothing asserted the surface. The twin,
+found while closing, is worse: a CLAIM of being checked is worth less than
+nothing, because it is the thing that stops somebody checking. `server.py` said
+its numbers were derived, and that sentence was the reason nobody derived them.
+
+## 32. RECEIPTS, PART FOUR
+
+    suite                      see the run recorded with the commit
+    captures taken             2 -- feed_item_commented, premium (re-read)
+    page loads                 3
+    badge before / after       unchanged; no notification or mynetwork load
+    threads opened             0
+    comments posted            0
+    SANCTIONED_MUTATIONS       2, unchanged all wave
+    fill entries landed        0
+    confirm_tokens minted      0
+    confirm_tokens used        0
+    writes performed           0
+    _state/session.json        untouched
+    phase 2                    untouched, as instructed
+
+Nothing was fired. Nothing was pushed.

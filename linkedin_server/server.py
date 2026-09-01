@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, five of which write to LinkedIn.
+"""The tool surface: thirty-three tools, six of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -22,15 +22,39 @@ the part to distrust. ``linkedin_my_activity_items`` arrived after the fifth
 correction had been made: another READ, no write, thirty-two -> thirty-three
 and twenty -> twenty-one.
 
-THE NUMBERS ABOVE ARE DERIVED, not counted by hand. Thirty-three is
-``len(await mcp.list_tools())``, pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtythree_tools``; five is
-``len(writes.PERFORMABLE)``, pinned in the same file. The surface splits three
-ways and the split is the part a reader actually needs: TWENTY-ONE read, FIVE
-write, and SEVEN are write-shaped, registered, gated and cannot act at all --
-none is in ``writes.PERFORMABLE``, none holds a ``url_template``, and
-``writes.mint`` refuses each of them a grant at issue, so no confirm token for
-any of them can exist. Twenty-one plus seven plus five is thirty-three.
+THE SEVENTH IS THE ONE WORTH READING, 2026-09-01, because it is not another
+tool arriving -- it is this paragraph being WRONG ABOUT ITSELF. It said "THE
+NUMBERS ABOVE ARE DERIVED, not counted by hand", and that sentence was false
+when it was written. Nothing compared these words against the code. What was
+pinned was the INSTRUCTIONS string, by
+``test_the_instructions_announce_every_write``, which derives its number from
+``writes.PERFORMABLE`` and would fail the moment a write shipped unannounced
+-- and it did exactly that job when ``update_setting`` shipped on 2026-08-31,
+so the instructions said SIX that day. This docstring kept saying FIVE for a
+day and a half, and the reason nobody caught it is the reason it is worth
+recording: A CHECK THAT COULD NOT FAIL IS INDISTINGUISHABLE FROM ONE THAT HAS
+NOT FAILED YET, and a claim of being checked is worth less than nothing when
+it is the thing stopping somebody from checking.
+
+THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
+than about an intention. Thirty-three is ``len(await mcp.list_tools())``,
+pinned in ``test_server_surface.py`` by
+``test_the_surface_is_exactly_the_thirtythree_tools``; the split is pinned in
+the same file by ``test_this_modules_docstring_numbers_are_derived``, which
+reads THESE WORDS and fails if any of the three disagrees with the registry.
+The surface splits three ways and the split is the part a reader actually
+needs: TWENTY-ONE read, SIX write, and SIX are write-shaped, registered, gated
+and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
+``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
+so no confirm token for any of them can exist. Twenty-one plus six plus six is
+thirty-three.
+
+NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
+THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
+the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
+``_refuse_unperformable``, and no tool was ever registered for it. So six plus
+six counts TOOLS and thirteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy.
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -2262,9 +2286,17 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
     Args:
         surface: which page to measure. A KEY, never a url, and one of these
-            nine: "feed", "profile", "profile_edit_intro", "settings",
-            "settings_dark_mode", "feed_item", "post_composer",
-            "article_composer" or "messaging_compose". Several are one page
+            eleven: "feed", "profile", "profile_edit_intro", "settings",
+            "settings_dark_mode", "feed_item", "feed_item_commented",
+            "post_composer", "article_composer", "messaging_compose" or
+            "premium". THIS LIST HAS BEEN INCOMPLETE TWICE and is now pinned
+            by ``test_the_census_docstring_lists_every_surface_it_answers_to``
+            -- it said "five" while eight keys existed, and was then corrected
+            to a NINE that named the wrong nine, listing "feed_item" while
+            omitting "feed_item_commented" and "premium". The count being
+            right by accident while the membership was wrong is why the test
+            checks MEMBERSHIP against ``census_surface_keys()`` and not just
+            the number. Several are one page
             out of a family whose other members stay unreachable, and the
             enumeration is the whole of that -- "settings" is the settings
             INDEX and nothing below it, and "settings_dark_mode" is one named
@@ -2277,7 +2309,14 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
             his own items, found by the own-activity reader and chosen as the
             first on the rail; no argument selects it, and a rail whose
             authorship cannot be established yields a refusal rather than a
-            census. The three composer keys each carry a "cost" field saying
+            census. "feed_item_commented" is the same resolver under a
+            different rule -- the item carrying the MOST permalink
+            anchors, which is a heuristic for the richest item on his rail
+            rather than a claim about what that item renders, and
+            CENSUS_ITEM_RULES names the rule an answer used. "premium"
+            is his own subscription page, added to settle whether an InMail
+            balance is a countable thing this server can read; it is not.
+            The three composer keys each carry a "cost" field saying
             what opening them may have spent. Notifications and /mynetwork/
             are still deliberately not offered: loading them consumes a badge
             he has not seen, which is a cost with nothing to show for it. See
@@ -3093,28 +3132,40 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # the blocker, because "no control has been observed" and "the address is
     # forbidden" want completely different work to lift them.
     "publish_post": (
-        "the composer is a modal and its editor has never been observed -- "
-        "zero contenteditable nodes on the feed. The two url-addressed "
-        "publish routes that DO exist, /article/new/ and /preload/sharebox/, "
-        "are not on the read allowlist. A capture of the opened composer "
-        "lifts it."
+        "the surface and the anchor are MEASURED as of 2026-08-31 and this "
+        "line said the opposite until 2026-09-01: /preload/sharebox/ is on "
+        "the read allowlist, loads with no redirect, draws contenteditable "
+        "== 2 and names its publish control 'Post'. What stops it is TYPING, "
+        "for which no mutation is sanctioned, AND the absence of a reliable "
+        "verification -- the only surface that could confirm a post exists "
+        "is his own activity rail, and that rail is measured to render "
+        "intermittently."
     ),
     "comment_on_item": (
-        "the item permalink /feed/update/<urn>/ is on the forbidden-url list, "
-        "so the target cannot be opened; and the comment box has never been "
-        "observed. Two blockers, and a boundary ruling only clears one."
+        "BOTH of the blockers this line named until 2026-09-01 are closed. "
+        "The item permalink is on the read allowlist, and the comment box "
+        "was observed on it: contenteditable == 1, a div with role=textbox "
+        "named 'Text editor for creating comment'. What stops it is TYPING "
+        "AND THE ABSENCE OF A COUNT -- 91 controls on that permalink and not "
+        "one of them totals comments, on a page where the reactions total "
+        "reads out fine."
     ),
     "react_to_item": (
-        "the anchor IS measured -- LinkedIn writes the toggle state into the "
-        "control's name -- and the target is not: the item permalink is on "
-        "the forbidden-url list, and the feed renders several items at once "
-        "so picking one there would be picking by position. The ON-state "
-        "label is also still unseen, so the undo has no anchor."
+        "the OFF anchor IS measured -- LinkedIn writes the toggle state "
+        "into the control's name -- and the target objection this line "
+        "carried until 2026-09-01 is gone: the item permalink is on the read "
+        "allowlist and draws EXACTLY ONE reaction control, so neither the "
+        "address nor picking-by-position blocks it now. What stops it: which "
+        "reaction the toggle would apply has never been observed, and the "
+        "ON-state label has never been seen, so the undo has no anchor."
     ),
     "update_profile_field": (
-        "'/edit/' is on the forbidden-url list, so the three editor addresses "
-        "measured live on 2026-08-30 are refused before the allowlist is "
-        "consulted; and no field inside any editor has been observed."
+        "'/edit/' is on the forbidden-url list, so the three editor "
+        "addresses measured live on 2026-08-30 are refused before the "
+        "allowlist is consulted. One exact-url exemption was ruled in on "
+        "2026-08-31, for the intro editor in its own-profile spelling, and "
+        "that one surface is now a census key; no field inside any editor "
+        "has been observed."
     ),
     "update_setting": (
         "the STATE is now measured -- dark mode is a three-state radio group "
@@ -3135,11 +3186,14 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "'invitation' and '/connect' are also forbidden urls."
     ),
     "send_message": (
-        "'/messaging/compose' is on the forbidden-url list and no composer "
-        "has ever been observed, because observing one costs opening a "
-        "stranger's thread. This preview does not pay that -- it reads the "
-        "nav badge and stops. linkedin_open_messaging is the tool that pays "
-        "it knowingly."
+        "'/messaging/compose' is on the forbidden-url list, and one "
+        "exact-url exemption was ruled in on 2026-08-31, so the composer HAS "
+        "now been observed -- this line said it never had until 2026-09-01. "
+        "What stops it is TYPING AND the absence of anything that could "
+        "verify a send: no countable total on the composer, and none on "
+        "/premium/my-premium/ either. The preview still costs nothing -- it "
+        "reads the nav badge and stops; linkedin_open_messaging is the tool "
+        "that opens a thread knowingly."
     ),
 }
 
