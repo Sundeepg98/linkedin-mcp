@@ -1797,3 +1797,183 @@ while looking exactly like success.
     phase 2                   untouched
 
 Nothing was fired. Nothing was pushed from this seat.
+
+---
+
+# PART SIX -- THE SEVENTH CAPABILITY, AND THE CLOSE (2026-09-01)
+
+## 46. `set_open_to_work` -- THE RULING WAS ADMITTED AND ITS PRECONDITION WAS NOT
+
+The operator ruled that **a click measured to issue no `ServerRequest` is, by
+effect, a READ** -- extending this package's own reasoning about the messaging
+filter pills, which send nothing and change nothing. That is a real route to a
+modal, and it is the route this action needed.
+
+The wave lead overrode a recommendation not to spend a fourth
+`SANCTIONED_MUTATIONS` entry on it, and the override was right on two grounds
+worth keeping:
+
+* **declining the entry would have made the ruling unactionable.** A ruling
+  whose implementation is refused exists on paper and nothing may act on it.
+* **the entry would have been NARROWER than the three already there.**
+  `perform`'s click and fill are STATIC permits -- authorised by the gate, not
+  by any measurement of the control they land on. This one would have been
+  authorised **per click, by a live reading of that control's own action
+  list.** That is a stronger shape than anything on the list.
+
+### The instrument, and the floor that made its answer trustworthy
+
+`dom.read_sdui_actions` counts SDUI action tokens in the flight payload and
+returns **integers only** -- the payload is ~1.09 MB of his profile, which is
+why the tracked fixtures carry zero script characters.
+
+Its `readable` flag is False unless the payload was present **AND** carried
+recognisable action tokens. That floor is the reason the result below is a
+finding rather than a shrug: **a parser that has stopped parsing returns zero
+of everything, and a row of zeroes is the exact shape of permission.**
+
+### The measurement -- one admitted read, no click
+
+    settle    verdict CONSISTENT    expected 233    read 233
+
+    sdui      script_blocks    2
+              payload_chars    2,146
+              needle_hits      0
+              global           server_request 0, navigate 0, set_state 0, show_menu 0
+              readable         FALSE
+              error            null
+
+    2026-08-24, pre-hydration    17 script blocks    1,091,238 payload chars
+    2026-09-01, at load event     2 script blocks         2,146 payload chars
+
+Three things make that decisive rather than inconclusive:
+
+1. **The page had fully arrived.** `settle` says `consistent` at 233/233. An
+   absence measured on a half-rendered page is worth nothing; this one is not.
+2. **The reader ran.** `error: null`. It did not throw and did not fail to
+   parse. It looked, and found 2,146 characters carrying not one action token.
+3. **So the diagnosis is ABSENT PAYLOAD, not broken reader** -- two different
+   `readable: false` verdicts, and this is the second.
+
+### The refusal
+
+**`set_open_to_work` refuses because the ruling's PRECONDITION cannot be
+satisfied through this transport.** Not because of `Edit`, and not because the
+reader is broken. The action lists the ruling turns on live in a React flight
+payload that is gone by the time this server can look. The 2026-08-24 audit's
+own post-hydration figure -- 3,686 characters -- matches today's 2,146, so this
+is the documented behaviour of the surface rather than a surprise.
+
+**The DOM controls are all still there** -- `Open to` with
+`aria-expanded="false"`, `Edit` at count 1. What is gone is the EVIDENCE ABOUT
+WHAT THEY DO, and the ruling turns on the evidence rather than on the controls.
+
+**The negative control was never reachable.** `Edit` could not be shown
+returning non-zero, because there is no payload to count in for EITHER control
+-- so by the rule agreed before the reading, no click was authorised and none
+happened.
+
+### THE FOURTH ENTRY WAS NEVER SPENT
+
+`readonly.SANCTIONED_MUTATIONS` is still **three**. The widening the lead
+accepted the cost of turned out not to be needed: the question cost **one page
+load of his own profile** -- no badge, no third party, no click, no new
+permission. The right call was to ask, and the recommendation against asking
+was wrong about the price.
+
+### What would lift it, and why it may not be worth lifting
+
+The payload exists **pre-hydration**. Reaching it means capturing the document
+response before the page hydrates, which is **request interception** -- `route`
+is on `readonly._MUTATION_CALL_PATTERNS`. That is a materially LARGER
+capability than the click it would have authorised: it lets this server see raw
+traffic rather than one measured control.
+
+**And it may not be worth it even then.** Step 7's `Edit` still fires
+`saveAndFetchNextStep`, so the editor stays behind a click that saves. The
+payload would only settle whether the AUDIENCE control happens to sit one level
+shallower, in the step-5 detail modal. Recorded as a decision belonging to the
+operator, with a recommendation against.
+
+## 47. THE THIRTEEN-ROW LEDGER, FINAL
+
+| # | action | state | the ground, as measured |
+|---|---|---|---|
+| 1 | `save_job` | **PERFORMS** | anchor `Save the job`, verified against the Saved tab |
+| 2 | `unsave_job` | **PERFORMS** | anchor measured across two independent routes |
+| 3 | `follow_company` | **PERFORMS** | verified by re-reading the followed list |
+| 4 | `unfollow_company` | **PERFORMS** | numeric id; refuses when the Page is not among rendered rows |
+| 5 | `apply_job` | **PERFORMS**, irreversible | verification reads the Applied tab; the submit gate names which of five conditions refused |
+| 6 | `update_setting` | **PERFORMS** | three-state radio group; role read off the row; verified by reload and re-read |
+| 7 | `react_to_item` | **PERFORMS** | OFF anchor on three surfaces; permalink draws exactly one control; verification returns `to_state` and declines to say WHICH reaction |
+| 8 | `send_invitation` | **PERFORMS**, irreversible | needle resolved to exactly one control inside the page; outcome DECLARED unverifiable |
+| 9 | `publish_post` | **PERFORMS**, irreversible | `Post` disabled-while-empty gives a real post-fill gate; refuses to type over a restored draft; outcome declared unverifiable |
+| 10 | `comment_on_item` | **PERFORMS**, irreversible | submit found by ARRIVAL; expects to refuse on first use and reports what it saw |
+| 11 | `send_message` | refuses | `Send` measured disabled-while-empty; the RECIPIENT control's name never reached disk. A MEASUREMENT gap |
+| 12 | `update_profile_field` | refuses | `/edit/` forbidden with one exact-url exemption; no field inside any editor observed. A MEASUREMENT gap |
+| 13 | `set_open_to_work` | refuses, **no tool** | the ruling's precondition is unsatisfiable through this transport: the action lists are in a payload absent at load. A MEASUREMENT gap |
+
+**Ten perform. Three refuse, and every one of the three refuses on a
+MEASUREMENT gap rather than on a permission he withheld.** A ruling cannot
+photograph a control, and that sentence is the shape of this whole wave.
+
+`performable_and_irreversible` is **four**: `apply_job`, `comment_on_item`,
+`publish_post`, `send_invitation`.
+
+## 48. THE DISCLOSURE SENTENCES, VERBATIM
+
+For each write that cannot confirm itself, what the gate prints -- the third
+field, the one that is about him:
+
+| action | what he must do himself |
+|---|---|
+| `send_invitation` | *"open My Network, then Manage, then Sent, and look for the person. That is the only way to know whether this landed"* |
+| `publish_post` | *"open your profile and look at your recent activity. If the post is there it published; this server cannot tell you reliably either way"* |
+| `comment_on_item` | *"open the post and look at the comments. Yours will be attributed to you. AND IF THIS REFUSES AFTER TYPING: a comment draft may be left in the box, and whether that draft is local to this browser or saved to your account is UNMEASURED..."* |
+
+## 49. THE FINDINGS
+
+The four from Part Four stand unchanged. Part Five added two. This part adds
+two more, and one of them is the sentence the whole wave turned on.
+
+> *A zero from a reader that has never been shown returning non-zero is not a
+> measurement.*
+
+Every instrument failure in this repository's last three days is one shape: an
+instrument returning a clean answer to a question it could not actually ask. A
+guard blind to a doubled backslash. A comparison with no passing case. A corpus
+of nothing reading as a pass. A suite green over a file it could not see. A
+parser that has stopped parsing reports zero of everything -- **and a row of
+zeroes is the exact shape of permission.**
+
+It is why `read_sdui_actions` carries its own floor rather than trusting a
+caller to check one, and it is why `readable: false` from an absent payload is
+a FINDING where a bare row of zeroes would have been an invitation.
+
+> *The payload cannot be kept because of what is in it, so the measurement has
+> to be retaken live. Those are the same fact, not bad luck.*
+
+The two captures the OTW census worked from are gone, and the surviving
+fixtures carry zero script characters DELIBERATELY -- because the flight
+payload is where his identity lives. The safety property that protects him is
+the same property that makes offline validation impossible. Treating the
+absence as an obstacle would have missed that they are one fact.
+
+## 50. RECEIPTS, PART SIX
+
+    commits           034fb78  the SDUI reader and its floor
+                      <this>   set_open_to_work's refusal, rewritten from the
+                               live measurement, and this close
+
+    suite             see the run recorded with the commit
+    SANCTIONED_MUTATIONS   3 -- the fourth entry was authorised and NOT SPENT
+    PERFORMABLE            10
+    still refusing         send_message, update_profile_field, set_open_to_work
+    live reads this part   1 (his own profile, settle-confirmed)
+    clicks                 0
+    confirm_tokens         0 minted, 0 used
+    writes performed       0
+    _state/session.json    untouched
+    phase 2                untouched
+
+Nothing was fired. Nothing was pushed from this seat.
