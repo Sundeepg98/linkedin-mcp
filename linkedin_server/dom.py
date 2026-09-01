@@ -4189,6 +4189,99 @@ SHAREBOX_COMPOSER_HREF = "/preload/sharebox/"
 #: urn, in a url this server's read boundary forbids (``/feed/update``).
 COMMENT_CONTROL_NAME = "Comment"
 
+#: The comment editor on an item permalink, MEASURED 2026-09-01: a div with
+#: role=textbox, named through aria-label, count 1, on a page reporting
+#: contenteditable == 1. Every previous census of every readable surface
+#: reported zero, so this is the first comment editor this server has seen.
+COMMENT_EDITOR_LABEL = "Text editor for creating comment"
+
+
+def comment_editor_selector() -> str:
+    """The contenteditable a comment's text is typed into. NO ARGUMENT."""
+    return 'div[role="textbox"][aria-label="' + COMMENT_EDITOR_LABEL + '"]'
+
+
+def comment_submit_selector(name: str) -> str:
+    """A selector for the comment submit, by a name MEASURED AFTER a fill.
+
+    THE ONE SELECTOR BUILDER HERE WHOSE NAME IS NOT A MODULE CONSTANT, and it
+    is guarded hardest for exactly that reason. ``post_submit_selector`` and
+    ``reaction_control_selector`` take no argument because their labels are
+    measured and frozen; this control's label CANNOT be frozen, because it
+    does not exist until a fill lands and nobody has ever seen it.
+
+    So the name arrives from ``writes._comment_submit_gate``, which obtained it
+    by diffing a SHAPED census -- meaning any label carrying a member's
+    identity has already had it substituted out and will fail the check below
+    on its ``<`` bracket. That is the intended path, not an edge case: a
+    control this server cannot name without naming a person is one it does not
+    press.
+
+    NOT ROUTED THROUGH :func:`named_role_selector` for the reason
+    ``post_submit_selector`` gives -- that function refuses any role outside
+    ``INPUT_TYPE_ROLES``, and widening it so one caller could use it would
+    trade a measured restriction for a convenience that every other caller
+    would inherit.
+    """
+    text = str(name or "").strip()
+    if not text or any(bad in text for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a comment submit selector from this name: it "
+            "is empty or carries a character that would end the selector's "
+            "own quoting. A shaped name containing '<' means the label held "
+            "somebody's identity, and that is a refusal rather than a bug."
+        )
+    return 'role=button[name="' + text + '"][exact=true]'
+
+
+async def read_comment_surface(page: Any) -> dict[str, Any]:
+    """The editor, and a SHAPED NAME CENSUS of every control on the page.
+
+    BUILT ON ``read_surface_census`` RATHER THAN BESIDE IT, because that
+    function is the only caller of ``CENSUS_JS`` and is where a raw accessible
+    name is discarded. This surface is the one place in the package where
+    reading names matters most and is most dangerous: LinkedIn writes OTHER
+    MEMBERS' NAMES into the labels here -- ``View more options for <member>'s
+    comment.`` is measured on it -- so a reader that returned raw names would
+    pull third-party identity into this process to build a selector with.
+
+    Everything below is therefore a SHAPE. A name that carried somebody's
+    identity comes back with it substituted out, which also means it comes
+    back UNUSABLE AS A SELECTOR -- and that is the correct outcome, not a
+    limitation to work around.
+
+    WHY A WHOLE-PAGE CENSUS AND NOT A SCOPED ONE. The comment apparatus has no
+    container to scope to: the editor, the ``Comment`` control and all four
+    ``Reply`` buttons report container ``none``, measured. The only
+    container-bearing controls on that permalink are two ad dialogs and the
+    ad-report form. So there is nothing to narrow to, and the delta this feeds
+    is over the whole page with that noise named rather than hidden.
+    """
+    out: dict[str, Any] = {
+        "editors": 0,
+        "names": {},
+        "controls_read": 0,
+        "error": None,
+    }
+    try:
+        out["editors"] = int(
+            await page.locator(comment_editor_selector()).count()
+        )
+        census = await read_surface_census(page)
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("comment surface unreadable: %s", out["error"])
+        return out
+    counts: dict[str, int] = {}
+    for row in census.get("control_shapes", []):
+        name = str(row.get("shape") or "")
+        if not name:
+            continue
+        counts[name] = counts.get(name, 0) + int(row.get("count") or 0)
+    out["names"] = counts
+    out["controls_read"] = int(census.get("controls_read") or 0)
+    return out
+
 #: The reaction control, and the most informative string measured that day.
 #: MEASURED ``aria-label="Reaction button state: no reaction"``: count 3 on
 #: ``/feed/`` and count 8 on ``/in/me/``. Eleven controls, every one of them in

@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, nine of which write to LinkedIn.
+"""The tool surface: thirty-three tools, ten of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -43,10 +43,10 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-ONE read, NINE write, and THREE are write-shaped, registered, gated
+needs: TWENTY-ONE read, TEN write, and TWO are write-shaped, registered, gated
 and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-one plus nine plus three is
+so no confirm token for any of them can exist. Twenty-one plus ten plus two is
 thirty-three.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
@@ -74,8 +74,8 @@ numbers, and that file is the one to believe when the two disagree.
 The eight writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
 ``linkedin_unfollow_company``, ``linkedin_apply_job``,
 ``linkedin_follow_company``, ``linkedin_update_setting``,
-``linkedin_react_to_item``, ``linkedin_send_invitation`` and
-``linkedin_publish_post``, all registered below and all behind the same
+``linkedin_react_to_item``, ``linkedin_send_invitation``, ``linkedin_publish_post`` and
+``linkedin_comment_on_item``, all registered below and all behind the same
 two-call gate. ``send_invitation`` is the first write here that reaches
 ANOTHER PERSON and the first that cannot confirm its own outcome;
 ``publish_post`` is the FIRST THAT TYPES, which cost this package its "it
@@ -211,11 +211,12 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. NINE WRITE: linkedin_save_job, "
+        "nothing. TEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
-        "linkedin_send_invitation and linkedin_publish_post. Call any of them "
+        "linkedin_send_invitation, linkedin_publish_post and "
+        "linkedin_comment_on_item. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -3144,21 +3145,11 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # permission and was granted; the verification did not close and was
     # ruled on, so the gate declares that the activity rail is unreliable
     # rather than refusing over it.
-    "comment_on_item": (
-        "BOTH of the blockers this line named until 2026-09-01 are closed. "
-        "The item permalink is on the read allowlist, and the comment box "
-        "was observed on it: contenteditable == 1, a div with role=textbox "
-        "named 'Text editor for creating comment'. What stops it is TYPING "
-        "AND THE ABSENCE OF A COUNT -- 91 controls on that permalink and not "
-        "one of them totals comments, on a page where the reactions total "
-        "reads out fine."
-    ),
-    # ``"react_to_item"`` LEFT THIS TABLE ON 2026-09-01 BECAUSE THE ACTION
-    # SHIPS. Three of its four blockers closed on 2026-08-31; the fourth --
-    # which reaction the toggle applies -- did not close and was RULED ON
-    # instead. It is now a disclosure printed from the spec's ``residue``,
-    # which is where a fact he must read before confirming belongs, rather
-    # than here where it decided for him.
+    # ``"comment_on_item"`` LEFT THIS TABLE ON 2026-09-01. Typing was granted,
+    # the verification was declared, and the SUBMIT is still unobserved -- so
+    # the gate finds it by arrival after the fill and refuses with the
+    # observation when two controls share a name. It may refuse on first use
+    # and that refusal is the measurement.
     "update_profile_field": (
         "'/edit/' is on the forbidden-url list, so the three editor "
         "addresses measured live on 2026-08-30 are refused before the "
@@ -3603,34 +3594,59 @@ async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str,
 async def linkedin_comment_on_item(
     item: str, text: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """Comment under one feed item. BUILT, GATED, AND REFUSING.
+    """Comment on one feed item. PERFORMS, and MAY REFUSE ON FIRST USE BY DESIGN.
 
-    Reads the feed live, then refuses and says what it saw.
+    READ THAT SECOND CLAUSE FIRST, because it is not a caveat. This tool can
+    type the comment into the box and then STOP WITHOUT POSTING IT, on
+    purpose, and report what it saw. That is designed behaviour for a control
+    nobody has measured -- not a bug, and not something to get past by trying
+    again.
 
-    WHAT IS MEASURED: the comment affordance, in both of its two shapes, and
-    they are not the same control. On the feed it is a text-named button that
-    opens a composer in place. On a profile it is an ANCHOR pointing at the
-    item's permalink, /feed/update/<urn>/ -- which is the only place a target
-    key for a feed item has ever been seen.
+    WHY. The control that POSTS a comment does not exist until the box has
+    content. On an empty permalink this server measures ONE control named
+    ``Comment``, and the feed draws that same name seven times annotated as
+    the thing that FOCUSES the box. So "find a control named Comment and press
+    it" is satisfied by the page BEFORE anything is typed, and would press the
+    wrong thing while looking exactly like success.
 
-    WHAT IS NOT, and there are three: the permalink family is on this server's
-    forbidden-url list, so the item cannot be opened; the comment box is a
-    contenteditable node and the census counted zero of them, so it has never
-    been observed; and the exact form of a feed urn is unmeasured, because the
-    census substitutes ``<urn>`` out before counting so that it cannot publish
-    an identifier.
+    SO THE SUBMIT IS IDENTIFIED BY ARRIVAL. The page's control names are
+    censused before the fill and again after, and the gate proceeds only if
+    exactly ONE NAME appeared that was not there before -- because "it did not
+    exist until there was something to submit" is what actually identifies it,
+    where a shared name identifies nothing and a position is not a property.
+    If a name's COUNT merely grew (``Comment`` 1 -> 2), two controls now share
+    one name and THIS REFUSES.
 
-    WHAT IT WOULD COST. A comment is PUBLIC, ATTRIBUTED TO YOU, and sits under
-    SOMEBODY ELSE'S item -- published to their audience rather than to your
-    followers, and it notifies them. Whether it can be deleted is unmeasured
-    here and this server could not delete it either way.
+    His own account's evidence suggests that second case is what will happen.
+    Which is the point: measuring the submit's real name requires the fill,
+    and the fill is the act this gate authorises. THE FIRST REFUSAL IS THE
+    MEASUREMENT, reported in the result's ``delta_gate`` block as ``arrived``
+    and ``grew``. That is how ``linkedin_unsave_job`` got its missing label,
+    and it is why this ships in a state that expects to stop.
+
+    IF IT REFUSES AFTER TYPING, A DRAFT MAY BE LEFT IN THE BOX. Whether such a
+    draft is local to this browser or saved to the account is UNMEASURED: 17
+    candidate draft-listing addresses are all refused by the read boundary, so
+    there is no surface on which one could be found or removed. Open the post
+    and clear the box by hand if it should not be there. "Nothing was left
+    behind" is a claim about instruments and is not available here.
+
+    NOTHING CAN VERIFY A POSTED COMMENT EITHER. There is no comment total on
+    that page -- 91 controls enumerated and not one counts comments, on a page
+    where the reactions total reads out fine. The confirm block says so in
+    full before you confirm.
+
+    A COMMENT IS PUBLIC AND ATTRIBUTED TO HIM, under somebody else's item and
+    published to THEIR audience, notifying them and staying attached to their
+    content. The confirm token is bound to the exact words and the preview
+    shows them verbatim.
 
     Args:
-        item: which feed item, by whatever identifier you have. This server has
-            never read one unshaped, so it does not pretend to validate the
-            form -- and it also cannot act on it.
-        text: the exact words. Part of the target, so a token binds to them.
-        confirm_token: accepted, and no token is ever issued for this action.
+        item: which feed item, as ``urn:li:activity:<digits>``.
+        text: EXACTLY what would be posted, verbatim. It is half the target,
+            so the token is bound to these bytes.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf -- this one is public and lands on another person's item.
     """
     try:
         return await _write_tool(

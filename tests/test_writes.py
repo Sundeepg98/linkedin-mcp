@@ -748,6 +748,12 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # types nothing" guarantee and readonly.SANCTIONED_MUTATIONS grew from
         # two entries to three -- the first growth that is not a click.
         "publish_post",
+        # THE TENTH, same day, and the only one in this set that ships
+        # EXPECTING TO REFUSE. Its submit control has never been observed and
+        # no ruling can measure one; the gate identifies it by ARRIVAL after
+        # the fill and refuses with the observation when two controls share a
+        # name. The refusal is what produces the missing measurement.
+        "comment_on_item",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -761,7 +767,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # performed, which is the only way anything is supposed to leave.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "set_open_to_work",
-        "comment_on_item",
         "update_profile_field",
         "send_message",
     }
@@ -812,7 +817,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # different bar, and lifting it does not photograph a control.
     assert surfaceless == {
         "set_open_to_work",
-        "comment_on_item",
         "update_profile_field",
         "send_message",
     }
@@ -1076,7 +1080,6 @@ async def test_exactly_the_performable_writes_are_registered():
     # registered writes must EQUAL PERFORMABLE -- so nothing goes unnoticed by
     # leaving here.
     for tool in (
-        "linkedin_comment_on_item",
         "linkedin_update_profile_field",
         "linkedin_send_message",
     ):

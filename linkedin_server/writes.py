@@ -992,8 +992,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_comment_on_item": WriteSpec(
         action="comment_on_item",
         tool_name="linkedin_comment_on_item",
-        url_template=None,
-        url_pattern=None,
+        # THE ITEM PERMALINK. The target is composite -- item AND text -- and
+        # only the ITEM half reaches this url, because assert_write_url
+        # formats the SUBJECT. His prose never enters a navigation.
+        url_template="https://www.linkedin.com/feed/update/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/feed/update/"
+            r"urn:li:[A-Za-z]+:[0-9]+/$"
+        ),
         exempt_substring=None,
         summary=(
             "Publish a comment under one feed item, under your own name."
@@ -1002,6 +1008,43 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         to_state="comment_published",
         target_kind="item_and_text",
         state_from="feed_item",
+        # RULING 1, 2026-09-01, and this declaration carries TWO things no
+        # other does: no count exists to verify against, and the ACT ITSELF
+        # may leave something behind that cannot be found.
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "the item permalink itself -- the page the comment would be "
+                "posted on, which is also the page this acts on"
+            ),
+            why_it_cannot=(
+                "NOTHING ON THAT PAGE COUNTS COMMENTS. Measured 2026-09-01: "
+                "91 controls enumerated, and the complete numeric inventory "
+                "is four '0' controls (one per rendered comment row, paired "
+                "1:1 with four 'Reply' buttons, so per-comment and not a post "
+                "total), '33 reactions 33', two impressions links, a profile "
+                "viewers link and five nav badges. THE INSTRUMENT HAS ITS OWN "
+                "CONTROL ON THAT READING: '33 reactions 33' is lowercase, "
+                "numeric and seen exactly once -- the precise shape "
+                "shape.census_redact_rare would blank if it blanked anything "
+                "-- and it came through INTACT, so this is an absence on the "
+                "page and not one in the reader. AND THE FALLBACK FAILS ON "
+                "THE SAME CAPTURE: counting rendered comment rows is not a "
+                "total, because the list sits under a 'Most relevant' control "
+                "and the reader takes a first render without scrolling -- a "
+                "comment posted seconds ago with no engagement has no "
+                "guaranteed place in a relevance-ordered first page"
+            ),
+            what_he_must_do=(
+                "open the post and look at the comments. Yours will be "
+                "attributed to you. AND IF THIS REFUSES AFTER TYPING: a "
+                "comment draft may be left in the box, and whether that draft "
+                "is local to this browser or saved to your account is "
+                "UNMEASURED -- 17 candidate draft-listing addresses are all "
+                "refused by the read boundary, so there is no surface on "
+                "which one could be found or removed. Open the post and clear "
+                "the box yourself if you do not want it there"
+            ),
+        ),
         direction_source=(
             "linkedin_surface_census(feed), taken live by this gate, reading "
             "the comment affordance and the item permalinks beside it. "
@@ -4097,6 +4140,21 @@ PERFORMABLE: frozenset[str] = frozenset(
         # scheduled-posts surface that would have fixed this was measured on
         # 2026-09-01 not to exist for this server.
         "publish_post",
+        # THE TENTH, 2026-09-01, and the one that ships EXPECTING TO REFUSE.
+        #
+        # Its surface, its editor and its aim are all measured. What is NOT
+        # measured is the accessible name of the control that posts a comment,
+        # because that control does not exist until the box has content -- and
+        # putting content in the box is the act this gate authorises. So the
+        # submit is identified by ARRIVAL (_comment_submit_gate), and when two
+        # controls end up sharing the name 'Comment', which his own screenshot
+        # suggests, THE GATE REFUSES AND REPORTS WHAT IT SAW.
+        #
+        # That refusal is the instrument rather than a failure: the first
+        # supervised run produces the measurement nobody could take any other
+        # way. Exactly the shape unsave_job took when its ON label could not
+        # be observed until one write produced it.
+        "comment_on_item",
         # THE SIXTH, 2026-08-31, and the FIRST that is not about a job or a
         # company Page. It is here because every clause the other five needed
         # is now true of it and not because a rule was relaxed:
@@ -4239,6 +4297,13 @@ def anchor_label_for(
     a table. The row is pinned separately, by company id; see
     ``dom.unfollow_control_selector``.
     """
+    if spec.action == "comment_on_item":
+        # THE EDITOR, and there is no submit to name. Unlike publish_post,
+        # whose submit is drawn from the start, this action's submit does not
+        # exist until the fill lands -- _comment_submit_gate finds it by
+        # ARRIVAL afterwards, or refuses.
+        return dom.COMMENT_EDITOR_LABEL
+
     if spec.action == "publish_post":
         # THE EDITOR, NOT THE SUBMIT, and that is the whole difference a
         # typing action makes to this function. For a click action the anchor
@@ -4355,71 +4420,14 @@ _NINE_REFUSALS: dict[str, str] = {
     # refusing over it. The declaration also records the thing that would have
     # fixed it and does not exist: a scheduled-posts surface, measured absent
     # on a settle-confirmed composer render the same day.
-    "comment_on_item": (
-        "comment_on_item is sanctioned and cannot be performed, AND ITS "
-        "OLDEST BLOCKER CLOSED ON 2026-08-31. WHAT IS MEASURED: the item "
-        "permalink /feed/update/<urn>/ is on the read allowlist now, "
-        "addressed by the urn shape "
-        "dom.ACTIVITY_ITEMS_JS will emit and nothing wider, and "
-        "linkedin_surface_census('feed_item') resolves one of HIS OWN items "
-        "and loads it. That capture answers the question this refusal has "
-        "carried since it was written: THE COMMENT BOX EXISTS AND IS NAMED. "
-        "'Text editor for creating comment', a div with role=textbox named "
-        "through aria-label, count 1, on a page reporting contenteditable == "
-        "1. Every previous census of every readable surface reported "
-        "contenteditable == 0, which was the whole of the 'NO CONTROL' half. "
-        "The permalink also renders exactly ONE comment affordance and ONE "
-        "reaction control where the feed and the profile draw eight, so the "
-        "choosing-by-position objection does not arise on this surface at "
-        "all. WHAT STOPS IT: COMMENTING MEANS TYPING, and no text-entry "
-        "mutation is sanctioned anywhere in this package -- 'fill', 'type', "
-        "'press' and 'keyboard' are on readonly._MUTATION_CALL_PATTERNS and "
-        "on no entry of readonly.SANCTIONED_MUTATIONS. AND THE THING THAT "
-        "WOULD STILL MATTER IF THAT CHANGED: a comment is PUBLIC AND "
-        "ATTRIBUTED TO HIM under somebody else's item, published to their "
-        "audience rather than his, notifying them and staying attached to "
-        "their content. That is why the target this action is addressed by "
-        "carries the TEXT and not just the item: a confirm token binds to the "
-        "exact words, and the preview must show them verbatim before "
-        "anything is posted. AND THE THING THAT STOPS IT EVEN IF THE "
-        "TYPING RULING IS SPENT, measured 2026-09-01 on the permalink "
-        "itself: NOTHING ON THAT PAGE COUNTS COMMENTS. 91 controls were "
-        "enumerated and the complete numeric inventory is four '0' "
-        "controls (div[role=button], one per rendered comment row, paired "
-        "1:1 with four 'Reply' buttons, so per-comment and not a post "
-        "total), '33 reactions 33', '1,287 impressions', 'Post "
-        "impressions 58', 'Profile viewers 31' and five nav badges. THE "
-        "INSTRUMENT HAS ITS OWN CONTROL ON THAT READING, which is why "
-        "this is an absence on the page rather than one in the reader: "
-        "'33 reactions 33' is lowercase, numeric and seen exactly once, "
-        "the precise shape shape.census_redact_rare would blank if it "
-        "were going to blank anything, and it came through INTACT. THE "
-        "FALLBACK FAILS ON THE SAME CAPTURE: counting rendered comment "
-        "controls is not a total, because the list sits under a 'Most "
-        "relevant' control (div[role=button], aria-expanded=false) and "
-        "the census reads first render without scrolling -- a comment "
-        "posted seconds ago with no engagement has no guaranteed place "
-        "in a relevance-ordered first page. So a built comment could "
-        "report only 'unknown', which is the shape apply_job carried "
-        "until 2026-08-31 on an action that cannot be taken back. WHAT "
-        "WOULD LIFT IT: BOTH a sanctioned text-entry mutation AND a "
-        "verification surface. The surface, the anchor and the aim are "
-        "in hand; the mutation is a ruling and the verification is a "
-        "measurement nobody has been able to take."
-    ),
-    # ``"react_to_item"`` WAS HERE UNTIL 2026-09-01 AND IS GONE BECAUSE THE
-    # ACTION SHIPS, on this function's standing rule that text left behind for
-    # a shipped action is unreachable AND false.
-    #
-    # WHAT IT SAID AND WHAT CLOSED IT. It refused on four grounds and three
-    # closed on 2026-08-31: the OFF anchor was measured, the permalink became
-    # readable, and the item became aimable. The FOURTH -- which reaction the
-    # toggle applies, and the never-seen ON label -- did NOT close. It was
-    # RULED ON instead: the operator lifted the verification standard on
-    # 2026-09-01 and admitted a write that applies LinkedIn's default provided
-    # the gate says nobody has measured which one that is. That sentence now
-    # lives in the spec's ``residue``, where the confirm block prints it,
-    # rather than here where it decided for him.
+    # ``"comment_on_item"`` LEFT THIS TABLE ON 2026-09-01, and it is the only
+    # action that left while one of its blockers was still OPEN AND NOT RULED
+    # ON. Typing was granted and the verification was declared -- but the
+    # SUBMIT CONTROL is still unobserved, and no ruling can measure a control.
+    # What changed is that the gate now finds it by ARRIVAL after the fill,
+    # and REFUSES WITH THE OBSERVATION when it cannot. Shipping a gate that
+    # expects to refuse is only honest because the refusal is what produces
+    # the missing measurement.
     "update_profile_field": (
         "update_profile_field is sanctioned and cannot be performed. WHAT IS "
         "MEASURED, live on 2026-08-30 and CONTRADICTING WHAT THIS SERVER USED "
@@ -4915,6 +4923,42 @@ async def _live_control(
                 "",
             )
         return (state, why, dom.named_role_selector(role, anchor))
+
+    if spec.action == "comment_on_item":
+        # THE FILL TARGET. There is no emptiness check to make here and the
+        # absence is deliberate: publish_post can tell an empty composer from
+        # a full one because its submit is DISABLED while empty, and this
+        # surface has no such signal -- which is the same measured fact that
+        # forces the delta gate. So this checks what it can (exactly one
+        # editor, on a page drawing the comment affordance) and leaves the
+        # submit question to the gate that runs after the fill.
+        reading = await dom.read_comment_surface(page)
+        if reading.get("error"):
+            return (UNKNOWN, str(reading["error"]), "")
+        editors = int(reading.get("editors") or 0)
+        if editors != 1:
+            return (
+                UNKNOWN,
+                f"{editors} comment editor(s) rendered on this permalink, "
+                "where exactly one is the shape measured on 2026-09-01. Zero "
+                "is a page that had not arrived -- an absent editor is "
+                "UNKNOWN and never an empty comment box.",
+                "",
+            )
+        names = dict(reading.get("names") or {})
+        affordances = int(names.get(dom.COMMENT_CONTROL_NAME, 0))
+        return (
+            "comment_control_present",
+            "the permalink drew exactly one editor named "
+            f"{dom.COMMENT_EDITOR_LABEL!r}, and "
+            f"{affordances} control(s) named {dom.COMMENT_CONTROL_NAME!r} "
+            "were counted BEFORE anything was typed -- which is the baseline "
+            "the delta gate will diff against after the fill. Note this "
+            "server cannot tell whether the box is already empty: on this "
+            "surface nothing changes state with content, which is the whole "
+            "reason a delta is needed.",
+            dom.comment_editor_selector(),
+        )
 
     if spec.action == "publish_post":
         # THIS RETURNS THE FILL TARGET, not a click target. perform routes it
@@ -5424,7 +5468,138 @@ async def _verify_after(
 #: by target_kind, because "has a text component" and "types it into the page"
 #: are different claims -- ``update_setting``'s target has a value component
 #: and that value is a RADIO DESTINATION, clicked and never typed.
-TYPING_ACTIONS: frozenset[str] = frozenset({"publish_post"})
+TYPING_ACTIONS: frozenset[str] = frozenset(
+    {"publish_post", "comment_on_item"}
+)
+
+
+#: ACTIONS WHOSE SUBMIT CONTROL DOES NOT EXIST UNTIL THE FILL LANDS, so it
+#: cannot be named in advance and must be identified by ARRIVAL.
+#:
+#: WHY THIS IS A SEPARATE SET FROM TYPING_ACTIONS. ``publish_post`` types too
+#: and needs no delta: its submit is drawn from the start and merely DISABLED,
+#: so the fill produces a state change on a control that was already there.
+#: The comment surface draws a control named ``Comment`` that is ENABLED while
+#: the box is empty -- so "present and enabled" is true before anything is
+#: typed, and a gate keyed on it would press the FOCUS AFFORDANCE and return
+#: something indistinguishable from success. One measured boolean separates
+#: the two surfaces and it changes which instrument works.
+DELTA_SUBMIT_ACTIONS: frozenset[str] = frozenset({"comment_on_item"})
+
+
+async def _comment_submit_gate(
+    page: Any, before: dict[str, int]
+) -> dict[str, Any]:
+    """THE DELTA GATE: identify the submit by the fact that it ARRIVED.
+
+    A name is shared by two controls here and a position is not a property, so
+    neither can identify the submit. What identifies it is that IT DID NOT
+    EXIST until there was something to submit.
+
+    THE RULE, and every branch of it refuses rather than guessing:
+
+    * exactly ONE name that was absent before is present after -> that name is
+      the submit, and the click is aimed at it;
+    * a name's COUNT merely grew (``Comment`` 1 -> 2) -> REFUSED. Two controls
+      share a name and only position separates them, which is the thing this
+      package will not do;
+    * nothing new, or several new -> REFUSED.
+
+    IT IS EXPECTED TO REFUSE ON FIRST USE, and that is the design rather than a
+    defect. His screenshot shows a blue button reading ``Comment`` beside an
+    existing control named ``Comment``, which is the second branch. Nobody has
+    MEASURED the submit's accessible name -- measuring it requires the fill,
+    and the fill is the act this gate exists to authorise. So the refusal
+    carries the observation, and the first supervised run is what settles it:
+    exactly the shape ``unsave_job`` took when its ON label could not be
+    observed until one write produced it.
+
+    THE NEW NAME MUST ALSO BE SELECTOR-SAFE. ``read_comment_surface`` returns
+    SHAPES, so a control whose label carried a member's name comes back with
+    the identity substituted out -- and therefore unusable to build a selector
+    from. That is the correct outcome: a control this server cannot name
+    without naming a person is a control it does not press.
+    """
+    reading = await dom.read_comment_surface(page)
+    out: dict[str, Any] = {
+        "proceed": False,
+        "selector": "",
+        "observed": {
+            "editors": reading.get("editors"),
+            "controls_read": reading.get("controls_read"),
+        },
+        "why": "",
+        "refused_condition": None,
+        # WHAT ARRIVED, reported whether or not it is usable. This is the
+        # measurement the first refusal exists to produce.
+        "arrived": [],
+        "grew": [],
+    }
+    if reading.get("error"):
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the permalink could not be read after the fill, so nothing is "
+            f"known about what appeared: {reading['error']}"
+        )
+        return out
+    if int(reading.get("editors") or 0) != 1:
+        out["refused_condition"] = "1_editor_absent"
+        out["why"] = (
+            f"{reading.get('editors')} comment editor(s) after the fill, "
+            "where exactly one is the shape measured. Zero means the page "
+            "changed under the gate, not that the comment is ready."
+        )
+        return out
+
+    after = dict(reading.get("names") or {})
+    arrived = sorted(name for name in after if name not in before)
+    grew = sorted(
+        name
+        for name, count in after.items()
+        if name in before and count > before[name]
+    )
+    out["arrived"] = arrived
+    out["grew"] = grew
+
+    if len(arrived) != 1:
+        out["refused_condition"] = (
+            "2_nothing_arrived" if not arrived else "3_several_arrived"
+        )
+        out["why"] = (
+            f"{len(arrived)} control name(s) appeared after the fill that were "
+            f"not there before, where exactly one is aimable. Names whose "
+            f"COUNT grew instead: {grew or 'none'}. A count growing means two "
+            "controls now share one name -- most likely the submit wearing "
+            f"the same name as the {dom.COMMENT_CONTROL_NAME!r} affordance "
+            "already on the page -- and only position separates them, which "
+            "is what this refuses. THIS IS THE MEASUREMENT: the submit's real "
+            "accessible name has never been observed, and observing it needs "
+            "the fill that just happened. Report these lists."
+        )
+        return out
+
+    name = arrived[0]
+    try:
+        selector = dom.comment_submit_selector(name)
+    except Exception as exc:  # noqa: BLE001 - a refusal, not a failure
+        out["refused_condition"] = "4_name_not_selector_safe"
+        out["why"] = (
+            f"exactly one control arrived and its shaped name cannot build a "
+            f"selector: {type(exc).__name__}. That happens when the name "
+            "carried somebody's identity and was substituted out, which is "
+            "the correct outcome -- a control this server cannot name without "
+            "naming a person is one it does not press."
+        )
+        return out
+    out["proceed"] = True
+    out["selector"] = selector
+    out["why"] = (
+        f"exactly one control name appeared after the fill -- {name!r} -- "
+        "that was not on the page before it. It is identified by ARRIVAL "
+        "rather than by a name two controls share or a position that is not a "
+        "property, and it is the first observation of this control anywhere."
+    )
+    return out
 
 
 async def _publish_submit_gate(page: Any) -> dict[str, Any]:
@@ -5875,18 +6050,40 @@ async def perform(
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
     click_plan: list[str] = [] if fill_plan else [selector]
 
+    # THE BEFORE-READING FOR A DELTA ACTION, taken here because it must happen
+    # BEFORE the fill and nowhere else. It is a READ -- a census of shaped
+    # control names -- so it adds no mutation and no call site.
+    comment_gate: Optional[dict[str, Any]] = None
+    before_names: dict[str, int] = {}
+    if spec.action in DELTA_SUBMIT_ACTIONS:
+        before_names = dict(
+            (await dom.read_comment_surface(page)).get("names") or {}
+        )
+
     try:
         while fill_plan:
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
             fills_made += 1
             # THE GATE BETWEEN THE FILL AND THE CLICK. The submit selector is
-            # appended only if a fresh read of the composer says it should be,
-            # so the decision to publish is taken AFTER the text is in the box
-            # rather than planned before it.
-            publish_gate = await _publish_submit_gate(page)
-            if publish_gate["proceed"]:
-                click_plan.append(publish_gate["selector"])
+            # appended only if a fresh read says it should be, so the decision
+            # to submit is taken AFTER the text is in the box rather than
+            # planned before it.
+            #
+            # TWO GATES BECAUSE THE TWO SURFACES ANSWER DIFFERENT QUESTIONS. A
+            # composer's submit is already drawn and merely disabled, so the
+            # fill produces a STATE CHANGE. A comment's submit does not exist
+            # until the fill lands, so it is identified by ARRIVAL. Same act,
+            # two instruments, and using either on the other's surface would
+            # press the wrong control.
+            if spec.action in DELTA_SUBMIT_ACTIONS:
+                comment_gate = await _comment_submit_gate(page, before_names)
+                if comment_gate["proceed"]:
+                    click_plan.append(comment_gate["selector"])
+            else:
+                publish_gate = await _publish_submit_gate(page)
+                if publish_gate["proceed"]:
+                    click_plan.append(publish_gate["selector"])
         while click_plan:
             await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
             clicks_made += 1
@@ -6014,7 +6211,35 @@ async def perform(
             # is the difference between "the flow opened" and "it submitted".
             "clicks_made": clicks_made,
         },
-        # WHAT THE SUBMIT GATE SAW, for the one action that has one.
+        # WHAT THE DELTA GATE SAW, and this block is the POINT of the action
+        # rather than a diagnostic. comment_on_item is expected to refuse on
+        # its first use -- the submit's accessible name has never been
+        # observed and observing it requires the fill -- so `arrived` and
+        # `grew` ARE the measurement that first run exists to produce.
+        "delta_gate": (
+            None
+            if comment_gate is None
+            else {
+                "proceeded": bool(comment_gate.get("proceed")),
+                "refused_condition": comment_gate.get("refused_condition"),
+                "why": comment_gate.get("why"),
+                "arrived": comment_gate.get("arrived"),
+                "grew": comment_gate.get("grew"),
+                "observed": comment_gate.get("observed"),
+            }
+        ),
+        # WHAT THE PUBLISH GATE SAW, for the composer.
+        "publish_gate": (
+            None
+            if publish_gate is None
+            else {
+                "proceeded": bool(publish_gate.get("proceed")),
+                "refused_condition": publish_gate.get("refused_condition"),
+                "why": publish_gate.get("why"),
+                "observed": publish_gate.get("observed"),
+            }
+        ),
+        # WHAT THE APPLY SUBMIT GATE SAW, for the one action that has one.
         #
         # THIS BLOCK IS THE FIX FOR A DEFECT MEASURED ON A LIVE APPLY. The
         # gate produced a specific sentence for whichever of its five
