@@ -5899,6 +5899,73 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
     return out
 
 
+def typed_text_residue(
+    spec: WriteSpec,
+    *,
+    fills_made: int,
+    clicks_made: int,
+    click_error: Optional[str],
+) -> Optional[dict[str, Any]]:
+    """What is left IN HIS COMPOSER after a typing action, said out loud.
+
+    THE FAILURE THIS EXISTS FOR, found 2026-09-02. ``publish_post`` and
+    ``comment_on_item`` FILL and then CLICK, and for a day and a half the
+    click could not resolve at all -- so the text landed in his composer, the
+    submit raised, ``perform`` caught it into ``click_error``, and the receipt
+    reported a failure. It failed SAFE. **It did not fail CLEANLY.**
+
+    A draft sitting in his UI that he did not put there is a side effect he
+    did not consent to, even though nothing published. Nothing in the old
+    receipt said the text was there; a reader saw an error and would
+    reasonably conclude nothing had happened.
+
+    IT IS NOT A CLEARING MUTATION AND MUST NOT BECOME ONE. The operator's
+    ruling is to TELL HIM and let him decide. Clearing would mean a second
+    write to undo a failed write, which is more machinery pointed at his
+    account, taken on this server's own judgement, at exactly the moment this
+    server has just demonstrated it cannot reliably press a button.
+
+    ALWAYS PRESENT FOR A TYPING ACTION, never omitted on the happy path. An
+    absent block would make "no text was left" and "nobody checked" the same
+    answer, which is the absent-is-not-zero rule on the field where the wrong
+    reading leaves his words on screen.
+    """
+    if spec.action not in TYPING_ACTIONS:
+        return None
+    if fills_made < 1:
+        return {
+            "text_was_entered": False,
+            "left_in_the_composer": False,
+            "what_to_do": (
+                "Nothing was typed. The action stopped before the fill, so "
+                "there is no draft to clear."
+            ),
+        }
+    submitted = clicks_made > 0
+    return {
+        "text_was_entered": True,
+        # WHETHER THE SUBMIT WAS PRESSED, which is NOT whether it posted.
+        # ``verification`` answers the second question and this one does not
+        # pretend to.
+        "submit_was_pressed": submitted,
+        "left_in_the_composer": not submitted,
+        "click_error": click_error,
+        "what_to_do": (
+            "THE TEXT WAS TYPED AND THE SUBMIT WAS NEVER PRESSED, so it is "
+            "still sitting in the composer on LinkedIn where anyone using "
+            "this browser would see it. Nothing was published. GO AND CLEAR "
+            "IT YOURSELF if you do not want it there -- this server will not "
+            "type again to undo a failed write, and it is telling you rather "
+            "than deciding for you."
+            if not submitted
+            else
+            "The text was typed and the submit WAS pressed. Whether it "
+            "actually posted is a different question and is answered by "
+            "'verification', not here."
+        ),
+    }
+
+
 async def perform(
     navigator: Any, page: Any, grant: WriteGrant
 ) -> dict[str, Any]:
@@ -6276,6 +6343,16 @@ async def perform(
                 "outcome_is_verifiable": "YES",
                 "read_from": state_landed or spec.direction_source,
             }
+        ),
+        # WHAT IS LEFT IN HIS COMPOSER. Beside "clicked" rather than inside
+        # it, because it is a fact about HIS SCREEN rather than about this
+        # server's click, and a reader looking for consequences should not
+        # have to find it under a diagnostic.
+        "typed_text": typed_text_residue(
+            spec,
+            fills_made=fills_made,
+            clicks_made=clicks_made,
+            click_error=click_error,
         ),
         "clicked": {
             "selector": selector,

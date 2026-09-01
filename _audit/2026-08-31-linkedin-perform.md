@@ -2740,3 +2740,71 @@ But three of the ten had never been exercisable, and no reconnect was needed
 to discover it -- **a local headless page and nine strings were enough**. The
 reload list is unchanged at two READ tools; this was never a live-surface
 question.
+
+## 76. FAILING SAFE IS NOT FAILING CLEANLY -- THE TEXT LEFT IN HIS COMPOSER
+
+The operator ruled on 2026-09-02, after the broken selectors were found. Both
+typing actions FILL and then CLICK. For a day and a half the click could not
+resolve, so the sequence was: text lands in his composer, submit raises,
+`perform` catches it into `click_error`, receipt reports a failure.
+
+**It failed SAFE. It did not fail CLEANLY.** Nothing in the receipt said the
+words were still on his screen, and a reader who saw an error would reasonably
+conclude nothing had happened. **A draft sitting in his UI that he did not put
+there is a side effect he did not consent to, even though nothing published.**
+
+`writes.typed_text_residue` is now in every receipt for a typing action:
+
+| field | says |
+|---|---|
+| `text_was_entered` | whether the fill landed |
+| `submit_was_pressed` | whether a click followed -- NOT whether it posted |
+| `left_in_the_composer` | the consequence, stated as a consequence |
+| `what_to_do` | go and clear it yourself |
+
+**IT IS NOT A CLEARING MUTATION AND MUST NOT BECOME ONE.** Clearing would be a
+second write to undo a failed write -- more machinery pointed at his account,
+on this server's own judgement, at exactly the moment it has just demonstrated
+it cannot reliably press a button. The ruling was TELL HIM. A test asserts no
+clearing verb appears in the block.
+
+**PRESENT ON THE HAPPY PATH TOO**, because a block that appeared only on
+failure would make "no text was left" and "nobody checked" the same answer.
+Four mutations caught: the block omitted when the submit succeeded, the helper
+unwired from the receipt, `left_in_the_composer` pinned false, and a clearing
+verb offered instead of an instruction.
+
+## 77. THE TWO "UNBLOCKED" ITEMS ARE MECHANICALLY COUPLED TO THE CAPABILITY
+
+The wave lead separated the three rulings by argument -- the `select_option`
+boundary entry and the required-empty refusal as structural, the capability as
+dependent on a reader that has never run live. **The argument separates
+cleanly and the mechanism does not.**
+
+`test_every_sanctioned_entry_is_actually_present` asserts
+
+    set(readonly.SANCTIONED_MUTATIONS) == found
+
+where `found` is what the scanner finds in the source. **A strict set
+equality.** So an entry with no call site fails exactly as loudly as a call
+site with no entry -- which is the guard working, and it means the permission
+and the `page.select_option` call are inseparable. That call is
+`update_profile_field`'s.
+
+The only way to land the entry alone is a `select_plan` queue gated on an
+EMPTY action set. That was considered and refused:
+
+* **A permission for a call nothing can make cannot be reviewed.** The entry
+  exists so a reviewer can read how the capability is used; with no use there
+  is nothing to read.
+* **The emptiness becomes the only guard.** A later edit adding an action to
+  that set inherits the permission WITHOUT anybody re-reading the entry --
+  which inverts what the allowlist is for.
+
+The required-empty refusal has the same shape one level down: built now it is
+a validator nothing calls, which is the defect
+`tests/test_reader_reachability.py` exists to end.
+
+**So both land WITH the capability, after the value reader has returned real
+values once.** Recorded here rather than settled silently, because declining
+an approved item is the wave lead's call to reverse.

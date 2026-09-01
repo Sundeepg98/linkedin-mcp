@@ -34,6 +34,8 @@ grant and the fill.
 """
 
 import ast
+import json
+import pathlib
 
 import pytest
 
@@ -217,3 +219,99 @@ def test_only_declared_typing_actions_can_reach_the_extractor():
     non_splittable = writes.spec_for_action("react_to_item")
     with pytest.raises(writes.WriteAttemptError):
         writes._text_component_of(non_splittable, "urn:li:activity:1")
+
+
+# ---------------------------------------------------------------------------
+# AND WHERE THE BYTES END UP WHEN THE SUBMIT NEVER HAPPENS
+# ---------------------------------------------------------------------------
+#
+# Added 2026-09-02, on the operator's ruling, after the three broken selectors
+# were found. Both typing actions FILL and then CLICK, and for a day and a half
+# that click could not resolve -- so the text landed in his composer, the
+# submit raised, and the receipt reported an error. It failed SAFE. It did not
+# fail CLEANLY: nothing said the words were still on his screen.
+
+
+def _residue(action, **kwargs):
+    return writes.typed_text_residue(writes.spec_for_action(action), **kwargs)
+
+
+def test_a_failed_submit_says_the_text_is_still_in_the_composer():
+    """THE SENTENCE HE NEEDS, on the path that produced the problem.
+
+    A draft sitting in his UI that he did not put there is a side effect he
+    did not consent to, even though nothing published. A reader who saw only
+    an error would reasonably conclude nothing had happened.
+    """
+    for action in sorted(writes.TYPING_ACTIONS):
+        block = _residue(
+            action, fills_made=1, clicks_made=0, click_error="Error: boom"
+        )
+        assert block["text_was_entered"] is True, action
+        assert block["submit_was_pressed"] is False, action
+        assert block["left_in_the_composer"] is True, action
+        assert "still sitting in the composer" in block["what_to_do"], action
+        assert "Nothing was published" in block["what_to_do"], action
+        assert block["click_error"] == "Error: boom", action
+
+
+def test_it_never_offers_to_clear_the_text_itself():
+    """THE RULING WAS TELL HIM, NOT FIX IT.
+
+    Clearing would be a second write to undo a failed write -- more machinery
+    pointed at his account, on this server's own judgement, at exactly the
+    moment it has just demonstrated it cannot reliably press a button. So the
+    block instructs HIM, and no clearing verb may appear in it.
+    """
+    block = _residue("publish_post", fills_made=1, clicks_made=0, click_error=None)
+    rendered = json.dumps(block).lower()
+    for verb in ("we will clear", "clearing it for you", "automatically clear"):
+        assert verb not in rendered, verb
+    assert "go and clear it yourself" in rendered
+
+
+def test_the_block_is_present_on_the_happy_path_too():
+    """ABSENT IS NOT ZERO, on the field where the wrong reading leaves his
+    words on screen.
+
+    If the block appeared only on failure, then "no text was left" and
+    "nobody checked" would be the same answer.
+    """
+    pressed = _residue("publish_post", fills_made=1, clicks_made=1, click_error=None)
+    assert pressed["text_was_entered"] is True
+    assert pressed["submit_was_pressed"] is True
+    assert pressed["left_in_the_composer"] is False
+    # ... and it does NOT claim the post landed. That is verification's job.
+    assert "different question" in pressed["what_to_do"]
+
+    never = _residue("publish_post", fills_made=0, clicks_made=0, click_error="x")
+    assert never["text_was_entered"] is False
+    assert never["left_in_the_composer"] is False
+
+
+def test_a_non_typing_action_has_no_such_block():
+    """Only the actions that type can leave text behind, and the block says
+    ``None`` rather than a reassuring false for the seven that cannot."""
+    for action in sorted(writes.PERFORMABLE):
+        if action in writes.TYPING_ACTIONS:
+            continue
+        assert (
+            _residue(action, fills_made=0, clicks_made=1, click_error=None) is None
+        ), action
+
+
+def test_the_receipt_actually_carries_it():
+    """THE WIRING, read off the AST, because a helper nothing calls is the
+    defect this repo has spent the week removing.
+
+    A block that is correct and unreached tells him nothing.
+    """
+    source = pathlib.Path(writes.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    called = {
+        node.func.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    assert "typed_text_residue" in called
+    assert '"typed_text":' in source
