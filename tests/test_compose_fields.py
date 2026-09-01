@@ -220,3 +220,82 @@ def test_no_second_injected_script_was_added_for_this_surface():
     source = inspect.getsource(dom.read_compose_fields)
     assert "page.evaluate" not in source, source
     assert "read_self_owned_editor_fields" in source
+
+
+# ---------------------------------------------------------------------------
+# The discriminator: the guard refuses, and the reader still answers
+# ---------------------------------------------------------------------------
+
+
+async def test_a_refusal_still_reports_which_send_mode_is_checked():
+    """THE POINT OF THE DISCRIMINATOR. Refusing must not mean answering nothing.
+
+    The composer's two send modes differ STRUCTURALLY and the difference
+    carries no name: one capitalised run without ``to``, against two runs
+    joined by it, both before the same name-free tail. That is enough to say
+    which mode is checked -- which is the question -- and it is storable where
+    the label is not.
+    """
+    page = _Page(
+        fields=[
+            "Send",
+            "Ada Lovelace will send message",
+            "Ada Lovelace to Grace Hopper will send message",
+        ]
+    )
+    out = await dom.read_compose_fields(page)
+    assert out["refused"] == "name_shaped_label_present"
+
+    shapes = out["label_shapes"]
+    assert len(shapes) == 2, shapes
+    assert shapes[0]["runs"] == 1 and shapes[0]["joined_by_to"] is False
+    assert shapes[1]["runs"] == 2 and shapes[1]["joined_by_to"] is True
+    # THE TAIL IS THE SAME ON BOTH and is what may be committed as a constant.
+    assert shapes[0]["tail"] == shapes[1]["tail"] == "will send message"
+
+
+async def test_no_part_of_a_name_survives_into_the_answer():
+    """THE WHOLE PERMISSION, asserted on the returned object as a string.
+
+    A shape that leaked one token of a name would be worse than a plain
+    refusal, because it would arrive wearing the authority of a redacted
+    thing. So the ENTIRE reply is searched, not just the fields meant to
+    carry names.
+    """
+    page = _Page(fields=["Ada Lovelace to Grace Hopper will send message"])
+    out = await dom.read_compose_fields(page)
+    blob = str(out)
+    for token in ("Ada", "Lovelace", "Grace", "Hopper"):
+        assert token not in blob, (token, blob)
+
+
+def test_every_tail_the_descriptor_returns_is_itself_name_free():
+    """The descriptor's own invariant, checked rather than asserted in prose.
+
+    ``tail`` is what survives the LAST capitalised run, so it cannot contain
+    one -- but that is a claim about the regex, and a claim about a regex is
+    the kind this package has been wrong about twice this week.
+    """
+    for text in (
+        "Ada Lovelace will send message",
+        "Ada Lovelace to Grace Hopper will send message",
+        "Grace Hopper",
+        "Send",
+        "",
+    ):
+        tail = shape.describe_name_shaped(text)["tail"]
+        assert not shape.looks_name_shaped(tail), (text, tail)
+
+
+def test_the_two_modes_are_distinguishable_by_shape_alone():
+    """If the shapes collide, the discriminator answers nothing.
+
+    This is the property the whole design rests on: two DIFFERENT modes must
+    produce two DIFFERENT descriptors, with no name involved. A descriptor
+    that could not tell them apart would leave the credit question exactly
+    where it was while looking like progress.
+    """
+    a = shape.describe_name_shaped("Ada Lovelace will send message")
+    b = shape.describe_name_shaped("Ada Lovelace to Grace Hopper will send message")
+    assert a != b
+    assert (a["runs"], a["joined_by_to"]) != (b["runs"], b["joined_by_to"])

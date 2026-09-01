@@ -2055,6 +2055,46 @@ his is exactly the shape this package refuses. If it refuses on his own name,
 that is a ruling to make with the evidence in hand, not a rule to soften in
 advance.
 
+### RESOLVED, and the reframe is better than the tension it dissolves
+
+The risk was never that HE must not see his own name. **It is that a control
+label becomes a COMMITTED CONSTANT** -- `MESSAGE_RECIPIENT_LABEL = "Enter
+message recipients"` sits in this repository -- and a literal `"<his name>
+will send message"` in source is a name committed, which
+`test_no_committed_identity` would flag on the next run and would be right to.
+**The guard protects the label table, not his eyes.**
+
+So the string is not stored and the DISCRIMINATOR is. The two modes differ
+structurally and the difference carries no name:
+
+    one capitalised run, no " to "        ->  runs=1, joined_by_to=False
+    two runs joined by " to "             ->  runs=2, joined_by_to=True
+
+both before the same name-free tail, which IS storable. The guard refuses to
+publish the labels; the reader still answers which mode is checked. **Nothing
+was softened and the question is still answered.**
+
+### AND THE LABELS MAY NOT SETTLE THE CREDIT QUESTION AT ALL
+
+This is the part not to stretch. *"X will send message"* against *"X to Y will
+send message"* most likely describes sending **as himself versus on behalf of
+a Page** -- which says nothing whatever about metering. **If the shapes come
+back like that, the InMail question is still open and must be reported as
+open.**
+
+What would actually settle it, none of which this server can currently read:
+
+* a readable **credit balance** -- measured absent on `/premium/my-premium/`,
+  twice, on readings of 73 and 80 controls that do not agree with each other;
+* an explicit **InMail affordance** on the composer -- the control named
+  `InMail` there is a conversation FILTER PILL carrying `aria-checked`, beside
+  `Focused` / `Unread` / `Starred` / `Connections`, confirmed three times;
+* some Premium surface naming an allowance, which nothing measured so far does.
+
+**An unmetered assumption is exactly what the gate must not rest on.** If the
+shapes do not answer it, `send_message` still refuses on that ground, and the
+refusal names this list as what would lift it.
+
 ## What is NOT on this list, and why
 
 `set_open_to_work` is not here. Its blocker is not a stale process: the SDUI

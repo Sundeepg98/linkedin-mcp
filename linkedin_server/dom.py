@@ -4441,18 +4441,38 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
     named = [str(field.get("name") or "") for field in fields]
     offending = [name for name in named if shape.looks_name_shaped(name)]
     if offending:
-        # THE NAMES ARE NOT REPORTED, only that there were some. Reporting
-        # them is the disclosure this guard exists to prevent.
+        # THE GUARD REFUSES AND THE READER STILL ANSWERS.
+        #
+        # The raw labels are NOT returned -- not because he must not see his
+        # own name, but because a control label becomes a COMMITTED CONSTANT
+        # in this repository, and a literal "<name> will send message" in
+        # source is a name committed. test_no_committed_identity would flag it
+        # on the next run and would be right to.
+        #
+        # So what comes back is the DISCRIMINATOR rather than the string. The
+        # composer's two send modes differ structurally and the difference
+        # carries no name: one capitalised run without " to ", against two
+        # runs joined by it, both before the same name-free tail. That is
+        # enough to say WHICH MODE IS CHECKED, which is the question, and it
+        # is storable where the label is not.
         return {
             "refused": "name_shaped_label_present",
             "recipients_selected": chosen,
             "why": (
                 f"{len(offending)} control label(s) in this container carry a "
                 "run of capitalised words, which is how a person's name looks "
-                "to every reader in this package. Publishing them to explain "
-                "a radio button is not a trade this server makes, so nothing "
-                "is returned. The labels themselves are not reported here."
+                "to every reader in this package. The labels are NOT returned "
+                "-- a label becomes a committed constant, and a name in source "
+                "is a name committed. Their SHAPE is returned instead, which "
+                "distinguishes the send modes without carrying anybody's name."
             ),
+            # NAME-FREE BY CONSTRUCTION: counts, a boolean, and the text that
+            # survives the last capitalised run.
+            "label_shapes": [
+                dict(shape.describe_name_shaped(name), checked=bool(field.get("checked")))
+                for name, field in zip(named, fields)
+                if shape.looks_name_shaped(name)
+            ],
         }
     return dict(reading, recipients_selected=chosen)
 

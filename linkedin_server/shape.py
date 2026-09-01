@@ -3646,6 +3646,46 @@ def census_shape(text: Optional[str]) -> str:
     return shaped
 
 
+def describe_name_shaped(text: str) -> dict[str, Any]:
+    """Describe a label's STRUCTURE without returning any part of its names.
+
+    THE PROBLEM THIS SOLVES IS NOT PRIVACY FROM HIM, IT IS COMMITTED SOURCE.
+    Control labels become constants -- ``MESSAGE_RECIPIENT_LABEL = "Enter
+    message recipients"`` sits in this repository. A literal
+    ``"<his name> will send message"`` in source is his name COMMITTED, which
+    ``test_no_committed_identity`` would flag on the next run and rightly so.
+    The guard protects the label table, not his eyes.
+
+    SO THE DISCRIMINATOR IS STORED AND THE STRING IS NOT. The composer's two
+    send modes differ structurally, and the difference carries no name:
+
+        one name-shaped run, no " to "     ->  runs=1, joined_by_to=False
+        two runs split by " to "           ->  runs=2, joined_by_to=True
+
+    both before the same name-free tail. That tail IS storable and is returned
+    here; the runs themselves never are, only how many there were.
+
+    ``tail`` is asserted name-free by construction -- it is what remains after
+    the last capitalised run -- and callers may compare it against a constant.
+    """
+    raw = str(text or "")
+    matches = list(_CENSUS_CAPS_RUN.finditer(raw))
+    if not matches:
+        return {"runs": 0, "joined_by_to": False, "tail": raw.strip()}
+    between = raw[matches[0].end() : matches[-1].start()] if len(matches) > 1 else ""
+    return {
+        "runs": len(matches),
+        # The literal separator between the FIRST and LAST run, lowercased and
+        # stripped. On this surface it is "to"; it is reported rather than
+        # assumed so an unexpected joiner is visible instead of silently
+        # matching.
+        "joined_by_to": between.strip().casefold() == "to",
+        # WHAT SURVIVES THE LAST NAME. Name-free by construction, so it may be
+        # compared against a committed constant.
+        "tail": raw[matches[-1].end() :].strip(),
+    }
+
+
 def looks_name_shaped(text: str) -> bool:
     """Would :func:`census_redact_rare` blank any part of this string?
 
