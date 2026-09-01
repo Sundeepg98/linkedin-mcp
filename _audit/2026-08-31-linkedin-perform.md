@@ -2479,6 +2479,24 @@ and the instrument is cheap: `git fetch` costs nothing and settles it. Both
 of our counts were built from snapshots; only one of us could re-measure
 without asking, so I did.
 
+**AND THE WAVE LEAD'S DIAGNOSIS IS BETTER THAN THE FINDING.** Their numbers
+were not wrong when taken -- each was a live `git ls-remote` at the moment of
+sending. **A RELAYED COUNT IS STALE BY CONSTRUCTION**, and theirs simply had
+the shorter half-life. Telling me five times to prefer theirs was fixing the
+wrong thing; the right instruction was *neither of us should be relaying
+this.* In their words: **a count is an instrument reading with a timestamp,
+and the timestamp gets dropped when the reading agrees with you.**
+
+THE PROTOCOL, agreed 2026-09-02 and standing: **neither agent states a push
+count to the other. Each fetches.** A disagreement then cannot happen,
+because there is nothing to disagree about -- both parties are reading the
+same remote rather than each other's memory of it.
+
+It generalises past git. Any number one agent hands another is a reading
+somebody took at a time, and the receiving agent cannot see the timestamp.
+Where the measurement is cheap to retake, RETAKE IT; relay only what cannot
+be re-measured.
+
 # PART NINE -- THE AIMING PROBLEM DISSOLVES, AND WHAT IS ACTUALLY LEFT
 
 ## 66. THE WAVE LEAD IS RIGHT, AND THE PROOF WAS ALREADY ON DISK
