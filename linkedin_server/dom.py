@@ -4164,6 +4164,36 @@ REACTIONS_MENU_LABEL = "Open reactions menu"
 INVITE_CONTROL_SUFFIX = " to connect"
 INVITE_CONTROL = 'button[aria-label$=" to connect"]'
 
+
+def invite_control_selector(index: int) -> str:
+    """A selector for ONE of the invitation controls, by its position.
+
+    GUARDED, like every other selector builder here that takes an argument.
+    ``index`` must be a real, non-negative ``int`` -- a bool is refused too,
+    because ``True`` is ``1`` in Python and a boolean arriving here means a
+    caller passed the wrong thing entirely.
+
+    POSITION, AND WHY THAT IS NOT "PICKING BY POSITION". This package refuses
+    to aim a write by position, and this selector is an index -- so the
+    distinction has to be exact. The index is not CHOSEN; it is the output of
+    :func:`writes.aim_invitation`, which returns one ONLY when the operator's
+    own needle matched exactly one control on the surface. Two matches erase
+    it rather than picking the first. So the position is a way of ADDRESSING
+    a control his word already selected, not a way of selecting one.
+
+    THE ANCHOR IS THE SUFFIX, NOT A NAME. These controls are labelled with
+    another person's name plus :data:`INVITE_CONTROL_SUFFIX`, and this server
+    does not read those names. Anchoring on the suffix keeps the selector free
+    of any third-party identity while still restricting it to controls that
+    are demonstrably invitations.
+    """
+    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+        raise ValueError(
+            "invite_control_selector needs a non-negative int index; a click "
+            "target is built from this string, so nothing else may reach it."
+        )
+    return INVITE_CONTROL + " >> nth=" + str(index)
+
 #: AIMING ONE OF THOSE NINE, AND THE REASON THIS IS A SCRIPT RATHER THAN A
 #: LOCATOR CHAIN. Every other reader in the block below deliberately injects
 #: nothing; this one injects, and the trade runs the other way here for one

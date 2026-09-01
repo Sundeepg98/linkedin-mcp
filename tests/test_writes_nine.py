@@ -78,7 +78,7 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 #: somebody deleting a spec, which is the move these tests exist to make
 #: visible.
 #:
-#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, FIVE FROM 2026-09-01. ``update_setting`` left this tuple on the
+#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, FOUR FROM 2026-09-01. ``update_setting`` left this tuple on the
 #: day it entered ``writes.PERFORMABLE``, and it LEFT rather than being kept
 #: with an exception, because every check below asserts that its subject
 #: CANNOT be performed -- an action in both places would be asserted to be two
@@ -92,7 +92,6 @@ SEVEN = (
     "publish_post",
     "comment_on_item",
     "update_profile_field",
-    "send_invitation",
     "send_message",
 )
 
@@ -110,6 +109,11 @@ LIFTED = {
     # blocker did not close; it became a disclosure, and it is printed from
     # the spec's ``residue``.
     "react_to_item": "2026-09-01",
+    # THE THIRD DEPARTURE, same day as the second and on the other half of the
+    # same ruling. react_to_item kept a real verification and disclosed its
+    # limit; send_invitation has NO verification and ships on the declaration.
+    # Both left by shipping, which is the only way out of this tuple.
+    "send_invitation": "2026-09-01",
 }
 
 
@@ -285,11 +289,44 @@ COMPOSITE_ACTIONS = tuple(
     if spec_for_action(action).target_kind in writes._COMPOSITE_TARGET_KINDS
 )
 TWO_PART_ACTIONS = tuple(a for a in COMPOSITE_ACTIONS if len(_components(a)) == 2)
+#: EVERY SANCTIONED ACTION WITH AN OPAQUE TARGET, not just the refusing ones.
+#:
+#: THIS WAS DERIVED FROM ``SEVEN`` UNTIL 2026-09-01 AND THAT WENT SILENTLY
+#: EMPTY. ``react_to_item`` and ``send_invitation`` are the only two opaque
+#: kinds there are, both shipped that day, both left ``SEVEN`` -- and the
+#: three tests parametrized over this tuple stopped running. pytest reported
+#: them as SKIPPED with "got empty parameter set", which in a run of 2361
+#: passing tests reads exactly like a pass.
+#:
+#: The checks below are about how an opaque TARGET is normalised, which has
+#: nothing to do with whether the action performs. Scoping them to the
+#: refusing set was always wrong; it only became visible when the set emptied.
 OPAQUE_ACTIONS = tuple(
-    action
-    for action in SEVEN
-    if spec_for_action(action).target_kind in writes._OPAQUE_TARGET_KINDS
+    spec.action
+    for spec in SANCTIONED_WRITES.values()
+    if spec.target_kind in writes._OPAQUE_TARGET_KINDS
 )
+
+
+def test_no_parametrized_corpus_in_this_file_is_empty():
+    """A parametrized test over an empty tuple SKIPS, and a skip reads as a pass.
+
+    This is the guard for the failure that produced the comment above: three
+    checks stopped running and nothing said so louder than one grey line. Any
+    tuple this file fans out over must be non-empty, asserted by name so the
+    failure says WHICH corpus emptied.
+    """
+    for name, corpus in (
+        ("SEVEN", SEVEN),
+        ("OPAQUE_ACTIONS", OPAQUE_ACTIONS),
+        ("COMPOSITE_ACTIONS", COMPOSITE_ACTIONS),
+        ("TWO_PART_ACTIONS", TWO_PART_ACTIONS),
+        ("COMPONENT_CASES", COMPONENT_CASES),
+    ):
+        assert corpus, (
+            "%s is empty, so every test parametrized over it now SKIPS "
+            "instead of running. That is not coverage." % name
+        )
 
 #: (action, component) for every component of every composite target.
 COMPONENT_CASES = tuple(
@@ -762,25 +799,36 @@ def test_the_module_says_why_an_opaque_target_declines_to_validate():
     doc = (writes._opaque_target.__doc__ or "").upper()
     assert "DECLINES TO VALIDATE" in doc
     assert "READ NEITHER UNSHAPED" in doc
-    assert "FIRST THING THAT MUST CHANGE" in doc
+    # THIS PINNED THE OLD WARNING UNTIL 2026-09-01: "if either is ever made
+    # performable, THIS FUNCTION IS THE FIRST THING THAT MUST CHANGE".
+    # react_to_item became performable and the function did NOT have to
+    # change -- the warning aimed at the wrong place. What replaced it is an
+    # executable rule in tests/test_opaque_targets.py: an opaque-kind action
+    # that becomes performable must either keep its target out of the url
+    # entirely, or carry a url_pattern that provably REFUSES a garbage
+    # target. A warning became a check, which is the only honest upgrade.
+    assert "STOPPED BEING TRUE" in doc
+    assert "URL_PATTERN" in doc
 
 
-@pytest.mark.parametrize("action", OPAQUE_ACTIONS)
-def test_an_opaque_target_still_cannot_reach_a_grant(writes_on, action):
-    """WHY ACCEPTING AN UNVALIDATED STRING IS SAFE TODAY, asserted rather than
-    argued.
-
-    Both opaque actions hold no ``url_template``, so ``mint`` refuses them at
-    issue and no target of this kind can reach a navigation or a click. That
-    is the entire safety argument for the permissiveness above, so it is
-    pinned here beside it rather than left in section 1 where a future reader
-    would have to go looking for it.
-    """
-    spec = spec_for_action(action)
-    assert spec.url_template is None
-    with pytest.raises(WriteAttemptError) as excinfo:
-        mint(action, MEMBER, receipt="anything")
-    assert "no grant is minted for" in str(excinfo.value)
+# ``test_an_opaque_target_still_cannot_reach_a_grant`` WAS HERE AND WAS
+# REMOVED ON 2026-09-01, because its premise stopped being true rather than
+# because it became inconvenient. It asserted that no opaque-kind action could
+# obtain a grant, and its stated reason was the one ``_opaque_target``'s
+# docstring gave: neither held a ``url_template``, so ``mint`` refused at
+# issue. Both shipped that day. The test would have to be SOFTENED to pass
+# now, and a check softened to accommodate a capability has stopped being one.
+#
+# WHAT REPLACED IT IS STRONGER AND LIVES IN ``tests/test_opaque_targets.py``:
+# an opaque target no longer needs to be unreachable, it needs to be
+# CONSTRAINED. Every performable opaque-kind action must either keep its
+# target out of the url entirely -- absolute for a NEEDLE, which has no shape
+# to enforce -- or carry a ``url_pattern`` proven to REFUSE a garbage target
+# AND proven to still admit a real one. Both directions are asserted and both
+# were shown failing at mutations before being accepted.
+#
+# Recorded here rather than left as a deleted line, because a test that
+# vanished and a test that was superseded look identical in a diff.
 
 
 # ---------------------------------------------------------------------------

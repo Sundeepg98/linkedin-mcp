@@ -1032,6 +1032,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # siblings, because a derived list would admit the eighth silently.
         "react_to_item",
         "save_job",
+        # EIGHTH, same day. Ships under Ruling 1 -- nothing this server may
+        # read can confirm a sent invitation -- and it is the second
+        # performable action that cannot be undone.
+        "send_invitation",
         "unfollow_company",
         "unsave_job",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -1058,10 +1062,13 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "follow_company",
         # ADDED DELIBERATELY, 2026-09-01. This list is spelled out rather than
         # derived from writes.PERFORMABLE precisely so that a new write cannot
-        # arrive by agreeing with whatever the code now says -- a seventh
-        # write has to be typed here by somebody who meant it.
+        # arrive by agreeing with whatever the code now says -- it has to be
+        # typed here by somebody who meant it.
         "react_to_item",
         "save_job",
+        # THE EIGHTH, same day, and the first write on this surface that
+        # reaches another person AND cannot confirm its own outcome.
+        "send_invitation",
         "unfollow_company",
         "unsave_job",
         "update_setting",
@@ -1112,7 +1119,6 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "publish_post",
         "comment_on_item",
         "update_profile_field",
-        "send_invitation",
         "send_message",
     }
     assert "update_setting" not in set(not_performed)
@@ -1122,6 +1128,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # field exists to prevent is a caller unable to tell "not offered" from
     # "examined and refused".
     assert "react_to_item" not in set(not_performed)
+    assert "send_invitation" not in set(not_performed)
     # ``writes_available`` is EMPTY here -- this test runs with the write flag
     # OFF, which is the whole of what it is about -- so the positive half is
     # asserted against the two things that do not depend on the flag.
@@ -1374,7 +1381,10 @@ async def test_the_server_instructions_name_every_write_that_ships():
     from linkedin_server import writes
 
     text = (mcp.instructions or "").lower()
-    words = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven"}
+    words = {
+        2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+        7: "seven", 8: "eight", 9: "nine", 10: "ten",
+    }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
         tool = writes.spec_for_action(action).tool_name
@@ -1615,10 +1625,30 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         if writes.spec_for_action(action).irreversible
     )
     assert block["performable_and_irreversible"] == expected_performable
-    assert expected_performable == ["apply_job"], (
-        "apply is the only permanent thing this server performs; a second one "
-        "arriving must be typed in here by whoever added it"
+    assert expected_performable == ["apply_job", "send_invitation"], (
+        "the permanent things this server performs are typed in here by "
+        "whoever added one. A THIRD arriving is a decision, not a diff."
     )
+    # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
+    # why this is written out rather than the list quietly growing by one.
+    #
+    # apply_job is permanent and lands on a COMPANY that advertised for
+    # applications. send_invitation is permanent and lands on a PERSON who
+    # asked for nothing -- and it is also the first performable action whose
+    # outcome this server cannot confirm AT ALL, because the surface that
+    # would show it is unreachable twice over (a forbidden substring, and a
+    # badge its route would spend).
+    #
+    # Those two facts compound: a caller cannot check whether the permanent
+    # thing happened. That is what the operator was shown before he lifted the
+    # standard, and it is why the spec carries an `unverifiable` declaration
+    # that the confirm block prints. A permanent act with no receipt is the
+    # strongest case there is for the two-call gate, and the gate is
+    # unchanged: no token, nothing happens.
+    for action in expected_performable:
+        spec = writes.spec_for_action(action)
+        assert spec.irreversible is True, action
+        assert spec.reversibility_procedure, action
     # A performable irreversible action is a SUBSET of the sanctioned ones, and
     # the two lists disagreeing would mean one of them is computed off the
     # wrong predicate -- the failure that would make either list unreadable.

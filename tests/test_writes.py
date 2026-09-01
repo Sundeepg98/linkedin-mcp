@@ -734,6 +734,15 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "follow_company",
         "update_setting",
         "react_to_item",
+        # THE EIGHTH, same day as the seventh, and it crossed on the OTHER
+        # half of the same ruling. react_to_item kept a real verification and
+        # disclosed what that verification could not say. This one has NO
+        # verification at all -- nothing this server may read can confirm a
+        # sent invitation -- and ships on the declaration itself.
+        #
+        # It is also the SECOND performable action that cannot be undone, and
+        # the first that lands on a person rather than a company.
+        "send_invitation",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -750,7 +759,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "publish_post",
         "comment_on_item",
         "update_profile_field",
-        "send_invitation",
         "send_message",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
@@ -803,7 +811,6 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "publish_post",
         "comment_on_item",
         "update_profile_field",
-        "send_invitation",
         "send_message",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
@@ -1069,7 +1076,6 @@ async def test_exactly_the_performable_writes_are_registered():
         "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_update_profile_field",
-        "linkedin_send_invitation",
         "linkedin_send_message",
     ):
         assert tool in names, tool

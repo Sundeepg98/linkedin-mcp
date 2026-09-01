@@ -1314,14 +1314,51 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_send_invitation": WriteSpec(
         action="send_invitation",
         tool_name="linkedin_send_invitation",
-        url_template=None,
-        url_pattern=None,
+        # HIS OWN PROFILE, and the url carries NO ``{target}``. That is not a
+        # simplification: the target here is his NEEDLE, which has no
+        # measurable shape and must never reach a navigation. The controls
+        # live on a page addressed by a constant, and the aiming is done by
+        # aim_invitation refusing anything but exactly one match -- so the
+        # needle selects a control and never a url.
+        #
+        # This surface costs NO BADGE. /mynetwork/ would consume the
+        # pending-invitation counter, which is why no tool here loads it; his
+        # own profile draws the same controls and carries no such counter.
+        url_template="https://www.linkedin.com/in/me/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/in/me/$"),
         exempt_substring=None,
         summary="Send one connection invitation to another LinkedIn member.",
         from_state="invite_control_present",
         to_state="invitation_sent",
         target_kind="member",
         state_from="profile_invitations",
+        # RULING 1, 2026-09-01. Nothing can confirm this, and the gate says so
+        # in three parts rather than one paragraph -- the third is the only
+        # one that is about HIM, and a paragraph is what loses it.
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "your Sent Invitations manager, under My Network > Manage > "
+                "Sent, which is the one surface that lists invitations you "
+                "have sent and would show this one as pending"
+            ),
+            why_it_cannot=(
+                "this server cannot open it, for two separate measured "
+                "reasons and either would be enough. Its address contains "
+                "'invitation', which is on readonly._FORBIDDEN_URL_SUBSTRINGS "
+                "and is checked before the allowlist is consulted. And "
+                "reaching it goes through /mynetwork/, whose load CONSUMES "
+                "the pending-invitation badge -- a cost measured twice, paid "
+                "by you, and spent on somebody else's notification rather "
+                "than on anything this call needs. NOR IS THERE A POST-CLICK "
+                "STATE ON THE PAGE IT DOES ACT ON: no invitation control has "
+                "ever been observed after being pressed, so this server "
+                "cannot even report that the control changed"
+            ),
+            what_he_must_do=(
+                "open My Network, then Manage, then Sent, and look for the "
+                "person. That is the only way to know whether this landed"
+            ),
+        ),
         direction_source=(
             "HIS OWN PROFILE, and choosing that surface is the finding rather "
             "than a detail. The obvious surface for this is /mynetwork/, "
@@ -2107,12 +2144,34 @@ def _opaque_target(spec: WriteSpec, raw: str) -> str:
     would be doing precisely what this package refuses to do with a selector:
     asserting a shape nobody has seen.
 
-    WHY ACCEPTING IT IS SAFE TODAY. Both actions that use this hold no
-    ``url_template``, so :func:`mint` refuses them a grant at ISSUE and no
-    target of this kind can ever reach a navigation or a click. If either is
-    ever made performable, THIS FUNCTION IS THE FIRST THING THAT MUST CHANGE,
-    and the measurement that would let it is one unshaped read of a permalink
-    href.
+    WHY ACCEPTING IT WAS SAFE UNTIL 2026-09-01, AND WHERE THE PROTECTION LIVES
+    NOW. This paragraph used to read: *"Both actions that use this hold no
+    ``url_template``, so mint refuses them a grant at ISSUE... If either is
+    ever made performable, THIS FUNCTION IS THE FIRST THING THAT MUST
+    CHANGE."* ``react_to_item`` became performable on 2026-09-01 and that
+    sentence stopped being true the same day, so it is corrected here rather
+    than left as a guarantee nobody re-read.
+
+    THIS FUNCTION DID NOT HAVE TO CHANGE, and the reason is worth stating
+    because the old warning aimed at the wrong place. The protection is not
+    validation here; it is :data:`WriteSpec.url_pattern`, enforced by
+    :func:`assert_write_url`, which REBUILDS the url from the grant and
+    refuses it unless the whole thing matches an anchored pattern. For
+    ``react_to_item`` that pattern is ``urn:li:[A-Za-z]+:[0-9]+``, so a target
+    that is not a urn cannot produce a url that passes the write door -- the
+    shape is enforced where the string is USED rather than where it arrives,
+    which is strictly stronger because it also covers a target that changed
+    shape in between.
+
+    SO THE RULE FOR THE NEXT ONE, stated as a check rather than a warning: an
+    opaque-kind action that becomes performable must carry a ``url_pattern``
+    that CONSTRAINS its target, and
+    ``tests/test_opaque_targets.py`` fails if one does not.
+    ``send_invitation`` is the case that shows why the rule is about the
+    pattern and not about this function: its target is a NEEDLE, which has no
+    shape to enforce at all, and its url_template is a constant carrying no
+    ``{target}`` -- so its target never reaches a url, and its aiming is done
+    by :func:`aim_invitation` refusing anything but exactly one match.
     """
     return _clean_target_part(spec, spec.target_kind, raw)
 
@@ -3911,6 +3970,26 @@ PERFORMABLE: frozenset[str] = frozenset(
         # -- the check answers WHETHER and answers it honestly; what is
         # unknown is a different question, and it is named.
         "react_to_item",
+        # THE EIGHTH, 2026-09-01, and the FIRST that reaches another person.
+        # It ships under Ruling 1 -- nothing can confirm it -- with the
+        # declaration in `unverifiable` naming the Sent Invitations manager,
+        # why this server cannot open it, and what he must do himself.
+        #
+        # WHAT PROTECTS THE THIRD PARTY, unchanged and load-bearing:
+        #
+        #   the RECIPIENT is supplied by him per call and never DISCOVERED.
+        #   The needle is his own word; the LABEL is LinkedIn's string, and
+        #   the comparison happens INSIDE THE PAGE, which is what makes
+        #   "never stored" enforceable rather than promised.
+        #
+        #   the AIM refuses anything but exactly one match. Two matches erase
+        #   the index rather than shortlisting -- an invitation that reaches
+        #   whoever was drawn first is the failure this exists to refuse.
+        #
+        #   NO THIRD PARTY'S PROFILE IS LOADED. The controls are on HIS OWN
+        #   profile, which draws nine of them and costs no badge, where
+        #   /mynetwork/ would consume the pending-invitation counter.
+        "send_invitation",
         # THE SIXTH, 2026-08-31, and the FIRST that is not about a job or a
         # company Page. It is here because every clause the other five needed
         # is now true of it and not because a rule was relaxed:
@@ -4053,6 +4132,15 @@ def anchor_label_for(
     a table. The row is pinned separately, by company id; see
     ``dom.unfollow_control_selector``.
     """
+    if spec.action == "send_invitation":
+        # THE SUFFIX, NOT A NAME, and this is the one anchor in the package
+        # that is deliberately PARTIAL. LinkedIn labels these controls with
+        # another person's name plus " to connect". The name half is a third
+        # party's identity and this server does not read it; the suffix half
+        # is the part that establishes the control is an invitation, and it is
+        # the only part an anchor needs.
+        return dom.INVITE_CONTROL_SUFFIX
+
     if spec.action == "react_to_item":
         # THE OFF LABEL, MEASURED ON THREE SURFACES -- the feed, his profile,
         # and the item permalink itself. LinkedIn writes the toggle state into
@@ -4297,57 +4385,20 @@ _NINE_REFUSALS: dict[str, str] = {
     # that has to TYPE something -- publish_post, comment_on_item,
     # update_profile_field, send_message -- needs a mutation CLASS sanctioned,
     # which is a different and larger decision than a url.
-    "send_invitation": (
-        "send_invitation is sanctioned and cannot be performed, AND ITS "
-        "BLOCKER MOVED TWICE ON 2026-08-31. WHAT IS MEASURED: the route costs "
-        "NO BADGE -- the invitation controls are on his OWN PROFILE, 9 of "
-        "them, accessible names ending ' to connect', counted identically on "
-        "three separate days, on a page this server already loads and which "
-        "carries no pending-invitation counter. So this action never needs "
-        "/mynetwork/, whose load is refused precisely because it consumes "
-        "that counter. THE AIMING WORKS AND NOW RUNS: a needle he supplies is "
-        "handed INTO the page, the comparison happens there, and three "
-        "integers come back. Exactly one match is aimable; zero and "
-        "two-or-more both refuse, the second because choosing between "
-        "indistinguishable controls is choosing by position. That matcher had "
-        "NO CALLER IN THIS PACKAGE until today -- observe handed its readers "
-        "no target, so the aiming this capability is built around had never "
-        "run against a page. It does now. AND THE CONFIRM BLOCK CAN NAME THE "
-        "PERSON, which was the blocker this refusal carried this morning. The "
-        "operator ruled that ONE label may be read -- the control his own "
-        "needle has already uniquely selected -- printed for him to check, "
-        "and discarded. It reaches the block and NOTHING else: not the grant, "
-        "not the retained preview, not the observation, not consume's "
-        "mismatch message, not a log. That is enforced by ORDER rather than "
-        "by scrubbing -- the block is stored on the grant BEFORE the label "
-        "exists -- and by the reader that feeds the observation not reading a "
-        "label at all. The ruling turned on a distinction worth carrying: "
-        "loading a stranger's PROFILE stays refused because it EMITS, and "
-        "linkedin_who_viewed_me reads the receiving end of exactly that "
-        "signal; reading one accessible name off a page already rendered on "
-        "his own profile emits nothing, notifies nobody, and creates no "
-        "record. WHAT STOPS IT NOW IS NARROWER AND IS ALSO MEASURED: NOTHING "
-        "CAN CONFIRM THE SEND. No post-click state of that control has ever "
-        "been observed -- the label it wears after an invitation goes is the "
-        "identical gap react_to_item has for its ON label and unsave_job had "
-        "until 2026-08-30. And the surface that WOULD settle it, the "
-        "sent-invitations manager, is on the forbidden list and would consume "
-        "the pending-invitation badge to read. So a performed invitation "
-        "could only ever report 'unknown'. THAT IS THE SHAPE THIS SERVER JUST "
-        "FIXED IN apply_job AND WILL NOT SHIP AGAIN: an irreversible act "
-        "whose verification cannot pass on any reading it could take, on the "
-        "one action where a caller must not retry to find out. It is a higher "
-        "bar than follow_company clears, deliberately -- a follow is "
-        "reversible and observable by him, while an invitation is a request "
-        "to a real person, sent under his name, that LinkedIn will not let "
-        "him take back and that counts against the account if it is ignored. "
-        "WHAT WOULD LIFT IT is one supervised act on his own terms, exactly "
-        "the shape that lifted unsave_job: he sends ONE invitation himself, "
-        "in his own browser, and this server re-reads that control by the "
-        "read-only route it already has. One act pays for the label, and the "
-        "re-measurement is then bought with reads rather than with a second "
-        "invitation. Nothing here will do that for him."
-    ),
+    # ``"send_invitation"`` LEFT THIS TABLE ON 2026-09-01, and its two
+    # blockers resolved in two different ways worth telling apart.
+    #
+    # THE AIM CLOSED. It refused because the label is another person's NAME,
+    # which this server will not read, so the measurable suffix selected all
+    # nine controls. ``aim_invitation`` now resolves HIS OWN needle to exactly
+    # one control, with the comparison run inside the page, and refuses two
+    # matches rather than shortlisting them.
+    #
+    # THE VERIFICATION DID NOT CLOSE. It was RULED ON instead: nothing this
+    # server may read can confirm a sent invitation, and that is now a
+    # declaration the gate prints -- ``unverifiable`` on the spec, naming the
+    # Sent Invitations manager, both reasons it is unreachable, and what he
+    # must do himself -- rather than a reason to refuse.
     "send_message": (
         "send_message is sanctioned and cannot be performed, AND THE COST "
         "THIS REFUSAL WAS BUILT AROUND TURNED OUT NOT TO EXIST. WHAT IS "
@@ -4776,6 +4827,32 @@ async def _live_control(
                 "",
             )
         return (state, why, dom.named_role_selector(role, anchor))
+
+    if spec.action == "send_invitation":
+        # THE NEEDLE IS HANDED STRAIGHT INTO THE PAGE and the comparison
+        # happens there. That is what makes "the label is never stored"
+        # ENFORCEABLE rather than promised: a name that reaches Python can
+        # reach a traceback, a log line or a cache key, and no care downstream
+        # un-rings that. See dom.INVITE_NEEDLE_JS.
+        #
+        # reveal_single_match is NOT asked for here. The label is revealed
+        # only in the preview, by _name_the_invitation_recipient, into a dict
+        # built AFTER grant.preview is assigned -- so the grant provably never
+        # held it. Asking for it again at click time would put it in this
+        # function's scope for no purpose, and the purpose is the whole test.
+        reading = await dom.read_invitation_surface(page, grant.target)
+        verdict, why, index = aim_invitation(reading)
+        if verdict != INVITE_AIMED or index is None:
+            # THE NEEDLE IS NOT IN ``why`` and must never be: aim_invitation
+            # builds these sentences out of COUNTS. Asserted by
+            # tests/test_needle_never_escapes.py, shown failing at a mutation
+            # that interpolates it.
+            return (UNKNOWN, why, "")
+        return (
+            "invite_control_present",
+            why,
+            dom.invite_control_selector(index),
+        )
 
     if spec.action == "react_to_item":
         # THE PERMALINK DRAWS EXACTLY ONE, which is the whole reason this

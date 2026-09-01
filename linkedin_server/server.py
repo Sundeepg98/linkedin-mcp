@@ -1,4 +1,4 @@
-"""The tool surface: thirty-three tools, seven of which write to LinkedIn.
+"""The tool surface: thirty-three tools, eight of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -43,10 +43,10 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-ONE read, SEVEN write, and FIVE are write-shaped, registered, gated
+needs: TWENTY-ONE read, EIGHT write, and FOUR are write-shaped, registered, gated
 and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
 ``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-one plus seven plus five is
+so no confirm token for any of them can exist. Twenty-one plus eight plus four is
 thirty-three.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
@@ -71,11 +71,14 @@ discipline, because a reader trusts it more. **The counts here are prose and
 nothing tests them** -- ``tests/test_server_surface.py`` pins the real
 numbers, and that file is the one to believe when the two disagree.
 
-The seven writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
+The eight writes are ``linkedin_save_job``, ``linkedin_unsave_job``,
 ``linkedin_unfollow_company``, ``linkedin_apply_job``,
-``linkedin_follow_company``, ``linkedin_update_setting`` and
-``linkedin_react_to_item``, all registered below and all behind the same
-two-call gate. This sentence named FOUR of them
+``linkedin_follow_company``, ``linkedin_update_setting``,
+``linkedin_react_to_item`` and ``linkedin_send_invitation``, all registered
+below and all behind the same two-call gate. The last is the first write here
+that reaches ANOTHER PERSON, and the first that cannot confirm its own
+outcome -- both facts are printed in its confirm block rather than left in
+this docstring, where only somebody reading source would meet them. This sentence named FOUR of them
 and omitted ``linkedin_follow_company`` until 2026-08-31; it is corrected here
 rather than quietly widened, because the omitted name is the one whose absence
 made the count wrong. ``linkedin_update_setting`` joined it later that day,
@@ -204,10 +207,11 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SEVEN WRITE: linkedin_save_job, "
+        "nothing. EIGHT WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
-        "linkedin_update_setting and linkedin_react_to_item. Call any of them "
+        "linkedin_update_setting, linkedin_react_to_item and "
+        "linkedin_send_invitation. Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -3176,13 +3180,11 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "before ruling on it that 'Close and delete account' and 'Hibernate "
         "account' are in it."
     ),
-    "send_invitation": (
-        "a route exists that costs no badge -- the control is on his own "
-        "profile, 9 of them, not on /mynetwork/ -- and it still cannot be "
-        "aimed: the label is the other person's NAME, which this server will "
-        "not read, so the measurable suffix selects all nine. '/invite', "
-        "'invitation' and '/connect' are also forbidden urls."
-    ),
+    # ``"send_invitation"`` LEFT THIS TABLE ON 2026-09-01. Its aim closed --
+    # aim_invitation resolves his own needle to exactly one control, with the
+    # comparison run inside the page -- and its verification did not, so the
+    # gate now DECLARES that nothing can confirm a sent invitation rather than
+    # refusing over it.
     "send_message": (
         "'/messaging/compose' is on the forbidden-url list, and one "
         "exact-url exemption was ruled in on 2026-08-31, so the composer HAS "
@@ -3846,41 +3848,56 @@ async def linkedin_update_setting(
 async def linkedin_send_invitation(
     member: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """Send one connection invitation. BUILT, GATED, AND REFUSING.
+    """Send one connection invitation. PERFORMS, behind the gate, and CANNOT BE CONFIRMED.
 
-    IT DOES NOT OPEN /mynetwork/, AND THAT IS THE POINT OF HOW IT PREVIEWS.
-    Loading that page consumes LinkedIn's pending-invitation badge -- signal
-    you have not seen yet -- which is why this server refuses to census it at
-    all. So the preview reads YOUR OWN PROFILE instead, a page it already
-    loads and which carries no such counter, and the invitation control is
-    there: 9 of them were measured on 2026-08-30, buttons whose accessible
-    name ends `` to connect``. The capability has a route that costs no badge.
+    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01. Two things
+    changed and they are different in kind, which is the part to carry out of
+    here.
 
-    WHAT STOPS IT ANYWAY, and both halves are real. THE LABEL IS THE OTHER
-    PERSON'S NAME: LinkedIn writes it into the aria-label, this server's
-    census blanks a name before counting it, and reading the full label in
-    order to aim a click would mean collecting a stranger's identity to fill
-    in a confirmation block. The suffix is all that may be known without
-    paying that, and a suffix selects all nine controls rather than one. And
-    ``/invite``, ``invitation`` and ``/connect`` are all on the forbidden-url
-    list.
+    THE AIM CLOSED, by measurement. It refused because the accessible name of
+    an invitation control IS the other person's name -- a string this server
+    will not read -- so the only measurable part, the suffix " to connect",
+    selected all nine controls on the page. You now supply a NEEDLE: your own
+    word for the person. The comparison runs INSIDE THE PAGE, so the name
+    never reaches this process, and exactly one match is the only aimable
+    answer. **Two matches refuse rather than shortlist**, because an
+    invitation that reaches whoever was drawn first is precisely the failure
+    worth refusing.
 
-    WHAT IT WOULD COST. An invitation is a REQUEST TO A REAL PERSON and lands
-    as a notification with your name on it. Whether it can be withdrawn is
-    unmeasured here -- the sent-invitations manager is itself on the forbidden
-    list -- and withdrawing would not un-notify. There is a quieter cost too:
-    LinkedIn restricts accounts whose invitations are frequently ignored, so
-    this is the one action here whose repetition has a consequence for the
-    account itself.
+    THE VERIFICATION DID NOT CLOSE, AND THIS SHIPS ANYWAY BECAUSE HE RULED IT
+    SO. **Nothing this server can read will tell you whether the invitation
+    was sent.** The confirm block says so in three parts -- what would confirm
+    it, why this server cannot reach that, and what you must do yourself --
+    and the result block repeats them, because the sentence you need after
+    acting is the last one. In short: open My Network, then Manage, then Sent,
+    and look.
 
-    WHAT WOULD LIFT IT: a decision, not a measurement -- whether this server
-    may hold one named person's identity long enough to show it to you and aim
-    one click. That is about you and a stranger, and it is yours to make.
+    Two separate measured reasons put that surface out of reach, and either
+    would be enough on its own: its address contains "invitation", which is on
+    the forbidden-url list and is checked before the allowlist; and reaching
+    it goes through /mynetwork/, whose load CONSUMES your pending-invitation
+    badge. No post-click state has ever been observed on the page this DOES
+    act on, either, so it cannot even report that the control changed.
+
+    WHERE IT ACTS, and why that page: your OWN profile draws nine invitation
+    controls and costs NO badge. No third party's profile is ever loaded --
+    that would leave them a durable record, which is the one thing this whole
+    family of rulings refuses to spend.
+
+    IT CANNOT BE TAKEN BACK by this server, and whether LinkedIn offers a
+    withdraw at all is UNMEASURED -- which is a stronger statement than this
+    server lacking one. The surface that would show it is the same one that is
+    out of reach.
 
     Args:
-        member: who to invite. Unvalidated: this server has never read a member
-            slug unshaped, deliberately.
-        confirm_token: accepted, and no token is ever issued for this action.
+        member: YOUR OWN WORD for the person -- a name fragment that picks
+            out exactly one of the invitation controls on your profile. It is
+            handed into the page and compared there; it is never used to
+            discover anybody, and this server reads no names back out of the
+            match except the single label it shows you in the preview to
+            confirm your word selected who you meant.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf -- this one reaches another person.
     """
     try:
         return await _write_tool("send_invitation", member, confirm_token)
