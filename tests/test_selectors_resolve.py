@@ -191,6 +191,15 @@ async def test_the_role_selectors_match_by_name_and_by_case():
     and ``[name="always on"i]`` matches 1. That is the property pinned here,
     and the mutation that breaks it is ``s`` -> ``i``.
 
+    **AND THIS ASSERTION IS THE GUARD, NOT THE SUFFIX. DO NOT DELETE IT ON
+    THE GROUNDS THAT THE ``s`` COVERS IT.** Case-sensitive is also this
+    Playwright version's DEFAULT, which is why a mutation dropping the suffix
+    entirely still passes -- so the suffix is documentation, and what actually
+    protects this package from a future Playwright flipping that default is
+    the line below pinning ``[name="always on"]`` to 0. Remove it and the
+    suffix goes on LOOKING correct while silently doing nothing, which is the
+    state the ``[exact=true]`` clause was in for a day and a half.
+
     The whole-name behaviour is asserted too -- it is real and load-bearing on
     a radio group, where ``Always on`` and ``Always on, recommended`` are
     different destinations -- but it is asserted as a fact about the ENGINE

@@ -988,6 +988,17 @@ def named_role_selector(role: str, name: str) -> str:
     the behaviour written down rather than inherited -- which is the reason to
     keep it, and the honest size of that reason.
 
+    SO THE SUFFIX IS DOCUMENTATION AND THE TEST IS THE GUARD. Because
+    case-sensitivity is already the default, dropping ``s`` changes nothing
+    observable -- a mutation doing exactly that passes the suite, and is
+    recorded passing rather than hidden. What actually protects this package
+    from a future Playwright flipping that default is
+    ``tests/test_selectors_resolve.py`` pinning ``[name="always on"]`` to
+    ZERO. That assertion is load-bearing and the suffix is not; deleting it
+    on the grounds that the ``s`` covers it would leave the suffix looking
+    correct while silently doing nothing, which is precisely the state
+    ``[exact=true]`` was in.
+
     GUARDED THE SAME WAY :func:`save_control_selector` IS, and the guard has
     to be here rather than at the call site: this is a string a CLICK is built
     from. The role must be one this package maps, and the name must contain

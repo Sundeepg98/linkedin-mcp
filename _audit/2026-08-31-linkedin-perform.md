@@ -2713,6 +2713,38 @@ the disease this file has spent the whole wave naming. The suffix is kept for
 explicitness, and its docstring says exactly that rather than claiming the
 suffix is load-bearing.
 
+**AND THAT MEANS THE TEST IS THE GUARD, NOT THE SUFFIX**, which is worth
+stating because it changes what a future reader must not delete. Since
+case-sensitivity is already the default, the thing standing between this
+package and a future Playwright that flips it is
+`tests/test_selectors_resolve.py` pinning `[name="always on"]` to ZERO -- not
+the `s` being present. Both that file and `named_role_selector`'s docstring
+now say so in terms, so nobody removes the assertion reasoning that the suffix
+covers it. **The suffix would go on looking correct while silently doing
+nothing -- which is exactly the state `[exact=true]` was in for a day and a
+half.**
+
+## 73a. THE SECOND WAY A COMMENT CORRUPTS WHAT IS BUILT FROM IT
+
+Section 69 recorded the first: **prose about a pattern contains the pattern.**
+Here is the second, and it is worse because the corruption runs into the
+instrument rather than into a guard's input.
+
+The `[exact=true]` clause carried a justification nobody had measured -- that
+it prevented a substring match. When the test was written to defend the fixed
+selector, **it pinned substring protection, because that is what the comment
+said the thing was for.** The mutation dropping the suffix passed it. The
+check inherited the error instead of catching it.
+
+> **A TEST DERIVED FROM A COMMENT TESTS THE COMMENT.**
+
+An unmeasured claim in prose becomes the specification for the check that was
+supposed to verify the code, and the loop closes with nothing on either side
+having touched the running system. The fix is not "read comments
+sceptically"; it is that a check's premise has to come from a MEASUREMENT --
+here, four selector strings resolved against a real page, which took one
+command and refuted the sentence that had stood for a day and a half.
+
 ## 74. WHAT ELSE THE SAME PROBE SETTLED
 
 **No twelfth `evaluate` waiver is needed for the option-presence check.** I
