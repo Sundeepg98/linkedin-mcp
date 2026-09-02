@@ -173,6 +173,7 @@ import secrets
 import time
 from dataclasses import dataclass, field
 from typing import Any, Optional, Union
+from urllib.parse import urlsplit
 
 from linkedin_server import dom, shape
 from linkedin_server.errors import WriteAttemptError
@@ -4538,6 +4539,49 @@ def anchor_label_for(
             if destination.strip().casefold() == known.casefold():
                 return known
         return None
+    if spec.action == "update_profile_field":
+        # THE FIELD NAME, PER CALL, and this arm was MISSING when the action
+        # shipped in a540461 on 2026-09-02. Its absence was not a subtlety and
+        # it is the second time this exact function has had it:
+        #
+        #     'update_profile_field' has no measured anchor and will not be
+        #     performed. ... anchor_label_for has no branch for it ...
+        #     NAVIGATIONS ATTEMPTED: []
+        #
+        # Zero. It raised at ``perform``'s FIRST guard -- before the write
+        # door, before the navigation, before any control was read -- while
+        # ``grant_is_possible`` still returned True, so ``mint`` handed out a
+        # live confirm token, he read a real preview off a real read of his
+        # profile, he confirmed, and the second call died. A capability that
+        # asks for authorisation and then refuses is worse than one that
+        # refuses, because it spends his judgement rather than his time.
+        #
+        # SEE THE COMMENT ON THE apply_job ARM BELOW. It records the identical
+        # defect, in this function, on 2026-08-26 -- "registered, listed in
+        # PERFORMABLE, and reported by server_info as performable and
+        # irreversible -- and could not run". Seven days apart, and the prose
+        # naming the first was on screen when the second was written. That is
+        # why ``tests/test_a_performable_action_can_reach_its_control.py``
+        # exists and why it fans out over PERFORMABLE rather than listing
+        # actions: a comment describing a defect does not prevent its
+        # recurrence in the function it is written in.
+        #
+        # IT IS NOT CHECKED AGAINST A TABLE, and ``update_setting``'s is, and
+        # that difference is a fact about the two surfaces rather than a
+        # relaxation. Dark mode has THREE STATES THIS SERVER HAS SEEN
+        # RENDERED, so a closed set exists to check a destination against. The
+        # editor's field list is whatever that container draws today -- the
+        # "six approved fields" is prose in a comment, not a measured
+        # constant -- and ``_live_control`` checks this name against THE LIVE
+        # CONTROL LIST, requiring exactly one match, on the very page the
+        # write will act on. That is strictly stronger than any table written
+        # at spec time, and it is taken at the moment that counts.
+        #
+        # AND IT DISCLOSES NOTHING NEW. The field name is already in the
+        # grant, already in the canonical target ``consume`` binds the token
+        # to, and already printed in the preview he confirms.
+        field, _, _ = str(target or "").partition(TARGET_JOIN)
+        return field.strip() or None
     if spec.action == "unfollow_company":
         return UNFOLLOW_ANCHOR_PREFIX
     if spec.action == "follow_company":
@@ -5049,6 +5093,24 @@ _VERIFIED_FROM: dict[str, str] = {
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
 
 
+#: A landed profile path, split into the MEMBER SEGMENT and everything after
+#: it. Used only by :func:`_assert_landed_on_target`, and only to allow the
+#: segment to differ while holding the rest exact.
+#:
+#: NOT IMPORTED FROM ``server.py``, which has ``_MEMBER_SEGMENT`` and
+#: ``_path_without_member`` for its own self-ownership block. ``server``
+#: imports ``writes``, so the dependency only runs one way, and a second
+#: spelling here is the cost of that. It is a THREE-LINE regex whose job is
+#: different from theirs -- they redact a segment for printing, this compares
+#: the path around one -- so the two are not a rule with two implementations.
+_MEMBER_PATH = re.compile(r"^(?:/in/)([^/?#]+)(/.*)?$")
+
+
+def _path_of(url: str) -> str:
+    """The path of a url, with no scheme, host, query or fragment."""
+    return urlsplit(str(url or "")).path
+
+
 def _assert_landed_on_target(
     spec: WriteSpec, grant: WriteGrant, landed: str
 ) -> None:
@@ -5071,12 +5133,92 @@ def _assert_landed_on_target(
             )
         return
     expected = str(spec.url_template or "").format(target=grant.target)
+
+    # THE SELF-PROFILE SHAPE, ADDED 2026-09-02, AND WITHOUT IT NO ``/in/me/``
+    # ACTION COULD EVER HAVE PASSED THIS GUARD.
+    #
+    # ``/in/me/`` REDIRECTS. That is not an edge case -- it is the entire
+    # reason that spelling is the only profile form on the read allowlist, and
+    # ``readonly``'s own comment beside the pattern says so: "Own profile.
+    # /in/me/ redirects to whoever is signed in." A whole-url comparison was
+    # never going to hold against it, and it held only because nothing had
+    # ever navigated there to WRITE. Measured live 2026-09-01 and recorded in
+    # _audit/2026-08-31-linkedin-perform.md:
+    #
+    #     requested  /in/me/edit/intro/
+    #     landed     /in/<member>/edit/intro     (and no trailing slash)
+    #
+    # TWO ACTIONS ARE AFFECTED, not one: ``update_profile_field`` and
+    # ``send_invitation``, whose surface is ``/in/me/``. The second resolves
+    # its anchor cleanly and failed HERE, which is why it looked healthy.
+    #
+    # WHAT MAKES THE RELAXATION SAFE, and it is a property of the REQUEST
+    # rather than of the landing. The member segment is allowed to differ; the
+    # path after it is not. And the reason a differing segment cannot be a
+    # stranger is that the url was not chosen by a caller -- ``assert_write_url``
+    # REBUILDS it from the grant, ``readonly`` admits only the ``/in/me/``
+    # spelling, and ``/in/me/`` can resolve to exactly one member: the one
+    # signed in. So this accepts "LinkedIn told us who you are" and refuses
+    # everything else.
+    #
+    # IT IS NOT ``census_substitute`` ON BOTH SIDES, which was the first thing
+    # tried and is WRONG. That reduces EVERY member segment to the same
+    # ``<member>`` token, so HIS editor path and A STRANGER'S editor path
+    # normalise to one identical string and compare EQUAL -- measured before
+    # it was rejected. A comparison that cannot tell those two apart is not a
+    # landing check. The exactly-one-member-can-answer argument above is what
+    # does the work, and it needs the REQUESTED segment to be literally ``me``.
+    #
+    # (The two example paths are described rather than written out. They were
+    # written out in the first draft of this comment and
+    # ``test_no_committed_identity`` refused the file for two SLUG-SHAPED
+    # strings -- invented ones, which is no defence, because the rule is on
+    # the shape and a reviewer cannot tell an invented vanity slug from a real
+    # one. Same guard, same lesson, as the urn literal it caught an hour
+    # earlier in a test file.)
+    expected_member = _MEMBER_PATH.match(_path_of(expected))
+    if expected_member is not None and expected_member.group(1) == "me":
+        landed_member = _MEMBER_PATH.match(_path_of(landed))
+        if landed_member is None:
+            raise WriteAttemptError(
+                f"refusing to click: this action is performed on his own "
+                f"profile at {expected!r} and the browser landed on {landed!r}, "
+                "which is not a /in/<member>/ url at all. A redirect that "
+                "leaves the profile family is not the redirect this action "
+                "expects."
+            )
+        want = (expected_member.group(2) or "").rstrip("/")
+        got = (landed_member.group(2) or "").rstrip("/")
+        if want != got:
+            raise WriteAttemptError(
+                f"refusing to click: this action is performed on {expected!r} "
+                f"and the browser landed on {landed!r}. The member segment is "
+                "allowed to differ -- /in/me/ redirects to whoever is signed "
+                f"in -- but the path after it is not: this expects {want!r} "
+                f"and the page is showing {got!r}."
+            )
+        return
+
     if str(landed).rstrip("/") != expected.rstrip("/"):
+        # THE SENTENCE IS THE ACTION'S OWN, and until 2026-09-02 it was the
+        # unfollow's, printed on everything that reached here. A profile field
+        # edit was told "a list write is anchored to a row on one page", which
+        # is the borrowed-prose defect commit 3742a2d removed from the
+        # RECEIPT -- arriving here in a GATE. A refusal is the worse place for
+        # it: a receipt describes what happened, a refusal is what he reads
+        # while the server is STOPPING him, and a wrong explanation there
+        # teaches him the wrong model of what is safe.
         raise WriteAttemptError(
             f"refusing to click: this action is performed on {expected!r} and "
-            f"the browser landed on {landed!r}. A list write is anchored to a "
-            "row on one page, so landing anywhere else means the row this "
-            "grant names is not on the screen."
+            f"the browser landed on {landed!r}. "
+            + (
+                "A list write is anchored to a row on one page, so landing "
+                "anywhere else means the row this grant names is not on the "
+                "screen."
+                if spec.target_kind == "company_id"
+                else "This action acts on one measured surface and that is "
+                "not it, so nothing here is the control this grant names."
+            )
         )
 
 
@@ -5290,7 +5432,14 @@ async def _live_control(
         # field against them. The surface moved once in thirty-six hours; a
         # selector baked at design time would have aimed at whatever replaced
         # it.
-        reading = await dom.read_self_owned_editor_fields(page)
+        # ``include_dom_id=True`` IS THE ONLY PLACE THIS FLAG IS PASSED, and
+        # it is what makes the arm below able to aim at all. The reader's
+        # default projection deliberately omits the id so the TOOL path never
+        # publishes one; this call is the write path, which needs a selector
+        # and never prints what it builds it from.
+        reading = await dom.read_self_owned_editor_fields(
+            page, include_dom_id=True
+        )
         if reading.get("refused"):
             return (UNKNOWN, str(reading.get("reason") or ""), "")
 
@@ -5365,6 +5514,49 @@ async def _live_control(
                 f"{wanted!r} was found exactly once and carries no id, so "
                 "there is no way to aim at it that is not positional. "
                 "Refused rather than addressed by document order.",
+                "",
+            )
+        # REFUSE, DO NOT SANITISE. An id carrying a member token is one this
+        # server does not aim with, and there are two independent ways to be
+        # unusable:
+        #
+        #   IT LOOKS LIKE IDENTITY  -- ``census_substitute`` CHANGES it, which
+        #       means it matched a urn, a member path, a company path or a
+        #       long digit run. LinkedIn does write ids of that shape
+        #       (``ember-view-urn:li:fsd_profile:<id>``).
+        #   IT WOULD BREAK THE SELECTOR -- a character that ends the quoting.
+        #
+        # SANITISING IS NOT THE ALTERNATIVE and would be worse in both cases:
+        # a substituted id addresses nothing, so the write would aim at a
+        # control that does not exist while reporting success on the fill. A
+        # refusal states the situation; a scrubbed id hides it. This is the
+        # rule ``dom.comment_submit_selector`` already applies to a shaped
+        # name carrying ``<``.
+        #
+        # NEITHER BRANCH ECHOES THE ID. The one on the left is the thing being
+        # refused for possibly carrying identity, so printing it to explain
+        # the refusal would be the disclosure the refusal exists to prevent --
+        # the same rule ``_comment_submit_gate`` follows when it declines to
+        # quote a shaped label.
+        if shape.census_substitute(dom_id) != dom_id:
+            return (
+                "editor_addressed",
+                f"the control named {wanted!r} carries a dom id that this "
+                "server's own identity substitution CHANGES -- so it matched a "
+                "urn, a member or company path, or a long digit run. It is "
+                "refused rather than scrubbed, and it is NOT printed here: an "
+                "id that failed this check is the one string on this path most "
+                "likely to name somebody. Nothing was typed.",
+                "",
+            )
+        if any(bad in dom_id for bad in dom._SELECTOR_UNSAFE):
+            return (
+                "editor_addressed",
+                f"the control named {wanted!r} carries a dom id containing a "
+                "character that would end the selector's own quoting, so no "
+                "safe selector can be built from it. Refused rather than "
+                "escaped: an escaping rule is a second predicate nobody has "
+                "reviewed. Nothing was typed.",
                 "",
             )
         if control.get("disabled") is True:

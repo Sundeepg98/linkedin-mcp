@@ -3164,6 +3164,7 @@ async def read_self_owned_editor_fields(
     max_chars: int = 300,
     anchor_name: str = EDITOR_ANCHOR_NAME,
     container_selector: str = EDITOR_CONTAINER_SELECTOR,
+    include_dom_id: bool = False,
 ) -> dict[str, Any]:
     """Label every control inside the editor dialog, or REFUSE and name why.
 
@@ -3259,28 +3260,56 @@ async def read_self_owned_editor_fields(
 
     fields: list[dict[str, Any]] = []
     for control in list(data.get("controls") or []):
-        fields.append(
-            {
-                # THE UNGATED NAME. ``census_substitute`` and not
-                # ``census_shape``: the substitutions run, the <opaque> gate
-                # does not. That one-word difference IS the capability.
-                "name": shape.census_substitute(control.get("name")),
-                "name_source": str(control.get("name_source") or "none"),
-                "tag": str(control.get("tag") or ""),
-                "type": control.get("type"),
-                "role": control.get("role"),
-                "disabled": bool(control.get("disabled")),
-                # UNCOERCED, exactly as the census carries it: None means NOT
-                # CHECKABLE and False means checkable and off, and bool() here
-                # would collapse the two.
-                "checked": control.get("checked"),
-                "checked_source": str(control.get("checked_source") or "none"),
-                # Same tri-state, same reason -- None is "no required marker is
-                # readable on this kind of control", never "optional".
-                "required": control.get("required"),
-                "has_href": bool(control.get("has_href")),
-            }
-        )
+        record = {
+            # THE UNGATED NAME. ``census_substitute`` and not
+            # ``census_shape``: the substitutions run, the <opaque> gate
+            # does not. That one-word difference IS the capability.
+            "name": shape.census_substitute(control.get("name")),
+            "name_source": str(control.get("name_source") or "none"),
+            "tag": str(control.get("tag") or ""),
+            "type": control.get("type"),
+            "role": control.get("role"),
+            "disabled": bool(control.get("disabled")),
+            # UNCOERCED, exactly as the census carries it: None means NOT
+            # CHECKABLE and False means checkable and off, and bool() here
+            # would collapse the two.
+            "checked": control.get("checked"),
+            "checked_source": str(control.get("checked_source") or "none"),
+            # Same tri-state, same reason -- None is "no required marker is
+            # readable on this kind of control", never "optional".
+            "required": control.get("required"),
+            "has_href": bool(control.get("has_href")),
+        }
+        # THE ADDRESSABLE HANDLE, AND IT IS OFF BY DEFAULT.
+        #
+        # ``EDITOR_FIELDS_JS`` has emitted ``dom_id`` since 2026-09-02 -- it
+        # was added because the reader could NAME every control in this
+        # container and ADDRESS NONE of them. THIS PROJECTION DROPPED IT. The
+        # script produced the id, the rebuild above discarded it, and
+        # ``writes._live_control`` aimed from ``control["dom_id"]``, so the
+        # value was always None and that arm always took its "carries no id"
+        # refusal. The success path could not be entered by any page at all,
+        # which is why the eleventh capability shipped unable to act.
+        #
+        # WHY A KEYWORD RATHER THAN JUST ADDING THE KEY. This projection is a
+        # PRIVACY BOUNDARY -- rebuilding each control into a fixed key set is
+        # exactly what makes it one -- and its output reaches a caller through
+        # ``server.linkedin_profile_editor_fields``. A DOM id is not identity
+        # IN THE IDS THAT HAVE BEEN SEEN (``e-city``, ``e-country-region``),
+        # which is not the same statement as "is not identity": LinkedIn also
+        # writes ids like ``ember-view-urn:li:fsd_profile:<id>``.
+        #
+        # So the id is NOT PUBLISHED. Only ``writes._live_control`` asks for
+        # it, to build a selector it never prints; the tool path never passes
+        # this flag and therefore never sees one. That dissolves the question
+        # rather than answering it -- no substitution has to be correct for a
+        # value that does not leave. It is the same move as reading the
+        # payload with a passive listener instead of an interceptor: remove
+        # the exposure rather than guard it, because a guard is one edit from
+        # being an absent guard.
+        if include_dom_id:
+            record["dom_id"] = str(control.get("dom_id") or "")
+        fields.append(record)
 
     out: dict[str, Any] = {
         "container": {
