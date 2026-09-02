@@ -5195,12 +5195,45 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
     # ``shape.looks_name_shaped`` whether to refuse -- which made that
     # predicate the only thing between his name and the output, on the one
     # surface whose labels ARE his name. It failed open on the checked default
-    # for a day and a half. Now the shaping happens in the page and the raw
-    # label never enters this process, so there is nothing here to guard: the
-    # guard is a second line elsewhere rather than the only line here.
+    # for a day and a half. Now the shaping happens in the page, so the raw
+    # label never enters this process at all.
+    modes = list(reading.get("modes") or [])
+
+    # AND THE GUARD IS A SECOND LINE, WHICH UNTIL NOW WAS ONLY A CLAIM.
+    #
+    # The re-anchoring left ``shape.looks_name_shaped`` with NO caller, while
+    # three docstrings and a commit message described it as defence in depth.
+    # An uncalled function is not a second line; it is a comment. This is the
+    # call that makes the sentence true.
+    #
+    # WHAT IT ACTUALLY CHECKS, because a redundant assertion would be worse
+    # than none. ``tail`` arrives from the PAGE, asserted name-free by an
+    # implementation this process cannot see running. That is a claim from
+    # across a trust boundary, and this is the boundary. Verifying it here
+    # catches a regression in the page's shaping -- the one failure mode the
+    # in-page design cannot self-report -- using an independent implementation
+    # of the same rule.
+    #
+    # It has never fired. That is the expected state for a boundary check, and
+    # it is why the refusal names the page rather than the label.
+    offending = [m for m in modes if shape.looks_name_shaped(str(m.get("tail") or ""))]
+    if offending:
+        return {
+            "refused": "page_shaping_returned_a_name",
+            "recipients_selected": chosen,
+            "why": (
+                f"{len(offending)} of {len(modes)} tails came back from the page "
+                "still carrying a capitalised run, which the page asserts cannot "
+                "happen -- a tail is what SURVIVES the last run. The tails are "
+                "NOT returned, because a tail that failed this check is the one "
+                "string on this path most likely to be a name. Nothing is "
+                "published from this reading."
+            ),
+        }
+
     return {
         "recipients_selected": chosen,
-        "modes": list(reading.get("modes") or []),
+        "modes": modes,
         # THE BODY, PRESENCE AND KIND ONLY. Its label is deliberately NOT
         # shaped, NOT guarded and NOT returned, and that is a decision rather
         # than an omission. The guard gates PUBLICATION; a label that is never

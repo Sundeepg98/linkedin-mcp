@@ -683,7 +683,10 @@ DESCRIPTOR_CASES = [
     ("Grace Hopper", 1, False, ""),
     ("Send", 1, False, ""),
     ("Open send options", 1, False, "send options"),
-    ("", 0, False, ""),
+    # NONE, NOT "". No run was found, so no name-free tail can be derived.
+    # An empty tail would mean "the name ran to the end of the string",
+    # which is a different fact and is what ``Send`` above reports.
+    ("", 0, False, None),
 ]
 
 
@@ -712,31 +715,147 @@ def test_the_descriptor_returns_the_tail_a_reader_would_write_down(
     assert (out["runs"], out["joined_by_to"], out["tail"]) == (runs, joined, tail)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "KNOWN HOLE, 2026-09-02: _NAME_SHAPE_RUN matches [A-Z], which is "
-        "ASCII-only, so a name in any other script scores ZERO runs -- the "
-        "guard passes it and the descriptor hands back the whole string as a "
-        "'name-free tail'. The fix is its own commit: 'I cannot analyse this' "
-        "must mean REFUSE. strict=True so that when it lands this test FAILS "
-        "as unexpectedly-passing and this marker has to be removed rather "
-        "than quietly outliving the hole it documents."
-    ),
+@pytest.mark.parametrize(
+    "label",
+    [
+        "\u00c9lodie will send message",
+        "\u674e\u96f7 will send message",
+        "\u0410\u043d\u043d\u0430 will send message",
+    ],
+    ids=["latin-accent", "han", "cyrillic"],
 )
-def test_a_name_outside_ascii_does_not_survive_into_the_tail():
-    """The hole the circular oracle could not express, written as a sentence.
+def test_a_name_outside_ascii_does_not_survive_into_the_tail(label):
+    """The hole the circular oracle could not express, now closed.
 
-    ``read_compose_fields`` no longer reaches this -- it shapes in the page and
-    refuses on zero runs -- so this is a loaded gun rather than a live wound.
-    That is exactly why it is pinned: the next caller will not have watched
-    this happen.
+    THIS WAS AN ``xfail(strict=True)`` UNTIL THE FIX LANDED, and that is why
+    the marker is GONE rather than relaxed: a strict xfail that starts
+    passing FAILS, so the fix could not land without someone deleting it.
+    The documentation of the defect was forced to die with the defect,
+    instead of outliving it as prose nobody re-read.
 
-    The census does not share the hole, and the reason is structural rather
-    than lucky: ``_CENSUS_SAFE_CHARS`` is ASCII-only ON PURPOSE, so a name in
-    another script is refused BY THE GATE rather than by a rule somebody
-    remembered to write. The compose path never ran that gate.
+    THE DEFECT. ``_NAME_SHAPE_RUN`` matches ``[A-Z]``, which is ASCII, so a
+    name in any other script scored ZERO runs -- the guard passed it and the
+    descriptor handed back the whole string as a "name-free tail" with the
+    name still in it.
+
+    THE CENSUS NEVER HAD IT, and the reason is structural rather than lucky:
+    ``_CENSUS_SAFE_CHARS`` is ASCII-only ON PURPOSE, so a name in another
+    script is refused BY THE GATE rather than by a rule somebody remembered
+    to write. The publication path never ran that gate -- two paths, one
+    with a structural refusal and one with a remembered rule.
     """
-    label = "\u00c9lodie will send message"
     out = shape.describe_name_shaped(label)
-    assert out["tail"] != label, "the whole string came back as a name-free tail"
+    assert out["runs"] == 0
+    # Not the whole string, and not a truncation of it either.
+    assert out["tail"] is None
+    # And the guard refuses it, which is the half that decides publication.
+    assert shape.looks_name_shaped(label) is True
+
+
+def test_the_guard_still_passes_a_string_with_no_name_in_it():
+    """The refusal must not have become unconditional.
+
+    A guard that refused everything would satisfy the test above while making
+    every caller dead -- the same control the compose reader carries, turned
+    on the predicate itself.
+    """
+    assert shape.looks_name_shaped("will send message") is False
+    assert shape.looks_name_shaped("") is False
+    assert shape.looks_name_shaped("send") is False
+# ---------------------------------------------------------------------------
+# The three name predicates, and where each one is actually reached from
+# ---------------------------------------------------------------------------
+
+#: Predicate -> why it exists after the 2026-09-02 re-anchoring. AN ENTRY IS A
+#: CLAIM THAT IS ITSELF CHECKED, borrowing the rule from
+#: ``tests/test_reader_reachability.py``: listing a predicate as test-only
+#: fails if it gains a production caller, and listing one as production fails
+#: if it loses its last one. Neither direction is a waiver.
+PREDICATE_DISPOSITION = {
+    "name_shape_run_pattern": "production",
+    "looks_name_shaped": "production",
+    # THE ONE THAT IS NOT REACHED FROM THE TOOL SURFACE, and the reason is not
+    # "nobody got round to it". The page shapes labels itself, so nothing in
+    # production asks Python to shape one. What this function IS now is the
+    # REFERENCE IMPLEMENTATION the shipped JavaScript is checked against, in
+    # test_the_page_shaping_agrees_with_the_python_descriptor. Moving it into
+    # that test would put a third copy of the rule in a third place, which is
+    # the drift the whole split exists to prevent -- so it stays here and its
+    # job is stated rather than assumed.
+    "describe_name_shaped": "reference implementation for the cross-engine check",
+}
+
+
+def _production_call_counts():
+    """How many times each predicate is CALLED in linkedin_server/*.py.
+
+    An AST walk over ``ast.Call`` nodes, not a substring search, for the reason
+    ``test_reader_reachability`` gives: these names appear in seven docstrings
+    and comments across dom.py, and a grep counts every one of them as a use.
+    Docstrings do not get a vote on whether code is reachable.
+    """
+    import ast
+    import pathlib
+
+    package = pathlib.Path(shape.__file__).resolve().parent
+    counts = {name: 0 for name in PREDICATE_DISPOSITION}
+    for path in sorted(package.glob("*.py")):
+        if path.name == "shape.py":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            name = getattr(func, "attr", None) or getattr(func, "id", None)
+            if name in counts:
+                counts[name] += 1
+    return counts
+
+
+def test_each_name_predicate_is_reached_the_way_its_entry_says():
+    """A predicate nobody calls is a comment, whatever its docstring claims.
+
+    THIS EXISTS BECAUSE THE RE-ANCHORING BROKE ITS OWN STORY. Moving the
+    shaping into the page left ``looks_name_shaped`` with ZERO callers, while
+    three docstrings and a commit message went on describing it as defence in
+    depth. The claim was false for exactly as long as nobody counted -- the
+    same shape as ``read_settings_surface``, which sat dead for ten days with a
+    comment noting it was uncalled one sentence after arguing that such readers
+    go stale unread.
+
+    So the disposition is measured rather than asserted in prose, in both
+    directions.
+    """
+    counts = _production_call_counts()
+    for name, disposition in PREDICATE_DISPOSITION.items():
+        if disposition == "production":
+            assert counts[name] > 0, (
+                f"{name} is listed as production and has NO caller in "
+                f"linkedin_server/. Either wire it or change its entry -- do "
+                f"not leave it described as a guard it is not."
+            )
+        else:
+            assert counts[name] == 0, (
+                f"{name} is listed as {disposition!r} but is now CALLED "
+                f"{counts[name]} time(s) in production. Update its entry: the "
+                f"reason it is kept has changed."
+            )
+
+
+def test_the_reference_implementation_is_actually_referenced():
+    """The other half: test-only is a job, not an excuse.
+
+    ``describe_name_shaped`` is kept for one stated purpose -- being the thing
+    the shipped ``COMPOSE_MODES_JS`` is compared against. If that comparison
+    ever stops naming it, the function is not test-only, it is dead, and this
+    fails rather than letting the entry above quietly become the excuse it was
+    written not to be.
+    """
+    import pathlib
+
+    differential = (
+        pathlib.Path(__file__).resolve().parent / "test_compose_fields.py"
+    ).read_text(encoding="utf-8")
+    assert "describe_name_shaped" in differential
+    assert "test_the_page_shaping_agrees_with_the_python_descriptor" in differential

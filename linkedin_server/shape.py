@@ -3713,11 +3713,32 @@ def describe_name_shaped(text: str) -> dict[str, Any]:
 
     ``tail`` is asserted name-free by construction -- it is what remains after
     the last capitalised run -- and callers may compare it against a constant.
+
+    IT IS ``None`` WHEN NO RUN WAS FOUND, and that is not the same as an empty
+    tail. Empty means "the name ran to the end of the string"; None means "no
+    name-shaped run was found at all, so no name-free tail can be derived from
+    this string". A caller that treats them alike will publish a string this
+    function declined to vouch for.
     """
     raw = str(text or "")
     matches = list(_NAME_SHAPE_RUN.finditer(raw))
     if not matches:
-        return {"runs": 0, "joined_by_to": False, "tail": raw.strip()}
+        # ``tail`` IS None HERE, AND IT USED TO BE THE WHOLE STRING.
+        #
+        # The old answer was defended as safe because the caller already held
+        # the string it was handing back. That defence was wrong twice over.
+        # It is a FALSE STATEMENT regardless of who holds it -- a field
+        # documented as "name-free by construction" carrying a name -- and the
+        # run rule is ASCII, so zero matches is exactly the case where the
+        # string is MOST likely to be a name this module cannot see.
+        #
+        # None is the honest answer: no run was found, so no name-free tail can
+        # be derived. It also makes this function agree EXACTLY with
+        # ``dom.COMPOSE_MODES_JS``, which returned null here from the start
+        # because in the page the old answer would have been the leak. That
+        # divergence was documented as deliberate on 2026-09-02 and is now
+        # gone: one behaviour, two engines, nothing to remember.
+        return {"runs": 0, "joined_by_to": False, "tail": None}
     between = raw[matches[0].end() : matches[-1].start()] if len(matches) > 1 else ""
     return {
         "runs": len(matches),
@@ -3780,11 +3801,37 @@ def looks_name_shaped(text: str) -> bool:
     ``tests/test_compose_fields.py``.
 
     The price is paid knowingly: one-word control names -- ``Send``,
-    ``InMail`` -- are now name-shaped to this predicate, and the reader refuses
-    on labels no person is in. Over-refusing costs a refusal; under-refusing
-    costs a disclosure.
+    ``InMail`` -- are name-shaped to this predicate, and a caller that guards a
+    label it never publishes will refuse on furniture forever. Over-refusing
+    costs a refusal; under-refusing costs a disclosure.
+
+    AND IT REFUSES WHAT IT CANNOT READ. A name outside ASCII scores zero runs
+    against ``[A-Z]``, so it used to pass. It no longer does: a letter this
+    module cannot classify is treated as a possible name. The reasoning is on
+    the return statement.
     """
-    return bool(_NAME_SHAPE_RUN.search(str(text or "")))
+    raw = str(text or "")
+    if _NAME_SHAPE_RUN.search(raw):
+        return True
+    # I CANNOT ANALYSE THIS, THEREFORE I REFUSE.
+    #
+    # The run rule is ``[A-Z]``, which is ASCII. A name written in any other
+    # script -- an acute accent, Han characters, Cyrillic, Devanagari -- scores
+    # ZERO runs, so until 2026-09-02 this returned False on it and the guard
+    # FAILED OPEN on exactly the strings least likely to be furniture.
+    #
+    # The census never had this hole, and the reason is structural rather than
+    # lucky: :data:`_CENSUS_SAFE_CHARS` is ASCII-only ON PURPOSE, so a name in
+    # another script is refused BY THE GATE rather than by a rule somebody
+    # remembered to write. This predicate is on the publication path and never
+    # ran that gate -- two paths, one with a structural refusal and one with a
+    # remembered rule, and the composer was on the wrong side.
+    #
+    # So silence from the run rule is not evidence of safety. A letter this
+    # module cannot classify is a letter that may be somebody's name, and the
+    # asymmetry decides it: over-refusing costs a refusal, under-refusing costs
+    # a disclosure.
+    return any(ch.isalpha() and ord(ch) > 127 for ch in raw)
 
 
 def census_redact_rare(shape: str, count: int) -> str:

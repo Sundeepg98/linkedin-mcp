@@ -259,6 +259,59 @@ async def test_a_refusal_carries_the_counts_and_no_modes():
     assert "3 radio(s)" in out["why"]
 
 
+async def test_a_tail_that_still_carries_a_name_is_refused_at_the_boundary():
+    """THE SECOND LINE, SHOWN FIRING. Until this existed it was a claim.
+
+    ``tail`` arrives from the page asserted name-free -- it is what SURVIVES
+    the last capitalised run, so by construction it cannot contain one. This
+    drives a reading where that construction has broken, which is exactly the
+    regression the in-page design cannot self-report: if the page's shaping
+    were wrong, the page would still say it was right.
+
+    So the boundary re-asks the question with an independent implementation of
+    the same rule, and refuses. **The tails are not returned**, because a tail
+    that failed this check is the single string on this path most likely to be
+    a name.
+
+    It has never fired in production. That is the expected state for a boundary
+    check and not a reason to delete it -- the reason to keep it is that the
+    page cannot be trusted to detect its own regression, and the reason to test
+    it is that a check nobody has seen fail certifies nothing.
+    """
+    page = _Page(reading=_reading([
+        {"runs": 1, "joined_by_to": False, "tail": "Ada Lovelace",
+         "checked": True, "disabled": False},
+        {"runs": 2, "joined_by_to": True, "tail": "will send message",
+         "checked": False, "disabled": False},
+    ]))
+    out = await dom.read_compose_fields(page)
+    assert out["refused"] == "page_shaping_returned_a_name"
+    assert "modes" not in out
+    assert "1 of 2 tails" in out["why"]
+    for token in ("Ada", "Lovelace"):
+        assert token not in str(out), (token, out)
+
+
+def test_the_guard_has_a_production_caller():
+    """An uncalled guard is a comment, and this file said otherwise for a while.
+
+    THE RE-ANCHORING LEFT ``shape.looks_name_shaped`` WITH NO CALLER while
+    three docstrings and a commit message called it defence in depth. The claim
+    was false for exactly as long as nobody checked, which is the shape of
+    ``read_settings_surface`` -- dead for ten days with its own comment noting
+    it was uncalled.
+
+    So the claim is now asserted rather than repeated. If a future edit removes
+    the boundary check, this fails and whoever removed it has to either restore
+    it or stop calling the predicate a second line.
+    """
+    import inspect
+
+    source = inspect.getsource(dom.read_compose_fields)
+    assert "shape.looks_name_shaped(" in source
+    assert "page_shaping_returned_a_name" in source
+
+
 def test_every_structural_refusal_has_a_reason_written_for_it():
     """A refusal code with no sentence behind it is a code nobody can act on.
 
@@ -478,11 +531,19 @@ def test_the_page_shaping_agrees_with_the_python_descriptor():
     ``COMPOSE_MODES_JS`` by brace-matching, not transcribed -- under V8 and
     compares every case against Python.
 
-    THE ONE DELIBERATE DIVERGENCE, asserted rather than tolerated: on zero
-    runs Python returns ``tail = the whole string`` and the page returns
-    ``null``. Python's answer is safe because its caller already holds the
-    string; in the page it would BE the leak. That is why it is a divergence
-    and not a bug, and why it is pinned here.
+    THERE IS NO DIVERGENCE ANY MORE, and how that happened is worth the
+    sentence. This docstring used to record one as DELIBERATE: on zero runs
+    the page returned ``null`` and Python returned the whole string,
+    defended as safe because Python's caller already held it. The ASCII fix
+    showed the defence was wrong -- a field documented "name-free by
+    construction" carrying a name is a false statement whoever holds it --
+    so Python returns ``None`` too.
+
+    THE PAGE HAD THE RIGHT ANSWER FIRST, because there the wrong one would
+    obviously have been the leak. Writing the rule where its consequence was
+    visible produced the behaviour that turned out to be correct in both
+    places -- which is an argument for shaping at the boundary, arriving
+    from a third direction.
     """
     if _node() is None:
         pytest.skip(
@@ -500,21 +561,20 @@ def test_the_page_shaping_agrees_with_the_python_descriptor():
     divergences = []
     for row in rows:
         py = shape.describe_name_shaped(row["raw"])
-        expected_tail = None if py["runs"] == 0 else py["tail"]
         if (row["runs"], row["joined_by_to"], row["tail"]) != (
-            py["runs"], py["joined_by_to"], expected_tail
+            py["runs"], py["joined_by_to"], py["tail"]
         ):
             divergences.append((row["raw"], row, py))
     assert not divergences, divergences
 
-    # AND THE DIVERGENCE IS REAL, not vacuous: at least one case must actually
-    # exercise it, or this test would pass against a page that returned the
-    # whole string too.
+    # NOT VACUOUS: the zero-run branch is the one that used to differ, so the
+    # corpus must actually reach it -- otherwise this would pass against two
+    # implementations never compared where it mattered.
     zero_run = [r for r in rows if r["runs"] == 0]
     assert zero_run, "no zero-run case in the corpus"
     for row in zero_run:
         assert row["tail"] is None
-        assert shape.describe_name_shaped(row["raw"])["tail"] == row["raw"].strip()
+        assert shape.describe_name_shaped(row["raw"])["tail"] is None
 
 
 def test_the_shaping_check_is_loud_when_it_does_not_run():
