@@ -425,7 +425,7 @@ scanner has nothing new to scan.
 ### 5.1 The job-card parser put a location in the company field
 
 **Observed live:** a `linkedin_search_jobs` row came back with
-`"company": "Bengaluru, Karnataka, India (On-site)"` and `"location": null`.
+`"company": "Springfield, Example State, Elbonia (On-site)"` and `"location": null`.
 
 **Mechanism.** `harvest_linked_cards` finds the entity lockup by an `img[alt]`
 ending in `" logo"`, and reads `logo_name` AND `meta_line` only inside

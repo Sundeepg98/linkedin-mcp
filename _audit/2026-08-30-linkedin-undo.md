@@ -58,7 +58,7 @@ from outside, from a page that never drew. That is now the leading suspect, and 
 rather than a finding because nothing in the running build can see the live saved row.
 
 One corroborating oddity, recorded but not chased: the live DRAFT row parses **degraded** --
-`title` swallows the whole card (`"ServiceNow Application Developer Luxoft . India (Remote)No
+`title` swallows the whole card (`"ServiceNow Application Developer Gridwell . India (Remote)No
 longer accepting applications"`), `company` and `location` null -- while the same parser over
 `jobs_tracker_row.html` produces clean fields. So the live tracker DOM has already drifted from
 the capture on the one tab that still works. That is a second, independent reason to believe the

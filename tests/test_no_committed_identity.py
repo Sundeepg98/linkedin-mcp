@@ -104,7 +104,10 @@ replace that block alone.
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -114,6 +117,10 @@ from tests.test_no_committed_credential import committable_files, tracked_files
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE_DIR = REPO / "tests" / "fixtures"
+
+#: The exact-value half of the guard, and the gitignored wordlist it reads.
+SWEEP_PATH = REPO / "scripts" / "sweep_tracked_for_identity.py"
+SWEEP_KEY_PATH = REPO / "_audit" / "_sanitisation_key.json"
 
 # ===========================================================================
 # WIRING -- the only repo-specific part. A sibling repo replaces this block.
@@ -911,13 +918,25 @@ def test_a_phrase_is_hunted_in_its_url_spellings_too():
 
 
 def test_the_exact_value_sweep_exists_and_keeps_its_wordlist_out_of_the_repo():
-    """The half no shape can do, and the reason it is a script not a test.
+    """The half no shape can do, and why its wordlist is not in the repo.
 
     A campus name in a comment is an English phrase; nothing structural marks
     it. Catching that needs the real strings -- so the sweep reads them from a
     gitignored file, and the sweep itself is tracked while its wordlist never
-    is. A test that needed the wordlist would either embed it or skip, and a
-    skipping guard is a dead one.
+    is.
+
+    THIS DOCSTRING USED TO END "a test that needed the wordlist would either
+    embed it or skip, and a skipping guard is a dead one", and that reasoning
+    produced something worse than the skip it refused. The sweep was made a
+    SCRIPT to avoid skipping -- and then nothing called the script. It was
+    invoked by no test, no hook and no CI job for ten days, during which it
+    went from its recorded 0 hits / 89 files to 6 hits / 166 files with a real
+    city, a real region and a real employer sitting in tracked, PUBLIC files.
+
+    A dead guard is not the worst outcome. AN ABSENT ONE IS, because a skip is
+    at least a sentence in the run. So the sweep is now also RUN, by
+    :func:`test_the_exact_value_sweep_actually_runs` below, and its skip is
+    loud on the machines that lack the key.
     """
     sweep = REPO / "scripts" / "sweep_tracked_for_identity.py"
     assert sweep.exists(), sweep
@@ -928,3 +947,111 @@ def test_the_exact_value_sweep_exists_and_keeps_its_wordlist_out_of_the_repo():
     ignored = (REPO / ".gitignore").read_text(encoding="utf-8")
     assert "_audit/_sanitisation_key.json" in ignored
     assert "scripts/sweep_tracked_for_identity.py" in tracked_files()
+
+
+# ---------------------------------------------------------------------------
+# 4. The exact-value sweep, RUN rather than merely present
+# ---------------------------------------------------------------------------
+
+
+def _sweep_module():
+    """Import the sweep from ``scripts/``, which is not a package."""
+    spec = importlib.util.spec_from_file_location("_identity_sweep", SWEEP_PATH)
+    assert spec is not None and spec.loader is not None, SWEEP_PATH
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_the_exact_value_sweep_actually_runs():
+    """THE GUARD THAT EXISTED AND NEVER EXECUTED.
+
+    Its own docstring argued a skipping guard is a dead guard, so it was built
+    as a script instead -- and then nothing ever called it. Measured on
+    2026-09-02: 6 hits across 166 tracked files, against a recorded baseline of
+    0 across 89, undetected for ten days because no runner touched it. A real
+    city, a real region and a real employer were in tracked files, and those
+    files were already public.
+
+    SO IT RUNS HERE, AND THE SKIP IS A SENTENCE RATHER THAN A DOT. On a machine
+    without the key the check genuinely cannot run -- the values are the whole
+    instrument -- but "did not run" is then SAID, in the summary of every run,
+    instead of being indistinguishable from "ran and found nothing". That is
+    the entire difference between this and what it replaced.
+
+    The sweep's own output is already redacted to shape, so passing its hit
+    lines into a failure message republishes nothing.
+    """
+    assert SWEEP_PATH.exists(), SWEEP_PATH
+    if not SWEEP_KEY_PATH.exists():
+        pytest.skip(
+            "THE EXACT-VALUE SWEEP DID NOT RUN, so nothing in this session "
+            "checked any tracked file for a real name, city, employer or "
+            "campus. The wordlist %s is absent -- it is gitignored on purpose, "
+            "because it is the de-anonymisation key for the committed "
+            "fixtures. The SHAPE half of this module ran and needs nothing; "
+            "the EXACT-VALUE half did not, and a green run here does not mean "
+            "what it means on a machine that has the key."
+            % SWEEP_KEY_PATH.relative_to(REPO).as_posix()
+        )
+
+    proc = subprocess.run(
+        [sys.executable, str(SWEEP_PATH)],
+        cwd=str(REPO),
+        capture_output=True,
+        text=True,
+    )
+    hits = [ln.strip() for ln in proc.stdout.splitlines() if ln.lstrip().startswith("HIT")]
+    assert proc.returncode == 0, (
+        "the exact-value sweep found %d hit(s) in tracked files:\n%s"
+        % (len(hits), "\n".join(hits))
+    )
+    assert "PASS: 0 hits" in proc.stdout, proc.stdout[-400:]
+
+
+def test_the_skip_is_loud_because_the_config_makes_it_loud():
+    """The previous test's loudness is a CONFIG property, so it is asserted.
+
+    ``pytest.skip`` prints a bare ``s`` and nothing else unless the run asks
+    for skip reasons. ``-ra`` is what turns it into a sentence in the summary,
+    and without it the whole argument above collapses back into the silent skip
+    this design exists to avoid. A future edit dropping ``-ra`` would make that
+    check quiet again without touching it, so the dependency is pinned here
+    rather than assumed.
+    """
+    ini = (REPO / "pytest.ini").read_text(encoding="utf-8")
+    addopts = [ln for ln in ini.splitlines() if ln.strip().startswith("addopts")]
+    assert addopts, ini
+    assert re.search(r"-ra\b", addopts[0]), addopts
+
+
+def test_the_sweep_reports_a_hit_when_one_exists(tmp_path, capsys):
+    """CAN-IT-FAIL, on the real code path and with no real value anywhere.
+
+    A sweep asserted to return 0 proves nothing unless it can return 1. This
+    drives the module's own ``main`` over a synthetic wordlist and a synthetic
+    tracked file, so the control needs neither the key nor a planted real
+    string in a tracked file -- planting one would put the very thing this
+    guard exists to remove into the working tree, where a crash would leave it.
+
+    IT ALSO ASSERTS THE REDACTION, which is the property that makes the failure
+    message above safe to print: the planted value must NOT appear in the
+    output that reports finding it.
+    """
+    module = _sweep_module()
+    planted = "Zzyzxville"
+    (tmp_path / "planted.md").write_text(
+        "a line naming %s in prose\n" % planted, encoding="utf-8"
+    )
+    (tmp_path / "clean.md").write_text("a line naming nobody\n", encoding="utf-8")
+
+    module.REPO = tmp_path
+    module.tracked = lambda: ["planted.md", "clean.md"]
+    module.load_wordlist = lambda: {"planted_class": {planted}}
+
+    assert module.main() == 1
+    out = capsys.readouterr().out
+    assert "HIT planted.md:1 [planted_class]" in out, out
+    assert "FAIL: 1 hit(s)" in out, out
+    assert planted not in out, "the sweep printed the value it was hunting"
+    assert "clean.md" not in out, out

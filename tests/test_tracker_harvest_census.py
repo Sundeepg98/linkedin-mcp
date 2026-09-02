@@ -336,7 +336,7 @@ async def test_the_row_shape_reports_no_text_of_its_own():
 
     shapes = await _with_html(markup("jobs_tracker_row"), work)
     rendered = str(shapes)
-    for secret in ("Ashgrove", "Platform Integration", "Fairhaven", "Luxoft"):
+    for secret in ("Ashgrove", "Platform Integration", "Fairhaven", "Gridwell"):
         assert secret not in rendered, f"{secret!r} leaked out of the row shape"
     # Nor may it reach the sentence built from it.
     note = shape.tracker_read_note(

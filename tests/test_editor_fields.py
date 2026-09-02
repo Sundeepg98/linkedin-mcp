@@ -213,7 +213,7 @@ RELAXED_HTML = (
 #: live one: LinkedIn draws the headline as a ``div[role=textbox]`` whose text
 #: content IS what has been typed into it, so its accessible name resolves
 #: through the LAST route in the name chain -- the element's own text.
-EDITABLE_VALUE = "Senior Widget Engineer | Node and TypeScript | Bengaluru"
+EDITABLE_VALUE = "Senior Widget Engineer | Node and TypeScript | Springfield"
 
 #: The editor dialog with the control that broke the promise.
 #:
