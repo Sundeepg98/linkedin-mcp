@@ -5422,6 +5422,28 @@ async def _verify_after(
             + spec.unverifiable.what_he_must_do,
             "",
         )
+    # EVERY BRANCH BELOW THAT RE-NAVIGATES FORMATS ``spec.url_template``, and
+    # until 2026-09-02 none of them checked it first. That was safe, and it was
+    # safe BY COINCIDENCE: all ten performable actions happen to carry a url,
+    # and nothing anywhere requires that. It is the same accident found four
+    # times elsewhere the same day -- three assertions and one derived safety
+    # property encoding "unperformable implies unaddressed" -- running in the
+    # OPPOSITE direction here: "performable implies addressed".
+    #
+    # An action made performable without a url would not have been refused. It
+    # would have raised AttributeError on ``None.format`` from inside the
+    # verification step, AFTER the click had already happened -- reporting a
+    # crash where a boundary belongs, on the one code path where the operator
+    # most needs to know what did and did not occur.
+    if spec.url_template is None:
+        raise WriteAttemptError(
+            f"{spec.action!r} is performable and has no url_template, so the "
+            "outcome cannot be verified: there is no surface to re-read. This "
+            "is refused rather than attempted because the alternative is an "
+            "AttributeError raised after the write has already landed. Give "
+            "the action a measured surface, or declare the outcome "
+            "unverifiable on its spec and say why."
+        )
     if spec.action == "react_to_item":
         # A FRESH NAVIGATION AND A RE-READ OF THE CONTROL. Not an independent
         # surface -- there is only one page that carries this item's reaction
@@ -5628,6 +5650,24 @@ async def _verify_after(
             "look. " + why,
             landed,
         )
+
+    # THE TWO GUARDS ABOVE AGREE, AND THIS ASSERTS THAT THEY DO. The negative
+    # test raises for every action that is not ``unfollow_company``, so the
+    # positive block below it always runs -- but they are two separate ``if``
+    # statements, so nothing checks that the pair stays exhaustive. Without
+    # this, the declared ``tuple[str, str, str]`` is a lie on a path a reader
+    # can see: falling off the end returns None, and the caller unpacks it
+    # somewhere far from where the mistake was made.
+    #
+    # NOT COLLAPSED INTO AN ``else``. The positive branch is written positively
+    # on purpose -- being handled and being SEEN to be handled are different
+    # things, and that distinction is what would have caught apply_job. So the
+    # shape is kept and the gap is closed with a raise instead.
+    raise WriteAttemptError(
+        f"unreachable: {spec.action!r} passed the not-unfollow_company raise "
+        "and then failed the is-unfollow_company test. The two guards in this "
+        "function have stopped being exhaustive."
+    )
 
 
 #: THE ACTIONS THAT TYPE BEFORE THEY CLICK. Kept as a set rather than tested
