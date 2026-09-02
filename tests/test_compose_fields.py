@@ -310,7 +310,15 @@ def test_the_two_predicates_are_split_and_the_guard_is_stricter():
         assertion satisfiable by PROSE, the exact failure mode it exists to
         catch. Unparsing the body drops the docstring node and every comment.
         """
-        body = ast.parse(textwrap.dedent(inspect.getsource(fn))).body[0].body
+        top = ast.parse(textwrap.dedent(inspect.getsource(fn))).body[0]
+        # NARROWED RATHER THAN ASSUMED. `Module.body[0]` is typed `ast.stmt`,
+        # which has no `.body` -- only some subclasses do. At runtime the source
+        # of a function always parses to one FunctionDef (a decorator hangs off
+        # the node rather than adding a statement), so the attribute is always
+        # there; this states that instead of relying on it, and fails by name if
+        # it ever stops being true.
+        assert isinstance(top, (ast.FunctionDef, ast.AsyncFunctionDef)), top
+        body = top.body
         first = body[0] if body else None
         if (
             isinstance(first, ast.Expr)
