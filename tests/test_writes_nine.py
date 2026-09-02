@@ -439,8 +439,29 @@ def test_none_of_the_seven_names_a_write_surface(action):
     ``assert_write_url`` needs BOTH -- it refuses on a missing template or a
     missing pattern, so a spec carrying one of the two would slip past a
     membership test while being half-armed.
+
+    UPDATE_PROFILE_FIELD IS EXEMPT FROM 2026-09-02, and the exemption is the
+    sixth site of one accident rather than a special case. This assertion --
+    like three others in two other files -- encoded "unperformable implies
+    unaddressed". Nothing ever ruled that; it was true because no unperformable
+    action happened to carry a url. A ruling then gave this one an exact-url
+    address while leaving it firmly outside ``PERFORMABLE``.
+
+    THE GUARANTEE THIS TEST EXISTS FOR IS UNCHANGED, and it moved rather than
+    weakened: what stops a grant being minted is now ``PERFORMABLE``
+    membership, checked in ``mint`` itself, which is the reason that was always
+    meant. The url check that used to supply it worked by coincidence, and
+    ``test_mint_refuses_each_of_the_seven_a_grant_at_issue`` below is the one
+    that actually holds the line.
     """
     spec = spec_for_action(action)
+    if action == "update_profile_field":
+        # Addressed by ruling, and still refused -- by membership, not by the
+        # absence of a page.
+        assert spec.url_template is not None, action
+        assert spec.url_pattern is not None, action
+        assert spec.action not in writes.PERFORMABLE, action
+        return
     assert spec.url_template is None, action
     assert spec.url_pattern is None, action
 
@@ -500,10 +521,25 @@ async def test_a_preview_of_each_of_the_seven_issues_no_confirm_token(
     assert block["to_confirm"] is None, action
     assert block["performed"] is False, action
     assert "NO CONFIRM TOKEN IS ISSUED" in block["what_happens_next"], action
-    # And it says WHY there is no token rather than leaving him to infer it:
-    # the surface has never been loaded, so the block cannot even name the
-    # page the action would act on.
-    assert "UNMEASURED" in block["where"]["url"], action
+    # And it says WHY there is no token rather than leaving him to infer it.
+    #
+    # FOR SIX OF THE SEVEN that reason is the surface: it has never been
+    # loaded, so the block cannot even name the page the action would act on.
+    #
+    # UPDATE_PROFILE_FIELD IS THE SEVENTH AND ITS REASON IS DIFFERENT since
+    # 2026-09-02 -- it HAS a measured surface, and is refused on PERFORMABLE
+    # membership instead. The block correctly names the real page. That is
+    # more informative rather than less: he is told exactly what would be
+    # acted on AND that nothing will act on it.
+    #
+    # The three assertions above are the guarantee and they are unchanged for
+    # all seven. This one is about the EXPLANATION, and the explanation was
+    # only ever "unmeasured" by the coincidence that no unperformable action
+    # had an address.
+    if action == "update_profile_field":
+        assert block["where"]["url"] == spec_for_action(action).url_template
+    else:
+        assert "UNMEASURED" in block["where"]["url"], action
 
 
 @pytest.mark.parametrize("action", SEVEN)

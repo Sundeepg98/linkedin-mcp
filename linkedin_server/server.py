@@ -4574,10 +4574,14 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                     # were narrowed the same day; this is the one that had teeth,
                     # because it did not merely assert the invariant -- it
                     # DERIVED a safety answer from it.
-                    "can_hold_a_grant": (
-                        spec.url_template is not None
-                        and spec.action in writes.PERFORMABLE
-                    ),
+                    #
+                    # AND IT IS NOW THE SHARED PREDICATE RATHER THAN A FOURTH
+                    # COPY. This was fixed here first, in isolation, which
+                    # corrected what the server REPORTS while mint() and
+                    # preview() went on deciding from the url alone -- so the
+                    # description was right and the layer was still gone. One
+                    # function answers it for all three.
+                    "can_hold_a_grant": writes.grant_is_possible(spec),
                     "irreversible": spec.irreversible,
                 }
                 for spec in sorted(

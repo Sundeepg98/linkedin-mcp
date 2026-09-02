@@ -4231,9 +4231,19 @@ def test_send_message_can_report_not_sent_and_never_sent():
     spec = writes.spec_for_action("send_message")
     assert spec.not_performed_state == "composer_holds_text"
 
-    # The stale one, fixed in the same commit: the composer HAS been measured.
-    assert spec.from_state == "composer_holds_text"
-    assert spec.from_state != "composer_unmeasured"
+    # AND from_state IS DELIBERATELY DIFFERENT, which is the half this test
+    # got wrong first. It was changed to "composer_holds_text" on the
+    # grounds that the composer HAS been measured -- true of the census and
+    # irrelevant here. This field is what THE GATE has seen, and the gate
+    # refuses to open messaging to find out, because doing so redirects
+    # into a stranger's conversation. Overwriting it made the gate refuse
+    # with a wrong-state error instead of its designed refusal.
+    #
+    # The two fields are read at opposite ends and looking costs
+    # differently at each: BEFORE, by a gate that must not open messaging;
+    # AFTER, when the composer is already open and re-reading is free.
+    assert spec.from_state == "composer_unmeasured"
+    assert spec.not_performed_state != spec.from_state
 
     # And the refusal now names the route rather than a surface that does not
     # exist -- while still saying WHAT WOULD LIFT IT, which the table requires.

@@ -1872,11 +1872,18 @@ def test_a_grant_needs_permission_and_not_merely_an_address():
     from linkedin_server import server as server_module
     from linkedin_server import writes
 
+    # IT IS THE SHARED PREDICATE, NOT A LOCAL COPY. Fixing this field in
+    # isolation is what corrected the server's DESCRIPTION of the layer
+    # while mint() and preview() went on deciding from the url alone.
     source = inspect.getsource(server_module)
     start = source.index('"can_hold_a_grant"')
-    derivation = source[start : start + 200]
-    assert "PERFORMABLE" in derivation, derivation
-    assert "url_template" in derivation, derivation
+    derivation = source[start : start + 120]
+    assert "grant_is_possible" in derivation, derivation
+
+    # And the predicate itself asks both questions.
+    predicate = inspect.getsource(writes.grant_is_possible)
+    assert "PERFORMABLE" in predicate
+    assert "url_template" in predicate
 
     # AND BEHAVIOURALLY, on the pair that distinguishes the two derivations:
     # addressed, not performable, therefore no grant.

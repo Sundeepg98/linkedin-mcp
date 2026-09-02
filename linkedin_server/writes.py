@@ -1530,11 +1530,27 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         summary=(
             "Send one message or InMail to another LinkedIn member."
         ),
-        # "composer_unmeasured" UNTIL 2026-09-02, and the fourth stale
-        # statement found in this file in one day. The composer has been
-        # measured repeatedly -- 77 controls, both dispatch radios, the body
-        # editor, and Send drawn DISABLED while it is empty.
-        from_state="composer_holds_text",
+        # "composer_unmeasured", AND IT IS NOT STALE -- it was changed to
+        # "composer_holds_text" on 2026-09-02 and changed straight back, which
+        # is worth recording because the mistake is a subtle one and a sweep
+        # for stale clauses is primed to make it.
+        #
+        # THE CONFLATION. The composer HAS been measured -- 77 controls, both
+        # dispatch radios, the body editor, Send drawn DISABLED while empty.
+        # All true, and none of it is what this field means. This is the state
+        # THE GATE reads before acting, and the gate deliberately does not open
+        # messaging to find out: doing so redirects into one conversation of
+        # LinkedIn's choosing and spends a stranger's thread. So the gate has
+        # never observed this composer and says so.
+        #
+        #   the composer has been measured by the census   TRUE
+        #   THIS GATE can observe the composer's state     FALSE, BY DESIGN
+        #
+        # Overwriting it produced a gate that refused with a WRONG-STATE error
+        # -- "valid only from composer_holds_text, this reads
+        # composer_unmeasured" -- instead of its designed refusal. The safety
+        # property held; the reason he would have READ was wrong.
+        from_state="composer_unmeasured",
         to_state="message_sent",
         # WHAT PROVES IT DID *NOT* HAPPEN -- apply_job's mechanism, and the
         # answer to a blocker this entry named wrongly for a week.
@@ -1564,6 +1580,19 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # that state the True arm is unreachable by construction. This action
         # can be shown NOT to have happened and cannot be shown to have
         # happened.
+        #
+        # AND WHY THIS NAMES A COMPOSER STATE WHILE from_state ABOVE DOES NOT.
+        # The two fields are read at opposite ends of the action and the cost
+        # of looking is not the same at both:
+        #
+        #   from_state           read BEFORE, by a gate that must not open
+        #                        messaging -- looking costs a stranger's thread
+        #   not_performed_state  read AFTER, when the composer is already open
+        #                        in front of you -- re-reading costs nothing
+        #
+        # That asymmetry is the whole reason one says "unmeasured" and the
+        # other names what it expects to find. Collapsing them looks like
+        # tidying and is how the wrong-state refusal got introduced once.
         not_performed_state="composer_holds_text",
         target_kind="member_and_text",
         state_from="messaging_badge",
@@ -1820,6 +1849,31 @@ def _sweep_expired_grants() -> int:
     return len(dead)
 
 
+def grant_is_possible(spec: WriteSpec) -> bool:
+    """Could a grant for this action ever be permission to do anything?
+
+    ONE PREDICATE, BECAUSE THE ALTERNATIVE IS HOW THIS WENT WRONG. Three
+    places needed this answer and all three computed it from ``url_template``
+    alone: ``mint``'s refusal, ``preview``'s decision whether to mint at all,
+    and ``linkedin_server_info``'s ``can_hold_a_grant``. That agreed with
+    reality only while no unperformable action carried a url, which nothing
+    ever required.
+
+    Addressing ``update_profile_field`` on 2026-09-02 broke all three at once
+    and in different ways -- a live confirm token from ``mint``, an exception
+    escaping ``preview`` instead of a refusal block, and a field reporting the
+    opposite of the truth. Each was a separate site of one accident, and
+    fixing them separately would have left a fourth copy to drift.
+
+    BOTH HALVES ARE REAL AND THEY ARE DIFFERENT QUESTIONS. Membership is
+    PERMISSION -- the write door refuses a non-member however the grant was
+    obtained. The url is ADDRESSING -- there is no page for the grant to be
+    permission to act on. ``mint`` raises separately for each because the
+    REASON is what a reader needs; this returns only whether either applies.
+    """
+    return spec.action in PERFORMABLE and spec.url_template is not None
+
+
 def mint(action: str, target: str, *, receipt: str) -> WriteGrant:
     """Issue a single-use grant, and ONLY against a live read receipt.
 
@@ -1854,13 +1908,47 @@ def mint(action: str, target: str, *, receipt: str) -> WriteGrant:
             f"{sorted(spec.action for spec in SANCTIONED_WRITES.values())}."
         )
     spec = spec_for_action(action)
+    # THE REASON IS PERMISSION, AND UNTIL 2026-09-02 THIS ASKED ABOUT ADDRESS.
+    #
+    # The check below used to be `url_template is None` alone, reasoned as "a
+    # grant is permission to ACT and there is nothing to act on". That stopped
+    # the unperformable actions -- and it stopped them BY ACCIDENT, because
+    # none of them happened to carry a url. Nothing ever required that.
+    #
+    # Addressing update_profile_field broke it immediately and silently: the
+    # action still could not perform, but mint() no longer refused it, and a
+    # LIVE CONFIRM TOKEN existed in the process for an action the write door
+    # would always reject. The only thing left between that token and a
+    # navigation was a check a future click has to remember to run, which is
+    # the exact condition this refusal was written to prevent.
+    #
+    # It was caught by a test asserting the TOKEN. The field this server
+    # publishes about the layer -- can_hold_a_grant -- had already been
+    # "fixed" to say url AND membership, so the description was right while
+    # the layer stayed removed. A property is not tested by asserting what the
+    # system says about it.
+    if spec.action not in PERFORMABLE:
+        raise WriteAttemptError(
+            f"no grant is minted for {action!r}: it is sanctioned but NOT "
+            "PERFORMABLE, so the write door would refuse it however the grant "
+            "were used. Refused at ISSUE rather than only at use, because an "
+            "invariant a future click has to remember to check is not an "
+            "invariant -- and a live token for an action that cannot act is "
+            "the thing this refusal exists to keep out of the process. The "
+            "reason is MEMBERSHIP, not the url: an address is not permission, "
+            "and this check asked about the address until 2026-09-02."
+        )
+    # AND THE SECOND QUESTION, WHICH IS GENUINELY ABOUT THE ADDRESS. Kept as a
+    # separate refusal because it is not the same fact: a performable action
+    # with no surface has nothing to navigate to. No such action exists today
+    # -- that is site five of the same coincidence -- and this fires BEFORE the
+    # click, where _verify_after's equivalent guard can only fire after it.
     if spec.url_template is None:
         raise WriteAttemptError(
-            f"no grant is minted for {action!r}: its surface has never been "
-            "loaded by this server, so there is no page for a grant to be "
-            "permission to act on. Refused at ISSUE rather than only at use, "
-            "because an invariant a future click has to remember to check is "
-            "not an invariant."
+            f"no grant is minted for {action!r}: it is performable and its "
+            "surface has never been loaded by this server, so there is no "
+            "page for a grant to be permission to act on. Give it a measured "
+            "surface before making it performable, not after."
         )
     target = _target_for(spec, target)
     observation = _take_observation(receipt, spec=spec, target=target)
@@ -3950,7 +4038,12 @@ async def preview(
         direction = _direction(spec, observation, to_state)
         token: Optional[str] = None
         grant: Optional[WriteGrant] = None
-        if spec.url_template is not None:
+        # ASKED THE SAME WAY mint ANSWERS IT, rather than by a proxy.
+        # This used to test `url_template is not None`, so an addressed
+        # but unperformable action reached mint and its refusal escaped
+        # as an exception where a refusal BLOCK belongs -- the caller
+        # got a traceback instead of a gate explaining itself.
+        if grant_is_possible(spec):
             grant = mint(
                 spec.action, observation.target, receipt=observation.receipt
             )
