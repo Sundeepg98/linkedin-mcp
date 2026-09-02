@@ -458,10 +458,18 @@ async def test_the_ownership_refusal_carries_no_fields(run_values):
     result, navigations = await run_values(
         VALUES_HTML, profile_landed=LANDED_PROFILE_NO_ASSERTION
     )
-    assert result.get("refused") == "no_self_assertion", result
+    # ABSENT, NOT FALSE, and the code says which. Changed 2026-09-02: the
+    # single ``no_self_assertion`` collapsed "LinkedIn says no" with "LinkedIn
+    # did not answer", and the second is not evidence about the account.
+    assert result.get("refused") == "self_assertion_unreadable", result
+    assert "NOT A STATEMENT THAT THE PROFILE IS NOT YOURS" in result["reason"]
     assert "fields" not in result, result
-    assert result["pages_loaded"] == 1
-    assert navigations == [SELF_PROFILE_URL]
+    # TWO PROFILE LOADS AND NO EDITOR LOAD. The absent case is retried once,
+    # because two live calls seconds apart returned absent then true; the
+    # editor is still never fetched, which is the property this test was
+    # written for.
+    assert result["pages_loaded"] == 2
+    assert navigations == [SELF_PROFILE_URL, SELF_PROFILE_URL]
 
 
 # ---------------------------------------------------------------------------

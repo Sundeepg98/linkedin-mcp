@@ -2535,6 +2535,14 @@ _MEMBER_SEGMENT = re.compile(r"^/in/([^/?#]+)/")
 #: LinkedIn's own claim that the profile just loaded is the viewer's.
 _SELF_ASSERTION_PARAM = "isSelfProfile"
 
+#: How many times the profile is loaded looking for the self-assertion before
+#: giving up. TWO, and the number is a measurement rather than a preference:
+#: on 2026-09-02 the first load came back absent and the immediate second came
+#: back true. BOUNDED because a gate that retries without limit turns a
+#: LinkedIn change into a page-load loop against his account, and the rate
+#: discipline this server promises is 3s between loads.
+_SELF_ASSERTION_ATTEMPTS = 2
+
 
 def _landed_path(landed_url: str) -> str:
     """The path of a landed url, with no query and no fragment."""
@@ -2550,6 +2558,47 @@ def _member_segment_of(landed_url: str) -> Optional[str]:
     """
     match = _MEMBER_SEGMENT.match(_landed_path(landed_url))
     return match.group(1) if match else None
+
+
+#: The three states of LinkedIn's own self-assertion, which the boolean below
+#: collapses to two. ABSENT IS NOT FALSE, and conflating them produced two
+#: false refusals from the editor gate -- one on each editor tool's first live
+#: call.
+SELF_ASSERTION_TRUE = "true"
+SELF_ASSERTION_FALSE = "false"
+SELF_ASSERTION_ABSENT = "absent"
+
+
+def _self_assertion_state(landed_url: str) -> str:
+    """Whether ``isSelfProfile`` says yes, says no, or DID NOT RIDE AT ALL.
+
+    THREE STATES, because two of them mean opposite things and the boolean
+    version reports them identically:
+
+    * ``true``   -- LinkedIn asserts the profile is the viewer's own.
+    * ``false``  -- LinkedIn asserts it is NOT. Evidence about the account.
+    * ``absent`` -- the parameter did not ride on the landed url. **This is
+      not evidence about whose page it is.** It is the reader failing to ask.
+
+    MEASURED 2026-09-02: two calls seconds apart, same code and same page, one
+    absent and one true. So absence is a transient property of the redirect
+    rather than a statement, and a gate that reports it as a statement will
+    tell him his own profile is not his.
+
+    This is the ``readable: false, error: null`` distinction the rest of this
+    package keeps, on the one field where collapsing it produces a confident
+    lie.
+    """
+    query = parse_qs(urlsplit(str(landed_url or "")).query)
+    values = [
+        str(value).strip().lower()
+        for value in query.get(_SELF_ASSERTION_PARAM, [])
+    ]
+    if not values:
+        return SELF_ASSERTION_ABSENT
+    if any(value == "true" for value in values):
+        return SELF_ASSERTION_TRUE
+    return SELF_ASSERTION_FALSE
 
 
 def _self_assertion_on(landed_url: str) -> bool:
@@ -2654,31 +2703,66 @@ async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
     because this is what does the loading. A tool counting its callee's page
     loads is a number maintained by hand in two places.
     """
-    landed_profile = await BROWSER.goto(page, SELF_PROFILE_URL)
-    assert_not_authwall(landed_profile, surface="profile")
+    # THE EXTERNAL ASSERTION FIRST. If LinkedIn does not say the profile is
+    # the viewer's own, nothing further is loaded -- the editor page is not
+    # fetched at all, so a call that cannot establish ownership reads no
+    # editor.
+    #
+    # AND ABSENT IS RETRIED WHERE FALSE IS NOT, which is the whole of the
+    # 2026-09-02 fix. Two calls seconds apart, same code and same page,
+    # returned absent then true -- so absence is a transient property of the
+    # redirect and not a statement about the account. Retrying a STATEMENT
+    # would be asking a settled question twice; retrying an UNREAD one is what
+    # a reader does.
+    profile_loads = 0
+    landed_profile = ""
+    state = SELF_ASSERTION_ABSENT
+    for _attempt in range(_SELF_ASSERTION_ATTEMPTS):
+        landed_profile = await BROWSER.goto(page, SELF_PROFILE_URL)
+        profile_loads += 1
+        assert_not_authwall(landed_profile, surface="profile")
+        state = _self_assertion_state(landed_profile)
+        if state != SELF_ASSERTION_ABSENT:
+            break
 
-    # THE EXTERNAL ASSERTION FIRST. If LinkedIn does not say the
-    # profile is the viewer's own, nothing further is loaded -- the
-    # editor page is not fetched at all, so a call that cannot
-    # establish ownership costs one page load and reads no editor.
-    self_assertion = _self_assertion_on(landed_profile)
-    if not self_assertion:
+    if state == SELF_ASSERTION_FALSE:
         return {
-            "refused": "no_self_assertion",
+            # LINKEDIN SAID NO. A settled answer: refused at once, never
+            # retried.
+            "refused": "not_self_profile",
             "reason": (
-                "the landed profile url carries no "
-                f"{_SELF_ASSERTION_PARAM}=true, which is LinkedIn's own "
-                "way of saying the profile is the viewer's. Without it "
-                "this tool has only its own reasoning about what "
-                "/in/me/ ought to mean, and that is not what the "
-                "relaxed gate was granted on."
+                f"the landed profile url carries {_SELF_ASSERTION_PARAM} "
+                "with a value that is not 'true'. That is LinkedIn stating "
+                "the profile is NOT the viewer's own, which is a settled "
+                "answer rather than a reading that failed -- so it is not "
+                "retried, and nothing further is loaded."
             ),
             "self_ownership": _ownership_block(
-                established=False,
-                self_assertion=False,
-                same_member=None,
+                established=False, self_assertion=False, same_member=None
             ),
-            "pages_loaded": 1,
+            "pages_loaded": profile_loads,
+        }
+    if state == SELF_ASSERTION_ABSENT:
+        return {
+            # THE READER COULD NOT ASK. This says so, and says nothing about
+            # whose page it is -- which the old single refusal did, wrongly,
+            # twice.
+            "refused": "self_assertion_unreadable",
+            "reason": (
+                f"the landed profile url carried no {_SELF_ASSERTION_PARAM} "
+                f"parameter at all, on {profile_loads} attempt(s). THIS IS "
+                "NOT A STATEMENT THAT THE PROFILE IS NOT YOURS -- LinkedIn "
+                "did not answer the question, and this server will not turn "
+                "an unread assertion into a claim about your account. "
+                "MEASURED 2026-09-02: two calls seconds apart returned absent "
+                "then present, so the parameter does not ride on every "
+                "redirect. Try again; if it keeps happening, the /in/me/ "
+                "redirect has changed shape and this gate needs re-measuring."
+            ),
+            "self_ownership": _ownership_block(
+                established=False, self_assertion=False, same_member=None
+            ),
+            "pages_loaded": profile_loads,
         }
 
     profile_segment = _member_segment_of(landed_profile)
@@ -2695,7 +2779,7 @@ async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
                 self_assertion=True,
                 same_member=None,
             ),
-            "pages_loaded": 1,
+            "pages_loaded": profile_loads,
         }
 
     landed_editor = await BROWSER.goto(
@@ -2725,7 +2809,7 @@ async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
                 same_member=None,
             ),
             "landed_paths": paths,
-            "pages_loaded": 2,
+            "pages_loaded": profile_loads + 1,
         }
     # SELF IS PROVEN TWO WAYS, EITHER OF WHICH IS SUFFICIENT, and this
     # was a bare equality until 2026-09-01 -- when the tool was run for
@@ -2771,7 +2855,7 @@ async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
                 same_member=False,
             ),
             "landed_paths": paths,
-            "pages_loaded": 2,
+            "pages_loaded": profile_loads + 1,
         }
 
     return {
@@ -2779,7 +2863,7 @@ async def _establish_self_owned_editor(page: Any) -> dict[str, Any]:
             established=True, self_assertion=True, same_member=True
         ),
         "landed_paths": paths,
-        "pages_loaded": 2,
+        "pages_loaded": profile_loads + 1,
     }
 
 

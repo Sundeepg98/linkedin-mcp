@@ -487,12 +487,12 @@ async def test_a_missing_self_assertion_refuses_before_the_second_load(run_tool)
         TWO_DIALOG_HTML, profile_landed=LANDED_PROFILE_NO_ASSERTION
     )
 
-    assert result.get("refused") == "no_self_assertion", result
+    assert result.get("refused") == "self_assertion_unreadable", result
     assert "fields" not in result, sorted(result)
     assert result["self_ownership"]["established"] is False
     assert result["self_ownership"]["self_assertion_present"] is False
-    assert result["pages_loaded"] == 1
-    assert navigations == [SELF_PROFILE_URL], navigations
+    assert result["pages_loaded"] == 2
+    assert navigations == [SELF_PROFILE_URL, SELF_PROFILE_URL], navigations
 
 
 async def test_two_landed_urls_naming_different_members_refuse(run_tool):
@@ -1098,3 +1098,46 @@ def test_the_two_character_case_is_what_the_old_code_got_wrong():
     from linkedin_server.server import _path_without_member
 
     assert _path_without_member(url, "me") == "/in/<member>/edit/intro/"
+
+
+async def test_an_explicit_false_assertion_refuses_at_once(run_tool):
+    """FALSE IS A STATEMENT AND ABSENT IS NOT, so only one of them is retried.
+
+    Added 2026-09-02 with the split. ``isSelfProfile=false`` is LinkedIn
+    answering the question -- a settled answer, refused on the FIRST load with
+    no retry, because asking a settled question twice is not a reading, it is
+    a page load spent on nothing.
+
+    The absent case above costs two loads for exactly the opposite reason: the
+    question was never answered, and a live pair of calls seconds apart
+    returned absent then true.
+    """
+    landed_false = LANDED_PROFILE.replace("isSelfProfile=true", "isSelfProfile=false")
+    result, navigations = await run_tool(TWO_DIALOG_HTML, profile_landed=landed_false)
+
+    assert result.get("refused") == "not_self_profile", result
+    assert "fields" not in result, result
+    assert result["pages_loaded"] == 1, result
+    assert navigations == [SELF_PROFILE_URL], navigations
+    assert "settled answer" in result["reason"]
+
+
+def test_the_three_assertion_states_are_distinguished():
+    """THE PRIMITIVE, on its own, because the tool-level tests can only reach
+    two of the three cheaply -- and the third is the one that was missing.
+
+    ``_self_assertion_on`` still returns a BOOLEAN and still has two other
+    callers; it is not changed. ``_self_assertion_state`` is the three-way
+    reading beside it, and the pair is what stops a future edit collapsing
+    them again.
+    """
+    from linkedin_server.server import _self_assertion_state as state
+
+    base = "https://www.linkedin.com/in/somebody/"
+    assert state(base + "?isSelfProfile=true") == "true"
+    assert state(base + "?isSelfProfile=TRUE") == "true"
+    assert state(base + "?isSelfProfile=false") == "false"
+    assert state(base + "?isSelfProfile=") == "absent"
+    assert state(base) == "absent"
+    # AND THE TWO THAT MUST NEVER BE EQUAL.
+    assert state(base + "?isSelfProfile=false") != state(base)

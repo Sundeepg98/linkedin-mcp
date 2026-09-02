@@ -3183,3 +3183,64 @@ loaded the same page minutes earlier; the badge precondition was read first
 and was zero. **It went THROUGH the gate rather than around it**, which is the
 distinction that separates this from the workaround refused in section 82 --
 importing the module and launching the browser from a script.
+
+## 84. RULING 1 BUILT: THE GATE NOW SEPARATES ABSENT FROM FALSE
+
+The wave lead's ruling, and it is this week's own lesson turned on the gate
+that produced two false refusals:
+
+> `readable: false, error: null` again -- the distinction between *the reader
+> ran and the answer is no* and *the reader could not ask*.
+
+`_self_assertion_state` reads THREE states where `_self_assertion_on` reads
+two. The boolean is UNCHANGED and keeps its two other callers; the three-way
+reading sits beside it.
+
+| state | meaning | what the gate does |
+|---|---|---|
+| `true` | LinkedIn asserts the profile is his | proceed |
+| `false` | LinkedIn asserts it is NOT | **refuse at once**, `not_self_profile`, one page load, no retry |
+| `absent` | the parameter did not ride at all | **retry once**, then `self_assertion_unreadable` |
+
+**A STATEMENT IS NOT RETRIED AND AN UNREAD QUESTION IS.** Asking a settled
+question twice is a page load spent on nothing; re-asking one that was never
+answered is what a reader does. `_SELF_ASSERTION_ATTEMPTS = 2` is the
+measurement rather than a preference -- on 2026-09-02 the first load came back
+absent and the immediate second came back true -- and it is BOUNDED because an
+unbounded retry turns a LinkedIn change into a page-load loop against his
+account.
+
+**The absent refusal now says what it does not know**, in terms: *THIS IS NOT
+A STATEMENT THAT THE PROFILE IS NOT YOURS -- LinkedIn did not answer the
+question, and this server will not turn an unread assertion into a claim about
+your account.* The old text invited exactly the opposite conclusion, twice, on
+the first live call of two different tools.
+
+`pages_loaded` is now derived from the loads actually made rather than the
+literal `1` and `2`, so a retried call reports two profile loads and a
+refusal before the editor still reports that the editor was never fetched.
+
+**Three mutations, each shown failing:** absent collapsed back into false (3
+failed); the retry removed (`assert 1 == 2`); a settled `false` retried like an
+absent one (`pages_loaded` 2 where 1 is the contract). And a new test the old
+suite had no way to express -- `isSelfProfile=false`, LinkedIn answering NO --
+which could not be written while both states shared one code.
+
+## 85. WHAT IS NOT BUILT, AND WHY, SO THE LEDGER IS HONEST
+
+Rulings 2, 3 and 4 arrived in the same message and are NOT in this commit.
+
+* **RULING 2 -- narrow the composer read** to the dispatch radios by role and
+  radio group, and the body textbox by role. Correct and not started. It is a
+  reader rewrite whose subject sits OUTSIDE the container the current reader
+  scopes to (section 83), so it is a new aiming design rather than an edit.
+* **RULING 3 -- the gitignored identity-value file** with a loud skip. Correct
+  and not started.
+* **RULING 4 -- the required-empty refusal.** The coupling recorded in section
+  77 still holds: built now it is a validator nothing calls, because its
+  caller is the re-aimed capability. The wave lead's argument -- *"it is
+  reachable, it is called on every write"* -- is true of the guard ONCE THE
+  CAPABILITY EXISTS, and presupposes it. Flagged rather than built, for the
+  second time, on the same mechanism.
+
+Nothing fires. No `confirm_token`.
