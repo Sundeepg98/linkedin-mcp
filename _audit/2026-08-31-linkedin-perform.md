@@ -3287,3 +3287,223 @@ for the first, `test_reader_reachability` for the second.
 
 Recorded because it was asked for, and because the instruction attached to it
 is the useful half: **flag it a third time if it happens again.**
+
+## 88. RECORD A KNOWN DEFECT IN A FORM THAT FAILS WHEN THE DEFECT IS FIXED
+
+A comment saying "known hole" outlives the hole and becomes a lie nobody
+notices. `read_settings_surface` is the standing proof: dead for ten days with
+its own comment observing it was uncalled.
+
+**So the ASCII hole was pinned as `pytest.mark.xfail(strict=True)` instead of
+prose.** A strict xfail that starts passing FAILS. The documentation of the
+defect could not survive the fix.
+
+**The receipt, from two gate runs one commit apart:**
+
+    4cbd9b8    2521 passed, 7 skipped, 1 xfailed
+    bc1bc42    2529 passed, 7 skipped
+
+The xfail line is gone from the count because the commit that closed the hole
+had to delete the marker to stay green. Nobody chose to tidy it up; the
+mechanism made leaving it impossible.
+
+**The general form, which is the reusable part:** where a defect is known and
+deliberately not fixed yet, record it as a test that fails on the fix rather
+than a comment that describes the defect. The next known hole gets pinned the
+same way.
+
+It also announces itself in every run, printing its full reason, because
+`-ra` is in `pytest.ini` -- and that dependency is itself asserted, since the
+loudness lives in a different file from the design.
+
+## 89. A WHOLESALE FILE REWRITE IS A COVERAGE DELETION THAT NO TEST REPORTS
+
+`tests/test_compose_fields.py` was replaced wholesale for the new contract. It
+had carried the only invariant test on `shape.describe_name_shaped`, and that
+test went with it.
+
+**Nothing in this repository would have caught it.** The suite count went UP,
+because the new file has more tests than the old one. There is no instrument
+that notices a test which stopped existing.
+
+It was found by going to REWRITE the thing and discovering it was gone --
+which is luck, not method.
+
+**This is the reachability instrument's blindness one level out.**
+`tests/test_reader_reachability.py` checks that code is reachable from the tool
+surface. Nothing checks that a test still exists for a thing that still does.
+A deleted test and an unreachable reader are the same defect wearing different
+clothes: something that looks like coverage and is not.
+
+The descriptor test was rehoused to `tests/test_shape.py`, which is where it
+belonged once the compose reader stopped calling the descriptor at all.
+
+## 90. THE FIFTH COSTUME: PROSE CLAIMING A CAPABILITY THAT DOES NOT EXIST
+
+Section 69 is *prose containing the pattern it describes*. This is its sibling
+and it is worth naming separately: **prose asserting a relationship in the code
+that is not there.**
+
+**The instance.** After the compose reader was re-anchored to shape labels in
+the page, `shape.looks_name_shaped` had ZERO callers -- while three docstrings,
+a commit message, and the wave lead's report to the operator all described it
+as defence in depth. Four witnesses restating a claim that a three-line AST
+walk falsified.
+
+That is a better instance than `read_settings_surface` precisely BECAUSE more
+people restated it. Repetition is not corroboration when everyone is reading
+the same sentence.
+
+**A second instance the same day, caught by a scanner rather than a person.**
+The `linkedin_compose_fields` docstring was being rewritten because it
+described a contract that no longer existed -- and the rewrite said "plus
+exactly one message body". `readonly.docstring_write_claims` treats `message`
+as a claimable verb, found no negator in the window, and read a READ tool as
+claiming to message somebody. `test_no_docstring_claims_a_write` and its
+coverage twin both fired. "body editor" says the same thing and claims nothing.
+
+**Why this class keeps recurring.** Every claim in this repository that a test
+can check, a test does check -- except claims made in PROSE about the code's
+own structure. Prose is the one artifact with no instrument pointed at it. The
+predicate-disposition register in `tests/test_shape.py` is the first instrument
+aimed at that class, and it caught something on its first run.
+
+**The repair is never to reword the claim.** `looks_name_shaped` was given a
+real job: `read_compose_fields` now re-checks, at the trust boundary, that
+every tail the PAGE asserts is name-free actually is. That is not redundant --
+it is the one regression the in-page design structurally cannot self-report,
+because a page whose shaping broke would still claim it had not.
+
+## 91. WHERE A RULE IS IMPLEMENTED CHANGES WHETHER ITS CONSEQUENCE IS VISIBLE
+
+`describe_name_shaped` returned the WHOLE STRING as `tail` when it found no
+capitalised run. That was defended as safe because the caller already held the
+string.
+
+`COMPOSE_MODES_JS`, which implements the same rule, returned `null` there from
+the first line it was written -- because in the page, handing back the whole
+label would obviously have been the leak.
+
+**Same rule, same author, same day, two answers.** The difference was not care;
+it was that one implementation sat where the consequence was visible and the
+other did not.
+
+**The defence was also wrong on its own terms:** a field documented "name-free
+by construction" that carries a name is a FALSE STATEMENT whoever holds it. The
+Python side now returns `None` too, which deleted a divergence that had been
+recorded as deliberate the same morning.
+
+**The rule to carry forward: when two implementations of one rule disagree,
+trust the one written closest to the harm.** And the differential now compares
+with no special case, which is strictly better than two implementations
+agreeing to differ.
+
+### The companion mechanism: a silent restore makes every later claim unfalsifiable
+
+While demonstrating that the disposition register fails in both directions, a
+mutation backup was written to `/tmp` while the restore read from the
+scratchpad. **Both the failing `cp` and the missing source were loud, and both
+were piped past.** `tests/test_shape.py` sat mutated until the next run.
+
+The incident cost nothing. The mechanism is the point: **once a restore has
+silently failed, every subsequent "restored byte-identical" claim in that
+session is unfalsifiable** -- the claim and the check are the same act. A
+restore must be verified by comparing bytes, not by the absence of an error
+message nobody read.
+
+## 92. THE CAPABILITY LEDGER: WHAT THE OPERATOR ASKED FOR, AND WHAT HE HAS
+
+Recorded at the wave lead's request, because "the instruments are right" and
+"the thing he asked for works" are DIFFERENT CLAIMS and this wave has mostly
+been reporting the first.
+
+**A day was spent on measurement apparatus.** The predicate split, the
+exact-value sweep, the re-anchoring, the twelfth script, the cross-engine
+differential, the disposition register. All of it is real and all of it was
+provoked by defects. **None of it is a capability he asked for.**
+
+### What DID change for him
+
+* `linkedin_compose_fields` now reads the two dispatch radios rather than two
+  unrelated buttons, and reports WHICH MODE IS CHECKED. That was a stated
+  precondition of `send_message` and it is met.
+* A live leak was closed before it could fire: the guard would have published
+  his own name verbatim the moment the reader reached the right container.
+* Six real strings -- a city, a region, an employer -- were removed from
+  tracked files. **They remain public in git history**; remediation of what is
+  already served is his decision.
+
+### `update_profile_field` -- REFUSES, and its refusal is HALF STALE
+
+    NO CONTROL   "contenteditable == 0 and no field inside any editor has
+                 ever been observed"
+                 -> FALSE as of 2026-08-31. linkedin_profile_editor_fields and
+                    linkedin_profile_editor_values read the intro editor's
+                    controls AND their values. Aiming is resolved.
+
+    NO SURFACE   "/edit/ is on readonly._FORBIDDEN_URL_SUBSTRINGS"
+                 -> STILL TRUE, verified 2026-09-02. Reads reach the editor
+                    under an exact-url census exemption; a WRITE does not.
+
+**What is left to build, concretely:**
+
+1. an operator ruling admitting `/in/<member>/edit/` for a WRITE, which is the
+   only blocker that still stands;
+2. a `select_option` entry in `SANCTIONED_MUTATIONS` -- currently three
+   entries, none of which is `select_option`;
+3. the required-empty refusal;
+4. the restore path as a second gated call.
+
+**Items 2-4 are deliberately NOT built**, and the reason is in section 85's
+shape: each is coupled to a capability that does not exist, so building either
+validator now creates a checker nothing calls -- which is the defect this wave
+spent the day removing.
+
+### `send_message` -- REFUSES on THREE grounds, one of which is now STALE
+
+    TYPING        "no text-entry mutation is sanctioned anywhere in this
+                  package"
+                  -> FALSE as of 2026-09-01. SANCTIONED_MUTATIONS carries
+                     ("linkedin_server/writes.py", "perform", "fill").
+
+    BALANCE       measured unreadable on both admitted surfaces. InMail is a
+                  conversation FILTER PILL -- five independent readings, shape-
+                  identical to Focused / Unread / Starred / Connections / Jobs
+                  -- and /premium/my-premium/ carries no numeric balance of any
+                  kind. NARROWER THAN "there is no balance": two links there
+                  are NOT admitted, so a balance behind one is not ruled out.
+
+    VERIFICATION  NOTHING CAN CONFIRM A SEND. The composer carries no countable
+                  total anywhere; every other verification in this package
+                  rests on LinkedIn's own stated count. The only confirming
+                  surface is the thread, which is forbidden AND costs a read
+                  receipt on a real person.
+
+**The third is the one that settles it, and it is untouched by any of this
+wave's work.** A performed send could only ever report `performed: "unknown"`
+on an action that cannot be taken back.
+
+**What would lift it: a verification surface.** A text-entry sanction does not
+reach it and neither does the balance.
+
+### `set_open_to_work` -- REFUSES, unchanged, and not reopened
+
+Sanctioned, refused by `_refuse_unperformable`, and **no tool is registered for
+it at all** -- the seventh action with no tool. Its refusal was NARROWED on
+2026-08-30 when a live census refuted the old sentence ("its editor is not
+addressed by a url at all"): three editors ARE ordinary anchors. What survives
+is narrower and still decisive: none of them reaches the OPEN TO WORK audience
+editor, which remains modal-only.
+
+### THE HONEST SUMMARY
+
+**Ten of the sanctioned writes perform. Three refuse.** Of those three, this
+wave moved `send_message` closer by exactly one precondition -- the dispatch
+mode is now readable -- and moved the other two not at all.
+
+**Two of the three refusal texts are stale in one clause each**, found by
+reading them against the code on 2026-09-02 rather than by anything failing.
+That is the same class as section 90: prose asserting a state the code has left
+behind, with no instrument pointed at it. **A refusal that overstates its
+blockers is not safe-by-default -- it hides how close a capability actually
+is**, which is its own cost.
