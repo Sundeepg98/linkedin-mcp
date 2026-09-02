@@ -1493,12 +1493,33 @@ async def test_the_server_instructions_name_every_write_that_ships():
     assert "it read" in frame
     # And the correction must follow it, not merely precede it.
     assert "every one of those now exists as a tool" in text
+    # THE SKIP ASKS THE SHARED QUESTION, and it used to ask a proxy:
+    # `in PERFORMABLE or url_template is not None`. Addressing
+    # update_profile_field moved it into that `or` and this loop SILENTLY
+    # STOPPED CHECKING it -- green, unchanged count, one case no longer
+    # covered. Sites one to eight of that coincidence FAILED when it broke,
+    # which is how they were found; this one just stopped looking.
+    #
+    # A PERMISSIVE SKIP IS A COVERAGE DELETION THAT REPORTS SUCCESS -- the
+    # same family as a wholesale file rewrite taking a test with it.
+    examined: set[str] = set()
     for spec in writes.SANCTIONED_WRITES.values():
-        if spec.action in writes.PERFORMABLE or spec.url_template is not None:
+        if writes.grant_is_possible(spec):
             continue
         if spec.tool_name == "linkedin_set_open_to_work":
             continue  # registers no tool; nothing to name.
+        examined.add(spec.action)
         assert spec.tool_name.lower() in text, spec.tool_name
+    # AND WHAT THE LOOP EXAMINED IS PINNED AS A SET, not a count. A named
+    # exception only protects the action somebody already thought of; the
+    # next widening drops a different one just as quietly. A count is
+    # weaker still -- two changes that cancel would pass. With the set, a
+    # widened skip FAILS NAMING WHAT IT STOPPED CHECKING.
+    #
+    # Same move as the disposition register: an entry is a claim that is
+    # itself checked, applied to a loop's coverage rather than a
+    # function's callers.
+    assert examined == {"update_profile_field", "send_message"}, examined
     # AND THE PARAGRAPH MUST SAY THEY CANNOT ACT, or naming them is worse than
     # silence: it would advertise capabilities that refuse.
     assert "none of them can act" in text

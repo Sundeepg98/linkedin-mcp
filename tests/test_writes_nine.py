@@ -54,6 +54,12 @@ import re
 
 import pytest
 
+# INERT AT RUNTIME AND STILL WRONG WITHOUT IT. `from __future__ import
+# annotations` stores TO_STATES' annotation as the STRING
+# "dict[str, Optional[str]]", so importing this module never raised --
+# but typing.get_type_hints() on it raised NameError, measured 2026-09-02.
+from typing import Optional
+
 from linkedin_server import dom, readonly, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import (
