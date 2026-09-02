@@ -801,13 +801,20 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # a caller. A typo in a fill becomes his headline; a typo in a select is a
     # refusal, because no option carries that label.
     #
-    # BY LABEL, NEVER BY VALUE AND NEVER BY INDEX. The label is the text the
-    # page renders, which is the same string the value reader observed and the
-    # same one the preview printed for him to read. `value=` is a submission
-    # token LinkedIn chose and means nothing to him; an index is position-
-    # aiming, which is the defect the container measurement was taken to end.
-    # So the thing he agrees to and the thing that is chosen are the same
-    # string, and that equality is the whole of the permission.
+    # BY LABEL, NEVER BY VALUE AND NEVER BY INDEX -- and this is the half that
+    # is a PROPERTY rather than a reassurance.
+    #
+    # `dom.read_self_owned_editor_values` returns, for a <select>, the OPTION'S
+    # RENDERED TEXT. That is the string the preview prints for him, and it is
+    # the string `select_option(label=...)` matches. Same string, from the same
+    # reader, in BOTH HALVES OF THE TRANSACTION: what he agrees to and what is
+    # chosen are not merely intended to correspond, they are the same value
+    # read once.
+    #
+    # `value=` would break that. It is a submission token LinkedIn chose, it
+    # never appears in anything he read, and no comparison could tie it back to
+    # his consent. An index is worse still -- position-aiming, which is the
+    # defect the container measurement was taken to end.
     #
     # AND THE CONTROL IS NOT CHOSEN BY THIS SERVER EITHER. `_live_control`
     # reads the editor live, requires EXACTLY ONE control named as asked, and
