@@ -847,9 +847,23 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # thing in the way. This set held apply_job as well until its surface was
     # measured -- and the surface that measurement found is the POSTING page,
     # not an apply url, because navigating to the apply url lands back on the
-    # posting with the flow drawn over it. follow_company is the one that COULD
-    # be granted and still is not performed, which is why its refusal is the
-    # one most likely to be argued with later.
+    # posting with the flow drawn over it.
+    #
+    # A FALSE SENTENCE STOOD HERE UNTIL 2026-09-02 and it is removed rather
+    # than left: "follow_company is the one that COULD be granted and still is
+    # not performed, which is why its refusal is the one most likely to be
+    # argued with later." follow_company ENTERED PERFORMABLE ON 2026-08-30, so
+    # the sentence was false for three days and described a refusal that no
+    # longer existed.
+    #
+    # IT IS NOTED RATHER THAN QUIETLY DELETED because it is the fifth instance
+    # of one family found in this wave: prose that was correct when written,
+    # became false when the code moved, and had no instrument on it. The
+    # sharpest instance is the comment inside ``anchor_label_for`` describing
+    # the apply_job defect -- correct, specific, present, and read -- directly
+    # above the code that repeated that defect seven days later. Prose is the
+    # artifact with no test on it, and the only defence found so far is to
+    # convert a claim into an assertion whenever one can be.
     surfaceless = {
         spec.action
         for spec in SANCTIONED_WRITES.values()

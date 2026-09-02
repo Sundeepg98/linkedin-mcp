@@ -136,6 +136,23 @@ REFUSING = tuple(
     )
 )
 
+#: THE ACTIONS RULED TO HAVE NO ADDRESS TO NAME, and the only ones whose
+#: refusal may take the second arm of the address check below.
+#:
+#: ONE MEMBER, and it earned the exemption with an enumeration rather than a
+#: phrase: ``set_open_to_work``'s refusal contains no slash because ITS ENTIRE
+#: MEASURED CONTENT IS THAT NO URL EXISTS -- 237 distinct urls and 37 payload
+#: paths enumerated across five profile captures, zero of which reach the
+#: editor, which is fetched by an SDUI RPC and opens as a modal from a control
+#: on his own profile.
+#:
+#: IT IS A SET RATHER THAN A CONDITION IN THE TEST because "names a page OR
+#: says it has none" is a disjunction, and the second arm is satisfiable by any
+#: refusal that happens to carry the phrase. Pinning the membership is what
+#: stops the exemption widening by prose.
+MAY_CLAIM_NO_ADDRESS: frozenset = frozenset({"set_open_to_work"})
+
+
 #: What has left ``REFUSING``, and when. An action may only be here if it is in
 #: ``writes.PERFORMABLE``, which is asserted below -- so this cannot become a
 #: place to park something that merely stopped passing.
@@ -877,6 +894,21 @@ def test_every_refusal_names_its_own_fix_and_a_measured_artefact(action):
     page, or it SAYS IN WORDS that there is no page to name. A refusal that
     simply forgot to mention where it acts satisfies neither and still fails,
     which is the property the flat version was protecting.
+
+    AND THE SECOND ARM IS ITSELF PINNED, because a disjunction is exactly where
+    a check rots. "Names a page OR says it has none" is satisfied by ANY
+    refusal that happens to contain the phrase, so the escape hatch would widen
+    silently the first time somebody wrote it into a refusal that could
+    perfectly well have named an address. :data:`MAY_CLAIM_NO_ADDRESS` is the
+    closed set of actions permitted to take it, checked in BOTH directions
+    below: a new action taking it FAILS until somebody rules on it, and a
+    member that stops taking it fails too, so the entry cannot outlive its
+    reason.
+
+    A CHECK THAT WAS FLAT AND IS NOW CONDITIONAL NEEDS THE CONDITION CHECKED,
+    or the narrowing is the last thing anybody verified about it. Same shape as
+    the empty ``CANNOT_REACH`` table kept rather than deleted: the structure
+    carries a claim its absence would not.
     """
     reason = _refusal_for(action)
     assert len(reason) > 200, (action, len(reason))
@@ -884,11 +916,30 @@ def test_every_refusal_names_its_own_fix_and_a_measured_artefact(action):
     assert "MEASURED" in reason, action
     assert re.search(r"\d", reason), action
     assert _GENERIC_BACKSTOP not in reason, action
-    if not re.search(r"/[a-z]", reason):
+    names_a_page = bool(re.search(r"/[a-z]", reason))
+    if not names_a_page:
+        assert action in MAY_CLAIM_NO_ADDRESS, (
+            "%s refuses without naming a page. Only %s is ruled to have no "
+            "address to name -- its measured finding IS the absence of one. "
+            "A new action claiming this needs a ruling, not a phrase: say "
+            "which enumeration establishes that no url reaches it, and add it "
+            "to MAY_CLAIM_NO_ADDRESS with that reason."
+            % (action, sorted(MAY_CLAIM_NO_ADDRESS))
+        )
         assert "not addressed by a url" in reason, (
             "%s refuses without naming a page AND without saying it has no "
             "page to name. One or the other: an address, or the measured "
             "finding that there is no address." % action
+        )
+    else:
+        # THE OTHER DIRECTION, so an entry cannot outlive its reason. If a
+        # member of the exempt set starts naming a page, the exemption is
+        # stale -- and a stale exemption is an escape hatch nobody is
+        # watching, which is the state the flat check was narrowed out of.
+        assert action not in MAY_CLAIM_NO_ADDRESS, (
+            "%s is listed in MAY_CLAIM_NO_ADDRESS and its refusal now names a "
+            "page. The exemption has outlived the finding that earned it; "
+            "remove the entry." % action
         )
 
 
