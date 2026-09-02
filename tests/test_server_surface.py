@@ -1094,6 +1094,12 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
         # nor a company Page: one named account setting, on a page measured
         # six times, by clicking the radio named for the destination.
+        # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
+        # It is the FIRST write here that can verify its own outcome by
+        # reading the field back -- publish_post declared its outcome
+        # unverifiable, send_invitation has none, and apply_job can only
+        # establish that it did not happen.
+        "update_profile_field",
         "update_setting",
     ]
 
@@ -1133,6 +1139,12 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         "send_invitation",
         "unfollow_company",
         "unsave_job",
+        # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
+        # It is the FIRST write here that can verify its own outcome by
+        # reading the field back -- publish_post declared its outcome
+        # unverifiable, send_invitation has none, and apply_job can only
+        # establish that it did not happen.
+        "update_profile_field",
         "update_setting",
     ]
     assert "OFF" in info["writes_note"]
@@ -1178,10 +1190,13 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     not_performed = info["writes_sanctioned_but_not_performed"]
     assert set(not_performed) == {
         "set_open_to_work",
-        "update_profile_field",
         "send_message",
     }
     assert "update_setting" not in set(not_performed)
+    # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
+    # the only way anything is meant to leave it. A shipped action still
+    # listed as refusing would tell a caller the opposite of the truth.
+    assert "update_profile_field" not in set(not_performed)
     # AND THE SECOND DEPARTURE, 2026-09-01. Asserted ABSENT by name for the
     # same reason update_setting is: a shipped action still listed as refusing
     # would tell a caller the opposite of the truth, and the failure mode this
@@ -1216,8 +1231,12 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     assert not_performed["set_open_to_work"]["can_hold_a_grant"] is False
     # AND THE ONE THAT HAS A SURFACE AND STILL CANNOT HOLD A GRANT, which is
     # the pair the old derivation could not express: addressed, and refused.
-    assert not_performed["update_profile_field"]["has_a_measured_surface"] is True
-    assert not_performed["update_profile_field"]["can_hold_a_grant"] is False
+    # THE ADDRESSED-BUT-GRANTLESS PAIR THAT USED TO LIVE HERE IS GONE, and
+    # its departure is the point rather than a deletion: update_profile_field
+    # was the only action that was addressed and still refused, and on
+    # 2026-09-02 it shipped. The property it demonstrated is now asserted on
+    # a CONSTRUCTED spec in tests/test_addressing_is_not_permission.py, so it
+    # cannot quietly stop discriminating when the registry changes shape.
     assert "follow_company" not in not_performed
     assert "follow_company" in info["writes_sanctioned"]
     # AND THE DEPARTURE IS ASSERTED FROM BOTH SIDES, because "absent from a
@@ -1457,6 +1476,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
     words = {
         2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
         7: "seven", 8: "eight", 9: "nine", 10: "ten",
+        # ELEVEN FROM 2026-09-02. The map is extended rather than the
+        # assertion loosened: a count with no word is a KeyError naming the
+        # number, which is a better failure than a check that quietly stops
+        # comparing.
+        11: "eleven", 12: "twelve",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -1519,7 +1543,10 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # Same move as the disposition register: an entry is a claim that is
     # itself checked, applied to a loop's coverage rather than a
     # function's callers.
-    assert examined == {"update_profile_field", "send_message"}, examined
+    # update_profile_field left this set on 2026-09-02 by becoming performable,
+    # which is exactly what the set is here to make visible: the departure is a
+    # diff rather than a silence.
+    assert examined == {"send_message"}, examined
     # AND THE PARAGRAPH MUST SAY THEY CANNOT ACT, or naming them is worse than
     # silence: it would advertise capabilities that refuse.
     assert "none of them can act" in text
@@ -1906,9 +1933,18 @@ def test_a_grant_needs_permission_and_not_merely_an_address():
     assert "PERFORMABLE" in predicate
     assert "url_template" in predicate
 
-    # AND BEHAVIOURALLY, on the pair that distinguishes the two derivations:
-    # addressed, not performable, therefore no grant.
-    spec = writes.spec_for_action("update_profile_field")
-    assert spec.url_template is not None
-    assert spec.action not in writes.PERFORMABLE
-    assert not (spec.url_template is not None and spec.action in writes.PERFORMABLE)
+    # AND BEHAVIOURALLY, ON A CONSTRUCTED PAIR, because the registry stopped
+    # containing one. update_profile_field WAS the addressed-but-unperformable
+    # case and it shipped on 2026-09-02 -- so a test that kept reading it from
+    # the registry would have gone on passing while no longer distinguishing
+    # the two derivations at all. That is the permissive weakening from
+    # section 93, in the test whose subject is that very defect.
+    import dataclasses
+
+    real = writes.spec_for_action("save_job")
+    addressed_but_unperformable = dataclasses.replace(
+        real, action="not_a_sanctioned_action"
+    )
+    assert addressed_but_unperformable.url_template is not None
+    assert addressed_but_unperformable.action not in writes.PERFORMABLE
+    assert writes.grant_is_possible(addressed_but_unperformable) is False

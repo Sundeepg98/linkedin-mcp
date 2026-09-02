@@ -3093,6 +3093,21 @@ EDITOR_FIELDS_JS = """
       name: named.name,
       name_source: named.source,
       tag: tag,
+      // THE ADDRESSABLE HANDLE, added 2026-09-02 because this reader could
+      // NAME every control in the container and address NONE of them. The six
+      // editable profile fields are all `label-for` named -- their label
+      // carries `for=<id>` -- so the id is what turns a measured name into a
+      // selector a write can aim at.
+      //
+      // EMPTY STRING WHEN THERE IS NONE, and a caller that gets one must
+      // REFUSE rather than fall back to a positional or text-matched
+      // selector. Aiming by position is the defect the container measurement
+      // was taken to end, and it would come back here first.
+      //
+      // NOT ADDED TO EDITOR_VALUES_JS. That script is the widest-publishing
+      // one on the list and nothing needs an id from it: the write aims from
+      // the FIELDS reading and the values reading is compared against it.
+      dom_id: attrOf(el, 'id'),
       type: tag === 'input' ? String(el.type || '').toLowerCase() : null,
       role: attrOf(el, 'role') || null,
       disabled: el.disabled === true

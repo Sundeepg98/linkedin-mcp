@@ -786,6 +786,35 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # publish control is drawn DISABLED on an empty composer, so a fill that
     # worked is observable and one that did not is refused.
     ("linkedin_server/writes.py", "perform", "fill"),
+    # THE FOURTH ENTRY, added 2026-09-02, and it is the NARROWEST of the four
+    # rather than the widest -- which is the argument for it.
+    #
+    # WHAT IT DOES: chooses one option on one <select> inside the profile
+    # editor, matched BY THE OPTION'S OWN RENDERED LABEL.
+    #
+    # WHY IT IS STRICTLY NARROWER THAN THE FILL ALREADY SANCTIONED. A fill puts
+    # an ARBITRARY STRING into a box -- the third entry above spends most of
+    # its argument on exactly that, and on the drain point and AST assertion
+    # built to bound it. A select_option cannot introduce a string at all. It
+    # can only choose something THE PAGE ITSELF ALREADY DEFINED, so the set of
+    # reachable outcomes is enumerated by LinkedIn and not by this server or by
+    # a caller. A typo in a fill becomes his headline; a typo in a select is a
+    # refusal, because no option carries that label.
+    #
+    # BY LABEL, NEVER BY VALUE AND NEVER BY INDEX. The label is the text the
+    # page renders, which is the same string the value reader observed and the
+    # same one the preview printed for him to read. `value=` is a submission
+    # token LinkedIn chose and means nothing to him; an index is position-
+    # aiming, which is the defect the container measurement was taken to end.
+    # So the thing he agrees to and the thing that is chosen are the same
+    # string, and that equality is the whole of the permission.
+    #
+    # AND THE CONTROL IS NOT CHOSEN BY THIS SERVER EITHER. `_live_control`
+    # reads the editor live, requires EXACTLY ONE control named as asked, and
+    # refuses otherwise -- naming what it saw, shaped, because that reader
+    # returns accessible names ungated and one control in that editor is named
+    # by its own content.
+    ("linkedin_server/writes.py", "perform", "select_option"),
 )
 
 

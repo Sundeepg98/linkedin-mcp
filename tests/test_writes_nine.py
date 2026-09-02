@@ -95,7 +95,6 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
 #: The constant keeps its name so the link to the seven the operator asked
 #: about is not lost; ``LIFTED`` below is where the difference is recorded.
 SEVEN = (
-    "update_profile_field",
     "send_message",
 )
 
@@ -104,6 +103,19 @@ SEVEN = (
 #: place to park something that merely stopped passing.
 LIFTED = {
     "update_setting": "2026-08-31",
+    # THE SIXTH DEPARTURE, 2026-09-02, and the only one that left because
+    # everything its refusal named as missing was BUILT rather than measured
+    # away, ruled around, or declared. The refusal said "/edit/ is forbidden
+    # and no field inside any editor has ever been observed"; by the time it
+    # left, the editor was addressed by an exact-url exemption, its controls
+    # were readable, a fourth mutation kind existed to choose among them, and
+    # the value could be read back afterwards.
+    #
+    # IT IS ALSO THE BEST-VERIFIED WRITE IN THIS PACKAGE, which none of the
+    # five before it can say: publish_post declared its outcome unverifiable,
+    # send_invitation ships with none at all, and apply_job can only establish
+    # that it did NOT happen. This one reads the field back.
+    "update_profile_field": "2026-09-02",
     # THE SECOND DEPARTURE, and it left for a different reason from the first.
     # ``update_setting`` left because its last blocker was MEASURED away.
     # ``react_to_item`` left with one blocker still open -- which reaction the

@@ -172,7 +172,7 @@ import re
 import secrets
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from linkedin_server import dom, shape
 from linkedin_server.errors import WriteAttemptError
@@ -1212,6 +1212,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         summary="Change one field on your own LinkedIn profile.",
         from_state="editor_addressed",
         to_state="field_changed",
+        # WHAT PROVES IT DID NOT HAPPEN. The field still holding exactly what
+        # it held before the write is the unchanged state, and unlike
+        # send_message's equivalent this action can ALSO prove the positive:
+        # the value reads back as the one that was asked for. Both arms are
+        # reachable, which makes this the best-verified write here.
+        not_performed_state="value_unchanged",
         target_kind="field_and_value",
         state_from="profile_editors",
         direction_source=(
@@ -4219,6 +4225,21 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # THE TWELFTH, 2026-09-02, on the operator's ruling "I want all
+        # capabilities". Everything the earlier refusal named as missing was
+        # built for it rather than around it: an exact-url exemption for the
+        # editor, an aiming branch that reads the live control list and
+        # refuses unless EXACTLY ONE control is named as asked, a fourth
+        # sanctioned mutation kind that can only choose an option the page
+        # already defines, an empty-into-required refusal, a verification that
+        # reads the field back, and a restore path that hands him the previous
+        # value and the call that puts it back WITHOUT this server ever
+        # restoring anything itself.
+        #
+        # ENABLING IS NOT FIRING. It stays behind the same two-call gate as
+        # every other write; what changed is that a token he confirms would
+        # now reach a working action instead of a refusal.
+        "update_profile_field",
         "save_job",
         "unsave_job",
         "unfollow_company",
@@ -4595,34 +4616,18 @@ _NINE_REFUSALS: dict[str, str] = {
     # and REFUSES WITH THE OBSERVATION when it cannot. Shipping a gate that
     # expects to refuse is only honest because the refusal is what produces
     # the missing measurement.
-    "update_profile_field": (
-        "update_profile_field is sanctioned and cannot be performed. WHAT IS "
-        "MEASURED, live on 2026-08-30 and CONTRADICTING WHAT THIS SERVER USED "
-        "TO SAY: profile editors ARE addressed by url. Three of them are "
-        "ordinary anchors on his own profile -- /in/<member>/edit/intro/, "
-        "/in/<member>/edit/forms/summary/new/ and "
-        "/in/<member>/overlay/contact-info/ -- and the live page carries 2 "
-        "forms where every tracked profile fixture carries 0. NO SURFACE: "
-        "'/edit/' is on readonly._FORBIDDEN_URL_SUBSTRINGS, checked before "
-        "the allowlist and not shortened for a write, so the two edit "
-        "addresses are refused twice over. THE CONTROLS, HOWEVER, ARE "
-        "MEASURED -- and the sentence that stood here until 2026-09-02 said "
-        "the opposite: 'contenteditable == 0 and no field inside any editor "
-        "has ever been observed'. That was true when written and became "
-        "false on 2026-08-31, when linkedin_profile_editor_fields read this "
-        "editor's controls and linkedin_profile_editor_values read what they "
-        "HOLD. Aiming is resolved and the values are readable, so a restore "
-        "path can be designed against real state rather than a guess. "
-        "LEAVING THE OLD SENTENCE UP HAD A COST: a refusal that overstates "
-        "its blockers is not caution, it is misinformation wearing a safety "
-        "costume, and it hid how close this already was. WHAT WOULD LIFT "
-        "IT, AND IT IS SHORTER THAN IT WAS: the url boundary above -- plus a "
-        "select_option entry in "
-        "SANCTIONED_MUTATIONS, a required-empty refusal, and the restore "
-        "path as a second gated call. Those three are deliberately unbuilt: "
-        "each is coupled to a capability that does not exist, and building "
-        "one now ships a validator nothing calls."
-    ),
+    # ``"update_profile_field"`` LEFT THIS TABLE ON 2026-09-02 by SHIPPING,
+    # which is the only way anything is meant to leave it. Its refusal named
+    # two blockers and both were real; both were BUILT AWAY rather than ruled
+    # around or measured away. The url boundary became an exact-url exemption
+    # for one address, and "no field inside any editor has ever been observed"
+    # stopped being true when the editor's controls and their values became
+    # readable.
+    #
+    # The three items that refusal listed as remaining -- a select_option
+    # sanction, an empty-into-required refusal, and a restore path -- were
+    # built WITH the call site rather than before it, which is why they are no
+    # longer validators nothing calls.
     # ``"update_setting"`` WAS HERE UNTIL 2026-08-31 AND IS GONE BECAUSE THE
     # ACTION SHIPS. It is removed rather than reworded, on this function's own
     # standing rule: ``_refuse_unperformable`` is for actions that are
@@ -5098,7 +5103,7 @@ def _save_candidates_note(
 
 async def _live_control(
     page: Any, spec: WriteSpec, grant: WriteGrant, anchor: str
-) -> tuple[str, str, str]:
+) -> Union[tuple[str, str, str], tuple[str, str, str, str]]:
     """GATE 5, per family: re-read the very control, and build its selector.
 
     Returns ``(state, why, selector)``. The state comes from the CONTROL, on
@@ -5114,6 +5119,121 @@ async def _live_control(
     still carries exactly one unfollow button, which is the precondition a
     click needs and a list read does not.
     """
+    if spec.action == "update_profile_field":
+        # AIM FROM THE LIVE CONTROL LIST, never from a remembered selector.
+        # ``perform`` has already navigated to the editor, so this reads the
+        # controls that are on the page RIGHT NOW and matches the requested
+        # field against them. The surface moved once in thirty-six hours; a
+        # selector baked at design time would have aimed at whatever replaced
+        # it.
+        reading = await dom.read_self_owned_editor_fields(page)
+        if reading.get("refused"):
+            return (UNKNOWN, str(reading.get("reason") or ""), "")
+
+        controls = list(reading.get("fields") or [])
+        wanted, _, new_value = grant.target.partition(TARGET_JOIN)
+        wanted = wanted.strip()
+
+        matches = [c for c in controls if str(c.get("name") or "") == wanted]
+        if len(matches) != 1:
+            # NAMING WHAT IT SAW, BUT NOT RAW. This reader returns accessible
+            # names UNGATED -- that is its documented nature and the reason it
+            # is safe only inside a container measured to be his own. One of
+            # the controls in this editor is named by its OWN CONTENT (the
+            # headline), which is why that field is refused outright, and a
+            # refusal that echoed the list verbatim would publish it while
+            # explaining why it would not.
+            #
+            # So the list is shaped before it is printed: a label route keeps
+            # its name, anything named by its own text becomes <opaque>, and
+            # the guard gets the last word on either.
+            seen = []
+            for control in controls:
+                name = str(control.get("name") or "")
+                source = str(control.get("name_source") or "")
+                if source in ("aria-label", "aria-labelledby", "label-for",
+                              "label-ancestor") and not shape.looks_name_shaped(name):
+                    seen.append(name)
+                else:
+                    seen.append(shape.CENSUS_OPAQUE)
+            return (
+                UNKNOWN,
+                f"{len(matches)} controls in this editor are named {wanted!r}, "
+                f"where exactly one is required. What the editor drew: {seen}. "
+                "Aiming at one of several, or at none, would be aiming by "
+                "document order -- which is the thing this gate exists not to "
+                "do. Nothing was typed.",
+                "",
+            )
+
+        control = matches[0]
+
+        # THE EMPTY-INTO-REQUIRED REFUSAL. It reads the ``required`` flag the
+        # label reader returns, which is a tri-state: True, False, or None for
+        # a control that cannot be required at all.
+        #
+        # IT GUARDS AN EMPTY SET TODAY, and saying so is the point rather than
+        # a hedge -- none of the six approved fields has been observed
+        # required. It is here because the page moved once in thirty-six hours
+        # and because clearing a required field is the one edit whose failure
+        # mode is a profile LinkedIn will not let him save, discovered after
+        # the value is already gone.
+        if control.get("required") is True and not new_value.strip():
+            return (
+                "editor_addressed",
+                f"{wanted!r} is drawn REQUIRED and the requested value is "
+                "empty. Emptying a required field is refused rather than "
+                "attempted: the old value is gone either way, and what comes "
+                "back is a form that will not save.",
+                "",
+            )
+
+        # THE ADDRESSABLE HANDLE. `dom_id` was added to EDITOR_FIELDS_JS for
+        # exactly this: the six editable fields are `label-for` named, so the
+        # name is what a human reads and the id is what a write can aim at.
+        # NO FALLBACK. A control with no id is refused rather than addressed
+        # by position or by text -- both of those are the aiming this gate
+        # exists to refuse.
+        dom_id = str(control.get("dom_id") or "").strip()
+        if not dom_id:
+            return (
+                "editor_addressed",
+                f"{wanted!r} was found exactly once and carries no id, so "
+                "there is no way to aim at it that is not positional. "
+                "Refused rather than addressed by document order.",
+                "",
+            )
+        if control.get("disabled") is True:
+            return (
+                "editor_addressed",
+                f"{wanted!r} is drawn disabled. A disabled control is not "
+                "typed into to find out what happens.",
+                "",
+            )
+
+        # WHICH MUTATION THIS CONTROL TAKES, decided HERE because this is where
+        # the control was read. ``dom.aria_role_of`` sets the pattern: a kind
+        # is derived from the row that was measured, never guessed at the call
+        # site from a selector string.
+        #
+        # A FOURTH ELEMENT RATHER THAN A WIDER TUPLE EVERYWHERE. The other
+        # eight arms answer a question that has one answer -- their control is
+        # clicked -- and rewriting all of them to say "click" would be eight
+        # chances to typo inside the function that presses things. ``perform``
+        # unpacks with a star and defaults to a click, so only the arm that
+        # has something new to say says it.
+        tag = str(control.get("tag") or "").lower()
+        kind = "select_option" if tag == "select" else "fill"
+        return (
+            "editor_addressed",
+            f"the editor drew exactly one control named {wanted!r}, it is "
+            f"enabled, it carries an id to aim at, and it is a {tag!r} so this "
+            f"write would {kind}. Read live from the page this write would act "
+            f"on, not from the preview.",
+            "#" + dom_id,
+            kind,
+        )
+
     if spec.action == "update_setting":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE -- so this is
         # FRESHNESS rather than a second source, and it is labelled that way
@@ -5460,12 +5580,52 @@ async def _live_control(
     return (state, why, dom.save_control_selector(anchor))
 
 
+async def _editor_value_of(page: Any, field: str) -> tuple[Optional[str], str]:
+    """The current value of ONE named control in the open editor.
+
+    Returns ``(value, why)``; ``value`` is None when it could not be read, and
+    None is never collapsed into an empty string -- "I could not read it" and
+    "it is empty" are the two answers this package refuses to conflate, and
+    they are the two that matter most on a restore.
+
+    NOT A SECOND SURFACE, AND IT SAYS SO. The editor is the only place this
+    value lives, so this is a FRESH READ of the same page rather than an
+    independent corroboration. ``update_setting``'s branch makes the same
+    distinction for the same reason: a gate that implied two readings when it
+    took one would be overstating its own evidence.
+
+    FOR A SELECT IT RETURNS THE OPTION'S RENDERED TEXT, not the value
+    attribute -- which is what makes the restore exact. The same string is
+    what ``select_option(label=...)`` matches, what the preview printed, and
+    what he agreed to.
+    """
+    reading = await dom.read_self_owned_editor_values(page)
+    if reading.get("refused"):
+        return (None, str(reading.get("reason") or "the editor could not be read."))
+    records = [
+        record
+        for record in (reading.get("fields") or [])
+        if str(record.get("name") or "") == field
+    ]
+    if len(records) != 1:
+        return (
+            None,
+            f"{len(records)} controls named {field!r} carry a value, where "
+            "exactly one is required.",
+        )
+    value = records[0].get("value")
+    if value is None:
+        return (None, f"{field!r} was found but its value could not be read.")
+    return (str(value), f"read live from the editor after the write.")
+
+
 async def _verify_after(
     navigator: Any,
     page: Any,
     spec: WriteSpec,
     grant: WriteGrant,
     observation: Observation,
+    prior_value: Optional[str] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -5537,6 +5697,49 @@ async def _verify_after(
             "the action a measured surface, or declare the outcome "
             "unverifiable on its spec and say why."
         )
+    if spec.action == "update_profile_field":
+        # THE BEST-VERIFIED WRITE IN THIS PACKAGE, and that is worth saying
+        # plainly because almost nothing else here can say it. publish_post
+        # ships with its outcome DECLARED unverifiable; apply_job can only
+        # establish that it did NOT happen; send_message is the same. This one
+        # can read the field back and see the value it asked for.
+        #
+        # IT IS A FRESH READ OF THE SAME SURFACE, NOT A SECOND ONE. The editor
+        # is the only place this value lives. What that buys is freshness --
+        # the value as the page holds it now, after the write -- and saying so
+        # is the difference between evidence and the appearance of it.
+        wanted, _, requested = grant.target.partition(TARGET_JOIN)
+        wanted = wanted.strip()
+        current, why = await _editor_value_of(page, wanted)
+        if current is None:
+            return (UNKNOWN, why, "")
+        if current == requested:
+            return (
+                "field_changed",
+                f"{wanted!r} now reads back as the value this write asked "
+                f"for. {why}",
+                "",
+            )
+        if prior_value is not None and current == prior_value:
+            return (
+                "value_unchanged",
+                f"{wanted!r} still holds exactly what it held before this "
+                f"write, so nothing was changed. {why}",
+                "",
+            )
+        # NEITHER THE REQUESTED VALUE NOR THE OLD ONE. Reported as unknown
+        # rather than guessed at: LinkedIn may normalise what it stores, and a
+        # gate that called a normalised value a failure would be wrong in the
+        # direction that makes him undo a change that worked.
+        return (
+            UNKNOWN,
+            f"{wanted!r} reads back as neither the requested value nor the "
+            f"previous one. LinkedIn may have normalised it, or something "
+            f"else may have changed it. {why} The exact strings are in this "
+            "block for you to compare.",
+            "",
+        )
+
     if spec.action == "react_to_item":
         # A FRESH NAVIGATION AND A RE-READ OF THE CONTROL. Not an independent
         # surface -- there is only one page that carries this item's reaction
@@ -6353,7 +6556,13 @@ async def perform(
     _assert_landed_on_target(spec, grant, landed)
 
     # Gate 5: the control itself, read live, on the page about to be clicked.
-    live_state, live_why, selector = await _live_control(page, spec, grant, anchor)
+    # A STAR SO THE OTHER EIGHT ARMS NEED NO EDIT. Only the arm with a choice
+    # to report returns a fourth element; everything else is a click, which is
+    # what this defaults to.
+    live_state, live_why, selector, *live_kind = await _live_control(
+        page, spec, grant, anchor
+    )
+    control_kind = live_kind[0] if live_kind else "click"
     # THE ORIGIN CHECK GOES THROUGH ``valid_from`` NOW, and that is what makes
     # a multi-state action performable at all. It was ``live_state !=
     # spec.from_state``, which for an action whose ``from_state`` is ``None``
@@ -6412,9 +6621,26 @@ async def perform(
     # verbatim in the preview" condition enforced by construction rather than
     # by care, and tests/test_typed_bytes.py asserts the identity.
     fill_plan: list[tuple[str, str]] = []
-    if spec.action in TYPING_ACTIONS:
+    # THE THIRD MUTATION KIND, 2026-09-02. A profile field is either typed into
+    # or CHOSEN FROM, and which one is a property of the CONTROL rather than of
+    # the action -- ``City`` is an input and ``Country/Region`` is a select, in
+    # the same editor, behind the same tool.
+    #
+    # STILL EXACTLY ONE ``fill_plan.append``, and that is deliberate rather
+    # than tidy. ``test_the_fill_types_the_grants_own_text_and_nothing_else``
+    # asserts on the AST that this module has ONE fill site, so that the string
+    # typed is provably a slice of the very target the token was minted
+    # against. A second append would have satisfied the same behaviour while
+    # dissolving that proof, so the branch chooses a PLAN and the append
+    # happens once.
+    select_plan: list[tuple[str, str]] = []
+    if control_kind == "select_option":
+        select_plan.append((selector, _text_component_of(spec, grant.target)))
+    elif spec.action in TYPING_ACTIONS or control_kind == "fill":
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
-    click_plan: list[str] = [] if fill_plan else [selector]
+    click_plan: list[str] = (
+        [] if (fill_plan or select_plan) else [selector]
+    )
 
     # THE BEFORE-READING FOR A DELTA ACTION, taken here because it must happen
     # BEFORE the fill and nowhere else. It is a READ -- a census of shaped
@@ -6426,7 +6652,34 @@ async def perform(
             (await dom.read_comment_surface(page)).get("names") or {}
         )
 
+    # THE PRIOR VALUE, READ BEFORE ANYTHING IS TYPED and on a page already
+    # open. It is the whole of the restore path: this server will not put a
+    # value back, so the ONE thing it owes him is the exact string it is about
+    # to overwrite, verbatim, while it still exists to be read.
+    #
+    # A READ, ON THE SAME PAGE, THROUGH A DECLARED SCRIPT. No navigation, no
+    # new waiver, and it happens here rather than in the preview because the
+    # preview reads his profile and the value lives in the editor.
+    prior_value: Optional[str] = None
+    prior_why = ""
+    if spec.action == "update_profile_field":
+        prior_field, _, _ = grant.target.partition(TARGET_JOIN)
+        prior_value, prior_why = await _editor_value_of(page, prior_field.strip())
+
+    selects_made = 0
     try:
+        while select_plan:
+            select_selector, select_text = select_plan.pop(0)
+            # BY THE OPTION'S OWN LABEL, never by value and never by index.
+            # ``label=`` matches the text the page itself renders, which is the
+            # same string the value reader observed and the same one the
+            # preview printed. An index would be position-aiming; ``value=``
+            # would be a submission token the page chose, and neither is the
+            # thing he agreed to.
+            await page.select_option(
+                select_selector, label=select_text, timeout=CLICK_TIMEOUT_MS
+            )
+            selects_made += 1
         while fill_plan:
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
@@ -6482,7 +6735,7 @@ async def perform(
     verified_why = ""
     try:
         verified_state, verified_why, state_landed = await _verify_after(
-            navigator, page, spec, grant, observation
+            navigator, page, spec, grant, observation, prior_value=prior_value
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -6545,11 +6798,53 @@ async def perform(
         target_block["company_id"] = grant.target
         target_block["company"] = observation.facts.get("company")
 
+    # THE RESTORE PATH, AND IT IS NOT AN UNDO BUTTON. Ruling, 2026-09-02.
+    #
+    # THIS SERVER RESTORES NOTHING ON ITS OWN. What it owes him is the exact
+    # string it overwrote and the exact call that puts it back -- both here,
+    # both copy-pasteable, so the act of restoring is HIS and goes through the
+    # same two-call gate as any other write.
+    #
+    # WHY NOT AN UNDO. An undo that this server could fire would be a second
+    # write authorised by the first, and there is no such permission. It would
+    # also be wrong the moment LinkedIn normalises what it stored -- the value
+    # to put back is the one that was READ, and he is the one who can see
+    # whether that is still the right answer.
+    #
+    # `previous_value` IS VERBATIM AND MAY BE None. None means it could not be
+    # read, never that it was empty; the two are not collapsed, because on a
+    # restore that difference is the whole message.
+    restore_block: Optional[dict[str, Any]] = None
+    if spec.action == "update_profile_field":
+        restore_field, _, _ = grant.target.partition(TARGET_JOIN)
+        restore_field = restore_field.strip()
+        restore_block = {
+            "previous_value": prior_value,
+            "how_it_was_read": prior_why,
+            "to_put_it_back": (
+                None
+                if prior_value is None
+                else "linkedin_update_profile_field(field="
+                + repr(restore_field)
+                + ", value="
+                + repr(prior_value)
+                + ")  # then confirm the token it returns"
+            ),
+            "this_server_will_not_do_it_for_you": (
+                "Restoring is a WRITE and gets its own preview, its own token "
+                "and its own confirmation. Nothing here is queued, scheduled "
+                "or held. If the previous value reads as null it could not be "
+                "read before the change -- which is not the same as it having "
+                "been empty, and on a restore that difference is the message."
+            ),
+        }
+
     return {
         "action": spec.action,
         "what": spec.summary,
         "target": target_block,
         "performed": performed,
+        **({"restore": restore_block} if restore_block is not None else {}),
         # THE SAME DISCLOSURE THE PREVIEW CARRIED, repeated on the result and
         # not merely referenced. Ruling 1, 2026-09-01.
         #

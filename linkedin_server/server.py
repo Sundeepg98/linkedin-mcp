@@ -1,4 +1,4 @@
-"""The tool surface: thirty-five tools, ten of which write to LinkedIn.
+"""The tool surface: thirty-five tools, eleven of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -47,6 +47,20 @@ writing would belong in the other column, and would fail
 ``test_the_surface_is_exactly_the_thirtyfive_tools``'s split rather than
 being argued about here.
 
+THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
+first correction here that moves a tool BETWEEN columns instead of adding one.
+No tool was registered: ``linkedin_update_profile_field`` was already on the
+surface and already refusing, and the operator ruled "I want all capabilities".
+So thirty-five is unchanged, TEN -> ELEVEN write, and the write-shaped-but-
+unable column drops from TWO to ONE.
+
+It is worth one more sentence than the arrivals were. The eighth correction
+above says ``linkedin_profile_editor_values`` "exists so
+``linkedin_update_profile_field`` can be undone" -- that is what it now does,
+and the undo is a SECOND GATED CALL he makes rather than anything this server
+runs for him. The result block carries the previous value verbatim and the
+exact call that restores it.
+
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Thirty-five is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
@@ -54,11 +68,18 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-THREE read, TEN write, and TWO are write-shaped, registered,
-gated and cannot act at all -- none is in ``writes.PERFORMABLE``, none holds a
-``url_template``, and ``writes.mint`` refuses each of them a grant at issue,
-so no confirm token for any of them can exist. Twenty-three plus ten plus two
-is thirty-five.
+needs: TWENTY-THREE read, ELEVEN write, and ONE is write-shaped, registered,
+gated and cannot act at all -- it is not in ``writes.PERFORMABLE``, and
+``writes.mint`` refuses it a grant at issue, so no confirm token for it can
+exist. Twenty-three plus eleven plus one is thirty-five.
+
+AND THE REASON MINT REFUSES IT CHANGED ON 2026-09-02, which matters because
+the old sentence gave the wrong one. It said the refusal followed from holding
+no ``url_template``. That was true of every member of this column while none
+of them happened to carry one -- an accident nothing required, and it broke
+the moment ``update_profile_field`` was given an address while still refusing.
+``mint`` now refuses on ``PERFORMABLE`` MEMBERSHIP, which is the reason it
+always meant: an address is not a permission.
 
 NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
 THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
@@ -222,12 +243,17 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TEN WRITE: linkedin_save_job, "
+        "nothing. ELEVEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
-        "linkedin_send_invitation, linkedin_publish_post and "
-        "linkedin_comment_on_item. Call any of them "
+        "linkedin_send_invitation, linkedin_publish_post, "
+        "linkedin_comment_on_item and linkedin_update_profile_field. "
+        "THE ELEVENTH ARRIVED 2026-09-02 and is the only one here that "
+        "can verify its own outcome by reading the field back; it also "
+        "returns the PREVIOUS value verbatim and the exact call that "
+        "puts it back, which this server will never run for him. "
+        "Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
         "that block, used once within two minutes, actually acts. NEVER "
@@ -4142,9 +4168,25 @@ async def linkedin_react_to_item(
 async def linkedin_update_profile_field(
     field: str, value: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """Change one field on your own profile. BUILT, GATED, AND REFUSING.
+    """Change one field on your own profile. PERFORMS, behind the usual gate.
 
-    Reads your profile live, then refuses and says what it found.
+    IT REFUSED UNTIL 2026-09-02 and this paragraph said so. What changed is
+    that everything its refusal named as missing was BUILT: the editor is
+    addressed by an exact-url exemption, its controls are read live and matched
+    by name, and a fourth sanctioned mutation kind chooses among the options
+    the page itself defines.
+
+    THE BEST-VERIFIED WRITE THIS SERVER HAS, and that is a low bar worth
+    stating precisely. publish_post declares its outcome unverifiable;
+    send_invitation has no verification at all; apply_job can establish only
+    that it did NOT happen. This one reads the field back afterwards and
+    compares it to what you asked for -- so `performed` can honestly be true.
+
+    AND IT HANDS YOU THE VALUE IT OVERWROTE. The result carries the previous
+    value verbatim and the exact call that puts it back. THAT CALL IS NOT AN
+    UNDO BUTTON AND THIS SERVER WILL NEVER RUN IT FOR YOU: restoring is a
+    write, and it gets its own preview, its own token and your confirmation,
+    exactly like this one did.
 
     WHAT IS MEASURED, and it CONTRADICTS what this server used to say. Profile
     editors ARE addressed by url. Three are ordinary anchors on your own

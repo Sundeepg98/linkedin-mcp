@@ -114,8 +114,14 @@ async def test_the_server_docstring_numbers_are_derived(tools):
         % (headline.group(2), len(performable))
     )
 
+    # "is" AS WELL AS "are" SINCE 2026-09-02. The third column dropped to
+    # ONE when update_profile_field shipped, and "one are write-shaped" is
+    # not a sentence. The regex follows the prose rather than the prose
+    # being bent to keep a regex happy -- a docstring written for a
+    # matcher stops being written for a reader.
     split = re.search(
-        r"([A-Z-]+) read, ([A-Z-]+) write, and ([A-Z-]+) are write-shaped", doc
+        r"([A-Z-]+) read, ([A-Z-]+) write, and ([A-Z-]+) (?:is|are) write-shaped",
+        doc,
     )
     assert split, "the three-way split sentence changed shape"
     assert _NUMBER_WORDS[split.group(1).lower()] == reads, (

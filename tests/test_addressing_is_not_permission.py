@@ -160,14 +160,38 @@ def test_only_one_function_may_combine_addressing_with_permission():
     assert "PERFORMABLE" in source
     assert "url_template" in source
 
-    # And it answers both halves, checked behaviourally rather than by reading.
-    addressed_but_refused = writes.spec_for_action("update_profile_field")
-    assert addressed_but_refused.url_template is not None
-    assert addressed_but_refused.action not in writes.PERFORMABLE
-    assert writes.grant_is_possible(addressed_but_refused) is False
+    # AND IT ANSWERS BOTH HALVES -- ON A SPEC BUILT FOR THE PURPOSE, because
+    # the registry no longer contains a discriminating one.
+    #
+    # THIS IS WORTH THE SENTENCE. Until 2026-09-02 update_profile_field WAS
+    # the addressed-but-unperformable case, and it was the reason this
+    # assertion could tell the two halves apart. Then it shipped, and every
+    # addressed action became performable again -- so a test that kept using
+    # the registry would have gone on passing while no longer discriminating
+    # anything. That is the permissive-skip shape from section 93, arriving in
+    # a test whose subject is precisely that defect.
+    #
+    # So the pair is CONSTRUCTED. An addressed spec whose action is not in
+    # PERFORMABLE must be refused a grant, and the only thing that can refuse
+    # it is the membership half.
+    import dataclasses
 
-    performable = writes.spec_for_action("save_job")
-    assert writes.grant_is_possible(performable) is True
+    real = writes.spec_for_action("save_job")
+    assert writes.grant_is_possible(real) is True
+
+    addressed_but_unperformable = dataclasses.replace(
+        real, action="not_a_sanctioned_action"
+    )
+    assert addressed_but_unperformable.url_template is not None
+    assert addressed_but_unperformable.action not in writes.PERFORMABLE
+    assert writes.grant_is_possible(addressed_but_unperformable) is False
+
+    # And the mirror: performable but unaddressed is refused by the other half.
+    performable_but_unaddressed = dataclasses.replace(
+        real, url_template=None
+    )
+    assert performable_but_unaddressed.action in writes.PERFORMABLE
+    assert writes.grant_is_possible(performable_but_unaddressed) is False
 
 
 def test_the_three_consumers_call_the_predicate_rather_than_recompute_it():
@@ -218,9 +242,7 @@ def test_the_three_consumers_call_the_predicate_rather_than_recompute_it():
     assert "grant_is_possible" not in mint_source
 
 
-@pytest.mark.parametrize(
-    "action", sorted({"update_profile_field", "send_message", "set_open_to_work"})
-)
+@pytest.mark.parametrize("action", sorted({"send_message", "set_open_to_work"}))
 def test_no_unperformable_action_can_hold_a_grant(action):
     """The layer itself, asserted on the artifact rather than on the report.
 

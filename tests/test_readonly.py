@@ -110,14 +110,19 @@ def test_the_sanctioned_list_is_exactly_these_three_calls():
         ("linkedin_server/writes.py", "perform", "click"),
         ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
         ("linkedin_server/writes.py", "perform", "fill"),
+        ("linkedin_server/writes.py", "perform", "select_option"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 3
-    # EXACTLY ONE non-click, asserted separately. The count alone would let a
+    assert len(readonly.SANCTIONED_MUTATIONS) == 4
+    # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
     # puts his words on a page.
+    #
+    # FOUR FROM 2026-09-02, and the new one is the NARROWEST rather than the
+    # widest: a select_option cannot introduce a string at all, only choose
+    # one the page already defined. The argument is with the entry itself.
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
-    assert kinds == ["click", "click", "fill"], kinds
+    assert kinds == ["click", "click", "fill", "select_option"], kinds
 
 
 def test_every_sanctioned_entry_is_actually_present():
@@ -157,11 +162,12 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
         len(readonly.scan_source_for_mutations(m.read_text(encoding="utf-8")))
         for m in MODULES
     )
-    # TWO from 2026-08-26, THREE from 2026-09-01 when one page.fill entered.
-    # The equality against the allowlist LENGTH is the load-bearing half and
-    # is unchanged -- an unlisted mutating call still fails whatever its kind
-    # -- while the literal is what makes growth visible in a diff.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 3, total
+    # TWO from 2026-08-26, THREE from 2026-09-01 when one page.fill entered,
+    # FOUR from 2026-09-02 with one page.select_option. The equality against
+    # the allowlist LENGTH is the load-bearing half and is unchanged -- an
+    # unlisted mutating call still fails whatever its kind -- while the
+    # literal is what makes growth visible in a diff.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 4, total
 
 
 def test_the_partition_conserves_every_hit():

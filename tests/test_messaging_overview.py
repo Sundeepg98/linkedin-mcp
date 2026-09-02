@@ -249,7 +249,10 @@ def test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted():
     # The number is what this asserts; that none of them is reachable from
     # a READ path is what it means. A fill inside the gated write cannot be
     # reached by this call and the count moving does not change that.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 3
+    # FOUR SINCE 2026-09-02, when the profile editor's select_option was
+    # sanctioned. The number is what makes growth visible in a diff; the
+    # load-bearing half is that an unlisted mutating call still fails.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 4
     # NOT ALL CLICKS ANY MORE, and the assertion is re-aimed at the property
     # this test is actually about rather than loosened. It read
     # ``all(kind == "click" ...)`` until 2026-09-01, which was a true
@@ -404,7 +407,10 @@ def test_the_click_is_on_the_sanctioned_list_and_the_list_is_still_short():
     # The number is what this asserts; that none of them is reachable from
     # a READ path is what it means. A fill inside the gated write cannot be
     # reached by this call and the count moving does not change that.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 3
+    # FOUR SINCE 2026-09-02, when the profile editor's select_option was
+    # sanctioned. The number is what makes growth visible in a diff; the
+    # load-bearing half is that an unlisted mutating call still fails.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 4
 
 
 def test_the_compose_surface_is_still_refused_after_all_of_this():

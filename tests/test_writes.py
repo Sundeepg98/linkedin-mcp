@@ -727,6 +727,15 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # the two entries it has been since 2026-08-26, because the click it needs
     # is perform()'s existing one.
     assert writes.PERFORMABLE == {
+        # THE TWELFTH, 2026-09-02, on the operator's ruling "I want all
+        # capabilities". It is the only member of this set that can verify its
+        # own outcome by reading the changed value back -- publish_post
+        # declared its outcome unverifiable, send_invitation has none at all,
+        # and apply_job can establish only that it did NOT happen. It is also
+        # the only one that hands back the value it overwrote, verbatim, with
+        # the exact call that restores it and the statement that this server
+        # will not run that call for him.
+        "update_profile_field",
         "save_job",
         "unsave_job",
         "unfollow_company",
@@ -765,9 +774,13 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # having left in the same wave that brought seven in.
     # Eight until 2026-08-31, SEVEN since -- ``update_setting`` left by being
     # performed, which is the only way anything is supposed to leave.
+    # TWO SINCE 2026-09-02, down from three. update_profile_field left by
+    # SHIPPING -- the only way anything leaves this set -- and its refusal was
+    # removed from _NINE_REFUSALS rather than reworded, on this module's
+    # standing rule that a refusal kept for a performable action tells a
+    # caller the opposite of the truth.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "set_open_to_work",
-        "update_profile_field",
         "send_message",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
@@ -2749,30 +2762,32 @@ def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
     """
     source = Path(writes.__file__).read_text(encoding="utf-8")
     raw = readonly.scan_source_for_mutations(source)
-    # TWO SINCE 2026-09-01: the click, and the fill publish_post needed. The
-    # raw scan still reports BOTH -- it was not taught to stop seeing either,
-    # which is the whole reason it can still see a third.
-    assert len(raw) == 2, raw
+    # THREE SINCE 2026-09-02: the click, the fill publish_post needed, and the
+    # select_option the profile editor needed. The raw scan still reports ALL
+    # THREE -- it was not taught to stop seeing any of them, which is the whole
+    # reason it can still see a fourth.
+    assert len(raw) == 3, raw
     # ORDER-FREE, and that is a correction rather than a loosening. This read
     # ``raw[0][1] == "click"`` while there was one hit; with two, position in
     # the scan is a fact about which call comes FIRST IN THE FILE, which is
     # not a property worth asserting -- moving the fill above the click would
     # have failed a check that is supposed to be about kinds.
-    assert sorted(hit[1] for hit in raw) == ["click", "fill"], raw
+    assert sorted(hit[1] for hit in raw) == ["click", "fill", "select_option"], raw
 
     sanctioned, unsanctioned = readonly.partition_mutation_hits(
         "linkedin_server/writes.py", source
     )
     assert unsanctioned == []
-    # TWO SINCE 2026-09-01, and BOTH IN ``perform``: the click, and the fill
-    # that publish_post needed. The count is asserted rather than derived, so
-    # a third mutating call in this module fails here whatever its kind -- and
-    # every one of them is required to be in ``perform``, which is the half
-    # that keeps the drain points auditable.
-    assert len(sanctioned) == 2, sanctioned
+    # THREE SINCE 2026-09-02, and ALL IN ``perform``: the click, the fill that
+    # publish_post needed, and the select_option the profile editor needed.
+    # The count is asserted rather than derived, so a FOURTH mutating call in
+    # this module fails here whatever its kind -- and every one of them is
+    # required to be in ``perform``, which is the half that keeps the drain
+    # points auditable.
+    assert len(sanctioned) == 3, sanctioned
     for hit in sanctioned:
         assert readonly.enclosing_function(source, hit[0]) == "perform", hit
-    assert sorted(hit[1] for hit in sanctioned) == ["click", "fill"]
+    assert sorted(hit[1] for hit in sanctioned) == ["click", "fill", "select_option"]
 
 
 def test_a_second_click_inside_perform_is_still_caught():
@@ -4133,47 +4148,59 @@ async def test_the_happy_arm_of_that_same_function_still_answers(writes_on):
 # ---------------------------------------------------------------------------
 
 
-def test_addressing_the_profile_editor_did_not_make_it_performable():
-    """THE NEGATIVE CONTROL, and it is the condition the ruling landed under.
+def test_the_profile_editor_shipped_and_membership_is_still_the_gate():
+    """THIS TEST FIRED, WHICH IS WHAT IT WAS BUILT TO DO.
 
-    ``update_profile_field`` was given a url on 2026-09-02. A url is ADDRESSING,
-    not permission -- the permission is ``PERFORMABLE`` membership, and
-    ``_refuse_unperformable`` checks that FIRST. But an address that only
-    becomes live when somebody edits a frozenset means the review that belongs
-    with "make this performable" has partly happened already, elsewhere, out of
-    context. So the ordering is proven rather than described.
+    It was ``test_addressing_the_profile_editor_did_not_make_it_performable``,
+    written on 2026-09-02 when the editor was given a url while the action
+    stayed refused. Its whole purpose was stated at the time: **the day
+    somebody flips that frozenset, a red test names what they just turned on.**
+    That day was the same day. The operator ruled "I want all capabilities",
+    ``update_profile_field`` entered ``PERFORMABLE``, and this went red naming
+    it.
 
-    THE SECOND HALF IS WHAT MAKES IT A CONTROL. Asserting that it still refuses
-    proves nothing on its own -- it refused before the url too, and a test that
-    passes identically before and after a change measures nothing. So the
-    action is added to ``PERFORMABLE`` and the SAME call must stop raising.
-    That is what identifies membership as the gate.
+    So it is rewritten to the new truth rather than deleted -- a control that
+    fires and is then removed taught nothing.
 
-    The day somebody flips that frozenset for real, this goes red and names
-    exactly what they turned on.
+    WHAT IT ASSERTS NOW is that the ordering it proved has not changed:
+    membership is STILL the gate, and the address is still not one. The action
+    is performable today because somebody added it to a frozenset, not because
+    it acquired a url -- and the constructed case below is what keeps that
+    distinction observable now that the registry no longer contains a
+    naturally-occurring one.
     """
+    import dataclasses
+
     spec = writes.spec_for_action("update_profile_field")
 
-    # It IS addressed now -- otherwise the control below would be vacuous.
+    # IT SHIPPED. Addressed, performable, and it does not raise.
     assert spec.url_template == "https://www.linkedin.com/in/me/edit/intro/"
     assert spec.exempt_substring == "/edit/"
+    assert spec.action in writes.PERFORMABLE
+    writes._refuse_unperformable(spec)  # must NOT raise
 
-    with pytest.raises(WriteAttemptError) as caught:
-        writes._refuse_unperformable(spec)
-    assert "update_profile_field" in str(caught.value)
-
-    # AND NOW THE OTHER DIRECTION: membership is the only thing holding it.
+    # AND MEMBERSHIP IS STILL WHAT DECIDES. Take the same spec, keep the
+    # address, remove it from the set: it refuses again. The url did nothing.
     original = writes.PERFORMABLE
     try:
-        writes.PERFORMABLE = frozenset(original | {"update_profile_field"})
-        writes._refuse_unperformable(spec)  # must NOT raise
+        writes.PERFORMABLE = frozenset(original - {"update_profile_field"})
+        with pytest.raises(WriteAttemptError) as caught:
+            writes._refuse_unperformable(spec)
+        assert "update_profile_field" in str(caught.value)
     finally:
         writes.PERFORMABLE = original
 
-    # Restored, or every later test in this file is running against a lie.
-    assert "update_profile_field" not in writes.PERFORMABLE
-    with pytest.raises(WriteAttemptError):
-        writes._refuse_unperformable(spec)
+    # Restored, or every later test in this file runs against a lie.
+    assert "update_profile_field" in writes.PERFORMABLE
+    writes._refuse_unperformable(spec)
+
+    # AND THE GRANT DOOR AGREES, on a constructed pair rather than on the
+    # registry -- which stopped containing an addressed-but-unperformable
+    # action the moment this one shipped.
+    addressed_only = dataclasses.replace(spec, action="not_a_sanctioned_action")
+    assert addressed_only.url_template is not None
+    assert writes.grant_is_possible(addressed_only) is False
+    assert writes.grant_is_possible(spec) is True
 
 
 def test_the_editor_exemption_is_an_exact_url_and_not_a_family():
