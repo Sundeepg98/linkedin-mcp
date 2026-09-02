@@ -3561,6 +3561,21 @@ _CENSUS_CAPS_RUN = re.compile(
 #:
 #: AND IT BROKE THE OTHER HALF TOO: with no run found, ``describe_name_shaped``
 #: returned a "name-free tail" of the ENTIRE STRING, name included.
+#:
+#: WHAT THIS IS NOT, AND THE NEXT CALLER WILL NOT HAVE WATCHED IT HAPPEN. This
+#: is a PUBLICATION GATE, not a "is this a name" oracle. It matches a
+#: capitalised word at position 0, so it matches almost every accessible name
+#: a real interface writes: ``Send``, ``InMail``, ``Open send options``,
+#: ``Write a message`` are all name-shaped to it. That is CORRECT for the
+#: question it answers -- may this string be published -- because over-refusing
+#: costs a refusal and under-refusing costs a disclosure. It is WRONG as a
+#: general test of whether a string contains a person, and a caller that uses
+#: it that way will refuse on furniture forever.
+#:
+#: SO: only feed it strings you intend to PUBLISH. A label that is never
+#: returned needs no gate, and gating it anyway is how a reader ends up
+#: refusing on its own message-box placeholder. ``dom.read_compose_fields``
+#: carries the worked example.
 _NAME_SHAPE_RUN = re.compile(
     r"[A-Z][A-Za-z0-9.'\u2019-]*(?:\s+[A-Z][A-Za-z0-9.'\u2019-]*)+"
     r"|(?:(?<=\s)|^)[A-Z][A-Za-z0-9.'\u2019-]*"
@@ -3717,15 +3732,38 @@ def describe_name_shaped(text: str) -> dict[str, Any]:
     }
 
 
+def name_shape_run_pattern() -> str:
+    """The guard's pattern as SOURCE, for a script that must shape in the page.
+
+    THIS EXISTS TO PREVENT A SECOND COPY OF THE PREDICATE. ``COMPOSE_MODES_JS``
+    shapes labels inside the browser so a raw one never reaches this process,
+    which means the run rule has to exist in JavaScript too. Writing it there
+    by hand would create exactly the drift this module spent 2026-09-02
+    removing -- two rules that agree until one is edited -- so the pattern is
+    HANDED to the script instead and compiled there.
+
+    One definition, two languages, no copy. The pattern is written in a subset
+    both engines read identically: character classes, ``\\s``, a non-capturing
+    group, an alternation and one lookbehind, all of which mean the same thing
+    to :mod:`re` and to V8.
+    """
+    return _NAME_SHAPE_RUN.pattern
+
+
 def looks_name_shaped(text: str) -> bool:
     """Is any part of this string shaped like somebody's name?
 
     STRICTLY STRICTER THAN :func:`census_redact_rare`, and until 2026-09-02
     this docstring claimed the opposite -- that the guard was DELIBERATELY the
     redactor's own rule, so the two could never drift. That reasoning was
-    sound about drift and wrong about which rule to share. Added 2026-09-01 for
-    ``dom.read_compose_fields``, which publishes raw labels from a self-owned
-    container and must stop rather than publish one that looks like a person.
+    sound about drift and wrong about which rule to share.
+
+    AND ITS ORIGINAL CALLER NO LONGER EXISTS AS DESCRIBED. This was added
+    2026-09-01 for ``dom.read_compose_fields``, "which publishes raw labels
+    from a self-owned container". Later the same week that reader was rebuilt
+    to shape its labels IN THE PAGE, so it publishes no raw label and asks
+    this predicate nothing. The reasoning survives the caller: a guard is worth
+    having, and it is worth NOT being the only one.
 
     WHAT THE SHARED RULE COST. ``_CENSUS_CAPS_RUN`` declines to match a
     capitalised word at position 0, because in a census that word is the

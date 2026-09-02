@@ -2896,12 +2896,23 @@ async def linkedin_compose_fields() -> dict[str, Any]:
       party AT ALL -- that is what licenses reading its labels, and it is
       asserted rather than assumed. With a recipient present the labels
       describe a conversation with a person in it and the argument evaporates.
-    * NOTHING NAME-SHAPED IS PUBLISHED. A label carrying a run of capitalised
-      words stops it. That is not about hiding his name from him: a control
-      label becomes a COMMITTED CONSTANT, and a name in source is a name
-      committed. The SHAPE comes back instead -- how many capitalised runs,
-      whether they are joined by "to", and the name-free tail -- which tells
-      the two modes apart without carrying anybody's name.
+    * THE PAGE IS NOT THE PAGE THIS WAS BUILT AGAINST. It reads the two
+      dispatch radios by role and refuses unless there are EXACTLY two with
+      EXACTLY one checked, plus exactly one message body. Anything else and it
+      cannot say which control is a send mode, so it says nothing.
+
+    NO LABEL IS PUBLISHED BECAUSE NO LABEL IS READ INTO THIS SERVER. Until
+    2026-09-02 this paragraph described a second guard: labels came back and a
+    predicate decided whether to refuse. That made one regex the only thing
+    between his name and the output, on the one surface whose labels ARE his
+    name -- and it failed open on the checked default for a day and a half.
+    The labels are now reduced INSIDE THE BROWSER and the raw string never
+    crosses into this process, on any path including refusals.
+
+    So what comes back is the SHAPE and only ever the shape: how many
+    capitalised runs a label carried, whether they were joined by "to", the
+    name-free tail, and which radio is checked. That is enough to tell the two
+    modes apart and it carries nobody's name.
 
     THE BADGE. This loads a messaging surface, so read the nav badge before
     and after through the profile census. It is measured at 0 either side

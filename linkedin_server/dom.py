@@ -3063,10 +3063,21 @@ EDITOR_FIELDS_JS = """
   catch (e) { container = null; }
   if (!container) return out;
 
-  // The selector admits exactly two things, so the kind is total rather than a
-  // lookup: the tag, or else it matched on the role.
+  // WHAT THE CONTAINER ACTUALLY IS -- and this LIED until 2026-09-02.
+  // It read `containerTag === 'dialog' ? 'dialog' : 'role=dialog'`, under a
+  // comment asserting "the selector admits exactly two things". That was true
+  // of EDITOR_CONTAINER_SELECTOR and stopped being true the moment the
+  // selector became an ARGUMENT: read_compose_fields passes "form", so every
+  // <form> came back labelled `role=dialog`. Nothing branched on the value --
+  // Python only checks it for truthiness -- so nothing failed, and the unit
+  // test's double returned "form", a shape the real script could not produce.
+  // The double and the script disagreed, and the double was the one that
+  // looked right.
   const containerTag = (container.tagName || '').toLowerCase();
-  out.container_kind = containerTag === 'dialog' ? 'dialog' : 'role=dialog';
+  const containerRole = attrOf(container, 'role').trim().toLowerCase();
+  out.container_kind = (containerTag === 'dialog' || containerTag === 'form')
+    ? containerTag
+    : (containerRole ? 'role=' + containerRole : containerTag);
 
   let inside;
   try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
@@ -3505,7 +3516,10 @@ EDITOR_VALUES_JS = """
   if (!container) return out;
 
   const containerTag = (container.tagName || '').toLowerCase();
-  out.container_kind = containerTag === 'dialog' ? 'dialog' : 'role=dialog';
+  const containerRole = attrOf(container, 'role').trim().toLowerCase();
+  out.container_kind = (containerTag === 'dialog' || containerTag === 'form')
+    ? containerTag
+    : (containerRole ? 'role=' + containerRole : containerTag);
 
   let inside;
   try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
@@ -4846,6 +4860,250 @@ MESSAGE_SEND_NAME = "Send"
 #:
 #: The page does draw exactly one form; that half was true.
 MESSAGE_CONTAINER_SELECTOR = "form"
+#: The two dispatch radios and the message body, SHAPED IN THE PAGE.
+#:
+#: WHY A TWELFTH SCRIPT RATHER THAN A FLAG ON :data:`EDITOR_FIELDS_JS`. Two
+#: reasons, and the second is the one that decided it.
+#:
+#: FIRST, REACH. That script is anchor-then-``closest(containerSelector)``.
+#: The dispatch radios have NO container ancestor at all -- measured twice,
+#: ``containers {"none": 1}`` -- so no value of any parameter it already takes
+#: can reach them. Giving it a document-wide mode would put a
+#: select-anywhere path inside a script whose entire safety story is "the
+#: container IS the permission", and the profile editor runs that same script.
+#:
+#: SECOND, AND DECISIVELY: EDITOR_FIELDS_JS RETURNS ACCESSIBLE NAMES UNGATED.
+#: That is by design and correct for a container measured to be his own. On
+#: THIS surface the labels ARE his name -- the checked radio reads ``<him>
+#: will send message`` -- so returning them and then guarding them in Python
+#: makes :func:`shape.looks_name_shaped` the only thing between his name and
+#: the output. That guard failed OPEN on this exact label until 2026-09-02.
+#: A correct guard is one regex edit from being an incorrect guard, so this
+#: script does not rely on one: THE RAW LABEL NEVER LEAVES THE BROWSER, on any
+#: path, refusals included. The guard becomes a second line rather than the
+#: only one.
+#:
+#: WHAT COMES BACK is the discriminator and nothing else: how many capitalised
+#: runs a label carries, whether they are joined by "to", and the name-free
+#: TAIL that survives the last run. Never the label.
+#:
+#: THE RUN RULE IS HANDED IN, NOT REWRITTEN. ``cfg.nameShapeRun`` carries
+#: :func:`shape.name_shape_run_pattern`, so the predicate has ONE definition
+#: that two engines compile. A hand-written copy here would be the same drift
+#: this package removed the morning it was written.
+#:
+#: AND ``tail`` IS NULL WHEN NOTHING MATCHED, which is the one place the
+#: Python descriptor cannot be copied. :func:`shape.describe_name_shaped`
+#: returns ``tail: raw.strip()`` on zero runs -- the WHOLE STRING -- which is
+#: safe there because the caller already holds the string. Here it would be
+#: the leak. Zero runs returns ``null`` and the reader refuses.
+COMPOSE_MODES_JS = """
+(cfg) => {
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found);
+  };
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+
+  // THE NAME, RESOLVED BUT NEVER RETURNED. Every route here feeds shapeOf and
+  // nothing else; no branch puts `raw` on `out`.
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { raw: aria, source: 'aria-label' };
+    const ids = attrOf(el, 'aria-labelledby');
+    if (ids) {
+      const parts = [];
+      for (const id of ids.split(/\\s+/)) {
+        if (!id) continue;
+        let target = null;
+        try { target = document.getElementById(id); } catch (e) { target = null; }
+        if (target) parts.push(textOf(target));
+      }
+      const joined = parts.join(' ').trim();
+      if (joined) return { raw: joined, source: 'aria-labelledby' };
+    }
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (labels && labels.length) {
+      const id = attrOf(el, 'id');
+      for (const node of labels) {
+        if (id && attrOf(node, 'for') !== id) continue;
+        const named = textOf(node);
+        if (named) return { raw: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = textOf(wrapper);
+      if (named) return { raw: named, source: 'label-ancestor' };
+    }
+    return { raw: '', source: 'none' };
+  };
+
+  // THE SHAPING, and the only thing downstream of a raw label.
+  const shapeOf = (raw) => {
+    let re;
+    try { re = new RegExp(cfg.nameShapeRun, 'g'); }
+    catch (e) { return null; }
+    const spans = [];
+    let match;
+    while ((match = re.exec(raw)) !== null) {
+      if (match[0] === '') { re.lastIndex += 1; continue; }
+      spans.push([match.index, match.index + match[0].length]);
+      if (spans.length > 64) break;
+    }
+    if (!spans.length) return { runs: 0, joined_by_to: false, tail: null };
+    const last = spans[spans.length - 1];
+    const between = spans.length > 1 ? raw.slice(spans[0][1], last[0]) : '';
+    return {
+      runs: spans.length,
+      joined_by_to: between.trim().toLowerCase() === 'to',
+      // NAME-FREE BY CONSTRUCTION: what survives the LAST capitalised run.
+      tail: raw.slice(last[1]).trim()
+    };
+  };
+
+  const out = {
+    radio_count: 0,
+    checked_count: 0,
+    textbox_count: 0,
+    body_present: false,
+    body_is_editable: false,
+    body_name_source: null,
+    modes: [],
+    refused: null
+  };
+
+  let radios = [];
+  let boxes = [];
+  try { radios = Array.from(document.querySelectorAll('input[type="radio"]')); }
+  catch (e) { radios = []; }
+  try { boxes = Array.from(document.querySelectorAll('div[role="textbox"]')); }
+  catch (e) { boxes = []; }
+
+  out.radio_count = radios.length;
+  out.textbox_count = boxes.length;
+
+  // EXACTLY TWO, EXACTLY ONE CHECKED, asserted BEFORE anything is shaped. The
+  // count is the whole structural claim: on this surface `input[type=radio]`
+  // is measured at exactly 2 across 77 controls, so a third radio means the
+  // page is not the page this was built against and the aim is not safe.
+  let checked = 0;
+  for (const el of radios) { if (el.checked === true) checked += 1; }
+  out.checked_count = checked;
+  if (radios.length !== 2) { out.refused = 'radio_count_not_two'; return out; }
+  if (checked !== 1) { out.refused = 'checked_count_not_one'; return out; }
+  if (boxes.length !== 1) { out.refused = 'textbox_count_not_one'; return out; }
+
+  // THE BODY: presence and KIND only. Its label is never shaped, never
+  // guarded and never returned -- see the note on read_compose_fields.
+  const body = boxes[0];
+  out.body_present = true;
+  try { out.body_is_editable = body.isContentEditable === true; }
+  catch (e) { out.body_is_editable = false; }
+  out.body_name_source = nameOf(body).source;
+
+  for (const el of radios) {
+    const shaped = shapeOf(nameOf(el).raw);
+    if (!shaped) { out.refused = 'shaping_unavailable'; out.modes = []; return out; }
+    if (shaped.runs === 0) { out.refused = 'label_carried_no_run'; out.modes = []; return out; }
+    out.modes.push({
+      runs: shaped.runs,
+      joined_by_to: shaped.joined_by_to,
+      tail: shaped.tail,
+      checked: el.checked === true,
+      disabled: el.disabled === true
+        || attrOf(el, 'aria-disabled').trim().toLowerCase() === 'true'
+    });
+  }
+  return out;
+}
+"""
+
+
+
+#: WHY EACH STRUCTURAL REFUSAL HAPPENED, in words, with the counts filled in.
+#:
+#: EVERY ONE OF THESE IS "THE PAGE IS NOT THE PAGE THIS WAS BUILT AGAINST".
+#: None of them is a privacy refusal, because there is no privacy decision left
+#: to make here -- the script never hands over a label. That is the whole point
+#: of shaping in the page: the only thing this reader can still get wrong is
+#: AIM, and aim is what these report.
+_COMPOSE_REFUSALS = {
+    "radio_count_not_two": (
+        "this surface draws {radios} radio(s); the composer's dispatch choice "
+        "is measured at EXACTLY TWO across 77 controls, on 2026-08-31 and "
+        "again on 2026-09-02. A different number means the page changed shape "
+        "and this reader cannot say which control is a send mode. Nothing was "
+        "shaped and nothing is returned."
+    ),
+    "checked_count_not_one": (
+        "{checked} of the two dispatch radios report checked. A radio group "
+        "has exactly one selection; zero means the page had not settled and "
+        "two means these are not one group. Either way the question 'which "
+        "mode is default' has no answer, so none is invented."
+    ),
+    "textbox_count_not_one": (
+        "this surface draws {boxes} div[role=textbox]; the composer's message "
+        "body is measured at exactly one, corroborated by a contenteditable "
+        "count of one. A different number means the body cannot be identified "
+        "by role alone."
+    ),
+    "label_carried_no_run": (
+        "a dispatch radio's label carries no capitalised run at all, so the "
+        "page cannot produce a name-free tail for it. THE STRING IS NOT "
+        "RETURNED SO THAT IT CAN BE INSPECTED -- that would be the disclosure "
+        "this reader exists to avoid. Note the case that reaches here: the run "
+        "rule is ASCII, so a name in another script scores zero runs, and "
+        "refusing is the only safe answer to 'I cannot analyse this'."
+    ),
+    "shaping_unavailable": (
+        "the page could not compile the run rule handed to it, so no label "
+        "was shaped. Reported rather than fallen back on: a fallback here "
+        "would be a second, unreviewed predicate."
+    ),
+}
+
+
+async def read_compose_modes(page: Any) -> dict[str, Any]:
+    """Shape the two dispatch radios IN THE PAGE. No label comes back.
+
+    THIS IS THE TWELFTH INJECTED SCRIPT AND THE ARGUMENT FOR IT IS PRIVACY,
+    not reach. Reach alone could have been bought by widening
+    :data:`EDITOR_FIELDS_JS`, and that was considered and refused: it would
+    put a select-anywhere path into a script whose safety story is "the
+    container IS the permission", which the profile editor also runs.
+
+    The deciding argument is the other one. ``EDITOR_FIELDS_JS`` returns
+    accessible names UNGATED -- correct for a container measured to be his own.
+    Here the labels ARE his name, so returning them would make
+    :func:`shape.looks_name_shaped` the only thing standing between his name
+    and the output. It failed open on this exact label until 2026-09-02. So
+    the label is shaped where it lives and never crosses into this process.
+
+    WHAT COMES BACK: counts, a checked flag, and per radio the run count,
+    whether the runs are joined by "to", and the name-free tail. On any
+    refusal, ``modes`` is EMPTY -- a refusal that quotes what it refused is
+    the leak wearing an apology.
+    """
+    cfg = {
+        # ONE DEFINITION, TWO ENGINES. Handing the pattern over is what stops a
+        # second copy of the run rule existing in JavaScript and drifting from
+        # the Python one -- which is the exact defect this package removed on
+        # the morning this script was written.
+        "nameShapeRun": shape.name_shape_run_pattern(),
+    }
+    try:
+        data = await page.evaluate(COMPOSE_MODES_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the composer's dispatch modes: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return dict(data or {})
 
 
 async def read_compose_fields(page: Any) -> dict[str, Any]:
@@ -4915,56 +5173,49 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
         )
         return out
 
-    reading = await read_self_owned_editor_fields(
-        page,
-        anchor_name=MESSAGE_SEND_NAME,
-        container_selector=MESSAGE_CONTAINER_SELECTOR,
-    )
-    # NO EXPLICIT REFUSAL PASSTHROUGH, and its absence is deliberate. One was
-    # written here and REMOVED on 2026-09-01 after a mutation showed deleting
-    # it left the suite green: a refusal carries no ``fields``, so the walk
-    # below finds nothing to name-check and returns the reading as it arrived.
-    # The branch and the test guarding it were the same redundancy twice, and
-    # a branch that cannot be observed to matter is a branch that hides
-    # whether the code under it works.
-    fields = list(reading.get("fields") or [])
-    named = [str(field.get("name") or "") for field in fields]
-    offending = [name for name in named if shape.looks_name_shaped(name)]
-    if offending:
-        # THE GUARD REFUSES AND THE READER STILL ANSWERS.
-        #
-        # The raw labels are NOT returned -- not because he must not see his
-        # own name, but because a control label becomes a COMMITTED CONSTANT
-        # in this repository, and a literal "<name> will send message" in
-        # source is a name committed. test_no_committed_identity would flag it
-        # on the next run and would be right to.
-        #
-        # So what comes back is the DISCRIMINATOR rather than the string. The
-        # composer's two send modes differ structurally and the difference
-        # carries no name: one capitalised run without " to ", against two
-        # runs joined by it, both before the same name-free tail. That is
-        # enough to say WHICH MODE IS CHECKED, which is the question, and it
-        # is storable where the label is not.
+    reading = await read_compose_modes(page)
+    refused = reading.get("refused")
+    if refused:
         return {
-            "refused": "name_shaped_label_present",
+            "refused": refused,
             "recipients_selected": chosen,
-            "why": (
-                f"{len(offending)} control label(s) in this container carry a "
-                "run of capitalised words, which is how a person's name looks "
-                "to every reader in this package. The labels are NOT returned "
-                "-- a label becomes a committed constant, and a name in source "
-                "is a name committed. Their SHAPE is returned instead, which "
-                "distinguishes the send modes without carrying anybody's name."
+            "why": _COMPOSE_REFUSALS[refused].format(
+                radios=reading.get("radio_count"),
+                checked=reading.get("checked_count"),
+                boxes=reading.get("textbox_count"),
             ),
-            # NAME-FREE BY CONSTRUCTION: counts, a boolean, and the text that
-            # survives the last capitalised run.
-            "label_shapes": [
-                dict(shape.describe_name_shaped(name), checked=bool(field.get("checked")))
-                for name, field in zip(named, fields)
-                if shape.looks_name_shaped(name)
-            ],
+            "radio_count": reading.get("radio_count"),
+            "checked_count": reading.get("checked_count"),
+            "textbox_count": reading.get("textbox_count"),
         }
-    return dict(reading, recipients_selected=chosen)
+
+    # THE ANSWER, AND THERE IS NO LABEL IN IT TO WITHHOLD.
+    #
+    # Until 2026-09-02 this returned raw labels and then asked
+    # ``shape.looks_name_shaped`` whether to refuse -- which made that
+    # predicate the only thing between his name and the output, on the one
+    # surface whose labels ARE his name. It failed open on the checked default
+    # for a day and a half. Now the shaping happens in the page and the raw
+    # label never enters this process, so there is nothing here to guard: the
+    # guard is a second line elsewhere rather than the only line here.
+    return {
+        "recipients_selected": chosen,
+        "modes": list(reading.get("modes") or []),
+        # THE BODY, PRESENCE AND KIND ONLY. Its label is deliberately NOT
+        # shaped, NOT guarded and NOT returned, and that is a decision rather
+        # than an omission. The guard gates PUBLICATION; a label that is never
+        # published has nothing to gate. And the split predicate is strict
+        # enough that ordinary furniture trips it -- the body's own label is
+        # something like "Write a message", which opens with a capital -- so
+        # feeding it to the guard would make this reader refuse forever on its
+        # own placeholder. See the note on :data:`shape._NAME_SHAPE_RUN`.
+        "body": {
+            "present": bool(reading.get("body_present")),
+            "is_editable": bool(reading.get("body_is_editable")),
+            # A KIND, never the name: 'aria-label', 'label-for', 'content'...
+            "name_source": reading.get("body_name_source"),
+        },
+    }
 
 
 def comment_editor_selector() -> str:

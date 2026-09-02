@@ -452,7 +452,44 @@ def test_only_dom_module_waives_evaluate():
     # UNCONDITIONAL assertion that it contains no value read, and a cfg flag
     # would turn that into a claim about a branch. A waiver is the cheaper
     # thing to spend than that guard.
-    assert waived_in.get("dom.py", 0) <= 11, waived_in
+    # TWELVE FROM 2026-09-02, and it is the FOURTH spent on a privacy
+    # guarantee -- COMPOSE_MODES_JS, run by dom.read_compose_modes. It reads
+    # the message composer's two dispatch radios, whose labels are measured to
+    # be "<him> will send message" and "<him> to <a company> will send
+    # message". The labels ARE his name.
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT, and it is the seventh's argument
+    # exactly. The work is: resolve each radio's accessible name, count the
+    # capitalised runs in it, and return the counts and the name-free tail. A
+    # locator chain would fetch the label into this process and decide
+    # afterwards -- and a string that reaches this process can reach a
+    # traceback, a log line or a cache key. The whole point of doing it in the
+    # page is that the label never exists here at all.
+    #
+    # WHY IT IS A SECOND SCRIPT rather than a flag on EDITOR_FIELDS_JS. Two
+    # reasons, and the second is the one that decided it.
+    #
+    # REACH: the eighth is anchor-then-closest(containerSelector), and the
+    # dispatch radios have NO container ancestor -- measured twice,
+    # containers {"none": 1}. No value of any parameter it already takes
+    # reaches them, so it would need a document-wide mode: a select-anywhere
+    # path inside the script whose entire safety story is "the container IS
+    # the permission", which the profile editor also runs. The census measured
+    # what is on that page while this was decided: twenty-two controls naming
+    # people, with zero recipients selected.
+    #
+    # AND THE DECIDING ONE: the eighth returns accessible names UNGATED. That
+    # is correct for a container measured to be his own, and it is why it is
+    # described above as the seventh's inverse. On THIS surface the names are
+    # his, so riding that script means shape.looks_name_shaped is the only
+    # thing between his name and the output -- and that predicate failed OPEN
+    # on this exact label until 2026-09-02. A flag would also make the
+    # eighth's containment story conditional, which is the same objection that
+    # bought the eleventh.
+    #
+    # A correct guard is one regex edit from being an incorrect guard. This
+    # waiver buys the label never being in the process to guard.
+    assert waived_in.get("dom.py", 0) <= 12, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -460,6 +497,15 @@ def test_only_dom_module_waives_evaluate():
 # ---------------------------------------------------------------------------
 
 INJECTED_SCRIPTS = {
+    # 2026-09-02. The composer's dispatch modes, shaped IN THE PAGE. Declared
+    # here for the ordinary reason -- an executed script that is not declared
+    # is one nobody reviewed -- and it needs the scan for the usual reason and
+    # the privacy assertion for its own: it is the only script here that
+    # resolves an accessible name KNOWN to be the operator's own name, and the
+    # entire design is that the string is reduced to counts before it can
+    # leave. test_the_compose_script_returns_no_unshaped_label is the check
+    # that the reduction has no bypass.
+    "COMPOSE_MODES_JS": dom.COMPOSE_MODES_JS,
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
     "READ_PROFILE_JS": dom.READ_PROFILE_JS,
@@ -671,10 +717,21 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     returns what the controls HOLD, verbatim -- and a second script rather
     than a flag on the eighth precisely so that the eighth's "no value read"
     assertion stays unconditional.
+
+    TWELVE FROM 2026-09-02: ``COMPOSE_MODES_JS``, run once from
+    ``dom.read_compose_modes``. It is the NARROWEST-publishing script on the
+    list and the exact opposite of the eleventh -- it resolves a label it is
+    forbidden to return, and hands back only how many capitalised runs the
+    label carried, whether they were joined by "to", and the tail that
+    survives the last one. It is a second script rather than a flag on the
+    eighth for the same reason the eleventh was, plus one the eleventh did not
+    have: the eighth cannot REACH these controls at all, because they have no
+    container ancestor to be scoped to. The argument is with the budget in
+    ``test_only_dom_module_waives_evaluate``.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 11, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 12, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

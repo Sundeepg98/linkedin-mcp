@@ -669,3 +669,74 @@ def test_envelope_merges_extra_fields():
     assert out["query"] == "node.js"
     assert out["pages_loaded"] == 2
     assert out["results"] == ROWS
+
+
+# ---------------------------------------------------------------------------
+# describe_name_shaped -- and the circular oracle that used to "check" it
+# ---------------------------------------------------------------------------
+
+#: Label, and the descriptor a HUMAN says it should produce. Literal expected
+#: values are the whole point: see the docstring below.
+DESCRIPTOR_CASES = [
+    ("Ada Lovelace will send message", 1, False, "will send message"),
+    ("Ada Lovelace to Grace Hopper will send message", 2, True, "will send message"),
+    ("Grace Hopper", 1, False, ""),
+    ("Send", 1, False, ""),
+    ("Open send options", 1, False, "send options"),
+    ("", 0, False, ""),
+]
+
+
+@pytest.mark.parametrize("label,runs,joined,tail", DESCRIPTOR_CASES)
+def test_the_descriptor_returns_the_tail_a_reader_would_write_down(
+    label, runs, joined, tail
+):
+    """The descriptor's invariant, checked with an INDEPENDENT oracle.
+
+    THIS TEST REPLACED A CIRCULAR ONE, and the circularity is the finding
+    rather than the bug it hid. The previous version asserted:
+
+        assert not shape.looks_name_shaped(tail)
+
+    -- it validated the descriptor USING THE PREDICATE THE DESCRIPTOR IS BUILT
+    ON. When the tail IS somebody's name, ``looks_name_shaped(tail)`` is False,
+    so ``not False`` passes and the test AGREES WITH THE BUG BY CONSTRUCTION.
+    No amount of care in writing that assertion would have helped, because the
+    oracle and the subject were the same rule.
+
+    A CHECKER MAY NEVER BE ITS OWN ORACLE. The expected values here are
+    written out by hand, so the only way this test can agree with a broken
+    descriptor is for a person to have written the broken answer down.
+    """
+    out = shape.describe_name_shaped(label)
+    assert (out["runs"], out["joined_by_to"], out["tail"]) == (runs, joined, tail)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "KNOWN HOLE, 2026-09-02: _NAME_SHAPE_RUN matches [A-Z], which is "
+        "ASCII-only, so a name in any other script scores ZERO runs -- the "
+        "guard passes it and the descriptor hands back the whole string as a "
+        "'name-free tail'. The fix is its own commit: 'I cannot analyse this' "
+        "must mean REFUSE. strict=True so that when it lands this test FAILS "
+        "as unexpectedly-passing and this marker has to be removed rather "
+        "than quietly outliving the hole it documents."
+    ),
+)
+def test_a_name_outside_ascii_does_not_survive_into_the_tail():
+    """The hole the circular oracle could not express, written as a sentence.
+
+    ``read_compose_fields`` no longer reaches this -- it shapes in the page and
+    refuses on zero runs -- so this is a loaded gun rather than a live wound.
+    That is exactly why it is pinned: the next caller will not have watched
+    this happen.
+
+    The census does not share the hole, and the reason is structural rather
+    than lucky: ``_CENSUS_SAFE_CHARS`` is ASCII-only ON PURPOSE, so a name in
+    another script is refused BY THE GATE rather than by a rule somebody
+    remembered to write. The compose path never ran that gate.
+    """
+    label = "\u00c9lodie will send message"
+    out = shape.describe_name_shaped(label)
+    assert out["tail"] != label, "the whole string came back as a name-free tail"
