@@ -1178,9 +1178,37 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_update_profile_field": WriteSpec(
         action="update_profile_field",
         tool_name="linkedin_update_profile_field",
-        url_template=None,
-        url_pattern=None,
-        exempt_substring=None,
+        # ADDRESSED 2026-09-02, and this spec carried NO URL AT ALL until
+        # then -- which the refusal never said. It named "/edit/ is on
+        # _FORBIDDEN_URL_SUBSTRINGS", a real obstacle, while omitting the
+        # larger one: there was nothing to refuse, because nothing was
+        # addressed. Two entries in this table were caught OVERSTATING their
+        # blockers; this one UNDERSTATED, by naming the smaller of two.
+        #
+        # THE URL IS A CONSTANT, not a template with a target: the target of
+        # this action is a FIELD AND A VALUE, not a page. So the pattern is
+        # exact and anchored, on the same address the reads already use --
+        # readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS has held it as an equality
+        # key since the editor became readable.
+        #
+        # ADDRESSING IS NOT PERMISSION. PERFORMABLE is a hand-written
+        # frozenset and this action is not in it, so _refuse_unperformable
+        # raises before any url is used. That ordering is asserted rather
+        # than assumed: a NEGATIVE CONTROL in tests/test_writes.py adds this
+        # action to PERFORMABLE and shows the refusal stop firing. The day
+        # somebody flips that frozenset for real, it goes red and names what
+        # they just turned on.
+        url_template="https://www.linkedin.com/in/me/edit/intro/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/in/me/edit/intro/$"
+        ),
+        # THE ONE FORBIDDEN SUBSTRING THIS EXACT URL MAY CARRY. Per-substring
+        # by design: a url exempted for "/edit/" that also contained
+        # "/delete" is still refused by "/delete". And the exemption is
+        # deliberately NARROWER than the pattern -- the slashless spelling
+        # /in/me/edit/intro stays refused, the conservative direction and the
+        # one already chosen for the reads.
+        exempt_substring="/edit/",
         summary="Change one field on your own LinkedIn profile.",
         from_state="editor_addressed",
         to_state="field_changed",
@@ -1502,8 +1530,41 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         summary=(
             "Send one message or InMail to another LinkedIn member."
         ),
-        from_state="composer_unmeasured",
+        # "composer_unmeasured" UNTIL 2026-09-02, and the fourth stale
+        # statement found in this file in one day. The composer has been
+        # measured repeatedly -- 77 controls, both dispatch radios, the body
+        # editor, and Send drawn DISABLED while it is empty.
+        from_state="composer_holds_text",
         to_state="message_sent",
+        # WHAT PROVES IT DID *NOT* HAPPEN -- apply_job's mechanism, and the
+        # answer to a blocker this entry named wrongly for a week.
+        #
+        # The refusal said the way out was A VERIFICATION SURFACE. There is
+        # none: the composer carries no countable total, and the only surface
+        # that could confirm a send is the thread, which is forbidden AND
+        # costs a read receipt on a real person.
+        #
+        # BUT PROVING A SEND HAPPENED WAS NEVER THE ONLY OPTION. perform()
+        # compares the verified state against expected_after for True and
+        # against unchanged_state for False, falling to UNKNOWN between them.
+        # Reading the state that proves NOTHING WAS DISPATCHED -- the composer
+        # still holding its text with Send still enabled -- turns the worst
+        # answer into the second best.
+        #
+        # AND THE PROPERTY THAT MAKES THIS ADMISSIBLE IS THE ONE THAT
+        # DISQUALIFIED THE ALTERNATIVE, INVERTED. A "composer cleared means
+        # sent" rule could only be validated BY SENDING, and a verification
+        # you can only validate by performing the irreversible thing is not a
+        # verification. The negative direction needs no such thing: fill the
+        # composer, do not send, and observe what UNCHANGED looks like. That
+        # is a read.
+        #
+        # IT STILL CANNOT REPORT "sent". expected_after is "message_sent" and
+        # verified_state initialises to UNKNOWN, so with no surface writing
+        # that state the True arm is unreachable by construction. This action
+        # can be shown NOT to have happened and cannot be shown to have
+        # happened.
+        not_performed_state="composer_holds_text",
         target_kind="member_and_text",
         state_from="messaging_badge",
         direction_source=(
@@ -4574,9 +4635,22 @@ _NINE_REFUSALS: dict[str, str] = {
         "confirm a send is the thread, which is forbidden AND costs a read "
         "receipt on a real person. So a performed send could only ever "
         "report 'unknown' -- the shape apply_job carried until 2026-08-31, "
-        "on an action that cannot be taken back. WHAT WOULD LIFT IT: a "
-        "verification surface, at /premium/my-premium/ or anywhere else. A "
-        "text-entry mutation does not reach it and neither does the balance."
+        "on an action that cannot be taken back. WHAT WOULD LIFT IT, AND THIS "
+        "CLAUSE NAMED THE WRONG THING UNTIL 2026-09-02: it said 'a "
+        "verification surface'. There is none and there may never be one -- "
+        "but proving a send HAPPENED was never the only route. apply_job hit "
+        "the same wall on an equally irreversible action and resolved it the "
+        "other way round, with WriteSpec.not_performed_state: read the state "
+        "that proves NOTHING WAS DISPATCHED, so a failure reports False "
+        "instead of 'unknown'. That state is now named on this spec -- the "
+        "composer still holding its text with Send still enabled -- and it is "
+        "measurable WITHOUT a first send, which is exactly what a "
+        "cleared-composer rule could never be. So this can report NOT SENT or "
+        "UNKNOWN and never SENT: it can be shown not to have happened and "
+        "cannot be shown to have happened. What remains is therefore not a "
+        "verification surface. It is the operator's decision on PERFORMABLE "
+        "membership, plus a preview stating that an InMail may spend a credit "
+        "this server cannot count."
     ),
 
 }

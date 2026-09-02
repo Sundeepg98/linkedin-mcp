@@ -815,9 +815,16 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # last of those three is now the ONLY thing stopping some of them: the
     # operator lifted the VERIFICATION standard on 2026-09-01, which is a
     # different bar, and lifting it does not photograph a control.
+    #
+    # ``update_profile_field`` LEFT THIS SET ON 2026-09-02 by being GIVEN an
+    # address -- the same way update_setting and react_to_item left it. It is
+    # still not performable, and that is the point of the split: the ruling
+    # admitted /in/me/edit/intro/ as an exact-url exemption for a write, which
+    # is ADDRESSING, while PERFORMABLE membership is PERMISSION and remains the
+    # operator's. See test_addressing_the_profile_editor_did_not_make_it_
+    # performable for the control that proves the ordering.
     assert surfaceless == {
         "set_open_to_work",
-        "update_profile_field",
         "send_message",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
@@ -1038,8 +1045,19 @@ async def test_exactly_the_performable_writes_are_registered():
     for name in (names & set(SANCTIONED_WRITES)) - performable_tools:
         spec = SANCTIONED_WRITES[name]
         assert spec.action not in writes.PERFORMABLE, name
-        assert spec.url_template is None, name
-        assert spec.url_pattern is None, name
+        # AN ADDRESS IS NOT A PERMISSION, and this assertion used to conflate
+        # them: it required every non-performable spec to be UNADDRESSED. That
+        # held while the two facts happened to coincide and stopped holding on
+        # 2026-09-02, when update_profile_field was given its url under an
+        # exact-url exemption while staying firmly outside PERFORMABLE.
+        #
+        # NARROWED RATHER THAN DROPPED. Every OTHER non-performable spec must
+        # still be unaddressed -- that is the half of the guard that was always
+        # about safety -- and the one exception is named, so a second one is a
+        # visible edit here rather than a silent pass.
+        if spec.action != "update_profile_field":
+            assert spec.url_template is None, name
+            assert spec.url_pattern is None, name
     assert names & FORBIDDEN_TOOLS == set()
 
     # The sanctioned actions that are NOT performable must be unreachable, and
@@ -1079,10 +1097,18 @@ async def test_exactly_the_performable_writes_are_registered():
     # Its departure is asserted positively by the derived test above -- the
     # registered writes must EQUAL PERFORMABLE -- so nothing goes unnoticed by
     # leaving here.
-    for tool in (
-        "linkedin_update_profile_field",
-        "linkedin_send_message",
-    ):
+    #
+    # linkedin_update_profile_field LEFT THIS LOOP ON 2026-09-02, and the
+    # comment above is the reason it needs a sentence rather than a quiet
+    # deletion. This is NOT a check softened to accommodate a shipped
+    # capability -- nothing shipped. The action is still outside
+    # PERFORMABLE and still refuses. What changed is that a RULING gave it
+    # an address, and the loop was pinning "unperformable implies
+    # unaddressed", which was true by coincidence rather than by design.
+    # Three separate guards in this file encoded that same conflation and
+    # all three had to be narrowed; that they agreed with each other is
+    # not evidence they were right.
+    for tool in ("linkedin_send_message",):
         assert tool in names, tool
         assert SANCTIONED_WRITES[tool].url_template is None, tool
         assert SANCTIONED_WRITES[tool].action not in writes.PERFORMABLE, tool
@@ -4102,3 +4128,120 @@ async def test_the_happy_arm_of_that_same_function_still_answers(writes_on):
     assert FOLLOWED_COMPANY_NAME in why
     # And it asked the page for the id-keyed selector, not a label-only one.
     assert page.asked == [dom.unfollow_control_selector(FOLLOWED_COMPANY)]
+# ---------------------------------------------------------------------------
+# Addressing is not permission -- the 2026-09-02 url ruling and its control
+# ---------------------------------------------------------------------------
+
+
+def test_addressing_the_profile_editor_did_not_make_it_performable():
+    """THE NEGATIVE CONTROL, and it is the condition the ruling landed under.
+
+    ``update_profile_field`` was given a url on 2026-09-02. A url is ADDRESSING,
+    not permission -- the permission is ``PERFORMABLE`` membership, and
+    ``_refuse_unperformable`` checks that FIRST. But an address that only
+    becomes live when somebody edits a frozenset means the review that belongs
+    with "make this performable" has partly happened already, elsewhere, out of
+    context. So the ordering is proven rather than described.
+
+    THE SECOND HALF IS WHAT MAKES IT A CONTROL. Asserting that it still refuses
+    proves nothing on its own -- it refused before the url too, and a test that
+    passes identically before and after a change measures nothing. So the
+    action is added to ``PERFORMABLE`` and the SAME call must stop raising.
+    That is what identifies membership as the gate.
+
+    The day somebody flips that frozenset for real, this goes red and names
+    exactly what they turned on.
+    """
+    spec = writes.spec_for_action("update_profile_field")
+
+    # It IS addressed now -- otherwise the control below would be vacuous.
+    assert spec.url_template == "https://www.linkedin.com/in/me/edit/intro/"
+    assert spec.exempt_substring == "/edit/"
+
+    with pytest.raises(WriteAttemptError) as caught:
+        writes._refuse_unperformable(spec)
+    assert "update_profile_field" in str(caught.value)
+
+    # AND NOW THE OTHER DIRECTION: membership is the only thing holding it.
+    original = writes.PERFORMABLE
+    try:
+        writes.PERFORMABLE = frozenset(original | {"update_profile_field"})
+        writes._refuse_unperformable(spec)  # must NOT raise
+    finally:
+        writes.PERFORMABLE = original
+
+    # Restored, or every later test in this file is running against a lie.
+    assert "update_profile_field" not in writes.PERFORMABLE
+    with pytest.raises(WriteAttemptError):
+        writes._refuse_unperformable(spec)
+
+
+def test_the_editor_exemption_is_an_exact_url_and_not_a_family():
+    """NARROWNESS, asserted in both directions the ruling named.
+
+    ``/edit/`` stays on ``_FORBIDDEN_URL_SUBSTRINGS`` and is NOT relaxed. What
+    passes is one exact url, by equality. A loose exemption is how a real write
+    hides, and the two cases below are the ones that would hide in it.
+    """
+    spec = writes.spec_for_action("update_profile_field")
+    exact = "https://www.linkedin.com/in/me/edit/intro/"
+
+    assert spec.url_pattern.match(exact)
+
+    # A DIFFERENT MEMBER OF THE SAME FAMILY. Still refused -- the exemption is
+    # not "anything under /edit/".
+    for sibling in (
+        "https://www.linkedin.com/in/me/edit/forms/summary/new/",
+        "https://www.linkedin.com/in/me/edit/contact-info/",
+        "https://www.linkedin.com/in/someone-else/edit/intro/",
+    ):
+        assert not spec.url_pattern.match(sibling), sibling
+
+    # A URL THAT MERELY BEGINS WITH THE EXACT ONE -- the traversal shape the
+    # exemption table's own docstring names.
+    assert not spec.url_pattern.match(exact + "../../evil")
+
+    # AND THE SLASHLESS SPELLING, which is refused ON PURPOSE: the exemption is
+    # deliberately NARROWER than the address, the conservative direction, and
+    # the same choice already made for the reads.
+    assert not spec.url_pattern.match(
+        "https://www.linkedin.com/in/me/edit/intro"
+    )
+
+    # /edit/ IS STILL FORBIDDEN GLOBALLY. The exemption buys past one gate for
+    # one url; it does not soften the tuple.
+    assert "/edit/" in readonly._FORBIDDEN_URL_SUBSTRINGS
+
+
+def test_send_message_can_report_not_sent_and_never_sent():
+    """The 2026-09-02 ruling: read what proves it did NOT happen.
+
+    ``perform`` decides True by comparing the verified state against
+    ``expected_after``, and False by comparing it against ``unchanged_state``,
+    falling to UNKNOWN between them. This action can never reach the True arm
+    -- ``verified_state`` initialises to UNKNOWN and no surface exists that
+    writes ``"message_sent"`` -- so naming the NOT-performed state is what
+    turns the worst answer into the second best.
+
+    The property that admits it is the one that disqualified the alternative,
+    inverted: a "cleared composer means sent" rule could only be validated by
+    SENDING, while "the composer still holds its text" is measurable without a
+    first send.
+    """
+    spec = writes.spec_for_action("send_message")
+    assert spec.not_performed_state == "composer_holds_text"
+
+    # The stale one, fixed in the same commit: the composer HAS been measured.
+    assert spec.from_state == "composer_holds_text"
+    assert spec.from_state != "composer_unmeasured"
+
+    # And the refusal now names the route rather than a surface that does not
+    # exist -- while still saying WHAT WOULD LIFT IT, which the table requires.
+    reason = writes._NINE_REFUSALS["send_message"]
+    assert "not_performed_state" in reason
+    assert "WHAT WOULD LIFT IT" in reason.upper()
+    assert "NOT SENT or UNKNOWN and never SENT" in reason
+
+    # STILL NOT PERFORMABLE. This ruling changed what it would REPORT, not
+    # whether it may run -- that decision is the operator's.
+    assert "send_message" not in writes.PERFORMABLE

@@ -1203,10 +1203,21 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # EVERY refusal must name its own fix or the field is a wall of
         # "cannot" that nobody can act on. Checked as a class rather than
         # per-action, so an eighth entry has to satisfy it too.
+        # STILL FALSE FOR EVERY ONE OF THEM, and for a moment on 2026-09-02
+        # it was not. Addressing update_profile_field flipped this to True,
+        # because the field was DERIVED from spec.url_template alone -- and
+        # "mint refuses at issue" is written as defence in depth for exactly
+        # these actions, so the fix was to the derivation rather than to the
+        # addressing. can_hold_a_grant now requires a url AND membership in
+        # PERFORMABLE, which is what "could this ever perform" always meant.
         assert entry["can_hold_a_grant"] is False, action
     # The one with no measured surface cannot even hold a grant, and the field
     # says so rather than leaving a reader to infer it from a missing url.
     assert not_performed["set_open_to_work"]["can_hold_a_grant"] is False
+    # AND THE ONE THAT HAS A SURFACE AND STILL CANNOT HOLD A GRANT, which is
+    # the pair the old derivation could not express: addressed, and refused.
+    assert not_performed["update_profile_field"]["has_a_measured_surface"] is True
+    assert not_performed["update_profile_field"]["can_hold_a_grant"] is False
     assert "follow_company" not in not_performed
     assert "follow_company" in info["writes_sanctioned"]
     # AND THE DEPARTURE IS ASSERTED FROM BOTH SIDES, because "absent from a
@@ -1836,3 +1847,40 @@ async def test_that_declaration_is_not_a_hardcoded_string():
     for module, _verb, _arg in sites:
         stem = module.replace(".py", "")
         assert stem in declared or stem.replace("_", " ") in declared, module
+
+
+def test_a_grant_needs_permission_and_not_merely_an_address():
+    """THE LAYER, RE-ASSERTED BY CONSTRUCTION rather than by coincidence.
+
+    ``can_hold_a_grant`` was derived from ``spec.url_template`` alone until
+    2026-09-02. That was right only while no unperformable action carried a
+    url -- an accident nothing required, and one that held until a ruling gave
+    ``update_profile_field`` its address. For the length of that commit, a
+    safety property nobody had stated was doing real work, and the first
+    action to violate the accident silently lost a layer.
+
+    THE FOURTH SITE OF ONE COINCIDENCE. Three assertions elsewhere encoded
+    "unperformable implies unaddressed" and were narrowed the same day. This
+    was the one with teeth: the others asserted the invariant, this one
+    DERIVED a safety answer from it.
+
+    So the derivation now asks the question it always meant -- could this ever
+    pass the write door -- and this test fails if it reverts to url-only.
+    """
+    import inspect
+
+    from linkedin_server import server as server_module
+    from linkedin_server import writes
+
+    source = inspect.getsource(server_module)
+    start = source.index('"can_hold_a_grant"')
+    derivation = source[start : start + 200]
+    assert "PERFORMABLE" in derivation, derivation
+    assert "url_template" in derivation, derivation
+
+    # AND BEHAVIOURALLY, on the pair that distinguishes the two derivations:
+    # addressed, not performable, therefore no grant.
+    spec = writes.spec_for_action("update_profile_field")
+    assert spec.url_template is not None
+    assert spec.action not in writes.PERFORMABLE
+    assert not (spec.url_template is not None and spec.action in writes.PERFORMABLE)

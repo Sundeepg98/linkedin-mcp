@@ -4553,8 +4553,31 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
             "writes_sanctioned_but_not_performed": {
                 spec.action: {
                     "why_not": _WHY_NOT_PERFORMED[spec.action],
+                    # THIS ONE IS GENUINELY THE URL QUESTION. A surface has been
+                    # measured or it has not, and an address is the evidence.
                     "has_a_measured_surface": spec.url_template is not None,
-                    "can_hold_a_grant": spec.url_template is not None,
+                    # AND THIS ONE NEVER WAS, though it was derived from the url
+                    # alone until 2026-09-02. The question a grant answers is
+                    # "could this ever perform?" -- and an address is only HALF
+                    # of that. Membership in PERFORMABLE is the other half, and
+                    # it is the half the write door actually checks.
+                    #
+                    # The old derivation was correct only while no unperformable
+                    # action happened to carry a url, which nothing ever
+                    # required. Giving update_profile_field its address made the
+                    # accident visible: a safety property nobody had stated
+                    # became load-bearing, and the first action to violate the
+                    # coincidence would have silently lost a layer.
+                    #
+                    # THE FOURTH SITE OF ONE COINCIDENCE. Three assertions
+                    # elsewhere encoded "unperformable implies unaddressed" and
+                    # were narrowed the same day; this is the one that had teeth,
+                    # because it did not merely assert the invariant -- it
+                    # DERIVED a safety answer from it.
+                    "can_hold_a_grant": (
+                        spec.url_template is not None
+                        and spec.action in writes.PERFORMABLE
+                    ),
                     "irreversible": spec.irreversible,
                 }
                 for spec in sorted(
