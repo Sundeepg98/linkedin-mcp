@@ -1,4 +1,4 @@
-"""The tool surface: thirty-five tools, eleven of which write to LinkedIn.
+"""The tool surface: thirty-five tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -68,10 +68,21 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-THREE read, ELEVEN write, and ONE is write-shaped, registered,
-gated and cannot act at all -- it is not in ``writes.PERFORMABLE``, and
-``writes.mint`` refuses it a grant at issue, so no confirm token for it can
-exist. Twenty-three plus eleven plus one is thirty-five.
+needs: TWENTY-THREE read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Twenty-three plus twelve plus zero is thirty-five.
+
+THAT THIRD COLUMN EMPTIED ON 2026-09-02 AND THE FACT IS WORTH A SENTENCE
+RATHER THAN A ZERO. It held one member, ``linkedin_send_message``, which was
+registered and gated and refused; it now performs, so **every write tool on
+this surface can act.** The column is kept rather than deleted because it is
+the honest place for the next one, and because an absent column and an empty
+column say different things.
+
+ONE SANCTIONED ACTION STILL REFUSES AND IT IS NOT IN THAT COUNT.
+``set_open_to_work`` has no tool registered for it at all, so it is not part
+of the thirty-five: it is a spec behind the gate with nothing on the surface
+to call it. ``writes.mint`` refuses it a grant at issue, so no confirm token
+for it can exist for anyone.
 
 AND THE REASON MINT REFUSES IT CHANGED ON 2026-09-02, which matters because
 the old sentence gave the wrong one. It said the refusal followed from holding
@@ -243,16 +254,41 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. ELEVEN WRITE: linkedin_save_job, "
+        "nothing. TWELVE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
-        "linkedin_comment_on_item and linkedin_update_profile_field. "
-        "THE ELEVENTH ARRIVED 2026-09-02 and is the only one here that "
-        "can verify its own outcome by reading the field back; it also "
-        "returns the PREVIOUS value verbatim and the exact call that "
-        "puts it back, which this server will never run for him. "
+        "linkedin_comment_on_item, linkedin_update_profile_field and "
+        "linkedin_send_message. "
+        "THE ELEVENTH is the only one here that can verify its own outcome "
+        "by reading the field back; it also returns the PREVIOUS value "
+        "verbatim and the exact call that puts it back, which this server "
+        "will never run for him. NOTE IT SHIPPED ON 2026-09-02 UNABLE TO "
+        "ACT and was repaired the same day: three separate defects meant it "
+        "raised at the first guard without ever loading a page, while still "
+        "issuing him a confirm_token to approve. If you were told it worked "
+        "before that repair, that was wrong. "
+        "THE TWELFTH ARRIVED 2026-09-02 AND SHIPS EXPECTING TO REFUSE, "
+        "which is the design and not a fault -- say so plainly rather than "
+        "presenting a refusal as a surprise. linkedin_send_message types a "
+        "recipient into the composer and then STOPS to check: it proceeds "
+        "only if EXACTLY ONE recipient is committed AND that recipient's "
+        "name carries the needle he supplied, compared inside the page so no "
+        "third party's name ever reaches this process. A COUNT IS NOT THE "
+        "PROPERTY -- one committed recipient with the wrong name refuses, "
+        "because 'LinkedIn thinks this is sendable' and 'this is addressed "
+        "to the person he named' are different claims. Nobody has ever typed "
+        "into that combobox through this server, so whether a bare fill "
+        "commits anybody is UNKNOWN, and the counts the refusal returns are "
+        "the measurement nobody can take another way. His words are never "
+        "typed until that check passes, so a refusal costs him a name "
+        "sitting in a composer and never his message. It can report NOT SENT "
+        "and can never report SENT: the only surface that could confirm a "
+        "send is the thread, which is forbidden here AND costs a read "
+        "receipt on a real person. AND IT MAY SPEND AN INMAIL CREDIT whose "
+        "size is UNMEASURED rather than denied -- no countable balance "
+        "exists on either surface this server may read. "
         "Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
@@ -290,28 +326,35 @@ mcp = FastMCP(
         "fine, because only a single-screen apply flow has ever been observed "
         "and a multi-step one is refused rather than walked. That is the tool "
         "working, not a gap; it says what it saw. "
-        "THE SEVEN THAT REFUSE, and this paragraph said the OPPOSITE until "
-        "2026-08-30 -- it read 'There is no message, no connection request, "
-        "no InMail, no profile edit, and no post -- do not look for them or "
-        "suggest they exist.' Every one of those now EXISTS as a tool: "
-        "linkedin_publish_post, linkedin_comment_on_item, "
+        "THE SEVEN THAT USED TO REFUSE, and this paragraph said the OPPOSITE "
+        "until 2026-08-30 -- it read 'There is no message, no connection "
+        "request, no InMail, no profile edit, and no post -- do not look for "
+        "them or suggest they exist.' Every one of those now EXISTS as a "
+        "tool: linkedin_publish_post, linkedin_comment_on_item, "
         "linkedin_react_to_item, linkedin_update_profile_field, "
         "linkedin_update_setting, linkedin_send_invitation and "
-        "linkedin_send_message. NONE OF THEM CAN ACT. Each reads the relevant "
-        "surface live, then refuses and names what it saw, what is missing, "
-        "and the one measurement that would complete it -- and no confirm "
-        "token is ever issued for any of them, so there is nothing to "
-        "confirm. Answer questions about them from what the tool itself "
-        "returns rather than from a stored belief: the reason they are the "
-        "opposite of a silence is that a silence conflates 'this server will "
-        "not' with 'LinkedIn cannot'. Two of them are worth knowing in "
-        "advance. linkedin_send_message DOES NOT OPEN MESSAGING -- loading it "
-        "is measured to redirect into a stranger's conversation, so the "
-        "preview reads the nav badge and stops; if the surface must be "
-        "measured, HE calls linkedin_open_messaging, which pays that cost "
-        "knowingly. And linkedin_send_invitation DOES NOT OPEN /mynetwork/, "
-        "because that load spends his pending-invitation badge; it reads the "
-        "invitation controls on his own profile instead. "
+        "linkedin_send_message. AND AS OF 2026-09-02 EVERY WRITE TOOL ON "
+        "THIS SURFACE CAN ACT -- that column is empty; the last of them "
+        "shipped that day. This paragraph said 'NONE OF THEM CAN ACT' until "
+        "then and it is corrected here rather than quietly deleted, because a "
+        "stale capability claim is the one a reader is most likely to repeat. "
+        "WHAT SHIPPING DID NOT CHANGE: each still reads the relevant surface "
+        "live before it does anything, each still refuses and names what it "
+        "saw when the surface is not the shape it was measured in, and NONE "
+        "of them acts without a confirm_token he supplied. Answer questions "
+        "about them from what the tool itself returns rather than from a "
+        "stored belief -- including this paragraph, which has now been wrong "
+        "in both directions. "
+        "TWO COSTS ARE WORTH KNOWING IN ADVANCE AND SHIPPING MADE THEM MORE "
+        "RELEVANT, NOT LESS. linkedin_send_message DOES NOT OPEN MESSAGING at "
+        "preview -- loading it is measured to redirect into a stranger's "
+        "conversation, so the preview reads the nav badge and stops; if the "
+        "surface must be measured, HE calls linkedin_open_messaging, which "
+        "pays that cost knowingly. Performing it opens the composer, which is "
+        "a different address and does not redirect. And "
+        "linkedin_send_invitation DOES NOT OPEN /mynetwork/, because that "
+        "load spends his pending-invitation badge; it reads the invitation "
+        "controls on his own profile instead. "
         "Following a company IS now performed, through "
         "linkedin_follow_company and behind the same gate -- with one "
         "asymmetry to carry into any answer: this server can start a follow "

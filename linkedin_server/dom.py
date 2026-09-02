@@ -5295,6 +5295,197 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# The composer's WRITE path: three selectors and two readers
+# ---------------------------------------------------------------------------
+#
+# NOTHING BELOW IS REACHED BY A READ TOOL. ``read_compose_fields`` above is the
+# read path and answers "which dispatch mode is checked" without returning a
+# label. These are for ``writes.perform``, which needs strings a fill and a
+# click can be aimed at.
+
+
+def compose_recipient_selector() -> str:
+    """The combobox a recipient is typed into. NO ARGUMENT.
+
+    THE ROLE ENGINE, because the control is named through ``label-for`` --
+    measured -- and no attribute selector can follow that. NOT routed through
+    :func:`named_role_selector`, which refuses any role outside
+    ``INPUT_TYPE_ROLES``: widening that function so one caller could use it
+    would trade a measured restriction for a convenience every other caller
+    inherits, which is the argument :func:`post_submit_selector` already makes
+    for standing apart.
+
+    GUARDED ON THE CONSTANT rather than on an argument, because there is no
+    argument. The check is here anyway so a future rename that introduced a
+    quote could not produce a selector that silently matches something else.
+    """
+    if any(bad in MESSAGE_RECIPIENT_LABEL for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build the composer's recipient selector: "
+            f"{MESSAGE_RECIPIENT_LABEL!r} carries a character that would end "
+            "the selector's own quoting."
+        )
+    return 'role=combobox[name="' + MESSAGE_RECIPIENT_LABEL + '"s]'
+
+
+def compose_body_selector() -> str:
+    """The contenteditable a message's text is typed into. NO ARGUMENT.
+
+    **ADDRESSED BY ROLE ALONE, AND IT NEEDS NO LABEL.** That is the whole
+    reason this control was never a blocker: its ``aria-label`` comes back
+    ``<opaque>`` from the census, so a label-based selector was never
+    available -- and it was never needed, because ``div[role="textbox"]`` is
+    MEASURED at exactly ONE on this surface, corroborated by a
+    contenteditable count of one, on 2026-08-31 and again on 2026-09-02.
+
+    THE COUNT IS THE IDENTIFICATION and it is checked by the reader rather
+    than by this string: :func:`read_compose_modes` refuses
+    ``textbox_count_not_one`` before anything is typed. A selector that
+    matched two boxes would be aiming by document order, which is what that
+    refusal exists to prevent.
+    """
+    return 'div[role="textbox"]'
+
+
+def compose_send_selector() -> str:
+    """The control that dispatches the message. NO ARGUMENT.
+
+    ``Send`` is TEXT-NAMED -- measured -- so the accessible name is the
+    element's own text and the role engine reads it. Drawn DISABLED on an
+    empty composer, which is the transition the send gate requires.
+    """
+    if any(bad in MESSAGE_SEND_NAME for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build the composer's send selector: "
+            f"{MESSAGE_SEND_NAME!r} carries a character that would end the "
+            "selector's own quoting."
+        )
+    return 'role=button[name="' + MESSAGE_SEND_NAME + '"s]'
+
+
+#: WHERE A COMMITTED RECIPIENT MIGHT BE DRAWN, as several independent
+#: spellings rather than one.
+#:
+#: **NOT ONE OF THESE HAS EVER MATCHED ANYTHING.** ``read_compose_fields`` has
+#: counted selected recipients since 2026-09-02 using the first two, and every
+#: reading it has ever taken returned ZERO -- on a composer that genuinely had
+#: nobody in it, so a zero proves nothing about the selector. The test that
+#: covers its non-zero branch injects the count through a double whose
+#: ``locator`` DISCARDS the selector argument, so the strings below have never
+#: been executed against a page on either branch.
+#:
+#: THAT IS WHY THIS IS A LIST AND WHY THE READER REPORTS PER-SELECTOR COUNTS.
+#: A single guessed selector that matches nothing is indistinguishable from a
+#: composer with nobody in it, and on THIS surface those two answers are
+#: "refuse" and "send". The counts are the measurement the first supervised
+#: run exists to produce -- the same shape ``_comment_submit_gate`` takes,
+#: where the refusal is the instrument.
+RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
+    'button[aria-label^="Remove"]',
+    "[data-test-selected-recipient]",
+    'li[class*="selected"] button',
+    '[role="listitem"] button[aria-label*="emove"]',
+)
+
+
+#: COUNT the committed recipients, and count how many carry HIS NEEDLE. The
+#: comparison happens IN THE PAGE and no label comes back.
+#:
+#: THE SAME ARGUMENT AS :data:`INVITE_NEEDLE_JS`, on a surface where it is
+#: sharper: a committed recipient IS a third party, by definition, so any label
+#: read here names somebody who is not him. A name that reaches Python can
+#: reach a traceback, a log line or a cache key, and no care downstream
+#: un-rings that. So the needle is handed in and only integers come out.
+#:
+#: THERE IS NO ``revealSingleMatch`` HERE, unlike the invitation script. That
+#: flag exists so a PREVIEW can show him who he is about to reach; this script
+#: runs inside ``perform``, after he has already confirmed, where there is
+#: nothing left to show him and therefore no reason for a name to exist in
+#: this process at all.
+SELECTED_RECIPIENT_JS = """
+(cfg) => {
+  const needle = String(cfg.needle).toLowerCase();
+  const perSelector = {};
+  const seen = [];
+  for (const selector of cfg.selectors) {
+    let nodes = [];
+    try { nodes = Array.from(document.querySelectorAll(selector)); }
+    catch (e) { perSelector[selector] = -1; continue; }
+    perSelector[selector] = nodes.length;
+    for (const node of nodes) { if (seen.indexOf(node) === -1) seen.push(node); }
+  }
+  let matches = 0;
+  for (const node of seen) {
+    // THE LABEL IS READ AND IMMEDIATELY DISCARDED. It exists for the length of
+    // this comparison and is never assigned anywhere that leaves the loop.
+    const label =
+      (node.getAttribute('aria-label') || '') + ' ' + (node.textContent || '');
+    if (label.toLowerCase().indexOf(needle) !== -1) { matches += 1; }
+  }
+  return {
+    per_selector: perSelector,
+    total: seen.length,
+    matches: matches
+  };
+}
+"""
+
+
+async def read_selected_recipients(page: Any, needle: str) -> dict[str, Any]:
+    """How many recipients are committed, and how many carry ``needle``.
+
+    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
+    candidate string, ``total`` is the de-duplicated node count, ``matches`` is
+    how many of those carry his needle. No accessible name, no text, no
+    identifier.
+
+    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
+    an invalid string, not an empty page -- and it is reported rather than
+    folded into zero, because "this selector is wrong" and "there is nobody
+    here" are the two answers this whole gate turns on.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            SELECTED_RECIPIENT_JS,
+            {"needle": str(needle or ""), "selectors": list(RECIPIENT_CHIP_SELECTORS)},
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the composer's selected recipients: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return dict(data or {})
+
+
+async def read_compose_send_state(page: Any) -> dict[str, Any]:
+    """The Send control: how many, and whether the one is enabled.
+
+    ``Send`` is measured DISABLED on an empty composer, which is the same
+    observable transition ``publish_post``'s gate rests on. Counted rather
+    than assumed at one, because more than one control named ``Send`` would
+    make pressing either a choice by position.
+    """
+    out: dict[str, Any] = {
+        "controls": 0,
+        "enabled": None,
+        "textboxes": 0,
+        "error": None,
+    }
+    try:
+        control = page.locator(compose_send_selector())
+        out["controls"] = int(await control.count())
+        out["textboxes"] = int(
+            await page.locator(compose_body_selector()).count()
+        )
+        if out["controls"] == 1:
+            out["enabled"] = bool(await control.first.is_enabled())
+    except Exception as exc:  # pragma: no cover - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+    return out
+
+
 def comment_editor_selector() -> str:
     """The contenteditable a comment's text is typed into. NO ARGUMENT."""
     return 'div[role="textbox"][aria-label="' + COMMENT_EDITOR_LABEL + '"]'

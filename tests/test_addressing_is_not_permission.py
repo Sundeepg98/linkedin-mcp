@@ -242,7 +242,44 @@ def test_the_three_consumers_call_the_predicate_rather_than_recompute_it():
     assert "grant_is_possible" not in mint_source
 
 
-@pytest.mark.parametrize("action", sorted({"send_message", "set_open_to_work"}))
+#: THE SANCTIONED ACTIONS THAT ARE NOT PERFORMABLE, DERIVED rather than typed.
+#:
+#: IT WAS THE LITERAL SET ``{"send_message", "set_open_to_work"}`` until
+#: 2026-09-02, and it went stale the day ``send_message`` shipped -- the test
+#: failed asserting a performable action was not performable, which is a
+#: corpus that has stopped describing the system rather than a defect it
+#: found. Derived, the corpus follows the frozenset and a thirteenth action
+#: entering ``PERFORMABLE`` needs no edit here.
+#:
+#: THE EMPTY-CORPUS TRAP IS GUARDED SEPARATELY BELOW. A parametrised test over
+#: an empty set SKIPS, and a skip reads as a pass -- so if every sanctioned
+#: action ever becomes performable, this file must say so out loud rather than
+#: quietly certifying nothing.
+UNPERFORMABLE = sorted(
+    spec.action
+    for spec in writes.SANCTIONED_WRITES.values()
+    if spec.action not in writes.PERFORMABLE
+)
+
+
+def test_there_is_still_an_unperformable_action_to_check():
+    """The corpus above is not allowed to empty silently.
+
+    ``pytest`` reports a parametrised test over an empty sequence as one
+    SKIPPED case, which in a run of thousands reads exactly like a pass. This
+    is the same guard ``test_preview_state_and_click_state`` keeps over its own
+    derived corpora, and it exists because the 2026-09-01 gap happened that
+    way.
+    """
+    assert UNPERFORMABLE, (
+        "every sanctioned action is now performable, so the parametrised test "
+        "below runs zero cases and certifies nothing. That may be correct -- "
+        "but it has to be SAID, because a vanished check and a passing check "
+        "look identical in a run."
+    )
+
+
+@pytest.mark.parametrize("action", UNPERFORMABLE)
 def test_no_unperformable_action_can_hold_a_grant(action):
     """The layer itself, asserted on the artifact rather than on the report.
 

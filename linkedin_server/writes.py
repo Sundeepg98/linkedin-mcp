@@ -372,6 +372,43 @@ class WriteSpec:
     #: by retrying -- the docstring forbids the retry, because a retry on an
     #: act that may have half-landed is the failure being guarded against.
     not_performed_state: Optional[str] = None
+    #: THE STATE THE CLICK-TIME READING MUST REPORT, when that is NOT the state
+    #: the PREVIEW's reading reports. ``None`` means they are the same string,
+    #: which is true of every action but one.
+    #:
+    #: ADDED 2026-09-02, AND IT IS THE TENTH INSTANCE OF ONE PATTERN.
+    #: ``from_state`` is compared against a live reading TWICE, at opposite
+    #: ends of a write, and the two readings are not taken off the same thing:
+    #:
+    #:   PREVIEW    ``_direction`` compares ``observation.state`` -- read off
+    #:              whichever surface ``state_from`` names -- against this
+    #:              spec's ``from_state``.
+    #:   CLICK      ``valid_from``, from ``perform``'s gate 5, compares what
+    #:              ``_live_control`` returned -- read off THE VERY CONTROL the
+    #:              click will land on -- against the SAME field.
+    #:
+    #: For all ten binary toggles those produce the same string. NOTHING
+    #: ANYWHERE REQUIRED THAT. It is the same unruled coincidence that cost
+    #: nine sites when url-presence and performability turned out not to
+    #: coincide, and like those it is exposed by the first action to violate
+    #: it. ``tests/test_preview_state_and_click_state.py`` is the instrument.
+    #:
+    #: ``send_message`` VIOLATES IT BY DESIGN, which is why this field exists
+    #: rather than being avoidable. Its preview reads the NAV BADGE off a page
+    #: already open and deliberately does NOT load messaging -- looking costs a
+    #: stranger's thread -- so its preview state is ``composer_unmeasured``,
+    #: which is CORRECT and must not be "fixed": see the long note on that
+    #: field in its own spec, and the wrong-state refusal that overwriting it
+    #: produced once. Its click-time reading is taken on the composer, which by
+    #: then is open in front of it. The two cannot be one string without one of
+    #: them lying.
+    #:
+    #: READ BY ``valid_from`` AND BY NOTHING ELSE. ``_direction`` still reads
+    #: ``from_state``, so the preview is untouched; ``anchor_label_for`` and
+    #: ``perform``'s ``unchanged_state`` read it too. Naming this field for the
+    #: ONE question it answers is what stops it becoming a fifth meaning
+    #: stacked on the four that field already carries.
+    click_from_state: Optional[str] = None
     #: DECLARED WHEN NOTHING CAN CONFIRM THIS ACTION'S OUTCOME. See
     #: :class:`Unverifiable`. ``None`` means this action HAS a verification,
     #: and ``_verify_after`` must carry a branch that can actually return the
@@ -1531,9 +1568,22 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_send_message": WriteSpec(
         action="send_message",
         tool_name="linkedin_send_message",
-        url_template=None,
-        url_pattern=None,
-        exempt_substring=None,
+        # ADDRESSED 2026-09-02. The composer's exact url has been on the read
+        # allowlist since 2026-08-31, admitted by the operator's ruling as the
+        # NARROWEST entry on that list -- ``"/messaging/compose"`` STAYS on
+        # ``readonly._FORBIDDEN_URL_SUBSTRINGS`` and this one address is let
+        # past it by an EXACT-url exemption, so every other spelling in that
+        # family refuses exactly as before.
+        #
+        # A CONSTANT, not a template: the target of this action is a MEMBER
+        # AND A TEXT, not a page, so ``{target}`` appears nowhere and the
+        # pattern is anchored whole. ``send_invitation`` has the same shape
+        # for the same reason.
+        url_template="https://www.linkedin.com/messaging/compose/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/compose/$"
+        ),
+        exempt_substring="/messaging/compose",
         summary=(
             "Send one message or InMail to another LinkedIn member."
         ),
@@ -1601,6 +1651,23 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # other names what it expects to find. Collapsing them looks like
         # tidying and is how the wrong-state refusal got introduced once.
         not_performed_state="composer_holds_text",
+        # THE CLICK-TIME STATE, AND THE REASON THIS FIELD EXISTS AT ALL.
+        #
+        # ``from_state`` above is ``composer_unmeasured`` and that is CORRECT
+        # -- it describes what the PREVIEW's gate has seen, and that gate
+        # deliberately does not open messaging to find out. By click time the
+        # composer IS open, because ``perform`` navigated to it, so the
+        # click-time reading is a real reading of a real composer and cannot
+        # honestly be called unmeasured.
+        #
+        # ONE FIELD CANNOT BE BOTH. Before this existed, ``valid_from``
+        # compared the click-time reading against ``from_state`` -- so this
+        # action would have refused EVERY reading it could ever take, with a
+        # wrong-state error, which is a gate that cannot pass rather than a
+        # gate refusing something. That is precisely the failure
+        # ``update_setting`` had when a multi-state action was compared against
+        # a single ``from_state``, one field along.
+        click_from_state="composer_empty",
         target_kind="member_and_text",
         state_from="messaging_badge",
         direction_source=(
@@ -2402,6 +2469,48 @@ def _text_component_of(spec: WriteSpec, target: str) -> str:
             "Refusing to type any part of it."
         )
     return target.split(TARGET_JOIN, 1)[1]
+
+
+def _subject_component_of(spec: WriteSpec, target: str) -> str:
+    """The part of a canonical target that names WHO or WHAT. Never composed here.
+
+    THE MIRROR OF :func:`_text_component_of`, and it exists for exactly one
+    reason: ``send_message`` types TWO things -- a recipient and a body -- and
+    both must be provably slices of the target the token was minted against.
+
+    THE PROPERTY THIS PRESERVES is the one ``tests/test_typed_bytes.py``
+    asserts on the AST: **this server never composes what it types under his
+    name.** That test pinned a single fill site whose text was a bare call to
+    ``_text_component_of``. A second thing to type could have been handled by
+    relaxing it to "the text contains a call"; it was not. The test was
+    EXTENDED so both components carry the same proof, which is the only
+    acceptable way to argue with a test that has to change.
+
+    IT REFUSES RATHER THAN GUESSING, on the same rule: a one-part target has
+    no subject to split off, and returning the whole string would type the
+    body into the recipient field.
+    """
+    kind = spec.target_kind
+    if kind not in _COMPOSITE_TARGET_KINDS:
+        raise WriteAttemptError(
+            f"{spec.action!r} has target_kind {kind!r}, which has no subject "
+            "component, so there is nothing measured to type into a second "
+            "control."
+        )
+    first, second = _COMPOSITE_TARGET_KINDS[kind]
+    if not second:
+        raise WriteAttemptError(
+            f"{spec.action!r} is addressed by {first!r} alone -- its target is "
+            "one component, so it has no subject half. Refusing to type any "
+            "part of it into a second control."
+        )
+    if target.count(TARGET_JOIN) != 1:
+        raise WriteAttemptError(
+            f"{spec.action!r} holds a target that is not the canonical "
+            "two-part form, so its subject half cannot be identified. "
+            "Refusing to type any part of it."
+        )
+    return target.split(TARGET_JOIN, 1)[0]
 
 
 def _opaque_target(spec: WriteSpec, raw: str) -> str:
@@ -4226,6 +4335,46 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # THE TWELFTH, 2026-09-02, AND IT SHIPS EXPECTING TO REFUSE.
+        #
+        # It is here on the operator's ruling and on a design that is NOT the
+        # one first briefed. The briefed gate was publish_post's: fill the
+        # recipient, fill the body, and proceed if `Send` became enabled.
+        # THAT GATE CANNOT CARRY THIS ACTION. "Send became enabled" says
+        # LinkedIn thinks this is sendable; it does not say the recipient is
+        # the person he named -- and if the typeahead commits anything on the
+        # blur the SECOND fill causes, the gate's own evidence is satisfied by
+        # exactly the thing that is wrong, and the message reaches whoever
+        # LinkedIn drew first. That is verbatim what aim_invitation exists to
+        # refuse, on the action this spec itself calls the most
+        # irreversible-in-audience in the design.
+        #
+        # SO THE GATE IS THE NAME MATCH, NOT THE COUNT: exactly ONE committed
+        # recipient WHOSE ACCESSIBLE NAME CARRIES HIS OWN NEEDLE, compared
+        # inside the page, integers only coming back. A count of one with the
+        # wrong name refuses. A count of zero refuses.
+        #
+        # AND THE ORDER IS THE SAFETY PROPERTY: the recipient gate runs
+        # BETWEEN the two fills, so HIS WORDS ARE NEVER TYPED until a
+        # recipient has been confirmed. A refusal costs him a typed name in a
+        # composer, not his message.
+        #
+        # IT IS EXPECTED TO REFUSE ON FIRST USE AND THE REFUSAL IS THE
+        # MEASUREMENT. Nobody has typed into that combobox through this
+        # server; whether a bare fill commits a recipient at all is unknown;
+        # and the selectors that would find a committed one have never matched
+        # anything on any page, on either branch of the only test that covers
+        # them -- its double DISCARDS the selector argument. The per-selector
+        # counts the refusal returns cannot be obtained any other way, because
+        # taking the measurement requires typing into the box. Exactly the
+        # shape comment_on_item shipped in, and unsave_job before it.
+        #
+        # WHAT IT STILL CANNOT DO is report "sent". to_state is
+        # "message_sent" and no surface this server may read writes that
+        # state, so the True arm is unreachable by construction; what it CAN
+        # report is NOT SENT, from not_performed_state. And the InMail cost
+        # stays UNMEASURED rather than denied -- the preview says so.
+        "send_message",
         # THE ELEVENTH, 2026-09-02, on the operator's ruling "I want all
         # capabilities". Everything the earlier refusal named as missing was
         # built for it rather than around it: an exact-url exemption for the
@@ -4423,12 +4572,18 @@ def valid_from(spec: WriteSpec, state: str, target: str) -> tuple[bool, str]:
     one that counts -- the preview's reading is up to two minutes old, and on
     a setting he may have changed in another tab in between.
     """
-    if spec.from_state is not None:
-        if state == spec.from_state:
+    # THE CLICK-TIME STATE, WHICH IS NOT ALWAYS THE PREVIEW'S. See
+    # ``WriteSpec.click_from_state``: this is the ONLY reader of that field,
+    # and it defaults to ``from_state`` so the ten actions whose two readings
+    # coincide are unchanged. What the field buys is that the coincidence is
+    # now RULED rather than relied on.
+    wanted_here = spec.click_from_state or spec.from_state
+    if wanted_here is not None:
+        if state == wanted_here:
             return True, ""
         return False, (
-            f"{spec.action!r} is valid only from {spec.from_state!r} and the "
-            f"control on the page reads {state!r}."
+            f"{spec.action!r} is valid only from {wanted_here!r} at click time "
+            f"and the control on the page reads {state!r}."
         )
     destination = destination_of(spec, target)
     if not destination:
@@ -4539,6 +4694,20 @@ def anchor_label_for(
             if destination.strip().casefold() == known.casefold():
                 return known
         return None
+    if spec.action == "send_message":
+        # THE RECIPIENT COMBOBOX, NOT THE SEND CONTROL, and that is the same
+        # distinction ``publish_post``'s arm makes: for a typing action the
+        # anchor names the control that will be FILLED FIRST, not the one that
+        # will be pressed. ``Send`` is not addressed here at all -- it is
+        # reached only through ``_send_gate``, after a recipient has been
+        # confirmed and the body has landed, or not at all.
+        #
+        # MEASURED: an input with ``role=combobox`` named ``Enter message
+        # recipients`` through ``label-for``, on a 77-control census of
+        # ``/messaging/compose/`` taken 2026-08-31 and agreeing again
+        # 2026-09-02.
+        return dom.MESSAGE_RECIPIENT_LABEL
+
     if spec.action == "update_profile_field":
         # THE FIELD NAME, PER CALL, and this arm was MISSING when the action
         # shipped in a540461 on 2026-09-02. Its absence was not a subtlety and
@@ -4723,77 +4892,31 @@ _NINE_REFUSALS: dict[str, str] = {
     # declaration the gate prints -- ``unverifiable`` on the spec, naming the
     # Sent Invitations manager, both reasons it is unreachable, and what he
     # must do himself -- rather than a reason to refuse.
-    "send_message": (
-        "send_message is sanctioned and cannot be performed, AND THE COST "
-        "THIS REFUSAL WAS BUILT AROUND TURNED OUT NOT TO EXIST. WHAT IS "
-        "MEASURED, on the operator's own authorisation and with his "
-        "precondition checked before and after: /messaging/compose/ was "
-        "loaded on 2026-08-31 and IT DOES NOT REDIRECT. It stayed at the "
-        "composer, drew 77 controls and ZERO dialogs, and opened NOBODY'S "
-        "THREAD -- which is the opposite of what this entry predicted and of "
-        "what /messaging/ is measured TWICE to do. His messaging badge read "
-        "'Messaging, 0 new notifications' immediately before and immediately "
-        "after, so nothing of anybody's was spent. THE CONTROLS ARE NAMED: "
-        "'Enter message recipients', an input with role=combobox named "
-        "through label-for; the message body as a div with role=textbox "
-        "inside form#0; and 'Send', a text-named button which renders "
-        "DISABLED on an empty composer. It also draws TWO file inputs, the "
-        "first this server has measured anywhere. AND THE INMAIL BALANCE IS "
-        "NOT READABLE BY THIS SERVER AT ALL, which is MEASURED on both "
-        "candidate surfaces rather than merely unread. On the composer the "
-        "control named 'InMail' is a conversation-list FILTER PILL carrying "
-        "aria-checked=false, beside 'Focused', 'Unread', 'Starred' and "
-        "'Connections' -- a view filter, not a credit count. And "
-        "/premium/my-premium/ was admitted by the operator and captured on "
-        "2026-09-01: 80 controls, ZERO forms, ZERO dialogs, and NO NUMERIC "
-        "BALANCE OF ANY KIND -- subscription management, feature promos and "
-        "perk offers, the only integers on the page being carousel indices "
-        "and months in promotional copy. THE PRECISE CLAIM, because it is "
-        "narrower than 'there is no balance': no countable balance exists "
-        "on either surface this server MAY READ. Two links there go "
-        "elsewhere -- 'Manage subscription', and 'See all features' to "
-        "/premium/sb/explore/ -- and NEITHER is admitted, so a balance "
-        "behind one of them is not ruled out and would need a further "
-        "ruling. WHAT NO LONGER STOPS IT: sending means TYPING, and this "
-        "entry said until 2026-09-02 that no text-entry mutation was "
-        "sanctioned anywhere in this package. That stopped being true on "
-        "2026-09-01, when ('linkedin_server/writes.py', 'perform', 'fill') "
-        "entered SANCTIONED_MUTATIONS for publish_post. Typing is a solved "
-        "permission and is not a blocker here. WHAT MUST BE TRUE BEFORE IT "
-        "SHIPS "
-        "EVEN IF THAT CHANGES: an InMail may spend a finite credit whose size "
-        "this server does not know, and a gate that cannot tell him what an "
-        "action COSTS is not fully a gate -- every other write here names its "
-        "cost. Since the balance is measured unreadable, a preview would "
-        "have to say exactly that: this may spend one of a finite number of "
-        "InMail credits and this server cannot tell you how many remain. "
-        "AND THE THIRD THING, which is the one that settles it: NOTHING CAN "
-        "VERIFY A SEND. The composer renders a conversation LIST -- Focused, "
-        "Unread, Starred, Connections, 'Load more conversations' -- and "
-        "carries NO COUNTABLE TOTAL anywhere, where every other "
-        "verification in this package rests on LinkedIn's own stated count: "
-        "the tracker's per-tab number, the followed-pages total, the "
-        "dark-mode group's three-way checked. The only surface that could "
-        "confirm a send is the thread, which is forbidden AND costs a read "
-        "receipt on a real person. So a performed send could only ever "
-        "report 'unknown' -- the shape apply_job carried until 2026-08-31, "
-        "on an action that cannot be taken back. WHAT WOULD LIFT IT, AND THIS "
-        "CLAUSE NAMED THE WRONG THING UNTIL 2026-09-02: it said 'a "
-        "verification surface'. There is none and there may never be one -- "
-        "but proving a send HAPPENED was never the only route. apply_job hit "
-        "the same wall on an equally irreversible action and resolved it the "
-        "other way round, with WriteSpec.not_performed_state: read the state "
-        "that proves NOTHING WAS DISPATCHED, so a failure reports False "
-        "instead of 'unknown'. That state is now named on this spec -- the "
-        "composer still holding its text with Send still enabled -- and it is "
-        "measurable WITHOUT a first send, which is exactly what a "
-        "cleared-composer rule could never be. So this can report NOT SENT or "
-        "UNKNOWN and never SENT: it can be shown not to have happened and "
-        "cannot be shown to have happened. What remains is therefore not a "
-        "verification surface. It is the operator's decision on PERFORMABLE "
-        "membership, plus a preview stating that an InMail may spend a credit "
-        "this server cannot count."
-    ),
+    # ``"send_message"`` LEFT THIS TABLE ON 2026-09-02 BY SHIPPING, which is
+    # the only way anything is meant to leave it, and it left with one of its
+    # three blockers still open -- the same terms comment_on_item shipped on.
+    #
+    # TYPING was solved on 2026-09-01 and this entry already said so.
+    #
+    # THE COST was measured and stays UNMEASURABLE: no countable InMail
+    # balance exists on either surface this server MAY read -- the composer's
+    # `InMail` is a conversation FILTER PILL with aria-checked=false, and
+    # /premium/my-premium/ carries no numeric balance of any kind. The gate
+    # now DISCLOSES that instead of refusing over it.
+    #
+    # THE VERIFICATION did not close and was RULED ON, exactly as this entry
+    # predicted: nothing can prove a send happened, so the spec names
+    # not_performed_state and the action reports NOT SENT or UNKNOWN and never
+    # SENT.
+    #
+    # WHAT THIS ENTRY NEVER NAMED, AND IT IS THE ONE THAT SHAPED THE BUILD:
+    # THE RECIPIENT. It listed a surface, a cost and a verification and said
+    # nothing about how a message gets ADDRESSED. The recipient control is a
+    # typeahead nobody has typed into, and "Send became enabled" is not an
+    # aiming fact. That is why the shipped gate requires a committed recipient
+    # whose name carries his own needle rather than a count, and why the
+    # action ships expecting to refuse.
+
 
 }
 
@@ -4980,6 +5103,11 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "follow_company": "your followed companies",
     "update_setting": "your dark-mode setting",
     "update_profile_field": "the profile editor for that field",
+    # THE TWELFTH, and the only row here naming a surface this server
+    # deliberately will NOT open. Reading the thread is what would settle
+    # a send, and it costs a read receipt on a real person -- his to
+    # spend, not this gate's.
+    "send_message": "your own LinkedIn messages",
     # THE FOUR WHOSE ANSWER IS NOT ON A SURFACE THIS SERVER MAY READ, and each
     # names the place a HUMAN would look rather than the place this server
     # would. That distinction is the whole value of the field: it is read
@@ -5090,6 +5218,15 @@ _VERIFIED_FROM: dict[str, str] = {
         "rather than from a list that could be counted before and after."
     ),
 }
+_VERIFIED_FROM["send_message"] = (
+    "THE COMPOSER, RE-READ, and it answers only the NEGATIVE. A composer "
+    "still on screen with Send still enabled is what holding un-dispatched "
+    "text looks like on this surface, so that reading reports NOT SENT. "
+    "Nothing here can report SENT: the only surface that could is the thread, "
+    "which is forbidden AND costs a read receipt on a real person. So this "
+    "action can be shown not to have happened and cannot be shown to have "
+    "happened, which is the honest shape rather than a shortfall."
+)
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
 
 
@@ -5695,6 +5832,80 @@ async def _live_control(
             dom.comment_editor_selector(),
         )
 
+    if spec.action == "send_message":
+        # THE COMPOSER MUST BE EMPTY, AND EVERY CLAUSE HERE IS A MEASURED
+        # SHAPE RATHER THAN A PRECAUTION.
+        #
+        # ``read_compose_fields`` refuses outright if ANY recipient is already
+        # committed, and that refusal is reused rather than re-implemented:
+        # once somebody is in the box this reader's whole self-ownership
+        # argument evaporates, and a composer holding a stranger is not a
+        # composer this gate may type into. It also enforces exactly two
+        # dispatch radios with exactly one checked, and exactly one
+        # ``div[role=textbox]`` -- which is what identifies the body, since
+        # the body carries no usable label.
+        reading = await dom.read_compose_fields(page)
+        if reading.get("refused"):
+            return (
+                UNKNOWN,
+                "the composer was not in the state this gate acts from: "
+                + str(reading.get("why") or reading.get("refused")),
+                "",
+            )
+
+        send = await dom.read_compose_send_state(page)
+        if send.get("error"):
+            return (UNKNOWN, str(send["error"]), "")
+        if int(send.get("textboxes") or 0) != 1:
+            return (
+                UNKNOWN,
+                f"{send.get('textboxes')} div[role=textbox] on this page, "
+                "where the composer's body is measured at exactly one. The "
+                "body carries no label this server may use, so the COUNT is "
+                "its whole identification -- at any other number a fill would "
+                "be aiming by document order.",
+                "",
+            )
+        if int(send.get("controls") or 0) != 1:
+            return (
+                UNKNOWN,
+                f"{send.get('controls')} control(s) named "
+                f"{dom.MESSAGE_SEND_NAME!r} are drawn, where exactly one is "
+                "the measured shape. Zero is a page that had not arrived; "
+                "more than one and pressing either would be picking by "
+                "position.",
+                "",
+            )
+        if send.get("enabled") is not False:
+            # AN ENABLED SEND ON AN EMPTY COMPOSER IS NOT THE MEASURED STATE.
+            # ``Send`` is measured DISABLED with no recipient and no body, so
+            # an enabled one means something is already in this composer that
+            # this server did not put there and cannot read back. Same rule as
+            # publish_post's already-enabled refusal, and the same reason: a
+            # fill REPLACES, and replacing a draft he wrote is a side effect
+            # he did not ask for.
+            return (
+                UNKNOWN,
+                "the Send control is already ENABLED before anything was "
+                "typed. On this surface it is measured DISABLED on an empty "
+                "composer, so something is already in that box -- a draft "
+                "LinkedIn restored, most likely his. This gate will not type "
+                "over content it cannot read back. Open the composer yourself "
+                "and clear it.",
+                "",
+            )
+        return (
+            "composer_empty",
+            "the composer is empty and in the shape this action is measured "
+            f"to act from: no recipient committed, exactly one "
+            f"div[role=textbox] for the body, and exactly one control named "
+            f"{dom.MESSAGE_SEND_NAME!r} drawn DISABLED -- which on this "
+            "surface is what empty looks like. The recipient combobox is the "
+            "first fill target; the body is typed only if the recipient gate "
+            "confirms a committed recipient carrying your own needle.",
+            dom.compose_recipient_selector(),
+        )
+
     if spec.action == "publish_post":
         # THIS RETURNS THE FILL TARGET, not a click target. perform routes it
         # into fill_plan rather than click_plan for anything in
@@ -6235,6 +6446,65 @@ async def _verify_after(
         )
         return state, why, landed
 
+    if spec.action == "send_message":
+        # THE BRANCH THAT PROVES IT DID **NOT** HAPPEN, and cannot prove that
+        # it did. That asymmetry is the design and it is stated rather than
+        # worked around.
+        #
+        # WHY NOT ``unverifiable``. That declaration short-circuits this
+        # function to UNKNOWN before any comparison runs -- correct for
+        # ``publish_post``, where nothing can answer -- and here it would
+        # DELETE the answer this action does have while keeping the flag that
+        # says there is none. ``not_performed_state`` exists precisely so an
+        # action that cannot prove the positive can still prove the negative,
+        # which is how ``apply_job`` stopped reporting "unknown" on every run.
+        #
+        # AND THE READ COSTS NOTHING. ``from_state`` says the composer is
+        # unmeasured because the PREVIEW's gate must not open messaging; by
+        # the time this runs the composer is already open in front of us, so
+        # re-reading it spends nobody's thread. That asymmetry is why one
+        # field says "unmeasured" and this one names what it expects to find.
+        reading = await dom.read_compose_send_state(page)
+        if reading.get("error"):
+            return (
+                UNKNOWN,
+                "the composer could not be re-read after the attempt, so this "
+                f"says nothing about whether anything was sent: {reading['error']}",
+                "",
+            )
+        boxes = int(reading.get("textboxes") or 0)
+        if boxes != 1:
+            return (
+                UNKNOWN,
+                f"{boxes} div[role=textbox] on the re-read, where the "
+                "composer draws exactly one. An absent body is a page that "
+                "changed, NOT evidence that a message left -- reporting it as "
+                "either outcome would be reading a half-rendered page as a "
+                "result.",
+                "",
+            )
+        if reading.get("enabled") is True:
+            return (
+                "composer_holds_text",
+                "the composer is still on screen with Send still ENABLED, "
+                "which on this surface is what a composer holding its "
+                "content looks like. NOTHING WAS DISPATCHED. That is the "
+                "strongest statement this action can make, and it is the "
+                "negative one: this server can show that a message did not "
+                "go, and cannot show that one did.",
+                "",
+            )
+        return (
+            UNKNOWN,
+            "the composer no longer has Send enabled. This server will NOT "
+            "read that as 'sent': a cleared composer and a composer that "
+            "never received the text look identical from here, and the only "
+            "surface that could tell them apart is the thread -- which is "
+            "forbidden AND costs a read receipt on a real person. Open your "
+            "messages and look.",
+            "",
+        )
+
     if spec.action in ("save_job", "unsave_job"):
         landed = await _load(navigator, page, SAVED_LIST_URL, surface="saved jobs")
         state, why = await _read_saved_state(page, grant.target)
@@ -6327,8 +6597,23 @@ async def _verify_after(
 #: are different claims -- ``update_setting``'s target has a value component
 #: and that value is a RADIO DESTINATION, clicked and never typed.
 TYPING_ACTIONS: frozenset[str] = frozenset(
-    {"publish_post", "comment_on_item"}
+    {"publish_post", "comment_on_item", "send_message"}
 )
+
+
+#: THE ACTIONS THAT TYPE **TWO** THINGS: a subject into one control and the
+#: content into another. Only ``send_message``, and it is a set rather than a
+#: test on ``target_kind`` for the same reason ``TYPING_ACTIONS`` is --
+#: ``comment_on_item`` also has a two-part target and types only one half of
+#: it, because the other half is an item urn that addresses the page.
+#:
+#: THE ORDER IS THE SAFETY PROPERTY. The SUBJECT is typed first and the
+#: content is queued only if ``_recipient_gate`` confirms it, so his words are
+#: never in a composer until the recipient has been checked against his own
+#: needle. Appending on PROCEED rather than clearing on refuse is deliberate:
+#: the default has to be "do not type", so that forgetting a branch fails
+#: closed.
+ADDRESSED_TYPING_ACTIONS: frozenset[str] = frozenset({"send_message"})
 
 
 #: ACTIONS WHOSE SUBMIT CONTROL DOES NOT EXIST UNTIL THE FILL LANDS, so it
@@ -6545,6 +6830,187 @@ async def _publish_submit_gate(page: Any) -> dict[str, Any]:
         "the editor is present and the publish control went from the "
         "disabled state this surface draws when empty to enabled, which is "
         "the observable transition a fill produces here."
+    )
+    return out
+
+
+async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
+    """THE GATE BETWEEN THE RECIPIENT FILL AND THE BODY FILL.
+
+    **WHAT MAKES THIS SAFE IS THE NAME MATCH, NOT THE COUNT.** A count of one
+    says LinkedIn has committed a recipient; it does not say the recipient is
+    the person he named. Those are different claims and only the second one
+    matters when the thing being sent reaches a named individual. So this
+    requires EXACTLY ONE committed recipient WHOSE ACCESSIBLE NAME CARRIES HIS
+    OWN NEEDLE, compared inside the page, with only integers coming back.
+
+    WHY THE BRIEFED DESIGN WAS NOT ENOUGH. The obvious gate is the one
+    ``publish_post`` uses: fill both fields, then check that ``Send`` became
+    enabled. That answers "does LinkedIn think this is sendable" and nothing
+    else -- and if the typeahead commits anything on the blur that the SECOND
+    fill causes, the gate's own evidence is satisfied by exactly the thing
+    that is wrong, and the message reaches whoever LinkedIn drew first. That
+    is verbatim the failure ``aim_invitation`` exists to refuse, on the action
+    this package's own spec calls the most irreversible in audience.
+
+    THE ORDERING IS THE SAFETY PROPERTY. This runs after the RECIPIENT fill
+    and before the BODY fill, so **his words are never typed until a recipient
+    has been confirmed against his needle.** A refusal here costs him a typed
+    name sitting in a composer; the alternative ordering costs him his message
+    in a composer, or worse, sent.
+
+    IT IS EXPECTED TO REFUSE ON FIRST USE, and that is the design rather than
+    a defect. Nobody has ever typed into that combobox through this server, so
+    nobody knows whether a bare fill commits a recipient at all -- and the
+    selectors that would find a committed one have never matched anything, on
+    any page, on either branch of the only test that covers them. **The
+    counts this refusal returns ARE the measurement**, and there is no way to
+    take it that does not involve typing into the box. Exactly the shape
+    ``comment_on_item`` shipped in, and ``unsave_job`` before it.
+
+    IT FAILS CLOSED, which is what makes shipping it honest. An unvalidated
+    selector that matches nothing reads zero and REFUSES. A selector that
+    matches a chip carrying the wrong name reads zero MATCHES and refuses. The
+    only way through is a chip that both exists and carries his needle.
+    """
+    needle = _subject_component_of(spec_for_action(grant.action), grant.target)
+    out: dict[str, Any] = {
+        "proceed": False,
+        "observed": {},
+        "why": "",
+        "refused_condition": None,
+    }
+    try:
+        reading = await dom.read_selected_recipients(page, needle)
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the composer could not be read after the recipient was typed, so "
+            f"nothing is known about who is in it: {type(exc).__name__}: {exc}"
+        )
+        return out
+
+    # THE COUNTS ARE THE POINT OF THIS BLOCK. Per-selector, so a refusal says
+    # WHICH candidate matched and which found nothing -- the difference
+    # between "there is nobody here" and "my selector is wrong", which on this
+    # surface are the difference between refusing and sending.
+    out["observed"] = {
+        "per_selector": reading.get("per_selector"),
+        "total": reading.get("total"),
+        "matches": reading.get("matches"),
+        "selectors_tried": list(dom.RECIPIENT_CHIP_SELECTORS),
+    }
+    total = int(reading.get("total") or 0)
+    matches = int(reading.get("matches") or 0)
+
+    if total == 0:
+        out["refused_condition"] = "1_no_recipient_committed"
+        out["why"] = (
+            "NO COMMITTED RECIPIENT WAS FOUND BY ANY CANDIDATE SELECTOR after "
+            "the name was typed, so nothing was typed into the body and "
+            "nothing was sent. THIS IS THE EXPECTED FIRST RESULT AND IT IS "
+            "THE MEASUREMENT: typing into a typeahead is not the same as "
+            "choosing from it, and whether a bare fill commits a recipient on "
+            "this surface has never been observed. The per-selector counts "
+            "above are what nobody could obtain any other way -- a zero from "
+            "every candidate means either that the fill committed nobody, or "
+            "that none of these selectors is how LinkedIn draws a committed "
+            "recipient, and those two need a human looking at the screen to "
+            "tell apart."
+        )
+        return out
+    if total > 1:
+        out["refused_condition"] = "2_several_recipients"
+        out["why"] = (
+            f"{total} committed recipients are in this composer. This action "
+            "sends to one person named by you; a composer holding several is "
+            "not a state this gate acts from, and choosing among them would "
+            "be choosing by position."
+        )
+        return out
+    if matches != 1:
+        out["refused_condition"] = "3_needle_does_not_match"
+        out["why"] = (
+            "exactly one recipient is committed and it does NOT carry the "
+            "name you supplied -- the comparison ran inside the page and "
+            f"returned {matches} match(es). THE COUNT IS NOT THE PROPERTY: a "
+            "committed recipient means LinkedIn thinks this is sendable, and "
+            "only the name match means it is sendable TO THE PERSON YOU "
+            "NAMED. Refused, and the label is not reported here, because it "
+            "is somebody's name and this server does not read one to explain "
+            "itself."
+        )
+        return out
+
+    out["proceed"] = True
+    out["why"] = (
+        "exactly one recipient is committed and its accessible name carries "
+        "the needle you supplied, compared INSIDE the page so no name entered "
+        "this process. That is the property this gate exists for -- not that "
+        "the composer looks sendable, but that it is addressed to the person "
+        "you named. The body may now be typed."
+    )
+    return out
+
+
+async def _send_gate(page: Any) -> dict[str, Any]:
+    """THE GATE BETWEEN THE BODY FILL AND THE SEND CLICK.
+
+    The same measured transition ``publish_post``'s gate rests on: ``Send`` is
+    drawn DISABLED on an empty composer, so a fill that landed produces
+    something this server can SEE rather than an inference about what the fill
+    did.
+
+    IT IS THE SECOND GATE AND NOT THE ONLY ONE. Reaching it means a recipient
+    was already confirmed against his needle, which is the claim this gate
+    cannot make and does not pretend to: all it adds is that the body landed.
+    """
+    reading = await dom.read_compose_send_state(page)
+    out: dict[str, Any] = {
+        "proceed": False,
+        "selector": dom.compose_send_selector(),
+        "observed": reading,
+        "why": "",
+        "refused_condition": None,
+    }
+    if reading.get("error"):
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the composer could not be read after the body was typed, so "
+            f"nothing is known about whether it is ready: {reading['error']}"
+        )
+        return out
+    if int(reading.get("textboxes") or 0) != 1:
+        out["refused_condition"] = "1_body_absent"
+        out["why"] = (
+            f"{reading.get('textboxes')} div[role=textbox] after the fill, "
+            "where exactly one is the shape measured. Zero means the composer "
+            "is gone -- a page that changed under the gate, not a composer "
+            "declining to send."
+        )
+        return out
+    if int(reading.get("controls") or 0) != 1:
+        out["refused_condition"] = "2_no_send_control"
+        out["why"] = (
+            f"{reading.get('controls')} control(s) named "
+            f"{dom.MESSAGE_SEND_NAME!r} are drawn, where exactly one is "
+            "required."
+        )
+        return out
+    if reading.get("enabled") is not True:
+        out["refused_condition"] = "3_send_disabled"
+        out["why"] = (
+            "the Send control is drawn and NOT enabled after the body was "
+            "typed. On this surface it is measured disabled while the "
+            "composer is empty, so this reads as the text not having landed "
+            "-- and a disabled control is not pressed to find out."
+        )
+        return out
+    out["proceed"] = True
+    out["why"] = (
+        "the body is present and Send went from the disabled state this "
+        "surface draws when empty to enabled, which is the observable "
+        "transition a fill produces here."
     )
     return out
 
@@ -6961,6 +7427,8 @@ async def perform(
     fills_made = 0
     apply_gate: Optional[dict[str, Any]] = None
     publish_gate: Optional[dict[str, Any]] = None
+    recipient_gate: Optional[dict[str, Any]] = None
+    send_gate: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -6992,6 +7460,13 @@ async def perform(
     select_plan: list[tuple[str, str]] = []
     if control_kind == "select_option":
         select_plan.append((selector, _text_component_of(spec, grant.target)))
+    elif spec.action in ADDRESSED_TYPING_ACTIONS:
+        # THE SUBJECT ONLY. The content is appended by ``_recipient_gate``
+        # inside the loop, and ONLY if that gate confirms a committed
+        # recipient carrying his own needle -- so the queue starts one entry
+        # long and grows only on evidence. See ADDRESSED_TYPING_ACTIONS for
+        # why appending on proceed beats clearing on refuse.
+        fill_plan.append((selector, _subject_component_of(spec, grant.target)))
     elif spec.action in TYPING_ACTIONS or control_kind == "fill":
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
     click_plan: list[str] = (
@@ -7051,7 +7526,31 @@ async def perform(
             # until the fill lands, so it is identified by ARRIVAL. Same act,
             # two instruments, and using either on the other's surface would
             # press the wrong control.
-            if spec.action in DELTA_SUBMIT_ACTIONS:
+            if spec.action in ADDRESSED_TYPING_ACTIONS:
+                # TWO FILLS, TWO GATES, AND THE RECIPIENT ONE RUNS FIRST.
+                #
+                # THE REPORTED REASON USED TO BE WHICHEVER GATE RAN LAST,
+                # because this loop ran one gate after every fill and kept one
+                # variable. With two fills that would report the SEND gate's
+                # verdict on a run that stopped at the RECIPIENT gate, which
+                # is the wrong sentence at the worst moment. Each gate keeps
+                # its own block, and ``fills_made`` says which fill this pass
+                # is -- so a refusal names WHICH fill it stopped on rather
+                # than reporting a composite.
+                if fills_made == 1:
+                    recipient_gate = await _recipient_gate(page, grant)
+                    if recipient_gate["proceed"]:
+                        fill_plan.append(
+                            (
+                                dom.compose_body_selector(),
+                                _text_component_of(spec, grant.target),
+                            )
+                        )
+                else:
+                    send_gate = await _send_gate(page)
+                    if send_gate["proceed"]:
+                        click_plan.append(send_gate["selector"])
+            elif spec.action in DELTA_SUBMIT_ACTIONS:
                 comment_gate = await _comment_submit_gate(page, before_names)
                 if comment_gate["proceed"]:
                     click_plan.append(comment_gate["selector"])
@@ -7291,6 +7790,52 @@ async def perform(
                 "arrived": comment_gate.get("arrived"),
                 "grew": comment_gate.get("grew"),
                 "observed": comment_gate.get("observed"),
+            }
+        ),
+        # WHAT THE RECIPIENT GATE SAW, and this block is THE POINT of the
+        # action rather than a diagnostic. send_message is expected to refuse
+        # here on first use: nobody has ever typed into that combobox through
+        # this server, and the selectors that would find a committed recipient
+        # have never matched anything on any page. `per_selector` IS the
+        # measurement that first run exists to produce -- it distinguishes
+        # "the fill committed nobody" from "none of these is how LinkedIn
+        # draws a committed recipient", which are the two answers a human has
+        # to tell apart by looking.
+        #
+        # NO LABEL APPEARS IN IT. The needle comparison happened inside the
+        # page and only integers came back; a committed recipient is by
+        # definition a third party, so a name here would be the disclosure
+        # this whole design avoids.
+        "recipient_gate": (
+            None
+            if recipient_gate is None
+            else {
+                "proceeded": bool(recipient_gate.get("proceed")),
+                "refused_condition": recipient_gate.get("refused_condition"),
+                "why": recipient_gate.get("why"),
+                "observed": recipient_gate.get("observed"),
+                "what_this_is_not": (
+                    "a count of recipients is not the property this gate "
+                    "checks. It requires exactly one committed recipient "
+                    "WHOSE NAME CARRIES YOUR NEEDLE -- a count of one with "
+                    "the wrong name refuses, because 'LinkedIn thinks this is "
+                    "sendable' and 'this is addressed to the person you "
+                    "named' are different claims and only the second one is "
+                    "worth anything here."
+                ),
+            }
+        ),
+        # WHAT THE SEND GATE SAW. Reached only past the recipient gate, so a
+        # null here on a send_message run means the recipient gate stopped it
+        # and the body was never typed.
+        "send_gate": (
+            None
+            if send_gate is None
+            else {
+                "proceeded": bool(send_gate.get("proceed")),
+                "refused_condition": send_gate.get("refused_condition"),
+                "why": send_gate.get("why"),
+                "observed": send_gate.get("observed"),
             }
         ),
         # WHAT THE PUBLISH GATE SAW, for the composer.

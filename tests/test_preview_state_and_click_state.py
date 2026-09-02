@@ -102,6 +102,7 @@ from linkedin_server.writes import (
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
 from tests.test_result_verification_block import SHAREBOX_MARKUP
+from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
 from tests.test_writes import (  # noqa: F401 -- two of these are fixtures
     FOLLOWED_COMPANY,
@@ -216,6 +217,23 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_editor_fields.py",
         TWO_DIALOG_HTML,
         EDITOR_FIELD_TARGET,
+    ),
+    # THE TWELFTH, 2026-09-02, and the EMPTY composer is the state its arm
+    # acts from -- no recipient committed, one unlabelled div[role=textbox]
+    # for the body, and Send drawn DISABLED, which on that surface is what
+    # empty looks like.
+    #
+    # ITS CLICK-TIME STATE IS NOT ITS PREVIEW STATE, which is the whole reason
+    # this file exists and the reason ``click_from_state`` was added. The
+    # preview reads the NAV BADGE and reports ``composer_unmeasured``, because
+    # that gate must not open messaging; ``_live_control`` reads the composer
+    # itself and reports ``composer_empty``. Part 1 compares against the
+    # CLICK-time field, so this row exercises the split rather than working
+    # around it.
+    "send_message": (
+        "tests/test_send_message_gate.py",
+        COMPOSER_MARKUP,
+        _canonical("send_message"),
     ),
 }
 
@@ -353,15 +371,47 @@ def _assert_the_two_ends_agree(spec, state: str, selector: str, why: str) -> Non
         "reached _live_control's success path and the invariant below was not "
         f"exercised at all. why={why!r}"
     )
-    if spec.from_state is not None:
-        assert state == spec.from_state, (
+    # THE CLICK-TIME FIELD, WHICH IS NOT ALWAYS ``from_state`` -- AND THAT
+    # SENTENCE IS WHY THIS FILE EXISTS.
+    #
+    # WHEN THIS FILE WAS WRITTEN the check was ``state == spec.from_state``,
+    # because all eleven actions then shipped had a click-time reading equal
+    # to their preview reading. THE FILE'S OWN FAILURE MESSAGE NAMED WHAT WAS
+    # MISSING: "those two ends have now disagreed, and NOTHING IN THIS PACKAGE
+    # RULES WHICH OF THEM OWNS THE FIELD."
+    #
+    # ``send_message`` shipped the next hour and disagreed, exactly as
+    # predicted -- its preview reads the NAV BADGE and must not open
+    # messaging, so it reports ``composer_unmeasured``; its click-time reading
+    # is taken on the composer, which by then is open. Something now DOES rule
+    # it: ``WriteSpec.click_from_state``, read by ``writes.valid_from`` and by
+    # nothing else.
+    #
+    # SO THE INVARIANT IS STRONGER THAN IT WAS, NOT WEAKER. It was "the two
+    # readings are equal", which was a coincidence. It is now "the click-time
+    # reading equals the field the CLICK-TIME GATE compares against, AND any
+    # action whose two ends differ has DECLARED that in a field rather than
+    # diverging by accident". A silent divergence still fails here; a declared
+    # one is now sayable.
+    click_state = spec.click_from_state or spec.from_state
+    if click_state is not None:
+        assert state == click_state, (
             f"{spec.action!r}: the control _live_control read at CLICK time "
-            f"reports {state!r}, and the spec says the action is valid only "
-            f"from {spec.from_state!r} -- which is the same field "
-            "writes._direction compares the PREVIEW's reading against. Those "
-            "two ends have now disagreed, and nothing in this package rules "
-            "which of them owns the field. why=" + repr(why)
+            f"reports {state!r}, and writes.valid_from will compare that "
+            f"against {click_state!r}. They disagree, so gate 5 refuses every "
+            "reading this action can take -- which is not a gate refusing "
+            "something, it is a gate that cannot pass. why=" + repr(why)
         )
+        if spec.click_from_state is not None:
+            # AND A DIVERGENCE MUST BE DELIBERATE. Declaring the field is the
+            # act that turns "these two readings happen to differ" into "these
+            # two readings are of different things, and here is which".
+            assert spec.click_from_state != spec.from_state, (
+                f"{spec.action!r} declares click_from_state identical to "
+                "from_state, which declares nothing. Either the two ends read "
+                "the same thing -- in which case drop the field -- or they do "
+                "not, in which case say what the click-time one is."
+            )
         return
     assert state.strip().casefold() in spec.audiences, (
         f"{spec.action!r} has no single from_state, so writes.valid_from "
@@ -414,8 +464,8 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     #
     # An empty ``CANNOT_REACH`` still asserts something -- that nothing is
     # currently unreachable -- which is why it is a table and not a deletion.
-    assert len(PERFORMABLE) == 11, sorted(PERFORMABLE)
-    assert len(REACHED) == 11, sorted(REACHED)
+    assert len(PERFORMABLE) == 12, sorted(PERFORMABLE)
+    assert len(REACHED) == 12, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
@@ -920,13 +970,33 @@ async def test_the_unmutated_specs_still_pass_the_same_check(writes_on, over):
 #: declaration is an ``ast.AnnAssign`` over a bare name; neither is an attribute
 #: read. Both are counted separately below, so the distinction is asserted
 #: rather than assumed.
+#: MOVED 2026-09-02, FROM 3 TO 1 IN ``valid_from``, AND THAT DROP IS THE
+#: POINT OF THIS WHOLE FILE LANDING.
+#:
+#: ``valid_from`` read ``.from_state`` three times: once to test whether the
+#: action is a binary toggle, once to compare, once to name the state in its
+#: refusal. It now reads ``spec.click_from_state or spec.from_state`` ONCE
+#: into a local and uses that. **A meaning was split off the field rather than
+#: stacked on it.**
+#:
+#: THIS PIN IS WHAT MADE THE CHANGE VISIBLE. The number moved the moment the
+#: split landed, and a reviewer reading only the diff of ``valid_from`` would
+#: have seen a tidy-up. What it actually is: the field stopped answering the
+#: click-time question, which was the tenth instance of an unruled coincidence
+#: in this package.
 FROM_STATE_READERS: dict[str, int] = {
     "_direction": 3,
-    "valid_from": 3,
+    "valid_from": 1,
     "anchor_label_for": 2,
     "_live_control": 1,
     "perform": 2,
 }
+
+#: AND ITS SIBLING, pinned beside it so the split cannot be quietly undone.
+#: ``click_from_state`` has exactly ONE reader, and if a second appears it is a
+#: second meaning arriving on a field that exists because one field carrying
+#: four meanings is how this went wrong.
+CLICK_FROM_STATE_READERS: dict[str, int] = {"valid_from": 1}
 
 #: The two ends the design is written around, named so the test can assert they
 #: are still here even if the counts move.
@@ -997,7 +1067,7 @@ def test_every_reader_of_from_state_is_named_and_counted():
         "measured": dict(sorted(measured.items())),
         "pinned": dict(sorted(FROM_STATE_READERS.items())),
     }
-    assert sum(measured.values()) == 11, sum(measured.values())
+    assert sum(measured.values()) == 9, sum(measured.values())
     # The two ends this file is about must be among them, whatever else moves.
     for name in THE_TWO_ENDS:
         assert name in measured, (name, sorted(measured))

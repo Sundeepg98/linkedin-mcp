@@ -92,6 +92,23 @@ PAGE = (
     f"<button>{dom.COMMENT_CONTROL_NAME}</button>"
     f'<button aria-label="{dom.REACTION_OFF_LABEL}">react</button>'
     '<button aria-label="Someone to connect">invite</button>'
+    # THE COMPOSER'S THREE, added 2026-09-02 with send_message. The recipient
+    # is drawn as a LABEL-FOR pair rather than with an aria-label, because
+    # that is how the live surface names it -- measured, "an input with
+    # role=combobox named through label-for" -- and an aria-label here would
+    # make this fixture prove the selector against a naming route the real
+    # page does not use.
+    f'<label for="msg-recipients">{dom.MESSAGE_RECIPIENT_LABEL}</label>'
+    '<input id="msg-recipients" role="combobox">'
+    # The body carries NO LABEL, which is the point: it is addressed by role
+    # alone. Note this page now draws THREE div[role=textbox] -- the post
+    # editor, the comment editor and this -- so compose_body_selector matches
+    # three here. That is correct and is why this test asserts >= 1: the
+    # body's exactly-one property is a fact about the COMPOSER, enforced by
+    # dom.read_compose_modes refusing textbox_count_not_one, not a fact about
+    # the selector.
+    '<div role="textbox"></div>'
+    f"<button>{dom.MESSAGE_SEND_NAME}</button>"
     '<a href="/jobs/view/1/">a job row</a>'
     "</main></body></html>"
 )
@@ -112,6 +129,9 @@ def build_all() -> dict[str, str]:
         "reaction_control_selector": dom.reaction_control_selector(),
         "invite_control_selector": dom.invite_control_selector(0),
         "tracker_list_selector": dom.tracker_list_selector(),
+        "compose_recipient_selector": dom.compose_recipient_selector(),
+        "compose_body_selector": dom.compose_body_selector(),
+        "compose_send_selector": dom.compose_send_selector(),
     }
 
 

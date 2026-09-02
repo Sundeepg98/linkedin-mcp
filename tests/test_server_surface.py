@@ -1089,6 +1089,14 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # read can confirm a sent invitation -- and it is the second
         # performable action that cannot be undone.
         "send_invitation",
+        # THE TWELFTH, 2026-09-02, and the one that SHIPS EXPECTING TO REFUSE.
+        # It reaches a named person like send_invitation does, and unlike it
+        # the gate stops between the two fills: a recipient is typed, then
+        # checked for EXACTLY ONE committed recipient whose name carries his
+        # own needle, and only then are his words typed. A count of one with
+        # the wrong name refuses. Nobody has typed into that combobox through
+        # this server, so the first refusal IS the measurement.
+        "send_message",
         "unfollow_company",
         "unsave_job",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -1137,6 +1145,14 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTH, same day, and the first write on this surface that
         # reaches another person AND cannot confirm its own outcome.
         "send_invitation",
+        # THE TWELFTH, 2026-09-02, and the one that SHIPS EXPECTING TO REFUSE.
+        # It reaches a named person like send_invitation does, and unlike it
+        # the gate stops between the two fills: a recipient is typed, then
+        # checked for EXACTLY ONE committed recipient whose name carries his
+        # own needle, and only then are his words typed. A count of one with
+        # the wrong name refuses. Nobody has typed into that combobox through
+        # this server, so the first refusal IS the measurement.
+        "send_message",
         "unfollow_company",
         "unsave_job",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
@@ -1188,10 +1204,15 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # considered", and a third state -- built and SHIPPING -- belongs in
     # ``writes_available``, which is asserted below.
     not_performed = info["writes_sanctioned_but_not_performed"]
-    assert set(not_performed) == {
-        "set_open_to_work",
-        "send_message",
-    }
+    # ``send_message`` LEFT THIS SET ON 2026-09-02 BY SHIPPING. One member is
+    # left, and it is the one with no tool on the surface at all --
+    # ``set_open_to_work`` is a spec behind the gate that nothing can call, so
+    # its refusal is not something a caller ever meets.
+    #
+    # Written out rather than derived, for the reason this file writes every
+    # capability list out: a set that supplies its own expected value cannot
+    # notice a member arriving.
+    assert set(not_performed) == {"set_open_to_work"}
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
     # the only way anything is meant to leave it. A shipped action still
@@ -1544,16 +1565,46 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # itself checked, applied to a loop's coverage rather than a
     # function's callers.
     # update_profile_field left this set on 2026-09-02 by becoming performable,
-    # which is exactly what the set is here to make visible: the departure is a
-    # diff rather than a silence.
-    assert examined == {"send_message"}, examined
-    # AND THE PARAGRAPH MUST SAY THEY CANNOT ACT, or naming them is worse than
-    # silence: it would advertise capabilities that refuse.
-    assert "none of them can act" in text
-    # The two whose refusal has a COST attached must say so where an assistant
-    # reads it, not only in the tool's own docstring.
+    # and send_message left it the same day -- which is exactly what the set is
+    # here to make visible: a departure is a diff rather than a silence.
+    #
+    # IT IS NOW EMPTY, AND THE EMPTINESS IS ASSERTED RATHER THAN THE LOOP
+    # BEING DELETED. A loop over nothing passes without running, so all this
+    # line does today is NAME the emptiness -- and that is worth keeping,
+    # because the next sanctioned-and-refusing action with a registered tool
+    # re-populates it and must be looked at. Deleting the loop would make that
+    # arrival silent, which is the permissive-skip failure this very block was
+    # written about.
+    assert examined == set(), examined
+    # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
+    # "none of them can act" of a set that is now empty, and a sentence
+    # describing an empty set as refusing is a claim about nothing -- worse
+    # than silence, because a reader takes it as describing something.
+    #
+    # ``not in`` WAS WRITTEN HERE FIRST AND IT IS THE WRONG SHAPE, which this
+    # file had already ruled twenty lines above for the OTHER denial: this
+    # package QUOTES a claim it is correcting rather than swapping it
+    # silently, because that convention is what makes every earlier reversal
+    # in these files legible. A ``not in`` forbids the correction along with
+    # the error.
+    #
+    # So the same stronger check applies: the old sentence may appear ONCE,
+    # and only inside a frame saying it is what the paragraph used to say.
+    stale = "none of them can act"
+    assert text.count(stale) == 1, text.count(stale)
+    quoted_at = text.index(stale)
+    frame = text[max(0, quoted_at - 300):quoted_at + 300]
+    assert "until then" in frame, frame
+    assert "corrected here rather than quietly deleted" in frame, frame
+    # AND THE CORRECTION ITSELF MUST BE PRESENT, not merely the framing. A
+    # frame around a stale claim with no replacement beside it is an apology,
+    # not a correction.
+    assert "every write tool on this surface can act" in text.lower()
+    # THE COSTS SURVIVE THE SHIPPING, and that is the half worth keeping. The
+    # messaging paragraph still has to say the preview does not open messaging
+    # -- send_message performing does not make that cost go away, it makes it
+    # a thing a caller can now actually incur.
     assert "does not open messaging" in text
-    assert "mynetwork" in text
 
     # The apply paragraph: it must offer the half that ships and refuse the
     # half that does not, WITHOUT calling the refusal a scoping decision.
@@ -1751,9 +1802,24 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "comment_on_item",
         "publish_post",
         "send_invitation",
+        # THE FIFTH, 2026-09-02, ADDED BY HAND BECAUSE THAT IS THE POINT OF
+        # THIS LIST. send_message is irreversible and it reaches a NAMED
+        # INDIVIDUAL -- the spec calls it the most irreversible-in-audience
+        # action in the design, because a message is read by a person, usually
+        # within a day, and arrives as an email as well as a notification.
+        # Recalling it, if LinkedIn even permits that, removes it from a
+        # thread; it does not un-send the email and it does not un-read what
+        # somebody has read.
+        #
+        # AND IT MAY SPEND SOMETHING BESIDES. An InMail credit is a finite
+        # allowance whose size this server has MEASURED itself unable to read
+        # -- no countable balance exists on either surface it may open -- so
+        # this is the only entry here that can consume a resource nobody in
+        # this process can count.
+        "send_message",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. A THIRD arriving is a decision, not a diff."
+        "whoever added one. A SIXTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

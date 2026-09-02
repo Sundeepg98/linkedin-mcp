@@ -6,8 +6,27 @@ change a setting, send an invitation, send a message -- and an eighth,
 ``follow_company``, became performable. This file is about the seven. It is
 NOT about follow, which is covered where the performable actions are.
 
-WHAT MAKES THE SEVEN AN UNUSUAL THING TO TEST. Every one of them is sanctioned
-and none of them can act. That combination is only worth anything if it is
+THE SEVEN ARE NOW ONE, AND THE FILE IS NOT ABOUT SEVEN THINGS ANY MORE. All
+seven shipped between 2026-08-31 and 2026-09-02 -- the last, ``send_message``,
+as the twelfth performable write -- and each left by becoming performable,
+which is the only exit this file admits. What remains sanctioned and refusing
+is ``set_open_to_work`` alone, so the corpus is named ``REFUSING`` and derived
+from the registry rather than typed and named for a count that has now been
+wrong three times. ``LIFTED`` records every departure with its date and its
+reason, and the checks below run against whatever still refuses.
+
+TWO CONSEQUENCES OF THAT ARRIVAL WORTH READING BEFORE THE SECTIONS, because
+both changed what the checks assert rather than merely which action they run
+on. First, ``writes._NINE_REFUSALS`` IS EMPTY: every entry left with its
+action, and ``set_open_to_work`` refuses from a sibling branch of the same
+function, so section 3 reads the refusal a CALLER GETS by invoking
+``_refuse_unperformable`` rather than by indexing a table. Second,
+``writes._SURFACE_READS`` is the FALLBACK FAMILY and not the routing table --
+``observe`` handles this action's surface in a branch above it -- so section 2
+resolves the expected url through a helper that knows the difference.
+
+WHAT MAKES THIS AN UNUSUAL THING TO TEST. Every action in the corpus is
+sanctioned and none of them can act. That combination is only worth anything if it is
 STRUCTURAL rather than a habit: a capability that cannot act because nobody
 wired the click is one click away from acting, and a capability that cannot
 act because no grant may exist for it is not. So the load-bearing claims here
@@ -60,7 +79,7 @@ import pytest
 # but typing.get_type_hints() on it raised NameError, measured 2026-09-02.
 from typing import Optional
 
-from linkedin_server import dom, readonly, writes
+from linkedin_server import dom, readonly, shape, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import (
     PERMANENTLY_FORBIDDEN,
@@ -79,26 +98,45 @@ from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
     writes_on,
 )
 
-#: The ones that are sanctioned and STILL REFUSE, written out rather than
-#: derived from ``SANCTIONED_WRITES``. A derived list would be satisfied by
-#: somebody deleting a spec, which is the move these tests exist to make
-#: visible.
+#: The ones that are sanctioned and STILL REFUSE, DERIVED from the registry.
 #:
-#: SEVEN UNTIL 2026-08-31, SIX FROM THAT DAY, TWO FROM 2026-09-01. ``update_setting`` left this tuple on the
-#: day it entered ``writes.PERFORMABLE``, and it LEFT rather than being kept
-#: with an exception, because every check below asserts that its subject
-#: CANNOT be performed -- an action in both places would be asserted to be two
-#: things at once, and one of the two assertions would have to be softened to
-#: let it pass. Softening a check to accommodate a shipped capability is how a
-#: check stops being one.
+#: IT WAS CALLED ``SEVEN`` AND IT WAS TYPED OUT, until 2026-09-02. Both of
+#: those were wrong and they were wrong in different ways, so they are recorded
+#: separately.
 #:
-#: The constant keeps its name so the link to the seven the operator asked
-#: about is not lost; ``LIFTED`` below is where the difference is recorded.
-SEVEN = (
-    "send_message",
+#: THE NAME WAS A COUNT, AND A CORPUS NAMED FOR ITS SIZE LIES THE MOMENT THE
+#: SIZE CHANGES. It changed three times in three days -- seven on 2026-08-30,
+#: six on 08-31, two on 09-01, one on 09-02 -- and the constant went on being
+#: called SEVEN through all of it, so every sentence in this file that said
+#: "the seven" was describing a population that had not existed for days. The
+#: name is now what it is: the actions that refuse.
+#:
+#: THE OLD COMMENT ARGUED AGAINST DERIVING IT and the argument is quoted
+#: because it was half right: "A derived list would be satisfied by somebody
+#: deleting a spec, which is the move these tests exist to make visible." That
+#: hazard is real and it is covered -- by
+#: ``test_nothing_left_the_refusing_set_except_by_shipping``, which reconciles
+#: this corpus, ``LIFTED`` and ``PERFORMABLE`` against the whole sanctioned
+#: set, so a deleted spec goes missing from the TOTAL. What the typed tuple
+#: bought on top of that was nothing, and what it cost was two stale-corpus
+#: failures in two days.
+#:
+#: WHY IT NOW INCLUDES ``set_open_to_work``, WHICH THE TYPED VERSION EXCLUDED.
+#: The old derivation filtered on ``spec.tool_name == name`` and then
+#: explicitly discarded this one, on the ground that it has no registered MCP
+#: tool. That was a fact about REACHABILITY and this corpus is about
+#: REFUSAL -- and scoping a refusal corpus by whether a tool happens to be
+#: registered is what emptied it: with ``send_message`` shipped, the filter
+#: returned nothing at all and every check below would have run zero cases.
+REFUSING = tuple(
+    sorted(
+        spec.action
+        for spec in SANCTIONED_WRITES.values()
+        if spec.action not in writes.PERFORMABLE
+    )
 )
 
-#: What has left ``SEVEN``, and when. An action may only be here if it is in
+#: What has left ``REFUSING``, and when. An action may only be here if it is in
 #: ``writes.PERFORMABLE``, which is asserted below -- so this cannot become a
 #: place to park something that merely stopped passing.
 LIFTED = {
@@ -141,6 +179,22 @@ LIFTED = {
     # finds the submit by ARRIVAL and refuses with the observation when it
     # cannot -- so the first refusal is what produces the measurement.
     "comment_on_item": "2026-09-01",
+    # THE SEVENTH DEPARTURE, 2026-09-02, and it was THE LAST ONE WITH A
+    # REGISTERED TOOL. Its blocker was not a missing control but a missing
+    # AIM: the recipient box is a typeahead nobody had typed into, and "Send
+    # became enabled" says LinkedIn thinks the message is sendable, not that
+    # the recipient is the person he named. It ships on a gate that requires
+    # exactly ONE committed recipient whose accessible name carries his own
+    # needle, compared inside the page with integers only coming back, run
+    # BETWEEN the two fills so his words are never typed until the recipient
+    # is confirmed.
+    #
+    # ITS DEPARTURE IS WHY THIS FILE WAS RESTRUCTURED rather than merely
+    # edited. It emptied ``writes._NINE_REFUSALS`` -- the table began with
+    # seven entries on 2026-08-30 and every one of them left by shipping -- and
+    # the checks below were reading that table directly. See the section 3
+    # comment for what they read instead.
+    "send_message": "2026-09-02",
 }
 
 
@@ -148,21 +202,35 @@ def test_nothing_left_the_refusing_set_except_by_shipping():
     """THE LEDGER'S OWN GUARD, and it is the whole reason ``LIFTED`` is a dict
     rather than a deleted line.
 
-    An action can leave ``SEVEN`` for two reasons that look identical in a
+    An action can leave ``REFUSING`` for two reasons that look identical in a
     diff: it became performable, or its checks became inconvenient. This
     asserts the first. Every name recorded as lifted must really be in
     ``writes.PERFORMABLE``, no name may be in both, and the two together must
     still account for every sanctioned action -- so a spec quietly deleted
     goes missing from the total instead of going unnoticed.
+
+    THIS IS ALSO WHAT MAKES DERIVING ``REFUSING`` SAFE, and it is the reason
+    the old typed tuple could be retired on 2026-09-02. The objection to a
+    derived corpus was that deleting a spec would silently shrink it. It
+    cannot shrink silently past this line: the reconciliation is against the
+    WHOLE sanctioned set, so a deleted spec fails here whichever side of the
+    performable line it was on.
+
+    THE ``{"set_open_to_work"}`` TERM IS GONE from the union below, and its
+    absence is the point rather than a tidy-up. It was there because the old
+    corpus deliberately excluded that action, so the total did not add up
+    without putting it back by hand. ``REFUSING`` now contains it, so the term
+    would be redundant -- and a redundant term in a reconciliation is worse
+    than untidy: it would go on making the sum work after the corpus stopped
+    covering that action, which is exactly the failure this line exists to
+    catch.
     """
     for action, when in LIFTED.items():
         assert action in writes.PERFORMABLE, action
-        assert action not in SEVEN, action
+        assert action not in REFUSING, action
         assert when
     sanctioned = {spec.action for spec in SANCTIONED_WRITES.values()}
-    accounted = (
-        set(SEVEN) | set(LIFTED) | set(writes.PERFORMABLE) | {"set_open_to_work"}
-    )
+    accounted = set(REFUSING) | set(LIFTED) | set(writes.PERFORMABLE)
     assert sanctioned == accounted, sanctioned.symmetric_difference(accounted)
 
 #: A feed item key and a member key. Both are INVENTED, and inventing them is
@@ -216,16 +284,67 @@ FEED_MARKUP = (
     "</body></html>"
 )
 
+#: THE PROFILE OWNER'S DISPLAY NAME ON THE FAKE TOPCARD.
+#:
+#: A PLACEHOLDER, and deliberately not the name on the frozen capture in
+#: ``tests/fixtures/``. This file builds its pages rather than reading them,
+#: and a real name typed into a tracked source file is the thing
+#: ``tests/test_no_committed_identity.py`` exists to refuse. The reader only
+#: needs SOME name -- ``_read_profile_state`` refuses to render a gate when the
+#: topcard drew none, and echoes whatever it found into ``facts`` -- so the
+#: content is irrelevant and its absence is not.
+#:
+#: It deliberately does not contain ``MEMBER``. The invitation section counts
+#: controls whose accessible name carries that needle, and a topcard heading
+#: that happened to include it would be a fixture quietly feeding the aiming
+#: tests an extra match.
+PROFILE_OWNER = "A Placeholder Person"
+
+#: THE TOPCARD, ADDED 2026-09-02 WHEN ``set_open_to_work`` ENTERED THE CORPUS.
+#:
+#: Until then no test here previewed an action that reads ``profile_topcard``,
+#: so this page carried only the editor link and the invitation control -- and
+#: the preview refused with "the topcard drew no name" rather than rendering
+#: the block. That is the gate working: it will not describe whose setting is
+#: being changed without having read the profile. The fixture was the thing
+#: that was wrong.
+#:
+#: WHAT ``READ_PROFILE_JS`` ACTUALLY NEEDS, which is why this shape and not a
+#: simpler one: a ``<main>``, at least one ``h1/h2/h3`` inside it, and the
+#: section's lines are the innerText of the block that heading climbs to. With
+#: no ``<title>``, ``shape.pick_topcard`` falls back to the FIRST section, and
+#: ``shape.parse_profile_topcard`` takes the first line as the name -- so the
+#: heading must be both first and the name. The editor link and the invitation
+#: control stay OUTSIDE ``<main>`` so they cannot land in the topcard's lines
+#: and be read as a headline.
+#:
+#: THE MIDDLE DOT IS TAKEN FROM ``shape.MIDDLE_DOT`` rather than typed. It is
+#: the separator LinkedIn draws between the label and the audience, it is
+#: non-ASCII, and this file is ASCII-only -- so the one place it may exist is
+#: the constant the production regex is built from, which also means the
+#: fixture cannot drift away from what that regex matches.
+#:
+#: THE AUDIENCE IS NOT VALIDATED HERE AND DOES NOT NEED TO BE. If it were not
+#: one of the strings the spec has seen LinkedIn render, ``_read_profile_state``
+#: returns UNKNOWN, ``_direction`` refuses to render a gate on an unknown, and
+#: the preview tests fail loudly. The check is the test, not an assertion here.
+PROFILE_TOPCARD_MARKUP = (
+    "<main><div>"
+    "<h1>" + PROFILE_OWNER + "</h1>"
+    "<p>Open to work " + shape.MIDDLE_DOT + " Recruiters only</p>"
+    "</div></main>"
+)
+
 PROFILE_MARKUP = (
-    "<html><body>"
-    '<a href="https://www.linkedin.com/in/somebody'
+    "<html><body>" + PROFILE_TOPCARD_MARKUP
+    + '<a href="https://www.linkedin.com/in/somebody'
     + dom.PROFILE_EDITOR_HREFS[0]
     + '">Edit intro</a>'
     # The label LinkedIn writes here is another person's name, so the fake
     # carries a placeholder and the reader never reads it -- see
     # dom.read_invitation_surface, which returns a count and nothing else.
-    '<button aria-label="Invite Somebody' + dom.INVITE_CONTROL_SUFFIX + '"></button>'
-    "</body></html>"
+    + '<button aria-label="Invite Somebody' + dom.INVITE_CONTROL_SUFFIX + '"></button>'
+    + "</body></html>"
 )
 
 #: THE DARK-MODE PAGE, and it REPLACED a settings-INDEX markup on 2026-08-31.
@@ -271,7 +390,23 @@ def _nine_pages() -> dict[str, str]:
 #: destination equal to the current state with "the setting is already X.
 #: Nothing to change." A test asking for the state it is already in would
 #: exercise that refusal instead of the gate.
-TO_STATES: dict[str, Optional[str]] = {"update_setting": "Always on"}
+TO_STATES: dict[str, Optional[str]] = {
+    "update_setting": "Always on",
+    # ADDED 2026-09-02 with set_open_to_work. It is the SECOND multi-state
+    # action and it has three audiences, so ``_direction`` refuses to derive a
+    # destination for it exactly as it does for dark mode.
+    #
+    # ``off`` RATHER THAN ``all linkedin members``, and the choice is not
+    # arbitrary even though nothing is performed here. The fixture's current
+    # state is "Recruiters only", so the destination has to differ from it or
+    # the gate refuses with "already X, nothing to change" and these tests
+    # would exercise that refusal instead of the block. Of the two remaining,
+    # ``all linkedin members`` is the one that draws a public #OpenToWork
+    # frame his employer can see -- so a fixture standing permanently in the
+    # suite asking for it would be modelling the most dangerous call in the
+    # design as the ordinary one.
+    "set_open_to_work": "off",
+}
 
 
 #: A well-formed target for each of the seven, in the shape its own
@@ -284,6 +419,12 @@ TARGETS: dict[str, object] = {
     "update_setting": {"setting": "dark-mode", "value": "Always on"},
     "send_invitation": MEMBER,
     "send_message": {"member": MEMBER, "text": "Hello, are you hiring?"},
+    # ADDED 2026-09-02, when the corpus stopped excluding this action. Its
+    # target_kind is ``self`` -- the write lands on his own account and names
+    # nothing else -- and ``_canonical_target`` accepts exactly "self", "me" or
+    # the empty string for that kind, so this is not a placeholder standing in
+    # for an id. There is no id.
+    "set_open_to_work": "self",
 }
 
 #: A clean value for every component name the five composite kinds use, so a
@@ -310,10 +451,32 @@ def _components(action: str) -> tuple[str, ...]:
     return (first, second) if second else (first,)
 
 
+#: EVERY SANCTIONED ACTION WITH A COMPOSITE TARGET, not just the refusing ones.
+#:
+#: DERIVED FROM THE REFUSING SET UNTIL 2026-09-02, AND THAT WAS ALWAYS WRONG.
+#: It is the identical mistake ``OPAQUE_ACTIONS`` was carrying until
+#: 2026-09-01, for the identical reason, and it is recorded twice rather than
+#: fixed quietly because one file making the same scoping error twice in three
+#: days is the thing worth noticing.
+#:
+#: The checks these feed are about how a composite TARGET IS NORMALISED -- the
+#: separator refusal, the empty component, the character cap, the control
+#: characters, the non-dict. Not one of them has anything to do with whether
+#: the action performs. Scoping them to the refusing set meant the coverage
+#: SHRANK every time a capability shipped, so the suite tested least exactly
+#: where the most was happening: on 2026-09-02 it was down to ONE action and
+#: TWO component cases, and ``send_message`` shipping would have taken it to
+#: zero -- which does not fail, it just quietly stops running.
+#:
+#: Derived from the registry it is 5 actions and 9 component cases, and the
+#: four that were never being checked are the four that type: publish_post,
+#: comment_on_item, update_profile_field and update_setting.
 COMPOSITE_ACTIONS = tuple(
-    action
-    for action in SEVEN
-    if spec_for_action(action).target_kind in writes._COMPOSITE_TARGET_KINDS
+    sorted(
+        spec.action
+        for spec in SANCTIONED_WRITES.values()
+        if spec.target_kind in writes._COMPOSITE_TARGET_KINDS
+    )
 )
 TWO_PART_ACTIONS = tuple(a for a in COMPOSITE_ACTIONS if len(_components(a)) == 2)
 #: EVERY SANCTIONED ACTION WITH AN OPAQUE TARGET, not just the refusing ones.
@@ -335,25 +498,33 @@ OPAQUE_ACTIONS = tuple(
 )
 
 
-def test_the_refusing_corpus_is_derived_from_the_registry_not_typed():
-    """``SEVEN`` must EQUAL what the registry says still refuses.
+def test_the_refusing_corpus_really_refuses():
+    """``REFUSING`` must be the registry's answer AND every member must refuse.
 
-    ADDED 2026-09-01, after the suite shrank by four and nobody could see why.
-    The mechanism was legitimate -- ``comment_on_item`` shipped and left this
-    tuple -- but it cost **20 collected cases**, and the only reason anyone
-    noticed was a hand-diff of two totals.
+    ADDED 2026-09-01 AS A DRIFT DETECTOR, REPURPOSED 2026-09-02 WHEN THE DRIFT
+    BECAME IMPOSSIBLE. It was written after the suite shrank by four and nobody
+    could see why: ``comment_on_item`` shipped, left the typed tuple, and cost
+    **20 collected cases**, noticed only by a hand-diff of two totals. Its job
+    was to compare a TYPED tuple against the registry, in both directions.
 
-    WHAT THIS ASSERTS AND WHAT IT DELIBERATELY DOES NOT. It asserts MEMBERSHIP
-    against the registry, in both directions, so the corpus cannot drift
-    wrongly: an action that stops refusing and stays here fails, and one that
-    starts refusing and is missing fails.
+    THE TYPED TUPLE IS GONE, so that comparison would now be a tautology --
+    ``REFUSING`` is built from the registry, so asserting it equals the
+    registry asserts nothing. A check that cannot fail is worse than no check,
+    and rather than delete this one it was pointed at the claim that CAN still
+    be wrong.
 
-    IT DOES NOT PIN AN ABSOLUTE CASE COUNT, and that is a judgement rather than
-    an omission. A pinned total fires on every legitimate change, and this
-    package has watched exactly that train a reader to bump a number without
-    reading it -- the module docstring in server.py rotted SEVEN times while
-    carrying counts somebody re-typed each time. A check that cries wolf on
-    every commit is how the real signal gets ignored.
+    WHAT IT ASSERTS NOW IS BEHAVIOUR RATHER THAN MEMBERSHIP: every member of
+    this corpus, put through the function a caller actually reaches, really
+    does refuse. That is not derivable from the registry -- ``PERFORMABLE``
+    membership is a set operation, refusing is what ``_refuse_unperformable``
+    does -- so the two can disagree, and this is where they would be caught.
+
+    IT STILL DOES NOT PIN AN ABSOLUTE CASE COUNT, and that is a judgement
+    rather than an omission. A pinned total fires on every legitimate change,
+    and this package has watched exactly that train a reader to bump a number
+    without reading it -- the module docstring in server.py rotted SEVEN times
+    while carrying counts somebody re-typed each time. A check that cries wolf
+    on every commit is how the real signal gets ignored.
 
     WHAT SERVES THE VISIBILITY INSTEAD is ``LIFTED``: one line per departure,
     with its date and its reason. The gap on 2026-09-01 was not a missing test
@@ -361,21 +532,28 @@ def test_the_refusing_corpus_is_derived_from_the_registry_not_typed():
     membership change and never its consequence. That is a reporting habit,
     and it is cheaper to fix than a noisy assertion.
     """
-    refusing_with_a_tool = {
+    from_registry = {
         spec.action
-        for name, spec in SANCTIONED_WRITES.items()
-        if spec.action not in writes.PERFORMABLE and spec.tool_name == name
+        for spec in SANCTIONED_WRITES.values()
+        if spec.action not in writes.PERFORMABLE
     }
-    # set_open_to_work is sanctioned, refuses, and has NO registered tool, so
-    # it is not in this file's corpus and is accounted for separately by
-    # test_nothing_left_the_refusing_set_except_by_shipping.
-    refusing_with_a_tool.discard("set_open_to_work")
-    assert set(SEVEN) == refusing_with_a_tool, {
-        "typed here but no longer refusing": sorted(
-            set(SEVEN) - refusing_with_a_tool
+    assert set(REFUSING) == from_registry, {
+        "in the corpus but no longer refusing": sorted(
+            set(REFUSING) - from_registry
         ),
-        "refusing but not typed here": sorted(refusing_with_a_tool - set(SEVEN)),
+        "refusing but missing from the corpus": sorted(
+            from_registry - set(REFUSING)
+        ),
     }
+    # AND THE HALF THAT IS NOT A TAUTOLOGY. A spec can sit outside PERFORMABLE
+    # and still be waved through, if the function that refuses ever stops
+    # agreeing with the set that defines it -- which is not hypothetical:
+    # _refuse_unperformable returns EARLY for anything in PERFORMABLE and then
+    # picks its message from two different places, and one of those places is
+    # now empty.
+    for action in REFUSING:
+        with pytest.raises(WriteAttemptError):
+            writes._refuse_unperformable(spec_for_action(action))
 
 
 def test_no_parametrized_corpus_in_this_file_is_empty():
@@ -385,9 +563,25 @@ def test_no_parametrized_corpus_in_this_file_is_empty():
     checks stopped running and nothing said so louder than one grey line. Any
     tuple this file fans out over must be non-empty, asserted by name so the
     failure says WHICH corpus emptied.
+
+    ALL FIVE CORPORA ARE NOW DERIVED FROM ``SANCTIONED_WRITES``, as of
+    2026-09-02, and that makes this guard MORE necessary rather than less. A
+    typed tuple empties only when somebody edits it; a derived one empties when
+    the system changes shape, silently, on a commit that touched no test. Both
+    of this file's silent-emptying incidents were derived corpora --
+    OPAQUE_ACTIONS on 09-01, and COMPOSITE_ACTIONS which would have gone the
+    same way on 09-02 had it not been re-derived first.
+
+    NONE OF THE FIVE CAN LEGITIMATELY EMPTY TODAY, so all five are asserted
+    non-empty with no exceptions. ``REFUSING`` is the one to watch: it holds
+    exactly ``set_open_to_work``, whose refusal rests on a payload that is
+    absent by the time this server can look at the page. If that is ever
+    resolved and the action ships, this line fires -- and the right answer then
+    is to say so here, in the assertion, rather than to drop the corpus from
+    the list.
     """
     for name, corpus in (
-        ("SEVEN", SEVEN),
+        ("REFUSING", REFUSING),
         ("OPAQUE_ACTIONS", OPAQUE_ACTIONS),
         ("COMPOSITE_ACTIONS", COMPOSITE_ACTIONS),
         ("TWO_PART_ACTIONS", TWO_PART_ACTIONS),
@@ -444,12 +638,12 @@ async def _preview_the_refusal(page, action: str):
 
 
 # ---------------------------------------------------------------------------
-# 1. No grant can exist for any of the seven
+# 1. No grant can exist for any refusing action
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("action", SEVEN)
-def test_none_of_the_seven_names_a_write_surface(action):
+@pytest.mark.parametrize("action", REFUSING)
+def test_no_refusing_action_names_a_write_surface(action):
     """Both url fields empty, per action rather than as a claim about the set.
 
     A set-level assertion ("the surfaceless set is these eight") is satisfied
@@ -458,34 +652,31 @@ def test_none_of_the_seven_names_a_write_surface(action):
     missing pattern, so a spec carrying one of the two would slip past a
     membership test while being half-armed.
 
-    UPDATE_PROFILE_FIELD IS EXEMPT FROM 2026-09-02, and the exemption is the
-    sixth site of one accident rather than a special case. This assertion --
-    like three others in two other files -- encoded "unperformable implies
-    unaddressed". Nothing ever ruled that; it was true because no unperformable
-    action happened to carry a url. A ruling then gave this one an exact-url
-    address while leaving it firmly outside ``PERFORMABLE``.
+    THE UPDATE_PROFILE_FIELD EXEMPTION LIVED HERE FOR ONE DAY and is gone,
+    which is worth a paragraph because deleting a carve-out normally means
+    somebody softened something. This is the opposite. On 2026-09-02 that
+    action was addressed-but-unperformable -- the first thing ever to be
+    both -- and this assertion, like three others in two other files, had
+    encoded "unperformable implies unaddressed" without anybody ruling it. It
+    then SHIPPED later the same day, so it is no longer in this corpus at all
+    and the branch was unreachable. Removed rather than kept, on the rule this
+    file already applies to ``LIFTED``: a branch for a shipped action is dead
+    text that reads like a live exception.
 
-    THE GUARANTEE THIS TEST EXISTS FOR IS UNCHANGED, and it moved rather than
-    weakened: what stops a grant being minted is now ``PERFORMABLE``
-    membership, checked in ``mint`` itself, which is the reason that was always
-    meant. The url check that used to supply it worked by coincidence, and
-    ``test_mint_refuses_each_of_the_seven_a_grant_at_issue`` below is the one
-    that actually holds the line.
+    WHAT THE ACCIDENT TAUGHT SURVIVES ANYWAY, and it is why the sentence stays
+    here rather than going with the branch: THE ABSENCE OF A URL IS NOT WHAT
+    MAKES A GRANT IMPOSSIBLE. ``PERFORMABLE`` membership is, checked in
+    ``mint`` itself, and ``test_mint_refuses_a_grant_at_issue`` below is the
+    one that actually holds the line. This test pins a narrower and still
+    useful thing: that no action in the refusing set is half-armed.
     """
     spec = spec_for_action(action)
-    if action == "update_profile_field":
-        # Addressed by ruling, and still refused -- by membership, not by the
-        # absence of a page.
-        assert spec.url_template is not None, action
-        assert spec.url_pattern is not None, action
-        assert spec.action not in writes.PERFORMABLE, action
-        return
     assert spec.url_template is None, action
     assert spec.url_pattern is None, action
 
 
-@pytest.mark.parametrize("action", SEVEN)
-def test_mint_refuses_each_of_the_seven_a_grant_at_issue(writes_on, action):
+@pytest.mark.parametrize("action", REFUSING)
+def test_mint_refuses_a_grant_at_issue(writes_on, action):
     """Refused at ISSUE, not merely at use, and the message must say so.
 
     The distinction is the whole guarantee. If these were stopped only by
@@ -524,8 +715,41 @@ def test_mint_reaches_a_different_refusal_for_an_action_that_has_a_surface(
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("action", SEVEN)
-async def test_a_preview_of_each_of_the_seven_issues_no_confirm_token(
+def _expected_surface_url(spec) -> str:
+    """The url ``observe`` will load for this spec, without indexing one table.
+
+    ``writes._SURFACE_READS`` IS ONLY THE FALLBACK FAMILY, and reading it as
+    though it were the whole routing table was a wrong assumption in this file
+    rather than a gap in ``writes``. ``observe`` dispatches on ``state_from``
+    through a chain of its own branches -- ``posting_page``, ``apply_control``,
+    ``followed_pages``, ``saved_list``, ``profile_topcard`` -- and only then
+    falls through to that dict. Indexing it directly therefore raised KeyError
+    for ``set_open_to_work`` the moment that action entered this corpus on
+    2026-09-02, which looked like a missing entry and was not one. NOTHING WAS
+    ADDED TO ``_SURFACE_READS`` TO MAKE THE LOOKUP WORK: an entry there would
+    have changed which branch of ``observe`` runs in production, to make a test
+    convenient.
+
+    IT RAISES RATHER THAN GUESSING for a state this file has not been taught.
+    A default would silently assert against the wrong page, which is the same
+    class of defect as the KeyError and quieter.
+    """
+    if spec.state_from in writes._SURFACE_READS:
+        url, _surface, _reader = writes._SURFACE_READS[spec.state_from]
+        return url
+    if spec.state_from == "profile_topcard":
+        return writes.PROFILE_URL
+    raise AssertionError(
+        "no expected surface url is known for state_from=%r (action %r). "
+        "observe routes this through one of its own branches; add it here "
+        "with the url that branch loads, and do NOT add it to "
+        "writes._SURFACE_READS, which would change production routing."
+        % (spec.state_from, spec.action)
+    )
+
+
+@pytest.mark.parametrize("action", REFUSING)
+async def test_a_preview_issues_no_confirm_token(
     writes_on, browser_page, action
 ):
     """The block he reads is a WARNING and not an offer.
@@ -540,27 +764,21 @@ async def test_a_preview_of_each_of_the_seven_issues_no_confirm_token(
     assert block["performed"] is False, action
     assert "NO CONFIRM TOKEN IS ISSUED" in block["what_happens_next"], action
     # And it says WHY there is no token rather than leaving him to infer it.
+    # For everything in this corpus the reason is the surface: it has never
+    # been loaded, so the block cannot even name the page the action would act
+    # on.
     #
-    # FOR SIX OF THE SEVEN that reason is the surface: it has never been
-    # loaded, so the block cannot even name the page the action would act on.
-    #
-    # UPDATE_PROFILE_FIELD IS THE SEVENTH AND ITS REASON IS DIFFERENT since
-    # 2026-09-02 -- it HAS a measured surface, and is refused on PERFORMABLE
-    # membership instead. The block correctly names the real page. That is
-    # more informative rather than less: he is told exactly what would be
-    # acted on AND that nothing will act on it.
-    #
-    # The three assertions above are the guarantee and they are unchanged for
-    # all seven. This one is about the EXPLANATION, and the explanation was
-    # only ever "unmeasured" by the coincidence that no unperformable action
-    # had an address.
-    if action == "update_profile_field":
-        assert block["where"]["url"] == spec_for_action(action).url_template
-    else:
-        assert "UNMEASURED" in block["where"]["url"], action
+    # THERE WAS AN UPDATE_PROFILE_FIELD BRANCH HERE FOR ONE DAY, asserting the
+    # opposite -- that the block names the REAL page, because that action was
+    # addressed and still unperformable. It shipped later the same day and
+    # left this corpus, so the branch became unreachable and was removed
+    # rather than left looking live. The distinction it drew is still true and
+    # is recorded on test_no_refusing_action_names_a_write_surface: an address
+    # is not a permission, and the two only ever agreed by coincidence.
+    assert "UNMEASURED" in block["where"]["url"], action
 
 
-@pytest.mark.parametrize("action", SEVEN)
+@pytest.mark.parametrize("action", REFUSING)
 async def test_each_refusal_is_a_fresh_reading_of_the_specs_own_surface(
     writes_on, browser_page, action
 ):
@@ -570,12 +788,10 @@ async def test_each_refusal_is_a_fresh_reading_of_the_specs_own_surface(
     All three surfaces are frozen for every action, so a reader pointed at the
     wrong one would be served rather than erroring. What catches it is the
     navigator's record: exactly one load, and it must be the url this spec's
-    own ``state_from`` names. That also pins the restraint in send_message,
-    which reads the messaging badge off the FEED precisely so that it never
-    opens messaging.
+    own ``state_from`` names.
     """
     spec = spec_for_action(action)
-    expected, _surface, _reader = writes._SURFACE_READS[spec.state_from]
+    expected = _expected_surface_url(spec)
     _block, nav = await _preview_the_refusal(browser_page, action)
     assert nav.gotos == [expected], (action, nav.gotos)
 
@@ -596,53 +812,140 @@ async def test_the_message_gate_never_opens_messaging(writes_on, browser_page):
 # ---------------------------------------------------------------------------
 # 3. Every refusal names its own fix
 # ---------------------------------------------------------------------------
+#
+# THESE READ THE REFUSAL FROM THE FUNCTION, NOT FROM A TABLE, since 2026-09-02,
+# and the change is the lesson of the day rather than a refactor.
+#
+# They used to index ``writes._NINE_REFUSALS[action]``. That worked for as long
+# as the table happened to be where every refusal lived -- and it stopped the
+# moment the corpus contained an action whose refusal lives in a SIBLING BRANCH
+# of the same function. ``set_open_to_work`` raises from an explicit
+# ``if spec.action == "set_open_to_work"`` clause, four thousand characters of
+# it, and the table lookup raised KeyError on an action that refuses perfectly
+# well. The test was checking one of two STORAGE LOCATIONS instead of the one
+# FUNCTION they both feed.
+#
+# ``_NINE_REFUSALS`` IS NOW EMPTY -- seven entries on 2026-08-30, every one
+# gone by shipping -- so reading it would today check nothing at all. Reading
+# the function is what a CALLER does, it is invariant to a refusal moving
+# between the two places, and it is the only version of these checks that
+# survived the move.
 
 
-@pytest.mark.parametrize("action", SEVEN)
+#: A distinctive fragment of ``_refuse_unperformable``'s generic backstop.
+#:
+#: Quoted here so the checks below can prove a caller did NOT reach it. The
+#: backstop says "%r is not performable. The complete performable set is [...],
+#: and it is deliberately smaller than the sanctioned set." -- true of every
+#: refusing action and explanatory of none, which is exactly why an action
+#: reaching it must fail these tests.
+_GENERIC_BACKSTOP = "is not performable. The complete performable set is"
+
+
+def _refusal_for(action: str) -> str:
+    """What a caller actually gets when this action is refused."""
+    with pytest.raises(WriteAttemptError) as excinfo:
+        writes._refuse_unperformable(spec_for_action(action))
+    return str(excinfo.value)
+
+
+@pytest.mark.parametrize("action", REFUSING)
 def test_every_refusal_names_its_own_fix_and_a_measured_artefact(action):
     """A refusal that does not name its own fix is indistinguishable from one
     nobody intends to lift.
 
-    Three things are required and each fails on its own: the length, because a
-    one-line "cannot" is the shape that goes stale unnoticed; the phrase
-    naming the fix; and a CONCRETE MEASURED ARTEFACT -- a count and an address
-    -- because "this was measured" with nothing measured beside it is the
-    confident string this package exists to refuse.
+    Four things are required and each fails on its own: the length, because a
+    one-line "cannot" is the shape that goes stale unnoticed; the phrase naming
+    the fix; a MEASURED COUNT, because "this was measured" with nothing
+    measured beside it is the confident string this package exists to refuse;
+    and the refusal being the action's OWN rather than the generic backstop.
+
+    THE ADDRESS REQUIREMENT IS NOW SELF-POLICING, and that is a real narrowing
+    with a reason rather than an assertion dropped because it failed. It used
+    to be a flat ``re.search(r"/[a-z]", reason)`` -- name a page. That is a
+    fair demand of a refusal whose blocker is a forbidden or unmeasured url,
+    which is what all seven of the original entries had. It is an incoherent
+    demand of ``set_open_to_work``, whose refusal contains no slash at all
+    because ITS ENTIRE CONTENT IS THAT NO URL EXISTS: 237 distinct urls and 37
+    payload paths enumerated across five profile captures, zero of which reach
+    the editor, which opens as a modal from a control on his own profile.
+    Requiring an address of the one action whose measured finding is the
+    absence of an address would have forced either a softened check or a
+    fictional url in a refusal.
+
+    SO THE EXEMPTION HAS TO BE EARNED BY THE REFUSAL ITSELF. Either it names a
+    page, or it SAYS IN WORDS that there is no page to name. A refusal that
+    simply forgot to mention where it acts satisfies neither and still fails,
+    which is the property the flat version was protecting.
     """
-    reason = writes._NINE_REFUSALS[action]
+    reason = _refusal_for(action)
     assert len(reason) > 200, (action, len(reason))
     assert "WHAT WOULD LIFT IT" in reason.upper(), action
     assert "MEASURED" in reason, action
     assert re.search(r"\d", reason), action
-    assert re.search(r"/[a-z]", reason), action
+    assert _GENERIC_BACKSTOP not in reason, action
+    if not re.search(r"/[a-z]", reason):
+        assert "not addressed by a url" in reason, (
+            "%s refuses without naming a page AND without saying it has no "
+            "page to name. One or the other: an address, or the measured "
+            "finding that there is no address." % action
+        )
 
 
-@pytest.mark.parametrize("action", SEVEN)
-def test_refuse_unperformable_raises_the_actions_own_refusal_verbatim(action):
-    """The dict and the raise are the same string, not two that agree today.
+@pytest.mark.parametrize("action", REFUSING)
+def test_refuse_unperformable_raises_this_actions_own_refusal(action):
+    """The caller reaches a refusal written for THIS action, not the backstop.
 
-    ``_refuse_unperformable`` has a generic backstop at the bottom -- "not
-    performable", true of all of them and explanatory of none. Asserting
-    equality with the dict entry is what proves the backstop is not what he
-    would actually read.
+    IT ASSERTED EQUALITY WITH ``_NINE_REFUSALS[action]`` UNTIL 2026-09-02.
+    That was the right idea aimed at the wrong thing: the point was never that
+    a dict and a raise agree, it was that the GENERIC BACKSTOP is not what he
+    would read. Equality with a table proved that only while the table was
+    where the refusal lived, and it broke -- with a KeyError, on an action that
+    refuses correctly -- as soon as one did not.
+
+    Asserting the property directly is both narrower and stronger: it holds
+    however the refusal is stored, and it is the thing that was actually being
+    protected.
     """
-    spec = spec_for_action(action)
-    with pytest.raises(WriteAttemptError) as excinfo:
-        writes._refuse_unperformable(spec)
-    assert str(excinfo.value) == writes._NINE_REFUSALS[action], action
+    reason = _refusal_for(action)
+    assert _GENERIC_BACKSTOP not in reason, (
+        "%s falls through to the generic backstop, which says 'not "
+        "performable' -- true of every refusing action and explanatory of "
+        "none. Give it a reason of its own." % action
+    )
+    # AND IT IS ABOUT THIS ACTION, which is what stops one action's reason
+    # being reachable for another. The backstop names the action too, so this
+    # is only meaningful beside the assertion above.
+    assert action in reason, action
 
 
-def test_the_seven_refusals_are_seven_different_strings():
+def test_the_refusals_are_different_strings():
     """THE CONTROL for the two tests above.
 
-    Seven gaps printing one sentence would satisfy every per-action assertion
-    in this section and teach a reader that the sentence carries no
-    information. They are distinct, and distinct in their first hundred
-    characters rather than only in a trailing clause.
+    N gaps printing one sentence would satisfy every per-action assertion in
+    this section and teach a reader that the sentence carries no information.
+    They are distinct, and distinct in their first hundred characters rather
+    than only in a trailing clause.
+
+    WITH ONE ACTION IN THE CORPUS, PAIRWISE DISTINCTNESS IS VACUOUSLY TRUE, and
+    a check that is vacuously true is one that has stopped running. It was
+    called ``test_the_seven_refusals_are_seven_different_strings`` and it
+    compared seven strings; the corpus is one, so the comparison it was named
+    for cannot happen.
+
+    WHAT REPLACES IT IS THE SAME CLAIM AGAINST A FIXED POINT. The hazard was
+    never "two refusals collide" in the abstract -- it was that a refusal
+    carries no information. The one string that carries none is the generic
+    backstop, so every refusal is required to differ from THAT, whatever the
+    corpus size. The pairwise check is kept as well and starts doing work again
+    the moment a second action refuses.
     """
-    reasons = [writes._NINE_REFUSALS[action] for action in SEVEN]
-    assert len(set(reasons)) == len(SEVEN)
-    assert len({reason[:100] for reason in reasons}) == len(SEVEN)
+    reasons = [_refusal_for(action) for action in REFUSING]
+    assert len(set(reasons)) == len(REFUSING)
+    assert len({reason[:100] for reason in reasons}) == len(REFUSING)
+    # THE FIXED POINT, which does not go vacuous at any corpus size.
+    for action, reason in zip(REFUSING, reasons):
+        assert _GENERIC_BACKSTOP not in reason, action
 
 
 # ---------------------------------------------------------------------------
@@ -942,7 +1245,7 @@ def test_the_module_says_why_an_opaque_target_declines_to_validate():
 # ---------------------------------------------------------------------------
 
 
-def test_every_surface_the_seven_read_is_already_on_the_read_boundary():
+def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     """THE LOAD-BEARING CLAIM OF THE WHOLE WAVE.
 
     Seven capabilities were added and the read boundary was not touched. That
@@ -953,20 +1256,34 @@ def test_every_surface_the_seven_read_is_already_on_the_read_boundary():
     The dict is also checked for CONTENT before it is iterated. A ``for url in
     {}`` loop passes, and a test that passes on an empty dict certifies
     nothing -- so the six surfaces are counted and reconciled against the
-    ``state_from`` of the seven specs themselves.
+    ``state_from`` of the specs themselves.
     """
-    # SIX SURFACES AND SIX REFUSING ACTIONS PLUS THE LIFTED ONE, reconciled
-    # rather than counted. ``update_setting`` left ``SEVEN`` when it shipped
-    # and its surface did NOT leave ``_SURFACE_READS`` -- ``observe`` still
-    # reads that page at preview, so the claim being made here still has to
-    # hold for it. Dropping it from this reconciliation would have quietly
-    # stopped checking the read boundary for the one action that now performs
-    # on it, which is exactly backwards.
+    # SIX SURFACES, reconciled rather than counted. ``update_setting`` left the
+    # refusing set when it shipped and its surface did NOT leave
+    # ``_SURFACE_READS`` -- ``observe`` still reads that page at preview, so
+    # the claim being made here still has to hold for it. Dropping it from this
+    # reconciliation would have quietly stopped checking the read boundary for
+    # an action that now performs on it, which is exactly backwards.
     assert len(writes._SURFACE_READS) == 6
-    covered = set(SEVEN) | set(LIFTED)
-    assert {spec_for_action(a).state_from for a in covered} == set(
-        writes._SURFACE_READS
-    )
+    covered = set(REFUSING) | set(LIFTED)
+    state_froms = {spec_for_action(a).state_from for a in covered}
+    # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive
+    # ``set_open_to_work`` entering the corpus, for the same reason the preview
+    # test could not index ``_SURFACE_READS``: that dict is the FALLBACK
+    # FAMILY, not the whole routing table, and this action's surface is read by
+    # a branch of ``observe`` above it.
+    #
+    # SPLIT RATHER THAN LOOSENED, so both directions still bite. Every entry in
+    # ``_SURFACE_READS`` must still be claimed by one of these actions -- an
+    # orphan entry is a reader nothing reaches -- and every state_from that is
+    # NOT in it must be one this file has named, so a new unrouted surface
+    # fails here instead of being absorbed.
+    assert state_froms & set(writes._SURFACE_READS) == set(writes._SURFACE_READS)
+    assert state_froms - set(writes._SURFACE_READS) == {"profile_topcard"}
+    # AND THE BOUNDARY CLAIM HOLDS FOR THE BRANCH SURFACE TOO. It is asserted
+    # separately because it does not come with a reader to check: ``observe``
+    # loads PROFILE_URL directly for it.
+    assert readonly.is_read_url(writes.PROFILE_URL)
     for state_from, (url, _surface, reader) in writes._SURFACE_READS.items():
         assert readonly.is_read_url(url), (state_from, url)
         assert callable(reader), state_from

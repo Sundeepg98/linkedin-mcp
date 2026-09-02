@@ -495,7 +495,27 @@ def test_only_dom_module_waives_evaluate():
     #
     # A correct guard is one regex edit from being an incorrect guard. This
     # waiver buys the label never being in the process to guard.
-    assert waived_in.get("dom.py", 0) <= 12, waived_in
+    #
+    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS``, and the argument
+    # for it is the twelfth's carried one surface further. The twelfth shapes
+    # a label known to be HIS. This one runs where a committed recipient is by
+    # definition A THIRD PARTY, so every label it touches names somebody who
+    # is not him -- and it returns INTEGERS ONLY: counts per candidate
+    # selector, a de-duplicated total, and how many carry the needle the
+    # caller supplied. The needle comparison happens in the page for the
+    # reason ``INVITE_NEEDLE_JS`` does the same, and there is no
+    # ``revealSingleMatch`` escape: that flag lets a PREVIEW show him who he
+    # would reach, and this runs inside ``perform``, after he has confirmed,
+    # where there is nothing left to show and therefore no reason for a name
+    # to exist in this process.
+    #
+    # WHY NOT RIDE AN EXISTING SCRIPT. ``read_compose_fields`` counts selected
+    # recipients through ``page.locator``, which needs no waiver -- and that
+    # is exactly the route whose selector has never matched anything and whose
+    # only test discards the selector argument. A count that cannot say WHICH
+    # candidate matched, and cannot compare a label without pulling it into
+    # this process, is not the reading a send gate needs.
+    assert waived_in.get("dom.py", 0) <= 13, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -512,6 +532,20 @@ INJECTED_SCRIPTS = {
     # leave. test_the_compose_script_returns_no_unshaped_label is the check
     # that the reduction has no bypass.
     "COMPOSE_MODES_JS": dom.COMPOSE_MODES_JS,
+    # 2026-09-02, and it is the SECOND script on the composer and the one with
+    # the sharper privacy argument. COMPOSE_MODES_JS resolves a name known to
+    # be HIS; this one runs where a committed recipient is by definition a
+    # THIRD PARTY, so any label it touches names somebody who is not him.
+    #
+    # It is declared for the ordinary reason -- an executed script that is not
+    # declared is one nobody reviewed -- and its own rule is that it returns
+    # INTEGERS ONLY: a per-selector count, a de-duplicated total, and how many
+    # carry the needle the caller handed in. The needle comparison happens
+    # inside the page for the reason INVITE_NEEDLE_JS does the same, and there
+    # is deliberately no `revealSingleMatch` escape hatch: that flag exists so
+    # a PREVIEW can show him who he would reach, and this script runs inside
+    # perform, after he has confirmed, where there is nothing left to show.
+    "SELECTED_RECIPIENT_JS": dom.SELECTED_RECIPIENT_JS,
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
     "READ_PROFILE_JS": dom.READ_PROFILE_JS,
@@ -737,7 +771,7 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 12, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 13, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

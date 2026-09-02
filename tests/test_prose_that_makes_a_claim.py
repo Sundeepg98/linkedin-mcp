@@ -43,6 +43,13 @@ from linkedin_server import readonly, server, writes
 from linkedin_server.server import mcp
 
 _NUMBER_WORDS: dict[str, int] = {
+    # ZERO, ADDED 2026-09-02, and it is not filler. The docstring's third
+    # column -- write-shaped, registered, gated, unable to act -- EMPTIED when
+    # send_message shipped, and this table could not spell the number, so the
+    # check raised KeyError instead of comparing. A vocabulary that cannot say
+    # "none" cannot verify a claim that something is none, which is the claim
+    # most worth verifying on a surface that gates writes.
+    "zero": 0,
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
     "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,

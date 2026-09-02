@@ -623,7 +623,16 @@ def test_the_extractor_actually_found_the_shipped_function():
 
 
 def test_the_script_is_declared_where_scripts_are_reviewed():
-    """An injected script nobody declared is one nobody reviewed."""
+    """An injected script nobody declared is one nobody reviewed.
+
+    BOTH COMPOSER SCRIPTS ARE NAMED HERE FROM 2026-09-02, and the second one
+    is why this test failed rather than quietly widening. ``dom.py`` gained
+    ``SELECTED_RECIPIENT_JS`` when ``send_message`` shipped as the twelfth
+    performable write, which took the count of executed scripts from 12 to 13.
+    A count is the only thing that notices an ADDITION -- the membership line
+    above it would have gone on passing with an undeclared thirteenth script
+    in the tree -- so the count is what caught it.
+    """
     spec = importlib.util.spec_from_file_location(
         "_readonly_check",
         os.path.join(os.path.dirname(__file__), "test_readonly.py"),
@@ -632,4 +641,25 @@ def test_the_script_is_declared_where_scripts_are_reviewed():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert "COMPOSE_MODES_JS" in module.INJECTED_SCRIPTS
-    assert len(module.EXECUTED_SCRIPTS) == 12
+    # THE SECOND SCRIPT ON THE COMPOSER, and it is declared for the sharper
+    # reason. COMPOSE_MODES_JS shapes a label already known to be HIS.
+    # SELECTED_RECIPIENT_JS runs where a committed recipient is by definition
+    # A THIRD PARTY, so every label it touches names somebody who is not him.
+    #
+    # WHAT IT DOES: it counts the committed recipients in the composer -- per
+    # candidate selector, then de-duplicated -- and counts how many of them
+    # carry the needle the caller handed in. WHY IT RETURNS INTEGERS ONLY:
+    # the needle comparison is done INSIDE THE PAGE, for the reason
+    # INVITE_NEEDLE_JS does the same, so no third party's name is ever pulled
+    # into this process. There is deliberately no ``revealSingleMatch``
+    # escape hatch either -- that flag exists so a PREVIEW can show him who he
+    # would reach, and this script runs inside ``perform``, after he has
+    # already confirmed, where there is nothing left to show and therefore no
+    # reason for a name to exist here at all.
+    assert "SELECTED_RECIPIENT_JS" in module.INJECTED_SCRIPTS
+    # TWELVE UNTIL 2026-09-02, THIRTEEN SINCE. Not derived from
+    # ``len(module.INJECTED_SCRIPTS)``, which happens to be 13 as well today:
+    # EXECUTED_SCRIPTS is keyed by CALL SITE and INJECTED_SCRIPTS by NAME, so
+    # one script executed from two places would make them differ, and a
+    # derived assertion would silently accept exactly that.
+    assert len(module.EXECUTED_SCRIPTS) == 13

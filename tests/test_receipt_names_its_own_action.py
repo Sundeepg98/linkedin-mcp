@@ -36,6 +36,17 @@ THREE COUNTS FROM THAT SAME MEASUREMENT, because they name the shapes:
 Live on one real ``publish_post`` receipt, the post's own text also came back
 under the key ``company_id``.
 
+EVERY COUNT ABOVE IS OUT OF ELEVEN AND STAYS OUT OF ELEVEN, and that is a
+deliberate refusal rather than an oversight. ``send_message`` shipped as the
+TWELFTH performable action on 2026-09-02, after the repair; re-writing "8 of
+the 11" as "8 of the 12" would be arithmetic performed on a measurement nobody
+took, because the chains those numbers describe no longer exist to be measured.
+The counts are a reading of a population of eleven at a moment, and a twelfth
+action arriving does not retroactively join a population that was already
+counted. What the twelfth action DOES demand is the thing the control below
+says out loud: its rows had to be written, and the phrase-ownership tables had
+to be re-derived to cover the surfaces those rows name.
+
 WHY A GREEN SUITE WAS NOT EVIDENCE OF ANY OF THIS. The suite stood at 2534
 tests, passing, on the morning the defect was measured. Not one of them read a
 receipt field. The defect was never a broken assertion; it was an ABSENT one.
@@ -157,6 +168,23 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # across a group of three inputs.
     "checked property": frozenset({"update_setting"}),
     "group of three": frozenset({"update_setting"}),
+    # ADDED 2026-09-02 FOR THE TWELFTH ACTION. ``send_message`` verifies from
+    # the COMPOSER, re-read -- a composer still on screen with Send still
+    # enabled is what un-dispatched text looks like -- and it is the only
+    # action in the package verified from a composer at all. The phrase was
+    # derived the way every phrase above was: by measuring which rows contain
+    # it, not by deciding what the surface ought to be called. It occurs in
+    # exactly one row.
+    #
+    # TWO CANDIDATES FROM THE SAME ROW WERE MEASURED AND REJECTED, recorded
+    # here because a rejected candidate is what a later reader re-proposes.
+    # ``"thread"`` occurs only in this row today, but this row names the
+    # thread as the surface it MAY NOT read; owning a phrase in order to claim
+    # an absence is not what this table means, and a future reply or
+    # conversation action would trespass on it while being entirely correct.
+    # ``"read receipt"`` is a cost, not a surface, which puts it in the same
+    # class as the strength-class candidates rejected in the module docstring.
+    "composer": frozenset({"send_message"}),
 }
 
 #: THE SAME, FOR ``_WHERE_TO_LOOK``. These values are short phrases rather
@@ -184,6 +212,14 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     "recent activity": frozenset({"publish_post"}),
     "My Network": frozenset({"send_invitation"}),
     "the post": frozenset({"react_to_item", "comment_on_item"}),
+    # ADDED 2026-09-02 FOR THE TWELFTH ACTION. ``send_message`` sends him to
+    # his own LinkedIn messages, which no other row names. THE PHRASE IS THE
+    # TWO-WORD SURFACE AND NOT THE BARE WORD, for the reason the module
+    # docstring gives about ``"saved"``: a one-word owner fires on a correct
+    # row. ``"message"`` alone is a word any future messaging-adjacent row
+    # would legitimately contain -- an InMail, a reply, a request -- and it
+    # would be reported as a trespass on a surface those rows never claimed.
+    "LinkedIn messages": frozenset({"send_message"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -483,9 +519,34 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     action is not an error in itself; it means the docstring's arithmetic and
     the phrase-ownership tables both want re-deriving, and this is the line
     that says so.
+
+    IT SAID SO ON 2026-09-02 AND THE WORK IT DEMANDED WAS DONE, which is the
+    only reason the number moved to TWELVE. ``send_message`` shipped as the
+    twelfth performable action that day, this line failed, and both things it
+    names were then re-derived rather than assumed:
+
+    * THE DOCSTRING'S ARITHMETIC was NOT restated as "of 12". Those counts
+      describe five if/elif chains that were deleted in the repair, measured
+      on the population that existed when they were deleted. There is nothing
+      left to re-measure, so the docstring now says out loud that its counts
+      are out of eleven and stay out of eleven.
+    * THE PHRASE-OWNERSHIP TABLES WERE re-derived, by the measurement the
+      module docstring describes rather than by guessing: ``"composer"`` in
+      ``_VERIFIED_FROM`` and ``"LinkedIn messages"`` in ``_WHERE_TO_LOOK``,
+      each measured to occur in exactly one row, each with the candidates from
+      the same rows that were rejected recorded beside it.
+
+    THE CHECK IS DELIBERATELY NOT DERIVED FROM ``len(writes.PERFORMABLE)``,
+    and this is the one place in this wave where retyping a number is the
+    correct answer. A self-deriving count is trivially true and would let a
+    thirteenth action arrive with borrowed rows in silence -- which is exactly
+    the defect this whole file was written to catch, since a borrowed row is
+    complete, confident and passes every completeness check there is. The
+    number is a HUMAN ACKNOWLEDGEMENT that somebody looked at the new action's
+    rows, and it is worth nothing if the machine can supply it.
     """
-    assert len(writes.PERFORMABLE) == 11, (
-        "writes.PERFORMABLE holds %d actions, not the 11 this file was "
+    assert len(writes.PERFORMABLE) == 12, (
+        "writes.PERFORMABLE holds %d actions, not the 12 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

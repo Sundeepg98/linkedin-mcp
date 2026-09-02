@@ -112,7 +112,27 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         "nothing in writes.py calls _text_component_of, so whatever the one "
         "fill types, it is not provably a slice of the grant's target"
     )
-    # And the ONLY thing appended to the fill queue must be that call's result.
+    # EVERYTHING APPENDED TO THE FILL QUEUE MUST BE AN EXTRACTOR'S RESULT.
+    #
+    # THIS ASSERTED len(appended) == 1 UNTIL 2026-09-02, and that number was
+    # not the property -- it was the property's shape while exactly one thing
+    # was ever typed. ``send_message`` types TWO: a recipient into a combobox
+    # and the body into a contenteditable, and they are different halves of
+    # one canonical target.
+    #
+    # THE TEST WAS EXTENDED RATHER THAN WEAKENED, and the difference matters.
+    # Weakening would have been relaxing "IS a bare call to
+    # ``_text_component_of``" into "contains a call somewhere" so a second
+    # append could pass. What happened instead is that EVERY append is now
+    # held to the same standard, against a NAMED extractor: the subject half
+    # must be a bare ``_subject_component_of(spec, grant.target)`` and the
+    # content half a bare ``_text_component_of(spec, grant.target)``. The
+    # invariant -- THIS SERVER NEVER COMPOSES WHAT IT TYPES UNDER HIS NAME --
+    # now covers both components instead of being dropped for one.
+    #
+    # A test that must change is not a test that may be weakened, and the
+    # change was flagged before the code was touched rather than discovered in
+    # the diff.
     appended = [
         node
         for node in ast.walk(_TREE)
@@ -122,7 +142,7 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         and isinstance(node.func.value, ast.Name)
         and node.func.value.id == "fill_plan"
     ]
-    assert len(appended) == 1, [ast.unparse(a) for a in appended]
+    assert len(appended) == 3, [ast.unparse(a) for a in appended]
 
     # THE ARGUMENT MUST BE THE CALL ITSELF, not merely contain it.
     #
@@ -134,23 +154,37 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
     # typing it under his name. So the check is on the NODE TYPE. A BinOp, an
     # f-string, a .strip(), a slice or a call wrapping it are all a different
     # node and all fail.
-    pushed = appended[0].args[0]
-    assert isinstance(pushed, ast.Tuple) and len(pushed.elts) == 2, ast.unparse(
-        appended[0]
-    )
-    text_expr = pushed.elts[1]
-    assert isinstance(text_expr, ast.Call), (
-        "the text pushed onto the fill queue is %r, which is not a bare call. "
-        "Anything wrapping, appending to or trimming the grant's own text is "
-        "this server composing what it types." % ast.unparse(text_expr)
-    )
-    assert isinstance(text_expr.func, ast.Name), ast.unparse(text_expr)
-    assert text_expr.func.id == "_text_component_of", ast.unparse(text_expr)
-    assert [ast.unparse(a) for a in text_expr.args] == [
-        "spec",
-        "grant.target",
-    ], ast.unparse(text_expr)
-    assert not text_expr.keywords, ast.unparse(text_expr)
+    extractors = []
+    for append in appended:
+        pushed = append.args[0]
+        assert isinstance(pushed, ast.Tuple) and len(pushed.elts) == 2, ast.unparse(
+            append
+        )
+        text_expr = pushed.elts[1]
+        assert isinstance(text_expr, ast.Call), (
+            "the text pushed onto the fill queue is %r, which is not a bare "
+            "call. Anything wrapping, appending to or trimming the grant's own "
+            "text is this server composing what it types."
+            % ast.unparse(text_expr)
+        )
+        assert isinstance(text_expr.func, ast.Name), ast.unparse(text_expr)
+        assert [ast.unparse(a) for a in text_expr.args] == [
+            "spec",
+            "grant.target",
+        ], ast.unparse(text_expr)
+        assert not text_expr.keywords, ast.unparse(text_expr)
+        extractors.append(text_expr.func.id)
+
+    # AND BOTH HALVES ARE NAMED. Not "some extractor" -- the SUBJECT extractor
+    # exactly once and the CONTENT extractor twice, because two actions type a
+    # body and only one types a recipient. A queue that pushed the subject
+    # where the content belongs would type his message into the recipient box,
+    # which no count-only assertion would notice.
+    assert sorted(extractors) == [
+        "_subject_component_of",
+        "_text_component_of",
+        "_text_component_of",
+    ], extractors
 
 
 @pytest.mark.parametrize("text", AWKWARD_TEXTS)

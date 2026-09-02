@@ -727,8 +727,16 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # the two entries it has been since 2026-08-26, because the click it needs
     # is perform()'s existing one.
     assert writes.PERFORMABLE == {
-        # THE TWELFTH, 2026-09-02, on the operator's ruling "I want all
-        # capabilities". It is the only member of this set that can verify its
+        # THE ELEVENTH, 2026-09-02, on the operator's ruling "I want all
+        # capabilities". THE ORDINAL READ "TWELFTH" UNTIL 2026-09-02 AND WAS
+        # OFF BY ONE -- writes.py has always called this one the eleventh, and
+        # tests/test_receipt_names_its_own_action.py measured PERFORMABLE at
+        # eleven with this action already in it. Corrected here on the day a
+        # real twelfth arrived, because two entries in one set literal both
+        # captioned THE TWELFTH is precisely the rot this file's captions
+        # exist to prevent.
+        #
+        # It is the only member of this set that can verify its
         # own outcome by reading the changed value back -- publish_post
         # declared its outcome unverifiable, send_invitation has none at all,
         # and apply_job can establish only that it did NOT happen. It is also
@@ -763,6 +771,28 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # the fill and refuses with the observation when two controls share a
         # name. The refusal is what produces the missing measurement.
         "comment_on_item",
+        # THE TWELFTH, 2026-09-02, and it EMPTIES THE GAP THIS TEST IS ABOUT.
+        # Every other entry above widened the middle set while leaving
+        # something outside it; this one leaves exactly one sanctioned action
+        # unperformed, and that one -- set_open_to_work -- has no registered
+        # tool, so nothing a caller can reach is refused any more.
+        #
+        # IT SHIPS EXPECTING TO REFUSE, which is comment_on_item's shape, and
+        # for a sharper reason: its blocker is not a missing control but a
+        # missing AIM. The recipient box is a typeahead nobody has typed into,
+        # and "Send became enabled" says LinkedIn thinks this is sendable, not
+        # that the recipient is the person he named. So the gate requires
+        # exactly one committed recipient WHOSE ACCESSIBLE NAME CARRIES HIS
+        # OWN NEEDLE, compared inside the page with integers only coming back.
+        # A count of one with the wrong name refuses; a count of zero refuses.
+        #
+        # AND THE ORDER IS THE SAFETY PROPERTY: the recipient gate runs
+        # BETWEEN the two fills, so his words are never typed until a
+        # recipient has been confirmed, and a refusal costs him a typed name
+        # in a composer rather than his message. That ordering is what
+        # WriteSpec.click_from_state exists to express, and it arrived with
+        # this action.
+        "send_message",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -774,26 +804,45 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # having left in the same wave that brought seven in.
     # Eight until 2026-08-31, SEVEN since -- ``update_setting`` left by being
     # performed, which is the only way anything is supposed to leave.
-    # TWO SINCE 2026-09-02, down from three. update_profile_field left by
-    # SHIPPING -- the only way anything leaves this set -- and its refusal was
-    # removed from _NINE_REFUSALS rather than reworded, on this module's
-    # standing rule that a refusal kept for a performable action tells a
-    # caller the opposite of the truth.
+    # TWO SINCE 2026-09-02, down from three, and ONE SINCE LATER THE SAME DAY.
+    # update_profile_field and then send_message both left by SHIPPING -- the
+    # only way anything leaves this set -- and each refusal was removed from
+    # _NINE_REFUSALS rather than reworded, on this module's standing rule that
+    # a refusal kept for a performable action tells a caller the opposite of
+    # the truth.
     assert sanctioned_actions - writes.PERFORMABLE == {
         "set_open_to_work",
-        "send_message",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
-    # action, so a ninth spec that is not performable and writes no refusal
-    # fails here rather than falling through perform()'s generic backstop --
-    # which says "not performable" and explains nothing.
+    # action, so a fourteenth spec that is not performable and writes no
+    # refusal fails here rather than falling through perform()'s generic
+    # backstop -- which says "not performable" and explains nothing.
+    #
+    # THE LOOP BELOW NOW RUNS ZERO BODIES, AND THAT IS SAID OUT LOUD RATHER
+    # THAN LEFT TO BE DISCOVERED. The only member of the set above is
+    # ``set_open_to_work``, which the loop skips, so with send_message shipped
+    # there is nothing left for it to check. A ``for`` over an empty-after-
+    # skipping set does not skip and does not fail; it passes in silence,
+    # which is the same defect as a parametrized test over an empty sequence
+    # and is how three checks in tests/test_writes_nine.py stopped running on
+    # 2026-09-01 without anybody noticing.
+    #
+    # SO THE STATE OF THE TABLE IS ASSERTED DIRECTLY. ``_NINE_REFUSALS`` is
+    # EMPTY as of 2026-09-02: it began as seven entries on 2026-08-30 and every
+    # one of them left by shipping. That is not a defect -- it is the table
+    # doing exactly what it was for -- but it must be a visible fact, because
+    # an empty refusal table and a refusal table nobody maintains look
+    # identical from here. When a thirteenth sanctioned-and-refusing action
+    # arrives, this assertion fails and whoever adds it has to come here and
+    # decide, which is the whole point.
+    assert writes._NINE_REFUSALS == {}, sorted(writes._NINE_REFUSALS)
     for action in sanctioned_actions - writes.PERFORMABLE:
         if action == "set_open_to_work":
             continue  # its refusal predates this dict and lives inline.
         assert action in writes._NINE_REFUSALS, action
         reason = writes._NINE_REFUSALS[action]
         assert "WHAT WOULD LIFT IT" in reason.upper(), action
-    # ONE OF THE TWO cannot even hold a grant: no surface has ever been loaded,
+    # THE ONE THAT IS LEFT cannot even hold a grant: no surface has ever been loaded,
     # so mint() refuses at issue rather than leaving the write door as the only
     # thing in the way. This set held apply_job as well until its surface was
     # measured -- and the surface that measurement found is the POSTING page,
@@ -836,9 +885,19 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # is ADDRESSING, while PERFORMABLE membership is PERMISSION and remains the
     # operator's. See test_addressing_the_profile_editor_did_not_make_it_
     # performable for the control that proves the ordering.
+    #
+    # ``send_message`` LEFT THIS SET ON 2026-09-02, LATER THE SAME DAY, and it
+    # left the ordinary way: it was given /messaging/compose/ as an
+    # exact-substring exemption and then SHIPPED, so unlike the profile editor
+    # it crossed both lines at once. What is left is ONE action, and the two
+    # sets in this test have converged on it: the only sanctioned action with
+    # no surface is now also the only sanctioned action that is not
+    # performable. THAT CONVERGENCE IS A COINCIDENCE OF THE MOMENT AND NOT A
+    # RULE, which is why the two are still asserted separately -- this file
+    # spent 2026-09-02 unpicking three guards that had quietly fused
+    # "unaddressed" with "unperformable" while the two happened to agree.
     assert surfaceless == {
         "set_open_to_work",
-        "send_message",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
     # same treatment apply got when its surface was measured.
@@ -1121,7 +1180,53 @@ async def test_exactly_the_performable_writes_are_registered():
     # Three separate guards in this file encoded that same conflation and
     # all three had to be narrowed; that they agreed with each other is
     # not evidence they were right.
-    for tool in ("linkedin_send_message",):
+    #
+    # ``linkedin_send_message`` LEFT THIS LOOP ON 2026-09-02 BY SHIPPING, and
+    # it was the LAST MEMBER. It left the way react_to_item left and not the
+    # way update_profile_field left: it became performable, so the assertion
+    # "this tool cannot act" stopped being true of it rather than stopping
+    # being the right question.
+    #
+    # SO THE TUPLE IS NOW DERIVED, AND THE EMPTY CASE IS ASSERTED. A
+    # hand-typed tuple has gone stale here twice in two days; more to the
+    # point, a ``for`` over an empty tuple runs no bodies, raises nothing and
+    # reports nothing, so the version of this that simply deleted the last
+    # name would leave a check that cannot fail sitting where a check used to
+    # be. That is the same shape as a parametrized test over an empty sequence
+    # -- three of those went silently dead in tests/test_writes_nine.py on
+    # 2026-09-01 -- and it is worse here, because there is not even a grey
+    # SKIPPED line to notice.
+    #
+    # WHAT THE DERIVATION IS. Exactly the set the loop forty lines above
+    # already iterates: registered tool names that name a sanctioned action
+    # ``perform`` will not execute. That loop asserts the same three
+    # properties and needs no edit for a thirteenth action, so nothing is lost
+    # by not re-typing names here. What is KEPT is the visibility: the
+    # membership is asserted, so a registered-but-grant-incapable tool
+    # arriving is a failing test that lands a reader on this comment rather
+    # than a silent addition.
+    #
+    # AND IT IS ASSERTED EMPTY RATHER THAN NON-EMPTY, which inverts the usual
+    # guard in this suite and is deliberate. Registering a tool that cannot
+    # act is ALLOWED here and has been since the 2026-08-30 widening argued
+    # for it -- such a tool is not a dead button, it loads a page, counts what
+    # bears on the capability and returns the measurement with its reason. So
+    # emptiness is a fact about today, not a rule; the assertion exists to
+    # make the next departure from it visible, not to forbid one.
+    grant_incapable = sorted(
+        name
+        for name in names & set(SANCTIONED_WRITES)
+        if SANCTIONED_WRITES[name].action not in writes.PERFORMABLE
+    )
+    assert grant_incapable == [], (
+        "these write tools are registered and cannot act: %s. That is "
+        "permitted -- see the 2026-08-30 argument above -- but it is no "
+        "longer true of nothing, so say here which surface each one reads "
+        "and why it refuses, the way linkedin_send_message and "
+        "linkedin_react_to_item were described before they shipped."
+        % grant_incapable
+    )
+    for tool in grant_incapable:
         assert tool in names, tool
         assert SANCTIONED_WRITES[tool].url_template is None, tool
         assert SANCTIONED_WRITES[tool].action not in writes.PERFORMABLE, tool
@@ -4272,13 +4377,36 @@ def test_send_message_can_report_not_sent_and_never_sent():
     assert spec.from_state == "composer_unmeasured"
     assert spec.not_performed_state != spec.from_state
 
-    # And the refusal now names the route rather than a surface that does not
-    # exist -- while still saying WHAT WOULD LIFT IT, which the table requires.
-    reason = writes._NINE_REFUSALS["send_message"]
-    assert "not_performed_state" in reason
-    assert "WHAT WOULD LIFT IT" in reason.upper()
-    assert "NOT SENT or UNKNOWN and never SENT" in reason
+    # THE REFUSAL IS GONE, AND THAT IS WHY THIS BLOCK CHANGED.
+    #
+    # It used to read the action's entry out of ``_NINE_REFUSALS`` and assert
+    # the entry named its own fix. The action SHIPPED on 2026-09-02, so the
+    # entry was removed rather than reworded -- ``_refuse_unperformable``'s
+    # standing rule is that text left behind for a shipped action is
+    # unreachable AND false, which is the pair this package has now paid for
+    # three times.
+    assert "send_message" not in writes._NINE_REFUSALS
 
-    # STILL NOT PERFORMABLE. This ruling changed what it would REPORT, not
-    # whether it may run -- that decision is the operator's.
-    assert "send_message" not in writes.PERFORMABLE
+    # PERFORMABLE, AND THE THREE FIELDS THAT MAKE THE VERDICT HONEST.
+    #
+    # ``to_state`` is a state no reader here can return, so the True arm is
+    # unreachable BY CONSTRUCTION -- that is the design, not an oversight.
+    # ``not_performed_state`` is what makes the False arm reachable. So this
+    # action can be shown NOT to have happened and cannot be shown to have
+    # happened, and the asymmetry is asserted rather than described.
+    assert "send_message" in writes.PERFORMABLE
+    assert spec.to_state == "message_sent"
+    assert spec.unverifiable is None, (
+        "send_message must NOT declare `unverifiable`: that short-circuits "
+        "_verify_after to UNKNOWN before any comparison runs, which would "
+        "delete the not-sent answer while keeping the flag saying there is no "
+        "answer. Those are opposite things and they look identical in a spec "
+        "table."
+    )
+
+    # AND THE CLICK-TIME STATE IS A DIFFERENT FIELD, which is the whole reason
+    # ``click_from_state`` exists. ``from_state`` above is what the PREVIEW's
+    # gate has seen; by click time the composer is open in front of us and
+    # calling it unmeasured would be the lie. One field could not be both.
+    assert spec.click_from_state == "composer_empty"
+    assert spec.click_from_state != spec.from_state
