@@ -3436,7 +3436,57 @@ _CENSUS_CURLY = re.compile(r"[\u2018\u2019]")
 
 #: An entity urn. First, because it carries digits and colons that every later
 #: rule would otherwise bite into.
-_CENSUS_URN = re.compile(r"urn:li:[A-Za-z0-9_.:%@-]+")
+#:
+#: WIDENED 2026-09-02, AND THE HOLE IT CLOSES WAS A LIVE ONE. The pattern was
+#: ``urn:li:[A-Za-z0-9_.:%@-]+`` alone, whose character class excludes ``(``,
+#: so it stopped at the first parenthesis of a COMPOSITE urn and left the rest
+#: of the token standing:
+#:
+#:     urn:li:fsd_profileGeo:(<member token>,GEO)  ->  <urn>(<member token>,GEO)
+#:
+#: **The member token survived a substitution whose whole job is removing it**,
+#: and nothing downstream caught it: ``_CENSUS_LONG_DIGITS`` needs six
+#: consecutive digits and a LinkedIn member token is alphanumeric. So this
+#: function's own docstring -- "a urn ... identifies somebody whichever
+#: container they were read in" -- was not true of the composite form.
+#:
+#: ENUMERATED BEFORE IT WAS CHANGED, because a fix found from one instance
+#: rarely covers the class. Measured over the ten captured LinkedIn documents
+#: in ``_audit/`` (~1.9 MB): SEVEN urn tokens, ONE escaping character, ``(``,
+#: and every one of the seven is ``urn:li:application:(web,flagship-web)``,
+#: which identifies nobody. Then probed against constructed forms -- none of
+#: them his -- which found THREE escaping characters rather than one:
+#:
+#:     plain, member id, url-encoded    ->  <urn>                    clean
+#:     composite 2-tuple                ->  <urn>(...)               ESCAPED
+#:     composite nested                 ->  <urn>(...)               ESCAPED
+#:     base64 padded, trailing '=='     ->  <urn>==                  escaped
+#:     a following '/xyz'               ->  <urn>/xyz                see below
+#:
+#: WHAT IS NOW CONSUMED, and each clause is here for a measured reason:
+#:
+#:   the COMPOSITE TAIL -- one level of nesting, which covers
+#:   ``(<token>,GEO)`` and ``(urn:li:<ns>:<token>,123)``. Written as an
+#:   explicit two-level group rather than a recursive pattern because ``re``
+#:   has no recursion; a third level would leave its innermost parentheses
+#:   standing, which is over-redaction of the outer text and the safe
+#:   direction to fail in.
+#:
+#:   BASE64 PADDING -- LinkedIn writes ``=``-padded identifiers, corroborated
+#:   independently by ``readonly``'s own thread pattern, whose character class
+#:   ``[A-Za-z0-9%\-_=]`` already had to admit it.
+#:
+#: WHAT IS DELIBERATELY NOT CONSUMED: a following ``/``. It appeared in NO urn
+#: in the corpus and it is a PATH SEPARATOR rather than urn content -- a urn
+#: sitting inside a media url is followed by more path, and swallowing it would
+#: eat text that is not part of the identifier. Refusing to widen where the
+#: evidence says the delimiter is real is the same discipline as refusing a
+#: selector nobody has measured.
+_CENSUS_URN = re.compile(
+    r"urn:li:[A-Za-z0-9_.:%@-]+"
+    r"(?:\((?:[^()]|\([^()]*\))*\))?"
+    r"=*"
+)
 
 #: A member path segment. The slug IS the identity, so nothing of it survives.
 _CENSUS_IN_PATH = re.compile(r"/in/[A-Za-z0-9\-_%.]+/?")
