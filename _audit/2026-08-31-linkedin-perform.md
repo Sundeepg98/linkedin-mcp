@@ -3244,3 +3244,46 @@ Rulings 2, 3 and 4 arrived in the same message and are NOT in this commit.
   second time, on the same mechanism.
 
 Nothing fires. No `confirm_token`.
+
+## 86. A CONFLATED STATE IS A HOLE IN WHAT THE TEST LANGUAGE CAN SAY
+
+The sharpest thing to come out of ruling 1, and it generalises well past this
+gate.
+
+While `false` and `absent` shared the single refusal code `no_self_assertion`,
+**there was no way to write a test asserting the difference.** Not a test
+nobody had thought of -- a test the vocabulary could not express. Any
+assertion about "LinkedIn said no" and any assertion about "LinkedIn did not
+answer" resolved to the same string, so the suite could not have caught the
+defect no matter how carefully anybody wrote it.
+
+The proof is in the fix: `test_an_explicit_false_assertion_refuses_at_once`
+could only be written AFTER the split, and it is not a test somebody forgot.
+It is a sentence the old code had no words for.
+
+> **Collapsing two states does not merely produce a wrong answer. It removes
+> a whole class of test from the language, and the missing tests are invisible
+> because there is nothing to name them with.**
+
+That is why `readable: false, error: null`, `checked: None` vs `False`,
+`value_chars: None` vs `0`, and `absent` vs `false` are all the same rule
+wearing different clothes -- and why this package pays the cost of the
+tri-state every time rather than arguing it case by case. The cost of
+collapsing is not one bug; it is the permanent inability to test for the bug.
+
+## 87. THE WAVE LEAD'S OWN PATTERN, RECORDED AT THEIR REQUEST
+
+Ruling 4 was withdrawn, and the withdrawal names a repeating shape in the
+reasoning that produced it:
+
+> **I treat "this logic is independent" as "this artifact is independent," and
+> it is not -- a guard's existence is coupled to its call site even when its
+> logic is not.**
+
+Twice on the same axis: the `select_option` boundary entry (section 77) and
+the required-empty refusal. Both times the argument separated the guard from
+its caller and the mechanism refused -- `set(SANCTIONED_MUTATIONS) == found`
+for the first, `test_reader_reachability` for the second.
+
+Recorded because it was asked for, and because the instruction attached to it
+is the useful half: **flag it a third time if it happens again.**
