@@ -2919,3 +2919,173 @@ nothing *resembling* code changed.
 
 **Three instances is a pattern rather than a coincidence**, which is why the
 rule is filed and not just the three tools.
+
+# PART ELEVEN -- THE READERS RAN, AND BOTH DESIGNS WERE BUILT ON A SURFACE THAT MOVED
+
+Both readers ran live on 2026-09-02 for the first time. **Neither result
+matches its design.** Diagnosed before anything was adapted, which is the
+entire reason the build waited.
+
+## 79. THE EDITOR: THE NAME CHAINS AGREE. LINKEDIN CHANGED THE PAGE.
+
+Two hypotheses were open: the two readers' name chains disagree, or the page
+changed. **One call separated them completely** --
+`linkedin_profile_editor_fields` run against the same live page, minutes after
+the value reader.
+
+**THEY AGREE, CONTROL FOR CONTROL.** Same 17 controls, same order, same names,
+same `name_source` on every one. `test_the_three_name_chains_agree` is not
+passing on an inadequate fixture; the chains genuinely agree, on the live page,
+including on the controls that come back unnamed.
+
+So the 2026-08-31 reading is **stale rather than wrong**: 23 controls then, 17
+now, and a different set.
+
+| 2026-08-31 | 2026-09-02 |
+|---|---|
+| `First name*` label-for | **`""` -- no accessible name at all** |
+| `Last name*` label-for | **`""` -- no accessible name at all** |
+| `School*` select label-for | gone; `Education` select label-for |
+| `Month` select aria-label | gone; `Pronouns` select label-for |
+| `Industry*`, `City`, `Country/Region*`, `Additional name`, `Save`, `<content>` | unchanged, same sources |
+| -- | new: `Dismiss`, `All LinkedIn members`, `Write with AI`, `Learn more`, `Edit contact info`, two unnamed switches |
+
+### What this does to the re-aiming design
+
+**The first-name and last-name inputs have NO ACCESSIBLE NAME AND ARE
+`required: true`.** Their values read perfectly -- the value reader returned
+both -- and they cannot be addressed by name. That is the exact inverse of the
+problem the ruling was written to solve, and it lands on two of the fields the
+ruling was written to reach.
+
+**THE AIMABLE SET IS SIX, NOT EIGHT, AND IT IS A DIFFERENT SIX:**
+
+| field | name source | tag | value read |
+|---|---|---|---|
+| `Additional name` | label-for | input text | empty string |
+| `Country/Region` | aria-label | input text | yes |
+| `City` | aria-label | input text | yes |
+| `Industry` | aria-label | input text | yes |
+| `Pronouns` | label-for | **select** | yes, option text |
+| `Education` | label-for | **select** | yes, option text |
+
+**UNAIMABLE, and now for two different reasons:** `headline` because its name
+IS its content, and first/last name because they have no name at all.
+
+**THE SELECT DECISION HOLDS AND SO DOES THE `select_option` NEED** -- two of
+the six are selects, and both returned their option TEXT exactly as designed.
+That is the one part of the design the live surface confirmed.
+
+**AND THE REQUIRED-EMPTY REFUSAL WOULD CURRENTLY PROTECT NOTHING**, which is
+worth saying rather than discovering later: the only two `required: true`
+controls in the container are the two that cannot be aimed at. It is still the
+right guard -- a page that moved once will move again -- but on today's surface
+it guards an empty set.
+
+## 80. THE GATE IS NON-DETERMINISTIC, AND IT PRODUCED A SECOND FALSE REFUSAL
+
+The first call to `linkedin_profile_editor_fields` refused:
+
+    refused: no_self_assertion
+    "the landed profile url carries no isSelfProfile=true"
+    pages_loaded: 1
+
+**An immediate retry, same code, same page, seconds later, SUCCEEDED** with
+`established: true, same_member: true`. And the wave lead's run of the value
+reader minutes earlier had also succeeded.
+
+So `isSelfProfile=true` does not reliably appear on the `/in/me/` redirect.
+`server._establish_self_owned_editor` fails CLOSED, which is the right
+direction -- but it hands back a confident, specific refusal that misdescribes
+the world, and its text invites the reader to conclude the page was not his.
+
+**THIS IS THE SECOND FALSE REFUSAL FROM THIS GATE.** The first was on
+`linkedin_profile_editor_fields`'s first-ever live call. Both were confident,
+both were specific, and both were wrong about the account. A gate whose anchor
+is an external query parameter is only as deterministic as that parameter, and
+nothing here had measured whether it is.
+
+## 81. THE COMPOSER: THE PREDICTION LANDED AND ITS MECHANISM WAS WRONG
+
+    refused: name_shaped_label_present    recipients_selected: 0
+    label_shapes:  {runs: 1, joined_by_to: false, tail: "", checked: false}
+                   {runs: 1, joined_by_to: false, tail: "", checked: false}
+
+**The refusal code is exactly the one predicted. The reason given for the
+prediction cannot be the cause.** Measured against the shipped predicate:
+
+    'Firstname will send message'          runs 0  -- NOT name-shaped
+    'Firstname to Acme will send message'  runs 1, tail 'will send message'
+
+(The examples above read `Firstname` rather than his actual given name. The
+first draft of this section used the real one, twice, and
+`test_no_committed_identity` PASSED IT -- that guard looks for emails, phones,
+slugs, urns, member tokens, company ids, credentials and drive roots, and **a
+bare given name is none of those**. Caught by grepping the file for the values
+the readers had just returned, which is a check no test performs. The rule is
+*values reach the tool result and nothing else, never the audit*, and it needs
+a human sweep because the automated one cannot see this class.)
+
+The predicted single-name label **does not trip the guard at all**, because
+`_CENSUS_CAPS_RUN` needs either two consecutive capitalised words or a
+capitalised word with whitespace before it -- and a name at position 0 has
+neither. **Right outcome, wrong mechanism**, recorded as such rather than
+claimed as a clean hit.
+
+### What the measured numbers actually correspond to
+
+`runs: 1, tail: ""` means a label whose LAST word is a capitalised token
+preceded by a space, with no other capitalised run:
+
+    'Write with AI'      {runs: 1, joined_by_to: False, tail: ''}
+    'Send as InMail'     {runs: 1, joined_by_to: False, tail: ''}
+    'Send as Message'    {runs: 1, joined_by_to: False, tail: ''}
+
+### AND THIS IS WHY THE DISCRIMINATOR CANNOT DISCRIMINATE
+
+**The two shapes are identical because the shape deletes exactly the token
+that distinguishes them.** If the two send modes differ in a single trailing
+proper noun -- `...InMail` against `...Message` -- then `runs`,
+`joined_by_to` and `tail` are identical BY CONSTRUCTION. Identical output is
+not an anomaly to be tuned away; it is the specified behaviour of a shape
+whose job is to delete capitalised words, applied to a pair that differs only
+in one.
+
+**NO ADJUSTMENT OF THE EXTRACTOR FIXES THIS.** The information needed to tell
+the modes apart is precisely the information the guard exists to withhold.
+That is a design contradiction, not a bug, and it was invisible until the
+surface was read.
+
+The design assumed the modes differed STRUCTURALLY -- one name against two
+names joined by "to". They do not appear to.
+
+**WHAT IS NOT ESTABLISHED, and must not be stretched:** whether these two
+controls are the send-mode radios at all. `checked: false` on both, where the
+census recorded one radio checked, is unexplained. They could be the radios in
+a different render, or two other checkable controls entirely. **The shapes are
+consistent with several readings and settle none of them.**
+
+**THE INMAIL QUESTION IS STILL OPEN.** Nothing in this reading says whether
+either mode spends a credit. It was made a precondition precisely so that it
+would not be answered by inference, and it has not been answered.
+
+## 82. THE ALL-OR-NOTHING REFUSAL, WHICH IS A REAL DESIGN QUESTION
+
+Two name-shaped labels withheld **every** field, including the message body's
+`aria-label` -- an unrelated control carrying nobody's name. So `send_message`
+is blocked by a guard protecting something else.
+
+**MY READING: the container-wide refusal is right and the PREDICATE is what is
+wrong.** Per-label withholding would publish fifteen names from a container
+that has just produced evidence this server misjudged it -- and "the labels I
+could read look safe" is not a reason to trust the ones I could not.
+
+The defect is upstream. `looks_name_shaped` fires on any label ending in a
+capitalised word after a space, which on a real UI includes `Write with AI` --
+a control this server has now READ, BY NAME, in the profile editor, on the
+same account. **The predicate cannot tell a product feature from a person**,
+and on a surface where LinkedIn brands things in title case that is not an
+edge case.
+
+Fixing the predicate is a change to a privacy gate and is the wave lead's to
+rule. It is recorded here and NOT adjusted.
