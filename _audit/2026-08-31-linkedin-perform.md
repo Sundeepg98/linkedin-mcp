@@ -3507,3 +3507,120 @@ That is the same class as section 90: prose asserting a state the code has left
 behind, with no instrument pointed at it. **A refusal that overstates its
 blockers is not safe-by-default -- it hides how close a capability actually
 is**, which is its own cost.
+
+## 93. COVERAGE DELETIONS THAT REPORT SUCCESS
+
+Two mechanisms, one family, and **nothing in this repository can currently
+detect either.** In both, the suite is green, the count is unchanged or higher,
+and a case that used to be checked no longer is.
+
+**MECHANISM ONE -- A WHOLESALE FILE REWRITE.** `tests/test_compose_fields.py`
+was replaced for a new contract. It had carried the only invariant test on
+`shape.describe_name_shaped`, and that went with it. The count went UP, because
+the new file has more tests than the old one. Found by going to rewrite the
+thing and discovering it gone, which is luck rather than method.
+
+**MECHANISM TWO -- A PERMISSIVE SKIP.**
+`test_the_server_instructions_name_every_write_that_ships` skipped on
+`in PERFORMABLE or url_template is not None`. Addressing
+`update_profile_field` moved it into that `or`, so the loop stopped asserting
+that the instructions name it. Green, unchanged count, one case no longer
+covered.
+
+**THE DISTINCTION THAT MAKES THIS THE ENTRY'S POINT.** Sites one to eight of
+the addressing/permission coincidence FAILED when the coincidence broke --
+that is how every one of them was found. **Site nine stopped looking.** A
+failure recruits attention; a silence does not, and the second is the one that
+survives a green gate.
+
+**THE FIX SHAPE, applied to the skip:** assert the SET the loop actually
+examined, not a count and not a named exception. A named case protects only
+the action somebody already thought of; a count is weaker still, because two
+changes that cancel would pass. With the set pinned, a widened skip fails
+NAMING WHAT IT STOPPED CHECKING:
+
+    E   AssertionError: {'send_message'}
+    E   assert {'send_message'} == {'send_message', 'update_profile_field'}
+
+Same move as the predicate-disposition register in `tests/test_shape.py` --
+*an entry is a claim that is itself checked* -- applied to a loop's coverage
+rather than to a function's callers.
+
+**The rewrite mechanism is NOT closed.** Nothing detects a deleted test. It is
+recorded here because naming it is the only defence currently available.
+
+## 94. THE DEAF EAR: ONE DEMONSTRATION PROVES AN INSTRUMENT CAN FIRE, NOT WHAT IT CAN SEE
+
+The instrument register's second law is *an instrument enters only if it has
+been shown failing.* That is normally read as proving the thing can speak.
+
+`tests/test_addressing_is_not_permission.py` was harvested at the close of
+this wave and put through three mutations, one per shape of the defect it
+claims to cover:
+
+    a new unclassified read              CAUGHT, names the site
+    a consumer deciding from the url     CAUGHT, names the site
+    a read CHANGING MEANING IN PLACE     *** NOT CAUGHT ***
+
+**And the shape it was deaf to was the one with the most consequence** --
+site four, `can_hold_a_grant`, the one that left a live confirm token in the
+process. The instrument pins WHERE reads live; that mutation does not move a
+read, it changes what one MEANS. An inventory cannot see that by construction.
+
+**It would have shipped believing it covered the class.** One demonstration
+proves an instrument can fire and says nothing about the shapes it is silent
+on -- and that is true of every check ever admitted on "I showed it failing
+once", including several admitted earlier in this same wave.
+
+**THE RULE: enumerate the distinct shapes of the defect an instrument claims
+to cover, and mutate one of each.**
+
+The missing half,
+`test_the_three_consumers_call_the_predicate_rather_than_recompute_it`, exists
+**because the demonstration demanded it, not because anybody predicted it.**
+That sentence is the whole argument for the law.
+
+Two smaller dispositions from the same harvest, recorded so the weaker forms
+are not copied by imitation:
+
+* **It is a TEST, not a script.** `scripts/sweep_tracked_for_identity.py` is a
+  script ONLY because its wordlist cannot be tracked -- a constraint, not a
+  design. Anything needing nothing gitignored should be a test, so it runs
+  every time rather than when somebody remembers.
+* **It pins an INVENTORY, not a rule.** Whether a read is addressing or
+  permission cannot be decided mechanically, so it does not pretend to. A new
+  read is not a defect; it is a site somebody must classify, and the test makes
+  that unavoidable rather than optional.
+
+## 95. THE INSTRUMENT SPOKE AND THE READER DID NOT LISTEN
+
+Every other finding in this wave is an instrument that could not answer: a
+check that cannot fail, a corpus that cannot discriminate, a circular oracle, a
+skip that stopped looking. **This one is the opposite and belongs on its own.**
+
+**FIRST INSTANCE, IN A TERMINAL.** The enumeration script printed its own
+`counts:` line. Its output was read through a `sed -n '55,100p'` window, the
+window cut the listing, and the visible tail was reported as the whole thing --
+**on an enumeration whose entire value was being exhaustive.** The figure given
+to the wave lead, "9 PERFORMABLE references in tests", was wrong; the real
+number was 34 across 7 files.
+
+**SECOND INSTANCE, THE SAME DAY, IN CODE.**
+`test_the_three_consumers_call_the_predicate_rather_than_recompute_it` read
+`preview` through a 900-character window into the module. `preview`'s docstring
+is longer than the window, so the test failed on a CLEAN tree. **A window into
+a module is sized by guesswork.** Fixed by reading the function's own source --
+the same structural answer as the AST compare and the call graph.
+
+**Both were a partial view treated as the whole thing, and neither announced
+itself.** A truncated listing looks exactly like a complete one. The
+instruments were correct, complete and self-describing in both cases; the
+READING was partial.
+
+**AND THE CONCLUSION DRAWN FROM THE TRUNCATED VIEW SURVIVED THE FULL RE-SCAN.**
+"The remaining exposure was in tests, and it was permissive rather than
+failing" turned out to be true -- site nine was the only one, with three other
+skips confirmed asking membership questions. **The answer was right and the
+entitlement to it did not exist until the re-run.** A correct conclusion
+reached without the basis for it is a coincidence, and this wave spent nine
+sites on what coincidences cost.
