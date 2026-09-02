@@ -4225,7 +4225,7 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
-        # THE TWELFTH, 2026-09-02, on the operator's ruling "I want all
+        # THE ELEVENTH, 2026-09-02, on the operator's ruling "I want all
         # capabilities". Everything the earlier refusal named as missing was
         # built for it rather than around it: an exact-url exemption for the
         # editor, an aiming branch that reads the live control list and
@@ -4883,6 +4883,170 @@ _WRITE_SURFACE: dict[str, str] = {
     # otherwise fall back to -- tells him nothing about where to go and look.
     "setting_and_value": "settings",
 }
+
+
+#: WHERE HE GOES TO SETTLE AN OUTCOME THIS SERVER COULD NOT, per action, as
+#: ``(url, what to call it in a sentence)``.
+#:
+#: WHY A TABLE RATHER THAN THE THREE IF/ELSE CHAINS IT REPLACES. Those chains
+#: were written when this package performed four actions, all of them about a
+#: job or a company Page, and every one of them ended in an ``else`` carrying
+#: THE SAVE PAIR'S OWN TEXT. Seven more actions arrived and inherited it
+#: silently, because inheriting an ``else`` looks exactly like being handled --
+#: which is the same thing ``_verify_after``'s no-catch-all raise exists to
+#: stop, one layer further out, in the block that REPORTS the verification
+#: rather than in the one that takes it.
+#:
+#: MEASURED BEFORE IT WAS BUILT, on 2026-09-02, across the five action-keyed
+#: chains in ``perform``'s receipt: **8 of the 11 performable actions carried
+#: at least one field whose text was written for a different action.** The
+#: three clean ones -- ``save_job``, ``unsave_job``, ``unfollow_company`` --
+#: are precisely the actions the chains were written for. Live on a
+#: ``publish_post`` receipt: the post's own text came back under the key
+#: ``company_id``; ``read_this_if_unsure`` called a post a toggle and sent him
+#: to his saved jobs; and ``verification.surface`` told him LinkedIn's saved
+#: list had confirmed it, on the one action whose spec DECLARES that nothing
+#: can confirm it.
+#:
+#: A MISSING ROW DOES NOT BORROW A NEIGHBOUR'S. :func:`_where_to_look` returns
+#: ``None`` and every caller says so in words, because "nobody wrote this for
+#: your action" and "open your saved jobs" are different sentences and only one
+#: of them can be true. ``tests/test_receipt_names_its_own_action.py`` fails on
+#: any performable action absent from this table, so the gap is loud at test
+#: time rather than quiet at read time.
+#:
+#: IT IS A PHRASE AND NOT A URL, deliberately. Three of these places have no
+#: address this server may print at all -- ``send_invitation``'s Sent
+#: Invitations manager is behind ``/mynetwork/`` and its address contains
+#: ``invitation``, which is on ``readonly._FORBIDDEN_URL_SUBSTRINGS`` -- and
+#: two more are the acted-on page, whose url is per-target rather than
+#: constant. The url the verification ACTUALLY read is already reported, in
+#: ``verification.read_from``; this field answers the different question of
+#: where a HUMAN goes, and he can open a page this server may not.
+_WHERE_TO_LOOK: dict[str, str] = {
+    "save_job": "your saved jobs",
+    "unsave_job": "your saved jobs",
+    "apply_job": "the Applied tab of your job tracker",
+    "unfollow_company": "your followed companies",
+    # THE FOLLOW'S SECOND OPINION, and it is the one ``_verify_after`` already
+    # tells him to take: that branch verifies from the control it just
+    # clicked, names itself the weakest witness in this design, and ends
+    # "Open your followed companies if you want a second opinion." This is
+    # that sentence, in the field built for it.
+    "follow_company": "your followed companies",
+    "update_setting": "your dark-mode setting",
+    "update_profile_field": "the profile editor for that field",
+    # THE FOUR WHOSE ANSWER IS NOT ON A SURFACE THIS SERVER MAY READ, and each
+    # names the place a HUMAN would look rather than the place this server
+    # would. That distinction is the whole value of the field: it is read
+    # after an act that may not be repeatable, by somebody who can open any
+    # page he likes and is not bound by this server's read boundary.
+    "react_to_item": "the post itself",
+    "comment_on_item": "the post you commented on",
+    "publish_post": "your profile's recent activity",
+    "send_invitation": "My Network, then Manage, then Sent",
+}
+
+#: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
+#: of a toggle.
+#:
+#: ``read_this_if_unsure`` has warned since August that "a retry on a toggle
+#: that did land performs the opposite action". TRUE, and it was printed on
+#: all eleven -- including ``apply_job``, where the danger is the opposite
+#: shape and worse: a retry does not undo an application, it may file a second
+#: one. A generic warning that misdescribes the danger is the same species of
+#: confident string as an unmeasured reversibility claim, which is why
+#: ``WriteSpec.wrong_state_note`` exists one layer up. This is that rule
+#: applied to the receipt.
+_TOGGLE_ACTIONS: frozenset[str] = frozenset(
+    {"save_job", "unsave_job", "follow_company", "unfollow_company",
+     "react_to_item"}
+)
+
+
+def _where_to_look(action: str) -> Optional[str]:
+    """The place a human opens to settle this action, or ``None``.
+
+    ``None`` is returned rather than a default, and that is the whole point of
+    the function existing. A default here is a sentence sending him to a page
+    that cannot answer his question, which is strictly worse than no sentence:
+    he reads it, opens it, sees nothing, and concludes something about the
+    write from the silence of a surface that was never going to speak.
+    """
+    return _WHERE_TO_LOOK.get(action)
+
+
+#: WHAT THE VERIFICATION'S EVIDENCE ACTUALLY IS, per action, in the words the
+#: receipt prints beside the verdict.
+#:
+#: THESE ARE THREE DIFFERENT PROMISES AND THE RECEIPT SAYS WHICH IT MADE. A
+#: DIFFERENT surface from the one clicked is the ideal shape; the SAME page
+#: reloaded is a fresh render from LinkedIn and is weaker; reading back the
+#: control that was just pressed is the weakest, because it is testifying about
+#: its own effect. Flattening them would be the same species of confident
+#: string this module keeps refusing to print -- and until 2026-09-02 the
+#: flattening was in the other direction: six actions printed the save pair's
+#: "a DIFFERENT surface ... LinkedIn's own saved list", which for all six named
+#: evidence that does not exist.
+_VERIFIED_FROM: dict[str, str] = {
+    "save_job": (
+        "a DIFFERENT surface from the one clicked. A control that redraws "
+        "itself is the weakest possible witness to its own effect, so the "
+        "confirmation comes from LinkedIn's own saved list with its own "
+        "per-tab count."
+    ),
+    "apply_job": (
+        "a DIFFERENT surface from the one clicked -- the tracker's APPLIED "
+        "tab, with LinkedIn's own per-tab count reconciling it. Until "
+        "2026-08-31 this read the SAVED tab, whose three answers do not "
+        "include 'applied', so the comparison could not pass and every apply "
+        "reported 'unknown'."
+    ),
+    "unfollow_company": (
+        "THE SAME PAGE, RELOADED, and there is no other: LinkedIn lists "
+        "followed Pages on exactly one surface. A fresh navigation is a fresh "
+        "render from LinkedIn rather than a control that redrew itself in "
+        "place -- stronger than reading the button just pressed, weaker than "
+        "an independent surface, and said plainly rather than implied. The "
+        "verdict rests on LinkedIn's own stated total, not on the row's "
+        "absence."
+    ),
+    "update_setting": (
+        "THE SAME PAGE, RELOADED, and read through LinkedIn's own checked "
+        "property on a group of three rather than through a label the control "
+        "chose to draw. There is no second surface for a setting -- the page "
+        "that renders the value is the page that sets it -- so this is a "
+        "fresh render from LinkedIn rather than an independent witness, and "
+        "saying which is the point. It is stronger than reading back the "
+        "button just pressed: a control that redrew wrongly would have to "
+        "report itself checked AND the other two report themselves unchecked "
+        "to pass this."
+    ),
+    "react_to_item": (
+        "THE SAME PAGE, RELOADED. There is only one surface carrying this "
+        "item's reaction state, so this is a fresh RENDER from LinkedIn "
+        "rather than a second source. What it reads is the control's own "
+        "accessible name, which LinkedIn writes the toggle state into. It "
+        "says the reaction MOVED and does not say what to -- the ON label has "
+        "never been observed."
+    ),
+    "update_profile_field": (
+        "THE SAME PAGE, and there is no other -- the editor is the only place "
+        "this value lives. So this is a FRESH READ rather than an independent "
+        "corroboration, and the difference between those two is the "
+        "difference between evidence and the appearance of it. What it buys "
+        "is the value as the page holds it now, after the write."
+    ),
+    "follow_company": (
+        "THE CONTROL THAT WAS JUST CLICKED, on the page it was clicked on. "
+        "That is the WEAKEST verification in this design and it is labelled "
+        "as such rather than presented as equal to the other two: the control "
+        "is testifying about its own effect. The stronger read is not "
+        "available here because this action's direction came from the posting "
+        "rather than from a list that could be counted before and after."
+    ),
+}
+_VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
 
 
 def _assert_landed_on_target(
@@ -6742,18 +6906,37 @@ async def perform(
         # This is the sentence a human follows after an irreversible act, so
         # it must name the surface that carries the answer -- it said SAVED
         # for an apply until 2026-08-31, sending him to a tab that cannot
-        # settle it.
-        state_landed = (
-            FOLLOWED_PAGES_URL
-            if spec.action == "unfollow_company"
-            else APPLIED_LIST_URL
-            if spec.action == "apply_job"
-            else SAVED_LIST_URL
-        )
+        # settle it, and it said SAVED for seven more actions until
+        # 2026-09-02, by falling out of the same else.
+        #
+        # ``state_landed`` IS NOW EMPTY HERE, AND THAT IS THE CORRECTION
+        # RATHER THAN A LOSS. This block runs when the verification read
+        # RAISED, which means it landed NOWHERE -- so the url this field held
+        # was a page the verification never reached, printed under the key
+        # ``verification.read_from``, whose entire job is saying where the
+        # answer was read from. A url in that field is a claim that a read
+        # happened there. Empty says no read happened, which is the fact.
+        #
+        # The place a HUMAN goes is a different question and is answered
+        # separately, by ``_where_to_look``, in words rather than in an
+        # address -- three of the eleven have no address this server may
+        # print at all.
+        state_landed = ""
+        where = _where_to_look(spec.action)
         verified_why = (
             f"the verification read itself failed ({type(exc).__name__}: "
-            f"{exc}), so this says nothing about whether the click landed. "
-            f"Open {state_landed} and look."
+            f"{exc}), so this says nothing about whether the click landed, "
+            "and nothing was read anywhere -- this is not a reading that came "
+            "back empty. "
+            + (
+                f"Open {where} and look."
+                if where
+                else (
+                    "AND THIS SERVER CANNOT TELL YOU WHERE TO LOOK: no "
+                    f"surface is recorded for {spec.action!r}. That is a gap "
+                    "in this package, not a statement that no surface exists."
+                )
+            )
         )
 
     # THREE OUTCOMES, DECIDED BY THE VERIFICATION AND NOT BY THE CLICK.
@@ -6789,14 +6972,50 @@ async def perform(
     else:
         performed = UNKNOWN
 
-    target_block: dict[str, Any] = {"url": url}
+    # WHAT THIS WRITE ACTED ON, KEYED BY ITS OWN TARGET KIND.
+    #
+    # THIS WAS ``job_id`` OR ELSE ``company_id`` UNTIL 2026-09-02, and the
+    # else was not a default -- it was ``unfollow_company``'s branch with no
+    # name on it. Six actions whose target is neither fell into it, so the
+    # receipt reported a company id for something that is not a company. Live
+    # on a ``publish_post`` receipt the same day:
+    #
+    #     "target": {"company_id": "Shipping a small thing today.", ...}
+    #
+    # HIS POST, UNDER THE KEY ``company_id``. Not a cosmetic mislabel: the
+    # receipt is what he reads to find out what this server just did, and this
+    # field is the part that says to WHAT.
+    #
+    # THE KIND IS NAMED WHATEVER HAPPENS, so an unmapped target kind produces
+    # a field that says which kind it was rather than borrowing a key from a
+    # kind it is not. Absent is not zero, applied to the receipt.
+    target_block: dict[str, Any] = {"url": url, "kind": spec.target_kind}
     if spec.target_kind == "job_id":
         target_block["job_id"] = grant.target
         target_block["title"] = observation.facts.get("title")
         target_block["company"] = observation.facts.get("company")
-    else:
+    elif spec.target_kind == "company_id":
         target_block["company_id"] = grant.target
         target_block["company"] = observation.facts.get("company")
+    else:
+        # THE SUBJECT AND THE VALUE, SPLIT, for every composite kind -- and
+        # ``subject`` is EMPTY for a one-component target rather than being
+        # filled with the content a second time. ``destination_of`` already
+        # owns the split; a second spelling of it here would be a second way
+        # to disagree with the separator that binds a token to what the
+        # preview showed.
+        value = destination_of(spec, grant.target)
+        target_block["subject"] = (
+            grant.target[: -(len(value) + len(TARGET_JOIN))] if value else ""
+        )
+        target_block["value"] = value or grant.target
+        target_block["what_these_are"] = (
+            "the two halves of this action's canonical target, split on the "
+            "separator the confirm token was bound across. For a one-part "
+            "target 'subject' is empty and 'value' is the whole of it. "
+            "Neither is a job id or a company id, and this block no longer "
+            "calls them one."
+        )
 
     # THE RESTORE PATH, AND IT IS NOT AN UNDO BUTTON. Ruling, 2026-09-02.
     #
@@ -6845,23 +7064,6 @@ async def perform(
         "target": target_block,
         "performed": performed,
         **({"restore": restore_block} if restore_block is not None else {}),
-        # THE SAME DISCLOSURE THE PREVIEW CARRIED, repeated on the result and
-        # not merely referenced. Ruling 1, 2026-09-01.
-        #
-        # REPEATED ON PURPOSE. He reads the preview to decide and the result
-        # to find out what happened, and the sentence he needs AFTER acting is
-        # the third one -- what to go and look at. A result that reported
-        # ``performed: "unknown"`` and left the instruction back in the
-        # preview would be handing him the worst field of the three and
-        # keeping the useful one.
-        "verification": (
-            spec.unverifiable.as_block()
-            if spec.unverifiable is not None
-            else {
-                "outcome_is_verifiable": "YES",
-                "read_from": state_landed or spec.direction_source,
-            }
-        ),
         # WHAT IS LEFT IN HIS COMPOSER. Beside "clicked" rather than inside
         # it, because it is a fact about HIS SCREEN rather than about this
         # server's click, and a reader looking for consequences should not
@@ -6954,57 +7156,75 @@ async def perform(
             }
         ),
         "verified": verified,
-        "verification": {
-            # THE DESTINATION AS IT WAS COMPARED, which for a multi-state
-            # action is on the grant and not on the spec. Printing
-            # ``spec.to_state`` here would print ``None`` beside a verdict
-            # that was reached against a real string.
-            "expected_state": expected_after,
-            "observed_state": verified_state,
-            "read_from": state_landed,
-            "why": verified_why,
-            "surface": (
-                (
-                    "THE SAME PAGE, RELOADED, and there is no other: LinkedIn "
-                    "lists followed Pages on exactly one surface. A fresh "
-                    "navigation is a fresh render from LinkedIn rather than a "
-                    "control that redrew itself in place -- stronger than "
-                    "reading the button just pressed, weaker than an "
-                    "independent surface, and said plainly rather than "
-                    "implied. The verdict rests on LinkedIn's own stated "
-                    "total, not on the row's absence."
-                )
-                if spec.action == "unfollow_company"
-                else (
-                    "THE SAME PAGE, RELOADED, and read through LinkedIn's own "
-                    "checked property on a group of three rather than through "
-                    "a label the control chose to draw. There is no second "
-                    "surface for a setting -- the page that renders the value "
-                    "is the page that sets it -- so this is a fresh render "
-                    "from LinkedIn rather than an independent witness, and "
-                    "saying which is the point. It is stronger than reading "
-                    "back the button just pressed: a control that redrew "
-                    "wrongly would have to report itself checked AND the "
-                    "other two report themselves unchecked to pass this."
-                )
-                if spec.action == "update_setting"
-                else (
-                    "a DIFFERENT surface from the one clicked -- the tracker's "
-                    "APPLIED tab, with LinkedIn's own per-tab count "
-                    "reconciling it. Until 2026-08-31 this read the SAVED tab, "
-                    "whose three answers do not include 'applied', so the "
-                    "comparison could not pass and every apply reported "
-                    "'unknown'."
-                )
-                if spec.action == "apply_job"
-                else (
-                    "a DIFFERENT surface from the one clicked. A control that "
-                    "redraws itself is the weakest possible witness to its own "
-                    "effect, so the confirmation comes from LinkedIn's own "
-                    "saved list with its own per-tab count."
-                )
-            ),
-        },
+        # ONE ``verification`` KEY. THERE WERE TWO UNTIL 2026-09-02, IN THIS
+        # DICT LITERAL, AND THE LATER ONE SILENTLY WON.
+        #
+        # The first was built from ``spec.unverifiable.as_block()`` with a
+        # comment above it saying it was REPEATED ON PURPOSE, because he reads
+        # the preview to decide and the result to find out what happened, and
+        # the sentence he needs AFTER acting is the third one -- what to go
+        # and look at. Python evaluates both keys and keeps the last, so that
+        # block was constructed and discarded inside the expression that
+        # returns it. Ruling 1 reached the preview and never reached the
+        # result, for the whole of its life.
+        #
+        # AND WHAT THE SURVIVOR PRINTED IN ITS PLACE WAS WORSE THAN THE GAP.
+        # Its ``surface`` fell out of an if/elif chain with no arm for
+        # ``publish_post``, so the one action whose spec DECLARES that nothing
+        # can confirm it told him: "the confirmation comes from LinkedIn's own
+        # saved list with its own per-tab count." Nothing read that list. It
+        # is a jobs tab. That is ``apply_job``'s defect one layer further out
+        # -- not in the check, in the block that reports it -- which is the
+        # exact thing ``Unverifiable``'s docstring forbids: A CHECK THAT
+        # CANNOT PASS MAY NEVER SHIP AS THOUGH IT MIGHT.
+        #
+        # NOTHING CAUGHT IT BECAUSE NOTHING RAN IT.
+        # ``tests/test_unverifiable_outcomes.py`` asserts the pairing between
+        # the spec and ``_verify_after``, which is a statement about those two
+        # and says nothing about what ``perform`` hands back; and the only
+        # end-to-end ``perform`` test in the suite drove ``update_setting``,
+        # which is verifiable and therefore took the surviving branch. There
+        # had never been an end-to-end run of either action carrying an
+        # ``Unverifiable``. See ``tests/test_result_verification_block.py``,
+        # which is that run.
+        #
+        # THE BRANCH IS EXCLUSIVE BY THE SAME RULE THE PAIRING TEST ENFORCES:
+        # an action has EXACTLY ONE of {a branch in ``_verify_after``, an
+        # ``Unverifiable`` on its spec}. So a declaration and a comparison can
+        # never both be true of one action, and one key can carry either.
+        "verification": (
+            spec.unverifiable.as_block()
+            if spec.unverifiable is not None
+            else {
+                # THE DESTINATION AS IT WAS COMPARED, which for a multi-state
+                # action is on the grant and not on the spec. Printing
+                # ``spec.to_state`` here would print ``None`` beside a verdict
+                # that was reached against a real string.
+                "expected_state": expected_after,
+                "observed_state": verified_state,
+                "read_from": state_landed,
+                "why": verified_why,
+                # WHAT THE EVIDENCE ACTUALLY IS, read out of a table keyed by
+                # this action rather than fallen out of an else written for
+                # the save pair. Six of the eleven inherited that else until
+                # 2026-09-02 and named evidence that does not exist for them.
+                #
+                # A MISSING ROW SAYS SO. It does not borrow the nearest
+                # sentence, because a receipt that describes another action's
+                # evidence is worse than one that admits it has none: the
+                # first is read and believed.
+                "surface": _VERIFIED_FROM.get(
+                    spec.action,
+                    "NOT RECORDED for this action. That is a gap in this "
+                    "package rather than a statement about the evidence -- "
+                    "the verification above ran and its reading is reported; "
+                    "what is missing is the sentence saying how strong it is. "
+                    "Do not read this as 'a different surface': six actions "
+                    "printed that sentence by inheritance until 2026-09-02 "
+                    "and for all six it was false.",
+                ),
+            }
+        ),
         "preview_age_seconds": round(observation.age(), 3),
         "to_undo": spec.reversible_by,
         "newly_observed_save_label": became,
@@ -7026,22 +7246,58 @@ async def perform(
                 "row, so there is no control left to read back and sweeping "
                 "for one would report a neighbouring row's."
             )
+            if spec.action == "unfollow_company"
+            # AND THE SIX THAT ARE NEITHER, which read the unfollow's sentence
+            # until 2026-09-02 and were told an unfollow had removed its own
+            # row. ``became`` is a SAVE-FAMILY sweep -- ``perform`` only takes
+            # it when ``target_kind`` is ``job_id`` -- so for these it is
+            # ``None``, and the field beside a null has to explain the null
+            # rather than describe somebody else's action.
+            else (
+                "not applicable to this action: the label above it is a sweep "
+                "for a SAVE control, taken only on a job posting, so it is "
+                "null here and means 'not looked for' rather than 'not "
+                "found'. Nothing on this action's surface is read back this "
+                "way."
+            )
         ),
         # THE SURFACE IS NAMED PER ACTION, and it was not until a test caught
         # it: an unfollow whose outcome was unknown told him to go and look at
-        # his SAVED JOBS. The advice not to retry is the same for both and is
-        # the important half; sending him to the wrong page to check is how a
+        # his SAVED JOBS. Sending him to the wrong page to check is how a
         # correct instruction becomes useless.
+        #
+        # TEN OF THE ELEVEN WERE STILL DOING IT ON 2026-09-02, because the fix
+        # that caught the unfollow added ONE arm and left the else. Every
+        # other action -- an apply, a post, a comment, an invitation, a
+        # profile edit, a dark-mode change -- was sent to his saved jobs.
+        #
+        # AND THE TOGGLE SENTENCE WAS PRINTED ON ALL ELEVEN, which is true of
+        # five. On ``apply_job`` it is not merely inapplicable, it
+        # MISDESCRIBES THE DANGER IN THE SAFER DIRECTION: a retry there does
+        # not perform the opposite action, it may file a second application to
+        # the same employer. A generic warning that gets the danger wrong is
+        # the same species of confident string as an unmeasured reversibility
+        # claim, and ``WriteSpec.wrong_state_note`` exists one layer up for
+        # exactly this reason.
         "read_this_if_unsure": (
             "performed is 'unknown' when the click may or may not have "
-            "dispatched. Do NOT retry on 'unknown': a retry on a toggle that "
-            "did land performs the opposite action. Open "
+            "dispatched. Do NOT retry on 'unknown': "
             + (
-                "your followed companies"
-                if spec.action == "unfollow_company"
-                else "your saved jobs"
+                "a retry on a toggle that did land performs the opposite "
+                "action."
+                if spec.action in _TOGGLE_ACTIONS
+                else "this action is NOT a toggle, so a retry does not undo a "
+                "first attempt that landed -- it may do the same thing twice, "
+                "to the same person or the same employer."
             )
-            + " and look first."
+            + (
+                " Open " + str(_where_to_look(spec.action)) + " and look first."
+                if _where_to_look(spec.action)
+                else " AND THIS SERVER CANNOT TELL YOU WHERE TO LOOK: no "
+                f"surface is recorded for {spec.action!r}, which is a gap in "
+                "this package rather than a claim that none exists. Do not "
+                "retry to find out."
+            )
         ),
     }
 
