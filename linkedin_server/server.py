@@ -2898,7 +2898,7 @@ async def linkedin_compose_fields() -> dict[str, Any]:
       describe a conversation with a person in it and the argument evaporates.
     * THE PAGE IS NOT THE PAGE THIS WAS BUILT AGAINST. It reads the two
       dispatch radios by role and refuses unless there are EXACTLY two with
-      EXACTLY one checked, plus exactly one message body. Anything else and it
+      EXACTLY one checked, plus exactly one body editor. Anything else and it
       cannot say which control is a send mode, so it says nothing.
 
     NO LABEL IS PUBLISHED BECAUSE NO LABEL IS READ INTO THIS SERVER. Until
