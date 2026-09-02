@@ -4817,9 +4817,34 @@ COMMENT_EDITOR_LABEL = "Text editor for creating comment"
 MESSAGE_RECIPIENT_LABEL = "Enter message recipients"
 MESSAGE_SEND_NAME = "Send"
 
-#: The composer's own container. Measured: every composer control -- the body
-#: editor, both send-mode radios, Send and the two attach buttons -- reports
-#: ``form#0``, and the page draws exactly one form.
+#: The composer's own container -- and it does NOT hold the send-mode radios.
+#:
+#: THIS COMMENT SAID THE OPPOSITE UNTIL 2026-09-02. It read "every composer
+#: control -- the body editor, BOTH SEND-MODE RADIOS, Send and the two attach
+#: buttons -- reports ``form#0``". Two independent censuses of
+#: ``messaging_compose`` say otherwise, and they agree with each other:
+#:
+#:     both radios                 containers {"none": 1}   -- no form ancestor
+#:     Enter message recipients    containers {"none": 1}   -- nor does it
+#:
+#: measured 2026-08-31 (``_audit/2026-08-31-linkedin-perform.md`` section 83)
+#: and again 2026-09-02, 77 controls expected and 77 read, settle consistent.
+#:
+#: WHAT ``form#0`` ACTUALLY HOLDS, thirteen controls: the body editor
+#: (``div[role=textbox]``, the page's only contenteditable), ``Send``
+#: (disabled on an empty composer), the two attach buttons, ``Maximize compose
+#: field``, ``Open send options``, four hidden inputs, two file inputs, and two
+#: buttons whose aria-labels the census redacts.
+#:
+#: WHY THE WRONG VERSION MATTERED. It is the justification for scoping this
+#: reader to ``form``, so it read as evidence that the scope was right when it
+#: was in fact the reason the radios have never been read -- they are outside
+#: the container BY CONSTRUCTION, and no anchor's ``closest()`` reaches an
+#: element that has no such ancestor. A comment asserting a measurement nobody
+#: re-took is how this package loses a day, and it has now lost two to exactly
+#: this shape.
+#:
+#: The page does draw exactly one form; that half was true.
 MESSAGE_CONTAINER_SELECTOR = "form"
 
 
