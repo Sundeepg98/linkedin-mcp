@@ -3089,3 +3089,97 @@ edge case.
 
 Fixing the predicate is a change to a privacy gate and is the wave lead's to
 rule. It is recorded here and NOT adjusted.
+
+## 83. THE COMPOSER: THE DESIGN WAS RIGHT AND THE READER IS AIMED AT THE WRONG CONTAINER
+
+The wave lead asked which controls the two shapes describe, before anything
+touches the extractor. **The census answers it, and the answer inverts the
+conclusion.**
+
+`linkedin_surface_census(surface="messaging_compose")`, badge read ZERO first
+through `linkedin_new_messages` off `/feed/`, settle verdict `consistent`,
+77 controls expected and 77 read.
+
+### The send-mode radios exist, and they are EXACTLY the shape the design predicted
+
+    shape "<redacted> will send message"                 radio  label-for  checked TRUE
+    shape "<redacted> to <redacted> will send message"   radio  label-for  checked false
+
+**One name, versus two names joined by "to".** That is precisely the
+structural difference `shape.describe_name_shaped` was built to detect. The
+design's model of this surface was CORRECT and is confirmed by an instrument
+that has never been able to publish those labels.
+
+### And `read_compose_fields` cannot see either of them, by CONTAINMENT
+
+    both radios          containers: {"none": 1}    -- no form ancestor
+    dom.MESSAGE_SEND_NAME          'Send'
+    dom.MESSAGE_CONTAINER_SELECTOR 'form'
+
+The reader anchors on `Send` and scopes to that control's nearest `form`
+ancestor -- `form#0`. **The radios are in no form at all.** They are outside
+the container by construction, and no adjustment to the predicate, the
+extractor or the shaping would ever bring them into view.
+
+The two shapes it DID return therefore describe two OTHER controls inside
+`form#0`. The census shows exactly two candidates there: a pair of buttons,
+`name_source: aria-label`, `aria_expanded: false`, count 2, whose names the
+census also redacts.
+
+**So the reader is not mis-shaping the radios. It has never read them.**
+
+### THE THIRD FINDING IS A PRIVACY DEFECT, AND IT MAKES THE FIX ORDER MATTER
+
+    looks_name_shaped('Firstname will send message')             False
+    looks_name_shaped('Firstname to Acmecorp will send message')  True
+
+`_CENSUS_CAPS_RUN` matches either two consecutive capitalised words, or a
+single capitalised word **preceded by whitespace**. A name at position 0 has
+neither. So the guard **fails OPEN on the CHECKED mode** -- the default one,
+the label most likely to carry his name and nothing else.
+
+**RE-POINTING THE READER AT THE RIGHT CONTAINER WITHOUT FIXING THE PREDICATE
+WOULD PUBLISH HIS NAME VERBATIM.** The container-scope bug is currently the
+only thing preventing that, which is not a design and cannot be relied on.
+
+The same defect corrupts the discriminator's other half: for that label
+`describe_name_shaped` returns `runs: 0` and a "name-free tail" of **the whole
+string, name included**. The tail is name-free only for the mode that happens
+to trip the guard.
+
+### What the discriminator would do if both halves were fixed
+
+It would work. `runs: 0` against `runs: 1` separates the two modes cleanly,
+and the checked flag says which is default. The mechanism is sound; it has
+simply never been pointed at its subject, and one of its two outputs is
+unsafe on the subject it was built for.
+
+### THE INMAIL QUESTION IS STILL OPEN, and this reading narrows it without answering it
+
+`InMail` on this page is a **button, `role=button`, `aria-checked=false`,
+count 1, container `none`** -- sitting beside `Focused`, `Unread`, `Starred`,
+`Connections` and `Jobs`, all with the same shape. **Third independent
+corroboration that it is a conversation FILTER PILL and not a send affordance.**
+
+No balance, allowance or credit count appears anywhere in 77 controls.
+
+**One unopened door is named rather than guessed:** a button `Open send
+options`, `aria_expanded: false`, inside `form#0`. It has never been opened
+and its contents are unmeasured. That is where a send-mode or credit
+affordance would plausibly live, and this server has not looked.
+
+**And the composer has the disabled-when-empty signal** the comment surface
+lacks: `Send` is `disabled: true` on an empty composer with no recipient. That
+is the same measured transition `publish_post`'s submit gate uses, and it
+would be available to a future `send_message` gate.
+
+### One disclosure about how this reading was taken
+
+My session's census schema is STALE -- it documents five surfaces where the
+committed code carries nine -- so `messaging_compose` is a key my own tool
+description does not list. The server process is current (`2be66b8`) and
+accepts it; the surface is sanctioned in committed code and the wave lead had
+loaded the same page minutes earlier; the badge precondition was read first
+and was zero. **It went THROUGH the gate rather than around it**, which is the
+distinction that separates this from the workaround refused in section 82 --
+importing the module and launching the browser from a script.
