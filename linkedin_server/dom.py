@@ -4849,11 +4849,21 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
     describing a conversation with a person in it and the argument evaporates.
 
     **Nothing name-shaped is published.** Any label carrying a run of
-    capitalised words -- the same rule ``shape.census_redact_rare`` applies --
-    stops this reader. The second send-mode label came back from the census as
-    ``<redacted> to <redacted>``, two name-shaped tokens, which is exactly the
-    case that must stop it. A reader that guessed there would be publishing a
-    stranger's name to explain a radio button.
+    capitalised words stops this reader. The second send-mode label came back
+    from the census as ``<redacted> to <redacted>``, two name-shaped tokens,
+    which is exactly the case that must stop it. A reader that guessed there
+    would be publishing a stranger's name to explain a radio button.
+
+    AND IT IS NO LONGER "the same rule ``shape.census_redact_rare`` applies",
+    which is what this paragraph said until 2026-09-02. It was, and the shared
+    rule declined to match a capitalised word at position 0 -- so it scored the
+    CHECKED default radio, ``<him> will send message``, at zero runs and this
+    guard failed OPEN on it. :func:`shape.looks_name_shaped` now carries its
+    own predicate, strictly stricter than the redactor's; the reasoning is on
+    :data:`shape._NAME_SHAPE_RUN`. The visible cost here is that one-word
+    furniture in this container -- ``Send``, ``Open send options`` -- is
+    name-shaped too, so this reader refuses on every composer measured so far
+    and answers through ``label_shapes`` rather than through ``fields``.
 
     A REFUSAL CARRIES NO FIELD DATA, following the profile editor's rule:
     there is no ``fields`` key on a refusal, so a refusal cannot be misread as

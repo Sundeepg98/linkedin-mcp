@@ -3535,6 +3535,37 @@ _CENSUS_CAPS_RUN = re.compile(
     r"|(?<=\s)[A-Z][A-Za-z0-9.'\u2019-]*"
 )
 
+#: THE SAME RUN, PLUS A CAPITALISED WORD AT THE START OF THE STRING -- and
+#: this is a SECOND regex rather than a widening of the one above, because the
+#: two answer different questions and the safe direction is opposite in each.
+#:
+#: WHY NOT JUST WIDEN THE FIRST. ``census_redact_rare`` substitutes on
+#: ``_CENSUS_CAPS_RUN`` across a whole document-wide census. Teaching that one
+#: about position 0 would blank ``Save``, ``Dismiss``, ``Jobs``, ``About`` --
+#: every one-word control name seen once -- and a census that redacts its own
+#: vocabulary reports nothing. The comment above that pattern already records
+#: the leniency as DELIBERATE and names the case it declines to cover.
+#:
+#: WHY THE GUARD MUST BE STRICTER ANYWAY. ``looks_name_shaped`` decides
+#: whether a label may be PUBLISHED. Over-refusing costs a refusal;
+#: under-refusing costs a disclosure. The costs are not symmetric, so the
+#: guard does not get to inherit a predicate tuned for a counting instrument.
+#:
+#: MEASURED 2026-09-02, and this is the defect it closes. The live message
+#: composer draws two dispatch radios whose labels are ``<him> will send
+#: message`` and ``<him> to <a company> will send message``. Under
+#: ``_CENSUS_CAPS_RUN`` the FIRST scores zero runs -- a name at position 0 has
+#: neither two consecutive capitalised words nor a space before it -- so the
+#: guard returned False on the CHECKED default, the label most likely to be
+#: his name and nothing else. It would have been published verbatim.
+#:
+#: AND IT BROKE THE OTHER HALF TOO: with no run found, ``describe_name_shaped``
+#: returned a "name-free tail" of the ENTIRE STRING, name included.
+_NAME_SHAPE_RUN = re.compile(
+    r"[A-Z][A-Za-z0-9.'\u2019-]*(?:\s+[A-Z][A-Za-z0-9.'\u2019-]*)+"
+    r"|(?:(?<=\s)|^)[A-Z][A-Za-z0-9.'\u2019-]*"
+)
+
 #: The placeholders this module writes. Removed before the character gate
 #: runs, because they are the one source of ``<`` and ``>`` that is allowed.
 _CENSUS_PLACEHOLDER = re.compile(r"<(?:member|company|id|urn|redacted|opaque)>")
@@ -3669,7 +3700,7 @@ def describe_name_shaped(text: str) -> dict[str, Any]:
     the last capitalised run -- and callers may compare it against a constant.
     """
     raw = str(text or "")
-    matches = list(_CENSUS_CAPS_RUN.finditer(raw))
+    matches = list(_NAME_SHAPE_RUN.finditer(raw))
     if not matches:
         return {"runs": 0, "joined_by_to": False, "tail": raw.strip()}
     between = raw[matches[0].end() : matches[-1].start()] if len(matches) > 1 else ""
@@ -3687,21 +3718,35 @@ def describe_name_shaped(text: str) -> dict[str, Any]:
 
 
 def looks_name_shaped(text: str) -> bool:
-    """Would :func:`census_redact_rare` blank any part of this string?
+    """Is any part of this string shaped like somebody's name?
 
-    THE SAME RULE, EXPOSED AS A PREDICATE, so a caller that must REFUSE on a
-    name-shaped label asks the same question the redactor asks rather than
-    writing a second rule that drifts from it. Added 2026-09-01 for
+    STRICTLY STRICTER THAN :func:`census_redact_rare`, and until 2026-09-02
+    this docstring claimed the opposite -- that the guard was DELIBERATELY the
+    redactor's own rule, so the two could never drift. That reasoning was
+    sound about drift and wrong about which rule to share. Added 2026-09-01 for
     ``dom.read_compose_fields``, which publishes raw labels from a self-owned
     container and must stop rather than publish one that looks like a person.
 
-    IT IS DELIBERATELY THE REDACTOR'S RULE AND NOT A BETTER ONE. A second,
-    cleverer name detector would disagree with the redactor somewhere, and the
-    two disagreeing is worse than either being imperfect: the guard would
-    refuse things the redactor would have shaped, or -- the direction that
-    matters -- pass things the redactor would have blanked.
+    WHAT THE SHARED RULE COST. ``_CENSUS_CAPS_RUN`` declines to match a
+    capitalised word at position 0, because in a census that word is the
+    control's VERB and blanking it would empty the instrument. But a label that
+    OPENS with a name is exactly the composer's checked default, so the shared
+    predicate returned False on the one label most likely to be his name and
+    nothing else. The full measurement is on :data:`_NAME_SHAPE_RUN`.
+
+    SO THE TWO PREDICATES ARE ALLOWED TO DISAGREE, IN ONE DIRECTION ONLY. This
+    one matches everything ``_CENSUS_CAPS_RUN`` matches and more, so the guard
+    can only ever refuse where the redactor would have shaped -- never pass
+    where the redactor would have blanked. That containment is the property
+    worth having, and it is asserted rather than described in
+    ``tests/test_compose_fields.py``.
+
+    The price is paid knowingly: one-word control names -- ``Send``,
+    ``InMail`` -- are now name-shaped to this predicate, and the reader refuses
+    on labels no person is in. Over-refusing costs a refusal; under-refusing
+    costs a disclosure.
     """
-    return bool(_CENSUS_CAPS_RUN.search(str(text or "")))
+    return bool(_NAME_SHAPE_RUN.search(str(text or "")))
 
 
 def census_redact_rare(shape: str, count: int) -> str:

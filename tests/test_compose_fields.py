@@ -18,9 +18,15 @@ permission:
    person in it and the argument evaporates.
 
 2. **Nothing name-shaped is published.** Any label carrying a run of
-   capitalised words stops the reader, using ``shape.looks_name_shaped`` --
-   the SAME rule the redactor applies, deliberately not a cleverer one. Two
-   name detectors disagreeing is worse than one being imperfect.
+   capitalised words -- INCLUDING ONE AT POSITION 0 -- stops the reader, using
+   ``shape.looks_name_shaped``. Until 2026-09-02 this paragraph said that was
+   deliberately the SAME rule the redactor applies. It is not, any more, and
+   the reason is measured rather than argued: the composer's checked default
+   radio is labelled ``<him> will send message``, a name at position 0, and
+   the redactor's rule scores it zero runs. The shared predicate failed OPEN
+   on the one label most likely to be his name and nothing else. The two
+   predicates are now split, and the guard's is strictly the stricter -- see
+   ``test_the_two_predicates_are_split_and_the_guard_is_stricter``.
 
 AND NO NEW SCRIPT WAS ADDED. ``EDITOR_FIELDS_JS`` was already parameterised on
 anchor, container and control selector, so this surface reuses it and costs no
@@ -100,17 +106,44 @@ async def test_a_name_shaped_label_refuses_without_reporting_the_label():
     assert "fields" not in out
     assert "Ada" not in str(out), out
     assert "Lovelace" not in str(out), out
-    assert "1 control label" in out["why"]
+    # TWO, NOT ONE, AND THE CHANGE IS THE POINT. ``Send`` is name-shaped to the
+    # guard's predicate since the 2026-09-02 split -- a capitalised word at
+    # position 0 is exactly what the guard was widened to catch, and it cannot
+    # tell a one-word verb from a one-word surname. The count is derived from
+    # the labels rather than pinned to a literal, so a future widening moves
+    # this number instead of silently agreeing with it.
+    offending = [
+        n for n in ["Send", "Ada Lovelace will send message"]
+        if shape.looks_name_shaped(n)
+    ]
+    assert len(offending) == 2, offending
+    assert "%d control label" % len(offending) in out["why"]
 
 
-async def test_ordinary_composer_labels_pass():
-    """THE PASSING CASE, without which the two refusals prove nothing.
+async def test_the_success_path_survives_though_no_measured_label_reaches_it():
+    """THE PASSING CASE, now reachable only by a corpus that does not occur.
 
-    A reader that refused everything would satisfy both tests above while
-    making the capability permanently dead -- and a reader that never answers
-    looks exactly like a surface that has nothing to say.
+    THIS TEST CHANGED MEANING ON 2026-09-02 AND SAYS SO RATHER THAN QUIETLY
+    MOVING ITS VALUES. It used to pass ``["Send", "Open send options", "Enter
+    message recipients"]`` -- three real composer labels -- through the guard
+    and out the success path. After the predicate split every one of those is
+    name-shaped, because each opens with a capitalised word, so that corpus
+    REFUSES and no substitution of values restores the old assertion.
+
+    WHY THE CONTROL IS KEPT ANYWAY. Its job was to stop a reader that refuses
+    unconditionally from looking identical to a working one, and that job did
+    not go away: a mutation replacing the guard with ``return True`` must still
+    be caught, and this is the only test that catches it.
+
+    AND THE HONEST HALF, ASSERTED RATHER THAN LEFT IN PROSE: the corpus below
+    is synthetic. Sentence case is how accessible names are written, so the
+    second half pins that every label MEASURED on the live composer trips the
+    guard -- recorded from the census in
+    ``_audit/2026-08-31-linkedin-perform.md`` section 83. If a future predicate
+    lets one of them through, this fails, and the passing corpus stops being a
+    fiction nobody re-examined.
     """
-    page = _Page(fields=["Send", "Open send options", "Enter message recipients"])
+    page = _Page(fields=["send", "open send options"])
     out = await dom.read_compose_fields(page)
     # THE SUCCESS PATH CARRIES NO "refused" KEY AT ALL, which is the profile
     # editor's own convention: a refusal cannot be misread as an empty result
@@ -119,11 +152,13 @@ async def test_ordinary_composer_labels_pass():
     assert out["recipients_selected"] == 0
     fields = out.get("fields")
     assert fields is not None, out
-    assert [f["name"] for f in fields] == [
-        "Send",
-        "Open send options",
-        "Enter message recipients",
-    ]
+    assert [f["name"] for f in fields] == ["send", "open send options"]
+
+    # THE MEASURED COMPOSER. ``form#0`` holds ``Send``, ``Open send options``,
+    # the recipient input, and two buttons whose names that census redacted.
+    # NOT ONE of them reaches the branch above.
+    for measured in ("Send", "Open send options", "Enter message recipients"):
+        assert shape.looks_name_shaped(measured), measured
 
 
 async def test_it_anchors_on_send_inside_the_form():
@@ -173,38 +208,125 @@ async def test_an_unreadable_recipient_count_refuses_rather_than_assuming_zero()
     assert page.evaluated is False
 
 
-def test_the_guard_uses_the_redactors_own_rule():
-    """One rule, asked two ways -- not two rules that can drift apart.
+def test_the_two_predicates_are_split_and_the_guard_is_stricter():
+    """The guard STOPPED using the redactor's rule, and this asserts why.
 
-    A second, cleverer name detector would disagree with the redactor
-    somewhere, and the direction that matters is the one where the guard
-    PASSES something the redactor would have blanked.
+    THIS TEST REPLACED ITS OWN OPPOSITE. Until 2026-09-02 it was
+    ``test_the_guard_uses_the_redactors_own_rule`` and asserted that one rule
+    served both callers, on the reasoning that two name detectors disagreeing
+    is worse than one being imperfect. That reasoning was right about DRIFT and
+    wrong about WHICH RULE TO SHARE, and the measurement that settled it is the
+    first case below: the redactor scores ``<name> will send message`` at zero
+    runs, so the guard it fed failed OPEN on the composer's checked default --
+    the label most likely to be his name and nothing else.
+
+    THE TWO QUESTIONS ARE NOT THE SAME QUESTION, which is the whole ruling:
+
+    * ``census_redact_rare`` substitutes across a document-wide census.
+      Teaching it about position 0 would blank ``Save``, ``Dismiss``, ``Jobs``,
+      ``About`` -- every one-word control name seen once. A census that redacts
+      its own vocabulary reports nothing.
+    * ``looks_name_shaped`` decides whether a label may be PUBLISHED.
+      Over-refusing costs a refusal; under-refusing costs a disclosure. The
+      costs are not symmetric, so the guard does not inherit a predicate tuned
+      for a counting instrument.
+
+    DRIFT IS STILL THE HAZARD, so it is bounded rather than denied: the two are
+    allowed to disagree in ONE DIRECTION ONLY, asserted below as containment.
     """
-    assert shape.looks_name_shaped("Ada Lovelace will send message") is True
-    assert shape.looks_name_shaped("Send") is False
-    assert shape.looks_name_shaped("Enter message recipients") is False
-    assert shape.looks_name_shaped("Open send options") is False
-    assert shape.looks_name_shaped("InMail") is False
+    # 1. THE MEASUREMENT THAT FORCED THE SPLIT. Both are name-shaped now; the
+    #    first was False before, with a "name-free tail" of the whole string.
+    checked_default = "Ada Lovelace will send message"
+    other_mode = "Ada Lovelace to Grace Hopper will send message"
+    assert shape.looks_name_shaped(checked_default) is True
+    assert shape.describe_name_shaped(checked_default) == {
+        "runs": 1,
+        "joined_by_to": False,
+        "tail": "will send message",
+    }
+    assert shape.describe_name_shaped(other_mode) == {
+        "runs": 2,
+        "joined_by_to": True,
+        "tail": "will send message",
+    }
 
-    # A BARE NAME, CARRYING NONE OF THE SURROUNDING PHRASE. This case was
-    # ADDED AFTER A MUTATION GOT THROUGH: replacing the redactor's rule with
-    # `" will send " in text` passed every assertion above, because every
-    # name-shaped example happened to contain that phrase. The cases agreed
-    # with the right answer without DISCRIMINATING between the two rules,
-    # which is the same defect as a corpus that cannot fail.
-    assert shape.looks_name_shaped("Ada Lovelace") is True
+    # 2. THE CENSUS KEEPS ITS OWN RULE, and this is the half that breaks loudly
+    #    if somebody "simplifies" the split away by widening the shared pattern
+    #    instead. These strings are the census's own vocabulary.
+    for furniture in ("Save", "Dismiss", "Jobs", "About", "Send", "InMail"):
+        assert shape.census_redact_rare(furniture, 1) == furniture, furniture
 
-    # And the predicate agrees with the redactor it was derived from, across
-    # cases that pull in both directions.
+    # 3. THE PREDICATES DISAGREE, and a test that could not observe the
+    #    disagreement would pass just as well against no split at all.
+    disagreements = [
+        text
+        for text in ("Send", "InMail", "Enter message recipients", checked_default)
+        if shape.looks_name_shaped(text) != (shape.census_redact_rare(text, 1) != text)
+    ]
+    assert disagreements, "the split is not observable, so it is not a split"
+
+    # 4. CONTAINMENT -- THE ONE DIRECTION THE DRIFT MAY GO. The guard must match
+    #    EVERYTHING the redactor blanks, and may match more. A guard that passed
+    #    something the redactor would have blanked is precisely the failure the
+    #    old shared-rule reasoning existed to prevent; it is now prevented by
+    #    assertion rather than by sharing.
     for text in (
-        "Ada Lovelace will send message",
+        checked_default,
+        other_mode,
         "Ada Lovelace",
+        "Connect with Prince",
+        "Click to stop following Acme",
         "Send",
         "InMail",
         "Enter message recipients",
+        "Open send options",
+        "",
+        "send",
     ):
-        blanked = shape.census_redact_rare(text, 1) != text
-        assert blanked == shape.looks_name_shaped(text), text
+        if shape.census_redact_rare(text, 1) != text:
+            assert shape.looks_name_shaped(text), ("redactor blanked, guard passed", text)
+
+    # 5. A BARE NAME, CARRYING NONE OF THE SURROUNDING PHRASE. Kept from the
+    #    test this replaced: it was ADDED AFTER A MUTATION GOT THROUGH --
+    #    replacing the rule with `" will send " in text` passed every case then,
+    #    because every name-shaped example happened to contain that phrase.
+    assert shape.looks_name_shaped("Ada Lovelace") is True
+
+    # 6. STRUCTURAL, because 1-5 are behavioural and would all survive somebody
+    #    deleting `_NAME_SHAPE_RUN` and re-widening `_CENSUS_CAPS_RUN` in place
+    #    -- which is the one edit that reintroduces the census defect this split
+    #    was made to avoid. The redactor must still name the census pattern; the
+    #    guard and the descriptor must name the other one and NOT the census's.
+    import ast
+    import inspect
+    import textwrap
+
+    def _code_of(fn):
+        """The function's CODE, with docstring and comments gone.
+
+        Not a string replace of ``fn.__doc__``: Python 3.13 dedents docstrings
+        at compile time, so ``__doc__`` no longer occurs verbatim in the source
+        and the replace silently removes nothing -- which would leave this
+        assertion satisfiable by PROSE, the exact failure mode it exists to
+        catch. Unparsing the body drops the docstring node and every comment.
+        """
+        body = ast.parse(textwrap.dedent(inspect.getsource(fn))).body[0].body
+        first = body[0] if body else None
+        if (
+            isinstance(first, ast.Expr)
+            and isinstance(first.value, ast.Constant)
+            and isinstance(first.value.value, str)
+        ):
+            body = body[1:]
+        return "\n".join(ast.unparse(node) for node in body)
+
+    redactor = _code_of(shape.census_redact_rare)
+    assert "_CENSUS_CAPS_RUN" in redactor, redactor
+    assert "_NAME_SHAPE_RUN" not in redactor, redactor
+    for fn in (shape.looks_name_shaped, shape.describe_name_shaped):
+        code = _code_of(fn)
+        assert "_NAME_SHAPE_RUN" in code, fn.__name__
+        assert "_CENSUS_CAPS_RUN" not in code, fn.__name__
 
 
 def test_no_second_injected_script_was_added_for_this_surface():
@@ -246,12 +368,32 @@ async def test_a_refusal_still_reports_which_send_mode_is_checked():
     out = await dom.read_compose_fields(page)
     assert out["refused"] == "name_shaped_label_present"
 
+    # THREE, NOT TWO, SINCE THE 2026-09-02 SPLIT: ``Send`` is name-shaped to the
+    # guard now, so this container's furniture is described alongside the two
+    # radios. That is the over-refusal the split was known to buy, and it is why
+    # the modes are selected BY TAIL rather than by position -- an index into
+    # this list was only ever right while the container happened to hold nothing
+    # else, and the reader is still aimed at ``form#0``, which holds several
+    # things else.
     shapes = out["label_shapes"]
-    assert len(shapes) == 2, shapes
-    assert shapes[0]["runs"] == 1 and shapes[0]["joined_by_to"] is False
-    assert shapes[1]["runs"] == 2 and shapes[1]["joined_by_to"] is True
+    assert len(shapes) == 3, shapes
+    modes = [s for s in shapes if s["tail"] == "will send message"]
+    assert len(modes) == 2, shapes
+    assert modes[0]["runs"] == 1 and modes[0]["joined_by_to"] is False
+    assert modes[1]["runs"] == 2 and modes[1]["joined_by_to"] is True
     # THE TAIL IS THE SAME ON BOTH and is what may be committed as a constant.
-    assert shapes[0]["tail"] == shapes[1]["tail"] == "will send message"
+    assert modes[0]["tail"] == modes[1]["tail"] == "will send message"
+    # AND THE FURNITURE IS STILL SEPARABLE FROM A MODE, which is what keeps the
+    # answer readable while the container is too wide: ``Send`` COLLIDES with
+    # the checked default on (runs, joined_by_to) and is separated only by the
+    # tail. The discriminator is doing less work than its name suggests until
+    # the reader is re-anchored on the radios.
+    furniture = [s for s in shapes if s["tail"] != "will send message"]
+    assert len(furniture) == 1 and furniture[0]["tail"] == "", shapes
+    assert (furniture[0]["runs"], furniture[0]["joined_by_to"]) == (
+        modes[0]["runs"],
+        modes[0]["joined_by_to"],
+    ), "the collision this comment describes stopped happening; re-read it"
 
 
 async def test_no_part_of_a_name_survives_into_the_answer():
