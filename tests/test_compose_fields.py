@@ -662,4 +662,18 @@ def test_the_script_is_declared_where_scripts_are_reviewed():
     # EXECUTED_SCRIPTS is keyed by CALL SITE and INJECTED_SCRIPTS by NAME, so
     # one script executed from two places would make them differ, and a
     # derived assertion would silently accept exactly that.
-    assert len(module.EXECUTED_SCRIPTS) == 13
+    # THIRTEEN UNTIL 2026-09-03, SIXTEEN SINCE, and the three are the
+    # zero-page-load harvest: PROFILE_VIEWS_INSIGHTS_JS, JOB_INSIGHT_MARKERS_JS
+    # and the linked-card harvest. Each is ARGUED where scripts are reviewed,
+    # in tests/test_readonly.py's declaration; this line is the COUNT that
+    # noticed they had arrived, which is the job its own docstring gives it.
+    #
+    # UPDATED HERE ONLY AFTER THE ARGUMENT EXISTED ELSEWHERE. The number is
+    # pinned in three files and the first fix moved one of them, which made
+    # the other two read as a regression rather than an omission -- a number
+    # maintained in three places will be maintained in one. Whether these
+    # three pins should be one derived source is a separate ruling and is with
+    # the builder who has read all three; they may pin genuinely different
+    # properties that share a number today, and collapsing them on a matching
+    # integer would be the mistake.
+    assert len(module.EXECUTED_SCRIPTS) == 16

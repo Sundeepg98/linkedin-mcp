@@ -328,4 +328,15 @@ def test_the_scope_statement_cost_no_boundary_movement():
 
     # Every top-level function is still present and none was touched by this.
     functions = [n for n in tree.body if isinstance(n, ast.FunctionDef)]
-    assert len(functions) == 13, len(functions)
+    # THIRTEEN UNTIL 2026-09-03, FOURTEEN SINCE. readonly.py gained one
+    # top-level function when the compose-by-identifier admission shipped --
+    # the anchored pattern-exemption helper, which exists because an exact key
+    # was impossible: the exemption table is an equality test on a lowered url
+    # and a compose-with-recipient address carries two member ids.
+    #
+    # THE COUNT IS NOT INCIDENTAL TO THIS TEST. What it protects is the claim
+    # in the docstring above -- that stating the scope in a MODULE docstring
+    # moved no digest. A function arriving is exactly the thing that would
+    # falsify "nothing but prose changed", so the number must move
+    # deliberately, with the arrival named, rather than be derived.
+    assert len(functions) == 14, len(functions)
