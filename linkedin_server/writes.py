@@ -5873,6 +5873,17 @@ async def _live_control(
         # nothing in the markup requires it to keep passing, and because the
         # failure it catches is the one that looks like success: a label with
         # the right text and no 'for' would click cleanly and set nothing.
+        # THE LABEL AIM APPLIES TO RADIOS ONLY, because a radio is the only
+        # shape whose input was MEASURED unclickable. On 2026-09-03 the live
+        # dark-mode page covered its three radio inputs with a decorative div
+        # and every click was intercepted; that is the defect this route
+        # exists for. NOTHING HAS MEASURED A CHECKBOX ON THIS SURFACE, and
+        # applying a radio's remedy to a shape nobody has read would be the
+        # same guess this arm refuses everywhere else -- it was applied to
+        # every checkable role for about an hour and three tests said so.
+        if role != "radio":
+            return (state, why, dom.named_role_selector(role, anchor))
+
         binding = await dom.read_radio_label_binding(page, role, anchor)
         if not binding["bound"]:
             return (

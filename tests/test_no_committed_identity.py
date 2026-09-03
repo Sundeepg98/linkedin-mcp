@@ -853,9 +853,70 @@ def test_no_tracked_file_pairs_fixture_content_with_anything_else():
         offenders = key_shaped_tables(
             (REPO / rel).read_text(encoding="utf-8", errors="replace"), blob
         )
+        offenders = [
+            (name, n) for (name, n) in offenders
+            if (rel, name) not in NOT_A_PRE_IMAGE
+        ]
         if offenders:
             found[rel] = offenders
     assert found == {}, found
+
+
+#: Tables this detector flags that are NOT de-anonymisation keys, each with the
+#: argument for why. The rule it applies -- one string in a fixture, another
+#: absent -- cannot tell a MAPPING TARGET from a CLASS LABEL, and the second is
+#: not a pre-image of anything.
+#:
+#: ASSERTED AS A SET, NOT A COUNT, so an entry cannot rot: a table that stops
+#: being flagged fails the companion test below and must be deleted from here.
+#: Same shape as KNOWN_DERIVED_NAVIGATIONS, which was forced in and forced out
+#: on the day it was written.
+NOT_A_PRE_IMAGE: dict[tuple[str, str], str] = {
+    (
+        "tests/test_the_second_gate_covers_the_class.py",
+        "CLASS_MEMBERS",
+    ): (
+        "Rows pair a LinkedIn settings URL with the keyword naming what that "
+        "page is FOR -- change-password/'password', two-factor-authentication/"
+        "'two-factor'. Both halves are LinkedIn's own public vocabulary and "
+        "neither is an identifier of his. The keyword is a CLASS LABEL, not "
+        "the pre-image of the url, so nothing here reverses anything. It "
+        "trips only because the urls appear in fixtures and the bare keywords "
+        "do not."
+    ),
+    (
+        "tests/test_the_second_gate_covers_the_class.py",
+        "CLASS_ALSO_CLOSES",
+    ): (
+        "Same table shape and the same argument: settings addresses beside "
+        "the keyword for the capability they carry. Public vocabulary on "
+        "both sides."
+    ),
+}
+
+
+def test_every_pre_image_allowance_still_names_a_flagged_table():
+    """AN ALLOWANCE THAT STOPS BEING NEEDED IS A PERMISSION NOBODY REVIEWS.
+
+    If a declared table is no longer flagged -- renamed, rewritten, deleted --
+    this fails and the entry has to go. That is what stops the list growing
+    into a silencer, and it is the same law the derived-navigation declaration
+    already runs under.
+    """
+    blob = fixture_blob()
+    for (rel, name), reason in NOT_A_PRE_IMAGE.items():
+        assert len(reason.strip()) > 60, (rel, name)
+        path = REPO / rel
+        assert path.exists(), "%s is declared and does not exist" % rel
+        flagged = {
+            n for (n, _count) in key_shaped_tables(
+                path.read_text(encoding="utf-8", errors="replace"), blob
+            )
+        }
+        assert name in flagged, (
+            "%s::%s is declared here and is NOT flagged by the detector any "
+            "more. Delete the entry." % (rel, name)
+        )
 
 
 def test_that_detector_fires_on_the_shape_it_was_written_for():

@@ -375,14 +375,23 @@ PROFILE_MARKUP = (
 #: No ``<form>``, deliberately: the live page measures ``forms: 0`` on all six
 #: readings, and a fixture that wrapped these in one would be testing a page
 #: LinkedIn does not serve.
+#: CORRECTED 2026-09-03 TO THE SHAPE THAT WAS MEASURED, after the first live
+#: fire. This fixture drew ``<span>`` elements and inputs carrying NO id --
+#: right about the naming route and wrong about the element. The live page
+#: binds a real ``<label for>`` to an input that HAS an id, and the aim now
+#: presses that label because the input itself is covered by a decorative div
+#: and cannot be clicked. Without ids here there is no ``for`` to bind, so the
+#: activation check correctly refused and three tests went red against a page
+#: LinkedIn does not serve.
 DARK_MODE_MARKUP = (
     "<html><body>"
-    '<span id="dm-off">Always off</span>'
-    '<input type="radio" name="dm" aria-labelledby="dm-off" checked>'
-    '<span id="dm-on">Always on</span>'
-    '<input type="radio" name="dm" aria-labelledby="dm-on">'
-    '<span id="dm-dev">Device settings</span>'
-    '<input type="radio" name="dm" aria-labelledby="dm-dev">'
+    '<input type="radio" name="dm" id="dm-r-off"'
+    ' aria-labelledby="dm-off" checked>'
+    '<label for="dm-r-off" id="dm-off">Always off</label>'
+    '<input type="radio" name="dm" id="dm-r-on" aria-labelledby="dm-on">'
+    '<label for="dm-r-on" id="dm-on">Always on</label>'
+    '<input type="radio" name="dm" id="dm-r-dev" aria-labelledby="dm-dev">'
+    '<label for="dm-r-dev" id="dm-dev">Device settings</label>'
     "</body></html>"
 )
 
@@ -2075,12 +2084,21 @@ def test_no_aiming_verdict_can_carry_a_name():
 #: the world as it would be AFTER the click. Built by moving the attribute
 #: rather than by editing the whole string, and ASSERTED to have moved, so a
 #: fixture that silently failed to change could not pass for one that did.
+#: Derived by MOVING the checked attribute, and the two asserts below are what
+#: keep the derivation honest: if a fixture edit stops these replacements
+#: matching, DARK_MODE_AFTER silently equals DARK_MODE_MARKUP and every test
+#: that verifies "the page changed" passes against a page that did not. That
+#: is exactly what happened on 2026-09-03 when the markup gained ids and
+#: labels -- caught at collection by the first assert rather than by a green
+#: run, which is why it is an assert and not a comment.
 DARK_MODE_AFTER = DARK_MODE_MARKUP.replace(
-    '<input type="radio" name="dm" aria-labelledby="dm-off" checked>',
-    '<input type="radio" name="dm" aria-labelledby="dm-off">',
+    '<input type="radio" name="dm" id="dm-r-off"'
+    ' aria-labelledby="dm-off" checked>',
+    '<input type="radio" name="dm" id="dm-r-off" aria-labelledby="dm-off">',
 ).replace(
-    '<input type="radio" name="dm" aria-labelledby="dm-on">',
-    '<input type="radio" name="dm" aria-labelledby="dm-on" checked>',
+    '<input type="radio" name="dm" id="dm-r-on" aria-labelledby="dm-on">',
+    '<input type="radio" name="dm" id="dm-r-on"'
+    ' aria-labelledby="dm-on" checked>',
 )
 assert DARK_MODE_AFTER != DARK_MODE_MARKUP
 assert DARK_MODE_AFTER.count("checked") == 1
