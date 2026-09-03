@@ -140,7 +140,23 @@ DRAFT_TABS_EMPTY = "\n".join(
 NOTIFICATIONS_URL = "https://www.linkedin.com/notifications/"
 PROFILE_ME_URL = "https://www.linkedin.com/in/me/"
 PROFILE_RESOLVED_URL = "https://www.linkedin.com/in/alex-r/"
-SKILLS_URL = "https://www.linkedin.com/in/alex-r/details/skills/"
+#: THE `/in/me` SPELLING, AND THE CHANGE IS THE POINT OF THE ASSERTION.
+#:
+#: This was `/in/alex-r/details/skills/` -- built from the slug the profile
+#: read had just parsed out of a LANDED URL. That is the derived-navigation
+#: class `tests/test_navigation_is_never_derived.py` exists for, and it found
+#: this site in shipped code rather than in a probe.
+#:
+#: The fix was measured before it was made: `scripts/_probe_self_details_url.py`
+#: ran live on 2026-09-03 and `/in/me/details/skills/` is served, returning 20
+#: skill cards through the same harvest with the same arguments.
+#:
+#: KEEPING THE SLUG IN `PROFILE_RESOLVED_URL` IS DELIBERATE. The profile read
+#: still LANDS on a member path and still reports the slug as
+#: `public_identifier` -- reading a landed url was never the defect. Navigating
+#: to one was. So the fixture keeps the redirect and changes only the address
+#: this tool AIMS AT, which is exactly the distinction the rule draws.
+SKILLS_URL = "https://www.linkedin.com/in/me/details/skills/"
 AUTHWALL_URL = "https://www.linkedin.com/login?session_redirect=%2Ffeed"
 
 

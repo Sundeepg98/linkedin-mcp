@@ -3929,3 +3929,104 @@ now the row graph -- five readers, no attribution.
 `set_open_to_work` is unreachable at proportionate cost. That is a clean
 ending rather than a defeat, it rests on instruments that can be re-run, and
 nothing in any of them was tuned to avoid it.
+
+## 103. THE SLUG LEAK RECURRED TWICE MORE, ONCE INSIDE ITS OWN RULING AND ONCE
+## INSIDE ITS OWN FIX
+
+Section 101 is incomplete as written, and the omission is the same shape as the
+defect it describes. **A lesson that leaves out its own instances is weaker
+than one that names them**, so both are recorded here rather than tidied away.
+
+### INSTANCE TWO: THE RULING LEAKED THE SLUG IT WAS RULING ABOUT
+
+The wave lead's disk ruling on the leak -- `_TEAM_LEAD_RULING_OTW_PROBE.md`,
+written at the repo root to route around a dead message channel -- pasted the
+diagnostic tally verbatim, including the line naming the vanity path it had
+been looking for. **The document ruling on a slug leak contained the slug.**
+
+It was caught by `test_no_committed_identity`, which parametrises over tracked
+files and named that one. It was removed by the acknowledgement protocol
+itself: a disk ruling is acked by DELETING it, so the file's own lifecycle
+closed the exposure before anybody had to decide what to do about it.
+
+### INSTANCE THREE: THE PROBE THAT MEASURED THE FIX PRINTED THE SLUG
+
+`scripts/_probe_self_details_url.py` was written to take the one measurement
+section 101's third site was waiting on. Its docstring promised "a path, a
+status and counts -- never a url". Its first live run printed:
+
+    /in/me/details/skills/ landed at path: /in/<vanity>/details/skills
+
+**The probe written to measure the fix for the slug leak leaked the slug.**
+
+### AND THE REASONING THAT LET IT THROUGH IS THE REUSABLE PART
+
+It was not carelessness; it was a borrowed argument that did not transfer. The
+resolver's tally emits PATHS and argues, correctly, that this costs no
+disclosure: every path it observes is a resource path, and the profile document
+is served at `/in/me`. That argument was carried one file over -- and there the
+landed path is a MEMBER path by construction, because `/in/me/details/skills/`
+redirects into the member space where `/in/me` does not.
+
+> **A disclosure argument is about a particular set of strings, not about a
+> kind of field.** "Paths are safe" was never the rule; "these paths are safe"
+> was. The short form is what travels between files, and the short form is
+> false.
+
+The repair is `_shape_of`, which returns the RELATION between the address asked
+for and the one that came back -- served, redirected within the member space,
+or redirected elsewhere -- and never the address itself. The relation is what
+the question needed; the path was never load-bearing.
+
+**THREE INSTANCES IN ONE DAY, IN THE PROBES, IN THE RULING AND IN THE FIX.**
+Each was found by a different mechanism -- an allowlist refusal, a committed
+tracked-file scan, and reading a run's own output -- and none by the guard that
+would have prevented it, because there is no guard on what a print statement
+composes.
+
+## 104. THE THIRD SITE: MEASURED, THEN FIXED, AND THE DECLARATION DELETED
+
+Section 101 left `server.py` declared rather than repaired, on the grounds that
+the fix was a guess. **The ruling that followed was the right one: the
+measurement was cheap and takeable, so take it before fixing.**
+
+`scripts/_probe_self_details_url.py`, live 2026-09-03, two allowlisted reads,
+nothing pressed:
+
+    /in/me/details/skills/     REDIRECTED into the member space, i.e. SERVED
+    skill cards harvested      20
+    of those carrying text     20
+
+The same harvest the shipped tool runs, with the same arguments, off the
+`/in/me` spelling. **It serves.** So the derivation was replaceable, and
+`linkedin_my_profile(include_skills=True)` now navigates
+`f"{BASE_URL}/in/me/details/skills/"` -- a template built from a module
+constant -- instead of a url assembled from a slug parsed out of a landed url.
+
+**`slug` STILL GATES THE FETCH AND NO LONGER BUILDS THE ADDRESS.** That
+separation is deliberate: it still says whether the profile read succeeded well
+enough to be worth a second navigation, which is a question about WHEN to
+fetch, where the taint was about WHERE to point. Dropping the guard would be a
+different decision and is not taken here.
+
+**THE FIXTURE CHANGE IS THE ASSERTION.** `tests/test_tools.py` pinned
+`navigations == [PROFILE_ME_URL, SKILLS_URL]` with `SKILLS_URL` spelled as the
+vanity form; it is now the `/in/me` form. `PROFILE_RESOLVED_URL` keeps its
+slug on purpose -- the profile read still lands on a member path and still
+reports it as `public_identifier`. **Reading a landed url was never the defect.
+Navigating to one was**, and the fixture now draws exactly that line.
+
+### THE DECLARATION DELETING ITSELF IS THE MECHANISM WORKING
+
+`KNOWN_DERIVED_NAVIGATIONS` is now empty. It was not empty this morning.
+
+The entry was forced IN by a finding -- the rule went red on its first run
+against shipped code -- and forced OUT by the fix, because the set is asserted
+rather than a count or a skip, so a repaired site fails the file until its
+declaration is deleted. **The documentation of the defect could not survive the
+defect**, which is section 88's shape applied to an inventory, exercised once
+in each direction on the same day it was written.
+
+That is worth more than the fix. A "known hole" comment would have described
+this site accurately this morning and lied by lunchtime, with nothing to notice
+it -- which is exactly what `read_settings_surface` did for ten days.

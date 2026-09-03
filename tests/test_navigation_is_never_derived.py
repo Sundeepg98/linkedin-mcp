@@ -173,36 +173,29 @@ def _python_files() -> list[pathlib.Path]:
 
 #: THE SITES THAT ARE STILL DERIVED, DECLARED RATHER THAN WAIVED.
 #:
-#: **THIS RULE FOUND A THIRD ONE ON ITS FIRST RUN, AND IT IS NOT IN A PROBE.**
-#: Both probes were fixed before this test existed; ``server.py`` was not,
-#: because nobody had looked. ``linkedin_my_profile(include_skills=True)``
-#: derives the operator's slug FROM A LANDED URL and then navigates to a url
-#: built out of it::
+#: **EMPTY, AND IT WAS NOT EMPTY WHEN THIS FILE WAS WRITTEN.** The rule found a
+#: third site on its first run, in shipped code rather than in a probe:
+#: ``linkedin_my_profile(include_skills=True)`` parsed the operator's slug OUT
+#: OF A LANDED URL and navigated to an address built from it. Safe -- the
+#: allowlist admits ``/in/<member>/details/skills/`` -- and the same class,
+#: because the aim came from the page rather than from this package.
 #:
-#:     slug = shape.profile_slug_from(final_url)      # server.py:1695
-#:     skills_url = f"{BASE_URL}/in/{slug}/details/skills/"
-#:     skills_final = await BROWSER.goto(page, skills_url)
+#: IT WAS DECLARED HERE FIRST, DELIBERATELY, and the holding position was the
+#: right one: the fix was a GUESS until ``scripts/_probe_self_details_url.py``
+#: ran live on 2026-09-03 and measured that ``/in/me/details/skills/`` is
+#: served, returning 20 skill cards through the same harvest with the same
+#: arguments. Then it was fixed, and the entry deleted.
 #:
-#: It is SAFE TODAY and it is the same class. The allowlist admits
-#: ``/in/<member>/details/``, so the navigation succeeds and no refusal fires;
-#: the exposure is that the aim comes from the page rather than from this
-#: repository, which is the property the ruling is about.
+#: **THE DELETION IS THE MECHANISM WORKING.** The set is asserted rather than a
+#: count or a skip, so fixing a declared site FAILS this file until its entry
+#: goes -- the documentation of a defect cannot outlive the defect. That is
+#: section 88's shape applied to an inventory, and it has now been exercised
+#: once in each direction: the entry was forced in by a finding and forced out
+#: by a fix.
 #:
-#: WHY IT IS DECLARED AND NOT FIXED HERE. The fix is almost certainly to
-#: navigate ``/in/me/details/skills/`` -- ``me`` matches the same allowlist
-#: pattern, and "LinkedIn's own self-reference serves the signed-in member and
-#: nobody else" is the argument that already carried the probes. But whether
-#: LinkedIn SERVES that address is a live measurement nobody has taken, and
-#: changing a shipped read tool on an unverified guess is how a working
-#: capability breaks quietly.
-#:
-#: THE SET IS ASSERTED, NOT A COUNT AND NOT A SKIP. A new derived navigation
-#: fails naming itself; FIXING this one also fails, because the declared entry
-#: stops matching and has to be deleted. The documentation of the defect cannot
-#: survive the fix -- section 88's shape, applied to an inventory.
-KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
-    "server.py": ["skills_url"],
-}
+#: Leave it empty. A new derived navigation fails naming itself, and an entry
+#: added here has to carry the same argument this one did.
+KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {}
 
 
 @pytest.mark.parametrize(

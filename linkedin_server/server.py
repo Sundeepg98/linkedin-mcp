@@ -1733,8 +1733,36 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
 
             if include_skills:
                 if slug:
-                    skills_url = f"{BASE_URL}/in/{slug}/details/skills/"
-                    skills_final = await BROWSER.goto(page, skills_url)
+                    # THE `/in/me` SPELLING, NOT ONE BUILT FROM THE LANDED URL.
+                    #
+                    # This read used to aim at `f"{BASE_URL}/in/{slug}/..."`,
+                    # where `slug` is parsed OUT OF a previous navigation's
+                    # landed url. It was safe -- the allowlist admits
+                    # `/in/<member>/details/skills/` -- and it was the same
+                    # class as the defect that put his vanity slug in a
+                    # traceback from both payload probes: the aim came from the
+                    # page rather than from this package. A page that can
+                    # choose the next address can choose a stranger's.
+                    #
+                    # FOUND BY `tests/test_navigation_is_never_derived.py` on
+                    # its first run, in shipped code rather than in a probe,
+                    # and FIXED ONLY AFTER MEASURING. `scripts/
+                    # _probe_self_details_url.py` ran live on 2026-09-03:
+                    # `/in/me/details/skills/` is served, and the same harvest
+                    # with the same arguments returned 20 skill cards, all
+                    # carrying text. The address was a guess until then, and
+                    # changing a shipped read tool on a guess is how a working
+                    # capability breaks quietly.
+                    #
+                    # `slug` STILL GATES THIS, deliberately and narrowly. It no
+                    # longer builds the address, so the taint is gone; it still
+                    # says whether the profile read succeeded well enough to be
+                    # worth a second navigation. Dropping that guard would
+                    # change WHEN this fetches, which is a separate decision
+                    # from WHERE it points.
+                    skills_final = await BROWSER.goto(
+                        page, f"{BASE_URL}/in/me/details/skills/"
+                    )
                     assert_not_authwall(skills_final, surface="skills")
                     records = await dom.harvest_linked_cards(
                         page,
