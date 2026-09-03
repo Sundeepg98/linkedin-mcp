@@ -6898,6 +6898,20 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         "total": reading.get("total"),
         "matches": reading.get("matches"),
         "selectors_tried": list(dom.TYPEAHEAD_OPTION_SELECTORS),
+        # HOW MANY ROWS EACH CANDIDATE MATCHER WOULD MATCH, added 2026-09-03
+        # after a live run returned ten options and ten matches. That reading
+        # is the substring matcher counting LinkedIn's own result set -- a
+        # typeahead returns a row BECAUSE it matched what was typed -- so the
+        # shipped discriminator cannot discriminate, and these counts are what
+        # says which one could. Integers only; no accessible name is read.
+        "pattern_census": reading.get("pattern_census"),
+        "what_the_census_is": (
+            "how many suggestion rows each CANDIDATE matcher would match, "
+            "counted in the page. It is a measurement and not a choice: the "
+            "aim is still 'substring', and which matcher presses is a "
+            "decision that waits on these numbers rather than being taken by "
+            "them."
+        ),
     }
     if reading.get("error"):
         out["refused_condition"] = "0_selector_unbuildable"
@@ -6966,12 +6980,56 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         return out
     if matches > 1:
         out["refused_condition"] = "4_several_options_match"
+        # THE ADVICE THAT USED TO BE HERE COULD NOT WORK, and it was removed
+        # on 2026-09-03 rather than softened. It said "supply a name that
+        # distinguishes them". A typeahead returns a row BECAUSE it matched
+        # what was typed, so a longer needle narrows LinkedIn's RESULT SET
+        # while every row in it still contains the needle -- the ratio does
+        # not move, and the live run that measured ten of ten is the expected
+        # shape rather than an unlucky one. Telling him to try harder at
+        # something that cannot help is worse than telling him nothing.
+        census = dict(reading.get("pattern_census") or {})
+        strictest = census.get(dom.TYPEAHEAD_STRICTEST_PATTERN)
+        if strictest is None or strictest < 0:
+            verdict = (
+                "The per-pattern census could not be taken, so this refusal "
+                "cannot say whether any stricter matcher would separate them."
+            )
+        elif strictest == 1:
+            verdict = (
+                f"AND ONE CANDIDATE DOES SEPARATE THEM: "
+                f"{dom.TYPEAHEAD_STRICTEST_PATTERN!r} matches exactly one of "
+                "these rows. This gate is not aiming by it -- the aim is "
+                "still the substring, and which matcher presses is a decision "
+                "that waits on this measurement rather than being taken by it."
+            )
+        elif strictest == 0:
+            verdict = (
+                f"AND EVERY STRICTER CANDIDATE MATCHES NOTHING: "
+                f"{dom.TYPEAHEAD_STRICTEST_PATTERN!r} counted zero. That says "
+                "these rows do not BEGIN with the name you supplied -- so the "
+                "name sits somewhere else in the row, and a matcher anchored "
+                "at the start would refuse everybody rather than refuse "
+                "correctly."
+            )
+        else:
+            verdict = (
+                f"AND THE ROWS ARE NOT SEPARABLE BY THE NAME YOU GAVE: the "
+                f"strictest candidate, {dom.TYPEAHEAD_STRICTEST_PATTERN!r}, "
+                f"still matches {strictest}. Your name is a PREFIX of more "
+                "than one of these people, and if it is somebody's whole "
+                "display name then there is no longer name to give. This is "
+                "the case no matcher fixes, and it is named rather than "
+                "papered over: what is ambiguous is the NAME, not the reading."
+            )
         out["why"] = (
             f"{matches} of the {total} suggestion(s) carry the name you "
             "supplied. This action reaches ONE person; choosing among several "
             "rows that all match would be choosing by position, which is the "
-            "one thing this gate exists to refuse. Supply a name that "
-            "distinguishes them."
+            "one thing this gate exists to refuse. " + verdict + " The "
+            "per-pattern counts are in 'observed' and they are the "
+            "measurement nobody can take another way -- reading the live "
+            "shape directly would mean reading other people's names."
         )
         return out
 

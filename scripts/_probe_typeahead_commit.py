@@ -240,6 +240,23 @@ async def main() -> None:
         print("    per candidate selector:")
         for candidate, count in (reading.get("per_selector") or {}).items():
             print(f"      {count:>4}  {candidate}")
+        # THE PATTERN CENSUS, AND ON THE LIVE SURFACE IT IS THE POINT OF THE
+        # RUN. The first live reading returned ten options and ten matches,
+        # because the shipped matcher is a SUBSTRING and a typeahead returns a
+        # row BECAUSE it matched what was typed -- so that predicate counts
+        # LinkedIn's result set instead of discriminating inside it. These
+        # counts say which candidate could, and they say it without any
+        # accessible name entering this process.
+        print("    per candidate MATCHER (would-match counts, nothing pressed):")
+        for label, count in (reading.get("pattern_census") or {}).items():
+            print(f"      {count:>4}  {label}")
+        print(
+            "    READ THE CENSUS AS A DIAGNOSTIC, not a scoreboard. "
+            "'prefix' at zero says the rows do not start with the name. "
+            "'prefix_boundary' at zero while 'prefix_then_nonletter' is "
+            "non-zero says the degree suffix is run onto the name with no "
+            "separator, which is the case a word boundary cannot see."
+        )
         print(
             "    A ZERO FROM EVERY CANDIDATE HAS TWO READINGS and this probe "
             "cannot choose between them: the dropdown did not open, or none "

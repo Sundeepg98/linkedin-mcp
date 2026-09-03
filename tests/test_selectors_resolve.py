@@ -89,6 +89,23 @@ NOT_RESOLVED_HERE: dict[str, str] = {
         "because its match is the ACCESSIBLE NAME of a suggestion and this "
         "file's page has no suggestions to name"
     ),
+    # THE CENSUS BUILDER, added 2026-09-03, and it is here for its sibling's
+    # reason plus one of its own: it takes a PATTERN TEMPLATE as well as a
+    # name, so resolving it on this page would need both a suggestion row to
+    # name and a template to try, and neither exists here.
+    #
+    # It IS resolved -- in tests/test_click_is_not_its_own_evidence.py, in a
+    # real browser, where every one of the six candidate templates is counted
+    # against two listboxes that differ only in whether a separator sits
+    # between the name and the connection degree. Those counts are asserted
+    # individually, so a template that stopped resolving fails there rather
+    # than silently returning zero.
+    "typeahead_pattern_selector": (
+        "resolved in tests/test_click_is_not_its_own_evidence.py against two "
+        "real listboxes, once per candidate pattern, because it needs both a "
+        "suggestion to name and a pattern template and this file's page has "
+        "neither"
+    ),
 }
 
 #: One document carrying a control for every builder below. Every label is

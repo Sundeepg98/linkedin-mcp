@@ -5504,6 +5504,152 @@ _SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
 _REGEX_META = ".^$*+?()[]{}|"
 
 
+#: THE CANDIDATE MATCHERS, AS A CENSUS RATHER THAN A CHOICE.
+#:
+#: WHY THIS EXISTS, and it is a live measurement rather than a worry. On
+#: 2026-09-03 ``scripts/_probe_typeahead_commit.py`` was run against his own
+#: account with a real first-degree name and returned::
+#:
+#:     listbox appeared        True
+#:     options (total)         10
+#:     carrying the needle     10
+#:     refused                 4_several_options_match
+#:
+#: **THAT IS THE SUBSTRING MATCHER COUNTING LINKEDIN'S OWN RESULT SET.** A
+#: typeahead returns a row BECAUSE it matched what was typed, so "this row
+#: contains the needle" is close to tautological and ten-of-ten is the
+#: expected reading rather than the surprising one. A gate whose only
+#: discriminator is that predicate cannot discriminate: it refuses whenever
+#: LinkedIn returns more than one row, which is almost always, and the refusal
+#: reads as caution while being a defect.
+#:
+#: WHAT IS AND IS NOT ESTABLISHED, kept apart on purpose. Ten of ten is
+#: VERIFIED -- one live reading. That the ratio is STRUCTURAL is DERIVED, and
+#: one observation of one number does not show an instrument can return
+#: another. This tuple exists to take that measurement rather than to argue
+#: about it.
+#:
+#: EVERY ENTRY IS A READ. Counting how many rows a pattern WOULD match costs
+#: one locator count each and presses nothing, so the census can be attached
+#: to a refusal and the refusal becomes the instrument -- the same shape
+#: ``_comment_submit_gate`` and the chip selectors already take.
+#:
+#: ``{n}`` is replaced by the ESCAPED needle. The order is
+#: loosest-to-strictest and it is meaningful: a reader compares adjacent rows
+#: to learn what shape the page is drawing.
+#:
+#: THE ONE THAT IS NOT OBVIOUS, and it is the reason this is a census and not
+#: a one-line fix. The natural boundary assertion is ``\b``, and on this
+#: surface it may reject the very person it is meant to find: a suggestion
+#: row's accessible name concatenates the name with the connection degree, and
+#: if it does so WITHOUT A SEPARATOR the name becomes ``<name>1st``. ``\b``
+#: sits between a word character and a non-word character; ``G`` and ``1`` are
+#: both word characters, so there is no boundary there and ``^<n>\b`` matches
+#: NOTHING. ``^<n>(?![A-Za-z])`` accepts the digit and still rejects
+#: ``<n>upta``, which is the discrimination actually wanted. Whether the live
+#: rows carry a separator has never been read -- no accessible name from that
+#: listbox has ever entered this process -- so both are counted and the page
+#: answers.
+TYPEAHEAD_NAME_PATTERNS: tuple[tuple[str, str], ...] = (
+    # What ships today. Expected to equal the option count.
+    ("substring", "{n}"),
+    # The name is at the START of the accessible name. Distinguishes a row
+    # that merely mentions him from one that is his.
+    ("prefix", "^{n}"),
+    # Prefix, and the next character is not a Latin letter -- so a degree
+    # suffix, a comma, a space or end-of-string all pass and a longer name
+    # does not.
+    ("prefix_then_nonletter", "^{n}(?![A-Za-z])"),
+    # Prefix and a regex word boundary. Defeated by a digit-initial degree
+    # suffix run onto the name, which is exactly what this census is for.
+    ("prefix_boundary", "^{n}\\b"),
+    # Prefix, then whitespace or the end. The strictest of the prefix family
+    # and the one that needs a separator to exist at all.
+    ("prefix_then_space_or_end", "^{n}(\\s|$)"),
+    # The accessible name is the needle and nothing else.
+    ("whole", "^{n}$"),
+)
+
+#: THE STRICTEST CANDIDATE IN :data:`TYPEAHEAD_NAME_PATTERNS` that can still
+#: match a row carrying a degree suffix. Named rather than indexed so the
+#: ambiguity refusal and the census cannot drift apart.
+TYPEAHEAD_STRICTEST_PATTERN = "prefix_then_nonletter"
+
+
+def escaped_needle(needle: str) -> str:
+    """The needle as a LITERAL regex body, or a refusal.
+
+    Extracted from :func:`typeahead_option_selector` so the census and the
+    aim escape identically. Two escapers would be two chances to disagree,
+    and a disagreement here means one function counting rows that another
+    would not press.
+    """
+    for bad in _SELECTOR_BREAKING:
+        if bad in needle:
+            raise ExtractionFailedError(
+                "refusing to build the typeahead's option selector: the name "
+                "you supplied carries a quote, a slash or a backslash, any of "
+                "which would end this selector's own delimiting and could aim "
+                "it at a different row. Refused rather than escaped."
+            )
+    return "".join(
+        (chr(92) + char) if char in _REGEX_META else char for char in needle
+    )
+
+
+def typeahead_pattern_selector(needle: str, body: str) -> str:
+    """One candidate matcher, as a role selector. COUNTED, never pressed.
+
+    ``body`` is a template from :data:`TYPEAHEAD_NAME_PATTERNS` whose ``{n}``
+    is replaced by the escaped needle. The template itself is a MODULE
+    CONSTANT and never a caller's string, so the only thing a caller
+    contributes is the needle and the only thing that reaches a regex is the
+    escaped form of it.
+
+    WHAT THIS IS FOR. Every selector it builds is handed to ``locator.count``
+    and to nothing else. The census reports how many rows each candidate WOULD
+    match; which candidate the click is aimed by is
+    :func:`typeahead_option_selector`'s answer and is a separate decision,
+    deliberately, because a function that both proposed and chose would be
+    choosing its own evidence.
+    """
+    return "role=option[name=/" + body.replace("{n}", escaped_needle(needle)) + "/i]"
+
+
+async def read_typeahead_pattern_census(
+    page: Any, needle: str
+) -> dict[str, int]:
+    """How many suggestion rows each candidate matcher WOULD match.
+
+    RETURNS INTEGERS KEYED BY THE PATTERN'S OWN NAME. No accessible name, no
+    row text, no identifier -- every comparison happens inside the browser
+    through Playwright's role engine, exactly as the aim does.
+
+    A ``-1`` means that candidate RAISED -- an unparseable pattern, not an
+    empty page -- and it is reported rather than folded into zero, because
+    "this pattern is wrong" and "nothing matched it" are the two answers the
+    choice between candidates turns on.
+
+    THIS IS THE MEASUREMENT NOBODY CAN TAKE ANY OTHER WAY, and it is the
+    reason the refusal carries it: reading the live shape means reading
+    accessible names that belong to other people, and this counts them
+    instead. One live refusal now hands back enough to choose the matcher
+    without anybody's name entering this process.
+    """
+    out: dict[str, int] = {}
+    for label, body in TYPEAHEAD_NAME_PATTERNS:
+        try:
+            selector = typeahead_pattern_selector(needle, body)
+        except ExtractionFailedError:
+            out[label] = -1
+            continue
+        try:
+            out[label] = int(await page.locator(selector).count())
+        except Exception:  # noqa: BLE001 - an unusable pattern is reported as -1
+            out[label] = -1
+    return out
+
+
 def typeahead_option_selector(needle: str) -> str:
     """Aim at ONE suggestion BY ITS ACCESSIBLE NAME, never by position.
 
@@ -5559,18 +5705,13 @@ def typeahead_option_selector(needle: str) -> str:
             character. REFUSED RATHER THAN ESCAPED: this server would rather
             not send at all than send accurately-quoted to somebody else.
     """
-    for bad in _SELECTOR_BREAKING:
-        if bad in needle:
-            raise ExtractionFailedError(
-                "refusing to build the typeahead's option selector: the name "
-                "you supplied carries a quote, a slash or a backslash, any of "
-                "which would end this selector's own delimiting and could aim "
-                "it at a different row. Refused rather than escaped."
-            )
-    escaped = "".join(
-        (chr(92) + char) if char in _REGEX_META else char for char in needle
-    )
-    return "role=option[name=/" + escaped + "/i]"
+    # ONE ESCAPER, SHARED WITH THE CENSUS. It used to live here; it moved to
+    # escaped_needle() when read_typeahead_pattern_census started needing the
+    # same transformation. Two copies would be two chances to disagree, and a
+    # disagreement here means the census counting rows this function would not
+    # press -- which is the one way a measurement can mislead the decision it
+    # was taken for.
+    return "role=option[name=/" + escaped_needle(needle) + "/i]"
 
 
 async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
@@ -5599,6 +5740,10 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
         "matches": 0,
         "selector": None,
         "error": None,
+        # ABSENT IS NOT EMPTY. An unbuildable needle returns before the census
+        # is taken, and {} there means "nobody counted" rather than "every
+        # candidate matched nothing".
+        "pattern_census": {},
     }
     try:
         out["selector"] = typeahead_option_selector(needle)
@@ -5637,6 +5782,13 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
         out["matches"] = await page.locator(out["selector"]).count()
     except Exception as exc:  # noqa: BLE001 - reported, never raised
         out["error"] = f"{type(exc).__name__}: {exc}"
+
+    # THE CENSUS, TAKEN ON EVERY READING AND NOT ONLY ON A REFUSAL. It costs
+    # one locator count per candidate and presses nothing, and taking it
+    # unconditionally means the PROCEEDING case is measured too -- otherwise
+    # the only shape ever recorded would be the shape that failed, which is
+    # how a family of instruments ends up knowing nothing about success.
+    out["pattern_census"] = await read_typeahead_pattern_census(page, needle)
     return out
 
 

@@ -87,7 +87,7 @@ from tests.test_send_message_gate import (  # noqa: F401
     OPERATOR_STANDIN,
     SOMEBODY_ELSE,
 )
-from tests.test_writes import FixtureNavigator, writes_on  # noqa: F401
+from tests.test_writes import FixtureNavigator, _bare_grant, writes_on  # noqa: F401
 
 # THE FEED, because the PREVIEW reads the messaging badge off it rather
 # than opening messaging -- which is ``send_message``'s ``from_state``
@@ -531,6 +531,242 @@ async def test_a_run_that_pressed_no_send_should_report_not_performed(
     )
     assert block["clicked"]["clicks_made"] - block["clicked"]["typeahead_clicks"] == 0
     assert block["performed"] is False, block["performed"]
+
+
+# ---------------------------------------------------------------------------
+# 2d. THE CONTROL THE LIVE RUN ASKED FOR, and what the census settles
+# ---------------------------------------------------------------------------
+#
+# ON 2026-09-03 THE PROBE RAN LIVE and returned ten options and ten matches,
+# refusing with ``4_several_options_match``. That is the shipped SUBSTRING
+# matcher counting LinkedIn's own result set: a typeahead returns a row
+# BECAUSE it matched what was typed, so "this row contains the needle" is close
+# to tautological and ten-of-ten is the expected reading.
+#
+# **ONE OBSERVATION OF ONE NUMBER DOES NOT SHOW AN INSTRUMENT CAN RETURN
+# ANOTHER.** So before any matcher changes, this section establishes two things
+# over real markup in a real browser:
+#
+#   1. the counts CAN differ -- ``matches`` is not welded to ``total``;
+#   2. the census DISCRIMINATES, and it tells the two plausible live shapes
+#      apart rather than merely preferring one.
+#
+# NONE OF IT SAYS WHICH SHAPE LINKEDIN DRAWS. That is a live reading, and the
+# probe now prints the census so that one run settles it.
+
+#: A SECOND INVENTED PERSON WHOSE NAME SHARES THE FIRST'S PREFIX. The whole
+#: difficulty in one string: LinkedIn returns him too, and no substring of the
+#: needle separates them.
+SIMILAR_NAME = "Quillfeather Nettlebore"
+
+#: THE NEEDLE THESE FIXTURES ARE PROBED WITH -- a genuine prefix of
+#: ``NAMED_RECIPIENT`` and of ``SIMILAR_NAME`` both, which is exactly the shape
+#: a two-word needle has against a longer surname beginning with the same
+#: letter.
+PREFIX_NEEDLE = "Quillfeather N"
+
+
+def _row(name: str, degree: str, separator: str = "") -> str:
+    """One suggestion row. THE SEPARATOR IS THE VARIABLE UNDER TEST.
+
+    A row's accessible name is its text content, so a ``<span>`` holding the
+    name next to a ``<span>`` holding the degree, with nothing between them,
+    computes as ``name1st`` -- run together with no break. With a space it
+    computes as ``name 1st``.
+
+    WHICH ONE LINKEDIN DRAWS HAS NEVER BEEN READ, and cannot be read the
+    obvious way: the accessible names on that listbox belong to other people.
+    So both are built here and the CENSUS is what tells them apart on a live
+    page, using counts instead of names.
+    """
+    return (
+        '<div role="option"><span>'
+        + name
+        + "</span>"
+        + separator
+        + "<span>"
+        + degree
+        + "</span></div>"
+    )
+
+
+def _listbox_of(*rows: str) -> str:
+    return '<div role="listbox">' + "".join(rows) + "</div>"
+
+
+def _composer_with(listbox: str) -> str:
+    out = COMPOSER_MARKUP.replace(CHIP_RAIL_EMPTY, CHIP_RAIL_EMPTY + listbox, 1)
+    assert out != COMPOSER_MARKUP
+    return out
+
+
+#: THE LIVE-SHAPED LISTBOX: three rows, every one of them containing the
+#: needle, degree run onto the name with NO separator. The ten-of-ten reading
+#: in miniature.
+COMPOSER_RUN_TOGETHER = _composer_with(
+    _listbox_of(
+        _row(NAMED_RECIPIENT, "1st"),
+        _row(SIMILAR_NAME, "2nd"),
+        _row(PREFIX_NEEDLE, "1st"),
+    )
+)
+
+#: THE SAME THREE PEOPLE with a space between name and degree. Nothing else
+#: differs, which is what makes the census's answer attributable.
+COMPOSER_SEPARATED = _composer_with(
+    _listbox_of(
+        _row(NAMED_RECIPIENT, "1st", " "),
+        _row(SIMILAR_NAME, "2nd", " "),
+        _row(PREFIX_NEEDLE, "1st", " "),
+    )
+)
+
+#: NOBODY'S NAME CONTAINS THIS. The needle that cannot match.
+UNMATCHABLE_NEEDLE = "Zarquon Threnodybast"
+
+
+async def _census(over, html: str, needle: str) -> dict:
+    async def work(page):
+        return await writes._typeahead_gate(
+            page,
+            _bare_grant(
+                action="send_message", target=needle + TARGET_JOIN + MESSAGE_BODY
+            ),
+        )
+
+    return await over(html, work)
+
+
+async def test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak(
+    over, _fast_wait
+):
+    """**THE CONTROL. ``matches`` is not welded to ``total``.**
+
+    The live run returned 10 and 10, and an instrument that has only ever
+    returned one number has not been shown to return another. Two readings
+    over the SAME page with two different needles:
+
+        a needle that is a prefix of all three rows  ->  matches == total
+        a needle nobody's name contains             ->  matches 0, total 3
+
+    The second is what makes the first mean something.
+    """
+    matching = await _census(over, COMPOSER_RUN_TOGETHER, PREFIX_NEEDLE)
+    assert matching["observed"]["total"] == 3, matching["observed"]
+    assert matching["observed"]["matches"] == 3, matching["observed"]
+
+    absent = await _census(over, COMPOSER_RUN_TOGETHER, UNMATCHABLE_NEEDLE)
+    assert absent["observed"]["total"] == 3, absent["observed"]
+    assert absent["observed"]["matches"] == 0, absent["observed"]
+    assert absent["refused_condition"] == "3_no_option_carries_the_needle"
+
+    # AND THE TWO READINGS ARE OF THE SAME PAGE, so the difference is the
+    # needle and not the fixture.
+    assert matching["observed"]["total"] == absent["observed"]["total"]
+
+
+async def test_the_census_separates_rows_the_shipped_matcher_cannot(
+    over, _fast_wait
+):
+    """THE MEASUREMENT THAT DECIDES THE FIX, taken before the fix.
+
+    Three rows, all containing the needle. The shipped matcher counts three.
+    One candidate counts exactly one -- and it is NOT the obvious one:
+
+        substring                 3   what ships. Counts the result set.
+        prefix                    3   they all start with it too.
+        prefix_boundary           0   DEFEATED. The last letter of the name and
+                                      the first character of the degree are
+                                      both word characters, so there is no
+                                      boundary between them.
+        prefix_then_nonletter     1   accepts the digit, rejects the longer
+                                      surname.
+        prefix_then_space_or_end  0   there is no separator to match.
+        whole                     0   the name is not the whole row.
+
+    ``prefix_boundary`` reading ZERO is the finding. A word boundary is the
+    natural thing to reach for and on this shape it refuses EVERYBODY,
+    including the person it was meant to find -- a matcher that fails closed
+    for the wrong reason and looks like caution.
+    """
+    found = await _census(over, COMPOSER_RUN_TOGETHER, PREFIX_NEEDLE)
+    census = found["observed"]["pattern_census"]
+    assert census["substring"] == 3, census
+    assert census["prefix"] == 3, census
+    assert census["prefix_boundary"] == 0, census
+    assert census["prefix_then_nonletter"] == 1, census
+    assert census["prefix_then_space_or_end"] == 0, census
+    assert census["whole"] == 0, census
+
+
+async def test_the_census_tells_the_two_plausible_live_shapes_apart(
+    over, _fast_wait
+):
+    """IT IS A DIAGNOSTIC, NOT A PREFERENCE ORDER.
+
+    The same three people with a SPACE between name and degree. Only the
+    separator changed, and three of the six counts move -- so one live run
+    reports which shape LinkedIn draws without any accessible name being read.
+    """
+    run_together = (await _census(over, COMPOSER_RUN_TOGETHER, PREFIX_NEEDLE))[
+        "observed"
+    ]["pattern_census"]
+    separated = (await _census(over, COMPOSER_SEPARATED, PREFIX_NEEDLE))[
+        "observed"
+    ]["pattern_census"]
+
+    assert run_together["prefix_boundary"] == 0
+    assert separated["prefix_boundary"] == 1
+    assert run_together["prefix_then_space_or_end"] == 0
+    assert separated["prefix_then_space_or_end"] == 1
+    # AND THE ONE THAT WORKS ON BOTH, which is why it is the named strictest.
+    assert run_together["prefix_then_nonletter"] == 1
+    assert separated["prefix_then_nonletter"] == 1
+    assert dom.TYPEAHEAD_STRICTEST_PATTERN == "prefix_then_nonletter"
+
+
+async def test_the_refusal_names_the_ambiguity_when_no_matcher_can_help(
+    over, _fast_wait
+):
+    """THE CASE THE FIX MUST NOT DODGE.
+
+    Two people whose display name IS the needle. Every candidate matches both,
+    including the strictest, and no longer name exists to supply -- the needle
+    is already somebody's whole name. The honest outcome is a refusal that says
+    WHICH property is ambiguous, and it says the NAME rather than implying a
+    better needle would have worked.
+    """
+    html = _composer_with(
+        _listbox_of(_row(PREFIX_NEEDLE, "1st"), _row(PREFIX_NEEDLE, "2nd"))
+    )
+    found = await _census(over, html, PREFIX_NEEDLE)
+    assert found["refused_condition"] == "4_several_options_match"
+    census = found["observed"]["pattern_census"]
+    assert census[dom.TYPEAHEAD_STRICTEST_PATTERN] == 2, census
+
+    why = found["why"]
+    assert "NOT SEPARABLE BY THE NAME YOU GAVE" in why, why
+    assert "no longer name to give" in why, why
+    # AND THE ADVICE THAT COULD NOT WORK IS GONE.
+    assert "Supply a name that distinguishes them" not in why, why
+
+
+async def test_the_refusal_says_when_a_matcher_would_have_separated_them(
+    over, _fast_wait
+):
+    """The other side of the same refusal, and it is the useful one.
+
+    On the run-together listbox the strictest candidate matches exactly one
+    row. The gate still refuses -- the AIM has not changed, and changing it is
+    a decision that waits on a live census -- and it says so plainly rather
+    than implying it could not have known.
+    """
+    found = await _census(over, COMPOSER_RUN_TOGETHER, PREFIX_NEEDLE)
+    assert found["refused_condition"] == "4_several_options_match"
+    why = found["why"]
+    assert "ONE CANDIDATE DOES SEPARATE THEM" in why, why
+    assert "prefix_then_nonletter" in why, why
+    assert "the aim is still the substring" in why, why
 
 
 # ---------------------------------------------------------------------------
