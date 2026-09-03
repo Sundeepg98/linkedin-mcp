@@ -142,7 +142,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server import dom, writes  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
-from linkedin_server.config import SETTLE_MS  # noqa: E402
 
 #: The environment variable the needle may arrive in instead of argv.
 NEEDLE_ENV = "LINKEDIN_TYPEAHEAD_NEEDLE"
@@ -206,24 +205,35 @@ def _report(title: str, rows: dict) -> None:
 
 
 async def _open_composer(page) -> str:
-    """Navigate to the composer. THE URL IS THE SPEC'S CONSTANT, not a landed one.
+    """Navigate to the composer THROUGH THE READ DOOR, not around it.
 
-    The team lead's 2026-09-03 ruling on ``BROWSER.goto`` is that its argument
-    may be a module-level constant or an allowlist template and never a value
-    derived from a prior navigation. ``spec.url_template`` for this action is a
-    CONSTANT rather than a template -- the target is a member and a text, not a
-    page -- so it is passed whole and nothing that came back from the browser
-    is fed into a navigation.
+    IT WAS A BARE ``page.goto`` UNTIL 2026-09-03, following the sibling probes,
+    and that was the wrong call here. ``_probe_messaging.py`` drives Playwright
+    directly BECAUSE it deliberately probes a FORBIDDEN surface -- going round
+    the door is the whole experiment. This probe navigates an address that is
+    already on the allowlist, so there is nothing to go round and every reason
+    not to: ``BROWSER.goto`` runs ``readonly.assert_read_url`` first, which
+    turns "this url is admissible" from something this file asserts into
+    something the boundary decides.
+
+    THE URL IS THE SPEC'S OWN CONSTANT. The team lead's 2026-09-03 ruling is
+    that a ``goto`` argument may be a module-level constant or an allowlist
+    template and never a value derived from a prior navigation.
+    ``spec.url_template`` for this action is a CONSTANT rather than a template
+    -- the target is a member and a text, not a page -- so it is passed whole,
+    and nothing that came back from the browser is fed into a navigation.
+    ``tests/test_navigation_is_never_derived.py`` enforces that rather than
+    this docstring promising it.
+
+    AND THE CORRECTION THAT MADE THIS SAFE TO DO. ``BROWSER.goto``
+    INTERPOLATES ITS URL INTO THE ERROR IT RAISES, at browser.py:444 -- which
+    the lead first reported the other way round and then corrected. That is
+    exactly why the ruling above matters: a landed identity url handed to this
+    function would put his vanity slug in a traceback. A module-level constant
+    carries no identity, so there is nothing for that message to publish.
     """
     url = writes.spec_for_action(ACTION).url_template
-    await BROWSER.wait_for_rate_slot()
-    await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
-    BROWSER._last_navigation_at = time.monotonic()
-    try:
-        await page.wait_for_load_state("networkidle", timeout=SETTLE_MS)
-    except Exception:  # noqa: BLE001 - settling is best-effort, never a gate
-        await page.wait_for_timeout(SETTLE_MS)
-    return url
+    return await BROWSER.goto(page, url)
 
 
 async def main() -> None:
