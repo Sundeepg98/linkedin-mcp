@@ -849,6 +849,43 @@ async def linkedin_cdp_status() -> dict[str, Any]:
 
 
 @mcp.tool()
+async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
+    """Add ``recipient_id`` to the rows LinkedIn drew a Message button for.
+
+    JOINED BY SLUG, NEVER BY POSITION. The reader returns one entry per
+    button and the harvest returns one row per viewer, and those two lists are
+    NOT the same length -- so pairing them by index would attach a stranger's
+    id to somebody else's row. The slug is the only thing both sides carry.
+
+    ABSENT STAYS ABSENT. A row with no button gets ``recipient_id: None``,
+    never ``""``. The page has THREE states and only two of them are about
+    visibility: of four named viewers on the captured page, only two carry a
+    Message button -- the others offer Connect or Follow, because LinkedIn
+    draws the action the RELATIONSHIP allows. So "no id" means either "this
+    person is not messageable from here" or "this row is anonymous", and
+    neither is "the id is an empty string".
+
+    IT NEVER RAISES. A viewer list that reads perfectly well is not worth
+    failing because an optional enrichment did not; the ids are a bonus on a
+    tool whose job is the list. A failure leaves every ``recipient_id`` None,
+    which is the same answer the tool gave yesterday.
+    """
+    try:
+        reading = await dom.read_recipient_ids(page)
+    except Exception:  # noqa: BLE001 - enrichment never breaks the read
+        reading = {"rows": [], "error": "unread"}
+    by_slug = {
+        entry["slug"]: entry["recipient"]
+        for entry in reading.get("rows") or []
+        if entry.get("slug") and entry.get("recipient")
+    }
+    for row in rows:
+        # The profile url is the row's own; the slug is its last path segment.
+        profile = str(row.get("profile") or "")
+        slug = profile.rstrip("/").rsplit("/", 1)[-1] if profile else ""
+        row["recipient_id"] = by_slug.get(slug)
+
+
 async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
@@ -898,6 +935,26 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 )
                 rows, dropped = dom.parse_all(records, shape.parse_person_card)
                 if rows:
+                    # THE MEMBER ID WAS ALREADY ON THIS PAGE AND WAS BEING
+                    # THROWN AWAY. The harvest above is anchored on the PERSON
+                    # link; every row that offers one also draws a Message
+                    # button, which is a separate anchor into the compose
+                    # surface carrying that viewer's member id. Same class as
+                    # the analytics aggregates: value on a page already
+                    # loaded, dropped on the floor.
+                    #
+                    # NO EXTRA PAGE LOAD AND NO EXTRA NAVIGATION. This reads
+                    # the page the loop above just opened.
+                    #
+                    # IT IS WHAT MAKES ADDRESSING BY IDENTIFIER POSSIBLE.
+                    # Addressing a message recipient by NAME is a measured
+                    # dead end -- eleven distinct needle offsets across ten
+                    # rows, accessible names 49 to 178 characters -- and
+                    # resolving a slug by opening a third party's profile is
+                    # permanently forbidden and would leave that person a
+                    # durable record. This is the only route that costs
+                    # nobody anything.
+                    await _attach_recipient_ids(page, rows)
                     return shape.envelope(
                         rows,
                         limit=limit,
