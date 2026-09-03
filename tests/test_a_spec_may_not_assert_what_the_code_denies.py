@@ -103,9 +103,30 @@ PRINTED_PROSE: tuple[str, ...] = (
 #: its template can be FILLED. A numeric id covers the job and company family;
 #: a urn covers the feed-item family. Reachability is "at least one probe
 #: builds a url this server may read", which is the question the prose answers.
+#:
+#: THE URN IS SHAPE-VALID ON PURPOSE, AND A PLACEHOLDER WOULD BREAK THE RULE.
+#: That distinction was ruled today and this is the case where a literal is
+#: REQUIRED rather than merely convenient: ``comment_on_item`` and
+#: ``react_to_item`` address ``/feed/update/{target}/``, and the read boundary
+#: admits that address ONLY for a urn-shaped target -- measured, both False on
+#: the numeric probe and both True on this one. Swap in ``<urn>`` and
+#: ``_own_surface_read_url`` silently returns None for those two specs, which
+#: does not fail anything; it just stops two rules being able to fire on them.
+#: A check that quietly loses coverage is the disease this file treats, so
+#: ``test_the_urn_probe_is_load_bearing`` measures the property rather than
+#: leaving this comment to be believed.
+#:
+#: THE DIGITS ARE THE REPO'S OWN SYNTHETIC CONVENTION, not an invented run.
+#: ``7400000000000000001`` is already in ``SYNTHETIC_IDS`` in
+#: ``tests/test_no_committed_identity.py`` -- shape-valid, unmistakably
+#: fabricated, and blessed there rather than declared here. THE FIRST VERSION
+#: OF THIS FILE USED AN ASCENDING DIGIT RUN AND THE IDENTITY GUARD CAUGHT IT
+#: WITHIN MINUTES OF THE COMMIT, which is that guard working. Reusing an
+#: allowlisted value beats widening the allowlist: no boundary moves, and
+#: nothing new has to be declared.
 _PROBE_TARGETS: tuple[str, ...] = (
     "123456789",
-    "urn:li:activity:1234567890123456789",
+    "urn:li:activity:7400000000000000001",
 )
 
 #: Sentence boundaries, and the colon is one of them ON PURPOSE. The claim
@@ -631,6 +652,38 @@ def test_the_quoted_retraction_exemption_takes_two_things_not_one(
     """
     fired = "NOT_PERFORMED" in _rules_that_fired(_with("save_job", residue=prose))
     assert fired is still_fires, why
+
+
+def test_the_urn_probe_is_load_bearing():
+    """The urn-shaped probe reaches specs the numeric one cannot.
+
+    WHY THIS IS A TEST AND NOT A COMMENT. A shape-valid literal in a tracked
+    file is a cost -- the identity guard has to be able to tell it from a real
+    one -- so it has to earn its place, and "trust me, it is needed" is what
+    a comment offers. This measures it.
+
+    IT ALSO GUARDS THE SWAP THAT LOOKS FREE. Replacing the urn with ``<urn>``
+    or ``urn:li:activity:<id>`` raises nothing and fails nothing: it just
+    makes ``_own_surface_read_url`` return None for the two feed-item specs,
+    so OWN_SURFACE_UNREACHABLE and CITES_A_WALL_IT_WALKS_THROUGH quietly stop
+    being able to fire on them. This is what goes red instead.
+    """
+    numeric_only = [target for target in _PROBE_TARGETS if "urn" not in target]
+    reached_by_urn = set()
+    for spec in SANCTIONED_WRITES.values():
+        if _own_surface_read_url(spec) is None:
+            continue
+        if not any(
+            readonly.is_read_url(spec.url_template.format(target=probe))
+            for probe in numeric_only
+        ):
+            reached_by_urn.add(spec.action)
+
+    assert reached_by_urn == {"comment_on_item", "react_to_item"}, (
+        "the set of specs reachable ONLY through the urn probe changed: %s. "
+        "If it is now empty the literal is no longer needed and should become "
+        "a placeholder; if it grew, say so here." % sorted(reached_by_urn)
+    )
 
 
 def test_the_restore_predicate_is_derived_and_not_typed():
