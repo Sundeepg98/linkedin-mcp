@@ -7667,13 +7667,36 @@ VIEWS_CHART_DESC_MAX_CHARS = 120
 PROFILE_VIEWS_INSIGHTS_JS = """
 (cfg) => {
   const main = document.querySelector('main');
+  // THE SCOPE IS THE DOCUMENT, AND main IS REPORTED RATHER THAN OBEYED.
+  //
+  // This scoped to main and returned nulls for three fields on the live page
+  // -- measured 2026-09-03: trend null, filters [], viewer_rows 0, while the
+  // controls were on screen and nine viewer rows had just been harvested. The
+  // committed capture explains it: it has NO main element at all and 45
+  // data-view-name elements outside one. LinkedIn draws this page's furniture
+  // above and beside the content region, not inside it.
+  //
+  // WIDENING IS SAFE HERE BY CONSTRUCTION, WHICH IS THE ONLY REASON IT IS
+  // DONE. This page is a list of other members and the usual answer to
+  // "widen the scope" is no. But this script's privacy property is not its
+  // scope -- it is WHAT IT LOOKS AT: paragraph pairs whose first is a bare
+  // number, <label> text, a line carrying the chart's own description, and
+  // COUNTS of view names. None of those touches a person at document scope
+  // any more than at main scope, because none of them reads an aria-label or
+  // any text inside a viewer row. A scope change that cannot reach a name is
+  // a scope change with nothing to weigh.
+  //
+  // main_present and main_chars are still reported, because the difference
+  // between "no main" and "an empty main" is exactly the kind of two-zeros
+  // distinction this package keeps.
+  const scope = main || document.body;
   const out = {
     metrics: [], filters: [], view_names: [], view_name_counts: {},
     viewer_rows: 0, chart_present: false, chart_description: null,
     main_present: !!main, main_chars: 0
   };
-  if (!main) return out;
-  out.main_chars = main.innerText ? main.innerText.length : 0;
+  if (!scope) return out;
+  out.main_chars = main && main.innerText ? main.innerText.length : 0;
 
   const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
   const NUMBERISH = /^[0-9][0-9,.]*%?$/;
@@ -7682,7 +7705,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   // sibling <p> elements. Anchoring on the number is what makes this stable:
   // the label is prose and changes, the shape "a <p> that is only a number
   // followed by a <p> that is not" does not.
-  const paragraphs = Array.from(main.querySelectorAll('p'));
+  const paragraphs = Array.from(scope.querySelectorAll('p'));
   for (let i = 0; i < paragraphs.length && out.metrics.length < cfg.metricMax; i++) {
     const value = textOf(paragraphs[i]);
     if (!NUMBERISH.test(value)) continue;
@@ -7705,7 +7728,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   // script and the fallback does not bend it: this page's aria-labels name
   // other members ("Send a message to <a person>"), and a <label> is a form
   // control's own caption.
-  for (const holder of main.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
+  for (const holder of scope.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
     const label = textOf(holder.querySelector('label')) || textOf(holder);
     if (label && out.filters.indexOf(label) === -1 &&
         out.filters.length < cfg.filterMax) {
@@ -7713,7 +7736,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
     }
   }
   if (!out.filters.length) {
-    for (const node of main.querySelectorAll('label')) {
+    for (const node of scope.querySelectorAll('label')) {
       const label = textOf(node);
       if (label && label.length <= cfg.labelMaxChars &&
           out.filters.indexOf(label) === -1 &&
@@ -7733,7 +7756,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   // nothing. Presence is then asserted from the sentence rather than from the
   // holder, which is the honest order: what is being reported is the
   // description, so the description is what has to be found.
-  const chart = main.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  const chart = scope.querySelector('[data-view-name="' + cfg.chartName + '"]');
   let described = null;
   if (chart) {
     out.chart_present = true;
@@ -7747,7 +7770,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
     }
   }
   if (!described) {
-    const text = main.innerText || '';
+    const text = scope.innerText || '';
     for (const raw of text.split('\\n')) {
       const line = raw.trim();
       if (line && line.length < cfg.chartMaxChars &&
@@ -7761,7 +7784,7 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   out.chart_description = described;
 
   // COUNTS OF EVERY VIEW NAME, and the viewer rows counted and NOT read.
-  for (const el of main.querySelectorAll('[data-view-name]')) {
+  for (const el of scope.querySelectorAll('[data-view-name]')) {
     const value = el.getAttribute('data-view-name') || '';
     if (!value) continue;
     out.view_name_counts[value] = (out.view_name_counts[value] || 0) + 1;

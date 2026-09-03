@@ -318,43 +318,40 @@ async def test_the_views_reader_still_works_when_no_view_name_is_drawn(
     assert views["trend"]["description"] == "Line chart with 13 data points."
 
 
-async def test_the_committed_analytics_capture_cannot_exercise_this_reader(
+async def test_the_analytics_capture_reads_whole_even_though_it_has_no_main(
     chromium_page,
 ):
-    """THE ANALYTICS FIXTURE HAS NO ``<main>``, so the reader reads nothing
-    from it -- and that is a fact about the corpus rather than a bug.
+    """THE VIEW-NAME ROUTE, on the capture that still carries the attribute --
+    and the reason this test exists twice over.
 
-    This test was written as the opposite: assert the view-name route on the
-    capture, since that capture hangs a ``data-view-name`` off every control.
-    It fails, and the measurement is worth more than the assertion was::
+    IT WAS WRITTEN, FAILED, WAS REWRITTEN AS A GAP, AND THEN PASSED. Worth
+    recording, because each step was a real measurement:
 
-        has_main        False
-        doc_view_names     45      <- all of them, and all outside main
-        body_chars       1433
-        main_chars          0
+    1. Written to assert the precise anchor on this capture. It returned
+       nothing at all.
+    2. Measured why: ``has_main False``, ``doc_view_names 45`` -- forty-five
+       view names in the document and every one outside a ``<main>`` this
+       freeze does not have. The reader scoped to ``main``.
+    3. Rewritten to pin that as a gap, arguing the reader must not widen to
+       the document on a page made of other members.
+    4. **That argument was wrong, and the live page is what showed it.** The
+       same three fields were null LIVE -- trend, filters, and viewer_rows 0
+       while nine rows had just been harvested. One explanation covers the
+       capture and the live page: LinkedIn draws this page's furniture outside
+       the content region. Scoping to ``main`` was not a safety property, it
+       was a bug that happened to look like one.
 
-    Forty-five view names in the document and none reachable, because
-    ``read_profile_views_insights`` scopes to ``main`` and this freeze has no
-    ``main`` element anywhere.
+    WHY WIDENING IS SAFE HERE, since the step-3 argument has to be answered
+    rather than dropped. This script's privacy property is not its scope, it
+    is WHAT IT LOOKS AT: number-first paragraph pairs, ``<label>`` text, the
+    line carrying the chart's own description, and COUNTS of view names. None
+    of those reaches a name at document scope any more than at ``main`` scope,
+    because none of them reads an ``aria-label`` or any text inside a viewer
+    row. A scope change that cannot reach a name has nothing to weigh.
 
-    **THE READER IS NOT WIDENED TO ``body`` TO MAKE THIS PASS.** The live page
-    HAS a main -- measured, 2,092 characters, and the headline and delta come
-    back through it -- so scoping is correct for the surface this runs on.
-    Widening it would mean reading the whole document on a page that IS a list
-    of other members, to satisfy a fixture. That is the wrong direction to
-    trade, and it is the trade this file exists to refuse.
-
-    WHAT IT COSTS, said plainly so nobody re-derives it: the analytics capture
-    cannot test this reader at all. The behaviour is covered by
-    ``test_the_views_reader_still_works_when_no_view_name_is_drawn``, whose
-    markup reproduces the LIVE page's shape, and by the live call recorded in
-    the wave notes. Re-capturing the fixture WITH its main element would give
-    the view-name route a home; that needs the live account and the profile
-    lock, and is left as the one uncovered path.
-
-    Meanwhile this asserts the two-different-zeros property on a real file:
-    ``main_present`` False is not the same answer as an empty main, and the
-    reader says which.
+    ``main_present`` is still REPORTED, and this asserts it False here: "no
+    main" and "an empty main" stay different answers even though neither stops
+    the read.
     """
     html = (FIXTURES / "profile_views_analytics_hydrated.html").read_text(
         encoding="utf-8"
@@ -362,22 +359,25 @@ async def test_the_committed_analytics_capture_cannot_exercise_this_reader(
     await chromium_page.set_content(html, wait_until="domcontentloaded")
     views = await dom.read_profile_views_insights(chromium_page)
 
+    # The premise: this capture has no main, and is read anyway.
     assert views["observed"]["main_present"] is False
     assert views["observed"]["main_chars"] == 0
-    assert views["headline"] is None
-    assert views["trend"] is None
-    assert views["filters"] == []
 
-    # The document is not empty -- the panels ARE in this file, just not under
-    # a main. Asserted so the zero above cannot be read as "the capture is
-    # blank", which is the misreading this whole file is built against.
-    outside = await chromium_page.evaluate(
-        "() => document.querySelectorAll('[data-view-name]').length"
-    )
-    assert outside > 40, outside
+    assert views["headline"] == {"value": "27", "label": "Profile viewers"}
+    assert views["delta"] == {"value": "50%", "label": "vs. prior 7 days"}
+    assert views["filters"] == ["Past 90 days", "Interesting viewers", "Company"]
+    assert views["trend"]["present"] is True
+    assert "13 data points" in views["trend"]["description"]
 
-    # NO top-companies AND NO top-locations. Asserted on the reader's own
-    # return shape, which carries no such key in any state.
+    # viewer_rows has NO fallback and is counted straight off the view name,
+    # so eleven here is what says the precise route really ran rather than the
+    # label-and-text one standing in for it.
+    assert views["observed"]["viewer_rows"] == 11
+    assert "line-chart" in views["observed"]["view_names"]
+
+    # NO top-companies AND NO top-locations, asserted as an ABSENCE. The
+    # capability census described this surface as carrying both; what it
+    # carries is a COMPANY FILTER, which is one of the three above.
     assert "top_companies" not in views
     assert "top_locations" not in views
 
