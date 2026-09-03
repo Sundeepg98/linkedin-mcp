@@ -1006,6 +1006,13 @@ def test_the_probe_still_intercepts_nothing_and_writes_nowhere():
         line for line in source.splitlines() if not line.strip().startswith("#")
     )
     assert code.count(".route(") == 0, "the probe has acquired an interception path"
-    assert source.count("page.on(") == 2, source.count("page.on(")
+    # THREE SINCE 2026-09-03, AND THE THIRD IS NAMED HERE RATHER THAN WAVED
+    # THROUGH. `_tally` is a second PASSIVE response listener that counts
+    # document responses BY PATH -- no url, no query, no body -- so that a
+    # refusal can say what it did see instead of only what it did not match.
+    # It is attached and removed in the same try/finally as `_remember` and
+    # reads nothing. The bound that actually matters is the line above:
+    # `.route(` stays 0, so the probe still has no interception path.
+    assert source.count("page.on(") == 3, source.count("page.on(")
     for writer in ("open(", ".write_text(", ".write_bytes(", ".mkdir("):
         assert writer not in code, writer

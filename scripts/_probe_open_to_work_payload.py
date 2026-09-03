@@ -168,6 +168,13 @@ from linkedin_server.config import BASE_URL  # noqa: E402
 #: the ONLY profile spelling that cannot reach a third party.
 SELF_PROFILE_URL = f"{BASE_URL}/in/me/"
 
+
+def _member_path(url: str) -> str:
+    """The `/in/<vanity>` path of a url, with no query and no trailing slash."""
+    from urllib.parse import urlsplit
+
+    return urlsplit(str(url or "")).path.rstrip("/")
+
 #: NO OUTPUT DIRECTORY, and no path constant to become one later. See the
 #: docstring: the instrument this replaces was a pile of files on disk.
 
@@ -1190,6 +1197,7 @@ async def main() -> None:
 
         # --- PASS 2: the passive listener, bound to that one string ----------
         seen: list = []
+        tally: list = []
 
         def _remember(response) -> None:
             """Collect the ONE document response for the resolved url.
@@ -1199,7 +1207,15 @@ async def main() -> None:
             unbounded moment. The body is read later, once, by the caller.
             """
             try:
-                if response.url != landed:
+                # MATCHED AGAINST `/in/me`, THE URL FETCHED. `/in/me/` IS NOT
+                # A REDIRECT: measured 2026-09-03, LinkedIn serves the profile
+                # AT `/in/me` with a 200 and rewrites the address bar
+                # client-side, so `page.url` and `response.url` are different
+                # strings by construction and no equality between them can
+                # hold. This bound is also the STRONGER one -- `/in/me` can
+                # serve the signed-in member and nobody else, where a vanity
+                # path names only SOME member.
+                if _member_path(response.url) != _member_path(SELF_PROFILE_URL):
                     return
                 if response.request.resource_type != "document":
                     return
@@ -1207,17 +1223,46 @@ async def main() -> None:
                 return
             seen.append(response)
 
+        def _tally(response) -> None:
+            """Count every document response by path, matched or not.
+
+            A REFUSAL THAT CANNOT SAY WHAT IT SAW IS HALF A MEASUREMENT.
+            Paths only, never a url and never a query, so it costs no
+            disclosure.
+            """
+            try:
+                if response.request.resource_type != "document":
+                    return
+                tally.append(_member_path(response.url) or "/")
+            except Exception:
+                return
+
         page.on("response", _remember)
+        page.on("response", _tally)
         try:
-            await BROWSER.goto(page, landed)
+            # NAVIGATE THE SANCTIONED SPELLING, NEVER THE LANDED URL. Passing
+            # `landed` here was a LEAK: LinkedIn intermittently decorates the
+            # landed url with `?isSelfProfile=true` (it rides per load -- see
+            # section 84), the read allowlist correctly refuses any query, and
+            # `readonly.assert_read_url` interpolates the refused url into its
+            # message. So a coin flip printed his vanity slug into whatever
+            # transcript was watching. The mechanism is REMOVED rather than
+            # guarded: this function is never handed an identity url at all,
+            # which is why the refusal text keeps its url and stays debuggable.
+            await BROWSER.goto(page, SELF_PROFILE_URL)
         finally:
             page.remove_listener("response", _remember)
+            page.remove_listener("response", _tally)
 
-        print(f"    pass 2: document responses matching that exact url: {len(seen)}")
+        print(f"    pass 2: self-owned (/in/me) document responses: {len(seen)}")
         if len(seen) != 1:
-            print("    REFUSED: expected exactly one. Zero means the response was")
-            print("    served from cache or the url moved; more than one means this")
-            print("    cannot say which document it would be reading. Nothing read.")
+            print("    REFUSED: expected exactly one self-owned document. Zero")
+            print("    means /in/me served nothing this pass; more than one means")
+            print("    this cannot say which document it reads. Nothing read.")
+            print(f"    document responses of ANY url this pass: {len(tally)}")
+            for path in tally:
+                print(f"      seen: {path}")
+            print(f"    was looking for: {_member_path(SELF_PROFILE_URL)}")
             await BROWSER.stop()
             return
 
