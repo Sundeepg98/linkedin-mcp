@@ -48,9 +48,33 @@ import pytest
 from linkedin_server import dom, shape
 
 #: A thread id shaped like the real one, invented. Base64-ish with the digit
-#: prefix and the padding that made the live value unmistakable.
+#: prefix and the padding that made the live value unmistakable. ITS SHAPE IS
+#: DECORATION and may be changed freely: the redactor matches ``[^/?#]+``, so
+#: any non-empty run without a delimiter exercises it identically. That is
+#: NOT true of the slug below, which is the distinction this file now pins.
 FAKE_THREAD_ID = "2-INVENTEDTHREADIDzzz=="
 THREAD_URL = f"https://www.linkedin.com/messaging/thread/{FAKE_THREAD_ID}/"
+
+#: A member profile url, and THE ONE LITERAL HERE WHOSE SHAPE IS LOAD-BEARING.
+#: It is the over-reach control: a redactor that flattened every url would
+#: pass a leak-only test perfectly while destroying every profile reading, and
+#: this url is what notices. The mutant that does that is keyed on SLUG SHAPE,
+#: so an unmistakable placeholder -- ``/in/<SLUG>`` -- would not match it, the
+#: assertion would hold under the mutant, and the control would quietly stop
+#: being able to fire. Measured both ways in
+#: ``test_the_profile_control_is_load_bearing``, which is why that test exists
+#: instead of this comment being trusted.
+#:
+#: WHY THIS PARTICULAR VALUE IS SAFE, so nobody re-derives it: the slug is
+#: already sanctioned in ``SYNTHETIC_SLUGS`` in
+#: ``tests/test_no_committed_identity.py`` -- shape-valid, unmistakably
+#: fabricated, and blessed there rather than declared here, so no allowlist
+#: moves and no plant has to be pinned. THIS FILE SHIPPED WITH ``some-slug``
+#: INSTEAD, and that guard failed it within the hour: a hand-written
+#: placeholder is not the same thing as a declared one, because the guard has
+#: no way to tell it from a real slug. Reusing an allowlisted value is what
+#: makes the literal both safe and load-bearing at once.
+PROFILE_URL = "https://www.linkedin.com/in/some-person-a1b2c3/"
 
 #: A url is UNREDACTED if a thread segment survives that is not the marker.
 RAW_THREAD = re.compile(r"/messaging/thread/(?!<THREAD-ID>)[^/?#]+")
@@ -140,8 +164,54 @@ def test_the_redactor_is_shown_working_and_shown_not_over_reaching():
     # NOT a thread url: it must come back untouched.
     feed = "https://www.linkedin.com/feed/"
     assert shape.redact_thread_id(feed) == feed
-    profile = "https://www.linkedin.com/in/some-slug/"
-    assert shape.redact_thread_id(profile) == profile
+    assert shape.redact_thread_id(PROFILE_URL) == PROFILE_URL
+
+
+#: THE MUTANT THE PROFILE CONTROL EXISTS TO CATCH: somebody reads
+#: ``redact_thread_id`` as "the redactor" and generalises it to every url that
+#: names a member. The character class is the identity guard's own
+#: ``SLUG_SHAPE``, so "shape-valid" here means valid by the repo's definition
+#: of the shape rather than by one invented in this file.
+_OVER_REACHING_SLUG = re.compile(r"(/in/)([A-Za-z0-9\-_%]{3,})")
+
+
+def _over_reaching_redactor(url: str) -> str:
+    """``redact_thread_id`` as it must NOT become."""
+    url = re.sub(r"(/messaging/thread/)[^/?#]+", r"\1<THREAD-ID>", url)
+    return _OVER_REACHING_SLUG.sub(r"\1<SLUG>", url)
+
+
+def test_the_profile_control_is_load_bearing():
+    """The profile url's SHAPE is what lets the over-reach control fail.
+
+    WHY THIS IS A TEST AND NOT A COMMENT. A slug-shaped literal in a tracked
+    file is a cost -- the identity guard has to be able to tell it from a real
+    one -- so it has to earn its place, and "trust me, it is needed" is what a
+    comment offers. This measures it.
+
+    IT GUARDS THE SWAP THAT LOOKS FREE. ``redact_thread_id`` reads no slug
+    shape at all, so replacing the slug with ``<SLUG>`` raises nothing and
+    fails nothing today. What it does is make the mutant below invisible:
+    ``<SLUG>`` is not slug-shaped, the over-reaching redactor leaves it alone,
+    ``redact_thread_id(PROFILE_URL) == PROFILE_URL`` holds under the mutant
+    too, and an assertion that cannot fail is left behind looking like
+    coverage. Both directions are asserted, because only the pair shows that
+    the shape -- and not the url -- is doing the work.
+    """
+    # The control CAN fail: the mutant changes the value it asserts is equal.
+    assert _over_reaching_redactor(PROFILE_URL) != PROFILE_URL, (
+        "the over-reaching redactor no longer touches PROFILE_URL, so the "
+        "second assertion in the not-over-reaching test certifies nothing"
+    )
+    # And a placeholder is exactly what would kill it.
+    placeholder = "https://www.linkedin.com/in/<SLUG>/"
+    assert _over_reaching_redactor(placeholder) == placeholder, (
+        "a placeholder slug is now matched by the mutant, which would make "
+        "the swap safe after all -- re-read this test before relying on it"
+    )
+    # The mutant is otherwise the shipped redactor: it must still redact
+    # threads, or the two assertions above would pass on a dead function.
+    assert "<THREAD-ID>" in _over_reaching_redactor(THREAD_URL)
 
 
 def test_the_pattern_this_file_guards_with_can_fail():
