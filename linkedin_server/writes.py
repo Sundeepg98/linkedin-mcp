@@ -6853,7 +6853,7 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
 
     * **Exactly one, or refuse.** Zero refuses, two refuse, and a row whose
       name does not carry his needle refuses. It never falls back to the first
-      row -- picking from a dropdown of three Thornwicks by position is
+      row -- picking from a dropdown of three same-named people by position is
       verbatim the ``aim_invitation`` failure, on the action whose audience is
       the least recoverable in this package.
     * **The comparison runs in the page.** Playwright's ``name=`` matches the

@@ -226,6 +226,13 @@ that did not exist.
    discovered twenty minutes later by a suite, at which point it looks like a
    defect.
 5. Credit it. The first line of a pin commit says whose work it is.
+6. **GREP THE PINNED CONTENT FOR IDENTITY BEFORE COMMITTING IT.** Added
+   2026-09-03, having stepped on it: a live measurement table was pinned
+   with the operator's real needle in it, and quoted onward in commit
+   messages, because the pin was reviewed for CORRECTNESS and not for
+   DISCLOSURE. Adopting somebody else's work adopts their disclosure too,
+   and `tests/test_no_committed_identity.py` says in its own first line
+   that it cannot catch a name for you.
 
 ---
 
