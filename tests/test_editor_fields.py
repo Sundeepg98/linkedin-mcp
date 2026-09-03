@@ -44,6 +44,7 @@ and only a laid-out document can answer what it asks -- ``closest()`` and
 
 from __future__ import annotations
 
+import ast
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -876,18 +877,49 @@ def test_the_census_has_no_path_into_this_reader():
     """A CALLER MUST NOT BE ABLE TO REACH THIS BEHAVIOUR THROUGH THE CENSUS.
 
     Read off the SOURCE rather than argued: ``read_self_owned_editor_fields``
-    is named exactly once in ``server.py``, and the surface census's body does
-    not name it. The census's key table is pinned at five here too, so a sixth
+    is CALLED exactly once in ``server.py``, and the surface census's body does
+    not call it. The census's key table is pinned at five here too, so a sixth
     key pointing somewhere new fails in this file as well as in its own.
+
+    COUNTED BY AST, NOT BY ``str.count``, AND THE CHANGE IS A CORRECTION
+    RATHER THAN A RELAXATION. It counted occurrences of the name in the file's
+    characters, so on 2026-09-03 it went red at 2 when a corrected docstring
+    NAMED the reader -- in a sentence explaining that editor fields ARE
+    observed, which is prose ABOUT the reader and not a path INTO it. A
+    mention is not a call, and a check that cannot tell them apart is
+    measuring the wrong thing: the property being guarded is reachability,
+    and reachability is a fact about the call graph. Same lesson this package
+    learned when a grep for a reader's name matched a docstring and reported a
+    dead function as live. The census body check below is now a call check for
+    the same reason.
     """
     source = Path(server_module.__file__).read_text(encoding="utf-8")
-    assert source.count("read_self_owned_editor_fields") == 1, source.count(
-        "read_self_owned_editor_fields"
+    tree = ast.parse(source)
+
+    def _calls_named(node: ast.AST, name: str) -> int:
+        """How many times ``name`` is CALLED anywhere under ``node``."""
+        hits = 0
+        for sub in ast.walk(node):
+            if not isinstance(sub, ast.Call):
+                continue
+            fn = sub.func
+            called = fn.attr if isinstance(fn, ast.Attribute) else getattr(fn, "id", "")
+            if called == name:
+                hits += 1
+        return hits
+
+    assert _calls_named(tree, "read_self_owned_editor_fields") == 1, _calls_named(
+        tree, "read_self_owned_editor_fields"
     )
 
-    body = source.split("async def linkedin_surface_census", 1)[1]
-    body = body.split("async def linkedin_profile_editor_fields", 1)[0]
-    assert "read_self_owned_editor_fields" not in body
+    census = [
+        n
+        for n in ast.walk(tree)
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and n.name == "linkedin_surface_census"
+    ]
+    assert len(census) == 1, [n.name for n in census]
+    assert _calls_named(census[0], "read_self_owned_editor_fields") == 0
     # PINNED AS A SET RATHER THAN A COUNT, and the change is a strengthening.
     # It read ``len(CENSUS_SURFACES) == 5``, which a key ADDED and a key
     # REMOVED in one edit would satisfy -- and what this file is guarding
