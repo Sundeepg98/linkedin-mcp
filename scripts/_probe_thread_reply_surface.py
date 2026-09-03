@@ -129,15 +129,33 @@ async def main() -> None:
             return
 
         print()
+        # THE DENOMINATOR BEFORE ANY COUNT, because without it every number
+        # below is uninterpretable rather than zero. The first live run of
+        # this probe printed the counts and not this, and the zeros were
+        # reported as a finding -- which is the defect the field was added to
+        # close, reproduced by the script that reads the field.
+        print("    DID THE PAGE ARRIVE? Read this before any count below.")
+        print(f"      elements on the page: {reading['elements']}")
+        print(f"      settle verdict:       {reading['settle']!r}")
+        print(f"      why:                  {reading['settle_why']}")
+        if reading["settle"] == "unrendered":
+            print()
+            print("    STOP. The page did not render. Every count below is")
+            print("    UNINTERPRETABLE, not zero -- including the refutation")
+            print("    reading. Nothing here is evidence about LinkedIn.")
+        print()
         print("    THE READING THAT WOULD REFUTE THE APPROACH, FIRST:")
         print(f"      recipient comboboxes: {reading['recipient_boxes']}")
         print("      (expected ZERO -- a thread has nobody to choose. A")
         print("       non-zero here means a reply is not addressless and this")
         print("       whole route needs rethinking.)")
         print()
-        print("    THE REPLY BOX:")
-        print(f"      contenteditable nodes:  {reading['editors']}")
+        print("    THE REPLY BOX, ACROSS EVERY MECHANISM:")
+        print(f"      contenteditable, any:   {reading['editors']}")
+        print(f"      contenteditable=true:   {reading['editable_true']}")
         print(f"      div[role=textbox]:      {reading['textboxes']}")
+        print(f"      textarea:               {reading['textareas']}")
+        print(f"      input[type=text]:       {reading['text_inputs']}")
         print()
         print("    THE SUBMIT, AND ITS GATE SIGNAL:")
         print(f"      controls named Send:    {reading['send_controls']}")
