@@ -4676,3 +4676,127 @@ rather than at one, costed against the fixture corpus. Furniture such as
 "Comment" and "Repost" carries no capitalised RUN and may survive untouched,
 but that is a hypothesis and this document has spent the day on the cost of
 believing those.
+
+## 110. PINNED AS KNOWN IS NOT CLOSED
+
+`shape.py` names this exact case about itself, in its own comment, and pins it
+as a known gap:
+
+    "a bare one-word button with no href is the case neither rule covers,
+     and it is pinned as known"
+
+**A pinned known gap reads as managed.** It was not managed. It was recorded
+and left, and on 2026-09-03 it emitted three third parties' names and the
+operator's own into a model's context, out of a SHIPPED tool, on an ordinary
+profile page. Documented is not closed, and a comment saying so is not a
+mitigation.
+
+That is the finding. The fix is below it and is smaller than it.
+
+### THE TWO RULES, AND WHY THE CASE BETWEEN THEM WAS REACHABLE
+
+    census_redact_rare            fires only at count == 1
+    census_href_identifies_entity needs a destination to refuse on
+
+Every leaked row had merged to 2 or 8, so the singleton cap never ran. The two
+worst were BUTTONS WITH NO HREF, so there was no destination. Each rule was
+designed knowing the other would cover its gap; **the intersection of their
+gaps was never measured**, and it turns out to be one of the commonest controls
+on a profile page.
+
+### THE FIX THAT LOOKED OBVIOUS, COSTED AND REJECTED
+
+Applying `_CENSUS_CAPS_RUN` at ANY count rather than only at one closes every
+leaked row. Measured against the fixture corpus:
+
+    distinct shapes                                  214
+    surviving unblanked today                        173
+    caps rule at ANY count -- survivors destroyed      43   (25%)
+    template rule          -- survivors destroyed       1   (0.6%)
+
+A quarter of the census's readable output, and the losses name the reason:
+`Back End Developer with verification`, `Click to stop following <a company>`,
+`Chart. Highcharts interactive chart.` **No property of the string separates a
+job title from a person's name** -- which is the fact `census_redact_rare` was
+built on in the first place. A fix that closes the leak by destroying the
+instrument is not a fix, and this is the second time in one day that the
+obvious tightening cost job titles.
+
+The single shape the template rule costs is a FIXTURE'S invented person being
+correctly redacted, so the true cost is zero.
+
+### SO THE THIRD RULE KEYS ON NEITHER THE STRING NOR THE TALLY
+
+It keys on the TEMPLATE -- label forms whose head or tail is a person -- which
+needs no count and no href, and therefore lands in `census_substitute` where
+every caller already passes. Three rules, each where its precondition holds:
+
+    structural, no count   census_href_identifies_entity   (destination)
+    structural, no count   _CENSUS_NAME_TEMPLATES          (label form)  NEW
+    needs the count        census_redact_rare              (singletons)
+
+This is the same shape as the messaging probe's repair earlier the same day,
+and it was reached the same way: the fix that works on every case and breaks
+the instrument was measured FIRST, so the argument for the narrow rule is a
+number rather than a preference.
+
+### AND source_url WAS THE ONE RAW URL IN THE PAYLOAD
+
+`href_shapes` substitutes `/in/<member>/` throughout the census answer. The
+field naming the page the census had just loaded did not, so a `profile`
+census returned the operator's vanity slug verbatim beside a dict that shaped
+the identical string correctly.
+
+**THAT IS THE THIRD TIME IN ONE DAY** that a redaction was applied at one site
+and not at its twin -- the thread id in `activate_messaging_filter`, the slug
+missing from the messaging probe's `_redact`, and now this. Fixed with
+`census_substitute`, the shaping the rest of the payload already gets.
+
+> **A redaction applied at one site is a redaction that has not been applied.**
+> Three instances, three different files, three different authors, one day.
+> The common factor is that each site was written by someone reading the
+> neighbouring redaction as decoration rather than as a boundary.
+
+FIVE MORE `source_url` SITES EXIST and are NOT changed here: two land in member
+space by construction and one emits company urls. They are another owner's read
+tools, they are reported rather than edited, and the count is stated so that
+"the source_url hole" is not later believed to have been one hole.
+
+### THE HONEST LIMIT, CARRIED OVER
+
+The template rules were derived from ONE live page. They close what was
+observed to leak; they are not a general solution, and an unobserved label form
+whose tail is a name still reaches the count rule and still survives at two.
+The casualty figures come from job and profile fixtures, and there is no
+committed capture of a feed or an inbox to measure against because the probes
+that read those surfaces write none, by design. **The safety property that
+makes those tools safe is the same one that makes their cost unmeasurable.**
+
+### THE DETECTOR TOOK THREE GOES, AND EVERY WRONG ANSWER LOOKED CLEAN
+
+The control written for the one-line `source_url` fix is the reason the
+inventory above exists, and building it repeated the day's lesson a third time:
+
+    keyed on the text            found 3 of 7   a quote sits between the
+                                                name and the colon in one
+                                                spelling and not the other
+    widened to allow the quote   found 6 of 7   a "]" sits there in a third
+    reading the STRUCTURE        found 7 of 7   dict entry, subscript assign
+                                                and keyword arg are three
+                                                syntaxes for one fact
+
+**Every miss reported a smaller number and no error.** A scan compared against
+nothing would have published three and looked complete; both wrong answers
+were caught only because the expected set had been measured INDEPENDENTLY
+first, by a different method, before the detector existed.
+
+That is the same defect class as everything else in 107 and 108 -- a check
+that fires and does not certify what it appears to -- met while building a
+check for that class. Fourth instance in one day.
+
+A LITERAL BACKSPACE BYTE also reached the file, left by `\b` collapsing through
+a shell heredoc. It survived an ASCII check, because a check written as
+`all(b < 128)` says nothing about CONTROL characters. Every file touched today
+was then swept: zero. The heredoc-collapses-backslashes scar was written down
+this morning and cost a fourth repeat this afternoon; the standing repair is to
+build a backslash from `chr(92)` or to use an editor rather than a heredoc.
