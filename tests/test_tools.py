@@ -466,6 +466,14 @@ async def test_profile_views_carry_name_headline_and_when_it_happened(drive):
             "viewed": "2 days ago",
             "anonymous": False,
             "profile": "https://www.linkedin.com/in/priya-raman-123",
+            # ADDED 2026-09-03 WITH THE MEMBER-ID READ, and None is the
+            # RIGHT answer on this page rather than a missing one: the fake
+            # draws no Message button, and a row with no button has no id.
+            # Asserted as part of the whole-row equality on purpose -- the
+            # row shape is what a caller receives, so a new key appearing in
+            # it is a change to this tool's output and should have to be
+            # written down here.
+            "recipient_id": None,
         }
     ]
     assert navigations == [ANALYTICS_VIEWS_URL]
@@ -1046,8 +1054,40 @@ UNPARSEABLE_VIEWER_CARDS = [
 ]
 
 
+#: What ``dom.PROFILE_VIEWS_INSIGHTS_JS`` returns off the analytics page.
+#:
+#: THE VALUES ARE THE MEASURED ONES. 27 profile viewers, up 50% on the prior
+#: 7 days, a 13-point line chart and LinkedIn's three filters -- all read off
+#: ``tests/fixtures/profile_views_analytics_hydrated.html`` and confirmed on
+#: the live page 2026-09-03. Inventing numbers here would make the assertion
+#: below prove only that a dict survives a function call.
+VIEWS_INSIGHTS_SCRIPT_RESULT = {
+    "metrics": [
+        {"value": "27", "label": "Profile viewers"},
+        {"value": "50%", "label": "vs. prior 7 days"},
+    ],
+    "filters": ["Past 90 days", "Interesting viewers", "Company"],
+    "view_names": ["viewer-list", "viewer-list-item", "line-chart"],
+    "view_name_counts": {"viewer-list-item": 11, "line-chart": 1},
+    "viewer_rows": 11,
+    "chart_present": True,
+    "chart_description": "Line chart with 13 data points.",
+    "main_present": True,
+    "main_chars": 2130,
+}
+
+
 async def test_who_viewed_me_falls_back_to_the_classic_page_once(drive):
-    page = ScriptedPage(evaluate_queue=[UNPARSEABLE_VIEWER_CARDS, [PERSON_CARD]])
+    page = ScriptedPage(
+        evaluate_queue=[
+            UNPARSEABLE_VIEWER_CARDS,
+            # THE MEMBER-ID READ runs only once rows have parsed, so the
+            # first page -- whose cards are all chrome -- never reaches it.
+            [PERSON_CARD],
+            [],
+            VIEWS_INSIGHTS_SCRIPT_RESULT,
+        ]
+    )
     navigations = drive(page)
 
     result = await linkedin_who_viewed_me(limit=25)
@@ -1061,24 +1101,49 @@ async def test_who_viewed_me_falls_back_to_the_classic_page_once(drive):
 
 async def test_who_viewed_me_loads_one_page_when_the_first_one_answers(drive):
     """The fallback must be a fallback, not a second page load on every call."""
-    page = ScriptedPage(evaluate_queue=[[PERSON_CARD], [PERSON_CARD]])
+    page = ScriptedPage(
+        evaluate_queue=[[PERSON_CARD], [], VIEWS_INSIGHTS_SCRIPT_RESULT]
+    )
     navigations = drive(page)
 
     result = await linkedin_who_viewed_me(limit=25)
 
     assert result["pages_loaded"] == 1
     assert navigations == [ANALYTICS_VIEWS_URL]
-    # TWO EVALUATES, ONE PAGE, AND THE DISTINCTION IS THE POINT OF THIS PIN.
-    # It was 1 until 2026-09-03, when the viewer list began also reading the
-    # member id off each row's Message button -- a value already drawn on this
-    # page that the person-anchored harvest was discarding.
+    # THREE EVALUATES, ONE PAGE, AND THE DISTINCTION IS THE POINT OF THIS PIN.
+    # It was 1 until 2026-09-03, then 2 when the viewer list began also reading
+    # the member id off each row's Message button, then 3 when it began reading
+    # the aggregates around the list. All three are values already drawn on
+    # this page that the person-anchored harvest was discarding.
     #
     # WHAT THIS ASSERTION IS ACTUALLY GUARDING is the line above it:
     # `navigations` is still ONE url. A second READ of a page already open
     # costs nothing; a second NAVIGATION would cost a page load, and on the
     # profile-views surface it would also be a second chance to land somewhere
     # that leaves a record. The two numbers move independently on purpose.
-    assert len(page.evaluations) == 2
+    assert len(page.evaluations) == 3
+    assert page.evaluate_overrun is False
+
+    # AND THE AGGREGATES REACH THE CALLER. Counting the evaluates proves a
+    # read happened; only this proves the answer was plumbed through, which is
+    # the exact gap tests/test_job_detail_wiring.py exists for -- a field
+    # computed correctly, tested correctly, and never wired.
+    insights = result["insights"]
+    assert insights["headline"] == {"value": "27", "label": "Profile viewers"}
+    assert insights["delta"] == {"value": "50%", "label": "vs. prior 7 days"}
+    assert insights["trend"]["present"] is True
+    assert "13 data points" in insights["trend"]["description"]
+    assert insights["filters"] == ["Past 90 days", "Interesting viewers", "Company"]
+    assert insights["observed"]["viewer_rows"] == 11
+
+    # NO top_companies AND NO top_locations, and this asserts their ABSENCE
+    # rather than that they are null. The capability census described this
+    # tool as discarding "the trend graph, top companies and top locations";
+    # the trend graph is real and the other two are not on the page, measured
+    # on the committed capture and again live. A key that is always null is a
+    # claim the page does not support.
+    assert "top_companies" not in insights
+    assert "top_locations" not in insights
 
 
 async def test_both_profile_view_pages_failing_is_reported_as_a_failure(drive):
