@@ -298,6 +298,31 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         ("server.py", "_path_without_member"),
         ("shape.py", "census_shape"),
         ("writes.py", "_live_control"),
+        # SIXTH AND SEVENTH, added 2026-09-03, and this test caught them --
+        # which is a third instance of the shape its own docstring describes:
+        # a caller arriving between the enumeration and the reading of it.
+        #
+        # BOTH ARE THE SAME ONE-LINE FIX TO A `source_url` FIELD, and both are
+        # PUBLISHERS rather than refusal tests, so they are the kind this
+        # enumeration exists to make somebody look at.
+        #
+        #   linkedin_surface_census  a REAL LEAK, closed. Its source_url was
+        #       the only unshaped url in a payload that substituted
+        #       /in/<member>/ everywhere else, and the profile surface it names
+        #       carries THIRD PARTIES.
+        #
+        #   linkedin_my_profile      NOT a leak, and the distinction matters
+        #       more than the line. That tool publishes `name`,
+        #       `public_identifier` and `profile_url` DELIBERATELY -- it is a
+        #       window onto his own account and redacting them would empty it.
+        #       source_url was a redundant copy of output published on purpose
+        #       two fields up. Shaped for CONSISTENCY, never concealment: a
+        #       shaped source_url sitting above a deliberate public_identifier
+        #       is WORSE than an unshaped one if a reader takes it for a
+        #       redaction, because it claims a property the payload does not
+        #       have.
+        ("server.py", "linkedin_surface_census"),
+        ("server.py", "linkedin_my_profile"),
     }, sorted(callers)
 
 
