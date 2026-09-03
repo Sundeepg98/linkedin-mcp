@@ -69,7 +69,9 @@ from __future__ import annotations
 import ast
 import json
 
-from linkedin_server import writes
+import pytest
+
+from linkedin_server import dom, writes
 from linkedin_server.writes import TARGET_JOIN, spec_for_action
 
 # ONE OWNER PER FIXTURE, which is this suite's standing convention. The empty
@@ -404,6 +406,75 @@ async def test_his_own_needle_never_leaks_out_of_a_block_that_READ_the_page(
             rendered = json.dumps(block.get(key), default=str).lower()
             for word in NAMED_RECIPIENT.split():
                 assert word.lower() not in rendered, (key, word)
+
+
+# ---------------------------------------------------------------------------
+# 2b. A refusal may not assert something it did not check
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def _fast_wait(monkeypatch):
+    """Shorten the dropdown wait for the one test that WANTS it to time out.
+
+    The bound is five seconds because a real typeahead is fetched. Here the
+    timeout is the subject rather than an obstacle, so waiting the full five
+    would buy nothing but a slower suite.
+    """
+    monkeypatch.setattr(dom, "TYPEAHEAD_TIMEOUT_MS", 250)
+
+
+#: OPTIONS WITH NO WRAPPER. A page can draw suggestion rows without the
+#: ``[role="listbox"]`` element the reader waits on -- nobody has measured
+#: which shape LinkedIn uses -- and this is that page.
+COMPOSER_OPTIONS_WITHOUT_LISTBOX = COMPOSER_MARKUP.replace(
+    CHIP_RAIL_EMPTY,
+    CHIP_RAIL_EMPTY
+    + _option(NAMED_RECIPIENT, "1st")
+    + _option(SOMEBODY_ELSE, "2nd"),
+    1,
+)
+assert COMPOSER_OPTIONS_WITHOUT_LISTBOX != COMPOSER_MARKUP
+assert '<div role="listbox">' not in COMPOSER_OPTIONS_WITHOUT_LISTBOX
+
+
+async def test_the_no_listbox_refusal_does_not_claim_the_list_was_empty(
+    writes_on, over, _fast_wait
+):
+    """THE REFUSAL MAY ONLY SAY WHAT IT MEASURED.
+
+    This branch fires on one fact: no wrapper attached inside the wait. It
+    used to go on and say "there was nothing to choose from", which is a claim
+    about the OPTIONS -- and the option counts are taken afterwards, so on a
+    page like this one they are NOT zero. The refusal was telling him the
+    dropdown offered nobody while its own numbers said two rows were drawn.
+
+    The gate still refuses, which is the conservative direction and is
+    unchanged. What changed is that it now reports the wrapper as the thing
+    that is missing, and says so only when the count agrees.
+    """
+    block = await over(
+        COMPOSER_OPTIONS_WITHOUT_LISTBOX,
+        lambda page: _run(page, COMPOSER_OPTIONS_WITHOUT_LISTBOX),
+    )
+    gate = block["typeahead_gate"]
+    assert gate["proceeded"] is False
+    assert gate["refused_condition"] == "1_no_listbox", gate
+
+    # THE NUMBERS THAT MAKE THE OLD SENTENCE FALSE.
+    assert gate["observed"]["appeared"] is False
+    assert int(gate["observed"]["total"]) >= 2, gate["observed"]
+
+    why = gate["why"]
+    assert "nothing to choose from" not in why, why
+    assert "the WRAPPER that is missing" in why, why
+    assert str(gate["observed"]["total"]) in why, why
+
+    # AND NOTHING WAS PRESSED OR TYPED. The correction is to a sentence, not
+    # to the behaviour, and this is what says so.
+    assert block["clicked"]["clicks_made"] == 0, block["clicked"]
+    assert block["recipient_gate"] is None
+    assert block["typed_text"]["left_in_the_composer"] is True
 
 
 # ---------------------------------------------------------------------------

@@ -6912,14 +6912,39 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
     # the second one says anything about whether he has this connection.
     if not reading.get("appeared"):
         out["refused_condition"] = "1_no_listbox"
+        # WHAT THIS BRANCH MAY AND MAY NOT ASSERT. It knows one thing: no
+        # element matching the WRAPPER selector attached inside the wait. It
+        # said "there was nothing to choose from", which is a claim about the
+        # OPTIONS -- and the option counts are taken afterwards and may be
+        # non-zero, because a page can draw rows without the wrapper this
+        # reader waits on. A refusal that states something it did not check is
+        # the defect this repository spends most of its time removing, so the
+        # sentence is built from what was counted.
         out["why"] = (
-            "the typeahead never drew a listbox within the bounded wait, so "
-            "there was nothing to choose from and nothing was clicked. THIS "
-            "IS A FACT ABOUT THIS READER AND THIS PAGE TOGETHER: either the "
-            "dropdown did not open, or it does not use any of the option "
-            "spellings this server knows. The per-selector counts above are "
-            "how those two are told apart, and neither of them is a statement "
-            "that the person you named is not reachable."
+            f"no element matching {dom.TYPEAHEAD_LISTBOX_SELECTOR!r} attached "
+            f"within the bounded wait, and {total} option(s) were counted "
+            "afterwards. Nothing was clicked. THIS IS A FACT ABOUT THIS "
+            "READER AND THIS PAGE TOGETHER, not about the person you named. "
+            + (
+                "AND THE OPTION COUNT IS NOT ZERO, so rows ARE drawn here and "
+                "it is the WRAPPER that is missing -- which makes this a "
+                "finding about the wait rather than about the dropdown, and "
+                "is exactly why this refusal does not tell you the list was "
+                "empty."
+                if total
+                else "Every candidate selector counted zero as well, so "
+                "either the dropdown did not open, or it uses none of the "
+                "spellings this server knows -- and the per-selector counts "
+                "above are how a human tells those two apart."
+            )
+            # THE CLOSING SENTENCE IS VERBATIM WHAT IT WAS, and that is
+            # deliberate rather than incidental: a refusal on this branch
+            # must not be readable as "he is not on LinkedIn", and
+            # tests/test_typeahead_gate.py pins the exact words. Rewriting
+            # the sentence around it is a correction; rewriting the
+            # sentence itself would delete a promise somebody is relying on.
+            + " Neither of them is a statement that the person you named "
+            "is not reachable."
         )
         return out
     if total == 0:
