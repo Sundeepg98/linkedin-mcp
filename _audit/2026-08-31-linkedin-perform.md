@@ -4218,3 +4218,242 @@ admissions were, for a few hours, a working way to navigate a
 recipient-addressed messaging url. **Using the gap after reporting it would not
 have been a measurement**; it would have been the thing the gap exists to
 prevent, taken by the person who found it.
+
+## 106. HARVESTING AN IDENTIFIER OFF A PAGE ALREADY LOADED, AND THE THREE
+## STATES THAT KEPT IT HONEST
+
+Section 105 established that LinkedIn addresses compose by identifier. The
+identifier itself was then found to be arriving on a page this server ALREADY
+LOADS and throwing it away: `linkedin_who_viewed_me` renders the viewer list,
+LinkedIn draws a Message button for the first-degree rows, and that button's
+href carries the member id twice. No new page, no new permission, no new cost
+-- the read was already paid for and the value was being dropped on the floor.
+
+`dom.read_recipient_ids` now reads it, and `server._attach_recipient_ids`
+joins it onto the rows.
+
+### JOINED BY SLUG, NEVER BY POSITION
+
+The obvious join is by index: the Nth button belongs to the Nth row. It is also
+wrong the first time LinkedIn draws a row without a button, and it fails
+SILENTLY -- every id shifts by one and every value still looks like a value.
+The join is on the row's own slug, so a row LinkedIn drew no button for simply
+finds nothing.
+
+### THREE STATES, AND THE EMPTY STRING IS NOT ONE OF THEM
+
+    an id was read            recipient_id = "<id>"
+    no button on that row     recipient_id = None
+    the read itself failed    recipient_id = None on every row
+
+**An anonymous viewer has no id, and must not quietly become `""`.** An empty
+string is a value: it compares, it concatenates, it formats into a url, and it
+survives every truthiness check a caller writes by hand. `None` is the absence
+the row actually has. This is the same tri-state discipline `send_disabled`
+carries -- absent is not false, and neither is zero.
+
+> **A join that cannot express "there was nothing here" will invent something
+> here.**
+
+### THE ENTITY THAT MADE ONE ASSERTION READ ZERO
+
+Committed markup spells the separator `&amp;recipient=`. `getAttribute("href")`
+hands the reader back `&recipient=`. The reader's `[?&]` is correct for what it
+receives -- and a fixture assertion written against the RAW file with the same
+class reads zero matches, because the raw file does not contain `&` there at
+all.
+
+Both halves are true at once and they are about different strings. The fixture
+test now matches all three spellings; the reader still matches what a browser
+gives it. Nothing was loosened to make them agree.
+
+### THE REPLY SURFACE, WITH ITS DENOMINATOR
+
+A reply needs no address: the conversation exists, the recipient is already in
+it, and the entire recipient-gate apparatus has nothing to decide. That made
+the thread the cheapest surface to measure, and it was measured after the badge
+read `new_since_last_visit = 0, state = 'read'` -- so no unread conversation
+was consumed to take the reading.
+
+    elements                1139        settle: rendered_no_baseline
+    recipient comboboxes       0
+    contenteditable, any       0
+    contenteditable = true     0
+    div[role=textbox]          0
+    textarea                   1        <- THE REPLY BOX
+    input[type=text]           1
+    controls named Send        0
+
+**The counts are reported under a denominator, and that is the only reason any
+of them means anything.** An earlier version of this reading printed the zeros
+alone. Zero on a page that never rendered and zero on a page that rendered
+fully are the same character and opposite findings, and this package had
+already shipped one reader that could not tell them apart.
+
+`settle` says `rendered_no_baseline` rather than `settled`, deliberately: the
+census earns a settled figure by reading a surface twice and having the
+readings agree, and nobody has done that for a thread. So `recipient_boxes: 0`
+on 1139 elements is CREDIBLE and not CONFIRMED, and the retraction filed
+against the earlier reading is lifted only that far.
+
+### TWO CAUSES WERE TANGLED, AND ONLY THE CENSUS SEPARATED THEM
+
+`contenteditable == 0` across five surfaces looked like one fact about
+LinkedIn. It was two facts about two different surfaces, and
+`linkedin_surface_census` settled both at zero additional cost:
+
+    post_composer      SETTLED         contenteditable 2
+    profile_edit_intro half-rendered   contenteditable 0
+
+A settled surface draws contenteditable nodes. So the profile editor's zero was
+a MISSING DENOMINATOR -- a reading of a page that had not arrived -- while the
+thread's zero was a MISSING SELECTOR: the thread's reply box is a `textarea`,
+which no editor-reader in this package had ever looked for. One symptom, two
+causes, and guessing either one would have "fixed" half the surfaces and left
+the other half wrong for a reason nobody had named.
+
+### THE THIRD SINK: A VALUE THAT IS NEITHER NAVIGATED NOR PRINTED
+
+`activate_messaging_filter` returned a raw conversation id in two url fields.
+It reached no navigation and no print, so the AST taint rule -- which models
+exactly those two sinks -- was silent, and correctly so. The identifier
+travelled as RETURNED DATA into a model's context.
+
+> **A returned identifier is a third sink, and the taint rule does not model
+> it. Every reader in this package returns data to a caller, so the sink the
+> rule does not cover is the one every reader uses.**
+
+Fixed at the SOURCE rather than at the caller: a caller-side redaction leaves
+the raw value sitting on the next caller, and there was already a second caller
+by the time it was found. `tests/test_a_thread_id_never_leaves_the_module.py`
+asserts the CLASS -- every string the function returns -- so a third url field
+added tomorrow goes red here instead of shipping raw. Checking the two known
+fields by name would have protected the two mistakes already made and none of
+the next one.
+
+The third sink is NAMED, not closed. Closing it means the taint rule modelling
+returned values, and `error` fields built from exception text are the same
+class: `f"{type(exc).__name__}: {exc}"` composes a string nobody reviewed from
+a library nobody controls.
+
+## 107. THE CHECKS THAT COULD NOT FIRE: A FAMILY, NOT A RUN OF BAD LUCK
+
+Six defects in this package share one shape, and the shape matters more than
+any of the six fixes. **The check ran. It reported. It was green. And it could
+not have been anything else.**
+
+A check that cannot fail is indistinguishable from a check that passes, by
+construction -- so nothing downstream can detect one, and the greener the suite
+gets the more expensive each instance becomes. These are the six, with the
+mechanism that disabled each:
+
+    #  the check                        why it could not fire
+    -- -------------------------------- --------------------------------------
+    1  send_message's uniqueness gate    its input was already filtered BY the
+                                         predicate it tests
+    2  the reply probe's badge gate      it asked a reader for fields that
+                                         reader does not return
+    3  a committed-identity guard        its own text was the literal it bans
+    4  the redactor's over-reach control a placeholder swap would remove the
+                                         shape the control keys on
+    5  census_redact_rare, in a reader   its trigger (count == 1) cannot arise
+                                         before rows merge
+    6  a spec test's urn literal         a placeholder swap makes two rules
+                                         return None instead of firing
+
+Numbers 3, 5 and 6 were found by sibling builders on the same day; 1, 2 and 4
+here. Six in one package in one day is not six accidents.
+
+### THE TWO MECHANISMS, AND ONE OF THEM IS INVISIBLE TO REVIEW
+
+**MECHANISM A -- BORN DEAD (1, 2, 3, 5).** The check never could fire. It was
+written against a set, a return shape, a text or a lifecycle that makes its
+condition unreachable. `send_message` asked whether exactly one suggestion
+carries the needle, over rows LinkedIn returned BECAUSE they carry the needle:
+measured live at `options 10, carrying the needle 10`. The gate refused, would
+refuse forever, and looked exactly like caution.
+
+> **Never test uniqueness over a set that was already filtered by the same
+> predicate.** The answer is a property of the filter, not of the set.
+
+**MECHANISM B -- KILLED BY A SAFE-LOOKING EDIT (4, 6).** The check fired when
+written, and an edit that raises nothing, fails nothing and reviews clean took
+its ability away. Both instances are the same edit: replacing a shape-valid
+literal with an honest placeholder.
+
+Mechanism B is the dangerous one, because every incentive points at making the
+edit. A slug-shaped or urn-shaped literal in a tracked file is a REAL COST --
+the identity guard has to tell it from a real identifier, and on this repo it
+correctly refused mine within the hour. "Replace it with a placeholder" is the
+right instinct, it is what the guard appears to be asking for, and in these two
+cases it silently retires the check.
+
+### MEASURED, BECAUSE THE ANSWER IS NOT THE SAME EVERY TIME
+
+The slug case, measured rather than argued -- and note the first column, which
+is what makes the swap look free:
+
+    candidate              shipped code     over-reach mutant    identity
+                           reads shape?     still fires?         guard clean?
+    some-slug              no               yes                  NO
+    /in/<SLUG>             no               NO                   yes
+    some-person-a1b2c3     no               yes                  yes
+
+The shipped redactor reads no slug shape at all. Every local check passes with
+`<SLUG>` in place. What the swap removes is the ability of the OVER-REACH
+control to notice a redactor that has been generalised into an identity
+scrubber -- because that mutant is keyed on slug shape, and `<SLUG>` is not
+slug-shaped.
+
+**The opposite answer is also common, which is why this must be measured each
+time rather than ruled once.** Where the shape is genuinely decoration, a
+placeholder is strictly better, because a placeholder cannot decay into a real
+value. In the same file, `FAKE_THREAD_ID` is exactly that case: the redactor
+matches `[^/?#]+`, so any non-empty run exercises it identically. Two literals,
+one file, opposite answers. **"Is the SHAPE what the code reads?" is the
+question, and it has to be asked of the literal, not of the file.**
+
+### THE RESOLUTION, WHICH IS THE SAME BOTH TIMES
+
+Where the shape IS load-bearing, the value must be shape-valid AND unmistakably
+invented. Those pull against each other only if the vocabulary is invented
+locally. This repo already keeps one: `SYNTHETIC_SLUGS` and `SYNTHETIC_IDS` in
+`tests/test_no_committed_identity.py`. Reusing an allowlisted value satisfies
+both at once, and beats widening the allowlist -- no boundary moves, nothing
+new has to be declared, and the identity guard remains the thing that enforces
+safety rather than a comment.
+
+And the dependency is PINNED AS A TEST, not written as a comment:
+`test_the_profile_control_is_load_bearing` and its sibling
+`test_the_urn_probe_is_load_bearing` both assert that the literal's shape is
+what lets a rule fire. The free-looking swap now goes RED instead of going
+silent. That is the only durable answer, because the next person to see a
+shape-valid identifier in a test file will have exactly the same correct
+instinct that produced two of these six.
+
+### THE DETECTION METHOD THAT WORKED EVERY TIME
+
+Not review. Not reasoning. **Plant the failure and watch.**
+
+Every one of the six was found by making the thing the check guards against
+actually happen -- a live census that measured the filter, a run that reported
+what it DID see instead of what it did not, a mutation run against the guard.
+For number 4, the control was explicit: plant `/in/<SLUG>`, run the file, and
+watch one test go red while the other five stay green. That single observation
+is the entire argument for the literal, and it doubles as the demonstration
+that the swap "raises nothing and fails nothing" -- because five of six tests
+did not notice it at all.
+
+> **An instrument enters the register only if it has been SHOWN FAILING**, and
+> a self-referential guard that fails by being the literal it bans is not a
+> false positive to exempt -- it is the guard saying it cannot name what it
+> forbids and still forbid it. Build the marker from parts; do not weaken the
+> guard.
+
+### THE STANDING QUESTION THIS LEAVES
+
+Nothing in this package can currently enumerate checks of Mechanism A. Every
+one of the six was found by a human or an agent reading the code with
+suspicion, at the moment it happened to matter. A structural detector -- a
+mutation pass that asserts each guard can be made to fail -- is the instrument
+this section argues for and does not deliver.
