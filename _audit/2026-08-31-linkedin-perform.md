@@ -4298,6 +4298,13 @@ against the earlier reading is lifted only that far.
 
 ### TWO CAUSES WERE TANGLED, AND ONLY THE CENSUS SEPARATED THEM
 
+> **HALF OF THIS SUBSECTION IS SUPERSEDED BY 108, WHICH RETRACTS IT BY
+> MEASUREMENT.** The profile-editor half stands. The THREAD half -- that its
+> zero was a missing SELECTOR and the `textarea` was the reply box -- is wrong:
+> the element is invisible and is not a composer input. Left in place with this
+> marker rather than rewritten, because the sentence being retracted is the
+> evidence for how the mistake was made.
+
 `contenteditable == 0` across five surfaces looked like one fact about
 LinkedIn. It was two facts about two different surfaces, and
 `linkedin_surface_census` settled both at zero additional cost:
@@ -4457,3 +4464,129 @@ one of the six was found by a human or an agent reading the code with
 suspicion, at the moment it happened to matter. A structural detector -- a
 mutation pass that asserts each guard can be made to fail -- is the instrument
 this section argues for and does not deliver.
+
+## 108. THE REPLY BOX WAS NOT A REPLY BOX, AND THE DENOMINATOR THAT MISSED IT
+
+Section 106 reported a two-cause finding that was called the best diagnosis of
+the session. Half of it was wrong, and the half that was wrong was mine.
+
+### WHAT WAS CONCLUDED, QUOTED SO THE MISTAKE STAYS LEGIBLE
+
+    profile editor   read 0 because the page had not arrived  -- missing DENOMINATOR
+    thread           reads 0 because nobody counted textareas -- missing SELECTOR
+    post composer    was never 0 -- reads 2 when settled
+
+Rows one and three stand. **Row two is retracted.** The enumeration that went
+looking for the submit measured the textarea itself:
+
+    textarea   1   visible=FALSE   placeholder=none   aria-label=none   name=present
+
+An invisible element with no placeholder, no accessible name and a `name`
+attribute is a hidden form field. `textarea 1 <- THE REPLY BOX` was never a
+measurement; it was an INFERENCE from its being the only editable thing on the
+page, and it read as a finding because it arrived in the same run as a real
+one.
+
+> **A correct finding standing beside a guess lends the guess its credibility.**
+> The census result was solid, so the sentence next to it was read as solid
+> too -- including by the person who wrote both.
+
+### AND THERE IS NO COMPOSER AT ALL ON THAT READING
+
+    button[type=submit]   0        contenteditable       0
+    input[type=submit]    0        div[role=textbox]     0
+    button:disabled       0        form                  0
+    controls examined    54        send/submit/reply/post/deliver  0 each
+
+Nothing is disabled anywhere, so nothing is waiting for content. No control on
+the page carries a submit word. The thread's zero is therefore NOT a missing
+selector; it is the profile editor's cause after all, or a fifth thing nobody
+has named. Separating "drawn lazily", "had not finished arriving" and "this
+surface has none" requires TYPING, which is a write against a real
+conversation, so the probe stops rather than finding out.
+
+### THE KNOCK-ON, WHICH IS THE EXPENSIVE PART
+
+`recipient_boxes: 0` was the reading that would REFUTE the whole addressless-
+reply approach -- a non-zero meaning a reply needs an address after all. On a
+page where no composer rendered, zero is what that reading returns either way.
+**It is not weak evidence. It is uninterpretable**, and it had already been
+relayed upward as credible before the enumeration ran.
+
+### THE DENOMINATOR THAT COULD NOT DO ITS JOB
+
+`settle: rendered_no_baseline` came from an ABSOLUTE FLOOR of 50 elements. The
+page drew 1,142 and cleared it without difficulty.
+
+**An element count answers "did a page arrive", never "did the composer
+arrive."** The census earns its verdict from two agreeing readings of the SAME
+surface; the floor was a stand-in that cannot make that distinction, chosen
+because a ratio needs the baseline nobody had earned. It is section 107's
+family one level up: a check that fires, reports, and does not certify what it
+appears to certify. The field was added to stop uninterpretable zeros being
+read as findings, and it did not stop this one.
+
+That is the ARGUMENT for a `messaging_compose` census rather than a step to be
+taken after it.
+
+### THE PATTERN TURNED INWARD, TWICE, IN THE ACT OF FIXING IT
+
+**The probe's first run printed the counts and not the settle verdict.** The
+script written to read the liveness field reproduced, in its own output, the
+exact defect the field was added to close -- zeros presented as findings with
+no denominator beside them. Fixed by printing the denominator FIRST, with an
+explicit STOP when the page did not render.
+
+**Then the enumeration's own predicate escaped its scope.** It asked "is there
+a button within seven ancestor levels of the textarea", which goes true the
+moment the walk reaches the page container. It did -- 42 buttons at ancestor 3,
+page-wide total also 42 -- and printed THE THIRD CANDIDATE IS REFUTED off the
+whole page. A scope now counts as composer-local only if it is strictly
+SMALLER than the page. The listing was also truncated at twelve rows with "30
+more, not listed", when the decisive row was as likely to be among the thirty;
+a count over all 54 replaced it, because a count cannot be truncated.
+
+> **Three instruments built to catch this class, each defective in this class
+> on its first run.** Not carelessness -- the check is written by the same
+> hands, in the same sitting, under the same assumption that produced the
+> defect. It is the argument for running a guard against a planted failure
+> before believing it, every time, including when the guard is about guards.
+
+### A LEAK IN A SANCTIONED REDACTOR, FOUND BY TRYING TO REUSE IT
+
+The enumeration needed to say something about control names on a page that is a
+private conversation. `scripts/_probe_messaging.py` carries a redactor built for
+exactly that and tested in both directions, so reusing it was the correct move
+over hand-rolling a second privacy boundary. It was tested offline first, on
+the labels a conversation page actually produces:
+
+    Conversation with <name>   redacted   (an explicit template rule caught it)
+    <name>                     redacted
+    Reply to <name>            NAME SURVIVED
+    Open <name> profile        NAME SURVIVED
+    Send message to <name>     NAME SURVIVED
+
+**MECHANISM.** Its name pattern matches the MAXIMAL run of letter-words and
+then requires EVERY word in that run to be capitalised. One lowercase word --
+"to", "profile", "sent" -- exempts the entire run, name included. The two that
+redact do so because of a template rule, not because the name logic works. The
+docstring admits a "single capitalised token" gap; this is far wider, and a
+composer control is plausibly "Reply to <name>", which puts the hole exactly
+where this probe's input would have gone.
+
+Not fixed here: it is another owner's file, and a tightening needs a casualty
+measurement first. Reported instead.
+
+**So the probe emits a RELATION and never a name** -- word count, character
+count, and which of a closed declared vocabulary appear. A relation cannot
+carry an identity; a redacted string can, whenever the redactor has a hole.
+Controlled on the exact strings that leaked: zero escaped. The first cut
+matched substrings and reported "Open <name> profile" as `vocab=file`, because
+"file" sits inside "profile" -- no leak, but a profile link reading as an
+attachment button is the wrong pointer to hand the next step, so it matches
+whole words.
+
+### ONE LINE ON THE LOCK
+
+The profile lock freed after roughly three minutes. The lead's reading was
+right and mine was a collision, not a stuck lock.
