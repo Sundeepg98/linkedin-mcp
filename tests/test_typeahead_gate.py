@@ -143,6 +143,7 @@ async def test_exactly_one_suggestion_carrying_the_needle_proceeds(over):  # noq
     assert found["observed"]["total"] == 2
     assert found["observed"]["matches"] == 1
     assert found["selector"] == dom.typeahead_option_selector(NEEDLE)
+    assert found["observed"]["appeared"] is True
 
 
 @pytest.mark.asyncio
@@ -177,7 +178,7 @@ async def test_a_listbox_that_never_appears_refuses_about_the_reader(over):  # n
     assert found["proceed"] is False
     assert found["refused_condition"] == "1_no_listbox"
     assert found["observed"]["appeared"] is False
-    assert "not a statement that the person you named is not reachable" in found["why"]
+    assert "the person you named is not reachable" in found["why"]
 
 
 @pytest.mark.asyncio
@@ -190,7 +191,10 @@ async def test_an_empty_listbox_refuses_separately_from_an_absent_one(over):  # 
     """
     empty = await _gate(over, _listbox())
     assert empty["refused_condition"] == "2_no_options"
-    assert empty["observed"]["appeared"] is False
+    # THE LISTBOX IS THERE. That is the whole distinction: it opened and it
+    # offered nobody, which is a fact about the name he supplied.
+    assert empty["observed"]["appeared"] is True
+    assert empty["observed"]["total"] == 0
     absent = await _gate(over, NO_LISTBOX)
     assert absent["refused_condition"] == "1_no_listbox"
     assert empty["refused_condition"] != absent["refused_condition"]
@@ -263,11 +267,17 @@ def test_the_selector_builder_refuses_a_quote_and_a_backslash():
     """
     from linkedin_server.errors import ExtractionFailedError
 
-    for bad in ('a"b', "a" + chr(92) + "b"):
+    for bad in ('a"b', "a" + chr(92) + "b", "a/b"):
         with pytest.raises(ExtractionFailedError):
             dom.typeahead_option_selector(bad)
     assert dom.typeahead_option_selector(NEEDLE) == (
-        'role=option[name="' + NEEDLE + '"i]'
+        "role=option[name=/" + NEEDLE + "/i]"
+    )
+    # AND A METACHARACTER IS ESCAPED RATHER THAN PASSED THROUGH: an unescaped
+    # `.` matches any character, so a selector built from `Jr.` would also
+    # match `JrX` -- more rows than the name it came from.
+    assert dom.typeahead_option_selector("Jr.") == (
+        "role=option[name=/Jr" + chr(92) + "./i]"
     )
 
 
