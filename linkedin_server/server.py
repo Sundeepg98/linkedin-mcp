@@ -4046,24 +4046,191 @@ async def linkedin_follow_company(
 # them.
 
 
+# ---------------------------------------------------------------------------
+# THE AUDIENCE NOBODY CHOSE
+# ---------------------------------------------------------------------------
+#
+# ``linkedin_publish_post`` had NO visibility parameter and its docstring never
+# said "visibility", "audience", "Anyone" or "connections" -- measured, all
+# four at zero occurrences. What it did say, at length, was REACH: a follower
+# count and three impression figures. THAT WORD COLLISION IS HOW THIS HID FOR
+# THREE DAYS. "Audience" was present in the spec meaning HOW MANY, while the
+# SETTING meaning WHO was absent, so a reader searching for the word found it
+# and stopped.
+#
+# REACH IS NOT AUDIENCE. How many people saw the last post is a fact about the
+# past. Who the next one goes to is a control on the composer, and this server
+# published at whatever that control happened to be set to.
+#
+# THE CONTROL WAS SEEN, WRITTEN DOWN, AND NEVER NAMED. A live capture on
+# 2026-08-31 read 31 controls off the composer and recorded the finding in
+# three words -- "and an audience control" -- in
+# _audit/2026-08-31-linkedin-perform.md. It was never named, never read and
+# never wired.
+#
+# RE-MEASURED 2026-09-03, one page load, nothing pressed:
+#
+#     linkedin_surface_census("post_composer")
+#     source_url    https://www.linkedin.com/preload/sharebox/   (no redirect)
+#     controls_read 32      settle verdict "consistent"
+#     dialog#0      Add media, Celebrate an occasion, Share that you're
+#                   hiring, Schedule post, More, Dismiss x2, Post (DISABLED),
+#                   Text editor for creating content, one <opaque> text
+#                   button, and ONE aria-label-named button carrying
+#                   aria-expanded="false" -- a control that opens a menu.
+#
+# That last row is the audience control. Everything else in the dialog is
+# accounted for by name.
+#
+# AND THE CENSUS REDACTS ITS ACCESSIBLE NAME. ``shape.census_redact_rare``
+# blanks a capitalised run in any shape seen exactly once, which is the rule
+# that keeps other members' names out of this process, and it fires here. So
+# the measurement is NOT "the audience currently reads X". It is:
+#
+#     NOTHING IN THIS PACKAGE CAN SAY WHAT THE AUDIENCE IS SET TO.
+#
+# WHICH IS WHY THIS REFUSES RATHER THAN DEFAULTING. Every other gate here
+# QUOTES the state it is about to change: set_open_to_work prints "Open to
+# work <dot> Recruiters only" verbatim off the topcard, and its own comment
+# says the gate "never has to describe the state he is in; it can quote it."
+# For a post, the state that decides WHO SEES IT is unread. A gate that cannot
+# name the audience cannot obtain consent to broadcast at it -- and this is the
+# action the spec itself calls IRREVERSIBLE IN AUDIENCE, whose outcome is
+# DECLARED UNVERIFIABLE, so a wrong audience can be neither detected afterwards
+# nor taken back.
+#
+# WHY NOT JUST ADD A REQUIRED ``audience`` PARAMETER. Because honouring one
+# means PRESSING that control and choosing from a menu nobody has opened, and
+# that is exactly what react_to_item's residue already forbids: "a gate that
+# cannot say what it is about to express under his name does not get to
+# guess." A parameter accepted and not applied would be worse than none.
+#
+# WHAT LIFTS THIS, and it is one closed-form slice in somebody else's file:
+# a reader on ``dom`` that names the composer's audience control and returns
+# its CURRENT VALUE, read off the composer the write path already has open. It
+# needs no new address -- the sharebox is this action's own url_template -- and
+# no click. With it, the gate can quote the audience the way the topcard gate
+# quotes Open To Work, and this refusal disappears on its own: the guard below
+# is keyed on whether that reader exists, not on a flag somebody has to
+# remember to flip.
+#
+# TWO THINGS DELIBERATELY NOT CLAIMED. Whether the control currently reads
+# "Anyone" or something narrower is UNMEASURED -- the redaction is why. And
+# whether LinkedIn remembers a previous session's choice is UNMEASURED too, so
+# "it would default to public" is not asserted here; what is asserted is only
+# that nobody in this process can say.
+#
+#: The name of the reader that would settle it. It does not exist yet, and
+#: this guard is keyed on that rather than on a boolean: a flag would have to
+#: be flipped by hand and would go stale exactly the way the seven spec
+#: sentences corrected on 2026-09-03 did.
+_COMPOSER_AUDIENCE_READER = "read_post_composer_audience"
+
+
+def _composer_audience_is_readable() -> bool:
+    """Can anything here say WHO a post would be published to?
+
+    Feature detection on ``dom`` rather than a constant, so that the refusal
+    below stops firing the moment the capability exists and cannot outlive it.
+    """
+    return callable(getattr(dom, _COMPOSER_AUDIENCE_READER, None))
+
+
+def _publish_post_audience_refusal() -> dict[str, Any]:
+    """The refusal, carrying its own measurement and the fix that lifts it."""
+    return {
+        "error": "audience_unread",
+        "message": (
+            "REFUSING TO PUBLISH: this server cannot say WHO would see it. "
+            "A post is a broadcast under your own name, this action is "
+            "declared IRREVERSIBLE and its outcome is declared UNVERIFIABLE "
+            "-- so the one fact that must be on the table before you confirm "
+            "is the audience, and it is the one fact missing. "
+            "linkedin_publish_post has no visibility parameter and never had "
+            "one; the gate quantified REACH -- a follower count and three "
+            "impression figures -- while naming nobody. Reach is how many saw "
+            "the last post. Audience is who gets the next one."
+        ),
+        "what_was_measured": (
+            "The composer DOES carry an audience control. Read live on "
+            "2026-09-03 at https://www.linkedin.com/preload/sharebox/ -- one "
+            "page load, nothing pressed, 32 controls with the census's own "
+            "settle verdict 'consistent'. Inside the composer dialog, every "
+            "control is accounted for by name except one: an aria-label-named "
+            "button carrying aria-expanded='false', which is a control that "
+            "opens a menu. That is the audience control, and it was recorded "
+            "in three words on 2026-08-31 without ever being named or read."
+        ),
+        "why_it_cannot_be_named": (
+            "The only instrument that sees it is the surface census, and the "
+            "census REDACTS its accessible name -- shape.census_redact_rare "
+            "blanks a capitalised run in any shape seen exactly once, which "
+            "is the rule that keeps other members' names out of this process "
+            "and it does not know this control is yours. So no reader here "
+            "can report what the audience is set to."
+        ),
+        "not_claimed": (
+            "Whether the control currently reads 'Anyone' or something "
+            "narrower is UNMEASURED, and whether LinkedIn remembers a "
+            "previous session's choice is UNMEASURED. This refusal does not "
+            "assert that a post would go out public. It asserts that nobody "
+            "in this process can say which it would be."
+        ),
+        "what_would_lift_it": (
+            "A reader named dom." + _COMPOSER_AUDIENCE_READER + " that names "
+            "the composer's audience control and returns its CURRENT VALUE, "
+            "read off the composer this write already opens. No new address "
+            "-- the sharebox is this action's own url_template -- and no "
+            "click. The gate could then QUOTE the audience the way the "
+            "profile gate quotes 'Open to work <dot> Recruiters only', and "
+            "this refusal lifts itself: it is keyed on whether that reader "
+            "exists. APPLYING a chosen audience is a SEPARATE and larger "
+            "question -- it means pressing that control and choosing from a "
+            "menu nobody has opened, which needs its own measurement first."
+        ),
+        "what_you_can_do_now": (
+            "Publish from LinkedIn itself, where the audience selector is on "
+            "the screen in front of you and you can see what it says."
+        ),
+        "performed": False,
+    }
+
+
 @mcp.tool()
 async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str, Any]:
-    """Publish a post to your LinkedIn feed. PERFORMS, and IT TYPES.
+    """Publish a post to your LinkedIn feed. REFUSES: the audience is unread.
 
-    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01. It is the first
-    tool on this surface that puts your words on a page rather than pressing a
-    control that already exists, and the package's standing claim that it
-    "types nothing" -- true, and printed in three places -- was corrected in
-    the same change that made it false.
+    READ THAT FIRST, because it is not a caveat and it is not a failure. This
+    tool has NO VISIBILITY PARAMETER and never had one, and the composer
+    carries an audience control this server cannot read -- so it will not
+    publish. Call it to read the refusal; it loads nothing and costs nothing.
 
-    WHAT TYPING MEANS HERE, exactly, because the phrase is doing a lot of
-    work. ONE ``page.fill``, at one call site, draining a queue. The text is a
-    slice of the GRANT's canonical target -- the same string the preview
-    printed and the confirm token was minted against -- so **this server never
-    composes what it types**; it types back what you supplied and read.
-    ``tests/test_typed_bytes.py`` asserts that on the syntax tree rather than
-    trusting it, because an earlier version of that check compared source text
-    and let a mutation appending a hashtag through.
+    THE WORD COLLISION THAT HID IT. This docstring talked about REACH at
+    length -- a follower count, three impression figures -- and said
+    "visibility", "audience", "Anyone" and "connections" exactly zero times.
+    Reach is how many people saw the last post. Audience is who gets the next
+    one, it is a control on the composer, and publishing at whatever that
+    control happens to be set to is not a choice anybody made.
+
+    WHAT IS MEASURED, 2026-09-03: the composer draws 32 controls on a
+    settle-consistent reading and one of them -- the only aria-label-named
+    button in the dialog with aria-expanded="false" -- is the audience
+    control. The census that sees it REDACTS its name, by the rule that keeps
+    other members out of this process. So the honest statement is that nothing
+    here can say what the audience is set to, and this is the action the spec
+    calls IRREVERSIBLE IN AUDIENCE whose outcome is DECLARED UNVERIFIABLE.
+
+    Everything below describes the machinery that is still built and still
+    correct, and would run the moment the audience can be named.
+
+    IT TYPES, and that was true from 2026-09-01. ONE ``page.fill``, at one
+    call site, draining a queue. The text is a slice of the GRANT's canonical
+    target -- the same string the preview printed and the confirm token was
+    minted against -- so **this server never composes what it types**; it
+    types back what you supplied and read. ``tests/test_typed_bytes.py``
+    asserts that on the syntax tree rather than trusting it, because an
+    earlier version of that check compared source text and let a mutation
+    appending a hashtag through.
 
     A FILL IS NOT A PUBLISH. Typing into the composer sends nothing. The act
     that reaches LinkedIn is the click after it, and that click happens only
@@ -4095,19 +4262,33 @@ async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str,
     composer render, the page draws seven links and none reaches a posted or
     scheduled list. Open your profile and look.
 
-    WHAT IT COSTS. This is a BROADCAST under your own name -- 274 followers,
-    and past posts measured at 113, 319 and 1,287 impressions. Whether a post
-    can be deleted is UNMEASURED: the per-post overflow menu has never been
-    opened.
+    WHAT IT COSTS. This is a BROADCAST under your own name, to a few hundred
+    followers, with past posts measured in the hundreds and low thousands of
+    impressions. THE EXACT FIGURES ARE NOT REPEATED HERE because the two
+    copies of them in this package DISAGREE -- this docstring said 274 / 113,
+    319, 1287 and the spec's residue says 275 / 103, 308, 1284, and neither
+    has been re-measured. That disagreement is recorded rather than resolved
+    by picking one. Whether a post can be deleted is UNMEASURED: the per-post
+    overflow menu has never been opened.
 
     Args:
-        text: EXACTLY what will be published, verbatim. It is the target, so
+        text: EXACTLY what would be published, verbatim. It is the target, so
             the confirm token is bound to these bytes -- changing them between
             the preview and the confirmation invalidates the token rather than
             publishing something you did not read.
         confirm_token: leave empty to read the gate. NEVER confirm on his
-            behalf.
+            behalf. While the audience is unread this argument is not reached
+            at all: the refusal fires before any token is minted or consumed.
     """
+    # THE AUDIENCE GATE, AND IT RUNS BEFORE ANYTHING ELSE. It loads no page
+    # and touches no token -- deliberately, because a refusal that first
+    # opened the composer would spend the autosave risk CENSUS_SURFACE_COST
+    # documents ("a composer may autosave... this server cannot see it") to
+    # tell him something already known. It also covers BOTH doors: the
+    # preview that would mint a token and the confirmation that would consume
+    # one already held.
+    if not _composer_audience_is_readable():
+        return _publish_post_audience_refusal()
     try:
         return await _write_tool("publish_post", {"text": text}, confirm_token)
     except Exception as exc:
