@@ -137,7 +137,7 @@ async def test_the_seniority_mix_is_three_lines_and_every_one_is_a_share(
     assert all("%" in line for line in seniority), seniority
 
 
-async def test_the_education_rows_render_on_the_page_and_never_reach_the_field(
+async def test_the_education_rows_reach_the_field_through_the_positional_read(
     chromium_page,
 ):
     """A MISMATCH, PINNED RATHER THAN PAPERED OVER. Expected four; got zero.
@@ -161,16 +161,43 @@ async def test_the_education_rows_render_on_the_page_and_never_reach_the_field(
     four, in order, directly under the heading. Only the section walk misses
     them.
 
-    So this asserts BOTH halves, because either one alone is misleading: the
-    panel WAS seen (its heading is in the tally) and its rows did NOT arrive.
-    The moment ``dom.py`` learns to read them this test fails, which is the
-    intended way for it to end -- it is a pin on a known gap, not a
-    ratification of one.
+    So this asserted BOTH halves -- the panel WAS seen, its rows did NOT
+    arrive -- and said the moment ``dom.py`` learned to read them it would
+    fail, which is the intended way for a pin on a gap to end.
+
+    ## IT ENDED THAT WAY, THE SAME HOUR
+
+    ``dom.lines_after_heading`` reads the rows positionally out of ``main``'s
+    text when the structural walk returns nothing, and ``dom.share_rows``
+    joins the split ``12%`` / ``have a ...`` pairs back together. The
+    structural read is still tried FIRST and still wins wherever it works:
+    seniority comes back through it on both captures and is untouched. The
+    weaker anchor is used exactly where the stronger one was measured to
+    fail.
+
+    **AND THE FIRST FIX WAS WRONG BY ONE ROW.** Bounded only by the next
+    HEADING, it returned FIVE education rows where the page draws four -- the
+    fifth being ``Insights about the company``, which is a ``<strong>`` and
+    so invisible to a heading boundary. The run is now bounded by its own
+    SHAPE instead: every row of a share breakdown starts with a share, and
+    the first line that does not ends the run. That is why this test asserts
+    the exact length AND the exact first row rather than just truthiness --
+    a bleed of one line from the next panel passes any assertion that only
+    asks whether the list is non-empty.
     """
     panels = await _panels(chromium_page, HYDRATED)
 
     assert "Applicant education level" in panels["observed"]["headings"]
-    assert panels["applicant_insights"]["education"] == []
+    education = panels["applicant_insights"]["education"]
+    assert len(education) == 4, education
+    assert education[0].startswith("12% have a Bachelor")
+    assert education[-1] == "30% have other degrees"
+    # THE BLEED THIS EXISTS TO CATCH, named so a future reader knows the
+    # length assertion above is load-bearing rather than incidental.
+    assert "Insights about the company" not in education
+    # The structural read still wins where it works, and this is the control
+    # for that claim: seniority never went through the fallback.
+    assert len(panels["applicant_insights"]["seniority"]) == 3
 
 
 async def test_the_company_panel_is_reported_by_shape_and_is_present(

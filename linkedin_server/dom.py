@@ -7176,6 +7176,122 @@ def lines_below(section: Optional[dict[str, Any]]) -> list[str]:
     return lines[:JOB_PANEL_MAX_LINES]
 
 
+#: A line that is nothing but a share -- ``12%``. Anchored at both ends,
+#: because ``60% Entry level people applied for this job`` is a whole row and
+#: must not be treated as a dangling number.
+_BARE_SHARE = re.compile(r"^\d{1,3}%$")
+
+
+def lines_after_heading(
+    body: str, heading: str, stop_headings: set[str], cap: int
+) -> list[str]:
+    """Lines that follow a heading in ``main``'s rendered text.
+
+    THE FALLBACK FOR A BLOCK THE SECTION WALK CANNOT SEE, and it exists
+    because of a real defect rather than as belt and braces.
+
+    ``READ_PROFILE_JS`` finds a heading's block by climbing from the heading
+    while each ancestor holds exactly ONE heading. That is the right rule and
+    it fails on this page for a reason no rule about headings could have
+    anticipated: the posting draws the education shares as a ``<tbody>`` with
+    four ``<tr>`` rows and **no ``<table>`` anywhere in the document**. An
+    HTML parser drops ``<tbody>`` and ``<tr>`` outside a table, so the
+    ``<h3>`` is reparented into a div that already holds the counts block and
+    the seniority block -- three headings in one parent -- and the climb
+    breaks at the first hop. The section comes back holding its heading and
+    nothing else.
+
+    THE ROWS WERE NEVER LOST. ``main``'s rendered text carries all four, in
+    order, directly under the heading; only the structural walk misses them.
+    So this reads them positionally out of the text, bounded by the NEXT
+    heading the same walk found -- which means the boundary comes from the
+    page's own headings rather than from a line count.
+
+    Used ONLY when the structural read returned nothing. A block the walk can
+    see is read the structural way, because position in a text dump is the
+    weaker anchor and is worth using exactly where the stronger one has been
+    measured to fail.
+    """
+    lines = [line.strip() for line in str(body or "").splitlines()]
+    try:
+        start = lines.index(heading.strip())
+    except ValueError:
+        return []
+    out: list[str] = []
+    for line in lines[start + 1:]:
+        if not line:
+            continue
+        if line in stop_headings:
+            break
+        out.append(line)
+        if len(out) >= cap:
+            break
+    return out
+
+
+#: A line that STARTS with a share, whether or not it carries its own text.
+_SHARE_PREFIX = re.compile(r"^\d{1,3}%")
+
+
+def share_rows(lines: list[str]) -> list[str]:
+    """The leading run of share rows, joined, stopping where the run stops.
+
+    TWO JOBS, AND THE SECOND IS THE ONE THAT WAS LEARNED RATHER THAN DESIGNED.
+
+    THE JOIN. The two breakdowns on this panel are drawn DIFFERENTLY, and a
+    reader that assumed one shape would silently halve the other. Measured on
+    both captures::
+
+        seniority   "60% Entry level people applied for this job"   one line
+        education   "12%" then "have a Bachelor's Degree"           two lines
+
+    So a share ALONE on its line is joined to the line after it, and a share
+    that already carries its own text is kept exactly as it is.
+
+    THE STOP. The positional fallback this feeds is bounded by the next
+    HEADING, and on both captures the next thing after the education rows is
+    ``Insights about the company`` -- a ``<strong>``, not a heading, so the
+    heading boundary does not see it and one line of the next panel came back
+    inside the education list. Measured, not foreseen: the first run returned
+    five rows where the page draws four.
+
+    A heading list could not have caught that and a longer list of furniture
+    strings is the wrong instrument -- the next such title would just be a
+    different string. What actually bounds the run is its own SHAPE: every
+    row of a share breakdown starts with a share, and the first line that
+    does not is not part of it. So the run ends there.
+
+    TRUNCATING RATHER THAN FILTERING, deliberately. Keeping only the lines
+    that match would silently drop a breakdown row drawn without a leading
+    share; stopping makes the same case show up as a SHORT list, which a
+    caller comparing against the page can see. A wrong length is legible and
+    a quietly filtered list is not.
+
+    A trailing bare share with nothing after it is kept on its own rather than
+    dropped -- a row this function cannot complete is still a row the page
+    drew.
+    """
+    out: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        following = lines[index + 1] if index + 1 < len(lines) else ""
+        if _BARE_SHARE.match(line):
+            if following and not _SHARE_PREFIX.match(following):
+                out.append("%s %s" % (line, following))
+                index += 2
+                continue
+            out.append(line)
+            index += 1
+            continue
+        if _SHARE_PREFIX.match(line):
+            out.append(line)
+            index += 1
+            continue
+        break
+    return out
+
+
 def pair_metrics(lines: list[str]) -> list[dict[str, str]]:
     """Number-then-label lines into label/value pairs.
 
@@ -7295,14 +7411,45 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
     seniority_section = section_matching(sections, JOB_SENIORITY_HEADINGS)
     education_section = section_matching(sections, JOB_EDUCATION_HEADINGS)
 
+    # main's rendered text, read once. It answers the two marker questions
+    # below AND backs the fallback for a block the section walk cannot see --
+    # see lines_after_heading for the measured reason one exists.
+    body = await read_main_text(page)
+    stop_headings = {
+        str(section.get("heading") or "").strip()
+        for section in sections
+        if str(section.get("heading") or "").strip()
+    }
+
+    def _breakdown(section: Optional[dict[str, Any]]) -> list[str]:
+        """A share breakdown, structurally if possible and positionally if not.
+
+        THE STRUCTURAL READ IS TRIED FIRST AND KEPT WHEN IT WORKS. Seniority
+        comes back through it on both captures; education comes back EMPTY on
+        both, because the page draws its rows as table elements outside a
+        table and the parser reparents them out of reach. Falling back only
+        on an empty result means the weaker anchor -- position in a text dump
+        -- is used exactly where the stronger one has been measured to fail,
+        and nowhere else.
+        """
+        structural = lines_below(section)
+        if structural or not section:
+            return structural
+        heading = str(section.get("heading") or "")
+        return share_rows(
+            lines_after_heading(
+                body, heading, stop_headings, JOB_PANEL_MAX_LINES
+            )
+        )
+
     applicant: Optional[dict[str, Any]] = None
     if applicant_heading or counts_section or seniority_section:
         applicant = {
             "heading": str((applicant_heading or {}).get("heading") or "").strip()
             or None,
             "metrics": pair_metrics(lines_below(counts_section)),
-            "seniority": lines_below(seniority_section),
-            "education": lines_below(education_section),
+            "seniority": _breakdown(seniority_section),
+            "education": _breakdown(education_section),
         }
 
     company: Optional[dict[str, Any]] = None
@@ -7318,8 +7465,8 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
     # THE TWO MARKER STRINGS ARE MATCHED IN PYTHON, AGAINST main's text.
     # ``JOB_INSIGHT_MARKERS_JS`` returns the LENGTH of that text and never the
     # text itself, so the substring tests live here where the constants they
-    # test for are declared and can be read beside them.
-    body = await read_main_text(page)
+    # test for are declared and can be read beside them. ``body`` was read
+    # once above, before the breakdowns that also need it.
     return {
         "applicant_insights": applicant,
         "company_insights": company,
