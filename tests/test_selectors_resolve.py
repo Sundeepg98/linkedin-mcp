@@ -73,6 +73,22 @@ NOT_RESOLVED_HERE: dict[str, str] = {
         "in tests/test_writes.py, where the row structure it climbs is real "
         "rather than invented"
     ),
+    # THE ONLY BUILDER HERE WHOSE MATCH IS AN ACCESSIBLE NAME OF A PERSON.
+    # Every control on this file's PAGE is furniture with a fixed label, so a
+    # suggestion row is the one thing it cannot honestly draw: the selector's
+    # subject is a name supplied at call time, and a fixture inventing one
+    # would resolve a string this builder will never be handed.
+    #
+    # It IS resolved -- in tests/test_typeahead_gate.py, in a real browser,
+    # against a listbox of two suggestions, including the case that matters:
+    # his row drawn SECOND, so a builder aiming by position would press a
+    # stranger. That file also pins the measurement that forced the regex
+    # spelling, which this fixture could not have exposed.
+    "typeahead_option_selector": (
+        "resolved in tests/test_typeahead_gate.py against a real listbox, "
+        "because its match is the ACCESSIBLE NAME of a suggestion and this "
+        "file's page has no suggestions to name"
+    ),
 }
 
 #: One document carrying a control for every builder below. Every label is
