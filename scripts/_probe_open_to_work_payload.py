@@ -170,7 +170,29 @@ SELF_PROFILE_URL = f"{BASE_URL}/in/me/"
 
 
 def _member_path(url: str) -> str:
-    """The `/in/<vanity>` path of a url, with no query and no trailing slash."""
+    """The ``/in/<vanity>`` path of a url, with no query and no trailing slash.
+
+    THE PART THAT IDENTIFIES A MEMBER, AND NOTHING ELSE. Ported from
+    ``scripts/_probe_sdui_action_resolver.py`` (``e923355``), where the defect
+    it exists for was measured on this same page.
+
+    WHY THE QUERY IS DROPPED. LinkedIn appends its own ``?isSelfProfile=true``
+    to the first navigation off ``/in/me/`` and does not reliably append it to
+    the next one -- section 84 of the perform audit measured exactly that, and
+    it is why ``_SELF_ASSERTION_ATTEMPTS`` is 2. The full string is therefore
+    not stable between two loads of the same page. The path is.
+
+    AND THE PATH IS NOT WHAT THIS FILE COMPARES ANY MORE, which is the part
+    worth knowing before reaching for it. ``/in/me/`` IS NOT A REDIRECT:
+    LinkedIn serves the profile document AT ``/in/me`` with a 200 and rewrites
+    the address bar client-side afterwards, so ``page.url`` and
+    ``response.url`` are different kinds of thing and no equality between them
+    can hold. This normalises both sides so the listener can compare a response
+    against the CONSTANT ``/in/me``, which is a stronger bound than any vanity
+    path: ``/in/me`` can serve the signed-in member and nobody else, where a
+    vanity path names merely SOME member -- the claim the read allowlist
+    already admits for anyone.
+    """
     from urllib.parse import urlsplit
 
     return urlsplit(str(url or "")).path.rstrip("/")
