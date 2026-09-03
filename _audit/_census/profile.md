@@ -8,7 +8,7 @@ Read-only. No LinkedIn account was touched: no browser, no session, no page
 load, no MCP tool call. The taxonomy was imported by walking LinkedIn's PUBLIC
 Help Center and then, in a second pass, by SEARCHING FOR PRODUCT NAMES where a
 topic index looked thin. The coverage verdicts come from the repository at
-`D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`. Nothing was committed and
+``. Nothing was committed and
 no tracked file was edited.
 
 ---

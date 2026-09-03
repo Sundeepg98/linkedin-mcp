@@ -4,7 +4,7 @@ What LinkedIn's own Help Center documents a member can do with jobs, against wha
 `linkedin_server/` can actually do. Read-only work: no browser, no session, no page load,
 no `mcp__linkedin__*` call, no tracked file edited, nothing committed.
 
-Date 2026-09-03. Repo at `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`, branch
+Date 2026-09-03. Repo at ``, branch
 `master`. Server surface measured at **35 registered tools** (`grep -c "^@mcp.tool()"`),
 `writes.PERFORMABLE` at **12 actions**, `writes.SANCTIONED_WRITES` at 13 (the thirteenth,
 `set_open_to_work`, has no tool).
@@ -587,5 +587,5 @@ Marketplace) remains unwalked and out of scope.
     commits                           0
 
 Walk products retained at:
-`C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\hc-search.md`,
+`<a session scratch directory>`
 `...\hc-apply.md`, `...\hc-prefs.md`.

@@ -3,7 +3,7 @@
 Written 2026-09-03. Read-only. **No LinkedIn account was touched**: no browser,
 no session, no page load, no `mcp__linkedin__*` call. The taxonomy was imported
 by walking LinkedIn's PUBLIC Help Center; the coverage verdicts come from the
-repository at `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`. Nothing was
+repository at ``. Nothing was
 committed and no tracked file was edited.
 
 ---
