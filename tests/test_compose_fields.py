@@ -628,10 +628,23 @@ def test_the_script_is_declared_where_scripts_are_reviewed():
     BOTH COMPOSER SCRIPTS ARE NAMED HERE FROM 2026-09-02, and the second one
     is why this test failed rather than quietly widening. ``dom.py`` gained
     ``SELECTED_RECIPIENT_JS`` when ``send_message`` shipped as the twelfth
-    performable write, which took the count of executed scripts from 12 to 13.
-    A count is the only thing that notices an ADDITION -- the membership line
-    above it would have gone on passing with an undeclared thirteenth script
-    in the tree -- so the count is what caught it.
+    performable write.
+
+    THIS FILE'S QUESTION IS MEMBERSHIP, AND ONLY MEMBERSHIP, SINCE 2026-09-03.
+    It used to re-assert the global count of executed scripts as well, on the
+    argument that a count is the only thing that notices an ADDITION while a
+    membership check for two named scripts would go on passing beside an
+    undeclared third. The argument is right and the placement was wrong: that
+    property is held by
+    ``tests/test_readonly.py::test_the_scripts_executed_are_exactly_the_ones_declared``,
+    which asserts the count AND ``names == set(INJECTED_SCRIPTS)`` in the file
+    where the declaration list lives and a reviewer reads it.
+
+    Re-asserting it here made one number maintained in two files, and earlier
+    the same day it was updated in one and not the other -- which reads as a
+    regression rather than as the omission it was. The reasoning for dropping
+    it, including why the third file that looked like a sibling pin is not one,
+    is at the removal site below.
     """
     spec = importlib.util.spec_from_file_location(
         "_readonly_check",
@@ -662,18 +675,50 @@ def test_the_script_is_declared_where_scripts_are_reviewed():
     # EXECUTED_SCRIPTS is keyed by CALL SITE and INJECTED_SCRIPTS by NAME, so
     # one script executed from two places would make them differ, and a
     # derived assertion would silently accept exactly that.
-    # THIRTEEN UNTIL 2026-09-03, SIXTEEN SINCE, and the three are the
-    # zero-page-load harvest: PROFILE_VIEWS_INSIGHTS_JS, JOB_INSIGHT_MARKERS_JS
-    # and the linked-card harvest. Each is ARGUED where scripts are reviewed,
-    # in tests/test_readonly.py's declaration; this line is the COUNT that
-    # noticed they had arrived, which is the job its own docstring gives it.
     #
-    # UPDATED HERE ONLY AFTER THE ARGUMENT EXISTED ELSEWHERE. The number is
-    # pinned in three files and the first fix moved one of them, which made
-    # the other two read as a regression rather than an omission -- a number
-    # maintained in three places will be maintained in one. Whether these
-    # three pins should be one derived source is a separate ruling and is with
-    # the builder who has read all three; they may pin genuinely different
-    # properties that share a number today, and collapsing them on a matching
-    # integer would be the mistake.
-    assert len(module.EXECUTED_SCRIPTS) == 16
+    # THE COUNT USED TO BE RE-ASSERTED HERE AND IS NOT ANY MORE. The ruling
+    # was asked for and this is it, made after reading all three pins rather
+    # than after noticing that three integers matched.
+    #
+    # THERE WERE NEVER THREE PINS ON THIS NUMBER. There were two, plus a
+    # coincidence:
+    #
+    #   tests/test_readonly.py:884      len(EXECUTED_SCRIPTS) == 16
+    #   tests/test_compose_fields.py    len(EXECUTED_SCRIPTS) == 16   <- here
+    #   tests/test_api_call_sites.py    len(functions)        == 14
+    #
+    # The third pins the number of TOP-LEVEL FUNCTIONS IN readonly.py. It
+    # contains the string EXECUTED_SCRIPTS zero times, it moved 13 -> 14 for an
+    # unrelated reason (readonly.py gained the anchored pattern-exemption
+    # helper), and it protects a different claim entirely -- that stating the
+    # boundary's scope in a MODULE docstring moved no digest. It shared the
+    # integer 13 with the script count by ACCIDENT, and today it is 14 while
+    # the scripts are 16, so the accident has already come apart. It must not
+    # be collapsed into anything and it is not touched.
+    #
+    # THE OTHER TWO WERE GENUINE DUPLICATION, and the test is the one the
+    # redundancy argument asks for: is there any tree in which one fails and
+    # the other passes? No. This file loads test_readonly.py BY PATH and reads
+    # module.EXECUTED_SCRIPTS -- the same object, the same length, computed
+    # once. Two guards that cannot disagree are one guard maintained twice,
+    # which is not redundancy, and this exact number was updated in one file
+    # and not the other earlier today.
+    #
+    # NOTHING IS LOST BY DROPPING IT, which is the only reason it goes.
+    # tests/test_readonly.py's own
+    # test_the_scripts_executed_are_exactly_the_ones_declared already asserts
+    # BOTH halves in the place the declaration lives -- the membership
+    # (names == set(INJECTED_SCRIPTS)) and the count. The addition-detecting
+    # property this line's docstring claims for itself is therefore held
+    # THERE, next to the list a reviewer reads. What stays here is what only
+    # this file can say: that the composer's two scripts are declared at all.
+    #
+    # AND A CORRECTION TO WHAT STOOD HERE. The comment this replaces named the
+    # three new arrivals as "PROFILE_VIEWS_INSIGHTS_JS, JOB_INSIGHT_MARKERS_JS
+    # and the linked-card harvest". The third is wrong: HARVEST_LINKED_CARDS_JS
+    # has been executed from two call sites since 2026-08-30 -- harvest_linked_
+    # cards and harvest_census -- and that duplicate is why EXECUTED_SCRIPTS
+    # (16, by call site) exceeds INJECTED_SCRIPTS (15, by name). The actual
+    # third arrival is RECIPIENT_IDS_JS. A wrong attribution inside a pin's own
+    # argument is the rubber stamp the pin exists to prevent, so it is fixed
+    # rather than carried.
