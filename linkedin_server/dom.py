@@ -5503,11 +5503,6 @@ _SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
 #: more rows on this surface means pressing somebody else.
 _REGEX_META = ".^$*+?()[]{}|"
 
-#: A LITERAL BACKSLASH, named because this module writes regex bodies as Python
-#: strings and a bare one in a source literal is the character most likely to
-#: be miscounted by a reader and by an editor.
-BACKSLASH = chr(92)
-
 
 #: THE CANDIDATE MATCHERS, AS A CENSUS RATHER THAN A CHOICE.
 #:
@@ -5689,95 +5684,6 @@ def typeahead_strictest_selector(needle: str) -> str:
     presses less than the server would, never more.
     """
     return _typeahead_selector_named(needle, TYPEAHEAD_STRICTEST_PATTERN)
-
-
-#: HOW FAR THE OFFSET SCAN LOOKS, in characters. A suggestion row's accessible
-#: name is a row of UI text; 200 is well past any plausible one and the scan
-#: costs one locator count per position, which is a few milliseconds each.
-TYPEAHEAD_OFFSET_SCAN_MAX = 200
-
-
-async def read_typeahead_needle_offsets(
-    page: Any, needle: str, *, scan_to: int = TYPEAHEAD_OFFSET_SCAN_MAX
-) -> dict[str, Any]:
-    """WHERE the needle sits inside each row's name, and how long the names are.
-
-    **TWO HISTOGRAMS OF INTEGERS AND NOTHING ELSE.** ``offsets`` maps a
-    character position to how many rows begin the needle there; ``lengths``
-    maps a name length to how many rows have it. No text, no name, no
-    substring, and nothing per-row -- an aggregate is strictly less
-    disclosing than a list of pairs and answers the same question.
-
-    THE QUESTION IT EXISTS FOR, and it is the only one left. Three live runs
-    measured ``substring`` at 10 and every anchored candidate at ZERO, which
-    says the rows do NOT begin with the name: something precedes it inside the
-    accessible name and no anchored matcher can work until somebody knows how
-    much. Reading the name to find out would mean reading other people's
-    names. **POSITION IS A NUMBER, AND A NUMBER CAN CROSS.**
-
-    WHAT THE ANSWER MEANS, decided before it is taken so the reading cannot be
-    fitted to a hope:
-
-    * ONE offset with all the rows on it -- the prefix is FURNITURE, constant
-      across rows, and a matcher can skip past it by construction.
-    * SEVERAL offsets -- the name sits at a genuinely variable position, and
-      no positional matcher will ever work. That is a conclusive answer, not
-      another candidate.
-    * NO offset at all inside the scan -- the needle is not in the accessible
-      name in a form this engine matches, and the substring count of 10 was
-      matching something else about the row.
-
-    IT NEEDS NO INJECTED SCRIPT AND NO EVALUATE WAIVER, which is why it is
-    shaped as a SCAN rather than as a page function. For each position ``k``
-    it asks the role engine for rows whose name begins with exactly ``k``
-    arbitrary characters and then the needle, and counts them -- so the whole
-    measurement is locator counts through the same engine the aim uses. A page
-    function would have been the obvious way to get a per-row pair, and it
-    would have cost the fourteenth evaluate waiver in order to return LESS
-    private data than this returns.
-
-    THE ANY-CHARACTER CLASS IS THE WHITESPACE PAIR RATHER THAN A DOT, because
-    a dot does not match a newline and a name this scan could not span would
-    report as ABSENT rather than as long -- the one reading that would be
-    mistaken for a finding. Accessible names are whitespace-collapsed, so this
-    is belt and braces rather than an expected case.
-    """
-    out: dict[str, Any] = {
-        "offsets": {},
-        "lengths": {},
-        "scanned_to": int(scan_to),
-        "rows": 0,
-        "error": None,
-    }
-    try:
-        body = escaped_needle(needle)
-    except ExtractionFailedError as exc:
-        out["error"] = str(exc)
-        return out
-    try:
-        out["rows"] = int(await page.locator(TYPEAHEAD_OPTION_SELECTORS[0]).count())
-    except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
-        return out
-
-    any_char = "[" + BACKSLASH + "s" + BACKSLASH + "S]"
-    for position in range(int(scan_to) + 1):
-        pattern = "^" + any_char + "{" + str(position) + "}" + body
-        try:
-            found = int(await page.locator("role=option[name=/" + pattern + "/i]").count())
-        except Exception:  # noqa: BLE001 - an unusable position is skipped
-            continue
-        if found:
-            out["offsets"][position] = found
-    for length in range(int(scan_to) + 1):
-        pattern = "^" + any_char + "{" + str(length) + "}$"
-        try:
-            found = int(await page.locator("role=option[name=/" + pattern + "/i]").count())
-        except Exception:  # noqa: BLE001 - an unusable length is skipped
-            continue
-        if found:
-            out["lengths"][length] = found
-    return out
 
 
 async def read_typeahead_pattern_census(

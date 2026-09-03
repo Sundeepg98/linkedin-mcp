@@ -68,6 +68,7 @@ from __future__ import annotations
 
 import ast
 import json
+import pathlib
 
 import pytest
 
@@ -96,6 +97,41 @@ from tests.test_writes import FixtureNavigator, _bare_grant, writes_on  # noqa: 
 # that owns it, so there is one feed double in this suite.
 from tests.test_writes_nine import FEED_MARKUP  # noqa: F401
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
+
+# THE PROBE, LOADED AS A MODULE, because the offset reader lives there now.
+# It moved out of dom.py when tests/test_reader_reachability.py caught it as
+# a public read_* nothing on the tool surface can reach -- which it never
+# will be, being ~400 locator round-trips whose output chooses a matcher.
+#
+# IMPORTING A SCRIPT IS SAFE HERE AND THAT IS ENFORCED, NOT ASSUMED:
+# tests/test_scripts_are_import_safe.py exists because importing a script
+# once rebuilt four committed fixtures, and this probe additionally guards
+# its own launch behind __main__ for a stronger reason -- an import that ran
+# it would type into his live composer.
+
+def _load_probe():
+    """Load ``scripts/_probe_typeahead_commit.py`` as a module.
+
+    By path rather than by package import, because ``scripts/`` is not a
+    package -- the same route ``tests/test_typeahead_probe.py`` takes to read
+    the file it guards.
+    """
+    import importlib.util
+
+    path = (
+        pathlib.Path(__file__).resolve().parent.parent
+        / "scripts"
+        / "_probe_typeahead_commit.py"
+    )
+    spec = importlib.util.spec_from_file_location("_probe_typeahead_commit", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+#: The probe module, loaded once. See the note above the import block.
+probe = _load_probe()
+
 
 COMPOSE_URL = spec_for_action("send_message").url_template
 TARGET = NAMED_RECIPIENT + TARGET_JOIN + MESSAGE_BODY
@@ -994,7 +1030,7 @@ async def test_a_constant_prefix_reports_as_one_offset(over, _fast_wait):
     """
 
     async def work(page):
-        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+        return await probe.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
 
     found = await over(COMPOSER_PREFIXED, work)
     assert found["error"] is None, found
@@ -1023,7 +1059,7 @@ async def test_a_varying_prefix_reports_as_several_offsets(over, _fast_wait):
     """
 
     async def work(page):
-        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+        return await probe.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
 
     found = await over(COMPOSER_VARYING_PREFIX, work)
     assert found["error"] is None, found
@@ -1044,7 +1080,7 @@ async def test_the_offset_scan_returns_integers_and_no_name(over, _fast_wait):
     """
 
     async def work(page):
-        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+        return await probe.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
 
     found = await over(COMPOSER_PREFIXED, work)
     rendered = json.dumps(found, default=str).lower()
@@ -1081,7 +1117,7 @@ async def test_a_needle_nobody_carries_reports_no_offset_at_all(
     """
 
     async def work(page):
-        return await dom.read_typeahead_needle_offsets(page, UNMATCHABLE_NEEDLE)
+        return await probe.read_typeahead_needle_offsets(page, UNMATCHABLE_NEEDLE)
 
     found = await over(COMPOSER_PREFIXED, work)
     assert found["offsets"] == {}, found
@@ -1251,7 +1287,7 @@ async def test_the_offsets_reproduce_the_live_verdict_including_recurrence(
     """
 
     async def work(page):
-        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+        return await probe.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
 
     found = await over(COMPOSER_LIVE_SHAPE, work)
     assert found["error"] is None, found
@@ -1280,7 +1316,7 @@ async def test_the_reading_still_carries_no_name_on_the_live_shape(
 
     async def work(page):
         return {
-            "offsets": await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE),
+            "offsets": await probe.read_typeahead_needle_offsets(page, PREFIX_NEEDLE),
             "census": await dom.read_typeahead_pattern_census(page, PREFIX_NEEDLE),
         }
 

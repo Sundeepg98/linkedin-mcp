@@ -123,7 +123,8 @@ nothing.
 
 ### 3.4 The offset scan: why anchoring cannot work
 
-`dom.read_typeahead_needle_offsets` returns TWO HISTOGRAMS OF INTEGERS: how
+`read_typeahead_needle_offsets`, in `scripts/_probe_typeahead_commit.py`,
+returns TWO HISTOGRAMS OF INTEGERS: how
 many rows begin the needle at each character position, and how many rows have
 each label length. Aggregate rather than per-row, which is strictly less
 disclosing and answers the same question.
@@ -140,6 +141,20 @@ Live:
     offset  9 -> 7 rows
     offset 15, 16, 17, 20, 21, 26, 28, 31, 40, 50 -> 1 row each
     lengths 49, 56, 59, 87, 94, 143, 151, 152, 178
+
+**IT LIVES IN THE PROBE, AND IT WAS MOVED THERE BY A TEST.** It was written
+into `dom.py` beside the other typeahead readers, where
+`tests/test_reader_reachability.py` caught it on the full gate: a public
+`read_*` in that module must be reachable from the tool surface, and nothing
+reaches this one. The choice was an allowlist entry or a move, and the code
+decided it -- `UNREACHABLE_BY_DESIGN` is deliberately EMPTY and that file
+says empty is the target state, while this reader is STRUCTURALLY probe-only
+in two independent ways: it is ~400 locator round-trips, which nothing on
+the write path can afford, and its output chooses a MATCHER, which no tool
+should ever return. A reader that will never be reachable, in a module whose
+rule is that readers are reachable, is in the wrong module. It still calls
+into `dom` for the shared escaper, so the one-escaper property that keeps
+the census and the aim in agreement is unaffected.
 
 The three verdicts were decided IN THE CODE before the reading, so the answer
 could not be fitted to a hope: one offset means constant furniture and a
@@ -236,12 +251,80 @@ that did not exist.
 
 ---
 
+## 6a. A real name reached three tracked files, and the guard was not wrong
+
+Recorded as its own section because the sharpest thing in this episode is a
+DISTINCTION, and a distinction stated in passing is a distinction that gets
+paraphrased away.
+
+**WHAT HAPPENED.** A real third party's given name -- the needle used in the
+live measurements -- was in `linkedin_server/dom.py` (6 occurrences),
+`linkedin_server/writes.py` (1) and `tests/test_typeahead_gate.py` (1), and in
+commit messages across the unpushed range. It reached origin/master ZERO times.
+It was caught before the push, the tip was substituted, and the whole unpushed
+history was rewritten.
+
+**THE IDENTITY GUARD WAS NOT WRONG, AND SAYING SO MATTERS MORE THAN THE FIX.**
+
+`tests/test_no_committed_identity.py` opens by declaring this exact limitation
+in capitals: *NONE OF THESE CHECKS DETECTS A PERSONAL NAME. NAMES HAVE NO
+SHAPE.* It hunts identifier SHAPES -- a session cookie, a member urn, a
+key-shaped table -- because a shape can be hunted and a name cannot. It ran
+green through every gate on the day this happened and it was CORRECT to. A
+guard that documents its own blind spot, and whose blind spot then arrives
+exactly where it said it would, is a guard working as designed. Filing this as
+"the identity check missed it" would teach the wrong lesson and would make the
+next reader trust the check less than they should.
+
+**AND THE SWEEP PASSED FOR A SECOND, DIFFERENT REASON.** The wave lead's
+exact-value sweep also passed, and not because it shares the shape limitation:
+its wordlist is the OPERATOR's identity -- his name, city, employer, campus.
+This was a THIRD PARTY's name. Two independent instruments, two independent
+reasons for silence, and neither of them broken. **A name that belongs to
+somebody who is not the operator was outside the reach of every check in the
+repository**, and that is the finding rather than the near miss.
+
+**HOW IT PROPAGATED, WHICH IS THE PART THAT IS ACTIONABLE.** The regex-form
+measurement was recorded VERBATIM in a selector builder's docstring, needle
+included. That file was PINNED by the other builder in this tree, and the same
+table was then quoted onward in a pin commit message. Reviewing a pin for
+CORRECTNESS is not reviewing it for DISCLOSURE, and only the first was done.
+Hence step 6 of the procedure in the section above.
+
+**THE RECURRENCE FIX IS IN, AND IT CLOSES THE CLASS RATHER THAN THE INSTANCE.**
+The identity key now carries a `measurement_needles` class and the real name is
+in it, so this string can never be committed silently again -- and the check is
+CONTROLLED IN BOTH DIRECTIONS, so it fails if the string reappears and fails if
+the entry goes stale. The substituted placeholder is admitted DELIBERATELY as a
+synthetic value rather than tolerated by accident, which is the convention every
+other allowlist in that file already keeps.
+
+The principle it encodes is worth stating plainly, because it generalises past
+this needle: **a name the operator hands an instrument is, by definition, a real
+person.** Any measurement that takes a person's name as input will want to
+record that input beside its numbers, and that instinct is exactly what put a
+name in a docstring here. The numbers are the evidence; the name was only ever
+the input.
+
 ## 7. What did NOT move
 
-Verified across the whole wave, **`e923355..c4e7cd3`** -- a commit range and
-not `HEAD`, deliberately. A boundary claim written against a moving tip is a
-claim that goes false without anybody editing it, which is the failure this
-file exists to prevent one instance of.
+Verified across the whole wave -- a commit RANGE and not `HEAD`,
+deliberately, because a boundary claim written against a moving tip goes
+false without anybody editing it. The range is named by its endpoints'
+SUBJECTS first and their hashes second:
+
+    from   fix(probe): /in/me is served, not redirected     e923355
+    to     docs(typeahead): addressing a recipient BY NAME
+           is dead, and it was measured dead                5a4117f
+
+**THE SUBJECTS ARE THE DURABLE HALF AND THIS FILE LEARNED IT THE SAME DAY.**
+The range was first written as `e923355..c4e7cd3`. Hours later the unpushed
+history was rewritten to substitute a name out of every blob and message,
+every hash after the first changed, and `c4e7cd3` became a commit on a
+backup branch and nowhere on `master`. **It still RESOLVED**, which is the
+trap: `git cat-file -e` said yes, and the reference was already wrong. When
+the backup branch is deleted after the push it will stop resolving
+altogether. A subject line survives a rewrite; a hash does not.
 
     linkedin_server/readonly.py       0 diff lines -- never opened
     SANCTIONED_MUTATIONS              4      unchanged
@@ -256,7 +339,8 @@ A new mutating capability, a second mutating path through `perform`, a mutating
 probe, and two new measuring instruments all landed, and the boundary did not
 move by one entry.
 
-**AND WHAT MOVES IT NEXT MOVES IT INWARD.** Immediately after `c4e7cd3`,
+**AND WHAT MOVES IT NEXT MOVES IT INWARD.** Immediately after the range
+above closed,
 `readonly.py` was opened for the first time in this wave to NARROW
 `_ALLOWED_URL_PATTERNS`: three sibling spellings --
 `/messaging/thread/new/?recipient=`, `/messaging/?composeTo=` and
@@ -264,7 +348,9 @@ move by one entry.
 `/messaging/compose/?recipient=` correctly refused. *A ruling one spelling
 cannot express is not a ruling, it is a spelling filter.* That change is a
 tightening and it is not this wave's; it is recorded here only so that the
-numbers above are read as a range rather than as a standing state. The typeahead click reuses the existing
+numbers above are read as a range rather than as a standing state.
+
+The typeahead click reuses the existing
 `(writes.py, perform, click)` sanction by draining the same queue through the
 same call site; the name matching and both censuses run through Playwright's
 role engine rather than through an injected script.
