@@ -1162,9 +1162,34 @@ async def read_radio_label_binding(
     out["observed"]["labels_matching"] = matching
     if matching != 1:
         out["why"] = (
-            f"{matching} <label> element(s) carry that text. Zero means the "
-            "page names this control some other way; more than one and "
-            "pressing either would be picking by position."
+            f"{matching} <label> element(s) carry that text. More than one and "
+            "pressing either would be picking by position. "
+            + (
+                # ZERO IS THE INTERESTING ONE AND IT HAS A KNOWN NEXT STEP.
+                #
+                # The aim matches a label by its XPath STRING VALUE, and the
+                # name it is matched against is an ACCESSIBLE NAME. Those come
+                # from two different algorithms: CSS ::before content and an
+                # <img alt> inside the label reach the accessible name and not
+                # the string value, and a visually-hidden span can reach the
+                # string value and not the name. They agree on this page today.
+                # Nothing makes them agree tomorrow.
+                #
+                # So a zero here is most likely a MISMATCH rather than a
+                # missing label, and the refusal says where to look instead --
+                # a dead end that names its own exit is worth more than one
+                # that reports a count.
+                "ZERO IS PROBABLY A TEXT MISMATCH RATHER THAN A MISSING "
+                "LABEL: this aim matches a label by its rendered text, and "
+                "the name it matches against is an ACCESSIBLE NAME computed "
+                "by a different rule. The route that does not depend on the "
+                "two agreeing is the control's own aria-labelledby, which "
+                "points at its label directly -- measured on all three "
+                "dark-mode radios on 2026-09-03, each naming a <label> whose "
+                "for is that radio's id."
+                if matching == 0
+                else ""
+            )
         )
         return out
 
@@ -2891,6 +2916,35 @@ CENSUS_CONTROL_SELECTOR = (
 CENSUS_MAX_CONTROLS = 400
 
 
+#: **``name_source`` NAMES THE RESOLVER, NOT THE RELATION.** Recorded here on
+#: 2026-09-03 because it was misread as a fact about the DOM and the misreading
+#: nearly shipped a click at the wrong element.
+#:
+#: :data:`CENSUS_JS`'s ``nameOf`` dispatches in this order::
+#:
+#:     aria-label -> aria-labelledby -> title -> labelRoutes -> text
+#:
+#: and ``labelRoutes`` is what finds a ``<label for>`` or a label ancestor. So
+#: ``aria-labelledby`` is consulted SECOND and ``label-for`` FOURTH: **once the
+#: second answers, the fourth is never reached.**
+#:
+#: WHAT THAT MEANS FOR A READER. ``name_source: "aria-labelledby"`` says the
+#: name came from that attribute. It says NOTHING about whether a ``<label
+#: for>`` binding also exists, and on the dark-mode settings page one does --
+#: ``label[for="theme__dark"]`` counts 1 while the census reports
+#: ``aria-labelledby`` for the same control.
+#:
+#: WHY THE DIFFERENCE MATTERS ENOUGH TO WRITE DOWN. ``aria-labelledby`` is a
+#: NAMING relation and ``<label for>`` is an ACTIVATION relation. Only the
+#: second makes a click on the text operate the control. An instrument that
+#: reports the first is not evidence about the second, and treating it as such
+#: produces a target that passes every actionability check and sets nothing.
+#:
+#: THE HABIT THIS BREAKS. ``labelRoutes`` is DEFINED earlier in the script than
+#: ``nameOf``, and its order was inferred from that. Position in a file is not
+#: order of execution. If you want to know whether a relation exists, query for
+#: it -- ``page.locator('label[for="<id>"]').count()`` is one line and it is
+#: the only thing that answers.
 async def read_surface_census(
     page: Any,
     *,

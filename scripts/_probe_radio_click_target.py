@@ -180,9 +180,14 @@ async def _report_radio(page, name: str) -> None:
             verdict = await _trial(by_id, "name source")
             print("    trial click on NAME SRC   %s" % verdict)
             if verdict == "PASSES":
-                print("      ^ NOT GOOD NEWS. With no <label for> binding, an\n"
-                      "        element can be perfectly clickable and wired to\n"
-                      "        nothing. Actionability is not activation.")
+                print("      ^ AND THE BINDING EXISTS, measured. The two\n"
+                      "        lines below settle it: this element IS a\n"
+                      "        <label> and its for is this radio's own id,\n"
+                      "        so the click ACTIVATES rather than merely\n"
+                      "        landing. A pass here would NOT be good news\n"
+                      "        if those two lines said otherwise -- an\n"
+                      "        element that only NAMES a control clicks\n"
+                      "        cleanly and sets nothing.")
     else:
         print("    (no single id to follow -- aria-labelledby is empty or a list)")
 
@@ -195,7 +200,15 @@ async def _report_radio(page, name: str) -> None:
     radio_id = await radio.get_attribute("id")
     if radio_id:
         bound = await page.locator('label[for="' + radio_id + '"]').count()
-        print("    <label for> bound to it   %d   (census predicts 0)" % bound)
+    # THIS LINE ONCE READ '(census predicts 0)' AND THE PREDICTION WAS MINE,
+    # NOT THE CENSUS'S. linkedin_surface_census reports name_source
+    # 'aria-labelledby' for these radios, and I read that as proving no
+    # label-for exists. It proves nothing of the kind: the census's nameOf
+    # dispatches aria-label -> aria-labelledby -> title -> label-for ->
+    # text, so once the SECOND resolver answers the FOURTH is never
+    # consulted. This query returned 1 where I had written 0, which is the
+    # comparison doing its job on the person who wrote it.
+        print("    <label for> bound to it   %d   (see note below)" % bound)
 
     # --- candidate 1: the decoration, reached FROM the named input ----------
     #
@@ -206,15 +219,34 @@ async def _report_radio(page, name: str) -> None:
     # three rows and each radio still finds its own decoration.
     total = await page.locator(DECORATION).count()
     print("    %-25s %d on the page" % (DECORATION, total))
-    scoped = radio.locator(
-        "xpath=ancestor::*[contains(@class,'setting-radio')][1]"
-    ).locator(DECORATION)
+    # THE ANCESTOR IS COUNTED SEPARATELY FROM THE DECORATION INSIDE IT, and
+    # that is a correction to this probe rather than extra detail.
+    #
+    # It printed ONE number, "in this radio's row", and that number was zero.
+    # Zero there has TWO readings -- no such ancestor exists, or the ancestor
+    # exists and holds no decoration -- and they say opposite things about
+    # whether the walk is the right relation. Collapsing them is the defect
+    # this repository has a name for, and it was in my own instrument while I
+    # was using its output to rule a candidate dead.
+    row = radio.locator("xpath=ancestor::*[contains(@class,'setting-radio')][1]")
     try:
-        n = await scoped.count()
+        rows_found = await row.count()
     except Exception as exc:  # noqa: BLE001 - an unusable walk is a reading
-        n = -1
+        rows_found = -1
         print("    ancestor walk failed      %s" % type(exc).__name__)
-    print("    ...in this radio's row    %d" % n)
+    print("    setting-radio ancestors   %d" % rows_found)
+    n = 0
+    if rows_found == 1:
+        try:
+            n = await row.locator(DECORATION).count()
+        except Exception as exc:  # noqa: BLE001 - reported, never raised
+            n = -1
+            print("    decoration count failed   %s" % type(exc).__name__)
+        print("    ...decorations inside it  %d" % n)
+    else:
+        print("    ...decorations inside it  NOT ASKED -- there is no single "
+              "ancestor to look inside, so a zero here would be a fact about "
+              "the WALK and not about the row.")
     if n == 1:
         print("    trial click on DECORATION %s" % await _trial(scoped, "decoration"))
 
