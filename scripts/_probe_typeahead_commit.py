@@ -14,6 +14,42 @@ most one suggestion, reads the composer, and ends. It never types a message
 body and never presses a send control, so there is no path through it that
 dispatches anything.
 
+WHAT THE FIRST LIVE RUN SETTLED, AND THE DEFECT IT EXPOSED
+-----------------------------------------------------------
+Run on 2026-09-03 against his own account::
+
+    listbox appeared        True
+    options (total)         10
+    carrying the needle     10
+    refused                 4_several_options_match
+
+THE DROPDOWN OPENS AND ITS ROWS ARE READABLE. That is settled and it was
+unknown before. Two of the three candidate option selectors resolved it.
+
+**AND THE RUN COULD NOT GET PAST STEP 4, WHICH IS STRUCTURAL RATHER THAN
+UNLUCKY.** The shipped matcher is a SUBSTRING, and a typeahead returns a row
+BECAUSE it matched what was typed -- so "this row contains the needle" is
+close to tautological, ten-of-ten is the expected reading, and the gate
+refuses whenever LinkedIn returns more than one row. A probe that could only
+ever press what the gate identified would never reach the chip read, and the
+question in this file's title would stay unanswered by the instrument built
+to answer it.
+
+SO THIS AIMS BY THE STRICTEST CANDIDATE when the census resolves it to
+exactly one row -- ``dom.typeahead_strictest_selector``, anchored at the start
+of the accessible name, refusing a longer surname where the substring accepts
+it. **It presses strictly LESS than the server would, never more**, and the
+run PRINTS the divergence before the result rather than burying it: the
+server would have refused there, and this is not a rehearsal of production.
+
+THE CENSUS IS THE OTHER HALF, and it is a read. Every candidate matcher is
+counted against the live listbox -- six locator counts, no accessible name
+crossing into this process -- so one run reports which matcher could
+discriminate. Read it as a DIAGNOSTIC: ``prefix`` at zero says the rows do not
+start with the name; ``prefix_boundary`` at zero while
+``prefix_then_nonletter`` is non-zero says the connection degree is run onto
+the name with no separator, which is the shape a word boundary cannot see.
+
 WHY IT CANNOT BE A TEST
 -----------------------
 Every gate below is already covered over frozen markup in
@@ -65,11 +101,13 @@ SETTLES, whichever way it comes out:
 * which of ``dom.TYPEAHEAD_OPTION_SELECTORS`` matches a live LinkedIn
   typeahead, per selector, as counts;
 * whether the dropdown opens at all for a filled combobox;
-* whether pressing the one row that carries the needle commits a recipient --
-  read afterwards through ``dom.RECIPIENT_CHIP_SELECTORS``, whose four
-  candidates have never matched anything on any page either, so a zero here
-  still has two readings and the per-selector counts are how they are told
-  apart;
+* how many rows each CANDIDATE matcher would match, which is what chooses the
+  one the server should press;
+* whether pressing the one row the strictest matcher uniquely identifies
+  commits a recipient -- read afterwards through
+  ``dom.RECIPIENT_CHIP_SELECTORS``, whose four candidates have never matched
+  anything on any page either, so a zero here still has two readings and the
+  per-selector counts are how they are told apart;
 * whether ``Send`` goes from disabled to enabled, which is an INDEPENDENT
   corroboration of the chip reading from a control that is not a chip.
 
