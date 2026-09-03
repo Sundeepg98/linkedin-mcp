@@ -163,4 +163,9 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
 
     # AND THE COUNT DID NOT MOVE, which is the reason neither rule could be
     # replaced by a cheaper one. 35 tools before, 35 after.
-    assert len(_tool_names()) == 35
+    #
+    # 36 FROM 2026-09-03: ``linkedin_connections``, a READ that ships
+    # refusing because its side-effect cost is unmeasured. The count is
+    # updated in the commit that adds the tool, which is the review moment
+    # this assertion exists to create.
+    assert len(_tool_names()) == 36

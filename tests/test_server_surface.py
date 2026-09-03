@@ -231,6 +231,12 @@ EXPECTED_TOOLS = {
     "linkedin_follow_company",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
+    # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
+    # boundary admits its address, and whether opening the page spends his
+    # pending-invitation badge is UNMEASURED. Registered anyway, so the
+    # refusal is REACHABLE and names the measurement that would lift it,
+    # rather than living as a comment nobody calls.
+    "linkedin_connections",
     "linkedin_react_to_item",
     "linkedin_update_profile_field",
     "linkedin_update_setting",
@@ -368,7 +374,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtyfive_tools(tools):
+async def test_the_surface_is_exactly_the_thirtysix_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -447,7 +453,7 @@ async def test_the_surface_is_exactly_the_thirtyfive_tools(tools):
     even the label reader refuses them, on the operator's ruling that the
     previous value is what makes his own write undoable.
 
-    THIRTY-FIVE NAMES OVER THIRTY-FOUR CAPABILITIES; the login pair is still
+    THIRTY-SIX NAMES OVER THIRTY-FIVE CAPABILITIES; the login pair is still
     the only pair.
     """
     assert set(tools) == EXPECTED_TOOLS
@@ -460,7 +466,11 @@ async def test_the_surface_is_exactly_the_thirtyfive_tools(tools):
     # added -- which is the half of this line that matters, because the tool
     # that arrived is the UNDO for a write, and an undo shipping as a write
     # would be the exact confusion this split exists to catch.
-    assert len(tools) == 35
+    # THIRTY-SIX FROM 2026-09-03: linkedin_connections, a READ. No write was
+    # added, which is again the half that matters. A tool whose whole body
+    # is a refusal is still a tool, and registering it is what makes the
+    # refusal reachable.
+    assert len(tools) == 36
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -547,7 +557,11 @@ async def test_the_surface_is_exactly_the_thirtyfive_tools(tools):
     # exists to make linkedin_update_profile_field undoable, and it does that
     # by reading. A tool that made the write undoable BY WRITING would be a
     # write, would move the other number, and would fail here.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 23
+    # TWENTY-FOUR FROM 2026-09-03: linkedin_connections is a READ, and the
+    # write side is byte-identical across the change -- which is the half
+    # of this split that matters. A read arriving must not be able to move
+    # the write column, and this is where that would show.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 24
 
 
 def test_the_read_that_was_nearly_named_a_write():

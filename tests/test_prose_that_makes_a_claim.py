@@ -55,8 +55,13 @@ _NUMBER_WORDS: dict[str, int] = {
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
     "twenty": 20, "twenty-one": 21, "twenty-two": 22, "twenty-three": 23,
+    # TWENTY-FOUR, ADDED 2026-09-03 with the twenty-fourth read tool. The
+    # table has to be able to SAY a number before it can check a claim
+    # about it -- a missing word raises KeyError, which reads as a broken
+    # test rather than as a moved number.
+    "twenty-four": 24,
     "thirty-one": 31, "thirty-two": 32, "thirty-three": 33, "thirty-four": 34,
-    "thirty-five": 35,
+    "thirty-five": 35, "thirty-six": 36,
 }
 
 

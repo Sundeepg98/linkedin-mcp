@@ -1,4 +1,4 @@
-"""The tool surface: thirty-five tools, twelve of which write to LinkedIn.
+"""The tool surface: thirty-six tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_thirtyfive_tools``'s split rather than
+``test_the_surface_is_exactly_the_thirtysix_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -62,14 +62,24 @@ runs for him. The result block carries the previous value verbatim and the
 exact call that restores it.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Thirty-five is ``len(await mcp.list_tools())``,
+than about an intention. Thirty-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtyfive_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_thirtysix_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-THREE read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Twenty-three plus twelve plus zero is thirty-five.
+needs: TWENTY-FOUR read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Twenty-four plus twelve plus zero is thirty-six.
+
+THE TWENTY-FOURTH READ ARRIVED 2026-09-03: ``linkedin_connections``, and it
+SHIPS REFUSING, which is the design rather than an unfinished edge. The read
+boundary admits its address -- two forbidden substrings that exist to stop this
+server issuing an invitation were also matching the page that merely lists
+people he already knows, which is a write guard matching a read address -- but
+whether OPENING that page spends his pending-invitation badge is UNMEASURED,
+and the neighbouring refusal it would be judged against is itself an inference.
+So the tool exists, is registered, names the measurement that would lift it,
+and loads nothing until somebody takes it.
 
 THAT THIRD COLUMN EMPTIED ON 2026-09-02 AND THE FACT IS WORTH A SENTENCE
 RATHER THAN A ZERO. It held one member, ``linkedin_send_message``, which was
@@ -174,8 +184,11 @@ line:
 
 from __future__ import annotations
 
+import functools
+import inspect
 import logging
 import re
+from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlencode, urlsplit
 
@@ -232,6 +245,152 @@ BUILD = buildinfo.stamp(REPO_ROOT)
 #: When this process came up. Kept OUT of the frozen stamp on purpose: uptime
 #: is derived fresh on every call, and a cached uptime is a lie that grows.
 CLOCK = buildinfo.ProcessClock()
+
+#: The key a stale answer carries. Named for what it tells the caller rather
+#: than for the mechanism, because it appears in payloads a reader meets
+#: without having asked for it.
+STALE_PROCESS_KEY = "stale_process"
+
+
+def _head_commit_on_disk() -> tuple[Optional[str], Optional[str]]:
+    """The checkout's current HEAD, read from FILES. Never a subprocess.
+
+    WHY NOT ``buildinfo.resolve``. It is the honest counterpart this comparison
+    wants, and it shells out to git -- which
+    ``test_build_echo.test_the_stamp_is_not_re_resolved_per_call`` forbids on a
+    request path, correctly: a hung git behind a five-second timeout would hold
+    a tool answer hostage, and that rule caught this on its first run.
+
+    So HEAD is read the way git stores it. Plain file I/O, microseconds, no
+    process to hang -- and it answers exactly the one question here, which is
+    which commit the checkout points at, not what its whole state is.
+
+    Returns ``(commit, None)`` or ``(None, why not)``. Dirtiness is NOT read:
+    it needs ``git status``, and uncommitted files say nothing about what this
+    process loaded.
+    """
+    try:
+        git_path = Path(REPO_ROOT) / ".git"
+        if git_path.is_file():
+            # A worktree or submodule: .git is a file naming the real dir.
+            pointer = git_path.read_text(encoding="ascii", errors="replace")
+            _, _, target = pointer.partition("gitdir:")
+            if not target.strip():
+                return None, "the .git file names no gitdir"
+            git_path = Path(target.strip())
+            if not git_path.is_absolute():
+                git_path = (Path(REPO_ROOT) / git_path).resolve()
+        head = (git_path / "HEAD").read_text(encoding="ascii").strip()
+    except (OSError, ValueError):
+        return None, "the checkout's .git/HEAD could not be read"
+
+    if not head.startswith("ref:"):
+        # Detached HEAD holds the hash itself.
+        return (head or None), (None if head else "empty .git/HEAD")
+
+    ref = head.partition("ref:")[2].strip()
+    if not ref:
+        return None, "the .git/HEAD ref line names no ref"
+    try:
+        return (git_path / ref).read_text(encoding="ascii").strip(), None
+    except OSError:
+        pass
+    # A ref that has been packed away has no loose file. This is the ordinary
+    # state of a freshly cloned repository, not an error.
+    try:
+        packed = (git_path / "packed-refs").read_text(
+            encoding="ascii", errors="replace"
+        )
+    except OSError:
+        return None, "the branch ref is neither loose nor in packed-refs"
+    for line in packed.splitlines():
+        if line.startswith(("#", "^")):
+            continue
+        sha, _, name = line.partition(" ")
+        if name.strip() == ref:
+            return sha.strip(), None
+    return None, "the branch ref is neither loose nor in packed-refs"
+
+
+def _staleness() -> dict[str, Any]:
+    """Is the code in THIS PROCESS the code on disk?
+
+    THE DETECTION ALREADY EXISTED AND NOTHING CONSULTED IT. ``buildinfo``
+    documents this exact comparison in its own docstring -- "compare a held
+    ``stamp`` against a fresh ``resolve`` and a stale process is visible as a
+    disagreement" -- and ``linkedin_server_info`` told the caller to run it BY
+    HAND, against ``git rev-parse HEAD``. Nobody does that before calling a
+    tool, which is why the trap kept working.
+
+    IT BLOCKED WORK FOUR TIMES ON 2026-09-03 ALONE: a radio-label fix, a
+    thread-reply reading, a write attempt, and a badge measurement. Each was
+    found by a person noticing. On the fourth, the stale process was serving a
+    version of the surface census that LEAKS THIRD PARTIES' NAMES -- a privacy
+    fix that existed on disk and not in the process a caller reached.
+
+    TRI-STATE, and the unknown is not a formality. If either side has no
+    commit -- no git, no work tree, an installed package -- the answer is
+    ``None``: this cannot tell, which is a different fact from "not stale" and
+    must not be reported as one.
+
+    DIRTINESS IS REPORTED AND DOES NOT SET ``stale``. Uncommitted edits mean
+    the FILES differ from the commit; they say nothing about whether the
+    process loaded them. Conflating the two would make every developer box
+    permanently "stale" and teach everyone to ignore the field.
+    """
+    on_disk, why_not = _head_commit_on_disk()
+    loaded = BUILD.commit
+    if on_disk is not None and loaded is not None:
+        on_disk = on_disk[: len(loaded)]
+    block: dict[str, Any] = {
+        "loaded_commit": loaded,
+        "disk_commit": on_disk,
+        "process_started_at": CLOCK.started_at,
+    }
+    if loaded is None or on_disk is None:
+        block["stale"] = None
+        block["why"] = (
+            "cannot tell: %s. A missing commit on either side is not evidence "
+            "that the running code is current."
+            % (why_not or BUILD.detail or "no commit on one side")
+        )
+        return block
+    block["stale"] = loaded != on_disk
+    block["why"] = (
+        (
+            "THIS PROCESS IS RUNNING OLDER CODE. It was imported from %s and "
+            "the checkout is now at %s, so any fix committed since is NOT "
+            "loaded here and no answer below reflects it. Restart the server. "
+            "This is reported, never enforced: a deliberately detached "
+            "checkout is a legitimate state and only the caller knows which "
+            "one this is." % (loaded, on_disk)
+        )
+        if block["stale"]
+        else "the loaded commit matches the checkout"
+    )
+    return block
+
+
+def _announce_staleness(result: Any) -> Any:
+    """Add the staleness block to an answer that a stale process produced.
+
+    ONLY WHEN THERE IS SOMETHING TO SAY. A payload gains this key when the
+    process is stale or when staleness cannot be determined, and is returned
+    untouched otherwise -- so the field's PRESENCE is the signal and no caller
+    has to learn a new key to keep working. ``linkedin_server_info`` carries
+    the block unconditionally, which is where "was this even checked" gets its
+    answer.
+
+    NEVER OVERWRITES. A tool that has its own ``stale_process`` field keeps it;
+    silently replacing a tool's own answer with this one would be the same
+    class of defect this field exists to report.
+    """
+    if not isinstance(result, dict) or STALE_PROCESS_KEY in result:
+        return result
+    block = _staleness()
+    if block.get("stale") is False:
+        return result
+    return {**result, STALE_PROCESS_KEY: block}
 
 #: There is NO second stamp to report here. The sibling naukri, uplers and
 #: instahyre servers report a ``jobcore`` commit alongside their own because
@@ -389,6 +548,57 @@ mcp = FastMCP(
         "sweeping."
     ),
 )
+
+
+# ---------------------------------------------------------------------------
+# EVERY ANSWER SAYS SO WHEN THIS PROCESS IS STALE
+# ---------------------------------------------------------------------------
+#
+# ONE WRAPPER RATHER THAN THIRTY-SIX EDITS, and the reason is the defect
+# itself: a rule that has to be remembered at thirty-six call sites is a rule
+# that will be missing from the thirty-seventh. The tool decorator is wrapped
+# once, here, before any tool is declared, so a tool added tomorrow inherits it
+# without its author knowing this exists.
+#
+# IT IS A NO-OP UNLESS THERE IS SOMETHING TO SAY. `_announce_staleness` returns
+# the payload untouched when the loaded commit matches the checkout, so a
+# healthy process produces byte-identical answers and no caller and no test has
+# to learn a new key. The field's PRESENCE is the signal.
+#
+# REPORTS, NEVER REFUSES. Ruled by the wave lead on 2026-09-03: a deliberately
+# detached checkout is a legitimate state, and only the caller knows whether
+# this one is. Refusing would break a real workflow to prevent a surprise.
+_mcp_tool = mcp.tool
+
+
+def _tool_announcing_staleness(*decorator_args: Any, **decorator_kwargs: Any):
+    """``mcp.tool`` plus the staleness announcement on the way out."""
+
+    register = _mcp_tool(*decorator_args, **decorator_kwargs)
+
+    def decorate(fn):
+        if inspect.iscoroutinefunction(fn):
+
+            @functools.wraps(fn)
+            async def announced(*args: Any, **kwargs: Any):
+                return _announce_staleness(await fn(*args, **kwargs))
+
+        else:
+
+            @functools.wraps(fn)
+            def announced(*args: Any, **kwargs: Any):
+                return _announce_staleness(fn(*args, **kwargs))
+
+        # functools.wraps sets __wrapped__, which is what inspect.signature
+        # follows -- so FastMCP builds the same schema from the same signature
+        # and the tool surface is unchanged. Asserted in
+        # tests/test_stale_process_is_announced.py rather than assumed.
+        return register(announced)
+
+    return decorate
+
+
+mcp.tool = _tool_announcing_staleness
 
 
 # ---------------------------------------------------------------------------
@@ -910,7 +1120,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_thirtyfive_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_thirtysix_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.
@@ -1099,6 +1309,132 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
             )
     except Exception as exc:
         return _error(exc)
+
+
+#: WHAT IT WOULD COST TO OPEN THE CONNECTIONS LIST -- and it is ``None``
+#: because nobody has measured it, not because it is free.
+#:
+#: A DECLARED HOLE, so that filling it is a visible edit by somebody who took a
+#: reading. When this stops being ``None`` it should hold the two badge values
+#: and the date, e.g. ``{"before": 3, "after": 3, "measured": "2026-09-04"}``,
+#: and ``linkedin_connections`` starts working without any other change.
+#:
+#: WHY IT IS NOT MEASURED YET, both halves recorded because the second is the
+#: one that will trip the next person:
+#:
+#:   1. The census reads that badge, and on 2026-09-03 the running MCP process
+#:      predated a privacy fix in the census, so calling it would have re-run
+#:      the leaking version;
+#:   2. **the badge read ZERO.** A zero before and a zero after cannot
+#:      distinguish "the page consumed nothing" from "there was nothing to
+#:      consume". Taking the measurement against a zero would produce a number
+#:      that could not fail, which is the defect this package spent the day
+#:      finding elsewhere.
+#:
+#: SO THE MEASUREMENT NEEDS A NON-ZERO BADGE, and that is not arrangeable on
+#: demand. It waits.
+CONNECTIONS_BADGE_COST: Optional[dict[str, Any]] = None
+
+#: The one address this admits, written once so the tool and the refusal name
+#: the same string. It is on the read allowlist AND carries a paired exemption
+#: for the two forbidden substrings it trips -- see readonly.py, where the
+#: argument for both lives.
+CONNECTIONS_URL = f"{BASE_URL}/mynetwork/invite-connect/connections/"
+
+
+@mcp.tool()
+async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
+    """The people he is connected to. SHIPS REFUSING, and that is the design.
+
+    ================= READ THIS BEFORE REPORTING IT BROKEN =================
+    THIS TOOL REFUSES TODAY. Not because it is unfinished -- the read boundary
+    admits the address and the route works -- but because opening the page may
+    spend something nobody has measured, and the operator's standing rule is
+    that a cost is measured before it is paid, never estimated.
+    =======================================================================
+
+    WHY THE CAPABILITY EXISTS AT ALL. The operator asked why this server cannot
+    find a person in his own network. It could not: two entries on the
+    forbidden-substring list, both there to stop this server from ever issuing
+    an invitation, were ALSO matching the address of the page that merely lists
+    people he already knows. A write guard was matching a read address, and
+    this tool sends nothing and issues nothing. That was ruled and fixed on
+    2026-09-03; ``readonly.py`` names the two substrings and carries the whole
+    argument, so it is not repeated here.
+
+    WHAT IT UNLOCKS. The identifier route needs a surface where LinkedIn draws
+    a per-person conversation control, because the href on that control is the
+    only place ``recipient_id`` can be READ from.
+    ``linkedin_who_viewed_me`` was the only readable such surface and it is the
+    wrong one: it lists whoever happened to LOOK. An authorised target who has
+    not viewed his profile is absent from it entirely, and one who has may
+    still carry ``recipient_id: null`` where LinkedIn drew no control. This
+    surface does not depend on who happened to look.
+
+    WHAT IT IS WAITING FOR, precisely. ``/mynetwork/`` is REFUSED because it
+    consumes the pending-invitation badge. Whether this SUB-PAGE does too is
+    unmeasured -- and the neighbouring refusal is itself an inference, which
+    ``server.py`` admits in its own words: "a third member of a family whose
+    other two members both cost a badge does not get admitted on the hope that
+    it is the exception." Only notifications and messaging were ever measured.
+
+    The one measured fact next door is the closest thing to an answer:
+    ``writes.py`` records that his own profile page "carries no
+    pending-invitation counter, so this route costs no badge". The counter is
+    known to live on one page and known not to live on another. This one is
+    open.
+
+    IT DOES NOT LOAD ANYTHING TO TELL YOU THIS. A tool that refuses should not
+    spend a browser session doing it, so the refusal is decided from
+    :data:`CONNECTIONS_BADGE_COST` before any page is opened.
+
+    Returns:
+        Either the refusal, naming the measurement that would lift it, or --
+        once that measurement is recorded -- the connection rows.
+    """
+    if CONNECTIONS_BADGE_COST is None:
+        return {
+            "readable": False,
+            "rows": [],
+            "returned": 0,
+            "refused": "the side-effect cost of this page is UNMEASURED",
+            "why": (
+                "/mynetwork/ is refused because it consumes the pending-"
+                "invitation badge. Whether this sub-page does is not known, "
+                "and the neighbouring refusal is itself an inference rather "
+                "than a measurement. Opening this page could mark a real "
+                "person's invitation seen -- a durable record spent by "
+                "somebody who is not him."
+            ),
+            "what_would_lift_it": (
+                "read the invitation badge through the feed or profile census "
+                "BEFORE and AFTER one load of this address, exactly as "
+                "CENSUS_SURFACE_COST prescribes for messaging, then record "
+                "both values in server.CONNECTIONS_BADGE_COST. This tool then "
+                "works with no other change."
+            ),
+            "and_the_measurement_needs_a_non_zero_badge": (
+                "a zero before and a zero after cannot distinguish 'consumed "
+                "nothing' from 'there was nothing to consume'. On 2026-09-03 "
+                "the badge read zero, so the reading could not be taken."
+            ),
+            "the_address_is_admitted": CONNECTIONS_URL,
+            "pages_loaded": 0,
+            "verified": (
+                "NOTHING WAS LOADED. This refusal is decided from a declared "
+                "constant, so it costs no page and no browser session."
+            ),
+        }
+    # No branch below this line yet, and that is deliberate: the reader is
+    # built when the cost is known, against a real badge reading, rather than
+    # written now and left untested behind a constant nobody can flip.
+    return _error(
+        ExtractionFailedError(
+            "CONNECTIONS_BADGE_COST is set but no reader has been built for "
+            "this surface yet. Recording the cost does not by itself make the "
+            "page readable -- build the reader in the same change."
+        )
+    )
 
 
 @mcp.tool()
@@ -1791,8 +2127,15 @@ async def linkedin_followed_companies(
     """The company Pages LinkedIn records you as following.
 
     A read, and the exact counterpart of linkedin_saved_jobs: it answers "is
-    this Page already on the list?". This server cannot follow or unfollow
-    anything and ships no tool that could.
+    this Page already on the list?".
+
+    THIS NEXT SENTENCE WAS FALSE AND IS CORRECTED RATHER THAN QUIETLY
+    REWRITTEN: it used to say this server "cannot follow or unfollow
+    anything" and shipped no tool for either. Both
+    ``linkedin_follow_company`` and ``linkedin_unfollow_company`` are
+    registered tools and both act; see ``linkedin_unfollow_company``'s own
+    docstring for the AIMING asymmetry that keeps the pair from being a
+    clean round trip, rather than restating it here.
 
     THE ONE THING TO READ BEFORE TRUSTING AN ANSWER. LinkedIn draws only the
     first rows of this list and fetches the rest on scroll; this server opens
@@ -4217,13 +4560,21 @@ async def linkedin_unsave_job(job_id: str, confirm_token: str = "") -> dict[str,
     wrong state performs the opposite action -- an unsave fired on an unsaved
     posting saves it.
 
-    A SECOND BLOCKER IS LIVE AS OF 2026-08-30 AND IT IS NOT THIS TOOL'S FAULT.
-    The preview takes its DIRECTION from your Saved tab, and that list cannot
-    currently be read: the rows draw, and the harvest returns none of them.
-    Until that is fixed the preview refuses with "the current state of this
-    target came back 'unknown'" and mints no token. So this tool is capable and
-    not yet reachable end to end. ``linkedin_saved_jobs`` fails the same way
-    and prints what it saw.
+    A SECOND BLOCKER WAS LIVE AS OF 2026-08-30, AND IT IS CLOSED AS OF
+    2026-08-31 -- recorded here rather than quietly dropped, same as the
+    reversal above. This paragraph used to open "A SECOND BLOCKER IS LIVE AS
+    OF 2026-08-30 AND IT IS NOT THIS TOOL'S FAULT," and go on to say the
+    preview's DIRECTION comes from your Saved tab, that the tab's rows drew
+    while the harvest came back with none of them, and that the preview
+    therefore refused, in its own words, with "the current state of this
+    target came back 'unknown'", minting no token -- true then, and a defect
+    in the Saved-tab harvest rather than in this tool.
+
+    THE HARVEST WAS FIXED ON 2026-08-31. On 2026-09-03 this tool was driven
+    end to end against the real account: preview minted a token, confirm
+    returned ``performed: true, verified: true, clicks_made: 1``, and
+    ``linkedin_saved_jobs`` returned the row both before and after. The
+    blocker is closed.
 
     WHAT AN UNSAVE COSTS YOU, since the gate will ask. It drops a posting you
     chose to keep, and this server has no record of what your list held before
@@ -4330,8 +4681,26 @@ async def linkedin_unfollow_company(
     LinkedIn's own stated total dropping by one, not on the row having
     vanished. On a partial list an absent row is not evidence.
 
-    THE PAIR IS ASYMMETRIC ON PURPOSE: this server can stop a follow and cannot
-    start one. ``linkedin_follow_company`` is specced and is not performed.
+    THIS DOCSTRING SAID THE PAIR WAS ASYMMETRIC ON PURPOSE, AND THAT IS
+    FALSE AT HEAD. It read: "THE PAIR IS ASYMMETRIC ON PURPOSE: this server
+    can stop a follow and cannot start one," and went on to describe
+    ``linkedin_follow_company`` as specified but not wired to act.
+    ``linkedin_follow_company`` is live in both ``writes_available`` and
+    ``writes_sanctioned``, and its own docstring says PERFORMED FROM
+    2026-08-30. Both directions are performable now.
+
+    WHAT IS ASYMMETRIC IS AIMING, NOT CAPABILITY. ``linkedin_follow_company``
+    is addressed by ``job_id``, and a posting names its employer by SLUG,
+    while ``linkedin_unfollow_company`` is addressed by a NUMERIC company id
+    off Manage Pages -- and nothing in this server resolves one to the
+    other. So the pair cannot be round-tripped here even though each leg
+    works on its own.
+
+    A MEASUREMENT THAT BEARS ON TRUSTING THIS TOOL'S OWN VERDICT, taken
+    2026-09-03: ``linkedin_followed_companies`` returned ``total_followed:
+    null`` -- LinkedIn's own stated total could not be read at all, where it
+    read 58 on 2026-08-23. Confirmation above rests on that total dropping
+    by one; while it reads null, this server cannot confirm an unfollow.
 
     Args:
         company_id: the numeric LinkedIn company id, as printed by
@@ -5275,6 +5644,18 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "code": BUILD.as_dict(),
                 "process": CLOCK.as_dict(),
                 "jobcore": JOBCORE_STAMP_NOTE,
+                # THE COMPARISON THIS DOCSTRING USED TO ASK THE CALLER TO RUN
+                # BY HAND. It said: compare build.code.commit against
+                # `git rev-parse HEAD` in the checkout. Nobody does that before
+                # calling a tool, which is why the staleness trap kept working
+                # -- four separate times on 2026-09-03, the last of them
+                # serving a census that leaked third parties' names.
+                #
+                # HERE IT IS UNCONDITIONAL, unlike the field other answers
+                # grow: this is where "was it even checked" has to be
+                # answerable, so `stale: false` is stated rather than implied
+                # by absence.
+                STALE_PROCESS_KEY: _staleness(),
             },
             # THESE TWO FIELDS WERE LITERALS -- `True` and `[]` -- until
             # 2026-08-23, and they were true for as long as this package had
