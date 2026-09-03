@@ -128,9 +128,44 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #
     # SENDING IS STILL IMPOSSIBLE: /messaging/compose remains on the forbidden
     # substring list, which is checked BEFORE this one.
-    re.compile(r"^https://www\.linkedin\.com/messaging/?(\?[^#]*)?$"),
+    # TIGHTENED 2026-09-03, ON THE WAVE LEAD'S RULING, AND MEASURED FIRST.
+    #
+    # THE DEFECT. `"/messaging/compose"` is on the forbidden tuple precisely so
+    # that a composer cannot be addressed with a recipient, and
+    # `/messaging/compose/?recipient=` duly refuses. THREE SIBLING SPELLINGS
+    # REACHED THE SAME PLACE AND DID NOT:
+    #
+    #     /messaging/thread/new/?recipient=<id>
+    #     /messaging/?composeTo=<id>
+    #     /messaging/?recipient=<id>
+    #
+    # **A ruling that one spelling cannot express is not a ruling, it is a
+    # spelling filter.** Neither mechanism was argued; both were inherited. The
+    # root pattern admitted ANY query, which is over-broad whatever the query
+    # says, and the thread-id class matched the literal `new` -- a keyword it
+    # was never written for.
+    #
+    # THE ROOT TAKES NO QUERY. Measured from the code rather than from memory:
+    # `config.MESSAGING_URL` is the only construction of this address and it is
+    # navigated ONCE, at `server.py`'s messaging reader, with nothing appended.
+    # The query group protected a landed-url re-check that does not exist -- and
+    # the landed url, which LinkedIn redirects into a conversation, is covered
+    # by the thread pattern below, which keeps its query.
+    #
+    # A THREAD ID STARTS WITH A DIGIT. That is a SHAPE, deliberately, rather
+    # than a blocklist naming `new` -- a filter on one spelling is what got us
+    # here. Every thread id recorded anywhere in this repository starts with a
+    # digit: `2-abc`, `2-abcdef123456`, `2-NjY1ZDkwYWEt==`,
+    # `2-QUJDREVGSElKS0xNTk9Q==`, `4600000042`. `new` is a word.
+    #
+    # MEASURED BEFORE APPLIED, WITH ZERO CASUALTIES, and that is a fact worth
+    # stating rather than assuming: every shipped construction and every url
+    # `tests/test_readonly.py` pins as ALLOWED still matches, and all three gap
+    # spellings now refuse.
+    re.compile(r"^https://www\.linkedin\.com/messaging/?$"),
     re.compile(
-        r"^https://www\.linkedin\.com/messaging/thread/[A-Za-z0-9%\-_=]+/?(\?[^#]*)?$"
+        r"^https://www\.linkedin\.com/messaging/thread/"
+        r"[0-9][A-Za-z0-9%\-_=]*/?(\?[^#]*)?$"
     ),
     # Own profile views (Premium analytics view, and the classic one).
     re.compile(r"^https://www\.linkedin\.com/analytics/profile-views/?(\?[^#]*)?$"),

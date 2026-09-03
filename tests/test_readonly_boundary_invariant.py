@@ -365,7 +365,48 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ``/premium/`` has purchase and upgrade flows under it, NONE of which is
     # admitted -- the anchoring is the whole of that, and
     # ``tests/test_readonly.py`` puts three of them through the real guard.
-    "_ALLOWED_URL_PATTERNS": "6ae718fcbdbfc3ae",
+    #
+    # RE-FROZEN 2026-09-03, AND THIS ONE MOVED IN THE DIRECTION THAT ALMOST
+    # NEVER HAPPENS: THE ALLOWLIST GOT NARROWER. Two patterns tightened, none
+    # added, nothing removed from any denylist.
+    #
+    #   _ALLOWED_URL_PATTERNS      6ae718fcbdbfc3ae -> b064768de4ee4036
+    #
+    # WHAT IT CLOSES. "/messaging/compose" is on the forbidden tuple precisely
+    # so a composer cannot be addressed with a recipient, and
+    # /messaging/compose/?recipient= duly refused. THREE SIBLING SPELLINGS
+    # REACHED THE SAME PLACE AND DID NOT:
+    #
+    #     /messaging/thread/new/?recipient=<id>
+    #     /messaging/?composeTo=<id>
+    #     /messaging/?recipient=<id>
+    #
+    # Neither mechanism was argued; both were inherited. The root pattern took
+    # ANY query, and the thread-id class matched the literal `new`, a keyword
+    # it was never written for. A ruling that ONE SPELLING CANNOT EXPRESS is
+    # not a ruling, it is a spelling filter.
+    #
+    # CLOSED BY SHAPE, NOT BY BLOCKLIST, deliberately -- naming `new` would be
+    # another filter on another spelling. The root now takes no query, and a
+    # thread id must START WITH A DIGIT, which every thread id recorded
+    # anywhere in this repository does (2-abc, 2-abcdef123456,
+    # 2-NjY1ZDkwYWEt==, 2-QUJDREVGSElKS0xNTk9Q==, 4600000042) and which `new`
+    # does not.
+    #
+    # MEASURED BEFORE APPLIED, ZERO CASUALTIES, and the wave lead required
+    # that order rather than trusting it: every shipped construction was
+    # enumerated FROM THE CODE (config.MESSAGING_URL, navigated once with
+    # nothing appended; the census and write templates, both exact) and run
+    # through the tightened patterns offline alongside every url
+    # tests/test_readonly.py pins as ALLOWED. All still match. A tightening
+    # with no casualties is a fact worth stating rather than assuming.
+    #
+    # THE INVENTORY IS THE RECEIPT. tests/test_messaging_recipient_addressing.py
+    # pinned the pre-ruling verdicts, so this change turned it red on exactly
+    # the three lines that moved and on the test asserting the two families
+    # DIFFERED. Both were updated in the same commit; that file now records one
+    # argued admission and three closed accidents.
+    "_ALLOWED_URL_PATTERNS": "b064768de4ee4036",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -465,7 +506,48 @@ DENYLISTS_AT_A76FE32 = {
     # subscription page. Sixth re-baseline; the forbidden list did NOT move
     # this time, which is the direction that matters and the one the roster
     # tests police independently.
-    "_ALLOWED_URL_PATTERNS": "6ae718fcbdbfc3ae",
+    #
+    # RE-FROZEN 2026-09-03, AND THIS ONE MOVED IN THE DIRECTION THAT ALMOST
+    # NEVER HAPPENS: THE ALLOWLIST GOT NARROWER. Two patterns tightened, none
+    # added, nothing removed from any denylist.
+    #
+    #   _ALLOWED_URL_PATTERNS      6ae718fcbdbfc3ae -> b064768de4ee4036
+    #
+    # WHAT IT CLOSES. "/messaging/compose" is on the forbidden tuple precisely
+    # so a composer cannot be addressed with a recipient, and
+    # /messaging/compose/?recipient= duly refused. THREE SIBLING SPELLINGS
+    # REACHED THE SAME PLACE AND DID NOT:
+    #
+    #     /messaging/thread/new/?recipient=<id>
+    #     /messaging/?composeTo=<id>
+    #     /messaging/?recipient=<id>
+    #
+    # Neither mechanism was argued; both were inherited. The root pattern took
+    # ANY query, and the thread-id class matched the literal `new`, a keyword
+    # it was never written for. A ruling that ONE SPELLING CANNOT EXPRESS is
+    # not a ruling, it is a spelling filter.
+    #
+    # CLOSED BY SHAPE, NOT BY BLOCKLIST, deliberately -- naming `new` would be
+    # another filter on another spelling. The root now takes no query, and a
+    # thread id must START WITH A DIGIT, which every thread id recorded
+    # anywhere in this repository does (2-abc, 2-abcdef123456,
+    # 2-NjY1ZDkwYWEt==, 2-QUJDREVGSElKS0xNTk9Q==, 4600000042) and which `new`
+    # does not.
+    #
+    # MEASURED BEFORE APPLIED, ZERO CASUALTIES, and the wave lead required
+    # that order rather than trusting it: every shipped construction was
+    # enumerated FROM THE CODE (config.MESSAGING_URL, navigated once with
+    # nothing appended; the census and write templates, both exact) and run
+    # through the tightened patterns offline alongside every url
+    # tests/test_readonly.py pins as ALLOWED. All still match. A tightening
+    # with no casualties is a fact worth stating rather than assuming.
+    #
+    # THE INVENTORY IS THE RECEIPT. tests/test_messaging_recipient_addressing.py
+    # pinned the pre-ruling verdicts, so this change turned it red on exactly
+    # the three lines that moved and on the test asserting the two families
+    # DIFFERED. Both were updated in the same commit; that file now records one
+    # argued admission and three closed accidents.
+    "_ALLOWED_URL_PATTERNS": "b064768de4ee4036",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",

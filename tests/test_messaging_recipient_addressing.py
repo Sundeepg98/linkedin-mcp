@@ -118,26 +118,38 @@ REFUSED_TODAY: dict[str, str] = {
         "and without the trailing slash, so the refusal is not an artefact of "
         "one spelling"
     ),
+    # THE THREE THAT WERE ADMITTED UNTIL 2026-09-03. Each was a gap, not a
+    # decision, and each is now closed by a SHAPE rather than by a blocklist
+    # naming it -- a filter on one spelling is what created the gap.
+    "https://www.linkedin.com/messaging/thread/new/?recipient=" + FAKE_ID: (
+        "was admitted because `new` matched a thread-id character class "
+        "written for real thread ids. Closed by requiring an id to START WITH "
+        "A DIGIT, which every thread id recorded in this repository does and "
+        "which `new` does not"
+    ),
+    "https://www.linkedin.com/messaging/?composeTo=" + FAKE_ID: (
+        "was admitted because the messaging-root pattern took ANY query. "
+        "Closed by removing the query group -- measured first: the only "
+        "shipped construction of that address appends nothing"
+    ),
+    "https://www.linkedin.com/messaging/?recipient=" + FAKE_ID: (
+        "same pattern, and it carried the same parameter name the composer's "
+        "refused spelling uses, which is what made it the sharpest of the "
+        "three"
+    ),
 }
 
-#: ADMITTED, AND UNRULED. Nobody argued for these; two regexes let them
-#: through. Pinned so the fact is visible rather than latent.
+#: ADMITTED. **ONE ENTRY, AND IT WAS ARGUED.**
+#:
+#: This table had FOUR entries when it was written and three of them were
+#: accidents. The wave lead ruled on 2026-09-03 that they come out, and the
+#: patterns were tightened after measuring that nothing shipped depended on
+#: them. Their entries moved to :data:`REFUSED_TODAY` below.
 ADMITTED_TODAY: dict[str, str] = {
     "https://www.linkedin.com/messaging/compose/": (
         "THE ONE DELIBERATE ADMISSION -- an exact-url exemption, argued on the "
         "operator's 2026-08-31 ruling and conditioned on the messaging badge "
         "reading zero first"
-    ),
-    "https://www.linkedin.com/messaging/thread/new/?recipient=" + FAKE_ID: (
-        "UNRULED. `new` matches the thread-id character class, which was "
-        "written for real thread ids"
-    ),
-    "https://www.linkedin.com/messaging/?composeTo=" + FAKE_ID: (
-        "UNRULED. The messaging-root pattern admits any query"
-    ),
-    "https://www.linkedin.com/messaging/?recipient=" + FAKE_ID: (
-        "UNRULED. Same pattern, and it is the same parameter name the "
-        "composer's refused spelling uses"
     ),
 }
 
@@ -168,37 +180,48 @@ def test_the_currently_admitted_messaging_urls_are_pinned(url):
     assert _verdict(url) == "admitted", (url, ADMITTED_TODAY[url])
 
 
-def test_the_unruled_admissions_are_named_as_unruled():
-    """A DECLARATION THAT DOES NOT SAY WHICH ENTRIES ARE ACCIDENTS IS A LIST.
+def test_every_admission_is_an_argued_one():
+    """THE STATE THE RULING PRODUCED: one admission, and it was argued for.
 
-    Exactly one admission was argued. The rest carry ``UNRULED`` in their own
-    reason string, so the count of deliberate admissions is asserted rather
-    than left to be inferred from prose that may be skimmed.
+    This asserted THREE UNRULED admissions when it was written -- the gap, in
+    the form of a count. The tightening deleted them, so the assertion had to
+    invert, and that inversion is the receipt: an inventory that could not go
+    from three accidents to none would not have been measuring anything.
+
+    A NEW ADMISSION FAILS HERE unless its reason says it was argued. That is
+    the point of asserting the SHAPE of the reasons rather than their number:
+    a count would pass for any four entries, including four new accidents.
     """
-    unruled = [why for why in ADMITTED_TODAY.values() if why.startswith("UNRULED")]
-    assert len(unruled) == 3, unruled
-    deliberate = [
-        why for why in ADMITTED_TODAY.values() if "DELIBERATE" in why
-    ]
-    assert len(deliberate) == 1, deliberate
+    assert len(ADMITTED_TODAY) == 1, ADMITTED_TODAY
+    for why in ADMITTED_TODAY.values():
+        assert "DELIBERATE" in why or "argued" in why, why
+    assert not [why for why in ADMITTED_TODAY.values() if why.startswith("UNRULED")]
 
 
-def test_the_two_families_are_not_the_same_family():
-    """THE SENTENCE THAT MISLEADS, PINNED AS THE MEASUREMENT THAT CORRECTS IT.
+def test_the_families_now_agree_and_that_is_the_ruling_landing():
+    """THIS TEST ASSERTED THE OPPOSITE YESTERDAY, AND THE FLIP IS THE POINT.
 
-    The audit records that "every other spelling in that family refuses exactly
-    as before". True of `/messaging/compose/`. The neighbouring families admit
-    the same parameter on a different path, and asserting the DIFFERENCE is
-    what stops the reassuring half being read as the whole.
+    It was written to pin a DIVERGENCE: the composer refused `?recipient=` and
+    the messaging root admitted it, which is what made the audit's reassuring
+    sentence -- "every other spelling in that family refuses exactly as before"
+    -- true and misleading at once. Its own failure message said what to do if
+    the boundary were ever tightened: move the root url into `REFUSED_TODAY`
+    and delete the premise.
+
+    That happened. **A ruling one spelling cannot express is not a ruling, it
+    is a spelling filter**, and the same parameter now refuses on both paths.
+
+    The assertion is kept rather than deleted, inverted, because the property
+    worth guarding is not "these two differ" but "these two AGREE" -- a future
+    edit that reopens either path fails here, naming the family that drifted.
     """
     composer = "https://www.linkedin.com/messaging/compose/?recipient=" + FAKE_ID
     root = "https://www.linkedin.com/messaging/?recipient=" + FAKE_ID
-    assert _verdict(composer) == "refused"
-    assert _verdict(root) == "admitted"
-    assert _verdict(composer) != _verdict(root), (
-        "the two families now agree -- if the boundary was tightened, move the "
-        "root url into REFUSED_TODAY and delete this test's premise"
+    thread = (
+        "https://www.linkedin.com/messaging/thread/new/?recipient=" + FAKE_ID
     )
+    verdicts = {url: _verdict(url) for url in (composer, root, thread)}
+    assert set(verdicts.values()) == {"refused"}, verdicts
 
 
 def test_the_evidence_url_matches_the_shape_linkedin_draws():
