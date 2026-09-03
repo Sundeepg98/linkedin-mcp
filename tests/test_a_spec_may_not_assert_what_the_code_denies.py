@@ -114,6 +114,46 @@ _PROBE_TARGETS: tuple[str, ...] = (
 #: splitter that ignored colons would attribute the claim to the wrong action.
 _SENTENCE_BREAK = re.compile(r"(?<=[.:;])\s+")
 
+#: A QUOTED RETRACTION IS NOT AN ASSERTION, and this file learned that the
+#: hard way -- the first version of it went red on the very corrections it had
+#: just demanded, because this package's standing convention is to QUOTE THE
+#: SENTENCE IT IS RETRACTING so the mistake stays legible. That convention is
+#: everywhere in ``writes.py`` and it is the reason four of the corrections
+#: this file drove could be reviewed at all.
+#:
+#: A CHECK THAT FORBIDS THE CORRECTION IS WORSE THAN NO CHECK. It would push
+#: every future fixer into silently swapping sentences, which is exactly the
+#: behaviour the convention exists to stop and exactly how these seven
+#: defects survived: nobody could see what a field used to say.
+#:
+#: SO THE EXEMPTION IS NARROW AND TAKES TWO THINGS, never one:
+#:
+#:   1. the match sits inside a DOUBLE-QUOTED span, and
+#:   2. a retraction marker appears in the same field BEFORE that span opens.
+#:
+#: One alone is not enough, and both halves have a control below. A bare
+#: quotation with no marker still fires -- otherwise any false claim could be
+#: laundered by putting quotes round it -- and a marker with the claim outside
+#: the quotes still fires, which is what caught the half-quoted clause in
+#: ``update_profile_field.reversible_by`` on the first run of this rule.
+_QUOTED_SPAN = re.compile(r'"[^"]*"')
+_RETRACTION_MARKER = re.compile(
+    r"used\s+to\s+(?:say|read|end|claim|carry|close|add)"
+    r"|\bit\s+(?:said|read)\b"
+    r"|(?:was|were|is)\s+(?:false|wrong)"
+    r"|quoted\s+(?:so|rather\s+than)"
+    r"|is\s+DISCHARGED",
+    re.IGNORECASE,
+)
+
+
+def _is_a_quoted_retraction(text: str, match: re.Match) -> bool:
+    """True when this match is a sentence being RETRACTED, not asserted."""
+    for span in _QUOTED_SPAN.finditer(text):
+        if span.start() < match.start() and match.end() <= span.end():
+            return bool(_RETRACTION_MARKER.search(text[: span.start()]))
+    return False
+
 
 def _own_surface_read_url(spec: WriteSpec) -> Optional[str]:
     """The spec's own url, IF the read boundary admits it. Else None.
@@ -381,6 +421,8 @@ def findings_for(spec: WriteSpec) -> list[_Finding]:
         text = getattr(spec, field, "") or ""
         for rule in RULES:
             for match in rule.detector.finditer(text):
+                if _is_a_quoted_retraction(text, match):
+                    continue
                 sentence = _sentence_around(text, match)
                 reason = rule.contradiction(spec, match, sentence)
                 if reason is None:
@@ -549,6 +591,46 @@ def test_each_rule_has_been_shown_failing(action, field, prose, rule):
 def test_a_true_sentence_of_the_same_shape_stays_green(action, field, prose, rule):
     """The other half. Over-firing would train the next reader to ignore it."""
     assert rule not in _rules_that_fired(_with(action, **{field: prose}))
+
+
+@pytest.mark.parametrize(
+    "prose,still_fires,why",
+    [
+        (
+            'It used to say "this action is not performed". It is.',
+            False,
+            "a marker before a quoted span is the retraction this package writes",
+        ),
+        (
+            'The residue notes that "this action is not performed".',
+            True,
+            "QUOTES ARE NOT A LAUNDRY. No marker, so this is still an assertion",
+        ),
+        (
+            "This field used to say it, and this action is not performed.",
+            True,
+            "a marker with the claim OUTSIDE the quotes is a half-retraction, "
+            "which is exactly the shape that survived the first fix pass",
+        ),
+        (
+            "This action is not performed.",
+            True,
+            "the bare assertion, which must not become unreachable",
+        ),
+    ],
+)
+def test_the_quoted_retraction_exemption_takes_two_things_not_one(
+    prose, still_fires, why
+):
+    """The exemption, shown letting the right thing through and nothing else.
+
+    THIS EXEMPTION IS THE MOST DANGEROUS LINE IN THE FILE. It is the only
+    place a rule declines to fire on text that matches its detector, so it is
+    the only place a false claim could hide. Each row is one way of getting it
+    wrong, and three of the four must still fail.
+    """
+    fired = "NOT_PERFORMED" in _rules_that_fired(_with("save_job", residue=prose))
+    assert fired is still_fires, why
 
 
 def test_the_restore_predicate_is_derived_and_not_typed():
