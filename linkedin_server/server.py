@@ -1299,9 +1299,32 @@ async def linkedin_open_messaging(
             # Read AFTER the filter, so every count -- including the
             # send-surface counts -- describes the page the caller was given.
             html = await page.content()
+            # WHETHER A REPLY IS POSSIBLE, ON THE CONVERSATION THIS TOOL JUST
+            # OPENED. No extra navigation and no extra page: the thread is
+            # already on screen and this counts what it draws.
+            #
+            # IT IS THE PRECONDITION FOR THE ONLY ADDRESSLESS SEND. Composing
+            # a NEW message needs a recipient, and both routes to one are
+            # expensive -- by NAME is a measured dead end, by IDENTIFIER needs
+            # an id harvested from a page that happens to show one. A REPLY
+            # needs no address at all, so the question "does this page offer a
+            # reply box and a Send that starts disabled" is the whole of what
+            # stands between here and the most job-hunt-relevant messaging
+            # action the census found.
+            #
+            # COUNTS AND BOOLEANS ONLY, and on this surface that matters more
+            # than anywhere else in the package: a conversation is a third
+            # party's words, in full, sent to him privately. The reader has no
+            # field that could carry a message, a name or a thread id.
+            reply_surface = await dom.read_thread_reply_surface(page)
         verdict = shape.messaging_overview(
             html, landed, include_names=bool(include_names)
         )
+        # EXPECTED TO SHOW ZERO RECIPIENT BOXES, and that zero is the finding
+        # rather than a formality: a thread has nobody to choose, so a
+        # combobox here would mean a reply is not addressless after all and
+        # the route needs rethinking.
+        verdict["reply_surface"] = reply_surface
         # The filter pills, READ rather than assumed. This is what settles
         # whether InMails are a separate surface: if a pill is an anchor its
         # href names the filter parameter, and if it is a button with no href

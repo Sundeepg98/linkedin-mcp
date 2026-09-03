@@ -6535,6 +6535,73 @@ async def read_composer_surface(page: Any) -> dict[str, Any]:
     return out
 
 
+async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
+    """What an OPEN CONVERSATION offers for replying, counted and nothing else.
+
+    WHY THIS SURFACE AT ALL. Addressing a NEW message is the hard problem: by
+    name is a measured dead end, and by identifier needs an id this server can
+    only get from a page that happens to be showing one. **A REPLY NEEDS NO
+    ADDRESS.** The conversation already exists, the recipient is already in it,
+    and the whole recipient-gate apparatus has nothing to decide. The capability
+    census called replying the most job-hunt-relevant messaging action in the
+    package, and the economics agree: answering an InMail he was sent is free
+    where sending one spends a credit.
+
+    **EVERY FIELD IS A COUNT OR A BOOLEAN AND THAT IS NOT FASTIDIOUSNESS
+    HERE.** A conversation page is a third party's words, in full, addressed to
+    him privately -- the single richest surface in this package. There is no
+    field on this reader that could carry a message, a name or a thread id, so
+    there is nothing for a caller to leak and nothing for a traceback to
+    print. The same discipline the compose readers use, on the surface that
+    most needs it.
+
+    WHAT THE FIELDS ARE FOR:
+
+    * ``editors`` / ``textboxes`` -- the reply box. Two spellings because a
+      LinkedIn editor has been measured as both a ``contenteditable`` and a
+      ``div[role=textbox]``, and a reader that knew only one would report zero
+      on a page that has the other.
+    * ``send_controls`` / ``send_disabled`` -- the transition ``publish_post``
+      and ``send_message`` both gate on. An empty box draws ``Send`` DISABLED,
+      so a fill that lands is observable without reading what was typed.
+    * ``recipient_boxes`` -- **EXPECTED TO BE ZERO, AND THE ZERO IS THE
+      POINT.** A thread has nobody to choose, so a recipient combobox here
+      would mean this is not the surface it looks like. It is the one field
+      whose non-zero reading would refute the whole approach.
+
+    NOTHING IS ASSERTED FROM A PREVIOUS RUN. Every number is taken afresh, and
+    a caller that gets zeroes everywhere is looking at a page this reader
+    cannot speak for rather than a conversation with no reply box.
+    """
+    out: dict[str, Any] = {
+        "editors": 0,
+        "textboxes": 0,
+        "send_controls": 0,
+        "send_disabled": None,
+        "recipient_boxes": 0,
+        "error": None,
+    }
+    try:
+        out["editors"] = int(await page.locator("[contenteditable]").count())
+        out["textboxes"] = int(await page.locator('[role="textbox"]').count())
+        out["recipient_boxes"] = int(
+            await page.locator(
+                '[aria-label="' + MESSAGE_RECIPIENT_LABEL + '"]'
+            ).count()
+        )
+        send = page.locator(compose_send_selector())
+        out["send_controls"] = int(await send.count())
+        if out["send_controls"] == 1:
+            # TRI-STATE ON PURPOSE. None means "not asked", which is a
+            # different fact from False. Asking a control that does not
+            # uniquely exist would be reading whichever one Playwright
+            # resolved first.
+            out["send_disabled"] = bool(await send.first.is_disabled())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+    return out
+
+
 async def read_reaction_surface(page: Any) -> dict[str, Any]:
     """The reaction and comment controls on this page, and the states worn.
 
