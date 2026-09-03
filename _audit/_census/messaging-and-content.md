@@ -13,30 +13,46 @@ it advertises against the code in `linkedin_server/`.
 
 ## 1. THE COUNTS
 
-**Denominator: 120 member-performable capabilities** -- 45 messaging, 75 content.
+**REVISED 2026-09-03 after a second pass over this file's own declared holes, using
+LinkedIn's help-article index (`/help/linkedin/search?q=`). The denominator moved
+120 -> 142. Every added row is a GAP but one.** Section 2 records what the re-check
+found, hole by hole, including the holes that came back empty.
+
+| | first pass | after re-check | delta |
+|---|---:|---:|---:|
+| **denominator** | **120** | **142** | **+22** |
+| messaging | 45 | 51 | +6 |
+| content | 75 | 91 | +16 |
+
+**Denominator: 142 member-performable capabilities** -- 51 messaging, 91 content.
 Every row is sourced to a LinkedIn Help Center page; none was recalled from memory.
 
-| state | count | share |
-|---|---:|---:|
-| COVERED-PROVEN -- tool exists, audits record it firing and returning its payload | **2** | 1.7% |
-| COVERED-UNFIRED -- tool exists, never returned its payload live | **7** | 5.8% |
-| COVERED-CANNOT-DELIVER -- tool exists and is structurally unable to complete | **2** | 1.7% |
-| EXCLUDED-RULED -- no tool, written reason in the repo | **21** | 17.5% |
-| GAP -- no tool and no reason; nobody considered it | **88** | 73.3% |
-| | **120** | |
+| state | count | share | delta |
+|---|---:|---:|---:|
+| COVERED-PROVEN -- tool exists, audits record it firing and returning its payload | **2** | 1.4% | 0 |
+| COVERED-UNFIRED -- tool exists, never returned its payload live | **7** | 4.9% | 0 |
+| COVERED-CANNOT-DELIVER -- tool exists and is structurally unable to complete | **2** | 1.4% | 0 |
+| EXCLUDED-RULED -- no tool, written reason in the repo | **22** | 15.5% | +1 |
+| GAP -- no tool and no reason; nobody considered it | **109** | 76.8% | +21 |
+| | **142** | | |
 
 Split by half:
 
-| | messaging (45) | content (75) |
+| | messaging (51) | content (91) |
 |---|---:|---:|
 | COVERED-PROVEN | 1 | 1 |
 | COVERED-UNFIRED | 3 | 4 |
 | COVERED-CANNOT-DELIVER | 2 | 0 |
-| EXCLUDED-RULED | 5 | 16 |
-| GAP | 34 | 54 |
+| EXCLUDED-RULED | 5 | 17 |
+| GAP | 40 | 69 |
 
-**The one-line reading: this slice is 9 capabilities covered out of 120, and 88 of the
-120 have never been thought about.** The repo's own prose is dense, careful and honest
+**The coverage numerator did not move.** 22 capabilities were added and not one of them
+found hidden coverage: 21 are GAPs and 1 (delete an article) falls under an existing
+prohibition. That is the load-bearing result of the re-check -- **the hole was bigger,
+not shallower.**
+
+**The one-line reading: this slice is 9 capabilities covered out of 142, and 109 of the
+142 have never been thought about.** The repo's own prose is dense, careful and honest
 about the 21 it ruled on -- and that density is what makes the 88 easy to miss. A reader
 of `README.md` or of the tool docstrings would come away believing the messaging and
 content surface had been thoroughly considered. It has been thoroughly considered along
@@ -85,32 +101,100 @@ Inbox), `a550614` (away message, Premium), `a569446`/`a552111` (smart/reply sugg
 `a528144` (hashtags and follow topics), `a566460`/`a540824`/`a542733` (Groups membership),
 video meetings in messaging.
 
-### NOT reached -- named holes
+### The instrument that closed the holes (added 2026-09-03)
 
-1. **`/help/recruiter/*`** (Recruiter and Recruiter Lite). Surfaced repeatedly in
-   messaging searches (`topic/a52` "InMail and Inbox", `a417392` LinkedIn Scheduler,
-   `a1597359` out-of-office replies). Different product, different licence. Excluded
-   deliberately -- the operator holds Premium Career, not Recruiter -- but the exclusion
-   is an assumption about his licence, not a measurement of it.
-2. **`/help/lms/*`** (Marketing Solutions / Sponsored Messaging / Pages advertising).
-   Excluded as advertiser surface.
-3. **`/help/sales-navigator/*`**. Excluded, same reason.
-4. **LinkedIn Pages admin content.** The Share Content topic mixes member and Page-admin
-   articles freely (`a6848685`, `a1633417`, `a6850421`, `a1426072`, "Newsletters for
-   Pages"). Page-admin rows are excluded from the denominator. If the operator administers
-   a Page, an entire second messaging-and-content surface exists that this census does
-   not cover at all.
-5. **`Data and Privacy` (`topic/a65`) and `Basics` (`topic/a51`).** Not walked. Messaging
-   privacy controls (who can message you, connection-request message settings) partly
-   live there and are partly counted here via `a541708` and `a567370`; the remainder is
-   unenumerated.
-6. **The `Media`, `Creators Core`, `LinkedIn Polls` and `Custom Content` subtopic pages**
-   were not opened as topic trees. Their articles were reached transitively through
-   Post/Share Content, so coverage of them is incidental rather than exhaustive.
-7. **Mobile-only affordances.** Every count here is the desktop web surface, which is the
-   only surface this server can drive. Where the Help Center describes a mobile-only path
-   (tap-and-hold to react, some attachment menus) the capability is still counted, because
-   the question is what LinkedIn offers, not what a browser exposes conveniently.
+    https://www.linkedin.com/help/linkedin/search?q=<terms>
+
+It queries LinkedIn's OWN article index, so unlike an external engine it cannot miss an
+article nobody crawled. The parameter name is load-bearing: `?query=`, `?keywords=`,
+`?searchTerm=`, `?term=` and `?text=` all return HTTP 400. Fourteen queries were run.
+**This instrument is strictly better than a topic-tree walk and should be the default for
+any future census pass** -- it recovered 22 capabilities that four fully-enumerated topic
+trees did not contain.
+
+### Holes re-checked, hole by hole
+
+| hole declared in pass 1 | verdict | delta |
+|---|---|---:|
+| `/help/recruiter/*` licence assumption | **CONFIRMED, with a correction** | +2 |
+| `/help/lms/*`, `/help/sales-navigator/*` | **CONFIRMED empty for a Premium Career member** | 0 |
+| Pages-admin content | **CONFIRMED as a real boundary** | 0 |
+| `Data and Privacy` (`topic/a65`) | **CHECKED, near-empty for this slice** | +3 |
+| `Basics` (`topic/a51`) | **CHECKED, empty of anything new** | 0 |
+| Newsletters | **REAL HOLE** | +5 |
+| Articles | **REAL HOLE** | +4 |
+| Polls | **REAL HOLE** | +1 |
+| Scheduled posts | **CONFIRMED correct** | 0 |
+| Live-adjacent | **REAL HOLE, reassigned** | 0 (see s10) |
+| Comments / reactions / mentions | **REAL HOLE** | +6 |
+| Messaging attachments, voice, archive, InMail | **REAL HOLE** | +6 |
+| Saved posts | **CHECKED, empty** | 0 |
+| Hashtags | **SOURCE WAS DEAD** | -1 |
+
+**1. The licence assumption was right, and resting on it cost two rows anyway.**
+`q=recruiter inmail` returned ten articles and **all ten sit under `/help/linkedin/`, the
+member index, not `/help/recruiter/`.** So excluding the Recruiter PRODUCT is correct
+(`a1376069` "Individual Account vs. Recruiter Account", `a417251` on the Recruiter tiers,
+confirm the licence line is real) -- but the member index carries member-side InMail
+capabilities that my Messaging topic walk did not list: **M46 opt out of receiving InMail**
+and **M47 respond to a Recruiter InMail**. The assumption was sound; not measuring it
+still hid two rows, one of which is the most job-hunt-relevant messaging action in the
+slice.
+
+**2. `/help/lms/*` and `/help/sales-navigator/*` -- confirmed empty.** No query returned
+a member-performable capability from either. The only crossings were `a549501`
+"Automatically archived Sponsored Messaging ads" and `a1382752`, both advertiser-side.
+Checked and empty is a result, not silence.
+
+**3. Pages-admin -- confirmed as a real boundary, and the check strengthened it.**
+`q=scheduled post` returned five Page-level scheduling articles (`a1419179`, `a548192`,
+`a1424039`, `a1427033`, `a9599594`) sitting beside the one member article `a1347212`.
+LinkedIn documents the two surfaces separately, which is exactly what a defensible
+exclusion needs. Same pattern for `a551424` (repost a Page post), `a548396` (delete
+comments on a Page post), `a567534` (edit a Page article). The member/Page split holds.
+
+**4. `Data and Privacy` -- checked, and near-empty FOR THIS SLICE.** `q=privacy settings
+visibility` returned eleven articles; nine are profile or network identity (connection
+visibility, birthday, email, profile photo, last name, who's-viewed). Only `a595755`
+"Follow visibility" and the generic `a1338877` touch content. The mention/tag privacy
+family (`a522861`, `a524212`, `a524346`) came in through `q=mention tag people in post`
+instead and is counted as C87-C89. **The hole cost three rows, not thirty** -- worth
+knowing, because it is the hole I was least able to size from outside.
+
+**5. `Basics` -- walked, 26 articles, nothing new.** Its only two content articles are
+`a526256` and `a528132` (edit and delete comments in the feed), both already recovered
+through `q=comment`. Genuinely empty.
+
+**6. The thin-index class was the real damage.** Newsletters went 2 rows -> 7,
+articles 5 -> 9, polls 1 -> 2, and the comment/reaction/mention families gained six.
+None of it was hiding behind an empty topic page -- **it was hiding inside topic pages
+that listed 60 articles each and still did not list these.** That is a worse failure mode
+than the Events/Live empty-index hazard, because a 60-article listing reads as exhaustive.
+
+**7. One row was WRONG, not merely missing.** C52/C53 rested on `a528144`
+("Use Hashtags and Follow Topics"), which **returns HTTP 404**. Two independent index
+queries (`q=hashtag`, `q=follow topics interests feed`) return no hashtag-following
+article at all. The URL had reached me through an external search with a mangled locale
+suffix. C52 is rewritten to what LinkedIn's index does document (`a528074`, feed
+preferences) and C53 is retired in place rather than deleted. **This is the one place
+where the first pass asserted a LinkedIn capability that its own help index does not
+support.**
+
+### Still NOT reached
+
+1. **The `Media`, `Creators Core` and `Custom Content` subtopic pages** as topic trees.
+   Their articles were reached transitively and via search, so coverage is good but not
+   provably exhaustive.
+2. **Group-admin and Event-organizer surfaces.** `q=group members invite` returned eight
+   "(Group Management)" articles -- approve, block, unblock, remove, promote, merge,
+   message all members. Excluded as admin, on the same basis as Pages. If the operator
+   owns a group, that is another unwalked surface.
+3. **Mobile-only affordances.** Every count is the desktop web surface, the only one this
+   server can drive. Mobile-only paths are still counted as capabilities, because the
+   question is what LinkedIn offers.
+4. **Whether the operator administers a Page or owns a Group.** Both exclusions in this
+   file are conditioned on him doing neither, and that is still an assumption. It is a
+   one-question answer and nobody has asked it.
 
 ---
 
@@ -290,6 +374,12 @@ from what this server could do about it.
 | M43 | Open the inbox and list conversations | a564261 | COVERED-UNFIRED | R | REV | `linkedin_open_messaging`. Deliberately never called: `_audit/2026-08-30-linkedin-writes.md:335-336` -- "**This wave did NOT call `linkedin_open_messaging`.** The cost lands on somebody who is not him, so it is his to spend." |
 | M44 | See the unread-messages badge count | a564261 | **COVERED-PROVEN** | R | REV | `linkedin_new_messages`; measured `Messaging, 0 new notifications` on both feed and profile, 2026-08-30. Reads the badge off a page already open; loads no messaging surface |
 | M45 | Open a blank compose window | a541865 | COVERED-UNFIRED | R | REV | `linkedin_compose_fields` loads `/messaging/compose/` by exemption. Fired live 2026-09-02 and returned `refused: name_shaped_label_present`; the design was confirmed by a different instrument and the repaired build has not been re-run |
+| M46 | Opt out of receiving InMail messages | a554229 | GAP | W | REV | recovered 2026-09-03 by help-index search. A member-side InMail control the whole InMail discussion in this repo never mentions -- every sentence there is about SPENDING a credit, none about the receiving end |
+| M47 | Respond to a Recruiter InMail (Interested / Not interested) | a552643 | GAP | W | **NOT** | recovered by help-index search. Distinct from a plain reply: it is a structured response with its own affordances, and it is the single most job-hunt-relevant messaging action in this slice |
+| M48 | React to a message with an emoji | a552661 | GAP | W | REV | recovered by help-index search. Reactions exist on MESSAGES as well as posts; `react_to_item` addresses feed items only and nothing in the repo mentions the messaging case |
+| M49 | Read message delivery / read indicators | a569649 | GAP | R | REV | recovered by help-index search. `linkedin_open_messaging` returns per-row unread flags for HIS state; the sender-side indicators are a different signal and were never enumerated |
+| M50 | Manage LinkedIn message nudges | a568627 | GAP | W | REV | recovered by help-index search; never named |
+| M51 | Use LinkedIn AI-powered conversation in messaging | a10346037 | GAP | W | NOT (it sends) | recovered by help-index search. Distinct from M40 smart replies; adjacent to the `auto_accept_or_auto_reply` prohibition without being covered by it |
 
 ---
 
@@ -348,8 +438,8 @@ from what this server could do about it.
 | C49 | Manage comments on your articles | a522438 | GAP | W | mixed | never named |
 | C50 | Create a newsletter | a522525, a591266 | GAP | W | **NOT** (it mails subscribers) | zero hits for "newsletter" anywhere in the repo |
 | C51 | Manage a newsletter | a517925 | GAP | W | REV | same |
-| C52 | Follow a hashtag / topic | a528144 | GAP | W | REV | zero hits for "hashtag". Note `linkedin_follow_company` exists and is PERFORMABLE -- the company case was built and the hashtag case was never raised |
-| C53 | Unfollow a hashtag / topic | a528144 | GAP | W | REV | same |
+| C52 | Manage your LinkedIn feed preferences (follow / unfollow topics and sources) | a528074 | GAP | W | REV | **ROW CORRECTED 2026-09-03.** It previously read "Follow a hashtag / topic" sourced to `a528144`, which **returns HTTP 404**, and two independent help-index queries (`q=hashtag`, `q=follow topics interests feed`) return no hashtag-following article at all. What the index does document is feed preferences and the profile Interests section (`a569139`). The capability as I first stated it is not sourceable from LinkedIn's own index; this row is what survives |
+| C53 | *(retired -- see C52)* | -- | -- | -- | -- | the unfollow half of an unsourceable row. Retired rather than kept, and recorded rather than deleted |
 | C54 | Create a collaborative post | a14240120 | GAP | W | **NOT** | zero hits |
 | C55 | Manage collaborators on a collaborative post | a14180127 | GAP | W | REV | zero hits |
 | C56 | Remove yourself from a collaborative post | a14250134 | GAP | W | NOT | zero hits |
@@ -372,6 +462,23 @@ from what this server could do about it.
 | C73 | Allow or disallow your posts being embedded | a7462020 | GAP | W | REV | never named |
 | C74 | Read your feed | a1480504 | GAP | R | REV | `/feed/` is on the allowlist and has been censused dozens of times -- for CONTROL COUNTS. No tool returns a feed item. "286 controls, 1 form, 0 contenteditable" is what the feed looks like from here |
 | C75 | Read notifications about engagement on your content | -- | **COVERED-PROVEN** | R | **NOT** (loading clears the badge) | `linkedin_notifications`; one measured call 2026-08-21 took the badge from 1 to 0 and it did not come back. Overlaps the network slice -- flagged rather than double-counted there |
+| C76 | Contribute to a collaborative article | a1413111, a1443723 | GAP | W | **NOT** | recovered 2026-09-03 by help-index search. A whole LinkedIn product -- AI-seeded articles members add sections to under their own name, with a Top Voice badge attached to doing it well. Absent from the Share Content and Post topic trees entirely |
+| C77 | Delete an article | a522451 | EXCLUDED-RULED | W | **NOT** | `writes.py:1801-1814` `delete_or_withdraw_anything`. LinkedIn's own article is titled *"Unable to retrieve deleted articles"*, which is the platform confirming the irreversibility the repo's entry asserts |
+| C78 | Set the visibility of your articles | a517863 | GAP | W | REV | recovered by help-index search; never named |
+| C79 | Follow or unfollow member articles | a519786 | GAP | W | REV | recovered by help-index search. Distinct from following a person; never named |
+| C80 | Subscribe or unsubscribe to a newsletter | a1644939 | GAP | W | REV | recovered by help-index search. A READER-side capability -- the two newsletter rows I had were both author-side |
+| C81 | Create a Newsletter Page | a518936 | GAP | W | REV | recovered by help-index search |
+| C82 | Share a Newsletter Page | a521766 | GAP | W | REV | recovered by help-index search |
+| C83 | View newsletter analytics | a1658525 | GAP | R | REV | recovered by help-index search |
+| C84 | Manage multiple newsletters | a6588862 | GAP | W | REV | recovered by help-index search |
+| C85 | Vote in a poll / view poll results | a527273, a527270 | GAP | W | **NOT** | recovered by help-index search. My original poll row was author-side only; voting is the reader-side act and it cannot be changed once cast |
+| C86 | Tag people in your photos | a522896 | GAP | W | NOT once posted | recovered by help-index search. Distinct from an `@` mention in text -- a coordinate-anchored tag on an image |
+| C87 | Remove a mention or tag of yourself | a524346 | GAP | W | REV | recovered by help-index search. The one capability in this family that acts on somebody ELSE's content, on his own behalf |
+| C88 | Choose whether members can mention, tag or collaborate with you | a522861 | GAP | W | REV | recovered by help-index search; a setting, never named |
+| C89 | Set the visibility of mentions and tags | a524212 | GAP | W | REV | recovered by help-index search |
+| C90 | Verified comments filter on your post | a10721097 | GAP | W | REV | recovered by help-index search; a per-post comment control |
+| C91 | React in a group conversation | a549002 | GAP | W | REV | recovered by help-index search. Reactions have a third surface -- posts, messages (M48) and group conversations -- and the repo names only the first |
+| C92 | Comment on an Event and reply to Event comments | a738312 | GAP | W | NOT | recovered by help-index search. See s10 -- overlaps the sibling's Events slice and is flagged rather than claimed |
 
 ---
 
@@ -380,33 +487,40 @@ from what this server could do about it.
 Shapes, not designs. "Reversibility dominates" is applied per family, and the asset at
 risk throughout is the operator's professional identity.
 
+Regrouped 2026-09-03 over the revised 109. Family counts sum to 109 exactly.
+
 | family | rows | R/W | reversibility | shape of what it would take |
 |---|---:|---|---|---|
-| **Media upload** (message photo/video/file/voice, post photo/video/document, article media, comment image) | 9 | W | NOT once published | One decision, not nine: sanction `set_input_files` as a mutation class, with a target allowlist and a file-provenance rule. It is the single largest unlocked block and it has never been discussed |
-| **Groups** (access, join, leave, withdraw, post, comment, mention, edit/delete, approval, invite, search) | 11 | R+W | mostly REV; posting NOT | A whole product surface with no address on either list. Needs: `/groups/` admitted to the allowlist, a group-id read, a group composer census. Posting in a group is a second broadcast route with a different audience -- treat as C1's equal in risk, not as a lesser case |
-| **Conversation management** (archive, restore, mute, star, mark read/unread, bulk, leave, layout, windows, filters-search, smart features, group-chat settings) | 13 | W | REV except leave | Every one is a per-conversation overflow-menu item and **that menu has never been opened** -- the exact shape of the post-deletion gap in s3.2. One capture of an open conversation overflow menu would settle a dozen rows at once. Low risk: none of these emits anything to a third party except a read receipt already accepted by `open_messaging` |
-| **Message composition beyond plain text** (requests send/accept/decline/review, Open Profile, reply-in-thread, edit, forward, GIF, emoji, group chat create/participants/mention, video meeting, smart replies) | 16 | W | NOT | All blocked upstream by s3.1: there is no working way to address a human being on this surface. Nothing here is worth building until compose-by-identifier lands and a committed recipient has been OBSERVED for the first time |
-| **Post composition beyond plain text** (audience, alt text, poll, celebration, mention, hashtag, draft) | 7 | W | NOT once published | C2 (audience) is the one that should not wait: `publish_post` can broadcast to an audience nobody chose or read back. It is a one-parameter, one-control addition to a tool that already exists |
-| **Comment surface** (reply, media, mention, sort, edit) | 5 | W | NOT | Needs a comment-level identifier, which is a strictly harder version of C42 -- and C42 is already the ruled blocker on the post level |
-| **Reading content** (feed, post text, own articles, group search, share-off-platform) | 5 | R | REV | The census instrument is built to destroy exactly what these need: it reduces every name and href to a SHAPE before counting. Reading content requires a SECOND instrument with a different privacy contract, not a flag on this one |
-| **Analytics** (post, comment, creator) | 3 | R | REV | Three addresses, none on the allowlist. Cheap, read-only, zero third-party cost -- and it would give `publish_post` the outcome check it currently declares unverifiable. The best value-per-risk in the whole slice |
+| **Message composition beyond plain text** (requests send/accept/decline/review, Open Profile, reply-in-thread, edit, forward, GIF, emoji, group chat create/participants/mention, video meeting, smart replies, respond-to-Recruiter-InMail, react-to-message, AI conversation) | 18 | W | NOT | All blocked upstream by s3.1: there is no working way to address a human being on this surface. Nothing here is worth building until compose-by-identifier lands and a committed recipient has been OBSERVED for the first time. **M47 is the exception worth pulling forward** -- responding to an inbound Recruiter InMail needs no addressing at all, because the thread already exists and is already on the read allowlist |
+| **Media upload** (message photo/video/file/voice; post photo/video/document/alt-text; article media; photo tagging) | 11 | W | NOT once published | One decision, not eleven: sanction `set_input_files` as a mutation class, with a target allowlist and a file-provenance rule. Still the single largest unlocked block, and still never discussed anywhere in the repo |
+| **Conversation management** (archive, restore, mute, star, mark read/unread, bulk, leave, layout, windows, search, delivery indicators) | 11 | W | REV except leave | Every one is a per-conversation overflow-menu item and **that menu has never been opened** -- the exact shape of the post-deletion gap in s3.2. One capture of an open conversation overflow menu would settle eleven rows at once. Low risk: none emits anything to a third party except a read receipt already accepted by `open_messaging` |
+| **Groups** (access, join, leave, withdraw, post, comment, mention, edit/delete, approval, invite, react) | 11 | R+W | mostly REV; posting NOT | A whole product surface with no address on either list -- `/groups/` returns zero grep hits across the entire package. Needs `/groups/` on the allowlist, a group-id read, a group composer census. Posting in a group is a second broadcast route with a different audience: treat as C1's equal in risk, not a lesser case |
+| **Comment surface** (reply, media, mention, sort, edit, comment-on-comment reaction, turn off/limit, hide, verified filter) | 9 | W | NOT | Needs a comment-level identifier, a strictly harder version of C42 -- and C42 is already the ruled blocker at the post level |
+| **Post composition beyond plain text** (audience, poll create, poll vote, celebration, mention, hashtag-in-text, draft) | 7 | W | NOT once published | **C2 (audience) is the one that should not wait**: `publish_post` can broadcast to an audience nobody chose or read back. One parameter and one control on a tool that already exists |
+| **Reading content** (feed, post text, own articles, group search, share-off-platform, feed preferences) | 6 | R | REV | The census instrument is built to destroy exactly what these need -- it reduces every name and href to a SHAPE before counting. Reading content needs a SECOND instrument with a different privacy contract, not a flag on this one |
+| **Newsletters** (create, manage, multiple, Newsletter Page, share, subscribe/unsubscribe) | 6 | W | NOT (it mails subscribers) | Never considered, and larger than the first pass showed. Higher blast radius than a post; should inherit C1's gate wholesale before anything is built. **C80 subscribe/unsubscribe is the safe half** -- reader-side, private, reversible |
+| **Articles** (collaborative articles, visibility, follow member articles, embed, manage comments) | 5 | W | mixed | `/article/new/` is already on the read allowlist and was deliberately not used (C44). Collaborative articles (C76) are a product the repo has never named at all |
+| **Events and Live** (create, attend/leave, broadcast, Event comments) | 4 | W | mixed | Reassigned -- see s10. Undercounted here; the sibling's re-walk sizes it properly |
+| **Analytics** (post, comment, creator, newsletter) | 4 | R | REV | Four addresses, none on the allowlist. Cheap, read-only, zero third-party cost -- and it would give `publish_post` the outcome check it currently declares unverifiable. **Still the best value-per-risk in the whole slice** |
+| **Mentions and tags** (remove a mention of yourself, mention/tag permissions, mention visibility) | 3 | W | REV | Recovered by the re-check. C87 is the only capability in this slice that acts on somebody ELSE's content on his own behalf, and it is the one a job-seeker most plausibly needs in a hurry |
+| **Collaborative posts** (create, manage collaborators, remove yourself) | 3 | W | mixed | Never considered |
 | **Saved posts** (save, unsave) | 2 | W | REV | `/my-items/saved-posts/` is one allowlist entry away. Fully reversible, private, no third party. Directly analogous to `save_job`, which is built and PROVEN |
-| **Hashtags** (follow, unfollow) | 2 | W | REV | Analogous to `follow_company`, which is built and PERFORMABLE. `/follow` and `/unfollow` are forbidden substrings, so the company case had to solve this already |
-| **Newsletters** | 2 | W | NOT (it mails subscribers) | Never considered. Higher blast radius than a post; should inherit C1's gate wholesale before anything is built |
-| **Events / Live / collaborative posts / boost / embed settings / report spam / read receipts / spam / Page settings** | 13 | W | mixed | Individually small, collectively the tail. Events and Live are absent from LinkedIn's own topic tree (s2), which is how they went unnoticed |
+| **Messaging settings and controls** (group-chat notifications, read receipts, report spam, smart features, group-member permissions, InMail opt-out, nudges) | 7 | W | REV | `/psettings/` and `/settings/` are forbidden substrings, so the settings family has a boundary but no reasoning. `update_setting` reaches exactly one setting today |
+| **Tail** (boost a post, post-embed setting) | 2 | W | mixed | Boost is the only capability in the slice that costs money |
 
-**Reversibility across the 88 GAPs, counted off the tables: 41 NOT reversible, 45
+**Reversibility across the 109 GAPs, counted off the tables: 47 NOT reversible, 60
 reversible, 2 mixed (C49, C67 -- each bundles an edit with a delete).** By read/write:
-75 are writes, 12 are reads, 1 is both. The irreversible 41 cluster almost entirely in
-composition -- messages, posts, comments, group posts, newsletters, collaborative posts,
-invitations to groups. The reversible 45 cluster in management and reading -- archive,
-mute, star, save, follow, analytics, drafts.
+94 are writes, 14 are reads, 1 is both. The irreversible 47 cluster almost entirely in
+composition -- messages, posts, comments, group posts, newsletters, collaborative posts
+and articles. The reversible 60 cluster in management, settings and reading -- archive,
+mute, star, save, subscribe, analytics, permissions, drafts.
 
-**The asymmetry is the recommendation.** The reversible 45 include several that are
-cheaper, safer and more useful than anything currently blocked: post analytics, saved
-posts, hashtag follow, conversation archive/mute/star. Every one is private, undoable,
-and costs no third party a notification. The repo has spent its entire design budget on
-the irreversible half.
+**The asymmetry is the recommendation, and the re-check sharpened it.** The reversible
+60 -- up from 45 -- include several cheaper, safer and more useful than anything
+currently blocked: post and newsletter analytics, saved posts, conversation
+archive/mute/star, mention-and-tag permissions, InMail opt-out. Every one is private,
+undoable, and costs no third party a notification. **The repo has spent its entire design
+budget on the irreversible 47, and the reversible 60 grew faster than they did.**
 
 ---
 
@@ -427,10 +541,24 @@ the irreversible half.
    refuse, never as a task to schedule. Opening those four menus is a read that changes
    nothing.
 
-3. **Two Help Center topic pages return zero articles for products that exist.** Events
-   (`topic/a150003`) and LinkedIn Live (`topic/a151003`) both render `0 articles`. Any
-   future census that walks the topic tree and stops there will silently under-count by
-   at least 4 rows. Walk by search as well as by tree.
+3. **The topic tree is not a reliable index, and the empty-page hazard was the smaller
+   half of that.** Events (`topic/a150003`) and LinkedIn Live (`topic/a151003`) both
+   render `0 articles` for products that plainly exist -- that was pass 1's finding and it
+   was right. **Pass 2 found the larger failure: the Share Content and Post topic pages
+   list 60 articles each and still omit collaborative articles, newsletter analytics,
+   Newsletter Pages, newsletter subscription, poll voting, photo tagging, mention
+   permissions, mention removal, the verified-comments filter, article visibility,
+   member-article following, and the feed-preferences surface.** A 60-article listing
+   reads as exhaustive and is not. `?q=` search against LinkedIn's own index is the
+   instrument; the topic tree is a browsing aid. Any future census slice should run the
+   search first and treat the tree as a cross-check.
+
+4. **A dead help URL survived a full pass as a sourced capability.** `a528144` returns
+   404 and it carried two rows. Nothing in the first pass could have caught it, because
+   the URL arrived from an external search engine that was serving a stale index. **Every
+   capability sourced only to an external search result is unverified until it resolves
+   against `/help/linkedin/`.** This is the one defect in pass 1 that produced a wrong
+   claim rather than a missing one.
 
 ---
 
@@ -455,3 +583,46 @@ LinkedIn for this document.
 refused, one has fired against a placeholder and refused, and two have never been
 invoked at all. **Zero `confirm_token`s have ever been minted or consumed for any of
 them** -- `perform.md:1794-1799`, restated at the close of every Part through Part Six.
+
+**Re-check pass, 2026-09-03.** Fourteen queries against
+`https://www.linkedin.com/help/linkedin/search?q=` -- `recruiter inmail`, `newsletter`,
+`poll`, `scheduled post`, `article`, `who can message me settings`, `linkedin live video`,
+`comment`, `reaction`, `voice message attachment`, `hashtag`, `archive conversation`,
+`saved items`, `group members invite`, `privacy settings visibility`, `events attend`,
+`follow topics interests feed`, `mention tag people in post`, `repost share post to
+group` -- plus the `Basics` topic tree (`topic/a51`, 26 articles) and one direct fetch of
+`answer/a528144` (HTTP 404). No browser, no LinkedIn session, no page load against the
+operator's account.
+
+---
+
+## 10. RECONCILIATION -- ROWS THAT MAY BELONG TO A SIBLING
+
+Flagged rather than deleted, per the lead's instruction that double-counting is
+preferable to dropping between two agents. **These rows are still counted in this file's
+142.** If the sibling's slice claims them, subtract exactly the rows named here.
+
+| rows | capability | my read of where it belongs |
+|---|---|---|
+| C60-C63, C69 | Groups: access, join, withdraw request, leave, invite connections to a group | **THE SIBLING'S.** These are membership and invitation acts. C69 in particular is a connection-style invitation, and `a541787` "Invite group members to connect" is plainly a network capability |
+| C64-C68, C91 | Groups: post in a group feed, comment in a group conversation, mention group members, edit/delete a group post, submit for approval, react in a group conversation | **MINE.** These are composition and engagement inside a group -- a second publishing surface with a different audience. They belong with C1 and C25, not with membership |
+| C57, C58, C92 | Events: create, attend/leave, comment on an Event | **SPLIT.** Create and attend are the sibling's; C92 (Event comments, `a738312`) is a comment capability and belongs here |
+| C59 | LinkedIn Live: create or broadcast | **THE SIBLING'S**, and **I undercounted it 5:1.** `q=linkedin live video` returned `a554240` (overview), `a548518` (broadcasting FAQ), `a569473` (broadcaster features), `a570593` (video player controls), `a523091` (go live via Zoom), `a8338312` (boost a Live event). My single row should be at least five |
+| C75 | Read engagement notifications | Overlaps the network slice; already flagged in pass 1 |
+
+**On the sibling's three no-cost group capabilities** -- view a group's member list, invite
+a fellow group member from inside the group, filter connections when inviting. **All three
+are network-slice, not mine**, and the help index agrees: they resolve to `a541787`
+("Invite group members to connect") and `a547071`, both of which are connection
+invitations that merely happen to be reached through a group. My interest in that address
+family is different and narrower: **it is the only route to a group COMPOSER**, which is
+where C64-C68 live. The sibling's finding that the family carries no badge cost, no
+third-party profile load and no forbidden substring **applies to my rows too, and is the
+single most useful thing anyone has established about Groups.** If that address family is
+admitted for the network slice, the group composer becomes reachable at the same moment
+and should be censused in the same pass rather than in a later one.
+
+**Also worth handing over:** `/events/` and `/groups/` return **zero grep hits across the
+entire package** -- no tool, no ruling, not one sentence. That is not a finding about
+Groups and Events specifically. It is the shape of every one of the 109: **the repo can
+only refuse what somebody named, and nobody named these.**

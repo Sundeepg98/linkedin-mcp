@@ -16,25 +16,65 @@ files in `_audit/_census/`.
 
 | state | count | share |
 |---|---:|---:|
-| COVERED-PROVEN -- a tool exists and is recorded working | 45 | 6.6% |
-| COVERED-UNFIRED -- a tool exists, never run live | 27 | 4.0% |
-| COVERED-CANNOT-DELIVER -- fired live, measured unable | 7 | 1.0% |
-| EXCLUDED-RULED -- no tool, written reason exists | 272 | 39.9% |
-| **GAP -- no tool, no reason: nobody considered it** | **330** | **48.5%** |
-| **total enumerated** | **681** | |
+| COVERED-PROVEN -- a tool exists and is recorded working | 45 | 5.9% |
+| COVERED-UNFIRED -- a tool exists, never run live | 26 | 3.4% |
+| COVERED-CANNOT-DELIVER -- fired live, measured unable | 8 | 1.1% |
+| EXCLUDED-RULED -- no tool, written reason exists | 273 | 35.9% |
+| **GAP -- no tool, no reason: nobody considered it** | **409** | **53.7%** |
+| **total enumerated** | **761** | |
 
-By slice: jobs 132, profile/settings/privacy 260, messaging/content 120,
-network/people 169.
+By slice: jobs 150, profile/settings/privacy 260, messaging/content 142,
+network/people 209.
 
-**REVISED ONCE, IN THE DIRECTION THE METHOD PREDICTED.** The first pass read
-661/360-gap. Re-auditing the profile slice against the test-docstring finding
-below moved **45 rows from GAP to EXCLUDED-RULED** -- 23 of them the `/edit/`
-family, whose argument was written beside the single exemption granted from it
--- and added 20 capabilities from products with NO topic home at all (Sign in
-and security, Visibility, Notifications, Advertising data), which had to be
-assembled article by article. The correction went exactly where the method
-said it would, which is the only reason to trust the second number more than
-the first.
+## THE NUMERATOR HAS NEVER MOVED
+
+Three passes. The denominator grew every time and the covered count did not
+change once:
+
+| pass | enumerated | proven | what changed |
+|---|---:|---:|---|
+| 1 | 661 | **45** | the first walk of the Help Center topic tree |
+| 2 | 721 | **45** | rulings found in test docstrings; Groups and Events recovered |
+| 3 | 761 | **45** | LinkedIn's OWN help search replaced external search |
+
+**Every re-check found a bigger hole and zero hidden coverage.** Three
+independent slices reported the same shape in the same words -- jobs +18 all
+GAP, network +34 all GAP, messaging/content +22 of which 21 GAP. That is the
+strongest single result here: the uncertainty in this census is entirely in
+the denominator, and it runs one way.
+
+**761 IS STILL A FLOOR.** It is not converged: the stop condition was a flat
+discovery curve and the curve has not flattened.
+
+## THE INSTRUMENT THAT CHANGED THE NUMBERS
+
+    https://www.linkedin.com/help/linkedin/search?q=<terms>
+
+The parameter name is the whole trick: `?query=`, `?keywords=`, `?searchTerm=`,
+`?term=` and `?text=` all return HTTP 400. It queries LINKEDIN'S OWN article
+index, so unlike an external engine it cannot miss an article nobody crawled.
+It should be the default for any further Help Center work, and it belongs in
+the instrument register.
+
+**AND IT CAUGHT A WRONG CLAIM, NOT ONLY MISSING ONES.** Pass 1 asserted a
+hashtag-following capability sourced to `a528144`, which returns **HTTP 404** --
+the url reached the census from an external engine serving a stale index with a
+mangled locale suffix. Two independent index queries return no such article.
+The row was retired IN PLACE rather than deleted. No topic-tree walk could have
+caught that, and it is the only place a pass produced a false positive rather
+than an omission.
+
+## THREE WAYS AN ENUMERATION UNDERCOUNTS, RANKED BY HOW WELL THEY HIDE
+
+1. **A thin index that reads as exhaustive -- the worst.** "Share Content" and
+   "Post" each list SIXTY articles and still omit collaborative articles,
+   newsletter analytics, poll voting, photo tagging, mention permissions, the
+   verified-comments filter and article visibility. A 60-article listing looks
+   complete. Nothing about it invites a second query.
+2. **A topic page that renders `0 articles` for a product that exists** --
+   Events and LinkedIn Live. An unwalked area reads exactly like an absent one.
+3. **A product with no topic home at all** -- Sign in and security, Visibility,
+   Notifications, Advertising data had to be assembled article by article.
 
 ## THE FINDING UNDER THE NUMBER
 

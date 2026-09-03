@@ -13,21 +13,28 @@ Date 2026-09-03. Repo at `D:\Sundeep\projects\job-hunting\mcp-servers\linkedin`,
 
 ## THE COUNTS
 
-The table below carries **133 numbered rows**. One of them (row 58, bulk-unsave) is a
-thing LinkedIn itself does not offer, so it takes no state. **The denominator is 132
-distinct job capabilities**, imported from LinkedIn's own Help Center (not brainstormed).
-Every count here was taken by grep against the finished table, not estimated:
+**REVISED 2026-09-03 after a second pass with a better instrument. The denominator grew by
+18 and not one of the new rows is covered.** The first pass walked LinkedIn's Help TOPIC
+tree; the second queried LinkedIn's own ARTICLE INDEX at
+`linkedin.com/help/linkedin/search?q=` (see section 7). Before/after is in section 7.
 
-| state | count | share of 132 |
-|---|---|---|
-| COVERED-PROVEN | 21 | 15.9% |
-| COVERED-UNFIRED | 7 | 5.3% |
-| EXCLUDED-RULED | 23 | 17.4% |
-| GAP | 81 | 61.4% |
+The table below carries **151 numbered rows**. One of them (row 58, bulk-unsave) is a thing
+LinkedIn itself does not offer, so it takes no state. **The denominator is 150 distinct job
+capabilities**, imported from LinkedIn's own Help Center (not brainstormed). Every count
+here was taken by grep against the finished table, not estimated:
 
-**104 of 132 job capabilities cannot be reached through this server** -- 81 because nobody
-considered them, 23 because somebody wrote down a reason. That is 78.8%. Of the **28** a
-tool can reach, **21** have live-fire evidence and 7 have never run against LinkedIn.
+| state | count | share of 150 | was (133-row pass) |
+|---|---|---|---|
+| COVERED-PROVEN | 21 | 14.0% | 21 |
+| COVERED-UNFIRED | 7 | 4.7% | 7 |
+| EXCLUDED-RULED | 23 | 15.3% | 23 |
+| GAP | 99 | 66.0% | 81 |
+
+**122 of 150 job capabilities cannot be reached through this server** -- 99 because nobody
+considered them, 23 because somebody wrote down a reason. That is 81.3%, up from 78.8%. Of
+the **28** a tool can reach, **21** have live-fire evidence and 7 have never run against
+LinkedIn. **The covered set did not move at all: the re-walk found no hidden coverage, only
+a bigger hole.**
 
 **7 of those 81 GAPs are served by the `linkedin-jobs` SKILL** rather than by this server.
 They are counted as server GAPs because the server does not hold them, flagged `SKILL` in
@@ -295,8 +302,62 @@ Every alert WRITE is a GAP. Everything the alerts DELIVER is served by the skill
 | 129 | InMail the job poster after applying | a508716 | GAP | -- |
 | 130 | Read recruiter messages / InMails in the inbox | a519730 | CP | `linkedin_open_messaging`, `linkedin_new_messages`. `server.py:5012` records the lifted refusal: "those people wrote to HIM" |
 | 131 | Decide WHO to message and whether it costs a credit | -- | GAP `SKILL` | server: none. Skill `referral_join.py` + `inmail-targeting.md`: free 1st-degree DM vs paid InMail, ranked; "The tool **recommends only**. It never sends" |
-| 132 | Premium interview preparation (question bank, sample answers, AI feedback) | a7474394 | GAP | -- |
-| 133 | Premium AI resume builder / resume review | a7474394 | GAP | -- |
+
+### J. AI interview prep, Premium (7) -- RECOVERED 2026-09-03
+
+Rows 132-138 replace a single row that read "Premium interview preparation (question bank,
+sample answers, AI feedback)" and was sourced only to the Premium benefits page. The real
+product is `a8336402`, "Learning FAQ: Practice with AI interview prep", which the topic
+walk never reached. Every row is Premium-gated -- "You must be a Premium member to access
+this feature" -- and the operator HAS Premium Career.
+
+| # | capability | source | state | tool, or the repo's own reason |
+|---|---|---|---|---|
+| 132 | Generate role-specific practice questions from a real job description | a8336402 | GAP | "role-specific questions generated from real job descriptions" |
+| 133 | Practice out loud, by voice | a8336402 | GAP | "You can practice out loud" |
+| 134 | Practice by reading and typing responses instead | a8336402 | GAP | "read and type out your responses" |
+| 135 | Be interviewed by a real-time AI interviewer | a8336402 | GAP | "The AI interviewer listens, responds, and evaluates your answers in real time" |
+| 136 | Receive an interview readiness score (low / medium / high) | a8336402 | GAP | "interview readiness score" |
+| 137 | Receive a summary of strengths and areas to improve | a8336402 | GAP | "a summary of your strengths and areas to improve" |
+| 138 | Receive a transcript of your responses with worked improvements | a8336402 | GAP | "a transcript of your responses with examples on how to improve" |
+
+### K. AI interviews as a hiring stage, candidate side (7) -- RECOVERED 2026-09-03
+
+An entire product surface the first census had **zero** rows for. `a10376002`, "AI
+interviews on LinkedIn": a hirer invites an applicant to an audio or video interview
+conducted by an AI. **Not Premium-gated.** This is a stage of applying, squarely in this
+slice, and no walk of the jobs topic tree surfaced it.
+
+| # | capability | source | state | tool, or the repo's own reason |
+|---|---|---|---|---|
+| 139 | Take a practice AI interview first, unlimited repeats | a10376002 | GAP | "You can take the practice interview as many times as you'd like" |
+| 140 | Complete a hirer's voice-based or video-based AI screening interview | a10376002 | GAP | "complete the hirer's voice-based or video-based AI screening interview" |
+| 141 | End an interview in progress | a10376002 | GAP | "To end the interview, click End interview" |
+| 142 | Decline to participate, without automatic disqualification | a10376002 | GAP | "If you decide not to participate, you will not be automatically disqualified" |
+| 143 | Reply to the invitation with feedback on the interview experience | a10376002 | GAP | "contact the hirer with additional information or feedback on the interview experience by replying to the initial interview invitation" |
+| 144 | Request your rating, summaries, transcript or recording | a10376002 | GAP | "You can request access to your rating and summaries, transcript, or recording by contacting the hirer" |
+| 145 | Request an accommodation | a10376002 | GAP | "contact the hirer directly to request an accommodation" |
+
+### L. Resume tips and Writing Assistant, Premium (5) -- RECOVERED 2026-09-03
+
+Rows 146-149 replace a single row that read "Premium AI resume builder / resume review"
+and **misnamed the product**. `a6813101` documents resume TIPS, and states the limit
+plainly: "Resume Tips is only able to provide feedback on an **existing uploaded resume**"
+-- there is no builder. Desktop and English only.
+
+| # | capability | source | state | tool, or the repo's own reason |
+|---|---|---|---|---|
+| 146 | Upload a resume for analysis against one specific job posting | a6813101 | GAP | reached from the Jobs tab, "Tailor my resume to this job" |
+| 147 | Receive personalized insights on the job and how to enhance the resume | a6813101 | GAP | "personalized insights about the job" |
+| 148 | Refine sections of the resume with suggested language | a6813101 | GAP | "refine sections of your resume with suggested language" |
+| 149 | Export the result, or attach it to a LinkedIn application | a6813101 | GAP | "export it or attach it to a job application that you can submit through LinkedIn" |
+| 150 | Send an enhanced message to a recruiter using Writing Assistant | a7146402 | GAP | Premium, "select LinkedIn Premium subscribers in the United States" |
+
+### M. Late addition to job search (1)
+
+| # | capability | source | state | tool, or the repo's own reason |
+|---|---|---|---|---|
+| 151 | Filter a job search by MULTIPLE simultaneous locations | a523131 | GAP | "You can add multiple locations in the same search." Row 3 covers ONE location; `linkedin_search_jobs` takes a single `location` string |
 
 ---
 
@@ -325,7 +386,11 @@ Shapes, not designs. `R`/`W` is read or write. `REV` is whether the effect can b
 | 116-126 | "How you match", applicant insights, Premium company insights, top-applicant, AI tips | 116-120 and 121-122 render **on the posting page `job_detail` already loads**, for a Premium account, which this operator has. Parser additions at zero extra page load. 123-126 need other surfaces | R | REV |
 | 127 | InMail balance | `/premium/my-premium/` is already ruled admitted as a census key; the boundary entry and the reader were deliberately not built. Smallest unbuilt read on this list | R | REV |
 | 129 | InMail the job poster | needs both a compose surface for InMail (distinct from the message composer) and a verification. `send_message` cannot report "sent" today | W | **NOT reversible**, and it spends a credit |
-| 132-133 | Premium interview prep, resume builder | separate product surfaces; nothing in this repo touches either | R + W | REV |
+| 132-138 | Premium AI interview prep | a whole separate product that opens in LinkedIn Learning in a new tab. Voice capture, a real-time conversational agent, and a scored transcript. **Structurally out of shape for this server**: it is not a page to read or a control to click, it is a live audio session. The realistic reachable slice is the READ side -- a past session's readiness score, summary and transcript, if they are addressed by a url | R (results) + W (the session) | REV (practice leaves no mark on any application) |
+| 139-145 | AI interviews as a hiring stage | same shape and higher stakes: rows 140-142 are decisions on a live application. **Row 142 is the one to notice** -- declining is documented as safe ("you will not be automatically disqualified"), so an automated participation decision would be making a career call, not a mechanical one. Rows 143-145 are messages to a human hirer | R + W | 140 **NOT reversible** (a completed screening interview is submitted); 141-145 REV |
+| 146-149 | Resume tips | reached from the Jobs tab by a sparkle control, desktop only. Needs the surface captured and a file input this server has never had (same blocker as row 70). Feedback only -- **it cannot generate a resume** | R + W | REV (it produces a file; nothing is sent) |
+| 150 | Writing Assistant recruiter message | US-only Premium overlay on a compose surface. Blocked behind the same wall as `send_message`: nothing here can verify a send | W | **NOT reversible** |
+| 151 | multi-location job search | the smallest item on this list: `linkedin_search_jobs` takes one `location` string and LinkedIn accepts several. Parameter work, no new surface | R | REV |
 
 **The cheapest real wins, in order.** (a) Rows 9-14 and 4-7: search filters are parameter
 work with no new surface, no capture and no permission -- six filters for the price of six
@@ -355,23 +420,36 @@ Career benefits; job collections and recommendations.
 
 **Reached only weakly, and these are holes rather than zeros:**
 
-1. **Interview preparation.** 7 rows are SEARCH-SNIPPET-ONLY -- WebFetch never loaded the
-   interview-prep pages directly. Rows 132-133 rest on the Premium Career benefits page
-   (a7474394) rather than on a dedicated page. **If LinkedIn documents an interview-prep
-   feature set of its own, this census undercounts it.**
+1. **Interview preparation. RESOLVED 2026-09-03, and it was the worst hole on the list.**
+   The first pass had 2 rows resting on the Premium benefits page. LinkedIn documents two
+   separate products the topic walk never surfaced: `a8336402` (Premium AI interview prep,
+   7 capabilities) and `a10376002` (hirer-invited AI interviews, 7 capabilities, **not**
+   Premium-gated). Plus `a6813101` turned "AI resume builder" into 4 resume-TIPS rows and
+   showed the original phrasing was wrong -- there is no builder. **2 rows became 18.**
 2. **Mobile-only job capabilities.** The walk was desktop-shaped. Several pages name mobile
    paths (alert defaults, Skills Match notifications); a mobile-only capability with no
    desktop equivalent would not have surfaced.
 3. **The job-search-specific boolean page is dead.** `a507571` 404s under both URL forms.
    Row 2 rests on the GENERAL search boolean page (a524335); whether job search restricts
    operators to the description field is unconfirmed.
-4. **Four filter chips are unsourced.** Title, Industry, Job function and Benefits are
-   widely reported as job-search filters by third parties, and **no `linkedin.com/help`
-   page documents them as such**. They are NOT in the 133. If they exist, the GAP count
-   rises by 4 and the coverage share falls.
-5. **Per-job "Not interested" has no help page.** Seven differently-worded searches found
-   none. It is in the census (row 84) only because this repo's own fixtures show a
-   `Dismiss` control on job cards -- product evidence, not documentation.
+4. **Four filter chips. CHECKED AND CONFIRMED EMPTY 2026-09-03.** Title, Industry, Job
+   function and Benefits are widely reported as job-search filters by third parties. Two
+   article-index queries (`job search filter industry job function title`, `benefits filter
+   job search`) returned `a507441` as the only candidate, and that page -- fetched four
+   times now -- names none of them. **LinkedIn's own article index has no page documenting
+   these as job-search filters.** They stay out of the denominator, and now with a reason
+   rather than an absence. If they exist, LinkedIn does not document them.
+   The same queries DID recover one real filter capability the topic walk missed:
+   `a523131`, multiple simultaneous locations in one search -- now row 151. That page also
+   **confirms the negative** on location radius: it documents adding locations by name and
+   no distance control, which is the second page to agree.
+5. **Per-job "Not interested". CHECKED AND CONFIRMED EMPTY 2026-09-03.** Two further
+   article-index queries (`not interested job`, `hide job recommendation dismiss`) returned
+   nothing about dismissing a job -- the `dismiss` query returns only PROFILE-recommendation
+   articles (a542701 "Accept or dismiss recommendations" is about testimonials, not jobs).
+   **LinkedIn does not document a per-job "Not interested" action anywhere in its own
+   index.** Row 84 stays sourced to this repo's own fixtures, which show a `Dismiss` control
+   on job cards -- product evidence with no documentation behind it, now confirmed twice.
 6. **Sort is contested.** The page literally titled "Filter and sort job search results"
    (a507441) does not contain the word "sort" in its retrievable body across three fetches.
    Sort is sourced to a6889044, which frames "Most recent / Most relevant" as still being
@@ -430,16 +508,74 @@ touches LinkedIn. He sends by hand in the browser. Do not add sending."
 
 ---
 
-## 6. RECEIPTS
+## 6. THE SECOND PASS -- INSTRUMENT, DELTA, AND WHAT IT CONFIRMED
 
-    numbered rows in the table        133
-    denominator (rows carrying state) 132   (row 58 is a LinkedIn non-capability)
-    four-way split                    CP 21 / CU 7 / XR 23 / GAP 81   (sums to 132)
+**The instrument.** `https://www.linkedin.com/help/linkedin/search?q=<terms>`. I verified it
+myself before using it: `?q=interview%20preparation` returns a real 10-row article index.
+It queries LinkedIn's OWN index, so unlike an external search engine it cannot miss an
+article nobody crawled -- and unlike the topic tree, it cannot render `0 articles` for a
+product that exists. **That difference is the entire finding**: the two products in sections
+J and K are live, member-facing and documented, and a topic walk surfaced neither.
+
+**Before / after.**
+
+| | 133-row pass | 151-row pass | delta |
+|---|---|---|---|
+| numbered rows | 133 | 151 | **+18** |
+| denominator | 132 | 150 | **+18** |
+| COVERED-PROVEN | 21 | 21 | 0 |
+| COVERED-UNFIRED | 7 | 7 | 0 |
+| EXCLUDED-RULED | 23 | 23 | 0 |
+| GAP | 81 | 99 | **+18** |
+| unreachable share | 78.8% | 81.3% | +2.5pp |
+
+**Every one of the 18 is a GAP. The covered set did not move by a single row.** The
+recovery found no hidden coverage; it found the hole was bigger than a topic walk could
+see -- the same result the sibling slice reported.
+
+**Queries run (10), and what each settled.**
+
+| query | result |
+|---|---|
+| `interview preparation` | **+6** -- a8336402, a10376002, a10133010 all new |
+| `interview prep questions practice answers` | corroborated a8336402 and a10376002 |
+| `not interested job` | **CONFIRMED EMPTY** -- nothing about dismissing a job |
+| `hide job recommendation dismiss` | **CONFIRMED EMPTY** -- profile recommendations only |
+| `job search filter industry job function title` | **CONFIRMED EMPTY** for the four chips; recovered a523131 |
+| `benefits filter job search` | **CONFIRMED EMPTY** for the four chips |
+| `job collections` | **CONFIRMED** -- a1652837 only, already held. No delta |
+| `top applicant jobs` | **CONFIRMED** -- a548337 and a1462229 already held; a1517941 is the same Top Choice surface, no new member capability |
+| `Premium job seeker features` | **CONFIRMED** -- a1462281, a548337, a1517941 all already held |
+| `resume builder AI writing assistant` | **+4** -- a6813101 corrected and expanded rows; a7146402 new |
+
+**One article deliberately excluded.** `a10133010`, "Allow camera and mic permissions for
+AI interviews", is browser-settings troubleshooting for Chrome/Safari/Firefox/Edge. It
+documents no LinkedIn capability of its own, so it is cited as evidence that sections J-K
+exist and is not counted as a row.
+
+**Not re-walked, as instructed:** everything the first pass already covered. The seventh
+hole in section 3 (hirer side, LinkedIn Learning course recommendations, Services
+Marketplace) remains unwalked and out of scope.
+
+---
+
+## 7. RECEIPTS
+
+    numbered rows in the table        151   (was 133 before the 2026-09-03 re-walk)
+    denominator (rows carrying state) 150   (row 58 is a LinkedIn non-capability)
+    four-way split                    CP 21 / CU 7 / XR 23 / GAP 99   (sums to 150)
+    delta from the second pass        +18 rows, all GAP; covered set unchanged
     counted by                        grep against the finished table, not by eye
     excluded as NOT-A-LINKEDIN-CAP    1 (withdraw, per a512388) -- never entered the table
-    gaps the skill already serves     7 (counted inside the 81)
-    help pages fetched OK             48 + 32 + 34 per walk; overlap unmeasured
+    gaps the skill already serves     7 (counted inside the 99)
+    help pages fetched OK             48 + 32 + 34 per topic walk; overlap unmeasured
+                                      + 6 articles fetched in the 2026-09-03 pass
+    article-index queries run         10, all against linkedin.com/help/linkedin/search?q=
+    holes checked and found EMPTY     2 (the four filter chips; per-job "Not interested")
+    areas confirmed with no delta     3 (job collections, top applicant, Premium job)
     help pages dead (404)             9 distinct; notably a507571, a520684, a507653
+    external WebSearch calls          0 in the second pass (budget was exhausted; the
+                                      article index made it unnecessary)
     server tools measured             35 (grep -c "^@mcp.tool()")
     writes.PERFORMABLE                12
     writes.SANCTIONED_WRITES          13 (set_open_to_work has no tool)

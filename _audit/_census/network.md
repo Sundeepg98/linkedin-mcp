@@ -31,7 +31,7 @@ reported by the team lead -- LinkedIn Help TOPIC pages render "0 articles" for
 products that plainly exist, so a topic-tree walk undercounts INVISIBLY -- sent
 this slice back to recover four areas that had come back empty or 404. **That
 recovery added 34 in-slice capabilities and 6 admin ones, all 34 of them GAPs.**
-Section 12 records the delta against the frozen top-level total; section 13
+Section 11 records the delta against the frozen top-level total; section 12
 records the instrument that closed the hazard.
 
 Raw rows harvested: **260** (52 invitations + 58 following + 94 discovery + 56
@@ -41,7 +41,7 @@ rows owned by the messaging census slice, 15 split out as admin-only.
 
 **Three numbers carry this slice.**
 
-**COVERED-PROVEN is 3 of 160, and all three are READS.** They are: the list of
+**COVERED-PROVEN is 3 of 194, and all three are READS.** They are: the list of
 Pages he follows, his profile-viewer list, and the anonymous rows inside it.
 **No network or people WRITE has ever completed against live LinkedIn.** Not one
 invitation, not one follow, not one unfollow, not one message.
@@ -50,8 +50,9 @@ invitation, not one follow, not one unfollow, not one message.
 produce 71 of the 78. Section 6 splits them out rather than letting the total
 imply a deliberation that did not happen 78 times.
 
-**GAP is 73, and 23 of them are one missing surface.** People search --
-`/search/results/people/` -- and its thirteen filters account for 23 of the 73.
+**GAP is 107, and 57 of them are three missing surfaces.** People search
+(`/search/results/people/`, 23 rows), Groups (18) and Events (15) account for 56
+of the 107, and the seventh hashtag row makes 57.
 There is no pattern for it in the read allowlist and, critically, **no sentence
 anywhere in the repository about it.** Nobody ruled against people search; it
 was never considered.
@@ -446,10 +447,75 @@ people search.
 | 159 | Enable or disable Open Profile on your own profile | W | EXCLUDED-RULED | R11. REV |
 | 160 | Send, receive and manage message requests | W | GAP | Messaging slice |
 
-### O. Page-admin capabilities -- counted separately (9, all GAP)
+### P. LinkedIn Groups as a people surface (18) -- ALL GAP, recovered second pass
 
-He does not administer a Page, so none of these is a capability he currently
-has. All nine are GAP: no tool, and no written reason.
+**The Groups help tree was never walked in the first pass and is not an empty
+area.** `/groups/` returns **0 grep hits** across `linkedin_server/*.py`; so does
+`linkedin.com/groups`. No tool, no ruling, no sentence -- the same pure silence
+as people search.
+
+| # | capability | R/W | state | note |
+|---|---|---|---|---|
+| 161 | Search for groups by name or keyword | R | GAP | |
+| 162 | Browse groups recommended from attributes you share with their members | R | GAP | A people-similarity signal |
+| 163 | Request to join a group | W | GAP | REV (row 64 leaves) |
+| 164 | Join a group by responding to an invitation from a member or manager | W | GAP | REV |
+| 165 | View the full member list of a group you belong to | R | GAP | **The one member-directory read on LinkedIn this server could plausibly reach without a third-party profile load** |
+| 166 | Send a connection invitation to a fellow group member from inside the group | W | GAP | NOT-REV. An invitation route that does NOT require opening the person's profile |
+| 167 | Send a message request to a group member you are not connected to | W | GAP | NOT-REV |
+| 168 | Invite your connections to join a group you are merely a member of | W | GAP | REV for the invitee |
+| 169 | Filter the connections you invite by location, company, school and industry | W | GAP | **A filtered read over his own connections** -- the capability rows 23-28 are ruled out of |
+| 170 | Allow or prevent other group members from messaging you | W | GAP | REV |
+| 171 | Expose your profile to every member of a group you join | R | GAP | A cost of joining, not an action |
+| 172 | View a fellow group member's connections only after connecting with them | R | GAP | |
+| 173 | Access the list of groups you belong to | R | GAP | |
+| 174 | View the groups you have requested to join | R | GAP | |
+| 175 | Reach a private unlisted group through a direct link or an invitation | R | GAP | |
+| 176 | Prevent your network being updated when you join a group | W | GAP | REV |
+| 177 | Find people you know through shared group membership | R | GAP | |
+| 178 | See which groups a member belongs to before connecting | R | GAP | Overlaps row 65's surface but is its own read |
+
+**Rows 165, 166 and 169 are the finding in this block.** They are a people
+directory, an invitation route and a connection filter that all live on
+`/groups/` -- an address family carrying NO badge, NO third-party profile load,
+and NO forbidden substring. Every reason rows 23-33 and 34-36 are ruled out
+fails to apply here. Nobody has looked.
+
+### Q. LinkedIn Events as a people surface (15) -- ALL GAP, recovered second pass
+
+**The Events topic page `topic/a150003` returns HTTP 200 with a valid title and
+ZERO article links** -- re-measured during the recovery pass. It was recovered
+by searching the product name. `/events/` returns **0 grep hits** in the package.
+
+| # | capability | R/W | state | note |
+|---|---|---|---|---|
+| 179 | Search for events by keyword and filter results to the Events tab | R | GAP | |
+| 180 | See events recommended from your interests, Pages you follow, and what your network is attending | R | GAP | |
+| 181 | Find events hosted by Pages you follow | R | GAP | Composes with row 52, the one COVERED-PROVEN read in the slice |
+| 182 | Accept or ignore an event invitation | W | GAP | REV |
+| 183 | Receive event invitations only from your 1st-degree connections | R | GAP | A setting-shaped constraint |
+| 184 | Reach an event through its URL after it has been shared with you | R | GAP | |
+| 185 | Attend an event you accepted | W | GAP | REV |
+| 186 | Invite your 1st-degree connections to an event you are attending | W | GAP | REV for the invitee. **Weekly cap 1000** -- three orders of magnitude above anything else in this census |
+| 187 | Filter your invitee list by location, company, school and industry | W | GAP | Another filtered read over his own connections |
+| 188 | View the complete attendee list of an event | R | GAP | **A second member directory reachable without a profile load** |
+| 189 | See which of your 1st-degree connections have confirmed attendance, without attending yourself | R | GAP | |
+| 190 | Hide your own attendance from non-attending 1st-degree connections | W | GAP | REV |
+| 191 | Message attendees who are already your connections | W | GAP | NOT-REV |
+| 192 | Reach attendees who are not your connections via InMail | W | GAP | NOT-REV. The InMail half is EXCLUDED-RULED under R9; the ATTENDEE-TARGETING half is not, and is what makes this a distinct row |
+| 193 | Share an event you are attending with your network | W | GAP | NOT-REV once posted |
+
+### R. One recovered hashtag row that is people-discovery (1)
+
+| # | capability | R/W | state | note |
+|---|---|---|---|---|
+| 194 | Find hiring managers through the #Hiring hashtag in search | R | GAP | Blocker: no people search. The other seven recovered hashtag rows are post-composition or Page-admin and belong to the content slice |
+
+### S. Admin-only capabilities -- counted separately (15, all GAP)
+
+He administers no Page, owns no group and organizes no event, so none of these
+is a capability he currently holds. All fifteen are GAP: no tool, and no written
+reason. A10-A15 were recovered in the second pass.
 
 | # | capability | R/W |
 |---|---|---|
@@ -462,12 +528,22 @@ has. All nine are GAP: no tool, and no written reason.
 | A7 | Turn on automatic invitations to content engagers (Premium) | W |
 | A8 | Turn off automatic invitations (Premium) | W |
 | A9 | Invite followers of similar Pages to follow your Page (Premium) | W |
+| A10 | Invite your connections to a group you own or manage | W |
+| A11 | Message an individual group member as owner or manager | W |
+| A12 | Send a message request as a group admin to a member you are not connected to | W |
+| A13 | Privately message any event attendee as the organizer, without being connected | W |
+| A14 | Remove an attendee from an event you organize | W |
+| A15 | Withdraw an event invitation before the invitee responds | W |
 
 ---
 
-## 5. THE 73 GAPS: WHAT EACH FAMILY WOULD TAKE
+## 5. THE 107 GAPS: WHAT EACH FAMILY WOULD TAKE
 
 A shape, not a design. Reversibility is stated because it dominates this slice.
+The eleven families below cover the first pass's 73; the second pass added 34
+more in three families -- **Groups (18), Events (15) and one hashtag row** --
+all of them READ-and-WRITE mixes on address families with zero prior art in the
+package. They are not repeated here; sections P, Q and R carry them.
 
 | family | rows | read/write | reversible | shape |
 |---|---|---|---|---|
@@ -726,7 +802,7 @@ the third member of the badge family whose measurements ground R1.
 ## 7. THE HEADLINE FINDING
 
 **Everything he can do on LinkedIn's network surface, he can do through this
-server for exactly three of 160 capabilities, and all three are reads.**
+server for exactly three of 194 capabilities, and all three are reads.**
 
 The four PERFORMABLE network writes -- `send_invitation`, `follow_company`,
 `unfollow_company`, `send_message` -- are all COVERED-UNFIRED. Three have never
@@ -744,7 +820,7 @@ No confirm_token was passed to anything, by anyone, at any point |`.
 
 ---
 
-## 8. FOUR THINGS THIS CENSUS FOUND THAT ARE NOT ROWS
+## 8. SIX THINGS THIS CENSUS FOUND THAT ARE NOT ROWS
 
 ### 8.1 The profile-view analytics are already on screen and thrown away
 
@@ -808,6 +884,83 @@ failure was measured end to end; **`send_invitation`'s was inferred.** Its
 blocker-2 failure has never been observed on a live page. That is why row 1 is
 COVERED-UNFIRED and not FIRED-FAILED.
 
+### 8.5 LinkedIn DOES offer a withdraw. The server calls that unmeasured, and it is right about itself and wrong about the product
+
+`send_invitation`'s spec says (`writes.py:1537`):
+
+```
+reversibility_evidence=(
+    "NOT MEASURED, and it cannot be measured from here. The surface "
+    "that would show a withdraw affordance is the sent-invitations "
+    "manager, whose address contains 'invitation' and is on the read "
+    "boundary's forbidden list -- so this server has never seen it "
+    "and holds no evidence either way."
+),
+```
+
+and its docstring goes further: "whether LinkedIn offers a withdraw at all is
+UNMEASURED -- which is a stronger statement than this server lacking one."
+
+**Both sentences are true of the SERVER and the second is false of LINKEDIN.**
+Fetched directly from `linkedin.com/help/linkedin/answer/a568295`, a public page
+requiring no account: LinkedIn documents the withdraw on desktop and mobile --
+My Network, Invitations, Show all or Manage, the Sent tab, Withdraw, then
+Withdraw again in a confirmation pop-up. It also documents the price:
+
+```
+"You won't be able to send a new invitation to the same member for up to three weeks."
+```
+
+The server's evidence claim is correct as scoped -- it holds no evidence, because
+its own read boundary forbids the only surface that would show it. The
+docstring's generalisation from "this server cannot see it" to "LinkedIn's offer
+is unmeasured" is the error, and it is the error a census that never leaves the
+repository would repeat.
+
+**The lead's warning against assuming symmetry with applications was right in
+both directions.** A sibling slice verified from LinkedIn's own help page that a
+submitted application CANNOT be withdrawn. An invitation CAN. Two actions that
+this server files identically under `delete_or_withdraw_anything` differ in the
+product, and only one of the two is genuinely one-way.
+
+**But the reversibility is of FORM, not of CONSEQUENCE**, and this is the part
+that matters for a write gate. Withdrawal is quiet -- "The recipient will not be
+notified when you withdraw the invitation" -- and yet
+`linkedin.com/help/linkedin/answer/a550555` states:
+
+```
+"Withdrawing pending invitations will not remove the restriction"
+```
+
+So withdrawing undoes the pending row and does NOT undo the account signal the
+invitation contributed to. `send_invitation`'s `residue` -- "this is the one
+action here whose repetition has a consequence for the account itself" --
+survives the correction intact.
+
+### 8.6 Blocking is documented by LinkedIn as NOT fully undoable
+
+Row 141 said "NOT-REV in practice" on a cooldown argument. The recovery pass
+established something stronger from LinkedIn's own pages. From
+`answer/a1380117`: blocking means "If you're connected, you won't be connected
+anymore" and "We'll remove any endorsements and recommendations from that
+member". From `answer/a1338373`, reinstatement is ruled out explicitly:
+
+```
+"recommendations from a member you blocked cannot be reinstated if you unblock them"
+```
+
+and the endorsement case is confirmed separately at `answer/a565110` as
+"automatically removed and not reinstated if you re-establish the connection".
+
+LinkedIn also states an asymmetry outright: "There is no limit to how many
+members you can block", one sentence away from a 2000-block threshold past which
+UNBLOCKING may fail, plus a 48-hour wait before re-blocking.
+
+**A block therefore destroys reputation artifacts other people wrote about him**
+-- their recommendations, their endorsements -- permanently, and the blocked
+member is never notified. If a block capability is ever proposed for this
+server, that is the sentence its gate has to print.
+
 ---
 
 ## 9. WHICH HELP CENTER AREAS WERE WALKED, AND WHICH WERE NOT
@@ -845,19 +998,52 @@ muting, and Page-follow invitations including the admin variants.
 
 | area | why it was left | risk it carries |
 |---|---|---|
-| **LinkedIn Groups help tree** | Only join/leave were harvested, via "alternatives to inviting". The Groups topic was never opened | Group member directories, group messaging and group invitations are a people surface and are **entirely uncounted**. If the lead wants groups in the denominator, this needs a walk |
-| **LinkedIn Events help tree** | Touched only through the invitation-type filter | Event attendee lists and event invitations are uncounted |
+| ~~**LinkedIn Groups help tree**~~ | **CLOSED second pass.** Recovered by searching the product name | 18 in-slice rows added (section P) plus 3 admin. Group member directories, in-group invitations and connection filtering are now counted |
+| ~~**LinkedIn Events help tree**~~ | **CLOSED second pass.** The topic page returns HTTP 200 with ZERO article links; recovered by searching the product name | 15 in-slice rows added (section Q) plus 3 admin. Attendee lists and event invitations are now counted |
 | **Sales Navigator and Recruiter help centers** | Separate products; the free-account boundary was taken from `linkedin.com/help/linkedin` only | The brief asked for "Sales-Navigator-adjacent features available on a normal account". What is answered is what the CONSUMER help center says a free account can do. Anything Sales Navigator exposes that leaks into the consumer product is not counted |
 | **Company Page admin tree** | 9 rows harvested opportunistically, not exhaustively | The admin block is a sample, not a census |
 | **Mobile-only network surfaces** | Not walked separately | Contact sync (rows 105-107) is mobile-first; its desktop equivalents may differ |
 | **Localised / India-specific variants** | Not walked | Unknown |
 
-### 9.4 One number LinkedIn does not state
+### 9.4 The numbers LinkedIn states, and the one it does not
 
-**The weekly invitation cap has NO Help Center number.** The commonly cited
-100/200-per-week figures trace only to member-written Pulse posts, not to any
-Help Center page walked. This matters because `send_invitation`'s own `residue`
-(`writes.py:1533`) leans on the restriction being real:
+A dedicated limits pass fetched 26 Help Center articles. Established:
+
+| what | LinkedIn's stated value |
+|---|---|
+| Maximum 1st-degree connections | **30,000**, not liftable by tier |
+| Followers | **unlimited**, stated explicitly in both directions |
+| At the connection ceiling | Follow becomes the default profile action; you can neither send nor **ACCEPT** invitations until you remove connections |
+| Invitation expiry / reminders | **6 months** / up to **2** |
+| Cooldown after withdrawing before re-inviting | **3 weeks** |
+| How an invitation restriction lifts | by **waiting**; typically **1 week**. Premium does not lift it, and support cannot: "LinkedIn cannot remove or shorten the wait period" |
+| Members you may block | **no limit** -- but unblocking is documented as possibly unavailable past **2000** blocks |
+| Cooldown before re-blocking | **48 hours** |
+| Skills listed | **100** |
+| Endorsements given | **150 per 24 hours**, explicitly not increasable |
+| Non-admin Page-follow invitations | **30/month** for your employer's Page, **50/month** for other Pages, and only Pages under 5,000 followers |
+| Event invitations | **1000 per week** |
+| Follow / unfollow notification | a non-connection **IS** notified on follow and on re-follow; **NOT** notified on unfollow |
+
+**And the one LinkedIn does not state: the invitation cap itself.** No page
+walked publishes any number of invitations per week, per month or per day.
+LinkedIn documents the MECHANISM in full -- restriction is triggered by
+invitations "ignored, left pending, or marked as spam by the recipients", cannot
+be bought off ("You can't buy or acquire more invitations while you've been
+restricted, or otherwise"), and applies to Basic and Premium alike -- and
+publishes no threshold for any of it. The widely repeated 100/200-per-week
+figures trace only to member-written Pulse posts, which are not sources.
+
+**LinkedIn states outright that the member is blind to the accumulating signal**
+(`answer/a540947`):
+
+```
+"There is no functionality for a member to see which recipients, or how many
+recipients, have selected I don't know this person in response to your invitations"
+```
+
+That CORROBORATES `send_invitation`'s own `residue` (`writes.py:1533`) rather
+than merely leaving it unchallenged:
 
 ```
 "There is a second, quieter "
@@ -867,14 +1053,17 @@ Help Center page walked. This matters because `send_invitation`'s own `residue`
 "the account itself. Nothing readable reports that limit."
 ```
 
-The last sentence is confirmed by this walk from the outside as well: **nothing
-LinkedIn publishes reports that limit either.** LinkedIn does state the network
-size limit (30,000 connections), invitation expiry (six months), reminder count
-(two), and the post-withdrawal cooldown (up to three weeks).
+The last sentence is confirmed from the outside: **nothing LinkedIn publishes
+reports that limit either.** The server's claim is correct, and now it is
+corroborated rather than merely unchallenged.
 
-Two Help Center self-contradictions were found and are recorded rather than
-resolved: the personalized-note allowance reads three per month on `a563153`
-and five per month plus a 300-character Premium limit on `a6239760`.
+**One Help Center self-contradiction, and it is three-way rather than two-way.**
+The personalized-note allowance reads **3 per month at 200 characters** on
+`a563153`; **5 per month** on both `a6239760` and `a550555`; and the character
+cap disagrees too -- `a563153` attaches no Premium cap, `a6239760` says 300.
+Left unadjudicated: LinkedIn contradicts itself and picking a winner would
+manufacture a fact. Row 5 in the table stays a GAP either way, since the tool
+takes no note parameter at all.
 
 ---
 
@@ -894,10 +1083,92 @@ and five per month plus a 300-character Premium limit on `a6239760`.
 
 ---
 
-## 11. PROVENANCE
+## 11. THE DELTA AGAINST THE FROZEN TOP-LEVEL TOTAL
 
-Repo state: branch `master`, working tree as of 2026-09-03 15:10. Line numbers
-are as of that tree.
+`61d3816` froze the four-slice census at **661 capabilities, 45 proven, one
+write that has ever landed**, with this slice contributing 160 mapped + 9 admin.
+
+**This slice is now 194 mapped + 15 admin.** The delta:
+
+| | frozen | now | delta |
+|---|---|---|---|
+| mapped, in scope | 160 | 194 | **+34** |
+| COVERED-PROVEN | 3 | 3 | 0 |
+| COVERED-UNFIRED | 6 | 5 | -1 |
+| COVERED-CANNOT-DELIVER | -- | 1 | +1 |
+| EXCLUDED-RULED | 78 | 78 | 0 |
+| GAP | 73 | 107 | **+34** |
+| admin-only | 9 | 15 | +6 |
+
+**Every one of the 34 new capabilities is a GAP.** Not one is covered, and not
+one is ruled -- `/groups/` and `/events/` return zero grep hits across the whole
+package. The recovery did not find hidden coverage; it found that the hole was
+bigger than the first pass could see.
+
+**The top-level 661 understates the denominator by at least 34 from this slice
+alone**, and the covered numerator is unchanged. The lead should assume the same
+hazard bit the other three slices and decide whether to re-freeze. The direction
+of the error is one-way: a topic-page walk can only UNDERCOUNT.
+
+## 12. THE INSTRUMENT THAT CLOSED THE HAZARD
+
+The hazard is real and was re-measured directly during the recovery pass by
+counting `answer/a` links in each topic page's server-rendered HTML:
+
+| topic page | HTTP | article links rendered |
+|---|---|---|
+| `/help/linkedin/topic/a150003` (Events) | 200 | **0** |
+| `/help/linkedin/topic/a151003` (LinkedIn Live) | 200 | **0** |
+| `/help/linkedin/topic/a150001` (Networking) | 200 | 37 |
+| `/help/linkedin/topic/a151001` (Connections) | 200 | 29 |
+
+Events returns a valid page with a valid title and zero articles. Nothing in
+the response distinguishes that from a product with no features.
+
+**LinkedIn's help center has a server-rendered search index, reachable without
+an account, and the parameter name is the whole trick:**
+
+    https://www.linkedin.com/help/linkedin/search?q=<terms>
+
+`?query=`, `?keywords=`, `?searchTerm=`, `?term=` and `?text=` all return
+**HTTP 400**, and `/help/linkedin/solutions?query=` returns **404** -- which is
+very likely why an earlier walk concluded the help center had no searchable
+index. It has one, and it queries LinkedIn's own article index rather than a
+third-party crawl, so it cannot miss an article merely because no external
+engine indexed it. **This is strictly better than the WebSearch method the
+briefs prescribed** and should be the default for any further Help Center work
+on any slice.
+
+Two curl-only instruments were built on it, `hcsearch.sh` and `hcbody.sh`, and
+both were shown failing as well as succeeding. They belong in the project
+instrument register.
+
+**METHOD DEVIATION, DISCLOSED.** Both recovery children found the session's
+WebSearch budget already exhausted (200 of 200) before they started, and every
+third-party engine blocked (DuckDuckGo CAPTCHA, Mojeek 403, Marginalia
+obfuscated). Rather than declare the holes unrecoverable they substituted: one
+used the `?q=` index above, the other used `tavily_search` scoped to
+linkedin.com with every quote and number **re-read from the live page** rather
+than relayed. Both stayed inside every prohibition -- no browser, no login, no
+authenticated page, no `mcp__linkedin__` call. Reviewed and accepted; the
+evidence rule (a number counts only if a Help Center page states it) held in
+both.
+
+**One inference is labelled as one and not acted on.** The recovery could not
+find any follow-a-hashtag article: `a528144` is dead on eight URL forms, sixteen
+query phrasings across four help centers returned no replacement of any id, and
+`a5999182` carries a dated retirement receipt for profile hashtags
+(February/March 2024). The best-supported reading is that LinkedIn RETIRED the
+member hashtag-follow surface. **Rows 59-61 were nevertheless kept mapped**,
+because deleting capabilities on an unverified inference is the same undercount
+this pass exists to correct, only pointing the other way.
+
+## 13. PROVENANCE
+
+Repo state: branch `master`. First pass written against the tree at 2026-09-03
+15:10; second pass appended after `61d3816` committed this file, so it is now a
+tracked file and this revision shows as a modification rather than an addition.
+Line numbers are as of the first-pass tree.
 
 Intermediate extractions, all untracked, under `_audit/_scratch/`:
 
@@ -911,6 +1182,12 @@ Intermediate extractions, all untracked, under `_audit/_scratch/`:
     _census-hc-invitations.md     52 rows, 42 Help Center pages
     _census-hc-following.md       58 rows, 42 Help Center pages
     _census-hc-discovery.md       94 rows, 62 Help Center pages
+    _census-hc-recovery.md        56 rows recovered from four holes that the
+                                  topic-tree walk had read as empty; the
+                                  ?q= search-index discovery
+    _census-hc-limits.md          20 limits established from 26 articles; the
+                                  three-way note contradiction; the blocking
+                                  irreversibility finding
 
 No LinkedIn account was accessed at any point by this slice or by any of its
 children. No tracked file was modified. Nothing was committed.
