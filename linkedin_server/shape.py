@@ -3653,6 +3653,43 @@ CENSUS_OPAQUE = "<opaque>"
 #: What a capitalised run in a one-off shape becomes.
 CENSUS_REDACTED = "<redacted>"
 
+#: LABEL FORMS WHOSE TAIL OR HEAD IS A PERSON, refused on the TEMPLATE and so
+#: needing no count and no href. Added 2026-09-03 after a live `profile` census
+#: emitted three third parties' names and the operator's own.
+#:
+#: WHY NEITHER EXISTING RULE CAUGHT THEM, which is the whole argument for a
+#: third. `census_redact_rare` fires only at `count == 1`, and every leaked row
+#: had merged to 2 or 8 -- a member who appears twice defeats it, which that
+#: function's own docstring predicts. `census_href_identifies_entity` needs a
+#: destination, and the two worst rows were BUTTONS WITH NO HREF. The
+#: intersection of the two gaps is an hrefless control whose repeated label
+#: carries a name, `shape.py` had pinned it as known, and pinned-as-known is
+#: not closed.
+#:
+#: AND THE FIX THAT LOOKED OBVIOUS WAS MEASURED AND REJECTED. Applying
+#: `_CENSUS_CAPS_RUN` at ANY count closes all of them and destroys 43 of the
+#: 173 shapes that survive today on the fixture corpus -- a quarter of the
+#: census's readable output -- because no property of a STRING separates
+#: "Back End Developer with verification" or "Click to stop following
+#: <a company>" from a person's name. That is the fact `census_redact_rare`
+#: was built on, so the answer is a rule that keys on neither the string's
+#: capitalisation nor a tally: THE TEMPLATE. Measured cost of these three:
+#: ONE shape of 173, and that one is a fixture's invented person being
+#: correctly redacted, so the true cost is zero.
+#:
+#: HONEST LIMIT, and it is the same one every measurement here carries: these
+#: templates were derived from ONE live page. They close what was observed to
+#: leak and they are not a general solution -- an unobserved label form whose
+#: tail is a name still reaches the count rule and still survives at two.
+_CENSUS_NAME_TEMPLATES: tuple[tuple["re.Pattern[str]", str], ...] = (
+    (re.compile(r"(?i)^(invite)\s+.+?\s+(to connect)$"), r"\1 <member> \2"),
+    (re.compile(r"(?i)^(.*\bpost by)\s+.+$"), r"\1 <member>"),
+    (
+        re.compile(r"(?i)^(.+?)(\s+&\s+\d+\s+other connections follow.*)$"),
+        r"<member>\2",
+    ),
+)
+
 
 def census_substitute(text: Optional[str]) -> str:
     """The SUBSTITUTION half of :func:`census_shape`, with no gate on the end.
@@ -3695,6 +3732,8 @@ def census_substitute(text: Optional[str]) -> str:
     shaped = _CENSUS_POSSESSIVE_LOWER.sub(
         lambda m: "<member>" + m.group(1), shaped
     )
+    for pattern, replacement in _CENSUS_NAME_TEMPLATES:
+        shaped = pattern.sub(replacement, shaped)
     shaped = _CENSUS_LONG_DIGITS.sub("<id>", shaped)
     return shaped
 

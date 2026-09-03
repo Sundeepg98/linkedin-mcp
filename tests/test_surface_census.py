@@ -42,6 +42,7 @@ as the census had never been asked to name a form field.
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from contextlib import asynccontextmanager
@@ -3708,3 +3709,270 @@ def test_a_surface_earns_its_entry_by_being_measured_more_than_once():
     )
     for surface, expected in CENSUS_SETTLED_CONTROLS.items():
         assert expected > 0, surface
+
+
+# ---------------------------------------------------------------------------
+# THE TEMPLATE RULE: the case NEITHER existing rule covered
+# ---------------------------------------------------------------------------
+#
+# WHAT IT COST TO FIND. On 2026-09-03 a live `profile` census emitted three
+# THIRD PARTIES' names and the operator's own into a model's context, out of a
+# shipped tool. `shape.py` had already pinned this exact case as a known gap in
+# its own comment -- and PINNED AS KNOWN IS NOT CLOSED. It was recorded and
+# left.
+#
+# WHY BOTH EXISTING RULES DECLINED, which is the whole argument for a third:
+#
+#   census_redact_rare             fires only at count == 1
+#   census_href_identifies_entity  needs a destination to refuse on
+#
+# Every leaked row had merged to count 2 or 8, so the singleton cap never ran,
+# and the two worst were BUTTONS WITH NO HREF, so there was no destination.
+# Each rule was written knowing the other covered its gap; the INTERSECTION of
+# their gaps was never measured, and it is one of the commonest controls on a
+# profile page.
+#
+# NO LEAKED VALUE APPEARS HERE. Every name below is already declared in
+# INVENTED_NAMES in tests/test_a_person_name_is_never_a_literal.py. What makes
+# these rows leak is their SHAPE -- a capitalised run inside a known template,
+# at a count above one, with no entity href -- not which name they carried, so
+# the shape is what is tested.
+TEMPLATE_LEAKS = [
+    ("Invite Savita Krishnan to connect", "Savita Krishnan"),
+    ("Open control menu for post by Thornwick M", "Thornwick M"),
+    ("Grace Hopper & 70 other connections follow this page", "Grace Hopper"),
+]
+
+
+@pytest.mark.parametrize(
+    "raw,identity", TEMPLATE_LEAKS, ids=[row[1] for row in TEMPLATE_LEAKS]
+)
+def test_a_template_name_is_refused_at_a_count_the_cap_declines(raw, identity):
+    """THE COUNT IS TWO ON PURPOSE -- one is the case that already worked.
+
+    At count 1 the existing cap catches all three and always did. Two is where
+    the leak lived: the singleton rule returns the shape untouched, and with no
+    href there is nothing structural to refuse on either.
+    """
+    shaped = shape.census_redact_rare(shape.census_shape(raw), 2)
+    assert identity not in shaped, f"{identity!r} survived as {shaped!r}"
+    assert "<member>" in shaped, shaped
+
+
+def test_the_template_rule_would_notice_if_it_stopped_firing():
+    """THE CONTROL, and it is the inverse of the table above.
+
+    Without the templates, `census_shape` leaves all three strings intact --
+    none carries a path, an id or a possessive to substitute -- so at count 2
+    every planted name survives. This asserts that the ONLY thing standing
+    between these shapes and a leak is the template substitution, by checking
+    the cap alone cannot do it.
+    """
+    survived = [
+        identity
+        for raw, identity in TEMPLATE_LEAKS
+        if identity in shape.census_redact_rare(raw, 2)
+    ]
+    assert len(survived) == len(TEMPLATE_LEAKS), (
+        "the raw strings are already being redacted by something other than "
+        "census_substitute, so this table no longer tests the template rule: "
+        f"{survived}"
+    )
+
+
+#: Shapes the census EXISTS to report, which the rejected fix destroys.
+#:
+#: MEASURED, NOT ASSUMED. Applying `_CENSUS_CAPS_RUN` at ANY count rather than
+#: only at one closes every leaked row above and blanks 43 of the 173 shapes
+#: that survive today across this repo's fixture corpus -- a quarter of the
+#: census's readable output. No property of a STRING separates a job title
+#: from a person's name, which is the fact `census_redact_rare` was built on.
+#: These six are drawn from that measured casualty list.
+MUST_SURVIVE_THE_TEMPLATE_RULE = [
+    "Apply to Staff Engineer",
+    "Back End Developer with verification",
+    "Click to stop following Gridwell",
+    "Chart. Highcharts interactive chart.",
+    "Comment",
+    "Repost",
+]
+
+
+@pytest.mark.parametrize("raw", MUST_SURVIVE_THE_TEMPLATE_RULE)
+def test_the_template_rule_does_not_touch_what_the_census_reports(raw):
+    """THE HALF A NAIVE FIX SKIPS.
+
+    A rule that closed the leak by blanking every capitalised run would pass
+    every test above and destroy the instrument. The casualty figure is
+    asserted here rather than left in a comment, so the narrow rule cannot
+    later be widened into the one that was measured and rejected.
+    """
+    assert shape.census_substitute(raw) == raw
+    assert shape.census_redact_rare(shape.census_shape(raw), 2) == raw
+
+
+def test_an_unobserved_template_is_a_KNOWN_residual():
+    """PINNED AS KNOWN -- and this file has learned what that is worth.
+
+    The three templates were derived from ONE live page. A label form nobody
+    has observed, whose tail is a name, still reaches only the count rule and
+    still survives above one. That is the residual, and the difference between
+    this pin and the one that preceded it is that a test holds it: if a future
+    change closes it, this FAILS and the claim gets deleted deliberately
+    instead of drifting into being false.
+    """
+    unobserved = "Endorse Savita Krishnan for Python"
+    shaped = shape.census_redact_rare(shape.census_shape(unobserved), 2)
+    assert "Savita Krishnan" in shaped, (
+        "an unobserved template is now being caught, so the residual "
+        "documented in shape.py and here is CLOSED -- update both rather "
+        "than deleting this test: %r" % shaped
+    )
+
+
+def test_the_census_never_returns_a_raw_source_url():
+    """THE ONE-LINE FIX GETS A CONTROL, because that is where one is least
+    visible.
+
+    `href_shapes` substitutes `/in/<member>/` throughout the census answer,
+    and until 2026-09-03 the field naming the page it had just loaded did not
+    -- so a `profile` census returned the operator's vanity slug verbatim
+    beside a dict that shaped the identical string correctly. THE THIRD TIME
+    IN ONE DAY a redaction was applied at one site and not its twin.
+
+    Asserted two ways, because either alone can pass while the leak is back:
+    the shaper must actually shape a member url, and the census must not
+    assign the landed url raw.
+    """
+    slug_url = "https://www.linkedin.com/in/some-real-slug-99/?isSelfProfile=true"
+    shaped = shape.census_substitute(slug_url)
+    assert "some-real-slug-99" not in shaped, shaped
+    assert "/in/<member>/" in shaped, shaped
+
+    body = _census_function_source()
+    assert '"source_url": shape.census_substitute(final_url)' in body
+    assert '"source_url": final_url' not in body, (
+        "the census is assigning the landed url raw again; it must pass "
+        "through shape.census_substitute like every other url in the payload"
+    )
+
+
+def _census_function_source() -> str:
+    """Just the census tool's own body, so this rule cannot be satisfied or
+    broken by a SIBLING tool's assignment. The first version of this test
+    scanned the whole module and went red on three other tools -- correctly,
+    which is what the inventory below records."""
+    source = Path(server_module.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.name == "linkedin_surface_census":
+                return ast.get_source_segment(source, node) or ""
+    raise AssertionError("linkedin_surface_census not found")
+
+
+#: TOOLS THAT STILL RETURN A RAW ``source_url``, pinned by NAME so a new one
+#: is a visible edit. Not a claim that these are safe -- a claim that they are
+#: KNOWN, which is the only honest thing a test in this file can say about
+#: code it does not own.
+#:
+#: MEASURED 2026-09-03, by LANDING SURFACE rather than by reading the name:
+#:
+#:   linkedin_my_profile          lands on /in/<slug>/  <- LEAKS A MEMBER SLUG
+#:   linkedin_followed_companies  company urls
+#:   linkedin_job_detail          job urls
+#:   linkedin_new_messages        /feed/
+#:   linkedin_notifications       /notifications/
+#:   _read_cards, _read_tracker   helpers; depend on the caller
+#:
+#: ``linkedin_my_profile`` is the SAME defect the census had, and it is
+#: REPORTED rather than fixed here: another owner's read tool, and a boundary
+#: change needs its casualty measurement first. The rest are recorded so that
+#: "the source_url hole" is never later believed to have been one hole.
+TOOLS_WITH_A_RAW_SOURCE_URL = frozenset(
+    {
+        "_read_cards",
+        "_read_tracker",
+        "linkedin_new_messages",
+        "linkedin_job_detail",
+        "linkedin_followed_companies",
+        "linkedin_my_profile",
+        "linkedin_notifications",
+    }
+)
+
+#: THREE SPELLINGS OF ONE ASSIGNMENT, WHICH IS WHY THIS IS NOT A REGEX.
+#:
+#: MEASURED THE HARD WAY, TWICE, ON THIS CHECK. A pattern keyed on the text
+#: found 3 of the 7 sites, because ``"source_url": final_url`` puts a closing
+#: quote between the name and the colon and ``source_url=final_url`` does not.
+#: Widened to allow the quote, it found 6 -- still missing
+#: ``out["source_url"] = final_url``, where a ``]`` sits between them. Every
+#: miss looked like a clean result.
+#:
+#: **So it reads the STRUCTURE.** A dict entry, a subscript assignment and a
+#: keyword argument are three syntaxes for one fact, and the parser knows
+#: which is which where no amount of punctuation-guessing does. Both wrong
+#: answers were caught only because the expected set below was measured
+#: independently first: a scan compared against nothing reports its own blind
+#: spots as absence.
+def _tools_returning_a_raw_source_url() -> set[str]:
+    source = Path(server_module.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    raw_values = {"final_url", "landed"}
+
+    def is_raw(value: ast.AST) -> bool:
+        return isinstance(value, ast.Name) and value.id in raw_values
+
+    def names_source_url(node: ast.AST) -> bool:
+        return isinstance(node, ast.Constant) and node.value == "source_url"
+
+    found: set[str] = set()
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for node in ast.walk(func):
+            # 1. {"source_url": final_url}
+            if isinstance(node, ast.Dict):
+                for key, value in zip(node.keys, node.values):
+                    if key is not None and names_source_url(key) and is_raw(value):
+                        found.add(func.name)
+            # 2. out["source_url"] = final_url
+            elif isinstance(node, ast.Assign) and is_raw(node.value):
+                for target in node.targets:
+                    if isinstance(target, ast.Subscript) and names_source_url(
+                        target.slice
+                    ):
+                        found.add(func.name)
+            # 3. helper(..., source_url=final_url)
+            elif isinstance(node, ast.Call):
+                for kw in node.keywords:
+                    if kw.arg == "source_url" and is_raw(kw.value):
+                        found.add(func.name)
+    return found
+
+
+def test_the_remaining_raw_source_url_sites_are_a_pinned_inventory():
+    """THE CENSUS WAS ONE SITE OF SEVEN, and that is the finding.
+
+    A redaction applied at one site is a redaction that has not been applied.
+    This COUNTS the siblings rather than trusting that fixing the census fixed
+    the class -- so adding an eighth, or fixing one, moves this set and shows
+    up in a diff instead of in an incident.
+    """
+    found = _tools_returning_a_raw_source_url()
+    assert found == TOOLS_WITH_A_RAW_SOURCE_URL, (
+        "the set of tools returning a raw source_url moved: "
+        f"unexpected={sorted(found - TOOLS_WITH_A_RAW_SOURCE_URL)} "
+        f"fixed={sorted(TOOLS_WITH_A_RAW_SOURCE_URL - found)}"
+    )
+
+
+def test_that_inventory_would_notice_the_census_regressing():
+    """THE CONTROL. The scan must be able to SEE the census -- otherwise the
+    inventory passes because the detector is blind, not because the census is
+    clean. Asserted by checking the census is absent from a set the detector
+    demonstrably CAN populate."""
+    found = _tools_returning_a_raw_source_url()
+    assert "linkedin_surface_census" not in found
+    assert len(found) >= 6, found

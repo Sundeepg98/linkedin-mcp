@@ -2872,7 +2872,20 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
             )
             out: dict[str, Any] = {
                 "surface": key,
-                "source_url": final_url,
+                # SHAPED, LIKE EVERY OTHER URL THIS ANSWER CARRIES. Until
+                # 2026-09-03 this field was the ONE raw url in the payload:
+                # `href_shapes` substitutes `/in/<member>/` throughout the same
+                # dict, and the field naming the page the census loaded did
+                # not -- so a `profile` census returned the operator's vanity
+                # slug verbatim while correctly shaping the identical string
+                # everywhere else.
+                #
+                # THAT IS THE THIRD TIME IN ONE DAY that a redaction was
+                # applied at one site and not at its twin, and it is the reason
+                # this uses `census_substitute` rather than a rule written
+                # here: the shaping the rest of the payload already gets is the
+                # shaping this field should always have had.
+                "source_url": shape.census_substitute(final_url),
                 "counts": census["counts"],
                 "control_shapes": control_shapes,
                 "href_shapes": href_shapes,
