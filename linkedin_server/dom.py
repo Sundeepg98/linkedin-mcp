@@ -2559,12 +2559,36 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
         await page.wait_for_timeout(FILTER_SETTLE_MS)
     except Exception:  # pragma: no cover - a settle, not a gate
         pass
+    # REDACTED AT THE SOURCE, NOT AT ONE CALLER.
+    #
+    # THESE TWO FIELDS SHIPPED RAW AND A REAL CONVERSATION IDENTIFIER REACHED A
+    # TRANSCRIPT ON 2026-09-03. Its twin was already safe: the same reading's
+    # ``thread_opened.landed_url`` goes through ``shape.redact_thread_id`` and
+    # came back ``.../messaging/thread/<THREAD-ID>/``, while these came back
+    # whole -- a redaction applied at one site and not at the site beside it,
+    # because the second pair was added later by somebody reading the first as
+    # decoration.
+    #
+    # IT IS FIXED HERE RATHER THAN IN THE TOOL THAT PRINTED IT, because a
+    # caller-side fix leaves the raw value on the next caller. Nothing that
+    # consumes this function can leak what it never receives.
+    #
+    # AND THE TAINT RULE WAS NEVER GOING TO CATCH IT.
+    # ``tests/test_navigation_is_never_derived.py`` guards two SINKS -- a
+    # navigation and a print. This value reaches neither: it is RETURNED, as
+    # data, and travels to a model's context that way. A returned identifier is
+    # a third sink that rule does not model, and saying so is worth more than
+    # the fix.
+    #
+    # ``navigated`` stays a plain comparison, which yields a boolean and
+    # carries nothing -- it is the signal a caller actually needs from these
+    # two, and it survives redaction untouched.
     return {
         "activated": True,
         "filter": wanted,
         "pill_label": label,
-        "url_before": before,
-        "url_after": page.url,
+        "url_before": shape.redact_thread_id(before),
+        "url_after": shape.redact_thread_id(page.url),
         "navigated": page.url != before,
     }
 
