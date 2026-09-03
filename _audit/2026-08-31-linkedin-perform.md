@@ -4590,3 +4590,89 @@ whole words.
 
 The profile lock freed after roughly three minutes. The lead's reading was
 right and mine was a collision, not a stuck lock.
+
+## 109. THE SETTLED COMPOSER, AND THE CENSUS THAT LEAKED WHILE MEASURING IT
+
+The `messaging_compose` census earned the baseline no messaging surface had:
+
+    expected_controls 77    controls_read 80    verdict: consistent
+
+That is the first SETTLED reading of a messaging surface in this package, and
+it answers the submit question that three probes could not.
+
+### EVERYTHING THE THREAD DID NOT HAVE
+
+    "Send"                       button   DISABLED = TRUE   in form#0
+    "Enter message recipients"   input    role=combobox     aria_expanded=true
+    contenteditable 1            div role=textbox           in form#0
+    forms 1   file_inputs 2   "Open send options"   "Maximize compose field"
+
+**THE READER'S SELECTORS WERE RIGHT THE WHOLE TIME.**
+`dom.MESSAGE_RECIPIENT_LABEL` is `"Enter message recipients"` and
+`dom.MESSAGE_SEND_NAME` is `"Send"`; both match the settled surface exactly.
+The thread returned zeros because THE THREAD HAD NO COMPOSER, not because
+anything was aimed wrongly.
+
+So the three candidates from 108 are closed, and none of them was the answer:
+
+    1. named something else      NO -- it is named exactly `Send`
+    2. not a `button` role       NO -- it is a `button`
+    3. only exists with content  NO -- it exists, drawn DISABLED, empty
+
+The disabled-when-empty transition every gate in this package rests on is
+PRESENT on the composer and ABSENT on the thread, where `button:disabled` read
+zero across the whole page. Two surfaces, and only one of them was ever the one
+being described.
+
+> **Three rounds of instrument-building went into a question whose answer was
+> one call to a tool this server already shipped.** The census key existed, the
+> operator had already cleared its cost, and the ranked candidate list was
+> built against a surface that could not answer any of them. The cheapest
+> measurement available was, again, one somebody had already built.
+
+### THE BADGE RULING WAS HONOURED
+
+Zero before, zero after, read through the feed and profile censuses exactly as
+`CENSUS_SURFACE_COST` requires. Nothing of anybody's was spent.
+
+### AND THE CENSUS LEAKED REAL NAMES WHILE DOING IT
+
+The profile census loaded to satisfy that badge precondition returned four
+control shapes carrying real personal names verbatim -- three of them THIRD
+PARTIES -- plus the operator's vanity slug in `source_url`. **No value is
+recorded here, and that is deliberate: this document is tracked.** The shapes
+alone carry the whole finding:
+
+    "Invite <a real full name> to connect"                count 2   has_href FALSE
+    "<a real given name> & 70 other connections follow"   count 2
+    "<a real given name> & 113 other connections follow"  count 2
+    "Open control menu for post by <his own name>"        count 8   has_href FALSE
+    source_url                                            his slug, unsubstituted
+
+**THE MECHANISM IS THE ONE THIS PACKAGE PINNED AS KNOWN HOURS EARLIER.**
+`census_redact_rare` fires only at `count == 1`; every row above merged to 2 or
+8, so the singleton cap never ran. `census_href_identifies_entity` is the layer
+built to cover exactly that, and it cannot reach these: the two worst are
+BUTTONS with no href, so there is no destination to refuse on. **An hrefless
+control whose repeated label carries a name is covered by neither rule.**
+
+`shape.py` documents that residual in its own comments. It is not theoretical,
+it fires on an ordinary profile page, and it reached a model's context through
+a shipped tool.
+
+`source_url` is a second and simpler hole: `href_shapes` substitutes
+`/in/<member>/` correctly throughout the same payload, and the field naming the
+page the census loaded does not.
+
+> **The count rule and the structural rule were each designed knowing the other
+> would cover its gap, and the intersection of their gaps was never measured.**
+> Two rules, each sound, each documented, each aware of the other -- and the
+> case both decline is the commonest control on a profile page.
+
+NOT FIXED HERE. It is a shipped tool's privacy boundary, and a tightening needs
+a casualty measurement first -- the same discipline that made the probe fix
+land correctly. What to measure: whether the caps rule can apply at ANY count
+rather than at one, costed against the fixture corpus. Furniture such as
+"Comment" and "Repost" carries no capitalised RUN and may survive untouched,
+but that is a hypothesis and this document has spent the day on the cost of
+believing those.
