@@ -136,6 +136,19 @@ PAGE = (
     "<!doctype html><html><body><main>"
     # named_role_selector -- the dark-mode radio group's shape.
     '<input type="radio" aria-label="Always on">'
+    # THE SETTINGS RADIO AS LINKEDIN ACTUALLY DRAWS IT, measured 2026-09-03
+    # from the failure of the first live update_setting. The real <input> is
+    # covered by a decorative div that intercepts every pointer event, and the
+    # element that ACTIVATES it is a <label for> -- which is why the aim moved
+    # off the input. The covering div is in this fixture deliberately: without
+    # it the page would not carry the defect the label aim exists to route
+    # around, and a fixture that cannot reproduce the bug cannot prove the fix.
+    '<div class="setting-radio">'
+    '<input name="theme" type="radio" id="theme__dark"'
+    ' aria-labelledby="theme__dark__label">'
+    '<div class="setting-radio__button"></div>'
+    '<label for="theme__dark" id="theme__dark__label">Device settings</label>'
+    '</div>'
     # ... and a NEAR MISS, so exactness is tested rather than assumed.
     '<input type="radio" aria-label="Always on, recommended">'
     f'<button aria-label="{SAVE_LABEL}">save</button>'
@@ -172,6 +185,30 @@ def build_all() -> dict[str, str]:
     """Every selector, built exactly as the capability that uses it builds it."""
     return {
         "named_role_selector": dom.named_role_selector("radio", "Always on"),
+        # RESOLVED RATHER THAN DECLARED, because it is a pure function of
+        # its argument and the fixture already draws the row it aims at --
+        # the covered input, the decorative div, and the <label for> that
+        # activates it. Whether that label is BOUND to the right control is
+        # a different question and a different file:
+        # tests/test_radio_label_binding.py reads the relation, because a
+        # selector that resolves is not a selector that activates.
+        "settings_radio_label_selector": dom.settings_radio_label_selector(
+            "Always on"
+        ),
+        # THE LABEL AIM, resolved beside the input aim it replaced. Both are
+        # built from the same name on purpose: the pair is the record of what
+        # changed on 2026-09-03, when the input aim resolved correctly and
+        # could not be clicked because a decorative div intercepted every
+        # attempt. Resolving both here means a future edit that breaks either
+        # spelling fails in this file rather than in a live fire.
+        # NAMED FOR THE LIVE PAGE'S THIRD STATE, not "Always on", because the
+        # two radios already in this fixture exist to pin the suffix behaviour
+        # -- "Always on" versus "Always on, recommended" -- and a third control
+        # carrying either name would break that test rather than this one.
+        # Dark mode really does render three radios; this is one of them.
+        "settings_radio_label_selector": dom.settings_radio_label_selector(
+            "Device settings"
+        ),
         "save_control_selector": dom.save_control_selector(SAVE_LABEL),
         "follow_control_selector": dom.follow_control_selector(FOLLOW_LABEL),
         "post_editor_selector": dom.post_editor_selector(),

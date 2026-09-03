@@ -5802,7 +5802,31 @@ async def _live_control(
         # dom.settings_radio_label_selector for the two candidates measured
         # and why a direct label[for=] query refuted the inference drawn from
         # the census's name_source.
-        return (state, why, dom.settings_radio_label_selector(anchor))
+        # AND THE BINDING IS VERIFIED BEFORE THE SELECTOR IS HANDED BACK.
+        #
+        # The builder matches a label by its TEXT, which is a naming relation.
+        # What moves a radio is <label for=X> binding to the control with id X,
+        # which is an ACTIVATION relation. They look identical on a page and
+        # only one of them does anything -- confusing them is what cost this
+        # round, so the second is read rather than inferred.
+        #
+        # IT PASSES TODAY, measured on all three radios. It is here because
+        # nothing in the markup requires it to keep passing, and because the
+        # failure it catches is the one that looks like success: a label with
+        # the right text and no 'for' would click cleanly and set nothing.
+        binding = await dom.read_radio_label_binding(page, role, anchor)
+        if not binding["bound"]:
+            return (
+                state,
+                "the control is in the right state and this server will not "
+                "press its label: " + str(binding["why"]) + " " + why,
+                "",
+            )
+        return (
+            state,
+            why + " " + str(binding["why"]),
+            dom.settings_radio_label_selector(anchor),
+        )
 
     if spec.action == "comment_on_item":
         # THE FILL TARGET. There is no emptiness check to make here and the

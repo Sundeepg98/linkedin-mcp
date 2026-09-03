@@ -1077,6 +1077,117 @@ def settings_radio_label_selector(name: str) -> str:
     return 'xpath=//label[normalize-space(.)="' + name + '"]'
 
 
+async def read_radio_label_binding(
+    page: Any, role: str, name: str
+) -> dict[str, Any]:
+    """Is the label this aim presses actually WIRED to the radio it names?
+
+    :func:`settings_radio_label_selector` matches a ``<label>`` by its
+    normalised text. That is a NAMING relation. What makes a click on a label
+    move a radio is a ``<label for=X>`` binding to the control with id ``X`` --
+    an ACTIVATION relation. **The two look identical on a page and only one of
+    them does anything**, and confusing them is what this whole round cost.
+
+    So the binding is READ rather than assumed, immediately before the click,
+    and every clause is a refusal:
+
+    1. exactly ONE control carries the accessible name asked for, and it has
+       an ``id``;
+    2. exactly ONE label matches that name's text -- more than one and
+       pressing either would be picking by position;
+    3. that label's ``for`` EQUALS the input's own id.
+
+    Clause 3 is the whole point. A label with the right text and no ``for``
+    passes every actionability check and sets nothing -- a target that fails
+    by SUCCEEDING. A label whose ``for`` points at a DIFFERENT radio is worse:
+    it sets the wrong one, which is the only outcome worse than setting none.
+
+    MEASURED 2026-09-03, on all three radios: the element ``aria-labelledby``
+    points at IS a label, and its ``for`` is that radio's own id. This check
+    passes today. It exists because nothing in the markup requires it to keep
+    passing, and because the alternative is a click aimed by a string that
+    stopped meaning what it meant.
+
+    WHY NOT FOLD THIS INTO THE SELECTOR BUILDER. A builder returns a string
+    and cannot read a page; a reader can. Keeping them apart is also what lets
+    ``tests/test_selectors_resolve.py`` resolve the builder against real
+    markup as a pure function of its argument, which is the property that
+    file exists to hold.
+    """
+    out: dict[str, Any] = {
+        "bound": False,
+        "why": "",
+        "observed": {
+            "controls_named": None,
+            "input_id": None,
+            "labels_matching": None,
+            "label_for": None,
+        },
+    }
+    try:
+        control = page.locator(named_role_selector(role, name))
+        found = int(await control.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["why"] = (
+            f"the control named {name!r} could not be counted: "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return out
+    out["observed"]["controls_named"] = found
+    if found != 1:
+        out["why"] = (
+            f"{found} control(s) carry the accessible name {name!r}, where "
+            "exactly one is the measured shape."
+        )
+        return out
+
+    input_id = await control.get_attribute("id")
+    out["observed"]["input_id"] = input_id
+    if not input_id:
+        out["why"] = (
+            "the control has no id, so no label can be bound to it by 'for' "
+            "and there is no activation relation to verify."
+        )
+        return out
+
+    try:
+        labels = page.locator(settings_radio_label_selector(name))
+        matching = int(await labels.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["why"] = (
+            f"the label for {name!r} could not be counted: "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return out
+    out["observed"]["labels_matching"] = matching
+    if matching != 1:
+        out["why"] = (
+            f"{matching} <label> element(s) carry that text. Zero means the "
+            "page names this control some other way; more than one and "
+            "pressing either would be picking by position."
+        )
+        return out
+
+    bound_to = await labels.get_attribute("for")
+    out["observed"]["label_for"] = bound_to
+    if bound_to != input_id:
+        out["why"] = (
+            f"the label carrying that text is bound to {bound_to!r} and this "
+            f"control's id is {input_id!r}. A label that NAMES a control and "
+            "does not ACTIVATE it clicks cleanly and sets nothing; one bound "
+            "elsewhere sets somebody else's radio."
+        )
+        return out
+
+    out["bound"] = True
+    out["why"] = (
+        f"the label carrying that text is bound by 'for' to {bound_to!r}, "
+        "which is this control's own id -- an ACTIVATION relation, read off "
+        "the page rather than assumed."
+    )
+    return out
+
+
 def save_control_selector(label: str) -> str:
     """A selector for the save control wearing exactly ``label``.
 
