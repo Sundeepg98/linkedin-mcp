@@ -5558,7 +5558,14 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
         return out
 
     try:
-        await page.wait_for_selector(  # readonly-ok
+        # NO ``# readonly-ok`` HERE, DELIBERATELY. ``wait_for_selector`` is on
+        # no entry of ``readonly._MUTATION_CALL_PATTERNS`` -- it observes and
+        # cannot act -- so a waiver would be claiming an exemption this call
+        # does not need, and the waiver COUNT is pinned precisely so that an
+        # unnecessary one shows up as a boundary change. It did: the first
+        # version of this line carried one and moved dom.py's count from 13 to
+        # 14.
+        await page.wait_for_selector(
             TYPEAHEAD_OPTION_SELECTORS[0],
             timeout=TYPEAHEAD_TIMEOUT_MS,
             state="visible",

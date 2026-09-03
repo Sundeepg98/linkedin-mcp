@@ -2942,12 +2942,34 @@ def test_a_second_click_inside_perform_is_still_caught():
         "to match it -- and do NOT relax the assertion below, which is the "
         "only thing stopping this control from testing nothing at all."
     )
+    # THE INDENT IS DERIVED, NOT TYPED, AND 2026-09-03 IS WHY. It was a
+    # hardcoded twelve spaces. The call site then moved one block deeper --
+    # ``send_message`` needs a click BETWEEN two fills, so the fill loop and
+    # the click loop merged into one loop over two queues -- and the injected
+    # duplicate landed at the wrong indentation. That is not a syntax error
+    # this test reports; it is a source string that no longer PARSES, so
+    # ``enclosing_function`` attributed nothing, every call in the file came
+    # back unsanctioned, and the control failed for a reason that has nothing
+    # to do with what it checks.
+    #
+    # Reading the indent off the real line keeps the control pointed at its
+    # subject through the next move as well. ``assert doubled != source`` and
+    # the parse assertion below are still what stop it testing nothing.
+    line = next(
+        one for one in source.splitlines() if call_site in one
+    )
+    indent = line[: len(line) - len(line.lstrip())]
     doubled = source.replace(
         call_site,
-        f"{call_site}\n            {call_site}",
+        f"{call_site}\n{indent}{call_site}",
         1,
     )
     assert doubled != source
+    # AND THE DOUBLED SOURCE MUST STILL PARSE, or the partition below is
+    # answering about a file it could not read rather than about a duplicate
+    # click. This is the assertion whose absence let the indent bug look like
+    # a boundary failure.
+    ast.parse(doubled)
 
     # The partition is BLIND to it, and that is asserted rather than hidden.
     _sanctioned, unsanctioned = readonly.partition_mutation_hits(
