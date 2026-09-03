@@ -853,6 +853,43 @@ async def test_the_census_escapes_the_needle_in_every_candidate(
     )
 
 
+async def test_the_strictest_selector_resolves_to_one_row_on_a_real_listbox(
+    over, _fast_wait
+):
+    """THE INSTRUMENT'S AIM, HANDED TO A BROWSER. A selector nobody resolves
+    is a string.
+
+    ``dom.typeahead_strictest_selector`` is what the PROBE presses when the
+    shipped substring aim cannot identify a row -- which, on a live dropdown,
+    is always. It is never what the server presses, and that is the point:
+    strictly narrower, anchored at the start, refusing a longer surname where
+    the substring accepts it.
+
+    Three rows here all carry the needle. The shipped aim would find three and
+    refuse. This finds one, and it is asserted to be the SAME count the census
+    reports for that pattern -- so the aim and the measurement cannot drift
+    into disagreeing about which row is meant.
+    """
+
+    async def work(page):
+        strict = dom.typeahead_strictest_selector(PREFIX_NEEDLE)
+        loose = dom.typeahead_option_selector(PREFIX_NEEDLE)
+        return {
+            "selector": strict,
+            "strict": await page.locator(strict).count(),
+            "loose": await page.locator(loose).count(),
+            "census": await dom.read_typeahead_pattern_census(page, PREFIX_NEEDLE),
+        }
+
+    found = await over(COMPOSER_RUN_TOGETHER, work)
+    assert found["loose"] == 3, found
+    assert found["strict"] == 1, found
+    # THE AIM AND THE CENSUS AGREE, which is what makes the census usable as
+    # the reason for an aim rather than a number printed beside one.
+    assert found["census"][dom.TYPEAHEAD_STRICTEST_PATTERN] == found["strict"], found
+    assert found["selector"].startswith("role=option[name=/^"), found["selector"]
+
+
 # ---------------------------------------------------------------------------
 # 3. Structure: the invariant, read off the syntax tree
 # ---------------------------------------------------------------------------

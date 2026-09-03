@@ -25,8 +25,9 @@ file for saying it does not do the thing.
                                 and argue with this file
     what the fill is aimed at   the selector ``_live_control`` returned, never
                                 ``dom.compose_body_selector()``
-    what the click is aimed at  the typeahead gate's own selector, never a
-                                send control
+    what the click is aimed at  one of exactly two selectors -- the gate's,
+                                or the strictest candidate matcher -- and
+                                never a send control
     ``perform`` is never called it is the function that continues past the
                                 point this probe stops at
     the needle has no default   a default would be a real person's name in a
@@ -171,8 +172,39 @@ def test_the_probe_presses_no_send_control():
     """
     clicks = [call for kind, call in _mutating_calls(_tree()) if kind == "click"]
     assert len(clicks) == 1, clicks
-    aim = _aim_of(clicks[0])
-    assert aim == "gate['selector']", aim
+    assert _aim_of(clicks[0]) == "aim", _aim_of(clicks[0])
+
+    # AND ``aim`` CAN ONLY EVER HOLD TWO SELECTORS, checked by collecting every
+    # assignment to it rather than by reading the one line that clicks.
+    #
+    # THIS REPLACED A LITERAL COMPARISON on 2026-09-03, when the probe stopped
+    # being able to reach its own measurement. The shipped matcher is a
+    # SUBSTRING and a typeahead returns a row BECAUSE it matched what was
+    # typed, so the gate refuses every real dropdown -- measured live, ten
+    # options and ten matches -- and a probe that could only ever press
+    # ``gate['selector']`` could never answer whether a click commits anybody.
+    # It now aims by the STRICTEST candidate when the census says that
+    # candidate resolves to exactly one row, which is an aim strictly NARROWER
+    # than the shipped one.
+    #
+    # THE CHECK HAD TO GET STRONGER RATHER THAN LOOSER. The click is aimed at a
+    # LOCAL now, and a comparison against one literal would be satisfied by
+    # anything that local could hold. So the assertion is about the whole SET
+    # of values it can take, and a third assignment fails here whatever it is.
+    assigned = {
+        ast.unparse(node.value)
+        for node in ast.walk(_tree())
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "aim"
+            for target in node.targets
+        )
+    }
+    assert assigned == {
+        "None",
+        "gate['selector']",
+        "dom.typeahead_strictest_selector(needle)",
+    }, assigned
 
     # AND NOTHING IN THIS FILE EVEN RESOLVES A SEND CONTROL. Checked on the
     # tree rather than by grep, so the docstring that promises this stays
@@ -330,13 +362,42 @@ def _mutate(old: str, new: str) -> ast.AST:
 def test_the_send_check_goes_red_on_a_planted_send_click():
     """Plant the click this probe is forbidden to make, and watch it caught."""
     tree = _mutate(
-        "await page.click(gate[\"selector\"], timeout=writes.CLICK_TIMEOUT_MS)",
-        "await page.click(gate[\"selector\"], timeout=writes.CLICK_TIMEOUT_MS)\n"
+        "await page.click(aim, timeout=writes.CLICK_TIMEOUT_MS)",
+        "await page.click(aim, timeout=writes.CLICK_TIMEOUT_MS)\n"
         "        await page.click(dom.compose_send_selector())",
     )
     clicks = [call for kind, call in _mutating_calls(tree) if kind == "click"]
     assert len(clicks) == 2
     assert "dom.compose_send_selector" in _called_names(tree)
+
+
+def test_the_aim_check_goes_red_when_a_send_control_becomes_reachable():
+    """THE CONTROL FOR THE SET, and it is the mutation that matters most.
+
+    The click is aimed at a local, so a single literal comparison would be
+    satisfied by any value that local could hold. Assign a send control to it
+    on one branch -- code that still parses, and that a reader skimming the
+    click line would not notice -- and the set check must report it.
+    """
+    tree = _mutate(
+        "aim = dom.typeahead_strictest_selector(needle)",
+        "aim = dom.compose_send_selector()",
+    )
+    assigned = {
+        ast.unparse(node.value)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "aim"
+            for target in node.targets
+        )
+    }
+    assert "dom.compose_send_selector()" in assigned, assigned
+    assert assigned != {
+        "None",
+        "gate['selector']",
+        "dom.typeahead_strictest_selector(needle)",
+    }
 
 
 def test_the_body_check_goes_red_on_a_planted_body_fill():

@@ -275,17 +275,72 @@ async def main() -> None:
         )
         print(f"    why: {gate.get('why')}")
 
-        if not gate.get("proceed"):
+        # --- 4b. CAN THIS RUN PRESS ANYTHING AT ALL? -----------------------
+        #
+        # THE PROBE'S OWN PURPOSE IS UNREACHABLE THROUGH THE SHIPPED AIM, and
+        # that is the finding rather than a workaround. The gate matches a
+        # SUBSTRING; a typeahead returns a row BECAUSE it matched what was
+        # typed; so on any real dropdown every row carries the needle, the
+        # gate refuses `4_several_options_match`, and a probe that stops there
+        # can never answer the question it was built for -- does pressing a
+        # suggestion commit a recipient. Measured live 2026-09-03: ten options,
+        # ten matches, refused.
+        #
+        # SO THE INSTRUMENT AIMS BY THE STRICTEST CANDIDATE, and only when the
+        # census says that candidate resolves to EXACTLY ONE row. That aim is
+        # strictly NARROWER than the shipped one -- anchored at the start of
+        # the accessible name, and refusing a longer name where the substring
+        # accepts it -- so this presses less than the server would, never more.
+        #
+        # AND THE DIVERGENCE IS PRINTED, not buried. A probe pressing something
+        # the server would not press is a probe whose result has to be read
+        # with that in mind, and hiding it would make this run look like a
+        # rehearsal of production when it is not.
+        census = dict(reading.get("pattern_census") or {})
+        strictest = census.get(dom.TYPEAHEAD_STRICTEST_PATTERN)
+        aim = None
+        aimed_by = None
+        if gate.get("proceed"):
+            aim = gate["selector"]
+            aimed_by = "substring (the shipped aim)"
+        elif strictest == 1:
+            aim = dom.typeahead_strictest_selector(needle)
+            aimed_by = dom.TYPEAHEAD_STRICTEST_PATTERN + " (NOT the shipped aim)"
+
+        if aim is None:
             print(
-                "\n    STOPPING AT THE GATE. Nothing was clicked and no body "
-                "was typed. THE NEEDLE IS STILL IN HIS COMPOSER -- go and "
-                "clear it if you do not want it there; this server will not "
-                "type again to undo a write."
+                "\n    STOPPING WITHOUT PRESSING ANYTHING. Nothing was clicked "
+                "and no body was typed."
+            )
+            print(
+                "    The shipped gate refused, and the strictest candidate "
+                f"matched {strictest} row(s) rather than exactly one -- so "
+                "there is no row this run can identify without choosing by "
+                "position, which is the one thing it will not do."
+            )
+            print(
+                "    THE NEEDLE IS STILL IN HIS COMPOSER. Go and clear it if "
+                "you do not want it there; this server will not type again to "
+                "undo a write."
             )
             return
 
+        _report(
+            "4b. what this run will press, and by which matcher",
+            {"aimed by": aimed_by, "strictest matched": strictest},
+        )
+        if not gate.get("proceed"):
+            print(
+                "    READ THIS BEFORE READING THE RESULT. The server would "
+                "have REFUSED here. This instrument is pressing a row the "
+                "shipped aim could not identify, using a matcher that is "
+                "strictly narrower than the shipped one, because the "
+                "measurement below cannot be taken any other way. It is not a "
+                "rehearsal of what production does today."
+            )
+
         # --- 5. THE CLICK. Mutation two of two, and it dispatches nothing ----
-        await page.click(gate["selector"], timeout=writes.CLICK_TIMEOUT_MS)
+        await page.click(aim, timeout=writes.CLICK_TIMEOUT_MS)
         print("\n=== 5. one suggestion was pressed. Still nothing has been sent.")
 
         # --- 6. THE ANSWER, read by the gate that was already shipped -------

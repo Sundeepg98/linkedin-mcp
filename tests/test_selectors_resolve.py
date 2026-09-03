@@ -100,6 +100,27 @@ NOT_RESOLVED_HERE: dict[str, str] = {
     # between the name and the connection degree. Those counts are asserted
     # individually, so a template that stopped resolving fails there rather
     # than silently returning zero.
+    # THE INSTRUMENT'S AIM, added 2026-09-03, and it is here rather than in
+    # build_all() for its siblings' reason -- its match is a person's
+    # accessible name and this file's page has no suggestions to name.
+    #
+    # WHAT IT IS FOR, because a builder nobody in production calls would
+    # otherwise look like dead weight. The SHIPPED aim is
+    # typeahead_option_selector and it is a substring; a typeahead returns a
+    # row BECAUSE it matched what was typed, so on a live dropdown every row
+    # carries the needle and the gate refuses. That leaves the probe unable to
+    # reach the measurement it exists for, so the probe -- and only the probe
+    # -- aims by the STRICTEST candidate when the census says it resolves to
+    # exactly one row. Strictly narrower than the shipped aim, never wider.
+    #
+    # It IS resolved in tests/test_click_is_not_its_own_evidence.py against a
+    # real listbox, where it is asserted to pick exactly one of three rows
+    # that all carry the needle.
+    "typeahead_strictest_selector": (
+        "resolved in tests/test_click_is_not_its_own_evidence.py against a "
+        "real listbox, because its match is the ACCESSIBLE NAME of a "
+        "suggestion and this file's page has none to name"
+    ),
     "typeahead_pattern_selector": (
         "resolved in tests/test_click_is_not_its_own_evidence.py against two "
         "real listboxes, once per candidate pattern, because it needs both a "

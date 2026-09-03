@@ -5616,6 +5616,41 @@ def typeahead_pattern_selector(needle: str, body: str) -> str:
     return "role=option[name=/" + body.replace("{n}", escaped_needle(needle)) + "/i]"
 
 
+def typeahead_strictest_selector(needle: str) -> str:
+    """The STRICTEST candidate matcher, as a selector. FOR AN INSTRUMENT ONLY.
+
+    :data:`TYPEAHEAD_STRICTEST_PATTERN` names it and this resolves it, so a
+    caller that wants the strictest aim cannot pick a different one by
+    indexing into the tuple and cannot drift from the label the refusal texts
+    print.
+
+    **THIS IS NOT WHAT THE SERVER PRESSES.** ``typeahead_option_selector`` is,
+    and it is still the substring form. The two are deliberately different
+    functions rather than a flag, because a flag would put "which matcher
+    presses his message" one boolean away from changing, and that decision is
+    supposed to cost a live measurement.
+
+    WHO MAY USE THIS. ``scripts/_probe_typeahead_commit.py``, which exists to
+    take a measurement the shipped gate can no longer reach: the substring
+    matcher counts LinkedIn's own result set, so it refuses on every real
+    dropdown, and a probe that always stops at that refusal can never answer
+    whether pressing a suggestion commits anybody. The strictest form is
+    STRICTLY NARROWER than the shipped one -- anchored at the start and
+    refusing a longer name where the substring accepts it -- so the instrument
+    presses less than the server would, never more.
+    """
+    for label, body in TYPEAHEAD_NAME_PATTERNS:
+        if label == TYPEAHEAD_STRICTEST_PATTERN:
+            return typeahead_pattern_selector(needle, body)
+    raise ExtractionFailedError(
+        "refusing to build the strictest typeahead selector: "
+        f"{TYPEAHEAD_STRICTEST_PATTERN!r} is not a candidate in "
+        "TYPEAHEAD_NAME_PATTERNS. The name and the table have diverged, and "
+        "guessing which candidate was meant is exactly the choice this "
+        "function exists to remove."
+    )
+
+
 async def read_typeahead_pattern_census(
     page: Any, needle: str
 ) -> dict[str, int]:
