@@ -6559,6 +6559,22 @@ async def read_composer_surface(page: Any) -> dict[str, Any]:
     return out
 
 
+#: Below this many elements a LinkedIn page has not rendered at all.
+#:
+#: AN ABSOLUTE FLOOR RATHER THAN A RATIO, because a ratio needs a settled
+#: baseline and no thread has earned one. The census's two observed half-renders
+#: came in at roughly a QUARTER of their settled counts -- 67 of 233 and 67 of
+#: 255 -- so even a badly truncated LinkedIn page still draws dozens of
+#: elements. A page under this figure has not arrived in any sense worth
+#: arguing about.
+#:
+#: IT CANNOT CATCH THE INTERESTING CASE and says so: a page that renders 200
+#: elements of a 900-element thread passes this floor and is still incomplete.
+#: That is what a settled baseline would catch, and earning one takes two
+#: agreeing readings nobody has taken.
+THREAD_RENDERED_FLOOR = 50
+
+
 async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
     """What an OPEN CONVERSATION offers for replying, counted and nothing else.
 
@@ -6598,16 +6614,78 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
     cannot speak for rather than a conversation with no reply box.
     """
     out: dict[str, Any] = {
+        "elements": 0,
+        "settle": "unread",
+        "settle_why": "",
         "editors": 0,
+        "editable_true": 0,
         "textboxes": 0,
+        "textareas": 0,
+        "text_inputs": 0,
         "send_controls": 0,
         "send_disabled": None,
         "recipient_boxes": 0,
         "error": None,
     }
     try:
+        # THE DENOMINATOR, AND IT IS WHY THIS READER'S ZEROS MEANT NOTHING
+        # UNTIL NOW.
+        #
+        # On 2026-09-03 this reported editors 0, textboxes 0, send_controls 0
+        # and recipient_boxes 0 on a live thread, and that reading was passed
+        # on as "a thread is addressless". **It established nothing.** On a
+        # page that has not rendered, every count reads zero -- including the
+        # one the whole route turned on. Same zero, two meanings, and no field
+        # telling them apart.
+        #
+        # THE INSTRUMENT ALREADY EXISTED ON A SIBLING. The surface census
+        # carries a settle check, and on the same day it said in its own
+        # output "read it as a reading of a page that had not arrived rather
+        # than as a reading of the page" -- and proved the point: a SETTLED
+        # post-composer census reads contenteditable 2, while a HALF-RENDERED
+        # profile-editor census reads 0. The zeros were never about LinkedIn.
+        # This reader simply never carried the check its sibling had.
+        out["elements"] = int(await page.locator("*").count())
+        if out["elements"] < THREAD_RENDERED_FLOOR:
+            out["settle"] = "unrendered"
+            out["settle_why"] = (
+                "%d elements, under the %d floor. A LinkedIn page draws "
+                "hundreds; this one had not arrived, so EVERY count below is "
+                "uninterpretable rather than zero."
+                % (out["elements"], THREAD_RENDERED_FLOOR)
+            )
+        else:
+            # NO BASELINE, AND THAT IS STATED RATHER THAN GUESSED. The census
+            # earns a settled figure by reading a surface twice and having the
+            # readings agree; nobody has done that for a thread. So this says
+            # the page is plainly rendered and refuses to claim it is COMPLETE
+            # -- which is the difference between "not obviously broken" and
+            # "trustworthy", and only the first is measured.
+            out["settle"] = "rendered_no_baseline"
+            out["settle_why"] = (
+                "%d elements, so the page rendered. No settled baseline has "
+                "been earned for a thread -- two agreeing readings would earn "
+                "one -- so a zero below is CREDIBLE and not CONFIRMED."
+                % out["elements"]
+            )
+
         out["editors"] = int(await page.locator("[contenteditable]").count())
+        # SPLIT FROM THE BARE ATTRIBUTE, because `[contenteditable]` also
+        # matches `contenteditable="false"` -- an editor that refuses input
+        # would otherwise be counted as an editor.
+        out["editable_true"] = int(
+            await page.locator('[contenteditable="true"]').count()
+        )
         out["textboxes"] = int(await page.locator('[role="textbox"]').count())
+        # THE MECHANISM NO EDITOR-READER IN THIS PACKAGE LOOKED FOR. The
+        # settled post-composer census draws a `textarea` alongside its
+        # contenteditable nodes, and every reader here counted neither. Half a
+        # hypothesis that turned out true on its own terms even though page
+        # rendering, not selector coverage, was what produced the zeros.
+        out["textareas"] = int(await page.locator("textarea").count())
+        out["text_inputs"] = int(
+            await page.locator('input[type="text"]').count()
+        )
         out["recipient_boxes"] = int(
             await page.locator(
                 '[aria-label="' + MESSAGE_RECIPIENT_LABEL + '"]'

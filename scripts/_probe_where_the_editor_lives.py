@@ -66,7 +66,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from linkedin_server import dom  # noqa: E402
+from linkedin_server import dom, shape  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import FEED_URL, MESSAGING_URL  # noqa: E402
 
@@ -122,18 +122,42 @@ async def main() -> None:
             print("    AUTH WALL. Not signed in, so nothing was measured.")
             await BROWSER.stop()
             return
-        badge = await dom.read_messaging_badge(page)
+        # THE BADGE, THROUGH THE READER THAT INTERPRETS IT.
+        #
+        # THIS GATE COULD NEVER HAVE PASSED, and the first live run refused
+        # because of it rather than because of the badge. It called
+        # `dom.read_messaging_badge`, which returns {"links", "label"} -- a raw
+        # reading -- and then asked it for `unread` and `readable`, TWO FIELD
+        # NAMES THAT DO NOT EXIST ON IT. Both came back None from `.get`, so
+        # the refusal fired unconditionally, on every run, forever.
+        #
+        # A precondition that is unsatisfiable BY CONSTRUCTION is the same
+        # shape as a guard that cannot fire: present, correct-looking, and
+        # structurally unable to do its job. It looked like an unreadable page.
+        #
+        # THE INTERPRETATION LIVES IN `shape.messaging_badge`, which is what
+        # `linkedin_new_messages` uses and why that tool read 0 from the same
+        # badge, the same account and the same session twelve minutes earlier.
+        # Reaching for the raw reader meant inventing a second interpretation,
+        # and the one I invented was wrong.
+        #
+        # ITS `why` DISTINGUISHES THE TWO FAILURES -- no badge element found,
+        # versus found and unparseable -- which is the thing the old refusal
+        # could not say and which cost two wrong diagnoses today.
+        html = await page.content()
+        badge = shape.messaging_badge(html)
         print(
-            f"    messaging badge: unread={badge.get('unread')!r} "
-            f"readable={badge.get('readable')!r}"
+            "    messaging badge: new_since_last_visit="
+            f"{badge.get('new_since_last_visit')!r} state={badge.get('state')!r}"
         )
-        if not badge.get("readable"):
+        print(f"    why: {badge.get('why')}")
+        if badge.get("state") != "read":
             print("    REFUSED: the badge could not be read. Unknown is not")
             print("    permission -- this cannot tell whether opening")
             print("    messaging would mark somebody's message read.")
             await BROWSER.stop()
             return
-        if badge.get("unread"):
+        if badge.get("new_since_last_visit"):
             print("    REFUSED: unread messages. Opening messaging would mark")
             print("    a real person's message read.")
             await BROWSER.stop()

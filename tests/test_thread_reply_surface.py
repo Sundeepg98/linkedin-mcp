@@ -48,8 +48,24 @@ SEND = dom.MESSAGE_SEND_NAME
 RECIPIENT_LABEL = dom.MESSAGE_RECIPIENT_LABEL
 
 
-def _page(body: str) -> str:
-    return "<!doctype html><html><body>" + body + "</body></html>"
+#: PADDING, SO THE FIXTURES CLEAR THE RENDERED FLOOR.
+#:
+#: The reader now refuses to interpret counts on a page under
+#: ``dom.THREAD_RENDERED_FLOOR`` elements, and a handful of hand-written tags
+#: is far under it. Without this every test below would exercise the
+#: UNRENDERED path and prove nothing about the counting -- which is the floor
+#: working, and is why it gets its own test rather than being padded away
+#: silently.
+_FILLER = "<span></span>" * (dom.THREAD_RENDERED_FLOOR + 10)
+
+
+def _page(body: str, *, filler: bool = True) -> str:
+    return (
+        "<!doctype html><html><body>"
+        + body
+        + (_FILLER if filler else "")
+        + "</body></html>"
+    )
 
 
 #: A CONVERSATION: a reply box, a Send drawn disabled, and nobody to choose.
@@ -202,6 +218,15 @@ async def test_the_reading_carries_no_text_from_the_page():
     """
     reading = await _read(THREAD_TYPED)
     assert reading.pop("error") is None
+    # THE TWO STRING FIELDS ARE A CLOSED VOCABULARY PLUS INTEGERS, NEVER PAGE
+    # TEXT. `settle` is one of three fixed verdicts this module writes, and
+    # `settle_why` is a format string of this module's own words with element
+    # COUNTS substituted in. Asserting the verdict is drawn from a closed set
+    # is what keeps "it is a string" from becoming "it can carry anything".
+    verdict = reading.pop("settle")
+    why = reading.pop("settle_why")
+    assert verdict in {"unread", "unrendered", "rendered_no_baseline"}, verdict
+    assert "a reply" not in why, why
     for key, value in reading.items():
         assert isinstance(value, (int, bool)) or value is None, (key, value)
     assert "a reply" not in repr(reading)
@@ -218,3 +243,66 @@ def test_the_reader_has_no_output_path_and_no_logging():
     )
     for sink in ("logger.", "print(", "open(", ".write_text("):
         assert sink not in code, sink
+
+
+@pytest.mark.asyncio
+async def test_a_page_that_did_not_render_refuses_to_be_interpreted():
+    """THE FIELD THAT WAS MISSING WHEN THIS READER'S ZEROS WERE BELIEVED.
+
+    On 2026-09-03 this reader returned editors 0, textboxes 0, send_controls 0
+    and recipient_boxes 0 on a live thread, and that was reported as "a thread
+    is addressless". It established NOTHING: on a page that has not arrived,
+    every count reads zero including the one the route turned on.
+
+    The census's settle check proved the point the same day -- a SETTLED
+    post-composer reads contenteditable 2 where a HALF-RENDERED profile editor
+    reads 0 -- so the zeros were never about LinkedIn. This reader simply did
+    not carry the instrument its sibling had.
+
+    Here the same markup, unpadded, reads UNRENDERED and says so.
+    """
+    reading = await _read(_page("", filler=False))
+    assert reading["settle"] == "unrendered", reading
+    assert "uninterpretable" in reading["settle_why"], reading["settle_why"]
+    assert reading["elements"] < dom.THREAD_RENDERED_FLOOR
+
+
+@pytest.mark.asyncio
+async def test_a_rendered_page_is_credible_and_not_confirmed():
+    """RENDERED IS NOT SETTLED, and the verdict refuses to conflate them.
+
+    Clearing the floor says the page arrived. It does NOT say the page is
+    COMPLETE -- the census earns that by reading a surface twice and having
+    the readings agree, and nobody has done it for a thread. So the verdict
+    names the gap rather than implying a confidence nobody measured.
+    """
+    reading = await _read(THREAD)
+    assert reading["settle"] == "rendered_no_baseline", reading
+    assert "CREDIBLE and not CONFIRMED" in reading["settle_why"]
+
+
+@pytest.mark.asyncio
+async def test_it_now_counts_the_mechanism_no_reader_looked_for():
+    """A TEXTAREA IS AN EDITOR AND NOTHING HERE COUNTED ONE.
+
+    The settled post-composer census draws a textarea beside its
+    contenteditable nodes. Every editor-reader in this package counted
+    neither -- so a surface whose editor is a textarea would have read zero
+    editors and been believed.
+    """
+    reading = await _read(_page('<textarea></textarea><input type="text">'))
+    assert reading["textareas"] == 1, reading
+    assert reading["text_inputs"] == 1, reading
+
+
+@pytest.mark.asyncio
+async def test_contenteditable_false_is_not_counted_as_an_editor():
+    """`[contenteditable]` ALSO MATCHES `contenteditable="false"`.
+
+    An editor that refuses input is not an editor, and a reader conflating the
+    two would report one. The bare count and the true count are both reported
+    so the difference is visible rather than resolved silently.
+    """
+    reading = await _read(_page('<div contenteditable="false"></div>'))
+    assert reading["editors"] == 1, reading
+    assert reading["editable_true"] == 0, reading
