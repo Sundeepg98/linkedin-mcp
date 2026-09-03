@@ -270,6 +270,14 @@ def _residue(action, **kwargs):
     return writes.typed_text_residue(writes.spec_for_action(action), **kwargs)
 
 
+# THE KEYWORD IS ``submit_clicks``, NOT ``clicks_made``, SINCE 2026-09-03.
+# ``send_message`` presses a typeahead suggestion between its two fills and
+# that click dispatches nothing, so ``perform``'s raw click counter stopped
+# being the number this block may reason from. Every call below passes the
+# SUBMIT count; ``test_a_typeahead_click_is_not_a_submit`` is the control
+# that shows what the old wiring would have printed.
+
+
 def test_a_failed_submit_says_the_text_is_still_in_the_composer():
     """THE SENTENCE HE NEEDS, on the path that produced the problem.
 
@@ -279,7 +287,7 @@ def test_a_failed_submit_says_the_text_is_still_in_the_composer():
     """
     for action in sorted(writes.TYPING_ACTIONS):
         block = _residue(
-            action, fills_made=1, clicks_made=0, click_error="Error: boom"
+            action, fills_made=1, submit_clicks=0, click_error="Error: boom"
         )
         assert block["text_was_entered"] is True, action
         assert block["submit_was_pressed"] is False, action
@@ -297,7 +305,7 @@ def test_it_never_offers_to_clear_the_text_itself():
     moment it has just demonstrated it cannot reliably press a button. So the
     block instructs HIM, and no clearing verb may appear in it.
     """
-    block = _residue("publish_post", fills_made=1, clicks_made=0, click_error=None)
+    block = _residue("publish_post", fills_made=1, submit_clicks=0, click_error=None)
     rendered = json.dumps(block).lower()
     for verb in ("we will clear", "clearing it for you", "automatically clear"):
         assert verb not in rendered, verb
@@ -311,14 +319,14 @@ def test_the_block_is_present_on_the_happy_path_too():
     If the block appeared only on failure, then "no text was left" and
     "nobody checked" would be the same answer.
     """
-    pressed = _residue("publish_post", fills_made=1, clicks_made=1, click_error=None)
+    pressed = _residue("publish_post", fills_made=1, submit_clicks=1, click_error=None)
     assert pressed["text_was_entered"] is True
     assert pressed["submit_was_pressed"] is True
     assert pressed["left_in_the_composer"] is False
     # ... and it does NOT claim the post landed. That is verification's job.
     assert "different question" in pressed["what_to_do"]
 
-    never = _residue("publish_post", fills_made=0, clicks_made=0, click_error="x")
+    never = _residue("publish_post", fills_made=0, submit_clicks=0, click_error="x")
     assert never["text_was_entered"] is False
     assert never["left_in_the_composer"] is False
 
@@ -330,7 +338,7 @@ def test_a_non_typing_action_has_no_such_block():
         if action in writes.TYPING_ACTIONS:
             continue
         assert (
-            _residue(action, fills_made=0, clicks_made=1, click_error=None) is None
+            _residue(action, fills_made=0, submit_clicks=1, click_error=None) is None
         ), action
 
 

@@ -7280,10 +7280,28 @@ def typed_text_residue(
     spec: WriteSpec,
     *,
     fills_made: int,
-    clicks_made: int,
+    submit_clicks: int,
     click_error: Optional[str],
 ) -> Optional[dict[str, Any]]:
     """What is left IN HIS COMPOSER after a typing action, said out loud.
+
+    ``submit_clicks`` IS NOT THE NUMBER OF CLICKS, and the rename is the
+    fix rather than the decoration. This parameter was ``clicks_made`` and
+    it was handed ``perform``'s raw click counter, which was sound while
+    every click a typing action made WAS a submit. ``send_message`` broke
+    that on 2026-09-03: it presses a TYPEAHEAD SUGGESTION between its two
+    fills, and that click dispatches nothing. Fed the raw count, this
+    function would have reported ``submit_was_pressed: True`` and
+    ``left_in_the_composer: False`` on a run that pressed a name in a
+    dropdown and then REFUSED at the recipient gate -- both false, on the
+    action where a false receipt costs the most, and it would have told
+    him there was nothing on his screen while his composer held somebody's
+    name.
+
+    So the caller subtracts, and the parameter is NAMED for the claim it
+    makes. A click that is not a submit must not move the submit count,
+    and a parameter called ``clicks_made`` invites the next caller to make
+    the same substitution for the same reason.
 
     THE FAILURE THIS EXISTS FOR, found 2026-09-02. ``publish_post`` and
     ``comment_on_item`` FILL and then CLICK, and for a day and a half the
@@ -7318,7 +7336,7 @@ def typed_text_residue(
                 "there is no draft to clear."
             ),
         }
-    submitted = clicks_made > 0
+    submitted = submit_clicks > 0
     return {
         "text_was_entered": True,
         # WHETHER THE SUBMIT WAS PRESSED, which is NOT whether it posted.
@@ -7553,6 +7571,13 @@ async def perform(
     # modal exists rather than planned before it does.
     click_error: Optional[str] = None
     clicks_made = 0
+    # HOW MANY OF THOSE CLICKS SUBMITTED NOTHING, counted separately
+    # because the two numbers stopped being the same one on 2026-09-03.
+    # It is INCREMENTED WHERE THE CLICK IS RECOGNISED rather than derived
+    # afterwards from the action and the count: a derivation would have to
+    # re-decide which click this was, and that decision already exists
+    # twenty lines below. See ``typed_text_residue``.
+    typeahead_clicks = 0
     fills_made = 0
     apply_gate: Optional[dict[str, Any]] = None
     publish_gate: Optional[dict[str, Any]] = None
@@ -7678,6 +7703,12 @@ async def perform(
                     # only thing that appends his message to the queue. The
                     # click is how a recipient gets committed; this is what
                     # says one did.
+                    #
+                    # AND IT DISPATCHED NOTHING, so it is recorded as a click
+                    # that is not a submit. This is the only branch that knows
+                    # which click this was, which is why the counter moves here
+                    # and is not reconstructed later from the action name.
+                    typeahead_clicks += 1
                     recipient_gate = await _recipient_gate(page, grant)
                     if recipient_gate["proceed"]:
                         fill_plan.append(
@@ -7931,7 +7962,11 @@ async def perform(
         "typed_text": typed_text_residue(
             spec,
             fills_made=fills_made,
-            clicks_made=clicks_made,
+            # THE SUBMITS, NOT THE CLICKS. A typeahead suggestion is
+            # pressed to ADDRESS the message and dispatches nothing, so
+            # counting it here would tell him his words had gone out when
+            # what happened was a name being chosen in a dropdown.
+            submit_clicks=clicks_made - typeahead_clicks,
             click_error=click_error,
         ),
         "clicked": {
@@ -7943,6 +7978,13 @@ async def perform(
             # HOW MANY CLICKS ACTUALLY HAPPENED, which for a two-click action
             # is the difference between "the flow opened" and "it submitted".
             "clicks_made": clicks_made,
+            # AND HOW MANY OF THEM SUBMITTED NOTHING. Reported rather than
+            # left to be inferred from the action name, because the whole
+            # defect this field exists to close was a reader -- this
+            # server's own -- inferring "a click happened" meant "it was
+            # sent". For send_message a lone click is the SUGGESTION being
+            # pressed and nothing has been dispatched.
+            "typeahead_clicks": typeahead_clicks,
         },
         # WHAT THE DELTA GATE SAW, and this block is the POINT of the action
         # rather than a diagnostic. comment_on_item is expected to refuse on
