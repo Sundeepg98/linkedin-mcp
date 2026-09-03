@@ -6091,6 +6091,115 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
     return out
 
 
+#: THE RECIPIENT ID INSIDE A MESSAGE BUTTON'S HREF.
+#:
+#: Captured, not guessed: ``tests/fixtures/profile_views_analytics.html`` is a
+#: sanitised freeze of the Who's-Viewed-Me page, and every row that offers a
+#: Message button draws it as an anchor into the compose surface carrying the
+#: viewer's member id twice -- once bare, once inside a profile urn.
+RECIPIENT_ID_HREF = r"[?&]recipient=([A-Za-z0-9_-]{1,64})"
+
+#: How far up from a Message button to look for the person link that names the
+#: same row. Small, because a row is small: past this the walk leaves the row
+#: and the next person link belongs to somebody else.
+RECIPIENT_ROW_HOPS = 8
+
+RECIPIENT_IDS_JS = """
+(cfg) => {
+  const personRe = new RegExp(cfg.personPattern);
+  const recipientRe = new RegExp(cfg.recipientPattern);
+  const out = [];
+  let buttons = 0;
+  for (const anchor of Array.from(document.querySelectorAll('a[href]'))) {
+    const href = anchor.getAttribute('href') || '';
+    const found = href.match(recipientRe);
+    if (!found) continue;
+    buttons += 1;
+    // WALK UP FOR THE ROW, then find the person link inside it. Anchoring on
+    // the message button and climbing is the only direction that works: the
+    // person link and the button are SIBLING subtrees, so neither contains
+    // the other.
+    let node = anchor;
+    let slug = '';
+    let hops = 0;
+    while (node && hops < cfg.maxHops && !slug) {
+      node = node.parentElement;
+      hops += 1;
+      if (!node || !node.querySelectorAll) continue;
+      for (const link of Array.from(node.querySelectorAll('a[href]'))) {
+        const person = (link.getAttribute('href') || '').match(personRe);
+        if (person) { slug = person[1]; break; }
+      }
+    }
+    out.push({slug: slug, recipient: found[1], hops: hops});
+  }
+  return {rows: out, buttons: buttons};
+}
+"""
+
+
+async def read_recipient_ids(page: Any) -> dict[str, Any]:
+    """Member ids off the Message buttons already drawn on this page.
+
+    ZERO EXTRA PAGE LOADS. This reads the page a caller has already opened --
+    the Who's-Viewed-Me analytics surface draws a Message button per row that
+    offers one, and the id has been on screen the whole time. The
+    link-anchored harvest beside this one is anchored on the PERSON link and
+    discards the button, so the id was being thrown away rather than being
+    unavailable.
+
+    **THE VALUES IT RETURNS ARE IDENTIFIERS AND THEY ARE DATA, NOT OUTPUT.**
+    A member id names a real person as surely as their name does. Nothing here
+    logs one, and nothing that consumes this may print one -- the id travels to
+    a caller and stops there. That is why this function has no ``logger`` line
+    at all: the cheapest way not to log an identifier is to have nowhere that
+    does.
+
+    ABSENT IS NOT EMPTY, AND THE PAGE HAS THREE STATES RATHER THAN TWO. The
+    obvious model is "named rows have an id, anonymous rows do not", and the
+    captured page refutes it: of four named viewers, only TWO carry a Message
+    button. The others offer Connect or Follow instead, because LinkedIn draws
+    the action the relationship allows. So a row can be named and still have no
+    id, which is a fact about the connection rather than about visibility.
+
+    A caller therefore gets ``slug`` and ``recipient`` per BUTTON, and joins
+    onto its own rows by slug. Rows with no button simply do not appear here --
+    they must not be given an empty id, because "" and "no button" would then
+    be the same value and this package has already lost measurements to
+    exactly that collapse.
+
+    ``slug`` MAY BE EMPTY, and that is a different absence again: it means the
+    walk found a Message button and no person link within
+    :data:`RECIPIENT_ROW_HOPS`, so this reader cannot say WHOSE id it is. An
+    unattributable id is reported with an empty slug rather than dropped,
+    because a caller silently receiving fewer ids than the page has buttons
+    would have no way to notice.
+    """
+    out: dict[str, Any] = {"rows": [], "buttons": 0, "error": None}
+    try:
+        data = await page.evaluate(  # readonly-ok
+            RECIPIENT_IDS_JS,
+            {
+                "personPattern": PERSON_HREF,
+                "recipientPattern": RECIPIENT_ID_HREF,
+                "maxHops": RECIPIENT_ROW_HOPS,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["buttons"] = int((data or {}).get("buttons") or 0)
+    for row in (data or {}).get("rows") or []:
+        out["rows"].append(
+            {
+                "slug": str(row.get("slug") or ""),
+                "recipient": str(row.get("recipient") or ""),
+                "hops": int(row.get("hops") or 0),
+            }
+        )
+    return out
+
+
 async def read_compose_send_state(page: Any) -> dict[str, Any]:
     """The Send control: how many, and whether the one is enabled.
 
