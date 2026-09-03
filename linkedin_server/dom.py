@@ -5459,6 +5459,131 @@ async def read_selected_recipients(page: Any, needle: str) -> dict[str, Any]:
     return dict(data or {})
 
 
+#: WHERE THE TYPEAHEAD DRAWS ITS SUGGESTIONS, as several spellings rather than
+#: one, for the same reason :data:`RECIPIENT_CHIP_SELECTORS` is a list: a single
+#: guessed selector that matches nothing is indistinguishable from a dropdown
+#: that never opened, and on THIS surface those two answers are "refuse" and
+#: "refuse for the wrong reason".
+#:
+#: **NONE OF THESE HAS EVER MATCHED ANYTHING**, because nobody has typed into
+#: that combobox through this server. The per-selector counts the first
+#: supervised run returns ARE the measurement, exactly as the recipient chips'
+#: were.
+TYPEAHEAD_OPTION_SELECTORS: tuple[str, ...] = (
+    '[role="option"]',
+    '[role="listbox"] [role="option"]',
+    '[aria-controls] ~ * [role="option"]',
+)
+
+#: How long to wait for the dropdown after the needle is typed. BOUNDED, and
+#: short: a typeahead that has not drawn in this long has not drawn, and a
+#: longer wait would be a poll loop against his account.
+TYPEAHEAD_TIMEOUT_MS = 5_000
+
+
+def typeahead_option_selector(needle: str) -> str:
+    """Aim at ONE suggestion BY ITS ACCESSIBLE NAME, never by position.
+
+    **THIS IS THE WHOLE SAFETY ARGUMENT OF THE CLICK IT AIMS.** Every other
+    click in this package targets a control whose label is UI furniture --
+    ``Save the job``, ``Send``, a filter pill. A typeahead row exists because
+    LinkedIn matched A PERSON, so the thing being clicked is drawn from
+    somebody's name. Two consequences, and both are met here rather than
+    routed around:
+
+    * **The name never enters this process.** Playwright's ``name=`` matches
+      the ACCESSIBLE NAME inside the browser; what crosses back is a count.
+      The only string this function holds is the needle, which is HIS OWN
+      input and was already in this process before it was called.
+    * **The aim is the name, not the row.** ``nth``, ``first`` or an index
+      derived from a match would all press whatever LinkedIn drew in that
+      slot, which is verbatim the ``aim_invitation`` failure. If the name does
+      not resolve to exactly one row, the caller refuses; it never falls back
+      to a position.
+
+    The ``i`` flag is a CASE-INSENSITIVE SUBSTRING match, which is the same
+    relation ``_recipient_gate`` uses on the committed chip -- his needle is
+    part of a fuller name, not equal to it. ``s`` (exact) would refuse every
+    real suggestion, and the two flags differ by one character, so which one
+    this is gets said out loud.
+
+    Raises:
+        ExtractionFailedError: the needle carries a character that would end
+            the selector's own quoting. REFUSED RATHER THAN ESCAPED: a quoting
+            bug here builds a selector that matches the wrong row, and this
+            server would rather not send than send accurately-quoted to
+            somebody else.
+    """
+    if '"' in needle or "\\" in needle:
+        raise ExtractionFailedError(
+            "refusing to build the typeahead's option selector: the name you "
+            "supplied carries a quote or a backslash, either of which would "
+            "end this selector's own quoting and could aim it at a different "
+            "row. Refused rather than escaped."
+        )
+    return 'role=option[name="' + needle + '"i]'
+
+
+async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
+    """How many suggestions the typeahead drew, and how many carry ``needle``.
+
+    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
+    candidate spelling, ``total`` is the largest of them, ``matches`` is how
+    many rows Playwright's accessible-name match resolves to. No name, no
+    identifier, no ``urn``.
+
+    THE WAIT IS PART OF THE READING. A dropdown is asynchronous, so a count
+    taken too early is a zero that means "not yet" and reads identically to a
+    zero that means "nobody". This waits, once, bounded, and reports
+    ``appeared`` separately from ``total`` so those two zeroes stay
+    distinguishable -- the same tri-state discipline ``_self_assertion_state``
+    pays for.
+
+    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
+    an invalid string, not an empty dropdown -- reported rather than folded
+    into zero.
+    """
+    out: dict[str, Any] = {
+        "appeared": False,
+        "per_selector": {},
+        "total": 0,
+        "matches": 0,
+        "selector": None,
+        "error": None,
+    }
+    try:
+        out["selector"] = typeahead_option_selector(needle)
+    except ExtractionFailedError as exc:
+        out["error"] = str(exc)
+        return out
+
+    try:
+        await page.wait_for_selector(  # readonly-ok
+            TYPEAHEAD_OPTION_SELECTORS[0],
+            timeout=TYPEAHEAD_TIMEOUT_MS,
+            state="visible",
+        )
+        out["appeared"] = True
+    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
+        # NOT AN ERROR. The dropdown not drawing is one of the outcomes this
+        # reader exists to report, and calling it an error would put it in the
+        # same bucket as a broken selector.
+        logger.debug("typeahead did not appear: %s", type(exc).__name__)
+
+    for selector in TYPEAHEAD_OPTION_SELECTORS:
+        try:
+            out["per_selector"][selector] = await page.locator(selector).count()
+        except Exception:  # noqa: BLE001 - an invalid selector is reported as -1
+            out["per_selector"][selector] = -1
+    out["total"] = max([0] + [n for n in out["per_selector"].values() if n > 0])
+
+    try:
+        out["matches"] = await page.locator(out["selector"]).count()
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+    return out
+
+
 async def read_compose_send_state(page: Any) -> dict[str, Any]:
     """The Send control: how many, and whether the one is enabled.
 

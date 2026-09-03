@@ -6834,6 +6834,135 @@ async def _publish_submit_gate(page: Any) -> dict[str, Any]:
     return out
 
 
+async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
+    """THE GATE BETWEEN THE RECIPIENT FILL AND THE TYPEAHEAD CLICK.
+
+    **THE MISSING STEP, MEASURED RATHER THAN ASSUMED.** On 2026-09-03 a
+    supervised run typed a correct, first-degree name into an empty composer
+    and ``_recipient_gate`` returned ``1_no_recipient_committed`` with all four
+    chip selectors reading ZERO. That settles the question the recipient gate
+    was shipped to ask: **a bare fill does not commit a recipient.** Typing
+    into a typeahead is not choosing from it, and this gate is the choosing.
+
+    **IT CLICKS A CONTROL DRAWN FROM SOMEBODY'S NAME, WHICH IS A NEW CLASS.**
+    Every other click this package makes targets UI furniture -- ``Save the
+    job``, ``Send``, a filter pill. A suggestion row exists BECAUSE LinkedIn
+    matched a person, so the design has to hold that rather than route around
+    it. Two properties do the holding, and both are the recipient gate's own,
+    reused one step earlier:
+
+    * **Exactly one, or refuse.** Zero refuses, two refuse, and a row whose
+      name does not carry his needle refuses. It never falls back to the first
+      row -- picking from a dropdown of three Thornwicks by position is
+      verbatim the ``aim_invitation`` failure, on the action whose audience is
+      the least recoverable in this package.
+    * **The comparison runs in the page.** Playwright's ``name=`` matches the
+      accessible name inside the browser and hands back a COUNT. No
+      suggestion's label, id or urn enters this process, so there is nothing
+      here for a traceback or a log line to publish.
+
+    **AND THE CLICK IS NOT ITS OWN EVIDENCE.** This gate says a uniquely-named
+    suggestion exists and may be pressed. It does NOT say a recipient was
+    committed -- ``_recipient_gate`` still runs afterwards, unchanged, and
+    remains the only thing that authorises his words to be typed. A gate that
+    both performed an act and certified it would be reading its own homework,
+    which is the defect ``apply_job`` spent months inside.
+
+    **IT MAY STILL REFUSE AFTER A SUCCESSFUL CLICK**, and that is correct
+    rather than wasteful: the cost is a name sitting in his composer, which is
+    what the recipient gate's ordering already buys, and it is the only way to
+    learn whether clicking a suggestion is what commits one.
+    """
+    needle = _subject_component_of(spec_for_action(grant.action), grant.target)
+    out: dict[str, Any] = {
+        "proceed": False,
+        "observed": {},
+        "why": "",
+        "refused_condition": None,
+        "selector": None,
+    }
+    try:
+        reading = await dom.read_typeahead_options(page, needle)
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the typeahead could not be read after the name was typed, so "
+            "nothing is known about what it offered: "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return out
+
+    out["observed"] = {
+        "appeared": reading.get("appeared"),
+        "per_selector": reading.get("per_selector"),
+        "total": reading.get("total"),
+        "matches": reading.get("matches"),
+        "selectors_tried": list(dom.TYPEAHEAD_OPTION_SELECTORS),
+    }
+    if reading.get("error"):
+        out["refused_condition"] = "0_selector_unbuildable"
+        out["why"] = str(reading["error"])
+        return out
+
+    total = int(reading.get("total") or 0)
+    matches = int(reading.get("matches") or 0)
+
+    # THE LISTBOX AND THE OPTIONS ARE ASKED ABOUT SEPARATELY, because "it never
+    # opened" and "it opened empty" are different facts about LinkedIn and only
+    # the second one says anything about whether he has this connection.
+    if not reading.get("appeared"):
+        out["refused_condition"] = "1_no_listbox"
+        out["why"] = (
+            "the typeahead never drew a listbox within the bounded wait, so "
+            "there was nothing to choose from and nothing was clicked. THIS "
+            "IS A FACT ABOUT THIS READER AND THIS PAGE TOGETHER: either the "
+            "dropdown did not open, or it does not use any of the option "
+            "spellings this server knows. The per-selector counts above are "
+            "how those two are told apart, and neither of them is a statement "
+            "that the person you named is not reachable."
+        )
+        return out
+    if total == 0:
+        out["refused_condition"] = "2_no_options"
+        out["why"] = (
+            "the listbox drew ZERO suggestions for the name you supplied. "
+            "Nothing was clicked and nothing was typed into the body."
+        )
+        return out
+    if matches == 0:
+        out["refused_condition"] = "3_no_option_carries_the_needle"
+        out["why"] = (
+            f"the listbox drew {total} suggestion(s) and NOT ONE of them "
+            "carries the name you supplied -- the comparison ran inside the "
+            "page and returned zero matches. Refused, and the labels are not "
+            "reported here, because they are other people's names and this "
+            "server does not read one to explain itself."
+        )
+        return out
+    if matches > 1:
+        out["refused_condition"] = "4_several_options_match"
+        out["why"] = (
+            f"{matches} of the {total} suggestion(s) carry the name you "
+            "supplied. This action reaches ONE person; choosing among several "
+            "rows that all match would be choosing by position, which is the "
+            "one thing this gate exists to refuse. Supply a name that "
+            "distinguishes them."
+        )
+        return out
+
+    out["proceed"] = True
+    out["selector"] = reading["selector"]
+    out["why"] = (
+        f"exactly one of the {total} suggestion(s) carries the name you "
+        "supplied, matched on its ACCESSIBLE NAME inside the page rather than "
+        "by position, so no label entered this process. That row may be "
+        "pressed. It does NOT mean a recipient is committed -- the recipient "
+        "gate runs after the click and remains the only thing that lets your "
+        "message be typed."
+    )
+    return out
+
+
 async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
     """THE GATE BETWEEN THE RECIPIENT FILL AND THE BODY FILL.
 
@@ -7428,6 +7557,7 @@ async def perform(
     apply_gate: Optional[dict[str, Any]] = None
     publish_gate: Optional[dict[str, Any]] = None
     recipient_gate: Optional[dict[str, Any]] = None
+    typeahead_gate: Optional[dict[str, Any]] = None
     send_gate: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
@@ -7511,7 +7641,52 @@ async def perform(
                 select_selector, label=select_text, timeout=CLICK_TIMEOUT_MS
             )
             selects_made += 1
-        while fill_plan:
+        # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
+        #
+        # THIS WAS TWO SEQUENTIAL LOOPS -- every fill, then every click -- and
+        # ``send_message`` cannot be expressed that way. Its order is fill the
+        # recipient, CLICK a suggestion, then fill the body: a click BETWEEN
+        # two fills, which a fills-then-clicks structure cannot produce.
+        #
+        # THE ALTERNATIVE WAS A SECOND ``page.click`` CALL SITE, AND IT WAS
+        # REFUSED. ``readonly.SANCTIONED_MUTATIONS`` grants
+        # ``(writes.py, perform, click)`` once, and the boundary is policed by
+        # COUNTED LITERAL CALL SITES, not by the triple -- a second literal
+        # ``.click(`` here fails ``test_the_package_contains_exactly_as_many_
+        # mutating_calls_as_are_listed`` and its writes.py twin, and the suite
+        # already carries ``test_a_second_click_inside_perform_is_still_caught``
+        # as the shown-failing control for exactly this. So the typeahead click
+        # drains the SAME queue through the SAME call site that apply's second
+        # click, the comment submit, the publish submit and the send all
+        # already use. **No new exemption is bought, and none is needed.**
+        #
+        # NOTHING ELSE REORDERS. ``click_plan`` starts non-empty only when
+        # there is no fill and no select to do (see its construction above), so
+        # for every other action the queues are never both loaded and
+        # click-first is the same sequence it always was.
+        while fill_plan or click_plan:
+            if click_plan:
+                await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
+                clicks_made += 1
+                if spec.action in TWO_CLICK_ACTIONS and clicks_made == 1:
+                    apply_gate = await _apply_submit_gate(page)
+                    if apply_gate["proceed"]:
+                        click_plan.append(apply_gate["selector"])
+                elif spec.action in ADDRESSED_TYPING_ACTIONS and clicks_made == 1:
+                    # THE TYPEAHEAD CLICK JUST LANDED, AND IT PROVES NOTHING.
+                    # The recipient gate runs here, unchanged, and is still the
+                    # only thing that appends his message to the queue. The
+                    # click is how a recipient gets committed; this is what
+                    # says one did.
+                    recipient_gate = await _recipient_gate(page, grant)
+                    if recipient_gate["proceed"]:
+                        fill_plan.append(
+                            (
+                                dom.compose_body_selector(),
+                                _text_component_of(spec, grant.target),
+                            )
+                        )
+                continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
             fills_made += 1
@@ -7538,14 +7713,15 @@ async def perform(
                 # is -- so a refusal names WHICH fill it stopped on rather
                 # than reporting a composite.
                 if fills_made == 1:
-                    recipient_gate = await _recipient_gate(page, grant)
-                    if recipient_gate["proceed"]:
-                        fill_plan.append(
-                            (
-                                dom.compose_body_selector(),
-                                _text_component_of(spec, grant.target),
-                            )
-                        )
+                    # THE NAME IS TYPED; NOW IT HAS TO BE CHOSEN. Measured
+                    # 2026-09-03: a bare fill commits nobody, all four chip
+                    # selectors zero on a clean composer with a correct
+                    # first-degree name. So the recipient gate no longer runs
+                    # here -- it runs after the click, where there is
+                    # something for it to find.
+                    typeahead_gate = await _typeahead_gate(page, grant)
+                    if typeahead_gate["proceed"]:
+                        click_plan.append(typeahead_gate["selector"])
                 else:
                     send_gate = await _send_gate(page)
                     if send_gate["proceed"]:
@@ -7558,13 +7734,6 @@ async def perform(
                 publish_gate = await _publish_submit_gate(page)
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
-        while click_plan:
-            await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
-            clicks_made += 1
-            if spec.action in TWO_CLICK_ACTIONS and clicks_made == 1:
-                apply_gate = await _apply_submit_gate(page)
-                if apply_gate["proceed"]:
-                    click_plan.append(apply_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
         click_error = f"{type(exc).__name__}: {exc}"
 
@@ -7806,6 +7975,30 @@ async def perform(
         # page and only integers came back; a committed recipient is by
         # definition a third party, so a name here would be the disclosure
         # this whole design avoids.
+        # REPORTED SEPARATELY FROM THE RECIPIENT GATE, AND BEFORE IT, because
+        # they answer different questions and a run can stop at either. This
+        # one says whether a uniquely-named suggestion was found and pressed;
+        # the recipient gate says whether pressing it committed anybody. A
+        # single "message gate" field would collapse "the dropdown never
+        # opened" into "nobody is committed", which are the two facts this
+        # whole step exists to tell apart.
+        "typeahead_gate": (
+            None
+            if typeahead_gate is None
+            else {
+                "proceeded": bool(typeahead_gate.get("proceed")),
+                "refused_condition": typeahead_gate.get("refused_condition"),
+                "why": typeahead_gate.get("why"),
+                "observed": typeahead_gate.get("observed"),
+                "what_this_is_not": (
+                    "this gate does NOT say a recipient was committed. It "
+                    "says exactly one suggestion carried your needle and was "
+                    "pressed. Whether pressing it committed anybody is the "
+                    "recipient gate's answer, below, and the click is never "
+                    "its own evidence."
+                ),
+            }
+        ),
         "recipient_gate": (
             None
             if recipient_gate is None
