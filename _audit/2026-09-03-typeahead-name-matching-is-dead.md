@@ -231,7 +231,10 @@ that did not exist.
 
 ## 7. What did NOT move
 
-Verified across the whole wave, `e923355..HEAD`:
+Verified across the whole wave, **`e923355..c4e7cd3`** -- a commit range and
+not `HEAD`, deliberately. A boundary claim written against a moving tip is a
+claim that goes false without anybody editing it, which is the failure this
+file exists to prevent one instance of.
 
     linkedin_server/readonly.py       0 diff lines -- never opened
     SANCTIONED_MUTATIONS              4      unchanged
@@ -244,7 +247,17 @@ Verified across the whole wave, `e923355..HEAD`:
 
 A new mutating capability, a second mutating path through `perform`, a mutating
 probe, and two new measuring instruments all landed, and the boundary did not
-move by one entry. The typeahead click reuses the existing
+move by one entry.
+
+**AND WHAT MOVES IT NEXT MOVES IT INWARD.** Immediately after `c4e7cd3`,
+`readonly.py` was opened for the first time in this wave to NARROW
+`_ALLOWED_URL_PATTERNS`: three sibling spellings --
+`/messaging/thread/new/?recipient=`, `/messaging/?composeTo=` and
+`/messaging/?recipient=` -- reached a composer with a recipient attached while
+`/messaging/compose/?recipient=` correctly refused. *A ruling one spelling
+cannot express is not a ruling, it is a spelling filter.* That change is a
+tightening and it is not this wave's; it is recorded here only so that the
+numbers above are read as a range rather than as a standing state. The typeahead click reuses the existing
 `(writes.py, perform, click)` sanction by draining the same queue through the
 same call site; the name matching and both censuses run through Playwright's
 role engine rather than through an injected script.
