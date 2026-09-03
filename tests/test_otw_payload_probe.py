@@ -393,3 +393,619 @@ def test_the_located_labels_are_ui_furniture_and_not_identifiers(label):
     """
     assert label in ("Show details", "Edit"), label
     assert probe._CONTROL_LABELS == ("Show details", "Edit")
+
+
+# ---------------------------------------------------------------------------
+# The reference-following reader
+#
+# THE THIRD INSTRUMENT AIMED AT ONE QUESTION, and the register's second law
+# applies to it exactly as it did to the two above: it enters only if it has
+# been SHOWN FAILING, on the DISTINCT shapes of the defect it claims to cover.
+#
+# ITS CLAIM IS NARROW AND IT IS NEW. The tally cannot attribute an action to a
+# control because it has no control; the enclosure reader cannot because on
+# this page a label's own object holds no actions. This one follows the
+# reference SDUI actually uses -- and the FIRST test below is the one that
+# matters, because it proves the difference rather than asserting it: on the
+# same corpus, the enclosure reader returns zeroes and this returns the
+# Navigate.
+#
+# WHAT IS NOT PROVED HERE, said as plainly as the file above says it: every
+# payload below is invented. These prove the reader's LOGIC against the shape
+# the census described. They prove NOTHING about what LinkedIn's page
+# currently contains, and if the real payload attaches actions by some other
+# relation, the reader will REFUSE rather than answer -- which is the whole
+# reason the refusals are tested one by one.
+# ---------------------------------------------------------------------------
+
+#: Keys shaped like the four the census actually measured. Invented values, as
+#: every literal in this repo's tests must be -- but the SHAPES are real: an
+#: ``auto-component-<uuid>`` container key, an opaque uuid on the Edit button,
+#: and the one that matters for the safety argument, a key carrying a profile
+#: slug.
+_CK_CARD = "auto-component-9b53a9f4-1111-2222-3333-444455556666"
+_CK_EDIT = "4623f77c-1a18-4c85-9f42-d4115640cc74"
+_CK_VANITY = "jordan-blake-7f31_openToButton"
+
+
+def _component(key: str, label: str, *, escaped: bool = False) -> str:
+    """A component chunk: a key, and a label nested inside it. NO ACTIONS.
+
+    THE ABSENCE OF ACTIONS HERE IS THE CORPUS'S WHOLE POINT. It is what the
+    live payload looked like -- a balanced 297-character object around
+    ``Show details`` holding zero action kinds -- and any corpus that put the
+    actions beside the label would be testing the enclosure reader again
+    under a new name.
+    """
+    quote = '\\"' if escaped else '"'
+
+    def field(name: str, value: str) -> str:
+        return quote + name + quote + ":" + quote + value + quote
+
+    return (
+        "{"
+        + field("componentkey", key)
+        + ",{q}component{q}:{{{q}children{q}:[{{{t}}}]}}".format(
+            q=quote, t=field("text", label)
+        )
+        + "}"
+    )
+
+
+def _action_chunk(
+    key: str,
+    kinds: tuple[str, ...],
+    *,
+    escaped: bool = False,
+    request_id: str = "",
+) -> str:
+    """An action chunk: the SAME key, and the action types it fires, in order.
+
+    Written the way the payload writes them -- fully qualified
+    ``proto.sdui.actions.core.<Kind>`` -- because the probe's counter matches
+    a bare token inside a dotted name and a corpus using bare kinds would be
+    testing an easier string than the live one.
+    """
+    quote = '\\"' if escaped else '"'
+    actions = ",".join(
+        "{" + quote + "$type" + quote + ":" + quote
+        + "proto.sdui.actions.core." + kind + quote
+        + (
+            "," + quote + "requestId" + quote + ":" + quote + request_id + quote
+            if request_id and kind == "ServerRequest"
+            else ""
+        )
+        + "}"
+        for kind in kinds
+    )
+    return (
+        "{" + quote + "componentkey" + quote + ":" + quote + key + quote
+        + "," + quote + "onTap" + quote + ":[" + actions + "]}"
+    )
+
+
+def _sdui(*chunks: str) -> str:
+    """A payload: chunks side by side, the way flight rows sit side by side."""
+    return ",".join(chunks)
+
+
+def test_it_attributes_an_action_the_enclosure_reader_structurally_cannot():
+    """THE CLAIM OF THIS INSTRUMENT, PROVED BY DIFFERENCE ON ONE CORPUS.
+
+    This is the test the whole file turns on. Two readers, the same bytes:
+
+        enclosure   the label's own object -- ZERO kinds, exactly as the live
+                    run reported for ``Show details`` at 297 characters
+        reference   follows the key to the action chunk -- the Navigate
+
+    If the enclosure reader could answer this, the new one would be a second
+    way of doing something already done. It cannot, and the assertion that it
+    cannot is written FIRST so the difference is the subject rather than a
+    footnote.
+    """
+    payload = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate", "NavigateToScreen")),
+    )
+
+    enclosure = probe._actions_for(payload, "Show details")
+    assert enclosure["refused"] is None, enclosure
+    assert not any(enclosure["kinds"].values()), enclosure
+
+    reference = probe._actions_by_reference(payload, "Show details")
+    assert reference["refused"] is None, reference
+    assert reference["kinds"]["Navigate"] == 1, reference
+    assert reference["kinds"]["ServerRequest"] == 0, reference
+
+
+def test_it_reads_the_order_and_not_only_the_set():
+    """August recorded ``SetState x2, THEN ServerRequest``. Order is half of it.
+
+    A reader that reported an unordered set would drop the half of the census
+    finding that says the button writes two optimistic state values BEFORE
+    the save request leaves -- which is the reason the census called that
+    click the dangerous step rather than a save with some state attached.
+    """
+    payload = _sdui(
+        _component(_CK_EDIT, "Edit"),
+        _action_chunk(
+            _CK_EDIT,
+            ("SetState", "SetState", "ServerRequest"),
+            request_id="saveAndFetchNextStepRequest",
+        ),
+    )
+    found = probe._actions_by_reference(payload, "Edit")
+    assert found["refused"] is None, found
+    assert found["kinds"]["SetState"] == 2, found
+    assert found["kinds"]["ServerRequest"] == 1, found
+    assert found["kinds"]["saveAndFetchNextStepRequest"] == 1, found
+    assert found["sequence"][0] == "SetState", found
+    assert found["sequence"].index("SetState") < found["sequence"].index(
+        "ServerRequest"
+    ), found
+
+
+def test_a_serverrequest_arriving_on_show_details_is_visible():
+    """THE REGRESSION THAT WOULD SETTLE THE CLICK, MUTATED.
+
+    August counted ZERO ``ServerRequest`` for ``Show details``. If LinkedIn
+    has since attached one, the click stays refused permanently -- so the
+    reader must be shown reporting that transition rather than trusted to.
+    """
+    before = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate",)),
+    )
+    assert probe._actions_by_reference(before, "Show details")["kinds"][
+        "ServerRequest"
+    ] == 0
+
+    after = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate", "ServerRequest")),
+    )
+    found = probe._actions_by_reference(after, "Show details")
+    assert found["refused"] is None, found
+    assert found["kinds"]["ServerRequest"] == 1, found
+
+
+def test_it_does_not_attribute_a_neighbours_action_chunk():
+    """THE NEGATIVE CONTROL, and it is the one a windowed reader fails.
+
+    ``Edit``'s action chunk sits directly beside ``Show details``' own -- that
+    is the real adjacency on the card, an edit button that is an immediate
+    sibling of the detail link. A reader scoped by distance attributes the
+    ServerRequest to both. This one follows a key, so it attributes it to
+    exactly one.
+    """
+    payload = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _component(_CK_EDIT, "Edit"),
+        _action_chunk(_CK_CARD, ("Navigate",)),
+        _action_chunk(_CK_EDIT, ("SetState", "SetState", "ServerRequest")),
+    )
+    show = probe._actions_by_reference(payload, "Show details")
+    assert show["refused"] is None, show
+    assert show["kinds"]["Navigate"] == 1, show
+    assert show["kinds"]["ServerRequest"] == 0, show
+    assert show["kinds"]["SetState"] == 0, show
+
+    edit = probe._actions_by_reference(payload, "Edit")
+    assert edit["refused"] is None, edit
+    assert edit["kinds"]["ServerRequest"] == 1, edit
+    assert edit["kinds"]["Navigate"] == 0, edit
+
+
+def test_a_duplicated_action_definition_is_not_double_counted():
+    """MAX ACROSS SITES, NOT SUM, and the census is why -- the RIGHT half of it.
+
+    THE TEMPTING CITATION IS THE WRONG ONE, and it was in this file's first
+    draft: the census's "responsive duplicate pair, identical componentkey"
+    was measured on ``button[aria-label="Open to"]``, a control neither reader
+    here reads. ``Edit`` is DOM count 1 and unique. Citing it would have been
+    a measurement of a NEIGHBOURING control standing in for this one, which is
+    this wave's own section-91 defect committed in a justification.
+
+    The on-point measurement is in the payload, where this reader looks:
+    ``Edit``'s click action was resolved at TWO offsets, and the Open-to menu
+    items appear 3x each, once per rendering variant. Summing would report
+    ``SetState 4`` against an August baseline of ``SetState x2`` and
+    MANUFACTURE a disagreement out of an aggregation choice -- an instrument
+    inventing the finding it was built to look for.
+    """
+    duplicated = _sdui(
+        _component(_CK_EDIT, "Edit"),
+        _action_chunk(_CK_EDIT, ("SetState", "SetState", "ServerRequest")),
+        _action_chunk(_CK_EDIT, ("SetState", "SetState", "ServerRequest")),
+    )
+    found = probe._actions_by_reference(duplicated, "Edit")
+    assert found["refused"] is None, found
+    assert found["reference_sites"] == 2, found
+    assert found["kinds"]["SetState"] == 2, found
+    assert found["kinds"]["ServerRequest"] == 1, found
+
+
+def test_an_ancestor_object_is_not_an_action_chunk():
+    """A key that also appears on the CONTAINER must not attribute the container.
+
+    An object enclosing the component encloses its NEIGHBOURS too, so its
+    kinds are the carousel's. Attributing them would be the fixed-window
+    failure arrived at by walking instead of by a constant -- the same wrong
+    answer, harder to see.
+    """
+    inner = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_EDIT, ("ServerRequest",)),
+    )
+    payload = (
+        '{"componentkey":"' + _CK_CARD + '","carousel":[' + inner + "],"
+        '"trailing":"' + _CK_CARD + '"}'
+        + "," + _action_chunk(_CK_CARD, ("Navigate",))
+    )
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["refused"] is None, found
+    assert found["ancestor_sites"] >= 1, found
+    # The neighbour's ServerRequest lives inside the ancestor and is NOT
+    # attributed, which is the whole assertion.
+    assert found["kinds"]["ServerRequest"] == 0, found
+    assert found["kinds"]["Navigate"] == 1, found
+
+
+# ---------------------------------------------------------------------------
+# Every refusal, one at a time. A refusal that has never been produced is a
+# branch nobody has read.
+# ---------------------------------------------------------------------------
+
+
+def test_it_refuses_when_every_reference_site_is_empty():
+    """THE FLOOR, AND IT IS THE MOST CONSEQUENTIAL BRANCH IN THE READER.
+
+    **Zero of everything is the exact shape of permission.** The operator
+    ruled that a click measured to issue no ``ServerRequest`` is by effect a
+    READ, so an all-zero reading from this instrument is what would authorise
+    pressing a button on his live profile -- and all-zero has two causes that
+    look identical: the control has no actions, or THE READER FOUND THE KEY
+    IN OBJECTS THAT DO NOT CARRY ACTIONS.
+
+    The second is not hypothetical: a payload writing the key BESIDE its
+    actions rather than around them produces exactly this, and it is what the
+    corpus below is. So the reader refuses, and that refusal is what makes
+    every non-zero reading trustworthy -- a run that reports kinds has shown,
+    on that same payload, that it can see kinds through a reference.
+    """
+    beside = _sdui(
+        _component(_CK_CARD, "Show details"),
+        '{"componentkey":"' + _CK_CARD + '"}',
+        '{"onTap":[{"$type":"proto.sdui.actions.core.Navigate"}]}',
+    )
+    found = probe._actions_by_reference(beside, "Show details")
+    assert found["reference_sites"] >= 1, found
+    assert found["kinds"] is None, found
+    assert "not a measurement" in found["refused"], found
+
+    # AND IT IS NOT SIMPLY ALWAYS REFUSING: the same shape with the actions
+    # INSIDE the referenced object is answered.
+    inside = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate",)),
+    )
+    assert probe._actions_by_reference(inside, "Show details")["refused"] is None
+
+
+def test_it_refuses_when_no_key_encloses_the_label():
+    """A label carried outside any keyed component cannot be followed.
+
+    THE REFUSAL SAYS WHICH FACT IT IS. "No key within four levels" is a fact
+    about the PAGE's shape -- learned, note, without a byte of the page
+    crossing out of the process, which is the only way this instrument is
+    allowed to teach anybody anything.
+    """
+    found = probe._actions_by_reference('{"text":"Show details"}', "Show details")
+    assert found["key_found"] is False, found
+    assert found["kinds"] is None, found
+    assert "no component key" in found["refused"], found
+
+
+def test_it_refuses_two_distinct_keys_at_the_same_level():
+    """Two keys in one object, and no way to say which owns the label.
+
+    Choosing would be attribution by document order -- refused here for the
+    same reason the locator refuses a doubled label, and the reason ``Edit``
+    itself refused as ambiguous on the last live run.
+    """
+    payload = (
+        '{"componentkey":"' + _CK_CARD + '","sibling":'
+        '{"componentkey":"' + _CK_EDIT + '"},"text":"Show details"}'
+    )
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["kinds"] is None, found
+    assert "DISTINCT component keys" in found["refused"], found
+
+
+def test_it_refuses_a_key_too_short_to_follow():
+    """A short key is the substring defect wearing a reference's clothes.
+
+    Following ``ab`` through a megabyte matches prose. The floor refuses
+    rather than reporting the whole page's kinds as one control's.
+    """
+    payload = '{"componentkey":"ab","text":"Show details"},{"componentkey":"ab"}'
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["kinds"] is None, found
+    assert "character floor" in found["refused"], found
+
+
+def test_it_refuses_a_key_that_is_never_referenced():
+    """DEFINED AND UNREFERENCED IS A FACT ABOUT THE MECHANISM, not the control.
+
+    If nothing else in the payload names this key, this page does not attach
+    THIS control's actions by componentkey -- and a third instrument has now
+    failed to attribute it. The refusal says exactly that, so nobody reads it
+    as "the control has no actions" and treats it as permission.
+    """
+    found = probe._actions_by_reference(
+        _component(_CK_CARD, "Show details"), "Show details"
+    )
+    assert found["key_found"] is True, found
+    assert found["reference_sites"] == 0, found
+    assert found["kinds"] is None, found
+    assert "never referenced" in found["refused"], found
+
+
+def test_it_refuses_a_key_that_occurs_too_often_without_walking_anything():
+    """THE COST CEILING, and it is checked BEFORE the expensive pass starts.
+
+    Every occurrence costs a region walk of up to ``_REGION_CAP`` in each
+    direction. A key matching thousands of times would drag this reader
+    through hundreds of millions of characters of his profile to produce a
+    number it would refuse anyway on the site cap -- so the refusal comes
+    first, and the assertion that NOTHING WAS WALKED is the point: an
+    unwalked payload is the cheap answer and the honest one at once.
+    """
+    key = "aaaaaaaaaaaa-repeated-key"
+    payload = (
+        '{"componentkey":"' + key + '","text":"Show details"}'
+        + ("," + '{"componentkey":"' + key + '"}') * (probe._MAX_KEY_OCCURRENCES + 5)
+    )
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["key_occurrences"] > probe._MAX_KEY_OCCURRENCES, found
+    assert found["sites"] == [], "a region was walked before the ceiling refused"
+    assert found["kinds"] is None, found
+    assert "occurrence ceiling" in found["refused"], found
+
+
+def test_it_refuses_when_a_reference_site_cannot_be_walked():
+    """A PARTIAL READING IS REFUSED, because the missing site is the dangerous one.
+
+    The site this reader could not walk is exactly where the ``ServerRequest``
+    that would REFUSE a click might be, and a reading that comes back missing
+    a kind is indistinguishable from a control that does not have it. Those
+    two errors are not symmetric, so this leans at the safe end -- the same
+    argument ``dom.SDUI_WINDOW_CHARS`` makes about its window.
+    """
+    # THE UNWALKABLE SITE IS MADE BY CONSTRUCTION, not by hoping a brace walk
+    # fails: one occurrence of the key is buried past the region cap, which is
+    # the same technique the enclosure reader's own cap test uses. A test that
+    # relied on an accidental imbalance would be testing the corpus.
+    buried = '{"' + "a" * (probe._REGION_CAP + 100) + '","componentkey":"' + _CK_CARD + '"}'
+    payload = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate",)),
+        buried,
+    )
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["unresolved_sites"] >= 1, found
+    assert found["kinds"] is None, found
+    assert "refused rather than reported" in found["refused"], found
+
+
+def test_it_inherits_the_locators_refusals():
+    """The two readers share one locator, so they cannot answer about
+    different bytes.
+
+    A doubled label refused the enclosure reader on the last live run --
+    ``Edit``'s escaped form occurred TWICE. The reference reader must refuse
+    the same reading rather than quietly following the first one's key.
+    """
+    doubled = _sdui(
+        _component(_CK_CARD, "Edit"),
+        _component(_CK_EDIT, "Edit"),
+        _action_chunk(_CK_EDIT, ("ServerRequest",)),
+    )
+    found = probe._actions_by_reference(doubled, "Edit")
+    assert found["occurrences"] == 2, found
+    assert found["kinds"] is None, found
+    assert "document order" in found["refused"], found
+
+    absent = probe._actions_by_reference('{"text":"nothing here"}', "Edit")
+    assert absent["kinds"] is None, absent
+    assert "the finding" in absent["refused"], absent
+
+
+# ---------------------------------------------------------------------------
+# The spellings, and the bound that lets this read a string at all
+# ---------------------------------------------------------------------------
+
+
+def test_the_key_field_is_read_in_the_escaped_flight_spelling():
+    """FOUR SPELLINGS, AND THE ESCAPED ONE IS THE LIVE ONE.
+
+    The label was found on the live page in its ESCAPED form -- a flight
+    payload carries JSON inside JS string literals -- so a key reader that
+    knew only ``"componentkey":"..."`` would report "no key" on the exact
+    payload it was built for, and "no key" and "a key I cannot see" are the
+    two answers this file exists to keep apart.
+
+    The mutation is the assertion: the same corpus in the escaped spelling
+    must answer, and the run must say WHICH spelling matched.
+    """
+    escaped = _sdui(
+        _component(_CK_CARD, "Show details", escaped=True),
+        _action_chunk(_CK_CARD, ("Navigate",), escaped=True),
+    )
+    found = probe._actions_by_reference(escaped, "Show details")
+    assert found["located_by"] == "escaped", found
+    assert found["refused"] is None, found
+    assert found["key_spelling"] == "componentkey escaped", found
+    assert found["kinds"]["Navigate"] == 1, found
+
+
+def test_the_camelcase_key_field_is_read_too():
+    """``componentkey`` is the DOM attribute's spelling. JSON may camel it.
+
+    Counted separately for the same reason the label's three spellings are:
+    a reader silent on one spelling reports a confident zero.
+    """
+    camel = (
+        '{"componentKey":"' + _CK_CARD + '","text":"Show details"}'
+        + "," + '{"componentKey":"' + _CK_CARD + '","onTap":'
+        '[{"$type":"proto.sdui.actions.core.Navigate"}]}'
+    )
+    found = probe._actions_by_reference(camel, "Show details")
+    assert found["refused"] is None, found
+    assert found["key_spelling"] == "componentKey quoted", found
+    assert found["kinds"]["Navigate"] == 1, found
+
+
+def test_the_locator_aims_at_the_payload_and_not_at_the_dom():
+    """RULING 1, AND THE CORPUS IS THE LIVE SHAPE RATHER THAN A CONVENIENT ONE.
+
+    The document this probe reads is not a payload. It is an HTML page WITH a
+    payload inside it, and the two spell a label differently::
+
+        "Edit"        an HTML attribute, aria-label="Edit"   -> the DOM
+        \\"Edit\\"     JSON inside a JS string literal        -> the payload
+
+    So on a document carrying both, THE QUOTED FORM IS THE DOM -- and the
+    reader preferred quoted until the live run of 2026-09-03, which aimed it
+    at the HTML attribute where no JSON object exists. Both readers refused,
+    neither refusal was about the page, and **a reader aimed at the wrong half
+    of a document reports a fact about itself in the grammar of a fact about
+    its subject.**
+
+    THE CORPUS BELOW REPRODUCES THE MEASURED COUNTS EXACTLY: quoted 1,
+    escaped 2 -- the census's unique ``button[aria-label="Edit"]`` and its two
+    payload offsets. A quoted-first reader picks the attribute and refuses for
+    the wrong reason; an escaped-first reader picks the payload and refuses as
+    AMBIGUOUS, which is the right reason.
+    """
+    dom = '<button aria-label="Edit" class="x"></button>'
+    # TWO escaped components, because the payload carries one action list ONCE
+    # PER RENDERING VARIANT -- that is where the measured escaped 2 comes
+    # from, and a corpus with one would be testing an easier document than the
+    # live one.
+    payload = _sdui(
+        _component(_CK_EDIT, "Edit", escaped=True),
+        _action_chunk(_CK_EDIT, ("SetState", "ServerRequest"), escaped=True),
+        _component(_CK_EDIT, "Edit", escaped=True),
+        _action_chunk(_CK_EDIT, ("SetState", "ServerRequest"), escaped=True),
+    )
+    document = dom + "<script>" + payload + "</script>"
+
+    found = probe._actions_by_reference(document, "Edit")
+    assert found["spellings"]["quoted"] == 1, found["spellings"]
+    assert found["spellings"]["escaped"] == 2, found["spellings"]
+
+    # THE AIM: the payload, not the attribute.
+    assert found["located_by"] == "escaped", found
+
+    # AND THE HONEST REFUSAL THAT BUYS. Two payload occurrences, so the reader
+    # cannot say which is the control. This is the CORRECT outcome and not a
+    # regression -- fixing the aim was never going to produce an answer here.
+    assert found["kinds"] is None, found
+    assert "document order" in found["refused"], found
+
+    # THE DISCRIMINATING HALF: aimed at the DOM attribute instead, the refusal
+    # is a different one entirely and says nothing true about the page.
+    at_the_attribute = probe._actions_for(dom, "Edit")
+    assert at_the_attribute["located_by"] == "quoted", at_the_attribute
+    assert "balanced" in at_the_attribute["refused"], at_the_attribute
+
+
+def test_the_quoted_fallback_survives_for_an_unescaped_payload():
+    """The fallback is not decoration: a plain-JSON page has no escaped form.
+
+    Preferring escaped WITH a quoted fallback is correct on both documents.
+    Preferring quoted is correct only on the second, which is what made it
+    wrong live.
+    """
+    plain = _sdui(
+        _component(_CK_CARD, "Show details"),
+        _action_chunk(_CK_CARD, ("Navigate",)),
+    )
+    found = probe._actions_by_reference(plain, "Show details")
+    assert found["spellings"]["escaped"] == 0, found["spellings"]
+    assert found["located_by"] == "quoted", found
+    assert found["refused"] is None, found
+    assert found["kinds"]["Navigate"] == 1, found
+
+
+def test_the_component_key_never_reaches_a_printed_line():
+    """THE ONE STRING THIS FILE READS OUT, AND IT MUST NOT BE PRINTED.
+
+    Following a reference means holding the thing referred to, so the bound
+    moved from "no capture group exists" to "one exists and its value is
+    never emitted". THAT IS ASSERTED OVER THE RENDERED LINES, not over the
+    dict: the dict is an intermediate, the lines are what reaches a
+    transcript, and a transcript is a publication channel -- this repo's own
+    finding about failure messages, applied to a printout.
+
+    AND THE KEY IS NOT ASSUMED HARMLESS. The census measured one componentkey
+    on this page as ``<vanity>_openToButton``. A key on this page can BE an
+    identifier, which is why this is a leak test and not a tidiness test.
+    """
+    payload = _sdui(
+        _component(_CK_VANITY, "Show details"),
+        _action_chunk(_CK_VANITY, ("Navigate",)),
+    )
+    found = probe._actions_by_reference(payload, "Show details")
+    assert found["refused"] is None, found
+    assert found["kinds"]["Navigate"] == 1, found
+
+    rendered = "\n".join(probe._render_reference(found))
+    assert _CK_VANITY not in rendered, "the componentkey reached a printed line"
+    assert "jordan-blake" not in rendered, "the slug reached a printed line"
+    # ...and the render is not empty, so the assertion is not vacuous.
+    assert "Navigate" in rendered, rendered
+
+    # THE DICT IS ALLOWED TO BE AN INTERMEDIATE, but nothing in it that a
+    # caller would loop over may carry the key either.
+    assert _CK_VANITY not in repr(found["sites"]), found["sites"]
+    assert _CK_VANITY not in repr(found["kinds"]), found["kinds"]
+
+
+def test_a_refusal_never_quotes_the_key_either():
+    """FAILURE MESSAGES RENDER REDACTED. A refusal is a publication too.
+
+    The identity guard in this repo states it as a rule and earned it: a
+    guard that prints the identifier it found has republished it somewhere
+    new. Every refusal below is produced against a vanity-shaped key and none
+    of them may contain it.
+    """
+    unreferenced = _component(_CK_VANITY, "Show details")
+    empty = _sdui(
+        _component(_CK_VANITY, "Show details"),
+        '{"componentkey":"' + _CK_VANITY + '"}',
+    )
+    for payload in (unreferenced, empty):
+        found = probe._actions_by_reference(payload, "Show details")
+        assert found["refused"], payload[:40]
+        assert _CK_VANITY not in "\n".join(probe._render_reference(found))
+
+
+def test_the_probe_still_intercepts_nothing_and_writes_nowhere():
+    """THE BOUNDS PINNED AS COUNTS, because the reader grew and they did not.
+
+    The previous run measured ``.route`` 0 and ``page.on`` 2. Following a
+    reference needed no new browser capability at all -- it reads bytes this
+    process already held -- so those two numbers must be IDENTICAL after the
+    change, and asserting the counts rather than mere absence is what makes
+    that a measurement.
+    """
+    source = _PROBE_PATH.read_text(encoding="utf-8")
+    code = "\n".join(
+        line for line in source.splitlines() if not line.strip().startswith("#")
+    )
+    assert code.count(".route(") == 0, "the probe has acquired an interception path"
+    assert source.count("page.on(") == 2, source.count("page.on(")
+    for writer in ("open(", ".write_text(", ".write_bytes(", ".mkdir("):
+        assert writer not in code, writer

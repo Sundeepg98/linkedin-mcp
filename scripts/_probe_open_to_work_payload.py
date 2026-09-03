@@ -101,11 +101,34 @@ reporting it as one would be worse than reporting nothing.
 ## What it can settle, stated narrowly, because it is narrower than the
 ## analysis it guards
 
-IT IS A REGRESSION DETECTOR, NOT A RE-DERIVATION. The August analysis
+THE TALLY IS A REGRESSION DETECTOR, NOT A RE-DERIVATION. The August analysis
 attributed individual actions to individual controls by reading the payload's
 structure around each ``componentkey``. A count cannot do that: it can say the
 payload contains eleven ``Navigate`` tokens, and it cannot say which control
 owns them.
+
+THERE ARE NOW THREE READERS HERE, AND THE THIRD IS THE ONLY ONE THAT
+ATTRIBUTES. They are kept together deliberately: one live read of his profile
+answers all three, and the printout shows what each can and cannot say about
+the same bytes.
+
+    1  the TALLY          counts the closed vocabulary across the whole
+                          payload. No control, so no attribution.
+    2  the ENCLOSURE      smallest balanced object around a label. Live it
+       reader             found a 297-character region holding ZERO action
+                          kinds -- because SDUI defines actions in their own
+                          chunks and REFERENCES them by ``componentkey``.
+                          Enclosure is the wrong relation on this page.
+    3  the REFERENCE      label -> that component's key -> every other place
+       follower           the key appears -> the kinds in those objects. The
+                          relation the payload actually uses.
+
+Reader 3 is the first code in this file that reads a STRING out of the
+payload, because a reference cannot be followed without holding the thing
+referred to. The bound moves accordingly and is stated where it lives: one
+capture group, its value never emitted, asserted over the RENDERED LINES. The
+census measured one componentkey on this page as ``<vanity>_openToButton``, so
+that rule is protecting a measured identifier and not a protocol string.
 
 WHAT IT CAN SAY IS WHETHER THE VOCABULARY AND THE COUNTS STILL HOLD. If
 ``saveAndFetchNextStepRequest`` has vanished, or ``ServerRequest`` has appeared
@@ -402,20 +425,17 @@ def _enclosing_object(payload: str, at: int) -> Optional[tuple[int, int]]:
     return None
 
 
-def _actions_for(payload: str, label: str) -> dict[str, Any]:
-    """Which action kinds sit in the region around ONE labelled control.
+def _locate_label(payload: str, label: str) -> tuple[dict[str, Any], list[int]]:
+    """Find ONE labelled control, or refuse. Shared by BOTH readers.
 
-    RETURNS COUNTS AND A REFUSAL REASON, never a slice of the payload. The
-    region is located, the closed vocabulary is counted inside it, and the
-    region itself is discarded -- exactly the tally's discipline applied to a
-    smaller piece of the same document, which is why this needed no wider
-    permission than the read that already holds the whole body in memory.
+    EXTRACTED SO THE TWO READERS CANNOT DISAGREE ABOUT WHICH OCCURRENCE THEY
+    ARE DESCRIBING. :func:`_actions_for` walks out to an enclosure and
+    :func:`_actions_by_reference` follows a key, and if each had its own
+    locator they could silently answer about different bytes -- which is the
+    failure that would be hardest to see in a printout that shows both.
 
-    REFUSES ON ANYTHING BUT EXACTLY ONE OCCURRENCE. Zero means the label is
-    gone, which is itself the finding. More than one means this cannot say
-    which control it would be describing, and picking the first would be
-    attribution by document order -- the thing this package refuses everywhere
-    else.
+    Returns the shared skeleton and the hit positions. A refusal is already
+    written into the skeleton when the hits are not exactly one.
     """
     # THREE SPELLINGS, COUNTED SEPARATELY, AND THE COUNTS ARE THE DIAGNOSTIC.
     #
@@ -439,11 +459,51 @@ def _actions_for(payload: str, label: str) -> dict[str, Any]:
         name: len(re.findall(re.escape(form), payload))
         for name, form in spellings.items()
     }
-    # THE QUOTED FORM FIRST, THEN THE ESCAPED ONE. Bare is never used to
-    # locate: in a payload this size a bare label matches prose, and
-    # attributing actions to a prose match is the fixed-window failure wearing
-    # a different hat.
-    chosen = "quoted" if seen["quoted"] else ("escaped" if seen["escaped"] else "")
+    # THE ESCAPED FORM FIRST, AND THE LIVE RUN OF 2026-09-03 IS WHY.
+    #
+    # THIS WAS QUOTED-FIRST, AND QUOTED-FIRST AIMS AT THE DOM. The document
+    # this reads is not a payload -- it is an HTML page WITH a payload inside
+    # it, and the two write a label differently:
+    #
+    #     "Edit"       an HTML attribute, aria-label="Edit"   -> the DOM
+    #     \\"Edit\\"     JSON inside a JS string literal        -> the payload
+    #
+    # So on a document carrying both, THE QUOTED FORM IS THE DOM. Measured
+    # live, and the census corroborates both halves exactly:
+    #
+    #     Edit           quoted 1, escaped 2, bare 27
+    #                    quoted 1  == census: button[aria-label="Edit"],
+    #                                 count 1, UNIQUE -- the DOM attribute
+    #                    escaped 2 == census: Edit's action resolved at TWO
+    #                                 payload offsets, 681922 and 682537
+    #     Show details   quoted 0, escaped 1, bare 2
+    #
+    # Quoted-first therefore sent the reader at the HTML attribute, where
+    # there is no JSON object at all -- and BOTH readers duly refused, one
+    # with "no balanced object within 20000 characters" and the other with
+    # "walked 0". Neither refusal was about the page. **A reader aimed at the
+    # wrong half of a document reports a fact about itself in the grammar of a
+    # fact about its subject**, which is this file's oldest lesson arriving
+    # one layer along.
+    #
+    # WHAT THE FIX BUYS IS AN HONEST REFUSAL, NOT AN ANSWER, and that is worth
+    # saying plainly rather than discovering as a disappointment: aimed at the
+    # payload, ``Edit`` now finds its escaped form TWICE and refuses as
+    # AMBIGUOUS. That is the correct outcome. Two payload occurrences and no
+    # way to say which is the control means picking one would be attribution
+    # by document order.
+    #
+    # THE FALLBACK IS KEPT, and it is not decoration: a page that served plain
+    # unescaped JSON would carry its payload in the QUOTED form, and escaped
+    # would be zero. Preferring escaped with a quoted fallback is correct on
+    # both documents; preferring quoted is correct only on the second.
+    #
+    # Bare is never used to locate: in a payload this size a bare label matches
+    # prose, and attributing actions to a prose match is the fixed-window
+    # failure wearing a different hat. Live, ``Edit`` bare was 27 -- every
+    # ``Edit profile``, ``Edit about`` and ``Edit default activity`` on the
+    # page -- which is exactly the noise that rule exists for.
+    chosen = "escaped" if seen["escaped"] else ("quoted" if seen["quoted"] else "")
     hits = (
         [m.start() for m in re.finditer(re.escape(spellings[chosen]), payload)]
         if chosen
@@ -455,8 +515,6 @@ def _actions_for(payload: str, label: str) -> dict[str, Any]:
         "spellings": seen,
         "located_by": chosen or None,
         "refused": None,
-        "kinds": None,
-        "region_chars": None,
     }
     if not chosen and seen["bare"]:
         out["refused"] = (
@@ -466,7 +524,7 @@ def _actions_for(payload: str, label: str) -> dict[str, Any]:
             "READER, not about the page -- do not read it as the control "
             "having gone." % seen["bare"]
         )
-        return out
+        return out, []
     if len(hits) != 1:
         out["refused"] = (
             "zero occurrences -- the label is not on this page at all, which "
@@ -478,6 +536,38 @@ def _actions_for(payload: str, label: str) -> dict[str, Any]:
                 "document order." % len(hits)
             )
         )
+        return out, []
+    return out, hits
+
+
+def _actions_for(payload: str, label: str) -> dict[str, Any]:
+    """Which action kinds sit in the region ENCLOSING one labelled control.
+
+    RETURNS COUNTS AND A REFUSAL REASON, never a slice of the payload. The
+    region is located, the closed vocabulary is counted inside it, and the
+    region itself is discarded -- exactly the tally's discipline applied to a
+    smaller piece of the same document, which is why this needed no wider
+    permission than the read that already holds the whole body in memory.
+
+    REFUSES ON ANYTHING BUT EXACTLY ONE OCCURRENCE. Zero means the label is
+    gone, which is itself the finding. More than one means this cannot say
+    which control it would be describing, and picking the first would be
+    attribution by document order -- the thing this package refuses everywhere
+    else.
+
+    AND ON THE LIVE PAGE IT ANSWERS NEITHER QUESTION, which is recorded here
+    rather than only in the commit that found it: SDUI defines actions in
+    their own chunks and references them by ``componentkey``, so the object
+    enclosing a label does not contain that label's actions. Enclosure is the
+    wrong relation on this page. :func:`_actions_by_reference` is the right
+    one, and this stays because a reader that refuses is still evidence --
+    it is what proves the actions are not where a structural reading would
+    naturally look.
+    """
+    out, hits = _locate_label(payload, label)
+    out["kinds"] = None
+    out["region_chars"] = None
+    if out["refused"] or not hits:
         return out
 
     region = _enclosing_object(payload, hits[0])
@@ -502,6 +592,580 @@ def _actions_for(payload: str, label: str) -> dict[str, Any]:
         payload[start:end], "saveAndFetchNextStepRequest"
     )
     return out
+
+
+# ---------------------------------------------------------------------------
+# THE REFERENCE-FOLLOWING READER
+#
+# THE THIRD INSTRUMENT AIMED AT ONE QUESTION, AND THE FIRST THAT CAN ANSWER
+# IT. Two have already failed, and neither failed by being buggy:
+#
+#   the TALLY (:func:`_count_vocabulary`) counts the whole payload. It can say
+#   the page holds eleven Navigate tokens and cannot say which control owns
+#   one. A count is not an attribution and never was.
+#
+#   the ENCLOSURE reader (:func:`_actions_for`) takes the smallest balanced
+#   object around the label. Live, that object was 297 characters, balanced,
+#   and held ZERO action kinds -- because SDUI DEFINES ACTIONS IN THEIR OWN
+#   CHUNKS AND REFERENCES THEM BY ``componentkey``. The object enclosing a
+#   label does not contain its actions. Enclosure is the wrong RELATION on
+#   this page, so no amount of widening the window fixes it: widening only
+#   swallows neighbours.
+#
+# So the relation has to be followed rather than assumed: label -> the key of
+# the component that carries it -> every other place that key appears -> the
+# action kinds in those objects. That is what this does.
+#
+# WHAT IT COSTS, STATED FIRST BECAUSE IT IS THE REAL CHANGE. This is the ONLY
+# code in this file that reads a string OUT of the payload. Everything else
+# asks "how many times do you contain this fixed string I already had"; a
+# reference cannot be followed without holding the thing referred to. So the
+# key crosses into a local variable, and the bound moves from "no capture
+# group exists" to "one capture group exists, its value is never emitted, and
+# a test asserts that over the RENDERED LINES rather than over the dict".
+#
+# AND THE KEY IS NOT ASSUMED HARMLESS. The census measured the topcard
+# button's key as ``<vanity>_openToButton`` -- a componentkey that carries his
+# profile slug. Others are opaque uuids. So "never emit the key" is not
+# fastidiousness about a protocol string: on this page one of the four known
+# keys IS an identifier, and the rule exists because of that measurement.
+# ---------------------------------------------------------------------------
+
+#: The field that names a component's key, in every spelling this payload can
+#: write it in.
+#:
+#: FOUR SPELLINGS, COUNTED SEPARATELY, AND THE RUN SAYS WHICH MATCHED. That is
+#: the locator's own lesson applied one level down, and it was earned: the
+#: first version of :func:`_locate_label` searched ONE spelling, got zero, and
+#: would have reported "the label is gone" when the truth was "this reader
+#: cannot see it". A key reader that searched only ``"componentkey":"..."``
+#: could report "no key" on a payload whose every key is written
+#: ``\"componentKey\":\"...\"``, and the two answers look identical.
+#:
+#: The escaped pair is not hypothetical. A Next.js flight payload carries JSON
+#: inside JS string literals, which is exactly why the label had to be looked
+#: for in an escaped form too -- and the label WAS found escaped on the live
+#: page. Whatever spelling the label wears, its neighbours wear.
+_KEY_FIELD_NAMES: tuple[str, ...] = ("componentkey", "componentKey")
+
+#: What a key may be made of. Deliberately permissive about CONTENT (uuids,
+#: slugs and ``auto-component-`` prefixes are all real shapes here) and strict
+#: about LENGTH, because an unbounded value class on a megabyte of payload is
+#: how a "key" becomes half a document.
+_KEY_VALUE_CLASS = r"[A-Za-z0-9_.:%\-]{1,200}"
+
+
+def _key_field_patterns() -> dict[str, "re.Pattern[str]"]:
+    """The key-field patterns, BUILT rather than typed out.
+
+    Two axes -- the field's spelling and whether the JSON is escaped -- so a
+    third field name is one entry and not two more copies to keep in step.
+    The same rule the vocabulary corpus follows in the tests.
+    """
+    out: dict[str, re.Pattern[str]] = {}
+    for name in _KEY_FIELD_NAMES:
+        out[name + " quoted"] = re.compile(
+            '"' + name + r'"\s*:\s*"(' + _KEY_VALUE_CLASS + ')"'
+        )
+        out[name + " escaped"] = re.compile(
+            r'\\"' + name + r'\\"\s*:\s*\\"(' + _KEY_VALUE_CLASS + r')\\"'
+        )
+    return out
+
+
+_KEY_PATTERNS = _key_field_patterns()
+
+#: How many enclosing objects out from the label this will look for a key.
+#:
+#: THE LABEL IS NOT ITSELF KEYED. It sits in a text node inside a component,
+#: so the key is at least one object out -- but "at least one" is not "exactly
+#: one", and a fixed depth of 1 would refuse a page that nests its text one
+#: level deeper for reasons that have nothing to do with actions. Four is the
+#: number at which a parent stops plausibly being THIS control's component and
+#: starts being the carousel that holds it; past that, a key found is somebody
+#: else's.
+#:
+#: RAISING THIS WAS CONSIDERED ON 2026-09-03 AND DECLINED, and the decision is
+#: recorded here because a declined widening that nobody wrote down is
+#: indistinguishable from one nobody thought of.
+#:
+#: The live run walked all four levels for ``Show details`` and found ZERO
+#: component keys in all four spellings. Six or eight levels might have found
+#: one. **That is exactly why it was not tried: a cap raised until it returns
+#: something is not a measurement, it is a search for agreement.** And the
+#: thing a wider walk would find is knowable in advance without running it --
+#: past level four the enclosing object is the carousel, so its key belongs to
+#: the container and attributing the container's actions to a button inside it
+#: is the fixed-window failure this whole reader exists to avoid.
+#:
+#: The honest reading of that zero is the one the refusal already prints: on
+#: this page the componentkey is not reachable from the label by enclosure.
+#: The answer to that is a DIFFERENT relation -- the flight row's ``$L<n>``
+#: pointers -- not a bigger number here.
+_REFERENCE_LEVELS = 4
+
+#: A key shorter than this is refused rather than followed. Eight characters
+#: is not an identifier addressing one control among thousands, and following
+#: a short string through a megabyte matches prose -- the substring defect
+#: this file already paid for once, wearing a different hat.
+_MIN_KEY_CHARS = 8
+
+#: More reference sites than this and the key is not a key.
+#:
+#: MEASURED, NOT GUESSED, AND MEASURED ON THE RIGHT CONTROL. The obvious
+#: citation here is the census's responsive duplicate pair -- two nodes,
+#: identical componentkey -- and it is the WRONG one: that was measured on
+#: ``button[aria-label="Open to"]``, which this reader does not read. ``Edit``
+#: is DOM count 1 and unique.
+#:
+#: The on-point measurement is in the PAYLOAD, which is where this reader
+#: looks: the census resolved ``Edit``'s own click action at TWO offsets
+#: (681922 and 682537), and the Open-to menu items appear 3x each, "once per
+#: rendering variant". So a payload carrying two or three copies of one
+#: control's action definition is measured behaviour ON A CONTROL THIS READER
+#: READS. Twelve leaves room for that plus slack, and refuses the reading
+#: where a "key" turns out to be a common token.
+_MAX_REFERENCE_SITES = 12
+
+#: How many times a key may OCCUR before this refuses without walking.
+#:
+#: A SEPARATE BOUND FROM THE SITE CAP, and both are needed. The site cap is
+#: about attribution -- twelve distinct objects is not one control. This one is
+#: about COST: every occurrence costs a region walk of up to
+#: :data:`_REGION_CAP` in each direction, and a key matching thousands of times
+#: would drag this reader through hundreds of millions of characters of his
+#: profile before refusing on the other cap. Checked first, so the expensive
+#: pass never starts.
+_MAX_KEY_OCCURRENCES = 200
+
+
+def _keys_in(region: str) -> tuple[set[str], dict[str, int]]:
+    """Distinct key VALUES in one region, and the per-spelling match counts.
+
+    THE SET IS THE POINT. One value found through two spellings is still one
+    key; two values found through one spelling are two keys and this reader
+    must not choose between them. So the ambiguity test is on the distinct
+    VALUES, never on the number of matches.
+
+    The values are returned to the caller inside this module and go no
+    further. Nothing that leaves this file carries one.
+    """
+    values: set[str] = set()
+    counts: dict[str, int] = {}
+    for spelling, pattern in _KEY_PATTERNS.items():
+        found = pattern.findall(region)
+        counts[spelling] = len(found)
+        values.update(found)
+    return values, counts
+
+
+def _key_for_label(payload: str, at: int) -> dict[str, Any]:
+    """Walk outward from a located label to the nearest object naming a key.
+
+    STOPS AT THE FIRST LEVEL THAT NAMES ONE, which is the only defensible
+    stopping rule: an outer object that also names a key names the key of
+    something LARGER, and preferring the outer one would attribute a
+    carousel's actions to a button inside it.
+
+    EVERY FAILURE IS A NAMED REFUSAL, and the names are the diagnostic. This
+    reader cannot print the payload, so the only way a human learns what shape
+    the page actually has is by which of these refusals comes back. "No key
+    within four levels" and "three distinct keys at level two" are different
+    facts about LinkedIn's markup, learned without a byte of it crossing out.
+    """
+    out: dict[str, Any] = {
+        "levels_walked": 0,
+        "key_spellings": {spelling: 0 for spelling in _KEY_PATTERNS},
+        "key_found": False,
+        "key_spelling": None,
+        "region": None,
+        "refused": None,
+        # The value itself is deliberately NOT in this dict under a name a
+        # renderer might loop over. It travels as ``_key`` and every consumer
+        # in this file reads it explicitly.
+        "_key": None,
+    }
+    region = _enclosing_object(payload, at)
+    while region is not None and out["levels_walked"] < _REFERENCE_LEVELS:
+        out["levels_walked"] += 1
+        start, end = region
+        values, counts = _keys_in(payload[start:end])
+        for spelling, count in counts.items():
+            out["key_spellings"][spelling] += count
+        if len(values) > 1:
+            out["refused"] = (
+                "%d DISTINCT component keys inside the object at level %d, so "
+                "this cannot say which one belongs to the label. Choosing "
+                "would be attribution by document order." % (
+                    len(values), out["levels_walked"],
+                )
+            )
+            return out
+        if values:
+            key = next(iter(values))
+            if len(key) < _MIN_KEY_CHARS:
+                out["refused"] = (
+                    "the key at level %d is %d characters, under the %d-"
+                    "character floor. A string that short is not addressing "
+                    "one control among thousands, and following it through a "
+                    "megabyte matches prose rather than references."
+                    % (out["levels_walked"], len(key), _MIN_KEY_CHARS)
+                )
+                return out
+            out["key_found"] = True
+            out["_key"] = key
+            out["region"] = region
+            out["key_spelling"] = next(
+                spelling for spelling, count in counts.items() if count
+            )
+            return out
+        if start == 0:
+            break
+        region = _enclosing_object(payload, start - 1)
+    if out["refused"] is None:
+        out["refused"] = (
+            "no component key in any of the %d objects enclosing this label "
+            "(walked %d). THAT IS A FACT ABOUT THE PAGE'S SHAPE, not about "
+            "the control: it means the label is not carried inside a keyed "
+            "component, so there is no reference for this instrument to "
+            "follow and no attribution it can honestly make."
+            % (_REFERENCE_LEVELS, out["levels_walked"])
+        )
+    return out
+
+
+def _kinds_in(region: str) -> dict[str, Any]:
+    """The closed vocabulary counted in one region, plus the ORDER it occurs in.
+
+    THE ORDER IS PART OF THE BASELINE AND COSTS NOTHING TO REPORT. August did
+    not record "Edit fires SetState and ServerRequest", it recorded **SetState
+    x2, THEN ServerRequest** -- a save preceded by two optimistic state
+    writes. Comparing an unordered set against that would drop the half of the
+    finding that says which happens first.
+
+    AND IT EMITS NO PAYLOAD. The sequence is this file's OWN fixed strings
+    sorted by where each first occurs; the offsets are used and discarded and
+    the strings were never read out of the region.
+    """
+    counts = {kind: _occurrences(region, kind) for kind in _REPORTABLE_KINDS}
+    counts["saveAndFetchNextStepRequest"] = _occurrences(
+        region, "saveAndFetchNextStepRequest"
+    )
+    firsts: list[tuple[int, str]] = []
+    for kind, count in counts.items():
+        if not count:
+            continue
+        match = re.search(
+            r"(?<![A-Za-z0-9_])" + re.escape(kind) + r"(?![A-Za-z0-9_])", region
+        )
+        if match:
+            firsts.append((match.start(), kind))
+    return {
+        "kinds": counts,
+        "sequence": [kind for _, kind in sorted(firsts)],
+    }
+
+
+def _actions_by_reference(payload: str, label: str) -> dict[str, Any]:
+    """Which action kinds are attached to ONE labelled control, BY REFERENCE.
+
+    THE ONE QUESTION THIS EXISTS FOR, and nothing wider::
+
+        Show details   August census: one Navigate, ZERO ServerRequest
+        Edit           August census: SetState x2, then ServerRequest
+                       saveAndFetchNextStep
+
+    WHAT IT EMITS: action KINDS from a closed set, counts, the order they
+    occur in, and how many sites carried them. NOT the key, NOT the chunk, NOT
+    the arguments of any request. The Edit RPC's payload carries
+    ``currentStep``, ``origin`` and ``isEditFlow`` values -- none of it is
+    read, because "which kinds" is the question and the rest is a different
+    permission nobody has asked for.
+
+    PER SITE, NOT SUMMED, and that choice is load-bearing. The census resolved
+    ``Edit``'s click action at TWO payload offsets, and the Open-to menu items
+    appear three times each, once per rendering variant -- so one control's
+    action definition arriving two or three times is measured behaviour here.
+    Summing would report ``SetState 4`` for a control August recorded at
+    ``SetState x2`` and manufacture a disagreement out of an aggregation
+    choice -- the exact way an instrument invents a finding. Each site is
+    reported separately and a human compares one against August.
+
+    A DISAGREEMENT IS THE FINDING. If ``Show details`` now carries a
+    ``ServerRequest``, this prints that and says nothing about what it means.
+    Deciding is a ruling and rulings are not taken by scripts.
+
+    THE ONE REFERENCE IT FOLLOWS, AND THE ONE IT DOES NOT. This follows
+    ``componentkey``. The payload has a SECOND reference mechanism -- the
+    flight row's own ``$L<n>`` lazy chunk pointers, which is how the census
+    resolved the ``Open to`` menu's three items -- and this does not follow
+    those. That is scope, not oversight: two instruments have already answered
+    the wrong question by being widened past what was asked, and a ``$L``
+    follower reads a chunk chosen by an integer rather than by a name.
+
+    THE COST OF THAT BOUND IS PAID IN A REFUSAL, NOT IN A WRONG ANSWER. If
+    this page attaches the two controls' actions by ``$L`` rather than by key,
+    this returns "the key is defined and never referenced" -- which names the
+    mechanism as the thing that failed and is exactly the input a ruling on a
+    fourth instrument would need.
+    """
+    out, hits = _locate_label(payload, label)
+    out.update(
+        {
+            "key_found": False,
+            "key_spelling": None,
+            "key_spellings": {},
+            "levels_walked": 0,
+            "sites": [],
+            "reference_sites": 0,
+            "definition_sites": 0,
+            "ancestor_sites": 0,
+            "unresolved_sites": 0,
+            "key_occurrences": 0,
+            "kinds": None,
+            "sequence": None,
+        }
+    )
+    if out["refused"] or not hits:
+        return out
+
+    found = _key_for_label(payload, hits[0])
+    out["key_found"] = found["key_found"]
+    out["key_spelling"] = found["key_spelling"]
+    out["key_spellings"] = found["key_spellings"]
+    out["levels_walked"] = found["levels_walked"]
+    if not found["key_found"]:
+        out["refused"] = found["refused"]
+        return out
+
+    key = found["_key"]
+    home_start, home_end = found["region"]
+    pattern = r"(?<![A-Za-z0-9_])" + re.escape(key) + r"(?![A-Za-z0-9_])"
+    positions = [match.start() for match in re.finditer(pattern, payload)]
+
+    # THE OCCURRENCE CEILING, CHECKED BEFORE ANY REGION IS WALKED. Each walk
+    # scans up to :data:`_REGION_CAP` in each direction, so a key found a few
+    # thousand times would send this reader through hundreds of millions of
+    # characters of his profile to produce a number it would refuse anyway on
+    # the site cap below. Refusing FIRST is both the cheap answer and the
+    # honest one: a string occurring this often is not addressing one control,
+    # and the count is reported so the refusal is legible.
+    out["key_occurrences"] = len(positions)
+    if len(positions) > _MAX_KEY_OCCURRENCES:
+        out["refused"] = (
+            "the key occurs %d times, past the %d-occurrence ceiling, so no "
+            "region was walked at all. A string appearing that often is not "
+            "an identifier for one control -- following it would attribute "
+            "the page." % (len(positions), _MAX_KEY_OCCURRENCES)
+        )
+        return out
+
+    # ONE REGION PER SITE. A key written twice inside the same object -- as a
+    # field and again inside a tracking blob -- is one place, not two, and
+    # counting it twice would double every kind in it.
+    seen_regions: dict[tuple[int, int], str] = {}
+    for position in positions:
+        region = _enclosing_object(payload, position)
+        if region is None:
+            out["unresolved_sites"] += 1
+            continue
+        start, end = region
+        if start >= home_start and end <= home_end:
+            # Inside the object the key was found in: this is the definition,
+            # whatever its own braces say.
+            role = "definition"
+        elif start <= home_start and end >= home_end:
+            # AN ANCESTOR, AND IT IS NOT AN ACTION CHUNK. An object that
+            # CONTAINS the component also contains its neighbours, so its
+            # kinds are the carousel's, not this control's. Counting it would
+            # be the fixed-window failure reached by a different route -- the
+            # window arrived at by walking rather than by a constant.
+            role = "ancestor"
+        else:
+            role = "reference"
+        seen_regions.setdefault(region, role)
+
+    for region, role in sorted(seen_regions.items()):
+        start, end = region
+        reading = _kinds_in(payload[start:end])
+        out["sites"].append(
+            {
+                "role": role,
+                "region_chars": end - start,
+                "kinds": reading["kinds"],
+                "sequence": reading["sequence"],
+            }
+        )
+        if role == "reference":
+            out["reference_sites"] += 1
+        elif role == "ancestor":
+            out["ancestor_sites"] += 1
+        else:
+            out["definition_sites"] += 1
+
+    if out["unresolved_sites"]:
+        out["refused"] = (
+            "%d occurrence(s) of the key sit in no object this reader can "
+            "walk -- unbalanced, or larger than the %d-character cap. The "
+            "reading is refused rather than reported without them, because "
+            "the site it could not read is exactly where the ServerRequest "
+            "that would REFUSE a click might be. A partial reading that comes "
+            "back missing a kind is indistinguishable from a control that "
+            "does not have it." % (out["unresolved_sites"], _REGION_CAP)
+        )
+        out["sites"] = []
+        return out
+
+    if out["reference_sites"] > _MAX_REFERENCE_SITES:
+        out["refused"] = (
+            "the key is referenced at %d distinct sites, past the %d-site "
+            "cap. A key that appears that often is not addressing one "
+            "control, and attributing every one of those objects to this "
+            "label would be the fixed-window failure with more steps."
+            % (out["reference_sites"], _MAX_REFERENCE_SITES)
+        )
+        out["sites"] = []
+        return out
+
+    if out["reference_sites"] == 0:
+        out["refused"] = (
+            "the key is DEFINED and never referenced anywhere else in the "
+            "payload, so there is no reference to follow. That is a fact "
+            "about the mechanism, not about the control: this page does not "
+            "attach this control's actions by componentkey, and a third "
+            "instrument has now failed to attribute it. Do not read it as "
+            "'the control has no actions'."
+        )
+        return out
+
+    union = {kind: 0 for kind in _REPORTABLE_KINDS}
+    union["saveAndFetchNextStepRequest"] = 0
+    order: list[str] = []
+    for site in out["sites"]:
+        if site["role"] != "reference":
+            continue
+        for kind, count in site["kinds"].items():
+            union[kind] = max(union[kind], count)
+        for kind in site["sequence"]:
+            if kind not in order:
+                order.append(kind)
+    # THE FLOOR, AND IT IS THE MOST IMPORTANT LINE IN THIS FUNCTION.
+    #
+    # ZERO OF EVERYTHING IS THE EXACT SHAPE OF PERMISSION. The operator ruled
+    # on 2026-09-01 that a click measured to issue no ``ServerRequest`` is by
+    # effect a READ -- so an all-zero reading from this instrument is the
+    # thing that would authorise pressing a button on his live profile. And an
+    # all-zero reading has two causes that look identical: the control really
+    # has no actions, or THIS READER FOUND THE KEY IN OBJECTS THAT DO NOT
+    # CARRY ACTIONS. The second is entirely plausible here -- a payload that
+    # writes ``{"componentkey":"X"},{"actions":[...]}`` as SIBLINGS rather
+    # than as parent and child would produce exactly this, and nothing in the
+    # output would say so.
+    #
+    # SO IT REFUSES, and the refusal is what makes every NON-zero reading
+    # trustworthy: a run that reports kinds has demonstrated, ON THIS PAYLOAD,
+    # that it can see kinds through a reference. A zero for one particular
+    # kind is then a reading rather than a silence, which is the negative
+    # control ``dom.read_sdui_actions`` had to be given for the same reason.
+    if not any(union.values()):
+        out["refused"] = (
+            "every reference site resolved and NOT ONE contains an action "
+            "kind from the closed set. This is NOT 'the control has no "
+            "actions' -- it is equally consistent with the key being defined "
+            "beside its actions rather than around them, which this reader "
+            "would not be able to tell apart. A zero from a reader that has "
+            "not been shown returning non-zero on this same payload is not a "
+            "measurement, and an all-zero reading is what would authorise a "
+            "click."
+        )
+        return out
+
+    # MAX ACROSS SITES, NOT SUM, for the responsive-duplicate reason above.
+    # Stated in the output too, because a number whose aggregation rule is
+    # only in the source is a number the next reader will misread.
+    out["kinds"] = union
+    out["sequence"] = order
+    return out
+
+
+def _render_reference(found: dict[str, Any]) -> list[str]:
+    """The lines a run prints for ONE control. Pure, so a test can read them.
+
+    THE LEAK CHECK LIVES HERE RATHER THAN ON THE DICT. The dict is an
+    intermediate; the LINES are what reaches a transcript, and a transcript is
+    a publication channel -- that is this repo's own finding about failure
+    messages, applied to a printout. So the rendering is a function with no
+    side effects and ``tests/test_otw_payload_probe.py`` asserts a
+    vanity-shaped key never appears in what it returns.
+    """
+    lines = [
+        "    %r: %d occurrence(s)  spellings=%s  located_by=%r"
+        % (
+            found["label"],
+            found["occurrences"],
+            found["spellings"],
+            found["located_by"],
+        )
+    ]
+    # THE FOUR KEY SPELLINGS PRINT WHETHER OR NOT ONE MATCHED, and the case
+    # where NONE did is the one they exist for. "No key here" and "a key
+    # written in a spelling this reader does not know" produce the same
+    # refusal text, and only these four counts tell them apart -- which is
+    # the locator's own lesson, and it was earned by a reader that reported
+    # `Show details`: 0 OCCURRENCES when the label was sitting there escaped.
+    if found["levels_walked"]:
+        lines.append(
+            "      key fields seen while walking %d level(s): %s"
+            % (found["levels_walked"], found["key_spellings"])
+        )
+    if found["key_found"]:
+        lines.append(
+            "      key: found at level %d, spelling %r (value withheld -- one "
+            "known key on this page carries his profile slug)"
+            % (found["levels_walked"], found["key_spelling"])
+        )
+    if found["key_occurrences"]:
+        lines.append(
+            "      key occurrences in the whole payload: %d"
+            % found["key_occurrences"]
+        )
+    # THE SITE SUMMARY PRINTS BEFORE ANY REFUSAL THAT HAS ONE. A refusal
+    # whose evidence is withheld is a reader saying "no" and keeping the
+    # reason: the all-zero refusal below is only readable if you can see that
+    # it DID resolve sites and they DID hold nothing.
+    if found["key_found"]:
+        lines.append(
+            "      sites: %d definition, %d reference, %d ancestor, %d "
+            "unresolved"
+            % (
+                found["definition_sites"],
+                found["reference_sites"],
+                found["ancestor_sites"],
+                found["unresolved_sites"],
+            )
+        )
+    for index, site in enumerate(found["sites"]):
+        present = {k: v for k, v in site["kinds"].items() if v}
+        lines.append(
+            "        site %d  %-10s %6d chars  %s"
+            % (index, site["role"], site["region_chars"], present or "no kinds")
+        )
+        if site["sequence"]:
+            lines.append("                  order: %s" % " -> ".join(site["sequence"]))
+    if found["refused"]:
+        lines.append("      REFUSED: %s" % found["refused"])
+        return lines
+    lines.append(
+        "      ATTRIBUTED (reference sites only, MAX across sites not sum -- "
+        "the payload carries one action list once per rendering variant; "
+        "August resolved Edit's at two offsets):"
+    )
+    lines.append(
+        "        %s" % ({k: v for k, v in found["kinds"].items() if v} or "none")
+    )
+    if found["sequence"]:
+        lines.append("        order: %s" % " -> ".join(found["sequence"]))
+    return lines
 
 
 async def main() -> None:
@@ -639,6 +1303,18 @@ async def main() -> None:
                 print("        them. Enclosure cannot attribute here -- only")
                 print("        following the reference can, which is a")
                 print("        different instrument and a wider one.")
+
+        print("\n=== READER 3: FOLLOWING THE COMPONENTKEY REFERENCE")
+        print("    The two readers above cannot attribute an action to a")
+        print("    control -- a tally has no control, and an enclosure holds")
+        print("    no actions on this page. This one follows the reference")
+        print("    SDUI actually uses. It emits action KINDS and nothing")
+        print("    else: no key, no chunk, no request arguments.")
+        print()
+        for label in _CONTROL_LABELS:
+            for line in _render_reference(_actions_by_reference(payload, label)):
+                print(line)
+            print()
 
         unknown = _unknown_action_kinds(payload)
         print(f"\n    SDUI action type names NOT in this vocabulary: {unknown}")
