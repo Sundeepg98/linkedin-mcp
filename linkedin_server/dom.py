@@ -5475,10 +5475,33 @@ TYPEAHEAD_OPTION_SELECTORS: tuple[str, ...] = (
     '[aria-controls] ~ * [role="option"]',
 )
 
+#: THE DROPDOWN ITSELF, waited for SEPARATELY FROM ITS ROWS.
+#:
+#: THE FIRST VERSION WAITED FOR AN OPTION AND IT COLLAPSED TWO STATES. "The
+#: dropdown never opened" and "the dropdown opened and offered nobody" are
+#: different facts -- the first is about this reader and the page, the second
+#: is about the name he supplied -- and waiting on a ROW made them the same
+#: timeout. A test written to assert they differ is what found it, which is
+#: this repository's own rule arriving on its own code: collapsing two states
+#: does not merely give a wrong answer, it removes the test that would catch
+#: it.
+TYPEAHEAD_LISTBOX_SELECTOR = '[role="listbox"]'
+
 #: How long to wait for the dropdown after the needle is typed. BOUNDED, and
 #: short: a typeahead that has not drawn in this long has not drawn, and a
 #: longer wait would be a poll loop against his account.
 TYPEAHEAD_TIMEOUT_MS = 5_000
+
+#: Characters that would end the SELECTOR's own delimiting, refused rather than
+#: escaped. ``/`` closes the regex, a backslash starts an escape this function
+#: did not author, and a quote ends the attribute.
+_SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
+
+#: Regex metacharacters, escaped so a name is matched LITERALLY. A ``.`` in
+#: ``Jr.`` must match a period and not any character -- an unescaped needle is
+#: a selector that matches MORE rows than the name it came from, and matching
+#: more rows on this surface means pressing somebody else.
+_REGEX_META = ".^$*+?()[]{}|"
 
 
 def typeahead_option_selector(needle: str) -> str:
@@ -5501,27 +5524,53 @@ def typeahead_option_selector(needle: str) -> str:
       not resolve to exactly one row, the caller refuses; it never falls back
       to a position.
 
-    The ``i`` flag is a CASE-INSENSITIVE SUBSTRING match, which is the same
-    relation ``_recipient_gate`` uses on the committed chip -- his needle is
-    part of a fuller name, not equal to it. ``s`` (exact) would refuse every
-    real suggestion, and the two flags differ by one character, so which one
-    this is gets said out loud.
+    **A REGEX, AND THE QUOTED FORM WAS MEASURED WRONG BEFORE THIS WAS
+    WRITTEN.** The obvious spelling is ``[name="Thornwick M"i]`` and it does not
+    do what it reads like. Measured on 2026-09-03 against a two-row listbox::
+
+        role=option[name="Thornwick M"i]      0
+        role=option[name="Thornwick M"]       0
+        role=option[name="Thornwick M"s]      0
+        role=option[name=/Thornwick M/i]      1
+        [role="option"]                      2
+
+    **The quoted form is a WHOLE-STRING match**, and a suggestion row's
+    accessible name is the whole row -- ``Thornwick M1st`` in that fixture, name
+    and degree concatenated. So the quoted form matches a real suggestion
+    NEVER, and the failure is silent: zero matches reads exactly like "he is
+    not in the list". Only the regex form is a substring, which is the
+    relation ``_recipient_gate`` already uses on the committed chip -- his
+    needle is PART of a fuller name, not equal to it.
+
+    That is why ``_compose_send_selector``'s quoted ``"s]`` spelling is right
+    THERE and wrong here: ``Send`` IS the entire accessible name of its
+    control. Same syntax, different relation, and copying it across would have
+    produced a gate that could never aim at anybody.
+
+    **THE NEEDLE IS ESCAPED, NOT TRUSTED.** An unescaped ``.`` matches any
+    character, so ``Jr.`` would match ``JrX`` -- a selector matching MORE rows
+    than the name it came from, which on this surface means pressing somebody
+    else. Metacharacters are escaped; the three characters that would break
+    the selector's own delimiting are REFUSED instead, because escaping those
+    correctly is a second parser to get subtly wrong.
 
     Raises:
-        ExtractionFailedError: the needle carries a character that would end
-            the selector's own quoting. REFUSED RATHER THAN ESCAPED: a quoting
-            bug here builds a selector that matches the wrong row, and this
-            server would rather not send than send accurately-quoted to
-            somebody else.
+        ExtractionFailedError: the needle carries a selector-breaking
+            character. REFUSED RATHER THAN ESCAPED: this server would rather
+            not send at all than send accurately-quoted to somebody else.
     """
-    if '"' in needle or "\\" in needle:
-        raise ExtractionFailedError(
-            "refusing to build the typeahead's option selector: the name you "
-            "supplied carries a quote or a backslash, either of which would "
-            "end this selector's own quoting and could aim it at a different "
-            "row. Refused rather than escaped."
-        )
-    return 'role=option[name="' + needle + '"i]'
+    for bad in _SELECTOR_BREAKING:
+        if bad in needle:
+            raise ExtractionFailedError(
+                "refusing to build the typeahead's option selector: the name "
+                "you supplied carries a quote, a slash or a backslash, any of "
+                "which would end this selector's own delimiting and could aim "
+                "it at a different row. Refused rather than escaped."
+            )
+    escaped = "".join(
+        (chr(92) + char) if char in _REGEX_META else char for char in needle
+    )
+    return "role=option[name=/" + escaped + "/i]"
 
 
 async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
@@ -5566,9 +5615,9 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
         # version of this line carried one and moved dom.py's count from 13 to
         # 14.
         await page.wait_for_selector(
-            TYPEAHEAD_OPTION_SELECTORS[0],
+            TYPEAHEAD_LISTBOX_SELECTOR,
             timeout=TYPEAHEAD_TIMEOUT_MS,
-            state="visible",
+            state="attached",
         )
         out["appeared"] = True
     except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
