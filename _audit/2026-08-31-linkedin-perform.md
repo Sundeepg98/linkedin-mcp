@@ -3624,3 +3624,308 @@ skips confirmed asking membership questions. **The answer was right and the
 entitlement to it did not exist until the re-run.** A correct conclusion
 reached without the basis for it is a coincidence, and this wave spent nine
 sites on what coincidences cost.
+## 96. THE FIFTH INSTRUMENT, AND WHY IT IS NOT THE FIFTH GUESS
+
+Four readers have been aimed at one question -- *given a control, what does
+this page say pressing it does* -- and each failed for a DIFFERENT structural
+reason. That list is the argument for building a fifth, and the absence of that
+list is what would have made it a guess.
+
+    dom.read_sdui_actions   a FIXED WINDOW around a needle. Over-counts on
+                            purpose. It bounds; it cannot attribute.
+    the TALLY               the whole payload. No control in a whole-payload
+                            count, so no attribution in one.
+    the ENCLOSURE reader    the smallest balanced object. LIVE: 297 chars,
+                            balanced, ZERO kinds -- because SDUI defines
+                            actions in their own chunks and REFERENCES them.
+    the COMPONENTKEY        LIVE: no key in any of four enclosing objects, in
+    follower                any of four spellings.
+
+**The fourth reader's own refusal names the fifth.** It ends *the flight row's
+`$L<n>` pointers are a DIFFERENT relation, not a bigger number here* -- so this
+was not a new idea, it was the recorded consequence of a measurement. And the
+live refusal CORROBORATES it: finding no componentkey within four enclosing
+levels is exactly what a page wiring its components by `$L` would produce.
+
+`scripts/_probe_sdui_action_resolver.py`, `tests/test_sdui_action_resolver.py`.
+`set_open_to_work` is its FIRST CALLER and not its purpose: the surface
+registry is one entry long and the mechanism knows nothing about open-to-work,
+which is asserted rather than claimed -- the caller passes
+`saveAndFetchNextStepRequest`, and a mutation moving that string into the
+resolver's own vocabulary is caught.
+
+## 97. THE REFERENCE POINTS BOTH WAYS, AND THE FIRST CUT WALKED IT THE WRONG WAY
+
+The obvious reading of "follow the reference from the label" is that the
+control names a row and that row holds its actions. Call it SHAPE A. It was
+built first and it is not what the census recorded.
+
+`_slice-otw-census.md` line 243 records a parent naming `children [$L153,
+$L154, $L155]`, and its table at 301-303 resolves each of those to a row
+carrying a `legacyControlName`, a label AND an action list. **That is SHAPE B:
+the label and its actions share a row, and the reference points AT that row
+from its parent.** In shape B, walking OUT from a label finds no `$L` at all --
+so a resolver built only for the obvious direction would have refused on the
+exact case we have ground truth for.
+
+So it reads both, and says which answered:
+
+    OUTGOING   a `$L` in the objects enclosing the label -> that row's kinds.
+    INCOMING   the label's HOME ROW is itself named by a `$L` elsewhere.
+
+**The incoming reading is GATED ON THAT LICENCE.** A lazily referenced row is a
+COMPONENT -- addressed as a unit, delivered as a unit, attributable as a unit.
+A row nobody names is a slab of the main tree, and its action kinds belong to
+the page section it serialises. Without the licence the home row's kinds are
+not counted at all, only its SIZE.
+
+**AND IT ATTRIBUTES ONLY WHEN EXACTLY ONE MECHANISM IS AVAILABLE**, on the
+argument that they are naturally exclusive. **That argument is refuted below by
+the page**, which is the finding this whole instrument produced.
+
+> **The general form: when an instrument fails, ask whether the RELATION was
+> wrong before asking whether the parameters were.** Three of the four readers
+> above failed on relation, not on tuning, and every one could have been
+> "fixed" by widening a number instead.
+
+## 98. "IDENTICAL REFUSALS" AND "SETTLE WHAT EDIT DOES" COULD NOT BOTH HOLD
+
+The brief asked for the predecessor's refusals unchanged AND for one live run
+to settle what `Show details` and `Edit` do. On this page those are
+incompatible, and the incompatibility is a MEASUREMENT rather than an opinion:
+`aff8368` recorded `Edit` escaped TWICE, so the exactly-one locator refuses it
+as AMBIGUOUS and can never answer for it. The census explains the two -- a
+control's definition appears "once per rendering variant".
+
+So every occurrence is read INDEPENDENTLY and the readings must AGREE. On one
+occurrence that is the old rule exactly. On two it either agrees -- and the
+agreement is its own evidence -- or it REFUSES naming the disagreement.
+**Nothing is ever attributed by document order**, which is the property the old
+refusal was protecting.
+
+**That makes it a STRICTER instrument, not a relaxed one**, and the difference
+is worth stating precisely because relaxing a refusal to get an answer is the
+move this wave has refused seven times. The old rule refused a case it could
+not read. The new rule reads it and refuses if the readings disagree. The
+guarantee is unchanged; the coverage is larger.
+
+`_locate_label` keeps the old behaviour byte-for-byte and a DIFFERENTIAL test
+asserts it returns dict-identical answers to the probe's -- refusal texts
+included -- across four labels and four corpora.
+
+## 99. THE CORPUS LIED, AND IT IS THE ONE PLACE NOTHING ELSE WAS WATCHING
+
+Every finding in sections 93-95 is about an instrument that could not see. This
+one is about the SUBJECT the instrument was pointed at.
+
+The first smoke corpus was written through a shell heredoc, which collapsed
+every `\n` into a real newline. **The corpus for an ESCAPED flight payload was
+silently an UNESCAPED one** -- and the smoke PASSED, because the
+literal-newline anchor happened to cover it. It proved the wrong half and
+looked exactly like proving the right one.
+
+It happened twice more before the lesson landed: a patch script wrote a real
+newline inside a string literal and produced a syntax error, and every
+multi-line needle in the mutation harness failed silently against a CRLF tree.
+**This package has now been bitten by shell-collapsed backslashes at least four
+times, across three agents.**
+
+Three defences, all cheap:
+
+* **Every backslash in the tests is built from `chr(92)`.** Not typed, so
+  nothing between here and the file can eat one.
+* **The first test asserts the corpus is genuinely escaped** -- against a real
+  newline, exactly, over the whole document, rather than through an anchor
+  count that a single-row corpus legitimately reads zero for. The collapse is
+  itself one of the mutations, so the check is shown firing on the accident it
+  exists for.
+* **The mutation harness proves its own round trip** against the pristine hash
+  BEFORE mutating anything, and applies every mutation in memory first. A stale
+  needle aborting halfway leaves a run that reports on the mutations it reached
+  and is silent about the rest -- a partial view of a COVERAGE claim, which is
+  section 95 arriving inside the instrument built to prevent it.
+
+> **A test corpus is an instrument too, and it is the only one with nothing
+> pointed at it.** Everything else here is checked by something else; the
+> corpus is checked by whether the tests pass, which is the circularity that
+> makes a collapsed corpus invisible.
+
+## 100. TWENTY-FOUR MUTATIONS, TWO OF WHICH EXIST BECAUSE A PREDICTION FAILED
+
+Twenty-four mutations, each caught by the check credited with its shape,
+restore verified by sha256 rather than by the absence of an error message.
+
+**Two of the twenty-four were not predicted.**
+
+1. Blinding the reference reader was expected to break BOTH answer paths. It
+   broke one. `_incoming_references` scans the patterns itself rather than
+   calling `_references_in`, so shape B kept answering through a reader the
+   mutation never touched. Two answer paths, two readers, two mutations.
+2. The both-mechanisms refusal SURVIVED the incoming-licence mutation, because
+   reading the home row unlicensed makes the licence MORE available and the
+   refusal still fires. It needed a mutation of its own.
+
+Neither was foreseen; both exist because the demonstration demanded them.
+
+**AND THE SUITE COULD NOT SEE THE WORST DEFECT IN THE FILE.** `_row_holding`
+walked the row list and resolved each row's id by scanning every id it knew --
+quadratic in the row count, instant on a four-row corpus and minutes on a
+document the size of his profile. Every test passed. All twenty-four mutations
+were caught. Nothing was wrong with the ANSWERS, and a correctness suite
+measures answers.
+
+It was found by re-reading the code, which is luck. **The method is the scale
+check**, now written down: a 1.1 MB document shaped like payload -- braces,
+quotes and delimiters, not padding, because those are what the scans cost --
+timed end to end. After the fix: 8,093 rows indexed in 0.03s, both controls
+attributed in 0.00s.
+
+> **A correctness suite cannot see a cost, and "it was fast on the fixture" is
+> not evidence about the document.** Anything that will be pointed at his real
+> profile gets sized against a synthetic one first, before somebody is asked to
+> run it live. The wave lead has adopted this into the live-read clearance,
+> having cleared this instrument on safety bounds alone -- `.route` at zero,
+> `page.on` at two, no write paths -- and not one cost bound.
+
+The scale corpus then earned its own entry: its first version counted filler
+row ids up in hex past the control rows' ids, so the two collided -- and the
+resolver REFUSED both, reporting "the label's own row is named by 2 other rows
+rather than by exactly one". A defective corpus, caught by the instrument under
+test, on a shape nobody had written a test for.
+
+## 101. `/in/me/` IS NOT A REDIRECT, AND BOTH PROBES LEAKED HIS SLUG BEFORE
+## ANYBODY NOTICED
+
+Both payload probes did this:
+
+    landed = await BROWSER.goto(page, SELF_PROFILE_URL)
+    ...
+    await BROWSER.goto(page, landed)
+
+**THE LEAK.** LinkedIn intermittently decorates the landed url with
+`?isSelfProfile=true` -- section 84 measured it riding per load, which is why
+`_SELF_ASSERTION_ATTEMPTS` is 2. The read allowlist admits the member path and
+NOT a query, so `readonly.assert_read_url` refused -- and its refusal
+interpolates the url it is refusing. **The operator's vanity slug went into a
+traceback**, out of scripts whose docstrings promise they never print a url.
+That promise held for what they CHOOSE to print and not for an exception
+escaping through them. Section 90's class, publishing identity rather than
+merely misdescribing.
+
+**THE DIAGNOSIS WE BOTH GOT WRONG.** The obvious fix is to compare on
+scheme+host+path. It returns zero, and so does whole-url equality. The wave
+lead then made the refusal TALLY every document response by path, and that
+cracked it: eight document responses in the pass, exactly one of them a
+profile document, served at `/in/me` -- and NONE at the vanity path, ever.
+
+**`/in/me/` IS NOT A REDIRECT.** LinkedIn serves the profile AT `/in/me` with a
+200 and rewrites the address bar client-side afterwards. So `page.url` and
+`response.url` are different KINDS OF THING and no equality between them can
+ever hold -- whole-url, member-path, or query-stripped. Two of us diagnosed a
+plausible wrong cause off the same uninformative refusal.
+
+> **A refusal that cannot say what it DID see is half a measurement**, and it
+> cost two agents a round each. "Zero matched" is equally consistent with the
+> page not being fetched, with the url moving, and with the filter being wrong.
+> The tally emits PATHS ONLY, so the diagnostic costs no disclosure.
+
+**AND THE CORRECTED BOUND IS STRONGER, NOT LOOSER.** Binding to `/in/me` -- the
+url FETCHED -- is LinkedIn's own self-reference: it can serve the signed-in
+member and nobody else, so a document response carrying that path is self-owned
+BY CONSTRUCTION. A vanity path names merely SOME member, which is the weaker
+claim and the one the read allowlist already admits for anyone.
+
+**THE RULING, AND ITS ENFORCEABLE FORM.** The url STAYS in the refusal: a
+navigation refusal that will not name what it refused makes every future
+boundary bug harder to find. The defect is at the CALL SITE -- handing a landed
+identity url to the function whose job is printing urls -- and the fix removes
+the mechanism rather than guarding it.
+
+A ruling that is only prose is section 90's own defect, so it is now
+`tests/test_navigation_is_never_derived.py`: an AST taint analysis asserting no
+argument to `BROWSER.goto` in `scripts/` or `linkedin_server/` is derived from
+a prior navigation. Taint propagates through assignment, renaming,
+concatenation and f-strings, and is collected PER MODULE rather than per
+function -- both probes read `landed` from an enclosing scope inside a closure,
+so a function-scoped analysis would have been blind to the shape it was written
+for. Shown failing in both directions: seven red cases and four green ones,
+including the sanctioned form and the auth-wall check that READS a landed url,
+which must stay writable.
+
+**IT FOUND A THIRD SITE ON ITS FIRST RUN, AND IT IS NOT IN A PROBE.**
+
+    slug = shape.profile_slug_from(final_url)          # server.py:1695
+    skills_url = f"{BASE_URL}/in/{slug}/details/skills/"
+    skills_final = await BROWSER.goto(page, skills_url)
+
+`linkedin_my_profile(include_skills=True)` aims a navigation at a url built
+from a slug parsed OUT OF A LANDED URL. Safe today -- the allowlist admits
+`/in/<member>/details/`, so no refusal fires and no url is interpolated -- and
+it is the same class. Declared in `KNOWN_DERIVED_NAVIGATIONS` rather than
+fixed: the likely repair is `/in/me/details/skills/`, but whether LinkedIn
+SERVES that address is a live measurement nobody has taken, and changing a
+shipped read tool on an unverified guess is how a capability breaks quietly.
+The SET is asserted, so a new site fails naming itself and FIXING this one also
+fails -- section 88's shape applied to an inventory.
+
+## 102. THE LIVE READING: BOTH RELATIONS FIRE, AND NEITHER ISOLATES A CONTROL
+
+The resolver ran end to end on his profile, 2026-09-03 12:51.
+
+    document      935,211 characters, one self-owned (/in/me) response, 200
+    anchors       escaped newline 153 | literal newline 0 | chunk start 0
+                  153 rows, 153 distinct ids
+
+    Show details  1 escaped occurrence
+                  home row 82,960 chars, named by 1 other row
+                  walked 3 levels, [0, 0, 1], outgoing at level 3 -> 1 row
+                  REFUSED: BOTH mechanisms available
+
+    Edit          2 escaped occurrences -- the census's rendering variants
+      site 0      home row 76,666 chars, named by 0, walked 0 levels
+                  REFUSED: NEITHER mechanism
+      site 1      home row 272,070 chars, named by 1
+                  outgoing at level 1 -> 1 row
+                  REFUSED: BOTH mechanisms available
+
+**NO KINDS AND NO ORDER, BECAUSE NOTHING WAS ATTRIBUTED.** That is the answer
+rather than a gap in it.
+
+**THE MODEL'S OWN PREMISE IS REFUTED BY THE PAGE.** The resolver refuses when
+both mechanisms fire, on the argument that they are exclusive -- a main-tree
+slab has no incoming reference, a lazy chunk has no outgoing one. The page
+fires both on two of three sites. The refusal is the instrument reporting its
+own model failing rather than picking one and calling it a measurement.
+
+**AND THE ROW SIZES SAY WHY: 76,666 / 82,960 / 272,070.** A lazily referenced
+row on this page is a PAGE SECTION, not a control. The incoming licence was
+granted to mean "delivered as a unit, therefore attributable as a unit"; the
+census's `$L153` menu items were small enough for that to be true, and the
+topcard's rows are not. The licence holds formally and carries none of the
+meaning it was granted for -- `_REGION_CAP` swallowing a carousel, reached by a
+different route. `_ROW_CAP` at 100,000 would refuse site 1 on size alone; the
+two smaller rows pass it and are still sections, so the cap is the right idea
+and is not sufficient. Those sizes are now measured rather than guessed, which
+is what the cap's own comment asked for.
+
+`Edit` site 0 walked ZERO levels: no balanced object encloses that occurrence
+within 20,000 characters, a fourth distinct shape and the one the enclosure
+reader failed on in August.
+
+**THE THIRD ANCHOR CONTRIBUTED NOTHING AND IS NOT CREDITED FOR IT.** The
+chunk-start anchor, added so that rows opening a chunk cannot be invisible,
+matched ZERO on the live document; the escaped-newline anchor found all 153.
+Either this page serves one chunk or its push spelling differs from the
+pattern. Its value is UNPROVEN LIVE, and an anchor that found nothing has not
+earned the credit its comment claims.
+
+### What this settles for `set_open_to_work`
+
+**The fourth mechanism is empty too, and it is empty more informatively than
+the first three**: it did not fail to find a relation, it found BOTH and
+neither isolates a control. Fixed window, tally, enclosure, componentkey, and
+now the row graph -- five readers, no attribution.
+
+`set_open_to_work` is unreachable at proportionate cost. That is a clean
+ending rather than a defeat, it rests on instruments that can be re-run, and
+nothing in any of them was tuned to avoid it.
