@@ -249,6 +249,139 @@ async def test_the_company_panel_carries_its_rows_and_not_its_plumbing(
     assert "Chart with 25 data points." in lines
 
 
+#: THE LIVE PROFILE-VIEWS PAGE, REPRODUCED IN ITS ONE LOAD-BEARING RESPECT.
+#:
+#: Measured through the shipped tool on 2026-09-03: the live analytics page
+#: carried NO ``data-view-name`` attribute ANYWHERE. ``observed.view_names``
+#: came back ``[]`` and ``view_name_counts`` came back ``{}`` on a page with
+#: nine viewer rows on it. The committed capture is from 2026-08-23 and is
+#: full of them, so every assertion taken from that capture exercises the
+#: PRECISE anchor and none of them exercises the page LinkedIn serves today.
+#:
+#: A fixture cannot be re-captured here -- that needs the live account and the
+#: profile lock -- so the shape is reproduced instead: the same metric
+#: paragraphs, the same filter captions as ``<label>`` elements, the same
+#: chart sentence, and not one ``data-view-name``. What it is faithful ABOUT
+#: is the only thing this test turns on.
+LIVE_SHAPED_VIEWS_PAGE = (
+    "<!doctype html><html><body><main>"
+    "<div><p>31</p><p>Profile viewers</p></div>"
+    "<div><p>20%</p><p>vs. prior 7 days</p></div>"
+    "<div><label>Past 90 days</label></div>"
+    "<div><label>Interesting viewers</label></div>"
+    "<div><label>Company</label></div>"
+    "<div><div>Line chart with 13 data points.</div></div>"
+    "</main></body></html>"
+)
+
+
+async def test_the_views_reader_still_works_when_no_view_name_is_drawn(
+    chromium_page,
+):
+    """THE ANCHOR THIS READER WAS BUILT ON IS NOT ON THE LIVE PAGE.
+
+    Both the chart and the filters were originally found through
+    ``data-view-name``, because the committed capture hangs one off every
+    control. A live call on 2026-09-03 returned ``trend: null`` and
+    ``filters: []`` while the controls were plainly on screen, and
+    ``observed`` said why in the same breath: ``view_names: []``,
+    ``view_name_counts: {}``, ``main_chars: 2092``. **That is the observed
+    block earning its place** -- two nulls with no explanation would have read
+    as "LinkedIn drew no chart", which is false.
+
+    So each has a second route, and this is what exercises it, because no
+    committed capture can: the capture has the attribute and the live page
+    does not, so an assertion taken from the capture proves only that the
+    route nobody hits still works.
+
+    THE SECOND ROUTES STAY INSIDE THE READER'S PRIVACY RULE, which is the part
+    worth checking rather than assuming. Filters fall back to ``<label>``
+    elements -- a form control's own caption, never an ``aria-label``, because
+    this page's aria-labels name other members. The chart falls back to the
+    line of ``main``'s text carrying its own description, which IS the value
+    the field returns, so finding it directly loses nothing. Both fallbacks
+    are capped.
+    """
+    panels = await _panels_of_markup(chromium_page, LIVE_SHAPED_VIEWS_PAGE)
+    del panels  # this markup is a views page; the job reader is not its reader
+
+    views = await dom.read_profile_views_insights(chromium_page)
+
+    # The premise: this page is shaped like the live one, not like the capture.
+    assert views["observed"]["view_names"] == []
+    assert views["observed"]["view_name_counts"] == {}
+
+    assert views["headline"] == {"value": "31", "label": "Profile viewers"}
+    assert views["delta"] == {"value": "20%", "label": "vs. prior 7 days"}
+    assert views["filters"] == ["Past 90 days", "Interesting viewers", "Company"]
+    assert views["trend"]["present"] is True
+    assert views["trend"]["description"] == "Line chart with 13 data points."
+
+
+async def test_the_committed_analytics_capture_cannot_exercise_this_reader(
+    chromium_page,
+):
+    """THE ANALYTICS FIXTURE HAS NO ``<main>``, so the reader reads nothing
+    from it -- and that is a fact about the corpus rather than a bug.
+
+    This test was written as the opposite: assert the view-name route on the
+    capture, since that capture hangs a ``data-view-name`` off every control.
+    It fails, and the measurement is worth more than the assertion was::
+
+        has_main        False
+        doc_view_names     45      <- all of them, and all outside main
+        body_chars       1433
+        main_chars          0
+
+    Forty-five view names in the document and none reachable, because
+    ``read_profile_views_insights`` scopes to ``main`` and this freeze has no
+    ``main`` element anywhere.
+
+    **THE READER IS NOT WIDENED TO ``body`` TO MAKE THIS PASS.** The live page
+    HAS a main -- measured, 2,092 characters, and the headline and delta come
+    back through it -- so scoping is correct for the surface this runs on.
+    Widening it would mean reading the whole document on a page that IS a list
+    of other members, to satisfy a fixture. That is the wrong direction to
+    trade, and it is the trade this file exists to refuse.
+
+    WHAT IT COSTS, said plainly so nobody re-derives it: the analytics capture
+    cannot test this reader at all. The behaviour is covered by
+    ``test_the_views_reader_still_works_when_no_view_name_is_drawn``, whose
+    markup reproduces the LIVE page's shape, and by the live call recorded in
+    the wave notes. Re-capturing the fixture WITH its main element would give
+    the view-name route a home; that needs the live account and the profile
+    lock, and is left as the one uncovered path.
+
+    Meanwhile this asserts the two-different-zeros property on a real file:
+    ``main_present`` False is not the same answer as an empty main, and the
+    reader says which.
+    """
+    html = (FIXTURES / "profile_views_analytics_hydrated.html").read_text(
+        encoding="utf-8"
+    )
+    await chromium_page.set_content(html, wait_until="domcontentloaded")
+    views = await dom.read_profile_views_insights(chromium_page)
+
+    assert views["observed"]["main_present"] is False
+    assert views["observed"]["main_chars"] == 0
+    assert views["headline"] is None
+    assert views["trend"] is None
+    assert views["filters"] == []
+
+    # The document is not empty -- the panels ARE in this file, just not under
+    # a main. Asserted so the zero above cannot be read as "the capture is
+    # blank", which is the misreading this whole file is built against.
+    outside = await chromium_page.evaluate(
+        "() => document.querySelectorAll('[data-view-name]').length"
+    )
+    assert outside > 40, outside
+
+    # NO top-companies AND NO top-locations. Asserted on the reader's own
+    # return shape, which carries no such key in any state.
+    assert "top_companies" not in views
+    assert "top_locations" not in views
+
+
 async def test_a_promoted_posting_says_so(chromium_page):
     panels = await _panels(chromium_page, HYDRATED)
 

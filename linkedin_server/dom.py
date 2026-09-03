@@ -7655,6 +7655,15 @@ VIEWS_METRIC_MAX = 6
 VIEWS_FILTER_MAX = 10
 VIEWS_VIEW_NAME_MAX = 60
 
+#: Caps on the two FALLBACK routes, which are looser than the view-name
+#: anchors they stand in for and so need a bound the precise routes do not.
+#: A filter caption is three or four words ("Interesting viewers", "Past 90
+#: days"); the chart's own sentence is one line. Anything longer is not the
+#: thing being looked for, and the cap is what stops a loose anchor turning
+#: into a text dump off a page made of other members.
+VIEWS_LABEL_MAX_CHARS = 40
+VIEWS_CHART_DESC_MAX_CHARS = 120
+
 PROFILE_VIEWS_INSIGHTS_JS = """
 (cfg) => {
   const main = document.querySelector('main');
@@ -7683,26 +7692,73 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   }
 
   // THE FILTERS, by their own <label> text.
+  //
+  // TWO ROUTES, AND THE SECOND EXISTS BECAUSE THE FIRST WAS MEASURED DEAD ON
+  // THE LIVE PAGE. The committed capture wraps each filter in a
+  // data-view-name holder; the live page on 2026-09-03 carried NO
+  // data-view-name attribute ANYWHERE, so the holder query matched nothing
+  // and this came back empty while the controls were plainly on screen. The
+  // fallback reads every <label> in main, which is what the holder contained
+  // anyway.
+  //
+  // <label> TEXT, NEVER an aria-label. That is the whole privacy rule of this
+  // script and the fallback does not bend it: this page's aria-labels name
+  // other members ("Send a message to <a person>"), and a <label> is a form
+  // control's own caption.
   for (const holder of main.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
     const label = textOf(holder.querySelector('label')) || textOf(holder);
-    if (label && out.filters.length < cfg.filterMax) out.filters.push(label);
+    if (label && out.filters.indexOf(label) === -1 &&
+        out.filters.length < cfg.filterMax) {
+      out.filters.push(label);
+    }
+  }
+  if (!out.filters.length) {
+    for (const node of main.querySelectorAll('label')) {
+      const label = textOf(node);
+      if (label && label.length <= cfg.labelMaxChars &&
+          out.filters.indexOf(label) === -1 &&
+          out.filters.length < cfg.filterMax) {
+        out.filters.push(label);
+      }
+    }
   }
 
   // THE TREND CHART and its OWN accessible description. Never a data point,
   // never a date: the description is LinkedIn's sentence about the chart.
+  //
+  // SAME TWO ROUTES AND THE SAME REASON. The view-name holder is the precise
+  // anchor where it exists; where it does not, the chart still announces
+  // itself in main's text -- "Line chart with 13 data points." -- and that
+  // sentence IS the thing this field returns, so finding it directly loses
+  // nothing. Presence is then asserted from the sentence rather than from the
+  // holder, which is the honest order: what is being reported is the
+  // description, so the description is what has to be found.
   const chart = main.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  let described = null;
   if (chart) {
     out.chart_present = true;
-    let described = null;
     for (const node of chart.querySelectorAll('div')) {
       const line = textOf(node);
-      if (line && line.length < 120 && line.indexOf('data point') !== -1) {
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
         described = line;
         break;
       }
     }
-    out.chart_description = described;
   }
+  if (!described) {
+    const text = main.innerText || '';
+    for (const raw of text.split('\\n')) {
+      const line = raw.trim();
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        out.chart_present = true;
+        break;
+      }
+    }
+  }
+  out.chart_description = described;
 
   // COUNTS OF EVERY VIEW NAME, and the viewer rows counted and NOT read.
   for (const el of main.querySelectorAll('[data-view-name]')) {
@@ -7762,6 +7818,8 @@ async def read_profile_views_insights(page: Any) -> dict[str, Any]:
                 "metricMax": VIEWS_METRIC_MAX,
                 "filterMax": VIEWS_FILTER_MAX,
                 "viewNameMax": VIEWS_VIEW_NAME_MAX,
+                "labelMaxChars": VIEWS_LABEL_MAX_CHARS,
+                "chartMaxChars": VIEWS_CHART_DESC_MAX_CHARS,
             },
         )
     except Exception as exc:
@@ -7912,12 +7970,28 @@ async def read_profile_detail_entries(
             "main_chars": len(body),
         },
     }
-    if records and not entries:
+    if records and len(entries) != len(records):
+        # THE TWO NUMBERS DISAGREE, SO SAY WHY BEFORE A READER HAS TO GUESS.
+        #
+        # MEASURED LIVE 2026-09-03: three experience cards, two names. Without
+        # this the result carried experience_entries: 3 beside
+        # experience_count: 2 and offered nothing to reconcile them, which
+        # reads as a contradiction rather than as two different facts.
+        #
+        # It fires on ANY mismatch, not only on zero. The zero case -- no card
+        # carried readable text -- was the only one this said anything about,
+        # and the partial case is the one that actually occurs and the one
+        # more likely to be misread: an empty list is obviously a failure,
+        # while a SHORT list looks like an answer.
         out["why"] = (
-            "the page drew %d entry cards and none of them carried text this "
-            "reader could take a name from. The COUNT is still the count -- "
-            "an empty list here is a failed read of the names, not an empty "
-            "section." % len(records)
+            "the page drew %d entry cards and %d name(s) could be read from "
+            "them. Two things produce that gap and this reader cannot tell "
+            "them apart: a card whose text did not render, and two entries "
+            "sharing a name -- the names are de-duplicated, so a second spell "
+            "at the same title collapses into the first. THE COUNT IS THE "
+            "COUNT either way; the shorter list is a failed or merged read of "
+            "the NAMES and never a smaller section."
+            % (len(records), len(entries))
         )
     elif not records:
         out["why"] = (
