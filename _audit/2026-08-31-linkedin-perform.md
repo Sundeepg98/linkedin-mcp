@@ -4839,3 +4839,118 @@ afternoon about fields.
 The five remaining declared sites land on `/feed/`, `/notifications/`, company
 and job urls. None is CONFIRMED to carry a member identifier, which is a
 statement about what has been measured rather than a clearance.
+
+## 111. A WRITE GUARD MATCHING A READ ADDRESS, AND THE FREEZE THAT COULD NOT SEE IT
+
+The operator asked the question nobody in this wave had: why must he supply a
+profile url -- why can this server not find a person in his own network?
+
+It could not, because `/invite` and `/connect` are on the forbidden list to
+stop this server SENDING invitations, and they were also catching
+`/mynetwork/invite-connect/connections/` -- a page that sends nothing, invites
+nobody, and lists people he is ALREADY connected to.
+
+**A write guard was matching a read address, and it had been doing so since the
+substrings were added.** A census agent flagged it hours earlier and said it was
+what the Gmail skill exists to work around; nobody carried it to a ruling.
+
+### MEASURED BEFORE THE BOUNDARY MOVED
+
+    204 addresses compared against the previous implementation
+      2 widened   -- the two spellings of that one page
+      0 tightened
+      0 shipped constructions newly admitted
+
+Eight neighbours pinned refusing, before and after. `/mynetwork/` itself was
+ALREADY in `MUST_STAY_UNREADABLE`, so it is this change's regression guard at
+no cost.
+
+### THE FIRST URL TO TRIP TWO FORBIDDEN SUBSTRINGS
+
+Every earlier exemption excused one substring and the table held one string per
+pattern. This address carries `/invite` AND `/connect`, so that mechanism could
+excuse only half of it -- the url would still refuse, for a reason nothing in
+the table could state. The value is a frozenset now. **It enumerates; it does
+not wildcard**, and the compose entry is asserted to still excuse exactly its
+one, because widening a shared mechanism is how a neighbouring permission grows
+by accident.
+
+### AND THE FREEZE COULD NOT HAVE SEEN ANY OF IT
+
+`test_readonly_boundary_invariant` pinned the DENYLIST and not the door beside
+it. The two tables that excuse a url FROM the denylist were unpinned -- and one
+is a dict, which `_literal` did not handle, so it fell through to an
+`<unhandled>` placeholder that is CONSTANT whatever the dict holds.
+
+Proven by planting an exemption for `/mynetwork/invitation-manager/`, an
+address `MUST_STAY_UNREADABLE` forbids by name:
+
+    0 of 6 digests moved   before the names were pinned
+    0 of 8 digests moved   AFTER pinning them -- the dict still hashed a
+                           placeholder, so pinning the name bought NOTHING
+    1 of 8 digests moved   once _literal learned about dicts
+
+> **A permission could be granted with zero digest movement, past the guard
+> whose entire purpose is to make a boundary change visible.**
+
+**THE MIDDLE ROW IS THE ONE THAT MATTERS.** The fix was applied, re-measured,
+and was still blind. Stopping at "added the names to PINNED" would have shipped
+a closed-hole report on a hole that was still open, and nobody would have
+checked, because the fix looked like the fix.
+
+So the second control is the general one: **every pinned name must hash real
+content rather than a placeholder**, asserted for all of them, because the next
+unhandled type arrives exactly the same way.
+
+### PEOPLE SEARCH: HELD, WITH ITS COST RECORDED
+
+Ruled a separate decision and NOT admitted -- not on cost, but because
+admitting the general case before the specific one is proven insufficient is a
+widening bought on speculation. If a lookup over connections cannot find the
+person, that failure becomes the argument.
+
+Its cost, measured: it trips NO forbidden substring at all, so it is blocked
+purely by the allowlist's absence and needs no exemption -- mechanically the
+CHEAPER change.
+
+> **It would be the first admitted address whose query is composed from A NAME
+> THE CALLER SUPPLIES. All 24 patterns admitted today take no query, a closed
+> vocabulary, or an id. That is a change in KIND, not degree: it is the first
+> time an arbitrary string from outside would reach the url this server
+> navigates.**
+
+### THE BADGE PRECONDITION IS RULED MANDATORY, AND CANNOT BE MEASURED TODAY
+
+Any tool built on the connections url carries an invitation-badge read before
+and after, and refuses on an unreadable badge. The lead ruled it after
+retracting the opposite argument: a list of existing connections *probably*
+consumes nothing, and `/mynetwork/` was refused on exactly that question.
+
+**TWO THINGS BLOCK THE MEASUREMENT, AND THE SECOND IS THE FAMILIAR ONE.**
+
+1. The census is the instrument that reads that badge, and **the running MCP
+   server process started 08:15 and holds the code it started with.** The
+   census leak closed at 21:44 is not closed in the live process, so calling it
+   today would re-run the leaking version.
+
+2. **The badge currently reads ZERO.** Both censuses taken this evening report
+   `0 new notifications` against `/mynetwork`. A zero before and a zero after
+   cannot distinguish "the page consumed nothing" from "there was nothing to
+   consume" -- which is the uninterpretable-zero shape this package has now
+   met four separate times in one day, arriving in the measurement ruled to
+   settle a cost.
+
+So the honest state is that the address is admitted, the precondition is ruled,
+and the number behind it does not exist yet. What would produce it: a restarted
+server, and a moment when the badge is NON-ZERO. Neither is arrangeable on
+demand, and running the measurement against a zero would manufacture exactly
+the false confidence this section is about.
+
+### WHAT THIS UNLOCKS, WHICH IS WHY IT WAS ASKED FOR
+
+The identifier route needs a surface that draws Message buttons, because that
+is where `recipient_id` comes from. Who's-Viewed-Me was the only readable one
+and it is the wrong surface: it lists whoever happened to look. An authorised
+target who has not viewed his profile is unreachable there, and one who has may
+still carry `recipient_id: null` where LinkedIn drew no button. The connections
+list is the surface that does not depend on who happened to look.
