@@ -848,7 +848,28 @@ async def linkedin_cdp_status() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+# NOT A TOOL, AND IT CARRIED @mcp.tool() FOR ABOUT TWENTY MINUTES.
+#
+# The decorator below belongs to ``linkedin_who_viewed_me``. This helper was
+# inserted BETWEEN the two, which handed the decorator to the helper and left
+# the tool it was written for undecorated. Measured off ``mcp.list_tools()``
+# rather than reasoned about:
+#
+#     linkedin_who_viewed_me registered: False
+#     _attach_recipient_ids  registered: True
+#
+# So a shipped READ tool -- the one the capability census calls the
+# highest-signal tool in the package -- stopped being callable, and a private
+# helper whose first parameter is a live Playwright page took its place on the
+# tool surface. Neither half of that is survivable and neither would have
+# raised anything: the surface simply had a different shape.
+#
+# ``tests/test_server_surface.py`` did not catch it, which is the part worth
+# keeping. A decorator that moves between two adjacent defs changes WHICH
+# function is a tool without changing the file's shape, so nothing that counts
+# tools or greps for names sees it. The check that does see it is asking
+# ``mcp.list_tools()`` for a NAME, and that is what the test added beside this
+# fix does.
 async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
     """Add ``recipient_id`` to the rows LinkedIn drew a Message button for.
 
@@ -886,6 +907,7 @@ async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
         row["recipient_id"] = by_slug.get(slug)
 
 
+@mcp.tool()
 async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
