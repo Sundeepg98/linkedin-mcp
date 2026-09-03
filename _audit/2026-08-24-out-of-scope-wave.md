@@ -1,4 +1,29 @@
-# The eight refusals, worked -- `445c7a0` .. `5bc0181`
+# The eight refusals, worked -- "the apply route read, the unfollow performed" .. "the lead's three rulings and what shipped under them"
+
+> **EVERY SHORT SHA IN THIS FILE IS DEAD, and the subjects above replace the
+> two that were in the title.** Added 2026-09-03.
+>
+> Sixteen distinct pre-rewrite hashes are cited here, across thirty
+> occurrences, and **not one of them resolves.** The history they named was
+> replaced by a rewrite that scrubbed a name out of every blob and message, so
+> every commit kept its subject and its author date and got a NEW hash; a
+> garbage collection then removed the old objects locally as well. On a fresh
+> clone each citation reads `unknown revision`, and there is nothing in the
+> text to say what it referred to.
+>
+> **THE CONTENT OF THIS FILE IS UNAFFECTED.** Nothing measured here is wrong.
+> What broke is the cross-references, which look authoritative and resolve to
+> nothing -- the worst of both, because a reader has no way to tell a dead
+> hash from a typo.
+>
+> **THE RULE THIS TEACHES, stated once and applying to every audit in this
+> directory: CITE THE SUBJECT FIRST AND THE HASH SECOND.** A subject survives
+> a rewrite; a hash does not. A reference pinned to a hash goes false without
+> anybody editing the file it lives in -- which is the same trap as a claim
+> pinned to a moving HEAD, arriving from the other side.
+>
+> The mapping from every dead hash to its recovered subject and its live
+> equivalent is at the foot of this file, under **"Dead hashes, recovered"**.
 
 The operator lifted the scope restriction and asked for `out_of_scope_by_design`'s eight entries
 listed, built, tested and completed, in a stated order of value. This is what each one turned out to
@@ -795,3 +820,55 @@ exposure. I tracked my own four census files (swept clean, 0 hits) because they 
 numbers now frozen into code, and left the other four alone because they are not mine to decide. A
 blanket `_slice-*.md` ignore is still the wrong fix: six are now tracked, so the rule's own set would
 contradict it.
+
+---
+
+## Dead hashes, recovered
+
+Added 2026-09-03. Every short sha cited above predates the history rewrite and
+resolves to nothing; the rewrite preserved each commit's SUBJECT and author
+date and changed only its hash, so the referents still exist under new names.
+
+**HOW THE MAPPING WAS ESTABLISHED, because a table of hashes asserting itself
+is exactly the thing that just went wrong.** The tracked `.md` files are blobs:
+their text, including these dead hashes, survived the rewrite byte for byte.
+But several LIVE commit MESSAGE BODIES restate the same facts -- the same CI run
+ids, the same measured counts, the same corrections -- using the NEW hashes.
+Where both sides describe one event, that is a direct cross-reference rather
+than an inference. Two structural checks were used as well:
+`git log -1 c89d0b2^` returns `a11d077`, matching the text's "pre-wave
+`a1360d1`"; and `git rev-list --count 67f7988..d2e1c70` returns 8, matching
+"the gap existed for eight commits".
+
+`CONFIRMED` means the audit prose and the commit subject agree on the
+substance. `LIKELY` means ordering plus a validated clock offset and nothing
+else -- the three so marked appear in the CI table with no elaboration beyond
+"success", so there is no sentence to cross-check them against. The GitHub
+Actions times in that table are UTC and `git log` renders IST here; +5:30 lines
+all eight entries up to the exact minute against eight consecutive commits, and
+four of the eight are independently confirmed by content, which is what makes
+the offset a measured relationship rather than a coincidence.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `04abadb` | docs(audit): the last run and the closing numbers | `21f2b77` | LIKELY |
+| `063c9b7` | docs(readme): the third write, the apply route, and three counts that had gone stale | `91f69dc` | CONFIRMED |
+| `0979ed8` | fix(writes): the apply warning was written for Open To Work | `a55a003` | CONFIRMED |
+| `4057a6b` | docs(audit): record what was done about the ungated API path | `4c8afe0` | CONFIRMED |
+| `445c7a0` | feat(writes): the apply route read, the unfollow performed, and four claims corrected | `c89d0b2` | CONFIRMED |
+| `460d800` | test(server): sixty-eight tests about a feature, none about whether it is plugged in | `e123252` | CONFIRMED |
+| `4b34c64` | fix(probe): a module-level asyncio.run would drive a browser on import | `bedd5d6` | LIKELY |
+| `56e03b0` | feat(boundary): declare and pin the one request that is not a page load | `fd98b19` | CONFIRMED |
+| `5bc0181` | docs(audit): the lead's three rulings and what shipped under them | `c3891bd` | CONFIRMED |
+| `6e11109` | test(writes): the unfollow CLICK had no test, and writing one found a defect | `64bff7d` | CONFIRMED |
+| `6ea78ce` | test(writes): two defensive branches, and an honest account of which can fire | `76c2c49` | CONFIRMED |
+| `844f5a3` | docs(audit): the paged read works, is aimed at the wrong half, and one claim I wrote in the wrong tense | `9bc20ff` | CONFIRMED |
+| `a1360d1` | docs(audit): CI 32661307599 success on all three cells, and the OS axis closed | `a11d077` | CONFIRMED |
+| `c90469c` | docs(audit): close the record at d5ee2c4, with all four CI runs | `9580360` | LIKELY |
+| `eae1740` | docs: the messaging side effect is a HYPOTHESIS, and I stated it as fact | `f12be75` | CONFIRMED |
+| `f351edf` | feat(server_info): report irreversibility BEFORE a caller commits to anything | `d5ee2c4` | CONFIRMED |
+
+**The live hashes in the right-hand column are themselves perishable and the
+subjects are not.** They are given because they are useful today, not because
+they are the reference. If this table needs remaking after the next rewrite,
+remake it from the subjects.

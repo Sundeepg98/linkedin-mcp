@@ -1,4 +1,25 @@
-# The click, and the row of a table that is not one -- `5277dfc`..`db99276`
+# The click, and the row of a table that is not one -- "perform() for save_job, and unsave built but refusing" .. (end of wave)
+
+> **EVERY SHORT SHA IN THIS FILE IS DEAD.** Added 2026-09-03. Eight distinct
+> pre-rewrite hashes are cited here across fourteen occurrences and **not one
+> resolves.** A rewrite scrubbed a name out of every blob and message, so each
+> commit kept its subject and author date and got a NEW hash; a garbage
+> collection then removed the old objects locally too. On a fresh clone every
+> citation reads `unknown revision`.
+>
+> **THE CONTENT IS UNAFFECTED** -- nothing measured here is wrong. What broke
+> is the cross-references, which still look authoritative.
+>
+> **THE RULE: CITE THE SUBJECT FIRST AND THE HASH SECOND.** A subject survives
+> a rewrite; a hash does not. A reference pinned to a hash goes false without
+> anybody editing the file it lives in.
+>
+> **THE TITLE'S SECOND HALF IS NOT RECOVERED, and it is left honest rather
+> than filled.** `db99276` is one of two hashes in this file whose referent
+> could not be established -- not for want of evidence but because the
+> evidence CONFLICTS, and the conflict is written out at the foot of this file
+> rather than resolved by picking. The mapping is under **"Dead hashes,
+> recovered"**.
 
 **What a caller can now do that it could not before.** Save a job posting, in two
 calls. The first performs nothing: it loads the posting and his saved list, and returns a block
@@ -218,3 +239,58 @@ is therefore NOT a harvested instrument -- if this recurs, that script is worth 
 skip-counted-as-a-pass one is closed (gate exit 0, `skipped=0`). The interpreter one is closed for
 the boundary digest specifically, measured rather than argued. The gitignored-file one is closed by
 the sweep. The history one does not apply -- nothing added here reads git history.
+
+---
+
+## Dead hashes, recovered
+
+Added 2026-09-03. Every short sha cited above predates the history rewrite. The
+rewrite preserved each commit's SUBJECT and author date and changed only its
+hash, so the referents still exist under new names.
+
+Method, and the two structural checks that anchor it: the tracked `.md` text
+survived the rewrite byte for byte and still carries the OLD hashes, while
+several LIVE commit message bodies restate the same facts using the NEW ones --
+where both sides describe one event that is a direct cross-reference, not an
+inference. Separately, `git log -1 7eee070^` returns `67f7988`, and
+`git rev-list --count 67f7988..d2e1c70` returns 8, matching this file's own
+"the gap existed for eight commits".
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `026359e` | chore(boundary): re-freeze readonly.py at 7eee070, and pin the allowlist too | `c3746a0` | CONFIRMED |
+| `3d55dd6` | chore(hygiene): ignore the two artefacts CI's own recipe produces, and record the wave | `460bd40` | CONFIRMED |
+| `5277dfc` | feat(writes): perform() for save_job, and unsave built but refusing | `7eee070` | CONFIRMED |
+| `5a69147` | docs(audit): the measured numbers, and the one deliverable not produced | `3ea7a8e` | CONFIRMED |
+| `76c34dc` | docs(audit): 3.10 green at HEAD, and a fifth way local green is not green | `d2e1c70` | CONFIRMED |
+| `94600de` | **UNMAPPED** -- see below | -- | UNMAPPED |
+| `ae34c7c` | chore(hygiene): ignore uv.lock before something writes one | `67f7988` | CONFIRMED |
+| `db99276` | **UNMAPPED** -- see below | -- | UNMAPPED |
+
+### The two that were NOT recovered, and why that is the answer
+
+Both were left unmapped because the evidence CONFLICTS, not because it is
+absent. In each case the obvious positional reading points at a commit that is
+already claimed, on better evidence, by a different dead hash -- and two dead
+hashes cannot be the same commit.
+
+**`94600de`.** This file says "digests re-measured at `3d55dd6` and again at
+`94600de`, identical both times", and `d2e1c70`'s live body says "measured
+twice (460bd40 and 3ea7a8e)". Pairing those positionally gives
+`94600de` -> `3ea7a8e`. But `3ea7a8e`'s own body says "re-confirmed at this
+commit by the lead's own probe: 13 of 13 functions, 0 mismatches" -- a
+first-person self-reference carrying the same numbers and the same attribution
+as this file's row for `5a69147`. Self-reference beats positional pairing, so
+`5a69147` -> `3ea7a8e` stands and `94600de` is left open.
+
+**`db99276`.** The title-line convention in the sibling file is
+self-referential and continuously updated, which would make `db99276` the
+commit that last touched this file's title -- `460bd40`. But `460bd40` is
+already the better-evidenced referent of `3d55dd6` (its body describes adding a
+new tracked file, matching "`3d55dd6` added a tracked file between the collect
+and the run"). Rather than guess which of the two readings breaks, this one is
+left open. No other commit in the wave carries any textual link to it.
+
+**Recording the gap is the point.** A mapping table that filled these two on
+ordering alone would read exactly like the fourteen rows above it and be wrong,
+which is the failure this whole exercise exists to stop.

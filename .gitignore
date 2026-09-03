@@ -74,7 +74,32 @@ _audit/_fixture_sanitisation_check.txt
 # clean -- this is the only thing that reverses them, so it is the one file in
 # this repo that must never be committed. It was tracked once, inside the
 # sanitisation script itself, which is the leak this line exists to prevent.
+#
+# THE EXACT PATH IS KEPT AND IS NO LONGER THE RULE. It stayed an exact path
+# until 2026-09-03, when a working backup called
+# ``_sanitisation_key.json.bak-preneedle-20260903`` was made and turned out to
+# be FULLY COMMITTABLE -- the one file that reverses every fixture, untracked
+# and un-ignored, one `git add -A` from a public commit. It was moved out of
+# the tree by hand; this is the rule that stops the next one.
+#
+# WHY AN EXACT PATH WAS THE WRONG SHAPE. What must never be committed is a
+# FILE, and files acquire suffixes: .bak, .orig, .save, a date stamp, an
+# editor's copy. An exact path covers one name out of an open set.
+#
+# AND THE DIRECTORY ANCHOR WAS A SECOND HOLE, measured with `git check-ignore`
+# rather than assumed: `scripts/_sanitisation_key.json` -- a copy sitting
+# beside the sweep that READS the key, which is where a copy would most
+# naturally land -- was committable too. So the glob below carries NO leading
+# directory: a gitignore pattern with no slash matches that basename at every
+# depth, which is exactly the intent here.
+#
+# The narrow line is kept because it costs nothing and because
+# tests/test_no_committed_identity.py asserts that exact string is present.
+# tests/test_the_sanitisation_key_is_unignorable_under_any_name.py puts eleven
+# spellings through `git check-ignore` itself, and asserts from the other side
+# too -- that this glob does NOT swallow the sweep script beside it.
 _audit/_sanitisation_key.json
+_sanitisation_key*
 
 # --- Publish-readiness hardening, 2026-08-24 -------------------------------
 # Added while auditing this repo for going public. Each line closes a way a

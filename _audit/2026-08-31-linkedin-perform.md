@@ -3433,6 +3433,62 @@ provoked by defects. **None of it is a capability he asked for.**
   tracked files. **They remain public in git history**; remediation of what is
   already served is his decision.
 
+> ## CORRECTION, 2026-09-03: THE TWO SECTIONS BELOW ARE WRONG ABOUT A SHIPPED TOOL
+>
+> **`update_profile_field` no longer refuses. It performs, and it has since
+> 2026-09-02.** The section immediately below was written before that and
+> describes a boundary that has moved. It is left standing rather than
+> rewritten -- it is a contemporaneous record and its reasoning is sound for
+> the day it was written -- but a reader who stops at the heading below learns
+> something false, which is why this block sits above it rather than at the
+> end of the file.
+>
+> **THE `send_message` SECTION FURTHER DOWN IS A SEPARATE CASE AND IS NOT
+> CORRECTED HERE.** That tool now exists -- it is in `SANCTIONED_WRITES` with
+> the compose surface as its target -- and it SHIPS EXPECTING TO REFUSE, which
+> is its design rather than a fault. Its third ground, that nothing can
+> confirm a send, is untouched by anything below. What is stale there is only
+> the implication that the tool is unbuilt; the refusal itself stands.
+>
+> **WHAT ACTUALLY HAPPENED, and the ugly half is the part worth reading.**
+>
+> `a540461` (2026-09-02 14:08) shipped `update_profile_field` as "the
+> eleventh, and the best verified". **It could not navigate once.** Three
+> independent fatal blockers, each verified by driving it, any one of them
+> sufficient on its own: `anchor_label_for` had no arm for it, so `perform`
+> raised at its FIRST guard with `NAVIGATIONS ATTEMPTED: []`;
+> `_assert_landed_on_target` compared the whole url against a `/in/me/`
+> surface that is measured to redirect; and
+> `dom.read_self_owned_editor_fields` dropped the `dom_id` that `_live_control`
+> aimed from, so the arm's success path could not be entered by any page at
+> all.
+>
+> **AND IT WAS NOT ONE ACTION.** `send_invitation` -- shipped 2026-09-01 as
+> "the FIRST that reaches another person" -- failed the second blocker too.
+> Two of the eleven writes used a self-profile surface and BOTH could not act.
+>
+> **THE SHAPE WAS THE WORST AVAILABLE, and this is the sentence the record
+> needs to carry.** `grant_is_possible` asks membership and addressing and NOT
+> aiming, so `mint` issued a LIVE CONFIRM TOKEN: the operator read a real
+> preview off a real read of his own profile, **approved it**, and the second
+> call died at the first guard. Not a capability that refuses -- one that asks
+> for his authorisation and then refuses, which spends his judgement rather
+> than his time. It shipped unable to act while minting live confirm tokens he
+> approved, and that is the honest sentence.
+>
+> Repaired the same day in `ea5354d` (2026-09-02 19:12), all three together,
+> because repairing 1 exposes 2 and repairing 2 exposes 3 -- three chances to
+> declare victory early on a capability already announced as working.
+>
+> **WHY THIS CORRECTION IS LATE, which is its own finding.** The repair landed
+> in the commit log and in the server's own tool description on 2026-09-02 and
+> reached **zero audit files**. For a day, anyone reading `_audit/` alone --
+> including a future agent booting from it -- learned that this action
+> refuses. The line below at "STILL TRUE, verified 2026-09-02" is the sharpest
+> form of it: a false claim carrying the date of the day it was falsified.
+> A system of record that is updated by the code but not by the record is not
+> one, and nothing in this repository was watching for the gap.
+
 ### `update_profile_field` -- REFUSES, and its refusal is HALF STALE
 
     NO CONTROL   "contenteditable == 0 and no field inside any editor has
@@ -3445,6 +3501,14 @@ provoked by defects. **None of it is a capability he asked for.**
                  -> STILL TRUE, verified 2026-09-02. Reads reach the editor
                     under an exact-url census exemption; a WRITE does not.
 
+                 *** FALSE SINCE 2026-09-02, corrected 2026-09-03. The write
+                 *** spec for update_profile_field carries
+                 *** exempt_substring="/edit/" and its target is
+                 *** https://www.linkedin.com/in/me/edit/intro/. The WRITE
+                 *** does reach it. This line carries the date of the day it
+                 *** was falsified, which is why the correction block at the
+                 *** head of this section names it specifically.
+
 **What is left to build, concretely:**
 
 1. an operator ruling admitting `/in/<member>/edit/` for a WRITE, which is the
@@ -3453,6 +3517,17 @@ provoked by defects. **None of it is a capability he asked for.**
    entries, none of which is `select_option`;
 3. the required-empty refusal;
 4. the restore path as a second gated call.
+
+> **ITEMS 1 AND 2 ARE BOTH DONE, corrected 2026-09-03.** Item 1 was ruled and
+> the write ships against `https://www.linkedin.com/in/me/edit/intro/` with
+> `exempt_substring="/edit/"`. Item 2 landed the same day: `SANCTIONED_MUTATIONS`
+> now carries FOUR entries, read off the live module --
+> `("linkedin_server/writes.py", "perform", "select_option")` is the fourth.
+> The count in the line above ("currently three") is stale and is left as
+> written, because a number in a record is evidence of what was true when it
+> was written and correcting it in place destroys that.
+
+
 
 **Items 2-4 are deliberately NOT built**, and the reason is in section 85's
 shape: each is coupled to a capability that does not exist, so building either

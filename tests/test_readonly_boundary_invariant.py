@@ -25,9 +25,33 @@ the one that bit.
 
 RE-DERIVING THE BASELINE, in any full clone::
 
-    git show 5277dfc:linkedin_server/readonly.py
+    git show 7eee070:linkedin_server/readonly.py
 
-and re-run :func:`ast_digest` over it. If a future change to the boundary is
+and re-run :func:`ast_digest` over it.
+
+THAT COMMAND SAID ``5277dfc`` UNTIL 2026-09-03 AND HAD STOPPED WORKING. A
+history rewrite scrubbed a name out of every blob and message, so every commit
+kept its subject and author date and took a NEW hash; ``5277dfc`` resolves to
+nothing, in this clone and in a fresh one. The instruction this file gives for
+checking itself had gone false without anybody editing the line.
+
+**THE REPLACEMENT IS VERIFIED, NOT LOOKED UP.** ``7eee070`` is the live
+commit whose subject is "feat(writes): perform() for save_job, and unsave
+built but refusing", and the proof that it is the right one is this file's own
+instrument: running ``ast_digest`` over ``git show
+7eee070:linkedin_server/readonly.py`` reproduces ALL FOUR documented constant
+digests exactly -- ``ae3977e43da53d26``, ``0b857f0637cdaaad``,
+``23aece1483afdee9``, ``d47e30b67c583c1b`` -- and yields
+``<functions> = 9f0a86dafffc2299``, which is the value named four paragraphs
+below as the pre-2026-08-24 ``<functions>``. Five independent 64-bit
+agreements. A subject could be a coincidence; five digests are not.
+
+AND THE LESSON GENERALISES BEYOND THIS LINE: **cite the SUBJECT first and the
+hash second.** A subject survives a rewrite and a hash does not, so a
+reference pinned to a hash goes false with nobody editing it. The two
+2026-08-24 audit files carry the same correction and a full recovery table.
+
+If a future change to the boundary is
 DELIBERATE, update the digests in the same commit that changes the behaviour --
 that is the review moment this file exists to create, and it should feel like
 one.
@@ -39,7 +63,9 @@ the comments on PINNED below; read those for what moved each time. The first is
 described next because it is the one that established the format.
 
 On 2026-08-23 the package acquired its first mutating
-call and the baseline moved from ``oldsha14`` to ``5277dfc``. Two digests moved
+call and the baseline moved from ``oldsha14`` to "perform() for save_job,
+and unsave built but refusing" (``7eee070``; written as ``5277dfc`` before
+the rewrite). Two digests moved
 and four did not, and the four are the ones that matter: the navigation
 allowlist, the forbidden-substring list, the mutation scanner's patterns and
 the JS token list are byte-identical across the change. That is asserted below
@@ -69,6 +95,13 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: because widening them lets something through, and this one is worth freezing
 #: because ADDING TO IT lets something through. A boundary made of four
 #: denylists and one allowlist is only as frozen as its allowlist.
+#:
+#: ---------------------------------------------------------------------------
+#: THE RE-FREEZE LEDGER FOR THE VALUES BELOW. Entries are dated; the newest is
+#: first. Both digest dicts in this file carry the same values, so an entry
+#: lives here once rather than being written twice and updated once.
+#: ---------------------------------------------------------------------------
+#:
 #: RE-FROZEN 2026-09-03 A SECOND TIME, by a different wave, AND THIS IS THE
 #: FIRST RE-FREEZE IN THIS FILE'S HISTORY WHERE THE MOVING DIGEST IS A DENYLIST
 #: GROWING. Every previous one moved the allowlist. Recorded here rather than
@@ -141,7 +174,9 @@ PINNED = (
     "SANCTIONED_MUTATIONS",
 )
 
-#: Digests of ``linkedin_server/readonly.py`` at ``5277dfc``.
+#: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
+#: unsave built but refusing" -- ``7eee070`` today, written as ``5277dfc``
+#: before the history rewrite. Subject first, hash second.
 #:
 #: RE-FROZEN 2026-08-23, DELIBERATELY, and this is the review moment the file's
 #: own docstring promised. The previous baseline was ``oldsha14``, the commit
