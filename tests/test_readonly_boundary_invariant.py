@@ -166,9 +166,33 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: ``<functions>``, which did not move. The 3.10 cell in CI is the actual
 #: verification and it runs on push; if it reds on this digest, that sentence
 #: was wrong and this is where to come back to.
+#: THE TWO EXEMPTION TABLES WERE ADDED 2026-09-03, AND THE HOLE WAS PROVEN
+#: RATHER THAN SUSPECTED.
+#:
+#: This freeze pinned the DENYLIST and not the door beside it. The two tables
+#: that excuse a url FROM the denylist were unpinned, and neither is a
+#: function, so a planted exemption moved NOTHING:
+#:
+#:     plant: one line added to _FORBIDDEN_SUBSTRING_EXEMPTIONS, excusing
+#:            "/invite" for /mynetwork/invitation-manager/ -- an address
+#:            nobody ruled on and one this file's own MUST_STAY_UNREADABLE
+#:            table forbids
+#:     result: 0 of 6 digests moved
+#:
+#: A permission could be granted with zero digest movement, past a guard whose
+#: entire purpose is to make a boundary change visible. That is the same shape
+#: this package spent 2026-09-03 finding elsewhere -- a check that fires and
+#: does not cover what it appears to -- arriving in the instrument that exists
+#: to catch exactly this.
+#:
+#: ADDING THEM IS PURELY ADDITIVE. It can only make the freeze notice more; no
+#: existing digest changes meaning, and the four originals are byte-identical
+#: across the addition.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
+    "_FORBIDDEN_SUBSTRING_EXEMPTIONS",
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS",
     "_MUTATION_CALL_PATTERNS",
     "JS_MUTATION_TOKENS",
     "SANCTIONED_MUTATIONS",
@@ -232,7 +256,65 @@ PINNED = (
 #: holding a value re-frozen twice since. A name that asserts a provenance it
 #: no longer has is the same defect as a docstring that denies a capability
 #: that ships, one layer down.
+#: RE-FROZEN 2026-09-03, and this entry records a hole in the freeze ITSELF
+#: alongside the boundary change that exposed it.
+#:
+#: WHAT MOVED ON THE BOUNDARY, and it is one address:
+#:
+#:     _ALLOWED_URL_PATTERNS   7696e6f928aee6e2 -> 97f175ae03ccc7d1
+#:     <functions>             df57656b3e6e8cf9 -> 4a6eba4033964196
+#:
+#: HIS OWN CONNECTIONS LIST is now readable. ``/invite`` and ``/connect`` are
+#: on the forbidden list to stop this server SENDING invitations, and they
+#: were also catching ``/mynetwork/invite-connect/connections/`` -- a page
+#: that sends nothing and invites nobody, listing people he is ALREADY
+#: connected to. A write guard matching a read address. The operator asked why
+#: this server cannot find a person in his own network; that was the reason.
+#:
+#: MEASURED BEFORE THE BOUNDARY MOVED, over every linkedin url literal in the
+#: package and its tests plus the neighbourhood of the change: 204 addresses
+#: compared against the previous implementation, TWO widened (the trailing-
+#: slash and slashless spellings of that one page) and ZERO tightened.
+#:
+#: ``<functions>`` moved because ``_pattern_exempted_substring`` returns a SET
+#: now and is renamed to match. That was not a preference: the connections
+#: address is the first url to trip TWO forbidden substrings at once, so a
+#: mechanism returning one substring per pattern could excuse only half of it.
+#: Each entry still ENUMERATES what it excuses.
+#:
+#: THE FORBIDDEN ROSTER DID NOT MOVE -- b0291a66ec9bd51e before and after.
+#: Nothing was shortened to admit this. That is the load-bearing half.
+#:
+#: AND TWO NAMES JOINED THE FREEZE, WHICH IS THE FINDING WORTH MORE THAN THE
+#: FIX. This file pinned the DENYLIST and not the door beside it: the two
+#: tables that excuse a url FROM the denylist were unpinned, and one of them
+#: is a dict, which ``_literal`` did not handle and rendered as a CONSTANT
+#: placeholder. Both were proven by planting an exemption for
+#: ``/mynetwork/invitation-manager/`` -- an address MUST_STAY_UNREADABLE
+#: forbids -- and watching 0 of 6 digests move, then 0 of 8 after pinning the
+#: names, then 1 of 8 once ``_literal`` learned about dicts.
+#:
+#: **A permission could be granted with zero digest movement, past the guard
+#: whose entire purpose is to make a boundary change visible.** Same shape as
+#: everything else this package found on 2026-09-03 -- a check that fires and
+#: does not cover what it appears to -- arriving in the instrument built to
+#: catch exactly that.
+#:
+#: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
+#: moved is a tuple of string literals and a dict of them, the class this
+#: file records as matching on every Python.
 READONLY_AST_AT_LAST_REFREEZE = {
+    "<functions>": "4a6eba4033964196",
+    "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
+    "SANCTIONED_MUTATIONS": "bccb17cef4b986f2",
+    "_ALLOWED_URL_PATTERNS": "97f175ae03ccc7d1",
+    "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
+    "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
+    "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
+}
+
+_SUPERSEDED_READONLY_AST_AT_LAST_REFREEZE = {
     # RE-FROZEN 2026-08-26, deliberately, in the commit that moved them.
     #
     # WHAT MOVED AND WHY. The operator ruled that reading his own inbox is his
@@ -580,6 +662,18 @@ READONLY_AST_AT_LAST_REFREEZE = {
 #: write widened nothing" is CHECKABLE rather than a sentence in a comment.
 #: ``test_the_write_did_not_touch_any_of_the_four_denylists`` compares them.
 DENYLISTS_AT_A76FE32 = {
+    # UPDATED 2026-09-03. _ALLOWED_URL_PATTERNS moved for a deliberate READ
+    # admission -- his own connections list -- so its value here moves with
+    # it, exactly as the 2026-08-26 note below describes for the same reason.
+    # The other three are byte-identical and are the ones that would have to
+    # move for anything to have been weakened.
+    #
+    # _FORBIDDEN_SUBSTRING_EXEMPTIONS JOINS THIS DICT, because it is now
+    # frozen at all: it is the door beside the denylist, and it did NOT move
+    # in this change. A widening that arrived through it would now show up
+    # here rather than nowhere.
+    "_ALLOWED_URL_PATTERNS": "97f175ae03ccc7d1",
+    "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
     # This dict answers "did the WRITE widen anything", and the answer is
@@ -681,7 +775,6 @@ DENYLISTS_AT_A76FE32 = {
     # the three lines that moved and on the test asserting the two families
     # DIFFERED. Both were updated in the same commit; that file now records one
     # argued admission and three closed accidents.
-    "_ALLOWED_URL_PATTERNS": "7696e6f928aee6e2",
     # RE-BASELINED 2026-09-03 by the class close. afcb7f0d14c481a0 ->
     # b0291a66ec9bd51e, ten substrings added and none removed. The full
     # ledger entry is above ``PINNED``; both dicts carry the same value and
@@ -705,6 +798,24 @@ def _literal(node: ast.AST):
         return node.value
     if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
         return [_literal(item) for item in node.elts]
+    # A DICT, ADDED 2026-09-03, AND ITS ABSENCE WAS NOT COSMETIC. Without this
+    # branch a dict fell through to the ``<unhandled>`` placeholder at the
+    # bottom, which is CONSTANT whatever the dict holds -- so
+    # ``_FORBIDDEN_SUBSTRING_EXEMPTIONS``, the exact-url table that excuses a
+    # url from the forbidden list, hashed identically no matter what was in
+    # it. Adding the name to :data:`PINNED` bought nothing until this existed:
+    # measured by planting an exemption for an address MUST_STAY_UNREADABLE
+    # forbids and watching 0 of 8 digests move, twice -- once before the name
+    # was pinned and once after.
+    #
+    # KEYS AND VALUES BOTH, IN SOURCE ORDER. Not sorted: a table whose entries
+    # were REORDERED is a table somebody edited, and the freeze exists to make
+    # somebody look.
+    if isinstance(node, ast.Dict):
+        return [
+            [_literal(key) if key is not None else "**", _literal(value)]
+            for key, value in zip(node.keys, node.values)
+        ]
     if isinstance(node, ast.Call):
         func = node.func
         name = (
@@ -928,3 +1039,85 @@ def test_the_launch_boundary_is_still_a_zero_line_diff():
     source = (REPO / "tests" / "test_launch_boundary.py").read_text(encoding="ascii")
     assert "--disable-blink-features=AutomationControlled" in source
     assert source.count("LAUNCH_ARGS") >= 1
+
+
+def test_a_planted_exemption_moves_a_digest():
+    """THE HOLE THIS FREEZE HAD, closed and shown closed.
+
+    Until 2026-09-03 this file pinned the DENYLIST and not the door beside it.
+    The two tables that excuse a url FROM the forbidden list were unpinned,
+    and ``_FORBIDDEN_SUBSTRING_EXEMPTIONS`` is a dict, which ``_literal`` did
+    not handle -- it fell through to the ``<unhandled>`` placeholder, constant
+    whatever the dict held. So a permission could be granted with ZERO digest
+    movement, past the guard whose entire purpose is to make a boundary change
+    visible.
+
+    The plant is not hypothetical: it excuses ``/invite`` for
+    ``/mynetwork/invitation-manager/``, an address ``test_readonly``'s
+    MUST_STAY_UNREADABLE table forbids by name.
+
+    Measured three times while fixing it -- 0 of 6 digests moved before the
+    names were pinned, 0 of 8 after pinning them, 1 of 8 once ``_literal``
+    learned about dicts. The first two are why this is a test and not a
+    comment.
+    """
+    source = READONLY.read_text(encoding="ascii")
+    anchor = "_FORBIDDEN_SUBSTRING_EXEMPTIONS: dict[str, str] = {"
+    assert anchor in source, (
+        "the exemption table was renamed or re-typed; this control is aimed "
+        "at a declaration that no longer exists and is certifying nothing"
+    )
+    # THE NEWLINE IS BUILT, NOT TYPED. A shell heredoc collapses a backslash
+    # escape, and this repository lost six edits to that on 2026-09-03 alone;
+    # chr(10) survives every quoting layer between an author and this file.
+    entry = (
+        chr(10)
+        + '    "https://www.linkedin.com/mynetwork/invitation-manager/":'
+        + ' "/invite",'
+    )
+    planted = source.replace(anchor, anchor + entry, 1)
+    assert planted != source
+
+    before = ast_digest(source)
+    after = ast_digest(planted)
+    moved = {name for name in before if before[name] != after.get(name)}
+    assert moved == {"_FORBIDDEN_SUBSTRING_EXEMPTIONS"}, (
+        "a planted exemption moved %s. It must move exactly the exemption "
+        "table's digest: nothing means the freeze is blind to permissions "
+        "again, and more means this plant is changing something else."
+        % (sorted(moved) or "NOTHING")
+    )
+
+
+def test_every_pinned_structure_hashes_its_real_content():
+    """A PINNED NAME IS NOT A FROZEN STRUCTURE, which is the trap above.
+
+    ``_literal`` returns ``["<unhandled>", ...]`` for node types it does not
+    know, and that value is CONSTANT -- so a structure of an unhandled type is
+    listed in the freeze, digested, reported, and pinned to nothing at all.
+    Adding a name to PINNED bought exactly this until dicts were handled.
+
+    Asserted for every pinned name rather than for the one that was wrong,
+    because the next unhandled type will arrive the same way.
+    """
+    tree = ast.parse(READONLY.read_text(encoding="ascii"))
+    seen = set()
+    for node in tree.body:
+        target = None
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            target = node.target.id
+        elif isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
+            target = node.targets[0].id
+        if target in PINNED and node.value is not None:
+            seen.add(target)
+            rendered = _literal(node.value)
+            assert not (
+                isinstance(rendered, list)
+                and rendered
+                and rendered[0] == "<unhandled>"
+            ), (
+                f"{target} is pinned but _literal cannot render a "
+                f"{type(node.value).__name__}, so its digest is a constant "
+                "placeholder and freezes nothing"
+            )
+    assert seen == set(PINNED), sorted(set(PINNED) - seen)

@@ -1602,6 +1602,28 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/messaging/compose/?recipient=someone",
     "https://www.linkedin.com/mynetwork/invitation-manager/",
     "https://www.linkedin.com/mynetwork/",
+    # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
+    # are the addresses that must not travel with it, and the entry above --
+    # ``/mynetwork/`` itself -- is the load-bearing one: it was put through a
+    # written side-effect ruling on 2026-08-30 and REFUSED because it consumes
+    # the pending invitation badge. It was already here, so it doubles as the
+    # regression guard for this change at no cost.
+    "https://www.linkedin.com/mynetwork/invite-connect/",
+    "https://www.linkedin.com/mynetwork/invite-connect/invitations/",
+    # THE QUERY AND THE SUB-PATH, which prove the new pattern is anchored and
+    # not a prefix. A query is where a filter naming a person would arrive.
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1",
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/x",
+    # THE PEOPLE HE FOLLOWS, recorded on the Manage-Pages allowlist entry as
+    # the sibling nobody may reach for. It carries ``/follow`` and the new
+    # exemption does not excuse that substring for any address.
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/",
+    # PEOPLE SEARCH, which is the GENERAL case where connections is the
+    # specific one. It has no allowlist pattern and no written reason, and the
+    # lead ruled it a SEPARATE decision rather than part of this one. Pinned
+    # here so that admitting it later is a deliberate edit to this table
+    # rather than a side effect of some other widening.
+    'https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D',
     "https://www.linkedin.com/company/example-co/",
     "https://www.linkedin.com/feed/following/",
     "https://www.linkedin.com/in/me/edit/",
@@ -1804,3 +1826,115 @@ def test_no_previously_forbidden_address_became_readable(url):
         f"{url} became readable. Every url here is one this repository has "
         "decided it will not open, and each is refused today."
     )
+
+
+# ---------------------------------------------------------------------------
+# HIS OWN CONNECTIONS LIST: a write guard that was matching a read address
+# ---------------------------------------------------------------------------
+#
+# THE QUESTION THAT FOUND IT was the operator's, not an audit's: why must he
+# supply a profile url -- why can this server not find a person in his own
+# network? It could not, because ``/invite`` and ``/connect`` are on the
+# forbidden list to stop this server SENDING invitations, and they also catch
+# ``/mynetwork/invite-connect/connections/``, which sends nothing and invites
+# nobody. It is the page listing people he is ALREADY connected to.
+#
+# WHY IT MATTERS BEYOND ONE PAGE. The identifier route needs a surface that
+# draws Message buttons, because that is where ``recipient_id`` comes from.
+# Who's-Viewed-Me was the only readable one and it is the wrong surface: it
+# lists whoever happened to look, so an authorised target who has not viewed
+# his profile is unreachable, and one who has may still carry
+# ``recipient_id: null`` where LinkedIn drew no button.
+CONNECTIONS_URL = (
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/"
+)
+
+
+def test_the_connections_list_is_readable():
+    """Both spellings, because the pattern ends at an optional slash."""
+    assert readonly.is_read_url(CONNECTIONS_URL)
+    assert readonly.is_read_url(CONNECTIONS_URL.rstrip("/"))
+
+
+def test_that_address_trips_two_forbidden_substrings():
+    """THE FACT THAT FORCED THE MECHANISM TO CHANGE, asserted rather than
+    described.
+
+    Every earlier exemption excused ONE substring, and the table held one
+    string per pattern. This address carries ``/invite`` AND ``/connect``, so
+    a mechanism returning a single substring could only ever excuse half of it
+    -- the url would still refuse, for a reason nothing in the table could
+    state. If this ever drops to one, the set is no longer load-bearing and
+    the simpler shape should come back.
+    """
+    tripped = {
+        bad
+        for bad in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if bad in CONNECTIONS_URL.lower()
+    }
+    assert tripped == {"/invite", "/connect"}, tripped
+
+
+def test_the_exemption_names_exactly_those_two_and_no_more():
+    """A SET IS NOT A WILDCARD. What an entry excuses stays enumerated."""
+    excused = readonly._pattern_exempted_substrings(CONNECTIONS_URL)
+    assert excused == frozenset({"/invite", "/connect"}), excused
+    # And it excuses them for THIS address only.
+    assert readonly._pattern_exempted_substrings(
+        "https://www.linkedin.com/mynetwork/invite-connect/invitations/"
+    ) == frozenset()
+
+
+def test_both_gates_are_required_and_neither_alone_admits_it():
+    """SHOWN FAILING, one gate at a time.
+
+    The exemption says which forbidden substrings the url may carry; the
+    allowlist says the url is a permitted read. A test that only checked the
+    happy path would pass if either gate were deleted, which is exactly how a
+    boundary widens without anybody noticing.
+    """
+    original = readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS
+    try:
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = tuple(
+            (pattern, substrings)
+            for pattern, substrings in original
+            if "mynetwork" not in pattern.pattern
+        )
+        assert not readonly.is_read_url(CONNECTIONS_URL), (
+            "the connections url is admitted with its exemption removed, so "
+            "the forbidden substrings are no longer being checked at all"
+        )
+    finally:
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = original
+    assert readonly.is_read_url(CONNECTIONS_URL)
+
+    allowed = readonly._ALLOWED_URL_PATTERNS
+    try:
+        readonly._ALLOWED_URL_PATTERNS = tuple(
+            pattern for pattern in allowed if "invite-connect" not in pattern.pattern
+        )
+        assert not readonly.is_read_url(CONNECTIONS_URL), (
+            "the connections url is admitted with its allowlist pattern "
+            "removed, so the exemption alone is opening it"
+        )
+    finally:
+        readonly._ALLOWED_URL_PATTERNS = allowed
+    assert readonly.is_read_url(CONNECTIONS_URL)
+
+
+def test_the_compose_exemption_still_excuses_exactly_one():
+    """THE ENTRY THAT DID NOT CHANGE, asserted because the mechanism did.
+
+    Widening a shared mechanism is how a neighbouring permission grows by
+    accident. The compose address excused one substring before the value
+    became a set and must excuse exactly that one after.
+    """
+    compose = (
+        "https://www.linkedin.com/messaging/compose/"
+        "?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAB7hidden"
+        "&recipient=ACoAAB7hidden"
+    )
+    assert readonly._pattern_exempted_substrings(compose) == frozenset(
+        {"/messaging/compose"}
+    )
+    assert readonly.is_read_url(compose)

@@ -448,6 +448,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # particular ``/premium/`` has purchase and upgrade flows under it and
     # NONE of them is admitted here.
     re.compile(r"^https://www\.linkedin\.com/premium/my-premium/?$"),
+    # HIS OWN CONNECTIONS LIST. Admitted 2026-09-03; the full argument is on
+    # the paired entry in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS, which is
+    # where the interesting half lives. This is the SECOND, INDEPENDENT gate:
+    # the exemption says which forbidden substrings this url may carry, and
+    # this says the url is a permitted read. Neither alone admits it.
+    #
+    # THE PEOPLE-SEARCH SIBLING IS DELIBERATELY NOT HERE.
+    # ``/search/results/people/`` is the GENERAL case where this is the
+    # specific one, it has no pattern and no written reason, and the lead
+    # ruled it a separate decision rather than part of this one. Recording
+    # that here because the obvious later "fix" is to reach for it, exactly as
+    # the people-follow list is recorded on the Manage-Pages entry above.
+    #
+    # NO QUERY STRING. Nothing builds one, and a query is where a filter
+    # naming a person would arrive.
+    re.compile(
+        r"^https://www\.linkedin\.com/mynetwork/invite-connect/connections/?$"
+    ),
     # Notifications list.
     re.compile(r"^https://www\.linkedin\.com/notifications/?(\?[^#]*)?$"),
     # Feed, used only as a corroborating auth measurement.
@@ -740,7 +758,9 @@ _FORBIDDEN_SUBSTRING_EXEMPTIONS: dict[str, str] = {
 #: ADMITTING ONE IS A BOUNDARY CHANGE. The allowlist below must ALSO match --
 #: this table only says which forbidden substring a url may carry, never that
 #: the url is permitted.
-_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
+_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
+    tuple[re.Pattern[str], frozenset[str]], ...
+] = (
     # THE COMPOSE-WITH-RECIPIENT ADDRESS, admitted 2026-09-03 on the operator's
     # ruling, relayed by the wave lead, and scoped to this one shape.
     #
@@ -775,23 +795,84 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[tuple[re.Pattern[str], str], ...]
             r"\?profileUrn=urn%3Ali%3Afsd_profile%3A[A-Za-z0-9_-]{1,64}"
             r"&recipient=[A-Za-z0-9_-]{1,64}$"
         ),
-        "/messaging/compose",
+        frozenset({"/messaging/compose"}),
+    ),
+    # HIS OWN CONNECTIONS LIST, admitted 2026-09-03 on the operator's question
+    # -- "why must I supply a profile url; why can this server not find a
+    # person in my own network?" -- ruled by the wave lead.
+    #
+    # A WRITE GUARD WAS MATCHING A READ ADDRESS, which is the whole of the
+    # defect. ``/invite`` and ``/connect`` are on the forbidden list to stop
+    # this server SENDING invitations. They also catch
+    # ``/mynetwork/invite-connect/connections/``, which sends nothing and
+    # invites nobody: it is the page listing people he is ALREADY connected
+    # to. The substring was doing its job and hitting the wrong url.
+    #
+    # THIS IS THE FIRST ENTRY THAT NEEDS TWO SUBSTRINGS, and it is why the
+    # value became a SET. The address trips ``/invite`` AND ``/connect`` --
+    # measured, not assumed -- and a mechanism returning one substring per
+    # pattern could only ever excuse half of it. The set is still a CLOSED,
+    # WRITTEN ENUMERATION per pattern: no wildcard, and an entry that wanted a
+    # third substring would have to say so.
+    #
+    # WHAT IT UNLOCKS, which is the reason it was asked for. The identifier
+    # route needs a surface that draws Message buttons, because that is where
+    # ``recipient_id`` comes from. Who's-Viewed-Me was the only such surface
+    # this server could read, and it is the wrong one: it lists whoever
+    # happened to look, so an authorised target who has not viewed his profile
+    # is unreachable and one who has may still carry ``recipient_id: null``
+    # when LinkedIn drew no button on that row.
+    #
+    # WHAT IT DOES NOT ADMIT, and each was measured refusing before and after:
+    #   * ``/mynetwork/`` itself, which was put through a written side-effect
+    #     ruling on 2026-08-30 and REFUSED because it consumes the pending
+    #     invitation badge. Untouched, and this pattern cannot reach it;
+    #   * ``/mynetwork/invite-connect/`` and ``.../invitations/`` -- the
+    #     invitation surfaces the forbidden substrings exist for;
+    #   * any query string. The pattern ends at the optional slash, so
+    #     ``?foo=1`` refuses. Nothing builds one, so nothing needs it, and a
+    #     query is where a filter that names a person would arrive;
+    #   * ``/mynetwork/network-manager/people-follow/following/``, which
+    #     carries ``/follow`` and is not excused here.
+    #
+    # ITS SIDE-EFFECT COST IS NOT YET MEASURED, and that is stated rather than
+    # assumed. The argument for admitting it is that a list of EXISTING
+    # connections consumes no badge -- but ``/mynetwork/`` was refused on
+    # exactly that question, and reasoning is what this wave has been punished
+    # for all day. The measurement that would settle it is the one
+    # ``CENSUS_SURFACE_COST`` already prescribes for messaging: read the
+    # invitation badge through the feed census before and after. Any TOOL
+    # built on this url should carry that precondition; the boundary admitting
+    # the address does not itself load anything.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/invite-connect/"
+            r"connections/?$"
+        ),
+        frozenset({"/invite", "/connect"}),
     ),
 )
 
 
-def _pattern_exempted_substring(url: str) -> Optional[str]:
-    """The ONE forbidden substring an anchored pattern lets this url carry.
+def _pattern_exempted_substrings(url: str) -> frozenset[str]:
+    """The forbidden substrings an anchored pattern lets this url carry.
 
     SEPARATE FROM THE DICT LOOKUP AND DELIBERATELY SO. The dict is an equality
     test and stays one; this is the narrow extension for urls with a variable
     segment, and keeping them apart means the cheap discipline still covers
     every url that can have it.
+
+    RETURNS A SET, since 2026-09-03, and the singular version was not merely
+    inconvenient -- it was WRONG for the first url that needed two. The
+    connections list trips ``/invite`` and ``/connect`` together, so a
+    mechanism returning one substring per pattern would excuse half of it and
+    the url would still refuse, for a reason nothing in the table could state.
+    Each entry still ENUMERATES what it excuses; the set adds no wildcard.
     """
-    for pattern, substring in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS:
+    for pattern, substrings in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS:
         if pattern.match(url):
-            return substring
-    return None
+            return substrings
+    return frozenset()
 
 
 def assert_read_url(url: str) -> str:
@@ -824,21 +905,28 @@ def assert_read_url(url: str) -> str:
     # equality test, which is the whole of the discipline: a url that merely
     # begins with an exempted one matches nothing here. See
     # :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS`.
-    exempted = _FORBIDDEN_SUBSTRING_EXEMPTIONS.get(lowered)
-    if exempted is None:
+    exact = _FORBIDDEN_SUBSTRING_EXEMPTIONS.get(lowered)
+    exempted: frozenset[str] = frozenset({exact}) if exact is not None else frozenset()
+    if not exempted:
         # THE PATTERN TABLE IS CHECKED SECOND AND AGAINST THE ORIGINAL URL,
         # not the lowered one: the member ids in a compose address are
         # case-sensitive, and lowering them would admit a url this server
         # could never build. The dict keeps its lowered equality test, which
         # is right for a constant.
-        exempted = _pattern_exempted_substring(url)
+        exempted = _pattern_exempted_substrings(url)
     for bad in _FORBIDDEN_URL_SUBSTRINGS:
         if bad in lowered:
             # PER-SUBSTRING, so an exemption for /edit/ does not survive a
             # /delete appearing in the same url. The loop continues rather
             # than returning: the remaining substrings still get their say,
             # and the allowlist below still has to admit the url.
-            if exempted is not None and exempted == bad:
+            #
+            # A SET SINCE 2026-09-03, because the connections list is the
+            # first url to trip TWO forbidden substrings at once. Membership
+            # replaces equality; what an entry excuses is still enumerated in
+            # the table, one substring at a time, and nothing here excuses a
+            # substring its pattern did not name.
+            if bad in exempted:
                 continue
             raise WriteAttemptError(
                 f"navigation blocked: {url!r} contains {bad!r}, which is not a "
