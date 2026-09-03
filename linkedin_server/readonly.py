@@ -408,6 +408,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # 1, on ``/feed/`` and on his profile, 2026-08-31. With no unread message
     # there is no stranger's InMail to spend.
     re.compile(r"^https://www\.linkedin\.com/messaging/compose/?$"),
+    # THE SAME COMPOSER, ADDRESSED TO ONE MEMBER BY IDENTIFIER. Added
+    # 2026-09-03. The forbidden substring it carries is exempted by the
+    # ANCHORED pattern in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS, and this
+    # entry is the second, independent gate -- the exemption says which
+    # substring the url may carry, this says the url is a permitted read.
+    #
+    # IT REPLACES A MEASURED DEAD END RATHER THAN ADDING A CAPABILITY.
+    # Addressing a recipient by NAME is finished: three stable live census
+    # runs, and an offset instrument that found the needle at ELEVEN distinct
+    # positions across ten rows with accessible names 49 to 178 characters
+    # long. No anchored or positional matcher can work there. This is how one
+    # person gets named deterministically instead.
+    re.compile(
+        r"^https://www\.linkedin\.com/messaging/compose/"
+        r"\?profileUrn=urn%3Ali%3Afsd_profile%3A[A-Za-z0-9_-]{1,64}"
+        r"&recipient=[A-Za-z0-9_-]{1,64}$"
+    ),
     # HIS OWN SUBSCRIPTION PAGE. Admitted 2026-09-01 on the operator's
     # ruling, as ONE named address, and it exists to answer ONE question:
     # whether an InMail balance is a countable thing this server can read.
@@ -595,6 +612,78 @@ _FORBIDDEN_SUBSTRING_EXEMPTIONS: dict[str, str] = {
     "https://www.linkedin.com/messaging/compose/": "/messaging/compose",
 }
 
+#: THE SAME EXEMPTION, FOR A URL THAT CANNOT BE AN EQUALITY KEY.
+#:
+#: WHY THIS TABLE HAD TO EXIST AT ALL. The dict above is an equality test and
+#: that is the whole of its discipline. The compose-with-recipient url carries
+#: two MEMBER IDS, so there is no constant to key on -- and the alternative
+#: precedent is worse: ``/feed/update/<urn>/`` was admitted by REMOVING its
+#: substring from the forbidden tuple, which drops the guard for a whole
+#: family to admit one member of it. This buys one anchored shape and leaves
+#: ``"/messaging/compose"`` on the forbidden tuple, still refusing every other
+#: spelling exactly as it did an hour ago.
+#:
+#: EACH ENTRY IS (PATTERN, THE ONE SUBSTRING IT EXEMPTS), so the per-substring
+#: rule survives: a pattern admitted for ``/messaging/compose`` does not also
+#: excuse a ``/delete`` that turns up in the same url. And it is ANCHORED at
+#: both ends, so it cannot be reached by prefixing or suffixing.
+#:
+#: ADMITTING ONE IS A BOUNDARY CHANGE. The allowlist below must ALSO match --
+#: this table only says which forbidden substring a url may carry, never that
+#: the url is permitted.
+_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
+    # THE COMPOSE-WITH-RECIPIENT ADDRESS, admitted 2026-09-03 on the operator's
+    # ruling, relayed by the wave lead, and scoped to this one shape.
+    #
+    # WHAT IT PERMITS: opening a NEW message composer already addressed to one
+    # member named by identifier. Nothing else.
+    #
+    # WHAT IT DOES NOT PERMIT, and each of these is a separate gate that still
+    # stands between this url and a message leaving:
+    #   * it is a NAVIGATION, which is a read. It types nothing and presses
+    #     nothing;
+    #   * ``assert_write_url`` is a different, narrower door and is untouched;
+    #   * ``writes.PERFORMABLE``, the grant, the confirm token and
+    #     ``_recipient_gate`` are all unchanged and all still run.
+    #
+    # WHY IT IS SAFER THAN THE GAP IT REPLACES. Three sibling spellings were
+    # admitted by accident until this morning, and two of them reached
+    # ``/messaging/`` -- which LinkedIn redirects into an EXISTING conversation
+    # of its own choosing, spending a read receipt on a real person. A NEW
+    # compose opens no thread and costs nobody anything.
+    #
+    # WHY THE SHAPE IS THIS EXACT. It is LinkedIn's own, read off a committed
+    # sanitised fixture rather than guessed: the Message button on
+    # Who's-Viewed-Me is an anchor carrying ``profileUrn`` and ``recipient``.
+    # This admits those TWO parameters, in that order, and nothing else --
+    # narrower than the url LinkedIn itself draws, which also carries
+    # ``screenContext`` and ``interop``. If those turn out to be load-bearing,
+    # that is a measurement and then a second deliberate entry, not a widening
+    # of this one.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/messaging/compose/"
+            r"\?profileUrn=urn%3Ali%3Afsd_profile%3A[A-Za-z0-9_-]{1,64}"
+            r"&recipient=[A-Za-z0-9_-]{1,64}$"
+        ),
+        "/messaging/compose",
+    ),
+)
+
+
+def _pattern_exempted_substring(url: str) -> Optional[str]:
+    """The ONE forbidden substring an anchored pattern lets this url carry.
+
+    SEPARATE FROM THE DICT LOOKUP AND DELIBERATELY SO. The dict is an equality
+    test and stays one; this is the narrow extension for urls with a variable
+    segment, and keeping them apart means the cheap discipline still covers
+    every url that can have it.
+    """
+    for pattern, substring in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS:
+        if pattern.match(url):
+            return substring
+    return None
+
 
 def assert_read_url(url: str) -> str:
     """Return ``url`` if it is a permitted read surface, else raise.
@@ -627,6 +716,13 @@ def assert_read_url(url: str) -> str:
     # begins with an exempted one matches nothing here. See
     # :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS`.
     exempted = _FORBIDDEN_SUBSTRING_EXEMPTIONS.get(lowered)
+    if exempted is None:
+        # THE PATTERN TABLE IS CHECKED SECOND AND AGAINST THE ORIGINAL URL,
+        # not the lowered one: the member ids in a compose address are
+        # case-sensitive, and lowering them would admit a url this server
+        # could never build. The dict keeps its lowered equality test, which
+        # is right for a constant.
+        exempted = _pattern_exempted_substring(url)
     for bad in _FORBIDDEN_URL_SUBSTRINGS:
         if bad in lowered:
             # PER-SUBSTRING, so an exemption for /edit/ does not survive a

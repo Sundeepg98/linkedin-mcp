@@ -145,11 +145,30 @@ REFUSED_TODAY: dict[str, str] = {
 #: accidents. The wave lead ruled on 2026-09-03 that they come out, and the
 #: patterns were tightened after measuring that nothing shipped depended on
 #: them. Their entries moved to :data:`REFUSED_TODAY` below.
+#: THE COMPOSE ADDRESS THIS SERVER BUILDS. Two parameters, in this order, and
+#: NARROWER THAN THE ONE LINKEDIN DRAWS -- see the constant above, which keeps
+#: `screenContext` and `interop` and is still refused.
+IDENTIFIER_COMPOSE_URL = (
+    "https://www.linkedin.com/messaging/compose/"
+    "?profileUrn=urn%3Ali%3Afsd_profile%3A" + FAKE_ID
+    + "&recipient=" + FAKE_ID
+)
+
 ADMITTED_TODAY: dict[str, str] = {
     "https://www.linkedin.com/messaging/compose/": (
-        "THE ONE DELIBERATE ADMISSION -- an exact-url exemption, argued on the "
-        "operator's 2026-08-31 ruling and conditioned on the messaging badge "
-        "reading zero first"
+        "THE FIRST DELIBERATE ADMISSION -- an exact-url exemption, argued on "
+        "the operator's 2026-08-31 ruling and conditioned on the messaging "
+        "badge reading zero first"
+    ),
+    IDENTIFIER_COMPOSE_URL: (
+        "THE SECOND DELIBERATE ADMISSION, argued on the operator's 2026-09-03 "
+        "ruling. A url with two MEMBER IDS cannot be an equality key, so it is "
+        "exempted by an ANCHORED pattern rather than by removing "
+        "'/messaging/compose' from the forbidden tuple -- which is the older "
+        "precedent and drops the guard for a whole family to admit one member "
+        "of it. It is a NAVIGATION, which is a read: the write door, the "
+        "grant, PERFORMABLE and the recipient gate all still stand between it "
+        "and a message leaving"
     ),
 }
 
@@ -192,10 +211,70 @@ def test_every_admission_is_an_argued_one():
     the point of asserting the SHAPE of the reasons rather than their number:
     a count would pass for any four entries, including four new accidents.
     """
-    assert len(ADMITTED_TODAY) == 1, ADMITTED_TODAY
+    assert len(ADMITTED_TODAY) == 2, ADMITTED_TODAY
     for why in ADMITTED_TODAY.values():
         assert "DELIBERATE" in why or "argued" in why, why
     assert not [why for why in ADMITTED_TODAY.values() if why.startswith("UNRULED")]
+
+
+@pytest.mark.parametrize(
+    "url, why",
+    [
+        (
+            IDENTIFIER_COMPOSE_URL + "&screenContext=NON_SELF_PROFILE_VIEW",
+            "LINKEDIN'S OWN URL CARRIES TWO MORE PARAMETERS AND IS STILL "
+            "REFUSED. This server builds a narrower address than the page "
+            "does; if those turn out to be load-bearing that is a measurement "
+            "and then a second entry, not a widening of this one",
+        ),
+        (
+            "https://www.linkedin.com/messaging/compose/?recipient="
+            + FAKE_ID
+            + "&profileUrn=urn%3Ali%3Afsd_profile%3A"
+            + FAKE_ID,
+            "the same two parameters in the other order -- the pattern is "
+            "anchored and ordered, so a reshuffled url is a different url",
+        ),
+        (
+            "https://www.linkedin.com/messaging/compose/"
+            "?profileUrn=urn%3Ali%3Afsd_profile%3A" + FAKE_ID,
+            "no recipient. Half the address is not the address",
+        ),
+        (
+            "https://www.linkedin.com/messaging/compose/x?profileUrn="
+            "urn%3Ali%3Afsd_profile%3A" + FAKE_ID + "&recipient=" + FAKE_ID,
+            "a path prefix -- anchored at BOTH ends, so it cannot be reached "
+            "by prefixing or suffixing",
+        ),
+    ],
+)
+def test_only_the_exact_identifier_shape_is_admitted(url, why):
+    """THE ADMISSION IS ONE SHAPE, AND THE NEAR-MISSES PROVE IT IS ONE.
+
+    An exemption that admitted anything ADJACENT to the argued shape would be
+    the wildcard this whole morning was spent removing. The most important
+    case is the first: LinkedIn's own Message-button href is still refused,
+    because it carries two parameters this server has no reason to send.
+    """
+    assert _verdict(url) == "refused", (url, why)
+
+
+def test_the_identifier_admission_did_not_reopen_the_family():
+    """ONE SHAPE IN DOES NOT MEAN THE FAMILY IS BACK.
+
+    ``"/messaging/compose"`` is still on the forbidden tuple -- the pattern
+    table says which substring ONE anchored url may carry, never that the
+    family is permitted. The three spellings closed this morning are checked
+    here too, because a widening and a regression look identical in a diff and
+    only a test tells them apart.
+    """
+    for url in (
+        "https://www.linkedin.com/messaging/compose/?recipient=" + FAKE_ID,
+        "https://www.linkedin.com/messaging/thread/new/?recipient=" + FAKE_ID,
+        "https://www.linkedin.com/messaging/?composeTo=" + FAKE_ID,
+        "https://www.linkedin.com/messaging/?recipient=" + FAKE_ID,
+    ):
+        assert _verdict(url) == "refused", url
 
 
 def test_the_families_now_agree_and_that_is_the_ruling_landing():

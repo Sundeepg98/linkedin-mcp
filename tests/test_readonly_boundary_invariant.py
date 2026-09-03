@@ -406,7 +406,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # the three lines that moved and on the test asserting the two families
     # DIFFERED. Both were updated in the same commit; that file now records one
     # argued admission and three closed accidents.
-    "_ALLOWED_URL_PATTERNS": "b064768de4ee4036",
+    "_ALLOWED_URL_PATTERNS": "7696e6f928aee6e2",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -439,7 +439,38 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # url pattern, and no mutation pattern. A change that had loosened any of
     # those on the way past would have moved a second digest, and none moved.
     "SANCTIONED_MUTATIONS": "bccb17cef4b986f2",
-    "<functions>": "eb16cd07f5cf369d",
+    #
+    # AND ON 2026-09-03 <functions> MOVED FOR THE FIRST TIME SINCE, which is
+    # the loudest thing this file can say and is why it is frozen separately:
+    #
+    #   <functions>                eb16cd07f5cf369d -> df57656b3e6e8cf9
+    #   _ALLOWED_URL_PATTERNS      b064768de4ee4036 -> 7696e6f928aee6e2
+    #
+    # assert_read_url GAINED FOUR LINES. The exemption lookup was a dict
+    # get() on the lowered url and stays one; when it returns None, an
+    # ANCHORED PATTERN TABLE is consulted against the ORIGINAL url.
+    #
+    # WHY A SECOND MECHANISM WAS NEEDED. The compose-with-recipient address
+    # carries two MEMBER IDS, so there is no constant to key on. The older
+    # precedent for that problem was /feed/update/<urn>/, admitted by REMOVING
+    # its substring from the forbidden tuple -- which drops the guard for a
+    # whole family in order to admit one member of it. This buys one anchored
+    # shape and leaves "/messaging/compose" on the forbidden tuple, refusing
+    # every other spelling exactly as before.
+    #
+    # AGAINST THE ORIGINAL URL, NOT THE LOWERED ONE, and that asymmetry is
+    # deliberate: member ids are case-sensitive, and matching a lowered url
+    # would admit an address this server could never build.
+    #
+    # WHAT THE FORBIDDEN ROSTER DID: NOTHING. No substring left it. The
+    # allowlist gained ONE anchored pattern, and the exemption table gained
+    # ONE anchored entry paired with the single substring it excuses -- so the
+    # per-substring rule survives and a /delete appearing in the same url
+    # would still refuse.
+    #
+    # AND IT IS A READ. A navigation types nothing and presses nothing;
+    # assert_write_url is a different and narrower door and is byte-identical.
+    "<functions>": "df57656b3e6e8cf9",
 }
 
 #: The four denylist digests as they stood at ``oldsha14``, kept so that "the
@@ -547,7 +578,7 @@ DENYLISTS_AT_A76FE32 = {
     # the three lines that moved and on the test asserting the two families
     # DIFFERED. Both were updated in the same commit; that file now records one
     # argued admission and three closed accidents.
-    "_ALLOWED_URL_PATTERNS": "b064768de4ee4036",
+    "_ALLOWED_URL_PATTERNS": "7696e6f928aee6e2",
     "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
