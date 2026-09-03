@@ -3878,17 +3878,26 @@ def _census_function_source() -> str:
 #:
 #: MEASURED 2026-09-03, by LANDING SURFACE rather than by reading the name:
 #:
-#:   linkedin_my_profile          lands on /in/<slug>/  <- LEAKS A MEMBER SLUG
 #:   linkedin_followed_companies  company urls
 #:   linkedin_job_detail          job urls
 #:   linkedin_new_messages        /feed/
 #:   linkedin_notifications       /notifications/
 #:   _read_cards, _read_tracker   helpers; depend on the caller
 #:
-#: ``linkedin_my_profile`` is the SAME defect the census had, and it is
-#: REPORTED rather than fixed here: another owner's read tool, and a boundary
-#: change needs its casualty measurement first. The rest are recorded so that
-#: "the source_url hole" is never later believed to have been one hole.
+#: ``linkedin_my_profile`` WAS on this list and was fixed on the lead's ruling
+#: -- but NOT because it was the census's defect repeated, and the difference
+#: is the reason this comment is long. There, the raw url was the ONLY unshaped
+#: one in a payload that substituted ``/in/<member>/`` everywhere else, on a
+#: surface that also carried THIRD PARTIES. In ``my_profile`` the identity is
+#: the OPERATOR'S OWN and is published on purpose two fields up, in ``name``,
+#: ``public_identifier`` and ``profile_url``, which are the tool's entire job.
+#: Shaping its ``source_url`` buys CONSISTENCY, not concealment, and reading it
+#: as "that payload has no slug in it" would be wrong.
+#:
+#: The five below are recorded so that "the source_url hole" is never later
+#: believed to have been one hole. None is confirmed to carry a member
+#: identifier: they land on /feed/, /notifications/, company and job urls. That
+#: is a statement about what has been MEASURED, not a clearance.
 TOOLS_WITH_A_RAW_SOURCE_URL = frozenset(
     {
         "_read_cards",
@@ -3896,7 +3905,6 @@ TOOLS_WITH_A_RAW_SOURCE_URL = frozenset(
         "linkedin_new_messages",
         "linkedin_job_detail",
         "linkedin_followed_companies",
-        "linkedin_my_profile",
         "linkedin_notifications",
     }
 )
@@ -3975,4 +3983,4 @@ def test_that_inventory_would_notice_the_census_regressing():
     demonstrably CAN populate."""
     found = _tools_returning_a_raw_source_url()
     assert "linkedin_surface_census" not in found
-    assert len(found) >= 6, found
+    assert len(found) >= 5, found

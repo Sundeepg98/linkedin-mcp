@@ -2013,7 +2013,28 @@ async def linkedin_my_profile(
                     "skills_listed": None,
                 },
                 "pages_loaded": 1,
-                "source_url": final_url,
+                # SHAPED FOR CONSISTENCY, NOT BECAUSE IT HIDES ANYTHING, and
+                # the difference matters enough to write down.
+                #
+                # `source_url` is a PROVENANCE field: nothing consumes it, and
+                # it duplicated `profile_url` three lines up. Shaping it makes
+                # every url this server reports about a page go through the
+                # same shaper, which is the property worth having.
+                #
+                # IT DOES NOT MAKE THIS PAYLOAD SLUG-FREE AND MUST NOT BE READ
+                # THAT WAY. `name`, `public_identifier` and `profile_url` above
+                # carry the operator's identity DELIBERATELY -- this tool is a
+                # window onto his own account and reporting his own profile is
+                # the entire job. Redacting those would empty the tool.
+                #
+                # So this is NOT the census's defect repeated. There, the raw
+                # `source_url` was the ONLY unshaped url in a payload that
+                # substituted `/in/<member>/` everywhere else, and the surface
+                # it leaked from also carried THIRD PARTIES. Here the identity
+                # is his own and is already published on purpose two fields up.
+                # A disclosure argument is about a particular set of strings,
+                # not a kind of field.
+                "source_url": shape.census_substitute(final_url),
             }
             if deferred:
                 out["completeness"]["not_rendered_means"] = (

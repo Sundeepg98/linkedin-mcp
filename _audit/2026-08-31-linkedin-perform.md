@@ -4800,3 +4800,42 @@ a shell heredoc. It survived an ASCII check, because a check written as
 was then swept: zero. The heredoc-collapses-backslashes scar was written down
 this morning and cost a fourth repeat this afternoon; the standing repair is to
 build a backslash from `chr(92)` or to use an editor rather than a heredoc.
+
+### `linkedin_my_profile`, AND WHY IT IS NOT THE SAME CASE
+
+Fixed on the lead's ruling, and the ruling's stated reason did not survive the
+check. It rested on `census_substitute` already being applied to `href_shapes`
+on that surface. **`linkedin_my_profile` contains ZERO occurrences of any
+shaper** -- no `href_shapes`, no `census_substitute`, no `census_shape`. That
+was true of the census and not of this tool.
+
+The fix is still right, for a different reason, and the reason is worth more
+than the line of code:
+
+    "name":              identity["name"]              deliberate
+    "public_identifier": slug                          deliberate
+    "profile_url":       final_url.split("?", 1)[0]    deliberate
+    "source_url":        final_url                     provenance, unshaped
+
+Three fields carry the operator's identity ON PURPOSE -- this tool is a window
+onto his own account and reporting his own profile is the entire job.
+`source_url` is the fourth, consumed by nothing, duplicating `profile_url`.
+Shaping it buys CONSISTENCY: every url this server reports about a page now
+goes through one shaper.
+
+> **IT DOES NOT MAKE THAT PAYLOAD SLUG-FREE, AND THE RISK IS THAT SOMEBODY
+> READS IT THAT WAY.** A shaped `source_url` sitting above a deliberate
+> `public_identifier` is a worse state than an unshaped one IF it is mistaken
+> for a redaction. So the code says which fields still carry identity and why,
+> in the same comment as the fix.
+
+The census's case was genuinely different on both counts: its raw url was the
+ONLY unshaped one in a payload that substituted `/in/<member>/` everywhere
+else, and the surface it leaked from carried THIRD PARTIES. **A disclosure
+argument is about a particular set of strings, not a kind of field** -- the
+same sentence that was learned this morning about paths, arriving in the
+afternoon about fields.
+
+The five remaining declared sites land on `/feed/`, `/notifications/`, company
+and job urls. None is CONFIRMED to carry a member identifier, which is a
+statement about what has been measured rather than a clearance.
