@@ -1158,10 +1158,12 @@ def test_the_three_assertion_states_are_distinguished():
     """THE PRIMITIVE, on its own, because the tool-level tests can only reach
     two of the three cheaply -- and the third is the one that was missing.
 
-    ``_self_assertion_on`` still returns a BOOLEAN and still has two other
-    callers; it is not changed. ``_self_assertion_state`` is the three-way
-    reading beside it, and the pair is what stops a future edit collapsing
-    them again.
+    ``_self_assertion_on`` still returns a BOOLEAN and is not changed, but as
+    of 2026-09-03 it has NO callers left in the package: the activity path was
+    its last one and now shares ``_goto_self_profile_asserted`` with the
+    editor gate. It is kept as the collapsed reading this pair exists to be
+    contrasted with. ``_self_assertion_state`` is the three-way reading beside
+    it, and the pair is what stops a future edit collapsing them again.
     """
     from linkedin_server.server import _self_assertion_state as state
 

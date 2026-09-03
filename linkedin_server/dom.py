@@ -4043,8 +4043,14 @@ async def read_self_owned_editor_values(
 # url rather than about a document.
 #
 # * C1 -- LinkedIn's own self-assertion. ``isSelfProfile=true`` on the landed
-#   url of ``/in/me/``. ``server._self_assertion_on``, the same helper
-#   ``linkedin_profile_editor_fields`` uses. Not in this script.
+#   url of ``/in/me/``. ``server._goto_self_profile_asserted``, the same
+#   loader ``linkedin_profile_editor_fields`` uses -- it reads the TRI-STATE
+#   ``server._self_assertion_state`` and retries only the ABSENT case, which
+#   is a reading that failed rather than an answer. This line named
+#   ``_self_assertion_on`` until 2026-09-03, when the activity path stopped
+#   using it: that boolean collapses ABSENT into FALSE, so a redirect that
+#   simply did not carry the parameter was reported as LinkedIn denying the
+#   profile was his. Not in this script.
 # * C2 -- UNANIMITY. Every control whose accessible name starts with
 #   :data:`ACTIVITY_OVERFLOW_PREFIX` must carry the SAME remainder, and there
 #   must be at least one. Two different authors anywhere on the page is MIXED
@@ -4568,8 +4574,13 @@ async def read_own_activity_items(
     THE CALLER MUST HAVE ESTABLISHED C1 BEFORE THIS RUNS. This function reads a
     document; it cannot see a url's query string and does not try.
     ``server.linkedin_my_activity_items`` is the only caller and it checks
-    LinkedIn's own ``isSelfProfile=true`` first, with the same
-    ``server._self_assertion_on`` ``linkedin_profile_editor_fields`` uses. This
+    LinkedIn's own ``isSelfProfile=true`` first, through the same
+    ``server._goto_self_profile_asserted`` ``linkedin_profile_editor_fields``
+    uses -- one loader, reading the tri-state and retrying only the ABSENT
+    case. That parity was a CLAIM this line made and the code did not keep
+    until 2026-09-03: this path used the collapsing boolean and loaded once,
+    so a redirect that did not carry the parameter refused as though LinkedIn
+    had said no. Both paths share the loader now. This
     reader is not exposed as a tool and takes no argument selecting a surface,
     for the reason ``read_self_owned_editor_fields`` is not: pointed at an
     arbitrary page it would publish item keys off it.

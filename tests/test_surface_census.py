@@ -3565,13 +3565,18 @@ async def test_the_richest_item_is_chosen_without_indexing_a_moving_list(
         return dict(rail)
 
     monkeypatch.setattr(dom, "read_own_activity_items", _rail)
-    monkeypatch.setattr(
-        server_module, "_self_assertion_on", lambda landed: True
-    )
 
+    # THE ASSERTION IS LANDED, NOT STUBBED, and that is a deliberate change
+    # from the version of this test that patched ``_self_assertion_on`` to
+    # return True. That patch named a SEAM rather than a fact, so when the
+    # resolver moved to the tri-state reader on 2026-09-03 the stub stopped
+    # intercepting anything and this test failed for a reason that had
+    # nothing to do with what it pins. Landing a url that CARRIES the
+    # assertion lets the real reader run and keeps the subject of this test
+    # -- which item the tie-break chooses -- the only thing it can fail on.
     class _Nav:
         async def goto(self, page, url):
-            return url
+            return url + "?isSelfProfile=true"
 
     monkeypatch.setattr(server_module, "BROWSER", _Nav())
 

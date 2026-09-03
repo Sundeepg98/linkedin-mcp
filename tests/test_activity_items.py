@@ -79,8 +79,20 @@ ACTIVITY_VIEWPORT = {"width": 1280, "height": 720}
 LANDED_PROFILE = f"https://www.linkedin.com/in/{MEMBER_SLUG}/?isSelfProfile=true"
 
 #: The same landing with LinkedIn's assertion missing, and identical in every
-#: other respect, so A3 isolates the one thing it is about.
+#: other respect, so A3 isolates the one thing it is about. ABSENT: the
+#: parameter did not ride at all, which is the reader failing to ask -- and,
+#: since 2026-09-03, retried up to ``_SELF_ASSERTION_ATTEMPTS`` times before
+#: refusing ``self_assertion_unreadable``.
 LANDED_NO_ASSERTION = f"https://www.linkedin.com/in/{MEMBER_SLUG}/"
+
+#: THE OTHER STATE, and the one no fixture in this file exercised before
+#: 2026-09-03. ``isSelfProfile=false`` is LinkedIn STATING the profile is not
+#: the viewer's own -- a settled answer, refused at once and never retried,
+#: which is the distinction ``not_self_profile`` exists to keep separate from
+#: the absent case above.
+LANDED_NOT_SELF_PROFILE = (
+    f"https://www.linkedin.com/in/{MEMBER_SLUG}/?isSelfProfile=false"
+)
 
 #: Invented item urns. The digits are drawn from the ``SYNTHETIC_IDS`` family
 #: ``tests/test_no_committed_identity.py`` sanctions -- the same nineteen-digit
@@ -346,19 +358,28 @@ async def run_tool(monkeypatch):
     count, the absence of every name. Testing ``dom.read_own_activity_items``
     directly would answer none of those, because C1 lives in the tool and the
     reader deliberately cannot see a url's query string.
+
+    ``landed`` TAKES EITHER ONE LANDING OR A SEQUENCE OF THEM. A single string
+    is returned on every ``/in/me/`` load, which is what every test before
+    2026-09-03 needed. A list is consumed one entry per load and the LAST
+    entry repeats once exhausted -- which is what a test proving the retry
+    actually retries needs: the self-assertion gate now loads ``/in/me/`` up
+    to twice, and a fixture that can only answer once cannot tell a reader
+    that retries from one that does not.
     """
     playwright = pytest.importorskip("playwright.async_api")
     async with playwright.async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
 
         async def _run(
-            html: str, *, landed: str = LANDED_PROFILE
+            html: str, *, landed: str | list[str] = LANDED_PROFILE
         ) -> tuple[dict[str, Any], list[str], list[str]]:
             context = await browser.new_context(
                 viewport=dict(ACTIVITY_VIEWPORT)
             )
             navigations: list[str] = []
             scripts: list[str] = []
+            landings = [landed] if isinstance(landed, str) else list(landed)
             try:
                 page_obj = await context.new_page()
 
@@ -399,7 +420,8 @@ async def run_tool(monkeypatch):
                 async def fake_goto(target_page, url, **kwargs):
                     navigations.append(url)
                     await render(html)
-                    return landed
+                    index = min(len(navigations) - 1, len(landings) - 1)
+                    return landings[index]
 
                 monkeypatch.setattr(
                     browser_module.BROWSER, "session", fake_session
@@ -706,12 +728,53 @@ async def test_without_the_self_assertion_nothing_at_all_is_read(run_tool):
     also hold for a reader that injected the script and discarded the result;
     the proxy in the harness sees the injection itself, so this asserts that
     nothing was read rather than that nothing was reported.
+
+    ABSENT, NOT FALSE, and retried. Changed 2026-09-03: the single
+    ``no_self_assertion`` collapsed "LinkedIn says no" with "LinkedIn did not
+    answer", and the second is not evidence about the account -- so it is
+    retried up to ``_SELF_ASSERTION_ATTEMPTS`` times before this refuses. The
+    fixture answers ``LANDED_NO_ASSERTION`` on every load, so both attempts
+    come back absent and ``pages_loaded`` is 2, not 1 -- the real count of
+    what was actually navigated, never a hardcoded guess.
     """
     result, navigations, scripts = await run_tool(
         HIS_RAIL_HTML, landed=LANDED_NO_ASSERTION
     )
 
-    assert result.get("refused") == "no_self_assertion", result
+    assert result.get("refused") == "self_assertion_unreadable", result
+    assert "NOT A STATEMENT THAT THE PROFILE IS NOT YOURS" in result["reason"]
+    assert "items" not in result, sorted(result)
+    assert "counts" not in result, sorted(result)
+    assert "item_root_source" not in result, sorted(result)
+    assert scripts == [], scripts
+    assert navigations == [SELF_PROFILE_URL, SELF_PROFILE_URL], navigations
+
+    assert result["authorship"]["established"] is False
+    assert result["authorship"]["self_assertion_present"] is False
+    assert result["authorship"]["authors_found"] is None
+    assert result["authorship"]["unanimous"] is None
+    assert result["authorship"]["matches_page_owner"] is None
+    assert result["pages_loaded"] == 2
+
+
+async def test_an_explicit_false_assertion_refuses_at_once_no_retry(run_tool):
+    """THE SIBLING CASE, and the one no fixture in this file exercised before
+    2026-09-03. ``isSelfProfile=false`` is LinkedIn ANSWERING the question --
+    a settled statement that the profile is not his -- so unlike the absent
+    case above it is refused on the FIRST load, with no second attempt.
+
+    Both this test and the one above drive the identical markup and differ
+    only in the query string on the landed url, exactly like A3 isolates C1
+    against A2. What differs here is which of the two new refusal codes comes
+    back and how many times ``/in/me/`` was loaded to get there -- the
+    distinction the tri-state read exists to keep separate.
+    """
+    result, navigations, scripts = await run_tool(
+        HIS_RAIL_HTML, landed=LANDED_NOT_SELF_PROFILE
+    )
+
+    assert result.get("refused") == "not_self_profile", result
+    assert "settled answer" in result["reason"]
     assert "items" not in result, sorted(result)
     assert "counts" not in result, sorted(result)
     assert "item_root_source" not in result, sorted(result)
@@ -720,9 +783,6 @@ async def test_without_the_self_assertion_nothing_at_all_is_read(run_tool):
 
     assert result["authorship"]["established"] is False
     assert result["authorship"]["self_assertion_present"] is False
-    assert result["authorship"]["authors_found"] is None
-    assert result["authorship"]["unanimous"] is None
-    assert result["authorship"]["matches_page_owner"] is None
     assert result["pages_loaded"] == 1
 
 
@@ -732,6 +792,45 @@ async def test_the_same_markup_reads_when_the_assertion_is_there(run_tool):
     about the fixture."""
     _result, _navigations, scripts = await run_tool(HIS_RAIL_HTML)
     assert scripts == [dom.ACTIVITY_ITEMS_JS], len(scripts)
+
+
+async def test_an_absent_reading_that_turns_true_on_retry_succeeds(run_tool):
+    """THE RETRY ACTUALLY RETRIES, proven rather than assumed.
+
+    Every test above drives a fixture that answers the SAME WAY on every
+    ``/in/me/`` load, because ``run_tool`` could previously only be told one
+    landing -- so none of them could tell a reader that retries from one that
+    gives up after a single absent read; both shapes come back
+    ``self_assertion_unreadable`` with ``pages_loaded == 1`` either way. This
+    is the one test in the file that hands the fixture a SEQUENCE, because
+    proving the retry needs the second load to answer differently from the
+    first.
+
+    MEASURED 2026-09-02: two live calls seconds apart returned absent then
+    true, which is the exact sequence played back here. If
+    ``_goto_self_profile_asserted`` stopped after the first absent load --
+    the defect this file used to pin -- this would refuse
+    ``self_assertion_unreadable`` with ``pages_loaded == 1`` instead of
+    succeeding with ``pages_loaded == 2``, which is what makes this test able
+    to fail.
+    """
+    result, navigations, scripts = await run_tool(
+        HIS_RAIL_HTML, landed=[LANDED_NO_ASSERTION, LANDED_PROFILE]
+    )
+
+    assert result.get("refused") is None, result
+    assert result["items"] == [HIS_ITEM_ONE, HIS_ITEM_TWO], result["items"]
+    assert result["authorship"]["established"] is True
+    assert result["authorship"]["self_assertion_present"] is True
+
+    # THE PROOF: two navigations, both to the one address, and the tool did
+    # not give up after the first one came back absent.
+    assert navigations == [SELF_PROFILE_URL, SELF_PROFILE_URL], navigations
+    assert result["pages_loaded"] == 2, result
+    # AND THE RAIL WAS READ EXACTLY ONCE -- off the SECOND, successful load.
+    # A reader that read the first (absent) load too would inject the script
+    # twice, which this rules out the same way A3 rules out reading zero.
+    assert scripts == [dom.ACTIVITY_ITEMS_JS], scripts
 
 
 # ---------------------------------------------------------------------------
@@ -973,7 +1072,8 @@ def test_the_stray_really_sits_outside_the_rail():
 #: missed the refusal reasons entirely.
 EVERY_PATH = [
     ("established", HIS_RAIL_HTML, LANDED_PROFILE),
-    ("no_self_assertion", HIS_RAIL_HTML, LANDED_NO_ASSERTION),
+    ("self_assertion_unreadable", HIS_RAIL_HTML, LANDED_NO_ASSERTION),
+    ("not_self_profile", HIS_RAIL_HTML, LANDED_NOT_SELF_PROFILE),
     ("mixed_authors", MIXED_RAIL_HTML, LANDED_PROFILE),
     ("no_overflow_controls", EMPTY_RAIL_HTML, LANDED_PROFILE),
     ("no_page_owner_heading", NO_HEADING_HTML, LANDED_PROFILE),
@@ -1022,6 +1122,7 @@ def test_every_one_of_those_names_really_is_in_its_markup():
     assert OTHER_AUTHOR in WRONG_OWNER_HTML
     assert MEMBER_SLUG in LANDED_PROFILE
     assert MEMBER_SLUG in LANDED_NO_ASSERTION
+    assert MEMBER_SLUG in LANDED_NOT_SELF_PROFILE
 
 
 # ---------------------------------------------------------------------------
@@ -1296,10 +1397,12 @@ async def test_the_refusal_codes_are_the_enumeration_they_claim_to_be(run_tool):
     """A COMPLETENESS CLAIM, MADE CHECKABLE.
 
     ``dom.ACTIVITY_REFUSALS`` says the reader has five refusals and the tool
-    adds a sixth of its own. A tuple nothing exercises is a list of hopes, so
-    every code in it is produced here by a real fixture, and every code produced
-    is shown to be in it -- both directions, because one of them alone would
-    pass against a tuple with a spare entry nobody can reach.
+    adds two of its own -- ``not_self_profile`` and ``self_assertion_unreadable``,
+    the tri-state split of what was one ``no_self_assertion`` code before
+    2026-09-03. A tuple nothing exercises is a list of hopes, so every code in
+    it is produced here by a real fixture, and every code produced is shown to
+    be in it -- both directions, because one of them alone would pass against
+    a tuple with a spare entry nobody can reach.
     """
     produced = set()
     for _label, markup, landed in EVERY_PATH:
@@ -1308,7 +1411,10 @@ async def test_the_refusal_codes_are_the_enumeration_they_claim_to_be(run_tool):
         if code is not None:
             produced.add(code)
 
-    assert produced == set(dom.ACTIVITY_REFUSALS) | {"no_self_assertion"}, (
+    assert produced == set(dom.ACTIVITY_REFUSALS) | {
+        "not_self_profile",
+        "self_assertion_unreadable",
+    }, (
         sorted(produced),
         sorted(dom.ACTIVITY_REFUSALS),
     )
