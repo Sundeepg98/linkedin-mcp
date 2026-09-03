@@ -103,6 +103,10 @@ SETTLES, whichever way it comes out:
 * whether the dropdown opens at all for a filled combobox;
 * how many rows each CANDIDATE matcher would match, which is what chooses the
   one the server should press;
+* WHERE the needle begins inside each row's accessible name, and how long
+  those names are, as two histograms of integers -- the measurement that says
+  whether an anchored matcher can ever work, taken without any name crossing
+  into this process;
 * whether pressing the one row the strictest matcher uniquely identifies
   commits a recipient -- read afterwards through
   ``dom.RECIPIENT_CHIP_SELECTORS``, whose four candidates have never matched
@@ -301,6 +305,77 @@ async def main() -> None:
             "of these is how LinkedIn draws one. A human looking at the "
             "screen tells those apart in a second."
         )
+
+        # --- 3b. WHERE THE NEEDLE SITS, and this is now the whole question --
+        #
+        # THREE LIVE RUNS, three browser sessions, identical numbers: substring
+        # 10, and ZERO for every anchored candidate. The rows do not BEGIN with
+        # the name -- something precedes it inside the accessible name -- so no
+        # anchored matcher can work until somebody knows how much. Reading the
+        # name to find out would mean reading other people's names.
+        #
+        # POSITION IS A NUMBER AND A NUMBER CAN CROSS. Two histograms of
+        # integers come back and nothing else, and they are AGGREGATE rather
+        # than per-row, which is strictly less disclosing and answers the same
+        # question.
+        #
+        # WHAT THE ANSWER MEANS IS DECIDED HERE, BEFORE IT IS READ, so the
+        # reading cannot be fitted to a hope:
+        #
+        #   one offset, all rows on it  -> the prefix is FURNITURE and a
+        #                                  matcher can skip past it
+        #   several offsets             -> the name sits at a variable
+        #                                  position and NO positional matcher
+        #                                  will ever work. Conclusive, not
+        #                                  another candidate.
+        #   no offset in range          -> the needle is not in the accessible
+        #                                  name in a form this engine matches,
+        #                                  and the substring count was matching
+        #                                  something else about the row.
+        where = await dom.read_typeahead_needle_offsets(page, needle)
+        _report(
+            "3b. WHERE THE NEEDLE BEGINS (two histograms, integers only)",
+            {
+                "rows scanned": where.get("rows"),
+                "scanned to": where.get("scanned_to"),
+                "error": where.get("error"),
+            },
+        )
+        offsets = dict(where.get("offsets") or {})
+        print("    needle begins at offset -> how many rows:")
+        if offsets:
+            for position in sorted(offsets):
+                print(f"      offset {position:>4}   {offsets[position]} row(s)")
+        else:
+            print("      NOTHING. The needle begins nowhere inside the scan.")
+        lengths = dict(where.get("lengths") or {})
+        print("    accessible name length -> how many rows:")
+        if lengths:
+            for size in sorted(lengths):
+                print(f"      length {size:>4}   {lengths[size]} row(s)")
+        else:
+            print("      NOTHING. No row's name fit inside the scan.")
+
+        if not offsets:
+            print(
+                "    VERDICT: the needle is not at any position this engine "
+                "can match, so the substring count above was matching "
+                "something other than the name as this scan spells it."
+            )
+        elif len(offsets) == 1:
+            only = next(iter(offsets))
+            print(
+                f"    VERDICT: EVERY MATCHING ROW BEGINS THE NEEDLE AT {only}. "
+                "The prefix is furniture of constant width, so a matcher can "
+                "skip exactly that many characters and anchor after it."
+            )
+        else:
+            print(
+                f"    VERDICT: the needle begins at {len(offsets)} DIFFERENT "
+                "positions across these rows. The name sits at a variable "
+                "position and NO positional matcher will work. That is a "
+                "conclusive answer rather than another candidate to try."
+            )
 
         # --- 4. the gate's verdict, unmodified ------------------------------
         gate = await writes._typeahead_gate(page, grant)

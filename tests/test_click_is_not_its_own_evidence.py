@@ -890,6 +890,207 @@ async def test_the_strictest_selector_resolves_to_one_row_on_a_real_listbox(
     assert found["selector"].startswith("role=option[name=/^"), found["selector"]
 
 
+
+# ---------------------------------------------------------------------------
+# 2e. THE SHAPE MY FIXTURES COULD NOT CONTAIN, and the instrument for it
+# ---------------------------------------------------------------------------
+#
+# THREE LIVE RUNS, three browser sessions, identical: substring 10 and ZERO
+# for every anchored candidate including the one this file named strictest.
+# ``prefix`` at zero is the finding -- THE ROWS DO NOT BEGIN WITH THE NAME.
+#
+# **EVERY FIXTURE ABOVE ASSUMED THEY DID.** They were built to the shape the
+# only measurement available at the time showed -- name first, degree run on --
+# and every candidate derived from them inherits that opening. That is not a
+# bug in the fixtures; it is the limit of what a fixture can tell you, and it
+# is why the census was worth building even though it chose nothing.
+#
+# So this section builds the shape the live page actually has, and tests the
+# instrument that answers the only question left: HOW MUCH precedes the name,
+# and is it the same on every row.
+
+
+def _prefixed_row(furniture: str, name: str, degree: str) -> str:
+    """A suggestion row with FURNITURE before the name.
+
+    An avatar's alternative text, a "Photo of", a status word -- anything the
+    row draws before the person. What it says does not matter; that it is
+    THERE, and whether it is the same width on every row, is the whole
+    question.
+    """
+    return (
+        '<div role="option"><span>'
+        + furniture
+        + "</span><span>"
+        + name
+        + "</span><span>"
+        + degree
+        + "</span></div>"
+    )
+
+
+#: THE LIVE SHAPE: constant furniture before every name.
+COMPOSER_PREFIXED = _composer_with(
+    _listbox_of(
+        _prefixed_row("Photo of ", NAMED_RECIPIENT, "1st"),
+        _prefixed_row("Photo of ", SIMILAR_NAME, "2nd"),
+        _prefixed_row("Photo of ", PREFIX_NEEDLE, "1st"),
+    )
+)
+
+#: THE OTHER POSSIBILITY: furniture of DIFFERENT widths per row. If the live
+#: page looks like this, no positional matcher can ever work, and that is a
+#: conclusive answer rather than another candidate.
+COMPOSER_VARYING_PREFIX = _composer_with(
+    _listbox_of(
+        _prefixed_row("Photo of ", NAMED_RECIPIENT, "1st"),
+        _prefixed_row("Img ", SIMILAR_NAME, "2nd"),
+        _prefixed_row("Picture of the member ", PREFIX_NEEDLE, "1st"),
+    )
+)
+
+
+async def test_a_prefixed_listbox_reproduces_the_live_census_signature(
+    over, _fast_wait
+):
+    """**THE FIXTURE THAT FINALLY MATCHES THE LIVE READING.**
+
+    Live: substring 10, every anchored candidate 0. Here: substring 3, every
+    anchored candidate 0. Same signature, and it is produced by ONE difference
+    from the fixtures above -- furniture in front of the name.
+
+    That is what the live numbers were telling us, and until this fixture
+    existed nothing local could reproduce them. A census that only ever ran
+    against pages shaped like its own hypothesis would have gone on agreeing
+    with itself.
+    """
+    found = await _census(over, COMPOSER_PREFIXED, PREFIX_NEEDLE)
+    census = found["observed"]["pattern_census"]
+    assert census["substring"] == 3, census
+    assert census["prefix"] == 0, census
+    assert census["prefix_then_nonletter"] == 0, census
+    assert census["prefix_boundary"] == 0, census
+    assert census["prefix_then_space_or_end"] == 0, census
+    assert census["whole"] == 0, census
+
+    # AND THE GATE REFUSES, saying the anchored family found nothing rather
+    # than pretending a longer needle would help.
+    assert found["refused_condition"] == "4_several_options_match"
+    assert "EVERY STRICTER CANDIDATE MATCHES NOTHING" in found["why"], found["why"]
+
+
+async def test_a_constant_prefix_reports_as_one_offset(over, _fast_wait):
+    """CONSTANT FURNITURE -> ONE OFFSET, every row on it.
+
+    This is the outcome that would unblock the send path: the prefix is the
+    same width everywhere, so a matcher can skip exactly that many characters
+    and anchor after them.
+
+    THE OFFSET IS NOT HARDCODED. Accessible-name computation collapses
+    whitespace and this test does not model that, so what is asserted is the
+    SHAPE of the answer -- exactly one position, non-zero, carrying every
+    matching row. A hardcoded number here would be asserting my model of the
+    accessibility tree rather than the instrument's reading of it.
+    """
+
+    async def work(page):
+        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+
+    found = await over(COMPOSER_PREFIXED, work)
+    assert found["error"] is None, found
+    assert found["rows"] == 3, found
+    offsets = found["offsets"]
+    assert len(offsets) == 1, offsets
+    position, count = next(iter(offsets.items()))
+    assert int(position) > 0, offsets
+    assert count == 3, offsets
+    # AND THE NAME LENGTHS COME BACK TOO, which is how a reader knows the scan
+    # spanned the names rather than running off the end of them.
+    assert found["lengths"], found
+
+
+async def test_a_varying_prefix_reports_as_several_offsets(over, _fast_wait):
+    """VARIABLE FURNITURE -> SEVERAL OFFSETS, and that is CONCLUSIVE.
+
+    The three rows carry furniture of three different widths. The instrument
+    must report three positions rather than averaging, picking, or reporting
+    the commonest -- because the finding here is that no positional matcher
+    can work, and a reading that collapsed to one number would hide it.
+
+    THIS IS THE CONTROL FOR THE TEST ABOVE. Without it, "one offset" proves
+    only that this instrument returns one number, not that it returns one
+    number BECAUSE the prefix is constant.
+    """
+
+    async def work(page):
+        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+
+    found = await over(COMPOSER_VARYING_PREFIX, work)
+    assert found["error"] is None, found
+    offsets = found["offsets"]
+    assert len(offsets) == 3, offsets
+    assert sum(offsets.values()) == 3, offsets
+
+
+async def test_the_offset_scan_returns_integers_and_no_name(over, _fast_wait):
+    """THE PRIVACY PROPERTY, asserted rather than argued.
+
+    The whole reason this is a scan of locator counts instead of a page
+    function is that a number can cross where a name cannot. So the entire
+    reading is rendered and searched for every component word of every
+    invented person on the page -- including the one the needle names, because
+    unlike the receipt this reading echoes nothing he supplied and has no
+    business carrying it either.
+    """
+
+    async def work(page):
+        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+
+    found = await over(COMPOSER_PREFIXED, work)
+    rendered = json.dumps(found, default=str).lower()
+    # DISTINCTIVE TOKENS ONLY, and the threshold is the point rather than a
+    # convenience. ``PREFIX_NEEDLE`` ends in a single initial, and a one- or
+    # two-character token is found in ordinary JSON furniture -- the first
+    # version of this assertion fired on the "n" in ``null``. A substring
+    # search is evidence only when what it searches for could not have arrived
+    # by coincidence, which is the same reason the names in this suite are
+    # constructed compounds rather than plausible ones.
+    for name in (NAMED_RECIPIENT, SIMILAR_NAME, PREFIX_NEEDLE, "photo"):
+        for word in name.split():
+            if len(word) < 3:
+                continue
+            assert word.lower() not in rendered, (name, word, rendered)
+    # AND THE READING IS NUMBERS AND KEYS THIS MODULE NAMED, asserted directly
+    # rather than inferred from the absence of words: every value in both
+    # histograms is an integer, and so is every key.
+    for histogram in (found["offsets"], found["lengths"]):
+        for position, count in histogram.items():
+            assert isinstance(count, int), (position, count)
+            assert int(position) >= 0
+
+
+async def test_a_needle_nobody_carries_reports_no_offset_at_all(
+    over, _fast_wait
+):
+    """THE THIRD OUTCOME, and it must not look like the other two.
+
+    "The needle begins nowhere" is a different fact from "it begins at one
+    place" and from "it begins at several", and the probe branches on exactly
+    that distinction. An empty histogram is the honest answer and it is
+    asserted here so the branch cannot rot.
+    """
+
+    async def work(page):
+        return await dom.read_typeahead_needle_offsets(page, UNMATCHABLE_NEEDLE)
+
+    found = await over(COMPOSER_PREFIXED, work)
+    assert found["offsets"] == {}, found
+    assert found["rows"] == 3, found
+    # THE ROWS ARE STILL THERE AND STILL HAVE LENGTHS, which is what separates
+    # "nobody matched" from "nothing was drawn".
+    assert found["lengths"], found
+
+
 # ---------------------------------------------------------------------------
 # 3. Structure: the invariant, read off the syntax tree
 # ---------------------------------------------------------------------------

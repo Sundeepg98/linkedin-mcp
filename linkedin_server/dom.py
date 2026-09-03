@@ -5503,6 +5503,11 @@ _SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
 #: more rows on this surface means pressing somebody else.
 _REGEX_META = ".^$*+?()[]{}|"
 
+#: A LITERAL BACKSLASH, named because this module writes regex bodies as Python
+#: strings and a bare one in a source literal is the character most likely to
+#: be miscounted by a reader and by an editor.
+BACKSLASH = chr(92)
+
 
 #: THE CANDIDATE MATCHERS, AS A CENSUS RATHER THAN A CHOICE.
 #:
@@ -5570,9 +5575,28 @@ TYPEAHEAD_NAME_PATTERNS: tuple[tuple[str, str], ...] = (
     ("whole", "^{n}$"),
 )
 
-#: THE STRICTEST CANDIDATE IN :data:`TYPEAHEAD_NAME_PATTERNS` that can still
-#: match a row carrying a degree suffix. Named rather than indexed so the
-#: ambiguity refusal and the census cannot drift apart.
+#: THE CANDIDATE THE SERVER PRESSES BY. Named rather than spelled out at the
+#: call site, so "which matcher reaches a human being" is a row in the table
+#: above and a reviewer reads it there.
+#:
+#: IT IS THE LOOSEST ONE, AND THAT IS MEASURED RATHER THAN CHOSEN. Three live
+#: runs on 2026-09-03, three separate browser sessions, identical numbers:
+#: substring 10, and ZERO for every anchored candidate including the one named
+#: strictest below. The rows do not begin with the name -- something precedes
+#: it inside the accessible name -- so anchoring refuses everybody rather than
+#: refusing correctly. Until an offset reading says what precedes it, the
+#: substring is the only candidate that matches anything at all.
+TYPEAHEAD_SHIPPED_PATTERN = "substring"
+
+#: THE STRICTEST CANDIDATE that can still match a row whose connection degree
+#: is run onto the name. Named rather than indexed so the ambiguity refusal,
+#: the census and the probe's aim cannot drift apart.
+#:
+#: MEASURED DEAD ON THE LIVE SURFACE, and the name is kept because the reason
+#: is worth keeping: it is strictest among the ANCHORED family, and the
+#: anchored family is what three live runs measured at zero. It is what the
+#: probe would aim by if anchoring worked, and the refusal that reports it
+#: matching zero is how a reader learns that it does not.
 TYPEAHEAD_STRICTEST_PATTERN = "prefix_then_nonletter"
 
 
@@ -5616,6 +5640,31 @@ def typeahead_pattern_selector(needle: str, body: str) -> str:
     return "role=option[name=/" + body.replace("{n}", escaped_needle(needle)) + "/i]"
 
 
+def _typeahead_selector_named(needle: str, label: str) -> str:
+    """Resolve ONE named candidate from the table and build its selector.
+
+    THE SINGLE LOOKUP, and it exists because there are two named aims -- the
+    one the server presses by and the one the probe presses by -- and they
+    must be two different NAMES rather than two different pieces of string
+    surgery. Resolving both through here means neither can drift from the
+    table the census counts, or from the label the refusal texts print.
+
+    Raises:
+        ExtractionFailedError: no candidate carries that label. Refused rather
+            than defaulted: guessing which candidate was meant is exactly the
+            choice this function exists to remove.
+    """
+    for candidate, body in TYPEAHEAD_NAME_PATTERNS:
+        if candidate == label:
+            return typeahead_pattern_selector(needle, body)
+    raise ExtractionFailedError(
+        f"refusing to build a typeahead selector: {label!r} is not a candidate "
+        "in TYPEAHEAD_NAME_PATTERNS. A name and the table have diverged, and "
+        "guessing which candidate was meant is exactly the choice this lookup "
+        "exists to remove."
+    )
+
+
 def typeahead_strictest_selector(needle: str) -> str:
     """The STRICTEST candidate matcher, as a selector. FOR AN INSTRUMENT ONLY.
 
@@ -5639,16 +5688,96 @@ def typeahead_strictest_selector(needle: str) -> str:
     refusing a longer name where the substring accepts it -- so the instrument
     presses less than the server would, never more.
     """
-    for label, body in TYPEAHEAD_NAME_PATTERNS:
-        if label == TYPEAHEAD_STRICTEST_PATTERN:
-            return typeahead_pattern_selector(needle, body)
-    raise ExtractionFailedError(
-        "refusing to build the strictest typeahead selector: "
-        f"{TYPEAHEAD_STRICTEST_PATTERN!r} is not a candidate in "
-        "TYPEAHEAD_NAME_PATTERNS. The name and the table have diverged, and "
-        "guessing which candidate was meant is exactly the choice this "
-        "function exists to remove."
-    )
+    return _typeahead_selector_named(needle, TYPEAHEAD_STRICTEST_PATTERN)
+
+
+#: HOW FAR THE OFFSET SCAN LOOKS, in characters. A suggestion row's accessible
+#: name is a row of UI text; 200 is well past any plausible one and the scan
+#: costs one locator count per position, which is a few milliseconds each.
+TYPEAHEAD_OFFSET_SCAN_MAX = 200
+
+
+async def read_typeahead_needle_offsets(
+    page: Any, needle: str, *, scan_to: int = TYPEAHEAD_OFFSET_SCAN_MAX
+) -> dict[str, Any]:
+    """WHERE the needle sits inside each row's name, and how long the names are.
+
+    **TWO HISTOGRAMS OF INTEGERS AND NOTHING ELSE.** ``offsets`` maps a
+    character position to how many rows begin the needle there; ``lengths``
+    maps a name length to how many rows have it. No text, no name, no
+    substring, and nothing per-row -- an aggregate is strictly less
+    disclosing than a list of pairs and answers the same question.
+
+    THE QUESTION IT EXISTS FOR, and it is the only one left. Three live runs
+    measured ``substring`` at 10 and every anchored candidate at ZERO, which
+    says the rows do NOT begin with the name: something precedes it inside the
+    accessible name and no anchored matcher can work until somebody knows how
+    much. Reading the name to find out would mean reading other people's
+    names. **POSITION IS A NUMBER, AND A NUMBER CAN CROSS.**
+
+    WHAT THE ANSWER MEANS, decided before it is taken so the reading cannot be
+    fitted to a hope:
+
+    * ONE offset with all the rows on it -- the prefix is FURNITURE, constant
+      across rows, and a matcher can skip past it by construction.
+    * SEVERAL offsets -- the name sits at a genuinely variable position, and
+      no positional matcher will ever work. That is a conclusive answer, not
+      another candidate.
+    * NO offset at all inside the scan -- the needle is not in the accessible
+      name in a form this engine matches, and the substring count of 10 was
+      matching something else about the row.
+
+    IT NEEDS NO INJECTED SCRIPT AND NO EVALUATE WAIVER, which is why it is
+    shaped as a SCAN rather than as a page function. For each position ``k``
+    it asks the role engine for rows whose name begins with exactly ``k``
+    arbitrary characters and then the needle, and counts them -- so the whole
+    measurement is locator counts through the same engine the aim uses. A page
+    function would have been the obvious way to get a per-row pair, and it
+    would have cost the fourteenth evaluate waiver in order to return LESS
+    private data than this returns.
+
+    THE ANY-CHARACTER CLASS IS THE WHITESPACE PAIR RATHER THAN A DOT, because
+    a dot does not match a newline and a name this scan could not span would
+    report as ABSENT rather than as long -- the one reading that would be
+    mistaken for a finding. Accessible names are whitespace-collapsed, so this
+    is belt and braces rather than an expected case.
+    """
+    out: dict[str, Any] = {
+        "offsets": {},
+        "lengths": {},
+        "scanned_to": int(scan_to),
+        "rows": 0,
+        "error": None,
+    }
+    try:
+        body = escaped_needle(needle)
+    except ExtractionFailedError as exc:
+        out["error"] = str(exc)
+        return out
+    try:
+        out["rows"] = int(await page.locator(TYPEAHEAD_OPTION_SELECTORS[0]).count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+
+    any_char = "[" + BACKSLASH + "s" + BACKSLASH + "S]"
+    for position in range(int(scan_to) + 1):
+        pattern = "^" + any_char + "{" + str(position) + "}" + body
+        try:
+            found = int(await page.locator("role=option[name=/" + pattern + "/i]").count())
+        except Exception:  # noqa: BLE001 - an unusable position is skipped
+            continue
+        if found:
+            out["offsets"][position] = found
+    for length in range(int(scan_to) + 1):
+        pattern = "^" + any_char + "{" + str(length) + "}$"
+        try:
+            found = int(await page.locator("role=option[name=/" + pattern + "/i]").count())
+        except Exception:  # noqa: BLE001 - an unusable length is skipped
+            continue
+        if found:
+            out["lengths"][length] = found
+    return out
 
 
 async def read_typeahead_pattern_census(
@@ -5740,13 +5869,24 @@ def typeahead_option_selector(needle: str) -> str:
             character. REFUSED RATHER THAN ESCAPED: this server would rather
             not send at all than send accurately-quoted to somebody else.
     """
-    # ONE ESCAPER, SHARED WITH THE CENSUS. It used to live here; it moved to
-    # escaped_needle() when read_typeahead_pattern_census started needing the
-    # same transformation. Two copies would be two chances to disagree, and a
-    # disagreement here means the census counting rows this function would not
-    # press -- which is the one way a measurement can mislead the decision it
-    # was taken for.
-    return "role=option[name=/" + escaped_needle(needle) + "/i]"
+    # ONE CONSTRUCTOR, AND THIS IS A TABLE LOOKUP RATHER THAN A THIRD PIECE OF
+    # STRING SURGERY.
+    #
+    # THREE FUNCTIONS BUILT THIS SHAPE FOR A WHILE and the team lead called it
+    # out: this one, the census's parameterised builder, and the probe's
+    # strictest aim. They are not competitors -- they answer three different
+    # questions -- but they were three places that knew how to spell
+    # "role=option[name=/.../i]" and how to escape a needle, which is three
+    # chances to disagree about which row is meant.
+    #
+    # SO THERE IS NOW ONE CONSTRUCTOR (typeahead_pattern_selector), ONE ESCAPER
+    # (escaped_needle) and ONE LOOKUP (_typeahead_selector_named), and the two
+    # named aims are each a single line naming a row of the table the census
+    # counts. What did NOT collapse is the pair of NAMES: the aim the server
+    # presses by and the aim the probe presses by stay two different constants
+    # rather than one flag, because a flag puts "which matcher reaches a human
+    # being" one boolean away from changing.
+    return _typeahead_selector_named(needle, TYPEAHEAD_SHIPPED_PATTERN)
 
 
 async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
