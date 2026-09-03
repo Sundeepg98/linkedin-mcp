@@ -1665,8 +1665,27 @@ async def test_a_follow_says_plainly_that_this_server_cannot_take_it_back(
     # unfollow_company is performable, so its own undo -- a follow -- is the
     # one this server does NOT do. The pair must not both claim to cover each
     # other; that would be a cycle of two half-truths reading as one whole one.
+    #
+    # THIS WAS AN ``or`` UNTIL 2026-09-03, AND THE ``or`` PINNED A LIE IN:
+    #
+    #     assert "NOT this server" in unfollow_by or "not performed" in unfollow_by
+    #
+    # The second arm accepted "linkedin_follow_company is sanctioned but is
+    # not performed" as a SATISFYING condition. That sentence went false on
+    # 2026-08-30, the day follow_company entered PERFORMABLE, and went on
+    # being printed to him because this test was happy either way. A test that
+    # will accept either of two reasons cannot notice when one of them stops
+    # being true -- it is not merely failing to catch the drift, it is the
+    # reason the drift reads as intentional to the next person who looks.
+    #
+    # The verdict and the reason are now asserted SEPARATELY, and the reason
+    # is the aiming gap, which is a property of two address spaces rather than
+    # a permission that can be flipped by one line in a frozenset.
     unfollow_by = spec_for_action("unfollow_company").reversible_by
-    assert "NOT this server" in unfollow_by or "not performed" in unfollow_by
+    assert "NOT this server" in unfollow_by
+    aiming = unfollow_by.casefold()
+    assert "slug" in aiming
+    assert "numeric company id" in aiming
 
     # And the distinction survives into the block he actually reads, which is
     # the only place it can do him any good.

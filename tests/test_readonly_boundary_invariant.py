@@ -69,6 +69,70 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: because widening them lets something through, and this one is worth freezing
 #: because ADDING TO IT lets something through. A boundary made of four
 #: denylists and one allowlist is only as frozen as its allowlist.
+#: RE-FROZEN 2026-09-03 A SECOND TIME, by a different wave, AND THIS IS THE
+#: FIRST RE-FREEZE IN THIS FILE'S HISTORY WHERE THE MOVING DIGEST IS A DENYLIST
+#: GROWING. Every previous one moved the allowlist. Recorded here rather than
+#: beside the values because BOTH digest dicts carry it and a ledger entry
+#: written twice is a ledger entry that will be updated once.
+#:
+#:     _FORBIDDEN_URL_SUBSTRINGS  afcb7f0d14c481a0 -> b0291a66ec9bd51e
+#:
+#:     _ALLOWED_URL_PATTERNS      7696e6f928aee6e2   UNCHANGED
+#:     _MUTATION_CALL_PATTERNS    23aece1483afdee9   UNCHANGED
+#:     JS_MUTATION_TOKENS         d47e30b67c583c1b   UNCHANGED
+#:     SANCTIONED_MUTATIONS       bccb17cef4b986f2   UNCHANGED
+#:     <functions>                df57656b3e6e8cf9   UNCHANGED
+#:
+#: THE DIRECTION: TEN SUBSTRINGS ADDED, NONE REMOVED, NOTHING ELSE MOVED AT
+#: ALL. ``<functions>`` unchanged means ``assert_read_url`` is byte-identical
+#: across a change that added ten refusals to it -- no gate was taught an
+#: exception, no check reordered, no clause relaxed. The whole change is DATA,
+#: which is the only shape of boundary change a reviewer can check by reading
+#: a list.
+#:
+#: WHAT MOVED IT. ``_FORBIDDEN_URL_SUBSTRINGS`` documents itself as "a second,
+#: independent gate ... belt and braces". Asked MECHANICALLY for the first
+#: time -- which addresses does the anchored allowlist refuse ALONE? -- ten
+#: came back, including the account's password page and its second
+#: authentication factor. NONE WAS EVER REACHABLE. The allowlist held all ten
+#: and holds them still; this is a defence-in-depth asymmetry, not an open
+#: door, and it is worth saying in that order.
+#:
+#: AND WHY TEN ENTRIES IS NOT TEN LITERALS. The 2026-08-30 and 2026-08-31
+#: entries each closed the surface that had just been found. These close the
+#: reason those surfaces were findable: the list was anchored to path
+#: spellings on the DESKTOP tree, so a second spelling
+#: (``/public-profile/settings``, no trailing slash), a legacy namespace
+#: (``/uas/``) or a parallel tree (``/mwlite/``, an entire mobile-web mirror)
+#: walked past it. ``tests/test_the_second_gate_covers_the_class.py`` is where
+#: that claim is CHECKED rather than made: it puts an address through the real
+#: guard for every one of these ten that is not itself one of the ten found,
+#: so an entry that closed only its own member goes red there.
+#:
+#: ZERO CASUALTIES, MEASURED BEFORE APPLIED, in the order the 2026-09-03
+#: allowlist re-freeze required rather than trusted: every census surface,
+#: every readable setting and every write target rebuilt from its own spec,
+#: filtered to those the ANCHORED ALLOWLIST admits, all still open. That check
+#: ships in the same file rather than being a sentence here.
+#:
+#: ONE PART OF THE CLASS IS DELIBERATELY NOT CLOSED and the boundary is honest
+#: about it: six of the ten live under ``/mypreferences/d/``, that prefix is
+#: the natural close, and it CANNOT be taken -- ``writes.assert_write_url``
+#: reads this tuple directly and does not consult
+#: ``_FORBIDDEN_SUBSTRING_EXEMPTIONS``, so the prefix would break the only
+#: settings write this server ships. Shown, not argued, in
+#: ``test_the_subtree_prefix_is_absent_and_the_blocker_is_shown``.
+#:
+#: VERIFIED UNDER 3.13.14 ONLY, and that is a real gap in this file's own
+#: ritual, stated rather than papered over: the box carries one interpreter.
+#: What limits the risk is not an argument but the shape of what moved -- a
+#: tuple of plain string literals, the class this file's docstring records as
+#: matching on EVERY Python through both interpreter splits that killed digest
+#: v1 and v2 ("the four CONSTANT digests matching every time because a regex
+#: is a string on every Python"). The f-string hazard lives in
+#: ``<functions>``, which did not move. The 3.10 cell in CI is the actual
+#: verification and it runs on push; if it reds on this digest, that sentence
+#: was wrong and this is where to come back to.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
@@ -407,7 +471,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # DIFFERED. Both were updated in the same commit; that file now records one
     # argued admission and three closed accidents.
     "_ALLOWED_URL_PATTERNS": "7696e6f928aee6e2",
-    "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
+    # RE-BASELINED 2026-09-03 by the class close. afcb7f0d14c481a0 ->
+    # b0291a66ec9bd51e, ten substrings added and none removed. The full
+    # ledger entry is above ``PINNED``; both dicts carry the same value and
+    # both moved for the same edit.
+    "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # RE-FROZEN AGAIN 2026-08-26, and this one moved for a different reason
@@ -579,7 +647,11 @@ DENYLISTS_AT_A76FE32 = {
     # DIFFERED. Both were updated in the same commit; that file now records one
     # argued admission and three closed accidents.
     "_ALLOWED_URL_PATTERNS": "7696e6f928aee6e2",
-    "_FORBIDDEN_URL_SUBSTRINGS": "afcb7f0d14c481a0",
+    # RE-BASELINED 2026-09-03 by the class close. afcb7f0d14c481a0 ->
+    # b0291a66ec9bd51e, ten substrings added and none removed. The full
+    # ledger entry is above ``PINNED``; both dicts carry the same value and
+    # both moved for the same edit.
+    "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }

@@ -641,6 +641,21 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     # password page at EVERY address -- desktop tree, mobile tree, legacy
     # namespace, and whatever LinkedIn ships next. The prefix would refuse it
     # at one. On this axis the second-best close is the broader one.
+    #
+    # ONE RESIDUE, RECORDED RATHER THAN LEFT TO BE TRIPPED OVER, in the same
+    # spirit as the note on the intro-editor exemption above. A word entry is
+    # matched against the WHOLE url, and ``/in/<vanity>/`` is on the allowlist
+    # -- so a member whose vanity slug happens to contain one of these words
+    # is now refused. ``cookies`` and ``visibility`` are the two that could
+    # plausibly appear in a real person's handle; the rest could not.
+    #
+    # MEASURED BEFORE ACCEPTED, not waved past: every ``linkedin.com/in/<slug>``
+    # in this repository was extracted and checked -- 16 distinct slugs, ZERO
+    # of which any entry here refuses. And the failure mode is the safe one:
+    # a loud WriteAttemptError naming the substring, never a silent wrong
+    # read. A false refusal on one third-party profile is the price of a
+    # second gate on the account's own cookie and visibility settings, and it
+    # is a price this list is in the business of paying.
     "password",
     "two-factor",
     "verification",
