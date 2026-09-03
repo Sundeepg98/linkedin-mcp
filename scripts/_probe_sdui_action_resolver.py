@@ -206,6 +206,19 @@ from linkedin_server.config import BASE_URL  # noqa: E402
 #: only profile spelling that cannot reach a third party.
 SELF_PROFILE_URL = f"{BASE_URL}/in/me/"
 
+
+def _member_path(url: str) -> str:
+    """The `/in/<vanity>/` path of a url, with no query and no trailing slash.
+
+    THE PART THAT IDENTIFIES A MEMBER, AND NOTHING ELSE. LinkedIn appends its
+    own ``?isSelfProfile=true`` to the first redirect off ``/in/me/`` and does
+    not reliably append it to the next one, so the full string is not stable
+    between two navigations to the same page. The path is.
+    """
+    from urllib.parse import urlsplit
+
+    return urlsplit(str(url or "")).path.rstrip("/")
+
 #: NO OUTPUT DIRECTORY, and no path constant to become one later.
 
 
@@ -1222,6 +1235,7 @@ async def main() -> None:
 
         # --- PASS 2: the passive listener, bound to that one string ----------
         seen: list = []
+        tally: list = []
 
         def _remember(response) -> None:
             """Collect the ONE document response for the resolved url.
@@ -1230,7 +1244,32 @@ async def main() -> None:
             event loop. The body is read later, once, by the caller.
             """
             try:
-                if response.url != landed:
+                # MATCHED AGAINST `/in/me`, THE URL FETCHED -- never against
+                # the url the address bar ends up showing. They are different
+                # strings by construction, and learning why replaced a guess
+                # with a fact.
+                #
+                # `/in/me/` IS NOT A REDIRECT. Measured 2026-09-03 by tallying
+                # every document response in the pass: the profile arrives as a
+                # 200 served AT `/in/me`, and the vanity url appears afterwards
+                # because the page rewrites the address bar client-side. So
+                # `page.url` reports `/in/<vanity>` while the only document
+                # response ever fetched says `/in/me`. Two earlier bounds --
+                # whole-url equality, then member-path equality against the
+                # landed url -- both compared a post-rewrite address against an
+                # HTTP fetch and both correctly refused on zero matches. The
+                # refusals were right; the question was wrong.
+                #
+                # AND THE CORRECTED BOUND IS THE STRONGER ONE. `/in/me` is
+                # LinkedIn's own self-reference: it can serve the signed-in
+                # member and nobody else, so a document response carrying that
+                # path is self-owned by construction. A vanity path only names
+                # SOME member -- it is the weaker claim, and it is what the
+                # read allowlist already admits for anyone. Pass 1 stays as the
+                # auth-wall check and as the record of WHICH member is signed
+                # in; it is no longer asked to carry an identity proof it was
+                # never able to make.
+                if _member_path(response.url) != _member_path(SELF_PROFILE_URL):
                     return
                 if response.request.resource_type != "document":
                     return
@@ -1238,17 +1277,61 @@ async def main() -> None:
                 return
             seen.append(response)
 
+        def _tally(response: Any) -> None:
+            """Count every document response by member path, matched or not.
+
+            A REFUSAL THAT CANNOT SAY WHAT IT DID SEE IS HALF A MEASUREMENT.
+            On 2026-09-03 this run refused with "zero matched" three times and
+            the sentence was true and useless -- zero is consistent with the
+            page not being fetched, with the url moving, and with the filter
+            being wrong, and nothing in the output separated them. This tallies
+            PATHS ONLY, never a full url and never a query, so the diagnostic
+            costs no disclosure.
+            """
+            try:
+                if response.request.resource_type != "document":
+                    return
+                tally.append(_member_path(response.url) or "/")
+            except Exception:
+                return
+
         page.on("response", _remember)
+        page.on("response", _tally)
         try:
-            await BROWSER.goto(page, landed)
+            # NAVIGATE TO THE ALLOWLISTED SPELLING, MATCH ON THE LANDED ONE, and
+            # the two are deliberately different strings.
+            #
+            # Pass 1 resolves /in/me/ and LinkedIn hands back a url carrying its
+            # OWN self-assertion query -- `?isSelfProfile=true`. Navigating to
+            # that landed string is REFUSED by the read boundary, which admits
+            # the member path and not the query, and on 2026-09-03 it refused
+            # exactly that: "navigation blocked ... not on the read-only
+            # allowlist". The boundary was right and the probe was wrong.
+            #
+            # Widening the allowlist to admit the query would have been the
+            # cheap fix and the wrong one: it relaxes a read boundary to let an
+            # instrument run, which is the direction that never gets tightened
+            # again. So the NAVIGATION uses the spelling already sanctioned, and
+            # the LISTENER keeps matching the pass-1 landed url by equality --
+            # the redirect lands the same document, so the equality bound is
+            # untouched. If LinkedIn ever stops re-adding the query, `seen` is
+            # empty and the run REFUSES rather than reading a document it did
+            # not identify.
+            await BROWSER.goto(page, SELF_PROFILE_URL)
         finally:
             page.remove_listener("response", _remember)
+            page.remove_listener("response", _tally)
 
-        print(f"    pass 2: document responses matching that exact url: {len(seen)}")
+        print(f"    pass 2: self-owned (/in/me) document responses: {len(seen)}")
         if len(seen) != 1:
-            print("    REFUSED: expected exactly one. Zero means the response was")
-            print("    served from cache or the url moved; more than one means this")
-            print("    cannot say which document it would be reading. Nothing read.")
+            print("    REFUSED: expected exactly one self-owned document. Zero")
+            print("    means /in/me served nothing this pass; more than one means")
+            print("    this cannot say which document it reads. Nothing read.")
+            # SAY WHAT WAS SEEN. Paths only -- never a url, never a query.
+            print(f"    document responses of ANY url this pass: {len(tally)}")
+            for path in tally:
+                print(f"      seen: {path}")
+            print(f"    was looking for: {_member_path(SELF_PROFILE_URL)}")
             await BROWSER.stop()
             return
 
