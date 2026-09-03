@@ -982,6 +982,25 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     could: nothing is fetched about any viewer, and no viewer's profile is
     ever opened. What you get is the row LinkedIn already put on your screen.
 
+    insights carries what the analytics page draws AROUND the list, off the
+    same load: the headline viewer count with its own label, the change
+    against the previous period, the trend chart (as LinkedIn's own
+    description of it -- "Line chart with 13 data points" -- not the points
+    themselves), and the filters currently applied, which is how you know
+    whether you are looking at 7 days or 90.
+
+    THERE IS NO TOP-COMPANIES OR TOP-LOCATIONS BREAKDOWN HERE, and their
+    absence is deliberate rather than unbuilt. That page carries no such
+    panel -- measured on a frozen capture and again live. What it has is a
+    COMPANY FILTER, which is one of the three filters reported. No key is
+    returned for either, because a field that is always null is a claim the
+    page does not support.
+
+    insights reads NO name and NO text from any viewer row. That page is made
+    of other people and its control labels carry them; the reader takes
+    numbers, filter labels, the chart's own sentence and COUNTS of page
+    regions, and nothing else. The rows themselves are what results is for.
+
     Reads the Premium analytics page. The older /me/profile-views/ address
     now redirects to that same page, so the second attempt is a re-load for a
     page that had not finished rendering rather than a different surface; it
@@ -1587,6 +1606,26 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     that case you also get 'observed': the accessible names that were actually
     on the page. Those are REPORTED and nothing more -- no state is inferred
     from one, and no click can be aimed by one.
+
+    insights carries the Premium panels LinkedIn draws BESIDE the posting, off
+    this same page and at no extra load: how many people have applied and how
+    many applied in the past day, the seniority and education mix of the
+    applicants, and LinkedIn's own hiring-trend line for the employer. It also
+    says whether the posting is promoted, whether the hirer manages responses
+    off LinkedIn, and whether the job carries a verification badge.
+
+    AND IT NAMES WHAT IT DID NOT OPEN. The "How you match" panel is on the
+    page COLLAPSED, behind a control -- measured on both frozen captures and
+    on a live posting. This server does not press anything, so that panel is
+    not read; the control's name comes back in
+    insights.more_behind_a_control instead, so you learn the panel exists and
+    that it was not opened rather than seeing nothing. Open it yourself if you
+    want it.
+
+    insights.observed is populated whatever the panels do -- the headings and
+    view names actually seen, and how big the page's main region was. A null
+    panel with 17,000 characters under 13 headings and a null panel on an
+    empty page are different answers, and this is what tells them apart.
 
     A field the page did not carry comes back null rather than blank. If the
     page did not render the posting at all the call FAILS instead of
