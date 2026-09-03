@@ -527,7 +527,47 @@ def test_only_dom_module_waives_evaluate():
     # WHAT IT INJECTS: a read that climbs from a Message button to the row
     # that holds it, so a member id already drawn on a page this server opens
     # stops being discarded. It writes nothing and returns ids to a caller.
-    assert waived_in.get("dom.py", 0) <= 14, waived_in
+    #
+    # THE FIFTEENTH AND SIXTEENTH, 2026-09-03: ``JOB_INSIGHT_MARKERS_JS`` and
+    # ``PROFILE_VIEWS_INSIGHTS_JS``. Two waivers in one change, which is why
+    # the argument is made once for both and then separately for each.
+    #
+    # WHAT THEY ARE FOR. Both read a page a tool has ALREADY loaded for
+    # another reason and take what was being thrown away -- the Premium
+    # insight panels on a job posting, and the headline count, the change
+    # against the prior period, the trend chart and the filters on the
+    # profile-views page. Neither navigates, neither clicks, and neither adds
+    # a page load anywhere.
+    #
+    # WHY NOT RIDE AN EXISTING SCRIPT, asked seriously because these are the
+    # two cheapest waivers on this list to have refused. ``READ_PROFILE_JS``
+    # does carry the job panels -- it walks ``main``'s headings, and
+    # ``read_job_insight_panels`` uses it for exactly that, which is why only
+    # ONE waiver is spent on the posting rather than two. What it cannot
+    # answer is whether an element carries ``aria-label="Verified job"``,
+    # which is an attribute and not a heading. On the profile-views page it
+    # answers nothing at all: that page has NO h1, h2 or h3 anywhere, so the
+    # heading walker returns two sections of advertising furniture and none of
+    # the aggregates.
+    #
+    # THE FIFTEENTH IS THE LEAST-PUBLISHING SCRIPT ON THIS LIST. It runs on a
+    # posting, whose DOM holds a hiring team and a "people also viewed" rail,
+    # and it returns data-view-name attribute values, three booleans and a
+    # character count. No accessible name, no text, no href; the two furniture
+    # strings it tests for are compared inside the page and only a boolean
+    # crosses.
+    #
+    # THE SIXTEENTH RUNS WHERE THE ARGUMENT IS SHARPEST -- a page that IS a
+    # list of other members, whose aria-labels name them. It is shaped by
+    # subtraction: paragraph pairs whose first is a bare number, the <label>
+    # text inside a filter control, the chart's own one-sentence description,
+    # and COUNTS of view names. It reads no aria-label at all and takes no
+    # text from inside a viewer row. That shape was chosen because the
+    # alternative was MEASURED: a probe the same day pointed the surface
+    # census at this page, hand-rolled its own tally, and published thirteen
+    # real names -- the singleton blanking that would have caught them runs at
+    # publish time in ``shape.census_aggregate``, not in the reader.
+    assert waived_in.get("dom.py", 0) <= 16, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -640,6 +680,39 @@ INJECTED_SCRIPTS = {
     # worst combination available. Asserted a second time in
     # tests/test_activity_items.py.
     "ACTIVITY_ITEMS_JS": dom.ACTIVITY_ITEMS_JS,
+    # 2026-09-03. The job posting's insight markers. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring
+    # it ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # IT IS THE LEAST-PUBLISHING SCRIPT ON THIS LIST, which is a fact about
+    # its design rather than luck. It runs on a JOB POSTING, and a posting
+    # draws a hiring team and a "people also viewed" rail, so its DOM is full
+    # of third parties. What it returns is: the data-view-name attribute
+    # values (this package's own vocabulary, written by LinkedIn as page
+    # structure and naming nobody), three booleans, and a character COUNT for
+    # main. No accessible name, no text, no href. The two furniture strings it
+    # tests for are compared INSIDE the page and only a boolean crosses.
+    "JOB_INSIGHT_MARKERS_JS": dom.JOB_INSIGHT_MARKERS_JS,
+    # 2026-09-03. The profile-views aggregates, and this one's privacy
+    # argument is the sharpest read-side argument in the list because of WHERE
+    # it runs. The Who's-Viewed-Me page IS a list of other members: its
+    # aria-labels say "Send a message to <a person>", "Invite <a person> to
+    # connect", "Follow <a person>".
+    #
+    # So the script is shaped by subtraction. It reads FOUR things: paragraph
+    # pairs where the first is a bare number, the <label> text inside a filter
+    # control, the chart's own one-sentence description, and COUNTS of
+    # data-view-name values. It reads NO aria-label at all and takes NO text
+    # from inside a viewer row -- those are counted and never opened.
+    #
+    # THAT SHAPE WAS CHOSEN BECAUSE THE ALTERNATIVE WAS MEASURED. A probe
+    # written the same day pointed dom.read_surface_census at this page,
+    # hand-rolled its own tally of the rows, and published thirteen real
+    # names -- because the singleton blanking that would have caught them runs
+    # at publish time in shape.census_aggregate, not in the reader. A script
+    # that only ever looks at numbers, <label> text and view names cannot make
+    # that mistake whatever a future caller does with it.
+    "PROFILE_VIEWS_INSIGHTS_JS": dom.PROFILE_VIEWS_INSIGHTS_JS,
 }
 
 
@@ -789,10 +862,26 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     harvest beside it discards. It publishes nothing: the ids go to a caller
     as data and the function has no logging line at all, asserted on its
     source in ``tests/test_recipient_ids_from_the_viewer_list.py``.
+
+    FOURTEEN AND FIFTEEN FROM 2026-09-03: ``JOB_INSIGHT_MARKERS_JS``, run once
+    from ``dom.read_job_insight_panels``, and ``PROFILE_VIEWS_INSIGHTS_JS``,
+    run once from ``dom.read_profile_views_insights``. Both are new surface
+    area rather than a second call site, and both read a page a tool has
+    ALREADY loaded -- the posting ``linkedin_job_detail`` opens for its
+    description, and the analytics page ``linkedin_who_viewed_me`` opens for
+    its rows. Neither navigates and neither clicks.
+
+    ONLY ONE WAIVER IS SPENT ON THE POSTING, and the reason belongs here
+    rather than in the budget: ``read_job_insight_panels`` gets its headings
+    from ``READ_PROFILE_JS``, the script that already exists, and injects its
+    own only for the questions a heading walk cannot answer -- an
+    ``aria-label``, two substring tests kept inside the page, and a character
+    count. The profile-views page gets no such reuse because it has NO h1, h2
+    or h3 at all, so the heading walker returns nothing of it.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 14, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 16, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
