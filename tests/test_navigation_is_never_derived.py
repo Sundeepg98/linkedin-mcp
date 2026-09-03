@@ -112,6 +112,27 @@ _SINK_ATTRS = frozenset(
 #: value that cannot reconstruct it. ``_member_path`` is NOT here and must not
 #: be -- it returns a path, and a member path IS an identity. That distinction
 #: is the whole of the third leak.
+#:
+#: ``_redact`` DID NOT MEET THAT BAR WHEN IT WAS ADDED HERE, and this note is
+#: the correction rather than a footnote to it. It was entered on the strength
+#: of its NAME. Measured 2026-09-03, it had NO SLUG RULE AT ALL: handed
+#: ``https://www.linkedin.com/in/<a vanity name>/`` it returned the string
+#: byte-identical, while this list told every other check in the package that
+#: its result carried nothing. A sanitiser entry is a promise made on a
+#: function's behalf, and nothing was verifying the promise.
+#:
+#: IT QUALIFIES NOW, AND ONLY FOR WHAT THIS RULE ACTUALLY TRACKS. The taint
+#: sources here are a ``goto`` return and ``.url`` -- URLS, nothing else -- and
+#: for a url ``_redact`` now blanks the thread id, the urn, the vanity slug and
+#: any long digit run, which is the complete set of identifying parts a
+#: LinkedIn url carries. It is NOT a general-purpose name redactor and must not
+#: be trusted as one: a display name sitting beside a lowercase word passes
+#: straight through it, which is why that case is handled at the tally in
+#: ``_label_shapes`` and not here.
+#:
+#: **That scoping is the rule, not a caveat.** "This function is safe" was
+#: never true; "this function is safe for urls" is, and the short form is what
+#: travels between files.
 _SANITISERS = frozenset({"_shape_of", "_redact"})
 
 #: CALLS WHOSE RESULT IS A NUMBER, whatever went in.
