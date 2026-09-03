@@ -1091,6 +1091,208 @@ async def test_a_needle_nobody_carries_reports_no_offset_at_all(
     assert found["lengths"], found
 
 
+
+# ---------------------------------------------------------------------------
+# 2f. THE MEASURED DEAD END, reproduced so nobody re-opens it with a regex
+# ---------------------------------------------------------------------------
+#
+# THE LIVE OFFSET READING, 2026-09-03, ten suggestion rows, one needle::
+#
+#     rows scanned  10        scanned to 200        error None
+#     offset  9 -> 7 rows
+#     offset 15, 16, 17, 20, 21, 26, 28, 31, 40, 50 -> 1 row each
+#     lengths 49, 56, 59, 87, 94, 143, 151, 152, 178
+#
+#     VERDICT: the needle begins at 11 DIFFERENT positions.
+#
+# THREE FACTS, AND EACH ONE KILLS A DIFFERENT REPAIR:
+#
+#   1. ELEVEN DISTINCT OFFSETS. The name sits at a variable position, so no
+#      matcher anchored at the start of the accessible name can work. Not the
+#      word boundary, not the negative lookahead, not a skip-N-then-anchor --
+#      there is no N.
+#
+#   2. THE OFFSETS SUM TO 17 ACROSS 10 ROWS. The needle RECURS inside a single
+#      row's name. Even a per-row offset would not identify a person, because
+#      one row carries the needle in two places.
+#
+#   3. LENGTHS FROM 49 TO 178 CHARACTERS. These are not names with furniture in
+#      front. They are whole row descriptions -- name, degree, headline, and
+#      more -- so the string being matched is not the person's name at all, and
+#      no relation defined over it can be a relation over the person.
+#
+# **THE NAME IS THE WRONG ADDRESSING PRIMITIVE HERE, AND THAT IS MEASURED
+# RATHER THAN CONCLUDED FROM FATIGUE.** Every other write in this package
+# addresses its target by IDENTIFIER -- a job id, a company id, an item urn.
+# ``send_message`` is the only one addressing a human being by the text of
+# their name, and the text is not theirs.
+#
+# WHAT THIS SECTION IS FOR. Prose asserting a dead end is section 90's defect:
+# a claim about the code that nothing checks. The fixture below reproduces the
+# measured shape, and the test derives its assertion FROM THE PATTERN TABLE
+# rather than from a list -- so a seventh anchored candidate added in three
+# weeks with a clever regex arrives here automatically and has to read zero on
+# the shape the live page actually has.
+
+
+def _long_row(furniture: str, name: str, degree: str, headline: str) -> str:
+    """A suggestion row shaped like the live ones: LONG, and name-in-the-middle.
+
+    The live accessible names ran 49 to 178 characters, which is a whole row
+    description rather than a name with a bit of furniture in front. This draws
+    that: something before the name, the connection degree after it, and a
+    headline after that.
+    """
+    return (
+        '<div role="option"><span>'
+        + furniture
+        + "</span><span>"
+        + name
+        + "</span><span>"
+        + degree
+        + "</span><span>"
+        + headline
+        + "</span></div>"
+    )
+
+
+#: THE LIVE SHAPE, REPRODUCED. Four rows: furniture of three different widths,
+#: names long enough to be row descriptions, and ONE row carrying the needle
+#: TWICE -- in its name and again in its headline -- which is what the live
+#: offsets summing past the row count means.
+COMPOSER_LIVE_SHAPE = _composer_with(
+    _listbox_of(
+        _long_row(
+            "Photo of ",
+            NAMED_RECIPIENT,
+            " 1st",
+            " Principal Engineer at a company nobody here has heard of",
+        ),
+        _long_row(
+            "Img ",
+            SIMILAR_NAME,
+            " 2nd",
+            " Staff Engineer, formerly somewhere else entirely",
+        ),
+        _long_row(
+            "Picture of the member ",
+            PREFIX_NEEDLE,
+            " 1st",
+            " Engineering Manager and long-standing collaborator",
+        ),
+        # THE RECURRING ONE. His name is in the headline as well as in the
+        # name slot, which is how a single row lands on two offsets.
+        _long_row(
+            "Photo of ",
+            SIMILAR_NAME,
+            " 3rd",
+            " Colleague of " + PREFIX_NEEDLE + " at a previous employer",
+        ),
+    )
+)
+
+
+def _anchored_patterns() -> tuple[str, ...]:
+    """Every candidate in the table whose template is ANCHORED at the start.
+
+    DERIVED FROM THE TABLE, not listed here, and that is the whole point of
+    the test below: a seventh anchored candidate added later is included
+    without anybody remembering to add it, and has to answer for itself
+    against the shape the live page actually has.
+    """
+    return tuple(
+        label for label, body in dom.TYPEAHEAD_NAME_PATTERNS if body.startswith("^")
+    )
+
+
+async def test_no_anchored_matcher_can_work_on_the_shape_the_page_actually_has(
+    over, _fast_wait
+):
+    """**THE DEAD END, AS A TEST.** Every anchored candidate reads zero.
+
+    This is the regression guard on a NEGATIVE RESULT, which is the kind most
+    likely to be quietly re-opened: the reading was expensive, the answer was
+    "none of these", and a fresh reader three weeks from now will have a
+    clever regex and no memory of why it cannot work.
+
+    THE ASSERTION IS DERIVED FROM THE PATTERN TABLE. A new anchored candidate
+    lands here automatically and must read zero on this fixture. If somebody
+    genuinely finds a relation that works, they will have to change the
+    fixture too -- and changing the fixture means arguing with the live
+    measurement recorded above it, which is exactly the conversation that
+    should happen.
+    """
+    found = await _census(over, COMPOSER_LIVE_SHAPE, PREFIX_NEEDLE)
+    census = found["observed"]["pattern_census"]
+    rows = int(found["observed"]["total"])
+    assert rows == 4, found["observed"]
+
+    anchored = _anchored_patterns()
+    assert len(anchored) >= 4, anchored
+    for label in anchored:
+        assert census[label] == 0, (label, census)
+
+    # AND THE LOOSE ONE MATCHES EVERYTHING, which is the other half of the
+    # finding: the substring counts LinkedIn's result set rather than
+    # discriminating inside it.
+    assert census["substring"] == rows, census
+    assert dom.TYPEAHEAD_SHIPPED_PATTERN == "substring"
+
+
+async def test_the_offsets_reproduce_the_live_verdict_including_recurrence(
+    over, _fast_wait
+):
+    """THE THREE FACTS, each asserted, on markup shaped like the live page.
+
+    Variable position, recurrence within one row, and lengths long enough to
+    be row descriptions rather than names. Any one of them would sink a
+    positional matcher; the fixture carries all three because the live page
+    did.
+    """
+
+    async def work(page):
+        return await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE)
+
+    found = await over(COMPOSER_LIVE_SHAPE, work)
+    assert found["error"] is None, found
+    assert found["rows"] == 4, found
+
+    offsets = found["offsets"]
+    # 1. VARIABLE POSITION.
+    assert len(offsets) >= 3, offsets
+    # 2. RECURRENCE. One row carries the needle twice, so the offset counts
+    #    sum past the number of rows -- which is a fact about the label, not a
+    #    bug in the scan, and the probe reports it as such.
+    assert sum(offsets.values()) > found["rows"], offsets
+    # 3. ROW DESCRIPTIONS, not names.
+    assert max(int(size) for size in found["lengths"]) > 49, found["lengths"]
+
+
+async def test_the_reading_still_carries_no_name_on_the_live_shape(
+    over, _fast_wait
+):
+    """The privacy property holds on the longest, busiest rows in this file.
+
+    These names carry headlines as well as people, which is more text than
+    anything else here and therefore the best place to check that none of it
+    crosses.
+    """
+
+    async def work(page):
+        return {
+            "offsets": await dom.read_typeahead_needle_offsets(page, PREFIX_NEEDLE),
+            "census": await dom.read_typeahead_pattern_census(page, PREFIX_NEEDLE),
+        }
+
+    found = await over(COMPOSER_LIVE_SHAPE, work)
+    rendered = json.dumps(found, default=str).lower()
+    for name in (NAMED_RECIPIENT, SIMILAR_NAME, PREFIX_NEEDLE, "principal", "colleague"):
+        for word in name.split():
+            if len(word) < 3:
+                continue
+            assert word.lower() not in rendered, (name, word)
+
+
 # ---------------------------------------------------------------------------
 # 3. Structure: the invariant, read off the syntax tree
 # ---------------------------------------------------------------------------

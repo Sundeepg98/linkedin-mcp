@@ -386,6 +386,34 @@ async def main() -> None:
                 "position and NO positional matcher will work. That is a "
                 "conclusive answer rather than another candidate to try."
             )
+        # RECURRENCE, REPORTED RATHER THAN LEFT TO BE NOTICED. Each position
+        # counts the rows that BEGIN the needle there, so the counts summing
+        # past the row total means at least one row carries the needle TWICE --
+        # in its name and again somewhere else in the same label. That is a
+        # separate reason a positional aim is hopeless, and it was spotted by
+        # hand on the first live reading, which is exactly the kind of thing an
+        # instrument should say for itself.
+        placements = sum(offsets.values())
+        rows = int(where.get("rows") or 0)
+        if offsets and placements > rows:
+            print(
+                f"    AND THE NEEDLE RECURS: {placements} placements across "
+                f"{rows} row(s), so at least one label carries it more than "
+                "once. Even a per-row offset would not identify a person "
+                "there, because one row holds the needle in two places."
+            )
+        # THE NAME LENGTHS ARE THEIR OWN FINDING. A suggestion label long
+        # enough to be a row DESCRIPTION -- name, degree, headline -- is not a
+        # name with furniture in front of it, and no relation defined over that
+        # string is a relation over the person.
+        if lengths:
+            widest = max(int(size) for size in lengths)
+            if widest > 40:
+                print(
+                    f"    AND THE LABELS ARE LONG: up to {widest} characters. "
+                    "That is a whole row description rather than a name, so "
+                    "the string being matched is not the person's name at all."
+                )
 
         # --- 4. the gate's verdict, unmodified ------------------------------
         gate = await writes._typeahead_gate(page, grant)
