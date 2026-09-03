@@ -848,6 +848,45 @@ async def linkedin_cdp_status() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+#: THE THREE PROFILE DETAILS PAGES, AS LITERALS, ONE PER SECTION.
+#:
+#: A TABLE RATHER THAN AN F-STRING, and the difference is the whole point.
+#: ``linkedin_my_profile`` takes a ``details`` argument, checks it against
+#: ``dom.PROFILE_DETAIL_SECTIONS`` and then needs an address. Interpolating
+#: the checked argument would be safe TODAY and is one edit away from not
+#: being: a validation that moves, or a fourth section admitted without
+#: re-reading the call site, and a caller's string is in a url.
+#:
+#: A lookup that can only ever return one of three literals written in this
+#: file cannot degrade that way. It is the same rule
+#: ``tests/test_navigation_is_never_derived.py`` enforces against the browser
+#: -- the process must be able to say what it is about to navigate to without
+#: having asked anything outside this repository -- applied to the other
+#: direction the address could come from, which is the caller.
+#:
+#: THE ``/in/me/`` SPELLING IN ALL THREE. It resolves to whoever is signed in
+#: and can therefore reach nobody else's profile, which is why the read
+#: boundary admits it. The vanity slug is never used to build one of these,
+#: even though the allowlist would accept it: an address built from a landed
+#: url is an address the page chose.
+PROFILE_DETAIL_URLS: dict[str, str] = {
+    "experience": f"{BASE_URL}/in/me/details/experience/",
+    "education": f"{BASE_URL}/in/me/details/education/",
+    "skills": f"{BASE_URL}/in/me/details/skills/",
+}
+
+#: Which ``completeness`` field each section fills. The names are the ones
+#: ``linkedin_my_profile`` has DECLARED since it shipped and returned null for
+#: until 2026-09-03, so they are kept exactly as they were rather than
+#: renamed to match the sections: a caller reading ``experience_entries``
+#: should find it filled, not find it gone.
+PROFILE_DETAIL_FIELD: dict[str, str] = {
+    "experience": "experience_entries",
+    "education": "education_entries",
+    "skills": "skills_listed",
+}
+
+
 # NOT A TOOL, AND IT CARRIED @mcp.tool() FOR ABOUT TWENTY MINUTES.
 #
 # The decorator below belongs to ``linkedin_who_viewed_me``. This helper was
@@ -864,12 +903,28 @@ async def linkedin_cdp_status() -> dict[str, Any]:
 # tool surface. Neither half of that is survivable and neither would have
 # raised anything: the surface simply had a different shape.
 #
-# ``tests/test_server_surface.py`` did not catch it, which is the part worth
-# keeping. A decorator that moves between two adjacent defs changes WHICH
-# function is a tool without changing the file's shape, so nothing that counts
-# tools or greps for names sees it. The check that does see it is asking
-# ``mcp.list_tools()`` for a NAME, and that is what the test added beside this
-# fix does.
+# ``tests/test_server_surface.py`` DID catch it, and the earlier version of
+# this comment said it did not. Corrected on the wave lead's ruling, with the
+# run that settles it:
+#
+#     Extra items in the left set:  '_attach_recipient_ids'
+#     Extra items in the right set: 'linkedin_who_viewed_me'
+#
+# ``test_the_surface_is_exactly_the_thirtyfive_tools`` compares the SET of tool
+# NAMES, not a count -- so a decorator sliding onto an adjacent def changes
+# that set and fails, naming both halves of the swap. A count would have been
+# blind, which is presumably where the wrong claim came from.
+#
+# THE CORRECTION MATTERS MORE THAN THE FACT. A comment asserting an existing
+# guard is blind when it is not teaches the next reader to build a second
+# instrument for a hole that does not exist -- the same class as prose
+# asserting a relationship the code lacks, pointed the other way.
+#
+# ``tests/test_every_tool_is_on_the_surface.py`` is kept and is worth keeping
+# on its own merits: asking ``mcp.list_tools()`` for a NAME tests the
+# registration directly rather than inferring it from a module's shape. Two
+# instruments on one property is not waste when they fail for different
+# reasons.
 async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
     """Add ``recipient_id`` to the rows LinkedIn drew a Message button for.
 
@@ -1911,7 +1966,13 @@ async def linkedin_my_profile(
                     for section in ("Experience", "Education", "Skills")
                 }
 
-            if include_skills:
+            # WHICH ONE DETAILS PAGE GETS THE SECOND LOAD. ``details`` wins
+            # when it is given, because it is the more specific instruction;
+            # otherwise the long-standing include_skills behaviour is
+            # unchanged, so an existing caller sees exactly what it saw
+            # before.
+            section = wanted or ("skills" if include_skills else "")
+            if section:
                 if slug:
                     # THE `/in/me` SPELLING, NOT ONE BUILT FROM THE LANDED URL.
                     #
@@ -1940,49 +2001,87 @@ async def linkedin_my_profile(
                     # worth a second navigation. Dropping that guard would
                     # change WHEN this fetches, which is a separate decision
                     # from WHERE it points.
-                    skills_final = await BROWSER.goto(
-                        page, f"{BASE_URL}/in/me/details/skills/"
+                    # AND THE ADDRESS IS PICKED FROM A TABLE OF LITERALS, not
+                    # built by interpolating the argument. ``section`` has
+                    # already been checked against dom.PROFILE_DETAIL_SECTIONS
+                    # so an f-string would be safe -- and a table is the
+                    # stronger form for the same reason the comment above
+                    # gives: the process can say what it is about to navigate
+                    # to without having asked anything outside this file. A
+                    # validated argument is one edit away from an unvalidated
+                    # one; a dict lookup that can only return one of three
+                    # module-level literals is not.
+                    details_final = await BROWSER.goto(
+                        page, PROFILE_DETAIL_URLS[section]
                     )
-                    assert_not_authwall(skills_final, surface="skills")
-                    records = await dom.harvest_linked_cards(
-                        page,
-                        href_pattern=dom.SKILL_HREF,
-                        max_items=200,
-                        max_chars=300,
+                    assert_not_authwall(details_final, surface=section)
+                    reading = await dom.read_profile_detail_entries(
+                        page, section=section
                     )
-                    skills: list[str] = []
-                    for record in records:
-                        lines = shape.content_lines(record.get("text", ""))
-                        if not lines:
-                            continue
-                        name = shape.trim(lines[0], 80)
-                        if name and name not in skills:
-                            skills.append(name)
+                    entries = list(reading.get("entries") or [])
+                    count = int(reading.get("count") or 0)
                     out["pages_loaded"] = 2
-                    if skills:
-                        out["skills"] = skills
-                        out["skills_count"] = len(skills)
-                        out["completeness"]["skills_listed"] = len(skills)
-                        # Say where the number came from. Skills is one of the
-                        # sections the profile page defers, so it is listed as
-                        # not rendered there AND counted here, and without this
-                        # the two read as a contradiction.
-                        out["completeness"]["skills_listed_source"] = (
-                            "the /details/skills/ page, loaded as the second "
-                            "page of this call -- not the profile page, where "
-                            "the skills section had not rendered"
+                    out["details_section"] = section
+                    out["details_observed"] = reading.get("observed")
+                    if wanted and include_skills and wanted != "skills":
+                        # SAID OUT LOUD RATHER THAN SILENTLY HONOURED. A
+                        # caller that passed both would otherwise get no
+                        # skills and no explanation, and conclude the skills
+                        # read had broken.
+                        out["include_skills_ignored"] = (
+                            "details=%r was given, and only one details page "
+                            "fits in this call's two-page budget, so the "
+                            "skills page was not loaded. Ask for skills in "
+                            "its own call." % section
                         )
-                    else:
-                        out["skills_note"] = (
-                            "the skills page loaded but no skill entries could "
-                            "be read from it. That is a failed read, not an "
-                            "empty skills list, so no list is reported."
+                    if entries:
+                        out[section] = entries
+                        out["%s_count" % section] = len(entries)
+                    if count:
+                        out["completeness"][PROFILE_DETAIL_FIELD[section]] = count
+                        # Say where the number came from. All three of these
+                        # sections are ones the profile page DEFERS, so each
+                        # is listed as not rendered there AND counted here,
+                        # and without this the two read as a contradiction.
+                        out["completeness"][
+                            "%s_source" % PROFILE_DETAIL_FIELD[section]
+                        ] = (
+                            "the /details/%s/ page, loaded as the second page "
+                            "of this call -- not the profile page, where the "
+                            "%s section had not rendered" % (section, section)
                         )
+                    if reading.get("why"):
+                        out["%s_note" % section] = reading["why"]
                 else:
-                    out["skills_note"] = (
+                    # NAMED AFTER THE SECTION, WHICH KEEPS ``skills_note``
+                    # EXACTLY WHERE IT WAS. This used to be a hardcoded
+                    # ``skills_note`` because skills was the only section this
+                    # tool could load. Generalising it to ``details_note``
+                    # would have silently renamed a key a caller may already
+                    # read; naming it for the section keeps the old spelling
+                    # for the old case and gives the two new sections their
+                    # own, which is the same shape one level out.
+                    out["%s_note" % section] = (
                         "could not resolve your public profile identifier, so "
-                        "the full skills page was not loaded."
+                        "the %s details page was not loaded." % section
                     )
+            # WHICH COUNTS ARE NULL BECAUSE NOBODY ASKED. Without this a null
+            # count is indistinguishable from "LinkedIn has none", which is
+            # the exact misreading three hardcoded nulls invited for as long
+            # as this tool has shipped.
+            not_requested = [
+                PROFILE_DETAIL_FIELD[name]
+                for name in dom.PROFILE_DETAIL_SECTIONS
+                if out["completeness"].get(PROFILE_DETAIL_FIELD[name]) is None
+            ]
+            if not_requested:
+                out["completeness"]["counts_not_requested"] = not_requested
+                out["completeness"]["counts_not_requested_means"] = (
+                    "null because this call did not load that section's own "
+                    "details page, NOT because LinkedIn holds nothing there. "
+                    "Only one details page fits in a call; pass details= to "
+                    "load a different one."
+                )
             return out
     except Exception as exc:
         return _error(exc)
