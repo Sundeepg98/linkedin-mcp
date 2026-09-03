@@ -4030,3 +4030,116 @@ in each direction on the same day it was written.
 That is worth more than the fix. A "known hole" comment would have described
 this site accurately this morning and lied by lunchtime, with nothing to notice
 it -- which is exactly what `read_settings_surface` did for ten days.
+
+## 105. ADDRESSING A RECIPIENT BY IDENTIFIER, AND THE THREE SPELLINGS THAT
+## WALKED AROUND THE RULING
+
+The name path is a MEASURED dead end. The typeahead census, run live and
+stable across three runs, returned `substring 10` and ZERO for all five
+stricter candidates -- and the offset instrument explains why: a suggestion
+row's accessible name is 49 to 178 characters, the whole row description, with
+the person's name at eleven different offsets across ten rows. `prefix` at zero
+was never fixable at the front of the string. **No positional or anchored
+matcher will work on that surface, ever.**
+
+So the question became whether a NAME is the wrong addressing primitive
+entirely. Every other write in this package addresses a target by IDENTIFIER.
+
+### THE ANSWER WAS ALREADY IN THIS REPOSITORY, AT ZERO COST
+
+No browser, no lock, no page load, no badge precondition spent.
+`tests/fixtures/profile_views_analytics.html` -- a committed, sanitised capture
+of Who's-Viewed-Me -- draws a Message button for a FIRST-DEGREE connection as
+an ordinary anchor:
+
+    /messaging/compose/?profileUrn=urn:li:fsd_profile:<id>
+                       &recipient=<id>
+                       &screenContext=NON_SELF_PROFILE_VIEW
+                       &interop=msgOverlay
+
+**LinkedIn addresses compose by identifier**, with the recipient supplied twice
+-- as a bare id and as a full profile urn -- plus a screen context and an
+interop flag. That is evidence rather than a guessed shape.
+
+> **The cheapest measurement available is often one somebody already took.**
+> Two agents were preparing live reads of a surface whose answer had been sitting
+> in a committed fixture since the day it was sanitised.
+
+### AND IT IS REFUSED, WHICH IS THE RULING WORKING
+
+`"/messaging/compose"` is a forbidden substring; the one admitted composer url
+is admitted by an EQUALITY key, so every query-bearing spelling refuses.
+`tests/test_readonly.py` already pinned `?recipient=`, `compose/new/` and the
+pre-filled overlay as BLOCKED.
+
+### THE FINDING WAS THE NEIGHBOURS, AND IT IS THE ENTRY'S POINT
+
+Three sibling spellings reached the same place and did NOT refuse:
+
+    /messaging/thread/new/?recipient=<id>
+    /messaging/?composeTo=<id>
+    /messaging/?recipient=<id>
+
+Two incidental mechanisms, neither argued, both inherited: the messaging-root
+pattern admitted ANY query, and the thread-id character class matched the
+literal `new`.
+
+**The audit's own earlier sentence misleads by being true.** *"Every other
+spelling in that family refuses exactly as before"* is correct about
+`/messaging/compose/`, and the two families beside it admitted the same
+parameter on a different path.
+
+> **A ruling that one spelling cannot express is not a ruling, it is a
+> spelling filter.** And an invariant nobody ruled is a coincidence -- finding
+> it while it is still a coincidence is the whole value.
+
+### PINNED BEFORE FIXED, AND THE ORDER WAS THE POINT
+
+Refusing something currently admitted IS a ruling, so it was not taken
+unilaterally. `tests/test_messaging_recipient_addressing.py` pinned the
+CURRENT verdicts as a checked inventory, naming which admission was argued and
+which three were accidents.
+
+When the ruling came, the tightening turned that file red on EXACTLY the three
+lines that moved, plus the test asserting the two families differed. **The diff
+was the receipt**, which is what an inventory built before a fix buys and what
+a comment never could.
+
+Closed by SHAPE rather than by blocklist, deliberately -- naming `new` would be
+another filter on another spelling. The root takes no query; a thread id must
+start with a digit, true of every id recorded here and false of a word.
+
+**MEASURED FIRST, ZERO CASUALTIES.** Every shipped construction enumerated from
+the code rather than from memory, run through the tightened patterns offline
+alongside every allowed url the readonly tests pin. A tightening with no
+casualties is a fact worth stating rather than assuming.
+
+### THE PRECONDITION, AND IT IS NOT A FOOTNOTE
+
+**NO INSTRUMENT HAS EVER OBSERVED A COMMITTED RECIPIENT.**
+`dom.RECIPIENT_CHIP_SELECTORS` -- four candidate spellings -- has never matched
+anything on any page, which `dom` says at length where they are defined.
+
+That is a precondition for the identifier route, not a caveat on it. Even with
+the url shape in hand, **the route cannot be VERIFIED by anything that exists
+today**: `_recipient_gate` would be asked whether a recipient is committed and
+would answer with four zeroes, which is its designed refusal and is
+indistinguishable from a page it cannot read.
+
+> **"We know the address" and "we know it worked" are different claims**, and
+> the second one currently has no instrument behind it. The identifier route
+> needs its own observation built before it can be more than a navigation.
+
+### WHAT IS DELIBERATELY NOT DONE HERE
+
+The identifier admission is a SEPARATE, LATER, ARGUED entry -- flagged to the
+operator, since it admits a read spelling that refuses today. It is not folded
+into the tightening, and the reason is the whole shape of this entry: arriving
+through a hole would mean the capability's safety story is *nobody noticed*,
+which is the one story this package does not tell.
+
+Two routes to the measurement existed and one was refused. The three unruled
+admissions were, for a few hours, a working way to navigate a
+recipient-addressed messaging url. **Using the gap after reporting it would not
+have been a measurement**; it would have been the thing the gap exists to
+prevent, taken by the person who found it.
