@@ -478,6 +478,62 @@ async def test_the_no_listbox_refusal_does_not_claim_the_list_was_empty(
 
 
 # ---------------------------------------------------------------------------
+# 2c. A defect I found and am not fixing, recorded so it cannot rot
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "KNOWN DEFECT, 2026-09-03. A run that pressed NO send control reports "
+        "performed: 'unknown' where False is certain. STRICT ON PURPOSE: the "
+        "day somebody fixes this, this test XPASSes and strict turns that into "
+        "a FAILURE, so the marker cannot outlive the defect."
+    ),
+)
+async def test_a_run_that_pressed_no_send_should_report_not_performed(
+    writes_on, over
+):
+    """``performed`` is decided by a STATE COMPARISON that cannot fire here.
+
+        expected_after       message_sent          no surface writes it
+        not_performed_state  composer_holds_text   the composer holding his
+                                                   words with Send enabled
+        anything else        -> "unknown"
+
+    The inert run stops at the RECIPIENT GATE, so his words are never typed.
+    The composer therefore holds a NAME and not a message, Send stays
+    disabled, and neither state matches -- so ``performed`` comes back
+    ``"unknown"``.
+
+    **AND "unknown" IS AN UNDERSTATEMENT OF WHAT IS KNOWN.** No send control
+    was pressed. Not "we could not tell whether one was" -- this process never
+    issued the click, which is a fact about THIS PROCESS rather than an
+    inference about LinkedIn, and it is the one thing here that needs no
+    witness. The tool's headline promise is that it can report NOT SENT and
+    can never report SENT; on the most common path it currently reports
+    neither.
+
+    WHY IT IS NOT FIXED HERE. ``performed``'s derivation is shared by
+    ``publish_post`` and ``comment_on_item``, it sits in ``writes.py`` beside a
+    live co-writer, and short-circuiting it on "no submit click" is a change to
+    what the field MEANS for three actions rather than a repair to this one.
+    That is a decision to be taken deliberately, not folded into a typeahead
+    commit. Recorded here instead, in a form that fails when it is fixed.
+
+    NOTE THE CARE THE FIX WOULD NEED: ``perform``'s own docstring says the
+    click's SUCCESS is not evidence, and it is right. The absence of a click is
+    a different claim and a sound one -- but a fix that blurred those two would
+    reintroduce exactly the reasoning that block was written to refuse.
+    """
+    block = await over(
+        COMPOSER_TYPEAHEAD_INERT, lambda page: _run(page, COMPOSER_TYPEAHEAD_INERT)
+    )
+    assert block["clicked"]["clicks_made"] - block["clicked"]["typeahead_clicks"] == 0
+    assert block["performed"] is False, block["performed"]
+
+
+# ---------------------------------------------------------------------------
 # 3. Structure: the invariant, read off the syntax tree
 # ---------------------------------------------------------------------------
 #
