@@ -4509,8 +4509,13 @@ PERFORMABLE: frozenset[str] = frozenset(
         #   whoever was drawn first is the failure this exists to refuse.
         #
         #   NO THIRD PARTY'S PROFILE IS LOADED. The controls are on HIS OWN
-        #   profile, which draws nine of them and costs no badge, where
-        #   /mynetwork/ would consume the pending-invitation counter.
+        #   profile, which costs no badge, where /mynetwork/ would consume
+        #   the pending-invitation counter. This line said the profile
+        #   "draws nine of them" until 2026-09-04; the nine were MEASURED
+        #   2026-08-30 and the same page drew ZERO twice on 2026-09-03 and
+        #   nine again later. The rail need not be drawn, so the count is a
+        #   reading rather than a property -- see wrong_state_note, which
+        #   has always said the right thing about an empty page.
         "send_invitation",
         # THE NINTH, 2026-09-01, AND THE FIRST THAT TYPES. Everything above
         # it presses a control that already exists; this one puts his words on

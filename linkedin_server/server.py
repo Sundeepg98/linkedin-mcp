@@ -5498,10 +5498,26 @@ async def linkedin_send_invitation(
     badge. No post-click state has ever been observed on the page this DOES
     act on, either, so it cannot even report that the control changed.
 
-    WHERE IT ACTS, and why that page: your OWN profile draws nine invitation
-    controls and costs NO badge. No third party's profile is ever loaded --
-    that would leave them a durable record, which is the one thing this whole
-    family of rulings refuses to spend.
+    WHERE IT ACTS, and why that page: your OWN profile, which costs NO badge.
+    No third party's profile is ever loaded -- that would leave them a durable
+    record, which is the one thing this whole family of rulings refuses to
+    spend.
+
+    HOW MANY CONTROLS IT DRAWS IS NOT A PROPERTY OF THE PAGE, and this
+    sentence said it was until 2026-09-04. It read "your OWN profile draws
+    nine invitation controls" -- a measurement taken 2026-08-30 and frozen
+    into a permanent claim. **MEASURED 2026-09-03: the same page drew ZERO,
+    on two separate calls minutes apart, and nine again later the same
+    evening.** The rail carrying them is a suggestion rail and LinkedIn need
+    not draw it, so the count is a reading and not a guarantee.
+
+    WHAT THAT MEANS FOR A CALLER: a refusal saying no invitation control
+    rendered is this tool working, not this tool broken, and it is not a
+    statement that you have nobody to invite. Call it again later. The gate
+    reports that state as UNKNOWN rather than as zero for exactly this
+    reason, and the anchor itself was re-measured on 2026-09-03 and found
+    CORRECT -- the selector and its in-page predicate both found the nine
+    when the nine were there.
 
     IT CANNOT BE TAKEN BACK by this server, and whether LinkedIn offers a
     withdraw at all is UNMEASURED -- which is a stronger statement than this
