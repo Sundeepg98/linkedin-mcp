@@ -4240,10 +4240,26 @@ async def linkedin_update_profile_field(
     reported for a week that the profile editor "is not addressed by a url at
     all"; that was true of the captures and false of the site.
 
-    WHAT IS NOT: ``/edit/`` is on the forbidden-url list, so those addresses
-    are refused before the allowlist is even consulted, and no field inside
-    any editor has ever been observed -- so even given the address there is
-    nothing measured to type into.
+    THIS PARAGRAPH SAID THE ACTION COULD NOT REACH ITS EDITOR, UNTIL
+    2026-09-03. It read: ``/edit/`` is on the forbidden-url list so those
+    addresses are refused before the allowlist is consulted, and no field
+    inside any editor has ever been observed. **Both halves had become false,
+    and the first one describes the very mechanism this action now works by.**
+
+    ``/edit/`` IS still on the forbidden list -- and this action's own url,
+    ``/in/me/edit/intro/``, is let past it by an EXACT exemption recorded on
+    its spec. That is not a loophole around the paragraph, it is how the
+    action acts at all. And the fields ARE observed:
+    ``dom.read_self_owned_editor_fields`` reads the editor's live control list
+    and ``writes._live_control`` aims from it, requiring exactly one control
+    named as asked.
+
+    IT WAS FOUND BY READING, NOT BY A CHECK, and that limit is stated rather
+    than papered over. The two guards added the same day catch the MECHANICAL
+    claims -- a performable tool saying it issues no token, or headlining
+    itself as refusing. A paragraph asserting a capability is absent has no
+    shape a guard can match, so nothing here would have caught this and
+    nothing will catch the next one.
 
     WHAT IT WOULD COST. Your profile is what recruiters read, continuously
     rather than at a moment you choose -- it reports 29 profile views. An edit
@@ -4255,7 +4271,17 @@ async def linkedin_update_profile_field(
         field: which field. Named freely; nothing here validates it against a
             list of fields, because no editor has been opened to enumerate one.
         value: the new value. Part of the target, so a token binds to it.
-        confirm_token: accepted, and no token is ever issued for this action.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf: a token from that block, used once within two minutes, is
+            the only thing that acts.
+
+            THIS SAID "accepted, and no token is ever issued for this action"
+            UNTIL 2026-09-03, four weeks after the action shipped able to act.
+            Nobody reported it -- it was found by counting every PERFORMABLE
+            action against that sentence while fixing the one that WAS
+            reported. A caller reads this instead of the source, so
+            understating a capability makes them careless in exact proportion
+            to how much they trust it.
     """
     try:
         return await _write_tool(
@@ -4450,26 +4476,68 @@ async def linkedin_send_invitation(
 async def linkedin_send_message(
     member: str, text: str, confirm_token: str = ""
 ) -> dict[str, Any]:
-    """Send a message or InMail. BUILT, GATED, AND REFUSING.
+    """Send a message or InMail. PERFORMS, and it TYPES A NAME BEFORE IT STOPS.
 
-    THIS PREVIEW DOES NOT OPEN MESSAGING, and that is deliberate rather than
-    incidental. Loading /messaging/ is MEASURED TWICE to redirect into one
+    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-03, and on the one
+    tool here that reaches another person that was the most dangerous sentence
+    on this surface. It shipped able to act on 2026-09-02. It mints real
+    confirm tokens. Its Args block went on saying no token is ever issued for
+    it. A CALLER READS THIS INSTEAD OF THE SOURCE, so a docstring understating
+    a capability makes them careless in exact proportion to how much they
+    trust it -- which is the opposite of the failure everyone guards against.
+
+    IT REFUSES BY STOPPING PART-WAY, NOT BY DECLINING. That distinction is the
+    whole of what a caller needs and the old text hid it. The anchor is the
+    RECIPIENT COMBOBOX, not ``Send``: this fills the recipient FIRST, then
+    checks, and only a passing check lets your words be typed at all. So a
+    refusal is not free -- it leaves a NAME SITTING IN YOUR COMPOSER. It costs
+    you that and never your message.
+
+    AND THE RESIDUE MAKES THE NEXT CALL REFUSE DIFFERENTLY. Measured
+    2026-09-03: a first call left a name in the recipient box, and the second
+    refused at the STATE gate rather than the recipient one, because the state
+    gate requires an EMPTY composer and reads 0 dispatch radios once the box
+    is dirty. Two different refusals, one underlying cause, and the second
+    reason does not name the first. Clear the composer by hand between
+    attempts.
+
+    IT HAS NEVER SENT, AND THE REASON IS MEASURED RATHER THAN ASSUMED. On an
+    empty composer, with a CORRECT first-degree name, all four candidate
+    recipient selectors read ZERO committed recipients -- a bare fill does not
+    commit anybody. So the gate is not being cautious about an unknown; the
+    combobox demonstrably does not accept a typed name this way, and until
+    that is solved this cannot reach a send at all.
+
+    WHY A COUNT IS NOT THE PROPERTY. It proceeds only if EXACTLY ONE recipient
+    is committed AND that recipient's name carries the needle you supplied,
+    compared inside the page so no third party's name reaches this process.
+    One committed recipient with the wrong name refuses: "LinkedIn thinks this
+    is sendable" and "this is addressed to the person you named" are different
+    claims.
+
+    IT CAN REPORT NOT SENT AND CAN NEVER REPORT SENT. The only surface that
+    could confirm a send is the thread, which is forbidden here and costs a
+    read receipt to look at.
+
+    ON OPENING MESSAGING, which is still true and still the reason the PREVIEW
+    stays blind. Loading /messaging/ is MEASURED TWICE to redirect into one
     specific conversation of LinkedIn's own choosing -- so the load itself
     OPENS SOMEBODY'S THREAD, and whether that fires them a read receipt is an
     honest unknown believed unmeasurable from outside. The nav badge also
-    counts new-since-last-visit and resets when the tab is opened. A gate that
-    opened messaging in order to describe that cost would have spent it, on a
-    third party, to produce a sentence.
+    counts new-since-last-visit and resets when the tab is opened. So the
+    preview reads the BADGE off a page already open and stops. If you want the
+    surface measured, call ``linkedin_open_messaging`` yourself: it pays that
+    cost knowingly and its own name says so.
 
-    So it reads the BADGE off a page already open -- that number is the
-    counter a load would consume -- and stops. If you want the surface
-    measured, call ``linkedin_open_messaging`` yourself: it pays that cost
-    knowingly and its own name says so.
-
-    WHAT IS NOT MEASURED: any composer. ``/messaging/compose`` is on this
-    server's forbidden-url list -- it is the entry that SURVIVED when the
-    blanket messaging ban was narrowed in August so you could read your own
-    inbox, and it was kept for exactly this.
+    THE COMPOSER, THOUGH, IS MEASURED -- 77 controls, both dispatch radios,
+    the body editor, and ``Send`` drawn DISABLED while empty. And
+    ``/messaging/compose/`` is NOT forbidden to this action: the exact url has
+    been on the read allowlist since 2026-08-31 by an EXACT-url exemption, and
+    it is this action's own ``url_template``. The substring
+    ``/messaging/compose`` stays on the forbidden list, so every other
+    spelling in that family refuses exactly as it did. THIS DOCSTRING SAID THE
+    COMPOSER WAS UNMEASURED AND ITS URL FORBIDDEN; both had been false since
+    the day the action was addressed.
 
     WHAT IT WOULD COST. A message is read by a person, usually within a day,
     and arrives as an email as well as a notification; it is the most
@@ -4482,9 +4550,19 @@ async def linkedin_send_message(
 
     Args:
         member: who to message. Unvalidated, for the same reason as
-            ``linkedin_send_invitation``.
+            ``linkedin_send_invitation`` -- and it is ALSO the needle the
+            recipient check compares against inside the page.
         text: the exact words. Part of the target, so a token binds to them.
-        confirm_token: accepted, and no token is ever issued for this action.
+            Never typed unless the recipient check has already passed.
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf: a token from that block, used once within two minutes, is
+            the only thing that acts -- and acting here TYPES A NAME into his
+            composer before it decides whether it may continue.
+
+            THIS SAID "accepted, and no token is ever issued for this action"
+            while the tool minted real ones. It is the sentence that started
+            the 2026-09-03 census of every PERFORMABLE action's docstring,
+            which found ``update_profile_field`` saying it too.
     """
     try:
         return await _write_tool(

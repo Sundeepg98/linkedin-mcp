@@ -315,3 +315,136 @@ def test_no_refusal_calls_a_path_forbidden_that_is_not_forbidden():
                 ), "%s calls %r forbidden and it is not. Sentence: %s" % (
                     where, token, sentence,
                 )
+# ---------------------------------------------------------------------------
+# A FOURTH DRIFT, and it is the most dangerous shape this file guards
+# ---------------------------------------------------------------------------
+#
+# The three above are a docstring understating a COUNT, a description naming
+# the WRONG MEMBERS, and a refusal citing a boundary that had moved. This one
+# is a docstring understating a CAPABILITY -- and not any capability: the two
+# it was found on are the only write tools that put the operator's words in
+# front of another person.
+#
+# FOUND 2026-09-03, ON TWO TOOLS, BY CENSUS RATHER THAN BY NOTICE. The wave
+# lead ran ``linkedin_send_message`` and it minted real confirm tokens while
+# its own Args block said ``no token is ever issued for this action``. Fixing
+# the tool that was noticed would have left the class: counting every
+# PERFORMABLE action against that sentence found ``update_profile_field``
+# saying it too, and nobody had reported that one.
+#
+# **A TOOL DESCRIPTION IS READ INSTEAD OF THE SOURCE, WHICH INVERTS WHO A
+# STALE SENTENCE ENDANGERS.** A caller reading "no token is ever issued"
+# concludes the call is inert and may offer it freely. Understating a
+# capability is therefore strictly more dangerous than overstating one: the
+# overstatement makes a caller too careful, and this makes them careless in
+# exact proportion to how much they trust the docs.
+
+
+def _registered_tool(tools, action: str):
+    """The registered tool object for one sanctioned action, or None."""
+    for name, spec in writes.SANCTIONED_WRITES.items():
+        if spec.action == action and name in tools:
+            return tools[name]
+    return None
+
+
+def _live_claim(text: str) -> str:
+    """The FIRST PARAGRAPH of a description -- where a live claim lives.
+
+    BOTH CHECKS BELOW READ ONLY THIS, and the reason is the same one that
+    keeps the headline check on the summary line: **this repo requires a
+    corrected docstring to say what it used to say**, verbatim, so a caller
+    who read the old text learns it was wrong. That disclosure necessarily
+    contains the false sentence.
+
+    A guard matching anywhere in the description therefore fires on the FIX --
+    measured, on the first run of these two checks: both corrected docstrings
+    came back red for quoting the sentence they had just retracted. That is
+    this repo's own self-refuting shape (``test_path_hygiene`` proving it
+    detects real paths by carrying one) arriving in a guard.
+
+    So the split is structural rather than clever: a live claim is what the
+    description LEADS with; a retraction is a later paragraph, set off by a
+    blank line. Reading the first paragraph keeps the check sharp on the claim
+    and blind to the history, which is the only arrangement in which both can
+    coexist.
+    """
+    return " ".join((text or "").strip().split("\n\n")[0].split())
+
+
+def _param_claim(tools, action: str, param: str) -> str:
+    """One parameter's live claim, as a caller sees it in the JSON schema.
+
+    THE DESCRIPTION ALONE WOULD HAVE MISSED IT, and that was measured while
+    writing this. FastMCP splits an authored docstring: the prose becomes
+    ``description`` and the ``Args:`` block becomes per-parameter
+    ``description`` entries in the schema. The sentence that started this --
+    ``no token is ever issued for this action`` -- lives in the Args block, so
+    a guard reading ``tool.description`` reports CLEAN over a false claim the
+    caller can read in the schema. That is this file's own disease: a check
+    aimed at the half of the surface where the defect was not.
+    """
+    tool = _registered_tool(tools, action)
+    if tool is None:
+        return ""
+    schema = getattr(tool, "parameters", None) or {}
+    field = (schema.get("properties") or {}).get(param) or {}
+    return _live_claim(str(field.get("description") or ""))
+
+
+@pytest.mark.anyio
+async def test_no_performable_tool_claims_it_never_issues_a_token(tools):
+    """A tool that CAN act may not tell a caller that it cannot.
+
+    Asserted over every PERFORMABLE action rather than the one that was
+    reported, because the reported one was not the only one -- and a guard
+    written against a single instance would have shipped green over the
+    second.
+    """
+    lying = [
+        action
+        for action in sorted(writes.PERFORMABLE)
+        if "no token is ever issued"
+        in _param_claim(tools, action, "confirm_token")
+    ]
+    assert not lying, (
+        "these actions are PERFORMABLE and their confirm_token description "
+        "says no token is ever issued for them: %s" % lying
+    )
+
+    # AND THE CHECK CAN STILL SEE, which is not free given what it reads.
+    # Narrowing to the first paragraph is exactly the move that could turn
+    # this into a check that cannot fail -- if the parameter descriptions
+    # stopped reaching it, every action would pass for the wrong reason. So
+    # the corpus is asserted non-empty first.
+    described = [
+        action
+        for action in sorted(writes.PERFORMABLE)
+        if _param_claim(tools, action, "confirm_token")
+    ]
+    assert len(described) == len(writes.PERFORMABLE), (
+        "confirm_token has no readable description on: %s"
+        % sorted(set(writes.PERFORMABLE) - set(described))
+    )
+
+
+@pytest.mark.anyio
+async def test_no_performable_tool_headlines_itself_as_refusing(tools):
+    """The FIRST line is the summary a caller sees in a tool list.
+
+    ``BUILT, GATED, AND REFUSING`` is the correct headline for an action that
+    refuses, and four docstrings still carry the phrase HISTORICALLY -- "this
+    said X until 2026-09-01" -- which is exactly the disclosure this repo
+    wants and must keep passing. So this reads only the summary line, where
+    the phrase is a live claim rather than a record of one.
+    """
+    refusing = []
+    for action in sorted(writes.PERFORMABLE):
+        tool = _registered_tool(tools, action)
+        summary = ((tool.description or "") if tool else "").strip().splitlines()
+        if summary and "REFUSING" in summary[0].upper():
+            refusing.append((action, summary[0].strip()))
+    assert not refusing, (
+        "these actions PERFORM and their summary line says they refuse: %s"
+        % refusing
+    )
