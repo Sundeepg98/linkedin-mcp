@@ -1024,6 +1024,59 @@ def named_role_selector(role: str, name: str) -> str:
     return f'role={role}[name="{name}"s]'
 
 
+def settings_radio_label_selector(name: str) -> str:
+    """Aim at the ``<label for>`` that ACTIVATES a settings radio, by its name.
+
+    **THE INPUT IS UNCLICKABLE AND THIS IS MEASURED, NOT INFERRED.** On
+    2026-09-03 the first end-to-end ``update_setting`` fired with a real
+    confirm token and came back ``clicks_made: 0``. The selector was right:
+    ``role=radio[name="Always on"s]`` resolved the correct input, and
+    Playwright reported it visible, enabled and stable. It then retried 23
+    times over ten seconds and every attempt was intercepted::
+
+        <div class="setting-radio__button"> intercepts pointer events
+
+    LinkedIn draws its radios by covering the real ``<input>`` with a
+    decorative div. The verification re-navigated, re-read all three radios,
+    and correctly reported the state UNCHANGED -- so nothing downstream was
+    wrong. The click simply cannot land on the input.
+
+    **WHY THE LABEL, AND WHY A DIRECT QUERY SETTLED IT.** Two candidates were
+    measured before this was written, and the reading inverted the expected
+    answer. ``linkedin_surface_census`` reports ``name_source:
+    "aria-labelledby"`` for all three radios, which was read as proving there
+    is no ``<label for>`` binding -- ``aria-labelledby`` NAMES a control,
+    ``<label for>`` ACTIVATES one, and only the second makes a click on the
+    text move the radio. On that reading the label would pass every
+    actionability check and set nothing: a candidate that FAILS BY SUCCEEDING,
+    which is the worst shape available.
+
+    A direct query refuted it. ``label[for="theme__dark"]`` counts **1**. The
+    element ``aria-labelledby`` points at IS a ``<label>``, and its ``for``
+    attribute is the input's id -- a real activation relation. So
+    ``name_source`` is not a reliable proxy for whether a label-for binding
+    exists, and the inference from it was wrong where the query was right.
+
+    The other candidate died in the same reading: ``.setting-radio__button``
+    is present 3 times on the page and **0 times inside the target radio's
+    row**, so an ancestor walk to it resolves nothing.
+
+    **THIS IS STILL A NAME AIM.** The label's text IS the accessible name --
+    that is what ``aria-labelledby`` means here -- so matching the label by
+    its normalised text aims at exactly the control the caller asked for.
+    Re-ordering the three rows changes nothing, and no index is taken.
+    """
+    if not name or any(bad in name for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a settings-radio label selector from this "
+            "name: it is empty or carries a character that would end the "
+            "selector's own quoting. Same rule as named_role_selector, and "
+            "for the same reason -- what a wrong escaping produces here is a "
+            "click on a different control."
+        )
+    return 'xpath=//label[normalize-space(.)="' + name + '"]'
+
+
 def save_control_selector(label: str) -> str:
     """A selector for the save control wearing exactly ``label``.
 

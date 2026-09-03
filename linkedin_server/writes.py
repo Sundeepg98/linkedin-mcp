@@ -5794,7 +5794,15 @@ async def _live_control(
                 "matches nothing or matches something else. " + why,
                 "",
             )
-        return (state, why, dom.named_role_selector(role, anchor))
+        # AIM AT THE LABEL, NOT THE INPUT -- measured 2026-09-03, after the
+        # first live fire came back clicks_made: 0 with the input resolved
+        # correctly and every click intercepted by a decorative div. The role
+        # check above still runs and still refuses an unmeasured shape: what
+        # changed is only WHICH element carrying that name gets pressed. See
+        # dom.settings_radio_label_selector for the two candidates measured
+        # and why a direct label[for=] query refuted the inference drawn from
+        # the census's name_source.
+        return (state, why, dom.settings_radio_label_selector(anchor))
 
     if spec.action == "comment_on_item":
         # THE FILL TARGET. There is no emptiness check to make here and the
