@@ -10,24 +10,34 @@ committed and no tracked file was edited.
 
 ## 1. COUNTS
 
-    CAPABILITIES ENUMERATED, IN SCOPE, MAPPED       160
+    CAPABILITIES ENUMERATED, IN SCOPE, MAPPED       194
 
       COVERED-PROVEN                                  3
-      COVERED-UNFIRED                                 6
+      COVERED-UNFIRED                                  5
+      COVERED-CANNOT-DELIVER                          1
       EXCLUDED-RULED                                 78
-      GAP                                            73
+      GAP                                           107
 
 Counted separately so neither inflates the member denominator:
 
-    PAGE-ADMIN capabilities (require Page admin rights he does
-      not hold; all 9 are GAP -- no tool, no ruling)                    9
+    ADMIN-ONLY capabilities (Page admin, group owner/manager,
+      event organizer -- rights he does not hold; all 15 are
+      GAP -- no tool, no ruling)                                       15
     ----------------------------------------------------------------
-    TOTAL ENUMERATED                                                  169
+    TOTAL ENUMERATED                                                  209
 
-Raw rows harvested across the three Help Center walks before dedupe and
-scoping: **204** (52 invitations + 58 following + 94 discovery). Removed: 26
-duplicates across walks, 9 rows owned by the messaging census slice, 9 split
-out as Page-admin.
+**REVISED 2026-09-03, SECOND PASS.** The first pass mapped 160. A hazard
+reported by the team lead -- LinkedIn Help TOPIC pages render "0 articles" for
+products that plainly exist, so a topic-tree walk undercounts INVISIBLY -- sent
+this slice back to recover four areas that had come back empty or 404. **That
+recovery added 34 in-slice capabilities and 6 admin ones, all 34 of them GAPs.**
+Section 12 records the delta against the frozen top-level total; section 13
+records the instrument that closed the hazard.
+
+Raw rows harvested: **260** (52 invitations + 58 following + 94 discovery + 56
+recovery). Removed: 26 duplicates across the first three walks, 16 recovery rows
+that duplicate an existing row or belong to the content and messaging slices, 9
+rows owned by the messaging census slice, 15 split out as admin-only.
 
 **Three numbers carry this slice.**
 
@@ -54,6 +64,9 @@ was never considered.
                        returning what it claims. Cited per row.
     COVERED-UNFIRED    a tool exists and would not refuse at the gate, and
                        nothing records it completing live.
+    COVERED-CANNOT-     a tool exists, it HAS fired live, and it cannot do the
+      DELIVER          thing. Filing this as COVERED-UNFIRED would say "nobody
+                       has tried", which inverts a measurement.
     EXCLUDED-RULED     no tool, and a written passage in this repo gives a
                        reason that BEARS ON THIS CAPABILITY -- naming it, or
                        naming an address family or act-class containing it.
@@ -74,12 +87,19 @@ capability unreachable. Everything a general mechanism merely happens to block
 is a **GAP with a NAMED BLOCKER**, recorded in the row so nobody reads GAP as
 "cheap", but not laundered into a decision.
 
-**One state needed a footnote and got one instead of a fifth bucket.**
-`linkedin_send_message` HAS run live, twice, and REFUSED both times. That is not
-COVERED-PROVEN (nothing completed) and "no evidence it has ever run" is false.
-It is filed COVERED-UNFIRED with `RAN-AND-REFUSED` in its note. The distinction
-matters: a refusal that fires is a measurement, and this one produced the
-finding that killed name-addressing (section 8.3).
+**THE FIFTH STATE, adopted from a sibling slice on the lead's ruling.**
+`linkedin_send_message` HAS run live, twice, and REFUSED both times. The first
+pass filed it COVERED-UNFIRED with a footnote; that was wrong, because
+COVERED-UNFIRED asserts nobody has tried, and somebody did -- the trying is what
+produced the measurement. It is now the slice's ONE
+**COVERED-CANNOT-DELIVER** (row 155).
+
+**Exactly one row qualifies, and the boundary is worth stating.** The state
+needs a tool NAMED FOR THE CAPABILITY that fired and could not deliver it. Rows
+132-136 are not it: `who_viewed_me` has fired successfully and does deliver what
+it is named for; the viewer AGGREGATES on the same page are simply not parsed by
+anything. No tool is named for them, so they stay GAP. Rows 1, 46 and 48 are not
+it either -- those three have never fired at all.
 
 ---
 
@@ -166,7 +186,7 @@ LinkedIn chose to suggest that day.
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
 | 9 | View the invitations you have sent (Sent tab) | R | EXCLUDED-RULED | R2. Named verbatim in `send_invitation`'s own `unverifiable` block as the surface that would confirm a send and cannot be opened |
-| 10 | Withdraw a pending invitation you sent | W | EXCLUDED-RULED | R5 + R2 |
+| 10 | Withdraw a pending invitation you sent | W | EXCLUDED-RULED | R5 + R2. **LinkedIn DOES offer this -- verified against the Help Center, see 8.5.** The server's spec calls it UNMEASURED; that is true of the server and false of the product |
 | 11 | View the Page-follow invitations you have sent | R | EXCLUDED-RULED | R2 |
 | 12 | Withdraw a Page-follow invitation you sent | W | EXCLUDED-RULED | R5 + R2 |
 
@@ -241,9 +261,9 @@ read it out of Gmail instead. Rows 23-33 are why that skill exists.
 | 56 | Unsubscribe from a newsletter | W | GAP | REV |
 | 57 | View the newsletters you subscribe to | R | GAP | |
 | 58 | Unsubscribe from newsletter emails while staying subscribed on the feed | W | GAP | REV |
-| 59 | Follow a hashtag | W | GAP | REV. `hashtag` 0 hits in the package. **HC page 404'd -- see 9.2** |
-| 60 | Unfollow a hashtag | W | GAP | REV. Same |
-| 61 | View your followed hashtags | R | GAP | Same |
+| 59 | Follow a hashtag | W | GAP | REV. **EXISTENCE UNCERTAIN -- see 9.2.** The recovery pass found a528144 DEAD on eight URL forms and no follow-a-hashtag article of any id across 16 query phrasings, alongside a dated retirement receipt (a5999182, profile hashtags removed Feb/Mar 2024). LinkedIn may have RETIRED the member hashtag-follow surface. **Kept mapped, because that reading is an inference and removing capabilities on an inference is the same undercount this pass exists to fix** |
+| 60 | Unfollow a hashtag | W | GAP | REV. Same uncertainty |
+| 61 | View your followed hashtags | R | GAP | Same uncertainty |
 | 62 | Follow topics from the My Network page | W | EXCLUDED-RULED | R1 |
 | 63 | Join a LinkedIn group | W | GAP | REV |
 | 64 | Leave a LinkedIn group | W | GAP | REV |
@@ -392,8 +412,8 @@ silently downgraded.
 
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
-| 141 | Block a member | W | EXCLUDED-RULED | R4 -- initiated from the member's profile. NOT-REV in practice: unblocking carries a LinkedIn cooldown before you can re-block |
-| 142 | Unblock a member | W | EXCLUDED-RULED | R11 -- the blocked list is a settings page |
+| 141 | Block a member | W | EXCLUDED-RULED | R4 -- initiated from the member's profile. **NOT-REV, and LinkedIn says so outright** -- see 8.6. Blocking destroys the connection and removes that member's endorsements and recommendations, and unblocking reinstates none of them |
+| 142 | Unblock a member | W | EXCLUDED-RULED | R11 -- the blocked list is a settings page. Rate-limited: 48 hours before you may re-block, and documented as possibly UNAVAILABLE past 2000 blocks |
 | 143 | See the list of members you have blocked | R | EXCLUDED-RULED | R11 |
 | 144 | Report a member's profile | W | EXCLUDED-RULED | R4. NOT-REV |
 | 145 | Report a fake or impersonating profile | W | EXCLUDED-RULED | R4. NOT-REV |
@@ -419,7 +439,7 @@ people search.
 
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
-| 155 | Message a 1st-degree connection | W | **COVERED-UNFIRED (RAN-AND-REFUSED)** | `linkedin_send_message`. NOT-REV. Fired live and refused; see 8.3 |
+| 155 | Message a 1st-degree connection | W | **COVERED-CANNOT-DELIVER** | `linkedin_send_message`. NOT-REV. Fired live and REFUSED, twice. The only row in the slice in this state; see 2 and 8.3 |
 | 156 | Send an InMail to a member outside your network | W | EXCLUDED-RULED | R9 -- four written rulings. NOT-REV |
 | 157 | View your available InMail credits | R | EXCLUDED-RULED | R9. The `premium` census key was added 2026-09-01 to ask exactly this and settled that the balance is not on the composer |
 | 158 | Send an Open Profile message without spending an InMail | W | EXCLUDED-RULED | R9. NOT-REV |

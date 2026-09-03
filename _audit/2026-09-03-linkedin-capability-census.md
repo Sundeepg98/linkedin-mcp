@@ -16,15 +16,25 @@ files in `_audit/_census/`.
 
 | state | count | share |
 |---|---:|---:|
-| COVERED-PROVEN -- a tool exists and is recorded working | 45 | 6.8% |
-| COVERED-UNFIRED -- a tool exists, never run live | 27 | 4.1% |
-| COVERED-CANNOT-DELIVER -- fired live, measured unable | 2 | 0.3% |
-| EXCLUDED-RULED -- no tool, written reason exists | 227 | 34.3% |
-| **GAP -- no tool, no reason: nobody considered it** | **360** | **54.5%** |
-| **total enumerated** | **661** | |
+| COVERED-PROVEN -- a tool exists and is recorded working | 45 | 6.6% |
+| COVERED-UNFIRED -- a tool exists, never run live | 27 | 4.0% |
+| COVERED-CANNOT-DELIVER -- fired live, measured unable | 7 | 1.0% |
+| EXCLUDED-RULED -- no tool, written reason exists | 272 | 39.9% |
+| **GAP -- no tool, no reason: nobody considered it** | **330** | **48.5%** |
+| **total enumerated** | **681** | |
 
-By slice: jobs 132, profile/settings/privacy 240, messaging/content 120,
+By slice: jobs 132, profile/settings/privacy 260, messaging/content 120,
 network/people 169.
+
+**REVISED ONCE, IN THE DIRECTION THE METHOD PREDICTED.** The first pass read
+661/360-gap. Re-auditing the profile slice against the test-docstring finding
+below moved **45 rows from GAP to EXCLUDED-RULED** -- 23 of them the `/edit/`
+family, whose argument was written beside the single exemption granted from it
+-- and added 20 capabilities from products with NO topic home at all (Sign in
+and security, Visibility, Notifications, Advertising data), which had to be
+assembled article by article. The correction went exactly where the method
+said it would, which is the only reason to trust the second number more than
+the first.
 
 ## THE FINDING UNDER THE NUMBER
 
@@ -83,12 +93,29 @@ path nobody has driven.
    ship-and-repair of `update_profile_field` and `send_invitation` appears in
    ZERO audit files. `_audit/2026-08-31-linkedin-perform.md:3436` still tells a
    reader the action REFUSES.
-4. **A per-address fix for a class defect.** `/close-accounts` and
-   `/hibernate-account` are refused twice (forbidden list AND allowlist-miss);
-   `/mypreferences/d/two-factor-authentication`, `/verifications` and
-   `/job-application-accounts` are refused ONCE, by allowlist-miss alone. All
-   five are closed today; three lack the second layer, and one of those is the
-   account's second authentication factor.
+4. **A per-address fix for a class defect -- and the class has TEN known
+   members, not three.** `/close-accounts` and `/hibernate-account` are
+   refused TWICE (forbidden list AND allowlist-miss). Machine-checked against
+   all 23 forbidden substrings, these ten are refused ONCE, by allowlist-miss
+   alone:
+
+       /mypreferences/d/change-password        <- the password page
+       /mypreferences/d/two-factor-authentication
+       /mypreferences/d/verifications
+       /mypreferences/d/member-cookies
+       /mypreferences/d/job-application-accounts
+       /mypreferences/d/profile-visibility-for-partners
+       /public-profile/settings
+       /uas/login
+       /badges/profile/create
+       /mwlite/settings                        <- an ENTIRE parallel mobile tree
+
+   **Everything here is closed today.** Nothing is reachable, and this is not
+   an open door. It is a defence-in-depth asymmetry: the fix taken on
+   2026-08-31 was per-address when the thing found was a CLASS, and the class
+   includes the account's password and its second authentication factor. The
+   mobile tree is the sharpest instance -- a whole settings surface nobody
+   enumerated, guarded by nothing but not being on a list of 22 patterns.
 5. **`send_invitation` can only reach whoever LinkedIn drew into the rail on
    his OWN profile** -- third-party profiles are permanently forbidden. The
    docstring says where it acts, never that this bounds WHO is invitable.
@@ -97,9 +124,13 @@ path nobody has driven.
 
 * **13 job read capabilities render on a page `linkedin_job_detail` ALREADY
   LOADS.** Parser work, zero extra page loads.
-* **`/details/experience/` and `/details/education/` are already allowlisted
-  and nothing navigates to them.** `my_profile` hands out both urls and reports
-  `None` for both counts.
+* **`my_profile` DECLARES `experience_entries` and `education_entries`, fires
+  live, and returns `None` for both by construction** (`server.py:1714-1715`).
+  The lead first recorded this as "nothing navigates to them", which was the
+  wrong diagnosis of the right symptom: the fields are declared and hardcoded
+  `None`, so this is a tool that runs and cannot deliver two of its own stated
+  outputs -- not a capability nobody considered. `skills_listed` is `None` on
+  the same line.
 * **`who_viewed_me` already opens the analytics page and discards** the trend
   graph, top companies and top locations.
 * **45 of the 88 messaging/content gaps are reversible, private, and notify
