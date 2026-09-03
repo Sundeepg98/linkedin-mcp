@@ -165,6 +165,7 @@ async def _report_radio(page, name: str) -> None:
     # names this radio, so following the pointer cannot land on a different
     # row however the three are ordered.
     labelled_by = await radio.get_attribute("aria-labelledby")
+    radio_id = await radio.get_attribute("id")
     print("    aria-labelledby           %r" % labelled_by)
     if labelled_by and " " not in labelled_by.strip():
         ident = labelled_by.strip()
@@ -197,7 +198,6 @@ async def _report_radio(page, name: str) -> None:
     # only reports that after failing to find a label-for and a label-ancestor.
     # Asked again here directly, because a claim inherited from another
     # instrument is a claim this probe cannot defend on its own.
-    radio_id = await radio.get_attribute("id")
     if radio_id:
         bound = await page.locator('label[for="' + radio_id + '"]').count()
     # THIS LINE ONCE READ '(census predicts 0)' AND THE PREDICTION WAS MINE,
@@ -209,6 +209,47 @@ async def _report_radio(page, name: str) -> None:
     # consulted. This query returned 1 where I had written 0, which is the
     # comparison doing its job on the person who wrote it.
         print("    <label for> bound to it   %d   (see note below)" % bound)
+
+    # --- THE TWO AIM ROUTES, COUNTED SIDE BY SIDE --------------------------
+    #
+    # WHY THIS IS IN THE PROBE RATHER THAN IN A SCRATCH SCRIPT. The comparison
+    # was first written as a throwaway, it answered the question that unblocked
+    # the fire, and then it died with the scratch directory it lived in. An
+    # instrument worth running before a write is worth keeping next to the
+    # other readings of the same surface.
+    #
+    # THE TWO ROUTES REACH THE SAME LABEL BY DIFFERENT RELATIONS:
+    #
+    #   TEXT   dom.settings_radio_label_selector -- what the server presses.
+    #          Matches a label by its XPath STRING VALUE.
+    #   ID     the input's own aria-labelledby, followed to #<id>.
+    #
+    # THEY CAN DISAGREE, and that is the whole reason to count both. The string
+    # value and the ACCESSIBLE NAME come from different algorithms: CSS
+    # ::before content and an <img alt> inside the label reach the name and not
+    # the string value; a visually-hidden span does the reverse. They agree on
+    # this page today and nothing makes them agree tomorrow. If TEXT ever reads
+    # 0 while ID reads 1, the aim needs to move BEFORE anything is pressed.
+    text_route = dom.settings_radio_label_selector(name)
+    try:
+        n_text = int(await page.locator(text_route).count())
+    except Exception as exc:  # noqa: BLE001 - an unusable route is a reading
+        n_text = -1
+        print("    text route RAISED         %s" % type(exc).__name__)
+    print("    aim by TEXT resolves to   %d" % n_text)
+    if n_text == 1:
+        bound = await page.locator(text_route).get_attribute("for")
+        print("    ...and its for is         %r  (bound here? %s)"
+              % (bound, bound == radio_id))
+
+    # AND THE SHIPPED GATE'S OWN VERDICT, which is what actually runs before a
+    # click: it requires one control, one label, and the label's for to equal
+    # this input's id. Printed here so the probe reports the same answer the
+    # write path will reach rather than a reconstruction of it.
+    verdict = await dom.read_radio_label_binding(page, "radio", name)
+    print("    binding check             %s" % ("BOUND" if verdict["bound"] else "REFUSED"))
+    if not verdict["bound"]:
+        print("      why: %s" % verdict["why"])
 
     # --- candidate 1: the decoration, reached FROM the named input ----------
     #

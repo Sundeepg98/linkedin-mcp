@@ -383,17 +383,94 @@ PROFILE_MARKUP = (
 #: and cannot be clicked. Without ids here there is no ``for`` to bind, so the
 #: activation check correctly refused and three tests went red against a page
 #: LinkedIn does not serve.
-DARK_MODE_MARKUP = (
-    "<html><body>"
-    '<input type="radio" name="dm" id="dm-r-off"'
-    ' aria-labelledby="dm-off" checked>'
-    '<label for="dm-r-off" id="dm-off">Always off</label>'
-    '<input type="radio" name="dm" id="dm-r-on" aria-labelledby="dm-on">'
-    '<label for="dm-r-on" id="dm-on">Always on</label>'
-    '<input type="radio" name="dm" id="dm-r-dev" aria-labelledby="dm-dev">'
-    '<label for="dm-r-dev" id="dm-dev">Device settings</label>'
-    "</body></html>"
+#: THE THREE ROWS, AS DATA. ``(input id, label id, visible text)``.
+_DM_ROWS = (
+    ("dm-r-off", "dm-off", "Always off"),
+    ("dm-r-on", "dm-on", "Always on"),
+    ("dm-r-dev", "dm-dev", "Device settings"),
 )
+
+
+def _dm_row(
+    input_id: str,
+    label_id: str,
+    text: str,
+    *,
+    checked: bool = False,
+    kind: str = "radio",
+    tag: str = "",
+) -> str:
+    """ONE settings row, built rather than spelled.
+
+    **EVERY VARIANT IN THIS FILE IS BUILT THROUGH HERE, and that is a repair to
+    a whole CLASS rather than to one fixture.** These pages used to be derived
+    by string-replacing literal ``<input ...>`` tags out of
+    ``DARK_MODE_MARKUP``. On 2026-09-03 that markup was corrected to the shape
+    the live page actually has -- real ids, a real ``<label for>`` -- and FOUR
+    derivations anchored on the old literals silently became no-ops in the same
+    edit.
+
+    Two of them had guards that caught it (``assert 'role="switch"' in broken``
+    and ``assert both.count("checked") == 2``). One had a guard too WEAK to:
+    ``assert after.count("checked") == 1`` was satisfied by the unmodified
+    page, because the before-state also has exactly one checked -- so the test
+    ran the whole flow against a page that never changed and failed on
+    ``performed`` with no hint why.
+
+    A derivation that can silently no-op needs a guard. A derivation that
+    cannot no-op needs none, and this is that: the variant and the base are
+    generated from the same three tuples, so a change to the row shape moves
+    both at once and there is no literal left to fall out of step.
+
+    ``tag`` replaces the whole ``<input>`` element for the one test that needs
+    a non-input control; everything else varies only ``checked`` and ``kind``.
+    """
+    control = tag or (
+        '<input type="' + kind + '" name="dm" id="' + input_id + '"'
+        ' aria-labelledby="' + label_id + '"' + (" checked" if checked else "") + ">"
+    )
+    return (
+        control
+        + '<label for="'
+        + input_id
+        + '" id="'
+        + label_id
+        + '">'
+        + text
+        + "</label>"
+    )
+
+
+def _dm_page(
+    *,
+    checked: str = "Always off",
+    kind: str = "radio",
+    also_checked: str = "",
+    replace: tuple = (),
+) -> str:
+    """The dark-mode surface, with exactly the variation asked for.
+
+    ``checked`` names the row that is checked; ``also_checked`` names a SECOND
+    one, for the two-checked refusal; ``replace`` is ``(text, tag)`` and swaps
+    one row's control for an arbitrary element.
+    """
+    swap_text, swap_tag = (replace + ("", ""))[:2]
+    rows = []
+    for input_id, label_id, text in _DM_ROWS:
+        rows.append(
+            _dm_row(
+                input_id,
+                label_id,
+                text,
+                checked=(text == checked or text == also_checked),
+                kind=kind,
+                tag=swap_tag if (swap_text and text == swap_text) else "",
+            )
+        )
+    return "<html><body>" + "".join(rows) + "</body></html>"
+
+
+DARK_MODE_MARKUP = _dm_page()
 
 
 def _nine_pages() -> dict[str, str]:
@@ -2091,15 +2168,11 @@ def test_no_aiming_verdict_can_carry_a_name():
 #: is exactly what happened on 2026-09-03 when the markup gained ids and
 #: labels -- caught at collection by the first assert rather than by a green
 #: run, which is why it is an assert and not a comment.
-DARK_MODE_AFTER = DARK_MODE_MARKUP.replace(
-    '<input type="radio" name="dm" id="dm-r-off"'
-    ' aria-labelledby="dm-off" checked>',
-    '<input type="radio" name="dm" id="dm-r-off" aria-labelledby="dm-off">',
-).replace(
-    '<input type="radio" name="dm" id="dm-r-on" aria-labelledby="dm-on">',
-    '<input type="radio" name="dm" id="dm-r-on"'
-    ' aria-labelledby="dm-on" checked>',
-)
+DARK_MODE_AFTER = _dm_page(checked="Always on")
+# THE GUARDS STAY EVEN THOUGH THE DERIVATION CAN NO LONGER NO-OP. They cost
+# nothing and they are what caught this constant the last time the markup
+# moved; a guard removed because "it cannot fail now" is a guard nobody
+# reinstates when the reason changes.
 assert DARK_MODE_AFTER != DARK_MODE_MARKUP
 assert DARK_MODE_AFTER.count("checked") == 1
 
@@ -2186,7 +2259,26 @@ async def test_update_setting_runs_end_to_end_and_is_verified_from_a_reload(
 
     # THE SELECTOR IS BUILT FROM THE ROLE THE PAGE REPORTED, not an assumed
     # one. That is what ``input_type`` was added to the census for.
-    assert page.clicks == ['role=radio[name="Always on"s]'], page.clicks
+    # **THE CLICK TARGET MOVED ON 2026-09-03 AND THIS ASSERTION MOVED WITH
+    # IT.** It pinned the radio input. The first live update_setting proved the
+    # input cannot be clicked: LinkedIn covers it with a decorative div, and
+    # Playwright retried 23 times over ten seconds with every attempt
+    # intercepted, coming back clicks_made 0 with the state correctly reported
+    # unchanged.
+    #
+    # So the aim is the <label> that ACTIVATES the radio. This is a corrected
+    # expectation and not a weakened one -- the round trip then landed on the
+    # real account, both directions verified, which is what a moved assertion
+    # has to be able to point at.
+    assert page.clicks == [
+        'xpath=//label[normalize-space(.)="Always on"]'
+    ], page.clicks
+    # AND IT IS STILL A NAME AIM, which is the property that survived the move
+    # and the one worth asserting rather than the string alone: the destination
+    # appears in the selector, so a page that redrew its three rows in a
+    # different order still gets this one.
+    assert TO_STATES["update_setting"] in page.clicks[0]
+    assert "nth" not in page.clicks[0] and "[1]" not in page.clicks[0]
     assert result["performed"] is True, result
     assert result["verified"] is True
     assert result["verification"]["observed_state"] == "Always on"
@@ -2259,10 +2351,8 @@ async def test_an_unreadable_group_refuses_rather_than_choosing_by_position(
     """
     nav = FixtureNavigator(_nine_pages())
     _block, grant = await _setting_grant(nav, browser_page)
-    both = DARK_MODE_MARKUP.replace(
-        '<input type="radio" name="dm" aria-labelledby="dm-on">',
-        '<input type="radio" name="dm" aria-labelledby="dm-on" checked>',
-    )
+    both = _dm_page(checked="Always off", also_checked="Always on")
+    assert both != DARK_MODE_MARKUP
     assert both.count("checked") == 2
     nav.pages[writes.DARK_MODE_URL] = both
     page = _ClickRecordingPage(browser_page, nav, both)
@@ -2279,9 +2369,8 @@ async def test_an_unreadable_group_refuses_rather_than_choosing_by_position(
 #: radio and checkbox alike. So "they are radios" is an assumption this server
 #: must not be making, and the only way to show it is not making one is to
 #: serve it the other type and watch the selector follow.
-DARK_MODE_AS_CHECKBOXES = DARK_MODE_MARKUP.replace(
-    '<input type="radio"', '<input type="checkbox"'
-)
+DARK_MODE_AS_CHECKBOXES = _dm_page(kind="checkbox")
+assert DARK_MODE_AS_CHECKBOXES != DARK_MODE_MARKUP
 assert DARK_MODE_AS_CHECKBOXES.count('type="checkbox"') == 3
 assert 'type="radio"' not in DARK_MODE_AS_CHECKBOXES
 
@@ -2305,13 +2394,13 @@ async def test_a_checkbox_group_is_clicked_as_a_checkbox_not_as_a_radio(
     nav.pages[writes.DARK_MODE_URL] = DARK_MODE_AS_CHECKBOXES
     _block, grant = await _setting_grant(nav, browser_page)
 
-    after = DARK_MODE_AS_CHECKBOXES.replace(
-        '<input type="checkbox" name="dm" aria-labelledby="dm-off" checked>',
-        '<input type="checkbox" name="dm" aria-labelledby="dm-off">',
-    ).replace(
-        '<input type="checkbox" name="dm" aria-labelledby="dm-on">',
-        '<input type="checkbox" name="dm" aria-labelledby="dm-on" checked>',
-    )
+    after = _dm_page(checked="Always on", kind="checkbox")
+    # **THE INEQUALITY IS THE GUARD THAT WAS MISSING HERE**, and its absence is
+    # why this test failed on ``performed`` rather than on its own setup: the
+    # old derivation no-opped, the count guard was satisfied by the UNCHANGED
+    # page (the before-state also has exactly one checked), and the whole flow
+    # then ran against a page that never moved.
+    assert after != DARK_MODE_AS_CHECKBOXES
     assert after.count("checked") == 1
     page = _ClickRecordingPage(browser_page, nav, after)
     result = await writes.perform(nav, page, grant)
@@ -2349,17 +2438,25 @@ async def test_a_destination_wearing_an_unmapped_role_refuses_rather_than_raisin
     # The destination becomes a switch. The other two inputs still carry the
     # group's state, so the reading still settles and the direction still
     # renders -- this isolates the ROLE question and nothing else.
-    broken = DARK_MODE_MARKUP.replace(
-        '<input type="radio" name="dm" aria-labelledby="dm-on">',
-        # A BUTTON rather than a div, and that is not cosmetic: a bare
-        # ``div[role=switch]`` matches no arm of CENSUS_CONTROL_SELECTOR and
-        # so produces NO ROW AT ALL -- the first attempt at this test used one
-        # and refused at "0 controls are named 'Always on'", one step before
-        # the branch it was written for. A button is censused, carries
-        # aria-checked, and therefore arrives at the role check.
-        '<button role="switch" aria-checked="false" aria-labelledby="dm-on">'
-        "</button>",
+    # BUILT, NOT REPLACED, for the reason ``_dm_row`` gives at length: the four
+    # derivations in this file that were string-replacements all silently
+    # no-opped when the markup was corrected, and this one's guard is what
+    # caught it.
+    #
+    # A BUTTON RATHER THAN A DIV, and that is not cosmetic: a bare
+    # ``div[role=switch]`` matches no arm of CENSUS_CONTROL_SELECTOR and so
+    # produces NO ROW AT ALL -- the first attempt at this test used one and
+    # refused at "0 controls are named 'Always on'", one step before the branch
+    # it was written for. A button is censused, carries aria-checked, and
+    # therefore arrives at the role check.
+    broken = _dm_page(
+        replace=(
+            "Always on",
+            '<button role="switch" aria-checked="false" '
+            'aria-labelledby="dm-on"></button>',
+        )
     )
+    assert broken != DARK_MODE_MARKUP
     assert 'role="switch"' in broken
     nav.pages[writes.DARK_MODE_URL] = broken
     page = _ClickRecordingPage(browser_page, nav, broken)
