@@ -35,7 +35,7 @@ save produced it. Everything else:
 | write | state |
 |---|---|
 | `save_job` | LANDED |
-| `apply_job` | fired once on a real posting, **did not submit** -- the gate held |
+| `apply_job` | fired once on a real posting, **did not submit** -- the gate held on its OWN logic, one of `_apply_submit_gate`'s five conditions. Both defects that firing exposed were about REPORTING the outcome, not causing the refusal. **So the next fire is the first real submit, not a de-risked repeat.** |
 | `send_message` | fired live, **cannot deliver** (name addressing measured dead) |
 | `update_profile_field` | fired once, failed `NAVIGATIONS ATTEMPTED: []`, repaired, never re-driven |
 | `follow_company` | **never fired** -- see below |
@@ -64,10 +64,21 @@ path nobody has driven.
    unrecoverable when the undo was already built. Three sibling defects sit in
    the same field, and **the tests pin the stale phrases**, locking the wrong
    text in rather than catching it.
-2. **`publish_post` broadcasts at an audience nobody chose.** Signature is
-   `(text, confirm_token)`; no visibility parameter, and the docstring never
-   says visibility, audience, "Anyone" or "connections only". The gate names
-   impressions while not naming who sees it.
+2. **`publish_post` broadcasts at an audience nobody chose -- and the control
+   was SEEN.** Signature is `(text, confirm_token)`; no visibility parameter,
+   and the docstring never says visibility, audience, "Anyone" or "connections
+   only". This is not an unknown surface: a live capture of the composer
+   dialog, 31 controls read, records "and an audience control" in three words
+   at `_audit/2026-08-31-linkedin-perform.md:166`. Seen, written down, never
+   named, never read, never wired.
+
+   **The collision that hid it:** the spec's `residue` uses the word "audience"
+   to mean REACH and quantifies it -- 275 followers, 103/308/1,284 impressions
+   -- so the word is present and the SETTING is absent. **The gate tells him
+   how many may see a post and never who may.** Closing it costs one read on an
+   already-allowlisted address, which makes it the cheapest unclaimed
+   capability in the inventory. It is a PRECONDITION of any `publish_post`
+   fire, not a note.
 3. **The system of record is stale about a repaired tool.** The 2026-09-02
    ship-and-repair of `update_profile_field` and `send_invitation` appears in
    ZERO audit files. `_audit/2026-08-31-linkedin-perform.md:3436` still tells a
@@ -101,14 +112,39 @@ path nobody has driven.
 
 * The read allowlist is **22 patterns** and reaches no Groups, Events,
   newsletters or hashtags -- most of one slice's 88 gaps in one line.
-* `set_input_files` sits on the mutation-pattern list and appears in NO
-  sanction and NO document. That single undiscussed omission closes every
-  photo, video, document and attachment path -- 9 gaps nobody argued about.
+* **File upload is closed, deliberately, and is ONE OPERATOR ANSWER FROM
+  OPENING.** `set_input_files` sits on the mutation-pattern list and in no
+  sanction, closing every photo, video, document and attachment path -- 9
+  capabilities. **The lead first recorded this as "undiscussed" and was
+  wrong.** `tests/test_readonly.py:310-341` carries the full reasoning, scans
+  every module, plants a mutation to prove the pattern still bites, and
+  asserts the kind absent from `SANCTIONED_MUTATIONS` BY NAME. Its argument:
+  *"UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words in
+  a box; a file input puts a FILE from this machine into somebody else's
+  inbox, chosen by a path string. Nothing in this package should be one edit
+  away from that, and the operator has never been asked about it."* Nothing
+  needs measuring first. It needs an answer.
+
+* **AND THAT DISCREPANCY IS ITSELF A FINDING ABOUT THIS CENSUS.** Several of
+  this repository's sharpest rulings live in TEST DOCSTRINGS rather than in
+  `_audit/` -- `set_input_files` has ONE mention across 51 audit files, and
+  that one is a zero count. A census reading only `_audit/` scores such a
+  ruling as never-considered. **So GAP=360 is over-counted by an unknown
+  amount, and EXCLUDED-RULED=227 is under-counted by the same amount.** The
+  totals move in opposite directions from the topic-page hazard below, and
+  neither correction has been measured. Any future pass should grep test
+  docstrings before calling anything unconsidered.
 * **72 of 105 settings exclusions are ONE ruling** (admitted by name or not at
   all). The ruling is correct, and it means nobody has an opinion about 71
   individual settings.
 * **People search is 23 gaps and largely unconsidered** -- not ruled against,
   not weighed.
+* **JOB SEARCH IS THE ONLY SEARCH.** No people, company or content search has
+  an address on the allowlist at all. So several capabilities that LOOK blocked
+  by a missing write are blocked EARLIER, by having no way to find the target.
+  Also absent: company Pages (`/company/<slug>/`) -- which is exactly the
+  slug-versus-numeric-id gap behind the follow/unfollow aiming failure -- and
+  `/pulse/`, even though `/article/new/` is allowed.
 
 ## HOLES IN THE DENOMINATOR, DECLARED RATHER THAN SCORED AS ZERO
 
