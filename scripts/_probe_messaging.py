@@ -55,6 +55,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, FEED_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.shape import census_redact_rare  # noqa: E402
 
 # NO OUTPUT DIRECTORY. This probe writes no file, so it holds no path to write
 # one to. That is deliberate: the version that had an ``OUT`` used it, and the
@@ -93,6 +94,23 @@ _REDACTIONS = (
     (re.compile(r'(/messaging/thread/)[^/"?\s]+'), r'\1<THREAD-ID>'),
     (re.compile(r'(?i)\b(urn:li:[a-z_]+):[A-Za-z0-9_%\-=]+'), r'\1:<ID>'),
     (re.compile(r'(?i)\b(conversation with|message from)\s+.+$'), r'\1 <NAME>'),
+    # A VANITY SLUG, WHICH THIS REDACTOR DID NOT TOUCH UNTIL 2026-09-03.
+    # `_redact(page.url)` runs on EVERY page this probe loads, and
+    # `/in/somebodys-vanity-name/` came back byte-identical -- a member's
+    # public identity printed by the one function standing between this probe
+    # and a leak. A slug with digits fared no better: only the digits changed.
+    #
+    # THAT IS THE LEAK CLASS THAT COST THIS SESSION THREE SEPARATE INCIDENTS,
+    # and it is refused here on STRUCTURE rather than on how the string looks
+    # -- the same move `shape.census_href_identifies_entity` makes. Whatever
+    # sits after `/in/` names a member, so no rule about its shape is needed
+    # or wanted.
+    #
+    # ORDERED BEFORE THE DIGIT RULE ON PURPOSE. Behind it, `<N>` had already
+    # eaten the slug's trailing digits and this pattern then matched only the
+    # remainder, printing `/in/<SLUG><N>/` -- correct but ugly, and ugly in a
+    # way that invites somebody to "tidy" one of the two rules away.
+    (re.compile(r'(/in/)[A-Za-z0-9%\-_]{3,}'), r'\1<SLUG>'),
     (re.compile(r'\d{3,}'), '<N>'),
 )
 
@@ -151,14 +169,108 @@ def _redact(value: str) -> str:
     return _collapse_names(out)
 
 
+#: What a control is reported as when its DESTINATION identifies somebody. The
+#: label is never shaped, never counted and never printed -- only the fact that
+#: such a control was there.
+ENTITY_LABEL = "<entity link>"
+
+#: Hrefs that identify a person or a company BY CONSTRUCTION. The same two
+#: shapes ``shape._CENSUS_ENTITY_HREFS`` names, and the same reasoning: this
+#: does not depend on how the label reads or on how often it repeats.
+_ENTITY_HREF = re.compile(r"/(?:in|company)/[A-Za-z0-9%\-_.]{2,}")
+
+#: One HTML tag. Attribute ORDER VARIES on LinkedIn's markup, so the label and
+#: the href are pulled from the same tag rather than assumed adjacent -- a
+#: pattern requiring `aria-label` before `href` silently matches nothing on
+#: half the controls, which is a reading that looks like an absence.
+_TAG = re.compile(r"<[a-zA-Z][^>]{0,600}>")
+_TAG_LABEL = re.compile(r'aria-label="([^"]{0,80})"')
+_TAG_HREF = re.compile(r'href="([^"]{0,300})"')
+
+
+def _href_identifies_entity(href: str | None) -> bool:
+    """True when this control's destination names a person or a company."""
+    return bool(href) and bool(_ENTITY_HREF.search(href or ""))
+
+
+def _labelled_tags(html: str) -> list[tuple[str, str | None]]:
+    """``(aria-label, href)`` for every tag carrying a label, PAIRED.
+
+    The old reading took labels alone, with a regex over the whole document,
+    and so could never ask the one question that does not depend on the
+    string: where does this control GO. Pairing them is what makes the
+    structural refusal above possible at all.
+    """
+    out: list[tuple[str, str | None]] = []
+    for tag in _TAG.finditer(html):
+        text = tag.group(0)
+        label = _TAG_LABEL.search(text)
+        if not label:
+            continue
+        href = _TAG_HREF.search(text)
+        out.append((label.group(1), href.group(1) if href else None))
+    return out
+
+
 def _label_shapes(html: str, limit: int = 25) -> list[str]:
-    """aria-label TEMPLATES and their counts -- never the labels themselves."""
+    """aria-label TEMPLATES and their counts -- never the labels themselves.
+
+    THE COUNT RULE LIVES HERE AND CANNOT LIVE IN ``_redact``, which is the
+    whole reason this function changed rather than that one.
+
+    ``_redact`` could not see a name that sits beside a lowercase word: its
+    name rule takes the MAXIMAL run of letter-words and requires EVERY word in
+    it to be capitalised, so one lowercase word -- "to", "profile", "sent" --
+    exempts the run and the name with it. Measured 2026-09-03:
+
+        Conversation with <a name>   redacted   (a template rule caught it)
+        Reply to <a name>            NAME SURVIVED
+        Open <a name> profile        NAME SURVIVED
+        Send message to <a name>     NAME SURVIVED
+
+    THE OBVIOUS FIX WAS MEASURED AND REJECTED. Teaching ``_redact`` to blank
+    any capitalised run -- the census's rule -- closes all four, and against
+    the 104 distinct aria-labels in this repo's committed fixtures it also
+    blanks 32 shapes that are JOB TITLES and product names: "Apply to Staff
+    Engineer", "Back End Developer with verification", "Chart. Highcharts
+    interactive chart." Nothing about those STRINGS separates them from a
+    person's name, which is precisely the premise
+    :func:`shape.census_redact_rare` is built on: **page furniture repeats
+    across a surface and a member does not.** The discriminator is the COUNT,
+    and the count does not exist until the shapes merge -- three lines below
+    this comment and nowhere earlier.
+
+    So the sanctioned instrument is applied at the one place its precondition
+    holds. The TEMPLATE still survives -- "Reply to <redacted>", "Apply to
+    <redacted>" -- so what is lost is the variable part and not the structure
+    this function exists to report.
+
+    HONEST LIMIT ON THAT COST. It was measured on job and profile fixtures,
+    and this probe reads neither: it loads the feed and the inbox. There is no
+    committed capture of either to measure against, because this probe writes
+    none -- by design, after the version that did. **The safety property that
+    makes the real cost unmeasurable is the same one that makes the probe
+    safe**, and that is stated rather than quietly rounded to zero.
+    """
     counts: dict[str, int] = {}
-    for raw in re.findall(r'aria-label="([^"]{0,80})"', html):
-        shape = _redact(raw)
-        counts[shape] = counts.get(shape, 0) + 1
-    ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
-    return [f"{shape} x{n}" for shape, n in ordered[:limit]]
+    for raw, href in _labelled_tags(html):
+        # LAYER ONE, STRUCTURAL AND COUNT-FREE. A control pointing at a member
+        # or a company IS a link to that entity, so its accessible name is that
+        # entity's name whatever the string looks like and however often it
+        # appears. Refused here rather than downstream, because the count rule
+        # below cannot see it.
+        if _href_identifies_entity(href):
+            counts[ENTITY_LABEL] = counts.get(ENTITY_LABEL, 0) + 1
+            continue
+        shaped = _redact(raw)
+        counts[shaped] = counts.get(shaped, 0) + 1
+    # LAYER TWO. THE MERGE HAS HAPPENED; THE COUNT NOW EXISTS.
+    merged: dict[str, int] = {}
+    for shaped, n in counts.items():
+        blanked = census_redact_rare(shaped, n)
+        merged[blanked] = merged.get(blanked, 0) + n
+    ordered = sorted(merged.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [f"{shaped} x{n}" for shaped, n in ordered[:limit]]
 
 
 def _badges(html: str) -> dict[str, list[str]]:

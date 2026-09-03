@@ -63,6 +63,18 @@ MUST_REDACT = [
     ("https://www.linkedin.com/messaging/thread/2-QUJDREVGSElKS0xNTk9Q==/", "thread id"),
     ("Jane Q Public", "bare name with a one-letter initial"),
     ("Ingr\u00edd \u00d6sterberg", "non-ascii name"),
+    # THE VANITY SLUG, ADDED 2026-09-03 AFTER IT WAS FOUND PASSING THROUGH
+    # BYTE-IDENTICAL. `_redact` is called on `page.url` for EVERY page this
+    # probe loads and had no slug rule at all, so a member's public identity
+    # was printed by the function standing between this probe and a leak.
+    #
+    # THE SLUG IS SHAPE-VALID ON PURPOSE AND A PLACEHOLDER WOULD BREAK THIS.
+    # The rule matches `/in/` followed by 3+ slug characters; `/in/<SLUG>` does
+    # not match it, so the test would pass on a redactor that had lost the rule
+    # entirely. The value is `some-real-slug-99`, already sanctioned in
+    # SYNTHETIC_SLUGS in tests/test_no_committed_identity.py -- blessed there
+    # rather than declared here, so no allowlist moves.
+    ("https://www.linkedin.com/in/some-real-slug-99/", "vanity slug in a url"),
 ]
 
 #: Inputs that MUST SURVIVE. These are the probe's actual output vocabulary;
@@ -86,6 +98,159 @@ def test_identity_is_redacted(value: str, why: str) -> None:
 @pytest.mark.parametrize("value", MUST_SURVIVE)
 def test_structure_survives(value: str) -> None:
     assert _probe_module()._redact(value) == value
+
+
+#: Names `_redact` CANNOT see, because its name rule takes the maximal run of
+#: letter-words and requires EVERY word in it to be capitalised -- so one
+#: lowercase word ("to", "profile", "sent") exempts the run and the name with
+#: it. These are not in MUST_REDACT because MUST_REDACT tests `_redact`, and
+#: `_redact` is deliberately NOT where this is fixed.
+LEAKED_BESIDE_A_LOWERCASE_WORD = [
+    "Reply to Jane Public",
+    "Open Jane Public profile",
+    "Send message to Jane Q Public",
+    "Jane Public sent a message",
+]
+
+
+def _shapes(labels: list[str]) -> list[str]:
+    html = "".join('<a aria-label="%s"></a>' % one for one in labels)
+    return _probe_module()._label_shapes(html)
+
+
+@pytest.mark.parametrize("value", LEAKED_BESIDE_A_LOWERCASE_WORD)
+def test_a_name_beside_a_lowercase_word_is_blanked_on_the_label_path(value):
+    """THE FIX IS AT THE TALLY, WHICH IS WHY THIS TESTS `_label_shapes`.
+
+    Making `_redact` itself blank any capitalised run closes these four and
+    also blanks 32 shapes across this repo's committed fixtures that are JOB
+    TITLES -- "Apply to Staff Engineer", "Back End Developer with
+    verification". No property of the STRING separates a job title from a
+    person's name, which is the premise `shape.census_redact_rare` rests on:
+    furniture repeats across a surface and a member does not. The
+    discriminator is the COUNT, and the count does not exist until the shapes
+    merge.
+    """
+    shaped = _shapes([value])[0]
+    for token in ("Jane", "Public"):
+        assert token not in shaped, (value, shaped)
+
+
+def test_the_template_survives_what_the_count_rule_blanks():
+    """BLANKED, NOT DROPPED -- the structure is the whole point of the probe.
+
+    A redactor that returned "<redacted>" for the entire label would pass the
+    test above perfectly and report nothing, which is the failure mode this
+    file was written against in the first place.
+    """
+    assert _shapes(["Reply to Jane Public"])[0].startswith("Reply to <redacted>")
+    assert _shapes(["Jane Public sent a message"])[0].endswith("sent a message x1")
+
+
+def test_repeated_furniture_is_not_eaten_by_the_count_rule():
+    """THE COST CONTROL. The count rule fires at count == 1 ONLY, so a label
+    the surface repeats keeps its text -- which is what makes the rule
+    affordable on furniture while still blanking a singleton name."""
+    rows = _shapes(["Conversation List", "Conversation List",
+                    "Global Navigation", "Global Navigation"])
+    assert "Conversation List x2" in rows, rows
+    assert "Global Navigation x2" in rows, rows
+
+
+def test_the_count_rule_is_actually_reached():
+    """A CONTROL FOR THE CONTROL. If `_label_shapes` stopped calling
+    `census_redact_rare`, every assertion above about blanking would fail --
+    but a future edit could also make the rule unreachable while these pass by
+    accident, so the singleton/repeat DIFFERENCE is asserted directly."""
+    once = _shapes(["Reply to Jane Public"])[0]
+    twice = _shapes(["Reply to Jane Public", "Reply to Jane Public"])[0]
+    assert "<redacted>" in once
+    assert twice.endswith("x2")
+
+
+def _tagged(label: str, href: str | None, times: int = 1) -> list[str]:
+    attrs = 'aria-label="%s"' % label
+    if href:
+        attrs = 'href="%s" ' % href + attrs
+    return _probe_module()._label_shapes(("<a %s></a>" % attrs) * times)
+
+
+#: Both spellings LinkedIn writes member links in -- MEASURED to appear on one
+#: page -- plus a company link, because the structural rule covers both entity
+#: kinds and a test of only one would leave half of it unexercised.
+#:
+#: EVERY ID HERE IS SHAPE-VALID AND DECLARED. `_ENTITY_HREF` needs real slug
+#: and id characters after the prefix, so a placeholder would stop the rule
+#: firing and the test would pass on a redactor that had lost it. The first
+#: version of this list used a bare ascending five-digit company id and the
+#: identity guard failed it within the minute -- correctly, since it was not in
+#: SYNTHETIC_IDS and nothing about it says invented. THE VALUE IS NOT QUOTED
+#: HERE, and that is the point: naming it in the comment put it straight back
+#: into the file and failed the guard a SECOND time, on the very line
+#: explaining the first. A retraction that must quote a forbidden literal
+#: cannot be written in the file that forbids it. `5300011` and
+#: `some-real-slug-99` are both
+#: already sanctioned in tests/test_no_committed_identity.py, so no allowlist
+#: moves and no plant is pinned.
+ENTITY_HREFS = ["/in/some-real-slug-99/",
+                "https://www.linkedin.com/in/some-real-slug-99/",
+                "/company/5300011/"]
+
+
+@pytest.mark.parametrize("href", ENTITY_HREFS)
+def test_an_entity_link_is_refused_however_often_it_repeats(href):
+    """THE LAYER THE COUNT RULE CANNOT PROVIDE.
+
+    `census_redact_rare` rests on "furniture repeats and a member does not",
+    and that premise FAILS on a conversation surface, where one participant
+    appearing twice is normal rather than exceptional. Measured before this
+    layer existed: at count 2 the name shipped verbatim.
+
+    A destination does not depend on the premise. `/in/<slug>` is a link to a
+    member however the label reads and however many times it appears, so the
+    refusal is on the STRUCTURE of the control -- the same move
+    `shape.census_href_identifies_entity` makes for the census.
+    """
+    for times in (1, 2, 3):
+        row = _tagged("Reply to Jane Public", href, times)[0]
+        for token in ("Jane", "Public"):
+            assert token not in row, (href, times, row)
+
+
+def test_the_pairing_survives_attribute_order():
+    """MEASURED, NOT ASSUMED. LinkedIn writes these attributes in both orders,
+    and a pattern requiring `aria-label` before `href` matches nothing on half
+    the controls -- an absence that reads exactly like a clean page."""
+    first = _tagged("Reply to Jane Public", "/in/some-real-slug-99/", 2)[0]
+    both = _probe_module()._label_shapes(
+        '<a aria-label="Reply to Jane Public" href="/in/some-real-slug-99/"></a>' * 2
+    )[0]
+    assert "Jane" not in first and "Jane" not in both, (first, both)
+
+
+def test_a_non_entity_href_is_not_swallowed():
+    """THE OTHER DIRECTION. A rule that called everything an entity link would
+    pass every leak test and report nothing at all."""
+    row = _tagged("Star conversation", "/messaging/", 2)[0]
+    assert row == "Star conversation x2", row
+
+
+def test_the_residual_gap_is_pinned_rather_than_hidden():
+    """WHAT NEITHER LAYER COVERS, asserted so it cannot be forgotten.
+
+    A control with NO href whose repeated label carries a name: the structural
+    rule has no destination to read, and the count rule declines above one.
+    The census documents the same residual for the same reason. Pinned as a
+    KNOWN state -- if a future change closes it, this test fails and the gap
+    gets deleted from the docs deliberately rather than by drift.
+    """
+    row = _probe_module()._label_shapes(
+        '<button aria-label="Reply to Jane Public"></button>' * 2
+    )[0]
+    assert "Jane Public" in row, (
+        "the hrefless repeated-name gap is CLOSED -- update this test and the "
+        "probe's docstring, which both still describe it as open: %r" % row
+    )
 
 
 def test_the_probe_writes_no_capture() -> None:
