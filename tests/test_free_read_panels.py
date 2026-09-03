@@ -209,6 +209,46 @@ async def test_the_company_panel_is_reported_by_shape_and_is_present(
     assert panels["company_insights"]["heading"] == dom.JOB_COMPANY_PANEL_SHAPE
 
 
+async def test_the_company_panel_carries_its_rows_and_not_its_plumbing(
+    chromium_page,
+):
+    """The panel's CONTENT, which shipped empty until the fallback reached it.
+
+    Its heading was found and its ``lines`` were ``[]`` on both captures, for
+    the same reason the education rows were: the structural walk cannot reach
+    a block whose heading shares a parent with two others. It carries the one
+    thing on a posting that is genuinely about the EMPLOYER rather than the
+    role -- headcount, two-year growth, median tenure -- so an empty list here
+    was a silently wrong answer rather than a missing nicety.
+
+    THREE BOUNDARIES ARE ASSERTED, because each was wrong once:
+
+    * ``Powered by Bing`` is a byline LinkedIn draws INSIDE the panel and the
+      section walk reports it as a heading. Stopping there returned an empty
+      panel, so it is IGNORED rather than stopped at -- and the first row
+      after it is asserted here, which is what proves the skip works.
+    * ``Show Premium Insights`` sits at the panel's END and is not a heading,
+      so the read ran one line past it. It is asserted absent.
+    * the screen-reader chart plumbing is dropped, and the one line of that
+      block worth keeping is asserted PRESENT -- a filter that took the whole
+      block would have been indistinguishable from one that took too much.
+    """
+    panels = await _panels(chromium_page, HYDRATED)
+    lines = panels["company_insights"]["lines"]
+
+    assert lines, panels["observed"]["headings"]
+    assert lines[0] == "The latest hiring trend"
+    assert "288" in lines and "Total employees" in lines
+    assert any(line.startswith("Median employee tenure") for line in lines)
+
+    assert "Powered by Bing" not in lines
+    assert "Show Premium Insights" not in lines
+    assert "Chart" not in lines
+    assert "End of interactive chart." not in lines
+    assert not any(line.startswith("The chart has ") for line in lines)
+    assert "Chart with 25 data points." in lines
+
+
 async def test_a_promoted_posting_says_so(chromium_page):
     panels = await _panels(chromium_page, HYDRATED)
 

@@ -7206,8 +7206,32 @@ def lines_below(section: Optional[dict[str, Any]]) -> list[str]:
 _BARE_SHARE = re.compile(r"^\d{1,3}%$")
 
 
+#: The attribution label LinkedIn draws INSIDE the Premium company panel,
+#: between the panel's own heading and its first row. Measured on both
+#: captures and live on 2026-09-03, always in that position.
+#:
+#: IT IS A HEADING, WHICH MAKES IT A TRAP. The section walk sees it as one, so
+#: it lands in the heading list and would end the positional read at the very
+#: first line -- returning an empty panel for a panel that is plainly there.
+#: It is a byline, not a section, so it is SKIPPED rather than stopped at.
+JOB_COMPANY_ATTRIBUTION = "Powered by Bing"
+
+#: Lines the company panel draws for a SCREEN READER rather than for a reader.
+#: Measured on both captures: a bare "Chart", an "End of interactive chart.",
+#: and two sentences describing the axes and their ranges. The one line worth
+#: keeping from that block is "Chart with 25 data points." -- the same shape
+#: the profile-views trend reader keeps -- so the drop is by exact match and
+#: by one prefix rather than by the word "chart".
+JOB_COMPANY_LINE_NOISE: tuple[str, ...] = ("Chart", "End of interactive chart.")
+JOB_COMPANY_LINE_NOISE_PREFIXES: tuple[str, ...] = ("The chart has ",)
+
+
 def lines_after_heading(
-    body: str, heading: str, stop_headings: set[str], cap: int
+    body: str,
+    heading: str,
+    stop_headings: set[str],
+    cap: int,
+    ignore: tuple[str, ...] = (),
 ) -> list[str]:
     """Lines that follow a heading in ``main``'s rendered text.
 
@@ -7244,6 +7268,13 @@ def lines_after_heading(
     out: list[str] = []
     for line in lines[start + 1:]:
         if not line:
+            continue
+        # IGNORED BEFORE STOPPED AT, and the order is the whole of it. A byline
+        # LinkedIn draws as a heading INSIDE a panel would otherwise end the
+        # read at the panel's first line -- see JOB_COMPANY_ATTRIBUTION, which
+        # sits between the company panel's heading and its first row on both
+        # captures and live.
+        if line in ignore:
             continue
         if line in stop_headings:
             break
@@ -7342,6 +7373,58 @@ def pair_metrics(lines: list[str]) -> list[dict[str, str]]:
             pending = None
     if pending is not None:
         out.append({"value": pending, "label": ""})
+    return out
+
+
+def company_panel_lines(lines: list[str], heading: str) -> list[str]:
+    """The company panel's rows, with the employer substituted and the
+    screen-reader plumbing dropped.
+
+    TWO JOBS, AND THE FIRST IS A CONSISTENCY RULE THIS MODULE IMPOSES ON
+    ITSELF. The panel's heading is republished as
+    :data:`JOB_COMPANY_PANEL_SHAPE` so that a heading TALLY cannot print an
+    employer -- and its rows say things like "<employer> hired 6 people from
+    <another company>" and "Sources: <employer's domain>". Shaping the heading
+    and shipping the name three lines below it would be a rule that only
+    looked like one.
+
+    IT COSTS NOTHING THE PANEL WAS FOR. "<company> hired 6 people from X" is
+    the same fact as the sentence with the name in it, and the employer is
+    already on the result under ``company`` and ``company_url`` -- read off
+    the page's own structure rather than out of a prose line. Nothing is
+    hidden; one string is simply not repeated into a place where a tally could
+    reprint it.
+
+    THE SECOND JOB is dropping what LinkedIn writes for a screen reader: a
+    bare "Chart", an "End of interactive chart.", and two sentences describing
+    the axes. "Chart with 25 data points." is KEPT -- it is the same
+    one-sentence summary the profile-views trend reader keeps, and it is the
+    only line of that block a reader can use.
+
+    WHAT THIS DOES NOT CLAIM, stated because the claim above is easy to
+    over-read. The substitution is an EXACT-STRING one on the employer's name
+    as the heading spells it. The panel's "Sources:" line carries the
+    employer's own DOMAIN, and a domain is a different string, so it survives.
+    That is deliberate rather than missed: it is the employer's public
+    website, this same result already carries their LinkedIn page under
+    ``company_url``, and a substitution loose enough to catch a slugified
+    domain would be loose enough to eat words out of ordinary prose. The
+    property is "the name is not repeated into the rows", not "no trace of the
+    employer can be inferred from them".
+    """
+    employer = ""
+    text = str(heading or "").strip()
+    if text.startswith(JOB_COMPANY_PANEL_PREFIX):
+        employer = text[len(JOB_COMPANY_PANEL_PREFIX):].strip()
+    out: list[str] = []
+    for line in lines:
+        if line in JOB_COMPANY_LINE_NOISE:
+            continue
+        if any(line.startswith(prefix) for prefix in JOB_COMPANY_LINE_NOISE_PREFIXES):
+            continue
+        if employer:
+            line = line.replace(employer, "<company>")
+        out.append(line)
     return out
 
 
@@ -7480,9 +7563,31 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
     for section in sections:
         heading = str(section.get("heading") or "").strip()
         if heading.startswith(JOB_COMPANY_PANEL_PREFIX):
+            # SAME FALLBACK AS THE BREAKDOWNS, and this panel needs it on
+            # every capture and live -- the structural read returns the
+            # heading and nothing else, so shipping only that would have
+            # published an empty panel for a panel that is plainly there.
+            #
+            # THE HEADING PASSED IN IS THE RAW ONE, carrying the employer's
+            # name, because that is the string that appears in the page's own
+            # text and there is nothing to find without it. It is used to
+            # LOCATE and is never returned: what comes back on the result is
+            # JOB_COMPANY_PANEL_SHAPE.
+            lines = lines_below(section) or lines_after_heading(
+                body,
+                heading,
+                # THE COLLAPSED CONTROLS BOUND THIS PANEL. "Show Premium
+                # Insights" sits at its end and is not a heading, so without
+                # it the read ran one line past the panel -- the same
+                # one-line bleed the education rows had, and caught the same
+                # way: by looking at what came back rather than at the code.
+                stop_headings | set(JOB_COLLAPSED_CONTROL_NAMES),
+                JOB_PANEL_MAX_LINES,
+                ignore=(JOB_COMPANY_ATTRIBUTION,),
+            )
             company = {
                 "heading": JOB_COMPANY_PANEL_SHAPE,
-                "lines": lines_below(section),
+                "lines": company_panel_lines(lines, heading),
             }
             break
 
