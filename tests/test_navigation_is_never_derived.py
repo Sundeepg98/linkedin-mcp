@@ -1,4 +1,26 @@
-"""A url that came from a navigation is never handed back to one.
+"""A value the browser chose never reaches a navigation, and never reaches a print.
+
+TWO SINKS, ONE TAINT ENGINE. The filename names the first, which is the one
+this file was built for; the second was added on 2026-09-03 after the same
+defect leaked the operator's slug three times in a morning. They share
+``_tainted_names`` deliberately -- two implementations of "did this come from
+the browser" would drift, and the quieter one would go wrong unnoticed.
+
+    SINK 1   BROWSER.goto        a url the page chose, navigated to
+    SINK 2   print and logging   a url the page chose, published
+
+**A LEAK NEEDS A TAINTED VALUE AND A WAY OUT.** This file guarded one way out
+for a day. Three leaks went through the other one -- an allowlist refusal
+interpolating the url it refused, a disk ruling that pasted its own diagnostic,
+and a probe printing a landed path out of a file whose docstring promised it
+never printed a url. Each was caught by a DIFFERENT accident: a raised
+exception, a tracked-file scan, a human reading output. **None by an
+instrument.** That is not three mistakes, it is one missing check that had
+already fired three times.
+
+---
+
+
 
 THE DEFECT THIS EXISTS FOR, measured on 2026-09-03. Both payload probes did::
 
@@ -68,6 +90,45 @@ _TAINTED_ATTRS = frozenset({"url"})
 _TAINTED_CALLS = frozenset({"goto"})
 
 
+#: THE SECOND SINK. ``print`` and the logging verbs.
+#:
+#: A LEAK NEEDS A TAINTED VALUE AND A WAY OUT, and until now this rule guarded
+#: only one way out. Three slug leaks in one day went through the other one.
+_SINK_NAMES = frozenset({"print"})
+_SINK_ATTRS = frozenset(
+    {"debug", "info", "warning", "warn", "error", "exception", "critical", "log"}
+)
+
+#: FUNCTIONS WHOSE RESULT CARRIES NONE OF THEIR INPUT.
+#:
+#: **WITHOUT THIS THE RULE WOULD FORBID ITS OWN FIX.** ``_shape_of`` takes a
+#: landed url and returns the RELATION between it and the address that was
+#: asked for -- served, redirected within the member space, or redirected
+#: elsewhere. That is the repair for the third leak, and a rule that flagged it
+#: would push the next author back to printing the path.
+#:
+#: AN ENTRY HERE IS A CLAIM ABOUT A FUNCTION'S CONTRACT, so it is deliberately
+#: hard to add: the function must take a tainted value and provably return a
+#: value that cannot reconstruct it. ``_member_path`` is NOT here and must not
+#: be -- it returns a path, and a member path IS an identity. That distinction
+#: is the whole of the third leak.
+_SANITISERS = frozenset({"_shape_of", "_redact"})
+
+#: CALLS WHOSE RESULT IS A NUMBER, whatever went in.
+_COUNTING_CALLS = frozenset({"len"})
+
+
+def _is_sanitiser_call(node: ast.AST) -> bool:
+    if not isinstance(node, ast.Call):
+        return False
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id in _SANITISERS
+    if isinstance(func, ast.Attribute):
+        return func.attr in _SANITISERS
+    return False
+
+
 def _is_tainted_expr(node: ast.AST, tainted: set[str]) -> bool:
     """Does this expression read anything the browser produced?
 
@@ -75,8 +136,35 @@ def _is_tainted_expr(node: ast.AST, tainted: set[str]) -> bool:
     that merely CONTAINS a tainted name is tainted too. A rule that only
     matched a bare ``Name`` would be defeated by ``landed + "/"``, which is the
     same url with a slash on it.
+
+    AND IT STOPS AT A SANITISER, which is what makes the output rule usable
+    rather than merely strict. ``_shape_of(landed, ASKED)`` reads a tainted
+    value and returns a relation; descending into it would flag the very repair
+    the third leak was fixed with.
     """
-    for child in ast.walk(node):
+    stack: list[ast.AST] = [node]
+    while stack:
+        child = stack.pop()
+        if _is_sanitiser_call(child):
+            # ITS RESULT CARRIES NOTHING, so its arguments are not this rule's
+            # business. The claim lives in _SANITISERS and is argued there.
+            continue
+        if isinstance(child, ast.Compare):
+            # A COMPARISON YIELDS A BOOLEAN, whatever it compared. Without this
+            # the rule flags `"/login" in landed` -- an auth-wall check every
+            # probe here makes and the one thing they must keep doing. It also
+            # stops the fixed point tainting `walled = "/login" in landed`,
+            # which is a bool wearing a tainted name.
+            continue
+        if (
+            isinstance(child, ast.Call)
+            and isinstance(child.func, ast.Name)
+            and child.func.id in _COUNTING_CALLS
+        ):
+            # `len(payload)` is an integer. Counting a thing is the discipline
+            # this package uses INSTEAD of printing it, so a rule that flagged
+            # it would forbid the safe form.
+            continue
         if isinstance(child, ast.Name) and child.id in tainted:
             return True
         if isinstance(child, ast.Attribute) and child.attr in _TAINTED_ATTRS:
@@ -87,7 +175,53 @@ def _is_tainted_expr(node: ast.AST, tainted: set[str]) -> bool:
             and child.func.attr in _TAINTED_CALLS
         ):
             return True
+        stack.extend(ast.iter_child_nodes(child))
     return False
+
+
+def _tainted_names(tree: ast.AST) -> set[str]:
+    """Every name in a module bound, however indirectly, to a navigation.
+
+    ONE DEFINITION, SHARED BY BOTH SINKS. The navigation rule and the output
+    rule ask the same question -- did this come from the browser -- and two
+    implementations of it would drift, with the quieter one going wrong
+    unnoticed.
+
+    COLLECTED PER MODULE AND TO A FIXED POINT. Per module because both probes
+    read ``landed`` from an enclosing scope inside a closure, so a
+    function-scoped analysis would be blind to the exact shape this was written
+    for. To a fixed point because an assignment can taint a name that an
+    EARLIER line already copied, and one pass in document order would miss it.
+    """
+    tainted: set[str] = set()
+    for _ in range(4):
+        before = set(tainted)
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+                continue
+            value = node.value
+            if value is None or not _is_tainted_expr(value, tainted):
+                continue
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                for name in ast.walk(target):
+                    if isinstance(name, ast.Name):
+                        tainted.add(name.id)
+        if tainted == before:
+            break
+    return tainted
+
+
+def _sink_calls(tree: ast.AST):
+    """Every ``print(...)`` and logging call in a module."""
+    for child in ast.walk(tree):
+        if not isinstance(child, ast.Call):
+            continue
+        func = child.func
+        if isinstance(func, ast.Name) and func.id in _SINK_NAMES:
+            yield child, func.id
+        elif isinstance(func, ast.Attribute) and func.attr in _SINK_ATTRS:
+            yield child, func.attr
 
 
 def _goto_calls(node: ast.AST):
@@ -129,26 +263,7 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
     thing it was written for.
     """
     tree = ast.parse(source, filename=label)
-    tainted: set[str] = set()
-    # PASS 1 -- what is tainted. Repeated to a fixed point, because an
-    # assignment can taint a name that an EARLIER line already copied, and one
-    # pass in document order would miss it.
-    for _ in range(4):
-        before = set(tainted)
-        for node in ast.walk(tree):
-            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
-                continue
-            value = node.value
-            if value is None or not _is_tainted_expr(value, tainted):
-                continue
-            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            for target in targets:
-                for name in ast.walk(target):
-                    if isinstance(name, ast.Name):
-                        tainted.add(name.id)
-        if tainted == before:
-            break
-
+    tainted = _tainted_names(tree)
     found: list[tuple[int, str]] = []
     for call in _goto_calls(tree):
         arg = _url_arg(call)
@@ -156,6 +271,44 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
             continue
         if _is_tainted_expr(arg, tainted):
             found.append((call.lineno, ast.unparse(arg)))
+    return sorted(found)
+
+
+def output_violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
+    """Every ``print`` or logging call handed something a navigation produced.
+
+    THE SINK THAT HAD NO GUARD, AND IT HAD ALREADY FIRED THREE TIMES. On
+    2026-09-03 the operator's vanity slug reached a transcript three separate
+    ways: an allowlist refusal interpolating the url it refused, a disk ruling
+    that pasted its own diagnostic, and a probe printing a landed path out of a
+    file whose docstring promised it never printed a url. Each was caught by a
+    DIFFERENT accident -- a raised exception, a tracked-file scan, a human
+    reading output -- and none by an instrument.
+
+    **A LEAK NEEDS A TAINTED VALUE AND A WAY OUT.** The taint half was already
+    computed for the navigation rule; this adds the second way out, and the
+    same engine answers both. One taint definition, two sinks, so the two
+    cannot drift apart.
+
+    WHAT THIS DOES NOT COVER, SAID PLAINLY RATHER THAN IMPLIED. Taint here
+    means NAVIGATION-DERIVED -- a ``goto`` return, a ``.url``, anything bound to
+    one. **A response BODY is not tainted by this rule**, so printing
+    ``await response.text()`` would pass, and that is the richest identity in
+    this package. It is left out deliberately: tainting it would flag
+    ``len(payload)`` and every count taken off it, and a rule whose true
+    positives arrive buried in false ones gets declared into uselessness. The
+    body is guarded by design instead -- the probes hold no output path and
+    emit counts -- and naming the gap is the honest alternative to implying it
+    is covered.
+    """
+    tree = ast.parse(source, filename=label)
+    tainted = _tainted_names(tree)
+    found: list[tuple[int, str]] = []
+    for call, sink in _sink_calls(tree):
+        for argument in list(call.args) + [k.value for k in call.keywords]:
+            if _is_tainted_expr(argument, tainted):
+                found.append((call.lineno, "%s(%s)" % (sink, ast.unparse(argument))))
+                break
     return sorted(found)
 
 
@@ -337,6 +490,171 @@ def test_it_stays_green_on_a_url_this_repository_authored(body, why):
     fix is worse than no guard, because the next author deletes it.
     """
     assert violations(_HEAD + body) == [], why
+
+
+#: OUTPUT SITES THAT HAND A NAVIGATION-DERIVED VALUE TO A PRINT.
+#:
+#: **EIGHT, ALL FOUND BY THIS RULE'S FIRST RUN, NONE PREVIOUSLY KNOWN.** Every
+#: one is a hand-run diagnostic probe printing the url it landed on, and every
+#: one is the shape of the third slug leak: a value the browser chose, handed
+#: to an output sink, in a file that never claimed to be careful about it.
+#:
+#: WHY THEY ARE DECLARED AND NOT FIXED. The tempting argument is that these
+#: probes land on RESOURCE paths -- /feed/following/, a job url, a preferences
+#: page -- so their urls carry no identity. **That is the exact argument that
+#: produced the third leak.** "Paths are safe" was never the rule; "these paths
+#: are safe" was, and not one of these eight has been checked. Fixing them on
+#: the assumption would be repeating this morning's mistake across more files.
+#:
+#: So they are declared, which states the truth: a rule now sees them, nobody
+#: has measured what they emit, and the declaration makes that visible instead
+#: of latent. Fixing one -- print a RELATION, or route it through a proven
+#: redactor as ``_probe_messaging`` already does -- forces its entry out.
+KNOWN_TAINTED_OUTPUT: dict[str, list[str]] = {
+    "_capture_toggle_states.py": [
+        "print(f'    final url : {page.url}')",
+    ],
+    "_probe_apply_flow.py": [
+        "print(f'    landed  {page.url}')",
+    ],
+    "_probe_apply_route_screen.py": [
+        "print(f'  {job_id}  EXPIRED (redirected to {landed[:70]})')",
+    ],
+    "_probe_follow_on_posting.py": [
+        "print(f'    final url: {page.url}   pre {len(pre)}  hyd {len(hyd)}')",
+    ],
+    "_probe_following.py": [
+        "print(f'    final url: {page.url}')",
+    ],
+    "_probe_in_progress.py": [
+        "print(f'    landed {page.url}')",
+    ],
+    "_probe_interests.py": [
+        "print(f'    final url: {page.url}')",
+    ],
+    "_probe_manage_pages_both.py": [
+        "print(f'    final url: {page.url}')",
+    ],
+}
+
+
+@pytest.mark.parametrize("path", _python_files(), ids=lambda p: p.name)
+def test_no_navigation_derived_value_reaches_an_output_sink(path):
+    """THE SECOND SINK, AND THE ONE THAT HAD NO GUARD AT ALL.
+
+    Three slug leaks in one day, each found by a different accident and none by
+    an instrument. A leak needs a tainted value AND a way out; the taint half
+    was already computed for the navigation rule, and this is the other way
+    out. The same engine answers both, so the two cannot drift.
+    """
+    found = output_violations(path.read_text(encoding="utf-8"), path.name)
+    declared = KNOWN_TAINTED_OUTPUT.get(path.name, [])
+    assert [what for _line, what in found] == declared, (
+        "%s: tainted output sites are %s and the declared set is %s. A value "
+        "the browser chose, handed to a print, is how the operator's slug "
+        "reached a transcript three times. If you ADDED one, emit a RELATION "
+        "or a count instead. If you FIXED one, delete its entry -- this "
+        "failing is the point." % (path.name, found, declared)
+    )
+
+
+def test_every_declared_output_site_still_exists():
+    """A declaration for a site that is gone is a comment pretending to check."""
+    for name in KNOWN_TAINTED_OUTPUT:
+        matches = [p for p in _python_files() if p.name == name]
+        assert matches, "%s is declared and is not a scanned file" % name
+        found = output_violations(matches[0].read_text(encoding="utf-8"), name)
+        assert found, "%s is declared and has no tainted output. Delete it." % name
+
+
+@pytest.mark.parametrize(
+    "body, why",
+    [
+        ("    print(page.url)\n", "the address bar, printed bare"),
+        (
+            "    landed = await BROWSER.goto(page, X)\n    print(landed)\n",
+            "a goto return, printed",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            '    print(f"landed at {landed}")\n',
+            "and inside an f-string",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n    logger.info(landed)\n",
+            "a logging call is a sink too",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n    print(landed[:70])\n",
+            "a SLICE of a url is still a url",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            "    print(_member_path(landed))\n",
+            "A MEMBER PATH IS AN IDENTITY. _member_path is deliberately not a "
+            "sanitiser, and this is the third leak's exact shape",
+        ),
+    ],
+)
+def test_output_goes_red_on_a_navigation_derived_value(body, why):
+    assert output_violations(_HEAD + body), why
+
+
+@pytest.mark.parametrize(
+    "body, why",
+    [
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            "    print(_shape_of(landed, X))\n",
+            "THE REPAIR MUST STAY WRITABLE -- a relation between the address "
+            "asked for and the one returned carries neither",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            '    print("/login" in landed)\n',
+            "an auth-wall check yields a BOOLEAN, and every probe here makes one",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            '    walled = "/login" in landed\n'
+            "    print(walled)\n",
+            "and the boolean does not become tainted by being named",
+        ),
+        (
+            "    print(len(payload))\n",
+            "a COUNT is the discipline this package uses instead of printing",
+        ),
+        (
+            "    print(needle)\n",
+            "THE OPERATOR'S OWN NEEDLE. He supplied it, it was in this process "
+            "before any page loaded, and a rule that forbade echoing it would "
+            "forbid telling him what he asked for",
+        ),
+        ("    print(response.status)\n", "a status code is not a url"),
+    ],
+)
+def test_output_stays_green_on_a_value_that_carries_nothing(body, why):
+    """THE OTHER DIRECTION, and it is what keeps the rule from being deleted.
+
+    A checker that flagged every print would pass all six red cases above while
+    making the repair, the auth-wall check and the counts unwritable. A guard
+    that forbids the fix does not survive its first inconvenient morning.
+    """
+    assert output_violations(_HEAD + body) == [], why
+
+
+def test_a_sanitiser_entry_is_a_claim_about_a_contract():
+    """PINNED, because the set is the one place this rule can be defeated.
+
+    Adding a name to ``_SANITISERS`` silences every site that calls it. Two
+    entries today, each earned: ``_shape_of`` returns a relation, and
+    ``_redact`` has its own both-directions test file. ``_member_path`` is NOT
+    there and must not be -- it returns a path, and a member path is an
+    identity. That single distinction is the whole of the third leak.
+    """
+    assert _SANITISERS == frozenset({"_shape_of", "_redact"}), _SANITISERS
+    assert "_member_path" not in _SANITISERS
+    assert "_path_of" not in _SANITISERS
 
 
 def test_the_checker_reads_both_goto_arities():
