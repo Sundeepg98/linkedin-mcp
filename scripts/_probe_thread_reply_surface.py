@@ -283,8 +283,33 @@ async def main() -> None:
                 # textarea and counting at each level says where the composer's
                 # own furniture sits without naming a class or a test id.
                 box = page.locator("textarea").first
+                # IS THIS EVEN THE REPLY BOX? Asked because the first run
+                # could not tell. A lone `textarea` was read as the composer
+                # on the strength of being the only editable thing on the
+                # page, which is an INFERENCE, and the walk below then found
+                # nothing around it that looks like a composer.
+                print()
+                print("      IS THE TEXTAREA A COMPOSER INPUT?")
+                for attr in ("placeholder", "aria-label", "readonly", "name"):
+                    value = await box.get_attribute(attr)
+                    if attr in ("readonly", "name"):
+                        print(f"        {attr:<12} present={value is not None}")
+                    else:
+                        print(f"        {attr:<12} {_name_relation(value)}")
+                print(f"        visible      {await box.is_visible()}")
+                print(f"        enabled      {await box.is_enabled()}")
+
                 print()
                 print("      WALKING OUT FROM THE REPLY BOX:")
+                # THE SCOPE MUST BE SMALLER THAN THE PAGE, and the first cut
+                # of this predicate did not require that. It asked only "is
+                # there a button within seven levels", which goes TRUE the
+                # moment the walk reaches the page container -- and it did,
+                # reporting 42 buttons at ancestor 3 when the page total was
+                # also 42, then printing "the third candidate is refuted" off
+                # the whole page. A predicate satisfied by escaping its own
+                # scope is the family this wave keeps meeting: it fired, and
+                # it fired on the wrong thing.
                 first_with = 0
                 for depth in range(1, 8):
                     scope = box.locator(f"xpath=ancestor::*[{depth}]")
@@ -292,20 +317,54 @@ async def main() -> None:
                         break
                     here = int(await scope.locator("button").count())
                     here_any = int(await scope.locator("[role=button]").count())
+                    escaped = here >= all_buttons and all_buttons > 0
                     print(
                         f"        ancestor {depth}: button {here}"
                         f"  [role=button] {here_any}"
+                        f"{'   <- this is the whole page, not a composer' if escaped else ''}"
                     )
-                    if here and not first_with:
+                    if here and not first_with and not escaped:
                         first_with = depth
+
+                # THE VOCABULARY SWEEP, OVER EVERY CONTROL AND NOT A PAGEFUL
+                # OF THE FIRST TWELVE. The first run listed twelve rows and
+                # said "30 more, not listed" -- and the decisive row, if there
+                # is one, is as likely to be in the thirty. A COUNT over all
+                # of them costs nothing and cannot be truncated.
+                print()
+                print("      SUBMIT VOCABULARY, ACROSS EVERY CONTROL ON THE PAGE:")
+                tally = {word: 0 for word in
+                         ("send", "submit", "reply", "post", "deliver", "enter")}
+                every = page.locator("button, [role=button], input")
+                seen = int(await every.count())
+                for index in range(seen):
+                    one = every.nth(index)
+                    label = await one.get_attribute("aria-label")
+                    try:
+                        text = label if (label or "").strip() else await one.inner_text()
+                    except Exception:  # noqa: BLE001
+                        continue
+                    words = set(re.findall(r"[a-z]+", (text or "").lower()))
+                    for word in tally:
+                        if word in words:
+                            tally[word] += 1
+                print(f"        controls examined: {seen}")
+                for word, count in tally.items():
+                    print(f"        {word:<10} {count}")
 
                 if not first_with:
                     print()
-                    print("      NO BUTTON WITHIN SEVEN LEVELS OF THE REPLY BOX.")
-                    print("      That is the THIRD CANDIDATE surviving, and it is")
-                    print("      the expensive one: it cannot be distinguished")
-                    print("      from 'renders only once there is content' without")
-                    print("      typing, which is a write and needs its own ruling.")
+                    print("      NO COMPOSER-LOCAL CONTROL EXISTS.")
+                    print("      Every button on this page sits in a scope that IS")
+                    print("      the page; the two levels enclosing the textarea")
+                    print("      hold none. Together with button:disabled = 0 --")
+                    print("      nothing anywhere is waiting for content -- the")
+                    print("      THIRD CANDIDATE SURVIVES, and so does a fourth")
+                    print("      this probe did not start with: that the textarea")
+                    print("      is not the reply box at all.")
+                    print("      Neither can be separated from the other without")
+                    print("      typing, which is a write against a real")
+                    print("      conversation and needs its own ruling.")
                     print("      STOPPING HERE rather than typing to find out.")
                 else:
                     print()
@@ -327,13 +386,14 @@ async def main() -> None:
                             f"  {await _relation_for(one)}"
                         )
                     if total > 12:
-                        print(f"        ... {total - 12} more, not listed")
+                        print(f"        ... {total - 12} more; the vocabulary")
+                        print("        sweep above covers all of them.")
                     print()
-                    print("      THE THIRD CANDIDATE IS REFUTED: controls exist")
-                    print("      beside the reply box with nothing typed. Which")
-                    print("      of the first two applies is read off the rows")
-                    print("      above -- `type` answers the role question, and")
-                    print("      `vocab` answers the naming one.")
+                    print("      THE THIRD CANDIDATE IS REFUTED: controls exist in")
+                    print("      a scope SMALLER THAN THE PAGE beside the reply")
+                    print("      box, with nothing typed. Which of the first two")
+                    print("      applies is read off the rows above -- `type`")
+                    print("      answers the role question, `vocab` the naming one.")
         except Exception as exc:  # noqa: BLE001
             # TYPE ONLY, for the same reason as `_relation_for`.
             print(f"      ENUMERATION FAILED ({type(exc).__name__}). No counts.")
