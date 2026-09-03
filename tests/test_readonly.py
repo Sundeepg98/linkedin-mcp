@@ -1406,6 +1406,34 @@ FORBIDDEN_SUBSTRINGS_EVER = (
     # ``categories/``. They had no second gate at all.
     "/close-accounts",
     "/hibernate-account",
+    # ADDED 2026-09-03, ten of them, and they are on this roster the day they
+    # join the boundary for the same reason the two above are: they close a
+    # hole rather than tidy one.
+    #
+    # WHAT THE HOLE WAS. The two entries above, and the two before them, were
+    # each written after ONE surface was found with no second gate. Asked
+    # mechanically instead -- which addresses does the anchored allowlist
+    # refuse ALONE? -- ten came back, and what they have in common is that
+    # THIS LIST WAS ANCHORED TO PATH SPELLINGS ON THE DESKTOP TREE: a second
+    # spelling (``/public-profile/settings``, no trailing slash, which
+    # ``"/settings/"`` does not match), a legacy namespace (``/uas/``), or a
+    # parallel tree (``/mwlite/``, an entire mobile-web mirror) each walked
+    # past it. None was ever reachable; the allowlist held all ten.
+    #
+    # The argument for each entry is on the entry itself in readonly.py, and
+    # ``tests/test_the_second_gate_covers_the_class.py`` is where the CLASS
+    # claim is checked rather than asserted -- it puts an address through the
+    # real guard for every entry here that is not one of the ten.
+    "settings",
+    "/uas/",
+    "/mwlite/",
+    "password",
+    "two-factor",
+    "verification",
+    "cookies",
+    "job-application",
+    "visibility",
+    "/create",
 )
 
 #: THE ONE SUBSTRING THAT HAS EVER LEFT THE FORBIDDEN LIST, and the reason.
@@ -1478,6 +1506,33 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/in/me/edit/topcard/",
     "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
     "https://www.linkedin.com/in/me/edit/intro/../../evil",
+    # ADDED 2026-09-03, with the class close. THESE ARE THE ADDRESSES, and
+    # this list is the half of that change that keeps working if every
+    # substring is later rewritten -- which is the lesson of the comment at
+    # the top of this tuple, where a string sat on the forbidden list for the
+    # life of the repository while catching nothing.
+    #
+    # The account's password and its second authentication factor lead,
+    # because they are the two members that make the asymmetry worth the
+    # paragraph it got.
+    "https://www.linkedin.com/mypreferences/d/change-password",
+    "https://www.linkedin.com/mypreferences/d/two-factor-authentication",
+    "https://www.linkedin.com/mypreferences/d/verifications",
+    "https://www.linkedin.com/mypreferences/d/member-cookies",
+    "https://www.linkedin.com/mypreferences/d/job-application-accounts",
+    "https://www.linkedin.com/mypreferences/d/profile-visibility-for-partners",
+    # BOTH SPELLINGS OF ONE SURFACE. The trailing-slash form was refused all
+    # along, by ``"/settings/"``; the slashless form is the one that reached
+    # the allowlist and nothing else, and a pair recorded here is what stops
+    # the distinction being lost again.
+    "https://www.linkedin.com/public-profile/settings",
+    "https://www.linkedin.com/public-profile/settings/",
+    # THE LEGACY AUTH NAMESPACE and THE PARALLEL MOBILE TREE, one address
+    # each. The tree entry closes an unbounded family; these two are the
+    # members that exposed it.
+    "https://www.linkedin.com/uas/login",
+    "https://www.linkedin.com/mwlite/settings",
+    "https://www.linkedin.com/badges/profile/create",
 )
 
 

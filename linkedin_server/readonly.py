@@ -560,10 +560,104 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     # is exactly the situation a backstop exists for. Now there is one.
     "/close-accounts",
     "/hibernate-account",
+    # ------------------------------------------------------------------
+    # ADDED 2026-09-03, AND THIS TIME THE THING BEING FIXED IS THE SHAPE OF
+    # THE PREVIOUS TWO FIXES.
+    #
+    # The 2026-08-30 and 2026-08-31 entries above were each written after a
+    # surface was found with no second gate, and each closed THAT SURFACE.
+    # On 2026-09-03 the question was asked mechanically instead of
+    # incidentally -- which addresses does the anchored allowlist refuse ALONE?
+    # -- and ten came back. Reading them together names what the two
+    # per-address fixes had both walked past:
+    #
+    #     THIS LIST WAS ANCHORED TO PATH SPELLINGS ON THE DESKTOP TREE.
+    #
+    # Three ways past it, all ten members accounted for by one of them:
+    #
+    # * A SECOND SPELLING. ``/public-profile/settings`` has no trailing
+    #   slash, so ``"/settings/"`` -- slashes on both sides, present since
+    #   the beginning -- does not match it. The SAME url with a trailing
+    #   slash was already refused. A gate that turns on a trailing slash is
+    #   a spelling filter, not a ruling.
+    # * A LEGACY NAMESPACE. ``/uas/`` is LinkedIn's old auth tree and the
+    #   exact sibling of the ``/psettings/`` three lines up, which is on this
+    #   list for precisely the stated reason that a legacy address is one
+    #   LinkedIn can start serving again.
+    # * A PARALLEL TREE. ``/mwlite/`` is a whole mobile-web mirror of the
+    #   site -- every settings page, every editor, at paths no desktop
+    #   pattern anticipated. It is the sharpest instance and the cheapest
+    #   entry here: one line, an unbounded number of members.
+    #
+    # NOTHING WAS EVER REACHABLE, and that matters more than the fix. All ten
+    # are refused today and were refused before this block existed; the
+    # anchored allowlist held every one. This is a defence-in-depth asymmetry
+    # -- one layer where the paragraph at the top of this tuple promises two
+    # -- and it is not an open door.
+    #
+    # EVERY ENTRY BELOW WAS MEASURED FOR CASUALTIES BEFORE IT WAS WRITTEN,
+    # against every census surface, every readable setting and every write
+    # target rebuilt from its own spec. Zero. The check ships as
+    # ``test_the_second_gate_covers_the_class.py``, which also puts an address
+    # through the real guard FOR EVERY ENTRY HERE that is not one of the ten
+    # -- an entry that closed only its own member is a literal wearing a
+    # class's clothes, and that test is what tells them apart.
+    #
+    # THE THREE THAT CLOSE A TREE OR A SPELLING.
+    #
+    # ``"settings"`` bare, and ``"/settings/"`` above is KEPT rather than
+    # replaced: the bare word is a strict superset, so replacing costs nothing
+    # behaviourally while being a DELETION from a list that has only ever
+    # grown -- a boundary change needing its own review, bought for no gain.
+    # A redundant refusal is free.
+    "settings",
+    "/uas/",
+    "/mwlite/",
+    # THE SIX WORD-SHAPED ENTRIES, and the reason they are words rather than
+    # the one path prefix that would replace them.
+    #
+    # Six of the ten live under ``/mypreferences/d/``. That prefix is the
+    # natural close and IT CANNOT BE TAKEN. Two reasons, the second measured:
+    #
+    # 1. The six share with the two ADMITTED urls under that prefix -- the
+    #    settings index and ``/mypreferences/d/dark-mode``, both on the
+    #    allowlist above -- only the prefix itself. No substring separates
+    #    them. Same mechanical fact as ``/feed/update``, recorded above.
+    # 2. :data:`_FORBIDDEN_SUBSTRING_EXEMPTIONS` could hold those two urls for
+    #    the READ door. ``writes.assert_write_url`` DOES NOT CONSULT IT. It
+    #    iterates this tuple directly and honours only
+    #    ``spec.exempt_substring``, which is ``None`` on the settings write.
+    #    So adding the prefix closes six read addresses and breaks the only
+    #    settings write this server ships. Demonstrated, not supposed, in
+    #    ``test_the_subtree_prefix_is_absent_and_the_blocker_is_shown``.
+    #
+    # The repair is one line -- ``exempt_substring="/mypreferences/d/"`` on
+    # the ``update_setting`` spec -- and it is in ``writes.py``, which the
+    # agent who wrote this block did not own. The prefix entry is therefore a
+    # decision left to somebody who does, rather than a gap to be rediscovered
+    # mechanically a third time.
+    #
+    # AND THE WORDS ARE NOT MERELY THE FALLBACK. ``password`` refuses the
+    # password page at EVERY address -- desktop tree, mobile tree, legacy
+    # namespace, and whatever LinkedIn ships next. The prefix would refuse it
+    # at one. On this axis the second-best close is the broader one.
+    "password",
+    "two-factor",
+    "verification",
+    "cookies",
+    "job-application",
+    "visibility",
+    # ------------------------------------------------------------------
     "/edit/",
     "action=",
     "/delete",
     "/withdraw",
+    # THE VERB THAT WAS NEVER ON THIS LIST. The four entries above are the
+    # destructive verbs and they have been here from the start; the verb that
+    # MAKES something has not. ``/badges/profile/create`` is the member that
+    # exposed it, and the class is every creation surface on the account.
+    # Added 2026-09-03 with the block above.
+    "/create",
 )
 
 #: The ONE url permitted to carry a forbidden substring, and WHICH substring.
