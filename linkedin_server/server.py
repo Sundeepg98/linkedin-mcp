@@ -977,12 +977,43 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     # durable record. This is the only route that costs
                     # nobody anything.
                     await _attach_recipient_ids(page, rows)
+                    # AND THE AGGREGATES AROUND THE LIST, off the same open
+                    # page. This tool has always loaded the analytics surface
+                    # for its rows and thrown the rest of it away: the
+                    # headline viewer count, the change against the previous
+                    # period, the trend chart and the filters LinkedIn is
+                    # currently applying were all on this render.
+                    #
+                    # WHAT IS DELIBERATELY NOT HERE. The capability census
+                    # described this tool as discarding "the trend graph, top
+                    # companies and top locations". The trend graph is real
+                    # and is now returned. THE OTHER TWO ARE NOT ON THIS PAGE
+                    # -- measured on the committed capture and again live on
+                    # 2026-09-03, where the surface carries a COMPANY FILTER
+                    # and no locations control of any kind. So no
+                    # top_companies and no top_locations key is returned: a
+                    # field that is always null is a claim the page does not
+                    # support, and this result would have carried two of them
+                    # forever.
+                    #
+                    # SAME FAILURE RULE AS THE IDS BESIDE IT. The viewer list
+                    # is what this tool is for; an aggregate that will not
+                    # parse comes back as insights_error carrying the
+                    # exception TYPE and nothing else.
+                    extra: dict[str, Any] = {}
+                    try:
+                        extra["insights"] = await dom.read_profile_views_insights(
+                            page
+                        )
+                    except Exception as exc:  # noqa: BLE001 - never raised
+                        extra["insights_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,
                         source_url=last_url,
                         pages_loaded=attempt,
                         dropped=dropped,
+                        extra=extra,
                     )
             raise ExtractionFailedError(
                 "no profile viewers could be read from either the analytics or "
@@ -1603,6 +1634,32 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
                 link_target=apply_control.get("link_target"),
             )
 
+            # THE PREMIUM INSIGHT PANELS, off the same open page and at no
+            # extra load -- the fourth thing read off this one rendering, and
+            # the same move the three above it make.
+            #
+            # WHAT IT ADDS, and it is the largest block of free reads the
+            # capability census found: how many people have applied and how
+            # many applied in the past day, the seniority and education mix of
+            # the applicants, LinkedIn's own hiring-trend line for the
+            # employer, whether the posting is PROMOTED, whether the hirer
+            # manages responses off LinkedIn, and whether the job carries a
+            # verification badge. None of that is on any card, none of it was
+            # being read, and every one of them was on this render already.
+            #
+            # THE ENRICHMENT NEVER FAILS THE TOOL. A posting whose description
+            # and pay read perfectly is not worth losing because an optional
+            # panel did not parse, so a failure comes back as insights_error
+            # carrying the exception TYPE and nothing else -- never the
+            # message, because a boundary refusal interpolates the url it
+            # refused. Reported rather than swallowed: a silent absence here
+            # would read as "LinkedIn shows you no insights", which is a
+            # different and false claim.
+            try:
+                out["insights"] = await dom.read_job_insight_panels(page)
+            except Exception as exc:  # noqa: BLE001 - reported, never raised
+                out["insights_error"] = type(exc).__name__
+
             out["pages_loaded"] = 1
             out["source_url"] = final_url
             return out
@@ -1695,7 +1752,9 @@ async def linkedin_followed_companies(
 
 
 @mcp.tool()
-async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
+async def linkedin_my_profile(
+    include_skills: bool = True, details: str = ""
+) -> dict[str, Any]:
     """Read your own LinkedIn profile as LinkedIn currently stores it.
 
     Returns name, headline, location, the About text, and which sections were
@@ -1705,18 +1764,52 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
     here, so this server does not report one. What it reports is derived and
     labelled as such.
 
-    One honest limitation, stated because its absence would otherwise read as
-    data: LinkedIn now defers Experience, Education and Skills until the page
-    is SCROLLED, and this server does not scroll. Those sections are therefore
-    usually absent from the render, and absent means UNKNOWN here, never zero.
-    sections_not_rendered names them, and details_urls gives you the page for
-    each one if you want to look yourself.
+    THE SCROLL LIMITATION, AND WHAT IT DOES AND DOES NOT COST YOU. LinkedIn
+    defers Experience, Education and Skills until the profile page is
+    SCROLLED, and this server does not scroll. So those sections are usually
+    absent from the FIRST page this tool loads, and absent means UNKNOWN
+    there, never zero -- sections_not_rendered names them.
+
+    IT IS NOT WHY THE COUNTS USED TO BE NULL, and until 2026-09-03 this
+    docstring let a reader believe it was. Each of those sections has its own
+    page at /in/me/details/<section>/, all three have been on this server's
+    read allowlist since it shipped, and nothing had ever navigated to two of
+    them -- so experience_entries and education_entries were DECLARED in the
+    result and hardcoded null, which is a tool that runs and cannot deliver
+    its own stated outputs rather than a limitation of the render. Pass
+    details and the matching count comes back read, not guessed.
+
+    ONE DETAILS PAGE PER CALL, AND THAT IS THE CEILING RATHER THAN A
+    PREFERENCE. Nothing in this package loads more than two pages in one call.
+    The profile itself is always the first, so exactly one details page fits
+    in the second. Ask for the other sections in their own calls.
 
     Args:
-        include_skills: also load the full skills page, which is where a real
-            skills list can be read. That is a second page load, reported as
-            pages_loaded: 2. Pass false to stay at one.
+        include_skills: load the full skills page as the second page load,
+            which is where a real skills list can be read. Reported as
+            pages_loaded: 2. Pass false to stay at one. Ignored when details
+            is given, and the result says so.
+        details: load ONE details page instead, and fill that section's count
+            in the completeness block. One of "experience", "education" or
+            "skills"; empty means keep the include_skills behaviour. Anything
+            else is refused without loading anything, because the section
+            becomes part of an address.
     """
+    # THE ARGUMENT IS CHECKED BEFORE ANYTHING IS LOADED, and it returns rather
+    # than raising -- there is no failure to report here, only a question this
+    # tool will not be asked. The section names a document, so an unrecognised
+    # one must never reach a navigation, and refusing it up here means the
+    # profile page is not loaded either: a call that cannot be answered should
+    # not cost a page load on the way to finding that out.
+    wanted = str(details or "").strip().lower()
+    if wanted and wanted not in dom.PROFILE_DETAIL_SECTIONS:
+        return {
+            "error": "bad_argument",
+            "message": (
+                "details must be one of %s, or empty. Got %r."
+                % (", ".join(dom.PROFILE_DETAIL_SECTIONS), details)
+            ),
+        }
     try:
         async with BROWSER.session() as page:
             final_url = await BROWSER.goto(page, f"{BASE_URL}/in/me/")
@@ -1790,6 +1883,14 @@ async def linkedin_my_profile(include_skills: bool = True) -> dict[str, Any]:
                     "sections_present": present,
                     "sections_not_rendered": deferred,
                     "headings_seen": headings,
+                    # THE THREE COUNTS. Null here is the NOT-REQUESTED value,
+                    # and until 2026-09-03 it was the only value any of them
+                    # could take -- all three were hardcoded null and no call
+                    # could change that, while the result went on declaring
+                    # them. The details load below fills whichever one was
+                    # asked for; counts_not_requested, added beside them,
+                    # names the ones that were not, so a null can no longer be
+                    # read as "LinkedIn has none".
                     "experience_entries": None,
                     "education_entries": None,
                     "skills_listed": None,

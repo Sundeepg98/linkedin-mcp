@@ -1068,7 +1068,17 @@ async def test_who_viewed_me_loads_one_page_when_the_first_one_answers(drive):
 
     assert result["pages_loaded"] == 1
     assert navigations == [ANALYTICS_VIEWS_URL]
-    assert len(page.evaluations) == 1
+    # TWO EVALUATES, ONE PAGE, AND THE DISTINCTION IS THE POINT OF THIS PIN.
+    # It was 1 until 2026-09-03, when the viewer list began also reading the
+    # member id off each row's Message button -- a value already drawn on this
+    # page that the person-anchored harvest was discarding.
+    #
+    # WHAT THIS ASSERTION IS ACTUALLY GUARDING is the line above it:
+    # `navigations` is still ONE url. A second READ of a page already open
+    # costs nothing; a second NAVIGATION would cost a page load, and on the
+    # profile-views surface it would also be a second chance to land somewhere
+    # that leaves a record. The two numbers move independently on purpose.
+    assert len(page.evaluations) == 2
 
 
 async def test_both_profile_view_pages_failing_is_reported_as_a_failure(drive):

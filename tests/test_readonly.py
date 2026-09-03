@@ -515,7 +515,19 @@ def test_only_dom_module_waives_evaluate():
     # only test discards the selector argument. A count that cannot say WHICH
     # candidate matched, and cannot compare a label without pulling it into
     # this process, is not the reading a send gate needs.
-    assert waived_in.get("dom.py", 0) <= 13, waived_in
+    #
+    # THE FOURTEENTH, 2026-09-03: ``RECIPIENT_IDS_JS``, and unlike the
+    # ``wait_for_selector`` waiver that was REMOVED from this count the same
+    # day, this one is necessary -- ``page.evaluate`` is on
+    # ``_MUTATION_CALL_PATTERNS`` and ``wait_for_selector`` is not. The
+    # difference is the whole reason the count is pinned rather than trusted:
+    # an unnecessary waiver moved this number once already and was caught by
+    # it.
+    #
+    # WHAT IT INJECTS: a read that climbs from a Message button to the row
+    # that holds it, so a member id already drawn on a page this server opens
+    # stops being discarded. It writes nothing and returns ids to a caller.
+    assert waived_in.get("dom.py", 0) <= 14, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -546,6 +558,7 @@ INJECTED_SCRIPTS = {
     # a PREVIEW can show him who he would reach, and this script runs inside
     # perform, after he has confirmed, where there is nothing left to show.
     "SELECTED_RECIPIENT_JS": dom.SELECTED_RECIPIENT_JS,
+    "RECIPIENT_IDS_JS": dom.RECIPIENT_IDS_JS,
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
     "READ_PROFILE_JS": dom.READ_PROFILE_JS,
@@ -768,10 +781,18 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     have: the eighth cannot REACH these controls at all, because they have no
     container ancestor to be scoped to. The argument is with the budget in
     ``test_only_dom_module_waives_evaluate``.
+
+    THIRTEEN FROM 2026-09-03: ``RECIPIENT_IDS_JS``, run once from
+    ``dom.read_recipient_ids``. It climbs from a Message button to the row
+    that holds it and reads the member id already drawn there -- a value on a
+    page ``linkedin_who_viewed_me`` ALREADY OPENS, which the person-anchored
+    harvest beside it discards. It publishes nothing: the ids go to a caller
+    as data and the function has no logging line at all, asserted on its
+    source in ``tests/test_recipient_ids_from_the_viewer_list.py``.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 13, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 14, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

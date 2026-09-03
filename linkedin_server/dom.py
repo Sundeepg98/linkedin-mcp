@@ -6974,3 +6974,614 @@ async def read_tracker_evidence(page: Any) -> dict[str, Any]:
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("tracker visible scan failed: %s", type(exc).__name__)
     return out
+
+
+# ---------------------------------------------------------------------------
+# The free reads -- what an already-open page carries and nobody was reading
+# ---------------------------------------------------------------------------
+#
+# EVERY READER BELOW COSTS ZERO NAVIGATIONS. Each is handed a page a tool has
+# ALREADY loaded for another reason, and reads what was on it the whole time.
+# That is the entire design constraint, and it is why none of them takes a
+# url, builds one, or may ever be given one.
+#
+# NOTHING HERE PRESSES ANYTHING. Two of the panels this section is about are
+# COLLAPSED behind a control on the posting -- measured 2026-09-03, one
+# occurrence each of ``Show match details`` and ``Show Premium Insights`` in
+# BOTH committed captures AND on a live posting, with ZERO occurrences of the
+# text they reveal. So "How you match" is not missing from the render; it is
+# one click away, and a click is a different permission from a read. The
+# reader REPORTS those controls by name instead, because naming what this
+# server will not do is worth more than five silent nulls.
+
+
+#: LinkedIn's own words on a job posting, each MEASURED rather than guessed.
+#: The capture each came from is named, because a furniture string is a fact
+#: about LinkedIn on a date and not a constant.
+#:
+#: ``tests/fixtures/job_detail_following_hydrated.html``::
+#:
+#:     <span>Promoted by hirer &#183; </span>
+#:     <span>Responses managed off LinkedIn</span>
+#:     <span role="img" aria-label="Verified job">
+#:
+#: The badge is the one to notice: the capability census recorded that this
+#: repository "prints no rendered badge wording anywhere" for it, and the
+#: wording was sitting in a committed fixture the whole time.
+JOB_PROMOTED_MARKER = "Promoted by hirer"
+JOB_RESPONSES_OFF_MARKER = "Responses managed off LinkedIn"
+JOB_VERIFIED_BADGE_NAME = "Verified job"
+
+#: The two controls that HIDE a panel rather than being one. Measured once
+#: each in both job captures and on the live posting, 2026-09-03.
+JOB_COLLAPSED_CONTROL_NAMES: tuple[str, ...] = (
+    "Show match details",
+    "Show Premium Insights",
+)
+
+#: The applicant-insights panel's heading, in BOTH spellings LinkedIn draws.
+#:
+#: THE SECOND SPELLING IS NOT A NICETY. ``job_detail_hydrated.html`` says
+#: "other applicants" and ``job_detail_following_hydrated.html`` says "others
+#: who clicked apply" -- and that second capture carries NO ``data-view-name``
+#: attribute at all, so a reader anchored on the view name reads one capture
+#: and not the other, while one anchored on the word "Applicant" misses the
+#: clicked-apply posting entirely. Both anchors are load-bearing, and both
+#: spellings were measured rather than anticipated.
+JOB_APPLICANT_PANEL_HEADINGS: tuple[str, ...] = (
+    "See how you compare to other applicants",
+    "See how you compare to others who clicked apply",
+)
+
+#: The metric and breakdown headings under that panel, again in both
+#: spellings. ``Applicants for this job`` carries its numbers as sibling lines
+#: under its own heading -- measured live 2026-09-03: five lines, being the
+#: heading, 7691, "Applicants", 200, "Applicants in the past day".
+JOB_APPLICANT_SECTION_HEADINGS: tuple[str, ...] = (
+    "Applicants for this job",
+    "Candidates who clicked apply",
+)
+JOB_SENIORITY_HEADINGS: tuple[str, ...] = (
+    "Applicant seniority level",
+    "Candidate seniority level",
+)
+JOB_EDUCATION_HEADINGS: tuple[str, ...] = (
+    "Applicant education level",
+    "Candidate education level",
+)
+
+#: The Premium company panel. Its heading NAMES THE EMPLOYER --
+#: "Exclusive Job Seeker Insights about <employer>" -- so it is matched on its
+#: stable prefix and republished with the employer replaced. A heading list
+#: that reprints an employer's name is a heading list that publishes one.
+JOB_COMPANY_PANEL_PREFIX = "Exclusive Job Seeker Insights about "
+JOB_COMPANY_PANEL_SHAPE = JOB_COMPANY_PANEL_PREFIX + "<company>"
+
+#: The other posting heading that carries a name -- the job title, inside a
+#: control label. Same treatment, same reason.
+JOB_ALERT_HEADING_PREFIX = "Set alert for similar jobs as "
+JOB_ALERT_HEADING_SHAPE = JOB_ALERT_HEADING_PREFIX + "<title>"
+
+#: Caps. A panel that grew a hundred rows would otherwise become the result.
+JOB_PANEL_MAX_LINES = 24
+JOB_PANEL_MAX_HEADINGS = 40
+
+
+def job_heading_shape(heading: str) -> str:
+    """A posting heading, with the two that carry a name reduced to a shape.
+
+    NOT A FILTER AND NOT A GUESS. Exactly two headings on this surface carry
+    an identity, both were measured, and both are matched on a stable prefix
+    LinkedIn writes itself. Everything else comes back verbatim, because a
+    reader that blanked headings it merely did not recognise would destroy the
+    tally that makes a null answer legible.
+    """
+    text = str(heading or "").strip()
+    if text.startswith(JOB_COMPANY_PANEL_PREFIX):
+        return JOB_COMPANY_PANEL_SHAPE
+    if text.startswith(JOB_ALERT_HEADING_PREFIX):
+        return JOB_ALERT_HEADING_SHAPE
+    return text
+
+
+def section_matching(
+    sections: list[dict[str, Any]], wanted: tuple[str, ...]
+) -> Optional[dict[str, Any]]:
+    """The first section whose heading is one of ``wanted``, else None."""
+    for section in sections:
+        if str(section.get("heading") or "").strip() in wanted:
+            return section
+    return None
+
+
+def lines_below(section: Optional[dict[str, Any]]) -> list[str]:
+    """A section's lines with its own heading dropped, capped.
+
+    The heading walker returns the heading as the first line of its own block,
+    so every caller here would otherwise have to strip it, and one of them
+    would forget.
+    """
+    if not section:
+        return []
+    heading = str(section.get("heading") or "").strip()
+    lines = [str(line).strip() for line in (section.get("lines") or [])]
+    lines = [line for line in lines if line and line != heading]
+    return lines[:JOB_PANEL_MAX_LINES]
+
+
+def pair_metrics(lines: list[str]) -> list[dict[str, str]]:
+    """Number-then-label lines into label/value pairs.
+
+    LinkedIn draws the NUMBER FIRST and its label after it -- measured live
+    2026-09-03, where "Applicants for this job" held 7691, "Applicants", 200,
+    "Applicants in the past day" in that order.
+
+    A NUMBER WITH NO LABEL IS REPORTED WITH AN EMPTY ONE RATHER THAN DROPPED.
+    A metric this function cannot name is still a metric the page carried, and
+    dropping it would make a partial read indistinguishable from a page that
+    drew fewer numbers.
+    """
+    out: list[dict[str, str]] = []
+    pending: Optional[str] = None
+    for line in lines:
+        bare = line.replace(",", "").replace("%", "").replace("+", "")
+        if bare.isdigit():
+            if pending is not None:
+                out.append({"value": pending, "label": ""})
+            pending = line
+            continue
+        if pending is not None:
+            out.append({"value": pending, "label": line})
+            pending = None
+    if pending is not None:
+        out.append({"value": pending, "label": ""})
+    return out
+
+
+JOB_INSIGHT_MARKERS_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  const names = [];
+  const collapsed = [];
+  let verified = false;
+  let chars = 0;
+  if (main) {
+    for (const el of main.querySelectorAll('[data-view-name]')) {
+      const value = el.getAttribute('data-view-name') || '';
+      if (value && names.indexOf(value) === -1) names.push(value);
+      if (names.length >= cfg.maxNames) break;
+    }
+    for (const el of main.querySelectorAll('[aria-label]')) {
+      if ((el.getAttribute('aria-label') || '').trim() === cfg.verifiedName) {
+        verified = true;
+        break;
+      }
+    }
+    const text = main.innerText || '';
+    chars = text.length;
+    for (const name of cfg.collapsedNames) {
+      if (text.indexOf(name) !== -1) collapsed.push(name);
+    }
+  }
+  return {
+    view_names: names,
+    verified: verified,
+    collapsed: collapsed,
+    main_present: !!main,
+    main_chars: chars
+  };
+}
+"""
+
+
+async def read_job_insight_panels(page: Any) -> dict[str, Any]:
+    """The Premium insight panels on a job posting that is ALREADY OPEN.
+
+    ZERO EXTRA PAGE LOADS AND ZERO CLICKS. ``linkedin_job_detail`` loads the
+    posting for its description and its pay; these panels were on that same
+    render and were being thrown away. It is the same move
+    ``read_follow_control``, ``read_save_control`` and ``read_apply_control``
+    already make on this surface, and it costs exactly what they cost, which
+    is nothing.
+
+    WHAT IT WILL NOT DO, said here rather than discovered later. Two panels on
+    this page are COLLAPSED behind a control -- ``Show match details`` and
+    ``Show Premium Insights`` -- and pressing one is not a read. They come
+    back named in ``more_behind_a_control``, so a caller learns the panel
+    exists, learns this server did not open it, and can open it themselves. A
+    silent absence would have read as "LinkedIn does not show you this", which
+    is false.
+
+    ``observed`` IS ALWAYS POPULATED, AND IT IS THE WHOLE ANSWER WHEN THE
+    PANELS ARE NULL. A bare null has already cost this repository two wrong
+    diagnoses, so the headings seen, the view names seen and the size of
+    ``main`` come back whatever the panels do: "no panel, and main carried
+    17,825 characters under 13 headings" and "no panel, and main was empty"
+    are different findings, and a reader that cannot tell them apart is not
+    worth calling.
+
+    THE EMPLOYER'S NAME NEVER LEAVES THIS FUNCTION. LinkedIn writes it into
+    the company panel's own heading, so both that heading and every heading in
+    the tally pass through :func:`job_heading_shape`, which replaces the two
+    measured name-carrying prefixes and leaves everything else verbatim.
+    """
+    fields = await read_profile_fields(page)
+    sections = [dict(section) for section in (fields.get("sections") or []) if section]
+    try:
+        markers = await page.evaluate(  # readonly-ok
+            JOB_INSIGHT_MARKERS_JS,
+            {
+                "verifiedName": JOB_VERIFIED_BADGE_NAME,
+                "collapsedNames": list(JOB_COLLAPSED_CONTROL_NAMES),
+                "maxNames": JOB_PANEL_MAX_HEADINGS,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the job posting: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    markers = dict(markers or {})
+
+    applicant_heading = section_matching(sections, JOB_APPLICANT_PANEL_HEADINGS)
+    counts_section = section_matching(sections, JOB_APPLICANT_SECTION_HEADINGS)
+    seniority_section = section_matching(sections, JOB_SENIORITY_HEADINGS)
+    education_section = section_matching(sections, JOB_EDUCATION_HEADINGS)
+
+    applicant: Optional[dict[str, Any]] = None
+    if applicant_heading or counts_section or seniority_section:
+        applicant = {
+            "heading": str((applicant_heading or {}).get("heading") or "").strip()
+            or None,
+            "metrics": pair_metrics(lines_below(counts_section)),
+            "seniority": lines_below(seniority_section),
+            "education": lines_below(education_section),
+        }
+
+    company: Optional[dict[str, Any]] = None
+    for section in sections:
+        heading = str(section.get("heading") or "").strip()
+        if heading.startswith(JOB_COMPANY_PANEL_PREFIX):
+            company = {
+                "heading": JOB_COMPANY_PANEL_SHAPE,
+                "lines": lines_below(section),
+            }
+            break
+
+    # THE TWO MARKER STRINGS ARE MATCHED IN PYTHON, AGAINST main's text.
+    # ``JOB_INSIGHT_MARKERS_JS`` returns the LENGTH of that text and never the
+    # text itself, so the substring tests live here where the constants they
+    # test for are declared and can be read beside them.
+    body = await read_main_text(page)
+    return {
+        "applicant_insights": applicant,
+        "company_insights": company,
+        "promoted": JOB_PROMOTED_MARKER in body,
+        "responses_managed_off_linkedin": JOB_RESPONSES_OFF_MARKER in body,
+        "verified_job": bool(markers.get("verified")),
+        "more_behind_a_control": list(markers.get("collapsed") or []),
+        "observed": {
+            "headings": [
+                job_heading_shape(section.get("heading") or "")
+                for section in sections[:JOB_PANEL_MAX_HEADINGS]
+            ],
+            "heading_count": len(sections),
+            "view_names": list(markers.get("view_names") or []),
+            "main_present": bool(markers.get("main_present")),
+            "main_chars": int(markers.get("main_chars") or 0),
+        },
+    }
+
+
+#: The profile-views analytics surface, measured from
+#: ``tests/fixtures/profile_views_analytics_hydrated.html`` and confirmed on
+#: the live page 2026-09-03.
+#:
+#: **THAT PAGE HAS NO h1, h2 OR h3 AT ALL.** :func:`read_profile_fields` walks
+#: ``h1,h2,h3`` and returns two sections there, both of them advertising
+#: furniture. It is the wrong instrument for this surface and is deliberately
+#: not used by the reader below -- recorded here because "reuse the heading
+#: walker" is the obvious next idea and it does not work.
+#:
+#: What the page DOES carry, and what the reader takes::
+#:
+#:     <p>27</p><p>Profile viewers</p>              the headline metric
+#:     <p>50%</p><p>vs. prior 7 days</p>            the delta
+#:     data-view-name="line-chart"                  THE TREND GRAPH
+#:       aria-label="Chart. Highcharts interactive chart."
+#:       "Line chart with 13 data points."          its own description
+#:     data-view-name="search-filter-top-bar-select" x3, each wrapping a
+#:       <label>: "Past 90 days", "Interesting viewers", "Company"
+#:
+#: **AND WHAT IT DOES NOT CARRY.** There is no top-companies panel and no
+#: locations control of any kind, in the capture or live. The capability
+#: census recorded this tool as discarding "the trend graph, top companies and
+#: top locations"; the trend graph is real and the other two are not on this
+#: page. What is there is a COMPANY FILTER, which is the likeliest thing that
+#: description was remembering. No ``top_companies`` or ``top_locations``
+#: field is returned, because a field that is always null is a claim the page
+#: does not support.
+VIEWS_CHART_VIEW_NAME = "line-chart"
+VIEWS_FILTER_VIEW_NAME = "search-filter-top-bar-select"
+VIEWS_ROW_VIEW_NAME = "viewer-list-item"
+
+#: A metric value is the text of a ``<p>`` that is a bare number, a
+#: percentage, or a number with LinkedIn's own thousands comma. Its label is
+#: the very next ``<p>``.
+VIEWS_METRIC_MAX = 6
+VIEWS_FILTER_MAX = 10
+VIEWS_VIEW_NAME_MAX = 60
+
+PROFILE_VIEWS_INSIGHTS_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  const out = {
+    metrics: [], filters: [], view_names: [], view_name_counts: {},
+    viewer_rows: 0, chart_present: false, chart_description: null,
+    main_present: !!main, main_chars: 0
+  };
+  if (!main) return out;
+  out.main_chars = main.innerText ? main.innerText.length : 0;
+
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const NUMBERISH = /^[0-9][0-9,.]*%?$/;
+
+  // THE METRIC PAIRS. LinkedIn draws the number and then its label, as two
+  // sibling <p> elements. Anchoring on the number is what makes this stable:
+  // the label is prose and changes, the shape "a <p> that is only a number
+  // followed by a <p> that is not" does not.
+  const paragraphs = Array.from(main.querySelectorAll('p'));
+  for (let i = 0; i < paragraphs.length && out.metrics.length < cfg.metricMax; i++) {
+    const value = textOf(paragraphs[i]);
+    if (!NUMBERISH.test(value)) continue;
+    const label = textOf(paragraphs[i + 1]);
+    if (!label || NUMBERISH.test(label)) continue;
+    out.metrics.push({value: value, label: label});
+  }
+
+  // THE FILTERS, by their own <label> text.
+  for (const holder of main.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
+    const label = textOf(holder.querySelector('label')) || textOf(holder);
+    if (label && out.filters.length < cfg.filterMax) out.filters.push(label);
+  }
+
+  // THE TREND CHART and its OWN accessible description. Never a data point,
+  // never a date: the description is LinkedIn's sentence about the chart.
+  const chart = main.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  if (chart) {
+    out.chart_present = true;
+    let described = null;
+    for (const node of chart.querySelectorAll('div')) {
+      const line = textOf(node);
+      if (line && line.length < 120 && line.indexOf('data point') !== -1) {
+        described = line;
+        break;
+      }
+    }
+    out.chart_description = described;
+  }
+
+  // COUNTS OF EVERY VIEW NAME, and the viewer rows counted and NOT read.
+  for (const el of main.querySelectorAll('[data-view-name]')) {
+    const value = el.getAttribute('data-view-name') || '';
+    if (!value) continue;
+    out.view_name_counts[value] = (out.view_name_counts[value] || 0) + 1;
+    if (out.view_names.indexOf(value) === -1 &&
+        out.view_names.length < cfg.viewNameMax) {
+      out.view_names.push(value);
+    }
+  }
+  out.viewer_rows = out.view_name_counts[cfg.rowName] || 0;
+  return out;
+}
+"""
+
+
+async def read_profile_views_insights(page: Any) -> dict[str, Any]:
+    """What the profile-views page carries BESIDES the viewer rows.
+
+    ZERO EXTRA PAGE LOADS. ``linkedin_who_viewed_me`` already opens this page
+    for the viewer list and discards everything around it -- the headline
+    count, the change against the previous period, the trend chart and the
+    filters LinkedIn is currently applying. Every one of those was on the
+    render the whole time.
+
+    **THIS PAGE IS MADE OF OTHER PEOPLE, AND THAT IS WHY THE READER IS SHAPED
+    LIKE THIS RATHER THAN BEING A GENERAL CENSUS.** Its accessible names carry
+    strangers -- "Send a message to <a person>", "Invite <a person> to
+    connect", "Follow <a person>". So this function reads FOUR things and no
+    others: paragraph pairs where the first is a bare number, the ``<label>``
+    text inside a filter control, the chart's own one-sentence description,
+    and COUNTS of ``data-view-name`` values. It reads no ``aria-label`` at
+    all, and it never reads text from inside a viewer row -- those are counted
+    and not opened. The viewer rows are ``linkedin_who_viewed_me``'s business
+    and it already returns them; nothing here needs to see one.
+
+    That constraint is not caution. A probe written for this same wave printed
+    a raw control census of this page and published thirteen real names,
+    because it hand-rolled a tally and so skipped the redaction the shipped
+    tool applies at publish time. A reader that only ever looks at numbers,
+    ``<label>`` text and view names cannot make that mistake, whatever a
+    future caller does with it.
+
+    ``observed`` is always populated, so a page that rendered nothing this
+    reader recognises still says how big ``main`` was and which view names
+    were on it. Absent is UNKNOWN here, never zero: this reader does not
+    scroll, and the page defers most of itself.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            PROFILE_VIEWS_INSIGHTS_JS,
+            {
+                "chartName": VIEWS_CHART_VIEW_NAME,
+                "filterName": VIEWS_FILTER_VIEW_NAME,
+                "rowName": VIEWS_ROW_VIEW_NAME,
+                "metricMax": VIEWS_METRIC_MAX,
+                "filterMax": VIEWS_FILTER_MAX,
+                "viewNameMax": VIEWS_VIEW_NAME_MAX,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the profile-views page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    data = dict(data or {})
+
+    metrics = [dict(row) for row in (data.get("metrics") or [])]
+    headline = metrics[0] if metrics else None
+    delta = metrics[1] if len(metrics) > 1 else None
+    trend = None
+    if data.get("chart_present"):
+        trend = {
+            "present": True,
+            "description": data.get("chart_description") or None,
+        }
+    return {
+        "headline": headline,
+        "delta": delta,
+        "trend": trend,
+        "filters": list(data.get("filters") or []),
+        "observed": {
+            "metrics_seen": len(metrics),
+            "view_names": list(data.get("view_names") or []),
+            "view_name_counts": dict(data.get("view_name_counts") or {}),
+            "viewer_rows": int(data.get("viewer_rows") or 0),
+            "main_present": bool(data.get("main_present")),
+            "main_chars": int(data.get("main_chars") or 0),
+        },
+    }
+
+
+#: The three profile sections LinkedIn serves at ``/in/me/details/<section>/``
+#: and the read allowlist already admits, at ``readonly.py``'s
+#: ``/in/<member>/details/(skills|experience|education)/`` pattern. This tuple
+#: is the whole of what any caller may ask for; nothing here accepts a
+#: free-text section name, because the section becomes part of an address.
+PROFILE_DETAIL_SECTIONS: tuple[str, ...] = ("experience", "education", "skills")
+
+#: The per-entry key on each of those pages, one per section.
+#:
+#: MEASURED LIVE 2026-09-03, not predicted from the skills pattern. The
+#: prediction was reasonable and this repository has already ruled that
+#: reasonable is not measured, so the probe ran every candidate once and
+#: printed the count beside it::
+#:
+#:     /in/me/details/experience/   SERVED, main 2585 chars
+#:       /details/experience/edit/forms/(\\d+)   ->  3
+#:       /company/([A-Za-z0-9\\-_%]+)            ->  3
+#:       /details/skills/edit/forms/(\\d+)       ->  0   <- THE CONTROL
+#:
+#:     /in/me/details/education/    SERVED, main 1231 chars
+#:       /details/education/edit/forms/(\\d+)    ->  1
+#:       /school/([A-Za-z0-9\\-_%]+)             ->  1
+#:       /details/skills/edit/forms/(\\d+)       ->  0   <- THE CONTROL
+#:
+#: **THE CONTROL LINE IS WHY THE OTHER NUMBERS MEAN ANYTHING.**
+#: :data:`SKILL_HREF` is the pattern already proven on the skills page, and it
+#: reads ZERO on both of these. That is what establishes the form ids are
+#: section-specific -- without it, three hits could have been three of
+#: something else. A count with no control beside it is not a measurement.
+PROFILE_DETAIL_ENTRY_HREF: dict[str, str] = {
+    "experience": r"/details/experience/edit/forms/(\d+)",
+    "education": r"/details/education/edit/forms/(\d+)",
+    "skills": SKILL_HREF,
+}
+
+#: Entries per section this reader will return. Well above the three and one
+#: measured, and well below a number that could turn a result into a dump.
+PROFILE_DETAIL_MAX_ENTRIES = 200
+PROFILE_DETAIL_MAX_CHARS = 300
+
+
+async def read_profile_detail_entries(
+    page: Any, *, section: str
+) -> dict[str, Any]:
+    """Entries on a ``/in/me/details/<section>/`` page that is ALREADY OPEN.
+
+    ONE SECTION, ONE ALREADY-LOADED PAGE, NO NAVIGATION. The caller does the
+    loading, because the caller is the one that owns the page-load budget --
+    this package's ceiling is two loads per call and a reader that navigated
+    would spend one without the tool knowing.
+
+    WHY THIS EXISTS. ``linkedin_my_profile`` has been DECLARING
+    ``experience_entries``, ``education_entries`` and ``skills_listed`` and
+    returning ``None`` for all three by construction. That is not a capability
+    nobody considered -- it is a tool that runs and cannot deliver three of
+    its own stated outputs. Both details addresses were already on the read
+    allowlist and nothing had ever navigated to either.
+
+    THE HARVEST IS THE ONE THAT ALREADY WORKS. ``linkedin_my_profile``'s
+    skills read runs :func:`harvest_linked_cards` against :data:`SKILL_HREF`
+    and returns 20 cards; this runs the same harvest against
+    :data:`PROFILE_DETAIL_ENTRY_HREF`, whose experience and education patterns
+    were measured on 2026-09-03 rather than inferred from the skills one.
+
+    ``count`` IS THE ANSWER AND ``entries`` IS THE EVIDENCE. The field
+    ``my_profile`` promises is a count, and a count does not depend on any
+    entry's text being readable. So a page that yields cards with no text
+    still yields a count, and says so in ``why`` rather than reporting an
+    empty list that would read as an empty profile.
+
+    ``observed`` CARRIES WHAT WAS SEEN WHEN NOTHING MATCHED, because a zero
+    that cannot say what it looked at is the thing that has cost this
+    repository two wrong diagnoses. Zero cards with 2,585 characters of main
+    text is a key this reader did not ask for; zero cards with no text at all
+    is a page that did not draw, and this reader does not scroll.
+    """
+    key = str(section or "").strip().lower()
+    if key not in PROFILE_DETAIL_ENTRY_HREF:
+        # A REFUSAL THAT RETURNS. The section names a document, so an unknown
+        # one must not reach a harvest, and there is no failure here to route
+        # through an exception -- only a question this reader will not answer.
+        return {
+            "section": key,
+            "refused": "unknown_section",
+            "reason": (
+                "section must be one of %s"
+                % ", ".join(PROFILE_DETAIL_SECTIONS)
+            ),
+        }
+
+    records = await harvest_linked_cards(
+        page,
+        href_pattern=PROFILE_DETAIL_ENTRY_HREF[key],
+        max_items=PROFILE_DETAIL_MAX_ENTRIES,
+        max_chars=PROFILE_DETAIL_MAX_CHARS,
+    )
+    entries: list[str] = []
+    for record in records:
+        lines = shape.content_lines(record.get("text", ""))
+        if not lines:
+            continue
+        name = shape.trim(lines[0], 120)
+        if name and name not in entries:
+            entries.append(name)
+
+    body = await read_main_text(page)
+    out: dict[str, Any] = {
+        "section": key,
+        "count": len(records),
+        "entries": entries,
+        "observed": {
+            "cards": len(records),
+            "cards_with_text": len(entries),
+            "main_chars": len(body),
+        },
+    }
+    if records and not entries:
+        out["why"] = (
+            "the page drew %d entry cards and none of them carried text this "
+            "reader could take a name from. The COUNT is still the count -- "
+            "an empty list here is a failed read of the names, not an empty "
+            "section." % len(records)
+        )
+    elif not records:
+        out["why"] = (
+            "no entry card matched. main carried %d characters, so read this "
+            "against that number: text with no cards means LinkedIn keys "
+            "these entries on something this reader does not ask for, and no "
+            "text at all means the page had not drawn. This reader does not "
+            "scroll." % len(body)
+        )
+    return out
