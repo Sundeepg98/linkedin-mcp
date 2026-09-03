@@ -158,11 +158,20 @@ supervised save was the measurement that lifted it, exactly as this paragraph
 predicted, and three read-only re-measurements confirmed the label before the
 row was written. See :data:`shape.SAVE_LABELS` and :func:`anchor_label_for`.
 
-WHAT IS STILL NOT HERE is now one surface rather than one row, and it is not
-in this module: ``unsave_job`` has its anchor and cannot be PREVIEWED, because
-:func:`_direction` refuses on an ``unknown`` origin and the Saved tab that
-supplies that origin cannot currently be read. The capability is real; the
-route to it runs through a broken list read.
+WHAT WAS STILL NOT HERE, until 2026-08-31, and it is recorded rather than
+silently fixed in place. This paragraph used to open "WHAT IS STILL NOT
+HERE is now one surface rather than one row, and it is not in this
+module," and go on to say that ``unsave_job`` had its anchor and could not
+be PREVIEWED because :func:`_direction` refuses on an ``unknown`` origin,
+and the Saved tab that supplies that origin drew its rows while the
+harvest returned none of them. It closed: "The capability is real; the
+route to it runs through a broken list read." True then.
+
+WHAT IS HERE NOW: the Saved-tab harvest was fixed on 2026-08-31, and on
+2026-09-03 ``unsave_job`` was previewed and confirmed against the real
+account -- ``performed: true``, ``verified: true``, ``clicks_made: 1`` --
+with :func:`linkedin_saved_jobs` corroborating the row both before and
+after. The capability and the route to it are both real now.
 """
 
 from __future__ import annotations
