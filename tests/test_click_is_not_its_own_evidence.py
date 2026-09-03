@@ -769,6 +769,90 @@ async def test_the_refusal_says_when_a_matcher_would_have_separated_them(
     assert "the aim is still the substring" in why, why
 
 
+
+#: TWO INVENTED PEOPLE WHO DIFFER ONLY WHERE A METACHARACTER WOULD WILDCARD.
+#: The first carries a period in his name; the second carries a letter in the
+#: same position. An unescaped ``.`` matches both; an escaped one matches the
+#: first alone.
+DOTTED_NAME = "Nimblewick Jr."
+UNDOTTED_NAME = "Nimblewick JrX"
+
+
+async def test_a_metacharacter_in_the_needle_is_escaped_and_it_matters(
+    over, _fast_wait
+):
+    """**HIS INPUT REACHES A REGEX NOW, WHICH IT DID NOT BEFORE.**
+
+    The aim used to be ``[name="<needle>"i]`` -- a quoted whole-string match,
+    where the needle was data. It is ``[name=/<needle>/i]`` since the quoted
+    form was measured at zero against a real row, so the needle is now PATTERN
+    SOURCE. That is a new surface and it is not a theoretical one: an
+    unescaped ``.`` matches any character, so a needle ending ``Jr.`` would
+    also match ``JrX`` -- a selector matching MORE rows than the name it came
+    from, and on this surface a wider match means pressing somebody else.
+
+    THE STRING ASSERTION ALREADY EXISTS in tests/test_typeahead_gate.py and it
+    checks the SPELLING. This checks the CONSEQUENCE, in a browser, and it
+    carries its own control: the same page counted with an UNESCAPED pattern
+    matches both rows. Without that second count the first proves only that
+    two rows exist, not that the escaping is what separated them.
+    """
+    html = _composer_with(
+        _listbox_of(_row(DOTTED_NAME, "1st"), _row(UNDOTTED_NAME, "2nd"))
+    )
+
+    async def work(page):
+        escaped = dom.typeahead_option_selector(DOTTED_NAME)
+        # THE CONTROL, BUILT BY HAND. Not from the builder -- the whole point
+        # is to count what the builder would have produced if it did nothing,
+        # so this is the one place in these tests where a raw needle is put
+        # into a pattern deliberately.
+        unescaped = "role=option[name=/" + DOTTED_NAME + "/i]"
+        return {
+            "rows": await page.locator('[role="option"]').count(),
+            "escaped": await page.locator(escaped).count(),
+            "unescaped": await page.locator(unescaped).count(),
+            "selector": escaped,
+        }
+
+    found = await over(html, work)
+    assert found["rows"] == 2, found
+    assert found["escaped"] == 1, found
+    # THE CONTROL FIRES. An unescaped period wildcards onto the other person.
+    assert found["unescaped"] == 2, found
+    assert chr(92) + "." in found["selector"], found["selector"]
+
+
+async def test_the_census_escapes_the_needle_in_every_candidate(
+    over, _fast_wait
+):
+    """EVERY template, not just the aim's.
+
+    The census builds six patterns out of the same needle. One of them
+    forgetting to escape would count rows the aim would never press, and a
+    measurement that overcounts is worse than none when the decision it feeds
+    is which matcher may click.
+    """
+    html = _composer_with(
+        _listbox_of(_row(DOTTED_NAME, "1st"), _row(UNDOTTED_NAME, "2nd"))
+    )
+
+    async def work(page):
+        return await dom.read_typeahead_pattern_census(page, DOTTED_NAME)
+
+    census = await over(html, work)
+    # Every candidate that can match at all matches the DOTTED row only.
+    assert census["substring"] == 1, census
+    assert census["prefix"] == 1, census
+    # The period is not a letter, so the lookahead accepts what follows it.
+    assert census["prefix_then_nonletter"] == 1, census
+    assert census["whole"] == 0, census
+    assert all(count != 2 for count in census.values()), (
+        "a candidate matched BOTH rows, which on this page can only mean its "
+        "needle went into the pattern unescaped: " + repr(census)
+    )
+
+
 # ---------------------------------------------------------------------------
 # 3. Structure: the invariant, read off the syntax tree
 # ---------------------------------------------------------------------------
