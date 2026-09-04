@@ -1464,8 +1464,14 @@ async def test_an_input_named_by_nothing_is_still_reported_as_nothing(
 # describe an instrument that no longer exists and nothing says so.
 #
 # So it was measured rather than argued. Both scripts -- the real one, and one
-# with the label call site deleted -- were run over all 19 committed fixtures,
-# 537 controls, on 2026-08-31. TWENTY-EIGHT controls move, and the shape of the
+# with the label call site deleted -- were run over all committed fixtures on
+# 2026-08-31: 19 files, 537 controls. The corpus is 20 files and 553 controls
+# since 2026-09-04, when connections_list.html was ADDED -- and the movement
+# below is unchanged, which is a finding rather than an assumption: the new
+# file draws no input and no select, so no label route fires on it, and
+# test_the_movement_the_label_routes_cause_is_pinned_file_by_file asserts the
+# per-file map BEFORE it asserts the denominator. TWENTY-EIGHT controls move,
+# and the shape of the
 # movement is the whole finding:
 #
 #   * 26 ``input`` controls go from ``none`` to ``label-for``. Their published
@@ -1513,7 +1519,15 @@ FIXTURE_MOVEMENT = {
 
 #: Controls read across the whole fixture directory, and the denominator of
 #: "28 moved". Pinned because a sweep whose size nobody recorded can shrink.
-FIXTURE_CONTROLS = 537
+#:
+#: 537 -> 553 ON 2026-09-04, RE-MEASURED RATHER THAN ADJUSTED, which is what
+#: the assertion message beside it demands. ``connections_list.html`` was
+#: ADDED to the directory -- an invented page for a surface this server has
+#: never opened -- and it draws 16 controls. Nothing that was already here
+#: changed, and that is checked rather than claimed: every per-file map in
+#: this module (movement, containment, checked readings, key split) is
+#: asserted BEFORE its denominator and all of them passed untouched.
+FIXTURE_CONTROLS = 553
 
 
 def _census_without_label_routes() -> str:
@@ -1900,7 +1914,7 @@ async def test_the_descriptor_population_is_not_the_counts_block(census_over):
 # nothing in the diff says so.
 #
 # So it is measured, not argued. Two scripts -- the real one, and one with the
-# container call site deleted -- are run over all 19 committed fixtures and
+# container call site deleted -- are run over all 20 committed fixtures and
 # every pre-existing field of every control is compared. ZERO move. The
 # comparator is shown catching movement on the same files in the control test,
 # so "zero" is a reading rather than a comparison that could not fail.
@@ -2012,7 +2026,8 @@ async def _container_sweep(
 
 
 #: EVERY control in the fixture directory that sits inside a container, file
-#: by file, measured 2026-08-31. THREE, out of 537 -- and all three are in the
+#: by file, measured 2026-08-31 out of 537, re-measured 2026-09-04 out of 553.
+#: THREE either way -- and all three are in the
 #: Easy Apply capture, which is the finding rather than a shortfall: it is the
 #: only committed fixture that captured a MODAL, and a modal is the shape this
 #: field exists to describe. The other 18 are page fragments with neither a
@@ -2092,8 +2107,8 @@ async def test_every_descriptor_in_every_committed_fixture_is_a_shape(
     makes and for the same reason.
 
     WHAT THIS DOES AND DOES NOT COVER, because the numbers are lopsided and a
-    reader should not take more from it than is there. All 537 controls are
-    checked, and 534 of them are in no container at all, so for those the
+    reader should not take more from it than is there. All 553 controls are
+    checked, and 550 of them are in no container at all, so for those the
     check only confirms the string is ``none``. THREE controls, all in the
     Easy Apply capture, are the only real-capture evidence that a descriptor
     built off LinkedIn's own ids, classes and headings carries none of them --
@@ -2111,7 +2126,7 @@ async def test_every_descriptor_in_every_committed_fixture_is_a_shape(
     # page fragment.
     assert contained == FIXTURE_CONTAINMENT
     inside = sum(len(rows) for rows in contained.values())
-    assert (inside, total - inside) == (3, 534)
+    assert (inside, total - inside) == (3, 550)
 
 
 async def test_deleting_the_container_walk_takes_the_readings_with_it(
@@ -2395,7 +2410,7 @@ async def test_that_reader_comparison_can_detect_a_changed_row(
 # EVERY input type and reads ``false`` on a text box, so an ungated read would
 # report a control that cannot be checked at all as one that is checkable and
 # off. That is measured across this repo rather than argued: the real script
-# finds 29 non-null readings in the 19 committed fixtures and the ungated
+# finds 29 non-null readings in the 20 committed fixtures and the ungated
 # derivation finds 37, and the 8 extra are all ``input`` controls that are not
 # checkable. It is also the SAME conflation this instrument was caught in
 # earlier the same day, when ``name_source: "none"`` was reading as "this
@@ -3196,13 +3211,16 @@ def test_a_record_with_no_checked_field_at_all_still_aggregates():
 # carries a SECOND risk the other two did not, because it touches the merge
 # key -- a split can drop a row to ``count == 1``, where
 # ``census_redact_rare`` blanks capitalised runs, so the field could destroy
-# readable output in order to report itself. Both are measured over all 19
-# committed fixtures, 537 controls, on 2026-08-31.
+# readable output in order to report itself. Both were measured over all 19
+# committed fixtures, 537 controls, on 2026-08-31, and re-measured over 20
+# files and 553 controls on 2026-09-04. THE READINGS DID NOT MOVE: the file
+# added that day draws buttons and anchors only, so it contributes no
+# checkable control at all.
 #
 # WHAT THE SWEEP FOUND:
 #
 #   * ZERO pre-existing fields move. Same names, same sources, same counts.
-#   * 29 of the 537 controls carry a non-null ``checked``, all of them
+#   * 29 of the 553 controls carry a non-null ``checked``, all of them
 #     ``native``, all of them on ``input`` controls, in five files: one
 #     unchecked input in each of three job-detail captures, twelve in the
 #     empty job tracker and fourteen in the tracker row.
@@ -3245,7 +3263,7 @@ FIXTURE_CHECKED = {
 #: recorded can shrink, and a count with no denominator cannot be read.
 FIXTURE_CHECKED_TOTAL = 29
 
-#: What the ungated derivation reads instead, over the same 537 controls. The
+#: What the ungated derivation reads instead, over the same 553 controls. The
 #: EIGHT-control gap is the type gate's whole value, expressed as a number
 #: rather than as an argument: eight ``input`` controls in this repo are not
 #: checkable and would be reported as checkable-and-off without it.

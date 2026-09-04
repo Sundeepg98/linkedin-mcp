@@ -1,0 +1,148 @@
+<!doctype html>
+<!--
+  A SANITISED, INVENTED freeze of the shape /mynetwork/invite-connect/connections/
+  is expected to have. IT IS NOT A CAPTURE, and nothing in this repository claims
+  it is: that page has never been opened by this server, because opening it is
+  the very cost linkedin_connections refuses to spend before it is measured.
+
+  So every name, slug and member id below is invented, and the STRUCTURE is
+  assembled from what is measured elsewhere rather than from this surface:
+
+    * the per-row Message control -- LinkedIn's own Help Center, quoted in
+      _audit/_scratch/_census-hc-invitations.md:50: "Click Message on the right
+      of the connection's name to message them."
+    * the Message href carrying the member id twice, once bare and once inside
+      a profile urn -- copied in SHAPE from tests/fixtures/profile_views_analytics.html,
+      which IS a capture.
+    * the nav badge label tail ", N new notification(s)" --
+      _audit/2026-08-31-linkedin-perform.md:1208, five nav badges on one page.
+      The word BEFORE the comma is redacted in the audit
+      (_audit/2026-08-31-linkedin-lift.md:174) and is therefore invented here
+      too; the selector never matches it, which is the point.
+
+  WHAT IT IS ARRANGED TO PROVE, and the arrangement is deliberate:
+
+    * THE FIRST ROW HAS NO MESSAGE BUTTON. Pairing the button list to the row
+      list by INDEX therefore attaches a stranger's identifier to every single
+      row below, rather than to none of them or to one. A fixture where index
+      pairing accidentally works cannot fail on the defect it exists to catch.
+    * TWO ROWS ARE NOT MESSAGEABLE AT ALL -- one offers Follow, one offers only
+      an overflow control. "Named" and "has an id" are different questions.
+    * ONE MESSAGE CONTROL HAS NO PERSON LINK ANYWHERE NEAR IT (the promo block
+      at the end). Its id is unattributable, and an unattributable id must be
+      COUNTED rather than silently dropped or guessed onto a neighbour.
+    * ONE ROW WRAPS ITS WHOLE CARD IN THE PERSON ANCHOR, so its name cannot be
+      read off the link and has to come off the climbed row instead.
+    * THE NAV DRAWS TWO /mynetwork/ LINKS and only one carries a count.
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>My Network</title></head>
+<body>
+<header>
+  <nav aria-label="Primary">
+    <a href="/feed/" aria-label="Home, 1 new notification">Home</a>
+    <!-- THE BADGE. Prefix invented; the tail is the measured part. -->
+    <a href="/mynetwork/" aria-label="Nav, 3 new notifications">My Network</a>
+    <!-- A SECOND /mynetwork/ LINK WITH NO COUNT. Taking .first would be a
+         choice by position between two controls that are not the same thing. -->
+    <a href="/mynetwork/grow/">Grow</a>
+    <a href="/messaging/" aria-label="Messaging, 0 new notifications">Messaging</a>
+    <!-- HIS OWN PROFILE, drawn in the nav on every signed-in page. It is a
+         /in/ anchor and it is not a connection; profile_slug_from drops the
+         "me" alias structurally, without a rule being written for it. -->
+    <a href="/in/me/">Me</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Connections</h1>
+  <p>5 connections</p>
+
+  <ul class="connections-list">
+
+    <!-- 1. NO MESSAGE CONTROL. LinkedIn draws Follow instead, because it
+            draws the action the relationship allows. -->
+    <li class="connection-row">
+      <a href="/in/farhan-qureshi-2b8e77c4/">
+        <span aria-hidden="true">Farhan Qureshi</span>
+        <span class="visually-hidden">Farhan Qureshi</span>
+      </a>
+      <p class="headline">Engineering Manager at Umbrella Systems</p>
+      <p class="degree">1st</p>
+      <div class="row-actions">
+        <button type="button">Follow</button>
+      </div>
+    </li>
+
+    <!-- 2. MESSAGEABLE. -->
+    <li class="connection-row">
+      <a href="/in/anita-krishnan-9d2f4a11/">
+        <span aria-hidden="true">Anita Krishnan</span>
+        <span class="visually-hidden">Anita Krishnan</span>
+      </a>
+      <p class="headline">Staff Software Engineer at Northwind Labs</p>
+      <p class="degree">1st</p>
+      <div class="row-actions">
+        <a class="message"
+           href="/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAD4h5J6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0&amp;recipient=ACoAAD4h5J6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0&amp;screenContext=CONNECTIONS_LIST&amp;interop=msgOverlay">Message</a>
+      </div>
+    </li>
+
+    <!-- 3. NO MESSAGE CONTROL. Only an overflow menu, which is chrome. -->
+    <li class="connection-row">
+      <a href="/in/daniel-okonkwo-77bd9f02/">
+        <span aria-hidden="true">Daniel Okonkwo</span>
+        <span class="visually-hidden">Daniel Okonkwo</span>
+      </a>
+      <p class="headline">Product Designer at Vandelay Interactive</p>
+      <p class="degree">1st</p>
+      <div class="row-actions">
+        <button type="button" aria-label="More">More</button>
+      </div>
+    </li>
+
+    <!-- 4. MESSAGEABLE. -->
+    <li class="connection-row">
+      <a href="/in/lakshmi-menon-51ac0e39/">
+        <span aria-hidden="true">Lakshmi Menon</span>
+        <span class="visually-hidden">Lakshmi Menon</span>
+      </a>
+      <p class="headline">Director of Data at Cyberdyne Retail</p>
+      <p class="degree">1st</p>
+      <div class="row-actions">
+        <a class="message"
+           href="/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAE5j6K7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1&amp;recipient=ACoAAE5j6K7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1&amp;screenContext=CONNECTIONS_LIST&amp;interop=msgOverlay">Message</a>
+      </div>
+    </li>
+
+    <!-- 5. MESSAGEABLE, AND THE WHOLE CARD SITS INSIDE THE PERSON ANCHOR, so
+            the link's text is several lines and cannot name one thing. The job
+            tracker is drawn this way, which is why shape.anchored_title
+            returns None on it and the caller falls back to the row. -->
+    <li class="connection-row">
+      <a href="/in/sunita-rao-3ef1a6d8/">
+        <span aria-hidden="true">Sunita Rao</span>
+        <span class="visually-hidden">Sunita Rao</span>
+        <p class="headline">Principal Data Engineer at Initech Cloud</p>
+        <p class="degree">1st</p>
+      </a>
+      <div class="row-actions">
+        <a class="message"
+           href="/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAF6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0z1A2&amp;recipient=ACoAAF6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0z1A2&amp;screenContext=CONNECTIONS_LIST&amp;interop=msgOverlay">Message</a>
+      </div>
+    </li>
+
+  </ul>
+
+  <!-- A MESSAGE CONTROL WITH NO PERSON LINK WITHIN REACH. The climb from this
+       button leaves the promo block and finds nothing; the id is real and
+       nobody can say whose it is. It must be COUNTED, never attached to the
+       nearest row that happens to be above it. -->
+  <aside class="promo">
+    <h2>Reach out to a recruiter</h2>
+    <a class="message"
+       href="/messaging/compose/?recipient=ACoAAG7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1a2B3&amp;screenContext=PROMO">Message</a>
+  </aside>
+</main>
+</body>
+</html>

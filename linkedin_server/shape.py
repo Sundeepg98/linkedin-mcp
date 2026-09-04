@@ -430,7 +430,30 @@ def parse_connection_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     subtree of the person link, and it is joined on BY SLUG afterwards. A
     parser cannot see it and must not invent a key for it.
     """
-    lines = content_lines(record.get("text", ""))
+    # THE SCREEN-READER COPIES COME OUT FIRST, and this is not a refinement
+    # -- it is the difference between a headline and the name printed twice.
+    # MEASURED on ``tests/fixtures/connections_list.html`` before it was
+    # written this way: every row came back
+    # ``headline: "Farhan Qureshi Farhan Qureshi"``, because innerText welds a
+    # ``.visually-hidden`` copy of the name onto the visible one, so the
+    # doubled string is not equal to the name and the "skip the name" test
+    # never fired. ``content_lines`` alone cannot see it: it collapses
+    # CONSECUTIVE duplicate LINES, and this duplicate is inside one line.
+    #
+    # THE SUBTRACTION IS THE ONE THE JOB CARDS ALREADY RUN, in the same order
+    # -- ``strip_screen_reader_copies`` then ``drop_consecutive_repeats`` then
+    # the chrome filter -- rather than a rule invented here. It subtracts BY
+    # COUNT, so a name marked hidden once and printed twice keeps exactly one
+    # copy, and nothing has to know what any of the strings say.
+    text = record.get("text", "")
+    hidden = list(record.get("hidden") or ())
+    lines = [
+        line
+        for line in drop_consecutive_repeats(
+            strip_screen_reader_copies(text, hidden)
+        )
+        if not is_chrome(line)
+    ]
 
     # THE LINK FIRST, because the invariant is structural. A row with no
     # ``/in/<slug>`` is furniture whatever its text says, and asking about the

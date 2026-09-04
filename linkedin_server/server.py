@@ -1477,7 +1477,7 @@ def _connections_refusal(reason: str, why: str, **extra: Any) -> dict[str, Any]:
 
 @mcp.tool()
 async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
-    """The people he is connected to, with the id needed to message them.
+    """The people he is connected to, and the identifier a conversation needs.
 
     ================= READ THIS BEFORE REPORTING IT BROKEN =================
     THIS TOOL REFUSES TODAY, AND THE READER BEHIND THE REFUSAL IS BUILT. Not
@@ -1497,9 +1497,10 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     argument, so it is not repeated here.
 
     WHAT IT RETURNS WHEN IT RETURNS. One row per connection: name, headline,
-    profile link, and ``recipient_id`` -- the member id LinkedIn writes into
-    the Message button drawn beside that person's name. ``recipient_id`` is
-    null where LinkedIn drew no such button, which is a fact about the
+    profile link, and ``recipient_id``. This tool sends nothing and opens no
+    conversation: the id is simply read back out of the Message control
+    LinkedIn already drew beside that person's name. ``recipient_id`` is null
+    where LinkedIn drew no such control, which is a fact about the
     relationship rather than a failure, and it is never an empty string.
 
     WHAT IT UNLOCKS. The identifier route needs a surface where LinkedIn draws
@@ -1595,12 +1596,29 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     ),
                     badge_before=before,
                     pages_loaded=1,
-                    source_url=landed,
+                    source_url=shape.census_substitute(landed),
                 )
 
             # 2. THE PAGE.
             landed = await BROWSER.goto(page, CONNECTIONS_URL)
             assert_not_authwall(landed, surface="connections")
+
+            # EVERY source_url BELOW GOES THROUGH THE CENSUS SUBSTITUTION,
+            # never the raw landing. tests/test_surface_census.py keeps a
+            # pinned inventory of the tools that still return one raw, and
+            # this page is exactly the kind that should not join it: it is
+            # made ENTIRELY of third parties. linkedin_my_profile was moved
+            # off that list on the same reasoning inverted -- there the
+            # identity in the url is HIS OWN and published on purpose, so
+            # shaping bought consistency; here it would not be his.
+            #
+            # WHAT THE SUBSTITUTION DOES AND DOES NOT DO, said plainly rather
+            # than implied: it rewrites identifier-shaped PATH segments. The
+            # address this tool navigates to is a constant carrying no
+            # identifier at all, so in the ordinary case it changes nothing.
+            # The value is in the case nobody has seen -- a redirect that
+            # lands somewhere else -- which is the only reason `landed` is
+            # reported rather than the constant.
 
             # 3. AFTER, off the nav of the page just loaded. NO THIRD
             #    NAVIGATION -- the badge renders on every signed-in page,
@@ -1629,7 +1647,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     badge_after=after,
                     census=census,
                     pages_loaded=2,
-                    source_url=landed,
+                    source_url=shape.census_substitute(landed),
                 )
             if after["pending"] != before["pending"]:
                 return _connections_refusal(
@@ -1646,7 +1664,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     badge_after=after,
                     census=census,
                     pages_loaded=2,
-                    source_url=landed,
+                    source_url=shape.census_substitute(landed),
                     and_this_falsifies_the_recorded_cost=(
                         "server.CONNECTIONS_BADGE_COST says this load is free. "
                         "This run disagrees with it. Re-take the measurement "
@@ -1656,7 +1674,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
             return shape.envelope(
                 rows,
                 limit=limit,
-                source_url=landed,
+                source_url=shape.census_substitute(landed),
                 pages_loaded=2,
                 dropped=census.get("rows_unparsed") or 0,
                 extra={
@@ -1976,6 +1994,54 @@ _EXPERIENCE = {
     "executive": "6",
 }
 
+#: Employment type. THE SAME SHAPE AS :data:`_EXPERIENCE` -- a set of values
+#: comma-joined into one parameter -- and it is that shape because LinkedIn's
+#: own control is a multi-select, not a radio.
+_JOB_TYPE = {
+    "full_time": "F",
+    "part_time": "P",
+    "contract": "C",
+    "temporary": "T",
+    "volunteer": "V",
+    "internship": "I",
+    "other": "O",
+}
+
+#: The four filters LinkedIn spells as a bare ``true``, mapped from the
+#: keyword argument that turns each one on.
+#:
+#: **MEASURED LIVE 2026-09-04, NOT TAKEN FROM A URL SOMEBODY REMEMBERED**, and
+#: the control is what makes the reading worth anything. Seven loads of
+#: ``/jobs/search/`` on one session, three seconds apart, one fixed keyword,
+#: reading every button's accessible name and aria state:
+#:
+#:     BASELINE            ?keywords=<K>                 71 buttons
+#:     NEGATIVE CONTROL    ?keywords=<K>&f_ZZQQX=true    71 buttons, 0 pills changed
+#:                                                       AND THE PARAMETER WAS
+#:                                                       STRIPPED from the landed url
+#:     f_AL=true      'LinkedIn Apply filter.'         aria-checked false -> TRUE
+#:     f_EA=true      'Under 10 applicants filter.'    absent -> aria-checked TRUE
+#:     f_JIYN=true    'In your network filter.'        absent -> aria-checked TRUE
+#:     f_FCE=true     'Fair Chance Employer filter.'   absent -> aria-checked TRUE
+#:
+#: **THE NEGATIVE CONTROL IS THE MEASUREMENT.** Without it, a pill reading
+#: "checked" is a screenshot; with it, "identical to baseline" is a reading
+#: that MEANS ignored -- and no candidate here read that way. LinkedIn also
+#: DELETED the parameter it did not recognise from the address it landed on
+#: and KEPT all of these, which is a second, independent channel agreeing with
+#: the first.
+#:
+#: A filter here is OFF BY DEFAULT and off means NO PARAMETER, never
+#: ``f_AL=false``. LinkedIn's control is a checkbox and an unchecked box is
+#: absent from its url; emitting ``false`` would be inventing a spelling
+#: nothing above measured.
+_BOOLEAN_FILTERS: tuple[tuple[str, str], ...] = (
+    ("easy_apply", "f_AL"),
+    ("under_ten_applicants", "f_EA"),
+    ("in_your_network", "f_JIYN"),
+    ("fair_chance_employer", "f_FCE"),
+)
+
 
 @mcp.tool()
 async def linkedin_search_jobs(
@@ -1984,6 +2050,11 @@ async def linkedin_search_jobs(
     remote: str = "any",
     date_posted: str = "any",
     experience_level: str = "",
+    job_type: str = "",
+    easy_apply: bool = False,
+    under_ten_applicants: bool = False,
+    in_your_network: bool = False,
+    fair_chance_employer: bool = False,
     sort_by: str = "relevance",
     start: int = 0,
     limit: int = SEARCH_DEFAULT_LIMIT,
@@ -2002,13 +2073,32 @@ async def linkedin_search_jobs(
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
+    ONE LOCATION, NOT SEVERAL. LinkedIn's own search accepts more than one
+    location at a time and this tool takes a single string. That is a known
+    missing capability rather than an oversight, and it is missing for a
+    reason worth stating: nobody here has measured HOW LinkedIn spells a
+    second location in a url, and the plausible spellings disagree about which
+    city you would get. A guessed encoding does not fail loudly -- it silently
+    searches somewhere else -- so it is left out until it is measured.
+
     Args:
         keywords: what to search for, e.g. "senior node.js engineer".
         location: city, region or country. Empty means LinkedIn's default.
+            ONE location; see the note above.
         remote: any | on_site | remote | hybrid.
         date_posted: any | past_24h | past_week | past_month.
         experience_level: comma-separated from internship, entry, associate,
             mid_senior, director, executive. Empty means no filter.
+        job_type: comma-separated from full_time, part_time, contract,
+            temporary, volunteer, internship, other. Empty means no filter.
+        easy_apply: only postings that apply through LinkedIn, never an
+            off-site ATS.
+        under_ten_applicants: only postings LinkedIn reports as having fewer
+            than ten applicants.
+        in_your_network: only postings at companies where you have a
+            connection.
+        fair_chance_employer: only employers who have declared themselves
+            open to applicants with a criminal record.
         sort_by: relevance | date.
         start: result offset for manual paging (0, 25, 50 ...).
         limit: maximum rows to return (default 25, max 50).
@@ -2059,6 +2149,43 @@ async def linkedin_search_jobs(
         if levels:
             params.append(("f_E", ",".join(_EXPERIENCE[p] for p in levels)))
 
+        kinds = [p.strip().lower() for p in job_type.split(",") if p.strip()]
+        unknown_kinds = [p for p in kinds if p not in _JOB_TYPE]
+        if unknown_kinds:
+            # WHAT IT SAW, NOT ONLY WHAT IT DID NOT MATCH. The rejected values
+            # are named back, because "unknown job_type" over a comma-joined
+            # argument leaves the caller to work out WHICH of the four it got
+            # wrong.
+            return {
+                "error": "bad_argument",
+                "message": (
+                    f"unknown job_type {unknown_kinds}; choose from "
+                    f"{sorted(_JOB_TYPE)}"
+                ),
+            }
+        if kinds:
+            params.append(("f_JT", ",".join(_JOB_TYPE[p] for p in kinds)))
+
+        # THE FOUR CHECKBOX FILTERS, and OFF EMITS NOTHING. See
+        # _BOOLEAN_FILTERS for the live measurement and for its negative
+        # control, which is the half that makes the reading mean anything.
+        #
+        # BOUND EXPLICITLY RATHER THAN OUT OF ``locals()``. A lookup into the
+        # frame would read whichever local happened to carry the name, so a
+        # renamed argument would go on emitting the old filter silently. This
+        # spelling raises KeyError the moment the table and the signature
+        # disagree, and tests/test_tools.py asserts the two match by AST so
+        # the disagreement is caught before anything runs.
+        chosen = {
+            "easy_apply": easy_apply,
+            "under_ten_applicants": under_ten_applicants,
+            "in_your_network": in_your_network,
+            "fair_chance_employer": fair_chance_employer,
+        }
+        for argument, parameter in _BOOLEAN_FILTERS:
+            if chosen[argument]:
+                params.append((parameter, "true"))
+
         if sort_by.strip().lower() == "date":
             params.append(("sortBy", "DD"))
         elif sort_by.strip().lower() not in ("", "relevance"):
@@ -2086,6 +2213,15 @@ async def linkedin_search_jobs(
             "remote": remote,
             "date_posted": date_posted,
             "experience_level": levels or None,
+            "job_type": kinds or None,
+            # THE FOUR ARE ECHOED EVEN WHEN OFF, and that is deliberate: a
+            # caller reading this block is asking what was searched, and
+            # "easy_apply was not applied" is an answer where a missing key
+            # is a question about whether this build has the filter at all.
+            "easy_apply": easy_apply,
+            "under_ten_applicants": under_ten_applicants,
+            "in_your_network": in_your_network,
+            "fair_chance_employer": fair_chance_employer,
             "sort_by": sort_by or "relevance",
             "start": start,
         }

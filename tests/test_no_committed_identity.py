@@ -171,6 +171,13 @@ SYNTHETIC_SLUGS = frozenset(
         "priya-raman-123", "priya-sharma-12ab34", "priya-sharma-8a41b207",
         "robin%2Dellery%2D77c3", "rohan-desai-71f2e004",
         "sam%2Dokonkwo%2D31a9", "some-person-a1b2c3", "some-real-slug-99",
+        # tests/fixtures/connections_list.html, 2026-09-04. Five invented
+        # people on an invented page: that surface has never been opened by
+        # this server, so there was no capture to sanitise and nothing here
+        # was ever anybody's.
+        "anita-krishnan-9d2f4a11", "daniel-okonkwo-77bd9f02",
+        "farhan-qureshi-2b8e77c4", "lakshmi-menon-51ac0e39",
+        "sunita-rao-3ef1a6d8",
     }
 )
 
@@ -197,6 +204,14 @@ SYNTHETIC_MEMBER_TOKENS = (
     "ACoAAA1B2C3D4E5F6G7H8I9J0KLMNOPQRSTUVWX",
     "ACoAAB7hidden",
     "ACoAAAB",
+    # tests/fixtures/connections_list.html, 2026-09-04. Four invented ids --
+    # three on rows and one on a promo control that has no row, which is the
+    # case the reader has to leave UNATTRIBUTED rather than blame on the
+    # nearest person.
+    "ACoAAD4h5J6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0",
+    "ACoAAE5j6K7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1",
+    "ACoAAF6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0z1A2",
+    "ACoAAG7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1a2B3",
 )
 
 #: A credential value that is obviously not one.

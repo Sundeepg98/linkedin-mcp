@@ -6137,6 +6137,21 @@ RECIPIENT_ID_HREF = r"[?&]recipient=([A-Za-z0-9_-]{1,64})"
 #: How far up from a Message button to look for the person link that names the
 #: same row. Small, because a row is small: past this the walk leaves the row
 #: and the next person link belongs to somebody else.
+#:
+#: THE HOP CAP WAS NEVER THE THING THAT KEPT THE WALK INSIDE THE ROW, and that
+#: was MEASURED on 2026-09-04 rather than reasoned about. A Message control
+#: with no person row of its own -- a promo block offering to message a
+#: recruiter -- climbed TWO hops, reached ``<main>``, and was attributed to the
+#: FIRST person on the page: a stranger's identifier on somebody else's row,
+#: arriving through the slug join rather than around it. Two hops is well
+#: inside a budget of eight, so no cap could have stopped it.
+#:
+#: WHAT STOPS IT IS CONTAINMENT, and the rule is not invented here: it is the
+#: one ``rowOf`` in :data:`HARVEST_LINKED_CARDS_JS` already runs and has run on
+#: every surface this package reads -- ``if (keysWithin(node).size > 1) break``.
+#: An ancestor holding MORE THAN ONE distinct person is not this button's row;
+#: it is the container holding everybody's. The two walks now stop on the same
+#: condition, which is what stops them disagreeing about where a row ends.
 RECIPIENT_ROW_HOPS = 8
 
 RECIPIENT_IDS_JS = """
@@ -6157,16 +6172,30 @@ RECIPIENT_IDS_JS = """
     let node = anchor;
     let slug = '';
     let hops = 0;
+    let leftTheRow = false;
     while (node && hops < cfg.maxHops && !slug) {
       node = node.parentElement;
       hops += 1;
       if (!node || !node.querySelectorAll) continue;
+      // DISTINCT PEOPLE, not the first link found. This is rowOf's own stop
+      // condition (keysWithin(node).size > 1) and it is what keeps the climb
+      // inside the row: an ancestor holding two different people is the
+      // container holding everybody, so this button's row ended below it and
+      // the id is UNATTRIBUTABLE rather than the first person's.
+      const keys = new Set();
       for (const link of Array.from(node.querySelectorAll('a[href]'))) {
         const person = (link.getAttribute('href') || '').match(personRe);
-        if (person) { slug = person[1]; break; }
+        if (person) { keys.add(person[1]); }
       }
+      if (keys.size > 1) { leftTheRow = true; break; }
+      if (keys.size === 1) { slug = Array.from(keys)[0]; }
     }
-    out.push({slug: slug, recipient: found[1], hops: hops});
+    out.push({
+      slug: slug,
+      recipient: found[1],
+      hops: hops,
+      left_the_row: leftTheRow
+    });
   }
   return {rows: out, buttons: buttons};
 }
@@ -6204,11 +6233,20 @@ async def read_recipient_ids(page: Any) -> dict[str, Any]:
     exactly that collapse.
 
     ``slug`` MAY BE EMPTY, and that is a different absence again: it means the
-    walk found a Message button and no person link within
-    :data:`RECIPIENT_ROW_HOPS`, so this reader cannot say WHOSE id it is. An
+    walk found a Message button and could not say WHOSE it is. An
     unattributable id is reported with an empty slug rather than dropped,
     because a caller silently receiving fewer ids than the page has buttons
     would have no way to notice.
+
+    ``left_the_row`` SEPARATES THE TWO WAYS THAT HAPPENS, and it exists
+    because the second one used to produce a WRONG ANSWER rather than an empty
+    slug. Measured 2026-09-04 on a page carrying a promo Message control with
+    no person row of its own: the climb reached the list container in two hops
+    and attributed that id to the FIRST person on the page. ``true`` means the
+    climb reached an ancestor holding more than one distinct person and
+    stopped -- this control has no row. ``false`` with an empty slug means it
+    ran out of hops instead, which is a row deeper than the budget and a
+    different repair entirely.
     """
     out: dict[str, Any] = {"rows": [], "buttons": 0, "error": None}
     try:
@@ -6230,6 +6268,13 @@ async def read_recipient_ids(page: Any) -> dict[str, Any]:
                 "slug": str(row.get("slug") or ""),
                 "recipient": str(row.get("recipient") or ""),
                 "hops": int(row.get("hops") or 0),
+                # WHY the slug is empty, which is a different question from
+                # whether it is. An empty slug because the climb ran out of
+                # hops means the row is deeper than the budget; an empty slug
+                # because the climb LEFT THE ROW means this control has no row
+                # of its own. The first wants a bigger budget and the second
+                # must never get one.
+                "left_the_row": bool(row.get("left_the_row")),
             }
         )
     return out
