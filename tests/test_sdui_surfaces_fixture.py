@@ -1329,3 +1329,232 @@ async def test_a_skill_keeps_only_its_name_not_its_evidence_lines():
     assert skills[0] == "Node.js"
     assert not any("experiences at" in skill for skill in skills)
     assert not any("Skill Assessment" in skill for skill in skills)
+
+
+# ---------------------------------------------------------------------------
+# 9. What these two pages DRAW, and what this package used to discard
+#
+# `_audit/2026-09-03-linkedin-gap-blockers.md` names PARSER-ON-A-LOADED-PAGE
+# the cheapest build in the document: two census rows -- N 118, endorsement
+# counts on his own skills, and P L2, his own follower count -- each said to
+# render on a page a tool already opens.
+#
+# BOTH WERE MEASURED ON 2026-09-04 AND NEITHER IS THERE.
+#
+#   N 118  /in/me/details/skills/ drew 20 cards and 2,359 characters of main
+#          text, and ZERO occurrences of "endors" anywhere on it. The page
+#          drew; the line did not.
+#   P L2   /in/me/ drew exactly ONE relationship-count line and it is
+#          CONNECTIONS. The follower count quoted in publish_post.residue did
+#          not come from the topcard.
+#
+# What IS on those pages, read and thrown away by code that already held it:
+# the connections count, which parse_profile_topcard recognises only in order
+# to rule it out of the headline; and the corroboration lines under a skill,
+# which the harvest returns and the reader dropped after line 0.
+#
+# The tests below cover both, and the one that matters most is
+# `test_the_endorsement_reader_can_say_yes` -- a reader that can only ever
+# report "not drawn" is a check that cannot fail, and this repository has
+# already paid for that lesson.
+# ---------------------------------------------------------------------------
+
+
+COUNT_LINE_CASES = (
+    # line, kind, count, at_least
+    ("268 connections", "connections", 268, False),
+    ("1,284 followers", "followers", 1284, False),
+    # THE CASE THAT DECIDES WHETHER THE FIELD IS HONEST. LinkedIn stops
+    # counting out loud at five hundred, so an account with 2,000 connections
+    # and one with 501 draw the same string. Returning 500 for it would turn
+    # the page's "at least" into the result's "exactly".
+    ("500+ connections", "connections", 500, True),
+    ("500+ followers", "followers", 500, True),
+    # Singular, which LinkedIn draws at one, normalised to the plural key so a
+    # caller never has to look in two places.
+    ("1 connection", "connections", 1, False),
+)
+
+
+@pytest.mark.parametrize("line,kind,count,at_least", COUNT_LINE_CASES)
+def test_a_relationship_count_keeps_the_plus_it_was_drawn_with(
+    line, kind, count, at_least
+):
+    reading = shape.relationship_count(line)
+    assert reading is not None, line
+    assert reading["kind"] == kind
+    assert reading["count"] == count
+    assert reading["at_least"] is at_least
+    assert reading["as_drawn"] == line
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Contact info",
+        "Riverton, Fairhaven, United States",
+        "Senior Backend Engineer",
+        "",
+        "connections",
+        "268",
+    ],
+)
+def test_a_line_that_is_not_a_count_is_not_read_as_one(line):
+    """The topcard is mostly not counts, and a false positive here would put a
+    location into a field the operator reads as a number."""
+    assert shape.relationship_count(line) is None
+
+
+@pytest.mark.parametrize("which", BOTH_PROFILES)
+async def test_the_topcard_returns_the_count_it_used_to_only_rule_out(which):
+    _, _, topcard = await _profile(which)
+    identity = shape.parse_profile_topcard((topcard or {}).get("lines") or [])
+
+    assert identity["connections"] == {
+        "kind": "connections",
+        "count": 268,
+        "at_least": False,
+        "as_drawn": "268 connections",
+    }
+    # NOT DRAWN IS NOT ZERO, and this is the measured half of census row P L2:
+    # neither render of his topcard carries a followers line, so null here is
+    # the page's answer rather than a parse that missed it.
+    assert identity["followers"] is None
+
+
+@pytest.mark.parametrize("which", BOTH_PROFILES)
+async def test_reading_the_count_did_not_cost_the_headline(which):
+    """The count line is still ruled out of the fields it was always ruled out
+    of. It was recognised in order to be EXCLUDED, and keeping it must not
+    stop the excluding.
+
+    READ `test_the_count_exclusion_is_load_bearing_without_a_contact_line`
+    BEFORE TRUSTING THIS ONE. Over the committed fixtures this test CANNOT
+    FAIL from deleting the exclusion -- measured, not supposed. On both
+    renders the count sits BELOW "Contact info", so `parse_profile_topcard`
+    takes its headline and location from the lines above that link and
+    returns before the count is ever a candidate. This test is a real check
+    that the fields are right; it is NOT the check its own name implies, and
+    the one below is.
+    """
+    _, _, topcard = await _profile(which)
+    identity = shape.parse_profile_topcard((topcard or {}).get("lines") or [])
+    assert identity["headline"] == HEADLINE
+    assert identity["location"] == LOCATION
+    assert "connections" not in (identity["headline"] or "")
+    assert "connections" not in (identity["location"] or "")
+
+
+def test_the_count_exclusion_is_load_bearing_without_a_contact_line():
+    """The shape in which dropping `_COUNT_LINE` DOES change the answer.
+
+    ADDED AFTER A RED-PROOF SHOWED THE GUARD ABOVE WAS BLIND. Deleting the
+    `not _COUNT_LINE.match(line)` clause from `parse_profile_topcard` left
+    every fixture test passing, because the fixtures anchor on "Contact info"
+    and the count is drawn below it. A differential run over three shapes
+    found exactly one where the clause is load-bearing: a topcard with NO
+    contact link, where the parser falls back to "second eligible line is the
+    location" and the count is the second eligible line.
+
+    So the exclusion is not dead code -- it is code whose only witness was
+    missing. This is the witness, and it is written as line input rather than
+    as a fixture because the shape is defined by what it LACKS, and a capture
+    cannot be trusted to go on lacking something.
+    """
+    identity = shape.parse_profile_topcard(
+        ["Alex Rivera", "Senior Backend Engineer", "268 connections"]
+    )
+
+    assert identity["headline"] == "Senior Backend Engineer"
+    assert identity["location"] is None, (
+        "with no contact link the count is the second eligible line, so "
+        "dropping the exclusion hands it back as the location -- a number "
+        "printed where a place belongs"
+    )
+    # And it is still KEPT, in the field it belongs in.
+    assert identity["connections"]["count"] == 268
+
+
+async def _skills_reading():
+    async def work(page):
+        return await dom.read_profile_detail_entries(page, section="skills")
+
+    return await _with_page(PROFILE_SKILLS, work)
+
+
+async def test_the_evidence_lines_are_returned_beside_the_names():
+    reading = await _skills_reading()
+
+    assert reading["entries"] == SKILLS
+    evidence = {row["name"]: row["lines"] for row in reading["evidence"]}
+    assert "Node.js" in evidence
+    assert any("experiences at" in line for line in evidence["Node.js"])
+    assert any("Skill Assessment" in line for line in evidence["Node.js"])
+    assert reading["observed"]["cards_with_evidence"] == len(reading["evidence"])
+
+
+async def test_the_evidence_lines_never_rejoin_the_skills_list():
+    """The rule `test_a_skill_keeps_only_its_name_not_its_evidence_lines`
+    protects, restated against the structure that now carries them: surfacing
+    the evidence must not put it back where it was wrong."""
+    reading = await _skills_reading()
+    for row in reading["evidence"]:
+        for line in row["lines"]:
+            assert line not in reading["entries"]
+
+
+async def test_the_endorsement_reading_says_what_it_looked_at():
+    """Census row N 118, answered as a measurement rather than as a parser.
+
+    A refusal that only says "no" cannot be told apart from a page that never
+    loaded, so the denominator ships with the answer.
+    """
+    reading = await _skills_reading()
+    endorsements = reading["endorsements"]
+
+    assert endorsements["drawn"] is False
+    assert endorsements["lines"] == []
+    looked = endorsements["looked_at"]
+    assert looked["cards"] == 6
+    assert looked["card_lines"] > looked["cards"], (
+        "the denominator has to count LINES, not cards -- a card is not what "
+        "was searched"
+    )
+    assert looked["main_chars"] > 0, "a zero over an empty page says nothing"
+    assert looked["main_mentions_endorsement"] is False
+    assert str(looked["cards"]) in endorsements["why"]
+    assert str(looked["main_chars"]) in endorsements["why"]
+
+
+async def test_the_endorsement_reader_can_say_yes():
+    """THE CONTROL, AND THE POINT OF THE WHOLE READING.
+
+    Every other assertion about endorsements in this file is a negative taken
+    on a page that draws none. A reader that returned `drawn: False`
+    unconditionally would satisfy all of them and be worth nothing -- it would
+    go on denying an endorsement count for as long as this server runs,
+    including on the day LinkedIn starts drawing one.
+
+    So the same reader is handed a card that DOES carry the line, keyed on the
+    same href the real page uses, and has to report it.
+    """
+    markup = (
+        "<main><ul>"
+        '<li><a href="https://www.linkedin.com/in/someone/details/skills'
+        '/edit/forms/7/">Node.js</a>'
+        "<p>Node.js</p><p>3 endorsements</p></li>"
+        "</ul></main>"
+    )
+
+    async def work(page):
+        return await dom.read_profile_detail_entries(page, section="skills")
+
+    reading = await _with_html(markup, work)
+    endorsements = reading["endorsements"]
+
+    assert endorsements["drawn"] is True, reading
+    assert any("3 endorsements" in line for line in endorsements["lines"])
+    assert "why" not in endorsements, (
+        "the explanation belongs to the not-drawn case; printing it beside a "
+        "count that WAS drawn would contradict the count"
+    )

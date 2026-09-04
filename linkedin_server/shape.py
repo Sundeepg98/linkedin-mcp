@@ -3114,7 +3114,41 @@ def parse_open_to_work(lines: Iterable[str]) -> dict[str, Any]:
 _PRONOUNS = re.compile(r"^[a-z]{2,6}\s*/\s*[a-z]{2,6}$", re.I)
 
 #: "268 connections", "500+ followers". A relationship count, never a location.
-_COUNT_LINE = re.compile(r"^[\d,]+\+?\s+(connections?|followers?)$", re.I)
+_COUNT_LINE = re.compile(r"^([\d,]+)(\+?)\s+(connections?|followers?)$", re.I)
+
+
+def relationship_count(line: str) -> Optional[dict[str, Any]]:
+    """``"500+ followers"`` -> the kind, the number, and whether it is a floor.
+
+    WHY THE ``+`` GETS ITS OWN FIELD RATHER THAN BEING STRIPPED. LinkedIn stops
+    counting connections out loud at five hundred: an account with 2,000 of
+    them and an account with 501 both draw ``500+ connections``. Returning
+    ``500`` for that is not a rounding error, it is a different claim -- the
+    page said AT LEAST five hundred and the field would say EXACTLY. So
+    ``at_least`` carries the ``+`` and ``as_drawn`` carries the line, and a
+    caller that wants to print something prints what the page printed.
+
+    Returns ``None`` for anything that is not one of these lines, which is
+    most of a topcard.
+    """
+    match = _COUNT_LINE.match(str(line or "").strip())
+    if not match:
+        return None
+    digits, plus, noun = match.groups()
+    try:
+        count = int(digits.replace(",", ""))
+    except ValueError:
+        # UNREACHABLE THROUGH THE PATTERN, KEPT ANYWAY. `[\d,]+` admits
+        # ",,," which `int` refuses, and a topcard reader is not the place to
+        # raise: the caller wants a headline and a location, and a strange
+        # count line is not a reason to fail the whole read.
+        return None
+    return {
+        "kind": noun.lower().rstrip("s") + "s",
+        "count": count,
+        "at_least": bool(plus),
+        "as_drawn": str(line).strip(),
+    }
 
 #: Topcard furniture: buttons and prompts LinkedIn packs in beside the name.
 _TOPCARD_CHROME = frozenset(
@@ -3184,11 +3218,33 @@ def parse_profile_topcard(lines: Iterable[str]) -> dict[str, Any]:
     as the location.
     """
     ordered = [line for line in lines if line]
-    out: dict[str, Any] = {"name": None, "headline": None, "location": None}
+    out: dict[str, Any] = {
+        "name": None,
+        "headline": None,
+        "location": None,
+        # KEPT, HAVING BEEN RECOGNISED ANYWAY. `_COUNT_LINE` has been in this
+        # function since it was written, used ONLY to keep a count line from
+        # being mistaken for the headline -- so the page said how many people
+        # follow him, this parser read the line well enough to rule it out,
+        # and then dropped it on the floor. Census row P L2 records the same
+        # thing from the other end: the number is quoted inside
+        # `writes.publish_post.residue` and returned by no tool.
+        #
+        # BOTH KEYS ARE ALWAYS PRESENT, and `None` means NOT DRAWN rather than
+        # zero. Measured live on 2026-09-04: his topcard holds exactly one
+        # such line and it is CONNECTIONS -- so `followers` is `None` there,
+        # and that is the page's answer, not a parse failure.
+        "connections": None,
+        "followers": None,
+    }
     if not ordered:
         return out
 
     out["name"] = trim(ordered[0], 120)
+    for line in ordered[1:]:
+        counted = relationship_count(line)
+        if counted and out.get(counted["kind"]) is None:
+            out[counted["kind"]] = counted
 
     eligible = [
         index

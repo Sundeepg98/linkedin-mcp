@@ -165,9 +165,15 @@ file:
   reason worth stating: message, profile-edit and Open To Work all have
   REGISTERED tools now, and every one of them refuses -- being named here is
   a claim about what can be PERFORMED, not about what appears on the surface.
-* The package contains exactly ONE mutating call, in ``writes.perform``,
+* The package contains exactly FIVE mutating calls -- four in
+  ``writes.perform`` (a click, a fill, a select_option and, from 2026-09-04, a
+  set_input_files) and the messaging filter's click in ``dom.py`` -- each
   admitted by path and function and kind in ``readonly.SANCTIONED_MUTATIONS``.
-  A second one anywhere fails ``tests/test_readonly.py``.
+  A SIXTH one anywhere fails ``tests/test_readonly.py``. (This said "exactly
+  ONE" from 2026-08-23 until 2026-09-04, through three widenings that each
+  moved the count where it was ASSERTED and left it here where it was only
+  stated -- the same carried-count rot as the two corrections above it, which
+  is why all three now name their own date.)
 * EVERY write tool performs NOTHING without a single-use token from its own
   preview, and nothing at all unless the process was started with writes
   deliberately enabled. (This said "Both write tools" while there were four
@@ -1321,40 +1327,39 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
         return _error(exc)
 
 
-#: WHAT IT WOULD COST TO OPEN THE CONNECTIONS LIST -- and it is ``None``
-#: because nobody has measured it, not because it is free.
+#: WHAT OPENING THE CONNECTIONS LIST HAS BEEN MEASURED TO COST. ``None`` means
+#: no run has yet caught the badge non-zero, which is the only state in which
+#: the question is answerable at all.
 #:
-#: A DECLARED HOLE, so that filling it is a visible edit by somebody who took a
-#: reading. When this stops being ``None`` it should hold the two badge values
-#: and the date, e.g. ``{"before": 3, "after": 3, "measured": "2026-09-04"}``,
-#: and ``linkedin_connections`` starts working without any other change.
+#: IT NO LONGER GATES ANYTHING, as of 2026-09-04, and this is the second time
+#: in two days that what it gates has changed. First it gated an EMPTY branch;
+#: then the reader was built behind it; now the refusal it powered is gone.
 #:
-#: THE READER BEHIND IT IS BUILT AS OF 2026-09-04, which changes what this
-#: constant gates. It used to gate an EMPTY branch, and the comment that sat
-#: here said the reader would be "built when the cost is known, against a real
-#: badge reading, rather than written now and left untested behind a constant
-#: nobody can flip". That was reversed deliberately: a boundary opened with
-#: nothing behind it is a capability that exists on paper, and this address is
-#: the worked example of one in
-#: ``_audit/2026-09-03-linkedin-gap-blockers.md`` A10 and A12 -- "the refusal
-#: is gone and the answer is still unavailable, and nothing in the tool
-#: surface would tell you which of those two states you are in". So the tool
-#: still refuses, for the reason below, and the work is finished behind it.
+#: WHY IT STOPPED GATING. Filling it requires a measurement that requires a
+#: NON-ZERO badge, and nobody can arrange one -- somebody else has to send him
+#: an invitation. A refusal whose only exit is an event nobody controls is not
+#: a gate, it is a wall, and it was standing in front of the capability
+#: ``network.md`` calls "the single most consequential block in the census for
+#: the operator's actual job hunt".
 #:
-#: WHY IT IS NOT MEASURED YET, both halves recorded because the second is the
-#: one that will trip the next person:
+#: THE ARGUMENT THAT TOOK IT DOWN, in full inside ``linkedin_connections``:
+#: the zero that makes the general claim unprovable is the SAME zero that
+#: makes an individual call harmless, because a badge at zero has nothing left
+#: to consume. The old gate refused hardest exactly where the risk was nil.
 #:
-#:   1. The census reads that badge, and on 2026-09-03 the running MCP process
-#:      predated a privacy fix in the census, so calling it would have re-run
-#:      the leaking version;
-#:   2. **the badge read ZERO.** A zero before and a zero after cannot
-#:      distinguish "the page consumed nothing" from "there was nothing to
-#:      consume". Taking the measurement against a zero would produce a number
-#:      that could not fail, which is the defect this package spent the day
-#:      finding elsewhere.
+#: WHAT IT IS NOW: a RECORD, not a permission. The tool takes the before/after
+#: reading on EVERY call, reports whether that run PROVED anything, and still
+#: refuses on a badge that moved or could not be read -- which is a stronger
+#: guarantee than a constant somebody wrote down once, not a weaker one.
 #:
-#: SO THE MEASUREMENT NEEDS A NON-ZERO BADGE, and that is not arrangeable on
-#: demand. It waits.
+#: When a run finally lands against a non-zero badge it should hold the two
+#: values and the date, e.g. ``{"before": 3, "after": 3, "measured": "..."}``.
+#:
+#: HISTORICAL, kept because it is why the wall stood so long: on 2026-09-03 the
+#: badge read zero, and the running MCP process predated a privacy fix in the
+#: census, so the reading could not be taken through that route either. On
+#: 2026-09-04 the badge was measured zero again -- this time by an instrument
+#: proven live, with a non-zero sibling badge on the same nav as its control.
 CONNECTIONS_BADGE_COST: Optional[dict[str, Any]] = None
 
 #: The one address this admits, written once so the tool and the refusal name
@@ -1480,11 +1485,11 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """The people he is connected to, and the identifier a conversation needs.
 
     ================= READ THIS BEFORE REPORTING IT BROKEN =================
-    THIS TOOL REFUSES TODAY, AND THE READER BEHIND THE REFUSAL IS BUILT. Not
-    because it is unfinished -- the read boundary admits the address, the
-    route works and the rows parse -- but because opening the page may spend
-    something nobody has measured, and the operator's standing rule is that a
-    cost is measured before it is paid, never estimated.
+    THIS TOOL MEASURES ITS OWN COST ON EVERY CALL AND REFUSES WHEN IT CANNOT.
+    It reads the pending-invitation badge before the load and again after it,
+    and declines -- loading nothing, or withholding what it read -- if that
+    badge is unreadable at either end or MOVED across the load. What it no
+    longer does is refuse on a constant nobody could fill; see below.
     =======================================================================
 
     WHY THE CAPABILITY EXISTS AT ALL. The operator asked why this server cannot
@@ -1512,9 +1517,9 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     still carry ``recipient_id: null`` where LinkedIn drew no control. This
     surface does not depend on who happened to look.
 
-    WHAT IT IS WAITING FOR, precisely. ``/mynetwork/`` is REFUSED because it
-    consumes the pending-invitation badge. Whether this SUB-PAGE does too is
-    unmeasured -- and the neighbouring refusal is itself an inference, which
+    WHAT IS STILL UNKNOWN. ``/mynetwork/`` is REFUSED because it consumes the
+    pending-invitation badge. Whether this SUB-PAGE does too has never been
+    measured -- and the neighbouring refusal is itself an inference, which
     ``server.py`` admits in its own words: "a third member of a family whose
     other two members both cost a badge does not get admitted on the hope that
     it is the exception." Only notifications and messaging were ever measured.
@@ -1523,59 +1528,75 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     is ruled, not a preference. The before reading is taken off the feed's nav,
     which is where this package already reads the messaging badge; the after
     reading is taken off the connections page's OWN nav, so it costs no third
-    navigation. Only ``after == before`` certifies that the load consumed
-    nothing: a DROP is the harm this gate exists to catch, and a RISE cannot be
-    told apart from a drop masked by an invitation arriving mid-read. Both
-    refuse, and both say what they saw.
+    navigation. Only ``after == before`` lets the rows through: a DROP is the
+    harm this gate exists to catch, and a RISE cannot be told apart from a drop
+    masked by an invitation arriving mid-read. Both refuse, and both say what
+    they saw.
 
-    IT DOES NOT LOAD ANYTHING TO TELL YOU IT IS REFUSING FOR WANT OF THAT
-    MEASUREMENT. A tool that refuses should not spend a browser session doing
-    it, so that refusal is decided from :data:`CONNECTIONS_BADGE_COST` before
-    any page is opened.
+    WHY IT NO LONGER REFUSES FOR WANT OF A RECORDED COST, which is the change
+    of 2026-09-04 and the thing most likely to be queried. The old gate
+    demanded a number in :data:`CONNECTIONS_BADGE_COST`, and that number needs
+    a NON-ZERO badge to mean anything -- which nobody here can arrange, since
+    the invitation has to arrive from somebody else. It had blocked the
+    capability indefinitely. The argument that removed it:
+
+      * a ZERO badge makes the GENERAL question unanswerable -- unchanged is
+        the only outcome available, so the reading cannot fail;
+      * a ZERO badge makes THIS CALL harmless -- the badge counts what he has
+        not yet seen, and at zero there is nothing left to consume.
+
+    They are the same zero. The old gate therefore refused hardest exactly
+    where the risk was nil. What replaced it is stricter where it matters: the
+    reading is taken on EVERY call rather than trusted from a constant, so the
+    tool cannot silently spend a badge even once.
+
+    ``cost.proven`` IN THE RESULT SAYS WHICH CASE YOU GOT. ``true`` means the
+    badge was non-zero, could have fallen, and did not -- a real measurement,
+    and the one this constant was waiting for. ``false`` means it was zero and
+    this run proved nothing about the page, while costing nothing either.
 
     Args:
         limit: maximum rows to return (default 25, max 100).
 
     Returns:
-        Either a refusal, naming what it saw and what would lift it, or --
-        once the cost is recorded -- the connection rows.
+        The connection rows with both badge readings and ``cost``, or a
+        refusal naming what it saw.
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
-    if CONNECTIONS_BADGE_COST is None:
-        return _connections_refusal(
-            "the side-effect cost of this page is UNMEASURED",
-            (
-                "/mynetwork/ is refused because it consumes the pending-"
-                "invitation badge. Whether this sub-page does is not known, "
-                "and the neighbouring refusal is itself an inference rather "
-                "than a measurement. Opening this page could mark a real "
-                "person's invitation seen -- a durable record spent by "
-                "somebody who is not him."
-            ),
-            what_would_lift_it=(
-                "read the invitation badge through the feed or profile census "
-                "BEFORE and AFTER one load of this address, exactly as "
-                "CENSUS_SURFACE_COST prescribes for messaging, then record "
-                "both values in server.CONNECTIONS_BADGE_COST. This tool then "
-                "works with no other change."
-            ),
-            and_the_measurement_needs_a_non_zero_badge=(
-                "a zero before and a zero after cannot distinguish 'consumed "
-                "nothing' from 'there was nothing to consume'. On 2026-09-03 "
-                "the badge read zero, so the reading could not be taken."
-            ),
-            the_reader_behind_this_refusal_is_built=(
-                "server._read_connection_rows harvests the rows and joins the "
-                "member id off each Message button BY SLUG. Recording the cost "
-                "above is the only thing between this refusal and a result -- "
-                "there is no second change to make."
-            ),
-            pages_loaded=0,
-            verified=(
-                "NOTHING WAS LOADED. This refusal is decided from a declared "
-                "constant, so it costs no page and no browser session."
-            ),
-        )
+    # THERE IS NO PRE-FLIGHT REFUSAL FROM :data:`CONNECTIONS_BADGE_COST` ANY
+    # MORE, and the argument for removing it is the whole of what follows.
+    #
+    # The gate here read "if the constant is None, refuse", and the constant
+    # could only be filled by a measurement needing a NON-ZERO badge -- which
+    # nobody can arrange, because somebody else has to send him an invitation.
+    # A refusal whose only exit is an event nobody controls is a wall.
+    #
+    # WHAT IT CONFLATED, and separating the two dissolves it:
+    #
+    #   THE SCIENCE -- "does opening this address consume a badge, in
+    #   general?" A zero before cannot answer that: unchanged is the only
+    #   outcome available, so the reading could not fail and certifies
+    #   nothing. That is the uninterpretable zero, and it is real.
+    #
+    #   THE CALL -- "will THIS call consume one of HIS invitations?" A zero
+    #   before answers that completely, and answers it SAFE. The badge counts
+    #   what he has not yet seen; at zero nothing is unseen, and no load can
+    #   spend what does not exist.
+    #
+    # So the exact condition that makes the general claim unprovable is the
+    # condition that makes the individual call harmless. The old gate refused
+    # hardest precisely where the risk was nil, and let the risk in only in
+    # the one case it never reached.
+    #
+    # WHAT STILL REFUSES, unchanged and ruled: an UNREADABLE badge BEFORE
+    # (nothing is loaded at all), an UNREADABLE badge AFTER, and a badge that
+    # MOVED. The before/after runs on EVERY call, so this tool measures its
+    # own cost every time rather than trusting a number somebody wrote down
+    # once -- a stronger guarantee than the one removed, not a weaker one.
+    #
+    # AND THE SCIENCE STILL GETS DONE, as a side effect of ordinary use: the
+    # first call that happens to land while the badge is non-zero produces the
+    # measurement, and the result says so and asks for it to be recorded.
     try:
         async with BROWSER.session() as page:
             # 1. BEFORE, off the feed's nav. /feed/ is on the read allowlist,
@@ -1671,6 +1692,49 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                         "before trusting that constant again."
                     ),
                 )
+            # THE BADGE HELD -- and what that PROVES depends entirely on
+            # whether it COULD have fallen. Saying which is the difference
+            # between a measurement and a number that merely agreed with a
+            # plausible story.
+            if before["pending"] > 0:
+                cost: dict[str, Any] = {
+                    "proven": True,
+                    "what_this_run_showed": (
+                        "the pending-invitation badge stood at %d before this "
+                        "load and %d after it. It COULD have fallen and did "
+                        "not, so opening this address consumed nothing."
+                        % (before["pending"], after["pending"])
+                    ),
+                    "record_it": (
+                        "this is the measurement CONNECTIONS_BADGE_COST has "
+                        "been waiting for; record before=%d after=%d with "
+                        "today's date." % (before["pending"], after["pending"])
+                    ),
+                }
+            else:
+                cost = {
+                    "proven": False,
+                    "what_this_run_showed": (
+                        "the badge read ZERO before and after. That is NOT a "
+                        "measurement of what this page costs: a zero cannot "
+                        "fall, so unchanged was the only outcome available "
+                        "and the reading could not have failed."
+                    ),
+                    "why_the_call_was_safe_anyway": (
+                        "the badge counts what he has NOT YET SEEN. At zero "
+                        "there was nothing to consume, so this load cannot "
+                        "have spent an invitation whatever the page does in "
+                        "general. The unprovable case and the harmless case "
+                        "are the same case."
+                    ),
+                    "what_would_prove_it": (
+                        "one call made while the badge is non-zero. It needs "
+                        "no code change -- the reading is taken on every call "
+                        "and this field reports proven when it can."
+                    ),
+                }
+            if CONNECTIONS_BADGE_COST is not None:
+                cost["previously_recorded"] = CONNECTIONS_BADGE_COST
             return shape.envelope(
                 rows,
                 limit=limit,
@@ -1680,6 +1744,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 extra={
                     "badge_before": before,
                     "badge_after": after,
+                    "cost": cost,
                     "census": census,
                 },
             )
@@ -1876,10 +1941,14 @@ async def linkedin_open_messaging(
     THAT CLICK IS SANCTIONED AND NARROW. Only seven named pills can be
     activated -- focused, other, unread, jobs, connections, inmail, starred --
     checked against a fixed list before any selector is built, so an arbitrary
-    string can never become a click target. It is the second and only other
-    entry in ``readonly.SANCTIONED_MUTATIONS``. A filter sends nothing and
-    changes nothing on LinkedIn's servers; counted by effect it is a read, and
-    it is strictly less invasive than the conversation this tool opens anyway.
+    string can never become a click target. It is the SECOND entry in
+    ``readonly.SANCTIONED_MUTATIONS`` and the ONLY ONE OUTSIDE
+    ``writes.perform`` -- which is the property worth stating, and is what
+    "the only other entry" meant when there were two of them and four
+    widenings ago. Every other entry sits behind the two-call token gate and
+    none is reachable from this tool. A filter sends nothing and changes
+    nothing on LinkedIn's servers; counted by effect it is a read, and it is
+    strictly less invasive than the conversation this tool opens anyway.
 
     ``active_filter`` comes back in the result so a filtered page can never be
     mistaken for the whole list, and the send-surface counts are taken AFTER
@@ -2719,6 +2788,21 @@ async def linkedin_my_profile(
                 "name": identity["name"],
                 "headline": identity["headline"],
                 "location": identity["location"],
+                # THE COUNT THE TOPCARD DRAWS, WHICH WAS READ AND DISCARDED.
+                #
+                # `shape.parse_profile_topcard` has always recognised these
+                # lines -- it had to, to stop "268 connections" being taken
+                # for his headline -- and then dropped them. Census row P L2
+                # records the other half: the number is quoted inside
+                # `writes.publish_post.residue` and returned by no tool.
+                #
+                # NULL MEANS THE PAGE DID NOT DRAW IT, NOT ZERO. Measured live
+                # 2026-09-04: his topcard holds exactly ONE such line and it is
+                # connections, so `followers` is null here and that is the
+                # page's answer. Whatever else knows his follower count, this
+                # page is not where it lives.
+                "connections": identity.get("connections"),
+                "followers": identity.get("followers"),
                 "public_identifier": slug,
                 "profile_url": final_url.split("?", 1)[0],
                 "about": about,
@@ -2852,6 +2936,22 @@ async def linkedin_my_profile(
                     if entries:
                         out[section] = entries
                         out["%s_count" % section] = len(entries)
+                    # THE REST OF EACH CARD, WHICH THIS TOOL USED TO DROP.
+                    # A skill card can carry where the skill was used and in
+                    # how many places; the harvest already returned those
+                    # lines and this tool kept only the name. Reported BESIDE
+                    # the names and never merged into them -- see
+                    # dom.read_profile_detail_entries for why that separation
+                    # is a rule here rather than a preference.
+                    if reading.get("evidence"):
+                        out["%s_evidence" % section] = reading["evidence"]
+                    if reading.get("endorsements") is not None:
+                        # CENSUS ROW N 118. Not a parser this tool is missing
+                        # -- a line LinkedIn does not draw. The reading is
+                        # taken live on every call and carries what it looked
+                        # at, so the day a count appears this reports it
+                        # rather than going on denying it.
+                        out["endorsements"] = reading["endorsements"]
                     if count:
                         out["completeness"][PROFILE_DETAIL_FIELD[section]] = count
                         # Say where the number came from. All three of these
