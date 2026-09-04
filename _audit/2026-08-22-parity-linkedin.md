@@ -16,6 +16,7 @@
 **Unbuilt reads worth having, ranked, each 1 page load unless noted:**
 1. **Search appearances** (`/analytics/search-appearances/`) -- is his profile being *found*, and for what. Direct analog of `naukri_search_impressions`. ~1 wave: new surface, new parser, live capture at both hydration states.
 2. **Skill endorsement counts** -- the `/details/skills/` page is *already loaded* by `linkedin_my_profile(include_skills=True)`; counts are dropped today. **0 extra page loads.** Smallest real win left.
+   **CORRECTED BY:** `_audit/2026-08-23-build-linkedin.md` -- measured the next day: the committed skills capture carries zero endorsement counts, so this is not 0 extra page loads.
 3. **Job recommendations** (`/jobs/collections/recommended/`) -- overlaps the `linkedin-jobs` Gmail skill, which already reads the recommendation digests for free. Only worth it if the on-site set proves richer than the email.
 4. Post/follower analytics -- he is not posting; no job-hunt value today. Not recommended.
 

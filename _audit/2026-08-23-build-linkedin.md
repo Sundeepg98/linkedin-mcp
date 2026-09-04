@@ -232,6 +232,8 @@ carries **zero** endorsement counts -- no `N endorsements` text anywhere in the 
 "already loaded" half is right; the *capture* does not exist, so the build needs a fresh live
 page load and a re-freeze, not zero.
 
+**CORRECTS:** `_audit/2026-08-22-parity-linkedin.md` -- its line 18 ranked skill endorsement counts at 0 extra page loads; the capture carries zero counts, so the real cost is a fresh live load and a re-freeze.
+
 What the frozen fixture DOES carry and no tool reports: per-skill corroboration lines
 (`"2 experiences at Northwind and 1 other company"`, `"Passed LinkedIn Skill Assessment"`).
 
