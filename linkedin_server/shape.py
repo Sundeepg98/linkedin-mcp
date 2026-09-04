@@ -3784,6 +3784,31 @@ _CENSUS_IN_PATH = re.compile(r"/in/[A-Za-z0-9\-_%.]+/?")
 #: A company path segment.
 _CENSUS_COMPANY_PATH = re.compile(r"/company/[A-Za-z0-9\-_%.]+/?")
 
+#: A NEWSLETTER PATH SEGMENT, AND IT IS THE ONE THAT MATTERS MOST HERE.
+#:
+#: A newsletter is authored BY A PERSON, and LinkedIn builds its slug out of
+#: the title, which routinely carries that author's name. MEASURED 2026-09-04
+#: by `scripts/_probe_interests_entity_shaping.py`: with no rule here,
+#: `census_shape` published the slug VERBATIM in the `href_shape` field of
+#: every record -- at ANY count, on every surface the census already reads,
+#: with no count coincidence needed. That is a leak the aggregate count rule
+#: in `census_redact_rare` cannot see, because that rule returns the shape
+#: unchanged for `count != 1`.
+_CENSUS_NEWSLETTER_PATH = re.compile(r"/newsletters/[A-Za-z0-9\-_%.]+/?")
+
+#: A school path segment. An institution rather than a person, and it is here
+#: for the same reason `/company/` is: the accessible name of a control that
+#: POINTS AT a named entity is that entity's name, whatever the string looks
+#: like, and this module's job is shapes.
+_CENSUS_SCHOOL_PATH = re.compile(r"/school/[A-Za-z0-9\-_%.]+/?")
+
+#: A group path segment. `_CENSUS_LONG_DIGITS` below already reduced a numeric
+#: group id to `<id>`, so this adds little to the HREF -- but it gives the
+#: family a PLACEHOLDER, and a placeholder is what `_CENSUS_ENTITY_HREFS`
+#: matches on, which is what redacts the NAME beside it. The group id was
+#: never the disclosure; the group's name was.
+_CENSUS_GROUP_PATH = re.compile(r"/groups/[A-Za-z0-9\-_%.]+/?")
+
 #: Six or more consecutive digits: a job id, an activity id, a member id.
 #: Six rather than four so that a year, a count, or "500+" survives -- those
 #: identify nobody and are worth keeping in a shape.
@@ -3923,7 +3948,19 @@ _NAME_SHAPE_RUN = re.compile(
 
 #: The placeholders this module writes. Removed before the character gate
 #: runs, because they are the one source of ``<`` and ``>`` that is allowed.
-_CENSUS_PLACEHOLDER = re.compile(r"<(?:member|company|id|urn|redacted|opaque)>")
+#: THE PLACEHOLDERS A SHAPE MAY CONTAIN AND STILL PASS THE CHARACTER GATE.
+#: THREE ADDED 2026-09-04 WITH THE PATHS THAT PRODUCE THEM, and the pairing
+#: is not optional: `_CENSUS_SAFE_CHARS` admits no angle brackets, so a
+#: placeholder missing from this pattern survives the strip, fails the gate
+#: and turns the whole shape into `<opaque>`. That was measured on the first
+#: attempt at this fix -- `/newsletters/<newsletter>/` came back `<opaque>`,
+#: which LOOKS safe and is worse than the leak it replaced: `<opaque>`
+#: carries no marker, so `census_href_identifies_entity` returns False and
+#: the NAME beside it ships. A half-applied redaction that silently reopens
+#: the hole it closed is exactly what a RED-then-GREEN pair exists to catch.
+_CENSUS_PLACEHOLDER = re.compile(
+    r"<(?:member|company|newsletter|school|group|id|urn|redacted|opaque)>"
+)
 
 #: The ONLY characters a name may contain and still be emitted verbatim.
 #: Deliberately narrow: no letters outside ASCII, so a name in any other
@@ -4018,6 +4055,9 @@ def census_substitute(text: Optional[str]) -> str:
     shaped = _CENSUS_URN.sub("<urn>", shaped)
     shaped = _CENSUS_IN_PATH.sub("/in/<member>/", shaped)
     shaped = _CENSUS_COMPANY_PATH.sub("/company/<company>/", shaped)
+    shaped = _CENSUS_NEWSLETTER_PATH.sub("/newsletters/<newsletter>/", shaped)
+    shaped = _CENSUS_SCHOOL_PATH.sub("/school/<school>/", shaped)
+    shaped = _CENSUS_GROUP_PATH.sub("/groups/<group>/", shaped)
     shaped = _CENSUS_POSSESSIVE.sub(lambda m: "<member>" + m.group(1), shaped)
     shaped = _CENSUS_POSSESSIVE_LOWER.sub(
         lambda m: "<member>" + m.group(1), shaped
@@ -4239,7 +4279,27 @@ def census_redact_rare(shape: str, count: int) -> str:
 #: Href shapes that IDENTIFY AN ENTITY by construction. A control pointing at
 #: one of these is a link to a person or a company, so its accessible name IS
 #: that person's or company's name -- whatever the string happens to look like.
-_CENSUS_ENTITY_HREFS = ("/in/<member>", "/company/<company>")
+_CENSUS_ENTITY_HREFS = (
+    "/in/<member>",
+    "/company/<company>",
+    # THREE ADDED 2026-09-04, EACH FROM A MEASURED LEAK RATHER THAN A GUESS.
+    # The two above were written for the feed, where a member and a company
+    # are what a control points at. The profile Interests tab enumerates FIVE
+    # kinds of entity, and `scripts/_probe_interests_entity_shaping.py` put a
+    # name behind each of them and ran both guards over it. A group, a
+    # newsletter and a school all shipped their name VERBATIM at `count == 2`
+    # -- which is not an exotic input: it is the exact escape this predicate
+    # was added to close, and the escape its own docstring above names as the
+    # commonest control on a feed.
+    #
+    # THE PROBE RAN TWO CONTROLS AND BOTH BEHAVED, which is what makes the
+    # three rows readable: a person behind `/in/` was redacted (the guard can
+    # fire) and the furniture label `Show more` survived (the guard is not
+    # blanking the instrument's own vocabulary).
+    "/newsletters/<newsletter>",
+    "/school/<school>",
+    "/groups/<group>",
+)
 
 
 def census_href_identifies_entity(href_shape: Optional[str]) -> bool:
