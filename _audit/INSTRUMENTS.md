@@ -338,3 +338,91 @@ function name `linkedin_compose_fields` was correct at every reading.
 **CITE BY ANCHOR: the enclosing function name plus the quoted source line.** In
 a tree with concurrent writers a line number is a reading carrying a timestamp
 its reader cannot see, and it is the one part of a citation guaranteed to rot.
+
+### 2.5 `A-REDACTION-THAT-ERASES-ITS-OWN-MARKER`
+
+**A redaction that erases its own marker is more dangerous than no redaction,
+because it buys the reader's trust.**
+
+`shape._CENSUS_ENTITY_HREFS` had TWO members -- `/in/<member>` and
+`/company/<company>` -- while the profile Interests tab enumerates FIVE entity
+kinds. Groups, newsletters and schools shipped their names VERBATIM at
+`count == 2`, and a newsletter shipped its slug -- routinely its author's name
+-- in the `href_shape` field of every record at ANY count. On surfaces the
+census ALREADY reads. `census_redact_rare` could not see it: it returns the
+shape unchanged for `count != 1`, in its first line, deliberately.
+
+**THE NEAR-MISS IS THE ENTRY, NOT THE LEAK.** The first fix added the path
+substitutions and the markers and NOT the placeholders. `_CENSUS_SAFE_CHARS`
+admits no angle brackets, so every new shape failed the gate and became
+`<opaque>`. That reads as a redaction and is strictly worse than the leak it
+replaced: `<opaque>` carries no marker, so `census_href_identifies_entity`
+returns False and the NAME BESIDE IT SHIPS. Nothing raises, no count moves, and
+the output looks more careful than before.
+
+    THE INSTRUMENT  scripts/_probe_interests_entity_shaping.py -- one
+                    adversarial table, five entity kinds, run at count 1 AND
+                    count 2, over BOTH leak paths (`shape` and `href_shape`)
+    THE RED         run against the PRE-FIX shaper: 3 name leaks, 1 href leak
+    THE GREEN       run against the repository's own shaper: 0 and 0
+    THE CONTROLS    both must behave in BOTH runs --
+                      MUST-REDACT   a person behind /in/<slug>. If this
+                                    survives the guard is broken and every
+                                    other row is uninterpretable.
+                      MUST-SURVIVE  the furniture label `Show more`, with no
+                                    href. If this is redacted the shaper is
+                                    blanking its own vocabulary, and a table
+                                    of redactions proves nothing.
+    HOW IT RUNS     it takes a CANDIDATE PACKAGE ROOT as argv[1], so the pair
+                    is taken against the same table with only the shaper
+                    differing, without editing a file another wave holds. It
+                    REFUSES a root with no `linkedin_server/shape.py` rather
+                    than falling back to the repository's own and reporting a
+                    pass for a file it never loaded -- caught when a typo'd
+                    path produced a confident GREEN.
+
+**THE STANDING RULE: a GREEN alone would have passed the broken fix.** Every
+needle was gone from the field being checked. Only running the same table
+against the pre-fix code, and requiring the leak count to MOVE with both
+controls behaving in both runs, distinguishes "the hole is closed" from "the
+hole moved to the field I stopped looking at".
+
+### 2.6 `BOTH-BRANCHES-OF-A-TWO-BRANCH-MESSAGE`
+
+**A message that can only ever say one of two things is printing a constant,
+not reporting a fact.**
+
+`readonly.assert_read_url` checks forbidden substrings BEFORE the allowlist and
+raises on the first hit, so its refusal named a substring and stopped. Readers
+took the substring for the wall. It is usually not the wall -- the allowlist is
+closed by default, and every address measured on 2026-09-04 that tripped a
+forbidden substring ALSO had no pattern admitting it.
+
+**IT MISLED THREE READERS**, which is what promoted it from a wording nit to a
+defect: the blockers ledger's section 2 filed `/invite` and `/follow` as the
+blocker for rows they do not gate; a measurement wave reported the same two the
+next morning as "the defect"; and the team lead relayed that upward as an
+instruction to narrow the guards. All three read a refusal telling them half of
+what it knew.
+
+    THE FIX        the refusal now also says whether any allowlist pattern
+                   would have matched. No refusal is removed; the raise is
+                   unconditional either way and only the sentence differs.
+    THE INSTRUMENT tests/test_refusal_names_both_gates.py
+    THE CONTROL    BOTH branches are exercised. The second needs an address a
+                   pattern ADMITS and a substring still REFUSES -- which the
+                   shipped boundary deliberately has none of, since the
+                   exemption tables exist to remove them -- so it is
+                   CONSTRUCTED by emptying those tables for one test, the
+                   technique tests/test_readonly.py already uses to reach its
+                   own hard branch.
+    AND THE FACT   each branch asserts its claim INDEPENDENTLY against
+                   `_ALLOWED_URL_PATTERNS`, so the test pins a measurement
+                   rather than a string.
+
+**A WORDING CONSTRAINT PINNED BESIDE THE CODE THAT COULD BREAK IT.** Two tests
+in `tests/test_readonly.py` tell the two gates apart BY THE MESSAGE -- the
+forbidden sentence must contain "not a read surface" and must NOT contain the
+allowlist's own sentence. A later edit phrasing the new clause with the
+allowlist's words would pass its own test and silently break theirs from
+another file, so the prohibition is asserted in the new file too.

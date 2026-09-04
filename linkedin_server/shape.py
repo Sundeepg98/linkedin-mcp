@@ -3956,8 +3956,25 @@ _NAME_SHAPE_RUN = re.compile(
 #: attempt at this fix -- `/newsletters/<newsletter>/` came back `<opaque>`,
 #: which LOOKS safe and is worse than the leak it replaced: `<opaque>`
 #: carries no marker, so `census_href_identifies_entity` returns False and
-#: the NAME beside it ships. A half-applied redaction that silently reopens
-#: the hole it closed is exactly what a RED-then-GREEN pair exists to catch.
+#: the NAME beside it ships.
+#:
+#: THE LAW, STATED GENERALLY BECAUSE IT IS NOT ABOUT NEWSLETTERS:
+#: **A REDACTION THAT ERASES ITS OWN MARKER IS MORE DANGEROUS THAN NO
+#: REDACTION, BECAUSE IT BUYS THE READER'S TRUST.** An unredacted field is
+#: read as raw and treated with suspicion. A field reading `<opaque>` is read
+#: as handled -- so the reader stops looking, while the identity travels in
+#: the neighbouring field that no longer has a marker to trigger on. The
+#: failure is silent in both directions: nothing raises, no count changes, and
+#: the output looks MORE careful than before.
+#:
+#: WHAT CATCHES IT IS THE PAIR, NOT THE FIX. A GREEN run alone would have
+#: passed this: every needle was gone from the `shape` field. It was caught by
+#: running the SAME adversarial table against the pre-fix shaper and the
+#: post-fix one and requiring the leak to move from 3 to 0 with BOTH controls
+#: behaving in BOTH runs -- a person still redacted, and the furniture label
+#: `Show more` still surviving, since a redactor that redacts everything
+#: certifies nothing. `scripts/_probe_interests_entity_shaping.py`; registered
+#: in `_audit/INSTRUMENTS.md` section 2.5.
 _CENSUS_PLACEHOLDER = re.compile(
     r"<(?:member|company|newsletter|school|group|id|urn|redacted|opaque)>"
 )
