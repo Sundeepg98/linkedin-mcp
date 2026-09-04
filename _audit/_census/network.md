@@ -18,6 +18,21 @@ committed and no tracked file was edited.
       EXCLUDED-RULED                                 78
       GAP                                           107
 
+**DELTA SINCE THE FREEZE, 2026-09-04. The block above is UNCHANGED**, so every
+document citing those numbers still resolves against them. What moved:
+
+    CAPABILITIES ENUMERATED      194  ->  194   no row added or removed
+      MEASURED-ABSENT              0  ->    1   N 118, endorsement counts
+      GAP                        107  ->  106   N 118 left it
+
+`MEASURED-ABSENT` is defined in section 2, added the same day: no tool, and a
+LIVE READING of the surface says LinkedIn does not draw the thing. Filing N 118
+as GAP would say "no tool and no reason", which INVERTS A MEASUREMENT -- the
+reason exists, and it is stronger than a ruling, because nobody decided against
+the capability. **The row is retired, not deleted**, and its reading is quoted
+inside it: a deleted row is indistinguishable from a row nobody thought of, and
+this census has already sent a wave to build something that is not there.
+
 Counted separately so neither inflates the member denominator:
 
     ADMIN-ONLY capabilities (Page admin, group owner/manager,

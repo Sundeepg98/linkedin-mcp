@@ -23,6 +23,29 @@ no tracked file was edited.
       EXCLUDED-RULED                                150
       GAP                                            79
 
+**DELTA SINCE THE FREEZE, 2026-09-04. The block above is UNCHANGED and still
+reads as it did when this census was written**, so every document citing those
+numbers still resolves against them. What moved is recorded here instead,
+because a count that silently rewrites itself cannot be cited:
+
+    CAPABILITIES ENUMERATED      260  ->  261   L2 SPLIT into L2 and L2b
+      MEASURED-ABSENT              0  ->    1   L2, the follower COUNT
+      GAP                         79  ->   79   L2 left it, L2b entered it
+
+**Why the split, since a split is the unusual move.** `L2` read "Own follower
+count and follower list" -- two capabilities on one row. A live reading on
+2026-09-04 retired one half and never touched the other, and no single state is
+honest about both: MEASURED-ABSENT claims evidence the LIST does not have, GAP
+throws away evidence the COUNT does have. Merging them deletes the vocabulary
+needed to describe what is actually known, which is how a row comes to be more
+confident than its evidence -- and section L is where this census already
+carries one such row's consequences.
+
+**`MEASURED-ABSENT` is defined in section 2**, added the same day: no tool, and
+a LIVE READING of the surface says LinkedIn does not draw the thing. It is not
+a weaker GAP; it is a stronger reason than most EXCLUDED-RULED rows carry,
+because nobody decided against the capability -- the page does not have it.
+
 Set aside BEFORE mapping, and counted so none of them reads as a zero:
 
     Help Center rows that DOCUMENT behaviour rather than name a
@@ -377,7 +400,7 @@ the denylist does not.
 | K9 | Show / hide the Top Voice badge | W | GAP | `a1577365`; no tool, no reason |
 | K10 | Verification badge as it appears on job posts | R | GAP | no tool, no reason |
 
-### L. Creator tools, followers and analytics (8)
+### L. Creator tools, followers and analytics (9)
 
 Creator mode itself is RETIRED (section 8); these survived it, and LinkedIn's
 Help Center now states all members have access.
@@ -385,7 +408,8 @@ Help Center now states all members have access.
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
 | L1 | Creator analytics / audience analytics | R | GAP | no tool, no reason |
-| L2 | Own follower count and follower list | R | MEASURED-ABSENT | **THE COUNT IS NOT ON THE TOPCARD. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/` drew exactly ONE `shape._COUNT_LINE` match and it reads CONNECTIONS -- zero followers lines. So the *"275 followers"* quoted inside `publish_post.residue`, which is this row's own evidence, did NOT come from this page, and where it did come from is unestablished. **READ THE SCOPE BEFORE REUSING THIS STATE, because this row is COMPOUND and only half of it was measured:** the COUNT is measured absent from the topcard and nowhere else was searched; the follower LIST was never looked for at all and remains a plain GAP inside this row. What the same reading DID recover is the CONNECTIONS count, which `shape.parse_profile_topcard` had recognised since it was written -- only ever to rule it out of the headline -- and thrown away; `linkedin_my_profile` now returns it, with `at_least` carrying the `+` because LinkedIn stops counting out loud at 500 |
+| L2 | Own follower COUNT | R | MEASURED-ABSENT | **NOT ON THE TOPCARD. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/` drew exactly ONE `shape._COUNT_LINE` match and it reads CONNECTIONS -- zero followers lines. So the *"275 followers"* quoted inside `publish_post.residue`, which was this row's own evidence, did NOT come from that page. **SCOPE, and the state claims nothing wider: measured absent FROM THE TOPCARD, and no other surface was searched.** A measurement retires the surface it covered, never the capability's whole name. What the same reading DID recover is the CONNECTIONS count, which `shape.parse_profile_topcard` had recognised since it was written -- only ever to rule it out of the headline -- and thrown away; `linkedin_my_profile` now returns it, with `at_least` carrying the `+` because LinkedIn stops counting out loud at 500 |
+| L2b | Own follower LIST | R | GAP | **NOBODY HAS LOOKED.** Split from L2 on 2026-09-04 by team-lead ruling. L2 was compound -- count AND list -- and one half is measured absent while the other was never searched for. Neither state is honest about both: MEASURED-ABSENT would claim evidence this half does not have, and GAP would throw away evidence the COUNT half does have. **Merging the two deletes the vocabulary needed to say what is actually known**, which is how a row comes to be more confident than its evidence -- and this census has already dispatched a wave on one that was. No tool, no reason, and no reading |
 | L3 | Create / edit / delete a newsletter | W | GAP | no tool, no reason |
 | L4 | Newsletter analytics | R | GAP | no tool, no reason |
 | L5 | Host a LinkedIn Live | W | GAP | he clears the >150-follower gate at 275; no tool, no reason |

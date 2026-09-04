@@ -104,10 +104,24 @@ AUDIT = ROOT / "_audit"
 #: documents in THIS corpus, and a dangling citation is a different defect.
 CITATION = re.compile(r"`([^`\n]*?\.md)(?::\d+(?:-\d+)?)?`")
 
-#: The declaration channel. Matched on the uppercase keyword plus its colon, so
-#: markdown emphasis around it does not matter -- ``**CORRECTS:**`` and a bare
-#: ``CORRECTS:`` both count.
-MARKER = re.compile(r"(?:^|[^A-Za-z])(CORRECTS|CORRECTED BY):")
+#: The declaration channel. The keyword plus its colon must OPEN the line --
+#: leading whitespace and markdown emphasis are allowed, so ``**CORRECTS:**``,
+#: an indented ``   **CORRECTED BY:**`` and a bare ``CORRECTS:`` all count.
+#:
+#: **IT USED TO MATCH THE KEYWORD ANYWHERE IN A LINE, AND THAT WAS WRONG IN A
+#: WAY ONLY THIS FILE'S OWN SUBJECT MATTER EXPOSES.** A sentence DESCRIBING the
+#: mechanism -- "a corrector writes a ``CORRECTS:`` marker; the named target
+#: must carry ``CORRECTED BY:``" -- was read AS a marker, and reported as one
+#: naming zero documents. It was found the hour the register entry describing
+#: this check was written, which is exactly when it would be found: **prose
+#: about a mechanism is indistinguishable from the mechanism to a pattern that
+#: does not care where on the line it sits.** That is this repository's own
+#: recurring defect, committed by the check written to catch a cousin of it.
+#:
+#: Anchoring at line-start is the fix rather than a workaround, because a
+#: DECLARATION is a line, not a phrase: every real marker in this corpus opens
+#: its line, and nothing that merely mentions one does.
+MARKER = re.compile(r"^\s*(?:\*\*)?(CORRECTS|CORRECTED BY):")
 
 #: How many lines from a citation the vocabulary may sit. THE REAL INSTANCE
 #: NEEDS AT LEAST 1: the citation is at ``build-linkedin.md:229`` and the words
@@ -157,6 +171,15 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("INSTRUMENTS.md", "2026-08-22-parity-linkedin.md"): (
+        "the register DESCRIBES this check and quotes the instance it was "
+        "built for, so it cites the corrected document while explaining that "
+        "its line 18 was deliberately left byte-identical. It corrects "
+        "nothing; the corrector is 2026-08-23-build-linkedin.md and the "
+        "parity audit already carries its CORRECTED BY: pointer to that file. "
+        "A back-pointer aimed here would name the documentation of a "
+        "correction as its author"
+    ),
     # THESE TWO WERE ADDED BY THIS FILE GOING RED ON ITS AUTHOR, an hour after
     # it was written, when census row N 118 was retired to MEASURED-ABSENT and
     # the retirement quoted both documents in the chain. That is the check
@@ -634,6 +657,12 @@ def test_a_marker_line_does_not_feed_the_prose_scan():
     assert _is_marker("CORRECTS: `x.md` -- unbolded still counts") == "CORRECTS"
     assert _is_marker("this paragraph corrects `x.md`, in prose") is None
     assert _is_marker("| a table row | that is WRONG |") is None
+    # PROSE ABOUT THE MECHANISM IS NOT THE MECHANISM. These two shapes were
+    # both read as real markers until 2026-09-04, when writing the register
+    # entry that DESCRIBES this check turned the check red on its own author.
+    # A marker is a line; a mention is a phrase.
+    assert _is_marker("a corrector writes a `CORRECTS:` marker; see below") is None
+    assert _is_marker("the target must carry `CORRECTED BY:`. Zero false") is None
 
     text = "**CORRECTED BY:** `_audit/2026-08-23-build-linkedin.md` -- measured"
     assert _citations(text, _resolver()), "the citation itself must still parse"
