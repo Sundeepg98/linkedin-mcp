@@ -219,8 +219,56 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # Own profile. /in/me/ redirects to whoever is signed in.
     re.compile(r"^https://www\.linkedin\.com/in/me/?$"),
     re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/?$"),
+    # THE `/in/me/` FORM ONLY, NARROWED 2026-09-04 ON THE OPERATOR'S RULING.
+    #
+    # THIS ENTRY USED TO TAKE `[A-Za-z0-9\-_%]+` FOR THE MEMBER SEGMENT, so it
+    # admitted ANY member's detail pages -- their experience, their education,
+    # their skills. That was never ruled. It contradicted two things this same
+    # file says about itself: `known_side_effects` states that no tool here
+    # loads a third party's profile, and the intro editor below is confined to
+    # `/in/me/` on the MEASURED ground that loading a third party's profile
+    # leaves them a durable record in their own viewer list.
+    #
+    # IT WAS NEARLY INHERITED. The Interests page was first admitted by adding
+    # a fourth word to this alternation, which for one commit ALLOWED
+    # `/in/<a-third-party>/details/interests/` -- a stranger's follow graph,
+    # read while announcing to that stranger that he had looked. Caught in
+    # review. The RED is recorded here rather than fixed quietly, because a
+    # boundary defect nobody can see afterwards teaches nobody.
+    #
+    # NARROWED ONLY AFTER MEASURING WHAT IT WOULD COST, never on the argument
+    # alone -- changing a shipped read on a guess is how a working capability
+    # breaks quietly, which is the lesson the navigation site below already
+    # carries. `scripts/_probe_details_url_breadth.py` PARSED every module
+    # (grep is defeated by this very entry: it is a two-line implicit
+    # concatenation, and a partial read of it misled a reviewer the same day):
+    #
+    #     55 files, 10854 string literals, 122 mentioning `/in/`, 42
+    #     mentioning `/details/`, 12 f-strings, 0 `.format()` calls
+    #     -> 21 literal-me, 10 f-string literal-me, 4 compiled patterns,
+    #        8 with no member segment, and TWO interpolated sites
+    #
+    # BOTH interpolated sites were traced by hand and NEITHER is a third
+    # party: `server.py` builds `details_urls` from
+    # `shape.profile_slug_from(final_url)` -- HIS OWN slug, off the landing of
+    # `/in/me/` -- and `scripts/_probe_interests.py` interpolates the constant
+    # `ME = "me"`. So the breadth was reach NOBODY USED.
+    #
+    # AND THE NAVIGATION SITE WAS CHECKED SEPARATELY, because a literal census
+    # answers what BUILDS a url and not what OPENS one. `linkedin_my_profile`
+    # picks its second load from `PROFILE_DETAIL_URLS`, a table of `/in/me/`
+    # literals; the slug-built form was removed from that path earlier by
+    # `tests/test_navigation_is_never_derived.py`. Zero callers break.
+    #
+    # ONE CONSEQUENCE, RECORDED SO IT IS NOT DISCOVERED LATER: the
+    # `details_urls` field `linkedin_my_profile` returns is built in the SLUG
+    # form, so this server now advertises three addresses its own read door
+    # will refuse. Nothing consumes that field -- it has exactly one write site
+    # and no readers -- so nothing breaks today. It is an inconsistency in an
+    # OUTPUT, and it is the owner of that emission's to resolve, not this
+    # entry's.
     re.compile(
-        r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/details/"
+        r"^https://www\.linkedin\.com/in/me/details/"
         r"(skills|experience|education)/?(\?[^#]*)?$"
     ),
     # THE INTERESTS PAGE, AND THE ``/in/me/`` FORM ONLY. Added 2026-09-04.

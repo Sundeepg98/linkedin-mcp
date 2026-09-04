@@ -1034,7 +1034,14 @@ ALLOWED = [
     "https://www.linkedin.com/jobs-tracker/?stage=draft",
     "https://www.linkedin.com/jobs/search/?keywords=node&f_WT=2",
     "https://www.linkedin.com/in/me/",
-    "https://www.linkedin.com/in/alex-r/details/skills/",
+    # THE `/in/me/` FORM, CORRECTED 2026-09-04 WHEN THE BOUNDARY NARROWED.
+    # This read `/in/<a-slug>/details/skills/` and was STALE: the server
+    # stopped building that form on 2026-09-03, when
+    # `test_navigation_is_never_derived` found the aim was parsed out of a
+    # landed url and `linkedin_my_profile` was moved onto
+    # `PROFILE_DETAIL_URLS`, a table of `/in/me/` literals. The allowlist
+    # kept admitting the old shape for a day longer than anything built it.
+    "https://www.linkedin.com/in/me/details/skills/",
     "https://www.linkedin.com/notifications/",
     "https://www.linkedin.com/feed/",
     "https://www.linkedin.com/login",
@@ -1511,7 +1518,12 @@ def test_the_urls_the_server_actually_builds_all_pass_the_allowlist():
         f"{BASE_URL}/jobs-tracker/?stage=saved",
         f"{BASE_URL}/jobs-tracker/?stage=draft",
         f"{BASE_URL}/in/me/",
-        f"{BASE_URL}/in/alex-r/details/skills/",
+        # CORRECTED 2026-09-04, and this list's NAME is the reason it
+        # mattered: it claims to hold the urls the server ACTUALLY
+        # builds, and this entry had not been one since 2026-09-03. A
+        # fixture that names a capability it no longer describes passes
+        # for exactly as long as nothing else moves.
+        f"{BASE_URL}/in/me/details/skills/",
         f"{BASE_URL}/notifications/",
         f"{BASE_URL}/mypreferences/d/",
         # THE TWO CENSUS SURFACES ADDED 2026-08-31. Both are built in

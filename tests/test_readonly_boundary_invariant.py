@@ -438,11 +438,43 @@ PINNED = (
 #: the shipped boundary deliberately contains no address that a pattern admits
 #: and a substring still refuses.
 #:
+#: RE-FROZEN 2026-09-04 (fourth today), REDUCING REACH ON AN OPERATOR RULING:
+#:
+#:     _ALLOWED_URL_PATTERNS   3791e30def5f29bc -> a37487dee3bbcc5f
+#:
+#: THE SELF-PROFILE DETAIL PAGES ARE NOW `/in/me/` ONLY. That entry took
+#: `[A-Za-z0-9\-_%]+` for its member segment, so it admitted ANY member's
+#: experience, education and skills pages -- and nobody had ever ruled that.
+#: It contradicted two things `readonly.py` says about itself:
+#: `known_side_effects` states no tool here loads a third party's profile, and
+#: the intro editor is confined to `/in/me/` on the MEASURED ground that
+#: loading a third party's profile leaves them a durable record in their own
+#: viewer list.
+#:
+#: RULED ONLY AFTER THE COST WAS MEASURED.
+#: `scripts/_probe_details_url_breadth.py` PARSED 55 files and 10854 string
+#: literals: 21 literal-me, 10 f-string literal-me, 4 compiled patterns, 8
+#: with no member segment, and TWO interpolated sites -- both traced to HIS
+#: OWN slug and to the constant `ME = "me"`. The navigation site was checked
+#: separately, because a literal census answers what BUILDS a url and not what
+#: OPENS one: `linkedin_my_profile` picks its second load from
+#: `PROFILE_DETAIL_URLS`, a table of `/in/me/` literals. **Zero callers
+#: break.**
+#:
+#: NOT A NEW RULE -- the code brought into line with a rule the file already
+#: states about itself.
+#:
+#: STILL OPEN AND DELIBERATELY NOT TOUCHED HERE: the entry directly above,
+#: `^.../in/[A-Za-z0-9\-_%]+/?$`, admits ANY member's profile page itself. It
+#: carries no comment of its own, and the same measurement finds nothing
+#: navigating it either. That is the same question one level up and a larger
+#: reach than the one just closed; it is recorded rather than ruled.
+#:
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "3791e30def5f29bc",
+    "_ALLOWED_URL_PATTERNS": "a37487dee3bbcc5f",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -816,7 +848,11 @@ DENYLISTS_AT_A76FE32 = {
     # commit. Same direction as every other move in this dict: a READ
     # admission, and this time a read admission being REDUCED. The three
     # denylists and the exemption table beside them are byte-identical.
-    "_ALLOWED_URL_PATTERNS": "3791e30def5f29bc",
+    # NARROWED 2026-09-04 on an operator ruling: the self-profile detail
+    # pages are `/in/me/` only. REDUCING reach, the first move in this dict's
+    # history to go that direction on purpose. Denylists and exemptions
+    # byte-identical, as ever.
+    "_ALLOWED_URL_PATTERNS": "a37487dee3bbcc5f",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
