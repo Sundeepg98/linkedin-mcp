@@ -67,6 +67,17 @@ home at all, not from an index that rendered empty. Detail in section 10.
     COVERED-CANNOT-DELIVER  a tool exists, it HAS fired live, and it cannot do
                             this thing. Filing these as UNFIRED would say
                             "nobody has tried", which inverts a measurement.
+    MEASURED-ABSENT         no tool, and a LIVE READING of the surface says
+                            LinkedIn does not draw the thing. Added 2026-09-04
+                            by team-lead ruling, for the same reason
+                            COVERED-CANNOT-DELIVER exists above it: filing this
+                            as GAP would say "no tool and no reason", which
+                            INVERTS A MEASUREMENT. The reason exists and is
+                            stronger than a ruling -- nobody decided against
+                            it, the page simply does not carry it. THE ROW
+                            SURVIVES rather than being deleted, with its
+                            evidence quoted in it, because a deleted row is
+                            indistinguishable from a row nobody thought of.
     EXCLUDED-RULED          no tool, and a written passage in this repo gives a
                             reason that BEARS ON THIS CAPABILITY -- naming it,
                             or naming an address family or act-class containing
@@ -374,7 +385,7 @@ Help Center now states all members have access.
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
 | L1 | Creator analytics / audience analytics | R | GAP | no tool, no reason |
-| L2 | Own follower count and follower list | R | GAP | the count IS read incidentally -- *"his profile reports 275 followers"* is quoted inside `publish_post.residue` -- and no tool returns it |
+| L2 | Own follower count and follower list | R | MEASURED-ABSENT | **THE COUNT IS NOT ON THE TOPCARD. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/` drew exactly ONE `shape._COUNT_LINE` match and it reads CONNECTIONS -- zero followers lines. So the *"275 followers"* quoted inside `publish_post.residue`, which is this row's own evidence, did NOT come from this page, and where it did come from is unestablished. **READ THE SCOPE BEFORE REUSING THIS STATE, because this row is COMPOUND and only half of it was measured:** the COUNT is measured absent from the topcard and nowhere else was searched; the follower LIST was never looked for at all and remains a plain GAP inside this row. What the same reading DID recover is the CONNECTIONS count, which `shape.parse_profile_topcard` had recognised since it was written -- only ever to rule it out of the headline -- and thrown away; `linkedin_my_profile` now returns it, with `at_least` carrying the `+` because LinkedIn stops counting out loud at 500 |
 | L3 | Create / edit / delete a newsletter | W | GAP | no tool, no reason |
 | L4 | Newsletter analytics | R | GAP | no tool, no reason |
 | L5 | Host a LinkedIn Live | W | GAP | he clears the >150-follower gate at 275; no tool, no reason |

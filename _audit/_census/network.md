@@ -72,6 +72,18 @@ was never considered.
                        reason that BEARS ON THIS CAPABILITY -- naming it, or
                        naming an address family or act-class containing it.
                        Quoted per row group in section 6.
+    MEASURED-ABSENT    no tool, and a LIVE READING of the surface says LinkedIn
+                       does not draw the thing. Added 2026-09-04 by team-lead
+                       ruling, for the same reason COVERED-CANNOT-DELIVER
+                       exists one row up: filing this as GAP would say "no
+                       tool and no reason", which INVERTS A MEASUREMENT. The
+                       reason exists and is stronger than a ruling -- nobody
+                       decided against it, the page simply does not carry it.
+                       THE ROW SURVIVES RATHER THAN BEING DELETED, and its
+                       evidence is quoted in it, because a deleted row is
+                       indistinguishable from a row nobody thought of -- and
+                       this census has already sent one wave to build
+                       something that is not there.
     GAP                no tool and no such passage.
 
 This matches the convention already set by `_audit/_census/profile.md` section
@@ -362,7 +374,7 @@ considered.
 | 115 | Opt out of receiving endorsements entirely | W | EXCLUDED-RULED | R11 |
 | 116 | Manage endorsement settings | W | EXCLUDED-RULED | R11 |
 | 117 | Manage skill-endorsement notifications | W | EXCLUDED-RULED | R11 |
-| 118 | Read the endorsement counts on your own skills | R | GAP | **Costed at zero extra page loads and never built.** `_audit/2026-08-22-parity-linkedin.md:18`: "the `/details/skills/` page is *already loaded* by `linkedin_my_profile(include_skills=True)`; counts are dropped today. **0 extra page loads.** Smallest real win left" |
+| 118 | Read the endorsement counts on your own skills | R | MEASURED-ABSENT | **LinkedIn DRAWS NO ENDORSEMENT LINE ON THIS PAGE. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/details/skills/` returned 20 skill cards and 2,359 characters of `main`, with **ZERO** occurrences of `endors` anywhere on it -- cards or body. The page DREW, so a stale capture is ruled out; the committed fixture agrees with live LinkedIn. This was NEVER a missing parser. Two worlds fit the evidence and nothing on his own account separates them -- LinkedIn draws the line only for a skill someone endorsed, or it stopped drawing it -- so `dom.read_profile_detail_entries` now RE-TAKES this reading on every call and returns it with the denominator it was taken over, rather than hard-coding an answer that would go on denying a count on the day one appears. Costed at zero extra page loads by `_audit/2026-08-22-parity-linkedin.md:18` and refuted the next day by `_audit/2026-08-23-build-linkedin.md:229`, whose correction this row failed to carry for twelve days |
 
 ### K. Recommendations (10) -- all EXCLUDED-RULED under R3
 

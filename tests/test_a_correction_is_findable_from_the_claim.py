@@ -157,6 +157,26 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    # THESE TWO WERE ADDED BY THIS FILE GOING RED ON ITS AUTHOR, an hour after
+    # it was written, when census row N 118 was retired to MEASURED-ABSENT and
+    # the retirement quoted both documents in the chain. That is the check
+    # working rather than a collision: a genuine correction written into
+    # `_audit/` is SUPPOSED to stop the suite until somebody triages it.
+    ("network.md", "2026-08-22-parity-linkedin.md"): (
+        "the row RECORDS a correction rather than making one. N 118 cites the "
+        "parity audit's cost claim in order to say it was refuted, and names "
+        "the document that refuted it -- so the corrector here is "
+        "2026-08-23-build-linkedin.md, not network.md, and the parity audit "
+        "already carries its CORRECTED BY: back-pointer to exactly that file. "
+        "A second back-pointer aimed at this census row would name a reader of "
+        "the correction as its author"
+    ),
+    ("network.md", "2026-08-23-build-linkedin.md"): (
+        "points at the CORRECTOR, not at a corrected document. N 118 cites "
+        "2026-08-23-build-linkedin.md as the file that got this right; "
+        "requiring build-linkedin.md to carry a CORRECTED BY: pointer back to "
+        "this row would invert the relation the whole check exists to fix"
+    ),
     ("2026-09-03-hygiene-boundary-and-record.md", "2026-08-31-linkedin-perform.md"): (
         "reports the staleness incident rather than correcting it: perform.md "
         "now carries the correction IN PLACE, as a dated block at its own line "
