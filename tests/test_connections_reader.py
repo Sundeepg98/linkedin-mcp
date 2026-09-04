@@ -632,26 +632,106 @@ class _FakeBrowser:
         return url
 
 
-@pytest.mark.asyncio
-async def test_the_tool_refuses_and_opens_nothing():
-    """The shipped state. A tool that refuses must not spend a session doing
-    it, so the refusal is decided from a declared constant."""
-    assert server.CONNECTIONS_BADGE_COST is None
-    out = await server.linkedin_connections(limit=5)
-    assert out["readable"] is False
-    assert out["rows"] == []
-    assert out["pages_loaded"] == 0
-    assert "UNMEASURED" in out["refused"]
-    assert out["the_address_is_admitted"] == server.CONNECTIONS_URL
+def test_no_test_in_this_file_may_call_the_tool_without_a_fake_browser():
+    """THE HAZARD THAT ARRIVED WITH THE GATE CHANGE, pinned so it cannot
+    return.
+
+    Until 2026-09-04 ``linkedin_connections`` refused from a constant BEFORE
+    opening anything, so calling it in a test was free. Removing that
+    pre-flight refusal made the very same call NAVIGATE -- and two tests here
+    did exactly that on the next run: the log shows a profile lock acquired
+    and a real Chrome started, against his real account, from a unit test.
+    Nothing was spent (a feed load is what this package does routinely) but a
+    test suite that can open his session is a test suite nobody can run.
+
+    So this asserts BY AST that every call to the tool in this file sits in a
+    function that also installs the fake browser. A reviewer cannot be asked
+    to notice this by eye: the failure is silent, it looks like a slow test,
+    and it only happens on the machine that has a live session.
+    """
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    offenders = []
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        names = {
+            node.func.attr
+            for node in ast.walk(func)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        }
+        if "linkedin_connections" not in names:
+            continue
+        source = ast.get_source_segment(
+            Path(__file__).read_text(encoding="utf-8"), func
+        ) or ""
+        if "_FakeBrowser" not in source:
+            offenders.append(func.name)
+    assert offenders == [], offenders
 
 
 @pytest.mark.asyncio
-async def test_the_refusal_says_the_reader_behind_it_exists():
-    """The A10 defect, closed. "The boundary is open" and "the boundary is
-    open AND the reader is built" are different states, and the tool surface
-    could not previously tell you which one you were in."""
+async def test_a_zero_badge_returns_the_rows_and_says_it_proved_nothing(
+    monkeypatch,
+):
+    """THE GATE CHANGE OF 2026-09-04, and the case it was made for.
+
+    The old pre-flight refusal demanded a recorded cost, and that cost needs a
+    NON-ZERO badge nobody can arrange. It had blocked the capability
+    indefinitely -- on the surface ``network.md`` calls the most consequential
+    in the census for his actual job hunt.
+
+    A ZERO BADGE IS TWO DIFFERENT ANSWERS TO TWO DIFFERENT QUESTIONS, and the
+    old gate ran them together:
+
+      * "does this page consume a badge, in general?" -- UNANSWERABLE at zero.
+        Unchanged is the only outcome available, so the reading cannot fail.
+      * "will this call consume one of HIS invitations?" -- ANSWERED, and
+        answered safe. The badge counts what is unseen; at zero there is
+        nothing to consume.
+
+    So the rows come back AND ``cost.proven`` is false, with the reason. A
+    result that quietly claimed the page was free would be the manufactured
+    no-change this repository keeps meeting.
+    """
+    browser = _FakeBrowser(object())
+    monkeypatch.setattr(server, "BROWSER", browser)
+    _patch_badges(monkeypatch, _reading(0), _reading(0))
+
+    async def fake_rows(page, limit):
+        return [{"name": "x", "recipient_id": None}], {"rows_parsed": 1}
+
+    monkeypatch.setattr(server, "_read_connection_rows", fake_rows)
+
     out = await server.linkedin_connections(limit=5)
-    assert "_read_connection_rows" in out["the_reader_behind_this_refusal_is_built"]
+    assert out["count"] == 1, "the rows are returned, which is the whole change"
+    assert out["cost"]["proven"] is False
+    assert "nothing to consume" in out["cost"]["why_the_call_was_safe_anyway"]
+    assert "could not have failed" in out["cost"]["what_this_run_showed"]
+    assert server.CONNECTIONS_URL in browser.gotos
+
+
+@pytest.mark.asyncio
+async def test_a_non_zero_badge_that_held_is_the_measurement(monkeypatch):
+    """AND THE OTHER HALF, which is what makes ``proven`` mean anything.
+
+    A badge that stood at three and still stands at three COULD have fallen.
+    That is a real measurement of the page, obtained as a side effect of an
+    ordinary call rather than from an experiment nobody can schedule -- and
+    the result says so and asks for it to be recorded.
+    """
+    browser = _FakeBrowser(object())
+    monkeypatch.setattr(server, "BROWSER", browser)
+    _patch_badges(monkeypatch, _reading(3), _reading(3))
+
+    async def fake_rows(page, limit):
+        return [{"name": "x"}], {"rows_parsed": 1}
+
+    monkeypatch.setattr(server, "_read_connection_rows", fake_rows)
+
+    out = await server.linkedin_connections(limit=5)
+    assert out["cost"]["proven"] is True
+    assert "COULD have fallen and did" in out["cost"]["what_this_run_showed"]
+    assert "record" in out["cost"]["record_it"]
 
 
 def _patch_badges(monkeypatch, before, after):
@@ -913,13 +993,45 @@ async def test_the_census_counts_identifiers_without_holding_one():
 
 
 @pytest.mark.asyncio
-async def test_no_identifier_reaches_the_shipped_refusal():
-    """The refusal is what every caller sees today, so it is the payload most
-    likely to be read, quoted and pasted. It opens no page and therefore holds
-    no id -- asserted rather than reasoned from that."""
+async def test_no_identifier_reaches_a_refusal_payload(monkeypatch):
+    """A refusal is the payload most likely to be read, quoted and pasted, so
+    it is the one that must carry no identifier.
+
+    IT USED TO CALL THE TOOL BARE, AND THAT BECAME A LIVE LEAK THE MOMENT THE
+    PRE-FLIGHT REFUSAL WENT. Recorded because the diff that caused it looked
+    entirely safe: this test asserted "no id in the result" and passed for as
+    long as the result was a constant. With the constant gone, the same line
+    opened his real session, loaded the real connections list, and put five
+    real people's names and member ids into a pytest assertion message. The
+    assertion FAILED, which is the only reason anybody saw it -- had the
+    marker not matched, a green test would have been quietly reading his
+    network on every run.
+
+    THE LESSON IS NOT ABOUT THIS TEST. A test whose safety rests on the code
+    under test declining to act has no safety at all; it has a coincidence.
+    ``test_no_test_in_this_file_may_call_the_tool_without_a_fake_browser``
+    is the structural fix, and this is now driven by the fake browser like
+    every other call in this file.
+    """
+    browser = _FakeBrowser(object())
+    monkeypatch.setattr(server, "BROWSER", browser)
+    _patch_badges(monkeypatch, _reading(2), _UNREADABLE)
+
+    async def fake_rows(page, limit):
+        # A row carrying an id, so the refusal has something it COULD leak.
+        # A refusal proved clean against rows that never held one proves
+        # nothing at all.
+        return [{"name": "x", "recipient_id": "ACo" + "AA" + "synthetic"}], {
+            "rows_parsed": 1
+        }
+
+    monkeypatch.setattr(server, "_read_connection_rows", fake_rows)
+
     out = await server.linkedin_connections(limit=5)
+    assert out["readable"] is False
+    assert out["rows"] == []
     marker = "ACo" + "AA"
-    assert marker not in repr(out)
+    assert marker not in repr(out), "the withheld rows reached the refusal"
 
 
 def test_the_docstrings_on_this_path_carry_no_identifier():
