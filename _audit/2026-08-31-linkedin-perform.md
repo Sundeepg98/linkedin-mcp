@@ -3521,11 +3521,21 @@ provoked by defects. **None of it is a capability he asked for.**
 > **ITEMS 1 AND 2 ARE BOTH DONE, corrected 2026-09-03.** Item 1 was ruled and
 > the write ships against `https://www.linkedin.com/in/me/edit/intro/` with
 > `exempt_substring="/edit/"`. Item 2 landed the same day: `SANCTIONED_MUTATIONS`
-> now carries FOUR entries, read off the live module --
-> `("linkedin_server/writes.py", "perform", "select_option")` is the fourth.
-> The count in the line above ("currently three") is stale and is left as
-> written, because a number in a record is evidence of what was true when it
-> was written and correcting it in place destroys that.
+> **carried FOUR entries as of 2026-09-03**, read off the live module that
+> day -- `("linkedin_server/writes.py", "perform", "select_option")` was the
+> fourth. The count in the line above ("currently three") is stale and is left
+> as written, because a number in a record is evidence of what was true when
+> it was written and correcting it in place destroys that.
+>
+> **UPDATE 2026-09-04: FIVE now, by the same rule this block states about
+> itself.** `SANCTIONED_MUTATIONS` carried five entries as of 2026-09-04, read
+> off the live module that day -- `("linkedin_server/writes.py", "perform",
+> "set_input_files")` was the fifth, sanctioning file upload. The "FOUR" above
+> is left as written for the reason it gives: a number in a record is
+> evidence of what was true when it was written. This block is now phrased as
+> a snapshot of its own date rather than a present-tense claim, precisely so
+> a sixth entry does not have to rewrite it a third time -- only add beside
+> it.
 
 
 

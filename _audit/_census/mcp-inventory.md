@@ -718,17 +718,44 @@ category made concrete:
   capabilities that look blocked by a missing write are actually blocked
   earlier, by having no way to FIND the target.
 
-## 5. Sanctioned mutations -- 4
+## 5. Sanctioned mutations -- 5
 
 `readonly.SANCTIONED_MUTATIONS`. The whole of what this server can do to
 LinkedIn. Widening this is a test failure, not a judgement call.
+
+**This heading said "-- 4" and the table carried four rows until 2026-09-04.**
+Corrected in place: `set_input_files` was sanctioned that day (the fifth row
+below), and the answer to the open question section 5a used to ask is
+recorded there now. All five rows are verified against the live module.
 
 | path | function | kind |
 |---|---|---|
 | `linkedin_server/writes.py` | `perform` | `click` |
 | `linkedin_server/writes.py` | `perform` | `fill` |
 | `linkedin_server/writes.py` | `perform` | `select_option` |
+| `linkedin_server/writes.py` | `perform` | `set_input_files` |
 | `linkedin_server/dom.py` | `activate_messaging_filter` | `click` |
+
+**RESOLVED 2026-09-04.** The question section 5a asks below was put to the
+operator, and he opened it FULLY -- profile photo, post media and message
+attachments, all three, not a narrower subset. `SANCTIONED_MUTATIONS`'s fifth
+entry, `("linkedin_server/writes.py", "perform", "set_input_files")` in the
+table above, is that answer. The guard the answer required is
+`linkedin_server/uploads.py`: a declared root, a refusal on any symlink
+anywhere in the path chain, a check that the target is a regular readable
+file, and a sha256 digest read at preview time and re-read immediately
+before the browser is handed the file.
+
+**This does not ship the 16 rows `FILE-UPLOAD-UNSANCTIONED` names in
+`_audit/2026-09-03-linkedin-gap-blockers.md:309,327-336` -- it UNBLOCKS
+them.** `writes.UPLOAD_ACTIONS` ships EMPTY, verified live 2026-09-04: no
+action has joined it, so no composer is wired to the new drain point yet.
+Each of the 16 still needs its own composer surface measured and built
+before it ships.
+
+The original write-up below is left intact rather than deleted or rewritten,
+because it is the record of the question being askable in the first place,
+not a stale claim about the present.
 
 ## 5a. EVERY UPLOAD PATH IS CLOSED BY ONE OMISSION -- and it is an OPEN OPERATOR QUESTION, not an oversight
 

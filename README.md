@@ -98,7 +98,12 @@ Audited 2026-08-24 across all 105 tracked files:
   *scanner's own pattern* for detecting such a call. The scanner names the
   things it forbids, which is why its source contains them and the rest of the
   package does not -- `partition_mutation_hits` confirms it independently, at
-  one sanctioned mutating call and zero unsanctioned.
+  zero unsanctioned. This audit was taken 2026-08-24, when the sanctioned side
+  was one call. **Corrected 2026-09-04: the sanctioned side is now five** --
+  four in `writes.perform` (`click`, `fill`, `select_option`,
+  `set_input_files`) and one in `dom.activate_messaging_filter` (`click`),
+  read off the live `readonly.SANCTIONED_MUTATIONS`. The unsanctioned count,
+  the load-bearing half of this sentence, is unchanged at zero.
 - **No stealth dependency.** Four dependencies, none of them an anti-detection
   library, and `readonly.scan_source_for_evasion` returns zero hits across the
   package -- its only hits anywhere are a deliberately planted control in a
@@ -330,15 +335,25 @@ refused, because that is the axis that actually predicts whether it will ever
 change.
 
 **Sending a message or an InMail. Publishing a post. Commenting. Reacting.
-Editing a profile field.** All five are registered, specced and refusing, and
-all five are blocked by the same measured thing: **they would have to TYPE.**
-`fill`, `type`, `press` and `keyboard` are all on
-`readonly._MUTATION_CALL_PATTERNS` and none of them is on
-`readonly.SANCTIONED_MUTATIONS` for any function in this package. `perform` may
-CLICK -- that is one entry, `(writes.py, perform, click)` -- and it may do
-nothing else. So no measurement and no url admits any of these five; a new
-mutation CLASS would have to be sanctioned, which is a deliberate boundary
-decision nobody has taken.
+Editing a profile field.** This paragraph described all five as registered,
+specced and refusing, blocked by the same measured thing -- that they would
+have to TYPE, and no typing kind was sanctioned anywhere in this package --
+and **that stopped being true on 2026-09-01.** It is corrected in place
+rather than deleted, because the section it sits in is organised by WHY a
+thing is refused, and this paragraph is now the record of a refusal that
+ENDED rather than a live example of one.
+
+`fill` was sanctioned inside `writes.perform` on 2026-09-01, and
+`select_option` on 2026-09-02. **All five of these now perform, behind the
+same two-call token gate as every other write in this package** -- verified
+2026-09-04 against the live `writes.PERFORMABLE`, which carries
+`send_message`, `publish_post`, `comment_on_item`, `react_to_item` and
+`update_profile_field` alongside the rest. None of the five was handed a new
+refusal to replace the old one: the sentence this paragraph used to close
+on -- "`perform` may CLICK -- that is one entry ... and it may do nothing
+else" -- is false in both halves now. `perform` may CLICK, FILL and SELECT,
+three entries and not one, and "no measurement and no url admits any of
+these five" does not hold for a single one of the five any more.
 
 **Endorsing a skill is IMPOSSIBLE rather than refused**, and it is the only one
 of these where the refusal is on somebody else's behalf. The control exists
@@ -385,7 +400,10 @@ today as ONE exact url, by an exemption, for a capture that has not been taken.
 
 Anything else that would change something on LinkedIn's servers is out of
 scope, and `tests/test_readonly.py` fails the build if a mutating call appears
-anywhere in the package outside the two entries `SANCTIONED_MUTATIONS` names.
+anywhere in the package outside the entries `SANCTIONED_MUTATIONS` names --
+five of them, read off the live module 2026-09-04. This line said "two" and
+is corrected in place rather than left carrying a bare number that goes stale
+at the next widening.
 
 One tool changes something on **this machine**: `linkedin_logout(confirm=True)`
 erases the local cookie jar. It issues no request, so LinkedIn is never told,
@@ -490,20 +508,37 @@ package. A check that cannot fail certifies nothing.
 
 2. **A source scanner.** The package is grepped for calls that could change
    state -- `click`, `fill`, `type`, `press`, `select_option`, `set_input_files`,
-   form submission, and any non-GET request. It finds **exactly one**: the click
-   in `writes.perform`.
+   form submission, and any non-GET request. **This said "exactly one" until
+   2026-09-04** -- and the verb list two lines up had already named
+   `set_input_files` before that correction, so this paragraph had been
+   internally inconsistent with itself since before today. It finds **five**,
+   read off the live `readonly.SANCTIONED_MUTATIONS`: four inside
+   `writes.perform` (`click`, `fill`, `select_option`, `set_input_files`) and
+   one click in `dom.activate_messaging_filter`.
 
-   The scanner was **not** relaxed to accommodate it. It still reports every
-   mutating call unconditionally, and what admits this one is a separate
-   one-line allowlist, `readonly.SANCTIONED_MUTATIONS`, keyed on
-   `(path, function, kind)`. All three parts refuse something real: a click in
-   `dom.py`, a click in a different function of `writes.py`, and a `fill` inside
-   `perform` are each rejected -- and so is a click buried in a closure one scope
-   down, because attribution is to the innermost enclosing function. Those five
-   near-misses are each **shown failing**. The package is separately asserted to
-   contain exactly as many mutating calls as the list has entries, which is what
-   catches a *second* click inside `perform` that the triple alone cannot
-   distinguish from the first.
+   The scanner was **not** relaxed to accommodate any of them. It still
+   reports every mutating call unconditionally, and what admits these five is
+   a separate one-line allowlist, `readonly.SANCTIONED_MUTATIONS`, keyed on
+   `(path, function, kind)`. **Six near-misses are shown failing, not five**
+   -- corrected 2026-09-04, counted directly off
+   `tests/test_readonly.py::test_the_exception_does_not_widen`: the
+   sanctioned click in the wrong FILE (`dom.py`), the sanctioned kind in the
+   wrong FUNCTION of `writes.py`, two wrong KINDS inside `perform` itself
+   (`page.type` and `page.press` -- a `fill` inside `perform` stopped being
+   one of these on 2026-09-01, when it was sanctioned and the test case was
+   re-aimed from `page.fill` to `page.type` rather than deleted), a click
+   buried in a closure one scope down (attribution is to the innermost
+   enclosing function, so the closure is named as itself and inherits
+   nothing), and a click at module level with no enclosing function at all.
+   The package is separately asserted to contain exactly as many mutating
+   calls as the list has entries, which is what catches a *second* click
+   inside `perform` that the triple alone cannot distinguish from the first.
+
+   **The fifth kind, `set_input_files`, is bounded by `linkedin_server/uploads.py`
+   rather than by this allowlist** -- a declared root, a refusal on any
+   symlink in the chain, a regular-file check, and a digest read at preview
+   and re-read before the browser is handed the file; the allowlist controls
+   the WIDTH of the opening, the guard controls what comes through it.
 
    `evaluate` is flagged too: the three read-only DOM harvesters waive it with a
    trailing `# readonly-ok`, so any new `evaluate` fails the build until somebody
