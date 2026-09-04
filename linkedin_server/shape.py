@@ -381,6 +381,98 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     return out
 
 
+def parse_connection_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """Shape one row of his own 1st-degree connections list.
+
+    ``record`` is ``{"href": ..., "text": ..., "link_text": ...}`` as harvested
+    from the page, exactly as :func:`parse_person_card` takes it.
+
+    WHY THIS IS NOT ``parse_person_card``, checked rather than assumed. That
+    parser REQUIRES a ``Viewed <when>`` line, and says so as its own invariant:
+    "Every row LinkedIn draws here has one." That is true of the profile-views
+    page and there is no reason it would be true of this one. Pointing it at
+    this surface would drop every row and report zero -- the "zero matched"
+    answer that has already cost this repository two wrong diagnoses, arriving
+    from a page full of people.
+
+    THE INVARIANT HERE IS THE LINK, and it is the strongest one available on a
+    surface nobody has captured. A 1st-degree connection is never anonymous and
+    never linkless: LinkedIn's own Help Center describes this page as drawing
+    the name with a Message control beside it
+    (``_audit/_scratch/_census-hc-invitations.md:50`` -- "Click Message on the
+    right of the connection's name to message them"). So a row that produced no
+    ``/in/<slug>`` is not a person, and ``profile_slug_from`` already drops the
+    ``/in/me`` self-alias, which is how the nav's own link to HIS profile
+    leaves without a rule being written for it.
+
+    THE NAME IS PREFERRED OFF THE ANCHOR, and ``named_by`` says which route
+    produced it, because the two are not equally trustworthy:
+
+      ``link``  :func:`anchored_title` -- the link that MAKES this a person row
+                reduced to exactly one line, so the link names one thing;
+      ``row``   the first content line of the climbed row.
+
+    The fallback exists because the climb is the only route left when LinkedIn
+    wraps a whole card in one anchor, which is what the job tracker does. It is
+    reported rather than hidden: ``parse_person_card`` records that a page
+    heading was once emitted four times over, each wearing a different real
+    viewer's link, and a caller counting ``named_by`` can see that shape
+    developing before it becomes a wrong answer.
+
+    NO ``connected`` FIELD, AND ITS ABSENCE IS DELIBERATE. LinkedIn offers a
+    "Recently added" sort on this page (Help Center a566261), which orders by a
+    date; it does not establish that a date is DRAWN in the row. A field that
+    would be null on every row is a claim the page does not support -- the same
+    rule that keeps ``top_companies`` off ``who_viewed_me``.
+
+    NO ``recipient_id`` EITHER, and that is a different absence: it is not on
+    this record. It comes from the Message button's href, which is a sibling
+    subtree of the person link, and it is joined on BY SLUG afterwards. A
+    parser cannot see it and must not invent a key for it.
+    """
+    lines = content_lines(record.get("text", ""))
+
+    # THE LINK FIRST, because the invariant is structural. A row with no
+    # ``/in/<slug>`` is furniture whatever its text says, and asking about the
+    # text first would let a heading that climbed into the row decide.
+    slug = profile_slug_from(record.get("href", ""))
+    if not slug:
+        return None
+
+    named_by = "link"
+    name = anchored_title(record)
+    if not name:
+        named_by = "row"
+        name = trim(lines[0], 120) if lines else None
+    else:
+        name = trim(name, 120)
+    if not name or is_degree_badge(name):
+        return None
+
+    # BY SUBTRACTION, and every subtrahend is already measured somewhere in
+    # this module rather than being a new list of strings to keep current.
+    # ``content_lines`` has removed the row's own controls already -- Message,
+    # Connect, Follow, View profile and More are all in :data:`_CHROME` -- so
+    # what is left to skip is the name itself, the degree badge, a mutuals
+    # line and anything carrying a relative time.
+    headline = None
+    for line in lines:
+        if line == name or is_degree_badge(line) or _MUTUALS.match(line):
+            continue
+        if has_time_ago(line):
+            continue
+        headline = trim(line)
+        if headline:
+            break
+
+    return {
+        "name": name,
+        "headline": headline,
+        "profile": f"https://www.linkedin.com/in/{slug}",
+        "named_by": named_by,
+    }
+
+
 #: A status is a line that IS a status, not a line that contains a status
 #: word. Anchoring matters: "Applied Scientist" is a job title, and a
 #: substring match would eat it as the status and shift every other field up
@@ -2370,6 +2462,125 @@ def messaging_badge(html: str) -> dict[str, Any]:
             "/feed/, which opens no conversation."
         ),
     }
+
+
+#: THE TAIL OF A NAV BADGE LABEL, and the tail is all of it that is measured.
+#:
+#: ``_audit/2026-08-31-linkedin-perform.md:1208`` inventories every numeric
+#: control on one page and lists ``..., N new notification(s)`` five times, as
+#: ``a``/``button`` -- the nav badges. ``_audit/2026-08-31-linkedin-lift.md:174``
+#: records the mynetwork one specifically, on two surfaces, as
+#: ``<redacted>, 0 new notifications``: **its leading word is redacted in the
+#: audit and is therefore not a string this package may write down.**
+#:
+#: SO THIS PATTERN DELIBERATELY HAS NO PREFIX AND IS NOT ANCHORED AT ``^``.
+#: Which badge a label belongs to is decided by the HREF of the control it was
+#: read from (:func:`dom.invitation_badge_selector`), never by its own words --
+#: which is a stronger discriminator anyway, since the five nav badges differ
+#: only in that leading word.
+#:
+#: Singular AND plural, because "1 new notification" is a real reading and the
+#: plural-only spelling would report it unreadable.
+_NAV_BADGE_TAIL = re.compile(r",\s*([\d,]+)\s+new notification", re.I)
+
+
+def invitation_badge(reading: Optional[dict[str, Any]]) -> dict[str, Any]:
+    """How many pending invitations the nav badge says are waiting.
+
+    Takes the WHOLE reading from :func:`dom.read_invitation_badge` rather than
+    a bare label, because the interesting failures are not in the label: they
+    are "the nav drew no mynetwork link at all" and "it drew three and only one
+    of them should have a count". A function handed just the string could not
+    tell those apart and would answer "unreadable" to both.
+
+    ZERO IS A REAL ANSWER AND IS NOT THE SAME AS UNREADABLE. Same contract as
+    :func:`messaging_badge`, and here it is load-bearing twice over: the tool
+    that consumes this refuses on ``unreadable``, and the reason the cost it
+    guards has never been measured is that a badge sitting at zero cannot
+    distinguish "the page consumed nothing" from "there was nothing to
+    consume".
+
+    **THE REFUSAL SAYS WHAT IT DID SEE.** Every unreadable branch carries the
+    counts it read -- how many mynetwork links the page drew, how many of them
+    carried the measured tail -- so "no badge" is never the whole answer. A
+    nav that did not hydrate (``links: 0``) and a label whose shape changed
+    (``links: 3, badge_links: 0``) want completely different repairs, and a
+    bare "zero matched" is what stops anyone telling them apart.
+
+    THE LABEL IT PARSES HAS ALREADY BEEN THROUGH ``census_shape``. That is why
+    the ``why`` strings below may quote it: whatever the nav one day carries,
+    what reaches here is a shape, and an opaque one simply fails the pattern
+    and is reported as the opaque marker it is.
+    """
+    seen = dict(reading or {})
+    links = seen.get("links")
+    badge_links = seen.get("badge_links")
+    label = seen.get("label")
+    error = seen.get("error")
+
+    def _unreadable(why: str) -> dict[str, Any]:
+        return {
+            "pending": None,
+            "state": "unreadable",
+            "why": why,
+            # WHAT IT DID SEE, on every branch and not only on the interesting
+            # ones. A field present on some refusals and absent on others is
+            # one a caller learns to stop reading.
+            "saw": {
+                "mynetwork_links": links,
+                "links_carrying_a_count": badge_links,
+                "shaped_label": label,
+                "error": error,
+            },
+        }
+
+    if error:
+        return _unreadable(
+            "the badge could not be read from the page at all: %s" % error
+        )
+    if not badge_links:
+        return _unreadable(
+            "no mynetwork nav control carried the measured badge tail "
+            "%r. That is NOT zero pending invitations: the nav may not have "
+            "hydrated, or LinkedIn may have restyled the label."
+            % _NAV_BADGE_TAIL.pattern
+        )
+    if badge_links != 1:
+        return _unreadable(
+            "%d mynetwork controls carry a count, and this reader will not "
+            "choose between them by position. One of them is the nav badge "
+            "and the others are something nobody here has seen."
+            % int(badge_links)
+        )
+    match = _NAV_BADGE_TAIL.search(str(label or ""))
+    if not match:
+        return _unreadable(
+            "the control resolved and its shaped label does not carry a "
+            "count. The aim matched on the raw attribute and the parse runs "
+            "on the shaped one, so a label the census shaper made opaque "
+            "lands here."
+        )
+    raw = match.group(1).replace(",", "")
+    try:
+        count = int(raw)
+    except ValueError:  # pragma: no cover - defensive
+        return _unreadable("the badge read %r, which is not a number." % raw)
+    return {
+        "pending": count,
+        "state": "read",
+        "why": (
+            "LinkedIn's own mynetwork nav badge reads %d new. Read off the "
+            "nav of a page that was already open, which opens no invitation "
+            "and no third party's profile." % count
+        ),
+        "saw": {
+            "mynetwork_links": links,
+            "links_carrying_a_count": badge_links,
+            "shaped_label": label,
+            "error": None,
+        },
+    }
+
 
 #: LinkedIn's outbound interstitial. NOT an apply-specific url: the same
 #: wrapper carries any external link on the page, so a capture holding two of

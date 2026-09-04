@@ -6919,6 +6919,106 @@ async def read_messaging_badge(page: Any) -> dict[str, Any]:
     return out
 
 
+#: THE PENDING-INVITATION BADGE, and every part of this aim is measured rather
+#: than guessed -- which matters because the obvious spelling is not available.
+#:
+#: WHAT WAS MEASURED, from this repository's own audit:
+#:
+#:   * ``_audit/2026-08-31-linkedin-perform.md:1208`` -- the complete numeric
+#:     control inventory of one page lists ``..., N new notification(s)`` as an
+#:     ``a``/``button`` shape occurring FIVE times: the nav badges. The TAIL of
+#:     the label is the measured part.
+#:   * ``_audit/2026-08-31-linkedin-lift.md:174`` --
+#:     ``<redacted>, 0 new notifications   (mynetwork, both surfaces)``. The
+#:     mynetwork badge was read on ``/feed/`` AND on ``/in/me/``, and **its
+#:     leading word is redacted in the audit**.
+#:
+#: SO THE PREFIX IS NOT AVAILABLE TO AIM WITH, and writing one would be
+#: inventing a string the record deliberately does not contain. The href is
+#: what identifies WHICH badge this is, and the label tail is what identifies
+#: it as a badge at all -- so the aim is the conjunction of the two, and the
+#: label's own leading word is never matched, never stored and never needed.
+#:
+#: ``read_messaging_badge`` beside this one aims at ``a[href*="/messaging/"]``
+#: and takes ``.first``. This does NOT, and the difference is deliberate: a
+#: page can draw several ``/mynetwork/`` links -- the nav item and any
+#: in-page link to the same surface -- so ``.first`` would be a choice by
+#: POSITION between candidates that are not interchangeable. Requiring the
+#: badge substring narrows the aim to the one control that carries a count,
+#: and the reader below refuses unless exactly one resolves.
+INVITATION_BADGE_TAIL = "new notification"
+
+
+def invitation_badge_selector() -> str:
+    """The mynetwork nav control that carries a count. NO ARGUMENT.
+
+    Both halves are constants measured on the live nav, so this takes nothing
+    from a caller and cannot be aimed at a person: there is no name in it.
+    """
+    return (
+        'a[href*="/mynetwork/"][aria-label*="' + INVITATION_BADGE_TAIL + '"]'
+    )
+
+
+async def read_invitation_badge(page: Any) -> dict[str, Any]:
+    """The pending-invitation nav badge, read WITHOUT opening My Network.
+
+    THE POINT OF READING IT AT ALL. ``/mynetwork/`` is refused because opening
+    it is believed to consume this badge, and the connections sub-page was
+    admitted on the argument that listing people he already knows sends
+    nothing. "Believed" and "argued" are not measurements, so
+    ``linkedin_connections`` reads this before and after and refuses when it
+    cannot -- and this is the reader that makes that possible.
+
+    IT COSTS NO PAGE LOAD. The nav renders on every signed-in page, which is
+    the same property ``read_messaging_badge`` relies on: the badge was
+    measured through it on ``/feed/`` and on ``/in/me/`` alike. So the AFTER
+    reading can be taken on the connections page itself.
+
+    EXACTLY ONE OR IT REFUSES, and it reports BOTH counts when it does. A page
+    may draw several links to ``/mynetwork/``; only one of them carries a
+    count. Taking ``.first`` would be choosing by position between controls
+    that are not interchangeable, and answering "no badge" would be the
+    "zero matched" refusal this package has been told twice now says nothing.
+    So the failure carries ``links`` (every mynetwork link on the page) beside
+    ``badge_links`` (those that also carry the measured tail), and a reader of
+    the refusal can tell "the nav did not hydrate" from "the label changed
+    shape" without opening a browser.
+
+    THE LABEL IS SHAPED ON THE WAY OUT, the same route
+    ``read_messaging_badge`` takes, and the count is parsed from the SHAPED
+    string by :func:`shape.invitation_badge`. That ordering is deliberate: it
+    means the only string this process ever holds has already been through the
+    census shaper, so a nav label that one day carries a name carries it no
+    further than the page.
+    """
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE. Every early return below leaves the label
+        # None, so a reader that could not run never looks like a badge at
+        # zero -- which is the distinction this whole measurement rests on.
+        "links": None,
+        "badge_links": None,
+        "label": None,
+        "error": None,
+    }
+    try:
+        out["links"] = int(await page.locator('a[href*="/mynetwork/"]').count())
+        badges = page.locator(invitation_badge_selector())
+        out["badge_links"] = int(await badges.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    if out["badge_links"] != 1:
+        return out
+    try:
+        label = await badges.first.get_attribute("aria-label")
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["label"] = shape.census_shape(str(label or "").strip()) or None
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Job tracker readiness
 # ---------------------------------------------------------------------------

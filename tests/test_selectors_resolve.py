@@ -177,6 +177,21 @@ PAGE = (
     '<div role="textbox"></div>'
     f"<button>{dom.MESSAGE_SEND_NAME}</button>"
     '<a href="/jobs/view/1/">a job row</a>'
+    # THE PENDING-INVITATION NAV BADGE, added 2026-09-04 with the connections
+    # reader. TWO mynetwork links are drawn on purpose and only one carries a
+    # count: that is the discriminating case, because the sibling reader
+    # dom.read_messaging_badge takes .first and this one may not -- a page can
+    # link to /mynetwork/ from the nav AND from the page body, and those two
+    # controls are not interchangeable.
+    #
+    # THE PREFIX BEFORE THE COMMA IS INVENTED, AND THAT IS THE POINT. The
+    # audit records this badge as "<redacted>, 0 new notifications" on two
+    # surfaces (_audit/2026-08-31-linkedin-lift.md:174) -- its leading word is
+    # not a string this repository holds. The selector never matches it: the
+    # href says WHICH badge and the measured tail says it IS one. A fixture
+    # whose prefix is arbitrary and which still resolves is the proof of that.
+    f'<a href="/mynetwork/" aria-label="Nav, 0 {dom.INVITATION_BADGE_TAIL}s">n</a>'
+    '<a href="/mynetwork/grow/">grow your network</a>'
     "</main></body></html>"
 )
 
@@ -223,6 +238,11 @@ def build_all() -> dict[str, str]:
         "compose_recipient_selector": dom.compose_recipient_selector(),
         "compose_body_selector": dom.compose_body_selector(),
         "compose_send_selector": dom.compose_send_selector(),
+        # NO ARGUMENT AT ALL -- both halves are module constants measured on
+        # the live nav, so there is no name in it and nothing a caller can aim
+        # it with. It is resolved here rather than declared because the page
+        # above draws exactly the pair it has to tell apart.
+        "invitation_badge_selector": dom.invitation_badge_selector(),
     }
 
 

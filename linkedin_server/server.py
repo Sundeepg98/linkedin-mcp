@@ -81,6 +81,16 @@ and the neighbouring refusal it would be judged against is itself an inference.
 So the tool exists, is registered, names the measurement that would lift it,
 and loads nothing until somebody takes it.
 
+**ITS READER WAS BUILT ON 2026-09-04, BEHIND THE REFUSAL.** That is not a
+contradiction and the distinction is the whole point: the boundary was opened
+on 2026-09-03 and NOTHING READ THE ADDRESS -- the state
+``_audit/2026-09-03-linkedin-gap-blockers.md`` calls "a capability that exists
+on paper", where "the refusal is gone and the answer is still unavailable, and
+nothing in the tool surface would tell you which of those two states you are
+in". So the rows, the Message-button member ids and the badge readings are all
+written and tested; what is still missing is the one measurement, and the tool
+says so rather than being empty behind the constant.
+
 THAT THIRD COLUMN EMPTIED ON 2026-09-02 AND THE FACT IS WORTH A SENTENCE
 RATHER THAN A ZERO. It held one member, ``linkedin_send_message``, which was
 registered and gated and refused; it now performs, so **every write tool on
@@ -1319,6 +1329,18 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
 #: and the date, e.g. ``{"before": 3, "after": 3, "measured": "2026-09-04"}``,
 #: and ``linkedin_connections`` starts working without any other change.
 #:
+#: THE READER BEHIND IT IS BUILT AS OF 2026-09-04, which changes what this
+#: constant gates. It used to gate an EMPTY branch, and the comment that sat
+#: here said the reader would be "built when the cost is known, against a real
+#: badge reading, rather than written now and left untested behind a constant
+#: nobody can flip". That was reversed deliberately: a boundary opened with
+#: nothing behind it is a capability that exists on paper, and this address is
+#: the worked example of one in
+#: ``_audit/2026-09-03-linkedin-gap-blockers.md`` A10 and A12 -- "the refusal
+#: is gone and the answer is still unavailable, and nothing in the tool
+#: surface would tell you which of those two states you are in". So the tool
+#: still refuses, for the reason below, and the work is finished behind it.
+#:
 #: WHY IT IS NOT MEASURED YET, both halves recorded because the second is the
 #: one that will trip the next person:
 #:
@@ -1342,15 +1364,127 @@ CONNECTIONS_BADGE_COST: Optional[dict[str, Any]] = None
 CONNECTIONS_URL = f"{BASE_URL}/mynetwork/invite-connect/connections/"
 
 
+async def _read_connection_rows(
+    page: Any, limit: int
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """His connections, with the member id off each Message button.
+
+    Returns ``(rows, census)``. THE CENSUS IS NOT A GARNISH: it is what lets a
+    zero say what it saw. ``harvest_census`` runs the IDENTICAL walk under a
+    flag and additionally reports how many keyed person anchors the page
+    offered and how many were discarded for carrying no text -- so "the page
+    had no people on it" and "the walk found forty and the parser refused
+    every one" stop being the same answer. This package met the
+    uninterpretable zero four times in one day; it does not get to produce a
+    fifth.
+
+    ZERO EXTRA PAGE LOADS AND ZERO NEW INJECTED SCRIPTS. Both halves run
+    scripts this package already ships and ``tests/test_readonly.py`` already
+    declares -- ``HARVEST_LINKED_CARDS_JS`` and ``RECIPIENT_IDS_JS`` -- so the
+    ``page.evaluate`` waiver budget pinned at sixteen does not move for this
+    capability.
+
+    THE JOIN IS BY SLUG AND THE JOINER IS THE ONE ALREADY IN USE.
+    :func:`_attach_recipient_ids` is CALLED rather than reimplemented, so this
+    surface inherits a tested joiner instead of a second one written from the
+    same description. Its two invariants are exactly the ones that matter
+    here: the reader returns one entry PER BUTTON and the harvest one row PER
+    PERSON, and those lists are different lengths -- so pairing them by index
+    would attach a stranger's identifier to somebody else's row; and a row
+    with no button gets ``None``, never ``""``.
+
+    ``sibling_rows`` IS NOT USED, unlike ``who_viewed_me``. That flag exists
+    because LinkedIn draws a privacy-limited VIEWER with no link at all. A
+    1st-degree connection is not privacy-limited to him -- the Help Center
+    describes this page as drawing each name with a Message control beside it
+    -- so turning it on would harvest this page's chrome and call it people.
+
+    **THE IDS IT RETURNS ARE IDENTIFIERS AND THEY LEAVE AS DATA.** Nothing
+    here logs, prints or formats one, and the census counts them without ever
+    holding one: ``with_recipient_id`` is a length, not a list.
+    """
+    census: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE, the discipline the dom readers keep. A census
+        # that could not run must not come back looking like a page that
+        # offered nothing.
+        "anchors_keyed": None,
+        "dropped_empty_text": None,
+        "rows_parsed": None,
+        "rows_unparsed": None,
+        "named_by_link": None,
+        "named_by_row": None,
+        "message_buttons": None,
+        "ids_unattributable": None,
+        "with_recipient_id": None,
+        "recipient_reader_error": None,
+    }
+    reading = await dom.harvest_census(
+        page, href_pattern=dom.PERSON_HREF, max_items=limit * 3
+    )
+    census["anchors_keyed"] = reading.get("anchors_keyed")
+    census["dropped_empty_text"] = reading.get("dropped_empty_text")
+    rows, dropped = dom.parse_all(
+        reading.get("rows") or [], shape.parse_connection_card
+    )
+    census["rows_parsed"] = len(rows)
+    census["rows_unparsed"] = dropped
+    census["named_by_link"] = sum(1 for r in rows if r.get("named_by") == "link")
+    census["named_by_row"] = sum(1 for r in rows if r.get("named_by") == "row")
+
+    # THE BUTTON COUNT IS TAKEN SEPARATELY FROM THE JOIN, on purpose. The
+    # joiner reports nothing about what it saw, so without this a row set
+    # carrying no ids at all cannot say whether the page drew no Message
+    # buttons or drew forty the slug walk could not attribute -- and those are
+    # a fact about the RELATIONSHIP and a fact about the PAGE STRUCTURE
+    # respectively.
+    try:
+        buttons = await dom.read_recipient_ids(page)
+    except Exception as exc:  # noqa: BLE001 - a census never breaks the read
+        buttons = {"rows": [], "buttons": 0, "error": type(exc).__name__}
+    census["message_buttons"] = buttons.get("buttons")
+    census["recipient_reader_error"] = buttons.get("error")
+    census["ids_unattributable"] = sum(
+        1
+        for entry in buttons.get("rows") or []
+        if entry.get("recipient") and not entry.get("slug")
+    )
+
+    await _attach_recipient_ids(page, rows)
+    census["with_recipient_id"] = sum(1 for row in rows if row.get("recipient_id"))
+    return rows, census
+
+
+def _connections_refusal(reason: str, why: str, **extra: Any) -> dict[str, Any]:
+    """One shape for every way this tool declines, so none of them is softer.
+
+    A refusal that varies its shape teaches a caller to read only the branches
+    it recognises. Every one below carries ``readable: False``, an empty
+    ``rows``, the reason, and whatever it DID see -- which is the rule this
+    repository wrote down after "zero matched" produced two wrong diagnoses in
+    a single day.
+    """
+    out: dict[str, Any] = {
+        "readable": False,
+        "rows": [],
+        "returned": 0,
+        "refused": reason,
+        "why": why,
+        "the_address_is_admitted": CONNECTIONS_URL,
+    }
+    out.update(extra)
+    return out
+
+
 @mcp.tool()
 async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
-    """The people he is connected to. SHIPS REFUSING, and that is the design.
+    """The people he is connected to, with the id needed to message them.
 
     ================= READ THIS BEFORE REPORTING IT BROKEN =================
-    THIS TOOL REFUSES TODAY. Not because it is unfinished -- the read boundary
-    admits the address and the route works -- but because opening the page may
-    spend something nobody has measured, and the operator's standing rule is
-    that a cost is measured before it is paid, never estimated.
+    THIS TOOL REFUSES TODAY, AND THE READER BEHIND THE REFUSAL IS BUILT. Not
+    because it is unfinished -- the read boundary admits the address, the
+    route works and the rows parse -- but because opening the page may spend
+    something nobody has measured, and the operator's standing rule is that a
+    cost is measured before it is paid, never estimated.
     =======================================================================
 
     WHY THE CAPABILITY EXISTS AT ALL. The operator asked why this server cannot
@@ -1361,6 +1495,12 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     this tool sends nothing and issues nothing. That was ruled and fixed on
     2026-09-03; ``readonly.py`` names the two substrings and carries the whole
     argument, so it is not repeated here.
+
+    WHAT IT RETURNS WHEN IT RETURNS. One row per connection: name, headline,
+    profile link, and ``recipient_id`` -- the member id LinkedIn writes into
+    the Message button drawn beside that person's name. ``recipient_id`` is
+    null where LinkedIn drew no such button, which is a fact about the
+    relationship rather than a failure, and it is never an empty string.
 
     WHAT IT UNLOCKS. The identifier route needs a surface where LinkedIn draws
     a per-person conversation control, because the href on that control is the
@@ -1378,27 +1518,32 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     other two members both cost a badge does not get admitted on the hope that
     it is the exception." Only notifications and messaging were ever measured.
 
-    The one measured fact next door is the closest thing to an answer:
-    ``writes.py`` records that his own profile page "carries no
-    pending-invitation counter, so this route costs no badge". The counter is
-    known to live on one page and known not to live on another. This one is
-    open.
+    THE BADGE IS READ BEFORE AND AFTER, AND AN UNREADABLE BADGE REFUSES. That
+    is ruled, not a preference. The before reading is taken off the feed's nav,
+    which is where this package already reads the messaging badge; the after
+    reading is taken off the connections page's OWN nav, so it costs no third
+    navigation. Only ``after == before`` certifies that the load consumed
+    nothing: a DROP is the harm this gate exists to catch, and a RISE cannot be
+    told apart from a drop masked by an invitation arriving mid-read. Both
+    refuse, and both say what they saw.
 
-    IT DOES NOT LOAD ANYTHING TO TELL YOU THIS. A tool that refuses should not
-    spend a browser session doing it, so the refusal is decided from
-    :data:`CONNECTIONS_BADGE_COST` before any page is opened.
+    IT DOES NOT LOAD ANYTHING TO TELL YOU IT IS REFUSING FOR WANT OF THAT
+    MEASUREMENT. A tool that refuses should not spend a browser session doing
+    it, so that refusal is decided from :data:`CONNECTIONS_BADGE_COST` before
+    any page is opened.
+
+    Args:
+        limit: maximum rows to return (default 25, max 100).
 
     Returns:
-        Either the refusal, naming the measurement that would lift it, or --
-        once that measurement is recorded -- the connection rows.
+        Either a refusal, naming what it saw and what would lift it, or --
+        once the cost is recorded -- the connection rows.
     """
+    limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     if CONNECTIONS_BADGE_COST is None:
-        return {
-            "readable": False,
-            "rows": [],
-            "returned": 0,
-            "refused": "the side-effect cost of this page is UNMEASURED",
-            "why": (
+        return _connections_refusal(
+            "the side-effect cost of this page is UNMEASURED",
+            (
                 "/mynetwork/ is refused because it consumes the pending-"
                 "invitation badge. Whether this sub-page does is not known, "
                 "and the neighbouring refusal is itself an inference rather "
@@ -1406,35 +1551,122 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 "person's invitation seen -- a durable record spent by "
                 "somebody who is not him."
             ),
-            "what_would_lift_it": (
+            what_would_lift_it=(
                 "read the invitation badge through the feed or profile census "
                 "BEFORE and AFTER one load of this address, exactly as "
                 "CENSUS_SURFACE_COST prescribes for messaging, then record "
                 "both values in server.CONNECTIONS_BADGE_COST. This tool then "
                 "works with no other change."
             ),
-            "and_the_measurement_needs_a_non_zero_badge": (
+            and_the_measurement_needs_a_non_zero_badge=(
                 "a zero before and a zero after cannot distinguish 'consumed "
                 "nothing' from 'there was nothing to consume'. On 2026-09-03 "
                 "the badge read zero, so the reading could not be taken."
             ),
-            "the_address_is_admitted": CONNECTIONS_URL,
-            "pages_loaded": 0,
-            "verified": (
+            the_reader_behind_this_refusal_is_built=(
+                "server._read_connection_rows harvests the rows and joins the "
+                "member id off each Message button BY SLUG. Recording the cost "
+                "above is the only thing between this refusal and a result -- "
+                "there is no second change to make."
+            ),
+            pages_loaded=0,
+            verified=(
                 "NOTHING WAS LOADED. This refusal is decided from a declared "
                 "constant, so it costs no page and no browser session."
             ),
-        }
-    # No branch below this line yet, and that is deliberate: the reader is
-    # built when the cost is known, against a real badge reading, rather than
-    # written now and left untested behind a constant nobody can flip.
-    return _error(
-        ExtractionFailedError(
-            "CONNECTIONS_BADGE_COST is set but no reader has been built for "
-            "this surface yet. Recording the cost does not by itself make the "
-            "page readable -- build the reader in the same change."
         )
-    )
+    try:
+        async with BROWSER.session() as page:
+            # 1. BEFORE, off the feed's nav. /feed/ is on the read allowlist,
+            #    carries the nav badge on every signed-in render, and is the
+            #    same route linkedin_new_messages already takes for its own
+            #    badge. It costs one of the two navigations this call may make.
+            landed = await BROWSER.goto(page, FEED_URL)
+            assert_not_authwall(landed, surface="feed")
+            before = shape.invitation_badge(await dom.read_invitation_badge(page))
+            if before["state"] != "read":
+                return _connections_refusal(
+                    "the pending-invitation badge could not be read BEFORE",
+                    (
+                        "this tool may not open the connections list without a "
+                        "before-and-after reading of that badge, and the "
+                        "before reading failed. NOTHING WAS SPENT: the "
+                        "connections page was not opened."
+                    ),
+                    badge_before=before,
+                    pages_loaded=1,
+                    source_url=landed,
+                )
+
+            # 2. THE PAGE.
+            landed = await BROWSER.goto(page, CONNECTIONS_URL)
+            assert_not_authwall(landed, surface="connections")
+
+            # 3. AFTER, off the nav of the page just loaded. NO THIRD
+            #    NAVIGATION -- the badge renders on every signed-in page,
+            #    which is the property read_messaging_badge already relies on.
+            after = shape.invitation_badge(await dom.read_invitation_badge(page))
+            rows, census = await _read_connection_rows(page, limit)
+
+            # THE ROWS ARE READ BEFORE THE VERDICT AND WITHHELD AFTER IT, and
+            # that order is deliberate. The page is open by now, so whatever
+            # this load cost is already spent; reading is free at this point
+            # and the census is what makes a refusal informative. What a
+            # failed verdict withholds is the RESULT, because a tool gated on
+            # a cost it could not confirm must not hand back a clean answer as
+            # though it had.
+            if after["state"] != "read":
+                return _connections_refusal(
+                    "the pending-invitation badge could not be read AFTER",
+                    (
+                        "the page WAS opened, so whatever it costs has already "
+                        "been spent -- stated rather than hidden. What cannot "
+                        "be said is whether it consumed one of his pending "
+                        "invitations, and a tool gated on that question does "
+                        "not return a result it cannot certify."
+                    ),
+                    badge_before=before,
+                    badge_after=after,
+                    census=census,
+                    pages_loaded=2,
+                    source_url=landed,
+                )
+            if after["pending"] != before["pending"]:
+                return _connections_refusal(
+                    "the pending-invitation badge MOVED across this load",
+                    (
+                        "only an unchanged badge certifies that opening this "
+                        "page consumed nothing. A DROP is exactly the harm "
+                        "this gate exists to catch. A RISE cannot be told "
+                        "apart from a drop masked by an invitation arriving "
+                        "mid-read, so it refuses too rather than reporting a "
+                        "reading it cannot interpret."
+                    ),
+                    badge_before=before,
+                    badge_after=after,
+                    census=census,
+                    pages_loaded=2,
+                    source_url=landed,
+                    and_this_falsifies_the_recorded_cost=(
+                        "server.CONNECTIONS_BADGE_COST says this load is free. "
+                        "This run disagrees with it. Re-take the measurement "
+                        "before trusting that constant again."
+                    ),
+                )
+            return shape.envelope(
+                rows,
+                limit=limit,
+                source_url=landed,
+                pages_loaded=2,
+                dropped=census.get("rows_unparsed") or 0,
+                extra={
+                    "badge_before": before,
+                    "badge_after": after,
+                    "census": census,
+                },
+            )
+    except Exception as exc:
+        return _error(exc)
 
 
 @mcp.tool()
