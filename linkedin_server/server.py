@@ -1512,11 +1512,31 @@ def _connections_source_url(landed: str) -> str:
     back, and no redirect can smuggle anything out through a field that is not
     read from the page. A class removed beats a class filtered.
 
-    WHEN IT DOES NOT MATCH, IT SAYS SO RATHER THAN LYING. Returning the
-    constant unconditionally would misreport where the rows came from the one
-    time it mattered, so a mismatch falls back to the shared substitution and
-    the caller gets ``landed_on_the_admitted_address: false`` beside it. That
-    is the best-effort path, and it is marked as one.
+    WHEN IT DOES NOT MATCH, IT SAYS SO RATHER THAN LYING -- AND IT DROPS THE
+    QUERY. Returning the constant unconditionally would misreport where the
+    rows came from the one time it mattered, so a mismatch publishes the
+    landed PATH, shaped, and the caller gets
+    ``landed_on_the_admitted_address: false`` beside it.
+
+    **THE QUERY IS DROPPED BECAUSE THAT IS WHERE THE GAP LIVES.** The first
+    version of this helper shaped the whole landed url on the mismatch branch
+    and its own comment claimed the token class was removed. Measured, it was
+    not::
+
+        _connections_source_url(".../connections/?u=<member token>")
+            -> ".../connections/?u=<member token>"     TOKEN SURVIVED
+
+    The claim was true of the matching branch and false of the only branch
+    where a token could ever appear, which is the branch that matters. Taking
+    the path alone removes the class by CONSTRUCTION rather than by filtering
+    it: a query string read off the page is never published at all, and what
+    remains -- a slug or a urn in a path segment -- is exactly what the shared
+    predicate is measured to handle.
+
+    The cost is named rather than hidden: a redirect's query is not reported,
+    so a caller diagnosing an unexpected landing sees the page and not the
+    parameters. That is the right way round for a surface made of other
+    people.
 
     **THIS IS NOT A REDACTION PROMISE ABOUT THE ROWS.** The rows carry third
     parties' names, profile urls and member ids ON PURPOSE -- that is the
@@ -1529,7 +1549,7 @@ def _connections_source_url(landed: str) -> str:
     """
     if landed == CONNECTIONS_URL:
         return CONNECTIONS_URL
-    return shape.census_substitute(landed)
+    return shape.census_substitute(_landed_path(landed))
 
 
 @mcp.tool()

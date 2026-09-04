@@ -1175,6 +1175,67 @@ async def test_no_identifier_reaches_a_refusal_payload(monkeypatch):
     assert marker not in repr(out), "the withheld rows reached the refusal"
 
 
+#: Landings this tool could plausibly be handed, built rather than written.
+#: The two query cases are the ones that used to leak.
+def _source_url_probes() -> list[tuple[str, str, str]]:
+    base = "https://www.linkedin.com"
+    token = "AC" + "oAAB" + "0" * 4 + "xyz"
+    slug = "some-real-slug-99"
+    return [
+        ("the admitted address", server.CONNECTIONS_URL, token),
+        ("token in a query", server.CONNECTIONS_URL + "?u=" + token, token),
+        ("token in a recipient query", base + "/messaging/compose/?recipient=" + token, token),
+        ("redirect to a profile", base + "/in/" + slug + "/", slug),
+        ("token as an /in/ segment", base + "/in/" + token + "/", token),
+        ("composite urn in a path",
+         base + "/x/urn" + ":li:fsd_profileGeo:(" + token + ",GEO)/", token),
+    ]
+
+
+@pytest.mark.parametrize(
+    "label,landed,secret", _source_url_probes(), ids=lambda v: v if isinstance(v, str) else ""
+)
+def test_no_identifier_leaves_through_source_url(label, landed, secret):
+    """``source_url`` is the one field on this tool read off the PAGE.
+
+    The rows publish third parties' identifiers on purpose; this field does
+    not, and it is the only place where a redirect could smuggle one out of a
+    surface made entirely of other people.
+    """
+    assert secret not in server._connections_source_url(landed), label
+
+
+def test_the_source_url_closure_was_shown_leaking_first():
+    """THE CONTROL, and it is a control over MY OWN FIRST ATTEMPT.
+
+    The first version of ``_connections_source_url`` shaped the whole landed
+    url on the mismatch branch, and its comment claimed the member-token class
+    was removed. Measured, it was not: the claim held on the MATCHING branch
+    and failed on the only branch where a token can appear.
+
+        shape.census_substitute(".../connections/?u=<token>")
+            -> unchanged. TOKEN SURVIVED.
+
+    So the pre-fix behaviour is reconstructed here and asserted to leak. If
+    the shared predicate ever learns bare member tokens this fails, and the
+    query-dropping in the helper can be revisited deliberately rather than
+    left in place because nobody rechecked.
+    """
+    token = "AC" + "oAAB" + "0" * 4 + "xyz"
+    landed = server.CONNECTIONS_URL + "?u=" + token
+
+    # The old body, rebuilt: shape the WHOLE url.
+    pre_fix = shape.census_substitute(landed)
+    assert token in pre_fix, (
+        "the shared predicate now covers bare member tokens -- revisit the "
+        "query-dropping in _connections_source_url rather than keeping it "
+        "for a reason that has expired"
+    )
+
+    # And the shipped body does not.
+    assert token not in server._connections_source_url(landed)
+
+
 def test_the_docstrings_on_this_path_carry_no_identifier():
     """A docstring is a sink too: it ships in the tool description and reaches
     every model that lists the surface."""

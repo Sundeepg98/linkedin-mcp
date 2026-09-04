@@ -323,6 +323,52 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         #       have.
         ("server.py", "linkedin_surface_census"),
         ("server.py", "linkedin_my_profile"),
+        # EIGHTH, 2026-09-04, and it is the first consumer whose surface is
+        # made ENTIRELY of third parties -- so the question this enumeration
+        # exists to force is not "is the predicate correct" but "is it correct
+        # over rows that are all other people". Answered by MEASUREMENT, and
+        # the answer is RIGHT BUT INSUFFICIENT:
+        #
+        #     /in/<slug>/                             -> /in/<member>/  CHANGED
+        #     /x/urn:li:fsd_profileGeo:(<token>,GEO)/ -> /x/<urn>/      CHANGED
+        #     /y/?q=urn:li:fsd_profile:<token>        -> /y/?q=<urn>    CHANGED
+        #     /feed/update/<10 digits>/               -> <id>           CHANGED
+        #     /...connections/?u=<member token>            UNCHANGED  <-- gap
+        #
+        # A BARE MEMBER TOKEN IN A QUERY SURVIVES THE SUBSTITUTION, and that
+        # is the one identifier class this particular surface traffics in:
+        # every Message control on the connections page carries
+        # `?recipient=<token>`. A gap elsewhere is theoretical; here it is the
+        # page's own vocabulary.
+        #
+        # WHAT WAS DONE ABOUT IT, and it is deliberately not a widening. The
+        # predicate was NOT changed -- eight consumers publish through it and
+        # only this one has evidence for the gap -- and no second redactor was
+        # written, because a package with two privacy boundaries has two that
+        # can disagree. Instead `_connections_source_url` returns the module
+        # CONSTANT when the landing matches it, and on a mismatch publishes
+        # the landed PATH -- shaped by this predicate, with THE QUERY DROPPED,
+        # because the query is where the gap lives. That removes the token
+        # class by construction rather than filtering it, and leaves the
+        # predicate handling exactly what it is measured to handle.
+        #
+        # THE FIRST VERSION OF THAT HELPER DID NOT DO THIS AND ITS COMMENT
+        # CLAIMED IT DID. It shaped the whole landed url, which is correct on
+        # the matching branch and useless on the only branch where a token can
+        # appear. Caught by measuring the helper's own claim rather than by
+        # re-reading it; `test_the_source_url_closure_was_shown_leaking_first`
+        # now pins the pre-fix behaviour as a control, so if this predicate
+        # ever learns bare member tokens the query-dropping gets revisited
+        # deliberately instead of outliving its reason.
+        #
+        # AND THE `my_profile` LESSON APPLIES HERE HARDER THAN THERE. That
+        # entry warns a shaped source_url above deliberately published
+        # identifiers claims a property the payload lacks. This payload
+        # publishes OTHER PEOPLE'S names, profile urls and member ids on
+        # purpose, so the false claim would be worse -- hence
+        # `rows_are_not_redacted` is returned beside it, saying in the payload
+        # what the shaping does and does not mean.
+        ("server.py", "_connections_source_url"),
     }, sorted(callers)
 
 
