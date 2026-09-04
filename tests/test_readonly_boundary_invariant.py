@@ -411,8 +411,35 @@ PINNED = (
 #: moved is one entry in a tuple of string literals -- the class this file
 #: records as matching on every Python -- which is the same class of move as
 #: the 2026-09-03 connections admission below.
+#: RE-FROZEN 2026-09-04 (third time today), AND ONLY `<functions>` MOVED:
+#:
+#:     <functions>   4a6eba4033964196 -> d7e1d0922e3af446
+#:
+#: EXACTLY THE SHAPE OF THE 2026-08-24 MOVE RECORDED BELOW, and for the same
+#: kind of reason: a sentence in `assert_read_url`'s error message. All four
+#: CONSTANT digests are byte-identical -- both denylists, both exemption
+#: tables, the pattern list and the mutation tables -- which is what proves the
+#: change touched the MESSAGE and widened no boundary.
+#:
+#: WHAT THE MESSAGE NOW SAYS. The forbidden loop runs FIRST and raised naming
+#: only the substring, so a reader took the substring for the wall. It is
+#: usually not the wall: the allowlist is closed by default, and every address
+#: measured on 2026-09-04 that tripped a forbidden substring ALSO had no
+#: pattern admitting it. The refusal now says which case it is.
+#:
+#: IT MISLED THREE READERS BEFORE IT WAS FIXED -- the blockers ledger's
+#: section 2, a measurement wave the next morning, and the team lead relaying
+#: that upward as an instruction to narrow the guards. That is why this is a
+#: code change and not a note.
+#:
+#: NO REFUSAL WAS REMOVED. The raise is unconditional either way; only the
+#: sentence differs. `tests/test_refusal_names_both_gates.py` proves BOTH
+#: branches fire -- the second one by emptying the exemption tables, because
+#: the shipped boundary deliberately contains no address that a pattern admits
+#: and a substring still refuses.
+#:
 READONLY_AST_AT_LAST_REFREEZE = {
-    "<functions>": "4a6eba4033964196",
+    "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
     "_ALLOWED_URL_PATTERNS": "3791e30def5f29bc",

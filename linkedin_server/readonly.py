@@ -998,11 +998,48 @@ def assert_read_url(url: str) -> str:
             # substring its pattern did not name.
             if bad in exempted:
                 continue
+            # WHETHER THE OTHER GATE WOULD HAVE REFUSED IT TOO, and this
+            # clause exists because its absence MISLED THREE READERS.
+            #
+            # This loop runs FIRST, so a refusal from here names the substring
+            # and stops -- and a reader takes the substring for the wall. It
+            # is usually not the wall. Every address measured on 2026-09-04
+            # that tripped a forbidden substring ALSO had no pattern admitting
+            # it, so narrowing the substring would have freed nothing.
+            #
+            # THE THREE READERS, because a defect that misled one reader is an
+            # anecdote and three is a property of the message: the blockers
+            # ledger's section 2 filed `/invite` and `/follow` as the blocker
+            # for rows they do not gate; a measurement wave reported the same
+            # two as "the defect" the next morning; and the team lead relayed
+            # that upward as an instruction to narrow the guards. All three
+            # were reading a refusal that told them half of what it knew.
+            #
+            # IT ADDS INFORMATION AND REMOVES NO REFUSAL. The raise is
+            # unconditional either way; only the sentence differs.
+            #
+            # THE WORDING IS CONSTRAINED, and deliberately so. Two tests tell
+            # the two gates apart BY THE MESSAGE --
+            # `test_readonly.py` asserts "not a read surface" is present here
+            # and that the allowlist's own sentence is ABSENT. So this clause
+            # must not borrow that sentence's words, and it does not.
+            admitted = any(
+                pattern.match(url) for pattern in _ALLOWED_URL_PATTERNS
+            )
+            second_gate = (
+                "A READ PATTERN DOES ADMIT THIS ADDRESS, so this substring is "
+                "the ONLY thing refusing it -- the refusal is a decision "
+                "about the substring rather than about the address."
+                if admitted
+                else "AND NO READ PATTERN ADMITS THIS ADDRESS EITHER, so "
+                "removing this substring would not make it readable. Both "
+                "gates refuse it, and the substring is merely the first."
+            )
             raise WriteAttemptError(
                 f"navigation blocked: {url!r} contains {bad!r}, which is not a "
                 "read surface. This is the READ door and it refuses; a write "
                 "goes through assert_write_url, which is narrower still. If "
-                "you reached this, a url was built wrong."
+                f"you reached this, a url was built wrong. {second_gate}"
             )
 
     for pattern in _ALLOWED_URL_PATTERNS:
