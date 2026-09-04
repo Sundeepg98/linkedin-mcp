@@ -48,8 +48,30 @@ WHAT IS HUNTED
    committed fixture with one that appears in no fixture is a pre-image by
    construction. This is the check that found a SECOND sanitisation script
    nobody had flagged; see :func:`key_shaped_tables`.
-2. **Five identifier shapes** -- email, phone, ``/in/`` slug, LinkedIn opaque
-   ids (company, member token, numeric urn) and credential/session tokens.
+2. **The identifier shapes** -- email, phone (contiguous, E.164 and GROUPED),
+   ``/in/`` slug, LinkedIn opaque ids (company, member token, numeric urn and
+   OPAQUE urn), credential/session tokens, and the path family.
+
+   THE THREE ADDED ON 2026-09-04 EACH CLOSED A MEASURED HOLE, and the holes
+   are worth naming because each one is a shape the guard could see in one
+   spelling and not in another -- the same defect as ``[\/]`` in the path
+   rules, one shape to the left:
+
+   * ``PHONE_SHAPE`` wants TEN CONTIGUOUS digits and ``PHONE_E164_SHAPE``
+     allows ONE separator, so ``98765 43210`` -- the way a person actually
+     writes their mobile -- passed both. Measured: the grouped rule fires on
+     ZERO of the files here, and matches all six spellings tried against it;
+   * ``URN_ID_SHAPE`` requires DIGITS behind the prefix, so
+     ``urn:li:member:<opaque>`` and ``urn:li:digitalmediaAsset:<opaque>``
+     were invisible to every rule in this file. Measured before it was
+     admitted: 17 files carry an opaque-id urn, but 16 of them are already
+     covered by ``MEMBER_TOKEN_SHAPE`` or are all-digit ids belonging to
+     ``URN_ID_SHAPE``. **One file survives, carrying one distinct value**,
+     which is what makes the rule affordable rather than a mass allowlist.
+
+   NOTHING HERE CHANGES THE PARAGRAPH ABOVE. A phone, a urn and a member
+   token have shapes; a NAME still does not, and no rule added on any date
+   will give it one.
 
 A GUARD IS NOT EXEMPT FROM WHAT IT GUARDS. The first draft of the shared
 spelling expander in ``tests/leakwalk.py`` quoted the real job title, in both
@@ -193,6 +215,12 @@ SYNTHETIC_IDS = frozenset(
         "84120775", "87332095", "88410926", "902611",
         "7400000000000000001", "7400000000000000002", "7400000000000000003",
         "7490000000000000001", "7490000000000000002",
+        # tests/test_writes.py REACTED_ITEM, substituted 2026-09-04. The
+        # value it replaced was nineteen digits drawn from three distinct
+        # characters -- invented, and undeclared, so this guard was RED on
+        # that file for eight commits. Nothing between a commit and the
+        # disk runs this guard; CI does, and CI only sees a push.
+        "7400000000000000004",
     }
 )
 
@@ -225,6 +253,18 @@ SYNTHETIC_MEMBER_TOKENS = (
     "ACoAASYNTHETICSYNTHETICSYNTHETIC0000004",
 )
 
+#: Opaque (non-numeric) urn ids that are invented. PER VALUE, never by
+#: token: this repo already ruled that ``fake`` may not earn an exemption
+#: because it ASSERTS synthetic-ness rather than evidencing it, and
+#: ``INVENTED-FOR-THIS-TEST`` asserts exactly as loudly. It is listed here
+#: instead, by its whole value, so that widening the exemption is a diff.
+#:
+#: THIS SET IS THE WHOLE COST OF THE OPAQUE-URN RULE. It was measured
+#: BEFORE the rule was admitted rather than filled in afterwards to make a
+#: red run go green, which is the failure mode the rule would otherwise
+#: have: 17 files carry an opaque-id urn and 16 need no entry.
+SYNTHETIC_OPAQUE_URN_IDS = frozenset({"INVENTED-FOR-THIS-TEST"})
+
 #: A credential value that is obviously not one.
 PLACEHOLDER_MARKERS = ("xxx", "dummy", "fake", "redacted", "placeholder", "<", "...")
 
@@ -241,8 +281,13 @@ DECLARED_PLANTS = {
     ("tests/test_no_committed_identity.py", "email"): 2,
     ("tests/test_no_committed_identity.py", "linkedin slug"): 1,
     ("tests/test_no_committed_identity.py", "member token"): 3,
-    ("tests/test_no_committed_identity.py", "phone"): 1,
+    # TWO, not one, since 2026-09-04: the contiguous plant and the GROUPED
+    # plant are different spellings of the same class and each proves a
+    # different rule can fail. Collapsing them to one would leave whichever
+    # rule was dropped certifying without a control.
+    ("tests/test_no_committed_identity.py", "phone"): 2,
     ("tests/test_no_committed_identity.py", "urn id"): 1,
+    ("tests/test_no_committed_identity.py", "opaque urn"): 1,
     # The fixture guard's can-it-fail control, whose synthetic member token is
     # deliberately absent from the allowlist -- that IS the property it tests.
     ("tests/test_sdui_surfaces_fixture.py", "member token"): 1,
@@ -298,6 +343,26 @@ HASHY = re.compile(r"(requirements.*\.txt|\.lock)$", re.I)
 EMAIL_SHAPE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,24}")
 PHONE_SHAPE = re.compile(r"(?<![\d.])(?:\+?91[-\s]?)?[6-9]\d{9}(?![\d.])")
 PHONE_E164_SHAPE = re.compile(r"\+\d{1,3}[-\s]?\d{6,12}")
+
+#: THE SPELLING A PERSON ACTUALLY WRITES, added 2026-09-04 and the reason is
+#: the generalisation this file already states about backslashes: **a control
+#: must cover every spelling the value can be WRITTEN in.** The two rules
+#: above cover ten CONTIGUOUS digits and a ``+CC`` followed by ONE separator.
+#: Neither sees ``98765 43210``, and that is the form on a signature block.
+#:
+#: EXACTLY TEN NATIONAL DIGITS, opening 6-9, split 5+5, 4+6 or 3+3+4. The
+#: total is pinned because a looser rule was measured first and it fired on
+#: ``componentkey="dddd-dddd-dddd"`` in a committed fixture -- twelve digits,
+#: LinkedIn's own markup, and precisely the false positive that gets a shape
+#: guard disabled within a day. With the total pinned it fires on NOTHING in
+#: this repository, which is the count that made it admissible.
+PHONE_GROUPED_SHAPE = re.compile(
+    r"(?<![\d.])(?:\+?91[\s\-])?"
+    r"(?:[6-9]\d{4}[\s\-]\d{5}"
+    r"|[6-9]\d{3}[\s\-]\d{6}"
+    r"|[6-9]\d{2}[\s\-]\d{3}[\s\-]\d{4})"
+    r"(?![\d.\-])"
+)
 SLUG_SHAPE = re.compile(r"(?:linkedin\.com)?/in/([A-Za-z0-9\-_%]{3,})")
 COMPANY_ID_SHAPE = re.compile(r"(?:/company/|currentCompany=|companyId=)(\d{3,})")
 
@@ -310,6 +375,18 @@ MEMBER_TOKEN_SHAPE = re.compile(r"ACoAA[A-Za-z0-9_\-]{10,}")
 #: too noisy to sweep repo-wide -- prose says ``urn:li:activity:123`` -- but a
 #: prefix followed by a six-digit-or-longer id is never prose.
 URN_ID_SHAPE = re.compile(r"urn(?::|%3A)li(?::|%3A)[a-zA-Z_]+(?::|%3A)\(?(\d{6,})")
+
+#: THE SAME PREFIX WITH A NON-NUMERIC ID BEHIND IT, added 2026-09-04.
+#: ``URN_ID_SHAPE`` reads ``\d{6,}``, so every urn LinkedIn serves whose id
+#: is opaque rather than decimal -- ``urn:li:member:<uuid>``,
+#: ``urn:li:digitalmediaAsset:<opaque>`` -- walked past this whole module.
+#: The eight-character floor is what keeps it off prose; the ownership
+#: hand-offs live in :func:`_urn_opaque_ok` rather than in the pattern,
+#: because a lookahead that tried to say "not a member token, not decimal"
+#: had a hole exactly where the two rules meet.
+URN_OPAQUE_SHAPE = re.compile(
+    r"urn(?::|%3A)li(?::|%3A)[a-zA-Z_]+(?::|%3A)\(?([A-Za-z0-9_\-]{8,})"
+)
 
 JWT_SHAPE = re.compile(r"eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}")
 COOKIE_SHAPE = re.compile(
@@ -461,6 +538,30 @@ def _member_ok(match: re.Match[str], text: str) -> bool:
     return match.group(0).startswith(SYNTHETIC_MEMBER_TOKENS)
 
 
+def _urn_opaque_ok(match: re.Match[str], text: str) -> bool:
+    """An opaque urn id, minus the two territories that already own one.
+
+    THE HAND-OFFS ARE HERE AND NOT IN THE PATTERN, deliberately. A first
+    draft put them in a lookahead -- "not decimal, not ``ACoAA``" -- and it
+    left a hole precisely where the two rules meet: an id like ``ABC1234567``
+    carries a six-digit run, so the lookahead handed it to
+    :data:`URN_ID_SHAPE`, which anchors its digits at the START of the id and
+    does not match it either. Neither rule looked, and the seam was invisible
+    because each rule was individually correct.
+
+    So the deferral is explicit and total: all-digit ids belong to
+    :data:`URN_ID_SHAPE`, ``ACoAA`` ids belong to :data:`MEMBER_TOKEN_SHAPE`
+    (which is STRICTER -- it allows only declared tokens, so deferring does
+    not weaken anything), and everything else is this rule's to answer for.
+    """
+    ident = match.group(1)
+    if ident.isdigit():
+        return True
+    if ident.startswith(SYNTHETIC_MEMBER_TOKENS) or MEMBER_TOKEN_SHAPE.match(ident):
+        return True
+    return ident in SYNTHETIC_OPAQUE_URN_IDS or ident in SYNTHETIC_IDS
+
+
 def _credential_ok(match: re.Match[str], text: str) -> bool:
     value = match.group(1) if match.groups() else match.group(0)
     lowered = value.lower()
@@ -500,10 +601,12 @@ SHAPES: tuple[tuple[str, re.Pattern[str], object], ...] = (
     ("email", EMAIL_SHAPE, _email_ok),
     ("phone", PHONE_SHAPE, _phone_ok),
     ("phone", PHONE_E164_SHAPE, _phone_ok),
+    ("phone", PHONE_GROUPED_SHAPE, _phone_ok),
     ("linkedin slug", SLUG_SHAPE, _slug_ok),
     ("company id", COMPANY_ID_SHAPE, _id_ok),
     ("member token", MEMBER_TOKEN_SHAPE, _member_ok),
     ("urn id", URN_ID_SHAPE, _id_ok),
+    ("opaque urn", URN_OPAQUE_SHAPE, _urn_opaque_ok),
     ("credential", JWT_SHAPE, _credential_ok),
     ("credential", COOKIE_SHAPE, _credential_ok),
     # THE PATH FAMILY, added 2026-08-31. Ordered drive-root FIRST because it is
@@ -594,6 +697,19 @@ def test_the_sweep_actually_looked():
         ("company id", "/company/98765432"),
         ("member token", "urn%3Ali%3Afsd_profile%3AACoAAZz9Yy8Xx7Ww6Vv5Uu4Tt3Ss2Rr1Qq0Pp"),
         ("urn id", "urn:li:ugcPost:7511111111111111111"),
+        # THE TWO ADDED 2026-09-04, each shown failing before its rule was
+        # allowed to certify anything. Both are literals and both are
+        # therefore DECLARED in DECLARED_PLANTS, which is the convention
+        # every plant above follows except the composed path ones.
+        ("opaque urn", "urn:li:digitalmediaAsset:D5622AQFn8kR2mTq9Xy"),
+        # The number below is deliberately NOT the one SYNTHETIC_PHONES
+        # holds: a control built from an allowlisted value cannot fail.
+        # It is also not repeated in this comment, because the first draft
+        # WAS -- and this guard read the prose and counted three phones where
+        # the plant is one. The same thing happened to a probe script in this
+        # repo on 2026-09-04, and to two path comments on 2026-08-31: prose
+        # explaining a leak is a place the leak can live.
+        ("phone", "he can be reached on 98765 12345 any evening"),
         # NOT an li_at-shaped value: tests/test_no_committed_credential.py
         # hunts "AQ" + 40 chars across every tracked file and caught the
         # first version of this plant. Its guard is right and this control
@@ -654,6 +770,11 @@ def test_every_shape_can_actually_fail(shape, planted):
         ("company id", "/company/5417062"),
         ("member token", "ACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7"),
         ("urn id", "urn:li:ugcPost:7400000000000000001"),
+        # The one value SYNTHETIC_OPAQUE_URN_IDS holds, and the grouped
+        # spelling of the placeholder mobile. If either starts firing, the
+        # allowance has broken rather than the repo having changed.
+        ("opaque urn", "urn:li:member:INVENTED-FOR-THIS-TEST"),
+        ("phone", "the placeholder +91 98765 43210 is not a person"),
         ("credential", 'JSESSIONID="ajax:xxxxxxxxxxxxxxxxxxxxxxxx"'),
         # The two forms the cleanup on 2026-08-31 rewrote 49 real paths INTO.
         # If either of these ever starts failing, that commit's replacements

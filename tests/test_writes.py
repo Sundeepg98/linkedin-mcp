@@ -1928,7 +1928,21 @@ async def test_presence_in_a_partial_list_still_confirms_the_save(
 #: tests/test_writes_nine.py is a placeholder string -- but this test needs a
 #: target that actually PASSES the write door, which an opaque placeholder
 #: would not.
-REACTED_ITEM = "urn:li:activity:7000000000000000001"
+#:
+#: SUBSTITUTED 2026-09-04, and the reason is not that the old value was real.
+#: It was nineteen digits drawn from THREE distinct characters -- invented, on
+#: any reading of the entropy. It was also UNDECLARED, so
+#: tests/test_no_committed_identity.py flagged it as an unallowed urn id and
+#: went red, and it stayed red across eight commits because nothing between a
+#: commit and the disk runs that guard.
+#:
+#: The replacement is the next member of the family already declared in that
+#: guard's ``SYNTHETIC_IDS``. **A synthetic value that has to be argued for
+#: costs more than one that argues for itself** -- the same finding the
+#: connections fixture's member tokens were rewritten for the same day. Do not
+#: replace this with a fresh hand-typed number; take the next one in the
+#: series and declare it there.
+REACTED_ITEM = "urn:li:activity:7400000000000000004"
 
 #: THE SMALLEST MARKUP THAT SETTLES THE REACTION READER, following
 #: ``FEED_MARKUP`` in tests/test_writes_nine.py: one control wearing the OFF
