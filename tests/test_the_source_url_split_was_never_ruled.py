@@ -108,8 +108,31 @@ SHAPERS = frozenset(
         "_landed_path",
         "_shape_of",
         "_redact",
+        # ADDED 2026-09-04, AND THIS TEST IS WHY IT WAS NOTICED. An hour after
+        # this file was written, another agent replaced `census_substitute` at
+        # all four `linkedin_connections` sites with this named helper, and the
+        # SHAPED declaration went red because the set did not know the name.
+        # THE TEST WAS RIGHT TO FIRE: it refused a category change that had not
+        # been declared. The helper is a STRONGER shaper, not a weaker one --
+        # it publishes a module CONSTANT in the ordinary case, drops the query
+        # on a mismatch, and closes a bare-member-token-in-a-query gap that
+        # `census_substitute` measurably leaves open, which matters here
+        # because every Message control on that surface carries
+        # `?recipient=<token>`. So the declaration stands and the set widens.
+        "_connections_source_url",
     }
 )
+
+#: **THE RESIDUAL, NAMED RATHER THAN IMPLIED: THIS SET IS ALSO BY-NAME.**
+#: Adding a name here marks every site that calls it as shaped, which is the
+#: same shape of trust `_SANITISERS` extends and that
+#: `tests/test_a_sanitiser_earns_its_entry.py` exists to bound. Two things keep
+#: it smaller than that one: this set only CLASSIFIES sites inside the table
+#: below, where every entry already carries a written reason, and it silences
+#: no other check in the package. If it ever grows past a handful, enrol these
+#: the way that file enrols sanitisers -- against an adversarial table, shown
+#: failing. What is asserted today is only that each name EXISTS, which catches
+#: a typo and a dead entry and does not pretend to check a contract.
 
 PUBLISHES = "PUBLISHES"
 SHAPED = "SHAPED"
@@ -132,9 +155,10 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("shape.py", "envelope"): (PASSTHROUGH, 1),
     # --- SHAPED: incidental, and shaped on a stated ground -------------------
     # Four refusal/success paths on a surface that carries THIRD PARTIES -- his
-    # connections. The source comment at the first of them says every source_url
-    # in this tool goes through the census substitution, so the four are one
-    # ruling applied four times rather than four independent decisions.
+    # connections -- and the four are ONE ruling applied four times rather than
+    # four independent decisions. They now go through `_connections_source_url`
+    # rather than `census_substitute` directly; see the note on SHAPERS for why
+    # that swap made this entry go red and why the category did not change.
     ("server.py", "linkedin_connections"): (SHAPED, 4),
     # The census's own defect, already fixed and already argued in place: the
     # raw source_url was the ONLY unshaped url in a payload that substituted
@@ -354,6 +378,39 @@ def test_envelope_is_not_treated_as_a_shaper():
     assert "envelope" not in SHAPERS
     passthrough = 'def f():\n    return shape.envelope(rows, source_url=landed)\n'
     assert emission_points(passthrough, "s.py") == [("s.py", "f", False)]
+
+
+def test_every_name_in_shapers_exists():
+    """A DEAD OR TYPO'D SHAPER NAME SILENTLY MARKS NOTHING.
+
+    It cannot mark a site UNSHAPED by mistake -- a name nobody calls simply
+    never matches -- so the failure is quiet in the dangerous direction: the
+    set looks bigger than it is, and a reader trusts a coverage it does not
+    have. This does not check a CONTRACT, only existence, and says so.
+    """
+    defined: set[str] = set()
+    for folder in ("linkedin_server", "scripts"):
+        for path in sorted((REPO / folder).glob("*.py")):
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"), filename=path.name)
+            except SyntaxError:
+                continue  # a file mid-edit is not evidence about this set
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    defined.add(node.name)
+    missing = sorted(SHAPERS - defined)
+    assert not missing, (
+        "these are trusted as shapers and no function of that name exists: "
+        "%s. A name nobody calls never matches, so it marks nothing while "
+        "making this set look broader than it is." % missing
+    )
+
+
+def test_the_existence_check_would_notice_a_dead_name():
+    """THE CONTROL for the check above, on a name that cannot exist."""
+    defined = {"census_substitute"}
+    invented = "_a_shaper_that_was_never_written"
+    assert sorted({invented, "census_substitute"} - defined) == [invented]
 
 
 def test_there_are_sites_to_rule_on():

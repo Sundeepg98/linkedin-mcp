@@ -64,6 +64,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import pathlib
+import subprocess
 import sys
 
 import pytest
@@ -202,6 +203,86 @@ def _claimants() -> set[tuple[str, str]]:
                 if node.name in _SANITISERS:
                     found.add((path.name, node.name))
     return found
+
+
+def _tracked_names() -> set[str]:
+    """Basenames of the files GIT HAS, in the two scanned directories.
+
+    Shelled out the way ``tests/test_no_committed_credential.py`` does it, and
+    a non-zero return is a FAILURE rather than a skip: a check that goes quiet
+    when its instrument is missing is the shape this whole file exists to
+    refuse.
+    """
+    proc = subprocess.run(
+        ["git", "ls-files", "--", "scripts", "linkedin_server"],
+        cwd=str(REPO), capture_output=True, text=True,
+    )
+    assert proc.returncode == 0, "git ls-files failed: %s" % proc.stderr
+    return {
+        line.rsplit("/", 1)[-1]
+        for line in proc.stdout.splitlines()
+        if line.strip()
+    }
+
+
+def _untracked_enrolments(table) -> set[str]:
+    """Filenames in an enrolment table that git has never heard of.
+
+    A FUNCTION rather than an inline expression, so the control below can hand
+    it a table it should reject. A predicate only exercised on data that
+    passes has never been shown to reject anything.
+    """
+    tracked = _tracked_names()
+    return {filename for filename, _fn in table if filename not in tracked}
+
+
+def test_every_enrolled_file_is_tracked_by_git():
+    """**AN ENROLMENT NAMING AN UNTRACKED PATH IS A CLAIM ABOUT A WORKING COPY.**
+
+    THIS IS THE DEFECT THIS TEST WAS BORN FROM, and it was reproduced rather
+    than reasoned about. The seventh entry -- the one this file caught on its
+    first run and was rightly proud of -- named
+    ``scripts/_probe_search_render_timeline.py``, which at that moment had ZERO
+    COMMITS. It existed on one working copy and in no clone anywhere.
+
+    **CI CLONES.** The lead moved the file aside and re-ran this suite: 5
+    failed, 34 passed -- the four needle rows plus the discrimination row, and
+    exactly the five the full-suite gate had reported. They had been written
+    off as "already fixed at the present tree". They were not fixed; they were
+    INVISIBLE from the shared tree, and the first push would have gone red on
+    a defect nobody could reproduce locally. A suite that passes on your
+    machine and fails in CI is among the worst things a repository can hand
+    somebody.
+
+    **THE FILE HAS SINCE BEEN COMMITTED BY ITS AUTHOR (5bb70d4) AND THAT CLOSES
+    NOTHING.** It was resolved by somebody else's unrelated commit, not by
+    anything structural. Without this assertion the next untracked claimant
+    does it again, silently, the same way.
+
+    It is the same defect class as everything else this week, one layer down:
+    a claim about the REPOSITORY, verified against the WORKING COPY.
+    """
+    untracked = sorted(_untracked_enrolments(ENROLLED))
+    assert not untracked, (
+        "these files are enrolled and git has never heard of them: %s. They "
+        "exist on this working copy and in no clone, so this suite passes "
+        "here and fails in CI. COMMIT the file, then enrol it -- never the "
+        "other way round." % untracked
+    )
+
+
+def test_the_check_would_notice_an_untracked_enrolment():
+    """THE CONTROL, and it is the only reason the green above means anything.
+
+    Shown failing against a path that cannot exist, because the real table is
+    green now and a predicate exercised only on passing data has never been
+    shown to reject anything.
+    """
+    invented = "_probe_a_file_git_has_never_heard_of.py"
+    assert invented not in _tracked_names(), "pick a name that is really absent"
+    assert _untracked_enrolments({(invented, "_redact"): ONE_ARG}) == {invented}
+    # And the real table, through the same predicate, in the same call shape.
+    assert _untracked_enrolments(ENROLLED) == set()
 
 
 def test_every_claimant_of_a_sanitiser_name_is_enrolled():
