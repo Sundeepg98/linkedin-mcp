@@ -833,3 +833,38 @@ read in the package.
 **THE STANDING RULE: before narrowing a boundary, ask all three -- what BUILDS
 it, what OPENS it, and WHICH url the door is shown.** The first is a grep-like
 question, the second needs a reader, and the third is a property of the door.
+
+#### 2.7a The door's blindness is a LIABILITY in one place and LOAD-BEARING in another
+
+`assert_read_url` sees the REQUESTED url and never the landed one. That single
+property has opposite signs in two places in the same file, and a reader who
+"fixes" it in one will break the other.
+
+**LOAD-BEARING, here.** `/in/me/` redirects to his vanity slug -- the exact
+shape the removed pattern was the only thing admitting. The narrowing is safe
+ONLY because the door never sees where the navigation ended up.
+
+**A LIABILITY, on `/messaging/`.** LinkedIn redirects `/messaging/` into one
+conversation thread of its own choosing, measured twice. `readonly.py` records
+what that forced, in its own words:
+
+> leaving "/messaging/thread" forbidden while permitting "/messaging/" would
+> have produced **a guard that forbids a destination it knowingly delivers you
+> to -- a fiction, and a worse one than an honest permission, because the next
+> reader would trust it.**
+
+So BOTH forms had to go on the list. The blindness is why an honest boundary
+there costs two entries instead of one.
+
+**AND THE FILE ALREADY NAMES THE TRAP,** which is the part worth carrying: the
+messaging entry says listing only the root would mean the server "routinely
+sitting on a url its own allowlist does not cover -- **true today because the
+landed url is not re-checked, and a trap the moment anybody adds that
+check.**"
+
+**THE STANDING RULE: adding a landed-url check is not a hardening, it is a
+THIRD decision.** It would make `/messaging/` honest and would simultaneously
+break every self-profile read, because `/in/me/` no longer has a pattern for
+what it lands on. Anyone proposing it must re-answer the boundary for every
+redirecting address at once -- and this register entry exists so they find that
+out before writing the check rather than after.

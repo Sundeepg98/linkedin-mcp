@@ -1480,6 +1480,58 @@ def _connections_refusal(reason: str, why: str, **extra: Any) -> dict[str, Any]:
     return out
 
 
+def _connections_source_url(landed: str) -> str:
+    """Where the rows came from, WITHOUT publishing an arbitrary landed string.
+
+    THE MEASUREMENT THAT PUT THIS HERE, taken 2026-09-04 rather than assumed.
+    ``shape.census_substitute`` is the shared redactor and it covers the
+    classes a landed url usually carries::
+
+        /in/<slug>/                                     -> /in/<member>/     CHANGED
+        /x/urn:li:fsd_profileGeo:(<token>,GEO)/         -> /x/<urn>/         CHANGED
+        /y/?q=urn:li:fsd_profile:<token>                -> /y/?q=<urn>       CHANGED
+        /feed/update/<10 digits>/                       -> /feed/update/<id> CHANGED
+        /mynetwork/invite-connect/connections/?u=<token>  UNCHANGED  <-- HERE
+
+    **A BARE MEMBER TOKEN IN A QUERY SURVIVES IT.** That is not an idle gap for
+    this tool: a member token is the one identifier class this surface
+    traffics in -- every Message control on the page carries
+    ``?recipient=<token>`` -- so the shared predicate is correct and
+    INSUFFICIENT here, in exactly the class the page is made of.
+
+    TWO WAYS TO CLOSE IT, AND THE SECOND IS THE ONE TAKEN.
+
+    Widening ``census_substitute`` would change what all eight of its
+    consumers publish for a gap only this one has evidence for. Hand-rolling a
+    second token redactor here would stand up a SECOND privacy boundary beside
+    the sanctioned one, which this package has already ruled against -- reusing
+    a sanctioned instrument beats maintaining two that can disagree.
+
+    So this publishes NO ARBITRARY STRING in the ordinary case. The address is
+    a module constant; when the landing matches it, the constant is what comes
+    back, and no redirect can smuggle anything out through a field that is not
+    read from the page. A class removed beats a class filtered.
+
+    WHEN IT DOES NOT MATCH, IT SAYS SO RATHER THAN LYING. Returning the
+    constant unconditionally would misreport where the rows came from the one
+    time it mattered, so a mismatch falls back to the shared substitution and
+    the caller gets ``landed_on_the_admitted_address: false`` beside it. That
+    is the best-effort path, and it is marked as one.
+
+    **THIS IS NOT A REDACTION PROMISE ABOUT THE ROWS.** The rows carry third
+    parties' names, profile urls and member ids ON PURPOSE -- that is the
+    capability. ``linkedin_my_profile`` records why the distinction matters:
+    a shaped ``source_url`` sitting above deliberately published identifiers
+    is WORSE than an unshaped one if a reader takes it for a redaction,
+    because it claims a property the payload does not have. Here the payload
+    publishes OTHER PEOPLE'S identifiers, so the claim would be worse still.
+    ``rows_are_not_redacted`` is returned beside it for that reason.
+    """
+    if landed == CONNECTIONS_URL:
+        return CONNECTIONS_URL
+    return shape.census_substitute(landed)
+
+
 @mcp.tool()
 async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     """The people he is connected to, and the identifier a conversation needs.
@@ -1617,7 +1669,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     ),
                     badge_before=before,
                     pages_loaded=1,
-                    source_url=shape.census_substitute(landed),
+                    source_url=_connections_source_url(landed),
                 )
 
             # 2. THE PAGE.
@@ -1668,7 +1720,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     badge_after=after,
                     census=census,
                     pages_loaded=2,
-                    source_url=shape.census_substitute(landed),
+                    source_url=_connections_source_url(landed),
                 )
             if after["pending"] != before["pending"]:
                 return _connections_refusal(
@@ -1685,7 +1737,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     badge_after=after,
                     census=census,
                     pages_loaded=2,
-                    source_url=shape.census_substitute(landed),
+                    source_url=_connections_source_url(landed),
                     and_this_falsifies_the_recorded_cost=(
                         "server.CONNECTIONS_BADGE_COST says this load is free. "
                         "This run disagrees with it. Re-take the measurement "
@@ -1738,7 +1790,7 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
             return shape.envelope(
                 rows,
                 limit=limit,
-                source_url=shape.census_substitute(landed),
+                source_url=_connections_source_url(landed),
                 pages_loaded=2,
                 dropped=census.get("rows_unparsed") or 0,
                 extra={
@@ -1746,6 +1798,21 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                     "badge_after": after,
                     "cost": cost,
                     "census": census,
+                    # WHETHER source_url IS THE CONSTANT OR A BEST EFFORT.
+                    # Without this the caller cannot tell the two apart, and
+                    # a shaped landed url looks exactly like the admitted one.
+                    "landed_on_the_admitted_address": landed == CONNECTIONS_URL,
+                    # AND WHAT THE SHAPING DOES NOT MEAN. The rows below carry
+                    # third parties' names, profile urls and member ids ON
+                    # PURPOSE -- that is the capability, not an oversight. A
+                    # shaped source_url above them must not be read as a
+                    # redaction the payload does not perform.
+                    "rows_are_not_redacted": (
+                        "results carry third parties' names, profile urls and "
+                        "member ids deliberately -- that is what this tool is "
+                        "for. source_url is shaped because it is incidental, "
+                        "not because the rows are."
+                    ),
                 },
             )
     except Exception as exc:
@@ -2881,8 +2948,28 @@ async def linkedin_my_profile(
                     "they are filled in."
                 )
             if slug:
+                # THE `/in/me/` FORM, NOT THE VANITY SLUG. Changed 2026-09-04
+                # when the read boundary dropped the third-party profile
+                # patterns: the slug spelling is one this server can no longer
+                # open, and a tool that hands back three addresses its own read
+                # door refuses is advertising a capability it does not have.
+                #
+                # THIS IS THE ONE OF FOUR SUCH FIELDS THAT HAD AN OPENABLE
+                # ALTERNATIVE. `shape.parse_person_card` and
+                # `shape.parse_connection_card` emit OTHER members' profile
+                # links and always will -- that is what those fields are for,
+                # and marking them is the only correct answer there. This one
+                # points at HIS OWN pages, and `/in/me/details/<section>/` is
+                # both the form a browser resolves for him and the exact form
+                # `PROFILE_DETAIL_URLS` above navigates. Emission and
+                # navigation now agree.
+                #
+                # `slug` STILL GATES IT and no longer appears in it -- the same
+                # split the navigation site below already made: slug says
+                # whether the profile read succeeded well enough to be worth
+                # reporting these, never where they point.
                 out["details_urls"] = {
-                    section.lower(): f"{BASE_URL}/in/{slug}/details/{section.lower()}/"
+                    section.lower(): f"{BASE_URL}/in/me/details/{section.lower()}/"
                     for section in ("Experience", "Education", "Skills")
                 }
 
