@@ -73,6 +73,7 @@ from __future__ import annotations
 import ast
 import inspect
 import re
+import sys
 import textwrap
 from pathlib import Path
 
@@ -873,6 +874,18 @@ async def test_an_unchanged_badge_returns_the_rows(monkeypatch):
 #: The names that put a string somewhere it outlives the call.
 SINKS = ("print", "logger", "logging", "warn", "warnings")
 
+#: Parsed module sources, keyed by path. Cached because several checks below
+#: read the same three files, and because re-reading a file another agent is
+#: writing gives two checks in one run two different answers.
+_AST_CACHE: dict[str, ast.AST] = {}
+
+
+def _module_ast(path: Path) -> ast.AST:
+    key = str(path)
+    if key not in _AST_CACHE:
+        _AST_CACHE[key] = ast.parse(path.read_text(encoding="utf-8"))
+    return _AST_CACHE[key]
+
 
 def _sink_calls(func) -> list[str]:
     """Every logging-or-printing CALL in a function, found by AST.
@@ -883,8 +896,33 @@ def _sink_calls(func) -> list[str]:
     also cannot see into a nested ``def``, which is exactly where a
     convenience helper would hide one. ``ast`` answers the question actually
     being asked: does this function CALL something that emits?
+
+    AND NOT ``inspect.getsource`` EITHER, WHICH IS THE SECOND LESSON. This
+    used ``ast.parse(textwrap.dedent(inspect.getsource(func)))`` and it FAILED
+    on 2026-09-04 with a SyntaxError pointing at the middle of a docstring.
+    ``getsource`` resolves a function by the line number recorded when the
+    module was IMPORTED and then reads the file from DISK -- so in a tree that
+    another agent is writing, the two disagree and it returns a slice of the
+    wrong lines. Five agents were committing to this repository at the time.
+
+    So the module file is parsed ONCE and the function is located BY NAME.
+    That is immune to the race, and it is the right instrument anyway: the
+    question is about the source on disk, not about the object in memory.
     """
-    tree = ast.parse(textwrap.dedent(inspect.getsource(func)))
+    module = sys.modules[func.__module__]
+    tree = _module_ast(Path(module.__file__))
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == func.__name__
+        ):
+            tree = node
+            break
+    else:  # pragma: no cover - a renamed function must fail loudly
+        raise AssertionError(
+            "%s is not defined in %s -- this check would otherwise pass by "
+            "scanning nothing" % (func.__name__, module.__file__)
+        )
     found: list[str] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):

@@ -208,10 +208,21 @@ SYNTHETIC_MEMBER_TOKENS = (
     # three on rows and one on a promo control that has no row, which is the
     # case the reader has to leave UNATTRIBUTED rather than blame on the
     # nearest person.
-    "ACoAAD4h5J6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0",
-    "ACoAAE5j6K7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1",
-    "ACoAAF6k7L8m9N0p1Q2r3S4t5U6v7W8x9Y0z1A2",
-    "ACoAAG7l8M9n0P1q2R3s4T5u6V7w8X9y0Z1a2B3",
+    #
+    # REWRITTEN THE SAME DAY, and the reason is worth more than the values.
+    # The originals were a keyboard walk (alternating digit/letter, an
+    # incrementing series) -- genuinely invented, and INDISTINGUISHABLE FROM
+    # REAL WITHOUT AN ARGUMENT. They were declared here and not in
+    # tests/test_sdui_surfaces_fixture.py's _ALLOWED_OPAQUE_IDS, which went
+    # red, and the review that followed had to establish provenance from
+    # commit timestamps and string structure before anybody could rule out a
+    # history purge. **Declaring what you INVENTED is not the same as
+    # enumerating what you INHERITED**, and a synthetic value that has to be
+    # argued for costs more than one that argues for itself.
+    "ACoAASYNTHETICSYNTHETICSYNTHETIC0000001",
+    "ACoAASYNTHETICSYNTHETICSYNTHETIC0000002",
+    "ACoAASYNTHETICSYNTHETICSYNTHETIC0000003",
+    "ACoAASYNTHETICSYNTHETICSYNTHETIC0000004",
 )
 
 #: A credential value that is obviously not one.
@@ -906,6 +917,36 @@ NOT_A_PRE_IMAGE: dict[tuple[str, str], str] = {
         "Same table shape and the same argument: settings addresses beside "
         "the keyword for the capability they carry. Public vocabulary on "
         "both sides."
+    ),
+    # BOTH ADDED 2026-09-04, AND BOTH WERE FLAGGED BY A FIXTURE ARRIVING, not
+    # by either table changing. connections_list.html put the word
+    # "connections" into the fixture blob for the first time, which is enough
+    # to make any table pairing that word with a longer string look like a
+    # key. Recorded because it is a real property of this detector: ADDING A
+    # FIXTURE CAN LIGHT UP TABLES NOBODY TOUCHED, and the next person to add
+    # one should expect it rather than assume they broke something.
+    (
+        "tests/test_sdui_surfaces_fixture.py",
+        "COUNT_LINE_CASES",
+    ): (
+        "Rows pair a rendered relationship-count line with the KIND it "
+        "parses to -- '268 connections'/'connections', '500+ followers'/"
+        "'followers'. Both halves are LinkedIn's own public vocabulary for "
+        "counting, the numbers are invented, and the second element is a "
+        "CLASS LABEL rather than the pre-image of the first: knowing that "
+        "'268 connections' has kind 'connections' reverses nothing and "
+        "identifies nobody."
+    ),
+    (
+        "scripts/_probe_connections_badge_cost.py",
+        "_FAMILIES",
+    ): (
+        "Rows pair a nav-control family name with the HREF SUBSTRING that "
+        "identifies it -- 'mynetwork'/'/mynetwork/', 'messaging'/"
+        "'/messaging/'. Both halves are LinkedIn's own addressing, and the "
+        "label is a class name this probe prints INSTEAD of a nav label, "
+        "precisely because a nav label can carry his name and an href cannot. "
+        "It is a redaction table read the safe way round, not a key."
     ),
 }
 

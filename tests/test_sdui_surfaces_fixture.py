@@ -233,6 +233,31 @@ _ALLOWED_OPAQUE_IDS = re.compile(
             # Two impression tokens.
             "AAAAAAAAAAAAAAAAAAAAAA%3D%3D",
             "BBBBBBBBBBBBBBBBBBBBBB%3D%3D",
+            # FOUR ON connections_list.html, 2026-09-04, and they are here
+            # because THIS LIST WENT RED AND I DID NOT KNOW IT EXISTED.
+            #
+            # I declared that fixture's invented identifiers -- in
+            # tests/test_no_committed_identity.py, whose SYNTHETIC_MEMBER_TOKENS
+            # I grew deliberately. That is a DIFFERENT list, and declaring in
+            # one place is not declaring. The lesson is the one this whole
+            # module is about: a capture is made of real people BY DEFAULT and
+            # the burden is on the capture to prove otherwise -- and proving it
+            # means satisfying every guard that asks, not the first one that
+            # fails.
+            #
+            # THE VALUES WERE REPLACED RATHER THAN ONLY DECLARED. The originals
+            # were an alternating digit/letter keyboard walk continuing the
+            # B1c... sibling above (D4h..., E5j..., F6k..., G7l...), which is
+            # invented but has to be ARGUED to be seen as invented. These
+            # cannot be mistaken for a LinkedIn token by anybody, in any
+            # future audit, without reading a word of prose -- and they still
+            # MATCH the pattern above, so this guard keeps seeing them. A
+            # synthetic value that stopped matching would be hiding from the
+            # check rather than passing it.
+            "ACoAASYNTHETICSYNTHETICSYNTHETIC0000001",
+            "ACoAASYNTHETICSYNTHETICSYNTHETIC0000002",
+            "ACoAASYNTHETICSYNTHETICSYNTHETIC0000003",
+            "ACoAASYNTHETICSYNTHETICSYNTHETIC0000004",
         )
     )
 )
