@@ -139,20 +139,40 @@ class FixtureNavigator:
     actually opening pages, and shown opening the RIGHT ones -- the assertion
     that a follow costs one load and a save costs two is only meaningful
     against something that counted.
+
+    A URL MAY ALSO MAP TO A LIST, served one entry per visit in order (the
+    last entry repeats once the list runs out). Every other action already
+    verified from a DIFFERENT surface than the one it clicked, so one string
+    per url was enough -- ``save_job``'s "before" and "after" are two
+    different frozen worlds because they are two different urls.
+    ``react_to_item`` is not that shape: its own verification re-navigates to
+    the SAME item permalink its click's gate already read, because there is
+    only one surface that carries this item's reaction state. A single
+    static page cannot wear the OFF label a click needs to be valid FROM and
+    the ON label its verification needs to see AFTER, so this is the second
+    frozen world the same url needs, in visit order, rather than one page
+    pretending to have moved.
     """
 
-    def __init__(self, pages: dict[str, str]):
+    def __init__(self, pages: dict[str, "str | list[str]"]):
         self.pages = dict(pages)
         self.gotos: list[str] = []
+        self._visits: dict[str, int] = {}
 
     async def goto(self, page, url: str) -> str:
         self.gotos.append(url)
-        html = self.pages.get(url)
-        if html is None:
+        entry = self.pages.get(url)
+        if entry is None:
             raise AssertionError(
                 f"the gate asked for {url!r}, which this test did not freeze. "
                 f"It froze {sorted(self.pages)}."
             )
+        if isinstance(entry, (list, tuple)):
+            visit = self._visits.get(url, 0)
+            self._visits[url] = visit + 1
+            html = entry[min(visit, len(entry) - 1)]
+        else:
+            html = entry
         await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
         return url
 
@@ -1902,6 +1922,112 @@ async def test_presence_in_a_partial_list_still_confirms_the_save(
     assert block["verification"]["observed_state"] == "saved"
 
 
+#: A LinkedIn-shaped activity urn matching ``WriteSpec.url_pattern`` for
+#: react_to_item (``urn:li:[A-Za-z]+:[0-9]+``). NOT a real one -- this server
+#: has never parsed one unshaped, the same reason ``ITEM`` in
+#: tests/test_writes_nine.py is a placeholder string -- but this test needs a
+#: target that actually PASSES the write door, which an opaque placeholder
+#: would not.
+REACTED_ITEM = "urn:li:activity:7000000000000000001"
+
+#: THE SMALLEST MARKUP THAT SETTLES THE REACTION READER, following
+#: ``FEED_MARKUP`` in tests/test_writes_nine.py: one control wearing the OFF
+#: label this server has actually measured, and nothing else the read
+#: branches on.
+_REACTION_OFF_PAGE = (
+    "<html><body>"
+    '<button aria-label="' + dom.REACTION_OFF_LABEL + '"></button>'
+    "</body></html>"
+)
+
+#: DERIVED from the page above by substituting the ON label for the OFF one.
+#: THE LABEL ITSELF IS NOT DERIVED -- it was measured 2026-09-04, on the
+#: operator's own profile rail, across 8 reaction controls (off_state 7, this
+#: string on the eighth) -- what is derived here is a page that wears it,
+#: because no capture in this repo shows a REACTED item: every one predates
+#: the operator's first reaction.
+_REACTION_ON_LABEL = "Reaction button state: Like"
+_REACTION_ON_PAGE = _REACTION_OFF_PAGE.replace(
+    dom.REACTION_OFF_LABEL, _REACTION_ON_LABEL, 1
+)
+assert _REACTION_ON_PAGE != _REACTION_OFF_PAGE, (
+    "the reacted-item derivation anchored on "
+    f"{dom.REACTION_OFF_LABEL!r} and changed nothing, so the verify branch "
+    "below would read the OFF label twice and this test could never turn "
+    "red. Repoint the anchor; do NOT delete this."
+)
+
+
+async def test_react_to_item_surfaces_the_labels_its_own_verify_read_saw(
+    writes_on, browser_page
+):
+    """THE FINDING THIS TEST IS FOR: the ON label was never unreachable.
+
+    ``linkedin_react_to_item`` fired live on 2026-09-03 and landed --
+    performed True, verified True -- and its own ``reversibility_procedure``
+    promised that firing would settle ``reversible_by``'s open half in one
+    move: "React to one item and READ THE LABEL THE CONTROL CHANGES INTO."
+    The result reported no label. ``_verify_after``'s react branch already
+    calls ``dom.read_reaction_surface(page)`` to decide ``verified_state``,
+    and that dict already carries ``labels`` -- the shaped accessible names
+    of every reaction control on the page -- while the branch only ever
+    read ``controls`` and ``off_state`` off it. The string was in the dict
+    the fire built and discarded, and stayed discarded the next morning when
+    a probe re-measured it by hand instead.
+
+    THIS DRIVES ``writes.perform`` FOR REAL, over two frozen worlds for the
+    ONE url react_to_item's click and its own verification share. The save
+    pair's "confirm from a DIFFERENT surface" trick does not apply here --
+    there is only one surface -- so this hands ``FixtureNavigator`` a LIST
+    for that one url instead of a single string: gate 5 reads the OFF page
+    on the first visit, and ``_verify_after``'s own re-navigation reads the
+    ON page on the second.
+
+    SHOWN FAILING on the code before this patch: ``block`` carried no
+    ``newly_observed_reaction_labels`` key at all, so the assertion below
+    raised ``KeyError`` rather than an unequal value -- the red output is
+    recorded verbatim in ``_audit/_scratch/_reaction-label-report.md``.
+    """
+    spec = spec_for_action("react_to_item")
+
+    # THE GRANT IS MINTED OFF THE FEED, NOT THE PERMALINK. state_from is
+    # "feed_item" and _SURFACE_READS points that at FEED_URL -- the
+    # permalink itself is not opened until perform() clicks.
+    preview_nav = FixtureNavigator({writes.FEED_URL: _REACTION_OFF_PAGE})
+    block = await preview(
+        spec, target=REACTED_ITEM, navigator=preview_nav, page=browser_page
+    )
+    grant = consume(
+        block["to_confirm"], action="react_to_item", target=REACTED_ITEM
+    )
+
+    # THE CLICK'S OWN URL, VISITED TWICE. The first visit is gate 5's re-read
+    # of the control about to be pressed -- it needs the OFF label to be
+    # valid to click at all. The second is _verify_after's fresh render
+    # after the click -- it needs the ON label for verified_state to become
+    # "reacted", which is what makes the read this test is FOR run at all.
+    item_url = spec.url_template.format(target=REACTED_ITEM)
+    perform_nav = FixtureNavigator(
+        {item_url: [_REACTION_OFF_PAGE, _REACTION_ON_PAGE]}
+    )
+    block = await writes.perform(perform_nav, browser_page, grant)
+
+    assert block["clicked"]["selector"] == dom.reaction_control_selector()
+    assert block["clicked"]["error"] is None
+    assert block["performed"] is True
+    assert block["verified"] is True
+    assert block["verification"]["observed_state"] == "reacted"
+    # TWO VISITS TO THE SAME URL, not two different ones -- pinned so a
+    # later "optimise this to one load" cannot quietly start reusing gate
+    # 5's stale OFF-page reading for the verify too.
+    assert perform_nav.gotos == [item_url, item_url]
+
+    # THE POINT OF THIS TEST. Without the patch this key does not exist.
+    assert block["newly_observed_reaction_labels"] == [_REACTION_ON_LABEL]
+    assert _REACTION_ON_LABEL in block["what_those_labels_are_for"]
+    assert "reversible_by" in block["what_those_labels_are_for"]
+
+
 def test_unsave_has_its_anchor_now_and_the_row_is_what_supplied_it():
     """THE SUCCESSOR to ``test_unsave_refuses_because_its_anchor_has_never_been_measured``.
 
@@ -2891,41 +3017,62 @@ async def test_a_token_from_one_tool_will_not_redeem_at_the_other(
     assert "save_job" in out["message"]
 
 
-def test_the_write_module_contains_exactly_one_sanctioned_mutating_call():
+def test_the_write_module_contains_only_sanctioned_mutating_calls():
     """WHAT THIS TEST USED TO ASSERT: that the scanner found nothing here.
 
-    It finds one thing, in ``perform``, of kind ``click``, and that is the
-    complete list. The scanner was NOT taught to stop seeing it -- the raw scan
-    below still reports it -- which is why it can still see a second.
+    It finds four things, all in ``perform``, and that is the complete list.
+    The scanner was NOT taught to stop seeing any of them -- the raw scan
+    below still reports every one -- which is why it can still see a fifth.
+
+    THE NAME NO LONGER CARRIES A COUNT. It said "exactly one sanctioned
+    mutating call" while asserting three, and would have said it while
+    asserting four. A name that must be edited every time its subject grows is
+    a name that eventually will not be.
     """
     source = Path(writes.__file__).read_text(encoding="utf-8")
     raw = readonly.scan_source_for_mutations(source)
     # THREE SINCE 2026-09-02: the click, the fill publish_post needed, and the
-    # select_option the profile editor needed. The raw scan still reports ALL
-    # THREE -- it was not taught to stop seeing any of them, which is the whole
-    # reason it can still see a fourth.
-    assert len(raw) == 3, raw
+    # select_option the profile editor needed. FOUR SINCE 2026-09-04, with the
+    # set_input_files the operator opened -- and note that unlike the other
+    # three, NO ACTION USES IT YET (``writes.UPLOAD_ACTIONS`` is empty). The
+    # call site is real and the scanner reports it, which is exactly right: a
+    # drain point that exists is one an edit can reach, and the boundary
+    # describes what the code CAN do rather than what today's actions happen
+    # to do. The raw scan still reports ALL FOUR -- it was not taught to stop
+    # seeing any of them, which is the whole reason it can still see a fifth.
+    assert len(raw) == 4, raw
     # ORDER-FREE, and that is a correction rather than a loosening. This read
     # ``raw[0][1] == "click"`` while there was one hit; with two, position in
     # the scan is a fact about which call comes FIRST IN THE FILE, which is
     # not a property worth asserting -- moving the fill above the click would
     # have failed a check that is supposed to be about kinds.
-    assert sorted(hit[1] for hit in raw) == ["click", "fill", "select_option"], raw
+    assert sorted(hit[1] for hit in raw) == [
+        "click",
+        "fill",
+        "select_option",
+        "set_input_files",
+    ], raw
 
     sanctioned, unsanctioned = readonly.partition_mutation_hits(
         "linkedin_server/writes.py", source
     )
     assert unsanctioned == []
-    # THREE SINCE 2026-09-02, and ALL IN ``perform``: the click, the fill that
-    # publish_post needed, and the select_option the profile editor needed.
-    # The count is asserted rather than derived, so a FOURTH mutating call in
+    # FOUR SINCE 2026-09-04, and ALL IN ``perform``: the click, the fill that
+    # publish_post needed, the select_option the profile editor needed, and
+    # the set_input_files the upload ruling opened.
+    # The count is asserted rather than derived, so a FIFTH mutating call in
     # this module fails here whatever its kind -- and every one of them is
     # required to be in ``perform``, which is the half that keeps the drain
     # points auditable.
-    assert len(sanctioned) == 3, sanctioned
+    assert len(sanctioned) == 4, sanctioned
     for hit in sanctioned:
         assert readonly.enclosing_function(source, hit[0]) == "perform", hit
-    assert sorted(hit[1] for hit in sanctioned) == ["click", "fill", "select_option"]
+    assert sorted(hit[1] for hit in sanctioned) == [
+        "click",
+        "fill",
+        "select_option",
+        "set_input_files",
+    ]
 
 
 def test_a_second_click_inside_perform_is_still_caught():
