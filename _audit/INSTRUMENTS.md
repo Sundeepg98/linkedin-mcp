@@ -190,3 +190,151 @@ Three instances in one day, all initially read as somebody's error:
 
 **Before treating a disagreement as an error, ask whether the two readings
 share a moment.** A reading carries a timestamp its reader cannot see.
+
+---
+
+## 3. GUARDS THAT MEASURED A NAME INSTEAD OF A CONTRACT
+
+Section added 2026-09-04 by a cold verifier. APPENDED rather than merged,
+because this file had been written two minutes earlier and a full rewrite would
+have clobbered whatever was in flight -- 2.4 is the same lesson from the other
+side.
+
+### 3.1 `A-GUARD-THAT-MATCHES-A-NAME-CERTIFIES-A-NAME`
+
+`tests/test_navigation_is_never_derived.py` stops its taint walk at a call to
+any function whose NAME is in `_SANITISERS`. The whole test is
+`func.id in _SANITISERS`. Nothing checked the contract behind the name.
+
+**SHOWN FAILING BY MUTATION** -- seven versions of the real source of
+`scripts/_probe_job_search_filter_params.py`, through the guard's own
+`output_violations`:
+
+    1  real source, unmodified                             GREEN
+    2  the sanitiser's body gutted to return its input      GREEN   <-- defect
+    3  the sanitiser renamed, body intact                   GREEN
+    4  a synthetic module with its own no-op `_redact`      GREEN
+    5  a synthetic module with no sanitiser at all          RED
+    6  the sanitiser call DELETED, value emitted anyway     GREEN
+    7  arm 6 with that one `emit(...)` made `print(...)`    RED
+
+Arm 2 against arm 5: a body returning its input verbatim passes the check that
+the same code without the name fails. Arm 4: any module may define the name and
+inherit the trust. **Arms 6 and 7 differ by ONE IDENTIFIER** -- `emit` against
+`print` -- and that was the entire difference between green and red, because
+the probe routes its output through a closure the sink list does not know.
+
+    THE INSTRUMENT   tests/test_a_sanitiser_earns_its_entry.py
+                     ENROLMENT: every function in the scanned tree whose name
+                     is in _SANITISERS must be declared, which is what makes
+                     the name non-transferable. DEMONSTRATION: each is run
+                     against four needled urls and must change all four, and
+                     must still DISCRIMINATE, so a constant-returner fails too.
+    THE CONTROL      the same two tables through an identity function and
+                     through a constant function; both must be caught. In the
+                     file as test_the_table_would_catch_a_do_nothing_sanitiser
+                     and ..._a_constant_returning_sanitiser.
+    THE MUTATION     _audit/_scratch/_control_guard_is_name_only.py replants
+                     all seven arms against the live source.
+
+**IT CAUGHT A SEVENTH CLAIMANT ON ITS FIRST RUN.** The enrolment list was
+written with six entries; twenty minutes later, before the test was committed,
+another agent added `scripts/_probe_search_render_timeline.py` carrying its own
+`_redact`, which inherited the guard's trust the moment it was typed. It holds
+all four needles and was enrolled. The drift this guards against happened
+during the writing of the guard.
+
+**AND THE DRIFT WAS ALREADY THERE.** `test_a_sanitiser_entry_is_a_claim_about_a_contract`
+justifies its `_redact` entry with "`_redact` has its own both-directions test
+file". Six functions claimed a guarded name; exactly one had that file. True of
+one, false of five.
+
+### 3.2 `THE-SINK-IS-THE-PROCESS-BOUNDARY-NOT-THE-PRINT`
+
+`_SINK_NAMES = frozenset({"print"})` models ONE way out. Counted over all 52
+scanned files, with the sanitiser set both honoured and emptied:
+
+    P       print + logging (the shipped model)            8 / 17
+    +W      a local closure wrapping print (an `emit`)      1 /  2
+    +R      return <tainted>, any function                 58 / 58
+    +Rtool  return <tainted> from an @mcp.tool()           18 / 18
+    +F      file write                                      0 /  0
+    +X      raise Error(<tainted>)                         10 / 10
+
+**COUNT BEFORE WIDENING.** 58 was never the right number: a `return` inside an
+internal helper hands a value to more of the same process, where a return from
+an `@mcp.tool()` hands it OUT to a caller this package does not control. THE
+RULED BOUNDARY IS THE TOOL -- +Rtool (18) plus +X (10), because a refusal
+message crosses the same boundary a return does, and this package's refusal
+doctrine (a refusal must name what it saw) is exactly what puts urls into
+exception text.
+
+    THE INSTRUMENT   _audit/_scratch/_control_sink_model_blast_radius.py
+    THE COLUMN       the SECOND column is the number that matters: 10 sites
+    THAT MATTERS     across 5 files are held green ONLY by a sanitiser trusted
+                     by name. Fixing the sink model RAISES the stakes on 3.1
+                     rather than lowering them.
+
+**A RAW COUNT IS NOT A DEFECT COUNT.** Of the 18, triage gave 7 REACHES, 10
+SANITISED, 1 FALSE POSITIVE -- the checker taints by NAME across a subtree, so
+a dict called `out` that once touched a url stays tainted forever.
+
+### 3.3 `DECLARE-THE-ANSWER-NOT-THE-CURRENT-STATE`
+
+`source_url` was shaped in six places, raw in seven, relayed verbatim in one.
+Nothing decided which; a new site inherited whichever neighbour it sat beside.
+
+**THE FIX WAS NOT TO WRAP THE SEVEN.** Wrapping a deliberate publication is as
+much a defect as leaking an accidental one: it breaks a tool's contract
+silently, and afterwards nobody can tell a reasoned shaper from a reflexive
+one. `linkedin_my_profile` is the worked example and its own source comment
+already said so -- shaping `source_url` there "DOES NOT MAKE THIS PAYLOAD
+SLUG-FREE AND MUST NOT BE READ THAT WAY", because three fields above it publish
+his identity on purpose.
+
+    THE INSTRUMENT   tests/test_the_source_url_split_was_never_ruled.py
+                     Per site: PUBLISHES, SHAPED, UNMEASURED or PASSTHROUGH,
+                     each with its reason and its count.
+    BOTH DIRECTIONS  a shaper REMOVED from a SHAPED site fails; a shaper ADDED
+                     to an UNMEASURED one fails too. The second is the half
+                     nobody guards, and it is what stops the reflexive wrap.
+    THE CONTROL      four, on synthetic source: removal caught, addition
+                     caught, all three spellings of the field read (keyword
+                     argument, dict literal, subscript assignment), and
+                     `shape.envelope` asserted NOT to be a shaper.
+
+**MOST RAW SITES ARE `UNMEASURED`, NOT "FINE".** The tempting argument is that
+they land on resource paths and so carry no identity. That is the argument that
+produced the third slug leak: "paths are safe" was never the rule, "these paths
+are safe" was. A constant start is not a measured finish. **Close a row by
+MEASURING the surface, never by reasoning about what the path ought to be.**
+
+**`shape.envelope` IS NEUTRAL** -- it writes `source_url` into its result
+verbatim, so it neither shapes nor leaks and the verdict belongs entirely to
+its caller. Treating it as a shaper would mark four call sites safe on the
+strength of the function they call. Declared PASSTHROUGH and pinned, because a
+shaper added INSIDE it would silently double-shape all four
+`linkedin_connections` sites from one edit nobody would think of as touching
+those tools.
+
+### 3.4 `A-DENOMINATOR-IS-SITES-OR-OCCURRENCES-AND-THEY-DIFFER`
+
+Two readers counted `source_url` and got 13 and 19. Neither was wrong: 19 is
+every line the string appears on, six of which are comments ABOUT the field,
+and 13 is the places it is WRITTEN. Nothing was contradicted -- a denominator
+had gone unstated. **Say which you counted.**
+
+An earlier grep here also used `grep -v "^.*#"` intending to drop comment
+lines. It drops any line containing a `#` ANYWHERE. A filter that silently
+shrinks a count is worse than no filter. Parse, do not line-filter.
+
+### 3.5 `A-LINE-NUMBER-IS-NOT-AN-ANCHOR-IN-A-LIVE-TREE`
+
+One citation in this session was given as `server.py:4232`, re-checked by a
+second reader as `4201`, then by a third as `4322` -- three numbers, one site,
+inside an hour, because other agents were writing the file between reads. The
+function name `linkedin_compose_fields` was correct at every reading.
+
+**CITE BY ANCHOR: the enclosing function name plus the quoted source line.** In
+a tree with concurrent writers a line number is a reading carrying a timestamp
+its reader cannot see, and it is the one part of a citation guaranteed to rot.
