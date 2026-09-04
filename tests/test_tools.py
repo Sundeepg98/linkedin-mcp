@@ -1325,13 +1325,17 @@ async def test_a_checkbox_filter_emits_its_parameter_only_when_it_is_on(
     page = FakePage(evaluate_result=[SEARCH_CARD])
     navigations = drive(page)
 
+    # ONE `drive` INSTALL, TWO CALLS, AND THE LIST IS SHARED ON PURPOSE.
+    # `drive` closes over a SINGLE list, so calling it twice hands back the
+    # same accumulating list rather than a fresh one -- which is how the
+    # first draft of this test read the ON url as the OFF url and passed
+    # itself while asserting nothing. Indexing 0 and 1 off one install says
+    # what is actually meant: two navigations happened, in this order.
     await linkedin_search_jobs(keywords="node.js engineer", **{argument: True})
-    on_url = navigations[0]
-
-    page_off = FakePage(evaluate_result=[SEARCH_CARD])
-    off_navigations = drive(page_off)
     await linkedin_search_jobs(keywords="node.js engineer", **{argument: False})
-    off_url = off_navigations[0]
+
+    assert len(navigations) == 2, navigations
+    on_url, off_url = navigations
 
     assert f"{parameter}=true" in on_url, on_url
     assert parameter not in off_url, off_url
@@ -1438,6 +1442,13 @@ async def test_the_tool_says_it_takes_one_location(drive):
         "the reason has to be the reason -- not measured -- rather than a "
         "bare 'not supported'"
     )
+    # AND THE ARGUMENT ITSELF HAS TO CARRY IT, not only the paragraph above.
+    # ADDED AFTER A RED-PROOF SHOWED THE GUARD WAS WEAKER THAN IT LOOKED:
+    # "one location" occurs TWICE in this docstring, so deleting the `location:`
+    # arg line alone left both occurrences standing and this test passed. A
+    # caller reading `Args:` and stopping there is exactly who the admission is
+    # for, so that line is now asserted on its own.
+    assert "one location; see the note above" in text
 
 
 # ---------------------------------------------------------------------------

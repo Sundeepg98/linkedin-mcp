@@ -1995,8 +1995,22 @@ _EXPERIENCE = {
 }
 
 #: Employment type. THE SAME SHAPE AS :data:`_EXPERIENCE` -- a set of values
-#: comma-joined into one parameter -- and it is that shape because LinkedIn's
-#: own control is a multi-select, not a radio.
+#: comma-joined into one parameter.
+#:
+#: **ITS EVIDENCE IS WEAKER THAN ITS FOUR NEIGHBOURS' AND SAYS SO.** The same
+#: seven-load probe that flipped a named pill for each entry in
+#: :data:`_BOOLEAN_FILTERS` moved NO pill for ``f_JT``. What it did show is
+#: the second channel: LinkedIn STRIPPED the unknown ``f_ZZQQX`` from the
+#: address it landed on and KEPT ``f_JT=F``, along with all four booleans --
+#: a 1-against-5 reading with its own control.
+#:
+#: That is one channel rather than two, and the honest reading of one channel
+#: is that ``f_JT`` is CARRIED, not that it FILTERS. The difference matters:
+#: a parameter LinkedIn keeps in the url and ignores in the query returns an
+#: unfiltered page that looks filtered. A value-level control -- does
+#: ``f_JT=ZZ`` behave differently from ``f_JT=F`` -- is the measurement that
+#: would settle it, and until it is taken this table is believed on one
+#: channel and the other four are measured on two.
 _JOB_TYPE = {
     "full_time": "F",
     "part_time": "P",
@@ -2172,10 +2186,17 @@ async def linkedin_search_jobs(
         #
         # BOUND EXPLICITLY RATHER THAN OUT OF ``locals()``. A lookup into the
         # frame would read whichever local happened to carry the name, so a
-        # renamed argument would go on emitting the old filter silently. This
-        # spelling raises KeyError the moment the table and the signature
-        # disagree, and tests/test_tools.py asserts the two match by AST so
-        # the disagreement is caught before anything runs.
+        # renamed argument would go on emitting the old filter silently.
+        #
+        # WHAT THE DRIFT ACTUALLY LOOKS LIKE, measured by planting it rather
+        # than reasoned about: the KeyError does NOT reach the caller as a
+        # raise. This whole body sits inside ``except Exception -> _error``,
+        # so a table that stopped matching the signature returns
+        # ``{"error": "unexpected", "message": "KeyError: 'easy_apply_only'"}``
+        # with NO page load -- quieter than a crash and easy to read as a
+        # transient fault. That is why the AST check in tests/test_tools.py
+        # is not redundant with the url tests: it is the only thing that names
+        # the drift, and it names it without running anything.
         chosen = {
             "easy_apply": easy_apply,
             "under_ten_applicants": under_ten_applicants,
