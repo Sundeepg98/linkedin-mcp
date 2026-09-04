@@ -19,6 +19,23 @@ confirm it resolves under the copy before touching anything**, plant ONE
 mutation, run ONLY the selector that should die, restore by re-copying that one
 file, repeat. Finish on a clean control run.
 
+> **THIS RULE WAS ALREADY HERE ON 2026-09-04 AND WAS VIOLATED THE SAME DAY,
+> BY THE WAVE THAT WROTE MOST OF SECTIONS 2 AND 3 BELOW.** The upload wave
+> proved its three digest gates by mutating the REAL `linkedin_server/writes.py`
+> three times -- the file another agent was holding uncommitted work in at that
+> moment. Each mutation opened a window of roughly five seconds in which a
+> byte-exact restore would have silently reverted anything they wrote. Nothing
+> was lost, and that is LUCK RATHER THAN DESIGN: a restore verified by sha256
+> against the pre-mutation bytes cannot tell a clobbered edit from a clean one,
+> because both produce the hash it is checking for. **The verification I ran
+> was incapable of detecting the failure I was risking**, which is the same
+> shape as every entry in section 1.
+>
+> It was disclosed unprompted with the window measured rather than found in
+> review, which is the only reason it is a receipt and not an incident. The
+> rule needed no strengthening; it needed reading. **Read this preamble before
+> planting a mutation, not after.**
+
 ---
 
 ## 1. THE THREE GUARDS THAT COULD NOT FIRE
@@ -543,3 +560,144 @@ was writing when a third-party edit landed on top of it. It was left standing
 deliberately rather than deleted, because deleting it would have hidden the
 collision from the person who held the body. **Do not tidy away a broken
 reference until you know whether it is residue or a receipt.**
+
+
+---
+
+## 4. THE UPLOAD WAVE, 2026-09-04
+
+Four entries. The first three are patterns; the fourth is a defect class the
+grant model could not see.
+
+### 4.1 `A-SKIP-IS-NOT-A-RED`
+
+**A suite green because three tests never ran certifies nothing, and the report
+looks identical either way.**
+
+`tests/test_uploads.py` guards a path against symbolic links -- a symlink is a
+path that names one file and reads another, which is the one shape every other
+check in that module is blind to: the name sits inside the declared root and
+the bytes do not. Three tests plant a real symlink and assert the refusal.
+
+MEASURED on the development box: Windows refuses symlink creation without
+Developer Mode or elevation, `WinError 1314: A required privilege is not held
+by the client`. All three SKIPPED. The link guard -- the most important one in
+the file -- sat entirely unexercised while the run reported green, and would
+have gone on doing so on every developer box with the same privileges.
+
+    THE FIX      drive the branch DIRECTLY as well: monkeypatch
+                 `Path.is_symlink` to answer True for exactly ONE component of
+                 an otherwise ordinary file, and assert the refusal. Done for
+                 the leaf, for a parent, and shown NOT firing above the root.
+    THE CONTROL  each of those tests lifts the patch and re-runs the identical
+                 call, which must resolve. Without that half, a guard that
+                 refused everything would pass all three.
+
+**THE STANDING RULE: a platform-conditional skip is a HOLE in the suite until
+the property is also reached by a route that cannot skip.** Skipping loudly is
+correct -- swallowing the OSError would be worse -- but a loud skip is a
+request for a second route, not a discharge of the obligation. Count the skips
+in any run you are about to call green, and ask what each one was carrying.
+
+### 4.2 `TWO-GUARDS-ARE-NOT-REDUNDANT-UNTIL-ONE-IS-SHOWN-BLIND`
+
+**A docstring claiming "belt and braces" is a claim about two mechanisms that
+nobody has separated. Separate them, or delete one.**
+
+`linkedin_server/uploads.py` refuses a path two ways: a per-component symlink
+scan over the whole chain, and a containment check comparing the REAL path
+against the REAL root. The docstring asserted the second was not redundant
+because a Windows directory junction is not reported as a link. That was an
+argument, not a measurement.
+
+MEASURED 2026-09-04 on this box, and every clause of it matters:
+
+    mklink /J <inside-root> <outside>   succeeds with NO elevation
+    Path.is_symlink() on the junction   False
+    os.path.realpath follows it         straight out of the root
+
+So a junction planted inside the declared root passes a per-component link scan
+cleanly and serves bytes from anywhere on the disk. The link check provably
+cannot see it; containment provably catches it. Neither is redundant, and that
+is now `test_a_windows_junction_out_of_the_root_is_caught_by_containment`.
+
+    THE CONTROL  the test ASSERTS ITS OWN PREMISE first --
+                 `assert junction.is_symlink() is False` -- so that if a future
+                 Python starts reporting junctions as links, the test goes red
+                 instead of quietly passing while testing the OTHER guard and
+                 leaving the gap it documents unmeasured.
+
+**THE STANDING RULE: when two checks are said to cover each other, find the
+input that exactly one of them catches and pin it.** If no such input exists,
+one of the checks is decoration. If it does, the test that pins it must assert
+the premise that makes it that input.
+
+### 4.3 `A-SHARED-PAGE-CARRIES-THE-LAST-SUBJECTS-POLICY`
+
+**A survey reused one browser page across thirty captures and reported nine of
+them as unrenderable. All thirty render.**
+
+The file-input survey rendered every committed capture and measured it. Nine
+came back `RENDER FAILED`, all of them late in alphabetical order -- which is
+the tell, because a property of a CAPTURE does not correlate with its position
+in a list. Rendered individually every one of the nine succeeded.
+
+The discarded exception said it exactly:
+
+    Page.set_content: TypeError: Failed to execute 'write' on 'Document':
+    This document requires 'TrustedHTML' assignment.
+
+One earlier capture carries a Trusted Types Content-Security-Policy. Once
+loaded, that policy governs the PAGE, so every later `set_content` on the same
+page throws -- and the failures are attributed to the innocent captures that
+happened to come after it.
+
+    THE FIX      a fresh `browser.new_page()` per subject, closed after.
+    THE MISTAKE  the handler recorded `type(exc).__name__` and DROPPED the
+                 message. "Error" is what a nine-capture hole looked like for
+                 two runs; the message named the cause on the first.
+
+**TWO STANDING RULES.** A subject may leave state on the harness -- a CSP, a
+service worker, an init script, a cookie -- so **reuse the harness only where
+you can show the subject cannot alter it**, and prefer a fresh one. And **an
+exception handler in a measurement instrument records the MESSAGE**: a survey
+that reports its own failures as a bare class name cannot distinguish a broken
+subject from a broken harness, which is the distinction the survey exists to
+make.
+
+### 4.4 `A-TOKEN-BINDS-A-PATH-AND-A-PATH-IS-NOT-A-FILE`
+
+**The two-call grant model proves the caller confirmed the same TARGET. Where
+the target names something outside the process, that is strictly weaker than it
+reads, and the gap is invisible.**
+
+`writes.consume` refuses any token whose canonical target does not match the
+one it was minted for. For every write this package had before 2026-09-04 that
+was the whole story: the target WAS the content -- a post's words, a setting's
+value -- so binding the string bound the act.
+
+An upload's target is a PATH. The path is stable and the token matches and the
+preview showed him a file, and in between -- `GRANT_TTL_SECONDS`, long enough
+for a person to read a block and decide -- whatever sits at that path can be
+replaced, edited, or finish being written. Every check in the chain passes and
+different bytes leave the machine.
+
+    THE FIX      `uploads.digest_of` -- a sha256 prefix read when the preview
+                 is rendered, PRINTED in the block beside the size and the
+                 extension, and re-read immediately before the browser is
+                 handed the file. A mismatch is a refusal, naming both
+                 readings so the person reading it can check.
+    THE CONTROLS three mutations, each shown RED against a driven
+                 `preview -> consume -> perform` on headless Chromium:
+                 the comparison removed, the missing-digest check removed
+                 (it must fail CLOSED), and the queue never populated.
+                 Plus the positive control: an untouched file gets PAST the
+                 gate and fails elsewhere, which is what proves the gate was
+                 passed rather than skipped.
+
+**THE STANDING RULE, and it generalises well past uploads: when a consent token
+binds a NAME for something the process does not own, bind its CONTENT too.** A
+path, a url, a row id, a file handle -- each is a reference whose referent can
+change under a live grant. Ask of any new target kind: is the thing he approved
+the thing the string names, or only where it lives? If the latter, the token is
+one indirection short and something has to close it.
