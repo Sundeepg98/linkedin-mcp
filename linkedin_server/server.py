@@ -3791,6 +3791,35 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 # shaping this field should always have had.
                 "source_url": shape.census_substitute(final_url),
                 "counts": census["counts"],
+                # WHAT THIS SURFACE COULD BE UPLOADED TO, and it is here
+                # because the count alone stopped being enough on 2026-09-04.
+                #
+                # ``counts.file_inputs`` has always reported HOW MANY file
+                # inputs a page draws. The operator opened file upload that
+                # day and ``readonly.SANCTIONED_MUTATIONS`` gained
+                # ``set_input_files`` -- and wiring any composer to that drain
+                # point needs a control to AIM at, which a bare number cannot
+                # supply. ``read_file_inputs`` describes them: shaped name,
+                # container, disabled, and the two fields that decide a wiring
+                # -- ``ambiguous`` (a page drawing two cannot be addressed by
+                # count) and ``undercounted`` (the census stopped early, so no
+                # aim may be taken on this reading at all).
+                #
+                # IT UPLOADS NOTHING, AND ITS NAMES GET EXACTLY THE SHAPING
+                # THE REST OF THIS PAYLOAD GETS -- no more, and the difference
+                # was measured rather than assumed on 2026-09-04.
+                # ``shape.census_shape`` is a character and length gate:
+                # ``<opaque>`` for anything long or oddly punctuated, verbatim
+                # for anything short and plain, which is correct for UI chrome
+                # like "Attach a file for your draft conversation". The
+                # member-name protection is ``census_href_identifies_entity``,
+                # one field over. This block inherits both and claims neither
+                # beyond what they do.
+                #
+                # SAME READING AS ``counts`` ABOVE, passed in rather than
+                # re-taken, so the two halves of this payload cannot disagree
+                # about the page they describe.
+                "file_inputs": await dom.read_file_inputs(page, census=census),
                 "control_shapes": control_shapes,
                 "href_shapes": href_shapes,
                 "controls_read": census["controls_read"],

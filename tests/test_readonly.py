@@ -193,6 +193,25 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # is the load-bearing half and is unchanged -- an unlisted mutating call
     # still fails whatever its kind -- while the literal is what makes growth
     # visible in a diff.
+    #
+    # WARNING TO THE NEXT READER, AND IT IS THE POINT OF THIS BLOCK:
+    # **THIS LINE LOOKS DERIVED AND IS NOT.** A Python chained comparison
+    # ``a == b == 5`` reads as one relation and is two: ``total == len(...)``
+    # AND ``len(...) == 5``. The first half maintains itself; the second is a
+    # HARDCODED CONSTANT wearing the first half's clothes, and it has to be
+    # hand-edited on every widening exactly like a bare literal would.
+    #
+    # It was scanned as self-maintaining twice on 2026-09-04 -- once by me and
+    # once by the lead reviewing it -- which is two out of two readers fooled
+    # by the syntax, so the defect is in how it READS rather than in anyone's
+    # care. It is kept rather than split because the constant is what makes a
+    # widening visible in a diff, and it is NAMED here so that "the count is
+    # derived, so it cannot go stale" is not concluded from the shape of the
+    # line a third time.
+    #
+    # THE SAME SYNTAX HIDES THE SAME CONSTANT ANYWHERE IT APPEARS. If a
+    # chained comparison is ever added elsewhere in this package, it inherits
+    # this paragraph and not the reassurance.
     assert total == len(readonly.SANCTIONED_MUTATIONS) == 5, total
 
 

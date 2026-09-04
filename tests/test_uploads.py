@@ -37,7 +37,8 @@ import pathlib
 
 import pytest
 
-from linkedin_server import config, uploads, writes
+from linkedin_server import config, dom, uploads, writes
+from linkedin_server import shape as shape_module
 from linkedin_server.errors import WriteAttemptError
 
 
@@ -1064,3 +1065,212 @@ async def test_an_unchanged_file_gets_PAST_the_digest_gate(
     # THE CALL WAS REACHED. Playwright names the method it refused.
     assert "set_input_files" in error
     assert out["clicked"]["clicks_made"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 11. read_file_inputs -- the measurement every consumer is blocked on
+# ---------------------------------------------------------------------------
+#
+# WHY THIS READER EXISTS. Wiring a composer to the sanctioned drain point needs
+# a CONTROL TO AIM AT, and measured 2026-09-04, nothing in this package could
+# name one: `CENSUS_JS` COUNTED file inputs and no reader picked them out, so
+# the only two file-input names this project has ever seen lived as prose in a
+# docstring and an audit file. A name in prose is not a measurement a later
+# wave can act on.
+#
+# THE ARITHMETIC IS THE POINT, not the filtering. `count` is document-wide;
+# `described` is filtered from censused controls, which stop at
+# CENSUS_MAX_CONTROLS. A reader returning only the filtered list would say
+# "one file input" about a page with three, and a wiring aimed on that reading
+# would land on whichever one the census happened to reach first.
+
+
+def _census(*, file_inputs: int, controls: list, truncated: bool = False):
+    """A census reading, by hand. No browser: this tests the ARITHMETIC.
+
+    Passing the census in is a supported call -- `linkedin_surface_census`
+    does exactly this so that its counts and its file-input block are one
+    observation rather than two -- so driving it here is using the real
+    interface, not reaching around it.
+    """
+    return {
+        "counts": {"file_inputs": file_inputs},
+        "controls": controls,
+        "controls_read": len(controls),
+        "truncated": truncated,
+    }
+
+
+def _file_control(shape_name="<shaped>", **over):
+    record = {
+        "shape": shape_name,
+        "tag": "input",
+        "input_type": "file",
+        "role": None,
+        "disabled": False,
+        "container": "form#0",
+    }
+    record.update(over)
+    return record
+
+
+async def test_one_file_input_is_aimable_by_count(browser_page):
+    """EXACTLY ONE and a complete reading: the only shape a count can address."""
+    out = await dom.read_file_inputs(
+        browser_page, census=_census(file_inputs=1, controls=[_file_control()])
+    )
+    assert out["count"] == 1
+    assert out["described"] == 1
+    assert out["ambiguous"] is False
+    assert out["undercounted"] is False
+    assert len(out["inputs"]) == 1
+
+
+async def test_two_file_inputs_are_ambiguous_and_say_so(browser_page):
+    """THE MESSAGE COMPOSER'S MEASURED SHAPE. Two, so a count cannot aim.
+
+    MEASURED 2026-09-01 on /messaging/compose/: file_inputs 2, named "Attach a
+    file for your draft conversation" and "Attach an image for your draft
+    conversation", both in form#0. Addressing either one requires comparing a
+    needle against an accessible name INSIDE the page; this field is what
+    stops a later wiring pressing the first and calling it the one he meant.
+    """
+    out = await dom.read_file_inputs(
+        browser_page,
+        census=_census(
+            file_inputs=2,
+            controls=[_file_control(), _file_control()],
+        ),
+    )
+    assert out["count"] == 2
+    assert out["ambiguous"] is True
+
+
+async def test_no_file_input_is_ambiguous_too_rather_than_aimable(browser_page):
+    """ZERO IS NOT ONE, and the field must not read as "fine, go ahead".
+
+    ``ambiguous`` is ``count != 1`` rather than ``count > 1`` deliberately: a
+    caller testing ``not ambiguous`` before aiming must be stopped by an empty
+    page as firmly as by a crowded one. A boolean that said False here would
+    invite an aim at a control that does not exist.
+    """
+    out = await dom.read_file_inputs(
+        browser_page, census=_census(file_inputs=0, controls=[])
+    )
+    assert out["count"] == 0
+    assert out["ambiguous"] is True
+
+
+async def test_a_truncated_census_is_reported_as_undercounted(browser_page):
+    """THE READING THAT MUST NOT BE AIMED ON, and it looks aimable.
+
+    The document holds three file inputs; the census stopped early and
+    described one. Filtering alone would report "one" -- which is exactly the
+    reading a count-based aim would accept, on a page where two more exist
+    that it never saw.
+    """
+    out = await dom.read_file_inputs(
+        browser_page,
+        census=_census(file_inputs=3, controls=[_file_control()], truncated=True),
+    )
+    assert out["count"] == 3
+    assert out["described"] == 1
+    assert out["undercounted"] is True
+    assert out["ambiguous"] is True
+
+
+async def test_a_disagreement_alone_is_undercounted_even_without_the_flag(
+    browser_page,
+):
+    """The counts and the controls disagree and NOTHING said truncated.
+
+    That can happen without the truncation flag -- a control the selector does
+    not admit, a node the shaping dropped -- and the honest answer is the same:
+    this reading cannot be aimed on. Asserted separately from the flag so a
+    future change that stops setting ``truncated`` does not silently make a
+    disagreeing reading look clean.
+    """
+    out = await dom.read_file_inputs(
+        browser_page,
+        census=_census(file_inputs=2, controls=[_file_control()], truncated=False),
+    )
+    assert out["undercounted"] is True
+
+
+async def test_the_reader_agrees_with_the_page_on_a_real_fixture(browser_page):
+    """DRIVEN ON A REAL PAGE, not only on hand-built census dicts.
+
+    The census dicts above test the arithmetic. This tests that the filter
+    actually finds a file input in a rendered document, through the real
+    CENSUS_JS, with no census handed in -- so the two halves cannot both be
+    wrong in the same direction.
+
+    The fixture is the Easy Apply modal, whose ONE file input is a MEASURED
+    page-level count from 2026-08-24 even though its markup is derived.
+    """
+    fixture = (
+        pathlib.Path(__file__).resolve().parent
+        / "fixtures"
+        / "apply_modal_derived.html"
+    )
+    await browser_page.set_content(
+        fixture.read_text(encoding="utf-8"), wait_until="domcontentloaded"
+    )
+    out = await dom.read_file_inputs(browser_page)
+    assert out["count"] == 1, out
+    assert out["described"] == 1, out
+    assert out["ambiguous"] is False, out
+    assert out["undercounted"] is False, out
+    assert out["inputs"][0]["input_type"] == "file"
+
+
+async def test_the_reader_inherits_the_censuss_GATE_and_claims_nothing_more(
+    browser_page,
+):
+    """WHAT THE SHAPING ACTUALLY IS, asserted after I got it wrong.
+
+    THIS TEST FIRST ASSERTED THAT NO RAW ACCESSIBLE NAME ESCAPES, and it went
+    red, and the red was RIGHT. ``shape.census_shape`` is not a name redactor:
+    it is a CHARACTER AND LENGTH GATE plus placeholder substitution. A short,
+    plain label passes through VERBATIM by design, because "Send" and "Attach
+    a file for your draft conversation" identify nobody, and returning
+    ``<opaque>`` for them would make the census useless without making it
+    safer.
+
+    So the sentence I had written on ``dom.read_file_inputs`` -- that names
+    "arrive already shaped, because ``read_surface_census`` discards the raw
+    strings" -- overstated the layer beneath it. It was corrected in the same
+    change rather than left standing, because prose claiming a property the
+    code does not have is the exact defect this package spent 2026-09-04
+    hunting through its own README.
+
+    WHAT IS ACTUALLY TRUE, and it is what this asserts:
+
+    * a label over ``CENSUS_NAME_LIMIT`` (60) becomes ``<opaque>``;
+    * a label carrying characters outside the safe set becomes ``<opaque>``;
+    * a control whose href identifies a member is ``<redacted>`` by
+      ``census_href_identifies_entity``, which is where the member-name
+      protection actually lives;
+    * and anything short and plain passes through, which is the contract.
+    """
+    await browser_page.set_content(
+        "<html><body>"
+        '<input type="file" aria-label="Attach a file for your draft conversation">'
+        "</body></html>",
+        wait_until="domcontentloaded",
+    )
+    out = await dom.read_file_inputs(browser_page)
+    assert out["count"] == 1
+    # PLAIN UI CHROME SURVIVES, and that is the contract rather than a leak.
+    assert out["inputs"][0]["shape"] == "Attach a file for your draft conversation"
+
+    # AND THE GATE FIRES on a label the census will not vouch for. Without
+    # this the test above would be indistinguishable from no shaping at all.
+    await browser_page.set_content(
+        "<html><body>"
+        '<input type="file" aria-label="' + ("A" * 80) + '">'
+        "</body></html>",
+        wait_until="domcontentloaded",
+    )
+    out = await dom.read_file_inputs(browser_page)
+    assert out["inputs"][0]["shape"] == shape_module.CENSUS_OPAQUE

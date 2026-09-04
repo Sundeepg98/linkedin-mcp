@@ -3096,6 +3096,105 @@ async def read_surface_census(
 
 
 # ---------------------------------------------------------------------------
+# The file inputs a surface exposes -- COUNTED AND DESCRIBED, never aimed at
+# ---------------------------------------------------------------------------
+
+
+async def read_file_inputs(
+    page: Any, *, census: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
+    """Every ``input[type="file"]`` the rendered page draws, described.
+
+    WHY THIS EXISTS, AND IT IS A PRECONDITION RATHER THAN A FEATURE. The
+    operator opened file upload on 2026-09-04 and
+    ``readonly.SANCTIONED_MUTATIONS`` gained ``set_input_files``. Wiring any
+    composer to that drain point needs a control to aim at, and MEASURED
+    2026-09-04: nothing in this package could name one. ``CENSUS_JS`` COUNTED
+    file inputs -- ``counts.file_inputs`` -- and no reader picked them out; the
+    only two file-input names this project has ever seen live as PROSE in a
+    test docstring and an audit file, from a 2026-09-01 census, reproducible
+    by no instrument here. A name recorded in prose is not a measurement a
+    later wave can act on, and aiming at one would be asserting a shape nobody
+    can re-take.
+
+    NO NEW SCRIPT AND NO NEW WAIVER, deliberately. This filters
+    :func:`read_surface_census`, which already runs ``CENSUS_JS``, already
+    reports ``input_type`` per control, and already carries the module's only
+    ``evaluate`` waivers. A second harvester would have needed its own
+    ``# readonly-ok``, and that budget is pinned by
+    ``tests/test_readonly.py::test_only_dom_module_waives_evaluate`` precisely
+    so a new waiver has to argue for itself. This one needs none.
+
+    WHAT IT RETURNS AND WHAT IT DELIBERATELY DOES NOT. Shaped names, like
+    every other census record -- meaning they have been through
+    ``shape.census_shape`` inside ``read_surface_census`` before this function
+    sees them.
+
+    BE PRECISE ABOUT WHAT THAT BUYS, because this paragraph said "the raw
+    string is discarded" until it was measured on 2026-09-04 and that was an
+    OVERSTATEMENT. ``census_shape`` is a CHARACTER AND LENGTH GATE plus
+    placeholder substitution, not a name redactor: a label over
+    ``CENSUS_NAME_LIMIT`` or carrying unusual characters becomes
+    ``<opaque>``, and everything short and plain PASSES THROUGH VERBATIM --
+    which is the contract, since "Send" and "Attach a file for your draft
+    conversation" identify nobody and opaquing them would cost the census its
+    use without buying safety. The member-name protection lives one field
+    over, in ``census_href_identifies_entity``, which redacts the name of any
+    control whose href points at a person.
+
+    So this can tell a caller HOW MANY file inputs a surface draws,
+    whether they are disabled, and which container each sits in. It cannot
+    hand back a name to build a selector from, and it is not meant to: a
+    future ``_live_control`` arm must compare a needle against an accessible
+    name INSIDE THE PAGE, the way ``_typeahead_gate`` already does, so that no
+    string crosses the boundary in either direction.
+
+    ``ambiguous`` IS THE FIELD THAT DECIDES A WIRING. Aiming needs exactly one
+    candidate. Measured on the two surfaces this project has read: the message
+    composer draws TWO file inputs (2026-09-01) and is therefore ambiguous by
+    count -- it can only be aimed by name; the Easy Apply modal drew ONE
+    (2026-08-24, page-level count), which a count alone can address. Those are
+    different wiring costs and this field is what tells them apart, rather
+    than a comment somebody has to remember.
+    """
+    # ONE READING, NOT TWO. ``census`` is passed in by a caller that has
+    # ALREADY taken it -- ``linkedin_surface_census`` does -- so the count this
+    # returns and the counts that caller reports are the same observation of
+    # the same page rather than two evaluations moments apart. A composer
+    # hydrates while it is being read, so two readings can legitimately
+    # disagree, and a payload carrying both would contradict itself with no
+    # way for a reader to tell which half was stale. Omitted, it takes its own.
+    if census is None:
+        census = await read_surface_census(page)
+    inputs = [
+        control
+        for control in list(census.get("controls") or [])
+        if control.get("input_type") == "file"
+    ]
+    # THE COUNT COMES FROM THE COUNTS BLOCK, NOT FROM len(inputs), and the
+    # difference is the whole reason both are returned. ``counts.file_inputs``
+    # is a document-wide ``querySelectorAll``; ``inputs`` is filtered from the
+    # censused controls, which stop at ``CENSUS_MAX_CONTROLS`` and are reported
+    # ``truncated`` when they do. A page with more controls than the cap would
+    # make the filtered list an UNDERCOUNT, and a reader that returned only
+    # that would quietly say "one file input" about a page with three.
+    counted = int((census.get("counts") or {}).get("file_inputs") or 0)
+    described = len(inputs)
+    return {
+        "count": counted,
+        "described": described,
+        # TRUE WHEN THE TWO DISAGREE, which means the census stopped before it
+        # reached them all. A caller must not aim on a truncated reading.
+        "undercounted": bool(census.get("truncated")) or described != counted,
+        # AIMABLE BY COUNT ALONE only when the page draws exactly one and the
+        # reading was complete. Anything else needs a name, and a name needs an
+        # in-page comparison this reader does not do.
+        "ambiguous": counted != 1,
+        "inputs": inputs,
+    }
+
+
+# ---------------------------------------------------------------------------
 # The self-owned editor: NAMES, inside ONE measured container
 # ---------------------------------------------------------------------------
 #
