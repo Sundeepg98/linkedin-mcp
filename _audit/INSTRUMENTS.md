@@ -500,3 +500,46 @@ forbidden sentence must contain "not a read surface" and must NOT contain the
 allowlist's own sentence. A later edit phrasing the new clause with the
 allowlist's words would pass its own test and silently break theirs from
 another file, so the prohibition is asserted in the new file too.
+
+### 3.6 `A-REWRITE-THAT-REPLACES-A-FUNCTION-LEAVES-ITS-PROSE-BEHIND`
+
+`_redact` was replaced by `_shape_of` in one commit. Two blocks of prose about
+`_redact` survived it -- a module docstring paragraph and a constant's comment
+-- and between them made three claims that were no longer true:
+
+    ":func:`_redact` below carries that name"    no such function
+    "a pair prints its value verbatim if ..."    no value prints at all
+    "NOTHING OUTSIDE THIS FILE VERIFIES IT"      something now does
+
+**THE THIRD IS THE ONE WORTH THE ENTRY.** That sentence was an HONEST
+DISCLOSURE when it was written. The hour it stopped being true it became a
+false claim that UNDERSTATED the file's safety and POINTED AWAY FROM THE
+INSTRUMENT THAT FIXED IT. An auditor reading top-down meets "nothing verifies
+this" and stops -- so the fix existed and was unreachable from where the reader
+stood. That is the corrector and the corrected drifting apart inside a single
+file, and a stale honest disclosure is more dangerous than a stale boast
+because nobody re-reads a sentence that flatters nothing.
+
+**THIS IS THE SHAPE OF THE EDIT, NOT CARELESSNESS.** Replacing a function
+changes code the compiler checks and prose nothing checks. Expect the residue
+by default and schedule a pass for it; a glance will not find it, because the
+stale paragraph reads as fluent and self-consistent -- it was true once.
+
+    THE SWEEP        after any function replacement, grep the file's prose for
+                     the vocabulary of the OLD design -- here: raw, verbatim,
+                     printed, survived, allowlist, redact -- and check each
+                     hit against what the code now does.
+    THE CHEAP CHECK  resolve every `:func:` cross-reference against a `def`
+                     that exists. Four in that file, all resolved after the
+                     pass; one had been dangling.
+    THE DISTINCTION  a HISTORICAL mention of the old name in double backticks
+                     is correct and worth keeping -- it says what was replaced
+                     and why. A `:func:` CROSS-REFERENCE to it is a broken
+                     pointer. Same string, different claim.
+
+**AND A DANGLING REFERENCE IS SOMETIMES A COLLISION, NOT A TYPO.** The first
+dangling `:func:` in that file pointed at `_key_kept`, a channel another agent
+was writing when a third-party edit landed on top of it. It was left standing
+deliberately rather than deleted, because deleting it would have hidden the
+collision from the person who held the body. **Do not tidy away a broken
+reference until you know whether it is residue or a receipt.**
