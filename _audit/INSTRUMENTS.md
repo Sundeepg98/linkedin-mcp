@@ -36,6 +36,33 @@ file, repeat. Finish on a clean control run.
 > rule needed no strengthening; it needed reading. **Read this preamble before
 > planting a mutation, not after.**
 
+**THE PROOF STEP, tightened 2026-09-04 in the same wave as the receipt above,
+and BE PRECISE ABOUT WHAT CHANGED because most of it was already written.**
+The rule already said to print `linkedin_server.__file__` and CONFIRM it
+resolves under the copy. Two narrow things were missing, and both are the
+difference between an instruction and a control:
+
+* **ASSERT, do not confirm.** "Confirm" is a thing a person does with their
+  eyes, between the copy and the mutation, at the exact moment they are keen
+  to get on with it -- and it is skippable in silence. An `assert` that halts
+  BEFORE the first write is not. The check that catches you must be the one
+  that runs whether or not you remember it.
+* **ASSERT THE NEGATIVE TOO.** "Resolves under the copy" is a substring test
+  and passes on a path that contains BOTH roots; the repo path must also be
+  asserted ABSENT. One of those two checks alone is a check that can be
+  satisfied by the wrong tree.
+
+The shape, run before anything is mutated:
+
+    resolved = <subprocess: import linkedin_server.dom; print(dom.__file__)>
+    assert str(COPY) in resolved   # it IS the copy
+    assert str(REPO) not in resolved   # and it is NOT the live tree
+
+**"Run against a copy" is an intention. That is a measurement.** Everything
+after it -- the mutation, the selector, the restore -- is only as good as the
+answer to "which tree am I actually importing", and that question has a
+cheap, checkable answer that no amount of care substitutes for.
+
 ---
 
 ## 1. THE THREE GUARDS THAT COULD NOT FIRE
