@@ -284,6 +284,90 @@ share a moment.** A reading carries a timestamp its reader cannot see.
 
 ---
 
+### 2.5 `TRIAGE-THE-CANDIDATES-INSTEAD-OF-CLASSIFYING-THEM`
+
+**The move to reach for whenever the task is "detect X in prose" and X cannot
+be detected.** Named at the team lead's direction because it generalises past
+the check that produced it.
+
+**THE SITUATION.** A defect was found in `_audit/`: a correction can name what
+it corrects, and a corrected document cannot name its corrector, so the arrow
+points one way and every reader who starts at the claim reaches the wrong
+document first. The obvious fix is a check that FINDS corrections and demands
+a back-pointer for each.
+
+**THE OBVIOUS FIX CANNOT BE BUILT, and that was measured before anything was
+written rather than discovered afterwards:**
+
+    94 documents under _audit/
+    27 candidate (corrector, target) pairs under a loose vocabulary
+    26 of the 27 are MENTIONS, not corrections
+     1 is a genuine document-corrects-document pair
+
+The 26 are not near-misses. They are structurally different things that no
+vocabulary separates: a markdown table row whose NEIGHBOUR carries a verdict
+(tables have no blank lines, so proximity is meaningless); a correction of a
+HYPOTHESIS rather than of the cited document; a later document QUOTING the
+original correction; a self-correction about the author's own arithmetic; an
+open question explicitly DECLINING to rule. A tighter vocabulary at a one-line
+window reproduces 6, of which the same 1 is genuine.
+
+**So a classifier would either miss corrections or cry wolf, and a check that
+cries wolf gets an allowlist bolted on until it is a silencer.**
+
+**THE MOVE: STOP CLASSIFYING. MAKE THE NOISE DO THE WORK.**
+
+    1. ASSERT the contract only where it is DECLARED. A corrector writes a
+       `CORRECTS:` marker; the named target must carry `CORRECTED BY:`. Zero
+       false positives, because the assertion is over markers and not prose.
+
+    2. ASSERT that every CANDIDATE the loose scan finds is either declared
+       under (1) or listed on a `NOT_A_CORRECTION` dict with a written reason.
+
+Step 2 is what makes step 1 more than an honour system. A new correction
+written into `_audit/` turns the suite RED until somebody either declares it or
+says why it is not one. **The precision problem, which is unsolvable, becomes a
+bookkeeping obligation, which is bounded** -- 27 entries, and a wave writing a
+genuine correction pays one line.
+
+**THE ENTRIES ARE THEMSELVES CHECKED.** A `NOT_A_CORRECTION` entry for a pair
+the scan no longer produces FAILS as loudly as a missing one -- the discipline
+`test_reader_reachability.UNREACHABLE_BY_DESIGN` and
+`test_selectors_resolve.NOT_RESOLVED_HERE` already keep. Without that, the dict
+is a silencer with extra steps.
+
+**WHEN TO REACH FOR IT.** Any check whose subject is a JUDGEMENT a regex cannot
+make -- is this a correction, is this a real TODO, is this comment stale, does
+this docstring describe this function. Do not tune the detector. Let it
+over-report, then require every report to be resolved. The detector's job stops
+being "be right" and becomes "miss nothing", which a loose pattern is actually
+good at.
+
+**AND IT MUST BE ABLE TO GO RED ON ITS AUTHOR.** It did, within the hour:
+retiring census row `N 118` quoted both documents in the correction chain, and
+the check stopped the suite until both were triaged. **A check whose first
+real-world firing is against the person who wrote it is the cheapest available
+proof that it is not a silencer** -- cheaper than any mutation, because nobody
+arranged it.
+
+    THE INSTRUMENT  tests/test_a_correction_is_findable_from_the_claim.py
+    THE CONTROLS    delete the back-pointer   -> 1 test fails
+                    delete the marker         -> 2 fail (orphaned pointer AND
+                                                 untriaged candidate)
+                    plant a stale triage entry-> 1 fails
+                    All three shown failing in a scratch copy before the
+                    check was trusted.
+
+**ONE DEPLOYMENT DETAIL THAT DECIDES WHETHER IT IS ADOPTABLE.** The corrected
+claim is NOT rewritten. `2026-08-22-parity-linkedin.md` line 18 is
+byte-identical to what it always said -- verified by diff, so every existing
+`:18` citation still resolves -- and the back-pointer is a NEW line beneath it.
+The record still shows what was believed; it just cannot be read without
+meeting its refutation. A check that required editing the claim would have been
+refused by everyone holding a citation to it.
+
+---
+
 ## 3. GUARDS THAT MEASURED A NAME INSTEAD OF A CONTRACT
 
 Section added 2026-09-04 by a cold verifier. APPENDED rather than merged,
@@ -868,3 +952,51 @@ break every self-profile read, because `/in/me/` no longer has a pattern for
 what it lands on. Anyone proposing it must re-answer the boundary for every
 redirecting address at once -- and this register entry exists so they find that
 out before writing the check rather than after.
+
+### 4.7 `AIM-BY-THE-PROPERTY-NOT-BY-THE-LABEL`
+
+**"The only file input in this dialog" is a PROPERTY. "The input labelled
+`Resume`" is a GUESS. They look equally concrete in a report and only one of
+them survives contact with the page.**
+
+A survey of every committed capture found exactly one file input, in
+`tests/fixtures/apply_modal_derived.html`, and read its accessible name as
+`'Resume'`. Handing that string upward would have looked like a measurement.
+It is not one: the fixture is DERIVED, its own header separates what was
+measured from what was invented, and the name came from a
+`<label for="resume">Resume</label>` the fixture author wrote so the file would
+"answer to the recorded counts".
+
+What IS measured about that modal is the COUNT -- 1 file input, page-level,
+2026-08-24. So the two halves of the same record have different standing:
+
+    the count       MEASURED   -> "the only file input in this dialog" holds
+    the label       INVENTED   -> "the input named Resume" asserts a shape
+                                  nobody has seen
+
+**AND THE PROPERTY IS THE CHEAPER AIM ANYWAY**, which is what makes this a
+pattern rather than a caution. A count of exactly one addresses the control
+with no string at all, so it cannot be wrong about a name, cannot rot when
+LinkedIn relabels the control, and needs no in-page comparison. The measured
+half was the more useful half.
+
+**THE CONTRAST CASE, from the same wave, so the rule does not read as "never
+trust a name".** The post composer, read live on 2026-09-04, draws an
+`Add media` button whose name came off LinkedIn itself and survives the census
+shaping intact. That name is evidence. The difference is not the string; it is
+where it was read.
+
+**THE STANDING RULE: before aiming at a value, ask which half of the record
+was measured.** A capture, a fixture and a docstring all present measured and
+invented fields in the same typeface, and a derived fixture is BUILT to be
+consistent with the counts -- so it will hand you a plausible value for
+anything you ask it. Prefer the relation ("exactly one", "the only one named
+as asked", "the one whose href matches") over the literal, and where you must
+use a literal, cite where it was read.
+
+**IT IS THE SAME MOVE AS EMITTING THE RELATION RATHER THAN THE VALUE**, which
+this package already does for disclosure -- `_typeahead_gate` compares a needle
+INSIDE the page and returns integers, and `census_aggregate` reports shapes and
+counts instead of names. 4.7 is that discipline applied to AIMING instead of to
+what is emitted, and the two reinforce: a server that will not emit a name is
+a server that had better not need one to find a control.
