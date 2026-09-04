@@ -323,11 +323,20 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         #       have.
         ("server.py", "linkedin_surface_census"),
         ("server.py", "linkedin_my_profile"),
-        # EIGHTH, 2026-09-04, and it is the first consumer whose surface is
-        # made ENTIRELY of third parties -- so the question this enumeration
-        # exists to force is not "is the predicate correct" but "is it correct
-        # over rows that are all other people". Answered by MEASUREMENT, and
-        # the answer is RIGHT BUT INSUFFICIENT:
+        # AN EIGHTH ARRIVED AND THEN LEFT AGAIN ON 2026-09-04, and the round
+        # trip is worth more than either state.
+        #
+        # linkedin_connections became a consumer without anybody deciding it
+        # should be one, and this test caught it -- the fourth instance of the
+        # shape its own docstring describes. The consideration it forced is
+        # below, and its conclusion was that THIS TOOL SHOULD NOT DEPEND ON
+        # THIS PREDICATE AT ALL. So there is no eighth entry, and the absence
+        # is the finding rather than an oversight.
+        #
+        # WHY. Its surface is the one page in this package made ENTIRELY of
+        # third parties, so the question was never "is the predicate correct"
+        # but "is it correct over rows that are all other people". Measured,
+        # the answer was RIGHT BUT INSUFFICIENT:
         #
         #     /in/<slug>/                             -> /in/<member>/  CHANGED
         #     /x/urn:li:fsd_profileGeo:(<token>,GEO)/ -> /x/<urn>/      CHANGED
@@ -345,21 +354,33 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         # predicate was NOT changed -- eight consumers publish through it and
         # only this one has evidence for the gap -- and no second redactor was
         # written, because a package with two privacy boundaries has two that
-        # can disagree. Instead `_connections_source_url` returns the module
-        # CONSTANT when the landing matches it, and on a mismatch publishes
-        # the landed PATH -- shaped by this predicate, with THE QUERY DROPPED,
-        # because the query is where the gap lives. That removes the token
-        # class by construction rather than filtering it, and leaves the
-        # predicate handling exactly what it is measured to handle.
+        # can disagree.
         #
-        # THE FIRST VERSION OF THAT HELPER DID NOT DO THIS AND ITS COMMENT
-        # CLAIMED IT DID. It shaped the whole landed url, which is correct on
-        # the matching branch and useless on the only branch where a token can
-        # appear. Caught by measuring the helper's own claim rather than by
-        # re-reading it; `test_the_source_url_closure_was_shown_leaking_first`
-        # now pins the pre-fix behaviour as a control, so if this predicate
-        # ever learns bare member tokens the query-dropping gets revisited
-        # deliberately instead of outliving its reason.
+        # TWO FIXES WERE TRIED BEFORE THE RIGHT ONE, and both failed the same
+        # way -- a claim that outran its code:
+        #
+        #   1. shape the whole landed url. Correct on the matching branch and
+        #      useless on the only branch where a token can appear.
+        #   2. shape the landed PATH with the query dropped. Still leaves a
+        #      token standing anywhere outside an `/in/` segment, because that
+        #      is the only member shape this predicate knows:
+        #          /messaging/thread/<token>/  -> unchanged
+        #          /mynetwork/<token>/         -> unchanged
+        #      The six landings (2) was measured against did not include one,
+        #      because they were chosen to match what its author already
+        #      believed. Found by reviewing the function as though somebody
+        #      else had written it.
+        #
+        # WHAT SHIPPED IS A CLOSED VOCABULARY -- `_PUBLISHABLE_SEGMENTS` --
+        # matched BY NAME before any url is emitted, exactly as
+        # `dom.MESSAGING_FILTERS` is matched before any selector is built. An
+        # arbitrary string can never be published, so it can never carry an
+        # identifier. Structural, where every version above was a filter that
+        # had to keep up with LinkedIn's shapes.
+        #
+        # So `census_substitute` is not called on that path at all, this set
+        # does not name it, and `test_no_identifier_leaves_through_source_url`
+        # holds it to ten landings including the two that leaked.
         #
         # AND THE `my_profile` LESSON APPLIES HERE HARDER THAN THERE. That
         # entry warns a shaped source_url above deliberately published
@@ -368,7 +389,6 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         # purpose, so the false claim would be worse -- hence
         # `rows_are_not_redacted` is returned beside it, saying in the payload
         # what the shaping does and does not mean.
-        ("server.py", "_connections_source_url"),
     }, sorted(callers)
 
 

@@ -1480,6 +1480,43 @@ def _connections_refusal(reason: str, why: str, **extra: Any) -> dict[str, Any]:
     return out
 
 
+#: PATH SEGMENTS THIS TOOL MAY PUBLISH VERBATIM. A CLOSED SET, matched BY NAME
+#: before anything is emitted, so an arbitrary string can never reach a
+#: ``source_url`` and therefore can never carry somebody's identifier.
+#:
+#: Every entry is LinkedIn's own routing vocabulary and names a PRODUCT AREA,
+#: never a person. ``in`` is here and the slug after it is not: ``/in/<slug>/``
+#: publishes as ``/in/<segment>/``, which says he landed on a profile without
+#: saying whose.
+#:
+#: THE PATTERN IS ``dom.MESSAGING_FILTERS``, transposed. That tuple is matched
+#: by name before a selector exists, so "an arbitrary string can never become a
+#: click target"; this is matched by name before a url exists, so an arbitrary
+#: string can never become published text. Both are structural rather than
+#: filters that must keep up with LinkedIn.
+#:
+#: ADDING TO THIS LIST IS A DISCLOSURE DECISION, not a convenience. A segment
+#: belongs here only if it is a fixed route name -- if LinkedIn could ever put
+#: a person, an id or a token in that position, it does not.
+_PUBLISHABLE_SEGMENTS = frozenset(
+    {
+        "mynetwork",
+        "invite-connect",
+        "connections",
+        "feed",
+        "messaging",
+        "notifications",
+        "jobs",
+        "in",
+        "search",
+        "results",
+        "people",
+        "checkpoint",
+        "authwall",
+    }
+)
+
+
 def _connections_source_url(landed: str) -> str:
     """Where the rows came from, WITHOUT publishing an arbitrary landed string.
 
@@ -1527,16 +1564,36 @@ def _connections_source_url(landed: str) -> str:
             -> ".../connections/?u=<member token>"     TOKEN SURVIVED
 
     The claim was true of the matching branch and false of the only branch
-    where a token could ever appear, which is the branch that matters. Taking
-    the path alone removes the class by CONSTRUCTION rather than by filtering
-    it: a query string read off the page is never published at all, and what
-    remains -- a slug or a urn in a path segment -- is exactly what the shared
-    predicate is measured to handle.
+    where a token could ever appear, which is the branch that matters.
 
-    The cost is named rather than hidden: a redirect's query is not reported,
-    so a caller diagnosing an unexpected landing sees the page and not the
-    parameters. That is the right way round for a surface made of other
-    people.
+    **AND DROPPING THE QUERY WAS STILL NOT ENOUGH -- FOUND BY REVIEWING THIS
+    FUNCTION AS THOUGH SOMEBODY ELSE HAD WRITTEN IT.** Shaping the path with
+    the shared predicate leaves a member token standing anywhere outside a
+    ``/in/`` segment, because that is the only member shape it knows::
+
+        /messaging/thread/<member token>/   -> unchanged.  TOKEN SURVIVED
+        /mynetwork/<member token>/          -> unchanged.  TOKEN SURVIVED
+
+    The six landings the first fix was measured against did not include one,
+    because I chose them to match what I already believed. So the predicate is
+    not used here at all any more.
+
+    **WHAT IS USED INSTEAD IS A CLOSED VOCABULARY**, which is this package's
+    own sanctioned pattern for exactly this problem -- ``dom.MESSAGING_FILTERS``
+    is matched by name before a selector is ever built, so an arbitrary string
+    cannot become a click target. Transposed: a path segment is published only
+    if it is one of :data:`_PUBLISHABLE_SEGMENTS`, and anything else becomes
+    ``<segment>``. **An arbitrary string can never be emitted, so it cannot
+    carry an identifier** -- that is a structural property rather than a
+    filter that has to keep up with LinkedIn's shapes.
+
+    The cost is named rather than hidden: a redirect's query is not reported
+    and an unrecognised page reads as ``/<segment>/<segment>/``, so a caller
+    diagnosing an odd landing sees the known part and a count. That is the
+    right way round for a surface made entirely of other people, and it is why
+    this function is NOT on the considered-consumer list for
+    ``census_substitute``: the honest answer to "is that predicate right
+    here" turned out to be "this tool should not depend on it".
 
     **THIS IS NOT A REDACTION PROMISE ABOUT THE ROWS.** The rows carry third
     parties' names, profile urls and member ids ON PURPOSE -- that is the
@@ -1549,7 +1606,14 @@ def _connections_source_url(landed: str) -> str:
     """
     if landed == CONNECTIONS_URL:
         return CONNECTIONS_URL
-    return shape.census_substitute(_landed_path(landed))
+    segments = [part for part in _landed_path(landed).split("/") if part]
+    if not segments:
+        return "/"
+    kept = [
+        part if part in _PUBLISHABLE_SEGMENTS else "<segment>"
+        for part in segments
+    ]
+    return "/" + "/".join(kept) + "/"
 
 
 @mcp.tool()

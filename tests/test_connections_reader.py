@@ -1189,6 +1189,16 @@ def _source_url_probes() -> list[tuple[str, str, str]]:
         ("token as an /in/ segment", base + "/in/" + token + "/", token),
         ("composite urn in a path",
          base + "/x/urn" + ":li:fsd_profileGeo:(" + token + ",GEO)/", token),
+        # THE TWO THE FIRST PROBE SET MISSED, and their absence WAS the
+        # defect. A member token outside an `/in/` segment survived
+        # census_substitute untouched, because `/in/` is the only member shape
+        # that predicate knows. The six cases above were chosen to match what
+        # I already believed the risk was; these two are why the shipped fix
+        # is a closed vocabulary rather than a shaping pass.
+        ("token in a NON-/in/ path", base + "/messaging/thread/" + token + "/", token),
+        ("token in a mynetwork path", base + "/mynetwork/" + token + "/", token),
+        ("auth wall carrying a slug", base + "/authwall?sessionRedirect=/in/" + slug, slug),
+        ("empty landed", "", token),
     ]
 
 
@@ -1222,18 +1232,30 @@ def test_the_source_url_closure_was_shown_leaking_first():
     left in place because nobody rechecked.
     """
     token = "AC" + "oAAB" + "0" * 4 + "xyz"
-    landed = server.CONNECTIONS_URL + "?u=" + token
+    base = "https://www.linkedin.com"
 
-    # The old body, rebuilt: shape the WHOLE url.
-    pre_fix = shape.census_substitute(landed)
-    assert token in pre_fix, (
-        "the shared predicate now covers bare member tokens -- revisit the "
-        "query-dropping in _connections_source_url rather than keeping it "
+    # ATTEMPT 1, rebuilt: shape the WHOLE landed url. Leaks on a query.
+    query_landing = server.CONNECTIONS_URL + "?u=" + token
+    assert token in shape.census_substitute(query_landing), (
+        "the shared predicate now covers bare member tokens in a query -- "
+        "revisit _connections_source_url rather than keeping its vocabulary "
         "for a reason that has expired"
     )
 
-    # And the shipped body does not.
-    assert token not in server._connections_source_url(landed)
+    # ATTEMPT 2, rebuilt: shape the landed PATH, query dropped. STILL LEAKS,
+    # and this is the one that was missed the first time round -- a member
+    # token outside an `/in/` segment is invisible to that predicate.
+    path_landing = base + "/messaging/thread/" + token + "/"
+    from urllib.parse import urlsplit
+
+    assert token in shape.census_substitute(urlsplit(path_landing).path), (
+        "the shared predicate now covers member tokens in a non-/in/ path "
+        "segment -- the closed vocabulary can be revisited deliberately"
+    )
+
+    # AND THE SHIPPED BODY LEAKS NEITHER.
+    assert token not in server._connections_source_url(query_landing)
+    assert token not in server._connections_source_url(path_landing)
 
 
 def test_the_docstrings_on_this_path_carry_no_identifier():
