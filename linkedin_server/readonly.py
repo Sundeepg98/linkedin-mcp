@@ -221,61 +221,77 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/?$"),
     re.compile(
         r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/details/"
-        r"(skills|experience|education|interests)/?(\?[^#]*)?$"
-        # ``interests`` ADDED 2026-09-04, and it is one word inside a
-        # family the operator has already argued: same page, same owner,
-        # same shape as the three siblings beside it. `/in/me/` resolves
-        # to whoever is signed in, so there is no third party on his own
-        # Interests list -- and a sibling of three admitted siblings does
-        # not get a new tribunal.
-        #
-        # THE BAR IT HAD TO MEET WAS THE ONE ITS SIBLINGS MEET, AND THAT
-        # WAS CHECKED RATHER THAN ASSUMED. This tab enumerates FIVE kinds
-        # of entity, not one: Top Voices are PEOPLE, and Companies are
-        # settled by precedent because `linkedin_followed_companies`
-        # already publishes them -- but Groups, Newsletters and Schools
-        # had never been asked about. `scripts/_probe_interests_entity_
-        # shaping.py` put a name behind each of the five and ran the
-        # census guards over it: all three shipped their name verbatim,
-        # and a newsletter shipped its slug -- routinely its author's
-        # name -- on every record. That is fixed in `shape.py` and the
-        # probe is GREEN. **The widening landed after the shaper, not
-        # before it**, because a read that is safe only until he follows
-        # a person is not safe.
-        #
-        # WHAT IT WAS EXPECTED TO BUY, AND WHAT IT ACTUALLY BOUGHT --
-        # CORRECTED THE SAME DAY, BY THE READ THIS LINE MADE POSSIBLE.
-        #
-        # THE CLAIM: that this surface answers whether he belongs to any
-        # group or attends any event, WITHOUT opening `/groups/` or
-        # `/events/` -- the precondition for `GROUPS-SURFACE` (32 census
-        # rows), `EVENTS-SURFACE` (18) and `NEWSLETTER-SURFACE` (12).
-        #
-        # THE MEASUREMENT: `/in/me/details/interests/` REDIRECTS to the
-        # profile. Requested at path depth 4, landed at depth 2, and
-        # returned 236 controls and 8733 characters of main text --
-        # identical on both counts to a direct read of `/in/me/` taken the
-        # same hour. **The address is admitted and LinkedIn does not serve
-        # it.**
-        #
-        # THE CONTROL, because a lone redirect is uninterpretable: the two
-        # siblings on this very alternation were loaded in the same run.
-        # `skills` landed at depth 4 (84 controls, 2359 chars) and
-        # `education` did not redirect at all (56 controls, 1231 chars).
-        # So the redirect is a fact about THIS address, not about
-        # `/details/` pages and not about the session.
-        #
-        # TWO READINGS SURVIVE and this comment does not pick between them:
-        # LinkedIn may not serve the page at all, or may serve it only when
-        # the section is non-empty. Either way THE PRECONDITION QUESTION IS
-        # STILL OPEN, and whoever picks it up should not re-derive this
-        # route as the cheap answer -- it was tried and it does not serve.
-        #
-        # THE LINE STAYS. It admits a self-owned address that redirects to
-        # another self-owned address already on this list, so it widens
-        # nothing, and it costs nothing if LinkedIn starts serving it. What
-        # is corrected here is the CLAIM, not the permission. All three of
-        # `/groups/`, `/events/` and the newsletter addresses stay closed.
+        r"(skills|experience|education)/?(\?[^#]*)?$"
+    ),
+    # THE INTERESTS PAGE, AND THE ``/in/me/`` FORM ONLY. Added 2026-09-04.
+    #
+    # IT IS A SEPARATE PATTERN RATHER THAN A FOURTH WORD IN THE ALTERNATION
+    # ABOVE, AND THAT IS THE WHOLE OF THE PERMISSION. The pattern above takes
+    # ``[A-Za-z0-9\-_%]+`` for the member segment, so it admits ANY member's
+    # details pages. Adding a word to it would have admitted
+    # ``/in/<a-third-party>/details/interests/`` -- and that is the worst
+    # surface in the package on which to make that mistake, because this tab
+    # enumerates the PEOPLE somebody follows. It would have read a third
+    # party's follow graph WHILE ANNOUNCING TO THAT THIRD PARTY THAT HE
+    # LOOKED: ``linkedin_who_viewed_me`` establishes that loading a member's
+    # profile leaves them a durable record in their own viewer list.
+    #
+    # It was written the wrong way first and caught in review before it could
+    # be used. The RED is recorded because a boundary defect that was fixed
+    # quietly teaches nobody: at the intermediate commit,
+    # ``/in/<other>/details/interests/`` measured ALLOWED.
+    #
+    # THIS FORM MATCHES THE INTRO EDITOR BELOW, WHICH RULED THE SAME QUESTION
+    # SIXTEEN LINES AWAY: "a pattern that can address anybody but him is
+    # refused on that ground alone, whatever the page underneath is for."
+    # Two rulings three lines apart disagreed about the member segment; this
+    # entry follows the narrow one.
+    #
+    # AND IT COSTS NOTHING: every census row this surface was admitted for is
+    # about HIS OWN account, so the ``me`` form reaches all of them.
+    #
+    # THE SHAPE LAYER WAS ESTABLISHED FIRST, NOT ASSUMED. This tab enumerates
+    # FIVE kinds of entity. People are covered by every guard in ``shape.py``
+    # -- MEASURED, not argued: a person behind ``/in/`` redacts at both
+    # counts, and that row is the CONTROL in
+    # ``scripts/_probe_interests_entity_shaping.py``. Companies are settled by
+    # precedent, since ``linkedin_followed_companies`` already publishes them.
+    # Groups, Newsletters and Schools had never been asked about, and that
+    # probe MEASURED all three shipping a name verbatim past both census
+    # guards -- a newsletter also shipping its slug, routinely its author's
+    # name, on every record. Fixed in ``shape.py`` BEFORE this line existed,
+    # because a read that is safe only until he follows a person is not safe.
+    #
+    # WHAT IT WAS EXPECTED TO BUY, AND WHAT IT ACTUALLY BOUGHT. The claim was
+    # that this surface answers whether he belongs to any group or attends any
+    # event without opening ``/groups/`` or ``/events/`` -- the precondition
+    # for ``GROUPS-SURFACE`` (32 census rows), ``EVENTS-SURFACE`` (18) and
+    # ``NEWSLETTER-SURFACE`` (12).
+    #
+    # THE MEASUREMENT SAYS OTHERWISE: ``/in/me/details/interests/`` REDIRECTS
+    # to the profile. Requested at path depth 4, landed at depth 2, returning
+    # 236 controls and 8733 characters of main text -- identical on both
+    # counts to a direct read of ``/in/me/`` taken the same hour. **The
+    # address is admitted and LinkedIn does not serve it.**
+    #
+    # THE CONTROL, because a lone redirect is uninterpretable: both siblings
+    # on the alternation above were loaded in the same run. ``skills`` landed
+    # at depth 4 (84 controls, 2359 chars) and ``education`` did not redirect
+    # at all (56 controls, 1231 chars). So the redirect is a fact about THIS
+    # address, not about ``/details/`` pages and not about the session.
+    #
+    # TWO READINGS SURVIVE and this comment does not pick between them:
+    # LinkedIn may not serve the page at all, or may serve it only when the
+    # section is non-empty. Either way THE PRECONDITION QUESTION IS STILL
+    # OPEN, and whoever picks it up should not re-derive this route as the
+    # cheap answer -- it was tried and it does not serve.
+    #
+    # THE LINE STAYS. It admits a self-owned address that redirects to another
+    # self-owned address already on this list, so it widens nothing, and it
+    # costs nothing if LinkedIn starts serving it. ``/groups/``, ``/events/``
+    # and the newsletter addresses all stay closed.
+    re.compile(
+        r"^https://www\.linkedin\.com/in/me/details/interests/?(\?[^#]*)?$"
     ),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and

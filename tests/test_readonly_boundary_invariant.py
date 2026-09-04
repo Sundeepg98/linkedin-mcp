@@ -351,6 +351,36 @@ PINNED = (
 #: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
 #: moved is one entry in a tuple of string literals, the class this file
 #: records as matching on every Python.
+#: RE-FROZEN AGAIN 2026-09-04, NARROWING WHAT THE ENTRY BELOW ADMITTED:
+#:
+#:     _ALLOWED_URL_PATTERNS   a334f9fd2683831d -> 3791e30def5f29bc
+#:
+#: THE FIRST VERSION OF THE INTERESTS ADMISSION WAS TOO WIDE AND THIS RECORDS
+#: IT RATHER THAN HIDING IT. `interests` was added as a fourth word to the
+#: self-profile details alternation -- whose member segment is
+#: `[A-Za-z0-9\-_%]+`, NOT `me`. So for one commit the boundary admitted
+#: `/in/<a-third-party>/details/interests/`, MEASURED ALLOWED, on the worst
+#: possible surface for that mistake: the Interests tab enumerates the PEOPLE
+#: somebody follows, so it would have read a third party's follow graph while
+#: announcing to that third party that he looked -- `linkedin_who_viewed_me`
+#: establishes the durable viewer record.
+#:
+#: It is now its own anchored `/in/me/` pattern, NARROWER than its three
+#: siblings and matching the intro editor's form, which had already ruled the
+#: same question sixteen lines away. Twelve controls, zero mismatches: the
+#: `me` form and its tab query admitted; both third-party spellings refused;
+#: the three siblings unchanged; `interests/edit/`, `recommendations`,
+#: `/groups/` and `/events/` all still refused.
+#:
+#: EVERY OTHER DIGEST IS AGAIN BYTE-IDENTICAL. A narrowing that touched a
+#: denylist or an exemption would show here, and none did.
+#:
+#: A SEPARATE FINDING, MEASURED AND NOT ACTED ON: the three SIBLINGS are
+#: still `[A-Za-z0-9\-_%]+`, so `/in/<a-third-party>/details/skills/` is
+#: admitted and always has been. That breadth predates this wave and is
+#: recorded in the blockers ledger with its measurement. It is the operator's
+#: to rule on; nothing here changes it.
+#:
 #: RE-FROZEN 2026-09-04, and ONE digest moved:
 #:
 #:     _ALLOWED_URL_PATTERNS   97f175ae03ccc7d1 -> a334f9fd2683831d
@@ -385,7 +415,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "4a6eba4033964196",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "a334f9fd2683831d",
+    "_ALLOWED_URL_PATTERNS": "3791e30def5f29bc",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -755,7 +785,11 @@ DENYLISTS_AT_A76FE32 = {
     # profile Interests page joined the self-profile details alternation. The
     # other three denylists and the exemption table beside them are
     # byte-identical, which is the whole of what this dict is for.
-    "_ALLOWED_URL_PATTERNS": "a334f9fd2683831d",
+    # NARROWED 2026-09-04, after the admission above went in too wide for one
+    # commit. Same direction as every other move in this dict: a READ
+    # admission, and this time a read admission being REDUCED. The three
+    # denylists and the exemption table beside them are byte-identical.
+    "_ALLOWED_URL_PATTERNS": "3791e30def5f29bc",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
