@@ -1150,6 +1150,90 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # returns accessible names ungated and one control in that editor is named
     # by its own content.
     ("linkedin_server/writes.py", "perform", "select_option"),
+    # THE FIFTH ENTRY, added 2026-09-04, AND IT IS THE FIRST THAT REACHES THE
+    # OTHER WAY. The four above all act on something ALREADY ON THE PAGE: a
+    # control the reader found, a string the operator approved, an option
+    # LinkedIn itself drew. This one takes a FILE FROM THIS MACHINE and hands
+    # its bytes to a remote party. Nothing in the read-only boundary is about
+    # that direction, because until this line nothing went that way -- so this
+    # entry argues at more length than the other four, and it should.
+    #
+    # IT EXISTS BECAUSE THE OPERATOR WAS ASKED AND ANSWERED. The absence of
+    # `set_input_files` from this list was not an oversight: it was an OPEN
+    # QUESTION, written down as one, carried in
+    # `tests/test_readonly.py::test_nothing_in_this_package_can_reach_a_file_
+    # input` in the form "the operator has never been asked about it", and
+    # counted in `_audit/2026-09-03-linkedin-gap-blockers.md` as the single
+    # highest-value blocker in the census -- 16 capability rows, one ruling.
+    # He was asked on 2026-09-04 and opened it FULLY: profile photo, post
+    # media and message attachments. That test now asserts the opposite of
+    # what it used to, by name, which is the correct way for a written
+    # question to end.
+    #
+    # WHAT IT PERMITS: one `page.set_input_files`, inside `writes.perform`,
+    # draining a queue exactly as the click, the fill and the select do. ONE
+    # DRAIN POINT IS THE WHOLE DESIGN -- the scanner counts CALL SITES, so a
+    # queue keeps the guarantee this list exists to give (there is one place
+    # in this package that hands a file to a browser, and a reviewer reads it)
+    # where a second literal call would create a second place to audit.
+    #
+    # AND THE SANCTION IS THE EASY HALF. THE PATH STRING IS THE NEW SURFACE.
+    # A fill is bounded by the string being a slice of a target the operator
+    # read; a PATH is a name for something this server has not seen and he has
+    # not read. `linkedin_server/uploads.py` is what bounds it, and no part of
+    # it is optional:
+    #
+    #   A DECLARED ROOT -- `config.UPLOAD_ROOT`, and nothing outside it. An
+    #   unbounded path names a private key as readily as a photograph and a
+    #   string comparison cannot tell them apart. Putting a file in that
+    #   directory is an act the operator performs with his own hands, and it
+    #   is the one part of this mechanism a caller cannot fake.
+    #
+    #   NO SYMLINK ANYWHERE ON THE CHAIN -- a symlink is a path that names one
+    #   file and reads another, which defeats every other check by
+    #   construction: the name is inside the root, the bytes are not. Checked
+    #   per component AND by comparing the real path against the real root,
+    #   because a Windows directory junction is not reported as a link.
+    #
+    #   A REGULAR FILE THAT EXISTS AND CAN BE READ, with a size, refused by
+    #   name for each of those rather than as one flat "cannot use that file".
+    #
+    #   AND THE PATH IS NEVER COMPOSED BY THIS SERVER. It is a component of
+    #   the GRANT -- the canonical target the preview printed and the token
+    #   was minted against -- taken by `writes._file_component_of`, the third
+    #   member of the family `_text_component_of` started. `consume` has
+    #   already refused any token whose target did not match.
+    #
+    # A PATH IS NOT A FILE, WHICH THE GRANT ALONE CANNOT FIX. The token binds
+    # the path; whatever sits under that path can change while a grant is
+    # live. So the preview reads a sha256 prefix, prints it, and `perform`
+    # re-reads it immediately before handing anything over -- a mismatch is a
+    # refusal. That is what makes "the bytes uploaded are the bytes he saw" a
+    # property rather than a hope.
+    #
+    # WHAT IT DOES NOT PERMIT, by the triple's own construction: a
+    # set_input_files in `dom.py` or `browser.py` (the PATH refuses it), one
+    # in any other function in `writes.py` including a closure inside
+    # `perform` (the FUNCTION refuses it, since attribution is to the
+    # innermost enclosing function), and a click, fill, select, type, press or
+    # http_post bought by this line (the KIND refuses them -- this entry buys
+    # "set_input_files" and nothing else).
+    #
+    # AND ATTACHING IS NOT SENDING. Putting a file in a composer dispatches
+    # nothing; the act that reaches LinkedIn is the submit that follows, gated
+    # separately and after this. The block the operator reads says so in those
+    # words, and says the other half too -- that once that submit happens an
+    # upload CANNOT BE UN-SENT, because the bytes have left this machine and
+    # nothing here can withdraw them.
+    #
+    # NO ACTION USES IT YET, AND THAT IS DELIBERATE. `writes.UPLOAD_ACTIONS`
+    # ships EMPTY: the ruling landed, the mechanism landed, and each of the
+    # three composers still needs its own file input measured before it can
+    # join. This entry therefore describes a capability that is OPEN and a
+    # surface that is not yet wired, which is exactly the state it should
+    # describe -- and it means wiring the first one is a one-line diff beside
+    # a paragraph explaining what it costs.
+    ("linkedin_server/writes.py", "perform", "set_input_files"),
 )
 
 

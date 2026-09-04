@@ -130,12 +130,32 @@ harvest returns none of them, which blocks the save-family previews at
 
 WHAT IS HERE, AND WHAT STILL IS NOT
 -----------------------------------
-ONE mutating call exists in this package and it is in :func:`perform`: a single
-anchored click. ``readonly.scan_source_for_mutations`` still finds it -- the
-scanner was not taught to stop looking -- and it is admitted by name, path and
-kind in ``readonly.SANCTIONED_MUTATIONS``, which is one line long and which
-``tests/test_readonly.py`` fails if it widens or goes stale. Every other module
-in the package still scans clean.
+FIVE mutating calls exist in this package. FOUR are in :func:`perform` -- an
+anchored click, a fill, a select_option and, from 2026-09-04, a
+set_input_files -- and the fifth is the messaging filter's click in
+``dom.activate_messaging_filter``. ``readonly.scan_source_for_mutations``
+still finds every one of them -- the scanner was not taught to stop looking --
+and each is admitted by name, path and kind in
+``readonly.SANCTIONED_MUTATIONS``, which ``tests/test_readonly.py`` fails if it
+widens or goes stale. Every other module in the package scans clean.
+
+THIS PARAGRAPH SAID "ONE mutating call ... a single anchored click" UNTIL
+2026-09-04, and it had been false since 2026-08-26. Three widenings landed
+against it -- the filter click, the fill, the select_option -- each correcting
+the count where it was ASSERTED and none correcting it here, where it was
+merely stated. That is the exact failure mode this file's own tests exist to
+catch one layer down, and it is recorded rather than quietly patched: a number
+in prose has no test, so the only thing keeping it true is somebody looking.
+
+THE FIFTH IS NOT LIKE THE OTHER FOUR. A click presses what is already drawn; a
+fill and a select put a string the operator approved into a control on the
+page. ``set_input_files`` hands a FILE FROM THIS MACHINE to a remote party,
+which is a direction nothing else in this package goes. What bounds it is not
+the sanction but :mod:`linkedin_server.uploads` -- a declared root, no link
+anywhere on the chain, a regular-file check, and a digest read at preview and
+re-read immediately before the browser is handed anything. NO ACTION USES IT
+YET: :data:`UPLOAD_ACTIONS` is empty, and each composer joins it only once its
+own file input has been measured.
 
 WHAT A CALLER CAN DO: preview a save, read the block, and confirm it. That is
 two round trips through this module, and between them sit the flag, the live
@@ -184,7 +204,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
-from linkedin_server import dom, shape
+from linkedin_server import dom, shape, uploads
 from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------
@@ -2581,6 +2601,81 @@ def _subject_component_of(spec: WriteSpec, target: str) -> str:
     return target.split(TARGET_JOIN, 1)[0]
 
 
+#: THE ACTIONS THAT PUT A FILE FROM THIS MACHINE INTO A COMPOSER.
+#:
+#: **IT IS EMPTY, AND THAT IS THE DESIGN RATHER THAN AN UNFINISHED EDIT.**
+#:
+#: The operator opened file upload on 2026-09-04 -- profile photo, post media
+#: and message attachments, all three -- and that ruling is what
+#: ``readonly.SANCTIONED_MUTATIONS``'s fifth entry records. A ruling is not a
+#: surface. Each of those three composers still needs its own file-input
+#: measured, its own submit gate, and its own target shape, and every one of
+#: those is work with a live page in it. What landed here is the MECHANISM and
+#: its guard: the path check, the digest, the drain point, the block he reads.
+#:
+#: SO WHAT DOES THIS SET BUY WHILE IT IS EMPTY. It is the ONE place an upload
+#: becomes possible for an action, so wiring the first composer is a one-line
+#: diff a reviewer can see, sitting next to this paragraph -- rather than an
+#: upload appearing as a side effect of some other change to ``perform``. The
+#: same order this package already used for its confinement rule, written and
+#: driven at synthetic code long before ``perform`` had a body, so that the
+#: day it did the rule was already load-bearing rather than remembered.
+#:
+#: WHAT AN ACTION MUST BRING WITH IT TO JOIN. A ``target_kind`` in
+#: :data:`_COMPOSITE_TARGET_KINDS` whose CONTENT component is the file path,
+#: and a selector for the file input from ``_live_control``. See
+#: :func:`_file_component_of` for the one shape this vocabulary does NOT yet
+#: express -- an action carrying text AND a file -- and why that is left to
+#: the wave that first needs it rather than invented here.
+UPLOAD_ACTIONS: frozenset[str] = frozenset()
+
+
+def _file_component_of(spec: WriteSpec, target: str) -> uploads.UploadFile:
+    """The FILE named by a canonical target, resolved and checked. Never composed.
+
+    THE THIRD MEMBER OF A FAMILY, and it exists for the reason the other two
+    do. ``_text_component_of`` returns the half that would be TYPED;
+    ``_subject_component_of`` returns the half that names WHO; this returns
+    the half that names a FILE, and all three take a slice of the very target
+    the preview printed and the token was minted against.
+
+    **THE PATH IS NEVER BUILT HERE.** That is the whole property. Every other
+    act this package performs works on something already on the page; an
+    upload takes a path naming a file on this machine, and a path this server
+    composed would be a file the operator never saw named. So the path arrives
+    as a component of the grant, ``consume`` has already refused any token
+    whose target did not match, and what is opened is provably what he read.
+
+    AND THE PATH ALONE IS NOT ENOUGH, which is why this returns a resolved
+    :class:`uploads.UploadFile` rather than a string. A path is not a file: it
+    can point outside the declared root, name a symlink, name a directory, or
+    name nothing at all, and none of those is visible in the string. Every one
+    of them is refused by ``uploads.resolve_upload_file``, by name.
+
+    IT REFUSES RATHER THAN GUESSING, on the same rule as its two siblings: an
+    action that uploads must declare a target kind this module knows how to
+    split, and anything else raises before a file is opened.
+
+    THE SHAPE THIS VOCABULARY DOES NOT YET EXPRESS, named rather than left to
+    be discovered: an action carrying BOTH text and a file -- a post with an
+    image and a caption -- needs a THREE-part target, and
+    :data:`_COMPOSITE_TARGET_KINDS` maps a kind to exactly two components. It
+    is not invented here. Nothing has measured a composer that needs it, and
+    this package's own rule is that a shape nobody has seen does not get
+    asserted; the wave that wires the first such composer owns that decision
+    and will have a live surface to take it against.
+    """
+    kind = spec.target_kind
+    if kind not in _COMPOSITE_TARGET_KINDS:
+        raise WriteAttemptError(
+            f"{spec.action!r} is in UPLOAD_ACTIONS and its target_kind "
+            f"{kind!r} has no content component, so there is nothing measured "
+            "to upload. A file will not be chosen from a target this module "
+            "cannot split."
+        )
+    return uploads.resolve_upload_file(_text_component_of(spec, target))
+
+
 def _opaque_target(spec: WriteSpec, raw: str) -> str:
     """A single-component target whose SHAPE this server has never measured.
 
@@ -2728,7 +2823,23 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
     if spec.target_kind in _OPAQUE_TARGET_KINDS:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
-        return _composite_target(spec, target)
+        canonical = _composite_target(spec, target)
+        if spec.action in UPLOAD_ACTIONS:
+            # THE FILE IS CHECKED WHERE THE TARGET IS MADE, so that BOTH doors
+            # get it. ``observe`` canonicalises and ``mint`` canonicalises
+            # again, and this is the only point both of them pass through --
+            # so an unusable path is refused before a token exists for it,
+            # rather than at render time with a live grant already in the
+            # process bound to a file that cannot be opened.
+            #
+            # THE RESULT IS DISCARDED ON PURPOSE. What is wanted here is the
+            # REFUSAL, not the facts: an UploadFile carries a size and a
+            # digest that were true a moment ago, and caching either of them
+            # on the target would be storing a reading where a string belongs.
+            # The preview reads the file for itself and so does the drain
+            # point, which is what makes the digest comparison mean anything.
+            _file_component_of(spec, canonical)
+        return canonical
     raise WriteAttemptError(
         f"{spec.action!r} declares target_kind {spec.target_kind!r}, which "
         "this module has no way to address."
@@ -4143,6 +4254,29 @@ def _render(
         "spends": spec.spends,
         "performed": False,
     }
+
+    # THE FILE BLOCK, for an action that would upload one.
+    #
+    # HE IS APPROVING AN UPLOAD, AND "A FILE" IS NOT SOMETHING A PERSON CAN
+    # APPROVE. The name, the extension and the exact size go in the block for
+    # the same reason a post's words do: the canonical target is what the
+    # token binds to, and a target that reads as a path tells him where the
+    # bytes are, not what they are. A filename is also frequently identifying
+    # in its own right, and it goes to LinkedIn with the file.
+    #
+    # THE DIGEST IS READ HERE AND COMPARED AT THE DRAIN POINT. The grant binds
+    # the PATH; a path is not a file, and GRANT_TTL_SECONDS is long enough for
+    # the bytes under it to change. Reading it now is what makes "the bytes
+    # uploaded are the bytes he saw" a property rather than a hope.
+    #
+    # NOTHING IS SWALLOWED. ``uploads`` refuses by raising, and the raise is
+    # allowed out of here: a preview that could not read the file must not
+    # render a block offering to upload it, and _target_for has already made
+    # the same check, so reaching this line with an unusable file means the
+    # file changed between the two -- which is exactly the news worth having.
+    if spec.action in UPLOAD_ACTIONS:
+        upload = _file_component_of(spec, observation.target)
+        out["file"] = upload.as_block(digest=uploads.digest_of(upload))
 
     # THE VERIFICATION DISCLOSURE, printed in the preview and again in the
     # result. Ruling 1, 2026-09-01: an unverifiable outcome may ship PROVIDED
@@ -7823,8 +7957,23 @@ async def perform(
         fill_plan.append((selector, _subject_component_of(spec, grant.target)))
     elif spec.action in TYPING_ACTIONS or control_kind == "fill":
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
+    # THE FOURTH QUEUE, 2026-09-04, AND IT IS A QUEUE FOR THE REASON THE OTHER
+    # THREE ARE. ``readonly.SANCTIONED_MUTATIONS`` is keyed by
+    # ``(path, function, kind)`` and the scanner counts CALL SITES, so
+    # draining a queue keeps exactly the guarantee that list exists to give:
+    # there is ONE place in this package that hands a file to a browser, and a
+    # reviewer reads it. A second literal ``page.set_input_files`` anywhere
+    # would be a second place to audit and a second entry to justify.
+    #
+    # THE PATH IS NEVER COMPOSED HERE. It is a component of the GRANT --
+    # the canonical target the preview printed and the token was minted
+    # against -- resolved and checked by ``uploads.resolve_upload_file``. See
+    # :func:`_file_component_of`.
+    upload_plan: list[tuple[str, uploads.UploadFile]] = []
+    if spec.action in UPLOAD_ACTIONS:
+        upload_plan.append((selector, _file_component_of(spec, grant.target)))
     click_plan: list[str] = (
-        [] if (fill_plan or select_plan) else [selector]
+        [] if (fill_plan or select_plan or upload_plan) else [selector]
     )
 
     # THE BEFORE-READING FOR A DELTA ACTION, taken here because it must happen
@@ -7852,7 +8001,72 @@ async def perform(
         prior_value, prior_why = await _editor_value_of(page, prior_field.strip())
 
     selects_made = 0
+    uploads_made = 0
+    uploaded: Optional[dict[str, Any]] = None
     try:
+        # THE UPLOAD DRAINS FIRST, AND THE ORDER IS AN ARGUMENT RATHER THAN A
+        # PREFERENCE.
+        #
+        # Every submit gate in this function -- ``_publish_submit_gate``,
+        # ``_comment_submit_gate``, ``_send_gate`` -- decides whether to press
+        # submit by READING THE COMPOSER AFTER the content lands. That is the
+        # whole design: the decision to submit is taken after there is
+        # something to submit rather than planned before it. An upload that
+        # ran AFTER those gates would mean the gate approved a submit of a
+        # composer that did not yet hold the file, and the thing submitted
+        # would not be the thing measured. So the file goes in before any gate
+        # looks, and every gate downstream sees the composer he is actually
+        # sending.
+        #
+        # AND IT IS BEFORE ANY CLICK, which is what makes a refusal here
+        # harmless: nothing has been dispatched, so stopping costs nothing and
+        # leaves nothing half-done.
+        while upload_plan:
+            upload_selector, upload_file = upload_plan.pop(0)
+            # THE BYTES, CHECKED AGAINST THE BYTES HE WAS SHOWN.
+            #
+            # The grant binds the PATH and ``consume`` has already refused any
+            # token whose target did not match -- so the FILE NAMED is
+            # provably the file named in the preview. That is not the same
+            # claim as the file being the same file: a path is not its
+            # contents, and GRANT_TTL_SECONDS is long enough for whatever sits
+            # under it to be replaced, edited, or to finish being written.
+            #
+            # So the digest read when the preview was rendered is carried on
+            # the grant and compared here, immediately before the browser is
+            # handed anything. A mismatch is a REFUSAL, not a warning: he
+            # approved a file he saw the size and the digest of, and this is
+            # no longer that file.
+            approved = (grant.preview.get("file") or {}).get("sha256_prefix")
+            if not approved:
+                raise WriteAttemptError(
+                    f"refusing to upload for {spec.action!r}: this grant "
+                    "carries no file digest, so there is nothing to compare "
+                    "the file on disk against. A grant reaches here only "
+                    "through a preview, and a preview for an uploading "
+                    "action reads and prints one -- so this means the grant "
+                    "was made some other way. Nothing was uploaded."
+                )
+            current = uploads.digest_of(upload_file)
+            if current != approved:
+                raise WriteAttemptError(
+                    f"refusing to upload for {spec.action!r}: the file at "
+                    "that path has changed since you were shown it. The "
+                    f"preview read {approved!r} and it now reads {current!r}. "
+                    "The token binds the PATH; this comparison is what binds "
+                    "the BYTES, and they no longer match. Nothing was "
+                    "uploaded and nothing was clicked."
+                )
+            # THE ONE CALL SITE, and the fifth entry on
+            # readonly.SANCTIONED_MUTATIONS. The path handed over is
+            # ``UploadFile.path`` -- absolute, real, checked to be a regular
+            # file inside the declared root with no link anywhere on its chain
+            # -- and not the string a caller supplied.
+            await page.set_input_files(
+                upload_selector, str(upload_file.path), timeout=CLICK_TIMEOUT_MS
+            )
+            uploads_made += 1
+            uploaded = upload_file.as_block(digest=current)
         while select_plan:
             select_selector, select_text = select_plan.pop(0)
             # BY THE OPTION'S OWN LABEL, never by value and never by index.
@@ -8029,6 +8243,29 @@ async def perform(
             )
         )
 
+    # THE LABELS THE RE-READ CONTROL WEARS, taken AFTER ``_verify_after`` has
+    # already returned rather than by a navigation of this function's own.
+    # Its react branch RE-NAVIGATES to the item permalink and reads a fresh
+    # render; by the time it is back -- whichever way it came back -- the
+    # page is already sitting on that render, so this reads the current DOM
+    # for free rather than paying for a second load. Gated on the action and
+    # wrapped in the SAME except-Exception -> None shape ``became`` uses
+    # above: this is a MEASUREMENT, not a gate, so a failed read here must
+    # never reach ``verified_state`` or anything decided from it -- and
+    # nothing below this point reads the variable to decide anything.
+    #
+    # SAFE TO SURFACE: dom.read_reaction_surface shapes every label through
+    # shape.census_shape before it leaves that module, which is the same
+    # guard that keeps a member's name out of this block on the day LinkedIn
+    # writes one into the neighbouring "Hide post by <name>" control.
+    newly_observed_reaction_labels: Optional[list[str]] = None
+    if spec.action == "react_to_item":
+        try:
+            reaction_reading = await dom.read_reaction_surface(page)
+            newly_observed_reaction_labels = reaction_reading.get("labels")
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            newly_observed_reaction_labels = None
+
     # THREE OUTCOMES, DECIDED BY THE VERIFICATION AND NOT BY THE CLICK.
     #
     # An earlier draft of this branched on ``click_error`` as well, and both of
@@ -8167,6 +8404,18 @@ async def perform(
             # what happened was a name being chosen in a dropdown.
             submit_clicks=clicks_made - typeahead_clicks,
             click_error=click_error,
+        ),
+        # WHAT WAS PUT INTO THE COMPOSER FROM THIS MACHINE, and it sits beside
+        # "clicked" rather than inside it for the same reason "typed_text"
+        # does: it is a fact about WHAT LEFT THIS MACHINE, not a diagnostic
+        # about a click. ``None`` means no file was handed over -- which is
+        # every action that ships today, and it says so rather than being
+        # absent, because a missing key and "nothing was uploaded" are the
+        # same reading to anybody scanning the payload.
+        "uploaded": (
+            None
+            if uploaded is None
+            else {**uploaded, "files_handed_to_the_browser": uploads_made}
         ),
         "clicked": {
             "selector": selector,
@@ -8430,6 +8679,29 @@ async def perform(
                 "null here and means 'not looked for' rather than 'not "
                 "found'. Nothing on this action's surface is read back this "
                 "way."
+            )
+        ),
+        "newly_observed_reaction_labels": newly_observed_reaction_labels,
+        "what_those_labels_are_for": (
+            (
+                "the distinct accessible names the reaction controls on this "
+                "re-read wear, taken from the same fresh render the "
+                "verification above already read. It is recorded for a human "
+                "and nothing branches on it. The ON label was measured "
+                "2026-09-04 as 'Reaction button state: Like', which is the "
+                "anchor reversible_by calls missing on this action's spec. A "
+                "name in NEITHER that label nor " + repr(dom.REACTION_OFF_LABEL)
+                + " means LinkedIn renamed something and wants the selector "
+                "RE-MEASURED, not this table widened to whatever turned up "
+                "here."
+            )
+            if spec.action == "react_to_item"
+            else (
+                "not applicable to this action: the list above it is a sweep "
+                "for REACTION controls, taken only on the item permalink "
+                "react_to_item's own verification re-reads, so it is null "
+                "here and means 'not looked for' rather than 'not found'. "
+                "Nothing on this action's surface is read back this way."
             )
         ),
         # THE SURFACE IS NAMED PER ACTION, and it was not until a test caught

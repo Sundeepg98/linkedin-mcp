@@ -46,6 +46,26 @@ CHROME_PROFILE = Path(
     os.environ.get("LINKEDIN_PROFILE_DIR", str(STATE_DIR / "chrome-profile"))
 ).resolve()
 
+#: THE ONLY DIRECTORY A FILE MAY BE UPLOADED FROM. Declared here, beside the
+#: profile, because it is the same class of thing: a boundary that decides
+#: what of this machine this server can reach.
+#:
+#: WHY A ROOT AT ALL, AND WHY IT IS THE WHOLE OF THE PROTECTION. Every other
+#: act this server performs operates on something ALREADY ON THE PAGE -- a
+#: control it found, a string he typed. An upload is the first one that takes
+#: an arbitrary path from a caller and hands it to a browser, and a path with
+#: no root can name a private key as easily as a photograph. The root turns
+#: "any file on this machine" into "a file he put here on purpose", and
+#: PUTTING IT HERE IS THE CONSENT that no string comparison can fake.
+#:
+#: NOT CREATED HERE, deliberately. ``uploads.resolve_upload_file`` refuses and
+#: NAMES this directory when it is missing, so the answer to "where do I put
+#: it" is in the refusal rather than in a directory that appeared by itself.
+#: A guard that makes its own subject exist is a guard with a side effect.
+UPLOAD_ROOT = Path(
+    os.environ.get("LINKEDIN_UPLOAD_DIR", str(STATE_DIR / "uploads"))
+).resolve()
+
 # ---------------------------------------------------------------------------
 # Rendering a path INTO a tool result
 # ---------------------------------------------------------------------------
@@ -82,7 +102,12 @@ def known_paths() -> tuple[str, ...]:
     than the leak it was written for.
     """
     out: list[str] = []
-    for raw in (CHROME_PROFILE, STATE_DIR, REPO_ROOT, PACKAGE_DIR):
+    # UPLOAD_ROOT IS ON THIS LIST BECAUSE IT IS OVERRIDABLE. Under the default
+    # it sits inside STATE_DIR and would be scrubbed by that entry anyway;
+    # pointed elsewhere by LINKEDIN_UPLOAD_DIR it would not be, and an upload
+    # refusal quotes the root it measured against. A directory a person chose
+    # for their own files is exactly the kind of path that carries their name.
+    for raw in (CHROME_PROFILE, UPLOAD_ROOT, STATE_DIR, REPO_ROOT, PACKAGE_DIR):
         text = str(raw)
         out.append(text)
         # ...and the same path as REPR would spell it. Measured 2026-08-22:

@@ -60,7 +60,7 @@ def test_no_module_contains_an_UNSANCTIONED_mutating_call(module: Path):
     )
 
 
-def test_the_sanctioned_list_is_exactly_these_three_calls():
+def test_the_sanctioned_list_is_exactly_these_calls():
     """The allowlist, read out loud, so widening it is visible in a diff.
 
     A guard whose allowlist is checked only for "does it cover what we found"
@@ -103,26 +103,51 @@ def test_the_sanctioned_list_is_exactly_these_three_calls():
     was printed in three places, and is now false. Those places were corrected
     in the same commit rather than left to be found.
 
-    THE COUNT IS STILL PINNED, which is the part that matters. A FOURTH entry
+    THE COUNT IS STILL PINNED, which is the part that matters. A FIFTH entry
     fails here whatever its justification, and has to come and write one.
+
+    FIVE FROM 2026-09-04, AND THE FIFTH IS THE FIRST THAT REACHES THE OTHER
+    WAY. The four before it act on something already on the page -- a control
+    the reader found, a string he approved, an option LinkedIn drew. Uploading
+    takes a FILE FROM THIS MACHINE and hands its bytes to a remote party, and
+    nothing in the read-only boundary was ever about that direction. It is
+    here because the operator was asked and opened it fully; see the entry's
+    own argument in ``readonly.py``, and ``tests/test_uploads.py`` for the
+    guard that bounds the path, which is where the actual risk lives.
+
+    THE NAME OF THIS TEST NO LONGER CARRIES A COUNT. It said "these three
+    calls" while asserting four, and would have said it while asserting five.
+    A name that has to be edited every time the thing it names grows is a name
+    that will eventually not be.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
         ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
         ("linkedin_server/writes.py", "perform", "fill"),
         ("linkedin_server/writes.py", "perform", "select_option"),
+        ("linkedin_server/writes.py", "perform", "set_input_files"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 4
+    assert len(readonly.SANCTIONED_MUTATIONS) == 5
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
     # puts his words on a page.
     #
-    # FOUR FROM 2026-09-02, and the new one is the NARROWEST rather than the
+    # FOUR FROM 2026-09-02, and that one was the NARROWEST rather than the
     # widest: a select_option cannot introduce a string at all, only choose
-    # one the page already defined. The argument is with the entry itself.
+    # one the page already defined.
+    #
+    # FIVE FROM 2026-09-04, and that one is the WIDEST by a distance -- which
+    # is why the argument for it is the longest of the five and why most of it
+    # is about a path rather than about a call.
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
-    assert kinds == ["click", "click", "fill", "select_option"], kinds
+    assert kinds == [
+        "click",
+        "click",
+        "fill",
+        "select_option",
+        "set_input_files",
+    ], kinds
 
 
 def test_every_sanctioned_entry_is_actually_present():
@@ -163,11 +188,12 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
         for m in MODULES
     )
     # TWO from 2026-08-26, THREE from 2026-09-01 when one page.fill entered,
-    # FOUR from 2026-09-02 with one page.select_option. The equality against
-    # the allowlist LENGTH is the load-bearing half and is unchanged -- an
-    # unlisted mutating call still fails whatever its kind -- while the
-    # literal is what makes growth visible in a diff.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 4, total
+    # FOUR from 2026-09-02 with one page.select_option, FIVE from 2026-09-04
+    # with one page.set_input_files. The equality against the allowlist LENGTH
+    # is the load-bearing half and is unchanged -- an unlisted mutating call
+    # still fails whatever its kind -- while the literal is what makes growth
+    # visible in a diff.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 5, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -303,29 +329,62 @@ def test_the_mutation_scanner_catches_a_planted_write():
     assert {"click", "fill", "http_post"} <= kinds, hits
 
 
-def test_nothing_in_this_package_can_reach_a_file_input():
-    """The composer draws two file inputs. Nothing here may touch them.
+def test_exactly_one_place_in_this_package_can_reach_a_file_input():
+    """THE QUESTION THIS TEST CARRIED FOR THREE DAYS HAS BEEN ANSWERED.
 
-    MEASURED 2026-09-01 on /messaging/compose/: ``file_inputs: 2``, named
-    ``Attach a file for your draft conversation`` and ``Attach an image for
-    your draft conversation``, both in ``form#0``. They sit on a surface this
-    server now loads, beside a Send control it is being built to press.
+    It was called ``test_nothing_in_this_package_can_reach_a_file_input`` and
+    it closed with the sentence that made it a question rather than a rule:
 
-    ``set_input_files`` is on :data:`_MUTATION_CALL_PATTERNS` and is NOT on
-    ``SANCTIONED_MUTATIONS``, so the scanner would catch one. This asserts the
-    same thing from the other side and by NAME, because "nobody has written
-    that call" is a fact about today and this is a fact about the rule: a
-    control nothing reaches today is one refactor from being reachable.
+        UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words
+        in a box; a file input puts a FILE from this machine into somebody
+        else's inbox, chosen by a path string. Nothing in this package should
+        be one edit away from that, AND THE OPERATOR HAS NEVER BEEN ASKED
+        ABOUT IT.
 
-    UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words in
-    a box; a file input puts a FILE from this machine into somebody else's
-    inbox, chosen by a path string. Nothing in this package should be one edit
-    away from that, and the operator has never been asked about it.
+    He was asked on 2026-09-04 and opened it FULLY -- profile photo, post
+    media and message attachments. So the assertion is reversed, deliberately
+    and by name, because that is how a written question is supposed to end:
+    the file that recorded it is the file that records the answer, and a
+    reader who finds the old sentence in the history can see exactly what
+    changed and on whose say-so.
+
+    WHAT IS STILL MEASURED, and it is the same measurement. MEASURED
+    2026-09-01 on /messaging/compose/: ``file_inputs: 2``, named ``Attach a
+    file for your draft conversation`` and ``Attach an image for your draft
+    conversation``, both in ``form#0``. They sit on a surface this server
+    loads, beside a Send control it can press. That was the reason to ask; it
+    is not a reason to refuse now that he has answered.
+
+    WHAT THIS TEST ASSERTS NOW -- and it is strictly more than the old one,
+    not less:
+
+    * ONE place in the package reaches a file input, and it is
+      ``writes.perform``. The old test said "none"; the weaker claim would be
+      "at least the sanctioned one", and that is NOT what is asserted. A
+      second one anywhere, in any module, fails here by name.
+    * The pattern still bites, so the sweep is not a sweep over nothing.
+    * The kind IS on the allowlist, exactly once -- the literal inverse of the
+      line this test used to end on.
+
+    AND THE SANCTION IS NOT WHERE THE SAFETY LIVES. What makes a file input
+    safe to reach is not this list; it is ``linkedin_server/uploads.py`` --
+    the declared root, the link refusal, the regular-file check and the digest
+    -- exercised in ``tests/test_uploads.py``. This test polices the WIDTH of
+    the opening. That one polices what comes through it.
     """
+    found: list[tuple[str, int, str]] = []
     for module in MODULES:
         source = module.read_text(encoding="utf-8")
         for lineno, kind, line in readonly.scan_source_for_mutations(source):
-            assert kind != "set_input_files", (module.name, lineno, line)
+            if kind == "set_input_files":
+                found.append((module.name, lineno, line))
+                assert readonly.enclosing_function(source, lineno) == "perform", (
+                    module.name,
+                    lineno,
+                    line,
+                )
+                assert module.name == "writes.py", (module.name, lineno, line)
+    assert len(found) == 1, found
 
     # AND THE PATTERN ITSELF MUST STILL BITE, or the loop above is a loop over
     # nothing. A rule that cannot fire certifies nothing.
@@ -336,10 +395,19 @@ def test_nothing_in_this_package_can_reach_a_file_input():
     hits = readonly.scan_source_for_mutations(planted)
     assert [kind for _line, kind, _src in hits] == ["set_input_files"], hits
 
-    # It is not on the allowlist, so even inside perform it would be refused.
-    assert not any(
-        kind == "set_input_files" for _p, _f, kind in readonly.SANCTIONED_MUTATIONS
-    )
+    # IT IS ON THE ALLOWLIST NOW, AND EXACTLY ONCE. This line asserted the
+    # opposite until 2026-09-04. The count matters as much as the membership:
+    # the triple is (path, function, kind), so a SECOND entry would have to
+    # name a second file or a second function, and either is a widening that
+    # has to come here and argue.
+    uploads_sanctioned = [
+        entry
+        for entry in readonly.SANCTIONED_MUTATIONS
+        if entry[2] == "set_input_files"
+    ]
+    assert uploads_sanctioned == [
+        ("linkedin_server/writes.py", "perform", "set_input_files")
+    ], uploads_sanctioned
 
 
 def test_evaluate_is_flagged_unless_explicitly_waived():

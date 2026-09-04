@@ -252,7 +252,14 @@ def test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted():
     # FOUR SINCE 2026-09-02, when the profile editor's select_option was
     # sanctioned. The number is what makes growth visible in a diff; the
     # load-bearing half is that an unlisted mutating call still fails.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 4
+    # FIVE SINCE 2026-09-04, when set_input_files was sanctioned. That one
+    # matters to THIS test more than the others did: the compose surface draws
+    # two file inputs, so the entry this count records is reachable in
+    # principle from the very page this file is about. It is not reachable
+    # from HERE -- writes.UPLOAD_ACTIONS is empty and the call sits behind the
+    # two-call token gate -- and that is the property below, asserted rather
+    # than assumed.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 5
     # NOT ALL CLICKS ANY MORE, and the assertion is re-aimed at the property
     # this test is actually about rather than loosened. It read
     # ``all(kind == "click" ...)`` until 2026-09-01, which was a true
@@ -410,7 +417,16 @@ def test_the_click_is_on_the_sanctioned_list_and_the_list_is_still_short():
     # FOUR SINCE 2026-09-02, when the profile editor's select_option was
     # sanctioned. The number is what makes growth visible in a diff; the
     # load-bearing half is that an unlisted mutating call still fails.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 4
+    # FIVE SINCE 2026-09-04, when set_input_files was sanctioned. That one
+    # matters to THIS test more than the others did: the compose surface draws
+    # two file inputs, so the entry this count records is reachable in
+    # principle from the very page this file is about. It is not reachable
+    # from HERE -- writes.UPLOAD_ACTIONS is empty and the call sits behind the
+    # two-call token gate. THE COUNT IS ALL THIS TEST ASSERTS ABOUT IT: the
+    # reachability property is asserted in
+    # test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted
+    # above, and is not repeated here as prose.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 5
 
 
 def test_the_compose_surface_is_still_refused_after_all_of_this():

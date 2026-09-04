@@ -303,10 +303,58 @@ PINNED = (
 #: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
 #: moved is a tuple of string literals and a dict of them, the class this
 #: file records as matching on every Python.
+#: RE-FROZEN 2026-09-04, AND EXACTLY ONE DIGEST MOVED:
+#:
+#:     SANCTIONED_MUTATIONS   bccb17cef4b986f2 -> ab8fdd31f93ef4fc
+#:
+#: **THE OPERATOR OPENED FILE UPLOAD.** ``set_input_files`` was on
+#: ``_MUTATION_CALL_PATTERNS`` and in no sanction, which closed every photo,
+#: video, document and attachment path this server could ever take -- 16
+#: capability rows, the single highest rows-per-cost item in
+#: ``_audit/2026-09-03-linkedin-gap-blockers.md``. That absence was never an
+#: oversight: it was an OPEN QUESTION, written down as one in
+#: ``tests/test_readonly.py`` in the words "the operator has never been asked
+#: about it". He was asked on 2026-09-04 and opened it FULLY -- profile photo,
+#: post media and message attachments. The fifth entry is that answer.
+#:
+#: THE OTHER SEVEN DIGESTS ARE BYTE-IDENTICAL, AND THAT IS THE LOAD-BEARING
+#: HALF OF THIS RE-FREEZE. Widening a capability is exactly the moment a
+#: boundary quietly loses something else, so what did NOT move is the claim
+#: worth checking:
+#:
+#:     _ALLOWED_URL_PATTERNS                    97f175ae03ccc7d1  unchanged
+#:     _FORBIDDEN_URL_SUBSTRINGS                b0291a66ec9bd51e  unchanged
+#:     _FORBIDDEN_SUBSTRING_EXEMPTIONS          43e2bf7f3db0dbed  unchanged
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS  419e64a3cd92ec7e  unchanged
+#:     _MUTATION_CALL_PATTERNS                  23aece1483afdee9  unchanged
+#:     JS_MUTATION_TOKENS                       d47e30b67c583c1b  unchanged
+#:     <functions>                              4a6eba4033964196  unchanged
+#:
+#: No navigation address was added, no forbidden substring was dropped, no
+#: exemption was widened, NO DETECTOR WAS REMOVED FROM THE SCANNER -- the
+#: pattern that finds ``set_input_files`` is the same pattern it was, and it
+#: still reports the new call site, which is why
+#: ``test_exactly_one_place_in_this_package_can_reach_a_file_input`` can
+#: assert there is exactly one. And ``<functions>`` did not move because
+#: ``readonly.py`` gained no function and no function body changed: this is a
+#: POLICY change of one tuple entry and nothing else in the module.
+#:
+#: WHERE THE ACTUAL RISK WENT, since it is not in this file. The sanction is
+#: one line; the new surface is a PATH STRING, which is the first thing this
+#: package has ever taken from a caller and handed to something outside it.
+#: What bounds it is ``linkedin_server/uploads.py`` -- a declared root, a
+#: refusal on any link along the chain, a regular-file check, and a digest
+#: read at preview and re-read at the drain point -- and
+#: ``tests/test_uploads.py``, where every one of those is shown firing with a
+#: positive control beside it.
+#:
+#: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
+#: moved is one entry in a tuple of string literals, the class this file
+#: records as matching on every Python.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "4a6eba4033964196",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
-    "SANCTIONED_MUTATIONS": "bccb17cef4b986f2",
+    "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
     "_ALLOWED_URL_PATTERNS": "97f175ae03ccc7d1",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
