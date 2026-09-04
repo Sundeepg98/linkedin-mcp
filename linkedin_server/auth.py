@@ -193,6 +193,11 @@ def _identity_from(payload: Any) -> dict[str, Any]:
                 out["member"] = name
             if public_id:
                 out["public_identifier"] = public_id
+                # A BROWSER LINK, NOT A NAVIGABLE ADDRESS -- his own, and
+                # still the same object class as the two card parsers in
+                # `shape.py`. This server navigates `/in/me/`, which is the
+                # only self-profile form on the read allowlist; the vanity
+                # spelling here is for a human to open.
                 out["profile"] = f"https://www.linkedin.com/in/{public_id}"
             if out:
                 return out

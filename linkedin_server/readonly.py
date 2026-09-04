@@ -218,7 +218,45 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/jobs/view/\d{6,}/?$"),
     # Own profile. /in/me/ redirects to whoever is signed in.
     re.compile(r"^https://www\.linkedin\.com/in/me/?$"),
-    re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/?$"),
+    # THE THIRD-PARTY PROFILE PATTERN WAS REMOVED 2026-09-04, ON THE OPERATOR'S
+    # RULING. It read `^.../in/[A-Za-z0-9\-_%]+/?$` and admitted ANY member's
+    # profile page. It carried NO COMMENT OF ITS OWN -- the "Own profile" line
+    # above belongs to the `/in/me/` entry -- and nothing anywhere recorded a
+    # decision to admit it.
+    #
+    # WHAT DECIDED IT: THE ALLOWLIST ADMITTED WHAT THIS SERVER'S OWN
+    # DOCUMENTATION SAYS IT NEVER DOES. `known_side_effects` states plainly
+    # that no tool here loads a third party's profile, and gives the MEASURED
+    # reason -- `linkedin_who_viewed_me` reads the RECEIVING END of exactly
+    # that signal, so a third-party profile load leaves a durable record in
+    # that person's own viewer list. `PERMANENTLY_FORBIDDEN` names the act.
+    # Removing this line makes the boundary say what the server already claims.
+    #
+    # NOT "NOTHING USES IT, SO CLOSE IT" -- that is the weaker argument and it
+    # was rejected. The measurement is the second reason, not the first.
+    #
+    # AND THE MEASUREMENT ASKED THE RIGHT QUESTION, WHICH IS NOT THE OBVIOUS
+    # ONE. A literal census answers what BUILDS a url; the boundary's question
+    # is what OPENS one. Both were taken. Of 34 url-shaped `/in/` strings
+    # across 6457 literals in 19 package files: 20 literal-me, 5 compiled
+    # patterns, and 9 interpolated -- FIVE distinct sites, every one traced by
+    # hand, and NOT ONE a navigation. `auth.py` and two `shape.py` card
+    # parsers build a `profile` field for OUTPUT; `server.py` builds
+    # `details_urls` for output; one more is a `startswith("/in/")` CHECK and
+    # not a url at all. Every `goto` carrying `/in/` is `/in/me/`.
+    #
+    # `/in/me/` STILL WORKS, and that was checked rather than assumed:
+    # `browser.goto` asserts the REQUESTED url before navigating and does not
+    # re-check where it landed, so the redirect from `/in/me/` to his vanity
+    # slug never meets this list. `writes._load` asserts the requested url too,
+    # and its `PROFILE_URL` is the `/in/me/` form.
+    #
+    # THE OUTPUT FIELDS ARE A DIFFERENT OBJECT AND ARE NOT BROKEN BY THIS.
+    # A url in tool OUTPUT is for a human to open in a browser; a url on this
+    # list is for this server to navigate. Coupling them is the confusion, not
+    # the consequence. `parse_person_card` and `parse_connection_card` emit
+    # OTHER members' profile links and always will -- that is what those
+    # fields are for -- and each now says so at its own site.
     # THE `/in/me/` FORM ONLY, NARROWED 2026-09-04 ON THE OPERATOR'S RULING.
     #
     # THIS ENTRY USED TO TAKE `[A-Za-z0-9\-_%]+` FOR THE MEMBER SEGMENT, so it

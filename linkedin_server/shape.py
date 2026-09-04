@@ -377,6 +377,15 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         "anonymous": anonymous,
     }
     if slug and not anonymous:
+        # A BROWSER LINK, NOT A NAVIGABLE ADDRESS. This server will not
+        # open it. A url in tool OUTPUT and a url on
+        # `readonly._ALLOWED_URL_PATTERNS` are different objects with
+        # different purposes: the first is for a HUMAN to open, the
+        # second is for this process to navigate. The third-party
+        # profile pattern was removed from that list on 2026-09-04
+        # because the server must never load a member's profile -- and
+        # that did not touch this field, because handing him a link is
+        # not visiting it. Coupling the two is the confusion.
         out["profile"] = f"https://www.linkedin.com/in/{slug}"
     return out
 
@@ -491,6 +500,15 @@ def parse_connection_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     return {
         "name": name,
         "headline": headline,
+        # A BROWSER LINK, NOT A NAVIGABLE ADDRESS. This server will not
+        # open it. A url in tool OUTPUT and a url on
+        # `readonly._ALLOWED_URL_PATTERNS` are different objects with
+        # different purposes: the first is for a HUMAN to open, the
+        # second is for this process to navigate. The third-party
+        # profile pattern was removed from that list on 2026-09-04
+        # because the server must never load a member's profile -- and
+        # that did not touch this field, because handing him a link is
+        # not visiting it. Coupling the two is the confusion.
         "profile": f"https://www.linkedin.com/in/{slug}",
         "named_by": named_by,
     }

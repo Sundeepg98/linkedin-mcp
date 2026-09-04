@@ -470,11 +470,41 @@ PINNED = (
 #: navigating it either. That is the same question one level up and a larger
 #: reach than the one just closed; it is recorded rather than ruled.
 #:
+#: RE-FROZEN 2026-09-04 (fifth today), REDUCING REACH AGAIN AND FOR THE LAST
+#: OF THE TWO THAT DISAGREED:
+#:
+#:     _ALLOWED_URL_PATTERNS   a37487dee3bbcc5f -> 9d21c894b13316f7
+#:
+#: THE THIRD-PARTY PROFILE PATTERN IS GONE. `^.../in/[A-Za-z0-9\-_%]+/?$`
+#: admitted ANY member's profile page, carried no comment of its own, and
+#: nothing anywhere recorded a decision to admit it.
+#:
+#: WHAT DECIDED IT: the allowlist admitted what this server's own
+#: documentation says it never does. `known_side_effects` states no tool here
+#: loads a third party's profile, and gives the MEASURED reason --
+#: `linkedin_who_viewed_me` reads the RECEIVING END of that signal, so such a
+#: load leaves a durable record in that person's own viewer list.
+#: `PERMANENTLY_FORBIDDEN` names the act. Removing the line makes the boundary
+#: say what the server already claims. **Not "nothing uses it, so close it"**
+#: -- that argument was considered and rejected as the weaker one.
+#:
+#: `/in/me/` SURVIVES, CHECKED RATHER THAN ASSUMED: `browser.goto` asserts the
+#: REQUESTED url before navigating and never re-checks where it landed, so the
+#: redirect from `/in/me/` to his vanity slug does not meet this list.
+#: `writes._load` asserts the requested url too, and its `PROFILE_URL` is the
+#: `/in/me/` form. Seven controls, zero mismatches.
+#:
+#: AND IT SURFACED NO STALE FIXTURE -- 498 passed. That is itself the finding,
+#: and it CONTRASTS with the sibling narrowing three entries below, which
+#: surfaced two tests that had been wrong for a day. Nothing in this suite
+#: ever asserted the third-party profile breadth, which is what you would
+#: expect of reach nobody ruled and nobody used.
+#:
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "a37487dee3bbcc5f",
+    "_ALLOWED_URL_PATTERNS": "9d21c894b13316f7",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -852,7 +882,10 @@ DENYLISTS_AT_A76FE32 = {
     # pages are `/in/me/` only. REDUCING reach, the first move in this dict's
     # history to go that direction on purpose. Denylists and exemptions
     # byte-identical, as ever.
-    "_ALLOWED_URL_PATTERNS": "a37487dee3bbcc5f",
+    # NARROWED AGAIN 2026-09-04: the third-party profile pattern removed. The
+    # second reducing move in this dict's history, both on the same day and
+    # both on the same measured ground.
+    "_ALLOWED_URL_PATTERNS": "9d21c894b13316f7",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
