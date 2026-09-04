@@ -11,6 +11,21 @@ that could not fire, in one wave, and filing them in a scratch progress file
 would have taught nobody anything durable. The three are section 1. The
 method that found them is section 2.
 
+**THIS FILE IS APPEND-ORDERED. FIND ENTRIES BY NAME, NEVER BY SCROLLING TO A
+SECTION.** A number records which SECTION an entry belongs to; it says nothing
+about where the entry SITS. Several waves wrote this file at once and every one
+of them appended, which is the correct behaviour under contention -- an
+in-place insert into a contended file loses somebody's work. So 2.5, 2.6, 2.7
+and 2.7a sit physically after section 4, and later additions will do the same.
+
+This is stated rather than fixed on purpose. Renumbering would break the
+citations already written against these names in `linkedin_server/readonly.py`
+and `linkedin_server/shape.py`, and it would have to be redone after the next
+append. **A reader who cannot find an entry treats it as absent -- and an
+absent entry in a register of failing-proofs is exactly the confidence-at-scale
+this file exists to prevent**, so knowing how to look is load-bearing rather
+than cosmetic. Grep for the entry NAME.
+
 **How a red-proof is run here.** Never in the live tree -- several agents write
 `linkedin_server/` concurrently and mutating a shared file even briefly can be
 picked up or clobbered. Copy `linkedin_server`, `tests`, `scripts` and
