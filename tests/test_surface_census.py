@@ -601,6 +601,15 @@ async def test_the_reader_returns_the_counts_untouched():
         "contenteditable": 1,
         "file_inputs": 1,
         "dialogs": 3,
+        # ``menus``/``menu_items`` ADDED 2026-09-04, APPENDED LAST to both
+        # ``CENSUS_JS``'s counts block and this mirror -- see
+        # ``dom.read_comment_surface`` for why: the census could count menu
+        # roles but never name them. This fake payload predates the two
+        # keys, so the reader's own "int(... or 0)" default is what supplies
+        # them here, the same default every other key in this dict already
+        # falls back on.
+        "menus": 0,
+        "menu_items": 0,
     }
     assert census["controls_read"] == 3
 
@@ -979,6 +988,12 @@ async def test_the_result_has_the_shape_a_caller_is_promised(drive):
         "contenteditable",
         "file_inputs",
         "dialogs",
+        # ADDED 2026-09-04 alongside ``dom.read_comment_surface``'s menu
+        # counts -- this tool's ``counts`` is ``census["counts"]`` passed
+        # straight through (see ``server.linkedin_surface_census``), so the
+        # two new keys reach here unfiltered, same as every existing one.
+        "menus",
+        "menu_items",
     }
     assert isinstance(result["control_shapes"], list)
     assert isinstance(result["href_shapes"], dict)

@@ -5684,17 +5684,47 @@ async def linkedin_comment_on_item(
     where the reactions total reads out fine. The confirm block says so in
     full before you confirm.
 
-    A COMMENT IS PUBLIC AND ATTRIBUTED TO HIM, under somebody else's item and
-    published to THEIR audience, notifying them and staying attached to their
-    content. The confirm token is bound to the exact words and the preview
-    shows them verbatim.
+    A COMMENT IS PUBLIC AND ATTRIBUTED TO HIM. The confirm token is bound to
+    the exact words and the preview shows them verbatim.
+
+    WHOSE ITEM, AND WHOSE AUDIENCE -- THIS PARAGRAPH ASSERTED A GEOGRAPHY
+    NOBODY CAN REACH, until 2026-09-04. It read "under somebody else's item
+    and published to THEIR audience, notifying them and staying attached to
+    their content", and the Args block below told a caller "this one is public
+    and lands on another person's item". Under the targets this server can
+    actually aim, both are false in both directions: ``item`` is a urn, and
+    the ONLY reader in this package that produces one is
+    ``linkedin_my_activity_items``, which returns HIS OWN items and
+    establishes authorship three ways before it publishes a key. A comment
+    fired here lands on HIS post, in front of HIS audience, and notifies HIM.
+
+    THAT IS A FACT ABOUT WHAT IS REACHABLE, NOT A GUARANTEE ENFORCED HERE, and
+    the difference is the whole reason the old sentence was worth correcting
+    rather than inverting. ``item`` is free-form to the shape of a urn and
+    nothing checks that the urn is his. No reader here hands out a third
+    party's item key, so the case does not arise on any route this package
+    offers -- but a caller holding one from somewhere else is not stopped by
+    this parameter, and claiming otherwise would be the same kind of unearned
+    certainty being removed above.
+
+    A DELETE EXISTS, MEASURED 2026-09-04 AND WITHOUT PUBLISHING ANYTHING. The
+    overflow menu on one of his own comments draws exactly three items --
+    ``Copy link to comment``, ``Edit`` and ``Delete``. So the DATA is
+    restorable: by him, by hand, on the surface that holds it. Not by this
+    server, which forbids deletion permanently and should not now try to aim
+    one.
+
+    WHAT DOES NOT COME BACK IS THE NOTIFICATION. A delete takes back the row
+    and not the fact that it was read, which is why the spec still calls this
+    irreversible in audience and why the token still exists.
 
     Args:
         item: which feed item, as ``urn:li:activity:<digits>``.
         text: EXACTLY what would be posted, verbatim. It is half the target,
             so the token is bound to these bytes.
         confirm_token: leave empty to read the gate. NEVER confirm on his
-            behalf -- this one is public and lands on another person's item.
+            behalf -- this one is public, attributed to him, and irreversible
+            in audience however restorable the row is.
     """
     try:
         return await _write_tool(

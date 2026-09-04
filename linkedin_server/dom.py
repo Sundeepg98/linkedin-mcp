@@ -2716,8 +2716,21 @@ FILTER_SETTLE_MS = 2_000
 #: around it. The outermost walk is derived and shown FAILING in the tests.
 #: ``closest()`` starts at the element itself; a control that also matched the
 #: container selector would therefore name itself, which no member of
-#: ``CENSUS_CONTROL_SELECTOR`` can do without a role a real page does not
-#: write, and which has never been observed -- documented rather than guarded.
+#: ``CENSUS_CONTROL_SELECTOR`` can do while wearing only the roles that
+#: selector already names.
+#:
+#: THIS PARAGRAPH USED TO GO FURTHER, AND THE EXTRA CLAUSE WAS FALSE. It read
+#: "...which no member of CENSUS_CONTROL_SELECTOR can do without a role a
+#: real page does not write, and which has never been observed -- documented
+#: rather than guarded", stretching a narrow point about self-containment
+#: into a general claim that a role outside this selector is not one a real
+#: page writes. MEASURED WRONG 2026-09-04: opening the overflow menu on one
+#: of the operator's own comments draws three ``[role="menuitem"]`` nodes --
+#: ``Copy link to comment``, ``Edit``, ``Delete`` -- a role
+#: ``CENSUS_CONTROL_SELECTOR`` has never covered and a real LinkedIn page
+#: does write. The selector is still not widened for it, for the reasons
+#: :data:`CENSUS_JS`'s ``counts`` block gives; that count, not this sentence,
+#: is what the gap is measured and guarded by now.
 #:
 #: THE SELECTOR IS A LITERAL HERE, not a ``cfg`` entry like the control
 #: selector, because nothing in Python reads it. It is deliberately a
@@ -2919,7 +2932,9 @@ CENSUS_JS = """
       links: countOf('a[href]'),
       contenteditable: countOf('[contenteditable]:not([contenteditable="false"])'),
       file_inputs: countOf('input[type="file"]'),
-      dialogs: countOf('[role="dialog"], dialog')
+      dialogs: countOf('[role="dialog"], dialog'),
+      menus: countOf('[role="menu"]'),
+      menu_items: countOf('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
     },
     controls: controls
   };
@@ -3068,6 +3083,8 @@ async def read_surface_census(
             "contenteditable",
             "file_inputs",
             "dialogs",
+            "menus",
+            "menu_items",
         )
     }
     return {
@@ -6367,11 +6384,57 @@ async def read_comment_surface(page: Any) -> dict[str, Any]:
     container-bearing controls on that permalink are two ad dialogs and the
     ad-report form. So there is nothing to narrow to, and the delta this feeds
     is over the whole page with that noise named rather than hidden.
+
+    ``names`` WAS PERMANENTLY ``{}``, FOUND AND FIXED 2026-09-04. This body
+    read::
+
+        for row in census.get("control_shapes", []):
+            name = str(row.get("shape") or "")
+            if not name: continue
+            counts[name] = counts.get(name, 0) + int(row.get("count") or 0)
+
+    against ``read_surface_census``, whose return keys are exactly
+    ``counts``, ``controls``, ``controls_read`` and ``truncated`` -- there
+    has never been a ``control_shapes`` key at that layer, so the loop
+    iterated ``[]`` on every call, on every page, forever. It would have
+    stayed wrong even keyed correctly: ``read_surface_census`` returns ONE
+    RECORD PER CONTROL and none of them carries a ``count`` field, so
+    ``row.get("count") or 0`` summed zeros. THE FIX reads
+    ``census.get("controls")`` -- the key that actually exists -- and counts
+    OCCURRENCES, one per record, which is what a census over individual rows
+    means.
+
+    WHY THIS DID NOT SHOW UP AS AN ERROR. With ``names`` stuck at ``{}``,
+    ``writes._comment_submit_gate`` computed ``arrived`` as permanently
+    empty and refused ``2_nothing_arrived`` on every page, for a reason that
+    had nothing to do with LinkedIn -- and that refusal reads exactly like
+    the gate's OWN documented first-use refusal, so nothing about it looked
+    wrong. ``tests/test_comment_delta_gate.py`` could not have caught it
+    either: it monkeypatches this entire function with a fixed stand-in, so
+    the suite that exercises the gate never ran this body at all.
+
+    ``unnamed``, ADDED THE SAME DAY. A control whose shaped name is empty
+    still cannot become a selector -- that part of the old behaviour was
+    correct, and empty shapes are still skipped out of ``names`` -- but the
+    gate reading this census needs "nothing changed" to look different from
+    "something changed and this reader cannot name it", and a ``names`` dict
+    that silently drops both said the same thing about either. This is that
+    count.
+
+    ``menus`` AND ``menu_items``, ALSO ADDED 2026-09-04. ``CENSUS_CONTROL_
+    SELECTOR`` carries no menu role, so a ``[role="menu"]`` opened on this
+    surface was as invisible to a caller as the counting bug made everything
+    else -- except this gap is real, measured, and by design: see
+    :data:`CENSUS_JS`'s ``counts`` block for what closed it and why it is a
+    count rather than a widened selector.
     """
     out: dict[str, Any] = {
         "editors": 0,
         "names": {},
+        "unnamed": 0,
         "controls_read": 0,
+        "menus": 0,
+        "menu_items": 0,
         "error": None,
     }
     try:
@@ -6384,13 +6447,19 @@ async def read_comment_surface(page: Any) -> dict[str, Any]:
         logger.debug("comment surface unreadable: %s", out["error"])
         return out
     counts: dict[str, int] = {}
-    for row in census.get("control_shapes", []):
+    unnamed = 0
+    for row in census.get("controls", []):
         name = str(row.get("shape") or "")
         if not name:
+            unnamed += 1
             continue
-        counts[name] = counts.get(name, 0) + int(row.get("count") or 0)
+        counts[name] = counts.get(name, 0) + 1
     out["names"] = counts
+    out["unnamed"] = unnamed
     out["controls_read"] = int(census.get("controls_read") or 0)
+    census_counts = census.get("counts") or {}
+    out["menus"] = int(census_counts.get("menus") or 0)
+    out["menu_items"] = int(census_counts.get("menu_items") or 0)
     return out
 
 #: The reaction control, and the most informative string measured that day.

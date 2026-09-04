@@ -198,3 +198,146 @@ def test_the_submit_selector_refuses_anything_that_could_end_its_quoting(unsafe)
     """The builder is the last thing between a page-derived name and a click."""
     with pytest.raises(Exception):
         dom.comment_submit_selector(unsafe)
+
+
+# ---------------------------------------------------------------------------
+# The two defects found 2026-09-04, both driven through the REAL reader
+# ---------------------------------------------------------------------------
+#
+# EVERY TEST ABOVE THIS LINE REPLACES ``dom.read_comment_surface`` WITH
+# ``_Reading``, a fixed stand-in, and that is exactly what let ``names`` ship
+# permanently empty: the loop inside the real function summed a census key
+# (``control_shapes``) that ``read_surface_census`` has never returned,
+# against a field (``count``) no control row carries either, and nothing in
+# this file's suite ever ran that body to notice. The tests below drive the
+# real function -- and the real gate on top of it -- against a raw census
+# payload SHAPED THE WAY ``CENSUS_JS`` ACTUALLY SHAPES ONE, through a page
+# fake that answers ``.locator(...).count()`` and ``.evaluate(...)`` rather
+# than a reader stand-in.
+
+
+class _CommentCensusPage:
+    """A page whose ``evaluate`` returns a raw census payload and whose
+    ``locator`` reports a fixed editor count -- the shape ``CENSUS_JS``
+    itself hands back, before ``read_surface_census`` shapes it. Driving
+    ``dom.read_comment_surface`` against this exercises the REAL function,
+    unlike ``_Reading`` above which replaces it outright.
+    """
+
+    def __init__(self, controls, *, editors=1, counts=None):
+        self._editors = editors
+        self._payload = {
+            "counts": {
+                "forms": 0,
+                "buttons": 0,
+                "links": 0,
+                "contenteditable": 1,
+                "file_inputs": 0,
+                "dialogs": 0,
+                "menus": 0,
+                "menu_items": 0,
+                **(counts or {}),
+            },
+            "controls": controls,
+            "truncated": False,
+        }
+
+    def locator(self, _selector):
+        editors = self._editors
+
+        class _Locator:
+            async def count(self) -> int:
+                return editors
+
+        return _Locator()
+
+    async def evaluate(self, _script, _cfg=None):
+        return dict(self._payload)
+
+
+async def test_the_real_reader_harvests_names_off_a_census_payload():
+    """DEFECT 1, ITSELF. FAILS ON THE UNPATCHED CODE with ``names == {}``.
+
+    The unpatched loop read ``census.get("control_shapes", [])`` where
+    ``read_surface_census`` returns exactly ``counts``, ``controls``,
+    ``controls_read`` and ``truncated`` -- no ``control_shapes`` key has ever
+    existed at that layer -- so it iterated ``[]`` on every call regardless
+    of what the page carried. Three named, distinct controls go in; the fixed
+    reader must come back with all three counted once each.
+    """
+    controls = [
+        {"tag": "button", "name": "Comment", "href": None},
+        {"tag": "button", "name": "Reply", "href": None},
+        {"tag": "button", "name": "Submit comment", "href": None},
+    ]
+    page = _CommentCensusPage(controls)
+    result = await dom.read_comment_surface(page)
+    assert result["names"] == {"Comment": 1, "Reply": 1, "Submit comment": 1}
+    assert result["controls_read"] == 3
+    assert result["unnamed"] == 0
+
+
+async def test_an_unnamed_control_is_counted_rather_than_dropped_silently():
+    """The companion half of the same fix: an empty shape still cannot become
+    a selector, so it still does not enter ``names`` -- but it must not
+    vanish without a trace either, or a page that changed under the gate
+    reads identically to a page that truly held still."""
+    controls = [
+        {"tag": "button", "name": "Comment", "href": None},
+        {"tag": "button", "name": "", "href": None},
+    ]
+    page = _CommentCensusPage(controls)
+    result = await dom.read_comment_surface(page)
+    assert result["names"] == {"Comment": 1}
+    assert result["unnamed"] == 1
+    assert result["controls_read"] == 2
+
+
+async def test_menus_and_menu_items_reach_the_real_readers_return():
+    """DEFECT 2's PLUMBING. FAILS ON THE UNPATCHED CODE: the keys are absent
+    from ``read_comment_surface``'s return entirely, because neither
+    ``CENSUS_JS``'s ``counts`` block nor its Python mirror in
+    ``read_surface_census`` carried a menu count of any kind before this fix.
+    """
+    controls = [{"tag": "button", "name": "Comment", "href": None}]
+    page = _CommentCensusPage(controls, counts={"menus": 1, "menu_items": 3})
+    result = await dom.read_comment_surface(page)
+    assert result["menus"] == 1
+    assert result["menu_items"] == 3
+
+
+async def test_the_gate_names_menu_items_when_nothing_arrived_and_a_menu_is_open():
+    """DEFECT 2's CONSEQUENCE, at the gate. FAILS ON THE UNPATCHED GATE: with
+    no menu branch, this reading refuses the ordinary ``2_nothing_arrived``
+    and reports the absence as clean, which is exactly the claim this reader
+    cannot back up when the page carries menu items its census cannot name.
+
+    MEASURED 2026-09-04: opening a comment's own overflow menu draws three
+    ``[role="menuitem"]`` nodes (``Copy link to comment``, ``Edit``,
+    ``Delete``). Driven through the REAL ``dom.read_comment_surface`` via
+    ``_CommentCensusPage``, exactly like the two tests above -- a
+    monkeypatched reader would prove nothing about whether the gate actually
+    consults what that function now reports.
+    """
+    before = {"Comment": 1}
+    controls = [{"tag": "button", "name": "Comment", "href": None}]
+    page = _CommentCensusPage(controls, counts={"menus": 1, "menu_items": 3})
+    result = await writes._comment_submit_gate(page, dict(before))
+    assert result["proceed"] is False
+    assert result["refused_condition"] == "2b_menu_items_present"
+    assert result["arrived"] == []
+    assert "3 menu item" in result["why"]
+    assert "does not enumerate" in result["why"]
+    assert "UNKNOWN" in result["why"]
+
+
+async def test_the_gate_still_reports_the_ordinary_absence_with_no_menu_open():
+    """THE CONTROL for the test above: the same empty ``arrived`` list, with
+    ``menu_items`` at zero, must still take the ordinary branch. Otherwise
+    the new branch would not be adding a case, it would be replacing one."""
+    before = {"Comment": 1}
+    controls = [{"tag": "button", "name": "Comment", "href": None}]
+    page = _CommentCensusPage(controls, counts={"menus": 0, "menu_items": 0})
+    result = await writes._comment_submit_gate(page, dict(before))
+    assert result["proceed"] is False
+    assert result["refused_condition"] == "2_nothing_arrived"

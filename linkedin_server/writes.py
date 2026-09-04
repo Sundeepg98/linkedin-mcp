@@ -6912,6 +6912,19 @@ async def _comment_submit_gate(
     the identity substituted out -- and therefore unusable to build a selector
     from. That is the correct outcome: a control this server cannot name
     without naming a person is a control it does not press.
+
+    "NOTHING ARRIVED" IS NOT ONE CLAIM, AND THIS GATE NOW SAYS SO. Added
+    2026-09-04: LinkedIn draws menu roles this census counts but cannot name
+    -- opening a comment's own overflow menu measures three
+    ``[role="menuitem"]`` nodes (``Copy link to comment``, ``Edit``,
+    ``Delete``), and ``dom.CENSUS_CONTROL_SELECTOR`` carries no menu role at
+    all, so a change routed through one would not show up in ``names``
+    either way. A gate that reported that the same way it reports a page that
+    truly held still would be certifying a measurement it never took. See
+    ``2b_menu_items_present`` below: it fires only when arrival is empty AND
+    the page carries menu items, and it says the absence is UNKNOWN rather
+    than clean -- distinct from ``2_nothing_arrived``, which is the reading
+    this gate is actually equipped to vouch for.
     """
     reading = await dom.read_comment_surface(page)
     out: dict[str, Any] = {
@@ -6920,6 +6933,8 @@ async def _comment_submit_gate(
         "observed": {
             "editors": reading.get("editors"),
             "controls_read": reading.get("controls_read"),
+            "menus": reading.get("menus"),
+            "menu_items": reading.get("menu_items"),
         },
         "why": "",
         "refused_condition": None,
@@ -6953,6 +6968,35 @@ async def _comment_submit_gate(
     )
     out["arrived"] = arrived
     out["grew"] = grew
+
+    # THE MENU CASE, CHECKED BEFORE THE ORDINARY "NOTHING ARRIVED" READING,
+    # because it is a different claim and must not be reported as the same
+    # one. ``2_nothing_arrived`` below means this reader looked at the whole
+    # page and can vouch that nothing new is there. It cannot vouch for that
+    # here: the census counts menu items but names none of them (see
+    # ``dom.CENSUS_CONTROL_SELECTOR`` and the 2026-09-04 correction on
+    # ``read_comment_surface``), so if the page now carries menu items, a
+    # fill routed into one would leave ``arrived`` exactly this empty without
+    # the page actually having held still. Gated on ``not arrived`` alone --
+    # ``arrived`` growing to one or several is still decided the ordinary way
+    # below, menu items or not, because those branches do not depend on this
+    # reader's blind spot.
+    if not arrived:
+        menu_items = int(reading.get("menu_items") or 0)
+        if menu_items > 0:
+            out["refused_condition"] = "2b_menu_items_present"
+            out["why"] = (
+                f"nothing arrived, but the page carries {menu_items} menu "
+                "item(s) that this census does not enumerate -- opening a "
+                "comment's own overflow menu draws role=menuitem nodes "
+                "(Copy link to comment, Edit, Delete measured), and no "
+                "member of the control selector this reader names sees one. "
+                "So this is NOT the same claim as '2_nothing_arrived': "
+                "whether the fill landed on a menu item this census cannot "
+                "see is UNKNOWN, not clean, and this refusal says so rather "
+                "than reporting the absence the ordinary case reports."
+            )
+            return out
 
     if len(arrived) != 1:
         out["refused_condition"] = (
