@@ -109,6 +109,18 @@ NAMED_OFF_THE_ROW = "sunita-rao-3ef1a6d8"
 #: block that has no row at all.
 MESSAGE_CONTROLS = len(MESSAGEABLE_SLUGS) + 1
 
+#: THE LAST COMMIT WHERE THIS FILE STILL CALLED THE TOOL BARE, so the guard
+#: below can be shown failing against the real thing rather than a mock-up.
+#: Measured, not remembered: of the four commits touching this file,
+#: ``400e761`` and ``84dccba`` carry the bare-calling test and the two after
+#: them do not.
+#:
+#: IT IS A SHA AND A REWRITE IS PLANNED FOR THIS REPOSITORY, so the test that
+#: reads it SKIPS on a git failure rather than going red -- and its synthetic
+#: control runs either way, so a rewrite cannot turn that guard into a check
+#: over nothing.
+PRE_FIX_COMMIT = "84dccba"
+
 #: The recipient parameter AS THE SOURCE FILE SPELLS IT. Html escapes the
 #: separator, so a query string reads ``?a=1&amp;recipient=...`` on disk and
 #: ``?a=1&recipient=...`` once a browser has parsed it. ``dom.RECIPIENT_ID_HREF``
@@ -633,41 +645,132 @@ class _FakeBrowser:
         return url
 
 
+def unfaked_callers(source: str, *, call: str, fake: str) -> list[str]:
+    """Functions in ``source`` that call ``call`` without installing ``fake``.
+
+    THE DETECTOR, factored out of its assertion so it can be pointed at a
+    sample that MUST fail. A guard whose logic exists only inside the
+    ``assert`` that consumes it can never be shown working -- which is the
+    same defect, one level up, as the coincidence it was written to catch.
+
+    Generic in both names on purpose: the property is not about LinkedIn. It
+    is "a call that acts for real must not be reachable from a test unless
+    that test installed the substitute", and every package that fakes a
+    network, a clock or a filesystem has the same exposure.
+    """
+    tree = ast.parse(source)
+    offenders: list[str] = []
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        called = {
+            node.func.attr
+            for node in ast.walk(func)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        }
+        if call not in called:
+            continue
+        body = ast.get_source_segment(source, func) or ""
+        if fake not in body:
+            offenders.append(func.name)
+    return offenders
+
+
 def test_no_test_in_this_file_may_call_the_tool_without_a_fake_browser():
     """THE HAZARD THAT ARRIVED WITH THE GATE CHANGE, pinned so it cannot
     return.
 
     Until 2026-09-04 ``linkedin_connections`` refused from a constant BEFORE
     opening anything, so calling it in a test was free. Removing that
-    pre-flight refusal made the very same call NAVIGATE -- and two tests here
-    did exactly that on the next run: the log shows a profile lock acquired
-    and a real Chrome started, against his real account, from a unit test.
-    Nothing was spent (a feed load is what this package does routinely) but a
-    test suite that can open his session is a test suite nobody can run.
+    pre-flight refusal made the very same call NAVIGATE -- and a test here did
+    exactly that on the next run: the log shows a profile lock acquired and a
+    real Chrome started, against his real account, from a unit test, which put
+    five real people's names and member ids into a pytest assertion message.
+
+    **IT WAS CAUGHT ONLY BECAUSE THAT ASSERTION HAPPENED TO FAIL.** Had the
+    marker not matched, a green test would have been reading his live network
+    on every run, silently, forever.
 
     So this asserts BY AST that every call to the tool in this file sits in a
     function that also installs the fake browser. A reviewer cannot be asked
     to notice this by eye: the failure is silent, it looks like a slow test,
     and it only happens on the machine that has a live session.
     """
-    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
-    offenders = []
-    for func in ast.walk(tree):
-        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            continue
-        names = {
-            node.func.attr
-            for node in ast.walk(func)
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-        }
-        if "linkedin_connections" not in names:
-            continue
-        source = ast.get_source_segment(
-            Path(__file__).read_text(encoding="utf-8"), func
-        ) or ""
-        if "_FakeBrowser" not in source:
-            offenders.append(func.name)
+    offenders = unfaked_callers(
+        Path(__file__).read_text(encoding="utf-8"),
+        call="linkedin_connections",
+        fake="_FakeBrowser",
+    )
     assert offenders == [], offenders
+
+
+def test_the_unfaked_caller_detector_catches_the_real_pre_fix_file():
+    """SHOWN FAILING -- against the file as it ACTUALLY was, not a mock-up.
+
+    The guard above passes, and a guard that has only ever passed is a guard
+    nobody has seen work. So the detector is pointed at THE COMMITTED
+    PRE-FIX VERSION of this very file, read out of git, where
+    ``test_no_identifier_reaches_the_shipped_refusal`` called the tool bare.
+
+    It must name that function. If a future edit makes the historical file
+    stop offending -- or makes the detector stop noticing -- this fails, and
+    the guard's justification cannot quietly rot.
+
+    THE HISTORICAL READ IS NOT A DEPENDENCY ON HISTORY STAYING PUT. A rewrite
+    is planned for this repository; if the commit becomes unresolvable the
+    test SKIPS on the git error rather than failing, and the synthetic control
+    below still runs. What must never happen is this file passing because it
+    silently checked nothing.
+    """
+    import subprocess
+
+    proc = subprocess.run(
+        ["git", "show", "%s:tests/test_connections_reader.py" % PRE_FIX_COMMIT],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=str(Path(__file__).resolve().parents[1]),
+    )
+    if proc.returncode != 0:
+        pytest.skip("pre-fix commit unresolvable (history rewritten?)")
+
+    offenders = unfaked_callers(
+        proc.stdout, call="linkedin_connections", fake="_FakeBrowser"
+    )
+    assert "test_no_identifier_reaches_the_shipped_refusal" in offenders, offenders
+
+
+def test_the_unfaked_caller_detector_can_fail_and_can_pass():
+    """THE SYNTHETIC CONTROL, which runs even when git does not.
+
+    Both directions, because a detector that flags everything is as useless
+    as one that flags nothing -- and the passing half is the one that would
+    have made this guard unusable by firing on every honest test.
+    """
+    offends = (
+        "async def t():\n"
+        "    out = await server.linkedin_connections(limit=5)\n"
+        "    assert out\n"
+    )
+    assert unfaked_callers(
+        offends, call="linkedin_connections", fake="_FakeBrowser"
+    ) == ["t"]
+
+    clean = (
+        "async def t(monkeypatch):\n"
+        "    browser = _FakeBrowser(object())\n"
+        "    monkeypatch.setattr(server, 'BROWSER', browser)\n"
+        "    out = await server.linkedin_connections(limit=5)\n"
+    )
+    assert unfaked_callers(
+        clean, call="linkedin_connections", fake="_FakeBrowser"
+    ) == []
+
+    # AND IT MUST NOT FIRE ON A FILE THAT NEVER CALLS THE TOOL, or every
+    # module in the repo becomes an offender.
+    assert unfaked_callers(
+        "def t():\n    assert 1\n", call="linkedin_connections", fake="_FakeBrowser"
+    ) == []
 
 
 @pytest.mark.asyncio
