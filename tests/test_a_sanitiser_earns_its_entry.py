@@ -281,8 +281,17 @@ def test_the_check_would_notice_an_untracked_enrolment():
     invented = "_probe_a_file_git_has_never_heard_of.py"
     assert invented not in _tracked_names(), "pick a name that is really absent"
     assert _untracked_enrolments({(invented, "_redact"): ONE_ARG}) == {invented}
-    # And the real table, through the same predicate, in the same call shape.
-    assert _untracked_enrolments(ENROLLED) == set()
+    # A REAL TRACKED FILE THROUGH THE SAME PREDICATE, so this shows the
+    # predicate ACCEPTING as well as rejecting -- a rejecter that rejects
+    # everything is not a check either.
+    assert _untracked_enrolments({("shape.py", "_redact"): ONE_ARG}) == set()
+    # DELIBERATELY NOT `assert _untracked_enrolments(ENROLLED) == set()`. The
+    # test above owns that claim. Re-asserting it here would make the CONTROL
+    # go red whenever the STATE is broken, so a reader facing a red suite could
+    # not tell "the predicate is broken" from "the table is wrong" -- which is
+    # the one distinction a control exists to preserve. Measured: reproducing
+    # the original defect turned this test red alongside the real one until the
+    # line came out.
 
 
 def test_every_claimant_of_a_sanitiser_name_is_enrolled():
