@@ -50,9 +50,9 @@ PASS TWO -- settling ``f_JT`` on its own, six loads
 
 WHY A SECOND PASS EXISTS. Pass one's first live run returned, for ``f_JT=F``,
 a zero on both channels it consults (card delta 0, differing pills 0) while
-two channels it does NOT consult said the page had changed: the parameter
-SURVIVED into the landed url where the negative control's was STRIPPED, and
-the page carried 76 buttons against 71 for both baseline and the negative
+two channels it does NOT consult said the page had changed: LinkedIn KEPT the
+``f_JT`` key in the landed url where the negative control's key was STRIPPED,
+and the page carried 76 buttons against 71 for both baseline and the negative
 control. A verdict of IGNORED on a silent channel is not a measurement, it is
 an instrument reporting its own blind spot.
 
@@ -86,11 +86,35 @@ filter.
 
 * **CARD COUNT.** ``dom.harvest_linked_cards`` with ``dom.JOB_HREF``, the
   shipped harvest with the shipped pattern. THE COUNT ONLY.
-* **PILL STATE.** Every ``<button>`` on the page, read through
-  ``page.locator`` and ``get_attribute``, reported as an accessible name
-  beside its ``aria-pressed`` / ``aria-checked`` / ``aria-expanded``.
-* **PARAMETER SURVIVAL** into the landed url, verbatim, value included.
-* **THE LANDED QUERY**, rendered through :func:`_redact` -- see below.
+* **PILL STATE -- THE ARIA CHANNEL.** Every ``<button>`` on the page, read
+  through ``page.locator`` and ``get_attribute``, reported as an accessible
+  name beside its ``aria-pressed`` / ``aria-checked`` / ``aria-expanded``.
+  A control carrying none of the three CANNOT APPEAR ON THIS CHANNEL AT ALL,
+  which is why the one below exists.
+* **NAME PRESENCE -- A SECOND, SEPARATE CHANNEL.** The set of accessible NAMES
+  of every named button, WHATEVER its aria state, under the same length gate
+  and the same shaper. Reported as names that APPEARED or DISAPPEARED between
+  a load and its baseline, printed apart from the aria channel and never
+  merged into it. **THIS CHANNEL EXISTS BECAUSE A ZERO FROM A GATE THAT
+  CANNOT SEE THE CONTROL IS NOT A NEGATIVE READING.** ``Reset selected Job
+  type`` -- the single control that evidences ``f_JT`` having applied --
+  carries ``pressed=- checked=- expanded=-``, so the aria gate excluded it
+  structurally and pass one reported ``(none)`` differing for ``f_JT=F``.
+* **KEY KEPT** -- whether the landed url still carries the key=value pair
+  that was asked for, compared AFTER percent-encoding is normalised on both
+  sides (see :func:`_key_kept`), with the raw landed pair printed beside the
+  reading so the encoding is visible rather than merely trusted.
+
+  **THE KEY WAS KEPT; WHETHER THE VALUE WAS APPLIED IS A DIFFERENT QUESTION
+  AND THIS CHANNEL CANNOT ANSWER IT.** ``f_JT=ZZ`` -- a job-type value the
+  filter has never had -- was kept VERBATIM and was inert on every other
+  channel: +0 buttons, identical to BASELINE and to the negative control. So
+  this channel measures whether LinkedIn RECOGNISES THE KEY (``f_ZZQQX`` was
+  stripped; ``f_JT`` was not) and says nothing whatever about the VALUE.
+  **NOTHING MAY PRINT HONOURED ON THE STRENGTH OF THIS CHANNEL ALONE.**
+* **THE LANDED QUERY, AS A RELATION** through :func:`_shape_of` -- which
+  keys of ours it carried, how many it carried that are not ours, and which
+  of ours it dropped. Counts and our own key names; never a value.
 * **PASS TWO ALSO:** every control whose name contains "job type",
   "full-time", "contract" or "employment", case-insensitively, together with
   the inventory of names that were SEARCHED, so a zero says what it looked at.
@@ -146,20 +170,35 @@ sets share one enumeration**: a job card's own controls are ``<button>``
 elements on the same page, and LinkedIn writes titles and employers into their
 accessible names. Three gates separate them, in this order:
 
-    1. ARIA-STATE GATE. A button enters the printed inventory only if it
+    1. ARIA-STATE GATE. A button enters the ARIA-STATE inventory only if it
        carries at least one of the three aria attributes. One that carries
-       none is COUNTED and never named. This costs the question nothing --
-       aria state is the thing being measured -- and it is the structural
-       proxy for "this control is filter chrome".
+       none is COUNTED and never named ON THAT CHANNEL.
+
+       **IT WAS WRITTEN HERE THAT THIS COSTS THE QUESTION NOTHING. THAT WAS
+       WRONG, AND IT COST THE QUESTION THE WHOLE f_JT READING.** ``Reset
+       selected Job type`` carries ``pressed=- checked=- expanded=-``; it is
+       the single control that evidences ``f_JT`` having applied, and gate 1
+       excluded it structurally, so ``_differing_names`` reported ``(none)``
+       and that zero was read as a negative. A zero from a gate that cannot
+       see the thing is not a negative reading.
+
+       THE GATE STAYS -- it is still the structural proxy for "this control
+       is filter chrome", and dropping it would publish card text -- and the
+       repair is a SECOND CHANNEL beside it rather than a wider gate: the
+       NAME-PRESENCE channel carries every named button whatever its aria
+       state, under gates 2 and 3 only. Every reading off the aria channel
+       now prints its own denominator, so an absence there says how many
+       controls it could not see.
     2. ``shape.census_shape``, so a urn, a member path, a company path, a
        possessive or a long digit run cannot survive inside a printed name.
     3. LENGTH. Names of 60 characters or more are dropped, which is also
        ``shape.CENSUS_NAME_LIMIT``.
 
-**THE NEEDLE SEARCH IN PASS TWO IS THE ONE PLACE THAT LOOKS OUTSIDE GATE 1**,
-because a job-type control that carries no aria state is precisely the thing
-the hypothesis predicts, and a search that could not see it would confirm the
-hypothesis by construction. It gets its own gate instead: a needle match
+**TWO READINGS LOOK OUTSIDE GATE 1: THE NAME-PRESENCE CHANNEL ABOVE, AND THE
+NEEDLE SEARCH IN PASS TWO.** The needle search does so because a job-type
+control that carries no aria state is precisely the thing the hypothesis
+predicts, and a search that could not see it would confirm the hypothesis by
+construction. It gets its own gate instead: a needle match
 prints only if it CARRIES AN ARIA STATE or is under
 :data:`NEEDLE_NAME_LIMIT` characters. "Job type", "Full-time" and "Contract"
 are all short; "Save <a title> at <an employer>" is not, and is withheld with
@@ -179,7 +218,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from urllib.parse import unquote_plus, urlsplit
+from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -376,67 +415,91 @@ OUT_PATH = (
 MAX_NAMED_IN_CELL = 6
 
 
-def _redact(url: str) -> str:
-    """The LANDED QUERY, rendered so it can identify nobody. AN ALLOWLIST.
+def _shape_of(landed_url: str, requested_url: str) -> str:
+    """WHAT THE LANDED QUERY IS, never what it says. A RELATION.
 
-    **THIS FUNCTION'S NAME IS A CONTRACT, NOT A LABEL.**
-    ``tests/test_navigation_is_never_derived.py`` stops its taint walk at a
-    call to a function named ``_redact`` or ``_shape_of``, matched by NAME
-    across every module it scans. So naming a function this makes a promise to
-    every other check in this package -- "the result carries none of its
-    input" -- and that file's own comment records what happens when the
-    promise is made on the strength of a name: an entry sat in ``_SANITISERS``
-    while the function it vouched for had no slug rule at all.
+    **THIS REPLACED AN ALLOWLIST CALLED ``_redact`` ON 2026-09-04, AND THE
+    REASON IS A MEASUREMENT RATHER THAN A PREFERENCE.** That function rendered
+    each pair, printing a value verbatim when its KEY was in
+    :data:`QUERY_KEYS_PRINTABLE` and a name-plus-count otherwise. A cold
+    verifier fed it thirty adversarial urls and it leaked EIGHT, in four
+    classes that no repair to it could have closed:
 
-    NOTHING OUTSIDE THIS FILE VERIFIES THIS ONE. It is therefore built the one
-    way that does not need an auditor: **membership, not absence.** A pair
-    prints its value only if its key is in :data:`QUERY_KEYS_PRINTABLE`. A key
-    nobody anticipated -- a job id, a geo id, a tracking blob -- cannot print
-    its value by being unrecognised, which is exactly how a blocklist leaks.
+    1. A BARE VANITY SLUG under an allowlisted key. ``shape.census_shape``
+       substitutes ``/in/<slug>/``; strip the ``/in/`` prefix and a slug is
+       ``[a-z0-9-]``, which is entirely inside ``shape._CENSUS_SAFE_CHARS``,
+       carries no six-digit run, and passes both layers untouched.
+    2. A DISPLAY NAME under an allowlisted key, for the reason ``shape.py``
+       states about itself: ``census_shape`` is not a name oracle, and names
+       are caught at the TALLY in ``census_redact_rare``, which needs a count
+       this function never has.
+    3. THE KEY CHANNEL, which was never an allowlist at all. The membership
+       test gated VALUES; the KEY was printed through the shaper alone. And
+       ``key, value = pair, ""`` for a pair with no ``=`` moves a VALUE INTO
+       THE KEY POSITION, so a bare token walked straight around the gate.
+    4. A REPEATED allowlisted key printed every occurrence.
 
-    Returns the QUERY ONLY. No scheme, no host, no path: the path is reported
-    separately as a relation, and it is the one part of a LinkedIn url that
-    can be a member path.
+    **THE COMMON CAUSE IS THAT NO PROPERTY OF A STRING SEPARATES A SLUG FROM
+    AN ENUM.** ``f_TPR=r86400``, ``origin=JOBS_HOME`` and a vanity slug are
+    the same shape to any charset or length rule -- which is precisely the
+    fact ``shape.py`` records when it explains why ``census_redact_rare`` keys
+    on a COUNT and not on the string. A sanitiser here cannot win, so this
+    stops trying to render the query and reports the RELATION instead.
+
+    WHAT IT RETURNS, and every part is either a string this file authored or
+    an integer: which members of :data:`QUERY_KEYS_PRINTABLE` the landed query
+    carried, how many pairs it carried that are NOT in that literal set, and
+    whether it kept every key the requested address asked for. **No value is
+    read. No key the page invented is named.** A key nobody anticipated cannot
+    print anything but its existence.
+
+    THE NAME IS THE CONTRACT AND IS NOW EARNED RATHER THAN ASSERTED.
+    ``_shape_of`` is this package's established name for a relation-returner,
+    it is in ``tests/test_navigation_is_never_derived.py::_SANITISERS``, and
+    ``tests/test_a_sanitiser_earns_its_entry.py`` now runs this function --
+    with every other function claiming a sanitiser name -- against an
+    adversarial table and refuses to let an unenrolled claimant exist.
+
+    NOTHING IS LOST THAT A VERDICT USED. The old rendering fed no verdict: it
+    was assigned once and printed once. Whether a parameter survived is
+    answered by ``survived``, a boolean against a module-level constant,
+    computed four lines above the call site.
     """
-    query = urlsplit(str(url or "")).query
-    if not query:
+    landed = urlsplit(str(landed_url or "")).query
+    if not landed:
         return "(no query)"
-    rendered: list[str] = []
-    for pair in query.split("&"):
+
+    carried: set[str] = set()
+    unrecognised = 0
+    for pair in landed.split("&"):
         if not pair:
             continue
-        key, sep, value = pair.partition("=")
-        if not sep:
-            key, value = pair, ""
+        # THE KEY IS TESTED FOR MEMBERSHIP AND OTHERWISE ONLY COUNTED. This is
+        # the half the old function printed, and printing it is what let a
+        # valueless pair smuggle a token through the key position.
+        key = pair.partition("=")[0]
         if key in QUERY_KEYS_PRINTABLE:
-            # Shaped even so. The allowlist says the KEY is safe to read a
-            # value out of; the shaper is the second layer, and two layers is
-            # what this package does with a string it is about to publish.
-            shaped = shape.census_shape(value)
-            if shaped == shape.CENSUS_OPAQUE:
-                # PERCENT-ENCODING IS NOT AN IDENTITY, BUT IT CAN CARRY ONE.
-                # `%` is outside `shape._CENSUS_SAFE_CHARS`, so any encoded
-                # value goes opaque -- which would blind this probe on exactly
-                # the row it exists to read, since LinkedIn may return
-                # `f_JT=F%2CC` for the comma-joined address.
-                #
-                # DECODE FIRST, THEN RESHAPE. Passing the encoded text through
-                # a wider CHARSET would be the wrong repair: `%75%72%6E:...`
-                # is a urn wearing a costume, and a charset gate cannot see
-                # it. Decoding removes the costume and hands the shaper the
-                # string it was built to judge, so the urn rule, the member
-                # path rule and the digit-run rule all get their say.
-                decoded = shape.census_shape(unquote_plus(value))
-                shaped = (decoded + " (percent-encoded)"
-                          if decoded != shape.CENSUS_OPAQUE
-                          else "<opaque %d chars>" % len(value))
-            rendered.append("%s=%s" % (key, shaped))
+            carried.add(key)
         else:
-            rendered.append(
-                "%s=<withheld %d chars>"
-                % (shape.census_shape(key) or "<key>", len(value))
-            )
-    return "&".join(rendered)
+            unrecognised += 1
+
+    asked = {
+        pair.partition("=")[0]
+        for pair in urlsplit(str(requested_url or "")).query.split("&")
+        if pair
+    }
+    # A SET DIFFERENCE OVER KEYS THIS FILE PUT IN THE ADDRESS. `asked` comes
+    # from a module-level literal in LOADS/PASS2_LOADS, never from the page,
+    # so naming a dropped key names nothing the browser chose.
+    dropped = sorted(asked - {p.partition("=")[0] for p in landed.split("&") if p})
+
+    return (
+        "printable keys carried: %s; %d further pair(s) withheld; "
+        "asked-for keys dropped: %s"
+        % (", ".join(sorted(carried)) or "none",
+           unrecognised,
+           ", ".join(dropped) or "none")
+    )
 
 
 def _state_text(values: list) -> str:
@@ -616,13 +679,13 @@ async def _one_load(page, emit, label, parameter, url, index) -> dict:
         return row
 
     # EVERY READING OFF THE LANDED ADDRESS IS EITHER A COMPARISON AGAINST A
-    # CONSTANT THIS REPOSITORY AUTHORED, OR A CALL TO _redact. A boolean about
-    # a url, or an allowlisted rendering of its query -- never the url.
+    # CONSTANT THIS REPOSITORY AUTHORED, OR A CALL TO _shape_of. A boolean
+    # about a url, or a relation over its query -- never the url.
     served_exactly = landed_url == url
     walled = any(marker in landed_url for marker in WALL_MARKERS)
     on_surface = JOBS_SEARCH_PATH in landed_url
     survived = bool(parameter) and (parameter in landed_url)
-    landed_query = _redact(landed_url)
+    query_shape = _shape_of(landed_url, url)
 
     row["walled"] = walled
     if parameter:
@@ -635,7 +698,7 @@ async def _one_load(page, emit, label, parameter, url, index) -> dict:
     if parameter:
         emit("    %r survived into the landed url verbatim: %s"
              % (parameter, "YES" if survived else "NO"))
-    emit("    landed query: %s" % landed_query)
+    emit("    landed query: %s" % query_shape)
 
     if walled:
         row["failed"] = "auth wall"
@@ -885,7 +948,8 @@ async def main() -> None:
     emit("    two passes, one session, one fixed keyword, nothing pressed")
     emit("    keyword (fixed for all thirteen loads): %r" % KEYWORD_TEXT)
     emit("    card COUNTS only -- no title, no employer, no job id is printed")
-    emit("    the landed query is rendered through an ALLOWLIST (_redact)")
+    emit("    the landed query is reported as a RELATION (_shape_of):")
+    emit("    our key names and counts only -- no value is ever read")
 
     p1_rows: list[dict] = []
     p2_rows: list[dict] = []
