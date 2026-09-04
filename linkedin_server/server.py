@@ -3677,6 +3677,24 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
     members is out of scope for this server and this tool is built so that it
     cannot, rather than filtered afterwards so that it does not.
 
+    WHERE THAT PROTECTION ACTUALLY LIVES, named because the obvious guess is
+    wrong and a reader of this payload will act on the answer. It is NOT the
+    shaping step: ``shape.census_shape`` is a character and length gate --
+    ``<opaque>`` past its limit or on unusual punctuation, and VERBATIM for
+    anything short and plain, which is why ``Notifications`` survives it and so
+    would a short name. Two other functions do the work. ``census_href_identifies_entity``
+    blanks any control that links to a person. ``census_redact_rare`` blanks a
+    capitalised run in a shape seen exactly ONCE, and the count is the whole
+    discriminator: page furniture repeats across a surface and a member does
+    not.
+
+    THAT APPLIES TO ``file_inputs`` AS WELL AS TO ``control_shapes``, and it
+    did not for part of 2026-09-04. ``file_inputs`` reports per-control
+    records rather than counted ones, so it did not pass through the
+    aggregation where the singleton rule lives -- and this tool emitted, in
+    one payload, a name blanked in ``control_shapes`` and printed in
+    ``file_inputs``. Both blocks run it now, by calling the same function.
+
     ON COMPLETENESS -- ABSENT MEANS UNKNOWN, NEVER ZERO. LinkedIn defers most
     of a feed until the page is SCROLLED and this server does not scroll, so
     what is reported is the FIRST RENDER and nothing below the fold. A control

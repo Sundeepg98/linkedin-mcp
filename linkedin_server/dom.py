@@ -2993,14 +2993,42 @@ async def read_surface_census(
     """Return the control census of the rendered page, ALREADY SHAPED.
 
     The shaping is done here, in the only caller of :data:`CENSUS_JS`, so that
-    a raw accessible name has nowhere to go: this function returns records
+    a raw accessible name has only one exit: this function returns records
     whose ``shape`` and ``href_shape`` have been through
-    ``shape.census_shape``, and the raw strings are discarded inside it.
+    ``shape.census_shape``, and the unshaped strings are dropped inside it.
 
     That placement is the privacy property. Shaping in the tool instead would
     leave a function on this module returning other members' names to anyone
     who called it later, which is precisely the shape of defect that gets
     found a release after it is introduced.
+
+    **BE PRECISE ABOUT WHAT ``census_shape`` BUYS, BECAUSE IT IS NOT WHAT ITS
+    NAME SUGGESTS AND A CONSUMER OF THESE RECORDS WILL RELY ON THE ANSWER.**
+    This paragraph said "the raw strings are discarded" until 2026-09-04 and
+    that reads as redaction. Measured: ``census_shape('Ada Lovelace')``
+    returns ``'Ada Lovelace'``. It is a CHARACTER AND LENGTH GATE plus
+    placeholder substitution -- ``<opaque>`` past ``CENSUS_NAME_LIMIT`` or on
+    punctuation outside the safe set, and VERBATIM for anything short and
+    plain. That is correct and deliberate: opaquing ``Notifications`` would
+    cost the census its use and buy nothing.
+
+    SO THE MEMBER-NAME PROTECTION IS NOT HERE. It is two functions, both in
+    ``shape``, and a caller that reads these records without them is weaker
+    than the tool that ships them:
+
+    * ``census_href_identifies_entity`` -- applied in the loop below, blanking
+      the name of any control whose href points at a person;
+    * ``census_redact_rare`` -- **NOT applied here**, because it needs a COUNT
+      and these records are not yet counted. It fires on a capitalised run in
+      a shape seen exactly once, which is what separates ``Start A Post`` from
+      a member's name, and it lives in ``shape.census_aggregate``.
+
+    **A CALLER THAT EMITS THESE RECORDS WITHOUT AGGREGATING THEM MUST APPLY
+    ``census_redact_rare`` ITSELF.** That is not hypothetical: ``read_file_inputs``
+    below shipped without it on 2026-09-04, so one payload of
+    ``linkedin_surface_census`` blanked ``Message Ada Lovelace`` in
+    ``control_shapes`` and printed it in ``file_inputs``. Corrected the same
+    day by calling the same function rather than re-deriving the rule.
     """
     cfg = {
         "controlSelector": CENSUS_CONTROL_SELECTOR,
@@ -3166,11 +3194,41 @@ async def read_file_inputs(
     # way for a reader to tell which half was stale. Omitted, it takes its own.
     if census is None:
         census = await read_surface_census(page)
-    inputs = [
-        control
-        for control in list(census.get("controls") or [])
-        if control.get("input_type") == "file"
-    ]
+    inputs = []
+    for control in list(census.get("controls") or []):
+        if control.get("input_type") != "file":
+            continue
+        # THE SINGLETON REDACTION, AND WITHOUT IT THIS BLOCK WAS THE WEAKER
+        # HALF OF ITS OWN PAYLOAD. Shipped without it on 2026-09-04 and
+        # corrected the same day, measured rather than reasoned about:
+        #
+        #     control_shapes (aggregated)  'Message Ada Lovelace' -> <redacted>
+        #     file_inputs    (as shipped)  'Message Ada Lovelace' -> verbatim
+        #
+        # `census_shape` is only a character and length gate, so a short plain
+        # string survives it whatever it names. What actually catches a member
+        # name is `census_redact_rare`, which fires on a capitalised run in a
+        # shape seen ONCE -- and it lives in `census_aggregate`, which this
+        # function does not use. So `linkedin_surface_census` would have
+        # emitted, in ONE payload, a name blanked in `control_shapes` and
+        # printed in `file_inputs`.
+        #
+        # A REDACTION APPLIED AT ONE SITE AND NOT AT ITS TWIN is the defect
+        # this file's own history records three times in a single day. Fixed
+        # by CALLING the same function rather than re-deriving the rule, so
+        # there is no second copy to drift.
+        #
+        # COUNT 1 IS THE HONEST COUNT HERE. These records are emitted
+        # individually rather than merged, so each one has been seen exactly
+        # once by the time it is reported -- which is the condition
+        # `census_redact_rare` is defined on. It over-redacts a genuinely
+        # unique two-word label by construction, and that is the direction to
+        # be wrong in. Measured: the real chrome survives it --
+        # 'Attach a file for your draft conversation' and 'Resume' both pass
+        # through unchanged.
+        record = dict(control)
+        record["shape"] = shape.census_redact_rare(str(record.get("shape") or ""), 1)
+        inputs.append(record)
     # THE COUNT COMES FROM THE COUNTS BLOCK, NOT FROM len(inputs), and the
     # difference is the whole reason both are returned. ``counts.file_inputs``
     # is a document-wide ``querySelectorAll``; ``inputs`` is filtered from the

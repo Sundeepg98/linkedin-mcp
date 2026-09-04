@@ -701,3 +701,135 @@ path, a url, a row id, a file handle -- each is a reference whose referent can
 change under a live grant. Ask of any new target kind: is the thing he approved
 the thing the string names, or only where it lives? If the latter, the token is
 one indirection short and something has to close it.
+
+### 4.5 `BUILT-BUT-INERT` -- and this repo already had the guard
+
+**`tests/test_reader_reachability.py::test_every_reader_is_reachable_from_the_tool_surface`.
+Cite it. It is the check, and it is older than the argument.**
+
+A reader added to `dom.py` that nothing calls -- directly or transitively from
+`server.py` -- fails immediately, with:
+
+    read_file_inputs is defined in dom.py and NOTHING calls it, directly or
+    transitively, from outside dom.py. It cannot be exercised by any tool, so
+    its tests certify a thing no caller can reach.
+
+**IT FIRED ON `read_file_inputs` THE MOMENT THE FUNCTION EXISTED, before any
+of its tests were written.** The wave that added it had just spent two
+messages arguing the same objection in prose -- that a capability built and
+left unreachable is not built -- and had not known a test already enforced it.
+The fix was not to weaken the check: the reader was wired into
+`linkedin_surface_census`, which is where it belonged and where it now makes
+the file-input measurement one call wide.
+
+**THE STANDING RULE: a reader is not finished when it works, but when a tool
+can reach it.** Prose arguing that built-but-inert is a defect is weaker than
+the check that says so on the same day. Before writing tests for a new reader,
+run this file -- it costs a second and it fires before the tests it would
+otherwise certify.
+
+**AND THE GENERAL FORM, which is what earns this an entry rather than a note:
+when you are about to argue a standard in review, look for the test first.**
+It is faster, it does not depend on the reviewer being present, and where it
+exists it has already decided.
+
+### 4.6 `A-REDACTION-APPLIED-AT-ONE-SITE-AND-NOT-AT-ITS-TWIN`
+
+**One tool payload blanked a member's name in one block and printed it in the
+block beside it, because the two blocks took different paths to the same
+records.**
+
+`linkedin_surface_census` reports `control_shapes` (aggregated) and, from
+2026-09-04, `file_inputs` (per-control). Both start from
+`dom.read_surface_census`. Only the first went through
+`shape.census_aggregate`, and the singleton redaction lives inside it:
+
+    control_shapes   'Message Ada Lovelace'  ->  <redacted>
+    file_inputs      'Message Ada Lovelace'  ->  'Message Ada Lovelace'
+
+**THE TRAP IS THE NAME OF THE FUNCTION THAT LOOKS LIKE IT COVERS THIS.**
+`census_shape` sounds like the redactor and is not -- it is a character and
+length gate that returns anything short and plain VERBATIM, correctly, because
+opaquing `Send` would cost the census its use. What catches a member name is
+`census_href_identifies_entity` (any control linking to a person) and
+`census_redact_rare` (a capitalised run in a shape seen exactly once). The new
+block inherited the gate and missed both.
+
+    THE FIX      call `shape.census_redact_rare(shape, 1)` on each emitted
+                 record -- CALL it, never re-derive the rule, or the copy
+                 drifts (see 1.3)
+    THE CONTROL  two halves, and the second is the one that matters:
+                 'Message Ada Lovelace' must become <redacted>, AND
+                 'Attach a file for your draft conversation' must SURVIVE.
+                 A fix that redacted every file-input name would pass the
+                 first assertion and destroy the reader's only purpose.
+    RED-PROOF    the redaction line replaced with `pass`, run AGAINST A COPY
+                 with `dom.__file__` confirmed resolving under the copy first:
+                 control PASS, mutant RED, restored PASS, live tree untouched.
+
+**THE STANDING RULE: when you add a second way out of a data structure, list
+every transform the FIRST way applies and show your path applying each one.**
+Not "it goes through the shaper too" -- name them and check them off. A new
+emission path inherits the transforms it happens to call and silently drops
+every one it routes around, and the payload will contain both answers side by
+side for anyone who looks.
+
+**AND THE DOCUMENTATION HALF, because the code fix alone leaves the trap
+armed for the next caller.** The fact now sits where a payload reader meets
+it: `dom.read_surface_census`'s docstring names the two functions and says in
+so many words that a caller emitting its records WITHOUT aggregating them must
+apply `census_redact_rare` itself, and `linkedin_surface_census`'s docstring
+says the same to a tool consumer. The sentence that had to go was
+"the raw strings are discarded inside it" -- true of the unshaped value,
+and read by everyone as redaction.
+
+### 2.7 `A-CENSUS-ANSWERS-WHAT-BUILDS-A-URL-NOT-WHAT-OPENS-ONE`
+
+**A construction site and a navigation site are different questions, and only
+one of them is the boundary's.**
+
+A read allowlist governs what the process may OPEN. So "does anything build
+this url?" is the wrong question by one step -- it is answerable, it is
+cheaper, and it is not the one the decision rests on. A url can be built and
+never opened (an output field handed to a human), and a url can be opened
+without being built anywhere visible (picked from a table, or a landed
+redirect).
+
+**BOTH TIMES THIS WAS ASKED ON 2026-09-04, THE TWO QUESTIONS GAVE DIFFERENT
+ANSWERS, AND THE SECOND IS THE ONE THAT MATTERED:**
+
+| narrowing | the census said | the navigation site said |
+|---|---|---|
+| `/in/<not-me>/details/` | 2 interpolated sites BUILD such urls | `linkedin_my_profile` navigates from `PROFILE_DETAIL_URLS`, a table of `/in/me/` literals -- **zero open it** |
+| `/in/<not-me>/` | 5 interpolated sites BUILD such urls | every `goto` carrying `/in/` is `/in/me/` -- **zero open it** |
+
+In both cases a ruling taken on the census alone would have been RIGHT BY
+ACCIDENT: the builders were all output fields, and the navigation had already
+been moved onto literal tables by an earlier wave. The reason was not
+sufficient for the conclusion, and nobody would have known.
+
+    THE INSTRUMENT   scripts/_probe_details_url_breadth.py, parsed not
+                     grepped -- the allowlist entry it is about is a two-line
+                     implicit string concatenation, and a grep over it
+                     returned only the first line and misled a reviewer the
+                     same day
+    THE SECOND PASS  read the NAVIGATION site by hand: which table does the
+                     tool pick from, and does `goto` re-check the landed url?
+                     (It does not -- it asserts the REQUESTED url before
+                     navigating, which is what lets `/in/me/` survive a
+                     narrowing that removes the slug form it redirects to.)
+    THE CONTROL      the census reports the total literals examined and how
+                     many mention the marker, so a zero is legible: "0 hits
+                     across 10854 literals in 55 files" is a finding, "0 hits"
+                     alone is a broken parse
+
+**AND A THIRD QUESTION HIDES BEHIND THE SECOND: what does the process assert,
+the requested url or the landed one?** A narrowing is safe for a redirecting
+address only if the answer is "the requested one". That was checked at both
+assert sites (`browser.goto`, `writes._load`) rather than assumed, and it is
+the difference between removing a dead pattern and breaking every self-profile
+read in the package.
+
+**THE STANDING RULE: before narrowing a boundary, ask all three -- what BUILDS
+it, what OPENS it, and WHICH url the door is shown.** The first is a grep-like
+question, the second needs a reader, and the third is a property of the door.

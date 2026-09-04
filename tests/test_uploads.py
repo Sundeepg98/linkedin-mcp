@@ -1224,6 +1224,54 @@ async def test_the_reader_agrees_with_the_page_on_a_real_fixture(browser_page):
     assert out["inputs"][0]["input_type"] == "file"
 
 
+async def test_a_file_inputs_name_gets_the_SINGLETON_redaction_too(browser_page):
+    """THE DEFECT THIS BLOCK SHIPPED WITH ON 2026-09-04, shown failing.
+
+    `census_shape` is a character and length gate, so a short plain string
+    survives it whatever it names. What actually catches a member name is
+    `census_redact_rare`, which fires on a capitalised run in a shape seen
+    ONCE -- and it lives inside `census_aggregate`, which `read_file_inputs`
+    does not use.
+
+    So `linkedin_surface_census` emitted, IN ONE PAYLOAD, a name blanked in
+    `control_shapes` and printed verbatim in `file_inputs`. A redaction
+    applied at one site and not at its twin, which is the defect this
+    package's own history records three times in a single day.
+
+    THE CONTROL IS THE SECOND HALF: the real chrome must SURVIVE. A fix that
+    redacted every file-input name would pass the first assertion and destroy
+    the reader's only purpose, which is naming a control a wiring can aim at.
+    """
+    await browser_page.set_content(
+        "<html><body>"
+        '<input type="file" aria-label="Message Ada Lovelace">'
+        "</body></html>",
+        wait_until="domcontentloaded",
+    )
+    out = await dom.read_file_inputs(browser_page)
+    assert out["count"] == 1
+    assert out["inputs"][0]["shape"] == shape_module.CENSUS_REDACTED, out["inputs"]
+
+    # AND THE SAME PAGE THROUGH THE AGGREGATE PATH AGREES, which is the point:
+    # the two halves of one payload must not disagree about one string.
+    census = await dom.read_surface_census(browser_page)
+    aggregated, _href = shape_module.census_aggregate(census["controls"])
+    assert all(row["shape"] == shape_module.CENSUS_REDACTED for row in aggregated), (
+        aggregated
+    )
+
+    # THE CONTROL: real UI chrome is not redacted, so the reader still names
+    # what a wiring would aim at.
+    await browser_page.set_content(
+        "<html><body>"
+        '<input type="file" aria-label="Attach a file for your draft conversation">'
+        "</body></html>",
+        wait_until="domcontentloaded",
+    )
+    out = await dom.read_file_inputs(browser_page)
+    assert out["inputs"][0]["shape"] == "Attach a file for your draft conversation"
+
+
 async def test_the_reader_inherits_the_censuss_GATE_and_claims_nothing_more(
     browser_page,
 ):
