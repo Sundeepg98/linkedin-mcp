@@ -54,7 +54,7 @@ WHAT IS HUNTED
 
    THE THREE ADDED ON 2026-09-04 EACH CLOSED A MEASURED HOLE, and the holes
    are worth naming because each one is a shape the guard could see in one
-   spelling and not in another -- the same defect as ``[\/]`` in the path
+   spelling and not in another -- the same defect as ``[\\/]`` in the path
    rules, one shape to the left:
 
    * ``PHONE_SHAPE`` wants TEN CONTIGUOUS digits and ``PHONE_E164_SHAPE``
@@ -324,6 +324,16 @@ DECLARED_PLANTS = {
     ("tests/test_writes_nine.py", "urn id"): 1,
     # A planted session cookie, by exact path, in the module that defines it.
     ("tests/test_no_committed_credential.py", "credential"): 1,
+    # scripts/identity_gate.py's own can-it-fail controls, 2026-09-04. LITERALS
+    # and therefore declared, rather than assembled at runtime: assembling them
+    # would hide them from this sweep, and a sweep blinded to that file's
+    # deliberate values is blinded to a REAL value pasted into it later. Same
+    # reasoning as the two urn entries above, and the counts are pinned for the
+    # same reason -- one more of any class in that file goes red.
+    ("tests/test_identity_gate.py", "member token"): 2,
+    ("tests/test_identity_gate.py", "urn id"): 3,
+    ("tests/test_identity_gate.py", "opaque urn"): 1,
+    ("tests/test_identity_gate.py", "phone"): 1,
 }
 
 # ===========================================================================
