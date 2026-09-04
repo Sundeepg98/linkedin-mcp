@@ -69,7 +69,7 @@ STRUCTURALLY BLIND to it rather than reporting a true negative.
     5  f_JT=F,C            two values comma-joined
     6  f_JT=ZZ             A VALUE-LEVEL NEGATIVE CONTROL
 
-**LOAD 6 IS THE ONE THAT DECIDES.** The survival channel that pass one turned
+**LOAD 6 IS THE ONE THAT DECIDES.** The KEY KEPT channel that pass one turned
 up is only worth promoting if it is measuring the PARAMETER. If ``f_JT=ZZ`` --
 a value the job-type filter has never had -- is kept and looks identical to
 ``f_JT=F``, then LinkedIn keeps any ``f_``-prefixed pair whatever it says, the
@@ -102,8 +102,20 @@ filter.
   structurally and pass one reported ``(none)`` differing for ``f_JT=F``.
 * **KEY KEPT** -- whether the landed url still carries the key=value pair
   that was asked for, compared AFTER percent-encoding is normalised on both
-  sides (see :func:`_key_kept`), with the raw landed pair printed beside the
-  reading so the encoding is visible rather than merely trusted.
+  sides (see :func:`_key_kept`).
+
+  **THE ENCODING IS REPORTED AS A RELATION, NOT BY ECHOING IT.** The reading
+  says whether the landed value was BYTE-IDENTICAL to the literal this file
+  asked for and how many characters each ran to; the landed value itself is
+  never printed. An earlier draft of this probe printed the raw landed pair
+  "so the encoding is visible rather than merely trusted", and that is
+  precisely the design :func:`_shape_of` retired on a measurement: a cold
+  verifier fed the old per-pair renderer thirty adversarial urls and it leaked
+  eight, because **no property of a string separates a vanity slug from an
+  enum** -- ``f_TPR=r86400``, ``origin=JOBS_HOME`` and a slug are one shape to
+  any charset or length rule. A renderer cannot be made safe by inspecting the
+  value, so this one reports the relation and the reader trusts an integer
+  instead of a redactor.
 
   **THE KEY WAS KEPT; WHETHER THE VALUE WAS APPLIED IS A DIFFERENT QUESTION
   AND THIS CHANNEL CANNOT ANSWER IT.** ``f_JT=ZZ`` -- a job-type value the
@@ -132,22 +144,34 @@ or from anything the page said. ``tests/test_navigation_is_never_derived.py``
 scans this file like any other, and a probe that measured url parameters by
 deriving a url from the page would be the joke version of itself.
 
-**THE LANDED QUERY IS PRINTED THROUGH A SANITISER, AND THE NAME IS THE
-CONTRACT.** That same test guards a second sink -- ``print`` -- because a
-landed url reached a transcript three separate ways on 2026-09-03, and it
-stops descending only at a call to a function named in its ``_SANITISERS``
-set. :func:`_redact` below carries that name deliberately and implements the
-contract the name asserts. **NOTHING OUTSIDE THIS FILE VERIFIES IT.** That is
-the exact defect ``_SANITISERS``' own comment records -- an entry admitted on
-the strength of a name, while the function had no slug rule at all -- so the
-implementation here is built the one way that does not depend on being
-audited: **AN ALLOWLIST, NOT A BLOCKLIST.** A query pair prints its value
-verbatim only if its KEY is in :data:`QUERY_KEYS_PRINTABLE`, a module-level
-literal set; every other key prints its name and a character count and never
-its value. A blocklist fails open on the identifier nobody thought of --
-``currentJobId``, ``geoId``, a tracking token -- and an allowlist fails
-closed. Every emitted value additionally passes through
-``shape.census_shape``.
+**THE LANDED QUERY IS REPORTED AS A RELATION, AND THE NAME IS THE CONTRACT.**
+That same test guards a second sink -- ``print`` -- because a landed url
+reached a transcript three separate ways on 2026-09-03, and it stops
+descending only at a call to a function named in its ``_SANITISERS`` set.
+:func:`_shape_of` below carries that name deliberately.
+
+What it emits: which members of :data:`QUERY_KEYS_PRINTABLE` the landed query
+carried, how many pairs it carried that are NOT in that set, and which of ours
+it dropped. Our own key names and integers. **No value is read at all, and a
+key the page invented is COUNTED, never named.**
+
+**WHAT THIS PARAGRAPH SAID UNTIL 2026-09-04, BECAUSE THE CORRECTION IS THE
+POINT.** It described an allowlist called ``_redact`` which printed a pair's
+value verbatim when its KEY was in :data:`QUERY_KEYS_PRINTABLE`, and it closed
+with **"NOTHING OUTSIDE THIS FILE VERIFIES IT."**
+
+That sentence was an honest disclosure when it was written and became a FALSE
+one the hour it was fixed. ``tests/test_a_sanitiser_earns_its_entry.py`` now
+enrols every function in the scanned tree claiming a ``_SANITISERS`` name and
+runs each against an adversarial table, so this one IS verified from outside.
+**Leaving the old line standing would have UNDERSTATED this file's safety and
+pointed away from the instrument that fixed it** -- an auditor reading
+top-down meets "nothing verifies this" and stops, which is the corrector and
+the corrected drifting apart inside a single file.
+
+**A REWRITE THAT REPLACES A FUNCTION LEAVES ITS PROSE BEHIND BY DEFAULT.**
+That is the shape of the edit rather than carelessness, and it is why prose
+gets a deliberate pass after one -- not a glance.
 
 **IT IS THIRTEEN GETS AND NOTHING ELSE.** No click, no fill, no scroll, no
 ``set_input_files``, and ``asyncio.sleep`` between every pair of loads. One
@@ -218,7 +242,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, unquote_plus, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -361,16 +385,23 @@ WALL_MARKERS: tuple[str, ...] = ("/login", "/checkpoint", "/authwall", "/uas/log
 #: The path every one of the thirteen addresses asks for.
 JOBS_SEARCH_PATH = "/jobs/search"
 
-#: **THE ALLOWLIST :func:`_redact` RENDERS A LANDED QUERY THROUGH.** A pair
-#: whose key is here prints its value verbatim; every other pair prints its
-#: key and a character count and NEVER its value.
+#: **THE KEYS :func:`_shape_of` WILL NAME IN A RELATION.** Membership here
+#: decides whether a landed key is NAMED in the reading. It does not decide
+#: what a VALUE may print, because since 2026-09-04 no value prints at all.
 #:
-#: THE DIRECTION MATTERS AND IS THE WHOLE ARGUMENT. A blocklist of known-bad
-#: keys fails OPEN on the identifier nobody thought of, and a jobs-search url
-#: grows them without warning -- ``currentJobId`` is a job id, ``geoId`` is a
-#: location id, and LinkedIn appends tracking pairs at will. An allowlist fails
-#: CLOSED: an unforeseen key cannot print its value, because printing requires
-#: membership rather than absence.
+#: THE DIRECTION MATTERS AND IS STILL THE ARGUMENT FOR THE SET. A blocklist of
+#: known-bad keys fails OPEN on the identifier nobody thought of, and a
+#: jobs-search url grows them without warning -- ``currentJobId`` is a job id,
+#: ``geoId`` is a location id, and LinkedIn appends tracking pairs at will.
+#:
+#: **UNTIL 2026-09-04 THIS SET GATED VALUES, AND THAT WAS RIGHT AND
+#: INSUFFICIENT.** Membership fails closed against an unforeseen KEY, and a
+#: cold verifier then measured the two ways it fails open anyway: an
+#: allowlisted key can carry a vanity slug as its VALUE, which no charset or
+#: length rule separates from ``f_TPR=r86400``; and ``key, value = pair, ""``
+#: for a pair with no ``=`` moved a value into the KEY position, walking round
+#: the gate entirely. Eight of thirty adversarial urls leaked. The set stayed;
+#: what it gates changed. See :func:`_shape_of`.
 #:
 #: Every key here is either one this repository put in the url itself or a
 #: LinkedIn search-shape parameter that carries no identity. ``keywords`` is
@@ -461,9 +492,16 @@ def _shape_of(landed_url: str, requested_url: str) -> str:
     adversarial table and refuses to let an unenrolled claimant exist.
 
     NOTHING IS LOST THAT A VERDICT USED. The old rendering fed no verdict: it
-    was assigned once and printed once. Whether a parameter survived is
-    answered by ``survived``, a boolean against a module-level constant,
-    computed four lines above the call site.
+    was assigned once and printed once. Whether LinkedIn KEPT THE KEY is
+    answered by :func:`_key_kept`, against a module-level constant, computed
+    four lines above the call site.
+
+    **THAT FIELD WAS CALLED ``survived`` WHEN THIS DOCSTRING WAS WRITTEN AND
+    THE RENAME IS NOT COSMETIC.** "Survived" was read as evidence the filter
+    was HONOURED; it is not. ``f_JT=ZZ`` -- a job-type value the filter has
+    never had -- survived VERBATIM and was inert on every other channel, while
+    ``f_ZZQQX`` was STRIPPED. So the channel measures whether LinkedIn
+    RECOGNISES THE KEY, and the name now says that and only that.
     """
     landed = urlsplit(str(landed_url or "")).query
     if not landed:
@@ -517,17 +555,36 @@ def _state_text(values: list) -> str:
     return " ".join(parts)
 
 
-async def _read_buttons(page) -> dict:
-    """Names and aria state for every ``<button>``, plus the needle search.
+def _button_reading(records) -> dict:
+    """THE WHOLE BUTTON READING, from raw ``(name, aria-values)`` pairs. PURE.
 
-    Returns the name-to-state mapping (gate 1: aria-carrying only), the
-    job-type needle hits (which deliberately look OUTSIDE gate 1, under a
-    length gate of their own), and the counts that say how much of the page is
-    NOT being shown.
+    **THE JUDGEMENT IS SEPARATED FROM THE I/O SO IT CAN BE TESTED WITHOUT A
+    BROWSER**, which is the only reason the gate ladder below is checkable at
+    all. ``tests/test_probe_filter_channels.py`` feeds this function synthetic
+    controls -- including the one shape that broke the probe -- and needs no
+    live page to prove what the gates do.
 
-    THOSE COUNTS ARE NOT BOOKKEEPING. A mapping of six pills means one thing
-    if four hundred buttons were skipped and another if two were, and a reader
-    who cannot tell which is looking at a number with no denominator.
+    TWO CHANNELS COME OUT OF ONE WALK, and keeping them apart is the fix:
+
+    * ``states`` -- THE ARIA CHANNEL. Name to aria state, for controls
+      carrying at least one of the three aria attributes (gate 1).
+    * ``names`` -- THE NAME-PRESENCE CHANNEL. Every named control that passed
+      gates 2 and 3, WHATEVER its aria state. Gate 1 does not apply.
+
+    **WHY THE SECOND EXISTS, MEASURED RATHER THAN IMAGINED.** ``Reset selected
+    Job type`` -- the single control that evidences ``f_JT`` having applied --
+    carries ``pressed=- checked=- expanded=-``. Gate 1 excluded it, so
+    ``_differing_names`` returned ``(none)`` for ``f_JT=F`` and that zero was
+    read as a negative. A zero from a gate that cannot see the control is not
+    a negative reading.
+
+    ``no_aria_state`` COUNTS EVERY WALKED CONTROL LACKING ARIA STATE, counted
+    BEFORE the name gates rather than after. It used to be incremented in two
+    of the three branches, so a control with a 60-character name and no aria
+    state fell out of the denominator entirely -- an undercount in the one
+    number whose whole job is to say how blind the aria channel was. The count
+    therefore OVERLAPS ``nameless`` and ``too_long`` by construction, and the
+    emitted line says so rather than leaving a reader to subtract.
     """
     result = {
         "total": 0,
@@ -539,45 +596,29 @@ async def _read_buttons(page) -> dict:
         "unread": 0,
         "named": 0,
         "states": {},
+        "names": frozenset(),
         "needle_hits": [],
         "needle_withheld": 0,
         "failed": "",
     }
-    buttons = page.locator("button")
-    try:
-        result["total"] = int(await buttons.count())
-    except Exception as exc:
-        result["failed"] = type(exc).__name__
-        return result
-
-    limit = min(result["total"], MAX_BUTTONS)
-    result["truncated"] = result["total"] > MAX_BUTTONS
     states: dict[str, set] = {}
     hits: dict[str, set] = {}
-    for index in range(limit):
-        control = buttons.nth(index)
-        try:
-            values = []
-            for attribute in ARIA_STATE_ATTRS:
-                values.append(await control.get_attribute(attribute))
-            raw = await control.get_attribute("aria-label")
-            if not raw:
-                raw = await control.inner_text()
-        except Exception:
-            result["unread"] += 1
-            continue
+    names: set[str] = set()
+
+    for raw, values in records:
         result["walked"] += 1
         has_state = not all(one is None for one in values)
+        if not has_state:
+            # COUNTED HERE, BEFORE ANY NAME GATE CAN SWALLOW IT.
+            result["no_aria_state"] += 1
         name = " ".join(str(raw or "").split())
         if not name:
             result["nameless"] += 1
-            if not has_state:
-                result["no_aria_state"] += 1
             continue
         if len(name) >= NAME_LIMIT:
             result["too_long"] += 1
             continue
-        # GATE 2. The repository's own shaper, so a urn, a member path, a
+        # GATE 2. The repository owns this shaper, so a urn, a member path, a
         # company path or a long digit run cannot ride through inside a name
         # that passed the gates above.
         safe = shape.census_shape(name)
@@ -586,6 +627,10 @@ async def _read_buttons(page) -> dict:
             continue
         result["named"] += 1
         state = _state_text(values)
+
+        # THE NAME-PRESENCE CHANNEL. No aria condition, deliberately: this is
+        # the half gate 1 cannot have.
+        names.add(safe)
 
         # THE NEEDLE SEARCH LOOKS OUTSIDE GATE 1 DELIBERATELY. A job-type
         # control carrying no aria state is exactly what the hypothesis
@@ -599,24 +644,69 @@ async def _read_buttons(page) -> dict:
                 result["needle_withheld"] += 1
 
         if not has_state:
-            result["no_aria_state"] += 1
             continue
         states.setdefault(safe, set()).add(state)
 
     result["states"] = {key: frozenset(value) for key, value in states.items()}
+    result["names"] = frozenset(names)
     result["needle_hits"] = sorted(
         (key, sorted(value)) for key, value in hits.items()
     )
     return result
 
 
+async def _read_buttons(page) -> dict:
+    """Walk every ``<button>``, hand the raw pairs to :func:`_button_reading`.
+
+    THIS FUNCTION DOES THE I/O AND NOTHING ELSE. Every gate, every count and
+    both channels live in the pure function above, where a test can reach them
+    without a browser and without a network.
+    """
+    buttons = page.locator("button")
+    try:
+        total = int(await buttons.count())
+    except Exception as exc:
+        empty = _button_reading([])
+        empty["failed"] = type(exc).__name__
+        return empty
+
+    limit = min(total, MAX_BUTTONS)
+    records: list[tuple[str, list]] = []
+    unread = 0
+    for index in range(limit):
+        control = buttons.nth(index)
+        try:
+            values = []
+            for attribute in ARIA_STATE_ATTRS:
+                values.append(await control.get_attribute(attribute))
+            raw = await control.get_attribute("aria-label")
+            if not raw:
+                raw = await control.inner_text()
+        except Exception:
+            unread += 1
+            continue
+        records.append((raw, values))
+
+    result = _button_reading(records)
+    result["total"] = total
+    result["truncated"] = total > MAX_BUTTONS
+    result["unread"] = unread
+    return result
+
+
 def _differing_names(baseline: dict, other: dict) -> list[str]:
-    """Names whose aria state is not the same in the two loads.
+    """Names whose ARIA STATE is not the same in the two loads.
 
     A name PRESENT in one and ABSENT in the other counts as differing, which
     is the case a set-of-pairs difference would report twice and a
     key-intersection would miss entirely: a pill that changes its accessible
     name when a filter applies leaves one key and arrives as another.
+
+    **THIS IS THE ARIA CHANNEL AND IT IS STRUCTURALLY BLIND TO A CONTROL THAT
+    CARRIES NO ARIA STATE.** It cannot be read alone: an empty result here
+    means "nothing this channel can see changed", never "nothing changed".
+    :func:`_name_presence_delta` is the other half, and :func:`_aria_absence`
+    is why an absence here cannot be printed without its denominator.
     """
     left = baseline.get("states") or {}
     right = other.get("states") or {}
@@ -624,10 +714,63 @@ def _differing_names(baseline: dict, other: dict) -> list[str]:
     return sorted(name for name in names if left.get(name) != right.get(name))
 
 
-def _cell(names: list[str]) -> str:
-    """The differing-pill column, bounded so one row cannot become a page."""
+def _name_presence_delta(baseline: dict, other: dict) -> dict:
+    """Names that APPEARED or DISAPPEARED between two loads. ARIA IGNORED.
+
+    **THE CHANNEL THE ARIA GATE CANNOT HAVE, and it exists because of a
+    measured false negative rather than a worry.** On the live run ``f_JT=F``
+    drew ``Reset selected Job type`` -- a control absent from baseline, and
+    the only one on the page evidencing that the job-type filter applied. It
+    carries ``pressed=- checked=- expanded=-``, so it could not enter
+    ``states``, and the aria channel reported ``(none)``. On this channel it
+    reads as APPEARED.
+
+    Reported SEPARATELY from the aria channel and never merged into it. They
+    answer different questions, and a reader who cannot tell which one spoke
+    is back to a number with no denominator.
+    """
+    left = set(baseline.get("names") or ())
+    right = set(other.get("names") or ())
+    return {"appeared": sorted(right - left), "disappeared": sorted(left - right)}
+
+
+def _aria_absence(buttons: dict) -> str:
+    """WHAT AN EMPTY ARIA-CHANNEL READING IS ALLOWED TO SAY.
+
+    **A BARE ``(none)`` IS NOT ON THE LIST, AND THAT IS THE WHOLE POINT.**
+    Pass one printed ``(none)`` for ``f_JT=F`` while 51 controls on that page
+    carried no aria state: the zero was a fact about the gate and it was read
+    as a fact about the page. Every absence now carries the count of what the
+    channel could not see -- a denominator, exactly like the endorsement
+    reading elsewhere in this repository.
+
+    FAILS CLOSED. Handed no reading at all it says so, rather than claiming
+    the channel saw everything.
+    """
+    if not buttons:
+        return ("(none on the aria channel; NO BUTTON READING WAS TAKEN, so "
+                "this absence has no denominator at all)")
+    blind = int(buttons.get("no_aria_state") or 0)
+    if blind == 1:
+        return ("(none on the aria channel; 1 control carries no aria state "
+                "and is invisible to it)")
+    if blind:
+        return ("(none on the aria channel; %d controls carry no aria state "
+                "and are invisible to it)" % blind)
+    return ("(none on the aria channel; every control walked carried an aria "
+            "state, so this absence has a full denominator)")
+
+
+def _cell(names: list[str], buttons: dict) -> str:
+    """The differing-pill column, bounded so one row cannot become a page.
+
+    ``buttons`` IS REQUIRED AND CARRIES NO DEFAULT, deliberately. A default
+    would let a caller print an absence with no denominator by forgetting an
+    argument, which is exactly the failure this exists to make impossible.
+    Omitting it is a TypeError, not a quieter table.
+    """
     if not names:
-        return "(none)"
+        return _aria_absence(buttons)
     shown = names[:MAX_NAMED_IN_CELL]
     text = "; ".join(shown)
     if len(names) > len(shown):
@@ -635,15 +778,109 @@ def _cell(names: list[str]) -> str:
     return text
 
 
+def _key_kept(parameter: str, landed_url: str) -> dict:
+    """Did the landed url still carry the pair this file asked for?
+
+    **THIS MEASURES WHETHER LINKEDIN RECOGNISES THE KEY. IT DOES NOT MEASURE
+    WHETHER THE VALUE WAS APPLIED, AND NOTHING MAY READ IT AS HONOURED.**
+    ``f_JT=ZZ`` -- a job-type value the filter has never had -- was kept
+    VERBATIM and was inert on every other channel (+0 buttons, identical to
+    BASELINE and to the negative control), while ``f_ZZQQX`` was STRIPPED.
+    Those two facts together are the entire content of this channel.
+
+    **THE COMPARISON IS NORMALISED, AND THE RAW ONE PRODUCED A FALSE
+    NEGATIVE.** This was ``parameter in landed_url``, a raw substring test,
+    and it reported ``f_JT=F,C`` as NOT surviving for one reason only:
+    LinkedIn percent-encoded the comma and returned ``f_JT=F%2CC``, which was
+    accepted. Both sides are decoded before they are compared.
+
+    NO LANDED VALUE IS RETURNED OR PRINTED -- only integers and strings this
+    file authored. That is :func:`_shape_of`'s ruling and it binds here: a
+    cold verifier measured that no charset or length rule separates a vanity
+    slug from an enum, so the encoding is reported as a RELATION (byte
+    identical or not, how many characters) rather than by echoing the text.
+    """
+    asked = parse_qsl(str(parameter or ""), keep_blank_values=True)
+    if not asked:
+        return {"kept": None, "key": "", "asked_value": "", "asked_chars": 0,
+                "key_present": False, "occurrences": 0,
+                "byte_identical": False, "landed_chars": 0}
+
+    key, value = asked[0]
+    landed_query = urlsplit(str(landed_url or "")).query
+    # THE KEY MATCHED AGAINST IS OURS. It comes from parse_qsl over a
+    # module-level literal in LOADS / PASS2_LOADS, never from the page, so
+    # selecting pairs by it names nothing the browser chose.
+    raw_values = [
+        pair.partition("=")[2]
+        for pair in landed_query.split("&")
+        if pair and pair.partition("=")[0] == key
+    ]
+    decoded = [unquote_plus(one) for one in raw_values]
+    return {
+        "kept": value in decoded,
+        "key": key,
+        "asked_value": value,
+        "asked_chars": len(value),
+        "key_present": bool(raw_values),
+        "occurrences": len(raw_values),
+        "byte_identical": value in raw_values,
+        "landed_chars": max((len(one) for one in raw_values), default=0),
+    }
+
+
+def _key_kept_lines(parameter: str, reading: dict) -> list[str]:
+    """The KEY KEPT reading, as lines, printing no landed value.
+
+    **THE WORD HONOURED DOES NOT APPEAR HERE AND MUST NOT.** This channel
+    cannot support it; :func:`_key_kept` argues why.
+    """
+    if reading.get("kept") is None:
+        return []
+    kept = bool(reading["kept"])
+    lines = ["%r KEY KEPT (compared after percent-decoding both sides): %s"
+             % (parameter, "YES" if kept else "NO")]
+    if not reading["key_present"]:
+        lines.append(
+            "    the key is ABSENT from the landed query entirely, which is "
+            "what a key LinkedIn does not recognise looks like -- f_ZZQQX "
+            "reads this way")
+    else:
+        lines.append(
+            "    asked %r (%d chars, a literal in this file); the landed "
+            "value %s byte-identical to it (%d chars) and %s identical "
+            "after decoding"
+            % (reading["asked_value"], reading["asked_chars"],
+               "IS" if reading["byte_identical"] else "IS NOT",
+               reading["landed_chars"],
+               "IS" if kept else "IS NOT"))
+    if reading["occurrences"] > 1:
+        lines.append("    the key appears %d times in the landed query"
+                     % reading["occurrences"])
+    if kept:
+        lines.append(
+            "    THE KEY WAS KEPT; WHETHER THE VALUE WAS APPLIED IS A "
+            "DIFFERENT QUESTION AND THIS CHANNEL CANNOT ANSWER IT. f_JT=ZZ "
+            "-- a value the job-type filter has never had -- was kept "
+            "verbatim and was inert on every other channel.")
+    return lines
+
+
 def _verdict(row: dict, negative_matches: bool) -> str:
     """The PASS ONE reading for one candidate.
 
-    **THIS RULE CONSULTS TWO CHANNELS AND THE RUN PRODUCES FOUR.** It is left
+    **THIS RULE CONSULTS TWO CHANNELS AND THE RUN PRODUCES FIVE.** It is left
     deliberately narrow rather than widened in place, because widening it on
     the strength of one surprising run is how an instrument gets tuned until
     it agrees with whoever is holding it. Pass two is the widening, done as a
-    separate measurement with its own controls -- so a zero here now says
-    "silent on these two channels" instead of claiming IGNORED.
+    separate measurement with its own controls.
+
+    **WHAT CHANGED IS THAT IT MAY NO LONGER RETURN A BARE NO-CHANGE.** The
+    aria channel drops every control carrying no aria state, so a zero off it
+    is a fact about the gate until the size of that drop is stated beside it.
+    A no-change reading now carries the count, and a difference on the
+    name-presence channel is reported as a CHANGE these two channels could
+    not see rather than being folded into silence.
     """
     if not negative_matches:
         return "CANNOT TELL (negative control disagreed with baseline)"
@@ -651,6 +888,20 @@ def _verdict(row: dict, negative_matches: bool) -> str:
         return "CANNOT TELL (the load did not complete)"
     if row["cards_delta"] != 0 or row["differing"]:
         return "HONOURED (on the two channels this rule reads)"
+
+    appeared = row.get("names_appeared") or []
+    disappeared = row.get("names_disappeared") or []
+    if appeared or disappeared:
+        return ("CHANGED ON THE NAME-PRESENCE CHANNEL ONLY (%d name(s) "
+                "appeared, %d disappeared) while the aria channel read zero "
+                "-- a control carrying no aria state cannot appear on that "
+                "channel at all" % (len(appeared), len(disappeared)))
+
+    blind = int((row.get("buttons") or {}).get("no_aria_state") or 0)
+    if blind:
+        return ("NO CHANGE on the two channels this rule reads, BUT %d "
+                "control(s) carry no aria state and are invisible to the "
+                "pill channel -- see pass two" % blind)
     return "NO CHANGE on the two channels this rule reads -- see pass two"
 
 
@@ -663,7 +914,10 @@ async def _one_load(page, emit, label, parameter, url, index) -> dict:
         "cards_delta": 0,
         "buttons_delta": 0,
         "differing": [],
-        "survived": None,
+        "names_appeared": [],
+        "names_disappeared": [],
+        "key_kept": None,
+        "key_byte_identical": None,
         "failed": "",
         "buttons": None,
         "walled": False,
@@ -684,20 +938,31 @@ async def _one_load(page, emit, label, parameter, url, index) -> dict:
     served_exactly = landed_url == url
     walled = any(marker in landed_url for marker in WALL_MARKERS)
     on_surface = JOBS_SEARCH_PATH in landed_url
-    survived = bool(parameter) and (parameter in landed_url)
+    # KEY KEPT, COMPARED AFTER PERCENT-DECODING BOTH SIDES. This was
+    # `parameter in landed_url` -- a raw substring test that read `f_JT=F,C`
+    # as NOT surviving because LinkedIn returned the comma as `%2C`. The
+    # reading carries no landed value, only integers and our own literals.
+    kept_reading = _key_kept(parameter, landed_url)
     query_shape = _shape_of(landed_url, url)
 
     row["walled"] = walled
     if parameter:
-        row["survived"] = survived
+        # BOOLEANS, WRITTEN AS COMPARISONS, AND THAT SHAPE IS LOAD-BEARING.
+        # `tests/test_navigation_is_never_derived` collects taint per MODULE
+        # by NAME rather than per scope, so binding the landed-derived
+        # reading itself into `row[...]` taints the name `row` everywhere and
+        # cascades to `print`. A comparison yields a boolean whatever it
+        # compared, which that engine exempts by design -- and the row really
+        # does hold two booleans. The full reading stays local, below.
+        row["key_kept"] = kept_reading["kept"] is True
+        row["key_byte_identical"] = kept_reading["byte_identical"] is True
 
     emit("    landed at the exact address asked for: %s"
          % ("YES" if served_exactly else "NO"))
     emit("    still on %s: %s" % (JOBS_SEARCH_PATH, "YES" if on_surface else "NO"))
     emit("    auth wall: %s" % ("YES" if walled else "no"))
-    if parameter:
-        emit("    %r survived into the landed url verbatim: %s"
-             % (parameter, "YES" if survived else "NO"))
+    for text in _key_kept_lines(parameter, kept_reading):
+        emit("    %s" % text)
     emit("    landed query: %s" % query_shape)
 
     if walled:
@@ -728,10 +993,15 @@ async def _one_load(page, emit, label, parameter, url, index) -> dict:
             ", TRUNCATED" if buttons["truncated"] else ""))
     emit("    of those, carrying an aria state and named: %d"
          % len(buttons["states"]))
-    emit("    dropped: %d carried no aria state, %d nameless, "
-         "%d name >= %d chars, %d unreadable"
-         % (buttons["no_aria_state"], buttons["nameless"],
-            buttons["too_long"], NAME_LIMIT, buttons["unread"]))
+    emit("    invisible to the aria channel: %d carried no aria state "
+         "(this count OVERLAPS the three that follow -- it is every walked "
+         "control lacking aria state, whatever else dropped it)"
+         % buttons["no_aria_state"])
+    emit("    also dropped: %d nameless, %d name >= %d chars, %d unreadable"
+         % (buttons["nameless"], buttons["too_long"], NAME_LIMIT,
+            buttons["unread"]))
+    emit("    NAME-PRESENCE CHANNEL carried: %d distinct named control(s), "
+         "aria state ignored" % len(buttons["names"]))
     if buttons["failed"]:
         emit("    BUTTON WALK FAILED: %s" % buttons["failed"])
     return row
@@ -745,15 +1015,34 @@ def _compare_to_baseline(rows: list[dict], row: dict, emit) -> None:
     if base["buttons"] and row["buttons"]:
         row["buttons_delta"] = row["buttons"]["total"] - base["buttons"]["total"]
     row["differing"] = _differing_names(base["buttons"] or {}, row["buttons"] or {})
+    presence = _name_presence_delta(base["buttons"] or {}, row["buttons"] or {})
+    row["names_appeared"] = presence["appeared"]
+    row["names_disappeared"] = presence["disappeared"]
+
     emit("    card delta vs BASELINE: %+d" % row["cards_delta"])
     emit("    button delta vs BASELINE: %+d" % row["buttons_delta"])
-    emit("    pills whose aria state differs from BASELINE: %d"
+
+    emit("    ARIA CHANNEL -- pills whose aria state differs from BASELINE: %d"
          % len(row["differing"]))
+    if not row["differing"]:
+        emit("        %s" % _aria_absence(row["buttons"] or {}))
     for name in row["differing"][:MAX_NAMED_IN_CELL]:
         left = sorted((base["buttons"] or {}).get("states", {}).get(name, ()))
         right = sorted((row["buttons"] or {}).get("states", {}).get(name, ()))
         emit("        %-40s baseline=%s  here=%s"
              % (name, left or "ABSENT", right or "ABSENT"))
+
+    # THE SECOND CHANNEL, REPORTED SEPARATELY AND NEVER MERGED INTO THE
+    # FIRST. This is where a control carrying no aria state -- `Reset
+    # selected Job type`, the one that evidences f_JT applying -- can appear
+    # at all.
+    emit("    NAME-PRESENCE CHANNEL -- names appeared: %d, disappeared: %d "
+         "(aria state ignored; this channel sees every named control)"
+         % (len(presence["appeared"]), len(presence["disappeared"])))
+    for name in presence["appeared"][:MAX_NAMED_IN_CELL]:
+        emit("        APPEARED     %s" % name)
+    for name in presence["disappeared"][:MAX_NAMED_IN_CELL]:
+        emit("        DISAPPEARED  %s" % name)
 
 
 async def _pass_one(page, emit, first_overall) -> tuple:
@@ -897,9 +1186,16 @@ def _jt_reading(rows: list[dict]) -> list[str]:
 
     The decision rests on ONE comparison, and it is not ``f_JT=F`` against
     baseline. It is ``f_JT=ZZ`` -- a value the filter has never had -- against
-    ``f_JT=F``. Survival alone cannot separate "LinkedIn understood f_JT" from
+    ``f_JT=F``. KEY KEPT alone cannot separate "LinkedIn understood f_JT" from
     "LinkedIn keeps anything spelled f_something", and only a value-level
-    control can.
+    control can. **THE ONE HONOURED THIS FILE STILL PRINTS IS PRINTED HERE,
+    AND IT RESTS ON THAT CONTROL RATHER THAN ON KEY SURVIVAL** -- the key
+    being kept is a precondition it states separately, never the evidence.
+
+    ``f_JT=F,C`` IS REPORTED AS TWO QUESTIONS BECAUSE IT IS TWO. Whether the
+    key was kept is now settled (it was; an earlier run said otherwise only
+    because the comma came back percent-encoded). Whether BOTH values applied
+    is NOT settled and is not settleable from these loads.
     """
     out: list[str] = []
     by_parameter = {row["parameter"]: row for row in rows}
@@ -910,30 +1206,85 @@ def _jt_reading(rows: list[dict]) -> list[str]:
     if full.get("failed") or control.get("failed"):
         return ["CANNOT TELL -- one of the two decisive loads did not complete."]
 
-    kept_full = bool(full.get("survived"))
-    kept_control = bool(control.get("survived"))
+    kept_full = bool(full.get("key_kept"))
+    kept_control = bool(control.get("key_kept"))
     same_cards = full["cards_delta"] == control["cards_delta"]
     same_buttons = full["buttons_delta"] == control["buttons_delta"]
     same_pills = sorted(full["differing"]) == sorted(control["differing"])
     identical = same_cards and same_buttons and same_pills
 
-    out.append("f_JT=F  survived verbatim: %s" % ("YES" if kept_full else "NO"))
-    out.append("f_JT=ZZ survived verbatim: %s" % ("YES" if kept_control else "NO"))
+    out.append("f_JT=F  KEY KEPT (after decoding): %s"
+               % ("YES" if kept_full else "NO"))
+    out.append("f_JT=ZZ KEY KEPT (after decoding): %s"
+               % ("YES" if kept_control else "NO"))
+    out.append("    -- KEY KEPT means LinkedIn RECOGNISED THE KEY. It is not")
+    out.append("       evidence the VALUE was applied, which is exactly why")
+    out.append("       the f_JT=ZZ control below decides and this line does")
+    out.append("       not.")
     out.append("f_JT=ZZ vs f_JT=F -- cards same: %s, buttons same: %s, "
                "pills same: %s" % (same_cards, same_buttons, same_pills))
 
     if kept_full and not identical:
-        out.append("VERDICT: HONOURED. The name survives AND the value-level")
-        out.append("control behaves differently from a real value, so the")
-        out.append("survival channel is reading the PARAMETER, not the prefix.")
+        out.append("VERDICT: HONOURED -- AND NOT ON THE KEY-KEPT CHANNEL.")
+        out.append("The key being kept is a precondition, stated above. THE")
+        out.append("EVIDENCE IS THE VALUE-LEVEL CONTROL: f_JT=ZZ behaves")
+        out.append("differently from a real value, so what separates them is")
+        out.append("the VALUE and not the f_ prefix. Key survival alone would")
+        out.append("not support this word and does not carry it.")
     elif kept_control and identical:
         out.append("VERDICT: DISBELIEVED. f_JT=ZZ is kept and looks identical")
         out.append("to f_JT=F, so LinkedIn keeps any f_-prefixed pair and the")
-        out.append("survival channel is measuring the PREFIX. It proves")
+        out.append("key-kept channel is measuring the PREFIX. It proves")
         out.append("nothing about f_JT.")
     else:
         out.append("VERDICT: CANNOT TELL. Neither pattern was produced --")
         out.append("see the three readings above for which half is missing.")
+
+    out.extend(_jt_multi_value_reading(by_parameter.get("f_JT=F,C"), full))
+    return out
+
+
+def _jt_multi_value_reading(multi: dict, full: dict) -> list[str]:
+    """``f_JT=F,C`` -- TWO QUESTIONS, ANSWERED SEPARATELY AND BOTH SAID OUT.
+
+    **FIXING THE KEY-KEPT COMPARISON SETTLED THE ENCODING AND NOTHING ELSE,
+    AND THIS FUNCTION EXISTS SO THAT CANNOT BE MISREAD.** The old raw
+    substring test reported ``f_JT=F,C`` as not surviving purely because
+    LinkedIn returned ``f_JT=F%2CC``; normalising the comparison corrects a
+    FALSE NEGATIVE about the key. It says nothing whatever about whether BOTH
+    values were applied, and a reader who saw only a NO become a YES would
+    reasonably assume it did.
+
+    THE SECOND QUESTION STAYS CANNOT TELL. The button delta for two values was
+    identical to single-value ``f_JT=F``, which does not separate "both
+    applied" from "only the first applied" -- and no control in this pass can,
+    because the reading that would is a per-value control taken on the same
+    load, which this probe does not take.
+    """
+    if not multi or multi.get("failed"):
+        return ["", "f_JT=F,C -- not loaded, or its load did not complete."]
+
+    out = ["", "f_JT=F,C -- TWO QUESTIONS, ANSWERED SEPARATELY:"]
+    out.append("  (1) KEY KEPT: %s. Compared after percent-decoding both"
+               % ("YES" if multi.get("key_kept") else "NO"))
+    out.append("      sides; the landed value %s byte-identical to the"
+               % ("IS" if multi.get("key_byte_identical") else "IS NOT"))
+    out.append("      literal this file asked for.")
+    out.append("      AN EARLIER RUN READ THIS AS 'NO' PURELY BECAUSE THE")
+    out.append("      COMMA CAME BACK PERCENT-ENCODED. That was a false")
+    out.append("      negative from a raw substring test, and correcting it")
+    out.append("      SETTLED THE ENCODING AND NOTHING ELSE.")
+    out.append("  (2) DID BOTH VALUES APPLY: CANNOT TELL, and it stays")
+    out.append("      CANNOT TELL. Its button delta (%+d) is %s single-value"
+               % (multi.get("buttons_delta", 0),
+                  "IDENTICAL TO"
+                  if multi.get("buttons_delta") == full.get("buttons_delta")
+                  else "DIFFERENT FROM"))
+    out.append("      f_JT=F (%+d), which does not separate 'both applied'"
+               % full.get("buttons_delta", 0))
+    out.append("      from 'only the first applied'. NO CONTROL IN THIS PASS")
+    out.append("      SEPARATES THEM: the reading that would is a per-value")
+    out.append("      control on the same load, and this probe takes none.")
     return out
 
 
@@ -993,7 +1344,8 @@ async def main() -> None:
         delta = "n/a" if index == BASELINE_INDEX else "%+d" % row["cards_delta"]
         emit("    %-22s %-14s %6s %7s  %s"
              % (row["label"][:22], row["parameter"][:14], cards, delta,
-                "(baseline)" if index == BASELINE_INDEX else _cell(row["differing"])))
+                "(baseline)" if index == BASELINE_INDEX
+                else _cell(row["differing"], row["buttons"] or {})))
     if len(p1_rows) < len(LOADS):
         emit("    %d load(s) NOT TAKEN -- %s"
              % (len(LOADS) - len(p1_rows), p1_stopped or "stopped"))
@@ -1010,19 +1362,19 @@ async def main() -> None:
     emit()
     emit("=== PASS TWO TABLE")
     emit("    %-22s %-12s %8s %8s %8s %6s  %s"
-         % ("LOAD", "PARAMETER", "SURVIVED", "BUTTONS", "B-DELTA", "CARDS",
+         % ("LOAD", "PARAMETER", "KEY KEPT", "BUTTONS", "B-DELTA", "CARDS",
             "JT-MATCHED CONTROLS"))
     for index, row in enumerate(p2_rows):
         buttons = row["buttons"] or {}
-        survived = ("n/a" if row["survived"] is None
-                    else ("YES" if row["survived"] else "NO"))
+        kept = ("n/a" if row["key_kept"] is None
+                else ("YES" if row["key_kept"] else "NO"))
         hits = buttons.get("needle_hits") or []
         emit("    %-22s %-12s %8s %8s %8s %6s  %s"
-             % (row["label"][:22], row["parameter"][:12], survived,
+             % (row["label"][:22], row["parameter"][:12], kept,
                 buttons.get("total", "n/a"),
                 "n/a" if index == BASELINE_INDEX else "%+d" % row["buttons_delta"],
                 row["cards"] if row["cards"] >= 0 else "n/a",
-                "; ".join(name for name, _s in hits) or "(none)"))
+                "; ".join(name for name, _s in hits) or "(no needle match)"))
     if len(p2_rows) < len(PASS2_LOADS):
         emit("    %d load(s) NOT TAKEN -- %s"
              % (len(PASS2_LOADS) - len(p2_rows), p2_stopped or "stopped"))
