@@ -179,7 +179,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote_plus, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -412,7 +412,25 @@ def _redact(url: str) -> str:
             # Shaped even so. The allowlist says the KEY is safe to read a
             # value out of; the shaper is the second layer, and two layers is
             # what this package does with a string it is about to publish.
-            rendered.append("%s=%s" % (key, shape.census_shape(value)))
+            shaped = shape.census_shape(value)
+            if shaped == shape.CENSUS_OPAQUE:
+                # PERCENT-ENCODING IS NOT AN IDENTITY, BUT IT CAN CARRY ONE.
+                # `%` is outside `shape._CENSUS_SAFE_CHARS`, so any encoded
+                # value goes opaque -- which would blind this probe on exactly
+                # the row it exists to read, since LinkedIn may return
+                # `f_JT=F%2CC` for the comma-joined address.
+                #
+                # DECODE FIRST, THEN RESHAPE. Passing the encoded text through
+                # a wider CHARSET would be the wrong repair: `%75%72%6E:...`
+                # is a urn wearing a costume, and a charset gate cannot see
+                # it. Decoding removes the costume and hands the shaper the
+                # string it was built to judge, so the urn rule, the member
+                # path rule and the digit-run rule all get their say.
+                decoded = shape.census_shape(unquote_plus(value))
+                shaped = (decoded + " (percent-encoded)"
+                          if decoded != shape.CENSUS_OPAQUE
+                          else "<opaque %d chars>" % len(value))
+            rendered.append("%s=%s" % (key, shaped))
         else:
             rendered.append(
                 "%s=<withheld %d chars>"

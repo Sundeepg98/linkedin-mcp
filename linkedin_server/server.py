@@ -2066,20 +2066,41 @@ _EXPERIENCE = {
 #: Employment type. THE SAME SHAPE AS :data:`_EXPERIENCE` -- a set of values
 #: comma-joined into one parameter.
 #:
-#: **ITS EVIDENCE IS WEAKER THAN ITS FOUR NEIGHBOURS' AND SAYS SO.** The same
-#: seven-load probe that flipped a named pill for each entry in
-#: :data:`_BOOLEAN_FILTERS` moved NO pill for ``f_JT``. What it did show is
-#: the second channel: LinkedIn STRIPPED the unknown ``f_ZZQQX`` from the
-#: address it landed on and KEPT ``f_JT=F``, along with all four booleans --
-#: a 1-against-5 reading with its own control.
+#: **MEASURED WITH A VALUE-LEVEL CONTROL, which is a stronger instrument than
+#: the one its four neighbours got.** The first pass flipped a named pill for
+#: every entry in :data:`_BOOLEAN_FILTERS` and moved NO pill for ``f_JT``,
+#: which looked like a negative and was not one: the job-type control is a
+#: dropdown, so it has no per-value pill to flip, and a channel that cannot
+#: see a thing is not evidence the thing is absent.
 #:
-#: That is one channel rather than two, and the honest reading of one channel
-#: is that ``f_JT`` is CARRIED, not that it FILTERS. The difference matters:
-#: a parameter LinkedIn keeps in the url and ignores in the query returns an
-#: unfiltered page that looks filtered. A value-level control -- does
-#: ``f_JT=ZZ`` behave differently from ``f_JT=F`` -- is the measurement that
-#: would settle it, and until it is taken this table is believed on one
-#: channel and the other four are measured on two.
+#: The second pass asked the question the first could not. Six loads, one
+#: session, three seconds apart:
+#:
+#:     f_JT=F     kept    76 buttons (+5)   draws 'Reset selected Job type'
+#:     f_JT=C     kept    79 buttons (+8)   draws 'Reset selected Job type'
+#:     f_JT=ZZ    kept    71 buttons (+0)   draws NOTHING -- identical to
+#:                                          BASELINE on every channel read
+#:
+#: **THAT IS THE CONTROL THAT SETTLES IT.** A real value makes LinkedIn draw a
+#: control offering to UNDO the filter; a made-up value makes it draw nothing
+#: at all. So LinkedIn is reading the VALUE and not merely keeping any
+#: ``f_``-prefixed parameter it is handed -- which was the live alternative,
+#: and the reason the survival channel alone was not enough.
+#:
+#: **ONE THING IS STILL OPEN AND IT IS THE MULTI-VALUE FORM.** ``f_JT=F,C``
+#: reached the page with its comma percent-encoded, and drew 76 buttons and
+#: one matched control -- the same as ``f_JT=F`` ALONE, where ``f_JT=C`` alone
+#: drew 79 and two. That is consistent with the second value being dropped and
+#: also with ordinary render drift, and the channel that would separate them
+#: -- comparing the RESULT SETS -- is unavailable, because the job-card
+#: harvest returned 7 on all six loads including baseline (9 anchors on the
+#: page match ``/jobs/view/`` and ``harvest_linked_cards`` returns 7; that is
+#: a separate defect, recorded rather than fixed here).
+#:
+#: So: comma-joining is what ships, because it is the shape ``f_E`` already
+#: ships and LinkedIn keeps the parameter either way -- and a caller asking
+#: for two job types has NOT been shown to get both. Said here rather than
+#: discovered later.
 _JOB_TYPE = {
     "full_time": "F",
     "part_time": "P",
