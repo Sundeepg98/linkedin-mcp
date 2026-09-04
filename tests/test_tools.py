@@ -1162,7 +1162,12 @@ async def test_both_profile_view_pages_failing_is_reported_as_a_failure(drive):
 # 6. Search argument validation, and the url it builds
 # ---------------------------------------------------------------------------
 
-BAD_SEARCH_ARGS = {
+#: DELIBERATELY WRONG VALUES, all of them strings, unpacked into the tool.
+#: Annotated `dict[str, Any]` for the reason on the boolean cases below: the
+#: literal infers as `dict[str, str]`, a checker cannot tell which keyword
+#: each unpacking fills, and it therefore reports a `str` reaching `start`
+#: and `limit`, which are `int` and which no row here ever sets.
+BAD_SEARCH_ARGS: dict[str, dict[str, Any]] = {
     "empty_keywords": {"keywords": ""},
     "whitespace_keywords": {"keywords": "   "},
     "unknown_remote": {"keywords": "node.js", "remote": "anywhere"},
@@ -1331,8 +1336,17 @@ async def test_a_checkbox_filter_emits_its_parameter_only_when_it_is_on(
     # first draft of this test read the ON url as the OFF url and passed
     # itself while asserting nothing. Indexing 0 and 1 off one install says
     # what is actually meant: two navigations happened, in this order.
-    await linkedin_search_jobs(keywords="node.js engineer", **{argument: True})
-    await linkedin_search_jobs(keywords="node.js engineer", **{argument: False})
+    # TYPED `dict[str, Any]` SO A CHECKER STOPS GUESSING. Without the
+    # annotation these literals infer as `dict[str, bool]`, and a type checker
+    # cannot know WHICH keyword the unpacking will fill -- so it reports a
+    # bool reaching `location`, `remote`, `date_posted`, `job_type` and
+    # `sort_by`, none of which happens. Five false positives per call site is
+    # how a checker's output stops being read, which is the same failure as a
+    # test that cannot fail.
+    on_kwargs: dict[str, Any] = {argument: True}
+    off_kwargs: dict[str, Any] = {argument: False}
+    await linkedin_search_jobs(keywords="node.js engineer", **on_kwargs)
+    await linkedin_search_jobs(keywords="node.js engineer", **off_kwargs)
 
     assert len(navigations) == 2, navigations
     on_url, off_url = navigations
