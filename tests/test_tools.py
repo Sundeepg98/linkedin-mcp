@@ -28,6 +28,7 @@ from typing import Any, Optional
 import pytest
 
 from linkedin_server import browser as browser_module
+from linkedin_server import server as server_module
 from linkedin_server import shape
 from linkedin_server.config import (
     DEFAULT_LIMIT,
@@ -1233,7 +1234,25 @@ async def test_an_unfiltered_search_adds_no_filter_parameters(drive):
 
     url = navigations[0]
     assert url == "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
-    for absent in ("f_WT", "f_TPR", "f_E", "sortBy", "start", "location"):
+    for absent in (
+        "f_WT",
+        "f_TPR",
+        "f_E",
+        "sortBy",
+        "start",
+        "location",
+        # THE FIVE ADDED 2026-09-04. This is the assertion that decides
+        # whether a new filter is safe to add at all: an OFF checkbox must
+        # emit NOTHING, never `f_AL=false`. A default that leaked a parameter
+        # would silently narrow every unfiltered search this server runs, and
+        # the equality above is what catches it -- the loop below only names
+        # the suspects.
+        "f_JT",
+        "f_AL",
+        "f_EA",
+        "f_JIYN",
+        "f_FCE",
+    ):
         assert absent not in url
 
 
@@ -1251,9 +1270,174 @@ async def test_the_search_echoes_back_the_query_it_actually_ran(drive):
         "remote": "any",
         "date_posted": "any",
         "experience_level": None,
+        "job_type": None,
+        "easy_apply": False,
+        "under_ten_applicants": False,
+        "in_your_network": False,
+        "fair_chance_employer": False,
         "sort_by": "relevance",
         "start": 50,
     }
+
+
+# ---------------------------------------------------------------------------
+# 6b. The five filters added 2026-09-04, and the table they are driven from
+#
+# `_audit/2026-09-03-linkedin-gap-blockers.md` ranks JOB-SEARCH-PARAMS second
+# of the twelve blockers worth doing and first among the ones needing no
+# ruling: six census rows, one tool, no new surface, no capture, no
+# permission. Five of the six are here. The sixth -- searching several
+# locations at once -- is NOT, and `test_the_tool_says_it_takes_one_location`
+# below is the reason written as a check rather than as a promise.
+#
+# THE PARAMETER SPELLINGS WERE MEASURED, and the negative control is the
+# half that matters: `f_ZZQQX=true` was STRIPPED from the landed url and
+# moved no pill, so "behaves like baseline" is a reading that means IGNORED,
+# and none of these read that way. The evidence sits beside the table it
+# justifies, at `server._BOOLEAN_FILTERS`.
+# ---------------------------------------------------------------------------
+
+#: One row per boolean filter: the argument, the parameter it must emit, and
+#: the accessible name of the LinkedIn control the live probe watched change.
+#: The third column is not decoration -- it is what lets a future reader check
+#: the claim against the page instead of against this file.
+BOOLEAN_FILTER_CASES = (
+    ("easy_apply", "f_AL", "LinkedIn Apply filter."),
+    ("under_ten_applicants", "f_EA", "Under 10 applicants filter."),
+    ("in_your_network", "f_JIYN", "In your network filter."),
+    ("fair_chance_employer", "f_FCE", "Fair Chance Employer filter."),
+)
+
+
+@pytest.mark.parametrize(
+    "argument,parameter", [(a, p) for a, p, _ in BOOLEAN_FILTER_CASES]
+)
+async def test_a_checkbox_filter_emits_its_parameter_only_when_it_is_on(
+    drive, argument, parameter
+):
+    """On emits `<param>=true`; off emits nothing at all.
+
+    BOTH DIRECTIONS IN ONE TEST ON PURPOSE. A test that only checked the ON
+    case would pass just as well against code that emitted the parameter
+    unconditionally -- which is the defect that would quietly filter every
+    search in the package.
+    """
+    page = FakePage(evaluate_result=[SEARCH_CARD])
+    navigations = drive(page)
+
+    await linkedin_search_jobs(keywords="node.js engineer", **{argument: True})
+    on_url = navigations[0]
+
+    page_off = FakePage(evaluate_result=[SEARCH_CARD])
+    off_navigations = drive(page_off)
+    await linkedin_search_jobs(keywords="node.js engineer", **{argument: False})
+    off_url = off_navigations[0]
+
+    assert f"{parameter}=true" in on_url, on_url
+    assert parameter not in off_url, off_url
+
+
+async def test_the_boolean_table_and_the_signature_cannot_drift_apart():
+    """The table's argument names ARE the tool's arguments, checked by AST.
+
+    ``linkedin_search_jobs`` binds the four flags into a dict and reads
+    ``server._BOOLEAN_FILTERS`` to decide which parameter each one emits. If a
+    name in the table stopped matching an argument, the dict lookup would
+    raise -- but only on the call that used it, at runtime, in front of the
+    operator. This catches it at import time instead.
+
+    DERIVED FROM THE SIGNATURE, NOT FROM A LIST WRITTEN HERE. A hand-kept
+    copy of the argument names would be a third place to drift, and the point
+    of the check is that there are only two.
+    """
+    import ast
+    import pathlib
+
+    source = pathlib.Path(server_module.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name == "linkedin_search_jobs"
+    )
+    arguments = function.args
+    defaults = dict(
+        zip(
+            [a.arg for a in arguments.args][-len(arguments.defaults) :],
+            arguments.defaults,
+        )
+    )
+    boolean_arguments = {
+        name
+        for name, default in defaults.items()
+        if isinstance(default, ast.Constant) and default.value is False
+    }
+
+    assert boolean_arguments == {a for a, _ in server_module._BOOLEAN_FILTERS}, (
+        "every False-defaulting argument of linkedin_search_jobs must appear "
+        "in _BOOLEAN_FILTERS, and nothing else may. Found %r against a table "
+        "of %r" % (sorted(boolean_arguments), sorted(server_module._BOOLEAN_FILTERS))
+    )
+
+
+async def test_several_job_types_become_one_comma_joined_parameter(drive):
+    """The same shape as `f_E`, because LinkedIn's control is a multi-select."""
+    page = FakePage(evaluate_result=[SEARCH_CARD])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(
+        keywords="node.js engineer", job_type="full_time, contract"
+    )
+
+    assert "error" not in result, result
+    assert "f_JT=F%2CC" in navigations[0], navigations[0]
+    assert result["query"]["job_type"] == ["full_time", "contract"]
+
+
+async def test_an_unknown_job_type_names_the_values_it_actually_got(drive):
+    """A refusal has to say what it SAW, not only that it did not match.
+
+    ``job_type`` is comma-joined, so "unknown job_type" on its own leaves the
+    caller to work out which of four values was the bad one. The rejected
+    values are named back, and so is the accepted set.
+    """
+    page = FakePage(evaluate_result=[SEARCH_CARD])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(
+        keywords="node.js engineer", job_type="full_time, freelance, contract"
+    )
+
+    assert result["error"] == "bad_argument", result
+    assert "freelance" in result["message"], result["message"]
+    assert "full_time" in result["message"], "the accepted set has to be named"
+    assert "contract" not in result["message"].split("choose from")[0], (
+        "only the value that failed belongs in the complaint"
+    )
+    assert navigations == [], "a rejected argument must not cost a page load"
+
+
+async def test_the_tool_says_it_takes_one_location(drive):
+    """Census row J 151 is NOT built, and the docstring has to admit it.
+
+    LinkedIn's own search accepts several locations at once. This tool takes
+    one string, and the blockers ledger costed the gap as pure parameter work
+    -- which is true of the ARGUMENT and false of the URL: how LinkedIn spells
+    a second location has never been measured here, and the ways it might are
+    not interchangeable. A guessed encoding fails SILENTLY, returning results
+    for somewhere else, so the capability is left out and said out loud.
+
+    THIS TEST IS THE PART THAT CANNOT ROT. A note in a docstring saying "not
+    built yet" survives the thing being built; a test that reads the docstring
+    fails the moment the argument becomes a list and nobody updated the prose.
+    """
+    text = (linkedin_search_jobs.__doc__ or "").lower()
+    assert "one location" in text
+    assert "measured" in text, (
+        "the reason has to be the reason -- not measured -- rather than a "
+        "bare 'not supported'"
+    )
 
 
 # ---------------------------------------------------------------------------
