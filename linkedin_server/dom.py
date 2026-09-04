@@ -6993,15 +6993,43 @@ async def read_messaging_badge(page: Any) -> dict[str, Any]:
 #: and the reader below refuses unless exactly one resolves.
 INVITATION_BADGE_TAIL = "new notification"
 
+#: THE HREF HALF OF THE AIM, AND THE TRAILING SLASH IS DELIBERATELY ABSENT.
+#:
+#: It was PRESENT until 2026-09-04 and the aim matched nothing on the live
+#: feed. Measured rather than reasoned about -- the two network controls the
+#: nav actually draws:
+#:
+#:     a  aria-label with a count   href="https://www.linkedin.com/mynetwork"
+#:     a  no aria-label at all      href=".../mynetwork/network-manager/newsletters/"
+#:
+#: **The badged one has NO trailing slash and the unbadged one does.** So the
+#: old aim resolved zero badge controls while reporting one mynetwork link --
+#: it had found the newsletters link and rejected it for carrying no label.
+#: The refusal said exactly that (``mynetwork_links=1``,
+#: ``links_carrying_a_count=0``), which is the only reason this was a
+#: five-minute diagnosis instead of a wrong conclusion: a bare "zero matched"
+#: would have read as "he has no pending invitations", and the badge was
+#: reading ONE at the time.
+#:
+#: SAME CLASS AS THE ``&amp;`` TRAP in tests/test_connections_reader.py --
+#: an instrument matching a spelling the page does not use, failing CLOSED and
+#: therefore looking like an absence rather than a miss.
+INVITATION_BADGE_HREF = "/mynetwork"
+
 
 def invitation_badge_selector() -> str:
     """The mynetwork nav control that carries a count. NO ARGUMENT.
 
     Both halves are constants measured on the live nav, so this takes nothing
     from a caller and cannot be aimed at a person: there is no name in it.
+
+    The href needle matches the badged control AND its sub-pages, and the
+    LABEL half is what narrows it back to one: of the two network controls on
+    a live feed, only the badge carries a count.
     """
     return (
-        'a[href*="/mynetwork/"][aria-label*="' + INVITATION_BADGE_TAIL + '"]'
+        'a[href*="' + INVITATION_BADGE_HREF + '"]'
+        '[aria-label*="' + INVITATION_BADGE_TAIL + '"]'
     )
 
 
@@ -7047,7 +7075,11 @@ async def read_invitation_badge(page: Any) -> dict[str, Any]:
         "error": None,
     }
     try:
-        out["links"] = int(await page.locator('a[href*="/mynetwork/"]').count())
+        out["links"] = int(
+            await page.locator(
+                'a[href*="' + INVITATION_BADGE_HREF + '"]'
+            ).count()
+        )
         badges = page.locator(invitation_badge_selector())
         out["badge_links"] = int(await badges.count())
     except Exception as exc:  # noqa: BLE001 - reported, never raised
@@ -8151,6 +8183,13 @@ PROFILE_DETAIL_ENTRY_HREF: dict[str, str] = {
 PROFILE_DETAIL_MAX_ENTRIES = 200
 PROFILE_DETAIL_MAX_CHARS = 300
 
+#: Anything an endorsement line could be spelled as. DELIBERATELY WIDER THAN
+#: ``N endorsements``: the question is whether LinkedIn draws such a line AT
+#: ALL, so a pattern narrow enough to miss ``Endorsed by 3 people`` would
+#: answer a different question and answer it wrongly. It matches the stem, so
+#: it catches every inflection and cannot be defeated by a rewording.
+_ENDORSEMENT = re.compile(r"endors", re.I)
+
 
 async def read_profile_detail_entries(
     page: Any, *, section: str
@@ -8208,6 +8247,7 @@ async def read_profile_detail_entries(
         max_chars=PROFILE_DETAIL_MAX_CHARS,
     )
     entries: list[str] = []
+    evidence: list[dict[str, Any]] = []
     for record in records:
         lines = shape.content_lines(record.get("text", ""))
         if not lines:
@@ -8215,18 +8255,97 @@ async def read_profile_detail_entries(
         name = shape.trim(lines[0], 120)
         if name and name not in entries:
             entries.append(name)
+        # THE REST OF THE CARD, WHICH THIS READER USED TO THROW AWAY.
+        #
+        # `harvest_linked_cards` already returns every line of every card;
+        # this function kept line 0 and dropped the remainder, so the page was
+        # read and the reading discarded. Measured live 2026-09-04: 9 of his
+        # 20 skill cards carry a line after the name -- where a skill was
+        # used, and how many places used it -- and no tool has ever reported
+        # one.
+        #
+        # THEY DO NOT REJOIN `entries`, AND THAT IS A RULE RATHER THAN A
+        # PREFERENCE. `tests/test_sdui_surfaces_fixture.py::
+        # test_a_skill_keeps_only_its_name_not_its_evidence_lines` exists
+        # because these lines WERE once returned as skills -- "2 experiences
+        # at ..." listed as a thing he can do. Structured beside the name is
+        # the shape that test permits; flattened into the list is the defect
+        # it was written for.
+        rest = [shape.trim(line, PROFILE_DETAIL_MAX_CHARS) for line in lines[1:]]
+        rest = [line for line in rest if line]
+        if name and rest:
+            evidence.append({"name": name, "lines": rest})
 
     body = await read_main_text(page)
     out: dict[str, Any] = {
         "section": key,
         "count": len(records),
         "entries": entries,
+        "evidence": evidence,
         "observed": {
             "cards": len(records),
             "cards_with_text": len(entries),
+            "cards_with_evidence": len(evidence),
             "main_chars": len(body),
         },
     }
+    if key == "skills":
+        # CENSUS ROW N 118, ANSWERED BY MEASUREMENT INSTEAD OF BY A PARSER.
+        #
+        # The row asks for the endorsement count on each of his own skills,
+        # and two audits costed it at zero extra page loads because this page
+        # is already open. It is not a parser that is missing.
+        # **LINKEDIN DRAWS NO ENDORSEMENT LINE HERE.** Measured live
+        # 2026-09-04: 20 skill cards, 2,359 characters of `main`, and ZERO
+        # occurrences of "endors" anywhere on the page -- cards or body. The
+        # committed fixture agrees, and a 2026-08-23 audit had already found
+        # the same thing in it and been read past twice since.
+        #
+        # THIS IS A LIVE READING AND NOT A CONSTANT, which is the whole point.
+        # Two worlds fit the evidence -- LinkedIn draws the line only when the
+        # count is non-zero and his is zero, or LinkedIn stopped drawing it --
+        # and nothing on his own account can separate them. So the reader
+        # takes the measurement every time rather than hard-coding the answer:
+        # the day a count appears, this reports it instead of continuing to
+        # deny it, and no-one has to remember to come back.
+        endorsement_lines = [
+            shape.trim(line, PROFILE_DETAIL_MAX_CHARS)
+            for record in records
+            for line in shape.content_lines(record.get("text", ""))
+            if _ENDORSEMENT.search(line)
+        ]
+        out["endorsements"] = {
+            "drawn": bool(endorsement_lines),
+            "lines": endorsement_lines,
+            # WHAT IT DID SEE, not only what it failed to match. A "no" with
+            # no denominator is indistinguishable from a page that never
+            # loaded, and this repository has paid for that confusion twice.
+            "looked_at": {
+                "cards": len(records),
+                "card_lines": sum(
+                    len(shape.content_lines(record.get("text", "")))
+                    for record in records
+                ),
+                "main_chars": len(body),
+                "main_mentions_endorsement": bool(_ENDORSEMENT.search(body)),
+            },
+        }
+        if not endorsement_lines:
+            out["endorsements"]["why"] = (
+                "LinkedIn drew no endorsement count on this page. That is a "
+                "reading of what rendered, not a limit of this reader: it "
+                "searched %d card line(s) across %d card(s) and %d characters "
+                "of main text and found no mention of one. Two things produce "
+                "that and nothing on your own profile can tell them apart -- "
+                "LinkedIn draws the line only for a skill someone has "
+                "endorsed, or LinkedIn no longer draws it at all."
+                % (
+                    out["endorsements"]["looked_at"]["card_lines"],
+                    len(records),
+                    len(body),
+                )
+            )
+
     if records and len(entries) != len(records):
         # THE TWO NUMBERS DISAGREE, SO SAY WHY BEFORE A READER HAS TO GUESS.
         #

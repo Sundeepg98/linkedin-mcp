@@ -41,11 +41,17 @@
 <header>
   <nav aria-label="Primary">
     <a href="/feed/" aria-label="Home, 1 new notification">Home</a>
-    <!-- THE BADGE. Prefix invented; the tail is the measured part. -->
-    <a href="/mynetwork/" aria-label="Nav, 3 new notifications">My Network</a>
-    <!-- A SECOND /mynetwork/ LINK WITH NO COUNT. Taking .first would be a
+    <!-- THE BADGE. Prefix invented; the tail is the measured part. THE HREF
+         IS THE LIVE SPELLING, measured on the feed 2026-09-04: absolute, and
+         WITH NO TRAILING SLASH. It is written that way because the fixture
+         carried "/mynetwork/" until the live nav refuted it, and the aim that
+         required the slash resolved zero controls while a real badge read 1. -->
+    <a href="https://www.linkedin.com/mynetwork" aria-label="Nav, 3 new notifications">My Network</a>
+    <!-- A SECOND NETWORK LINK WITH NO COUNT, and on the live feed this is the
+         one WITH the trailing slash -- which is why the old aim found this and
+         rejected it, then reported the badge absent. Taking .first would be a
          choice by position between two controls that are not the same thing. -->
-    <a href="/mynetwork/grow/">Grow</a>
+    <a href="https://www.linkedin.com/mynetwork/network-manager/newsletters/">Newsletters</a>
     <a href="/messaging/" aria-label="Messaging, 0 new notifications">Messaging</a>
     <!-- HIS OWN PROFILE, drawn in the nav on every signed-in page. It is a
          /in/ anchor and it is not a connection; profile_slug_from drops the

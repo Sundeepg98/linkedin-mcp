@@ -207,9 +207,14 @@ def test_the_fixture_draws_the_shapes_these_tests_assume():
     # because every cross-check in this file reads the file rather than the
     # page and would make the same mistake.
     assert len(re.findall(RECIPIENT_IN_SOURCE, html)) == MESSAGE_CONTROLS
-    # Two links to /mynetwork/ and exactly one of them carries a count. That
-    # pair is what makes taking .first a choice by position.
-    assert len(re.findall(r'href="/mynetwork/', html)) == 2
+    # TWO NETWORK CONTROLS, AND THE SPELLINGS ARE THE LIVE ONES. Measured on
+    # the feed 2026-09-04: the BADGED control's href has no trailing slash and
+    # the unbadged one does. Written this way round because the fixture had it
+    # backwards and the live nav refuted it -- see
+    # test_the_pre_fix_badge_aim_finds_nothing_on_the_live_spelling.
+    assert len(re.findall(r'href="[^"]*/mynetwork', html)) == 2
+    assert 'href="https://www.linkedin.com/mynetwork"' in html
+    assert len(re.findall(r'href="[^"]*/mynetwork/', html)) == 1
     assert html.count(dom.INVITATION_BADGE_TAIL + "s\"") >= 1
     # His own profile is drawn in the nav and is not a connection.
     assert 'href="/in/me/"' in html
@@ -432,23 +437,62 @@ async def test_the_containment_rule_is_what_stops_it_and_the_hop_cap_is_not():
 
 
 @pytest.mark.asyncio
-async def test_the_badge_selector_narrows_two_mynetwork_links_to_one():
+async def test_the_badge_selector_narrows_two_network_controls_to_one():
     """``read_messaging_badge`` beside it takes ``.first``; this may not.
 
-    The page draws a nav badge and a plain link to the same surface, and those
-    two controls are not interchangeable. The aim is the conjunction of the
-    href and the measured label tail, so it resolves to exactly one.
+    The page draws a nav badge and a plain link into the same product, and
+    those two controls are not interchangeable. The aim is the conjunction of
+    the href and the measured label tail, so it resolves to exactly one.
     """
 
     async def run(page):
         return (
-            await page.locator('a[href*="/mynetwork/"]').count(),
+            await page.locator(
+                'a[href*="%s"]' % dom.INVITATION_BADGE_HREF
+            ).count(),
             await page.locator(dom.invitation_badge_selector()).count(),
         )
 
     links, badges = await _open(run)
     assert links == 2
     assert badges == 1
+
+
+@pytest.mark.asyncio
+async def test_the_pre_fix_badge_aim_finds_nothing_on_the_live_spelling():
+    """THE CONTROL FOR THE FIX, and it is the second one this file carries.
+
+    The aim required ``/mynetwork/`` WITH a trailing slash until 2026-09-04.
+    Run against the live feed it resolved ZERO badge controls, while the badge
+    it was looking for read ONE -- because the badged control's href has no
+    trailing slash and the only control that does is a newsletters link
+    carrying no label at all::
+
+        a  aria-label with a count   href="https://www.linkedin.com/mynetwork"
+        a  no aria-label             href=".../mynetwork/network-manager/newsletters/"
+
+    So the old aim is rebuilt here and asserted to find NOTHING on a page
+    drawn the way the live one is. Without this, the fix is a string somebody
+    changed and the reason lives only in a commit message.
+
+    IT FAILED CLOSED, WHICH IS WHY IT MATTERED. A miss that reports zero is
+    indistinguishable from an absence, and "no badge" would have been read as
+    "no pending invitations" -- the wrong answer to the exact question the
+    tool is blocked on. What saved it was the refusal naming what it DID see:
+    ``mynetwork_links=1, links_carrying_a_count=0`` says an element was found
+    and rejected, which no bare zero can say.
+    """
+    pre_fix = 'a[href*="/mynetwork/"][aria-label*="%s"]' % dom.INVITATION_BADGE_TAIL
+
+    async def run(page):
+        return (
+            await page.locator(pre_fix).count(),
+            await page.locator(dom.invitation_badge_selector()).count(),
+        )
+
+    old, new = await _open(run)
+    assert old == 0, "the pre-fix aim now resolves, so this control is stale"
+    assert new == 1
 
 
 @pytest.mark.asyncio
