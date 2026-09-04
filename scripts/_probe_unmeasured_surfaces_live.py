@@ -122,6 +122,21 @@ MESSAGING_URL = f"{BASE_URL}/messaging/"
 #: this account and the blockers are not the size they are recorded as.
 #: `/in/me/details/interests/` is NOT on the allowlist; `/in/me/` is.
 PROFILE_URL = f"{BASE_URL}/in/me/"
+#: HIS OWN INTERESTS PAGE, ADMITTED 2026-09-04 (readonly commit 90bfe21).
+#: THE PRECONDITION SURFACE. `/in/me/` renders the Interests SECTION only
+#: below the fold and this probe does not scroll, which is why the stage-a
+#: reading of it failed its own control. This is the dedicated page, the
+#: sibling of `/in/me/details/skills/` -- already proven to serve 20 cards
+#: through the shipped harvest.
+INTERESTS_URL = f"{BASE_URL}/in/me/details/interests/"
+#: THE CONTROL FOR THE INTERESTS READ. `scripts/_probe_self_details_url.py`
+#: established that this one IS served and that 20 skill cards come back
+#: through the shipped harvest. If skills lands at its own depth and
+#: interests redirects to the profile, the redirect is a fact about the
+#: interests address rather than about `/details/` pages or about the
+#: session. Without it, a redirect is uninterpretable.
+SKILLS_URL = f"{BASE_URL}/in/me/details/skills/"
+EDUCATION_URL = f"{BASE_URL}/in/me/details/education/"
 
 #: THE POSTING. Copied from ``scripts/_probe_free_reads_shapes.py``, where it
 #: was filled in on 2026-09-03 from ``linkedin_saved_jobs`` -- the one row in
@@ -271,11 +286,19 @@ STAGES: dict[str, tuple[str, ...]] = {
     # popup triggers -- agreement that could not be interpreted, because this
     # surface had no control. This stage runs the pill-row control on it.
     "d": ("messaging",),
+    # ONE LOAD, the surface the widening was for.
+    "e": ("interests",),
+    # THE CONTROL PAIR for stage e. Two siblings on the same alternation,
+    # one of them PROVEN served.
+    "f": ("skills", "education"),
 }
 
 URL_OF: dict[str, str] = {
     "feed": FEED_URL,
     "profile": PROFILE_URL,
+    "interests": INTERESTS_URL,
+    "skills": SKILLS_URL,
+    "education": EDUCATION_URL,
     "messaging": MESSAGING_URL,
     "posting": JOB_POSTING_URL,
 }
@@ -388,6 +411,39 @@ async def _report_needles(
                  _count_needle(html, needle), note))
 
 
+async def _report_href_kinds(page: object) -> None:
+    """Tally the census's SHAPED hrefs by entity kind. Counts, never names.
+
+    THIS IS THE PRECONDITION ANSWER. Every record's `href_shape` has been
+    through `shape.census_shape`, which since 2026-09-04 reduces a group, a
+    newsletter and a school to a placeholder exactly as it already did a
+    member and a company. So a tally over those placeholders says HOW MANY of
+    each kind this account carries without naming one of them.
+    """
+    census = await dom.read_surface_census(page)
+    kinds = {
+        "/in/<member>": 0,
+        "/company/<company>": 0,
+        "/groups/<group>": 0,
+        "/newsletters/<newsletter>": 0,
+        "/school/<school>": 0,
+    }
+    other = 0
+    for row in census.get("controls") or []:
+        hs = str(row.get("href_shape") or "")
+        for marker in kinds:
+            if marker in hs:
+                kinds[marker] += 1
+                break
+        else:
+            if hs:
+                other += 1
+    print("    entity kinds among %d shaped controls:" % len(census.get("controls") or []))
+    for marker, n in kinds.items():
+        print("      %-28s %d" % (marker, n))
+    print("      %-28s %d" % ("(other hrefs)", other))
+
+
 async def _report_badge(page: object, when: str) -> None:
     """The messaging nav badge, read off whatever page is already loaded."""
     try:
@@ -437,6 +493,9 @@ async def _read_surface(page: object, surface: str) -> None:
         await _report_needles(page, PROFILE_NEEDLES)
     elif surface == "messaging":
         await _report_needles(page, MESSAGING_NEEDLES)
+    elif surface == "interests":
+        await _report_needles(page, PROFILE_NEEDLES)
+        await _report_href_kinds(page)
 
 
 async def main() -> None:

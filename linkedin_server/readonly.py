@@ -243,12 +243,39 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
         # before it**, because a read that is safe only until he follows
         # a person is not safe.
         #
-        # WHAT IT BUYS, and it is why one word outranks its size: this is
-        # the surface that answers whether he belongs to any group or
-        # attends any event, WITHOUT opening `/groups/` or `/events/` --
-        # the precondition for `GROUPS-SURFACE` (32 census rows),
-        # `EVENTS-SURFACE` (18) and `NEWSLETTER-SURFACE` (12), all three
-        # of which stay closed here.
+        # WHAT IT WAS EXPECTED TO BUY, AND WHAT IT ACTUALLY BOUGHT --
+        # CORRECTED THE SAME DAY, BY THE READ THIS LINE MADE POSSIBLE.
+        #
+        # THE CLAIM: that this surface answers whether he belongs to any
+        # group or attends any event, WITHOUT opening `/groups/` or
+        # `/events/` -- the precondition for `GROUPS-SURFACE` (32 census
+        # rows), `EVENTS-SURFACE` (18) and `NEWSLETTER-SURFACE` (12).
+        #
+        # THE MEASUREMENT: `/in/me/details/interests/` REDIRECTS to the
+        # profile. Requested at path depth 4, landed at depth 2, and
+        # returned 236 controls and 8733 characters of main text --
+        # identical on both counts to a direct read of `/in/me/` taken the
+        # same hour. **The address is admitted and LinkedIn does not serve
+        # it.**
+        #
+        # THE CONTROL, because a lone redirect is uninterpretable: the two
+        # siblings on this very alternation were loaded in the same run.
+        # `skills` landed at depth 4 (84 controls, 2359 chars) and
+        # `education` did not redirect at all (56 controls, 1231 chars).
+        # So the redirect is a fact about THIS address, not about
+        # `/details/` pages and not about the session.
+        #
+        # TWO READINGS SURVIVE and this comment does not pick between them:
+        # LinkedIn may not serve the page at all, or may serve it only when
+        # the section is non-empty. Either way THE PRECONDITION QUESTION IS
+        # STILL OPEN, and whoever picks it up should not re-derive this
+        # route as the cheap answer -- it was tried and it does not serve.
+        #
+        # THE LINE STAYS. It admits a self-owned address that redirects to
+        # another self-owned address already on this list, so it widens
+        # nothing, and it costs nothing if LinkedIn starts serving it. What
+        # is corrected here is the CLAIM, not the permission. All three of
+        # `/groups/`, `/events/` and the newsletter addresses stay closed.
     ),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
