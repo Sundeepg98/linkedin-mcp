@@ -959,3 +959,530 @@ reader left for later, and later not yet arrived.
 document needed and did not have: an allowlist entry that gains a reader
 silently closes census rows, which is how `J 24 26 27 121 122 123` and `N 135`
 moved without anything in `_audit/` saying so until section 2 went looking.
+
+## A13. FOUR BLOCKERS MOVE: MEASURE ENDS AT 23 BLOCKERS / 105 ROWS, NOT THE STATED 22
+
+Four blockers move on evidence from a live wave -- measured verdicts, not
+proposals, recorded here rather than edited into section 3, for the reason A7
+already gives.
+
+**1. `PANEL-NOT-OBSERVED` (rank 8, 3 rows, 2R/1W) -- MEASURE to
+DECIDE-RETIRE.** Rows `J 25 29 30` -- `J 25` ("Why am I seeing this job?"),
+`J 29` (Skills Match insight), `J 30` (add a missing skill from the insight;
+depends on `J 29`) -- the same three rows section 6 already named and left
+open ("nobody knows whether LinkedIn still draws them").
+
+Measured with a known-value CONTROL taken from this document's own section 6
+-- the needles `Show match details` / `Show Premium Insights` / `How you
+match` must read 1/1/0 on a settled posting:
+
+* The control reproduced **1/1/0 on FOUR committed captures** (all confirmed
+  present on disk this pass): `tests/fixtures/job_detail.html`,
+  `job_detail_hydrated.html`, `job_detail_following_hydrated.html`, and the
+  unsanitised `_audit/_probe-job-followed-company-hyd.html`.
+* It reads **0/0/0 on exactly the two captures the fixture table already
+  marks un-hydrated** (`job_detail_following.html`, `job_detail_shell.html`)
+  -- so the control also discriminates settled from half-rendered.
+* It reproduced **1/1/0 LIVE, twice**, on `/jobs/view/<id>` across a full
+  browser stop and restart.
+
+On all four settled captures AND both live reads, every target needle reads
+**0 in visible text and 0 in html**: `Why am I seeing this job`,
+`Why am I seeing this`, `why am i`, `seeing this`, `Skills Match`,
+`skills match your profile`, `of 10 skills match`, `Add skill`. The loosest
+probe, the bare token `skill`, reads **1**, and that one occurrence sits
+inside `<strong>` with `<br>` siblings -- job-description prose, not a panel.
+
+The page carries `aria-expanded="false"` x10 and `aria-expanded="true"` x0,
+and **no aria-label on it mentions matching or skills**. So the panels are
+ABSENT, not collapsed.
+
+Also record: `/jobs/view/<id>` has **EARNED a settled-control baseline of
+193** -- two readings, 193 both times, identical on every structural count,
+across a browser restart. It belongs in `server.CENSUS_SETTLED_CONTROLS`
+(the name is real -- present in `server.py`, `tests/test_surface_census.py`
+and `scripts/_probe_unmeasured_surfaces_live.py`, checked this pass) under a
+`job_posting` key; that edit is not yet made.
+
+**A table cell this pass did not touch:** every DECIDE-RETIRE row in section
+3 carries `ruling: YES` -- all twelve, zero exceptions, checked by reading
+the column down. `PANEL-NOT-OBSERVED` currently carries `ruling: no`. The
+queue move argued above implies that column moves with it; section 3 stays
+unedited, so the table and this amendment disagree on that one cell until
+someone edits it.
+
+**2. `CONVERSATION-OVERFLOW-MENU` (rank 17, 10 rows, 1R/8W/1RW) -- ANSWERED,
+and the cost doubles.** Boundary change needed: **NONE**. `/messaging/` is
+already on the allowlist (machine-verified at HEAD) and
+`linkedin_open_messaging` already performs exactly this one navigation.
+
+THREE readings of `/messaging/`, the third carrying a control:
+
+| | reading 1 | reading 2 | reading 3 |
+|---|---:|---:|---:|
+| controls_read | 73 | 73 | 64 |
+| buttons / links | 42 / 18 | 42 / 18 | 37 / 18 |
+| `[aria-expanded="false"]` | 22 | 22 | 18 |
+| `[aria-haspopup]` | 0 | 0 | 0 |
+| `[role="menu"]` | 0 | 0 | 0 |
+| `[role="menuitem"]` | 0 | 0 | 0 |
+
+THE CONTROL: `dom.MESSAGING_FILTERS` is a closed set of seven pills that
+`dom.py` records as MEASURED to be `<button>`s on the live inbox -- the same
+tuple, and the same six-versus-seven wording split, A9 already flagged. On
+reading 3 all seven appear in VISIBLE main text (Focused 1, Other 2, Unread
+1, Starred 1, Jobs 1, Connections 1, InMail 4). So the render is settled and
+the zeros are readable. Two agreeing readings alone would NOT have been
+enough here -- repeated readings catch variance between readings, and cannot
+by themselves catch a stable wrong state; only a control with a known value
+can, which is why reading 3 carries one.
+
+THE FINDING: on a settled inbox of **1280994 characters of HTML** -- the
+largest DOM of any surface measured that day -- there is not one popup
+trigger and not one menu item in the document. `More options` occurs ONCE in
+1.28 MB of html and ZERO times in visible text; `Overflow menu` zero in both.
+
+THE COMPARISON THAT MAKES IT A FINDING RATHER THAN AN ABSENCE:
+
+| surface | settle evidence | `[aria-haspopup]` | `[role="menu"]` | `[role="menuitem"]` |
+|---|---|---:|---:|---:|
+| `/feed/` | CONSISTENT, 307 read vs 277 baseline | 16 | 6 | 3 |
+| `/jobs/view/<id>` | control fires 1/1/0, twice | 2 | 0 | 0 |
+| `/messaging/` | 7 of 7 filter pills drawn | 0 | 0 | 0 |
+
+**The feed proves this build DOES pre-render menus into the DOM with nothing
+pressed.** So messaging's zero is a fact about messaging, not about the
+instrument.
+
+CONSEQUENCE: the cost is **TWO interactions, not one**. The menu is not
+merely closed -- its TRIGGER is absent from the DOM, so the control must
+first be made to exist (the conversation row reveals it on hover) and only
+then opened. This document costs the unopened-menu class at "one capture
+each"; this member of the class needs a HOVER ruling as well as a press
+ruling, and hovering has never been argued anywhere in the package. Proposed
+queue move: MEASURE -> DECIDE, with the note that the ruling in front of it
+is about hovering, not about the click.
+
+Also: `/messaging/` redirected 1 -> 3 path segments on all three loads --
+LinkedIn auto-opens a conversation, which the August messaging probe
+hypothesised and nobody had watched. The nav badge read
+`new_since_last_visit: 0` before any inbox load, so by this project's own
+rule that a zero cannot separate "consumed nothing" from "there was nothing
+to consume", **no cost is claimed in either direction.**
+
+**A second table cell this pass did not touch:** every DECIDE row in section
+3 also carries `ruling: YES` -- all twelve, zero exceptions.
+`CONVERSATION-OVERFLOW-MENU` currently carries `ruling: no`. Same unedited-
+cell disagreement as item 1, same reason.
+
+**3. `HASHTAG-EXISTENCE` (rank 11, 3 rows, 1R/2W) -- RE-FILE 3 rows to 1.**
+Three independent instruments agree the hashtag-follow surface is not
+present:
+
+1. LinkedIn's own help index (recorded in this document already): source
+   article `a528144` returns HTTP 404, and two independent index queries
+   return no hashtag-following article.
+2. The read boundary at HEAD, machine-verified: `/feed/hashtag/hiring/`,
+   `/feed/hashtag/?keywords=hiring` and
+   `/search/results/content/?keywords=%23hiring` are all REFUSED-NO-PATTERN;
+   `/feed/follows/` is REFUSED-FORBIDDEN on the substring `/follow`.
+3. A live settled `/feed/` -- 307 controls, settle CONSISTENT against the
+   277 baseline, 405872 characters of html -- draws `/feed/hashtag/` 0,
+   `hashtag` 0, `#hiring` 0, `Followed hashtags` 0, in visible text AND in
+   html.
+
+The three rows do not share a blocker:
+
+| row | as published | at HEAD |
+|---|---|---|
+| `N 194` | `HASHTAG-EXISTENCE` | `SEARCH-RESULTS-SURFACE` -- the census's own note names its blocker: "no people search" |
+| `C 11` | `HASHTAG-EXISTENCE` | EXCLUDED-RULED, not GAP -- see below |
+| `C 52` | `HASHTAG-EXISTENCE` | `HASHTAG-EXISTENCE`, unchanged -- the one row the three instruments above actually speak to |
+
+**`C 11` needs precision, because the obvious citation is wrong.** The row
+reads "add a hashtag to a post", and a shipped, AST-asserted invariant
+already forbids the server composing anything into his text -- but **the
+word `hashtag` does NOT appear in `tests/test_typed_bytes.py`** (checked this
+pass, zero hits, case-insensitive). It appears in `linkedin_server/server.py`
+and `linkedin_server/writes.py`, in `publish_post`'s rationale comments -- at
+this pass's re-check, at lines 5486 and 4652 respectively, not the
+5434/4538 first cited. Both files are uncommitted-dirty in this tree right
+now, more so than A8's two-file reading (this tree is running well past
+a dozen touched files across the span of this append), so neither line
+number is a stable HEAD pin and both should be expected to drift again
+before anyone reads this. **What the test enforces is stronger than a
+hashtag rule** -- the typed text is a slice of the GRANT's canonical target,
+so the server never composes what it types; the AST-node form exists because
+the substring form let an appended-hashtag mutation through. The hashtag is
+the WORKED EXAMPLE of the defect, not the subject of the assertion. Reads
+EXCLUDED-RULED rather than GAP.
+
+So `HASHTAG-EXISTENCE` becomes a ONE-ROW blocker. Nothing in the evidence
+above argues its queue changes -- unlike items 1 and 2, no move off MEASURE
+is made for `C 52` here, so it is carried forward MEASURE, at 1 row, unless
+a future pass rules otherwise.
+
+**4. `MATCH-DETAILS-COLLAPSED` (rank 18, 5 rows, 5R, `J 116 117 118 119 120`)
+-- RE-FILE, do not delete.** Section 6 files these as present, COLLAPSED
+behind `Show match details`, queued DECIDE on the ground that "pressing a
+disclosure control is a different permission from reading a render". That
+premise is now measured false.
+
+**Measured on the UNSANITISED capture
+`_audit/_probe-job-followed-company-hyd.html` (its `URN-REMOVED` count is 0,
+so these are LinkedIn's own bytes and not the sanitiser's): `Show match
+details` is NOT a disclosure control.** It is an `<a href>` inside an `<li>`.
+Three such anchors exist on the page, all with the same path and the same
+ten parameter names:
+
+    path:   /preload/guideOverlay/
+    params: interop, query, originalThreadMailbox, conversationUrn,
+            contextUrns, intent, originalIntent, trackingId, customContext,
+            pageContextJobPostingUrns
+
+Their `query` parameter is LinkedIn's own control label -- plain words, no
+identity -- and reads:
+
+    'Show match details'
+    'Create cover letter'
+    'Help me stand out'
+
+**VERIFIED-BY-INSTRUMENT:** the three anchors, the ten parameters, the three
+labels, the tag being `<a>` and not `<button>`.
+
+**DERIVED (strong, not measured):** pressing it invokes a GENERATION product
+rather than expanding a region already on the page. The sibling labels
+settle the family -- "Create cover letter" and "Help me stand out" are
+unambiguously generative -- and `intent` / `originalIntent` / `customContext`
+read as a prompt payload.
+
+CONSEQUENCE: `J 116 117 118 119 120` are not "a render behind a click", so
+the blocker's NAME is wrong and the DECIDE in front of it is a different
+question -- closer to `AI-INTERVIEW-PRODUCT` (14 rows, DECIDE-RETIRE) than to
+the unopened-menu class. Proposed rename: `AI-ASSISTANT-OVERLAY` -- a
+proposal, not a ruling. **The five rows are not deleted** -- they are
+re-filed, and the capability they describe may genuinely not exist as a
+readable panel at all.
+
+Corroborating, from the same wave: `How you match` reads **0 in html on a
+settled live posting, twice**. There is no collapsed panel holding that
+text, which is consistent with the text not existing until something
+generates it.
+
+Also note: `/preload/guideOverlay/` is a sibling of `/preload/sharebox/`,
+already on the allowlist -- so the boundary cost would be one line. The
+boundary is the cheap part; the destination is not.
+
+**THE ARITHMETIC, closed rather than asserted.** Independently re-summed
+before applying any move: section 3's own 25 MEASURE-queue rows
+(`GROUPS-SURFACE` 32, `PANEL-NOT-OBSERVED` 3, `HASHTAG-EXISTENCE` 3,
+`EVENTS-SURFACE` 18, `CONVERSATION-OVERFLOW-MENU` 10, `OPEN-TO-WORK-MODAL`
+11, `INTRO-EDITOR-UNREAD-CONTROLS` 4, `AUDIO-EVENTS-EXISTENCE` 1,
+`NO-URL-AT-ALL` 1, `NOTIFY-COST-UNMEASURED` 1, `CONTACT-INFO-PANEL` 5,
+`OPEN-TO-HIRING-MODAL` 5, `FEED-ITEM-OVERFLOW-MENU` 5,
+`POST-COMMENT-CONTROLS` 4, `ALL-FILTERS-PANEL` 2, `MESSAGE-ADDRESSING` 1,
+`JOBCARD-OVERFLOW-MENU` 2, `THREAD-REPLY-BOX` 2, `PER-MESSAGE-OVERFLOW-MENU`
+2, `PICKER-SURFACES` 2, `POLL-SURFACE` 2, `ADD-SECTION-MENU` 1,
+`MESSAGE-REACTION` 1, `CELEBRATION-COMPOSER` 1, `REPORTING-FLOWS` 1) sum to
+**120**, matching section 4 exactly -- so the base this ledger moves from is
+confirmed, not assumed.
+
+    120   rows in MEASURE at the ranking (25 blockers)
+     -3   PANEL-NOT-OBSERVED, whole blocker, to DECIDE-RETIRE
+    -10   CONVERSATION-OVERFLOW-MENU, whole blocker, to DECIDE (proposed)
+     -2   HASHTAG-EXISTENCE re-filed: N 194 out to SEARCH-RESULTS-SURFACE,
+          C 11 out to EXCLUDED-RULED -- 1 row (C 52) stays in MEASURE
+    ----
+    105   rows in MEASURE
+
+     25   blockers in MEASURE at the ranking
+     -1   PANEL-NOT-OBSERVED leaves entirely
+     -1   CONVERSATION-OVERFLOW-MENU leaves entirely
+      0   HASHTAG-EXISTENCE -- SHRINKS to one row, does not leave
+    ----
+     23   blockers in MEASURE
+
+**Two corrections against the brief this amendment was built from, both
+recomputed rather than trusted:**
+
+* **"16 rows move" should read 15.** 13 (`PANEL-NOT-OBSERVED` 3 +
+  `CONVERSATION-OVERFLOW-MENU` 10) plus 2 (the two `HASHTAG-EXISTENCE` rows
+  that leave) is 15, not 16. 105 is unaffected, because the subtraction that
+  actually produces it is 120 - 3 - 10 - 2 = 105 either way -- `C 52` never
+  moves, so there is no sixteenth row to subtract.
+* **"22 blockers" should read 23.** The brief's own parenthetical already
+  contradicts itself: it names three blockers as leaving the queue "entirely"
+  and then describes the third, `HASHTAG-EXISTENCE`, as "remains but
+  shrinks" -- which is not entirely. Two blockers leave
+  (`PANEL-NOT-OBSERVED`, `CONVERSATION-OVERFLOW-MENU`); one shrinks in place
+  (`HASHTAG-EXISTENCE`, 3 rows to 1) and is still a MEASURE blocker on this
+  amendment. 25 - 2 = 23.
+
+`SEARCH-RESULTS-SURFACE` goes 21 -> 22 rows (21 + `N 194` = 22). `N 194` was
+a MEASURE row and `SEARCH-RESULTS-SURFACE` is a DECIDE blocker, so this same
+row leaving MEASURE is already inside the -2 line above; it is not a second
+subtraction.
+
+`MATCH-DETAILS-COLLAPSED` keeps its 5 rows and its DECIDE queue; only its
+name and the question in front of it change, so it does not enter this
+ledger at all.
+
+**One subtraction this pass did not make, flagged rather than taken:** `C 11`
+reading EXCLUDED-RULED is the same class of row A1 already subtracted eight
+of, out of the master GAP total (409 at the freeze, 390 at HEAD per A1,
+still 390 as of A11's re-check). If folded into that ledger the same way,
+HEAD would read 389. **DERIVED, not verified this pass** -- re-confirming
+the current pinned GAP total against a live HEAD running well past a dozen
+touched files was out of scope for this append, and A11 already shows how
+fast that number goes stale under exactly this kind of tree.
+
+**THE STATED LIMIT.** Every number above traces to a named instrument (a
+grep count, a settle-control triple, a redirect count, a badge read) or to
+this file's own prior sections (6, A1, A7-A9). Nothing here re-opens
+`PUBLISH-POST-AUDIENCE-PARAM` (A3/A9) or the boundary-with-no-reader class
+(A10/A12) -- both stand as last amended. The `AI-ASSISTANT-OVERLAY` rename is
+a proposal, not a ruling. Section 3's `ruling` column for `PANEL-NOT-OBSERVED`
+and `CONVERSATION-OVERFLOW-MENU` is unedited and now disagrees with the
+argument above until someone edits it -- the same kind of gap A7 already
+leaves standing for its own three moves. And the line numbers cited for `C
+11` are a snapshot of a tree that was still moving while this sentence was
+written.
+
+
+---
+
+# AMENDMENT B -- 2026-09-04. A CORRECT MEASUREMENT WAS PUBLISHED AND THEN WALKED PAST TWICE
+
+**Appended, not merged, on this document's own rule.** Sections 1-9 stand
+as published, and so does amendment A, A1-A13 included -- nothing above
+has been rewritten. This amendment is not about a number being
+wrong. It is about a number that was RIGHT, written down IN THIS REPOSITORY,
+and then contradicted by two later documents that never consulted it -- which
+is a documentation-integrity defect, and it is worth more than the row it
+happened to.
+
+## B1. THE THREE DOCUMENTS, IN ORDER
+
+**1. `_audit/2026-08-22-parity-linkedin.md:18` -- THE CLAIM.**
+
+> **Skill endorsement counts** -- the `/details/skills/` page is *already
+> loaded* by `linkedin_my_profile(include_skills=True)`; counts are dropped
+> today. **0 extra page loads.** Smallest real win left.
+
+Reasonable when written. Nobody had looked at the page.
+
+**2. `_audit/2026-08-23-build-linkedin.md:229-231` -- THE CORRECTION, TAKEN
+THE NEXT DAY, IN WRITING, IN THIS REPOSITORY.**
+
+> `_audit/2026-08-22-parity-linkedin.md` ranked "skill endorsement counts" as
+> the smallest real win at **0 extra page loads**. **That is mis-specified,
+> measured:** `tests/fixtures/profile_skills.html` carries **zero** endorsement
+> counts -- no `N endorsements` text anywhere in the capture. The "already
+> loaded" half is right; the *capture* does not exist, so the build needs a
+> fresh live page load and a re-freeze, not zero.
+
+That agent did the right thing in the right place: measured, named the earlier
+document, quoted the number, and said what it would actually cost.
+
+**3. `_audit/_census/network.md:365` and this file, section 5 and A7 -- THE
+CLAIM RESTATED, TWICE, AS THOUGH THE CORRECTION HAD NOT HAPPENED.**
+
+`network.md` row `N 118` cites the parity audit VERBATIM -- *"Costed at zero
+extra page loads and never built"* -- and cites `2026-08-22-parity-linkedin.md`
+by path while not citing the file that corrected it. This document then ranked
+`PARSER-ON-A-LOADED-PAGE` as **the cheapest build in the document** on that
+basis, and **A7 re-affirmed it unchanged** under the heading `WHAT DID NOT
+CHANGE`.
+
+**So a correct measurement sat in `_audit/` for twelve days and was walked past
+by two subsequent readers, one of them a pass whose entire purpose was to
+establish what blocks each row.**
+
+## B2. WHAT THE LIVE PAGE SAYS, 2026-09-04
+
+Two allowlisted self-reads, one session, three seconds apart, nothing pressed:
+
+| | measured |
+|---|---|
+| `/in/me/details/skills/` | 20 skill cards, 2,359 characters of `main` |
+| occurrences of `endors` anywhere on it | **0**, cards and body alike |
+| `/in/me/` topcard, relationship-count lines | **1**, and it reads CONNECTIONS |
+| followers lines on the topcard | **0** |
+
+**The page DREW.** So "the fixture is stale" is ruled out: the committed
+fixture agrees with live LinkedIn, which is what the 2026-08-23 correction
+already implied and nobody tested. `N 118` is not a missing parser. It is a
+line LinkedIn does not draw. And `P L2`'s follower count is not on the topcard
+at all -- wherever the *"275 followers"* in `writes.publish_post.residue` came
+from, it was not that page.
+
+**Both rows of the cheapest build in this document are refuted.** The cost was
+never 2; it was unbounded, because the thing being costed does not exist.
+
+## B3. WHY THIS IS THE FINDING AND THE ROWS ARE NOT
+
+The rows are two. The defect is general, and this document is a witness to it
+twice over: **the reason drifts away from the fact, and then the fact stops
+being consulted.**
+
+Every step was individually defensible. The parity audit was reasoning from a
+page nobody had opened. `network.md` was citing its source faithfully -- it
+quoted the parity audit exactly. This document's section 5 was ranking on the
+census's own numbers, which is what a ranking pass is for. A7 re-affirmed a row
+nothing had visibly moved. **No one of those is a mistake, and the outcome is a
+wave dispatched to build something that is not there.**
+
+The structural fault is that **a correction lived in a different file from the
+claim, and nothing joined them.** `2026-08-23-build-linkedin.md` names
+`2026-08-22-parity-linkedin.md`; the parity audit does not, and cannot, name
+its own corrector. Every later reader who started from the claim -- which is
+what a census row cites -- reached the wrong document first and had no signal
+that a second one existed.
+
+## B4. WHAT WOULD HAVE CAUGHT IT, STATED AS A CHECK RATHER THAN A RESOLUTION
+
+**A claim in `_audit/` that a later `_audit/` document contradicts should be
+findable from the claim.** The cheapest form is a backlink written INTO the
+corrected document at correction time -- one line at
+`2026-08-22-parity-linkedin.md:18` saying "CORRECTED 2026-08-23, see
+`2026-08-23-build-linkedin.md:229`" -- because it costs the corrector one edit
+and it reaches every future reader who starts where the census points.
+
+The mechanical version, which this repository is better at: **a check that
+greps `_audit/` for a document quoted by a later document that contains the
+words "mis-specified", "corrected", "measured" or "that is wrong" beside the
+citation, and asserts the cited document carries a pointer back.** Not built
+here; named so it can be built deliberately rather than rediscovered.
+
+**AND THE ROW-LEVEL FIX IS ALREADY IN THE CODE, which is the part that does not
+rot.** `N 118` is now answered by a LIVE reading in
+`dom.read_profile_detail_entries`, re-taken on every call, carrying the
+denominator it was taken over -- cards searched, card lines searched,
+characters of `main`, and whether the body mentions an endorsement at all. A
+constant would have frozen today's answer into next year's; a reading that
+ships with its denominator cannot be quoted onward as a property, which is
+exactly the failure this amendment is about. See `_audit/INSTRUMENTS.md`
+section 2.3.
+
+## B5. WHAT THIS AMENDMENT DOES NOT CLAIM
+
+It does not restate the GAP total. `N 118` and `P L2` do not become
+EXCLUDED-RULED on my authority -- they are refuted as SPECIFIED, and whether
+"LinkedIn does not draw it" retires a row or re-files it is the lead's ruling,
+the same fork A1 recorded for the eight forbidden-substring rows.
+
+It does not touch `PARSER-ON-A-LOADED-PAGE`'s cost model, its ranking method,
+or any other row. The instrument that produced the refutation is
+`scripts/_probe_endorse_and_follow_lines.py`, tracked, read-only, module-level
+literals only, and it prints no skill name, no employer and no member path --
+so these numbers can be re-taken by anyone who doubts them rather than
+re-derived.
+
+## A14. A BOUNDARY BREADTH NOBODY RULED, MEASURED AND LEFT FOR THE OPERATOR
+
+**RECORDED, NOT ACTED ON.** This section changes no code and moves no row. It
+exists because the measurement behind the ruling is cheap to take now and
+expensive to re-derive later.
+
+### The two rulings that disagree, three lines apart
+
+`linkedin_server/readonly.py` admits the self-profile detail pages with this
+member segment:
+
+    /in/[A-Za-z0-9\-_%]+/details/(skills|experience|education)/
+
+**That is not `me`. It admits ANY member's details pages.** Sixteen lines
+below it, the intro editor is deliberately restricted to the `/in/me/` form,
+and its comment gives a MEASURED reason rather than a preference:
+`linkedin_who_viewed_me` establishes that loading a member's profile leaves
+them a durable record in their own viewer list, so **"a pattern that can
+address anybody but him is refused on that ground alone, whatever the page
+underneath is for."**
+
+Both sentences are in one file, three lines apart, and they answer the same
+question differently. Nothing anywhere records a decision to treat the details
+pages as the exception.
+
+### It was nearly inherited today, and that is why this section exists
+
+The Interests page was first admitted by adding a fourth word to that
+alternation. **For one commit the boundary therefore admitted
+`/in/<a-third-party>/details/interests/`, measured ALLOWED rather than
+inferred** -- on the worst surface in the package for it, because that tab
+enumerates the PEOPLE somebody follows. It would have read a third party's
+follow graph while announcing to that third party that he had looked.
+
+Caught in review, and re-landed as its own anchored `/in/me/` pattern,
+NARROWER than its three siblings. Twelve controls, zero mismatches. The
+siblings were left exactly as they were, because narrowing them is a
+different decision with a different owner.
+
+### THE MEASUREMENT, so the cost of narrowing is a number and not a guess
+
+`scripts/_probe_details_url_breadth.py`. **Parsed, not grepped** -- and that
+is not fastidiousness: the allowlist entry is a two-line implicit string
+concatenation, and a grep over it during this very review returned only the
+first line and appeared to contradict a correct reading. A text-shaped read of
+a structure sees whichever line it caught.
+
+CONTROL FIRST, so a zero is legible rather than ambiguous:
+
+| what the instrument saw | count |
+|---|---:|
+| files parsed | 55 |
+| string literals examined | 10854 |
+| literals mentioning `/in/` | 122 |
+| literals mentioning `/details/` | 42 |
+| f-strings mentioning `/details/` | 12 |
+| `.format()` on a `/details/` string | 0 |
+
+RESULT:
+
+| classification | count |
+|---|---:|
+| `literal-me` | 21 |
+| f-string `literal-me` | 10 |
+| `regex` (the allowlist patterns themselves) | 4 |
+| `no-member-segment` | 8 |
+| `self-reference` (the probe's own prose) | 9 |
+| **f-string `interpolated`** | **2** |
+
+**BOTH interpolated sites were traced by hand, and NEITHER is a third party:**
+
+* `linkedin_server/server.py:2885` builds
+  `/in/{slug}/details/<section>/` for Experience, Education and Skills. `slug`
+  is `shape.profile_slug_from(final_url)`, and `final_url` is the LANDING of
+  `/in/me/` -- **his own vanity slug**. It emits these urls in
+  `linkedin_my_profile`'s answer; it does not navigate to them.
+* `scripts/_probe_interests.py:33` interpolates the module constant
+  `ME = "me"`.
+
+### THE ANSWER, and the limit on it
+
+**Nothing in this package builds a `/in/<not-me>/details/` url.** So the
+breadth in the allowlist is reach NOBODY USES, and narrowing the three
+siblings to the `me` form would break no caller here.
+
+**THAT IS A STATEMENT ABOUT THIS PACKAGE, NOT ABOUT THE BOUNDARY.** The
+allowlist still admits those urls to anything that asks -- a future tool, a
+future probe, or an agent handed a slug. The whole point of the intro editor's
+ruling is that the boundary should not depend on nobody happening to ask.
+
+**IT IS THE OPERATOR'S RULING AND IT IS NOT TAKEN HERE.** What this section
+provides is the cost: one pattern edit, one re-freeze, zero callers broken.
+
+### A SMALLER FINDING FROM THE SAME TRACE, reported and not fixed
+
+`linkedin_server/server.py:1095-1097`, immediately above `PROFILE_DETAIL_URLS`,
+states:
+
+> "The vanity slug is never used to build one of these, even though the
+> allowlist would accept it: an address built from a landed url is an address
+> the page chose."
+
+`server.py:2885` builds three details urls from exactly that vanity slug. The
+sentence is defensible if "one of these" means the NAVIGATION table it sits on
+and 2885's urls are only EMITTED -- but the distinction is not in the words,
+and it is load-bearing prose about the boundary. Not edited here: `server.py`
+had another wave writing in it throughout this review, and the correction is a
+sentence somebody who owns that file should choose.

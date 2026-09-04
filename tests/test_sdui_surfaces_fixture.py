@@ -1349,7 +1349,24 @@ async def test_the_skills_page_yields_skills_and_not_filter_pills():
 
 
 async def test_a_skill_keeps_only_its_name_not_its_evidence_lines():
-    """The first entry carries two extra lines. Neither is the skill."""
+    """The first entry carries two extra lines. Neither is the skill.
+
+    THIS TEST GUARDS ITS OWN COPY OF THE LOGIC, NOT THE READER. Named defect
+    `GUARDS-ITS-OWN-COPY`, `_audit/INSTRUMENTS.md` section 1.3. Its helper
+    `_skills()` calls `dom.harvest_linked_cards` and re-implements the
+    name-selection loop above, so what it exercises is the loop in THIS FILE.
+    `dom.read_profile_detail_entries` -- the shipped reader that makes the
+    same choice -- is not on its path at all.
+
+    MEASURED, not supposed: adding `entries.extend(rest)` to that reader makes
+    it return evidence lines as skills, which is precisely the defect this
+    test is named for, and this test PASSES. The one that fails is
+    `test_the_evidence_lines_never_rejoin_the_skills_list`.
+
+    The coverage is deliberately left as it is -- this test is not wrong, only
+    narrower than its name -- and the name is what has been corrected, here,
+    so the next reader does not take it for a guard on the reader.
+    """
     _, skills = await _skills()
     assert skills[0] == "Node.js"
     assert not any("experiences at" in skill for skill in skills)
