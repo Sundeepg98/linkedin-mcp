@@ -351,11 +351,41 @@ PINNED = (
 #: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
 #: moved is one entry in a tuple of string literals, the class this file
 #: records as matching on every Python.
+#: RE-FROZEN 2026-09-04, and ONE digest moved:
+#:
+#:     _ALLOWED_URL_PATTERNS   97f175ae03ccc7d1 -> a334f9fd2683831d
+#:
+#: THE PROFILE INTERESTS PAGE is now readable. `/in/me/details/interests/`
+#: joins the alternation that already held `skills`, `experience` and
+#: `education` -- one word, the same page, the same owner, the same shape as
+#: three siblings the operator has already argued. `/in/me/` resolves to
+#: whoever is signed in, so no third party's page is admitted by this.
+#:
+#: EVERY OTHER DIGEST IS BYTE-IDENTICAL and that is the substance of the
+#: claim, not a formality: `<functions>`, all three denylists, and BOTH
+#: exemption tables are unmoved. A read admission that widened a denylist or
+#: opened an exemption would show here, and none did.
+#:
+#: THE SHAPER LANDED FIRST, DELIBERATELY. The Interests tab enumerates FIVE
+#: kinds of entity. People and Companies were covered -- the first by every
+#: guard in `shape.py`, the second by precedent, since
+#: `linkedin_followed_companies` already publishes company names. Groups,
+#: Newsletters and Schools had never been asked about, and
+#: `scripts/_probe_interests_entity_shaping.py` MEASURED all three shipping a
+#: name verbatim past both census guards, with a newsletter also shipping its
+#: slug -- routinely its author's name -- on every record. That was fixed in
+#: `shape.py` BEFORE this line moved, because a read that is safe only until
+#: he follows a person is not safe.
+#:
+#: VERIFIED UNDER 3.13.14 ONLY; the 3.10 cell in CI is the real check. What
+#: moved is one entry in a tuple of string literals -- the class this file
+#: records as matching on every Python -- which is the same class of move as
+#: the 2026-09-03 connections admission below.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "4a6eba4033964196",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "97f175ae03ccc7d1",
+    "_ALLOWED_URL_PATTERNS": "a334f9fd2683831d",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -720,7 +750,12 @@ DENYLISTS_AT_A76FE32 = {
     # frozen at all: it is the door beside the denylist, and it did NOT move
     # in this change. A widening that arrived through it would now show up
     # here rather than nowhere.
-    "_ALLOWED_URL_PATTERNS": "97f175ae03ccc7d1",
+    # UPDATED AGAIN 2026-09-04, same reason and same shape as the 2026-09-03
+    # entry above it: a deliberate READ admission moved this one value. The
+    # profile Interests page joined the self-profile details alternation. The
+    # other three denylists and the exemption table beside them are
+    # byte-identical, which is the whole of what this dict is for.
+    "_ALLOWED_URL_PATTERNS": "a334f9fd2683831d",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

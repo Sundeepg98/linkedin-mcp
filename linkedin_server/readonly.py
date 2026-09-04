@@ -221,7 +221,34 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/?$"),
     re.compile(
         r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/details/"
-        r"(skills|experience|education)/?(\?[^#]*)?$"
+        r"(skills|experience|education|interests)/?(\?[^#]*)?$"
+        # ``interests`` ADDED 2026-09-04, and it is one word inside a
+        # family the operator has already argued: same page, same owner,
+        # same shape as the three siblings beside it. `/in/me/` resolves
+        # to whoever is signed in, so there is no third party on his own
+        # Interests list -- and a sibling of three admitted siblings does
+        # not get a new tribunal.
+        #
+        # THE BAR IT HAD TO MEET WAS THE ONE ITS SIBLINGS MEET, AND THAT
+        # WAS CHECKED RATHER THAN ASSUMED. This tab enumerates FIVE kinds
+        # of entity, not one: Top Voices are PEOPLE, and Companies are
+        # settled by precedent because `linkedin_followed_companies`
+        # already publishes them -- but Groups, Newsletters and Schools
+        # had never been asked about. `scripts/_probe_interests_entity_
+        # shaping.py` put a name behind each of the five and ran the
+        # census guards over it: all three shipped their name verbatim,
+        # and a newsletter shipped its slug -- routinely its author's
+        # name -- on every record. That is fixed in `shape.py` and the
+        # probe is GREEN. **The widening landed after the shaper, not
+        # before it**, because a read that is safe only until he follows
+        # a person is not safe.
+        #
+        # WHAT IT BUYS, and it is why one word outranks its size: this is
+        # the surface that answers whether he belongs to any group or
+        # attends any event, WITHOUT opening `/groups/` or `/events/` --
+        # the precondition for `GROUPS-SURFACE` (32 census rows),
+        # `EVENTS-SURFACE` (18) and `NEWSLETTER-SURFACE` (12), all three
+        # of which stay closed here.
     ),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
