@@ -104,6 +104,80 @@ its name. What is corrected is the claim, not the coverage.
 copy.** If a helper in a test file duplicates a function under test, the
 guard's subject is the duplicate. Call the real function or rename the test.
 
+### 1.4 `MOCKS-THE-READER-IT-DEPENDS-ON` -- and the refusal that agreed with the docstring
+
+**The worst-placed blind check found in two days, because its false result was
+the one the documentation told you to expect.**
+
+`dom.read_comment_surface` harvested control names with
+`census.get("control_shapes", [])`. `read_surface_census` has never returned
+that key -- its keys are `counts`, `controls`, `controls_read`, `truncated` --
+so the loop iterated an empty list on every page. A second bug sat in the same
+line: the shaped records carry no `count` field, so `row.get("count") or 0`
+would have summed zeros even with the key corrected.
+
+`writes._comment_submit_gate` builds its before/after maps from that reader.
+With `names` permanently `{}`, `arrived` was permanently empty, so the gate
+refused `2_nothing_arrived` **on every page, forever, for a reason with
+nothing to do with LinkedIn** -- and `controls_read` uses a key that DOES
+exist, so the refusal reported a plausible non-zero count beside the empty
+map and looked alive.
+
+**WHY IT SHIPPED:** `tests/test_comment_delta_gate.py` monkeypatches
+`dom.read_comment_surface` with a stand-in returning a fixed census. The gate
+is thoroughly tested, against a fake reader, so the real one's dead key was
+invisible to its own suite. That is 1.3 one level up: 1.3 re-implements the
+logic, this MOCKS it, and both leave the named subject unexercised.
+
+**WHY IT WAS EXPENSIVE:** `comment_on_item`'s docstring instructs the reader
+that it is "EXPECTED TO REFUSE ON FIRST USE, and that is the design rather
+than a defect". A fire would have typed his words into the box, refused,
+left a draft this package has no surface to find or remove, and handed back
+a refusal indistinguishable from the designed one -- and it would have been
+written up as a measurement. **A false result that agrees with the
+documentation's own prediction is the most expensive shape available.** It
+did not land only because a harness classifier refused the call.
+
+    THE CONTROL  swap the reader's census key back: in
+                 `dom.read_comment_surface`, iterate
+                 `census.get("control_shapes", [])` instead of
+                 `census.get("controls", [])`.
+                 tests/test_comment_delta_gate.py
+                   test_the_real_reader_harvests_names_off_a_census_payload
+                     FAILS -- {} where three names are expected
+                 Offline, no browser: the test feeds a page fake whose
+                 `evaluate` returns three named controls and reads `names`.
+                 Every test added with this entry drives the REAL reader --
+                 a stand-in is what hid the defect, so a stand-in cannot be
+                 what certifies the repair.
+
+    THE CONTROLS test_an_unnamed_control_is_counted_rather_than_dropped_silently
+                 -- an arrival with no accessible name must be REPORTED, or a
+                 nameless control arriving reads as nothing arriving.
+                 test_the_gate_still_reports_the_ordinary_absence_with_no_menu_open
+                 -- `2b_menu_items_present` must NOT fire when no menu is
+                 open. Without this, a branch that always fired would look
+                 like a branch that works.
+
+**THE SECOND HALF, and it is the same disease in the other direction.**
+`dom.CENSUS_CONTROL_SELECTOR` carries no menu role, so a delta pointed at a
+menu reports a clean absence. Measured 2026-09-04: a comment's own overflow
+menu draws three `[role="menuitem"]` nodes (`Copy link to comment`, `Edit`,
+`Delete`). The repair is 2.2's law -- a blind channel may not print a bare
+absence -- and it is a COUNT (`menus`, `menu_items`, appended last to the
+`counts` block beside `dialogs`) rather than a widened selector: widening
+shifts `controls_read` and the shaped-name distribution across all 19
+fixtures the boundary freeze hashes, and menu items on a comment menu sit
+beside people's names, so enumerating them would add a name-bearing class to
+a structure many consumers read.
+
+**AND THE COUNT IS CONSUMED.** `_comment_submit_gate` refuses
+`2b_menu_items_present`, distinct from `2_nothing_arrived`, when arrival is
+empty and menu items are present. *Adding an unread count while fixing an
+unread `labels` field would have been absurd* -- the same wave had just found
+`writes.py` discarding `read_reaction_surface`'s `labels`, the string its own
+fire was supposed to measure, from the dict it had already built.
+
 ---
 
 ## 2. THE MEASUREMENT PATTERNS WORTH REUSING
