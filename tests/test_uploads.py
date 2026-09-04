@@ -716,3 +716,351 @@ def test_the_extractor_takes_the_content_half_of_a_two_part_target(
     with pytest.raises(WriteAttemptError) as excinfo:
         writes._file_component_of(spec, bad)
     assert "there is no file at" in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
+# 9. The sanction's TRIPLE, shown refusing an upload -- each part separately
+# ---------------------------------------------------------------------------
+#
+# THE POINT OF THIS SECTION, and it is a correction. Everything above tests
+# the GUARD -- what may be uploaded. Nothing above tested the SANCTION -- where
+# an upload may be written. A file-upload sanction that has never refused an
+# upload has not been tested; it has only been written, and the entry admits
+# `(writes.py, perform, set_input_files)` by three parts that each have to
+# refuse something on their own.
+
+
+@pytest.mark.parametrize(
+    "label, path, source",
+    [
+        (
+            "wrong file",
+            "linkedin_server/dom.py",
+            "async def perform(page, grant):\n"
+            "    await page.set_input_files('#f', p)\n",
+        ),
+        (
+            "wrong function",
+            "linkedin_server/writes.py",
+            "async def _helper(page, grant):\n"
+            "    await page.set_input_files('#f', p)\n",
+        ),
+        (
+            "nested inside the sanctioned function",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n"
+            "    async def _go():\n"
+            "        await page.set_input_files('#f', p)\n"
+            "    return _go\n",
+        ),
+        (
+            "module level",
+            "linkedin_server/writes.py",
+            "page.set_input_files('#f', p)\n",
+        ),
+    ],
+)
+def test_an_upload_written_anywhere_else_is_refused(label, path, source):
+    """Each of the triple's three parts, refusing an UPLOAD specifically.
+
+    ``test_the_exception_does_not_widen`` in tests/test_readonly.py already
+    parametrises this shape over clicks, types and presses. It does NOT cover
+    ``set_input_files``, and "the same mechanism, so presumably the same
+    answer" is the reasoning this repo refuses everywhere else -- an invariant
+    that holds because nobody has violated it yet is a coincidence.
+
+    The closure case is the one worth reading twice: attribution is to the
+    INNERMOST enclosing function, so burying an upload one scope down inside
+    ``perform`` does not inherit ``perform``'s exemption.
+    """
+    from linkedin_server import readonly
+
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(path, source)
+    assert sanctioned == [], (label, sanctioned)
+    assert [kind for _l, kind, _s in unsanctioned] == ["set_input_files"], (
+        label,
+        unsanctioned,
+    )
+
+
+def test_the_triple_accepts_the_one_place_it_is_meant_to():
+    """THE POSITIVE CONTROL for the four refusals above.
+
+    Without it they would all pass against a partition that sanctioned
+    nothing at all, which is the same defect as a guard that refuses every
+    file on earth.
+    """
+    from linkedin_server import readonly
+
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py",
+        "async def perform(page, grant):\n"
+        "    await page.set_input_files('#f', p)\n",
+    )
+    assert unsanctioned == []
+    assert [kind for _l, kind, _s in sanctioned] == ["set_input_files"]
+
+
+def test_a_second_upload_inside_perform_is_still_caught():
+    """THE HARDEST EDIT, on the real file, mirroring the click's own control.
+
+    A second ``set_input_files`` inside ``perform`` is in the sanctioned file,
+    the sanctioned function and of the sanctioned kind -- so it matches the
+    allowlist entry exactly and the PARTITION cannot see it. That is asserted
+    here rather than hidden, because a control that concealed it would be
+    worse than none.
+
+    What catches it is the COUNT: the package is asserted to contain exactly
+    as many mutating calls as the list has entries. This reproduces that
+    arithmetic against the doubled source and shows it going red.
+    """
+    from linkedin_server import readonly
+    from tests.test_readonly import MODULES
+
+    source = pathlib.Path(writes.__file__).read_text(encoding="utf-8")
+    call_site = (
+        "await page.set_input_files(\n"
+        "                upload_selector, str(upload_file.path), "
+        "timeout=CLICK_TIMEOUT_MS\n"
+        "            )"
+    )
+    assert call_site in source, (
+        "the upload call site has been rewritten. Update this literal to "
+        "match it -- and do NOT relax the assertion below, which is the only "
+        "thing stopping this control from testing nothing at all."
+    )
+    doubled = source.replace(call_site, call_site + "\n            " + call_site, 1)
+    assert doubled != source
+    # AND IT MUST STILL PARSE, or the partition below is answering about a
+    # file it could not read rather than about a duplicated upload. This is
+    # the assertion whose absence once let an indent bug look like a boundary
+    # failure on the click's twin of this test.
+    ast.parse(doubled)
+
+    # The partition is BLIND to it, and that is asserted rather than hidden.
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py", doubled
+    )
+    assert unsanctioned == [], "the partition sees a duplicate -- update this test"
+
+    # The count is not. Counted the way the REAL check counts: across the
+    # whole package, not this one file.
+    package_total = 0
+    for module in MODULES:
+        text = (
+            doubled
+            if module.name == "writes.py"
+            else module.read_text(encoding="utf-8")
+        )
+        package_total += len(readonly.scan_source_for_mutations(text))
+    assert package_total == len(readonly.SANCTIONED_MUTATIONS) + 1, package_total
+    assert package_total != len(readonly.SANCTIONED_MUTATIONS), (
+        "the count check would not fire on a doubled upload"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 10. THE GATE, DRIVEN. An upload actually refused, on a real browser page.
+# ---------------------------------------------------------------------------
+#
+# EVERYTHING ABOVE IS STATIC. Section 9 reads source; sections 1-7 call the
+# guard directly. Neither runs the code inside ``writes.perform`` that decides
+# whether a file reaches a browser -- and a gate whose branches have never
+# executed is written rather than tested. Every instrument built in this
+# session to catch a specific defect turned out to have that defect on its
+# first run, so this section drives ``preview`` -> ``consume`` -> ``perform``
+# for real, over frozen pages in headless Chromium, and watches the refusals.
+#
+# NO ACTION SHIPS WITH AN UPLOAD (``writes.UPLOAD_ACTIONS`` is empty), so the
+# vehicle is ``publish_post`` MONKEYPATCHED INTO that set. Three properties
+# make that a fair test rather than a convenient one: its ``target_kind`` is
+# ``post_text``, a one-component composite, so the whole canonical target IS
+# the path and no third component has to be invented; its ``url_template`` is
+# a constant carrying no ``{target}``, so a path can never reach a url; and it
+# is genuinely PERFORMABLE, so mint, consume and every gate before the upload
+# run unmodified.
+#
+# EACH OF THE THREE SHOWN FAILING, on the real ``writes.py``, 2026-09-04. A
+# test that has never gone red on the defect it names is a claim, not a check:
+#
+#   M1  ``if current != approved:``  ->  ``if False:``
+#       the digest COMPARISON removed, so a swapped file uploads
+#       -> test_perform_REFUSES_when_the_bytes_moved_under_the_approved_path
+#          RED (1 failed)
+#   M2  ``if not approved:``  ->  ``if False:``
+#       the MISSING-digest check removed, so a grant with no digest passes
+#       -> test_perform_REFUSES_a_grant_that_carries_no_digest_at_all
+#          RED (1 failed)
+#   M3  the ``upload_plan.append(...)`` removed
+#       the drain point made unreachable, so nothing is ever handed over
+#       -> test_an_unchanged_file_gets_PAST_the_digest_gate  RED (1 failed)
+#
+# Unmutated baseline in the same run: 43 passed, 3 skipped. ``writes.py`` was
+# restored after each mutation and the restore verified by sha256, not by
+# assumption.
+
+from tests.test_writes import (  # noqa: E402,F401 - fixtures used by injection
+    FixtureNavigator,
+    browser_page,
+    writes_on,
+)
+from tests.test_writes_nine import FEED_MARKUP  # noqa: E402
+from tests.test_result_verification_block import SHAREBOX_MARKUP  # noqa: E402
+
+SHAREBOX_URL = "https://www.linkedin.com/preload/sharebox/"
+
+
+async def _granted_upload(page, root, monkeypatch, *, name="photo.png"):
+    """Preview a publish_post whose target is a FILE, and burn its token.
+
+    Returns ``(grant, path, preview_block)``. The grant is real: minted by
+    ``preview`` off a live read and redeemed by ``consume``, exactly as a
+    caller's second call would produce it.
+    """
+    monkeypatch.setattr(writes, "UPLOAD_ACTIONS", frozenset({"publish_post"}))
+    path = root / name
+    path.write_bytes(b"\x89PNG\r\n\x1a\n" + b"pixels" * 40)
+    spec = writes.spec_for_action("publish_post")
+    block = await writes.preview(
+        spec,
+        target=str(path),
+        navigator=FixtureNavigator({writes.FEED_URL: FEED_MARKUP}),
+        page=page,
+    )
+    grant = writes.consume(
+        block["to_confirm"], action="publish_post", target=str(path)
+    )
+    return grant, path, block
+
+
+async def test_the_preview_shows_him_the_file_before_any_token_is_spent(
+    writes_on, browser_page, root, monkeypatch
+):
+    """THE CONTROL for this whole section, and a claim in its own right.
+
+    A refusal test that could not first produce a WORKING preview would prove
+    only that something went wrong somewhere. This asserts the block he reads
+    actually carries what the ruling required -- the name, the extension, the
+    exact size, the root and the digest -- and that a confirm token was minted
+    against it.
+    """
+    _grant, path, block = await _granted_upload(browser_page, root, monkeypatch)
+    assert block["file"]["file_name"] == "photo.png"
+    assert block["file"]["extension"] == ".png"
+    assert str(path.stat().st_size) in block["file"]["size"]
+    assert len(block["file"]["sha256_prefix"]) == uploads.DIGEST_CHARS
+    assert "CANNOT BE UN-SENT" in block["file"]["cannot_be_unsent"]
+    assert "does not submit" in block["file"]["attaching_is_not_sending"]
+    # AND NO ABSOLUTE PATH IN THE BLOCK HE READS.
+    assert str(pathlib.Path.home()) not in block["file"]["path"]
+
+
+async def test_perform_REFUSES_when_the_bytes_moved_under_the_approved_path(
+    writes_on, browser_page, root, monkeypatch
+):
+    """**THE UPLOAD GATE, SHOWN REFUSING AN UPLOAD.**
+
+    The grant binds the PATH and ``consume`` has already matched it, so every
+    check before this one passes: same action, same target, same file name,
+    live token. What changed is the CONTENT, which no part of the token
+    mechanism can see -- and this is the branch that does.
+
+    WHAT IS ASSERTED BESIDES THE REFUSAL, because "it refused" is the least
+    interesting half: NOTHING WAS DISPATCHED. The upload queue drains before
+    the click queue, so a refusal here means zero clicks and no ``uploaded``
+    block -- the run stopped with the composer untouched rather than half
+    done.
+    """
+    grant, path, block = await _granted_upload(browser_page, root, monkeypatch)
+    approved_digest = block["file"]["sha256_prefix"]
+
+    path.write_bytes(b"\x89PNG\r\n\x1a\n" + b"SOMETHING ELSE" * 40)
+
+    out = await writes.perform(
+        FixtureNavigator({SHAREBOX_URL: SHAREBOX_MARKUP}), browser_page, grant
+    )
+    error = str(out["clicked"]["error"])
+    assert "the file at that path has changed since you were shown it" in error
+    # IT NAMES BOTH READINGS. A refusal that says only "changed" cannot be
+    # checked by the person reading it.
+    assert approved_digest in error
+    assert uploads.digest_of(uploads.resolve_upload_file(str(path))) in error
+    assert "Nothing was uploaded and nothing was clicked." in error
+
+    assert out["clicked"]["clicks_made"] == 0
+    assert out["uploaded"] is None
+
+    # ``performed`` IS DELIBERATELY NOT ASSERTED HERE, and the reason is worth
+    # writing down because the obvious assertion is wrong. It comes back
+    # ``"unknown"`` rather than ``False`` -- ``publish_post`` declares its
+    # outcome UNVERIFIABLE, so ``_verify_after`` short-circuits and this
+    # server will not claim either way. That is a property of the VEHICLE this
+    # test borrowed, not of the upload gate, and asserting it would pin
+    # somebody else's semantics into this file.
+    #
+    # The two facts above are the ones that mean "nothing was dispatched" and
+    # they hold whatever action carries the upload: no click was made, and no
+    # file was handed over.
+    assert out["clicked"]["error"], "a refusal must be reported, not swallowed"
+
+
+async def test_perform_REFUSES_a_grant_that_carries_no_digest_at_all(
+    writes_on, browser_page, root, monkeypatch
+):
+    """The other half of the same gate: nothing to compare against.
+
+    A grant reaches ``perform`` only through a preview, and a preview for an
+    uploading action reads and prints a digest -- so an absent one means the
+    grant was made some other way. The branch FAILS CLOSED rather than
+    treating a missing digest as "no objection", which is the difference
+    between a check and a decoration.
+    """
+    grant, _path, _block = await _granted_upload(browser_page, root, monkeypatch)
+    grant.preview = {}
+
+    out = await writes.perform(
+        FixtureNavigator({SHAREBOX_URL: SHAREBOX_MARKUP}), browser_page, grant
+    )
+    error = str(out["clicked"]["error"])
+    assert "carries no file digest" in error
+    assert out["clicked"]["clicks_made"] == 0
+    assert out["uploaded"] is None
+
+
+async def test_an_unchanged_file_gets_PAST_the_digest_gate(
+    writes_on, browser_page, root, monkeypatch
+):
+    """**THE POSITIVE CONTROL, and without it the two refusals prove nothing.**
+
+    A gate that refused every upload unconditionally would pass both tests
+    above and would look identical in the report. So: same setup, file NOT
+    touched, and the run must fail somewhere ELSE.
+
+    WHERE IT FAILS IS THE EVIDENCE. ``page.set_input_files`` is reached and
+    Chromium rejects the node -- ``publish_post``'s ``_live_control`` returns
+    the POST EDITOR, a contenteditable div, because nothing in ``dom.py``
+    resolves a file input yet. So the error names the CALL rather than the
+    digest, which proves two things at once: the digest comparison passed
+    rather than being skipped, and the one sanctioned call site genuinely
+    executed against a real browser with the resolved path.
+
+    AND IT PINS THE REASON ``UPLOAD_ACTIONS`` IS EMPTY, as a measurement
+    rather than a promise. There is no ``_live_control`` arm that returns a
+    file input, so even with an action forced into the set the drain point
+    cannot land -- which is exactly the per-composer work each of the three
+    surfaces still needs. If somebody adds that arm, this test goes red and
+    they come here to say so.
+    """
+    grant, _path, block = await _granted_upload(browser_page, root, monkeypatch)
+
+    out = await writes.perform(
+        FixtureNavigator({SHAREBOX_URL: SHAREBOX_MARKUP}), browser_page, grant
+    )
+    error = str(out["clicked"]["error"])
+
+    assert "has changed since you were shown it" not in error
+    assert "carries no file digest" not in error
+    assert block["file"]["sha256_prefix"] not in error
+    # THE CALL WAS REACHED. Playwright names the method it refused.
+    assert "set_input_files" in error
+    assert out["clicked"]["clicks_made"] == 0
