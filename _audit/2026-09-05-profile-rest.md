@@ -17,7 +17,7 @@ this wave ~18 min). It is not a property of one agent.
 
 | row | blocker | ledger | what happened |
 |---|---|---|---|
-| 43 | `BADGES-SURFACE` | 5 rows, 2R/3W, allowlist +1 | **MEASURED LIVE at allowlist +0. The `+1` is refuted for both R rows. One of the five rows is a DUPLICATE.** |
+| 43 | `BADGES-SURFACE` | 5 rows, 2R/3W, allowlist +1 | **BOTH R ROWS MEASURED LIVE at allowlist +0** -- K8 on his profile, K10 on a live job posting. The `+1` is refuted for both. **One of the five rows is a DUPLICATE.** |
 | 72 | `MULTILANG-PROFILE` | 2 rows, 1R/1W, allowlist +1 | **MEASURED LIVE at allowlist +0. The `+1` is refuted for the R row.** |
 | 78 | `OPEN-PROFILE-SETTING` | 1 row, 1W, allowlist +1 | **NO PATTERN WRITTEN, DELIBERATELY. The row names no address. The trap was converted into an asserted invariant instead.** |
 
@@ -217,6 +217,60 @@ is closed.
 
 ---
 
+## 2b. K10 WAS AN ARGUMENT. IT IS NOW A MEASUREMENT.
+
+This document said, in section 6, that I argued K10 from the address and did
+not open a posting. **I opened one** (`9d89134`), and the reading changed what
+I would have concluded.
+
+### First, the address, measured rather than recalled
+
+    /jobs/view/<id>/           True
+    /jobs/view/<id>            True
+    /jobs/view/<id>/?refId=x   FALSE
+
+**The bare spelling is admitted, so `allowlist +0` holds for K10.** But the
+QUERY-BEARING spelling is refused, and **LinkedIn's own job links routinely
+carry `refId` and `trackingId`** -- so a url copied off a listing verbatim
+does not pass. That is not a blocker for this row; it is a trap for whoever
+builds the reader, and it is the same shape as the messaging-root reasoning
+already written into `_ALLOWED_URL_PATTERNS`. I would have missed it entirely
+had I only checked the one spelling I expected to use.
+
+### The reading, on a live posting, reproduced in two runs
+
+    on the job posting          TEXT   NAMES
+    top voice                      0       0
+    verified                       0       1
+    verification                   1       0
+    premium                        1       9
+
+    controls 163   text_length 16437   name_nodes 93   names_length 2329
+    (identical across both runs; must-be-absent 0)
+
+**`verified` reads ZERO in text and ONE in accessible names.** So a
+verification marker IS present on this posting, and **the text-only reader
+this probe shipped with two hours ago would have reported it absent.**
+
+> **THE BLIND SPOT I DECLARED AND FIXED HAS NOW FIRED ON TWO DIFFERENT
+> SURFACES WITHIN THE HOUR** -- `premium` 0-to-19 on his profile, `verified`
+> 0-to-1 on a job posting. It was not an edge case, and declaring it without
+> fixing it would have shipped two wrong readings with a caveat attached.
+
+**And the two corpora disagree in the OTHER direction on the same page**:
+`verification` reads 1 in text and 0 in names. Neither corpus dominates, which
+is exactly why they are reported side by side and never summed. A single
+merged number would have hidden both disagreements.
+
+**What this does NOT establish.** One posting, chosen because it is the only
+job saved on the account -- so this is a sample of one, and a posting whose
+poster happens to be unverified would read 0 through a perfectly working
+reader. K10 asks what the badge looks like *as a class*; I have one instance.
+And I did not determine WHOSE verification the marker refers to, which is the
+question that decides whether this row can ever publish anything.
+
+---
+
 ## 3. ROW 72 `MULTILANG-PROFILE` -- the affordance is drawn, the content is not
 
 Census D27 (W, create / delete a secondary-language profile) and D28 (R, view
@@ -413,10 +467,9 @@ inert.
 * ~~**K8's reading is text-only.**~~ **DONE in `b88211b`** -- see section 2.
   The accessible-name corpus was added, the blind spot fired on `premium`
   (0 in text, 19 in names), and `top voice` stayed 0 in both.
-* **K10 was never read.** I argued from the address that a verification badge
-  on a job posting needs no allowlist entry; I did not open a posting to look.
-  That is an argument, not a measurement, and it is labelled as one.
-  **This is the largest thing still owed on row 43.**
+* ~~**K10 was never read.**~~ **DONE in `9d89134`** -- see section 2b. What
+  remains on K10 is narrower and is stated there: **a sample of one posting**,
+  and I did not determine whose verification the marker refers to.
 * **The probe was NOT admitted to any instrument register**, and I am not
   registering it. Its two declared defects are fixed and it now carries a
   two-corpus control that has been shown disagreeing -- but it has never been
@@ -518,8 +571,15 @@ called once at the control page and twice at the profile, so **three
     run 1  19:38   3 loads   completed   (text corpus only)
     run 2  19:41   3 loads   completed   (reproduced run 1 exactly)
     run 3  19:48   3 loads   completed   (accessible-name corpus, badge fix)
+    run 4  20:00   4 loads   completed   (K10 added: + the job posting)
+    run 5  20:05   4 loads   completed   (badge pair reordered; reproduced)
     ---------------------------------------------------------------------
-    TOTAL          9 page loads, 0 presses, 0 writes, 0 addresses added
+    TOTAL         17 page loads, 0 presses, 0 writes, 0 addresses added
+
+Plus **one MCP call** (`linkedin_saved_jobs`, limit 3) to obtain a real
+posting id, since every job id in this repository's tracked files is a
+synthetic fixture and navigating to one would have read a 404 and reported a
+clean absence.
 
 **RECOMPUTED AT FREEZE, NOT RE-READ.** The section as first written said
 `TOTAL 6` against two runs, and a third run happened after it. Six was correct
@@ -539,6 +599,8 @@ count over a pool a dozen waves share. The PAGE was closed, never the context.
     57117d4  audit: this document                            419 lines
     b88211b  probe: accessible names, badge pair, escape     +55 -12
     85364e7  test: the settings boundary refuses deletion    158 lines
+    7700cc6  audit: corrections (blind spot fired, plural)   +191 -27
+    9d89134  probe: K10 on a live job posting                 49 lines
 
 **Each was verified with `git show HEAD:<path> | wc -l` against the insertion
 count the commit reported**, because a failed `git commit --only` rolls the
