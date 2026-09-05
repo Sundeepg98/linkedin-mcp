@@ -118,6 +118,15 @@ INVENTED_NAMES = frozenset(
         "alex-r-12ab34",
         "priya-sharma-12ab34",
         "Always off",
+        # tests/test_feed_tally.py's NEEDLE, declared by the wave that wrote
+        # it. NOT A PERSON AND NOT A SLUG SHAPE: it carries no digit run, no
+        # capitalised run and no name, and it is deliberately unlike anything
+        # LinkedIn's default slug convention produces. It exists to be looked
+        # for in RETURN VALUES -- feed.py's whole contract is that no string
+        # derived from its input crosses a public return -- so what it needs
+        # is to be unmistakably absent from every other source in the repo,
+        # which is the opposite requirement from looking realistic.
+        "zqx-needle-alpha",
     }
 )
 
