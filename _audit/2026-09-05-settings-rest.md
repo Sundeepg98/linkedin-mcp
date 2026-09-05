@@ -173,6 +173,70 @@ feed has no authors", which is exactly the answer the surface exists to
 produce. Whoever opens the page first writes that half, and their zero will
 mean something because this half already refuses to publish a name.
 
+### 1.6a THE LIVE READ WAS TAKEN AFTER ALL -- and the two corpora DISAGREE, which is the point
+
+The shared Chrome came back at ~21:47 and `scripts/_probe_feed_kinds_live.py`
+ran at **21:51:08 by the box**, against Chrome on port 9224.
+
+    controls read on the feed          332
+    of those, carrying an href         120
+    resolved to an author               34
+    distinct (DEGENERATE, placeholders)  4
+
+    member       22        group         0
+    company       7        newsletter    0
+    school        3        AMBIGUOUS     0
+    event         2
+
+    not_an_entity_href                  84
+    entity_root_carries_no_identifier    2
+
+    invitation badge  BEFORE  state=read counted=1 pending=0
+                      AFTER   state=read counted=1 pending=0   MOVED: False
+    page closed in a finally, is_closed=True
+
+**THE HEADLINE IS NOT ANY SINGLE NUMBER -- IT IS THAT THE TWO CORPORA
+DISAGREE ABOUT WHICH KINDS EXIST, AND EACH IS RIGHT ABOUT ITS OWN INPUT.**
+
+| kind | tracked corpus | live feed |
+|---|---:|---:|
+| school | **0** | **3** |
+| newsletter | 10 | **0** |
+| group | 20 | **0** |
+| member | 42 | 22 |
+| company | 91 | 7 |
+
+Section 1.5 said the corpus's zero for `school` "says nothing about LinkedIn,
+because this corpus has no school links either." **The live feed drew three.**
+That is the corpus caveat being paid out rather than merely asserted -- and the
+disagreement runs both ways, since the feed drew no groups or newsletters where
+the corpus is full of them.
+
+**Agreement between two instruments sharing a defect is not corroboration;
+disagreement between two that do not share one is the cheapest signal
+available.** These two share no input and disagree in both directions, which is
+the strongest evidence available that each is reading its actual corpus rather
+than reporting its own shape.
+
+**The badge did not move, and the probe says what that is worth rather than
+banking it.** `pending` read 0 before and 0 after, so this load did not move
+that counter -- and a badge at zero cannot distinguish "consumed nothing" from
+"there was nothing to consume." The pair is reported as a non-result, not as a
+proof that a feed load is free.
+
+**THE AMBIGUITY BRANCH STILL HAS NOT FIRED -- 0 on the live feed too -- and this
+zero is WEAKER than the corpus zero, not stronger.** `href_shape` is a
+placeholder, so a two-entity path survives shaping only if BOTH markers survive
+it. The branch stays, still labelled asserted. Two zeros from two corpora do not
+add up to a refutation when the second instrument is the blunter of the two.
+
+**And the probe ran clean on its first attempt**, which its own docstring had
+predicted it would not -- it was committed UNSMOKED with a warning that every
+fresh instrument in this repository has had a bug on its first run. That
+prediction was wrong here, and it is left in the record rather than quietly
+deleted: the docstring's caution was the right posture even though the outcome
+went the other way.
+
 ### 1.7 `feed.py` is a THIRD module unreachable in a way the reachability guard cannot see
 
 Checked rather than assumed: `feed.py` contains **0** `async def` and no
@@ -481,7 +545,36 @@ ceiling. A message that is correct and a message that is misleading are
 indistinguishable until something independent is measured. **Two readings, same
 words, opposite verdicts, and only the port separated them.**
 
-### 5.2 RESTORING IT IS AN OPERATOR GATE, NOT AN ENGINEERING TASK
+### 5.2a SUPERSEDED AT 21:51 -- THE BROWSER CAME BACK AND MY REASONING BELOW WAS WRONG
+
+**The outage was real (5.1 stands as a measurement). My conclusion in 5.2 did
+not.** The lead restored the shared Chrome at ~21:47 -- pid 27940,
+Chrome/152.0.7977.77, port 9224, **on the same signed-in profile** -- and the
+probe ran at 21:51:08. See 1.6a for what it read.
+
+**The defect in my reasoning, named exactly:** I concluded that restoring the
+browser required either closing the operator's Chrome or accepting a
+signed-into-nothing profile, and therefore that it was an operator gate. What I
+did not have is that `scripts/start_chrome.ps1` launches **real system Chrome**
+on a dedicated user-data-dir with no automation flag -- it is neither of the two
+options I enumerated. **My enumeration was of the two paths the ERROR MESSAGE
+described, and I treated it as complete.**
+
+That is this repository's own scar arriving in my work: *a refusal that names
+what it did NOT match is half a measurement.* I read the failure text's two
+suggestions as the option space, when the repo shipped a third path in a script
+I never opened. **The caution about a playwright launch being a downgrade was
+correct and is not what was wrong** -- what was wrong was concluding a gate from
+an option list I had not verified was exhaustive.
+
+    RULE THIS COST ME: before declaring something an operator gate, grep the
+    repo's own scripts for the capability. An error message enumerates what
+    ITS author thought of, not what the repository can do.
+
+The two sections below are left standing, uncorrected, because they are what I
+believed and acted on and the correction is only legible beside them.
+
+### 5.2 RESTORING IT IS AN OPERATOR GATE, NOT AN ENGINEERING TASK -- SUPERSEDED, SEE 5.2a
 
 This is why the probe was left unrun rather than made to work:
 
@@ -499,7 +592,7 @@ This is why the probe was left unrun rather than made to work:
 **So this is a one-word ask for the operator, not a task for a wave.** Every
 live read across the fleet is blocked until a CDP Chrome exists again.
 
-### 5.3 The probe is committed UNRUN and says so in its own docstring
+### 5.3 The probe was committed UNRUN and has since RUN -- see 1.6a
 
 Verified about it: it parses, every import resolves, and `FEED_URL` is ALLOWED
 by `readonly.assert_read_url` at this tree. **Not verified: every line after
@@ -523,7 +616,7 @@ re-costed on a measured row census and 3 of those individually characterised.**
 
 ---
 
-## 5.4 TWICE THIS WAVE MY OWN AD-HOC INSTRUMENT WAS WRONG, AND NEITHER TIME BY A LITTLE
+### 5.4 TWICE THIS WAVE MY OWN AD-HOC INSTRUMENT WAS WRONG, AND NEITHER TIME BY A LITTLE
 
 Both were checks I wrote in a hurry to verify somebody else's work, and both
 would have produced a confident, false report. They are recorded together
@@ -600,7 +693,11 @@ re-read from the drafts above. Two numbers moved when I recomputed them.**
     sweep at gate      PASS  0 hits across 356 tracked files
     allowlist         31     re-derived by importing the module and counting
     boundary          UNTOUCHED -- no pattern, no list, no digest
-    live reads         0     attempted 1, browser gone -- see 5.1
+    live reads         1     attempted at 21:26 (browser gone, 5.1),
+                             TAKEN at 21:51:08 after the lead restored it --
+                             see 1.6a. Page closed in a finally, is_closed
+                             True. Badge 0 before and 0 after, reported as a
+                             NON-result rather than as proof of a free load.
     pushed          NOTHING
 
 **Guards run at freeze, 18 files across the enumeration and identity classes:**
