@@ -34,6 +34,29 @@ document being tidied. So this takes the shape this repository already uses for
 exactly this situation -- a list of sites KNOWN to be in a state, explicitly
 not a list cleared to be in it:
 
+**THE LIST IS EMPTY AS OF 2026-09-05 EVENING, AND THAT IS THE END STATE THE
+PARAGRAPH ABOVE SAID COULD NOT BE COMMITTED "TODAY".** It could, by the end of
+the same day. The three remaining entries came off in the commit that wired
+them -- ``linkedin_premium_status``, ``linkedin_newsletter_subscriptions`` and
+``linkedin_notify_cost_precondition`` -- so the count of readers this package
+ships that nobody can call is now zero, measured rather than asserted.
+
+**AN EMPTY INVENTORY IS NOT A DISARMED GUARD, AND THE DIFFERENCE MATTERS
+BECAUSE THIS FILE IS ABOUT EXACTLY THAT CONFUSION.** Every assertion below
+still runs and still has teeth: the detector is shown FAILING on a planted
+unwired reader before anything is asserted through it, and
+``test_the_unwired_readers_are_exactly_the_pinned_inventory`` compares a
+MEASURED set against a pinned one -- so the next reader added with no consumer
+turns it red with an empty pin exactly as it would have with three entries.
+What changed is that the empty side is now the LEFT one. Do not read the empty
+dict as permission to add a line to it; read it as the state a new line would
+break.
+
+**AND THE PARAGRAPH ABOVE IS KEPT RATHER THAN REWRITTEN.** It was true when it
+was written and the reason it stopped being true is a commit, not an argument.
+A document that edits its own history to look prescient is the shape this
+repository calls worse than a stale note.
+
 * an entry that is no longer unwired FAILS. Wiring a reader means deleting its
   line here, in the same commit, so the fix and the bookkeeping cannot drift;
 * a reader NOT on the list that is unwired FAILS. A new one shows up in a diff
@@ -55,49 +78,42 @@ PACKAGE = REPO / "linkedin_server"
 #: Owned by ``tests/test_reader_reachability.py``. Not re-checked here.
 COVERED_ELSEWHERE = {"dom.py"}
 
-#: THE INVENTORY. Every reader outside ``dom.py`` that no other module calls,
-#: with the reason it is in that state. **Not a list of readers cleared to be
-#: unwired** -- a list of readers KNOWN to be, so the next one arrives in a
-#: diff.
-KNOWN_UNWIRED: dict[str, str] = {
-    "newsletters.read_newsletter_subscriptions": (
-        "Built 2026-09-05 by the newsletter wave. Not this wave's to wire, "
-        "and named here rather than left invisible -- it is the reader that "
-        "made the scope gap above measurable rather than theoretical, since "
-        "two independent waves reached the same state on the same day."
-    ),
-    "notify_cost.read_notifications_badge": (
-        "Built 2026-09-05 by the settings-tail wave, and unwired BY DESIGN "
-        "rather than by omission. Its probe calls it; no tool does. The "
-        "place it belongs is inside linkedin_notifications, recording the "
-        "badge either side of the load so the side effect that tool already "
-        "declares becomes a measurement instead of a sentence dated "
-        "2026-08-21 and taken by hand. That edit lands in server.py, changes "
-        "a shipped tool's behaviour, and was not something to do in the last "
-        "twenty minutes of a session ten waves were writing in -- so the "
-        "reader ships measured and idle, and this line is how the next "
-        "person finds it rather than rebuilding it."
-    ),
-    "premium.read_premium_surface": (
-        "Built 2026-09-05 by the cheap-reads-build wave for census row 56, "
-        "and unwired for the same reason as the entry above rather than a "
-        "new one -- which is itself worth noticing, since this is now the "
-        "THIRD reader in one day to arrive with no consumer and the second "
-        "to name the last-hour crowding of server.py as the cause. The "
-        "address it reads, /premium/my-premium/, is admitted and has been "
-        "opened three times; the reader is aimed at a real render rather "
-        "than an invented DOM, which was the stated objection that stopped "
-        "two earlier waves building it. What it still lacks is a tool, and "
-        "wiring one moves pinned tool-inventory counts -- an ENUMERATION "
-        "class that a targeted run cannot clear and that needs a full clone. "
-        "Leaving that red in a shared tree at the end of a session was the "
-        "worse trade, so the reader ships idle and this line is the record. "
-        "Its verdict is built so an idle reader cannot mislead: every state "
-        "carries settles and leaves_open, an error shapes to error and never "
-        "to not_entitled, and the entitled branch says in its own payload "
-        "that it leaves the two panel states untouched."
-    ),
-}
+#: THE INVENTORY, AND IT IS EMPTY. Every reader outside ``dom.py`` that no
+#: other module calls, with the reason it is in that state. **Not a list of
+#: readers cleared to be unwired** -- a list of readers KNOWN to be, so the
+#: next one arrives in a diff.
+#:
+#: EMPTIED 2026-09-05 by wiring all three, not by deleting the check. What was
+#: here, and where each one went:
+#:
+#:   newsletters.read_newsletter_subscriptions -> linkedin_newsletter_subscriptions
+#:   notify_cost.read_notifications_badge      -> linkedin_notify_cost_precondition
+#:   premium.read_premium_surface              -> linkedin_premium_status
+#:
+#: THE REASON ALL THREE STOPPED ONE STEP SHORT WAS THE SAME ONE and it is
+#: worth keeping now that the entries are gone, because it is a fact about
+#: this repository rather than about those three modules: wiring a reader
+#: moves pinned tool-inventory counts, which is an ENUMERATION class no
+#: targeted run can clear -- the guard fires on *somebody added a caller*, a
+#: condition that does not exist until the caller is added. Three separate
+#: waves each judged that leaving that red in a shared tree at the end of a
+#: session was the worse trade, and each was probably right on its own day.
+#: The cost of three correct local decisions was three readers nobody could
+#: call, which is the case this file was built to make visible.
+#:
+#: THE ONE ENTRY THAT WAS NEVER HERE, and it belongs in the record rather than
+#: in a wave's memory: ``groups.py`` and ``recommendations.py`` shipped the
+#: same day with no consumer either, and NEITHER was ever listed -- correctly,
+#: because this detector selects functions whose name starts with ``read_``
+#: and neither module contains one. They are SHAPERS: they take hrefs somebody
+#: else read and both say so in their own docstrings. So a module can be
+#: unreachable in exactly the way this file exists to catch and be invisible
+#: to it, because the thing it lacks is a page reader rather than a caller.
+#: That is not a defect in the detector -- widening it to "any public
+#: function" would flag every helper in the package -- it is the boundary of
+#: what this instrument can see, written down where somebody counting readers
+#: will find it.
+KNOWN_UNWIRED: dict[str, str] = {}
 
 
 def _called_names(tree: ast.AST) -> set[str]:

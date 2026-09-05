@@ -196,4 +196,47 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # success, so it is returned as an integer only when four independent
     # facts hold: the section present, no rows, a body holding neither text
     # nor elements, and a non-empty sibling. See ``linkedin_server/events.py``.
-    assert len(_tool_names()) == 38
+    #
+    # 41 FROM 2026-09-05 EVENING: THREE AT ONCE, AND ALL THREE ARE READS.
+    # **THE PIN MOVED BECAUSE THE SURFACE MOVED, AND HERE ARE THE TOOLS THAT
+    # MOVED IT:**
+    #
+    #     linkedin_premium_status             premium.read_premium_surface
+    #     linkedin_newsletter_subscriptions   newsletters.read_newsletter_subscriptions
+    #     linkedin_notify_cost_precondition   notify_cost.read_notifications_badge
+    #
+    # MEASURED, NOT COUNTED BY HAND: 38 before the edit and 41 after, both off
+    # ``mcp.list_tools()`` on this tree, and each new name present in the
+    # sorted registry. The three readers were BUILT EARLIER THE SAME DAY and
+    # NONE could be called -- they sat in
+    # ``tests/test_readers_outside_dom_are_a_pinned_inventory.py`` as a pinned
+    # inventory of exactly that state, and their three lines are deleted in
+    # the same commit as this bump. That file's list is now EMPTY, which is
+    # the end state its own docstring said could not be committed that day.
+    #
+    # THE REVIEW MOMENT THIS ASSERTION EXISTS TO CREATE WAS USED, per tool,
+    # and the answers differ:
+    #
+    #   * premium publishes NO boolean and NO single number, because three
+    #     states were named about Premium and one load of /premium/my-premium/
+    #     refutes at most one of them. Every branch carries ``settles`` and
+    #     ``leaves_open`` so a caller cannot read "entitled" and quietly
+    #     assume a job-posting panel renders;
+    #   * newsletters REFUSES rather than answering when the pending-invitation
+    #     badge cannot be read either side of the load, or when it moved --
+    #     the obligation that address inherits from /mynetwork/, discharged in
+    #     the tool because the reader states it and does not do it;
+    #   * notify_cost ships a PRECONDITION and spends nothing. It loads the
+    #     feed and reads a nav badge; it never opens /notifications/, and
+    #     ``notify_cost.cost_delta`` is deliberately left with no caller,
+    #     because wiring the AFTER half is what would consume the operator's
+    #     unread state.
+    #
+    # IT STILL DOES NOT WEAKEN THE CONTROL ABOVE, for the reason already
+    # written: both rules run over REGISTRY_WHILE_BROKEN, a two-entry reading
+    # compared BY CONTENT, and nothing in that demonstration reads this
+    # number. That was re-checked after this bump rather than assumed --
+    # ``test_both_rules_reject_the_registry_that_was_actually_measured`` was
+    # run against a deliberately wrong pin and against the real one, and it
+    # is the count assertion alone that moves.
+    assert len(_tool_names()) == 41

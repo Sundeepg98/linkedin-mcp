@@ -225,7 +225,10 @@ from linkedin_server import (
     dom,
     events,
     jobfilter,
+    newsletters,
+    notify_cost,
     preflight,
+    premium,
     shape,
     writes,
 )
@@ -1559,6 +1562,287 @@ async def linkedin_events_home() -> dict[str, Any]:
                 ),
                 "pages_loaded": 1,
                 **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---------------------------------------------------------------------------
+# THREE READERS THAT WERE BUILT AND COULD NOT BE CALLED, 2026-09-05
+#
+# ``premium.py``, ``newsletters.py`` and ``notify_cost.py`` each shipped a
+# working reader with no tool on the other end of it. BUILT CODE NO TOOL
+# REACHES IS NOT CAPABILITY, IT IS A PROMISE -- and the reason all three
+# stopped one step short is written into
+# ``tests/test_readers_outside_dom_are_a_pinned_inventory.py``: wiring one
+# moves pinned tool-inventory counts, an ENUMERATION class no targeted run
+# clears, and no wave wanted to leave that red in a shared tree at the end of
+# a session. The three lines are deleted from that inventory in the same
+# commit as these tools, which is the mechanism it was built with.
+#
+# THE DECORATOR HAZARD, because this block adds four defs at once and one of
+# them is not a tool: ``_badge_refusal`` below sits BEFORE the first
+# ``@mcp.tool()`` and nothing is ever inserted BETWEEN a decorator and the
+# ``async def`` it decorates. That is the exact defect
+# ``tests/test_every_tool_is_on_the_surface.py`` exists for -- a helper taking
+# a live Playwright page took a shipped read tool's place on the surface and
+# the tool count never moved.
+#
+# AND NOTHING HERE IS ADDED TO ``dom``. ``server.py:_composer_audience_is_
+# readable`` lifts ``linkedin_publish_post``'s refusal by FEATURE DETECTION --
+# ``callable(getattr(dom, _COMPOSER_AUDIENCE_READER, None))`` -- so defining a
+# function of that name on that module would re-arm an irreversible broadcast.
+# It is the ONLY feature-detection site in the package (measured: one hit for
+# ``callable(getattr``/``hasattr`` across ``linkedin_server/*.py``), it keys on
+# ``dom`` alone, and this block touches neither that module nor that name.
+# ---------------------------------------------------------------------------
+
+
+def _badge_refusal(
+    error: str,
+    why: str,
+    *,
+    badge_before: Optional[dict[str, Any]] = None,
+    badge_after: Optional[dict[str, Any]] = None,
+    pages_loaded: int = 0,
+) -> dict[str, Any]:
+    """A read that could not certify its own cost returns THIS, not a result.
+
+    The shape ``_connections_refusal`` established, reused rather than
+    re-invented: a refusal says what it SAW, names what was and was not spent,
+    and withholds the answer -- because a tool gated on a cost it could not
+    confirm must not hand back a clean payload as though it had.
+    """
+    return {
+        "ok": False,
+        "error": error,
+        "why": why,
+        "badge_before": badge_before,
+        "badge_after": badge_after,
+        "pages_loaded": pages_loaded,
+    }
+
+
+@mcp.tool()
+async def linkedin_premium_status() -> dict[str, Any]:
+    """Is this account entitled to LinkedIn Premium -- and what that leaves open.
+
+    READ ``state`` AND ``leaves_open`` TOGETHER. THREE STATES WERE NAMED ABOUT
+    PREMIUM AND ONE LOAD OF THIS PAGE REFUTES AT MOST ONE OF THEM:
+
+        A  not entitled
+        B  entitled, and the job-posting panel is simply not drawn
+        C  entitled, the panel IS drawn, and the reader could not see it
+
+    **A LOAD OF /premium/my-premium/ SEPARATES A FROM {B, C} AND DOES NOTHING
+    ABOUT B VERSUS C.** Entitlement lives on this page; whether a Premium
+    panel renders on a JOB POSTING is a fact about a different surface that no
+    reading here can reach. So this tool publishes NO boolean and NO single
+    number that would silently pick between the two live states -- every
+    branch carries ``settles`` and ``leaves_open`` in its own payload, and the
+    ``entitled`` branch names the B-versus-C split explicitly.
+
+    FIVE STATES, and three of them are real answers rather than failures:
+
+        entitled       management verbs present, no sales verbs
+        not_entitled   sales verbs present, no management verbs
+        ambiguous      BOTH families present. An upsell can sit beside a live
+                       subscription, so this does not resolve and does not
+                       guess
+        unmatched      NEITHER family matched -- a reading about THIS
+                       INSTRUMENT, not about the account
+        error          the read itself failed. It NEVER falls through to
+                       ``not_entitled``: reporting "no Premium" from a read
+                       that never checked is the failure this design exists
+                       to avoid
+
+    ``strength`` is ``thin`` at one hit or fewer and ``corroborated`` above
+    that, and ``None`` on ``error``, where no reading was taken to grade.
+
+    WHAT IT WILL NOT TELL YOU. No plan name, no price, no renewal date, no
+    control label. The only page-derived values that leave the reader are
+    COUNTS; ``needles_fired`` is a subset of the two needle tuples THIS
+    PACKAGE authors, so naming them names nobody. Matched control text exists
+    only inside ``premium.read_premium_surface`` and is discarded there.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant
+    and is on the read allowlist, root only.
+    """
+    url = premium.PREMIUM_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="premium")
+            reading = await premium.read_premium_surface(page)
+            verdict = premium.premium_entitlement(reading)
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the same choice
+                # linkedin_events_home made and for the same reason: the
+                # requested url is a module constant a caller can already
+                # read, and a navigation-derived string buys nothing a
+                # boolean does not.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                "controls_scanned": reading["controls_scanned"],
+                "needles_fired": list(reading["needles_fired"]),
+                "read_error": reading["error"],
+                **verdict,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_newsletter_subscriptions() -> dict[str, Any]:
+    """The newsletters you subscribe to, as a COUNT with no titles.
+
+    **``distinct`` IS THE ANSWER AND ``anchors`` IS NOT.** Measured on the
+    live page 2026-09-05: ten anchors, five newsletters. LinkedIn draws every
+    row twice -- once around an illustration carrying no text, once around the
+    title -- so a reader publishing the anchor count answers ten to a question
+    whose answer is five, while looking entirely correct. Both numbers are
+    returned and only one of them is the subscription count.
+
+    **A ZERO IS ONLY INTERPRETABLE BESIDE ``heading_seen``.** Zero rows with
+    the heading present is a fact about the ACCOUNT. Zero rows with the
+    heading absent is a fact about the INSTRUMENT -- a wrong aim, or a page
+    that had not hydrated. They never share a field, and a caller that reports
+    the first when it measured the second has answered the question backwards.
+
+    NO TITLES AND NO AUTHORS. A newsletter is authored BY A PERSON and both
+    its title and its slug routinely carry that person's name -- measured, not
+    supposed. Every row leaves through ``shape.subscription_row``, which
+    redacts the title unconditionally and publishes a constant href shape, so
+    what comes back says a subscription EXISTS and never which one.
+
+    TWO PAGE LOADS, AND THE FIRST ONE IS THE COST GATE. This address sits
+    under /mynetwork/, which carries the pending-invitation badge, so the
+    obligation the reader states is discharged here: the badge is read BEFORE
+    (off the feed's nav) and AFTER (off this page's nav, no third navigation),
+    and this tool REFUSES rather than answering if either reading fails or if
+    the badge MOVED across the load. A moved badge means the load consumed one
+    of his pending invitations, and a result that cannot certify its own cost
+    is withheld rather than shipped with a caveat.
+    """
+    url = newsletters.SUBSCRIPTIONS_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, FEED_URL)
+            assert_not_authwall(landed, surface="feed")
+            before = shape.invitation_badge(await dom.read_invitation_badge(page))
+            if before["state"] != "read":
+                return _badge_refusal(
+                    "the pending-invitation badge could not be read BEFORE",
+                    (
+                        "this tool may not open the newsletters page without a "
+                        "before-and-after reading of that badge, and the "
+                        "before reading failed. NOTHING WAS SPENT: the "
+                        "newsletters page was not opened."
+                    ),
+                    badge_before=before,
+                    pages_loaded=1,
+                )
+
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="newsletters")
+            after = shape.invitation_badge(await dom.read_invitation_badge(page))
+            if after["state"] != "read":
+                return _badge_refusal(
+                    "the pending-invitation badge could not be read AFTER",
+                    (
+                        "the page WAS opened, so whatever it costs has already "
+                        "been spent -- stated rather than hidden. What cannot "
+                        "be said is whether it consumed one of his pending "
+                        "invitations, and a tool gated on that question does "
+                        "not return a result it cannot certify."
+                    ),
+                    badge_before=before,
+                    badge_after=after,
+                    pages_loaded=2,
+                )
+            if after["pending"] != before["pending"]:
+                return _badge_refusal(
+                    "the pending-invitation badge MOVED across this load",
+                    (
+                        "only an unchanged badge certifies that opening this "
+                        "page consumed no pending invitation. It moved, so "
+                        "this load DID cost something, and the reading is "
+                        "withheld rather than published beside a cost nobody "
+                        "authorised. Record the two badge values -- this is "
+                        "the measurement the surface has been waiting for."
+                    ),
+                    badge_before=before,
+                    badge_after=after,
+                    pages_loaded=2,
+                )
+
+            reading = await newsletters.read_newsletter_subscriptions(page)
+            return {
+                "ok": True,
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 2,
+                "badge_before": before,
+                "badge_after": after,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_notify_cost_precondition() -> dict[str, Any]:
+    """Is TODAY a day on which the notifications cost could be measured at all?
+
+    **THIS IS A PRECONDITION, NOT A MEASUREMENT, AND IT SPENDS NOTHING.** It
+    does not open the notifications page and cannot: it loads the feed, reads
+    the notifications badge off that page's nav, and stops. The surface whose
+    cost is in question is never touched, which is the only way the BEFORE
+    half of a before/after pair can be taken without spending the very thing
+    being measured.
+
+    WHY THE QUESTION IS NOT ALREADY ANSWERED. ``linkedin_notifications``
+    states its side effect from a reading TAKEN BY HAND on 2026-08-21 -- the
+    badge went 1 to 0 and did not come back. This package holds a messaging
+    badge reader and an invitation badge reader and, until now, none for
+    notifications, so the server could STATE that cost and never RE-TAKE it.
+
+    THE THREE ANSWERS, and the middle one is the whole point:
+
+        unreadable   the badge could not be read. Nothing can be said in
+                     either direction, and this is NOT a zero
+        not_today    the badge reads ZERO. A before/after pair would read
+                     0 -> 0, which cannot distinguish "the page consumed
+                     nothing" from "there was nothing to consume". A fact
+                     about THIS ACCOUNT TODAY, never about the platform, and
+                     ``reversible`` says so -- one arriving notification
+                     makes it measurable again
+        measurable   the badge reads above zero, so a pair taken around a
+                     legitimate ``linkedin_notifications`` call would carry a
+                     real answer
+
+    IT DOES NOT RECOMMEND TAKING THE READING. Whether to spend the unread
+    state is the operator's call. The AFTER half belongs in band, on a
+    ``linkedin_notifications`` call that was going to happen anyway -- and
+    ``notify_cost.cost_delta`` is deliberately left with no caller until
+    somebody rules on that, because wiring it is what would spend something.
+
+    ONE PAGE LOAD. The nav renders on every signed-in page -- measured for the
+    sibling invitation badge on the feed and on the profile alike -- so no
+    navigation to /notifications/ is involved at any point.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, FEED_URL)
+            assert_not_authwall(landed, surface="feed")
+            reading = await notify_cost.read_notifications_badge(page)
+            verdict = notify_cost.measurability(reading)
+            return {
+                "ok": True,
+                "redirected": landed.rstrip("/") != FEED_URL.rstrip("/"),
+                "pages_loaded": 1,
+                "notifications_page_opened": False,
+                **verdict,
             }
     except Exception as exc:
         return _error(exc)
