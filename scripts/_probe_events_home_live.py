@@ -153,13 +153,38 @@ async def _read_events(page, attempt: int) -> dict:
     if walled:
         return {"authwall": True}
 
+    # THE SETTLE RE-READ, AND IT IS NOT DECORATION.
+    # A container arrives BEFORE its contents, so a reading taken the instant
+    # a page lands can be a reading of a half-built page. This takes ONE
+    # reading, waits for the network to go quiet, and takes ANOTHER on THE
+    # SAME LOAD. Two readings across two loads (which this file already does)
+    # cannot separate "stable" from "always half-built"; two readings at
+    # different moments of one load can.
+    early = await events.read_events_home(page)
+    try:
+        await page.wait_for_load_state("networkidle", timeout=15_000)
+    except Exception as error:  # noqa: BLE001
+        print(f"    settle wait did not complete: {type(error).__name__}")
     reading = await events.read_events_home(page)
+    settled = (
+        early["cards_read"] == reading["cards_read"]
+        and early["rows_total"] == reading["rows_total"]
+        and early["verdict"] == reading["verdict"]
+    )
+    print(f"    SETTLE: early rows_total={early['rows_total']} "
+          f"verdict={early['verdict']} -> after networkidle "
+          f"rows_total={reading['rows_total']} "
+          f"verdict={reading['verdict']} -- "
+          f"{'UNCHANGED' if settled else 'MOVED'}")
     print(f"    cards_read={reading['cards_read']}  "
           f"rows_total={reading['rows_total']}  "
           f"verdict={reading['verdict']}  "
           f"registered_events={reading['registered_events']}  "
           f"error={reading['error']}")
     for index, card in enumerate(reading["cards"]):
+        print(f"        card {index}: body_found={card['body_found']} "
+              f"body_text_chars={card['body_text_chars']} "
+              f"body_elements={card['body_elements']}")
         print(f"        card {index}: known={card['known']!r} "
               f"rows={card['rows']} event_links={card['event_links']} "
               f"heading_shape={card['heading_shape']!r}")

@@ -51,6 +51,46 @@ CONTAINER.** A section that had not hydrated would carry a skeleton or would
 not be in the document. This one is structurally complete and holds a list of
 length zero.
 
+### 2a. THE OBJECTION TO THAT SENTENCE, AND THE MEASUREMENT THAT ANSWERS IT
+
+**A CONTAINER ARRIVES BEFORE ITS CONTENTS.** A capture can hold a container
+plus a shimmer bar and no text, and a container-only reader then publishes a
+confident wrong answer. `unhydrated` is not `absent`. The objection was put to
+this wave mid-flight and it is the right one to put, because the first version
+of the corroborator did not close it: **full sibling cards prove the PAGE
+hydrated, not that THIS card did.** Different cards hydrate from different
+calls.
+
+So the reader stopped inferring from the absence of rows and started reading
+the card's BODY. One reading, live, one page, one instrument:
+
+    card 0  'Your events'          body_found=True   text 0     elements 0
+    card 1  a promoted section     body_found=False  --         --
+    card 2  'Recommended for you'  body_found=True   text 1567  elements 432
+
+**THE THIRD LINE IS THE CONTROL AND IT IS WHAT MAKES THE FIRST A READING.**
+The same selector, on the same page, in the same pass, returns 1567 characters
+and 432 elements for one card and nothing at all for another. A reader blind
+to body content could not produce that contrast; a shimmer would have shown
+elements; a rendered empty state would have shown text. Card 0 has neither.
+
+The reader now REFUSES rather than answering zero in each of those cases --
+`body_not_empty` when anything is in there, `body_unreadable` when the body
+cannot be found. Reaching the one verdict that carries a zero takes four
+independent facts, and `tests/test_events_home_reader.py` drives a shimmer and
+a rendered empty state through it to show each refusing.
+
+**AND THE READING WAS TAKEN TWICE PER LOAD, AT DIFFERENT MOMENTS OF IT.** Two
+readings across two loads cannot separate "stable" from "always half-built";
+one early reading and one after waiting for the network can. Four readings,
+two loads, all four agreeing at 18 rows and the same verdict.
+
+Card 1 reads `body_found=False` because the promoted card is built from a
+different class family. It costs nothing here -- only the self-scoped card's
+body is consulted -- but it is recorded rather than hidden, because a selector
+that silently misses a third of the cards it is pointed at is worth knowing
+about before somebody reuses it.
+
 **HOW THE PREVIOUS PASS MISSED IT, because it was not carelessness.** That
 pass assigned anchors to their nearest preceding heading. **A heading with
 zero anchors under it is invisible to an anchor-assignment pass** -- it does
@@ -225,8 +265,9 @@ both ends, and neither moved.
 | `scripts/_probe_events_surface_shape.py` | anchors must total 54, the live census count; an impossible attribute must find 0 | both passed; the run REFUSES and voids every tally if the first fails |
 | `scripts/_probe_events_home_live.py` | dark-mode census 20 at the START and the END; two readings must agree | 20 and 20; agreed on all four fields |
 | `scripts/_probe_events_row_menu.py` | refuses unless exactly 18 share triggers; menu selectors tallied BEFORE and AFTER so the press is shown to have caused the change | 18 found; 0 -> 1 menu, 0 -> 5 items |
-| `linkedin_server/events.py` | the zero requires the self-scoped card present AND a non-empty sibling | verdict `empty_beside_full_siblings` |
+| `linkedin_server/events.py` | the zero requires four facts: card present, no rows, a body holding neither text nor elements, and a non-empty sibling | verdict `empty_beside_full_siblings`; the same body reader returns 1567 chars / 432 elements on a sibling card in the same pass |
 | `tests/test_events_home_reader.py` | the stub is shown discriminating `~=` from `*=` before anything is asserted through it | 18 vs 54, so the regression test can fail |
+| the settle re-read | one reading on landing, one after waiting on the network, SAME load | unchanged, on both loads -- four readings, all agreeing |
 
 **THE ONE DEFECT FOUND IN MY OWN WORK, AND IT LOOKED CORROBORATED.** The row
 selector first matched `[class*="discovery-card"]` and read **54 rows where

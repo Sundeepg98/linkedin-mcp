@@ -129,6 +129,36 @@ EVENTS_HOME_LINK_SELECTOR = 'a[href*="/events/"]'
 #: The heading of a card.
 EVENTS_HOME_HEADING_SELECTOR = "h2"
 
+#: THE CARD'S BODY, AND THIS SELECTOR IS THE ANSWER TO THE ONLY SERIOUS
+#: OBJECTION TO THIS WHOLE READER.
+#:
+#: **A CONTAINER ARRIVES BEFORE ITS CONTENTS.** A card can be in the document
+#: holding a shimmer bar and no text, and a reader that concludes "zero" from
+#: the container alone publishes a confident wrong answer. ``unhydrated`` is
+#: not ``absent``, and the sibling-card corroborator below does not close this
+#: gap on its own: different cards hydrate from different calls, so full
+#: siblings prove the PAGE hydrated and not that THIS card did.
+#:
+#: So the body is read directly, and the zero requires it to be empty of BOTH
+#: text and elements -- not merely empty of rows. Measured on the live page:
+#: the self-scoped card's body inner HTML is a framework empty-binding comment
+#: and whitespace, 0 characters of text and 0 descendant elements. A shimmer
+#: would have elements; a rendered empty state would have text; a changed row
+#: markup would have both. **Each of those three returns a REFUSAL rather than
+#: a zero**, which is the whole difference between this reader and the one the
+#: objection describes.
+#:
+#: If the body cannot be found at all, that is also a refusal
+#: (``body_unreadable``) -- never an empty one.
+EVENTS_HOME_CARD_BODY_SELECTOR = (
+    'main[class~="events-events-card-container__main"]'
+)
+
+#: Anything at all inside the body. A universal selector, so a shimmer bar, a
+#: skeleton, an illustration or an empty-state paragraph all count -- the
+#: point is to detect PRESENCE, not to classify it.
+EVENTS_HOME_BODY_CONTENT_SELECTOR = "*"
+
 #: THE CLOSED SET, AND IT IS THE WHOLE OF THE IDENTIFICATION.
 #:
 #: The self-scoped card is recognised by matching its heading against this
@@ -146,7 +176,14 @@ EVENTS_HOME_SELF_SCOPED_HEADINGS: tuple[str, ...] = ("your events",)
 
 
 def _events_home_verdict(
-    *, found: bool, own_rows: int, other_rows: int, cards: int
+    *,
+    found: bool,
+    own_rows: int,
+    other_rows: int,
+    cards: int,
+    body_found: bool,
+    body_text_chars: int,
+    body_elements: int,
 ) -> tuple[Optional[int], str]:
     """How many events he is registered for, and why that is or is not known.
 
@@ -154,6 +191,11 @@ def _events_home_verdict(
     a browser, which is the only way its ZERO branch can be shown FAILING --
     and a zero that cannot be shown failing is the defect this function was
     written to avoid.
+
+    SIX VERDICTS AND EXACTLY ONE OF THEM CARRIES A ZERO. Reaching it takes
+    four independent facts: the card is present, it holds no rows, its BODY
+    holds neither text nor elements, and at least one sibling card is full.
+    Remove any one of the four and the answer becomes ``None`` with a reason.
     """
     if cards <= 0:
         return None, "no_cards"
@@ -161,6 +203,15 @@ def _events_home_verdict(
         return None, "heading_unmatched"
     if own_rows > 0:
         return own_rows, "rows_present"
+    if not body_found:
+        # THE BODY IS THE EVIDENCE. Without it the zero rests on the absence
+        # of rows alone, which is exactly the reading a shimmer produces.
+        return None, "body_unreadable"
+    if body_text_chars > 0 or body_elements > 0:
+        # SOMETHING IS IN THERE THAT IS NOT A ROW. A skeleton, an empty-state
+        # illustration, or row markup this reader no longer recognises. All
+        # three want a human, and none of them is "he is registered for zero".
+        return None, "body_not_empty"
     if other_rows <= 0:
         # EVERY CARD EMPTY. The page did not hydrate, or LinkedIn restructured
         # it. Either way the zero is about the read.
@@ -233,6 +284,31 @@ async def read_events_home(page: Any) -> dict[str, Any]:
             links = await card.locator(EVENTS_HOME_LINK_SELECTOR).count()
         except Exception:  # noqa: BLE001
             links = 0
+        # THE BODY, read for EVERY card rather than only the self-scoped one.
+        # Reading it everywhere means the shape of a full card's body is on
+        # the record beside the shape of the empty one, so a reader can see
+        # what "empty" is being contrasted with instead of taking it on trust.
+        body_found = False
+        body_text_chars = 0
+        body_elements = 0
+        try:
+            bodies = card.locator(EVENTS_HOME_CARD_BODY_SELECTOR)
+            if await bodies.count():
+                body_found = True
+                body = bodies.first
+                body_text_chars = len(
+                    (
+                        await body.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS)
+                        or ""
+                    ).strip()
+                )
+                body_elements = int(
+                    await body.locator(
+                        EVENTS_HOME_BODY_CONTENT_SELECTOR
+                    ).count()
+                )
+        except Exception:  # noqa: BLE001
+            body_found = False
         raw_headings.append(heading)
         records.append(
             {
@@ -244,6 +320,9 @@ async def read_events_home(page: Any) -> dict[str, Any]:
                 ),
                 "rows": int(rows),
                 "event_links": int(links),
+                "body_found": bool(body_found),
+                "body_text_chars": int(body_text_chars),
+                "body_elements": int(body_elements),
             }
         )
 
@@ -262,11 +341,17 @@ async def read_events_home(page: Any) -> dict[str, Any]:
     other_rows = sum(
         int(record["rows"]) for record in records if record["known"] is None
     )
+    # THE BODY EVIDENCE COMES FROM THE SELF-SCOPED CARD ONLY. Summed across
+    # `own` rather than taken from the first of them, so a page that somehow
+    # drew two such cards cannot have the second one's contents ignored.
     registered, verdict = _events_home_verdict(
         found=bool(own),
         own_rows=own_rows,
         other_rows=other_rows,
         cards=int(count),
+        body_found=all(bool(record["body_found"]) for record in own),
+        body_text_chars=sum(int(record["body_text_chars"]) for record in own),
+        body_elements=sum(int(record["body_elements"]) for record in own),
     )
     out["cards"] = records
     out["rows_total"] = own_rows + other_rows
