@@ -543,6 +543,50 @@ worse instrument rather than a longer list. The segment is readable through a
 SHAPED route by whoever builds one; it is not readable through a print, and the
 guard is right about that.
 
+### I TESTED THE GENERALISATION RATHER THAN ASSERTING IT, AND IT REPRODUCED
+
+The register entry above claims the landed-address check generalises. **A claim
+about what a check WOULD find is worth nothing beside a run of it**, so
+`scripts/_probe_landed_address_sweep.py` ran it over four addresses that are on
+the allowlist today AND are loaded by shipped tools in ordinary use, so the
+sweep adds no exposure those tools do not already add.
+
+    CONTROL  the job search page              landed admitted: yes
+             the tracker, saved stage         landed admitted: yes
+             the tracker, applied stage       landed admitted: yes
+             the tracker, draft stage         landed admitted: yes
+             the recommended collection       landed admitted: NO
+
+    addresses measured beside the control : 4
+    refused AFTER landing                 : 1
+
+**ONE OF FOUR, AND IT IS A DIFFERENT MECHANISM FROM THE ALERTS CASE.** The
+alerts address redirects to another PATH. `/jobs/collections/recommended`
+serves and KEEPS ITS PATH -- and its landed address is still refused, because
+LinkedIn appends a QUERY and the pattern is anchored with none.
+
+**That is the no-query discipline biting the surface it was written to
+protect.** The rule is right -- *"a pattern that accepts a query accepts
+whatever a caller appends"* -- and its consequence, never stated, is that such
+a pattern **refuses the address LinkedIn actually serves.** Harmless while
+nothing re-checks the landing; a trap the moment anything does. Two entries now
+sit in that state, and the newer one was admitted at `db0dc40` two and a half
+hours before this reading.
+
+**I DID NOT TOUCH THE COLLECTIONS PATTERN.** It is the `db0dc40` wave's artifact
+by `git log`, the reading is reported rather than acted on, and **the remedy is
+a decision rather than an edit**: either the no-query rule accepts that anchored
+entries do not cover their own landings, or a landed-url check is added and
+these two are fixed before it lands. **Adding that check FIRST would turn two
+working surfaces red**, which is precisely why this is worth knowing before
+somebody adds it rather than after.
+
+**WHAT THE SWEEP DOES NOT CLAIM.** It walked four addresses, not the allowlist's
+32. Several admitted addresses are pages nobody has opened or belong to other
+waves' surfaces, and walking them at the end of a window to make a number bigger
+is a cost nobody sanctioned. **One in four is a rate over four**, and the file
+says which addresses it left alone.
+
 ---
 
 ## 8. THE ONE THING TO DO FIRST NEXT SESSION
