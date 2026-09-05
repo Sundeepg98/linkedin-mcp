@@ -504,8 +504,30 @@ have not opened the assist control. If LinkedIn's flow fills the composer and
 lets you EDIT before sending, then a two-step shape exists -- press assist, read
 the composer back, mint a grant on what it actually says, then send. That is not
 a small build; `send_message` already reads its composer back and that read-back
-is the hardest-won part of it. **WHAT WOULD SETTLE IT: one capture of the
-messaging composer with the assist control pressed.**
+is the hardest-won part of it.
+
+  **WHAT WOULD SETTLE IT IS ONE CALL TO A TOOL THAT ALREADY SHIPS**, and it is
+  worth stating exactly rather than as "a capture": `linkedin_surface_census`
+  on the `messaging_compose` key. Measured this pass -- `messaging_compose` is
+  one of the 12 entries in `server.CENSUS_SURFACES`, the address is admitted by
+  exemption, and the tool clicks nothing.
+
+  **It carries its own render gate, which is what makes it the right instrument
+  rather than merely an available one.**
+  `server.CENSUS_SETTLED_CONTROLS["messaging_compose"]` is **77**, earned in
+  the entry's own words from "77 AND 77, two independent readings on 2026-09-01
+  separated by hours and by a server restart". A run that reads 77 has proven
+  the render settled, so a zero then means ABSENT; a run that does not read 77
+  is void as a measurement. **Zero boundary change, zero new code, and a
+  control that must fire.**
+
+  **The narrower instrument on the same surface is NOT the one to use.**
+  `linkedin_compose_fields` refuses unless it finds exactly two dispatch radios
+  with exactly one checked plus one body editor, and publishes only the SHAPE
+  of a label -- it is aimed at the radios, not at the composer's control set.
+  Its last live fire returned `refused: name_shaped_label_present` and the
+  repaired build has not been re-run, which is a separate thing owed on a
+  different row.
 
 **WHATEVER THE MEMBERSHIP IS, TWO ROWS LEAVE.** All three candidates fail for the
 identical reason, and whichever one my reconstruction displaced lands under a
@@ -676,8 +698,10 @@ their class.**
   row.
 * **UNTESTED, and this is the honest limit:** I have not opened the message
   composer. Whether LinkedIn offers a voice note as an ATTACHMENT as well as a
-  recording is unknown. **WHAT WOULD SETTLE IT: one capture of the message
-  composer with the attachment controls enumerated.**
+  recording is unknown. **WHAT WOULD SETTLE IT is the same single call named in
+  3.6** -- `linkedin_surface_census` on the `messaging_compose` key, with its
+  earned settled-control baseline of 77 as the render gate. One read answers
+  both rulings.
 * **The reason that does not depend on the capture:** a recording that sounds
   like him saying words he did not speak is an identity forgery. That is the
   `auto_accept_or_auto_reply` class -- *"a message from a stranger wearing his
@@ -766,20 +790,44 @@ other accounts is unknown -- **and irrelevant, because this server only ever
 reads his.** The scope of the measurement matches the scope of the server
 exactly, which is the strongest form this evidence can take.
 
-**WHAT REOPENS IT, and it is cheap and already scripted:** the control reads
+**WHAT REOPENS IT, and both instruments already exist:** the control reads
 1/1/0 -- proving the page is settled and the reader can see -- AND any target
-needle reads non-zero. That is one probe run against one capture. **A zero
-without the control firing reopens nothing**, per the render gate: a read of zero
-from a surface whose control did not fire is a fact about the instrument.
+needle reads non-zero. **A zero without the control firing reopens nothing**,
+per the render gate: a read of zero from a surface whose control did not fire is
+a fact about the instrument.
 
-**ONE THING OWED THAT THIS PASS DID NOT DO.** A13 records that `/jobs/view/<id>`
-earned a settled-control baseline of **193** -- two readings, identical on every
-structural count, across a browser restart -- and belongs in
-`server.CENSUS_SETTLED_CONTROLS` under a `job_posting` key. That edit is still not
-made. **`linkedin_server/server.py` is a contended file with other waves writing
-it, so this pass did not touch it.** It is owed and it is routed by artifact: the
-baseline is A13's, and whoever next holds `CENSUS_SETTLED_CONTROLS` should carry
-it.
+Named exactly, because "one probe run" is not an instruction:
+
+* the LIVE half is `scripts/_probe_unmeasured_surfaces_live.py`, which carries
+  the `Show match details` / `Show Premium Insights` needles;
+* the OFFLINE half is `pytest tests/test_free_read_panels.py`, which carries
+  them too and runs against the four committed captures in seconds, with no
+  browser and no session. **A future LinkedIn change is invisible to the
+  offline half** -- captures do not update themselves -- so the offline run
+  guards the reasoning and only the live run can reopen the row.
+
+**TWO THINGS OWED ON ONE DICT, AND THEY ARE ONE EDIT.**
+
+1. A13 records that `/jobs/view/<id>` earned a settled-control baseline of
+   **193** -- two readings, identical on every structural count, across a
+   browser restart -- and belongs in `server.CENSUS_SETTLED_CONTROLS` under a
+   `job_posting` key. Still not made; `job_posting` is confirmed absent from
+   both `CENSUS_SURFACES` (12 keys) and `CENSUS_SETTLED_CONTROLS` at HEAD.
+2. **`CENSUS_SETTLED_CONTROLS` has a DUPLICATE KEY.** Measured by AST at
+   `linkedin_server/server.py:3876`: **8 literal keys, 7 distinct** --
+   `post_composer` appears twice. Both values are 31, so nothing is wrong at
+   runtime today, and that is exactly what makes it a trap: **the first entry
+   is dead and its comment is the more detailed of the two** ("31, 31, 31 --
+   three readings across two days and three builds" versus "31 twice,
+   2026-08-31"). Two hands wrote a baseline for the same surface and one of
+   them has never been read. **Anyone who updates the first entry will see no
+   effect whatever**, which is the failure this repository keeps finding in
+   other forms -- a check that looks correct and cannot fire.
+
+**`linkedin_server/server.py` is contended and this pass did not touch it.**
+Both items are routed by artifact rather than by name: whoever next holds
+`CENSUS_SETTLED_CONTROLS` should add `job_posting: 193` and collapse the
+duplicate in the same edit, keeping the fuller provenance comment.
 
 ---
 
@@ -909,19 +957,22 @@ each one, and they are deliberately concrete enough to be checked.
 | `HELP-CENTER-FORM` | `P N30 N31`, `N 152` | N30/N31: LinkedIn makes them self-service for a living member. N 152: an in-product STRUCTURED report, and even then the narrative stays his | LinkedIn |
 | `OFF-PLATFORM-WIDGET` | `N 50` | nothing plausible -- a third-party widget drivable without leaving `linkedin.com` is a contradiction | -- |
 | `LIVE-BROADCAST` | `P L5`, `M C59` | browser-native go-live with no external encoder | LinkedIn |
-| `AI-ASSIST-MESSAGING` | `M M40 M51` | the assist control fills an EDITABLE composer, making a read-back-then-mint shape possible | **one capture of the composer with assist pressed** |
+| `AI-ASSIST-MESSAGING` | `M M40 M51` | the assist control fills an EDITABLE composer, making a read-back-then-mint shape possible | **`linkedin_surface_census` on `messaging_compose`** -- ships today, address already admitted, settled baseline 77 |
 | `DEVICE-GEOLOCATION` | `J 17` | he wants a search whose location he cannot name AND the `location` string cannot express it -- both halves | the operator |
 | `SIGNIN-INTERSTITIAL` | `P N13` | nothing that keeps the shape | -- |
 | `MOBILE-APP-ONLY` | `P A23` | desktop recording for name pronunciation | LinkedIn |
 | `MESSAGING-SETTINGS` | `M M37 M41 M42 M46 M50` | **the operator names one.** That is the mechanism, not a consolation -- it is how dark mode got in | the operator |
-| `VOICE-CAPTURE` | `M M19` | the composer accepts an audio FILE -- and then it reopens as `FILE-UPLOAD-UNSANCTIONED`, not as this | **one capture of the composer** |
+| `VOICE-CAPTURE` | `M M19` | the composer accepts an audio FILE -- and then it reopens as `FILE-UPLOAD-UNSANCTIONED`, not as this | **the same single call as the row above** |
 | `PAID-BOOST` | `M C71` | nothing that keeps the shape | -- |
-| `PANEL-NOT-OBSERVED` | `J 25 29 30` | the control reads 1/1/0 AND a target needle reads non-zero. **A zero without the control firing reopens nothing** | one probe run |
+| `PANEL-NOT-OBSERVED` | `J 25 29 30` | the control reads 1/1/0 AND a target needle reads non-zero. **A zero without the control firing reopens nothing** | `scripts/_probe_unmeasured_surfaces_live.py` live; `tests/test_free_read_panels.py` offline |
 
-**Three reopeners are one capture each and two of those are the same capture** --
-the message composer settles both `AI-ASSIST-MESSAGING` and `VOICE-CAPTURE`. That
-is the cheapest un-retirement available and it is worth knowing before anyone
-argues either ruling.
+**THE CHEAPEST UN-RETIREMENT IN THE DOCUMENT IS ONE TOOL CALL, and it settles
+two rulings.** `linkedin_surface_census` on the `messaging_compose` key needs no
+boundary change, no new code and no capture: the tool ships, the address is
+admitted, and the surface already has an earned settled-control baseline of 77
+so the read validates itself. **Anyone minded to argue `AI-ASSIST-MESSAGING` or
+`VOICE-CAPTURE` should run it first rather than argue** -- that is the whole
+point of writing reopeners as instruments instead of as conditions.
 
 ---
 
