@@ -196,7 +196,49 @@ the gate holding the only publish capability shut. Its ledger ratio of 0.50
 prices the row and not the leverage, and a planner reading the ranked table
 alone would not see that.
 
-## 7. THE INSTRUMENT
+## 6b. THE BUILD SPEC FOR ROW 59 IS ALREADY IN THE CODE -- AND IT CARRIES A HAZARD
+
+Found after section 6 was written, which is why it sits beside it rather than
+inside it. `server.py:6400` and the twelve lines above it hold the whole
+remaining design:
+
+    _COMPOSER_AUDIENCE_READER = "read_post_composer_audience"
+
+    def _composer_audience_is_readable() -> bool:
+        return callable(getattr(dom, _COMPOSER_AUDIENCE_READER, None))
+
+**The refusal lifts by FEATURE DETECTION**, and the comment beside it argues the
+choice well: a boolean "would have to be flipped by hand and would go stale
+exactly the way the seven spec sentences corrected on 2026-09-03 did". That
+reasoning is right and I am not disputing it.
+
+**THE PROPERTY THAT FOLLOWS FROM IT, WHICH NOBODY WROTE DOWN.** The act that
+re-arms `linkedin_publish_post` is *defining a function with a particular name
+on `dom`*. Not landing a reader. Not proving it reads anything. A stub written
+to sketch an interface satisfies `callable(...)` and lifts the gate on an action
+this server declares IRREVERSIBLE and whose outcome it declares UNVERIFIABLE.
+
+**This is a measured defect class in this repository, arriving in the most
+expensive possible place.** `_redact` was admitted to `readonly._SANITISERS`
+"on the strength of its NAME and turned out to carry no slug rule at all" --
+and the remedy adopted then, `_relation` admitted *with the test that proves its
+contract*, is the remedy available here. The difference is that `_SANITISERS`
+learned it after the fact and this can be written before the reader exists, at
+which point it costs nothing.
+
+So `PUBLISH-POST-AUDIENCE-PARAM` is better understood than its ledger row says:
+
+| | ledger | measured here |
+|---|---|---|
+| what remains | 1 ruling + 1 tool | the ruling is A9 and is DONE; the tool has a NAME, a call site and a live consumer already waiting on it |
+| what is missing | a parameter | the **audience option set**, which one page load establishes |
+| the risk | none recorded | defining the name alone lifts an irreversible-action refusal |
+
+**I did not build the reader and should not have.** Its contract cannot be
+written until the option set is measured (A9), and inventing the vocabulary from
+a sibling control's options is the thing A9 explicitly forbids.
+
+## 7. THE INSTRUMENTS -- two, and both shown failing
 
 `tests/test_no_write_tool_names_a_third_party.py`, 15 tests, 1.21s.
 
@@ -234,6 +276,42 @@ does not and cannot prove no mention is composed inside the package;
 `test_typed_bytes.py` guards the mechanism, off the same AST, and neither is the
 claim alone.
 
+### `tests/test_the_audience_reader_arrives_with_its_contract.py`, 3 passed 1 skipped, 3.73s
+
+The hazard in 6b, turned into an assertion. If `dom.read_post_composer_audience`
+exists, a contract test for it must exist too -- so the reader cannot arrive
+alone and re-arm publishing on the strength of its name.
+
+**It carries two controls and they are the load-bearing part.** One pins the
+exact string the refusal is keyed on, so a rename fails HERE with a reason
+rather than leaving the guard watching an attribute nothing consults. The other
+asserts the live refusal still returns `audience_unread`, so the guard cannot
+outlive the thing it protects.
+
+**SHOWN FAILING IN-SUITE, not in a side script.** `test_this_guard_can_fail`
+monkeypatches the name onto `dom`, asserts the server's OWN feature detection
+then returns True, and asserts the guard turns red with `pytest.raises`. The
+mutation is a monkeypatch, so no contended file was edited. It also branches: if
+a contract test IS on disk by then it asserts the guard PASSES instead, and says
+which branch it took -- a guard whose failure demo silently inverts later is
+worse than no demo.
+
+**The skip is deliberate and is the current state, stated:** the reader does not
+exist, so the assertion cannot fire yet and says so in its skip reason rather
+than passing vacuously. A test that passes because its subject is absent is the
+green this repository distrusts most.
+
+### And the correction guard fired on ME, which is worth one line
+
+My first `CORRECTS:`/`CORRECTED BY:` pair was MALFORMED -- I wrapped the reason
+onto a second line and `test_every_marker_names_one_document_and_carries_a_reason`
+refused both halves with the exact reason. **I would not have caught it by
+reading**; the markers looked right. It also could not fire until the file was
+STAGED, because the corpus is `git ls-files -- _audit` -- which is today's
+~16:57 scar exactly: *after staging new files, RE-RUN the tracked-file guards.*
+I ran them before staging first, and they were green on a corpus that did not
+contain my document.
+
 ## 8. WHAT I DID NOT DO
 
 Said plainly, because the wave was 45 minutes and six blockers is not a
@@ -242,6 +320,15 @@ Said plainly, because the wave was 45 minutes and six blockers is not a
 * **No live read of any kind.** No browser attached, no composer opened, no page
   loaded. The two reads this surface owes -- the audience option set (section 6)
   and the celebration template (section 3) -- are both still owed.
+* **I went as far as the census tool and stopped there.** `linkedin_server_info`
+  reports the running process **STALE** -- loaded `1b940ff99ffc`, disk
+  `825543dbbaf8` -- so a census taken through it would be a measurement by older
+  code, reported without that sentence attached. **I did not restart the
+  server**: it is `transport`'s artifact, a dozen waves are attached to it, and
+  restarting a shared process to take my own reading is the shared-state move
+  this tree has been burned by. The probe route reads current code and was the
+  right answer; I chose section 6b over it with the clock I had, and 6b needed
+  no page at all.
 * **No boundary change.** `_ALLOWED_URL_PATTERNS` is 29 at this tree and I added
   nothing. The digest chain is contended and re-freezing it for a pattern I have
   no reader behind would be A10's "a boundary opened with nothing behind it".
