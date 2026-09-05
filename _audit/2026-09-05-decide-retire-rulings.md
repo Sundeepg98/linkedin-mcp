@@ -245,7 +245,16 @@ interview.
 **RETIRED -- rows 143, 144, 145 (messages to a human hirer).** All three routes
 are, in LinkedIn's own words, contacting the hirer: replying with feedback on the
 interview experience (143), requesting your rating, summaries, transcript or
-recording (144), requesting an accommodation (145). The content is a personal
+recording (144), requesting an accommodation (145).
+
+  **`a10376002` WAS ALSO FETCHED DIRECTLY THIS PASS and confirms all four
+  load-bearing sentences** -- *"audio or video (if available) screening call
+  with an AI interviewer"*; *"If you decide not to participate, you will not be
+  automatically disqualified."*; *"To end the interview, click End interview."*;
+  and, decisively for row 144, *"You can request access to your rating and
+  summaries, transcript, or recording by contacting the hirer."* **Row 144's
+  route is a message to a person, in LinkedIn's own words**, which settles the
+  R/W disagreement flagged below in favour of retiring it here. The content is a personal
 statement about his own experience or his own needs. That is the same class the
 shipped `auto_accept_or_auto_reply` prohibition names -- *"a reply in his name
 that he did not read is a message from a stranger wearing his face"* -- and an
@@ -445,6 +454,26 @@ on the strength of a name.
   the rule splits it at the domain boundary rather than at the row boundary.**
   If it were split into two rows the retirement would follow the act, not the
   id -- which is what writing the ruling as a shape buys.
+
+  **AND THEN THE ARTICLE WAS FETCHED, AND IT IS BOTH -- SPLIT ON A SECOND AXIS
+  THE RULE DID NOT PREDICT.** `a7443434`, read directly this pass, documents two
+  mechanisms:
+
+      DESKTOP  "Click on the Send icon. Click Copy link to post to copy the
+                post link. Paste the copied link into any external social
+                platform and share."
+      MOBILE   "Tap Share via. Swipe right and tap your preferred app or
+                platform. Follow the prompts by the app or platform."
+
+  **The desktop mechanism is a control on a LinkedIn page that produces a link.
+  It is a read, it is not off-domain, and the hand-back is correct.** The mobile
+  mechanism is the share dialog -- and it is refused twice over, being both
+  off-domain AND app-only, the same wall as 3.9.
+
+  **The shape rule split the row at the domain boundary and the article agrees;
+  it also adds a desktop/mobile axis this pass did not anticipate.** That is the
+  argument for shape rules stated as a result rather than as a preference: the
+  rule decided correctly on evidence it had not seen.
 
   **New blocker: `LINK-FOR-OFF-PLATFORM-USE` -- 2 rows, 2R, queue BUILD, cost 2**
   (parser +1, tool +1; ratio 1.00). No boundary change asserted, because I have
@@ -1041,16 +1070,19 @@ point of writing reopeners as instruments instead of as conditions.
    control), `VOICE-CAPTURE` (the composer's attachment set) and
    `LINK-FOR-OFF-PLATFORM-USE`'s cost (which page draws the control). Each names
    the capture that settles it.
-4. **THREE help articles were fetched directly and SEVEN were not.** Fetched and
-   confirmed sentence for sentence against the census: `a8336402` (AI interview
-   prep), `a10133010` (camera and microphone permissions), `a550527` (name
-   pronunciation). Still inherited from the census's reading: `a10376002`,
-   `a548518`, `a569473`, `a523091`, `a507441`, `a523131`, `a7443434`.
-   **The three that were checked all held**, which is evidence about the
-   census's reliability and not a licence to treat the other seven as checked.
-   And the fetch itself answers through a small model rather than returning raw
-   bytes, so what the three buy is a second independent reading that agrees --
-   corroboration, not a primary source.
+4. **FIVE help articles were fetched directly and FIVE were not.** Fetched and
+   confirmed against the census: `a8336402` (AI interview prep), `a10376002`
+   (AI interviews as a hiring stage), `a10133010` (camera and microphone
+   permissions), `a550527` (name pronunciation), `a7443434` (share a post off
+   LinkedIn). Still inherited from the census's reading: `a548518`, `a569473`,
+   `a523091`, `a507441`, `a523131`.
+   **All five that were checked held**, which is evidence about the census's
+   reliability and not a licence to treat the other five as checked. **One of
+   the five did more than confirm** -- `a7443434` added a desktop/mobile split
+   that no reading in this repository had, and it fell on the side 3.4's shape
+   rule already predicted. And the fetch itself answers through a small model
+   rather than returning raw bytes, so what these buy is a second independent
+   reading that agrees -- corroboration, not a primary source.
 5. **No browser was driven and no signed-in page was loaded.** Everything else
    was measured by importing `linkedin_server` at HEAD and by reading committed
    markdown. **THE ONE EXCEPTION, stated rather than buried:** three PUBLIC help
@@ -1110,7 +1142,7 @@ section 5 closes in both directions.
 * Working log: `_audit/_scratch/_progress-retire-rulings.md`.
 * Full-suite gate in a `git clone --no-hardlinks` of HEAD:
   `_audit/_scratch/_gate-retire-rulings-clone.txt`.
-* Help articles `a8336402`, `a10133010` and `a550527` fetched directly over
+* Help articles a8336402, a10376002, a10133010, a550527 and a7443434 fetched directly over
   plain HTTP -- public pages, no session, no account, no browser, no cookie.
   Each answered through a small model rather than returned as raw bytes, which
   is why they are cited as a second agreeing reading and never as a primary
