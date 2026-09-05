@@ -723,9 +723,17 @@ before it was relied on. The read-only allowlist is identical in both modes.
 - **One page load per tool call.** The only exception is
   `linkedin_my_profile(include_skills=True)`, which loads a second page and
   reports `pages_loaded: 2`.
-- **No auto-paging.** Ask for the next page of a search deliberately with
-  `start=25`. Every list result carries `capped`, `page_had` and `limit`, so
-  "25 results" is never mistaken for "25 results exist".
+- **No auto-paging, and the job-search window is SEVEN, not 25.** Ask for the
+  next page of a search deliberately with **`start=7`**, then 14, then 21 --
+  `start` offsets by ONES, and a load returns the seven cards the reader can
+  see. Measured over seventeen live loads spanning two professions, two cities,
+  five filters and three job-type values: seven every single time, on one query
+  against LinkedIn's own count of 2915. **This line used to prescribe
+  `start=25`**, on the belief that a page holds 25; at a window of seven that
+  stride skips eighteen postings per page turn. `linkedin_search_jobs`'s
+  docstring was corrected when the window was measured and this line was
+  missed. Every list result still carries `capped`, `page_had` and `limit`, so
+  a page count is never mistaken for a total.
 - **One call at a time**, serialised in-process; **one process at a time**,
   serialised by a cross-process lock on the Chrome profile. Two processes on one
   Chromium user-data dir corrupt it and your session is gone -- that cost a
