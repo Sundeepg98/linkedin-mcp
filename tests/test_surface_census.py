@@ -706,6 +706,14 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
         # nobody in this repository has opened, which is why it is a census
         # key and not a tool of its own yet.
         "search_appearances",
+        # 2026-09-05. HIS OWN GROUPS AND HIS OWN EVENTS, and they join for the
+        # same reason search_appearances did one entry up: nobody in this
+        # repository has opened either page, so the census is the right FIRST
+        # instrument and a reader is not. Both are the only route to the
+        # precondition under GROUPS-SURFACE (32 rows) and EVENTS-SURFACE (18)
+        # -- three cheaper routes were measured and all three are dead.
+        "groups",
+        "events",
     }
     assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
     # EVERY RESOLVED SURFACE NAMES ITS SELECTION RULE. A resolved key with no
@@ -719,7 +727,14 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
     assert census_surface_keys() == sorted(
         set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES
     )
-    assert len(census_surface_keys()) == 12
+    # 12 -> 14 ON 2026-09-05, for "groups" and "events". THE COUNT IS PINNED
+    # SEPARATELY FROM THE SET ABOVE ON PURPOSE, and this pair is why: the set
+    # literal was updated for search_appearances that morning and this number
+    # was NOT, so the membership was right while the count was stale -- the
+    # mirror of the older defect this test's own docstring records, where the
+    # count was right by accident and the membership was wrong. Two
+    # assertions, two failure modes, and neither one covers the other.
+    assert len(census_surface_keys()) == 14
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
@@ -930,9 +945,11 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
     # answer against the same dict that produced it could not fail.
     assert result["valid_surfaces"] == [
         "article_composer",
+        "events",
         "feed",
         "feed_item",
         "feed_item_commented",
+        "groups",
         "messaging_compose",
         "post_composer",
         "premium",
@@ -3673,6 +3690,13 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
         "feed_item_commented",
         "premium",
         "search_appearances",
+        # BOTH ADDED 2026-09-05, and they belong in THIS list rather than in
+        # CENSUS_SETTLED_CONTROLS for the reason the paragraph above gives:
+        # neither page has been opened once. A surface earns a baseline by
+        # being read more than once and agreeing with itself, and "unknown"
+        # is the only honest verdict until it has.
+        "groups",
+        "events",
     ):
         assert surface not in CENSUS_SETTLED_CONTROLS, surface
         report = census_settle_report(surface, 5)

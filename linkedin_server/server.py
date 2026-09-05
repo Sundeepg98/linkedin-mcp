@@ -3600,6 +3600,42 @@ CENSUS_SURFACES: dict[str, str] = {
     # own rule is that one load of the page under consideration cannot be the
     # evidence that authorises it, so the reciprocal page is read instead.
     "search_appearances": dom.SEARCH_APPEARANCES_URL,
+    # HIS OWN GROUPS AND HIS OWN EVENTS, added 2026-09-05 on the operator's
+    # ruling, and they are the first thing the boundary widening of the same
+    # day makes possible.
+    #
+    # ONE QUESTION EACH, AND IT IS THE SAME QUESTION: does he belong to any
+    # group, is he registered for any event? ``GROUPS-SURFACE`` (32 census
+    # rows) and ``EVENTS-SURFACE`` (18) both rest on that and nobody has
+    # established it -- 29 of the 32 are unreachable in principle if the
+    # answer is zero. Three cheaper routes were measured first and all three
+    # are dead; the argument in full is on the two allowlist entries in
+    # ``readonly.py`` rather than repeated here.
+    #
+    # THE CENSUS IS THE RIGHT INSTRUMENT AND A READER IS NOT, YET.
+    # ``read_surface_census`` reduces every name and href to a SHAPE inside
+    # itself and drops the name beside any control whose href identifies an
+    # entity -- which on these two surfaces is most of the page, by design. A
+    # group card links to a group, so its name is redacted and only the shape
+    # of its href survives. **That shape is the measurement**: counting
+    # controls carrying ``/groups/<group>`` or ``/events/<event>`` answers the
+    # precondition and names nobody, because both are placeholders this
+    # package writes rather than strings LinkedIn serves.
+    #
+    # A membership READER is a different object with a different privacy
+    # contract, and it needs a capture that does not exist: no document in
+    # this repository has ever held a group or event surface -- measured, 30
+    # documents and 2522736 characters, with a control that fires
+    # (``scripts/_probe_membership_signal_in_corpus.py``). Its per-record
+    # emission gate is built and proven in ``shape.membership_row``; what it
+    # lacks is a page to parse.
+    #
+    # NEITHER GETS A ``CENSUS_SETTLED_CONTROLS`` ENTRY, deliberately. Nobody
+    # has read either page even once, and a surface earns a baseline by being
+    # read more than once and agreeing with itself. Both report
+    # ``settle: unknown``, which is the ABSENCE of a check saying so.
+    "groups": f"{BASE_URL}/groups/",
+    "events": f"{BASE_URL}/events/",
 }
 
 #: WHAT A SETTLED RENDER OF EACH SURFACE LOOKS LIKE, as the control count it
@@ -3845,6 +3881,46 @@ CENSUS_SURFACE_COST: dict[str, str] = {
         "it before and after through the feed or profile census, which "
         "carries it as 'Messaging, N new notifications'."
     ),
+    "groups": (
+        "THIS MAY CONSUME HIS OWN UNREAD MARKERS. LinkedIn draws unread-post "
+        "indicators on group cards, and whether loading the LIST consumes "
+        "any of them is UNMEASURED -- which is the question this key exists "
+        "to answer. "
+        "THE OPERATOR RULED IT ADMISSIBLE, and the ground is the one that "
+        "separates the two answers already in known_side_effects: NOT the "
+        "size of the cost but WHETHER A CHEAPER ROUTE EXISTS. /mynetwork/ is "
+        "refused because one does -- send_invitation reads his own profile "
+        "instead. /notifications/ and /messaging/ are admitted because none "
+        "does. None does here either: three routes were measured and all "
+        "three are dead -- the allowlist (0 of 15 addresses admitted, 7 "
+        "controls passing), the RENDER (a tabbed category's rows are not in "
+        "the document until the tab is pressed, proven by a control that had "
+        "to fire and did not), and the admitted-but-redirecting Interests "
+        "address. "
+        "The activity behind an indicator is not destroyed, and nobody else "
+        "pays anything. "
+        "WHAT THIS ANSWER CAN AND CANNOT SAY: it reports what the page DREW. "
+        "If an indicator was consumed it says so; if it cannot tell, it says "
+        "UNKNOWN. It does not and cannot report that nothing was left "
+        "behind -- that is a claim about an instrument this server does not "
+        "have."
+    ),
+    "events": (
+        "SAME COST AND SAME UNKNOWN as groups above -- LinkedIn may draw "
+        "unread markers here too and whether a list load spends them has "
+        "never been measured. "
+        "AND ONE THING MORE, WHICH SHOULD BE WEIGHED BEFORE SPENDING IT. The "
+        "censused content of this root is a RECOMMENDATION surface: census "
+        "row N 180 is 'events recommended from your interests, Pages you "
+        "follow, and what your network is attending'. NO CENSUS ROW NAMES A "
+        "'your events' REGION. So this read may return nothing self-scoped "
+        "at all. "
+        "THAT OUTCOME IS THE FINDING RATHER THAN A FAILURE: if it does, this "
+        "address should be RETIRED rather than left open for a capability "
+        "nobody asked for. The address was admitted on the narrower ground "
+        "that it is the only route left to the groups/events precondition, "
+        "which governs 50 census rows, and one load settles it."
+    ),
 }
 
 
@@ -4067,11 +4143,11 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
     Args:
         surface: which page to measure. A KEY, never a url, and one of these
-            twelve: "feed", "profile", "profile_edit_intro", "settings",
+            fourteen: "feed", "profile", "profile_edit_intro", "settings",
             "settings_dark_mode", "feed_item", "feed_item_commented",
             "post_composer", "article_composer", "messaging_compose",
-            "premium" or "search_appearances". THIS LIST HAS BEEN INCOMPLETE
-            TWICE and is now pinned
+            "premium", "search_appearances", "groups" or "events". THIS LIST
+            HAS BEEN INCOMPLETE TWICE and is now pinned
             by ``test_the_census_docstring_lists_every_surface_it_answers_to``
             -- it said "five" while eight keys existed, and was then corrected
             to a NINE that named the wrong nine, listing "feed_item" while
