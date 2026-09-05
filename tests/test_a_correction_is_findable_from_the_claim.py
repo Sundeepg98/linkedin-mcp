@@ -44,7 +44,17 @@ exactly. **What does not differ is the ratio, and the ratio is the whole
 argument: 26 of 27 hits are mentions.** No threshold separates them, so a check
 built on the vocabulary alone would either miss corrections or cry wolf.
 
-**BOTH COUNTS ARE DATED READINGS, NOT PROPERTIES.** ``_audit/`` grew from 91 to
+**CORRECTED 2026-09-05 -- THE 94 WAS A COUNT OF THE WRONG CORPUS.** The scan
+reached ``_audit/`` with ``rglob``, which reads the WORKING COPY, and 37 of
+those 94 documents were ignored ``_audit/_scratch/`` working notes that no
+clone has. The domain is now the 57 documents git TRACKS at this SHA -- see
+:func:`_documents` for why, and for the local-passes/clone-fails divergence
+that found it. Re-measured over that corpus: **24** candidate pairs, still
+exactly **1** genuine one, so 23 of 24 are mentions. The ratio the argument
+rests on is unchanged; only the denominator moved, and it moved to the one a
+reader of the repository can reproduce.
+
+**ALL OF THESE ARE DATED READINGS, NOT PROPERTIES.** ``_audit/`` grew from 91 to
 94 documents during the hour this file was written, because concurrent waves
 write into it continuously. So no test below asserts a total. What they assert
 is an IDENTITY that survives the corpus moving: every candidate is declared or
@@ -90,6 +100,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 AUDIT = ROOT / "_audit"
@@ -244,36 +255,6 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "is the OTHER half of the collision, and the sentence says which of "
         "the two is wrong cannot be told from the text"
     ),
-    ("_census-upload-count-sites.md", "2026-08-31-linkedin-perform.md"): (
-        "quotes the hygiene document's account of the perform.md staleness, "
-        "including its words 'Corrected in place, as a dated block ABOVE the'. "
-        "It reports a correction that has already been made in the target"
-    ),
-    ("_census-upload-count-sites.md", "2026-09-03-hygiene-boundary-and-record.md"): (
-        "a meta-finding that hygiene's CORRECTION BLOCK is itself about to go "
-        "stale a second time. The words 'correction' and 'stale' are the "
-        "heading's subject, and nothing here says the cited document is wrong"
-    ),
-    ("_progress-build-jobs.md", "2026-08-23-build-linkedin.md"): (
-        "quotes build-linkedin's correction approvingly -- it 'had already "
-        "measured the first of these' -- as evidence the correction existed "
-        "and was walked past anyway. Citing a correction is not making one"
-    ),
-    ("_progress-hygiene.md", "2026-08-31-linkedin-perform.md"): (
-        "the progress log of the agent that ADDED the correction block to "
-        "perform.md in place, plus two inline corrections. The correction "
-        "lives in the target document, which is the outcome this test requires"
-    ),
-    ("_progress-measure-surfaces.md", "2026-09-03-linkedin-gap-blockers.md"): (
-        "a SELF-correction: the heading two lines up reads 'MY ARITHMETIC WAS "
-        "WRONG' about this progress log's own line count. gap-blockers is "
-        "cited as the file a section was appended to, not as one corrected"
-    ),
-    ("_progress-typeahead.md", "2026-09-03-typeahead-name-matching-is-dead.md"): (
-        "describes the CONTENTS of the cited write-up in a bullet listing what "
-        "it covers: 'the two wrong turns and why both were wrong the same way' "
-        "are turns that document narrates about its own investigation"
-    ),
     ("_slice-parity-census.md", "2026-08-22-linkedin-preflight.md"): (
         "the 'stale or still binding' judgment is about the linkedin-jobs "
         "SKILL.md Scope clause, not about the cited preflight audit -- which "
@@ -344,7 +325,54 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
 
 def _documents() -> list[pathlib.Path]:
-    return sorted(AUDIT.rglob("*.md"))
+    """Every ``.md`` document in ``_audit/`` THAT GIT TRACKS.
+
+    **IT USED TO BE ``AUDIT.rglob("*.md")``, AND THAT MADE THE SCAN'S DOMAIN
+    THE WORKING COPY RATHER THAN THE REPOSITORY.** The two are not the same
+    corpus, and the gap between them is not small: ``_audit/_scratch/`` is
+    ignored unconditionally by ``.gitignore``, so it holds ZERO tracked files
+    and, on 2026-09-05, 37 ``.md`` files on disk. A ``rglob`` sees all 37. A
+    clone sees none.
+
+    So this test PASSED in the working tree and FAILED in a clone AT THE SAME
+    SHA -- six ``NOT_A_CORRECTION`` entries naming ``_scratch/`` documents read
+    as live locally and as stale everywhere else. **A CHECK WHOSE VERDICT
+    DEPENDS ON WHICH TREE IT RUNS IN IS NOT CHECKING THE REPOSITORY**, and the
+    half of that divergence that mattered was the half nobody could see: the
+    author who added those entries had them pass.
+
+    Tracked-only is also the answer on the merits, not merely the one that
+    converges. This file exists so a reader who starts at a claim can reach its
+    correction. A reader has the repository; they do not have anybody's
+    scratch directory. A correction parked in an ignored working note was never
+    part of the durable record, so it cannot discharge -- nor create -- an
+    obligation that record carries.
+
+    **THIS IS DELIBERATELY NARROWER THAN ``committable_files()`` IN
+    ``test_no_committed_credential.py``, WHICH SWEEPS TRACKED PLUS
+    UNTRACKED-NOT-IGNORED.** That file guards against PUBLISHING a credential,
+    so it must see what is about to be committed or its first true answer
+    arrives one commit late. This file makes no claim about the future: it
+    asserts that the record AT THIS SHA is internally navigable. Including
+    untracked drafts would reintroduce exactly the divergence above, one
+    unfinished audit note at a time.
+
+    A non-zero git exit FAILS. It is not skipped and not defaulted to a disk
+    walk -- a check that goes quiet when its instrument is missing is the shape
+    this whole suite is written against.
+    """
+    proc = subprocess.run(
+        ["git", "ls-files", "--", "_audit"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, "git ls-files failed: %s" % proc.stderr
+    return sorted(
+        ROOT / line
+        for line in proc.stdout.splitlines()
+        if line.strip().endswith(".md")
+    )
 
 
 def _resolver() -> dict[str, pathlib.Path]:
