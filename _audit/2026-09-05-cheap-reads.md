@@ -122,6 +122,13 @@ level up: here BOTH sides are built and the wire between them is absent.
   census files read GAP for every row named above and a re-count taken today
   returns the old figure and would be right to.
 
+  > **CORRECTED BY: this document, section 7, about forty minutes later.** That
+  > sentence was true when it was committed at `6456701` and false by `990bbd3`,
+  > which is four commits later on the same afternoon. The marker is here, beside
+  > the claim, rather than at the foot of the file: a reader who opens this
+  > document to learn whether the census is current stops at this line satisfied,
+  > and a pointer they never scroll to cannot reach them.
+
 ## 6. PROVENANCE
 
 Boundary readings taken by importing the shipped module at the working tree, not
@@ -142,3 +149,66 @@ gitignored `_audit/_scratch/` and enters no commit, and the numeric shape is all
 the reading depended on -- any seven digits would have returned the same verdict.
 Recorded rather than left implicit: **a value inherited from a tracked file is
 still a value somebody vouched for, and it was not me.**
+
+---
+
+## 7. J 10 IS BUILT, AND THIS DOCUMENT WENT STALE WHILE IT WAS BEING BUILT
+
+`67da282` wires the company filter: `linkedin_search_jobs` now takes a
+`company_id`, and `linkedin_server/jobfilter.py` turns it into the `f_C` pair or
+refuses it. No new address, no allowlist pattern, no capture, no page load, no
+ruling -- section 4 predicted the row needed only the wire, and that is all it
+needed.
+
+**The refusal describes a shape and never quotes its input**, which is why the
+verdict is a module rather than four inline lines. This package's standing rule
+is that a refusal names what it SAW. Followed literally, the refusal for `f_C`
+publishes a company SLUG -- a third-party organisation's name, and the likeliest
+wrong value by a wide margin, since a slug is exactly what a posting hands you.
+**Two standing rules collide on this one function and the identity rule wins.**
+Length and character classes are reported instead; a digits-only value is echoed,
+because once known to be all digits it cannot be a name.
+
+Shown failing twice before admission: quoting the input turned 2 tests red (the
+leak test caught the slug verbatim inside its own failure message), and
+neutralising the digit guard turned 7 red. Restored, 11 pass. Gate: 246 passed
+across four suites.
+
+### The stale sentence, and it is this document's own thesis arriving on time
+
+Section 5 says the row-by-row census edit is not applied. **It was true at
+`6456701` and false by `990bbd3`**, four commits and roughly forty minutes later,
+when another wave landed 37 rows from GAP to EXCLUDED-RULED. This document opened
+by saying a ledger dated two days ago had gone stale under a tree that moves
+every hour. It then went stale itself, in under an hour, in the same tree.
+
+Two further readings in that commit bear directly on the table in section 1 and
+are recorded here rather than folded silently into it, because they are another
+wave's measurements and not this one's:
+
+* **`P G7` moved to COVERED-PROVEN today by the `search-appearances` wave** --
+  which corroborates section 2 from a second direction: that surface is not just
+  admitted, it is proven.
+* **the true GAP figure before that edit was 407, not 409**, and the counter saw
+  406, because one row's state cell had been overwritten with prose and is
+  invisible to the instrument that counts it.
+
+### What is still owed on J 10, and by whom
+
+**The census row is NOT edited and this wave did not edit it.** `f_C` does not
+have a row of its own: it sits inside a grouped row covering *six named search
+filters*, whose text still reads that the company filter *"needs a slug-to-numeric-id
+resolver, which the repo already names as an open problem"*. That premise is now
+false in the code and true in the census.
+
+It is left alone deliberately. Those files were edited by another wave twenty
+minutes before this was written, and a grouped row cannot be flipped for one of
+its six members without a judgement about the other five. **Naming the owner by
+artifact rather than by guess:** whoever holds `_audit/_census/jobs.md` and the
+applier behind `990bbd3` -- not the wave that happens to have built the filter.
+
+**And the standing-instruction hazard applies to that census line specifically.**
+An audit document is a dated record and rots fairly harmlessly; a census row is
+read as current truth by whoever plans from it next. The sentence naming the
+resolver as an open problem is the class most able to propagate a stale premise,
+and it is the one class the correction machinery cannot bind.

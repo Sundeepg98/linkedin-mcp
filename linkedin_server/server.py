@@ -2678,6 +2678,15 @@ async def linkedin_search_jobs(
             mid_senior, director, executive. Empty means no filter.
         job_type: comma-separated from full_time, part_time, contract,
             temporary, volunteer, internship, other. Empty means no filter.
+        company_id: the employer's NUMERIC LinkedIn Page id -- not a slug and
+            not a company name. Get one from ``linkedin_job_detail``, whose
+            ``company_id`` verdict reads ``resolved`` only when exactly one
+            insight card agrees and ``absent`` otherwise; ``absent`` means this
+            filter is unavailable for that employer, not that it has no id.
+            A non-numeric value is REFUSED and the refusal describes the value's
+            shape rather than quoting it, because the likeliest wrong value is
+            a company slug and a slug is an organisation's name. Empty means no
+            filter.
         easy_apply: only postings that apply through LinkedIn, never an
             off-site ATS.
         under_ten_applicants: only postings LinkedIn reports as having fewer
