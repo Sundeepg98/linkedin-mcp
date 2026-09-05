@@ -3464,6 +3464,28 @@ CENSUS_SURFACES: dict[str, str] = {
     # the address carries no member segment, so it can only ever resolve to
     # whoever is signed in, and the only person on the page is him.
     #
+    # THE SIDE-EFFECT POSITION, because the settings-index entry established
+    # that a read surface joins this table only after one, and TWO OF THE
+    # THREE PARTS ARE ANSWERED WHILE THE THIRD IS NOT:
+    #
+    # * EMITS NOTHING ANOTHER PERSON CAN OBSERVE. Structural rather than
+    #   believed: there is no third party on this page to emit to, and the
+    #   address cannot name one.
+    # * CHANGES NO VALUE THE ACCOUNT HOLDS. It renders analytics, the same
+    #   ground on which /analytics/profile-views/ has been loaded routinely
+    #   by linkedin_who_viewed_me since this server shipped.
+    # * **THE BADGE QUESTION IS UNMEASURED, and it is stated rather than
+    #   assumed away.** Notifications and messaging are refused as census
+    #   keys because their badges are MEASURED to reset on load. Nobody has
+    #   looked at whether this surface carries a counter of its own. It is
+    #   absent from CENSUS_SURFACE_COST below, which by that table's own rule
+    #   means "believed to cost nothing" -- believed, not measured.
+    #
+    # THAT GAP IS WHY THE CENSUS IS THE RIGHT FIRST READ RATHER THAN A HAZARD:
+    # a census reports the CONTROLS a page draws, so a badge on this surface
+    # is exactly the kind of thing its answer would show. The first reading
+    # is what fills this in, and whoever takes it should look.
+    #
     # WHY THE CENSUS AND NOT A TOOL OF ITS OWN. Nobody in this repository has
     # opened this page. A dedicated reader shipped with a docstring describing
     # what it returns would be describing a page its author had not seen --
