@@ -426,6 +426,37 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         # purpose, so the false claim would be worse -- hence
         # `rows_are_not_redacted` is returned beside it, saying in the payload
         # what the shaping does and does not mean.
+        #
+        # A NINTH, 2026-09-05: `linkedin_search_appearances`, on its
+        # `source_url`. A PUBLISHER, like the two server.py entries above and
+        # unlike the refusal tests -- and it is the weakest publisher in this
+        # set, which is exactly why it needed considering rather than waving
+        # through.
+        #
+        # WHAT IT SHAPES: the landed url of /analytics/search-appearances/, an
+        # address that carries no identifier of any kind. In the expected case
+        # the substitution changes nothing at all and this entry is ceremony.
+        #
+        # WHY IT IS HERE ANYWAY, and the reason is ignorance rather than
+        # caution. `assert_read_url` gates the REQUESTED url and the landed url
+        # is never re-checked, and NOBODY IN THIS REPOSITORY HAD OPENED THIS
+        # PAGE when the tool shipped -- so "it lands where it was sent" is a
+        # prediction. Shaping costs nothing here and a redirect nobody has
+        # observed is the one thing that could put a slug in this field.
+        #
+        # ITS VERDICT DOES NOT MOVE UNDER A WIDENING, for the same reason
+        # `writes._live_control` and `membership_row`'s name call do not: a
+        # wider pattern alters a superset, so a widening can only shape more.
+        #
+        # AND THE GAP THIS FILE RECORDS APPLIES TO IT, stated so the entry
+        # cannot be read as a clearance: A BARE MEMBER TOKEN IN A QUERY
+        # SURVIVES THESE SUBSTITUTIONS. If LinkedIn redirects this address to
+        # something carrying `?member=<token>`, this shaper does not catch it.
+        # That is why `redirected` is returned beside `source_url` rather than
+        # inferred from the shaped string -- the first live reading can SEE the
+        # redirect, and whoever takes it should re-open this entry and the
+        # matching one in `test_the_source_url_split_was_never_ruled.py`.
+        ("server.py", "linkedin_search_appearances"),
     }, sorted(callers)
 
 

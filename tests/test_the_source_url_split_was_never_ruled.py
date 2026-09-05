@@ -172,6 +172,32 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # make the payload slug-free. The deliberate publication lives in those
     # other three fields, which this file does not rule on.
     ("server.py", "linkedin_my_profile"): (SHAPED, 1),
+    # SHAPED BECAUSE NOBODY HAS EVER SEEN WHERE THIS ONE LANDS, 2026-09-05, and
+    # that is a different ground from the three above rather than a fourth
+    # instance of them.
+    #
+    # The address is a constant carrying no identifier at all --
+    # /analytics/search-appearances/ -- so in the ordinary case the shaper
+    # changes nothing and the entry looks like pure ceremony. THE ORDINARY CASE
+    # IS THE ONE NOBODY HAS OBSERVED. `assert_read_url` gates the REQUESTED url
+    # and the landed url is never re-checked, this page had never been opened by
+    # anybody in this repository when the tool shipped, and its own docstring
+    # says so. So "it lands where it was sent" is a prediction, not a reading.
+    #
+    # THE HONEST ALTERNATIVE WAS UNMEASURED, AND IT IS THE WRONG CATEGORY HERE
+    # rather than the humbler one. UNMEASURED means "raw, and nobody has
+    # measured what the surface emits" -- it leaves the value RAW while saying
+    # so. That is right for the helpers below, whose callers supply the url and
+    # cannot be ruled on separately. Here there is one caller, one constant, and
+    # a shaper that costs nothing, so leaving it raw to be honest about the
+    # ignorance would spend a real hole to buy an accurate label.
+    #
+    # WHAT IS NOT CLAIMED: that the substitution would catch whatever a redirect
+    # might carry. It rewrites identifier-shaped PATH segments and nothing else.
+    # `redirected` is returned beside it precisely so the first live reading can
+    # SEE that a redirect happened rather than inferring it from a shaped
+    # string, and whoever takes that reading should re-open this entry.
+    ("server.py", "linkedin_search_appearances"): (SHAPED, 1),
     # --- UNMEASURED: raw, and nobody has measured what the surface emits -----
     # Internal helpers, so the landed url is whatever their THREE callers
     # supplied. A helper cannot be ruled on without ruling on its callers, and
