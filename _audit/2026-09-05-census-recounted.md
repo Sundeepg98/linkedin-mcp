@@ -331,6 +331,50 @@ out: the arrow points the other way, because the census row APPLIES the ruling
 and the stale claim it corrects is jobs.md's own earlier cell text, replaced in
 the same commit.
 
+## 7.2 THE REGISTER ENTRY IS WRITTEN, IS UNCOMMITTED, AND IS NOT MINE TO COMMIT
+
+`_audit/INSTRUMENTS.md` section **12.11** describes
+`scripts/count_census_states.py` -- what it counts, what it deliberately does
+not (a denominator), the `--expect` control shown firing in BOTH directions
+(`rc=0` on the true counts, `rc=1` on the frozen ones), and `--unstated` as the
+only mode in which the `N 132` class is visible at all. **It is written into the
+working tree and this wave is not committing it.**
+
+    git diff HEAD -- _audit/INSTRUMENTS.md      118 insertions, 0 deletions
+    of which ~55 are section 12.11, this wave's
+    and ~63 are section 14, the article-publish wave's, uncommitted beside it
+
+**Committing that path takes both**, and `--only` cannot help: it protects at
+FILE granularity and both sections are inside the one path. Adopting a
+neighbour's sixty-three lines means adopting their disclosure as well as their
+prose, on a public repository, unreviewed -- and the standing preference for an
+append-only shared file is not to share it. **So the lines sit in the tree and
+their author says so here, which is the protocol from the author's end.**
+Whoever next commits that file carries section 12.11; it needs no review from
+them and this wave vouches for it.
+
+**TWO THINGS MEASURED WHILE LOSING THIS RACE, both worth more than the entry.**
+
+**A whole-file write is the mechanism that destroys a neighbour's append; an
+append-mode write cannot be.** The register is documented as append-ordered and
+contested, and the reason that discipline matters is mechanical rather than
+polite: `open(path, "a")` writes at whatever the end of the file is at that
+instant, so it cannot delete lines that arrived while you were composing. A tool
+that rewrites the file from a copy read minutes ago silently drops everything
+appended since. **Same shape as every other finding in this repository -- a stale
+reading, believed because nothing in the write path could tell it was stale.**
+
+**AND MY OWN CHECK GAVE A FALSE NEGATIVE, WHICH IS WHY IT IS WORTH WRITING
+DOWN.** Asked whether my entry had survived, I grepped `git show HEAD:` for
+`count_census_states.py -- the census count` and got 0, and briefly believed the
+text had been destroyed. The heading is
+``` `scripts/count_census_states.py` -- the census count ```: **there is a
+backtick between the two halves of my pattern**, so the grep could never match
+and its zero was a fact about the pattern. A second grep for the bare symbol
+found four hits on disk. *A search that returns zero must be shown returning
+non-zero on something before its zero means anything* -- this repository's own
+control law, aimed at a one-line grep.
+
 **THE APPLIER AND ONE COUNTER ARE IN THE GITIGNORED SCRATCH AND THAT IS A KNOWN
 COST.** The tracked counter is the half that matters, because it is the half that
 lets a stranger with a clone re-derive 369 and disagree with this document. The
