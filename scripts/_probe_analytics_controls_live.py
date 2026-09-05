@@ -117,7 +117,21 @@ MAX_PRESSES = 12
 #: to the element's own text and wins over both positive signals.
 SELECT_JS = """
 (cfg) => {
-  const nodes = Array.from(document.querySelectorAll(cfg.controlSelector));
+  // THE ROOT IS A PARAMETER SO THAT THIS EXACT CODE CAN BE AIMED AT A KNOWN
+  // DOCUMENT. With no rootHtml it reads the live page, which is the normal
+  // path; with one it reads a DETACHED element built from that string, which
+  // is how `--control` shows this selector FAILING and SUCCEEDING on inputs
+  // whose answer is known in advance. A control that runs a REIMPLEMENTATION
+  // of the rule proves nothing about the rule that ships -- and this
+  // repository stubs `evaluate` in every test, so a pytest cannot execute
+  // this function at all. The browser is the only place it can be shown
+  // failing, which is why the control lives in the probe and not in tests/.
+  let scope = document;
+  if (cfg.rootHtml) {
+    scope = document.createElement('div');
+    scope.innerHTML = cfg.rootHtml;
+  }
+  const nodes = Array.from(scope.querySelectorAll(cfg.controlSelector));
   const deny = cfg.deny;
   const vocab = cfg.vocab;
   const out = [];
@@ -213,6 +227,118 @@ VOCAB_WORDS = [
     "show more", "show all", "see more", "see all", "view more", "view all",
     "expand", "more analytics", "show less",
 ]
+
+
+#: THE CONTROL SET. Each row is (label, document, expected), and the documents
+#: are synthetic markup written here -- no capture, no member, no name.
+#:
+#: WHY THIS EXISTS AT ALL, in one sentence: **a clean absence and a broken
+#: presser return the same thing.** Case B returning zero is only evidence
+#: that the page has no disclosure if case A returns one IN THE SAME RUN. Run
+#: B alone and a selector that matches nothing at all reads as "this page
+#: hides nothing", which is precisely the failure this whole probe is named
+#: for -- `CENSUS_CONTROL_SELECTOR` carried no menu role, so a census pointed
+#: at an open menu reported a clean absence and a delta gate certified
+#: nothing while looking green.
+#:
+#: SO THE PAIR IS THE INSTRUMENT AND NEITHER HALF IS. That is why these are
+#: asserted together and why a failure of A is reported as invalidating B
+#: rather than as one row of five going red.
+CONTROL_CASES = (
+    (
+        "A  a closed disclosure, benign text",
+        '<button aria-expanded="false">Details</button>',
+        {"candidates": 1, "disclosure": 1, "vocab": 0, "denied": 0,
+         "expanded_already": 0},
+    ),
+    (
+        "B  NO disclosure, NO vocabulary -- the clean-absence case",
+        "<button>Details</button>",
+        {"candidates": 0, "disclosure": 0, "vocab": 0, "denied": 0,
+         "expanded_already": 0},
+    ),
+    (
+        "C  a closed disclosure carrying an ACT WORD -- must be refused",
+        '<button aria-expanded="false">Send message</button>',
+        {"candidates": 0, "disclosure": 0, "vocab": 0, "denied": 1,
+         "expanded_already": 0},
+    ),
+    (
+        "D  vocabulary but no aria-expanded -- the weaker signal, alone",
+        "<button>Show all results</button>",
+        {"candidates": 1, "disclosure": 0, "vocab": 1, "denied": 0,
+         "expanded_already": 0},
+    ),
+    (
+        "E  ALREADY expanded -- not a closed disclosure, and counted apart",
+        '<button aria-expanded="true">Details</button>',
+        {"candidates": 0, "disclosure": 0, "vocab": 0, "denied": 0,
+         "expanded_already": 1},
+    ),
+    (
+        "F  a disclosure AND vocabulary -- both signals, one candidate",
+        '<button aria-expanded="false">Show all results</button>',
+        {"candidates": 1, "disclosure": 1, "vocab": 1, "denied": 0,
+         "expanded_already": 0},
+    ),
+)
+
+
+async def run_controls(page) -> bool:
+    """Show the selector succeeding and failing on documents with known answers.
+
+    Returns True only if EVERY case matched. The caller refuses to report any
+    live absence when this returns False, because an absence reported by an
+    unproven detector is not a reading.
+    """
+    print("\n" + "=" * 70)
+    print("CONTROL: the selector, against documents whose answer is known")
+    print("=" * 70)
+    all_ok = True
+    positive_ok = False
+    for label, markup, expected in CONTROL_CASES:
+        found = await page.evaluate(  # readonly-ok
+            SELECT_JS,
+            {
+                "controlSelector": dom.CENSUS_CONTROL_SELECTOR,
+                "deny": DENY_WORDS,
+                "vocab": VOCAB_WORDS,
+                "rootHtml": markup,
+            },
+        )
+        candidates = list(found.get("candidates") or [])
+        got = {
+            "candidates": len(candidates),
+            "disclosure": len([c for c in candidates if c.get("disclosure")]),
+            "vocab": len([c for c in candidates if c.get("vocab")]),
+            "denied": int(found.get("denied") or 0),
+            "expanded_already": int(found.get("expanded_already") or 0),
+        }
+        ok = got == expected
+        all_ok = all_ok and ok
+        if label.startswith("A ") and ok:
+            positive_ok = True
+        print(f"  {'PASS' if ok else 'FAIL'}  {label}")
+        if not ok:
+            print(f"        expected {expected}")
+            print(f"        got      {got}")
+    print()
+    if not positive_ok:
+        print("  CASE A FAILED. The selector does not fire on a document that "
+              "certainly contains a disclosure, so EVERY ZERO THIS PROBE "
+              "REPORTS IS A FACT ABOUT THE SELECTOR AND NOT ABOUT ANY PAGE. "
+              "The live readings below, if they ran, mean nothing.")
+    elif all_ok:
+        print("  ALL SIX PASS. Case A fires and case B does not, on documents "
+              "that differ ONLY in the attribute this rule is about -- so a "
+              "zero from a real page is a statement about that page. Case C "
+              "is the refusal arm: the act-word denylist beats a true "
+              "disclosure, which is the branch a structural rule gets wrong.")
+    else:
+        print("  A CASE FAILED. Read which one before reading anything below: "
+              "a refusal arm failing and a detection arm failing are different "
+              "defects with different consequences for the live numbers.")
+    return all_ok
 
 
 def _relation(landed: str, asked: str) -> str:
@@ -345,6 +471,17 @@ async def press_pass(page, label: str) -> dict:
     unpressed_census = await _census(page)
     before = _summarise(unpressed_census)
     print(json.dumps(before, indent=2, sort_keys=True))
+    # THE UNPRESSED SHAPE TALLY, PRINTED IN FULL. Every earlier run reported
+    # only what CHANGED, which cannot answer "is the control for X on this
+    # page at all" -- and `N 135`, the weekly viewer trend graph, is the one
+    # row of the four that the census does NOT mark Premium. A delta is the
+    # wrong instrument for a question about presence.
+    print(f"\n  UNPRESSED SHAPES on {label}, aggregated and redacted:")
+    for name, count in sorted(
+        _shape_tally(unpressed_census).items(), key=lambda kv: (-kv[1], kv[0])
+    ):
+        print(f"    {count:>3}  {name}")
+
     settled = (first["controls_read"] == before["controls_read"])
     print(f"  BASELINE AGREES: {settled}  "
           f"({first['controls_read']} then {before['controls_read']})")
@@ -493,9 +630,17 @@ async def main() -> int:
         return 2
 
     print(f"port : {os.environ.get('LINKEDIN_CDP_PORT')}")
+    controls_only = "--control" in sys.argv
     out: dict = {}
 
     async with BROWSER.session() as page:
+        # THE CONTROL RUNS FIRST AND ITS RESULT GATES THE REPORT. Running it
+        # afterwards would let a session's live zeros be read before anyone
+        # knew whether the detector fires at all -- and a zero is the reading
+        # this probe is most likely to produce and least able to justify.
+        detector_ok = await run_controls(page)
+        if controls_only:
+            return 0 if detector_ok else 1
         # PRESSING IS SCOPED TO THE ANALYTICS TREE. The last two are opened
         # for ROUTE DISCOVERY ONLY and nothing on them is pressed: they are
         # here to answer "what address does LinkedIn itself draw for the
