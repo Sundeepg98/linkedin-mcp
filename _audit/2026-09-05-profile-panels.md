@@ -9,19 +9,24 @@ taken with `date`, not from an agent's sense of elapsed time.
     18:56      this document
     19:03      run 2 aborted on a regex it built badly, and cost one page load
     19:05      run 3: a second instrument, and it settled both declared defects
+    19:07      implementer measured on disk: NEITHER file exists
+    19:10      both files exist. It was working, not stalled
+    19:15      reviewed independently and committed at fc10b99
 
 ## WHAT THIS WAVE ACTUALLY MOVED
 
 | row | blocker | queue | what happened |
 |---|---|---|---|
 | 38 | `CONTACT-INFO-PANEL` | MEASURE | **MEASURED LIVE. The panel was opened for the first time in this repository.** |
-| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | ruling and design recorded below. **The module was delegated and NEVER ARRIVED** -- measured on disk at 19:07, neither file exists. Nothing recommendations-related is in the tree |
+| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | **RULED AND BUILT.** `linkedin_server/recommendations.py` + `tests/test_recommendation_tally.py`, reviewed independently and committed at `fc10b99`. No write designed, none fired |
 | 43 | `BADGES-SURFACE` | BUILD | **NOT STARTED** |
 | 72 | `MULTILANG-PROFILE` | BUILD | **NOT STARTED** |
 | 78 | `OPEN-PROFILE-SETTING` | BUILD | **NOT STARTED** |
 
 Three of the five blockers were not touched. They are BUILD rows costing
 allowlist +1 and a WriteSpec each; none of them is closer than it was at 18:47.
+**No row is RETIRED by this wave.** Two blockers moved -- one measured, one
+ruled and built -- and eight rows were never opened.
 
 ---
 
@@ -219,19 +224,54 @@ The slug domain is worse: slugs are enumerable and guessable, so a digest would
 be a lookup table wearing a redaction's clothes -- the shape this repository
 calls worse than the leak.
 
-**STATUS AT THE FREEZE, MEASURED ON DISK AND NOT RELAYED.** The module and its
-test were delegated to an implementer at 18:50. At 19:07 -- 28 minutes later --
-`ls` reports neither `linkedin_server/recommendations.py` nor
-`tests/test_recommendation_tally.py` exists, and `git status` shows no
-recommendations-named file of any kind. **No result of that agent's is reported
-here, in either direction:** an agent that has gone quiet is indistinguishable
-from one that is working, and only the box can tell them apart. What is stated
-is the disk reading and its timestamp.
+**IT LANDED AT `fc10b99`, AND THE SEQUENCE IS THE LESSON.** The module was
+delegated at 18:50. At 19:07 -- 28 minutes in -- `ls` reported neither file
+existing and `git status` showed nothing recommendations-named. This document
+recorded that disk reading and explicitly declined to call the agent stalled,
+because an agent that has gone quiet is indistinguishable from one that is
+working and only the box can tell them apart. **Three minutes later both files
+were on disk.** Had the reading been reported as a verdict rather than as a
+timestamped observation, it would have been wrong within three minutes.
 
-**So this row did NOT move.** The ruling and the design above are the durable
-part, and they are written here precisely because the code is not -- the next
-wave starts from the design rather than from the surface name, which is the
-whole point of routing the artifact rather than the verdict.
+### What was verified before it was admitted, and it was NOT the passing test
+
+A green test is not the property. Three checks were run by the reviewer rather
+than inherited:
+
+1. **A DIFFERENT NEEDLE than the one the module was written against.** An
+   instrument checked only against its author's chosen input agrees with its
+   author. Three public callables x seven adversarial hrefs, including query
+   and fragment spellings: **zero leaks**.
+2. **THE SHIPPED DETECTOR FIRED ON A PLANTED LEAK OF THE REVIEWER'S OWN**, then
+   was green on the real module. The test file's own mutation test does the
+   same thing from the inside, and the helper is factored out of both -- so the
+   green cannot be green because the sweep is inert.
+3. **THE COUNTING WAS CHECKED BY HAND.** Five rows, three authors, two distinct
+   (a relative and an absolute spelling of one author dedupe), a foreign
+   `/groups/` href refused, an out-of-vocabulary relation refused.
+
+### The implementer escalated a real collision instead of improvising
+
+The adversarial needle, written contiguously after `/in/`, is matched by
+`test_no_committed_identity.py`'s slug shape -- and that guard sweeps
+untracked-but-not-ignored files, so it would have fired the moment the test
+file touched disk, in a file the implementer had no authority to edit. It
+composed the hrefs by interpolation instead, which is the technique that guard
+file already uses on its own path-plant tests for the identical reason.
+Verified independently: the needle appears contiguously **zero** times in
+either new file, and `test_no_committed_identity.py` is **388 passed**.
+
+### The weakness that ships with it, stated rather than discovered later
+
+**THIS MODULE HAS NO CALLER.** `groups.py` shipped WITH its first caller
+precisely because a reader no caller can invoke is a hypothesis rather than a
+capability. This one does not, and the reason is the same one the newsletter
+wave gave for declining to build a DOM reader: **the recommendations page has
+never been opened here**, and inventing a reader for a page nobody has loaded
+fails closed as "he has no recommendations" -- the exact answer the surface
+exists to produce. The reader is ready for the live read. The live read is the
+thing that is owed next, and it needs an allowlist entry this wave did not
+add.
 
 ---
 
@@ -323,8 +363,11 @@ wave's to do from a reading this thin -- name the owner with
   Nothing this wave did touches `readonly._ALLOWED_URL_PATTERNS`, so there is no
   chain step to append.
 * **No write was designed, gated or fired** on any of the five surfaces.
-* **No test was added, and the probe was NOT admitted to any instrument
-  register.** It has been shown able to report an absence where one is known,
+* **The recommendations reader has NO CALLER and no allowlist entry**, so the
+  surface still cannot be read live. The module is the ruling made executable,
+  not the capability.
+* **No test was added FOR THE PROBE, and the probe was NOT admitted to any
+  instrument register.** It has been shown able to report an absence where one is known,
   which is the bar for believing this run -- but its label vocabulary is a
   substring match with a measured overreach (`im`), and an instrument with a
   known overreach should not be registered for reuse until that is fixed.
