@@ -779,6 +779,20 @@ their class.**
   3.6** -- `linkedin_surface_census` on the `messaging_compose` key, with its
   earned settled-control baseline of 77 as the render gate. One read answers
   both rulings.
+* **AND THE DOCUMENTARY ROUTE WAS TRIED AND IS DEAD.** The census sources this
+  row to article `a148003`, and that id returns **HTTP 404 on both URL forms
+  that served five sibling articles on this same pass**. Stated exactly: this
+  is not "the article does not exist" -- this repository's own precedent tested
+  eight forms before calling one dead and I tested two. It is *"the citation
+  does not resolve by the route that resolved its siblings"*, which is enough to
+  say the retirement cannot lean on it. **It does not:** the reasons above are
+  the derived microphone argument and the identity argument, and the untested
+  limit was already named before the fetch was tried.
+* **THAT DEAD CITATION IS NOT ONLY MINE, which is why it is repeated in 10.5.**
+  `a148003` is also the source for `M M18` -- attach files, and for the specific
+  limits "max 5, 20 MB total" -- and `M 18` is a `FILE-UPLOAD-UNSANCTIONED` row,
+  the rank-1 DECIDE blocker in the ledger. **Two numbers a sanction decision may
+  be argued from rest on a citation that does not currently resolve.**
 * **The reason that does not depend on the capture:** a recording that sounds
   like him saying words he did not speak is an identity forgery. That is the
   `auto_accept_or_auto_reply` class -- *"a message from a stranger wearing his
@@ -1356,3 +1370,26 @@ apart rather than to add triage entries to somebody else's test file.
 `linkedin_server/` -- nothing. Not one line. Every finding above is against
 committed code owned by another wave, and the reason each is routed rather than
 fixed is written beside it.
+
+### 10.5 A source citation that does not resolve, and it is under a rank-1 row
+
+Help article **`a148003` returns HTTP 404** on both URL forms that served five
+sibling articles on this pass. The census cites it for two rows:
+
+    M M18   attach files to a message -- and the limits "max 5, 20 MB total"
+    M M19   send a voice message
+
+`M 19` is retired in 3.11 and does not lean on it. **`M 18` is a
+`FILE-UPLOAD-UNSANCTIONED` row -- the rank-1 DECIDE blocker, 16 rows, the single
+highest rows-per-cost item in the ledger** -- and the two numbers anyone would
+quote when arguing that sanction come from this citation.
+
+**STATED AT ITS REAL STRENGTH:** this is not "the article does not exist". This
+repository's own precedent tested eight URL forms before calling `a528144` dead;
+this pass tested two. The claim is that **the citation does not resolve by the
+route that resolved its siblings**, which is enough to say that anybody about to
+rule on `set_input_files` should re-source those limits rather than quote them.
+
+**WHY NOT TAKEN:** re-sourcing them means an article-index query, and the row
+and the ruling in front of it belong to whoever holds
+`FILE-UPLOAD-UNSANCTIONED`. Routed rather than guessed at.
