@@ -528,3 +528,60 @@ whoever owns that row can promote it in one line.
 a LATER wave, never from the ledger** -- which is section 6.3's finding arriving
 from a second direction: the ranked table where the counts live has no ids in
 it, and no amount of scanning can find what was never written down.
+
+---
+
+## 10. THE GUARD FIRED WITHIN THE HOUR, ON A DEFECT IN MY OWN INSTRUMENT
+
+Written at `b343795`. Fired at 23:48, before this wave closed.
+
+    FAILED test_the_ledger_tables_still_total_97_blockers_and_409_rows
+    FAILED test_no_blocker_recounts_higher_than_the_ledger_published
+       these blockers hold MORE rows in the map than the ledger published:
+       CLOSED-SINCE-CENSUS, FORBIDDEN-CLASS-FIX-LANDED,
+       OWNED-BY-A-SIBLING-SLICE, SERVED-BY-GMAIL-SKILL
+
+**Nothing was wrong with the data. `ledger_counts()` read the ledger's two
+tables out of a HARDCODED LINE WINDOW, `text[140:311]`.** Another wave appended
+19 lines (`0d66ebe`), the file went 1546 -> 1565, both tables slid 28 lines down,
+and the cost-0 table left the window entirely. Its nine blockers then parsed as
+absent, `published.get(b, 0)` turned absent into **zero**, and four blockers the
+map holds legitimately read as over-counted.
+
+**A READING PINNED TO A POSITION IN A FILE OTHER WAVES ARE APPENDING TO.** That
+is this repository's own disease in a new place, and I wrote it into the
+instrument built to cure it. Both tables are now located by their HEADER ROW.
+
+### The second defect was in the MESSAGE, and it is the worse one
+
+The assertion said *"a committed source and the ledger disagree about which rows
+are in a set"*. That was false. It had SEEN four blockers missing from its
+lookup and REPORTED them as published at zero -- **a refusal naming a cause it
+had not observed**, which is this project's `refusals-must-name-what-they-saw`
+scar with my name on it. Anyone reading that message would have gone hunting a
+data disagreement that did not exist.
+
+Split into two assertions that cannot be confused, and the new one is **shown
+failing** by breaking the header anchor deliberately:
+
+    the map holds blockers the ledger parse does not know at all: [...].
+    Before treating this as a disagreement, check that BOTH ledger tables
+    still parse -- a renamed or reformatted header returns a partial parse
+    rather than an error.
+
+### And the reassuring measurement, taken because the alarm demanded it
+
+Re-parsed at `b343795` and at HEAD with the fixed reader:
+
+    b343795   97 blockers   409 rows
+    HEAD      97 blockers   409 rows
+    per-blocker count changes:  NONE
+
+`0d66ebe`'s *"four cells corrected"* touched cells other than the row counts, so
+**every comparison in sections 4 and 9 stands unchanged.** That is worth stating
+explicitly, because the honest reading of a fired guard is not "it was a false
+alarm" -- it is "the alarm was right about something, and here is what."
+
+**The receipt this leaves is the only argument for a guard that counts:** it
+caught a real drift within an hour, in the safest possible direction, on the
+author who wrote it.

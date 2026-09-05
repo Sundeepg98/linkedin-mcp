@@ -55,20 +55,48 @@ MAP_OUT = ROOT / "_audit" / "_census" / "blocker-map.tsv"
 LEDGER = ROOT / "_audit" / "2026-09-03-linkedin-gap-blockers.md"
 
 
+#: The two tables are located by their HEADER ROW, never by line offset.
+#: MEASURED 2026-09-05 23:48, and it is why this is not a window: another wave
+#: appended 19 lines to the ledger (`0d66ebe`), the file went 1546 -> 1565, both
+#: tables slid 28 lines down, and the cost-0 table left the hardcoded slice
+#: `text[140:311]` entirely -- so four blockers silently read as published 0 and
+#: the over-count assertion fired on them. It fired CORRECTLY on a defect in
+#: this parser rather than in the data, which is the outcome a guard is for. A
+#: reading pinned to a POSITION in a file other waves are appending to is the
+#: same class of defect as every stale reading in this repository.
+RANKED_HEADER = "| # | blocker | rows | R/W | boundary | ruling | cost |"
+ZEROCOST_HEADER = "| blocker | rows | queue | why |"
+
+
+def _table_after(lines: list[str], header: str) -> list[str]:
+    """Lines of the markdown table whose header row starts with `header`."""
+    for i, line in enumerate(lines):
+        if line.startswith(header):
+            out = []
+            for row in lines[i + 1:]:
+                if not row.startswith("|"):
+                    break
+                out.append(row)
+            return out
+    return []
+
+
 def ledger_counts() -> dict[str, int]:
     """The ledger's published per-blocker row counts, parsed from its own tables.
 
-    Never retyped: the 88-row ranked table and the 9-row cost-0 table are read
-    out of the document, and the caller asserts they total 97 blockers and 409
-    rows before anything is compared against them.
+    Never retyped: the ranked table and the cost-0 table are read out of the
+    document by locating their header rows, and the caller asserts they total 97
+    blockers and 409 rows before anything is compared against them. Returning a
+    partial parse silently would turn a missing table into a blocker published
+    at zero, which reads as a data disagreement and is not one.
     """
-    text = LEDGER.read_text(encoding="utf-8", errors="replace").splitlines()
+    lines = LEDGER.read_text(encoding="utf-8", errors="replace").splitlines()
     counts: dict[str, int] = {}
-    for line in text[140:311]:
+    for line in _table_after(lines, RANKED_HEADER):
         m = re.match(r"^\|\s*\d+\s*\|\s*`([A-Z0-9-]+)`\s*\|\s*(\d+)\s*\|", line)
         if m:
             counts[m.group(1)] = int(m.group(2))
-            continue
+    for line in _table_after(lines, ZEROCOST_HEADER):
         m = re.match(r"^\|\s*`([A-Z0-9-]+)`\s*\|\s*(\d+)\s*\|", line)
         if m:
             counts[m.group(1)] = int(m.group(2))

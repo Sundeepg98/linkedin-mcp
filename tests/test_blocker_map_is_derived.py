@@ -106,13 +106,27 @@ def test_no_blocker_recounts_higher_than_the_ledger_published(built):
     recount: dict[str, int] = {}
     for blocker, *_rest in assign.values():
         recount[blocker] = recount.get(blocker, 0) + 1
-    over = {b: (n, published.get(b, 0))
-            for b, n in recount.items() if n > published.get(b, 0)}
+    # SEPARATE THE TWO CAUSES BEFORE REPORTING EITHER. A blocker absent from the
+    # parse is not a blocker published at zero, and collapsing them makes a
+    # PARSER failure wear a DATA disagreement's costume. Measured 2026-09-05:
+    # a neighbouring wave appended 19 lines to the ledger, the cost-0 table slid
+    # out of a hardcoded line window, and four blockers read as published 0 --
+    # this assertion fired and named the wrong cause. It names both now.
+    unknown = sorted(b for b in recount if b not in published)
+    assert unknown == [], (
+        f"the map holds blockers the ledger parse does not know at all: "
+        f"{unknown}. Before treating this as a disagreement, check that BOTH "
+        "ledger tables still parse -- `build_blocker_map.ledger_counts()` "
+        "locates them by header row, and a renamed or reformatted header "
+        "returns a partial parse rather than an error."
+    )
+    over = {b: (n, published[b]) for b, n in recount.items() if n > published[b]}
     assert over == {}, (
-        f"these blockers hold MORE rows in the map than the ledger published: "
-        f"{over}. That is a committed source and the ledger disagreeing about "
-        "which rows are in a set. It is a finding for a person to adjudicate, "
-        "not a number to absorb -- do not widen the published count to clear it."
+        f"these blockers hold MORE rows in the map than the ledger published "
+        f"(map, published): {over}. That is a committed source and the ledger "
+        "disagreeing about which rows are in a set. It is a finding for a "
+        "person to adjudicate, not a number to absorb -- do not widen the "
+        "published count to clear it."
     )
 
 
