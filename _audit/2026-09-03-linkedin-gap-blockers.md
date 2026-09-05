@@ -356,6 +356,8 @@ page renders people who did not choose to be seen by him -- the same question
 already answered for two other surfaces, and it should be answered once for
 this one rather than inherited by accident.
 
+**CORRECTED BY:** `_audit/2026-09-05-search-results-consent.md` -- the parser-half claim above is an assumption about a page nobody here has captured, so this item's cost is one piece larger than 5; the ruling itself is prepared there, over 19 reads rather than 21 rows
+
 **4. `GROUPS-SURFACE` -- 32 rows, the single largest blocker in the census.**
 `/groups/` is on neither list and returns zero grep hits across the whole
 package. Twelve of the 32 are reads, including the only member directory this

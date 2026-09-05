@@ -586,6 +586,8 @@ package. They are not repeated here; sections P, Q and R carry them.
 | **Invitations (unreachable variants)** | 4, 5, 6, 7, 8 (5) | WRITE | NOT-REV | Depend on other gaps closing first |
 | **Messaging-slice rows** | 149, 150, 151, 160 (4) | WRITE | mixed | Owned by `_audit/_census/messaging-and-content.md` |
 
+**CORRECTED BY:** `_audit/2026-09-05-search-results-consent.md` -- the people-search row above says the parser half is done; measured in-process, parse_person_card returns nothing on a card with no Viewed timestamp, and no capture of that page exists to say whether it carries one
+
 **Two GAPs cost nothing to close and are worth the lead's attention: row 118 and
 rows 133-136.** Both sit on pages the server ALREADY loads and ALREADY parses.
 Both are pure reads. Neither touches another person.
