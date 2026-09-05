@@ -500,13 +500,32 @@ Live).
 **What the capability would be:** the server starts a live video broadcast under
 his name to his network.
 
-**RETIRED.** Going live requires an external encoder or a partner integration --
-the messaging census's own recovery pass names `a548518` (broadcasting FAQ),
-`a569473` (broadcaster features) and `a523091` (go live via Zoom) -- and the
-census cell states the consequence: *"needs a third-party streaming tool, so it
-is outside a browser driver regardless."* A browser driver cannot supply a video
-stream. DERIVED from LinkedIn's own documentation as read by the census; the
-articles were not re-fetched this pass.
+**RETIRED, on LinkedIn's own sentence, fetched this pass:**
+
+> **"You cannot stream directly from LinkedIn. A streaming tool is needed to
+> broadcast LinkedIn Lives"** -- `a568503`, LinkedIn Live access criteria.
+
+The same page confirms the eligibility gate the profile census cites -- *"Members
+and Pages with more than 150 followers and/or connections are eligible"* -- plus
+a good-standing record, a 30-day account age, and unavailability in mainland
+China. **A browser driver cannot supply a video stream, and LinkedIn says
+outright that no native path exists.**
+
+**HOW THIS NEARLY WENT THE OTHER WAY, recorded because the near-miss is the
+lesson.** The article the census cites for this family is `a548518`, the
+broadcasting FAQ. Fetched first, it says only that third-party tools EXIST --
+*"Some of the third-party tools allow you to stream to LinkedIn and another
+platform at the same time"* -- and never that one is REQUIRED. On that reading I
+was about to weaken this ruling and say the reason was not established, which is
+what the standing instruction for this pass demands when a reason turns out not
+to be real.
+
+**It was real; I had checked the wrong article.** `a548518` defers eligibility to
+`a568503` by link, and `a568503` carries the sentence. **"The article I checked
+does not say it" is not "the claim is unsupported" -- it is "I checked the wrong
+article", and the difference costs one more fetch.** Worth the cost precisely
+because the alternative was recording a false weakening, which is as damaging as
+a false retirement and harder to notice.
 
 **The profile slice recorded no reason at all** -- `P L5` reads *"he clears the
 >150-follower gate at 275; no tool, no reason."* That is the honest state this
@@ -622,14 +641,16 @@ and will reopen the wrong question.
 
 The two reasons that hold:
 
-* **The capability is already served by a parameter.** `linkedin_search_jobs`
-  takes a `location` string, and the jobs census establishes -- across two
-  independent help pages, `a507441` and `a523131`, which it calls *"the second
-  page to agree"* -- that LinkedIn's job search documents adding locations BY
-  NAME and carries **no distance or radius control**. So "current location" is a
-  convenience for a human who does not want to type a city; there is no result
-  set behind it that a named location cannot reach. An agent always knows the
-  city it means.
+* **The capability is already served by a parameter, and `a523131` was fetched
+  directly this pass to check it.** LinkedIn documents adding locations BY NAME
+  -- *"You can add multiple locations in the same search or check the box next
+  to any suggested locations you want to add."* -- and the fetch confirms, in
+  answer to a question that named every spelling, that **no distance, radius,
+  "within X miles/km", "near me" or current-location control is documented
+  anywhere on that page.** That is the second page to agree, as the jobs census
+  says of `a507441`. So "current location" is a convenience for a human who does
+  not want to type a city; there is no result set behind it that a named
+  location cannot reach, and an agent always knows the city it means.
 * **The cost is a durable permission on his real profile.** Granting a page
   geolocation writes a permission into the profile store of the browser he uses
   himself, and it outlives the read. This server's design is about not leaving
@@ -1084,19 +1105,24 @@ point of writing reopeners as instruments instead of as conditions.
    control), `VOICE-CAPTURE` (the composer's attachment set) and
    `LINK-FOR-OFF-PLATFORM-USE`'s cost (which page draws the control). Each names
    the capture that settles it.
-4. **FIVE help articles were fetched directly and FIVE were not.** Fetched and
-   confirmed against the census: `a8336402` (AI interview prep), `a10376002`
-   (AI interviews as a hiring stage), `a10133010` (camera and microphone
-   permissions), `a550527` (name pronunciation), `a7443434` (share a post off
-   LinkedIn). Still inherited from the census's reading: `a548518`, `a569473`,
-   `a523091`, `a507441`, `a523131`.
-   **All five that were checked held**, which is evidence about the census's
-   reliability and not a licence to treat the other five as checked. **One of
-   the five did more than confirm** -- `a7443434` added a desktop/mobile split
-   that no reading in this repository had, and it fell on the side 3.4's shape
-   rule already predicted. And the fetch itself answers through a small model
-   rather than returning raw bytes, so what these buy is a second independent
-   reading that agrees -- corroboration, not a primary source.
+4. **NINE help-article fetches were attempted: seven resolved, one 404'd, and
+   one did not carry the sentence it was cited for.**
+
+       RESOLVED AND CONFIRMED   a8336402  a10376002  a10133010  a550527
+                                a7443434  a568503    a523131
+       RESOLVED, DID NOT SAY IT a548518   (defers to a568503, which does)
+       404 ON TWO URL FORMS     a148003   (see 3.11 and 10.5)
+       STILL INHERITED          a569473   a523091   a507441
+
+   **Every claim that was checked held**, which is evidence about the census's
+   reliability and not a licence to treat the inherited three as checked. Two
+   fetches did more than confirm: `a7443434` added a desktop/mobile split no
+   reading in this repository had, falling on the side 3.4's shape rule
+   predicted; and `a568503` supplied a verbatim sentence stronger than the
+   census's paraphrase after `a548518` had appeared to undercut it. The fetch
+   answers through a small model rather than returning raw bytes, so what these
+   buy is a second independent reading that agrees -- corroboration, not a
+   primary source.
 5. **No browser was driven and no signed-in page was loaded.** Everything else
    was measured by importing `linkedin_server` at HEAD and by reading committed
    markdown. **THE ONE EXCEPTION, stated rather than buried:** three PUBLIC help
@@ -1156,7 +1182,8 @@ section 5 closes in both directions.
 * Working log: `_audit/_scratch/_progress-retire-rulings.md`.
 * Full-suite gate in a `git clone --no-hardlinks` of HEAD:
   `_audit/_scratch/_gate-retire-rulings-clone.txt`.
-* Help articles a8336402, a10376002, a10133010, a550527 and a7443434 fetched directly over
+* Help articles a8336402, a10376002, a10133010, a550527, a7443434, a568503,
+  a548518 and a523131 fetched directly over
   plain HTTP -- public pages, no session, no account, no browser, no cookie.
   Each answered through a small model rather than returned as raw bytes, which
   is why they are cited as a second agreeing reading and never as a primary
