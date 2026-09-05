@@ -252,7 +252,7 @@ class UnreadablePage:
     def locator(self, selector: str):
         raise RuntimeError("browser is gone")
 
-    async def inner_text(self, selector: str) -> str:
+    async def inner_text(self, selector: str, timeout=None, **_kwargs) -> str:
         raise RuntimeError("browser is gone")
 
 

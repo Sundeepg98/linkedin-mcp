@@ -153,9 +153,28 @@ class FakePage:
         #: model "the tab says 4 but nothing parsed" sets this.
         self.inner_text_result: Any = ""
         self.inner_text_calls: list[str] = []
+        #: The ceiling each read was given, in call order. Recorded rather than
+        #: swallowed for the same reason every other question here is recorded:
+        #: a bound the caller passes is part of what was ASKED, and a fake that
+        #: drops it cannot be used to check that a read is bounded at all.
+        self.inner_text_timeouts: list[Any] = []
 
-    async def inner_text(self, selector: str) -> str:
+    async def inner_text(self, selector: str, timeout: Any = None, **_kwargs) -> str:
+        # ``timeout`` IS PART OF THE REAL SIGNATURE, and leaving it out cost a
+        # full suite run to find. Playwright's page reads AUTO-WAIT, so
+        # ``read_main_text`` passes a ceiling; this fake accepted only the
+        # selector, raised TypeError on the keyword, and the production
+        # ``except Exception`` around that read turned the TypeError into
+        # "the page drew no main". NINE tests in test_tools.py then failed on
+        # a parsed count of None, several layers from the cause, and nothing
+        # anywhere reported that the read had not run.
+        #
+        # THE RULE THIS FAKE NOW CARRIES: a stand-in must accept everything the
+        # real API accepts. One that models a NARROWER signature does not fail
+        # where the real one would succeed -- it fails where the real one
+        # succeeds, and a broad ``except`` turns that into a plausible answer.
         self.inner_text_calls.append(selector)
+        self.inner_text_timeouts.append(timeout)
         result = self.inner_text_result
         if isinstance(result, Exception):
             raise result

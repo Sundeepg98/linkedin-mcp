@@ -91,7 +91,7 @@ class _Pills:
     def first(self):
         return self
 
-    async def get_attribute(self, _name: str) -> str:
+    async def get_attribute(self, _name: str, timeout=None, **_kwargs) -> str:
         return "InMail"
 
     async def click(self, **_kw) -> None:

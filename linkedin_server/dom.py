@@ -828,6 +828,36 @@ _COMPANY_LABEL = re.compile(r"^\s*Company\s*,\s*(.+?)\s*\.?\s*$", re.I)
 #: never travels out in a tool result.
 _COMPANY_SLUG = re.compile(r"/company/([A-Za-z0-9\-_%]+)")
 
+#: The ceiling on ONE ELEMENT READ -- a single attribute or text node -- taken
+#: from a page that has already settled.
+#:
+#: WHY IT HAS TO BE NAMED AT ALL. Playwright's reads AUTO-WAIT, and the default
+#: ceiling is THIRTY SECONDS. Every read below sits behind a ``try`` that turns
+#: a miss into ``None`` and moves on, which reads like a fast miss and is not
+#: one: an absent element costs the full thirty seconds first. MEASURED
+#: 2026-09-05 over ``tests/fixtures/job_detail_shell.html``, a capture with no
+#: company block:
+#:
+#:   read_job_identity   30.03 s   -> company=None
+#:   read_main_text       0.00 s   (that capture DOES draw a main)
+#:
+#: so a page that drew no posting cost thirty seconds to learn nothing, on a
+#: DOM that was already complete and could not change. The default is right
+#: for a control being waited ON; it is wrong for a field being read OFF a
+#: settled page, and the difference was invisible because nothing named it.
+#:
+#: WHAT THE NUMBER IS FOR. The reads that are allowed to wait for hydration
+#: have their own named ceilings and take them FIRST --
+#: :data:`JOB_DESCRIPTION_TIMEOUT_MS`, :data:`SAVE_READY_TIMEOUT_MS`,
+#: :data:`TRACKER_LIST_TIMEOUT_MS`. By the time anything below runs, the page
+#: has either drawn or spent one of those bounds failing to. This ceiling
+#: therefore covers the read itself, not the drawing: 2 s against the 0.04-0.07 s
+#: a present element has measured on every capture in this repo.
+#:
+#: It changes NO answer. Every site that carries it already returned ``None``
+#: or ``""`` on a miss; it changes only how long the miss takes to report.
+ELEMENT_READ_TIMEOUT_MS = 2_000
+
 
 async def read_job_identity(page: Any) -> dict[str, Any]:
     """Return the employer and the document title of a job posting.
@@ -853,7 +883,9 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
 
     try:
         block = page.locator(COMPANY_BLOCK).first
-        label = await block.get_attribute("aria-label")
+        label = await block.get_attribute(
+            "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS
+        )
     except Exception as exc:
         logger.debug("company block unreadable: %s: %s", type(exc).__name__, exc)
         return out
@@ -863,7 +895,9 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
         out["company"] = match.group(1).strip() or None
 
     try:
-        href = await block.locator('a[href*="/company/"]').first.get_attribute("href")
+        href = await block.locator('a[href*="/company/"]').first.get_attribute(
+            "href", timeout=ELEMENT_READ_TIMEOUT_MS
+        )
     except Exception as exc:
         logger.debug("company url unreadable: %s: %s", type(exc).__name__, exc)
         return out
@@ -1972,7 +2006,9 @@ async def read_main_text(page: Any) -> str:
     is the failure this whole module is arranged to prevent.
     """
     try:
-        return str(await page.inner_text("main") or "")
+        return str(
+            await page.inner_text("main", timeout=ELEMENT_READ_TIMEOUT_MS) or ""
+        )
     except Exception as exc:
         logger.debug("main text unreadable: %s: %s", type(exc).__name__, exc)
         return ""
@@ -7547,7 +7583,9 @@ async def read_tracker_evidence(page: Any) -> dict[str, Any]:
     # to make each injection reviewable, so an injection that a plain API call
     # replaces does not get to spend it.
     try:
-        content = await page.locator("main").first.text_content()
+        content = await page.locator("main").first.text_content(
+            timeout=ELEMENT_READ_TIMEOUT_MS
+        )
         out["main_content_chars"] = len(str(content or "").strip())
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("tracker main content unreadable: %s", type(exc).__name__)

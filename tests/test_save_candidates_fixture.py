@@ -283,14 +283,14 @@ async def test_a_control_that_would_not_read_makes_the_scan_incomplete():
     """
 
     class _Boom:
-        async def get_attribute(self, _name):
+        async def get_attribute(self, _name, timeout=None, **_kwargs):
             raise RuntimeError("detached")
 
     class _Fine:
         def __init__(self, label):
             self.label = label
 
-        async def get_attribute(self, _name):
+        async def get_attribute(self, _name, timeout=None, **_kwargs):
             return self.label
 
     class _Locator:
@@ -963,14 +963,14 @@ async def test_a_main_presence_check_that_failed_is_not_a_missing_main():
         async def count(self):
             return 0
 
-        async def get_attribute(self, _name):
+        async def get_attribute(self, _name, timeout=None, **_kwargs):
             return None
 
     class _Page:
         async def title(self):
             return "Backend Engineer | Remote | Ashgrove Systems | LinkedIn"
 
-        async def inner_text(self, _selector):
+        async def inner_text(self, _selector, timeout=None, **_kwargs):
             return "some text"
 
         def locator(self, selector):

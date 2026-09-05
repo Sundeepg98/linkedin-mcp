@@ -4386,7 +4386,7 @@ class _StubLocator:
     def first(self):
         return self
 
-    async def get_attribute(self, name: str):
+    async def get_attribute(self, name: str, timeout=None, **_kwargs):
         assert name == "aria-label"
         return self._label
 
