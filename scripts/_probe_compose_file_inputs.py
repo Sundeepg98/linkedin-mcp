@@ -132,18 +132,117 @@ def _verdict(reading: dict[str, Any], compose_fields: dict[str, Any]) -> str:
     return "TWO OR MORE (ambiguous - a count cannot aim)"
 
 
+def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
+    """Can a wiring aim by what the inputs DECLARE, where a name cannot?
+
+    THREE ANSWERS AND NO FOURTH, and the distinctions are the point:
+
+    * ``NO -- nothing declared``: every input is silent on both attributes, so
+      the page states nothing to aim by and this route is closed like the
+      name route before it.
+    * ``NO -- declarations identical``: they declare, and they declare THE
+      SAME THING. Two inputs that accept the same types are as unaimable as
+      two with no names -- aiming would come down to document order, which is
+      the thing every gate in this package exists not to do.
+    * ``YES -- N distinct declarations over N inputs``: each input says
+      something different about itself, so a wiring has a property to match
+      on that LinkedIn authored rather than one this server invented.
+
+    A COMPARISON, NEVER A JUDGEMENT ABOUT WHICH IS WHICH. Deciding that a
+    given ``accept`` list means "this is the photo one" is a mapping nobody
+    has reviewed; that belongs to whoever wires the composer, on the evidence
+    printed above this line.
+    """
+    if not declared:
+        return "NO -- no file inputs were read"
+    stated = [
+        row for row in declared
+        if any(value not in (None, "") for value in row.values())
+    ]
+    if not stated:
+        return "NO -- nothing declared (every input silent on accept and multiple)"
+    keys = {tuple(sorted(row.items(), key=lambda kv: kv[0])) for row in declared}
+    if len(keys) == 1:
+        return (
+            f"NO -- declarations identical across all {len(declared)} inputs; "
+            "aiming would be by document order"
+        )
+    return f"YES -- {len(keys)} distinct declarations over {len(declared)} inputs"
+
+
+#: WHAT A FILE INPUT DECLARES ABOUT ITSELF, and why only these two.
+#:
+#: `read_file_inputs` answers "how many, and what are they called". On this
+#: surface the answer was TWO and neither is called anything -- both come back
+#: with an empty shaped name and `name_source=none` -- so neither of this
+#: package's two aiming strategies (count-of-one, exactly-one-name-match) can
+#: address either input. That is a dead end for aiming BY NAME, and it is what
+#: sent this read looking for a discriminator the page states about itself.
+#:
+#: `accept` and `multiple` are LinkedIn's OWN declaration of what a control is
+#: for: which file types it will take, and whether it takes more than one.
+#: They are exactly the distinction the three blocked rows need -- attach a
+#: PHOTO, attach a VIDEO, attach FILES (max 5) -- and they are the site's
+#: vocabulary rather than anybody's identity: a mime type and a boolean carry
+#: no member, no slug and no urn.
+#:
+#: NOTHING ELSE IS READ OFF THE NODE. `id`, `name` and `class` are exactly the
+#: attributes a site puts entity ids in, and this file has no business
+#: printing them; `_live_control` builds selectors from dom ids precisely
+#: because that is the write path, which never prints what it aims with.
+_DECLARED_ATTRS: tuple[str, ...] = ("accept", "multiple")
+
+#: A cap, because an `accept` list is authored by LinkedIn and unbounded. Long
+#: values are truncated with a marker rather than dropped: a redaction that
+#: erases its own marker buys the reader's trust and hides what it removed.
+_ATTR_CHARS = 120
+
+
+async def _declared_shapes(page: Any) -> list[dict[str, Any]]:
+    """What each file input DECLARES it accepts. Attributes only, no names.
+
+    Read through the locator API rather than a new injected script, so this
+    costs no ``# readonly-ok`` waiver and no entry in the declared-scripts
+    list. Reading an attribute changes nothing;
+    ``readonly.scan_source_for_mutations`` over this file is what says so, and
+    it prints its own answer at the end of every run.
+    """
+    inputs = page.locator('input[type="file"]')
+    total = await inputs.count()
+    rows: list[dict[str, Any]] = []
+    for index in range(total):
+        node = inputs.nth(index)
+        row: dict[str, Any] = {}
+        for attr in _DECLARED_ATTRS:
+            try:
+                value = await node.get_attribute(attr)
+            except Exception as exc:  # noqa: BLE001 - reported, never raised
+                row[attr] = f"<unreadable: {type(exc).__name__}>"
+                continue
+            if value is None:
+                row[attr] = None
+            elif len(value) > _ATTR_CHARS:
+                row[attr] = value[:_ATTR_CHARS] + "<truncated>"
+            else:
+                row[attr] = value
+        rows.append(row)
+    return rows
+
+
 async def _measure(page: Any) -> dict[str, Any]:
-    """One allowlisted navigation and three reads. No mutation anywhere."""
+    """One allowlisted navigation and four reads. No mutation anywhere."""
     readonly.assert_read_url(TARGET_URL)
     landed = await BROWSER.goto(page, TARGET_URL)
     census = await dom.read_surface_census(page)
     file_inputs = await dom.read_file_inputs(page, census=census)
     compose_fields = await dom.read_compose_fields(page)
+    declared = await _declared_shapes(page)
     return {
         "landed": landed,
         "census": census,
         "file_inputs": file_inputs,
         "compose_fields": compose_fields,
+        "declared": declared,
     }
 
 
@@ -186,30 +285,60 @@ async def _run() -> int:
     try:
         await BROWSER.start()
         async with BROWSER.session() as page:
-            from linkedin_server.auth import assert_not_authwall
+            try:
+                from linkedin_server.auth import assert_not_authwall
 
-            out = await _measure(page)
-            assert_not_authwall(out["landed"], surface=TARGET_LABEL)
+                out = await _measure(page)
+                assert_not_authwall(out["landed"], surface=TARGET_LABEL)
 
-            census = out["census"]
-            reading = out["file_inputs"]
-            compose_fields = out["compose_fields"]
+                census = out["census"]
+                reading = out["file_inputs"]
+                compose_fields = out["compose_fields"]
 
-            print(f"--- {TARGET_LABEL} ({TARGET_URL})")
-            print(
-                f"    served:        "
-                f"{_relation(out['landed'], TARGET_URL)}"
-            )
-            print(f"    page counts:   {census['counts']}")
-            print(
-                f"    controls_read: {census['controls_read']} "
-                f"truncated={census['truncated']}"
-            )
-            print(_fmt_compose_fields(compose_fields))
-            print(_fmt_file_inputs(reading))
-            verdict = _verdict(reading, compose_fields)
-            print(f"    VERDICT: {verdict}")
-        return 0
+                print(f"--- {TARGET_LABEL} ({TARGET_URL})")
+                print(
+                    f"    served:        "
+                    f"{_relation(out['landed'], TARGET_URL)}"
+                )
+                print(f"    page counts:   {census['counts']}")
+                print(
+                    f"    controls_read: {census['controls_read']} "
+                    f"truncated={census['truncated']}"
+                )
+                print(_fmt_compose_fields(compose_fields))
+                print(_fmt_file_inputs(reading))
+                print("    declared (the page's own words about each input):")
+                for index, row in enumerate(out["declared"]):
+                    print(f"      [{index}] {row}")
+                print(
+                    "    aimable by declaration: "
+                    f"{_declaration_verdict(out['declared'])}"
+                )
+                verdict = _verdict(reading, compose_fields)
+                print(f"    VERDICT: {verdict}")
+            finally:
+                # CLOSE THE TAB THIS PROBE OPENED -- the PAGE, never the context,
+                # and in a `finally` so a run that raised still cleans up.
+                #
+                # In attach mode `BROWSER._page` opens a tab of its own rather
+                # than steering one of his, and `session()` does NOT close it on
+                # exit -- it only touches the idle timer. So every probe process
+                # that has ever run left a tab behind in the operator's own
+                # Chrome, and they accumulate: measured across the fleet at 24
+                # pages, which is why `connect_over_cdp` spends 13-17 seconds
+                # enumerating targets during the handshake and two attach
+                # attempts in three exceed a 15s ceiling.
+                #
+                # THE CONTEXT IS HIS BROWSER SESSION and closing it closes his
+                # window. This closes ONE TAB, the one this process opened, and
+                # reports rather than raises if it cannot -- a cleanup step that
+                # masks the real error is worse than one that fails.
+                try:
+                    await page.close()
+                    print("    tab: closed the page this probe opened")
+                except Exception as exc:  # noqa: BLE001 - reported, never raised
+                    print(f"    tab: could NOT close: {type(exc).__name__}: {exc}")
+            return 0
     finally:
         await BROWSER.stop()
         profile_lock.release()
