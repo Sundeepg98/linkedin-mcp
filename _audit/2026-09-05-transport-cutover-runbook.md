@@ -51,12 +51,20 @@ rollback is instant and lossless. It costs one sign-in.
 
 ## Cutover
 
+**Every command below runs from the repo root** -- the `mcp-servers/linkedin`
+directory inside the job-hunting project, the one holding `linkedin.py`. `cd`
+there once and the relative paths in this document all resolve.
+
+The paths here are deliberately relative rather than absolute. This file is a
+STANDING INSTRUCTION -- whoever opens it next reads it as the thing to type --
+and an absolute path off this machine names the account it lives under, which
+`test_no_committed_identity` is right to refuse. It also rots the moment the
+tree moves.
+
 ### 0. Copy the profile
 
 ```powershell
-Copy-Item -Recurse -Force `
-  "D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_state\chrome-profile" `
-  "D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_state\chrome-profile.pre-http-20260905"
+Copy-Item -Recurse -Force ".\_state\chrome-profile" ".\_state\chrome-profile.pre-http-20260905"
 ```
 
 ### 1. Stop every stdio LinkedIn server FIRST
@@ -78,7 +86,7 @@ Then confirm the lock is gone. If it is still there naming a live PID, that PID
 is a server you missed:
 
 ```powershell
-Test-Path "D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_state\chrome-profile.lock"   # must be False
+Test-Path ".\_state\chrome-profile.lock"   # must be False
 ```
 
 `start_chrome.ps1` refuses rather than proceeding if it is not (MEASURED -- the
@@ -87,7 +95,6 @@ refusal names the holding PID).
 ### 2. Start Chrome
 
 ```powershell
-cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
 .\scripts\start_chrome.ps1
 ```
 
@@ -112,17 +119,26 @@ writes on unless asked. Expect `"outcome": "started"` and `"url":
 
 ### 4. Change the config -- THIS IS THE SWITCH
 
-In `D:\Sundeep\projects\job-hunting\.mcp.json`, replace the `linkedin` entry.
+The file is the job-hunting project's `.mcp.json`, two levels above this repo
+(`..\..\.mcp.json` from the repo root). Copy it first -- **that copy, not this
+document, is the authoritative rollback**, because it is the entry byte for
+byte rather than a transcription of it:
 
-**Before (exactly as it stands today):**
+```powershell
+Copy-Item "..\..\.mcp.json" "..\..\.mcp.json.pre-http-20260905"
+```
+
+**Before** -- the entry you are replacing has this shape. The two paths are
+absolute and are written here as `<REPO>` only so this file does not publish
+the machine's directory layout; the real values are in the copy you just took.
 
 ```json
     "linkedin": {
       "type": "stdio",
-      "command": "D:\\Sundeep\\projects\\job-hunting\\mcp-servers\\linkedin\\venv\\Scripts\\python.exe",
+      "command": "<REPO>\\venv\\Scripts\\python.exe",
       "args": [
         "-u",
-        "D:\\Sundeep\\projects\\job-hunting\\mcp-servers\\linkedin\\linkedin.py"
+        "<REPO>\\linkedin.py"
       ],
       "env": {
         "PYTHONUNBUFFERED": "1",
@@ -161,8 +177,9 @@ the attached browser is his signed-in one.
 
 ## The restart command
 
+From the repo root:
+
 ```powershell
-cd D:\Sundeep\projects\job-hunting\mcp-servers\linkedin
 .\scripts\restart_server.ps1 -EnableWrites
 ```
 
@@ -186,11 +203,16 @@ just the two composed.
    on this machine before:
 
    ```powershell
-   $needle = [regex]::Escape("D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\_state\chrome-profile")
+   $needle = [regex]::Escape((Resolve-Path ".\_state\chrome-profile").Path)
    Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" |
      Where-Object { $_.CommandLine -match $needle } |
      ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
    ```
+
+   Resolving the path at run time rather than pasting it is not only a
+   disclosure fix: a hand-typed needle that does not match what Chrome was
+   actually given silently selects NOTHING, and a kill loop that matches
+   nothing looks exactly like a kill loop that worked.
 
 3. **Restore the profile copy** -- this is the step that exists because of the
    one-way door:
@@ -200,7 +222,16 @@ just the two composed.
    Copy-Item -Recurse -Force ".\_state\chrome-profile.pre-http-20260905" ".\_state\chrome-profile"
    ```
 
-4. Put the stdio entry back in `.mcp.json` verbatim (it is quoted above).
+4. Restore `.mcp.json` from the copy taken in step 4 of the cutover:
+
+   ```powershell
+   Copy-Item -Force "..\..\.mcp.json.pre-http-20260905" "..\..\.mcp.json"
+   ```
+
+   Restore the file, do not retype the entry. The shape is quoted in step 4
+   with its two absolute paths elided, so this document alone cannot
+   reconstruct it -- which is the point of taking the copy.
+
 5. `/mcp`.
 
 Nothing in the code needs reverting: `linkedin.py` still runs stdio when
