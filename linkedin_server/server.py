@@ -2346,6 +2346,33 @@ _EXPERIENCE = {
 #: ships and LinkedIn keeps the parameter either way -- and a caller asking
 #: for two job types has NOT been shown to get both. Said here rather than
 #: discovered later.
+#:
+#: **THE RESULT-SET CHANNEL EXISTS NOW, AND IT ANSWERED THE FIRST HALF AND
+#: REFUSED THE SECOND.** ``scripts/_probe_job_search_result_sets.py`` compares
+#: the SET of job ids two loads return rather than counting them, which is the
+#: channel called unavailable above. Pass three, run THREE times on 2026-09-05
+#: with the single-F load re-taken last as its own drift control:
+#:
+#:     f_JT=F alone and f_JT=C alone share ZERO postings, all three runs
+#:     drift floor over the same stretch: 2, 0, 0
+#:
+#: **THAT SETTLES THAT f_JT IS HONOURED, AND IT IS A BETTER MEASUREMENT THAN
+#: F AGAINST BASELINE.** The four booleans are OFF by default so baseline is
+#: their true unfiltered case; ``f_JT``'s default is ANY, and a Node search in
+#: a tech city is already mostly full-time -- so ``f_JT=F`` asks the corpus to
+#: narrow to what it already is, and it moved only 4 and 2 ids in two runs.
+#: **Two VALUES of the same filter is the comparison that has to separate, and
+#: F against C separates completely.**
+#:
+#: **THE MULTI-VALUE QUESTION IS STILL OPEN AND IS NOW OPEN WITH A SHAPE.**
+#: The pair ``f_JT=F,C`` returned, in all three runs, a window holding 5-6 of
+#: F's distinctive postings and EXACTLY ONE of C's. One posting in a window of
+#: seven cannot separate "the second value applied" from "the second value's
+#: postings rank below the window" -- both predict this picture. The verdict
+#: flipped between two runs on that single posting because the drift floor
+#: moved by two, which is how the probe learned to carry a RESOLUTION floor as
+#: well as a drift floor. Settling it needs a window wider than seven, and
+#: that needs a scroll, which is a boundary question rather than a parameter.
 _JOB_TYPE = {
     "full_time": "F",
     "part_time": "P",
@@ -2384,6 +2411,36 @@ _JOB_TYPE = {
 #: ``f_AL=false``. LinkedIn's control is a checkbox and an unchecked box is
 #: absent from its url; emitting ``false`` would be inventing a spelling
 #: nothing above measured.
+#:
+#: **AND EVERY CHANNEL ABOVE IS A READING ABOUT LINKEDIN'S PAGE, NOT ABOUT
+#: WHAT THIS TOOL RETURNS.** A drawn pill and a surviving parameter say the
+#: site accepted the filter. They cannot say the harvest came back different,
+#: and a filter that is accepted and changes nothing would read as a success
+#: on both -- which is the exact failure that would matter, because it puts a
+#: shortlist in front of him that was never filtered.
+#:
+#: **MEASURED ON THE RESULT SET, 2026-09-05, THIRTEEN LOADS, THREE CONTROLS.**
+#: ``scripts/_probe_job_search_result_sets.py`` takes the SET of job ids each
+#: load returns and compares it against the same query without the parameter:
+#:
+#:     POSITIVE CONTROL  another profession, same city   shared 0 of 7
+#:     NEGATIVE CONTROL  f_ZZQQX, never a LinkedIn key   shared 7 of 7
+#:     STABILITY CONTROL baseline again, taken LAST      shared 7 of 7
+#:
+#:     f_AL=true      14 ids moved      f_EA=true      14 ids moved
+#:     f_JIYN=true    12 ids moved      f_FCE=true     14 ids moved
+#:
+#: Fourteen is the maximum a seven-posting window allows: seven out, seven in.
+#: **THE POSITIVE CONTROL IS WHAT MAKES THE ZEROS READABLE.** Without a load
+#: whose set MUST differ, "identical to baseline" would mean the filter is
+#: inert OR the reader is blind, and nothing here could tell those apart. The
+#: stability control fixes the other end: the unchanged query re-taken after
+#: every other load moved 0 ids, so the drift floor was zero and every number
+#: above is the parameter rather than the ranking. A second run the same hour
+#: had a floor of 4 and the same four filters cleared it.
+#:
+#: **NONE OF THE FOUR IS INERT.** That is the claim the pill channel could not
+#: make, and it is the one a shortlist rests on.
 _BOOLEAN_FILTERS: tuple[tuple[str, str], ...] = (
     ("easy_apply", "f_AL"),
     ("under_ten_applicants", "f_EA"),
@@ -2628,6 +2685,37 @@ async def linkedin_search_jobs(
                 "the search page rendered but held no job cards -- either the "
                 "filters matched nothing, or the offset is past the end of the "
                 "results."
+            )
+        elif result.get("page_had", 0) < limit:
+            # THE SHORTFALL SAYS SO, RATHER THAN LOOKING LIKE AN ANSWER.
+            #
+            # `capped` is False here and `count` is a small number, and until
+            # 2026-09-05 those two facts together read as "the search found
+            # this many". They do not. MEASURED that day over seventeen live
+            # loads: the window is SEVEN postings whatever `limit` asks for,
+            # on a query LinkedIn's own page counted at 2915. A caller asking
+            # for 25 and receiving 7 was being told nothing at all about the
+            # eighteen it did not get.
+            #
+            # This is the same class this package keeps finding and is the
+            # reason `_read_tracker` refuses an uncorroborated zero: a partial
+            # answer that carries no mark of being partial is worse than a
+            # failure, because it is acted on. The remedy here is weaker than
+            # a refusal and deliberately so -- the rows ARE real and useful,
+            # so they are returned WITH the shortfall named, not withheld.
+            #
+            # NOT A GUESS AT A CAUSE. The note says what was asked and what
+            # arrived and what to do next. Whether this page was the end of
+            # the results or the end of the window is not knowable from here
+            # without LinkedIn's own count, which this read does not take.
+            result["note"] = (
+                "asked for up to %d and the page held %d. The reader's window "
+                "on this surface was measured at 7 postings per load on "
+                "2026-09-05, so a short page is the NORMAL case and not "
+                "evidence that the search found only this many. Page with "
+                "start=%d to get the next window; start offsets by postings, "
+                "not by pages." % (limit, result.get("page_had", 0),
+                                   start + max(1, result.get("page_had", 0)))
             )
         return result
     except Exception as exc:
