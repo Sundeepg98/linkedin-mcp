@@ -1958,3 +1958,173 @@ event page"; retiring "boost a post" must not retire "read a post's analytics" -
 which in that case is the best value-per-risk read left in its slice. **A
 retirement that quietly walls off its neighbours is the failure mode, and the
 only defence is writing the neighbour down.**
+
+## 12. The groups-surface wave, 2026-09-05
+
+### 12.1 `scripts/_probe_groups_menu.py` -- opening a menu without reading a name
+
+**WHAT IT IS FOR.** Reading the contents of a per-row overflow menu on a
+surface where every row is named after something, and where the name might be a
+person's. It presses each disclosure, reads the menu, presses Escape, and
+publishes labels that have been through `census_shape` AND `census_redact_rare`
+with a REAL tally.
+
+**THE REUSABLE IDEA IS WHY IT OPENS ALL FIVE.** The count rule --
+furniture repeats and a name does not -- is the only thing separating a menu
+verb from an entity's name, and **one menu has no tally.** Opened across five
+rows, a verb LinkedIn draws on every row appears five times and survives; a
+label carrying one row's own name is a singleton and is redacted with no
+special case. Pressing ONE menu would have produced a payload in which every
+capitalised label is redacted, which is the degenerate answer this surface was
+already warned about. **If the count rule is your only protection, take the
+measurement at the window where a count exists.**
+
+**AIMED STRUCTURALLY BECAUSE THE LABELS COULD NOT DO IT.** The measured per-row
+control labels were `More` five times and one label carrying an entity name, so
+a name-based aim reaches four rows of five or reaches a name. The rule used
+instead: from each button declaring `aria-expanded`, walk up; the FIRST
+ancestor holding at least one group anchor is the row, and the control
+qualifies only if that ancestor holds EXACTLY ONE. No budget and no depth
+limit.
+
+**SHOWN FAILING.** The attach refusal fires with the flag unset (exit 2). The
+taint guard was shown firing on a planted `print` of a landed url in a sibling
+file and green on this one.
+
+**THREE DEFECTS IT FOUND IN ITSELF, each from its own output:**
+
+* **Run 1 read menu ROLES alone** and reported "nothing drew" while
+  `aria-expanded` went true on all five presses. This surface draws NO
+  `[role=menu]` content at all. The sibling `_probe_comment_overflow_menu.py`
+  learned the exact opposite on its surface -- there the census delta was blind
+  and the roles were visible. **WHICH READER IS BLIND IS A PROPERTY OF THE
+  SURFACE, NOT OF THE READER**, so neither alone may report an empty menu.
+* **Run 2 double-shaped the arrived names.** They come out of
+  `read_surface_census` already shaped; shaping them again opaqued three
+  distinct labels into one identical string. **A double-shaped string and a
+  redacted one are indistinguishable**, so the reader cannot tell "LinkedIn's
+  label is unshapeable" from "this probe shaped it twice".
+* **Run 3 printed its badge diagnostic only on the failing branch.** The
+  comparison that mattered was between two PAGES and needed both sides. **A
+  diagnostic available only on failure cannot support a diagnosis that needs
+  both readings.**
+
+### 12.2 `linkedin_server/groups.py` -- the absent parameter as a safety property
+
+**WHAT IT IS FOR.** Counting group memberships without ever touching a name.
+`shape.membership_row` publishes a name under a stated, tested limit -- a group
+named after a person ships that person's name -- and its own docstring says the
+fix is a ruling rather than a refactor. This is the ruling: **no name is a
+parameter of any function in the module.**
+
+**THE PATTERN WORTH COPYING IS THE TEST, NOT THE CODE.** The safety claim is an
+ABSENCE, so it is asserted on `inspect.signature` rather than on behaviour. A
+future edit adding a `name` parameter would look reasonable in a diff and
+silently reintroduce the class; the signature test is what makes it red.
+**A filter has to keep up. An absent parameter does not.**
+
+**TWO STRUCTURAL REFUSALS, both measured rather than tuned:**
+
+* the query and fragment are DROPPED before any check runs, which closes the
+  escape `membership_row` measured -- a member token in a query survives the
+  census substitutions intact;
+* a NON-NUMERIC segment is refused, **because a slug is a name**. Measured over
+  a live capture: 10 of 10 group segments are pure digits at lengths 5-8, zero
+  non-numeric, zero carrying a query. The rule refuses nothing real.
+
+**A DIGEST WAS CONSIDERED AND REJECTED**, and the reasoning generalises: group
+ids run to eight digits, so a digest over that domain is brute-forceable end to
+end. **A digest over a small domain is a lookup table wearing a redaction's
+costume** -- worse than publishing the value, because it buys the reader's
+trust.
+
+**SHOWN FAILING.** Both refusal branches killed by planted mutation, on inputs
+where the branch under test is the ONLY thing standing. The obvious inputs
+prove neither: a bare member path still refuses with the foreign branch
+deleted, because it falls through to "not a group href". The sharp inputs are a
+group href whose segment is a person's name, and a group path that also carries
+a member segment.
+
+### 12.3 A CONTAINMENT RULE IS NOT SYMMETRIC
+
+**The finding, and it cost a wrong answer that was caught by its own control.**
+`_probe_membership_tally_live.py` ran the SAME stopping rule as 12.1 -- the
+first ancestor holding exactly one group anchor -- but from the ANCHOR instead
+of from the BUTTON. It found ZERO membership rows against FIVE, on the same
+page, in the same hour.
+
+> "The first ancestor holding exactly one X" does not name a ROW. It names THE
+> SMALLEST ELEMENT CONTAINING WHAT YOU STARTED FROM, and the two coincide only
+> when the start point is outside X's own subtree.
+
+From the button you must climb past the button's branch to reach the anchor, so
+you land on their common parent. From the anchor you stop at its own tight
+wrapper, which contains no control, and every row reads as having none.
+
+This project already knows that **a budget on how FAR a walk goes is not a rule
+about where it stops**. This is the other half: **a rule about where it stops
+is not complete until it says where it STARTS.**
+
+**AND THE PROBE REFUSED TO PUBLISH THE ZERO**, on the stated grounds that three
+instruments disagreeing is the finding and not a count. That refusal is what
+surfaced it. A reader that had printed "0 memberships" would have been believed
+-- it is a plausible number for an account that might have none.
+
+### 12.4 THE SECOND SPELLING OF THE IDENTIFIER RULE: prose is not exempt
+
+**Measured twice in ten minutes on one file.** The identity guard fired on a
+member path written as `/in/` plus a sixteen-character hyphenated run. It was
+RENAMED rather than declared -- a declaration permanently widens what the guard
+tolerates for that file and a rename widens nothing.
+
+**Then the comment explaining the rename quoted the removed string verbatim,
+and the file stayed red at exactly the same count**, with the defect now living
+in the explanation. The guard could not tell the difference and was right not
+to.
+
+> **A NOTE ABOUT A REMOVED VALUE MUST DESCRIBE ITS SHAPE, NEVER REPRODUCE IT.**
+
+Prose feels exempt from the identifier rule because it is only prose. It is
+not. And the ordering is the third instance recorded on this project: reading
+the rule beforehand prevented nothing; running the pair caught it in a minute.
+
+**THE PAIR THAT PROVES A RENAME IS NOT VACUOUS**, and it is cheap enough to be
+mandatory: red with the value, green after the fix, **red again with a fresh
+value of the same class that carries no synthetic token**. Without the third
+step a "fix" that exempts nothing looks identical to one that works.
+
+### 12.5 A GUARD FIRING IS AN INVITATION TO LOOK, NOT ONLY TO DECLARE
+
+`groups.py` first shaped the path with `census_substitute`, which made it a new
+consumer of that predicate and turned the pinned-consumer guard red -- a consent
+guard that exists so a new caller "shows up in a diff instead of in an
+INCIDENT". **Declaring was available and looking was better.** The function
+already split the path, so an exact SEGMENT match was available and is strictly
+tighter than a substring search over a shaped string; and the coupling was
+backwards anyway, since `census_substitute` blanks six-digit runs, which is the
+exact shape of the identifier being published.
+
+**The guard improved the design rather than being satisfied.** That is the
+outcome a consent guard is for, and it is only available to somebody who treats
+the red as a question.
+
+### 12.6 PROVISIONAL-UNSMOKED: `scripts/_probe_group_row_affordances.py`
+
+**ADMITTED IN THE UNSMOKED STATE, DELIBERATELY, WITH ITS CONTROL WRITTEN OUT.**
+It would settle the four JOIN rows by reading what LinkedIn draws on a
+SUGGESTION row -- the rows that have no overflow menu and are therefore
+invisible to 12.1. It has never produced a reading: three attach attempts
+aborted in the CDP handshake while port 9224 answered `/json/version` normally
+and the browser process stayed alive. **Contention, measured rather than
+assumed, and nothing was killed or restarted to get around it.**
+
+**THE CONTROL IT MUST PASS ON ITS FIRST REAL RUN IS STATED IN THE FILE so a
+successor cannot grade it after the fact: it must resolve exactly FIVE rows
+carrying a disclosure**, because it uses a THIRD stopping rule and the other
+two both measured five. The file prints AGREE/DISAGREE on that comparison
+rather than leaving it to a reader.
+
+The register's law is that an instrument enters only if it has been SHOWN
+FAILING. This one has -- its refusal path and its abort path both fire. What it
+has not done is produce a number, and the entry says so in its first line
+rather than in a footnote.
