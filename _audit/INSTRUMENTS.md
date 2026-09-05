@@ -1544,6 +1544,16 @@ no boundary change at all. That is reported as a hypothesis with the read that
 settles it, not as a move -- the same discipline the fourteen-row route audit
 used.
 
+**CORRECTED BY:** `_audit/2026-09-05-the-newsletter-create-route.md` -- the hypothesis above, that `M C50` may need no boundary change because `/article/new/` is already allowed, is refuted by a third address the live page draws.
+
+The live newsletters
+page draws `/article/newsletter/new/`, which
+`readonly.is_read_url` refuses. The measurement in that paragraph stands and
+only its inference falls, which is why this is a back-pointer rather than a
+rewrite. The prescribed settling read -- re-censusing `/article/new/` with its
+menus pressed -- is also superseded: it costs a composer load that may autosave
+a draft, and the page answered the question from the outside for nothing.
+
 **THE STANDING TRAP IT PRINTS IN ITS OWN OUTPUT: ALLOWED IS NOT SERVED.**
 `/in/me/details/interests/` is on the allowlist, was admitted for this
 blocker's precondition, and REDIRECTS. A route table that did not say so would
