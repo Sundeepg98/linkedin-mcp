@@ -452,3 +452,51 @@ reads.**
           process substitution. And after any commit that reports a size you
           did not expect, verify with `git show HEAD:<path>` -- a partial
           commit can fail in a way that edits your working tree.
+
+### 7a. THE COST IS NOT HYPOTHETICAL: ONE RED, AND IT IS MINE
+
+**Found at 19:21, after the fix commit. I caused it and I am not clearing it
+by relaxing the matcher.**
+
+    tests/test_click_is_not_its_own_evidence.py
+      test_a_click_that_does_commit_reaches_the_body_and_the_send
+      -> recipient_gate refuses 3_needle_does_not_match, expected proceed
+
+    66 passed, 1 failed, 1 xfailed
+
+**THE CAUSE, traced rather than guessed.** That module's listbox is
+`_option(NAMED_RECIPIENT, "1st")`, and its commit script sets the chip's
+label to `'Remove ' + node.textContent`. So the label runs the connection
+degree straight onto the name. The needle is the full name, the next character
+is a digit, and this fix counts digits as word characters -- so it refuses.
+
+**THAT IS THE MEASURED LIVE SHAPE, NOT AN ODD FIXTURE.** The typeahead audit
+records exactly this as why a word boundary could not work on the suggestion
+rows: *the last letter of a name and the `1` of `1st` are both word
+characters*. The fixture models what was measured.
+
+**SO THE "IT MAY REFUSE EVERYBODY" CLAUSE HAS ARRIVED CONCRETELY.** If real
+chips carry the degree run onto the name the way suggestions do, this gate
+refuses every legitimate recipient. Per the ruling that is the accepted
+direction to fail -- but it should be read as a live prediction rather than a
+formality, and it is strong evidence FOR the identifier route in section 6
+rather than for any further tuning of a string comparison.
+
+**WHY I DID NOT MAKE IT GREEN.** Two ways were available and both are wrong
+tonight:
+
+* **Relax the digit rule.** Defensible on its face -- names carry no digits,
+  so a digit adjacent to the needle is arguably a separator. But that is
+  reversing a safety decision, at the end of a wave, under a deadline, to turn
+  a test green. This repo already has the rule for that: a red queue is sorted
+  by WHAT THE ASSERTION IS ABOUT before anything is cleared, and a guard that
+  fired is not a count that moved.
+* **Edit that test.** It belongs to the typeahead wave, not to me, and tonight's
+  standing rule is that you do not sweep a neighbour's lines.
+
+**THE HAND-OFF.** Whoever owns `test_click_is_not_its_own_evidence.py` decides
+one question, and it is a ruling rather than a test edit: **is a digit adjacent
+to a name a word character or a separator?** Answering "separator" makes that
+test green and admits `<name>1st`; answering "word character" keeps this
+refusal and the positive test must be re-expressed as the accepted cost. I have
+deliberately not answered it for them.
