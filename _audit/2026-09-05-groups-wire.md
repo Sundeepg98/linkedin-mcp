@@ -561,8 +561,17 @@ own, and the first is now off the list. Owners route by
     343b192  a zero is interpretable now, and one branch is honestly ambiguous
     e1a81e9  two dangling citations my own rename created; the stale README headline
     564ed73  why this tool reports a moved counter where its sibling refuses
+    6531223  the close: freeze numbers, and how to falsify each claim
+    be1a6cd  the package front-door docstring understated the writes by nine tools
+    5023667  the tab guard could not see my close; the pin it enforces over-counts
+    7568f1c  page loads computed at freeze; the rename verified live
 
-**Zero AI attribution, verified by grep across all five message bodies.**
+**NINE, and this list said FIVE for half an hour** -- written when there were
+five and left behind by four more. It is the same class as the cost paragraph
+in section 7 and the same remedy: a list of what a wave did is only true at
+the freeze, so it is recomputed there rather than maintained as it goes.
+
+**Zero AI attribution, verified by grep across all nine message bodies.**
 Nothing pushed; the push freeze is the operator's.
 
 Neighbours committed five times INTO THIS RANGE while this wave ran
