@@ -91,8 +91,44 @@ telling you it expects two lists.** A section-aware collector needs the live
 capture that `groups-events` holds; no tracked fixture of a groups page exists
 in this repository (`tests/fixtures/` has none).
 
-**So the blocker is not a tool. It is a section-aware href collector, and it
-belongs to whoever holds the capture.**
+**So the blocker is not a tool. It is a section-aware href collector.**
+
+### And the collector already exists -- in a probe, behind a waiver this wave may not take
+
+This section was first written as *"it belongs to whoever holds the capture"*
+and that was the weaker answer. `scripts/_probe_membership_tally_live.py` is
+`groups.py`'s existing caller and it **already splits the page structurally**,
+on a rule validated by a sibling probe: for each group anchor, walk up to the
+first ancestor holding exactly one group anchor; that ancestor is the ROW; a
+row containing a control declaring `aria-expanded` is a MEMBERSHIP row, one
+containing none is a SUGGESTION row. No heading and no label is read. Run
+against the real page it returned **5 memberships / 5 suggestions / 0 in
+common**, agreeing with two offline signals that share no input feature with
+it.
+
+So the obvious move is `premium.py`'s: package a proven probe's logic into the
+reader the package ships. **Three measured reasons say not in this window, and
+they are stronger than the scheduling one:**
+
+1. **The walk is a `page.evaluate` call.** That is the one thing this package
+   confines to `dom.py`, behind an explicit waiver. `premium.py` exists as a
+   standalone module precisely BECAUSE its read is locator-only and needs no
+   waiver, and it says so. A groups reader carrying this walk has to land in
+   `dom.py` -- the most contended file in the tree, and the module the
+   `linkedin_publish_post` feature detection keys on.
+2. **The locator-only alternative is the wrong number**, per the paragraph
+   above. Avoiding the waiver by sweeping anchors flat answers ten where the
+   answer is five.
+3. **A groups tool cannot certify its own cost from the page it loads.**
+   Measured in `_audit/2026-09-05-groups-surface-measured.md`: the feed's nav
+   draws a mynetwork link carrying a count, and the groups page's nav draws two
+   that carry none -- the invitation badge reads UNREADABLE there. So the
+   before/after discipline `linkedin_newsletter_subscriptions` discharges above
+   would need a THIRD navigation back to the feed, and the badge sits at zero
+   anyway, which is the degenerate reading `shape.invitation_badge` names.
+
+**That third reason is a design question, not an implementation one**, and it
+is the one a wiring wave should not answer by itself.
 
 ### `recommendations.py` -- no admitted address, and nothing has been run live
 
@@ -251,8 +287,11 @@ to a sentence that carries one would be worse than recording the disagreement.
 
 ## 7. What is still owed
 
-* **A section-aware groups reader** -- see 2 above. It is the only thing between
-  `groups.py` and a tool, and it belongs to whoever holds the live capture.
+* **A section-aware groups reader** -- see 2 above. The collection rule is
+  already written and already validated live; what is owed is a ruling on
+  whether it lands in `dom.py` behind the `page.evaluate` waiver, and a
+  separate one on how a groups tool certifies a cost its own page cannot read.
+  Neither is an implementation question.
 * **A recommendations address, or a ruling that there will not be one.**
   Nothing about that module can move until a page is opened, and opening it is
   a boundary decision.
