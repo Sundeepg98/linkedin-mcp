@@ -184,13 +184,13 @@ async def main() -> int:
     print("=== LOCATOR-ONLY SECTION SPLIT -- can the walk be done without a "
           "page.evaluate waiver?")
 
-    page_ref = None
+    tab = None
     verdict_rows = None
     overlap = None
     control_before = control_after = 0
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            tab = page
             await BROWSER.goto(page, CONTROL_URL)
             control_before = int(
                 (await dom.read_surface_census(page)).get("controls_read") or 0
@@ -271,10 +271,10 @@ async def main() -> int:
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
     finally:
-        if page_ref is not None and not page_ref.is_closed():
-            await page_ref.close()
+        if tab is not None and not tab.is_closed():
+            await tab.close()
         print("    tab closed:",
-              page_ref.is_closed() if page_ref is not None else "no tab")
+              tab.is_closed() if tab is not None else "no tab")
 
     print("\n=== VERDICT")
     floor = int(CONTROL_EXPECTED * 0.5)
