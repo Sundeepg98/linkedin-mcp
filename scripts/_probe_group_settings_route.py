@@ -94,22 +94,40 @@ LINKS_JS = """
 """
 
 
-def _classify(href):
-    """The two gates, asked INDEPENDENTLY. Returns a class and counts only."""
+def _absolute(href) -> str:
+    """A relative href made absolute, for the gates that anchor on a scheme.
+
+    THE RESULT IS NEVER PRINTED AND NEVER RETURNED PAST A COMPARISON. It is
+    read only inside ``in`` tests and inside ``len()``, which is what keeps the
+    reporting section free of page-derived values.
+    """
+    text = str(href or "")
+    return text if text.startswith("http") else f"{BASE_URL}{text}"
+
+
+def _classify(href) -> dict:
+    """The two gates, asked INDEPENDENTLY. Returns counts and closed strings.
+
+    Kept as a function because the two gates must be asked SEPARATELY: a
+    verdict of REFUSED cannot tell "somebody wrote a substring against this"
+    from "the default-closed allowlist decided nothing", and this repository's
+    rule is that a general mechanism which merely happens to block something is
+    a GAP WITH A NAMED BLOCKER rather than a decision.
+    """
     if not href:
-        return {"has_href": False, "class": "NO HREF -- opens in place"}
-    absolute = href if href.startswith("http") else f"{BASE_URL}{href}"
+        return {"has_href": False, "class": "NO HREF -- opens in place",
+                "path_segments": 0, "forbidden_hits": 0}
+    absolute = _absolute(href)
     hits = [
         needle
         for needle in readonly._FORBIDDEN_URL_SUBSTRINGS
         if needle in absolute
     ]
-    allowed = readonly.is_read_url(absolute)
     segments = len([s for s in absolute.split("://")[-1].split("/")[1:] if s])
-    if allowed:
+    if readonly.is_read_url(absolute):
         verdict = "ALLOWED by an existing pattern"
     elif hits:
-        verdict = f"FORBIDDEN x{len(hits)}: {sorted(hits)}"
+        verdict = f"FORBIDDEN x{len(hits)}"
     else:
         verdict = "NO-PATTERN -- the default-closed allowlist, no substring"
     return {
@@ -181,38 +199,78 @@ async def main() -> int:
         if page_ref is not None and not page_ref.is_closed():
             await page_ref.close()
 
-    matched = int(reading.get("matched") or 0)
-    print(f"\n=== CONTROLS WEARING THAT LABEL: {matched}")
-    if matched == 0:
+    # ============================================================
+    # EVERY FIGURE BELOW IS A ``len()`` OF A LIST, AND THAT IS THE FIX
+    # RATHER THAN A STYLE.
+    # ============================================================
+    #
+    # ``page.evaluate`` is a TEXT SOURCE to the guard in
+    # ``tests/test_page_text_is_never_printed.py``, so everything derived from
+    # its return is tainted -- correctly, because a group's page text can carry
+    # a member's name and ``census_substitute`` returns a plain human name
+    # UNCHANGED. That is measured on this very surface, not hypothesised.
+    #
+    # The first version of this section printed ``reading``'s own integers and
+    # a dict built by walking its lists, and tripped the guard at THREE SITES.
+    # Every one of them was safe in substance -- a count, a set of HTML tag
+    # names, and a class string made of this repository's own vocabulary -- and
+    # **the guard was still right**, because none of that is visible to it and
+    # a later edit to any of those expressions could carry a name with no
+    # further review.
+    #
+    # THE REPAIR IS THE HOUSE DISCIPLINE, NOT A DECLARATION AND NOT A NEW
+    # SANITISER: counting a thing is what this package does INSTEAD of printing
+    # it, so the tainted values are read only inside ``len(...)`` and inside
+    # comparisons, and what crosses to a print is an integer or a string this
+    # file authored. A declaration would have keyed on the whole sink
+    # expression and tolerated that line forever, whatever it later held.
+    hrefs = list(reading.get("hrefs") or [])
+    tags = list(reading.get("tags") or [])
+
+    print("")
+    print(f"=== CONTROLS WEARING THAT LABEL: {len(hrefs)}")
+    if len(hrefs) == 0:
         print("    ZERO. The label was measured at 5 on this page an hour "
               "ago, so this is a finding about this match rule or about a "
               "changed page -- and NOT a finding that the control is gone.")
         return 1
 
-    tags = {}
-    for tag in (reading.get("tags") or []):
-        tags[str(tag)] = tags.get(str(tag), 0) + 1
-    print(f"    by tag: {tags}")
+    print(f"    anchors: {len([t for t in tags if t == 'A'])}   "
+          f"buttons: {len([t for t in tags if t == 'BUTTON'])}")
+    print(f"    carrying an href: {len([h for h in hrefs if h])}   "
+          f"opening in place: {len([h for h in hrefs if not h])}")
+    for depth in range(1, 7):
+        n = len([h for h in hrefs if h and _classify(h).get("path_segments") == depth])
+        if n:
+            print(f"    path depth {depth}: {n}")
 
-    verdicts = {}
-    for href in (reading.get("hrefs") or []):
-        row = _classify(href)
-        key = f"{row['class']}  [segments {row.get('path_segments', 0)}]"
-        verdicts[key] = verdicts.get(key, 0) + 1
-    print("    CLASS PER CONTROL:")
-    for key, count in sorted(verdicts.items(), key=lambda i: (-i[1], i[0])):
-        print(f"        {count:>3}  {key}")
+    print("    FORBIDDEN SUBSTRINGS MET, by needle "
+          "(this repository's own vocabulary, naming nobody):")
+    met = 0
+    for needle in sorted(readonly._FORBIDDEN_URL_SUBSTRINGS):
+        n = len([h for h in hrefs if h and needle in _absolute(h)])
+        if n:
+            met += 1
+            print(f"        {n:>3}  {needle!r}")
+    if met == 0:
+        print("        NONE")
+    admitted = len([h for h in hrefs if h and readonly.is_read_url(_absolute(h))])
+    print(f"    already ADMITTED by an existing allowlist pattern: {admitted}")
 
-    print("\n=== WHAT THIS SETTLES")
-    if all(not href for href in (reading.get("hrefs") or [])):
+    print("")
+    print("=== WHAT THIS SETTLES")
+    if len([h for h in hrefs if h]) == 0:
         print("    EVERY control opens IN PLACE -- no href, so no address and "
               "no boundary question. N 170 and N 176 cost no boundary change; "
               "what they need is a press and a reader.")
-    elif any(_classify(h).get("forbidden_hits") for h in (reading.get("hrefs") or [])):
-        print("    At least one control navigates to an address meeting a "
-              "FORBIDDEN SUBSTRING. N 170 and N 176 are DOUBLE-refused, the "
-              "way /groups/<id>/invite/ is, and need a denylist exemption "
-              "rather than an allowlist addition.")
+    elif met:
+        print("    The controls navigate to an address meeting a FORBIDDEN "
+              "SUBSTRING. N 170 and N 176 are DOUBLE-refused, the way "
+              "/groups/<id>/invite/ is, and need a denylist exemption rather "
+              "than an allowlist addition.")
+    elif admitted:
+        print("    The controls navigate to an address ALREADY ADMITTED. "
+              "N 170 and N 176 need no boundary change at all.")
     else:
         print("    The controls navigate and meet NO written substring, so "
               "the default-closed allowlist is what refuses them. That is a "
