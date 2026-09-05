@@ -585,6 +585,8 @@ controls, 0 control failures:
 | `/uas/login` | `/uas/` | `P N12` |
 | `/badges/profile/create` | `/create` | `P O5` |
 
+**CORRECTED BY:** `_audit/2026-09-05-routes-already-admitted.md` -- the `P N12` line above subtracts the row on `/uas/login`, which nothing in this package builds; the sign-in form this server does open is `config.LOGIN_URL` = `https://www.linkedin.com/login`, machine-verified ALLOWED at HEAD, so the boundary is not what holds that row out.
+
 **-7, BUILT** -- `J 24 26 27 121 122 123` (`linkedin_job_detail.insights`) and
 `N 135` (`linkedin_who_viewed_me.insights`).
 

@@ -377,6 +377,33 @@ DECLARED_PLANTS = {
     # needing an argument, which is the standing preference. Pinned at 1 so a
     # SECOND urn appearing in that file still goes red.
     ("tests/test_membership_row.py", "opaque urn"): 1,
+    # TWO SHAPE-VALID LITERALS IN THE ROUTE-AUDIT PROBES, 2026-09-05. THE GUARD
+    # FIRED FIRST and the remedy is the standing one: the values are already
+    # synthetic, so the allowlist widens -- red here means UNDECLARED, never
+    # REAL.
+    #
+    # Both identifier segments are ALL ZEROES, which is nobody's, and that is
+    # the convention ``tests/test_writes_nine.py``'s nineteen-zero urn already
+    # carries. Neither can be paraphrased away, and for opposite reasons:
+    #
+    #   _probe_route_vs_surface.py puts one address per allowlist pattern to
+    #   ``readonly.assert_read_url``, and the permalink pattern is
+    #   ``feed/update/urn:li:<type>:<digits>``. A url that is not urn-SHAPED
+    #   is refused by that pattern, so the probe would report a refusal that
+    #   is a fact about its own input rather than about the boundary.
+    #
+    #   _probe_alert_keywords_survive_shaping.py needs a company link as its
+    #   CONTROL -- the key that lives in a url's PATH, run beside the key that
+    #   lives in its QUERY, so that a zero from the second is legible. An id
+    #   the extractor cannot read would leave both keys silent and the reading
+    #   uninterpretable.
+    #
+    # LITERALS, NOT ASSEMBLED, for the reason the urn entries above give:
+    # assembling them at runtime would hide them from this sweep, and a sweep
+    # blinded to a file is blinded to a real value pasted into it later. Each
+    # is pinned at 1 so a SECOND value of that class in either file goes red.
+    ("scripts/_probe_route_vs_surface.py", "urn id"): 1,
+    ("scripts/_probe_alert_keywords_survive_shaping.py", "company id"): 1,
 }
 
 # ===========================================================================

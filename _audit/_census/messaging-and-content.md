@@ -480,6 +480,8 @@ from what this server could do about it.
 | C91 | React in a group conversation | a549002 | GAP | W | REV | recovered by help-index search. Reactions have a third surface -- posts, messages (M48) and group conversations -- and the repo names only the first |
 | C92 | Comment on an Event and reply to Event comments | a738312 | GAP | W | NOT | recovered by help-index search. See s10 -- overlaps the sibling's Events slice and is flagged rather than claimed |
 
+**CORRECTED BY:** `_audit/2026-09-05-routes-already-admitted.md` -- row `C60` above says `/groups/` is on neither the allowlist nor the forbidden list; commit `6b5dad5` admitted the `/groups/` root on 2026-09-05 and it is machine-verified ALLOWED at HEAD, so what holds that row is the render and the missing reader rather than the boundary.
+
 ---
 
 ## 7. THE 88 GAPS, GROUPED -- WHAT EACH FAMILY WOULD TAKE
