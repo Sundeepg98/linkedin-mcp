@@ -57,13 +57,47 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from typing import Any, Optional
 
 from linkedin_server.config import CDP_HOST, CDP_PORT, logger
 from linkedin_server.errors import BrowserUnavailableError
 
 #: How long to wait for the CDP handshake before giving up.
-ATTACH_TIMEOUT_MS = 15_000
+#:
+#: **THE DEFAULT IS UNCHANGED AND THE OVERRIDE IS THE WHOLE OF THIS EDIT.**
+#: Nobody who does not set the variable sees any difference, which is why this
+#: is a knob rather than a policy change on somebody else's file.
+#:
+#: WHY IT NEEDED ONE, measured 2026-09-05 between 16:52 and 17:07 after FIVE
+#: consecutive attach failures with an identical signature:
+#:
+#:     <ws connected> ... then TimeoutError at 15000ms
+#:
+#: The browser was healthy throughout and that was measured rather than
+#: assumed -- port 9224 LISTENING, ``/json/version`` answering in 0.07s,
+#: the Chrome process alive. **The cause is the number of TARGETS**, because
+#: ``connect_over_cdp`` enumerates and attaches to every one of them during the
+#: handshake:
+#:
+#:     /json/list   120 targets:  24 page, 40 iframe, 54 worker, 2 browser_ui
+#:     OS           54 chrome processes
+#:
+#: This value was chosen when the browser was one session's. It is now SHARED
+#: by a dozen concurrent waves that each leave pages open, and a constant sized
+#: for the old world silently became a fleet-wide outage: every wave's attach
+#: fails, and the failure text points at Chrome not running, which is the one
+#: thing that was not wrong.
+#:
+#: **THE REAL FIX IS NOT THIS KNOB.** It is that a wave should close the pages
+#: it opens, or that something should. Raising a timeout buys time against an
+#: unbounded growth and is the wrong shape of remedy for it -- stated here so
+#: the knob does not read as the answer. What it does buy is that a wave which
+#: cannot get a slot has something to try other than killing a browser it does
+#: not own, which is the thing that must never happen.
+ATTACH_TIMEOUT_MS = int(
+    os.environ.get("LINKEDIN_CDP_ATTACH_TIMEOUT_MS", "15000")
+)
 #: How long to wait on the plain HTTP probe of ``/json/version``.
 PROBE_TIMEOUT_S = 5.0
 
