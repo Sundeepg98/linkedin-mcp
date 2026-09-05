@@ -224,6 +224,7 @@ from linkedin_server import (
     cdp_bridge,
     dom,
     events,
+    jobfilter,
     preflight,
     shape,
     writes,
@@ -2599,6 +2600,7 @@ async def linkedin_search_jobs(
     date_posted: str = "any",
     experience_level: str = "",
     job_type: str = "",
+    company_id: str = "",
     easy_apply: bool = False,
     under_ten_applicants: bool = False,
     in_your_network: bool = False,
@@ -2755,6 +2757,24 @@ async def linkedin_search_jobs(
             }
         if kinds:
             params.append(("f_JT", ",".join(_JOB_TYPE[p] for p in kinds)))
+
+        # THE COMPANY FILTER. Census row ``J 10``, and the blocker it was filed
+        # against is discharged: ``/jobs/search/?f_C=<id>`` is on the read
+        # allowlist (measured, not assumed) and
+        # ``shape.company_id_from_insight_cards`` resolves the id off a posting.
+        # Neither half was missing; the wire between them was.
+        #
+        # The verdict is built in ``linkedin_server.jobfilter`` rather than
+        # inline, for one reason that is not style: its refusal must describe
+        # the SHAPE of a rejected value and never quote it, because the most
+        # likely wrong value here is a company SLUG -- a third-party name --
+        # and an inline f-string naming what it saw would publish one. That
+        # rule needs a test with a handle on it, which inline logic cannot have.
+        company_filter = jobfilter.company_filter_param(company_id)
+        if company_filter["state"] == "refused":
+            return {"error": "bad_argument", "message": company_filter["why"]}
+        if company_filter["param"] is not None:
+            params.append(company_filter["param"])
 
         # THE FOUR CHECKBOX FILTERS, and OFF EMITS NOTHING. See
         # _BOOLEAN_FILTERS for the live measurement and for its negative
