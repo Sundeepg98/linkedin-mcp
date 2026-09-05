@@ -342,6 +342,41 @@ DECLARED_PLANTS = {
     ("tests/test_identity_gate.py", "urn id"): 3,
     ("tests/test_identity_gate.py", "opaque urn"): 1,
     ("tests/test_identity_gate.py", "phone"): 1,
+    # TWO SLUG-SHAPED LITERALS, 2026-09-05, in the file that proves
+    # ``shape.membership_row`` drops a row pointing at a person instead of
+    # publishing it. THE GUARD FIRED FIRST AND THE REMEDY IS THE STANDING ONE:
+    # the value is already synthetic, so the allowlist widens -- red here means
+    # UNDECLARED, never REAL.
+    #
+    # THE COUNT WENT 5 -> 2 BEFORE THIS ENTRY WAS WRITTEN, and that is the part
+    # worth reading. The first version repeated each url at its use sites. Both
+    # spellings now live in ONE named constant each -- ``A_MEMBER_PROFILE`` and
+    # ``A_GROUP_URL_CARRYING_A_MEMBER`` -- so the declaration is small enough
+    # to check by eye, which is the whole value of a pinned count.
+    #
+    # WHY BOTH SPELLINGS ARE NEEDED AND NEITHER IS DECORATION. The absolute
+    # form is a plain third-party profile: it must be refused because the href
+    # names a member. The relative one sits INSIDE A GROUP URL'S QUERY --
+    # a member roster's own address -- and it is the input that proves the
+    # foreign-marker check runs BEFORE the group-marker check. A red proof
+    # measured the earlier version of that test insensitive to exactly that
+    # ordering, so removing this literal would put the blindness back.
+    #
+    # LITERALS, NOT ASSEMBLED. Building them at runtime would hide them from
+    # this sweep, and a sweep blinded to that file is blinded to a real value
+    # pasted into it later -- the same reasoning as the two urn entries above.
+    # Pinned so a THIRD slug in that file goes red.
+    ("tests/test_membership_row.py", "linkedin slug"): 2,
+    # AND ONE URN-SHAPED LITERAL IN THE SAME FILE, for the same reason as the
+    # two urn entries higher up: proving that a NAME carrying a urn is shaped
+    # rather than published needs a urn-SHAPED string to feed the shaper, and
+    # a shape-valid literal IS the test, so it cannot be paraphrased away.
+    #
+    # The literal's identifier segment is the word ``SYNTHETIC``. It carries no
+    # digits and no member-token prefix -- it argues for itself rather than
+    # needing an argument, which is the standing preference. Pinned at 1 so a
+    # SECOND urn appearing in that file still goes red.
+    ("tests/test_membership_row.py", "opaque urn"): 1,
 }
 
 # ===========================================================================

@@ -323,6 +323,43 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         #       have.
         ("server.py", "linkedin_surface_census"),
         ("server.py", "linkedin_my_profile"),
+        # AN EIGHTH, added 2026-09-05, AND THIS TEST DID ITS JOB ON IT -- the
+        # consideration it forced changed the function rather than being
+        # written down and waved through.
+        #
+        # shape.membership_row is the per-record gate a groups reader needs
+        # and cannot inherit: census_shape is a length-and-charset gate, and
+        # census_redact_rare needs a COUNT so it lives in aggregation. It
+        # calls this predicate TWICE and, as first written, one of those was a
+        # PUBLISHER.
+        #
+        #   the NAME   a CHANGE DETECTOR. If substitution alters the name it
+        #       carried a urn, a member path, a possessive or a six-digit run,
+        #       and the SHAPE is published through census_shape instead of the
+        #       string. Its verdict does not move with a widening for the same
+        #       reason writes._live_control's does not: a wider pattern alters
+        #       a superset, so anything the narrow one flagged the wide one
+        #       flags too. A widening can only shape MORE names, which is the
+        #       safe direction.
+        #
+        #   the HREF   WAS a publisher, and IS NOT ANY MORE. It published
+        #       census_substitute(href) as href_shape, and the gap this very
+        #       test records three entries below is fatal to that: A BARE
+        #       MEMBER TOKEN IN A QUERY SURVIVES THESE SUBSTITUTIONS, since
+        #       /in/ is the only member shape they know. So
+        #       /groups/<id>/?invitedBy=<token> would have shaped to
+        #       /groups/<group>/?invitedBy=<that same token> and emitted it.
+        #
+        # THE FIX IS THE ONE linkedin_connections ARRIVED AT, applied without
+        # having to rediscover it: do not publish an arbitrary string at all.
+        # The href now DECIDES ONLY, and what is emitted is a module literal.
+        # So this caller is now a REFUSAL TEST on both calls, like
+        # writes._live_control and unlike the two server.py entries above.
+        # tests/test_membership_row.py rebuilds the leaky first version from
+        # this predicate and asserts it still leaks, so if the shared rule
+        # ever learns the bare-token shape the decision gets revisited
+        # deliberately rather than outliving its reason.
+        ("shape.py", "membership_row"),
         # AN EIGHTH ARRIVED AND THEN LEFT AGAIN ON 2026-09-04, and the round
         # trip is worth more than either state.
         #

@@ -4610,6 +4610,174 @@ def census_href_identifies_entity(href_shape: Optional[str]) -> bool:
     return any(marker in shaped for marker in _CENSUS_ENTITY_HREFS)
 
 
+#: THE ONE ENTITY MARKER A MEMBERSHIP ROW IS ALLOWED TO BE ABOUT.
+#:
+#: :data:`_CENSUS_ENTITY_HREFS` above holds five markers and the census treats
+#: all five identically: a control pointing at any of them has its NAME
+#: dropped. That is right for the census and WRONG for a reader, because a
+#: reader of his own group memberships exists to return group names -- exactly
+#: the field the census discards. Reusing that predicate as the reader's gate
+#: would blank the whole payload.
+#:
+#: So the reader's gate is not "does this href identify an entity" but "WHICH
+#: entity, and is it the one kind this row may be about". One marker in, four
+#: markers out, from the same table -- so a sixth marker added to
+#: :data:`_CENSUS_ENTITY_HREFS` tomorrow becomes a REFUSAL here automatically
+#: rather than a hole. That direction is the whole reason this is derived from
+#: that tuple instead of being a literal of its own.
+_MEMBERSHIP_HREF_MARKER = "/groups/<group>"
+_MEMBERSHIP_FOREIGN_MARKERS = tuple(
+    marker for marker in _CENSUS_ENTITY_HREFS if marker != _MEMBERSHIP_HREF_MARKER
+)
+
+#: THE ONLY HREF STRING A MEMBERSHIP ROW EVER PUBLISHES. A LITERAL, not a
+#: shape of the input, and the difference is the whole safety property -- see
+#: :func:`membership_row`'s docstring for the member token that survives the
+#: substitutions and would ride out in a query otherwise.
+_MEMBERSHIP_PUBLISHED_HREF = _MEMBERSHIP_HREF_MARKER + "/"
+
+
+def membership_row(href: Optional[str], name: Optional[str]) -> dict[str, Any]:
+    """One group-membership row, or a refusal that says what it saw.
+
+    THIS IS THE GATE A GROUPS READER NEEDS AND CANNOT INHERIT. The census's
+    two protections do not reach a per-record path, and the reason is
+    structural rather than an oversight:
+
+    * :func:`census_shape` is a LENGTH AND CHARSET gate. It is not the
+      redactor and never was; it returns ``<opaque>`` for a name it cannot
+      certify and the name itself for one it can.
+    * :func:`census_redact_rare` IS a redactor and it needs a COUNT, so it
+      lives inside :func:`census_aggregate` where a tally exists. A path that
+      emits one record at a time has no tally and therefore no access to it.
+
+    A reader that walked group cards and shaped each name would inherit
+    NEITHER, which is how a third party's name ends up in a payload that looks
+    shaped. **That mistake shipped in this package this week**, on the
+    Interests entity kinds, and it is why this function is written before any
+    harvest exists rather than after one.
+
+    THE RULE IS SUBTRACTION, NOT REDACTION, AND THE DIRECTION MATTERS. A row
+    whose href is a person is DROPPED, not blanked. A blanked row still says a
+    person was there, and a redaction that erases its own marker is worse than
+    no redaction at all -- it buys the reader's trust and ships the name
+    anyway. So the refusal returns no fragment of what it refused; it returns
+    the MARKERS it matched, which are this module's own vocabulary and name
+    nobody.
+
+    Returns a dict that is one of two shapes, never an exception, because a
+    single unpublishable row on a page of thirty is not an error:
+
+    ``{"published": True, "href_shape": ..., "name": ..., "name_shaped": bool}``
+        the row may be emitted. ``name_shaped`` is True when the name needed a
+        substitution to be safe, and then ``name`` is its SHAPE.
+
+    ``href_shape`` IS A CONSTANT AND NOT A SHAPE OF THE INPUT, and that is the
+    one design decision here worth arguing for. The obvious implementation
+    publishes ``census_substitute(href)``, which is what this function did
+    first. It is not safe, and the evidence is already in this repository:
+    ``test_the_consumers_of_this_predicate_are_the_ones_that_were_considered``
+    records that A BARE MEMBER TOKEN IN A QUERY SURVIVES THESE SUBSTITUTIONS,
+    because ``/in/`` is the only member shape they know. So
+    ``/groups/12345678/?invitedBy=<a token>`` would shape to
+    ``/groups/<group>/?invitedBy=<that same token>`` and publish it.
+
+    The fix is the one ``linkedin_connections`` arrived at after two failed
+    filters: **do not publish an arbitrary string at all.** The input href is
+    used ONLY to decide; what is emitted is this module's own literal. An
+    arbitrary string that never crosses can never carry an identifier, and
+    that is structural rather than a filter that has to keep up with
+    LinkedIn's shapes.
+
+    It also removes a smaller wrinkle for free: the relative and absolute
+    spellings LinkedIn writes on one page shaped to two different strings, so
+    a consumer comparing them saw two classes where there is one surface.
+
+    ``{"published": False, "refused": <reason>, "saw": [<markers>]}``
+        the row may not be emitted, and ``saw`` says which entity markers were
+        in the href. A refusal that reports only what it did NOT match is half
+        a measurement.
+
+    THE NAME IS PUBLISHED AS-IS WHEN IT IS SAFE, and that is a deliberate
+    departure from the census. A group's name is an entity name, the same
+    class as a company name, and ``linkedin_followed_companies`` already
+    publishes those. What it is checked against is IDENTITY: if running the
+    substitutions over the name CHANGES it, the name carried a urn, a member
+    path, a possessive or a long digit run, and no group name has any business
+    carrying one -- so the SHAPE is published instead and the caller is told.
+    The comparison normalises whitespace and curly apostrophes FIRST, so only
+    a genuine identity substitution can trip it and a group called
+    ``Node.js Developers - India`` is not shaped for having a hyphen.
+
+    :param href: the raw href off the row's own anchor, unshaped.
+    :param name: the accessible name read from INSIDE that same anchor.
+    """
+    if not href or not str(href).strip():
+        return {
+            "published": False,
+            "refused": "no_href",
+            "saw": [],
+            "why": (
+                "a row with no destination cannot be shown to be about a "
+                "group, and this gate refuses what it cannot establish rather "
+                "than passing what it cannot disprove."
+            ),
+        }
+
+    href_shape = census_substitute(href)
+    seen = [
+        marker for marker in _CENSUS_ENTITY_HREFS if marker in href_shape
+    ]
+    foreign = [
+        marker for marker in _MEMBERSHIP_FOREIGN_MARKERS if marker in href_shape
+    ]
+    if foreign:
+        return {
+            "published": False,
+            "refused": "href_identifies_another_kind_of_entity",
+            "saw": foreign,
+            "why": (
+                "this row points at something that is not one of his group "
+                "memberships, so its accessible name is that entity's name. "
+                "The row is DROPPED rather than blanked: a blanked row still "
+                "reports that somebody was there."
+            ),
+        }
+    if _MEMBERSHIP_HREF_MARKER not in href_shape:
+        return {
+            "published": False,
+            "refused": "not_a_group_href",
+            "saw": seen,
+            "why": (
+                "no group marker in the shaped href. A membership row is "
+                "identified by where it points, never by where it sits on "
+                "the page -- position is what a layout change moves."
+            ),
+        }
+
+    normalised = _CENSUS_CURLY.sub("'", _WS.sub(" ", str(name or "")).strip())
+    substituted = census_substitute(normalised)
+    if substituted != normalised:
+        return {
+            "published": True,
+            "href_shape": _MEMBERSHIP_PUBLISHED_HREF,
+            "name": census_shape(normalised),
+            "name_shaped": True,
+            "why": (
+                "the name carried something the identity substitutions "
+                "changed -- a urn, a member path, a possessive or a run of "
+                "six or more digits. A group's own name has no reason to "
+                "carry one, so the shape is published instead of the string."
+            ),
+        }
+    return {
+        "published": True,
+        "href_shape": _MEMBERSHIP_PUBLISHED_HREF,
+        "name": normalised,
+        "name_shaped": False,
+    }
+
+
 #: THE MERGE KEY'S FIELDS, NAMED ONCE AND IN ORDER, and this constant is a
 #: defect-class removal rather than tidying.
 #:
