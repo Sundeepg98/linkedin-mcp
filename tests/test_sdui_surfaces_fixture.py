@@ -946,6 +946,78 @@ async def test_the_unread_flag_is_read_before_the_page_load_destroys_it():
 
 
 # ---------------------------------------------------------------------------
+# 4a-ii. The key a job alert fired on, on markup the page actually served
+# ---------------------------------------------------------------------------
+#
+# ADDED 2026-09-05 with the fix, and it belongs in THIS file rather than
+# beside the extractor's own unit tests, for the reason this module exists:
+# the defect did not live in the shaping. ``notification_handles`` was correct
+# and passed eight cases. ``parse_notification`` handed it
+# ``absolute_url(href)``, which deletes the query string, and the keyword
+# lives ONLY in the query string -- so the key was unreachable through the
+# only caller, while ``company_id``, which lives in the path, always worked.
+#
+# Six green test functions could not see it because every one of them called
+# the extractor DIRECTLY with a url the caller never passes. What follows runs
+# the real harvest over the captured page instead.
+
+
+async def test_a_job_alerts_keyword_survives_the_real_harvest():
+    """Both alert rows on the captured page carry the key a tool accepts."""
+    _, rows, _ = await _notification_rows()
+    alerts = [
+        row for row in rows if "/jobs/search-results" in (row.get("link") or "")
+    ]
+    # NOT VACUOUS. A fixture regenerated without an alert card would make the
+    # loop below true of nothing, which is the failure this file was written
+    # against in the first place.
+    assert len(alerts) == 2, [row.get("link") for row in rows]
+    missing = [row["text"][:40] for row in alerts if not row.get("search_keywords")]
+    assert missing == [], missing
+
+
+async def test_no_published_notification_link_carries_a_query_string():
+    """The protection, measured on captured markup rather than argued.
+
+    The cheap way to make the test above pass is to stop stripping. Two of the
+    seven query strings on this fixture carry a content urn and a 15+ digit
+    tracking run, so the strip is an identity control. Every emitted link is
+    checked, not only the alert rows.
+    """
+    _, rows, _ = await _notification_rows()
+    assert len(rows) == 6, "an empty harvest would make this vacuous"
+    with_query = [
+        row["link"] for row in rows if "?" in (row.get("link") or "")
+    ]
+    assert with_query == [], with_query
+
+
+async def test_the_keyword_is_already_in_the_body_this_row_publishes():
+    """WHY EMITTING THE KEY DISCLOSES NOTHING NEW -- as a check, not a claim.
+
+    LinkedIn writes the alert's keyword into the card's own copy, and
+    ``parse_notification`` already publishes that copy verbatim as ``text``.
+    So ``search_keywords`` reformats a string that ships either way into the
+    argument ``linkedin_search_jobs`` takes.
+
+    That argument was the licence for publishing the field, so it is pinned
+    rather than left in a commit message. If LinkedIn ever stops writing the
+    keyword into the body, this goes red and somebody has to decide again
+    whether the field is still free -- instead of it having quietly stopped
+    being true.
+    """
+    _, rows, _ = await _notification_rows()
+    carrying = [row for row in rows if row.get("search_keywords")]
+    assert len(carrying) == 2, len(carrying)
+    not_in_body = [
+        row["search_keywords"][:20]
+        for row in carrying
+        if row["search_keywords"].lower() not in row["text"].lower()
+    ]
+    assert not_in_body == [], not_in_body
+
+
+# ---------------------------------------------------------------------------
 # 4b. The same card as the LIVE page lays it out
 # ---------------------------------------------------------------------------
 #
