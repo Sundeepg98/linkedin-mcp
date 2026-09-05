@@ -316,6 +316,54 @@ BLOCKED reads as "somebody established a dependency" and nobody did. It is the
 same shape as the `allowlist +1` placeholder: a state word standing in for an
 unknown.
 
+### 3.2 And the boundary is probably not the blocker for four of the six
+
+Since no row names an address, I put the PLAUSIBLE HOST SURFACE for each
+through the shipped gate. **These are guessed spellings and they are NOT the
+rows' addresses** -- the whole point of 3 is that the rows have none. What they
+establish is conditional and still worth having: *if* the capability is drawn
+on that surface, what does the boundary say?
+
+    ./venv/Scripts/python.exe -c "from linkedin_server import readonly; \
+      readonly.assert_read_url('<candidate>')"
+
+| blocker | candidate host (guessed) | verdict |
+|---|---|---|
+| 83 `REPORTING-FLOWS` | `/help/linkedin/answer/<id>` | REFUSED -- no pattern matches |
+| 83 `REPORTING-FLOWS` | `/in/me/report/` | REFUSED -- no pattern matches |
+| 31 `NO-URL-AT-ALL` | `/mynetwork/` | REFUSED -- no pattern matches |
+| 29 `AUDIO-EVENTS-EXISTENCE` | `/events/` | **ALLOWED** |
+| 48 `ALL-FILTERS-PANEL` | `/jobs/search/` | **ALLOWED** |
+| 48 `ALL-FILTERS-PANEL` | `/search/results/all/` | REFUSED -- no pattern matches |
+| 68 `PICKER-SURFACES` | `/messaging/` | **ALLOWED** |
+| 54 `RESUME-TOOLS-SURFACE` | `/premium/my-premium/` | **ALLOWED** |
+| 54 `RESUME-TOOLS-SURFACE` | `/in/me/details/experience/` | **ALLOWED** |
+
+    ALLOWED: 5 of 9.  REFUSED: 4 of 9, every one by a PATTERN MISS.
+    REFUSED BY A FORBIDDEN SUBSTRING: 0 of 9.
+
+**Two things follow and they point in opposite directions.**
+
+**First, and it favours the work:** for **29, 48, 68 and 54** a plausible host
+surface is ALREADY ADMITTED. If the capability is drawn there -- a filters
+panel on the jobs search page, a picker inside the messaging composer, a resume
+tool on his own profile or Premium page -- then the boundary component of those
+rows is **+0, not +1**, and the cheapest way to move them is to read a page
+this server already opens. That is the pattern `company-page` used to move
+three rows today at zero boundary cost, and it is available here.
+
+**Second, and it is the caution:** every refusal in that table is a PATTERN
+MISS, and **zero are forbidden-substring refusals.** A pattern miss is admitted
+the moment somebody writes a pattern -- which is precisely the class the
+boundary trap lives in. `close-account` is refused by nothing but a pattern
+miss too. **So the four REFUSED rows above are in the same undefended class as
+account deletion, and that is the argument for narrow anchored patterns rather
+than a family one, stated with a measurement instead of as a principle.**
+
+**No pattern was written for any of them.** Four of these nine spellings are
+guesses; writing a pattern against a guess is how an unnamed `+1` becomes a
+family rule.
+
 ---
 
 ## 4. THE BOUNDARY TRAP -- what this wave did about it
