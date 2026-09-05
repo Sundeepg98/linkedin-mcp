@@ -198,7 +198,7 @@ def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
     """
     if not declared:
         return "NO -- no file inputs were read"
-    shapes = [_declaration_shape(row) for row in declared]
+    shapes = list(declared)
     if not any(shape["declares_accept"] or shape["multiple"] == "declared"
                for shape in shapes):
         return "NO -- nothing declared (every input silent on accept and multiple)"
@@ -233,12 +233,6 @@ def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
 #: because that is the write path, which never prints what it aims with.
 _DECLARED_ATTRS: tuple[str, ...] = ("accept", "multiple")
 
-#: A cap, because an `accept` list is authored by LinkedIn and unbounded. Long
-#: values are truncated with a marker rather than dropped: a redaction that
-#: erases its own marker buys the reader's trust and hides what it removed.
-_ATTR_CHARS = 120
-
-
 async def _declared_shapes(page: Any) -> list[dict[str, Any]]:
     """What each file input DECLARES it accepts. Attributes only, no names.
 
@@ -260,13 +254,21 @@ async def _declared_shapes(page: Any) -> list[dict[str, Any]]:
             except Exception as exc:  # noqa: BLE001 - reported, never raised
                 row[attr] = f"<unreadable: {type(exc).__name__}>"
                 continue
-            if value is None:
-                row[attr] = None
-            elif len(value) > _ATTR_CHARS:
-                row[attr] = value[:_ATTR_CHARS] + "<truncated>"
-            else:
-                row[attr] = value
-        rows.append(row)
+            row[attr] = value
+        # THE RAW ATTRIBUTE NEVER LEAVES THIS FUNCTION.
+        #
+        # It used to: this returned the values and the caller reduced them at
+        # the print. That worked and it left a page-read value alive across
+        # four frames, which is one edit away from somebody printing it -- and
+        # a page's text on a composer surface can carry his name, a
+        # colleague's, or a filename, none of which have a shape any guard can
+        # detect. Reducing HERE, at the read, means there is no later moment at
+        # which the value could be emitted, rather than a later moment at which
+        # it happens not to be.
+        #
+        # A CAP IS NOT A REDUCTION and the truncation that used to live here
+        # went with it: 120 characters of an attribute is still the attribute.
+        rows.append(_declaration_shape(row))
     return rows
 
 
@@ -350,7 +352,7 @@ async def _run() -> int:
                 print(_fmt_file_inputs(reading))
                 print("    declared (each input's own words, REDUCED):")
                 for index, row in enumerate(out["declared"]):
-                    print(f"      [{index}] {_declaration_shape(row)}")
+                    print(f"      [{index}] {row}")
                 print(
                     "    aimable by declaration: "
                     f"{_declaration_verdict(out['declared'])}"
