@@ -309,11 +309,31 @@ should be trusted in.
 
 ## 6. WHAT THE MEASUREMENT COST, AND WHAT IT DID NOT
 
-Four runs of the menu probe and two of the tally probe. Control `dark-mode`
-read 20 at both ends of every run. The invitation badge read 0 on the feed
-before and 0 on the feed after, readable at both ends. Nothing was pressed
-inside any menu, no navigation occurred during any press sequence, and every
-menu closed on Escape with `aria-expanded` back to 0.
+**SIXTY-FIVE page loads, counted per probe rather than remembered.** This
+section said "four runs of the menu probe and two of the tally probe" until
+17:55, which was true when written and had stopped being the whole story two
+probes later. **A cost section that is merely out of date is the same defect as
+one that is wrong**, because a reader cannot tell them apart.
+
+    _probe_groups_menu.py            4 runs x 4 loads   16
+    _probe_membership_tally_live.py  2 runs x 5 loads   10
+    _probe_group_row_affordances.py  3 runs x 5 loads   15
+    _probe_group_settings_route.py   3 runs x 5 loads   15
+    _probe_groups_events_capture.py  3 runs x 3 loads    9
+    the tab-close control study      6 runs, session only, no navigation
+                                                      ----
+                                                        65
+
+The five ABORTED attach attempts navigated nowhere and are not counted.
+
+Control `dark-mode` read 20 at both ends of every single run. The invitation
+badge read 0 on the FEED before and 0 on the FEED after every run that took
+one, readable at both ends -- and the bound on that is narrower than it sounds
+and is stated in section 3: a badge at zero cannot distinguish "consumed
+nothing" from "nothing to consume".
+
+Nothing was pressed inside any menu, no navigation occurred during any press
+sequence, and every menu closed on Escape with `aria-expanded` back to 0.
 
 **Nothing was written to LinkedIn. No group was joined, left, or altered.**
 
