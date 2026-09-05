@@ -336,3 +336,37 @@ def test_the_neighbours_of_that_address_are_still_refused(url):
     from linkedin_server import readonly
 
     assert not readonly.is_read_url(url), url
+
+
+@pytest.mark.parametrize(
+    "suffix", ["\n", "\r", " ", "\t", "\n/in/someone-else/"]
+)
+def test_a_whitespace_spelling_of_the_address_is_refused(suffix):
+    """The trailing-newline class, and THE ANCHOR IS NOT WHAT REFUSES IT.
+
+    Handed to this wave by ``groups-events``, whose own boundary additions
+    carry these spellings as controls: in Python ``$`` matches at the end of
+    the string OR just before a trailing newline, so an anchored pattern is
+    not by itself a defence against ``.../search-appearances/\\n``.
+
+    MEASURED, AND THE MECHANISM IS NOT THE ONE THE CONTROL SUGGESTS. The bare
+    regex DOES admit it -- ``pattern.match(url + "\\n")`` is True. What refuses
+    it is a whole-string whitespace guard at the TOP of
+    ``readonly.assert_read_url``, before any pattern is consulted::
+
+        if any(character.isspace() for character in url):
+            raise WriteAttemptError(...)
+
+    So this test passes for a reason other than the one it looks like it is
+    testing, and that is worth writing down rather than enjoying: **it
+    certifies the upstream guard, not this entry's anchoring.** Every
+    ``$``-anchored pattern in that file rests on the same line -- this wave's,
+    the groups and events roots, and the twenty-odd that predate all of them.
+    If that guard is ever removed or narrowed, they all admit a trailing
+    newline together, and this test would go red along with its siblings,
+    which is the behaviour to want.
+    """
+    from linkedin_server import readonly
+
+    url = "https://www.linkedin.com/analytics/search-appearances/" + suffix
+    assert not readonly.is_read_url(url), repr(url)

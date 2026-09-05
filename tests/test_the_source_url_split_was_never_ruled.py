@@ -197,6 +197,22 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # `redirected` is returned beside it precisely so the first live reading can
     # SEE that a redirect happened rather than inferring it from a shaped
     # string, and whoever takes that reading should re-open this entry.
+    #
+    # **THIS ENTRY RULES ON THE URL. IT DOES NOT RULE ON THE PAYLOAD**, and the
+    # distinction matters more here than at any other row in this table because
+    # of what this particular page is made of. The other entries name surfaces
+    # whose url is the only interesting string; this one names a page RENDERED
+    # OUT OF OTHER PEOPLE'S SEARCHES -- their employers, their titles, the words
+    # they typed, and possibly their names.
+    #
+    # What the reader does with those is a SEPARATE question with a separate
+    # answer, and it lives in `dom.read_search_appearances` and
+    # `dom._search_appearance_labels`: past the first two paragraph pairs the
+    # label is withheld INSIDE the page, the two that cross are shaped, tallied
+    # and run through `census_redact_rare`, and the only positive publication is
+    # an integer count of member links. None of that is asserted by this row.
+    # A reader who takes "SHAPED" here as a statement about the payload has
+    # read a claim this table does not make.
     ("server.py", "linkedin_search_appearances"): (SHAPED, 1),
     # --- UNMEASURED: raw, and nobody has measured what the surface emits -----
     # Internal helpers, so the landed url is whatever their THREE callers
