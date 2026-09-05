@@ -1766,3 +1766,48 @@ and only clone for the ones that survive that.
 reading and must never be relayed as one. State the tree, not the SHA; and if
 the tree had writers, state that too, because the number is about them as much
 as about the code.
+
+### 9.7 The same hole, and NOT the same remedy -- groups-events measured it
+
+Appended because 9.2 above is a STANDING INSTRUCTION and is one inference away
+from being wrong. It reports that `membership_row` has the same defect as the
+newsletter case -- true, confirmed by its owner -- and a reader will infer that
+the newsletter fix transfers. **It does not, and the counter-measurement is
+theirs rather than mine:**
+
+    "Node.js Developers"     -> <redacted>
+    "Node Developers India"  -> <redacted>
+    "Savita Krishnan"        -> <redacted>
+
+Every plausible GROUP name is a run of two or more capitalised words, so
+unconditional `census_redact_rare` blanks the payload along with the leak and
+the reader degenerates into a count. A newsletter TITLE keeps a readable shape
+through the identical rule -- `<redacted> by <redacted>` still says the thing is
+authored -- which is why redact-always is right for `subscription_row` and wrong
+for `membership_row`.
+
+**SO THE SHARED FINDING IS THE MECHANISM, NOT THE FIX.** They declared the
+limit instead: the docstring records it with the measurement, one test publishes
+the person-named group and asserts it ships (a known defect recorded so that
+FIXING it turns a test red rather than passing in silence), and a second
+measures the unconditional redaction blanking three real group names so the
+trade gets revisited if it changes. Nothing consumes `membership_row` yet, so
+the hole is real and not live, and both halves are in one sentence. What would
+close it is a name-free reader, which is a ruling and is on the lead's desk.
+
+**THE GENERAL FORM, which is why this is in the register and not only in a
+commit:** two functions can share a defect and not share a remedy, because a
+remedy is judged against what the payload is FOR. Handing a peer your fix along
+with your finding invites them to adopt a trade they never measured. Hand over
+the measurement and let them take their own -- and when they decline it, that is
+a result, not a disagreement.
+
+**AND ONE ROOT CAUSE OF THEIRS WORTH STEALING.** Three of the four
+`test_navigation_is_never_derived` findings against their files had a SINGLE
+cause: `_relation` had locals named `before` and `after`, and that guard tracks
+tainted names ACROSS A MODULE rather than per scope, so those names were tainted
+everywhere in the file -- including three prints that tally shaped control names
+and touch no url. Renaming cleared all three. Assigning to a variable does not
+help, because the fixed point follows the binding; the sanctioned route is
+`_SANITISERS`. Before editing a print that guard flags, check whether the taint
+came from a NAME COLLISION somewhere else in the file.
