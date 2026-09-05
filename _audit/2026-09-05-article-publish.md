@@ -2,8 +2,14 @@
 
 **CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- blocker 51 `COLLABORATIVE-CONTENT` is filed as one blocker and is two under that document's own merge rule, so three of its four rows are costed higher than they are; detail in section 4.
 
-Wave `article-publish`, 2026-09-05, working 18:46-19:2x by the box (`date`,
-pasted in section 8). Six blockers, 17 rows. Nothing pushed.
+Wave `article-publish`, 2026-09-05, 18:46 to 19:1x by the box (`date`, stamps in
+section 8). Six blockers, 17 rows. Three commits. Nothing pushed.
+
+Numbers RECOMPUTED at freeze rather than re-read: `_ALLOWED_URL_PATTERNS` **29**,
+unchanged by this wave; the two instruments **18 passed, 1 skipped**; the shipped
+identity sweep **PASS, 0 hits across 335 tracked files**, taken at the gate and
+not at the start; **0 AI attribution across all three commits**, verified per
+commit rather than as a habit.
 
 ## 1. THE HEADLINE, AND IT IS NOT THE RULING I WAS HANDED
 
