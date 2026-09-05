@@ -530,3 +530,60 @@ school has no who-viewed-me; a collection is LinkedIn's own.
 The grant conditions each first load on the same before/after badge measurement
 this section demonstrates. That is a repeatable procedure now, which is what a
 successor needs more than a half-built reader.
+
+---
+
+## 13. FREEZE, AMENDED. SECTION 11 COUNTED FIVE; THERE ARE SEVEN
+
+> **CORRECTED BY: this section.** Section 11's table is not wrong about any row
+> it lists; it is incomplete, because a freeze cannot count the commits that
+> come after it. Read this one for totals.
+
+Recomputed from `git` at 19:14 by the box, not carried forward from section 11:
+
+    7 commits    1218 insertions    0 deletions    5 distinct files
+
+| commit | + | what |
+|---|---:|---|
+| `6456701` | 144 | the seven-address measurement |
+| `67da282` | 290 | `jobfilter.py`, its tests, the `server.py` wire |
+| `825543d` | 79 | the `company_id` docstring, section 7 |
+| `780a5c2` | 56 | the gate sweep red |
+| `88bd02c` | 87 | its close |
+| `ce2c815` | 74 | the first freeze |
+| `ae469cc` | 488 | the premium load |
+
+**ZERO DELETIONS ACROSS ALL SEVEN.** Still the load-bearing number, still
+measured with `--numstat` rather than recalled: no neighbour's line entered any
+commit here, in a tree where that happened five times today.
+
+**AI attribution: 0, checked per commit across all seven.**
+
+**`linkedin_server/readonly.py` appears in none of them** -- the file list over
+all seven returns five paths and that is not one. The boundary this wave was
+granted permission to widen **was not widened**, because the two rows that
+needed it were measured rather than built, and the one row that got a live read
+needed no pattern at all.
+
+### The self-correcting freeze is itself the day's shape, for the fourth time
+
+Section 5 went stale in forty minutes. Section 8 went stale in ten. Section 11
+went stale on the next commit. **A freeze is a reading with a timestamp, exactly
+like every other reading this document warns about**, and the honest form is not
+to stop writing them but to say which one is current. This one is, until the
+next commit.
+
+### The state of the seven rows at close
+
+| row | state at close |
+|---|---|
+| 55 `COMPANY-ID-RESOLVER` | **BUILT** -- `f_C` wired, gated, shown failing twice |
+| 34 `MISSING-PARAM-MESSAGING` | re-costed: filed "none", actually needs allowlist +1 |
+| 53 `SEARCH-APPEARANCES-SURFACE` | already paid for by another wave; nothing claimed |
+| 56 `PREMIUM-READER-NOT-BUILT` | **UNBLOCKED, not built** -- the page is opened, serves, costs nothing measurable |
+| 41 `PREMIUM-JOBS-SURFACES` | entitlement REFUTES the cheap retirement; still 3 rows |
+| 40 `SCHOOL-PAGE-SURFACE` | boundary measured REFUSED; ruling recorded for application |
+| 75 `JOB-COLLECTIONS-SURFACE` | boundary measured REFUSED; ruling recorded for application |
+
+**One built, one unblocked, three re-costed, two measured and left with an
+applicable ruling.** Nothing was retired on a guess and nothing was built on one.
