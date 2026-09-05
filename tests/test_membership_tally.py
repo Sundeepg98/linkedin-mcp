@@ -282,6 +282,34 @@ def test_a_long_real_length_identifier_is_accepted():
         assert verdict["identifier"] == built
 
 
+def test_a_run_of_non_ascii_digits_is_refused():
+    """``str.isdigit()`` IS TRUE OF SEVERAL SCRIPTS AND THIS RULE IS NOT.
+
+    Found on a fresh-eyes re-read before the freeze rather than by a test, so
+    the test is written after the fix and says so. Measured: a five-character
+    run in Arabic-Indic digits, one in Extended Arabic-Indic digits and a pair
+    of superscripts are ALL ``isdigit() == True``, and ``int()`` cannot even
+    parse the superscripts.
+
+    **THE POINT IS NOT THAT LINKEDIN WILL SERVE ONE.** It is that this module's
+    whole design rests on one sentence -- *a charset wide enough to hold a slug
+    is wide enough to hold a name* -- and ``isdigit()`` admits a charset
+    materially wider than the ten characters the docstring promised. That is a
+    check being correct for the inputs it was imagined against, which is the
+    defect this repository has now been caught by three times.
+
+    THE CHARACTERS ARE BUILT BY CODEPOINT, NOT TYPED. A tracked file in this
+    repository stays ASCII, and a literal here would also be unreadable to the
+    next person, who would have to guess whether it was deliberate.
+    """
+    for start, length in ((0x0663, 5), (0x06F1, 8), (0x00B2, 2)):
+        run = "".join(chr(start) for _ in range(length))
+        assert run.isdigit(), "the premise of this test is that isdigit passes"
+        verdict = groups.group_identifier(f"/groups/{run}/")
+        assert verdict["identified"] is False, run.encode("unicode_escape")
+        assert verdict["refused"] == "identifier_is_not_numeric"
+
+
 def test_an_absurdly_long_run_is_refused_rather_than_published():
     verdict = groups.group_identifier(f"/groups/{_long_digits(64)}/")
     assert verdict["identified"] is False

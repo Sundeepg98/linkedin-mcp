@@ -134,12 +134,31 @@ PUBLISHED_HREF = shape._MEMBERSHIP_PUBLISHED_HREF
 #: The path segment that names a group, and the whole of what may be published
 #: as an identifier.
 #:
-#: DIGITS ONLY. Not a "safe charset" -- a charset wide enough to hold a slug is
-#: wide enough to hold a person's name, and a group named after a person is the
-#: precise input this module exists for. Bounded above because an unbounded
-#: repetition on attacker-shaped input is a cost nobody chose; twenty digits is
-#: more than twice the longest id measured on his own page.
+#: THE TEN ASCII DIGITS ONLY. Not a "safe charset" -- a charset wide enough to
+#: hold a slug is wide enough to hold a person's name, and a group named after
+#: a person is the precise input this module exists for. Bounded above because
+#: an unbounded repetition on attacker-shaped input is a cost nobody chose;
+#: twenty digits is more than twice the longest id measured on his own page.
 _MAX_IDENTIFIER_DIGITS = 20
+
+#: THE TEN ASCII DIGITS, WRITTEN OUT, BECAUSE ``str.isdigit()`` IS NOT THIS.
+#:
+#: Found on a fresh-eyes re-read before the freeze, not by a test.
+#: ``"12345".isdigit()`` is True and so is the same run written in
+#: Arabic-Indic digits, in Extended Arabic-Indic digits, or as superscripts --
+#: measured, three scripts, all True. ``int()`` cannot even parse the
+#: superscript form.
+#:
+#: **THAT MATTERS BECAUSE OF WHAT THIS MODULE CLAIMS, not because LinkedIn is
+#: likely to serve one.** The whole design rests on one sentence: *a charset
+#: wide enough to hold a slug is wide enough to hold a name.* ``isdigit()``
+#: admits a charset materially wider than the ten characters the docstring
+#: promises, so the promise was an overclaim -- small in practice and exactly
+#: the shape of thing this repository has been caught by twice, where a check
+#: is correct for the inputs it was imagined against.
+#:
+#: A membership test against a literal set cannot widen behind anybody's back.
+_ASCII_DIGITS = frozenset("0123456789")
 
 #: The path segment that introduces a group. Taken from the marker rather than
 #: written again, so the two cannot disagree.
@@ -240,17 +259,23 @@ def group_identifier(href: Optional[str]) -> dict[str, Any]:
         }
 
     segment = segments[index + 1]
-    if not segment.isdigit() or len(segment) > _MAX_IDENTIFIER_DIGITS:
+    if (
+        not segment
+        or not set(segment) <= _ASCII_DIGITS
+        or len(segment) > _MAX_IDENTIFIER_DIGITS
+    ):
         return {
             "identified": False,
             "refused": "identifier_is_not_numeric",
             "saw": [GROUP_MARKER],
             "why": (
-                "a group segment that is not a bounded run of digits is a "
-                "SLUG, and a slug is a name -- a group named after a person "
-                "gets that person's name in its slug. Publishing it as an "
-                "identifier would ship the name this module exists to keep "
-                "out, wearing an identifier's clothes."
+                "a group segment that is not a bounded run of the TEN "
+                "ASCII DIGITS is a SLUG, and a slug is a name -- a group "
+                "named after a person gets that person's name in its slug. "
+                "Publishing it as an identifier would ship the name this "
+                "module exists to keep out, wearing an identifier's clothes. "
+                "The ten are named explicitly because str.isdigit() is true "
+                "of several other scripts' digits as well."
             ),
         }
 
