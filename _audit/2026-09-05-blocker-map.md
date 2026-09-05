@@ -585,3 +585,47 @@ alarm" -- it is "the alarm was right about something, and here is what."
 **The receipt this leaves is the only argument for a guard that counts:** it
 caught a real drift within an hour, in the safest possible direction, on the
 author who wrote it.
+
+---
+
+## 11. THE TAB LEAK RE-MEASURED AT FREEZE -- 39 PINNED, 41, THEN 42
+
+Section 6.4 read the tab ratchet at **41** against a pinned 39, at 23:34. Read
+again at 23:55, immediately before this wave closed, it is **42**.
+
+    23:34   41 leaking scripts   +2 since the pin: _probe_contact_info_panel.py (f08e62b)
+                                                   _probe_premium_entitlement.py (ae469cc)
+    23:55   42 leaking scripts   +1 more:          _probe_job_alerts_live.py     (NO COMMIT)
+
+**THE THIRD LEAKER IS IN THE INDEX AND IN NO COMMIT ANYWHERE**, and I nearly
+published a wrong owner for it. I attributed it to `6b90622` because that commit
+carries the job-alerts boundary work and the name matched. Then I ran the check
+this repository already requires -- `git log --oneline -1 -- <path>` -- and it
+returned NOTHING. `git log --all` returns nothing either, while
+`git ls-files --error-unmatch` succeeds. The file is staged and unwritten to
+history.
+
+**A name that sounds right is not a measurement**, and that rule caught me one
+command before the commit. The owner of that probe cannot be named by `git log`
+at all and is not named here.
+
+**AND THE STATE ITSELF IS THE FINDING.** A tracked-file guard reads the INDEX, so
+a staged-but-uncommitted file is already inside every such guard's corpus while
+being invisible to every history query. That is the ~16:57 scar -- files entering
+the index between two readings -- seen from the other side: not a sweep going
+stale, but a file with no author a reader can reach.
+
+**A number in a durable record is a MEASUREMENT and it expires.** 6.4's 41 was
+true when taken and is stated with its time; this is the same reading retaken at
+the gate, which is the discipline this repository already applies to the identity
+sweep and which applies identically to a ratchet in a tree with a dozen writers.
+
+**The third leaker is not mine either.** 445 passed across the five suites that
+enumerate `scripts/`, one failed, and neither `enumerate_gap_rows.py` nor
+`build_blocker_map.py` appears in the leak list at either reading -- they open no
+browser session at all.
+
+**Nothing here is a criticism of three good probes.** The ratchet is doing
+exactly what a ratchet does: naming the moment a class grew, cheaply, so it is a
+line in a diff and not an incident. Each remedy is one `finally` closing the
+PAGE, and each belongs to the wave that opened it.
