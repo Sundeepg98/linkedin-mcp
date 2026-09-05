@@ -1,4 +1,4 @@
-"""The tool surface: thirty-eight tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-one tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_thirtyeight_tools``'s split rather than
+``test_the_surface_is_exactly_the_fortyone_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -61,15 +61,27 @@ and the undo is a SECOND GATED CALL he makes rather than anything this server
 runs for him. The result block carries the previous value verbatim and the
 exact call that restores it.
 
+THE TENTH IS THREE READS AT ONCE, 2026-09-05 evening, and what it records is
+not an arrival: all three had been BUILT EARLIER THE SAME DAY and none could
+be called. ``premium.read_premium_surface``,
+``newsletters.read_newsletter_subscriptions`` and
+``notify_cost.read_notifications_badge`` each shipped working, tested and with
+nothing on the other end, and all three stopped one step short for the same
+reason -- wiring a reader moves pinned tool-inventory counts, an enumeration
+class no targeted run clears. Thirty-eight -> forty-one and twenty-six ->
+twenty-nine, with the write count untouched at twelve. **BUILT CODE NO TOOL
+REACHES IS NOT CAPABILITY, IT IS A PROMISE**, and three separate waves each
+made the locally correct call not to leave that red in a shared tree.
+
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Thirty-eight is ``len(await mcp.list_tools())``,
+than about an intention. Forty-one is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtyeight_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_fortyone_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-SIX read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Twenty-six plus twelve plus zero is thirty-eight.
+needs: TWENTY-NINE read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Twenty-nine plus twelve plus zero is forty-one.
 
 THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
 the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
@@ -1178,7 +1190,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_thirtyeight_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_fortyone_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.
@@ -1695,7 +1707,15 @@ async def linkedin_premium_status() -> dict[str, Any]:
 
 @mcp.tool()
 async def linkedin_newsletter_subscriptions() -> dict[str, Any]:
-    """The newsletters you subscribe to, as a COUNT with no titles.
+    """A COUNT of the newsletter rows on your own newsletters page, no titles.
+
+    THE HEADLINE AVOIDS ONE VERB ON PURPOSE, and saying so is cheaper than
+    somebody restoring it: the natural phrasing names the act of subscribing,
+    and ``test_no_docstring_claims_a_write`` reads that as a READ TOOL
+    ADVERTISING A WRITE. It fired on the first draft of this line. The fix is
+    the CONTENT, never an exemption -- the exemption list has a control
+    asserting each entry really does claim a write, so parking a read in it
+    would turn a different test red. This tool changes nothing.
 
     **``distinct`` IS THE ANSWER AND ``anchors`` IS NOT.** Measured on the
     live page 2026-09-05: ten anchors, five newsletters. LinkedIn draws every

@@ -171,6 +171,26 @@ EXPECTED_TOOLS = {
     # ZERO, and its reader returns that integer only when four
     # independent facts hold -- see linkedin_server/events.py.
     "linkedin_events_home",
+    # THE THIRTY-NINTH, FORTIETH AND FORTY-FIRST, 2026-09-05 evening, and
+    # they arrive together because they are one finding rather than three
+    # tools: each of their readers was BUILT EARLIER THE SAME DAY and NONE
+    # could be called. No write was added by any of them.
+    #
+    #   linkedin_premium_status             premium.read_premium_surface
+    #   linkedin_newsletter_subscriptions   newsletters.read_newsletter_subscriptions
+    #   linkedin_notify_cost_precondition   notify_cost.read_notifications_badge
+    #
+    # All three stopped one step short for the SAME reason, which is why
+    # they are recorded as one line: wiring a reader moves pinned
+    # tool-inventory counts -- this assertion, the count below, this
+    # module's docstring and
+    # tests/test_readers_outside_dom_are_a_pinned_inventory.py -- and that
+    # is an ENUMERATION class a targeted run is structurally blind to. The
+    # sibling inventory's list is EMPTY as of this commit, which is the end
+    # state its own docstring said could not be committed that day.
+    "linkedin_premium_status",
+    "linkedin_newsletter_subscriptions",
+    "linkedin_notify_cost_precondition",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
@@ -384,7 +404,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtyeight_tools(tools):
+async def test_the_surface_is_exactly_the_fortyone_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -463,8 +483,19 @@ async def test_the_surface_is_exactly_the_thirtyeight_tools(tools):
     even the label reader refuses them, on the operator's ruling that the
     previous value is what makes his own write undoable.
 
-    THIRTY-SIX NAMES OVER THIRTY-FIVE CAPABILITIES; the login pair is still
-    the only pair.
+    FORTY-ONE NAMES OVER FORTY CAPABILITIES; the login pair is still the only
+    pair.
+
+    **THAT SENTENCE READ "THIRTY-SIX NAMES OVER THIRTY-FIVE" UNTIL 2026-09-05
+    EVENING, THROUGH TWO BUMPS THAT MOVED THE BODY AND NOT THE PROSE.** The
+    test was renamed at thirty-seven and again at thirty-eight, the assertion
+    was updated both times, and this line was not -- so a docstring three
+    lines above a correct assertion was quietly two tools stale. It is
+    corrected here rather than deleted, because it is the same defect this
+    file exists to catch, committed inside this file, and the arithmetic is
+    the load-bearing part: names minus capabilities is the login pair and
+    nothing else, which is a claim that stays checkable when the count moves
+    again.
     """
     assert set(tools) == EXPECTED_TOOLS
     # THIRTY-FOUR FROM 2026-09-01. The thirty-fourth is
@@ -486,7 +517,15 @@ async def test_the_surface_is_exactly_the_thirtyeight_tools(tools):
     # test_reader_reachability refuses -- and because a sibling guard,
     # tests/test_readers_outside_dom_are_a_pinned_inventory.py, would fail
     # if its line were left on the unwired list after this wiring landed.
-    assert len(tools) == 38
+    # FORTY-ONE FROM 2026-09-05 EVENING: linkedin_premium_status,
+    # linkedin_newsletter_subscriptions and linkedin_notify_cost_precondition,
+    # three READS. No write was added, which is again the half that matters.
+    # THE PIN MOVED BECAUSE THE SURFACE MOVED AND THE NAMES ABOVE ARE THE
+    # TOOLS THAT MOVED IT -- measured off mcp.list_tools(), 38 before the
+    # edit and 41 after, not counted by hand. Each one wires a reader that
+    # already existed and could not be reached; the sibling inventory that
+    # named all three is EMPTY as of the same commit.
+    assert len(tools) == 41
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -582,7 +621,18 @@ async def test_the_surface_is_exactly_the_thirtyeight_tools(tools):
     # answer can be the integer ZERO, which is the one number a read can get
     # wrong in a way that looks like success -- see linkedin_server/events.py
     # for the four facts its zero requires.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 26
+    # TWENTY-NINE FROM 2026-09-05 EVENING: linkedin_premium_status,
+    # linkedin_newsletter_subscriptions and linkedin_notify_cost_precondition
+    # are all THREE READS, and the write side is byte-identical across them --
+    # which is the half of this split that matters and the reason three tools
+    # arriving at once is not alarming. Each wires a reader built earlier the
+    # same day that nothing could call. THE ONE WORTH A SECOND LOOK IS THE
+    # THIRD: notify_cost exists to reason about the COST of a page load, and a
+    # tool about a cost is the shape most likely to smuggle in the spending.
+    # It does not. It loads the feed, reads a nav badge, and never opens
+    # /notifications/; notify_cost.cost_delta -- the half that would need the
+    # AFTER reading -- is deliberately left with no caller.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 29
 
 
 def test_the_read_that_was_nearly_named_a_write():

@@ -159,15 +159,32 @@ reason.
 2026-09-05.** `linkedin_search_appearances` has a row above and this count did
 NOT move to twenty-two, because moving it to twenty-two would make it wrong in
 a new way. Counted off the live registry rather than off this page: the server
-registers 38 tools and this table names 27 of them, so **eleven registered tools
-have no row here** -- `linkedin_comment_on_item`, `linkedin_compose_fields`,
-`linkedin_connections`, `linkedin_profile_editor_values`,
-`linkedin_events_home`, `linkedin_publish_post`, `linkedin_react_to_item`,
+registers 41 tools and this table names 27 of them, so **fourteen registered
+tools have no row here** -- `linkedin_comment_on_item`,
+`linkedin_compose_fields`, `linkedin_connections`,
+`linkedin_profile_editor_values`, `linkedin_events_home`,
+`linkedin_newsletter_subscriptions`, `linkedin_notify_cost_precondition`,
+`linkedin_premium_status`, `linkedin_publish_post`, `linkedin_react_to_item`,
 `linkedin_send_invitation`,
 `linkedin_send_message`, `linkedin_update_profile_field`, and this wave's own
 until the row above was written. Several are writes and are described
 elsewhere in this file; that is a reason some of them are absent, not a reason
 the number twenty-one is right.
+
+**38 -> 41 ON 2026-09-05 EVENING**, three READS wiring readers that were built
+earlier the same day and could not be called: `linkedin_premium_status`,
+`linkedin_newsletter_subscriptions` and `linkedin_notify_cost_precondition`.
+The registry half of that sentence is re-derived off `mcp.list_tools()`, not
+adjusted by three.
+
+**AND THE OTHER HALF OF IT DID NOT RECONCILE, WHICH IS REPORTED RATHER THAN
+SMOOTHED OVER.** The "27" above was NOT re-derived here. Counting rows in this
+file that begin with a tool name gives **30 rows over 28 distinct names**, and
+no reading of it gives 27 -- so either this page has more than one table of
+tool rows or a name appears twice, and this wave did not open that. It is
+exactly the audit the paragraph below parks, and adding a wrong number to a
+sentence that already carries one would be worse than leaving the disagreement
+visible. What IS re-derived is the 41.
 
 So the honest state is: the sentence "All twenty-one reads are here" is the
 same defect its own two paragraphs were written about, and it is recorded here
