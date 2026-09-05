@@ -378,6 +378,34 @@ wave's to do from a reading this thin -- name the owner with
   by name, no run scoped to these files could have told me.
 * **Nothing was pushed.**
 
+## 4b. THE IDENTITY SWEEP FLIPPED THREE TIMES WHILE THIS WAVE RAN
+
+The standing rule is that the exact-value sweep runs AT THE GATE, because a
+reading from earlier in the session is not evidence about the current tree. The
+existing receipt for that is two readings ten minutes apart. This wave measured
+it four times in twenty-four minutes and the interval is much shorter than
+"minutes":
+
+    18:54:44   PASS   0 hits / 314 files
+    18:59      FAIL   1 hit  -- _audit/2026-09-05-jobs-tail.md, another wave's
+                              COMMITTED file (f8e706c, b312d98)
+    19:15:23   PASS   0 hits / 339 files  -- that wave had fixed it
+    19:17:42   FAIL   1 hit
+    19:18:24   PASS   0 hits / 339 files
+
+**FAIL to PASS in 42 SECONDS.** The tracked-file count moved 314 -> 342 across
+the same window, so roughly one file entered the tree per minute from a dozen
+writers. A sweep result is not a property of the repository; it is a photograph
+of it, and this one develops in under a minute.
+
+**WHAT THIS WAVE DID WITH THE HIT IT FOUND, and it is the part worth copying:**
+nothing. It was not this wave's file, `git log` named two commits from another
+wave, and the correct action on somebody else's identity hit is to name the
+owner by artifact and leave the file alone. It was fixed by its owner within
+the window. **A red guard means UNDECLARED, not REAL** -- and even where the
+sweep's exact-value wordlist makes REAL the likelier reading, whose file it is
+does not change.
+
 ## 5. COST, RECOMPUTED RATHER THAN RECALLED
 
 **THE FIRST VERSION OF THIS SECTION UNDER-REPORTED BY MORE THAN HALF, AND IT
