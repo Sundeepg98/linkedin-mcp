@@ -250,6 +250,63 @@ built the rest*, and those are different queues.
 
 ---
 
+## 5b. THE "DEAD CITATION" UNDER `M 18` IS NOT DEAD. IT IS A TOPIC.
+
+**CORRECTS:** `_audit/2026-09-05-decide-retire-rulings.md` -- its section 10.5 records `a148003` as returning HTTP 404 and routes the row to this blocker's owner to re-source; the id is a TOPIC id and resolves in the `/topic/` form, so the row's numbers are unsourced for a different reason than the one recorded
+
+That section was routed to me by name -- *"whoever holds that blocker should
+re-source them rather than quote them"* -- and it was right to route it. The
+finding underneath it needs one correction and then goes further.
+
+**MEASURED, four url forms:**
+
+    /help/linkedin/topics/a148003      404
+    /help/linkedin/answer/a148003      404
+    /help/linkedin/answer/en/a148003   400
+    /help/linkedin/topic/a148003       SERVES -- "Messaging | LinkedIn Help",
+                                       a hub of 28 articles
+
+**`a148003` IS A TOPIC ID, NOT AN ARTICLE ID.** The earlier reading tried two
+ANSWER forms; an article route was never going to resolve a topic, so the 404s
+are facts about the form and not about the id. Both readings are accurate
+about what they saw -- the missing fact was the id's KIND.
+
+**AND THE CENSUS ALREADY HELD IT.** `_audit/_census/messaging-and-content.md`
+line 79 lists the Messaging topic as `/help/linkedin/topic/a148003`, 28
+articles, in its own topic table -- twenty-seven lines above the row table that
+cites the bare id. The correct form was in the same file the whole time. This
+is not a research failure; it is the same shape as everything else here, a
+fact present in one place and not carried to the place that needed it.
+
+### The row's numbers still cannot be sourced, and now for a reason that holds
+
+Asked for every article on that topic page concerning attaching or sending
+files, photos, videos or media, the served hub returns **none** -- its 28
+articles cover InMail, conversation management, group chats, editing and
+notification settings.
+
+**STATED AT ITS REAL STRENGTH.** That is a reading of the topic hub as served
+and rendered today, by one reader. It is NOT "LinkedIn documents no
+attachment limit" -- a hub can paginate, and a limit can live in an article
+the hub does not surface. What it does establish is that **"max 5, 20 MB
+total" cannot be re-derived from the citation the census gives for it**, which
+is what a ruling would need.
+
+### A second, independent line pointing the same way
+
+Section 3b read the compose surface's own controls: **`multiple` is absent on
+BOTH file inputs.** So the cap is not expressed by the control either. Two
+routes -- the cited documentation and the live DOM -- and neither corroborates
+the number.
+
+**THE CONSEQUENCE FOR THE ROW, precisely.** `M 18` stays a real capability row:
+the control exists, it accepts documents and video, and section 3b makes it
+aimable. What must not travel is the PARENTHESIS. "Attach files" is measured;
+"(max 5, 20 MB total)" is currently unsourced, and any ruling that leans on
+those two numbers is leaning on nothing this repository can show.
+
+---
+
 ## 6. WHAT THIS WAVE DID NOT DO
 
 * **It did not wire any action into `UPLOAD_ACTIONS`.** None of the four

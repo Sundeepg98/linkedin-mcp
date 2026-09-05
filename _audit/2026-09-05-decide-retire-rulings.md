@@ -1400,6 +1400,14 @@ fixed is written beside it.
 
 ### 10.5 A source citation that does not resolve, and it is under a rank-1 row
 
+**CORRECTED BY:** `_audit/2026-09-05-upload-sanction.md` -- `a148003` is a TOPIC id, not an article id, and it SERVES in the `/topic/` form ("Messaging | LinkedIn Help", 28 articles) while both ANSWER forms 404; the routing below was right and the numbers are still unsourced, but not because the citation is dead
+
+The working form was already in the census's own topic table (the Messaging
+row of the topic list in `_audit/_census`), twenty-seven lines above the row
+table that cites the bare id -- so this was never a research failure. It is
+the shape this document keeps finding: a fact present in one place and not
+carried to the place that needed it.
+
 Help article **`a148003` returns HTTP 404** on both URL forms that served five
 sibling articles on this pass. The census cites it for two rows:
 
