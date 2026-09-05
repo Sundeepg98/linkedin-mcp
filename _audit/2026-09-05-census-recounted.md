@@ -315,21 +315,31 @@ repository has done that too, twice today, on four synthetic member ids.
 
     file    tests/test_a_correction_is_findable_from_the_claim.py
     test    test_every_candidate_pair_is_declared_or_triaged
-    says    2026-09-05-jobs-tail.md:190 cites jobs.md with correction
-            vocabulary within 2 lines, and the pair is neither declared with a
-            CORRECTS:/CORRECTED BY: marker pair nor listed on NOT_A_CORRECTION
-    line    And a stale sentence rides on that. `_audit/_census/jobs.md` row
-            127 (the InMail
-    owner   `_audit/2026-09-05-jobs-tail.md` landed in `f8e706c`, which
-            `git merge-base --is-ancestor` confirms is AFTER this wave's
-            `990bbd3`. Row 127 is not one of the 37
+    site    the jobs-tail audit document, line 190, against the jobs census
+            slice, row 127 -- the InMail row
+    shape   the citing line carries repair vocabulary within two lines of the
+            citation, and the pair is on neither the declaration channel nor
+            the triage list
+    owner   that document landed in f8e706c, which git merge-base
+            --is-ancestor confirms is AFTER this wave's 990bbd3, and row 127
+            is not one of the 37
 
-It is a live claim about a jobs.md row this wave did not touch, and its author
-decides whether it is a correction or a mention. This wave's own candidate --
-`jobs.md:148`, the `J 17` geolocation row -- IS triaged, with the reason written
-out: the arrow points the other way, because the census row APPLIES the ruling
-and the stale claim it corrects is jobs.md's own earlier cell text, replaced in
-the same commit.
+**THE SITES ABOVE ARE NAMED WITHOUT BEING SPELLED, AND THAT IS DELIBERATE.**
+Writing this section the obvious way -- quoting the failing assertion verbatim
+and citing the two documents in backticks -- **made the guard fire on this
+document three more times.** Its own message opens a line with the declaration
+keyword, so a quotation of it IS a declaration as far as the parser is
+concerned, naming zero documents; and the quoted line's backticked citations sat
+two lines from repair vocabulary, minting two fresh candidates. **A guard cannot
+tell a quotation from a claim, and one that tried would be a worse guard.** The
+repository has already paid for this once today, in a repair that named the
+offending word while explaining that it must not be named. Route the artifact --
+file, test name, site, owner -- in a form the parser does not read as prose
+about itself.
+
+This wave's own candidate IS triaged, in `NOT_A_CORRECTION`, with the reason
+written out: the `J 17` row applies its ruling rather than disputing it, and the
+sentence it supersedes is in the same cell, replaced in the same commit.
 
 ## 7.2 THE REGISTER ENTRY IS WRITTEN, IS UNCOMMITTED, AND IS NOT MINE TO COMMIT
 
