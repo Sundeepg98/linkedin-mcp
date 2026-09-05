@@ -1167,3 +1167,127 @@ assert the guard actually MATCHES it somewhere.** A declaration nothing matches
 is either a stale entry or a blind spot, and both are worth knowing. Its
 mirror, harder and more valuable: **for each id-shaped literal in a tracked
 file, assert some pattern binds it.**
+
+---
+
+## 6. The search-appearances reader, and the two rules that are not one rule
+
+Added 2026-09-05 by the search-appearances wave. **APPENDED, not inserted** --
+see this file's preamble; find these by NAME.
+
+The instrument is `dom.read_search_appearances` plus its pure helper
+`dom._search_appearance_labels`, both in `linkedin_server/dom.py`, over
+`tests/fixtures/search_appearances_synthetic.html`. The selectors live in
+`tests/test_search_appearances.py`.
+
+**THE HONEST LIMIT GOES FIRST, because it changes what these entries certify.**
+The fixture is SYNTHETIC. Nobody in this repository has opened a
+search-appearances page. These eight proofs establish that the reader REFUSES
+what is put in front of it; they establish NOTHING about whether it reads the
+real surface. A refusal proven over an invented page is in the same family as
+an instrument that returns zero because it cannot see the thing -- if it is
+ever quoted as evidence about the live page, that is the defect, and this
+paragraph is where a reader is told so.
+
+Eight mutations were planted, one at a time, in a scratch copy of
+`linkedin_server`, `tests` and `pytest.ini`, with a guard asserting
+`linkedin_server.__file__` resolved under the copy before every pytest run --
+ten runs, zero WRONG TREE. Each was restored by re-copying that one file from
+the live tree, and the live `dom.py` and `readonly.py` were diffed
+byte-identical against the restored copies at the end. Baseline and final
+control both 24 passed.
+
+The run's own `RESULTS.md` was written to a session scratch directory outside
+this repository and **is not durable** -- its path is deliberately not quoted
+here, because `test_no_committed_identity` refuses a user path in a tracked
+file and it is right to: an absolute path under a home directory carries the
+account name. The table below is the record. If it disagrees with anything,
+re-plant the mutations rather than hunting for that file.
+
+| # | mutation | selector that died | what came back |
+|---|---|---|---|
+| M1 | `SEARCH_APPEARANCES_LABELLED_PAIRS = 2` -> `40` | `test_no_third_party_string_reaches_the_output` | RED -- leaked `Rivermouth` |
+| M2 | the entity gate -> `if False:` | `test_an_entity_linked_label_is_refused_whatever_it_says` | RED -- got `['Hillcrest']` |
+| M3 | `census_redact_rare(value, counts[value])` -> `value` | `test_a_singleton_two_capital_word_label_is_redacted` | RED -- got `['Northgate Analytics']` |
+| M4 | `!= "no"` -> `== "yes"` | `test_an_unwalked_row_is_treated_as_linked_and_not_as_unlinked` | RED -- got `['Hillcrest']` |
+| M5 | `const PERSON = /\/in\//` -> `/\/nobodyhere\//` | `test_the_person_anchor_count_is_non_zero_on_a_page_with_a_member` | RED -- `0 >= 1` |
+| M6 | `SEARCH_APPEARANCES_LABELLED_PAIRS = 2` -> `0` | `test_the_headline_and_delta_are_readable` | RED -- headline went blank |
+| M7 | delete the allowlist pattern | `test_the_address_this_reader_names_is_the_one_the_boundary_admits` | RED -- `is_read_url` False |
+| M8 | that pattern -> `/analytics/[a-z-]+/?$` | `test_the_neighbours_of_that_address_are_still_refused` | RED -- 1 of 7, on `/analytics/creator/` |
+
+### 6.1 What M1 and M3 prove that neither proves alone
+
+`Rivermouth` is why the fixture has a keyword panel at all. It is ONE
+capitalised word, seen ONCE, in a row carrying no anchor -- so
+`census_redact_rare` cannot touch it (its own docstring puts the run length at
+two) and `census_href_identifies_entity`'s sibling rule has no link to key on.
+**Neither redaction rule can reach it.** Only the in-page withholding does.
+
+Before that row existed, every breakdown row in the fixture was inside a
+company link, so killing ONE guard still left the other holding and the
+mutation came back green. **A fixture on which two guards overlap on every row
+cannot show either of them failing** -- it certifies the pair and says nothing
+about the members, which is the confidence-at-scale this register exists to
+prevent. The row was added for that reason and is documented in the fixture's
+own header.
+
+### 6.2 M4 and the extra check: two states of one field, kept apart
+
+M4 was run with a SECOND selector,
+`test_an_entity_linked_label_is_refused_whatever_it_says`, which **stayed
+GREEN**. That is the point of the pair. `entity_linked` has three values, and
+`unwalked` means the ancestor walk ran out of hops rather than reaching the
+page root having found nothing.
+
+* M2 (`if False:`) breaks the `yes` case; the `unwalked` selector also dies.
+* M4 (`== "yes"`) leaves `yes` correct and breaks `unwalked` alone.
+
+Two mutations, two different deaths, one green cross-check. Without it, two
+tests that both go red under every mutation are one test with two names. **A
+budget on how far a search goes is not a rule about where it may stop**, and
+this is the check that keeps the difference real rather than commented.
+
+### 6.3 M6 is the control-for-the-control, and it is the one worth copying
+
+Every other entry here proves a guard can REFUSE. M6 proves the suite notices
+when the reader goes BLANK: the labelled-pair budget is set to zero, the
+reader emits no labels at all, and every redaction test in the module still
+passes -- because a reader that says nothing leaks nothing.
+
+`test_the_headline_and_delta_are_readable` is the only thing standing between
+that state and a green suite, and under M6 it went RED. **A privacy test suite
+with no positive-reading control is satisfied by an instrument that has
+stopped working**, which is this project's most expensive recurring defect
+wearing its most flattering costume. Any future reader shaped by subtraction
+needs one of these.
+
+### 6.4 M8, and why the near-miss list is parametrised
+
+`/analytics/[a-z-]+/?$` is the widening a future reader is most likely to
+write -- it looks like tidying and it admits `/analytics/creator/` and every
+other page in that tree. It failed exactly ONE of seven parametrised
+neighbours while the other six still refused, which is what tells a real
+narrowing from a test that would have gone red at anything.
+
+The seventh case is `/search/results/people/?keywords=x`, and it is in that
+list on purpose rather than for symmetry: this whole reading exists to inform
+a ruling on people search, and the gate in
+`_audit/2026-08-30-linkedin-nine.md` forbids one load of the page under
+consideration being the evidence that authorises it. The test asserts the
+surface stayed shut.
+
+### 6.5 The attribution probe, which is an instrument and shipped with a control
+
+`_audit/_scratch/_probe_which_refreeze_carries_my_line.py` answers "does this
+frozen digest cover this line" by removing the line from the source text IN
+MEMORY -- `readonly.py` is never written, so a concurrent writer cannot be
+clobbered -- and recomputing. It found that the 2026-09-05 re-freeze
+`9d21c894b13316f7 -> 6f82ef147356ce5d` covers THREE allowlist additions while
+its written entry names two.
+
+**Its control is the entry condition:** removing a substring that appears
+nowhere drops zero lines and moves no digest. Without that line, "the digest
+changed" would be a fact about the removal machinery rather than about the
+line, and three matching moves would prove nothing. Declared DISPOSABLE as a
+one-off; the method -- *delete-and-recompute to ask what a digest covers, with
+an absent-needle control* -- is the part worth keeping.

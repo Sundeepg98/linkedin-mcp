@@ -504,6 +504,11 @@ PINNED = (
 #:
 #:     _ALLOWED_URL_PATTERNS   9d21c894b13316f7 -> 6737b38115e05b1c
 #:
+#: (RESTORED to the value this entry was COMMITTED with, at 6b5dad5. The
+#: working tree had it reading 6f82ef147356ce5d, which is the digest AFTER a
+#: THIRD pattern this entry does not describe. See the amendment below: the
+#: entry is correct as its author wrote it, and the number belongs to it.)
+#:
 #: HIS OWN GROUPS AND HIS OWN EVENTS, THE ROOTS ONLY. On the team lead's
 #: split: which groups he belongs to is his own data, the same class as his
 #: own profile; a group's MEMBER DIRECTORY and an event's ATTENDEE LIST are
@@ -556,11 +561,98 @@ PINNED = (
 #: _count_is_the_point`` asserts the count, and a companion test plants the
 #: wildcard a future reader is most likely to write and shows the roster
 #: falling out of it.
+#:
+#: ------------------------------------------------------------------------
+#: A THIRD ROOT, 2026-09-05, BY THE SEARCH-APPEARANCES WAVE. THE ENTRY ABOVE
+#: IS CORRECT AS ITS AUTHOR WROTE IT AND IS NOT REWRITTEN.
+#:
+#:     _ALLOWED_URL_PATTERNS   6737b38115e05b1c -> 6f82ef147356ce5d
+#:
+#: ONE ANCHORED PATTERN:
+#:
+#:     ^https://www\.linkedin\.com/analytics/search-appearances/?$
+#:
+#: **AND THE INTERESTING PART IS HOW THIS ENTRY NEARLY DID NOT GET WRITTEN.**
+#: At the moment this wave looked, the working tree carried the entry above
+#: with its arrow ending at ``6f82ef147356ce5d`` -- the digest INCLUDING this
+#: third pattern -- so the record read as though two roots had produced a move
+#: that three had. The first diagnosis was that the groups/events wave had
+#: frozen a stale reading. **THAT DIAGNOSIS WAS WRONG AND THE COMMIT SAYS SO:**
+#: at ``6b5dad5`` the prose and both pinned values all read
+#: ``6737b38115e05b1c``, entirely self-consistent, describing exactly the two
+#: roots it claims. What had happened since was an UNCOMMITTED re-pin by a
+#: third writer -- prose line and both values bumped to match whatever the
+#: live tuple hashed to, which by then included this pattern.
+#:
+#: THE DIAGNOSTIC THAT SETTLED IT IS THE STANDING ONE: date both readings
+#: before adjudicating either. ``git show <commit>:<file>`` is the reading
+#: with a date on it; the working tree is a reading with none.
+#:
+#: THE LESSON IS ABOUT THE RE-PIN, NOT ABOUT EITHER WAVE. **Re-pinning a
+#: frozen digest to whatever the tree currently hashes to is the one edit this
+#: instrument cannot survive.** It turns a freeze into a mirror: the test goes
+#: green, and the record of WHAT MOVED -- the only thing a reviewer can
+#: actually check -- is silently overwritten with somebody else's change. The
+#: entry above was restored to its committed number for that reason, and this
+#: entry carries the second leg on its own line, so the two moves stay
+#: separately readable and separately attributable.
+#:
+#: HIS OWN SEARCH-APPEARANCES PAGE. Same class as the two roots above and as
+#: ``/analytics/profile-views/`` beside it: his own analytics, no member
+#: segment anywhere in the address, so it cannot resolve to anybody but
+#: whoever is signed in. It is the reciprocal instrument in the people-search
+#: consent question -- ``_audit/2026-09-05-search-results-consent.md`` LOAD A.
+#:
+#: MEASURED, NOT INFERRED FROM THE TIMELINE, because "it must have been
+#: included" is exactly the reasoning this freeze exists to replace. Each of
+#: the three 2026-09-05 additions was removed from the SOURCE TEXT IN MEMORY
+#: -- ``readonly.py`` was never written -- and the allowlist digest
+#: recomputed. A digest that moves when a line is removed is a digest that
+#: covers that line::
+#:
+#:     pinned, and live on disk                     6f82ef147356ce5d
+#:     without /analytics/search-appearances/       6737b38115e05b1c   COVERED
+#:     without the groups root                      cd3289ecf04a6d0e   COVERED
+#:     without the events root                      3593b5d272af55fe   COVERED
+#:     CONTROL: without a substring that is absent  6f82ef147356ce5d   0 lines
+#:
+#: THE CONTROL LINE IS WHY THE OTHER THREE MEAN ANYTHING: a removal that
+#: drops no line moves no digest, so the three that DID move, moved because
+#: of what was taken out. ``_audit/_scratch/_probe_which_refreeze_carries_my_line.py``
+#: and ``_audit/_scratch/_refreeze-attribution.txt``.
+#:
+#: WHAT MOVED AND WHAT DID NOT. ``_ALLOWED_URL_PATTERNS`` moved, once, by one
+#: tuple entry. **EVERY OTHER PINNED DIGEST IS BYTE-IDENTICAL** --
+#: ``<functions>`` did not move, so ``assert_read_url`` and every other gate
+#: function is unchanged; no denylist was shortened; neither exemption table
+#: was touched. This wave added no forbidden substring and removed none: the
+#: count was 33 before the edit and 33 after, and all ten candidate addresses
+#: were measured REFUSED at HEAD carrying NO forbidden substring at all, so
+#: the pattern is the only thing standing between this server and that
+#: address.
+#:
+#: THE TWO PINNED VALUES WERE ALREADY AT ``6f82ef147356ce5d`` IN THE WORKING
+#: TREE WHEN THIS WAVE ARRIVED, typed by the third writer described above.
+#: They are ADOPTED here rather than retyped, because they are the correct
+#: consequence of THIS wave's allowlist entry and this wave owns the change
+#: that requires them -- committing the pattern without them would ship a
+#: knowingly red boundary invariant, which is worse than adopting three lines.
+#: **What is NOT adopted is the prose edit**, which has been put back to the
+#: number its own entry was committed with.
+#:
+#: WHAT THE THIRD ENTRY DELIBERATELY DID NOT BUY, in the same form the entry
+#: above uses and asserted in ``tests/test_search_appearances.py`` rather
+#: than promised here: the analytics tree root, ``/analytics/creator/``, any
+#: sub-path under the search-appearances address, a query string on it, the
+#: ``/me/`` spelling (which no measurement says LinkedIn serves), a
+#: member-addressed spelling, and -- the one that matters --
+#: ``/search/results/people/``, the surface the reading exists to inform,
+#: which is still refused.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "6737b38115e05b1c",
+    "_ALLOWED_URL_PATTERNS": "6f82ef147356ce5d",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -948,7 +1040,7 @@ DENYLISTS_AT_A76FE32 = {
     # WHY it was paid for: three cheaper routes to the same question were
     # measured first and all three are dead, which is written out in full
     # above the dict this one shadows.
-    "_ALLOWED_URL_PATTERNS": "6737b38115e05b1c",
+    "_ALLOWED_URL_PATTERNS": "6f82ef147356ce5d",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

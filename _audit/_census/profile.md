@@ -312,7 +312,7 @@ ruling does not reach it. Nothing else in this repo names it either.
 | G4 | Featured: reorder / edit / remove / unpin | W | EXCLUDED-RULED | `/edit/` family ruling, plus `drag_to` |
 | G5 | Feature content pulled from other profile sections | W | EXCLUDED-RULED | `/edit/` family ruling |
 | G6 | Per-post analytics | R | GAP | no tool, no reason. Two impressions links were counted on an item permalink 2026-09-01 and never followed |
-| G7 | Profile search appearances | R | GAP | no tool, no reason |
+| G7 | Profile search appearances | R | GAP | **"no tool, no reason" IS NOW HALF FALSE, 2026-09-05.** THE REASON EXISTS: this is the reciprocal instrument in the people-search consent question -- it reads the receiving end of a SEARCH the way `linkedin_who_viewed_me` reads the receiving end of a profile view, and `_audit/2026-09-05-search-results-consent.md` names it LOAD A, the one reading that would let 19 reads be ruled on evidence instead of on silence. Boundary opened, `dom.read_search_appearances` built, census key `search_appearances` added. **NO TOOL, and no live read** -- see `N 132` |
 
 ### H. Services / "Providing services" (11)
 

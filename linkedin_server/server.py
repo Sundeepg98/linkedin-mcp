@@ -3460,6 +3460,30 @@ CENSUS_SURFACES: dict[str, str] = {
     # balance a countable thing this server can read? The composer capture
     # settled that it is not on the composer.
     "premium": f"{BASE_URL}/premium/my-premium/",
+    # HIS OWN SEARCH APPEARANCES, added 2026-09-05, and it needed no ruling:
+    # the address carries no member segment, so it can only ever resolve to
+    # whoever is signed in, and the only person on the page is him.
+    #
+    # WHY THE CENSUS AND NOT A TOOL OF ITS OWN. Nobody in this repository has
+    # opened this page. A dedicated reader shipped with a docstring describing
+    # what it returns would be describing a page its author had not seen --
+    # and ``dom.read_search_appearances`` exists for after the capture, built
+    # against a SYNTHETIC fixture and saying so. The census is the right FIRST
+    # instrument for an unseen surface: it reports control SHAPES rather than
+    # content, it runs every name through ``shape.census_aggregate``, and its
+    # answer says how many controls drew and what the landed url was.
+    #
+    # WHAT THE READING IS FOR, since a census key usually just extends a map.
+    # This one is the reciprocal instrument in the people-search consent
+    # question -- ``_audit/2026-09-05-search-results-consent.md`` LOAD A. It
+    # reads the RECEIVING end of a search, the way ``linkedin_who_viewed_me``
+    # reads the receiving end of a profile view.
+    #
+    # AND IT IS NOT THE SURFACE UNDER CONSIDERATION. ``/search/results/people/``
+    # is NOT a key here and is still refused by the read boundary. That gate's
+    # own rule is that one load of the page under consideration cannot be the
+    # evidence that authorises it, so the reciprocal page is read instead.
+    "search_appearances": dom.SEARCH_APPEARANCES_URL,
 }
 
 #: WHAT A SETTLED RENDER OF EACH SURFACE LOOKS LIKE, as the control count it
@@ -3927,10 +3951,11 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
     Args:
         surface: which page to measure. A KEY, never a url, and one of these
-            eleven: "feed", "profile", "profile_edit_intro", "settings",
+            twelve: "feed", "profile", "profile_edit_intro", "settings",
             "settings_dark_mode", "feed_item", "feed_item_commented",
-            "post_composer", "article_composer", "messaging_compose" or
-            "premium". THIS LIST HAS BEEN INCOMPLETE TWICE and is now pinned
+            "post_composer", "article_composer", "messaging_compose",
+            "premium" or "search_appearances". THIS LIST HAS BEEN INCOMPLETE
+            TWICE and is now pinned
             by ``test_the_census_docstring_lists_every_surface_it_answers_to``
             -- it said "five" while eight keys existed, and was then corrected
             to a NINE that named the wrong nine, listing "feed_item" while

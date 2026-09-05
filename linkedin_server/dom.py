@@ -6,12 +6,25 @@ of a link: a person is behind ``/in/<slug>``, a job is behind
 ``/jobs/view/<id>``. Every list surface here is harvested by finding those
 links and taking the text of the card around them.
 
-Six small scripts are injected, and only six -- this sentence said "three" for
-long enough to survive three additions, so the count is now stated as a count
-somebody has to change. Each is a module-level constant so it can be read in
-one place and scanned by ``tests/test_readonly.py`` against
+Sixteen small scripts are injected. Each is a module-level constant so it can
+be read in one place and scanned by ``tests/test_readonly.py`` against
 :data:`readonly.JS_MUTATION_TOKENS` -- the scripts query the DOM and return
-text, tag names, character counts or, in the newest one, nothing but integers.
+text, tag names, character counts or, in several, nothing but integers.
+
+**CORRECTED 2026-09-05, AND THE CORRECTION IS THE INTERESTING PART.** This
+sentence read "Six small scripts are injected, and only six -- this sentence
+said 'three' for long enough to survive three additions, so the count is now
+stated as a count somebody has to change." It then survived NINE more
+additions, so it was wrong by nine before the sixteenth arrived. A count
+"somebody has to change" is not a check; the sentence that promised to be
+maintained by hand was maintained by nobody, exactly as the version before it
+had not been. **A DOCSTRING IS A STANDING INSTRUCTION READ AS CURRENT TRUTH,
+and this repository's ``CORRECTS:`` machinery governs ``_audit/*.md`` alone,
+so nothing could bind it.** What DOES bind it is one directory away and was
+already there: ``tests/test_readonly.py::test_every_injected_script_is_scanned``
+derives the set from ``dir(dom)`` and asserts it equals ``INJECTED_SCRIPTS``,
+so a seventeenth script cannot be added without that list moving. Read the
+number there; this line is a summary of it and can rot again.
 The Python side of each call carries a ``# readonly-ok`` waiver, which is what
 keeps a future ``evaluate`` from slipping in unreviewed.
 
@@ -8609,3 +8622,407 @@ async def read_profile_detail_entries(
             "scroll." % len(body)
         )
     return out
+
+
+# ---------------------------------------------------------------------------
+# Search appearances: HIS OWN, and the page is still made of other people
+# ---------------------------------------------------------------------------
+
+#: His own search-appearances page. ONE module constant, built here rather
+#: than at a call site, because ``readonly.py``'s entry for this address
+#: carries no query group and says so on the ground that nothing appends one.
+#: A caller that formats its own url is how a query gets appended.
+SEARCH_APPEARANCES_URL = "https://www.linkedin.com/analytics/search-appearances/"
+
+#: How many numberish paragraph pairs may carry their LABEL out of the page.
+#:
+#: THIS IS THE PRIMARY DEFENCE AND IT IS DELIBERATELY CRUDE. The sibling
+#: reader :func:`read_profile_views_insights` takes any ``<p>`` whose text is a
+#: bare number followed by a ``<p>`` that is not, up to six of them. On the
+#: profile-views page that rule is safe because the page draws exactly two such
+#: pairs -- the headline count and the change against the prior period.
+#:
+#: **THIS PAGE IS EXPECTED TO DRAW MORE, AND THE EXTRA ONES ARE MADE OF OTHER
+#: PEOPLE.** LinkedIn's search-appearances surface is understood to carry
+#: breakdown panels about the SEARCHERS -- where they work, what they do, what
+#: they typed. A breakdown row renders as exactly the shape the pair rule
+#: matches::
+#:
+#:     <p>12</p><p>Acme Corp</p>
+#:
+#: and the pair rule would publish the second paragraph verbatim. That is the
+#: per-record emission path this repository shipped once already: a hand-rolled
+#: tally on the profile-views page published thirteen real names, because
+#: ``shape.census_shape`` is a length-and-charset gate rather than a redactor,
+#: and the redaction that would have caught them runs at AGGREGATION time,
+#: where a count exists.
+#:
+#: NOTE THE EVIDENCE CLASS, because it is the weakest one here and it DECIDED
+#: this design rather than being decided by it. **The breakdown panels are an
+#: ASSUMPTION.** No capture of this page exists in this repository, and nobody
+#: here has opened it. So this constant is not tuned to a measured layout; it
+#: is set to the number of metrics this reader is FOR, and everything past it
+#: is withheld INSIDE THE PAGE. If the live read shows the headline is not
+#: among the first two pairs, this reader returns two shaped labels that do not
+#: say what was wanted -- a visible miss, which is the failure to have.
+SEARCH_APPEARANCES_LABELLED_PAIRS = 2
+
+#: Caps on the loose routes, taken from the profile-views reader for the same
+#: reason: a string longer than a caption is not a caption, and a loose anchor
+#: without a bound is how a reader turns into a text dump off a page made of
+#: other members.
+SEARCH_APPEARANCES_PAIR_MAX = 40
+SEARCH_APPEARANCES_LABEL_MAX_CHARS = 40
+SEARCH_APPEARANCES_FILTER_MAX = 10
+SEARCH_APPEARANCES_VIEW_NAME_MAX = 60
+SEARCH_APPEARANCES_CHART_DESC_MAX_CHARS = 120
+
+#: How far up from a paragraph to look for the anchor that would make its row
+#: an entity row.
+#:
+#: A BUDGET ON HOW FAR THE SEARCH GOES IS NOT A RULE ABOUT WHERE IT MAY STOP.
+#: That distinction is why the walk below has THREE outcomes: ``yes`` and
+#: ``no`` are answers, and ``unwalked`` means the budget ran out before the
+#: walk reached a stopping place. Folding ``unwalked`` into ``no`` would turn
+#: a limit on the search into a finding about the page.
+#:
+#: THE WALK STOPS AT THE PAGE ROOT, AND THAT STOP IS WHAT MAKES THE ANSWER
+#: MEAN ANYTHING. Without it the walk reaches ``main`` -- which on this page
+#: contains every member and company link there is -- and answers ``yes`` for
+#: EVERY pair including the headline. A reader whose every label comes back
+#: redacted is not a cautious reader, it is an instrument that cannot report,
+#: which is the same defect as one that returns zero because it cannot see.
+#: So the question this asks is "does the ROW around this pair link to an
+#: entity", and ``main``, ``body`` and ``html`` are not rows.
+SEARCH_APPEARANCES_ANCESTOR_HOPS = 6
+
+SEARCH_APPEARANCES_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  // SAME SCOPE RULING AS THE PROFILE-VIEWS READER AND FOR THE SAME MEASURED
+  // REASON: LinkedIn draws this tree's furniture outside main, and the
+  // committed profile-views capture has no main element at all. Widening is
+  // safe here by WHAT THIS LOOKS AT rather than by where it looks -- numbers,
+  // <label> captions, the chart's own sentence, booleans and counts. None of
+  // those reaches a person at document scope any more than at main scope.
+  const scope = main || document.body;
+  const out = {
+    pairs: [], filters: [], view_names: [], view_name_counts: {},
+    chart_present: false, chart_description: null,
+    person_anchors: 0, company_anchors: 0, total_anchors: 0,
+    list_items: 0, headings: 0, images: 0,
+    paragraphs_seen: 0, pairs_seen: 0, pairs_withheld: 0,
+    main_present: !!main, main_chars: 0
+  };
+  if (!scope) return out;
+  out.main_chars = main && main.innerText ? main.innerText.length : 0;
+
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const NUMBERISH = /^[0-9][0-9,.]*%?$/;
+  const PERSON = /\\/in\\//;
+  const COMPANY = /\\/company\\//;
+
+  // WHETHER THE ROW AROUND THIS PAIR IS A LINK TO SOMEBODY. Walks up from the
+  // paragraph and asks whether any ancestor SHORT OF THE PAGE ROOT contains a
+  // member or company link. RETURNS A WORD AND NEVER THE HREF: the test
+  // happens inside the page, the way the invitation needle and the recipient
+  // check do theirs, so no destination string crosses into the process.
+  //
+  // THE ROOT STOP IS NOT A DETAIL. main contains every link on the page, so a
+  // walk that reaches it answers 'yes' for the headline metric too, and every
+  // label comes back redacted. The question is about the ROW, and main, body
+  // and html are not rows.
+  //
+  // THREE STATES, NOT TWO. 'yes' and 'no' are answers -- 'no' means the walk
+  // reached the root having found nothing. 'unwalked' means the hop budget
+  // ran out FIRST, which is not the same claim at all. Collapsing those two is
+  // how a limit on how far a search went becomes a finding about the page.
+  const ROOTS = {MAIN: 1, BODY: 1, HTML: 1};
+  const entityLinked = (node) => {
+    let cur = node;
+    for (let hop = 0; hop < cfg.ancestorHops; hop++) {
+      const parent = cur ? cur.parentElement : null;
+      if (!parent || ROOTS[parent.tagName] === 1 || parent === scope) return 'no';
+      cur = parent;
+      let found = false;
+      for (const a of cur.querySelectorAll('a[href]')) {
+        const h = a.getAttribute('href') || '';
+        if (PERSON.test(h) || COMPANY.test(h)) { found = true; break; }
+      }
+      if (found) return 'yes';
+    }
+    return 'unwalked';
+  };
+
+  // THE PAIRS. Anchored on the NUMBER, like the sibling reader: the label is
+  // prose and changes, "a <p> that is only a number followed by a <p> that is
+  // not" does not.
+  //
+  // THE LABEL IS WITHHELD IN THE PAGE past the first cfg.labelledPairs -- not
+  // dropped in Python afterwards. A breakdown row's text never crosses this
+  // boundary at all, so no later caller can undo the decision and no future
+  // field can accidentally carry it.
+  const paragraphs = Array.from(scope.querySelectorAll('p'));
+  out.paragraphs_seen = paragraphs.length;
+  for (let i = 0; i < paragraphs.length && out.pairs.length < cfg.pairMax; i++) {
+    const value = textOf(paragraphs[i]);
+    if (!NUMBERISH.test(value)) continue;
+    const label = textOf(paragraphs[i + 1]);
+    if (!label || NUMBERISH.test(label)) continue;
+    out.pairs_seen++;
+    const rank = out.pairs.length;
+    const row = {
+      rank: rank,
+      value: value,
+      label: null,
+      label_withheld: true,
+      label_chars: label.length,
+      entity_linked: entityLinked(paragraphs[i])
+    };
+    if (rank < cfg.labelledPairs && label.length <= cfg.labelMaxChars) {
+      row.label = label;
+      row.label_withheld = false;
+    } else {
+      out.pairs_withheld++;
+    }
+    out.pairs.push(row);
+  }
+
+  // THE FILTERS, by their own <label> text, and the same two routes the
+  // profile-views reader needs: the view-name holder where the client has
+  // hydrated, every <label> where it has not. <label> TEXT, NEVER an
+  // aria-label -- this page's aria-labels are expected to name searchers, and
+  // a <label> is a form control's own caption.
+  for (const holder of scope.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
+    const label = textOf(holder.querySelector('label')) || textOf(holder);
+    if (label && label.length <= cfg.labelMaxChars &&
+        out.filters.indexOf(label) === -1 &&
+        out.filters.length < cfg.filterMax) {
+      out.filters.push(label);
+    }
+  }
+  if (!out.filters.length) {
+    for (const node of scope.querySelectorAll('label')) {
+      const label = textOf(node);
+      if (label && label.length <= cfg.labelMaxChars &&
+          out.filters.indexOf(label) === -1 &&
+          out.filters.length < cfg.filterMax) {
+        out.filters.push(label);
+      }
+    }
+  }
+
+  // THE CHART and its OWN sentence. Never a data point, never a date.
+  const chart = scope.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  let described = null;
+  if (chart) {
+    out.chart_present = true;
+    for (const node of chart.querySelectorAll('div')) {
+      const line = textOf(node);
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        break;
+      }
+    }
+  }
+  if (!described) {
+    const text = scope.innerText || '';
+    for (const raw of text.split('\\n')) {
+      const line = raw.trim();
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        out.chart_present = true;
+        break;
+      }
+    }
+  }
+  out.chart_description = described;
+
+  // THE ANCHOR CENSUS, AND IT IS THE WHOLE POINT OF THIS READER.
+  //
+  // Whether this page NAMES the people who searched is the question the
+  // ruling on people search turns on, and an INTEGER answers it. So these are
+  // counts of hrefs matched INSIDE the page: the string is tested here and a
+  // number leaves. No href and no anchor text crosses.
+  for (const a of scope.querySelectorAll('a[href]')) {
+    out.total_anchors++;
+    const h = a.getAttribute('href') || '';
+    if (PERSON.test(h)) out.person_anchors++;
+    if (COMPANY.test(h)) out.company_anchors++;
+  }
+
+  // STRUCTURE, counted and not read.
+  out.list_items = scope.querySelectorAll('li,[role="listitem"]').length;
+  out.headings = scope.querySelectorAll('h1,h2,h3').length;
+  out.images = scope.querySelectorAll('img').length;
+
+  for (const el of scope.querySelectorAll('[data-view-name]')) {
+    const value = el.getAttribute('data-view-name') || '';
+    if (!value) continue;
+    out.view_name_counts[value] = (out.view_name_counts[value] || 0) + 1;
+    if (out.view_names.indexOf(value) === -1 &&
+        out.view_names.length < cfg.viewNameMax) {
+      out.view_names.push(value);
+    }
+  }
+  return out;
+}
+"""
+
+
+def _search_appearance_labels(pairs: list[dict[str, Any]]) -> list[Optional[str]]:
+    """Shape, tally and redact the few labels the page let out.
+
+    **THIS IS THE AGGREGATION STEP, AND IT EXISTS BECAUSE THE COUNT LIVES
+    HERE AND NOWHERE ELSE.** ``shape.census_shape`` is a length-and-charset
+    gate; it is not the redactor and it has never claimed to be. The two rules
+    that actually refuse a name are
+    :func:`shape.census_href_identifies_entity`, which needs a destination,
+    and :func:`shape.census_redact_rare`, which needs a COUNT -- so a
+    per-record emission path inherits neither, which is exactly the defect
+    that put thirteen real names into a probe's output on the sibling page.
+
+    So the labels are shaped, TALLIED AGAINST EACH OTHER, and only then
+    published. The entity rule is applied from the page's own answer rather
+    than from an href: ``entity_linked`` is computed inside the page and comes
+    back as a word, and anything but a flat ``no`` costs the label.
+
+    ``census_redact_rare`` fires at ``count == 1`` and blanks a run of two or
+    more capitalised words. On this page's expected furniture that is the
+    right way round: "Search appearances" and "vs. prior 7 days" carry no such
+    run and survive; "Acme Corp" is exactly such a run and does not. It
+    over-redacts a genuinely unique two-word caption, which is the direction
+    to be wrong in.
+    """
+    shaped: list[Optional[str]] = []
+    for pair in pairs:
+        raw = pair.get("label")
+        if raw is None:
+            shaped.append(None)
+            continue
+        # ANYTHING BUT A FLAT "no" COSTS THE LABEL. 'unwalked' is not evidence
+        # of absence -- see SEARCH_APPEARANCES_ANCESTOR_HOPS.
+        if str(pair.get("entity_linked") or "") != "no":
+            shaped.append(shape.CENSUS_REDACTED)
+            continue
+        shaped.append(shape.census_shape(raw))
+
+    counts: dict[str, int] = {}
+    for value in shaped:
+        if value is None:
+            continue
+        counts[value] = counts.get(value, 0) + 1
+    return [
+        None if value is None else shape.census_redact_rare(value, counts[value])
+        for value in shaped
+    ]
+
+
+async def read_search_appearances(page: Any) -> dict[str, Any]:
+    """What his own search-appearances page says, with no name on it.
+
+    THE RECIPROCAL INSTRUMENT. ``linkedin_who_viewed_me`` reads the receiving
+    end of a PROFILE VIEW, and that reading is what settled whether this
+    server may load a stranger's profile. This is the receiving end of a
+    SEARCH: how often other people's searches put him in front of them. It
+    sits on his own account, it costs no third party anything, and it needed
+    no ruling.
+
+    **THE PAGE IS STILL MADE OF OTHER PEOPLE, AND MORE OF THEM THAN THE
+    SIBLING PAGE IS.** The profile-views surface draws two numberish
+    paragraph pairs and its reader may safely take six. This one is expected
+    to draw breakdown panels about the searchers -- their employers, their
+    titles, the words they typed -- in the SAME shape. So the label past the
+    first :data:`SEARCH_APPEARANCES_LABELLED_PAIRS` is withheld inside the
+    page, and the two that do cross are shaped, tallied and redacted by
+    :func:`_search_appearance_labels` before anything is returned.
+
+    **WHAT THIS READER CAN AND CANNOT SETTLE, stated here rather than left to
+    whoever reads its output.** ``anchors.person`` is the measurement that
+    matters: a non-zero count means this page draws links to individual
+    members, so the record LinkedIn keeps of a search IDENTIFIES the people in
+    it. A zero there means this page draws none -- it does NOT mean a search
+    emits nothing, because absence on a panel LinkedIn chose the contents of
+    is not absence in LinkedIn's store.
+
+    AND A ZERO HEADLINE IS NOT A NEGATIVE RESULT. If ``headline`` reports zero
+    appearances, that is consistent with "searches do not emit" AND with
+    "nobody searched for him this week", and this reader cannot separate them.
+    An instrument that returns zero because there was nothing to see is not
+    reporting a negative -- which is why ``observed`` is always populated and
+    why ``headline`` is ``None`` rather than ``0`` when no pair was found at
+    all. Absent and zero are different answers here.
+
+    ZERO EXTRA PAGE LOADS beyond the one its caller made. This reader does not
+    navigate, does not click and does not scroll, so a page that defers most
+    of itself reports less than the page holds -- ``observed.main_chars`` and
+    ``observed.paragraphs_seen`` are what say whether anything rendered.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            SEARCH_APPEARANCES_JS,
+            {
+                "chartName": VIEWS_CHART_VIEW_NAME,
+                "filterName": VIEWS_FILTER_VIEW_NAME,
+                "labelledPairs": SEARCH_APPEARANCES_LABELLED_PAIRS,
+                "pairMax": SEARCH_APPEARANCES_PAIR_MAX,
+                "labelMaxChars": SEARCH_APPEARANCES_LABEL_MAX_CHARS,
+                "filterMax": SEARCH_APPEARANCES_FILTER_MAX,
+                "viewNameMax": SEARCH_APPEARANCES_VIEW_NAME_MAX,
+                "chartMaxChars": SEARCH_APPEARANCES_CHART_DESC_MAX_CHARS,
+                "ancestorHops": SEARCH_APPEARANCES_ANCESTOR_HOPS,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the search-appearances page: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    data = dict(data or {})
+
+    pairs = [dict(row) for row in (data.get("pairs") or [])]
+    labels = _search_appearance_labels(pairs)
+    metrics = [
+        {
+            "value": pair.get("value"),
+            "label_shape": label,
+            "label_withheld": bool(pair.get("label_withheld")),
+            "entity_linked": pair.get("entity_linked"),
+        }
+        for pair, label in zip(pairs, labels)
+    ]
+    trend = None
+    if data.get("chart_present"):
+        trend = {
+            "present": True,
+            "description": data.get("chart_description") or None,
+        }
+    return {
+        # None rather than 0 when nothing was found: absent is not zero.
+        "headline": metrics[0] if metrics else None,
+        "delta": metrics[1] if len(metrics) > 1 else None,
+        "metrics": metrics,
+        "trend": trend,
+        "filters": list(data.get("filters") or []),
+        # THE ANSWER TO THE QUESTION THIS PAGE WAS OPENED FOR.
+        "anchors": {
+            "person": int(data.get("person_anchors") or 0),
+            "company": int(data.get("company_anchors") or 0),
+            "total": int(data.get("total_anchors") or 0),
+        },
+        "observed": {
+            "pairs_seen": int(data.get("pairs_seen") or 0),
+            "pairs_withheld": int(data.get("pairs_withheld") or 0),
+            "paragraphs_seen": int(data.get("paragraphs_seen") or 0),
+            "list_items": int(data.get("list_items") or 0),
+            "headings": int(data.get("headings") or 0),
+            "images": int(data.get("images") or 0),
+            "view_names": list(data.get("view_names") or []),
+            "view_name_counts": dict(data.get("view_name_counts") or {}),
+            "main_present": bool(data.get("main_present")),
+            "main_chars": int(data.get("main_chars") or 0),
+        },
+    }

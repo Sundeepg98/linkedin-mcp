@@ -426,7 +426,7 @@ silently downgraded.
 | 129 | See your profile viewers -- name, headline, when, profile link | R | **COVERED-PROVEN** | `linkedin_who_viewed_me`. Reaches 365 days back on his Premium Career account |
 | 130 | See anonymous viewers exactly as LinkedIn renders them | R | **COVERED-PROVEN** | Returned with `"anonymous": true`; harvested via `sibling_rows=True` because a link-anchored harvest cannot see them at all |
 | 131 | Learn the identity behind an anonymous viewer | R | EXCLUDED-RULED | R6 |
-| 132 | Switch between Search appearances and Who viewed your profile | R | GAP | Search appearances are never read |
+| 132 | Switch between Search appearances and Who viewed your profile | R | GAP | **STILL A GAP, AND THE BLOCKER CHANGED 2026-09-05.** "Search appearances are never read" was true for a fortnight and is no longer the reason. The address `/analytics/search-appearances/` is now on the read allowlist as one anchored pattern, `dom.read_search_appearances` exists, and `linkedin_surface_census` answers to the key `search_appearances`. **What is missing is the LIVE READ** -- nobody in this repository has opened this page, the reader is proven only against a fixture that says SYNTHETIC in its first line, and no tool returns an appearance count. The row stays GAP because a reader that has never met its page is not a capability |
 | 133 | Filter your profile-viewer data (Premium) | R | GAP | **The page is already open** -- see 8.1 |
 | 134 | See notable or interesting viewers (Premium) | R | GAP | Same |
 | 135 | See the weekly viewer trend graph (Premium) | R | GAP | Same |

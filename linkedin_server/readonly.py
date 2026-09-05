@@ -170,6 +170,53 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # Own profile views (Premium analytics view, and the classic one).
     re.compile(r"^https://www\.linkedin\.com/analytics/profile-views/?(\?[^#]*)?$"),
     re.compile(r"^https://www\.linkedin\.com/me/profile-views/?(\?[^#]*)?$"),
+    # HIS OWN SEARCH APPEARANCES. Added 2026-09-05. The sibling of the two
+    # lines above: same analytics tree, same account scope, and the same
+    # class of instrument -- it reads the RECEIVING end of a signal other
+    # people emit at him, which is what makes it his to read.
+    #
+    # IT CANNOT ADDRESS ANYBODY ELSE, AND THAT IS STRUCTURAL RATHER THAN
+    # PROMISED. This address carries NO member segment of any kind. There is
+    # no slug, no id, no ``/in/`` -- the account is chosen by the session
+    # cookie and by nothing in the string. So the constraint the intro-editor
+    # entry below has to buy with the ``/in/me/`` spelling is free here: the
+    # generalisation that entry forbids -- a pattern that can name a member --
+    # is not expressible at this address. The reason it forbids it holds all
+    # the same and is why this is anchored at all: ``linkedin_who_viewed_me``
+    # has MEASURED that loading a third party's page leaves them a durable
+    # record, so no pattern on this list may be able to reach one.
+    #
+    # ANCHORED WITH NO QUERY GROUP, unlike the two profile-views lines above.
+    # Those predate the discipline; this entry is written under it. ``dom``
+    # builds this url from one module constant with nothing appended, so
+    # there is no query to preserve, and a pattern that accepts one is a
+    # pattern that accepts whatever a caller appends. The landed url is never
+    # re-checked (see the messaging note above), so a redirect that adds
+    # LinkedIn's own tracking parameters is not refused by this.
+    #
+    # WHAT IS DELIBERATELY NOT HERE, because the obvious later "fix" is to
+    # reach for one of them:
+    #
+    # * ``/me/search-appearances/``. The profile-views pair lists both
+    #   spellings, so the symmetric thing would be to list both here. NO
+    #   MEASUREMENT SAYS LINKEDIN SERVES IT. The profile-views pair earned
+    #   its second line by being opened; this would be a guess wearing a
+    #   precedent's clothes, and an allowlist should permit what is opened
+    #   rather than what is plausible. If the live read finds the analytics
+    #   address does not serve, that is a second deliberate edit here.
+    # * ``/analytics/`` and every other page under it. The tree root and
+    #   ``/analytics/creator/`` were both measured REFUSED before this line
+    #   was written and are both still refused after it. One named page at a
+    #   time, never the family, never a wildcard -- the settings ruling's
+    #   words, applied to the tree next door.
+    #
+    # AND IT IS NOT THE OTHER SEARCH SURFACE. ``/search/results/people/`` is
+    # the act this reading exists to inform, it is NOT admitted by this line
+    # (measured: still REFUSED-NO-PATTERN after the edit), and the gate in
+    # ``_audit/2026-08-30-linkedin-nine.md`` forbids using one load of that
+    # page as the evidence that authorises it. This entry buys the reciprocal
+    # reading and nothing next to it.
+    re.compile(r"^https://www\.linkedin\.com/analytics/search-appearances/?$"),
     # The job tracker, which is where /my-items/saved-jobs/ now redirects (the
     # cardType query is dropped on the way, and that older address is no longer
     # on this list because nothing builds it any more). ``?stage=`` selects

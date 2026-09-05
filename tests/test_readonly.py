@@ -654,7 +654,30 @@ def test_only_dom_module_waives_evaluate():
     # census at this page, hand-rolled its own tally, and published thirteen
     # real names -- the singleton blanking that would have caught them runs at
     # publish time in ``shape.census_aggregate``, not in the reader.
-    assert waived_in.get("dom.py", 0) <= 16, waived_in
+    #
+    # THE SEVENTEENTH, 2026-09-05: ``SEARCH_APPEARANCES_JS``, run once from
+    # ``dom.read_search_appearances``. It is the SIXTEENTH's page one door
+    # along -- his own search-appearances analytics, the reciprocal instrument
+    # for a search the way profile-views is the reciprocal for a profile load.
+    #
+    # WHY IT DOES NOT RIDE THE SIXTEENTH, asked because they read sibling
+    # pages and the temptation is a flag. ``PROFILE_VIEWS_INSIGHTS_JS``
+    # publishes any of six numberish paragraph pairs verbatim, and that is
+    # SAFE ON ITS PAGE because that page draws exactly two. This page is
+    # expected to draw breakdown panels about the SEARCHERS in the identical
+    # shape -- ``<p>12</p><p>Acme Corp</p>`` -- so the same rule would publish
+    # a third party's employer. A flag that changes what a script may emit is
+    # not a flag, it is two scripts sharing a body, and the one with the
+    # weaker rule is the one a future caller reaches for.
+    #
+    # ITS OWN RULE IS SUBTRACTION TWICE OVER. Past the first two pairs the
+    # label is withheld INSIDE THE PAGE and never crosses; the two that do
+    # cross are shaped, tallied and run through ``census_redact_rare`` in
+    # ``dom._search_appearance_labels``, which is where a count exists. The
+    # only other things it returns are ``<label>`` captions, the chart's own
+    # sentence, and COUNTS -- including the person-anchor count, which is the
+    # measurement the whole page was opened for and is an integer.
+    assert waived_in.get("dom.py", 0) <= 17, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -800,6 +823,30 @@ INJECTED_SCRIPTS = {
     # that only ever looks at numbers, <label> text and view names cannot make
     # that mistake whatever a future caller does with it.
     "PROFILE_VIEWS_INSIGHTS_JS": dom.PROFILE_VIEWS_INSIGHTS_JS,
+    # 2026-09-05. His own search-appearances page -- the reciprocal instrument
+    # for a SEARCH, standing to people search where the entry above stands to
+    # a profile load.
+    #
+    # IT RUNS WHERE THE SIXTEENTH'S ARGUMENT IS TRUE AND ONE STEP WORSE. That
+    # page is a list of other members; this one is expected to be a list of
+    # other members PLUS aggregate panels about them, drawn in the exact shape
+    # the paragraph-pair rule matches. So this script's rule is subtraction
+    # applied twice: past the first two pairs the label is WITHHELD INSIDE THE
+    # PAGE, and the two that cross are shaped, tallied and redacted in
+    # ``dom._search_appearance_labels`` -- at aggregation time, where a count
+    # exists, because ``census_shape`` is a length-and-charset gate and not the
+    # redactor.
+    #
+    # ITS ONE POSITIVE PUBLICATION IS AN INTEGER. ``person_anchors`` counts
+    # hrefs matched inside the page and is the whole answer to whether this
+    # surface names the people who searched -- the question a ruling on people
+    # search turns on. The href itself never crosses.
+    #
+    # THE HONEST LIMIT, recorded here because a declaration is where a reader
+    # will look: this script has never run on the real page. It is proven
+    # against a SYNTHETIC fixture that says so in its own first line, and the
+    # scan below certifies that it cannot mutate, not that it can read.
+    "SEARCH_APPEARANCES_JS": dom.SEARCH_APPEARANCES_JS,
 }
 
 
@@ -968,7 +1015,7 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 16, sorted(EXECUTED_SCRIPTS)
+    assert len(EXECUTED_SCRIPTS) == 17, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

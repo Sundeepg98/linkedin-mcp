@@ -182,6 +182,21 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("profile.md", "2026-09-05-search-results-consent.md"): (
+        "the row CORRECTS ITSELF and cites the consent brief as its REASON. "
+        "G7's blocker read 'no tool, no reason'; the 2026-09-05 rewrite says "
+        "that is now half false, because the consent brief established what "
+        "the reason IS -- this page is the reciprocal instrument for a search, "
+        "its LOAD A. The correction vocabulary ('IS NOW HALF FALSE') is about "
+        "the census cell it replaces, which is why the fix is written IN PLACE "
+        "in the cell rather than as a separate corrector document. The consent "
+        "brief is not wrong about anything here and needs no CORRECTED BY: "
+        "pointer -- aiming one at it would tell a reader that the document "
+        "which SUPPLIED the reason had been refuted by the row that took it, "
+        "inverting the relation exactly as the network.md/build-linkedin.md "
+        "entry below describes. What the row DOES leave standing is that G7 "
+        "is still a GAP: no tool, and nobody has opened the page"
+    ),
     ("INSTRUMENTS.md", "2026-08-22-parity-linkedin.md"): (
         "the register DESCRIBES this check and quotes the instance it was "
         "built for, so it cites the corrected document while explaining that "
