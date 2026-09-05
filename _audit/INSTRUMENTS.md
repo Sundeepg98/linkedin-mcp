@@ -2386,3 +2386,44 @@ site says so**: raising a timeout buys time against unbounded growth, and 12.8
 is the actual repair. What the knob buys is that a wave which cannot get a slot
 has something to try OTHER than killing a browser it does not own -- and five
 refusals in a row is exactly when somebody reaches for that.
+
+### 12.10 CLEARING A NEW GUARD: count it out, do not declare it in
+
+**The situation is going to recur, because a guard extended today catches
+yesterday's files.** The page-text rule extended the taint engine from URLs to
+text-extraction sinks and caught this wave's newest probe at three sites: a
+count, a dict of HTML tag names, and a class string made entirely of this
+repository's own vocabulary.
+
+**EVERY ONE WAS SAFE IN SUBSTANCE AND THE GUARD WAS STILL RIGHT.** None of that
+safety is visible to it, and a later edit to any of those expressions could
+carry a name past a review that had already happened. The surface makes it
+concrete: `census_substitute` returns a plain human name UNCHANGED -- measured
+on this project, this week -- so a group page's text can carry a member's name
+that neither the url rule nor the shaper would catch.
+
+**THREE REMEDIES EXIST AND THEY ARE NOT EQUAL:**
+
+| remedy | what it tolerates afterwards |
+|---|---|
+| bump the pin | the sites, forever, unreviewed. **The bulk re-baseline this register already records as where a real guard goes to die** |
+| declare the site | that whole SINK EXPRESSION forever, whatever it later holds |
+| **remove the site** | nothing |
+
+The third was taken: the tainted values are read ONLY inside `len()` and inside
+comparisons, so what reaches a print is an integer or a string the file
+authored. **Counting a thing is what this package does instead of printing it**
+-- the guard's safe exits are not a loophole, they are the discipline written
+as a rule.
+
+**AND THE OUTPUT GOT BETTER, WHICH IS THE PART NOBODY EXPECTS.** "Emit a count"
+reads as a loss of information. It was not: the rewrite replaced one class
+string per control with a per-needle tally, so the report now says WHICH
+forbidden substrings were met and how many controls met each, where before it
+said only that some were met.
+
+**NOTE FOR WHOEVER CLEARS A GUARD ON THEIR OWN INSTRUMENT.** The author of this
+guard left these sites RED rather than folding them into its own baseline on
+the day it was built. That is the correct move and it is worth copying: a guard
+whose first act is to absolve the files its author could see is a guard that
+has never refused anything.
