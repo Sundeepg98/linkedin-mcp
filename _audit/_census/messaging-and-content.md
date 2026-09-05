@@ -329,8 +329,8 @@ from what this server could do about it.
 
 | # | capability | Help Center | state | R/W | REV | evidence, or what a GAP would take |
 |---|---|---|---|---|---|---|
-| M1 | Send a message to a 1st-degree connection | a541865 | **CANNOT-DELIVER** | W | **NOT** | `linkedin_send_message`; fired live 2026-09-03, refused at `_recipient_gate`. See s3.1 |
-| M2 | Send an InMail to a non-connection | a546814 | **CANNOT-DELIVER** | W | **NOT** | same tool, same gate; additionally spends a metered credit whose size is unreadable |
+| M1 | Send a message to a 1st-degree connection | a541865 | **COVERED-CANNOT-DELIVER** | W | **NOT** | `linkedin_send_message`; fired live 2026-09-03, refused at `_recipient_gate`. See s3.1 |
+| M2 | Send an InMail to a non-connection | a546814 | **COVERED-CANNOT-DELIVER** | W | **NOT** | same tool, same gate; additionally spends a metered credit whose size is unreadable |
 | M3 | Choose the dispatch mode (message vs InMail) | a546814 | EXCLUDED-RULED | W | NOT | `_TEAM_LEAD_SUCCESSOR_BRIEF.md:63-80`: "**DO NOT touch the dispatch radios.** Use the checked default" |
 | M4 | View available InMail credit balance | a543685 | EXCLUDED-RULED | R | REV | `readonly.py:411-433` admits `/premium/my-premium/` for exactly this and it carries no balance; `perform.md:3462-3487`: InMail on the composer is "a conversation FILTER PILL -- five independent readings" |
 | M5 | Send an Open Profile message | a544787 | GAP | W | **NOT** | needs a third party's profile loaded to find the control -- collides with the `who_viewed_me` emission ruling |

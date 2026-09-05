@@ -393,18 +393,24 @@ considered.
 
 ### K. Recommendations (10) -- all EXCLUDED-RULED under R3
 
-| # | capability | R/W |
-|---|---|---|
-| 119 | Request a recommendation from a 1st-degree connection | W |
-| 120 | Write and send a recommendation for a 1st-degree connection | W |
-| 121 | Accept a received recommendation onto your profile | W |
-| 122 | Dismiss a recommendation you received | W |
-| 123 | Ask for a revision of a recommendation you received | W |
-| 124 | Revise a recommendation you have given | W |
-| 125 | Delete a recommendation you have sent | W (also R5) |
-| 126 | Hide or unhide a recommendation you received | W |
-| 127 | Set the visibility of a recommendation you have given | W |
-| 128 | Decline a recommendation request someone sent you | W |
+| # | capability | R/W | state |
+|---|---|---|---|
+| 119 | Request a recommendation from a 1st-degree connection | W | EXCLUDED-RULED |
+| 120 | Write and send a recommendation for a 1st-degree connection | W | EXCLUDED-RULED |
+| 121 | Accept a received recommendation onto your profile | W | EXCLUDED-RULED |
+| 122 | Dismiss a recommendation you received | W | EXCLUDED-RULED |
+| 123 | Ask for a revision of a recommendation you received | W | EXCLUDED-RULED |
+| 124 | Revise a recommendation you have given | W | EXCLUDED-RULED |
+| 125 | Delete a recommendation you have sent | W (also R5) | EXCLUDED-RULED |
+| 126 | Hide or unhide a recommendation you received | W | EXCLUDED-RULED |
+| 127 | Set the visibility of a recommendation you have given | W | EXCLUDED-RULED |
+| 128 | Decline a recommendation request someone sent you | W | EXCLUDED-RULED |
+
+**The state column was added 2026-09-05 and carries no new judgement.** This table
+shipped with no state column at all, so its ten rows were in no counter's numerator
+or denominator in either direction. The value transcribed into every cell is the
+one this section's own heading states -- *all EXCLUDED-RULED under R3* -- and the
+precision flag immediately below is unchanged and still governs.
 
 **A precision flag on all ten.** The ruling's key is `endorse_or_recommend` and
 so it NAMES recommendations. But the measurement behind it counted **endorse
@@ -426,7 +432,7 @@ silently downgraded.
 | 129 | See your profile viewers -- name, headline, when, profile link | R | **COVERED-PROVEN** | `linkedin_who_viewed_me`. Reaches 365 days back on his Premium Career account |
 | 130 | See anonymous viewers exactly as LinkedIn renders them | R | **COVERED-PROVEN** | Returned with `"anonymous": true`; harvested via `sibling_rows=True` because a link-anchored harvest cannot see them at all |
 | 131 | Learn the identity behind an anonymous viewer | R | EXCLUDED-RULED | R6 |
-| 132 | Switch between Search appearances and Who viewed your profile | R | **READ LIVE 2026-09-05, still GAP for the SWITCH** | **STILL A GAP, AND THE BLOCKER CHANGED 2026-09-05.** "Search appearances are never read" was true for a fortnight and is no longer the reason. The address `/analytics/search-appearances/` is now on the read allowlist as one anchored pattern, `dom.read_search_appearances` exists, and `linkedin_surface_census` answers to the key `search_appearances`. **What is missing is the LIVE READ** -- nobody in this repository has opened this page, the reader is proven only against a fixture that says SYNTHETIC in its first line, and no tool returns an appearance count. **THE PAGE HAS NOW BEEN MET** -- read twice on 2026-09-05, 108 appearances both times, `_audit/2026-09-05-search-appearances-load-a.md`. This row stays GAP anyway and the reason is narrow: it is about SWITCHING between the two analytics views, and each is reached by its own address here rather than by pressing a control. Nothing in this package presses that switch, and nothing needs to |
+| 132 | Switch between Search appearances and Who viewed your profile | R | GAP | **READ LIVE 2026-09-05, STILL GAP FOR THE SWITCH.** (That sentence stood in the state cell from 2026-09-05 until this row was made countable again; the row is unchanged, only visible.) **STILL A GAP, AND THE BLOCKER CHANGED 2026-09-05.** "Search appearances are never read" was true for a fortnight and is no longer the reason. The address `/analytics/search-appearances/` is now on the read allowlist as one anchored pattern, `dom.read_search_appearances` exists, and `linkedin_surface_census` answers to the key `search_appearances`. **What is missing is the LIVE READ** -- nobody in this repository has opened this page, the reader is proven only against a fixture that says SYNTHETIC in its first line, and no tool returns an appearance count. **THE PAGE HAS NOW BEEN MET** -- read twice on 2026-09-05, 108 appearances both times, `_audit/2026-09-05-search-appearances-load-a.md`. This row stays GAP anyway and the reason is narrow: it is about SWITCHING between the two analytics views, and each is reached by its own address here rather than by pressing a control. Nothing in this package presses that switch, and nothing needs to |
 | 133 | Filter your profile-viewer data (Premium) | R | GAP | **The page is already open** -- see 8.1 |
 | 134 | See notable or interesting viewers (Premium) | R | GAP | Same |
 | 135 | See the weekly viewer trend graph (Premium) | R | GAP | Same |

@@ -42,10 +42,19 @@ SLICES = {
 }
 #: Every state spelling the four slices use, long and short form alike.
 STATES = {
-    "GAP", "CP", "CU", "CCD", "ER",
+    "GAP", "CP", "CU", "CCD", "ER", "XR",
     "EXCLUDED-RULED", "COVERED-PROVEN", "COVERED-UNFIRED",
     "COVERED-CANNOT-DELIVER", "MEASURED-ABSENT",
 }
+#: `XR` was added 2026-09-05 and is the single biggest thing this counter could
+#: not see. It is `jobs.md`'s own short spelling of EXCLUDED-RULED, used 23
+#: times and NOWHERE ELSE in the four slices -- and `jobs.md`'s own frozen
+#: table reads `EXCLUDED-RULED 23`. So 23 rows carrying a correctly-written
+#: verdict were in neither the numerator nor the denominator, and the cause was
+#: a DIALECT THIS INSTRUMENT DID NOT SPEAK, not prose in a state cell. It is
+#: reported under its own key rather than folded into EXCLUDED-RULED, which is
+#: how `CP`/`CU`/`CCD` are already handled: a counter that silently merges two
+#: spellings cannot show you that a slice uses two.
 ROW = re.compile(r"^\|\s*([A-Za-z0-9][A-Za-z0-9 .\-]*?)\s*\|")
 HEADERS = {"#", "id", "row", "rows", "state", "blocker", "capability"}
 

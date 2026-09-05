@@ -306,7 +306,7 @@ ruling does not reach it. Nothing else in this repo names it either.
 
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
-| G1 | Own activity items | R | COVERED-PROVEN, WITH A MEASURED RELIABILITY DEFECT | the rail returned 233 controls on one reading and 67 on another in the same session. The spec's own words: *"A check that answers nothing on some readings it can take is not a verification."* |
+| G1 | Own activity items | R | COVERED-PROVEN | **WITH A MEASURED RELIABILITY DEFECT** -- the qualifier was in the state cell until 2026-09-05 and made this row invisible to every counter. the rail returned 233 controls on one reading and 67 on another in the same session. The spec's own words: *"A check that answers nothing on some readings it can take is not a verification."* |
 | G2 | Activity section default view | W | GAP | no tool, no reason |
 | G3 | Featured section: add work samples | W | EXCLUDED-RULED | same ruling |
 | G4 | Featured: reorder / edit / remove / unpin | W | EXCLUDED-RULED | `/edit/` family ruling, plus `drag_to` |
