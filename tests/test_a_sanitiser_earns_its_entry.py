@@ -124,6 +124,32 @@ ENROLLED: dict[tuple[str, str], str] = {
     # adversarial table below is what checks it, and it was run against this
     # entry before the entry was committed.
     ("_probe_analytics_controls_live.py", "_relation"): TWO_ARG,
+    # ADDED 2026-09-05 by `profile-modals`, for its own file only.
+    #
+    # NO ORDINAL, DELIBERATELY, and it is a correction to the habit of the
+    # rows around it rather than a style choice. This table is append-only and
+    # shared: the block below calls itself "THE NINTH AND TENTH", which was
+    # true when written and stopped being true the moment this row was
+    # inserted above it. An ordinal in a concurrently-appended list is a
+    # number that goes stale without anyone editing it -- the same shape as
+    # the line-number citations struck out of `server.py` this week. The date
+    # and the owner are what a reader actually needs.
+    #
+    # IT IS HERE BECAUSE THE GUARD ABOVE IT BIT ME FIRST, and the sequence is
+    # worth one line: `_probe_profile_modal_presence.py` shipped a DIFFERENT
+    # function wearing this name -- four branches, one of them returning a
+    # claim about member space that the sanctioned version does not make --
+    # and `test_every_relation_definition_is_byte_identical` refused it on the
+    # first run. The body is now byte-identical to the copies that test
+    # governs, so the contract claimed here is one another file already
+    # proves, and the adversarial table below was run against this row before
+    # it was committed.
+    #
+    # I enrol MINE and no one else's. The four rows named above are still
+    # their owners' -- enrolment is a claim about a contract, and vouching for
+    # a function I did not write is the `_redact` mistake this file exists to
+    # stop.
+    ("_probe_profile_modal_presence.py", "_relation"): TWO_ARG,
     # THE NINTH AND TENTH, added 2026-09-05 by the groups-surface wave, which
     # is the successor on this surface and is enrolling ITS OWN TWO and no
     # more. The row above declined to enrol these on the correct principle --
