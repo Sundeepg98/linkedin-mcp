@@ -182,8 +182,10 @@ async def main() -> int:
     print(f"    attach mode, port {config.CDP_PORT}. Report is SHAPED; the "
           "capture is raw and gitignored.")
 
+    page_ref = None
     try:
         async with BROWSER.session() as page:
+            page_ref = page
             print("\n### CONTROL FIRST.")
             control = await _capture(
                 page, "control-darkmode", CONTROL_URL, "/never/<match>"
@@ -194,6 +196,29 @@ async def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
+    # CLOSE THE TAB THIS RUN OPENED. Measured 2026-09-05: in ATTACH mode
+    # ``BROWSER._page()`` calls ``ctx.new_page()`` AND CACHES IT, and
+    # ``session()``'s own ``finally`` only touches an idle timer -- so the tab
+    # OUTLIVES THE PROCESS. One leaked tab per probe run, in the operator's own
+    # Chrome. Across the fleet: 42 scripts call ``session()`` and 5 closed
+    # their page; 27 tabs and 125 CDP targets had accumulated, and
+    # ``connect_over_cdp`` enumerates every target during the handshake, which
+    # is what put every wave's live work on a coin flip against a 15s ceiling.
+    #
+    # THE PAGE, NEVER THE CONTEXT. The context is his signed-in browser
+    # session; closing it closes his window.
+    #
+    # AND NOT IN ``browser.py``, which is a ruling for whoever owns it rather
+    # than a drive-by: ``session()`` is shared by every server tool, and those
+    # legitimately REUSE the cached page across calls, so a per-session close
+    # there would churn tabs for a different caller. A probe is a one-shot and
+    # has nothing to keep.
+    #
+    # In a ``finally``, because the runs that ABORT are exactly the ones that
+    # were leaking.
+    finally:
+        if page_ref is not None and not page_ref.is_closed():
+            await page_ref.close()
 
     print("\n=== CONTROL")
     if control.get("refused") or control.get("authwall"):

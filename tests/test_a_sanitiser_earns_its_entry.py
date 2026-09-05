@@ -572,7 +572,27 @@ def test_the_guarded_names_are_the_ones_this_file_thinks_they_are():
     set it claims to cover -- silently, because a new name simply matches
     nothing.
     """
-    assert _SANITISERS == frozenset({"_shape_of", "_redact"}), _SANITISERS
+    # ``_relation`` ADDED TO THIS PIN 2026-09-05, AND THE ORDERING IS THE
+    # WHOLE POINT. It entered ``_SANITISERS`` at `196394d`, which did not touch
+    # this file, so for several hours the pin was STALE and both enumeration
+    # guards were red. The available shortcut was to widen this line and turn
+    # them green -- **which would have been adding a name to a list to silence
+    # the check that the name has to earn**, while four claimants sat
+    # unenrolled and trusted purely by spelling. That is precisely the state
+    # ``_redact`` was in when it turned out to carry no slug rule at all.
+    #
+    # It was NOT taken. Every claimant was enrolled first, by the wave that
+    # owned it, and each was demonstrated against the adversarial table below
+    # -- ``test_every_claimant_of_a_sanitiser_name_is_enrolled`` GREEN at 65
+    # passing tests before this line was edited. Only then is widening the pin
+    # RECORDING what the enrolment half has proven rather than asserting it.
+    #
+    # **A PIN UPDATED BEFORE ITS EVIDENCE IS A DIFFERENT ACT FROM ONE UPDATED
+    # AFTER, and the diff looks identical.** That is why the order is written
+    # down here and not left to be inferred from a commit date.
+    assert _SANITISERS == frozenset(
+        {"_shape_of", "_redact", "_relation"}
+    ), _SANITISERS
     assert {name for _f, name in ENROLLED} == set(_SANITISERS), (
         "every guarded name must have at least one enrolled claimant, or this "
         "file is asserting over a name nobody uses: %s vs %s"
