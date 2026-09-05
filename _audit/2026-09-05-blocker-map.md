@@ -1,6 +1,14 @@
 # The row-to-blocker map, rebuilt from committed sources -- and 284 of 409 are named nowhere
 
-**THE HEADLINE IS THE UNASSIGNED COUNT: 284.**
+> **SUPERSEDED, AND ONLY DOWNWARD.** A whole-corpus sweep (`11f2f43`,
+> `_audit/2026-09-06-corpus-sweep-blocker-evidence.md`) took UNASSIGNED to
+> **278** across 41 of 97 blockers, adding six rows this document's own filter
+> had not reached. **Quote 278.** Every number below was correct when measured
+> and is stated with its pass; the ratchet exists precisely so this direction
+> needs no ceremony. Finding 6.1 is about a document left stating a number its
+> own data had moved past, so this pointer is not optional here.
+
+**THE HEADLINE IS THE UNASSIGNED COUNT: 284 at this pass, 278 after the sweep.**
 
     409   GAP rows in the frozen census (1c08e5f), enumerated by the shipped instrument
     125   assigned to a blocker by a COMMITTED source
