@@ -25,8 +25,14 @@ allowlist +1 and a WriteSpec each; none of them is closer than it was at 18:47.
 
 ## 1. `CONTACT-INFO-PANEL` -- THE MEASUREMENT
 
-The instrument is `scripts/_probe_contact_info_panel.py`. **It is NOT in this
-commit** -- see section 3 for why, which matters more than the measurement.
+The instrument is `scripts/_probe_contact_info_panel.py`.
+
+> **CORRECTED at 18:58 by the box.** This line read *"It is NOT in this commit"*
+> when committed at `e69c348`, and section 3 argued the case for leaving it out.
+> The guard red was then diagnosed and fixed, and the probe IS committed. The
+> superseded reasoning is kept in section 3 rather than deleted, because the
+> diagnosis is the useful part and a record of a defect may not outlive the
+> defect quietly.
 
 ### It added no address. It pressed one.
 
@@ -157,7 +163,7 @@ wave starts from the design rather than from the surface name.
 
 ---
 
-## 3. THE PROBE IS NOT COMMITTED, AND THAT IS THE MOST USEFUL THING HERE
+## 3. THE GUARD RED, AND IT IS THE SAME MODULE-SCOPE SCAR AS `196394d`
 
 At 18:52:54 the guards were run against the new file:
 
@@ -181,17 +187,48 @@ the BINDING, not the content, and it is correct to -- a check that tried to
 reason about content is the check this repository keeps catching being wrong for
 the inputs it was imagined against.
 
-**I could not fix and verify it inside the window, so it is not committed.** A
-red on committed code is owed to whoever runs the gate; an uncommitted file is
-owed to nobody. The measurement in section 1 is real and is preserved here in
-the only form that survives -- counts, in a tracked document.
+### THE DIAGNOSIS, and it beats the fix
 
-The remedy for whoever picks it up: `report()` and the verdict block print from
-the dict returned by `press_contact_control(page)`, and that name is tainted at
-its binding. The fix is not to launder it through `int()` -- assigning does not
-launder taint, the fixed point follows the binding. It is either a `_SANITISERS`
-entry admitted WITH the test that proves its contract, or a restructure where
-the printed values never pass through a page-derived name at all.
+My first read of this was wrong in the ordinary way: I assumed the flagged site
+printed something page-derived, and started designing a `_SANITISERS` entry.
+Running the guard's own engine over my file instead of reasoning about it named
+the site in one call:
+
+    tainted names: ['after', 'before', 'controls', 'count', 'key', 'value']
+    HIT line 234 print :: print(f"    label {key:<18} {count}")
+
+`key` and `value` are the DICT-COMPREHENSION VARIABLES inside
+`press_contact_control`, bound from a page-derived object. **The taint engine
+tracks names across a MODULE, not per scope**, so binding `key` there tainted
+the name `key` everywhere in the file -- including a loop over
+`LABEL_VOCABULARY` inside `report()`, a function that touches no page at all
+and prints two integers.
+
+That is the identical mechanism `groups-events` root-caused at `196394d`, where
+locals named `before` and `after` tainted three prints tallying shaped control
+names that touched no url. Reading that entry did not prevent me writing the
+same defect; running the guard caught it. **The note is not the control.**
+
+**THE FIX IS A RENAME**, and two things that look like fixes are not:
+
+* `int()` does not launder. `_COUNTING_CALLS` is `frozenset({"len"})` and
+  nothing else, so wrapping a tainted name in `int()` changes nothing.
+* Assigning to a fresh variable does not launder either -- the fixed point
+  follows the binding.
+
+Renamed to `vocab_word` / `vocab_hits` in the comprehension and
+`label_word` / `label_count` in `report()`. The guard now reports this file
+nowhere. **The rename is documented in the file itself with the measurement
+attached**, so the next reader does not undo it as a style preference.
+
+### Verified without spending another live load
+
+The rename touches the print path, and the only end-to-end evidence was from
+BEFORE it. Rather than re-run five page loads on his account, the exact dict the
+live run produced was replayed through the renamed `report()` and reproduces the
+published output line for line. A rename inside a comprehension cannot change a
+count; what needed proving was that the renamed path still prints, and that is
+proven without touching LinkedIn.
 
 ### The other two reds are NOT mine, and I checked rather than assumed
 
@@ -214,11 +251,16 @@ wave's to do from a reading this thin -- name the owner with
   Nothing this wave did touches `readonly._ALLOWED_URL_PATTERNS`, so there is no
   chain step to append.
 * **No write was designed, gated or fired** on any of the five surfaces.
-* **No test was added.** The probe is an instrument and has not been admitted to
-  any register, because an instrument that reds a shipped guard has not earned
-  admission.
-* **The full suite was not run** and no clone was taken. The only pytest run in
-  this wave is the 236-test guard pair quoted above.
+* **No test was added, and the probe was NOT admitted to any instrument
+  register.** It has been shown able to report an absence where one is known,
+  which is the bar for believing this run -- but its label vocabulary is a
+  substring match with a measured overreach (`im`), and an instrument with a
+  known overreach should not be registered for reuse until that is fixed.
+* **The full suite was not run** and no clone was taken. The only pytest runs in
+  this wave are the guard pair quoted above (236 tests at 18:52, 242 at 18:56 as
+  the tree moved under me). **Targeted runs clear SHAPE violations, never
+  ENUMERATION violations** -- if this probe should have been enrolled somewhere
+  by name, no run scoped to these files could have told me.
 * **Nothing was pushed.**
 
 ## 5. COST, RECOMPUTED RATHER THAN RECALLED
