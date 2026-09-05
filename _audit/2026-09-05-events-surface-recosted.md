@@ -343,3 +343,129 @@ selector counted three sections per row. Two instruments agreeing is evidence
 only when their errors are independent. It is now a class-TOKEN match, pinned
 by a test that drives the broken form through the same stub and asserts 54
 comes back.
+
+## 10. THE WIRING, PREPARED AND NOT APPLIED
+
+`events.read_events_home` HAS NO CONSUMER. That is the same hole
+`groups-events` recorded on `shape.membership_row` the same day, and it is
+named here rather than left to be found.
+
+**WHY IT IS NOT WIRED, and the reason is the tree rather than the design.**
+`linkedin_server/server.py` carried another wave's uncommitted lines for
+almost the whole of this wave. It went clean once, for a few minutes, and was
+dirty again before the edit could be gated -- and `git commit --only` does not
+protect a neighbour's LINES inside a path you name. Three waves have had work
+land in a neighbour's commit in this tree this week. A tool is not worth being
+the fourth.
+
+**THE GUARD THAT WOULD HAVE CAUGHT THIS CANNOT SEE IT**, and that is the more
+useful half of this section. `tests/test_reader_reachability.py` refuses a
+reader nobody can call, its allowlist is EMPTY, and `server.py`'s docstring
+cites it as the reason a reader gets registered rather than parked. **It
+parses `dom.py` and nothing else.** Three new package modules appeared on
+2026-09-05 -- `events.py`, `groups.py`, `newsletters.py` -- each created
+because `dom.py` is 460 KB with several waves writing it. Correct decision;
+unnoticed side effect: the one guard against an unwired reader no longer
+covers where new readers are being put.
+
+Measured, not asserted: **two readers outside `dom.py` are unwired right now**
+-- `events.read_events_home` and `newsletters.read_newsletter_subscriptions`.
+Two independent waves reached the same state on the same day, which is what
+makes this a scope gap rather than one wave's oversight.
+
+`tests/test_readers_outside_dom_are_a_pinned_inventory.py` closes it in the
+idiom this repository already uses: a list of readers KNOWN to be unwired,
+each with its reason, failing in BOTH directions -- a new unwired reader fails,
+and wiring one fails until its line is deleted in the same commit. Its
+detector is shown firing on a planted reader, staying silent on a called one,
+and refusing to count a docstring mention as a call.
+
+### The four companion edits, so the next person does not rediscover them
+
+    linkedin_server/server.py      import `events`; add EVENTS_HOME_URL;
+                                   the module docstring counts move
+                                   25 read -> 26 and 37 total -> 38
+    tests/test_server_surface.py   add the name to EXPECTED_TOOLS, and
+                                   `assert len(tools) == 37` becomes 38
+    README.md                      the "registers 37 tools ... ten registered
+                                   tools have no row" paragraph
+    linkedin_server/events.py      EVENTS_HOME_URL, if it is put there rather
+                                   than in config
+
+### The tool body
+
+```python
+@mcp.tool()
+async def linkedin_events_home() -> dict[str, Any]:
+    """The events you are registered for, and what LinkedIn is recommending.
+
+    THE ANSWER TODAY IS ZERO, AND THE WHOLE DESIGN OF THIS TOOL IS ABOUT NOT
+    SAYING THAT WRONGLY. Zero is the same string a broken parser returns, an
+    unhydrated page returns, and a renamed section returns, so
+    ``registered_events`` is an INTEGER ONLY when four independent facts hold
+    and is ``null`` otherwise, with ``verdict`` saying which:
+
+        empty_beside_full_siblings    a real zero. The section is there, it
+                                      holds nothing at all, and a sibling
+                                      section on the same page is full
+        rows_present                  he is registered for that many
+        rows_present_may_be_partial   that many are DRAWN and a paging control
+                                      is present, so the number is a FLOOR
+        body_not_empty                something is in the section that is not
+                                      a row -- a skeleton, an empty state, or
+                                      markup this reader does not know
+        body_unreadable               the section's body could not be found
+        page_unhydrated               every section read empty
+        no_cards                      this is not the events page
+
+    **READ ``verdict`` BEFORE ``registered_events``.** A null there is not a
+    zero and never rounds to one.
+
+    WHY THE SECTION IS WORTH A TOOL AT ALL, since a prior reading concluded
+    LinkedIn has no such surface. It has one. It is drawn on the events root,
+    it is empty for this account, and the difference between "there is no such
+    page" and "the page says zero" is the difference between a capability
+    that can never work and one whose answer will change the day he registers
+    for something.
+
+    WHAT IT WILL NOT TELL YOU, and these are deliberate:
+
+    * **No event titles, dates or organisers.** Every section is reported as a
+      COUNT. The recommendation sections are made of other people's events,
+      and this tool publishes how many rather than which.
+    * **No names.** The self-scoped section is identified by matching its
+      heading against a closed set INSIDE the process; what comes back is the
+      key ``your_events``, a string this package owns. Section headings do
+      leave, but only through the census shaper with their real count, so a
+      heading carrying somebody's name is redacted.
+    * **``rows`` is what is DRAWN, not what exists.** Measured on this page: a
+      recommendation section drew three rows while its own control announced
+      fifty events. That is why the partial verdict exists.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The events root draws no counter,
+    badge or unread indicator of its own, so there is nothing here for a load
+    to spend -- and separately, read feed to events and back, neither nav
+    counter moved. Both stood at zero, which is a weaker statement than it
+    sounds and is why it is written down rather than summarised.
+    """
+    url = EVENTS_HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="events")
+            reading = await events.read_events_home(page)
+            return {
+                "ok": True,
+                # SHAPED, not raw. The same argument
+                # linkedin_search_appearances records at its own site: the
+                # boundary checks the REQUESTED url and never re-checks where
+                # it landed, so publishing an unshaped landing is a hole
+                # whether or not it turns out to be empty.
+                "source_url": shape.census_substitute(landed),
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+```
