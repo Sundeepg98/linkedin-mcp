@@ -16,9 +16,17 @@ constraint is a page nobody has opened.
 PAGE WAS LOADED, AND `LINKEDIN_ENABLE_WRITES` WAS NEVER SET.** Every
 measurement below is against code and against the shipped predicates.
 
-    commits   6b90622   boundary: the job-alerts READ half
-              27598ef   fix(prose): the refusal table cannot take a row
-                        whose surface nobody opened
+    commits   6b90622   boundary: the job-alerts READ half            726 / 2
+              27598ef   the refusal table cannot take a row whose
+                        surface nobody opened                         174 / 0
+              0d66ebe   this document, and the ledger back-pointer     428 / 0
+              93bfa7c   the admitted address is not served             399 / 11
+              e309ebe   the landing narrowed to one word               147 / 1
+
+Insertion counts are from `git show --numstat` per commit, and the three new
+source files were checked against `wc -l` on disk rather than against the
+commit's own total -- a number compared to itself is arithmetic, not
+verification.
 
 ---
 
@@ -384,8 +392,17 @@ about its own queue.
 
     tests/test_the_refusal_table_needs_a_spec.py    8 passed
 
-    scripts/sweep_tracked_for_identity.py         PASS, 0 hits across 380 files
-                                                  (re-run AFTER staging new files)
+    tests/test_writes.py + test_writes_nine.py
+    + test_prose_that_makes_a_claim.py
+    + the four boundary suites above           595 passed in 5m04s
+
+    tests/test_navigation_is_never_derived.py
+    + test_a_correction_is_findable_from_the_claim.py
+                                               279 passed, after the live probe
+
+    scripts/sweep_tracked_for_identity.py      PASS, 0 hits across 383 files
+                                               (re-run AFTER staging new files,
+                                                and again before each commit)
 
 **THIS IS A READING DATED BY THE TREE, NOT BY THE SHA.** pytest imports from
 the working tree, several waves were writing to it, and a targeted run clears
