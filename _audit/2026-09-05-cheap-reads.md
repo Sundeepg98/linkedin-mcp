@@ -268,3 +268,90 @@ and the retry. Nothing was lost -- the failure was loud, `--only` re-took exactl
 the two intended paths, and the diff was re-read before the retry. Worth knowing
 that in a tree this busy a commit is not certain to land, and **the honest check
 after any commit is `git log --oneline -1`, not the absence of an error.**
+
+---
+
+## 9. A POINTER FOR ROW 41, NOT A RULING ON IT
+
+`PREMIUM-JOBS-SURFACES` (3 rows, `allowlist +1`) was not worked on. One thing
+found while reading the census is worth handing to whoever takes it, because it
+could collapse the row count before any address is opened -- and because it is
+the shape the newsletter wave named: *a zero on the right page turns a
+twelve-row blocker into a one-row blocker.*
+
+Census rows `J 25`, `J 29` and `J 30` were retired today under
+`PANEL-NOT-OBSERVED` on an unusually strong measurement, quoted from the census
+rather than re-derived: the control -- *Show match details / Show Premium
+Insights / How you match* -- reproduces 1/1/0 on four committed captures, reads
+0/0/0 on exactly the two the fixture table marks un-hydrated, and reproduced
+1/1/0 LIVE twice across a browser restart. The conclusion recorded there is that
+**the panel is not drawn for this account, rather than unread.**
+
+### Why that is a pointer and not an answer
+
+**It does not transfer to row 41 by itself, and saying so is the point.** The
+retired rows are the match-insight panel on a posting. Row 41's rows are
+different features -- cover-letter assistance, marking a job Top Choice, AI
+job-fit tips -- and a panel not rendering says nothing directly about a separate
+product surface.
+
+**There is also a tension worth someone resolving rather than inheriting.** This
+account is understood to carry a Premium subscription, and a Premium-gated panel
+reading absent is exactly the observation that should not be waved through in
+either direction: it is equally consistent with *not entitled*, *entitled and
+not rendered on these postings*, and *rendered somewhere this reader has not
+looked*. **Three states, one reading, and the reading cannot separate them.**
+
+So the cheap move for row 41 is the one this wave did not have the hours for:
+establish the ENTITLEMENT first, on `/premium/my-premium/` -- **already on the
+allowlist, no boundary change, one page load** -- before costing three feature
+rows. If the entitlement is absent the rows retire for a reason that will still
+be true tomorrow; if it is present, the reader that row 56 wants and the answer
+row 41 needs are the same page load.
+
+**That is the strongest argument this wave found for building the premium
+reader, and it arrived too late in the session to act on.** It is recorded here
+so the next wave does not have to find it again: rows 41 and 56 are cheaper
+together than separately, and neither needs the boundary moved.
+
+---
+
+## 10. SECTION 8 IS CLOSED, WITHIN MINUTES, AND THE LOOP IS THE RESULT
+
+> **CORRECTED BY: this section.** Section 8 reports the gate sweep RED. It was
+> red when taken and is green now. Do not act on section 8's reading; re-run the
+> sweep, which is what section 8 itself tells you to do.
+
+    sweep at the time of section 8    FAIL, 1 hit  / 332 tracked files
+    sweep roughly ten minutes later   PASS, 0 hits / 329 tracked files
+
+The change is not drift and was not guessed at: `git log` on that path names
+`1eae6ff`, *"a real denied term reached a tracked audit doc, redacted at the
+tree"*, and the same wave had already committed `7da74fd`, *"my last commit
+reported a sweep PASS that had already failed, and a push is blocked."*
+
+**Three things are worth separating, because they are three different results.**
+
+1. **The finding was real.** Section 8 declined to say whether the hit was a
+   genuine identifier or a term quoted while being documented, on the standing
+   rule that a red guard proves UNDECLARED and never REAL. That hedge was the
+   right posture and the answer came back on the other side: the fix commit
+   calls it *a real denied term.* **Hedging correctly is not the same as being
+   wrong to hedge** -- the evidence available at the time supported no stronger
+   claim, and a stronger claim would have been the error the lead made twice
+   today.
+2. **The owning wave found it independently and first.** `7da74fd` predates this
+   wave's section 8. Two waves converged on the same push blocker from different
+   directions within minutes, which is the fleet working rather than duplication
+   to be trimmed -- and the one that owned the string is the one that fixed it,
+   which is the routing rule paying out.
+3. **This document has now gone stale three times in one session** -- section 5
+   on the census edit, section 8 on the sweep, and its own provenance note
+   warning that the allowlist count expires in hours. It opened by saying a
+   two-day-old ledger had gone stale under a fast tree. **Every correction in it
+   is that same sentence, aimed at itself, at a shorter interval each time.**
+
+The practical instruction, which has not changed and is now demonstrated twice
+rather than argued: **the sweep that matters is the one run at the gate.**
+Neither of the readings in this document is that reading, and by the time anyone
+reads this, neither is the reading above.
