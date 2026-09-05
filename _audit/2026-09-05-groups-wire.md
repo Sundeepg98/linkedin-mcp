@@ -366,6 +366,35 @@ verified every prediction against `git diff` afterwards. That is the
 suite-reading-is-dated-by-the-tree law applied by an agent to its own work,
 unprompted.
 
+## 8C. THIS TOOL DOES NOT REFUSE ON A MOVED COUNTER, AND ITS SIBLING DOES
+
+`linkedin_newsletter_subscriptions` WITHHOLDS its answer when the invitation
+badge moves. This tool REPORTS the move and keeps the reading. **That is a
+ruling and not an inconsistency**, and it is written where it is made rather
+than only here, because a reader comparing the two will otherwise assume one
+of them is sloppy.
+
+    the newsletter address sits UNDER /mynetwork/  -> a moved invitation badge
+                                                     is a live hypothesis that
+                                                     the load consumed one
+    NEITHER of this tool's counters belongs to /groups/, and this tool takes
+    THREE navigations over tens of seconds on a signed-in account -- during
+    which a notification arriving on its own is the ORDINARY case
+
+Refusing there would manufacture a false alarm out of a background event and
+teach a caller to ignore the field. **A refusal is not automatically the
+stricter choice**: two tools can share a mechanism without sharing a remedy,
+because a remedy is judged against what the payload is for. That law came out
+of two waves disagreeing earlier today and is applied here rather than
+re-derived.
+
+Pinned by `test_the_tool_has_no_refusal_branch_and_that_is_deliberate`
+(the tool body branches on nothing and calls no refusal helper) **with a
+control beside it** -- `test_the_sibling_that_DOES_refuse_still_does` --
+because otherwise the first test would pass equally well if `_badge_refusal`
+had been deleted or if nothing in the package refused any more. The contrast
+is what is being asserted, so both halves are.
+
 ## 9. WHAT IS STILL OWED
 
 * **`recommendations.py` is untouched and still has no consumer.** Its two

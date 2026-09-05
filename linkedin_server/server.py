@@ -1946,6 +1946,25 @@ async def linkedin_group_memberships() -> dict[str, Any]:
     event being bracketed**, so even the strongest verdict speaks for those
     counters and not for this load.
 
+    **WHY A MOVED COUNTER IS REPORTED HERE AND REFUSED BY ITS SIBLING, and
+    the difference is the surface rather than the discipline.**
+    ``linkedin_newsletter_subscriptions`` WITHHOLDS its answer when the
+    invitation badge moves, and it is right to: its address sits UNDER
+    ``/mynetwork/``, so a moved invitation badge is a live hypothesis that
+    the load itself consumed one. **Neither of this tool's counters belongs
+    to ``/groups/`` at all**, and this tool takes THREE navigations over tens
+    of seconds on a signed-in account, during which a notification arriving
+    on its own is the ordinary case. Refusing on that would manufacture a
+    false alarm out of a background event and teach a caller to ignore the
+    field.
+
+    So the payload REPORTS the move, names which counter moved, and keeps the
+    reading. **A refusal is not automatically the stricter choice** -- two
+    tools can share a mechanism without sharing a remedy, because a remedy is
+    judged against what the payload is for. If a groups-specific counter is
+    ever found, this decision should be revisited, and that is why
+    ``cost.counters`` publishes both values rather than a verdict alone.
+
     THIS TOOL WRITES NOTHING. It opens no group, presses nothing on any row,
     and never follows the per-row controls -- their hrefs meet two forbidden
     substrings and are refused before the allowlist is consulted.

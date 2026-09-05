@@ -413,3 +413,62 @@ def test_the_reader_attaches_the_zero_interpretation_to_every_reading():
     body = ast.unparse(node)
     assert "interpret_zero" in body
     assert "zero_reading" in body
+
+
+# ---------------------------------------------------------------------------
+# 6. THE TOOL DOES NOT WITHHOLD ITS READING, AND THAT IS A RULING
+# ---------------------------------------------------------------------------
+
+def test_the_tool_has_no_refusal_branch_and_that_is_deliberate():
+    """IT REPORTS A MOVED COUNTER RATHER THAN REFUSING ON ONE.
+
+    ``linkedin_newsletter_subscriptions`` withholds its answer when the
+    invitation badge moves, via ``_badge_refusal``, and is right to: its
+    address sits under ``/mynetwork/``, so a moved invitation badge is a live
+    hypothesis that the load consumed one.
+
+    **NEITHER OF THIS TOOL'S COUNTERS BELONGS TO ``/groups/``**, and it takes
+    three navigations over tens of seconds on a signed-in account, during
+    which a notification arriving on its own is the ORDINARY case. Refusing
+    there would manufacture a false alarm from a background event.
+
+    So this is a RULING, pinned rather than left to a future reader's
+    instinct that a refusal is always the stricter choice: the tool body
+    branches on nothing and calls no refusal helper. Two tools can share a
+    mechanism without sharing a remedy.
+    """
+    node = _function(_tree("server.py"), TOOL)
+    ifs = [n for n in ast.walk(node) if isinstance(n, ast.If)]
+    assert ifs == [], "the groups tool grew a conditional; is it withholding?"
+    called = {
+        n.func.id
+        for n in ast.walk(node)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+    }
+    assert "_badge_refusal" not in called
+
+
+def test_the_sibling_that_DOES_refuse_still_does():
+    """THE CONTROL FOR THE TEST ABOVE.
+
+    Without this, "the groups tool calls no refusal helper" could be true
+    because the helper stopped existing, or because nothing in the package
+    refuses any more. It asserts the contrast is real: the newsletter tool
+    still calls ``_badge_refusal``, so the two tools genuinely differ.
+    """
+    node = _function(_tree("server.py"), "linkedin_newsletter_subscriptions")
+    assert node is not None
+    called = {
+        n.func.id
+        for n in ast.walk(node)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+    }
+    assert "_badge_refusal" in called
+
+
+def test_the_reason_for_the_asymmetry_is_written_where_it_is_made():
+    """A ruling that lives only in an audit file is one nobody will read."""
+    node = _function(_tree("server.py"), TOOL)
+    doc = ast.get_docstring(node) or ""
+    assert "newsletter" in doc.lower()
+    assert "mynetwork" in doc.lower()
