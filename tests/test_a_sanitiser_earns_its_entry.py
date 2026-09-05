@@ -280,6 +280,28 @@ ENROLLED: dict[tuple[str, str], str] = {
     # the strength of its name and carried no slug rule at all. That row
     # belongs to whoever moves the name, and the red is the queue working.
     ("_probe_compose_file_inputs.py", "_relation"): TWO_ARG,
+    # THE LAST UNENROLLED CLAIMANT, enrolled 2026-09-05 by the successor to the
+    # wave that wrote it -- which is the only reason this row is not somebody
+    # else's to add. `scripts/_probe_premium_entitlement.py` is `cheap-reads`'
+    # tracked probe and this is `cheap-reads-build`, its direct successor,
+    # carrying its board.
+    #
+    # WHY IT WAS MISSED, and it is the same shape as `196394d`: that commit
+    # admitted `_relation` to `_SANITISERS` while touching five files, none of
+    # them this one, so every claimant born afterwards was trusted BY NAME by a
+    # guard that had never measured it. This claimant was born after it. The
+    # enumeration half of this file is precisely what catches that, and it
+    # cannot be reached by any run scoped to the probe's own file -- it fires
+    # on `somebody added a caller`, a condition that does not exist until the
+    # caller does.
+    #
+    # THE BODY WAS CHECKED BEFORE THE ROW WAS ADDED, not after: it is
+    # byte-identical to the copies this table already exercises, established
+    # by extracting it programmatically and comparing rather than by reading
+    # it. The eighth row records a wave that shipped a DIFFERENT body under
+    # this name and leaked its input on the first run, so `it is the same
+    # function` is a claim that has been wrong here before.
+    ("_probe_premium_entitlement.py", "_relation"): TWO_ARG,
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this
