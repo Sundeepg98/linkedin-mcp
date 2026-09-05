@@ -2003,14 +2003,23 @@ async def test_react_to_item_surfaces_the_labels_its_own_verify_read_saw(
     recorded verbatim in ``_audit/_scratch/_reaction-label-report.md``.
     """
     spec = spec_for_action("react_to_item")
+    item_url = spec.url_template.format(target=REACTED_ITEM)
 
-    # THE GRANT IS MINTED OFF THE FEED, NOT THE PERMALINK. state_from is
-    # "feed_item" and _SURFACE_READS points that at FEED_URL -- the
-    # permalink itself is not opened until perform() clicks.
-    preview_nav = FixtureNavigator({writes.FEED_URL: _REACTION_OFF_PAGE})
+    # THE GRANT IS MINTED OFF THE PERMALINK, SINCE 2026-09-05. It was minted
+    # off the FEED until then -- ``state_from`` was "feed_item" and
+    # ``_SURFACE_READS`` pointed that at FEED_URL, a leftover from the days
+    # when this action refused and had no url to aim at -- so the direction
+    # the operator confirmed was read over whatever controls the feed drew,
+    # all of them other people's, while the click pressed the one control on
+    # this item. Three of them, in the reading that caught it. This line
+    # froze FEED_URL and asserted that arrangement; it now freezes the page
+    # the click lands on. See
+    # ``tests/test_react_direction_is_read_where_it_acts.py``.
+    preview_nav = FixtureNavigator({item_url: _REACTION_OFF_PAGE})
     block = await preview(
         spec, target=REACTED_ITEM, navigator=preview_nav, page=browser_page
     )
+    assert preview_nav.gotos == [item_url], preview_nav.gotos
     grant = consume(
         block["to_confirm"], action="react_to_item", target=REACTED_ITEM
     )
@@ -2020,7 +2029,6 @@ async def test_react_to_item_surfaces_the_labels_its_own_verify_read_saw(
     # valid to click at all. The second is _verify_after's fresh render
     # after the click -- it needs the ON label for verified_state to become
     # "reacted", which is what makes the read this test is FOR run at all.
-    item_url = spec.url_template.format(target=REACTED_ITEM)
     perform_nav = FixtureNavigator(
         {item_url: [_REACTION_OFF_PAGE, _REACTION_ON_PAGE]}
     )

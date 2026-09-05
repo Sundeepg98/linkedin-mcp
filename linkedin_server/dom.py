@@ -4232,9 +4232,14 @@ async def read_self_owned_editor_values(
 # * C3 -- that one author is the PAGE OWNER, compared against the page's own
 #   ``h1``.
 #
-# C2 IS THE SAME RULE ``writes._read_feed_item`` ALREADY APPLIES to reaction
+# C2 IS THE SAME RULE ``writes._read_item_permalink`` APPLIES to reaction
 # state -- "a mixed page cannot settle a direction for any single item", and
-# picking one would be picking by position. It is also what makes the pairing
+# picking one would be picking by position. THE POINTER MOVED ON 2026-09-05
+# and the rule got STRICTER on the way: it lived in ``writes._read_feed_item``
+# and asked for UNANIMITY across every control the FEED drew, which is the
+# best a page of several items allows. The direction is now read on the item's
+# own permalink, where the rule is EXACTLY ONE CONTROL -- unanimity among one.
+# It is also what makes the pairing
 # in C4 safe: IF EVERY OVERFLOW CONTROL ON THE PAGE NAMES ONE AUTHOR, NO
 # PAIRING CAN ATTRIBUTE AN ITEM TO THE WRONG PERSON. The pairing rule below
 # still has to hold, and it is separately tested, but its failure mode under

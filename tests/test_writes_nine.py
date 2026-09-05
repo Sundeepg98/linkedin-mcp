@@ -92,6 +92,7 @@ from linkedin_server.writes import (
 )
 from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
     JOB,
+    REACTED_ITEM,
     FixtureNavigator,
     _bare_grant,
     browser_page,
@@ -1416,11 +1417,37 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # NOT in it must be one this file has named, so a new unrouted surface
     # fails here instead of being absorbed.
     assert state_froms & set(writes._SURFACE_READS) == set(writes._SURFACE_READS)
-    assert state_froms - set(writes._SURFACE_READS) == {"profile_topcard"}
-    # AND THE BOUNDARY CLAIM HOLDS FOR THE BRANCH SURFACE TOO. It is asserted
-    # separately because it does not come with a reader to check: ``observe``
-    # loads PROFILE_URL directly for it.
+    # TWO BRANCH SURFACES SINCE 2026-09-05, and the second arrived exactly the
+    # way this assertion was written to make it arrive: it failed here rather
+    # than being absorbed. ``react_to_item`` moved off ``feed_item`` -- which
+    # loads /feed/ -- onto its own item's permalink, because the direction it
+    # printed was being read over other people's posts while the click pressed
+    # the target's own control.
+    assert state_froms - set(writes._SURFACE_READS) == {
+        "profile_topcard",
+        "item_permalink",
+    }
+    # AND THE BOUNDARY CLAIM HOLDS FOR THE BRANCH SURFACES TOO. They are
+    # asserted separately because neither comes with a reader in the table:
+    # ``observe`` loads PROFILE_URL directly for one, and formats the spec's
+    # own ``url_template`` for the other.
     assert readonly.is_read_url(writes.PROFILE_URL)
+    # THE PERMALINK IS PER-TARGET, which is why it is a branch and not a table
+    # entry -- there is no constant url to put in one. The claim being checked
+    # is the same claim: the fix opened NO new surface. This address has been
+    # on the read allowlist since 2026-08-31 and this action has been LOADING
+    # it at click time since 2026-09-01; all that changed is that the preview
+    # loads it too. The write door is untouched -- ``assert_write_url`` still
+    # re-derives the identical string from the same template.
+    permalink = spec_for_action("react_to_item").url_template.format(
+        target=REACTED_ITEM
+    )
+    assert readonly.is_read_url(permalink), permalink
+    # THE CONTROL, because "is_read_url returned True" proves nothing unless it
+    # can return False on this same family. A query string is the shape the
+    # anchored pattern refuses, and it is the shape the FEED's own anchors are
+    # unread on -- see the note in ``writes._read_feed_item``.
+    assert readonly.is_read_url(permalink + "?utm_source=share") is False
     for state_from, (url, _surface, reader) in writes._SURFACE_READS.items():
         assert readonly.is_read_url(url), (state_from, url)
         assert callable(reader), state_from

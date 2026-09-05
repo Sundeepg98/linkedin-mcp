@@ -5990,13 +5990,29 @@ async def linkedin_react_to_item(
     your profile, and on the permalink itself. The control states its own
     state, so the direction is not inferred from anything around it.
 
+    AND SINCE 2026-09-05 THE GATE READS IT ON THE ITEM'S OWN PERMALINK, which
+    is the page the click lands on. It read ``/feed/`` from the day this
+    shipped until then -- a leftover from the days it refused, when the read
+    existed only to put a fresh measurement inside a refusal -- so the
+    direction printed in the confirm block came off whatever controls the feed
+    had drawn, ALL OF THEM ON OTHER PEOPLE'S POSTS, while the click pressed
+    the one control on your item. Measured 2026-09-05: three such controls
+    read, and the gate offered ``no reaction -> reacted`` for an item that
+    already carried a reaction. The block was IDENTICAL whether the target was
+    reacted or not.
+
     THE VERIFICATION IS REAL AND IT IS NARROW. After the click the permalink
     is re-rendered and the control re-read: present and no longer wearing the
-    off label means it moved. It CANNOT say what it moved to, because the
-    ON-state label has still never been observed. That is a different question
-    from whether it moved, and it is named rather than blurred -- a check that
-    answers "whether" honestly is not the same as one that could not pass,
-    which is what ``apply_job`` carried until 2026-08-31.
+    off label means it moved. Its VERDICT does not say what it moved to,
+    because ``reacted`` is the only destination this action declares -- and
+    that is a different question from whether it moved, named rather than
+    blurred. This paragraph said the reason was that the ON-state label had
+    never been observed; that stopped being true on 2026-09-04, when it was
+    measured as ``Reaction button state: Like``, and the names the control
+    wears after the click are now reported beside the verdict as
+    ``newly_observed_reaction_labels``. A check that answers "whether"
+    honestly is not the same as one that could not pass, which is what
+    ``apply_job`` carried until 2026-08-31.
 
     WHAT IT COSTS. A reaction NOTIFIES THE AUTHOR and can surface in your own
     network's feed. Taking it back later -- if that is possible, which is

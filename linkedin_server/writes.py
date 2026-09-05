@@ -1200,39 +1200,84 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         from_state="no_reaction",
         to_state="reacted",
         target_kind="item_urn",
-        state_from="feed_item",
+        # THE PAGE THE CLICK LANDS ON, since 2026-09-05. It was "feed_item"
+        # -- which loads /feed/ -- from 2026-08-30, when this action REFUSED
+        # and the read existed only to put a fresh measurement inside a
+        # refusal. It shipped on 2026-09-01 with that unchanged, so for four
+        # days the confirm block's direction came off up to eight controls on
+        # OTHER PEOPLE'S posts while the click pressed the one control on this
+        # item's permalink. Measured 2026-09-05: the gate offered
+        # 'no_reaction -> reacted' for an item that already carried a reaction.
+        state_from="item_permalink",
         direction_source=(
-            "The CONTROL'S OWN ACCESSIBLE NAME, which on this surface carries "
-            "the toggle state: aria-label='Reaction button state: no "
-            "reaction'. MEASURED 2026-08-30 across eleven controls -- 3 on "
-            "/feed/ and 8 on his profile -- every one of them in the OFF "
-            "state. That is the same convention as the follow control and the "
-            "unfollow row, and it is the strongest direction source of the "
-            "seven: the state and the button are the same object. The gate "
-            "reads it live and refuses unless EVERY rendered control agrees, "
-            "because a mixed page cannot say which item a direction belongs "
-            "to."
+            "The CONTROL'S OWN ACCESSIBLE NAME, ON THIS ITEM'S OWN PERMALINK "
+            "-- the page this action acts on and the control it presses. "
+            "LinkedIn writes the toggle state into that name: "
+            "aria-label='Reaction button state: no reaction' is the OFF "
+            "state, MEASURED 2026-08-30 across eleven controls (3 on /feed/, "
+            "8 on his profile) and on the permalink itself; 'Reaction button "
+            "state: Like' is the ON state, MEASURED 2026-09-04 on his profile "
+            "rail, 1 of 8. That is the same convention as the follow control "
+            "and the unfollow row, and it is the strongest direction source "
+            "in the design: the state and the button are the same object. "
+            "THE GATE REQUIRES EXACTLY ONE CONTROL and reads its label live. "
+            "The permalink drew ONE on 2026-08-31, where the same census read "
+            "3 on the feed and 8 on his profile -- so more than one means "
+            "this is not that render and pressing either would be picking by "
+            "position; zero means the page had not drawn the item, which is "
+            "UNKNOWN and never 'no reaction'. UNTIL 2026-09-05 THIS WAS READ "
+            "ON /feed/ INSTEAD, "
+            "over controls belonging to other people's posts -- a direction "
+            "for the wrong page, on a toggle."
+        ),
+        # ADDED 2026-09-05 WITH THE DIRECTION FIX, because the fix is what
+        # makes this refusal REACHABLE. While the direction came off /feed/,
+        # a reacted target read 'no_reaction' and the wrong-state arm was
+        # effectively dead; reading the target's own control is what turns it
+        # into the sentence the operator will actually meet. It was inheriting
+        # the default, which is a TOGGLE sentence -- right in kind here, since
+        # this is one -- illustrated entirely with SAVING A JOB. A refusal
+        # about a reaction that explains itself with an example from another
+        # action is the same species of misdescription the field's own
+        # docstring names on apply_job.
+        wrong_state_note=(
+            "A TOGGLE, so performing this from the wrong state performs its "
+            "OPPOSITE: confirming a reaction on an item that already carries "
+            "one would TAKE IT BACK. That is not a harmless no-op and it is "
+            "not what was asked for -- and it is worse than the same mistake "
+            "on a save, because the reaction it would remove is one that has "
+            "already notified the author. There is no un-react action in this "
+            "server, so it is refused here rather than offered as an inverse."
         ),
         reversibility="STILL-UNKNOWN whether a reaction can be taken back here",
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and the distinction is worth keeping sharp because "
-            "this one is TEMPTING to call reversible. A control whose "
-            "accessible name reports a STATE is almost certainly a toggle, "
-            "and almost certainly is not a measurement. THE ON-STATE LABEL "
-            "HAS NEVER BEEN SEEN -- all eleven controls read 'no reaction', "
-            "because nothing on either surface had been reacted to. This is "
-            "the identical position unsave_job has been in since August: the "
-            "OFF label is measured, the ON label is not, and the missing half "
-            "is not guessed. 'Reaction button state: like' and 'Reaction "
-            "button state: liked' are both plausible and neither has been "
-            "observed."
+            "STILL NOT MEASURED, AND THE REASON CHANGED ON 2026-09-04. This "
+            "field said 'THE ON-STATE LABEL HAS NEVER BEEN SEEN' from "
+            "2026-08-30 until 2026-09-05, and by then it was false: the label "
+            "was measured on 2026-09-04 off his own profile rail -- 8 "
+            "controls, 7 wearing the OFF name and 1 wearing 'Reaction button "
+            "state: Like'. So the toggle does rename itself, exactly as this "
+            "field guessed it almost certainly would, and 'almost certainly' "
+            "has become a reading. WHAT IS STILL UNMEASURED IS THE UNDO "
+            "ITSELF: nobody has pressed a control wearing the ON name and "
+            "read what it becomes, so whether LinkedIn takes a reaction back "
+            "on this surface is observed nowhere. A label is an ANCHOR, not "
+            "an outcome -- knowing where to aim is not evidence that firing "
+            "there undoes anything -- and the class stays STILL-UNKNOWN on "
+            "that ground rather than on the one it used to stand on."
         ),
         reversible_by=(
-            "UNKNOWN, and not this server in any case: with the ON label "
-            "unmeasured there is no selector for the inverse, so nothing here "
-            "could aim an un-react even if LinkedIn offers one."
+            "UNKNOWN, and not this server. THE SELECTOR OBJECTION IS GONE: "
+            "this field said 'with the ON label unmeasured there is no "
+            "selector for the inverse' until 2026-09-05, and the ON name is "
+            "now measured, so an inverse IS aimable. What stands in its place "
+            "is smaller and firmer -- NO INVERSE ACTION EXISTS HERE. There is "
+            "no un-react spec, it is in no table, and PERFORMABLE is "
+            "hand-written, so nothing in this server can be pointed at that "
+            "control however well it can now be found. Building one is a "
+            "decision, not a consequence of the measurement."
         ),
         residue=(
             "A reaction NOTIFIES THE AUTHOR and can surface in his own "
@@ -1251,20 +1296,36 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "applies a default Like immediately or opens that picker is "
             "unestablished. If it opens a picker, this gate REPORTS THAT and "
             "chooses nothing from it -- a gate that cannot say what it is "
-            "about to express under his name does not get to guess. And the "
-            "ON label has still never been seen, so the check after the click "
-            "can say the control MOVED and cannot say what it moved to."
+            "about to express under his name does not get to guess. "
+            "AND THE ON LABEL HAS NOW BEEN SEEN, which this sentence denied "
+            "until 2026-09-05: it was measured 2026-09-04 as 'Reaction button "
+            "state: Like', 1 of 8 controls on his own profile rail. The check "
+            "after the click still says only that the control MOVED, because "
+            "'reacted' is the only to_state this spec declares -- but the "
+            "names it wears on that re-read are reported beside the verdict "
+            "as newly_observed_reaction_labels, so what it moved TO is "
+            "readable even where the verdict does not assert it. THE TENSION "
+            "WITH THE PARAGRAPH ABOVE IS LEFT STANDING RATHER THAN RESOLVED: "
+            "that same reading bears on WHICH reaction this toggle applies, "
+            "and retiring a disclosure the operator ruled is his call and not "
+            "this file's."
         ),
         reversibility_procedure=(
-            "React to one item and READ THE LABEL THE CONTROL CHANGES INTO. "
-            "That single string settles both halves at once -- it is the "
-            "anchor for the inverse action and the evidence that an inverse "
-            "exists -- and it can only be taken immediately after a real "
-            "reaction on a real account, exactly as the missing half of "
-            "shape.SAVE_LABELS can only be taken after a real save. Note the "
-            "asymmetry with save: an unreacted item is his to experiment on "
-            "only if it is HIS OWN item, and 8 of the 11 measured controls "
-            "are on his own posts."
+            "PRESS A CONTROL WEARING THE ON NAME AND READ WHAT IT BECOMES. "
+            "That is the whole of what is left, and it is a WRITE on one of "
+            "his own posts, so it needs his ruling and not a wave's decision. "
+            "THIS FIELD USED TO SAY SOMETHING ELSE, and the difference is the "
+            "correction. It said: 'React to one item and READ THE LABEL THE "
+            "CONTROL CHANGES INTO. That single string settles both halves at "
+            "once -- it is the anchor for the inverse action and the evidence "
+            "that an inverse exists.' THE PROCEDURE WAS PERFORMED on "
+            "2026-09-03 and the label was read on 2026-09-04 -- 'Reaction "
+            "button state: Like'. It settled ONE half. A label is where to "
+            "aim; it is not evidence that firing there gives anything back, "
+            "and the field promising both was the same over-reach it was "
+            "written to prevent. Note also what the fire left behind: a "
+            "reaction now sits on one of his items that this server has no "
+            "action to remove."
         ),
     ),
     "linkedin_update_profile_field": WriteSpec(
@@ -3274,75 +3335,153 @@ async def _read_feed_composer(
 async def _read_feed_item(
     page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
-    """The comment and reaction controls on the feed, and the states worn.
+    """The comment affordance on the feed, and whether it rendered at all.
 
-    ONE READER, TWO VERDICTS, and they are computed differently on purpose.
-    A comment is ADDED, so the question is only whether the affordance is
-    there. A reaction is a TOGGLE whose state is written into its own
-    accessible name, so the question is whether every rendered control agrees
-    -- a page carrying a mix of states cannot say which item a direction
-    belongs to, and picking one would be picking by position.
+    ONE READER, ONE VERDICT SINCE 2026-09-05, and losing the second one was a
+    FIX rather than a tidy-up. It also computed ``react_to_item``'s toggle
+    direction, over every reaction control the FEED drew -- and the feed's
+    controls belong to other people's posts, while the action presses the one
+    control on ``/feed/update/<urn>/``. Measured that morning: a preview aimed
+    at one of his own items -- one that already carried a reaction, confirmed
+    independently by a census of that item's own permalink -- read ``controls
+    3, off_state 3, permalinks 0`` off the feed and offered ``no_reaction ->
+    reacted``. Every one of those three belonged to somebody else's post. The
+    direction now comes from :func:`_read_item_permalink`, on the page the
+    click lands on, and this reader answers only the question a comment asks.
+
+    WHY IT WAS EVER HERE. ``react_to_item`` REFUSED when this was written: the
+    read existed to give a refusal a fresh measurement and there was no
+    ``url_template`` to aim at. Commit ``d74178f`` gave it one on 2026-09-01
+    and did not touch ``state_from`` -- the diff contains no such line. A
+    leftover, not a boundary and not a page-load budget.
+
+    A COMMENT IS ADDED, NEVER FLIPPED, which is why this verdict is a presence
+    check and not a direction. A wrong reading here does not mean the opposite
+    would happen; it means nothing on the page says where the comment goes.
+    """
+    reading = await dom.read_reaction_surface(page)
+    facts = dict(reading)
+    comments = int(reading.get("comment_controls") or 0)
+    permalinks = int(reading.get("permalinks") or 0)
+    # THIS SENTENCE CALLED THE PERMALINK FAMILY FORBIDDEN UNTIL 2026-09-05, on
+    # a server that had been opening it since 2026-08-31. It is the same drift
+    # tests/test_prose_that_makes_a_claim.py's third guard exists for -- and
+    # that guard did not catch it, because its corpus is REFUSAL texts and
+    # this is a preview's ``state_why``.
+    #
+    # WHAT REPLACES IT SAYS WHICH HALF IS TRUE. The BARE permalink is
+    # allowlisted by an anchored pattern that accepts a urn and NO QUERY
+    # STRING. Whether the hrefs counted here are bare is NOT KNOWN from this
+    # reading: ``dom._count_links_with`` counts anchors by fragment and never
+    # returns one, so nothing here can say whether a key on this page would
+    # survive the pattern.
+    tail = (
+        f" {permalinks} item permalink(s) were counted on the page; that "
+        "address family is /feed/update/<urn>/, which the read boundary "
+        "ADMITS in its bare form -- an anchored pattern taking a urn and no "
+        "query string, since 2026-08-31. Whether THESE hrefs are bare is "
+        "unread: this counts anchors by fragment and never opens one, so a "
+        "key exists on the page and its followability is unmeasured."
+    )
+
+    if spec.action != "comment_on_item":
+        # A GUARD, not a fall-through. One action reads this surface; anything
+        # else arriving here is a spec pointing at a page whose reader has no
+        # verdict for it, and ``_direction`` refuses on ``unknown`` rather
+        # than letting a gate render on a state nobody computed.
+        return (
+            facts,
+            UNKNOWN,
+            f"{spec.action!r} declares state_from 'feed_item', and this "
+            "reader answers exactly one question -- whether the feed drew a "
+            "comment affordance. It has no verdict for this action, and a "
+            "gate whose state was never computed must not render." + tail,
+        )
+
+    if comments < 1:
+        return (
+            facts,
+            UNKNOWN,
+            "no control named "
+            f"{dom.COMMENT_CONTROL_NAME!r} rendered. The feed hydrates "
+            "after it lands and this does not scroll, so absence here is "
+            "unknown rather than zero." + tail,
+        )
+    return (
+        facts,
+        "comment_control_present",
+        f"{comments} comment control(s) and "
+        f"{reading.get('editors', 0)} contenteditable node(s). The "
+        "composer opens in place when the control is pressed, so a zero "
+        "for editors is the expected reading and is also why the comment "
+        "box itself has never been observed." + tail,
+    )
+
+
+async def _read_item_permalink(
+    page: Any, spec: WriteSpec, *, target: str = ""
+) -> tuple[dict[str, Any], str, str]:
+    """The ONE reaction control on one item's own permalink, and its state.
+
+    THE PAGE THE CLICK LANDS ON. That is the whole of why this exists apart
+    from :func:`_read_feed_item`: the direction printed in the confirm block
+    and the control the action presses are now the same object, so
+    ``same_page_as_action`` is True and the two cannot drift.
+
+    IT MIRRORS ``_live_control``'s REACT ARM DELIBERATELY, condition for
+    condition, and that pairing is asserted in
+    ``tests/test_react_direction_is_read_where_it_acts.py`` rather than left
+    as a resemblance. ``from_state`` is compared against a live reading TWICE
+    -- here at preview and there at click -- and until 2026-09-05 those two
+    readings came off DIFFERENT PAGES, so agreement between them was a
+    property of nothing. A preview that mints on a state the click will refuse
+    is a gate that spends the operator's confirmation to learn what it could
+    have read first.
+
+    EXACTLY ONE CONTROL, and the count is the aim. The permalink was measured
+    2026-08-31 drawing ONE, where the same census read 3 on the feed and 8 on
+    his profile; more than one means this is not that render and pressing
+    either would be picking by position, which is the objection that kept this
+    action refusing until the permalink was admitted. Zero is a page that had
+    not arrived -- UNKNOWN, never 'no reaction'.
     """
     reading = await dom.read_reaction_surface(page)
     facts = dict(reading)
     controls = int(reading.get("controls") or 0)
     off_state = int(reading.get("off_state") or 0)
-    comments = int(reading.get("comment_controls") or 0)
-    permalinks = int(reading.get("permalinks") or 0)
-    tail = (
-        f" {permalinks} item permalink(s) were counted on the page; that "
-        "address family is /feed/update/<urn>/, which the read boundary "
-        "forbids, so a key exists on the page and cannot be followed."
-    )
 
-    if spec.action == "comment_on_item":
-        if comments < 1:
-            return (
-                facts,
-                UNKNOWN,
-                "no control named "
-                f"{dom.COMMENT_CONTROL_NAME!r} rendered. The feed hydrates "
-                "after it lands and this does not scroll, so absence here is "
-                "unknown rather than zero." + tail,
-            )
-        return (
-            facts,
-            "comment_control_present",
-            f"{comments} comment control(s) and "
-            f"{reading.get('editors', 0)} contenteditable node(s). The "
-            "composer opens in place when the control is pressed, so a zero "
-            "for editors is the expected reading and is also why the comment "
-            "box itself has never been observed." + tail,
-        )
-
-    if controls < 1:
+    if controls != 1:
         return (
             facts,
             UNKNOWN,
-            "no reaction control rendered. Absence on a first render is "
-            "unknown, not zero." + tail,
+            f"{controls} reaction control(s) rendered on this permalink and "
+            "exactly one is the only shape this gate can act on. Zero means "
+            "the page had not drawn the item -- an absent control is UNKNOWN "
+            "and never 'no reaction' -- and more than one means this is not "
+            "the single-item render it was measured to be, so pressing either "
+            f"would be picking by position. The labels found were "
+            f"{reading.get('labels')}.",
         )
-    if off_state != controls:
+    if off_state != 1:
         return (
             facts,
-            UNKNOWN,
-            f"{controls} reaction control(s) rendered and only {off_state} of "
-            f"them read {dom.REACTION_OFF_LABEL!r}. The rest are wearing a "
-            "state this reader has never seen, and the labels found were "
-            f"{reading.get('labels')}. A mixed page cannot settle a direction "
-            "for any single item, and an unrecognised label is refused rather "
-            "than interpreted -- that unseen string is exactly the ON-state "
-            "label this action is waiting for." + tail,
+            "reacted",
+            "the one reaction control on this permalink is NOT wearing "
+            f"{dom.REACTION_OFF_LABEL!r}, so this item ALREADY CARRIES A "
+            f"REACTION. The labels found were {reading.get('labels')}. "
+            "LinkedIn writes the toggle state into the accessible name, so "
+            "this is the control stating its own state rather than an "
+            "inference from anything around it.",
         )
     return (
         facts,
         "no_reaction",
-        f"all {controls} reaction control(s) on the page read "
-        f"{dom.REACTION_OFF_LABEL!r}. LinkedIn writes the toggle state into "
-        "the accessible name, so this is read off the very control a reaction "
-        "would move -- the strongest direction source in this design. It "
-        "settles the STATE and not the TARGET: several items are on the page "
-        "and none of them can be selected from here." + tail,
+        "the one reaction control on this permalink reads "
+        f"{dom.REACTION_OFF_LABEL!r}, read off the very control the click "
+        "would land on, on the page the click would land on. LinkedIn writes "
+        "the toggle state into this name, so this is the control stating its "
+        "own state -- the strongest direction source in this design, and now "
+        "taken from the target rather than from the feed's neighbours.",
     )
 
 
@@ -3878,13 +4017,62 @@ async def observe(
             same_page_as_action=False,
         )
 
+    if spec.state_from == "item_permalink":
+        # ONE load, OF THE PAGE THE CLICK LANDS ON, and that is the whole
+        # point of the branch existing. ``react_to_item`` read its direction
+        # off ``/feed/`` until 2026-09-05 -- controls belonging to other
+        # people's posts, standing in for the one control on the target; three
+        # of them in the reading that caught it, eight in the 2026-08-30
+        # census of his profile -- and the two surfaces disagreed the first
+        # time anybody compared them. See :func:`_read_item_permalink`.
+        #
+        # IT IS A BRANCH RATHER THAN A ``_SURFACE_READS`` ENTRY because that
+        # table holds CONSTANT urls and this address carries the target's own
+        # urn. Adding it there would mean inventing a url for a table that has
+        # nowhere to put one -- the same reason ``posting_page``,
+        # ``apply_control`` and ``saved_list`` are branches.
+        #
+        # THE URL GOES THROUGH THE READ DOOR like every other preview load:
+        # ``_load`` calls ``readonly.assert_read_url``, which holds the
+        # anchored ``/feed/update/urn:li:<type>:<digits>/`` pattern admitted
+        # 2026-08-31. No new permission was needed for this fix, and the write
+        # door is untouched -- ``assert_write_url`` still re-derives this same
+        # url from the spec at click time.
+        url = str(spec.url_template or "").format(target=target)
+        landed = await _load(navigator, page, url, surface="feed item")
+        facts, state, why = await _read_item_permalink(page, spec, target=target)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
     if spec.state_from in _SURFACE_READS:
-        # THE SEVEN. One load each, of a page ALREADY on the read allowlist,
-        # and the state is whatever the page says right now -- which is the
-        # difference between a refusal that looked and a refusal that
-        # remembers. Every one of them then fails to mint, because none holds
-        # a url_template; what the operator gets back is the warning block
-        # with a fresh measurement inside it.
+        # ONE LOAD EACH, of a page ALREADY on the read allowlist, and the
+        # state is whatever the page says right now -- which is the difference
+        # between a refusal that looked and a refusal that remembers.
+        #
+        # THIS COMMENT SAID "THE SEVEN ... none holds a url_template" UNTIL
+        # 2026-09-05, and by then it was false of two of them: ``react_to_item``
+        # and ``comment_on_item`` both hold one, both are in ``PERFORMABLE``,
+        # and both therefore MINT. The sentence was written when every member
+        # of this family refused, and it is the reason ``react_to_item``'s
+        # ``state_from`` was never migrated when it shipped -- the routing
+        # table went on describing a population that had stopped existing.
+        #
+        # ``comment_on_item`` STILL READS ``/feed/`` HERE, deliberately left
+        # alone by the 2026-09-05 fix and recorded rather than fixed in
+        # passing. Its verdict is a PRESENCE check on an affordance, not a
+        # toggle direction, and its own ``wrong_state_note`` already says a
+        # wrong reading there means "nothing on the page tells this gate where
+        # the comment would go" rather than "the opposite would happen". It is
+        # the same surface mismatch and a different consequence, and it wants
+        # its own decision rather than a ride on this one.
         url, surface, reader = _SURFACE_READS[spec.state_from]
         landed = await _load(navigator, page, url, surface=surface)
         # THE TARGET REACHES THE READER, added 2026-08-31, and it closes a gap
@@ -4879,9 +5067,12 @@ def anchor_label_for(
         # the accessible name, which makes this the most self-describing
         # anchor in the package: the control says which state it is in.
         #
-        # THE ON LABEL HAS STILL NEVER BEEN SEEN, and that gap is carried in
-        # `residue` rather than here, because it is about what the gate can
-        # say AFTERWARDS and not about what it may press.
+        # THE ON LABEL WAS MEASURED 2026-09-04 -- 'Reaction button state:
+        # Like' -- and this comment said it had never been seen until
+        # 2026-09-05. It changes nothing HERE: the anchor is the state this
+        # action is valid FROM, so what it may press is still the OFF control
+        # and only that. What the ON name buys is an aimable inverse, which no
+        # spec in this package declares; see `reversible_by`.
         return dom.REACTION_OFF_LABEL
 
     if spec.action == "update_setting":
@@ -5402,12 +5593,17 @@ _VERIFIED_FROM: dict[str, str] = {
         "to pass this."
     ),
     "react_to_item": (
-        "THE SAME PAGE, RELOADED. There is only one surface carrying this "
-        "item's reaction state, so this is a fresh RENDER from LinkedIn "
-        "rather than a second source. What it reads is the control's own "
-        "accessible name, which LinkedIn writes the toggle state into. It "
-        "says the reaction MOVED and does not say what to -- the ON label has "
-        "never been observed."
+        "THE SAME PAGE, RELOADED -- and since 2026-09-05 the same page the "
+        "PREVIEW read too, which it was not before: the direction used to "
+        "come off /feed/. There is only one surface carrying this item's "
+        "reaction state, so this is a fresh RENDER from LinkedIn rather than "
+        "a second source. What it reads is the control's own accessible name, "
+        "which LinkedIn writes the toggle state into. THE VERDICT says the "
+        "reaction MOVED and does not say what to, because 'reacted' is the "
+        "only to_state this spec declares -- not because the ON label is "
+        "unknown, which this sentence claimed until 2026-09-05 and which was "
+        "false from 2026-09-04. The names the control wears are reported "
+        "beside the verdict as newly_observed_reaction_labels."
     ),
     "update_profile_field": (
         "THE SAME PAGE, and there is no other -- the editor is the only place "
