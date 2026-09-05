@@ -103,3 +103,120 @@ def test_the_keys_are_the_ones_tools_actually_accept():
 
     # And a company SLUG is not a company id, so it must not match.
     assert shape.notification_handles(f"{BASE}/company/some-company-name") == {}
+
+
+# ---------------------------------------------------------------------------
+# THROUGH THE CALLER. Everything above this line calls the extractor DIRECTLY.
+# ---------------------------------------------------------------------------
+#
+# That is what made this defect survive: six test functions and eight
+# parametrised cases, all green, none of them routed through
+# ``shape.parse_notification`` -- the only thing in this repository that calls
+# ``notification_handles`` at all. The extractor was correct and unreachable at
+# the same instant, and no test here could tell those apart, because the input
+# every one of them supplied was a url the caller never actually passes.
+#
+# The mechanism, measured 2026-09-05: ``parse_notification`` handed the
+# extractor ``absolute_url(href)``, and ``absolute_url`` deletes the query
+# string. ``search_keywords`` lives ONLY in the query string. So it was
+# extracted and discarded on every notification this server has ever shaped,
+# while ``company_id`` -- which lives in the PATH -- kept working. One of two
+# keys firing is why the surface never looked broken.
+#
+# The reason it costs real signal: the keyword is what a job alert FIRED ON,
+# which is the field that separates a relevant alert from noise, and it is the
+# argument ``linkedin_search_jobs`` takes.
+
+#: A job alert exactly as the tracked notifications fixture draws one: the
+#: keyword first, then LinkedIn's own filter and origin parameters.
+ALERT_HREF = (
+    "/jobs/search-results/?keywords=Senior+Software+Engineer"
+    "&f_TPR=a1787213463-&origin=SEMANTIC_SEARCH_JOB_ALERT"
+)
+
+#: The same alert with a content urn in its query. 2 of the 7 query strings on
+#: the tracked fixture carry one of these, which is what ``absolute_url`` is
+#: really protecting against -- it is an identity control, not tidiness. The
+#: urn is the one already used above for the feed-post case, so this widens
+#: nothing: it is a value this file has already established is invented.
+ALERT_HREF_WITH_URN = (
+    ALERT_HREF + "&highlightedUpdateUrn=urn%3Ali%3Aactivity%3A7400000000000000001"
+)
+
+
+def _alert_row(href: str) -> dict:
+    """One notification card, shaped the way the harvest hands them over."""
+    return {
+        "text": "Your job alert for Senior Software Engineer: 12 new jobs",
+        "time": "2h",
+        "href": href,
+        "unread": True,
+    }
+
+
+def test_a_job_alerts_keyword_reaches_the_caller_that_publishes_it():
+    """THE DEFECT, pinned end to end rather than at the extractor.
+
+    Reverting ``parse_notification`` to pass ``link`` instead of ``href``
+    turns this red and leaves every test above it green.
+    """
+    row = shape.parse_notification(_alert_row(ALERT_HREF))
+    assert row["search_keywords"] == "Senior Software Engineer"
+
+
+def test_the_published_link_still_has_its_query_deleted():
+    """THE PROTECTION, pinned so it cannot be traded away for the fix above.
+
+    The cheap way to make the previous test pass is to stop stripping the
+    query. That would publish the tracking parameters and, on a feed
+    notification, a content urn. This is the test that refuses that fix.
+    """
+    row = shape.parse_notification(_alert_row(ALERT_HREF))
+    assert row["link"] == f"{BASE}/jobs/search-results/"
+    assert "?" not in row["link"]
+
+
+def test_only_the_keyword_ever_escapes_the_query_string():
+    """Nothing else in the query may appear anywhere in the emitted row.
+
+    Derived from the href rather than typed as literals, so the check cannot
+    drift away from the input it is about, and so no new opaque value has to
+    be invented to write it.
+    """
+    row = shape.parse_notification(_alert_row(ALERT_HREF_WITH_URN))
+    emitted = " ".join(str(value) for value in row.values())
+    query = ALERT_HREF_WITH_URN.split("?", 1)[1]
+    leaked = [
+        part.split("=", 1)[0]
+        for part in query.split("&")
+        if "=" in part
+        and not part.startswith("keywords=")
+        and part.split("=", 1)[1]
+        and part.split("=", 1)[1] in emitted
+    ]
+    assert leaked == []
+    # And the control: the keyword DID come through, so an empty ``leaked``
+    # means "nothing else escaped" rather than "the row came back blank".
+    assert row["search_keywords"] == "Senior Software Engineer"
+
+
+def test_a_company_id_is_read_from_the_path_and_never_from_the_query():
+    """The hole the fix would otherwise have opened, closed and pinned.
+
+    Now that this function is handed unstripped urls, a ``/company/<digits>``
+    inside a redirect or tracking parameter would start being reported as the
+    company a notification is about. It is read from the path only.
+    """
+    in_the_query = (
+        f"{BASE}/jobs/search-results/?keywords=Backend+Engineer"
+        "&redirectUrl=/company/5417062"
+    )
+    assert shape.notification_handles(in_the_query) == {
+        "search_keywords": "Backend Engineer"
+    }
+    # The control, and it is the whole reading: the SAME digits in the PATH
+    # are still read, so the test above measures where the id was found and
+    # not whether the extractor works at all.
+    assert shape.notification_handles(f"{BASE}/company/5417062") == {
+        "company_id": "5417062"
+    }

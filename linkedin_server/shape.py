@@ -1007,7 +1007,8 @@ def parse_notification(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         # The one fact reading the page destroys, so it is reported as of the
         # moment it was read. See the tool docstring on the cleared badge.
         out["unread"] = bool(record["unread"])
-    link = absolute_url(record.get("href", ""))
+    href = str(record.get("href") or "")
+    link = absolute_url(href)
     if link:
         out["link"] = link
         # TURN THE URL INTO SOMETHING THE CALLER CAN ACT ON.
@@ -1024,7 +1025,23 @@ def parse_notification(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         # costs context, but a missing field costs a whole ROUND TRIP. A
         # keyword a caller can pass straight to linkedin_search_jobs is worth
         # more than the dozen tokens it occupies.
-        out.update(notification_handles(link))
+        #
+        # EXTRACT FROM ``href``, PUBLISH ``link``. They are different strings
+        # and the difference is the whole defect this line once carried: a job
+        # alert's keywords live ONLY in the query string, ``absolute_url``
+        # deletes the query string, and this call used to be handed its
+        # output -- so ``search_keywords`` was unreachable by construction,
+        # while ``company_id`` (which lives in the PATH) always worked. One of
+        # two keys firing is why nothing looked broken for so long.
+        #
+        # The query is still deleted from everything this function PUBLISHES,
+        # and that matters rather than being tidiness: measured on the tracked
+        # notifications fixture, 2 of its 7 query strings carry a content urn
+        # and a 15+ digit tracking run. Reading a key out of a string is not
+        # the same act as emitting the string, and only the second was ever
+        # the risk. ``absolute_url`` is unchanged and ``link`` is byte for
+        # byte what it was.
+        out.update(notification_handles(href))
     return out
 
 
@@ -1049,6 +1066,21 @@ def notification_handles(link: str) -> dict[str, Any]:
     output shape. Absent when the link carries neither, which is most of them
     -- a feed post or a member profile has no key this server can use, and
     saying nothing is the honest answer rather than inventing one.
+
+    PASS THE RAW HREF, not a url that has been through ``absolute_url``. One
+    of these two keys lives in the QUERY STRING and the other in the PATH, so
+    a caller that strips the query can only ever get half of this function's
+    contract, silently -- which is exactly what ``parse_notification`` did
+    until 2026-09-05.
+
+    THE TWO KEYS ARE READ FROM DIFFERENT HALVES OF THE URL ON PURPOSE. A
+    company id is taken from the PATH ONLY. That is not decoration: this
+    function is now handed unstripped urls, and without the split a
+    ``/company/<digits>`` sitting inside a redirect or tracking PARAMETER
+    would start being reported as the company this notification is about. The
+    scoping is strictly narrower than reading the whole string, and identical
+    to the old behaviour for any url that has no query -- so it closes that
+    hole without moving anything that previously worked.
     """
     out: dict[str, Any] = {}
     if not link:
@@ -1059,7 +1091,7 @@ def notification_handles(link: str) -> dict[str, Any]:
         cleaned = _WS.sub(" ", raw).strip()
         if cleaned:
             out["search_keywords"] = trim(cleaned, 120)
-    company = _COMPANY_LINK.search(link)
+    company = _COMPANY_LINK.search(link.split("?", 1)[0])
     if company:
         out["company_id"] = company.group(1)
     return out

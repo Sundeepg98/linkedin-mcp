@@ -80,7 +80,8 @@ def main() -> int:
         "href": ALERT_LINK,
         "unread": True,
     }
-    print(f"  parse_notification -> {shape.parse_notification(record)}")
+    shaped_row = shape.parse_notification(record) or {}
+    print(f"  parse_notification -> {shaped_row}")
 
     print("\nHOW MUCH OF THIS IS ON DISK ALREADY")
     if FIXTURE.exists():
@@ -92,9 +93,20 @@ def main() -> int:
     else:
         print(f"  {FIXTURE} is absent -- this half of the reading is not taken.")
 
-    lost = bool(raw_alert) and not out_alert
+    # THE VERDICT IS ABOUT THE CALLER, NOT ABOUT THE COMPOSITION.
+    #
+    # It used to be computed from ``notification_handles(absolute_url(link))``
+    # -- the two functions composed by hand here -- which was the same thing
+    # ``parse_notification`` did, so the two agreed and the reading was sound.
+    # THAT IS NO LONGER TRUE. The fix (2026-09-05) left ``absolute_url``
+    # stripping exactly as before and changed WHICH STRING the caller hands
+    # over, so the hand-composed reading still comes back empty while the
+    # surface works. A verdict computed that way would now be a fact about
+    # this script rather than about the server -- the failure this repository
+    # keeps finding, arriving inside the instrument that found it.
+    lost = "search_keywords" not in shaped_row
     kept = bool(out_company)
-    print("\nVERDICT")
+    print("\nVERDICT -- measured through parse_notification, which is what ships")
     print(f"  keyword survives shaping : {not lost}")
     print(f"  company id survives      : {kept}")
     if lost and kept:
@@ -102,6 +114,17 @@ def main() -> int:
         print("  key that lives in the query can never be emitted and the key")
         print("  that lives in the path always can. One of two keys still")
         print("  fires, which is why nothing looks broken.")
+    else:
+        print("\n  RESOLVED 2026-09-05. The composition read above still comes")
+        print("  back empty, and that is now the CORRECT answer rather than the")
+        print("  defect: absolute_url still deletes the query, and the caller")
+        print("  no longer asks it to. Extracting a key from a string and")
+        print("  publishing that string are different acts, and only the second")
+        print("  was ever the risk -- 2 of the 7 query strings on the tracked")
+        print("  fixture carry a content urn, which is what the strip protects.")
+        print("  The pinned form of this reading is now")
+        print("  tests/test_notification_handles.py, whose cases run through")
+        print("  parse_notification rather than calling the extractor directly.")
     return 0
 
 
