@@ -396,10 +396,23 @@ Said plainly, because the wave was 45 minutes and six blockers is not a
   W row on a surface with no admitted address, and I ran out of clock before
   asking whether the comment-gate work in `writes.py` already reaches it.
 
+* **The fifth mention row was never located** -- and that stopped mattering: the
+  map does not exist and section 2b closes the question from the rows instead.
+* **ONE CHILD PROCESS, read-only**, sent after the row-to-blocker map with an
+  explicit instruction not to edit, stage or commit anything. It wrote one file
+  outside the repo and reported the map absent plus the three row ids that
+  refuted my own verdict. **I reviewed its output before adopting any of it**:
+  its CONFIRMED rows for three blockers matched what I had already derived
+  independently, and I checked `C87`-`C89` against the census myself rather than
+  taking them on its word. Its ARTICLE-SURFACE row set is an arithmetic
+  reconstruction it labelled as such, and **I did not adopt it** -- section 5
+  still carries no row ids.
+
 Verified by the box, not estimated:
 
     Sat, Sep  5, 2026  6:46:51 PM     wave start
     Sat, Sep  5, 2026  6:55:30 PM     back-pointer written, guards re-run
+    Sat, Sep  5, 2026  7:11:11 PM     the self-correction in 2b committed
 
 **AND THE CLOCK LAW FIRED ON ME, mid-wave, which is worth one line because it
 is the third instance today.** At the point the box read **18:54** I had
