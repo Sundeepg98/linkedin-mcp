@@ -529,3 +529,105 @@ Start ~19:34 by the box, freeze written at 19:58 by the box, deadline 20:30 by
 the box. Every timestamp in this document was taken with `date` rather than
 from a sense of elapsed time -- the standing rule after an agent's own clock
 ran roughly two hours fast and truncated a wave that had two hours left.
+
+---
+
+## 10. TWO REDS THE WAVE CAUSED OR INHERITED, BOTH CLEARED, AND ONE SLICE DECLINED
+
+Written after section 9, which is therefore stale by exactly the amount this
+section describes. The regress is not worth another amendment; the totals at
+the foot of this section are current and the earlier tables are correct about
+the rows they list.
+
+### The row-56 slice shipped a reader with no consumer, and a guard said so
+
+    tests/test_readers_outside_dom_are_a_pinned_inventory.py
+    newly unwired (add with a reason, or wire it): ['premium.read_premium_surface']
+
+**The slice's own report said 254 passed and it did not run this guard.** That
+is not a criticism of the slice -- it ran the two guards its brief named -- it
+is a fact about a brief that named two and not three. The guard is an
+ENUMERATION guard: it fires on *somebody added a reader*, a condition that does
+not exist until the reader does, and it is invisible to any run scoped to the
+new file. **A slice cannot be briefed to run the guard that its own existence
+turns red unless whoever wrote the brief already knew.**
+
+Cleared at `9ed2b62` by giving the reason the guard asks for rather than
+widening the inventory silently. The row is worth reading for one thing beyond
+itself: **this is the THIRD reader in one day to arrive with no consumer and
+the SECOND to name the last-hour crowding of `server.py` as the cause.** One
+instance is a wave running out of clock. Three is a shape, and the shape is
+that a reader is cheap and a tool is not -- wiring one moves pinned
+tool-inventory counts, an enumeration class no targeted run can clear.
+
+### The last unenrolled sanitiser claimant was the predecessor's, and it is now enrolled
+
+    tests/test_a_sanitiser_earns_its_entry.py
+    unenrolled: [('_probe_premium_entitlement.py', '_relation')]
+
+Red since `196394d`, which admitted `_relation` to `_SANITISERS` while touching
+five files and none of them the enrolment table -- so every claimant born after
+it was trusted BY NAME by a guard that had never measured it. Four of the five
+were enrolled by their owners through the day. This is the fifth, it belongs to
+`cheap-reads`, and this wave is its direct successor carrying its board, which
+is the only reason the row was not somebody else's to add.
+
+**The body was checked BEFORE the row was added, not after** -- byte-identical
+to the copies the table already exercises, established by extracting it
+programmatically and comparing rather than by reading it. The table's eighth
+row records a wave that shipped a DIFFERENT body under this name and leaked its
+input on the first run, so *it is the same function* is a claim that has been
+wrong here before.
+
+Cleared at `9993170`. **336 passed** across the sanitiser table, both taint
+guards and the unwired-reader inventory.
+
+### A promotion attempted and REVERTED, which is a result rather than a failure
+
+The live instrument in section 5 lives in the gitignored scratch tree, so its
+evidence does not survive a clone. Promoting it to `scripts/` was attempted and
+reverted within minutes, because the page-text guard measured it handing
+LinkedIn's own text to a print at **7 sites** -- and that guard's failure
+message says explicitly not to clear it by adding a line.
+
+    scripts/_probe_two_new_reads.py   0 -> 7
+
+Reverting cost nothing that was not already recorded: the numbers it produced
+are in section 5 of this tracked document, and the gap is NAMED in section 7
+rather than hidden. **A gitignored instrument with its output written down is a
+worse artifact than a tracked one and a better one than a tracked instrument
+that turns a guard red for everybody who runs next.**
+
+### And a commissioned slice was declined rather than shipped
+
+A second probe was commissioned as a tracked instrument, arrived, and was moved
+to the scratch tree instead of committed. It would have been the sixth
+unenrolled claimant, and its own report flagged that it lands in a fleet-wide
+tab-leak ratchet **pinned at 39 and already measuring 41 before its file
+existed** -- a ratchet that only ever shrinks, being pushed the wrong way by
+several waves at once using the template shape their briefs mandate.
+
+That last number is not this wave's to fix and is passed on rather than
+absorbed: **the sanctioned probe template and the tab-leak ratchet disagree,
+and the template is winning by being written into every brief.** Whoever owns
+that ratchet should know it is being broken by the house pattern, not by
+carelessness.
+
+### Totals, recomputed at 20:03 by the box
+
+    7 commits   1855 insertions   9 deletions   8 distinct files
+
+| commit | + | - |
+|---|---:|---:|
+| `db0dc40` | 493 | 2 |
+| `2097401` | 783 | 0 |
+| `0c077a9` | 231 | 0 |
+| `73c46e9` | 247 | 7 |
+| `e868f5d` | 60 | 0 |
+| `9ed2b62` | 19 | 0 |
+| `9993170` | 22 | 0 |
+
+All nine deletions are still this wave's own lines, named in section 9. **AI
+attribution: 0, per commit, across all seven.** Nothing pushed -- the push is
+blocked on an unrelated matter recorded in the freeze file, and this wave did
+not touch it.
