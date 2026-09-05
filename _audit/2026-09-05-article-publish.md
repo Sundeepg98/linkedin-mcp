@@ -368,3 +368,98 @@ in test docstrings and amendments, and there is no index from one to the other.
 That is the same shape as the day's other findings and it is cheap to say: **a
 ruling that is not attached to the row it decides gets re-derived by whoever
 opens the row next**, and re-derivation is where a wave spends its hour.
+
+## 10. THE REGISTER ENTRY, AND WHY IT IS HERE INSTEAD OF IN THE REGISTER
+
+This is written as section 14 of `_audit/INSTRUMENTS.md` and is NOT in that
+file. I appended it, staged it, and the staged diff carried **118 lines of
+which 49 were another wave's section 12.11** -- appended in the seconds
+between my read of the file and my `git add`. Git reported ONE hunk: my
+block and theirs are contiguous, so there is no staging flag that separates
+them, which is the register's own recorded law about append-only shared
+files.
+
+**I backed my 69 lines out and left their 49 byte-identical** (`git diff`
+reports 49 insertions, 0 deletions, so nothing of theirs was altered), and
+moved my entry here -- the freeze file's own first recommendation: *append
+to your own file and let the lead merge*. Whoever holds `INSTRUMENTS.md`
+can lift the block below verbatim; it is written as a register section and
+needs no editing. **Its number will be wrong** -- another wave was mid-write
+and 14 may be taken by the time it lands.
+
+This is the sixth instance today of the staging window, and the first I
+know of where it was caught BEFORE the commit rather than after. What
+caught it was not `--numstat`: that read `118 0` and looked like mine.
+**It was grepping the added lines for headings**, which took one command
+and named a section number I had never typed.
+
+---
+
+## 14. The article-publish wave, 2026-09-05
+
+Two instruments, and the second is a NEW INSTANCE OF SECTION 3'S OWN LAW found
+in the most expensive place available.
+
+### 14.1 `tests/test_no_write_tool_names_a_third_party.py`
+
+Parses `server.py` with `ast`, enumerates every `linkedin_*` function, and
+refuses a parameter whose VALUE would be another member carried into published
+content -- `mention(s)`, `tag(s)`, `collaborator(s)`, `invitee(s)`, `celebrant`,
+`honoree`. Shown failing under a planted `mentions` parameter; a `tag` case
+stays green under that mutation, which is the discrimination proof. Carries a
+control pinning >= 30 tools parsed, because a rename of the `linkedin_` prefix
+would otherwise leave every case passing over an empty corpus.
+
+**THE PATTERN WORTH REUSING: EXEMPT BY NAME, NEVER BY SILENCE.**
+`audience`/`visibility` are ADMISSIBLE under Amendment A9's closed-vocabulary
+ruling and are listed in a `RULED_ADMISSIBLE` constant with A9 cited, plus a
+third test asserting the two sets stay disjoint. A guard that forbade them by
+omission would read, six weeks from now, as forbidding the very parameter a
+written ruling permits -- and nobody would be able to tell the omission from a
+decision.
+
+### 14.2 `tests/test_the_audience_reader_arrives_with_its_contract.py`
+
+`server._composer_audience_is_readable()` lifts `linkedin_publish_post`'s
+refusal by FEATURE DETECTION -- `callable(getattr(dom, _COMPOSER_AUDIENCE_READER,
+None))`. The reasoning beside it is sound: keying on the capability beats a
+boolean that must be flipped by hand and goes stale.
+
+**THE PROPERTY NOBODY WROTE DOWN: the act that re-arms an IRREVERSIBLE broadcast
+under his own name is DEFINING A FUNCTION WITH THAT NAME.** A stub sketching the
+interface satisfies `callable()` and opens the gate.
+
+**That is section 3 of this register, arriving where it costs the most.**
+`_redact` entered `_SANITISERS` on the strength of its name and carried no slug
+rule at all; `_relation` was later admitted WITH the test that proves its
+contract. This writes the same requirement BEFORE the reader exists, which is
+the only order in which it is free.
+
+The guard: if `dom.read_post_composer_audience` exists, a contract test for it
+must exist too. Two controls -- the exact keyed string, and that the live
+refusal still returns `audience_unread` -- so a rename fails there with a reason
+instead of leaving the guard watching an attribute nothing consults.
+
+**SHOWN FAILING IN-SUITE RATHER THAN IN A SIDE SCRIPT**, by monkeypatching the
+name onto `dom` and asserting the guard turns red. Two details worth copying:
+the demo **branches** and states which branch it took, so it cannot silently
+invert into a vacuous pass once a contract test lands; and the main assertion
+**skips** today with its reason rather than passing, because a test that passes
+because its subject is absent is the worst green available.
+
+### 14.3 The two laws this wave paid for
+
+**A RULING NOT ATTACHED TO THE ROW IT DECIDES GETS RE-DERIVED.** Four of this
+wave's six blockers were answerable from documents already in the tree -- the
+operator's typing ruling living in a TEST DOCSTRING, A9's closed-vocabulary
+decision, the ledger's own merge rule, and an existing EXCLUDED-RULED note.
+Nobody had joined any of them to the rows they settle. The census describes
+capabilities and the rulings live in docstrings and amendments, with no index
+between them.
+
+**A MARKER GUARD CAN ONLY SEE A STAGED FILE.** The correction machinery's corpus
+is `git ls-files -- _audit`. Guards run BEFORE staging were green on a corpus
+that did not contain this wave's document; run after staging, they caught a
+malformed `CORRECTS:`/`CORRECTED BY:` pair (the reason wrapped onto a second
+line) that reading would not have caught. Same shape as the ~16:57 sweep scar,
+on a different guard.
