@@ -1,4 +1,4 @@
-"""The tool surface: thirty-seven tools, twelve of which write to LinkedIn.
+"""The tool surface: thirty-eight tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -68,8 +68,8 @@ pinned in ``test_server_surface.py`` by
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-FIVE read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Twenty-five plus twelve plus zero is thirty-seven.
+needs: TWENTY-SIX read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Twenty-six plus twelve plus zero is thirty-eight.
 
 THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
 the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
@@ -219,7 +219,15 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from fastmcp import FastMCP
 
-from linkedin_server import buildinfo, cdp_bridge, dom, preflight, shape, writes
+from linkedin_server import (
+    buildinfo,
+    cdp_bridge,
+    dom,
+    events,
+    preflight,
+    shape,
+    writes,
+)
 from linkedin_server.auth import (
     assert_not_authwall,
     check_auth,
@@ -1430,6 +1438,82 @@ async def linkedin_search_appearances() -> dict[str, Any]:
             # holds -- neither of which is a third party's.
             return {
                 "ok": True,
+                "source_url": shape.census_substitute(landed),
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_events_home() -> dict[str, Any]:
+    """The events you are registered for, and what LinkedIn is recommending.
+
+    THE ANSWER TODAY IS ZERO, AND THE WHOLE DESIGN OF THIS TOOL IS ABOUT NOT
+    SAYING THAT WRONGLY. Zero is the same string a broken parser returns, an
+    unhydrated page returns, and a renamed section returns, so
+    ``registered_events`` is an INTEGER ONLY when four independent facts hold
+    and is ``null`` otherwise, with ``verdict`` saying which:
+
+        empty_beside_full_siblings    a real zero. The section is there, it
+                                      holds nothing at all, and a sibling
+                                      section on the same page is full
+        rows_present                  he is registered for that many
+        rows_present_may_be_partial   that many are DRAWN and a paging control
+                                      is present, so the number is a FLOOR
+        body_not_empty                something is in the section that is not
+                                      a row -- a skeleton, an empty state, or
+                                      markup this reader does not know
+        body_unreadable               the section's body could not be found
+        page_unhydrated               every section read empty
+        no_cards                      this is not the events page
+
+    **READ ``verdict`` BEFORE ``registered_events``.** A null there is not a
+    zero and never rounds to one.
+
+    WHY THE SECTION IS WORTH A TOOL AT ALL, since a prior reading concluded
+    LinkedIn has no such surface. It has one. It is drawn on the events root,
+    it is empty for this account, and the difference between "there is no such
+    page" and "the page says zero" is the difference between a capability
+    that can never work and one whose answer will change the day he registers
+    for something.
+
+    WHAT IT WILL NOT TELL YOU, and these are deliberate:
+
+    * **No event titles, dates or organisers.** Every section is reported as a
+      COUNT. The recommendation sections are made of other people's events,
+      and this tool publishes how many rather than which.
+    * **No names.** The self-scoped section is identified by matching its
+      heading against a closed vocabulary INSIDE the process; what comes
+      back is the key ``your_events``, a string this package owns. Section
+      headings do
+      leave, but only through the census shaper with their real count, so a
+      heading carrying somebody's name is redacted.
+    * **``rows`` is what is DRAWN, not what exists.** Measured on this page: a
+      recommendation section drew three rows while its own control announced
+      fifty events. That is why the partial verdict exists.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The events root draws no counter,
+    badge or unread indicator of its own, so there is nothing here for a load
+    to spend -- and separately, read feed to events and back, neither nav
+    counter moved. Both stood at zero, which is a weaker statement than it
+    sounds and is why it is written down rather than summarised.
+    """
+    url = events.EVENTS_HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="events")
+            reading = await events.read_events_home(page)
+            return {
+                "ok": True,
+                # SHAPED, not raw. The same argument
+                # linkedin_search_appearances records at its own site: the
+                # boundary checks the REQUESTED url and never re-checks where
+                # it landed, so publishing an unshaped landing is a hole
+                # whether or not it turns out to be empty.
                 "source_url": shape.census_substitute(landed),
                 "redirected": landed.rstrip("/") != url.rstrip("/"),
                 "pages_loaded": 1,

@@ -26,10 +26,13 @@ be reached passes every test it has* -- applied one level up, to the guard.
 ## WHY A PINNED INVENTORY AND NOT A FLAT REFUSAL
 
 A flat "every reader must be wired" is the right end state and cannot be
-committed today: two readers are unwired at this moment, both for stated
-reasons, and a red suite is not a way to communicate that. So this takes the
-shape this repository already uses for exactly this situation -- a list of
-sites KNOWN to be in a state, explicitly not a list cleared to be in it:
+committed today: a reader is unwired at this moment, for a stated reason, and a
+red suite is not a way to communicate that. **It was TWO when this file
+landed** -- ``events.read_events_home`` was the other, and it came off the list
+in the same commit that wired it, which is the mechanism working rather than a
+document being tidied. So this takes the shape this repository already uses for
+exactly this situation -- a list of sites KNOWN to be in a state, explicitly
+not a list cleared to be in it:
 
 * an entry that is no longer unwired FAILS. Wiring a reader means deleting its
   line here, in the same commit, so the fix and the bookkeeping cannot drift;
@@ -57,15 +60,6 @@ COVERED_ELSEWHERE = {"dom.py"}
 #: unwired** -- a list of readers KNOWN to be, so the next one arrives in a
 #: diff.
 KNOWN_UNWIRED: dict[str, str] = {
-    "events.read_events_home": (
-        "Built 2026-09-05 against a live page read four times with controls "
-        "passing at both ends. NOT WIRED because linkedin_server/server.py "
-        "carried another wave's uncommitted lines for the whole of that wave, "
-        "and committing a tool would have carried them too. The tool body and "
-        "the four companion edits are written out in section 10 of "
-        "_audit/2026-09-05-events-surface-recosted.md, ready to apply the "
-        "first time that file is clean."
-    ),
     "newsletters.read_newsletter_subscriptions": (
         "Built 2026-09-05 by the newsletter wave. Not this wave's to wire, "
         "and named here rather than left invisible -- it is the reader that "

@@ -93,7 +93,13 @@ import re
 from typing import Any, Optional
 
 from linkedin_server import shape
+from linkedin_server.config import BASE_URL
 from linkedin_server.dom import ELEMENT_READ_TIMEOUT_MS
+
+#: The one address this module reads, and the ONLY events address on the
+#: read allowlist. Admitted 2026-09-05, root only: ``/events/<id>/`` is
+#: refused and so is every sub-route under it.
+EVENTS_HOME_URL = f"{BASE_URL}/events/"
 
 #: The three sibling cards at the events root. A class CONTAINMENT match, and
 #: the choice is deliberate: the three carry different structural classes

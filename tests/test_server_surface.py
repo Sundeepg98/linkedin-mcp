@@ -166,6 +166,11 @@ EXPECTED_TOOLS = {
     # SEARCH. The only tool on this surface whose page nobody here had
     # opened when it shipped, and its docstring says so.
     "linkedin_search_appearances",
+    # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
+    # write was added. It is the only tool here whose whole answer can be
+    # ZERO, and its reader returns that integer only when four
+    # independent facts hold -- see linkedin_server/events.py.
+    "linkedin_events_home",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
@@ -379,7 +384,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtyseven_tools(tools):
+async def test_the_surface_is_exactly_the_thirtyeight_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -475,7 +480,13 @@ async def test_the_surface_is_exactly_the_thirtyseven_tools(tools):
     # added, which is again the half that matters. A tool whose whole body
     # is a refusal is still a tool, and registering it is what makes the
     # refusal reachable.
-    assert len(tools) == 37
+    # THIRTY-EIGHT FROM 2026-09-05: linkedin_events_home, a READ. No write
+    # was added, which is again the half that matters. It was registered
+    # rather than left as an unwired reader because that is what
+    # test_reader_reachability refuses -- and because a sibling guard,
+    # tests/test_readers_outside_dom_are_a_pinned_inventory.py, would fail
+    # if its line were left on the unwired list after this wiring landed.
+    assert len(tools) == 38
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -566,7 +577,12 @@ async def test_the_surface_is_exactly_the_thirtyseven_tools(tools):
     # write side is byte-identical across the change -- which is the half
     # of this split that matters. A read arriving must not be able to move
     # the write column, and this is where that would show.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 25
+    # TWENTY-SIX FROM 2026-09-05: linkedin_events_home is a READ, and the
+    # write side is byte-identical across it too. It is the read whose whole
+    # answer can be the integer ZERO, which is the one number a read can get
+    # wrong in a way that looks like success -- see linkedin_server/events.py
+    # for the four facts its zero requires.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 26
 
 
 def test_the_read_that_was_nearly_named_a_write():
