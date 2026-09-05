@@ -280,3 +280,154 @@ Every one of 2, 5 and 6 was surfaced by a subordinate or a control rather than b
 my own review. That remains the mechanism that works, and it is worth more than
 the rulings it overturns: **write rulings so they are cheap to refute, with the
 evidence attached.**
+
+---
+
+# ADDENDUM, written after the wave round closed
+
+Sections 1-12 were written at 17:13. The round's most useful findings landed
+after that, and three of them correct this document's own author.
+
+## 13. THREE MORE LEAD RULINGS THAT WERE WRONG
+
+**I "granted" a sanction granted the day before.** I opened the round by naming
+`FILE-UPLOAD-UNSANCTIONED` the highest-ratio item and sanctioning
+`set_input_files`. It had been in `SANCTIONED_MUTATIONS` since `615a5c4` on
+2026-09-04. I planned from a ledger frozen 2026-09-03 and never asked whether
+the world had moved. **The wave refused the order** -- re-adding would have
+tripped the count check that exists so a second grant cannot hide inside a set
+comparison. Verify-before-obey is the rule, not insubordination.
+
+**I said "8 of the 16 sit on composers already captured", as though captured
+meant cheap.** Measured: the post composer draws ZERO file inputs (the input is
+built behind an `Add media` click) and the message composer's two are both
+nameless. **Zero of the 16 are reachable.** A capture existing is not a capture
+supporting anything.
+
+**I relayed "no registered-events surface exists" as SETTLED.** The wave found an
+`h2` reading `Your events` inside the very capture that finding came from. The
+prior pass was not wrong -- it assigned anchors to headings, and a heading with
+zero anchors under it produces no output. But the two statements retire rows
+differently:
+
+    "the platform has no such surface"      permanent, universal
+    "the page reads zero for this account"  reversible the day he registers
+
+**I passed on a conclusion without its method, and the method was the part that
+mattered.**
+
+**The calibration, from the wave that caught two of them:** both stale premises
+were *same-day* drift inside a twelve-wave tree, not old documents. **Neither was
+findable by reading more carefully; both took a measurement against disk.** That
+is a sharper lesson than "be careful", and it is the one to keep.
+
+## 14. THE ARITHMETIC, AND THE SENTENCE THAT MUST TRAVEL WITH IT
+
+    GAP          409 -> 372 frozen basis;  390 -> 353 at HEAD (DERIVED)
+    denominator  761 -> 755 at most
+    share        53.7% -> 46.8%
+    blockers     97 -> 86;  DECIDE-RETIRE ends EMPTY
+
+Nobody had moved the denominator before. **A retirement moves a row between
+STATES inside it; a DUPLICATE row inflates BOTH**, because the census builds 761
+from the same table rows as 409. Four duplicates were subtracted from the
+numerator and never from the denominator; two more were measured later.
+
+**THE CAVEAT: the census FILES still read GAP for all 37 retired rows.** A
+re-count taken today returns the old figure and would be right to. The rulings
+are written, the row-by-row edit is specified (32 retired / 5 re-filed / 5 handed
+back), and it is NOT APPLIED. Quoting 372 without this sentence quotes an
+intention as a measurement.
+
+Five rows were **handed back rather than force-retired**, because the reasons did
+not hold. A retirement you cannot justify is worse than an open row: it stops
+anyone looking again.
+
+## 15. THREE BLOCKERS SHRANK BY MEASUREMENT, NOT BY RULING
+
+**`SEARCH-RESULTS-SURFACE`: 21 rows -> one decision.** All six verticals are
+refused by `readonly.assert_read_url`, so an address is the first blocker for
+every row and there is no subset to triage. The ledger costed it 5, which invites
+exactly the opposite reading.
+
+And its evidence path is **circular**: the load that would justify opening the
+surface can only be completed by opening it. The counter it depends on came back
+with a redacted caption -- so its headline number has no established unit or
+period. **An uncaptioned counter returns a number nobody can interpret.**
+
+**`EVENTS-SURFACE`: 18 rows -> 8.** rows/cost falls 2.00 -> 0.89, from 13th in
+the ranking to below median.
+
+**`GROUPS-SURFACE`: 32 rows -> 35**, and the wave declined to guess which three
+would reconcile it -- the same shape as the newsletter wave's 13-vs-12.
+
+## 16. THE RULING IMPLEMENTED BETTER THAN IT WAS SPECIFIED
+
+I asked for a membership reader publishing counts and identifiers and no names.
+The wave made it **structural**: no name is a parameter of any function in
+`groups.py`, asserted on `inspect.signature`, and a slug refused *because a slug
+is a name*. **A rule enforced by a signature cannot be forgotten by the next
+caller; a rule enforced by discipline can.**
+
+Its precondition also went from soft to hard: five per-row overflow menus opened,
+nothing pressed inside them, `Leave this group` read five times. You cannot leave
+a group you have not joined. That replaces an interpretation of LinkedIn's word
+"listing" with LinkedIn's own affordance -- and **five instruments sharing no
+input feature now agree on five.**
+
+## 17. A DELTA CANNOT ANSWER A QUESTION ABOUT PRESENCE
+
+Three independent instances in one afternoon:
+
+1. An analytics wave measured CHANGE for three runs at a question about whether
+   controls EXIST, then published a conclusion contradicting a number it had
+   printed two lines earlier.
+2. A tab-close proof read 25/25 and looked clean; three runs then read
+   `26 -> 27 -> 27 -> 30` **with the close firing**, because a dozen waves share
+   one Chrome. **A page count cannot prove a tab was closed** --
+   `page.is_closed()` is the presence reading.
+3. A newsletter wave separated the claims explicitly: *"the leak is refuted; the
+   count is not flat. Those are different claims and I am making only the first."*
+
+**And two corroborating readings can be wrong together.** An events selector read
+54 rows where there are 18; two independent selectors returned 9/9 and 45/45 and
+agreed, both being the same multiple of the truth.
+
+## 18. AN ERROR THAT FLATTERS IS THE ONE NOBODY GOES LOOKING FOR
+
+> Nothing external would ever have flagged "ten page loads" -- it was plausible,
+> it was mine, and it made the wave look cheaper than it was. What caught it was
+> **re-deriving the number instead of re-reading the sentence.**
+
+That ledger under-reported **6x in the flattering direction** (10 loads claimed,
+65 actual). Three of that hour's four corrections came the same way.
+
+    RULE: at freeze time, RECOMPUTE your numbers rather than re-reading them.
+          Proofreading cannot reach a number that is simply wrong.
+
+## 19. TWO INFRASTRUCTURE FAILURES WITH NO COMMIT TO BLAME
+
+**The CDP attach ceiling.** `ATTACH_TIMEOUT_MS = 15_000` was correct when the
+browser belonged to one session. Twelve concurrent waves made it a fleet-wide
+outage without anyone editing it -- 120+ targets, `connect_over_cdp` enumerating
+every one during the handshake, attaches measured at 13.6s / 16.6s / 17.5s. **And
+the refusal named the one thing that was not wrong** ("needs a Chrome that is
+ALREADY RUNNING") while the DevTools endpoint answered in 0.07s.
+
+**The tab leak under it.** In attach mode `BROWSER._page()` calls
+`ctx.new_page()` and caches it, while the session's `finally` only touches the
+idle timer -- so the tab outlives the process. **42 scripts call it; 5 closed
+their page.** One leaked tab per probe run, in the operator's own browser, for
+the whole day.
+
+Both were found by a wave measuring the handshake directly rather than believing
+the error text.
+
+## 20. WHERE THE BACK-POINTER GOES
+
+The correction machinery only requires a `CORRECTED BY:` marker to exist. A wave
+put it **beside the claim it corrects, at section 7**, reasoning that a reader who
+opens the document to check that specific claim stops there satisfied, and a
+marker at the foot of the file cannot reach them. **That is what the eleven-day
+scar was actually about: not that the marker exists, but that the reader reaches
+it.**
