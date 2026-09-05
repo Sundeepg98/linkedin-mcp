@@ -362,11 +362,36 @@ touched the tree and is red at the same commit afterwards.
    Route B pressed a COMMENT's menu; they are different controls and an unopened
    menu remains this repo's standing reason to refuse rather than to cost.
 
-### Provenance
+### Provenance, recomputed at freeze rather than re-read
 
-Every number above was recomputed at freeze time from the probe's own output,
-not carried forward from the earlier draft of this document -- which is how the
-element-count difference in section 3 was noticed at all. Both live runs were
-made against Chrome pid 1252 in ATTACH mode; the page opened was closed in a
-`finally` and `page.is_closed()` read True on both, because a page count cannot
-prove a tab closed when a dozen waves share one browser.
+Every number above was recomputed from the probe's own output, not carried
+forward from the earlier draft of this document -- which is how the
+element-count difference in section 3 was noticed at all. The rule exists
+because proofreading cannot reach a number that is wrong; only recomputation
+can.
+
+**Live runs: five**, all against Chrome pid 1252 in ATTACH mode. Two completed
+route A and route B; two were refused at the rail on a partial render; one
+walked all eight items. **Page loads: 5 profile loads plus 12 item permalink
+loads = 17**, all of them his own pages. **Presses: 2**, both on a comment
+overflow control, both followed by Escape, nothing inside a menu ever pressed.
+
+**Tab hygiene:** the page opened was closed in a `finally` and
+`page.is_closed()` read True on every run that reached it. A page count cannot
+prove a tab closed when a dozen waves share one browser; `is_closed()` is the
+presence reading. This probe is absent from
+`test_a_probe_closes_its_own_tab.py`'s leaking set.
+
+### Gate state at freeze, measured
+
+    sweep_tracked_for_identity.py            PASS, 0 hits across 335 files
+    test_page_text_is_never_printed.py       14 passed
+    test_navigation_is_never_derived.py      1 failed -- NOT MINE, see section 6
+    test_a_probe_closes_its_own_tab.py       1 failed -- NOT MINE, ratchet moved
+                                             39 -> 41 on two other waves' probes;
+                                             this probe is not in the set
+
+**Commits: 4.** `ac7ee5b`, `49dc9d4`, `e8831b6`, `fe30911`. Every one carries
+exactly two files, both created by this wave; no neighbour's lines were swept
+and no follow-up credit is owed. **Zero AI attribution across all four,
+verified by grep rather than by intention.** Nothing pushed.
