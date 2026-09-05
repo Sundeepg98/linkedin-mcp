@@ -700,7 +700,33 @@ re-read from the drafts above. Two numbers moved when I recomputed them.**
                              NON-result rather than as proof of a free load.
     pushed          NOTHING
 
-**Guards run at freeze, 18 files across the enumeration and identity classes:**
+### THE FULL SUITE WAS RUN, because enumeration reds are invisible to a targeted run
+
+    9 failed, 4758 passed, 4 skipped, 1 xfailed   in 16m46s
+    4772 collected
+
+**NONE OF THE NINE IS THIS WAVE'S.** Neither `test_feed_tally.py` nor
+`test_profile_pdf_download_is_blocked_on_transport.py` appears in the failure
+list -- checked by reading the list, not inferred from the targeted runs passing.
+
+| failing test | note |
+|---|---|
+| `test_a_correction_is_findable_from_the_claim` | the two untriaged pairs name other waves' documents |
+| `test_a_person_name_is_never_a_literal` | **my item is fixed**; the survivor is `fc10b99`'s, established by `merge-base --is-ancestor` |
+| `test_a_probe_closes_its_own_tab` | 41 vs 39; neither of my probes is in the leaking list it prints |
+| `test_click_is_not_its_own_evidence` | not this wave's surface |
+| `test_publish_post_names_its_audience` | not this wave's surface |
+| `test_server_surface::test_both_login_names_are_registered_and_the_old_one_forwards` | **the documented ORDER-DEPENDENT red.** `_TEAM_LEAD_PUSH_FREEZE.md` predicted it verbatim: *"it will surface in a full-suite gate as a red belonging to nobody who ran it."* It did |
+| `test_stale_process_is_announced` x3 | the running server versus a dirty tree -- a live-process condition, not a code red |
+
+**THIS READING IS DATED BY THE TREE, NOT BY A SHA, and the tree moved under it.**
+The run took 16m46s while a dozen waves were committing, so some of these nine
+may not reproduce at any single SHA. That is stated rather than glossed: "at
+HEAD" and "in this checkout" have diverged twice today, and the only place they
+coincide is a clean clone, which this was not.
+
+**Guards also run individually at freeze, 18 files across the enumeration and
+identity classes:**
 
     3 failed, 1413 passed in 75s
 
