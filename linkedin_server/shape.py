@@ -4775,6 +4775,57 @@ def membership_row(href: Optional[str], name: Optional[str]) -> dict[str, Any]:
     ``Node.js Developers - India`` is not shaped for having a hyphen.
 
     :param href: the raw href off the row's own anchor, unshaped.
+    THE LIMIT, AND IT CANNOT BE CLOSED IN THIS FUNCTION. **A group NAMED AFTER
+    A PERSON ships its name verbatim.** Found by the newsletter wave on
+    2026-09-05 in its own surface, and verified here rather than taken on
+    report::
+
+        census_substitute("Savita Krishnan")  ->  UNCHANGED
+
+    A plain human name carries no urn, no ``/in/`` path, no possessive and no
+    six-digit run, so the identity check above cannot see one. Lower base rate
+    than the newsletter case -- where a title routinely carries its author --
+    and the identical mechanism.
+
+    **THE COUNT RULE IS THE ONLY THING THAT SEPARATES THEM AND IT IS
+    UNAVAILABLE HERE BY CONSTRUCTION.** ``census_redact_rare``'s own docstring
+    gives the reason: nothing about the STRING separates "Start A Post" from
+    "Jane Elizabeth Doe"; what separates them is that furniture REPEATS across
+    a surface and a member does not. A per-record path has no tally -- which is
+    the gap this function exists to document, arriving in the function itself.
+
+    AND APPLYING IT UNCONDITIONALLY WOULD DESTROY THE PAYLOAD RATHER THAN
+    PROTECT IT. Measured over real group names at ``count == 1``::
+
+        "Node.js Developers"     ->  <redacted>
+        "Node Developers India"  ->  <redacted>
+        "Savita Krishnan"        ->  <redacted>
+
+    Every plausible group name is a run of two or more capitalised words, so
+    the singleton rule blanks the answer and the leak together. **That is the
+    difference from :func:`subscription_row`, which DOES redact
+    unconditionally**: a newsletter title keeps a readable shape through it --
+    ``<redacted> by <redacted>`` still says the thing is authored -- whereas a
+    group name reduces to a bare ``<redacted>``, which is exactly the
+    information a count already gives.
+
+    SO THE LIMIT IS DECLARED RATHER THAN PAPERED OVER, and
+    ``tests/test_membership_row.py`` ASSERTS THE HOLE, so it is a known and
+    tested boundary rather than an unknown -- and so closing it turns a test
+    red instead of passing in silence.
+
+    **NOTHING CONSUMES THIS FUNCTION YET.** There is no group harvest: no
+    document in this repository held a group surface when it was written, and
+    the reader that will use it does not exist. The hole is real and it is not
+    live, and both halves of that belong in the same sentence.
+
+    WHAT WOULD ACTUALLY CLOSE IT IS A RULING, NOT A REFACTOR: a membership
+    reader that publishes COUNTS AND IDENTIFIERS AND NO NAMES. The precondition
+    this surface was opened for is answered by counts alone -- five distinct
+    groups, disjoint from five suggestions -- and a name-free reader cannot
+    leak a name. Recorded here so whoever makes that call starts from the
+    measurement rather than from the question.
+
     :param name: the accessible name read from INSIDE that same anchor.
     """
     if not href or not str(href).strip():

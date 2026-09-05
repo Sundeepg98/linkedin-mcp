@@ -469,6 +469,64 @@ def test_the_other_four_entity_kinds_still_redact_and_two_controls_survive():
         ) is False, href
 
 
+#: A PLAIN HUMAN NAME. Invented, and it is invented in the shape that matters:
+#: two capitalised words, no urn, no path, no possessive, no digits. That is
+#: precisely the shape the identity check cannot see.
+A_GROUP_NAMED_AFTER_A_PERSON = "Savita Krishnan"
+
+
+def test_a_group_named_after_a_person_SHIPS_ITS_NAME_and_that_is_asserted():
+    """THE HOLE, RECORDED AS A TEST SO IT IS KNOWN RATHER THAN UNKNOWN.
+
+    Found by the newsletter wave in its own surface on 2026-09-05 and verified
+    here. ``census_substitute`` leaves a plain human name UNCHANGED -- no urn,
+    no ``/in/`` path, no possessive, no six-digit run -- so nothing in
+    ``membership_row``'s identity check can see one, and a group named after a
+    person publishes verbatim.
+
+    **THIS TEST ASSERTS THE DEFECT, ON PURPOSE.** The repository's own idiom:
+    record a known defect so that FIXING it turns a test red rather than
+    passing in silence. If this goes red, somebody has closed the hole -- read
+    ``membership_row``'s docstring for why that needed a ruling, then delete
+    this test and say what closed it.
+
+    WHY IT IS NOT CLOSED HERE. The only rule that separates a group name from a
+    person's name is ``census_redact_rare``, which needs a COUNT and therefore
+    cannot live on a per-record path. Applying it unconditionally is measured
+    below and blanks the payload along with the leak.
+    """
+    assert (
+        shape.census_substitute(A_GROUP_NAMED_AFTER_A_PERSON)
+        == A_GROUP_NAMED_AFTER_A_PERSON
+    ), "the substitutions now change a plain human name -- the premise moved"
+
+    row = shape.membership_row(GROUP_REL, A_GROUP_NAMED_AFTER_A_PERSON)
+    assert row["published"] is True, row
+    assert row["name_shaped"] is False, row
+    assert row["name"] == A_GROUP_NAMED_AFTER_A_PERSON, row
+
+
+def test_redacting_unconditionally_would_blank_the_payload_not_just_the_leak():
+    """WHY THE OBVIOUS FIX IS NOT THE FIX, measured rather than argued.
+
+    ``subscription_row`` DOES redact unconditionally and is right to: a
+    newsletter title keeps a readable shape through the rule, so the row still
+    says something. A group name does not -- every plausible one is a run of
+    two or more capitalised words and reduces to a bare marker, which is the
+    information a count already gives.
+
+    If this test goes red because a real group name now SURVIVES the singleton
+    rule, the trade above has changed and the ruling should be revisited.
+    """
+    for name in (
+        "Node.js Developers",
+        "Node Developers India",
+        A_GROUP_NAMED_AFTER_A_PERSON,
+    ):
+        blanked = shape.census_redact_rare(shape.census_shape(name), 1)
+        assert blanked == shape.CENSUS_REDACTED, (name, blanked)
+
+
 def test_the_foreign_markers_are_derived_from_the_shared_tuple():
     """A sixth entity kind must become a REFUSAL here, never a hole.
 

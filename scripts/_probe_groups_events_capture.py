@@ -81,8 +81,25 @@ CONTROL_URL = f"{BASE_URL}/mypreferences/d/dark-mode"
 CONTROL_EXPECTED = 20
 
 
-def _depth(url: str) -> int:
-    return len([seg for seg in urlsplit(str(url)).path.split("/") if seg])
+def _relation(landed: str, asked: str) -> str:
+    """The RELATION between two addresses, carrying neither of them.
+
+    Byte-identical in contract to the function of the same name in
+    ``_probe_groups_events_live.py``, and declared once for both in
+    ``tests/test_navigation_is_never_derived.py::_SANITISERS``. Every branch
+    returns a literal or an integer path depth; no substring of either input
+    can survive. The proof is a test, not this sentence -- an entry on that
+    list is a claim about a function's contract, and this repository has
+    already admitted one function there on the strength of its NAME and found
+    it had no rule at all.
+    """
+    if str(landed) == str(asked):
+        return "SERVED, exact"
+    asked_depth = len([seg for seg in urlsplit(str(asked)).path.split("/") if seg])
+    landed_depth = len([seg for seg in urlsplit(str(landed)).path.split("/") if seg])
+    if asked_depth != landed_depth:
+        return f"REDIRECTED, path depth {asked_depth} -> {landed_depth}"
+    return "SERVED, same depth, different url"
 
 
 async def _capture(page, name: str, url: str, marker: str) -> dict:
@@ -92,10 +109,14 @@ async def _capture(page, name: str, url: str, marker: str) -> dict:
         return {"refused": True}
 
     landed = await BROWSER.goto(page, url)
-    served = str(landed) == str(url)
-    print(f"    relation: {'SERVED exact' if served else 'MOVED'} "
-          f"(depth {_depth(url)} -> {_depth(landed)})")
-    if "/login" in str(landed) or "/checkpoint" in str(landed):
+    # THE RELATION, NEVER THE URL. _relation is declared in
+    # tests/test_navigation_is_never_derived.py::_SANITISERS and its contract
+    # -- that nothing of either input survives into the result -- is PROVEN
+    # there rather than promised here.
+    relation = _relation(landed, url)
+    walled = "/login" in str(landed) or "/checkpoint" in str(landed)
+    print(f"    relation: {relation}")
+    if walled:
         print("    AUTH WALL. Nothing else measured, nothing captured.")
         return {"authwall": True}
 

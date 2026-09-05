@@ -133,7 +133,30 @@ _SINK_ATTRS = frozenset(
 #: **That scoping is the rule, not a caveat.** "This function is safe" was
 #: never true; "this function is safe for urls" is, and the short form is what
 #: travels between files.
-_SANITISERS = frozenset({"_shape_of", "_redact"})
+#: ``_relation`` ADDED 2026-09-05, FOR THE TWO GROUPS/EVENTS PROBES, AND IT IS
+#: ADMITTED ON A PROOF RATHER THAN ON ITS NAME -- which is the whole lesson of
+#: the ``_redact`` paragraph above.
+#:
+#: The contract is ``_shape_of``'s: it takes a landed url and the address that
+#: was asked for, and returns the RELATION between them. Three branches, and
+#: every one returns a literal or an integer path depth taken with ``len``. No
+#: substring of either input can survive, because no branch interpolates
+#: either input.
+#:
+#: **THE PROOF IS A TEST IN THIS FILE**, not this comment:
+#: ``test_the_relation_sanitiser_cannot_reconstruct_its_input`` feeds it urls
+#: carrying a vanity slug, a urn, a long digit run and a thread id, exercises
+#: all three branches, and asserts none of those fragments appears in any
+#: result. An entry here is a promise made on a function's behalf; that test is
+#: the thing that verifies the promise, and it is what was missing when
+#: ``_redact`` was first listed.
+#:
+#: ONE FUNCTION, TWO FILES, DELIBERATELY. Both probes define ``_relation`` with
+#: identical bodies rather than importing one from the other -- scripts here
+#: are standalone by design -- and the test below asserts the two definitions
+#: are byte-identical, so a fix or a widening cannot land in one and not the
+#: other.
+_SANITISERS = frozenset({"_shape_of", "_redact", "_relation"})
 
 #: CALLS WHOSE RESULT IS A NUMBER, whatever went in.
 _COUNTING_CALLS = frozenset({"len"})
@@ -673,7 +696,9 @@ def test_a_sanitiser_entry_is_a_claim_about_a_contract():
     there and must not be -- it returns a path, and a member path is an
     identity. That single distinction is the whole of the third leak.
     """
-    assert _SANITISERS == frozenset({"_shape_of", "_redact"}), _SANITISERS
+    assert _SANITISERS == frozenset(
+        {"_shape_of", "_redact", "_relation"}
+    ), _SANITISERS
     assert "_member_path" not in _SANITISERS
     assert "_path_of" not in _SANITISERS
 
@@ -688,3 +713,117 @@ def test_the_checker_reads_both_goto_arities():
     assert violations(_HEAD + "    await page.goto(page.url)\n")
     assert violations(_HEAD + "    await BROWSER.goto(page, page.url)\n")
     assert violations(_HEAD + "    await BROWSER.goto(page, url=page.url)\n")
+
+
+# ---------------------------------------------------------------------------
+# THE PROOF BEHIND THE THIRD SANITISER ENTRY.
+#
+# _redact was admitted to _SANITISERS on the strength of its NAME and turned
+# out to have no slug rule at all -- it returned a vanity url byte-identical
+# while this list told every other check that its result carried nothing. So a
+# new entry ships with the test that verifies the promise.
+# ---------------------------------------------------------------------------
+
+#: Urls carrying every identifying part a LinkedIn address can hold. All
+#: invented: the slug is two words nobody is called, the token is not a real
+#: member token prefix, and the digit runs are sequential.
+_IDENTIFYING_FRAGMENTS = (
+    "a-made-up-slug",
+    # A URN WITH A FIVE-DIGIT ID, RESHAPED RATHER THAN DECLARED, per the
+    # standing order in test_no_committed_identity.py: an entry in
+    # DECLARED_PLANTS tolerates a shape in a file forever, so reach for it
+    # last. The first spelling here was urn:li:fsd_profile:<a word>, which
+    # fires the opaque-urn class. This one carries no identifier shape at all
+    # -- URN_ID_SHAPE reads six digits or more -- and it exercises the
+    # identical branch of _relation, which splits paths and never inspects a
+    # urn's contents.
+    "urn:li:activity:12345",
+    "123456789012345",
+    "2-abcdefabcdef",
+)
+
+
+def _relation_sources() -> list[tuple[str, str, str]]:
+    """Every ``_relation`` in ``scripts/``: file name, source text, body dump.
+
+    Read off disk with the AST rather than imported, because importing a probe
+    would pull in the browser module for a test that only wants one pure
+    function.
+    """
+    found: list[tuple[str, str, str]] = []
+    for path in sorted((REPO / "scripts").glob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "_relation":
+                body = [
+                    child for child in node.body
+                    if not (
+                        isinstance(child, ast.Expr)
+                        and isinstance(child.value, ast.Constant)
+                    )
+                ]
+                found.append(
+                    (
+                        path.name,
+                        ast.get_source_segment(text, node) or "",
+                        "\n".join(ast.dump(c) for c in body),
+                    )
+                )
+    return found
+
+
+def test_the_relation_sanitiser_cannot_reconstruct_its_input():
+    """ALL THREE BRANCHES, against every fragment a url can carry.
+
+    The entry in :data:`_SANITISERS` is a claim that nothing of either input
+    survives into the result. This is the thing that checks it, and it fails
+    the moment somebody widens ``_relation`` to interpolate a path, a host or
+    a query -- which is exactly the widening that would look harmless.
+    """
+    sources = _relation_sources()
+    assert sources, "no _relation found in scripts/ -- the entry is dead"
+
+    namespace: dict[str, object] = {}
+    exec(
+        compile(
+            "from urllib.parse import urlsplit\n" + sources[0][1],
+            "<relation>",
+            "exec",
+        ),
+        namespace,
+    )
+    relation = namespace["_relation"]
+
+    base = "https://www.linkedin.com"
+    slug, urn, digits, thread = _IDENTIFYING_FRAGMENTS
+    cases = [
+        (f"{base}/in/{slug}/", f"{base}/in/{slug}/"),
+        (f"{base}/messaging/thread/{thread}/", f"{base}/messaging/"),
+        (f"{base}/in/{slug}/", f"{base}/in/me/"),
+        (f"{base}/feed/update/{urn}/", f"{base}/feed/?q={digits}"),
+    ]
+    branches = set()
+    for landed, asked in cases:
+        result = relation(landed, asked)
+        branches.add(result.split(",")[0])
+        for fragment in _IDENTIFYING_FRAGMENTS:
+            assert fragment not in result, (result, fragment)
+        assert "linkedin.com" not in result, result
+        assert "/in/" not in result, result
+
+    assert branches == {"SERVED", "REDIRECTED"}, branches
+
+
+def test_every_relation_definition_is_byte_identical():
+    """Two standalone probes, one contract. They cannot drift apart.
+
+    Both groups/events probes define ``_relation`` rather than importing it --
+    scripts here are standalone by design -- so the risk this replaces is a
+    fix landing in one copy and not the other while the sanitiser entry
+    vouches for both.
+    """
+    sources = _relation_sources()
+    assert len(sources) >= 2, sources
+    bodies = {body for _name, _text, body in sources}
+    assert len(bodies) == 1, sorted(name for name, _text, _body in sources)
