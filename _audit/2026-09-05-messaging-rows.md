@@ -6,7 +6,7 @@
 **Page loads taken: FOUR, of which exactly ONE was `/messaging/`.
 Messages sent: ZERO. Controls pressed: ZERO. Rows I retire myself: ZERO --
 I hand up measurements, not retirements.
-Commits: 8. Tests added: 7, in one new file. Boundary changes: 0.**
+Commits: 9. Tests added: 9, in one new file. Boundary changes: 0.**
 
 **HEADLINE, and it is not the load.** The load answered row 66 outright and
 refuted the relayed zero behind rows 17 and 67. But the most reusable thing
@@ -545,6 +545,38 @@ repairing the sentence turns them RED, which is the point -- *a known defect
 must not be fixable in silence, and the record of a defect may not outlive the
 defect.* Each test's docstring says what a red means and what to delete.
 
+### 6.4a THE CLAIM HAS A SECOND HOME, AND IT IS THE WORSE ONE
+
+**Found at 22:40, after section 6 was written.** `README.md` line 493 restates
+the messaging bullet including its closed clause, with the same two tool names:
+
+    Only `linkedin_open_messaging` and `linkedin_new_messages` can incur
+    this, and only when called
+
+**So the defect exists TWICE, and a repair applied to one copy leaves the other
+standing.** A README is worse than the field it copies: `known_side_effects` is
+read by a caller weighing one call, but a README is a STANDING INSTRUCTION read
+as current truth by whoever opens the repository next, and it carries no
+`CORRECTED BY:` mechanism at all -- the correction machinery governs
+`_audit/*.md` only.
+
+**AND THE README CONTRADICTS ITSELF FOUR LINES LATER.** Its next bullet says
+*"the message composer is on the surface point 3 describes"* -- which is
+`linkedin_compose_fields`' destination, and point 3 does not name it. **The
+premise and its own counterexample sit in the same document, a few lines
+apart.** Nobody needed a browser, an AST walk or a live load to catch that;
+they needed to read two adjacent bullets as one claim.
+
+**NOT EDITED, same ruling as 6.4.** `README.md` was committed at 22:33 --
+six minutes before I read it -- by a wave actively working that file
+(`e1a81e9`). Route the artifact.
+
+**What landed instead is a DIVERGENCE DETECTOR**: a test asserting the two
+copies name the SAME tool set. Today they agree, both wrong identically; it
+fires the moment they stop agreeing, which is exactly what a one-sided repair
+looks like. Shown failing by a third mutation that simulates precisely that --
+the README copy repaired, `server.py` left alone: 1 failed, 8 passed.
+
 ### 6.5 SHOWN FAILING BEFORE IT ENTERED
 
 Per the register's second law. Two mutations, on a copy, each asserted to have
@@ -605,10 +637,13 @@ worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
                        scripts/_probe_messaging_family_off_the_feed.py 206 lines
                        tests/test_a_named_cost_names_a_tool_that_can_incur_it.py
                                                                      457 lines
-                       _audit/2026-09-05-messaging-rows.md           647 lines
-    tests added        7, all passing. 2 mutations shown KILLING the control,
+                       _audit/2026-09-05-messaging-rows.md           682 lines
+    tests added        9, all passing. 3 mutations shown KILLING a test,
                        each asserted to have changed the source first --
-                       a mutation that does not apply prints PASS
+                       a mutation that does not apply prints PASS.
+                       The third simulates a ONE-SIDED repair of the claim
+                       (README fixed, server.py not) and the divergence
+                       detector caught it: 1 failed, 8 passed.
     taint guards       279 passed with the census probe;
                        274 passed with the feed probe, green on first run
     exact-value sweep  run AFTER staging every time, per the gate-time rule.

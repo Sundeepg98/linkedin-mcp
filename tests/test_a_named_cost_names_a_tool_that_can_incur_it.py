@@ -440,6 +440,86 @@ def test_the_composer_address_really_is_under_the_messaging_family() -> None:
     )
 
 
+# ---------------------------------------------------------------------------
+# THE SECOND SITE. The same closed claim lives in README.md, and a README is
+# the class this repository's correction machinery cannot bind.
+# ---------------------------------------------------------------------------
+
+README = REPO / "README.md"
+
+
+def _readme_asserted_tools() -> set[str]:
+    """The same ``Only ... can incur this`` clause, out of the README."""
+    text = README.read_text(encoding="utf-8")
+    match = re.search(r"Only (.{0,400}?) can incur\s+this", text, re.S)
+    assert match, (
+        "README.md no longer carries an 'Only ... can incur this' clause. If "
+        "it was rewritten, read the new wording -- this file asserts that the "
+        "README and server.py say the SAME thing, and it cannot check a "
+        "sentence that is gone."
+    )
+    return set(re.findall(r"linkedin_[a-z_]+", match.group(1)))
+
+
+def test_the_readme_repeats_the_claim_and_the_two_copies_must_not_diverge() -> None:
+    """TWO COPIES OF ONE CLOSED CLAIM, and this is the divergence detector.
+
+    ``README.md`` restates the messaging cost bullet including its ``Only ...
+    can incur this`` clause, with the same two tool names. So the defect
+    measured in this file exists TWICE, and **a repair applied to one copy
+    leaves the other standing and wrong.**
+
+    A README is worse than the field it copies: an audit document is a dated
+    record and rots fairly harmlessly, but a README is a STANDING INSTRUCTION
+    read as current truth by whoever opens the repository next, and it carries
+    no ``CORRECTED BY:`` mechanism at all. This repository has already measured
+    a false premise propagating through a workflow comment rather than through
+    an audit doc, for exactly this reason.
+
+    **WHAT THIS TEST IS FOR IS THE DIVERGENCE, NOT THE AGREEMENT.** Today the
+    two copies agree -- both wrong, identically. It fires the moment they stop
+    agreeing, which is precisely what a one-sided fix looks like.
+    """
+    assert _readme_asserted_tools() == _asserted_tools(), (
+        "README.md and server.py's known_side_effects now name DIFFERENT tool "
+        "sets in their 'Only ... can incur this' clauses.\n"
+        "  README:    %r\n"
+        "  server.py: %r\n"
+        "If you are repairing this claim, repair BOTH copies. If you are "
+        "deliberately splitting them, say so and delete this test."
+        % (sorted(_readme_asserted_tools()), sorted(_asserted_tools()))
+    )
+
+
+def test_the_readme_contradicts_itself_four_lines_later() -> None:
+    """THE CORRECTION WAS ALREADY IN THE DOCUMENT, and nobody joined them.
+
+    The README's messaging bullet says only two named tools can incur the
+    messaging cost. **The very next bullet says "the message composer is on the
+    surface point 3 describes"** -- which is `linkedin_compose_fields`'
+    destination, and point 3 does not name it.
+
+    So the README states the premise and its own counterexample within a few
+    lines of each other, and the closed claim survived anyway. That is this
+    repository's most-repeated shape: two accurate statements, no reader
+    joining them, and the join is where the finding lives.
+
+    **This is not a second defect. It is evidence about how cheap the fix
+    was** -- nobody needed a browser, an AST walk or a live load to catch it;
+    they needed to read two adjacent bullets as one claim.
+    """
+    text = README.read_text(encoding="utf-8")
+    assert re.search(r"message composer is on the surface", text), (
+        "the README no longer says the message composer sits on the messaging "
+        "surface. If that bullet was rewritten, re-read both bullets together "
+        "before trusting either."
+    )
+    assert "linkedin_compose_fields" not in _readme_asserted_tools(), (
+        "the README's closed clause now names linkedin_compose_fields, so the "
+        "contradiction is resolved. Delete this test and say so."
+    )
+
+
 @pytest.mark.parametrize("tool", ["linkedin_new_messages", "linkedin_open_messaging"])
 def test_both_named_tools_exist_at_all(tool: str) -> None:
     """A sentence naming a tool that does not exist is a third failure mode.
