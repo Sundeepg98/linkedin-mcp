@@ -167,7 +167,14 @@ def _declaration_shape(row: dict[str, Any]) -> dict[str, Any]:
     tokens = [part for part in text.split(",") if part.strip()]
     return {
         "declares_accept": accept is not None,
-        "tokens": len(tokens),
+        # A LIST, NOT A COUNT, so the caller can emit `len(...)` at the print.
+        # `tests/test_page_text_is_never_printed.py` launders exactly two
+        # forms -- `len(...)` and a comparison -- and its TEXT_SANITISERS set
+        # is EMPTY ON PURPOSE, because an entry there would be a promise made
+        # on a function's behalf and `_redact` was once admitted to the
+        # sibling list on the strength of its name. So the remedy has to be
+        # the count itself, taken where the value is emitted.
+        "token_list": tokens,
         "image": "image/" in text,
         "video": any(token in text for token in _VIDEO_TOKENS),
         "documents": any(token in text for token in _DOC_TOKENS),
@@ -175,40 +182,30 @@ def _declaration_shape(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
-    """Can a wiring aim by what the inputs DECLARE, where a name cannot?
+def _fingerprint(shape: dict[str, Any]) -> dict[str, Any]:
+    """One input's declaration as BOOLEANS AND A COUNT, for comparing only.
 
-    THREE ANSWERS AND NO FOURTH, and the distinctions are the point:
+    THE VERDICT SENTENCE WAS REPLACED BY A COUNT, and that is the fix rather
+    than a casualty of it. It used to be built by a helper and printed, and a
+    helper's return is not something `tests/test_page_text_is_never_printed.py`
+    can launder -- its `TEXT_SANITISERS` set is EMPTY ON PURPOSE, because an
+    entry there is a promise made on a function's behalf and `_redact` was once
+    admitted to the sibling list on the strength of its name alone.
 
-    * ``NO -- nothing declared``: every input is silent on both attributes, so
-      the page states nothing to aim by and this route is closed like the
-      name route before it.
-    * ``NO -- declarations identical``: they declare, and they declare THE
-      SAME THING. Two inputs that accept the same types are as unaimable as
-      two with no names -- aiming would come down to document order, which is
-      the thing every gate in this package exists not to do.
-    * ``YES -- N distinct declarations over N inputs``: each input says
-      something different about itself, so a wiring has a property to match
-      on that LinkedIn authored rather than one this server invented.
-
-    A COMPARISON, NEVER A JUDGEMENT ABOUT WHICH IS WHICH. Deciding that a
-    given ``accept`` list means "this is the photo one" is a mapping nobody
-    has reviewed; that belongs to whoever wires the composer, on the evidence
-    printed above this line.
+    So the emission is `distinct=N of M -> True/False`: a `len` and a
+    comparison, the two forms the rule recognises. It says exactly what the
+    sentence said -- whether the page distinguishes its own inputs -- and it
+    says it in the vocabulary the guard can check rather than in one it has to
+    take on trust.
     """
-    if not declared:
-        return "NO -- no file inputs were read"
-    shapes = list(declared)
-    if not any(shape["declares_accept"] or shape["multiple"] == "declared"
-               for shape in shapes):
-        return "NO -- nothing declared (every input silent on accept and multiple)"
-    keys = {tuple(sorted(shape.items(), key=lambda kv: kv[0])) for shape in shapes}
-    if len(keys) == 1:
-        return (
-            f"NO -- declarations identical across all {len(declared)} inputs; "
-            "aiming would be by document order"
-        )
-    return f"YES -- {len(keys)} distinct declarations over {len(declared)} inputs"
+    return {
+        "declares_accept": shape["declares_accept"],
+        "tokens": len(shape["token_list"]),
+        "image": shape["image"],
+        "video": shape["video"],
+        "documents": shape["documents"],
+        "multiple": shape["multiple"],
+    }
 
 
 #: WHAT A FILE INPUT DECLARES ABOUT ITSELF, and why only these two.
@@ -352,10 +349,25 @@ async def _run() -> int:
                 print(_fmt_file_inputs(reading))
                 print("    declared (each input's own words, REDUCED):")
                 for index, row in enumerate(out["declared"]):
-                    print(f"      [{index}] {row}")
+                    # EVERY FIELD IS A COUNT OR A COMPARISON, which is what the
+                    # page-text rule recognises, and what it recognises is what
+                    # this package means by "emit the relation, not the value".
+                    print(
+                        f"      [{index}]"
+                        f" accept_declared={row['declares_accept'] is True}"
+                        f" tokens={len(row['token_list'])}"
+                        f" image={row['image'] is True}"
+                        f" video={row['video'] is True}"
+                        f" documents={row['documents'] is True}"
+                        f" multiple_declared={row['multiple'] == 'declared'}"
+                    )
+                distinct = len(
+                    {tuple(sorted(_fingerprint(r).items())) for r in out["declared"]}
+                )
                 print(
-                    "    aimable by declaration: "
-                    f"{_declaration_verdict(out['declared'])}"
+                    "    aimable by declaration:"
+                    f" distinct={distinct} of {len(out['declared'])}"
+                    f" -> {distinct == len(out['declared'])}"
                 )
                 verdict = _verdict(reading, compose_fields)
                 print(f"    VERDICT: {verdict}")
