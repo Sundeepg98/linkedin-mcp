@@ -695,6 +695,51 @@ PINNED = (
 #: ``_audit/_scratch/_probe_newsletter_refreeze_attribution.py`` and
 #: ``_audit/_scratch/_newsletter-refreeze-attribution.txt``.
 #:
+#: ------------------------------------------------------------------------
+#: A FIFTH ROOT, 2026-09-05, BY THE ANALYTICS-CREATOR WAVE. THE FOUR ENTRIES
+#: ABOVE ARE CORRECT AS THEIR AUTHORS WROTE THEM AND ARE NOT REWRITTEN. This
+#: line is computed against the tree AS IT THEN STOOD, which is
+#: ``a8ea5dcf4f8b3d52`` -- the value the newsletter entry above ends at.
+#:
+#:     _ALLOWED_URL_PATTERNS   a8ea5dcf4f8b3d52 -> ee9817a5cb439e2c
+#:
+#: ONE ANCHORED PATTERN:
+#:
+#:     ^https://www\.linkedin\.com/analytics/creator/content/?$
+#:
+#: HIS OWN CONTENT ANALYTICS -- the address the search-appearances entry
+#: above lists among the things it deliberately did NOT buy. It is bought
+#: here on its own evidence rather than by widening that line, which is the
+#: form that entry asked for.
+#:
+#: THE ADDRESS WAS READ OFF LINKEDIN, NOT SPELLED FROM A HELP ARTICLE, and
+#: that is the whole argument. ``scripts/_probe_analytics_controls_live.py``
+#: collected every link on two pages this server ALREADY OPENS and gated them
+#: to lowercase, digit-free product routes: ``/in/me/`` draws it twice and
+#: ``/feed/`` once. The census row for this surface records the address
+#: appearing "once, in a refused-address list" -- a string somebody wrote
+#: down. This is the same string, drawn by the product, three times.
+#:
+#: THE PAGE WAS THEN OPENED, TWICE, BEFORE THIS DIGEST WAS WRITTEN. An
+#: admitted address nobody has opened is the exact failure the newsletter
+#: wave declined to build a reader against. It SERVES: four unpressed census
+#: readings across two separate loads, every one 62 controls / 28 buttons /
+#: 28 links / 2 dialogs / 11 closed disclosures, with
+#: ``dom.read_invitation_badge`` read before and after each load and
+#: unmoved. That is a measurement of ONE counter and is not a proof that the
+#: load spends nothing.
+#:
+#: WHAT IT DID NOT BUY, asserted in
+#: ``tests/test_analytics_creator_boundary.py`` rather than promised here:
+#: the tree root, ``/analytics/creator/`` (the parent), any sub-path, any
+#: query, the two siblings the admitted page itself draws
+#: (``/analytics/creator/audience/`` and ``/analytics/creator/top-posts/``),
+#: ``/analytics/recruiter-views/`` which the profile-views page draws twice,
+#: and ``/search/results/people/`` which stays refused. **Being drawn by an
+#: admitted page is a reason to CONSIDER an address, never a reason to have
+#: admitted it** -- one named page at a time, never the family.
+#:
+#: ------------------------------------------------------------------------
 #: ONE INTERPRETER, NOT TWO, AND SAYING SO RATHER THAN CLAIMING BOTH. Earlier
 #: entries in this file verify each digest under 3.13 AND 3.10 before writing
 #: it down. **This box has no 3.10** -- measured: the four sibling venvs under
@@ -733,7 +778,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "a8ea5dcf4f8b3d52",
+    "_ALLOWED_URL_PATTERNS": "ee9817a5cb439e2c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1136,7 +1181,27 @@ DENYLISTS_AT_A76FE32 = {
     # `<functions>` unmoved. Its attribution is the strongest this dict has
     # carried, because the tree MINUS this line hashes to exactly the value
     # this line replaced -- so nothing else is riding inside the re-pin.
-    "_ALLOWED_URL_PATTERNS": "a8ea5dcf4f8b3d52",
+    #
+    # GREW AGAIN 2026-09-05 by ONE anchored page: his own content analytics,
+    # `/analytics/creator/content/`, for `CONTENT-ANALYTICS-SURFACE`. Same
+    # shape a fifth time -- a deliberate READ admission, three denylists and
+    # both exemption tables byte-identical, `<functions>` unmoved, SEVEN of
+    # eight digests unchanged.
+    #
+    # THE PREVIOUS ENTRY'S ATTRIBUTION FORM WAS COPIED RATHER THAN ITS WORDS,
+    # and it holds again: the tree MINUS this line hashes to exactly
+    # `a8ea5dcf4f8b3d52`, the value this line replaces. Two controls beside it
+    # -- removing the search-appearances sibling moves the digest somewhere
+    # else entirely, and a needle no line carries drops zero lines and moves
+    # nothing. The instrument is
+    # `_audit/_scratch/_probe_analytics_refreeze_attribution.py`, a one-line
+    # `re.compile` variant of the newsletter wave's three-line one; both are
+    # under `_audit/_scratch/`, which is gitignored, so THE EVIDENCE DOES NOT
+    # SURVIVE A CLONE and this comment is where it lives.
+    #
+    # ONE INTERPRETER. This box has one venv at 3.13; the entry says so rather
+    # than claiming a 3.10 confirmation it did not take.
+    "_ALLOWED_URL_PATTERNS": "ee9817a5cb439e2c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

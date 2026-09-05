@@ -217,6 +217,57 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # page as the evidence that authorises it. This entry buys the reciprocal
     # reading and nothing next to it.
     re.compile(r"^https://www\.linkedin\.com/analytics/search-appearances/?$"),
+    # HIS OWN CONTENT ANALYTICS. Added 2026-09-05, and it is the one address
+    # the entry above says it deliberately did NOT buy -- so it is bought
+    # here, on its own evidence, rather than by widening that line.
+    #
+    # THE ADDRESS WAS READ OFF LINKEDIN, NOT SPELLED FROM A HELP ARTICLE, and
+    # that distinction is the whole argument for this entry existing at all.
+    # `scripts/_probe_analytics_controls_live.py` collected every link on two
+    # pages this server ALREADY OPENS and gated them to lowercase, digit-free
+    # product routes:
+    #
+    #     /in/me/    ->  /analytics/creator/content/        x2
+    #     /feed/     ->  /analytics/creator/content/        x1
+    #
+    # The census row for this surface (`M C38`) records the address appearing
+    # "once, in a refused-address list" -- a string somebody wrote down. This
+    # is the same string, drawn by LinkedIn, three times, on his own account.
+    # The entry above asks that an allowlist "permit what is opened rather
+    # than what is plausible"; a route the product itself links from the
+    # profile is the closest thing to that a first load can have.
+    #
+    # IT CANNOT ADDRESS ANYBODY ELSE, and this is structural rather than
+    # promised, in exactly the sense the search-appearances entry means it.
+    # There is no slug, no id and no `/in/` in this string: the account is
+    # chosen by the session cookie and by nothing in the url. The `creator`
+    # segment is a product noun, not a member.
+    #
+    # ANCHORED, NO QUERY GROUP, NO SUB-PATH. LinkedIn's own analytics pages
+    # take `?metricType=` and similar; a group admitting one admits whatever
+    # a caller appends, and nothing in this package builds a query for this
+    # address. `/analytics/creator/` -- the parent -- is NOT admitted by this
+    # line and stays refused, so this is one named page rather than a family,
+    # which is the settings ruling applied to the analytics tree for the
+    # second time.
+    #
+    # WHAT OPENING IT COSTS: the load was measured with
+    # `dom.read_invitation_badge` read before and after, twice, and the badge
+    # did not move -- the same instrument and the same discipline the
+    # connections list is admitted under. That is a measurement of ONE
+    # counter, not a proof that the page spends nothing, and the entry says so
+    # rather than claiming more.
+    #
+    # THE BOUNDARY DECIDES WHAT MAY BE OPENED; THE SHAPER DECIDES WHAT MAY BE
+    # SAID -- the lead's 2026-09-05 ruling, and it is load-bearing here.
+    # LinkedIn's own description of this surface names viewer demographics,
+    # so the page is partly made of OTHER PEOPLE, aggregated. That is an
+    # argument about the PAYLOAD and it is answered by the shaper: this line
+    # admits no reader, and any reader built on it must go through
+    # `census_shape` plus `census_redact_rare` like every other. Refusing the
+    # ADDRESS on payload grounds would refuse `/analytics/profile-views/`,
+    # which is admitted above and is the harder case.
+    re.compile(r"^https://www\.linkedin\.com/analytics/creator/content/?$"),
     # The job tracker, which is where /my-items/saved-jobs/ now redirects (the
     # cardType query is dropped on the way, and that older address is no longer
     # on this list because nothing builds it any more). ``?stage=`` selects
