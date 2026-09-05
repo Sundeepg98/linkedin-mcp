@@ -1429,6 +1429,40 @@ rule on `set_input_files` should re-source those limits rather than quote them.
 and the ruling in front of it belong to whoever holds
 `FILE-UPLOAD-UNSANCTIONED`. Routed rather than guessed at.
 
+### 10.6 Six reds in `test_surface_census.py`, sorted before being reported
+
+A second clone gate, over the **28 test files that read `_audit/`**, at HEAD
+`d0e8943`: **7 failed, 1772 passed, 4 skipped** in 20m27s. One is 10.3. The
+other six are all in `tests/test_surface_census.py`.
+
+**SORTED BY WHAT THE ASSERTION IS ABOUT BEFORE BEING CLEARED**, which is this
+repository's own rule and the reason this paragraph exists rather than a count:
+three of the six have GUARD-shaped names -- `..._no_committed_fixture_moves_a_
+pre_existing_field`, `..._every_descriptor_in_every_committed_fixture_is_a_
+shape` -- and a guard firing is not the same kind of red as a number moving.
+
+**Read, they are one cause and it is the count.** Every one asserts
+`567 == 553` (or `(3, 564) == (3, 550)`): a newly committed fixture moved the
+corpus control sweep. The guards fire because their PRECONDITION failed -- the
+corpus is no longer the one their numbers were measured against -- not because
+a descriptor leaked.
+
+**AND THE TESTS PRESCRIBE THEIR OWN REMEDY, which is the opposite of a
+re-baseline:**
+
+> *"A fixture changed, so every number pinned in this section was measured
+> against a directory that no longer exists -- re-measure them rather than
+> moving this one."*
+
+Routed by artifact: the fixture arrived in `d0e8943`. **Not touched.** Bumping
+553 to 567 would satisfy every one of the six and would be precisely what those
+messages forbid.
+
+**Note for whoever reads the other gate:** the full-suite clone this pass also
+started was cloned at `b11b2cf`, which PREDATES `d0e8943`, so it cannot show
+these six. Two gate readings of the same tree, dated differently, will disagree
+-- and the difference is a commit, not an instrument.
+
 ---
 
 ## 11. THE CENSUS FILES STILL SAY GAP, AND THAT MATTERS MORE THAN IT LOOKS
