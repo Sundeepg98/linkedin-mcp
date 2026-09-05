@@ -570,6 +570,21 @@ A broader run of the enumeration-risk guards -- the two taint guards plus
 `test_no_committed_identity.py`, `test_a_sanitiser_earns_its_entry.py` and
 `test_readonly.py` -- returned **1 failed, 958 passed in 40.17s**.
 
+**THE FREEZE READING, taken at 20:01 with the boundary tests added:**
+
+    1 failed, 980 passed in 23.62s
+
+The single failure is `test_every_claimant_of_a_sanitiser_name_is_enrolled`,
+another wave's, named below. **No red in this tree is mine**, and that is a
+statement about a reading taken at 20:01 in THIS CHECKOUT -- not "at HEAD",
+because pytest imports from the working tree and in a tree a dozen waves are
+writing those are different objects.
+
+**The full suite was NOT run and no clone was taken.** A 29-minute suite does
+not fit inside this wave's window, and an enumeration violation is invisible
+to every run I did make. That is a hole in this reading, stated rather than
+papered over.
+
 ### THE ONE RED IS NOT MINE, AND I CHECKED RATHER THAN ASSUMED
 
     tests/test_a_sanitiser_earns_its_entry.py::test_every_claimant_of_a_sanitiser_name_is_enrolled
@@ -594,6 +609,36 @@ freeze file alone will go looking for four files that are already clean.
 adding a name to a list to turn a test green is the exact thing the enrolment
 half exists to prevent -- `_redact` was once admitted on the strength of its
 NAME and carried no slug rule at all. It is one line, owed by one owner.
+
+### A SECOND RED APPEARED AT FREEZE AND WAS NOT REAL. I NEARLY REPORTED IT.
+
+The freeze reading, taken at 20:00, returned **2 failed, 987 passed**. The
+second was the taint guard -- the same one I had fixed an hour earlier and had
+green at 262 passed twenty minutes before.
+
+Three readings settled it, and the ORDER is the finding:
+
+    20:00   combined set     2 failed, 987 passed
+    20:01   guard ALONE      1 passed
+    20:01   combined set     1 failed, 980 passed   <- did not reproduce
+
+**It was a neighbour's file mid-write.** This guard SCANS THE TREE, so its
+result is a photograph of a repository a dozen agents are writing, and two
+untracked probes belonging to other waves sat in `scripts/` throughout.
+
+**AND THE STRUCTURAL CORROBORATION IS BETTER THAN MY REASONING:** the two
+combined runs, one minute apart, collected **987 and 980 tests**. I changed
+nothing between them. *A count that moves under no change of mine is a number
+about the tree, not about my code* -- which is this day's "compare the SETS,
+never the totals" law arriving from the other direction. The totals moving is
+itself the evidence.
+
+    RULE: a red on a TREE-SCANNING guard, in a repo with many writers, is
+          re-taken before it is routed. Running it ALONE distinguishes a real
+          hit from a neighbour's file caught mid-write, and costs seconds.
+
+**I would have reported two reds at freeze, one of them owed by nobody.**
+Re-taking the reading caught it; re-reading the output could not have.
 
 ## 8. COST, RECOMPUTED RATHER THAN RECALLED
 
