@@ -199,6 +199,25 @@ async def read_group_memberships(page: Any) -> dict[str, Any]:
     IT NEVER RAISES ON A ROW IT CANNOT READ. One unusable anchor on a page of
     thirty is not an error, and ``groups.group_identifier`` already reports
     what it refused and why.
+
+    **A NON-ZERO ``overlap.in_common`` IS NOT AUTOMATICALLY A DEFECT, AND THE
+    TEMPTING FIX WOULD DESTROY THE MEASUREMENT.** The two lists are separated
+    by HREF STRING, not by identifier, so a group LinkedIn writes twice on one
+    page -- once relative, once absolute -- puts one copy in each list and
+    reports itself as one group in common. De-duplicating across the lists by
+    identifier would make that disappear.
+
+    It must not, because ``in_common`` is the DISCRIMINATING measurement on
+    this surface: it is what says the two sections are two sets rather than
+    one set drawn twice, which is the whole reason ``groups.disjoint`` exists.
+    A cross-list de-duplication would guarantee zero overlap by construction
+    and turn the deciding number into a constant -- an instrument reporting
+    its own shape.
+
+    So the overlap is reported RAW and a reader investigates. Measured zero on
+    this account at both live runs; if it ever reads non-zero, the question is
+    *did LinkedIn draw one group in both sections, or write one row's href
+    twice*, and that is answerable by looking rather than by patching this.
     """
     anchors = page.locator(ANCHOR)
     total = int(await anchors.count())

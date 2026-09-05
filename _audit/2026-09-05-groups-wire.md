@@ -426,7 +426,57 @@ is what is being asserted, so both halves are.
 | instrument | control | outcome |
 |---|---|---|
 | `scripts/_probe_groups_locator_walk.py` | dark-mode census 20 at both ends; REFUSES any split that is not 5 with 0 in common | GREEN, 1 run |
-| `scripts/_probe_group_memberships_tool_live.py` | refuses a payload disagreeing with the four corroborating instruments; refuses a non-numeric identifier; refuses a degenerate cost marked measured | GREEN, 1 run |
-| `tests/test_the_groups_tool_keeps_its_properties.py` | the `evaluate` detector planted INTO the shipped reader -- exactly one test red, file restored byte-identical | 22 passed |
+| `scripts/_probe_group_memberships_tool_live.py` | refuses a payload disagreeing with the four corroborating instruments; refuses a non-numeric identifier; refuses a degenerate cost marked measured | GREEN, 2 runs |
+| `tests/test_the_groups_tool_keeps_its_properties.py` | the `evaluate` detector planted INTO the shipped reader -- exactly one test red, file restored byte-identical | 30 passed |
 | `scripts/_check_tool_count_pin_control.py` | the pin mutated wrong with the registry intact | all demonstrations behaved as stated |
 | `scripts/sweep_tracked_for_identity.py` | run AFTER staging the new files, per the standing rule | PASS: 0 hits across 361 swept files |
+
+## 11. THE WAVE, BY COMMIT
+
+    5131271  wire the membership reader -- 41 -> 42
+    8d9ad77  the cost prediction refuted by the run; the audit; the property tests
+    343b192  a zero is interpretable now, and one branch is honestly ambiguous
+    e1a81e9  two dangling citations my own rename created; the stale README headline
+    564ed73  why this tool reports a moved counter where its sibling refuses
+
+**Zero AI attribution, verified by grep across all five message bodies.**
+Nothing pushed; the push freeze is the operator's.
+
+Neighbours committed five times INTO THIS RANGE while this wave ran
+(`697b609`, `a373547`, `d1b1a62`, `38ea9dc`, `e4a7947` -- a messaging wave).
+**None of their files is in any of the five commits above**, checked per
+commit with `git show --stat` rather than by trusting `--only`, which protects
+at FILE granularity and cannot protect a path two waves both legitimately own.
+
+## 12. THE NUMBERS, RECOMPUTED AT FREEZE
+
+    tools 42   read 30   write 12       off mcp.list_tools() at the freeze tree
+    boundary   allowlist UNCHANGED, no digest re-frozen, no pattern added
+    page loads 11, counted per run
+    identity   sweep AT THE GATE before every commit -- 0 hits, last run 368 files
+    ports      8322 LISTENING pid 29216   9224 LISTENING pid 27940 (Chrome)
+
+**The running MCP server holds older code and cannot see this tool.** It was
+NOT restarted: a dozen waves share it, and restarting it to demonstrate one
+wave's work is not a trade made at the end of a session. That is why the live
+verification went through the package's own registry instead.
+
+## 13. WHAT WOULD FALSIFY THIS WAVE'S CENTRAL CLAIMS
+
+Stated so the next reader can attack them cheaply rather than re-derive them:
+
+* **the split** -- run `scripts/_probe_groups_locator_walk.py`. It refuses to
+  publish anything but five disjoint memberships. A reading of TEN means the
+  walk collapsed into a flat sweep; a reading of ZERO with
+  `climbs_exhausted: 0` means LinkedIn moved the per-row control, and
+  `interpret_zero` will say `ambiguous` rather than guess.
+* **the waiver claim** -- plant an `evaluate` call anywhere in
+  `groups_page.py`; exactly one test must go red. Done once already, with the
+  file restored byte-identical in the same run.
+* **the cost claim** -- if a counter is ever found that responds to a
+  `/groups/` load, `cost.certifies` is wrong and section 4.3 is the paragraph
+  to delete. Until then the tool is bracketing with instruments that belong to
+  other surfaces and says so in the payload.
+* **the name claim** -- add any parameter to `linkedin_group_memberships` or a
+  name-shaped one to any `groups.py` function; two tests must go red.
+
