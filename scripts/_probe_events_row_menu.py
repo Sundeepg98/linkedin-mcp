@@ -223,7 +223,13 @@ async def main() -> int:
             try:
                 if not page.is_closed():
                     await page.close()
-                    print("    closed this run's tab.")
+                # PRESENCE, NOT A DELTA. A page count off /json/list is a
+                # delta over a pool a dozen waves share -- measured 26 -> 27
+                # -> 27 -> 30 across three runs with this close firing -- so
+                # it cannot answer a question about THIS tab in either
+                # direction. is_closed() is about the one object this run
+                # created and is unaffected by every neighbour.
+                print(f"    this run's tab is_closed={page.is_closed()}")
             except Exception as error:  # noqa: BLE001
                 print(f"    could not close this run's tab: "
                       f"{type(error).__name__}")

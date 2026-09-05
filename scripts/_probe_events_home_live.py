@@ -281,7 +281,22 @@ async def main() -> int:
             try:
                 if not page.is_closed():
                     await page.close()
-                    print("    closed this run's tab.")
+                # PRESENCE, NOT A DELTA, AND THE DIFFERENCE IS MEASURED.
+                #
+                # The obvious proof of this fix is a page COUNT off
+                # /json/list either side of a run. Taken three times in a row
+                # it read 26 -> 27 -> 27 -> 30 with this close in place and
+                # firing -- because a dozen waves share one Chrome and their
+                # probes open tabs in the same seconds. **A global count is a
+                # delta over a pool this process does not own**, so it cannot
+                # answer a question about THIS tab, in either direction: it
+                # cannot show the close working and it could not have shown it
+                # failing.
+                #
+                # ``page.is_closed()`` is the presence reading. It is about
+                # the one object this run created, it is unaffected by every
+                # neighbour, and it is the thing that was actually claimed.
+                print(f"    this run's tab is_closed={page.is_closed()}")
             except Exception as error:  # noqa: BLE001
                 print(f"    could not close this run's tab: "
                       f"{type(error).__name__}")
