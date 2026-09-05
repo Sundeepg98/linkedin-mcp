@@ -37,11 +37,18 @@ ALERT_LINK = (
     "https://www.linkedin.com/jobs/search-results/?keywords=Senior+Software"
     "+Engineer&f_TPR=a1787213463-&origin=SEMANTIC_SEARCH_JOB_ALERT"
 )
-#: A Page link whose id belongs to nobody -- the all-zeroes convention this
-#: repository already uses for a synthetic urn. It has to be SHAPE-VALID: it
-#: is the control, and an id the extractor cannot read would make the zero
-#: beside it uninterpretable.
-COMPANY_LINK = "https://www.linkedin.com/company/0000/"
+#: A Page link, and it is the CONTROL: the key that lives in a url's PATH,
+#: run beside the key that lives in its QUERY, so that a zero from the second
+#: is legible rather than ambiguous. It has to be shape-valid -- an id the
+#: extractor cannot read would leave both keys silent and say nothing.
+#:
+#: THE ID IS TAKEN FROM ``tests/test_no_committed_identity.py``'s
+#: ``SYNTHETIC_IDS``, WHICH ALREADY HOLDS IT. That set is the register of
+#: values this repository has established are invented, and ``_id_ok`` passes
+#: anything in it -- so reusing a member widens NOTHING, where declaring a
+#: plant would widen what the guard tolerates in this file forever. Reach for
+#: an existing synthetic before reaching for the allowlist.
+COMPANY_LINK = "https://www.linkedin.com/company/5417062/"
 
 
 def main() -> int:

@@ -33,11 +33,19 @@ BASE = "https://www.linkedin.com"
 
 #: A job id shape, not a job. Six digits is the pattern's own minimum.
 JOB_ID = "1234567890"
-#: A Page id SHAPE that belongs to nobody -- the all-zeroes convention this
-#: repository already uses for a synthetic urn. It is shape-valid on purpose:
-#: a self-test that hides from the identity guard blinds the guard to a real
-#: value pasted in later.
-PAGE_ID = "0000"
+#: A Page id shape, not a Page. Four digits is the minimum that reaches the
+#: ``f_C`` route at all.
+PAGE_ID = "1234"
+#: THE ITEM ID IS FIVE DIGITS ON PURPOSE, AND THE REASON IS NOT COSMETIC.
+#: The allowlist's permalink pattern is ``urn:li:<type>:[0-9]+`` and imposes
+#: NO length floor -- measured: 1, 2, 5 and 21 digits are all ALLOWED -- while
+#: ``tests/test_no_committed_identity.py``'s ``URN_ID_SHAPE`` reads ``\d{6,}``.
+#: So a five-digit id exercises exactly the same branch of exactly the same
+#: pattern and carries no identifier shape at all. That is a RESHAPE rather
+#: than a declaration: a declared plant widens what the guard tolerates in
+#: this file forever, and a value the guard was never built to look at widens
+#: nothing.
+ITEM_ID = "12345"
 
 MUST_ALLOW: tuple[tuple[str, str], ...] = (
     ("the feed", f"{BASE}/feed/"),
@@ -90,7 +98,7 @@ CANDIDATES: tuple[tuple[str, str, str], ...] = (
     ("M C60 N 173 N 174", "his own groups", f"{BASE}/groups/"),
     ("N 180", "his own events", f"{BASE}/events/"),
     ("M C43 M C34 N 148", "one post, by permalink",
-     f"{BASE}/feed/update/urn:li:activity:0000000000000000000/"),
+     f"{BASE}/feed/update/urn:li:activity:{ITEM_ID}/"),
     ("M C74", "the feed itself", f"{BASE}/feed/"),
     ("M M47 M M10", "one conversation", f"{BASE}/messaging/thread/2-ABCdef123/"),
     ("P N12", "the sign-in form, as the census names it", f"{BASE}/uas/login"),

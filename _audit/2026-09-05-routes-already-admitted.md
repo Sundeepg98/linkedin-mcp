@@ -216,7 +216,7 @@ as the control:
 | | raw link | link as `parse_notification` hands it over |
 |---|---|---|
 | `search_keywords` -- lives in the QUERY | `{'search_keywords': 'Senior Software Engineer'}` | `{}` |
-| `company_id` -- lives in the PATH | `{'company_id': '1035'}` | `{'company_id': '1035'}` |
+| `company_id` -- lives in the PATH | `{'company_id': '5417062'}` | `{'company_id': '5417062'}` |
 
 **THE CONTROL IS WHY THIS IS A FINDING AND NOT AN OBSERVATION.** One of the
 two keys still fires, on every notification that carries a company link. So
@@ -426,6 +426,18 @@ blockers and costs; it does not move the census.
 * The alert-keyword defect from
   `scripts/_probe_alert_keywords_survive_shaping.py`, with `company_id` as its
   control, plus a needle count over `tests/fixtures/notifications.html`.
+* **Both probes went red against `test_no_committed_identity` on their first
+  run and NEITHER was fixed by declaring a plant.** The route probe was
+  RESHAPED -- the permalink pattern spells its id `[0-9]+` with no length
+  floor, measured ALLOWED at 1, 2, 5 and 21 digits, where the guard's shape
+  starts at six, so a five-digit id exercises the identical branch and carries
+  no identifier shape. The alert probe REUSED a member of the guard's own
+  `SYNTHETIC_IDS`, because its control genuinely must be a readable company id
+  and no value satisfies `shape._COMPANY_LINK` while missing
+  `COMPANY_ID_SHAPE`. **A declaration widens what the guard tolerates in a
+  file forever; an existing synthetic names one value invented.** Recorded
+  because the first version of this document was written against a probe that
+  had been declared rather than reshaped, and against a Page id that was real.
 * Row set from `_audit/_scratch/_route_extract_gaps.py`, reconciled per file
   against the blockers ledger's own expectation before classification.
 * Pattern dates from `git log -S` over `linkedin_server/readonly.py`, one

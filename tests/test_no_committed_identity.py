@@ -377,33 +377,28 @@ DECLARED_PLANTS = {
     # needing an argument, which is the standing preference. Pinned at 1 so a
     # SECOND urn appearing in that file still goes red.
     ("tests/test_membership_row.py", "opaque urn"): 1,
-    # TWO SHAPE-VALID LITERALS IN THE ROUTE-AUDIT PROBES, 2026-09-05. THE GUARD
-    # FIRED FIRST and the remedy is the standing one: the values are already
-    # synthetic, so the allowlist widens -- red here means UNDECLARED, never
-    # REAL.
+    # NO ENTRY FOR THE TWO ROUTE-AUDIT PROBES, 2026-09-05, AND THE ABSENCE IS
+    # THE RECORD. Both went red here on their first run and both were fixed
+    # WITHOUT widening this table, which is the standing order -- an entry
+    # tolerates a shape in a file forever, and is inherited by readers who
+    # take this list to mean "known safe" rather than "known fake". Reach for
+    # it last.
     #
-    # Both identifier segments are ALL ZEROES, which is nobody's, and that is
-    # the convention ``tests/test_writes_nine.py``'s nineteen-zero urn already
-    # carries. Neither can be paraphrased away, and for opposite reasons:
+    #   scripts/_probe_route_vs_surface.py RESHAPED. Its permalink route needs
+    #   a urn, and ``readonly._ALLOWED_URL_PATTERNS`` spells that
+    #   ``urn:li:<type>:[0-9]+`` with NO length floor -- 1, 2, 5 and 21 digits
+    #   all measured ALLOWED. ``URN_ID_SHAPE`` above reads ``\d{6,}``. So a
+    #   five-digit id exercises the identical branch of the identical pattern
+    #   and carries no identifier shape for this guard to see.
     #
-    #   _probe_route_vs_surface.py puts one address per allowlist pattern to
-    #   ``readonly.assert_read_url``, and the permalink pattern is
-    #   ``feed/update/urn:li:<type>:<digits>``. A url that is not urn-SHAPED
-    #   is refused by that pattern, so the probe would report a refusal that
-    #   is a fact about its own input rather than about the boundary.
-    #
-    #   _probe_alert_keywords_survive_shaping.py needs a company link as its
-    #   CONTROL -- the key that lives in a url's PATH, run beside the key that
-    #   lives in its QUERY, so that a zero from the second is legible. An id
-    #   the extractor cannot read would leave both keys silent and the reading
-    #   uninterpretable.
-    #
-    # LITERALS, NOT ASSEMBLED, for the reason the urn entries above give:
-    # assembling them at runtime would hide them from this sweep, and a sweep
-    # blinded to a file is blinded to a real value pasted into it later. Each
-    # is pinned at 1 so a SECOND value of that class in either file goes red.
-    ("scripts/_probe_route_vs_surface.py", "urn id"): 1,
-    ("scripts/_probe_alert_keywords_survive_shaping.py", "company id"): 1,
+    #   scripts/_probe_alert_keywords_survive_shaping.py REUSED. Its control
+    #   genuinely must be a readable company id -- ``shape._COMPANY_LINK``
+    #   needs four digits or more, and ``COMPANY_ID_SHAPE`` starts at three,
+    #   so no value can satisfy one and miss the other. It takes a member of
+    #   :data:`SYNTHETIC_IDS` that this file already holds, which ``_id_ok``
+    #   passes on sight. An existing synthetic is narrower than a declaration:
+    #   it names ONE value invented, where an entry here admits whatever
+    #   arrives next in that file.
 }
 
 # ===========================================================================
