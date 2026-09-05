@@ -3,10 +3,10 @@
 **Owner: the `messaging-rows` wave. Scope: the same 7 blockers / 24 rows the
 `messaging` wave left, plus the authorised live load it declined to take.**
 
-**Page loads taken: THREE, of which exactly ONE was `/messaging/`.
+**Page loads taken: FOUR, of which exactly ONE was `/messaging/`.
 Messages sent: ZERO. Controls pressed: ZERO. Rows I retire myself: ZERO --
 I hand up measurements, not retirements.
-Commits: 3. Tests added: 7, in one new file. Boundary changes: 0.**
+Commits: 6. Tests added: 7, in one new file. Boundary changes: 0.**
 
 **HEADLINE, and it is not the load.** The load answered row 66 outright and
 refuted the relayed zero behind rows 17 and 67. But the most reusable thing
@@ -189,6 +189,22 @@ load would settle, and it is a plausible home for the requests or Other view.
 It is unresolved because of the no-strings rule in section 4, and that is the
 price of that rule stated plainly rather than hidden.
 
+> ### RESOLVED 22:34, WITHOUT A SECOND SPEND -- see section 2.9
+>
+> **It is the same anchor as the CONTROL, and it is the nav's own link.**
+> `a[href*="/messaging/"]` read 1 and `a[href*="/messaging/?"]` read 1 on that
+> page. **The second selector is a subset of the first**, so at 1 and 1 they
+> match THE SAME ELEMENT -- arithmetic over two counts I had already taken,
+> not a new reading and not a guess. It is the global nav's messaging link
+> wearing a query LinkedIn appends when you are already there, and it is not a
+> second destination.
+>
+> **The answer was inside the numbers already printed.** I wrote it up as an
+> open item because I read the two rows as two findings instead of asking what
+> relation the two SELECTORS have. Section 2.9 then confirmed the same shape
+> from `/feed/` at zero cost. *Recompute over your own readings before
+> declaring something unreached.*
+
 ### 2.5 Row 57 `MESSAGE-ADDRESSING` -- STILL UNOBSERVED, and now for a STATED reason
 
     composer recipient box      0
@@ -263,6 +279,50 @@ control is the render-gate trap**, which this repository has already paid for
 once on a tabbed profile category. Recorded as evidence toward, not as an
 answer.
 
+### 2.9 THE SAME QUESTION FROM `/feed/`, AT ZERO MESSAGING COST -- row 50 answered twice
+
+**VERIFIED-BY-INSTRUMENT.** `scripts/_probe_messaging_family_off_the_feed.py`,
+commit `e4a7947`, run 22:34:13. **Zero `/messaging/` loads.**
+
+`/feed/` is loaded by `linkedin_new_messages`, by every badge read in this
+package, and by the messaging probe at both of its own ends. It does not
+redirect into a conversation and does not clear the messaging badge -- that is
+precisely why it is the surface both badges are read off. **A global nav is
+drawn on every page**, so if LinkedIn advertises a message-requests
+destination anywhere, the feed carries it.
+
+**AND IT ADDS THE THING SECTION 2.4 LACKED: A DENOMINATOR.** Per-literal counts
+alone cannot separate *LinkedIn draws no requests link* from *my literals do
+not spell what LinkedIn draws.* So this counts the whole family, then the
+subset matching any of twenty declared spellings, and prints the difference.
+
+    total anchors under /messaging       1
+    matching at least one spelling       1
+    UNACCOUNTED                          0
+    the one that matched                 /messaging/   (the bare root)
+
+    messaging badge  new_since_last_visit=0  state='read'
+    invitation badge pending=0               state='read'
+
+**UNACCOUNTED = 0 is what makes the zeros mean something.** The messaging
+family, as drawn in the global nav, is fully spelled by the declared list --
+so the sixteen requests/filter zeros are readings about LinkedIn and not about
+my vocabulary. **A non-zero here would have proven an address this repository
+cannot name, and said how many.**
+
+> **ROW 50, STATED AS A RESULT:** the message-requests address is not
+> advertised in the global nav on ANY page this server loads -- measured from
+> two independent surfaces, the messaging page and the feed, with a firing
+> control on each. **The `allowlist +1` is a placeholder for an unknown, and
+> that is now measured rather than inferred from a ledger.** Nobody should
+> spend it by writing a pattern broad enough to cover the unknown.
+
+**What this does NOT establish:** that no such surface exists. LinkedIn may
+draw the entry inside the messaging page as a button rather than an anchor --
+which is consistent with `/messaging/thread/` reading 0 on a thread page, and
+with `role=menuitem` reading 12. **A destination that is not an anchor cannot
+be found by an href census**, and that is the honest limit of both readings.
+
 ---
 
 ## 3. WHAT THE LOAD DID **NOT** REACH
@@ -270,7 +330,9 @@ answer.
 Stated plainly, because a wave's omissions are the part a successor cannot
 recover.
 
-* **The query on the one `/messaging/?` anchor.** Cheapest open item.
+* ~~The query on the one `/messaging/?` anchor.~~ **RESOLVED at 22:34** by
+  arithmetic over readings I already had, and confirmed from `/feed/` at zero
+  cost. Sections 2.4 and 2.9.
 * **The labels of the 12 `role=menuitem` elements.** Deliberate, section 4.
 * **Whether the 12 menu items and the 12 `React` controls are the same
   elements.** An equal count is not an identity.
@@ -472,39 +534,72 @@ assertion, and both defect tests were shown sensitive to the reader dying.
 | owner of `tests/test_click_is_not_its_own_evidence.py` | the digit-adjacency ruling is UNCHANGED. No chip was observed, so this load produced no evidence either way | section 2.5 |
 | whoever re-costs this family | row 57's blocker is unreachable by any read, because a chip requires a committed recipient | section 2.5 |
 
-**The cheapest single open item in this whole family** is the query on the one
-`/messaging/?` anchor -- one more load, or a widened literal set on a re-run of
-the same probe, and it is the most likely home of row 50's address.
+**The cheapest single open item is now the 12-versus-12 question** in section
+2.3 -- whether the 12 `role=menuitem` elements and the 12 `React`-labelled
+controls are the same twelve. It needs the menu items' labels on a live
+conversation, so it needs a `/messaging/` load AND a ruling about reading
+labels on that surface. It is the only thing standing between rows 17/67/76
+and a clean retirement recommendation.
+
+**The next cheapest is NOT an href census.** Both of this wave's address
+readings are blind to a destination drawn as a button rather than an anchor,
+and section 2.9 says so. If row 50's surface exists, that is where it is.
 
 ---
 
 ## 8. PROVENANCE
 
-Recomputed at freeze, not re-read from the sections above.
+Recomputed at freeze, not re-read from the sections above. The two counts most
+worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
+(the feed-side probe added one), commits 3 -> 6.
 
-    commits            697b609  the probe, planned before spent   320 ins
-                       a373547  restore the body a rewrite ate    152 ins
-                       d1b1a62  the enumeration-claim instrument  457 ins
-    files              scripts/_probe_messaging_surface_census.py  472 lines
+    commits            697b609  the census probe, planned before spent  320 ins
+                       a373547  restore the body a rewrite ate          152 ins
+                       d1b1a62  the enumeration-claim instrument        457 ins
+                       38ea9dc  this document, first form               510 ins
+                       e4a7947  the feed-side family probe              206 ins
+                       + the commit carrying sections 2.9 and this block
+    files              scripts/_probe_messaging_surface_census.py    472 lines
+                       scripts/_probe_messaging_family_off_the_feed.py 206 lines
                        tests/test_a_named_cost_names_a_tool_that_can_incur_it.py
-                                                                   457 lines
-    tests added        7, all passing, 2 mutations shown killing the control
-    taint guards       279 passed (both guards + my file), 0 naming my files
-    exact-value sweep  run AFTER staging, per the gate-time rule:
-                         PASS: 0 hits across 366 swept files
+                                                                     457 lines
+                       _audit/2026-09-05-messaging-rows.md           605 lines
+    tests added        7, all passing. 2 mutations shown KILLING the control,
+                       each asserted to have changed the source first --
+                       a mutation that does not apply prints PASS
+    taint guards       279 passed with the census probe;
+                       274 passed with the feed probe, green on first run
+    exact-value sweep  run AFTER staging every time, per the gate-time rule.
+                       Four readings, and the ORDERING is what they say:
+                         0 hits / 361 files    before the first commit
+                         0 hits / 366 files    after staging the instrument
+                         0 hits / 367 files    after staging this document
+                         0 hits / 368 files    after staging the feed probe
+                       The corpus grew by 7 files across them. Only the last
+                       says anything about the tree this wave closed on.
     /messaging/ loads  1
-    total navigations  3
+    other page loads   3, all /feed/, an address every badge read uses
+    total navigations  4
     controls pressed   0
     writes fired       0
     boundary changes   0
     rows retired       0
-    AI attribution     0 across all three commits (grep over each body)
+    AI attribution     0 across all commits (grep over each body, recomputed
+                       at freeze rather than asserted from the first check)
     pushed             nothing
 
-**Every count in section 2 is reproducible**: re-run the probe. It refuses on
-a non-zero messaging badge, refuses on an unreadable badge at either end, and
-reports what it spent in its own finally.
+**Every count in section 2 is reproducible**: re-run the probes. The census
+refuses on a non-zero messaging badge, refuses on an unreadable badge at either
+end, and reports what it spent in its own finally. The feed probe spends
+nothing on the messaging counter at all.
 
 **No real person's name, no member id, no slug, no urn, no thread id and no
-href appears in anything this wave wrote.** The probe cannot emit one: it reads
-no page strings at all.
+href appears in anything this wave wrote.** Neither probe can emit one: they
+read no page strings.
+
+### One number in this document is NOT mine and is marked as such
+
+*"0 triggers and 0 menu items in 1.28 MB of DOM"* (section 2.2) is relayed from
+`_audit/_scratch/_progress-measure-surfaces.md` via the predecessor's own
+document, which relayed rather than confirmed it. **I refute the conclusion
+with a direct count and I do not vouch for the reading.** Route the artifact.
