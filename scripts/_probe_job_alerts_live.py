@@ -81,6 +81,118 @@ CONTROL_URL = "https://www.linkedin.com/jobs/search/?keywords=node.js"
 #: identifying, and the tally is over SHAPED control names.
 VOCABULARY = ("alert", "daily", "weekly", "delete", "edit", "manage", "off", "on")
 
+#: CANDIDATE LANDING PATHS, EVERY ONE A LITERAL TYPED INTO THIS FILE.
+#:
+#: The redirect is the finding and "somewhere else" is not an actionable form
+#: of it -- a pattern cannot be re-anchored on a shrug. So the landed path is
+#: COMPARED against literals and only the matching LABEL is printed. The label
+#: comes from this tuple and never from the browser, which is what keeps the
+#: output free of anything a navigation chose. It is the same discipline
+#: ``_relation`` uses inside itself, applied at the print site.
+#:
+#: A MISS IS A RESULT AND IS REPORTED AS ONE. If none matches, that says the
+#: landing is a spelling nobody here has guessed -- which is worth knowing and
+#: is not the same as knowing nothing.
+CANDIDATE_PATHS: tuple[tuple[str, str], ...] = (
+    ("the job search page", "/jobs/search"),
+    ("the jobs home", "/jobs"),
+    ("the recommended collection", "/jobs/collections/recommended"),
+    ("a collection other than recommended", "/jobs/collections"),
+    ("the alerts path without its trailing slash", "/jobs/alerts"),
+    ("a hyphenated job-alerts spelling", "/jobs/job-alerts"),
+    ("an opportunities-scoped alerts spelling",
+     "/jobs/opportunities/job-alerts"),
+    ("the job tracker", "/jobs-tracker"),
+    ("the feed", "/feed"),
+    ("the network hub", "/mynetwork"),
+    # SECOND BATCH, added after the first run reported the landing as UNDER
+    # /jobs and matching none of the ten above. The first batch narrowed the
+    # answer to one path segment; these are the segments a jobs product plausibly
+    # uses for alert management, saved searches and preferences.
+    ("a job-alerts segment spelled with an underscore", "/jobs/job_alerts"),
+    ("an alert-settings segment", "/jobs/alert-settings"),
+    ("a saved-searches segment", "/jobs/saved-searches"),
+    ("a saved segment", "/jobs/saved"),
+    ("an applied segment", "/jobs/applied"),
+    ("a my-jobs segment", "/jobs/my-jobs"),
+    ("a preferences segment", "/jobs/preferences"),
+    ("an opportunities segment", "/jobs/opportunities"),
+    ("a tracker segment under jobs", "/jobs/tracker"),
+    ("a manage segment under jobs", "/jobs/manage"),
+    ("a settings segment under jobs", "/jobs/settings"),
+    ("a search-alerts segment", "/jobs/search-alerts"),
+    ("a jobs view", "/jobs/view"),
+    # THIRD BATCH. The counts narrowed the landing to /jobs/<3 characters>, so
+    # these enumerate three-character segments rather than plausible words --
+    # a search space this small is worth walking instead of guessing at.
+    ("a three-letter segment: all", "/jobs/all"),
+    ("a three-letter segment: new", "/jobs/new"),
+    ("a three-letter segment: set", "/jobs/set"),
+    ("a three-letter segment: top", "/jobs/top"),
+    ("a three-letter segment: job", "/jobs/job"),
+    ("a three-letter segment: alt", "/jobs/alt"),
+    ("a three-letter segment: hub", "/jobs/hub"),
+    ("a three-letter segment: sub", "/jobs/sub"),
+    ("a three-letter segment: rec", "/jobs/rec"),
+    ("a three-letter segment: sav", "/jobs/sav"),
+    ("a three-letter segment: pre", "/jobs/pre"),
+    ("a three-letter segment: JAT", "/jobs/JAT"),
+    ("a three-letter segment: jat", "/jobs/jat"),
+    ("a three-letter segment: mgr", "/jobs/mgr"),
+    ("a three-letter segment: geo", "/jobs/geo"),
+    ("a three-letter segment: r-r", "/jobs/r-r"),
+)
+
+
+def _print_candidate_match(landed_path: str) -> None:
+    """Print the LABEL of the candidate this path matches, or a literal MISS.
+
+    IT PRINTS RATHER THAN RETURNS, AND THAT IS THE GUARD'S DOING. A version
+    that RETURNED the label was refused by
+    ``tests/test_navigation_is_never_derived.py``: the guard is a fixed point
+    over BINDINGS, so a value returned from a function called with a tainted
+    argument is tainted, whatever the function actually does with it. Only
+    ``_SANITISERS`` launders, and adding an entry there permanently widens what
+    the guard tolerates -- too much to spend on one line.
+
+    Printing INSIDE the loop keeps the print expression bound to ``label``,
+    which comes from ``CANDIDATE_PATHS`` -- a module constant -- and never from
+    the browser. The tainted value is used in the comparison and reaches no
+    output.
+    """
+    trimmed = landed_path.rstrip("/")
+    for label, candidate in CANDIDATE_PATHS:
+        if trimmed == candidate:
+            print("    landed path matches candidate: " + label)
+            return
+    for label, candidate in CANDIDATE_PATHS:
+        if trimmed.startswith(candidate + "/"):
+            print("    landed path is UNDER candidate: " + label)
+            return
+    print("    landed path matches NONE of the candidates -- a spelling "
+          "nobody here has guessed")
+
+
+def _print_path_shape(landed_path: str) -> None:
+    """COUNTS about the landed path, never its text.
+
+    The guard's own message sanctions this form -- *"emit a RELATION or a count
+    instead"* -- and ``_relation`` establishes it: segment depths are taken with
+    ``len`` precisely because counting a thing is what this package does instead
+    of printing it.
+
+    WHY IT IS WORTH PRINTING AT ALL. Twenty-three candidate spellings missed, and
+    a miss narrows nothing on its own. A segment COUNT and a segment LENGTH turn
+    "somewhere under /jobs" into a search space of one word of a known size, which
+    is what the next wave needs in order to stop guessing.
+    """
+    parts = [seg for seg in landed_path.split("/") if seg]
+    print(f"    landed path depth: {len(parts)} segments")
+    if len(parts) >= 2:
+        print(f"    the segment after 'jobs' is {len(parts[1])} characters long")
+    if len(parts) >= 3:
+        print(f"    the segment after that is {len(parts[2])} characters long")
+
 
 def _title_class(title: str) -> str:
     """A CLASS, never the title. A title is a string LinkedIn chose."""
@@ -181,6 +293,8 @@ async def _read(page, label: str, url: str) -> dict:
     else:
         print("    the LANDED address is admitted by the allowlist: NO -- the "
               "server has come to rest where its own allowlist refuses")
+    _print_candidate_match(urlsplit(str(landed)).path)
+    _print_path_shape(urlsplit(str(landed)).path)
     if walled:
         print("    AUTH WALL on this address. Nothing else measured.")
         return {"authwall": True}

@@ -497,10 +497,42 @@ have bought an f-string.
 
 ---
 
+### The landing narrowed to one word of a known size, without printing it
+
+"Redirected somewhere" cannot re-anchor a pattern, so the landed path was put
+through two measurements the taint guard's own message sanctions -- a
+comparison against LITERAL candidates typed into the probe, printing only the
+matching LABEL, and COUNTS.
+
+    CONTROL   landed path depth 2, the segment after 'jobs' is 6 characters
+              matches candidate: the job search page
+    ALERTS    landed path depth 2, the segment after 'jobs' is 3 characters
+              UNDER the jobs home, and matching NONE of 39 candidates
+
+**The control validates both instruments in the same breath:** it reports depth
+2 and a six-character segment, and `search` is six characters. So the readings
+are the path's, not the reader's.
+
+**THE HANDOVER IS THEREFORE A SEARCH SPACE, NOT A SHRUG: `/jobs/<3
+characters>`, depth 2, stable across three runs, and not one of the 39
+spellings this probe walks** -- ten product paths, thirteen plausible words and
+sixteen three-letter segments, every one a literal in the file so the misses
+are auditable rather than remembered.
+
+**I STOPPED GUESSING THERE, DELIBERATELY.** This repository's own rule is that
+a refusal measured against a guessed address tells you about the gate and never
+about the page, and thirty-nine misses is the point at which more guesses are a
+worse instrument rather than a longer list. The segment is readable through a
+SHAPED route by whoever builds one; it is not readable through a print, and the
+guard is right about that.
+
+---
+
 ## 8. THE ONE THING TO DO FIRST NEXT SESSION
 
 **Name the address LinkedIn redirects `/jobs/alerts/` to, and re-anchor the
-pattern on it.** Everything needed is now tracked: the probe takes the reading,
+pattern on it.** It is one three-character path segment under `/jobs/`.
+Everything needed is now tracked: the probe takes the reading,
 `scripts/_probe_boundary_line_attribution.py` attributes the digest move, and
 `tests/test_job_alerts_read_boundary.py` already holds the family mutation that
 will refuse a lazy fix. It is a one-line boundary edit once the spelling is
