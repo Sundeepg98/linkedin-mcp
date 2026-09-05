@@ -167,9 +167,23 @@ nothing on the root says which of the five those are.
 
 `N 176` ("prevent your network being updated when you join a group") and
 `N 170` ("allow or prevent other group members from messaging you") are
-SETTINGS and the per-row menu draws `Update your settings`, so their surface is
-one press away on an admitted address. **Both are UNMEASURED past that point**
--- nobody has seen what that item opens.
+SETTINGS, and the per-row menu draws `Update your settings` five times over on
+an admitted address. **That looked one press away and it is not.**
+
+Measured 17:27 by `scripts/_probe_group_settings_route.py`, which classified
+the control's href against the two gates INDEPENDENTLY and navigated nowhere:
+
+    5 controls wear that label, all of them <a>, path depth 3
+    5  FORBIDDEN x2: ['/psettings/', 'settings']
+
+**So both rows are DOUBLE-refused**, the way `/groups/<id>/invite/` is, and
+they move to 5.5. A denylist exemption is a heavier act than an allowlist
+addition, and `settings` is one of the broadest substrings on that list.
+
+**A CONTROL BEING DRAWN IS NOT A ROUTE**, and the difference cost nothing to
+establish here only because the href could be classified without following it.
+Had this been costed off "the control is right there on an open page", two rows
+would have been filed one boundary change from reachable when they are two.
 
 ### 5.4 NEEDS AN ALLOWLIST CHANGE -- 11 rows
 
@@ -187,7 +201,11 @@ until somebody has established there is a page at the other end** -- which is
 the mistake the events wave found in this same ledger, where eighteen rows were
 written against a registered-events surface that does not exist.
 
-### 5.5 DOUBLE-REFUSED, so the ledger's "allowlist +2" is short -- 5 rows
+### 5.5 DOUBLE-REFUSED, so the ledger's "allowlist +2" is short -- 7 rows
+
+`N 170` and `N 176` joined this list at 17:27, measured rather than assumed:
+the `Update your settings` control on every membership row is an `<a>` whose
+href meets **two** forbidden substrings, `/psettings/` and `settings`.
 
 `N 166`, `N 168`, `N 169`, `M C69` all live on `/groups/<id>/invite/`, which
 fails the anchored pattern AND contains `/invite`, a forbidden substring checked
@@ -253,13 +271,13 @@ AND reaches third parties, so it is behind 5.4 and 5.6 at once.
     REACHABLE NOW, reader built                              3   C60 173 162
     UNREACHABLE FOR THIS ACCOUNT (inferred, test named)      3   A10 A11 A12
     WRITE, affordance MEASURED PRESENT, needs a spec         2   64 C63
-    SETTINGS one press away, unmeasured past that            2   170 176
     NEEDS AN ALLOWLIST CHANGE                               11   161 C70 175
                                                                  C64 C65 C67
                                                                  C68 C91
                                                                  63 163 C61
-    DOUBLE-REFUSED, needs two boundary changes               5   166 168 169
+    DOUBLE-REFUSED, needs two boundary changes               7   166 168 169
                                                                  C69 C62
+                                                                 170 176
     ANSWERED BY AN EXISTING RULING                           5   165 167 172
                                                                  177 178
     UNSETTLED, and the zero cannot settle them               4   164 174 171
@@ -271,9 +289,12 @@ AND reaches third parties, so it is behind 5.4 and 5.6 at once.
 a total and not its members is a number nobody can check -- which is the exact
 defect section 4 records in the ledger this document corrects.
 
-**Twelve of the 35 need no new ruling from anybody**: three are built, two need
-a WriteSpec against a control that is already on the screen, two are one press
-away, and five are already answered.
+**Ten of the 35 need no new ruling from anybody**: three are built, two need a
+WriteSpec against a control that is already on the screen, and five are already
+answered. **It was twelve until 17:27**, when the two settings rows were
+measured to be double-refused rather than one press away -- the number went
+DOWN because something was measured, which is the direction this document
+should be trusted in.
 
 ## 6. WHAT THE MEASUREMENT COST, AND WHAT IT DID NOT
 
