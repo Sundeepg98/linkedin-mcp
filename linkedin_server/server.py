@@ -3906,9 +3906,30 @@ CENSUS_SETTLED_CONTROLS: dict[str, int] = {
     "settings_dark_mode": 20,
     # 34 (2026-08-30), 33.
     "settings": 33,
-    # 31, 31, 31 -- three readings across two days, the third carrying this
-    # instrument's own "consistent" verdict. The composer is the most stable
-    # surface after the dark-mode page.
+    # MERGED 2026-09-05 FROM TWO ENTRIES THAT BOTH SAID 31. This key was
+    # written TWICE, eight lines apart, by two authors neither aware of the
+    # other, and Python kept the second and discarded the first -- while
+    # leaving the first's COMMENT in the file, reading as live. Both sets of
+    # readings are kept verbatim below because the defect was never the
+    # numbers; it was that one of these two paragraphs was decorative and
+    # nothing said which.
+    #
+    # THE VALUES AGREED, WHICH IS WHY IT SURVIVED. Nothing was broken and no
+    # test failed. What was broken was the next edit: re-measure this surface,
+    # bump the shadowed entry, write down why, and the dict keeps the other
+    # value -- a silent no-op wearing the shape of a measurement.
+    # `tests/test_a_settled_count_is_named_once.py` now refuses the class, and
+    # it was SHOWN FAILING on this exact pair rather than on a synthetic one.
+    #
+    #   author 1: "31, 31, 31 -- three readings across two days, the third
+    #             carrying this instrument's own 'consistent' verdict. The
+    #             composer is the most stable surface after the dark-mode
+    #             page."
+    #   author 2: "31 twice, 2026-08-31, identical on every count."
+    #
+    # Five readings across three days, all 31, is a stronger baseline than
+    # either paragraph claimed alone -- so merging them ADDS evidence rather
+    # than choosing between authors, and neither had to be judged.
     "post_composer": 31,
     # 77 AND 77, two independent readings on 2026-09-01 separated by hours and
     # by a server restart. EARNED RATHER THAN ASSUMED, and recorded because
@@ -3916,8 +3937,25 @@ CENSUS_SETTLED_CONTROLS: dict[str, int] = {
     # the measurement away -- a surface earns an entry by being read more than
     # once and agreeing with itself, and this one has.
     "messaging_compose": 77,
-    # 31 twice, 2026-08-31, identical on every count.
-    "post_composer": 31,
+    # 51 THREE TIMES, 2026-09-05, and by TWO DIFFERENT INSTRUMENTS: twice from
+    # `dom.read_surface_census` through
+    # `scripts/_probe_analytics_controls_live.py`, and once from
+    # `linkedin_surface_census(surface="search_appearances")` itself. Every
+    # count agreed, not just the total -- buttons 22, links 30, forms 0,
+    # dialogs 0, menus 0, menu_items 0 on all three.
+    #
+    # EARNED BY THIS TABLE'S OWN STATED RULE, quoted from the entry above:
+    # "a surface earns an entry by being read more than once and agreeing with
+    # itself." Until now the tool answered `verdict: unknown` here, which its
+    # own settle report is careful to call the ABSENCE of a check rather than a
+    # check passing -- and leaving it unknown when a baseline has been earned
+    # throws the measurement away.
+    #
+    # TWO INSTRUMENTS RATHER THAN TWO RUNS IS THE STRONGER HALF. The probe and
+    # the tool reach this page by different paths and shape it with different
+    # code; agreeing on six counts is not something a single broken reader can
+    # do by repeating itself.
+    "search_appearances": 51,
 }
 
 #: How far below the known count a reading may fall before it is called out.

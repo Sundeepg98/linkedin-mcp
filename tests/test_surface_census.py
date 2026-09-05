@@ -3678,18 +3678,28 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     #
     # ``article_composer``, ``feed_item`` and ``feed_item_commented`` are read
     # once each at most.
-    # ``search_appearances`` is the strongest case on this list and the one
-    # that shows what "unknown" is FOR: it has been read ZERO times. Not once,
-    # not twice-disagreeing -- never. A verdict of "unknown" from a surface
-    # nobody has opened is the only honest answer there is, and if this
-    # instrument reported anything else about it, the report would be an
-    # invention rather than a measurement.
+    # ``search_appearances`` WAS the strongest case on this list -- read ZERO
+    # times, not once, not twice-disagreeing, never -- and the paragraph here
+    # said so, correctly, until 2026-09-05. **IT HAS NOW BEEN READ AND IT HAS
+    # MOVED TO ``CENSUS_SETTLED_CONTROLS`` AT 51.** Three readings by two
+    # different instruments, agreeing on all six counts.
+    #
+    # THE EXAMPLE IS KEPT HERE RATHER THAN DELETED, because what it was chosen
+    # to illustrate is still true and is worth more than the row: a verdict of
+    # "unknown" from a surface nobody has opened is the only honest answer
+    # there is, and an instrument reporting anything else about it would be
+    # inventing rather than measuring. What changed is the surface, not the
+    # principle.
+    #
+    # AND THE TRANSITION IS THE POINT. This is what "unknown" is supposed to
+    # do: hold the honest answer until somebody opens the page, then get out
+    # of the way. A list of never-opened surfaces that never loses a member is
+    # a list nobody is acting on.
     for surface in (
         "article_composer",
         "feed_item",
         "feed_item_commented",
         "premium",
-        "search_appearances",
         # BOTH ADDED 2026-09-05, and they belong in THIS list rather than in
         # CENSUS_SETTLED_CONTROLS for the reason the paragraph above gives:
         # neither page has been opened once. A surface earns a baseline by
