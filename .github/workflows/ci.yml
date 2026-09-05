@@ -89,11 +89,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # An explicit list, not a cross product, because the cells are not
-        # equally priced: this is a PRIVATE repository, so runner minutes come
-        # out of the account's free allowance and a Windows minute is billed
-        # at 2x a Linux one. The suite takes ~3m30s plus a chromium download
-        # (207s measured at oldsha24, up from ~1m45s as the browser modules grew).
+        # An explicit list, not a cross product. The cells differ in wall
+        # clock, not in money.
+        #
+        # CORRECTED 2026-09-05, AND THE THING CORRECTED WAS A FACT, NOT A
+        # WORDING. This block used to read "this is a PRIVATE repository, so
+        # runner minutes come out of the account's free allowance and a Windows
+        # minute is billed at 2x a Linux one", and it sized this matrix on that
+        # basis. THE PREMISE DID NOT HOLD. Measured with `gh repo view`:
+        # Sundeepg98/linkedin-mcp is isPrivate=false, visibility=PUBLIC.
+        # GitHub Actions minutes are FREE on public repositories -- no
+        # allowance is drawn, and the 2x Windows multiplier prices nothing
+        # here. The matrix was narrowed to save minutes that were never being
+        # spent.
+        #
+        # SO WIDENING THIS MATRIX IS NOW UNBLOCKED RATHER THAN UNECONOMIC. It
+        # is left narrow deliberately, and widening it is the operator's call,
+        # not a follow-up anybody should take as implied: the costs that
+        # remain are real and are not money. Every added cell pays the suite's
+        # ~3m30s plus a chromium download (207s measured at oldsha24, up from
+        # ~1m45s as the browser modules grew) in WALL CLOCK on every push, and
+        # every added cell is one more surface that can go flaky.
+        #
+        # The per-cell reasons below are untouched by this correction. None of
+        # them was a cost argument; each stands on what its cell can catch.
         #
         #   3.10  -- the floor pyproject.toml declares (requires-python
         #            ">=3.10"). A floor nobody runs is a claim, not a fact, and
