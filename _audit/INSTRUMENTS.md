@@ -1692,3 +1692,44 @@ And one thing the live run did NOT exercise: `pairs_withheld` was 0. Only two
 numberish pairs exist on that render, so **the primary defence -- withholding
 the label in the page -- was never exercised against live markup** and remains
 proven only against the synthetic fixture.
+
+### 9.5 The enumeration guard caught this wave too, and it changed the code
+
+Added after 9.2 rather than folded into it, because the entry above was written
+before the catch and rewriting it would erase the sequence.
+
+`tests/test_urn_substitution_covers_the_class.py::test_the_consumers_of_this
+_predicate_are_the_ones_that_were_considered` went RED on
+`shape.subscription_row`. **Second catch in two days, and the second time the
+consideration it forces changed the function** rather than being written down
+and waved through.
+
+**WHAT IT FOUND.** `subscription_row` called `census_substitute` twice and the
+second call was a PUBLISHER -- the first caller in this package to emit that
+predicate's raw output from a per-record path. The href call was already safe:
+it decides only, and the emitted href is a module literal, for the reason the
+same file records -- a bare member token in a query survives these
+substitutions, measured on this very shape,
+`/newsletters/<slug>/?authorProfile=<token>` shaping to
+`/newsletters/<newsletter>/?authorProfile=<that same token>`.
+
+**THE FIX** is `census_shape`: the same substitutions PLUS the length and
+charset gate, so an uncertifiable title comes back `<opaque>` -- a refusal that
+keeps its marker -- instead of being emitted. Measured identical on every
+title the module's tests carry and different exactly where it should be. Both
+uses are now REFUSAL TESTS, so a widening of the urn pattern cannot move what
+the function publishes: structural rather than argued.
+
+**AND THE PART WORTH KEEPING IS WHY A TARGETED RUN COULD NOT HAVE FOUND IT.**
+This wave ran `test_shape.py`'s neighbours and `test_membership_row.py` -- which
+NAMES this guard in its own docstring -- and still missed it, because the guard
+lives in a third file and fires on *somebody added a caller*.
+
+> **A guard that fires on a NEW CALLER cannot be found by running the tests of
+> the thing you added.** It is not in your file, not in your feature's file,
+> and not reachable from either by reading. Only the full suite reaches it.
+
+So a targeted set is a sound check for what a change BREAKS and an unsound one
+for what a change JOINS. Anything adding a caller to a shared predicate,
+registering a tool, or extending an enumerated family owes the suite a full
+run before it commits -- or it is relying on the next wave's run to find it.
