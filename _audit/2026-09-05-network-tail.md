@@ -495,3 +495,82 @@ Recomputed at close from the rows above, not carried forward from the brief.
 
 **Net boundary movement from this wave: ZERO.** Allowlist 29 before and after,
 denylist 33 before and after. No digest moved and no re-freeze was attempted.
+
+---
+
+## 10. CLOSE -- every number here RECOMPUTED, not re-read
+
+Taken at freeze by running the code, per the standing rule that proofreading
+cannot reach a number that is wrong and only recomputation can.
+
+    allowlist patterns        29     (unchanged by this wave)
+    forbidden substrings      33     (unchanged)
+    pattern exemptions         2     (unchanged)
+    exact-url exemptions       2     (unchanged)
+    files this wave committed  2     _audit/2026-09-05-network-tail.md
+                                     scripts/_probe_network_tail_boundary.py
+    commits                    3     ffc57c7, a867488, f834091
+    linkedin_server/readonly.py      NOT TOUCHED, byte-unchanged
+
+**Zero AI attribution across all three commit bodies, with the check SHOWN
+FIRING.** A planted `Co-Authored-By` trailer returns 1 from the same needle that
+returns 0 on all three commits. A check that cannot fail certifies nothing, and
+this one is now known to be able to.
+
+**AND THAT CHECK FALSE-ALARMED ON ITS FIRST RUN, which is worth recording
+because it is the day's own law pointed at me.** My first needle included
+`noreply` and matched all three commits -- on the operator's own GitHub
+`users.noreply.github.com` author address. **A red guard means MATCHED, not
+REAL.** I measured what it saw before concluding anything, and what it saw was a
+needle I had chosen too broadly. Had I escalated instead, I would have reported
+AI attribution on three clean commits, which is the exact error already recorded
+against the lead twice today over four synthetic member ids.
+
+### Suite reds in this checkout, none of them mine
+
+Named by file, because "the text-taint guard" is not an address:
+
+    test_page_text_is_never_printed::test_no_file_prints_page_text_beyond_its_pinned_inventory
+        scripts/_probe_comment_identifier.py, scripts/_probe_contact_info_panel.py
+    test_a_sanitiser_earns_its_entry::test_every_claimant_of_a_sanitiser_name_is_enrolled
+        scripts/_probe_profile_modal_presence.py  (its owner's commit says it is fixed there)
+    test_a_correction_is_findable_from_the_claim  (3 tests)
+        2026-09-05-census-recounted.md, 2026-09-05-jobs-tail.md, 2026-09-05-profile-modals.md
+
+**The correction guard went from 1 failure to 3 in eight minutes while I worked,
+and it is not the same 1.** Different documents, different lines -- other waves
+committing audit docs. *Compare the SETS, never the totals*: a count that moves
+under a change that should not move it is a number about the tree, not about the
+guard. My document is named in NONE of the three, checked by extracting the
+document names the failures print rather than by reading the summary line.
+
+### One thing raised OUT of this wave and routed
+
+The shipped exact-value identity sweep went RED at my commit gate on a file that
+is not mine and is already COMMITTED: `_audit/2026-09-05-jobs-tail.md:403`,
+class `operator_own_denied_terms`, blob at `f8e706c`. The file is clean in the
+working tree, so tree and blob are the same object and the hit is in history.
+Push freeze is on, so nothing is published.
+
+Handed off on disk at `_TEAM_LEAD_IDENTITY_HIT_JOBS_TAIL.md` (untracked, so it
+surfaces in every wave's own `git status`) rather than by message, because the
+owning wave is not in my roster and a send to a guessed idle name forks that
+agent. **I did not read the matched line, did not unmask it, and am not ruling
+on it.**
+
+**The ordering is the finding.** Two readings, both mine, both by the shipped
+sweep, about two minutes apart: PASS 0 hits over 314 files, then FAIL 1 hit over
+332. Eighteen files entered the index in between and this one was committed
+inside that window. That is the ~16:57 entry in the freeze file replaying about
+two hours after it was written, and it is a second receipt for the pre-commit
+hook that entry recommends -- a hook would have refused the commit at the moment
+it was made, instead of leaving it to a neighbour committing two minutes later.
+
+### The single sentence, if only one survives
+
+**Two of my five blockers were costed for a boundary change that measurement
+says is not owed, and both were costed from the surface's NAME rather than its
+ADDRESS.** The denylist narrowing I was sent to make is not needed where I was
+sent; the overreach it describes is real and sits one blocker away; and the
+remedy there is an anchored exemption, which leaves the guard's reach intact,
+rather than a narrowing, which does not.
