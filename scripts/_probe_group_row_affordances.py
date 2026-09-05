@@ -1,41 +1,37 @@
 """What can be DONE to a group from the one address this server may open?
 
 # ===================================================================
-# STATUS: **THIS PROBE HAS NEVER PRODUCED A READING.** NOT VALIDATED.
+# STATUS: RUN GREEN. Its own control AGREES, and it did NOT at first.
 # ===================================================================
 #
-# Written 2026-09-05 16:50 IST and attempted THREE TIMES between 16:52 and
-# 16:56. All three aborted identically before any navigation:
+# HISTORY, kept because the failures are the evidence that the control works:
 #
-#     BrowserUnavailableError ... TimeoutError: BrowserType.connect_over_cdp:
-#     Timeout 15000ms exceeded.  <ws connected> ... then nothing
+#   16:52-17:07  FIVE attach attempts, all aborted in the CDP handshake at the
+#                hardcoded 15s ceiling while the browser was measured healthy
+#                (port listening, /json/version answering in 0.07s, the process
+#                alive). Root-caused: 120 CDP targets on a browser shared by a
+#                dozen waves, every one enumerated during the handshake.
+#                NOTHING WAS KILLED OR RESTARTED to get around it.
+#   17:10        LINKEDIN_CDP_ATTACH_TIMEOUT_MS added; this file ran.
+#   17:17        FIRST READING, AND ITS OWN CONTROL FAILED: 11 anchors, 11
+#                rows, ZERO carrying a disclosure, against FIVE from the
+#                button-up walk. Printed DISAGREE and did not publish the zero.
+#   17:29        After the fix below: 11 anchors, 10 rows, FIVE with a
+#                disclosure and five without. AGREE.
 #
-# THE BROWSER WAS NOT THE PROBLEM AND THAT WAS MEASURED, not assumed:
-# port 9224 LISTENING, ``/json/version`` answering ``Chrome/152.0.7977.77``,
-# pid 1252 alive, between the second and third attempts. The websocket
-# CONNECTS and the handshake stalls, which is the shape of contention -- Chrome
-# is shared with a dozen concurrent waves and two of this wave's probes had run
-# through it cleanly twenty minutes earlier.
+# THE DEFECT THE CONTROL CAUGHT, and it is the reason the control was written
+# before the reading was taken: the control selector includes ``a[href]``, so
+# THE GROUP ANCHOR THE WALK CLIMBS FROM SATISFIED "this ancestor holds at least
+# one control" BY ITSELF. The conjunct that was supposed to make this rule
+# stricter than the anchor-up walk was VACUOUS, and the rule silently collapsed
+# back into the walk that had already been measured wrong.
 #
-# **NOTHING WAS KILLED AND NOTHING WAS RESTARTED.** The standing rule is that
-# pid 1252 is not this wave's to touch, and a probe that cannot get a slot is a
-# scheduling fact rather than a reason to take the browser away from whoever
-# has it.
+#     A CONJUNCT THAT IS ALWAYS TRUE IS NOT A STRICTER RULE. It is the same
+#     rule with a longer comment -- and it reads, in a diff, exactly like the
+#     repair it is not.
 #
-# SO THIS FILE IS COMMITTED AS PROVISIONAL AND UNSMOKED. Its refusal path is
-# shown firing (no attach flag) and its abort path is shown firing (three
-# times). Its READING path has never executed, so **no number it would print
-# has been seen, and no claim in this docstring about what LinkedIn draws on a
-# suggestion row is a measurement.** The precedent for admitting an instrument
-# in this state is the register's own: PROVISIONAL-UNSMOKED, with the controls
-# it would have to pass written out rather than implied.
-#
-# THE CONTROL IT MUST PASS ON ITS FIRST REAL RUN, stated now so a successor
-# cannot grade it after the fact: **it must resolve exactly FIVE rows carrying
-# a disclosure.** The button-up walk measured five, twice, and this file uses a
-# THIRD stopping rule. A number other than five means this rule is wrong, not
-# that the page changed -- and the file prints AGREE/DISAGREE on that
-# comparison rather than leaving it to a reader.
+# Nothing but the control separated the two. The output of the broken rule --
+# eleven rows, no disclosures -- is a perfectly plausible page.
 
 TWENTY OF ``GROUPS-SURFACE``'S THIRTY-TWO ROWS ARE WRITES, and every one of
 them was costed off a page nobody had opened. ``_probe_groups_menu.py`` opened
@@ -59,11 +55,30 @@ from, so that repair is unavailable here and a third rule is needed:
     anchor AND at least one control. Stop there. If an ancestor holding more
     than one group anchor is reached first, the anchor has no row of its own.
 
-**A ROW IS THE SMALLEST THING THAT HOLDS ONE GROUP AND SOMETHING TO DO TO IT.**
-That definition works from either end, which is the property the previous two
-lacked, and this probe reports the count it finds per class so a reader can see
-it agreeing with the button-up walk rather than take it on trust: **five rows
-carrying a disclosure is the number to check against.**
+**A ROW IS THE SMALLEST THING THAT HOLDS ONE GROUP AND SOMETHING TO DO TO IT
+THAT IS NOT THE GROUP LINK ITSELF.** The last clause is not pedantry -- it is
+the whole difference between this rule and the one it replaces, and leaving it
+out is what the STATUS block above records failing.
+
+This probe reports the count it finds per class so a reader can see it agreeing
+with the button-up walk rather than take it on trust: **five rows carrying a
+disclosure is the number to check against.**
+
+## WHAT IT ANSWERED, 2026-09-05 at 17:29 IST -- AND THE ANSWER IS AN ABSENCE
+
+    ROWS WITH A DISCLOSURE (memberships)   5   'Update your settings'  x5
+    ROWS WITHOUT ONE (suggestions)         5   nothing repeats at all
+
+**NO CONTROL IS DRAWN UNIFORMLY ACROSS THE SUGGESTION ROWS**, and that is how
+an absence becomes a measurement here rather than a shrug. A join affordance
+would wear one label on every suggestion row -- exactly as `Update your
+settings` does on every membership row -- so it would tally 5 and survive the
+count rule. Every suggestion-row label tallied ONE and was redacted as a
+singleton, which is what a label carrying a group's own name does.
+
+So `N 63`, `N 163` and `M C61` -- join, request to join -- are NOT reachable
+from this admitted address. They need `/groups/<id>/` or `/groups/discover/`,
+and neither is on the allowlist.
 
 ## LABELS ARE SHAPED AND COUNT-REDACTED, and the tally is real
 
@@ -114,8 +129,18 @@ ROWS_JS = """
   };
   const groupAnchors = (root) =>
     Array.from(root.querySelectorAll('a[href]')).filter(isGroup);
-  const controlsIn = (root) =>
-    Array.from(root.querySelectorAll(cfg.controls));
+  // THE GROUP ANCHOR IS NOT ONE OF THE ROW'S CONTROLS, AND RUN 1 SHIPPED
+  // BELIEVING IT WAS. The control selector includes ``a[href]``, so the very
+  // anchor the walk is climbing from satisfied "this ancestor holds at least
+  // one control" -- the added conjunct was VACUOUS, the rule collapsed back
+  // into the anchor-up walk, and it resolved 11 rows of which 0 carried a
+  // disclosure. **A conjunct that is always true is not a stricter rule; it
+  // is the same rule with a longer comment.**
+  const controlsIn = (root) => {
+    const own = new Set(groupAnchors(root));
+    return Array.from(root.querySelectorAll(cfg.controls))
+                .filter((n) => !own.has(n));
+  };
 
   const anchors = groupAnchors(document);
   const rows = [];
@@ -173,8 +198,10 @@ async def main() -> int:
     print("=== WHAT DOES LINKEDIN DRAW ON EACH GROUP ROW?")
     print("    Nothing is pressed. Labels are shaped and count-redacted.")
 
+    page_ref = None
     try:
         async with BROWSER.session() as page:
+            page_ref = page
             await BROWSER.goto(page, CONTROL_URL)
             control_before = int(
                 (await dom.read_surface_census(page)).get("controls_read") or 0
@@ -230,6 +257,23 @@ async def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
+    # CLOSE THE TAB THIS RUN OPENED. Measured 2026-09-05: in ATTACH mode
+    # ``BROWSER.session()`` calls ``ctx.new_page()`` and its own ``finally``
+    # only touches an idle timer, so **every probe run leaves a tab open on the
+    # operator's browser.** Twenty-four had accumulated across the fleet, and
+    # ``connect_over_cdp`` enumerates every target during the handshake, which
+    # is why attach was timing out for everybody.
+    #
+    # THE FIX BELONGS HERE AND NOT IN ``browser.py``, and the difference is
+    # LIFETIME rather than code: the MCP server keeps its page ACROSS tool
+    # calls on purpose, so closing centrally would cost a fresh tab per call
+    # and throw that reuse away. A probe is a one-shot and has nothing to keep.
+    #
+    # In a ``finally``, so a run that ABORTS still cleans up -- the aborting
+    # runs are exactly the ones that were leaking.
+    finally:
+        if page_ref is not None and not page_ref.is_closed():
+            await page_ref.close()
 
     floor = int(CONTROL_EXPECTED * 0.5)
     print("\n=== VERDICT")

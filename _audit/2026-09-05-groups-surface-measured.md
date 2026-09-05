@@ -171,12 +171,13 @@ SETTINGS and the per-row menu draws `Update your settings`, so their surface is
 one press away on an admitted address. **Both are UNMEASURED past that point**
 -- nobody has seen what that item opens.
 
-### 5.4 NEEDS AN ALLOWLIST CHANGE -- 8 rows
+### 5.4 NEEDS AN ALLOWLIST CHANGE -- 11 rows
 
 | rows | why |
 |---|---|
 | `N 161`, `M C70` | search inside Groups -- `/search/results/groups/` belongs to `SEARCH-RESULTS-SURFACE`, which is queued DECIDE and is not this blocker's to inherit |
 | `N 175` | a private unlisted group by direct link -- `/groups/<id>/` |
+| `N 63`, `N 163`, `M C61` | JOIN and request-to-join. Moved here from 5.7 at 17:29: measured, no join control is drawn on the root's suggestion rows |
 | `M C64`, `M C65`, `M C67`, `M C68`, `M C91` | the group FEED -- posting, commenting, editing, approval, reacting. All need `/groups/<id>/`, and the ledger's own ruling stands: **posting in a group is a second broadcast route with a different audience and is `publish_post`'s equal in risk** |
 
 `N 174` is NOT here, and the first draft of this table put it here. It is an
@@ -204,17 +205,35 @@ denylist removal is a different and heavier act than an allowlist addition.
 | `N 178` | which groups a member belongs to -- needs a third party's profile, which `PERMANENTLY_FORBIDDEN[load_a_third_partys_profile_to_measure_a_control]` refuses outright |
 | `N 172` | a fellow member's connections. Not an action he takes; a LinkedIn behaviour |
 
-### 5.7 UNSETTLED, AND THE ZERO CANNOT SETTLE THEM -- 7 rows
+### 5.7 UNSETTLED, AND THE ZERO CANNOT SETTLE THEM -- 4 rows
 
-`N 63`, `N 163`, `N 164`, `M C61` are the JOIN family. The join control would
-be drawn on a SUGGESTION row, and the suggestion rows are on the admitted root
--- so this may be reachable now. **It is not measured.**
-`scripts/_probe_group_row_affordances.py` was written today to settle exactly
-this and **has never produced a reading**: three attach attempts, all aborted
-in the CDP handshake while port 9224 answered `/json/version` normally and
-pid 1252 stayed alive. Contention, measured rather than assumed, and nothing
-was killed or restarted to get around it. The file is committed PROVISIONAL AND
-UNSMOKED with the control it must pass on its first real run written into it.
+**THREE OF THIS BUCKET WERE SETTLED AT 17:29 AND MOVED TO 5.4.** `N 63`,
+`N 163` and `M C61` -- join and request-to-join -- were costed on the guess
+that the join control sits on a SUGGESTION row, which is on the admitted root.
+`scripts/_probe_group_row_affordances.py` measured it:
+
+    ROWS WITH A DISCLOSURE (memberships)   5   'Update your settings'  x5
+    ROWS WITHOUT ONE (suggestions)         5   nothing repeats at all
+
+**NO CONTROL IS DRAWN UNIFORMLY ACROSS THE SUGGESTION ROWS**, and that is what
+turns an absence into a measurement. A join affordance would wear one label on
+every suggestion row -- exactly as `Update your settings` does on every
+membership row -- so it would tally 5 and survive the count rule. Every
+suggestion-row label tallied ONE and was redacted as a singleton, which is what
+a label carrying a group's own name does. **So the join rows need
+`/groups/<id>/` or `/groups/discover/`, and neither is admitted.**
+
+`N 164` ("join by responding to an invitation from a member or manager") stays
+here: it needs an invitations surface, and no instrument has looked for one.
+
+**THE PROBE'S OWN CONTROL FAILED FIRST AND THAT IS WHY ITS ANSWER IS WORTH
+ANYTHING.** Its first reading was 11 rows and ZERO disclosures against the
+button-up walk's five; it printed DISAGREE and refused to publish. The cause:
+its control selector included `a[href]`, so the group anchor it climbed from
+satisfied "this ancestor holds a control" all by itself. **A conjunct that is
+always true is not a stricter rule -- it is the same rule with a longer
+comment, and in a diff it reads exactly like the repair it is not.** Corrected,
+it resolves 5 and 5 and prints AGREE.
 
 `N 174` (groups requested to join): the root draws two sections and neither is
 a pending-requests list. **That is not evidence the surface does not exist**,
@@ -235,15 +254,15 @@ AND reaches third parties, so it is behind 5.4 and 5.6 at once.
     UNREACHABLE FOR THIS ACCOUNT (inferred, test named)      3   A10 A11 A12
     WRITE, affordance MEASURED PRESENT, needs a spec         2   64 C63
     SETTINGS one press away, unmeasured past that            2   170 176
-    NEEDS AN ALLOWLIST CHANGE                                8   161 C70 175
+    NEEDS AN ALLOWLIST CHANGE                               11   161 C70 175
                                                                  C64 C65 C67
                                                                  C68 C91
+                                                                 63 163 C61
     DOUBLE-REFUSED, needs two boundary changes               5   166 168 169
                                                                  C69 C62
     ANSWERED BY AN EXISTING RULING                           5   165 167 172
                                                                  177 178
-    UNSETTLED, and the zero cannot settle them               7   63 163 164
-                                                                 C61 174 171
+    UNSETTLED, and the zero cannot settle them               4   164 174 171
                                                                  C66
                                                               ----
                                                                 35
@@ -276,7 +295,16 @@ menu closed on Escape with `aria-expanded` back to 0.
   specified for whoever takes it, not built.
 * **The `Update your settings` press was not taken.** It is the cheapest thing
   left and it settles four rows at once (`N 170`, `N 176`, and the admin
-  inference behind `N A10`-`A12`).
+  inference behind `N A10`-`A12`). It is now measured to be drawn on all five
+  membership rows as a LINK rather than only as a menu item, so a press has a
+  second route to it.
+* **No page was closed by the probes until 17:26.** Measured: in ATTACH mode
+  `BROWSER.session()` opens a tab and its own `finally` only touches an idle
+  timer, so every probe run on this project leaks one. Twenty-four had
+  accumulated across the fleet and `connect_over_cdp` enumerates every target
+  during the handshake, which is what made attach fail five times running. All
+  three probes here now close in a `finally`; `browser.py` was deliberately NOT
+  changed, because the MCP server keeps its page across tool calls on purpose.
 * **`shape.membership_row` was not changed.** Its hole is real, tested, and
   still has no consumer; this wave built the alternative rather than editing a
   function whose limit is deliberately asserted by its own tests.
@@ -289,7 +317,7 @@ menu closed on Escape with `aria-expanded` back to 0.
 |---|---|---|
 | `_probe_groups_menu.py` | dark-mode 20 at both ends; refuses without CDP attach | passed, 4 runs; refusal shown firing |
 | `_probe_membership_tally_live.py` | dark-mode 20 at both ends; feed badge readable at both ends | passed, 2 runs |
-| `_probe_group_row_affordances.py` | must resolve exactly 5 disclosure rows | **NEVER RUN GREEN** -- 3 aborted attaches |
+| `_probe_group_row_affordances.py` | must resolve exactly 5 disclosure rows | RUN GREEN at 17:29 -- and its FIRST reading FAILED that control at 0, which is how the vacuous conjunct was caught |
 | `tests/test_membership_tally.py` | both refusal branches killed by planted mutation | passed, 23 tests |
 | `tests/test_no_committed_identity.py` | shown red on a real-looking slug, green after the rename, red again when it is restored | passed |
 

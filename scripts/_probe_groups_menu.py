@@ -313,8 +313,10 @@ async def main() -> int:
     arrived_tally: dict[str, int] = {}
     per_menu: list[dict] = []
 
+    page_ref = None
     try:
         async with BROWSER.session() as page:
+            page_ref = page
             print("\n=== 1. CONTROL AND COST, BEFORE")
             await BROWSER.goto(page, CONTROL_URL)
             control_before = await _census_controls(page)
@@ -473,6 +475,23 @@ async def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
+    # CLOSE THE TAB THIS RUN OPENED. Measured 2026-09-05: in ATTACH mode
+    # ``BROWSER.session()`` calls ``ctx.new_page()`` and its own ``finally``
+    # only touches an idle timer, so **every probe run leaves a tab open on the
+    # operator's browser.** Twenty-four had accumulated across the fleet, and
+    # ``connect_over_cdp`` enumerates every target during the handshake, which
+    # is why attach was timing out for everybody.
+    #
+    # THE FIX BELONGS HERE AND NOT IN ``browser.py``, and the difference is
+    # LIFETIME rather than code: the MCP server keeps its page ACROSS tool
+    # calls on purpose, so closing centrally would cost a fresh tab per call
+    # and throw that reuse away. A probe is a one-shot and has nothing to keep.
+    #
+    # In a ``finally``, so a run that ABORTS still cleans up -- the aborting
+    # runs are exactly the ones that were leaking.
+    finally:
+        if page_ref is not None and not page_ref.is_closed():
+            await page_ref.close()
 
     print("\n=== 6. THE MENU, SHAPED AND COUNT-REDACTED")
     print("    Every label passes census_shape AND census_redact_rare with "
