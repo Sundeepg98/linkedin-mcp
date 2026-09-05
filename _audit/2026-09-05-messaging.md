@@ -2,7 +2,13 @@
 
 **Owner: the `messaging` wave. Scope: 7 blockers, 24 rows (2R / 21W / 1RW).**
 **Page loads taken: ZERO. Messages sent: ZERO. Rows retired: ZERO.**
-**Commits: 4. Tests added: 7, in one new file. Boundary changes: 0.**
+**Commits: 7. Tests added: 8, in one new file. Boundary changes: 0.**
+
+**HEADLINE: a defect in `writes._recipient_gate` -- the last thing between a
+tool call and a message reaching a real person -- was found, measured, ruled
+on and FIXED today. Two ways a stranger reached `proceed: True` now refuse.
+Sections 1, 1a and 7. Section 7 carries the ruling and supersedes my own
+recommendation not to fix it.**
 
 Rows, recomputed at freeze rather than re-read from the brief:
 
@@ -267,7 +273,7 @@ Recomputed at freeze, not re-read from the sections above.
                           + the commit carrying section 1a
     file                  tests/test_the_needle_is_matched_as_a_bare_substring.py
                           430 lines, 7 tests
-    tests                 7 passed, 18.21s
+    tests                 8 passed after the fix (7 before it)
                           26 passed with tests/test_send_message_gate.py at
                           the tree as it stood at close, 90.69s -- re-run
                           because other waves committed to the modules this
