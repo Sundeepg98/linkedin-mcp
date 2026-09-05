@@ -15,7 +15,7 @@ taken with `date`, not from an agent's sense of elapsed time.
 | row | blocker | queue | what happened |
 |---|---|---|---|
 | 38 | `CONTACT-INFO-PANEL` | MEASURE | **MEASURED LIVE. The panel was opened for the first time in this repository.** |
-| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | ruling recorded below; the read module was in flight at the deadline and is NOT in this commit |
+| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | ruling and design recorded below. **The module was delegated and NEVER ARRIVED** -- measured on disk at 19:07, neither file exists. Nothing recommendations-related is in the tree |
 | 43 | `BADGES-SURFACE` | BUILD | **NOT STARTED** |
 | 72 | `MULTILANG-PROFILE` | BUILD | **NOT STARTED** |
 | 78 | `OPEN-PROFILE-SETTING` | BUILD | **NOT STARTED** |
@@ -219,10 +219,19 @@ The slug domain is worse: slugs are enumerable and guessable, so a digest would
 be a lookup table wearing a redaction's clothes -- the shape this repository
 calls worse than the leak.
 
-**STATUS AT THE DEADLINE: the module and its test were in flight with an
-implementer and had not returned.** Nothing recommendations-related is in this
-commit. The ruling above is the durable part and is written here so the next
-wave starts from the design rather than from the surface name.
+**STATUS AT THE FREEZE, MEASURED ON DISK AND NOT RELAYED.** The module and its
+test were delegated to an implementer at 18:50. At 19:07 -- 28 minutes later --
+`ls` reports neither `linkedin_server/recommendations.py` nor
+`tests/test_recommendation_tally.py` exists, and `git status` shows no
+recommendations-named file of any kind. **No result of that agent's is reported
+here, in either direction:** an agent that has gone quiet is indistinguishable
+from one that is working, and only the box can tell them apart. What is stated
+is the disk reading and its timestamp.
+
+**So this row did NOT move.** The ruling and the design above are the durable
+part, and they are written here precisely because the code is not -- the next
+wave starts from the design rather than from the surface name, which is the
+whole point of routing the artifact rather than the verdict.
 
 ---
 
@@ -328,8 +337,27 @@ wave's to do from a reading this thin -- name the owner with
 
 ## 5. COST, RECOMPUTED RATHER THAN RECALLED
 
-Counted off the probe's own control flow, not off memory: **five page loads**
-(`/mypreferences/d/dark-mode`, `/feed/`, `/in/me/`, `/feed/`,
-`/mypreferences/d/dark-mode`), **one press**, one Escape. One tab opened and
-closed -- `page.is_closed()` read `True`, which is a presence reading about the
-one object this run created, not a count over a pool a dozen waves share.
+**THE FIRST VERSION OF THIS SECTION UNDER-REPORTED BY MORE THAN HALF, AND IT
+UNDER-REPORTED IN THE FLATTERING DIRECTION.** It read *"five page loads"*,
+which is the count for ONE run, and there were THREE. Nothing external would
+have flagged it: five is derivable from the code, it was mine, and it made the
+wave look cheaper than it was. **Recomputing the number caught it; re-reading
+the sentence could not have**, which is the same 6x lesson the groups wave
+recorded today at a larger magnitude.
+
+Recomputed from the probe's own control flow with `grep -c` rather than from
+memory -- **five loads PER RUN**:
+
+    /mypreferences/d/dark-mode, /feed/, /in/me/, /feed/, /mypreferences/d/dark-mode
+
+    run 1  18:52   5 loads   completed
+    run 2  19:03   1 load    ABORTED at the first evaluate, on its own bad regex
+    run 3  19:05   5 loads   completed
+    ------------------------------------------------------------------
+    TOTAL         11 page loads, 2 completed presses, 2 Escape presses
+
+One tab per run, opened and closed. `page.is_closed()` read `True` on all
+three, INCLUDING the aborted one -- which is the reading that matters, because
+the `finally` is there for exactly the runs that do not finish. That is a
+presence reading about the one object each run created, not a count over a
+pool a dozen waves share.
