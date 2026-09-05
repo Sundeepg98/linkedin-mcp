@@ -181,6 +181,43 @@ a measured control to aim at instead of a plan for one.
 
 ---
 
+## 3c. `undercounted` IS A CORRECT GATE ON AIMING AND AN OVER-STRONG ONE ON COUNTING
+
+Read off the shipped code rather than its reputation:
+
+    "undercounted": bool(census.get("truncated")) or described != counted
+
+Two conditions, one flag, and they are not the same claim. `counted` comes
+from `counts.file_inputs`, a **document-wide `querySelectorAll`** that a
+control-list cap cannot touch. `described` comes from the censused controls,
+which stop at `CENSUS_MAX_CONTROLS`. So a truncated census makes the
+DESCRIPTIONS incomplete while leaving the COUNT exact.
+
+The reader's own docstring is right: *"a caller must not aim on a truncated
+reading."* Aiming needs a described control. **Counting does not.**
+
+**WHERE IT MATTERS, and it is a reading in the survey this wave already
+corrects once.** The feed came back `count=0 described=0 undercounted=True`
+and was recorded as *"UNKNOWN -- the census was truncated; no count may be
+read off this."* The truncation is real (177 buttons, 192 links, past the
+cap). But `count=0` is a document-wide zero, and with nothing to describe
+`described == counted`; the ONLY thing making that reading UNKNOWN is the
+`census.truncated` disjunct.
+
+**The honest statement about the feed is stronger than the one recorded:** it
+draws ZERO file inputs document-wide, and nothing can be AIMED there because
+its control list was cut short. Two facts, and the flag collapses them into
+the weaker one.
+
+**NOT FILED AS A DEFECT AND NOT CHANGED.** `read_file_inputs` is another
+wave's artifact, its conservative disjunct is defensible for the decision it
+was built to gate, and a caller wanting the count already has `count` sitting
+beside the flag. What is wrong is a READING that treats the flag as a verdict
+on the count -- and that is this document's business, because the same flag
+governs every surface in section 5's table.
+
+---
+
 ## 4. A GAP IN A SHIPPED CONSENT GUARD, REPORTED AND NOT FIXED
 
 `tests/test_navigation_is_never_derived.py` refuses a navigation-derived url
