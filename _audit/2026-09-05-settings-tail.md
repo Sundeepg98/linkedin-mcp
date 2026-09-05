@@ -364,3 +364,55 @@ freeze rather than re-read.
 * No write fired. No boundary list edited. No denylist touched. Nothing pushed.
 * No name, member id, slug, urn or page text appears in this document, in the
   module, in its tests or in the probe's output.
+
+---
+
+## 7. FREEZE, 19:15 IST -- numbers RECOMPUTED, not re-read
+
+    commits   3     6291bb6 (instrument)  d78aa99 (this doc + back-pointer)
+                    0850082 (inventory pin)
+    files     6     3 new source, 1 new doc, 2 pins/back-pointers
+    AI attribution  ZERO across all three, verified per commit
+    sweep at gate   PASS, 0 hits across 335 tracked files
+    pushed          NOTHING
+
+**Guard run at freeze: 826 passed, 2 failed. NEITHER FAILURE IS THIS WAVE'S,
+and both were checked rather than assumed:**
+
+| red | owner | how established |
+|---|---|---|
+| `test_the_tab_leak_only_ever_shrinks` (39 -> 41) | two other waves | `_probe_notify_cost_precondition.py` occurs **0 times** in the guard's own leaking list |
+| `test_every_claimant_of_a_sanitiser_name_is_enrolled` | `_probe_premium_entitlement.py` | the assertion names that file |
+
+### The second red is worth more than its fix, because it is MY defect repeated
+
+This wave's first probe defined a `_relation` helper, and the same two guards
+refused it at 19:01. I cleared them by STRUCTURE -- handing the navigation
+result to `auth.assert_not_authwall`, which raises, so no navigation-derived
+value is bound to a name that reaches a print. Green at 19:03.
+
+**At 19:14 the same guard was red again, on a different wave's probe, for the
+identical reason.** Two waves reached the same trap within about fifteen
+minutes, independently.
+
+That is the "reading a documented near-miss does not prevent it" finding
+arriving a second time, and it argues for something stronger than a note:
+**`_relation` is an attractive name for exactly the job that must not be done
+casually** -- turning a url into a description -- so the trap is structural
+rather than careless. The cheap hardening is not documentation. It is that
+`_SANITISERS` membership be spelled somewhere a probe author cannot pick the
+name by accident, or that the refusal message say *"rename it, do not enrol
+it"* first and name enrolment second. It currently advises enrolment, which is
+the more dangerous of the two remedies and the one it puts first.
+
+Recorded, not acted on: that message belongs to the guard's owner.
+
+### And a false positive of my own, kept because it is the day's disease in miniature
+
+My first AI-attribution check reported **1 hit on every one of my three
+commits**. It was matching `noreply` inside the operator's own configured
+GitHub address, `<id>+<user>@users.noreply.github.com` -- his legitimate
+identity, not an attribution trailer. A detector that fires on the correct
+state is worse than none, because the natural next move is to "fix" a commit
+that was already clean. Re-checked against the actual trailer vocabulary:
+**zero AI attribution, confirmed per commit.**
