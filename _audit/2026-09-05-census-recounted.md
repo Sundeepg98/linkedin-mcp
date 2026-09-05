@@ -241,8 +241,52 @@ not see is a counter that under-reports in silence.
     counter, tracked     scripts/count_census_states.py
     counter, existing    _audit/_scratch/_route_extract_gaps.py (gitignored)
     applier              _audit/_scratch/_census_apply_retirements.py (gitignored)
-    identity sweep       PASS, 0 hits across 311 swept files, run at the gate
+    identity sweep       see 7.1 -- PASS at `990bbd3`, FAIL at `cc3745f`,
+                         and the difference is not this wave's file
     correction guard     8 of 9 passed; the one red is NOT this wave's -- see below
+    push                 BLOCKED, and not by anything here. See 7.1
+
+## 7.1 THE SWEEP PASSED, THEN FAILED, AND MY OWN COMMIT MESSAGE IS WRONG ABOUT IT
+
+**CORRECTING MY OWN COMMIT MESSAGE, `cc3745f`.** Its closing line reads
+*"sweep_tracked_for_identity: PASS, 0 hits across 311 files, run at the gate."*
+**That is the reading from the FIRST commit, `990bbd3`, and it was already false
+when I wrote it.** The run I took immediately before `cc3745f` FAILED:
+
+    before 990bbd3   sweeping 314 tracked files   PASS, 0 hits across 311
+    before cc3745f   sweeping 332 tracked files   FAIL: 1 hit
+                     _audit/2026-09-05-jobs-tail.md:403 [operator_own_denied_terms]
+
+**EIGHTEEN FILES ENTERED THE INDEX BETWEEN THE TWO RUNS**, and one of them
+carries a real string. That is this repository's ~16:57 finding reproducing
+exactly: *the exact-value sweep runs AT THE GATE, and a sweep from earlier in the
+session is not evidence about the current tree.* I ran it at the gate, got the
+answer the rule exists to surface, and then pasted the earlier line into the
+message anyway. **The rule caught the tree and I defeated it by transcribing a
+number instead of reading the one in front of me** -- which is the same act as
+proofreading a figure rather than re-deriving it, one line lower down.
+
+**THE HIT IS NOT THIS WAVE'S AND NONE OF THIS WAVE'S FILES CARRY ONE.** Measured:
+zero hits across `_audit/2026-09-05-census-recounted.md`,
+`scripts/count_census_states.py`, `_audit/2026-09-05-decide-retire-rulings.md`,
+the four `_audit/_census/` slices and
+`tests/test_a_correction_is_findable_from_the_claim.py`.
+
+    file      _audit/2026-09-05-jobs-tail.md, line 403
+    class     operator_own_denied_terms
+    command   ./venv/Scripts/python.exe scripts/sweep_tracked_for_identity.py
+    owner     `git log --oneline -1 --` names `39b5a64` as its most recent
+              commit; it was created in `f8e706c`, both after `990bbd3`
+
+**THE STANDING RULE APPLIES AND I AM NOT INVOKING THE EXCEPTION.** A red guard
+means UNDECLARED, not real -- except for the one class where they coincide,
+machine paths, and this is not that class. The sweep's own summary line says
+*"Every one is a real string in a tracked file"*, which is the sweep's claim
+about its wordlist rather than an adjudication of that line, and the owner makes
+it. **What is certain is that a push is blocked until somebody rules on it**, and
+that nobody had said so, because the run that found it happened inside a commit
+that reported the opposite.
+
     push                 none
 
 **THE ONE RED, ROUTED WITH ITS ARTIFACT RATHER THAN ITS VERDICT.**
