@@ -324,6 +324,48 @@ write, and the exemption list carries a control asserting each entry really
 does make the claim. The prose was reworded instead, the exemption was
 deleted, and the test now needs none.
 
+## 8B. AN INDEPENDENT COUNT-SITE CENSUS FOUND TWO SITES I MISSED
+
+A child was dispatched to census every tracked site carrying `41` or `29` as a
+tool-count claim, pinned to the parent commit, with no permission to edit. Its
+deliverable is `_audit/_scratch/_groups-wire-count-sites.md`. **It confirmed
+the four sites I changed and found two more, both invisible to the obvious
+search:**
+
+1. **`server.py` cited the test I RENAMED, twice** --
+   ``test_the_surface_is_exactly_the_fortyone_tools`` at two sites, after I
+   had renamed it to `..._fortytwo_...`. **A Python identifier cannot carry a
+   hyphen**, so the glued spelling matches neither `forty-one` nor
+   `forty one`; only a pattern with an OPTIONAL separator finds it. I caused
+   these two dangling citations with my own rename and did not see them.
+2. **`README.md`'s opening headline was stale by NINE TOOLS** -- *"Thirty-three
+   tools ship. Twenty-one read. Five write. The other seven are write-shaped,
+   gated, and cannot act at all"* against a measured 42 / 30 / 12 / 0. **All
+   four numbers wrong, and the seventh category has been empty for some time.**
+   It predates this wave by several bumps.
+
+**THE SECOND ONE IS THE FINDING AND IT IS NOT ABOUT ARITHMETIC.**
+`server.py`'s module docstring carries the same three numbers and IS pinned --
+`test_this_modules_docstring_numbers_are_derived` reads those words and fails
+if they disagree with the registry. **The README headline, which is the first
+sentence any reader of this repository sees, is pinned by nothing.** So the
+highest-traffic claim on the surface is the unguarded one. Corrected, with
+the stale text kept and the asymmetry named in the file itself.
+
+Two smaller notes from the same census, neither actioned: `README.md`'s "27"
+still does not reconcile (30 rows over 28 distinct names, no reading gives
+27), which its own paragraph already parks; and the child confirmed
+independently that the pinned-inventory paragraph about `groups.py` does not
+go false, because its structural claim -- no `read_`-prefixed function in
+`groups.py` itself -- survives the wiring.
+
+**AND IT CAUGHT THE TREE MOVING UNDER IT**, which is why its numbers are
+trustworthy: two scans of `server.py` seconds apart disagreed on a line number
+for identical text, so it pinned the whole census to an immutable SHA and
+verified every prediction against `git diff` afterwards. That is the
+suite-reading-is-dated-by-the-tree law applied by an agent to its own work,
+unprompted.
+
 ## 9. WHAT IS STILL OWED
 
 * **`recommendations.py` is untouched and still has no consumer.** Its two

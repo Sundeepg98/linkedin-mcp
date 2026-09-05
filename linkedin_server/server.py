@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_fortyone_tools``'s split rather than
+``test_the_surface_is_exactly_the_fortytwo_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -1203,7 +1203,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_fortyone_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_fortytwo_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.

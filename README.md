@@ -3,11 +3,26 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Thirty-three tools ship. Twenty-one read. Five write. The other seven are
-write-shaped, gated, and cannot act at all.**
+**Forty-two tools ship. Thirty read. Twelve write. None is write-shaped and
+unable to act.**
+
+**AND THIS LINE WAS STALE BY NINE TOOLS WHEN THAT WAS WRITTEN, 2026-09-05.**
+It read *"Thirty-three tools ship. Twenty-one read. Five write. The other
+seven are write-shaped, gated, and cannot act at all"* -- every one of the
+four numbers wrong, and the seventh category has been EMPTY for some time.
+It was found by a census commissioned for a different purpose, not by a test.
+
+**THAT IS THE POINT WORTH KEEPING, not the numbers.** This paragraph already
+recorded the same failure once, one generation earlier, and the fix was to
+re-derive the numbers rather than to build something that would notice. The
+count in `linkedin_server/server.py`'s module docstring IS pinned -- a test
+reads those words and fails if they disagree with the registry -- and **this
+headline, the first thing any reader sees, is pinned by nothing.** So the
+higher-traffic claim is the unguarded one, which is this repository's
+standing-instruction problem in its purest form.
 
 This line said *"Fourteen of its seventeen tools read and change nothing.
-Three write"* until 2026-08-31, and it is corrected rather than quietly
+Three write"* until 2026-08-31, and it was corrected rather than quietly
 widened: every one of those three numbers was stale, and the write count was
 stale in the direction that matters. The numbers above are derived rather
 than counted by hand -- thirty-three and twenty-one are pinned in
