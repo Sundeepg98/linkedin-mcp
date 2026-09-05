@@ -586,3 +586,98 @@ def test_no_comment_claims_the_allowlist_accepts_what_it_refuses():
         "this comment says the allowlist would accept a spelling "
         "assert_read_url refuses: %s" % claims
     )
+
+
+# ---------------------------------------------------------------------------
+# A SIXTH DRIFT, and this one has not happened yet
+# ---------------------------------------------------------------------------
+#
+# The five above are drifts that SHIPPED. This is the same shape caught before
+# it moves, and it is here because the sentence that states it is the only
+# thing holding it: ``linkedin_my_profile`` says, of the urls it hands back,
+#
+#     `/in/me/details/<section>/` is both the form a browser resolves for him
+#     and the exact form `PROFILE_DETAIL_URLS` above navigates. EMISSION AND
+#     NAVIGATION NOW AGREE.
+#
+# They agree by COINCIDENCE OF TWO LISTS, not by construction. The tool
+# NAVIGATES with ``PROFILE_DETAIL_URLS`` and EMITS from a hardcoded
+# ``("Experience", "Education", "Skills")`` written 2300 lines away, so a
+# fourth section added to the table would leave the emission silently short
+# and the sentence silently false.
+#
+# THAT EXACT SCENARIO IS THE ONE THE TABLE'S OWN COMMENT WORRIES ABOUT --
+# "a fourth section admitted without re-reading the call site". The table was
+# built as a lookup precisely so a caller's string could never reach a url;
+# the emission site then interpolates, safely, from literals. Safe today, and
+# the argument for the table says exactly what "safe today" is worth.
+#
+# NOT FIXED BY EDITING server.py. Deriving the emission from the table would
+# make the invariant structural and this guard tautological -- the better
+# engineering, and not a change to make inside a shipped read tool in a tree
+# eight waves are writing, on a defect that has not fired. Pinned instead, so
+# whoever makes that change, or adds the fourth section, meets it.
+
+
+def _details_emission_sections() -> set[str]:
+    """The sections ``linkedin_my_profile`` EMITS urls for, read from source.
+
+    Located by CONTENT. The comprehension has no name to import and no way to
+    be called without a live profile read, so the source is the only place the
+    list exists.
+    """
+    import pathlib
+
+    marker = 'out["details_urls"] = {'
+    source = pathlib.Path(server.__file__).read_text(
+        encoding="utf-8", errors="replace"
+    )
+    start = source.find(marker)
+    assert start > 0, "emission site not found: %r" % marker
+    block = source[start : start + 400]
+    tup = re.search(r"for section in \(([^)]*)\)", block)
+    assert tup, "no section tuple in the emission block: %r" % block[:200]
+    return {
+        name.strip().strip("\"'").lower()
+        for name in tup.group(1).split(",")
+        if name.strip()
+    }
+
+
+def test_the_emission_site_was_found_and_is_not_empty():
+    """A set comparison between two empty sets passes. This stops that."""
+    sections = _details_emission_sections()
+    assert len(sections) >= 3, sections
+    assert "skills" in sections, sections
+
+
+def test_emission_and_navigation_agree_on_the_same_sections():
+    """The claim, checked. It is true today and nothing was holding it.
+
+    Adding a fourth entry to ``PROFILE_DETAIL_URLS`` without adding it to the
+    emission tuple turns this red, which is the whole point: the tool would
+    otherwise go on advertising three of four addresses while its own comment
+    said emission and navigation agree.
+    """
+    emitted = _details_emission_sections()
+    navigated = set(server.PROFILE_DETAIL_URLS)
+    assert emitted == navigated, {
+        "emitted, not navigated": sorted(emitted - navigated),
+        "navigated, not emitted": sorted(navigated - emitted),
+    }
+
+
+def test_every_navigated_detail_url_has_the_self_resolving_form():
+    """The other half of the claim: agreement on SHAPE, not only on keys.
+
+    Two lists can hold the same three names and still point at different
+    addresses. Every navigated url must be the ``/in/me/`` spelling the
+    emission site writes, which is also the only spelling the read boundary
+    admits -- see the guards above.
+    """
+    wrong = {
+        section: url
+        for section, url in server.PROFILE_DETAIL_URLS.items()
+        if not url.endswith("/in/me/details/%s/" % section)
+    }
+    assert wrong == {}, wrong
