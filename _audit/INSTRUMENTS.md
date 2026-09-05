@@ -2476,3 +2476,98 @@ this reason. **An instrument that reports only what it measures is worth more
 than one that derives a second number it cannot check.**
 
 Companion record: `_audit/2026-09-05-census-recounted.md`.
+
+### 12.12 `scripts/enumerate_gap_rows.py` -- the census count, by ID and at any ref
+
+12.11 says how MANY rows carry each state. It does not say WHICH, and that gap
+is why the ledger that split 409 GAP rows across 97 blockers was unauditable for
+two days: the classifier was never committed, so a per-blocker count could not
+be distinguished from a per-blocker guess, and a re-cost could not be told from a
+miscount.
+
+    ./venv/Scripts/python.exe scripts/enumerate_gap_rows.py --control
+    ./venv/Scripts/python.exe scripts/enumerate_gap_rows.py --ref 1c08e5f --count-only
+
+**IT IMPORTS 12.11 RATHER THAN REPARSING**, and states the price in its own
+docstring rather than leaving it to be discovered: **it inherits that parse's
+blind spots exactly.** A row whose state cell is prose is invisible to both, for
+the same reason and at the same moment. A shared parse is not a second opinion
+and this file does not pretend to be one.
+
+**`--control` GUARDS A REPLICATION AND NOTHING MORE.** One behaviour could not be
+imported because it lives inside 12.11's `main()` with no seam -- the network
+slice's admin-only table has no state column, so `N A<digits>` is forced to GAP.
+The control re-runs 12.11 as a subprocess and fails on any per-slice
+disagreement. **It cannot detect a defect the two share, because they share the
+parse by design**, and 12.11's own entry is the receipt for why that distinction
+must be written down rather than assumed.
+
+**`--ref` IS THE HALF THAT PAID.** It reads the four slices out of a git object,
+so a frozen row set is recoverable rather than merely remembered. Measured with
+it, 2026-09-05: the census at `1c08e5f` enumerates **99 / 79 / 109 / 122 = 409**,
+reproducing the ledger's four per-slice figures and not merely their total --
+**two errors of opposite sign cancel in a total and cannot cancel in four
+figures at once.** And the frozen set diffs to today's row by row: 40 rows have
+left GAP, 1 has entered (`P L2b`), 409 - 40 + 1 = 370, which is what 12.11
+returns. Before this, 409 and 370 were two numbers from two passes.
+
+**A TWO-POINT DIFF CANNOT SEE A ROUND TRIP.** `N 132` was countable at
+`1c08e5f`, invisible by `990bbd3^`, and countable again after `02e617d`. Both
+endpoints agree and the middle does not. Sample a third ref before claiming a
+row never moved.
+
+### 12.13 `scripts/build_blocker_map.py` + `tests/test_blocker_map_is_derived.py` -- a map that cannot silently stop being derived
+
+Joins `_audit/_census/blocker-assignments.tsv` (the evidence, one line per
+assignment with its committed source) to the row set from 12.12, and diffs the
+recount against the ledger's published per-blocker counts. Emits
+`_audit/_census/blocker-map.tsv`.
+
+**THE HEADLINE IT PRODUCES IS THE UNASSIGNED COUNT**, currently 287 of 409, and
+that is deliberate. A map that silently mixes derived and inferred assignments
+**manufactures auditability, which is worse than the honest silence it replaces**
+-- so a row no committed source names is `UNASSIGNED`, and there is no `INFERRED`
+class because there are no inferred rows. The strongest single candidate found
+(`N 132` completing `ANALYTICS-CONTROLS-UNPRESSED` by elimination over its
+family) was deliberately LEFT unassigned for exactly this reason.
+
+**SHOWN FAILING IN FIVE DIRECTIONS**, four planted and one that arrived by
+itself:
+
+    delete one evidence line             ratchet + map-drift red
+    double-assign an already-mapped row  DOUBLE-ASSIGNED
+    plant an id matching no census row   UNRESOLVED
+    plant a 2nd row on a 1-row blocker   over-count + map-drift red
+    break the ledger table header anchor "blockers the parse does not know"
+
+**THE FIFTH IS THE ENTRY'S WHOLE ARGUMENT, because it was not planted.** One
+hour after the guard was written, a neighbouring wave appended 19 lines to the
+ledger (`0d66ebe`, 1546 -> 1565 lines); both its tables slid 28 rows down, and
+`ledger_counts()` -- which read them out of a HARDCODED LINE WINDOW -- lost the
+cost-0 table entirely. Nine blockers parsed as absent, `.get(b, 0)` turned absent
+into zero, and four legitimate blockers read as over-counted.
+
+**A reading pinned to a POSITION in a file other waves are appending to.** Both
+tables are now found by their HEADER ROW.
+
+**AND THE DEFECT IN THE MESSAGE WAS WORSE THAN THE DEFECT IN THE PARSE.** The
+assertion reported *"a committed source and the ledger disagree about which rows
+are in a set"* -- a cause it had never observed. It had SEEN four blockers
+missing from a lookup and REPORTED a data disagreement, sending its reader
+hunting something that did not exist. **`refusals-must-name-what-they-saw`,
+inside a guard written to enforce exactly that discipline.** It is now two
+assertions that cannot be confused: *does the parse know this blocker at all*
+comes first, and says to check the parse before treating anything as a
+disagreement.
+
+**THE RATCHET IS A CEILING, NOT A PIN.** `UNASSIGNED` may fall freely --
+somebody finding a committed source that names more rows is the point of the
+artifact and must not need permission. It may not rise. And the dangerous
+direction is asserted separately and never merged: a blocker holding MORE rows
+than the ledger published is two committed sources disagreeing about set
+membership, which is a finding for a person, not a number to absorb. That
+assertion has already caught one -- `M C52` is claimed by `HASHTAG-EXISTENCE`
+(the ledger's own Amendment A13) and by `FEED-PREFERENCES`
+(`2026-09-05-settings-tail.md`), and the row's text supports both.
+
+Companion record: `_audit/2026-09-05-blocker-map.md`.
