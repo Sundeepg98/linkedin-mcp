@@ -386,7 +386,33 @@ Five commits from three waves landed during the six minutes that run took, and
 the tree moved again between its last two readings. A suite reading is dated by
 the TREE, not by the SHA, and this one is dated by a tree that was moving.
 
-## 9. What is still owed
+## 9. The properties are pinned structurally now, not in this document
+
+`tests/test_the_wired_readers_keep_their_properties.py` -- five assertions over
+`server.py`'s syntax tree, seven detector tests each shown failing on a plant
+first, nothing opening a browser:
+
+* premium returns the verdict **whole**, as a `**` spread, so `settles` and
+  `leaves_open` survive on every branch -- and publishes no single collapsed
+  answer. The second assertion is the one that matters: a boolean would not
+  remove the split, it would give a caller something to read INSTEAD of it.
+* the precondition tool names no notifications address **and never calls
+  `cost_delta`** -- the two ways the spends-nothing property can break, and the
+  second is the likelier because it reads as finishing the job.
+* the newsletter tool refuses on all **three** badge conditions.
+* `_badge_refusal` carries no decorator and all three tools carry theirs --
+  the count guard's own defect, asked of the syntax tree instead of the
+  registry, so the two cannot fail the same way.
+
+**ONE DETECTOR WAS WRONG ON ITS FIRST RUN, which is the reason to write them
+this way.** The notifications check fired on the REAL tool -- on the sentence
+in its own docstring promising it never opens that page. **A docstring cannot
+navigate.** The detector now skips it, the exclusion is pinned in both
+directions with its own plant, and the prose was NOT softened to keep a check
+quiet. Making a document worse to protect a guard is a trade this repository
+has already paid for once.
+
+## 10. What is still owed
 
 * **A section-aware groups reader** -- see 2 above. The collection rule is
   already written and already validated live; what is owed is a ruling on
