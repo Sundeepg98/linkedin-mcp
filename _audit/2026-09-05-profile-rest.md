@@ -400,6 +400,41 @@ repository keeps catching being taken as one fact.
 obeyed the brief instead of reading the artifact would have shipped a test
 asserting the weaker half only.
 
+### ANOTHER WAVE FOUND THE SAME THING INDEPENDENTLY, AND THAT IS THE STRONGEST PART
+
+`db0dc40` (`boundary: two anchored reads, and the family pattern shown
+admitting deletion`) landed from a different wave while mine was in flight. It
+carries `test_the_family_pattern_the_trap_names_does_admit_account_deletion`
+and `test_every_account_ending_spelling_is_still_refused`, and its docstring
+records **the same plural/singular split**, reached separately.
+
+**Two waves, not sharing an instrument, converged on the same measurement.**
+Mine came from a slice interrogating the shipped predicate; theirs from
+reading `readonly.py` and re-measuring. This is the day's corroboration law
+satisfied properly for once -- *agreement between instruments sharing a defect
+is not corroboration*, and these two share no defect because they share no
+method.
+
+**BOTH FILES SHOULD STAY, and a consolidator should know why before deleting
+either.** They are scoped differently:
+
+* theirs is anchored to **their own widening** (school and collections) and
+  asks whether those two new patterns can reach deletion;
+* mine is anchored to **the settings family in general** and is tied to no
+  widening, so it still asserts something after their patterns are gone.
+
+**AND MINE WAS EXERCISED BY A REAL WIDENING WITHIN THE HOUR, WHICH IS BETTER
+THAN ANY MUTATION I COULD PLANT.** It was written against an allowlist of
+**29** patterns. Re-measured at freeze, the allowlist stands at **31** -- two
+patterns added by another wave after my test landed -- and close-account is
+**still refused**, with my file green at 4 passed. A guard that survives an
+independent, unannounced boundary change is doing the thing it was built for.
+
+**One correction to my own commit message while I am here:** `85364e7` says
+the slice found something the brief did not know. True of *my* wave. It was
+not the only wave to find it, and saying so is cheaper than letting a reader
+infer sole discovery from a commit message.
+
 ---
 
 ## 5. THE TAINT GUARD WENT RED ON MY PROBE, AND THE DIAGNOSIS IS NEW
