@@ -297,6 +297,15 @@ day as an indictment -- and it is honest, because the reasons are real: a live
 audio session in a separate product, a mobile-only OAuth import, a third-party
 streaming tool, a Help Center form, a capability that costs currency.
 
+**CORRECTED BY:** `_audit/2026-09-05-decide-retire-rulings.md` -- the queue was
+ruled and it converts **37** rows rather than 39, and the answer was not "no" for
+all twelve: three rows of `AI-INTERVIEW-PRODUCT` (the READ side -- a past
+session's readiness score, summary and transcript) and two of
+`OFF-PLATFORM-WIDGET` (both reads drawn on a LinkedIn page) meet no reason that
+retires them and are handed back as gaps under two new blocker names. Five of the
+37 are a RE-FILE against a ruling that already existed rather than a new decision
+-- see the second pointer at section 7.
+
 ---
 
 ## 5. WHAT TO DO NEXT
@@ -487,6 +496,13 @@ have "zero prior art in the package" and gives no per-row blocker, so for those
    is a forbidden substring and the settings-family ruling is explicitly
    capability-level, which would reach them -- but the messaging slice filed
    them GAP and nothing written names messaging settings.
+
+   **CORRECTED BY:** `_audit/2026-09-05-decide-retire-rulings.md` -- they were
+   already ruled. The settings ruling is quoted in the live
+   `linkedin_update_setting` docstring at HEAD (*"a setting is admitted by name
+   or not at all"*) and the profile slice applied it to 93 rows as
+   EXCLUDED-RULED; the ruling says "a setting", not "a profile setting", so the
+   five are a RE-FILE and not a decision anybody still owes.
 4. **Whether `RECOMMENDATIONS-SURFACE` collides with the network slice's R3.**
    The same capability family is EXCLUDED-RULED under `endorse_or_recommend` in
    `network.md` and GAP in `profile.md`. One of the two slices is wrong and I
