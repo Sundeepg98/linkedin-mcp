@@ -298,6 +298,40 @@ async def _subscription_rows(page) -> list[dict]:
 
 
 async def main() -> int:
+    """Run the probe and ALWAYS give the tab back.
+
+    THIS WRAPPER IS A BUG FIX AND NOT A TIDY-UP, and the cost was measured on
+    the whole fleet rather than on this file. ``BROWSER.session()`` in attach
+    mode opens a tab of its own -- correctly, because navigating one of HIS
+    tabs would yank a page out from under him -- and caches it. Its ``finally``
+    touches the idle timer and does NOT close that tab. So every probe process
+    that attaches leaves one behind, this one included: it ran twice today and
+    leaked two.
+
+    They accumulate on a browser nobody restarts, and the bill arrives
+    somewhere else entirely: ``connect_over_cdp`` enumerates every target
+    during the handshake, so at 120 targets the attach itself takes 13 to 17
+    seconds against a 15-second ceiling. **Attach became a coin flip, and the
+    refusal it produced blamed "Chrome not running" -- a refusal naming what it
+    did NOT find instead of what it SAW, on a browser that was healthy
+    throughout.**
+
+    ``BROWSER.stop()`` closes the tab and drops the CDP connection, and in
+    attach mode it explicitly does NOT close the context, because the context
+    is his own browser session. It never raises, so it is safe in a ``finally``
+    even on the path where the attach gate refuses before anything started.
+
+    IN A ``finally``, so a probe that raises still gives the tab back. A
+    cleanup that only runs on the success path is the one that never runs when
+    it matters.
+    """
+    try:
+        return await _run()
+    finally:
+        await BROWSER.stop()
+
+
+async def _run() -> int:
     # ATTACH MODE IS A PRECONDITION, NOT A PREFERENCE.
     if not config.CDP_ATTACH:
         print("REFUSED: LINKEDIN_CDP_ATTACH is not set.")
