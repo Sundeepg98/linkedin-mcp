@@ -500,11 +500,67 @@ PINNED = (
 #: ever asserted the third-party profile breadth, which is what you would
 #: expect of reach nobody ruled and nobody used.
 #:
+#: RE-FROZEN 2026-09-05, GROWING BY TWO ANCHORED ROOTS:
+#:
+#:     _ALLOWED_URL_PATTERNS   9d21c894b13316f7 -> 6737b38115e05b1c
+#:
+#: HIS OWN GROUPS AND HIS OWN EVENTS, THE ROOTS ONLY. On the team lead's
+#: split: which groups he belongs to is his own data, the same class as his
+#: own profile; a group's MEMBER DIRECTORY and an event's ATTENDEE LIST are
+#: other people and are admitted nowhere.
+#:
+#: WHY IT WAS PAID FOR AT ALL, because the previous two attempts at this
+#: question were both cheaper and both wrong. ``GROUPS-SURFACE`` (32 census
+#: rows) and ``EVENTS-SURFACE`` (18) rest on a precondition nobody had
+#: established -- whether he belongs to anything at all -- and 29 of the 32
+#: are unreachable in principle if the answer is zero. THREE ROUTES TO THAT
+#: ANSWER WERE MEASURED AND ALL THREE ARE DEAD:
+#:
+#:   * THE ALLOWLIST, the visible gate: 15 Groups/Events addresses, ALLOWED 0,
+#:     seven controls passing (``_probe_unmeasured_surface_addresses.py``,
+#:     re-run at HEAD rather than relayed).
+#:   * THE RENDER, the gate nobody had stated, and the one that kills every
+#:     profile-side route: a category's rows are not in the document until its
+#:     tab is pressed. PROVEN BY A CONTROL -- the Companies category holds at
+#:     least 20 rows (20 and 40 distinct company anchors in the two tracked
+#:     manage-Pages fixtures) and renders ZERO on the Interests capture and
+#:     ZERO on a live 396909-character profile read.
+#:   * THE ADDRESS: ``/in/me/details/interests/`` was admitted on 2026-09-04
+#:     for exactly this purpose and REDIRECTS, with two same-run siblings as
+#:     its control.
+#:
+#: AND NO OFFLINE ROUTE EXISTS: ``_probe_membership_signal_in_corpus.py``
+#: swept 30 documents and 2522736 characters for six group/event route
+#: needles and found ZERO, with a must-fire control at 90 and a
+#: must-stay-silent control at 0. That instrument was shown failing four ways
+#: before it was believed -- see ``_audit/_scratch/_redproof-corpus-sweep.txt``.
+#:
+#: EVERY OTHER DIGEST IS BYTE-IDENTICAL, and that is the load-bearing half.
+#: ``<functions>`` did not move, so ``assert_read_url`` and every other gate
+#: function is unchanged; no denylist shortened; neither exemption table was
+#: touched. The change is two tuple entries and the comments around them.
+#:
+#: WHAT THE WIDENING DELIBERATELY DID NOT BUY, asserted in
+#: ``tests/test_readonly.py`` rather than promised here: the group feed, the
+#: member roster (census row N 165), the join-request queue, group discovery,
+#: an event page (N 184), event comments (C 92), the attendee list (N 188,
+#: N 189), and both search verticals. A query string on either root refuses
+#: too.
+#:
+#: ONE DISCLOSURE THAT BELONGS WITH THIS ENTRY RATHER THAN BURIED IN A TEST.
+#: ``/groups/<id>/invite/`` is refused TWICE -- ``/invite`` fires AND no
+#: pattern matches. **The member roster is refused ONCE.** It carries no
+#: forbidden substring at all, so the anchor on the entry above is the only
+#: thing between this server and a list of people who did not choose to be
+#: enumerated by him. ``test_the_member_roster_is_refused_by_ONE_gate_and_the
+#: _count_is_the_point`` asserts the count, and a companion test plants the
+#: wildcard a future reader is most likely to write and shows the roster
+#: falling out of it.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "9d21c894b13316f7",
+    "_ALLOWED_URL_PATTERNS": "6737b38115e05b1c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -885,7 +941,14 @@ DENYLISTS_AT_A76FE32 = {
     # NARROWED AGAIN 2026-09-04: the third-party profile pattern removed. The
     # second reducing move in this dict's history, both on the same day and
     # both on the same measured ground.
-    "_ALLOWED_URL_PATTERNS": "9d21c894b13316f7",
+    # GREW 2026-09-05 by two anchored roots -- his own groups and his own
+    # events, the roots ONLY. Same shape as every other move in this dict: a
+    # deliberate READ admission, with the three denylists and the exemption
+    # table beside them byte-identical. What is different about this one is
+    # WHY it was paid for: three cheaper routes to the same question were
+    # measured first and all three are dead, which is written out in full
+    # above the dict this one shadows.
+    "_ALLOWED_URL_PATTERNS": "6737b38115e05b1c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

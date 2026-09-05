@@ -374,11 +374,141 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #
     # THE LINE STAYS. It admits a self-owned address that redirects to another
     # self-owned address already on this list, so it widens nothing, and it
-    # costs nothing if LinkedIn starts serving it. ``/groups/``, ``/events/``
-    # and the newsletter addresses all stay closed.
+    # costs nothing if LinkedIn starts serving it. The newsletter addresses
+    # stay closed.
+    #
+    # ``/groups/`` AND ``/events/`` NO LONGER STAY CLOSED, and this sentence
+    # used to say they did. The two entries below opened exactly their roots on
+    # 2026-09-05, and the reasoning is there rather than repeated here. The
+    # line is CORRECTED rather than deleted because a comment is a STANDING
+    # INSTRUCTION -- whoever opens this file next reads it as current truth --
+    # and this one would otherwise assert a closed door two entries above the
+    # open one.
     re.compile(
         r"^https://www\.linkedin\.com/in/me/details/interests/?(\?[^#]*)?$"
     ),
+    # HIS OWN GROUPS, AND THE ROOT ONLY. Added 2026-09-05 on the team lead's
+    # split: which groups he belongs to is HIS OWN DATA, the same class as his
+    # own profile; a group's MEMBER DIRECTORY is other people and is not
+    # admitted here or anywhere.
+    #
+    # WHAT THIS SERVES: census rows ``N 173`` ("access the list of groups you
+    # belong to"), ``N 174`` ("view the groups you have requested to join")
+    # and ``C 60`` ("access your LinkedIn Groups", the same capability counted
+    # in a second slice).
+    #
+    # AND IT IS THE PRECONDITION FOR TWENTY-NINE MORE. If he belongs to zero
+    # groups then 29 of ``GROUPS-SURFACE``'s 32 rows are unreachable in
+    # principle for this account and the largest blocker in the census is a
+    # three-row one. Nobody has established which world we are in.
+    #
+    # THE CHEAP ROUTES WERE TRIED FIRST AND ALL THREE ARE DEAD. This entry
+    # exists because the alternatives are exhausted, and exhausted is a
+    # measurement here rather than a mood:
+    #
+    #   1. THE ALLOWLIST was the visible gate and the least interesting one.
+    #      ``scripts/_probe_unmeasured_surface_addresses.py``, re-run at HEAD
+    #      2026-09-05: 15 Groups/Events addresses, ALLOWED 0, all 7 controls
+    #      passing.
+    #   2. THE RENDER is the gate nobody had stated, and it kills every
+    #      profile-side route. The profile's Interests region draws five tabs
+    #      as ``div role="radio"`` with no href, no id and no data attribute,
+    #      and A CATEGORY'S ROWS ARE NOT IN THE DOCUMENT UNTIL ITS TAB IS
+    #      PRESSED. Proven by a control rather than argued: the Companies
+    #      category holds at least 20 rows -- 20 and 40 distinct company
+    #      anchors in ``tests/fixtures/manage_pages_following.html`` and its
+    #      hydrated sibling -- and renders ZERO of them on the Interests
+    #      capture and ZERO again on a LIVE 396909-character profile read.
+    #      A page where a known-non-empty category reads zero cannot answer
+    #      the membership question FOR ANY ANSWER.
+    #   3. THE ADDRESS: ``/in/me/details/interests/`` is admitted two entries
+    #      above and REDIRECTS, with two same-run siblings as the control.
+    #
+    # AND THERE IS NO OFFLINE ROUTE, measured with both controls behaving.
+    # ``scripts/_probe_membership_signal_in_corpus.py`` sweeps every HTML
+    # document this project holds -- 30 documents, 2522736 characters -- for
+    # six group and event route needles: ALL ZERO, while the must-fire control
+    # ``/company/`` found 90 and the must-stay-silent control found 0. Nothing
+    # this project has ever captured carries a group or event signal.
+    #
+    # THE ROOT ONLY, AND THE ANCHORING IS THE WHOLE OF THE PERMISSION. No
+    # query string and no sub-path, for the same reason as ``dark-mode`` and
+    # ``my-premium``: nothing builds one, so nothing needs preserving, and an
+    # anchor is what keeps one page from becoming a family. What that
+    # deliberately does NOT admit, each named because a widening is only
+    # narrow if its refusals are stated:
+    #
+    #     /groups/<id>/            a group feed -- other members' posts in full
+    #     /groups/<id>/members/    THE MEMBER ROSTER. Census row N 165, and
+    #                              the row the team lead put out of scope by
+    #                              name. It is a list of people who did not
+    #                              choose to be enumerated by him, and which
+    #                              url serves it changes nothing about that.
+    #     /groups/<id>/requests/   a pending-member queue, same objection
+    #     /groups/discover/        recommendations
+    #     /search/results/groups/  belongs to SEARCH-RESULTS-SURFACE, which is
+    #                              queued DECIDE and is not this entry's to
+    #                              inherit
+    #
+    # ``/groups/<id>/invite/`` IS REFUSED TWICE AND THAT IS WORTH KNOWING
+    # RATHER THAN DISCOVERING. It contains ``/invite``, which is on
+    # :data:`_FORBIDDEN_URL_SUBSTRINGS` and checked BEFORE this list, AND it
+    # fails this anchored pattern. Census rows ``N 166`` and ``C 69`` need TWO
+    # boundary changes, not one, and neither is proposed here.
+    #
+    # THE PAGE MAY RENDER OTHER PEOPLE AND THAT IS NOT THIS LIST'S QUESTION.
+    # Six of the addresses already on this list draw pages substantially made
+    # of other people -- the feed, notifications, both messaging forms, the
+    # connections list, the profile-views analytics and an item permalink with
+    # its comments. ``linkedin_who_viewed_me`` states the resolution in its
+    # own docstring, on the hardest case this package has: "that page is made
+    # of other people and its control labels carry them; the reader takes
+    # numbers, filter labels, the chart's own sentence and COUNTS of page
+    # regions, and nothing else." **This list decides what may be OPENED. The
+    # shaper decides what may be SAID.**
+    #
+    # NO WRITE IS BOUGHT BY THIS. Joining, leaving, posting and inviting all
+    # need their own url, their own sanction and their own ruling; posting in
+    # a group is a second broadcast route with a different audience and is
+    # ``publish_post``'s equal in risk rather than a lesser case.
+    re.compile(r"^https://www\.linkedin\.com/groups/?$"),
+    # HIS OWN EVENTS, AND THE ROOT ONLY. Added 2026-09-05, same ruling, same
+    # anchoring, same refusals -- and BOUGHT ON A THINNER ROW BASIS THAN
+    # ``/groups/`` ABOVE, which is recorded here rather than glossed.
+    #
+    # THE CENSUS HAS NO ROW FOR "the events you are registered for". The
+    # Events family's nearest neighbours are ``N 185`` "attend an event you
+    # accepted" (a WRITE) and ``N 183`` "receive event invitations only from
+    # your 1st-degree connections" (a SETTING, which lives under preferences
+    # and not here). The censused content of this root is ``N 180``: "events
+    # recommended from your interests, Pages you follow, AND WHAT YOUR NETWORK
+    # IS ATTENDING".
+    #
+    # So this admission buys a recommendation surface whose stated content
+    # includes other people's attendance, and buys the self-scoped read it was
+    # written for only if LinkedIn draws a "your events" region that no census
+    # row names. That is a fact about the census rather than a reason to
+    # refuse -- the row set was walked from LinkedIn's help tree, and a help
+    # tree documents what a member can DO rather than what a page DRAWS.
+    #
+    # IT IS ADMITTED ANYWAY, FOR ONE STATED REASON: it is the only route left
+    # to the precondition above, the precondition governs 50 census rows
+    # across both blockers, and one load settles it. Whoever reads the result
+    # should weigh the events half more carefully than the groups half.
+    #
+    # WHAT IT DOES NOT ADMIT:
+    #
+    #     /events/<id>/            an event page -- organizer and content.
+    #                              Census row N 184, and it is the row that
+    #                              proves the ledger's "allowlist +1" for this
+    #                              blocker was short.
+    #     /events/<id>/comments/   census row C 92, third-party comments
+    #     /events/<id>/about/      same page, same objection
+    #     THE ATTENDEE LIST        census rows N 188 and N 189. A second
+    #                              member roster, and out of scope by the same
+    #                              ruling that put N 165 out of scope.
+    #     /search/results/events/  SEARCH-RESULTS-SURFACE again
+    re.compile(r"^https://www\.linkedin\.com/events/?$"),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
     # therefore his to open.

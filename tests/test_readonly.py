@@ -1086,6 +1086,16 @@ ALLOWED = [
     # its neighbours are in BLOCKED below, which is where the narrowness is
     # actually asserted. /premium/ carries purchase and upgrade flows.
     "https://www.linkedin.com/premium/my-premium/",
+    # HIS OWN GROUPS AND HIS OWN EVENTS, THE ROOTS ONLY, 2026-09-05. Both
+    # spellings, because both anchored patterns end ``/?$`` and the slashless
+    # form therefore matches -- listing only the slashed one would leave half
+    # the permission unasserted. Everything under either root is in BLOCKED
+    # below, and that half is the one doing the work here: the member roster
+    # and the attendee list are what these two entries had to NOT admit.
+    "https://www.linkedin.com/groups/",
+    "https://www.linkedin.com/groups",
+    "https://www.linkedin.com/events/",
+    "https://www.linkedin.com/events",
 ]
 
 BLOCKED = [
@@ -1212,6 +1222,43 @@ BLOCKED = [
     "https://www.linkedin.com/mypreferences/d/dark-mode/extra",
     "https://www.linkedin.com/mypreferences/d/dark-mode?theme=dark",
     "https://www.linkedin.com/mypreferences/d/data-privacy",
+    # THE GROUPS FAMILY, WHICH IS EVERYTHING BUT THE ROOT. Added 2026-09-05
+    # alongside the two roots in ALLOWED, and this block is where the
+    # narrowness of that pair is actually asserted -- an ALLOWED entry says a
+    # url opens, and only the refused neighbours say the permission stopped
+    # where it was meant to.
+    #
+    # THE ROSTER IS THE ONE THAT MATTERS. Census row N 165 is a list of people
+    # who did not choose to be enumerated by him, and it was put out of scope
+    # BY NAME. If a future widening ever admits it, this line is what goes
+    # red.
+    "https://www.linkedin.com/groups/12345678/members/",
+    "https://www.linkedin.com/groups/12345678/",
+    "https://www.linkedin.com/groups/12345678/requests/",
+    "https://www.linkedin.com/groups/12345678/about/",
+    "https://www.linkedin.com/groups/discover/",
+    "https://www.linkedin.com/mynetwork/groups/",
+    "https://www.linkedin.com/search/results/groups/?keywords=engineering",
+    # A QUERY STRING ON EITHER ROOT. Neither pattern takes one -- nothing
+    # builds one, so nothing needs preserving, and a pattern that accepts a
+    # query is a pattern that accepts whatever a caller appends.
+    "https://www.linkedin.com/groups/?highlightedUpdateUrn=urn%3Ali%3Aactivity%3A1",
+    "https://www.linkedin.com/events/?tab=recommended",
+    # AND THE WHITESPACE SPELLINGS, because "$" matches before a trailing
+    # newline and the surrounding entries in this list already pay for that
+    # lesson twice.
+    "https://www.linkedin.com/groups/\n",
+    " https://www.linkedin.com/events/",
+    # THE EVENTS FAMILY, WHICH IS ALSO EVERYTHING BUT THE ROOT. The attendee
+    # list (census rows N 188 and N 189) is out of scope by the same ruling
+    # that excluded the group roster; an event page is census row N 184, and
+    # its refusal here is what makes the ledger's "allowlist +1" for this
+    # blocker measurably short.
+    "https://www.linkedin.com/events/12345678901234567890/",
+    "https://www.linkedin.com/events/12345678901234567890/about/",
+    "https://www.linkedin.com/events/12345678901234567890/comments/",
+    "https://www.linkedin.com/mynetwork/network-manager/events/",
+    "https://www.linkedin.com/search/results/events/?keywords=hiring",
 ]
 
 
@@ -1240,6 +1287,109 @@ def test_read_surfaces_are_allowed(url: str):
 def test_write_and_foreign_urls_are_blocked(url: str):
     with pytest.raises(WriteAttemptError):
         readonly.assert_read_url(url)
+
+
+GROUPS_ROOT = "https://www.linkedin.com/groups/"
+EVENTS_ROOT = "https://www.linkedin.com/events/"
+GROUP_MEMBER_ROSTER = "https://www.linkedin.com/groups/12345678/members/"
+GROUP_INVITE = "https://www.linkedin.com/groups/12345678/invite/"
+
+
+def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
+    """The 2026-09-05 widening, asserted in both directions at once.
+
+    An ALLOWED entry says a url opens. It says nothing about where the
+    permission stopped, and where it stopped is the whole of what was ruled:
+    HIS OWN memberships yes, a directory of other people no.
+    """
+    assert readonly.is_read_url(GROUPS_ROOT)
+    assert readonly.is_read_url(EVENTS_ROOT)
+    for url in (
+        GROUP_MEMBER_ROSTER,
+        "https://www.linkedin.com/groups/12345678/",
+        "https://www.linkedin.com/events/12345678901234567890/",
+        "https://www.linkedin.com/events/12345678901234567890/comments/",
+    ):
+        assert not readonly.is_read_url(url), url
+
+
+def test_the_member_roster_is_refused_by_ONE_gate_and_the_count_is_the_point():
+    """A DISCLOSURE, NOT A REASSURANCE, and it is why this test is named this.
+
+    ``/groups/<id>/invite/`` is refused TWICE -- by the ``/invite`` substring
+    and by the anchored allowlist -- so census rows N 166 and C 69 need two
+    boundary changes rather than one.
+
+    **The member roster is refused ONCE.** It carries no forbidden substring
+    at all: ``members`` is not on the denylist and neither is anything else in
+    that url. The ONLY thing standing between this server and a list of people
+    who did not choose to be enumerated by him is the fact that the pattern
+    two lines away is anchored to the root.
+
+    That is a true statement about a boundary and it is the kind that gets
+    lost. It is asserted here so that anyone widening ``/groups/`` later finds
+    out from a red test rather than from the roster arriving in an answer.
+    """
+    invite_substrings = [
+        substring
+        for substring in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if substring in GROUP_INVITE.lower()
+    ]
+    assert invite_substrings == ["/invite"], invite_substrings
+    assert not any(
+        pattern.match(GROUP_INVITE) for pattern in readonly._ALLOWED_URL_PATTERNS
+    ), "the invite url now matches an allow pattern -- it was refused by both"
+
+    roster_substrings = [
+        substring
+        for substring in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if substring in GROUP_MEMBER_ROSTER.lower()
+    ]
+    assert roster_substrings == [], (
+        "a forbidden substring now fires on the member roster. That is not a "
+        "failure -- it is a SECOND gate arriving where there was one -- but "
+        "this test's whole claim is the count, so update the claim rather "
+        f"than deleting the assertion. Fired: {roster_substrings}"
+    )
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+
+
+def test_the_anchor_is_what_refuses_the_roster_SHOWN_FAILING():
+    """Plant the widening a future reader is most likely to write.
+
+    The obvious "improvement" to the groups entry is to let it reach a group
+    -- ``^.../groups/.*$`` -- and the point of this test is that the roster
+    falls out of the same edit, silently, because nothing else refuses it.
+    A guard that has not been shown failing certifies nothing.
+    """
+    original = readonly._ALLOWED_URL_PATTERNS
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+    try:
+        readonly._ALLOWED_URL_PATTERNS = original + (
+            re.compile(r"^https://www\.linkedin\.com/groups/.*$"),
+        )
+        assert readonly.is_read_url(GROUP_MEMBER_ROSTER), (
+            "the roster is STILL refused with a wildcard groups pattern "
+            "installed, so something other than the anchor is refusing it "
+            "and this test is measuring the wrong thing"
+        )
+    finally:
+        readonly._ALLOWED_URL_PATTERNS = original
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+
+
+def test_neither_new_root_carries_a_query_or_a_subpath():
+    """The anchoring, asserted rather than described.
+
+    Both patterns end ``/?$``. Nothing in this package builds a query for
+    either address, so a pattern that accepted one would be accepting whatever
+    a caller appended.
+    """
+    for root in (GROUPS_ROOT, EVENTS_ROOT):
+        assert readonly.is_read_url(root)
+        assert readonly.is_read_url(root.rstrip("/"))
+        assert not readonly.is_read_url(root + "?tab=recommended")
+        assert not readonly.is_read_url(root + "anything/")
 
 
 def test_the_tracker_allowlist_admits_three_stages_and_no_more():
