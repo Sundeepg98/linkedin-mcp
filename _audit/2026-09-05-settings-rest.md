@@ -402,13 +402,40 @@ pattern was written; no narrow anchored pattern was written either, because
 the deliverable for those rows.
 
 The standing invariant was re-run rather than trusted:
-`tests/test_the_settings_boundary_refuses_account_deletion.py` passes at this
-tree. It was written against a 29-pattern allowlist and still refuses at **31**,
-so it has been exercised across two unannounced widenings by other waves --
-which is the right shape for a boundary test.
+`tests/test_the_settings_boundary_refuses_account_deletion.py` -- **4 passed**
+at this tree. It was written against a 29-pattern allowlist and still refuses
+at **31**, so it has been exercised across two unannounced widenings by other
+waves, which is the right shape for a boundary test.
 
 Allowlist re-derived by importing the module and counting, not read from a
 handoff document: **31**.
+
+### 4.1 And the trap re-measured at MY tree, not inherited
+
+    /mypreferences/d/close-account                   REFUSED -- no pattern matches
+    /mypreferences/d/close-accounts                  REFUSED -- forbidden substring
+    /mypreferences/d/account-closure                 REFUSED -- no pattern matches
+    /psettings/close-account                         REFUSED -- forbidden substring
+    /mypreferences/d/categories/account-management   REFUSED -- forbidden substring
+    /mypreferences/d/hibernate-account               REFUSED -- forbidden substring
+
+    ADMITTED: 0 of 6.
+    DEFENDED BY NOTHING BUT THE ABSENCE OF A PATTERN: 2 of 6.
+
+The trap's shape is corroborated: `close-account` singular and
+`account-closure` have **one** gate between them and admission, and that gate is
+that nobody has written a rule -- which is exactly what a family pattern
+removes. `close-accounts` plural and the other three have a substring gate as
+well.
+
+**I am NOT claiming to have reproduced the brief's count of 3.** The brief
+named 6 spellings and 3 undefended; these are the 6 spellings *I* chose and 2 of
+them are undefended. **A count over a set I picked is not a count over the set
+they picked**, and reporting mine as agreement or disagreement with theirs would
+be the corroboration trap in miniature -- two instruments compared without
+checking they were aimed at the same thing. What both readings share, and what
+matters, is the STRUCTURE: some account-ending spellings are held out by the
+absence of a rule alone.
 
 ---
 
