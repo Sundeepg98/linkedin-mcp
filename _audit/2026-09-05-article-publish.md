@@ -66,7 +66,7 @@ sanctioned here.
 | # | blocker | rows | verdict |
 |---|---|---:|---|
 | 16 | `MENTION-COMPOSITION-RULING` | 2W | **EXCLUDED-RULED** -- the operator's typing ruling, already asserted |
-| 64 | `MENTION-TAG-CONTROLS` | 3W | **EXCLUDED-RULED** for the composition half; see the caveat below |
+| 64 | `MENTION-TAG-CONTROLS` | 3W | **NOT EXCLUDED. My first verdict was wrong** -- see 2b |
 | 77 | `CELEBRATION-COMPOSER` | 1W | **EXCLUDED-RULED, CONDITIONALLY** -- one read settles it, not taken |
 | 51 | `COLLABORATIVE-CONTENT` | 4W | **RE-FILE as two blockers.** 3 composer-side, 1 needs an address |
 | 37 | `ARTICLE-SURFACE` | 6 | boundary measured, not closed. Section 5 |
@@ -88,6 +88,55 @@ settings on HIS OWN account governing who may tag HIM. Those are self-scoped and
 nothing above touches them. If any of blocker 64's three rows is a privacy
 control rather than a composition, that row is NOT excluded by this ruling and
 stays open. I did not establish which.
+
+## 2b. THE CAVEAT RESOLVED, AGAINST ME. Blocker 64 is three PRIVACY rows.
+
+Written after sections 1-8 and after the commits that carried them. The
+row-to-blocker map **does not exist** -- confirmed by a search across the tree
+and `git log -S` across all history; it was computed once by a disposable script
+in a prior session's temp scratchpad and never committed. So the caveat above
+could not be closed by finding the map. It was closed by finding the ROWS.
+
+`_audit/_census/messaging-and-content.md:476-478`, quoted rather than
+paraphrased:
+
+    C87  Remove a mention or tag of yourself
+    C88  Choose whether members can mention, tag or collaborate with you
+    C89  Set the visibility of mentions and tags
+
+**NOT ONE OF THEM COMPOSES A MENTION.** All three are self-scoped: two are
+settings on his own account, and `C87` acts on his own name in somebody else's
+content -- the census calls it *"the one capability in this family that acts on
+somebody ELSE's content, on his own behalf"*. The operator's typing ruling has
+nothing to say about any of them, because none of them types anything into a
+post.
+
+**So blocker 64 does not retire, and my table said it did.** The caveat I wrote
+named this exact possibility -- *"If any of blocker 64's three rows is a privacy
+control rather than a composition, that row is NOT excluded"* -- and the answer
+is all three, not some. The correction moves the wave's result DOWN, from five
+mention rows retired to two.
+
+**AND IT MAKES THEM CHEAPER, WHICH IS THE PART A PLANNER WANTS.** `C88` and
+`C89` are settings, and `linkedin_update_setting` is a SHIPPED, sanctioned
+write with a settings census key already ruled in. The ledger costs blocker 64
+at 7 (allowlist +1 plus a WriteSpec). If those two rows are reachable through
+the tool that already exists, that cost is wrong in the expensive direction.
+**I did not verify that they are reachable** -- it needs the settings surface
+read, and I took no live read. Stated as the next question, not as a finding.
+
+The two rows that DO retire under section 1 are the composition rows, `C10`
+(mention in a post) and `C28` (mention in a comment) -- which is exactly
+blocker 16's count of two, and the two blockers turn out to be split along the
+compose/settings line rather than arbitrarily.
+
+**HOW THIS WAS CAUGHT, because the method is the transferable part.** Not by
+re-reading my own table -- I had read it several times and it looked right. A
+child process was sent after the map, came back with "it does not exist" plus
+three row ids I had never seen, and the ids refuted the verdict in one grep.
+**A limit I had written down honestly was the thing that made the refutation
+cheap**: because the caveat named the failure mode, checking it took one command
+instead of a re-derivation.
 
 ## 3. `C9` -- why celebration is conditional and not ruled outright
 
