@@ -6,7 +6,7 @@
 **Page loads taken: FOUR, of which exactly ONE was `/messaging/`.
 Messages sent: ZERO. Controls pressed: ZERO. Rows I retire myself: ZERO --
 I hand up measurements, not retirements.
-Commits: 6. Tests added: 7, in one new file. Boundary changes: 0.**
+Commits: 8. Tests added: 7, in one new file. Boundary changes: 0.**
 
 **HEADLINE, and it is not the load.** The load answered row 66 outright and
 refuted the relayed zero behind rows 17 and 67. But the most reusable thing
@@ -594,12 +594,18 @@ worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
                        d1b1a62  the enumeration-claim instrument        457 ins
                        38ea9dc  this document, first form               510 ins
                        e4a7947  the feed-side family probe              206 ins
-                       + the commit carrying sections 2.9 and this block
+                       f6a4fd1  section 2.9 and the freeze recount    119 ins
+                       fdc063c  section 3a, the row-mapping limit       37 ins
+                       + the commit carrying this line, which is the 8th.
+                       A count that names its own commit has to include it:
+                       the earlier "6" was correct when written and stale by
+                       the time the file was saved, which is the same defect
+                       this document records twice elsewhere.
     files              scripts/_probe_messaging_surface_census.py    472 lines
                        scripts/_probe_messaging_family_off_the_feed.py 206 lines
                        tests/test_a_named_cost_names_a_tool_that_can_incur_it.py
                                                                      457 lines
-                       _audit/2026-09-05-messaging-rows.md           641 lines
+                       _audit/2026-09-05-messaging-rows.md           647 lines
     tests added        7, all passing. 2 mutations shown KILLING the control,
                        each asserted to have changed the source first --
                        a mutation that does not apply prints PASS
