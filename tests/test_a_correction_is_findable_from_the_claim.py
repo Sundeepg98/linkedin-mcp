@@ -182,6 +182,18 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-05-article-publish.md", "INSTRUMENTS.md"): (
+        "a handover note about WHO COMMITS the register, not a claim about "
+        "what it contains. The wave found another wave's 49 uncommitted "
+        "lines inside its own contiguous hunk, backed its 69 out, left "
+        "theirs byte-identical, and moved its own entry into its audit doc "
+        "for the lead to lift. The repair vocabulary is 'its number will be "
+        "wrong' -- said of the section number its OWN proposed entry would "
+        "carry, because a neighbour was mid-write in the same file. Nothing "
+        "in INSTRUMENTS.md is asserted wrong, and a CORRECTED BY: pointer "
+        "would tell a reader the register had been refuted by a document "
+        "that only declined to edit it"
+    ),
     ("2026-09-05-census-hygiene.md", "network.md"): (
         "a RECONCILIATION table and an open-question list, not a correction. "
         "The census-hygiene wave restored visibility to 37 rows that no "

@@ -294,6 +294,13 @@ Every alert WRITE is a GAP. Everything the alerts DELIVER is served by the skill
 | 126 | Premium AI job-fit tips | a7474394 | GAP | -- |
 | 127 | Read the InMail credit balance | a7474394 | GAP `SKILL` | server: `/premium/my-premium/` is a census key but `2026-08-31-linkedin-perform.md:1035` -- "the boundary entry and reader are **NOT built**". Skill `inmail-targeting.md` holds the ledger: 5/month, 15 cap, 90-day expiry, refunded on any reply |
 
+**CORRECTED BY:** `_audit/2026-09-05-jobs-tail.md` -- row 127 above cites a
+2026-08-31 audit for "the boundary entry and reader are NOT built". Measured
+2026-09-05: the boundary entry IS built and is one of the admitted patterns at
+that tree; the reader is still not built. Half that sentence is current and half
+is stale, which is the shape that survives a careless check -- a reader who
+verifies either half concludes the whole is sound.
+
 ### I. Recruiter contact and interview prep (6)
 
 | # | capability | source | state | tool, or the repo's own reason |
