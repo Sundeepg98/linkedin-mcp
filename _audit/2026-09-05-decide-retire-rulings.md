@@ -193,6 +193,28 @@ not matter to the ruling, which rests on the capability-level ruling in section
 job description, conducts or completes a spoken interview with a real-time AI
 interviewer, ends or declines one in progress, and messages the hirer about it.
 
+**THE SOURCE ARTICLES WERE FETCHED DIRECTLY THIS PASS, so this ruling does not
+rest on the census's reading of them.** `a8336402` and `a10133010`, public help
+pages, no session, no account, no browser. **Both confirm the census sentence
+for sentence**, and the four quotations below are the ones the ruling turns on:
+
+* *"the AI interviewer listens, responds, and evaluates your answers in real
+  time"* -- the session is real-time and spoken.
+* *"A new browser tab will open in LinkedIn Learning, where you can conduct
+  your mock interview."* -- it is a separate product in a separate tab, which
+  the census asserted and this confirms.
+* *"You must be a Premium member to access this feature."*
+* `a10133010` in full is browser-by-browser instructions for granting **camera
+  and microphone** access across Chrome, Safari, Firefox and Edge, including
+  *"Your browser is blocking microphone and camera access."*
+
+**THE EVIDENCE CLASS, stated precisely rather than inflated:** the fetch tool
+converts the page and answers through a small model, so these are a MODEL'S
+READING of the page and not raw bytes. What makes them load-bearing is that they
+are a SECOND INDEPENDENT READING agreeing with the census's, taken by a
+different instrument two days apart. Two readings agreeing is the corroboration;
+neither alone is the raw article.
+
 **RETIRED -- rows 132, 133, 134, 135, 139 (the session).** The surface is not a
 page to read or a control to click. It is a live audio or video session with a
 conversational agent, opened in a separate product in a new tab.
@@ -255,6 +277,16 @@ The census said so first and nobody acted on it: *"The realistic reachable slice
 is the READ side -- a past session's readiness score, summary and transcript, if
 they are addressed by a url."* Retiring these three would have retired the one
 part of this product the server could plausibly hold.
+
+  **The direct fetch sharpens this and does not settle it.** `a8336402` says the
+  three results arrive together at the end of a session -- *"you'll get detailed
+  feedback, including an interview readiness score, a summary of your strengths
+  and areas to improve, and a transcript of your responses with examples on how
+  to make them stronger"* -- and says nothing whatever about where they live
+  afterwards. **So the results are confirmed to EXIST and their ADDRESS is
+  confirmed to be undocumented**, which is exactly the shape of the new blocker
+  rather than an argument against it. They may well be drawn inside the Learning
+  tab and nowhere else, which would be a finding, not a failure.
 
   **New blocker: `AI-INTERVIEW-RESULTS-NO-ADDRESS` -- 3 rows, 3R, queue MEASURE,
   cost 4** (allowlist +1, capture +1, parser +1, tool +1; ratio 0.75). Nobody has
@@ -617,10 +649,16 @@ clip of his name on his profile.
 **RETIRED, refused twice from two independent directions, and neither is the
 allowlist.**
 
-* **LinkedIn's own article says desktop cannot do it.** `a550527`, as read by the
-  profile census: max 10 seconds, **mobile iOS/Android app only**, cannot be
-  recorded or edited on desktop, only deleted. A browser-driven server
-  structurally cannot record it.
+* **LinkedIn's own article says desktop cannot do it, and the article was
+  fetched directly this pass rather than inherited.** `a550527`, verbatim:
+  *"You currently can't record or edit your name pronunciation on the LinkedIn
+  desktop site. It can only be done on the LinkedIn iOS/Android mobile app."*
+  Plus *"Make sure that the total recording time is within 10 seconds"*, and
+  desktop instructions for DELETING it. **A browser-driven server structurally
+  cannot record it** -- and this is now a second independent reading agreeing
+  with the profile census's, rather than the census's reading alone. (Same
+  evidence-class caveat as 3.1: the fetch answers through a small model, so the
+  strength is the agreement between two instruments, not raw bytes.)
 * **The one verb desktop does offer is already forbidden.** Deleting it meets
   `writes.PERMANENTLY_FORBIDDEN["delete_or_withdraw_anything"]` -- *"destruction
   is not a write this design covers, at any confirm level"* -- an entry whose own
@@ -1003,14 +1041,23 @@ point of writing reopeners as instruments instead of as conditions.
    control), `VOICE-CAPTURE` (the composer's attachment set) and
    `LINK-FOR-OFF-PLATFORM-USE`'s cost (which page draws the control). Each names
    the capture that settles it.
-4. **No help article was re-fetched this pass.** Every citation to `a8336402`,
-   `a10376002`, `a10133010`, `a550527`, `a548518`, `a569473`, `a523091`,
-   `a507441`, `a523131`, `a7443434` is the census's reading of it, inherited. The
-   census walked them; this pass did not re-walk them.
-5. **No page was loaded and no browser was driven.** Everything measured here was
-   measured by importing `linkedin_server` at HEAD and by reading committed
-   markdown. `PANEL-NOT-OBSERVED` rests entirely on A13's measurement, restated
-   and not re-taken, as instructed.
+4. **THREE help articles were fetched directly and SEVEN were not.** Fetched and
+   confirmed sentence for sentence against the census: `a8336402` (AI interview
+   prep), `a10133010` (camera and microphone permissions), `a550527` (name
+   pronunciation). Still inherited from the census's reading: `a10376002`,
+   `a548518`, `a569473`, `a523091`, `a507441`, `a523131`, `a7443434`.
+   **The three that were checked all held**, which is evidence about the
+   census's reliability and not a licence to treat the other seven as checked.
+   And the fetch itself answers through a small model rather than returning raw
+   bytes, so what the three buy is a second independent reading that agrees --
+   corroboration, not a primary source.
+5. **No browser was driven and no signed-in page was loaded.** Everything else
+   was measured by importing `linkedin_server` at HEAD and by reading committed
+   markdown. **THE ONE EXCEPTION, stated rather than buried:** three PUBLIC help
+   articles were fetched over plain HTTP with no session, no account and no
+   browser -- the same class of read the census itself performed for its
+   article-index queries. `PANEL-NOT-OBSERVED` rests entirely on A13's
+   measurement, restated and not re-taken, as instructed.
 6. **353 is derived from a number this pass did not re-verify** -- see section 5.
    Section 9's ledger inherits that: every figure in it below `390` rests on
    A1's arithmetic being right, and A11 already shows how fast that number goes
@@ -1063,9 +1110,15 @@ section 5 closes in both directions.
 * Working log: `_audit/_scratch/_progress-retire-rulings.md`.
 * Full-suite gate in a `git clone --no-hardlinks` of HEAD:
   `_audit/_scratch/_gate-retire-rulings-clone.txt`.
-* No browser, no LinkedIn session, no page load, no `mcp__linkedin__*` call. No
-  identifier of any person appears in this document; capabilities and relations
-  only.
+* Help articles `a8336402`, `a10133010` and `a550527` fetched directly over
+  plain HTTP -- public pages, no session, no account, no browser, no cookie.
+  Each answered through a small model rather than returned as raw bytes, which
+  is why they are cited as a second agreeing reading and never as a primary
+  source.
+* **No browser was driven, no LinkedIn session was used, and no
+  `mcp__linkedin__*` tool was called.** The three fetches above are the only
+  network reads and they touch no account. No identifier of any person appears
+  in this document; capabilities and relations only.
 
 ---
 
