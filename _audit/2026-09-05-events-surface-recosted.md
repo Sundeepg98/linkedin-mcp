@@ -548,3 +548,42 @@ async def linkedin_events_home() -> dict[str, Any]:
     except Exception as exc:
         return _error(exc)
 ```
+
+## 11. THE CREDIT FOLLOW-UP, AND A RACE I LOST WHILE QUOTING THE RULE
+
+`a40e368` cleared a red I owned -- the enumeration guard on
+`shape.census_substitute`, which fires on somebody ADDING A CALLER and is
+therefore unreachable from any targeted run of the files I touched. The
+verdict was **outcome 3: this tool should not depend on that predicate**, and
+it no longer does; it publishes a boolean and two integer path depths instead
+of a shaped url.
+
+**THAT COMMIT ALSO CARRIES SEVEN ADDED AND TWO REMOVED LINES THAT ARE NOT
+MINE** -- a docstring rewording in `linkedin_job_detail`, in the same file. I
+declared this in the commit body. **The declaration was already stale when I
+wrote it**, and that is the part worth recording:
+
+    my last --numstat reading, seconds before the commit    43 +  /  6 -
+    what the commit actually contains                       51 +  /  8 -
+
+The neighbour rewrote their own parenthetical in that window -- the version I
+read named the offending word, the version I committed deliberately does not
+repeat it. So I quoted their earlier text in my commit body and shipped their
+later text.
+
+**I HAD READ THE RULE, QUOTED THE RULE, AND LOST THE RACE ANYWAY.** The freeze
+document states it exactly: for an append-only shared file there is no
+git-level fix, and reading the diff immediately before committing narrows the
+window without closing it, because the window is between your read and your
+commit. This is the third time this week that reading a documented near-miss
+did not prevent it.
+
+**THE CORRECTED CREDIT:** the `linkedin_job_detail` docstring change in
+`a40e368` is +7/-2, is not this wave's work, arrived from `bc5c2eb` at 16:38,
+and is byte-identical to what its author had on disk at the moment of the
+commit. I did not write it, did not review it, and do not vouch for it. It is
+in history under my commit and its author should know.
+
+**AND THE HONEST ACCOUNT OF WHY I TOOK IT:** the alternative was leaving a red
+I owned past the round's close. That is a judgement, not a rule, and it is
+recorded as one.
