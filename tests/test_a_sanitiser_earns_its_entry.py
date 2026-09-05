@@ -199,6 +199,61 @@ ENROLLED: dict[tuple[str, str], str] = {
     # probe was written, committed, and the red arrived from a file the wave
     # had never opened. Register 9.5, demonstrated on its own author.
     ("_probe_newsletter_subscriptions_live.py", "_relation"): TWO_ARG,
+    # THE TWELFTH, AND THE LAST ONE OWED. The `upload-sanction` wave, claiming
+    # the file the two comments above named as the remaining unenrolled
+    # claimant. With this row the CLAIMANT half of this file's enumeration is
+    # whole; the NAME half is not, and is deliberately left -- see below.
+    #
+    # WHY THIS COPY EXISTS AT ALL, because that is the part an enrolment
+    # should have to justify. The probe printed the landed url through a DICT
+    # SUBSCRIPT and `tests/test_navigation_is_never_derived.py` PASSED it --
+    # measured against a copy of the tree carrying two variants of the same
+    # file: the same value, the same line, printed through the bare name is
+    # caught and printed through `out['landed']` is not. The taint fixed point
+    # follows name bindings and a subscript launders it. Rather than ship
+    # through an instrument's blind spot, the probe took the sanctioned route,
+    # which is what put a `_relation` in it and this row here.
+    #
+    # WHAT MAKES THIS SAFE TO CLAIM RATHER THAN A GUESS, and it is the same
+    # two facts the rows above rest on, re-measured rather than inherited:
+    #
+    # 1. This copy was EXTRACTED from `_probe_groups_events_live.py`, never
+    #    retyped, so `test_every_relation_definition_is_byte_identical` --
+    #    which passed with this file under it, 196 tests -- says the contract
+    #    claimed here is the one that file's own three-branch adversarial test
+    #    already exercises.
+    # 2. THE MACHINERY WAS SHOWN FIRING ON THIS ROW BEFORE THE ROW WAS
+    #    COMMITTED, and it took TWO plants, which is the part worth keeping.
+    #
+    #    THE FIRST PLANT SURVIVED. It leaked in `_relation`'s
+    #    `landed == asked` branch, and the table passed. That is a result
+    #    about the PLANT and not a hole in the table: that branch is reachable
+    #    only when the two strings are EQUAL, at which point the value printed
+    #    IS the address this repository asked for -- a constant it authored.
+    #    There is nothing there to leak. Enlarging the mutation would have
+    #    been the wrong move; the right question was which branch makes the
+    #    sanitiser the only thing standing.
+    #
+    #    THE SECOND PLANT, on the fall-through -- same path depth, different
+    #    url, which is reached with a value the SITE chose -- failed the table
+    #    by name:
+    #
+    #        _probe_compose_file_inputs.py::_relation returned its input's
+    #        identity (a vanity slug in a member path)
+    #
+    #    Restored, it passes. An enrolment that has only ever been seen
+    #    passing certifies nothing, which is this file's entire subject. Both
+    #    plants were made and restored on this one file, which no other wave
+    #    writes, and the restore was verified by sha256 rather than assumed.
+    #
+    # THE NAME PIN IS NOT TOUCHED, DELIBERATELY.
+    # `test_the_guarded_names_are_the_ones_this_file_thinks_they_are` is still
+    # red because `_SANITISERS` gained `_relation` at `196394d` and this file's
+    # expected set did not. Widening that set to clear a red is precisely what
+    # the enrolment half exists to prevent -- `_redact` was admitted once on
+    # the strength of its name and carried no slug rule at all. That row
+    # belongs to whoever moves the name, and the red is the queue working.
+    ("_probe_compose_file_inputs.py", "_relation"): TWO_ARG,
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this
