@@ -1062,9 +1062,148 @@ async def test_an_unchanged_file_gets_PAST_the_digest_gate(
     assert "has changed since you were shown it" not in error
     assert "carries no file digest" not in error
     assert block["file"]["sha256_prefix"] not in error
-    # THE CALL WAS REACHED. Playwright names the method it refused.
-    assert "set_input_files" in error
+    # THE RUN REACHED THE LAST CHECK ABOVE THE CALL, which is now this
+    # package's own control check rather than Chromium's type error -- see
+    # the section below. It still proves what this test was written to
+    # prove: the digest comparison PASSED rather than being skipped, and
+    # execution carried on past both digest branches with the resolved path
+    # in hand.
+    assert "may only be handed to one classified" in error
     assert out["clicked"]["clicks_made"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 10b. THE CONTROL CHECK. A file may only be handed to a measured file input.
+# ---------------------------------------------------------------------------
+#
+# WHAT THIS SECTION IS ABOUT, and it is a defect rather than a hardening.
+#
+# ``perform`` loads four queues. ``select_plan`` is loaded when
+# ``control_kind == "select_option"`` -- a classification ``_live_control``
+# DERIVES from the tag of the control it actually read. ``upload_plan`` was
+# loaded on ``spec.action in UPLOAD_ACTIONS`` and nothing else, so it
+# inherited whatever selector that action's arm had built for its own
+# purpose.
+#
+# MEASURED 2026-09-04, by the wave that built the queue: with ``publish_post``
+# forced into the set, the selector arriving at the drain point resolves to
+# the POST EDITOR, a contenteditable div. Nothing in this package refused it.
+# Chromium did -- and Chromium's check fires on a div while passing a file
+# input that is simply the wrong one.
+#
+# THE REQUIREMENT ALREADY EXISTED IN PROSE. ``readonly.SANCTIONED_MUTATIONS``'s
+# fifth entry says ``UPLOAD_ACTIONS`` ships empty because each composer "still
+# needs its own file input measured before it can join", and in the same
+# breath that wiring one "is a one-line diff". A one-line diff satisfies no
+# comment. ``writes.UPLOAD_CONTROL_KIND`` is that requirement made executable.
+#
+# SHOWN FAILING, on the real ``writes.py``, 2026-09-05 -- see the wave record
+# at ``_audit/_scratch/_progress-upload-sanction.md``.
+
+
+#: A PAGE WHOSE ONLY CONTROL IS A REAL FILE INPUT. Deliberately minimal: this
+#: fixture exists to give the sanctioned call site something it can legally
+#: land on, so the positive control below proves the handover works rather
+#: than proving Chromium rejects a div.
+FILE_INPUT_MARKUP = (
+    "<!doctype html><html><body>"
+    "<form id='f'><input type='file' id='upload-target'></form>"
+    "</body></html>"
+)
+
+
+async def test_the_upload_REFUSES_a_control_the_reader_did_not_call_a_file_input(
+    writes_on, browser_page, root, monkeypatch
+):
+    """**THE GUARD, SHOWN REFUSING.**
+
+    Same vehicle as the digest tests: ``publish_post`` forced into
+    ``UPLOAD_ACTIONS``, which is the one-line diff the sanction's own comment
+    invites. Its arm returns the post editor and no fourth element, so
+    ``perform`` classifies the control ``"click"``.
+
+    WHAT IS ASSERTED BESIDES THE REFUSAL. The message must NAME what it found,
+    because a refusal that reports only what it did not match is half a
+    measurement -- and it must NOT carry the selector, because
+    ``_live_control`` builds selectors out of dom ids and a dom id on this
+    site can carry an entity identifier.
+    """
+    grant, _path, _block = await _granted_upload(browser_page, root, monkeypatch)
+
+    out = await writes.perform(
+        FixtureNavigator({SHAREBOX_URL: SHAREBOX_MARKUP}), browser_page, grant
+    )
+    error = str(out["clicked"]["error"])
+
+    # IT NAMES WHAT IT SAW, not only what it wanted.
+    assert "classified as 'click'" in error
+    assert repr(writes.UPLOAD_CONTROL_KIND) in error
+    # AND IT SAYS WHAT THE MISSING THING ACTUALLY IS, so the next reader does
+    # not try to fix it by editing the set again.
+    assert "Adding an action to that set does not build the arm." in error
+
+    # NOTHING WAS DISPATCHED AND NOTHING WAS HANDED OVER.
+    assert out["clicked"]["clicks_made"] == 0
+    assert out["uploaded"] is None
+
+    # AND NO SELECTOR IN THE MESSAGE. ``post_editor_selector`` is what that
+    # arm builds; asserting its absence by VALUE rather than by eye is what
+    # makes this a check instead of a convention.
+    assert dom.post_editor_selector() not in error
+
+
+async def test_the_sanctioned_call_site_EXECUTES_when_the_control_IS_a_file_input(
+    writes_on, browser_page, root, monkeypatch
+):
+    """**THE POSITIVE CONTROL FOR THE GUARD, and the stronger half.**
+
+    A check that refused every upload would pass the test above and would look
+    identical in the report. So this drives the other branch: an arm that
+    classifies its control ``set_input_files``, aimed at a real file input on
+    a real page in headless Chromium.
+
+    IT IS ALSO THE FIRST TIME IN THIS REPOSITORY THAT THE DRAIN POINT HAS
+    LANDED. Every upload test before it ended in a refusal -- by digest, or by
+    Chromium rejecting a div. Here ``page.set_input_files`` executes, and the
+    file is read back OFF THE BROWSER'S OWN NODE rather than off this
+    process's bookkeeping: ``el.files.length`` and the name the DOM reports.
+    Counting our own ``uploads_made`` and calling that evidence would be
+    asking the code whether it did the thing it says it did.
+
+    WHY ``_live_control`` IS SUBSTITUTED HERE AND NOT SOMETHING ELSE. It is
+    the seam the wiring wave will edit -- the arm is precisely what is
+    missing -- so standing in for it tests the contract that wave has to meet.
+    Everything downstream of it is the real ``perform``: the real target
+    resolution, the real digest read, the real queue and the real call site.
+    """
+    grant, path, block = await _granted_upload(browser_page, root, monkeypatch)
+    target_url = "https://www.linkedin.com/preload/sharebox/"
+
+    async def _arm(page, spec, grant_, anchor):
+        # THE SHAPE A WIRING WAVE'S ARM RETURNS: the state its spec is valid
+        # FROM, a reason, a selector, and the classification that says this
+        # control was read and found to be a file input.
+        return ("composer_present", "a file input, for the test", "#upload-target",
+                writes.UPLOAD_CONTROL_KIND)
+
+    monkeypatch.setattr(writes, "_live_control", _arm)
+
+    out = await writes.perform(
+        FixtureNavigator({target_url: FILE_INPUT_MARKUP}), browser_page, grant
+    )
+
+    # THE HANDOVER HAPPENED, measured on the node.
+    handed = await browser_page.locator("#upload-target").evaluate(
+        "el => [el.files.length, el.files.length ? el.files[0].name : '']"
+    )
+    assert handed[0] == 1, handed
+    assert handed[1] == path.name
+
+    # AND THE REPORT AGREES WITH THE NODE, which is the half that would have
+    # gone unnoticed if only one of the two were checked.
+    assert out["uploaded"] is not None
+    assert out["uploaded"]["files_handed_to_the_browser"] == 1
+    assert out["uploaded"]["sha256_prefix"] == block["file"]["sha256_prefix"]
 
 
 # ---------------------------------------------------------------------------

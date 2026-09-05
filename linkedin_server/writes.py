@@ -2789,6 +2789,35 @@ def url_target_of(spec: WriteSpec, target: str) -> str:
 #: the wave that first needs it rather than invented here.
 UPLOAD_ACTIONS: frozenset[str] = frozenset()
 
+#: THE CONTROL CLASSIFICATION AN UPLOADING ACTION'S ARM MUST RETURN, and the
+#: half of the paragraph above that used to be prose only.
+#:
+#: ``_live_control`` returns ``(state, why, selector)`` and, from the one arm
+#: with something more to say, a FOURTH element naming what KIND of mutation
+#: the control it measured takes -- ``"select_option"`` for a ``select`` tag,
+#: ``"fill"`` for anything else in that editor. ``perform`` defaults the
+#: missing element to ``"click"``.
+#:
+#: THE UPLOAD QUEUE WAS THE ONE QUEUE THAT NEVER CONSULTED IT. It was loaded
+#: on ``spec.action in UPLOAD_ACTIONS`` alone, so it inherited whatever
+#: selector that action's arm had built for its own purpose -- measured
+#: 2026-09-04 with ``publish_post`` forced into the set: the post EDITOR, a
+#: contenteditable div. Nothing in this package refused it; Chromium did.
+#:
+#: SO THIS CONSTANT IS THE CONTRACT A WIRING WAVE SATISFIES. An arm that has
+#: read a control and established it is a file input returns this as its
+#: fourth element; ``perform`` refuses to hand a file to anything else. The
+#: derivation belongs in the arm, beside the reading, exactly as the
+#: ``select`` tag's does -- never at the call site from a selector string.
+#:
+#: IT IS DELIBERATELY THE PLAYWRIGHT METHOD NAME. The other kinds are
+#: (``fill``, ``select_option``), the sanction is keyed on the same vocabulary
+#: (``readonly.SANCTIONED_MUTATIONS``'s fifth entry is
+#: ``("linkedin_server/writes.py", "perform", "set_input_files")``), and one
+#: word meaning one thing in both places is what stops a future reader
+#: inventing a mapping between two spellings of the same idea.
+UPLOAD_CONTROL_KIND: str = "set_input_files"
+
 
 def _file_component_of(spec: WriteSpec, target: str) -> uploads.UploadFile:
     """The FILE named by a canonical target, resolved and checked. Never composed.
@@ -8511,6 +8540,59 @@ async def perform(
                     "The token binds the PATH; this comparison is what binds "
                     "the BYTES, and they no longer match. Nothing was "
                     "uploaded and nothing was clicked."
+                )
+            # THE CONTROL, NOT THE BYTES. Both checks above are about the
+            # FILE. This one is about the thing about to receive it, and it is
+            # the last thing between a grant and a browser -- deliberately
+            # immediately above the call it protects, so a reader sees the
+            # check and the handover in one breath and no later edit slips
+            # between them.
+            #
+            # WHAT IT ENFORCES IS NOT A NEW BAR. It is the precondition the
+            # sanction itself already states in prose.
+            # ``readonly.SANCTIONED_MUTATIONS``'s fifth entry says
+            # ``UPLOAD_ACTIONS`` ships empty because "each of the three
+            # composers still needs its own file input measured before it can
+            # join", and then says wiring the first one "is a one-line diff".
+            # Both are true, and together they are the hole: a one-line diff
+            # satisfies no comment. This makes the stated requirement
+            # executable, so an action added to that set without an arm that
+            # MEASURED a file input refuses here, by name, having uploaded
+            # nothing.
+            #
+            # WHY THE CHECK IS ON THE KIND AND NOT ON THE SELECTOR. The kind
+            # is derived by ``_live_control`` from the control it actually
+            # read -- the same rule ``select_option`` follows, where a tag of
+            # ``select`` is what produces that kind. A selector string is a
+            # thing this function was handed; a kind is a thing the reader
+            # measured. Aiming a file by re-parsing a selector here would be
+            # deciding at the call site what the reader was supposed to decide
+            # at the page.
+            #
+            # AND THE SELECTOR IS NOT IN THE MESSAGE, which is not an
+            # oversight. ``_live_control`` builds selectors from dom ids, and
+            # a dom id on this site can carry an entity identifier. The kind
+            # answers the question and carries nothing.
+            #
+            # MEASURED 2026-09-04 BY THE WAVE THAT BUILT THIS QUEUE, which is
+            # why this is a defect and not a hypothetical: with
+            # ``publish_post`` forced into ``UPLOAD_ACTIONS``, the selector
+            # that arrives here resolves to the POST EDITOR -- a
+            # contenteditable div -- and the only thing that refused was
+            # Chromium's own type error. That refusal is somebody else's
+            # check: it fires on a div, and it would NOT fire on a file input
+            # that is simply the wrong one.
+            if control_kind != UPLOAD_CONTROL_KIND:
+                raise WriteAttemptError(
+                    f"refusing to upload for {spec.action!r}: the live reader "
+                    f"resolved a control it classified as {control_kind!r}, "
+                    f"and a file may only be handed to one classified "
+                    f"{UPLOAD_CONTROL_KIND!r}. That classification comes from "
+                    "the control that was READ on the page, so this says no "
+                    "arm of the gate measured a file input for this action -- "
+                    "which is exactly what UPLOAD_ACTIONS being empty is "
+                    "waiting on. Adding an action to that set does not build "
+                    "the arm. Nothing was uploaded and nothing was clicked."
                 )
             # THE ONE CALL SITE, and the fifth entry on
             # readonly.SANCTIONED_MUTATIONS. The path handed over is
