@@ -162,10 +162,58 @@ text node. So:
 > this probe reads 0 and is wrong.
 
 That is the single-aim caveat the contact-info probe declared, arriving in a
-different form on a different surface. It costs nothing on the three needles
-that read non-zero, and it is the whole of what is owed on K8: **the next
-reading of this row should aim at accessible names, not at text.** I did not
-take it.
+different form on a different surface.
+
+> **SUPERSEDED, four paragraphs down, before this document was pushed.** The
+> sentence that stood here read *"the next reading of this row should aim at
+> accessible names, not at text. I did not take it."* I then took it, in
+> `b88211b`, and **the defect fired.** No `CORRECTS:` marker: a marker naming
+> the file it lives in resolves zero documents and turns the suite red, and a
+> reader who reaches this line has already reached the correction. The pointer
+> is here rather than at the foot of the file because this is where the stale
+> claim gets read.
+
+### I TOOK THE READING, AND THE BLIND SPOT WAS REAL
+
+A second corpus was added -- `aria-label`, `alt` and `title` only -- reported
+**separately** from the text corpus so the two can disagree in one place
+rather than being averaged into one number.
+
+    needle                             TEXT   NAMES
+    dark                                  0       0
+    top voice                             0       0
+    verified                              4       5
+    verification                          0       0
+    premium                               0      19
+    another language                      0       0
+    profile language                      1       1
+    add profile in another language       0       0
+    zzq_no_surface_draws_this             0       0
+
+    name_nodes 167   names_length 4606   (identical on both reads)
+
+**`premium` reads ZERO in text and NINETEEN in accessible names.** The blind
+spot I declared was not hypothetical, and a wave that had trusted the text-only
+reading would have reported that word absent from a page carrying it nineteen
+times.
+
+**AND THIS IS WHAT MAKES THE `top voice` ZERO WORTH SOMETHING NOW.** It stays
+**0 in both corpora**. The pair has been *shown able to disagree* -- on this
+very page, in this very call -- so its agreement is evidence rather than a
+coincidence of one aim. K8's reading survives a strictly stronger instrument:
+
+> **No Top Voice badge is drawn on this account, in text or in accessible
+> names.**
+
+This is the day's own law arriving in my favour for once: *agreement between
+two instruments sharing a defect is not corroboration; disagreement between
+two NOT sharing one is the cheapest signal available.* Here both happened in
+one table, and the disagreement is what licenses the agreement.
+
+**The residue, and it is smaller than what it replaced:** accessible names
+still do not cover an image with no `alt`, or a badge conveyed by shape alone.
+That is a narrower hole than "all non-text content" and I am not claiming it
+is closed.
 
 ---
 
@@ -256,8 +304,47 @@ with nothing in the diff naming it.
 
 **So the highest-value thing on this row is not a pattern. It is a test that
 turns that accident into an invariant**, and it is owed whether or not anybody
-ever writes the pattern. That slice is `tests/test_the_settings_boundary_refuses_account_deletion.py`
--- see section 6 for its state at freeze.
+ever writes the pattern.
+
+### IT LANDED: `tests/test_the_settings_boundary_refuses_account_deletion.py`, `85364e7`
+
+Delegated as a closed-form slice, reviewed against the shipped predicate
+before admission. The load-bearing test **passes today and that is the
+point**: it monkeypatches a plausible settings-family pattern into
+`_ALLOWED_URL_PATTERNS` and asserts the close-account address **becomes
+admitted**, documenting the hazard as a reproducible fact rather than a
+warning in prose. `readonly.py` is not edited, and monkeypatch restores the
+tuple so no later test in the process inherits a widened boundary.
+
+Shown failing before admission: the refusal test run with the allowlist
+widened at import time gave **1 failed, 3 passed**, and **4 passed** after
+reverting.
+
+### THE SLICE FOUND SOMETHING MY BRIEF DID NOT KNOW, AND IT SHARPENS THE RULE
+
+I briefed it that close-account is refused by no pattern matching. That is
+true of the SINGULAR spelling. It read `readonly.py`'s own settings-audit
+comment and found that **LinkedIn's real address is the PLURAL**,
+`/close-accounts`, and that the plural is the spelling sitting on the
+forbidden-substrings tuple. So under one widened allowlist:
+
+    /mypreferences/d/close-accounts   REFUSED -- the denylist names it
+    /mypreferences/d/close-account    ADMITTED -- nothing names it
+
+Both halves are asserted, and the contrast is worth more than either:
+
+> **A name-based refusal survives a widened allowlist. A shape-based one does
+> not.**
+
+It also verified the GATE each refusal comes from rather than accepting a
+shared `False`: the four singular spellings refuse at the allowlist gate,
+`/psettings/close-account` refuses at the denylist gate. Two urls returning
+the same boolean for different reasons is precisely the reading this
+repository keeps catching being taken as one fact.
+
+**I did not know the plural existed when I wrote the brief.** A slice that had
+obeyed the brief instead of reading the artifact would have shipped a test
+asserting the weaker half only.
 
 ---
 
@@ -323,17 +410,22 @@ inert.
   still has none.
 * **I pressed nothing.** No control on either surface was activated. The
   `profile language` hit proves a phrase renders, not that a control exists.
-* **K8's reading is text-only.** `innerText` excludes `alt` and `aria-label`,
-  so a badge drawn as an icon would read 0 through this instrument. Section 2
-  states this as a defect rather than a caveat, and the re-read is owed.
+* ~~**K8's reading is text-only.**~~ **DONE in `b88211b`** -- see section 2.
+  The accessible-name corpus was added, the blind spot fired on `premium`
+  (0 in text, 19 in names), and `top voice` stayed 0 in both.
 * **K10 was never read.** I argued from the address that a verification badge
   on a job posting needs no allowlist entry; I did not open a posting to look.
   That is an argument, not a measurement, and it is labelled as one.
-* **The probe was NOT admitted to any instrument register.** It has been shown
-  able to report an absence in both directions, which is the bar for believing
-  this run, but it has a declared blind spot (accessible names) and an
-  instrument with a known blind spot should not be registered for reuse until
-  that is fixed.
+  **This is the largest thing still owed on row 43.**
+* **The probe was NOT admitted to any instrument register**, and I am not
+  registering it. Its two declared defects are fixed and it now carries a
+  two-corpus control that has been shown disagreeing -- but it has never been
+  run against a surface where the answer is independently known for the
+  needles that matter, only against a control page chosen for absence. The bar
+  for the register is that an instrument has been shown FAILING; this one has
+  been shown reporting absence, which is weaker.
+* **I did not press any control on either surface**, so `profile language 1`
+  says a phrase renders and nothing about whether it is actionable.
 * **The full suite was not run and no clone was taken.** Targeted runs clear
   SHAPE violations, never ENUMERATION violations -- if this probe or this test
   file should have been enrolled somewhere by name, no run scoped to these
@@ -358,9 +450,22 @@ before-and-after of one instrument; it is *no page* against *a page*.
 
 The honest residue: **where the badge could be read at all, it read `0 new`**,
 and no counter is observed moving. But *a reading no instrument can fail is
-not a reading*, and half of this pair could not have failed. **The fix is one
-line -- take the BEFORE reading after the first navigation, not before it --
-and I am recording it rather than silently claiming the check.**
+not a reading*, and half of this pair could not have failed.
+
+### FIXED IN `b88211b`, AND THE OBLIGATION IS NOW DISCHARGED
+
+Both readings are taken on the SAME address, bracketing the second load of it:
+
+    BEFORE (on the profile)  {'links': 2, 'badge_links': 1, 'label': 'My Network, 0 new notifications'}
+    AFTER  (on the profile)  {'links': 2, 'badge_links': 1, 'label': 'My Network, 0 new notifications'}
+
+**Identical at both ends, across three page loads of his profile.** The
+counter did not move under this wave's reads.
+
+**The caveat that must travel with it, because this repository has written it
+down twice:** a badge at zero cannot distinguish *the page consumed nothing*
+from *there was nothing to consume*. `0 new` at both ends is consistent with
+both, and I am claiming only the first -- that nothing this wave did moved it.
 
 ## 7. WHAT RAN, AND ITS EXACT SCOPE
 
@@ -404,16 +509,75 @@ NAME and carried no slug rule at all. It is one line, owed by one owner.
 
 ## 8. COST, RECOMPUTED RATHER THAN RECALLED
 
-Derived from the probe's own control flow, not from memory. **Three loads per
-run** -- one control page, then `/in/me/` twice:
+Derived from the probe's own control flow, not from memory -- `_read` is
+called once at the control page and twice at the profile, so **three
+`goto` calls per run**:
 
     /mypreferences/d/dark-mode, /in/me/, /in/me/
 
-    run 1  19:38   3 loads   completed
-    run 2  19:41   3 loads   completed
-    -----------------------------------------
-    TOTAL          6 page loads, 0 presses, 0 writes
+    run 1  19:38   3 loads   completed   (text corpus only)
+    run 2  19:41   3 loads   completed   (reproduced run 1 exactly)
+    run 3  19:48   3 loads   completed   (accessible-name corpus, badge fix)
+    ---------------------------------------------------------------------
+    TOTAL          9 page loads, 0 presses, 0 writes, 0 addresses added
 
-One tab per run, opened and closed. `page.is_closed()` read **True** on both
-runs -- a presence reading about the one object each run created, not a count
-over a pool a dozen waves share. The PAGE was closed, never the context.
+**RECOMPUTED AT FREEZE, NOT RE-READ.** The section as first written said
+`TOTAL 6` against two runs, and a third run happened after it. Six was correct
+when written and wrong when read, which is the shape this repository keeps
+paying for -- and it is the *flattering* direction, since it makes the wave
+look cheaper than it was. Re-reading the sentence could not have caught it;
+recomputing from the control flow did.
+
+One tab per run, opened and closed. `page.is_closed()` read **True** on all
+three runs -- a presence reading about the one object each run created, not a
+count over a pool a dozen waves share. The PAGE was closed, never the context.
+
+## 9. COMMITS, AND EVERY BLOB VERIFIED AGAINST ITS REPORTED COUNT
+
+    707583b  probe: the badge/language reader                241 lines
+    79e126b  test: the two vocabularies and two gate indices 125 lines
+    57117d4  audit: this document                            419 lines
+    b88211b  probe: accessible names, badge pair, escape     +55 -12
+    85364e7  test: the settings boundary refuses deletion    158 lines
+
+**Each was verified with `git show HEAD:<path> | wc -l` against the insertion
+count the commit reported**, because a failed `git commit --only` rolls the
+working tree back and two waves lost ~70 and ~90 finished lines to it today.
+Every message was passed as a FILE PATH, never on stdin -- the other half of
+that same scar.
+
+**Zero AI attribution across all five**, recomputed at freeze by grepping the
+five commit messages for the co-author, session and generated-with markers:
+**0 matches**. The repo is public.
+
+Nothing pushed. **The union of paths across all five commits is FOUR distinct
+files** -- recomputed with `git show --numstat`, because the sentence that
+first stood here said "two scripts" and there is only one, committed twice:
+
+    scripts/_probe_badge_and_language_affordances.py    (707583b, b88211b)
+    tests/test_badge_and_language_affordances.py        (79e126b)
+    tests/test_the_settings_boundary_refuses_account_deletion.py  (85364e7)
+    _audit/2026-09-05-profile-rest.md                   (57117d4, and this update)
+
+`readonly.py`, `dom.py`, `server.py` and `writes.py` are untouched by this
+wave, which is a stronger statement than a re-pinned digest and is checkable
+in one command. **Another wave committed two allowlist patterns
+(`/school/<slug>/` and `/jobs/collections/recommended/`) while this wave ran**
+-- that is why my measured count of 29 already exceeded the freeze file's 28,
+and it is theirs, not mine.
+
+## 10. WHAT THE NEXT WAVE ON THIS SURFACE SHOULD TAKE FIRST
+
+1. **Read K10 on a live job posting.** It is the one row here I argued rather
+   than measured, and the address is already admitted and already loaded by
+   `linkedin_job_detail`. Cheapest remaining row on this surface.
+2. **Aim the `profile-modals` aim reader at the `profile language` hit.**
+   *Named is not pressable.* One phrase renders; whether a control exists is
+   unmeasured, and that wave's reader answers exactly this question without
+   pressing anything.
+3. **Do NOT write a settings-family pattern.** Row 78 names no address, so
+   there is nothing to admit; and `85364e7` now makes the cost of writing one
+   visible as a red rather than as a silent admission.
+4. **The ledger's row 43 is one row too big** (B8 == K9) and both its
+   `allowlist +1` charges are refuted. Re-costing is the lead's; the
+   measurement is here.
