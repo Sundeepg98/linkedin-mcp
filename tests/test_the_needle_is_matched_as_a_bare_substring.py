@@ -1,27 +1,36 @@
-"""THE RECIPIENT GATE'S NAME MATCH IS A BARE SUBSTRING, AND ITS OWN SELECTOR
+"""THE RECIPIENT GATE'S NAME MATCH WAS A BARE SUBSTRING, AND ITS OWN SELECTOR
 SUPPLIES HALF THE HAYSTACK.
 
-``writes._recipient_gate`` is the only thing standing between a tool call and
-a message arriving in a named human being's inbox. Its docstring states the
-safety property in capitals -- **"WHAT MAKES THIS SAFE IS THE NAME MATCH, NOT
-THE COUNT"** -- and that claim is correct about the COUNT. This file is about
-the other half of the sentence: what the NAME MATCH actually is.
+**THE FILENAME IS THE DEFECT THIS FILE FOUND, NOT THE STATE OF THE CODE.** It
+was true when the file was created on 2026-09-05 and the fix landed the same
+day; the name is kept so the history and the tests stay findable from each
+other, and this paragraph exists so nobody reads the filename as current
+truth.
 
-It is ``indexOf``. ``dom.SELECTED_RECIPIENT_JS`` builds
+``writes._recipient_gate`` is the only thing standing between a tool call and
+a message arriving in a named human being's inbox. Its docstring used to state
+the safety property in capitals -- **"WHAT MAKES THIS SAFE IS THE NAME MATCH,
+NOT THE COUNT"** -- and that claim was correct about the COUNT. This file is
+about the other half of the sentence: what the NAME MATCH actually was. That
+docstring was corrected in the same commit as the code, because a docstring is
+read as current truth by whoever opens the file next and is the one class the
+correction machinery cannot bind.
+
+It was ``indexOf``. ``dom.SELECTED_RECIPIENT_JS`` builds
 
     (aria-label or "") + " " + (textContent or "")
 
-lowercases it, and asks whether the needle appears anywhere inside. That is
-the loosest relation available between two strings, and it is being asked to
-carry the most irreversible write in this package.
+lowercases it, and asked whether the needle appeared anywhere inside -- the
+loosest relation available between two strings, carrying the most irreversible
+write in this package.
 
-TWO THINGS GO WRONG, AND THEY ARE DIFFERENT
--------------------------------------------
+TWO THINGS WENT WRONG, AND THEY ARE DIFFERENT
+---------------------------------------------
 **1. THE HAYSTACK CONTAINS THE FURNITURE THE SELECTOR SELECTED ON.** Every
 candidate in ``dom.RECIPIENT_CHIP_SELECTORS`` constrains ``aria-label`` to
 carry a remove-control's own label word. The matcher then searches that same
 attribute. So a needle that is a substring of the CONTROL's wording matches on
-a chip naming a total stranger -- the gate finds its needle in the button, not
+a chip naming a total stranger -- the gate found its needle in the button, not
 in the person. This is
 ``uniqueness-over-a-filtered-set-measures-the-filter`` one layer down: the
 string being searched was chosen BECAUSE it contains the thing being searched
@@ -29,10 +38,27 @@ for.
 
 **2. A SHORT NAME IS A SUBSTRING OF A LONGER ONE.** No furniture needed. If he
 names someone and LinkedIn commits a different person whose name merely
-contains those letters, ``indexOf`` reports a match and the gate proceeds.
+contains those letters, ``indexOf`` reported a match and the gate proceeded.
 
-WHY THIS FILE DOES NOT FIX IT
------------------------------
+IT IS FIXED NOW. THIS FILE IS WHY, AND WHAT THE FIX COSTS
+---------------------------------------------------------
+**Both collisions were live until 2026-09-05 and both now refuse.**
+``dom.SELECTED_RECIPIENT_JS`` requires a WORD-BOUNDED match: a letter or digit
+on either side of the hit means the needle is a fragment of a longer word, and
+a fragment is not a name. The three refusal cases below and the fourth case --
+a full name still reaching ``proceed: True`` -- are the evidence that the
+tightening discriminates rather than merely refuses.
+
+**THE RULING BEHIND IT, because the reasoning is the durable half.** The
+choice looked blocked while it was framed as picking a matcher against an
+unobserved DOM. It is not, because the two error directions are not
+symmetric: too strict costs him a retry, too loose commits a STRANGER to an
+irreversible message under his name. When they differ that much the DOM need
+not be known -- only which way to fail. This gate fails closed, and it MAY
+refuse a legitimate recipient on a real chip. That is the accepted cost.
+
+WHAT THE FIX DOES NOT DO
+------------------------
 The obvious repair is a stricter matcher -- an anchor, a word boundary, a
 whole-token compare. **Every one of those was MEASURED DEAD on the
 neighbouring surface**, in ``_audit/2026-09-03-typeahead-name-matching-is-
@@ -50,18 +76,17 @@ and the last time somebody derived a matcher from a fixture built to the only
 shape anyone had guessed, it was "correct on the shape the fixtures had, and
 dead on the shape the page has."
 
-**A tighter matcher aimed at an unobserved rail could refuse everybody,
-including the right person -- which on this gate is safe -- or it could keep
-proceeding for a reason nobody measured, which is not.** The honest move is to
-make the current relation VISIBLE and let whoever observes a real chip choose,
-so the two known-defect tests below assert TODAY'S behaviour and turn RED the
-day it is fixed, rather than passing in silence either way.
+**So a boundary rule is not claimed to be the RIGHT relation for this rail --
+only a safer one than a substring.** A stranger whose name contains his needle
+as a WHOLE WORD still matches, and that residue is real. The answer to it is
+the identifier route in that audit's section 5, not a cleverer string
+comparison.
 
 WHAT THE READER SHOULD TAKE FROM A GREEN RUN OF THIS FILE
 ---------------------------------------------------------
-Green here means: the gate still matches by bare substring, and both
-collisions still reach ``proceed: True``. It is a defect RECORDED, not a
-defect absent.
+Green means: both measured collisions refuse, an exact name still proceeds,
+and the matcher in the source is still the bounded one. It does NOT mean the
+gate is known-correct against a real chip -- nobody has seen one.
 
 NOBODY IN THIS FILE IS ANYBODY. Every name is imported from
 ``tests/test_send_message_gate.py``'s invented set.
@@ -180,10 +205,24 @@ def test_the_matcher_searches_the_attribute_the_selector_selected_on():
     source = dom.SELECTED_RECIPIENT_JS
     assert "getAttribute('aria-label')" in source, source
     assert "textContent" in source, source
-    assert "indexOf(needle)" in source, source
-    # THE ORDERING IS NOT THE POINT AND IS NOT ASSERTED. Which of the two
-    # halves comes first changes nothing: indexOf has no anchor, so a needle
-    # found in either half is a match.
+
+    # THE HAYSTACK IS STILL CONTAMINATED -- that half of the defect is
+    # STRUCTURAL and no matcher removes it. The selector still pins a word into
+    # the attribute the script still reads. What changed is what counts as
+    # carrying the needle.
+    #
+    # THIS ASSERTION FIRED WHEN THE FIX LANDED, which is the whole reason it is
+    # written against the source: it read ``indexOf(needle)`` until 2026-09-05
+    # and went red the moment the matcher was tightened, rather than letting a
+    # change to the safety-critical relation land unnoticed.
+    assert "wordish" in source, source
+    assert "bounded(" in source, source
+    assert "indexOf(needle)" not in source, (
+        "the matcher is a bare substring again. If that is deliberate, it "
+        "reverses a ruling -- three refusal tests below go green for the "
+        "wrong reason and a stranger reaches proceed. Argue it in the commit.",
+        source,
+    )
 
 
 def test_the_furniture_needle_premise_holds_in_both_directions():
@@ -238,13 +277,13 @@ async def test_the_control_a_genuinely_absent_needle_is_refused(over):
 
 
 # ---------------------------------------------------------------------------
-# 3. The two known defects. GREEN HERE MEANS THE DEFECT IS STILL PRESENT.
+# 3. The two measured collisions, both now REFUSED, plus the yes-case
 # ---------------------------------------------------------------------------
 
 
-async def test_KNOWN_DEFECT_a_needle_inside_the_button_wording_proceeds(over):
-    """A NEEDLE FOUND IN THE REMOVE CONTROL, NOT IN THE PERSON, AND THE GATE
-    PROCEEDS ANYWAY.
+async def test_a_needle_inside_the_button_wording_is_refused(over):
+    """A NEEDLE FOUND IN THE REMOVE CONTROL, NOT IN THE PERSON. **FIXED
+    2026-09-05: this used to reach ``proceed: True`` and now refuses.**
 
     The composer holds exactly one committed recipient and it is a STRANGER --
     byte-for-byte the state ``test_the_gate_refuses_one_wrong_recipient``
@@ -252,15 +291,17 @@ async def test_KNOWN_DEFECT_a_needle_inside_the_button_wording_proceeds(over):
     substring of the control's own label, which every candidate selector
     guarantees is present.
 
-    ``matches`` reads 1 and ``total`` reads 1, so the gate returns
-    ``proceed: True`` and his words would be typed next -- addressed to
-    somebody he never named. The needle used here is a real, common given name,
-    so this is not a contrived string.
+    Under the old ``indexOf`` matcher ``matches`` read 1 against ``total`` 1,
+    the gate returned ``proceed: True``, and his words would have been typed
+    next -- addressed to somebody he never named. The needle is a real, common
+    given name, so this was never a contrived string.
 
-    **THIS TEST IS A RECORD OF A DEFECT, NOT A SPECIFICATION.** When the
-    matcher is tightened it goes RED, which is the point: the alternative is a
-    fix landing with nothing to notice it, or the defect surviving a rewrite
-    because no test ever described it.
+    **THE CHIP IS STILL SEEN.** ``total`` is still 1 here. What changed is that
+    the needle no longer counts as carried, because a letter sits on both sides
+    of it inside the control's own label word. Asserting ``total == 1``
+    alongside ``matches == 0`` is what separates "the matcher got stricter"
+    from "the fixture stopped drawing a chip", which would refuse for a reason
+    that proves nothing.
     """
     verdict = await _gate(
         over, _with_chips(SOMEBODY_ELSE), _target(FURNITURE_NEEDLE)
@@ -268,30 +309,29 @@ async def test_KNOWN_DEFECT_a_needle_inside_the_button_wording_proceeds(over):
 
     observed = verdict["observed"]
     assert observed["total"] == 1, observed
-    assert observed["matches"] == 1, observed
-    assert verdict["proceed"] is True, (
-        "the furniture collision no longer reaches proceed. If the matcher was "
-        "deliberately tightened, DELETE this test and say so in the commit -- "
-        "do not relax it. If nobody tightened anything, the chip fixture has "
-        "stopped matching and the control test above should have caught it.",
-        verdict,
-    )
+    assert observed["matches"] == 0, observed
+    assert verdict["proceed"] is False, verdict
+    assert verdict["refused_condition"] == "3_needle_does_not_match", verdict
 
 
-async def test_KNOWN_DEFECT_a_needle_inside_a_longer_name_proceeds(over):
-    """THE EVERYDAY COLLISION, needing no furniture at all.
+async def test_a_needle_inside_a_longer_name_is_refused(over):
+    """THE EVERYDAY COLLISION, needing no furniture at all. **FIXED
+    2026-09-05: this used to reach ``proceed: True`` and now refuses.**
 
     He names a short name; LinkedIn commits a DIFFERENT person whose name
     contains those letters. ``indexOf`` cannot tell that apart from naming the
     person, and there is no count to fall back on -- exactly one recipient is
     committed, which is the state the gate was built to act from.
 
-    This is the case that makes the fix hard rather than obvious: no relation
-    over the label alone distinguishes "this is the person" from "this person's
-    name contains that", which is why the identifier route in the typeahead
-    audit's section 5 exists.
+    The needle is a proper prefix of the stranger's first name, so the
+    character immediately after the hit is a letter. Word-bounding refuses it.
 
-    RED MEANS FIXED. See the sibling test above.
+    **WHAT THIS DOES NOT CLAIM.** A boundary rule does not distinguish "this is
+    the person" from "this person's name contains that" in general -- it
+    distinguishes it for hits that land mid-word, which is the shape both
+    measured collisions had. A stranger whose name contains his needle as a
+    WHOLE WORD would still match. That residue is real and it is why the
+    identifier route in the typeahead audit's section 5 remains the answer.
     """
     verdict = await _gate(
         over, _with_chips(SOMEBODY_ELSE), _target(CONTAINED_NEEDLE)
@@ -299,12 +339,33 @@ async def test_KNOWN_DEFECT_a_needle_inside_a_longer_name_proceeds(over):
 
     observed = verdict["observed"]
     assert observed["total"] == 1, observed
+    assert observed["matches"] == 0, observed
+    assert verdict["proceed"] is False, verdict
+    assert verdict["refused_condition"] == "3_needle_does_not_match", verdict
+
+
+async def test_the_strict_matcher_can_still_say_yes(over):
+    """**A GATE THAT CAN ONLY REFUSE CERTIFIES NOTHING.**
+
+    Three refusals above prove the matcher is capable of saying no. That is
+    only half a result: a matcher hard-wired to zero would produce all three
+    and look identical. This is the other half -- the full name, exactly as
+    committed, bounded by a space at each end, reaching ``proceed: True``.
+
+    Taken together the four cases say the tightening discriminates rather than
+    merely refuses, which is the property the ruling required and the one a
+    fail-closed change is most likely to lose by accident.
+
+    ON THE GUESSED CHIP, as ever. Whether a REAL chip presents a name with
+    boundaries around it is unobserved, and if it does not, this gate refuses
+    everybody -- deliberately. That is the accepted cost, not a surprise.
+    """
+    verdict = await _gate(over, _with_chips(SOMEBODY_ELSE), _target(SOMEBODY_ELSE))
+
+    observed = verdict["observed"]
+    assert observed["total"] == 1, observed
     assert observed["matches"] == 1, observed
-    assert verdict["proceed"] is True, (
-        "the containment collision no longer reaches proceed -- see the "
-        "sibling test's message before editing this one.",
-        verdict,
-    )
+    assert verdict["proceed"] is True, verdict
 
 
 # ---------------------------------------------------------------------------

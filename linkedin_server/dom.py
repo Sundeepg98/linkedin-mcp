@@ -5994,6 +5994,30 @@ RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
 #: COUNT the committed recipients, and count how many carry HIS NEEDLE. The
 #: comparison happens IN THE PAGE and no label comes back.
 #:
+#: **THE MATCH IS WORD-BOUNDED, AND IT WAS A BARE SUBSTRING UNTIL 2026-09-05.**
+#: The substring version was measured letting a STRANGER through in two ways,
+#: both in ``tests/test_the_needle_is_matched_as_a_bare_substring.py``:
+#:
+#:   1. every candidate in :data:`RECIPIENT_CHIP_SELECTORS` constrains
+#:      ``aria-label``, and this script then SEARCHES ``aria-label`` -- so the
+#:      haystack was selected BECAUSE it contains a fixed word, and a needle
+#:      that is a substring of that word matched a chip naming somebody else;
+#:   2. a short name is a substring of a longer one, so a stranger whose name
+#:      merely CONTAINS his needle counted as a match.
+#:
+#: A letter or digit on either side of the hit now refuses it. Digits count as
+#: word characters deliberately: a label running a name onto a connection
+#: degree (``<name>1st``) must REFUSE rather than match, because this gate is
+#: required to fail closed.
+#:
+#: **IT MAY REFUSE A LEGITIMATE RECIPIENT AND THAT IS THE RULING, NOT AN
+#: OVERSIGHT.** Nobody has ever observed a real chip, so the shape of a real
+#: label is unknown. The two error directions are not symmetric: too strict
+#: costs him a retry, too loose commits a stranger to an irreversible message
+#: under his name. When the directions differ that much the DOM does not have
+#: to be known -- only which way to fail. Relaxing this is a later question,
+#: and it needs a chip observed first.
+#:
 #: THE SAME ARGUMENT AS :data:`INVITE_NEEDLE_JS`, on a surface where it is
 #: sharper: a committed recipient IS a third party, by definition, so any label
 #: read here names somebody who is not him. A name that reaches Python can
@@ -6017,13 +6041,29 @@ SELECTED_RECIPIENT_JS = """
     perSelector[selector] = nodes.length;
     for (const node of nodes) { if (seen.indexOf(node) === -1) seen.push(node); }
   }
+  // A WORD-BOUNDARY MATCH, NOT A SUBSTRING. See the note above the constant.
+  // A letter or a digit on either side of the hit means the needle is a
+  // FRAGMENT of a longer word, and a fragment is not a name.
+  const wordish = /[\p{L}\p{N}]/u;
+  const bounded = (haystack, term) => {
+    if (!term) { return false; }
+    let from = 0;
+    for (;;) {
+      const at = haystack.indexOf(term, from);
+      if (at === -1) { return false; }
+      const before = at === 0 ? '' : haystack.charAt(at - 1);
+      const after = haystack.charAt(at + term.length);
+      if (!wordish.test(before) && !wordish.test(after)) { return true; }
+      from = at + 1;
+    }
+  };
   let matches = 0;
   for (const node of seen) {
     // THE LABEL IS READ AND IMMEDIATELY DISCARDED. It exists for the length of
     // this comparison and is never assigned anywhere that leaves the loop.
     const label =
       (node.getAttribute('aria-label') || '') + ' ' + (node.textContent || '');
-    if (label.toLowerCase().indexOf(needle) !== -1) { matches += 1; }
+    if (bounded(label.toLowerCase(), needle)) { matches += 1; }
   }
   return {
     per_selector: perSelector,

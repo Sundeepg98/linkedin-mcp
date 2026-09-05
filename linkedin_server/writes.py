@@ -7771,12 +7771,30 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
 async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
     """THE GATE BETWEEN THE RECIPIENT FILL AND THE BODY FILL.
 
-    **WHAT MAKES THIS SAFE IS THE NAME MATCH, NOT THE COUNT.** A count of one
-    says LinkedIn has committed a recipient; it does not say the recipient is
-    the person he named. Those are different claims and only the second one
-    matters when the thing being sent reaches a named individual. So this
-    requires EXACTLY ONE committed recipient WHOSE ACCESSIBLE NAME CARRIES HIS
-    OWN NEEDLE, compared inside the page, with only integers coming back.
+    **THE COUNT IS NOT ENOUGH, AND UNTIL 2026-09-05 NEITHER WAS THE NAME
+    MATCH.** A count of one says LinkedIn has committed a recipient; it does
+    not say the recipient is the person he named. Those are different claims
+    and only the second one matters when the thing being sent reaches a named
+    individual. So this requires EXACTLY ONE committed recipient WHOSE
+    ACCESSIBLE NAME CARRIES HIS OWN NEEDLE, compared inside the page, with only
+    integers coming back.
+
+    **THE CORRECTION, AND IT IS WHY THIS PARAGRAPH IS WORDED THE WAY IT IS.**
+    This docstring used to open *"WHAT MAKES THIS SAFE IS THE NAME MATCH, NOT
+    THE COUNT"*, which was read as current truth by everyone who opened this
+    file. The name match was ``indexOf`` -- the loosest relation between two
+    strings -- and it was MEASURED letting a stranger reach ``proceed: True``
+    in two ways: a needle inside the remove control's own label word, and a
+    needle inside a longer stranger's name. See
+    ``tests/test_the_needle_is_matched_as_a_bare_substring.py``.
+    ``dom.SELECTED_RECIPIENT_JS`` now requires a WORD-BOUNDED match, and the
+    note above that constant carries the reasoning.
+
+    **IT MAY NOW REFUSE A LEGITIMATE RECIPIENT. That is the ruling and not a
+    regression.** No chip has ever been observed, so a strict matcher on an
+    unobserved rail may refuse everybody -- and that is the correct direction
+    to fail: too strict costs a retry, too loose commits a stranger to an
+    irreversible message under his name.
 
     WHY THE BRIEFED DESIGN WAS NOT ENOUGH. The obvious gate is the one
     ``publish_post`` uses: fill both fields, then check that ``Send`` became
