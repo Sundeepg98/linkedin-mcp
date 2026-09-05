@@ -6029,7 +6029,7 @@ RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
 #: runs inside ``perform``, after he has already confirmed, where there is
 #: nothing left to show him and therefore no reason for a name to exist in
 #: this process at all.
-SELECTED_RECIPIENT_JS = """
+SELECTED_RECIPIENT_JS = r"""
 (cfg) => {
   const needle = String(cfg.needle).toLowerCase();
   const perSelector = {};
