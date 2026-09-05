@@ -1463,6 +1463,45 @@ started was cloned at `b11b2cf`, which PREDATES `d0e8943`, so it cannot show
 these six. Two gate readings of the same tree, dated differently, will disagree
 -- and the difference is a commit, not an instrument.
 
+### 10.7 The full suite, and four more reds -- three of them the enumeration class again
+
+**The full suite ran in a `git clone --no-hardlinks` at `b11b2cf`:
+`12 failed, 4232 passed, 10 skipped, 1 xfailed` in 59m45s.**
+
+Eight are already above -- 2 in 10.2, 6 in 10.6. **The correction red of 10.3 is
+NOT among them, and that is the dating rule again**: this clone was taken at
+`b11b2cf`, before the commit that introduced it. Four are new here, and none is
+this pass's:
+
+    test_readonly.py::test_only_dom_module_waives_evaluate
+        {'dom.py': 17, 'newsletters.py': 1}  -- a NEW MODULE calls evaluate and
+        only dom.py is waived.  ENUMERATION: a module joined the set.
+        linkedin_server/newsletters.py, last touched bfc09cc
+
+    test_readonly.py::test_the_scripts_executed_are_exactly_the_ones_declared
+        the declared JS inventory has drifted against the modules.  Same cause,
+        the pinned-inventory half of it.
+
+    test_server_surface.py::test_no_docstring_claims_a_write
+        linkedin_job_detail's docstring now carries a write verb.  GUARD.
+
+    test_server_surface.py::test_the_docstring_exemption_does_not_cover_the_reads
+        linkedin_saved_jobs' docstring carries 'apply' and 'send' -- and the
+        matched context reads like a DISCLAIMER about what the tool will not
+        do.  GUARD, and plausibly firing on a negation.
+
+**THE LAST TWO ARE GUARDS, NOT COUNTS, AND MUST NOT BE CLEARED WITH THE OTHER
+TEN.** A docstring guard that fires on a disclaimer is either a real leak of a
+write claim into a read tool's documentation or an instrument that cannot tell
+"will" from "will not" -- and those need opposite remedies. Whoever owns the
+docstring decides, one line at a time, with the matched text read.
+
+**Three of the four are the ENUMERATION class**, which is the third time this
+pass has met it: a new module, a new JS constant, a new probe `_relation`. **A
+package this many waves are extending trips its set-level guards constantly, and
+none of those waves can see it from a targeted run.** That is an argument for a
+cheap set-level gate on a cadence, not for narrowing the guards.
+
 ---
 
 ## 11. THE CENSUS FILES STILL SAY GAP, AND THAT MATTERS MORE THAN IT LOOKS
