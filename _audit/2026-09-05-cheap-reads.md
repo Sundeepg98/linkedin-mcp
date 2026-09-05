@@ -429,3 +429,104 @@ verdict about this repository's own code.
 `/premium/my-premium/`, already admitted, settles the entitlement question that
 sits under both. That is the single highest-value page load left on this wave's
 board and it needs no boundary change and no ruling.
+
+---
+
+## 12. THE PREMIUM LOAD WAS TAKEN. STATE A IS REFUTED; B AND C ARE UNTOUCHED
+
+Taken after the freeze above, on the coordinator's grant, at ~19:10-19:12 by the
+box. **One admitted address, no boundary change, no ruling applied.**
+
+    0. BOUNDARY   /premium/my-premium/ admitted: True. No allowlist edit made.
+    2. THE LOAD   relation SERVED, exact.   authwall False.
+
+**IT SERVES.** That is not a formality: `/in/me/details/interests/` is admitted
+and REDIRECTS, so this repository already has one door that opens onto nothing.
+This one does not.
+
+### The cost measurement, which conditioned the grant
+
+    nav families that MOVED        0
+    mynetwork pending              0 -> 0
+    instrument control             2 of 6 badges read NON-ZERO
+    reproduced                     twice, two separate runs
+
+**The control is what makes the zero mean anything.** Two badges carried live
+non-zero counts on both renders, so the reader resolves real values here rather
+than returning a default zero -- the failure mode that would make "nothing
+moved" a fact about the instrument. Both non-zero badges were themselves
+unchanged across the load.
+
+    SAFETY  discharged by ABSENCE -- nothing pending was consumed, because
+            nothing was pending.
+    COST    UNMEASURED -- and it stays unmeasured until a day the badge is not
+            zero.
+
+**Those are two claims and this run makes only the first.** A zero cannot
+decrement, so this says the load spent nothing that was pending; it does not say
+the address is free on a day something IS pending.
+
+### Entitlement: ENTITLED, and the strength is stated rather than implied
+
+    management-verb matches   1
+    sales-verb matches        0
+    needle that fired         'manage subscription'
+    VERDICT                   ENTITLED -- management verbs, no sales verbs
+    STRENGTH                  THIN -- a single match
+
+The instrument counts needles **this repository authors** against control
+accessible names and emits integers; no label, plan name, price or date leaves
+the process. Naming which needle fired is safe for the same reason the count is:
+it is our string, not the page's -- and it matters, because `billing` matching
+once and `manage subscription` matching once are very different evidence for the
+same integer. **It was the strong one.** A page selling a subscription does not
+offer to manage one.
+
+The verdict is built to be able to say **AMBIGUOUS** (both families present) and
+**NEITHER FAMILY MATCHED** (a reading about the instrument, not the account).
+Neither fired. A verdict that cannot return "cannot tell" is not a verdict.
+
+### What this settles, and the two states it does not touch
+
+    A  not entitled                                   REFUTED
+    B  entitled, panel not drawn on those postings     UNTOUCHED
+    C  entitled, panel drawn, reader could not see it  UNTOUCHED
+
+**Entitlement lives on this page; whether a panel renders on a JOB POSTING is a
+fact about a different surface, and no reading taken here can reach it.**
+Separating B from C needs a posting load with the 1/1/0 control firing, and that
+was not attempted.
+
+**The consequence for row 41 is the useful part.** `PREMIUM-JOBS-SURFACES` cannot
+be retired as *unreachable in principle for this account* -- the entitlement is
+there. That is the opposite of the newsletter precedent, where a zero would have
+collapsed twelve rows to one. **A measurement that REFUSES a cheap retirement is
+worth as much as one that grants it**, and it is the one nobody goes looking for.
+
+### Row 56 is now buildable, and that is the change
+
+It was declined earlier in this document because an invented DOM fails closed as
+*he has no premium features* -- the exact answer the surface exists to produce.
+**That objection is discharged: the page has been opened, it serves, and it costs
+nothing measurable.** A reader written against it would be aimed at a real render
+rather than a guess. Building it is a separate slice and is not done here.
+
+### Rows 40 and 75: the boundary measurement, so the next wave applies a ruling
+
+Measured with the shipped `readonly.is_read_url`, allowlist at 29:
+
+    /school/<slug>/                  REFUSED   row 40, allowlist +1 confirmed
+    /jobs/collections/recommended/   REFUSED   row 75, allowlist +1 confirmed
+
+**Both genuinely need the pattern; the ledger's cost is right for these two.**
+The grant reasoning is recorded so it can be applied rather than re-sought: the
+read boundary's sharpest refusal concerns member profiles, and its stated cause
+is that loading another member's profile leaves them a durable record --
+`linkedin_who_viewed_me` reads the receiving end of that signal. **That cause
+does not transfer to an organisation page or to system-curated furniture.** A
+school has no who-viewed-me; a collection is LinkedIn's own.
+
+**NOT BUILT, deliberately, and the reason is the clock and not the argument.**
+The grant conditions each first load on the same before/after badge measurement
+this section demonstrates. That is a repeatable procedure now, which is what a
+successor needs more than a half-built reader.
