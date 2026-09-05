@@ -360,6 +360,57 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         # ever learns the bare-token shape the decision gets revisited
         # deliberately rather than outliving its reason.
         ("shape.py", "membership_row"),
+        # A NINTH, added 2026-09-05, AND THIS TEST DID ITS JOB AGAIN -- second
+        # time in two days that the consideration it forces has CHANGED the
+        # function rather than been written down and waved through.
+        #
+        # shape.subscription_row is the per-record gate for a newsletter
+        # subscription row. It is a SIBLING of membership_row above and it is
+        # deliberately not the same gate, for a reason that is measured:
+        # membership_row publishes a group's name AS WRITTEN when these
+        # substitutions leave it unchanged, and
+        #
+        #     census_substitute("Weekly Notes by Savita Krishnan")
+        #         -> UNCHANGED
+        #
+        # A person's name carries no urn, no member path, no possessive and no
+        # six-digit run, so nothing in that check can see one -- while a
+        # newsletter's title and slug ROUTINELY ARE one, which is why
+        # /newsletters/<newsletter> is in _CENSUS_ENTITY_HREFS at all.
+        #
+        # WHAT THIS TEST CAUGHT. As first written it called this predicate
+        # TWICE and the second call was a PUBLISHER -- the first caller in the
+        # package to emit this predicate's raw output from a per-record path:
+        #
+        #   the HREF   decides only, and is never emitted. What is published
+        #       is a module literal, for the reason recorded three entries
+        #       below: A BARE MEMBER TOKEN IN A QUERY SURVIVES THESE
+        #       SUBSTITUTIONS. Measured on this very shape --
+        #       /newsletters/<slug>/?authorProfile=<token> shapes to
+        #       /newsletters/<newsletter>/?authorProfile=<that same token>.
+        #
+        #   the TITLE  WAS census_substitute(name), and IS NOW
+        #       census_shape(name) -- the same substitutions PLUS the length
+        #       and charset gate, so what cannot be certified comes back
+        #       <opaque> rather than being emitted. MEASURED identical on
+        #       every title that module's tests carry and different exactly
+        #       where it should be. The result then goes through
+        #       census_redact_rare at count 1 UNCONDITIONALLY, which is not a
+        #       trick to force redaction: a member subscribes to a given
+        #       newsletter once, so 1 is the tally the page actually has.
+        #
+        # SO ITS VERDICT DOES NOT MOVE WITH A WIDENING, and after the change
+        # that is structural rather than argued: both uses are now REFUSAL
+        # TESTS, like writes._live_control and membership_row and unlike the
+        # two server.py publishers above. A wider pattern alters a superset,
+        # and nothing here emits what it altered.
+        #
+        # THE RESIDUAL IS STATED RATHER THAN CLOSED, because census_redact_rare
+        # is a CAPITALISED-RUN rule and not a name detector: a title spelling
+        # its author in lower case survives it. That limit is asserted in
+        # tests/test_subscription_row.py rather than confessed in a docstring,
+        # and closing it needs an instrument this package does not have.
+        ("shape.py", "subscription_row"),
         # AN EIGHTH ARRIVED AND THEN LEFT AGAIN ON 2026-09-04, and the round
         # trip is worth more than either state.
         #

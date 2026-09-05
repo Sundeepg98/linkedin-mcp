@@ -89,6 +89,30 @@ def test_a_title_carrying_its_author_is_redacted_and_keeps_its_marker():
     assert shape.CENSUS_REDACTED in row["name"], row
 
 
+def test_a_title_the_charset_gate_cannot_certify_comes_back_marked():
+    """The branch a guard forced, asserted so it is not quietly reverted.
+
+    This function published ``census_substitute(name)`` until
+    ``test_the_consumers_of_this_predicate_are_the_ones_that_were_considered``
+    went red on it. It now publishes through ``census_shape``, which is the
+    same substitutions PLUS the length and charset gate -- so a title it
+    cannot certify comes back ``<opaque>`` rather than being emitted.
+
+    THE MARKER IS THE POINT, not the blanking. ``<opaque>`` says a value was
+    refused; an emitted-but-mangled string says nothing and is trusted.
+    """
+    uncertifiable = "A" * 300
+    row = shape.subscription_row(A_NEWSLETTER, uncertifiable)
+    assert row["published"] is True, row
+    assert row["name"] == shape.CENSUS_OPAQUE, row
+    assert row["name_redacted"] is True, row
+    # THE CONTROL: the gate has not started refusing ordinary titles.
+    assert (
+        shape.subscription_row(A_NEWSLETTER, A_TITLE_THAT_SURVIVES)["name"]
+        == A_TITLE_THAT_SURVIVES
+    )
+
+
 def test_a_bare_member_token_in_the_query_never_reaches_the_output():
     row = shape.subscription_row(A_NEWSLETTER_WITH_A_TOKEN, A_TITLE_THAT_SURVIVES)
     assert row["published"] is True, row

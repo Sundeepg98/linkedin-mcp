@@ -4993,9 +4993,26 @@ def subscription_row(href: Optional[str], name: Optional[str]) -> dict[str, Any]
             ),
         }
 
+    # THROUGH :func:`census_shape`, NOT THROUGH ``census_substitute``, AND THE
+    # CHOICE WAS FORCED BY A GUARD RATHER THAN PREFERRED.
+    # ``test_the_consumers_of_this_predicate_are_the_ones_that_were_considered``
+    # went red on this function and the consideration it demanded changed the
+    # code: as first written this line published ``census_substitute(name)``,
+    # which made this the FIRST caller in the package to publish that
+    # predicate's raw output from a per-record path. ``census_shape`` is the
+    # same substitutions PLUS the length and charset gate, so anything it
+    # cannot certify comes back ``<opaque>`` -- a refusal that keeps its own
+    # marker -- instead of being emitted. MEASURED: identical on every title
+    # this module's tests carry, and different exactly where it should be, on
+    # an over-long title and on one carrying characters the charset gate does
+    # not admit.
+    #
+    # It also makes this consumer a REFUSAL TEST on both of its uses of the
+    # shared predicate, like ``membership_row`` and ``writes._live_control``,
+    # so a widening of the urn pattern cannot move what this publishes.
     normalised = _CENSUS_CURLY.sub("'", _WS.sub(" ", str(name or "")).strip())
     published = census_redact_rare(
-        census_substitute(normalised), _SUBSCRIPTION_TITLE_COUNT
+        census_shape(normalised), _SUBSCRIPTION_TITLE_COUNT
     )
     return {
         "published": True,
