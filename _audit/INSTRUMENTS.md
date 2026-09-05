@@ -1733,3 +1733,36 @@ So a targeted set is a sound check for what a change BREAKS and an unsound one
 for what a change JOINS. Anything adding a caller to a shared predicate,
 registering a tool, or extending an enumerated family owes the suite a full
 run before it commits -- or it is relying on the next wave's run to find it.
+
+### 9.6 A shared-tree suite run over-reported the red count by 150 percent
+
+The push-freeze file already requires the gate to be a
+`git clone --no-hardlinks` rather than a worktree. **What was not on the record
+is the size of the error, and it is bigger than "a bit noisy".** Measured today,
+three runs of the same suite:
+
+    SHARED TREE, HEAD moving under the run   10 failed, 4040 passed  29:37
+    CLEAN CLONE at that HEAD                  4 failed, 4043 passed  25:33
+    CLEAN CLONE one commit later, targeted    3 failed,  261 passed
+
+**SIX OF THE TEN DID NOT EXIST.** Four waves committed during the 30-minute run;
+pytest imports from the WORKING TREE, and the working tree moved. The six named
+real files with real-sounding assertions -- a publish-post audience guard, a
+server-surface registration, three staleness tests, an emission-point
+declaration -- and every one of them passed when its file was run directly.
+
+**THE COST IS NOT THE NOISE, IT IS THE ROUTING.** A wave clearing that queue
+would have sent six owners to look at nothing, and the push-freeze file's own
+rule -- sort a red queue by WHAT THE ASSERTION IS ABOUT before clearing it --
+does not help here, because the assertions are about exactly what they say. The
+only thing that separates a phantom from a red is WHERE the suite ran.
+
+**THE TELL, so it can be caught without a 25-minute clone:** a failure that
+passes when its file is run alone, in a tree with live writers, is a phantom
+until a clone says otherwise. Run the file directly FIRST -- it costs seconds --
+and only clone for the ones that survive that.
+
+**AND THE COROLLARY FOR REPORTING:** a shared-tree run's count is not a gate
+reading and must never be relayed as one. State the tree, not the SHA; and if
+the tree had writers, state that too, because the number is about them as much
+as about the code.
