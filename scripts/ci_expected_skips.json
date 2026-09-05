@@ -1,0 +1,8 @@
+{
+  "_why": "Skips this repository's CI CANNOT arrange away, each named with the reason. Anything not listed here still fails the run. This file exists because a gate that cannot pass is indistinguishable from one that has not passed yet -- tests/test_prose_that_makes_a_claim.py opens with that sentence -- and without it every cell of the matrix is red forever for a reason nobody can fix. Adding an entry is a decision made in the open with a reason attached, which is exactly what scripts/ci_full_run_check.py's docstring asks for; deleting one is how you find out whether it is still true.",
+  "_measured": "2026-09-05, full serial run at e0dc8f9 in a clean clone, and again across six shards at 5046a3b. Four tests skipped; exactly one of them is structural.",
+  "_deliberately_absent": "tests.test_uploads' three symlink tests skip on the operator's laptop because this Windows account holds no SeCreateSymbolicLinkPrivilege. They are NOT listed: they run on Linux, and whether GitHub's Windows runner can create a symlink is unmeasured. If that cell goes red naming those three, that is the guard reporting something real and worth seeing once, not a defect in this file.",
+  "expected": {
+    "tests.test_no_committed_identity::test_the_exact_value_sweep_actually_runs": "The wordlist it needs, _audit/_sanitisation_key.json, is the de-anonymisation key for the committed fixtures. It is gitignored ON PURPOSE (.gitignore:102) and must never reach a public runner, so it is absent from every clone and this test skips on every machine but the operator's. The test itself says so at length when it skips. Nothing about CI can change that, which is what makes it structural rather than an arrangement that stopped working."
+  }
+}

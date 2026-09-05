@@ -67,6 +67,108 @@ name: CI
 # Note that test_browser.py, test_launch_boundary.py and test_preflight.py
 # only TALK about the browser -- they fake the driver and launch nothing. They
 # pass with no chromium present and are not part of the 150.
+#
+# -------------------------------------------------------------------------
+# SHARDING, ADDED 2026-09-05, AND WHAT IT COST AND BOUGHT
+# -------------------------------------------------------------------------
+#
+# WHAT WAS MEASURED FIRST, on the operator's box, in a `--no-hardlinks` clone
+# of e0dc8f9 so that a second agent writing to the working tree could not move
+# the numbers mid-run:
+#
+#     3660 tests in 92 files
+#     3655 passed, 4 skipped, 1 xfailed in 1660.5s  (27m40s, serial, cold)
+#     1647.6s of that is test time; the rest is collection and startup
+#
+# Every cell used to run all 3660 serially. Now each cell runs them in SHARDS:
+# the same tests, split across parallel jobs by scripts/ci_shard.py.
+#
+# THE WEIGHT IS SECONDS, NOT TESTS, and that correction is the difference
+# between a useful gate and a pointless one. Weighted by test count the six
+# shards come out 613/610/609/608/608/612 tests -- and 244s/177s/207s/272s/
+# 575s/172s, because the per-test cost here spans 0.005s to 14.9s. Weighted by
+# the measured seconds in scripts/ci_shard_timings.json they come out
+# 274.578s..274.639s, a spread of six hundredths of a second. So the test time
+# in a cell goes from 1647.6s to 274.6s: SIX TIMES, not the 2.9x that counting
+# tests would have delivered while looking perfectly balanced.
+#
+# THE SHARD COUNT IS SIX, AND SIX IS A CEILING RATHER THAN A PREFERENCE.
+# GitHub's Free plan documents a limit of 20 CONCURRENT JOBS on standard
+# runners. Three cells x six shards is 18 jobs, and they run at once; eight
+# shards would be 24, of which four would QUEUE, so the wall clock would stop
+# improving while the runner-minutes kept rising. The plan job and the totals
+# job do not overlap the matrix, so they do not count against that 18.
+#
+# WHAT DOES NOT GET SHARDED AWAY. Every job still pays a fixed floor -- the
+# checkout, the jobcore sibling clone, pip, two collections (~6s each), and the
+# chromium download (207s measured at oldsha24, up from ~1m45s as the browser
+# modules grew). At six shards the floor is comparable to the test time, which
+# is the second reason the number is six rather than twelve; the first is that
+# no file-level split can go below the biggest single FILE, and
+# tests/test_save_candidates_fixture.py is 180.6s on its own.
+#
+# The floor is why the browser binary is now CACHED between runs: that removes
+# the download from every job rather than from some of them. Skipping the
+# download only in the shards that hold no browser test was considered and
+# REJECTED on two grounds, one measured and one arithmetic: 25 test files
+# contain the string `chromium.launch` while only the six named above actually
+# need the binary, so the predicate would be a grep-shaped guess; and wall
+# clock is the MAX over shards, so a saving that leaves one shard still paying
+# 207s saves nothing at all.
+#
+# SO THE EXPECTED WALL CLOCK, per cell, is roughly the floor plus 275s, against
+# roughly the floor plus 1648s before. THAT IS A PREDICTION AND NOT A
+# MEASUREMENT: every number above was measured on one Windows laptop, no run of
+# this file has ever happened on a GitHub runner, and the cache's effect in
+# particular is unmeasured. What transfers to a runner is the RATIO -- a cell
+# runs a sixth of the suite where it used to run all of it -- not the seconds.
+#
+# scripts/ci_shard_timings.json goes stale as the suite changes, and staleness
+# costs BALANCE ONLY: membership always comes from live collection in the job,
+# and an unpriced file is estimated from its test count. Regenerate it after
+# anything that moves the shape of the suite; the recipe is in that script's
+# docstring.
+#
+# A SHARDED SUITE CAN GO GREEN HAVING RUN LESS, which is the entire risk and
+# the reason two guards exist rather than one:
+#
+#   * WITHIN a shard, scripts/ci_full_run_check.py compares that shard's
+#     collection against its junit report -- unchanged, and still the check
+#     that catches a deselection or an environment skip.
+#   * ACROSS shards, scripts/ci_shard_totals.py adds every shard's executed
+#     count up per cell and refuses unless the total equals what that cell
+#     collected. This is the half that catches a shard which never ran at all:
+#     a cancelled job leaves no artifact, and every artifact that DID arrive
+#     reconciles perfectly. Both guards have been shown failing -- see
+#     tests/test_ci_shard.py, where a packer that drops one file, a missing
+#     shard report, a duplicated one, a short total and a skipped test each
+#     have a control that makes the check refuse.
+#
+# TWO THINGS THIS WORKFLOW COULD NOT HAVE PASSED BEFORE TODAY, both found by
+# running the suite rather than by reading it, and both invisible until now
+# because CI has never run:
+#
+#   * junit records an XFAIL as a <skipped> element, so this suite's deliberate
+#     `xfail(strict=True)` counted as a test that could not run and every cell
+#     would have been red. The guards now count the two apart.
+#   * tests/test_no_committed_identity.py's exact-value sweep needs
+#     _audit/_sanitisation_key.json, which is gitignored on purpose and must
+#     never reach a public runner, so it skips in every clone -- forever. That
+#     one skip is now DECLARED in scripts/ci_expected_skips.json with its
+#     reason, printed on every run, and everything else still fails by name. A
+#     gate that cannot pass is indistinguishable from one that has not passed
+#     yet, which is the first sentence of
+#     tests/test_prose_that_makes_a_claim.py.
+#
+# Three more skips exist on the operator's Windows laptop -- tests/test_uploads
+# cannot create a symlink without SeCreateSymbolicLinkPrivilege. They are
+# deliberately NOT declared: they run on Linux, and whether this matrix's
+# windows-latest cell can create one is UNMEASURED. If that cell goes red
+# naming those three, the guard is reporting something real.
+#
+# The unsharded run still works exactly as it did: `pytest tests/` with no
+# arguments is untouched by any of this, and nothing in the suite knows it is
+# being sharded.
 
 on:
   push:
@@ -74,14 +176,83 @@ on:
   workflow_dispatch:
 
 jobs:
+  plan:
+    # ONE literal, in one place, feeding BOTH the matrix and the guard that
+    # checks the matrix. If the shard count were written here and again in the
+    # totals job, the first thing it would do is drift -- and it would drift
+    # SILENTLY, because a guard expecting five shards when six ran finds
+    # nothing missing.
+    name: shard plan
+    runs-on: ubuntu-latest
+    outputs:
+      cells: ${{ steps.plan.outputs.cells }}
+      shards: ${{ steps.plan.outputs.shards }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - id: plan
+        run: |
+          SHARDS=6
+          CELLS='[{"os":"ubuntu-latest","python-version":"3.10"},
+                  {"os":"ubuntu-latest","python-version":"3.13"},
+                  {"os":"windows-latest","python-version":"3.13"}]'
+          # The matrix cells, and the per-cell reasons for them. This list is
+          # an explicit set, not a cross product; each cell earns its place on
+          # what it can catch, and none of the reasons is about cost:
+          #
+          #   3.10  -- the floor pyproject.toml declares (requires-python
+          #            ">=3.10"). A floor nobody runs is a claim, not a fact,
+          #            and the four dependencies that resolve here all declare
+          #            the same floor, so this cell is the only thing that can
+          #            catch one of them raising it.
+          #   3.13  -- what the operator's box runs (3.13.14, measured).
+          #   windows x 3.13 -- one cell, not two. Windows earns a place
+          #            because three of this repo's concerns are Windows-
+          #            shaped: the cp1252 console encoding the ASCII guard
+          #            exists for, the core.autocrlf line-ending difference the
+          #            vendored-drift comparison normalises away, and the
+          #            preflight path logic pinned to a real 2026-08-22
+          #            failure. None of those vary with the Python version, so
+          #            one cell measures all three.
+          #
+          # CORRECTED 2026-09-05, AND THE THING CORRECTED WAS A FACT, NOT A
+          # WORDING. This block used to read "this is a PRIVATE repository, so
+          # runner minutes come out of the account's free allowance and a
+          # Windows minute is billed at 2x a Linux one", and it sized the
+          # matrix on that basis. THE PREMISE DID NOT HOLD. Measured with
+          # `gh repo view`: Sundeepg98/linkedin-mcp is isPrivate=false,
+          # visibility=PUBLIC. Actions minutes are FREE on public
+          # repositories -- no allowance is drawn, and the 2x Windows
+          # multiplier prices nothing here.
+          #
+          # The width that correction unblocked was spent on SHARDS rather
+          # than on more cells, deliberately: a fourth cell would test one
+          # more platform, while a shard makes every cell finish sooner, and
+          # the concurrency ceiling means the two compete for the same 20
+          # jobs.
+          echo "count=$SHARDS" >> "$GITHUB_OUTPUT"
+          echo "shards=$(python3 -c 'import json,sys; print(json.dumps(list(range(int(sys.argv[1])))))' "$SHARDS")" >> "$GITHUB_OUTPUT"
+          echo "cells=$(python3 -c 'import json,sys; print(json.dumps(json.loads(sys.argv[1])))' "$CELLS")" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
   test:
-    name: pytest (${{ matrix.os }}, Python ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    name: pytest (${{ matrix.cell.os }}, py${{ matrix.cell['python-version'] }}, shard ${{ matrix.shard }})
+    needs: plan
+    runs-on: ${{ matrix.cell.os }}
+
+    env:
+      # Inside the workspace, so ONE cache path works on both platforms --
+      # unset, playwright picks ~/.cache/ms-playwright on Linux and
+      # %LOCALAPPDATA%\ms-playwright on Windows, and a cache action would need
+      # to branch on the runner. The suite already runs with this variable set
+      # on the operator's box (D:\dev-cache\ms-playwright), and every test that
+      # reads it does so through monkeypatch, so setting it here is not a new
+      # condition for anything under test.
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
 
     defaults:
       run:
         # bash on both, including the Windows cell (Git Bash ships on the
-        # runner). Two steps below redirect command output to a file that a
+        # runner). Several steps below redirect command output to a file that a
         # later step parses, and identical redirection semantics across the
         # matrix is worth more here than using each platform's native shell.
         shell: bash
@@ -89,48 +260,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # An explicit list, not a cross product. The cells differ in wall
-        # clock, not in money.
-        #
-        # CORRECTED 2026-09-05, AND THE THING CORRECTED WAS A FACT, NOT A
-        # WORDING. This block used to read "this is a PRIVATE repository, so
-        # runner minutes come out of the account's free allowance and a Windows
-        # minute is billed at 2x a Linux one", and it sized this matrix on that
-        # basis. THE PREMISE DID NOT HOLD. Measured with `gh repo view`:
-        # Sundeepg98/linkedin-mcp is isPrivate=false, visibility=PUBLIC.
-        # GitHub Actions minutes are FREE on public repositories -- no
-        # allowance is drawn, and the 2x Windows multiplier prices nothing
-        # here. The matrix was narrowed to save minutes that were never being
-        # spent.
-        #
-        # SO WIDENING THIS MATRIX IS NOW UNBLOCKED RATHER THAN UNECONOMIC. It
-        # is left narrow deliberately, and widening it is the operator's call,
-        # not a follow-up anybody should take as implied: the costs that
-        # remain are real and are not money. Every added cell pays the suite's
-        # ~3m30s plus a chromium download (207s measured at oldsha24, up from
-        # ~1m45s as the browser modules grew) in WALL CLOCK on every push, and
-        # every added cell is one more surface that can go flaky.
-        #
-        # The per-cell reasons below are untouched by this correction. None of
-        # them was a cost argument; each stands on what its cell can catch.
-        #
-        #   3.10  -- the floor pyproject.toml declares (requires-python
-        #            ">=3.10"). A floor nobody runs is a claim, not a fact, and
-        #            the four dependencies that resolve here all declare the
-        #            same floor, so this cell is the only thing that can catch
-        #            one of them raising it.
-        #   3.13  -- what the operator's box runs (3.13.14, measured).
-        #   windows x 3.13 -- one cell, not two. Windows earns a place because
-        #            three of this repo's concerns are Windows-shaped: the
-        #            cp1252 console encoding the ASCII guard exists for, the
-        #            core.autocrlf line-ending difference the vendored-drift
-        #            comparison normalises away, and the preflight path logic
-        #            pinned to a real 2026-08-22 failure. None of those vary
-        #            with the Python version, so one cell measures all three.
-        include:
-          - { os: ubuntu-latest, python-version: "3.10" }
-          - { os: ubuntu-latest, python-version: "3.13" }
-          - { os: windows-latest, python-version: "3.13" }
+        # Both dimensions come from the plan job, so the guard in the totals
+        # job expects exactly the shape that ran.
+        cell: ${{ fromJSON(needs.plan.outputs.cells) }}
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -156,6 +289,10 @@ jobs:
       # example is real -- jobcore 6acc7e6 taught its path scrubber the doubled
       # separator spelling that OSError.__str__ produces, and this repo's copy
       # did not have it.
+      #
+      # Every shard clones it, not just one: the drift guards are ordinary
+      # tests and land in whichever shard their file lands in, and a sibling
+      # checkout is not something one job can leave behind for another.
       - name: Check out jobcore as a sibling, so the drift guards run
         # A plain relative target rather than actions/checkout: that action
         # refuses any path outside the workspace, and outside the workspace is
@@ -166,7 +303,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.cell['python-version'] }}
           cache: pip
 
       - name: Install
@@ -175,6 +312,14 @@ jobs:
         # (README's recipe is this line followed by pytest). No `pip install
         # -e .` -- pytest.ini sets pythonpath=., so linkedin_server imports
         # from the checkout, which is the code we want measured.
+        #
+        # NO PARALLEL PLUGIN IS INSTALLED HERE and that is a decision, not an
+        # omission. pytest-xdist would add in-runner parallelism on top of this
+        # sharding, but parts of this suite write files, hold a browser profile
+        # lock and assert on process state, so it cannot be added blind -- it
+        # needs its own measurement of which tests break under `-n auto`, and
+        # that is a separate proposal with its own evidence. File-level
+        # sharding across jobs is the half that needs no new dependency.
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
@@ -184,12 +329,42 @@ jobs:
         # happened in the past; this is the only place that shows what pip
         # picks TODAY under the requirements.txt bounds -- the gap that hid a
         # completely broken clean install in the sibling naukri repo for a day.
+        #
+        # Once per cell rather than once per shard: the shards of a cell
+        # install from the same file with the same interpreter, so five more
+        # copies of it would be five more places to read the same list.
+        if: matrix.shard == 0
         run: pip list --format=freeze
+
+      - name: What playwright resolved to, for the cache key
+        # The key has to be the BROWSER's version, and the browser's version
+        # follows the playwright package, which requirements.txt leaves
+        # unpinned (`playwright>=1.40`). Keying on the file's hash would pin
+        # the cache to a line that does not decide what gets downloaded, and
+        # the first upgrade would restore a browser the new driver refuses to
+        # launch.
+        id: playwright
+        run: |
+          python -c "import importlib.metadata as m; print('version=' + m.version('playwright'))" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          # Relative to the workspace, so one path works on both runners; the
+          # env var above is the absolute form playwright itself reads.
+          path: .pw-browsers
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
       - name: Install the Chromium binary
         # `pip install playwright` installs the DRIVER only. The browser is a
         # separate download, and skipping it is what produces the 112 failures
         # AND 38 errors described at the top of this file.
+        #
+        # Run unconditionally even on a cache hit, rather than gated on
+        # cache-hit: playwright skips the download itself when the binary is
+        # already at the resolved path, so on a hit this costs seconds, while
+        # `--with-deps` still installs the SYSTEM libraries, which are not in
+        # the cache and would otherwise be missing on exactly the runs that
+        # restored one.
         run: python -m playwright install --with-deps chromium
 
       - name: The server imports and registers its tools
@@ -202,19 +377,105 @@ jobs:
           print('tools registered:', len(asyncio.run(mcp.list_tools())))"
 
       - name: How many tests this checkout contains
-        # Written to a file rather than eyeballed: the next-but-one step
-        # compares it against what actually ran. Collection launches nothing.
+        # THE DENOMINATOR, and it is collected in EVERY shard rather than once
+        # in the plan job. Collection is a property of a checkout on a
+        # platform: a module that fails to import on 3.10 is collected on 3.13
+        # and not on 3.10, and a denominator carried in from another machine
+        # would be compared against a numerator this one produced. Collection
+        # launches nothing and costs seconds.
         run: python -m pytest --collect-only -q | tee collected.txt | tail -1
 
-      - name: Run the whole suite
-        # No -m filter, no --ignore, no --deselect anywhere in this line, and
-        # that is load-bearing: the check below fails if the number that ran
-        # is not the number that exists. -rs so any skip prints its reason.
-        run: python -m pytest -q -rs --junitxml=junit.xml
+      - name: Which files this shard owns
+        # Deterministic from collected.txt alone: same checkout, same shard,
+        # same files, on either platform. --json carries the counts the totals
+        # guard needs; the plain form is the file list pytest is given.
+        run: |
+          python scripts/ci_shard.py --index ${{ matrix.shard }} \
+            --of ${{ needs.plan.outputs.count }} --collected collected.txt \
+            > shard-files.txt
+          python scripts/ci_shard.py --index ${{ matrix.shard }} \
+            --of ${{ needs.plan.outputs.count }} --collected collected.txt \
+            --json > shard-plan.json
+          cat shard-plan.json
+          wc -l < shard-files.txt
 
-      - name: Every test that exists actually ran
+      - name: How many tests this shard contains
+        # The shard's own denominator, in the exact form ci_full_run_check.py
+        # already parses. Written by pytest rather than derived from the plan,
+        # so the check below compares two numbers pytest produced rather than
+        # one pytest produced and one this repo's own splitter believes.
+        run: |
+          python -m pytest --collect-only -q $(cat shard-files.txt) \
+            | tee shard-collected.txt | tail -1
+
+      - name: Run this shard
+        # No -m filter, no --ignore, no --deselect anywhere in this line, and
+        # that is load-bearing: the check below fails if the number that ran is
+        # not the number this shard contains. -rs so any skip prints its
+        # reason.
+        run: python -m pytest -q -rs --junitxml=junit.xml $(cat shard-files.txt)
+
+      - name: Every test in this shard actually ran
         # if: always() -- this must report the counts on a RED run too. A run
         # that failed AND ran a subset is two problems, and the second one is
         # the one nobody would otherwise look for.
         if: always()
-        run: python scripts/ci_full_run_check.py collected.txt junit.xml
+        run: python scripts/ci_full_run_check.py shard-collected.txt junit.xml
+
+      - name: Report this shard's numbers to the totals job
+        # if: always() for the same reason, and it matters more here: a shard
+        # that goes red still has to say how many tests it ran, or the totals
+        # job cannot tell "these tests failed" from "these tests never ran".
+        #
+        # The filename carries the cell and the index because the artifacts are
+        # merged into one directory downstream, and six files all called
+        # report.json would arrive as one.
+        if: always()
+        run: |
+          python scripts/ci_shard_totals.py record \
+            --plan shard-plan.json --junit junit.xml \
+            --cell '${{ toJSON(matrix.cell) }}' \
+            --out "reports/${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shard-report-${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}
+          path: reports/
+          retention-days: 7
+
+  totals:
+    # THE JOB THAT MAKES SHARDING SAFE. Everything above proves that each shard
+    # ran what it collected; only this proves that the shards together ran what
+    # the suite collected. It is deliberately NOT a summary step inside the
+    # matrix: a job cannot report on a job that never started.
+    #
+    # It is about COMPLETENESS, not about pass/fail. A run where every test ran
+    # and forty failed is GREEN here and red overall, which is correct -- the
+    # failing tests are already saying so, loudly, and conflating the two would
+    # bury the finding this job exists to surface.
+    name: every shard reported
+    needs: [plan, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Left strict on purpose. If NOTHING uploaded, this step fails with its
+      # own message and the run is red -- which is the right outcome, and a
+      # `continue-on-error` here would hand a transient download failure to the
+      # guard below, which would then report the shards as missing. A guard
+      # should not be given the chance to misdiagnose an infrastructure fault
+      # as the defect it hunts.
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: shard-report-*
+          path: reports
+          merge-multiple: true
+
+      - name: The shards add up to the suite
+        run: |
+          ls -R reports
+          python3 scripts/ci_shard_totals.py verify \
+            --reports reports --of ${{ needs.plan.outputs.count }} \
+            --cells '${{ needs.plan.outputs.cells }}'
