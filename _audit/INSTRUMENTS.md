@@ -2296,3 +2296,93 @@ Both lines are printed together so neither can be read as the other. **Copying
 the sibling's gate unexamined would have refused to take the read at all** --
 blocked by a proxy whose zero is the very thing that proves the read harmless.
 Same instrument, same reading, opposite verdicts.
+
+### 12.7 `scripts/_probe_group_settings_route.py` -- classify an href without following it
+
+**WHAT IT IS FOR.** Deciding whether a control that is DRAWN on an admitted
+page is also a ROUTE this server may take. It reads the control's href and
+classifies it against the two gates INDEPENDENTLY -- forbidden substrings, and
+the allowlist -- navigating nowhere and printing no address.
+
+**THE REUSABLE SENTENCE:**
+
+> **A CONTROL BEING DRAWN IS NOT A ROUTE.**
+
+Two census rows were filed as "one press away on an address we already open"
+because `Update your settings` appears on every membership row. Measured: all
+five are `<a>` elements whose href meets **two** forbidden substrings,
+`/psettings/` and `settings`. They are DOUBLE-refused and need a denylist
+exemption, which is a heavier act than an allowlist addition.
+
+It cost nothing to find out only because an href can be classified without
+being followed. **Costing a row off "the control is right there" would have
+filed two rows one boundary change from reachable when they are two** -- and
+nothing downstream would have contradicted it until somebody tried.
+
+**THE CLASS IS THE INSTRUMENT, NOT THE VERDICT.** Inherited from 11.1 and
+worth restating because it generalises past retirement rulings: a verdict of
+REFUSED cannot separate "somebody wrote a substring against this" from "the
+default-closed allowlist decided nothing", and this repository's rule is that
+a general mechanism which merely happens to block something is a GAP WITH A
+NAMED BLOCKER rather than a decision.
+
+**AIMED BY A LABEL, AND THE LABEL IS FURNITURE BY MEASUREMENT.** `Update your
+settings` tallied 5 across the rows and 10 across the menus, so the same count
+rule that redacts a singleton keeps it -- which is what makes it safe to write
+into a tracked file and safe to match on. A label appearing once would be a
+name.
+
+### 12.8 THE CONTROL EXPERIMENT THAT PROVED A TAB CLOSE, AND WHY A PAIR COULD NOT
+
+**The problem in one line: on a browser a dozen waves share, a before-and-after
+pair around your own action measures the FLEET, not your action.**
+
+Three runs of a real probe with the close in place gave `+1, -1, +1`. That is
+consistent with a working close and with a broken one, because neighbours open
+and close tabs in the same seconds.
+
+What settled it was a MINIMAL script run three times each way, with the close as
+the only difference:
+
+    WITHOUT close   deltas [1, 0, 2]   sum +3
+    WITH close      deltas [0, 1, -1]  sum  0
+
+**A DIFFERENCE MEASURED AGAINST A CONTROL SURVIVES NOISE THAT A DIFFERENCE
+MEASURED AGAINST ZERO CANNOT.** The noise did not go away; it stopped being
+confounded with the effect. Reach for this shape whenever the thing you are
+measuring shares its instrument with other actors -- which on this project is
+the browser, the git index, and the test tree.
+
+**THE UNDERLYING DEFECT, root-caused and NOT fixed centrally on purpose:** in
+attach mode `BROWSER._page()` calls `ctx.new_page()` and caches it, and
+`session()`'s `finally` only touches an idle timer, so **the tab outlives the
+process.** 42 scripts call `session()`; 5 closed their page. The fix went in
+the PROBES and not in `browser.py`, and the reason is LIFETIME rather than
+code: the MCP server reuses that cached page across tool calls on purpose, so a
+per-session close there churns tabs for a different caller. **The same line of
+code is correct in one caller and wrong in another, which is why it is not a
+drive-by.**
+
+Close the PAGE, never the CONTEXT -- the context is the operator's signed-in
+session.
+
+### 12.9 A CONSTANT SIZED FOR ONE SESSION IS A FLEET-WIDE OUTAGE WAITING
+
+`cdp_bridge.ATTACH_TIMEOUT_MS` was a hardcoded 15s, chosen when the browser
+belonged to one session. Shared by a dozen waves that each leak a tab, the
+handshake -- which enumerates every CDP target -- crossed it, and **every
+wave's live work became a coin flip.** Five consecutive refusals on this
+surface alone.
+
+**AND THE REFUSAL TEXT POINTED AT THE ONE THING THAT WAS NOT WRONG:** it
+explains at length that Chrome must be running and how to start it, while port
+9224 was LISTENING, `/json/version` answered in 0.07s and the process was
+alive. That is this project's own scar in a new place -- a refusal naming what
+it did NOT match instead of what it SAW.
+
+The remedy was an env override with the DEFAULT UNCHANGED, so nobody who does
+not set it sees a difference. **The knob is not the fix and the comment at the
+site says so**: raising a timeout buys time against unbounded growth, and 12.8
+is the actual repair. What the knob buys is that a wave which cannot get a slot
+has something to try OTHER than killing a browser it does not own -- and five
+refusals in a row is exactly when somebody reaches for that.
