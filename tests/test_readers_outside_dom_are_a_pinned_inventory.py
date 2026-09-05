@@ -113,6 +113,25 @@ COVERED_ELSEWHERE = {"dom.py"}
 #: function" would flag every helper in the package -- it is the boundary of
 #: what this instrument can see, written down where somebody counting readers
 #: will find it.
+#:
+#: SUCCESSOR, 2026-09-05 ~22:20 -- APPENDED RATHER THAN EDITED INTO THE
+#: PARAGRAPH ABOVE, because that paragraph was true when it was written and a
+#: document that rewrites its own history to look prescient is worse than a
+#: stale note. **``groups.py`` HAS A CONSUMER NOW.**
+#: ``linkedin_server/groups_page.read_group_memberships`` is the page reader
+#: it lacked, ``linkedin_group_memberships`` is the tool, and the count moved
+#: 41 -> 42 off ``mcp.list_tools()``.
+#:
+#: NO LINE WAS DELETED FROM THIS DICT FOR IT, AND THAT IS THE POINT THE
+#: PARAGRAPH ABOVE MAKES. ``groups.py`` was never listed, because it contains
+#: no ``read_`` function -- so the module went from unreachable to wired
+#: WITHOUT MOVING ANY NUMBER IN THIS FILE. The new reader IS in scope (it is
+#: named ``read_`` and lives outside ``dom.py``) and is absent from the pin
+#: only because ``server.py`` calls it, which is the detector working.
+#:
+#: ``recommendations.py`` is unchanged and still has no consumer: it has no
+#: admitted address, and no page behind it has ever been opened. It remains
+#: invisible here for the same reason and is NOT a candidate for a line.
 KNOWN_UNWIRED: dict[str, str] = {}
 
 

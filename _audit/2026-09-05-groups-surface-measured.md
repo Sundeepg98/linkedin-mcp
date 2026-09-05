@@ -8,6 +8,16 @@ Wave: groups-surface. Date: 2026-09-05. Every number below was taken by an
 instrument carrying a control that fired, and the two instruments built today
 are named with the runs they came from.
 
+**CORRECTED BY:** `_audit/2026-09-05-groups-wire.md` -- section 7A specifies the missing reader as a walk needing a `dom` reader, and the identical walk was expressed with Playwright locators instead, so `dom.py` was not touched at all; and section 3's cost consequence is right but names ONE counter where the feed carries TWO, which is the difference between a bracket that can only ever report UNMEASURABLE and one that carried information on the day.
+
+Measured 22:17 by the shipped tool: invitations 0 -> 0 (degenerate),
+notifications 1 -> 1 (unmoved above zero). Every count in the sections below
+is reproduced rather than contradicted -- five memberships, five suggestions,
+zero in common.
+
+*Line added by wave `groups-wire`; the rest of this document is its
+author's and is unreviewed by me.*
+
 ---
 
 ## 1. THE THING THAT WAS FILED AS UNMEASURED IS NOW MEASURED

@@ -1918,8 +1918,16 @@ async def linkedin_group_memberships() -> dict[str, Any]:
     already does; the page under test not answering for itself is the reason
     that pattern exists.
 
-    **AND THE COST COMES BACK UNMEASURABLE, WHICH IS A RESULT AND NOT A
-    FAILURE.** Read ``cost.state``:
+    **THE COST WAS PREDICTED UNMEASURABLE AND THE FIRST LIVE RUN REFUTED
+    THAT.** This paragraph said the verdict would come back ``degenerate``,
+    because the invitation badge is known to sit at zero on this account. It
+    did -- and the SECOND counter did not. Measured 2026-09-05 ~22:17: the
+    notifications badge read ONE before and ONE after, so the run returned
+    ``unmoved`` and carried real information. The prediction is left here
+    rather than edited away, because it is why this tool brackets with TWO
+    counters instead of one: a single degenerate instrument answers nothing,
+    and the cheapest repair for a degenerate bracket is another counter rather
+    than a better argument. Read ``cost.state``:
 
         degenerate    every readable counter sat at ZERO and stayed there. A
                       0 -> 0 pair cannot distinguish "consumed nothing" from

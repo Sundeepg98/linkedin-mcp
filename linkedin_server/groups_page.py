@@ -294,6 +294,17 @@ def cost_certification(
 
     **A SILENT ZERO IS THE FAILURE MODE THIS FUNCTION EXISTS TO PREVENT.**
     There is no branch that returns a cost of zero.
+
+    **WHY TWO COUNTERS AND NOT ONE, and this was decided before the run that
+    vindicated it.** The invitation badge is known to sit at zero on this
+    account, so a bracket built on it alone is degenerate by construction --
+    it would report UNMEASURABLE every time and could never do anything else.
+    Adding the notifications badge costs nothing (both render on the same nav
+    of the same already-loaded page) and gives the pair a chance of carrying
+    information. Measured on the first live run: invitations 0 -> 0
+    (degenerate), notifications 1 -> 1 (unmoved above zero). **The cheapest
+    repair for a degenerate instrument is a SECOND instrument, not a better
+    argument about the first.**
     """
     seen_before = dict(before or {})
     seen_after = dict(after or {})

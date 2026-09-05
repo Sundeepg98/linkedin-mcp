@@ -1,6 +1,17 @@
 # Wiring the readers that were built and could not be called
 
 **Wave `wire-readers`, 2026-09-05 evening. Commits `4f6d646`, `55ce03c`.**
+
+**CORRECTED BY:** `_audit/2026-09-05-groups-wire.md` -- all three reasons in section 2 for not wiring `groups.py` are now obsolete: the walk was re-expressed with Playwright locators so it needs no `page.evaluate` waiver and no `dom.py` change, it answers five rather than ten, and a tool does not have to certify its cost from the page it loads -- the counter-example is `linkedin_notify_cost_precondition`, wired in this same document. `groups.py` is wired and the tool count is 42.
+
+The measurement in that third reason STANDS and only the inference from it
+falls: the groups page really does carry no count-bearing nav control, which
+is why the tool navigates back to the feed.
+
+*Line added by wave `groups-wire`; the rest of this document is its
+author's and is unreviewed by me. The correction machinery requires the
+back-pointer to live here, because a corrector can name what it corrects
+and a corrected document cannot name its corrector.*
 All paths in this document are repo-relative; commands run from the repo root.
 
 Five modules were named to this wave as readers built during the day that no
