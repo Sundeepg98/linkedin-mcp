@@ -444,11 +444,12 @@ re-costed on a measured row census and 3 of those individually characterised.**
 **Recomputed from `git log` and `pytest --collect-only` at freeze, not
 re-read from the drafts above. Two numbers moved when I recomputed them.**
 
-    commits            5     812abc3  feed.py + tests (the ruling)
+    commits            6     812abc3  feed.py + tests (the ruling)
                              8c028d3  corpus probe + the measured correction
                              f86f27f  row-58 transport invariant
                              840f143  this document + the back-pointer
-                             (the live probe, unrun)
+                             00211ce  the live probe, unrun and labelled
+                             a5a988a  needle declared, neighbour's left red
     files added        6     1 module, 2 test files, 2 probes, 1 document
     files modified     1     the ranked table, 17 lines, all mine, 0 deletions
     tests added       37     collected, not counted by hand: 28 + 9
@@ -462,12 +463,34 @@ re-read from the drafts above. Two numbers moved when I recomputed them.**
     live reads         0     attempted 1, browser gone -- see 5.1
     pushed          NOTHING
 
-**Reds at freeze, and neither is this wave's -- established from the
-assertion text rather than assumed:**
+**Guards run at freeze, 18 files across the enumeration and identity classes:**
 
-| red | why not mine |
-|---|---|
-| `test_every_candidate_pair_is_declared_or_triaged` | the two untriaged pairs name `2026-09-05-article-publish.md` and `2026-09-05-jobs-tail.md`; it was already red before I wrote a line, and my own marker pair resolves |
+    3 failed, 1413 passed in 75s
+
+**One of the three WAS mine and is fixed. Ownership of each established from
+the assertion text or from commit ordering -- never assumed.** (The gate figure
+above was drafted from memory as "1295" and recomputed at freeze to 1413. It is
+a small error and it is recorded because the rule that caught it is the point:
+proofreading cannot reach a number that is wrong, only recomputation can.)
+
+| red | owner | how established |
+|---|---|---|
+| `test_every_person_constant_holds_a_declared_invented_name`, first item | **MINE -- FIXED at `a5a988a`** | the assertion named `test_feed_tally.py:32` |
+| the same test, second item -- still red | `fc10b99` (recommendations) | `git merge-base --is-ancestor fc10b99 812abc3` is TRUE, so it has been red since 19:15:46, about two hours before this wave existed |
+| `test_the_tab_leak_only_ever_shrinks` (41, up from 39) | two other waves | **neither of my probes is in the leaking list the failure prints** -- one attaches no browser at all, the other closes the PAGE in a `finally` |
+| `test_every_candidate_pair_is_declared_or_triaged` | `article-publish`, `jobs-tail` | the two untriaged pairs name those documents; already red before I wrote a line |
+
+**I declared only my own needle and left the neighbour's red standing.** That
+is this repository's rule for a guard that fires -- one line at a time, with
+its reason, by whoever owns the thing it fired on -- and declaring somebody
+else's needle would be adopting their disclosure rather than helping them.
+
+**And a distinction worth leaving beside that entry, because the two rules are
+opposite and somebody will read them together:** a needle for a SHAPE-reading
+matcher should look realistic, because the shape is what the code inspects. A
+needle for `feed.py` must look like NOTHING ELSE IN THE REPOSITORY, because it
+is searched for in return values and its whole job is to be unmistakable if it
+escapes. Same constant name, inverted requirement.
 
 My marker pair went red once and it WAS mine, twice over: the target could not
 resolve because my document was untracked (the guard reads `git ls-files`, not
