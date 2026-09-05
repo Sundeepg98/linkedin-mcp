@@ -21,12 +21,25 @@ token that is a prefix of the real one, and a token that merely starts with it.
 
 from __future__ import annotations
 
+import ast
 import asyncio
+import importlib.util
+import pathlib
 import socket
 
 import pytest
 
 from linkedin_server import transport
+
+_SCRIPTS = pathlib.Path(__file__).resolve().parent.parent / "scripts"
+
+
+def _load(path: pathlib.Path):
+    """Import a scripts/ module by path. There is no scripts/__init__.py."""
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 # ---------------------------------------------------------------------------
@@ -247,3 +260,182 @@ def test_the_refusal_names_the_variable_that_fixes_it():
     gated = transport.bearer_gate(_Recorder(), "s3cret")
     body = _drive(gated, [])["body"].decode()
     assert "LINKEDIN_HTTP_TOKEN" in body
+
+
+# ---------------------------------------------------------------------------
+# mcp_probe: the claim a rename rests on, and the payload it must not print
+# ---------------------------------------------------------------------------
+#
+# `test_navigation_is_never_derived` taints ANY `.url` attribute in this
+# package, on the generalisation that a `.url` here was read off a page, a
+# request or a response. That is true of `linkedin_server/` and it is right to
+# be coarse -- enumerating the objects that may hold one would be a list to
+# keep in step.
+#
+# `scripts/mcp_probe.py` is its first counterexample: an argparse Namespace
+# holding an address the caller typed. The argument is now `dest="endpoint"`,
+# which clears the guard -- and a rename that clears a guard is EXACTLY the
+# move that hides a value from the check that was watching it. What separates
+# the two is whether the claim behind the rename is itself checked. It is the
+# first test below, and it is the reason the rename is allowed to stand.
+
+_PROBE = _SCRIPTS / "mcp_probe.py"
+
+#: Every module `mcp_probe.py` is permitted to import. Not "no playwright" --
+#: an exact allowlist, because the interesting failure is a browser arriving
+#: through something nobody thought to ban.
+_PROBE_ALLOWED_IMPORTS = frozenset(
+    {"__future__", "argparse", "json", "os", "sys", "time", "urllib"}
+)
+
+
+def test_mcp_probe_has_no_browser_surface():
+    """THE CLAIM THE RENAME RESTS ON, made falsifiable.
+
+    `options.url` became `options.endpoint` because nothing in that file can
+    reach a browser, so the taint rule's premise does not hold there. If anyone
+    ever teaches the probe to drive a page, that stops being true -- and
+    without this test it would stop being true SILENTLY, because the guard that
+    would have caught it is looking for an attribute the file no longer has.
+
+    So this is the guard's replacement for that one file, and it is stricter:
+    the guard tolerates a browser as long as nothing is printed, this tolerates
+    no browser at all.
+    """
+    tree = ast.parse(_PROBE.read_text(encoding="utf-8"), filename=_PROBE.name)
+
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module.split(".")[0])
+
+    assert imported <= _PROBE_ALLOWED_IMPORTS, (
+        "mcp_probe.py imports %s, which is outside the stdlib set its "
+        "`dest=\"endpoint\"` rename depends on. If it now reaches a browser, "
+        "the navigation guard must see its urls again -- rename the argparse "
+        "dest back to `url` rather than widening this list."
+        % sorted(imported - _PROBE_ALLOWED_IMPORTS)
+    )
+
+
+def test_the_probe_still_takes_the_flag_its_callers_pass():
+    """The rename moved the ATTRIBUTE, and must not have moved the FLAG.
+
+    `start_server.ps1` and the cutover runbook both pass `--url`. A rename that
+    silently changed the command line would have broken the restart command --
+    which is the one thing this whole wave exists to deliver -- and it would
+    have broken it in a script whose failure output nobody reads until a
+    cutover.
+    """
+    source = _PROBE.read_text(encoding="utf-8")
+    assert '"--url"' in source
+    assert 'dest="endpoint"' in source
+
+
+def test_a_tool_that_was_never_measured_has_its_payload_withheld():
+    """The leak the navigation guard pointed at by accident.
+
+    It flagged this file for `options.url`, which is caller-supplied and
+    harmless. But the line it flagged also prints `call_result` -- the verbatim
+    result of ANY tool `--call` names. `linkedin_my_profile` would put the
+    operator's profile, vanity slug and all, into whatever transcript ran the
+    probe. That is the channel all three slug leaks of 2026-09-03 used.
+    """
+    probe = _load(_PROBE)
+    payload = {
+        "structuredContent": {
+            "public_identifier": "a-vanity-slug",
+            "headline": "some headline",
+            "connections": 500,
+        }
+    }
+    rendered = probe._render_call_result("linkedin_my_profile", payload)
+
+    assert "call_result" not in rendered
+    flat = repr(rendered)
+    assert "a-vanity-slug" not in flat
+    assert "some headline" not in flat
+    assert "500" not in flat, "a value survived into the shape"
+
+
+def test_the_shape_reports_the_keys_and_the_types_and_nothing_else():
+    """A shape must stay ANSWERABLE without being informative about content.
+
+    Reporting nothing would make the probe useless for "did the call come back
+    with what it should"; reporting a summary would be a second thing to trust.
+    Keys plus type names is the line: it cannot reconstruct what it describes.
+    """
+    probe = _load(_PROBE)
+    rendered = probe._render_call_result(
+        "linkedin_my_profile", {"structuredContent": {"slug": "x", "count": 3}}
+    )
+    assert rendered["call_result_shape"] == {"count": "int", "slug": "str"}
+    assert "withheld" in repr(rendered)
+
+
+#: A SLUG-SHAPED LITERAL, and it has to be shape-valid to be the test.
+#:
+#: The block below proves that text content does not survive into a shape. A
+#: bland string would prove that some string did not survive; only a string
+#: wearing the shape of the thing that actually leaked proves the class. And
+#: assembling it at runtime would hide it from `test_no_committed_identity`,
+#: blinding that sweep to a real value pasted into this file later -- the exact
+#: reasoning its own entries give.
+#:
+#: IT CARRIES A SANCTIONED TOKEN RATHER THAN A DECLARATION, and the difference
+#: is not cosmetic. `a-real-person` is in that guard's `SYNTHETIC_SLUG_TOKENS`
+#: -- its ruling that a slug containing it cannot be anyone's -- so this value
+#: needs no entry in `DECLARED_PLANTS` at all.
+#:
+#: The declaration was written first and then withdrawn, because it is the
+#: WORSE of the two. A `("tests/test_transport.py", "linkedin slug"): 1` entry
+#: tolerates ONE slug in this file whatever it is, so a real one pasted in
+#: later passes. The token exempts this VALUE and nothing else. Measured: with
+#: the literal below the file reads clean, and the same file plus one
+#: real-looking slug goes red.
+A_SLUG_SHAPED_REFUSAL = "refused /in/synthetic-not-a-real-person/"
+
+
+def test_a_text_block_result_is_counted_not_quoted():
+    """The other payload shape. Text blocks are where a refusal's prose lands,
+    and a refusal naming what it refused was leak number one."""
+    probe = _load(_PROBE)
+    rendered = probe._render_call_result(
+        "linkedin_my_profile",
+        {"content": [{"text": A_SLUG_SHAPED_REFUSAL}, {"text": "second"}]},
+    )
+    assert rendered["call_result_shape"] == {"content_blocks": 2}
+    assert "synthetic-not-a-real-person" not in repr(rendered)
+
+
+def test_the_measured_diagnostic_is_still_printed_in_full():
+    """The control, and it decides whether the rule above is a rule or a wall.
+
+    `linkedin_cdp_status` is what the cutover runbook calls and what proves
+    attach mode is live. If withholding applied to it too, the probe would pass
+    every test here while telling the operator nothing at the one moment he
+    needs it.
+    """
+    probe = _load(_PROBE)
+    body = {"reachable": True, "active_browser_mode": "attach"}
+    rendered = probe._render_call_result(
+        "linkedin_cdp_status", {"structuredContent": body}
+    )
+    assert rendered == {"call_result": body}
+
+
+def test_the_printable_list_is_exactly_what_was_measured():
+    """Adding a name here is a claim that a tool returns no identity.
+
+    `_redact` was admitted to the navigation guard's sanitiser list on the
+    strength of its NAME and turned out to carry no slug rule at all. This
+    pins the list so that widening it is a deliberate edit with a test to
+    change, not a quiet append.
+    """
+    probe = _load(_PROBE)
+    assert probe._PRINTABLE_IN_FULL == frozenset({"linkedin_cdp_status"})
+    assert "linkedin_my_profile" not in probe._PRINTABLE_IN_FULL
+    assert "linkedin_connections" not in probe._PRINTABLE_IN_FULL
+

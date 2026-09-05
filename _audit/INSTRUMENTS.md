@@ -1811,3 +1811,61 @@ and touch no url. Renaming cleared all three. Assigning to a variable does not
 help, because the fixed point follows the binding; the sanctioned route is
 `_SANITISERS`. Before editing a print that guard flags, check whether the taint
 came from a NAME COLLISION somewhere else in the file.
+
+### 9.8 The guard flagged the right line for the wrong value, and that decided the remedy
+
+`test_navigation_is_never_derived` went red on `scripts/mcp_probe.py`, two
+sites. 9.7 above invited the reader to check for a NAME COLLISION first, so
+that was checked first, and the answer was no: the cause there was locals
+tainted module-wide by an assignment elsewhere, and the cause here is the
+hard-coded `_TAINTED_ATTRS = {"url"}` firing on an Attribute literally spelled
+`.url`. **Same guard, same red, different cause -- the remedy did not carry
+over, which is 9.7's own point applied back to it.**
+
+MEASURED: exactly two `.url` sites exist in that file, both `options.url`, and
+they are the whole root cause. Simulating the rename alone takes the tainted-name
+set from ten names to zero and both violations to none; the second site was
+tainted only transitively through `result = probe(options.url, ...)`.
+
+**WHY IT WAS NOT DECLARED, and this is the transferable part.** A
+`KNOWN_TAINTED_OUTPUT` entry is keyed on the WHOLE SINK EXPRESSION. Declaring
+`print(json.dumps(result, indent=2))` tolerates that line forever, whatever
+`result` later holds -- and `result` holds `call_result`, the verbatim payload
+of any tool `--call` names. `mcp_probe.py --call linkedin_my_profile` would have
+put the operator's profile into whatever transcript ran it, which is the channel
+all three 2026-09-03 slug leaks used.
+
+So the guard was RIGHT ABOUT THE LINE AND WRONG ABOUT THE VALUE, and a
+declaration would have permanently blessed the real risk while arguing about the
+false one. `options.url` is an argparse Namespace holding a caller-typed address;
+that file's imports are exactly `argparse, json, os, sys, time, urllib` and no
+browser exists in it.
+
+The fix was therefore three things and only the first is about the guard:
+a `_PRINTABLE_IN_FULL` allowlist so a payload prints in full only for tools
+measured to carry no identity (one entry) and everything else reports keys and
+TYPE names; `dest="endpoint"` so the attribute stops claiming to be a browser
+url while the FLAG stays `--url` and callers are untouched; and
+`test_mcp_probe_has_no_browser_surface`, an exact import allowlist that pins the
+claim the rename rests on. **The third is what makes the rename not a dodge** --
+without it, a browser arriving in that file later goes unseen, because the guard
+is now looking for an attribute the file no longer has.
+
+**AND A DECLARATION THAT WOULD HAVE BEEN VACUOUS, caught by measuring it.** The
+slug-shaped fixture first fired `test_no_committed_identity`; a `DECLARED_PLANTS`
+entry was written, and then the replacement value was measured and found NOT TO
+BE COUNTED AT ALL -- `synthetic-not-a-real-person` contains `a-real-person`,
+already in that guard's `SYNTHETIC_SLUG_TOKENS`. The entry was withdrawn and the
+neighbour's file reverted untouched. **The token is strictly safer than the
+declaration: it exempts one VALUE, where a pinned count exempts any one slug in
+the file.** Measured both ways -- the file reads clean, and the same file plus
+one real-looking slug goes red. Before writing a declaration, measure that the
+guard actually counts the thing you are declaring.
+
+**ON WHETHER THE GUARD IS OVER-BROAD: it is, and it should stay that way.**
+`_TAINTED_ATTRS` taints any `.url` whatever holds it, and its own comment says
+naming the holder objects "would be a list to keep in step". That generalisation
+is true of `linkedin_server/`; `scripts/mcp_probe.py` is its first counterexample
+and `scripts/` will accumulate more. Narrowing it costs a list that goes stale
+silently; the coarseness costs a rename. It found a real leak here BY being
+coarse, which settles the trade.

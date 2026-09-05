@@ -22,7 +22,16 @@ stdout as JSON so a script can read it and a human can too.
     python scripts/mcp_probe.py --url http://127.0.0.1:8322/mcp
     python scripts/mcp_probe.py --list
     python scripts/mcp_probe.py --call linkedin_cdp_status
-    python scripts/mcp_probe.py --call linkedin_server_info --args '{"verbose": false}'
+
+WHAT ``--call`` PRINTS BACK, because it is not simply the result. ``--call``
+will invoke ANY tool the server exposes, and this output lands in terminals and
+agent transcripts. ``linkedin_my_profile`` would therefore put the operator's
+own profile into a transcript, which is the channel all three slug leaks of
+2026-09-03 used. So the payload is printed in full only for tools measured to
+carry no identity -- see ``_PRINTABLE_IN_FULL``, currently one entry -- and
+every other tool reports ``call_result_shape``: its top-level keys and the TYPE
+of each value, never a value. The verdict is unaffected either way; only the
+contents are withheld. If you want the contents, use an MCP client.
 """
 
 from __future__ import annotations
@@ -197,23 +206,104 @@ def probe(
             raise ProbeError(f"tools/call {call} returned an error: {message['error']}")
         payload = message.get("result") or {}
         out["called"] = call
-        # The structured field when there is one, the text blocks otherwise.
-        # Reported verbatim: a probe that summarises its own evidence is a
-        # probe you have to trust twice.
-        if "structuredContent" in payload:
-            out["call_result"] = payload["structuredContent"]
-        else:
-            out["call_result"] = [
-                block.get("text") for block in payload.get("content") or []
-            ]
         out["call_is_error"] = bool(payload.get("isError"))
+        out.update(_render_call_result(call, payload))
 
     return out
 
 
+#: TOOLS WHOSE RESULT MAY BE PRINTED IN FULL.
+#:
+#: This probe's output lands in terminals and, more to the point, in agent
+#: transcripts. ``--call`` will call ANY tool this server exposes, and some of
+#: them return the operator's own account: ``linkedin_my_profile`` would put his
+#: profile -- vanity slug included -- into whatever transcript ran the probe.
+#: That is precisely the channel the three slug leaks of 2026-09-03 used.
+#:
+#: So the payload is printed only for tools measured to carry no identity, and
+#: everything else reports its SHAPE. The list is deliberately one entry long:
+#: ``linkedin_cdp_status`` was read field by field (reachable, endpoint,
+#: browser, protocol_version, is_the_daily_path, active_browser_mode,
+#: how_to_use) and carries nothing about a person. Others may well be safe --
+#: they have not been measured, and a list of things nobody checked is the
+#: ``_redact`` mistake in a different costume.
+#:
+#: IT FAILS SAFE. A tool that is not on the list loses its payload, not its
+#: verdict; the caller still learns whether the call succeeded and what shape
+#: came back. Forgetting to add a name costs detail, never disclosure.
+_PRINTABLE_IN_FULL = frozenset({"linkedin_cdp_status"})
+
+
+def _render_call_result(call: str, payload: dict) -> dict:
+    """What to report about a tool result, given who returned it.
+
+    A SHAPE IS NOT A SUMMARY. It reports the top-level keys and the TYPE of
+    each value -- never a value -- so "did the call come back with what it
+    should" stays answerable without the contents passing through here. A
+    summary would be a second thing to trust; a key list cannot reconstruct
+    what it describes.
+    """
+    if call in _PRINTABLE_IN_FULL:
+        if "structuredContent" in payload:
+            return {"call_result": payload["structuredContent"]}
+        return {
+            "call_result": [
+                block.get("text") for block in payload.get("content") or []
+            ]
+        }
+
+    if "structuredContent" in payload:
+        structured = payload["structuredContent"]
+        shape = (
+            {key: type(value).__name__ for key, value in sorted(structured.items())}
+            if isinstance(structured, dict)
+            else type(structured).__name__
+        )
+    else:
+        shape = {"content_blocks": len(payload.get("content") or [])}
+
+    return {
+        "call_result_shape": shape,
+        "call_result_withheld": (
+            f"{call!r} is not in _PRINTABLE_IN_FULL, so its payload is not "
+            "printed -- this probe's output reaches transcripts and a tool "
+            "result can carry the operator's own account. Use an MCP client "
+            "if you need the contents."
+        ),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--url", default=os.environ.get("LINKEDIN_HTTP_URL", DEFAULT_URL))
+    # THE FLAG IS --url; THE ATTRIBUTE IS DELIBERATELY NOT `url`.
+    #
+    # `test_navigation_is_never_derived` treats ANY `.url` attribute in this
+    # package as a value the browser chose, and it is right to: enumerating the
+    # objects that could hold one would be a list to keep in step, so the rule
+    # taints the attribute whatever holds it. In `linkedin_server/` that
+    # generalisation is true -- every `.url` there is a page, a request or a
+    # response.
+    #
+    # This file is its first counterexample. `options.endpoint` would be an argparse
+    # Namespace holding an address the CALLER typed, and nothing in this module
+    # can reach a browser: it imports argparse, json, os, sys, time and urllib,
+    # and that is the whole list.
+    #
+    # THE RENAME IS NOT A DODGE, AND WHAT MAKES IT NOT ONE IS A TEST. Renaming
+    # to escape a checker is how a value stops being examined; the claim being
+    # made here -- that no browser exists in this file -- is pinned by
+    # `test_mcp_probe_has_no_browser_surface` in tests/test_transport.py, so if
+    # anyone ever teaches this probe to drive a page, that test fails and this
+    # comment stops being true out loud rather than quietly.
+    #
+    # `endpoint` is also just the better name. In a package where `.url` means
+    # "the browser chose this", calling a caller-supplied MCP address `url` is
+    # the misleading spelling, not the honest one.
+    parser.add_argument(
+        "--url",
+        dest="endpoint",
+        default=os.environ.get("LINKEDIN_HTTP_URL", DEFAULT_URL),
+    )
     parser.add_argument(
         "--token",
         default=os.environ.get("LINKEDIN_HTTP_TOKEN", ""),
@@ -242,7 +332,7 @@ def main() -> int:
     for attempt in range(options.retries + 1):
         try:
             result = probe(
-                options.url,
+                options.endpoint,
                 token=options.token,
                 list_tools=options.list,
                 call=options.call,
@@ -254,7 +344,7 @@ def main() -> int:
             if attempt < options.retries:
                 time.sleep(1.0)
                 continue
-            print(json.dumps({"served": False, "url": options.url, "reason": last}, indent=2))
+            print(json.dumps({"served": False, "url": options.endpoint, "reason": last}, indent=2))
             return 1
         result["attempts"] = attempt + 1
         print(json.dumps(result, indent=2))
