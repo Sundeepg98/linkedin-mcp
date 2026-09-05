@@ -648,11 +648,92 @@ PINNED = (
 #: member-addressed spelling, and -- the one that matters --
 #: ``/search/results/people/``, the surface the reading exists to inform,
 #: which is still refused.
+#:
+#: ------------------------------------------------------------------------
+#: A FOURTH ROOT, 2026-09-05, BY THE NEWSLETTER-SURFACE WAVE. THE THREE
+#: ENTRIES ABOVE ARE CORRECT AS THEIR AUTHORS WROTE THEM AND ARE NOT
+#: REWRITTEN.
+#:
+#:     _ALLOWED_URL_PATTERNS   6f82ef147356ce5d -> a8ea5dcf4f8b3d52
+#:
+#: ONE ANCHORED PATTERN:
+#:
+#:     ^https://www\.linkedin\.com/mynetwork/network-manager/newsletters/?$
+#:
+#: THE NEWSLETTERS HE SUBSCRIBES TO -- the third sibling in the
+#: Manage-my-network family, beside the connections list and the Pages list
+#: this server has read since 2026-08-23. The full argument is on the entry
+#: itself in ``readonly.py``; what belongs here is the attribution and what
+#: did not move.
+#:
+#: THE ADDRESS IS A MEASURED CONSTANT, NOT A GUESS, and it is not this wave's
+#: find. ``dom.py``'s invitation-badge aim records the two ``/mynetwork``
+#: controls a live feed drew on 2026-09-04, one of which is this address; it
+#: was found by an instrument hunting the badge, REJECTED for carrying no
+#: label, and left sitting in a docstring and a test for a day. It is also one
+#: anchor in the tracked fixture ``tests/fixtures/connections_list.html``, so
+#: ``tests/test_newsletter_route.py`` asserts the pattern against a captured
+#: document rather than against this paragraph.
+#:
+#: ATTRIBUTION MEASURED, AND THIS ONE ADMITS OF NO ARGUMENT. The removal
+#: control was run in the form the search-appearances entry above established
+#: -- drop the line from the SOURCE TEXT IN MEMORY, recompute -- with a
+#: variant that handles the multi-line ``re.compile`` construct, since the
+#: sibling probe's filter requires the call and the needle on one line::
+#:
+#:     pinned, and live on disk                     a8ea5dcf4f8b3d52
+#:     without the newsletters root                 6f82ef147356ce5d   COVERED
+#:     without the Pages sibling                    052961dfb7a8ed83   COVERED
+#:     CONTROL: without a needle no line carries    a8ea5dcf4f8b3d52   0 lines
+#:
+#: **THE TREE MINUS THIS WAVE'S LINE HASHES TO EXACTLY THE PREVIOUSLY PINNED
+#: VALUE.** That is stronger than "a digest that moves covers that line": it
+#: says this line is the ONLY allowlist change in this tree, so no neighbour's
+#: uncommitted work is riding inside this re-pin. The second row is the
+#: control that the mechanism can move at all, and the third is the control
+#: that a removal dropping no line moves nothing.
+#: ``_audit/_scratch/_probe_newsletter_refreeze_attribution.py`` and
+#: ``_audit/_scratch/_newsletter-refreeze-attribution.txt``.
+#:
+#: ONE INTERPRETER, NOT TWO, AND SAYING SO RATHER THAN CLAIMING BOTH. Earlier
+#: entries in this file verify each digest under 3.13 AND 3.10 before writing
+#: it down. **This box has no 3.10** -- measured: the four sibling venvs under
+#: ``mcp-servers/`` are all 3.13.14 and there is no ``py`` launcher -- so the
+#: value above is verified under Python 3.13.14 only. The 3.10 cell exists and
+#: is CI's (``ubuntu-latest`` x 3.10 in the matrix), so the second reading is
+#: available on push and is not available here. A claim of two interpreters
+#: would have been the cheapest false sentence in this file.
+#:
+#: WHAT MOVED AND WHAT DID NOT. ``_ALLOWED_URL_PATTERNS`` moved, once, by one
+#: tuple entry. **EVERY OTHER PINNED DIGEST IS BYTE-IDENTICAL** -- seven of
+#: eight identical, reported by the failure itself before the re-pin.
+#: ``<functions>`` did not move, so ``assert_read_url`` and every other gate
+#: function is unchanged; no denylist was shortened; neither exemption table
+#: was touched. This wave added no forbidden substring and removed none: 33
+#: before and 33 after.
+#:
+#: AND THE PATTERN IS THE ONLY THING STANDING, which is the disclosure the
+#: groups entry established as belonging with a widening rather than buried in
+#: a test. ``/mynetwork/network-manager/newsletters/`` carries NO forbidden
+#: substring at all -- measured at HEAD by
+#: ``scripts/_probe_newsletter_routes.py``, whose control row shows the
+#: neighbouring people-follow address refused by ``/follow`` and this one
+#: refused by no substring before the pattern existed. So the anchor on this
+#: entry is the whole of the narrowness.
+#:
+#: WHAT THE FOURTH ENTRY DELIBERATELY DID NOT BUY, asserted in
+#: ``tests/test_newsletter_route.py`` rather than promised here: one
+#: newsletter's own page in either slug form (its slug is ROUTINELY ITS
+#: AUTHOR'S NAME), the ``/newsletters/`` product root, per-newsletter
+#: analytics, the creator-hub analytics form, a query string on the admitted
+#: root, any sub-path under it, and ``/newsletters/create/`` -- which is
+#: refused TWICE, by the ``/create`` substring and by no pattern, and which
+#: census rows ``M C50`` and ``M C81`` would need.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "6f82ef147356ce5d",
+    "_ALLOWED_URL_PATTERNS": "a8ea5dcf4f8b3d52",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1040,7 +1121,22 @@ DENYLISTS_AT_A76FE32 = {
     # WHY it was paid for: three cheaper routes to the same question were
     # measured first and all three are dead, which is written out in full
     # above the dict this one shadows.
-    "_ALLOWED_URL_PATTERNS": "6f82ef147356ce5d",
+    #
+    # THAT LINE IS ONE ROOT BEHIND ITS OWN VALUE AND IS LEFT AS ITS AUTHOR
+    # WROTE IT. The search-appearances pattern landed the same day and the
+    # value above absorbed it without this prose saying so -- which is the
+    # narrative-by-deletion hazard the entry above the shadowed dict describes,
+    # arriving here as a narrative-by-omission instead. Correcting somebody
+    # else's line would be the same overwrite in the other direction, so it
+    # stands and this paragraph names the gap.
+    #
+    # GREW AGAIN 2026-09-05 by ONE anchored root -- the newsletters he
+    # subscribes to, the root ONLY. Same shape again: a deliberate READ
+    # admission, three denylists and both exemption tables byte-identical,
+    # `<functions>` unmoved. Its attribution is the strongest this dict has
+    # carried, because the tree MINUS this line hashes to exactly the value
+    # this line replaced -- so nothing else is riding inside the re-pin.
+    "_ALLOWED_URL_PATTERNS": "a8ea5dcf4f8b3d52",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

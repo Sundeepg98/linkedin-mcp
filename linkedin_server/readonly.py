@@ -609,6 +609,105 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
         r"^https://www\.linkedin\.com/mynetwork/network-manager/company/?$"
     ),
+    # THE NEWSLETTERS HE SUBSCRIBES TO, AND THE ROOT ONLY. Added 2026-09-05,
+    # as the third sibling in the Manage-my-network family: the connections
+    # list above, the Pages list directly above this, and now this one.
+    #
+    # THE ADDRESS WAS NOT GUESSED AND IT IS NOT THIS ENTRY'S FIND. It is a
+    # constant this repository MEASURED on 2026-09-04 while hunting something
+    # else entirely. ``dom.py``'s invitation-badge aim records the two
+    # ``/mynetwork`` controls a live feed actually draws::
+    #
+    #     a  aria-label with a count   href="https://www.linkedin.com/mynetwork"
+    #     a  no aria-label at all      href=".../mynetwork/network-manager/newsletters/"
+    #
+    # The badge hunt found this link and REJECTED it for carrying no label,
+    # and the address then sat unused in a docstring and a test for a day.
+    # It is also in a TRACKED FIXTURE -- one anchor in
+    # ``tests/fixtures/connections_list.html`` -- so the spelling this pattern
+    # admits is asserted against a captured document rather than against a
+    # commit message. ``tests/test_newsletter_route.py`` is that assertion,
+    # and it is the control that fires if LinkedIn moves the address.
+    #
+    # WHY THE CENSUS FILED THIS SURFACE SOMEWHERE ELSE, which is the whole
+    # point of the entry. ``NEWSLETTER-SURFACE``'s reader-side rows -- ``N 57``
+    # "view the newsletters you subscribe to" and its four neighbours -- are
+    # filed against the surface where LinkedIn DRAWS the control, which is the
+    # profile's Interests tab. That surface is dead twice over and both
+    # deaths are measured, not argued:
+    #
+    #   * THE RENDER GATE. The Interests region draws five categories as
+    #     ``div role="radio"`` with no href, and a category's rows are not in
+    #     the document until its tab is pressed. Newsletters is one of the
+    #     five. Proven by a control: the Companies category holds at least 20
+    #     rows in the tracked fixtures and renders ZERO on the Interests
+    #     capture and ZERO on a live 396909-character profile read.
+    #   * THE ADDRESS. ``/in/me/details/interests/`` is admitted six entries
+    #     above and LinkedIn REDIRECTS it to the profile, with two same-run
+    #     siblings that did not redirect as its control.
+    #
+    # So a row filed against the surface where the control is drawn is not
+    # necessarily blocked by that surface --
+    # ``_audit/2026-09-05-routes-already-admitted.md``, which moved fourteen
+    # rows on that hypothesis. This is the fifteenth.
+    #
+    # WHAT IT BUYS, STATED AS A PRECONDITION RATHER THAN AS A CAPABILITY,
+    # because that is the honest size of it. Whether he subscribes to any
+    # newsletter at all is unestablished, and if the answer is zero then five
+    # of this blocker's reader-side rows (``N 55``, ``N 56``, ``N 57``,
+    # ``N 58``, ``M C80``) are unreachable in principle for this account. One
+    # load settles it. That is the same argument the groups and events roots
+    # were paid for on, and it is deliberately not a larger one.
+    #
+    # AND IT DOES NOT BUY THE AUTHOR-SIDE PRECONDITION, which is the half a
+    # careless reader will assume it covers. ``M C50``, ``M C51``, ``M C81``,
+    # ``M C84`` and ``P L3`` are about newsletters he WRITES, and no
+    # measurement here says this page lists those. Whether it does is a
+    # question for the first live read, not an assumption for this entry.
+    #
+    # NO QUERY STRING AND NO SUB-PATH, and the anchoring is the whole of the
+    # permission -- the same shape as the two roots opened on 2026-09-05.
+    # What that deliberately does NOT admit, each named because a widening is
+    # only narrow if its refusals are stated:
+    #
+    #     /newsletters/<slug>/       ONE newsletter's own page. Its slug is
+    #                                ROUTINELY ITS AUTHOR'S NAME -- measured,
+    #                                ``scripts/_probe_interests_entity_shaping.py``
+    #                                -- so the address itself carries a person
+    #                                and admitting it would put one in every
+    #                                log line that records a page load.
+    #     /newsletters/              the product root, which is a family
+    #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
+    #     .../newsletters/?<anything>      a query is where a filter naming a
+    #                                person would arrive
+    #
+    # ONE REFUSAL WORTH KNOWING RATHER THAN DISCOVERING: creating a newsletter
+    # is refused TWICE. ``/newsletters/create/`` contains ``/create``, which
+    # is on :data:`_FORBIDDEN_URL_SUBSTRINGS` and checked BEFORE this list,
+    # AND no pattern admits it. Census rows ``M C81`` and ``M C50`` need two
+    # boundary changes and a WriteSpec, and none of the three is proposed
+    # here. Measured at HEAD by ``scripts/_probe_newsletter_routes.py``.
+    #
+    # THE BADGE QUESTION IS OPEN AND IS NOT SETTLED BY THIS ENTRY. ``/mynetwork/``
+    # itself is refused because opening it is BELIEVED to consume the pending
+    # invitation badge; the connections sub-page was admitted on the argument
+    # that a sub-page does not, and ``linkedin_connections`` does not rely on
+    # the argument -- it reads the badge before and after and refuses when it
+    # cannot. Any reader built on THIS address inherits that obligation, and
+    # the instrument already exists: ``dom.read_invitation_badge``. This entry
+    # opens the door; it does not certify that walking through it is free.
+    #
+    # THE PAGE IS MADE OF OTHER PEOPLE'S PUBLICATIONS AND THAT IS NOT THIS
+    # LIST'S QUESTION. **This list decides what may be OPENED. The shaper
+    # decides what may be SAID.** What may be said here is narrower than for
+    # any sibling in this family: :func:`shape.subscription_row` publishes a
+    # constant href shape and NEVER a newsletter's title, because no
+    # instrument in this package can decide whether a title carries a
+    # person's name -- MEASURED, and the measurement is in that function's
+    # docstring rather than asserted here.
+    re.compile(
+        r"^https://www\.linkedin\.com/mynetwork/network-manager/newsletters/?$"
+    ),
     # THE SETTINGS INDEX, AND ONLY THE INDEX. Added 2026-08-30 so that
     # linkedin_surface_census can measure it; nothing else in this package
     # builds this url.

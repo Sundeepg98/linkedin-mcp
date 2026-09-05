@@ -4843,6 +4843,168 @@ def membership_row(href: Optional[str], name: Optional[str]) -> dict[str, Any]:
     }
 
 
+#: THE ONE ENTITY MARKER A NEWSLETTER SUBSCRIPTION ROW IS ALLOWED TO BE ABOUT,
+#: derived from :data:`_CENSUS_ENTITY_HREFS` for the same reason the
+#: membership pair above is: a sixth marker added to that tuple tomorrow
+#: becomes a REFUSAL here automatically rather than a hole.
+_SUBSCRIPTION_HREF_MARKER = "/newsletters/<newsletter>"
+_SUBSCRIPTION_FOREIGN_MARKERS = tuple(
+    marker for marker in _CENSUS_ENTITY_HREFS if marker != _SUBSCRIPTION_HREF_MARKER
+)
+
+#: THE ONLY HREF STRING A SUBSCRIPTION ROW EVER PUBLISHES. A literal, not a
+#: shape of the input, and the reason is MEASURED rather than inherited:
+#: ``/newsletters/weekly-123456/?authorProfile=<a token>`` shapes to
+#: ``/newsletters/<newsletter>/?authorProfile=<that same token>``, because
+#: ``/in/`` is the only member shape the substitutions know. An arbitrary
+#: string that never crosses can never carry an identifier.
+_SUBSCRIPTION_PUBLISHED_HREF = _SUBSCRIPTION_HREF_MARKER + "/"
+
+#: THE COUNT :func:`subscription_row` HANDS :func:`census_redact_rare`, AND IT
+#: IS A CONSTANT ON PURPOSE.
+#:
+#: That redactor's premise is "furniture repeats and a name does not", so it
+#: only fires at ``count == 1``. On a subscription list the premise is not an
+#: approximation -- it is exactly true: a member subscribes to a given
+#: newsletter once, so every title on the page IS a singleton. Passing a
+#: literal 1 is therefore not a trick to force redaction; it is the tally the
+#: page actually has, asserted where a reader can see it instead of being
+#: recomputed per page from a list this function never sees.
+_SUBSCRIPTION_TITLE_COUNT = 1
+
+
+def subscription_row(href: Optional[str], name: Optional[str]) -> dict[str, Any]:
+    """One newsletter-subscription row, with the title redacted UNCONDITIONALLY.
+
+    THE SIBLING OF :func:`membership_row`, AND IT DIFFERS IN THE ONE PLACE
+    THAT MATTERS. That function publishes a group's name AS WRITTEN when the
+    identity substitutions do not change it, on the argument that a group's
+    name is an entity name of the same class as a company's. **That argument
+    does not transfer to a newsletter, and the difference is measured rather
+    than felt.**
+
+    ``scripts/_probe_interests_entity_shaping.py`` established on 2026-09-04
+    that a newsletter is authored BY A PERSON and that BOTH its title and its
+    slug routinely carry that person's name -- which is why
+    ``/newsletters/<newsletter>`` is in :data:`_CENSUS_ENTITY_HREFS` at all.
+    And the check that makes a group name safe CANNOT SEE ONE::
+
+        census_substitute("Weekly Notes by Savita Krishnan")
+            -> "Weekly Notes by Savita Krishnan"     UNCHANGED
+
+    A plain human name carries no urn, no ``/in/`` path, no possessive and no
+    digit run, so it survives every identity substitution untouched. A reader
+    that inherited the group rule would publish the author verbatim, and it
+    would look like a gate doing its job.
+
+    SO THE TITLE GOES THROUGH :func:`census_redact_rare` AT
+    :data:`_SUBSCRIPTION_TITLE_COUNT`, ALWAYS, WITH NO CONDITION ON IT::
+
+        "Weekly Notes by Savita Krishnan"  ->  "<redacted> by <redacted>"
+        "The Weekly Byte"                  ->  "<redacted>"
+        "data weekly"                      ->  "data weekly"
+
+    THE RESIDUAL RISK IS STATED RATHER THAN PAPERED OVER, because that
+    redactor is a CAPITALISED-RUN rule and not a name detector: a title
+    spelling its author in lower case -- ``notes by alex`` -- survives it, as
+    the third line above shows for an innocent title. This function is a floor
+    under the leak, not a proof there is none. What would raise it is an
+    instrument that can decide whether a string is a person's name, and this
+    package has none; that is a finding, not a TODO.
+
+    IT REDACTS RATHER THAN DROPS, AND THAT IS THE OTHER HALF. A dropped title
+    would leave a row saying nothing, and the reader's whole payload would be
+    a count it could have got by counting. ``<redacted>`` KEEPS ITS OWN
+    MARKER, which is the standing rule here -- a redaction that erases its
+    marker is worse than no redaction, because it buys the reader's trust and
+    ships the name anyway.
+
+    THE ROW IS DROPPED, NOT BLANKED, WHEN THE HREF IS WRONG -- the opposite
+    direction, and for the opposite reason. A blanked row still reports that
+    somebody was there, so a refusal returns no fragment of what it refused:
+    it returns the MARKERS it matched, which are this module's own vocabulary
+    and name nobody.
+
+    Returns one of two shapes, never an exception, because a single
+    unpublishable row on a page of thirty is not an error:
+
+    ``{"published": True, "href_shape": ..., "name": ..., "name_redacted": bool}``
+        the row may be emitted. ``name_redacted`` is True when the redactor
+        changed the title, which is the common case and not the exception.
+
+    ``{"published": False, "refused": <reason>, "saw": [<markers>]}``
+        the row may not be emitted, and ``saw`` says which entity markers were
+        in the href. A refusal that reports only what it did NOT match is half
+        a measurement.
+
+    :param href: the raw href off the row's own anchor, unshaped.
+    :param name: the accessible name read from INSIDE that same anchor.
+    """
+    if not href or not str(href).strip():
+        return {
+            "published": False,
+            "refused": "no_href",
+            "saw": [],
+            "why": (
+                "a row with no destination cannot be shown to be about a "
+                "newsletter, and this gate refuses what it cannot establish "
+                "rather than passing what it cannot disprove."
+            ),
+        }
+
+    href_shape = census_substitute(href)
+    seen = [marker for marker in _CENSUS_ENTITY_HREFS if marker in href_shape]
+    foreign = [
+        marker for marker in _SUBSCRIPTION_FOREIGN_MARKERS if marker in href_shape
+    ]
+    if foreign:
+        # THE BRANCH THE OBVIOUS TEST INPUT DOES NOT REACH, recorded here
+        # because a later reader will be tempted to delete it as unreachable.
+        # A bare ``/in/<member>/`` href is refused HERE today, but with this
+        # branch deleted it would fall through to the marker check below and
+        # be refused THERE, for a different reason and with the same verdict.
+        # So that input cannot tell whether this branch exists. What needs it
+        # is an href carrying BOTH markers --
+        # ``/in/<member>/recent-activity/newsletters/<newsletter>/``, a
+        # MEMBER'S OWN newsletter tab, which is a page about a person and
+        # whose accessible name is that person's newsletter. MEASURED: that
+        # href shapes to both markers at once.
+        return {
+            "published": False,
+            "refused": "href_identifies_another_kind_of_entity",
+            "saw": foreign,
+            "why": (
+                "this row points at something that is not one of his "
+                "newsletter subscriptions -- most dangerously a member's own "
+                "newsletter tab, which is a page about that member. The row "
+                "is DROPPED rather than blanked: a blanked row still reports "
+                "that somebody was there."
+            ),
+        }
+    if _SUBSCRIPTION_HREF_MARKER not in href_shape:
+        return {
+            "published": False,
+            "refused": "not_a_newsletter_href",
+            "saw": seen,
+            "why": (
+                "no newsletter marker in the shaped href. A subscription row "
+                "is identified by where it points, never by where it sits on "
+                "the page -- position is what a layout change moves."
+            ),
+        }
+
+    normalised = _CENSUS_CURLY.sub("'", _WS.sub(" ", str(name or "")).strip())
+    published = census_redact_rare(
+        census_substitute(normalised), _SUBSCRIPTION_TITLE_COUNT
+    )
+    return {
+        "published": True,
+        "href_shape": _SUBSCRIPTION_PUBLISHED_HREF,
+        "name": published,
+        "name_redacted": published != normalised,
+    }
+
+
 #: THE MERGE KEY'S FIELDS, NAMED ONCE AND IN ORDER, and this constant is a
 #: defect-class removal rather than tidying.
 #:
