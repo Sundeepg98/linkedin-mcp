@@ -1291,3 +1291,127 @@ changed" would be a fact about the removal machinery rather than about the
 line, and three matching moves would prove nothing. Declared DISPOSABLE as a
 one-off; the method -- *delete-and-recompute to ask what a digest covers, with
 an absent-needle control* -- is the part worth keeping.
+
+## 7. The groups/events wave, 2026-09-05
+
+Added by the groups-events wave. **APPENDED, not inserted** -- see this file's
+preamble; find these by NAME.
+
+Two instruments, both shown failing before they were believed. The transcripts
+are `_audit/_scratch/_redproof-corpus-sweep.txt` and
+`_audit/_scratch/_redproof-membership-row.txt`. Both runs asserted
+`linkedin_server.__file__` under the scratch copy AND the repo path absent
+before any mutation was planted, and both finished on a clean control run.
+
+### 7.1 `scripts/_probe_membership_signal_in_corpus.py` -- a NEGATIVE reading with two controls
+
+Sweeps every HTML document this repository holds for six group and event route
+needles. Its answer -- ZERO across 30 documents and 2522736 characters -- is
+what established that no offline route to the groups/events precondition
+exists, and it is worth having only because of the controls.
+
+**THE MUST-FIRE CONTROL IS `/company/`, and it is not decoration.** It has to
+be non-zero somewhere, because `linkedin_followed_companies` ships and reads
+exactly that data and `manage_pages_following.html` is a tracked capture of the
+surface it reads. A sweep reporting zero groups AND zero companies has measured
+its own blindness. The second control runs the other way: a needle nobody has
+ever written must find nothing, or the matcher is wrong rather than the corpus
+rich.
+
+| # | mutation | what came back |
+|---|---|---|
+| M1 | the must-fire control's regex -> a string that cannot match | RED -- MUST FIRE 0, FAIL, exit 1, and the verdict says the target counts are not a reading about memberships |
+| M2 | `CORPUS_DIRS` -> a directory that does not exist | RED -- "NO DOCUMENTS FOUND", exit 1 |
+| M3 | the must-stay-silent control's regex -> `a` | RED -- 30583 hits, FAIL, exit 1 |
+| M4 | ONE synthetic file added to the corpus carrying a group href | GREEN AND DIFFERENT -- groups-href 1, groups-path 1, both controls still PASS, verdict switches to the "an offline route MAY exist" branch |
+| -- | final clean control run | groups/events 0, company-href non-zero, needle 0, both controls PASS |
+
+**M4 IS THE ONE THAT MAKES THE ZERO READABLE.** M1 to M3 prove the instrument
+can DIE. Only M4 proves it can SEE -- that a real group signal in the corpus
+would change the answer. A sweep proven only to fail is still consistent with
+one that never finds anything, and "zero from an instrument that cannot see the
+thing" is the class this register exists to keep out.
+
+**A CORROBORATION THAT WAS NOT PLANNED.** The proof ran in a copy of
+`linkedin_server`, `tests`, `scripts` and `pytest.ini` -- and NOT `_audit`. Its
+control read 82 where the live tree reads 90. The difference is exactly the 8
+company anchors in the one raw `_audit` capture that survives on disk, so two
+independently-derived numbers reconcile to the document. The gap was a fact
+about the copy's scope, and it is recorded because a number that differs
+between two runs is normally the first sign of a stale reading.
+
+### 7.2 `shape.membership_row` -- and the mutation that UNDER-KILLED
+
+The per-record emission gate for a groups reader, over
+`tests/test_membership_row.py`. It exists because a per-record path inherits
+NEITHER census protection: `census_shape` is a length-and-charset gate, and
+`census_redact_rare` needs a COUNT so it lives inside aggregation.
+
+| # | mutation | what came back |
+|---|---|---|
+| M1 | delete the `if foreign:` branch | RED -- 5 failed |
+| M2 | delete the name substitution check | RED -- 5 failed |
+| M3 | gate on `census_href_identifies_entity` instead of on which entity kind | RED -- 14 failed |
+| M4 | hard-code the foreign set to 2 of the 4 markers | RED -- 3 failed, exactly the newsletter and school rows plus the derivation test |
+| -- | final clean control run | 24 passed |
+
+**M1 UNDER-KILLED ONE NAMED TEST, AND THAT IS THE ENTRY WORTH READING.**
+`test_a_refusal_returns_no_fragment_of_what_it_refused` was expected to die
+with the branch and did not. Diagnosis, taken by reading the test rather than
+by adjusting the mutation: its input was a plain `/in/` href, which with the
+foreign branch deleted STILL refuses -- it falls through to the group-marker
+check. **So the test passed against a guard with its first branch removed. It
+was asserting the refusal SHAPE and nothing at all about the branch it appeared
+to protect.**
+
+The remedy is the input, not the assertion. It now uses a url where the foreign
+branch is the ONLY thing refusing -- a group url carrying a member path in its
+query -- with the old input kept as a second case, because the two prove
+different refusal paths. Verified sensitive afterwards: with the branch
+neutralised, that input publishes a name verbatim.
+
+**THE GENERAL FORM, which is the part to carry away.** A mutation that fails to
+kill a test is not a weaker result than one that kills it -- it is a DIFFERENT
+result, and it is about the TEST. The instinct is to conclude the mutation was
+too small. Here the mutation was exactly right and the test's INPUT was chosen
+from its author's model of the risk rather than from the branch structure. That
+is the third time this project has caught a probe set that agreed with its
+author.
+
+### 7.3 M3 is a control for a failure mode, not just a mutation
+
+`census_href_identifies_entity` returns True for a group href -- the marker was
+added to that tuple on 2026-09-04 -- so a reader gated on the shared predicate
+refuses EVERY membership row and returns an empty list. **That empty list is
+indistinguishable from "he belongs to no groups"**, which is the exact question
+the whole wave exists to answer.
+
+M3 is therefore not testing a typo. It is testing that the suite can tell a
+correct empty answer from a blind one, and its blast radius says it can: 14 of
+24 tests died, including two of the suite's own mutation-proofs, because they
+depend on a group row publishing as their precondition. A suite where that
+mutation killed only one or two tests would be a suite that could ship the
+blind zero.
+
+### 7.4 A design decision a test forced, recorded because the test is the reason
+
+`membership_row` first published `census_substitute(href)` as its `href_shape`.
+`test_the_consumers_of_this_predicate_are_the_ones_that_were_considered` went
+red on the new caller, and the entry it already carries is fatal to that
+design: **a bare member token in a query survives those substitutions**, since
+`/in/` is the only member shape they know. So
+`/groups/<id>/?invitedBy=<token>` would have shaped to
+`/groups/<group>/?invitedBy=<that same token>` and published it.
+
+The fix is the closed-vocabulary conclusion `linkedin_connections` reached
+after two filters that each looked right: the href DECIDES and is never
+EMITTED; what is published is a module literal. An arbitrary string that never
+crosses cannot carry an identifier.
+
+**THE INSTRUMENT HERE IS THE ENUMERATION TEST, and this is its fifth catch.**
+It is not a boundary and it publishes nothing; its whole function is to make a
+new caller be CONSIDERED rather than inherited. On this occasion the
+consideration changed the code. `tests/test_membership_row.py` now rebuilds the
+leaky first version from the shared predicate and asserts it still leaks, so if
+that predicate ever learns the bare-token shape the decision is revisited
+deliberately instead of outliving its reason.
