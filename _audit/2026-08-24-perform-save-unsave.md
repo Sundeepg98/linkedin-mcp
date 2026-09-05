@@ -201,6 +201,8 @@ operating system that actually caught the earlier defects.
 `ae34c7c..76c34dc` as a fast-forward after verifying it independently. Recorded because the gap
 existed for eight commits and was named in a commit title rather than quietly omitted.
 
+**CORRECTED BY:** `_audit/2026-09-05-the-private-repo-premise.md` -- the metered-minutes half of this sentence was true of the predecessor repository object and prices nothing on the public one that replaced it; the outward-facing half stands and strengthens.
+
 ## A FIFTH way local green is not green, and it is about the MEASUREMENT rather than the code
 
 The four known mechanisms are: a skip counted as a pass; history CI lacks; a gitignored file CI

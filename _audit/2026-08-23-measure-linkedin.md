@@ -92,6 +92,8 @@ went on top. Nine live page loads, one at a time, nothing clicked.
    all this (`_audit/_fixture_sanitisation_check.txt`) is itself uncommittable, because it
    enumerates the strings it removed.
 
+   **CORRECTED BY:** `_audit/2026-09-05-the-private-repo-premise.md` -- the PRIVATE ruling above was accurate for the repository object then live; that object was replaced on 2026-08-24T17:03:32Z by the public one serving this code, so the reading is sound as dated and must not be carried forward.
+
 9. **CONTROLS.** Every refusal added has one: the three direction refusals against a
    `_direction` that raises unconditionally; the no-surface refusal against a door that has
    stopped opening; the UNMEASURED path against a renderer that has lost the ability to say it

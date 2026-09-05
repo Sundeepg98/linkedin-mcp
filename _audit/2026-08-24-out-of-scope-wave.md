@@ -726,6 +726,8 @@ month-to-date for the account is **3426 Linux + 2363 Windows + 52 macOS minutes*
 Linux-equivalent** once Windows is doubled and macOS multiplied by ten -- every line currently
 discounted to `netAmount: 0.0`. This wave alone added about thirteen runs across three cells.
 
+**CORRECTED BY:** `_audit/2026-09-05-the-private-repo-premise.md` -- the allowance reasoning above is scoped to a predecessor repository object; these runs are about nine hours older than the public object that exists today, whose Actions history begins at 2026-08-24T17:03:45Z.
+
 **It is NOT confirmed and it is not mine to confirm.** The billing endpoint that reported a remaining
 balance has moved, and the replacement exposes usage rather than headroom, so nothing readable from
 here distinguishes "allowance exhausted" from another account-level block. The spending-limit page is
