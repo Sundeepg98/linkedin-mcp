@@ -109,9 +109,20 @@ async def main() -> int:
             print("\n2. control -- the two SHIPPED badge readers, same page")
             inv_reading = await dom.read_invitation_badge(page)
             inv = shape.invitation_badge(inv_reading)
-            print("   invitation badge : state=%-11s links=%-3r counted=%r"
+            # THE PENDING COUNT IS PRINTED, and it is not decoration for this
+            # probe's own question. ``server.py``'s connections-cost block
+            # states its own unblocking condition verbatim --
+            # "what_would_prove_it: one call made while the badge is
+            # non-zero" -- which is the SAME precondition ``measurability``
+            # computes, one badge over. So this reading says whether that
+            # SHIPPED refusal is answerable today too. A count is a relation,
+            # not an identifier: no name, url or page text is involved.
+            print("   invitation badge : state=%-11s links=%-3r counted=%-3r "
+                  "pending=%r"
                   % (inv["state"], inv_reading["links"],
-                     inv_reading["badge_links"]))
+                     inv_reading["badge_links"], inv["pending"]))
+            print("   -> the connections-cost refusal at server.py is "
+                  "answerable today: %s" % (inv["pending"] not in (None, 0),))
             # NOTE the asymmetry, because it cost this probe a run:
             # ``shape.invitation_badge`` takes the READING dict, while
             # ``shape.messaging_badge`` takes raw HTML. Two shapers over two

@@ -407,6 +407,69 @@ the more dangerous of the two remedies and the one it puts first.
 
 Recorded, not acted on: that message belongs to the guard's owner.
 
+### 7.1 THE ROW UNBLOCKS A SHIPPED REFUSAL ONE BADGE OVER -- and the two disagree
+
+The brief said this row mattered beyond itself. Here is the concrete site
+rather than the claim.
+
+`server.py` already contains a connections-cost block that states its own
+unblocking condition verbatim:
+
+> `what_would_prove_it`: "one call made while the badge is non-zero."
+
+That is **exactly** what `measurability()` computes, one badge over. So the
+function generalises to the invitation badge with no new code, and the same
+live run answers both. Measured 19:16:58, same page, same instant:
+
+    invitation badge     state=read   counted=1   pending=0
+    notifications badge  state=read   counted=1   unread=2
+
+    -> connections cost : NOT answerable today
+    -> notify cost      : ANSWERABLE today
+
+**The two siblings disagree, and that disagreement is the strongest evidence
+available that the precondition is real.** Had both read the same, nothing
+would distinguish `measurability()` from a constant. One reads zero and one
+reads two on the same nav in the same instant, so the function is tracking the
+account rather than reporting its own shape.
+
+It is also the three-state contract paying for itself live: the invitation
+badge returned `state=read, pending=0` -- **a genuine zero, positively
+distinguished from unreadable**, which is the single distinction this whole
+module exists to preserve and the one a two-state answer would have destroyed.
+
+The consequence for the connections row is the honest one and it is not a
+retirement: **its cost is unmeasurable TODAY and reversibly so.** It becomes
+measurable the day one invitation arrives. Anyone reading that block's
+`proven: False` as a settled fact about LinkedIn is making the error this
+document is about.
+
+### AND A TREE INCIDENT, because it is a measurement and not a complaint
+
+**Both edits in this section were written to disk, exercised, and then
+reverted by something outside this wave.** The sequence is dated and the
+ordering is what carries it:
+
+    19:16:58  the probe RAN with the pending-count edit and printed
+              `pending=0` -- so the edit was on disk and executing
+    19:18:0x  `tests/...` 269 passed, taken after those edits
+    19:18:4x  `git status` on both files: EMPTY. Byte-identical to HEAD.
+              `grep -c "pending="` on the probe: 0
+
+I did not revert them, and no command of mine touches the working tree that
+way. Ten waves share this checkout, and a `git checkout -- .`, `git restore`
+or `git stash` run by any of them discards every other wave's uncommitted
+work silently and without a conflict.
+
+**The lesson is not "commit sooner" -- it is that the standing staging rules
+do not cover this class.** `--only`, staging by name and reading the staged
+diff all protect a COMMIT from a neighbour's content. **Nothing in that set
+protects UNCOMMITTED CONTENT FROM A NEIGHBOUR'S TREE-WIDE COMMAND.** The
+window here was about ninety seconds and the loss was total and silent; the
+only reason it was caught is that `git add` staged nothing and the zero looked
+wrong. **A `git add` that stages nothing is a signal, not a no-op** -- had I
+read that as "already committed" the section would simply have vanished.
+
 ### And a false positive of my own, kept because it is the day's disease in miniature
 
 My first AI-attribution check reported **1 hit on every one of my three
