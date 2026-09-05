@@ -1239,6 +1239,17 @@ to other waves who deliberately flagged rather than took them, and taking
 another wave's flagged subtraction is how a number acquires an author who never
 agreed to it.
 
+**CORRECTED BY:** `_audit/2026-09-05-census-recounted.md` -- the section 11 edit was applied and the census recounted from the files: it returns 370, not 372 or 353, and the share is 49.0% rather than 46.8%.
+
+Two corrections to this table, both in the same direction: the
+409 basis was already 407 in the files before this pass, because `N 118` (row 5
+above, listed as landed and never folded) and `P G7` (moved GAP to
+COVERED-PROVEN this afternoon, after this table was written) had both left; and
+353 subtracts nineteen A1 movements the census files have never carried, so it
+is a ledger figure the census cannot return. Folding everything gives 351, and
+the 350 floor above is one row high for the `P G7` reason. **The share is
+370/755 = 49.0%, not 46.8%.**
+
 **Row 4 is worth its own sentence because it runs the other way.** The ledger's
 section 7 says the double-count is *"the only direction of error I found in the
 total"*. It is not: one of A1's eight subtractions was made on an address
@@ -1561,3 +1572,14 @@ claim about what the census WOULD say, not about what it does say. **A re-count
 taken today still returns the old figure and would be right to.** That is not a
 hedge on the rulings -- they stand on their reasons -- it is a statement about
 where they currently live.
+
+**CORRECTED BY:** `_audit/2026-09-05-census-recounted.md` -- the edit IS made, at commit 990bbd3, and the recount returns 370 rather than the 372 predicted here, because two rows had already left GAP in the files.
+
+**THE EDIT IS MADE**, exactly as written above: 37 rows moved, the five
+handed-back rows untouched and asserted so, +37 / -37 across the four files. The
+paragraph above is now history rather than a live caveat. **The recount does not
+return 372.** It returns **370**, because two rows had already left GAP in the
+files and neither was in any ledger -- and it found a third, `N 132`, which is
+still GAP in its own prose and invisible to every counter, because its state cell
+was replaced with a sentence today. The rulings themselves stand unchanged; the
+arithmetic they were quoted with does not.

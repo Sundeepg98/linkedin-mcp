@@ -347,6 +347,18 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "correction block at its line 3436, so a reader who starts at that "
         "claim is not stranded, which is the harm this file is written against"
     ),
+    ("jobs.md", "2026-09-05-decide-retire-rulings.md"): (
+        "THE ARROW POINTS THE OTHER WAY: the census row is APPLYING the "
+        "ruling, not correcting it. Row J 17 retires on DEVICE-GEOLOCATION and "
+        "restates the ruling's own warning -- that the row's original reason "
+        "('needs browser geolocation permission') is false, because this "
+        "server drives Chrome over CDP and CDP can override geolocation. The "
+        "thing corrected is jobs.md's OWN earlier cell text, replaced in the "
+        "same commit that added the citation, so there is no second document "
+        "left holding a stale claim for a back-pointer to reach. A CORRECTED "
+        "BY: pointer aimed at the rulings document would tell a reader the "
+        "ruling had been refuted by the row that implements it"
+    ),
 }
 
 
