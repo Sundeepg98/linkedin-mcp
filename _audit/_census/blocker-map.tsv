@@ -142,7 +142,7 @@ M C57	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a LinkedIn Event	no committed sou
 M C58	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Attend or leave a LinkedIn Event	no committed source names this row against any blocker
 M C59	LIVE-BROADCAST	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Create or broadcast a LinkedIn Live	both retired, both flipped
 M C60	GROUPS-SURFACE	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L106	GAP	GAP	Access your LinkedIn Groups	PARTIAL -- with N 165 this is 4 of a published 32
-M C61	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a group	no committed source names this row against any blocker
+M C61	GROUPS-SURFACE	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	GAP	GAP	Join a group	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
 M C62	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Withdraw a group membership request	no committed source names this row against any blocker
 M C63	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Leave a group	no committed source names this row against any blocker
 M C64	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Post content in a group feed	no committed source names this row against any blocker
@@ -151,7 +151,7 @@ M C66	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mention group members in a conversation	
 M C67	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit or delete a group post or comment	no committed source names this row against any blocker
 M C68	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Submit a group post for admin approval	no committed source names this row against any blocker
 M C69	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite connections to join a group	no committed source names this row against any blocker
-M C70	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for content within Groups	no committed source names this row against any blocker
+M C70	SEARCH-RESULTS-SURFACE	RECON-DOC	_audit/2026-09-05-groups-surface-measured.md	L213	GAP	GAP	Search for content within Groups	table 5.4 explicitly carves this out of the GROUPS-SURFACE allowlist need: search inside Groups belongs to SEARCH-RESULTS-SURFACE, not this document's own blocker
 M C71	PAID-BOOST	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Boost a post (paid promotion)	sole row, retired, flipped
 M C72	OFF-PLATFORM-WIDGET	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Share a post off LinkedIn	graded DERIVED-WEAK; handed back rather than retired, so nothing acted on it
 M C73	EMBED-SETTING	RECON-DOC	_audit/2026-09-05-settings-tail.md	L225	GAP	GAP	Allow or disallow your posts being embedded	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
@@ -229,12 +229,12 @@ N 53	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View a Page's follower count	no committed
 N 54	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View how many of your connections follow a Page	no committed source names this row against any blocker
 N 55	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Subscribe to a newsletter	no committed source names this row against any blocker
 N 56	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unsubscribe from a newsletter	no committed source names this row against any blocker
-N 57	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the newsletters you subscribe to	no committed source names this row against any blocker
+N 57	NEWSLETTER-SURFACE	RECON-DOC	linkedin_server/readonly.py	L684,L708	GAP	GAP	View the newsletters you subscribe to	"view the newsletters you subscribe to"; filed against the Interests-tab surface, measured dead twice over. Its four neighbours (N 55, N 56, N 58, M C80) are named in the same comment but are contested by other committed sources and excluded here pending adjudication
 N 58	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unsubscribe from newsletter emails while staying subscribed on the feed	no committed source names this row against any blocker
 N 59	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow a hashtag	no committed source names this row against any blocker
 N 60	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow a hashtag	no committed source names this row against any blocker
 N 61	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View your followed hashtags	no committed source names this row against any blocker
-N 63	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a LinkedIn group	no committed source names this row against any blocker
+N 63	GROUPS-SURFACE	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	GAP	GAP	Join a LinkedIn group	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
 N 64	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Leave a LinkedIn group	no committed source names this row against any blocker
 N 76	OFF-PLATFORM-WIDGET	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Copy your personal Follow link for use off LinkedIn	graded DERIVED-WEAK; handed back rather than retired, so nothing acted on it
 N 79	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for a person by keyword or natural-language query	no committed source names this row against any blocker
@@ -289,9 +289,9 @@ N 152	HELP-CENTER-FORM	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-ru
 N 153	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide a network update from your feed	no committed source names this row against any blocker
 N 154	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide a single post from your feed without unfollowing its author	no committed source names this row against any blocker
 N 160	OWNED-BY-A-SIBLING-SLICE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	GAP	GAP	Send, receive and manage message requests	the cost-0 table names the four ids in its own cell
-N 161	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for groups by name or keyword	no committed source names this row against any blocker
+N 161	SEARCH-RESULTS-SURFACE	RECON-DOC	_audit/2026-09-05-groups-surface-measured.md	L213	GAP	GAP	Search for groups by name or keyword	table 5.4 explicitly carves this out of the GROUPS-SURFACE allowlist need: search inside Groups belongs to SEARCH-RESULTS-SURFACE, not this document's own blocker
 N 162	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Browse groups recommended from attributes you share with their members	no committed source names this row against any blocker
-N 163	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Request to join a group	no committed source names this row against any blocker
+N 163	GROUPS-SURFACE	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	GAP	GAP	Request to join a group	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
 N 164	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a group by responding to an invitation from a member or manager	no committed source names this row against any blocker
 N 165	GROUPS-SURFACE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L402	GAP	GAP	View the full member list of a group you belong to	"the only member directory this server could plausibly reach ... (N 165, a group's member list)". PARTIAL -- one of a published 32
 N 166	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a connection invitation to a fellow group member from inside the group	no committed source names this row against any blocker

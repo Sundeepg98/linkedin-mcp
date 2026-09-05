@@ -163,3 +163,26 @@ MISSING-PARAM-MESSAGING	M M34	RECON-DOC	_audit/2026-09-05-routes-already-admitte
 PEOPLE-FOLLOW-LISTS	N 38	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L349	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
 PEOPLE-FOLLOW-LISTS	N 39	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
 PEOPLE-FOLLOW-LISTS	N 40	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
+>
+> CORPUS-SWEEP ADDITIONS, 2026-09-06, wave `blocker-map`. A mechanical scan of
+> every tracked file for (blocker name, row id) co-occurrence, then a
+> proximity-plus-same-paragraph filter to drop cases where a fixed context
+> window merely spans two unrelated nearby claims (measured necessary: the
+> raw scan found 128 apparent CONTRADICTS against the committed map, and the
+> filter cut that to 22 -- the rest were a blocker's name sitting a few lines
+> from a DIFFERENT claim's ids, not a real assignment), then every surviving
+> candidate read by hand before being added here. Six survived that reading.
+>
+> Full raw evidence, including everything this filter and this reading
+> rejected, lives in `_audit/_scratch/_blocker-rowid-evidence.tsv`
+> (gitignored, not committed -- working material, not a source). Class is
+> RECON-DOC throughout: none of these six is the 2026-09-03 ledger itself,
+> and no commit was found that acted on any of them by changing a row's
+> state.
+>
+GROUPS-SURFACE	M C61	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
+GROUPS-SURFACE	N 63	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
+GROUPS-SURFACE	N 163	RECON-DOC	scripts/_probe_group_row_affordances.py	L36	the five suggestion rows have no join control; the join rows are N 63, N 163, M C61 -- corroborated independently at _audit/2026-09-05-groups-surface-measured.md:213, table 5.4
+NEWSLETTER-SURFACE	N 57	RECON-DOC	linkedin_server/readonly.py	L684,L708	"view the newsletters you subscribe to"; filed against the Interests-tab surface, measured dead twice over. Its four neighbours (N 55, N 56, N 58, M C80) are named in the same comment but are contested by other committed sources and excluded here pending adjudication
+SEARCH-RESULTS-SURFACE	M C70	RECON-DOC	_audit/2026-09-05-groups-surface-measured.md	L213	table 5.4 explicitly carves this out of the GROUPS-SURFACE allowlist need: search inside Groups belongs to SEARCH-RESULTS-SURFACE, not this document's own blocker
+SEARCH-RESULTS-SURFACE	N 161	RECON-DOC	_audit/2026-09-05-groups-surface-measured.md	L213	table 5.4 explicitly carves this out of the GROUPS-SURFACE allowlist need: search inside Groups belongs to SEARCH-RESULTS-SURFACE, not this document's own blocker

@@ -52,9 +52,16 @@ import build_blocker_map as bbm  # noqa: E402
 #: further committed blocker-to-row tables were harvested
 #: (`2026-09-05-settings-tail.md` section 2.3 and
 #: `2026-09-05-routes-already-admitted.md`), then 287 -> 284 when a recall check
-#: on the scan found one row list the equality filter had skipped. Lowering it
-#: is the intended direction and requires no ceremony; raising it needs a reason.
-UNASSIGNED_CEILING = 284
+#: on the scan found one row list the equality filter had skipped, then
+#: 284 -> 278 from a whole-tracked-corpus scan (not ledger-and-amendments only)
+#: whose raw 128-CONTRADICTS / 19-NEW output was cut by a proximity-plus-same-
+#: paragraph filter to 22 and 6 respectively, then each of the 6 survivors read
+#: by hand before being added -- all six RECON-DOC, none the ledger itself
+#: (GROUPS-SURFACE M C61/N 63/N 163, SEARCH-RESULTS-SURFACE M C70/N 161,
+#: NEWSLETTER-SURFACE N 57). The 22 refined CONTRADICTS were left for a person,
+#: not absorbed. Lowering it is the intended direction and requires no
+#: ceremony; raising it needs a reason.
+UNASSIGNED_CEILING = 278
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
