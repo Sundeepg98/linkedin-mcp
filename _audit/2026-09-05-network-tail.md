@@ -566,6 +566,45 @@ two hours after it was written, and it is a second receipt for the pre-commit
 hook that entry recommends -- a hook would have refused the commit at the moment
 it was made, instead of leaving it to a neighbour committing two minutes later.
 
+### AND THEN THE DISK WENT GREEN, WHICH IS NOT THE SAME AS RESOLVED
+
+    ~18:59  sweep FAIL: 1 hit  across 332 tracked files
+    ~19:09  sweep PASS: 0 hits across 333 tracked files
+
+Somebody fixed the working-tree copy in that window. **That is the correct
+remedy in a shared tree -- a follow-up commit, not a rewrite -- and it settles
+nothing about what a push would publish.** The file has six commits and grew
+from 22483 to 29800 bytes across them, so the fix is later than `f8e706c` and
+the earlier blobs are untouched. This repo's own rule: *a clean working tree
+says nothing about history; to make a claim about what a push would publish,
+sweep the BLOBS.*
+
+**I TRIED, MY INSTRUMENT WAS BROKEN, AND I AM CLAIMING NO READING.** I wrote an
+ad-hoc blob sweeper that imported the shipped `load_wordlist()` and then
+extracted the values from it myself. It printed:
+
+    sweeping blobs with 0 spellings
+      916d013 ... classes hit: NONE      (and five more, all NONE)
+
+**Zero spellings. An empty needle set matches nothing, and its `NONE` is not a
+result.** I am recording the broken output rather than deleting it, because six
+`NONE` lines read as an all-clear to anyone who did not read the first line --
+which is the precise shape this repo keeps catching.
+
+**This is the THIRD recorded instance of one specific error, and the remedy was
+already written down before I made it.** The lead built its own exact-value
+check twice on this date and both were broken; only the attempt that used the
+shipped code found the real hits, and the rule extracted from that was: *when a
+repo ships an instrument, IMPORT IT -- do not reimplement it to point at a
+different corpus.* I reimplemented it anyway, from the same motive (wanting the
+sweep aimed at blobs rather than at disk) and with the same outcome. **A rule
+that has now failed to prevent its own violation three times is a missing TOOL,
+not a missing reminder**: the shipped sweep has no blob mode, so everyone who
+needs one writes their own badly. That is the fix worth making.
+
+Honest state, and it must travel with any push decision on that file:
+**DISK GREEN, HISTORY UNREAD.**
+
 ### The single sentence, if only one survives
 
 **Two of my five blockers were costed for a boundary change that measurement
