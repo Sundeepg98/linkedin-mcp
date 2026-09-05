@@ -401,20 +401,66 @@ Six readings, two processes, **no press succeeded in either run**:
 and then 96. **Nothing was pressed and nothing navigated between the paired
 readings**, so none of this is an effect anybody caused.
 
-Section 6.2 called the first run's +13 hydration and that stands, but it
-UNDERSTATED the problem by an order of magnitude, and understating it in the
-reassuring direction is the part worth naming. The honest conclusion is
-stronger and less convenient: **a single census control-count of either
-surface supports nothing.** That reaches `server.py:4034`'s pin of 255 for
+**SUPERSEDED BY SECTION 6.5. The sentence that stood here read: "a single
+census control-count of either surface supports nothing", and a series taken
+twenty minutes later showed the count settling and staying settled.** It is
+kept because the mistake is the instructive part: I drew "never settles" from
+six PAIRED readings, which is exactly the inference a pair cannot support --
+the same shape as the delta-for-presence error I had spent the afternoon
+naming in other people's work. Section 6.2's +13 hydration reading was right
+and my escalation of it was not.
+
+The sentence as it should have read: **a single census control-count of either
+surface supports nothing, BECAUSE OF WHEN IT IS TAKEN and not because the
+quantity is unstable.** That reaches `server.py:4034`'s pin of 255 for
 `profile_edit_intro`, and it reaches the census note at `server.py:4000` that
 the surface *"was read TWICE at 67 controls and twice at 256"* -- which reads
 as two stable states and is equally consistent with two samples of a quantity
 that does not settle.
 
-**What would settle it, and I did not do it:** N readings of one surface in
-one process at spaced intervals, reported as a series. That is one probe run
-and nobody has taken it. I am not asserting the pin is wrong -- I am asserting
-that two readings 2.6x apart mean the pin has never been shown right.
+**What would settle it: N readings of one surface in one process at spaced
+intervals, reported as a series. I said nobody had taken it, then took it.**
+Section 6.5.
+
+### 6.5 -- I TOOK THE SERIES, AND IT REFUTED 6.4. The count settles.
+
+`--series`: one navigation, eight reads, 1500ms apart, same process.
+
+    /in/me/              80  235  235  235  235  235  235  235
+                         min 80   max 235   distinct 2   last three equal
+    /in/me/edit/intro/  252  252  252  252  252  252  252  252
+                         min 252  max 252   distinct 1   last three equal
+    dialogs              4 x8 on the profile, 5 x8 on the editor -- flat
+
+**Both surfaces settle, and one settles after a single read.** Every
+"unstable" number in 6.2 and 6.4 was a FIRST read, taken in the moment after
+navigation while the page was still hydrating. There is no instability. There
+is a reader that does not wait.
+
+**THIS EXPLAINS A BIMODALITY THIS PACKAGE RECORDED AS A MYSTERY.**
+`server.py:4000` notes `profile_edit_intro` *"was read TWICE at 67 controls
+and twice at 256"*, and that has been carried as two states of the surface.
+**They are one state read at two moments** -- 67 is a pre-hydration read and
+256 a settled one. My own runs reproduced exactly that split on the profile
+(80 then 235, seven times 235) without pressing or navigating anything.
+
+**So the remedy is not to distrust the census. It is to make it wait**, and
+the wait has a written stop condition rather than a magic number:
+
+    read until the last three reads agree, then report -- and report the
+    number of reads it took, so a surface that never converges is visible
+    as one rather than silently truncated at a timeout.
+
+That is buildable, cheap, needs no boundary and no ruling, and it retires a
+whole class of "the count moved" reds. It is the single most valuable thing
+this wave found and it was found by taking a measurement I had already written
+down as owed.
+
+**And the pin: today's settled value is 252 against a pinned 255.** Those are
+close and they are not equal, and after the above I will not call a
+three-control gap corroboration in either direction. It is a settled reading
+that disagrees with a settled pin by 3, taken three days later on a profile
+whose content changes.
 
 ### AIM: named is not pressable, and on this page it mostly is not
 

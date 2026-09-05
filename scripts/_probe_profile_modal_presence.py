@@ -403,6 +403,55 @@ async def press_add_section(page) -> dict:
     return {"pressed": pressed, "before": before, "after": after}
 
 
+async def stability_series(page, label: str, address: str, n: int = 8,
+                           gap_ms: int = 1500) -> None:
+    """Read ONE surface N times in ONE process and print the SERIES.
+
+    **THIS EXISTS BECAUSE TWO READINGS ARE NOT A MEASUREMENT AND SIX ARE NOT A
+    SERIES.** Runs 1 and 2 of this probe read the census control count at 67,
+    80, 80, 235 on the profile and 252, 96 on the intro editor, with nothing
+    pressed. That is enough to refuse a pin and not enough to say what the
+    quantity does. A series is: does it converge, does it oscillate, or does it
+    never settle -- three different findings that a pair of samples cannot
+    tell apart.
+
+    ONE NAVIGATION, N READS. Re-navigating each time would measure the LOAD
+    and this asks about the RENDER, which are different questions and the
+    difference is the whole design. Absolute counts, printed one per line, and
+    the summary is min/max/distinct rather than a mean: a mean of an
+    unsettled quantity is a number that looks like an answer.
+    """
+    print("\n" + "=" * 70)
+    print(f"STABILITY SERIES: {label}, {n} reads, one navigation, "
+          f"{gap_ms}ms apart")
+    print("=" * 70)
+    try:
+        landed = await BROWSER.goto(page, address)
+    except Exception as exc:  # noqa: BLE001
+        print(f"  NAVIGATION REFUSED: {type(exc).__name__}")
+        return
+    print(f"  {_relation(landed, address)}")
+    if any(marker in landed for marker in AUTHWALL_MARKERS):
+        print("  AUTHWALL -- nothing was read")
+        return
+    controls: list[int] = []
+    dialogs: list[int] = []
+    for i in range(n):
+        if i:
+            await page.wait_for_timeout(gap_ms)
+        controls.append(int((await read_needles(page)).get("__total", -1)))
+        dialogs.append(int((await read_structural(page)).get("dialogs", -1)))
+        print(f"  read {i + 1:2d}   controls {controls[-1]:5d}   "
+              f"dialogs {dialogs[-1]:3d}")
+    print(f"\n  controls  min {min(controls)}  max {max(controls)}  "
+          f"distinct {len(set(controls))}  last-three-equal "
+          f"{len(set(controls[-3:])) == 1}")
+    print(f"  dialogs   min {min(dialogs)}  max {max(dialogs)}  "
+          f"distinct {len(set(dialogs))}")
+    print("  A settled quantity ends with its last three reads equal. That is "
+          "the only claim this series makes, and it is checkable above.")
+
+
 @contextlib.asynccontextmanager
 async def own_tab():
     """``BROWSER.session()`` plus the close nobody does.
@@ -437,6 +486,11 @@ async def main() -> int:
             return 0 if detector_ok else 1
         if not detector_ok:
             return 1
+        if "--series" in sys.argv:
+            await stability_series(page, "self_profile", SELF_PROFILE_URL)
+            await stability_series(page, "intro_editor",
+                                   SELF_PROFILE_EDIT_INTRO_URL)
+            return 0
         await read_surface(page, "self_profile", SELF_PROFILE_URL)
         await press_add_section(page)
         await read_surface(page, "intro_editor", SELF_PROFILE_EDIT_INTRO_URL)
