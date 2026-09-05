@@ -367,6 +367,17 @@ ruling inside it: **posting in a group is a second broadcast route with a
 different audience, and it should be treated as `publish_post`'s equal in risk,
 not a lesser case.**
 
+**CORRECTED BY:** `_audit/2026-09-05-groups-events-precondition.md` -- the zero-groups possibility is closed by measurement; he belongs to five and these 32 rows stand.
+
+This entry, and the costed proposal that grew out of it, treat "he belongs to
+zero groups" as live -- an answer that would make 29 of these 32 rows
+unreachable in principle and leave a three-row blocker. Measured 2026-09-05 and
+it is not the case: five distinct groups on his own Groups page, disjoint from
+the five that page calls suggestions, each carrying a per-row management
+control the suggestion rows lack. **The 32 rows stand.** The same document
+files a MEASURED-ABSENT finding against the Events half, where the assumption
+did NOT survive: there is no "events you are registered for" surface at all.
+
 **5. `COMPANY-PAGE-SURFACE` -- 18 rows, and it pays a debt.** `job_detail`
 already returns a company Page url and cannot follow it. Thirteen of the 18 are
 reads. **It also closes the slug-versus-numeric-id gap behind

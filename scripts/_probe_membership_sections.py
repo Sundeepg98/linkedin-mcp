@@ -86,6 +86,16 @@ HEADING = re.compile(
 #: A heading pattern that cannot match anything. The must-stay-silent control.
 IMPOSSIBLE_HEADING = re.compile(r"<h9\b[^>]*>(.*?)</h9>", re.IGNORECASE)
 
+#: Accessible names, for the second signal. Bounded length: a genuine control
+#: label is short, and an unbounded capture would swallow markup.
+LABEL = re.compile(r'aria-label="([^"]{1,120})"')
+
+#: How far after an anchor a control still counts as belonging to its row.
+#: 1500 and 3000 were both measured on the groups capture and gave the SAME
+#: split, so the answer does not depend on the window -- which is what makes
+#: it a reading rather than an artefact of a number somebody picked.
+LABEL_WINDOW = 1500
+
 TAG = re.compile(r"<[^>]+>")
 WS = re.compile(r"\s+")
 
@@ -119,6 +129,9 @@ def _analyse(name: str, path: Path, anchor_pattern: str, expected: int) -> bool:
         if text:
             headings.append((match.start(), text))
     print(f"    headings found: {len(headings)}")
+
+    labels = [(m.start(), m.group(1)) for m in LABEL.finditer(html)]
+    print(f"    aria-labels in document: {len(labels)}")
 
     silent = len(IMPOSSIBLE_HEADING.findall(html))
     print(f"    CONTROL must stay silent: {silent} "
@@ -165,6 +178,44 @@ def _analyse(name: str, path: Path, anchor_pattern: str, expected: int) -> bool:
             common = set(per_section[keys[first]]) & set(per_section[keys[second]])
             print(f"        {len(common):>3}  {keys[first]!r} & "
                   f"{keys[second]!r}")
+
+    # THE SECOND SIGNAL, and it is independent of the heading. A row for a
+    # group he BELONGS TO carries a per-row management control; a suggestion
+    # does not have one until he interacts with it. So the presence or absence
+    # of a control near each anchor is a structural fact that either agrees
+    # with the heading reading or contradicts it -- and one signal agreeing
+    # with itself is not evidence, while two independent ones agreeing is.
+    #
+    # Labels pass the SAME two rules as headings, with the label's own count.
+    label_tally: dict[str, int] = {}
+    for _offset, label in labels:
+        label_tally[label] = label_tally.get(label, 0) + 1
+
+    near: dict[str, dict[str, int]] = {}
+    for offset, _identifier in anchors:
+        previous = [h for h in headings if h[0] < offset]
+        if not previous:
+            continue
+        text = previous[-1][1]
+        key = _safe(text, tally.get(text, 1))
+        for label_offset, label in labels:
+            if offset < label_offset <= offset + LABEL_WINDOW:
+                safe = _safe(label, label_tally.get(label, 1))
+                near.setdefault(key, {})
+                near[key][safe] = near[key].get(safe, 0) + 1
+
+    print(f"    CONTROLS WITHIN {LABEL_WINDOW} CHARS AFTER AN ANCHOR "
+          "(labels shaped and count-redacted):")
+    for key in sorted(per_section, key=lambda k: -len(per_section[k])):
+        found = near.get(key) or {}
+        if not found:
+            print(f"        {key!r}: NONE")
+            continue
+        print(f"        {key!r}:")
+        for label, count in sorted(
+            found.items(), key=lambda item: (-item[1], item[0])
+        )[:6]:
+            print(f"            {count:>3}  {label!r}")
 
     ok = len(anchors) == expected
     print(f"    CONTROL against the census: parsed {len(anchors)}, census "

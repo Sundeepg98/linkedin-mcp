@@ -1415,3 +1415,217 @@ consideration changed the code. `tests/test_membership_row.py` now rebuilds the
 leaky first version from the shared predicate and asserts it still leaks, so if
 that predicate ever learns the bare-token shape the decision is revisited
 deliberately instead of outliving its reason.
+
+## 8. The groups/events precondition wave, 2026-09-05 (second entry)
+
+**APPENDED, not inserted.** Three instruments from the run that answered the
+precondition. Section 7 above holds the two written before the browser freed;
+these are the three the live read produced, and each is here for a different
+reason.
+
+### 8.1 A FAILED CHEAP ROUTE, KEPT RATHER THAN DELETED
+
+`read_surface_census` returns a CONTAINER per control. If a member's own groups
+and LinkedIn's suggestions sat in different containers, the split would fall out
+with no name ever crossing -- the cheapest possible answer, and the first thing
+to try.
+
+**MEASURED: it does not.** 10 of 10 group-marked controls and 54 of 54
+event-marked controls report `container: none`, one distinct container each.
+
+**THIS IS AN INSTRUMENT AND NOT A NOTE.** It is in
+`scripts/_probe_groups_events_capture.py`, it runs on every invocation, and it
+prints the container tally whether or not it separates anything. A negative that
+saves the next person the same hour is worth its lines, and a negative kept only
+in prose is one somebody re-derives.
+
+Its control is the dark-mode surface at 20 controls, read in the same session.
+A container tally from a page that had not arrived would be a fact about the
+run.
+
+**AND IT REFUSES TO RUN IN LAUNCH MODE.** `LINKEDIN_CDP_ATTACH=1` is asserted
+before any session is opened, because a launch-mode session would open a second
+Chrome on the operator's real profile. The refusal was SHOWN FIRING before the
+real run rather than assumed to work.
+
+### 8.2 THE RELATIVE-HREF DEFECT, AND WHY IT IS THE THIRD OF ITS KIND THIS WEEK
+
+`scripts/_probe_membership_sections.py` first matched anchors with an ABSOLUTE
+pattern -- `linkedin\.com/groups/...`. On the real captures that found **5 of
+the 10 group links and ZERO of the 54 event links**, because both pages write
+RELATIVE hrefs.
+
+**THAT EXACT HAZARD IS DOCUMENTED IN THIS PACKAGE, AT ITS OWN SITE.**
+`census_href_identifies_entity` explains in its body why it uses CONTAINMENT
+rather than `startswith`, and names the measurement behind it: LinkedIn writes
+member links both ways on one page, so an anchored check caught the relative
+form and let the absolute one through.
+
+**Reading that comment did not prevent the same mistake on two more surfaces.**
+What caught it was the control. This is the third instance this week of
+documentation losing to a control -- the others being the `<opaque>`
+half-applied-fix note, which failed to prevent the same error on two consecutive
+days, and the `--stat` warning in the push-freeze file.
+
+**THE ENTRY IS THEREFORE NOT "USE CONTAINMENT".** It is: a hazard that has
+already been measured once and written down at its own site will still arrive in
+the next instrument, so the next instrument needs a CONTROL rather than a
+reader who has read the comment.
+
+### 8.3 THE CROSS-INSTRUMENT CONTROL, WHICH IS THE PATTERN TO COPY
+
+`_probe_membership_sections.py` parses HTML with regex. `read_surface_census`
+walks the live DOM. **Two different instruments over one page**, so their
+anchor totals must agree:
+
+    groups   parsed 10, census measured 10   AGREE
+    events   parsed 54, census measured 54   AGREE
+
+On the first run they did not agree -- 5 against 10, and 0 against 54 -- and the
+probe printed **THE TALLIES ABOVE ARE VOID** and returned 1, rather than
+printing a plausible section split that happened to be built from half the data.
+
+**THAT IS THE PART WORTH COPYING.** A 5-of-10 result is not obviously wrong: it
+would have produced a clean-looking table with two sections and a sensible
+story. The only thing standing between that table and this register was a number
+taken by a different instrument in the same session.
+
+**THE SECOND CONTROL RUNS THE OTHER WAY** -- an `<h9>` heading pattern that
+cannot match anything must find nothing, or the matcher is over-broad rather
+than the page rich. Both directions, both on every run.
+
+**AND ITS REDACTIONS ARE FED A REAL COUNT.** Headings and control labels pass
+`census_shape` and then `census_redact_rare` with the number of times that
+string occurs in the document -- not a guess, not 1. That is the shipped rule
+applied where it is correct, on a path that emits per record, which is the gap
+`shape.membership_row` exists to close elsewhere. It is visible working in the
+output: one events heading came back `<redacted>` and every group name in the
+control labels did.
+
+### 8.4 WHAT THE THREE OF THEM ANSWERED
+
+Two independent signals agreeing: five distinct group identifiers under a
+non-suggestion heading, disjoint from five under a suggestion heading, each
+carrying a per-row management control the suggestion rows lack -- measured at
+two window sizes with the same split.
+
+Recorded in full, with what is MEASURED separated from what is READ, in
+`_audit/2026-09-05-groups-events-precondition.md`.
+
+## 8. The newsletter-surface wave, 2026-09-05
+
+Added by the newsletter-surface wave. **APPENDED, not inserted** -- see this
+file's preamble; find these by NAME.
+
+Three instruments. The RED/GREEN transcript for the two guards is
+`_audit/_scratch/_redproof-newsletter-guards.txt`: four guards, each shown
+GREEN and then shown RED under a planted mutation, in memory, with nothing on
+disk written.
+
+### 8.1 `scripts/_probe_newsletter_routes.py` -- the route table for a blocker whose surfaces are all dead
+
+Twelve candidate addresses through `readonly.assert_read_url`, with three
+must-allow and four must-refuse controls, one of the four refused by a
+SUBSTRING rather than by a missing pattern. **The substring control is the one
+that earns its place**: without it a gate that refuses everything and a gate
+that refuses this family in particular produce the same clean table.
+
+**WHAT IT FOUND THAT THE CENSUS COULD NOT.** Two of the thirteen newsletter
+rows resolve to the SAME address as two others, which is how `M C80` was found
+to duplicate `N 55` + `N 56` and `P L4` to duplicate `M C83`. Neither slice
+flags either pair. **A route table is a duplicate detector; a capability census
+is not, because two rows written from two help articles look different until
+you ask where each one goes.**
+
+**AND IT FOUND A ROW COSTED AGAINST AN ADDRESS IT MAY NOT USE.**
+`/article/new/` is ALLOWED at HEAD and `/article/new/?isNewsletter=true` is
+refused FOR THE QUERY STRING ALONE. So `M C50` "create a newsletter" may need
+no boundary change at all. That is reported as a hypothesis with the read that
+settles it, not as a move -- the same discipline the fourteen-row route audit
+used.
+
+**THE STANDING TRAP IT PRINTS IN ITS OWN OUTPUT: ALLOWED IS NOT SERVED.**
+`/in/me/details/interests/` is on the allowlist, was admitted for this
+blocker's precondition, and REDIRECTS. A route table that did not say so would
+be read as a list of pages.
+
+### 8.2 `linkedin_server.shape.subscription_row` -- the gate that must NOT reuse its sibling's rule
+
+`tests/test_subscription_row.py`, 11 tests, three of them planted mutations.
+
+**THE MUTATION THAT MATTERS IS NOT A DELETION.** It is
+`membership_row`'s own rule -- publish the name as written when the identity
+substitutions leave it unchanged -- applied here. That rule is correct for a
+group and unsafe for a newsletter, and the difference is MEASURED::
+
+    census_substitute("Weekly Notes by Savita Krishnan")
+        -> "Weekly Notes by Savita Krishnan"     UNCHANGED
+
+A person's name carries no urn, no `/in/` path, no possessive and no six-digit
+run, so nothing in that check can see one -- while a newsletter's title and
+slug routinely ARE one. A reader generalising the group gate would write
+exactly this mutation and it would look like a gate doing its job.
+
+**EACH MUTATION'S INPUT WAS CHOSEN FROM THE BRANCH STRUCTURE, NOT FROM THE
+MODEL OF THE RISK**, which is this project's 2026-09-05 law one level down:
+
+* the foreign-marker branch is NOT testable with a bare `/in/<member>/` href --
+  with the branch deleted that input falls through to the newsletter-marker
+  check and is refused THERE, same verdict, different reason, mutation
+  survives. What needs the branch is
+  `/in/<member>/recent-activity/newsletters/<newsletter>/`, a MEMBER'S OWN
+  newsletter tab, which carries both markers at once;
+* the constant-href rule is NOT testable with a plain newsletter href -- it
+  shapes to the constant and the mutation is byte-identical. What needs it is
+  `?authorProfile=<a bare member token>`, which survives the substitutions
+  because `/in/` is the only member shape they know.
+
+**AND THE FINDING IS BIGGER THAN THE GUARD. The same hole is in the group
+gate**: a group named after a person passes `membership_row`'s name check for
+the identical reason. The base rate is lower; the mechanism is the same. Owner
+by artifact -- `shape.membership_row`, `tests/test_membership_row.py` -- is the
+groups-events wave, so it is reported rather than fixed here.
+
+**THE LIMIT IS ASSERTED IN THE SUITE RATHER THAN CONFESSED IN A DOCSTRING.**
+`census_redact_rare` is a CAPITALISED-RUN rule, not a name detector:
+`notes by alex` survives it.
+`test_the_redactor_is_a_caps_run_rule_and_NOT_a_name_detector` pins that, and
+tells a future reader to re-measure and rewrite rather than delete if the floor
+ever rises. This package has no instrument that can decide whether a string is
+a person's name, and that is a finding, not a TODO.
+
+### 8.3 `_audit/_scratch/_probe_newsletter_refreeze_attribution.py` -- a stronger attribution than "it moved"
+
+The variant of the search-appearances removal control that handles the
+MULTI-LINE `re.compile` construct: the sibling probe filters on the call and
+the needle appearing on ONE line, and dropping only the pattern line would
+leave a bare `re.compile()` behind -- a different edit, not a removal. This one
+walks out to the enclosing construct and ASSERTS the shape before deleting
+anything, so a layout change cannot make it silently delete the wrong lines.
+
+**IT PRODUCED THE STRONGEST FORM OF THIS EVIDENCE THIS PROJECT HAS RECORDED:**
+
+    pinned, and live on disk                     a8ea5dcf4f8b3d52
+    without the newsletters root                 6f82ef147356ce5d   COVERED
+    without the Pages sibling                    052961dfb7a8ed83   COVERED
+    CONTROL: without a needle no line carries    a8ea5dcf4f8b3d52   0 lines
+
+The tree MINUS this wave's line hashes to EXACTLY THE PREVIOUSLY PINNED VALUE.
+"A digest that moves when a line is removed covers that line" proves the line
+is in there; this proves it is the ONLY allowlist change in the tree, so no
+neighbour's uncommitted work is riding inside the re-pin. **In a tree several
+waves are writing, that is the difference between an attribution and a
+coincidence.**
+
+### 8.4 A claim NOT made, recorded because the omission is the instrument
+
+Every earlier re-freeze in `tests/test_readonly_boundary_invariant.py` verifies
+its digest under Python 3.13 AND 3.10 before writing it down. **This box has no
+3.10** -- measured, not assumed: the four sibling venvs under `mcp-servers/`
+are all 3.13.14 and there is no `py` launcher. The 3.10 reading exists and is
+CI's (`ubuntu-latest` x 3.10 is a matrix cell), so the entry says ONE
+interpreter and names where the second lives.
+
+Writing "verified under both" would have cost nothing, matched every
+neighbouring entry, and been false. A register whose entries are shown failing
+is worth nothing if its prose is not held to the same bar.
