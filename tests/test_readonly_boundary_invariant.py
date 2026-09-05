@@ -848,11 +848,81 @@ PINNED = (
 #: so the value above is verified under 3.13 only. The 3.10 cell is CI's and
 #: is available on push. Claiming two would be the cheapest false sentence
 #: in this file.
+#:
+#: RE-FROZEN AGAIN 2026-09-05, and ONE digest moved by ONE tuple entry:
+#:
+#:     _ALLOWED_URL_PATTERNS   fa201106ecfce5ef -> 34f364971cf9e81c   31 -> 32
+#:     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
+#:
+#: ONE ANCHORED PATTERN, FOR ONE SURFACE:
+#:
+#:     ^https://www\.linkedin\.com/jobs/alerts/?$
+#:
+#: Census row J37, blocker 36 ``JOB-ALERTS-SURFACE``, which gates seven rows.
+#: This entry buys ONE of them -- the READ -- and the other six are writes
+#: that it deliberately cannot reach.
+#:
+#: THE SPLIT IS THE WHOLE POINT AND THE SHIPPED REFUSAL MEASURED IT. The
+#: previous wave charged this blocker ``allowlist +1, denylist x1``, which
+#: prices one of two costs, once, for a set of addresses that each need both.
+#: ``assert_read_url`` reports, when a forbidden substring bites, whether a
+#: read pattern would have admitted the address anyway. For create, delete
+#: and frequency/channel it says NO READ PATTERN ADMITS THIS ADDRESS EITHER
+#: -- both gates refuse, independently -- so an exemption alone opens none of
+#: them. For the manage page NO SUBSTRING BITES AT ALL, so it costs one
+#: pattern and no exemption. Cheap read, expensive writes, and the boundary
+#: itself is what says so.
+#:
+#: WHAT IT BUYS HIM, because a boundary entry with no consumer is a widening
+#: for its own sake. A job alert is his own saved query and it is how
+#: LinkedIn's matcher decides what to push at him daily. The ``linkedin-jobs``
+#: skill already parses what those alerts DELIVER; nothing in this system can
+#: see what they are CONFIGURED to hunt, so an alert aimed at the wrong stack
+#: or the wrong geography is invisible and every downstream email inherits it.
+#:
+#: **IT IS NOT A FAMILY PATTERN, AND THAT IS PLANTED RATHER THAN PROMISED.**
+#: ``tests/test_job_alerts_read_boundary.py`` compiles the family pattern a
+#: wave would naturally reach for and shows it admitting FOUR addresses that
+#: carry no forbidden substring at all -- an alert detail page, the manage
+#: page with any query, an unconfirmed ``manage/`` spelling, and a ``pause``
+#: VERB. Pausing an alert changes a value the account holds: it is a WRITE
+#: defended today by nothing but the absence of a rule, which is the
+#: ``close-account`` shape arriving on a second root.
+#:
+#: THE MUTATION WAS RUN IN BOTH DIRECTIONS, because a test that passes on its
+#: first run has not been shown to fail. Removing the new entry from the
+#: roster in memory kills 3 of the 15 tests; substituting the FAMILY pattern
+#: for it kills 8. The eighth is the informative one:
+#: ``test_the_shipped_refusal_says_BOTH_gates_refuse_each_write`` goes red,
+#: because under a family pattern the three write addresses stop being
+#: refused by both gates and become refused by one -- a single exemption away
+#: from opening. The 12 that survive removal survive CORRECTLY: they assert
+#: what the entry did not buy, which is true with or without it.
+#:
+#: ATTRIBUTION: the tree MINUS this wave's one line hashes to exactly
+#: ``fa201106ecfce5ef``, the value this line replaces. Controls beside it --
+#: a needle no line carries drops zero lines and moves nothing, and dropping
+#: a PRE-EXISTING entry lands on ``1d679b9ca1004849``, neither pin.
+#:
+#: AND THE INSTRUMENT IS TRACKED THIS TIME. The previous re-freeze recorded
+#: that its attribution probe lived under ``_audit/_scratch/``, is gitignored,
+#: and therefore **does not survive a clone** -- so the comment had to carry
+#: the evidence. This one is ``scripts/_probe_boundary_line_attribution.py``,
+#: it takes the needle and the expected old digest as arguments, it IMPORTS
+#: ``ast_digest`` from this file rather than reimplementing it, and it runs
+#: both controls before it will print a measurement. The next re-freeze can
+#: re-run it instead of trusting this paragraph.
+#:
+#: ONE INTERPRETER, 3.13.14. ``_ALLOWED_URL_PATTERNS`` is a VALUE digest,
+#: which this file's ``_literal`` docstring establishes as
+#: interpreter-independent; ``<functions>`` -- the one digest that has split
+#: along the interpreter matrix -- did not move, so the 3.10 cell has nothing
+#: new to disagree about. CI runs that cell on push.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "fa201106ecfce5ef",
+    "_ALLOWED_URL_PATTERNS": "34f364971cf9e81c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1287,7 +1357,12 @@ DENYLISTS_AT_A76FE32 = {
     # THE THREE OTHER ENTRIES IN THIS DICT ARE UNTOUCHED, and that is the half
     # of it worth reading: a shortened forbidden list, a detector removed from
     # the scanner or a dropped JS token would all still fail here.
-    "_ALLOWED_URL_PATTERNS": "fa201106ecfce5ef",
+    #
+    # UPDATED AGAIN 2026-09-05, and for the same reason once more: the READ
+    # boundary admitted the job-alerts manage page, one anchored pattern, and
+    # THE WRITE STILL DID NOT TOUCH THIS. Said here rather than changed in
+    # silence, because a value updated quietly is a check quietly retired.
+    "_ALLOWED_URL_PATTERNS": "34f364971cf9e81c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

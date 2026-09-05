@@ -1008,6 +1008,58 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # NO QUERY AND NO SUB-PATH. Nothing in this package builds either, and a
     # pattern that accepts a query accepts whatever a caller appends.
     re.compile(r"^https://www\.linkedin\.com/jobs/collections/recommended/?$"),
+    # THE JOB-ALERTS MANAGE PAGE, AND NOTHING ELSE UNDER THAT ROOT. Admitted
+    # 2026-09-05, census row J37, blocker 36 ``JOB-ALERTS-SURFACE``.
+    #
+    # WHAT IT BUYS, and it is the reason this is the cheapest useful entry on
+    # the job surfaces. A job alert is HIS OWN SAVED QUERY, and it is how
+    # LinkedIn's matcher decides what to push at him every day. The
+    # ``linkedin-jobs`` skill already parses what those alerts DELIVER into
+    # his inbox -- it cannot see what they are CONFIGURED to hunt. So nothing
+    # in this system can currently tell him an alert is aimed at the wrong
+    # stack or the wrong geography, and every downstream email inherits that.
+    # One page load answers how many alerts exist, what each searches for and
+    # where each is pinned.
+    #
+    # THE RULING, ON THE CAUSE RATHER THAN ON A FEELING. This boundary's
+    # sharpest refusal is about member profiles, and its stated cause is that
+    # loading one leaves THEM a durable record. An alert list names no member,
+    # emits no view receipt, and has no third party at the other end. It is
+    # put through the same three-part test the settings INDEX was put through
+    # on 2026-08-30 and passed on: it consumes no unread badge, changes no
+    # value the account holds, and is observable by nobody else.
+    #
+    # THE WRITE HALF IS NOT BOUGHT AND CANNOT BE REACHED FROM HERE, measured
+    # rather than promised. Create, delete and frequency/channel are each
+    # refused by ``_FORBIDDEN_URL_SUBSTRINGS`` -- ``/create``, ``/delete``,
+    # ``/settings/`` and the bare ``settings`` -- which is checked BEFORE this
+    # list and is not shortened for a write. The shipped refusal reports both
+    # gates, and for all three it says BOTH refuse. So this entry cannot
+    # become a back door to them even if the shape below is later read wrong.
+    #
+    # AND THE FAMILY IS NOT BOUGHT, WHICH IS THE WHOLE DISCIPLINE OF THIS
+    # ENTRY. ``scripts/_probe_alerts_family_pattern.py`` plants
+    # ``^https://www\.linkedin\.com/jobs/alerts/.*$`` against a COPY of this
+    # roster and measures what it opens: of 11 candidate spellings it admits
+    # 10, and FOUR of those carry no forbidden substring at all -- an alert
+    # detail page, the manage page carrying any query, an unconfirmed
+    # ``manage/`` spelling, and a ``pause`` VERB. That last one is the point:
+    # pausing an alert is a WRITE nobody has named, and it is defended today
+    # by nothing but the absence of a rule. That is the same shape as
+    # ``close-account`` under the settings root, and it is why the pattern
+    # below takes no sub-path.
+    #
+    # NO QUERY, NO SUB-PATH, NO ID. Written under the rule the
+    # search-appearances entry states about itself: entries that predate the
+    # rule carry a query group, entries written under it do not, and nothing
+    # here needs one.
+    #
+    # THE ADDRESS IS A HYPOTHESIS AND THIS COMMENT WILL NOT PRETEND
+    # OTHERWISE. Nobody has opened this page. Everything above measures the
+    # GATE; not one byte of it says LinkedIn serves that spelling. If the
+    # first load 404s, the correct response is to CHANGE THIS PATTERN, not to
+    # conclude he has no alerts -- the skill's own inventory says he has five.
+    re.compile(r"^https://www\.linkedin\.com/jobs/alerts/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
