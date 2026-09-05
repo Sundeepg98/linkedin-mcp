@@ -42,9 +42,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import build_blocker_map as bbm  # noqa: E402
 
-#: The count at `78729da`, when `_audit/2026-09-05-blocker-map.md` published it.
-#: It is a CEILING, not a pin: see the module docstring.
-UNASSIGNED_CEILING = 306
+#: A CEILING, not a pin: see the module docstring. Lowered 306 -> 287 when two
+#: further committed blocker-to-row tables were harvested
+#: (`2026-09-05-settings-tail.md` section 2.3 and
+#: `2026-09-05-routes-already-admitted.md`). Lowering it is the intended
+#: direction and requires no ceremony; raising it needs a reason.
+UNASSIGNED_CEILING = 287
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 

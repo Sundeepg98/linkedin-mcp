@@ -1,13 +1,18 @@
-# The row-to-blocker map, rebuilt from committed sources -- and 306 of 409 were never recoverable
+# The row-to-blocker map, rebuilt from committed sources -- and 287 of 409 are named nowhere
 
-**THE HEADLINE IS THE UNASSIGNED COUNT: 306.**
+**THE HEADLINE IS THE UNASSIGNED COUNT: 287.**
 
     409   GAP rows in the frozen census (1c08e5f), enumerated by the shipped instrument
-    103   assigned to a blocker by a COMMITTED source
-    306   UNASSIGNED -- no committed source names them against any blocker
+    122   assigned to a blocker by a COMMITTED source
+    287   UNASSIGNED -- no committed source names them against any blocker
 
-     26   of 97 blockers have at least one recoverable row
-     71   of 97 have NOT ONE
+     38   of 97 blockers have at least one recoverable row
+     59   of 97 have NOT ONE
+
+**The first pass of this document published 306 and 26/71.** A second harvest
+found two further committed blocker-to-row tables (section 9) and moved 19 rows.
+That direction is the point of the artifact and the guard is built to allow it:
+`UNASSIGNED` is a CEILING that may only fall. **287 is the number to quote.**
 
 **`_audit/2026-09-03-linkedin-gap-blockers.md` assigned all 409 GAP rows to 97
 blockers and published only the counts. The classifier that produced the
@@ -21,13 +26,13 @@ re-cost from a miscount.**
 This document does not restore the classifier. It measures how much of its
 output survives in a form anybody can audit, and the answer is a quarter.
 
-**306 is the number to quote.** It bounds how much of the ledger's division was
-ever real, and it is the reason a per-blocker count in this repository should be
+**287 bounds how much of the ledger's division was ever real,** and it is the reason a per-blocker count in this repository should be
 read as an author's assertion rather than as a measurement, unless it appears in
 `_audit/_census/blocker-map.tsv`.
 
-Wave `blocker-map`, 2026-09-05. Four files committed at `d5f6409`. Read-only
-against the census: **no row's STATE was re-adjudicated, and none was edited.**
+Wave `blocker-map`, 2026-09-05. Commits `d5f6409`, `78729da`, `b343795` and the
+commit carrying this revision. Read-only against the census: **no row's STATE was
+re-adjudicated, and none was edited.**
 
 ---
 
@@ -93,8 +98,8 @@ per-slice figures at once.
 | `LEDGER-EXPLICIT` | 56 | the 2026-09-03 ledger's own body names these ids for this blocker. The nearest thing to the lost classifier that exists, because it is the classifier's author writing |
 | `LEDGER-AMENDMENT` | 3 | an amendment appended to that ledger names them |
 | `RECON-CENSUS-COMMITTED` | 34 | RECONSTRUCTED by a later wave, and commit `990bbd3` then acted on it |
-| `RECON-DOC` | 10 | reconstructed in a tracked document; nothing acted on it |
-| **`UNASSIGNED`** | **306** | **no committed source names the row against any blocker** |
+| `RECON-DOC` | 29 | reconstructed in a tracked document; nothing acted on it |
+| **`UNASSIGNED`** | **287** | **no committed source names the row against any blocker** |
 
 **BE PRECISE ABOUT WHAT `RECON-CENSUS-COMMITTED` BUYS, BECAUSE IT LOOKS LIKE
 MORE THAN IT IS.** `_audit/2026-09-05-decide-retire-rulings.md` section 1 says
@@ -123,7 +128,7 @@ post") and `M C52`.
 
 ---
 
-## 4. THE PER-BLOCKER DIFF -- 24 COMPLETE, 2 PARTIAL, 71 ABSENT
+## 4. THE PER-BLOCKER DIFF -- 32 COMPLETE, 6 PARTIAL, 59 ABSENT
 
 The ledger's published counts are **parsed out of the ledger's own tables, never
 retyped**, and the mapper refuses to run if those tables stop totalling 97
@@ -133,18 +138,23 @@ ranked table holds 88 blockers over 359 rows, the cost-0 table 9 over 50, and
 
 | blocker | published | recovered | verdict |
 |---|---:|---:|---|
-| `GROUPS-SURFACE` | 32 | 1 | **PARTIAL** -- 31 rows named nowhere |
+| `GROUPS-SURFACE` | 32 | 4 | **PARTIAL** -- 28 named nowhere |
+| `COMPANY-PAGE-SURFACE` | 18 | 1 | **PARTIAL** -- 17 named nowhere |
+| `EVENTS-SURFACE` | 18 | 1 | **PARTIAL** -- 17 named nowhere |
 | `FILE-UPLOAD-UNSANCTIONED` | 16 | 16 | COMPLETE |
 | `AI-INTERVIEW-PRODUCT` | 14 | 14 | COMPLETE |
 | `FORBIDDEN-CLASS-FIX-LANDED` | 8 | 8 | COMPLETE |
 | `CLOSED-SINCE-CENSUS` | 7 | 7 | COMPLETE |
 | `JOB-SEARCH-PARAMS` | 6 | 6 | COMPLETE |
+| `SERVED-BY-GMAIL-SKILL` | 6 | 2 | **PARTIAL** -- 4 named nowhere |
 | `CONTACT-IMPORT` | 5 | 5 | COMPLETE |
 | `MATCH-DETAILS-COLLAPSED` | 5 | 5 | COMPLETE |
 | `MESSAGING-SETTINGS` | 5 | 5 | COMPLETE |
-| `ANALYTICS-CONTROLS-UNPRESSED` | 4 | 3 | **PARTIAL** -- the fourth row is named nowhere |
+| `OPEN-TO-HIRING-MODAL` | 5 | 1 | **PARTIAL** -- 4 named nowhere |
+| `ANALYTICS-CONTROLS-UNPRESSED` | 4 | 3 | **PARTIAL** -- 1 named nowhere |
 | `GROUP-CHAT-SURFACE` | 4 | 4 | COMPLETE |
 | `OWNED-BY-A-SIBLING-SLICE` | 4 | 4 | COMPLETE |
+| `ENDORSE-SUBSTRING-OVERREACH` | 3 | 3 | COMPLETE |
 | `HASHTAG-EXISTENCE` | 3 | 3 | COMPLETE |
 | `HELP-CENTER-FORM` | 3 | 3 | COMPLETE |
 | `OFF-PLATFORM-WIDGET` | 3 | 3 | COMPLETE |
@@ -152,35 +162,43 @@ ranked table holds 88 blockers over 359 rows, the cost-0 table 9 over 50, and
 | `AI-ASSIST-MESSAGING` | 2 | 2 | COMPLETE |
 | `LIVE-BROADCAST` | 2 | 2 | COMPLETE |
 | `PARSER-ON-A-LOADED-PAGE` | 2 | 2 | COMPLETE |
+| `SEARCH-HISTORY-SURFACE` | 2 | 2 | COMPLETE |
+| `ACTIVITY-VIEW-SETTING` | 1 | 1 | COMPLETE |
 | `COMPANY-ID-RESOLVER` | 1 | 1 | COMPLETE |
 | `DEVICE-GEOLOCATION` | 1 | 1 | COMPLETE |
+| `EMBED-SETTING` | 1 | 1 | COMPLETE |
+| `LEARNING-CERTIFICATE` | 1 | 1 | COMPLETE |
+| `MISSING-PARAM-MESSAGING` | 1 | 1 | COMPLETE |
 | `MOBILE-APP-ONLY` | 1 | 1 | COMPLETE |
 | `PAID-BOOST` | 1 | 1 | COMPLETE |
 | `REPORTING-FLOWS` | 1 | 1 | COMPLETE |
 | `SIGNIN-INTERSTITIAL` | 1 | 1 | COMPLETE |
+| `SKILL-PAGE-SURFACE` | 1 | 1 | COMPLETE |
+| `VIDEO-MEETING-INTEGRATION` | 1 | 1 | COMPLETE |
 | `VOICE-CAPTURE` | 1 | 1 | COMPLETE |
-| **the other 71 blockers** | **306** | **0** | **ABSENT** |
+| **the other 59 blockers** | **287** | **0** | **ABSENT** |
 
-**WHERE EVIDENCE EXISTS, THE LEDGER'S ARITHMETIC WAS RIGHT.** Twenty-four
-blockers recount to exactly their published figure. That is twenty-four
+**WHERE EVIDENCE EXISTS, THE LEDGER'S ARITHMETIC WAS RIGHT.** Thirty-two
+blockers recount to exactly their published figure. That is thirty-two
 independent prior numbers reproduced -- not one total that happens to sum -- and
 it is the strongest thing that can be said for the ledger on the evidence
-available. **It says nothing whatever about the 306.**
+available. **It says nothing whatever about the 287.**
 
-**The two disagreements are both in the safe direction and neither is a
-miscount.** The map recovers 1 of `GROUPS-SURFACE`'s 32 and 3 of
-`ANALYTICS-CONTROLS-UNPRESSED`'s 4; the missing rows are named **nowhere**
-rather than named differently. The mapper asserts on the dangerous direction and
+**All six disagreements are in the safe direction and none is a miscount.** The
+map recovers 4 of `GROUPS-SURFACE`'s 32, 1 of `COMPANY-PAGE-SURFACE`'s 18, 1 of
+`EVENTS-SURFACE`'s 18, 2 of `SERVED-BY-GMAIL-SKILL`'s 6, 1 of
+`OPEN-TO-HIRING-MODAL`'s 5 and 3 of `ANALYTICS-CONTROLS-UNPRESSED`'s 4; the
+missing rows are named **nowhere** rather than named differently. The mapper asserts on the dangerous direction and
 would fail the run: **no blocker may recount HIGHER than its published count**,
 because that would mean a committed source and the ledger disagree about which
 rows are in a set, and that is a finding, not a merge.
 
 **`GROUPS-SURFACE` is the worst case and the most consequential.** It is the
-largest blocker in the census, and one row -- `N 165` -- is all that any
-committed source names. `_audit/2026-09-05-groups-surface-measured.md`
-independently derives **35** and records that *no subset reconciles to 32*. With
-31 of 32 rows unrecoverable, **that disagreement cannot be adjudicated at all.**
-There is no set to compare against; there are two counts and one row id.
+largest blocker in the census and four of its 32 rows are all that any committed
+source names. `_audit/2026-09-05-groups-surface-measured.md` independently
+derives **35** and records that *no subset reconciles to 32*. With 28 of 32 rows
+unrecoverable, **that disagreement still cannot be adjudicated** -- see section
+9.3, which measures where the 32 cannot be coming from.
 
 ---
 
@@ -288,13 +306,15 @@ section 7 says **761 is a floor**, and this is the mechanism by which it grows.
 
 ### 6.3 THE RANKED TABLE IS WHERE THE COUNTS LIVE AND IT CARRIES NO IDS AT ALL
 
-Of the assignments recovered, **56 are `LEDGER-EXPLICIT` and they cluster hard**:
+Of the assignments recovered, **56 are `LEDGER-EXPLICIT` and they cluster hard**
+(that figure did not move in the second harvest -- everything the second pass
+found came from LATER waves, not from the ledger):
 the ledger names rows freely for the blockers it argued about in prose (section
 5's handful, section 6's thirteen-free-reads table, section 2's boundary
 movements, Amendment A13) and names none at all for the 71 it merely ranked.
 **The ranked table is where the counts live and it carries no ids anywhere.**
 
-That is the structural cause of the 306, and it is worth stating as a rule
+That is the structural cause of the 287, and it is worth stating as a rule
 rather than as a complaint: **a table of counts with no key is not a
 classification, it is a summary of one.** The classifier existed -- the ledger
 describes it asserting on itself, raising on double-assignment, closing at
@@ -362,7 +382,7 @@ several writers share, and no instrument that can tell you it moved.
    author's reconstruction that a second person acted on. Both may be wrong
    together, and 3 of those 34 rows are graded `DERIVED-WEAK` or flagged as
    substitution risks in the source itself.
-3. **The 306 is a floor on what is unrecoverable, not a ceiling on what is
+3. **The 287 is a floor on what is unrecoverable, not a ceiling on what is
    wrong.** A row being `LEDGER-EXPLICIT` means the ledger's author named it,
    not that the assignment is right. The assignment rule -- *one blocker per
    row, the earliest binding constraint* -- is a judgment, and this document
@@ -371,7 +391,7 @@ several writers share, and no instrument that can tell you it moved.
    looks wrong (6.1's four summary tables) it is reported.
 5. **Nothing here re-costs any blocker.** `GROUPS-SURFACE` at 32 versus 35 and
    `NEWSLETTER-SURFACE` at 12 versus 13 are left exactly as their waves left
-   them; what this document adds is that 31 of the 32 and all of the 12 are
+   them; what this document adds is that 28 of the 32 and all of the 12 are
    unrecoverable, so those disagreements cannot currently be settled by anyone.
 
 ---
@@ -395,3 +415,116 @@ several writers share, and no instrument that can tell you it moved.
   against `git show HEAD --numstat` (143 + 410 + 205 + 158) and the map re-read
   out of `git show HEAD:_audit/_census/blocker-map.tsv` rather than off disk.
 * Zero AI attribution.
+
+---
+
+## 9. THE SECOND HARVEST -- 306 TO 287, AND THREE THINGS IT TURNED UP
+
+A mechanical scan of the whole tracked corpus was run for every one of the 97
+blocker names alongside census row ids. **Its output is a haystack and was
+treated as one:** 900 passages, and for `FILE-UPLOAD-UNSANCTIONED` -- a 16-row
+blocker -- it captured 111 distinct ids, because a context window catches
+neighbouring ids as readily as the blocker's own. **Folding that into the map
+would have been the exact failure this artifact exists to fix**, so none of it
+was folded in as scanned.
+
+What it was used for is a filter: passages whose id count EQUALS the blocker's
+published row count, over blockers the map had not already recovered. Seventeen
+candidates, each then read in its source and adjudicated by hand.
+
+### 9.1 Two real blocker-to-row tables, and five false positives
+
+| source | what it is | rows taken |
+|---|---|---:|
+| `_audit/2026-09-05-settings-tail.md` section 2.3 | an explicit blocker / row-id / R-W table over the settings family | 7 |
+| `_audit/2026-09-05-routes-already-admitted.md` | a route table naming the blocker per row beside a dated gate reading | 12 |
+
+Both state their own method, which is why they are admitted as `RECON-DOC` and
+not higher: settings-tail says its row lookup was delegated and verified against
+the ranked table's counts and R/W splits -- the same method, and the same
+weakness, as the retirement wave's reconstruction.
+
+**Five of the seventeen were rejected, and the rejections are the more useful
+half.** Four were parser artifacts (`P 1`, `N 1` -- ids scraped out of a table of
+ledger RANK numbers) and one was worse:
+
+> `INVITE-NOTE-PARAM` matched at 1 id, `P H9`, on a sentence reading *"It is the
+> same act as `INVITE-NOTE-PARAM` at twenty times the scale"*.
+
+**That is an ANALOGY, and an exact-count filter cannot tell an analogy from an
+assignment.** Taken, it would have filed a service-review row under an
+invitation-note blocker on the strength of a simile. The filter is a way of
+finding candidates; it is not a way of accepting them.
+
+Two of the twelve route-table rows -- `J 10` and `P N12` -- were ALREADY in the
+map from the ledger itself, and both agree. Small, but it is the only place in
+this exercise where two independent sources name the same row for the same
+blocker.
+
+### 9.2 A ROW CLAIMED BY TWO BLOCKERS, AND BOTH SOURCES ARE COMMITTED
+
+    M C52   "Manage your LinkedIn feed preferences (follow / unfollow topics/hashtags)"
+
+    ledger Amendment A13          keeps it as HASHTAG-EXISTENCE's one remaining row
+    2026-09-05-settings-tail.md   assigns it to FEED-PREFERENCES
+
+**Under the ledger's own rule -- one blocker per row, the earliest binding
+constraint -- exactly one of these is right, and the row's own text supports
+both readings.** Following/unfollowing hashtags is a hashtag capability and a
+feed-preferences capability in the same sentence.
+
+The map keeps it under `HASHTAG-EXISTENCE` because `LEDGER-AMENDMENT` outranks
+`RECON-DOC`, **and the row's `note` field records the dispute rather than
+hiding it.** `FEED-PREFERENCES` therefore recovers zero rows, and if the
+settings reading is right then `HASHTAG-EXISTENCE` is a two-row blocker, not
+three.
+
+**This was found by the double-assignment assertion, not by reading.** The guard
+earned its place within an hour of being written, which is the only argument for
+a guard that counts.
+
+### 9.3 WHERE `GROUPS-SURFACE`'s 32 CANNOT BE COMING FROM
+
+The largest blocker in the census, published at 32 rows, re-derived at 35 by
+`_audit/2026-09-05-groups-surface-measured.md`, which records that *no subset of
+the 35 reconciles to 32*. Four rows are now recovered. A measurement that
+narrows the space:
+
+    network.md section P, "LinkedIn Groups as a people surface"
+      at 1c08e5f:  18 rows, N 161-178, EVERY ONE GAP
+    network.md section Q, "LinkedIn Events as a people surface"
+      at 1c08e5f:  15 rows, N 179-193, EVERY ONE GAP
+
+**So `GROUPS-SURFACE`'s 32 draws at least 14 rows from OUTSIDE the network
+slice's groups section, and `EVENTS-SURFACE`'s 18 draws at least 3 from outside
+its own.** The re-derivation says where from -- `N 63 64`, `M C60-C70`, `M C91`,
+`N A10 A11 A12` -- but it walked a GITIGNORED route table to get there, so that
+half does not survive a clone.
+
+This does not settle 32 against 35. It says the disagreement is not a
+counting slip inside one section: **two documents are drawing a family boundary
+across four slices in two different places, and the boundary is what neither
+publishes.**
+
+### 9.4 THE STRONGEST UNASSIGNED CANDIDATE IN THE MAP, DELIBERATELY LEFT UNASSIGNED
+
+`ANALYTICS-CONTROLS-UNPRESSED` is published at 4 rows and the ledger names three
+(`N 133 134 136`). The profile-viewer analytics family at the freeze is exactly
+five GAP rows -- `N 132 133 134 135 136` -- and `N 135` is filed by name under
+`CLOSED-SINCE-CENSUS` in the same document. **Four remain, and the fourth is
+`N 132`, "Switch between Search appearances and Who viewed your profile" -- a
+control on a page this server already opens, which is precisely what the blocker
+name describes.**
+
+**It is still `UNASSIGNED` in the map, and that is the discipline rather than an
+oversight.** The elimination is mine, no committed source states it, and a
+headline number that means *"recoverable from a committed source"* stops meaning
+anything the moment one good inference is allowed in. It is recorded here so
+whoever owns that row can promote it in one line.
+
+### 9.5 WHAT THE SECOND HARVEST DID NOT CHANGE
+
+`LEDGER-EXPLICIT` stayed at 56. **Every row the second pass recovered came from
+a LATER wave, never from the ledger** -- which is section 6.3's finding arriving
+from a second direction: the ranked table where the counts live has no ids in
+it, and no amount of scanning can find what was never written down.

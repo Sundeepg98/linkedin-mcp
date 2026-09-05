@@ -92,7 +92,7 @@ OWNED-BY-A-SIBLING-SLICE	N 151	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-bl
 OWNED-BY-A-SIBLING-SLICE	N 160	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	the cost-0 table names the four ids in its own cell
 HASHTAG-EXISTENCE	N 194	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1251,L1279	A13 re-files N 194 out of this blocker into SEARCH-RESULTS-SURFACE
 HASHTAG-EXISTENCE	M C11	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1160,L1251	A13 writes it "C 11"; qualification measured -- bare M 11 is absent from the census, M C11 reads "Add a hashtag to a post"
-HASHTAG-EXISTENCE	M C52	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1176,L1251	A13 writes it "C 52"; qualification measured -- bare M 52 is absent from the census
+HASHTAG-EXISTENCE	M C52	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1176,L1251	A13 writes it "C 52"; qualification measured, bare M 52 is absent. CONTESTED: _audit/2026-09-05-settings-tail.md L224 assigns this same row to FEED-PREFERENCES. Kept here because LEDGER-AMENDMENT outranks RECON-DOC, not because the dispute is settled -- the row reads "follow / unfollow topics/hashtags" and supports both readings
 ANALYTICS-CONTROLS-UNPRESSED	N 133	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	"N 136 is therefore filed with N 133 134 under ANALYTICS-CONTROLS-UNPRESSED". PARTIAL -- three of a published four
 ANALYTICS-CONTROLS-UNPRESSED	N 134	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	PARTIAL -- three of a published four; the fourth is named nowhere
 ANALYTICS-CONTROLS-UNPRESSED	N 136	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	PARTIAL -- three of a published four; the fourth is named nowhere
@@ -141,3 +141,22 @@ GROUP-CHAT-SURFACE	M M22	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1
 GROUP-CHAT-SURFACE	M M23	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	as above; qualification measured, bare M 21-M 24 are absent from the census
 GROUP-CHAT-SURFACE	M M24	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	as above; this is the row the source's own risk table says could sit in MESSAGING-SETTINGS instead
 REPORTING-FLOWS	M M38	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	stated inside the MESSAGING-SETTINGS cell: "M 38 by REPORTING-FLOWS (1 row, 1W)"; qualification measured
+SEARCH-HISTORY-SURFACE	N 95	RECON-DOC	_audit/2026-09-05-settings-tail.md	L222	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+SEARCH-HISTORY-SURFACE	N 96	RECON-DOC	_audit/2026-09-05-settings-tail.md	L222	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+ACTIVITY-VIEW-SETTING	P G2	RECON-DOC	_audit/2026-09-05-settings-tail.md	L223	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+EMBED-SETTING	M C73	RECON-DOC	_audit/2026-09-05-settings-tail.md	L225	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+LEARNING-CERTIFICATE	P D29	RECON-DOC	_audit/2026-09-05-settings-tail.md	L226	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+VIDEO-MEETING-INTEGRATION	M M20	RECON-DOC	_audit/2026-09-05-settings-tail.md	L227	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+SKILL-PAGE-SURFACE	N 49	RECON-DOC	_audit/2026-09-05-settings-tail.md	L228	section 2.3 blocker-to-row table; the doc states its own method -- row-level lookup delegated, verified against the ranked table counts and R/W splits
+SERVED-BY-GMAIL-SKILL	J 37	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L97	the route table names the blocker per row alongside a dated gate reading
+SERVED-BY-GMAIL-SKILL	J 38	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L98	the route table names the blocker per row alongside a dated gate reading
+COMPANY-PAGE-SURFACE	J 107	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L100	PARTIAL -- one of a published 18
+OPEN-TO-HIRING-MODAL	P J4	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L101	PARTIAL -- one of a published 5
+ENDORSE-SUBSTRING-OVERREACH	P E6	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L103	the route table names the blocker per row alongside a dated gate reading
+ENDORSE-SUBSTRING-OVERREACH	P E7	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L104	the route table names the blocker per row alongside a dated gate reading
+ENDORSE-SUBSTRING-OVERREACH	N 114	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L105	the route table names the blocker per row alongside a dated gate reading
+GROUPS-SURFACE	M C60	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L106	PARTIAL -- with N 165 this is 4 of a published 32
+GROUPS-SURFACE	N 173	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L107	PARTIAL -- with N 165 this is 4 of a published 32
+GROUPS-SURFACE	N 174	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L108	PARTIAL -- with N 165 this is 4 of a published 32
+EVENTS-SURFACE	N 180	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L109	PARTIAL -- one of a published 18
+MISSING-PARAM-MESSAGING	M M34	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L110	the route table names the blocker per row alongside a dated gate reading
