@@ -115,6 +115,55 @@ about a COUNT, not a third hydration signal -- and folding it in would make
 the measured page refuse instead of answering, which is a reader that cannot
 read the one page it was written for. A test asserts exactly that.
 
+### 2d. THE SECTION SIZE LINKEDIN ANNOUNCES, AND WHERE IT HIDES
+
+`rows` counts what is drawn. LinkedIn writes the section's real size into its
+paging control's ACCESSIBLE NAME and nowhere else -- both paging footers read
+"Show more" as visible text, and only one label carries a number.
+
+    card 0  'Your events'          rows 0   footer 0/0     announced None
+    card 1  a promoted section     rows 3   footer 9/2     announced 50
+    card 2  'Recommended for you'  rows 15  footer 9/2     announced None
+
+**THREE DRAWN AGAINST FIFTY ANNOUNCED.** `announced_total` is an integer or
+`None`, never the label: a number is not a name, and a test asserts no field
+on the record carries the label string. `None` is not zero and is not "no
+control" -- card 2 pages and does not say how far, which `footer_elements`
+separates from card 0, which does not page at all.
+
+**AND THE SUBSTRING-VERSUS-TOKEN DEFECT ARRIVED A SECOND TIME.** The promoted
+card's footer token CONTAINS the ordinary one as a substring and is a
+different token, so a single `~=` footer selector found two cards of three and
+the announced total was invisible. **Caught because the live reading printed
+`footer_found=False` for a card where an offline regex pass had found a
+footer** -- two instruments disagreeing about the same element, which is worth
+more than either agreeing with itself. The first instance of this defect, at
+the row selector, was caught the same way.
+
+### 2e. A DELTA CANNOT ANSWER A QUESTION ABOUT PRESENCE
+
+Every probe run in this repository leaked a tab: `BROWSER.session()` does not
+close its page, and in attach mode it caches one tab per PROCESS. Fleet-wide
+that reached 24 open pages, and `connect_over_cdp` enumerates every target
+during the handshake, so attach began taking 13-17 seconds against a hardcoded
+15-second ceiling. **The slow attach was a symptom of tabs nobody closed, and
+the refusal blamed Chrome for not running.** Both probes here now close their
+page in a `finally`.
+
+The proof first offered for that fix was a page COUNT off `/json/list` either
+side of one run: 25 before, 25 after. Taken three times in a row it read
+
+    t0 26  ->  27  ->  27  ->  30
+
+**with the close in place and firing.** A dozen waves share one Chrome. A
+global count is a delta over a pool this process does not own, so it cannot
+answer a question about THIS tab in either direction -- it could not show the
+close working and could not have shown it failing. The 25/25 reading was a
+coincidence that agreed with me, which is the more dangerous way to be wrong.
+
+`page.is_closed()` is the presence reading, about the one object the run
+created. Three consecutive runs: `True`, `True`, `True`.
+
 ### 2c. THE READER MUST STAY SILENT SOMEWHERE, AND IT IS SHOWN DOING SO LIVE
 
 Every live run now points the events reader at the dark-mode preferences page
