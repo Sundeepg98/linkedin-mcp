@@ -191,6 +191,16 @@ EXPECTED_TOOLS = {
     "linkedin_premium_status",
     "linkedin_newsletter_subscriptions",
     "linkedin_notify_cost_precondition",
+    # THE FORTY-SECOND, 2026-09-05 evening, a READ.
+    # ``linkedin_group_memberships`` wires ``groups_page.read_group_
+    # memberships``, which wires ``groups.py`` -- a shaper that shipped
+    # the same day with no page reader at all, so nothing in the package
+    # could call it. It is the fourth reader in two days to be BUILT and
+    # UNREACHABLE, and the first whose blocker was a RULING rather than a
+    # missing caller: its predecessor declined to wire it because the
+    # groups page carries no counter to certify its own cost. The answer
+    # is that a tool need not certify its cost from the page it loads.
+    "linkedin_group_memberships",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
@@ -404,7 +414,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortyone_tools(tools):
+async def test_the_surface_is_exactly_the_fortytwo_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -483,8 +493,8 @@ async def test_the_surface_is_exactly_the_fortyone_tools(tools):
     even the label reader refuses them, on the operator's ruling that the
     previous value is what makes his own write undoable.
 
-    FORTY-ONE NAMES OVER FORTY CAPABILITIES; the login pair is still the only
-    pair.
+    FORTY-TWO NAMES OVER FORTY-ONE CAPABILITIES; the login pair is still the
+    only pair.
 
     **THAT SENTENCE READ "THIRTY-SIX NAMES OVER THIRTY-FIVE" UNTIL 2026-09-05
     EVENING, THROUGH TWO BUMPS THAT MOVED THE BODY AND NOT THE PROSE.** The
@@ -525,7 +535,14 @@ async def test_the_surface_is_exactly_the_fortyone_tools(tools):
     # edit and 41 after, not counted by hand. Each one wires a reader that
     # already existed and could not be reached; the sibling inventory that
     # named all three is EMPTY as of the same commit.
-    assert len(tools) == 41
+    # FORTY-TWO FROM 2026-09-05 EVENING: linkedin_group_memberships, a
+    # READ. No write was added, which is again the half that matters --
+    # and it is worth saying loudly here because the surface this tool
+    # opens DOES draw a write affordance: every membership row's overflow
+    # menu offers `Leave this group`, measured on all five. This tool
+    # presses nothing, follows no per-row control, and returns counts.
+    # MEASURED off mcp.list_tools(): 41 before the edit and 42 after.
+    assert len(tools) == 42
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -632,7 +649,12 @@ async def test_the_surface_is_exactly_the_fortyone_tools(tools):
     # It does not. It loads the feed, reads a nav badge, and never opens
     # /notifications/; notify_cost.cost_delta -- the half that would need the
     # AFTER reading -- is deliberately left with no caller.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 29
+    #
+    # THIRTY FROM 2026-09-05 EVENING: linkedin_group_memberships is the
+    # thirtieth read and the write side is BYTE-IDENTICAL across the
+    # change, which is the assertion that carries the weight on a tool
+    # whose page draws a leave-this-group control on every row.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 30
 
 
 def test_the_read_that_was_nearly_named_a_write():

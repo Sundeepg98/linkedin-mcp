@@ -159,17 +159,25 @@ reason.
 2026-09-05.** `linkedin_search_appearances` has a row above and this count did
 NOT move to twenty-two, because moving it to twenty-two would make it wrong in
 a new way. Counted off the live registry rather than off this page: the server
-registers 41 tools and this table names 27 of them, so **fourteen registered
+registers 42 tools and this table names 27 of them, so **fifteen registered
 tools have no row here** -- `linkedin_comment_on_item`,
 `linkedin_compose_fields`, `linkedin_connections`,
 `linkedin_profile_editor_values`, `linkedin_events_home`,
 `linkedin_newsletter_subscriptions`, `linkedin_notify_cost_precondition`,
-`linkedin_premium_status`, `linkedin_publish_post`, `linkedin_react_to_item`,
+`linkedin_premium_status`, `linkedin_group_memberships`,
+`linkedin_publish_post`, `linkedin_react_to_item`,
 `linkedin_send_invitation`,
 `linkedin_send_message`, `linkedin_update_profile_field`, and this wave's own
 until the row above was written. Several are writes and are described
 elsewhere in this file; that is a reason some of them are absent, not a reason
 the number twenty-one is right.
+
+**41 -> 42 LATER THE SAME EVENING**, one READ wiring a shaper that shipped
+that day with no page reader at all: `linkedin_group_memberships`. Its
+blocker was a RULING and not a missing caller -- the groups page carries no
+counter that could certify the load's cost, and the answer is that a tool
+need not certify its cost from the page it loads. It brackets the load with
+feed readings and reports the cost as UNMEASURABLE rather than as zero.
 
 **38 -> 41 ON 2026-09-05 EVENING**, three READS wiring readers that were built
 earlier the same day and could not be called: `linkedin_premium_status`,

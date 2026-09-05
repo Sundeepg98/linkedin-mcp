@@ -1,4 +1,4 @@
-"""The tool surface: forty-one tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-two tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -73,15 +73,27 @@ twenty-nine, with the write count untouched at twelve. **BUILT CODE NO TOOL
 REACHES IS NOT CAPABILITY, IT IS A PROMISE**, and three separate waves each
 made the locally correct call not to leave that red in a shared tree.
 
+THE ELEVENTH IS ONE READ, 2026-09-05 evening, and it is the same finding a
+fourth time: ``groups_page.read_group_memberships`` wires ``groups.py``, a
+shaper that shipped earlier the same day with no page reader, so nothing in
+the package could call it. Forty-one -> forty-two and twenty-nine ->
+thirty, with the write count untouched at twelve. **ITS BLOCKER WAS A
+RULING, NOT A MISSING CALLER**: a wave declined to wire it because the
+groups page carries no counter that could certify the load's cost. A tool
+does not have to certify its cost from the page it loads --
+``linkedin_notify_cost_precondition`` reads a badge on the feed to speak
+about the notifications page -- so this one brackets its load with feed
+readings and reports the result as UNMEASURABLE rather than as zero.
+
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-one is ``len(await mcp.list_tools())``,
+than about an intention. Forty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortyone_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_fortytwo_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-NINE read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Twenty-nine plus twelve plus zero is forty-one.
+needs: THIRTY read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Thirty plus twelve plus zero is forty-two.
 
 THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
 the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
@@ -236,6 +248,7 @@ from linkedin_server import (
     cdp_bridge,
     dom,
     events,
+    groups_page,
     jobfilter,
     newsletters,
     notify_cost,
@@ -1863,6 +1876,121 @@ async def linkedin_notify_cost_precondition() -> dict[str, Any]:
                 "pages_loaded": 1,
                 "notifications_page_opened": False,
                 **verdict,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_group_memberships() -> dict[str, Any]:
+    """How many LinkedIn Groups you belong to. COUNTS AND IDS, NEVER A NAME.
+
+    **``memberships.distinct`` IS THE ANSWER AND ``anchors`` IS NOT.** The
+    Groups page draws his memberships and LinkedIn's suggestions with the same
+    kind of anchor, so a reader that sweeps them flat answers TEN to a
+    question whose answer is FIVE -- in the flattering direction, while
+    looking entirely correct. This tool splits the page STRUCTURALLY instead:
+    a control whose nearest anchor-bearing ancestor holds exactly one group
+    anchor marks a MEMBERSHIP row; everything else is a suggestion or the
+    Groups root. No heading is read and no label is read.
+
+    THE SPLIT IS CORROBORATED, NOT ASSERTED. Four instruments sharing no input
+    feature agree on five: the heading boundary, the per-row control, the
+    row-scoped containment walk, and the fact that the per-row menu offers to
+    LEAVE the group. ``agrees_with_corroborated`` travels in the payload so a
+    caller can see at a glance whether this reading joins them -- and a
+    reading of ten is this repository's known defect arriving again, not a new
+    fact about his account.
+
+    NO GROUP NAME CAN LEAVE THIS TOOL, and that is structural rather than
+    filtered. Every href goes straight into ``groups.membership_tally``, which
+    takes no name as a parameter of any function; a non-numeric path segment
+    is refused BECAUSE A SLUG IS A NAME, and a group named after a person gets
+    that person's name in its slug. There is no substitution table here to
+    have got wrong.
+
+    **THREE PAGE LOADS, AND THE THIRD ONE IS THE HONEST PART.** The Groups
+    page's own nav carries NO count-bearing control -- measured: the feed's
+    nav draws a mynetwork link carrying a count and the Groups page's draws
+    two that carry none. So the cost bracket is taken on the FEED at both
+    ends, which costs a navigation back. Bracketing a load with a reading
+    taken on a different page is what ``linkedin_notify_cost_precondition``
+    already does; the page under test not answering for itself is the reason
+    that pattern exists.
+
+    **AND THE COST COMES BACK UNMEASURABLE, WHICH IS A RESULT AND NOT A
+    FAILURE.** Read ``cost.state``:
+
+        degenerate    every readable counter sat at ZERO and stayed there. A
+                      0 -> 0 pair cannot distinguish "consumed nothing" from
+                      "nothing to consume", so THE COST IS UNMEASURABLE
+                      TODAY. It is never reported as a cost of zero
+        unmoved       a counter stood above zero and did not move -- and see
+                      ``cost.certifies``, because it certifies less than it
+                      appears to
+        moved         a counter moved. Something was spent, and it is named
+        uncertified   a reading failed; nothing is said in either direction
+
+    ``cost.certifies`` carries the limit that no future non-zero badge
+    repairs: every counter this package can read is a nav badge for a
+    DIFFERENT surface, and nothing measured establishes that a groups load
+    touches one. **This server holds no instrument known to respond to the
+    event being bracketed**, so even the strongest verdict speaks for those
+    counters and not for this load.
+
+    THIS TOOL WRITES NOTHING. It opens no group, presses nothing on any row,
+    and never follows the per-row controls -- their hrefs meet two forbidden
+    substrings and are refused before the allowlist is consulted.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, FEED_URL)
+            assert_not_authwall(landed, surface="feed")
+            before = {
+                "invitations": shape.invitation_badge(
+                    await dom.read_invitation_badge(page)
+                ),
+                "notifications": notify_cost.notifications_badge(
+                    await notify_cost.read_notifications_badge(page)
+                ),
+            }
+
+            landed = await BROWSER.goto(page, groups_page.GROUPS_URL)
+            assert_not_authwall(landed, surface="groups")
+            reading = await groups_page.read_group_memberships(page)
+            # THE PAGE UNDER TEST, ASKED WHETHER IT CARRIES THE INSTRUMENT.
+            # Reported rather than assumed, so the day LinkedIn draws a badge
+            # here the third navigation below becomes removable ON EVIDENCE.
+            on_page = {
+                "invitations": shape.invitation_badge(
+                    await dom.read_invitation_badge(page)
+                ).get("state"),
+                "notifications": notify_cost.notifications_badge(
+                    await notify_cost.read_notifications_badge(page)
+                ).get("state"),
+            }
+
+            back = await BROWSER.goto(page, FEED_URL)
+            assert_not_authwall(back, surface="feed")
+            after = {
+                "invitations": shape.invitation_badge(
+                    await dom.read_invitation_badge(page)
+                ),
+                "notifications": notify_cost.notifications_badge(
+                    await notify_cost.read_notifications_badge(page)
+                ),
+            }
+
+            return {
+                "ok": True,
+                "redirected": (
+                    landed.rstrip("/")
+                    != groups_page.GROUPS_URL.rstrip("/")
+                ),
+                "pages_loaded": 3,
+                "cost": groups_page.cost_certification(before, after),
+                "counter_states_on_the_groups_page": on_page,
+                **reading,
             }
     except Exception as exc:
         return _error(exc)

@@ -239,4 +239,24 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # ``test_both_rules_reject_the_registry_that_was_actually_measured`` was
     # run against a deliberately wrong pin and against the real one, and it
     # is the count assertion alone that moves.
-    assert len(_tool_names()) == 41
+    #
+    # 42 FROM 2026-09-05, ~22:15 BY THE BOX: linkedin_group_memberships,
+    # a READ, wiring linkedin_server/groups_page.read_group_memberships.
+    # MEASURED off ``mcp.list_tools()``: 41 before the edit and 42 after.
+    #
+    # THE REVIEW MOMENT, USED. A predecessor wave DECLINED to wire
+    # ``groups.py`` on the reasoning that *a groups tool cannot certify
+    # its own cost from the page it loads* -- which is true and one step
+    # short. ``linkedin_notify_cost_precondition``, wired in the bump
+    # above, reads a badge on /feed/ to say something about
+    # /notifications/: bracketing a load with a reading taken ELSEWHERE
+    # is this package's pattern, not a workaround. So this tool loads the
+    # feed, the groups page, and the feed again, and reports the cost as
+    # DEGENERATE -- an honest 'I cannot measure this' rather than a zero.
+    #
+    # AND IT ADDS NOTHING TO ``dom.py``. Not one line. The walk this
+    # reader needed was written as a ``page.evaluate`` in a probe, which
+    # would have forced it into the one module ``_composer_audience_is_
+    # readable`` feature-detects on; it was re-expressed with locators
+    # instead and reproduced the validated split on its first live run.
+    assert len(_tool_names()) == 42
