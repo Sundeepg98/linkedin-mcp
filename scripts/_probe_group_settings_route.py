@@ -198,6 +198,22 @@ async def main() -> int:
         # opens one per run and never closes it.
         if page_ref is not None and not page_ref.is_closed():
             await page_ref.close()
+        # THE PRESENCE READING, NOT A POOL DELTA. Adopted from a sibling wave
+        # that measured the sharper instrument: a page COUNT off /json/list is
+        # a delta over a pool this process does not own, so on a browser a
+        # dozen waves share it cannot answer a question about THIS tab in
+        # EITHER direction. This wave's own proof was a CONTROLLED comparison
+        # -- three runs each way, +3 without the close and 0 with it -- which
+        # is better than a bare pair because it separates the effect from the
+        # noise, and still weaker than this, because it is an aggregate over
+        # other people's tabs and n was three.
+        #
+        # ``is_closed()`` is about the one object this run created and no
+        # neighbour can move it. **A DIRECT PRESENCE READING BEATS A CORRECT
+        # INFERENCE OVER A SHARED POOL**, and taking a peer's better
+        # instrument is cheaper than defending your own adequate one.
+        print("    tab closed:",
+              page_ref.is_closed() if page_ref is not None else "no tab opened")
 
     # ============================================================
     # EVERY FIGURE BELOW IS A ``len()`` OF A LIST, AND THAT IS THE FIX
