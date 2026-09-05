@@ -225,8 +225,22 @@ async def main() -> int:
     print("    and the two nav counters read before and after the load.")
     print(f"    attach mode, port {config.CDP_PORT}.")
 
+    # THE PAGE IS CLOSED IN A ``finally``, AND THIS IS A LEAK THIS FILE
+    # CAUSED. ``BROWSER.session()`` does not close its page: in attach mode it
+    # caches one tab per PROCESS and reuses it, and a probe is a process, so
+    # every run of every probe in this repository left a tab open in the
+    # operator's shared Chrome. Measured fleet-wide today: 120 CDP targets, 24
+    # of them pages, and ``connect_over_cdp`` enumerates all of them during the
+    # handshake -- which is why attaching started taking 13-17 seconds and
+    # failing against a 15-second ceiling. **A slow attach was a symptom of
+    # tabs nobody closed, and the refusal blamed Chrome for not running.**
+    #
+    # THE PAGE, NEVER THE CONTEXT. The context is the operator's own browser
+    # session; closing it closes his window.
+    page = None
     try:
-        async with BROWSER.session() as page:
+        async with BROWSER.session() as opened:
+            page = opened
             start_ok = await _control(page, "START")
             # BEFORE OFF THE FEED'S NAV, the route linkedin_connections and
             # linkedin_new_messages both already take. The preferences page
@@ -258,6 +272,18 @@ async def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
+    finally:
+        # IN A ``finally`` SO A FAILING RUN STILL CLEANS UP -- the runs that
+        # abort are exactly the ones that used to leave a tab behind, so
+        # closing only on the happy path would fix the cheaper half.
+        if page is not None:
+            try:
+                if not page.is_closed():
+                    await page.close()
+                    print("    closed this run's tab.")
+            except Exception as error:  # noqa: BLE001
+                print(f"    could not close this run's tab: "
+                      f"{type(error).__name__}")
 
     print("\n=== VERDICT")
     if not (start_ok and end_ok):

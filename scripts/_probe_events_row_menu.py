@@ -124,8 +124,16 @@ async def main() -> int:
         return 2
 
     print("=== ONE PRESS ON ONE EVENT ROW'S ONLY CONTROL")
+    # THE PAGE IS CLOSED IN A ``finally``. ``BROWSER.session()`` does not
+    # close it -- in attach mode it caches one tab per PROCESS -- so every
+    # probe run left a tab in the operator's shared Chrome. Fleet-wide that
+    # reached 24 open pages, and ``connect_over_cdp`` enumerates every target
+    # during the handshake, which is what pushed attach past its 15-second
+    # ceiling. THE PAGE, NEVER THE CONTEXT: the context is his own session.
+    page = None
     try:
-        async with BROWSER.session() as page:
+        async with BROWSER.session() as opened:
+            page = opened
             landed = await BROWSER.goto(page, EVENTS_URL)
             if "/login" in str(landed) or "/checkpoint" in str(landed):
                 print("    AUTH WALL. Nothing here is a reading.")
@@ -210,6 +218,15 @@ async def main() -> int:
     except Exception as error:  # noqa: BLE001
         print(f"\nRUN ABORTED: {type(error).__name__}: {error}")
         return 1
+    finally:
+        if page is not None:
+            try:
+                if not page.is_closed():
+                    await page.close()
+                    print("    closed this run's tab.")
+            except Exception as error:  # noqa: BLE001
+                print(f"    could not close this run's tab: "
+                      f"{type(error).__name__}")
     return 0
 
 
