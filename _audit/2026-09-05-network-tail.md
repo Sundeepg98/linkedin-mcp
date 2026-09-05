@@ -157,8 +157,44 @@ and incomplete for the writes:**
     [W] /services/page/edit/      REFUSED-FORBIDDEN   matched '/edit/'
     [W] /services/page/reviews/   REFUSED-NO-PATTERN  no forbidden substring; no allowlist pattern
 
-The read is a clean additive `allowlist +1` -- one anchored root, no query
-string. **But two of the ten writes are refused TWICE and eight only once**,
+### CORRECTED, SAME SESSION, ONE COMMIT LATER: `allowlist +1` IS NOT OWED EITHER
+
+The paragraph that stood here read the `+1` off `/services/page/` and called it
+correct. **It is not, and the error is the same one section 1 catches: costing
+a row by its SURFACE when the boundary gates an ADDRESS.**
+
+Row `P H11`, the 1R of this blocker, is *"the `Providing services` section AS
+RENDERED ON THE PROFILE"*. That is not `/services/page/`. It is his own
+profile, and:
+
+    [R] /in/me/                        ALLOWED             clean
+    [R] /in/me/details/services/       REFUSED-NO-PATTERN
+    [R] /services/page/                REFUSED-NO-PATTERN
+
+**`/in/me/` is already admitted and this server already loads it today.** The
+read row costs ZERO allowlist entries. `/services/page/` is a different surface
+serving the ten WRITES, and admitting it buys no read row at all.
+
+**THE RENDER GATE IS UNMEASURED AND I AM NOT CLAIMING THE READ WORKS.** This
+repo has already been bitten: a tabbed category's rows are not in the document
+until its tab is pressed, and the Companies category rendered ZERO on a live
+396909-character profile read while holding at least 20 rows in fixtures. I do
+not know whether the services section renders on a passive profile load, and a
+zero taken without pressing would be a fact about the instrument. **What is
+settled is the boundary; what is open is the render**, and those are different
+claims.
+
+**THIS IS NOW A PATTERN ACROSS TWO OF MY FIVE BLOCKERS AND IT GENERALISES.**
+Row 63's read was already allowed. Row 21's read is already allowed. Both were
+filed with a boundary cost derived from the surface's NAME. The company wave hit
+the same thing from the other side and shipped three rows off an About-card
+inside a posting it was already loading -- *no page load added, no allowlist
+pattern*. **Anyone re-costing this ledger should probe the ADDRESS of every 1R
+row before trusting its `allowlist +N` cell.** On the two I probed, the cell was
+wrong both times, and both times in the direction that makes the work look more
+expensive than it is.
+
+**But two of the ten writes are refused TWICE and eight only once**,
 and that is a real distinction the ledger's single "WriteSpec" cell cannot
 carry: a row refused by an anchored allowlist alone is one loose pattern away
 from reachable, where a row also carrying `/create` or `/edit/` has a second,
@@ -166,9 +202,47 @@ independent gate behind it. The groups/events entry recorded exactly this
 asymmetry for the member roster and called the count the point. It is the point
 here too.
 
-I did not enumerate which of the ten map to which side beyond the four probed.
-That enumeration is owed and is cheap -- it is one more table in the same
-probe.
+Enumerated at close. The ten writes are `P H1`-`P H10`; probing their plausible
+addresses returns REFUSED-NO-PATTERN for every one except the two carrying
+`/create` and `/edit/`. So the split is **2 refused twice, 8 refused once** --
+and the eight are the ones a single loose anchored pattern would reach.
+
+### AND ONE OF THE TEN IS NOT LIKE THE OTHER NINE. `P H9` IS EXCLUDED-RULED.
+
+    P H9  Request service reviews (up to 20 invitations)
+
+The census row flags it in its own note -- *"reaches real people"* -- and
+nobody had joined that to the invitation ruling. **It is the same act as
+`INVITE-NOTE-PARAM` at twenty times the scale**: an outward-facing, irreversible
+request delivered to up to twenty named human beings, composed from something,
+and unrecallable once sent. Every argument in section 5 applies and each one
+applies harder.
+
+The other nine writes change how he presents himself on a page. `P H9` puts a
+message in twenty other people's notifications. **"Design and gate them, fire
+none" is right for nine and is the wrong frame for this one** -- a gate is a
+mechanism for an act somebody intends to perform, and nothing in the record says
+he intends this one.
+
+**RULING: `P H9` is EXCLUDED-RULED, not GAP, on the section 5 ground.**
+`SERVICES-PAGE-SURFACE` costs 11 rows as filed and 10 as ruled: 1R + 9W.
+REOPENER, identical in shape to the invite-note one: he asks for it explicitly,
+with the recipients named. Not "he wants reviews" -- named recipients.
+
+### A THIRD WAVE REACHED THE SAME VERDICT ON A DIFFERENT DENYLIST, INDEPENDENTLY
+
+Observed at close, in this tree, in a sibling wave's commit message on the
+profile-modal blockers: *"THE DENYLIST WAS NOT NARROWED, and declining it is the
+finding"* -- its two candidate entries matched zero of 237 urls across five
+profile captures, so removing them would have traded a live guard for no reach.
+
+**Two waves, two unrelated blockers, both costed for a denylist change, both
+measured it and both declined.** That is not agreement between instruments
+sharing a defect -- the two measurements have nothing in common except the
+ledger column that predicted them. **The `denylist x1` cell has now been wrong
+in every case anyone has actually probed**, which is a claim about the ledger
+rather than about either blocker, and it is worth one pass over that column
+before another wave is dispatched to shorten something.
 
 ---
 
@@ -276,9 +350,13 @@ is committed, so the receiver can RE-TAKE the reading rather than trust it.
 
 **Also not done, and each is cheap:**
 
-* The ten `SERVICES-PAGE-SURFACE` writes are not designed. Four of them are
-  probed; the split of the remaining six between REFUSED-FORBIDDEN and
-  REFUSED-NO-PATTERN is unmeasured.
+* The `SERVICES-PAGE-SURFACE` writes are not designed. Their addresses are now
+  all probed (2 refused twice, 8 once) and `P H9` is ruled out, but no
+  WriteSpec was written for the remaining nine and none was fired.
+* **The services render gate is unmeasured.** I know the boundary admits
+  `/in/me/`; I do not know whether the `Providing services` section is in the
+  document on a passive load. That is one live read and it is the single
+  cheapest thing left in this cluster.
 * No live page was loaded, so **no invitation badge reading was taken** -- there
   was nothing to take one around. I loaded nothing, so nothing moved. That is a
   statement about my actions, not a measurement of the badge, and the
@@ -347,7 +425,7 @@ Recomputed at close from the rows above, not carried forward from the brief.
 |---|---|---|
 | 63 `ENDORSE-SUBSTRING-OVERREACH` | 3 rows, DECIDE, denylist x1 | **denylist x1 NOT OWED.** 1R already ALLOWED -> re-files to BUILD on an admitted address. 2W correctly refused. |
 | 52 `PEOPLE-FOLLOW-LISTS` | 4 rows, BUILD, allowlist +2 denylist x1 | **this is where the overreach lives.** allowlist +2 and exemptions +2 CONFIRMED; **denylist x1 REFUSED** -- exempt, never narrow. Spec written, not applied. |
-| 21 `SERVICES-PAGE-SURFACE` | 11 rows, DECIDE, allowlist +1 | ruling holds. allowlist +1 confirmed for the read. Write split measured on 4 of 10; 6 unmeasured. |
+| 21 `SERVICES-PAGE-SURFACE` | 11 rows, DECIDE, allowlist +1 | reads-are-fine ruling holds. **`allowlist +1` NOT OWED** -- the 1R renders on `/in/me/`, already admitted. **`P H9` EXCLUDED-RULED** (reaches up to 20 real people). 11 rows as filed -> 10 as ruled. Write split: 2 refused twice, 8 once. Render gate UNMEASURED. |
 | 11 `HASHTAG-EXISTENCE` | 3 rows, MEASURE | already re-filed to 1 row by the gap doc. Carries forward MEASURE. Not retired -- see section 4 on which class of claim the evidence reaches. |
 | 60 `INVITE-NOTE-PARAM` | 1 row, DECIDE | **EXCLUDED-RULED.** Reopener: he asks explicitly, with a target named. |
 
