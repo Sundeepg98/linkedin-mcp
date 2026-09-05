@@ -1869,3 +1869,92 @@ is true of `linkedin_server/`; `scripts/mcp_probe.py` is its first counterexampl
 and `scripts/` will accumulate more. Narrowing it costs a list that goes stale
 silently; the coarseness costs a rename. It found a real leak here BY being
 coarse, which settles the trade.
+
+---
+
+## 11. The retire-rulings wave, 2026-09-05
+
+### 11.1 `scripts/_probe_retire_ruling_boundary.py` -- the two gates, reported separately
+
+**WHAT IT IS FOR.** Deciding whether "the boundary refuses this" is EVIDENCE or
+merely TRUE. `readonly.assert_read_url` runs the forbidden-substring loop first
+and raises on the first hit, so every refusal names a substring and stops. This
+probe asks the two questions independently -- does any forbidden substring hit,
+and would any allowlist pattern admit it -- and prints a CLASS per address:
+
+    FORBIDDEN xN  N substrings somebody wrote, each with an argument beside it
+    NO-PATTERN    the default-closed allowlist, which decided nothing here
+
+**WHY THE CLASS IS THE WHOLE INSTRUMENT.** This repository's own rule is that a
+general mechanism which merely happens to block something is a GAP WITH A NAMED
+BLOCKER and may not be laundered into a decision. A verdict of REFUSED cannot
+tell those apart; the class can. Measured over the twelve DECIDE-RETIRE
+capability families: **exactly ONE meets a written substring. Eleven meet
+NO-PATTERN.** So eleven retirement rulings had to stand on the capability rather
+than on the boundary, and the probe is what made that visible instead of
+tempting.
+
+**SHOWN FAILING THREE WAYS** before being leaned on --
+`_audit/_scratch/_redproof_retire_boundary.py`, all three killed:
+
+* empty allowlist -> the must-allow controls fail and the run aborts, exit 1;
+* the substrings covering the settings family removed -> the class falls from
+  FORBIDDEN to NO-PATTERN while the VERDICT stays REFUSED, which is exactly the
+  discrimination claimed;
+* empty forbidden list -> the classifications go from 8 to 0.
+
+**AND IT PRINTS EVERY HIT, NOT THE FIRST, BECAUSE THE MUTATION THAT SURVIVED
+SAID TO.** Mutation 2 originally removed only `/psettings/` and did NOT change
+the classification. The instinct is to enlarge the mutation; the rule is to ask
+which input makes that entry the only thing standing. **None does** -- the bare
+`settings` substring, one of the ten added in the class fix, covers every
+`/psettings/` address too, so the settings family is refused TWICE by two
+independently written entries and no single-entry narrowing frees it. Reporting
+only the first hit is precisely the defect `readonly.py` records having misled
+three readers, committed by the probe written to avoid it. **"Covered twice" is
+a different fact from "covered once" and a first-hit verdict cannot say it.**
+
+**EVERY ADDRESS IS MARKED CITED OR ASSUMED IN THE OUTPUT.** Where no census row
+names a url the probe invents one and says so, because an assumed address proves
+what the boundary does with a SHAPE and cannot prove LinkedIn serves the
+capability at that shape. The blockers ledger declined to invent an address for
+this same family; the marking is how the invention is kept honest rather than
+avoided.
+
+### 11.2 A ruling written against a FAMILY survives a wrong row id; one written against ids does not
+
+Not a script -- a technique, and it is the one that made a whole queue rulable.
+
+The blockers ledger assigned all 409 GAP rows to blockers and published only the
+COUNTS; the row-to-blocker map was never written down and the classifier is not
+on disk. So eleven of twelve row sets had to be reconstructed, and **a wrong row
+id retires the wrong capability silently, into the one state nobody re-opens to
+check.**
+
+The containment: **write the ruling against the capability FAMILY, and carry the
+id list as a marked reconstruction.** Two rulings whose membership was soft were
+written to state their outcome under BOTH readings, and the arithmetic was shown
+identical either way. A blind second reconstruction -- handed the counts and the
+R/W splits and not the answer -- reproduced all twelve sets and named the same
+three one-row substitution risks.
+
+**THE DEFLATION IS PART OF THE ENTRY, and the blind reader wrote it: two readers
+agreeing rules out idiosyncrasy and NOT a shared misreading, because both read
+the same census. And on a one-row blocker an R/W split is a two-bit check**, so
+six of the twelve rest on their capability text being unique in the corpus
+rather than on arithmetic.
+
+### 11.3 A retirement must name the fact that reopens it, or it is a wall
+
+The standing form this wave used, and it is cheap enough to be mandatory: every
+retired row carries a REOPENER concrete enough to check, and each is attributed
+to who can establish it -- LinkedIn shipping something, one capture, one probe
+run, or the operator. Thirteen rulings produced thirteen reopeners, of which
+**three are one capture each and two of those three are the SAME capture**.
+
+The corollary that does the real work: a ruling is scoped to an ACT and states
+what it does NOT reach. Retiring "broadcast a Live" must not retire "read a Live
+event page"; retiring "boost a post" must not retire "read a post's analytics" --
+which in that case is the best value-per-risk read left in its slice. **A
+retirement that quietly walls off its neighbours is the failure mode, and the
+only defence is writing the neighbour down.**
