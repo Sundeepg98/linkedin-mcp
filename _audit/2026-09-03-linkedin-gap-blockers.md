@@ -263,6 +263,17 @@ That correction in full: `C54 C55 C56` sit on the post composer and need no new
 address, while `C76` is a different LinkedIn product whose two candidate
 addresses are both measured refused.
 
+**CORRECTED BY:** `_audit/2026-09-05-settings-tail.md` -- rows 74, 79, 80, 82,
+85, 86 and 87 are queued BUILD ("engineering only, no ruling needed, the shape
+is known") and none of the three clauses holds. A ruling that already ships --
+*"a setting is admitted by name or not at all"*, `server.py`, the operator's --
+governs any of them sitting in the settings family, so their earliest binding
+constraint is a decision and not a pattern. And measured: **not one of those
+rows names an in-product address**, so the "allowlist +1" charged against every
+one of them is not a unit of work but a placeholder for an unknown. Row 32
+(`NOTIFY-COST-UNMEASURED`) is also corrected there: it was never waiting on an
+experiment, it was waiting on an instrument, and that instrument now ships.
+
 **The nine with cost 0 -- nothing to build:**
 
 | blocker | rows | queue | why |
