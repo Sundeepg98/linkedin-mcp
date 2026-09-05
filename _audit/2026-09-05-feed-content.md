@@ -320,6 +320,30 @@ fails over `_relation` copies in six other waves' probe files
 and more). This probe defines no `_relation` at all. It was red before this wave
 touched the tree and is red at the same commit afterwards.
 
+## 6b. ONE NOTE FOR A NEIGHBOUR'S OPEN ROW, SINCE THE OBVIOUS ROUTE DOES NOT WORK
+
+`_TEAM_LEAD_IDENTITY_HIT_JOBS_TAIL.md` leaves an open ask: sweep the six blobs
+of `_audit/2026-09-05-jobs-tail.md` with the SHIPPED instrument, because disk is
+green and history is unread. It suggests extracting blobs to a scratch location
+"the shipped sweep can be pointed at".
+
+**It cannot be pointed at one.** Measured: `scripts/sweep_tracked_for_identity.py`
+builds its corpus from `git ls-files` run in `REPO`, hardwired, and its only
+command-line flag is `--show`. There is no path or root argument. So aiming it
+at extracted blobs needs either a change to the shipped instrument or a checkout
+that carries the wordlist -- and the wordlist is gitignored, which is the same
+reason a `git clone` gate cannot run this sweep at all.
+
+That is the whole of my contribution to that row: **the route named in the
+hand-off is closed, and knowing which door is locked is worth more to the next
+actor than another broken instrument.** I did not modify the sweep -- editing a
+shipped guard in a contended tree, minutes from a freeze, to chase a neighbour's
+red is how a check that cannot fail gets built. That has already happened three
+times today, once to the lead and once to the wave that raised this.
+
+I am not the owner (`git log` names the `measure(jobs):` commits) and I have not
+touched the file.
+
 ## 7. WHAT I DID NOT DO
 
 * **Fired no write.** `comment_on_item` and `publish_post` were not called, not
