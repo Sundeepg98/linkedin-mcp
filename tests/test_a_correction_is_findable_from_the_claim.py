@@ -182,6 +182,17 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("profile.md", "2026-09-05-search-appearances-load-a.md"): (
+        "points at the document that CARRIES the correction, not at one being "
+        "corrected -- and the correction is the citing wave's own. Row G7 "
+        "cites the LOAD A record as the place where an overclaim about what "
+        "five member links point at is WITHDRAWN; section 3 of that document "
+        "is the withdrawal. A CORRECTED BY: pointer aimed at it would tell a "
+        "reader that the document making a self-correction had been refuted "
+        "by the row that cites it. Same inversion as the sibling entry below, "
+        "arriving from the opposite direction: there the target supplied a "
+        "reason, here it supplies a retraction"
+    ),
     ("profile.md", "2026-09-05-search-results-consent.md"): (
         "the row CORRECTS ITSELF and cites the consent brief as its REASON. "
         "G7's blocker read 'no tool, no reason'; the 2026-09-05 rewrite says "
