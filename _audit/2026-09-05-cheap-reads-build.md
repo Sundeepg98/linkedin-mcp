@@ -460,6 +460,7 @@ is the honest number and is larger than the two this wave set out to spend.
 
 ### What a successor should pick up first
 
+
 1. **Wire `premium.py` to a tool.** It is a reader with no consumer, and that
    is the one class of hole this repository has met twice already.
 2. **Row 41 needs an ADDRESS, not a ruling.** One census pass naming where its
@@ -469,3 +470,62 @@ is the honest number and is larger than the two this wave set out to spend.
    the condition needs a second instrument -- or an explicit rule that the
    feed-return form is what it means. Right now every such wave will re-derive
    this from scratch, as this one did.
+
+---
+
+## 9. FREEZE, AMENDED. SECTION 8 COUNTED THREE; THERE ARE FOUR
+
+> **CORRECTED BY: this section.** Section 8's table is not wrong about any row
+> it lists. It is incomplete, because a freeze cannot count the commit that
+> carries it. Read this one for totals.
+
+Recomputed from `git` after that commit landed, not carried forward:
+
+    4 commits   1754 insertions   9 deletions   6 distinct files
+
+| commit | + | - | what |
+|---|---:|---:|---|
+| `db0dc40` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
+| `2097401` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
+| `0c077a9` | 231 | 0 | this document, sections 1-4 |
+| `73c46e9` | 247 | 7 | this document, sections 5-8 |
+
+**ALL NINE DELETIONS ARE THIS WAVE'S OWN LINES** and they are named rather
+than rounded away: two are the superseded `_ALLOWED_URL_PATTERNS` digest in
+the two dicts that pin it, and seven are the placeholder headings this
+document carried between its first commit and its second. **No neighbour's
+line entered any of the four**, in a tree where that happened five times
+today, and it is a `--numstat` reading rather than a recollection of having
+been careful.
+
+**AI attribution: 0, checked per commit across all four.**
+
+### And the wider gate, run after the last code commit
+
+    tools + server surface + every-tool-on-the-surface + readonly
+    + boundary invariant + the two new test files + both second-gate suites
+
+    515 passed
+
+That run is the one that matters for the row-56 slice's own claim -- it said
+`premium.py` needed **zero new entries in either pinned inventory**, and the
+tool-surface enumeration guards are the tests that would fail if it were
+wrong. Verified independently rather than relayed. **It is still a TARGETED
+run and clears SHAPE violations only**; the full clone gate is owed and is
+not this wave's to run.
+
+### The self-correcting freeze, for the fifth time in two documents
+
+The predecessor's section 11 went stale on the next commit and its section 13
+said so. This one went stale the same way, at the same distance, for the same
+reason. **A freeze is a reading with a timestamp exactly like every other
+reading these documents warn about**, and the honest form is not to stop
+writing them but to say which one is current. This one is, until the next
+commit.
+
+### Wall clock
+
+Start ~19:34 by the box, freeze written at 19:58 by the box, deadline 20:30 by
+the box. Every timestamp in this document was taken with `date` rather than
+from a sense of elapsed time -- the standing rule after an agent's own clock
+ran roughly two hours fast and truncated a wave that had two hours left.
