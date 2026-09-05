@@ -56,6 +56,27 @@ from linkedin_server.browser import BROWSER  # noqa: E402
 CONTROL_URL = "https://www.linkedin.com/mypreferences/d/dark-mode"
 PROFILE_URL = "https://www.linkedin.com/in/me/"
 
+#: OPTIONAL THIRD SURFACE, for census row K10 -- the verification badge as it
+#: appears on a job post. Supplied by the CALLER through the environment and
+#: never written into this file, for two reasons:
+#:
+#: 1. A live posting id rots. A hardcoded one turns this probe into a thing
+#:    that reads a 404 and reports a clean absence -- the exact failure this
+#:    file's control block exists to make visible.
+#: 2. It keeps navigation caller-chosen rather than page-chosen. This probe
+#:    never extracts an address from a document and navigates to it.
+#:
+#: MEASURED against the shipped predicate before use, because the two
+#: spellings do NOT behave the same:
+#:
+#:     /jobs/view/<id>/         True
+#:     /jobs/view/<id>          True
+#:     /jobs/view/<id>/?refId=x FALSE
+#:
+#: LinkedIn's own job links routinely carry `refId` and `trackingId`, so a
+#: url copied off a listing verbatim is REFUSED. Strip the query first.
+JOB_URL_ENV = "LINKEDIN_PROBE_JOB_URL"
+
 # Needles. Each is matched with a WORD-BOUNDARY test over lowercased text.
 #
 # `dark` is the MUST-FIND needle on the control page: that page is a
@@ -268,9 +289,37 @@ async def main():
                   % (first["needle"][MUST_BE_ABSENT_AT],
                      second["needle"][MUST_BE_ABSENT_AT]))
 
+            # THE BADGE PAIR CLOSES HERE, BEFORE THE K10 NAVIGATION, and the
+            # ordering is the whole point. When the job read was added, this
+            # call stayed at the end of the function and its label still said
+            # "on the profile" -- so the pair became `profile` against `job
+            # posting` while claiming to be a before/after of one address.
+            # That is the same defect as the original blank-tab BEFORE, made
+            # by the same author, one hour after fixing it. The label was
+            # right when written and wrong when read.
             badge_last = await dom.read_invitation_badge(page)
             print("invitation badge AFTER  (on %s) %s"
                   % ("the profile", badge_last))
+
+            # ROW K10. Skipped silently only in the sense that it announces the
+            # skip -- an absent env var must not look like a zero reading.
+            job_url = os.environ.get(JOB_URL_ENV, "").strip()
+            print()
+            if not job_url:
+                print("JOB POSTING (K10)  SKIPPED -- %s not set" % JOB_URL_ENV)
+            else:
+                from linkedin_server import readonly as _ro
+
+                if not _ro.is_read_url(job_url):
+                    print("JOB POSTING (K10)  REFUSED by the shipped predicate."
+                          " Strip the query and retry.")
+                else:
+                    job = await _read(page, job_url)
+                    print("JOB POSTING (K10)  admitted, read")
+                    report("job posting", job)
+                    print("    JOB GATE  must_be_absent=%d (want 0)"
+                          % job["needle"][MUST_BE_ABSENT_AT])
+
         finally:
             await page.close()
             print()
