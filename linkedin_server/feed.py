@@ -147,8 +147,45 @@ rather than re-derived:
 * that a name survives ``census_substitute`` unchanged;
 * that the feed root is already admitted by the read boundary.
 
-What is ASSERTED and labelled as such: that a feed row's author control
-points at one of those six kinds, and that two-entity paths occur. The
+### MEASURED AFTER THE FACT, against 1353 real anchors -- and it went
+### against this module's author on the point he was most confident about
+
+``scripts/_probe_feed_kinds_in_corpus.py`` runs this module over every
+tracked capture in ``tests/fixtures`` and ``_audit`` -- 35 documents, real
+markup off his signed-in session, no browser attached. Result:
+
+    anchors handed in                  1353
+    resolved to an author               217   (81 distinct)
+    kinds seen                            5   company 91, member 42,
+                                              event 54, group 20,
+                                              newsletter 10
+    kinds NOT seen                        1   school
+    entity_root_carries_no_identifier     3
+    not_an_entity_href                 1133
+    AMBIGUOUS TWO-ENTITY PATHS            0
+
+**THE AMBIGUITY BRANCH -- the one this module was proudest of, the one a
+mutation showed silently attributes a company's people directory to a
+PERSON -- did not fire once in 1353 real anchors.**
+
+That is a result about the branch, and it is NOT a refutation, for a
+reason the probe prints rather than leaves to be inferred: **the corpus
+contains no capture of the feed** (0 of 35 documents), and the two-entity
+shape was asserted FOR the feed. A branch deleted on a corpus that could
+not contain its input is deleted on no evidence at all. It stays, and it
+stays labelled.
+
+**The zero is worth something only because the same instrument reported
+presences in the same run** -- 217 resolutions across five of six kinds,
+and the root branch firing 3 times. A blind reader and a reader seeing
+nothing are indistinguishable from outside, and this one is demonstrably
+not blind. The unseen kind (school) is the honest companion finding: this
+corpus has no school links either, so that zero says nothing about
+LinkedIn.
+
+What remains ASSERTED and labelled as such: that a feed row's author
+control points at one of those six kinds, and that two-entity paths occur
+ON THE FEED SPECIFICALLY. The
 branch structure is carried over from ``groups.py``'s measured design,
 not from an observed feed. **This module deliberately does NOT contain a
 DOM reader**, for the reason the newsletter wave gave for declining one:
