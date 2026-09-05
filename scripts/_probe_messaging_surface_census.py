@@ -291,6 +291,158 @@ def _readable(msg_pair: tuple, inv_pair: tuple) -> bool:
     return msg_pair[1] == "read" and inv_pair[1] == "read"
 
 
+#: Appended to the INSTANT the /messaging/ navigation is issued, so the cost
+#: line in the finally reports what was SPENT rather than what was reached. A
+#: refusal before that point, or a crash before it, leaves it empty -- and the
+#: first run of this file crashed at exactly that point and correctly reported
+#: zero loads taken.
+_SPENT: list[int] = []
+
+
+async def _run(page) -> None:
+    """The census. Every refusal here returns BEFORE the spend."""
+    # -----------------------------------------------------------------------
+    # 1. BEFORE. Both badges, off the feed.
+    # -----------------------------------------------------------------------
+    print("\n1. BEFORE THE SPEND")
+    landed = await BROWSER.goto(page, FEED_URL)
+    if "/login" in landed or "/checkpoint" in landed:
+        print("    AUTH WALL. Not signed in, so nothing was measured and")
+        print("    nothing was spent.")
+        return
+    before_msg, before_inv = await _read_both_badges(page)
+    _show_badges("before", before_msg, before_inv)
+
+    if not _readable(before_msg, before_inv):
+        print()
+        print("    REFUSED, AND THE REFUSAL IS THE INSTRUCTION. One of the two")
+        print("    badges did not read. An unreadable badge is not a zero, and")
+        print("    a load whose cost cannot be certified at BOTH ends does not")
+        print("    get taken. Nothing was spent.")
+        return
+
+    if before_msg[0]:
+        print()
+        print("    REFUSED. Something has arrived since his last visit, so the")
+        print("    conversation LinkedIn redirects into may be UNREAD. Opening")
+        print("    it marks a real person's message read -- a durable record")
+        print("    spent by somebody who is not him. The operator's standing")
+        print("    precondition for this surface is a zero badge. Nothing was")
+        print("    spent.")
+        return
+
+    # -----------------------------------------------------------------------
+    # 2. THE ONE NAVIGATION, TO A MODULE CONSTANT.
+    # -----------------------------------------------------------------------
+    print("\n2. THE SPEND -- one navigation to config.MESSAGING_URL")
+    _SPENT.append(1)
+    thread_landed = await BROWSER.goto(page, MESSAGING_URL)
+    # A COMPARISON YIELDING A BOOLEAN. The landed url is never printed and
+    # never navigated to -- handing a landed url back to the read boundary is
+    # what put a vanity slug in a traceback once already.
+    print("    redirected into a conversation: %r"
+          % ("/messaging/thread/" in thread_landed))
+
+    # -----------------------------------------------------------------------
+    # 3. ARRIVAL FIRST. Without this every count below is uninterpretable.
+    # -----------------------------------------------------------------------
+    print("\n3. DID THE PAGE ARRIVE? Read this before any count.")
+    arrival = await dom.read_thread_reply_surface(page)
+    print("      elements on the page: %r" % arrival.get("elements"))
+    print("      settle verdict:       %r" % arrival.get("settle"))
+    print("      reader error:         %r" % (arrival.get("error") is not None))
+    if arrival.get("settle") == "unrendered":
+        print("    STOP READING THE COUNTS AS DATA. The page did not render;")
+        print("    every zero below is a fact about that.")
+
+    # -----------------------------------------------------------------------
+    # 4. ROW 66 -- THREAD-REPLY-BOX.
+    # -----------------------------------------------------------------------
+    print("\n4. ROW 66 THREAD-REPLY-BOX (dom.read_thread_reply_surface)")
+    for key in (
+        "recipient_boxes", "editors", "editable_true", "textboxes",
+        "textareas", "text_inputs", "send_controls", "send_disabled",
+    ):
+        print("      %-20s %r" % (key, arrival.get(key)))
+    print("      (recipient_boxes is the REFUTATION reading: a thread has")
+    print("       nobody to choose, so a non-zero means a reply is not")
+    print("       addressless and the whole route needs rethinking.)")
+
+    # -----------------------------------------------------------------------
+    # 5. ROWS 17 + 67 -- the overflow triggers, structurally.
+    # -----------------------------------------------------------------------
+    print("\n5. ROWS 17 + 67 -- OVERFLOW TRIGGERS, STRUCTURAL (no press)")
+    await _census(page, "aria relationships:", _POPUP_SELECTORS)
+    print("      (role=menuitem is expected 0 with nothing pressed. A trigger")
+    print("       count of 0 retires the rows; a non-zero means the ITEMS need")
+    print("       a sanctioned press this probe will not take. These two rows")
+    print("       share one reading -- it does NOT separate a conversation")
+    print("       menu from a per-message one.)")
+
+    # -----------------------------------------------------------------------
+    # 6. ROW 76 + the label vocabulary.
+    # -----------------------------------------------------------------------
+    print("\n6. ROW 76 + VOCABULARY (every zero here is about MY tuple)")
+    await _census(page, "aria-label substrings written in this file:",
+                  _LABEL_SELECTORS)
+
+    # -----------------------------------------------------------------------
+    # 7. ROW 50 -- the address, named off the page's own nav.
+    # -----------------------------------------------------------------------
+    print("\n7. ROW 50 MESSAGE-REQUESTS-SURFACE -- href families")
+    await _census(page, "anchors matching literals written in this file:",
+                  _HREF_SELECTORS)
+    print("      (the two CONTROL rows must be non-zero. If they are not, the")
+    print("       href reader is dead and every other zero is void.)")
+
+    # -----------------------------------------------------------------------
+    # 8. ROW 57 -- the EMPTY chip rail.
+    # -----------------------------------------------------------------------
+    print("\n8. ROW 57 MESSAGE-ADDRESSING -- the EMPTY rail")
+    recipient_boxes = await _count(page, _RECIPIENT_BOX_SELECTOR)
+    print("      %-30s %r" % ("composer recipient box", recipient_boxes))
+    for index, selector in enumerate(dom.RECIPIENT_CHIP_SELECTORS):
+        value = await _count(page, selector)
+        print("      chip selector %d of %d               %r"
+              % (index + 1, len(dom.RECIPIENT_CHIP_SELECTORS), value))
+    print("      (a chip exists only once a recipient is COMMITTED, and")
+    print("       committing one is not a read. What is measurable is the")
+    print("       EMPTY rail -- whether these selectors address anything on a")
+    print("       real page at all.)")
+
+    # -----------------------------------------------------------------------
+    # 9. ROW 45 + the role census.
+    # -----------------------------------------------------------------------
+    print("\n9. ROW 45 GROUP-CHAT-SURFACE + ROLE CENSUS")
+    await _census(page, "roles:", _ROLE_SELECTORS)
+
+    # -----------------------------------------------------------------------
+    # 10. AFTER. Both badges, off the feed again -- the same page and the same
+    #     readers as the BEFORE, so the two are comparable.
+    # -----------------------------------------------------------------------
+    print("\n10. AFTER THE SPEND")
+    await BROWSER.goto(page, FEED_URL)
+    after_msg, after_inv = await _read_both_badges(page)
+    _show_badges("after", after_msg, after_inv)
+
+    print("\n11. WHAT THE LOAD COST")
+    if not _readable(after_msg, after_inv):
+        print("    UNREPORTABLE. A badge that read BEFORE did not read AFTER,")
+        print("    so no delta can be stated. The load happened; its cost on")
+        print("    that counter is UNKNOWN, which is not the same as zero and")
+        print("    is not reported as one.")
+    else:
+        print("    messaging  before=%r after=%r  moved=%r"
+              % (before_msg[0], after_msg[0], before_msg[0] != after_msg[0]))
+        print("    invitation before=%r after=%r  moved=%r"
+              % (before_inv[0], after_inv[0], before_inv[0] != after_inv[0]))
+        print("    (a messaging badge that was ALREADY 0 cannot show this load")
+        print("     consuming anything -- that is the precondition doing its")
+        print("     job, not a measurement of zero cost. The conversation-")
+        print("     opened reading in section 2 is the cost that IS observable")
+        print("     here.)")
+
+
 async def main() -> None:
     print("=" * 72)
     print("MESSAGING SURFACE CENSUS -- one /messaging/ load, nothing pressed")
