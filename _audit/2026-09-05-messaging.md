@@ -83,7 +83,15 @@ chip, at which point every case becomes the empty case and passes for the
 wrong reason. The control refuses on the same page with the same chip, so both
 `proceed` results are attributable to the MATCHER and not to a dead fixture.
 
-### NOT FIXED, DELIBERATELY -- and this is the load-bearing judgment
+### NOT FIXED BY ME -- AND THEN RULED AND FIXED. SEE SECTION 7.
+
+> **SUPERSEDED THE SAME EVENING.** The paragraphs below argue for recording
+> the defect rather than repairing it. The coordinator ruled the other way,
+> with an argument I had not made and should have: **the two error directions
+> are not symmetric.** Section 7 carries the ruling, the fix and its cost.
+> Read it before acting on anything in this subsection.
+
+### The reasoning I used to decline, kept because the ruling turns on it
 
 The obvious repair is a stricter matcher. **Every stricter matcher was
 MEASURED DEAD on the neighbouring surface**:
@@ -351,3 +359,96 @@ conversation LinkedIn chooses. That is a load with a real obligation attached
 and it belongs to a wave that can pay it deliberately, bracket it with a badge
 reading before and after, and act on what it sees -- not to twenty minutes at
 the end of this one.
+
+
+---
+
+## 7. THE RULING WENT THE OTHER WAY, AND THE ARGUMENT IS BETTER THAN MINE
+
+**VERIFIED-BY-INSTRUMENT.** Commit `9503723`. 27 passed across this wave's
+file and `tests/test_send_message_gate.py`, including all 19 pre-existing gate
+tests.
+
+I declined to fix the gate on the grounds that choosing a matcher against an
+unobserved DOM is guessing. **That framing is what made it look blocked, and
+it is wrong** -- not because the DOM became known, but because the choice never
+depended on knowing it:
+
+    a matcher too STRICT   refuses a legitimate send. He retries, or sends by
+                           hand. Recoverable, visible, annoying.
+    a matcher too LOOSE    commits a STRANGER to an irreversible message under
+                           his name. Not recoverable, and not visible until
+                           the stranger replies.
+
+**When the error directions differ that much you do not need the DOM. You need
+only which way to fail, and that was already settled.** A gate that refuses
+everything on an unobserved surface is correct FOR an unobserved surface. My
+section 1 had the asymmetry in it as an aside -- *"either refuses everybody --
+safe -- or keeps proceeding for a reason nobody measured, which is not"* -- and
+I wrote it as a reason the choice was hard instead of reading it as the choice
+itself.
+
+### What landed
+
+`dom.SELECTED_RECIPIENT_JS` requires a WORD-BOUNDED match. A letter or digit
+on either side of the hit means the needle is a fragment of a longer word, and
+a fragment is not a name. Digits are word characters deliberately, so a label
+running a name onto a connection degree refuses rather than matches.
+
+    control    needle absent          total 1  matches 0  REFUSED
+    furniture  needle in the button   total 1  matches 0  REFUSED  (was PROCEED)
+    contained  needle inside a name   total 1  matches 0  REFUSED  (was PROCEED)
+    exact      the full name          total 1  matches 1  PROCEEDS
+
+**`total` stays 1 in every refusal**, which is what separates *the matcher got
+stricter* from *the fixture stopped drawing a chip*. And the fourth case is not
+decoration: **a gate that can only refuse certifies nothing**, so the strict
+matcher is shown capable of saying yes.
+
+**A CORRECTION TO MY OWN SECTION 1a.** I reported the available repair as a
+prefix strip "defined for exactly one candidate of four". That was the reach of
+*one* repair -- stripping the furniture -- and I presented it as the reach of
+the fix in general. **An unanchored word-boundary rule needs no strip at all**,
+applies to every candidate, and kills both collisions while still admitting an
+exact name. My number was right about the thing I measured and wrong about the
+question it was asked to answer.
+
+### The docstring was corrected in the SAME commit as the code
+
+`_recipient_gate` opened with *"WHAT MAKES THIS SAFE IS THE NAME MATCH, NOT THE
+COUNT"* while the name match was the loosest relation between two strings. A
+docstring is read as current truth by whoever opens the file next and is the
+one class the correction machinery cannot bind, so it could not wait.
+
+### What this still does not claim
+
+**It may refuse a legitimate recipient on a real chip, and that is the accepted
+cost rather than a regression.** No chip has ever been observed. A boundary
+rule is not claimed to be the RIGHT relation for this rail, only a safer one
+than a substring: **a stranger whose name contains the needle as a WHOLE WORD
+still matches.** The answer to that residue is the identifier route, which
+section 6 shows is now admitted at the boundary -- not a cleverer string
+comparison.
+
+**Relaxing this needs a chip observed, which needs `/messaging/` and its badge.
+That spend was explicitly NOT authorised for this fix and did not need to be:
+the fix does not depend on it.**
+
+### A HAZARD FOUND BY LOSING WORK TO IT, 19:18
+
+**A FAILED `git commit --only` ROLLED THE WORKING TREE BACK AND DISCARDED AN
+UNCOMMITTED APPEND TO THE FILE IT WAS GIVEN.** The commit failed because
+`-F /dev/stdin` could not be read (`fatal: could not read log file
+'/proc/self/fd/0'`), and a partial commit restores the tree it had staged
+around. Section 7 was written, verified present, and gone one command later.
+
+I found it because the commit that did land reported **8 insertions** where
+roughly ninety were expected, and I checked `git show HEAD:<path>` rather than
+trusting the success line. **The count in a success message is the cheapest
+available check on what a commit actually carried, and it is the one nobody
+reads.**
+
+    RULE: pass a commit message as a FILE PATH, never via /dev/stdin or a
+          process substitution. And after any commit that reports a size you
+          did not expect, verify with `git show HEAD:<path>` -- a partial
+          commit can fail in a way that edits your working tree.
