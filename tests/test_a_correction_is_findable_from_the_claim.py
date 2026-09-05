@@ -182,6 +182,32 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-05-census-hygiene.md", "network.md"): (
+        "a RECONCILIATION table and an open-question list, not a correction. "
+        "The census-hygiene wave restored visibility to 37 rows that no "
+        "counter could see and cited each slice to say how its row total now "
+        "reconciles against the ledger's 705. The repair vocabulary near the "
+        "citation is the wave describing what it did to the ROWS, and the "
+        "network citation flags an open question it deliberately did NOT "
+        "settle -- five recommendation rows now read EXCLUDED-RULED because "
+        "their section heading says so, while the paragraph beneath calls "
+        "them unmeasured. Nothing in that slice is asserted wrong: the state "
+        "column was ADDED where none existed, carrying the heading's own "
+        "value. A CORRECTED BY: pointer would tell a reader the slice had "
+        "been refuted by a document that only made it countable"
+    ),
+    ("2026-09-05-census-hygiene.md", "profile.md"): (
+        "same reconciliation table, same wave. The profile citation records "
+        "that the slice reads one row over its ledger figure while messaging "
+        "reads one under -- stated as UNEXPLAINED and explicitly not chased, "
+        "with the warning that the two cancel in the total and that is the "
+        "arithmetic which hides a pair of errors. An open discrepancy the "
+        "author declines to resolve is the opposite of a correction, and "
+        "aiming a back-pointer at the slice would publish a refutation "
+        "nobody made. The one profile row this wave did touch, G1, had its "
+        "verdict left byte-identical and only its qualifier moved out of the "
+        "state cell into the note beside it"
+    ),
     ("profile.md", "2026-09-05-search-appearances-load-a.md"): (
         "points at the document that CARRIES the correction, not at one being "
         "corrected -- and the correction is the citing wave's own. Row G7 "
