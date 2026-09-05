@@ -355,3 +355,77 @@ The practical instruction, which has not changed and is now demonstrated twice
 rather than argued: **the sweep that matters is the one run at the gate.**
 Neither of the readings in this document is that reading, and by the time anyone
 reads this, neither is the reading above.
+
+---
+
+## 11. FREEZE. THE NUMBERS BELOW WERE RECOMPUTED, NOT RE-READ
+
+Every figure here was derived from `git` at freeze time rather than copied from
+an earlier sentence in this document, because proofreading cannot reach a number
+that is wrong and the numbers most worth recomputing are the ones that flatter
+the author.
+
+    5 commits    656 insertions    0 deletions    4 distinct files
+
+| commit | files | + | - | what |
+|---|---:|---:|---:|---|
+| `6456701` | 1 | 144 | 0 | the seven-address measurement |
+| `67da282` | 3 | 290 | 0 | `jobfilter.py`, its tests, the `server.py` wire |
+| `825543d` | 2 | 79 | 0 | the `company_id` docstring, section 7 |
+| `780a5c2` | 1 | 56 | 0 | the gate sweep red |
+| `88bd02c` | 1 | 87 | 0 | its close |
+
+**ZERO DELETIONS ACROSS ALL FIVE, and that is the load-bearing number rather
+than the insertions.** It says no neighbour's line was swept into any commit
+here -- five separate incidents of exactly that happened in this tree today. It
+is a measurement (`git show --numstat`), not a recollection of having been
+careful.
+
+**AI attribution: 0 lines in each of the five, checked per commit rather than
+across the range.**
+
+    GATE  878 passed, 0 failed, 225.54s   test_company_job_filter, test_tools,
+                                          test_server_surface,
+                                          test_every_tool_is_on_the_surface,
+                                          test_job_search_fixture,
+                                          test_job_search_result_window,
+                                          test_no_committed_identity,
+                                          test_navigation_is_never_derived
+
+**That is a TARGETED run and it clears SHAPE violations only.** An enumeration
+guard fires on *somebody added a caller* and is invisible to any run scoped to a
+file list, so this says nothing about that class. The full clone gate is still
+owed and is not this wave's to run.
+
+### The boundary was not touched, and here is the check rather than the claim
+
+`linkedin_server/readonly.py` appears in none of the five commits --
+`git show --name-only` over all five returns four paths and that is not one of
+them. The allowlist stood at **29** when this wave measured it and this wave
+added nothing to it. **A wave that changes no boundary still has to prove it**,
+and the proof is the file list, not the intention.
+
+### Cost, in this document's own currency
+
+Rows moved: **one built** (`J 10`), **three re-costed on measurement** (34
+dearer, 53 already paid, 55 discharged), **three left alone with reasons** (40,
+41, 75), **one declined with a reason** (56).
+
+    page loads          0
+    allowlist patterns  0
+    captures            0
+    rulings sought      0
+    new modules         1
+    new test files      1
+
+**No live page was opened by this wave at any point.** The browser was available
+the whole session and none of it was used, so nothing in this document is a
+claim about what any LinkedIn page currently draws. Every verdict here is a
+verdict about this repository's own code.
+
+### What a successor should pick up first
+
+**Rows 41 and 56 are cheaper together than separately** -- section 9. One load of
+`/premium/my-premium/`, already admitted, settles the entitlement question that
+sits under both. That is the single highest-value page load left on this wave's
+board and it needs no boundary change and no ruling.
