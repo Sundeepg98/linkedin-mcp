@@ -1232,3 +1232,95 @@ note can neither declare a correction nor be found by one. **A measurement in a
 gitignored file is a measurement nobody took.** Lodging it here, with the credit
 where it belongs, is the whole of what section 9.2 does that is new -- the
 measuring was somebody else's.
+
+---
+
+## 10. WORK THIS PASS FOUND AND ROUTED RATHER THAN DID
+
+**Written into a TRACKED document on purpose.** A wave's closing message is not
+durable and this repository has already lost a finding to a gitignored working
+note (9.4). Each item below names the artifact, the owner as `git log` reports
+it, and why this pass did not take it.
+
+### 10.1 `server.CENSUS_SETTLED_CONTROLS` -- two items, ONE edit
+
+1. **A13's `/jobs/view/<id>` baseline of 193 is still unmade.** Two readings,
+   identical on every structural count, across a browser restart. Confirmed
+   absent this pass: `job_posting` is in neither `CENSUS_SURFACES` (12 keys) nor
+   `CENSUS_SETTLED_CONTROLS`.
+2. **The dict has a DUPLICATE KEY.** Measured by AST at
+   `linkedin_server/server.py:3876` -- **8 literal keys, 7 distinct**;
+   `post_composer` appears twice, both valued 31. Nothing is wrong at runtime,
+   which is what makes it a trap: **the FIRST entry is dead and carries the
+   FULLER provenance comment** ("31, 31, 31 -- three readings across two days
+   and three builds" versus "31 twice, 2026-08-31"). Two hands wrote a baseline
+   for the same surface and one has never been read. Anyone who updates the
+   first sees no effect whatever.
+
+**WHY NOT TAKEN:** `linkedin_server/server.py` is contended with several waves
+writing it. Both are one edit on one dict; keep the fuller comment.
+
+### 10.2 `tests/test_a_sanitiser_earns_its_entry.py` is RED, and it is the class targeted runs cannot catch
+
+Measured in a clean clone at `50552f8` over the **17 test files that enumerate
+`scripts/`**: `2 failed, 1098 passed, 1 skipped, 1 xfailed` in 5m35s. Both
+failures are in that one file and they are one cause.
+
+`_relation` was admitted to `_SANITISERS` by `groups-events`, correctly and with
+the test that proves its contract. **Two things did not follow it:**
+
+* `test_every_claimant_of_a_sanitiser_name_is_enrolled` -- **four probe scripts
+  define a `_relation` and none is in `ENROLLED`.** So the guard trusts them BY
+  NAME, which is the exact defect that list exists to prevent: `_redact` was
+  once admitted to `_SANITISERS` on the strength of its name and turned out to
+  carry no slug rule at all.
+* `test_the_guarded_names_are_the_ones_this_file_thinks_they_are` -- the file's
+  own pinned name set does not yet contain `_relation`.
+
+Owners by `git log --oneline -1 -- <path>`, never by wave name:
+
+    scripts/_probe_compose_file_inputs.py            7e77eee
+    scripts/_probe_groups_events_capture.py          196394d
+    scripts/_probe_groups_events_live.py             196394d
+    scripts/_probe_newsletter_subscriptions_live.py  2ff0d32
+
+**WHY NOT TAKEN:** enrolling a function is a CLAIM that it sanitises, measured
+against an adversarial table. It belongs to whoever wrote the function, one line
+at a time with its reason. Sweeping four of somebody else's into `ENROLLED`
+would be vouching for code this pass did not read, on the one list whose entire
+purpose is that the name is not enough.
+
+**AND THIS IS WHY IT WENT UNSEEN.** Targeted runs clear SHAPE violations and
+never ENUMERATION violations -- the condition is a property of the SET, so each
+of those waves can run its own probe and its own tests indefinitely without
+seeing it. This pass only found it because a new tracked script is itself that
+class, so the guards were enumerated rather than guessed.
+
+### 10.3 A declared correction whose target has no back-pointer
+
+`tests/test_a_correction_is_findable_from_the_claim.py` is red on exactly one
+pair. The declaring document, and the one that owes the back-pointer:
+
+    declares CORRECTS:   _audit/2026-09-05-groups-surface-measured.md
+    owes CORRECTED BY:   _audit/2026-09-05-groups-events-precondition.md
+
+**Both belong to the same wave**, so it is one line in their own file.
+
+Measured by importing the module and reading `_declarations()` rather than off
+the failure text: **14 declared pairs, 13 resolve, 1 does not, `malformed`
+empty.** A half-finished edit caught mid-flight, which is the check working.
+
+**THE PATHS ABOVE ARE IN A BLOCK RATHER THAN INLINE, AND THAT IS NOT
+COSMETIC.** Written as backticked citations they sat within two lines of the
+word "correction", which is this very check's LOOSE vocabulary -- so describing
+the red manufactured two fresh untriaged candidate pairs and turned the suite
+red a second way. Measured, not guessed: the run named both, at lines 1301 and
+1302. **A document that reports a correction defect in prose becomes one**, and
+the cheapest fix is to keep the citation and the vocabulary more than two lines
+apart rather than to add triage entries to somebody else's test file.
+
+### 10.4 What this pass deliberately did not touch
+
+`linkedin_server/` -- nothing. Not one line. Every finding above is against
+committed code owned by another wave, and the reason each is routed rather than
+fixed is written beside it.
