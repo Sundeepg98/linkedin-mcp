@@ -132,6 +132,49 @@ def _verdict(reading: dict[str, Any], compose_fields: dict[str, Any]) -> str:
     return "TWO OR MORE (ambiguous - a count cannot aim)"
 
 
+#: THE CLOSED VOCABULARY a declaration is reduced to. Nothing outside these
+#: tokens can be reported, whatever an attribute later holds.
+_DOC_TOKENS: tuple[str, ...] = (
+    ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".pps", ".ppsx",
+    ".xls", ".xlsx", ".txt", ".eml", ".ai", ".psd",
+)
+_VIDEO_TOKENS: tuple[str, ...] = (".mp4", ".mov", "video/")
+
+
+def _declaration_shape(row: dict[str, Any]) -> dict[str, Any]:
+    """Reduce one input's declaration to COUNTS AND BOOLEANS. Never the value.
+
+    WHY THE RAW ATTRIBUTE IS NOT PRINTED, even though it carries no identity.
+    A value read off the page and handed to a print is the shape the consent
+    guard exists to refuse, and the guard is STRUCTURAL -- it cannot know that
+    ``accept`` happens to hold mime types today. Declaring the site instead
+    would key the exemption to the whole sink expression and tolerate that
+    line forever, whatever the expression comes to hold. So the value is
+    reduced here rather than exempted there.
+
+    NOTHING IS LOST THAT THE FINDING NEEDED. The question was whether the two
+    inputs DIFFER, and a difference survives reduction: one accepts images
+    only, the other also accepts video and documents. The exact list is a
+    thing whoever wires the composer re-reads live, at the moment they aim.
+
+    A CLOSED VOCABULARY, not a filter. Every field below is an integer or a
+    boolean computed against a fixed token set; an ``accept`` value naming
+    something nobody anticipated raises ``tokens`` and moves no flag, which is
+    visible as an unexplained count rather than as silence.
+    """
+    accept = row.get("accept")
+    text = str(accept or "").lower()
+    tokens = [part for part in text.split(",") if part.strip()]
+    return {
+        "declares_accept": accept is not None,
+        "tokens": len(tokens),
+        "image": "image/" in text,
+        "video": any(token in text for token in _VIDEO_TOKENS),
+        "documents": any(token in text for token in _DOC_TOKENS),
+        "multiple": "declared" if row.get("multiple") is not None else "absent",
+    }
+
+
 def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
     """Can a wiring aim by what the inputs DECLARE, where a name cannot?
 
@@ -155,13 +198,11 @@ def _declaration_verdict(declared: list[dict[str, Any]]) -> str:
     """
     if not declared:
         return "NO -- no file inputs were read"
-    stated = [
-        row for row in declared
-        if any(value not in (None, "") for value in row.values())
-    ]
-    if not stated:
+    shapes = [_declaration_shape(row) for row in declared]
+    if not any(shape["declares_accept"] or shape["multiple"] == "declared"
+               for shape in shapes):
         return "NO -- nothing declared (every input silent on accept and multiple)"
-    keys = {tuple(sorted(row.items(), key=lambda kv: kv[0])) for row in declared}
+    keys = {tuple(sorted(shape.items(), key=lambda kv: kv[0])) for shape in shapes}
     if len(keys) == 1:
         return (
             f"NO -- declarations identical across all {len(declared)} inputs; "
@@ -307,9 +348,9 @@ async def _run() -> int:
                 )
                 print(_fmt_compose_fields(compose_fields))
                 print(_fmt_file_inputs(reading))
-                print("    declared (the page's own words about each input):")
+                print("    declared (each input's own words, REDUCED):")
                 for index, row in enumerate(out["declared"]):
-                    print(f"      [{index}] {row}")
+                    print(f"      [{index}] {_declaration_shape(row)}")
                 print(
                     "    aimable by declaration: "
                     f"{_declaration_verdict(out['declared'])}"
