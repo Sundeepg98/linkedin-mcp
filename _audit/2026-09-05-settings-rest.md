@@ -173,7 +173,35 @@ feed has no authors", which is exactly the answer the surface exists to
 produce. Whoever opens the page first writes that half, and their zero will
 mean something because this half already refuses to publish a name.
 
-### 1.7 Boundary cost: ZERO, re-derived rather than recalled
+### 1.7 `feed.py` is a THIRD module unreachable in a way the reachability guard cannot see
+
+Checked rather than assumed: `feed.py` contains **0** `async def` and no
+function whose name begins with `read_`. It is a SHAPER -- it takes hrefs
+somebody else read -- so it is correctly invisible to
+`tests/test_readers_outside_dom_are_a_pinned_inventory.py`, whose detector
+selects on the `read_` prefix. `KNOWN_UNWIRED` is empty and stays empty; no
+pinned count moved.
+
+**That file's own comment already names the hole, and this is a third instance
+arriving the same day:**
+
+> a module can be unreachable in exactly the way this file exists to catch and
+> be invisible to it, because the thing it lacks is a page reader rather than a
+> caller.
+
+`groups.py` and `recommendations.py` were the first two. `feed.py` is the
+third, and it was built in full knowledge of the pattern, which makes it a
+deliberate position rather than an oversight: **a shaper with no reader is the
+correct shape for a surface nobody has opened**, because the alternative is an
+invented DOM whose failure mode is a confident zero. Wiring it is the job of
+whoever takes the live read.
+
+**It is not on any unwired inventory and it should not be added to one.**
+Widening that detector to "any public function" would flag every helper in the
+package -- its author measured that and said so. The honest record is this
+paragraph, in a document, next to the count of modules in the class: **three.**
+
+### 1.8 Boundary cost: ZERO, re-derived rather than recalled
 
 `readonly._ALLOWED_URL_PATTERNS` already admits the feed root, and
 `/feed/update/` is separately admitted. **No pattern added, no list edited, no
