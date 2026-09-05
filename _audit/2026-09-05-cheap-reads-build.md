@@ -214,18 +214,258 @@ ledger.
 
 ---
 
-## 5. ROW 56: THE READER IS BUILT, AND IT CANNOT PUBLISH A NUMBER THAT PICKS
+## 5. THE GRANT CONDITION: DISCHARGED, BUT NOT WHERE IT WAS ASKED FOR
 
-Placeholder -- filled at freeze.
+**Both addresses SERVE.** That is not a formality -- `/in/me/details/interests/`
+is admitted and REDIRECTS, so this repository already holds one door that opens
+onto nothing.
+
+    /school/<slug>/                  relation SERVED, exact
+    /jobs/collections/recommended/   relation SERVED, same depth, different url
+    authwall on either              False
+
+### And then the badge condition failed, in the way it was written to fail
+
+    badge controls on the school Page            0
+    badge controls on the collections page       0
+    read IMMEDIATELY after load                  0
+    read again after a 4 SECOND settle           0
+    reproduced                                   twice, two independent runs
+
+**NEITHER SURFACE DRAWS THE NAV CONTROLS THIS PACKAGE'S BADGE READER CAN SEE.**
+The grant says an unreadable badge at either end is a refusal rather than a
+zero, so this is reported as a refusal: **no post-load reading taken ON either
+page can say what that page cost.**
+
+The hydration control is what makes that a statement about the PAGES rather
+than about the reader. A read-zero taken before a nav hydrates is a fact about
+the instrument -- the render-gate lesson, already paid for in this repository
+by a tabbed category that drew zero rows until its tab was pressed. Reading
+immediately and again after four seconds, twice, on two pages, returns the
+same zero. **Hydration is refuted; the controls are not there.**
+
+Note also what the raw movement line said, and why it is not a finding:
+five families reading `0 -> None` is the UNREADABLE state, not a counter that
+fell to zero. Those two are different results and a run that prints them the
+same way manufactures an incident.
+
+### The reading relocated, on the surface where the reader demonstrably works
+
+The counter the loads could have consumed lives on the nav, and the nav renders
+on the feed. So the post was taken there, after both loads:
+
+    feed BEFORE   6 badge controls   notifications 2, one other 1   2 of 6 NON-ZERO
+    feed AFTER    6 badge controls   notifications 2, one other 1   2 of 6 NON-ZERO
+    nav families that MOVED across BOTH loads    0
+    mynetwork pending                            0 -> 0
+
+**The instrument control fired at BOTH ends**, which is the whole reason the
+zero means anything -- two badges carried live non-zero counts on both renders,
+so the reader resolves real values here rather than returning a default zero.
+That is the failure mode that would make "nothing moved" a fact about the
+instrument, and it is excluded by measurement rather than by assumption.
+
+### THIS IS A WEAKER CLAIM THAN THE PREMIUM PROBE'S AND IT IS STATED AS ONE
+
+    WHAT IT SAYS      the six nav counters are where they were after both loads,
+                      measured where they are readable, with a live control at
+                      both ends
+    WHAT IT DOES NOT  say what either counter did AT THE INSTANT either page was
+                      open. Nothing here can see that, because neither page
+                      draws the counters.
+    SAFETY            discharged by ABSENCE for the invitation badge -- nothing
+                      pending was consumed, because nothing was pending.
+    COST              UNMEASURED, and it stays unmeasured until a day the badge
+                      is not zero.
+
+Those last two are two claims and this run makes only the first. The
+predecessor drew exactly that line for `/premium/my-premium/` and it is drawn
+again here rather than quietly rounded up.
 
 ---
 
-## 6. WHAT THIS WAVE DID NOT DO, STATED PLAINLY
+## 6. ROW 56: THE READER IS BUILT, AND IT CANNOT PUBLISH A NUMBER THAT PICKS
 
-Placeholder -- filled at freeze.
+`linkedin_server/premium.py` + `tests/test_premium_reader.py`, at `2097401`.
+345 and 438 lines, 33 tests, zero deletions.
+
+The objection that stopped two earlier waves is discharged rather than argued
+around: an invented DOM fails closed as *he has no premium features* -- the
+exact answer the surface exists to produce -- and the page has now been opened,
+serves, and costs nothing measurable, so the reader is aimed at a real render.
+The logic is PORTED from the live probe's needle tuples and verdict rather than
+re-derived, and no new browser session was opened to build it.
+
+    read_premium_surface(page)     async, returns integers/booleans/None only
+    premium_entitlement(reading)   pure, returns the verdict
+
+### The three states, and the field that stops a number picking between them
+
+Every verdict carries `settles` and `leaves_open` as literal strings, on EVERY
+branch including the entitled one. Measured by calling the shaper on five
+hand-built readings:
+
+    state           strength       settles / leaves open
+    ------------    -----------    ---------------------------------------------
+    entitled        thin           A REFUTED; B versus C left open EXPLICITLY
+    not_entitled    corroborated   A; and what a needle it does not name would say
+    ambiguous       corroborated   nothing -- an upsell can sit beside a live plan
+    unmatched       thin           NOTHING ABOUT THE ACCOUNT -- about the INSTRUMENT
+    error           None           everything; the read failed before any count
+
+**A verdict that cannot return "cannot tell" is not a verdict**, and both
+`ambiguous` and `unmatched` are reachable. `unmatched` says in its own payload
+that it is a reading about the instrument and not about the account -- the
+distinction a bare zero destroys.
+
+**`error` shapes to `error`, never to `not_entitled`.** Failing closed as "he
+has no premium" is the precise defect this module exists to avoid, and it is a
+test rather than a comment.
+
+### Shown failing before admission
+
+    leak planted in the scan loop (a matched control name retained)   1 failed
+    leak reverted                                                     1 passed
+
+The no-page-text guard is therefore one that has been seen firing. 33 pass on
+the module's own file; 254 pass across the two shipped taint guards, with zero
+new entries needed in either pinned inventory -- `premium.py` has no print, no
+logging and no `goto`.
+
+### What is NOT done, and it is deliberate
+
+**The reader is not wired to a tool.** `server.py` and `dom.py` are the two
+most contended files in this tree and a slice was not sent into either. That
+leaves `premium.py` in the same state as `membership_row` -- **a reader with no
+consumer** -- and that is said here plainly rather than left for someone to
+discover: the hole is real, it is not live, and both halves belong in the same
+sentence.
 
 ---
 
-## 7. FREEZE
+## 7. WHAT THIS WAVE DID NOT DO, STATED PLAINLY
 
-Placeholder -- filled at freeze, RECOMPUTED and not re-read.
+* **No pattern was written for row 41.** Section 4. Its `+1` names no address
+  and the only way to satisfy it is the family pattern the standing trap
+  forbids.
+* **`premium.py` is not wired into `server.py` and no MCP tool calls it.** A
+  reader with no consumer, said plainly in section 6.
+* **The census rows are NOT edited.** Rows 40, 75 and 56 still read GAP in
+  `_audit/_census/`, and a re-count taken today returns the old figure and
+  would be right to. That file was edited by another wave earlier today and a
+  grouped row cannot be flipped by whoever happens to have built one of its
+  members. Naming the owner by artifact: whoever holds `_audit/_census/jobs.md`
+  and the applier behind `990bbd3`.
+* **The ledger row for 41 is not edited either**, for the same reason, and it
+  is the more dangerous of the two: a census row is read as CURRENT TRUTH by
+  whoever plans from it next, and `allowlist +1` on row 41 is a standing
+  instruction to build against a number that specifies nothing.
+* **The post-load badge condition was NOT discharged on the target pages** --
+  section 5. It was relocated to the feed, and the weaker claim is labelled.
+* **B versus C is untouched.** Separating them needs a JOB POSTING load with
+  the 1/1/0 control firing, and that was not attempted. Nothing in this wave
+  moves that pair, and the reader is built so that it cannot appear to.
+* **No full-clone gate was run.** The runs below are TARGETED and clear SHAPE
+  violations only; an enumeration guard fires on *somebody added a caller* and
+  is invisible to any run scoped to a file list.
+* **Nothing was pushed.** The push is blocked on an unrelated matter recorded
+  in the freeze file, and this wave did not touch it.
+* **A second probe was commissioned as a tracked instrument and never
+  arrived.** The live reading in section 5 was taken with
+  `_audit/_scratch/_probe_two_new_reads.py`, which is GITIGNORED -- so the
+  instrument does not survive a clone and the output in section 5 is where the
+  evidence lives. That is a gap, not a preference.
+
+---
+
+## 8. FREEZE. RECOMPUTED FROM GIT, NOT CARRIED FORWARD FROM A SENTENCE ABOVE
+
+    3 commits   1507 insertions   2 deletions   6 distinct files
+
+| commit | + | - | what |
+|---|---:|---:|---|
+| `db0dc40` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
+| `2097401` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
+| `0c077a9` | 231 | 0 | this document, sections 1-4 |
+
+**THE TWO DELETIONS ARE NAMED RATHER THAN ROUNDED TO ZERO.** Both are the
+same line in `tests/test_readonly_boundary_invariant.py` -- the old
+`_ALLOWED_URL_PATTERNS` digest, replaced in the two dicts that pin it. No
+neighbour's line entered any commit here, which is worth measuring rather than
+recalling: five separate incidents of exactly that happened in this tree today,
+and this wave read `git diff -U0` immediately before each commit and found the
+only removed lines were its own two pins.
+
+**AI attribution: 0 lines, checked per commit across all three** rather than
+across the range.
+
+### Gate
+
+    tests/test_school_and_collections_boundary.py                 12 passed
+    + test_premium_reader.py + test_readonly_boundary_invariant   56 passed
+    the five neighbouring boundary suites                        301 passed
+    test_no_committed_identity + test_navigation_is_never_derived 637 passed
+    (the slice's own run) test_page_text + test_navigation        254 passed
+
+    scripts/sweep_tracked_for_identity.py, run AFTER staging the new test file
+    PASS: 0 hits across 344 swept files
+
+The sweep was re-run after staging because a sweep from earlier in a session is
+not evidence about the tree you push -- that rule has paid for itself twice in
+this repository in one afternoon.
+
+### One `git commit --only` failure, and it did NOT destroy anything
+
+Both this wave and the row-56 slice hit the same thing: `--only` refuses with
+`pathspec did not match any file(s) known to git` when one of its paths is
+UNTRACKED. **That refusal happens before the tree-rollback path**, and the
+working tree was verified byte-intact afterwards in both cases -- 53 and 88
+insertions still present, the new file still 352 lines, the module still
+importing with 31 patterns.
+
+This is worth separating from the destructive failure already recorded today,
+because they look identical from the outside and only one of them costs work:
+
+    commit FAILS after the paths resolve   -> working tree ROLLED BACK  (severe)
+    commit REFUSES on an unknown pathspec  -> nothing touched            (safe)
+
+The fix is `git add -- <path>` by name first. Not `-A`.
+
+### A neighbour reached the same finding from the other side, within the hour
+
+`85364e7` (`profile-rest`) landed `test(boundary): account deletion is refused
+by ACCIDENT -- assert it before someone tidies it` shortly after `db0dc40`.
+Two waves converged on the same trap from different directions and neither
+swept the other's lines. **Disagreement between instruments not sharing a
+defect is the cheapest signal available; agreement between two that reached the
+same place by different routes is the next cheapest** -- and it is worth noting
+that this one arrived by a route the trap's own author had not written down:
+the PLURAL-versus-SINGULAR split.
+
+### Cost, in the predecessor's currency
+
+    page loads          8   (2 feed pre, 2 school, 2 collections, 1 feed post, 1 feed pre re-run)
+    allowlist patterns  2
+    captures            0
+    rulings sought      0
+    new modules         2   (premium.py, and one gitignored probe)
+    new test files      2
+    census rows edited  0
+
+**Eight page loads, counted by re-deriving them from the three probe runs
+rather than by recalling how many felt right.** The run in section 5 was
+executed three times: once bare, once with the hydration control, once with the
+feed return. Two of those three were the same two target pages re-opened, which
+is the honest number and is larger than the two this wave set out to spend.
+
+### What a successor should pick up first
+
+1. **Wire `premium.py` to a tool.** It is a reader with no consumer, and that
+   is the one class of hole this repository has met twice already.
+2. **Row 41 needs an ADDRESS, not a ruling.** One census pass naming where its
+   three features render. Do not build against its `+1`.
+3. **The badge condition cannot be discharged on a surface that draws no
+   badges.** If the fleet keeps opening surfaces outside the SPA nav shell,
+   the condition needs a second instrument -- or an explicit rule that the
+   feed-return form is what it means. Right now every such wave will re-derive
+   this from scratch, as this one did.
