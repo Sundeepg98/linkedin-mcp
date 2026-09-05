@@ -31,24 +31,30 @@ which is a position LinkedIn chose and not one this repository invented.
 ``test_the_other_company_named_on_the_same_card_resolves_to_nothing`` is that
 red, kept.
 
-WHAT IS PINNED AND WHAT IS MEASURED. Everything asserted against a fixture is
-parsed out of the fixture at runtime where it can be, so a regenerated capture
-cannot leave a stale expectation passing quietly. The two values written down
--- the employer name and the id -- are INVENTED (see
+WHAT IS PINNED AND WHAT IS MEASURED. Exactly TWO literals are written down --
+the employer's name and the canned-search HREF -- and everything else is
+derived: ``EMPLOYER_ID`` is parsed back out of that href, and
+``test_the_pinned_href_is_the_fixtures_own`` holds the href itself to the
+tracked capture, so a regenerated fixture fails here rather than leaving a
+stale expectation passing quietly. Both ids inside the href are INVENTED (see
 ``scripts/_build_follow_fixtures.py``, whose substitution tables are paired by
 index against a gitignored key) and are declared in
-``tests/test_no_committed_identity.py``.
+``tests/test_no_committed_identity.py``. The href is a literal rather than an
+f-string for a reason that is itself a finding -- see the note on ``HREF``.
 
 THE HOP COUNT IS A MEASUREMENT AND IS PINNED AS ONE. ``harvest_linked_cards``
-defaults to eight ancestors and eight is the wrong depth on this panel; the
-module below runs the harvest at five depths and asserts what each returns,
-so the constant ``shape.COMPANY_ID_CARD_HOPS`` is backed by the reading rather
-than by a sentence about it.
+defaults to eight ancestors and eight is the wrong depth on this panel. The
+five-depth reading is in ``_audit/_scratch/_probe_canned_search_harvest.py``
+and is quoted on ``shape.COMPANY_ID_CARD_HOPS``; the module below re-runs the
+THREE depths that carry the argument -- two, three and eight -- and asserts
+what each returns, so the constant is backed by a reading this suite takes
+itself rather than by a sentence about one somebody took once.
 """
 
 from __future__ import annotations
 
 import asyncio
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
@@ -142,9 +148,22 @@ async def _harvest(html: str, hops: int) -> list[dict]:
             await browser.close()
 
 
-def harvest(name: str, hops: int) -> list[dict]:
+@lru_cache(maxsize=None)
+def harvest(name: str, hops: int) -> tuple[dict, ...]:
+    """One Chromium launch per (fixture, depth), not per assertion.
+
+    MEMOISED BECAUSE THE INPUT IS FROZEN. The fixtures are tracked files and
+    the harvest is a pure read of one, so a second call cannot return anything
+    a first did not -- there is no assertion here that a fresh launch could
+    make true or false. Without this the module launches twelve browsers to
+    ask seven questions, which on a loaded box is the difference between a
+    slow test and a flaky one, and this repository runs several suites at
+    once.
+
+    Returns a TUPLE so the cache cannot hand two tests the same mutable list.
+    """
     html = (FIXTURE_DIR / name).read_text(encoding="ascii")
-    return asyncio.run(_harvest(html, hops))
+    return tuple(asyncio.run(_harvest(html, hops)))
 
 
 def test_the_posting_carries_exactly_one_canned_people_search():
@@ -175,7 +194,7 @@ def test_the_other_four_job_captures_carry_no_such_link(name):
     empty. These are captures of the same surface that simply did not render
     the Premium panel, which is the case production will meet.
     """
-    assert harvest(name, shape.COMPANY_ID_CARD_HOPS) == []
+    assert harvest(name, shape.COMPANY_ID_CARD_HOPS) == ()
 
 
 def test_the_hop_count_is_the_measurement_it_claims_to_be():
