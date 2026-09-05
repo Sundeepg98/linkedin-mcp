@@ -8,7 +8,7 @@ shipped one aim that resolved ZERO against the live DOM and would have read as
 "he has no pending invitations" -- so a reader whose selector is never executed
 is precisely the instrument this file exists to refuse.
 
-``tests/fixtures/newsletter_subscriptions.html`` is SYNTHETIC in its content
+``tests/fixtures/synthetic/newsletter_subscriptions.html`` is SYNTHETIC in its content
 and MEASURED in its structure. The measurement is on the live page of
 2026-09-05 16:19 IST: ten anchors, five newsletters, every row drawn twice, an
 illustration anchor with no paragraph at all and a text anchor with exactly
@@ -41,7 +41,32 @@ import pytest
 
 from linkedin_server import newsletters, shape
 
-FIXTURE = Path(__file__).parent / "fixtures" / "newsletter_subscriptions.html"
+#: IN ``fixtures/synthetic/`` AND NOT IN ``fixtures/``, and the directory is
+#: the whole of the reason.
+#:
+#: ``tests/test_surface_census.py`` sweeps ``FIXTURE_DIR.glob("*.html")`` at
+#: five sites and pins aggregate counts over whatever it finds, so **every new
+#: html fixture joins that corpus automatically.** Adding this one moved the
+#: sweep from 553 controls to 567 and turned six tests red -- none of them
+#: about newsletters, none of them wrong.
+#:
+#: THE STRUCTURAL FIX RATHER THAN SIX RE-BASELINES, and there is precedent from
+#: the same day: ``search_appearances_synthetic.html`` was moved into this
+#: directory at ``2d13a41`` for exactly this reason. The glob is not recursive,
+#: so a fixture here is tested by its own suite and counted by nobody else's.
+#:
+#: **RE-PINNING WOULD HAVE BEEN THE WRONG FIX AND THE FIRST TEST SAYS SO IN ITS
+#: OWN FAILURE MESSAGE:** *"FIXTURE_MOVEMENT above was measured against a
+#: directory that no longer exists -- re-measure it rather than moving this
+#: number."* Six numbers moved by one cause; the cause is where the fix goes.
+#:
+#: The sort was done before the sweep, because a sweeping fix is only safe once
+#: you have checked what it would silence: all six failures carry the identical
+#: assertion -- *the sweep read 567 controls, not 553* -- so the queue is
+#: entirely the count class and holds no consent guard.
+FIXTURE = (
+    Path(__file__).parent / "fixtures" / "synthetic" / "newsletter_subscriptions.html"
+)
 
 #: What the fixture draws, MEASURED off the file by an independent parse below
 #: rather than transcribed here -- the same discipline the connections fixture
