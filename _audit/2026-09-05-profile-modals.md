@@ -45,7 +45,15 @@ it by reading the artifact instead of obeying the queue.
   lead's and my numbers below are stated against it, not inside it.
 * Did not build a tool for any of the four rows. Nothing here is registered on
   the MCP surface and nothing here can be called.
-* Did not settle `OPEN-TO-HIRING-MODAL`'s four write rows beyond presence.
+* Did not settle `OPEN-TO-HIRING-MODAL`'s four write rows beyond presence and
+  aim.
+* **Did not touch `dom.py`, `server.py`, `readonly.py` or `writes.py`.**
+  Recomputed at freeze rather than asserted: the union of paths across all
+  four of this wave's commits is three files -- the probe, this document, and
+  one row in `tests/test_a_sanitiser_earns_its_entry.py`. So the census fix
+  section 6.5 argues for is written down and NOT applied, deliberately: both
+  modules were contended all afternoon and the remedy belongs to whoever owns
+  the census.
 
 ---
 
@@ -524,13 +532,16 @@ because the reader did not change.
    the next step is NOT a press -- it is deciding which of the three `open_to`
    openers is the menu, and that is settled by reading their relations, not by
    pressing one and seeing what happens.
-4. **A stability series on the census control count.** One probe run, N
-   spaced readings of one surface in one process, reported as a series.
-   Section 6.4 shows the count spanning 67 to 235 on `/in/me/` with nothing
-   pressed; until somebody takes that series, every pinned control count in
-   this package is a single sample of a quantity nobody has shown settles.
-   **This is the cheapest high-value thing left in my four rows and it needs
-   no ruling, no boundary and no write.**
+4. **DONE, and it changed the answer -- see 6.5.** This item read: *"a
+   stability series on the census control count ... the cheapest high-value
+   thing left in my four rows."* I took it before winding up. The count
+   settles; what does not is when the census reads it. **What that item
+   becomes: teach the census to wait -- read until the last three reads agree,
+   report the number of reads it took.** No boundary, no ruling, no write, and
+   it retires a class of "the count moved" reds across every surface this
+   server censuses, not just my four. It is the largest thing this wave found
+   and it is not mine to build: `linkedin_surface_census` and `dom.py` were
+   contended all afternoon and I did not touch either.
 5. **The `_probe_*.html` captures under `_audit/` are UNTRACKED** (section 3).
    Any argument resting on "measured across all five profile captures" is
    resting on files a clone does not have.
