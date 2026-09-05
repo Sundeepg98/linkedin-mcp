@@ -459,3 +459,130 @@ async def test_no_performable_tool_headlines_itself_as_refusing(tools):
         "these actions PERFORM and their summary line says they refuse: %s"
         % refusing
     )
+
+
+# ---------------------------------------------------------------------------
+# A FIFTH DRIFT: prose about a url the code DELIBERATELY NEVER BUILDS
+# ---------------------------------------------------------------------------
+#
+# THIS IS THE GAP THE THIRD GUARD ABOVE NAMES AND DECLINES, and the reason it
+# declined does not cover this case. Its docstring says it "does not try to
+# police the opposite claim -- 'is on the allowlist' is checked by
+# ``assert_read_url`` itself, which is a better instrument than a regex."
+#
+# That is true of a REFUSAL TEXT, which describes a url the code was about to
+# open, so the boundary evaluates it either way. It is FALSE of a source
+# comment whose entire subject is a url this package deliberately never
+# builds. ``assert_read_url`` is never called on an address nobody constructs,
+# so no runtime instrument can ever contradict a claim about it. The comment
+# is unreachable by the better instrument, which is exactly why it drifted and
+# exactly why it needed a worse one.
+#
+# THE DRIFT, found 2026-09-05. ``PROFILE_DETAIL_URLS`` carried "The vanity
+# slug is never used to build one of these, even though the allowlist would
+# accept it". The read boundary had since dropped the third-party profile
+# patterns, so the allowlist REFUSES that spelling -- and a second comment in
+# the SAME FILE, on ``details_urls``, already said so. Two sites, one fact,
+# opposite answers, and the one a reader meets first was the wrong one.
+#
+# The clause was load-bearing in the wrong direction: it told the next reader
+# a slug-built address would pass the door, and it sold a mechanism as a
+# preference.
+
+#: An invented public identifier. Taken from ``SYNTHETIC_SLUGS`` in
+#: ``tests/test_no_committed_identity.py``, which is the register of values
+#: this repository has established are invented -- so reusing one widens
+#: NOTHING, where declaring a fresh plant would widen what that guard
+#: tolerates in this file forever.
+_INVENTED_SLUG = "some-real-slug-99"
+
+#: The three spellings the drifted clause claimed were admissible.
+_SLUG_SPELLINGS = (
+    "https://www.linkedin.com/in/%s/details/skills/" % _INVENTED_SLUG,
+    "https://www.linkedin.com/in/%s/details/experience/" % _INVENTED_SLUG,
+    "https://www.linkedin.com/in/%s/" % _INVENTED_SLUG,
+)
+
+
+def _profile_detail_comment() -> str:
+    """The contiguous comment block directly above ``PROFILE_DETAIL_URLS``.
+
+    Located by CONTENT, never by line number. Line numbers in this file have
+    moved three times in an hour under concurrent writers, and a guard that
+    reads a fixed offset measures the tree's churn rather than its prose.
+    """
+    import pathlib
+
+    anchor = "PROFILE_DETAIL_URLS: dict[str, str] = {"
+    lines = pathlib.Path(server.__file__).read_text(
+        encoding="utf-8", errors="replace"
+    ).splitlines()
+    index = next((i for i, ln in enumerate(lines) if ln.startswith(anchor)), -1)
+    assert index > 0, "anchor not found in server.py: %r" % anchor
+    block: list[str] = []
+    cursor = index - 1
+    while cursor >= 0 and lines[cursor].lstrip().startswith("#"):
+        block.append(lines[cursor])
+        cursor -= 1
+    assert block, "no comment block above %r" % anchor
+    return "\n".join(reversed(block))
+
+
+def test_the_profile_detail_comment_was_found_and_is_the_right_one():
+    """A LOOP OVER NOTHING PASSES, and so does a regex over an empty string.
+
+    The two guards below read a block located by an anchor. If the anchor ever
+    stops matching -- a rename, a reformat -- an empty block would make both
+    of them pass while checking nothing. This fails HERE instead, and names
+    what it did find rather than only what it did not.
+    """
+    block = _profile_detail_comment()
+    assert len(block.splitlines()) > 5, block
+    assert "/in/me/" in block, block
+
+
+def test_the_read_boundary_refuses_every_slug_spelling_of_a_details_page():
+    """The MEASUREMENT half. Prose is checked against this, not the reverse.
+
+    If the boundary is ever widened to admit a member-slug profile address
+    again, this goes red -- and the comment above ``PROFILE_DETAIL_URLS``,
+    which argues from this refusal, has to be re-read rather than silently
+    becoming wrong a second time.
+    """
+    admitted = []
+    for url in _SLUG_SPELLINGS:
+        try:
+            readonly.assert_read_url(url)
+        except Exception:
+            continue
+        admitted.append(url.split("/in/", 1)[1])
+    assert admitted == [], (
+        "the read boundary now ADMITS a slug-built profile address: %s"
+        % admitted
+    )
+    # THE CONTROL, and it is the whole reading. Without it an empty
+    # ``admitted`` could mean the boundary refuses everything, or that
+    # ``assert_read_url`` raises unconditionally, or that the urls above are
+    # malformed. The ``/in/me/`` spelling MUST be admitted for the refusals
+    # above to be about the SLUG rather than about the path.
+    readonly.assert_read_url("https://www.linkedin.com/in/me/details/skills/")
+
+
+def test_no_comment_claims_the_allowlist_accepts_what_it_refuses():
+    """The PROSE half, bound to the measurement above.
+
+    Deliberately narrow, in the shape the third guard established: it fires
+    only on a sentence that makes an ADMISSION claim about the allowlist, and
+    says nothing about prose that makes no such claim.
+    """
+    block = " ".join(_profile_detail_comment().replace("#:", " ").split())
+    claims = [
+        sentence
+        for sentence in block.split(". ")
+        if re.search(r"allowlist would accept|allowlist accepts", sentence, re.I)
+        and not re.search(r"\bREFUSES\b|read \"even though|until 2026", sentence)
+    ]
+    assert claims == [], (
+        "this comment says the allowlist would accept a spelling "
+        "assert_read_url refuses: %s" % claims
+    )

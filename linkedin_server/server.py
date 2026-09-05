@@ -1101,9 +1101,27 @@ async def linkedin_cdp_status() -> dict[str, Any]:
 #:
 #: THE ``/in/me/`` SPELLING IN ALL THREE. It resolves to whoever is signed in
 #: and can therefore reach nobody else's profile, which is why the read
-#: boundary admits it. The vanity slug is never used to build one of these,
-#: even though the allowlist would accept it: an address built from a landed
-#: url is an address the page chose.
+#: boundary admits it. The vanity slug is never used to build one of these:
+#: an address built from a landed url is an address the page chose.
+#:
+#: THAT WAS A DISCIPLINE AND IS NOW ALSO A MECHANISM, and this paragraph said
+#: the opposite until 2026-09-05. It read "even though the allowlist would
+#: accept it". THE ALLOWLIST REFUSES IT -- measured, not read off a
+#: neighbouring comment: ``readonly.assert_read_url`` raises on
+#: ``/in/<slug>/details/skills/``, on ``/in/<slug>/details/experience/`` and
+#: on ``/in/<slug>/`` alike, and admits only the ``/in/me/`` form, because the
+#: read boundary dropped the third-party profile patterns. The comment on
+#: ``details_urls`` in ``linkedin_my_profile`` has said so since; two sites in
+#: this file disagreed about the same fact.
+#:
+#: The stale clause was not merely imprecise. It told the next reader that a
+#: slug-built address would pass the read door -- which is how somebody writes
+#: a call that raises at the boundary -- and it sold a guarantee as a
+#: preference, which understates the protection. ``assert_read_url`` cannot
+#: catch this one on its own, and that is the whole reason it lasted: the
+#: claim is ABOUT a url this file deliberately never builds, so no runtime
+#: check ever evaluates it. It is pinned instead by
+#: ``tests/test_prose_that_makes_a_claim.py``.
 PROFILE_DETAIL_URLS: dict[str, str] = {
     "experience": f"{BASE_URL}/in/me/details/experience/",
     "education": f"{BASE_URL}/in/me/details/education/",
