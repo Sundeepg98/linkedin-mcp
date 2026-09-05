@@ -60,8 +60,14 @@ _NUMBER_WORDS: dict[str, int] = {
     # about it -- a missing word raises KeyError, which reads as a broken
     # test rather than as a moved number.
     "twenty-four": 24,
+    # TWENTY-FIVE and THIRTY-SEVEN, added 2026-09-05 with
+    # ``linkedin_search_appearances``. Same reason as the note above, and it
+    # bit exactly as predicted: the first run after registering the tool
+    # failed with ``KeyError: 'thirty-seven'``, which says nothing about the
+    # docstring being wrong and everything about this table being short.
+    "twenty-five": 25,
     "thirty-one": 31, "thirty-two": 32, "thirty-three": 33, "thirty-four": 34,
-    "thirty-five": 35, "thirty-six": 36,
+    "thirty-five": 35, "thirty-six": 36, "thirty-seven": 37,
 }
 
 

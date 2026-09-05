@@ -155,9 +155,30 @@ The twenty-first, `linkedin_my_activity_items`, arrived after that, on the
 same day again, and its row and the count moved in one edit for the same
 reason.
 
+**AND THE DISCIPLINE THOSE TWO PARAGRAPHS RECORD HAS SINCE LAPSED, MEASURED
+2026-09-05.** `linkedin_search_appearances` has a row above and this count did
+NOT move to twenty-two, because moving it to twenty-two would make it wrong in
+a new way. Counted off the live registry rather than off this page: the server
+registers 37 tools and this table names 27 of them, so **ten registered tools
+have no row here** -- `linkedin_comment_on_item`, `linkedin_compose_fields`,
+`linkedin_connections`, `linkedin_profile_editor_values`,
+`linkedin_publish_post`, `linkedin_react_to_item`, `linkedin_send_invitation`,
+`linkedin_send_message`, `linkedin_update_profile_field`, and this wave's own
+until the row above was written. Several are writes and are described
+elsewhere in this file; that is a reason some of them are absent, not a reason
+the number twenty-one is right.
+
+So the honest state is: the sentence "All twenty-one reads are here" is the
+same defect its own two paragraphs were written about, and it is recorded here
+rather than patched, because fixing it means auditing which of the ten belong
+in THIS table and which are documented in the write sections -- a different
+job from adding one row, and one that should be done by somebody who reads the
+whole file rather than as a side effect of a wave that touched one tool.
+
 | Tool | Reads |
 |---|---|
 | `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. |
+| `linkedin_search_appearances` | **The reciprocal of the row above** -- that one reads the receiving end of a profile view, this one the receiving end of a SEARCH: how often other people's searches put you in front of them. Your own analytics, no argument, and the address carries no member segment so it can only ever resolve to whoever is signed in. **It is the only tool here whose page nobody had opened when it shipped**, and its docstring says so rather than letting you find out: the parser was built against a fixture that is SYNTHETIC and labelled so, which proves the tool refuses to publish the third parties put in front of it and proves nothing about whether it reads the real surface. Past the first two number-and-caption pairs the caption is withheld INSIDE the page and never reaches the process -- LinkedIn's breakdown panels describe the SEARCHERS, in exactly the shape a headline metric has, and those are other people's employers and titles. `anchors.person` is a COUNT of member links and is the field worth reading first: non-zero means LinkedIn's record of a search names the people in it. **A zero settles less than it looks like** -- zero appearances is equally consistent with "searches leave no record" and "nobody searched for you this week", and this tool cannot separate them; `headline: null` means no metric was found at all, which is a different answer again. |
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_draft_applications` | The applications you STARTED and never sent -- the tracker tab LinkedIn labels "In Progress" and addresses as `?stage=draft`, with title, company, location, how long ago, and the job id. A draft is not a stalled application: nothing went anywhere, so an empty list here is not evidence about anything you did send. It reads the list and nothing else -- the row's own Delete control, and the discard dialog behind it, are never pressed from here. An empty result carries LinkedIn's own tab count, so "you have no drafts" and "this could not be read" are never the same answer. |
 | `linkedin_saved_jobs` | Jobs you bookmarked. |

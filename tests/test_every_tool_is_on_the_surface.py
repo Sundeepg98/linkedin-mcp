@@ -168,4 +168,14 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # refusing because its side-effect cost is unmeasured. The count is
     # updated in the commit that adds the tool, which is the review moment
     # this assertion exists to create.
-    assert len(_tool_names()) == 36
+    #
+    # 37 FROM 2026-09-05: ``linkedin_search_appearances``, a READ, and the
+    # review moment this assertion creates was USED rather than waved
+    # through. It was going to ship as an unwired reader with no tool at all,
+    # on the argument that a docstring should not describe a page its author
+    # has not opened. ``test_reader_reachability`` refused that, and it was
+    # right: its allowlist is EMPTY, no reader in this package has ever been
+    # exempted, and "not wired yet" would have been filed as "by design".
+    # The honest fix was to register the tool and put the ignorance in the
+    # docstring, where a caller reads it.
+    assert len(_tool_names()) == 37

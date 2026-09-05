@@ -27,7 +27,28 @@ import pytest
 
 from linkedin_server import dom, shape
 
-FIXTURE = Path(__file__).parent / "fixtures" / "search_appearances_synthetic.html"
+#: **IN ``fixtures/synthetic/``, NOT IN ``fixtures/``, AND THE DIRECTORY IS
+#: THE POINT RATHER THAN TIDYING.** Everything directly under ``fixtures/`` is
+#: a page LinkedIn served, and ``tests/test_surface_census.py`` treats that
+#: directory as a CORPUS: it globs ``fixtures/*.html`` non-recursively and
+#: pins measurements over the whole of it -- ``FIXTURE_CONTROLS = 553``, a
+#: per-file movement inventory, "29 of the 553 carry a non-null checked".
+#:
+#: Dropping this file in beside the captures took that denominator to 557 and
+#: made every one of those numbers a measurement over twenty real pages PLUS
+#: ONE INVENTION, with nothing in the corpus to say which was which. The
+#: numbers would still have been arithmetically right and would have stopped
+#: meaning what their own comments say they mean.
+#:
+#: So the subdirectory keeps the capture corpus pure and every other wave's
+#: pins untouched. The cost is real and is stated rather than glossed: this
+#: fixture is NOT swept by the census guards, so its invented names get no
+#: free proof that the shaping pipeline would redact them. The tests in this
+#: module assert that directly instead.
+FIXTURE = (
+    Path(__file__).parent / "fixtures" / "synthetic" /
+    "search_appearances_synthetic.html"
+)
 
 #: Every string in the fixture that names a third party. NONE of these may
 #: appear anywhere in the reader's output, at any depth, under any key.

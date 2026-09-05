@@ -934,6 +934,7 @@ def test_the_census_has_no_path_into_this_reader():
         "article_composer",
         "messaging_compose",
         "premium",
+        "search_appearances",
     }, sorted(CENSUS_SURFACES)
 
 

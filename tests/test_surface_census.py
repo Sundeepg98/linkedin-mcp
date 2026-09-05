@@ -701,6 +701,11 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
         "article_composer",
         "messaging_compose",
         "premium",
+        # 2026-09-05. His own search-appearances analytics -- the reciprocal
+        # instrument for a people search. The ONLY key here pointing at a page
+        # nobody in this repository has opened, which is why it is a census
+        # key and not a tool of its own yet.
+        "search_appearances",
     }
     assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
     # EVERY RESOLVED SURFACE NAMES ITS SELECTION RULE. A resolved key with no
@@ -714,7 +719,7 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
     assert census_surface_keys() == sorted(
         set(CENSUS_SURFACES) | CENSUS_RESOLVED_SURFACES
     )
-    assert len(census_surface_keys()) == 11
+    assert len(census_surface_keys()) == 12
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
@@ -933,6 +938,7 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
         "premium",
         "profile",
         "profile_edit_intro",
+        "search_appearances",
         "settings",
         "settings_dark_mode",
     ]
@@ -3655,11 +3661,18 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     #
     # ``article_composer``, ``feed_item`` and ``feed_item_commented`` are read
     # once each at most.
+    # ``search_appearances`` is the strongest case on this list and the one
+    # that shows what "unknown" is FOR: it has been read ZERO times. Not once,
+    # not twice-disagreeing -- never. A verdict of "unknown" from a surface
+    # nobody has opened is the only honest answer there is, and if this
+    # instrument reported anything else about it, the report would be an
+    # invention rather than a measurement.
     for surface in (
         "article_composer",
         "feed_item",
         "feed_item_commented",
         "premium",
+        "search_appearances",
     ):
         assert surface not in CENSUS_SETTLED_CONTROLS, surface
         report = census_settle_report(surface, 5)

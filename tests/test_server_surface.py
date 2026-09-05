@@ -161,6 +161,11 @@ EXPECTED_TOOLS = {
     # it. tests/test_editor_values.py is where that is held.
     "linkedin_profile_editor_values",
     "linkedin_who_viewed_me",
+    # 2026-09-05. The reciprocal of the tool above -- that one reads the
+    # receiving end of a profile view, this one the receiving end of a
+    # SEARCH. The only tool on this surface whose page nobody here had
+    # opened when it shipped, and its docstring says so.
+    "linkedin_search_appearances",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
@@ -374,7 +379,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_thirtysix_tools(tools):
+async def test_the_surface_is_exactly_the_thirtyseven_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -470,7 +475,7 @@ async def test_the_surface_is_exactly_the_thirtysix_tools(tools):
     # added, which is again the half that matters. A tool whose whole body
     # is a refusal is still a tool, and registering it is what makes the
     # refusal reachable.
-    assert len(tools) == 36
+    assert len(tools) == 37
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -561,7 +566,7 @@ async def test_the_surface_is_exactly_the_thirtysix_tools(tools):
     # write side is byte-identical across the change -- which is the half
     # of this split that matters. A read arriving must not be able to move
     # the write column, and this is where that would show.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 24
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 25
 
 
 def test_the_read_that_was_nearly_named_a_write():

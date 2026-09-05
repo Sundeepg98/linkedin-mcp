@@ -1,4 +1,4 @@
-"""The tool surface: thirty-six tools, twelve of which write to LinkedIn.
+"""The tool surface: thirty-seven tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_thirtysix_tools``'s split rather than
+``test_the_surface_is_exactly_the_thirtyseven_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -64,12 +64,21 @@ exact call that restores it.
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Thirty-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtysix_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_thirtyseven_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
-needs: TWENTY-FOUR read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Twenty-four plus twelve plus zero is thirty-six.
+needs: TWENTY-FIVE read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Twenty-five plus twelve plus zero is thirty-seven.
+
+THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
+the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
+end of a profile view, this one the receiving end of a SEARCH. It is the ONLY
+tool on this surface whose page nobody in this repository had opened when it
+shipped, and it says so in its own docstring rather than leaving a reader to
+find out. It was registered rather than left as an unwired reader because
+``test_reader_reachability`` refuses one, and its allowlist is EMPTY: no
+reader here has ever been exempted, and "not wired yet" is not "by design".
 
 THE TWENTY-FOURTH READ ARRIVED 2026-09-03: ``linkedin_connections``, and it
 SHIPS REFUSING, which is the design rather than an unfinished edge. The read
@@ -1136,7 +1145,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_thirtysix_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_thirtyseven_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.
@@ -1323,6 +1332,91 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 url=last_url,
                 hint="open the url yourself and compare with what this reports",
             )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_search_appearances() -> dict[str, Any]:
+    """How often other people's searches put you in front of them.
+
+    THE RECIPROCAL OF linkedin_who_viewed_me. That tool reads the receiving
+    end of a PROFILE VIEW; this one reads the receiving end of a SEARCH. Both
+    sit on your own analytics, both cost no third party anything, and neither
+    takes an argument -- the address carries no member segment at all, so it
+    can only ever resolve to whoever is signed in.
+
+    READ THIS BEFORE READING THE RESULT. **Nobody had opened this page when
+    this tool was written.** Its parser was built against a fixture that is
+    SYNTHETIC and says so in its own first line, so what is proven is that
+    this tool REFUSES to publish the third parties put in front of it -- not
+    that it reads the real surface correctly. The first live reading is the
+    one that establishes what these fields actually contain, and until then a
+    thin result means "the page did not look like the guess", not "there is
+    nothing there".
+
+    WHAT IT RETURNS AND WHAT IT WILL NOT. headline and delta are the first two
+    number-and-caption pairs the page draws, with the caption SHAPED rather
+    than quoted. metrics carries every pair, and past the first two the
+    caption is withheld INSIDE the page and never reaches this process at all:
+    LinkedIn's breakdown panels describe the SEARCHERS -- where they work,
+    what they do, what they typed -- in exactly the shape a headline metric
+    has, and those are other people's employers and titles. Nothing on this
+    surface is published as free text except a form control's own <label> and
+    the trend chart's own one-line description.
+
+    anchors IS THE FIELD WORTH READING FIRST. It counts links, and nothing
+    else: anchors.person is how many member profiles this page links to. A
+    non-zero count means LinkedIn's record of a search NAMES the people in it.
+    No href and no name crosses out of the page to produce that number.
+
+    ABSENT IS NOT ZERO, and the two are different answers here. headline is
+    null when NO metric was found, which is a page that did not render or did
+    not look like this. A headline whose value is "0" is LinkedIn saying zero.
+    Never read the first as the second.
+
+    AND A ZERO SETTLES LESS THAN IT LOOKS LIKE. Zero appearances is equally
+    consistent with "searches leave no record" and with "nobody searched for
+    you this week", and this tool cannot separate them. observed is what says
+    whether the page rendered at all -- main_chars, paragraphs_seen and the
+    view-name counts -- so a thin reading can be told apart from a real one.
+
+    NO SCROLLING, and one page load. This surface defers most of itself the
+    way the profile-views page does, so what is reported is what had drawn.
+    """
+    url = dom.SEARCH_APPEARANCES_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="search appearances")
+            reading = await dom.read_search_appearances(page)
+            # THE SOURCE URL GOES THROUGH THE CENSUS SUBSTITUTION, never the
+            # raw landing, and this tool was written returning it RAW until
+            # ``test_the_remaining_raw_source_url_sites_are_a_pinned_inventory``
+            # caught it. That inventory is a list of tools KNOWN to return one
+            # raw -- explicitly not a list of tools cleared to -- so the fix
+            # for a NEW tool is to shape it rather than to lengthen the list.
+            #
+            # THE ARGUMENT IS linkedin_connections', not linkedin_my_profile's.
+            # my_profile was taken OFF that list on the inverted reasoning: the
+            # identity in its url is HIS OWN and is the tool's whole output, so
+            # shaping bought consistency. Here the address is a constant with
+            # no identifier in it and the landing SHOULD be the same string --
+            # but the boundary checks the REQUESTED url and never re-checks
+            # where it landed, and nobody has ever loaded this page to find out
+            # where it lands. Publishing an unshaped url off a redirect nobody
+            # has observed is a hole whether or not it turns out to be empty.
+            #
+            # ``redirected`` is the diagnostic that survives the shaping, and
+            # it is computed HERE by comparing two strings this process already
+            # holds -- neither of which is a third party's.
+            return {
+                "ok": True,
+                "source_url": shape.census_substitute(landed),
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
     except Exception as exc:
         return _error(exc)
 
