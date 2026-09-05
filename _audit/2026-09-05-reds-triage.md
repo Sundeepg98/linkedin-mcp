@@ -18,7 +18,9 @@ a clean clone showed four. Not one of the three survivors is a defect in
 product code, and **not one of them may be cleared by this wave.** All three are
 guards refusing correctly, each owed by a wave that is not this one.
 
-**Zero reds cleared. Three left standing on purpose. Six dissolved as phantoms.**
+**Zero reds cleared. Three left standing on purpose. Six not present in a clean
+clone at all** -- and a concurrent shared-tree run measured below puts the real
+figure at eleven, not six.
 
 That is the whole result, and the count is the least interesting part of it:
 a queue of nine that is really a queue of three, none of which is a bug, is a
@@ -190,36 +192,92 @@ this tree:
 | **the full suite, clean clone, serial** | **passed** |
 
 **Neither documented order reproduces it, and the full serial clone does not
-either.** So the direction is not settled by preferring one report over the
-other -- both are now refuted at this tree, which is a different and better
-outcome than picking a winner. The standing hypothesis in the freeze document
-(that importing `linkedin_server.events` early changes package import order)
-is untouched by this: it was checked for the obvious mechanism and there is no
-`importlib.reload` of `server` anywhere in `tests/`, so that particular
-explanation is not the one.
+either.** Both prior reports are refuted at this tree, which is a better outcome
+than picking a winner between them.
 
-**What this does NOT establish.** A test that passes in one full-suite ordering
+**And the concurrent shared-tree run DID turn it red.** That is the seventh row
+of the table and the informative one:
+
+| the full suite, shared tree, concurrent with 13 landing commits | **FAILED** |
+
+So it is green in a clean clone and red in the shared tree, at the same nominal
+SHA. **This does not separate order-dependence from tree-dependence, and saying
+it did would be the over-claim this document was written to avoid:** the two
+runs differ in BOTH the tree and the collected set (4864 + 11 skipped against
+4890 + 4), so their collection orders were not the same either, and one
+confounder cannot be blamed over the other from two runs.
+
+What it does establish is where the red lives. A gate run in a clone does not
+see it; a gate run beside live writers does. Anyone triaging this from a shared
+tree will keep finding it and keep finding it belongs to nobody.
+
+The standing hypothesis in the freeze document -- that importing
+`linkedin_server.events` early changes package import order -- is untouched, but
+its obvious mechanism was checked and eliminated: there is no `importlib.reload`
+of `server` anywhere in `tests/`.
+
+**What none of this establishes.** A test that passes in one full-suite ordering
 is not a test shown to be order-independent; it is one sample. The suite has no
 `pytest-randomly`, so serial collection order is stable and this reading will
 reproduce -- which is exactly why it says nothing about the sharded or
-xdist-distributed orders CI will use. Recorded as an open item, not as a fix.
+xdist-distributed orders CI will use, and sharded CI is built and waiting on a
+push. Recorded as an open item, not as a fix.
 
-## The six phantoms, and the one thing worth carrying from them
+## The phantoms, MEASURED rather than inferred -- a concurrent second reading
 
-They are not enumerated by name because the readings that produced them were
-taken on a tree that has since moved, and naming a phantom from a stale run
-would be recording a reading as a fact -- the exact error this document exists
-to sort out. What is worth carrying is the ratio:
+The two 9-failure readings could only be compared as totals, and comparing
+totals is what hid this all day. So a second full run was taken CONCURRENTLY in
+the shared tree and diffed against the clone as a SET.
 
-    reported on a moving tree      9
-    real, in a clean clone         3
-    over-report                    200%
+| reading | tree | result | wall |
+|---|---|---|---|
+| authority | clone of `693f488`, serial | **3 failed**, 4864 passed, 11 skipped, 1 xfailed | 27:58 |
+| comparison | shared tree, 13 commits landed underneath it | **14 failed**, 4890 passed, 4 skipped, 1 xfailed | 33:45 |
 
-The earlier instance today ran at 150%. **This is worse, and both are the same
-mechanism:** pytest imports from the working tree, so a suite reading in a tree
-with live writers is a statement about a tree that existed for part of the run
-and nowhere afterwards. The remedy is not care. It is a clone, and the clone
-must be shown importing itself.
+    in both (the real ones)      3
+    shared-tree only            11
+    clone only                   0
+
+**The clone's failure set is a strict SUBSET of the shared tree's.** That is the
+result that makes the clone trustworthy rather than merely quieter: it hid
+nothing. Had the clone carried even one red the shared run did not, the clone
+would have been the suspect instrument.
+
+**The over-report is worse than the brief's, and by the same mechanism:** 14
+reported against 3 real is 367%, where the brief's two readings gave 200% and
+the earlier instance today gave 150%. The collected totals disagree too -- 4864
+passed and 11 skipped against 4890 and 4 -- which is the cheapest available tell
+that two runs did not read the same corpus, and it needs no failure analysis at
+all.
+
+**"ABSENT AT 693f488" IS NOT "NOT REAL", and collapsing the two would be this
+document's own error.** The eleven sort into causes, and several are real right
+now in a tree that did not exist when the clone was taken:
+
+- **3** in `test_stale_process_is_announced` -- these tests read git state, and
+  the tree was dirty with HEAD moving 13 times under the run. A test ABOUT tree
+  cleanliness goes red on a dirty tree by construction; that is it working.
+- **2** in `test_readonly_boundary_invariant` -- a boundary re-freeze in flight,
+  52 uncommitted lines in `linkedin_server/readonly.py` from a live writer.
+- **1** `test_no_committed_identity[scripts/_probe_alerts_family_pattern.py]` --
+  **REAL AND CURRENT.** That probe was untracked at 23:17 and its author
+  committed it mid-run. It is owed by that author, is the UNDECLARED class
+  again (the exact-value sweep passes at 0 hits over the whole tree), and it is
+  not in the clone only because the file did not exist at `693f488`.
+- **2** in `test_server_surface`, including the order-dependent login red.
+- **1** `test_typeahead_gate::test_the_recipient_gate_is_still_the_authority` --
+  same word-bounded family as red 3 above, and further evidence that the
+  coverage gap in `9503723` is wider than the one file this triage found.
+- **1** each in `test_publish_post_names_its_audience` and
+  `test_radio_label_binding`.
+
+So the honest summary is not "six phantoms". It is: **three reds that survive a
+clean clone and are owed by three named waves; and eleven more that are
+statements about a tree several waves were writing at the time**, of which at
+least one is a live red somebody owes today and the rest dissolve or belong to
+uncommitted work.
+
+The remedy is not care. It is a clone, shown importing itself, diffed as a SET.
 
 ## Instruments
 
