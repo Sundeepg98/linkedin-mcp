@@ -323,7 +323,70 @@ to a sentence that carries one would be worse than recording the disagreement.
 
 ---
 
-## 7. What is still owed
+## 7. Live verification was ATTEMPTED and is BLOCKED: the shared Chrome is gone
+
+Two of the three tools were called live, through the package rather than
+through the server -- the running HTTP server holds the code it started with,
+so it has 38 tools and cannot see these three, and restarting a server a dozen
+waves share to prove one wave's work is not a trade this wave makes at the end
+of a session. `linkedin_newsletter_subscriptions` was deliberately not called:
+two loads and a pending-invitation obligation, against a badge known to sit at
+zero, which is the degenerate reading.
+
+**BOTH RETURNED `browser_unavailable`, AND THE CAUSE IS NOT THIS WAVE'S CODE.**
+
+    socket connect 9224     TimeoutError
+    Get-NetTCPConnection    9224 NOT LISTENING
+    http://127.0.0.1:9224/json/version    WebException
+    Get-NetTCPConnection    8322 LISTENING pid 35196
+
+**The Chrome every tool and probe attaches to is DOWN, and the MCP server is
+still up in front of it.** The cold-boot section of the freeze ruling says
+*LEAVE pid 1252 RUNNING -- it is the browser every tool and probe attaches
+to*; it is not running. Anything in this fleet doing live work will get
+`browser_unavailable` and, per that document's own scar, the failure text
+points at the one thing that is not wrong.
+
+**NOT RESTARTED BY THIS WAVE, deliberately.** Bringing Chrome back touches the
+operator's real profile, and the profile is stamped 152 against playwright's
+151 -- a launch is a DOWNGRADE and is the 2026-08-25 failure that cost the
+signed-in session. That is a fleet-level call with an irreversible downside,
+and a wiring wave does not make it to verify its own three tools.
+
+**WHAT THE FAILED RUN DID ESTABLISH**, stated narrowly because it is narrow:
+both tools returned a SHAPED refusal through `_error` rather than a traceback,
+with `error` and `message` and nothing else -- so the failure path is
+exercised. **The success path is not**, and no claim is made about it. Zero
+page loads were spent: the refusal happens before any navigation.
+
+## 8. The wider run, and which reds are this wave's
+
+954 tests over the 28 files that touch the tool surface: **6 failed.** None of
+the six is a tool-count or a name-set pin -- `test_tools.py` (124),
+`test_every_tool_is_on_the_surface.py` and `test_surface_census.py` all passed.
+
+    2  test_a_correction_is_findable_from_the_claim.py -- markers in OTHER
+       waves' audit documents (2026-09-03-linkedin-gap-blockers.md:277,
+       2026-09-05-article-publish.md:453, 2026-09-05-jobs-tail.md:190).
+       NOT THIS WAVE'S. This document declares no correction marker.
+    4  the stale_process class -- test_stale_process_is_announced.py x3 and
+       test_server_surface.py::test_both_login_names_... The running server's
+       loaded commit is behind disk, so its answers carry a stale_process key
+       the assertions do not expect.
+
+**THE FOUR ARE A PROPERTY OF A LIVE TREE WITH A RUNNING SERVER BEHIND IT, NOT
+OF THIS WIRING**, and they will be red for any wave that commits while the
+server is stale. The remedy is `scripts/restart_server.ps1` and it belongs to
+whoever owns the transport -- and it is now entangled with the section above,
+because a restart with no Chrome to attach to fixes the staleness and not the
+outage.
+
+**AND THE MEASUREMENT ITSELF CARRIES A CAVEAT THAT SHOULD TRAVEL WITH IT.**
+Five commits from three waves landed during the six minutes that run took, and
+the tree moved again between its last two readings. A suite reading is dated by
+the TREE, not by the SHA, and this one is dated by a tree that was moving.
+
+## 9. What is still owed
 
 * **A section-aware groups reader** -- see 2 above. The collection rule is
   already written and already validated live; what is owed is a ruling on
@@ -336,8 +399,10 @@ to a sentence that carries one would be worse than recording the disagreement.
 * **`notify_cost.cost_delta`** stays unwired until somebody rules on spending
   the unread state in band. `linkedin_notify_cost_precondition` is what says
   whether spending it would produce evidence at all.
-* **Nothing here has been run against a live browser.** Every claim in this
-  document is about code, tests and the registry. The three tools were
-  registered and their guards run; none of the three pages was opened by this
-  wave.
+* **The success path of all three tools is unexercised.** Live verification was
+  attempted and blocked -- see 7. Every claim here about behaviour is about
+  code, tests and the registry; no page was opened by this wave.
+* **Chrome on port 9224 is DOWN and the MCP server is up in front of it.**
+  Reported, not fixed, and it is the most urgent thing in this document because
+  it blocks every wave's live work, not just this one's.
 * **Nothing pushed.** The push freeze is the operator's and is untouched.
