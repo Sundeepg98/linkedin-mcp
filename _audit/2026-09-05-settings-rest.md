@@ -351,10 +351,69 @@ SURFACES. That distinction is load-bearing and I am not going to blur it:
 | 68 | `PICKER-SURFACES` | both rows name no address | whether pickers draw |
 | 54 | `RESUME-TOOLS-SURFACE` | no upstream blocker is named | the entitlement |
 
-Also not reached: a LIVE feed read, which would have converted `feed.py`'s
+### 5.1 THE LIVE READ WAS ATTEMPTED AND THE BROWSER IS GONE -- this is fleet-wide
+
+The one live read this wave wanted was the feed, to convert `feed.py`'s
 remaining asserted claim (two-entity paths occur ON THE FEED) into a
-measurement. The corpus sweep is a weaker instrument aimed at the same claim and
-it says so on its own output.
+measurement. `scripts/_probe_feed_kinds_live.py` was written and **failed at
+the attach.** Measured at the OS level rather than read off the failure text:
+
+    21:26 by the box
+    port 9224                          NO LISTENER
+    chrome processes running           20
+    of those carrying the debug flag    0
+    port 8322 (the MCP server)         LISTENING, pid 35196
+
+**The shared CDP Chrome the whole fleet attaches to is gone, while the
+operator's own Chrome is running beside it.** The cold-boot section of
+`_TEAM_LEAD_PUSH_FREEZE.md` records that browser as pid 1252 and tells every
+wave to run its live reads against it. That is no longer true of this box, and
+any wave still holding that instruction will discover it the same way I did.
+
+**The failure text was RIGHT this time, and that is only knowable because the
+port was read.** The same message -- *"ATTACH mode needs a Chrome that is
+ALREADY RUNNING"* -- pointed at the one thing that was NOT wrong earlier today,
+when Chrome was answering in 0.07s and the real cause was a hardcoded timeout
+ceiling. A message that is correct and a message that is misleading are
+indistinguishable until something independent is measured. **Two readings, same
+words, opposite verdicts, and only the port separated them.**
+
+### 5.2 RESTORING IT IS AN OPERATOR GATE, NOT AN ENGINEERING TASK
+
+This is why the probe was left unrun rather than made to work:
+
+* starting a Chrome on `--remote-debugging-port=9224` requires quitting his
+  existing Chrome **completely** first -- the flag is otherwise handed silently
+  to the running instance and no port opens. **Closing the operator's own
+  browser is not a thing an agent may do**, and this repo's standing scar is an
+  agent that closed it as a side effect of a cleanup;
+* the documented alternative, a separate `--user-data-dir`, is signed into
+  nothing, so it cannot read his feed;
+* LAUNCH mode is barred outright: his profile is stamped Chrome 152 and
+  playwright's chromium is 151, so a launch is a **downgrade** -- the
+  2026-08-25 failure that cost the signed-in session.
+
+**So this is a one-word ask for the operator, not a task for a wave.** Every
+live read across the fleet is blocked until a CDP Chrome exists again.
+
+### 5.3 The probe is committed UNRUN and says so in its own docstring
+
+Verified about it: it parses, every import resolves, and `FEED_URL` is ALLOWED
+by `readonly.assert_read_url` at this tree. **Not verified: every line after
+the attach** -- its output shape, its badge pair, its census handling and its
+`finally` have never executed. Every fresh instrument built in this repository
+has had a bug on its first attempt, so it is filed as UNSMOKED rather than
+ready, in the docstring where the next runner will read it rather than here
+where they will not.
+
+It needs no new module and adds no reader: it uses the shipped
+`dom.read_surface_census`, whose `href_shape` already speaks the placeholder
+vocabulary `feed.py` derives its markers from. That choice was deliberate --
+**a neighbouring wave emptied the unwired-reader inventory within the hour and
+adding a reader here would have refilled it.** The cost is stated in the
+probe before its numbers rather than after: `href_shape` is a placeholder, so
+the KIND distribution it would report is real and the DISTINCT count is
+degenerate and means nothing.
 
 **Rows moved: 2 of 12** (49 built, 58's second half settled), **plus 6 blockers
 re-costed on a measured row census and 3 of those individually characterised.**
@@ -382,13 +441,42 @@ re-costed on a measured row census and 3 of those individually characterised.**
 
 ## 7. FREEZE -- numbers RECOMPUTED at freeze, not re-read
 
-    commits            4     812abc3  feed.py + tests (the ruling)
+**Recomputed from `git log` and `pytest --collect-only` at freeze, not
+re-read from the drafts above. Two numbers moved when I recomputed them.**
+
+    commits            5     812abc3  feed.py + tests (the ruling)
                              8c028d3  corpus probe + the measured correction
                              f86f27f  row-58 transport invariant
-                             (this document)
-    files added        4     1 module, 2 test files, 1 probe
-    tests added       37     28 feed + 9 transport
-    AI attribution     0     verified per commit
-    sweep at gate      PASS  0 hits across 354 tracked files
-    allowlist         31     re-derived by import, not read from a document
+                             840f143  this document + the back-pointer
+                             (the live probe, unrun)
+    files added        6     1 module, 2 test files, 2 probes, 1 document
+    files modified     1     the ranked table, 17 lines, all mine, 0 deletions
+    tests added       37     collected, not counted by hand: 28 + 9
+    AI attribution     0     per commit, against the trailer vocabulary --
+                             NOT against `noreply`, which matches the
+                             operator's own GitHub address and produced a
+                             false positive for a predecessor
+    sweep at gate      PASS  0 hits across 356 tracked files
+    allowlist         31     re-derived by importing the module and counting
+    boundary          UNTOUCHED -- no pattern, no list, no digest
+    live reads         0     attempted 1, browser gone -- see 5.1
     pushed          NOTHING
+
+**Reds at freeze, and neither is this wave's -- established from the
+assertion text rather than assumed:**
+
+| red | why not mine |
+|---|---|
+| `test_every_candidate_pair_is_declared_or_triaged` | the two untriaged pairs name `2026-09-05-article-publish.md` and `2026-09-05-jobs-tail.md`; it was already red before I wrote a line, and my own marker pair resolves |
+
+My marker pair went red once and it WAS mine, twice over: the target could not
+resolve because my document was untracked (the guard reads `git ls-files`, not
+the working copy -- deliberately, after that exact distinction made it pass
+locally and fail in a clone at the same SHA), and both markers wrapped their
+reason onto a second line where the guard reads only the first. Both fixed;
+that test passes.
+
+**What a successor should take first:** the browser (5.1) -- it is one word
+from the operator and it unblocks every wave, not just this one. Then run
+`scripts/_probe_feed_kinds_live.py`, which is written, unsmoked, and expects to
+need a fix.
