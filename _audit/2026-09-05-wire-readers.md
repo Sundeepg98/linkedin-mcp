@@ -288,6 +288,30 @@ then 38. Corrected to forty-one over forty, with the arithmetic stated -- names
 minus capabilities is the login pair and nothing else -- so the claim stays
 checkable when the count moves again.
 
+**A DISCLOSURE FIELD THAT WAS ALREADY WRONG, FOUND BY BECOMING WRONG TWICE.**
+`linkedin_server_info`'s `known_side_effects` -- the field its own docstrings
+point callers at as the place to look -- said:
+
+> loading `/mynetwork/` would consume the pending-invitation badge, **which is
+> why no tool here loads it at all**
+
+`linkedin_newsletter_subscriptions` loads
+`/mynetwork/network-manager/newsletters/`, so this wave falsified it. Checking
+before correcting found it had **already been false since 2026-09-03**:
+`linkedin_connections` loads `/mynetwork/invite-connect/connections/`, with
+exactly the before-and-after badge discipline that exists because the cost is
+unmeasured. Read charitably the sentence meant the ROOT. **A caller meets this
+field and does not meet the audit**, and would read it as the whole surface.
+
+Corrected to the precise claim -- no tool loads the root; two load addresses
+under it; neither assumes the cost in either direction; each refuses rather
+than answering if the badge cannot be read or moved -- with the stale half kept
+in the text so the next reader learns what it used to say. This is the
+standing-instruction class this repository keeps naming: a disclosure field is
+read as current truth by whoever opens it next and carries no correction
+mechanism of its own. **It was found only because a second instance arrived;
+the first one sat there for two days.**
+
 **And one disagreement left visible rather than smoothed.** `README.md` says
 the server registers N tools "and this table names 27 of them". N was
 re-derived here. **The 27 was not, and it does not reconcile:** counting rows
