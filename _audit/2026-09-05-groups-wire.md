@@ -566,12 +566,25 @@ own, and the first is now off the list. Owners route by
     5023667  the tab guard could not see my close; the pin it enforces over-counts
     7568f1c  page loads computed at freeze; the rename verified live
 
-**NINE, and this list said FIVE for half an hour** -- written when there were
-five and left behind by four more. It is the same class as the cost paragraph
-in section 7 and the same remedy: a list of what a wave did is only true at
-the freeze, so it is recomputed there rather than maintained as it goes.
+    97398e9  this list said five and there were nine
+    <this one> the count is self-referential; the range is not
 
-**Zero AI attribution, verified by grep across all nine message bodies.**
+**THE WAVE IS THE RANGE `5131271..HEAD` AT FREEZE, AND STATING IT AS A COUNT
+WAS THE MISTAKE.** This list said FIVE for half an hour, then NINE for one
+commit -- and it could not have said anything else, because **writing the
+number is itself a commit, so a self-counting list is wrong the instant it is
+saved.** It is the cost paragraph of section 7 one level up, and the remedy is
+not to recount: a RANGE is stable under its own recording and a COUNT is not.
+
+That is worth more than the bookkeeping. This repository keeps finding claims
+that were true when written -- a `--stat` read seconds before a commit, a port
+that was listening 38 minutes ago, an agent's own clock. **This one is the
+degenerate case: a claim that cannot be true when written, no matter how
+carefully.** The fix is never care; it is choosing a form that survives its
+own recording.
+
+**Zero AI attribution across every commit in the range, verified by grep over
+the message bodies.**
 Nothing pushed; the push freeze is the operator's.
 
 Neighbours committed five times INTO THIS RANGE while this wave ran
