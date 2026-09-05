@@ -1,7 +1,8 @@
 # Messaging wave, 2026-09-05
 
 **Owner: the `messaging` wave. Scope: 7 blockers, 24 rows (2R / 21W / 1RW).**
-**Page loads taken: ZERO. Messages sent: ZERO. Commits: 1.**
+**Page loads taken: ZERO. Messages sent: ZERO. Rows retired: ZERO.**
+**Commits: 4. Tests added: 7, in one new file. Boundary changes: 0.**
 
 Rows, recomputed at freeze rather than re-read from the brief:
 
@@ -120,6 +121,56 @@ contended all afternoon, and it is a change to the most irreversible write in
 the package that deserves its own wave and its own red/green pair rather than
 twenty minutes at the end of one.
 
+> **AMENDED BY SECTION 1a, BELOW, TWENTY MINUTES AFTER THIS PARAGRAPH WAS
+> WRITTEN.** The narrowing is real but it is SMALLER than the sentence above
+> implies, and I measured that rather than leaving it to be read charitably.
+> Read 1a before acting on this paragraph.
+
+## 1a. THE NARROWING IS SMALLER THAN I SAID, AND HERE IS ITS REACH
+
+**VERIFIED-BY-INSTRUMENT.** Commit `a745176`, same file, 2 further tests,
+7 passed total.
+
+A claim about a repair is worth what a measurement of its reach is worth. On
+the chip this suite draws, counts only, comparison inside the page:
+
+    found                    1
+    name in aria-label       1
+    name in textContent      0
+    furniture in aria-label  1
+
+**The name lives ONLY in the field carrying the contaminant.** So "stop
+searching the attribute you selected on", read as *drop `aria-label` from the
+haystack*, leaves the matcher searching a string with no name in it at all.
+The gate would then refuse every recipient including the right one -- safe,
+and useless.
+
+The available repair is therefore narrower than the paragraph above: **strip
+the pinned furniture from the front, then search the remainder.** And that is
+defined for exactly one candidate of four:
+
+    aria-label^=    1   position known, remainder well defined
+    aria-label*=    1   occurs somewhere, no defined cut point
+    no aria-label   2   no constraint on the haystack at all
+
+Stripping the first occurrence on the `*=` candidate would eat a name that
+happens to contain those letters, which is the collision being repaired. The
+two candidates with no `aria-label` constraint are not "fine" either -- what
+those chips carry is simply unknown, which is a different problem and no strip
+addresses it. They are counted separately for that reason.
+
+**The reader used here is shown both firing and not firing in a single call**
+-- same function, same needle, same node, one field answers 1 and another
+answers 0 -- so `in_text == 0` cannot be the reading of a reader stuck at
+zero. The detector is factored out of the assertion rather than assumed
+beside it.
+
+Same caveat as everywhere in this family: **this is the GUESSED chip.**
+Whether LinkedIn puts a name in `aria-label`, in `textContent`, in both or in
+neither is unobserved. What is measured is the shape this repo has been
+reasoning against, which is the shape any repair written today would be
+written against.
+
 ---
 
 ## 2. WHAT I DID NOT DO
@@ -208,14 +259,23 @@ family should reproduce that reading first.
 
 ## 5. PROVENANCE
 
-    commit                3c3bfa3   1 file, 307 insertions, 0 deletions
+Recomputed at freeze, not re-read from the sections above.
+
+    commits               3c3bfa3  the gate's substring match, 307 insertions
+                          9a9dbad  this document, 225 insertions
+                          a745176  the narrowing's reach, 123 insertions
+                          + the commit carrying section 1a
     file                  tests/test_the_needle_is_matched_as_a_bare_substring.py
-    tests                 5 passed, 7.15s
+                          430 lines, 7 tests
+    tests                 7 passed, 18.21s
     identity guards       602 passed, 3 failed, 0 naming this file
+    exact-value sweep     PASS, 0 hits across 326 swept files (taken AT THE
+                          GATE, not at wave start)
     page loads            0
     writes fired          0
     boundary changes      0
-    AI attribution        0 (grep over the commit body)
+    rows retired          0
+    AI attribution        0 (grep over every commit body)
 
 Names in the test file are imported from the invented set already committed in
 `tests/test_send_message_gate.py`. No real person, no member id, no slug, no
@@ -223,3 +283,55 @@ urn, no thread id appears in anything this wave wrote. The needles are DERIVED
 from the shipped selector constants rather than spelled, so a change to the
 candidate tuple fails the file instead of silently aiming it at nothing, and
 both needle premises are asserted in both directions.
+
+---
+
+## 6. ROW 57 `MESSAGE-ADDRESSING`: THE ADDRESS IS ADMITTED, AND THE BINDING
+## CONSTRAINT HAS MOVED TO THE ONE THIS WAVE MEASURED
+
+**VERIFIED-BY-INSTRUMENT**, by importing the module and counting rather than
+reading a comment:
+
+    _ALLOWED_URL_PATTERNS      29
+    _FORBIDDEN_URL_SUBSTRINGS  33
+
+    admitted: ^https://www\.linkedin\.com/messaging/compose/\?profileUrn=
+              urn%3Ali%3Afsd_profile%3A[A-Za-z0-9_-]{1,64}
+              &recipient=[A-Za-z0-9_-]{1,64}$
+
+The compose-by-identifier route is **admitted today**, anchored end to end,
+with both identifier components bounded.
+
+This matters because it changes which constraint binds first. When
+`_audit/2026-09-03-typeahead-name-matching-is-dead.md` was written its section
+5 recorded that route as refused by the read boundary; **the boundary has
+moved since, and this is a statement about the tree as it now stands rather
+than a claim about that document's accuracy on the day it was written.** Three
+sibling spellings named there are still refused, which is the tightening it
+anticipated.
+
+**THE RESIDUE THAT DOCUMENT NAMED IS THE ONE THAT STILL BINDS, and this wave
+made it worse rather than better:**
+
+> addressing by identifier removes the CHOOSING problem; it does not remove
+> the OBSERVING one.
+
+Section 1 measured the observing half and found that even when a chip IS read,
+the matcher over it cannot distinguish the person he named from a stranger
+whose label merely contains those letters. So row 57's earliest binding
+constraint is no longer an address and no longer name-matching -- both are
+settled -- it is that **the chip rail has never been observed and the relation
+read off it does not discriminate.**
+
+Cost consequence, offered as DERIVED: the ledger costs row 57 at 2 with
+`boundary: none`. The `none` is now right for a different reason than when it
+was written -- not "no boundary work is needed to reach the surface" by
+oversight, but because the pattern is already in. What it does not carry is
+the observation, which no column in that table represents.
+
+**I did not take that observation.** It needs a live composer, and a live
+composer is `/messaging/`, whose measured cost is a cleared badge and a
+conversation LinkedIn chooses. That is a load with a real obligation attached
+and it belongs to a wave that can pay it deliberately, bracket it with a badge
+reading before and after, and act on what it sees -- not to twenty minutes at
+the end of this one.
