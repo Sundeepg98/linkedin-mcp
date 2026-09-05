@@ -199,8 +199,8 @@ would have with three entries.
 
 Bumping a pinned number is the cheapest way in this repository to turn a test
 green, so the bump is only honest if the guard can still be demonstrated to
-fail. The demonstration is at `_audit/_scratch/_wire_readers_control_demo.py`
-and its output was:
+fail. The demonstration is **tracked**, at
+`scripts/_check_tool_count_pin_control.py`, and its output was:
 
     live registry: 41 tools
     broken reading: ['_attach_recipient_ids', 'linkedin_my_profile']
@@ -229,8 +229,22 @@ demonstration reads the number. C proves it rather than asserting it: with the
 registry intact and only the pin wrong, the two rules stay green and the count
 assertion alone moves.
 
-The script is a one-off demonstration, not an instrument, and is filed as
-disposable. What is durable is this section and the guard's own comment.
+**IT WAS GOING TO BE FILED AS DISPOSABLE AND THAT WAS THE WRONG CALL.** The
+pin moves often -- the sibling assertion in `tests/test_server_surface.py` has
+been renamed at every bump -- and rebuilding this demonstration from scratch
+each time is exactly how a review moment turns into a number edit. So it is
+tracked, with a docstring saying to run it after every bump and paste the
+output beside it.
+
+Promoting it exposed a defect in the first version worth recording, because it
+is the same disease it exists to catch: **part C carried the pin as a
+hardcoded string.** A stale needle simply fails to match, the mutation becomes
+a no-op, and the check prints PASS while demonstrating nothing. It now derives
+the pin with a regex, asserts the mutation actually changed the source, and
+asserts the pin agrees with the live registry -- three lines that turn a silent
+no-op into a visible failure. The docstring had already claimed it "reads the
+pin out of the test file" before the code did; the code was changed to match
+the docstring rather than the other way round.
 
 ---
 
