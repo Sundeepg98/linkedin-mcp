@@ -214,9 +214,9 @@ N 7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to follow your emp
 N 8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to follow a Page you do not manage (50/month)	no committed source names this row against any blocker
 N 33	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See how many of your connections work at an organization	no committed source names this row against any blocker
 N 37	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow a person directly from a feed post	no committed source names this row against any blocker
-N 38	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the list of people you follow	no committed source names this row against any blocker
-N 39	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the people you previously unfollowed	no committed source names this row against any blocker
-N 40	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Re-follow a person you previously unfollowed	no committed source names this row against any blocker
+N 38	PEOPLE-FOLLOW-LISTS	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L349	GAP	GAP	View the list of people you follow	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
+N 39	PEOPLE-FOLLOW-LISTS	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	GAP	GAP	View the people you previously unfollowed	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
+N 40	PEOPLE-FOLLOW-LISTS	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	GAP	GAP	Re-follow a person you previously unfollowed	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
 N 41	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow a member from one of their articles	no committed source names this row against any blocker
 N 42	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow the articles of a member you are not connected to	no committed source names this row against any blocker
 N 43	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mute a person from a feed post	no committed source names this row against any blocker

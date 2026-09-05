@@ -1,18 +1,19 @@
-# The row-to-blocker map, rebuilt from committed sources -- and 287 of 409 are named nowhere
+# The row-to-blocker map, rebuilt from committed sources -- and 284 of 409 are named nowhere
 
-**THE HEADLINE IS THE UNASSIGNED COUNT: 287.**
+**THE HEADLINE IS THE UNASSIGNED COUNT: 284.**
 
     409   GAP rows in the frozen census (1c08e5f), enumerated by the shipped instrument
-    122   assigned to a blocker by a COMMITTED source
-    287   UNASSIGNED -- no committed source names them against any blocker
+    125   assigned to a blocker by a COMMITTED source
+    284   UNASSIGNED -- no committed source names them against any blocker
 
-     38   of 97 blockers have at least one recoverable row
-     59   of 97 have NOT ONE
+     39   of 97 blockers have at least one recoverable row
+     58   of 97 have NOT ONE
 
 **The first pass of this document published 306 and 26/71.** A second harvest
-found two further committed blocker-to-row tables (section 9) and moved 19 rows.
-That direction is the point of the artifact and the guard is built to allow it:
-`UNASSIGNED` is a CEILING that may only fall. **287 is the number to quote.**
+found two further committed blocker-to-row tables (section 9) and moved 19 rows;
+a recall check on that scan (section 12) moved 3 more. That direction is the
+point of the artifact and the guard is built to allow it: `UNASSIGNED` is a
+CEILING that may only fall. **284 is the number to quote.**
 
 **`_audit/2026-09-03-linkedin-gap-blockers.md` assigned all 409 GAP rows to 97
 blockers and published only the counts. The classifier that produced the
@@ -26,7 +27,7 @@ re-cost from a miscount.**
 This document does not restore the classifier. It measures how much of its
 output survives in a form anybody can audit, and the answer is a quarter.
 
-**287 bounds how much of the ledger's division was ever real,** and it is the reason a per-blocker count in this repository should be
+**284 bounds how much of the ledger's division was ever real,** and it is the reason a per-blocker count in this repository should be
 read as an author's assertion rather than as a measurement, unless it appears in
 `_audit/_census/blocker-map.tsv`.
 
@@ -98,8 +99,8 @@ per-slice figures at once.
 | `LEDGER-EXPLICIT` | 56 | the 2026-09-03 ledger's own body names these ids for this blocker. The nearest thing to the lost classifier that exists, because it is the classifier's author writing |
 | `LEDGER-AMENDMENT` | 3 | an amendment appended to that ledger names them |
 | `RECON-CENSUS-COMMITTED` | 34 | RECONSTRUCTED by a later wave, and commit `990bbd3` then acted on it |
-| `RECON-DOC` | 29 | reconstructed in a tracked document; nothing acted on it |
-| **`UNASSIGNED`** | **287** | **no committed source names the row against any blocker** |
+| `RECON-DOC` | 32 | reconstructed in a tracked document; nothing acted on it |
+| **`UNASSIGNED`** | **284** | **no committed source names the row against any blocker** |
 
 **BE PRECISE ABOUT WHAT `RECON-CENSUS-COMMITTED` BUYS, BECAUSE IT LOOKS LIKE
 MORE THAN IT IS.** `_audit/2026-09-05-decide-retire-rulings.md` section 1 says
@@ -128,7 +129,7 @@ post") and `M C52`.
 
 ---
 
-## 4. THE PER-BLOCKER DIFF -- 32 COMPLETE, 6 PARTIAL, 59 ABSENT
+## 4. THE PER-BLOCKER DIFF -- 32 COMPLETE, 7 PARTIAL, 58 ABSENT
 
 The ledger's published counts are **parsed out of the ledger's own tables, never
 retyped**, and the mapper refuses to run if those tables stop totalling 97
@@ -154,6 +155,7 @@ ranked table holds 88 blockers over 359 rows, the cost-0 table 9 over 50, and
 | `ANALYTICS-CONTROLS-UNPRESSED` | 4 | 3 | **PARTIAL** -- 1 named nowhere |
 | `GROUP-CHAT-SURFACE` | 4 | 4 | COMPLETE |
 | `OWNED-BY-A-SIBLING-SLICE` | 4 | 4 | COMPLETE |
+| `PEOPLE-FOLLOW-LISTS` | 4 | 3 | **PARTIAL** -- 1 named nowhere |
 | `ENDORSE-SUBSTRING-OVERREACH` | 3 | 3 | COMPLETE |
 | `HASHTAG-EXISTENCE` | 3 | 3 | COMPLETE |
 | `HELP-CENTER-FORM` | 3 | 3 | COMPLETE |
@@ -176,13 +178,13 @@ ranked table holds 88 blockers over 359 rows, the cost-0 table 9 over 50, and
 | `SKILL-PAGE-SURFACE` | 1 | 1 | COMPLETE |
 | `VIDEO-MEETING-INTEGRATION` | 1 | 1 | COMPLETE |
 | `VOICE-CAPTURE` | 1 | 1 | COMPLETE |
-| **the other 59 blockers** | **287** | **0** | **ABSENT** |
+| **the other 58 blockers** | **284** | **0** | **ABSENT** |
 
 **WHERE EVIDENCE EXISTS, THE LEDGER'S ARITHMETIC WAS RIGHT.** Thirty-two
 blockers recount to exactly their published figure. That is thirty-two
 independent prior numbers reproduced -- not one total that happens to sum -- and
 it is the strongest thing that can be said for the ledger on the evidence
-available. **It says nothing whatever about the 287.**
+available. **It says nothing whatever about the 284.**
 
 **All six disagreements are in the safe direction and none is a miscount.** The
 map recovers 4 of `GROUPS-SURFACE`'s 32, 1 of `COMPANY-PAGE-SURFACE`'s 18, 1 of
@@ -314,7 +316,7 @@ the ledger names rows freely for the blockers it argued about in prose (section
 movements, Amendment A13) and names none at all for the 71 it merely ranked.
 **The ranked table is where the counts live and it carries no ids anywhere.**
 
-That is the structural cause of the 287, and it is worth stating as a rule
+That is the structural cause of the 284, and it is worth stating as a rule
 rather than as a complaint: **a table of counts with no key is not a
 classification, it is a summary of one.** The classifier existed -- the ledger
 describes it asserting on itself, raising on double-assignment, closing at
@@ -382,7 +384,7 @@ several writers share, and no instrument that can tell you it moved.
    author's reconstruction that a second person acted on. Both may be wrong
    together, and 3 of those 34 rows are graded `DERIVED-WEAK` or flagged as
    substitution risks in the source itself.
-3. **The 287 is a floor on what is unrecoverable, not a ceiling on what is
+3. **The 284 is a floor on what is unrecoverable, not a ceiling on what is
    wrong.** A row being `LEDGER-EXPLICIT` means the ledger's author named it,
    not that the assignment is right. The assignment rule -- *one blocker per
    row, the earliest binding constraint* -- is a judgment, and this document
@@ -419,6 +421,8 @@ several writers share, and no instrument that can tell you it moved.
 ---
 
 ## 9. THE SECOND HARVEST -- 306 TO 287, AND THREE THINGS IT TURNED UP
+
+*(a third pass took it to 284; see section 12.)*
 
 A mechanical scan of the whole tracked corpus was run for every one of the 97
 blocker names alongside census row ids. **Its output is a haystack and was
@@ -629,3 +633,51 @@ browser session at all.
 exactly what a ratchet does: naming the moment a class grew, cheaply, so it is a
 line in a diff and not an incident. Each remedy is one `finally` closing the
 PAGE, and each belongs to the wave that opened it.
+
+---
+
+## 12. A RECALL CHECK ON MY OWN FILTER -- 287 TO 284, AND 23 OF 24 CONFIRMED JUNK
+
+Section 9's filter accepted a passage only when its id count EQUALLED the
+blocker's published count. **That is a precision filter, and precision filters
+have recall costs nobody measures.** So before banking the number, I asked the
+opposite question of the same scan: of the blockers still ABSENT from the map,
+how many carry ANY id evidence at all, and does any of it look like a real row
+list the equality test skipped?
+
+    absent blockers carrying at least one captured id   24 of 58
+
+Every one of the 24 was read in its source. **Twenty-three are junk, and the
+junk falls into three named shapes:**
+
+| shape | example | what it really is |
+|---|---|---|
+| rank-table scrape | `EASY-APPLY-MULTISTEP` -> `P 0`, `MESSAGE-REACTION` -> `N 1` | ids manufactured out of a table of ledger RANK numbers and zero-costs |
+| sentence bleed | `THREAD-REPLY-BOX` and `MESSAGE-ADDRESSING` both -> `P L2` | one sentence names three blockers and one row; the row belongs to a fourth |
+| a POINTER cited as a set | `PREMIUM-JOBS-SURFACES` -> `J 25 J 29 J 30` | those are `PANEL-NOT-OBSERVED`'s rows, cited under a heading that says in terms *"A POINTER FOR ROW 41, NOT A RULING ON IT"* |
+
+One more deserves its own line because it is the funniest failure mode
+available: `CONTENT-ANALYTICS-SURFACE` matched `N 05 N 09 N 2026` -- **fragments
+of a date in a source comment**, wearing the exact shape of a network row id.
+
+### The one real miss, and why the filter missed it
+
+    PEOPLE-FOLLOW-LISTS   published 4   recovered 3   N 38, N 39, N 40
+
+`_audit/2026-09-05-routes-already-admitted.md` prints them in a refusal block and
+names the blocker in the next sentence -- *"Neither is a new finding:
+`PEOPLE-FOLLOW-LISTS` already costs a denylist edit alongside its two allowlist
+patterns, so the ledger has this right."* **An explicit, committed assignment,
+skipped purely because 3 is not 4.**
+
+**THE LESSON IS ABOUT THE FILTER, NOT THE ROW.** An equality test between a
+passage's id count and a published count is a proxy for *"is this a complete row
+list"*, and it silently discards every PARTIAL list -- which, given that the
+whole finding of this document is that lists are partial, was the wrong proxy to
+lean on unexamined. One recall check cost ten minutes and found one row set in
+twenty-four.
+
+**And it does not change the shape of the answer.** 284 rather than 287, 39
+blockers rather than 38, 58 absent rather than 59. The headline moved by 1% and
+the 23-of-24 junk rate is the more useful number: **it says the scan is a
+haystack and the map is right not to have absorbed it.**

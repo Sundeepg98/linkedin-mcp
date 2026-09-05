@@ -21,14 +21,20 @@ the ledger claims means a committed source and the ledger disagree about set
 membership; that is a finding to be adjudicated by a person, never a merge to be
 absorbed by a script.
 
-SHOWN FAILING before it was admitted, in all four directions -- an instrument
-that has only ever been green certifies nothing:
+SHOWN FAILING in five directions -- an instrument that has only ever been green
+certifies nothing. Four were planted before admission; the fifth arrived on its
+own an hour later and is the one worth reading:
 
-    delete one evidence line          -> UNASSIGNED 307 > 306, RATCHET fails
-    add a fabricated 33rd GROUPS row  -> recount 2 > published 32 is not hit, but
-                                         the map/evidence comparison fails
-    add a second blocker for J 9      -> DOUBLE-ASSIGNED, build() reports it
-    misspell an id (`J 999`)          -> UNRESOLVED, build() reports it
+    delete one evidence line             ratchet + map-drift red
+    double-assign an already-mapped row  DOUBLE-ASSIGNED
+    plant an id matching no census row   UNRESOLVED
+    plant a 2nd row on a 1-row blocker   over-count + map-drift red
+    break the ledger table header anchor "blockers the parse does not know"
+
+The fifth was not a mutation. A neighbouring wave appended 19 lines to the
+ledger, both its tables slid 28 rows down, and `ledger_counts()` -- then a
+hardcoded line window -- lost one of them. See the comment in
+`test_no_blocker_recounts_higher_than_the_ledger_published`.
 """
 from __future__ import annotations
 
@@ -45,9 +51,10 @@ import build_blocker_map as bbm  # noqa: E402
 #: A CEILING, not a pin: see the module docstring. Lowered 306 -> 287 when two
 #: further committed blocker-to-row tables were harvested
 #: (`2026-09-05-settings-tail.md` section 2.3 and
-#: `2026-09-05-routes-already-admitted.md`). Lowering it is the intended
-#: direction and requires no ceremony; raising it needs a reason.
-UNASSIGNED_CEILING = 287
+#: `2026-09-05-routes-already-admitted.md`), then 287 -> 284 when a recall check
+#: on the scan found one row list the equality filter had skipped. Lowering it
+#: is the intended direction and requires no ceremony; raising it needs a reason.
+UNASSIGNED_CEILING = 284
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 

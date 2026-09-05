@@ -160,3 +160,6 @@ GROUPS-SURFACE	N 173	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L107
 GROUPS-SURFACE	N 174	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L108	PARTIAL -- with N 165 this is 4 of a published 32
 EVENTS-SURFACE	N 180	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L109	PARTIAL -- one of a published 18
 MISSING-PARAM-MESSAGING	M M34	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L110	the route table names the blocker per row alongside a dated gate reading
+PEOPLE-FOLLOW-LISTS	N 38	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L349	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
+PEOPLE-FOLLOW-LISTS	N 39	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
+PEOPLE-FOLLOW-LISTS	N 40	RECON-DOC	_audit/2026-09-05-routes-already-admitted.md	L347	the refusal block names the rows and the prose names the blocker: "Neither is a new finding: PEOPLE-FOLLOW-LISTS already costs a denylist edit". PARTIAL -- three of a published four
