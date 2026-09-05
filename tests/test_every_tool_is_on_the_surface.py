@@ -178,4 +178,22 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # exempted, and "not wired yet" would have been filed as "by design".
     # The honest fix was to register the tool and put the ignorance in the
     # docstring, where a caller reads it.
-    assert len(_tool_names()) == 37
+    # 38 FROM 2026-09-05: ``linkedin_events_home``, a READ. **THE PIN MOVED
+    # BECAUSE THE SURFACE MOVED, AND HERE IS THE TOOL THAT MOVED IT** -- that
+    # ordering is the whole difference between recording a fact and faking
+    # one, and a count pin is the class this repository is most careful about
+    # precisely because bumping a number is the cheapest way to clear a test.
+    #
+    # IT DOES NOT WEAKEN THE CONTROL ABOVE. Both rules are run over
+    # REGISTRY_WHILE_BROKEN, a two-entry reading compared BY CONTENT, so
+    # nothing in the demonstration reads this number. What the number is for
+    # is the sentence above it -- the defect did not move the count, which is
+    # why neither rule could be replaced by a cheaper one -- and the review
+    # moment that a bump forces on whoever adds a tool.
+    #
+    # THE REVIEW MOMENT WAS USED. The reader behind this tool answers ZERO,
+    # and zero is the one number a read can get wrong in a way that looks like
+    # success, so it is returned as an integer only when four independent
+    # facts hold: the section present, no rows, a body holding neither text
+    # nor elements, and a non-empty sibling. See ``linkedin_server/events.py``.
+    assert len(_tool_names()) == 38

@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_thirtyseven_tools``'s split rather than
+``test_the_surface_is_exactly_the_thirtyeight_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -62,9 +62,9 @@ runs for him. The result block carries the previous value verbatim and the
 exact call that restores it.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Thirty-six is ``len(await mcp.list_tools())``,
+than about an intention. Thirty-eight is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_thirtyseven_tools``; the split is pinned in
+``test_the_surface_is_exactly_the_thirtyeight_tools``; the split is pinned in
 the same file by ``test_this_modules_docstring_numbers_are_derived``, which
 reads THESE WORDS and fails if any of the three disagrees with the registry.
 The surface splits three ways and the split is the part a reader actually
@@ -587,9 +587,12 @@ mcp = FastMCP(
 # EVERY ANSWER SAYS SO WHEN THIS PROCESS IS STALE
 # ---------------------------------------------------------------------------
 #
-# ONE WRAPPER RATHER THAN THIRTY-SIX EDITS, and the reason is the defect
-# itself: a rule that has to be remembered at thirty-six call sites is a rule
-# that will be missing from the thirty-seventh. The tool decorator is wrapped
+# ONE WRAPPER RATHER THAN ONE EDIT PER TOOL, and the reason is the defect
+# itself: a rule that has to be remembered at every call site is a rule that
+# will be missing from the next one. **Written with two counts in it, and
+# they had both rotted by the time anybody read them again** -- which is the
+# argument for the wrapper making itself, so the sentence is now count-free
+# and cannot go stale twice. The tool decorator is wrapped
 # once, here, before any tool is declared, so a tool added tomorrow inherits it
 # without its author knowing this exists.
 #
@@ -1171,7 +1174,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_thirtyseven_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_thirtyeight_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.

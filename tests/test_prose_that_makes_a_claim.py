@@ -68,6 +68,10 @@ _NUMBER_WORDS: dict[str, int] = {
     "twenty-five": 25,
     "thirty-one": 31, "thirty-two": 32, "thirty-three": 33, "thirty-four": 34,
     "thirty-five": 35, "thirty-six": 36, "thirty-seven": 37,
+    # thirty-eight, 2026-09-05, for the same reason the comment above
+    # gives: a table that is short reports a KeyError about itself and
+    # says nothing about the prose it was pointed at.
+    "thirty-eight": 38,
 }
 
 
