@@ -353,6 +353,42 @@ recover.
 
 ---
 
+## 3a. NOBODY CAN SAY WHICH ROWS THESE ARE, AND THAT LIMITS EVERY NUMBER ABOVE
+
+**DERIVED, from a delegated census I did NOT re-take, and then CORROBORATED
+from a tracked document I did read.** Flagged this way deliberately: a number
+one agent hands another is a reading with a timestamp the receiver cannot see.
+
+A slice sent to enumerate the row IDs behind my seven blockers found that
+**only one of the seven has an explicit row-id list anywhere** in the tracked
+or scratch corpus (`GROUP-CHAT-SURFACE`, and even there two independent
+reconstructions disagree about which row fills the fourth slot). For the other
+six -- including all 10 rows of `CONVERSATION-OVERFLOW-MENU` and all 4 of
+`MESSAGE-REQUESTS-SURFACE` -- there is no list.
+
+**THE CORROBORATION IS BETTER THAN THE DELEGATION**, and it is independent of
+it: `_audit/2026-09-05-decide-retire-rulings.md` section 1 says so in its own
+words, about its own work -- *"The ledger assigned all 409 rows to blockers and
+then published only the COUNTS... the classifier that produced the mapping is
+not on disk."* That wave had to reconstruct eleven of twelve blockers' row sets
+by reading each blocker NAME as a capability family.
+
+**WHAT THIS MEANS FOR EVERYTHING ABOVE.** The totals reconcile -- 10+4+2+2+1+1+4
+= 24, and the R/W split matches the predecessor's independently-stated
+2R/21W/1RW. **But a total that sums correctly is not a set that has been
+checked**, and this repository has already recorded the exact arithmetic that
+hides a pair of errors: profile +1 and messaging -1, cancelling in the total.
+
+So when section 2 says row 66's two rows are answered, that is a claim about a
+BLOCKER whose two rows nobody can name. **My measurements are about surfaces
+and they are sound; the mapping from surface to ledger row is the part that
+rests on a reconstruction.** Whoever retires rows on the strength of this
+document should retire them by BLOCKER, or reconstruct the row sets first and
+say which method they used -- not quote my section numbers against row ids
+nobody has.
+
+---
+
 ## 4. WHY THIS PROBE READS NO STRINGS AT ALL, AND WHAT THAT COST
 
 Every reading in section 2 is `locator(<a selector written in the probe>).count()`.
@@ -563,7 +599,7 @@ worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
                        scripts/_probe_messaging_family_off_the_feed.py 206 lines
                        tests/test_a_named_cost_names_a_tool_that_can_incur_it.py
                                                                      457 lines
-                       _audit/2026-09-05-messaging-rows.md           605 lines
+                       _audit/2026-09-05-messaging-rows.md           641 lines
     tests added        7, all passing. 2 mutations shown KILLING the control,
                        each asserted to have changed the source first --
                        a mutation that does not apply prints PASS
