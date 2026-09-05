@@ -116,17 +116,31 @@ CASES: tuple[tuple[str, str, str | None, str], ...] = (
 )
 
 
-def _substring_verdict(url: str) -> str | None:
-    """The forbidden substring this url trips, or None."""
+def _substring_verdict(url: str) -> tuple[str, ...]:
+    """EVERY forbidden substring this url trips, not just the first.
+
+    ``assert_read_url`` raises on the first hit and stops, and ``readonly.py``
+    records that this has already misled three readers into taking one
+    substring for the wall. **This probe reported only the first for its first
+    revision and inherited exactly that defect** -- found by a mutation that was
+    supposed to be routine: dropping ``/psettings/`` from the forbidden list did
+    not change the classification, because the bare ``settings`` substring covers
+    the same addresses. One substring looked load-bearing and two were.
+
+    So the column is a TUPLE. A family covered twice is a different fact from a
+    family covered once -- it says no single-entry narrowing frees it -- and a
+    reader cannot see that from a verdict that stops at the first hit.
+    """
     lowered = url.lower()
     exact = readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS.get(lowered)
     exempted = frozenset({exact}) if exact is not None else frozenset()
     if not exempted:
         exempted = readonly._pattern_exempted_substrings(url)
-    for bad in readonly._FORBIDDEN_URL_SUBSTRINGS:
-        if bad in lowered and bad not in exempted:
-            return bad
-    return None
+    return tuple(
+        bad
+        for bad in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if bad in lowered and bad not in exempted
+    )
 
 
 def _pattern_verdict(url: str) -> bool:
@@ -138,7 +152,7 @@ def main() -> int:
     print(f"allowlist patterns: {len(readonly._ALLOWED_URL_PATTERNS)}")
     print(f"forbidden substrings: {len(readonly._FORBIDDEN_URL_SUBSTRINGS)}")
     print()
-    header = f"{'case':28s} {'prov':8s} {'substring':22s} {'pattern':9s} {'verdict':10s}"
+    header = f"{'case':28s} {'prov':8s} {'forbidden substrings':34s} {'pattern':9s} {'verdict':10s}"
     print(header)
     print("-" * len(header))
 
@@ -152,8 +166,11 @@ def main() -> int:
         except WriteAttemptError:
             verdict = "REFUSED"
         klass = "FORBIDDEN" if bad else ("--" if admitted else "NO-PATTERN")
+        if bad:
+            klass = "%s x%d" % (klass, len(bad))
+        shown = ",".join(bad) if bad else "--"
         print(
-            f"{label:28s} {provenance:8s} {(bad or '--'):22s} "
+            f"{label:28s} {provenance:8s} {shown:34s} "
             f"{('admits' if admitted else 'none'):9s} {verdict:10s} {klass}"
         )
         if expectation == "ALLOW" and verdict != "ALLOWED":

@@ -138,15 +138,31 @@ substring for the wall when the allowlist was the wall.
 
 Receipt: `scripts/_probe_retire_ruling_boundary.py`, output at
 `_audit/_scratch/_retire-boundary-evidence.txt`. Four must-allow controls
-passed, one must-refuse control fired, zero control failures. 28 allowlist
-patterns, 33 forbidden substrings at HEAD.
+passed, one must-refuse control fired, zero control failures.
 
-| family | forbidden substring? | allowlist? | what that is worth |
+**The boundary moved WHILE THIS PASS RAN, so the counts are stated as dated
+readings and not as properties:** 28 allowlist patterns / 33 forbidden
+substrings at 16:23, **29 / 33 at 16:47**, another wave having landed a pattern
+in between. Nothing in this document rests on either number; it is recorded
+because a count pinned to a moving tip goes false with nobody touching it.
+
+| family | forbidden substrings | allowlist? | what that is worth |
 |---|---|---|---|
-| messaging settings | **YES** -- `/psettings/`, `/settings/`, `/mypreferences/d/categories/` | no pattern | a written entry with an argument behind it |
-| Help Center form | no | no pattern | **nothing.** Default-closed |
-| off-domain page | no | no pattern | **nothing** |
-| live video, campaign manager, Learning, contact import, checkpoint | no | no pattern | **nothing** |
+| messaging settings | **YES, and TWO of them** -- `/psettings/` AND the bare `settings` on every address; the index trips `/settings/` and `settings`; the category index trips `/mypreferences/d/categories/` | no pattern | a written entry with an argument behind it, **covered twice** |
+| Help Center form | none | no pattern | **nothing.** Default-closed |
+| off-domain page | none | no pattern | **nothing** |
+| live video, campaign manager, Learning, contact import, checkpoint | none | no pattern | **nothing** |
+
+**THE PROBE REPORTED ONLY THE FIRST SUBSTRING IN ITS FIRST REVISION, AND THAT IS
+HOW THE TWO WAS FOUND.** A routine mutation -- drop `/psettings/` from the
+forbidden list -- SURVIVED, and the survival was the result rather than a weak
+test: no input makes `/psettings/` the only thing standing, because the bare
+`settings` covers the same addresses. So the probe now reports EVERY hit, which
+is the defect `readonly.py` records having misled three readers, committed by
+the probe written to avoid it. **Removing both is what kills the mutation**, and
+the consequence for the ruling is that no single-entry narrowing of the
+forbidden list frees the settings family. Red proof:
+`_audit/_scratch/_redproof_retire_boundary.py`, three mutations, all killed.
 
 **Read the second column, not the verdict.** Exactly one of these families meets
 a rule somebody wrote; the other eleven meet the default-closed allowlist, which
@@ -956,8 +972,14 @@ section 5 closes in both directions.
   `_COMPOSITE_TARGET_KINDS` and `config.AUTHWALL_MARKERS` read by importing the
   modules under `venv/Scripts/python.exe` at HEAD.
 * Boundary refusals machine-checked by `scripts/_probe_retire_ruling_boundary.py`,
-  which reports the substring gate and the pattern gate separately; output at
+  which reports the substring gate and the pattern gate separately and prints
+  EVERY substring a url trips rather than the first; output at
   `_audit/_scratch/_retire-boundary-evidence.txt`. 5 controls, 0 failures.
+  Shown failing before being offered as an instrument:
+  `_audit/_scratch/_redproof_retire_boundary.py`, three mutations -- an empty
+  allowlist (controls abort the run), the substrings covering the settings
+  family removed (the class falls to NO-PATTERN), an empty forbidden list (the
+  classifications disappear) -- all three killed.
 * Blind second reconstruction of the row sets:
   `_audit/_scratch/_retire-rows-blind-check.md`.
 * Working log: `_audit/_scratch/_progress-retire-rulings.md`.
