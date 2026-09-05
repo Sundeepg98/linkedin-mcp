@@ -78,6 +78,7 @@ his own signed-in browser session.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -283,6 +284,12 @@ IDENT_ATTR_VOCAB = (
 )
 
 
+def _walk_all() -> bool:
+    """Walk EVERY item on the rail instead of stopping at the first with
+    comments. Off by default -- each extra item is one page load."""
+    return os.environ.get("LINKEDIN_PROBE_WALK_ALL", "") not in ("", "0")
+
+
 def _cfg() -> dict:
     return {
         "marker": COMMENT_URN_MARKER,
@@ -368,8 +375,22 @@ async def main() -> None:
             _report(f"item {position} of {len(order)} "
                     f"(anchors {anchors.get(urn, 0)})", reading)
             if len(reading["nodes_carrying_identifier"]) > 0:
-                found = reading
-                break
+                if found is None:
+                    found = reading
+                # WALK_ALL EXISTS TO SEPARATE A RELATION FROM A COINCIDENCE.
+                # On one page ``componentkey`` carried 4 distinct values and
+                # the page drew 4 comment overflow controls. 4 == 4 is a
+                # CORRESPONDENCE, and this repository has already been fooled
+                # once by two numbers agreeing because both were the same
+                # multiple of the truth. A second item with a DIFFERENT
+                # comment count is what turns it into a relation.
+                #
+                # DEFAULT UNCHANGED, DELIBERATELY: the ordinary run still
+                # stops at the first item, because widening a neighbour's
+                # default is the thing to avoid and this costs one page load
+                # per extra item.
+                if not _walk_all():
+                    break
             if len(reading["comment_overflow_controls"]) > 0 and found is None:
                 # A page WITH comments and WITHOUT identifiers is the decisive
                 # negative, and it is a different answer from a page with no

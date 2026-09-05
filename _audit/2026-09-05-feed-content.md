@@ -145,6 +145,45 @@ match -- and that the two are not derived from each other. It is still one
 page. A second item with a different comment count would settle it properly and
 was not run.
 
+### THE SECOND ITEM WAS ATTEMPTED AND COULD NOT BE REACHED
+
+A `LINKEDIN_PROBE_WALK_ALL=1` mode was added to walk every item on the rail
+rather than stopping at the first with comments, precisely to turn 4 == 4 from
+a correspondence into a relation. **It was run and it did not get there.** The
+rail refused, twice, before any item was opened:
+
+    REFUSED at the rail: no_overflow_controls
+
+**The refusal is correct and is the best-behaved thing in this document.** It
+names WHAT IT SAW rather than what it failed to match, and its own words are
+"an empty rail is not an authorship claim, and this reader does not treat
+'nobody disagreed' as agreement." A reader that had returned an empty item list
+instead would have reported that he has posted nothing.
+
+**The cause is a partial render, and the element count is what dates it:**
+
+| run | profile page elements | rail |
+|---|---:|---|
+| 1 | 2620 | 8 items |
+| 3 | 648 | REFUSED |
+| 4 | 834 | REFUSED |
+
+The profile page draws inconsistently on a Chrome a dozen waves are sharing,
+and the rail depends on controls that had not rendered. **I did not retune the
+probe's settle time to chase a successful read** -- adjusting an instrument
+until it returns the answer you went looking for is how a probe set comes to
+agree with its author, which this repository has now caught three times.
+
+**So the 4 == 4 correspondence stands unpromoted.** The identifier finding does
+not depend on it: that rests on two successful runs of the reader plus a
+control, and section 3's per-attribute split is a decomposition of a single
+page rather than a claim across pages.
+
+**And the control is the part that got stronger.** It read zero identifiers at
+2620, 834 and 648 elements -- three renders of the same page, one of them a
+third the size of another. A control that only passes on a fully-drawn page is
+not much of a control.
+
 ### And an unplanned stability result worth more than either number
 
 **The page drew 1089 elements on the first run and 838 on the second -- a 23%
@@ -271,8 +310,11 @@ touched the tree and is red at the same commit afterwards.
 1. **Run the probe on a SECOND item with a different comment count.** Section 3
    settles the 2x on one page; `componentkey == controls` at 4 == 4 is a
    correspondence, and one page cannot separate a relation from a coincidence.
-   The probe already walks the rail -- point it at an item with a different
-   number of comments and the answer is one run.
+   **The mode for this is built and committed** -- `LINKEDIN_PROBE_WALK_ALL=1`
+   walks every item instead of stopping at the first, default deliberately
+   unchanged so it costs nobody a page load who did not ask. It was attempted
+   and the rail refused on a partial render; see section 3. Re-run it on a
+   quieter browser, and do NOT lengthen the settle to force a read.
 2. **Then re-cost 46.** With an address in hand, whether `POST-COMMENT-CONTROLS`
    was ever blocked by 47 is one live reading, not an inference. Do not move the
    row on this document alone.
