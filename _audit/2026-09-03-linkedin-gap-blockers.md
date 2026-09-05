@@ -371,6 +371,8 @@ not a lesser case.**
 
 **CORRECTED BY:** `_audit/2026-09-05-groups-events-precondition.md` -- the zero-groups possibility is closed by measurement; he belongs to five and these 32 rows stand.
 
+**CORRECTED BY:** `_audit/2026-09-05-groups-surface-measured.md` -- the row count is 35 by derivation from the census and no subset reconciles to 32; three of the 35 are reachable NOW with no boundary change, three are unreachable for this account, `Leave this group` is drawn on an already-admitted address so the ledger's "allowlist +2" is the wrong shape of cost for it, and five more rows are DOUBLE-refused by a forbidden substring as well as the anchor.
+
 This entry, and the costed proposal that grew out of it, treat "he belongs to
 zero groups" as live -- an answer that would make 29 of these 32 rows
 unreachable in principle and leave a three-row blocker. Measured 2026-09-05 and
