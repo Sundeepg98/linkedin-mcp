@@ -393,7 +393,37 @@ only when their errors are independent. It is now a class-TOKEN match, pinned
 by a test that drives the broken form through the same stub and asserts 54
 comes back.
 
-## 10. THE WIRING, PREPARED AND NOT APPLIED
+## 10. THE WIRING -- PREPARED, THEN APPLIED AT 17:55
+
+**SUPERSEDED, AND THE SUPERSEDING IS WRITTEN HERE RATHER THAN BY DELETION.**
+This section was written while `server.py` was unavailable, and it said the
+tool was prepared and not applied. That stopped being true at 17:55: the file
+went clean, every staged line was read immediately before the commit, and
+`linkedin_events_home` is the thirty-eighth tool. **Everything below is the
+record of why it was nearly not done, kept because the reasoning outlives the
+window** -- an audit note is read once as history, and deleting the paragraph
+would leave the next reader with no account of the four polls it took.
+
+What changed with the wiring, all in one commit: the tool, the module
+docstring counts (25 read to 26, 37 total to 38), `EXPECTED_TOOLS`, both
+pinned numbers in `test_server_surface.py` and **that test's own function
+name** -- a name saying one number over a body asserting another is a claim
+like any other -- the README's derived counts, and the deletion of this
+reader's line from the unwired inventory.
+
+**THE INVENTORY GUARD BOUND ITS FIRST COMMIT TWO HOURS AFTER IT LANDED.** It
+fails if a reader on its list stops being unwired, so the wiring and the
+bookkeeping could not drift apart. That is the mechanism working rather than a
+document being tidied.
+
+**AND ONE WORD OF THE TOOL'S DOCSTRING CHANGED FOR A GUARD, NOT FOR STYLE:**
+"a closed set" tripped `docstring_write_claims` on the verb `set`. A read tool
+may not use a write verb affirmatively, and the guard is right that it cannot
+tell prose from a claim. It now says "a closed vocabulary".
+
+### The original section, kept
+
+## 10a. THE WIRING, AS IT STOOD BEFORE 17:55
 
 `events.read_events_home` HAS NO CONSUMER. That is the same hole
 `groups-events` recorded on `shape.membership_row` the same day, and it is
