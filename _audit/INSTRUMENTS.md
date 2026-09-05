@@ -2427,3 +2427,52 @@ guard left these sites RED rather than folding them into its own baseline on
 the day it was built. That is the correct move and it is worth copying: a guard
 whose first act is to absolve the files its author could see is a guard that
 has never refused anything.
+
+### 12.11 `scripts/count_census_states.py` -- the census count, reproducible from a clone
+
+Counts the state of every capability row in `_audit/_census/` and reports the
+totals. It exists because **the number it produces is this repository's most
+quoted figure and could not be re-derived by anybody with a clone.** Every count
+behind 409 was taken with a script under `_audit/_scratch/`, which `.gitignore`
+excludes deliberately, so the instrument and the headline lived on one disk.
+
+    ./venv/Scripts/python.exe scripts/count_census_states.py
+    ./venv/Scripts/python.exe scripts/count_census_states.py --expect J=99,P=79,M=109,N=122
+    ./venv/Scripts/python.exe scripts/count_census_states.py --unstated
+
+**SHOWN FAILING, IN BOTH DIRECTIONS, 2026-09-05.** The `--expect` control is the
+thing that can be wrong, so it is the thing demonstrated:
+
+    --expect J=84,P=73,M=99,N=113   (the true counts)     rc=0   MATCH
+    --expect J=99,P=79,M=109,N=122  (the frozen counts)   rc=1   MISMATCH
+
+An `--expect` that could only pass would certify nothing. Note the exit code is
+the assertion -- piping the run through `tail` swallows it, which is how a
+MISMATCH can print and still look green in a terminal.
+
+**THE THING IT REPORTS THAT NO PREVIOUS COUNTER DID: `--unstated`.** It lists
+rows sitting in a capability table that carry NO recognised state at all.
+Measured the day it was written: **`N 132` is GAP, says so in its own note, and
+is invisible to every counter in this repository**, because its state cell was
+replaced with a sentence -- a live-read result written where the state belongs.
+So a GAP row left the numerator with no ruling, no amendment, and no diff that
+looks like a state change.
+
+**AND THE WARNING THAT COMES WITH IT.** This counter and the older scratch one
+were written by different authors and BOTH return the same figure, because both
+share the same assumption about where a state lives. **Agreement between two
+instruments sharing a defect is not corroboration.** `N 132` was found by a git
+diff of the census against a dated commit -- a different instrument asking a
+different question. A counter that cannot report what it could not see
+under-reports in silence, which is what `--unstated` is for.
+
+**WHAT IT DELIBERATELY DOES NOT DO: compute a denominator.** Rows are not
+capabilities. `profile.md` collapses two blocks -- `O6-O20` is one line standing
+for 15 capabilities, the `P-R` block one line standing for 45 -- so the published
+761 is 705 table rows + 59 expansions - 2 stateless rows, while the GAP numerator
+is a plain row count over the same 705. Correcting a capability total from a row
+parse is an error this corpus has already refused once, at `93ff6ae`, for exactly
+this reason. **An instrument that reports only what it measures is worth more
+than one that derives a second number it cannot check.**
+
+Companion record: `_audit/2026-09-05-census-recounted.md`.
