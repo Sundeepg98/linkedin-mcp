@@ -1002,6 +1002,12 @@ point of writing reopeners as instruments instead of as conditions.
    markdown. `PANEL-NOT-OBSERVED` rests entirely on A13's measurement, restated
    and not re-taken, as instructed.
 6. **353 is derived from a number this pass did not re-verify** -- see section 5.
+   Section 9's ledger inherits that: every figure in it below `390` rests on
+   A1's arithmetic being right, and A11 already shows how fast that number goes
+   stale in this tree. **755 is firmer**, because each of the six duplicates was
+   read off the census tables on disk this pass rather than inherited -- but it
+   is an "at most", since nobody has de-duplicated the corpus and the two extra
+   pairs were found by an instrument that exists for one blocker family.
 7. **761 is still a floor.** Three passes grew it 661 to 721 to 761 and the
    covered count never moved once. Retiring 37 rows says nothing about the rows
    no pass has found, and `M C59`'s own 5:1 undercount is a live example inside
@@ -1035,7 +1041,18 @@ section 5 closes in both directions.
   classifications disappear) -- all three killed.
 * Blind second reconstruction of the row sets:
   `_audit/_scratch/_retire-rows-blind-check.md`.
+* Section 9's movers: A1 and A13 of the blockers ledger;
+  `_audit/2026-09-05-routes-already-admitted.md` for `P N12` and for `N 118`
+  having been re-stated MEASURED-ABSENT in commit `191c2f7`; the newsletter
+  wave's working log for the two extra duplicate pairs. Every duplicate was
+  re-read off the census tables on disk this pass rather than inherited:
+  `N 55`, `N 56`, `M C80`, `M C83`, `P L4`, `N 118`.
+* `server.CENSUS_SURFACES` (12 keys), `server.CENSUS_SETTLED_CONTROLS` (8
+  literal keys, 7 distinct) read by AST over `linkedin_server/server.py` at
+  HEAD.
 * Working log: `_audit/_scratch/_progress-retire-rulings.md`.
+* Full-suite gate in a `git clone --no-hardlinks` of HEAD:
+  `_audit/_scratch/_gate-retire-rulings-clone.txt`.
 * No browser, no LinkedIn session, no page load, no `mcp__linkedin__*` call. No
   identifier of any person appears in this document; capabilities and relations
   only.
@@ -1043,6 +1060,11 @@ section 5 closes in both directions.
 ---
 
 ## 9. THE LEDGER, RECOMPUTED -- AND THE DENOMINATOR MOVES TOO
+
+**APPENDED AFTER SECTION 8 RATHER THAN MERGED INTO SECTION 5**, which is why it
+sits past the provenance. That is this corpus's own convention and A7 gives the
+reason: a document that silently rewrites itself cannot be cited. Sections 1-8
+are as committed at `b11b2cf` and nothing in them has been restated.
 
 Section 5 gives this pass's own arithmetic. This section does the thing nobody
 had done: **collect every movement anybody has established against the census
