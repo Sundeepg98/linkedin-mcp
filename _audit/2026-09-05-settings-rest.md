@@ -492,12 +492,18 @@ re-costed on a measured row census and 3 of those individually characterised.**
 **Recomputed from `git log` and `pytest --collect-only` at freeze, not
 re-read from the drafts above. Two numbers moved when I recomputed them.**
 
-    commits            6     812abc3  feed.py + tests (the ruling)
+    commits            8     812abc3  feed.py + tests (the ruling)
                              8c028d3  corpus probe + the measured correction
                              f86f27f  row-58 transport invariant
                              840f143  this document + the back-pointer
                              00211ce  the live probe, unrun and labelled
                              a5a988a  needle declared, neighbour's left red
+                             1583c58  freeze recomputed (the 1295 correction)
+                             a01796e  the candidate-host gate table
+                             + the commit carrying this line, which a ledger
+                               cannot count -- stated rather than left to
+                               drift, since every correction of this figure
+                               creates another commit to correct it with
     files added        6     1 module, 2 test files, 2 probes, 1 document
     files modified     1     the ranked table, 17 lines, all mine, 0 deletions
     tests added       37     collected, not counted by hand: 28 + 9
