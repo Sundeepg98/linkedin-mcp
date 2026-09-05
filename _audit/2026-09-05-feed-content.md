@@ -145,6 +145,42 @@ match -- and that the two are not derived from each other. It is still one
 page. A second item with a different comment count would settle it properly and
 was not run.
 
+### THE WALK EVENTUALLY RAN, AND ANSWERED IN THE NEGATIVE
+
+On the third attempt the rail returned and all 8 items were walked. **Exactly
+one of his eight items carries any comment at all.** Item 8, the last walked,
+drew 575 elements, zero identifiers and zero comment overflow controls, and so
+did the six between.
+
+**So the second-item measurement is not pending, it is unavailable.** There is
+no item with a different comment count on this rail to settle 4 == 4 against.
+That retires my own next-step item rather than deferring it -- the retry I had
+queued would have hunted a page that does not exist.
+
+### AND THE WALK CAUGHT A DEFECT IN THIS PROBE, WHICH IS THE BEST THING IT DID
+
+Route B gated on `found` -- the reading from the FIRST item carrying comments --
+and then clicked at whatever page the browser was on. While the loop broke at
+the first hit those were the same page and the difference could not be seen.
+The walk separated them: `found` described item 1 with 4 comment overflow
+controls, the browser sat on item 8 with none, the gate consulted `found`, said
+proceed, and the click raised.
+
+> **A precondition read off a page other than the one the action lands on is
+> not a precondition.**
+
+This is the SAME DEFECT this wave was briefed about before it started --
+`linkedin_react_to_item` read its direction from the wrong page, and
+`comment_on_item` shipped with two ends measuring different things. **I
+reproduced it within the hour, in a file whose docstring cites the scar.**
+Reading the note did not prevent it; running the wider mode caught it, which is
+this repository's standing finding about documentation as a control.
+
+**The crash was the lucky outcome.** It failed loudly only because item 8 had no
+such control at all. The dangerous version of this bug finds a control and
+presses it -- and on this surface the controls sit on other people's comments.
+Fixed by re-reading the page about to be acted on and reporting THAT count.
+
 ### THE SECOND ITEM WAS ATTEMPTED AND COULD NOT BE REACHED
 
 A `LINKEDIN_PROBE_WALK_ALL=1` mode was added to walk every item on the rail

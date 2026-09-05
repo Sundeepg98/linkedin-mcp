@@ -419,9 +419,31 @@ async def main() -> None:
 
         # === ROUTE B. One press, on one control, to corroborate.
         print("\n=== 3. ROUTE B -- the overflow menu, pressed once")
-        if found is None or len(found["comment_overflow_controls"]) < 1:
-            print("    NOT ATTEMPTED: no comment overflow control on the page")
-            print("    that was landed on. Nothing was pressed.")
+        # THE PRECONDITION IS RE-READ ON THE PAGE ABOUT TO BE ACTED ON.
+        #
+        # THIS WAS A LIVE DEFECT AND IT IS THE REASON THIS BLOCK EXISTS.
+        # Until the walk-all mode was added, the loop broke on the first item
+        # carrying comments, so ``found`` and the current page were the same
+        # object and the difference was invisible. With the walk on, ``found``
+        # describes item 1 and the browser is sitting on item 8 -- and this
+        # gate consulted ``found``, said 4 comment overflow controls, and
+        # clicked at a page that has none. The click raised.
+        #
+        # That is precisely the defect this repository has found twice
+        # already: ``linkedin_react_to_item`` read its direction from the
+        # wrong page, and ``comment_on_item`` shipped with two ends measuring
+        # different things. **A precondition read off a page other than the
+        # one the action lands on is not a precondition.** The crash was the
+        # lucky outcome; the dangerous version proceeds and presses whatever
+        # happens to be at the selector.
+        here = await page.evaluate(IDENT_JS, _cfg())
+        controls_here = len(here["comment_overflow_controls"])
+        print(f"    comment overflow controls ON THIS PAGE: {controls_here}")
+        if controls_here < 1:
+            print("    NOT ATTEMPTED: the page this run finished on carries no")
+            print("    comment overflow control. Nothing was pressed.")
+            print("    (An earlier item may well have carried one -- that is a")
+            print("    fact about THAT page and licenses nothing here.)")
             return
 
         before = await page.evaluate(MENU_JS, _cfg())
