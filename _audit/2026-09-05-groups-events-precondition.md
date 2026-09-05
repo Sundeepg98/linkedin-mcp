@@ -152,6 +152,8 @@ invitations only from your 1st-degree connections" (a SETTING). The censused
 content of the root is `N 180` -- recommendations and what his network is
 attending -- and that is what the page draws.
 
+**CORRECTED BY:** `_audit/2026-09-05-events-surface-recosted.md` -- the root does draw a "Your events" region; it is present, structurally complete and EMPTY for this account, which this pass could not see because it assigned anchors to headings and a heading with zero anchors under it produces no output at all
+
 **THE ADDRESS STAYS OPEN.** The ratification condition attached to it was "if
 the read returns nothing else, retire it". The read returns nothing SELF-SCOPED
 but it does return `N 180`, a censused row, so retiring it would close a door
