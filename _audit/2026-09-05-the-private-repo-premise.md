@@ -137,6 +137,19 @@ where it was carried forward unscoped, which is exactly what a live comment does
 existing. One precision on that correction's own account: it reads as though the premise
 never held. It held, and stopped holding at a measurable instant.
 
+**AND THE BACK-POINTER MACHINERY CANNOT REACH IT, WHICH IS THE GAP WORTH NAMING.** The
+check that enforces the markers above draws its corpus from `git ls-files -- _audit`
+filtered to markdown, and its citation pattern matches markdown paths alone. A workflow
+file is outside on two independent counts, directory and extension. Measured rather than
+assumed: a declaration naming `.github/workflows/ci.yml` resolves ZERO documents, lands in
+the malformed list, and turns the check RED instead of joining anything.
+
+**So the one artifact class that carries a premise forward as an instruction is exactly
+the class no back-pointer can bind.** Between this file and that workflow the
+cross-reference is prose in both directions, maintained by hand, asserted by nothing. It is
+written down here because a reader who trusts the check to cover the record would
+otherwise assume it covered that too.
+
 ## What this correction does not reach, so nobody re-derives it
 
 **No code, test verdict, tool count or capability claim in any of the three documents
