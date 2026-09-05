@@ -351,9 +351,13 @@ about its own queue.
   otherwise.** Editing the table's own cells was not attempted -- it is another
   wave's artifact and the sanctioned mechanism here is the correction marker,
   which is what I used.
-* **I did not open the alerts manage page.** The pattern is frozen and the
-  address is unverified. That page load is the single cheapest next action on
-  this surface and it is still owed.
+* **SUPERSEDED BY SECTION 7, and the correction is against this document.**
+  This bullet read *"I did not open the alerts manage page ... that page load
+  is still owed"*, and it was true when written. I then took it, and it
+  returned a result that changes the boundary entry's status. The bullet is
+  left standing rather than deleted, because a wave that quietly rewrites its
+  own "did not do" list is one nobody can audit -- but **do not quote it: read
+  section 7.**
 * **I built no reader for it.** A DOM reader invented against a page nobody has
   opened fails closed as *"he has no alerts"* -- the exact answer the surface
   exists to produce. The `newsletter` wave declined a reader on that ground and
@@ -397,13 +401,114 @@ you commit.
 
 ---
 
-## 7. THE ONE THING TO DO FIRST NEXT SESSION
+## 7. I TOOK THE PAGE LOAD MYSELF, AND IT CORRECTS THIS DOCUMENT
 
-**Load `https://www.linkedin.com/jobs/alerts/` -- one page, on an address that
-is now admitted, with no write anywhere near it.** It settles four things at
-once: whether LinkedIn serves that spelling at all; how many alerts exist; what
-each one searches for; and which geography each is pinned to. If it 404s, the
-answer is to change the pattern, and that is a five-minute edit with the
-attribution probe already tracked.
+Section 5 said the alerts page load was still owed. It was cheap, the browser
+was already attached, and the entry I had just frozen said in its own comment
+that the address was a hypothesis. So I took it: `scripts/_probe_job_alerts_live.py`,
+run three times, no control clicked and no write fired.
 
-Everything else on this surface is behind an unopened page. This one is not.
+**THE ADDRESS IS NOT SERVED AT THAT SPELLING, AND THE LANDING IS NOT ADMITTED.**
+
+    CONTROL   /jobs/search/?keywords=...   path kept: yes   landed admitted: yes
+    ALERTS 1  /jobs/alerts/                path kept: NO    landed admitted: NO
+    ALERTS 2  /jobs/alerts/                path kept: NO    landed admitted: NO
+    CONTROL   again, at session end        path kept: yes   landed admitted: yes
+
+LinkedIn redirects `/jobs/alerts/` to a different path at the same depth, twice
+reproducibly, with the control serving correctly at both ends of the session.
+**And the shipped predicate, asked about the LANDED address, refuses it.**
+
+**THE PATTERN IS INCOMPLETE RATHER THAN WRONG.** It admits nothing it should
+not -- the family mutation and the account-deletion guard are untouched by this
+-- and it does not cover where LinkedIn actually puts the page. The remedy is
+the one the entry names for itself: change the pattern. It cannot be changed
+correctly until somebody names the landed spelling, and that is a deliberate
+step rather than an f-string, for the reason in the next paragraph.
+
+**THE GATE CONSEQUENCE IS LIVE AND IT IS NOT MINE ALONE.**
+`assert_read_url` gates the REQUESTED url and never re-checks the LANDED one.
+`tests/test_readonly_boundary_invariant.py` already records this about
+`/messaging/` and calls it *"harmless today ... and a trap the moment anyone
+adds that check."* **Here is a second instance, found within nine minutes of
+freezing the entry, by asking the shipped predicate about the address the
+browser actually came to rest on.** That question is cheap, and no probe in
+this repository was asking it.
+
+### What the page IS, and what I did not establish
+
+It is a real, distinct, stable page. Against the control, twice each:
+
+    controls_read   133   vs   185
+    forms             1   vs     5
+    links            52   vs    36
+    dialogs           2   vs     1
+    shapes blanked   14   vs    17
+    'edit' in a shaped name    1   vs   0
+
+No auth wall. Title carries the word `job` and not `alert`.
+
+**I DID NOT ESTABLISH THAT IT IS THE ALERTS MANAGE PAGE.** The vocabulary
+tally reads `daily=0 weekly=0 manage=0 delete=0`, and `alert=1` is worth
+nothing because the job-search control reads `alert=1` too. The only
+discriminating signal is a single `edit`-shaped control the search page does
+not have. **How many alerts he has is still unmeasured**, which is the fact the
+`linkedin-jobs` skill most wants, and it is one pattern away rather than one
+ruling away.
+
+**NO KEYWORD WAS READ OUT.** His search terms carry a geography and a stack and
+one of those spellings is on this repository's denied-terms list, so the probe
+tallies generic vocabulary and never transcribes.
+
+**CONSUMPTION: UNKNOWN.** `read_invitation_badge` returned no badge at either
+end, so the probe says UNKNOWN rather than "nothing was spent" -- a claim about
+an instrument this server did not have on that page.
+
+### Two instrument failures, both mine, both caught only by a control
+
+**The tally read `control["name"]` and returned ZERO for every word on every
+page** -- including `on`, across 185 controls of a page LinkedIn certainly
+labels in English. The census publishes `shape`, not `name`. A control that
+must fire and does not is the strongest evidence available that the instrument
+cannot see, and without noticing it I would have reported *"no alert controls
+are drawn"* -- a finding about a dictionary key, dressed as a finding about
+LinkedIn.
+
+**The containment check compared whole URLs and read False FOR THE CONTROL**, a
+page that certainly served, because LinkedIn reorders a query string. A
+containment test that fails on the known-good case is measuring the query, not
+the route. Comparing PATHS fixed it, and only then did the alerts `False` mean
+anything.
+
+Both ran in the flattering direction: the first made the page look empty, the
+second made every address look redirected. **Neither was caught by reasoning.
+Both were caught by the control disagreeing.**
+
+### And the taint guard refused the first version of the output
+
+`tests/test_navigation_is_never_derived.py` fired on `print(f"...{kept}")` and
+`print(f"...{landed_admitted}")`. Both are BOOLEANS and structurally incapable
+of carrying an address -- and the guard is right anyway, because it tracks
+tainted NAMES across a module and cannot type-check. **The failure message is
+the instruction** (*"emit a RELATION or a count instead"*), and the fix was to
+branch to literals at the print site rather than to widen `_SANITISERS`. A
+declaration permanently widens what the guard tolerates, and this one would
+have bought an f-string.
+
+---
+
+## 8. THE ONE THING TO DO FIRST NEXT SESSION
+
+**Name the address LinkedIn redirects `/jobs/alerts/` to, and re-anchor the
+pattern on it.** Everything needed is now tracked: the probe takes the reading,
+`scripts/_probe_boundary_line_attribution.py` attributes the digest move, and
+`tests/test_job_alerts_read_boundary.py` already holds the family mutation that
+will refuse a lazy fix. It is a one-line boundary edit once the spelling is
+known, and the spelling costs one page load that has already been paid for
+once.
+
+**The second thing is bigger than this surface: ask the landed-address question
+everywhere.** One probe asked the shipped predicate about the address the
+browser came to rest on, and the first admitted address it tried was refused
+there. **That check is cheap, it is nobody's artifact yet, and this repository
+has 32 allowlist patterns none of which has been asked it.**
