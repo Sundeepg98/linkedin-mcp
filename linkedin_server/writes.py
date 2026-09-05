@@ -5085,6 +5085,30 @@ TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
 #: control that has not settled is the failure mode with no error message.
 CLICK_TIMEOUT_MS = 10_000
 
+#: THE APPLY MODAL IS POLLED RATHER THAN WAITED FOR, and these are the two
+#: numbers that were bare literals until 2026-09-05.
+#:
+#: The gate re-reads because a modal still opening reads as ABSENT, and one
+#: read would refuse a posting that was about to be fine. The loop is real
+#: behaviour, not a workaround; what it lacked was a NAME, which is the whole
+#: difference between a bound somebody chose and a bound nobody can find.
+#:
+#: WHAT IT COSTS WHEN THE MODAL NEVER COMES is the full product, and that is
+#: correct against LinkedIn and wrong against a frozen capture, where the page
+#: cannot change and the fifteenth read is guaranteed to equal the first.
+#: MEASURED 2026-09-05 -- ``tests/test_verification_that_could_not_read.py``
+#: spent 60.97 s of its 74 s inside ``page.wait_for_timeout``, over 60 calls
+#: across four tests, every one of them pacing a page that was already final.
+#:
+#: SPLIT IN TWO ON PURPOSE. The COUNT is the safety property -- fifteen
+#: independent looks before the gate gives up -- and a test over a static page
+#: must keep all fifteen. The INTERVAL is pacing for a live browser and means
+#: nothing to a document that cannot change, so that is the one a test pushes
+#: down. Collapsing them into a single "timeout" would have made the cheap
+#: half unreachable without also weakening the half that matters.
+APPLY_MODAL_POLLS = 15
+APPLY_MODAL_POLL_MS = 1_000
+
 
 #: The accessible-name PREFIX the unfollow control wears. A prefix rather than
 #: an exact label because LinkedIn writes the Page's own name into it, which is
@@ -7929,11 +7953,11 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
        will not be walked on the assumption that it resembles the one that was.
     """
     modal: dict[str, Any] = {}
-    for _ in range(15):
+    for _ in range(APPLY_MODAL_POLLS):
         modal = await dom.read_apply_modal(page)
         if modal.get("modal_present") and modal.get("submit_present"):
             break
-        await page.wait_for_timeout(1_000)
+        await page.wait_for_timeout(APPLY_MODAL_POLL_MS)
 
     out: dict[str, Any] = {
         "proceed": False,

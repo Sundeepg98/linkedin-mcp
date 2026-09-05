@@ -70,6 +70,8 @@ navigator from ``tests/test_writes.py``.
 
 from __future__ import annotations
 
+import pytest
+
 from linkedin_server import writes
 from tests.test_writes import (  # noqa: F401 - three of these are fixtures
     JOB,
@@ -89,6 +91,58 @@ from tests.test_writes import (  # noqa: F401 - three of these are fixtures
 #: control that cannot fail. This copy is the unmutated reference every
 #: comparison below is made against.
 _REAL_WHERE_TO_LOOK: dict[str, str] = dict(writes._WHERE_TO_LOOK)
+
+#: THE SHIPPED PACING, snapshotted at import for the same reason the table
+#: above is: the fixture below mutates it, and a test that read the live
+#: attribute would be checking its own mutation.
+_SHIPPED_POLL_MS: int = writes.APPLY_MODAL_POLL_MS
+_SHIPPED_POLLS: int = writes.APPLY_MODAL_POLLS
+
+
+@pytest.fixture(autouse=True)
+def _the_poll_is_paced_for_a_page_that_cannot_change():
+    """Take the SLEEP out of the apply gate's poll. Not the poll.
+
+    WHAT THIS FILE WAS PAYING. Every test here drives ``apply_job`` at a
+    posting whose modal is never opened, so ``_apply_submit_gate`` runs its
+    loop to the end every time. MEASURED 2026-09-05, before this fixture:
+    60 calls to ``page.wait_for_timeout``, 60.97 s, against 74 s of measured
+    time for the whole module -- four tests each sleeping fifteen seconds.
+
+    WHY IT IS SOUND HERE AND WOULD NOT BE EVERYWHERE. These pages are frozen
+    captures loaded with ``set_content``; none of the twenty fixtures in this
+    repo carries a single ``<script>``, so the document is final before the
+    first read and the fifteenth read is provably equal to it. Pacing between
+    identical reads buys nothing that a page could spend.
+
+    THE COUNT IS UNTOUCHED, and that is the point. The safety property is
+    "fifteen independent looks before giving up", and it still happens fifteen
+    times; only the gap between them goes. The two are separate constants so
+    that this fixture cannot reach the one that matters, and
+    ``test_the_shipped_pacing_is_named_and_bounded`` below asserts the SHIPPED
+    values off the import-time snapshot, so it still fails if somebody edits
+    them in ``writes`` -- a guard that read the live attribute would be
+    certifying this fixture instead.
+    """
+    writes.APPLY_MODAL_POLL_MS = 1
+    try:
+        yield
+    finally:
+        writes.APPLY_MODAL_POLL_MS = _SHIPPED_POLL_MS
+
+
+def test_the_shipped_pacing_is_named_and_bounded():
+    """The numbers this module pushes down are still sane where they ship.
+
+    Asserted against the import-time snapshot rather than the live attribute,
+    because the autouse fixture above has already moved the live one. Without
+    this, pacing the poll down would silently certify the paced value, and
+    deleting the real interval would leave every test in this file green.
+    """
+    assert isinstance(_SHIPPED_POLLS, int)
+    assert 5 <= _SHIPPED_POLLS <= 60, _SHIPPED_POLLS
+    assert isinstance(_SHIPPED_POLL_MS, int)
+    assert 250 <= _SHIPPED_POLL_MS <= 5_000, _SHIPPED_POLL_MS
 
 #: The stem of the sentence, split out because three tests assert it and one
 #: asserts it survives a mutation. Reproduced from ``writes.perform``'s except
