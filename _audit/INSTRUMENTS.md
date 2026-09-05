@@ -1629,3 +1629,66 @@ interpreter and names where the second lives.
 Writing "verified under both" would have cost nothing, matched every
 neighbouring entry, and been false. A register whose entries are shown failing
 is worth nothing if its prose is not held to the same bar.
+
+---
+
+## 10. The LOAD A probe, and the failure it was caught in
+
+Added 2026-09-05 by the search-appearances wave. **APPENDED, not inserted.**
+
+`scripts/_probe_search_appearances_live.py` -- two loads of his own
+search-appearances page through `dom.read_search_appearances`, attach mode, no
+profile lock. Record: `_audit/2026-09-05-search-appearances-load-a.md`.
+
+**DECLARED DISPOSABLE AS A PROBE.** It answered one question once and the
+answer is written down. What is NOT disposable is the shape of its defect.
+
+### 10.1 A verdict function is an instrument, and this one failed on live data
+
+Its `verdict()` printed, on reading 5 member links: *"the record does not
+merely count, it NAMES. The emission is identifying."*
+
+`anchors.person` counts `/in/` hrefs inside `main`. Five is a true count of
+member links. It does not establish what they point at -- the searchers, a
+"people also viewed" rail, and **his own nav link** all produce that number.
+An integer answering *"are there member links here"* was read as answering
+*"does the record name the searchers"*.
+
+**IT WAS NOT CAUGHT BY A MUTATION. It was caught by reading the output against
+the question.** Every guard in section 6 was red-proofed; this function was
+not, because it emits prose rather than a value an assertion could pin. That
+is the gap worth carrying forward: **the reading half of a probe gets the same
+scrutiny as the measuring half, and it is the half no mutation test reaches.**
+
+The pattern that would have prevented it, and it is already this repository's
+own: a count is not the property. `linkedin_send_message`'s own documentation
+says *"A COUNT IS NOT THE PROPERTY"* about committed recipients. The same
+sentence was true here one surface over and nobody carried it across.
+
+### 10.2 The two-readings rule earned its keep
+
+Both loads returned identical values in every field -- 108, 13, 5, 0, 18,
+2005 chars. That is what makes them a measurement rather than a sample, and it
+answered a second question for free: **the badge question the census key's own
+comment leaves open.** Nothing observable was spent between the loads.
+
+Had the two disagreed, the probe says so and claims nothing -- the branch
+exists and is the reason the numbers above can be quoted.
+
+### 10.3 What the reader's conservative branch cost, measured
+
+Both metric labels returned `<redacted>` because `entity_linked` came back
+`unwalked`: the six-hop ancestor walk did not reach a page root, and anything
+but a flat `no` costs the label. The numbers are proven and their captions are
+not.
+
+**This is the failure the constant's docstring predicted in advance** -- *"a
+visible miss, which is the failure to have"* -- and it fired on the first live
+run. Recorded because the obvious repair is wrong: raising the hop budget
+makes the walk reach `main`, which contains every link on the page, and then
+EVERY label is redacted. The fix is a capture of the real DOM shape.
+
+And one thing the live run did NOT exercise: `pairs_withheld` was 0. Only two
+numberish pairs exist on that render, so **the primary defence -- withholding
+the label in the page -- was never exercised against live markup** and remains
+proven only against the synthetic fixture.
