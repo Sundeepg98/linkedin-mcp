@@ -523,6 +523,37 @@ re-costed on a measured row census and 3 of those individually characterised.**
 
 ---
 
+## 5.4 TWICE THIS WAVE MY OWN AD-HOC INSTRUMENT WAS WRONG, AND NEITHER TIME BY A LITTLE
+
+Both were checks I wrote in a hurry to verify somebody else's work, and both
+would have produced a confident, false report. They are recorded together
+because the pair is a pattern, not two accidents.
+
+| what I ran | what it said | what was true | what caught it |
+|---|---|---|---|
+| `grep -rn accept_downloads --include=*.py .` | 38 files | **0** tracked files | it swept `venv/` -- Playwright's own source. Scoping to `git ls-files` fixed it |
+| `grep -c '[^\x00-\x7F]'` for a strict-ASCII check | 485 non-ASCII lines in `feed.py` | **0** non-ASCII bytes | the counts equalled the files' LINE counts. GNU grep without `-P` does not interpret `\x`, so it was matching the literal characters `\`, `x`, `0`, `7`, `F` |
+
+**The first would have refuted a correct delegated measurement.** The second
+would have reported a strict-ASCII violation in every file this wave wrote.
+Neither was caught by reading the command; the first was caught by asking what
+corpus it had swept, and the second by noticing that a suspicious number
+matched a number I already knew.
+
+**The remedy in both cases was the same and it is the standing rule:** when the
+repository ships an instrument, import it. `sweep_tracked_for_identity.py` was
+available for the first; a three-line byte check with a control -- *does this
+checker return non-zero for a string I know is non-ASCII?* -- settled the
+second, and returned **2** for a deliberately non-ASCII string before it was
+believed about a zero.
+
+That is the same ordering this repository requires everywhere else: **a presser
+must be shown reporting a presence before its absence is worth anything.** I
+applied it to LinkedIn's surfaces all evening and nearly skipped it on my own
+tooling twice.
+
+---
+
 ## 6. PROVENANCE
 
 * No browser attached, no page opened, no badge read, no navigation, and
