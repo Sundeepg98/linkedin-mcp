@@ -774,11 +774,85 @@ PINNED = (
 #: root, any sub-path under it, and ``/newsletters/create/`` -- which is
 #: refused TWICE, by the ``/create`` substring and by no pattern, and which
 #: census rows ``M C50`` and ``M C81`` would need.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-05, LATER THE SAME DAY, AND THE ENTRY ABOVE IS NOT
+#: TOUCHED. The chain has ONE head and it was re-pinned twice today already.
+#: The line above is correct as its author wrote it and stays; this one is
+#: computed against the tree AS IT THEN STOOD, whose starting value is
+#: ``ee9817a5cb439e2c`` -- the value the creator-analytics entry ends at.
+#:
+#:     _ALLOWED_URL_PATTERNS   ee9817a5cb439e2c -> fa201106ecfce5ef
+#:
+#: TWO ANCHORED PATTERNS, ONE PER SURFACE:
+#:
+#:     ^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$
+#:     ^https://www\.linkedin\.com/jobs/collections/recommended/?$
+#:
+#: Census rows 40 ``SCHOOL-PAGE-SURFACE`` and 75 ``JOB-COLLECTIONS-SURFACE``,
+#: both measured REFUSED at 29 patterns by the previous wave and both filed
+#: at ``allowlist +1`` -- the one cost figure in that wave's seven that a
+#: re-measurement CORROBORATED rather than corrected.
+#:
+#: THE RULING, AND WHY IT REACHES THESE TWO. The sharpest refusal on this
+#: boundary is about MEMBER PROFILES, and its cause is specific rather than
+#: general: loading another member's profile leaves THEM a durable record,
+#: which ``who_viewed_me`` reads the receiving end of. That cause does not
+#: transfer to an ORGANISATION page, which emits no view receipt, nor to
+#: LINKEDIN'S OWN CURATED FURNITURE, which names nobody at all. Two
+#: surfaces, two patterns, and no family bought for either.
+#:
+#: **NEITHER IS A FAMILY PATTERN, AND THAT IS ASSERTED RATHER THAN
+#: PROMISED.** ``tests/test_school_and_collections_boundary.py`` holds the
+#: limits: the school Page's own tabs, its query form, its parent, a dotted
+#: segment (the ``..`` normalisation escape) and every other collection are
+#: each put through the real predicate and refuse. It also PLANTS THE FAMILY
+#: PATTERN THE STANDING TRAP NAMES and shows it admitting SIX account-ending
+#: addresses, three of which carry no forbidden substring at all -- so the
+#: guard is one that has been seen firing, not one that has only passed.
+#:
+#: A MEASURED SHARPENING OF THAT TRAP, recorded here because the trap as
+#: written is about ``close-account`` and the measurement says which
+#: spelling: the PLURAL ``/close-accounts`` has two gates (a forbidden
+#: substring AND no pattern); the SINGULAR ``/close-account`` and
+#: ``/account-closure`` have ONE. The addresses a family pattern would
+#: actually open are the spellings the denylist never learned.
+#:
+#: WHAT MOVED AND WHAT DID NOT. ``_ALLOWED_URL_PATTERNS`` moved, once, by
+#: two tuple entries. **EVERY OTHER PINNED DIGEST IS BYTE-IDENTICAL** --
+#: seven of eight, reported by the failure itself before the re-pin, so it is
+#: the instrument's reading and not the author's summary. ``<functions>`` did
+#: not move, so ``assert_read_url`` and every other gate function is
+#: unchanged. No denylist was shortened and none was lengthened: 33 forbidden
+#: substrings before and 33 after. Neither exemption table was touched, and
+#: the test file asserts that neither admitted address needed one.
+#:
+#: ATTRIBUTION, MEASURED THE WAY THE TWO ENTRIES ABOVE MEASURE IT: the tree
+#: MINUS this wave's two lines hashes to exactly ``ee9817a5cb439e2c``, the
+#: value this line replaces, so nothing else in a tree with a dozen writers
+#: rode in on the re-pin. Two controls beside it -- removing a PRE-EXISTING
+#: entry lands on ``ef5c55f83c7a32f1``, somewhere else entirely, and a needle
+#: no line carries drops zero lines and moves nothing. The instrument is
+#: ``_audit/_scratch/_probe_cheapreads_refreeze_attribution.py``, which is
+#: gitignored, so THE EVIDENCE DOES NOT SURVIVE A CLONE and this comment is
+#: where it lives.
+#:
+#: AND THE ATTRIBUTION PROBE CAUGHT A REAL DEFECT ON ITS FIRST RUN, which is
+#: why it is worth running rather than reasoning about. The collections
+#: pattern was first written across three lines; deleting the one line
+#: carrying the needle left ``re.compile()`` behind -- still valid, still
+#: parsed, a DIFFERENT digest -- and the probe reported MISMATCH. A
+#: line-based attribution instrument cannot describe a multi-line entry, and
+#: the fix was to make the entry one line rather than to loosen the check.
+#:
+#: ONE INTERPRETER. This box has one venv at 3.13.14 and no ``py`` launcher,
+#: so the value above is verified under 3.13 only. The 3.10 cell is CI's and
+#: is available on push. Claiming two would be the cheapest false sentence
+#: in this file.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
-    "_ALLOWED_URL_PATTERNS": "ee9817a5cb439e2c",
+    "_ALLOWED_URL_PATTERNS": "fa201106ecfce5ef",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1201,7 +1275,19 @@ DENYLISTS_AT_A76FE32 = {
     #
     # ONE INTERPRETER. This box has one venv at 3.13; the entry says so rather
     # than claiming a 3.10 confirmation it did not take.
-    "_ALLOWED_URL_PATTERNS": "ee9817a5cb439e2c",
+    #
+    # UPDATED 2026-09-05, later the same day, for the school and job-collection
+    # patterns. This dict answers "did the WRITE widen anything" and the answer
+    # is STILL NO -- the write did not touch this. What touched it, again, is a
+    # separate and deliberate READ boundary change, which is the same reason
+    # every previous update to this line was made. Leaving the old value would
+    # fail this test for a change it was never written to police; updating it
+    # in silence would quietly retire the check, so it is said here.
+    #
+    # THE THREE OTHER ENTRIES IN THIS DICT ARE UNTOUCHED, and that is the half
+    # of it worth reading: a shortened forbidden list, a detector removed from
+    # the scanner or a dropped JS token would all still fail here.
+    "_ALLOWED_URL_PATTERNS": "fa201106ecfce5ef",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

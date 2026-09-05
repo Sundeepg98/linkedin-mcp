@@ -955,6 +955,59 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/feed/?$"),
     # The login page, opened for the operator to sign in himself.
     re.compile(r"^https://www\.linkedin\.com/login/?(\?[^#]*)?$"),
+    # A SCHOOL PAGE, ONE SEGMENT DEEP. Admitted 2026-09-05, census row 40
+    # ``SCHOOL-PAGE-SURFACE``, on the ruling recorded in
+    # ``_audit/2026-09-05-cheap-reads.md`` section 12 and applied here.
+    #
+    # THE RULING, AND THE PART OF IT THAT DOES THE WORK. This boundary's
+    # sharpest refusal is about MEMBER PROFILES, and its stated cause is
+    # specific rather than general: loading another member's profile leaves
+    # THEM a durable record, which is not a supposition -- ``who_viewed_me``
+    # reads the receiving end of exactly that signal. **That cause does not
+    # transfer to an organisation page.** A school has no who-viewed-me and
+    # emits no view receipt to anybody. The ruling is granted on the cause,
+    # not on a feeling about how sensitive the address looks.
+    #
+    # ONE PATH SEGMENT AND NOTHING ELSE. No sub-path, no query. The tabs
+    # under a school Page (``/people/``, ``/jobs/``, ``/posts/``) are
+    # SEPARATE surfaces and ``/people/`` in particular is a roster of
+    # members -- the one place under this root where the member-profile
+    # cause could start to apply again. It is refused, and it is refused by
+    # this anchor rather than by a promise.
+    #
+    # A DOT IS DELIBERATELY OUTSIDE THE CHARACTER CLASS. A slug containing
+    # ``.`` is a real, if uncommon, spelling, and admitting it would also
+    # admit a segment of ``..`` -- which the browser normalises AWAY,
+    # turning an admitted school address into some other page entirely. The
+    # repository already pins ``/in/me/edit/intro/../../evil`` for that
+    # class. So a dotted slug fails CLOSED here, which is a refusal to be
+    # widened deliberately on evidence, never by relaxing the class.
+    #
+    # WHAT STILL REFUSES A SLUG THAT HAPPENS TO CARRY A FORBIDDEN SUBSTRING.
+    # Nothing about this entry excuses gate one: a school whose slug
+    # contains ``connect`` or ``invite`` refuses, and that is correct
+    # fail-closed behaviour rather than a defect to route around.
+    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$"),
+    # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
+    # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
+    # ruling.
+    #
+    # IT IS LINKEDIN'S OWN CURATED FURNITURE. The collection is assembled by
+    # the platform for the signed-in account; it names no member, carries no
+    # id of any kind, and there is no third party at the other end of it to
+    # receive a record. The member-profile cause has nothing to attach to.
+    #
+    # THE FAMILY IS NOT BOUGHT, AND THAT IS THE ENTIRE DISCIPLINE OF THIS
+    # ENTRY. ``/jobs/collections/<name>/`` is an open-ended namespace whose
+    # membership LinkedIn controls, so a pattern shaped for the family
+    # admits addresses that do not exist yet and that nobody has read. One
+    # named collection, and a second is a boundary change rather than a
+    # maintenance edit -- the same rule the exemption tables above state for
+    # themselves.
+    #
+    # NO QUERY AND NO SUB-PATH. Nothing in this package builds either, and a
+    # pattern that accepts a query accepts whatever a caller appends.
+    re.compile(r"^https://www\.linkedin\.com/jobs/collections/recommended/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
