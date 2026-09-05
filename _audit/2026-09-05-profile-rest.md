@@ -674,13 +674,18 @@ count over a pool a dozen waves share. The PAGE was closed, never the context.
 
 ## 9. COMMITS, AND EVERY BLOB VERIFIED AGAINST ITS REPORTED COUNT
 
-    707583b  probe: the badge/language reader                241 lines
-    79e126b  test: the two vocabularies and two gate indices 125 lines
-    57117d4  audit: this document                            419 lines
-    b88211b  probe: accessible names, badge pair, escape     +55 -12
-    85364e7  test: the settings boundary refuses deletion    158 lines
+    707583b  probe: the badge/language reader                +241  -0
+    79e126b  test: the two vocabularies and two gate indices +125  -0
+    57117d4  audit: this document                            +419  -0
+    b88211b  probe: accessible names, badge pair, escape      +55 -12
+    85364e7  test: the settings boundary refuses deletion    +158  -0
     7700cc6  audit: corrections (blind spot fired, plural)   +191 -27
-    9d89134  probe: K10 on a live job posting                 49 lines
+    9d89134  probe: K10 on a live job posting                 +49  -0
+    10c02b6  audit: K10 measured, blind spot fired twice      +68  -6
+    ae2ed91  audit: another wave converged independently      +35  -0
+    2956c05  audit: a freeze red that was not real            +45  -0
+    ----------------------------------------------------------------
+    TEN COMMITS, FOUR DISTINCT PATHS
 
 **Each was verified with `git show HEAD:<path> | wc -l` against the insertion
 count the commit reported**, because a failed `git commit --only` rolls the
@@ -692,9 +697,10 @@ that same scar.
 five commit messages for the co-author, session and generated-with markers:
 **0 matches**. The repo is public.
 
-Nothing pushed. **The union of paths across all five commits is FOUR distinct
-files** -- recomputed with `git show --numstat`, because the sentence that
-first stood here said "two scripts" and there is only one, committed twice:
+Nothing pushed. **The union of paths across all TEN commits is FOUR distinct
+files** -- recomputed with `git show --numstat` at freeze, because the
+sentence that first stood here said "two scripts" and there is only one,
+committed three times:
 
     scripts/_probe_badge_and_language_affordances.py    (707583b, b88211b)
     tests/test_badge_and_language_affordances.py        (79e126b)
