@@ -631,3 +631,49 @@ All nine deletions are still this wave's own lines, named in section 9. **AI
 attribution: 0, per commit, across all seven.** Nothing pushed -- the push is
 blocked on an unrelated matter recorded in the freeze file, and this wave did
 not touch it.
+
+---
+
+## 11. STOPPED ON THE OPERATOR'S CALL, AND ONE HALF-BUILT CHANGE WAS REVERTED
+
+The session was ended at ~20:07 by the box, ahead of this wave's 20:30. What
+follows is what was actually reached, not what was planned.
+
+### The tab-leak ratchet: re-measured as my own reading, then left alone
+
+Section 10 passed on a number a child reported. **It was re-taken here with the
+shipped guard rather than relayed**, which is the standing rule, and it agreed:
+
+    41 scripts open a browser session and never close the tab   (pin: 39)
+
+`scripts/_probe_premium_entitlement.py` is on that list, and it is the probe
+this wave enrolled at `9993170`, which made it arguably this wave's to fix.
+
+**A FIX WAS STARTED AND IS NOT IN ANY COMMIT.** A tab-closing helper was added
+to that probe and the re-measured ratchet moved 41 -> 40 -- **while the probe's
+own session line was unchanged, so the helper was never called.** The guard is
+a STATIC check for a `page.close()` call, so it read the improvement off a
+function nothing invoked.
+
+    a guard that reads better while the behaviour is identical is a FALSE GREEN
+
+That is the disease this repository spends its days hunting, arriving in this
+wave's own edit, and it was caught by reading the wiring rather than the guard.
+The change was **reverted in full** on the stop order rather than committed
+half-built: `git checkout --` on that path, and the ratchet re-measured back at
+its true **41**. Nothing about the leak is fixed and this document does not
+claim it is.
+
+**The finding survives the revert and is the part worth keeping:** the
+sanctioned probe template and the tab-leak ratchet disagree, the template is
+winning because it is written into every brief, and the ratchet's static check
+can be satisfied by a helper nobody calls. Whoever owns that guard should know
+all three.
+
+### Final state
+
+Eight commits, none pushed. The push is blocked on a history purge that must
+not run while this range is held, and this wave did not touch it. Two guards
+that were red are green (`9ed2b62`, `9993170`); one guard is red and was red
+before this wave and is not this wave's (`test_a_probe_closes_its_own_tab`, at
+41 against a pin of 39).
