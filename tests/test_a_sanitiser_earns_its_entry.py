@@ -101,6 +101,29 @@ ENROLLED: dict[tuple[str, str], str] = {
     ("_probe_unmeasured_surfaces_live.py", "_shape_of"): TWO_ARG,
     ("_probe_messaging.py", "_redact"): ONE_ARG,
     ("_probe_search_render_timeline.py", "_redact"): ONE_ARG,
+    # THE EIGHTH, AND IT IS ONE ROW OF FIVE THAT ARE OWED.
+    #
+    # ``_relation`` was added to ``_SANITISERS`` on 2026-09-05 by `196394d`,
+    # which touched five files and NOT this one. Both of this file's
+    # enumeration guards went red at that moment, with the two claimants that
+    # commit itself introduced. Three more arrived afterwards, this one among
+    # them, each inheriting the guard's trust the instant it was typed --
+    # **the exact event the paragraph above says this test was built for,
+    # happening a second time, to a different sanitiser name.**
+    #
+    # ONLY THIS ROW IS ADDED HERE, deliberately. The other four belong to
+    # `_probe_groups_events_capture.py`, `_probe_groups_events_live.py`,
+    # `_probe_compose_file_inputs.py` and `_probe_newsletter_subscriptions_
+    # live.py`, and a wave enrolling a neighbour's function would be vouching
+    # for a contract it did not write. Enrolment is a CLAIM, not a formality.
+    #
+    # WHAT MAKES THIS ROW SAFE TO ADD RATHER THAN A GUESS: this copy of
+    # ``_relation`` is byte-identical to the ones
+    # ``test_every_relation_definition_is_byte_identical`` already governs, so
+    # the contract being claimed is one that file already proves. The
+    # adversarial table below is what checks it, and it was run against this
+    # entry before the entry was committed.
+    ("_probe_analytics_controls_live.py", "_relation"): TWO_ARG,
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this
