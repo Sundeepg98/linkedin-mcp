@@ -129,6 +129,16 @@ facts above all point the same way and none of them is the word "member".
 overflow menus, which needs a PRESS. Not taken, and not needed for the
 consequence below.
 
+**CORRECTED BY:** `_audit/2026-09-05-groups-surface-measured.md` -- the press named above WAS taken, later the same day, and the reading in this section is no longer READ: all five menus were opened and every one draws `Leave this group`, which LinkedIn does not offer for a group you have not joined, so the membership reading now rests on its own affordance rather than on its choice of the word "listing"; five instruments sharing no input feature now say five, this section's three plus row-scoped containment walked from the control and the leave affordance itself; and no group name crossed to establish it, because the three menu labels repeat across the five menus and the count rule kept them where it would have redacted a singleton.
+
+The back-pointer is placed HERE, beside the claim, rather than at the foot of
+the document. A reader who opens this file to learn whether the membership
+reading is solid stops at this section satisfied, and a marker they never
+scroll to cannot reach them. **In this repository a correct measurement once
+sat for eleven days while three later documents restated the claim it had
+already refuted** -- no step was a mistake, and every reader who started from
+the claim missed the refutation.
+
 **THE CONSEQUENCE HOLDS EITHER WAY.** `GROUPS-SURFACE` is not a three-row
 blocker. Its 32 rows have a live account behind them.
 
