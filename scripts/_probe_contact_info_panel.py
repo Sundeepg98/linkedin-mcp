@@ -119,10 +119,12 @@ LABEL_VOCABULARY = (
 #: There is deliberately no branch that returns a substring of the document.
 #: The label match is `indexOf` against the caller's own tuple, so the value
 #: that crosses is the caller's literal and never the page's text.
-PANEL_JS = """
+PANEL_JS = r"""
 (cfg) => {
   const out = {controls: 0, expanded: 0, dialogs: 0, rows: 0, other: 0,
-               links: 0, labels: {}};
+               links: 0, labels: {},
+               visible_dialogs: 0, visible_rows: 0, visible_headings: 0,
+               visible_links: 0, visible_children: 0, token_labels: {}};
   const anchors = Array.from(document.querySelectorAll('a[href]'));
   for (const a of anchors) {
     let path = '';
@@ -133,10 +135,31 @@ PANEL_JS = """
       if (a.getAttribute('aria-expanded') !== null) { out.expanded += 1; }
     }
   }
-  const dialogs = Array.from(document.querySelectorAll(
-    '[role="dialog"], dialog'));
-  out.dialogs = dialogs.length;
-  for (const d of dialogs) {
+  const all = Array.from(document.querySelectorAll('[role="dialog"], dialog'));
+  out.dialogs = all.length;
+
+  // THE SECOND INSTRUMENT, AND IT DOES NOT SHARE AN INPUT FEATURE WITH THE
+  // FIRST. Run 1 published two numbers as declared UPPER BOUNDS: a label
+  // count taken by SUBSTRING over EVERY dialog on the page, and a row count
+  // of 1 that was implausible for a panel drawing three field classes.
+  //
+  // Both defects have the same root and it is not the matcher: the page
+  // carried FOUR dialogs BEFORE the press, so every count was taken over
+  // other people's markup as well as the panel. Restricting to the VISIBLE
+  // dialog aims the reader at the thing that was opened.
+  //
+  // And the label rule becomes a TOKEN match with word boundaries rather
+  // than a substring. `im` inside `time` is the measured overreach; a
+  // boundary rule cannot make it and reports zero where zero is the truth.
+  const visible = all.filter((d) => {
+    if (d.hidden) { return false; }
+    if (d.getAttribute('aria-hidden') === 'true') { return false; }
+    const r = d.getBoundingClientRect();
+    return (r.width > 0 && r.height > 0);
+  });
+  out.visible_dialogs = visible.length;
+
+  for (const d of all) {
     const text = (d.innerText || '').toLowerCase();
     let matchedAny = false;
     for (const word of cfg.vocab) {
@@ -148,6 +171,49 @@ PANEL_JS = """
     if (!matchedAny) { out.other += 1; }
     out.rows += d.querySelectorAll('li, section').length;
     out.links += d.querySelectorAll('a[href]').length;
+  }
+
+  // THE BOUNDARY RULE, BUILT WITHOUT A REGEX ON PURPOSE.
+  //
+  // A constructed RegExp needs the vocabulary escaped, and getting that
+  // escaping wrong is exactly how run 2 of this probe died -- Playwright
+  // reported "Invalid regular expression: missing /", the run aborted before
+  // the control leg, and it cost a page load and proved nothing. The escape
+  // had to survive a Python string literal AND a JavaScript regex literal,
+  // which is two layers of quoting to get right for no benefit.
+  //
+  // A NEIGHBOUR-CHARACTER TEST NEEDS NO ESCAPING AT ALL and cannot be
+  // mis-quoted: a match counts only when the characters either side of it
+  // are not letters or digits, which is what a word boundary means. The text
+  // is lower-cased before it gets here, so the letter test needs one range.
+  const isWordChar = (ch) =>
+    (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+  const hasToken = (text, word) => {
+    let from = 0;
+    for (;;) {
+      const at = text.indexOf(word, from);
+      if (at === -1) { return false; }
+      const before = (at === 0) ? '' : text.charAt(at - 1);
+      const after = text.charAt(at + word.length);
+      if (!isWordChar(before) && !isWordChar(after)) { return true; }
+      from = at + 1;
+    }
+  };
+
+  for (const d of visible) {
+    const text = (d.innerText || '').toLowerCase();
+    for (const word of cfg.vocab) {
+      if (hasToken(text, word)) {
+        out.token_labels[word] = (out.token_labels[word] || 0) + 1;
+      }
+    }
+    // A WIDER STRUCTURAL NET than li/section, because run 1's row count of 1
+    // says the panel's rows are probably neither.
+    out.visible_rows += d.querySelectorAll('li, section').length;
+    out.visible_headings += d.querySelectorAll(
+      'h1, h2, h3, h4, h5, h6').length;
+    out.visible_links += d.querySelectorAll('a[href]').length;
+    out.visible_children += d.querySelectorAll('*').length;
   }
   return out;
 }
@@ -204,6 +270,17 @@ async def press_contact_control(page):
     return {
         "status": "pressed",
         "controls": controls,
+        "visible_dialogs": int(after.get("visible_dialogs") or 0),
+        "visible_rows": int(after.get("visible_rows") or 0),
+        "visible_headings": int(after.get("visible_headings") or 0),
+        "visible_links": int(after.get("visible_links") or 0),
+        "visible_children": int(after.get("visible_children") or 0),
+        "token_labels": {
+            str(tok_word): int(tok_hits)
+            for tok_word, tok_hits in dict(
+                after.get("token_labels") or {}).items()
+            if tok_word in LABEL_VOCABULARY
+        },
         "dialogs_before": int(before.get("dialogs") or 0),
         "dialogs_after": int(after.get("dialogs") or 0),
         "rows": int(after.get("rows") or 0),
@@ -242,10 +319,19 @@ def report(title, result):
     print(f"    rows in dialogs   {result['rows']}")
     print(f"    links in dialogs  {result['links']}")
     print(f"    unmatched dialogs {result['other']}")
+    print(f"    VISIBLE dialogs   {int(result.get('visible_dialogs') or 0)}")
+    print(f"    visible rows      {int(result.get('visible_rows') or 0)}")
+    print(f"    visible headings  {int(result.get('visible_headings') or 0)}")
+    print(f"    visible links     {int(result.get('visible_links') or 0)}")
+    print(f"    visible elements  {int(result.get('visible_children') or 0)}")
     for label_word in LABEL_VOCABULARY:
         label_count = int(result["labels"].get(label_word) or 0)
         if label_count:
-            print(f"    label {label_word:<18} {label_count}")
+            print(f"    label SUBSTRING {label_word:<14} {label_count}")
+    for tok_label in LABEL_VOCABULARY:
+        tok_count = int((result.get("token_labels") or {}).get(tok_label) or 0)
+        if tok_count:
+            print(f"    label TOKEN     {tok_label:<14} {tok_count}")
     if "press_error_class" in result:
         print(f"    press error class {result['press_error_class']}")
 

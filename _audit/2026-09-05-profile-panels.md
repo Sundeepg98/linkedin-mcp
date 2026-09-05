@@ -7,6 +7,8 @@ taken with `date`, not from an agent's sense of elapsed time.
     18:52:35   the live probe attached over CDP
     18:52:54   the taint guards ran against the new probe
     18:56      this document
+    19:03      run 2 aborted on a regex it built badly, and cost one page load
+    19:05      run 3: a second instrument, and it settled both declared defects
 
 ## WHAT THIS WAVE ACTUALLY MOVED
 
@@ -78,9 +80,10 @@ is whether a control EXISTS, and a delta cannot answer that.
 1. **The contact-info control EXISTS on his profile and is pressable.** One
    anchor carrying `dom.PROFILE_EDITOR_HREFS[2]`, pressed, no exception.
 2. **Pressing it draws a dialog.** Four dialogs on the page before, five after.
-3. **The panel is about at least three field classes** -- profile, email, phone
-   -- by a substring match performed inside the page against a closed
-   vocabulary written in the probe.
+3. **The panel draws three field classes** -- profile, email, phone -- each
+   confirmed by a WORD-BOUNDARY match over the visible dialog in run 3. A
+   fourth, instant messaging, appeared under the substring rule and is ABSENT
+   under the boundary rule. See the run-3 section below.
 4. **Nothing about his contact details left the page.** The in-page script has
    no branch that returns a substring of the document; it returns integers and
    keys from the caller's own tuple. That is a structural property, not a
@@ -88,6 +91,12 @@ is whether a control EXISTS, and a delta cannot answer that.
    even if one had been present.
 
 ### What this does NOT establish, and two of these are defects in my instrument
+
+> **SUPERSEDED IN PART, and the pointer is here rather than at the foot of the
+> file because this is where the stale claim gets read.** The first three
+> bullets below were written at 18:56 against run 1 alone. Run 3 settled all
+> three -- two in my favour and ONE AGAINST ME. Read the run-3 section before
+> quoting any of them. The fourth bullet stands unchanged.
 
 * **`label im 2` IS NOT A READING.** `im` is a two-character token matched as a
   SUBSTRING of the dialog's whole text, so it matches inside ordinary English
@@ -108,6 +117,60 @@ is whether a control EXISTS, and a delta cannot answer that.
 * **Five rows are not retired by this.** One press on one aim, once. The row set
   filed against this blocker includes four WRITES, and this measurement says
   nothing whatever about a write.
+
+### A SECOND INSTRUMENT SETTLED BOTH DEFECTS -- run 3, 19:05 by the box
+
+The two caveats above were published as declared upper bounds. Rather than
+leave them declared, a second instrument was added to the SAME run so the two
+readings could disagree in one place. It shares no input feature with the
+first: the first matches by SUBSTRING over EVERY dialog on the page, the second
+by WORD BOUNDARY over the VISIBLE dialog only.
+
+    HIS OWN PROFILE      dialogs 5,  VISIBLE dialogs 1
+                         visible rows 1, headings 2, links 3, elements 43
+
+    label SUBSTRING      profile 1   email 1   phone 1   im 2
+    label TOKEN          profile 1   email 1   phone 1   im --
+
+    CONTROL PAGE         VISIBLE dialogs 0, and every count 0
+
+**THE DISAGREEMENT IS THE FINDING, and it resolves against my first
+instrument.** `im` scored 2 by substring and ZERO by token. The overreach
+mechanism is known and demonstrable -- `im` occurs inside ordinary words -- so
+the token rule wins on mechanism, not on being newer. **There is no instant-
+messaging section in his contact panel.** That is now measured; at 18:52 it was
+only suspected.
+
+**AND THE THREE THAT AGREE ARE UPGRADED.** `profile`, `email` and `phone` each
+survive the boundary rule at 1. They are no longer upper bounds on section
+presence -- they are readings.
+
+**ONE OF MY TWO HYPOTHESES ABOUT THE ROW COUNT WAS WRONG.** I wrote that a row
+count of 1 was implausible and guessed the rows were either not `li`/`section`
+or rendered outside `[role=dialog]`. The second reading REFUTES the second
+guess: the visible dialog holds 43 elements and still only 1 `li`/`section`,
+so nothing is hiding outside it. The panel is small and its structure is
+headings and links -- 2 and 3 -- not list items. **The count of 1 was correct
+and my objection to it was not.**
+
+**`VISIBLE dialogs 1` also retires the "one of five" caveat.** Four dialogs
+existed before the press and all four are hidden; exactly one dialog was open
+after it. The press-attributable dialog is now identified rather than inferred.
+
+### Run 2 died and cost a page load, and the cause is worth one line
+
+Between the two good runs, a version building a JavaScript `RegExp` from the
+vocabulary aborted with `Invalid regular expression: missing /`. The escape had
+to survive a Python string literal and a JS regex literal at once, and it did
+not. **The remedy was to delete the requirement, not to fix the escaping**: a
+neighbour-character test needs no escaping and cannot be mis-quoted. The tab
+still closed in the `finally`, which is the one thing that had to hold when a
+run aborts.
+
+Same class as the freeze ruling's "prose with backticks never goes through a
+shell string" -- and it bit again in this wave when a patch script passed
+through a heredoc and lost a backslash. **Both were fixed by using the file
+tools instead of a shell string.**
 
 ### The single-aim caveat, and it is the honest limit
 
