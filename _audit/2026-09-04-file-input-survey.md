@@ -130,6 +130,8 @@ cheapest aim available on any of the five surfaces.
 |---|---|---|
 | Easy Apply resume | nothing measurable. The count of 1 is measured; aim by count-of-one, never by the invented `Resume` label | a `_live_control` arm |
 | message composer | nothing measurable. Two inputs, so a count cannot address either -- needs an in-page name comparison, the way `_typeahead_gate` already does it | a `_live_control` arm + a name needle |
+
+**CORRECTED BY:** `_audit/2026-09-05-upload-sanction.md` -- the message composer row above costs a name needle that does not exist: read live 2026-09-05, both file inputs come back with an EMPTY shaped name and `name_source=none`, so neither of this package's two aiming strategies can address that surface
 | post composer | **ONE READ.** The address is allowlisted and nobody has ever looked | one page load |
 | profile photo | **A RULING, then a read.** The topcard draws no file input, so the control is behind something a click opens, and the editor address is not on the allowlist | operator ruling |
 
