@@ -80,6 +80,7 @@ UNPRESSED`` is filed against.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
 import sys
@@ -282,6 +283,42 @@ CONTROL_CASES = (
          "expanded_already": 0},
     ),
 )
+
+
+@contextlib.asynccontextmanager
+async def own_tab():
+    """``BROWSER.session()``, plus the close nobody does.
+
+    **EVERY PROBE PROCESS LEAKS EXACTLY ONE TAB, and it is a fleet-wide cost
+    rather than an untidiness.** Measured 2026-09-05: in ATTACH mode
+    ``BROWSER._page()`` calls ``ctx.new_page()`` and caches it, and
+    ``session()``'s ``finally`` only touches the idle timer -- so the tab
+    outlives the process, in the operator's own Chrome. The fleet reached 26
+    pages and 135 CDP targets, and ``connect_over_cdp`` enumerates every target
+    on attach: measured 13.6s, 16.6s and 17.5s against a 15s ceiling, so three
+    of this probe's own runs died on a handshake that a tab it had leaked
+    helped make too slow.
+
+    **THE PAGE, NEVER THE CONTEXT.** Closing the context in attach mode would
+    take the operator's signed-in browser down with it -- the context is his,
+    the tab is ours. That asymmetry is the whole reason this is four lines here
+    rather than a change to ``browser.py``.
+
+    IT SWALLOWS ITS OWN FAILURE, deliberately and narrowly: a tab that cannot
+    be closed is a leak worth one line of noise, and never a reason to lose the
+    reading the probe just took. It reports rather than raising.
+    """
+    async with BROWSER.session() as page:
+        try:
+            yield page
+        finally:
+            try:
+                if not page.is_closed():
+                    await page.close()
+            except Exception as exc:  # noqa: BLE001 -- a leak, not a failure
+                print(f"  NOTE: could not close this probe's tab "
+                      f"({type(exc).__name__}); it is left open and counts "
+                      "against the next attach")
 
 
 def control_verdict(results: dict) -> dict:
@@ -686,7 +723,7 @@ async def main() -> int:
     controls_only = "--control" in sys.argv
     out: dict = {}
 
-    async with BROWSER.session() as page:
+    async with own_tab() as page:
         # THE CONTROL RUNS FIRST AND ITS RESULT GATES THE REPORT. Running it
         # afterwards would let a session's live zeros be read before anyone
         # knew whether the detector fires at all -- and a zero is the reading
