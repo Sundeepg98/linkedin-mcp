@@ -6,7 +6,7 @@
 **Page loads taken: FOUR, of which exactly ONE was `/messaging/`.
 Messages sent: ZERO. Controls pressed: ZERO. Rows I retire myself: ZERO --
 I hand up measurements, not retirements.
-Commits: 9. Tests added: 9, in one new file. Boundary changes: 0.**
+Commits: 11. Tests added: 18, in two new files. Boundary changes: 0.**
 
 **HEADLINE, and it is not the load.** The load answered row 66 outright and
 refuted the relayed zero behind rows 17 and 67. But the most reusable thing
@@ -593,6 +593,46 @@ assertion, and both defect tests were shown sensitive to the reader dying.
 
 ---
 
+## 6a. MY OWN PROBE'S REFUSALS NEVER FIRED, AND I NEARLY SHIPPED THAT
+
+**Found at 22:47, reviewing my own work rather than LinkedIn's.**
+
+The census carries two refusals standing between the spend and a real person's
+inbox: both badges must READ at both ends, and the messaging badge must read
+ZERO. **On the run in section 1, both badges read and both read zero -- so
+neither refusal executed.** I reported that run as clean and had certified
+nothing whatever about the gates.
+
+That is the input on which a broken refusal and a working one are identical.
+**And the mirror of this exact bug is already recorded on this surface:**
+`_probe_thread_reply_surface.py` shipped a precondition that could NEVER PASS
+-- it asked `dom.read_messaging_badge` for two field names that do not exist on
+it, so it refused unconditionally, forever. **A refusal that can never FIRE is
+the worse direction: silent, and on the spending side.**
+
+`tests/test_the_messaging_census_refusals_can_fire.py`, 9 tests, drives the
+predicate directly -- no browser, no load, and a live run could not do it
+without arranging a non-zero badge nobody can produce on demand.
+
+**The positive case uses the ACTUAL 22:20:49 reading**, not an invented
+permissive input, so the negative cases are known to differ from a working one;
+each moves exactly ONE badge, so a pass cannot come from both being wrong.
+
+Shown failing by two more mutations:
+
+    truthiness instead of equality on state    6 failed, 3 passed
+    checks messaging and forgets invitation    3 failed, 6 passed
+
+The second is caught precisely by the independently parameterised invitation
+cases, which is why they are parameterised that way.
+
+**THE GENERAL FORM, and it is the one I will carry out of this wave:** a live
+run that takes the happy path certifies the happy path. **The refusals it did
+not exercise are untested code sitting on the most expensive action in the
+package**, and "it ran clean" is the sentence that hides them.
+
+---
+
 ## 7. HAND-OFFS, BY ARTIFACT
 
 | to | what | artifact |
@@ -628,6 +668,9 @@ worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
                        e4a7947  the feed-side family probe              206 ins
                        f6a4fd1  section 2.9 and the freeze recount    119 ins
                        fdc063c  section 3a, the row-mapping limit       37 ins
+                       ca6f4cc  the commit count made self-consistent    9 ins
+                       616ba2a  the README site + divergence detector   119 ins
+                       4c423ea  the refusals shown able to fire         168 ins
                        + the commit carrying this line, which is the 8th.
                        A count that names its own commit has to include it:
                        the earlier "6" was correct when written and stale by
@@ -636,9 +679,12 @@ worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
     files              scripts/_probe_messaging_surface_census.py    472 lines
                        scripts/_probe_messaging_family_off_the_feed.py 206 lines
                        tests/test_a_named_cost_names_a_tool_that_can_incur_it.py
-                                                                     457 lines
-                       _audit/2026-09-05-messaging-rows.md           682 lines
-    tests added        9, all passing. 3 mutations shown KILLING a test,
+                                                                     537 lines
+                       tests/test_the_messaging_census_refusals_can_fire.py
+                                                                     168 lines
+                       _audit/2026-09-05-messaging-rows.md           728 lines
+    tests added        18 across TWO files, all passing.
+                       5 mutations shown KILLING a test,
                        each asserted to have changed the source first --
                        a mutation that does not apply prints PASS.
                        The third simulates a ONE-SIDED repair of the claim
