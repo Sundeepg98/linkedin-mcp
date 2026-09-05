@@ -283,9 +283,31 @@ means UNDECLARED, not real -- except for the one class where they coincide,
 machine paths, and this is not that class. The sweep's own summary line says
 *"Every one is a real string in a tracked file"*, which is the sweep's claim
 about its wordlist rather than an adjudication of that line, and the owner makes
-it. **What is certain is that a push is blocked until somebody rules on it**, and
+it. **What is certain is that a push was blocked until somebody ruled on it**, and
 that nobody had said so, because the run that found it happened inside a commit
 that reported the opposite.
+
+### AMENDMENT, TAKEN TWO MINUTES AFTER THE COMMIT ABOVE: PASS -> FAIL -> PASS
+
+    before 990bbd3   314 tracked files   PASS, 0 hits across 311
+    before cc3745f   332 tracked files   FAIL, 1 hit
+    before 7da74fd   333 tracked files   PASS, 0 hits across 330
+
+**The hit was gone by the next run.** Its owner cleared it between my FAIL and my
+next gate, and `7da74fd` -- which says *"a push is blocked"* -- was already stale
+when it landed. That sentence is corrected here rather than rewritten in history.
+
+**THE THIRD READING DOES NOT WEAKEN THE FINDING, IT COMPLETES IT.** Three
+readings of one instrument inside about five minutes, every one true when taken
+and two of them false by the time they were read. The finding was never the hit;
+it is that **a sweep result is a reading with a timestamp and cannot be carried
+forward one commit**, in either direction. A stale PASS ships a real string. A
+stale FAIL freezes a tree over a value somebody already fixed -- and this
+repository has done that too, twice today, on four synthetic member ids.
+
+    RULE, and it is the same one twice: run the sweep at the gate, and REPORT
+    THE LINE IT PRINTED, not the line you remember. The distance between those
+    two is the whole defect, and it is not a distance a careful reader can see.
 
     push                 none
 
