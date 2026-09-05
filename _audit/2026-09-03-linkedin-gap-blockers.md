@@ -257,6 +257,12 @@ filed against the missing surface, not the missing write.
 | 87 | `SKILL-PAGE-SURFACE` | 1 | 1W | allowlist +1, WriteSpec | no | 7 | 0.14 | BUILD |
 | 88 | `INMAIL-COMPOSE-SURFACE` | 1 | 1W | allowlist +1, WriteSpec | YES | 8 | 0.12 | BLOCKED |
 
+**CORRECTED BY:** `_audit/2026-09-05-article-publish.md` -- row 51 `COLLABORATIVE-CONTENT` is filed as one blocker and is two under this section's own merge rule, so its single "allowlist +1" is owed by one row of four and the other three are costed higher than they are.
+
+That correction in full: `C54 C55 C56` sit on the post composer and need no new
+address, while `C76` is a different LinkedIn product whose two candidate
+addresses are both measured refused.
+
 **The nine with cost 0 -- nothing to build:**
 
 | blocker | rows | queue | why |
