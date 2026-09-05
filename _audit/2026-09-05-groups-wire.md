@@ -261,21 +261,29 @@ payload rather than trusting the chain. **No identifier was printed** -- the
 module publishes them because a caller computing overlap needs them, and a
 transcript is not that caller.
 
-**PAGE LOADS SPENT BY THIS WAVE: 11, counted per run rather than remembered.**
+**PAGE LOADS SPENT BY THIS WAVE: 16, COMPUTED AT FREEZE.**
 
-    _probe_groups_locator_walk.py            1 run  x 5 loads    5
-    _probe_group_memberships_tool_live.py    1 run  x 3 loads    3
-    the tool re-run after section 8 landed   1 run  x 3 loads    3
+    _probe_groups_locator_walk.py            2 runs x 5 loads   10
+    _probe_group_memberships_tool_live.py    2 runs x 3 loads    6
     the aborted tool run (AttributeError)    navigated nowhere   0
                                                               ----
-                                                                11
+                                                                16
 
-**THIS PARAGRAPH SAID 16 IN ITS FIRST DRAFT, THEN 8**, from my own sense of what I had
-run rather than from the runs. Corrected before the commit, then corrected AGAIN when a third
-run happened after it was written -- and left visible both times,
-because a cost section that is merely wrong and a cost section that is out of
-date are indistinguishable to a reader -- which is the finding
-`2026-09-05-groups-surface-measured.md` section 6 records about its own.
+**THIS PARAGRAPH HAS NOW BEEN WRONG THREE TIMES: 16 from memory, then 8, then
+11.** Each intermediate value was correct when written and stopped being
+correct within minutes, because the wave kept running. The two corrections are
+left visible and the lesson is not "count more carefully":
+
+> **A COST SECTION WRITTEN BEFORE THE WORK ENDS IS WRONG BY CONSTRUCTION.**
+> The only version worth trusting is the one computed at freeze, and the fix
+> is the TIMING, not the arithmetic.
+
+The first draft's 16 was a guess that happens to equal the final measured
+figure, which is worth naming rather than quietly enjoying: **a guess that
+lands on the right answer is still a guess**, and it was wrong at every moment
+between being written and now. The sibling audit records the identical shape
+one surface over -- a cost section that "was true when written and had stopped
+being the whole story two probes later".
 
 Every run closed its PAGE in a `finally` and never the CONTEXT. The dark-mode
 control census read 20 at both ends of the locator run.
@@ -540,7 +548,7 @@ own, and the first is now off the list. Owners route by
 
 | instrument | control | outcome |
 |---|---|---|
-| `scripts/_probe_groups_locator_walk.py` | dark-mode census 20 at both ends; REFUSES any split that is not 5 with 0 in common | GREEN, 1 run |
+| `scripts/_probe_groups_locator_walk.py` | dark-mode census 20 at both ends; REFUSES any split that is not 5 with 0 in common | GREEN, 2 runs -- the second AFTER the rename, so the edit is verified live rather than compiled |
 | `scripts/_probe_group_memberships_tool_live.py` | refuses a payload disagreeing with the four corroborating instruments; refuses a non-numeric identifier; refuses a degenerate cost marked measured | GREEN, 2 runs |
 | `tests/test_the_groups_tool_keeps_its_properties.py` | the `evaluate` detector planted INTO the shipped reader -- exactly one test red, file restored byte-identical | 30 passed |
 | `scripts/_check_tool_count_pin_control.py` | the pin mutated wrong with the registry intact | all demonstrations behaved as stated |
@@ -567,7 +575,7 @@ at FILE granularity and cannot protect a path two waves both legitimately own.
 
     tools 42   read 30   write 12       off mcp.list_tools() at the freeze tree
     boundary   allowlist UNCHANGED, no digest re-frozen, no pattern added
-    page loads 11, counted per run
+    page loads 16, computed at freeze (see 7)
     identity   sweep AT THE GATE before every commit -- 0 hits, last run 368 files
     ports      8322 LISTENING pid 29216   9224 LISTENING pid 27940 (Chrome)
 
