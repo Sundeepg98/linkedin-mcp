@@ -1420,3 +1420,63 @@ rule on `set_input_files` should re-source those limits rather than quote them.
 **WHY NOT TAKEN:** re-sourcing them means an article-index query, and the row
 and the ruling in front of it belong to whoever holds
 `FILE-UPLOAD-UNSANCTIONED`. Routed rather than guessed at.
+
+---
+
+## 11. THE CENSUS FILES STILL SAY GAP, AND THAT MATTERS MORE THAN IT LOOKS
+
+**Nothing in `_audit/_census/` was edited by this pass.** All 37 rows still carry
+`GAP` in their own slice tables. So an instrument that counts states off those
+tables -- which is how the 409 was established and how every re-count since has
+been taken -- **will not see any of this.**
+
+That is the convention: A7 and A13 both record moves as amendments rather than
+editing section 3, on the ground that a document which silently rewrites itself
+cannot be cited. **But the convention has a cost that nobody has priced, and it
+is the same disease as 9.4** -- a ruling that lives only in a ruling document is
+invisible to the instrument that produces the number the ruling is about.
+
+**The corpus does it both ways, which is the evidence that nobody has decided.**
+`N 118` was re-stated `MEASURED-ABSENT` **in the census file itself** by commit
+`191c2f7` -- so the row set at HEAD is 408 and not 409, a fact the ledger has
+never absorbed. One row was edited in place; thirteen blockers' worth of moves
+were not.
+
+**THE EDIT, WRITTEN OUT SO IT IS MECHANICAL RATHER THAN A JUDGEMENT.** Whoever
+owns the census can apply this without re-deriving anything:
+
+    EXCLUDED-RULED, retired by ruling (32 rows)
+      jobs.md        J 25 29 30
+                     J 132 133 134 135 139 140 141 142 143 144 145
+                     J 17
+      profile.md     P A23  P N13  P L5  P N30  P N31
+      messaging.md   M C59  M C71  M M19  M M40  M M51
+      network.md     N 50  N 105 106 107 108 109  N 152
+
+    EXCLUDED-RULED, re-filed under the settings ruling (5 rows)
+      messaging.md   M M37  M M41  M M42  M M46  M M50
+
+    STAY GAP -- new blockers, do NOT edit (5 rows)
+      jobs.md        J 136 137 138   AI-INTERVIEW-RESULTS-NO-ADDRESS
+      network.md     N 76            LINK-FOR-OFF-PLATFORM-USE
+      messaging.md   M C72           LINK-FOR-OFF-PLATFORM-USE
+
+**THE LIST WAS COUNTED, NOT EYEBALLED.** Parsed back out of this document with
+the shorthand expanded: **32 retired, 5 re-filed, 5 staying GAP -- 42 rows, no
+duplicate id, and no id appearing in both a move group and the stay group.**
+That matches the headline, section 5 and section 9's ledger. A hand-written
+edit list is exactly the artifact that goes wrong by one and is believed anyway.
+
+**WHY THIS PASS DID NOT MAKE IT.** Four census files, two of them touched by
+other waves within the hour, thirty-seven rows across them -- and this
+repository has already had three waves land work inside a neighbour's commit,
+with `--only` measured as no defence for a shared FILE. A thirty-seven-row edit
+across four contended files at the end of a session is the exact shape of that
+failure. **The list above costs its owner minutes and costs a stranger an hour
+of re-derivation, which is the whole reason it is written out.**
+
+**AND THE HONEST CONSEQUENCE UNTIL IT IS MADE:** every number in section 9 is a
+claim about what the census WOULD say, not about what it does say. **A re-count
+taken today still returns the old figure and would be right to.** That is not a
+hedge on the rulings -- they stand on their reasons -- it is a statement about
+where they currently live.
