@@ -1512,7 +1512,7 @@ two window sizes with the same split.
 Recorded in full, with what is MEASURED separated from what is READ, in
 `_audit/2026-09-05-groups-events-precondition.md`.
 
-## 8. The newsletter-surface wave, 2026-09-05
+## 9. The newsletter-surface wave, 2026-09-05
 
 Added by the newsletter-surface wave. **APPENDED, not inserted** -- see this
 file's preamble; find these by NAME.
@@ -1522,7 +1522,7 @@ Three instruments. The RED/GREEN transcript for the two guards is
 GREEN and then shown RED under a planted mutation, in memory, with nothing on
 disk written.
 
-### 8.1 `scripts/_probe_newsletter_routes.py` -- the route table for a blocker whose surfaces are all dead
+### 9.1 `scripts/_probe_newsletter_routes.py` -- the route table for a blocker whose surfaces are all dead
 
 Twelve candidate addresses through `readonly.assert_read_url`, with three
 must-allow and four must-refuse controls, one of the four refused by a
@@ -1549,7 +1549,7 @@ used.
 blocker's precondition, and REDIRECTS. A route table that did not say so would
 be read as a list of pages.
 
-### 8.2 `linkedin_server.shape.subscription_row` -- the gate that must NOT reuse its sibling's rule
+### 9.2 `linkedin_server.shape.subscription_row` -- the gate that must NOT reuse its sibling's rule
 
 `tests/test_subscription_row.py`, 11 tests, three of them planted mutations.
 
@@ -1594,7 +1594,7 @@ tells a future reader to re-measure and rewrite rather than delete if the floor
 ever rises. This package has no instrument that can decide whether a string is
 a person's name, and that is a finding, not a TODO.
 
-### 8.3 `_audit/_scratch/_probe_newsletter_refreeze_attribution.py` -- a stronger attribution than "it moved"
+### 9.3 `_audit/_scratch/_probe_newsletter_refreeze_attribution.py` -- a stronger attribution than "it moved"
 
 The variant of the search-appearances removal control that handles the
 MULTI-LINE `re.compile` construct: the sibling probe filters on the call and
@@ -1617,7 +1617,7 @@ neighbour's uncommitted work is riding inside the re-pin. **In a tree several
 waves are writing, that is the difference between an attribution and a
 coincidence.**
 
-### 8.4 A claim NOT made, recorded because the omission is the instrument
+### 9.4 A claim NOT made, recorded because the omission is the instrument
 
 Every earlier re-freeze in `tests/test_readonly_boundary_invariant.py` verifies
 its digest under Python 3.13 AND 3.10 before writing it down. **This box has no
