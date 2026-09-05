@@ -136,14 +136,37 @@ lead's -- I am recording the measurement against it.
 
 ### The three WRITE rows are not blocked by the allowlist either
 
-They are blocked by a **ruling that already exists**. `/mypreferences/d/verifications`
-is a page below the settings index, and census block K states the
-settings-family ruling reaches it -- which is why K1 through K7 are
-EXCLUDED-RULED while K8/K9/K10 sit as GAP. The operator's shipped settings
-ruling (`server.py:6874`) is *a setting is admitted by name or not at all*.
+> **CORRECTED AT FREEZE, BY CHECKING MY OWN PUBLISHED CLAIM.** This paragraph
+> said the three W rows are *"blocked by a ruling that already exists"*,
+> reasoning that block K's settings-family ruling reaches them. **That is
+> wrong, and I found it by reading the three rows verbatim instead of
+> reasoning from their neighbours.**
+
+All three carry the same note, and it is the opposite of a ruling:
+
+    B8 | Top Voice badge show / hide      | W | GAP | a1577365; no tool, no reason
+    B9 | Premium profile badge show / hide| W | GAP | a569234;  no tool, no reason
+    K9 | Show / hide the Top Voice badge  | W | GAP | a1577365; no tool, no reason
+
+**"No tool, no reason" means NOBODY HAS RULED.** The settings-family ruling
+reaches K1 through K7, which is why those are EXCLUDED-RULED -- and K8/K9/K10
+sit as GAP precisely *because it does not reach them*. I read the block's
+heading and inherited its ruling onto rows the census had deliberately left
+outside it. Grepped to confirm: neither article id appears anywhere in
+`linkedin_server/`. **Nothing in the shipped code has an opinion about these
+three.**
+
+**THE CORRECTION CHANGES THE REMEDY, WHICH IS WHY IT IS WORTH THE PARAGRAPH.**
+"Blocked by an existing ruling" invites a wave to go read that ruling and
+apply it. The truth -- *these are three capabilities nobody has considered* --
+is this repository's own `refusal census vs capability census` distinction:
+**you can grep a codebase for what it refuses, but never for what nobody
+thought about.** A wave sent to find the governing ruling would have found
+none and had to work out why.
 
 **So no part of row 43 is waiting on an allowlist pattern.** The reads need
-none; the writes need an operator ruling, which is a different instrument.
+none, and are now both measured. The three writes need a DECISION THAT HAS
+NEVER BEEN TAKEN -- not the application of one that has.
 
 ### WHAT THE READING SAYS ABOUT K8, STATED AS NARROWLY AS IT DESERVES
 
