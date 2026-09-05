@@ -137,7 +137,20 @@ async def _control(page, when: str) -> bool:
     ok = abs(read - CONTROL_EXPECTED) <= 2
     print(f"    CONTROL {when}: controls_read={read} expected "
           f"{CONTROL_EXPECTED} -- {'PASS' if ok else 'FAIL'}")
-    return ok
+
+    # THE SECOND CONTROL, AND IT RUNS THE OTHER WAY: the events reader, on a
+    # LIVE page that is not the events root, MUST FIND NOTHING. A reader that
+    # finds cards everywhere is measuring its own selectors. This is the
+    # cheapest possible must-stay-silent test and it costs no extra load,
+    # because this page is already open for the control above.
+    foreign = await events.read_events_home(page)
+    silent = foreign["cards_read"] == 0 and foreign["verdict"] == "no_cards"
+    print(f"    MUST-STAY-SILENT {when}: the events reader on a foreign page "
+          f"-> cards_read={foreign['cards_read']} "
+          f"verdict={foreign['verdict']} "
+          f"registered_events={foreign['registered_events']} -- "
+          f"{'PASS' if silent else 'FAIL'}")
+    return ok and silent
 
 
 async def _read_events(page, attempt: int) -> dict:
@@ -184,7 +197,10 @@ async def _read_events(page, attempt: int) -> dict:
     for index, card in enumerate(reading["cards"]):
         print(f"        card {index}: body_found={card['body_found']} "
               f"body_text_chars={card['body_text_chars']} "
-              f"body_elements={card['body_elements']}")
+              f"body_elements={card['body_elements']} | "
+              f"footer_found={card['footer_found']} "
+              f"footer_text_chars={card['footer_text_chars']} "
+              f"footer_elements={card['footer_elements']}")
         print(f"        card {index}: known={card['known']!r} "
               f"rows={card['rows']} event_links={card['event_links']} "
               f"heading_shape={card['heading_shape']!r}")

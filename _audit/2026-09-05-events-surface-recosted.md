@@ -91,6 +91,38 @@ body is consulted -- but it is recorded rather than hidden, because a selector
 that silently misses a third of the cards it is pointed at is worth knowing
 about before somebody reuses it.
 
+### 2b. A SECOND HAZARD IN THE SAME NUMBER: `rows` COUNTS WHAT IS DRAWN
+
+Measured on the same page: **the promoted card draws THREE rows and its
+footer control announces FIFTY events.** A reader taking `rows` as "how many
+there are" would be wrong by a factor of seventeen, today, with nothing about
+the reading looking suspicious. `Recommended for you` pages too -- its footer
+carries a control of its own.
+
+    card 0  'Your events'          footer_found=True   text 0  elements 0
+    card 1  a promoted section     footer_found=False  --      --
+    card 2  'Recommended for you'  footer_found=True   text 9  elements 2
+
+**IT DOES NOT TOUCH THE ZERO** -- a card drawing nothing has nothing to page
+through, and the self-scoped card's footer is measured EMPTY at both text and
+elements. It touches `rows_present`, the branch that fires the day he
+registers for something: with a footer control present the count becomes a
+FLOOR and the verdict says `rows_present_may_be_partial` rather than handing
+over a total that is short by an unknown factor.
+
+The footer is deliberately NOT folded into the hydration check. It is evidence
+about a COUNT, not a third hydration signal -- and folding it in would make
+the measured page refuse instead of answering, which is a reader that cannot
+read the one page it was written for. A test asserts exactly that.
+
+### 2c. THE READER MUST STAY SILENT SOMEWHERE, AND IT IS SHOWN DOING SO LIVE
+
+Every live run now points the events reader at the dark-mode preferences page
+-- already open for the control, so it costs no load -- and requires
+`cards_read=0`, `verdict=no_cards`, `registered_events=None`. **A reader that
+finds cards everywhere is measuring its own selectors.** PASS at both ends of
+the session.
+
 **HOW THE PREVIOUS PASS MISSED IT, because it was not carelessness.** That
 pass assigned anchors to their nearest preceding heading. **A heading with
 zero anchors under it is invisible to an anchor-assignment pass** -- it does
@@ -170,7 +202,7 @@ filter is a read.*
 |---|---|---|---|
 | `N 179` | search events by keyword, Events tab | **MISFILED** | the address is `/search/results/events/`. `readonly.py`'s own admission comment already assigns it to `SEARCH-RESULTS-SURFACE`, blocker 6, which is queued DECIDE with a consent ruling prepared. It is not blocked by the events surface |
 | `N 180` | events recommended from interests, Pages followed, and what the network is attending | **REACHABLE NOW, part shipped** | this is what the root draws and what the admission comment names as its censused content. `events.read_events_home` counts it today: 18 rows across two sections. Per-event CONTENT needs a shaper ruling -- see below |
-| `N 181` | events hosted by Pages you follow | **NEEDS RULING** | the organiser is on the page (each row's control block reads `<organiser> N attendees`). The join against `linkedin_followed_companies` can happen INSIDE the process, so the ruling is whether an organiser name may leave it or only the join's result may |
+| `N 181` | events hosted by Pages you follow | **NEEDS BOUNDARY** -- and this verdict was sharpened by a measurement taken after the first draft of this table; see 5a | the organiser is on the page as TEXT and **there is no entity link**: `/company/` hrefs per row, measured over all 18 rows, is **0**, and `/company/` appears nowhere in the page's 130 hrefs. So the join cannot be done on identifiers from this address at all |
 | `N 183` | receive event invitations only from 1st-degree connections | **MISFILED** | a SETTING, under preferences, not under `/events/`. `readonly.py`'s admission comment says so explicitly. Whether the setting exists is unmeasured and belongs to the settings family |
 | `N 184` | reach an event through its URL | **NEEDS BOUNDARY** | needs `/events/<id>/`. Measured: that is the ONLY sub-route LinkedIn links from the root, 54 of 54 anchors, so the ledger's "allowlist +1" is exactly one pattern for this row |
 | `N 188` | complete attendee list of an event | **EXCLUDED-RULED** | a member roster. Already ruled out in `readonly.py`'s admission comment, by the same ruling that put the group member list (`N 165`) out of scope |
@@ -186,6 +218,33 @@ filter is a read.*
 | `M C57` | create a LinkedIn Event | **NEEDS SURFACE** | no create control on the root. The `Create an event` control recorded in the census sits in the POST COMPOSER, a different surface with its own blocker, and the act is publish-class |
 | `M C58` | attend or leave a LinkedIn Event | **NEEDS BOUNDARY, subject absent** | the same missing RSVP control as `N 185`. Attending puts him on a public attendee list, which the census row already flags |
 | `M C92` | comment on an Event and reply to Event comments | **NEEDS A SECOND BOUNDARY PATTERN** | `/events/<id>/comments/`, which LinkedIn does NOT link from the root -- measured, 1 distinct path shape over 54 anchors. So this row needs a pattern nothing on an open page points at |
+
+### 5a. `N 181` MOVED, AND I AM SAYING SO RATHER THAN EDITING QUIETLY
+
+The first draft of the table above filed `N 181` as **NEEDS RULING**, on the
+reasoning that the organiser is on the page, the join against
+`linkedin_followed_companies` could happen inside the process, and the only
+open question was whether an organiser NAME may leave it.
+
+**Then I measured the hrefs.** Over all 18 rows: `/company/` hrefs per row is
+**0, eighteen times**. Across the whole document: `/company/` does not appear
+in any of the 130 hrefs, in any form.
+
+So the organiser is TEXT and nothing else on this address, and the join would
+have to be done **by matching names** -- the precise construction this
+repository has already measured as wrong on a different surface, where a
+uniqueness test over a set LinkedIn had already filtered by the needle could
+not fail. A ruling would not fix that; a ruling would authorise it.
+
+`N 181` therefore joins `N 184` on the other side of the boundary: the
+organiser is presumably an entity link on `/events/<id>/`, and until that page
+is opened this row has no non-fragile route. **The boundary buys four rows,
+not three.**
+
+**THE GENERAL POINT IS WORTH MORE THAN THE ROW.** The first verdict was
+reached from what the page SAID -- an organiser name is visible, so the
+organiser is available -- and the second from what the page LINKS. Those are
+different questions and only the second one has an answer a parser can hold.
 
 ## 6. THE ARITHMETIC, AND WHAT THE "ALLOWLIST +1" ACTUALLY BUYS
 
@@ -205,8 +264,13 @@ rows rather than from measuring anything new about LinkedIn.
 
 **THE BOUNDARY COST IS TWO PATTERNS, NOT ONE, AND THEY BUY DIFFERENT THINGS.**
 
-    /events/<id>/            unblocks N 184, N 185, C58   -- 3 rows
-    /events/<id>/comments/   unblocks C92                 -- 1 row
+    /events/<id>/            unblocks N 181, N 184, N 185, C58   -- 4 rows
+    /events/<id>/comments/   unblocks C92                        -- 1 row
+
+Five of the eight are behind those two patterns. **So the ruling on
+`/events/<id>/` is not one row's blocker, it is this blocker's centre of
+gravity** -- and it is the one thing in this document that needs a decision
+rather than a measurement.
 
 The admission comment for `/events/` predicted exactly this ("it is the row
 that proves the ledger's *allowlist +1* for this blocker was short"), and the

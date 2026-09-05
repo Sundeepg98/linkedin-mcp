@@ -187,23 +187,32 @@ def _row():
     )
 
 
-def _card(heading, rows, classes=CARD_CLASS, body_extra=()):
-    """A card: a header carrying the heading, and a body carrying the rows.
+#: The card's footer. On the self-scoped card, measured EMPTY. On a sibling it
+#: carries the control that announces how many events the section really has.
+FOOTER_CLASS = "events-events-card-container__footer display-flex justify-center"
+
+
+def _card(heading, rows, classes=CARD_CLASS, body_extra=(), footer_extra=()):
+    """A card: a header carrying the heading, a body of rows, and a footer.
 
     ``body_extra`` puts something in the body that is NOT a row -- a shimmer,
     an empty-state paragraph -- which is how the hydration branch is reached.
+    ``footer_extra`` puts a paging control in the footer, which is how the
+    partial-count branch is reached.
     """
     body = _Node(
         "main",
         BODY_CLASS,
         children=[_row() for _ in range(rows)] + list(body_extra),
     )
+    footer = _Node("footer", FOOTER_CLASS, children=list(footer_extra))
     return _Node(
         "section",
         classes,
         children=[
             _Node("header", children=[_Node("h2", text=heading)]),
             body,
+            footer,
         ],
     )
 
@@ -215,13 +224,19 @@ def _page(
     recommended_rows=15,
     own_body_extra=(),
     own_body=True,
+    own_footer_extra=(),
 ):
     """The events root as MEASURED, with each count a parameter.
 
     Defaults reproduce the live reading exactly: 3 cards, 0/3/15 rows,
     0/9/45 anchors, and a self-scoped body holding neither text nor elements.
     """
-    own = _card(own_heading, own_rows, body_extra=own_body_extra)
+    own = _card(
+        own_heading,
+        own_rows,
+        body_extra=own_body_extra,
+        footer_extra=own_footer_extra,
+    )
     if not own_body:
         # THE BODY GONE ENTIRELY, which is what a markup change looks like.
         own = _Node(
@@ -423,6 +438,48 @@ async def test_a_missing_body_refuses_rather_than_falling_back_to_the_rows():
     assert reading["registered_events"] is None
 
 
+@pytest.mark.asyncio
+async def test_a_paging_control_makes_the_count_a_floor_and_says_so():
+    """``rows`` COUNTS WHAT IS DRAWN, AND A SECTION CAN DRAW A SUBSET.
+
+    Measured on the live page: a sibling card draws THREE rows and its footer
+    control announces FIFTY events. A reader taking ``rows`` as a total would
+    be wrong by a factor of seventeen with nothing about the reading looking
+    suspicious.
+
+    It does not touch the zero -- a card drawing nothing has nothing to page
+    through, and the self-scoped card's footer is measured empty. It touches
+    ``rows_present``, which is why the verdict changes rather than the number.
+    """
+    reading = await events.read_events_home(
+        _page(own_rows=4, own_footer_extra=[_Node("button", text="Show all")])
+    )
+    assert reading["cards"][0]["footer_found"] is True
+    assert reading["cards"][0]["footer_elements"] == 1
+    assert reading["verdict"] == "rows_present_may_be_partial"
+    assert reading["registered_events"] == 4
+
+    plain = await events.read_events_home(_page(own_rows=4))
+    assert plain["cards"][0]["footer_elements"] == 0
+    assert plain["verdict"] == "rows_present"
+
+
+@pytest.mark.asyncio
+async def test_an_empty_footer_does_not_turn_the_zero_into_a_refusal():
+    """The footer is EVIDENCE ABOUT A COUNT, not a third hydration signal.
+
+    The self-scoped card has a footer; it is empty. If the footer had been
+    folded into the body check, the measured page would refuse instead of
+    answering, which would be a reader that cannot read the one page it was
+    written for.
+    """
+    reading = await events.read_events_home(_page())
+    assert reading["cards"][0]["footer_found"] is True
+    assert reading["cards"][0]["footer_elements"] == 0
+    assert reading["verdict"] == "empty_beside_full_siblings"
+    assert reading["registered_events"] == 0
+
+
 def test_only_one_verdict_may_carry_a_number():
     """THE WHOLE DECISION TABLE, and the property that matters across it.
 
@@ -430,7 +487,9 @@ def test_only_one_verdict_may_carry_a_number():
     independent facts: the card present, no rows, a body holding neither text
     nor elements, and a non-empty sibling. Delete any one and this goes red.
     """
-    def call(found, own, other, cards, body=True, chars=0, elements=0):
+    def call(
+        found, own, other, cards, body=True, chars=0, elements=0, footer=0
+    ):
         return events._events_home_verdict(
             found=found,
             own_rows=own,
@@ -439,12 +498,14 @@ def test_only_one_verdict_may_carry_a_number():
             body_found=body,
             body_text_chars=chars,
             body_elements=elements,
+            footer_content=footer,
         )
 
     table = [
         (call(False, 0, 0, 0), (None, "no_cards")),
         (call(False, 0, 18, 3), (None, "heading_unmatched")),
         (call(True, 4, 18, 3), (4, "rows_present")),
+        (call(True, 4, 18, 3, footer=1), (4, "rows_present_may_be_partial")),
         (call(True, 0, 18, 3, body=False), (None, "body_unreadable")),
         (call(True, 0, 18, 3, elements=1), (None, "body_not_empty")),
         (call(True, 0, 18, 3, chars=26), (None, "body_not_empty")),

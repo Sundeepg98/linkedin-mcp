@@ -159,6 +159,26 @@ EVENTS_HOME_CARD_BODY_SELECTOR = (
 #: point is to detect PRESENCE, not to classify it.
 EVENTS_HOME_BODY_CONTENT_SELECTOR = "*"
 
+#: THE CARD'S FOOTER, AND IT EXISTS BECAUSE ``rows`` COUNTS WHAT IS DRAWN.
+#:
+#: **A SECTION WITH A "SHOW ALL" CONTROL DRAWS A SUBSET.** Measured on this
+#: page: the promoted card draws THREE rows and its footer control announces
+#: FIFTY events. A reader taking ``rows`` as "how many there are" would be
+#: wrong by a factor of seventeen, on this page, today, with nothing about the
+#: reading looking suspicious.
+#:
+#: That does not touch the zero -- a card drawing nothing has nothing to page
+#: through, and the self-scoped card's footer is measured EMPTY -- but it
+#: absolutely touches ``rows_present``. So when the self-scoped card ever has
+#: rows AND a footer carrying anything, the count is reported as a FLOOR and
+#: the verdict says so, rather than being handed over as a total.
+#:
+#: The promoted card uses a different footer class family and is not matched
+#: here, exactly as with the body. Recorded rather than hidden.
+EVENTS_HOME_CARD_FOOTER_SELECTOR = (
+    'footer[class~="events-events-card-container__footer"]'
+)
+
 #: THE CLOSED SET, AND IT IS THE WHOLE OF THE IDENTIFICATION.
 #:
 #: The self-scoped card is recognised by matching its heading against this
@@ -184,6 +204,7 @@ def _events_home_verdict(
     body_found: bool,
     body_text_chars: int,
     body_elements: int,
+    footer_content: int = 0,
 ) -> tuple[Optional[int], str]:
     """How many events he is registered for, and why that is or is not known.
 
@@ -202,6 +223,12 @@ def _events_home_verdict(
     if not found:
         return None, "heading_unmatched"
     if own_rows > 0:
+        if footer_content > 0:
+            # A FOOTER MEANS A CONTROL, AND A CONTROL MEANS A SUBSET. Measured
+            # on the sibling card: 3 drawn, 50 announced. So the count is a
+            # FLOOR and the verdict says which, rather than handing over a
+            # total that is short by an unknown factor.
+            return own_rows, "rows_present_may_be_partial"
         return own_rows, "rows_present"
     if not body_found:
         # THE BODY IS THE EVIDENCE. Without it the zero rests on the absence
@@ -309,6 +336,29 @@ async def read_events_home(page: Any) -> dict[str, Any]:
                 )
         except Exception:  # noqa: BLE001
             body_found = False
+        footer_found = False
+        footer_text_chars = 0
+        footer_elements = 0
+        try:
+            footers = card.locator(EVENTS_HOME_CARD_FOOTER_SELECTOR)
+            if await footers.count():
+                footer_found = True
+                footer = footers.first
+                footer_text_chars = len(
+                    (
+                        await footer.inner_text(
+                            timeout=ELEMENT_READ_TIMEOUT_MS
+                        )
+                        or ""
+                    ).strip()
+                )
+                footer_elements = int(
+                    await footer.locator(
+                        EVENTS_HOME_BODY_CONTENT_SELECTOR
+                    ).count()
+                )
+        except Exception:  # noqa: BLE001
+            footer_found = False
         raw_headings.append(heading)
         records.append(
             {
@@ -323,6 +373,9 @@ async def read_events_home(page: Any) -> dict[str, Any]:
                 "body_found": bool(body_found),
                 "body_text_chars": int(body_text_chars),
                 "body_elements": int(body_elements),
+                "footer_found": bool(footer_found),
+                "footer_text_chars": int(footer_text_chars),
+                "footer_elements": int(footer_elements),
             }
         )
 
@@ -352,6 +405,10 @@ async def read_events_home(page: Any) -> dict[str, Any]:
         body_found=all(bool(record["body_found"]) for record in own),
         body_text_chars=sum(int(record["body_text_chars"]) for record in own),
         body_elements=sum(int(record["body_elements"]) for record in own),
+        footer_content=sum(
+            int(record["footer_text_chars"]) + int(record["footer_elements"])
+            for record in own
+        ),
     )
     out["cards"] = records
     out["rows_total"] = own_rows + other_rows
