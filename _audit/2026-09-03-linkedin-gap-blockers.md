@@ -274,6 +274,24 @@ one of them is not a unit of work but a placeholder for an unknown. Row 32
 (`NOTIFY-COST-UNMEASURED`) is also corrected there: it was never waiting on an
 experiment, it was waiting on an instrument, and that instrument now ships.
 
+**CORRECTED BY:** `_audit/2026-09-05-settings-rest.md` -- row 58 is queued DECIDE at cost 2 as though a ruling bound it, when the ruling was already given and what binds is a transport capability with nowhere to be written; and the address finding above reproduces over a second, disjoint set of six blockers.
+
+In full: **row 58 `PROFILE-PDF-DOWNLOAD`** is blocked because
+`accept_downloads` is a CONTEXT CREATION option, and in
+ATTACH mode (what the whole fleet runs) `cdp_bridge` adopts `contexts[0]` rather
+than creating one, so there is no call site where the option could be passed.
+Its boundary component is 0 and it is not a settings-family row at all. And the
+"not one row names an in-product address" finding above **reproduces over a
+second, disjoint set**: across rows 83, 31, 29, 48, 68 and 54, **0 of 9 census
+rows names a navigable address** (six cite Help Center ids, two cite nothing at
+all, and one states in its own text that the capability has no url). Three of
+those six are individually mis-filed: **31** is costed honestly and is a
+nav-path capability rather than a missing measurement; **29** rests on a SEARCH
+SNIPPET whose three candidate Help Center articles all 404, including the hub,
+which is a WEAKER evidence class than any of the three existence classes named
+today; and **54** is filed BLOCKED with **no upstream blocker named anywhere**
+(five places searched, reported UNFOUND rather than guessed).
+
 **The nine with cost 0 -- nothing to build:**
 
 | blocker | rows | queue | why |
