@@ -202,7 +202,7 @@ of which appear below on other evidence.
 | A20 | Education shown in intro | R | COVERED-PROVEN | read live; option text returned |
 | A21 | Education shown in intro | W | COVERED-UNFIRED | a `select`, same route |
 | A22 | Primary Position(s) -- which current role shows in the intro | W | GAP | real control, named verbatim in `a550169`: *"If you've already added Primary Position(s) select the company you want to show in your intro"*. Distinct from reordering (`a786867`). No position control among the 17 |
-| A23 | Name pronunciation audio | W | GAP | `a550527`: max 10 seconds, **mobile iOS/Android app only** -- cannot be recorded or edited on desktop, only deleted. A browser-driven server structurally cannot record it |
+| A23 | Name pronunciation audio | W | EXCLUDED-RULED | `a550527`: max 10 seconds, **mobile iOS/Android app only** -- cannot be recorded or edited on desktop, only deleted. A browser-driven server structurally cannot record it **RETIRED 2026-09-05, `MOBILE-APP-ONLY` (3.9).** Refused from two independent directions, neither of them the allowlist: `a550527`, fetched this pass, says it cannot be recorded or edited on the desktop site at all; and the one verb desktop does offer, delete, meets `writes.PERMANENTLY_FORBIDDEN['delete_or_withdraw_anything']`. REOPENER: LinkedIn shipping desktop recording. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | A24 | ID name as additional name | W | GAP | `a7153330`; requires an identity verification first (block K) |
 | A25 | Contact info panel | R | GAP | the control `Edit contact info` WAS among the 17 read on 2026-09-02; the panel behind it has never been opened |
 | A26 | Website on profile | W | GAP | inside that unopened panel |
@@ -412,7 +412,7 @@ Help Center now states all members have access.
 | L2b | Own follower LIST | R | GAP | **NOBODY HAS LOOKED.** Split from L2 on 2026-09-04 by team-lead ruling. L2 was compound -- count AND list -- and one half is measured absent while the other was never searched for. Neither state is honest about both: MEASURED-ABSENT would claim evidence this half does not have, and GAP would throw away evidence the COUNT half does have. **Merging the two deletes the vocabulary needed to say what is actually known**, which is how a row comes to be more confident than its evidence -- and this census has already dispatched a wave on one that was. No tool, no reason, and no reading |
 | L3 | Create / edit / delete a newsletter | W | GAP | no tool, no reason |
 | L4 | Newsletter analytics | R | GAP | no tool, no reason |
-| L5 | Host a LinkedIn Live | W | GAP | he clears the >150-follower gate at 275; no tool, no reason |
+| L5 | Host a LinkedIn Live | W | EXCLUDED-RULED | he clears the >150-follower gate at 275; no tool, no reason **RETIRED 2026-09-05, `LIVE-BROADCAST` (3.5), on LinkedIn's own sentence fetched this pass:** `a568503` -- you cannot stream directly from LinkedIn, a streaming tool is needed to broadcast LinkedIn Lives. A browser driver cannot supply a video stream and LinkedIn says outright that no native path exists. REOPENER: browser-native go-live with no external encoder. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | L6 | Audio events | W | GAP | no tool, no reason; the Help article itself 404s |
 | L7 | "Ideas for your next post" | R | GAP | no tool, no reason |
 | L8 | Analytics and tools hub | R | GAP | no tool, no reason |
@@ -450,7 +450,7 @@ Help Center now states all members have access.
 | N10 | Sign out of one session / all sessions | W | EXCLUDED-RULED | settings family, same page. A distinct act from reading the list |
 | N11 | Devices that remember your password | W | EXCLUDED-RULED | settings family |
 | N12 | Keep me logged in / auto sign-in | W | GAP | `/uas/login` -- not a settings-index page, caught by no substring, named nowhere in this repo. `a1342645`: unavailable when 2FA is on |
-| N13 | Sign-in security prompt / email code / CAPTCHA | R | GAP | an interstitial, not a page. `config.AUTHWALL_MARKERS` already turns a `/checkpoint/` landing into a reported failure, which is adjacent but not this |
+| N13 | Sign-in security prompt / email code / CAPTCHA | R | EXCLUDED-RULED | an interstitial, not a page. `config.AUTHWALL_MARKERS` already turns a `/checkpoint/` landing into a reported failure, which is adjacent but not this **RETIRED 2026-09-05, `SIGNIN-INTERSTITIAL` (3.8) -- holding it would be the defect.** An authentication challenge exists to test that the actor is the human, and `writes.PERMANENTLY_FORBIDDEN` already carries `any_anti_detection_technique`. The designed response is built: a landing on any `config.AUTHWALL_MARKERS` becomes a REPORTED FAILURE. The row asks for a READ and the server implements a STOP, and the stop is correct. REOPENER: nothing that keeps the shape. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | N14 | Identity verification for account recovery (Persona) | W | GAP | `a1342692`; no path, no tool, no reason |
 | N15 | Interface language | W | EXCLUDED-RULED | settings family. `a521833` names ONE language control |
 | N16 | Autoplay videos | W | EXCLUDED-RULED | settings family |
@@ -467,8 +467,8 @@ Help Center now states all members have access.
 | N27 | Merge or close duplicate accounts | W | EXCLUDED-RULED | settings family |
 | N28 | Close (delete) account | W | EXCLUDED-RULED | `"/close-accounts"` was added to the forbidden tuple 2026-08-31 precisely because nothing else caught it, plus `delete_or_withdraw_anything` |
 | N29 | Hibernate account | W | EXCLUDED-RULED | `"/hibernate-account"`, added the same day, same reason |
-| N30 | Deceased member -- request account closure | W | GAP | `a1380121`, via a Help Center form (`/help/linkedin/ask/ts-rmdmlp`). Not his own act; included because it is an account-lifecycle capability the product offers |
-| N31 | Deceased member -- request memorialization | W | GAP | same article, different form slug (`/help/linkedin/ask/TS-RDMLP` -- note the case differs) |
+| N30 | Deceased member -- request account closure | W | EXCLUDED-RULED | `a1380121`, via a Help Center form (`/help/linkedin/ask/ts-rmdmlp`). Not his own act; included because it is an account-lifecycle capability the product offers **RETIRED 2026-09-05, `HELP-CENTER-FORM` (3.3), and it is not his act at all.** This is what somebody ELSE files about HIM, after he dies. A server acting for him cannot perform an act defined as being performed by another person. No measurement needed. REOPENER: LinkedIn making it self-service for a living member. See `_audit/2026-09-05-decide-retire-rulings.md` |
+| N31 | Deceased member -- request memorialization | W | EXCLUDED-RULED | same article, different form slug (`/help/linkedin/ask/TS-RDMLP` -- note the case differs) **RETIRED 2026-09-05, `HELP-CENTER-FORM` (3.3), and it is not his act at all.** This is what somebody ELSE files about HIM, after he dies. A server acting for him cannot perform an act defined as being performed by another person. No measurement needed. REOPENER: LinkedIn making it self-service for a living member. See `_audit/2026-09-05-decide-retire-rulings.md` |
 
 ### O. Visibility and privacy (23)
 

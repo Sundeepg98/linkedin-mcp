@@ -280,7 +280,7 @@ read it out of Gmail instead. Rows 23-33 are why that skill exists.
 | 47 | Follow an organization's Page from the Page itself | W | GAP | REV. Blocker: no `/company/` pattern. `follow_company`'s own `residue` names the slug-vs-numeric-id gap |
 | 48 | Unfollow an organization's Page | W | **COVERED-UNFIRED** | `linkedin_unfollow_company`, by numeric company id off Manage Pages. REV in LinkedIn, NOT-REV here |
 | 49 | Follow a skills Page | W | GAP | REV |
-| 50 | Follow a company or school via an off-site Follow button | W | GAP | REV. Off-platform |
+| 50 | Follow a company or school via an off-site Follow button | W | EXCLUDED-RULED | REV. Off-platform **RETIRED 2026-09-05, `OFF-PLATFORM-WIDGET` (3.4).** The act is pressing a button embedded on a third party's website, and `server.py:5706-5711` already rules that out: driving a form on somebody else's domain, under their terms, is not this server's to do at any capture quality. Only the ROUTE is retired, not the outcome -- `linkedin_follow_company` holds the same follow and is built. REOPENER: none plausible; a third-party widget drivable without leaving linkedin.com is a contradiction. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | 51 | Mute a company | W | GAP | REV. `mute` 0 hits |
 | 52 | View the list of Pages you follow | R | **COVERED-PROVEN** | `linkedin_followed_companies`, 2 live readings, PASS |
 | 53 | View a Page's follower count | R | GAP | No `/company/` |
@@ -371,11 +371,11 @@ considered.
 
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
-| 105 | Import contacts from your mobile address book | W | GAP | Mobile-only flow; not a page this server can drive |
-| 106 | Import your Gmail contacts | W | GAP | OAuth flow |
-| 107 | Choose which device contacts to upload instead of all | W | GAP | |
-| 108 | Select or deselect the connection recommendations an import produces | W | GAP | |
-| 109 | Send connection requests to the imported contacts you selected | W | GAP | **NOT-REV, and it is the highest-blast-radius row in the census** -- one confirmation sends many invitations |
+| 105 | Import contacts from your mobile address book | W | EXCLUDED-RULED | Mobile-only flow; not a page this server can drive **RETIRED 2026-09-05, `CONTACT-IMPORT` (3.2).** LinkedIn documents this as a mobile address-book flow, and a browser driver has no address book to offer -- the same structural refusal as `MOBILE-APP-ONLY`. Verified against this cell; the help article was not re-fetched. REOPENER: a desktop address-book import. See `_audit/2026-09-05-decide-retire-rulings.md` |
+| 106 | Import your Gmail contacts | W | EXCLUDED-RULED | OAuth flow **RETIRED 2026-09-05, `CONTACT-IMPORT` (3.2).** A Gmail import is an OAuth consent screen on Google's domain, and `server.py:5706-5711` is a rule about DOMAINS: driving a form on somebody else's domain, under their terms, is not this server's to do at any capture quality. REOPENER: an import completing inside linkedin.com. See `_audit/2026-09-05-decide-retire-rulings.md` |
+| 107 | Choose which device contacts to upload instead of all | W | EXCLUDED-RULED | **RETIRED 2026-09-05, `CONTACT-IMPORT` (3.2).** This is a step INSIDE an import, so it has no life independent of one and falls with both routes. REOPENER: either import route reopening. See `_audit/2026-09-05-decide-retire-rulings.md` |
+| 108 | Select or deselect the connection recommendations an import produces | W | EXCLUDED-RULED | **RETIRED 2026-09-05, `CONTACT-IMPORT` (3.2).** This is a step INSIDE an import, so it has no life independent of one and falls with both routes. REOPENER: either import route reopening. See `_audit/2026-09-05-decide-retire-rulings.md` |
+| 109 | Send connection requests to the imported contacts you selected | W | EXCLUDED-RULED | **NOT-REV, and it is the highest-blast-radius row in the census** -- one confirmation sends many invitations **RETIRED 2026-09-05, `CONTACT-IMPORT` (3.2).** Sending connection requests to a selected batch is a loop write, and `writes.PERMANENTLY_FORBIDDEN['any_loop_sweep_or_scheduled_write']` already forbids it -- this row needs no new reason, only the existing one applied. REOPENER: only the operator moving that prohibition. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | 110 | Delete all imported contacts | W | EXCLUDED-RULED | R5. NOT-REV |
 
 ### J. Endorsements (8)
@@ -451,7 +451,7 @@ silently downgraded.
 | 149 | Report a message | W | GAP | NOT-REV. Surface owned by the messaging census slice |
 | 150 | Report a whole conversation thread | W | GAP | NOT-REV. Messaging slice |
 | 151 | Mark a system-flagged message as safe instead of reporting it | W | GAP | Messaging slice |
-| 152 | Report harassment or a safety concern | W | GAP | NOT-REV. A Help Center form, off the product surface |
+| 152 | Report harassment or a safety concern | W | EXCLUDED-RULED | NOT-REV. A Help Center form, off the product surface **RETIRED 2026-09-05, `HELP-CENTER-FORM` (3.3).** A harassment or safety report is an accusation with a consequence for the person named, carried by a free-text narrative only he can write, filed to a human review queue off the product surface. REOPENER: an in-product STRUCTURED report -- and even then the narrative stays his. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | 153 | Hide a network update from your feed | W | GAP | REV |
 | 154 | Hide a single post from your feed without unfollowing its author | W | GAP | REV |
 
