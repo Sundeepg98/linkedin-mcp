@@ -404,6 +404,16 @@ The blocker's NAME describes the one write. Its 2R are a different capability
 wearing the same label -- and retiring them would have walled off two cheap reads
 on the strength of a name.
 
+  **THE OBVIOUS OBJECTION, and the shape rule answers it rather than dodging
+  it.** "Share a post off LinkedIn" might mean a share DIALOG that hands the
+  post to another site, not merely a link to copy. **It makes no difference:**
+  opening the dialog and reading what it offers happens on a LinkedIn page and
+  is a read; pressing through to the destination is an act on another domain
+  and is retired by the same rule as `N 50`. **One census row spans both, and
+  the rule splits it at the domain boundary rather than at the row boundary.**
+  If it were split into two rows the retirement would follow the act, not the
+  id -- which is what writing the ruling as a shape buys.
+
   **New blocker: `LINK-FOR-OFF-PLATFORM-USE` -- 2 rows, 2R, queue BUILD, cost 2**
   (parser +1, tool +1; ratio 1.00). No boundary change asserted, because I have
   not established which page draws either control. **UNTESTED:** if either
