@@ -34,7 +34,7 @@ readings taken on a page that carries a counter.**
 | `linkedin_server/server.py` | `linkedin_group_memberships`, one import, one docstring paragraph |
 | `scripts/_probe_groups_locator_walk.py` | the walk, run live, REFUSING to publish anything but five |
 | `scripts/_probe_group_memberships_tool_live.py` | the tool called through the registry, live |
-| `tests/test_the_groups_tool_keeps_its_properties.py` | 22 tests over four claimed properties |
+| `tests/test_the_groups_tool_keeps_its_properties.py` | 30 tests over five claimed properties |
 
 ## 3. BOTH NAMED HAZARDS WERE AVOIDED, AND NEITHER BY BEING CAREFUL
 
@@ -395,16 +395,70 @@ because otherwise the first test would pass equally well if `_badge_refusal`
 had been deleted or if nothing in the package refused any more. The contrast
 is what is being asserted, so both halves are.
 
+## 8D. THE PACKAGE'S FRONT-DOOR DOCSTRING UNDERSTATED THE WRITE SURFACE BY NINE TOOLS
+
+Found by widening the count hunt past the census's `.py`/`.md` digit search to
+number WORDS in a non-count phrasing. `linkedin_server/__init__.py` -- the
+first docstring anyone importing this package reads -- said:
+
+> Three write tools ship: save, unsave and unfollow. [...] exactly ONE
+> mutating call exists in the package
+
+Measured off the live registry and off `readonly.SANCTIONED_MUTATIONS`:
+
+    write tools            12   (the docstring said 3)
+    sanctioned mutations    5   (the docstring said 1)
+
+**STALE IN THE DIRECTION THAT MATTERS**: understating the write surface by
+nine tools, five of them irreversible.
+
+**AND THE FILE HAD ALREADY DIAGNOSED ITS OWN FAILURE MODE, CORRECTLY, IN THE
+PARAGRAPH DIRECTLY ABOVE THE STALE SENTENCE.** It reads: *"The package
+docstring is the first thing a reader trusts and was the last thing
+updated."* It was written after that docstring claimed the package was
+read-only for a day past being true. **Then the file did it again, in the
+same direction** -- because the remedy chosen was to write a better sentence
+rather than to build something that would notice.
+
+**THE SHAPE, and it is the same one as 8B:**
+
+    server.py's module docstring   same counts   PINNED (a test reads the words)
+    __init__.py's docstring        same counts   pinned by NOTHING
+    README.md's opening headline   same counts   pinned by NOTHING
+
+**The two highest-traffic count claims in the repository are the two unguarded
+ones**, and both were found stale within the same hour, by a census
+commissioned for something else and by a grep run while waiting for a test
+suite. Neither was found by a test, because no test looks there.
+
+Both corrected, both keeping their stale text, and `__init__.py` now points a
+reader at `server.py`'s docstring for counts **on the stated ground that that
+one is checked and this one is not**. Extending the docstring-number pin to
+these two files is the mechanism-level fix and is left as an owed item rather
+than done at 22:45 in a tree eight waves are writing.
+
 ## 9. WHAT IS STILL OWED
 
 * **`recommendations.py` is untouched and still has no consumer.** Its two
   blockers are unchanged: no admitted address, and no page behind it has been
-  opened by anybody. **This wave deliberately kept its stronger property in
-  view when choosing this tool's shape** -- that module goes further than
-  `groups.py` (no public function returns any string derived from its input,
-  because a recommendation author's href IS a slug). The groups tool takes
-  **no parameter at all**, which is the same idea from the other end: there is
-  no input to derive anything from.
+  opened by anybody. **This wave kept its stronger property in view when
+  choosing this tool's shape, and READ THE FILE rather than the description of
+  it** -- a relayed property is a reading with a timestamp. Measured over its
+  syntax tree: the three public functions are `author_present(href)`,
+  `recommendation_tally(hrefs, relation)` and `relation_split(received,
+  given)`, and every key any of them returns is a count, a boolean, or the
+  module's own `href_shape` literal.
+
+  The one string parameter, `relation`, is the interesting case, and it is
+  handled the way `groups.py` handles a digit run: **a membership test against
+  a closed vocabulary**, returning `"relation": None` rather than echoing an
+  unrecognised value. So the property stated precisely is *no public function
+  returns a string derived from PAGE DATA* -- stronger than `groups.py`'s,
+  which publishes numeric identifiers, and right for a surface where a
+  recommendation author's href IS a person's slug.
+
+  The groups tool reaches the same place from the other end: it takes **no
+  parameter at all**, so there is no input to derive anything from.
 * **`shape.membership_row` still has its declared hole and still has no
   consumer.** Untouched by this wave, deliberately -- it is `groups-events`'
   artifact and its limit is asserted by its own tests. The name-free reader is
@@ -418,6 +472,11 @@ is what is being asserted, so both halves are.
   says which of the five those are.
 * **A groups-specific cost instrument does not exist**, and section 4.3 is the
   statement of that gap rather than a workaround for it.
+* **The docstring-number pin covers `server.py` and nothing else.** `README.md`'s
+  headline and `linkedin_server/__init__.py`'s docstring carry the same counts
+  and are checked by no test -- see 8D. Both are corrected; neither is
+  guarded. **That is the mechanism this wave found the need for and did not
+  build**, and it is the highest-value thing left on this list.
 * **Nothing pushed.** The push freeze is the operator's and is untouched. Zero
   AI attribution across this wave's commits, verified.
 
