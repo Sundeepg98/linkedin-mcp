@@ -212,3 +212,59 @@ An audit document is a dated record and rots fairly harmlessly; a census row is
 read as current truth by whoever plans from it next. The sentence naming the
 resolver as an open problem is the class most able to propagate a stale premise,
 and it is the one class the correction machinery cannot bind.
+
+---
+
+## 8. THE GATE SWEEP IS RED ON A COMMITTED FILE, AND IT IS NOT THIS WAVE'S
+
+Recorded here because a commit is the only receipt that survives a session, and
+because this one gates the push rather than any single row.
+
+    scripts/sweep_tracked_for_identity.py
+    HIT  _audit/2026-09-05-jobs-tail.md:403  [operator_own_denied_terms]
+    FAIL: 1 hit across 332 tracked files
+
+**It is COMMITTED, not working-tree.** `git diff --numstat` on that path is
+empty, so the string is in history and a clean working copy proves nothing about
+it. Route by artifact, not by guess: `git log -- _audit/2026-09-05-jobs-tail.md`
+names `f8e706c` and `b312d98`, both from the jobs-tail measurement work. **That
+wave owns the remedy.** This wave does not fix it -- a neighbour's lines are not
+swept, and for this class the author is the only person who can say what the
+string is.
+
+### What is NOT being claimed, because the rule cuts the other way here
+
+**A red guard means UNDECLARED, not real.** The lead escalated that reading
+twice today and was wrong twice. So this section reports a HIT and a CLASS and
+nothing more; it does not say an identifier is in history.
+
+**And the likeliest explanation is already written down.** The same guard fired
+this afternoon on a repair that explained a fix by NAMING the offending word in
+its new prose -- the guard cannot tell a quotation from a claim, and one that
+tried to would be a worse guard. The obfuscated hit is prose carrying markdown
+emphasis, which is the same shape. If that is what it is, the remedy is the one
+already found: describe the term without spelling it, and say so in the file, so
+the next reader does not reintroduce it while documenting it.
+
+### The ordering is the finding, and it is the third instance today
+
+    sweep before staging this wave's second commit   PASS, 0 hits / 316 files
+    sweep before staging this wave's third commit    FAIL, 1 hit  / 332 files
+
+Sixteen tracked files entered between those two readings and one of them carried
+this. **A sweep from earlier in a session is not evidence about the tree you
+push** -- the rule was written at ~16:57 today off exactly this ordering, and it
+has now paid for itself twice in one afternoon. The count of files swept moving
+316 to 332 is the part worth reading: the corpus grew under both readings.
+
+**Whoever runs the gate must run the sweep AGAIN at the gate.** Not this
+reading, and not the 0-hit one above it.
+
+### One race, recorded because it will happen to the next wave too
+
+This wave's third commit failed outright with an `index.lock` error while a
+neighbour was committing, and HEAD moved by three commits between the attempt
+and the retry. Nothing was lost -- the failure was loud, `--only` re-took exactly
+the two intended paths, and the diff was re-read before the retry. Worth knowing
+that in a tree this busy a commit is not certain to land, and **the honest check
+after any commit is `git log --oneline -1`, not the absence of an error.**
