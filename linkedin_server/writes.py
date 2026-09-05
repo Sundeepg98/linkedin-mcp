@@ -969,6 +969,29 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # a confirm token at all -- the operator reads a WARNING rather than an
     # offer, which is exactly what ``set_open_to_work`` has done since
     # August. The blockers are itemised per action in ``_NINE_REFUSALS``.
+    #
+    # SUCCESSOR, 2026-09-05, appended rather than substituted because the
+    # paragraph above is TRUE OF THE DAY IT DESCRIBES and only its last
+    # sentence has been overtaken. ALL SEVEN HAVE SINCE SHIPPED, every one
+    # of them carries a ``url_template`` now, and ``_NINE_REFUSALS``
+    # ITEMISES NOTHING -- it is empty, and ``tests/test_writes.py`` asserts
+    # that it is. A reader who follows that sentence reaches an empty dict.
+    #
+    # TWO WAVES DID FOLLOW IT, which is why this is a correction and not a
+    # tidy-up. Both were filing census rows whose SURFACE NOBODY HAS OPENED
+    # -- the job-alerts, premium-apply, tracker-menu, job-card-menu and
+    # found-a-job rows -- and both read the table's two blocker shapes (NO
+    # CONTROL, NO SURFACE) as an invitation to file such a row here at no
+    # cost, since a full spec cannot name a surface nobody has photographed.
+    #
+    # IT IS NOT THAT DOOR, AND THE PRECONDITION WAS NOWHERE IN WRITING:
+    # ``_refuse_unperformable`` takes a ``WriteSpec``, ``spec_for_action``
+    # raises for an unregistered action, so A KEY FOR AN ACTION WITH NO SPEC
+    # IS UNREACHABLE. This table is the home for a SANCTIONED action that
+    # cannot perform -- registration is the cost and the table does not
+    # avoid it. ``tests/test_the_refusal_table_needs_a_spec.py`` asserts the
+    # precondition with both plants, because the check is vacuous over an
+    # empty table and a vacuous check is how three siblings stopped running.
     "linkedin_publish_post": WriteSpec(
         action="publish_post",
         tool_name="linkedin_publish_post",
