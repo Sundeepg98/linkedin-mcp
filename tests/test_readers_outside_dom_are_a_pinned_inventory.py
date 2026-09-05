@@ -78,6 +78,25 @@ KNOWN_UNWIRED: dict[str, str] = {
         "reader ships measured and idle, and this line is how the next "
         "person finds it rather than rebuilding it."
     ),
+    "premium.read_premium_surface": (
+        "Built 2026-09-05 by the cheap-reads-build wave for census row 56, "
+        "and unwired for the same reason as the entry above rather than a "
+        "new one -- which is itself worth noticing, since this is now the "
+        "THIRD reader in one day to arrive with no consumer and the second "
+        "to name the last-hour crowding of server.py as the cause. The "
+        "address it reads, /premium/my-premium/, is admitted and has been "
+        "opened three times; the reader is aimed at a real render rather "
+        "than an invented DOM, which was the stated objection that stopped "
+        "two earlier waves building it. What it still lacks is a tool, and "
+        "wiring one moves pinned tool-inventory counts -- an ENUMERATION "
+        "class that a targeted run cannot clear and that needs a full clone. "
+        "Leaving that red in a shared tree at the end of a session was the "
+        "worse trade, so the reader ships idle and this line is the record. "
+        "Its verdict is built so an idle reader cannot mislead: every state "
+        "carries settles and leaves_open, an error shapes to error and never "
+        "to not_entitled, and the entitled branch says in its own payload "
+        "that it leaves the two panel states untouched."
+    ),
 }
 
 
