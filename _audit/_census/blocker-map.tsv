@@ -1,0 +1,410 @@
+row_id	blocker	evidence_class	source	locator	state_at_freeze	state_today	capability	note
+J 9	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter: Easy Apply only	section 5 item 2 states the six rows
+J 10	COMPANY-ID-RESOLVER	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L382	GAP	GAP	Filter: Company	"The company filter J 10 sits one blocker along (COMPANY-ID-RESOLVER)"
+J 11	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter: Employment type / job type	section 5 item 2 states the six rows
+J 12	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter: Under 10 applicants	section 5 item 2 states the six rows
+J 13	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter: In your network	section 5 item 2 states the six rows
+J 14	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter: Fair chance employer	section 5 item 2 states the six rows
+J 15	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	The "All filters" panel as a surface	no committed source names this row against any blocker
+J 16	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Suggested filters (adaptive, on AI search)	no committed source names this row against any blocker
+J 17	DEVICE-GEOLOCATION	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Search from device current location	sole row, retired, flipped
+J 18	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Recent searches: view and re-run	no committed source names this row against any blocker
+J 19	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Recent searches: clear history	no committed source names this row against any blocker
+J 24	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L127,L644	GAP	GAP	Hirer responsiveness: review-time estimate, "Responses managed off LinkedIn"	section 2b and Amendment A1 both list the seven
+J 25	PANEL-NOT-OBSERVED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L474,L1028	GAP	EXCLUDED-RULED	"Why am I seeing this job?"	section 6 table plus Amendment A13
+J 26	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L127,L644	GAP	GAP	"Promoted by hirer" labelling on a result	section 2b and Amendment A1 both list the seven
+J 27	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L128,L644	GAP	GAP	Verification badge on a posting	section 2b and Amendment A1 both list the seven
+J 28	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Report a job as closed	no committed source names this row against any blocker
+J 29	PANEL-NOT-OBSERVED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L474,L1028	GAP	EXCLUDED-RULED	Skills Match insight ("x of y skills match your profile")	section 6 table plus Amendment A13
+J 30	PANEL-NOT-OBSERVED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L474,L1028	GAP	EXCLUDED-RULED	Skills Match: add a missing skill from the insight	section 6 table plus Amendment A13
+J 31	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a job alert from a search	no committed source names this row against any blocker
+J 32	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a job alert from a company Page	no committed source names this row against any blocker
+J 33	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit an existing job alert	no committed source names this row against any blocker
+J 34	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Delete / turn off a job alert	no committed source names this row against any blocker
+J 35	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set alert frequency (daily / weekly)	no committed source names this row against any blocker
+J 36	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set alert delivery channel (email / app / both)	no committed source names this row against any blocker
+J 37	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	List and manage all alerts	no committed source names this row against any blocker
+J 38	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read the jobs an alert delivered	no committed source names this row against any blocker
+J 39	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read job recommendations ("Jobs you may be interested in")	no committed source names this row against any blocker
+J 40	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read per-job network proximity ("2 connections", "1 company alum")	no committed source names this row against any blocker
+J 41	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Subscribe / unsubscribe the job-collections weekly digest	no committed source names this row against any blocker
+J 42	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Job collections and their five groupings (Domains, Industries, Company Benefits, Editorial, Corporate Commitme	no committed source names this row against any blocker
+J 54	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Change a job's tracker stage manually	no committed source names this row against any blocker
+J 55	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Add notes to a tracked job	no committed source names this row against any blocker
+J 56	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter the tracker by date posted	no committed source names this row against any blocker
+J 57	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View network connections reachable for a tracked job	no committed source names this row against any blocker
+J 68	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Save an application as a draft / resume one	no committed source names this row against any blocker
+J 70	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Upload a NEW resume	section 5 item 1 lists all sixteen rows verbatim
+J 71	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	List / delete stored resumes (max 4)	no committed source names this row against any blocker
+J 72	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Download a stored resume	no committed source names this row against any blocker
+J 73	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See which resume was submitted for a given application	no committed source names this row against any blocker
+J 78	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Cover Letter Assistance (Premium AI drafting)	no committed source names this row against any blocker
+J 79	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mark a job "Top Choice" (Premium, 3/month)	no committed source names this row against any blocker
+J 80	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Attach an optional message to the poster with a Top Choice mark	no committed source names this row against any blocker
+J 81	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Verify account to raise the Easy Apply daily limit	no committed source names this row against any blocker
+J 82	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Observe the Easy Apply daily limit / rate-pause state	no committed source names this row against any blocker
+J 83	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Save voluntary self-identification answers for reuse	no committed source names this row against any blocker
+J 85	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Undo a dismissal	no committed source names this row against any blocker
+J 86	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"I'm interested" -- privately signal interest in a company (max 50, expires 1 year)	no committed source names this row against any blocker
+J 92	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set preference: job titles	no committed source names this row against any blocker
+J 93	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set preference: locations	no committed source names this row against any blocker
+J 94	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set preference: workplace types	no committed source names this row against any blocker
+J 95	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set preference: start date	no committed source names this row against any blocker
+J 96	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set preference: employment types	no committed source names this row against any blocker
+J 97	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set India-only preferences: notice period, expected annual salary	no committed source names this row against any blocker
+J 98	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set / edit / delete the Minimum Pay preference	no committed source names this row against any blocker
+J 99	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Control career-interests visibility to recruiters	no committed source names this row against any blocker
+J 100	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"Signal your interest to recruiters at companies you've created job alerts for"	no committed source names this row against any blocker
+J 106	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page About tab (size, industry, locations)	no committed source names this row against any blocker
+J 107	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page Jobs tab / "see all jobs at this company"	no committed source names this row against any blocker
+J 108	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page People tab (titles, study areas, skills, how you are connected)	no committed source names this row against any blocker
+J 109	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page Life tab	no committed source names this row against any blocker
+J 110	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page Home / Posts tabs	no committed source names this row against any blocker
+J 111	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page Products / Services tabs	no committed source names this row against any blocker
+J 112	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	School Page Alumni tab	no committed source names this row against any blocker
+J 113	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Company Page Insights tab (Premium)	no committed source names this row against any blocker
+J 114	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Premium Page Insights: headcount over time, distribution and growth by function, notable alumni, job openings 	no committed source names this row against any blocker
+J 116	MATCH-DETAILS-COLLAPSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L472,L1183	GAP	GAP	"How you match" panel: top-applicant flag	named in section 6 and again in Amendment A13
+J 117	MATCH-DETAILS-COLLAPSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L472,L1183	GAP	GAP	"How you match": skills associated with the job	named in section 6 and again in Amendment A13
+J 118	MATCH-DETAILS-COLLAPSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L472,L1183	GAP	GAP	"How you match": your matching profile skills	named in section 6 and again in Amendment A13
+J 119	MATCH-DETAILS-COLLAPSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L472,L1183	GAP	GAP	"How you match": skills missing from your profile	named in section 6 and again in Amendment A13
+J 120	MATCH-DETAILS-COLLAPSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L472,L1183	GAP	GAP	"How you match": additional skills among applicants	named in section 6 and again in Amendment A13
+J 121	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L128,L644	GAP	GAP	Applicant insights: your ranking percentile vs other applicants	section 2b and Amendment A1 both list the seven
+J 122	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L128,L644	GAP	GAP	Applicant insights: top skills among applicants, experience/education levels	section 2b and Amendment A1 both list the seven
+J 123	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L129,L644	GAP	GAP	Premium hiring-company insights (hiring trends, growth rate, average tenure, feeder companies/schools)	section 2b and Amendment A1 both list the seven
+J 124	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Premium AI company intelligence (headcount, openings, strategic priorities)	no committed source names this row against any blocker
+J 125	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"Jobs where you're a top applicant" section	no committed source names this row against any blocker
+J 126	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Premium AI job-fit tips	no committed source names this row against any blocker
+J 127	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read the InMail credit balance	no committed source names this row against any blocker
+J 129	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	InMail the job poster after applying	no committed source names this row against any blocker
+J 131	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Decide WHO to message and whether it costs a credit	no committed source names this row against any blocker
+J 132	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Generate role-specific practice questions from a real job description	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 133	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Practice out loud, by voice	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 134	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Practice by reading and typing responses instead	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 135	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Be interviewed by a real-time AI interviewer	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 136	AI-INTERVIEW-PRODUCT	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Receive an interview readiness score (low / medium / high)	one of the three read-shaped rows HANDED BACK rather than retired, so 990bbd3 does not touch it
+J 137	AI-INTERVIEW-PRODUCT	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Receive a summary of strengths and areas to improve	handed back, not retired
+J 138	AI-INTERVIEW-PRODUCT	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Receive a transcript of your responses with worked improvements	handed back, not retired
+J 139	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Take a practice AI interview first, unlimited repeats	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 140	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Complete a hirer's voice-based or video-based AI screening interview	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 141	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	End an interview in progress	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 142	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Decline to participate, without automatic disqualification	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 143	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Reply to the invitation with feedback on the interview experience	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 144	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Request your rating, summaries, transcript or recording	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 145	AI-INTERVIEW-PRODUCT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Request an accommodation	reconstructed J 132-J 145; 990bbd3 flipped the eleven retired ones
+J 146	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Upload a resume for analysis against one specific job posting	section 5 item 1 lists all sixteen rows verbatim
+J 147	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Receive personalized insights on the job and how to enhance the resume	section 5 item 1 lists all sixteen rows verbatim
+J 148	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Refine sections of the resume with suggested language	section 5 item 1 lists all sixteen rows verbatim
+J 149	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Export the result, or attach it to a LinkedIn application	section 5 item 1 lists all sixteen rows verbatim
+J 150	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send an enhanced message to a recruiter using Writing Assistant	no committed source names this row against any blocker
+J 151	JOB-SEARCH-PARAMS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L381	GAP	GAP	Filter a job search by MULTIPLE simultaneous locations	section 5 item 2 states the six rows
+M C2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Choose the post's audience / visibility	no committed source names this row against any blocker
+M C3	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Post a photo	section 5 item 1 lists all sixteen rows verbatim
+M C4	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Post a video	section 5 item 1 lists all sixteen rows verbatim
+M C5	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Post a document (PDF / carousel)	section 5 item 1 lists all sixteen rows verbatim
+M C6	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Add a title to an uploaded document	section 5 item 1 lists all sixteen rows verbatim
+M C7	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Add alt text to a post image	section 5 item 1 lists all sixteen rows verbatim
+M C8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a poll	no committed source names this row against any blocker
+M C9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Post a celebration ("Celebrate an occasion")	no committed source names this row against any blocker
+M M5	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send an Open Profile message	no committed source names this row against any blocker
+M M6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a message request	no committed source names this row against any blocker
+M M7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Accept a message request	no committed source names this row against any blocker
+M M8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Decline a message request	no committed source names this row against any blocker
+M M9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Review previously declined requests	no committed source names this row against any blocker
+M C10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mention a person or company in a post	no committed source names this row against any blocker
+M C11	HASHTAG-EXISTENCE	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1160,L1251	GAP	GAP	Add a hashtag to a post	A13 writes it "C 11"; qualification measured -- bare M 11 is absent from the census, M C11 reads "Add a hashtag to a post"
+M C12	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Save a post as a draft	no committed source names this row against any blocker
+M C23	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Turn off or limit comments on your post	no committed source names this row against any blocker
+M C24	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide a comment on your post	no committed source names this row against any blocker
+M C26	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Reply to a comment	no committed source names this row against any blocker
+M C27	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Add an emoji, GIF or image to a comment	section 5 item 1 lists all sixteen rows verbatim
+M C28	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mention someone in a comment	no committed source names this row against any blocker
+M C29	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Sort comments (Most relevant / Most recent)	no committed source names this row against any blocker
+M C30	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit your comment	no committed source names this row against any blocker
+M C34	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	React to a comment	no committed source names this row against any blocker
+M C36	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Save a post or article to Saved Items	no committed source names this row against any blocker
+M C37	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unsave a saved post	no committed source names this row against any blocker
+M C38	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View post analytics (impressions, viewer demographics)	no committed source names this row against any blocker
+M C39	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View analytics for your comments	no committed source names this row against any blocker
+M C40	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View your creator analytics	no committed source names this row against any blocker
+M C43	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read a post's text	no committed source names this row against any blocker
+M C45	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Add or edit rich media in an article	section 5 item 1 lists all sixteen rows verbatim
+M C46	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Embed content within an article	no committed source names this row against any blocker
+M C48	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View all your articles	no committed source names this row against any blocker
+M C49	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Manage comments on your articles	no committed source names this row against any blocker
+M C50	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a newsletter	no committed source names this row against any blocker
+M C51	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Manage a newsletter	no committed source names this row against any blocker
+M C52	HASHTAG-EXISTENCE	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1176,L1251	GAP	GAP	Manage your LinkedIn feed preferences (follow / unfollow topics and sources)	A13 writes it "C 52"; qualification measured -- bare M 52 is absent from the census
+M C54	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a collaborative post	no committed source names this row against any blocker
+M C55	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Manage collaborators on a collaborative post	no committed source names this row against any blocker
+M C56	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Remove yourself from a collaborative post	no committed source names this row against any blocker
+M C57	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a LinkedIn Event	no committed source names this row against any blocker
+M C58	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Attend or leave a LinkedIn Event	no committed source names this row against any blocker
+M C59	LIVE-BROADCAST	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Create or broadcast a LinkedIn Live	both retired, both flipped
+M C60	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Access your LinkedIn Groups	no committed source names this row against any blocker
+M C61	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a group	no committed source names this row against any blocker
+M C62	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Withdraw a group membership request	no committed source names this row against any blocker
+M C63	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Leave a group	no committed source names this row against any blocker
+M C64	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Post content in a group feed	no committed source names this row against any blocker
+M C65	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Add a comment to a group conversation	no committed source names this row against any blocker
+M C66	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mention group members in a conversation	no committed source names this row against any blocker
+M C67	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit or delete a group post or comment	no committed source names this row against any blocker
+M C68	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Submit a group post for admin approval	no committed source names this row against any blocker
+M C69	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite connections to join a group	no committed source names this row against any blocker
+M C70	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for content within Groups	no committed source names this row against any blocker
+M C71	PAID-BOOST	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Boost a post (paid promotion)	sole row, retired, flipped
+M C72	OFF-PLATFORM-WIDGET	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Share a post off LinkedIn	graded DERIVED-WEAK; handed back rather than retired, so nothing acted on it
+M C73	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Allow or disallow your posts being embedded	no committed source names this row against any blocker
+M C74	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read your feed	no committed source names this row against any blocker
+M C76	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Contribute to a collaborative article	no committed source names this row against any blocker
+M C78	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set the visibility of your articles	no committed source names this row against any blocker
+M C79	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow or unfollow member articles	no committed source names this row against any blocker
+M C80	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Subscribe or unsubscribe to a newsletter	no committed source names this row against any blocker
+M C81	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a Newsletter Page	no committed source names this row against any blocker
+M C82	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Share a Newsletter Page	no committed source names this row against any blocker
+M C83	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View newsletter analytics	no committed source names this row against any blocker
+M C84	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Manage multiple newsletters	no committed source names this row against any blocker
+M C85	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Vote in a poll / view poll results	no committed source names this row against any blocker
+M C86	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Tag people in your photos	section 5 item 1 lists all sixteen rows verbatim
+M C87	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Remove a mention or tag of yourself	no committed source names this row against any blocker
+M C88	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Choose whether members can mention, tag or collaborate with you	no committed source names this row against any blocker
+M C89	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Set the visibility of mentions and tags	no committed source names this row against any blocker
+M C90	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Verified comments filter on your post	no committed source names this row against any blocker
+M C91	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	React in a group conversation	no committed source names this row against any blocker
+M C92	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Comment on an Event and reply to Event comments	no committed source names this row against any blocker
+M M10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Reply to a message in a thread	no committed source names this row against any blocker
+M M11	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit a sent message (60-min window)	no committed source names this row against any blocker
+M M13	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Forward a message	no committed source names this row against any blocker
+M M14	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Attach a photo to a message	section 5 item 1 lists all sixteen rows verbatim
+M M15	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Attach a video to a message	section 5 item 1 lists all sixteen rows verbatim
+M M16	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a GIF	no committed source names this row against any blocker
+M M17	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send an emoji	no committed source names this row against any blocker
+M M18	FILE-UPLOAD-UNSANCTIONED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L373	GAP	GAP	Attach files (max 5, 20 MB total)	section 5 item 1 lists all sixteen rows verbatim
+M M19	VOICE-CAPTURE	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Send a voice message	sole row, retired, flipped
+M M20	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Start or schedule a video meeting from a message	no committed source names this row against any blocker
+M M21	GROUP-CHAT-SURFACE	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Create a group chat	stated inside the MESSAGING-SETTINGS cell: "M 24 is claimed by GROUP-CHAT-SURFACE (4 rows, 4W, exactly M 21-M 24)"
+M M22	GROUP-CHAT-SURFACE	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Add or remove group-chat participants	as above; qualification measured, bare M 21-M 24 are absent from the census
+M M23	GROUP-CHAT-SURFACE	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Mention people in a group chat	as above; qualification measured, bare M 21-M 24 are absent from the census
+M M24	GROUP-CHAT-SURFACE	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Manage group-chat notification settings	as above; this is the row the source's own risk table says could sit in MESSAGING-SETTINGS instead
+M M25	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Leave a conversation	no committed source names this row against any blocker
+M M27	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Archive a conversation	no committed source names this row against any blocker
+M M28	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View and restore archived conversations	no committed source names this row against any blocker
+M M29	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mute or unmute a conversation	no committed source names this row against any blocker
+M M30	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Star a conversation	no committed source names this row against any blocker
+M M31	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mark a conversation read or unread	no committed source names this row against any blocker
+M M32	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Bulk delete / archive / mark read	no committed source names this row against any blocker
+M M34	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search messages by keyword	no committed source names this row against any blocker
+M M35	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Choose Messaging inbox layout	no committed source names this row against any blocker
+M M36	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Manage how new conversations open (conversation windows)	no committed source names this row against any blocker
+M M37	MESSAGING-SETTINGS	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Turn read receipts and typing indicators on or off	graded DERIVED-STRONG in the source; all five re-filed and all five flipped
+M M38	REPORTING-FLOWS	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Report a message as spam	stated inside the MESSAGING-SETTINGS cell: "M 38 by REPORTING-FLOWS (1 row, 1W)"; qualification measured
+M M40	AI-ASSIST-MESSAGING	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Use smart replies / reply suggestions	graded DERIVED; the source flags J 150 as a possible displacer and J 150 did NOT flip
+M M41	MESSAGING-SETTINGS	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Manage smart features in Messaging	graded DERIVED-STRONG in the source; all five re-filed and all five flipped
+M M42	MESSAGING-SETTINGS	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Settings to allow or prevent messages from group members	the source flags M M42 as the substitution risk against M M24; the census now encodes the M M42 reading and M M24 did NOT flip
+M M46	MESSAGING-SETTINGS	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Opt out of receiving InMail messages	graded DERIVED-STRONG in the source; all five re-filed and all five flipped
+M M47	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Respond to a Recruiter InMail (Interested / Not interested)	no committed source names this row against any blocker
+M M48	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	React to a message with an emoji	no committed source names this row against any blocker
+M M49	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read message delivery / read indicators	no committed source names this row against any blocker
+M M50	MESSAGING-SETTINGS	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Manage LinkedIn message nudges	graded DERIVED-STRONG in the source; all five re-filed and all five flipped
+M M51	AI-ASSIST-MESSAGING	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Use LinkedIn AI-powered conversation in messaging	graded DERIVED; the source flags J 150 as a possible displacer and J 150 did NOT flip
+N 4	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send an invitation from a people-search result	no committed source names this row against any blocker
+N 5	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Add a personalized note to an invitation	no committed source names this row against any blocker
+N 6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Re-invite a member after the previous invitation expired	no committed source names this row against any blocker
+N 7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to follow your employer's Page (30/month)	no committed source names this row against any blocker
+N 8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to follow a Page you do not manage (50/month)	no committed source names this row against any blocker
+N 33	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See how many of your connections work at an organization	no committed source names this row against any blocker
+N 37	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow a person directly from a feed post	no committed source names this row against any blocker
+N 38	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the list of people you follow	no committed source names this row against any blocker
+N 39	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the people you previously unfollowed	no committed source names this row against any blocker
+N 40	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Re-follow a person you previously unfollowed	no committed source names this row against any blocker
+N 41	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow a member from one of their articles	no committed source names this row against any blocker
+N 42	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow the articles of a member you are not connected to	no committed source names this row against any blocker
+N 43	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mute a person from a feed post	no committed source names this row against any blocker
+N 44	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View your own followers	no committed source names this row against any blocker
+N 47	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow an organization's Page from the Page itself	no committed source names this row against any blocker
+N 49	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow a skills Page	no committed source names this row against any blocker
+N 50	OFF-PLATFORM-WIDGET	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Follow a company or school via an off-site Follow button	graded DERIVED-WEAK; the one row retired, and it is the one that flipped
+N 51	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Mute a company	no committed source names this row against any blocker
+N 53	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View a Page's follower count	no committed source names this row against any blocker
+N 54	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View how many of your connections follow a Page	no committed source names this row against any blocker
+N 55	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Subscribe to a newsletter	no committed source names this row against any blocker
+N 56	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unsubscribe from a newsletter	no committed source names this row against any blocker
+N 57	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the newsletters you subscribe to	no committed source names this row against any blocker
+N 58	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unsubscribe from newsletter emails while staying subscribed on the feed	no committed source names this row against any blocker
+N 59	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow a hashtag	no committed source names this row against any blocker
+N 60	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unfollow a hashtag	no committed source names this row against any blocker
+N 61	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View your followed hashtags	no committed source names this row against any blocker
+N 63	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a LinkedIn group	no committed source names this row against any blocker
+N 64	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Leave a LinkedIn group	no committed source names this row against any blocker
+N 76	OFF-PLATFORM-WIDGET	RECON-DOC	_audit/2026-09-05-decide-retire-rulings.md	S1	GAP	GAP	Copy your personal Follow link for use off LinkedIn	graded DERIVED-WEAK; handed back rather than retired, so nothing acted on it
+N 79	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for a person by keyword or natural-language query	no committed source names this row against any blocker
+N 80	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Narrow search results to People	no committed source names this row against any blocker
+N 81	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter a people search by Degree of connections	no committed source names this row against any blocker
+N 82	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Actively hiring	no committed source names this row against any blocker
+N 83	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Locations	no committed source names this row against any blocker
+N 84	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Current company	no committed source names this row against any blocker
+N 85	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Connections of	no committed source names this row against any blocker
+N 86	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Followers of	no committed source names this row against any blocker
+N 87	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Past company	no committed source names this row against any blocker
+N 88	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by School	no committed source names this row against any blocker
+N 89	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Industry	no committed source names this row against any blocker
+N 90	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Profile language	no committed source names this row against any blocker
+N 91	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Open to volunteering	no committed source names this row against any blocker
+N 92	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Service categories	no committed source names this row against any blocker
+N 93	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter by Keywords (first name, last name, title, company, school)	no committed source names this row against any blocker
+N 94	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Add more than one location to a single search	no committed source names this row against any blocker
+N 95	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View and re-run a recent search	no committed source names this row against any blocker
+N 96	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Clear your search history	no committed source names this row against any blocker
+N 99	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the Alumni page for your school	no committed source names this row against any blocker
+N A1	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Notify employees of a Page post	no committed source names this row against any blocker
+N A2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Follow another organization's Page on behalf of your Page	no committed source names this row against any blocker
+N A3	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the Pages your Page follows	no committed source names this row against any blocker
+N A4	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite connections to follow a Page you manage	no committed source names this row against any blocker
+N A5	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View your Page's invitation credit balance	no committed source names this row against any blocker
+N A6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Build a Page Follow button for your organization's website	no committed source names this row against any blocker
+N A7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Turn on automatic invitations to content engagers (Premium)	no committed source names this row against any blocker
+N A8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Turn off automatic invitations (Premium)	no committed source names this row against any blocker
+N A9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite followers of similar Pages to follow your Page (Premium)	no committed source names this row against any blocker
+N 100	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Use a school Page's alumni tab to find and contact alumni	no committed source names this row against any blocker
+N 101	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	List an organization's employees via its employee count	no committed source names this row against any blocker
+N 102	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Read employee insights on a Page's People tab	no committed source names this row against any blocker
+N 104	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Find an organization's Page by searching for it	no committed source names this row against any blocker
+N 105	CONTACT-IMPORT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Import contacts from your mobile address book	reconstructed N 105-N 109, all five retired and all five flipped
+N 106	CONTACT-IMPORT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Import your Gmail contacts	reconstructed N 105-N 109, all five retired and all five flipped
+N 107	CONTACT-IMPORT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Choose which device contacts to upload instead of all	reconstructed N 105-N 109, all five retired and all five flipped
+N 108	CONTACT-IMPORT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Select or deselect the connection recommendations an import produces	reconstructed N 105-N 109, all five retired and all five flipped
+N 109	CONTACT-IMPORT	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Send connection requests to the imported contacts you selected	reconstructed N 105-N 109, all five retired and all five flipped
+N 114	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide or show an endorsement you received from a particular member	no committed source names this row against any blocker
+N 118	PARSER-ON-A-LOADED-PAGE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L440	GAP	MEASURED-ABSENT	Read the endorsement counts on your own skills	"the cheapest BUILD in the document" names both rows
+N 132	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Switch between Search appearances and Who viewed your profile	no committed source names this row against any blocker
+N 133	ANALYTICS-CONTROLS-UNPRESSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	GAP	GAP	Filter your profile-viewer data (Premium)	"N 136 is therefore filed with N 133 134 under ANALYTICS-CONTROLS-UNPRESSED". PARTIAL -- three of a published four
+N 134	ANALYTICS-CONTROLS-UNPRESSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	GAP	GAP	See notable or interesting viewers (Premium)	PARTIAL -- three of a published four; the fourth is named nowhere
+N 135	CLOSED-SINCE-CENSUS	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L130,L645	GAP	GAP	See the weekly viewer trend graph (Premium)	section 2b and Amendment A1 both list the seven
+N 136	ANALYTICS-CONTROLS-UNPRESSED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L471	GAP	GAP	See top locations, industries and companies of your viewers (Premium)	PARTIAL -- three of a published four; the fourth is named nowhere
+N 148	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Report a post or a comment in your feed	no committed source names this row against any blocker
+N 149	OWNED-BY-A-SIBLING-SLICE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	GAP	GAP	Report a message	the cost-0 table names the four ids in its own cell
+N 150	OWNED-BY-A-SIBLING-SLICE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	GAP	GAP	Report a whole conversation thread	the cost-0 table names the four ids in its own cell
+N 151	OWNED-BY-A-SIBLING-SLICE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	GAP	GAP	Mark a system-flagged message as safe instead of reporting it	the cost-0 table names the four ids in its own cell
+N 152	HELP-CENTER-FORM	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Report harassment or a safety concern	all three retired and all three flipped
+N 153	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide a network update from your feed	no committed source names this row against any blocker
+N 154	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide a single post from your feed without unfollowing its author	no committed source names this row against any blocker
+N 160	OWNED-BY-A-SIBLING-SLICE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L296,L537,L647	GAP	GAP	Send, receive and manage message requests	the cost-0 table names the four ids in its own cell
+N 161	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for groups by name or keyword	no committed source names this row against any blocker
+N 162	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Browse groups recommended from attributes you share with their members	no committed source names this row against any blocker
+N 163	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Request to join a group	no committed source names this row against any blocker
+N 164	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Join a group by responding to an invitation from a member or manager	no committed source names this row against any blocker
+N 165	GROUPS-SURFACE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L402	GAP	GAP	View the full member list of a group you belong to	"the only member directory this server could plausibly reach ... (N 165, a group's member list)". PARTIAL -- one of a published 32
+N 166	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a connection invitation to a fellow group member from inside the group	no committed source names this row against any blocker
+N 167	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a message request to a group member you are not connected to	no committed source names this row against any blocker
+N 168	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to join a group you are merely a member of	no committed source names this row against any blocker
+N 169	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter the connections you invite by location, company, school and industry	no committed source names this row against any blocker
+N 170	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Allow or prevent other group members from messaging you	no committed source names this row against any blocker
+N 171	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Expose your profile to every member of a group you join	no committed source names this row against any blocker
+N 172	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View a fellow group member's connections only after connecting with them	no committed source names this row against any blocker
+N 173	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Access the list of groups you belong to	no committed source names this row against any blocker
+N 174	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the groups you have requested to join	no committed source names this row against any blocker
+N 175	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Reach a private unlisted group through a direct link or an invitation	no committed source names this row against any blocker
+N 176	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Prevent your network being updated when you join a group	no committed source names this row against any blocker
+N 177	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Find people you know through shared group membership	no committed source names this row against any blocker
+N 178	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See which groups a member belongs to before connecting	no committed source names this row against any blocker
+N 179	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Search for events by keyword and filter results to the Events tab	no committed source names this row against any blocker
+N 180	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See events recommended from your interests, Pages you follow, and what your network is attending	no committed source names this row against any blocker
+N 181	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Find events hosted by Pages you follow	no committed source names this row against any blocker
+N 182	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Accept or ignore an event invitation	no committed source names this row against any blocker
+N 183	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Receive event invitations only from your 1st-degree connections	no committed source names this row against any blocker
+N 184	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Reach an event through its URL after it has been shared with you	no committed source names this row against any blocker
+N 185	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Attend an event you accepted	no committed source names this row against any blocker
+N 186	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your 1st-degree connections to an event you are attending	no committed source names this row against any blocker
+N 187	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Filter your invitee list by location, company, school and industry	no committed source names this row against any blocker
+N 188	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View the complete attendee list of an event	no committed source names this row against any blocker
+N 189	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	See which of your 1st-degree connections have confirmed attendance, without attending yourself	no committed source names this row against any blocker
+N 190	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide your own attendance from non-attending 1st-degree connections	no committed source names this row against any blocker
+N 191	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Message attendees who are already your connections	no committed source names this row against any blocker
+N 192	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Reach attendees who are not your connections via InMail	no committed source names this row against any blocker
+N 193	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Share an event you are attending with your network	no committed source names this row against any blocker
+N 194	HASHTAG-EXISTENCE	LEDGER-AMENDMENT	_audit/2026-09-03-linkedin-gap-blockers.md	L1251,L1279	GAP	GAP	Find hiring managers through the #Hiring hashtag in search	A13 re-files N 194 out of this blocker into SEARCH-RESULTS-SURFACE
+N A10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Invite your connections to a group you own or manage	no committed source names this row against any blocker
+N A11	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Message an individual group member as owner or manager	no committed source names this row against any blocker
+N A12	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Send a message request as a group admin to a member you are not connected to	no committed source names this row against any blocker
+N A13	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Privately message any event attendee as the organizer, without being connected	no committed source names this row against any blocker
+N A14	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Remove an attendee from an event you organize	no committed source names this row against any blocker
+N A15	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Withdraw an event invitation before the invitee responds	no committed source names this row against any blocker
+P A9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Additional-name visibility	no committed source names this row against any blocker
+P B4	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Profile photo visibility audience	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P B7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	#Hiring photo frame apply / remove	no committed source names this row against any blocker
+P B8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Top Voice badge show / hide	no committed source names this row against any blocker
+P B9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Premium profile badge show / hide	no committed source names this row against any blocker
+P C2	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Customise the public profile URL	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P C3	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Public profile visibility master switch	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P C4	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Per-section public visibility toggles	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P C5	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Search-engine visibility of the public profile	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P C6	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L118	GAP	GAP	Unlink a prior public URL	section 2a table; letter inherited across the run P B4 C2 C3 C4 C5 C6
+P C8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Save profile as a PDF	no committed source names this row against any blocker
+P E6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide / show an endorsement received	no committed source names this row against any blocker
+P E7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Endorsements received	no committed source names this row against any blocker
+P F1	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Recommendations received	no committed source names this row against any blocker
+P F2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Request a recommendation	no committed source names this row against any blocker
+P F6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Accept or dismiss a recommendation received	no committed source names this row against any blocker
+P F7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Ask for a revision of one received	no committed source names this row against any blocker
+P F8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Decline a requested recommendation	no committed source names this row against any blocker
+P F9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Hide / unhide recommendations on the profile	no committed source names this row against any blocker
+P G2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Activity section default view	no committed source names this row against any blocker
+P G6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Per-post analytics	no committed source names this row against any blocker
+P G7	UNASSIGNED	UNASSIGNED	-	-	GAP	COVERED-PROVEN	Profile search appearances	no committed source names this row against any blocker
+P H1	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create a Service Page / add services	no committed source names this row against any blocker
+P H2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Service categories and specific services	no committed source names this row against any blocker
+P H3	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Service Page About / expertise text	no committed source names this row against any blocker
+P H4	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Work location and remote availability	no committed source names this row against any blocker
+P H5	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Starting rate or contact-for-pricing	no committed source names this row against any blocker
+P H6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Edit the Service Page	no committed source names this row against any blocker
+P H7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Unpublish the Service Page	no committed source names this row against any blocker
+P H8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Link / unlink the Service Page to a Company Page	no committed source names this row against any blocker
+P H9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Request service reviews (up to 20 invitations)	no committed source names this row against any blocker
+P J1	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Turn on #Hiring / share that you are hiring	no committed source names this row against any blocker
+P J2	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	#Hiring photo frame add / remove	no committed source names this row against any blocker
+P J3	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Which job the #Hiring frame links to	no committed source names this row against any blocker
+P J4	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Current #Hiring state	no committed source names this row against any blocker
+P K8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Top Voice blue badge on the profile	no committed source names this row against any blocker
+P K9	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Show / hide the Top Voice badge	no committed source names this row against any blocker
+P L1	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Creator analytics / audience analytics	no committed source names this row against any blocker
+P L2	PARSER-ON-A-LOADED-PAGE	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L442	GAP	MEASURED-ABSENT	Own follower count and follower list	"the cheapest BUILD in the document" names both rows
+P L3	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create / edit / delete a newsletter	no committed source names this row against any blocker
+P L4	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Newsletter analytics	no committed source names this row against any blocker
+P L5	LIVE-BROADCAST	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Host a LinkedIn Live	both retired, both flipped
+P L6	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Audio events	no committed source names this row against any blocker
+P L7	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"Ideas for your next post"	no committed source names this row against any blocker
+P L8	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Analytics and tools hub	no committed source names this row against any blocker
+P O3	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	WVYP Premium insights and filters	no committed source names this row against any blocker
+P O5	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L120	GAP	GAP	Public profile badge creation	section 2a table, /badges/profile/create row
+P A14	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Postal code	no committed source names this row against any blocker
+P A15	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Location display choice	no committed source names this row against any blocker
+P A22	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Primary Position(s) -- which current role shows in the intro	no committed source names this row against any blocker
+P A23	MOBILE-APP-ONLY	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Name pronunciation audio	sole row, retired, flipped
+P A24	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	ID name as additional name	no committed source names this row against any blocker
+P A25	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Contact info panel	no committed source names this row against any blocker
+P A26	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Website on profile	no committed source names this row against any blocker
+P A27	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Phone number on profile	no committed source names this row against any blocker
+P A28	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Instant messenger accounts on profile	no committed source names this row against any blocker
+P A29	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Birthday on profile, and its visibility	no committed source names this row against any blocker
+P B10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Open Profile setting (who may message without connecting)	no committed source names this row against any blocker
+P D24	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Open to volunteering	no committed source names this row against any blocker
+P D25	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"Add profile section" menu contents	no committed source names this row against any blocker
+P D27	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Create / delete a secondary-language profile	no committed source names this row against any blocker
+P D28	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	View a profile in multiple languages	no committed source names this row against any blocker
+P D29	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Add a LinkedIn Learning certificate of completion to the profile	no committed source names this row against any blocker
+P H10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Turn off / manage services reviews	no committed source names this row against any blocker
+P H11	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	"Providing services" section as rendered on the profile	no committed source names this row against any blocker
+P I13	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Minimum pay preference	no committed source names this row against any blocker
+P I14	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Signal interest in working for a company	no committed source names this row against any blocker
+P I15	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Remove interest in working for a company	no committed source names this row against any blocker
+P I16	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Share how you found your job	no committed source names this row against any blocker
+P K10	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Verification badge as it appears on job posts	no committed source names this row against any blocker
+P M11	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Resume Builder	no committed source names this row against any blocker
+P M12	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Resume Tips (AI resume feedback)	no committed source names this row against any blocker
+P N12	FORBIDDEN-CLASS-FIX-LANDED	LEDGER-EXPLICIT	_audit/2026-09-03-linkedin-gap-blockers.md	L119	GAP	GAP	Keep me logged in / auto sign-in	section 2a table, /uas/login row
+P N13	SIGNIN-INTERSTITIAL	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Sign-in security prompt / email code / CAPTCHA	sole row, retired, flipped
+P N14	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Identity verification for account recovery (Persona)	no committed source names this row against any blocker
+P N25	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	LinkedIn Services (DMA) connect / disconnect	no committed source names this row against any blocker
+P N30	HELP-CENTER-FORM	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Deceased member -- request account closure	all three retired and all three flipped
+P N31	HELP-CENTER-FORM	RECON-CENSUS-COMMITTED	_audit/2026-09-05-decide-retire-rulings.md	S1,990bbd3	GAP	EXCLUDED-RULED	Deceased member -- request memorialization	all three retired and all three flipped
+P O23	UNASSIGNED	UNASSIGNED	-	-	GAP	GAP	Whether a photo, banner or headline change notifies the network	no committed source names this row against any blocker
