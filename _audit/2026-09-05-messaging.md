@@ -268,9 +268,19 @@ Recomputed at freeze, not re-read from the sections above.
     file                  tests/test_the_needle_is_matched_as_a_bare_substring.py
                           430 lines, 7 tests
     tests                 7 passed, 18.21s
+                          26 passed with tests/test_send_message_gate.py at
+                          the tree as it stood at close, 90.69s -- re-run
+                          because other waves committed to the modules this
+                          file imports while it was being written
     identity guards       602 passed, 3 failed, 0 naming this file
-    exact-value sweep     PASS, 0 hits across 326 swept files (taken AT THE
-                          GATE, not at wave start)
+    exact-value sweep     TWO readings, and the ORDERING is the point:
+                            first   PASS, 0 hits across 326 swept files
+                            at close PASS, 0 hits across 330 swept files
+                          The corpus grew by 4 files between them. The second
+                          is the one that says anything about the tree this
+                          wave closed on; the first would have been a reading
+                          about a tree that no longer existed. My two files
+                          appear in 0 hits in both.
     page loads            0
     writes fired          0
     boundary changes      0
