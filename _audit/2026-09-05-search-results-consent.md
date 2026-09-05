@@ -6,6 +6,8 @@ be made in two minutes, consistently with the two he has already made.**
 
 ---
 
+**CORRECTED BY:** `_audit/2026-09-05-search-results-measured.md` -- the instrument this document says has never been read WAS read at 14:24 the same day (LOAD A, headline 108, twice, stable), and taking it did not produce the evidence the fork below promised: the counter's caption came back redacted, which class of search feeds it is open, and the AFTER half needs the very act this ruling gates
+
 ## 0. THE SENTENCE THAT GOES FIRST
 
 **I could not establish that opening a people-search results page leaves the
