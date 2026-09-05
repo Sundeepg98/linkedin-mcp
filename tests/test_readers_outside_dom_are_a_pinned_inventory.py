@@ -66,6 +66,18 @@ KNOWN_UNWIRED: dict[str, str] = {
         "made the scope gap above measurable rather than theoretical, since "
         "two independent waves reached the same state on the same day."
     ),
+    "notify_cost.read_notifications_badge": (
+        "Built 2026-09-05 by the settings-tail wave, and unwired BY DESIGN "
+        "rather than by omission. Its probe calls it; no tool does. The "
+        "place it belongs is inside linkedin_notifications, recording the "
+        "badge either side of the load so the side effect that tool already "
+        "declares becomes a measurement instead of a sentence dated "
+        "2026-08-21 and taken by hand. That edit lands in server.py, changes "
+        "a shipped tool's behaviour, and was not something to do in the last "
+        "twenty minutes of a session ten waves were writing in -- so the "
+        "reader ships measured and idle, and this line is how the next "
+        "person finds it rather than rebuilding it."
+    ),
 }
 
 
