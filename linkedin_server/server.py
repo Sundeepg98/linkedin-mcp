@@ -2413,22 +2413,59 @@ async def linkedin_search_jobs(
     Runs the search LinkedIn's own jobs page runs and reads the rendered
     results: title, company, location, job id and link.
 
-    One page load per call, no scrolling and no auto-paging -- LinkedIn puts
-    roughly 25 results on a page, so ask for the next page deliberately with
-    start=25, start=50 and so on. capped in the result tells you the limit
-    trimmed the rows, and page_had tells you how many the page actually held.
+    One page load per call, no scrolling and no auto-paging. capped in the
+    result tells you the limit trimmed the rows, and page_had tells you how
+    many the page actually held.
+
+    THE WINDOW IS SEVEN POSTINGS PER CALL, AND THAT IS A MEASUREMENT, NOT A
+    LIMIT YOU SET. Every load returns the seven job cards this reader can see
+    in the rendered page, whatever limit you ask for: measured 2026-09-05 over
+    seventeen live loads spanning two professions, two cities, five filters and
+    three job-type values, and it was seven every single time. On one of those
+    queries LinkedIn's own count was 2915. The cards beyond the seventh are not
+    in the DOM this read sees -- the harvest keyed 7 of the 9 job anchors
+    present, refused none, dropped none for empty text, and gained nothing when
+    the same page was re-read six seconds later. So it is not a limit, not the
+    parser and not a timing race; the rest of the list is not there to be read.
+
+    SO PAGE WITH start=7, NOT start=25. Three loads at start=0, 7 and 14
+    returned 21 DISTINCT postings with zero overlap, against a drift floor of
+    zero measured in the same session by re-taking the unchanged query last.
+    start offsets by ONES. This docstring used to prescribe start=25, start=50
+    "and so on" on the belief that a page holds 25; at a window of seven that
+    advice silently skips eighteen postings out of every twenty-five, and a
+    shortlist built on it is missing three quarters of itself without anything
+    saying so. Measured, corrected, and the evidence is in
+    scripts/_probe_job_search_paging_stride.py.
 
     Note that LinkedIn records searches in your own recent-search history,
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
-    ONE LOCATION, NOT SEVERAL. LinkedIn's own search accepts more than one
-    location at a time and this tool takes a single string. That is a known
-    missing capability rather than an oversight, and it is missing for a
-    reason worth stating: nobody here has measured HOW LinkedIn spells a
-    second location in a url, and the plausible spellings disagree about which
-    city you would get. A guessed encoding does not fail loudly -- it silently
-    searches somewhere else -- so it is left out until it is measured.
+    ONE LOCATION, NOT SEVERAL, AND THAT IS NOW A MEASURED REFUSAL RATHER THAN
+    AN UNMEASURED OMISSION. LinkedIn's own search accepts more than one
+    location and this tool takes a single string. This docstring used to say
+    "nobody here has measured HOW LinkedIn spells a second location in a url"
+    and predicted that a guessed encoding "does not fail loudly -- it silently
+    searches somewhere else". Both plausible spellings were measured live on
+    2026-09-05 and the prediction was exactly right:
+
+    * ``location=A%2C%20B`` (comma-joined) -- LinkedIn KEEPS the pair and
+      returns seven postings of which ZERO are among A's distinctive results
+      and ZERO are among B's. It is not the union, not A and not B: the
+      comma-joined string geocodes to somewhere neither search reaches. This
+      is the silent-wrong-city failure, caught by the only channel that can
+      see it.
+    * ``location=A&location=B`` (the key repeated) -- LinkedIn STRIPS the
+      first and serves B alone. A caller asking for two cities gets one, and
+      not the one they wrote first.
+
+    Both spellings are therefore WRONG rather than unmeasured, and neither
+    ships. Reaching two cities honestly needs LinkedIn's numeric place ids,
+    which a posting does not carry and which only a second page load could
+    resolve -- so it is a second-load capability, not a parameter, and it is
+    left out on that ground. Two searches, one per city, is the correct route
+    today. Evidence: scripts/_probe_job_search_result_sets.py, pass two.
 
     Args:
         keywords: what to search for, e.g. "senior node.js engineer".
@@ -2449,8 +2486,13 @@ async def linkedin_search_jobs(
         fair_chance_employer: only employers who have declared themselves
             open to applicants with a criminal record.
         sort_by: relevance | date.
-        start: result offset for manual paging (0, 25, 50 ...).
-        limit: maximum rows to return (default 25, max 50).
+        start: result offset for manual paging, in POSTINGS not pages
+            (0, 7, 14, 21 ...). Measured to offset by ones; the window is
+            seven, so a stride of seven tiles the list with no gap and no
+            repeat. See the paging note above before using any other stride.
+        limit: maximum rows to return (default 25, max 50). NOTE that the
+            window is seven, so a limit above seven has never yet trimmed
+            anything -- page_had is the number to read, not capped.
     """
     limit = _clamp(limit, SEARCH_DEFAULT_LIMIT, SEARCH_MAX_LIMIT)
     try:
@@ -2703,6 +2745,44 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     the five captures held here, because LinkedIn draws that panel for some
     employers and not others; that is the normal case and not a failure.
 
+    company_about IS THE EMPLOYER ITSELF, AND IT COMES FROM A SURFACE THIS
+    SERVER CANNOT OPEN. followers, industry, size_band and on_linkedin are
+    capabilities the surface census files against the company Page -- a
+    THIRD PARTY'S page, not on the read allowlist, and one whose view cost
+    nobody here has measured. LinkedIn draws all four on this posting's own
+    About-the-company card, so they arrive at no extra page load, no
+    boundary change, and no visit to that Page.
+
+    size_band AND on_linkedin ARE TWO DIFFERENT FACTS AND WILL DISAGREE.
+    size_band is the range the organisation DECLARED ('51-200'); on_linkedin
+    is how many member profiles LinkedIn ATTRIBUTES to it (304 on the same
+    capture). Neither is wrong. A reader that wants "how big is this company"
+    should say which of the two it means.
+
+    IT IS A VERDICT, LIKE company_id, and its middle states are the useful
+    ones. 'unhydrated' means the card's container was on the page holding no
+    text -- a fact about when it was read, NOT the claim that this employer
+    has no followers. 'partial' means some fields parsed and the rest are
+    null with a why rather than guessed. 'unnamed' means the card did not
+    open by naming this posting's employer, and then NOTHING off it is
+    reported.
+
+    THE DESCRIPTION IS COUNTED AND NEVER PUBLISHED. description_lines,
+    description_chars and description_words tell a company that wrote three
+    paragraphs from one that wrote none; the prose itself is withheld,
+    because it is the only field on this card a person's name can appear
+    inside and no shaper in this package can detect one.
+    description_truncated says whether LinkedIn had already collapsed it
+    behind 'Show more', so the character count is not read as the full
+    length.
+
+    interest_control REPORTS A WRITE THAT WAS NOT FIRED. LinkedIn draws an
+    "I'm interested" control on this card -- the census's own J 86 / P I14,
+    "privately signal interest in a company". This server does not press it
+    and offers no tool that does. The flag exists because "this write has no
+    surface" and "this write has a surface nobody has fired" are different
+    rows, and only the second is true.
+
     A field the page did not carry comes back null rather than blank. If the
     page did not render the posting at all the call FAILS instead of
     returning an empty one: LinkedIn serves the document title before the
@@ -2887,6 +2967,41 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             )
             out["company_id"] = shape.company_id_from_insight_cards(
                 id_cards, company=identity.get("company")
+            )
+
+            # THE EMPLOYER'S FOLLOWER COUNT, INDUSTRY, SIZE BAND AND LINKEDIN
+            # HEADCOUNT -- FOUR CAPABILITIES THE CENSUS FILED UNDER A SURFACE
+            # THIS SERVER CANNOT OPEN.
+            #
+            # `COMPANY-PAGE-SURFACE` scores 18 rows and every one of them is
+            # blocked on putting `/company/` on the read allowlist. Four of
+            # its thirteen READS do not need it: LinkedIn draws them on the
+            # posting's own About-the-company card, on `/jobs/view/<id>` --
+            # already on readonly._ALLOWED_URL_PATTERNS, already loaded here.
+            # So they cost NO extra page load, NO boundary change, and no
+            # visit to a company's own surface.
+            #
+            # THAT LAST CLAUSE IS THE POINT, not a bonus. A company Page is a
+            # third party's surface and nothing in this repository has
+            # measured what opening one costs: the instrument that proved the
+            # member-profile emission is linkedin_who_viewed_me, a per-member
+            # viewer list this account holds, and the organisation-side
+            # equivalent is a Page ADMIN analytics surface. The Manage Pages
+            # capture carries 58 Pages and zero admin markers, so that
+            # instrument is not reachable from this account and the cost of a
+            # Page view is UNMEASURED here -- which is not the same as zero.
+            # Reading these four off a page he already opened sidesteps the
+            # question rather than answering it, and that is the honest
+            # description of what this does.
+            #
+            # THE PARSE IS IN shape.py AND SO IS THE RULING ABOUT THE
+            # DESCRIPTION. The card's tail is the organisation's own free
+            # prose -- the only field here a person's name can appear inside
+            # -- and census_substitute was measured on 2026-09-05 returning a
+            # person's name unchanged. It is counted and not published.
+            about = await dom.read_company_about_card(page)
+            out["company_about"] = shape.company_about_card(
+                about, company=identity.get("company")
             )
 
             out["pages_loaded"] = 1

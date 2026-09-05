@@ -909,6 +909,127 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# The About-the-company card, on the posting that is already open
+# ---------------------------------------------------------------------------
+
+#: WHY THIS IS A DEDICATED READ AND NOT A CALL TO ``harvest_linked_cards``,
+#: which is what it was written as first.
+#:
+#: The card is ANCHORED on a ``/company/`` link that wraps the employer's name
+#: and its follower count. The industry, the self-declared size band and the
+#: "N on LinkedIn" line are SIBLINGS of that anchor, one level up. So the
+#: obvious implementation is the generic card walk with a ``/company/``
+#: pattern -- and it cannot work, for a reason that is in the walk rather than
+#: in the depth.
+#:
+#: MEASURED over the four tracked ``job_detail*`` fixtures at six depths
+#: (1, 2, 3, 4, 6, 8 -- ``_audit/_scratch/_probe_company_about_hops.py``):
+#: the card anchored on the ``/company/.../life/`` link is **16 characters at
+#: every one of them** and carries none of the three fields at any depth. The
+#: cause is ``HARVEST_LINKED_CARDS_JS``'s own stop rule,
+#: ``if (keysWithin(node).size > 1) break``: the About section holds TWO
+#: distinct ``/company/`` targets -- the name link and the Premium-insights
+#: link -- so the climb halts at the anchor itself, before it ever reaches the
+#: element the meta lines hang off. That separation is correct and deliberate,
+#: because it is what keeps two cards from merging into one. It simply means
+#: this card is not a card in that walk's sense, and raising ``max_hops``
+#: cannot reach it -- the walk is not stopping because it ran out of budget.
+#:
+#: THE ANCHORS ARE LINKEDIN'S OWN, read off the fixtures rather than guessed,
+#: and there are two because they do not appear at the same moment:
+#:
+#:     componentkey="JobDetails_AboutTheCompany_<job id>"   5 of 6 captures
+#:     data-sdui-component="...aboutTheCompanyForJobDetails" 4 of 6 captures
+#:
+#: The ``componentkey`` container is present on ``job_detail_following.html``
+#: while the SDUI attribute is not, AND THAT CAPTURE'S CONTAINER IS EMPTY --
+#: a skeleton with a ``width:24rem`` shimmer bar and no text at all. So the
+#: earlier anchor finds a box before LinkedIn has put anything in it, and a
+#: reader that used it alone would report an employer with no follower count
+#: and no industry as a FACT about the employer. It is a fact about the
+#: hydration state, and :func:`read_company_about_card` returns the two
+#: separately for exactly that reason.
+#:
+#: The suffix match on the SDUI name is deliberate: the full attribute is
+#: ``com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheCompanyForJobDetails``
+#: and the generated prefix is LinkedIn's build detail, not its contract. The
+#: same file already waits on ``...dsl.impl.aboutTheJob`` for hydration, so
+#: this is the anchor family this page is already read through.
+ABOUT_COMPANY_CONTAINER = 'div[componentkey^="JobDetails_AboutTheCompany"]'
+
+#: The corroborating anchor. Present LATER than the one above, so its absence
+#: is evidence about hydration and never about the employer.
+ABOUT_COMPANY_SDUI = '[data-sdui-component$="aboutTheCompanyForJobDetails"]'
+
+#: Cap on the lines returned, so a page that renders an unusually long company
+#: description cannot make this read unbounded. The card is nine lines of
+#: chrome plus a description on every capture held here; forty is generous
+#: and finite.
+ABOUT_COMPANY_MAX_LINES = 40
+
+
+async def read_company_about_card(page: Any) -> dict[str, Any]:
+    """Return the About-the-company card's OBSERVATIONS, deciding nothing.
+
+    A plain Playwright ``inner_text`` read of a container LinkedIn labels
+    itself. No script is injected, nothing is evaluated, no control is
+    pressed, and no page is loaded -- this reads the render
+    ``linkedin_job_detail`` has already performed.
+
+    Returns ``container``, ``sdui``, ``lines`` and ``error``. WHICH LINE IS
+    THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED HERE; that is
+    ``shape.company_about_card``'s job, where it can be tested without a
+    browser. The three-way distinction this function exists to preserve:
+
+        container False              -- LinkedIn drew no such card
+        container True,  lines []    -- the card is a skeleton, not yet filled
+        container True,  lines [...] -- there is something to parse
+
+    The middle case is the one worth the extra field. It looks identical to
+    "this employer has no follower count" in any shape that returns only a
+    list, and this repository has already paid for that confusion once, on a
+    harvest that could not tell "no anchor on the page" from "every anchor
+    discarded".
+    """
+    out: dict[str, Any] = {
+        "container": False,
+        "sdui": False,
+        "lines": [],
+        "error": None,
+    }
+
+    try:
+        container = page.locator(ABOUT_COMPANY_CONTAINER).first
+        found = int(await container.count())
+    except Exception as exc:
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("about-the-company container unreadable: %s", out["error"])
+        return out
+
+    if not found:
+        return out
+    out["container"] = True
+
+    try:
+        out["sdui"] = bool(await page.locator(ABOUT_COMPANY_SDUI).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("sdui marker unreadable: %s: %s", type(exc).__name__, exc)
+
+    try:
+        text = str(
+            await container.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS) or ""
+        )
+    except Exception as exc:
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("about-the-company text unreadable: %s", out["error"])
+        return out
+
+    lines = [line.strip() for line in text.splitlines()]
+    out["lines"] = [line for line in lines if line][:ABOUT_COMPANY_MAX_LINES]
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Save state
 # ---------------------------------------------------------------------------
 

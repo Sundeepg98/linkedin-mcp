@@ -3304,6 +3304,307 @@ def company_id_from_insight_cards(
 
 
 # ---------------------------------------------------------------------------
+# The About-the-company card, off the same posting
+# ---------------------------------------------------------------------------
+
+#: THE BULLET LINKEDIN SEPARATES THE META ROW WITH, and it is NOT
+#: :data:`MIDDLE_DOT`. Measured off ``dom.read_company_about_card`` over the
+#: tracked fixtures: this row uses U+2022 BULLET where the Open-To-Work line
+#: uses U+00B7 MIDDLE DOT. Two constants because they are two characters; one
+#: constant reused would be a guess that happened to be wrong.
+ABOUT_BULLET = chr(0x2022)
+
+#: U+2019 RIGHT SINGLE QUOTATION MARK -- the apostrophe LinkedIn draws in
+#: "I'm interested". Named as a code point rather than typed, so every source
+#: file in this package stays pure ASCII: the operator's console is cp1252 and
+#: this repository has already shipped one file that broke on being copied
+#: through it.
+APOSTROPHE = chr(0x2019)
+
+#: ``5,288,656 followers``. The digits are grouped by LinkedIn and the group
+#: separator is stripped before the value is returned as an int. ``N`` is
+#: admitted in the run because the tracked fixtures are SANITISED that way
+#: (``NNN,NNN followers``) -- a sanitised capture must still exercise the
+#: parser, or the fixture tests measure a different function from the one
+#: production runs. A capture that sanitised to letters yields ``None`` with
+#: a why rather than a wrong number.
+_ABOUT_FOLLOWERS = re.compile(r"^([\d,N]+)\s+followers$", re.I)
+
+#: ``51-200 employees`` / ``10001+ employees``. LinkedIn's own size BANDS,
+#: which the organisation picks from a closed list -- not a headcount, and
+#: deliberately not conflated with one. On the tracked capture the band says
+#: ``51-200`` while the LinkedIn headcount below it says ``304``: the band is
+#: what the company declared, the headcount is what LinkedIn counted, and a
+#: reader that folded them into one "size" field would publish a contradiction
+#: as a fact.
+_ABOUT_SIZE_BAND = re.compile(r"^(\d[\d,]*\s*-\s*\d[\d,]*|\d[\d,]*\+)\s+employees$", re.I)
+
+#: ``304 on LinkedIn`` -- the number of member profiles LinkedIn attributes to
+#: the organisation. This is the census's ``N 101`` capability, "list an
+#: organisation's employees via its employee count", in its READ half only:
+#: it is a COUNT of people and never a list of them.
+_ABOUT_ON_LINKEDIN = re.compile(r"^([\d,]+)\s+on LinkedIn$", re.I)
+
+#: The two words the follow control on this card wears. Read as a STATE, not
+#: pressed: ``dom.read_follow_line`` is what interrogates the control itself.
+_ABOUT_FOLLOW_STATE = re.compile(r"^(Follow|Following)$")
+
+#: WHAT AN INDUSTRY MAY LOOK LIKE, and why this is a refusal rather than a
+#: passthrough. The industry is picked by the organisation from LinkedIn's own
+#: taxonomy, so it is a SELECTION and not free text -- but nothing here can
+#: prove that list is closed, and the slot is one line in a card whose other
+#: lines are a company's own prose. So the value is published only when it
+#: has the shape of a taxonomy label; anything else returns ``None`` with a
+#: why naming the shape it failed. Refusing an unexpected string costs an
+#: industry; publishing one costs whatever was in that slot.
+_ABOUT_INDUSTRY = re.compile(r"^[A-Za-z0-9 ,&/()\.\-]{2,80}$")
+
+#: LinkedIn's control for privately signalling interest in an employer -- the
+#: census's ``J 86`` / ``P I14``. Its apostrophe is U+2019, not U+0027, which
+#: is why this is a pattern rather than a literal. IT IS NEVER PRESSED HERE.
+#: :func:`company_about_card` reports only that the card DREW it, because
+#: "this write has no surface" and "this write has a surface nobody has fired"
+#: are different rows and only the second one is true.
+_ABOUT_INTEREST_CONTROL = re.compile(
+    "^I\\s*['" + APOSTROPHE + "]\\s*m\\s+interested$", re.I
+)
+
+#: The disclosure that truncates the description. Its presence means the
+#: description on the render is PARTIAL, which is the same class as the
+#: collapsed match-details panel: pressing a disclosure control is a different
+#: permission from reading a render, and this function does neither.
+_ABOUT_SHOW_MORE = re.compile(r"^Show more$", re.I)
+
+#: How many lines of chrome precede the description. The meta row ends at the
+#: "N on LinkedIn" line, so everything after it is the company's own prose
+#: plus LinkedIn's interest-control copy.
+_ABOUT_META_TAIL_OFFSET = 2
+
+
+def _about_int(raw: str) -> Optional[int]:
+    """``"5,288,656"`` -> ``5288656``; a sanitised ``"NNN,NNN"`` -> ``None``."""
+    digits = raw.replace(",", "").strip()
+    return int(digits) if digits.isdigit() else None
+
+
+def company_about_card(
+    observation: dict[str, Any], *, company: Optional[str]
+) -> dict[str, Any]:
+    """The employer's follower count, industry, size band and LinkedIn headcount.
+
+    ``observation`` is what :func:`dom.read_company_about_card` returned off
+    the posting page ``linkedin_job_detail`` has already loaded. ``company``
+    is the employer name ``dom.read_job_identity`` read out of the page's own
+    ``aria-label="Company, <name>"``, and it is REQUIRED for the same reason
+    the id resolver requires it: a card read off the wrong container should
+    return nothing rather than another organisation's numbers.
+
+    NO COMPANY PAGE IS OPENED. Four capabilities the census files under
+    ``COMPANY-PAGE-SURFACE`` -- a Page's follower count, its industry, its
+    size and its LinkedIn headcount -- render on ``/jobs/view/<id>``, an
+    address already on ``readonly._ALLOWED_URL_PATTERNS`` and already loaded
+    by this tool. So they cost no page load, no boundary change, and no visit
+    to a surface belonging to somebody other than him.
+
+    THE STATES, and the middle two are the point:
+
+        absent        LinkedIn drew no About-the-company card
+        unhydrated    the card is a skeleton -- a container with no text.
+                      NOT "this employer has no follower count"; measured on
+                      ``job_detail_following.html``, where the container is
+                      present, the SDUI attribute is not, and the card holds
+                      a shimmer bar
+        unnamed       the card does not open by naming the employer the
+                      posting identified, so it is not this employer's card
+        partial       named, but at least one meta field did not parse
+        read          named, and all four meta fields parsed
+
+    THE META ROW IS MATCHED AS A ROW, NOT AS FOUR INDEPENDENT LINES. LinkedIn
+    draws it as ``<industry> BULLET <size band> BULLET <N on LinkedIn>``, and
+    the industry is the only one of the three with no pattern of its own -- it
+    is a label, and a label matched by position alone is whatever happens to
+    sit in that slot. So the size band is found by its own pattern first, and
+    the industry is read at a fixed offset from it ONLY IF the two bullets and
+    the headcount line are exactly where the row shape says they are. When
+    they are not, the industry is ``None`` with a why, and the neighbouring
+    fields are unaffected.
+
+    WHY A PARTIAL ANSWER IS ALLOWED HERE AND IS NOT ALLOWED BY
+    :func:`company_id_from_insight_cards`. That function feeds a WRITE that
+    unfollows and a FILTER that searches, where a wrong value is worse than
+    none, so it has one resolved state and no partial. This one feeds a human
+    deciding whether an application is worth his afternoon. A follower count
+    without an industry is a smaller answer, not a dangerous one -- so each
+    field refuses on its own and ``state`` says how many did.
+
+    THE DESCRIPTION IS MEASURED AND NOT PUBLISHED, and that is a ruling rather
+    than an oversight. The card's tail is the organisation's own free prose,
+    it is the only field here a person's name can appear inside, and no
+    instrument in this package can clear it: ``census_substitute`` was
+    measured on 2026-09-05 to return a person's name UNCHANGED, because a name
+    carries no urn, no ``/in/`` path and no digit run for a shape rule to
+    catch. ``membership_row`` already ships that defect and it is recorded as
+    a known one; adding a second instance today would be indefensible when the
+    field costs nothing to withhold. So this returns the description's line
+    count, character count and word count -- enough to tell a company that
+    wrote three paragraphs from one that wrote none -- and none of its text.
+    ``description_truncated`` says whether LinkedIn had already collapsed it
+    behind *Show more*, so a caller cannot read the character count as the
+    length of the whole thing.
+    """
+    if not (observation or {}).get("container"):
+        return {
+            "state": "absent",
+            "why": "this posting drew no About-the-company card",
+            "followers": None,
+            "industry": None,
+            "size_band": None,
+            "on_linkedin": None,
+            "follow_state": None,
+            "description_lines": 0,
+            "description_chars": 0,
+            "description_words": 0,
+            "description_truncated": False,
+            "interest_control": False,
+        }
+
+    lines = [str(line) for line in (observation.get("lines") or [])]
+
+    out: dict[str, Any] = {
+        "state": "read",
+        "why": "",
+        "followers": None,
+        "industry": None,
+        "size_band": None,
+        "on_linkedin": None,
+        "follow_state": None,
+        "description_lines": 0,
+        "description_chars": 0,
+        "description_words": 0,
+        "description_truncated": any(_ABOUT_SHOW_MORE.match(x) for x in lines),
+        "interest_control": any(_ABOUT_INTEREST_CONTROL.match(x) for x in lines),
+    }
+
+    if not lines:
+        out["state"] = "unhydrated"
+        out["why"] = (
+            "the About-the-company container is on the page and holds no text, "
+            "so the card had not been filled in when it was read; this is a "
+            "reading about hydration and not about the employer"
+        )
+        return out
+
+    wanted = str(company or "").strip()
+    if not wanted:
+        out["state"] = "unnamed"
+        out["why"] = (
+            "the posting did not name its employer, so the card that was found "
+            "has nothing to be checked against"
+        )
+        return out
+
+    # THE NAME MUST BE ON THE CARD'S OWN OPENING LINES, not anywhere in it.
+    # The description names other organisations -- the tracked capture lists
+    # five of them in one sentence -- so "does this card mention the employer"
+    # is true of a card belonging to somebody else. Only the heading and the
+    # name line are consulted.
+    head = [_WS.sub(" ", x).strip().casefold() for x in lines[:2]]
+    if not any(x == wanted.casefold() for x in head):
+        # EVERY observation is dropped, not merely the numbers. The two
+        # booleans above were computed before this check and would otherwise
+        # survive it -- and "the interest control is drawn" said about a card
+        # this function has just disowned is a claim about a page it declined
+        # to attribute. A refusal that keeps some of its findings is the
+        # half-applied shape this repository has now been bitten by twice.
+        out.update(
+            {
+                "state": "unnamed",
+                "description_truncated": False,
+                "interest_control": False,
+                "why": (
+                    f"the card found on this posting does not open by naming "
+                    f"{wanted!r}, so it is not this employer's card and nothing "
+                    "read off it is attributed"
+                ),
+            }
+        )
+        return out
+
+    missing: list[str] = []
+
+    for line in lines:
+        if out["followers"] is None:
+            match = _ABOUT_FOLLOWERS.match(line)
+            if match:
+                out["followers"] = _about_int(match.group(1))
+                continue
+        if out["follow_state"] is None:
+            match = _ABOUT_FOLLOW_STATE.match(line)
+            if match:
+                out["follow_state"] = match.group(1)
+
+    if out["followers"] is None:
+        missing.append("followers")
+
+    band_at = next(
+        (i for i, line in enumerate(lines) if _ABOUT_SIZE_BAND.match(line)), None
+    )
+    if band_at is None:
+        missing.extend(["size_band", "on_linkedin", "industry"])
+    else:
+        out["size_band"] = _ABOUT_SIZE_BAND.match(lines[band_at]).group(1)
+
+        # The row shape, asserted rather than assumed. Each of the three
+        # neighbours has to be what LinkedIn's row says it is, or the industry
+        # -- the one field with no pattern of its own -- is not read.
+        after = lines[band_at + 1 : band_at + 3]
+        row_is_whole = (
+            band_at >= _ABOUT_META_TAIL_OFFSET
+            and lines[band_at - 1] == ABOUT_BULLET
+            and len(after) == 2
+            and after[0] == ABOUT_BULLET
+            and bool(_ABOUT_ON_LINKEDIN.match(after[1]))
+        )
+        if not row_is_whole:
+            missing.extend(["on_linkedin", "industry"])
+        else:
+            out["on_linkedin"] = _about_int(
+                _ABOUT_ON_LINKEDIN.match(after[1]).group(1)
+            )
+            if out["on_linkedin"] is None:
+                missing.append("on_linkedin")
+            candidate = lines[band_at - _ABOUT_META_TAIL_OFFSET]
+            if _ABOUT_INDUSTRY.match(candidate):
+                out["industry"] = candidate
+            else:
+                missing.append("industry")
+
+        tail = lines[band_at + 3 :]
+        body = [
+            x
+            for x in tail
+            if not _ABOUT_SHOW_MORE.match(x) and not _ABOUT_INTEREST_CONTROL.match(x)
+        ]
+        out["description_lines"] = len(body)
+        out["description_chars"] = sum(len(x) for x in body)
+        out["description_words"] = sum(len(x.split()) for x in body)
+
+    if missing:
+        out["state"] = "partial"
+        out["why"] = (
+            "read off the posting's own About-the-company card; "
+            + ", ".join(sorted(set(missing)))
+            + " did not parse and are null rather than guessed"
+        )
+    else:
+        out["why"] = (
+            "read off the posting's own About-the-company card, which opens by "
+            f"naming {wanted!r}; no company Page was opened"
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Open To Work
 # ---------------------------------------------------------------------------
 
