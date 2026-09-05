@@ -88,9 +88,18 @@ readings and reports the result as UNMEASURABLE rather than as zero.
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Forty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortytwo_tools``; the split is pinned in
-the same file by ``test_this_modules_docstring_numbers_are_derived``, which
-reads THESE WORDS and fails if any of the three disagrees with the registry.
+``test_the_surface_is_exactly_the_fortytwo_tools``; the split is pinned by
+``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
+which reads THESE WORDS and fails if any of the three disagrees with the
+registry.
+
+**THAT CITATION WAS WRONG IN BOTH HALVES UNTIL 2026-09-05 ~22:52.** It named
+``test_this_modules_docstring_numbers_are_derived`` -- a test that does not
+exist under that name anywhere -- and placed it "in the same file", which is
+also not where it lives. The guard is REAL and was passing the whole time; the
+POINTER to it was dangling, so a reader who followed it found nothing and
+would reasonably conclude these numbers are unchecked. A citation is a claim
+like any other.
 The surface splits three ways and the split is the part a reader actually
 needs: THIRTY read, TWELVE write, and ZERO are write-shaped, registered,
 gated and unable to act. Thirty plus twelve plus zero is forty-two.

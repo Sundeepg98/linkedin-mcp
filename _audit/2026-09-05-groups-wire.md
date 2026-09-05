@@ -501,6 +501,46 @@ the commit that set the pin (`002a9dd`) and at this tree:
 own, and the first is now off the list. Owners route by
 `git log --oneline -3 -- scripts/<name>`, not by this table.
 
+## 8F. THE OWED MECHANISM WAS BUILT, AND BUILDING IT FOUND TWO MORE
+
+Section 8D named the mechanism-level fix -- extend the docstring-number pin to
+the two unguarded files -- and parked it. **It needed no ruling from anybody
+and 20 minutes remained, so it was built rather than left owed:**
+`tests/test_the_other_two_count_claims_are_pinned_too.py`, 18 assertions over
+`README.md`'s headline, its module listing, and
+`linkedin_server/__init__.py`'s write and mutation counts, each expected
+sentence CONSTRUCTED from the live registry so a failure hands over the exact
+replacement text.
+
+**BUILDING IT IMMEDIATELY FOUND TWO THINGS NO ASSERTION EXISTED FOR.**
+
+**1. `server.py`'s citation of its own guard was DANGLING IN BOTH HALVES.**
+Its docstring said the split is *"pinned in the same file by
+`test_this_modules_docstring_numbers_are_derived`"*. **No test of that name
+exists anywhere**, and the real guard --
+`tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived`
+-- is in a different file. The guard was passing the whole time; **the POINTER
+was broken, so a reader who followed it found nothing and would conclude the
+numbers were unchecked.** I concluded exactly that for about ninety seconds.
+
+**AND I HAD REPEATED THE BROKEN CITATION AS FACT.** Sections 8B and 8D above
+said server.py's docstring "IS pinned -- a test reads those words" and named
+that test. I took the name from the docstring rather than from the test suite.
+The CLAIM was true and the CITATION was false, and I could not have known
+which until I looked -- **which is the whole argument for pinning a claim
+rather than restating it, arriving inside this document about pinning
+claims.**
+
+**2. `tests/test_server_surface.py`'s OWN module docstring was stale by
+nineteen tools** -- *"The tool surface: twenty-three tools, nineteen of which
+do not write"* -- **three lines above assertions updated at every bump, in the
+file that pins the tool count.** That is the fourth stale count claim found in
+one hour and the third found by something other than a test.
+
+Both corrected. The dangling citation is corrected with its history kept,
+because a citation is a claim like any other and this one had been wrong long
+enough to mislead its own author.
+
 ## 9. WHAT IS STILL OWED
 
 * **`recommendations.py` is untouched and still has no consumer.** Its two

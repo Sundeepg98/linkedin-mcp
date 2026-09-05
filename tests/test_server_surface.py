@@ -1,4 +1,12 @@
-"""The tool surface: twenty-three tools, nineteen of which do not write.
+"""The tool surface: forty-two tools, thirty of which do not write.
+
+**THIS LINE SAID "twenty-three tools, nineteen of which do not write" UNTIL
+2026-09-05 ~22:52** -- stale by nineteen tools, in the file that PINS the tool
+count, three lines above assertions that were updated at every bump. It is the
+fourth count claim in this repository found stale in one hour and the third
+found by something other than a test. Corrected rather than deleted, because a
+stale claim inside the file that exists to catch stale claims is the most
+useful instance of the class.
 
 THE HEADLINE SAID "nineteen tools, fifteen of which read LinkedIn" UNTIL
 2026-08-25, and both halves of that sentence changed for the same small
