@@ -356,6 +356,119 @@ def test_publishing_the_name_without_the_substitution_check_ships_a_person(
     assert unchecked == "<member>'s Node Circle", unchecked
 
 
+# ---------------------------------------------------------------------------
+# THE EVENT MARKER, added 2026-09-05 in the same wave that opened /events/.
+#
+# These live here rather than in tests/test_surface_census.py because the
+# reason they exist is this wave's: the boundary admitted /events/, and the
+# next thing anybody does with an admitted address is census it.
+# ---------------------------------------------------------------------------
+
+AN_EVENT_HREF = "https://www.linkedin.com/events/7300000000000000000/"
+
+#: An event card's accessible name is routinely its ORGANISER. This one is
+#: invented and belongs to nobody.
+AN_ORGANISER_BEARING_NAME = "Hiring Meetup by Wilhelmina Farnsworth"
+
+
+def test_an_event_href_is_recognised_as_naming_an_entity():
+    """The gap this wave found, asserted so it cannot come back.
+
+    ``fa1a1ba`` added group, newsletter and school markers on 2026-09-04
+    because the profile Interests tab enumerates five entity kinds and a probe
+    put a name behind each. **Events are not on that tab**, so that probe had
+    no event row and could not have found this. It was found the other way
+    round -- by opening the address.
+    """
+    shaped = shape.census_shape(AN_EVENT_HREF)
+    assert shaped == "https://www.linkedin.com/events/<event>/", shaped
+    assert shape.census_href_identifies_entity(shaped) is True, shaped
+
+
+def test_the_event_placeholder_is_declared_or_the_shape_reads_opaque():
+    """THE HALF-APPLIED FIX, which is worse than the leak, and was made twice.
+
+    ``_CENSUS_SAFE_CHARS`` admits no angle brackets, so a substitution added
+    WITHOUT its placeholder turns every shape into ``<opaque>`` -- which reads
+    as a redaction, carries no marker, and therefore makes
+    ``census_href_identifies_entity`` return False and ship the name beside it.
+
+    That was recorded on ``_CENSUS_PLACEHOLDER`` on 2026-09-04 and the same
+    mistake was made again on 2026-09-05, caught in the same minute by running
+    the pair rather than reading the note. This asserts the outcome the note
+    could not enforce.
+    """
+    assert shape.census_shape(AN_EVENT_HREF) != shape.CENSUS_OPAQUE
+    assert shape._CENSUS_PLACEHOLDER.search("<event>"), (
+        "the event placeholder is not declared, so its shape will fail the "
+        "charset gate and read <opaque> -- a redaction with no marker, which "
+        "is worse than publishing the href"
+    )
+
+
+def test_the_count_rule_CANNOT_catch_an_organisers_name_and_that_is_the_point():
+    """SHOWN FAILING for the marker's REASON, not just its presence.
+
+    ``census_redact_rare`` fires only at ``count == 1``. An organiser who
+    appears twice on a page -- two events, or a card and a header -- merges to
+    ``count == 2`` and the name ships. So the count rule is not a second line
+    of defence here; the href marker is the only one.
+    """
+    shaped = shape.census_shape(AN_ORGANISER_BEARING_NAME)
+    assert shape.census_redact_rare(shaped, 2) == shaped, (
+        "the count rule fired at count 2, so this test is no longer "
+        "demonstrating the escape the href marker exists to close"
+    )
+    assert "Wilhelmina" in shaped, shaped
+    # And the href marker IS what catches it.
+    assert shape.census_href_identifies_entity(
+        shape.census_shape(AN_EVENT_HREF)
+    ) is True
+
+
+def test_removing_the_event_marker_makes_the_guard_silent(monkeypatch):
+    """The mutation, planted: drop the marker and the guard stops speaking."""
+    monkeypatch.setattr(
+        shape,
+        "_CENSUS_ENTITY_HREFS",
+        tuple(m for m in shape._CENSUS_ENTITY_HREFS if m != "/events/<event>"),
+    )
+    shaped = shape.census_shape(AN_EVENT_HREF)
+    assert shape.census_href_identifies_entity(shaped) is False, (
+        "the guard still fires with the event marker removed, so it is not "
+        "the marker doing the work and this test measures nothing"
+    )
+
+
+def test_the_other_four_entity_kinds_still_redact_and_two_controls_survive():
+    """A blanket redactor would pass every leak test above.
+
+    So the pair is run: five kinds that must be recognised, and two ordinary
+    LinkedIn addresses that must NOT be -- because a guard that fires on
+    everything has stopped discriminating and the census would publish nothing.
+    """
+    must_redact = [
+        AN_EVENT_HREF,
+        "https://www.linkedin.com/groups/12345678/",
+        A_MEMBER_PROFILE,
+        "https://www.linkedin.com/company/a-made-up-co/",
+        "https://www.linkedin.com/newsletters/weekly-123456/",
+        "https://www.linkedin.com/school/a-made-up-school/",
+    ]
+    must_survive = [
+        "https://www.linkedin.com/feed/",
+        "https://www.linkedin.com/jobs/search/",
+    ]
+    for href in must_redact:
+        assert shape.census_href_identifies_entity(
+            shape.census_shape(href)
+        ) is True, href
+    for href in must_survive:
+        assert shape.census_href_identifies_entity(
+            shape.census_shape(href)
+        ) is False, href
+
+
 def test_the_foreign_markers_are_derived_from_the_shared_tuple():
     """A sixth entity kind must become a REFUSAL here, never a hole.
 
@@ -369,6 +482,18 @@ def test_the_foreign_markers_are_derived_from_the_shared_tuple():
     assert set(shape._MEMBERSHIP_FOREIGN_MARKERS) == (
         set(shape._CENSUS_ENTITY_HREFS) - {shape._MEMBERSHIP_HREF_MARKER}
     )
-    assert len(shape._MEMBERSHIP_FOREIGN_MARKERS) == 4, (
+    # 4 -> 5 ON 2026-09-05, AND THE MOVE IS THE PROPERTY WORKING RATHER THAN A
+    # MAINTENANCE CHORE. The event marker was added to the shared tuple hours
+    # after this test was written, by the same wave, and the derivation turned
+    # it into a REFUSAL in `membership_row` with no edit to that function --
+    # which is exactly what the assertion above says it must do. The pinned
+    # count then went red so a human had to look, which is what the assertion
+    # below is for. Both halves did their job in the same session.
+    #
+    # An event href refusing here is CORRECT: a membership row is about a
+    # group, and an event is a different entity with a different consent
+    # question -- see the `/events/` allowlist entry, which records that its
+    # census rows are thinner than the groups half's.
+    assert len(shape._MEMBERSHIP_FOREIGN_MARKERS) == 5, (
         shape._MEMBERSHIP_FOREIGN_MARKERS
     )

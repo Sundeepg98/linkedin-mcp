@@ -4072,6 +4072,37 @@ _CENSUS_SCHOOL_PATH = re.compile(r"/school/[A-Za-z0-9\-_%.]+/?")
 #: never the disclosure; the group's name was.
 _CENSUS_GROUP_PATH = re.compile(r"/groups/[A-Za-z0-9\-_%.]+/?")
 
+#: AN EVENT PATH SEGMENT, AND IT IS THE ONE THE 2026-09-04 PASS MISSED.
+#:
+#: That pass added `groups`, `newsletters` and `school` because the profile
+#: Interests tab enumerates five entity kinds and a probe measured all three
+#: shipping a name verbatim past both census guards. Events are not on the
+#: Interests tab, so nobody looked -- and MEASURED 2026-09-05, an event href
+#: reduced to `/events/<id>/`, which carries no marker
+#: `_CENSUS_ENTITY_HREFS` recognises, so `census_href_identifies_entity`
+#: returned False and THE NAME BESIDE IT SHIPPED.
+#:
+#: BE PRECISE ABOUT WHETHER THIS EVER LEAKED, because over-claiming a live
+#: leak is its own defect. `scripts/_probe_membership_signal_in_corpus.py`
+#: sweeps 30 documents and 2522736 characters for event route needles and
+#: finds ZERO, with a must-fire control at 90 -- so no capture this project
+#: holds has ever carried an event control, and none of the guards had
+#: anything to be silent about. **What was measured is a guard that cannot
+#: fire on a shape, not a name that escaped.**
+#:
+#: WHAT MAKES IT WORTH FIXING NOW RATHER THAN WHEN SOMEBODY SEES ONE: the
+#: read boundary admitted `/events/` on 2026-09-05, so the very next thing
+#: anyone does with this surface is census it, and an event card's accessible
+#: name is routinely its ORGANISER -- a person. The ordering is the one
+#: `fa1a1ba` used and it is the whole lesson of that commit: the shape layer
+#: goes in BEFORE the address, because a read that is safe only until he
+#: attends something is not safe.
+#:
+#: An event id is long digits, so `_CENSUS_LONG_DIGITS` already reduced the
+#: ID. As with groups, the id was never the disclosure. The PLACEHOLDER is,
+#: because a placeholder is what the entity table matches on.
+_CENSUS_EVENT_PATH = re.compile(r"/events/[A-Za-z0-9\-_%.]+/?")
+
 #: Six or more consecutive digits: a job id, an activity id, a member id.
 #: Six rather than four so that a year, a count, or "500+" survives -- those
 #: identify nobody and are worth keeping in a shape.
@@ -4239,7 +4270,22 @@ _NAME_SHAPE_RUN = re.compile(
 #: certifies nothing. `scripts/_probe_interests_entity_shaping.py`; registered
 #: in `_audit/INSTRUMENTS.md` section 2.5.
 _CENSUS_PLACEHOLDER = re.compile(
-    r"<(?:member|company|newsletter|school|group|id|urn|redacted|opaque)>"
+    # ``event`` ADDED 2026-09-05, IN THE SAME EDIT AS THE SUBSTITUTION AND THE
+    # MARKER, AND THE REASON IS THE PARAGRAPH ABOVE THIS CONSTANT RATHER THAN A
+    # NEW ARGUMENT. Adding a substitution without its placeholder was tried on
+    # 2026-09-04 and is recorded here as WORSE THAN THE LEAK -- every shape
+    # becomes ``<opaque>``, which reads as a redaction, carries no marker, and
+    # so makes ``census_href_identifies_entity`` return False and ship the name
+    # beside it.
+    #
+    # THE SAME MISTAKE WAS MADE AGAIN HERE AND CAUGHT THE SAME WAY. The event
+    # substitution went in first, and the pair-run immediately printed
+    # ``<opaque>`` with ``identifies_entity False`` for an event href while the
+    # other four kinds read True. It was caught in the same minute, by running
+    # the pair rather than reasoning about it -- which is the practice this
+    # comment exists to keep, since the note above did not prevent the error
+    # and only the measurement did.
+    r"<(?:member|company|newsletter|school|group|event|id|urn|redacted|opaque)>"
 )
 
 #: The ONLY characters a name may contain and still be emitted verbatim.
@@ -4338,6 +4384,7 @@ def census_substitute(text: Optional[str]) -> str:
     shaped = _CENSUS_NEWSLETTER_PATH.sub("/newsletters/<newsletter>/", shaped)
     shaped = _CENSUS_SCHOOL_PATH.sub("/school/<school>/", shaped)
     shaped = _CENSUS_GROUP_PATH.sub("/groups/<group>/", shaped)
+    shaped = _CENSUS_EVENT_PATH.sub("/events/<event>/", shaped)
     shaped = _CENSUS_POSSESSIVE.sub(lambda m: "<member>" + m.group(1), shaped)
     shaped = _CENSUS_POSSESSIVE_LOWER.sub(
         lambda m: "<member>" + m.group(1), shaped
@@ -4579,6 +4626,24 @@ _CENSUS_ENTITY_HREFS = (
     "/newsletters/<newsletter>",
     "/school/<school>",
     "/groups/<group>",
+    # A FOURTH ADDED 2026-09-05, AND IT IS THE ONE THAT PASS COULD NOT HAVE
+    # FOUND. The three above came from the profile Interests tab, which
+    # enumerates five entity kinds; events are not on that tab, so the probe
+    # that measured those three never had an event row to put a name behind.
+    #
+    # It was found the other way round -- by opening the address. The read
+    # boundary admitted `/events/` the same day, and the first question after
+    # that is what the census would publish off it. MEASURED: an event href
+    # reduced to `/events/<id>/`, which matches nothing in this tuple, so this
+    # predicate returned False and the name beside the control shipped. An
+    # event card's accessible name is routinely its ORGANISER.
+    #
+    # NOT A LEAK THAT HAPPENED -- a guard that could not fire. No document in
+    # this repository has ever carried an event control (30 documents, 2522736
+    # characters, zero, with a firing control), so nothing escaped. The fix
+    # goes in BEFORE the surface is read, which is the ordering `fa1a1ba`
+    # established: the shape layer precedes the address.
+    "/events/<event>",
 )
 
 
