@@ -4,6 +4,8 @@
 
 **CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 4 says the twelve DECIDE-RETIRE rulings convert 39 rows and that the answer is almost certainly no for all of them; three rows of AI-INTERVIEW-PRODUCT (the READ side of the practice product) and two of OFF-PLATFORM-WIDGET (both reads drawn on a LinkedIn page) meet no reason that retires them, so the queue converts 37 rows and hands 5 back as gaps rather than 39 and none.
 
+**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 7 says 409 is at least 4 over-counted and that this is the only direction of error it found in the total; it is at least 6 (the newsletter wave measured two further duplicate pairs that no slice had flagged, verified on disk here) and it is not the only direction, because A1 subtracted P N12 on an address nothing in this package builds, so section 9 recomputes the ledger with every movement named and its TAKEN-or-FLAGGED status stated.
+
 **THE NUMBER: 37 rows leave GAP, not 39.** Twelve blockers plus
 `PANEL-NOT-OBSERVED` -- 42 rows after Amendment A13 -- were walked one row at a
 time. **32 rows are retired by a ruling written here. 5 more are re-filed against
@@ -986,3 +988,111 @@ section 5 closes in both directions.
 * No browser, no LinkedIn session, no page load, no `mcp__linkedin__*` call. No
   identifier of any person appears in this document; capabilities and relations
   only.
+
+---
+
+## 9. THE LEDGER, RECOMPUTED -- AND THE DENOMINATOR MOVES TOO
+
+Section 5 gives this pass's own arithmetic. This section does the thing nobody
+had done: **collect every movement anybody has established against the census
+total, say which have been TAKEN and which are only FLAGGED, and separate the
+two numbers that have been used interchangeably all day.**
+
+**THE TWO NUMBERS ARE NOT THE SAME NUMBER.** 761 is the DENOMINATOR -- distinct
+capabilities. 409 is the GAP NUMERATOR -- how many of them nobody considered.
+Retiring a row moves it between states inside the denominator and leaves 761
+alone. **A DUPLICATE ROW IS DIFFERENT: it inflates both.** The census's own
+section 1 builds 761 out of the same table rows it builds 409 from, so a
+capability counted twice is counted twice on both sides.
+
+### 9.1 The GAP numerator, every mover named
+
+| # | movement | rows | status | established by |
+|---|---|---:|---|---|
+| | **409 at the freeze** (`1c08e5f`, 2026-09-03 15:53:26) | 409 | | the census |
+| 1 | forbidden-class fix reaches 8 rows | -8 | **TAKEN** by A1 | team-lead ruling, machine-checked, 4 controls |
+| 2 | built and committed after the freeze | -7 | **TAKEN** by A1 | tool docstrings at HEAD |
+| 3 | sibling-slice double-count, `N 149 150 151 160` | -4 | **TAKEN** by A1 | `network.md`'s own note |
+| | **390 at `23f04f1`** -- A1's figure, and A11 re-checked it | 390 | | |
+| 4 | `P N12` was subtracted on `/uas/login`, which nothing builds | **+1** | FLAGGED, not folded | `2026-09-05-routes-already-admitted.md` |
+| 5 | `N 118` re-stated MEASURED-ABSENT in the census file itself | -1 | **LANDED IN THE CENSUS**, never folded into the ledger | commit `191c2f7`, verified on disk this pass |
+| 6 | `C 11` reads EXCLUDED-RULED | -1 | FLAGGED, deliberately not taken | A13 |
+| 7 | `M C80` duplicates `N 55` + `N 56` | -1 | FLAGGED, not taken | the newsletter wave |
+| 8 | `P L4` duplicates `M C83` | -1 | FLAGGED, not taken | the newsletter wave |
+| 9 | **this pass: 32 retired + 5 re-filed** | **-37** | **TAKEN HERE** | sections 3 and 5 |
+
+    390 - 37                          =  353   taking only what has been ruled
+    390 + 1 - 1 - 1 - 1 - 1 - 37      =  350   folding in every flagged movement
+
+**353 is the honest headline and 350 is the honest floor.** The difference is
+five movements nobody has ruled, and this pass does not rule them: four belong
+to other waves who deliberately flagged rather than took them, and taking
+another wave's flagged subtraction is how a number acquires an author who never
+agreed to it.
+
+**Row 4 is worth its own sentence because it runs the other way.** The ledger's
+section 7 says the double-count is *"the only direction of error I found in the
+total"*. It is not: one of A1's eight subtractions was made on an address
+nothing in this package builds, so a row was removed that the boundary does not
+hold out. **A total can be wrong by being too small**, and only one of the two
+directions had been looked for.
+
+### 9.2 The denominator: at least 6 over-counted, so at least 755
+
+Three rows describe two capabilities where `M C80` (subscribe OR unsubscribe,
+one compound row) meets `N 55` and `N 56` (subscribe, unsubscribe, split in
+two). Two rows describe one where `P L4` meets `M C83`. And eight rows describe
+four across the network/messaging boundary. Verified on disk this pass, row by
+row.
+
+    761   distinct capabilities, as published
+     -4   N 149 150 151 160 also counted by the messaging slice
+     -1   M C80 against N 55 + N 56
+     -1   P L4 against M C83
+    ----
+    755   AT MOST, and the "at least 6" is a floor rather than a result
+
+**A1 subtracted the four from the numerator and nobody subtracted them from the
+denominator**, so 761 has carried a known over-count since the amendment that
+found it. The other two were never subtracted from either.
+
+**WHY 6 IS A FLOOR AND NOT A MEASUREMENT, which is the whole point of this
+subsection.** Nobody has de-duplicated this census. **Both extra pairs were
+found by asking for the ROUTE -- two rows that duplicate resolve to one address
+-- and a route table is a duplicate detector where a capability census is not.**
+The route table exists for one blocker family. There are ninety-odd others. So
+the true over-count is unknown, and 6 is simply what two waves happened to trip
+over while working adjacent families.
+
+**That is an argument about instruments, not about tidiness.** The ledger's own
+section 7 named the double-count as the only error it found in the total; it
+found four because four were flagged IN THE PROSE by a slice that knew. The two
+found since were flagged by NOBODY -- each slice's author did not know the other
+held the same capability -- and only an instrument that resolves a row to an
+address could see them.
+
+### 9.3 The share, stated both ways so neither is quoted alone
+
+    as published        409 / 761   =  53.7%  of capabilities are GAP
+    ruled today         353 / 755   =  46.8%
+    every flag folded   350 / 755   =  46.4%
+
+**None of that is coverage and it must not be reported as coverage.** The
+proven capability count did not move today. What moved is how much of the
+remainder has a reason written against it.
+
+### 9.4 A finding about where the last two duplicates were living
+
+**The newsletter wave's over-count result exists only in
+`_audit/_scratch/_progress-newsletter.md`, and `_audit/_scratch/` is
+gitignored.** So for any reader of the repository -- a clone, a successor, CI --
+that finding does not exist. Its own hand-off names "the census owner" as the
+recipient and nothing carried it there.
+
+This is the disease the correction machinery was built for, one level down and
+outside its reach: `tests/test_a_correction_is_findable_from_the_claim.py`
+governs **tracked** `_audit/*.md`, so a finding parked in an untracked working
+note can neither declare a correction nor be found by one. **A measurement in a
+gitignored file is a measurement nobody took.** Lodging it here, with the credit
+where it belongs, is the whole of what section 9.2 does that is new -- the
+measuring was somebody else's.

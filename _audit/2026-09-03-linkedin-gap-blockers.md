@@ -501,6 +501,8 @@ have "zero prior art in the package" and gives no per-row blocker, so for those
 and messaging counts them again under its own ids. **So 409 is at least 4
 over-counted**, and that is the only direction of error I found in the total.
 
+**CORRECTED BY:** `_audit/2026-09-05-decide-retire-rulings.md` -- it is at least 6 and it is not the only direction: the newsletter wave measured two further duplicate pairs that no slice had flagged (M C80 against N 55 plus N 56, and P L4 against M C83, both verified on disk), while A1 subtracted P N12 on an address nothing in this package builds, which is an error in the OTHER direction; its section 9 recomputes the ledger with every movement named and its TAKEN-or-FLAGGED status stated, and applies the duplicates to the 761 denominator, which nobody had done.
+
 **AND 761 IS STILL A FLOOR.** Three passes grew it 661 -> 721 -> 761 and the
 covered count never moved once. This document classifies the 409 that exist; it
 makes no claim about the ones no pass has found. A blocker gating N rows today
