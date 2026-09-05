@@ -1,16 +1,8 @@
 # The DECIDE-RETIRE queue, ruled
 
-**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 3 files
-`MESSAGING-SETTINGS` as a blocker awaiting a ruling, and its section 7 leaves open
-whether those five rows "were already ruled"; they were, by a capability-level
-settings ruling shipped in `linkedin_server/server.py` and quoted below, so the
-five are a RE-FILE and not a decision anybody still owes.
+**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 3 files MESSAGING-SETTINGS as a blocker awaiting a ruling and its section 7 leaves open whether those five rows were already ruled; they were, by a capability-level settings ruling shipped in the live linkedin_update_setting docstring at HEAD and applied by the profile slice to 93 rows, so the five are a RE-FILE and not a decision anybody still owes.
 
-**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 4 says the
-twelve DECIDE-RETIRE rulings convert 39 rows, and that the answer "is almost
-certainly no" for all of them. Three rows of `AI-INTERVIEW-PRODUCT` and two of
-`OFF-PLATFORM-WIDGET` are not retired by any reason this pass could find, so the
-queue converts 37 rows and hands 5 back as gaps rather than 39 and none.
+**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its section 4 says the twelve DECIDE-RETIRE rulings convert 39 rows and that the answer is almost certainly no for all of them; three rows of AI-INTERVIEW-PRODUCT (the READ side of the practice product) and two of OFF-PLATFORM-WIDGET (both reads drawn on a LinkedIn page) meet no reason that retires them, so the queue converts 37 rows and hands 5 back as gaps rather than 39 and none.
 
 **THE NUMBER: 37 rows leave GAP, not 39.** Twelve blockers plus
 `PANEL-NOT-OBSERVED` -- 42 rows after Amendment A13 -- were walked one row at a
