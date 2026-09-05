@@ -218,6 +218,16 @@ lists every row in a capability table carrying no recognised state, which is the
 only way this class shows up at all. A counter that cannot report what it could
 not see is a counter that under-reports in silence.
 
+**CORRECTED BY:** `_audit/2026-09-05-census-hygiene.md` -- on two points, both in
+this section. (1) `--unstated` lists rows in EVERY table, not only capability
+tables; the code never makes the check this sentence describes, and 78 of the 117
+it printed are correctly stateless. (2) `N 132` is NOT the shape of the class. All
+117 were read: exactly TWO have prose where a state belongs. The largest cause is
+23 rows spelled `XR` -- `jobs.md`'s own short form of EXCLUDED-RULED, unknown to
+both parsers -- which is why two instruments agreed at 406. The one-row
+disagreement this document leaves open, *"369 is what the instrument reads, 370
+is what the census says"*, is closed there and closed toward the census.
+
 ## 6. WHAT THIS WAVE DID NOT TOUCH
 
 * **The frozen state tables at the head of each slice.** `jobs.md` still says
