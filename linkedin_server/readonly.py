@@ -1145,10 +1145,34 @@ _FORBIDDEN_URL_SUBSTRINGS: tuple[str, ...] = (
     #
     # ONE RESIDUE, RECORDED RATHER THAN LEFT TO BE TRIPPED OVER, in the same
     # spirit as the note on the intro-editor exemption above. A word entry is
-    # matched against the WHOLE url, and ``/in/<vanity>/`` is on the allowlist
-    # -- so a member whose vanity slug happens to contain one of these words
-    # is now refused. ``cookies`` and ``visibility`` are the two that could
-    # plausibly appear in a real person's handle; the rest could not.
+    # matched against the WHOLE url, and ``/in/<vanity>/`` WAS admitted when
+    # this was written -- so a member whose vanity slug happened to contain
+    # one of these words was refused. ``cookies`` and ``visibility`` are the
+    # two that could plausibly appear in a real person's handle; the rest
+    # could not.
+    #
+    # THE TENSE IS THE CORRECTION. This paragraph is kept because the trade it
+    # records was really made, and put in the past because the condition it
+    # describes has ended -- see the successor below. It read "is on the
+    # allowlist", which a reader meets as current truth.
+    #
+    # SUCCESSOR, 2026-09-05: THAT RESIDUE NO LONGER EXISTS. The paragraph
+    # above is left standing because it records a real trade that was really
+    # made, not because it is current -- appending beats rewriting, since a
+    # reader who arrives from the decision needs to find the decision.
+    #
+    # ``/in/<vanity>/`` IS NOT ON THE ALLOWLIST any more. The boundary dropped
+    # the third-party profile patterns -- the ruling sits beside the
+    # ``/in/me/`` entry below -- so a vanity slug cannot reach a word entry
+    # through this address at all, and the interaction described above can no
+    # longer arise. Measured, not inferred: ``assert_read_url`` raises on
+    # ``/in/<slug>/`` and admits only the ``/in/me/`` spelling.
+    #
+    # Two other sites in this package still asserted the opposite -- that the
+    # allowlist WOULD accept a member-slug address -- and were corrected the
+    # same day. The class is now checked by
+    # ``tests/test_prose_that_makes_a_claim.py`` rather than left to whoever
+    # reads carefully.
     #
     # MEASURED BEFORE ACCEPTED, not waved past: every ``linkedin.com/in/<slug>``
     # in this repository was extracted and checked -- 16 distinct slugs, ZERO

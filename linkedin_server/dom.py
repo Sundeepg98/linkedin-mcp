@@ -8546,11 +8546,23 @@ async def read_profile_views_insights(page: Any) -> dict[str, Any]:
     }
 
 
-#: The three profile sections LinkedIn serves at ``/in/me/details/<section>/``
-#: and the read allowlist already admits, at ``readonly.py``'s
-#: ``/in/<member>/details/(skills|experience|education)/`` pattern. This tuple
-#: is the whole of what any caller may ask for; nothing here accepts a
+#: The three profile sections LinkedIn serves at ``/in/me/details/<section>/``,
+#: which is the spelling the read allowlist admits and the only one. This
+#: tuple is the whole of what any caller may ask for; nothing here accepts a
 #: free-text section name, because the section becomes part of an address.
+#:
+#: THIS PARAGRAPH CITED A PATTERN THAT NO LONGER EXISTS, until 2026-09-05. It
+#: named ``readonly.py``'s ``/in/<member>/details/(skills|experience|education)/``
+#: -- dropped when the boundary stopped admitting third-party profiles, a
+#: removal RULED in ``readonly.py`` beside the ``/in/me/`` entry. So this
+#: comment sent a reader to a pattern they would not find, in support of a
+#: permission the boundary no longer grants.
+#:
+#: Measured rather than inferred: ``assert_read_url`` raises on the
+#: member-slug spelling of all three sections and admits only the ``/in/me/``
+#: form. Two other sites in this package carried the same stale claim and were
+#: corrected the same day; the class is checked by
+#: ``tests/test_prose_that_makes_a_claim.py``.
 PROFILE_DETAIL_SECTIONS: tuple[str, ...] = ("experience", "education", "skills")
 
 #: The per-entry key on each of those pages, one per section.

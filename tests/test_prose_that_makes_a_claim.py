@@ -71,6 +71,53 @@ _NUMBER_WORDS: dict[str, int] = {
 }
 
 
+def _spell_cardinal(n: int) -> str:
+    """``38`` -> ``'thirty-eight'``, in the hyphenation this package writes."""
+    ones = (
+        "zero", "one", "two", "three", "four", "five", "six", "seven",
+        "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
+        "fifteen", "sixteen", "seventeen", "eighteen", "nineteen",
+    )
+    tens = (
+        "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+        "eighty", "ninety",
+    )
+    if n < 20:
+        return ones[n]
+    return tens[n // 10] + ("" if n % 10 == 0 else "-" + ones[n % 10])
+
+
+# STOP HAND-MAINTAINING THE VOCABULARY. 2026-09-05.
+#
+# Read the four notes above in order: ZERO added after a KeyError,
+# TWENTY-FOUR added after a KeyError, TWENTY-FIVE and THIRTY-SEVEN added
+# after a KeyError -- with "it bit exactly as predicted" written next to
+# them. It bit a FOURTH time the same day, on `KeyError: 'thirty-eight'`,
+# while a thirty-eighth tool was being registered.
+#
+# Every one of those notes correctly diagnosed the symptom and prescribed
+# widening the table by hand, which is the thing that keeps failing. THE
+# TABLE IS NOT SHORT, IT IS HAND-MAINTAINED -- and a vocabulary that must be
+# extended whenever the surface grows will always be one tool behind the
+# surface, by construction.
+#
+# So the words are now GENERATED for 0-99 and the hand-written entries are
+# layered ON TOP, where they still win. Nothing above is deleted: those
+# notes are the record of why this exists, and the spellings they pin are
+# identical to the generated ones, so `_word` returns exactly what it did.
+#
+# What this does NOT do, stated so nobody reads more into it: it does not
+# make the docstring's numbers right. It makes a WRONG number fail with the
+# sentence "the headline says N tools, mcp.list_tools() returns M" instead
+# of with a KeyError -- which their own note says "reads as a broken test
+# rather than as a moved number". The guard could never speak while the
+# vocabulary was the thing that broke.
+_NUMBER_WORDS = {
+    **{_spell_cardinal(n): n for n in range(100)},
+    **_NUMBER_WORDS,
+}
+
+
 @pytest.fixture
 async def tools():
     return {t.name: t for t in await mcp.list_tools()}
@@ -681,3 +728,153 @@ def test_every_navigated_detail_url_has_the_self_resolving_form():
         if not url.endswith("/in/me/details/%s/" % section)
     }
     assert wrong == {}, wrong
+
+
+# ---------------------------------------------------------------------------
+# THE CLASS, not the instance: three sites said it, one was noticed
+# ---------------------------------------------------------------------------
+#
+# Correcting the comment above would have left the class. Sweeping the package
+# for prose making an ADMISSION claim about the read allowlist found FIVE
+# sentences, of which FOUR concerned a member-slug profile address and THREE
+# of those were false at the moment they were read:
+#
+#   server.py    PROFILE_DETAIL_URLS   "even though the allowlist would
+#                                       accept it"                    CORRECTED
+#   dom.py       PROFILE_DETAIL_SECTIONS  cited readonly.py's
+#                                       /in/<member>/details/... pattern,
+#                                       which no longer exists         CORRECTED
+#   readonly.py  forbidden-word residue  "/in/<vanity>/ is on the
+#                                       allowlist"                     CORRECTED
+#   server.py    a fifth sentence says the OPPOSITE -- "no member-slug form is
+#                on the allowlist, deliberately" -- and is TRUE.
+#
+# So the package simultaneously contained the true statement and three false
+# ones about the same fact, and the true one is the one nobody had to write a
+# test for. Measured: assert_read_url raises on the member-slug spelling of
+# all three detail sections and on the bare profile, and admits only /in/me/.
+#
+# WHY A SENTENCE AND NOT A CHARACTER WINDOW. A window catches a correction
+# paragraph that quotes the claim it is correcting -- including the ones
+# written today -- and a guard that fires on its own remedy gets deleted. The
+# claim and the address must be in the SAME sentence for this to speak.
+
+#: Prose asserting the allowlist LETS SOMETHING IN. The opposite claim is not
+#: policed here: a refusal that names a boundary is the third guard's subject,
+#: and assert_read_url is a better instrument than a regex WHENEVER the code
+#: actually builds the url -- which, for these sentences, it deliberately does
+#: not. That gap is why this exists.
+_ADMISSION = re.compile(
+    r"allowlist[^.]{0,80}?(?:would accept|accepts|admits|would admit)"
+    r"|(?:is|are) on the allowlist",
+    re.I,
+)
+
+#: A member-slug profile address, in the placeholder spellings this package
+#: uses for one. Every form the boundary REFUSES.
+_SLUG_ADDRESS = re.compile(r"/in/<(?:member|vanity|slug)>", re.I)
+
+#: A PINNED INVENTORY, not a filename exemption. Each entry names a
+#: DISTINGUISHING FRAGMENT of one sentence, so the rest of that file stays
+#: checked -- exempting ``server.py`` wholesale would blind the guard to the
+#: file where three of the five claims live.
+#:
+#: ONE ENTRY, and it is a hand-off rather than a judgement. This sentence
+#: narrates the past ("It WAS safe -- the allowlist admits ...") and its
+#: allowlist clause is in the present tense, so it reads as a live permission
+#: that the boundary no longer grants. It belongs in the correction that
+#: fixed its two siblings. IT WAS NOT TOUCHED BECAUSE ``server.py`` WAS BEING
+#: WRITTEN BY ANOTHER WAVE at the moment this landed -- measured with
+#: ``git status``, not assumed -- and today's rule is that you do not edit a
+#: file a neighbour is mid-edit in. Whoever owns that block should retense the
+#: clause and delete this entry; the guard will then hold at empty.
+_ALLOWED_ADMISSION_SITES: tuple[tuple[str, str], ...] = (
+    (
+        "server.py",
+        "It was safe -- the allowlist admits",
+    ),
+)
+
+
+def _admission_sentences() -> list[tuple[str, str]]:
+    """(file, sentence) for every allowlist-admission claim in the package."""
+    import pathlib
+
+    found: list[tuple[str, str]] = []
+    package = pathlib.Path(readonly.__file__).parent
+    for path in sorted(package.glob("*.py")):
+        flat = " ".join(
+            path.read_text(encoding="utf-8", errors="replace").split()
+        )
+        for sentence in flat.split(". "):
+            if _ADMISSION.search(sentence):
+                found.append((path.name, sentence))
+    return found
+
+
+def test_the_admission_sweep_actually_found_the_prose():
+    """A sweep that matches nothing passes. This says what it saw.
+
+    The package DOES discuss what the allowlist admits, in several places and
+    correctly. If this count falls to zero the detector has broken, not the
+    prose -- which is the failure mode a bare "no offenders" assertion cannot
+    tell apart from success.
+    """
+    sentences = _admission_sentences()
+    assert len(sentences) >= 3, sentences
+    assert {name for name, _ in sentences} >= {"readonly.py", "server.py"}, sorted(
+        {name for name, _ in sentences}
+    )
+
+
+def test_no_source_prose_says_the_allowlist_admits_a_member_slug_address():
+    """The class guard. Three sites said this; the boundary refuses all of it.
+
+    Reintroducing any of the three corrected sentences turns this red, and so
+    does a NEW one written anywhere in the package.
+    """
+    flat_pins = tuple(
+        (name, " ".join(fragment.split())) for name, fragment in _ALLOWED_ADMISSION_SITES
+    )
+    offenders = [
+        (name, sentence[:150])
+        for name, sentence in _admission_sentences()
+        if _SLUG_ADDRESS.search(sentence)
+        and not any(
+            name == pin_name and pin_fragment in " ".join(sentence.split())
+            for pin_name, pin_fragment in flat_pins
+        )
+    ]
+    assert offenders == [], offenders
+
+
+def test_the_boundary_still_refuses_what_that_prose_used_to_promise():
+    """The measurement the guard above is worth anything only because of.
+
+    A prose rule policing a claim nobody checked would be the same defect in a
+    new costume. These are the exact addresses the three corrected sentences
+    described.
+    """
+    admitted = [
+        url
+        for url in (
+            "https://www.linkedin.com/in/%s/" % _INVENTED_SLUG,
+            "https://www.linkedin.com/in/%s/details/skills/" % _INVENTED_SLUG,
+            "https://www.linkedin.com/in/%s/details/experience/" % _INVENTED_SLUG,
+            "https://www.linkedin.com/in/%s/details/education/" % _INVENTED_SLUG,
+        )
+        if _admits(url)
+    ]
+    assert admitted == [], admitted
+    assert _admits("https://www.linkedin.com/in/me/details/skills/"), (
+        "the control failed: the /in/me/ spelling must be admitted, or the "
+        "refusals above are about the path rather than about the slug"
+    )
+
+
+def _admits(url: str) -> bool:
+    try:
+        readonly.assert_read_url(url)
+    except Exception:
+        return False
+    return True
