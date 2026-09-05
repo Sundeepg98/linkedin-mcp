@@ -147,9 +147,20 @@ structural signal rather than an absence of evidence, but it is **READ, NOT
 MEASURED**: it assumes LinkedIn draws admin entries in that menu, which nobody
 here has seen it do for a group anyone manages.
 
-**The settling test, named rather than taken:** press `Update your settings` on
-one row and read what it draws. That is one more press on an already-admitted
-address and it is the cheapest thing left in this blocker.
+**The settling test WAS named here and this paragraph RETRACTS it.** It said:
+press `Update your settings` on one row and read what it draws, one more press
+on an already-admitted address, the cheapest thing left in this blocker.
+
+**Measured at 17:27 and it is not available.** That control is an ANCHOR whose
+href meets two forbidden substrings, so following it is refused before the
+allowlist is consulted. A press that navigates to a refused address is not a
+cheap measurement -- it is a boundary change wearing one.
+
+The retraction is left visible instead of edited away, because **a
+recommendation reads as a STANDING INSTRUCTION**, and this document's own
+audience is somebody who will do what it says. This blocker therefore has NO
+cheap settling test for the administrative inference, and these three rows stay
+READ, NOT MEASURED until `/groups/<id>/` is argued or a modal is observed.
 
 ### 5.3 THE ONE WRITE WHOSE AFFORDANCE IS MEASURED PRESENT -- 2 rows
 
@@ -314,11 +325,20 @@ menu closed on Escape with `aria-expanded` back to 0.
   `newsletters.py` and `events.py` both took today for the same reason.
 * **No write, no WriteSpec.** `Leave this group` is measured present and is
   specified for whoever takes it, not built.
-* **The `Update your settings` press was not taken.** It is the cheapest thing
-  left and it settles four rows at once (`N 170`, `N 176`, and the admin
-  inference behind `N A10`-`A12`). It is now measured to be drawn on all five
-  membership rows as a LINK rather than only as a menu item, so a press has a
-  second route to it.
+* **The `Update your settings` press was not taken, AND THIS ENTRY CORRECTS
+  ITSELF.** An earlier draft of this section called it "the cheapest thing
+  left". It is not available at all: measured at 17:27, the control is an
+  ANCHOR whose href meets two forbidden substrings, so following it is refused
+  by `assert_read_url` before the allowlist is even consulted. **A press that
+  navigates to a refused address is not a cheap measurement; it is a boundary
+  change wearing one.**
+
+  The correction is left visible rather than edited away, because the earlier
+  sentence is the more dangerous kind of stale: **a recommendation reads as a
+  standing instruction, and whoever opens this next would have tried it.**
+  What remains available is the modal question -- whether LinkedIn draws
+  anything in place before navigating -- and nothing measured today says it
+  does.
 * **No page was closed by the probes until 17:26.** Measured: in ATTACH mode
   `BROWSER.session()` opens a tab and its own `finally` only touches an idle
   timer, so every probe run on this project leaks one. Twenty-four had
