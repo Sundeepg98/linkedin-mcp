@@ -84,9 +84,10 @@ ANCHOR_SELECTOR = 'a[href*="/newsletters/"]'
 #: badge was reading ONE.
 HEADING_WORD = "newsletters"
 
-#: Read per anchor, IN THE PAGE. Returns the raw href and the raw first
-#: paragraph; both are gated in Python below and neither leaves this module
-#: unshaped.
+#: Where the heading control looks. Plain Playwright, no injection.
+HEADING_SELECTOR = "h1, h2, h3"
+
+#: The paragraphs inside one row anchor. The FIRST is the title.
 #:
 #: WHY THE FIRST PARAGRAPH IS THE TITLE, MEASURED RATHER THAN ASSUMED. Each
 #: text-bearing anchor holds exactly two paragraphs, the first 11 to 26
@@ -99,27 +100,44 @@ HEADING_WORD = "newsletters"
 #: That comparison is not discarded once the measurement is taken. It ships as
 #: a per-row boolean, so a page that ever reorders the two paragraphs makes
 #: this reader SAY SO instead of publishing a description as a title.
-ROWS_JS = """
-(cfg) => {
-  const out = { anchors: 0, headings: 0, rows: [] };
-  const heads = Array.from(document.querySelectorAll('h1,h2,h3'));
-  for (const head of heads) {
-    const text = (head.textContent || '').trim().toLowerCase();
-    if (text === cfg.headingWord) { out.headings += 1; }
-  }
-  const anchors = Array.from(document.querySelectorAll(cfg.selector));
-  out.anchors = anchors.length;
-  for (const anchor of anchors) {
-    const paragraphs = Array.from(anchor.querySelectorAll('p'));
-    out.rows.push({
-      href: anchor.getAttribute('href') || '',
-      paragraphs: paragraphs.length,
-      title: paragraphs.length ? (paragraphs[0].textContent || '').trim() : ''
-    });
-  }
-  return out;
-}
-"""
+PARAGRAPH_SELECTOR = "p"
+
+# ===========================================================================
+# THIS MODULE INJECTS NO SCRIPT, AND THAT WAS A CORRECTION RATHER THAN A
+# CHOICE.
+#
+# It first read the rows through one ``page.evaluate`` of a module-level
+# ``ROWS_JS``, carrying a ``# readonly-ok`` waiver. ``tests/test_readonly.py``
+# refused it, in two places and correctly:
+#
+#     test_only_dom_module_waives_evaluate          assert set(waived_in) <= {"dom.py"}
+#     test_the_scripts_executed_are_exactly_the_ones_declared    extra: ROWS_JS
+#
+# **THE WAIVER IS SCOPED TO ONE MODULE, NOT RATIONED ACROSS THE PACKAGE.** The
+# ``# readonly-ok`` comment silences the executed-script check; it does not
+# make a module eligible to hold one. So the choice was never "declare it or
+# not" -- it was "belong in ``dom.py``, or do not inject."
+#
+# AND THE ANSWER WAS ALREADY WRITTEN IN THAT GUARD'S OWN COMMENT, about a
+# waiver proposed on 2026-08-30 and declined:
+#
+#     "A THIRD WAS PROPOSED AND NOT SPENT: main's textContent length is read
+#      through locator.text_content(), Playwright's own API, because A WAIVER
+#      THAT A PLAIN CALL REPLACES IS A WAIVER NOBODY SHOULD BE ASKED TO
+#      REVIEW."
+#
+# Every line of that script is replaceable by a plain call -- ``count()``,
+# ``nth()``, ``get_attribute()``, ``inner_text()`` -- so it was exactly the
+# waiver that comment refuses. Declaring it would have asked reviewers to
+# widen a security boundary to save this module a loop.
+#
+# WHAT IT COSTS, STATED SO THE TRADE IS VISIBLE: about forty round trips on
+# this page instead of one, since each anchor needs a count, an href and a
+# paragraph read. On a five-row list that is not a cost worth a boundary
+# change. **If this surface ever grows to hundreds of rows the right answer is
+# to move the reader into ``dom.py``, where the waiver lives -- not to inject
+# from here.**
+# ===========================================================================
 
 #: Everything but letters and digits. A slug is lower-case and hyphenated and a
 #: title is neither, so the comparison has to be made on what survives both.
@@ -220,27 +238,49 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
         "titles_unmatched": 0,
         "error": None,
     }
-    cfg = {"selector": ANCHOR_SELECTOR, "headingWord": HEADING_WORD}
     try:
-        reading = await page.evaluate(ROWS_JS, cfg)  # readonly-ok
+        # THE CONTROL FIRST, so a run that finds no rows already knows which
+        # kind of zero it has.
+        headings = page.locator(HEADING_SELECTOR)
+        for index in range(int(await headings.count())):
+            text = str(await headings.nth(index).inner_text() or "").strip()
+            if text.lower() == HEADING_WORD:
+                out["heading_seen"] += 1
+
+        anchors = page.locator(ANCHOR_SELECTOR)
+        out["anchors"] = int(await anchors.count())
+        records: list[tuple[str, int, str]] = []
+        for index in range(out["anchors"]):
+            item = anchors.nth(index)
+            href = str(await item.get_attribute("href") or "")
+            paragraphs = item.locator(PARAGRAPH_SELECTOR)
+            count = int(await paragraphs.count())
+            title = (
+                str(await paragraphs.first.inner_text() or "").strip()
+                if count
+                else ""
+            )
+            records.append((href, count, title))
     except Exception as exc:  # pragma: no cover - defensive
         # THE CLASS AND THE MESSAGE, BOTH. A handler that keeps the class and
         # drops the message is one of this project's own scars: the diagnostic
         # named its own cause and was thrown away. Neither carries a title --
-        # the strings go INTO the page, and nothing is interpolated back.
+        # a selector goes in, and nothing is interpolated back.
+        #
+        # THE WHOLE READ IS INSIDE ONE TRY, and that is deliberate now that it
+        # is forty round trips rather than one evaluate: a frame detaching
+        # halfway would otherwise leave a PARTIAL row list that looks like a
+        # complete short one. A half-read subscription list reporting three of
+        # five is worse than an error, because nothing downstream can tell.
         out["error"] = "%s: %s" % (type(exc).__name__, exc)
+        out["rows"] = []
+        out["heading_seen"] = 0
+        out["anchors"] = 0
         return out
 
-    reading = dict(reading or {})
-    out["heading_seen"] = int(reading.get("headings") or 0)
-    out["anchors"] = int(reading.get("anchors") or 0)
-
     seen: set[str] = set()
-    for record in list(reading.get("rows") or []):
-        record = dict(record or {})
-        href = str(record.get("href") or "")
-        title = str(record.get("title") or "")
-        if not int(record.get("paragraphs") or 0):
+    for href, paragraph_count, title in records:
+        if not paragraph_count:
             # THE ILLUSTRATION ANCHOR: same href, no text of any kind. This is
             # the branch that makes ten into five.
             out["anchors_without_text"] += 1

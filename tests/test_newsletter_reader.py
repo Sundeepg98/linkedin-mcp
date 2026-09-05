@@ -351,7 +351,7 @@ async def test_a_page_that_cannot_be_evaluated_reports_the_class_and_the_message
     """
 
     class Exploding:
-        async def evaluate(self, _script, _cfg=None):
+        def locator(self, _selector):
             raise RuntimeError("frame was detached")
 
     out = await newsletters.read_newsletter_subscriptions(Exploding())
