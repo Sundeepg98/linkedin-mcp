@@ -140,6 +140,47 @@ printed by the run itself.
 
 ---
 
+## 3b. AND THEN THE SAME SURFACE ANSWERED, BY A THIRD ROUTE
+
+**Section 3 above is true and one inference from being wrong, so it gets a
+successor rather than an edit.** It says a count cannot aim and a name cannot
+aim. Both hold. What it silently assumed is that those are the only two ways
+to address a control, because they are the only two THIS PACKAGE uses.
+
+A file input declares what it is for. Read live on the same address, through
+the locator API rather than a new injected script:
+
+    [0] accept='image/*'                          multiple=None
+    [1] accept='image/*,.ai,.psd,.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,
+                .xls,.xlsx,.txt,.eml,.mov,.mp4'   multiple=None
+
+    aimable by declaration: YES -- 2 distinct declarations over 2 inputs
+
+**Two inputs, two different declarations, authored by LinkedIn rather than by
+this server.** That is a property to match on where a name and a count both
+fail, and it is the distinction the three blocked rows need: one input takes
+images only, the other also takes `.mov`, `.mp4` and the document extensions.
+
+**IT DOES NOT SAY WHICH ONE IS "THE PHOTO ONE".** Mapping an accept list onto
+a capability is a judgement, not a reading, and it belongs to whoever wires
+the composer. The probe's verdict function compares and refuses to interpret:
+NO when nothing is declared, NO when the declarations are IDENTICAL (two
+inputs saying the same thing are as unaimable as two with no names, and
+choosing between them would be aiming by document order), YES only when the
+page distinguishes them itself.
+
+**AND ONE THING THE READING TOOK AWAY.** `multiple` is absent on BOTH inputs,
+so the row reading "attach files, max 5, 20 MB total" has no DOM expression of
+its own limit here. A wiring cannot learn that cap from the control.
+
+**What this changes about the ledger:** `M M14 M15 M18` move from *no aiming
+strategy exists* to *the aim is available and the rest of the wiring is not
+built* -- a `_live_control` arm returning `UPLOAD_CONTROL_KIND`, a target
+shape, a tool and its consent text. That is a wave, and it is now a wave with
+a measured control to aim at instead of a plan for one.
+
+---
+
 ## 4. A GAP IN A SHIPPED CONSENT GUARD, REPORTED AND NOT FIXED
 
 `tests/test_navigation_is_never_derived.py` refuses a navigation-derived url
@@ -179,7 +220,7 @@ them". Here is what each still waits on, resolved against
 |---|---|---|
 | `M C3 C4 C5 C7` | post composer media | **a CLICK.** The composer was read live 2026-09-04, drew ZERO file inputs, and draws an `Add media` button that builds the input on demand. The capture exists and supports nothing. A click there is a new sanction with its own argument. |
 | `M C6` | title on an uploaded document | depends on `C5` |
-| `M M14 M15 M18` | message attachments | **two inputs, no names.** Section 3. Not a missing capture any more -- a missing property of the page. |
+| `M M14 M15 M18` | message attachments | **SUPERSEDED BY SECTION 3b.** Two inputs and no names (section 3), but they carry DIFFERENT `accept` declarations, so the aim exists. What is missing is now the wiring -- an arm returning `UPLOAD_CONTROL_KIND`, a target shape, a tool, consent text -- and not a way to address the control. |
 | `M C27` | media in a comment | a picker surface nobody has captured |
 | `M C45` | rich media in an article | depends on `C44`, the article composer |
 | `M C86` | tag people in a photo | **not an upload.** A coordinate-anchored tag on an image that must already exist. |
@@ -199,6 +240,13 @@ it moves is the floor under all of them: an action can no longer be wired by
 editing one set, the drain point has been proven to work end to end for the
 first time, and the aiming question for the largest sub-group has a measured
 answer instead of a plan.
+
+**AND THE AIMING ANSWER GOT BETTER AFTER THAT SENTENCE WAS WRITTEN** -- see
+section 3b. Three of the sixteen (`M14 M15 M18`) now have a control a wiring
+can address, by a property LinkedIn states about it. Still not reachable, and
+saying so is the point: an aim is one of four things those rows need. But the
+blocker under them changed from *nothing can address this* to *nobody has
+built the rest*, and those are different queues.
 
 ---
 
