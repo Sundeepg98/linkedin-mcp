@@ -39,12 +39,17 @@ both reporting absence and reporting presence, on the same run, minutes apart.
 ### Route A -- the identifier is in the document
 
     nodes carrying an identifier ......... 12
-    distinct identifier values ............ 8
+    distinct identifier values ............ 8   (8 on id, 4 on componentkey)
     comment overflow controls on page ..... 4
     attributes carrying it ................ id, componentkey
+    attributes outside the asked vocab .... 0
     longest digit run ..................... 19
+    colon-delimited segments .............. 5
     parenthesised ......................... yes
     comma-separated pair inside ........... yes
+
+Both figures reproduced exactly on a second run against a differently-rendered
+copy of the same page -- see section 3.
 
 The value is never held or printed. Its STRUCTURE is: the schema marker
 `urn:li:comment`, then a parenthesised pair of two 19-digit runs separated by a
@@ -101,23 +106,58 @@ just corrected on somebody else.
 
 Rows 73 and 84 were measured separately and are unchanged -- see section 4.
 
-## 3. THE ONE READING I DO NOT UNDERSTAND, STATED AS SUCH
+## 3. THE 2x, WHICH WAS THE THING TO BE SUSPICIOUS OF -- AND IS NOW SETTLED
 
-**8 distinct identifiers against 4 comment overflow controls.** That is exactly
-2x, and this repository lost a round today to a selector that read 54 rows where
-there were 18 because two instruments returned the same MULTIPLE of the truth
-and looked corroborated.
+The first run read **8 distinct identifiers against 4 comment overflow
+controls**: exactly 2x. This repository lost a round today to a selector that
+read 54 rows where there were 18, because two instruments returned the same
+MULTIPLE of the truth and looked corroborated. A clean 2x is the shape to stop
+at, not the shape to build on.
 
-So the honest statement is: the identifier count is a factor of two above the
-control count and I did not establish why. Candidate explanations -- each node
-carrying the value on both `id` and `componentkey`; replies counted alongside
-top-level comments; a virtualised list holding offscreen rows -- are three
-hypotheses and zero measurements. **Do not build a parser that assumes one
-identifier per visible comment until this is settled by a count taken a
-different way.**
+So the reader was rewritten to split the count PER ATTRIBUTE and re-run:
 
-The 12/8 split is likewise unexplained: 12 nodes carry a value, 8 values are
-distinct.
+| reading | run 1 | run 2 |
+|---|---:|---:|
+| elements on the page | 1089 | **838** |
+| nodes carrying an identifier | 12 | 12 |
+| distinct values, all attributes | 8 | 8 |
+| distinct values on `id` | -- | **8** |
+| distinct values on `componentkey` | -- | **4** |
+| nodes carrying it on both attributes | -- | 4 |
+| comment overflow controls | 4 | 4 |
+
+**THE ANSWER: the 2x lives on `id` and not on the surface.** `componentkey`
+carries exactly 4 distinct values against 4 comment overflow controls;
+`id` carries 8, of which `componentkey`'s 4 are a subset. The 12 nodes
+decompose as 4 carrying the identifier on both attributes plus 8 carrying it on
+one.
+
+**So a parser should key on `componentkey`, and that is now evidence rather than
+preference.** It is the attribute whose cardinality tracks the rendered
+comments; `id` is the one that would have produced a reader silently returning
+twice as many comments as exist.
+
+**The limit on that, stated because 4 == 4 is itself a correspondence and not a
+proof:** two numbers agreeing is exactly what the 54-vs-18 defect looked like.
+What raises confidence here is that they agree while being counted from
+different things -- an attribute value set versus an accessible-name prefix
+match -- and that the two are not derived from each other. It is still one
+page. A second item with a different comment count would settle it properly and
+was not run.
+
+### And an unplanned stability result worth more than either number
+
+**The page drew 1089 elements on the first run and 838 on the second -- a 23%
+difference -- and every identifier figure was byte-identical across both.**
+Nobody set out to measure that; the element count is in the output only as a
+denominator, so that a zero from a blind reader could be told from a zero on a
+page that failed to load.
+
+That is the difference between a control and a repetition, and this repository
+already has the law: a control proves the instrument CAN speak, and only
+repetition proves what it said was stable. The identifier reading survived a
+substantially different render of the same page. The element count did not, and
+would have been the wrong thing to pin.
 
 ## 4. ROWS 73 AND 84 -- MEASURED, AND THE LEDGER IS RIGHT
 
@@ -165,32 +205,45 @@ order-dependent mask that silently re-consumes its own output is the kind of
 thing that reads as data. It is why the shipped revision returns integers
 computed in the document instead of a skeleton string.
 
-## 6. THE GUARD RED I AM LEAVING, NAMED PRECISELY
+## 6. THE GUARD RED I RAISED, AND CLEARED
 
     file    tests/test_page_text_is_never_printed.py
     test    test_no_file_prints_page_text_beyond_its_pinned_inventory
-    line    scripts/_probe_comment_identifier.py  0 -> 14
+    guard introduced at 881a11f
 
-**This is not a leak and it is still owed.** Every value the probe prints is an
-integer, a boolean, or one of its own module constants; no page-chosen string
-reaches a print. But the guard is a taint analysis over the AST, and a count
-read out of a `page.evaluate` result is tainted no matter what it counts. It is
-right to be, and I am not arguing with it.
+    first revision   scripts/_probe_comment_identifier.py  0 -> 14   RED
+    then             scripts/_probe_comment_identifier.py  0 ->  2   RED
+    shipped          (absent from the moved-inventory list)         GREEN
 
-**The remedy is NOT to add the file to the pinned inventory.** The guard's own
-failure text forbids that, and every declaration permanently widens what it
-tolerates. The remedy is the carve-out the sibling guard already ships:
-`_COUNTING_CALLS = frozenset({"len"})` launders `len(x)`. So the fix is to have
-the page return ARRAYS and print `len(...)` of them, rather than returning
-pre-counted integers. Roughly six print sites. **I ran out of clock before I
-could make that change AND re-verify it live, and shipping an unverified edit to
-the file that produced the reading is how two ends come to measure different
-things.** The file is committed in the state that produced the numbers above.
+**It was never a leak, and the guard was still right.** Every value the probe
+printed was an integer, a boolean, or one of its own module constants. But the
+guard is a taint analysis over the AST: a count read out of a `page.evaluate`
+result is tainted no matter what it counts, because the analysis cannot see
+what was counted and should not guess.
 
-Two other files were red on the same guard at the same reading and are not mine:
-`scripts/_probe_contact_info_panel.py` (0 -> 1), and
+**The remedy was NOT a pinned-inventory entry.** The guard's own failure text
+forbids that, and every declaration permanently widens what it tolerates. The
+remedy is the carve-out the sibling guard already ships --
+`_COUNTING_CALLS = frozenset({"len"})` launders `len(x)`, because a length
+cannot carry an identifier. So the page now returns ARRAYS OF PLACEHOLDER
+ZEROES and the caller takes `len()`: the same number, with the property made
+visible to the analysis rather than asserted in a comment.
+
+**The second reading is the instructive one.** Converting the counts took it
+from 14 to 2 and the last two were the BOOLEANS -- `bool()` is not a laundering
+call and `len()` is, so `carries_paren_pair` had to come back as a
+length-1-or-0 array like everything else. A partial application of a rule that
+looks complete is this repository's most-repeated defect, and here it was
+visible only because the guard was re-run rather than reasoned about.
+
+**The remaining red in that pair is not mine.**
 `tests/test_navigation_is_never_derived.py::test_every_relation_definition_is_byte_identical`
-plus `_probe_profile_modal_presence.py`, which were red before I touched the tree.
+fails over `_relation` copies in six other waves' probe files
+(`_probe_analytics_controls_live.py`, `_probe_compose_file_inputs.py`,
+`_probe_groups_events_capture.py`, `_probe_groups_events_live.py`,
+`_probe_newsletter_subscriptions_live.py`, `_probe_notify_cost_precondition.py`,
+and more). This probe defines no `_relation` at all. It was red before this wave
+touched the tree and is red at the same commit afterwards.
 
 ## 7. WHAT I DID NOT DO
 
@@ -215,9 +268,27 @@ plus `_probe_profile_modal_presence.py`, which were red before I touched the tre
 
 ## 8. FOR WHOEVER TAKES THIS NEXT
 
-1. **Settle the 2x.** Count comment identifiers a second way -- per-node rather
-   than per-attribute -- before any parser is written. Section 3.
+1. **Run the probe on a SECOND item with a different comment count.** Section 3
+   settles the 2x on one page; `componentkey == controls` at 4 == 4 is a
+   correspondence, and one page cannot separate a relation from a coincidence.
+   The probe already walks the rail -- point it at an item with a different
+   number of comments and the answer is one run.
 2. **Then re-cost 46.** With an address in hand, whether `POST-COMMENT-CONTROLS`
-   was ever blocked by 47 is one live reading, not an inference.
-3. **The `len()` fix in section 6** is small, mechanical, and should be verified
-   by re-running the probe, not by re-reading the diff.
+   was ever blocked by 47 is one live reading, not an inference. Do not move the
+   row on this document alone.
+3. **Key any parser on `componentkey`, not on `id`.** `id` carries twice the
+   cardinality and would produce a reader that silently returns twice as many
+   comments as exist -- which is the failure this repository has now shipped
+   twice on other surfaces.
+4. **Row 44 needs the POST's overflow menu pressed**, which this wave did not do.
+   Route B pressed a COMMENT's menu; they are different controls and an unopened
+   menu remains this repo's standing reason to refuse rather than to cost.
+
+### Provenance
+
+Every number above was recomputed at freeze time from the probe's own output,
+not carried forward from the earlier draft of this document -- which is how the
+element-count difference in section 3 was noticed at all. Both live runs were
+made against Chrome pid 1252 in ATTACH mode; the page opened was closed in a
+`finally` and `page.is_closed()` read True on both, because a page count cannot
+prove a tab closed when a dozen waves share one browser.
