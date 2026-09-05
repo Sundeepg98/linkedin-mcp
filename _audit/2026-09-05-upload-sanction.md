@@ -173,6 +173,22 @@ page distinguishes them itself.
 so the row reading "attach files, max 5, 20 MB total" has no DOM expression of
 its own limit here. A wiring cannot learn that cap from the control.
 
+**THE PROBE NO LONGER PRINTS THOSE LISTS, AND THE LISTS ABOVE ARE STILL THE
+EVIDENCE.** A sibling wave extended the consent guard from urls to
+text-extraction sinks, and this probe's `print` of a value read off the page
+is one of the two new sites it caught. That guard is not in this tree yet --
+measured: the file's last commit here is `196394d`, it carries no text-sink
+rule, and both parametrized cases for this probe pass at HEAD -- but the line
+is the shape it names, so it was reduced rather than declared. A declaration
+keys on the whole sink expression and would tolerate that line forever
+whatever the expression later holds. The probe now emits a closed vocabulary:
+
+    [0] tokens=1  image=True video=False documents=False multiple=absent
+    [1] tokens=16 image=True video=True  documents=True  multiple=absent
+
+Same verdict, and it reads better than the value did. The exact list belongs
+to whoever wires the composer, re-read live at the moment they aim.
+
 **What this changes about the ledger:** `M M14 M15 M18` move from *no aiming
 strategy exists* to *the aim is available and the rest of the wiring is not
 built* -- a `_live_control` arm returning `UPLOAD_CONTROL_KIND`, a target
