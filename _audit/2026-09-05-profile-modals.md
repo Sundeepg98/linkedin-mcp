@@ -24,7 +24,13 @@ it by reading the artifact instead of obeying the queue.
   against his profile and the intro editor.
 * Pressed exactly one control -- the add-a-section menu button -- and read the
   page before and after as two absolute counts.
+* Extended it with an AIM reader -- named is not pressable -- and ran it a
+  second time, which **refuted a number in section 6.3 of this document.**
+  Section 6.4 carries the correction, beside the claim rather than at the foot
+  of the file.
 * Recomputed the cost of row 20 from the artifacts rather than from the ledger.
+* Had the denylist question re-measured against a corpus of my choosing by a
+  slice that imported the shipped predicate instead of rebuilding it.
 
 **DID NOT:**
 
@@ -147,6 +153,42 @@ a guard to reach a surface that has no address.
 So: the four frozen lists are untouched, and there is no digest to recompute.
 That is a stronger statement than a re-pin, and it is checkable in one command.
 
+**INDEPENDENTLY RE-MEASURED, because the quote above is a year-old reading
+against a corpus that has moved.** A slice re-took it today over a corpus this
+wave chose rather than the one the spec used -- 42 files across
+`tests/fixtures/` and `_audit/_census/`, 246 distinct url-shaped strings --
+and ran the causal form of the question rather than the containment form:
+**how many of those strings does `readonly.is_read_url` refuse, that it would
+admit if only those two entries were removed?** It monkeypatched the shipped
+tuple inside its own process and imported the shipped predicate rather than
+reimplementing it, which is this repo's standing rule after two home-made
+sweeps disagreed with the shipped one.
+
+    url-shaped strings containing "opentowork"     0
+    url-shaped strings containing "open-to-work"   0
+    admissions those two entries cost              0
+
+**AND ITS FALSE-NEGATIVE CHECK IS THE PART THAT MAKES THE ZERO WORTH
+ANYTHING.** A zero over a regex-extracted corpus is exactly the reading that
+looks the same when the extractor is broken, so the slice went back to the RAW
+TEXT and found the substrings ARE present -- as prose, and as a feature-flag
+key -- and never in a url. **So the extractor works and the zero is about
+addresses.** That is a stronger result than the containment zero on its own,
+and it is a correction to the shape of my own claim: the strings are not absent
+from the repo, they are absent from the class the denylist can act on.
+
+**Two independent corpora, taken a year apart by different methods, agree at
+zero.** The containment reading says the entries never match; the causal
+reading says removing them would change no verdict. Those are different
+claims and both were taken.
+
+The slice's own caveat travels with it and I am not dropping it: `git ls-files`
+returns nothing for the `_audit/_probe-*.html` glob, so the probe captures
+listed in this repo's audit directory are UNTRACKED and were not in its
+corpus. That is a hole in the denominator, not a zero -- but it cuts toward
+the same conclusion, since an untracked capture cannot be what a shipped
+denylist is protecting.
+
 ---
 
 ## 4. The census counts menu items and never lists them
@@ -168,12 +210,20 @@ different and smaller question.
     [role="button"], [role="link"], [role="textbox"], [role="combobox"],
     [contenteditable]:not([contenteditable="false"])
 
-It carries **no menuitem role**, while `CENSUS_JS`'s `counts` block does
-(`[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]`). So a
-menu item that is not also a button or a link is **counted and never listed**:
-press the menu, `counts.menu_items` moves, `controls` does not. `writes.py:7348`
-already records this for a different menu; this wave measured it on the
-add-section menu directly, and section 5 carries the numbers.
+**Measured mechanically rather than eyeballed** (regex over both strings
+verbatim): the `counts` block names **6** ARIA roles, the control selector
+names **4**, and **only `button` overlaps.** Five roles are counted and never
+listed as an individual control:
+
+    dialog   menu   menuitem   menuitemcheckbox   menuitemradio
+
+So a menu item that is not also a button or a link is **counted and never
+listed**: press the menu, `counts.menu_items` moves, `controls` does not.
+`writes.py:7348` already records this for one menu; the measurement here is
+that it is not one menu's problem but a **five-role hole in the census's
+listing**, and `dialog` being in it matters more than `menuitem` -- every
+blocker in this wave's set is named for a MODAL, and a dialog's contents reach
+`controls` only through whatever buttons happen to sit inside it.
 
 That is the `CENSUS_CONTROL_SELECTOR` failure this repo has hit before, still
 live: an instrument aimed at a role that is not there, reporting a clean
@@ -291,8 +341,15 @@ cheaper than implying otherwise.)
     aria-expanded=false 37   aria-expanded=true 0
     aria-haspopup 1   aria-modal=true 0
 
-**252 against a pin of 255** (`server.py:4034`) -- consistent with the census
-having read this surface, and re-dated today rather than resting on 2026-09-02.
+**SUPERSEDED BY SECTION 6.4 OF THIS FILE, four sections below, before this
+document was ever pushed.**
+This paragraph read: *"252 against a pin of 255 (`server.py:4034`) --
+consistent with the census having read this surface, and re-dated today rather
+than resting on 2026-09-02."* **A second run of the same probe eleven minutes
+later read 96.** The agreement with the pin was a coincidence of the moment,
+and I recorded it as corroboration because it flattered the reading. The
+sentence is kept rather than deleted so the mistake is legible; the number it
+rests on is not a measurement and section 6.4 says why.
 
 **252 census-visible controls where `linkedin_profile_editor_fields` read 17.**
 Those two numbers count different things -- the field reader is looking for
@@ -305,7 +362,105 @@ cheapest group in my four blockers and it is a re-read, not a press.
 
 **37 controls carry `aria-expanded="false"` and none carries `true`.** Every
 disclosure on that page is shut. That is the presence reading a delta-based
-pass would have had to infer.
+pass would have had to infer. (Run 2 read 12 on the same surface. See 6.4.)
+
+---
+
+## 6.4 -- SECOND RUN. Two things it settled, and one of them is against me.
+
+The probe was extended with an AIM reader and run again, same process shape,
+eleven minutes later.
+
+**THIS SECTION SUPERSEDES 6.3 ABOVE**, which read a count of 252 as
+corroborating a pinned 255. The second run read 96.
+
+NO `CORRECTS:` MARKER, AND THE REASON IS A MEASUREMENT ABOUT THE MACHINERY
+RATHER THAN A SHORTCUT. I wrote the marker pair first and
+`test_a_correction_is_findable_from_the_claim.py` refused it twice: a marker
+naming the file it lives in resolves ZERO documents. So the correction
+machinery does not model a document correcting itself -- and on inspection it
+should not, because the failure it exists to stop cannot happen here. That
+scar is that a reader who starts at the wrong claim can never find the
+corrector, since only the corrector names the correction. **When both are the
+same file, a reader who reaches 6.3 has already reached 6.4.** The pointer at
+6.3 is four sections from the fix, in the reading order, which is stronger
+than a cross-file marker and needs no index to survive.
+
+Recorded because the next wave to correct its own document in-flight will hit
+the same two reds and should not spend the round I spent.
+
+### The census control count on these surfaces is not a measurement
+
+Six readings, two processes, **no press succeeded in either run**:
+
+    /in/me/              67   80   |   80   235
+    /in/me/edit/intro/        252   |        96
+                        run 1      |  run 2
+
+`/in/me/` spans 67 to 235 -- a factor of 3.5. `/in/me/edit/intro/` read 252
+and then 96. **Nothing was pressed and nothing navigated between the paired
+readings**, so none of this is an effect anybody caused.
+
+Section 6.2 called the first run's +13 hydration and that stands, but it
+UNDERSTATED the problem by an order of magnitude, and understating it in the
+reassuring direction is the part worth naming. The honest conclusion is
+stronger and less convenient: **a single census control-count of either
+surface supports nothing.** That reaches `server.py:4034`'s pin of 255 for
+`profile_edit_intro`, and it reaches the census note at `server.py:4000` that
+the surface *"was read TWICE at 67 controls and twice at 256"* -- which reads
+as two stable states and is equally consistent with two samples of a quantity
+that does not settle.
+
+**What would settle it, and I did not do it:** N readings of one surface in
+one process at spaced intervals, reported as a series. That is one probe run
+and nobody has taken it. I am not asserting the pin is wrong -- I am asserting
+that two readings 2.6x apart mean the pin has never been shown right.
+
+### AIM: named is not pressable, and on this page it mostly is not
+
+The aim reader counts, per needle, how many named controls carry an
+ACTIVATION relation (`aria-haspopup`, `aria-expanded`, `aria-controls`). Its
+rule is a pure function controlled in four branches with the expected verdict
+written outside it. On his profile:
+
+    add_profile_section   ABSENT -- 0 controls carry the name
+    edit                  NAMED BUT INERT -- 6 named, 0 with any relation
+    open_to               AMBIGUOUS -- 3 of 5 carry one
+    hiring                NAMED BUT INERT -- 3 named, 0 with any relation
+
+**Three consequences, and each retires a plan somebody would otherwise make.**
+
+1. **`ADD-SECTION-MENU` (row 71) cannot be pressed because the control is not
+   drawn**, at count 0, from a reader that found 2 of them in its own fragment
+   seconds earlier. Whatever draws that menu is not on this render.
+2. **`OPEN-TO-HIRING-MODAL` (row 42): `hiring` is named 3 times and carries no
+   activation relation at all.** A wave told to press the Hiring entry has
+   nothing evidenced to press. This does NOT prove the control is not
+   clickable -- a React handler needs no aria attribute -- and that distinction
+   is the whole reading: **the page offers no evidence about what opens, so any
+   press here is a guess wearing a selector.**
+3. **`open_to` is AMBIGUOUS: 3 of 5 named controls carry a relation.** A press
+   would be choosing between three. That is exactly the bar
+   `linkedin_send_message` enforces on recipients -- *exactly one, or refuse* --
+   arriving unbidden on a different surface, and it is the same trap as the
+   spec's own 2026-08-24 correction, where aiming at `Open to` would have
+   opened a three-item menu containing none of the thing.
+
+**AND THIS IS WHERE `CENSUS_CONTROL_SELECTOR` WOULD HAVE FAILED SILENTLY.**
+`menus` and `menu_items` read 0 on every reading of both surfaces. A census
+aimed at a menu role finds nothing here -- not because the page has no menus,
+but because none is open and the selector that would list their items does not
+carry the role anyway (section 4). **A clean absence and a blind instrument
+produce the same table**, which is why the aim verdict distinguishes ABSENT
+from NAMED BUT INERT rather than reporting one count.
+
+### A caveat on the relation strings, stated rather than buried
+
+Run 1's landing relations were produced by this probe's FIRST `_relation`,
+which compared paths; run 2's by the sanctioned byte-identical one, which
+compares depth. **The two runs' relation strings are not comparable and I am
+making no claim from their difference.** The control counts are comparable
+because the reader did not change.
 
 ---
 
@@ -317,11 +472,22 @@ pass would have had to infer.
    `saveAndFetchNextStep`?* Everything else on those eleven rows is written.
 2. **A re-queue of rows 20 and 71 from MEASURE.** Row 20 is operator-gated;
    row 71 is a tool, not an observation. Neither is what its queue says.
-3. **`OPEN-TO-HIRING-MODAL` (row 42) is genuinely MEASURE and genuinely
-   cheap** -- the `Open to` menu item is observed across five captures and
-   resolves to three items, one of which is Hiring. Nothing acts on it and
-   nothing has to be pressed to cost it. It is the best-value row of my four
-   and I did not get to it beyond presence.
+3. **`OPEN-TO-HIRING-MODAL` (row 42) is genuinely MEASURE and I got it to the
+   aim and no further.** Section 6.4: `hiring` is named 3 times on his profile
+   and carries no activation relation; `open_to` is ambiguous at 3 of 5. So
+   the next step is NOT a press -- it is deciding which of the three `open_to`
+   openers is the menu, and that is settled by reading their relations, not by
+   pressing one and seeing what happens.
+4. **A stability series on the census control count.** One probe run, N
+   spaced readings of one surface in one process, reported as a series.
+   Section 6.4 shows the count spanning 67 to 235 on `/in/me/` with nothing
+   pressed; until somebody takes that series, every pinned control count in
+   this package is a single sample of a quantity nobody has shown settles.
+   **This is the cheapest high-value thing left in my four rows and it needs
+   no ruling, no boundary and no write.**
+5. **The `_probe_*.html` captures under `_audit/` are UNTRACKED** (section 3).
+   Any argument resting on "measured across all five profile captures" is
+   resting on files a clone does not have.
 4. **The intro editor's control set has a measured two-day half-life**
    (finding 7.6: 23 controls on 2026-08-31, 17 on 2026-09-02, *a different
    set*). Any row in census block A resting on the 2026-09-02 reading is now

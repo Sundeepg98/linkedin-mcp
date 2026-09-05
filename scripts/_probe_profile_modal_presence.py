@@ -155,6 +155,74 @@ STRUCTURAL_JS = """
 """
 
 
+#: Per needle, how many matching controls carry the ACTIVATION relations that
+#: make a press mean anything. ``dom.py:2889`` records the lesson this
+#: implements: ``aria-labelledby`` is a NAMING relation and ``<label for>`` is
+#: an ACTIVATION one, and an instrument reporting the first is not evidence
+#: about the second. Same shape here -- a control whose NAME contains "Open to"
+#: is not thereby a menu button, and pressing it because the name matched is
+#: how ``CENSUS_CONTROL_SELECTOR`` came to be aimed at a role that was not
+#: there.
+CANDIDATE_JS = """
+(cfg) => {
+  const nameOf = (el) => (
+    el.getAttribute('aria-label') ||
+    el.getAttribute('title') ||
+    (el.textContent || '')
+  ).trim().toLowerCase();
+  const nodes = Array.from(document.querySelectorAll(cfg.controlSelector));
+  const out = {};
+  for (const [key, needle] of cfg.needles) {
+    const hits = nodes.filter((el) => nameOf(el).includes(needle));
+    out[key] = {
+      named: hits.length,
+      haspopup: hits.filter((el) => el.hasAttribute('aria-haspopup')).length,
+      expandable: hits.filter(
+        (el) => el.hasAttribute('aria-expanded')).length,
+      controls_something: hits.filter(
+        (el) => el.hasAttribute('aria-controls')).length,
+      disabled: hits.filter(
+        (el) => el.hasAttribute('disabled') ||
+                el.getAttribute('aria-disabled') === 'true').length
+    };
+  }
+  return out;
+}
+"""
+
+
+async def read_candidates(page) -> dict:
+    return await page.evaluate(  # readonly-ok
+        CANDIDATE_JS,
+        {"controlSelector": STRUCTURAL["census_controls"],
+         "needles": [list(pair) for pair in NEEDLES]},
+    )
+
+
+def press_verdict(candidate: dict) -> str:
+    """Decide whether a needle has ONE pressable target. PURE, on purpose.
+
+    Factored out of the press so the rule can be read and argued with without
+    a browser, and so the press cannot quietly disagree with the report. The
+    bar is EXACTLY ONE control carrying an activation relation: zero means
+    nothing here opens, and two or more means a press would be choosing, and
+    a probe that chooses is guessing.
+    """
+    named = int(candidate.get("named", 0))
+    openers = max(int(candidate.get("haspopup", 0)),
+                  int(candidate.get("expandable", 0)))
+    if named == 0:
+        return "ABSENT: no control carries this name on this render"
+    if openers == 0:
+        return (f"NAMED BUT INERT: {named} control(s) carry this name and "
+                "NONE carries aria-haspopup or aria-expanded, so nothing here "
+                "is evidenced to open anything")
+    if openers > 1:
+        return (f"AMBIGUOUS: {openers} of {named} carry an activation "
+                "relation; a press would be choosing between them")
+    return f"ONE OPENER among {named} named -- pressable"
+
+
 def _relation(landed: str, asked: str) -> str:
     """Did the address serve, or did LinkedIn send us somewhere else?
 
@@ -225,6 +293,24 @@ async def run_controls(page) -> bool:
         print(f"  struct {key:24s} expected {expected}  "
               f"got {structural.get(key, -1)}  "
               f"{'PASS' if int(structural.get(key, -1)) == expected else 'FAIL'}")
+    # THE AIM RULE IS CONTROLLED TOO, and it needs no browser -- it is pure.
+    # Four cases, one per branch, with the expected VERDICT WORD written here
+    # rather than derived from the function. A rule whose only test is the
+    # rule itself certifies nothing.
+    for label, candidate, expect in (
+        ("nothing named", {"named": 0, "haspopup": 0, "expandable": 0},
+         "ABSENT"),
+        ("named, no relation", {"named": 3, "haspopup": 0, "expandable": 0},
+         "NAMED BUT INERT"),
+        ("two openers", {"named": 4, "haspopup": 2, "expandable": 2},
+         "AMBIGUOUS"),
+        ("one opener", {"named": 4, "haspopup": 1, "expandable": 0},
+         "ONE OPENER"),
+    ):
+        if not press_verdict(candidate).startswith(expect):
+            ok = False
+        print(f"  aim    {label:24s} expected {expect:16s} "
+              f"{'PASS' if press_verdict(candidate).startswith(expect) else 'FAIL'}")
     print(f"\n  DETECTOR USABLE: {ok}")
     if not ok:
         print("  Live numbers are NOT reported: a reader that cannot pass its "
@@ -257,7 +343,12 @@ async def read_surface(page, label: str, address: str) -> dict:
         if key == "census_controls":
             continue
         print(f"    struct {key:24s} {structural.get(key)}")
-    return {"needles": needles, "structural": structural}
+    candidates = await read_candidates(page)
+    print("  AIM -- named is not pressable, and the difference is the point:")
+    for key, _needle in NEEDLES:
+        print(f"    {key:24s} {press_verdict(candidates.get(key) or {})}")
+    return {"needles": needles, "structural": structural,
+            "candidates": candidates}
 
 
 async def press_add_section(page) -> dict:
