@@ -602,8 +602,60 @@ that has now failed to prevent its own violation three times is a missing TOOL,
 not a missing reminder**: the shipped sweep has no blob mode, so everyone who
 needs one writes their own badly. That is the fix worth making.
 
-Honest state, and it must travel with any push decision on that file:
-**DISK GREEN, HISTORY UNREAD.**
+Honest state at the time that was written: **DISK GREEN, HISTORY UNREAD.**
+
+### THE HISTORY IS NOW READ, AND THE MISSING TOOL IS BUILT
+
+The lead took the blob reading independently and it came back **3 blobs of one
+path**, `_audit/2026-09-05-jobs-tail.md`, class `operator_own_denied_terms`, all
+unpushed. Purge scoped, push blocked. **My caution was answered, not
+vindicated** -- the reading existed and I simply did not have it, which is the
+correct outcome of refusing to report a mute instrument rather than the reward
+for it.
+
+Then I built the thing whose absence caused the failure:
+**`scripts/sweep_blobs_for_identity.py`.**
+
+    needles: 218 spellings across 16 classes
+    range  : @{upstream}..HEAD -> 51 commit(s)
+    swept  : 388 distinct blob(s)
+    FAIL: 3 hit(s) in 1 distinct path(s).     exit 1
+
+**It agrees with the lead's independent pass: same count, same path, same
+class.** The two address the same objects by different names -- that pass
+reported COMMIT shas, this one dedupes by BLOB sha and adds the line number
+(403, which is also where the on-disk sweep found it, so three routes converge
+on one line).
+
+**AND THEY ARE NOT FULLY INDEPENDENT, WHICH MATTERS MORE THAN THE AGREEMENT.**
+Both import `load_wordlist()`, so a defect in the key would move both together
+-- and this repo has already recorded two corroborating readings being wrong
+together, an events selector reading 54 rows where there are 18 with two
+selectors agreeing because both were the same multiple of the truth. What IS
+independent here is the enumeration and the dedupe. Stating the shared
+component is the difference between corroboration and the appearance of it.
+
+**THE DESIGN IS ONE IDEA AND IT IS MY OWN SCAR ENCODED AS A GUARD.** The
+instrument REFUSES to report a green it cannot back: if the needle set is empty
+it exits 2 saying it cannot speak, **before sweeping anything**, so no
+reassuring output can precede the refusal, and it prints the needle count on
+every run so a reading arrives with its own denominator.
+
+SHOWN FAILING, both directions, because a mute instrument and a clean corpus are
+indistinguishable without both:
+
+    wordlist monkeypatched empty  ->  "REFUSING TO SWEEP: the needle set is
+                                       EMPTY."  exit 2
+    real range                    ->  218 needles, 3 hits, exit 1
+
+**The general lesson is the one worth keeping, and it is not about sweeping.**
+The rule *"when the repo ships an instrument, IMPORT IT"* was written down
+before any of the three violations and prevented none of them. Every violation
+had the same motive: wanting the instrument aimed somewhere its enumeration does
+not reach. **A rule that keeps being broken from an identical motive is a
+missing TOOL, not a missing reminder** -- the same discipline-to-mechanism
+conversion as the pre-commit hook the lead installed today, which now refuses at
+the index what three people were catching by hand.
 
 ### The single sentence, if only one survives
 
