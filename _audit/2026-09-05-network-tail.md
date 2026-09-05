@@ -283,7 +283,13 @@ live page load and I judged the reproduction of the two live-read obligations
 already queued in the freeze file to be a higher call on a shared browser.
 
 A fixture-wide offline census of hashtag needles was commissioned as a second,
-independent instrument. Its result is recorded in section 7.
+independent instrument. **It landed and it CHANGES the ruling above** -- see
+section 7. The evidence supports neither of the events wave's two classes but a
+third and narrower one: **LinkedIn still ships the hashtag data model and draws
+no hashtag surface.** So `C 52` carries forward MEASURE for a sharper reason
+than "I did not take the reading": a live type behind a withdrawn surface is
+precisely the thing that returns, and retiring the row on "the platform has no
+such surface" would retire it on a claim the evidence does not reach.
 
 ---
 
@@ -374,9 +380,67 @@ is committed, so the receiver can RE-TAKE the reading rather than trust it.
 
 Commissioned as an offline, independent check on whether any captured LinkedIn
 html in this repo draws a hashtag surface, with a must-fire control so that a
-zero could be distinguished from a broken scanner.
+zero could be distinguished from a broken scanner. Full working at
+`_audit/_scratch/_network-tail-hashtag-census.md` (gitignored -- the numbers
+that matter are reproduced here, because that path does not survive a clone).
 
-RESULT: recorded at close in section 8.
+    37 files (22 tracked, 15 untracked), 6955444 bytes
+
+    /feed/hashtag        0
+    Followed hashtags    0
+    feed/follows         0
+    #hiring              1
+    hashtag            146
+    CONTROL "<div"    4860, non-zero in EVERY one of the 37 files
+
+**Every zero carries its denominator**, which is the whole reason this was
+commissioned: a zero with no denominator is not a measurement. The three
+structural zeros are taken over all 37 files and all 6955444 bytes, and each was
+confirmed twice -- once by an occurrence counter, once by an independent tool.
+
+**AND THE NON-ZERO IS THE INTERESTING RESULT, NOT THE ZEROS.** `hashtag` occurs
+146 times, in exactly 4 of the 37 files, and **zero times in any of the 22
+tracked fixtures**. All 146 were inspected in context and fall into two buckets,
+neither of which is a rendered control:
+
+1. **icon-manifest asset filenames** -- a page-agnostic sprite manifest that
+   ships whatever the page shows, carrying a `hashtag` icon family alongside
+   many other generic entity-type families;
+2. **REST.li schema type definitions** -- a `Hashtag` record type, a urn type
+   reference, a `hashtagUrns` array field. The client's data model telling
+   itself the type exists.
+
+The two blobs are byte-identical across three of the four files, consistent with
+one shared inlined bundle rather than three independent occurrences of hashtag
+UI.
+
+### THIS SHARPENS THE CLAIM PAST BOTH OF THE EVENTS WAVE'S TWO CLASSES
+
+The events wave gave two classes -- *"the platform has no such surface"*
+(permanent, universal) and *"the page reads zero for this account"* (reversible).
+**The honest reading here is neither, and it is more useful than both:**
+
+> **LinkedIn still ships the hashtag DATA MODEL and draws no hashtag SURFACE.**
+
+A bare zero would have been consistent with LinkedIn having deleted the concept.
+It has not: the type is right there in the bundle. What is absent is every
+rendered affordance -- no `/feed/hashtag` link, no `Followed hashtags` heading,
+no follow control -- across 6955444 bytes in which the control needle fires
+4860 times.
+
+**That matters for the ROW rather than for LinkedIn.** A retired concept stays
+retired; a live type behind a withdrawn surface is exactly the thing that comes
+back, and a row retired on "the platform has no such surface" would be retired
+on a claim this evidence does not support. It supports the narrower one.
+
+**LIMITS, stated rather than left for a reader to find.** These are captures
+this repo happens to hold, taken for other purposes -- feed, groups, events,
+profile. **None was taken while looking for a hashtag surface**, so this is
+evidence of absence exactly to the degree those pages would have drawn one, and
+that degree is unquantified. The 22 tracked fixtures are sanitised, and a
+sanitiser that stripped hashtag markup would produce this same zero; the 15
+untracked raw captures are what carry the weight, and they are the ones that do
+not survive a clone.
 
 ---
 
