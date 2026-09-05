@@ -200,7 +200,8 @@ async def _read_events(page, attempt: int) -> dict:
               f"body_elements={card['body_elements']} | "
               f"footer_found={card['footer_found']} "
               f"footer_text_chars={card['footer_text_chars']} "
-              f"footer_elements={card['footer_elements']}")
+              f"footer_elements={card['footer_elements']} "
+              f"announced_total={card['announced_total']}")
         print(f"        card {index}: known={card['known']!r} "
               f"rows={card['rows']} event_links={card['event_links']} "
               f"heading_shape={card['heading_shape']!r}")

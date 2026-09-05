@@ -77,11 +77,14 @@ ANCHORS_PER_ROW = 3
 
 
 class _Node:
-    def __init__(self, tag, classes="", href=None, text="", children=()):
+    def __init__(
+        self, tag, classes="", href=None, text="", children=(), aria_label=None
+    ):
         self.tag = tag
         self.classes = classes
         self.href = href
         self.text = text
+        self.aria_label = aria_label
         self.children = list(children)
 
     def walk(self):
@@ -92,16 +95,28 @@ class _Node:
 
 _ATTR = re.compile(
     r'^(?P<tag>[a-z0-9]+)?'
-    r'(?:\[(?P<attr>[a-z-]+)(?P<op>[~*]?=)"(?P<value>[^"]+)"\])?$'
+    r'(?:\[(?P<attr>[a-z-]+)(?:(?P<op>[~*]?=)"(?P<value>[^"]+)")?\])?$'
 )
 
 
-def _matches(node, selector):
-    """The three operators this reader uses, and no others.
+def _attribute(node, attr):
+    if attr == "class":
+        return node.classes
+    if attr == "href":
+        return node.href
+    if attr == "aria-label":
+        return node.aria_label
+    return None
 
-    ``~=`` is a whitespace-separated TOKEN match; ``*=`` is a SUBSTRING match.
-    Implemented separately rather than reduced to one, because the difference
-    between them is the defect this file exists to pin.
+
+def _matches_one(node, selector):
+    """The operators this reader uses, and no others.
+
+    ``~=`` is a whitespace-separated TOKEN match; ``*=`` is a SUBSTRING match;
+    a bare ``[attr]`` is a PRESENCE match. Implemented separately rather than
+    reduced to one, because the difference between the first two is the defect
+    this file exists to pin -- and it turned out to be a defect twice, at the
+    row selector and again at the footer selector.
     """
     if selector.strip() == "*":
         return True
@@ -114,14 +129,34 @@ def _matches(node, selector):
     attr = parsed.group("attr")
     if attr is None:
         return True
-    value = parsed.group("value")
+    haystack = _attribute(node, attr)
     op = parsed.group("op")
-    haystack = node.classes if attr == "class" else (node.href or "")
+    if op is None:
+        # PRESENCE. None and the empty string are both absent, which is what
+        # a browser means by [aria-label].
+        return bool(haystack)
+    value = parsed.group("value")
+    haystack = haystack or ""
     if op == "~=":
         return value in haystack.split()
     if op == "*=":
         return value in haystack
     return haystack == value
+
+
+def _matches(node, selector):
+    """A SELECTOR LIST, because the shipped footer selector is one.
+
+    The footer selector names two class families separated by a comma -- the
+    promoted card's footer token contains the other as a SUBSTRING and is a
+    different token, so one ``~=`` match found two cards of three. A stub that
+    could not parse a comma would have made that fix untestable.
+    """
+    return any(
+        _matches_one(node, part)
+        for part in selector.split(",")
+        if part.strip()
+    )
 
 
 class _Loc:
@@ -145,6 +180,11 @@ class _Loc:
                 child for child in node.walk() if _matches(child, selector)
             )
         return _Loc(found)
+
+    async def get_attribute(self, name):
+        if not self.nodes:
+            return None
+        return _attribute(self.nodes[0], name)
 
     async def inner_text(self, timeout=None):
         """The node's own text plus its descendants', as a browser returns it.
@@ -191,8 +231,22 @@ def _row():
 #: carries the control that announces how many events the section really has.
 FOOTER_CLASS = "events-events-card-container__footer display-flex justify-center"
 
+#: The PROMOTED card's footer, and it is a different class TOKEN that contains
+#: the one above as a SUBSTRING. A ``~=`` match on the first finds two cards of
+#: three, which is how the announced total went missing on the first pass.
+PROMOTED_FOOTER_CLASS = (
+    "events-premium-events-card-container__footer display-flex justify-center"
+)
 
-def _card(heading, rows, classes=CARD_CLASS, body_extra=(), footer_extra=()):
+
+def _card(
+    heading,
+    rows,
+    classes=CARD_CLASS,
+    body_extra=(),
+    footer_extra=(),
+    footer_class=FOOTER_CLASS,
+):
     """A card: a header carrying the heading, a body of rows, and a footer.
 
     ``body_extra`` puts something in the body that is NOT a row -- a shimmer,
@@ -205,7 +259,7 @@ def _card(heading, rows, classes=CARD_CLASS, body_extra=(), footer_extra=()):
         BODY_CLASS,
         children=[_row() for _ in range(rows)] + list(body_extra),
     )
-    footer = _Node("footer", FOOTER_CLASS, children=list(footer_extra))
+    footer = _Node("footer", footer_class, children=list(footer_extra))
     return _Node(
         "section",
         classes,
@@ -246,8 +300,26 @@ def _page(
         )
     cards = [
         own,
-        _card("Exclusive for a tier name", promoted_rows, PROMOTED_CARD_CLASS),
-        _card("Recommended for you", recommended_rows),
+        _card(
+            "Exclusive for a tier name",
+            promoted_rows,
+            PROMOTED_CARD_CLASS,
+            footer_extra=[
+                _Node("button", text="Show more", aria_label="Show all 50 events")
+            ],
+            footer_class=PROMOTED_FOOTER_CLASS,
+        ),
+        _card(
+            "Recommended for you",
+            recommended_rows,
+            footer_extra=[
+                _Node(
+                    "button",
+                    text="Show more",
+                    aria_label="Show more about a section name",
+                )
+            ],
+        ),
     ]
     return _FakePage(_Node("body", children=cards))
 
@@ -478,6 +550,66 @@ async def test_an_empty_footer_does_not_turn_the_zero_into_a_refusal():
     assert reading["cards"][0]["footer_elements"] == 0
     assert reading["verdict"] == "empty_beside_full_siblings"
     assert reading["registered_events"] == 0
+
+
+@pytest.mark.asyncio
+async def test_the_announced_total_is_read_and_only_the_integer_leaves():
+    """LINKEDIN WRITES THE SECTION'S REAL SIZE INTO ITS PAGING CONTROL'S LABEL.
+
+    Measured on this page: three rows drawn, FIFTY announced. Both paging
+    footers read "Show more" as visible text, so the number is in the
+    accessible name and nowhere else.
+
+    THE LABEL IS NEVER EMITTED. What comes back is an integer or ``None``, and
+    this asserts the absence as carefully as the presence: no field on the
+    record carries the label string.
+    """
+    reading = await events.read_events_home(_page())
+    assert reading["cards"][1]["announced_total"] == 50
+    assert reading["cards"][1]["rows"] == 3, (
+        "3 drawn against 50 announced is the whole point -- a reader taking "
+        "rows as a total is wrong by a factor of seventeen here"
+    )
+    serialised = repr(reading)
+    assert "Show all" not in serialised
+    assert "Show more" not in serialised
+
+
+@pytest.mark.asyncio
+async def test_a_paging_control_with_no_number_announces_nothing_not_zero():
+    """``None`` IS NOT ZERO AND IS NOT "NO CONTROL".
+
+    Measured: the recommendation footer carries a control whose label has no
+    digits at all. The section pages and does not say how far. ``None`` there
+    beside a non-zero ``footer_elements`` is what says which.
+    """
+    reading = await events.read_events_home(_page())
+    assert reading["cards"][2]["announced_total"] is None
+    assert reading["cards"][2]["footer_elements"] > 0
+    assert reading["cards"][0]["announced_total"] is None
+    assert reading["cards"][0]["footer_elements"] == 0
+
+
+@pytest.mark.asyncio
+async def test_the_promoted_footer_family_is_matched_at_all():
+    """THE SUBSTRING-VERSUS-TOKEN DEFECT, ARRIVING A SECOND TIME.
+
+    The promoted card's footer token CONTAINS the ordinary one as a substring
+    and is a different token, so the first version of the footer selector --
+    a single ``~=`` -- found two cards of three and the announced total was
+    invisible. Caught because the live reading printed ``footer_found=False``
+    for a card where the offline parse had found a footer: two instruments
+    disagreeing, which is worth more than either agreeing with itself.
+    """
+    reading = await events.read_events_home(_page())
+    assert [card["footer_found"] for card in reading["cards"]] == [
+        True,
+        True,
+        True,
+    ]
+    assert "," in events.EVENTS_HOME_CARD_FOOTER_SELECTOR, (
+        "the footer selector must name BOTH class families"
+    )
 
 
 def test_only_one_verdict_may_carry_a_number():

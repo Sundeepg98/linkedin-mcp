@@ -89,6 +89,7 @@ The events root draws no counter of its own: ``aria-haspopup`` 0,
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from linkedin_server import shape
@@ -175,9 +176,38 @@ EVENTS_HOME_BODY_CONTENT_SELECTOR = "*"
 #:
 #: The promoted card uses a different footer class family and is not matched
 #: here, exactly as with the body. Recorded rather than hidden.
+#:
+#: TWO CLASS FAMILIES, AND THE SECOND WAS ADDED AFTER THE FIRST VERSION WAS
+#: MEASURED MISSING IT. The promoted card's footer is
+#: ``events-premium-events-card-container__footer`` -- which CONTAINS the
+#: other token as a substring and is a different token, so a ``~=`` match on
+#: one finds two cards of three. That is exactly the substring-versus-token
+#: distinction that cost this reader its row count, arriving a second time at
+#: a different site. It was caught here because the live reading printed
+#: ``footer_found=False`` for one card and the offline parse found a footer
+#: there, and two instruments disagreeing is worth more than either agreeing
+#: with itself.
 EVENTS_HOME_CARD_FOOTER_SELECTOR = (
-    'footer[class~="events-events-card-container__footer"]'
+    'footer[class~="events-events-card-container__footer"], '
+    'footer[class~="events-premium-events-card-container__footer"]'
 )
+
+#: A labelled control inside a footer. LinkedIn writes the section's real size
+#: into this label and nowhere else: the visible text is "Show more" on both
+#: paging footers, and only the accessible name carries the number.
+EVENTS_HOME_FOOTER_CONTROL_SELECTOR = "button[aria-label], a[aria-label]"
+
+#: THE ANNOUNCED TOTAL, AND ONLY THE INTEGER EVER LEAVES.
+#:
+#: Measured on this page: one footer label announces FIFTY against three rows
+#: drawn, and the other footer label carries no number at all. So a paging
+#: control means the count is a floor, and an announced total -- when there is
+#: one -- is what the floor is a floor of.
+#:
+#: The label itself is never emitted. A number is not a name, and this is the
+#: narrowest thing that answers the question: the largest integer in the
+#: footer's control labels, or ``None``.
+_ANNOUNCED_TOTAL = re.compile(r"\d[\d,]{0,8}")
 
 #: THE CLOSED SET, AND IT IS THE WHOLE OF THE IDENTIFICATION.
 #:
@@ -193,6 +223,44 @@ EVENTS_HOME_CARD_FOOTER_SELECTOR = (
 #: heading and row count, so a reader can tell "LinkedIn renamed the section"
 #: from "the page did not load" without opening a browser.
 EVENTS_HOME_SELF_SCOPED_HEADINGS: tuple[str, ...] = ("your events",)
+
+
+async def _announced_total(footer: Any) -> Optional[int]:
+    """The section size LinkedIn writes into its own paging control's label.
+
+    **ONLY THE INTEGER LEAVES.** The label is read inside this function and
+    discarded; what is returned is a number or ``None``. A number is not a
+    name, and this is the narrowest thing that answers the question.
+
+    ``None`` IS NOT ZERO AND IS NOT "NO CONTROL". Measured: both paging
+    footers on this page read "Show more" as visible text, one label carries a
+    number and the other does not. So a footer control with no number in its
+    label returns ``None`` -- the section pages, and it does not say how far.
+    The caller has ``footer_elements`` to tell those apart.
+
+    THE LARGEST NUMBER, not the first, and the reason is that a label may
+    carry more than one. Taking the first would be position-aiming inside a
+    string, which is the same defect as position-aiming inside a page.
+    """
+    try:
+        controls = footer.locator(EVENTS_HOME_FOOTER_CONTROL_SELECTOR)
+        count = int(await controls.count())
+    except Exception:  # noqa: BLE001
+        return None
+    best: Optional[int] = None
+    for index in range(count):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # noqa: BLE001
+            continue
+        for match in _ANNOUNCED_TOTAL.finditer(str(label or "")):
+            try:
+                value = int(match.group(0).replace(",", ""))
+            except ValueError:  # pragma: no cover - the pattern is digits
+                continue
+            if best is None or value > best:
+                best = value
+    return best
 
 
 def _events_home_verdict(
@@ -339,6 +407,7 @@ async def read_events_home(page: Any) -> dict[str, Any]:
         footer_found = False
         footer_text_chars = 0
         footer_elements = 0
+        announced_total: Optional[int] = None
         try:
             footers = card.locator(EVENTS_HOME_CARD_FOOTER_SELECTOR)
             if await footers.count():
@@ -357,6 +426,7 @@ async def read_events_home(page: Any) -> dict[str, Any]:
                         EVENTS_HOME_BODY_CONTENT_SELECTOR
                     ).count()
                 )
+                announced_total = await _announced_total(footer)
         except Exception:  # noqa: BLE001
             footer_found = False
         raw_headings.append(heading)
@@ -376,6 +446,7 @@ async def read_events_home(page: Any) -> dict[str, Any]:
                 "footer_found": bool(footer_found),
                 "footer_text_chars": int(footer_text_chars),
                 "footer_elements": int(footer_elements),
+                "announced_total": announced_total,
             }
         )
 
