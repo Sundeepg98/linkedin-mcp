@@ -684,8 +684,18 @@ count over a pool a dozen waves share. The PAGE was closed, never the context.
     10c02b6  audit: K10 measured, blind spot fired twice      +68  -6
     ae2ed91  audit: another wave converged independently      +35  -0
     2956c05  audit: a freeze red that was not real            +45  -0
+    6b90f42  audit: freeze the commit ledger                  +15  -9
     ----------------------------------------------------------------
-    TEN COMMITS, FOUR DISTINCT PATHS
+    ELEVEN COMMITS, FOUR DISTINCT PATHS
+
+**AND A LEDGER CANNOT COUNT THE COMMIT THAT WRITES IT.** The line above read
+TEN when it was committed, and committing it made eleven. That is not
+avoidable -- it is structural, and every wave freezing a ledger hits it -- but
+leaving the ten would have been a number that FLATTERS, understating the
+wave's own footprint, and this document has already corrected two of those.
+So the eleventh is listed and the twelfth, which adds this paragraph, is not.
+**The invariant that survives is the one that matters: FOUR distinct paths,
+whatever the commit count.**
 
 **Each was verified with `git show HEAD:<path> | wc -l` against the insertion
 count the commit reported**, because a failed `git commit --only` rolls the
