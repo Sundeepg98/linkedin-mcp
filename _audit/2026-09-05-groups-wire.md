@@ -261,16 +261,18 @@ payload rather than trusting the chain. **No identifier was printed** -- the
 module publishes them because a caller computing overlap needs them, and a
 transcript is not that caller.
 
-**PAGE LOADS SPENT BY THIS WAVE: 8, counted per run rather than remembered.**
+**PAGE LOADS SPENT BY THIS WAVE: 11, counted per run rather than remembered.**
 
     _probe_groups_locator_walk.py            1 run  x 5 loads    5
     _probe_group_memberships_tool_live.py    1 run  x 3 loads    3
+    the tool re-run after section 8 landed   1 run  x 3 loads    3
     the aborted tool run (AttributeError)    navigated nowhere   0
                                                               ----
-                                                                 8
+                                                                11
 
-**THIS PARAGRAPH SAID 16 IN ITS FIRST DRAFT**, from my own sense of what I had
-run rather than from the runs. Corrected before the commit and left visible,
+**THIS PARAGRAPH SAID 16 IN ITS FIRST DRAFT, THEN 8**, from my own sense of what I had
+run rather than from the runs. Corrected before the commit, then corrected AGAIN when a third
+run happened after it was written -- and left visible both times,
 because a cost section that is merely wrong and a cost section that is out of
 date are indistinguishable to a reader -- which is the finding
 `2026-09-05-groups-surface-measured.md` section 6 records about its own.
@@ -288,6 +290,39 @@ control census read 20 at both ends of the locator run.
    first attempt raised `AttributeError`; the public `mcp.call_tool` is the
    route. Cost: one aborted run that navigated nowhere and is not counted in
    the sixteen.
+
+## 8A. A ZERO HAD TO BE MADE INTERPRETABLE, AND ONE BRANCH IS HONESTLY AMBIGUOUS
+
+The reader answers five today. **It had no way to say what a ZERO would
+mean**, which is the newsletter tool's `heading_seen` gap arriving on a
+surface that needs it more. `groups_page.interpret_zero` closes it with three
+states, and only two of them are answers:
+
+    not_zero      memberships were found. Nothing to interpret.
+    instrument    no group anchor, or no disclosure control, or the climb
+                  exhausted its bound. The reader COULD NOT SEE, so the zero
+                  is a fact about the reader.
+    ambiguous     the walk ran cleanly over real anchors and real controls
+                  and resolved no row-scoped control.
+
+**`ambiguous` IS NOT A HEDGE AND IT IS THE INTERESTING ONE.** LinkedIn draws
+suggestion rows with NO per-row control -- so a page of suggestions alone,
+which is exactly what a group-less account draws, produces the identical
+reading to a restyle that moved the control. **Nobody here can separate them,
+because there is no known-empty groups account to test the reader against.**
+That is the freeze ruling's own shape, one surface over: *a reading no
+instrument can fail is not a reading.* So the tool never says he belongs to no
+group, and `test_no_branch_ever_says_he_belongs_to_no_group` asserts that over
+every reachable branch.
+
+**THAT TEST CAUGHT MY OWN PROSE AND MY FIRST FIX WAS THE WRONG ONE.** The
+`instrument` branch ended *"...and none of them says he belongs to no group"*
+-- the forbidden phrase, negated. My first response was to strip that exact
+sentence before checking, i.e. to park a negation in an exemption. **This
+repository already has the rule**: a negated write verb still reads as a
+write, and the exemption list carries a control asserting each entry really
+does make the claim. The prose was reworded instead, the exemption was
+deleted, and the test now needs none.
 
 ## 9. WHAT IS STILL OWED
 

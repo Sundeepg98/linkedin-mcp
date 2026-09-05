@@ -327,3 +327,89 @@ def test_the_tool_declares_the_page_loads_it_takes():
     """Three loads, said out loud in the payload rather than left to count."""
     source = ast.unparse(_function(_tree("server.py"), TOOL))
     assert "'pages_loaded': 3" in source or '"pages_loaded": 3' in source
+
+
+# ---------------------------------------------------------------------------
+# 5. A ZERO IS NEVER PUBLISHED AS "HE BELONGS TO NO GROUP"
+# ---------------------------------------------------------------------------
+
+def _zero_reading(**over) -> dict:
+    base = {
+        "anchors": 10,
+        "controls": 22,
+        "climbs_exhausted": 0,
+        "memberships": {"distinct": 0},
+    }
+    base.update(over)
+    return base
+
+
+def test_a_zero_from_a_blind_reader_is_about_the_instrument():
+    """Three separate ways the reader can be blind, each landing correctly.
+
+    A zero from a reader that could not see is a fact about the instrument.
+    Reporting it as a fact about the account is the defect this repository has
+    recorded on three surfaces; here it is asserted rather than avoided.
+    """
+    for over in (
+        {"anchors": 0},
+        {"controls": 0},
+        {"climbs_exhausted": 3},
+    ):
+        out = groups_page.interpret_zero(_zero_reading(**over))
+        assert out["state"] == "instrument", over
+        assert out["about_the_account"] is False
+
+
+def test_a_clean_walk_resolving_nothing_is_AMBIGUOUS_and_says_so():
+    """THE HONEST BRANCH, AND IT IS NOT A HEDGE.
+
+    A page of suggestions alone -- which is what a group-less account draws --
+    is indistinguishable from a restyle that moved the per-row control,
+    because no known-empty groups account exists to test against. The reader
+    must not pick the flattering branch.
+    """
+    out = groups_page.interpret_zero(_zero_reading())
+    assert out["state"] == "ambiguous"
+    assert out["about_the_account"] is None
+    assert "NOTHING HERE CAN SEPARATE THEM" in out["why"]
+
+
+def test_no_branch_ever_says_he_belongs_to_no_group():
+    """The claim that must not exist, asserted over every reachable branch."""
+    # THE FORBIDDEN PHRASES INCLUDE THEIR NEGATIONS, and the first draft of
+    # this test tried to exempt one by string surgery -- stripping the exact
+    # sentence "It is not reported as 'he belongs to no group'." before
+    # checking. THAT WAS THE WRONG FIX and this repository already has the
+    # rule for it: a NEGATED write verb still reads as a write, so the
+    # exemption list carries a control asserting each entry really does make
+    # the claim. Parking a negation in an exemption is how the real check
+    # gets lost. The prose was reworded instead, so the phrase does not
+    # appear here in any form and this test needs no exemption at all.
+    forbidden = ("belongs to no group", "has no groups", "no memberships")
+    for reading in (
+        _zero_reading(),
+        _zero_reading(anchors=0),
+        _zero_reading(controls=0),
+        _zero_reading(climbs_exhausted=1),
+        _zero_reading(memberships={"distinct": 5}),
+    ):
+        why = groups_page.interpret_zero(reading)["why"]
+        for claim in forbidden:
+            assert claim not in why, (claim, why)
+
+
+def test_a_nonzero_reading_has_no_zero_to_interpret():
+    out = groups_page.interpret_zero(_zero_reading(memberships={"distinct": 5}))
+    assert out["state"] == "not_zero"
+    assert out["about_the_account"] is None
+
+
+def test_the_reader_attaches_the_zero_interpretation_to_every_reading():
+    """Structural: the field cannot be forgotten by a future edit."""
+    source = (PACKAGE / "groups_page.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    node = _function(tree, "read_group_memberships")
+    body = ast.unparse(node)
+    assert "interpret_zero" in body
+    assert "zero_reading" in body

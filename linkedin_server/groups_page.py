@@ -90,11 +90,18 @@ down at ``shape.invitation_badge``:
 future non-zero badge repairs.** The counters this package can read are nav
 badges for OTHER surfaces -- pending invitations and unread notifications.
 Nothing measured anywhere says a ``/groups/`` load touches either. So even
-``unmoved`` on a non-zero badge would certify that *the invitation counter did
-not move*, and would say nothing about a groups-specific cost, because **this
+``unmoved`` on a non-zero badge certifies only that *the counters it names did
+not move*, and says nothing about a groups-specific cost, because **this
 server holds no instrument that is known to respond to the event being
 bracketed.** That is stated in the payload rather than left for a caller to
 work out, and it is why the verdict field is never a bare boolean.
+
+**THAT SENTENCE ORIGINALLY NAMED THE INVITATION COUNTER ALONE**, written
+before the first live run, and the run made it wrong in a small and
+instructive way: the verdict that came back was carried by the NOTIFICATIONS
+counter. The wording is generic now because the limit is about the CLASS --
+every counter here belongs to another surface -- and naming one instance made
+it read as a fact about that instance.
 """
 from __future__ import annotations
 
@@ -243,7 +250,7 @@ async def read_group_memberships(page: Any) -> dict[str, Any]:
     others = groups.membership_tally(remaining)
     overlap = groups.disjoint(claimed, remaining)
 
-    return {
+    reading = {
         "anchors": total,
         "controls": control_count,
         "rows_found": rows_found,
@@ -257,6 +264,95 @@ async def read_group_memberships(page: Any) -> dict[str, Any]:
         "corroborated_memberships": CORROBORATED_MEMBERSHIPS,
         "agrees_with_corroborated": (
             memberships["distinct"] == CORROBORATED_MEMBERSHIPS
+        ),
+    }
+    reading["zero_reading"] = interpret_zero(reading)
+    return reading
+
+
+def interpret_zero(reading: Optional[dict[str, Any]]) -> dict[str, Any]:
+    """Is a membership count of ZERO about the ACCOUNT or about this READER?
+
+    **THE QUESTION THE NEWSLETTER TOOL ASKS WITH ``heading_seen``, ASKED HERE
+    BECAUSE THIS SURFACE NEEDS IT MORE.** A zero from a reader that could not
+    see is a fact about the instrument; a zero from a reader that could is a
+    fact about the account. They never share a field, and a caller that
+    reports the first when it measured the second has answered the question
+    backwards -- which is a defect this repository has now recorded on three
+    separate surfaces.
+
+    ``state`` is one of:
+
+    ``not_zero``      memberships were found. Nothing to interpret.
+    ``instrument``    the page drew no group anchor, or no disclosure control,
+                      or the climb exhausted its bound. The reader could not
+                      see, so the zero says nothing about his memberships.
+    ``ambiguous``     the walk ran cleanly over real anchors and real controls
+                      and resolved no row-scoped control.
+
+    **``ambiguous`` IS THE HONEST ANSWER AND IT IS NOT A HEDGE.** It is what a
+    genuinely group-less account would look like -- LinkedIn draws suggestion
+    rows with no per-row control, so a page of suggestions alone produces
+    exactly this reading -- AND it is what a LinkedIn restyle that moved the
+    control would look like. **Nobody here can separate them, because there is
+    no known-empty groups account to test the reader against.** That is the
+    same shape as the freeze ruling's note about the profile's Groups tab: a
+    reading no instrument can fail is not a reading, and the correct response
+    is to say so rather than to pick the flattering branch.
+
+    IT NEVER ASSERTS THE ACCOUNT HAS NO GROUPS. There is no branch that says
+    that, on purpose, for exactly the reason above.
+    """
+    seen = dict(reading or {})
+    memberships = dict(seen.get("memberships") or {})
+    distinct = memberships.get("distinct")
+    anchors = seen.get("anchors")
+    controls = seen.get("controls")
+    exhausted = seen.get("climbs_exhausted")
+
+    if distinct:
+        return {
+            "state": "not_zero",
+            "about_the_account": None,
+            "why": (
+                "%d distinct memberships were resolved, so there is no zero "
+                "to interpret." % int(distinct)
+            ),
+        }
+
+    blind: list[str] = []
+    if not anchors:
+        blind.append("the page drew no anchor carrying a group segment")
+    if not controls:
+        blind.append("the page drew no control declaring aria-expanded")
+    if exhausted:
+        blind.append(
+            "%d control(s) exhausted the %d-level climb bound"
+            % (int(exhausted), MAX_CLIMB)
+        )
+    if blind:
+        return {
+            "state": "instrument",
+            "about_the_account": False,
+            "why": (
+                "this zero is a fact about the READER, not about his "
+                "memberships: " + "; ".join(blind) + ". A page that had not "
+                "hydrated, a restyle, or a wrong aim all land here, and not "
+                "one of them is evidence about his account in either "
+                "direction."
+            ),
+        }
+    return {
+        "state": "ambiguous",
+        "about_the_account": None,
+        "why": (
+            "the walk ran cleanly over %s anchor(s) and %s control(s) with no "
+            "climb exhausted, and resolved no row-scoped control. That is "
+            "what an account with no groups looks like AND what a restyle "
+            "that moved the per-row control looks like, and NOTHING HERE CAN "
+            "SEPARATE THEM -- there is no known-empty groups account to test "
+            "this reader against. So this is reported as AMBIGUOUS and never "
+            "as a membership count about the account." % (anchors, controls)
         ),
     }
 
