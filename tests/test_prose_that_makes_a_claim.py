@@ -779,21 +779,22 @@ _SLUG_ADDRESS = re.compile(r"/in/<(?:member|vanity|slug)>", re.I)
 #: checked -- exempting ``server.py`` wholesale would blind the guard to the
 #: file where three of the five claims live.
 #:
-#: ONE ENTRY, and it is a hand-off rather than a judgement. This sentence
-#: narrates the past ("It WAS safe -- the allowlist admits ...") and its
-#: allowlist clause is in the present tense, so it reads as a live permission
-#: that the boundary no longer grants. It belongs in the correction that
-#: fixed its two siblings. IT WAS NOT TOUCHED BECAUSE ``server.py`` WAS BEING
-#: WRITTEN BY ANOTHER WAVE at the moment this landed -- measured with
-#: ``git status``, not assumed -- and today's rule is that you do not edit a
-#: file a neighbour is mid-edit in. Whoever owns that block should retense the
-#: clause and delete this entry; the guard will then hold at empty.
-_ALLOWED_ADMISSION_SITES: tuple[tuple[str, str], ...] = (
-    (
-        "server.py",
-        "It was safe -- the allowlist admits",
-    ),
-)
+#: EMPTY, and it was not empty for the first twenty minutes of its life.
+#:
+#: A fourth sentence in ``server.py`` narrated the past with its allowlist
+#: clause in the present tense -- "It was safe -- the allowlist admits
+#: ``/in/<member>/details/skills/``" -- so a reader met a live permission the
+#: boundary no longer grants. It was PINNED rather than fixed, because
+#: ``server.py`` was being written by another wave at that moment (measured
+#: with ``git status``, not assumed) and you do not edit a file a neighbour is
+#: mid-edit in. When that wave committed, the sentence was retensed and the
+#: entry deleted.
+#:
+#: The pin was by FRAGMENT rather than by filename on purpose, and it stays
+#: that way: exempting ``server.py`` wholesale would have blinded this guard
+#: to the file where three of the five claims live -- so the pin that let one
+#: sentence through went on checking the other two.
+_ALLOWED_ADMISSION_SITES: tuple[tuple[str, str], ...] = ()
 
 
 def _admission_sentences() -> list[tuple[str, str]]:

@@ -3520,8 +3520,9 @@ async def linkedin_my_profile(
                     #
                     # This read used to aim at `f"{BASE_URL}/in/{slug}/..."`,
                     # where `slug` is parsed OUT OF a previous navigation's
-                    # landed url. It was safe -- the allowlist admits
-                    # `/in/<member>/details/skills/` -- and it was the same
+                    # landed url. It was safe AT THE TIME -- the allowlist
+                    # then admitted `/in/<member>/details/skills/`, and no
+                    # longer does -- and it was the same
                     # class as the defect that put his vanity slug in a
                     # traceback from both payload probes: the aim came from the
                     # page rather than from this package. A page that can
