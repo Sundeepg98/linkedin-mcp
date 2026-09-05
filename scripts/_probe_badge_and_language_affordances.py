@@ -124,21 +124,47 @@ MUST_BE_ABSENT_AT = 8
 # secondary-language profile has a page that declares more than one language.
 _SCRIPT = """
 (needles) => {
-  const text = (document.body ? document.body.innerText : "").toLowerCase();
   const isWordChar = (c) => c !== undefined && /[a-z0-9]/.test(c);
-  const hits = [];
-  for (const n of needles) {
+  const countIn = (haystack, n) => {
     let from = 0;
     let found = 0;
     for (;;) {
-      const at = text.indexOf(n, from);
+      const at = haystack.indexOf(n, from);
       if (at === -1) break;
-      const left = at === 0 ? undefined : text[at - 1];
-      const right = text[at + n.length];
+      const left = at === 0 ? undefined : haystack[at - 1];
+      const right = haystack[at + n.length];
       if (!isWordChar(left) && !isWordChar(right)) found += 1;
       from = at + n.length;
     }
-    hits.push(found);
+    return found;
+  };
+
+  const text = (document.body ? document.body.innerText : "").toLowerCase();
+
+  // THE SECOND CORPUS. `innerText` excludes `alt` and `aria-label`, and a
+  // badge is exactly the thing drawn as an icon carrying an accessible name
+  // and no text node. This gathers the accessible-name surface ONLY -- it is
+  // reported separately so the two readings can disagree in one place.
+  const nameParts = [];
+  document.querySelectorAll("[aria-label], [alt], [title]").forEach((el) => {
+    nameParts.push(el.getAttribute("aria-label") || "");
+    nameParts.push(el.getAttribute("alt") || "");
+    nameParts.push(el.getAttribute("title") || "");
+  });
+  // SEPARATOR NOTE, AND IT IS A BUG THIS FILE ALREADY HAD ONCE. This was
+  // written as a newline escape, which survives the Python string literal as
+  // a REAL newline and lands inside a JS string literal -- a syntax error.
+  // Same two-layer escaping class that aborted the contact-info probe's run 2.
+  // A pipe needs no escaping in either layer, and it is non-word on both
+  // sides, so two adjacent accessible names cannot join into a phrase that
+  // matches a needle spanning them.
+  const names = nameParts.join(" | ").toLowerCase();
+
+  const hits = [];
+  const nameHits = [];
+  for (const n of needles) {
+    hits.push(countIn(text, n));
+    nameHits.push(countIn(names, n));
   }
 
   const langNodes = document.querySelectorAll("[lang]");
@@ -149,6 +175,9 @@ _SCRIPT = """
 
   return {
     hits: hits,
+    name_hits: nameHits,
+    name_nodes: document.querySelectorAll("[aria-label], [alt], [title]").length,
+    names_length: names.length,
     controls: document.querySelectorAll(
       'button, a[href], input, textarea, select, [role="button"], [role="link"]'
     ).length,
@@ -171,6 +200,9 @@ async def _read(page, url):
     raw = await page.evaluate(_SCRIPT, list(NEEDLES))
     return {
         "needle": [int(n) for n in raw["hits"]],
+        "needle_in_names": [int(n) for n in raw["name_hits"]],
+        "name_nodes": int(raw["name_nodes"]),
+        "names_length": int(raw["names_length"]),
         "controls": int(raw["controls"]),
         "dialogs": int(raw["dialogs"]),
         "lang_nodes": int(raw["lang_nodes"]),
@@ -188,17 +220,19 @@ def report(label, reading):
     print("    lang_nodes %-4d distinct_langs %-4d other_than_document %d"
           % (reading["lang_nodes"], reading["distinct_langs"],
              reading["langs_other_than_document"]))
+    print("    name_nodes %-4d names_length %d"
+          % (reading["name_nodes"], reading["names_length"]))
+    print("    %-34s %6s %6s" % ("needle", "TEXT", "NAMES"))
     for at in range(len(REPORT_LABELS)):
-        print("    needle %-34s %d" % (REPORT_LABELS[at], reading["needle"][at]))
+        print("    %-34s %6d %6d"
+              % (REPORT_LABELS[at], reading["needle"][at],
+                 reading["needle_in_names"][at]))
 
 
 async def main():
     async with BROWSER.session() as session:
         page = await session.context.new_page()
         try:
-            badge_first = await dom.read_invitation_badge(page)
-            print("invitation badge BEFORE  %s" % badge_first)
-
             control = await _read(page, CONTROL_URL)
             print()
             print("CONTROL PAGE (admitted, draws no badge and no language selector)")
@@ -213,7 +247,15 @@ async def main():
                 print("CONTROL FAILED -- the reader is broken. Live numbers NOT printed.")
                 return
 
+            # THE BADGE PAIR, CORRECTED. The first version of this probe read
+            # the badge BEFORE any navigation -- on a blank tab, where there
+            # was no LinkedIn document to read. That pair was `no page` against
+            # `a page`, and half of it could not have failed. Both readings are
+            # now taken on the SAME address, bracketing the second load of it.
             first = await _read(page, PROFILE_URL)
+            badge_first = await dom.read_invitation_badge(page)
+            print("invitation badge BEFORE (on %s) %s"
+                  % ("the profile", badge_first))
             second = await _read(page, PROFILE_URL)
             print()
             print("HIS OWN PROFILE -- two absolute readings, never subtracted")
@@ -227,7 +269,8 @@ async def main():
                      second["needle"][MUST_BE_ABSENT_AT]))
 
             badge_last = await dom.read_invitation_badge(page)
-            print("invitation badge AFTER   %s" % badge_last)
+            print("invitation badge AFTER  (on %s) %s"
+                  % ("the profile", badge_last))
         finally:
             await page.close()
             print()
