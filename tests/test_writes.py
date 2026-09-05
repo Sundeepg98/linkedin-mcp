@@ -2826,11 +2826,23 @@ def test_perform_goes_through_the_write_door():
 def test_that_structural_check_would_notice_the_deletion():
     """THE CONTROL: the same walk over the source with the call removed."""
     source = Path(writes.__file__).read_text(encoding="utf-8")
+    # THE LITERAL MOVED 2026-09-05, when the url stopped being formatted from
+    # the whole canonical target -- ``comment_on_item``'s is ``item :: text``,
+    # so that spelling built an address with his comment inside it and the
+    # action could not navigate. This control has to quote whatever the call
+    # currently IS, which is why its assertion below says "update this test"
+    # rather than failing silently: a mutation that no longer applies proves
+    # nothing about a check that still runs.
     without = source.replace(
         "    url = assert_write_url(\n"
-        '        str(spec.url_template or "").format(target=grant.target), grant\n'
+        '        str(spec.url_template or "").format(\n'
+        "            target=url_target_of(spec, grant.target)\n"
+        "        ),\n"
+        "        grant,\n"
         "    )",
-        '    url = str(spec.url_template or "").format(target=grant.target)',
+        '    url = str(spec.url_template or "").format(\n'
+        "        target=url_target_of(spec, grant.target)\n"
+        "    )",
         1,
     )
     assert without != source, "the mutation did not apply -- update this test"

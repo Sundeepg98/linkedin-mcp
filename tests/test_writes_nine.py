@@ -1276,13 +1276,52 @@ async def test_the_gate_prints_the_words_in_full_beside_what_binds_them(
     the content as separate readable fields AND the canonical string beside
     them, because if those two ever disagree the canonical one is what would
     act. Truncation here would be the defect.
+
+    IT DRIVES ``preview`` DIRECTLY SINCE 2026-09-05, and the reason is a real
+    behaviour change rather than a test convenience. This action's preview
+    used to read ``/feed/``, so ``ITEM`` -- deliberately opaque, "an item key
+    this server has never parsed" -- never reached a navigation and the block
+    rendered for it. The preview now loads THE ITEM'S OWN PERMALINK, so an
+    unaddressable item is refused by the READ DOOR before any block exists:
+
+        navigation blocked: 'https://www.linkedin.com/feed/update/an-item-key-
+        this-server-has-never-parsed/' is not on the read-only allowlist
+
+    THAT IS THE GUARANTEE GETTING EARLIER, not weaker. ``test_opaque_targets``
+    already pins that an opaque target is stopped by ``url_pattern`` on the way
+    OUT; it is now also stopped on the way IN, by an allowlist that refuses to
+    open a page whose address nobody has measured. So this test asserts what it
+    always asserted -- the words, in full, beside what binds them -- over a
+    target the gate can actually address.
+
+    AND THE URL IS THE OTHER HALF OF THE BINDING. It is asserted here because
+    this is the block that prints it: until 2026-09-05 ``where.url`` was built
+    by formatting the WHOLE canonical target, so this very block named the page
+    it would act on as ".../feed/update/<urn> :: <his comment>/" -- his words
+    inside an address. The words belong in ``text``. They do not belong in a
+    url.
     """
-    block, _nav = await _preview_the_refusal(browser_page, "comment_on_item")
+    editor = (
+        '<div role="textbox" contenteditable="true" aria-label="'
+        + dom.COMMENT_EDITOR_LABEL
+        + '"></div>'
+    )
+    permalink = "https://www.linkedin.com/feed/update/%s/" % REACTED_ITEM
+    nav = FixtureNavigator({permalink: "<html><body>" + editor + "</body></html>"})
+    block = await preview(
+        spec_for_action("comment_on_item"),
+        target={"item": REACTED_ITEM, "text": COMMENT_A},
+        navigator=nav,
+        page=browser_page,
+    )
     where = block["where"]
-    assert where["item"] == ITEM
+    assert where["item"] == REACTED_ITEM
     assert where["text"] == COMMENT_A
-    assert where["target"] == ITEM + TARGET_JOIN + COMMENT_A
+    assert where["target"] == REACTED_ITEM + TARGET_JOIN + COMMENT_A
     assert where["target_kind"] == "item_and_text"
+    assert where["url"] == permalink, where["url"]
+    assert COMMENT_A not in where["url"], where["url"]
+    assert nav.gotos == [permalink], nav.gotos
 
 
 # ---------------------------------------------------------------------------
@@ -1396,13 +1435,20 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     nothing -- so the six surfaces are counted and reconciled against the
     ``state_from`` of the specs themselves.
     """
-    # SIX SURFACES, reconciled rather than counted. ``update_setting`` left the
-    # refusing set when it shipped and its surface did NOT leave
+    # FIVE SURFACES, reconciled rather than counted. ``update_setting`` left
+    # the refusing set when it shipped and its surface did NOT leave
     # ``_SURFACE_READS`` -- ``observe`` still reads that page at preview, so
     # the claim being made here still has to hold for it. Dropping it from this
     # reconciliation would have quietly stopped checking the read boundary for
     # an action that now performs on it, which is exactly backwards.
-    assert len(writes._SURFACE_READS) == 6
+    #
+    # IT WAS SIX UNTIL 2026-09-05, and the one that left is the opposite case
+    # to ``update_setting``'s: ``feed_item`` lost its LAST CLAIMANT rather
+    # than keeping a claimant that stopped refusing. Both actions that
+    # declared it were moved onto the page they act on, so the entry pointed
+    # at a reader nothing could reach -- and the equality below is what said
+    # so, before anybody noticed.
+    assert len(writes._SURFACE_READS) == 5
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive
@@ -1417,37 +1463,66 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # NOT in it must be one this file has named, so a new unrouted surface
     # fails here instead of being absorbed.
     assert state_froms & set(writes._SURFACE_READS) == set(writes._SURFACE_READS)
-    # TWO BRANCH SURFACES SINCE 2026-09-05, and the second arrived exactly the
-    # way this assertion was written to make it arrive: it failed here rather
-    # than being absorbed. ``react_to_item`` moved off ``feed_item`` -- which
-    # loads /feed/ -- onto its own item's permalink, because the direction it
-    # printed was being read over other people's posts while the click pressed
-    # the target's own control.
+    # THREE BRANCH SURFACES SINCE 2026-09-05, and TWO of them arrived exactly
+    # the way this assertion was written to make them arrive: each failed here
+    # rather than being absorbed. ``react_to_item`` and then ``comment_on_item``
+    # moved off ``feed_item`` -- which loads /feed/ -- onto their own item's
+    # permalink, because each was reading a page that was not the one it acts
+    # on: the reaction's direction came off other people's controls, and the
+    # comment's presence check counted the feed's affordances.
     assert state_froms - set(writes._SURFACE_READS) == {
         "profile_topcard",
         "item_permalink",
+        "item_comment_box",
     }
+    # AND ``feed_item`` LEFT ``_SURFACE_READS`` WITH ITS LAST CLAIMANT on the
+    # same day. The equality above already refuses an orphan -- it is what
+    # caught this one -- so the count is asserted separately rather than as a
+    # literal that has to be edited every time the table moves.
+    assert "feed_item" not in writes._SURFACE_READS
     # AND THE BOUNDARY CLAIM HOLDS FOR THE BRANCH SURFACES TOO. They are
-    # asserted separately because neither comes with a reader in the table:
+    # asserted separately because none comes with a reader in the table:
     # ``observe`` loads PROFILE_URL directly for one, and formats the spec's
-    # own ``url_template`` for the other.
+    # own ``url_template`` for the other two.
     assert readonly.is_read_url(writes.PROFILE_URL)
-    # THE PERMALINK IS PER-TARGET, which is why it is a branch and not a table
-    # entry -- there is no constant url to put in one. The claim being checked
-    # is the same claim: the fix opened NO new surface. This address has been
-    # on the read allowlist since 2026-08-31 and this action has been LOADING
-    # it at click time since 2026-09-01; all that changed is that the preview
-    # loads it too. The write door is untouched -- ``assert_write_url`` still
-    # re-derives the identical string from the same template.
-    permalink = spec_for_action("react_to_item").url_template.format(
-        target=REACTED_ITEM
-    )
-    assert readonly.is_read_url(permalink), permalink
-    # THE CONTROL, because "is_read_url returned True" proves nothing unless it
-    # can return False on this same family. A query string is the shape the
-    # anchored pattern refuses, and it is the shape the FEED's own anchors are
-    # unread on -- see the note in ``writes._read_feed_item``.
-    assert readonly.is_read_url(permalink + "?utm_source=share") is False
+    # THE PERMALINK IS PER-TARGET, which is why these are branches and not
+    # table entries -- there is no constant url to put in one. The claim being
+    # checked is the same claim: neither fix opened a new surface. This address
+    # has been on the read allowlist since 2026-08-31 and both actions have
+    # been LOADING it at click time since 2026-09-01; all that changed is that
+    # the previews load it too.
+    #
+    # BOTH ACTIONS ARE BUILT THE SAME WAY HERE, through ``url_target_of``,
+    # which is the derivation the write door itself uses. That matters for
+    # ``comment_on_item``: its target is ``item :: text``, and formatting the
+    # WHOLE target -- which every site did until 2026-09-05 -- produced an
+    # address with the operator's comment inside it that this very pattern
+    # then refused.
+    for action in ("react_to_item", "comment_on_item"):
+        spec = spec_for_action(action)
+        target = writes._target_for(
+            spec,
+            REACTED_ITEM
+            if action == "react_to_item"
+            else {"item": REACTED_ITEM, "text": "Congratulations on the launch."},
+        )
+        permalink = spec.url_template.format(
+            target=writes.url_target_of(spec, str(target))
+        )
+        # THE TWO ACTIONS MUST BUILD THE SAME STRING for the same item, which
+        # is the whole content of the composite-target repair: one of these
+        # targets carries a text half and the other does not, and the address
+        # cannot know the difference.
+        expected = "https://www.linkedin.com/feed/update/%s/" % REACTED_ITEM
+        assert permalink == expected, (action, permalink)
+        assert readonly.is_read_url(permalink), (action, permalink)
+        # THE CONTROL, because "is_read_url returned True" proves nothing
+        # unless it can return False on this same family. A query string is
+        # the shape the anchored pattern refuses -- and it is also the shape
+        # the FEED's own anchors were never read on, which is why no reader
+        # here has ever been able to say whether a key on that page is
+        # followable.
+        assert readonly.is_read_url(permalink + "?utm_source=share") is False
     for state_from, (url, _surface, reader) in writes._SURFACE_READS.items():
         assert readonly.is_read_url(url), (state_from, url)
         assert callable(reader), state_from

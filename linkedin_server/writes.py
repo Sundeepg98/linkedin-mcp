@@ -1085,8 +1085,20 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         action="comment_on_item",
         tool_name="linkedin_comment_on_item",
         # THE ITEM PERMALINK. The target is composite -- item AND text -- and
-        # only the ITEM half reaches this url, because assert_write_url
-        # formats the SUBJECT. His prose never enters a navigation.
+        # only the ITEM half reaches this url, because every site that formats
+        # it goes through ``url_target_of``. His prose never enters a
+        # navigation.
+        #
+        # THAT SENTENCE WAS FALSE FROM 2026-09-01 TO 2026-09-05 and it is the
+        # most load-bearing false claim this spec carried. It read "because
+        # assert_write_url formats the SUBJECT"; assert_write_url formatted
+        # ``grant.target``, the CANONICAL string, so the address it rebuilt
+        # was ".../feed/update/<urn> :: <his comment>/" -- which the pattern
+        # two lines below then refused. MEASURED: perform raised "fails its
+        # own pattern" with ZERO navigations, and the confirm block printed
+        # that string as ``where.url``. The spec described the behaviour it
+        # needed rather than the behaviour it had, and nothing compared the
+        # two, because this action has never been fired.
         url_template="https://www.linkedin.com/feed/update/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/feed/update/"
@@ -1099,7 +1111,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         from_state="comment_control_present",
         to_state="comment_published",
         target_kind="item_and_text",
-        state_from="feed_item",
+        # THE PAGE THE FILL LANDS ON, since 2026-09-05. It was "feed_item" --
+        # which loads /feed/ -- from 2026-08-30, when this action REFUSED and
+        # the read existed only to put a fresh measurement inside a refusal.
+        # It shipped 2026-09-01 with that unchanged, so the confirm block
+        # described whatever the FEED had drawn. MEASURED over frozen worlds:
+        # an item drawing a comment box and an item drawing NOTHING produced
+        # byte-identical output, token issued in both.
+        state_from="item_comment_box",
         # RULING 1, 2026-09-01, and this declaration carries TWO things no
         # other does: no count exists to verify against, and the ACT ITSELF
         # may leave something behind that cannot be found.
@@ -1138,13 +1157,25 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             ),
         ),
         direction_source=(
-            "linkedin_surface_census(feed), taken live by this gate, reading "
-            "the comment affordance and the item permalinks beside it. "
-            "MEASURED 2026-08-30 in BOTH of its shapes, which are not the "
-            "same control: a text-named button on /feed/ (count 3) that opens "
-            "an inline composer, and an ANCHOR on his profile (count 8) "
-            "pointing at /feed/update/<urn>/. The anchor is the only place a "
-            "target key has been seen."
+            "THE COMMENT EDITOR ON THIS ITEM'S OWN PERMALINK -- the very "
+            "control the text would be typed into, on the page it would be "
+            "typed on. The gate requires EXACTLY ONE control named "
+            "'Text editor for creating comment', which is the shape measured "
+            "on that permalink 2026-08-31 and which every previous census of "
+            "every readable surface reported as ZERO. Absent is not empty: a "
+            "page drawing no editor had not arrived, and that is UNKNOWN "
+            "rather than a state. "
+            "UNTIL 2026-09-05 THIS READ /feed/ AND COUNTED SOMETHING ELSE. It "
+            "was linkedin_surface_census(feed), counting controls NAMED "
+            "'Comment' -- measured 2026-08-30 as a text-named button on "
+            "/feed/ (count 3) opening an inline composer, and as an ANCHOR on "
+            "his profile (count 8) pointing at /feed/update/<urn>/. Both "
+            "readings are real and neither is this item: the feed's three "
+            "belong to other people's posts, and the count of an affordance "
+            "is not the count of an editor, which is the property the fill "
+            "actually needs. The anchor remains the only place a target key "
+            "has been seen, and that is what linkedin_my_activity_items is "
+            "for."
         ),
         wrong_state_note=(
             "Not a toggle. A comment is added, never flipped -- so a wrong "
@@ -2298,7 +2329,11 @@ def assert_write_url(url: str, grant: WriteGrant) -> str:
             "path here is exactly the confident string that rule exists to "
             "stop. Capture the surface first."
         )
-    expected = spec.url_template.format(target=grant.target)
+    # THE SUBJECT HALF, for a target that has two. See :func:`url_target_of`:
+    # this line formatted the CANONICAL string until 2026-09-05, so
+    # ``comment_on_item`` rebuilt an address with his comment text inside it,
+    # the pattern below refused it, and the action could not navigate at all.
+    expected = spec.url_template.format(target=url_target_of(spec, grant.target))
     if url != expected:
         raise WriteAttemptError(
             f"write blocked: {url!r} is not this grant's target. A write url "
@@ -2659,6 +2694,70 @@ def _subject_component_of(spec: WriteSpec, target: str) -> str:
             "two-part form, so its subject half cannot be identified. "
             "Refusing to type any part of it."
         )
+    return target.split(TARGET_JOIN, 1)[0]
+
+
+def url_target_of(spec: WriteSpec, target: str) -> str:
+    """The part of a target that goes INTO A URL. Never the part he typed.
+
+    ADDED 2026-09-05, AND IT IS A REPAIR RATHER THAN A TIDY-UP.
+    ``comment_on_item``'s target is ``item :: text`` and every
+    ``url_template.format(target=...)`` site was handed the canonical string
+    WHOLE, so the address it built was::
+
+        https://www.linkedin.com/feed/update/<urn> :: Congratulations on the
+        launch./
+
+    Two things came out of that, both measured by driving the real gate over
+    frozen worlds rather than read off this source:
+
+    * the confirm block printed THAT as ``where.url`` -- the field naming the
+      page the action would act on, which is the one thing he can check the
+      target against. It is not a page. It is his own sentence wearing an
+      address's shape, in the place a reader trusts most.
+    * ``assert_write_url`` rebuilt the same string and its own ``url_pattern``
+      refused it, so ``perform`` raised ``fails its own pattern`` with ZERO
+      navigations. The action was in ``PERFORMABLE``, was minting real confirm
+      tokens, and could not act -- the shape ``update_profile_field`` shipped
+      in on 2026-09-02.
+
+    NOBODY RULED THAT A URL GETS THE WHOLE TARGET, and nothing required it.
+    Counted off the live specs the day this was written: FIVE actions carry a
+    composite target and ``comment_on_item`` is the ONLY one whose
+    ``url_template`` also carries a ``{target}`` placeholder -- ``publish_post``,
+    ``update_profile_field``, ``update_setting`` and ``send_message`` all
+    address CONSTANTS, so ``format`` had nothing to substitute and the defect
+    could not show on any of them. The invariant held by coincidence across
+    four actions and broke on the first one to test it, which is the same
+    shape as the nine sites that assumed url-presence and performability
+    coincide.
+
+    IT DOES NOT RAISE, and that is the difference from its two neighbours.
+    :func:`_text_component_of` and :func:`_subject_component_of` refuse a
+    non-composite target because they exist to feed a FILL, where guessing
+    types the wrong string under his name. This feeds a url that is then
+    checked against an anchored pattern, and every simple-target action
+    passes its whole target through here unchanged -- so a refusal would break
+    ten working actions to describe one. A composite target that is not in
+    canonical two-part form also falls through unchanged, and the pattern
+    refuses it downstream, where the refusal can name the url.
+
+    ONE SPELLING, USED AT EVERY SITE. The split is written once here and
+    ``tests/test_comment_gate_reads_the_item_it_acts_on.py`` drives the real
+    door; a second spelling of it would be a second way to disagree with it,
+    which is the rule this module already applies to the two functions above.
+    """
+    kind = spec.target_kind
+    if kind not in _COMPOSITE_TARGET_KINDS:
+        return target
+    _first, second = _COMPOSITE_TARGET_KINDS[kind]
+    if not second:
+        # A one-component composite -- ``publish_post``, whose whole target IS
+        # the text. There is no subject to take, and its url is a constant, so
+        # what is returned here reaches no placeholder.
+        return target
+    if target.count(TARGET_JOIN) != 1:
+        return target
     return target.split(TARGET_JOIN, 1)[0]
 
 
@@ -3332,90 +3431,22 @@ async def _read_feed_composer(
     )
 
 
-async def _read_feed_item(
-    page: Any, spec: WriteSpec, *, target: str = ""
-) -> tuple[dict[str, Any], str, str]:
-    """The comment affordance on the feed, and whether it rendered at all.
-
-    ONE READER, ONE VERDICT SINCE 2026-09-05, and losing the second one was a
-    FIX rather than a tidy-up. It also computed ``react_to_item``'s toggle
-    direction, over every reaction control the FEED drew -- and the feed's
-    controls belong to other people's posts, while the action presses the one
-    control on ``/feed/update/<urn>/``. Measured that morning: a preview aimed
-    at one of his own items -- one that already carried a reaction, confirmed
-    independently by a census of that item's own permalink -- read ``controls
-    3, off_state 3, permalinks 0`` off the feed and offered ``no_reaction ->
-    reacted``. Every one of those three belonged to somebody else's post. The
-    direction now comes from :func:`_read_item_permalink`, on the page the
-    click lands on, and this reader answers only the question a comment asks.
-
-    WHY IT WAS EVER HERE. ``react_to_item`` REFUSED when this was written: the
-    read existed to give a refusal a fresh measurement and there was no
-    ``url_template`` to aim at. Commit ``d74178f`` gave it one on 2026-09-01
-    and did not touch ``state_from`` -- the diff contains no such line. A
-    leftover, not a boundary and not a page-load budget.
-
-    A COMMENT IS ADDED, NEVER FLIPPED, which is why this verdict is a presence
-    check and not a direction. A wrong reading here does not mean the opposite
-    would happen; it means nothing on the page says where the comment goes.
-    """
-    reading = await dom.read_reaction_surface(page)
-    facts = dict(reading)
-    comments = int(reading.get("comment_controls") or 0)
-    permalinks = int(reading.get("permalinks") or 0)
-    # THIS SENTENCE CALLED THE PERMALINK FAMILY FORBIDDEN UNTIL 2026-09-05, on
-    # a server that had been opening it since 2026-08-31. It is the same drift
-    # tests/test_prose_that_makes_a_claim.py's third guard exists for -- and
-    # that guard did not catch it, because its corpus is REFUSAL texts and
-    # this is a preview's ``state_why``.
-    #
-    # WHAT REPLACES IT SAYS WHICH HALF IS TRUE. The BARE permalink is
-    # allowlisted by an anchored pattern that accepts a urn and NO QUERY
-    # STRING. Whether the hrefs counted here are bare is NOT KNOWN from this
-    # reading: ``dom._count_links_with`` counts anchors by fragment and never
-    # returns one, so nothing here can say whether a key on this page would
-    # survive the pattern.
-    tail = (
-        f" {permalinks} item permalink(s) were counted on the page; that "
-        "address family is /feed/update/<urn>/, which the read boundary "
-        "ADMITS in its bare form -- an anchored pattern taking a urn and no "
-        "query string, since 2026-08-31. Whether THESE hrefs are bare is "
-        "unread: this counts anchors by fragment and never opens one, so a "
-        "key exists on the page and its followability is unmeasured."
-    )
-
-    if spec.action != "comment_on_item":
-        # A GUARD, not a fall-through. One action reads this surface; anything
-        # else arriving here is a spec pointing at a page whose reader has no
-        # verdict for it, and ``_direction`` refuses on ``unknown`` rather
-        # than letting a gate render on a state nobody computed.
-        return (
-            facts,
-            UNKNOWN,
-            f"{spec.action!r} declares state_from 'feed_item', and this "
-            "reader answers exactly one question -- whether the feed drew a "
-            "comment affordance. It has no verdict for this action, and a "
-            "gate whose state was never computed must not render." + tail,
-        )
-
-    if comments < 1:
-        return (
-            facts,
-            UNKNOWN,
-            "no control named "
-            f"{dom.COMMENT_CONTROL_NAME!r} rendered. The feed hydrates "
-            "after it lands and this does not scroll, so absence here is "
-            "unknown rather than zero." + tail,
-        )
-    return (
-        facts,
-        "comment_control_present",
-        f"{comments} comment control(s) and "
-        f"{reading.get('editors', 0)} contenteditable node(s). The "
-        "composer opens in place when the control is pressed, so a zero "
-        "for editors is the expected reading and is also why the comment "
-        "box itself has never been observed." + tail,
-    )
+# ``_read_feed_item`` LIVED HERE AND WAS DELETED 2026-09-05, in the commit
+# that moved ``comment_on_item`` onto the item permalink. It was the last
+# caller of the ``feed_item`` entry below, and an orphan reader is the
+# thing this package has a standing rule about: a reader kept for a state
+# nobody consults is a reader that goes stale unread. ``read_settings_
+# surface`` went the same way on 2026-09-02 for the same reason, and
+# ``tests/test_writes_nine.py`` is what refuses an orphan rather than a
+# reviewer noticing.
+#
+# WHAT WENT WITH IT, so the next reader does not hunt for it: a corrected
+# sentence about the read boundary, written 2026-09-05, saying the bare
+# permalink family is ADMITTED and that a count of anchors by fragment
+# cannot say whether the hrefs it counted are bare. That correction is
+# preserved in ``tests/test_writes_nine.py``'s boundary test, which asserts
+# the pattern accepts a bare permalink and REFUSES one carrying a query
+# string. It is 88 lines, recoverable from history at 5046a3b.
 
 
 async def _read_item_permalink(
@@ -3423,10 +3454,12 @@ async def _read_item_permalink(
 ) -> tuple[dict[str, Any], str, str]:
     """The ONE reaction control on one item's own permalink, and its state.
 
-    THE PAGE THE CLICK LANDS ON. That is the whole of why this exists apart
-    from :func:`_read_feed_item`: the direction printed in the confirm block
-    and the control the action presses are now the same object, so
-    ``same_page_as_action`` is True and the two cannot drift.
+    THE PAGE THE CLICK LANDS ON. That is the whole of why this exists: the
+    direction printed in the confirm block and the control the action presses
+    are the same object, so ``same_page_as_action`` is True and the two cannot
+    drift. It replaced a branch of ``_read_feed_item``, which read ``/feed/``
+    and was deleted on 2026-09-05 once nothing claimed it -- see the note where
+    that function was defined.
 
     IT MIRRORS ``_live_control``'s REACT ARM DELIBERATELY, condition for
     condition, and that pairing is asserted in
@@ -3482,6 +3515,94 @@ async def _read_item_permalink(
         "the toggle state into this name, so this is the control stating its "
         "own state -- the strongest direction source in this design, and now "
         "taken from the target rather than from the feed's neighbours.",
+    )
+
+
+async def _read_item_comment_box(
+    page: Any, spec: WriteSpec, *, target: str = ""
+) -> tuple[dict[str, Any], str, str]:
+    """The comment editor on one item's own permalink. THE FILL TARGET.
+
+    THE SECOND INSTANCE OF THE SAME DEFECT, fixed 2026-09-05 the day after the
+    reaction's. ``comment_on_item`` read ``/feed/`` at preview and fills on
+    ``/feed/update/<urn>/``, so the block the operator confirmed described
+    somebody else's posts. MEASURED over frozen worlds: an item drawing a
+    comment box and an item drawing NOTHING produced byte-identical output,
+    with a confirm token issued in both. A gate whose output does not move
+    when the target moves is not misreading the target; it is not reading it.
+
+    AND IT MEASURES WHAT THE CLICK MEASURES, which is the half the surface fix
+    alone would not have bought. The old preview counted controls NAMED
+    ``Comment``; ``_live_control``'s comment arm counts EDITORS named
+    :data:`dom.COMMENT_EDITOR_LABEL` and requires exactly one. Two different
+    properties compared against ONE ``from_state`` string -- the same
+    unruled-coincidence shape ``tests/test_preview_state_and_click_state.py``
+    exists for, one level down: that file asks whether the two ends compare
+    the same FIELD, this asks whether they measure the same THING. So this
+    mirrors that arm condition for condition, and
+    ``tests/test_comment_gate_reads_the_item_it_acts_on.py`` drives both over
+    one frozen world and asserts one string comes back.
+
+    ZERO EDITORS IS UNKNOWN AND NEVER AN EMPTY BOX. The permalink was measured
+    2026-08-31 drawing exactly one editor, where every previous census of every
+    readable surface reported zero; an absent editor is a page that had not
+    arrived. Nothing on this surface changes state with content, so this
+    reader cannot tell a full box from an empty one either -- which is not a
+    gap here, it is the measured fact that forces the delta gate after the
+    fill, and it is said rather than glossed.
+
+    THE NAME CENSUS IS NOT RETURNED. ``read_comment_surface`` reads a whole-page
+    census -- 91 controls on the measured permalink, including shapes carrying
+    other members' names -- because the delta gate needs a baseline. That
+    baseline is taken at CLICK time by ``_live_control``; nothing here depends
+    on it, so this projects counts only. A confirm block is not the place to
+    print a page's name inventory.
+    """
+    reading = await dom.read_comment_surface(page)
+    editors = int(reading.get("editors") or 0)
+    names = dict(reading.get("names") or {})
+    affordances = int(names.get(dom.COMMENT_CONTROL_NAME, 0))
+    facts: dict[str, Any] = {
+        "editors": editors,
+        "comment_affordances": affordances,
+        "controls_read": int(reading.get("controls_read") or 0),
+        "unnamed_controls": int(reading.get("unnamed") or 0),
+        "menus": int(reading.get("menus") or 0),
+    }
+
+    if reading.get("error"):
+        return (
+            facts,
+            UNKNOWN,
+            "the comment surface could not be read on this permalink: "
+            f"{reading['error']}. A gate whose read failed reports the "
+            "failure rather than a state.",
+        )
+    if editors != 1:
+        return (
+            facts,
+            UNKNOWN,
+            f"{editors} comment editor(s) rendered on this permalink, where "
+            "exactly one is the shape measured on 2026-09-01. Zero is a page "
+            "that had not arrived -- an absent editor is UNKNOWN and never an "
+            "empty comment box -- and more than one means this is not the "
+            "single-item render it was measured to be, so typing into either "
+            "would be picking by position. "
+            f"{affordances} control(s) named {dom.COMMENT_CONTROL_NAME!r} "
+            "were counted beside it; that count is NOT this verdict, and "
+            "reading it as one is the defect this reader replaced.",
+        )
+    return (
+        facts,
+        "comment_control_present",
+        "this permalink drew exactly one editor named "
+        f"{dom.COMMENT_EDITOR_LABEL!r} -- the very control the text would be "
+        "typed into, on the page it would be typed on -- beside "
+        f"{affordances} control(s) named {dom.COMMENT_CONTROL_NAME!r}. "
+        "NOTHING HERE SAYS THE BOX IS EMPTY: on this surface nothing changes "
+        "state with content, which is the same measured fact that forces the "
+        "delta gate to run after the fill rather than a name-and-enabled "
+        "check before it.",
     )
 
 
@@ -3845,7 +3966,13 @@ async def _read_messaging_badge(
 #: auth-wall message, reader).
 _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     "feed_composer": (FEED_URL, "feed", _read_feed_composer),
-    "feed_item": (FEED_URL, "feed", _read_feed_item),
+    # ``"feed_item"`` WAS HERE AND LEFT 2026-09-05 WITH ITS LAST CLAIMANT.
+    # It pointed two actions at ``/feed/`` -- ``react_to_item`` until
+    # 2026-09-05 and ``comment_on_item`` until the same day -- while both act
+    # on ``/feed/update/<urn>/``, and both now read that page through
+    # :data:`_PERMALINK_READS`. Its reader went with it: see the note where
+    # ``_read_feed_item`` was defined. An entry kept for a state no spec
+    # declares is an orphan, and ``tests/test_writes_nine.py`` refuses one.
     "profile_editors": (PROFILE_URL, "profile", _read_profile_editors),
     "profile_invitations": (PROFILE_URL, "profile", _read_profile_invitations),
     "messaging_badge": (FEED_URL, "feed", _read_messaging_badge),
@@ -3874,6 +4001,30 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # was. The reader is recoverable from history: 21 lines, deleted in the
     # commit that added this note, uncalled since 2026-08-31.
     "setting_dark_mode": (DARK_MODE_URL, "settings_dark_mode", _read_dark_mode),
+}
+
+
+#: THE SURFACES WHOSE URL IS THE SPEC'S OWN TEMPLATE, filled from the target.
+#: A SEPARATE TABLE FROM :data:`_SURFACE_READS`, and it has to be: that one
+#: holds a CONSTANT url per entry and these addresses carry the target's own
+#: urn, so there is nothing constant to put in it. Only the reader is named
+#: here; the url comes from ``spec.url_template`` through
+#: :func:`url_target_of`, which is the same derivation the write door uses.
+#:
+#: BOTH MEMBERS ARRIVED BY BEING WRONG THE SAME WAY. Each declared
+#: ``state_from="feed_item"`` -- correct while it REFUSED, when the read
+#: existed only to put a fresh measurement inside a refusal and there was no
+#: url to aim at -- and each was made performable without that being revisited
+#: (``d74178f`` and ``1fb3c15``, both 2026-09-01, neither diff containing a
+#: ``state_from`` line). The consequence was the same in both: a confirm block
+#: that came back identical whatever the target's own page said.
+#:
+#: ``same_page_as_action`` IS TRUE FOR EVERY MEMBER, by construction rather
+#: than by declaration -- the branch that reads this table records it, because
+#: the url it loads IS the url the action acts on.
+_PERMALINK_READS: dict[str, Any] = {
+    "item_permalink": _read_item_permalink,
+    "item_comment_box": _read_item_comment_box,
 }
 
 
@@ -4017,30 +4168,36 @@ async def observe(
             same_page_as_action=False,
         )
 
-    if spec.state_from == "item_permalink":
-        # ONE load, OF THE PAGE THE CLICK LANDS ON, and that is the whole
-        # point of the branch existing. ``react_to_item`` read its direction
-        # off ``/feed/`` until 2026-09-05 -- controls belonging to other
-        # people's posts, standing in for the one control on the target; three
-        # of them in the reading that caught it, eight in the 2026-08-30
-        # census of his profile -- and the two surfaces disagreed the first
-        # time anybody compared them. See :func:`_read_item_permalink`.
+    if spec.state_from in _PERMALINK_READS:
+        # ONE load, OF THE PAGE THE ACTION ACTS ON, and that is the whole
+        # point of the branch existing. Both members read ``/feed/`` until
+        # 2026-09-05 -- controls belonging to other people's posts standing in
+        # for the target's own -- and in both cases the block came back the
+        # same whatever the target's page said. See
+        # :func:`_read_item_permalink` and :func:`_read_item_comment_box`.
         #
-        # IT IS A BRANCH RATHER THAN A ``_SURFACE_READS`` ENTRY because that
-        # table holds CONSTANT urls and this address carries the target's own
-        # urn. Adding it there would mean inventing a url for a table that has
+        # A TABLE RATHER THAN A ``_SURFACE_READS`` ENTRY, because that table
+        # holds CONSTANT urls and these addresses carry the target's own urn.
+        # Adding them there would mean inventing a url for a table with
         # nowhere to put one -- the same reason ``posting_page``,
-        # ``apply_control`` and ``saved_list`` are branches.
+        # ``apply_control`` and ``saved_list`` are branches. It is a table
+        # rather than an if-chain because there are two of them now, and
+        # WHICH READER is a fact about the spec rather than about this
+        # function.
         #
         # THE URL GOES THROUGH THE READ DOOR like every other preview load:
         # ``_load`` calls ``readonly.assert_read_url``, which holds the
         # anchored ``/feed/update/urn:li:<type>:<digits>/`` pattern admitted
-        # 2026-08-31. No new permission was needed for this fix, and the write
-        # door is untouched -- ``assert_write_url`` still re-derives this same
-        # url from the spec at click time.
-        url = str(spec.url_template or "").format(target=target)
+        # 2026-08-31. No new permission was needed for either fix, and the
+        # write door is untouched -- ``assert_write_url`` re-derives this same
+        # url from the spec at click time, through the same
+        # :func:`url_target_of` this line uses.
+        url = str(spec.url_template or "").format(
+            target=url_target_of(spec, target)
+        )
         landed = await _load(navigator, page, url, surface="feed item")
-        facts, state, why = await _read_item_permalink(page, spec, target=target)
+        reader = _PERMALINK_READS[spec.state_from]
+        facts, state, why = await reader(page, spec, target=target)
         return _record(
             spec,
             target=target,
@@ -4410,7 +4567,12 @@ def _render(
             where[second] = content
         where["what_the_page_showed"] = observation.facts
     where["url"] = (
-        spec.url_template.format(target=observation.target)
+        # THE SUBJECT HALF. This printed the whole canonical target until
+        # 2026-09-05, so the field naming THE PAGE THIS ACTS ON read
+        # ".../feed/update/<urn> :: <his comment>/" -- his own words inside an
+        # address, in the one field he checks the target against. The two
+        # halves are still printed, above, as themselves.
+        spec.url_template.format(target=url_target_of(spec, observation.target))
         if spec.url_template
         else (
             "UNMEASURED -- this action's surface has never been loaded by "
@@ -5672,7 +5834,20 @@ def _assert_landed_on_target(
                 f"the browser landed on {landed!r}, which is not that posting."
             )
         return
-    expected = str(spec.url_template or "").format(target=grant.target)
+    # THE SUBJECT HALF, through the same derivation every other site uses --
+    # see :func:`url_target_of`. This was the FOURTH and last site formatting
+    # the canonical target, and it was found the way the other three were:
+    # by driving ``perform`` over a frozen world after each fix and reading
+    # where it raised NEXT. Fixing the door alone moved the refusal from
+    # "fails its own pattern" to "is not this grant's target"; fixing the
+    # caller too moved it here, to "landed on ... and that is not it", with
+    # the browser sitting on the correct page. THREE REFUSALS IN A ROW, each
+    # locally accurate, each about the same one defect -- which is why the
+    # measurement was repeated after every edit instead of stopping at the
+    # first green.
+    expected = str(spec.url_template or "").format(
+        target=url_target_of(spec, grant.target)
+    )
 
     # THE SELF-PROFILE SHAPE, ADDED 2026-09-02, AND WITHOUT IT NO ``/in/me/``
     # ACTION COULD EVER HAVE PASSED THIS GUARD.
@@ -6773,7 +6948,11 @@ async def _verify_after(
         landed = await _load(
             navigator,
             page,
-            spec.url_template.format(target=grant.target),
+            # ``url_target_of`` is a NO-OP for this action -- react's target is
+            # a bare urn -- and it is used anyway, so the split has ONE
+            # spelling across every site that builds a write url. A second
+            # spelling is a second way to disagree with it.
+            spec.url_template.format(target=url_target_of(spec, grant.target)),
             surface="the item permalink",
         )
         reading = await dom.read_reaction_surface(page)
@@ -8083,8 +8262,20 @@ async def perform(
         )
 
     # Gates 3 and 4: the write door, then the read door, on the same url.
+    #
+    # THE SUBJECT HALF, through the SAME derivation the door rebuilds with.
+    # This line formatted the canonical target until 2026-09-05, which for
+    # ``comment_on_item`` produced an address with his comment text inside it;
+    # fixing only ``assert_write_url`` would have moved the refusal from
+    # "fails its own pattern" to "is not this grant's target" without making
+    # the action reachable, because a door that rebuilds correctly still
+    # refuses a caller that built it wrongly. MEASURED in exactly that
+    # intermediate state before this line was changed too.
     url = assert_write_url(
-        str(spec.url_template or "").format(target=grant.target), grant
+        str(spec.url_template or "").format(
+            target=url_target_of(spec, grant.target)
+        ),
+        grant,
     )
     landed = await _load(
         navigator,
