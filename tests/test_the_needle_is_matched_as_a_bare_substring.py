@@ -305,3 +305,126 @@ async def test_KNOWN_DEFECT_a_needle_inside_a_longer_name_proceeds(over):
         "sibling test's message before editing this one.",
         verdict,
     )
+
+
+# ---------------------------------------------------------------------------
+# 4. THE REACH OF THE ONE NARROWING THAT NEEDS NO OBSERVATION
+# ---------------------------------------------------------------------------
+#
+# Section 1 of _audit/2026-09-05-messaging.md says a fix is available without
+# observing a real chip: STOP SEARCHING THE ATTRIBUTE THE SELECTOR SELECTED ON.
+# That is a claim about a repair nobody has applied, and a claim about a repair
+# is worth exactly as much as a measurement of its reach. These two measure it.
+#
+# THE ANSWER IS UNCOMFORTABLE AND THAT IS WHY IT IS HERE: on the guessed chip
+# the name and the contaminant are THE SAME STRING, so "search a different
+# field" is not an available move at all.
+
+
+#: A COUNT-ONLY READER, in the house style. The comparison happens IN THE PAGE
+#: and three integers come back, so no invented name and no label crosses into
+#: this process -- the same argument ``SELECTED_RECIPIENT_JS`` makes for
+#: itself, kept here so this file does not weaken it while measuring it.
+WHERE_DOES_THE_NAME_LIVE_JS = """
+(cfg) => {
+  const node = document.querySelector(cfg.selector);
+  if (!node) { return {found: 0, in_aria: 0, in_text: 0, furniture_in_aria: 0}; }
+  const aria = (node.getAttribute('aria-label') || '').toLowerCase();
+  const text = (node.textContent || '').toLowerCase();
+  const needle = String(cfg.needle).toLowerCase();
+  const furniture = String(cfg.furniture).toLowerCase();
+  return {
+    found: 1,
+    in_aria: aria.indexOf(needle) === -1 ? 0 : 1,
+    in_text: text.indexOf(needle) === -1 ? 0 : 1,
+    furniture_in_aria: aria.indexOf(furniture) === -1 ? 0 : 1
+  };
+}
+"""
+
+
+async def test_the_name_and_the_contaminant_are_the_same_string(over):
+    """**THE FIX CANNOT BE "SEARCH A DIFFERENT FIELD."**
+
+    Measured on the chip this suite draws: the recipient's name is present in
+    ``aria-label`` and ABSENT from ``textContent``, while the furniture word is
+    in ``aria-label`` too. The only field carrying the name is the field
+    carrying the contaminant.
+
+    So dropping ``aria-label`` from the haystack -- the obvious reading of
+    "stop searching what you selected on" -- would leave the matcher searching
+    a string with no name in it, and the gate would refuse EVERY recipient
+    including the right one. That is safe and it is also useless.
+
+    **The available repair is therefore narrower than it sounded: STRIP the
+    pinned furniture from the front of the attribute, then search the
+    remainder.** The sibling test measures how many candidates that is even
+    defined for.
+
+    CAVEAT WITH THE SAME FORCE AS EVERYWHERE ELSE IN THIS SUITE: this is the
+    GUESSED chip. Whether LinkedIn puts the name in ``aria-label``, in
+    ``textContent``, in both or in neither is unobserved. What is measured here
+    is the shape this repo has been reasoning against, which is the shape any
+    repair would be written against today.
+    """
+
+    async def work(page):
+        return await page.evaluate(  # readonly-ok
+            WHERE_DOES_THE_NAME_LIVE_JS,
+            {
+                "selector": dom.RECIPIENT_CHIP_SELECTORS[0],
+                "needle": SOMEBODY_ELSE,
+                "furniture": FURNITURE,
+            },
+        )
+
+    seen = await over(_with_chips(SOMEBODY_ELSE), work)
+
+    assert seen["found"] == 1, (
+        "the chip was not drawn at all, so nothing below is a reading about "
+        "where a name lives.",
+        seen,
+    )
+    # THE READER IS SHOWN BOTH FIRING AND NOT FIRING IN ONE CALL, which is
+    # what keeps ``in_text == 0`` from being the reading of a broken reader.
+    # Same function, same needle, same node: one field answers 1 and the other
+    # answers 0. A reader stuck at zero fails the line above; a reader stuck at
+    # one fails the line below.
+    assert seen["in_aria"] == 1, seen
+    assert seen["in_text"] == 0, seen
+    assert seen["furniture_in_aria"] == 1, seen
+
+
+def test_only_a_prefix_pinned_candidate_admits_a_principled_strip():
+    """HOW MANY CANDIDATES THE STRIP IS EVEN DEFINED FOR. An integer, not a hope.
+
+    A strip needs a KNOWN position for the furniture. ``aria-label^="X"`` pins
+    it at the front, so the remainder is well defined. ``aria-label*="X"``
+    pins only that it occurs SOMEWHERE, and there is no defined point to cut
+    -- stripping the first occurrence would eat a name that happens to contain
+    those letters, which is the very collision being repaired.
+
+    **So the repair is partial by construction**, and the number of candidates
+    it cannot serve is the number recorded here. A future editor who adds a
+    fifth candidate with ``*=`` moves this number and has to say why.
+    """
+    anchored = [s for s in dom.RECIPIENT_CHIP_SELECTORS if 'aria-label^="' in s]
+    unanchored = [s for s in dom.RECIPIENT_CHIP_SELECTORS if 'aria-label*="' in s]
+    no_aria = [
+        s
+        for s in dom.RECIPIENT_CHIP_SELECTORS
+        if "aria-label" not in s
+    ]
+
+    assert len(anchored) == 1, anchored
+    assert len(unanchored) == 1, unanchored
+    assert len(no_aria) == 2, no_aria
+    assert len(anchored) + len(unanchored) + len(no_aria) == len(
+        dom.RECIPIENT_CHIP_SELECTORS
+    ), dom.RECIPIENT_CHIP_SELECTORS
+
+    # THE TWO WITHOUT aria-label ARE NOT SAFE EITHER, and saying so is the
+    # point of counting them separately rather than folding them into "fine".
+    # They put NO constraint on the haystack, so what those chips carry is
+    # simply unknown -- which is a different problem from a known contaminant
+    # and is not fixed by any strip.
