@@ -993,7 +993,31 @@ def parse_notification(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     lines = [line for line in lines if not is_chrome(line)]
     if not lines:
         return None
-    when = compact_time_ago(stamp) or find_time_ago(lines)
+    # READ THE STAMP WITH BOTH VOCABULARIES BEFORE FALLING BACK TO THE BODY.
+    #
+    # The two readers here take DISJOINT forms, which is easy to miss because
+    # they both return the same spelled string:
+    #
+    #     compact_time_ago  ^(\d+)\s*(mo|s|m|h|d|w|y)$   -- "2h", and ONLY that
+    #     find_time_ago     \b(\d+)\s*<unit>s?\s+ago\b   -- "3 days ago", and
+    #                                                       "22m ago"
+    #
+    # ``stamp`` used to be offered to the first reader alone. When it did not
+    # match, the second ran over ``lines`` -- from which ``strip_screen_reader_
+    # copies`` has ALREADY DELETED the stamp, because ``also=[stamp]`` above
+    # asks it to. So a page that wrote "3 days ago" in its time element had
+    # that value removed from the body and then looked for in the body, and
+    # ``when`` came back absent while the timestamp was sitting in the record
+    # the whole time. Measured: "22m ago", "3 days ago" and "1 week ago" all
+    # returned None, with "2h" as the control that the pipeline works.
+    #
+    # THIS IS THE SAME SHAPE AS THE ALERT-KEYWORD DEFECT fixed the same day: a
+    # reader fed an input that a normaliser stripped of the thing it looks
+    # for. Offering the stamp to both readers costs one call and cannot
+    # regress -- the added term only runs when the compact reader has already
+    # declined, and it reads the element the page put the time in rather than
+    # the prose around it.
+    when = compact_time_ago(stamp) or find_time_ago([stamp]) or find_time_ago(lines)
     # Drop lines that ARE the timestamp; keep lines that merely contain one,
     # or a notification reading "viewed your profile today" loses its text.
     body = " ".join(ln for ln in lines if not is_timestamp_line(ln))

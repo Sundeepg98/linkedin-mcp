@@ -613,6 +613,78 @@ def test_notification_keeps_its_body_and_link_without_the_timestamp_line():
 
 
 # ---------------------------------------------------------------------------
+# 8b. A stamp the compact reader cannot spell is still a stamp
+# ---------------------------------------------------------------------------
+#
+# THE TWO TIME READERS TAKE DISJOINT FORMS, which is easy to miss because both
+# return the same spelled string:
+#
+#     compact_time_ago  ^(\d+)\s*(mo|s|m|h|d|w|y)$  -- "2h", and only that
+#     find_time_ago     \b(\d+)\s*<unit>s?\s+ago\b  -- "3 days ago", "22m ago"
+#
+# ``parse_notification`` offered the time element to the FIRST reader only,
+# then fell back to scanning the body -- from which ``strip_screen_reader_
+# copies`` has already DELETED that same stamp, because ``also=[stamp]`` asks
+# it to. So a page writing "3 days ago" in its time element had the value
+# removed from the body and then looked for in the body.
+#
+# Found 2026-09-05 by generalising the alert-keyword defect rather than by
+# noticing this one: both are a reader fed an input a normaliser stripped of
+# the thing it looks for. The first was reported and orphaned; nobody had
+# reported this one at all.
+
+#: Forms LinkedIn can write in a notification's own time element. The first
+#: is the one the surface uses today and is the CONTROL: it went through the
+#: compact reader before this fix and must still.
+_STAMPS = [
+    ("2h", "2 hours ago"),
+    ("22m ago", "22 minutes ago"),
+    ("3 days ago", "3 days ago"),
+    ("1 week ago", "1 week ago"),
+    ("1mo", "1 month ago"),
+]
+
+
+@pytest.mark.parametrize("stamp,expected", _STAMPS, ids=[s for s, _ in _STAMPS])
+def test_a_notification_reads_its_stamp_in_either_notation(stamp, expected):
+    """Every form the element can carry survives to ``when``.
+
+    The body deliberately REPEATS the stamp, which is what makes this a test
+    of the element rather than of the prose: ``strip_screen_reader_copies``
+    removes that repeat, so a reader that only ever saw the body would find
+    nothing. Before the fix, four of these five returned None.
+    """
+    card = parse_notification(
+        {
+            "href": "/jobs/view/3912345678",
+            "text": "Acme Corp posted a job that may interest you\n\n" + stamp,
+            "time": stamp,
+        }
+    )
+    assert card is not None
+    assert card["when"] == expected
+
+
+@pytest.mark.parametrize("stamp,_expected", _STAMPS, ids=[s for s, _ in _STAMPS])
+def test_the_stamp_is_never_left_dangling_on_the_body(stamp, _expected):
+    """The other half, and the reason the stamp is stripped in the first place.
+
+    Reading the element harder must not un-do the strip: the timestamp is
+    reported as a FIELD, so it may not also trail the sentence. This is what
+    stops a future fix from being "stop deleting the stamp".
+    """
+    card = parse_notification(
+        {
+            "href": "/jobs/view/3912345678",
+            "text": "Acme Corp posted a job that may interest you\n\n" + stamp,
+            "time": stamp,
+        }
+    )
+    assert card is not None
+    assert not card["text"].rstrip().endswith(stamp)
+
+
+# ---------------------------------------------------------------------------
 # 9. envelope
 # ---------------------------------------------------------------------------
 
