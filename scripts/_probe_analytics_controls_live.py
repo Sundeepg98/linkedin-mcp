@@ -284,6 +284,59 @@ CONTROL_CASES = (
 )
 
 
+def control_verdict(results: dict) -> dict:
+    """Read a set of control results. PURE, and that is the whole point.
+
+    ``results`` maps a case label to True/False. Returns
+    ``{"all_ok", "positive_ok", "valid"}`` where **``valid`` is the only field
+    a caller may use to decide whether a live zero means anything.**
+
+    WHY THIS IS NOT INSIDE ``run_controls``. The rule it encodes -- a negative
+    case is evidence only when a positive case passed in the same run -- was
+    PROSE in this file's docstring, and prose is what the repository keeps
+    finding on the wrong side of a defect. Inside the browser loop it could
+    only ever be exercised by attaching to Chrome, which is exactly the
+    dependency that made the JS untestable and pushed the selector's own
+    control into a probe rather than a test.
+
+    Factored out, it can be aimed at the case that matters and cannot be
+    reached any other way: **case A failing while case B passes.** That is a
+    broken detector wearing a clean absence's clothes, it is the one input this
+    whole apparatus exists to distinguish, and no live run can be relied on to
+    produce it on demand.
+    """
+    positive = [
+        label for label, expected in
+        ((lbl, exp) for lbl, _markup, exp in CONTROL_CASES)
+        if expected["disclosure"] >= 1
+    ]
+    negative = [
+        label for label, expected in
+        ((lbl, exp) for lbl, _markup, exp in CONTROL_CASES)
+        if expected["candidates"] == 0 and expected["denied"] == 0
+    ]
+    positive_ok = bool(positive) and all(results.get(lbl) for lbl in positive)
+    all_ok = bool(results) and all(results.values())
+    # THE ABSENCE ARM MUST EXIST TOO, and this line is here because the first
+    # draft computed ``negative`` and never read it. A variable an instrument
+    # calculates and ignores is worse than one it never had: it reads as a
+    # considered condition and enforces nothing. Either it is load-bearing or
+    # it goes -- and here it should be, because a table with no absence case
+    # cannot distinguish anything either, and `valid` is the field callers are
+    # told to trust.
+    negative_ok = bool(negative) and all(results.get(lbl) for lbl in negative)
+    return {
+        "all_ok": all_ok,
+        "positive_ok": positive_ok,
+        "negative_ok": negative_ok,
+        # A NEGATIVE READING IS VALID ONLY IF EVERY POSITIVE ARM FIRED. Not
+        # "most of them", and not "the run mostly passed": one positive arm
+        # failing means the selector has a hole, and a hole is enough to turn
+        # any zero into a fact about the detector.
+        "valid": all_ok and positive_ok and negative_ok,
+    }
+
+
 async def run_controls(page) -> bool:
     """Show the selector succeeding and failing on documents with known answers.
 
@@ -294,8 +347,7 @@ async def run_controls(page) -> bool:
     print("\n" + "=" * 70)
     print("CONTROL: the selector, against documents whose answer is known")
     print("=" * 70)
-    all_ok = True
-    positive_ok = False
+    results: dict = {}
     for label, markup, expected in CONTROL_CASES:
         found = await page.evaluate(  # readonly-ok
             SELECT_JS,
@@ -315,14 +367,15 @@ async def run_controls(page) -> bool:
             "expanded_already": int(found.get("expanded_already") or 0),
         }
         ok = got == expected
-        all_ok = all_ok and ok
-        if label.startswith("A ") and ok:
-            positive_ok = True
+        results[label] = ok
         print(f"  {'PASS' if ok else 'FAIL'}  {label}")
         if not ok:
             print(f"        expected {expected}")
             print(f"        got      {got}")
     print()
+    verdict = control_verdict(results)
+    all_ok = verdict["all_ok"]
+    positive_ok = verdict["positive_ok"]
     if not positive_ok:
         print("  CASE A FAILED. The selector does not fire on a document that "
               "certainly contains a disclosure, so EVERY ZERO THIS PROBE "
@@ -338,7 +391,7 @@ async def run_controls(page) -> bool:
         print("  A CASE FAILED. Read which one before reading anything below: "
               "a refusal arm failing and a detection arm failing are different "
               "defects with different consequences for the live numbers.")
-    return all_ok
+    return bool(verdict["valid"])
 
 
 def _relation(landed: str, asked: str) -> str:
