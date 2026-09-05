@@ -2571,3 +2571,120 @@ assertion has already caught one -- `M C52` is claimed by `HASHTAG-EXISTENCE`
 (`2026-09-05-settings-tail.md`), and the row's text supports both.
 
 Companion record: `_audit/2026-09-05-blocker-map.md`.
+
+## The jobs-requeue wave, 2026-09-05
+
+Four instruments, and one of them answers a question no probe in this
+repository was asking.
+
+### 14.1 THE LANDED-ADDRESS CHECK -- the one to copy
+
+    scripts/_probe_job_alerts_live.py
+
+`assert_read_url` gates the REQUESTED url and NEVER re-checks the LANDED one.
+`tests/test_readonly_boundary_invariant.py` has recorded this about
+`/messaging/` since August and calls it *"harmless today ... and a trap the
+moment anyone adds that check."*
+
+**THE CHECK IS ONE LINE AND IT FIRED ON THE FIRST ADMITTED ADDRESS IT WAS
+POINTED AT:** ask the shipped predicate about the address the browser actually
+came to rest on.
+
+    landed = await BROWSER.goto(page, url)
+    landed_admitted = readonly.is_read_url(str(landed))
+
+An admitted address frozen nine minutes earlier redirected to a path the
+allowlist REFUSES. **This repository has 32 allowlist patterns and, before
+this, none of them had been asked the question.** It costs nothing on top of a
+page load a probe is already taking.
+
+**SHOWN FAILING:** the control (`/jobs/search/?keywords=...`) answers YES on
+the same run the subject answers NO, so the check is shown discriminating
+rather than shown refusing.
+
+### 14.2 The boundary line-attribution probe, and why this one is TRACKED
+
+    scripts/_probe_boundary_line_attribution.py <needle> <expected-old-digest>
+
+Drops the lines carrying a needle, re-runs the SHIPPED `ast_digest`, and
+compares against the previously pinned value: if the tree minus your line
+hashes to the old pin, nothing else rode in on your re-freeze.
+
+**IT IMPORTS `ast_digest` FROM `tests/test_readonly_boundary_invariant.py`
+RATHER THAN REBUILDING IT.** Four waves reimplemented a shipped instrument in
+one day and three got a broken one.
+
+**TWO CONTROLS RUN BEFORE IT WILL PRINT A MEASUREMENT.** A needle NO line
+carries must drop 0 lines and move 0 digests; dropping a DIFFERENT,
+pre-existing entry must land on a digest that is neither pin. Without the
+second, a check that returned the pinned value for any deletion would look
+like it worked.
+
+**AND IT IS TRACKED, WHICH ITS PREDECESSOR WAS NOT.** The previous re-freeze
+recorded that its attribution probe lived under `_audit/_scratch/`, is
+gitignored, and **does not survive a clone** -- so the evidence had to live in
+a comment. This one can be re-run.
+
+### 14.3 The family-pattern planter
+
+    scripts/_probe_alerts_family_pattern.py
+
+Compiles the family pattern a wave would naturally reach for, applies it to a
+COPY of the roster, and reports per address: does a forbidden substring bite,
+does anything admit it today, would the family admit it.
+
+**THE NUMBER THAT MATTERS IS THE INTERSECTION:** addresses the family admits
+where NO substring bites are refused today by nothing but the absence of a
+rule. On `/jobs/alerts/` that set is FOUR and one of them is a `pause` VERB --
+a write nothing defends. Generalises to any root: point it at a new namespace
+before writing an allowlist entry there.
+
+### 14.4 The refusal-table precondition guard
+
+    tests/test_the_refusal_table_needs_a_spec.py
+
+`writes._NINE_REFUSALS` is keyed by action and its only consumer takes a
+`WriteSpec`, so a key for an action not in `SANCTIONED_WRITES` is unreachable.
+Two waves read the table's two blocker shapes as an invitation to file an
+unopened-surface row there at no cost. It is not that door.
+
+**THE VACUITY IS THE WHOLE DIFFICULTY.** The table is EMPTY, so "every key is
+registered" passes over zero keys. Every assertion is PAIRED with a plant --
+an unregistered key that must be flagged, a registered one that must not be,
+and a test that the two plants are genuinely different cases so a fixture that
+was secretly registered cannot make the pair agree for the wrong reason.
+
+### 14.5 Two instrument failures worth the register more than the instruments
+
+**A TALLY OVER THE WRONG DICTIONARY KEY.** `control["name"]` returned ZERO for
+every word on every page -- including `on`, across 185 controls of a page
+LinkedIn certainly labels in English. The census publishes `shape`. Reported
+as-is it would have been *"no alert controls are drawn"*: a finding about a
+key, wearing a finding about LinkedIn.
+
+**A CONTAINMENT TEST THAT FAILED ON ITS OWN CONTROL.** Comparing whole URLs
+read False for a page that certainly served, because LinkedIn reorders a query
+string. It was measuring the query, not the route. Comparing PATHS fixed it --
+and only then did the subject's False mean anything.
+
+Both ran in the flattering direction and neither was caught by reasoning.
+**Both were caught by the control disagreeing**, which is the argument for
+paying for a control on every probe rather than on the ones that feel risky.
+
+### 14.6 The taint guard shapes probe code, and the shape is worth knowing
+
+`tests/test_navigation_is_never_derived.py` is a fixed point over BINDINGS, not
+over types. It refused `print(f"...{kept}")` for two BOOLEANS that structurally
+cannot carry an address, and it refused a helper that RETURNED a literal label
+because the helper was called with a tainted argument.
+
+**THE TWO ROUTES THAT NEED NO `_SANITISERS` ENTRY**, and a declaration
+permanently widens what the guard tolerates:
+
+* **branch to literals at the print site** -- `if kept: print("...yes")`;
+* **print INSIDE the loop**, so the print expression is bound to a label that
+  came from a module constant rather than from the browser;
+* and `len()` of a tainted value is a form the guard already recognises, which
+  `_relation` documents about itself.
+
+Companion record: `_audit/2026-09-05-jobs-requeue.md`.
