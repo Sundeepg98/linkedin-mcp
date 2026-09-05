@@ -1509,13 +1509,50 @@ async def linkedin_events_home() -> dict[str, Any]:
             reading = await events.read_events_home(page)
             return {
                 "ok": True,
-                # SHAPED, not raw. The same argument
-                # linkedin_search_appearances records at its own site: the
-                # boundary checks the REQUESTED url and never re-checks where
-                # it landed, so publishing an unshaped landing is a hole
-                # whether or not it turns out to be empty.
-                "source_url": shape.census_substitute(landed),
+                # NO ``source_url``, AND THAT IS A DECISION RATHER THAN AN
+                # OMISSION. This tool was written publishing
+                # ``shape.census_substitute(landed)``, copying
+                # linkedin_search_appearances -- and
+                # ``test_the_consumers_of_this_predicate_are_the_ones_that_
+                # were_considered`` caught it, which is what that guard is
+                # for: it fires on somebody ADDING A CALLER and asks whether
+                # the new consumer was considered rather than inherited.
+                #
+                # CONSIDERED, AND THE ANSWER IS THAT THIS TOOL SHOULD NOT
+                # DEPEND ON IT. The two arguments that put the existing
+                # ``source_url`` publishers on that list do not reach here:
+                #
+                #   * linkedin_surface_census was A REAL LEAK -- its unshaped
+                #     url named a profile surface carrying third parties.
+                #     ``/events/`` carries no member segment in any spelling.
+                #   * linkedin_search_appearances argued that NOBODY HAD EVER
+                #     LOADED ITS PAGE, so the landing was unknown. This page
+                #     has been loaded six times across three sessions and
+                #     SERVED EXACTLY every time.
+                #
+                # So the predicate would be a no-op on every input this tool
+                # has ever handed it, and a protection that has never been
+                # exercised is not protection -- it is a mechanism standing in
+                # for a value nobody needs. The requested address is a module
+                # constant a caller can read; the url buys nothing
+                # ``redirected`` does not already give.
+                #
+                # WHAT REPLACES IT IS A RELATION, NEVER A VALUE: a boolean and
+                # an integer depth. ``len()`` is on the navigation guard's own
+                # counting list for exactly this reason -- counting a thing is
+                # the discipline that makes it publishable.
+                #
+                # IF IT EVER REDIRECTS, ``redirected`` fires and the depth
+                # moves. The right response then is a live reading of where it
+                # went, and a field added back WITH its shaping -- not a field
+                # shipped now that nobody could interpret.
                 "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "landed_path_depth": len(
+                    [seg for seg in urlsplit(str(landed)).path.split("/") if seg]
+                ),
+                "requested_path_depth": len(
+                    [seg for seg in urlsplit(url).path.split("/") if seg]
+                ),
                 "pages_loaded": 1,
                 **reading,
             }
@@ -2949,8 +2986,14 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     capture). Neither is wrong. A reader that wants "how big is this company"
     should say which of the two it means.
 
-    IT IS A VERDICT, LIKE company_id, and its middle states are the useful
-    ones. 'unhydrated' means the card's container was on the page holding no
+    IT IS A VERDICT AND NOT A BARE VALUE -- the same shape company_id has --
+    and its middle states are the useful ones. (This sentence once drew that
+    comparison with a word that is also one of WRITE_VERBS, because the same
+    word names a reaction. A read tool's docstring is a published claim, so
+    the guard was right to refuse it; the wording changed rather than the
+    exemption, and the offending term is not repeated here -- the guard
+    cannot tell a quotation from a claim, and it should not have to.)
+    'unhydrated' means the card's container was on the page holding no
     text -- a fact about when it was read, NOT the claim that this employer
     has no followers. 'partial' means some fields parsed and the rest are
     null with a why rather than guessed. 'unnamed' means the card did not
