@@ -2593,6 +2593,22 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     panel with 17,000 characters under 13 headings and a null panel on an
     empty page are different answers, and this is what tells them apart.
 
+    company_id IS THE EMPLOYER'S NUMERIC PAGE ID, AND IT IS THE ONE FIELD HERE
+    THAT UNBLOCKS A WRITE. company_url gives a SLUG; linkedin_unfollow_company
+    is addressed by a NUMBER; and until this field nothing on this server
+    turned one into the other, which is why linkedin_follow_company's own
+    docstring says the pair cannot be round-tripped. It is read off the
+    Premium insights panel's canned people-search link, on this same render,
+    at no extra load.
+
+    IT IS A VERDICT, NOT A VALUE, and reading it as a bare id is the one
+    mistake to avoid: company_id.state is 'resolved' only when exactly one
+    such link was on the page AND its card opened by naming this posting's
+    own employer. Every other state -- absent, ambiguous, unnamed, malformed
+    -- carries company_id.company_id null and a why. It is absent on four of
+    the five captures held here, because LinkedIn draws that panel for some
+    employers and not others; that is the normal case and not a failure.
+
     A field the page did not carry comes back null rather than blank. If the
     page did not render the posting at all the call FAILS instead of
     returning an empty one: LinkedIn serves the document title before the
@@ -2742,6 +2758,42 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
                 out["insights"] = await dom.read_job_insight_panels(page)
             except Exception as exc:  # noqa: BLE001 - reported, never raised
                 out["insights_error"] = type(exc).__name__
+
+            # THE EMPLOYER'S NUMERIC PAGE ID, OFF THE SAME RENDERING, AND IT
+            # PAYS A DEBT THIS SERVER HAS BEEN CARRYING SINCE 2026-08-30.
+            #
+            # ``linkedin_follow_company`` acts from a POSTING, which names its
+            # employer by SLUG. ``linkedin_unfollow_company`` acts on a NUMERIC
+            # id. Both docstrings say at length that nothing here resolves one
+            # to the other, and follow_company's calls it the reason the write
+            # was held back: "reversible in LinkedIn, and by hand. Not by this
+            # server."
+            #
+            # The resolution was on this page the whole time. LinkedIn's
+            # Premium company-insights panel draws one canned people search --
+            # "<Employer> hired N people from <Other>" -- whose href carries
+            # both organisations by numeric id. So the id costs NO extra page
+            # load, NO new address on readonly._ALLOWED_URL_PATTERNS, and no
+            # ruling: it is read off a link on a render already performed.
+            #
+            # THE HAZARD IS ATTRIBUTION AND IT IS HANDLED IN shape.py, not
+            # here. The same href also carries ``pastCompany``, a THIRD
+            # organisation, and the same sentence names it. Which one this is
+            # is decided by a count gate and a prefix name-check that can both
+            # refuse; ``tests/test_company_id_resolver.py`` carries the case
+            # where the wrong company was resolved from real markup, kept as a
+            # red. Absent on four of the five tracked job captures, which is
+            # the normal case rather than a failure -- the panel is Premium and
+            # LinkedIn does not draw it for every employer.
+            id_cards = await dom.harvest_linked_cards(
+                page,
+                href_pattern=shape.COMPANY_ID_LINK_MARKER,
+                max_items=8,
+                max_hops=shape.COMPANY_ID_CARD_HOPS,
+            )
+            out["company_id"] = shape.company_id_from_insight_cards(
+                id_cards, company=identity.get("company")
+            )
 
             out["pages_loaded"] = 1
             out["source_url"] = final_url
@@ -5509,9 +5561,22 @@ async def linkedin_unfollow_company(
     WHAT IS ASYMMETRIC IS AIMING, NOT CAPABILITY. ``linkedin_follow_company``
     is addressed by ``job_id``, and a posting names its employer by SLUG,
     while ``linkedin_unfollow_company`` is addressed by a NUMERIC company id
-    off Manage Pages -- and nothing in this server resolves one to the
-    other. So the pair cannot be round-tripped here even though each leg
-    works on its own.
+    off Manage Pages.
+
+    THIS PARAGRAPH USED TO END "and nothing in this server resolves one to the
+    other. So the pair cannot be round-tripped here even though each leg works
+    on its own." THAT IS NO LONGER TRUE, and the sentence is quoted rather than
+    deleted because a claim that silently disappears is indistinguishable from
+    one that was never made. ``linkedin_job_detail`` now returns
+    ``company_id`` -- the employer's numeric Page id, read off the Premium
+    insights panel on the posting itself. Follow by ``job_id``, then read the
+    id off the same posting, and this tool can be aimed.
+
+    WHAT STILL IS NOT A CLEAN ROUND TRIP, so the correction does not overstate
+    itself: that resolution is ABSENT whenever LinkedIn draws no insights panel
+    for the employer -- four of the five captures held here -- and the list
+    limitation below is untouched either way. An id you can name is not the
+    same as a row that rendered.
 
     A MEASUREMENT THAT BEARS ON TRUSTING THIS TOOL'S OWN VERDICT, taken
     2026-09-03: ``linkedin_followed_companies`` returned ``total_followed:
@@ -5544,18 +5609,29 @@ async def linkedin_follow_company(
     READ THE ASYMMETRY BEFORE YOU USE IT, because it is the whole reason this
     was held back. A follow IS reversible -- LinkedIn writes the inverse into
     the control's own accessible name, ``Following``, and into two other
-    surfaces besides -- but THIS SERVER CANNOT AIM THE UNDO. A posting names
-    its employer by SLUG; ``linkedin_unfollow_company`` addresses rows by
-    NUMERIC COMPANY ID; and nothing resolves one to the other. That was
-    re-measured on 2026-08-30 by the cheapest available route:
-    ``linkedin_job_detail`` on a live posting returns
-    ``company_url: .../company/<slug>/``, a slug and not an id. Manage Pages
-    also renders about twenty rows of however many you follow with no
-    pagination, so a newly followed Page may not even appear there.
+    surfaces besides -- but THIS SERVER COULD NOT AIM THE UNDO. A posting
+    names its employer by SLUG; ``linkedin_unfollow_company`` addresses rows
+    by NUMERIC COMPANY ID. That was re-measured on 2026-08-30 by the cheapest
+    available route: ``linkedin_job_detail`` on a live posting returns
+    ``company_url: .../company/<slug>/``, a slug and not an id.
 
-    So: reversible in LinkedIn, and by hand. Not by this server. The preview
-    says exactly that in ``reversible_by`` and it is why you are reading it
-    here as well.
+    THE HALF OF THAT WHICH CHANGED, 2026-09-05. This paragraph used to
+    continue "and nothing resolves one to the other", and end "So: reversible
+    in LinkedIn, and by hand. Not by this server." The measurement above still
+    holds -- ``company_url`` is still a slug -- but it was never the whole
+    page. ``linkedin_job_detail`` now also returns ``company_id``, read off
+    the canned people-search link in LinkedIn's Premium insights panel on the
+    same posting, at no extra load. So the undo CAN now be aimed from the
+    posting you followed from.
+
+    THE HALF THAT DID NOT CHANGE, and it is why this is not yet a round trip.
+    That panel is Premium and LinkedIn does not draw it for every employer:
+    ``company_id.state`` comes back ``absent`` on four of the five captures
+    held here, and an absent resolution is the normal case rather than a
+    fault. Manage Pages also renders about twenty rows of however many you
+    follow with no pagination, so a newly followed Page may not appear there
+    whatever id you hold. ``reversible_by`` on the preview is written against
+    the weaker of these two facts on purpose.
 
     THE DIRECTION IS READ OFF THE POSTING, at no extra page load -- the state
     and the action share a page, which is the best shape a gate can have. The

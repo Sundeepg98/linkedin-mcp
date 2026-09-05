@@ -221,6 +221,14 @@ SYNTHETIC_IDS = frozenset(
         # that file for eight commits. Nothing between a commit and the
         # disk runs this guard; CI does, and CI only sees a push.
         "7400000000000000004",
+        # tests/test_company_id_resolver.py, 2026-09-05. The SECOND
+        # organisation in that module's ambiguity case -- the one whose whole
+        # job is to make the resolver refuse rather than take the first
+        # number it finds. Taken as the next member of the 530000xx series
+        # already above rather than invented fresh, so its provenance is
+        # visible in the value: a reviewer asking "is this real?" can see
+        # what it is a successor to.
+        "53000017",
     }
 )
 

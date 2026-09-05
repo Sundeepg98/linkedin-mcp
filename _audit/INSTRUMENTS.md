@@ -1042,3 +1042,128 @@ INSIDE the page and returns integers, and `census_aggregate` reports shapes and
 counts instead of names. 4.7 is that discipline applied to AIMING instead of to
 what is emitted, and the two reinforce: a server that will not emit a name is
 a server that had better not need one to find a control.
+
+---
+
+### 4.8 `A-CARD-THAT-NAMES-TWO-PARTIES-NEEDS-A-POSITION-NOT-A-MENTION`
+
+**Where:** `linkedin_server/shape.py`
+`company_id_from_insight_cards`; `tests/test_company_id_resolver.py`.
+
+**The guard:** the employer's numeric Page id is read off the canned
+people-search link in a posting's Premium insights panel, and it is accepted
+only if the card carrying it NAMES the employer the posting already
+identified.
+
+**Shown failing, on real markup, on the first run.** The name check was
+written first as a MENTION -- "is the employer's name in this card's text".
+LinkedIn's own sentence is
+
+    <Employer> hired 6 people from <Other>. See all
+
+and its href carries BOTH organisations, `currentCompany=<employer>` and
+`pastCompany=<other>`. So "does this card mention X" is TRUE FOR BOTH, and the
+resolver asked about `<Other>` returned `<Employer>`'s id -- with a `why`
+string stating, correctly by its own lights, that the card named the company
+asked about. Against the tracked fixture, not a constructed case.
+
+**The mutation that kills it:** revert `startswith` to `in`:
+
+    -    if not _WS.sub(" ", text).strip().casefold().startswith(wanted.casefold()):
+    +    if wanted.casefold() not in _WS.sub(" ", text).casefold():
+
+`test_the_other_company_named_on_the_same_card_resolves_to_nothing` reds.
+Three further mutations were planted and all four were killed by their named
+test, zero survivors, run in an isolated copy with
+`linkedin_server.__file__` printed and asserted under it:
+`_audit/_scratch/_mutate_company_id_resolver.py`, output beside it.
+
+**THE LESSON, WHICH IS NOT ABOUT COMPANIES.** When one string names two
+parties, a MENTION cannot attribute and a POSITION can. The fix is not a
+cleverer matcher; it is noticing that the SOURCE already encodes the
+attribution -- LinkedIn made the employer the subject of its sentence -- and
+anchoring on that rather than on containment. Ask of any name check: *could
+this text name somebody else too?* If yes, containment is measuring the wrong
+thing, and it will be confidently wrong rather than silent.
+
+**Its companion, and the reason both are here.** A related failure has the
+same shape one level up: `dom.harvest_linked_cards` defaults to EIGHT
+ancestor hops, and at eight this card's text becomes the whole insights panel
+-- every organisation named anywhere on it. A containment check over that text
+would pass for almost any name on the page. Measured at five depths and pinned
+at three (`shape.COMPANY_ID_CARD_HOPS`), with the reading written on the
+constant. This is `a-budget-is-not-a-containment-rule` again: a cap on how far
+a walk climbs is not a rule about what it is allowed to absorb.
+
+### 4.9 `A-GUARD-THAT-NEEDS-ADJACENCY-IS-DEFEATED-BY-INTERPOLATION`
+
+**Where:** `tests/test_no_committed_identity.py`, `COMPANY_ID_SHAPE` --
+`(?:/company/|currentCompany=|companyId=)(\d{3,})`.
+
+**Shown failing.** A new test module was written with its urls built the
+obvious way::
+
+    HREF = f"...?currentCompany={EMPLOYER_ID}&pastCompany=26105338"
+
+The identity guard swept the file -- it sweeps tracked PLUS
+untracked-not-ignored, so the file was genuinely in scope -- and passed. It
+passed because it found NOTHING TO CHECK: its pattern needs the parameter name
+and the digits ADJACENT IN THE SOURCE TEXT, and the f-string had put an
+expression between them. **A green that means "no match" is indistinguishable
+from a green that means "declared and verified", and this file's whole job is
+to tell those apart.**
+
+**The control that proves it now speaks.** Append a comment carrying the
+parameter name and six digits with nothing between them -- the literal is NOT
+written out here, for a reason two paragraphs down -- and re-run: the guard
+reds on
+`test_no_tracked_file_carries_a_real_identifier[tests/test_company_id_resolver.py]`
+with `assert 1 <= 0`. Before the url was spelled out as a literal, planting a
+bare `31415926` and a bare `9876543210` in the same file changed NOTHING --
+which is the measurement that found this, and it is worth repeating that the
+plant that finds a blind spot is the one that looks like the real thing rather
+than the one that looks alarming.
+
+**AND THIS ENTRY WENT RED ON ITSELF, WHICH IS THE BEST EVIDENCE IN IT.** The
+first draft quoted the control verbatim. `_audit/INSTRUMENTS.md` is a tracked
+file, the guard sweeps it like any other, and the quoted control is a real
+match with an undeclared value -- so the paragraph explaining the check FAILED
+the check, inside the same test run that was meant to certify it. Nothing was
+wrong with the guard; the documentation was a live instance of what it hunts.
+Declaring the throwaway in `SYNTHETIC_IDS` would have "fixed" it by making the
+register a place where identifiers get waved through, so the literal is
+described instead. **A register of failing-proofs has to be sweepable on the
+same terms as the code it describes.**
+
+**The fix is in the TEST, not the guard, and deliberately.** The url is now a
+literal and the id is parsed back out of it (`EMPLOYER_ID = parse_qs(...)`),
+with `test_the_pinned_href_is_the_fixtures_own` holding the literal to the
+tracked capture so it cannot go stale. Widening `COMPANY_ID_SHAPE` to chase
+interpolations would make it match `currentCompany={` and start reporting
+variable names as identifiers.
+
+**WHAT WAS NOT DONE, stated so nobody reads this entry as closed.** A census of
+the same shape found EIGHT tracked sites putting a value next to `/company/`
+through a variable. Six interpolate a SLUG, which this digits-only pattern
+would never match anyway and which are therefore not instances. **Two are
+numeric ids and are real instances:**
+
+    tests/test_unfollow_fixture.py:250   f"/company/{ANCHOR_ID}/"    ANCHOR_ID = "902611"
+    tests/test_writes.py:4157            "/company/" + FOLLOWED_COMPANY + "/"
+
+Neither is a live red -- both values are declared in `SYNTHETIC_IDS` and both
+appear adjacent to `/company/` inside a tracked fixture, so the guard checks
+them THERE. But it does not check them at these sites, and it cannot tell you
+which of the two situations you are in.
+
+**One value in the same neighbourhood is invented and undeclared and nothing
+can see it:** `tests/test_writes.py:83` `UNFOLLOWED_COMPANY = "7777777"`. Seven
+sevens is self-evidently constructed, so this is not an incident -- it is a
+demonstration that the guard's coverage is decided by ADJACENCY rather than by
+what a file contains.
+
+The general check that would catch the class: **for each declared synthetic id,
+assert the guard actually MATCHES it somewhere.** A declaration nothing matches
+is either a stale entry or a blind spot, and both are worth knowing. Its
+mirror, harder and more valuable: **for each id-shaped literal in a tracked
+file, assert some pattern binds it.**

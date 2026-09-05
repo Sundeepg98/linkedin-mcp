@@ -3059,6 +3059,251 @@ def followed_page_state(query: str, parsed: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# The employer's numeric Page id, read off the posting that is already open
+# ---------------------------------------------------------------------------
+
+#: THE PARAMETER THAT NAMES THE EMPLOYER, AND THE ONE BESIDE IT THAT DOES NOT.
+#:
+#: A job posting's Premium company-insights panel draws one canned people
+#: search -- LinkedIn's own prose is "<Employer> hired 6 people from <Other>"
+#: with a *See all* link -- and that link's query carries BOTH organisations,
+#: by numeric id, in one href:
+#:
+#:     /search/results/people/?origin=JOB_PAGE_CANNED_SEARCH
+#:         &currentCompany=<the employer>&pastCompany=<somewhere else>
+#:
+#: ``currentCompany`` is the posting's own employer. ``pastCompany`` IS A
+#: THIRD PARTY -- the company those hires came from -- and reading it as the
+#: employer would aim a follow, an unfollow or a job-search filter at an
+#: organisation the posting never advertised. So the key is matched BY NAME
+#: through a real query parse rather than by "the first number in the href",
+#: and ``pastCompany`` is not merely unused here:
+#: :func:`company_id_from_insight_cards` is required to return NOTHING when it
+#: is the only key present, and ``tests/test_company_id_resolver.py`` asserts
+#: that case explicitly rather than trusting the parse.
+#:
+#: WHY THIS MATTERS ENOUGH TO HAVE ITS OWN MODULE SECTION. This server can
+#: follow a company (addressed by ``job_id``, off a posting that names its
+#: employer by SLUG) and can unfollow one (addressed by a NUMERIC id off
+#: Manage Pages), and until this function nothing here resolved one to the
+#: other -- ``linkedin_follow_company``'s own docstring says so, twice, and
+#: calls it the reason the write was held back. The resolution turns out to
+#: be on the posting itself, at zero extra page loads and with no address
+#: added to ``readonly._ALLOWED_URL_PATTERNS``: the panel is on the render
+#: ``linkedin_job_detail`` already performs.
+COMPANY_ID_QUERY_KEY = "currentCompany"
+
+#: The key that must never be mistaken for it. A named constant rather than a
+#: literal in two places, so the test that pins the distinction and the code
+#: that enforces it cannot drift apart.
+COMPANY_ID_DECOY_QUERY_KEY = "pastCompany"
+
+#: The href family the id is read out of, matched as a substring of the whole
+#: url because the query around it varies. The id is taken from the PARSED
+#: query and never from this string.
+COMPANY_ID_LINK_MARKER = "/search/results/people/"
+
+#: A LinkedIn organisation id is decimal, and four digits is the floor
+#: :data:`_COMPANY_LINK` already pins for the same value read off a
+#: notification link. The two agree deliberately: a resolver that accepted
+#: ``"7"`` would hand ``linkedin_unfollow_company`` a target no Manage-Pages
+#: row can carry, and the refusal would arrive one surface too late.
+_COMPANY_ID_VALUE = re.compile(r"^\d{4,}$")
+
+#: HOW FAR THE CARD WALK MAY CLIMB, AND IT IS A MEASUREMENT RATHER THAN A CAP.
+#:
+#: ``dom.harvest_linked_cards`` builds a card by climbing ancestors from the
+#: anchor. Run over the tracked ``job_detail_following_hydrated.html`` at five
+#: depths, the walk returns three different things and only one of them is a
+#: card:
+#:
+#:     1, 2 hops  ->  "See all"                       (the link, no sentence)
+#:     3, 4 hops  ->  "<Employer> hired 6 people from <Other>. See all"
+#:     8 hops     ->  the WHOLE Premium insights panel, 400+ characters
+#:                    beginning "Insights about the company ..."
+#:
+#: Eight is ``harvest_linked_cards``'s own default and it is the wrong depth
+#: here: at eight the text carries every organisation named anywhere on the
+#: panel, so a name check over it would pass for a company this posting merely
+#: mentions. That is the failure this repository has already recorded once as
+#: "a limit on how FAR a search goes is not a rule about WHERE it may stop".
+#:
+#: THREE IS PINNED, AND THE ANCHOR BELOW FAILS CLOSED AT EVERY OTHER DEPTH,
+#: which is why the constant is a safety net rather than the safety case: at
+#: one or two hops the text is "See all" and names nobody, at eight it begins
+#: with LinkedIn's panel heading. Both refuse. A caller that passes the wrong
+#: depth gets nothing, never somebody else's id.
+COMPANY_ID_CARD_HOPS = 3
+
+
+def company_id_from_insight_cards(
+    records: Iterable[dict[str, Any]], *, company: Optional[str]
+) -> dict[str, Any]:
+    """The employer's numeric Page id, or a stated reason there is none.
+
+    ``records`` are ``dom.harvest_linked_cards`` observations -- each a dict
+    with ``href`` and ``text`` -- harvested off the posting page with the
+    people-search href pattern. ``company`` is the employer name
+    ``dom.read_job_identity`` already read out of the page's own
+    ``aria-label="Company, <name>"``, and it is REQUIRED: this function will
+    not resolve an id it cannot cross-check.
+
+    THE GATES RUN IN THIS ORDER AND THE ORDER IS THE SAFETY CASE:
+
+    1. COLLECT, UNFILTERED. Every record whose href carries
+       :data:`COMPANY_ID_QUERY_KEY` is a candidate. Nothing is filtered by
+       the employer's name at this stage, deliberately -- asking "is there
+       exactly one candidate" over a set already narrowed BY the name would
+       measure the filter rather than the page, and this repository has been
+       bitten by that exact shape before.
+    2. COUNT DISTINCT VALUES. Zero is ``absent``. More than one is
+       ``ambiguous`` and refuses; it does not take the first. LinkedIn draws
+       one canned search on both captures held here, but "one on two
+       captures" is not "always one", and a second panel -- the Competitors
+       block sits directly below this one -- is the obvious way a second
+       arrives.
+    3. ONLY THEN, CHECK THE NAME -- AND CHECK IT AS A PREFIX, NOT AS A
+       SUBSTRING. The single candidate's card must OPEN by naming the
+       employer the posting already identified. A substring test was written
+       first and was wrong on the very first fixture: LinkedIn's sentence
+       names TWO organisations ("<Employer> hired 6 people from <Other>"), so
+       "does this card mention the employer" is also true of the company the
+       hires came from, and asking it that way resolved
+       ``pastCompany``'s organisation to ``currentCompany``'s id. The
+       position is LinkedIn's own -- the employer is the subject of its
+       sentence -- and it is the anchor-and-key discipline
+       ``test_unfollow_fixture.py`` states for the unfollow row: the thing you
+       found and the thing you name must agree, or nothing is returned.
+
+       A NAME THAT DISAGREES IN SPELLING REFUSES, and that is the intended
+       cost. If the ``aria-label`` says "Vantrex Systems Inc." where the
+       sentence says "Vantrex Systems", this returns ``unnamed`` rather than
+       an id, because the alternative is a resolver that decides for itself
+       when two names are the same company.
+    4. CHECK THE SHAPE. Four digits or more, or ``malformed``.
+
+    RETURNS a dict that always carries ``company_id``, ``state`` and ``why``.
+    ``company_id`` is a string of digits only when ``state == "resolved"``,
+    and ``None`` in every other state -- there is no partial answer, because
+    the only two callers of a company id on this server are a WRITE that
+    unfollows and a FILTER that searches, and a wrong id is worse than none.
+
+    ONE ENCODING NOTE, STATED BECAUSE IT FAILS CLOSED AND SHOULD KEEP DOING
+    SO. An href taken from a browser is entity-decoded before it reaches
+    here, which is the only path production uses. An href copied verbatim out
+    of raw markup still spells its separators ``&amp;``, and
+    ``urllib.parse.parse_qs`` then reads the second parameter's name as
+    ``amp;currentCompany``. That resolves to ``absent`` -- never to a wrong
+    id -- and it is left failing that way on purpose rather than normalised
+    behind a defensive unescape: a transform that quietly repairs its input
+    is one more thing between a caller and the truth about what the page
+    actually said.
+    """
+    wanted = str(company or "").strip()
+    candidates: list[tuple[str, str]] = []
+    links_seen = 0
+
+    for record in records or ():
+        href = str((record or {}).get("href") or "")
+        if COMPANY_ID_LINK_MARKER not in href:
+            continue
+        links_seen += 1
+        query = parse_qs(urlsplit(href).query)
+        values = query.get(COMPANY_ID_QUERY_KEY) or []
+        value = str(values[0]).strip() if values else ""
+        if not value:
+            continue
+        candidates.append((value, str((record or {}).get("text") or "")))
+
+    distinct = sorted({value for value, _ in candidates})
+
+    if not distinct:
+        # Restricted to the SAME href family the search above walked. A scan
+        # over every record would let an unrelated link elsewhere on the page
+        # explain this absence, and a why that names the wrong cause is worse
+        # than a bare one.
+        decoyed = any(
+            COMPANY_ID_LINK_MARKER in str((r or {}).get("href") or "")
+            and COMPANY_ID_DECOY_QUERY_KEY
+            in parse_qs(urlsplit(str((r or {}).get("href") or "")).query)
+            for r in (records or ())
+        )
+        return {
+            "company_id": None,
+            "state": "absent",
+            "why": (
+                f"no link on this posting carries {COMPANY_ID_QUERY_KEY!r}"
+                + (
+                    f"; one carries {COMPANY_ID_DECOY_QUERY_KEY!r}, which names "
+                    "a different organisation and is not read here"
+                    if decoyed
+                    else f" ({links_seen} people-search link(s) seen)"
+                )
+            ),
+            "candidates": len(distinct),
+        }
+
+    if len(distinct) > 1:
+        return {
+            "company_id": None,
+            "state": "ambiguous",
+            "why": (
+                f"{len(distinct)} different {COMPANY_ID_QUERY_KEY} values are on "
+                "this page, so which one is the employer cannot be told apart "
+                "from which one is a comparison"
+            ),
+            "candidates": len(distinct),
+        }
+
+    value = distinct[0]
+    text = next(text for found, text in candidates if found == value)
+
+    if not wanted:
+        return {
+            "company_id": None,
+            "state": "unnamed",
+            "why": (
+                "the posting did not name its employer, so the one id found "
+                "has nothing to be checked against"
+            ),
+            "candidates": 1,
+        }
+
+    if not _WS.sub(" ", text).strip().casefold().startswith(wanted.casefold()):
+        return {
+            "company_id": None,
+            "state": "unnamed",
+            "why": (
+                f"the card carrying the only {COMPANY_ID_QUERY_KEY} does not "
+                f"open by naming {wanted!r}, so the id and the employer do not "
+                "agree"
+            ),
+            "candidates": 1,
+        }
+
+    if not _COMPANY_ID_VALUE.match(value):
+        return {
+            "company_id": None,
+            "state": "malformed",
+            "why": (
+                f"{COMPANY_ID_QUERY_KEY} is not a LinkedIn organisation id: "
+                "four or more digits were expected"
+            ),
+            "candidates": 1,
+        }
+
+    return {
+        "company_id": value,
+        "state": "resolved",
+        "why": (
+            f"one {COMPANY_ID_QUERY_KEY} on this posting, on a card opening "
+            f"with {wanted!r}"
+        ),
+        "candidates": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Open To Work
 # ---------------------------------------------------------------------------
 
