@@ -226,3 +226,64 @@ rather than method. Four kills, zero survivors, each by its own named test:
   is off committed, sanitised fixtures plus one untracked raw capture. The
   parser is therefore verified against markup as of the day those were taken,
   not against today's.
+
+## 9. TWO REDS FROM `bc5c2eb`, CLEARED -- AND THE FIX LANDED IN SOMEBODY ELSE'S COMMIT
+
+Added 18:20. `bc5c2eb` left two reds in `tests/test_server_surface.py`:
+`test_no_docstring_claims_a_write` and
+`test_the_docstring_exemption_does_not_cover_the_reads`. Blast radius was
+exactly one read tool and one sentence in it.
+
+**The guard is right and the cause is small.** The sentence compared
+`company_about`'s verdict shape to `company_id`'s, and the word it used to
+draw that comparison is one of `readonly.WRITE_VERBS` -- the same word names
+a reaction on this platform. A docstring is a PUBLISHED CLAIM, so a read
+tool whose prose reads as though it writes is a disclosure problem rather
+than a style one. This repository's rule that a surface may not print a
+claim it cannot derive binds a claim it must not make just as hard.
+
+**Rephrased, not exempted.** The second failing test exists precisely to
+catch somebody reaching for `DOCSTRING_WRITE_TOOLS` instead.
+
+**AND THE FIRST REPAIR WAS STILL RED, WHICH IS THE PART WORTH KEEPING.** It
+explained the fix by NAMING the offending word in the new prose. The guard
+matched it again, correctly: **it cannot tell a quotation from a claim, and
+a guard that tried to would be a worse guard.** The note now describes the
+term without spelling it, and says so, so the next reader does not
+reintroduce the word while documenting it.
+
+Verb hits were measured with `readonly.docstring_write_claims` itself
+rather than guessed -- one hit before, zero after.
+`tests/test_server_surface.py`: **50 passed.**
+
+### The commit is not mine, and I am the author this time
+
+I staged the fix as a single hunk with `git apply --cached` rather than
+`--only`, because `server.py` also carried an uncommitted
+`linkedin_events_home` hunk belonging to the events wave and `--only` would
+have taken it. The staged diff was read line by line and was eight lines,
+all mine.
+
+**In the seconds between staging and committing, the events wave committed
+`server.py` and my eight lines went in with it, as `a40e368`.** My own
+commit then reported "nothing added to commit", which is how I found out.
+
+**This is the exact mirror of section 1**, one hour later and with the roles
+reversed: there I sweept 55 of the job-search wave's lines, here the events
+wave swept 8 of mine. Both times `git status` and `git diff` were read
+correctly and both times the tree moved in between. That is now the FIFTH
+instance today, and it is worth stating plainly that **staging a precise
+hunk does not narrow this window at all** -- the window is between the
+staging and the commit, and it is open however small the change is.
+
+**NOT REWRITTEN and NOT RE-LANDED.** The lines are byte-identical in
+history, the guard is green at HEAD, and re-applying them would produce a
+no-op commit claiming work that is already in the tree. The record is here
+instead, which is the whole point of the protocol: the sweeper credits the
+author, and where the sweeper has not yet noticed, the author says so.
+
+**So this wave's work sits in three commits and one of them is not mine:**
+
+    bc5c2eb  mine    the reader, the shaper, the tests
+    25cb74e  mine    the credit for the 55 lines I swept
+    a40e368  theirs  carries my 8-line docstring repair
