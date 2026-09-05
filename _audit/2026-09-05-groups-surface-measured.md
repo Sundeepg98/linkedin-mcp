@@ -372,6 +372,60 @@ sequence, and every menu closed on Escape with `aria-expanded` back to 0.
 * **The three ledger rows that would reconcile 35 to 32 were not identified.**
   Guessing them would have produced a reconciliation nobody could check.
 
+## 7A. THE READER THAT IS MISSING, SPECIFIED RATHER THAN LEFT AS "BUILD A TOOL"
+
+Three rows are REACHABLE NOW and what stands between them and a tool is a DOM
+walk plus `server.py` wiring. This section is what that walk has to do, written
+so the next wave implements rather than researches. **Every rule below was
+measured today by an instrument that carried a control.**
+
+### The walk
+
+    1. GOTO the feed. Read shape.invitation_badge. Refuse if state != "read"
+       -- the groups page cannot certify a cost, section 3.
+    2. GOTO https://www.linkedin.com/groups/  (already on the allowlist).
+    3. Collect every anchor whose href PATH contains "/groups/". EXPECT 11 on
+       this account, of which one is the nav's own link to the root.
+    4. For every button declaring aria-expanded, walk UP. The first ancestor
+       holding at least one group anchor is the row; the control QUALIFIES
+       only if that ancestor holds EXACTLY ONE.
+    5. The group anchor inside a qualifying row's ancestor is a MEMBERSHIP.
+       Every other group anchor is a suggestion or the root.
+    6. Hand both lists to groups.membership_tally and the pair to
+       groups.disjoint. Emit counts and identifiers. EMIT NO NAME.
+    7. Read the badge again ON THE FEED, not on the groups page.
+
+### The four rules that are NOT obvious and each cost a wrong reading
+
+* **WALK FROM THE CONTROL, NEVER FROM THE ANCHOR.** The identical stopping rule
+  run from the anchor resolved ZERO membership rows against five, on one page
+  in one hour. A containment rule is not symmetric.
+* **IF YOU ADD "and holds a control" TO THE STOPPING RULE, EXCLUDE THE GROUP
+  ANCHOR FROM WHAT COUNTS AS A CONTROL.** An `a[href]` control selector makes
+  that conjunct vacuous and silently collapses the rule back into the anchor
+  walk.
+* **DO NOT LOOK FOR `[role=menu]`.** This surface draws none. The overflow
+  content arrives as ordinary controls and is visible only to a census DELTA.
+* **DO NOT COUNT THE ROOT LINK.** `groups.group_identifier` already refuses it
+  by name; a walk that pre-filters must refuse it for the same reason or it
+  inflates every tally by exactly one.
+
+### The control the reader must pass before its number is believed
+
+**It must find exactly FIVE membership rows and FIVE suggestions with ZERO
+identifiers in common.** Four independent instruments agree on that today. A
+different number is a finding about the reader until proven otherwise -- and
+the reader should PRINT the comparison rather than leave it to a reader of its
+output, which is what caught two wrong rules on this surface already.
+
+### What the tool may say
+
+Counts, distinct counts, overlap, and the identifiers. **No name, and the
+signature should make that structural rather than filtered** -- the reader can
+hand `groups.membership_tally` a list of hrefs and never hold a name at all.
+That is the ruling this surface was opened under, and a tool that takes names
+"just in case" has re-opened the hole its module exists to close.
+
 ## 8. PROVENANCE
 
 | instrument | control | outcome |
