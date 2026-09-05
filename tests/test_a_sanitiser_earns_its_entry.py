@@ -124,6 +124,81 @@ ENROLLED: dict[tuple[str, str], str] = {
     # adversarial table below is what checks it, and it was run against this
     # entry before the entry was committed.
     ("_probe_analytics_controls_live.py", "_relation"): TWO_ARG,
+    # THE NINTH AND TENTH, added 2026-09-05 by the groups-surface wave, which
+    # is the successor on this surface and is enrolling ITS OWN TWO and no
+    # more. The row above declined to enrol these on the correct principle --
+    # a wave enrolling a neighbour's function vouches for a contract it did not
+    # write -- and that principle cuts the other way too: leaving them
+    # unenrolled leaves the guard trusting them BY NAME, which is the exact
+    # state `_redact` was in when it turned out to carry no slug rule at all.
+    #
+    # WHAT MAKES THESE TWO SAFE TO CLAIM RATHER THAN A GUESS, and it is two
+    # separate facts, not one restated:
+    #
+    # 1. ``test_every_relation_definition_is_byte_identical`` in
+    #    ``tests/test_navigation_is_never_derived.py`` asserts that every
+    #    ``_relation`` body in the tree is ONE body. So the contract claimed
+    #    here is the same contract that file's own
+    #    ``test_the_relation_sanitiser_cannot_reconstruct_its_input``
+    #    exercises across all three branches, against a vanity slug, a urn, a
+    #    fifteen-digit run and a thread id.
+    # 2. The adversarial table BELOW was run against both rows before they
+    #    were committed, and the enrolment machinery was SHOWN FIRING on them:
+    #    a deliberately leaky ``_relation`` -- one that interpolates the landed
+    #    url into its result -- was planted in the capture probe and this file
+    #    failed on it. An enrolment that has only ever been seen passing
+    #    certifies nothing, which is this file's own subject.
+    #
+    # STILL UNENROLLED AND DELIBERATELY LEFT: `_probe_compose_file_inputs.py`,
+    # and it is ONE file rather than the two this comment first named.
+    # `_probe_newsletter_subscriptions_live.py` was enrolled by its own wave
+    # between this wave being told about it and running the check -- **which is
+    # why the list was re-measured rather than copied from the message that
+    # reported it.** A relayed set of names is a reading with a timestamp the
+    # receiver cannot see.
+    #
+    # The remaining one is not this wave's artifact by any measurement --
+    # neither the git history nor the surface -- and the enumeration guard
+    # stays red until its owner claims it. **That red is the queue working,
+    # not a failure to finish.**
+    ("_probe_groups_events_capture.py", "_relation"): TWO_ARG,
+    ("_probe_groups_events_live.py", "_relation"): TWO_ARG,
+    # THE ELEVENTH, added 2026-09-05 by the newsletter-build wave.
+    #
+    # IT WAS WRITTEN AS "THE NINTH" AND RENUMBERED, because the groups-surface
+    # wave claimed nine and ten in this same file within the same minutes. A
+    # duplicate ordinal in a list several waves append to is a hazard rather
+    # than an untidiness -- the register carried two sections numbered 8 for
+    # exactly this reason a day earlier, and something cited one of them by
+    # number.
+    #
+    # ONE ROW, NOT FOUR. Of the four claimants owed when this was written,
+    # groups-surface has since taken its own two. `_probe_compose_file_inputs.py`
+    # REMAINS UNENROLLED and is neither wave's, so the enumeration guard above
+    # is still red and correctly so. Enrolling a neighbour's function would be
+    # vouching for a contract this wave did not write.
+    #
+    # THE CLAIM BEING MADE, because an enrolment is a claim: this copy of
+    # ``_relation`` takes a landed url and an asked-for url and returns the
+    # RELATION between them, and no substring of either input survives -- every
+    # branch yields a literal or an integer depth taken with ``len``.
+    #
+    # WHAT MAKES IT SAFE TO ADD RATHER THAN A GUESS, and it is the same
+    # argument the eighth row made: this copy is byte-identical to the ones
+    # ``test_every_relation_definition_is_byte_identical`` already governs, so
+    # the contract is one another file already proves. That is corroboration
+    # and NOT the check -- the adversarial table below is the check, and it was
+    # run against this entry before the entry was written, in both directions:
+    # green as it stands, and RED under a planted mutation that interpolates
+    # the landed path into the returned string.
+    #
+    # THE ENROLMENT GUARD IS AN ENUMERATION GUARD -- it fires on *somebody
+    # added a claimant*, which is a condition that does not exist until the
+    # claimant is typed. This wave proved earlier the same day that a targeted
+    # run cannot reach that class, and then met it from the other side: the
+    # probe was written, committed, and the red arrived from a file the wave
+    # had never opened. Register 9.5, demonstrated on its own author.
+    ("_probe_newsletter_subscriptions_live.py", "_relation"): TWO_ARG,
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this
