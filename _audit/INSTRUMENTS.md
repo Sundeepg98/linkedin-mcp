@@ -2138,3 +2138,161 @@ The register's law is that an instrument enters only if it has been SHOWN
 FAILING. This one has -- its refusal path and its abort path both fire. What it
 has not done is produce a number, and the entry says so in its first line
 rather than in a footnote.
+
+---
+
+## 13. The newsletter-build wave, 2026-09-05
+
+Appended, not inserted. Two instruments and one law. The law is the part that
+travels: the other two are its receipts.
+
+### 13.1 A GUARD'S SCOPE IS NOT ITS NAME, and this one was doing duty it could not do
+
+`tests/test_navigation_is_never_derived.py` is the consent guard this package
+reaches for. Four mutations were planted in a live probe:
+
+    print the landed url directly                      RED
+    navigate to a url the page chose                   RED
+    smuggle the landed url through an f-string         RED
+    print a raw accessible name off an anchor          GREEN
+
+**The fourth is the only one of the four that puts a PERSON in a transcript,
+and it is the one that passed.** Its taint sources are a `goto` return and a
+`.url` attribute -- urls, and nothing else -- so a title read with `inner_text`
+is invisible to it.
+
+**That file is not wrong and it says so itself**: *"'This function is safe' was
+never true; 'this function is safe for urls' is."* What nobody had written down
+is that the uncovered half is the half with the names in it, and that three
+waves were relying on the covered half while reading rendered text.
+
+**THE TRANSFERABLE FORM.** A guard named for one leak accrues authority over
+the whole class it seems to be about. Nothing in this repository said "the
+consent guard" was a url guard -- the name did, quietly, and only a mutation
+that a reader expected to fail said it out loud.
+
+### 13.2 `tests/test_page_text_is_never_printed.py` -- the sibling rule
+
+Fourteen tests. Five synthetic RED cases, five GREEN, an inventory pinned per
+file, and that inventory demonstrated red three ways -- an entry one too low, one
+too high, and absent for a file that has sites.
+
+**IT IS A SEPARATE FILE BECAUSE THE SANITISERS DO NOT TRANSFER.** `_relation`
+provably carries no substring of its input -- FOR A URL. Hand it a person's name
+and it returns `SERVED, exact`, which discards the question rather than
+answering it. Adding page text to the same taint set would credit every entry on
+`_SANITISERS` with cleaning text on an argument only ever made about addresses.
+**A shared taint set with unshared sanitisers is one rule that is wrong half the
+time and says so nowhere.** The engine -- fixed point, sink list, counting and
+comparison carve-outs -- is IMPORTED rather than copied, which is that file's own
+principle about two implementations drifting.
+
+**THE OBJECTION WAS MET WITH A NUMBER, NOT AN ARGUMENT.** That file declines to
+taint response bodies because *"a rule whose true positives arrive buried in
+false ones gets declared into uselessness."* The same objection applies to page
+text, so it was measured::
+
+    sanitisers as they stand                                    81 sites
+    + census_shape, census_redact_rare, census_substitute       79
+    + subscription_row, membership_row, invitation_badge        79
+
+**Crediting every shaping function in the package removes 2 of 81.** These sites
+are not printing shaped text through a shaper the rule cannot see; they are
+printing text that never met a shaper. The feared flood is 2.5 percent, because
+the machinery that would have caused it already exists -- `_COUNTING_CALLS`
+absorbs `len(text)` and the `Compare` carve-out absorbs `"x" in text`.
+
+**AND ITS SANITISER LIST IS DELIBERATELY EMPTY**, which is a finding rather than
+a gap: `census_substitute` returns a plain human name unchanged, `census_shape`
+is a length and charset gate that returns a short plain name verbatim, and
+`census_redact_rare` is a capitalised-run rule. This package has no instrument
+that can decide whether a string is a person's name, and an empty list is where
+that finding becomes structural instead of documentary.
+
+### 13.3 A PLANTED RED CASE FOUND A HOLE IN THE ENGINE IT INHERITED
+
+`_tainted_names` walks `Assign` and `AnnAssign` only. So::
+
+    rows = await page.evaluate(JS)
+    for row in rows:
+        print(row["title"])
+
+taints `rows` and never `row`. **Iteration is a binding and the engine did not
+know it.** That is the most natural way to handle page data in this codebase,
+and **the same hole exists in the url rule** for a list of landed addresses.
+
+Adding `For`, `AsyncFor`, comprehensions, `with ... as` and the walrus moved the
+measurement from **81 sites in 22 files to 111 in 25** -- so **30 sites, 27
+percent of the class, were hidden by that one omission.**
+
+**IT WAS FOUND BY A CASE FAILING, NOT BY READING THE ENGINE.** The case was
+written because it is the shape a reader takes; the engine disagreed with it. A
+green-only run would have passed the version that could not see a third of the
+class -- which is the whole argument for showing a rule failing before trusting
+its greens.
+
+### 13.4 `linkedin_server.newsletters` -- a reader whose AIMING RULE CAN FAIL
+
+`tests/test_newsletter_reader.py`, 15 tests, in a real headless page so the
+selector is actually executed. Five planted mutations, five killed.
+
+**THE COUNT IS `distinct`, NOT `anchors`.** Measured live: ten anchors, five
+newsletters -- every row drawn twice, once around an illustration with no text
+and once around the title. A reader publishing the anchor count answers **ten**
+to the one question the surface was opened to settle, and looks entirely correct
+doing it.
+
+**THE AIMING RULE SHIPS WITH ITS OWN REFUTATION, and that is the reusable part.**
+The first paragraph is the title because its normalised text is a PREFIX OF THE
+SLUG in five rows of five and the second paragraph's is in none -- the slug being
+an independent witness, derived by LinkedIn from the title, that names nobody.
+**That comparison is not discarded once the measurement is taken.** It ships as a
+per-row boolean, so a page that reorders the paragraphs makes the reader SAY SO
+instead of publishing a description as a title.
+
+> **A reader whose aiming rule cannot fail is not aimed. It is guessing, and
+> reporting the guess as data.**
+
+Its limit is stated rather than guarded against: the rule is a STRICT prefix and
+assumes the slug is not truncated, which five titles of 11 to 26 characters
+could not have shown either way. Widening it to "either is a prefix of the other"
+would absorb that case and make the control much harder to fail, which is the
+property it exists for.
+
+### 13.5 A SURVIVING MUTATION SENT ME TO THE FIXTURE, NOT TO THE MUTATION
+
+Of the five planted mutations, "drop the deduplication" first came back GREEN.
+The instinct is that the mutation was too small. Measured, it was the fixture:
+the illustration anchors are dropped by the paragraph check BEFORE the dedup is
+reached, so on the live page the ten-becomes-five collapse is done by that check
+alone and **the dedup branch had no reaching input at all.** My own docstring had
+credited the dedup with the collapse; the mutation said otherwise.
+
+The fixture now draws an ELEVENTH anchor -- two text anchors on one href -- so
+that row is where the dedup is the only thing standing. **A fixture that only
+mirrors the page leaves a live branch unexercised**, and a branch no input
+reaches is untested however many times the suite runs. That is this project's
+2026-09-05 law -- when a mutation survives, ask which input would make that
+branch the only thing standing -- arriving on a fixture rather than on a test.
+
+### 13.6 The obligation this surface inherits, and why a zero discharged half of it
+
+`/mynetwork/` is refused on the belief that opening it consumes the pending
+invitation badge, so any read under it reads `dom.read_invitation_badge` before
+and after. Both loads: 0 to 0, `state=read` at all four ends, no other nav badge
+moved, two of six badges non-zero at every end so the reader is proven to resolve
+real values.
+
+**THE SIBLING PROBE STOPS ON A ZERO BEFORE, AND IS RIGHT TO. THIS ONE MUST NOT,
+AND THE DIFFERENCE IS THE QUESTION.** `_probe_connections_badge_cost.py` asks
+what the address COSTS, and a zero cannot decrement, so an "unchanged" would
+agree with a story it had no power to refute. This probe asks whether the read
+SPENT something it passed, and a zero answers that by absence.
+
+    SAFETY   discharged -- nothing pending was consumed, because nothing was pending
+    COST     UNMEASURED, and it stays unmeasured until a day the badge is not zero
+
+Both lines are printed together so neither can be read as the other. **Copying
+the sibling's gate unexamined would have refused to take the read at all** --
+blocked by a proxy whose zero is the very thing that proves the read harmless.
+Same instrument, same reading, opposite verdicts.
