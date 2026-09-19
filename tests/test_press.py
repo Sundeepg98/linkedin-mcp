@@ -70,7 +70,16 @@ class FakePage:
 
 
 async def _counters(values=(0, 0)):
-    return {"invitations": values[0], "messaging": values[1]}
+    """Includes ``off_state`` because /feed/ declares it SENSITIVE.
+
+    A reading that omits the declared counter is refused: a basis naming a
+    counter nobody read prices nothing.
+    """
+    return {
+        "invitations": values[0],
+        "messaging": values[1],
+        "off_state": 3,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -232,43 +241,88 @@ def test_a_moved_counter_makes_it_a_write_and_that_is_terminal():
     assert verdict["reachable_by_this_route"] is False
 
 
-def test_unchanged_counters_pass_and_name_what_priced_it():
-    verdict = press.check_counters({"invitations": 0}, {"invitations": 0})
-    assert verdict.get("counters_ok") is True
-    assert verdict["priced_by"] == ["invitations"]
+def test_a_merely_readable_counter_no_longer_prices_anything():
+    """RULED 2026-09-19. READABILITY IS NOT ENOUGH, and this is the change.
 
+    ``check_counters`` used to PASS on any counter read at both ends and name
+    those in ``priced_by``. So condition 3 could be shown passing and could
+    never be shown capable of failing -- this repository's own definition of a
+    check that certifies nothing.
 
-def test_priced_by_means_READABLE_and_says_so_rather_than_implying_sensitive():
-    """THE WEAK SENSE, LABELLED.
-
-    ``priced_by`` names counters READ at both ends. It does NOT establish that
-    any of them would have moved had the press done something, and the field
-    name invites exactly that stronger reading -- so the weaker one is stated
-    in the verdict rather than left to a reader's charity.
-
-    The ruling's own language is the strong sense: *where no counter CAN price
-    a press, unmeasurable resolves AGAINST the press.* This implementation
-    reads "can price" as "was read at both ends". **That gap is real and is
-    recorded rather than closed**, because closing it would require showing a
-    counter SENSITIVE to a press class -- which, for an outward counter, is
-    shown only by a press of that class moving it, which is the write the gate
-    exists to prevent.
-
-    So on a surface offering no safe sensitive counter, the strong reading can
-    be shown passing and can never be shown capable of failing. Whether that
-    resolves against the press is a boundary ruling, not a code change.
+    With no declared basis for the surface, unchanged readable counters are now
+    a REFUSAL, and ``reachable_by_this_route`` is True because declaring a
+    basis is an available next step rather than an impossibility.
     """
     verdict = press.check_counters(
-        {"invitations": 0, "notifications_unread": 6},
-        {"invitations": 0, "notifications_unread": 6},
+        {"invitations": 0}, {"invitations": 0}, basis=None
+    )
+    assert verdict["refused"] == "no_sensitivity_basis"
+    assert verdict["reachable_by_this_route"] is True
+    assert "READABLE" in verdict["why"]
+
+
+def test_the_sensitive_path_names_only_the_sensitive_counter():
+    """PATH (a). The worked example is the feed's ``off_state``.
+
+    ``priced_by`` now means shown-sensitive AND read at both ends. The merely
+    readable counters are still reported -- under a different name, because
+    they are a weaker fact and used to be published as the stronger one.
+    """
+    basis = press.sensitivity_basis("https://www.linkedin.com/feed/")
+    assert basis["kind"] == "sensitive"
+    verdict = press.check_counters(
+        {"off_state": 3, "invitations": 0},
+        {"off_state": 3, "invitations": 0},
+        basis=basis,
     )
     assert verdict["counters_ok"] is True
-    assert verdict["priced_by"] == ["invitations", "notifications_unread"]
-    assert verdict["sensitivity_established"] is False, (
-        "a passing counter check must not claim its counters were sensitive "
-        "to the press -- it only ever showed they were readable."
+    assert verdict["basis"] == "sensitive"
+    assert verdict["priced_by"] == ["off_state"], (
+        "priced_by must name the SENSITIVE counter only -- invitations was "
+        "read at both ends and prices nothing."
     )
-    assert "SENSITIVE" in verdict["sensitivity_note"]
+    assert verdict["read_at_both_ends"] == ["invitations", "off_state"]
+
+
+def test_a_basis_naming_a_counter_nobody_read_prices_nothing():
+    """The basis is not a password. It has to be satisfied by a real reading."""
+    basis = press.sensitivity_basis("https://www.linkedin.com/feed/")
+    verdict = press.check_counters(
+        {"invitations": 0}, {"invitations": 0}, basis=basis
+    )
+    assert verdict["refused"] == "sensitive_counter_not_read"
+    assert verdict["reachable_by_this_route"] is True
+
+
+def test_the_structural_path_prices_by_argument_and_names_no_counter():
+    """PATH (b). An explicit argument that no outward effect is possible.
+
+    It reports ``priced_by: []`` deliberately -- the surface is not priced by a
+    counter at all, and claiming one would be the same over-claim in the other
+    direction.
+    """
+    verdict = press.check_counters(
+        {"invitations": 0},
+        {"invitations": 0},
+        basis={"kind": "structural", "why": "no third party on this surface"},
+    )
+    assert verdict["counters_ok"] is True
+    assert verdict["basis"] == "structural"
+    assert verdict["priced_by"] == []
+    assert verdict["why"]
+
+
+def test_the_basis_table_is_closed_and_not_caller_supplied():
+    """``disclose`` resolves the basis from the SURFACE, never from a caller.
+
+    A basis a caller can assert is a basis a caller can invent, and "no
+    outward effect is possible here" is exactly the claim somebody in a hurry
+    would make about a surface they had not read.
+    """
+    signature = inspect.signature(press.disclose)
+    assert "basis" not in signature.parameters
+    assert "sensitivity" not in signature.parameters
+    assert press.sensitivity_basis("https://www.linkedin.com/in/me/") is None
 
 
 # ---------------------------------------------------------------------------
@@ -498,8 +552,11 @@ def test_a_press_that_skips_the_closure_check_cannot_report_success():
     verdict = press.evaluate(
         url=f"{BASE}/feed/",
         shape="[aria-expanded]",
-        before={"invitations": 0},
-        after={"invitations": 0},
+        # ``off_state`` is the feed's declared SENSITIVE counter, so condition
+        # 3 is genuinely satisfied here rather than stepped over -- which is
+        # what makes the closure the only thing left standing.
+        before={"off_state": 3},
+        after={"off_state": 3},
         expanded_before="false",
         expanded_after="true",
     )

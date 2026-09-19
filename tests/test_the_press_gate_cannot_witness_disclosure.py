@@ -62,7 +62,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server import press  # noqa: E402
 
-ADMITTED_URL = "https://www.linkedin.com/analytics/profile-views/"
+# MOVED FROM /analytics/profile-views/ TO /feed/ ON 2026-09-19, and the reason
+# is the ruling rather than convenience. Condition 3 is now satisfied only by a
+# counter shown SENSITIVE to the press class, or by a structural argument that
+# no outward effect is possible -- and the analytics page carries NEITHER in
+# press.SENSITIVITY_BASES, so a press there is now refused at condition 3.
+#
+# That is the ruling working, and it is the retrospective verdict on the first
+# sanctioned press: it was SAFE and its record over-claimed, because the nav
+# badges that "priced" it were shown READABLE and never shown SENSITIVE.
+#
+# These tests are about the WITNESS, not about which surface, so they move to a
+# surface that declares a basis. Declaring one for the analytics page instead
+# would have meant inventing a claim about a surface this file never read.
+ADMITTED_URL = "https://www.linkedin.com/feed/"
 SHAPE = "[aria-expanded]"
 
 #: The three worlds. Named here so a reader sees the space before the fakes.
@@ -155,8 +168,16 @@ class StatefulPage:
 
 
 def _steady_counters(values=(0, 6)):
+    """Includes ``off_state`` because /feed/ declares it as its SENSITIVE
+    counter. A reading that omits the declared counter is refused with
+    ``sensitive_counter_not_read`` -- a basis naming a counter nobody read
+    prices nothing."""
     async def read():
-        return {"invitations": values[0], "notifications_unread": values[1]}
+        return {
+            "invitations": values[0],
+            "notifications_unread": values[1],
+            "off_state": 3,
+        }
 
     return read
 
@@ -167,7 +188,10 @@ def _moving_counters():
 
     async def read():
         state["n"] += 1
-        return {"invitations": 0 if state["n"] == 1 else 1}
+        return {
+            "off_state": 3,
+            "invitations": 0 if state["n"] == 1 else 1,
+        }
 
     return read
 
@@ -361,7 +385,16 @@ def test_closure_passes_on_a_press_that_never_opened_anything():
 def test_the_safety_conditions_still_hold_whichever_happened(mode):
     page, verdict = _press(mode)
 
-    assert verdict.get("priced_by") == ["invitations", "notifications_unread"]
+    # UPDATED 2026-09-19 with the condition-3 ruling. ``priced_by`` used to
+    # name every counter READ at both ends; it now names only the counter shown
+    # SENSITIVE to this press class -- here the feed's ``off_state``. The two
+    # nav badges are still read and still reported, under the name that says
+    # what they actually are.
+    assert verdict.get("basis") == "sensitive"
+    assert verdict.get("priced_by") == ["off_state"]
+    assert verdict.get("read_at_both_ends") == [
+        "invitations", "notifications_unread", "off_state"
+    ]
     assert verdict.get("shape") == SHAPE
     assert page.clicks == [SHAPE], "exactly one control, and it is the shape"
     assert page.keys == ["Escape"], "it was dismissed"

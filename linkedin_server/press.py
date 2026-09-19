@@ -126,6 +126,71 @@ _COMPOSER_MARKERS: tuple[str, ...] = (
 #: is signed in; anything else under ``/in/`` is a third party's surface.
 _SELF_SEGMENTS = frozenset({"me"})
 
+#: HOW CONDITION 3 MAY BE SATISFIED, PER SURFACE, AS A CLOSED TABLE.
+#:
+#: **RULED 2026-09-19** (``_audit/2026-09-19-two-census-conventions-ruled.md``
+#: section 5). ``check_counters`` used to pass on any counter READ at both
+#: ends, and ``priced_by`` named those -- so condition 3 could be shown
+#: PASSING and could never be shown capable of FAILING, which is this
+#: repository's own definition of a check that certifies nothing.
+#:
+#: Requiring SENSITIVITY alone was rejected and the reason is not leniency: a
+#: counter is shown sensitive only by a press of that class moving it, which
+#: for an outward counter is the write this gate exists to prevent. **A
+#: condition nothing can satisfy is a disabled gate, not a stricter one.**
+#:
+#: So condition 3 is satisfied in EITHER of two ways, and the verdict says
+#: WHICH:
+#:
+#: * ``sensitive``  -- a counter shown SENSITIVE to this press class. The
+#:   worked example is ``off_state`` for a feed press: sensitivity derived
+#:   from what the label constant MEANS rather than from watching it move,
+#:   with availability verified and sensitivity marked derived.
+#: * ``structural`` -- an explicit argument that NO outward effect is possible
+#:   from this surface. Made in writing, recorded here, open to refutation.
+#:
+#: **A MERELY READABLE COUNTER IS NEITHER AND NO LONGER PRICES ANYTHING.**
+#:
+#: THE TABLE IS CLOSED AND KEYED BY SURFACE, not supplied by a caller, for the
+#: same reason ``SANCTIONED_SHAPES`` is: a basis a caller can assert is a basis
+#: a caller can invent, and "no outward effect is possible here" is exactly the
+#: claim somebody in a hurry would assert about a surface they had not read.
+SENSITIVITY_BASES: tuple[tuple[str, dict[str, Any]], ...] = (
+    (
+        "/feed/",
+        {
+            "kind": "sensitive",
+            "counters": ("off_state",),
+            "why": (
+                "read_reaction_surface publishes off_state, a count of "
+                "reaction controls wearing the reaction-OFF label. A reaction "
+                "necessarily moves it, which follows from what that label "
+                "constant MEANS rather than from having watched it move, and "
+                "a reaction is visible to the post's author -- so it is "
+                "OUTWARD. Availability verified by instrument (non-zero, read "
+                "3 on a live feed); sensitivity DERIVED and marked as such."
+            ),
+        },
+    ),
+)
+
+
+def sensitivity_basis(url: Optional[str]) -> Optional[dict[str, Any]]:
+    """The declared basis for this surface, or None. PURE.
+
+    None means condition 3 has no way to be satisfied here yet -- not that the
+    press is unsafe, and not that no basis could ever exist. Supplying one is
+    an edit to the table above with an argument, which is the point.
+    """
+    if not url:
+        return None
+    path = urlsplit(str(url).strip()).path
+    for marker, basis in SENSITIVITY_BASES:
+        if marker in path:
+            return basis
+    return None
+
+
 #: THE WITNESS. What is counted at the open moment, as a CLOSED SET.
 #:
 #: **ADDED 2026-09-19 because the gate could not see disclosure at all.** The
@@ -247,8 +312,13 @@ def check_shape(shape: Optional[str]) -> dict[str, Any]:
     return {"pressed": False, "shape_ok": True}
 
 
-def check_counters(before: Optional[dict], after: Optional[dict]) -> dict[str, Any]:
-    """Condition 3. PURE.
+def check_counters(
+    before: Optional[dict],
+    after: Optional[dict],
+    *,
+    basis: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Condition 3. PURE, and READABILITY IS NOT ENOUGH.
 
     Each argument is a mapping of counter name to an integer, or None where the
     counter could not be read. **An unreadable counter is not a zero**, and a
@@ -296,39 +366,50 @@ def check_counters(before: Optional[dict], after: Optional[dict]) -> dict[str, A
             terminal=True,
         )
 
+    # CONDITION 3 IS NOT SATISFIED BY READABILITY. See SENSITIVITY_BASES.
+    if basis is None:
+        return _refuse(
+            "no_sensitivity_basis",
+            f"counters {sorted(shared)} were read at both ends and did not "
+            "move, which shows they are READABLE and nothing more. Condition "
+            "3 is satisfied only by a counter shown SENSITIVE to this press "
+            "class, or by an explicit structural argument that no outward "
+            "effect is possible from this surface. A merely readable counter "
+            "is neither and prices nothing. Declare a basis for this surface "
+            "in press.SENSITIVITY_BASES.",
+            terminal=False,
+        )
+
+    kind = str(basis.get("kind"))
+    if kind == "structural":
+        return {
+            "pressed": False,
+            "counters_ok": True,
+            "basis": "structural",
+            "priced_by": [],
+            "why": basis.get("why"),
+            "read_at_both_ends": sorted(shared),
+        }
+
+    named = [name for name in basis.get("counters") or () if name in shared]
+    if not named:
+        return _refuse(
+            "sensitive_counter_not_read",
+            f"this surface declares {list(basis.get('counters') or ())} as "
+            f"sensitive, and none of them was read at both ends -- only "
+            f"{sorted(shared)} was. A basis that names a counter nobody read "
+            "prices nothing.",
+            terminal=False,
+        )
+
     return {
         "pressed": False,
         "counters_ok": True,
-        # READ AT BOTH ENDS. That is the whole of what this establishes.
-        "priced_by": sorted(shared),
-        # **AND THIS IS THE HONEST LABEL ON IT.** ``priced_by`` names counters
-        # shown READABLE, never counters shown SENSITIVE to the press. The
-        # check compares readings taken at two moments; it cannot and does not
-        # establish that any of them WOULD have moved had the press done
-        # something.
-        #
-        # THE RULING'S LANGUAGE IS THE STRONGER ONE -- "where no counter CAN
-        # price a press, unmeasurable resolves AGAINST the press" -- and this
-        # implementation reads "can price" in the weaker sense. The gap is
-        # recorded here rather than papered over, because a field called
-        # ``priced_by`` invites the strong reading and would be believed.
-        #
-        # WHY IT IS NOT SIMPLY TIGHTENED: sensitivity of an OUTWARD counter to
-        # a press class is shown only by a press of that class moving it --
-        # which, for an outward counter, is the write the gate exists to
-        # prevent. On a surface that offers no safe sensitive counter, the
-        # strong reading can be shown PASSING and can never be shown capable
-        # of FAILING, and a condition that cannot fail certifies nothing.
-        #
-        # Whether that resolves against the press is a BOUNDARY RULING and not
-        # this module's to take. Routed; see the wave notes.
-        "sensitivity_established": False,
-        "sensitivity_note": (
-            "priced_by names counters READ at both ends, not counters shown "
-            "SENSITIVE to this press. Establishing sensitivity for an outward "
-            "counter requires a press of the class that moves it, which is "
-            "the act this gate exists to prevent."
-        ),
+        "basis": "sensitive",
+        # NOW MEANS: shown sensitive to this press class AND read at both ends.
+        "priced_by": sorted(named),
+        "why": basis.get("why"),
+        "read_at_both_ends": sorted(shared),
     }
 
 
@@ -451,10 +532,17 @@ def evaluate(
             "still_to_show": ["counters_unmoved", "closure_verified"],
         }
 
-    verdict = check_counters(before, after)
+    # THE BASIS IS RESOLVED FROM THE SURFACE, never handed in. See
+    # SENSITIVITY_BASES: a basis a caller can assert is a basis a caller can
+    # invent, and "no outward effect is possible here" is exactly the claim
+    # somebody in a hurry would make about a surface they had not read.
+    verdict = check_counters(before, after, basis=sensitivity_basis(url))
     if verdict.get("refused"):
         return verdict
     priced_by = verdict.get("priced_by")
+    basis_kind = verdict.get("basis")
+    basis_why = verdict.get("why")
+    read_at_both_ends = verdict.get("read_at_both_ends")
     verdict = check_closure(expanded_before, expanded_after)
     if verdict.get("refused"):
         return verdict
@@ -462,7 +550,16 @@ def evaluate(
     return {
         "pressed": True,
         "permitted": True,
+        # WHICH OF THE TWO WAYS CONDITION 3 WAS SATISFIED. The ruling requires
+        # the verdict to say which, because "priced" meant two different
+        # things and only one of them was ever established.
+        "basis": basis_kind,
+        "basis_why": basis_why,
         "priced_by": priced_by,
+        # Kept separate and deliberately NOT called priced_by: these are the
+        # counters READ at both ends, which is a weaker fact and used to be
+        # reported as the stronger one.
+        "read_at_both_ends": read_at_both_ends,
         "shape": shape,
     }
 
