@@ -182,6 +182,37 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("messaging-and-content.md", "network.md"): (
+        "TABLE-ROW PROXIMITY and a DECLINE TO RULE, and both halves were "
+        "measured rather than inferred. The row is C52, and a markdown table "
+        "row is ONE LINE, so every phrase in a 2.4k-character cell sits at "
+        "line-distance zero from every other phrase in it. The scan finds "
+        "exactly ONE vocabulary word in that row -- 'corrected', at character "
+        "2145 -- against the network.md citation at character 1885: 260 "
+        "characters apart with no newline between them. "
+        "THAT WORD IS THE ROW'S OWN PRE-EXISTING MARKER, "
+        "'**ROW CORRECTED 2026-09-03.**', which records that this cell once "
+        "read 'Follow a hashtag / topic' sourced to a help article that "
+        "returns HTTP 404. It was written sixteen days before the network.md "
+        "sentence, it corrects THIS ROW and no other document, and it names "
+        "no slice at all. The two are adjacent only because a table row "
+        "cannot contain a blank line. "
+        "The network.md mention is the OPPOSITE of a correction and says so "
+        "in its own words: '**This does NOT rule on network.md rows 59-61**'. "
+        "Those rows record that LinkedIn may have retired the member "
+        "hashtag-follow surface, and they were DELIBERATELY kept mapped "
+        "because removing capabilities on an inference is the same undercount "
+        "that pass exists to fix. The 2026-09-19 reading behind C52 is of the "
+        "FEED -- zero rendered hashtag anchors and zero /feed/hashtag/ hrefs "
+        "across four loads -- and a feed that surfaces no hashtag anchors is "
+        "consistent BOTH with the follow surface having been retired AND with "
+        "its existing somewhere the feed does not link to. So the evidence is "
+        "genuinely non-dispositive for rows 59-61, which is why the row "
+        "declines to rule on them instead of quietly retiring them. A "
+        "CORRECTED BY: pointer in network.md would tell a reader those rows "
+        "had been refuted by a measurement whose own sentence refuses to "
+        "refute them"
+    ),
     ("2026-09-19-content-tail.md", "2026-09-03-linkedin-gap-blockers.md"): (
         "the cited document is the REFUTING SOURCE, not the refuted one, and "
         "the thing being corrected is a THIRD file the scan cannot see. "
