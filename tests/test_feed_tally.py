@@ -18,7 +18,9 @@ file opens a page.
 """
 from __future__ import annotations
 
+import functools
 import inspect
+import types
 
 import pytest
 
@@ -31,13 +33,56 @@ from linkedin_server import feed
 #: href this test handed in and from nowhere else.
 NEEDLE = "zqx-needle-alpha"
 
-#: Every public callable in the module, resolved once so a function added
+
+def _public_callables(module, predicate) -> list[str]:
+    """The sweep's membership rule, named so a control can vary the predicate."""
+    return sorted(
+        name
+        for name, value in vars(module).items()
+        if not name.startswith("_") and predicate(value)
+    )
+
+
+def _is_ours(module):
+    """DEFINED HERE, whatever CPython happens to make of it.
+
+    ``__module__`` survives decoration -- ``functools.wraps`` copies it -- so
+    this answers the question the sweep is actually asking. The predicate it
+    replaced, ``inspect.isfunction``, answers a different one: whether the
+    object is a plain Python function right now. See the comment below.
+    """
+
+    def predicate(value) -> bool:
+        return callable(value) and getattr(value, "__module__", None) == module.__name__
+
+    return predicate
+
+
+#: Every public callable THIS MODULE DEFINES, resolved once so a function added
 #: later is swept automatically rather than needing to be listed here.
-PUBLIC_CALLABLES = sorted(
-    name
-    for name, value in vars(feed).items()
-    if not name.startswith("_") and inspect.isfunction(value)
-)
+#:
+#: THE PREDICATE USED TO BE ``inspect.isfunction`` AND THAT WAS A DEFECT, not a
+#: style point. ``feed`` imports ``urlsplit`` from ``urllib.parse``, and CPython
+#: wrapped that function in an ``lru_cache`` after 3.10. So:
+#:
+#:     3.13  isfunction(urlsplit) is False  -> dropped, sweep green
+#:     3.10  isfunction(urlsplit) is True   -> swept, and the IN-half then
+#:                                             reported urlsplit's OWN stdlib
+#:                                             parameters as an unpermitted
+#:                                             widening of this repo's closed
+#:                                             set, while the OUT-half reported
+#:                                             a public callable "added"
+#:
+#: Both reds were real failures of this file and neither was a fact about the
+#: feed reader. Measured in run 35441013901: two sites, ubuntu py3.10 only.
+#:
+#: ``inspect.isfunction`` was standing in for "is this one of ours", which is
+#: not what it answers -- it answers how CPython implements an object this
+#: release. ``__module__`` answers the intended question on every version, and
+#: ``callable`` rather than ``isfunction`` means the same decorator applied to
+#: one of OUR functions cannot drop it out of the sweep either. A callable
+#: imported from a sibling module is swept where it is defined.
+PUBLIC_CALLABLES = _public_callables(feed, _is_ours(feed))
 
 
 def _strings(value):
@@ -70,6 +115,66 @@ def test_the_module_declares_at_least_one_public_callable():
     tests that follow it.
     """
     assert len(PUBLIC_CALLABLES) >= 4, PUBLIC_CALLABLES
+
+
+def test_the_hazard_is_present_rather_than_hypothetical():
+    """``feed`` really does import a stdlib callable into its namespace.
+
+    If this ever stops being true the comment on PUBLIC_CALLABLES is history
+    rather than a live constraint, and a reader deserves to be told which.
+    """
+    assert "urlsplit" in vars(feed), sorted(vars(feed))
+    assert "urlsplit" not in PUBLIC_CALLABLES, PUBLIC_CALLABLES
+
+
+def test_the_sweep_asks_who_defined_it_not_what_cpython_made_of_it():
+    """CAN-IT-FAIL for the membership rule itself, both ways.
+
+    Built on a synthetic namespace rather than on ``feed``, because the bug
+    being pinned is only VISIBLE on 3.10 and this file has to run on 3.13. The
+    three members reproduce the three cases structurally:
+
+    * ``borrowed``  -- a function defined somewhere else, imported in. This is
+      ``urlsplit`` as 3.10 sees it: a plain function, so the old predicate
+      swept it and then read a stdlib signature as this repo's leak.
+    * ``ours``      -- defined here. Must be swept, or the predicate is one
+      that refuses everything and certifies nothing.
+    * ``ours_cached`` -- ours, wrapped the way CPython wrapped ``urlsplit``.
+      The old predicate DROPS it, which is how the 3.13 half of this stayed
+      green; the new one keeps it, so the same trick applied to our own code
+      cannot silently leave the sweep.
+    """
+    stand_in = types.ModuleType("feed_stand_in")
+
+    def ours(href):
+        return href
+
+    def borrowed(href):
+        return href
+
+    # Both functions are DEFINED in this test module, so each one's
+    # ``__module__`` is set explicitly here -- otherwise the namespace would
+    # not be a stand-in for a module at all and the control would be asserting
+    # that a test file is not `feed_stand_in`, which is true and useless.
+    ours.__module__ = stand_in.__name__
+    borrowed.__module__ = "somewhere.else"
+    ours_cached = functools.lru_cache(maxsize=1)(ours)
+
+    stand_in.ours = ours
+    stand_in.borrowed = borrowed
+    stand_in.ours_cached = ours_cached
+    stand_in._private = ours
+
+    old_predicate = inspect.isfunction
+    assert _public_callables(stand_in, old_predicate) == ["borrowed", "ours"], (
+        "the predicate this file used to use no longer behaves the way the "
+        "defect report describes, so this control is measuring nothing"
+    )
+
+    assert _public_callables(stand_in, _is_ours(stand_in)) == [
+        "ours",
+        "ours_cached",
+    ], "the replacement predicate does not answer 'who defined it'"
 
 
 @pytest.mark.parametrize("name", PUBLIC_CALLABLES)
