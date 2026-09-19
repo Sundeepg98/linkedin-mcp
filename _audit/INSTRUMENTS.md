@@ -3180,3 +3180,70 @@ register's bar is that an instrument enters only if it has been SHOWN FAILING. A
 refusal is shown failing when it REFUSES something real, and this one did, on a
 live tree, on its first use, with the thing it refused named. A planted version
 would have been weaker evidence: this one did not know it was being tested.
+
+## 17. The read tail, 2026-09-19
+
+### 17.1 `tests/test_a_covered_row_names_the_artifact_that_covers_it.py`
+
+**A COVERED census row goes RED when the artifact covering it leaves.** The
+sibling of 16.1 and the other half of the same law: that one binds an
+EXCLUDED-RULED row to the RULE that excluded it, this one binds a COVERED row
+to the CODE that covers it. A census that can drift one way can drift the
+other, and only the first direction had ever been looked for here.
+
+**THE ASSERTION THAT EARNS ITS PLACE IS A PASSTHROUGH.** `verified_job` is set
+inside `dom.read_job_insight_panels`'s returned dict and reaches a caller ONLY
+because `server.py` assigns that WHOLE dict to `insights`. So
+
+    grep -n "verified_job" linkedin_server/server.py     -> nothing
+
+and a field set in `dom.py` and named nowhere else looks exactly like a dead
+field. **A FIELD-NAME GREP CANNOT SEE A DICT THAT PASSES THROUGH BY REFERENCE**,
+which makes a passthrough the coupling most worth asserting: either end can be
+edited away and nothing in between notices. Both ends and the join are
+asserted, the join off the AST.
+
+Shown failing three ways against copies, each with a discrimination case that
+stays green: `insights` assigned something else (RED, J10 chain still passes);
+`COMPANY_FILTER_KEY` renamed (RED, K10 join still passes); a banked row reverted
+to GAP (RED naming the row, K10 still passes). Plus a control that both slices
+are readable.
+
+**FIRST-RUN BUG, recorded because this register has measured that every fresh
+instrument has one:** `ast.unparse` renders string subscripts with SINGLE
+quotes, so a target check written `["insights"]` never matched and the guard
+failed for a reason unrelated to the code under test.
+
+### 17.2 `scripts/_probe_job_collections_live.py`, and the control that fired TWICE
+
+**ADMITTED AS AN INSTRUMENT BECAUSE ITS CONTROL REFUTED ITS OWN AUTHOR TWICE,
+on live inputs, without being planted.** That is a stronger demonstration than
+a mutation: it did not know it was being tested.
+
+    marker 1  "/jobs/view/" hrefs        0 on the target page
+              SAME MARKER on /jobs/search/, which certainly lists jobs
+                                         0  -> the zero measured the MARKER
+    marker 2  control["href"]            "(no href)" on 147 of 147 controls
+                                         -> looks exactly like a page with no
+                                            links, and is the boundary working
+
+**THE MEASUREMENT THAT MATTERS TO EVERY FUTURE READER ON THESE SURFACES:**
+`dom.read_surface_census` carries **`has_href`** and **`href_shape`** and
+**never hands out a raw href by construction.** Asking it for `href` returns a
+shape indistinguishable from absence. It is a CENSUS -- it counts and shapes --
+and shaping is exactly what makes it unusable as a parser. That is the shaper
+doing its job, not a defect, and it is worth one sentence in a brief rather than
+an hour per wave.
+
+**THE OTHER DISCIPLINES IT CARRIES**, all copied rather than invented: the
+boundary is asked BEFORE any navigation; `_relation` is byte-identical to the
+groups/events copy that was admitted to `_SANITISERS` WITH the test proving its
+contract; the invitation badge is read before and after (**identical**, so the
+load consumed nothing -- a counter that must NOT move and does not is the only
+evidence the instrument can tell the difference); it REFUSES to run without
+`LINKEDIN_CDP_ATTACH=1`; and it closes the tab it opened -- **the page, never
+the context.**
+
+**AND ONE INSTABILITY IT RECORDED RATHER THAN SMOOTHED:** the same address read
+75 controls on one run and 93 about five minutes later. A count off that surface
+is a reading with a timestamp.
