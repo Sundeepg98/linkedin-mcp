@@ -229,3 +229,56 @@ not to this wave.
     page loads spent          0
     writes fired              0
     AI attribution            0
+
+---
+
+# AMENDMENT, 13:47 -- THIS FILE WAS SWEPT INTO ANOTHER WAVE'S COMMIT
+
+**Measured, not inferred:** `git log --diff-filter=A` on this path names
+`8c42866`, *"audit(events): what ran, what did not, and the three reds that are
+not mine"* -- the events wave's commit. Its stat holds three files:
+
+    _audit/2026-09-19-events-surface.md           the events wave's own work
+    _audit/2026-09-19-groups-surface.md           THIS FILE, this wave's
+    scripts/_probe_creator_content_analytics.py   a third wave's taint fix
+
+**Nothing was lost and nothing was altered.** The blob in the tree is
+byte-identical to what this wave wrote: 231 lines, and `git diff HEAD` on the
+path returns empty. **What is wrong is the attribution**, in a repository whose
+discipline is the accurate attribution of findings -- and it is recorded here
+rather than repaired by rewriting, because the push is frozen and history that
+has been written is evidence.
+
+The row banking itself is unaffected and correctly attributed: `5c44bd5`
+carries the two census files under this wave's own message.
+
+## THE MECHANISM, AND IT IS NOT "SOMEBODY WAS CARELESS"
+
+This wave used `git add <path>` and then `git commit --only <paths>`. The
+`--only` is sound and did exactly its job -- the commit it produced holds only
+the paths named. **The exposure is the WINDOW BEFORE IT.**
+
+    13:45:45   git add succeeded, after 10 retries on a contended index.lock
+    13:45:56   git commit --only ran
+       11 SECONDS, during which the file sat in the SHARED index
+
+A neighbour running a plain `git commit` in that window takes everything
+staged. One did. **`--only` protects the commit; it does not protect the
+index.** And the retry loop that got past the lock is what widened the window:
+the more contended the index, the longer a staged file is exposed.
+
+> **`git add` is the exposure, and it is unavoidable for an UNTRACKED file** --
+> `git commit --only` cannot commit a path git has never seen. So a new file in
+> a shared tree has a window by construction, and a modified tracked file does
+> not: `git commit --only` on it needs no `add` at all.
+
+**THE PRACTICAL RULE, which this amendment is committed under to prove it
+works:** for a new file in a contended tree, stage into a PRIVATE index
+(`GIT_INDEX_FILE` pointing at a scratch path, `git read-tree HEAD`, then stage
+and commit with that env var set) so the shared index is never touched. For an
+existing tracked file, use `git commit --only <path>` with no `add` and there
+is no window to lose.
+
+This wave considered the private-index route earlier, for a different reason,
+and abandoned it as over-engineering once a simpler path appeared. That was the
+wrong call and the cost showed up eleven seconds wide.
