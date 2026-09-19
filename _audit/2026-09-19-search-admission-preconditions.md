@@ -325,3 +325,46 @@ test that silently skipped the new file would certify nothing about it.
     readonly.py              0 lines changed, 32 patterns before and after
     commits                  3, none touching a file owned by another wave
     AI attribution           0
+
+---
+
+## F. A SECOND WAVE DISCHARGED THE SAME TWO CONDITIONS, ONE MINUTE APART
+
+Found at 12:45 by reading `git log`, not by any message.
+`17733f1 guard(search): pin the blast radius BEFORE the search admission
+pattern exists` adds `tests/test_search_admission_blast_radius.py` and is
+another wave's answer to conditions 3 and 4. It was committed at 12:45:00; the
+first of this wave's commits landed at 12:39.
+
+**There is no code conflict.** The two files touch nothing in common and pass
+together -- 21 tests, 0.18s, run at 12:45. `readonly.py` is untouched by both.
+
+**There are three substantive disagreements, and they are the lead's to
+settle rather than either wave's:**
+
+**1. THE SIBLING'S GUARD FORBIDS THREE OF THIS BLOCKER'S OWN ROWS.** Its
+`MUST_STAY_REFUSED` set lists `/search/results/groups/`,
+`/search/results/events/` and `/search/results/companies/` as addresses that
+must be refused *after* the admission. But `N 161` and `M C70` are groups rows
+and `N 179` is an events row, all three assigned to `SEARCH-RESULTS-SURFACE` in
+`_audit/_census/blocker-assignments.tsv` -- so that guard, as written, would
+forbid serving 3 of the 20 reads it exists to unblock.
+
+   **It is not wrong; it is CHOICE-DEPENDENT and presented as durable.** Under
+   S1 (people only) every line of it holds. Under S2b it contradicts the census.
+   A guard whose truth depends on a decision nobody has made yet should say so.
+   (`companies` is the one that holds either way -- see the correction in A.1.)
+
+**2. DELETE OR REWRITE?** This wave's revert test says the admitting wave
+**deletes** it, so the rollback is a recorded decision. The sibling's says its
+file is **rewritten and inverted**, so it keeps both directions. Both are
+defensible and they cannot both be followed. **Pick one before the admitting
+wave reads two contradictory instructions at 2am.**
+
+**3. THE TARGET SET DIFFERS.** The sibling's `ADMISSION_TARGETS` is two urls --
+people and the blended `all` tab. This wave's is eight, and includes the
+filter-query shape that 13 of the 16 people rows actually need.
+
+**WHAT IS NOT IN DISPUTE**, and it is most of it: nothing is admitted, nothing
+is fired, `readonly.py` is unchanged, and both waves refused to land the
+pattern without the shaper.
