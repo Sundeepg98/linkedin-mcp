@@ -644,7 +644,36 @@ import build_blocker_map as bbm  # noqa: E402
 #: acting ahead of my own request, which is the inversion the
 #: disclosing-press ruling names: a recommendation is not permission to act
 #: on itself.
-UNASSIGNED_CEILING = 58
+#: 58 -> 48. The three ruling requests are RULED at 12c20e1 and filed:
+#: CONVERSATION-OVERFLOW-MENU 8 of 10, PREMIUM-APPLY-SURFACES 1 of 5,
+#: BADGES-SURFACE 5 of 5.
+#:
+#: THE GOVERNING RULE IS "FILL WHAT IS FORCED, LEAVE WHAT IS CHOSEN", and
+#: it corrects a misreading I shared: EMPTY-BEATS-GUESSED operates on ROWS,
+#: not on whole blockers. 8 of 10 with two NAMED holes beats 10 of 10 with
+#: two guesses in it, and beats 0 outright.
+#:
+#: TWO WENT AGAINST MY RECOMMENDATION, BOTH ON MY OWN ARGUMENT.
+#: CONVERSATION-OVERFLOW-MENU: I proposed filing nine plus a read. The two
+#: left empty are refused by my own sentences -- M35 was "admitted by the
+#: count rather than by resemblance" (and a row admitted by a count it
+#: SHARES WITH A RIVAL is not admitted), and I wrote "read receipts are a
+#: setting, not a menu item" two lines under recommending M49.
+#: PREMIUM-APPLY-SURFACES: I proposed dropping J 81 and filing five. Only
+#: J 82 is filed, on the standard I supplied and c1a2a46 turned on -- the
+#: claim made by the SOURCE, not the reader. The probe over-names by one
+#: and cannot say which, so no WRITE is forced; only the unambiguous 1R is.
+#:
+#: The eight are forced BY COUNTING, not resemblance: 8 W slots against 9 W
+#: candidates puts every survivor in the set however the contest resolves,
+#: and M28 is the only R+W row in the slice.
+#:
+#: BADGES-SURFACE is ruled K9 and CLOSES, because there the choice is
+#: unknowable AND near consequence-free: B8 and K9 are duplicates of each
+#: OTHER, so a wave routed to either arrives at the same page. Recorded as
+#: a PICK ON A WEAK TIEBREAK and explicitly NOT a precedent. B8 stays a
+#: frozen-GAP row, UNASSIGNED -- not retired, not subtracted.
+UNASSIGNED_CEILING = 48
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
