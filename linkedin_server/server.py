@@ -85,8 +85,49 @@ does not have to certify its cost from the page it loads --
 about the notifications page -- so this one brackets its load with feed
 readings and reports the result as UNMEASURABLE rather than as zero.
 
+THE TWELFTH IS TWO READS, 2026-09-19, AND THE ARRIVAL IS NOT THE PART WORTH
+READING. ``linkedin_creator_analytics`` and ``linkedin_job_collections``
+landed, so forty-two -> forty-four and thirty -> thirty-two, with the write
+count untouched at twelve for the fourth correction running. What happened
+next is the part: the headline at the top of this docstring was moved to
+forty-four and ``README.md`` was moved with it, AND THE TWO SENTENCES A
+HUNDRED LINES DOWN WERE NOT. They went on reporting thirty reads and a total
+of forty-two -- arithmetic that adds up perfectly and disagrees with the
+registry in two places, which is exactly what the guard named below predicts a
+hand-maintained count looks like just before it rots.
+
+THE STALE SENTENCE IS DESCRIBED JUST ABOVE AND DELIBERATELY NOT QUOTED, AND
+THAT IS NOT FASTIDIOUSNESS. The guard finds each of its three numbers with
+``re.search``, which returns the FIRST match in this docstring. A verbatim
+quotation of the old sum sentence, sitting a hundred lines above the corrected
+one, IS that first match -- so QUOTING THE ROT REINTRODUCES IT, and the guard
+goes red against a sentence whose only purpose is to record that it was fixed.
+This is measured rather than reasoned about: the first draft of this entry did
+quote it, and the guard failed with ``[30, 12, 0] == [32, 12, 0]`` while the
+real sentence below already said thirty-two. **A HISTORY SECTION IN A FILE A
+MATCHER READS CANNOT QUOTE THE THING IT IS CORRECTING.**
+
+**A PARTIAL CORRECTION IS THE DANGEROUS KIND**, because the half that was
+fixed is the half a reader checks. Anyone who read the first line of this file
+saw a number that agreed with the registry and had no reason to keep reading
+to the one that did not.
+
+AND IT WAS NOT FREE. This red was one of exactly TWO failures the pre-commit
+hook named when three finished repairs, by three different waves, tried to
+enter the tree together; a stale sentence in a docstring is what held them
+out. The other was an orphaned output-guard red in
+``scripts/_probe_add_section_menu.py`` that two waves had each reported as not
+theirs.
+
+ONE THING IS LEFT DELIBERATELY UNDONE HERE. The pin cited below is still named
+``test_the_surface_is_exactly_the_fortytwo_tools`` over a surface of
+forty-four, and by that file's own doctrine -- *a test name is a CLAIM like
+any other* -- the name is now an instance of what it exists to catch. Renaming
+it belongs in ``test_server_surface.py``'s own repair with its own reasoning,
+not folded into this one.
+
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-two is ``len(await mcp.list_tools())``,
+than about an intention. Forty-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
 ``test_the_surface_is_exactly_the_fortytwo_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
@@ -101,8 +142,8 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Thirty plus twelve plus zero is forty-two.
+needs: THIRTY-TWO read, TWELVE write, and ZERO are write-shaped, registered,
+gated and unable to act. Thirty-two plus twelve plus zero is forty-four.
 
 THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
 the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
