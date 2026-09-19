@@ -78,10 +78,21 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "NOT PERMANENT: delete this entry when a feed page reader lands."
     ),
     "recommendations": (
-        "THE IDENTICAL GAP TO feed, and the identical remedy. It answers an "
-        "operator-facing question -- who recommended me, is it reciprocal -- "
-        "and takes hrefs rather than a page, so it has no caller and cannot "
-        "get one until a page reader exists. NOT PERMANENT."
+        "I FILED THIS AS THE IDENTICAL GAP TO feed AND THE MEASUREMENT SAYS "
+        "OTHERWISE. It takes hrefs rather than a page, so it does need a page "
+        "reader -- but writing one needs the recommendations section's "
+        "structure, and FOUR INSTRUMENTS FAILED THEIR CONTROLS trying to find "
+        "it (scripts/_probe_profile_sections_live.py, 2026-09-19): an id "
+        "substring, the vocabulary-into-the-page matcher, Playwright "
+        "`:has-text`, and a re-read after a settle. Each asked for "
+        "`Experience` and `Education` alongside, and each read zero for them "
+        "on a profile that has both. The detail address "
+        "`/in/me/details/recommendations/` is REFUSED by the boundary and "
+        "SCROLL is not sanctioned, so neither is a route. **So this is not a "
+        "mechanical gap a page reader closes; the surface is UNMEASURED and "
+        "the next attempt needs a different instrument, not more effort.** "
+        "NOT PERMANENT, and the remaining hypothesis is written in that "
+        "probe's docstring."
     ),
     "intro_fields": (
         "LANDED 2026-09-19 (d7ffc42) FROM ANOTHER WAVE, and the ruling is its "
