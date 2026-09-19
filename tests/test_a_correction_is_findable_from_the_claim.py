@@ -182,6 +182,23 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("profile.md", "2026-09-19-settings-tail-addresses.md"): (
+        "the citation is CORROBORATION and the cited document is not asserted "
+        "wrong. Census row P B10 was flipped GAP -> EXCLUDED-RULED under "
+        "network.md's ruling R11, and its note cites the settings-tail audit "
+        "for the independent half of the evidence: that document enumerated "
+        "the 20 addresses the settings index draws and found this toggle is "
+        "not among them, which is what places it behind a denylisted "
+        "categories/ page. That audit's own conclusion on this row was that "
+        "the charge against it is NOT an allowlist addition but 'either a "
+        "denylist narrowing or a modal with no address' -- and R11 is exactly "
+        "the denylist ruling. So the flip carries that finding one step "
+        "further rather than refuting any part of it. The repair vocabulary "
+        "near the citation is the row describing what was WRONG WITH ITS OWN "
+        "PRIOR STATE (GAP on the words 'no tool, no reason'), not with the "
+        "document it cites. A CORRECTED BY: pointer would tell a reader the "
+        "settings-tail measurement had been overturned by a row that rests on it"
+    ),
     ("network.md", "2026-09-19-the-disclosing-press-ruling.md"): (
         "the cited document is the GRANTING AUTHORITY and the row is applying "
         "it, not overturning it. N 133 and N 134 cite the disclosing-press "
