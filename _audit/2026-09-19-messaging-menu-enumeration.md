@@ -130,6 +130,14 @@ draws them gets the answer for one page load.
 The triggers are present -- 24 collapsed, none expanded. So the blocker is no
 longer "nobody has looked". **It is a press this package does not sanction.**
 
+**CORRECTED BY:** `_audit/2026-09-19-boundary-perimeter.md` -- this section reports the refusal to press as a discipline the fleet holds, and measurement refutes that: `scripts/` carries ten real `.click()` calls and seven `page.keyboard.press("Escape")` calls, and at least seven probes open a menu by clicking it and close it with Escape, so the press was unsanctioned IN THE PACKAGE and routine IN THE PROBES.
+
+What survives: the rows are still blocked, because the package genuinely has no
+sanctioned route and the probe scanner never covered `scripts/` at all. What
+does not survive is the framing -- nobody had ruled, everybody assumed, and this
+document wrote the assumption down as a finding. The probe-side rule that now
+exists is `tests/test_probe_interaction_budget.py`.
+
 ### 3.1 The precedent for sanctioning it is this repository's own
 
 `readonly.SANCTIONED_MUTATIONS` already carries a READ-PATH CLICK,

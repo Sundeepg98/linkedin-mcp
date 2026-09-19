@@ -191,6 +191,15 @@ That is an unsanctioned, unverifiable write occurring inside an admitted read --
 and `/article/new/` is on the allowlist today, so the exposure is live, not
 hypothetical.
 
+**CORRECTED BY:** `_audit/2026-09-19-boundary-perimeter.md` -- the UNVERIFIABLE half holds and the UNSANCTIONED half does not: `server.CENSUS_SURFACE_COST` carries this exact risk for both composer surfaces, records that 17 draft-listing addresses were run against the read boundary and all 17 refused, states that the operator cleared the cost knowingly, and emits it on the ANSWER as `out["cost"]` rather than in a docstring, so the exposure is disclosed and priced rather than unruled.
+
+The rest of this section stands and is strengthened: the exposure IS live and
+callable (`server.py:5116` navigates to `CENSUS_SURFACES[key]` and
+`article_composer` is an accepted key), the autosave remains unmeasured, and
+this repository still has no reachable surface on which such a draft could be
+detected or removed. What the correction changes is who is accountable for it:
+reachable AND disclosed is a different situation from reachable and unruled.
+
 **I did not measure whether the autosave happens.** It is the one live read this
 tail owes and it is genuinely two-sided: the read that would settle it is the
 read that would cause it. The clean sequence is to open the composer with the
