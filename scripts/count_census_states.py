@@ -10,7 +10,11 @@ take is a measurement on its way to becoming a quotation. That is the disease
 WHAT IT COUNTS, AND WHAT IT DELIBERATELY DOES NOT. It counts TABLE ROWS carrying
 a state cell. Rows are not capabilities: `profile.md` collapses two blocks
 (`O6-O20` stands for 15, the `P-R` block stands for 45), so the published
-capability DENOMINATOR is 705 rows + 59 collapsed - 2 stateless = 761, while the
+capability DENOMINATOR is 704 rows + 59 collapsed - 2 stateless = 761 -- the 705
+was a typo, the expression evaluated to 762 and did not match its own stated
+total. RE-DERIVED 2026-09-19 against the file: rows 704, collapse +58 (`O6-O20`
+15-in-1 = +14, the `P-R` SECTION 45-in-1 = +44), so today's tree gives 760. The
+one-capability gap is drift and 761 is deliberately NOT changed here. While the
 GAP numerator is a plain row count. Correcting a capability total from a row
 count is the error the ledger's own section 1 warns about, so this script prints
 rows and states and computes no denominator.
