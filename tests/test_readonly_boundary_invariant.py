@@ -918,6 +918,50 @@ PINNED = (
 #: interpreter-independent; ``<functions>`` -- the one digest that has split
 #: along the interpreter matrix -- did not move, so the 3.10 cell has nothing
 #: new to disagree about. CI runs that cell on push.
+#: RE-FROZEN 2026-09-19, AND ONE DIGEST MOVED. IT IS THE SCANNER, AND THIS IS
+#: THE FIRST RE-FREEZE IN THIS FILE'S HISTORY WHERE THE MOVING DIGEST IS A
+#: DETECTOR TABLE GROWING:
+#:
+#:     _MUTATION_CALL_PATTERNS   23aece1483afdee9 -> 10a0e8e2bb4d7812
+#:
+#: ELEVEN DETECTOR CLASSES WERE ADDED. The scanner's patterns matched
+#: SPELLINGS rather than CAPABILITIES, and playwright ships a sibling for
+#: nearly every one of them. Measured, not suspected: the public async methods
+#: of Locator, Page, Frame, ElementHandle, Keyboard and Mouse were enumerated
+#: from the INSTALLED playwright, every interaction-shaped name was run through
+#: the shipped scanner as a fixture source, and 19 were seen while 22 were not.
+#: The misses clustered as near-miss siblings of calls already caught --
+#: ``press`` caught and ``press_sequentially`` (which TYPES) missed;
+#: ``check`` caught and ``set_checked`` missed; ``drag_to`` caught and
+#: ``drag_and_drop`` missed; ``route`` caught and ``unroute`` missed;
+#: ``add_init_script`` caught and ``add_script_tag`` missed.
+#:
+#: AND THE SHARPEST CASE WAS AN ASYMMETRY INSIDE ONE MODULE: ``JS_MUTATION_TOKENS``
+#: already refused ``.focus(`` and ``.blur(`` in injected JavaScript, so the
+#: same act was a mutation written one way and invisible written the other,
+#: decided by two tables that never met. Adding them is not a new policy; it is
+#: making the Python scanner agree with one this file already enforces.
+#:
+#: EVERY OTHER DIGEST IS BYTE-IDENTICAL -- all three denylists, both exemption
+#: tables, ``JS_MUTATION_TOKENS``, ``SANCTIONED_MUTATIONS`` and ``<functions>``.
+#: That last one matters: ``readonly.py`` gained no function and no function
+#: body changed, so this is a DETECTOR change and nothing else in the module.
+#:
+#: NO SANCTION WAS ADDED AND NONE WAS NEEDED. The eleven classes were measured
+#: against all 31 package modules with the scanner's REAL semantics -- which
+#: skip comments, ``re.compile(`` lines, bare string literals and
+#: ``# readonly-ok``, and those rules change the answer -- and found ZERO hits.
+#: The package still contains exactly five mutating calls and the sanctioned
+#: list still has exactly five entries.
+#:
+#: **AND A DIGEST CANNOT TELL A TABLE THAT GREW FROM ONE THAT SHRANK**, which
+#: is the erosion this file already names for the forbidden roster. The remedy
+#: it adopted there is adopted here:
+#: ``tests/test_the_scanner_has_only_ever_gained_detectors.py`` pins all 29
+#: class names as a SUBSET, so a deletion cannot pass without an edit somebody
+#: reviews. It also pins that each detector still FIRES on a fixture call, that
+#: reads are not flagged, and that ``clear`` and ``goto`` stay out -- the two
+#: candidates rejected on measurement rather than on taste.
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -926,7 +970,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
-    "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
+    # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
+    # detector classes added, zero removed, and the direction is pinned by
+    # contents in tests/test_the_scanner_has_only_ever_gained_detectors.py
+    # because this value cannot express it.
+    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
 }
 
 _SUPERSEDED_READONLY_AST_AT_LAST_REFREEZE = {
@@ -1470,7 +1518,28 @@ DENYLISTS_AT_A76FE32 = {
     # ledger entry is above ``PINNED``; both dicts carry the same value and
     # both moved for the same edit.
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
-    "_MUTATION_CALL_PATTERNS": "23aece1483afdee9",
+    # UPDATED 2026-09-19, AND THIS IS THE FIRST TIME THIS DICT HAS MOVED FOR A
+    # REASON THAT IS NOT A READ ADMISSION. 23aece1483afdee9 -> 10a0e8e2bb4d7812.
+    #
+    # This dict answers "did the WRITE widen anything", and the answer is still
+    # no: the write did not touch the scanner. What moved it was a later,
+    # deliberate change of a different kind -- ELEVEN DETECTOR CLASSES ADDED,
+    # none removed, because the patterns matched spellings rather than
+    # capabilities and playwright ships a sibling for nearly every one.
+    #
+    # THE DIRECTION IS THE WHOLE PROBLEM WITH RECORDING IT HERE. This entry is
+    # one of the four whose stated purpose is to catch "a detector removed from
+    # the scanner", and a digest cannot tell a removal from an addition -- so
+    # re-baselining it is the identical edit either way. That is the erosion
+    # this dict already admits to further up.
+    #
+    # So the direction is pinned by CONTENTS, not by this value:
+    # ``tests/test_the_scanner_has_only_ever_gained_detectors.py`` asserts all
+    # 29 class names as a subset, asserts each detector still FIRES on a
+    # fixture call, and asserts reads are not flagged. A removal now turns that
+    # file red no matter what happens to this digest. Six mutations were shown
+    # killing those checks before they were admitted.
+    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
 

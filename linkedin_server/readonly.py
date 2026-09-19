@@ -1634,6 +1634,69 @@ _MUTATION_CALL_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("evaluate", re.compile(r"\.evaluate\w*\s*\(")),
     ("add_init_script", re.compile(r"\.add_init_script\s*\(")),
     ("route", re.compile(r"\.route\s*\(")),
+    # -----------------------------------------------------------------------
+    # ADDED 2026-09-19. THE PATTERNS ABOVE MATCH SPELLINGS, NOT CAPABILITIES,
+    # AND PLAYWRIGHT SHIPS A SIBLING FOR NEARLY EVERY ONE OF THEM.
+    #
+    # Measured rather than suspected: the public async methods of Locator,
+    # Page, Frame, ElementHandle, Keyboard and Mouse were enumerated from the
+    # INSTALLED playwright, every interaction-shaped name was run through this
+    # scanner as a fixture source, and 19 were seen while 22 were not. Four
+    # reads were also run as a false-positive control (input_value, is_checked,
+    # count, screenshot) and correctly matched nothing.
+    #
+    # The misses were not independent. They cluster as NEAR-MISS SIBLINGS of
+    # calls already caught, which is the defect this block closes:
+    #
+    #     press            caught      press_sequentially   MISSED -- it TYPES
+    #     check/uncheck    caught      set_checked          MISSED
+    #     drag_to          caught      drag_and_drop        MISSED
+    #     route            caught      unroute, route_from_har,
+    #                                  route_web_socket     MISSED
+    #     add_init_script  caught      add_script_tag,
+    #                                  add_style_tag        MISSED
+    #
+    # AND THERE WAS AN ASYMMETRY INSIDE THIS FILE. ``JS_MUTATION_TOKENS``
+    # below already refuses ``.focus(`` and ``.blur(`` in injected JavaScript.
+    # So focusing an element was a mutation when written one way and invisible
+    # when written the other, decided by two tables in one module that never
+    # met. Adding them here is NOT a new policy -- it is making the Python
+    # scanner agree with the policy this file already enforces twenty lines
+    # down. Every other JS token either has a class above or is reachable from
+    # Python only through ``evaluate``, which is classed, so the asymmetry was
+    # exactly these two.
+    #
+    # COST, measured with this scanner's real semantics (which skip comments,
+    # ``re.compile(`` lines, bare string literals and ``# readonly-ok``, and
+    # those rules change the answer): ZERO hits across all 31 package modules.
+    # Nothing needed sanctioning and no existing guarantee moved.
+    #
+    # TWO CANDIDATES WERE REJECTED, for different reasons, and both are
+    # recorded because the reasons generalise:
+    #
+    # * ``clear`` -- a bare ``\.clear\s*\(`` matches ``_CACHE.clear()``,
+    #   ``_GRANTS.clear()`` and ``_OBSERVED.clear()``, three dict/set calls
+    #   with no browser in sight. PLAYWRIGHT'S METHOD NAMES COLLIDE WITH
+    #   PYTHON'S CONTAINER API, so a text scanner cannot take a bare verb
+    #   without asking what else in the language owns that name. A pattern
+    #   firing on ordinary Python would force noise-suppression, and the whole
+    #   stated value of this scanner is that its finding is unconditional.
+    # * ``goto``/``go_back``/``reload`` -- 31 hits across auth, browser, server
+    #   and writes. This package navigates ON PURPOSE. Adding the class would
+    #   demand 31 sanction entries and is a decision about what the guarantee
+    #   MEANS, not a gap fix. Reported to the operator, not taken.
+    ("hover", re.compile(r"\.hover\s*\(")),
+    ("focus_or_blur", re.compile(r"\.(focus|blur)\s*\(")),
+    ("select_text", re.compile(r"\.select_text\s*\(")),
+    ("scroll_into_view", re.compile(r"\.scroll_into_view_if_needed\s*\(")),
+    ("press_sequentially", re.compile(r"\.press_sequentially\s*\(")),
+    ("set_checked", re.compile(r"\.set_checked\s*\(")),
+    ("drag_and_drop", re.compile(r"\.drag_and_drop\s*\(")),
+    ("script_tag", re.compile(r"\.add_(script|style)_tag\s*\(")),
+    ("expose", re.compile(r"\.expose_(function|binding)\s*\(")),
+    ("route_family", re.compile(
+        r"\.(unroute(_all)?|route_from_har|route_web_socket)\s*\(")),
+    ("http_headers", re.compile(r"\.set_extra_http_headers\s*\(")),
 )
 
 
