@@ -140,7 +140,23 @@ execute:**
 **35 of 97 blockers, carrying 192 of 409 published rows -- 47% of the census
 -- are priced in `allowlist +N` currency.**
 
-### 4.1 Where addresses have actually been measured, the price is wrong 80% of the time
+### 4.1 In the SETTINGS FAMILY the price is wrong 16 times in 20 -- and NOWHERE ELSE
+
+> **DO NOT QUOTE THE 80% CENSUS-WIDE. IT IS A SETTINGS-FAMILY NUMBER AND IT
+> DOES NOT GENERALISE -- MEASURED, NOT ASSUMED.** This section was written
+> with that bound stated in s4.3, and the bound was then dropped in a relay
+> and had to be restored. A sibling wave has since measured the other
+> families: **across 23 candidates in six families, 16 were refused -- but
+> FIFTEEN of those by NO PATTERN MATCHING and only ONE by a substring.**
+> That is roughly the INVERSE of settings, so `allowlist +1` is the RIGHT
+> currency outside this family. One named exception:
+> `/in/me/verifications/` is refused by the substring `verification`, so a
+> bare pattern buys nothing there and it needs a paired exemption-table
+> edit. **One family in six carries the disease, and it is a badges row.**
+> What survives census-wide is s4.2 and s4.3: 35 of 97 blockers priced in
+> `allowlist +N`, 20 of those UNLOCATABLE, and the mechanism -- a price set
+> from a guess about which gate would refuse an address, by people who did
+> not have the address.
 
 `_audit/2026-09-19-settings-tail-addresses.md` pinned all 20 real
 `/mypreferences/` addresses (`tests/test_the_settings_index_addresses_are_pinned.py`,

@@ -301,25 +301,6 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "state, not to any claim in the sweep document. A CORRECTED BY: "
         "pointer there would tell a reader the question had been wrong to ask"
     ),
-    ("2026-09-19-blocker-table-refresh.md",
-     "2026-09-19-settings-tail-addresses.md"): (
-        "the cited document is the MEASURING SOURCE, not the thing called "
-        "wrong, and the thing actually being corrected is a THIRD file the "
-        "scan cannot see from this pair. The heading at :127 reads 'the price "
-        "is wrong 80% of the time' and :129 cites the settings-addresses "
-        "document two lines below it -- but the PRICE is the 2026-09-03 "
-        "ledger's, and the settings document is the evidence that convicts "
-        "it: it pinned all 20 real /mypreferences/ addresses and found 16 "
-        "refused by a FORBIDDEN SUBSTRING, a gate that runs before the "
-        "allowlist loop, so an 'allowlist +1' price cannot buy them. The "
-        "refresh document quotes that measurement approvingly and adds "
-        "nothing against it. Same shape as the "
-        "('2026-09-19-content-tail.md', '2026-09-03-linkedin-gap-blockers.md') "
-        "entry above, arriving from the other direction: there the ledger was "
-        "the refuting source, here the settings document is. A CORRECTED BY: "
-        "pointer in it would tell a reader that the document supplying the "
-        "refutation had itself been refuted"
-    ),
     ("2026-09-19-content-tail.md", "2026-09-03-linkedin-gap-blockers.md"): (
         "the cited document is the REFUTING SOURCE, not the refuted one, and "
         "the thing being corrected is a THIRD file the scan cannot see. "
