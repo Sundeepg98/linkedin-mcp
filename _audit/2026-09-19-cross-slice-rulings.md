@@ -238,3 +238,71 @@ Reported that way rather than dropped, because a number that turns out to be
 about the instrument is exactly the thing this repository keeps catching late.
 The cheap fix, for whoever wants the count: parse the R/W column per slice from
 that slice's own header row instead of guessing its index.
+
+---
+
+# AMENDMENT C — B2 IS REFUTED, and the real answer is a hole in the corpus
+
+Amendment B2 said the `COVERED-PROVEN vs EXCLUDED-RULED` class is mostly READ vs
+WRITE of one subject, and flagged that my check returned 74% unknown. **I rebuilt
+the check properly and it does not support B2.**
+
+## C1. The parser was guessing; the deeper cause is structural
+
+The fix was to read each table's OWN header rather than assume a column index.
+Headers repeat per section and the four slices do not agree:
+
+    jobs.md      | # | capability | source | state | tool/reason |     NO R/W COLUMN
+    profile.md   | # | capability | R/W | state | evidence |           R/W present
+    messaging    | # | capability | Help Center | state | R/W | REV |  R/W present
+    network.md   | # | capability | R/W | state | note |               R/W present
+
+Measured across the whole census:
+
+    jobs                   151 rows,   0 with R/W    <- records direction NOWHERE
+    profile                202 rows, 199 with R/W
+    messaging-and-content  143 rows, 138 with R/W
+    network                209 rows, 208 with R/W
+
+**One of the four slices does not record read-versus-write at all.** So for any
+pair with a `jobs.md` side, the direction question is **not answerable from the
+census by anyone**, however well they parse it. My earlier "74% unknown" was not
+a parser defect to be fixed — it was this hole, wearing a parser defect's
+costume.
+
+## C2. The answer to "is this a third class or an artefact": NEITHER, YET
+
+| | of 19 |
+|---|---:|
+| have a `jobs.md` side, so direction is unrecorded | **14 (74%)** |
+| adjudicable from the census's own column | **3** — 2 same direction, 1 opposite |
+
+Three pairs cannot decide a class. And inferring direction from the capability
+TEXT instead — a weaker source, and the one my hand-reading actually used —
+gives **4 opposite / 6 same / 9 ambiguous**: no dominant pattern either.
+
+> **So B2's read/write reading is withdrawn.** I hand-read ten pairs, saw a
+> pattern in their wording, and generalised it to nineteen. The census's own
+> column can confirm it for three, and text inference puts "opposite" at 21%.
+
+**The honest verdict for the lead: the 19 are 84% unanswerable, and the reason
+is a missing column rather than anything about the pairs.** Assigning the class
+to anyone before that hole is named would hand them a question the corpus cannot
+answer.
+
+## C3. What this costs elsewhere, including my own earlier work
+
+`jobs.md` is **151 of 705 rows**. Any analysis that keys on R/W — a blocker's
+published `11W` split, a read-only/write-only queue, a boundary cost that turns
+on whether a row is a read — **silently loses a fifth of the census**, and loses
+it as "unknown" rather than as an error.
+
+**It bears on my own blocker-20 mistake.** I called `11 rows, 11W` a match "on
+two independent axes". The `W`-ness of the real set (`J92`–`J98` + `I13`–`I16`)
+is knowable for the `profile.md` half and **unrecorded for the seven `jobs.md`
+rows** — so even the axis I thought I had was half absent. The test was weaker
+than I understood at the time I over-claimed it.
+
+**The cheap repair is a column, not a ruling**, and it is not mine: adding `R/W`
+to `jobs.md`'s five table headers is a slice-owner's edit. Routed with the
+number attached — 151 rows, 0 recorded — so whoever takes it knows the size.
