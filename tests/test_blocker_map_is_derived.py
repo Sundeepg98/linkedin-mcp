@@ -141,7 +141,20 @@ import build_blocker_map as bbm  # noqa: E402
 #: THREE MORE WERE FOUND AND LEFT: N 55, N 56 and M C80 are named by the same
 #: shipped comment and are on the sweep's three-way self-conflict list.
 #: Adjudicating a three-way claim is a RULING, not a recovery.
-UNASSIGNED_CEILING = 243
+#: 243 -> 232. Blocker 20 `OPEN-TO-WORK-MODAL` recovered at 11 of 11, ABSENT
+#: -> COMPLETE, and it REPLACES eleven lines refused at `3a1e2df`. Those named
+#: `P I2`-`I12`, EXCLUDED-RULED AT THE FROZEN COMMIT and so never in the
+#: 409-row set. The real rows are `J 92`-`J 98` + `P I13`-`I16`.
+#:
+#: THE SOURCE IS ITSELF A CORRECTION -- Amendment E is headed "SECTION 1 IS
+#: WRONG. Blocker 20 is not a closed door" and retracts its own document's
+#: headline. That class keeps earning its rank: `article-publish`'s "THE CAVEAT
+#: RESOLVED, AGAINST ME" carried MENTION-TAG-CONTROLS the same way.
+#:
+#: The blocker reads LIVE at 5 still-GAP rows, not 11: `539752b` moved J 92-97
+#: to EXCLUDED-RULED mid-session. MEMBERSHIP is a fact about the FROZEN set;
+#: `state_today` is a separate column and moves under you.
+UNASSIGNED_CEILING = 232
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
