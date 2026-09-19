@@ -364,6 +364,90 @@ def test_every_refusal_says_which_it_is():
         assert verdict.get("why"), "a refusal must say what it saw"
 
 
+# ---------------------------------------------------------------------------
+# THE REGRESSION CASE -- a real press, scored 1 of 4 by the wave that took it
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_the_all_filters_press_scores_one_of_four_and_is_refused():
+    """THE SPECIFICATION IN ONE CASE, and it is not hypothetical.
+
+    On 2026-09-19 a probe pressed the All-filters trigger on `/jobs/search/`.
+    Its own wave then audited that press against these four conditions and
+    scored it **1 of 4**:
+
+        1. page already admitted        PASS  (/jobs/search/)
+        2. matched by ATTRIBUTE         FAIL  matched by LABEL TEXT
+        3. shown not to move a counter  FAIL  no counter reading taken at all
+        4. closed, closure VERIFIED     FAIL  Escape pressed, never checked
+
+    Its author's sentence is the specification: *"I can't show it was harmless,
+    because I never measured the thing that would show it."*
+
+    **A MECHANISM THAT WOULD HAVE ALLOWED THAT PRESS IS NOT THE MECHANISM THE
+    RULING DESCRIBES**, so it is pinned here as a regression rather than left
+    as a story. Each of the three failing conditions is asserted to refuse on
+    its own, because a case that fails three ways can pass a gate that only
+    catches one of them -- the mutation-survives lesson applied to a test
+    input.
+    """
+    jobs = f"{BASE}/jobs/search/"
+
+    # CONDITION 1 is the one it PASSED, and asserting that is what makes the
+    # other three mean something: the refusals below are not an artefact of an
+    # address that was never admitted.
+    assert readonly.is_read_url(jobs) is True
+    assert press.check_address(jobs).get("admitted") is True
+
+    # CONDITION 2 -- the actual selector it used, refused for being a label.
+    for real_selector in (
+        'button[aria-label*="All filters" i]',
+        'button:has-text("All filters")',
+    ):
+        verdict = press.check_shape(real_selector)
+        assert verdict["refused"] == "shape_not_sanctioned"
+        assert verdict["reachable_by_this_route"] is False
+
+    # CONDITION 3 -- no reading taken at either end.
+    assert press.check_counters(None, None)["refused"] == "no_counter_reading"
+
+    # CONDITION 4 -- Escape pressed, closure never read back.
+    assert press.check_closure("true", None)["refused"] == "closure_unverifiable"
+
+    # AND END TO END: the gate refuses before the page is touched at all.
+    page = FakePage(jobs)
+    verdict = await press.disclose(
+        page,
+        shape='button[aria-label*="All filters" i]',
+        read_counters=_counters,
+    )
+    assert verdict["pressed"] is False
+    assert verdict["refused"] == "shape_not_sanctioned"
+    assert page.clicks == [] and page.selectors == [], (
+        "the regression press reached the page. This is the exact press the "
+        "mechanism exists to have prevented."
+    )
+
+
+def test_a_press_that_skips_the_closure_check_cannot_report_success():
+    """The fourth condition, isolated so it is the only thing standing.
+
+    The regression case failed three conditions at once, so it would be
+    refused by this gate even if condition 4 did nothing. This input passes 1,
+    2 and 3 and fails only the closure, which is what makes the branch
+    reachable and the test falsifiable.
+    """
+    verdict = press.evaluate(
+        url=f"{BASE}/feed/",
+        shape="[aria-expanded]",
+        before={"invitations": 0},
+        after={"invitations": 0},
+        expanded_before="false",
+        expanded_after="true",
+    )
+    assert verdict["refused"] == "not_restored"
+
+
 def test_the_caller_cannot_hand_in_a_selector():
     """The signature is the safety property: ``shape`` is membership-checked
     against a closed tuple before it is ever used to build a locator."""
