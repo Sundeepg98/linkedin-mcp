@@ -189,6 +189,93 @@ def test_no_new_probe_navigates_without_a_guard_or_a_declaration():
     )
 
 
+#: Calls that take CONTENT out of whatever page is loaded.
+CONTENT_READS = frozenset({
+    "content", "inner_text", "text_content", "inner_html",
+    "all_text_contents", "all_inner_texts", "evaluate",
+})
+
+
+def _content_reads(path: pathlib.Path) -> dict[str, int]:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return {}
+    found: dict[str, int] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            if node.func.attr in CONTENT_READS:
+                found[node.func.attr] = found.get(node.func.attr, 0) + 1
+    return found
+
+
+def test_the_measurement_exemplar_proves_the_distinction_discriminates():
+    """A MEASUREMENT AND A ROUTE ARE DIFFERENT, AND THE REPO HAS ONE OF EACH.
+
+    Without this test the measurement/route distinction would be a phrase.
+    ``_probe_landed_address_sweep.py`` is the exemplar -- it exists precisely to
+    measure what an address LANDS ON -- and it is shaped exactly as the
+    distinction predicts:
+
+        navigations   1, ALL through the guarded door
+        content reads ZERO
+
+    **It goes somewhere to find out where it ends up, and takes nothing.**
+    Meanwhile all eight recorded unguarded sites call ``page.content()`` or
+    ``evaluate`` after navigating, so what they do is not "measure an address"
+    -- it is take a full document from wherever they landed.
+
+    **THAT IS THE RISK STATED PRECISELY.** Not that any of them went somewhere
+    bad, which is unknown and not statically knowable since every one passes a
+    variable -- but that the allowlist is the only thing that would have
+    bounded WHERE A FULL DOCUMENT COULD BE TAKEN FROM, and it was not consulted.
+
+    If this exemplar ever starts reading content, the distinction has lost its
+    only clean example and this test should fail rather than the phrase
+    quietly becoming untrue.
+    """
+    exemplar = SCRIPTS / "_probe_landed_address_sweep.py"
+    assert exemplar.exists(), "the measurement exemplar is gone"
+
+    reads = _content_reads(exemplar)
+    assert not reads, (
+        f"the landed-address sweep now reads page content: {reads}. It was "
+        "the clean example of a MEASUREMENT -- go somewhere, report where you "
+        "ended up, take nothing."
+    )
+
+    sites = [
+        site for site in navigation_sites()
+        if site["file"] == exemplar.name
+    ]
+    assert sites, "the exemplar no longer navigates at all"
+    assert all(site["guarded_door"] for site in sites), (
+        "the exemplar now navigates raw. It measured addresses THROUGH the "
+        "guarded door, which is what made it an argument that the guarded "
+        "door does not prevent the measurement."
+    )
+
+
+def test_every_recorded_site_takes_content_and_that_is_the_actual_risk():
+    """The other side of the same distinction, asserted so it stays true.
+
+    All eight recorded sites harvest the document. If one is ever rewritten to
+    report only a relation -- the landed address, a count -- it has become a
+    measurement and should be re-argued rather than left in a table of routes.
+    """
+    takers = {
+        name for name in KNOWN_UNGUARDED
+        if _content_reads(SCRIPTS / name)
+    }
+    missing = sorted(set(KNOWN_UNGUARDED) - takers)
+    assert not missing, (
+        f"these recorded sites no longer read content: {missing}. That is a "
+        "change in KIND, not a tidy-up: a probe that navigates unguarded but "
+        "takes nothing is a measurement, and belongs in a different argument "
+        "from one that takes a full document."
+    )
+
+
 def test_the_recorded_sites_are_still_unguarded():
     """The INVERSE of an exemption: fixing one turns this red.
 
