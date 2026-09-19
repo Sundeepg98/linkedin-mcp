@@ -79,7 +79,21 @@ import build_blocker_map as bbm  # noqa: E402
 #: rather than this one -- the two guards catch different halves, and the
 #: dangerous half is the other one. C55 is a collaborators row, not a mention
 #: row.
-UNASSIGNED_CEILING = 268
+#:
+#: 268 -> 266 on 2026-09-19. `SEARCH-APPEARANCES-SURFACE` recovered at 2 of 2,
+#: ABSENT -> COMPLETE, on three committed sources naming the same pair and a
+#: count that closes on BOTH axes: the ledger publishes it at 2 rows / 2R, and
+#: `N 132` and `P G7` are both R.
+#:
+#: THAT WAS THE ONLY SURVIVOR OF A 50-BLOCKER SWEEP, and the ratio is the
+#: finding rather than the row. Of five candidates whose id count matched the
+#: published count, FOUR were junk -- an analogy, two sentence bleeds and a
+#: pointer-cited-as-a-set -- each already named as junk by
+#: `_audit/2026-09-05-blocker-map.md`, which says in terms that "an exact-count
+#: filter cannot tell an analogy from an assignment". **Closing the count is a
+#: weak bar at published=1, where any single mention closes it**, and strong
+#: only at 2+. Do not raise this ceiling to admit a pub=1 match.
+UNASSIGNED_CEILING = 266
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
