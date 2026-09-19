@@ -93,7 +93,24 @@ import build_blocker_map as bbm  # noqa: E402
 #: filter cannot tell an analogy from an assignment". **Closing the count is a
 #: weak bar at published=1, where any single mention closes it**, and strong
 #: only at 2+. Do not raise this ceiling to admit a pub=1 match.
-UNASSIGNED_CEILING = 266
+#:
+#: 266 -> 259 on 2026-09-19, seven rows, five more blockers off UNLOCATABLE,
+#: from a source class the document sweep had EXCLUDED: the census rows' own
+#: notes. A row naming its blocker in its own note is a stronger claim than a
+#: document mentioning both, and it is the class that produced `N 194`'s
+#: "Blocker: no people search".
+#:
+#:   MENTION-TAG-CONTROLS   M C87 C88 C89   3 of 3   count AND 3W both close
+#:   NO-URL-AT-ALL          P N25           1 of 1   an explicit RE-FILE
+#:   ADD-SECTION-MENU       P D25           1 of 1   moderate, R/W carries it
+#:   SAVED-POSTS-SURFACE    M C36           1 of 2   partial
+#:   ARTICLE-SURFACE        M C48           1 of 6   weakest; C48 is the only R
+#:
+#: **HAND-READING CHANGED THREE OF EIGHT CANDIDATES**, which is why the notes
+#: carry a stated STRENGTH. `M C87` looked like a MENTION-TAG-CONTROLS hit and
+#: its note is an argument for filing it ELSEWHERE; taking the mechanical match
+#: would have recorded an exclusion as an assignment.
+UNASSIGNED_CEILING = 259
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
