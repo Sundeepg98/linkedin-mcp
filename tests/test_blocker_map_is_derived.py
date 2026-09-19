@@ -496,7 +496,31 @@ import build_blocker_map as bbm  # noqa: E402
 #: SAVED-POSTS-SURFACE: the census pairs its two rows itself -- C37 cites
 #: the same Help source as C36 (its evidence cell reads literally "same")
 #: and records "COST CORRECTED 2026-09-19 with C36".
-UNASSIGNED_CEILING = 76
+#: 76 -> 74. COMPANY-PAGE-SURFACE to 10 of 18, on the census's own BLOCKER
+#: CELL rather than a name match: N 101 and N 102 both read "No /company/"
+#: as their reason, and the ledger charges this blocker allowlist +1 -- the
+#: /company/ pattern. THIRD time in this recovery that a published cost and
+#: a measured absence are the same fact from opposite ends (SCHOOL's
+#: /school/, CONTENT-ANALYTICS's /analytics/creator/, now this).
+#: N 102 "employee insights on a Page's People tab" is also the same tab
+#: as J 108 "Company Page People tab", already filed here at 5d06446.
+#:
+#: N 104 IS DELIBERATELY NOT TAKEN: a company row by subject, a SEARCH row
+#: by act, and named by search-results-consent.md as one of three candidates
+#: for that blocker's two unattributed slots. I left it out of
+#: SEARCH-RESULTS-SURFACE at 68949ea and will not take it here on a weaker
+#: argument than the one I declined to use there.
+#:
+#: HASHTAG-EXISTENCE NEEDS NOTHING, and the near miss is worth recording:
+#: the matcher offered N 59 "Follow a hashtag" + N 60 "Unfollow a
+#: hashtag", a clean 2-row fit for room 2. It is WRONG. The ledger names
+#: this blocker's three rows EXPLICITLY -- N 194, C 11, C 52 -- and all
+#: three are already placed: N 194 to SEARCH-RESULTS-SURFACE, M C11 held
+#: here, M C52 to FEED-PREFERENCES on a 2026-09-19 correction. A correctly
+#: dispersed set, not an under-count. LEDGER-EXPLICIT beats a name-plus-
+#: split match, and this is the one place today the matcher would have
+#: written a wrong row had the ledger not been read first.
+UNASSIGNED_CEILING = 74
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
