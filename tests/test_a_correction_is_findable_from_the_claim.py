@@ -889,6 +889,44 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "NEIGHBOUR THIS CORRECTS:', which corrects a neighbouring CENSUS ROW "
         "-- `N 136` -- and not a document at all"
     ),
+    # THESE TWO WERE ADDED BY THE BANKING PASS THAT MOVED jobs 44 AND profile
+    # N2 TO COVERED-PROVEN on the first writes this server ever fired. Both are
+    # TABLE-ROW PROXIMITY, and in both the matched word sits in a DIFFERENT
+    # TOOL'S ROW from the citation -- which is why each reason below names the
+    # line the word is on and the line the citation is on, separately.
+    ("jobs.md", "2026-08-30-linkedin-undo.md"): (
+        "the matched word is in the NEXT ROW and belongs to a different tool. "
+        "The flagged line is the `save_job` row, whose citation to the undo "
+        "audit ('YES, and it landed', :433 and :1645) is CONFIRMED by the "
+        "2026-09-19 fires and contradicted by nothing. The 'SUPERSEDED' one "
+        "line below is in the `unsave_job` row, which cites the same audit at "
+        ":1775 -- so the pair would be produced by either line and the reason "
+        "has to answer for both. IT IS STILL NOT A CORRECTION: the undo audit "
+        "said `unsave_job` had never been fired, which was TRUE when written "
+        "and remains a true statement about the state on 2026-08-30. An EVENT "
+        "OVERTAKING A TRUE STATEMENT IS NOT AN ERROR IN THE DOCUMENT THAT MADE "
+        "IT, and a CORRECTED BY: pointer would tell a reader the undo audit "
+        "got something wrong. What changed is the world, on 2026-09-19. The "
+        "census row itself carries the supersession in place and names the "
+        "document that supersedes it, and its own words keep the six undo "
+        "citations 'because they were accurate when written' -- which is the "
+        "findability this file asks for, aimed at the claim that actually moved"
+    ),
+    ("profile.md", "2026-08-31-linkedin-finish.md"): (
+        "same shape and cleaner, because the two lines share no citation at "
+        "all. The flagged line is the `linkedin_surface_census` row, citing "
+        "finish.md:275-279 for control counts -- read and checked: that is a "
+        "boundary table giving `settings_dark_mode` 2, `profile_edit_intro` 4, "
+        "`profile` 4, `settings` 3, none of which anything today touches. The "
+        "'superseded' one line ABOVE is in the `linkedin_update_setting` row, "
+        "and that row CITES ONLY 2026-09-19-tier1-fires.md -- finish.md is not "
+        "named on it. What it supersedes is that cell's OWN PRIOR TEXT, a "
+        "standing 'WRITE NEVER FIRED' replaced when the write fired and was "
+        "verified both ways. A cell superseding its own earlier wording is the "
+        "in-place correction this file prefers; aiming a CORRECTED BY: pointer "
+        "at finish.md would refute a control-count table over a dark-mode "
+        "write it never made a claim about"
+    ),
 }
 
 
