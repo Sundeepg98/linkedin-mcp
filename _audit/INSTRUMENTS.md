@@ -3140,3 +3140,43 @@ from having paid for both sides.** That is the register's own section 3 disease
 in the mildest possible form: an entry that measured its own instance correctly
 and generalised one step too far, which is exactly the class a second reader
 catches and the author cannot.
+
+### 16.6 16.5's REFUSAL FIRED ON ITS FIRST USE, and the same run named the other form
+
+Not a demonstration this wave constructed. It is what happened when 16.5 was
+committed, four minutes after being written, against this file.
+
+    git add _audit/INSTRUMENTS.md
+    git diff --cached --name-only
+      _audit/2026-09-19-hashtag-surface-live-evidence.md     <-- not mine
+      _audit/INSTRUMENTS.md
+      _audit/_census/messaging-and-content.md                <-- not mine
+
+    -> REFUSAL. git reset HEAD _audit/INSTRUMENTS.md
+
+**A plain commit would have swept two of another wave's files into a register
+commit about not sweeping other waves' files.** The refusal turned that into an
+abort, which is exactly the failure-mode change 16.5 claims and the only thing
+it claims.
+
+**AND THE SAME READING THEN CHOSE THE OTHER FORM, which is 16.5's actual
+point.** The neighbour was STAGING, not merely editing -- so by 16.5's own table
+this file was no longer the index-form case, and `--only` was correct for this
+commit. It committed 56 insertions, **zero of theirs**, and **left their staged
+index intact** (re-checked after: the same three paths, now grown to three,
+still staged and untouched).
+
+    the form is not a habit. it is a reading of what the
+    neighbours are doing AT THAT MOMENT, and the reading is
+    one command.
+
+**By the time of the second check the neighbour's staged set had grown from two
+paths to three** -- inside the span of a single commit. That is the window 16.3
+measured, seen from the other side, and it is why the refusal is worth more than
+the flag: the flag is a standing choice, and the window is a moving fact.
+
+**WHY THIS IS ADMITTED AS A DEMONSTRATION AND NOT AS AN ANECDOTE.** This
+register's bar is that an instrument enters only if it has been SHOWN FAILING. A
+refusal is shown failing when it REFUSES something real, and this one did, on a
+live tree, on its first use, with the thing it refused named. A planted version
+would have been weaker evidence: this one did not know it was being tested.
