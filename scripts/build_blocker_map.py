@@ -365,6 +365,23 @@ def main(argv: list[str] | None = None) -> int:
     for k in sorted(by_class):
         print(f"  {k:26s} {by_class[k]:4d}")
 
+    #: ROWS A BLOCKER HOLDS THAT IT NEVER PUBLISHED, i.e. the other end of every
+    #: RE_FILED entry. ADDED 2026-09-19 after a wave measured that the first cut
+    #: of RE_FILED credited a re-file's DESTINATION for rows outside its own
+    #: published set: SEARCH-RESULTS-SURFACE read 21 of 21 while holding four
+    #: incoming rows, so its own count was 17 of 21 and four holes were masked;
+    #: FEED-PREFERENCES read 1 of 1 while holding nothing it published.
+    #:
+    #: A PUBLISHED COUNT IS A CLAIM ABOUT A BLOCKER'S OWN ROWS. A row that
+    #: arrived from somewhere else does not satisfy it, and subtracting at the
+    #: source while adding at the destination is how a re-file turned into free
+    #: credit at both ends.
+    incoming: dict[str, int] = {}
+    for _src, _rows in RE_FILED.items():
+        for _rid, _why in _rows.items():
+            _dest = _why.split(' -- ')[0].strip()
+            incoming[_dest] = incoming.get(_dest, 0) + 1
+
     recount: dict[str, int] = {}
     for blocker, *_ in assign.values():
         recount[blocker] = recount.get(blocker, 0) + 1
@@ -375,8 +392,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {'blocker':32s} {'pub':>4s} {'map':>4s} {'delta':>6s}  verdict")
     complete = partial = 0
     for b in sorted(published, key=lambda x: (-published[x], x)):
-        got = recount.get(b, 0)
-        if got == 0:
+        got = recount.get(b, 0) - incoming.get(b, 0)
+        # SKIP ONLY BLOCKERS THAT HOLD NOTHING AT ALL -- they are counted separately
+        # as 'absent'. Testing the NET here would hide a blocker whose every held
+        # row arrived from somewhere else, which is exactly what FEED-PREFERENCES
+        # is: 1 published, 1 held, 0 of them its own.
+        if recount.get(b, 0) == 0:
             continue
         d = got - published[b]
         if d == 0:
