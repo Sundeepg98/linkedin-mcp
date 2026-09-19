@@ -695,3 +695,31 @@ one positive from the same read, and the zero carries its own control.**
 **NO THEORY is offered for the shell.** It was not reproduced; a transient
 hydration failure, a session state and a product change are all consistent with
 what I can see, and nothing here separates them.
+
+## F6. The shell finding was RETRACTED, and the two retakes used DIFFERENT instruments
+
+`content-tail` withdrew the 2KB finding (`9938b0d`) on its own re-measurement:
+`payload_chars` is **stable within a load and varies by three orders of magnitude
+ACROSS loads of the same address** — it read 5,063,129 / 2,146 / 5,147,717 on the
+feed. One reading of it establishes nothing about a page.
+
+**My retake reached the same place from a different instrument, and the contrast
+is the useful part:**
+
+| instrument | across 3 separate loads of one address |
+|---|---|
+| `payload_chars` (theirs) | 5,063,129 / 2,146 / 5,147,717 — **3 orders of magnitude** |
+| `documentElement.outerHTML.length` (mine) | 398,365 / 398,234 / 398,424 — **±200 chars** |
+
+> **For the question "did this page render", outerHTML length is the stabler
+> instrument and `payload_chars` is not fit for it.** Two waves now have
+> cross-load readings on one measure each, which is what makes this a comparison
+> rather than a preference.
+
+**And the convergence is not corroboration.** We agree the shell is not there,
+but we did not run the same check — they re-measured their own number and found
+it unstable; I measured a different number and found it stable. **Two waves
+agreeing after measuring different things is worth more than two agreeing after
+measuring the same thing**, and it is the opposite of the failure I recorded in
+Amendment E, where two readers agreed because both had made the same unchecked
+assumption.
