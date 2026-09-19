@@ -635,3 +635,68 @@ blocks, so I went to read the second and it was not there. **A finding about one
 collapsed block led to the file's arithmetic because the docstring enumerated
 its terms** — the same property that made the blocker map auditable is what made
 this checkable.
+
+---
+
+# AMENDMENT I — the same-state class measured properly: 13 true of 16, against 7 of 15
+
+## I1. A bug in my own filter was hiding the best pairs
+
+My first pass at this class compared state strings literally and found **13**
+jobs↔profile pairs. **`jobs.md` writes `XR` where the other slices write
+`EXCLUDED-RULED`** — and `CP`/`CU`/`CCD` likewise — so every pair whose agreement
+was spelled in two dialects was silently dropped as a disagreement.
+
+Normalising the dialects: **229 live same-state pairs**, and the ones the bug hid
+are the highest-scoring in the corpus.
+
+**This is the counter's own `XR` scar recurring in a new instrument.**
+`count_census_states.py` documents that `XR` cost it 23 rows it could not see —
+*"a DIALECT THIS INSTRUMENT DID NOT SPEAK"* — and I read that docstring this
+morning and wrote the same defect anyway.
+
+## I2. The measured precision, hand-read
+
+| | different-state | same-state |
+|---|---|---|
+| precision at the head | **7 of 15** | **13 of 16** |
+
+True duplicates in the top 16, each a single capability stated twice:
+
+    J 76 / P M7    opt out of saving job-application data      0.987
+    J 89 / P I2    turn Open to Work on / off                  0.972
+    J 74 / P M8    "share resume data with recruiters" toggle  0.910
+    P F5 / N 125   delete a recommendation you sent            0.889
+    P E8 / N 115   opt out of endorsements entirely            0.872
+    M M1 / N 155   message a 1st-degree connection             0.871
+    P L4 / M C83   newsletter analytics                        0.778
+    M M4 / N 157   InMail credit balance                       0.750
+    P O22 / N 143  the list of members you have blocked        0.742
+    P E6 / N 114   hide / show an endorsement received         0.740
+    M C69 / N 168  invite connections to join a group          0.740  (already subtracted)
+
+**One false:** `P D24` *Open to volunteering* (a profile field) against `N 91`
+*Filter by Open to volunteering* (a people-search filter) — the field/filter
+confusion that also produced the `Filter: Location` false pair.
+
+**Two partial:** `P O21` *Block / unblock* bundles what `N 142` states as
+*Unblock* alone; `M C80` *Subscribe or unsubscribe* bundles `N 55` and `N 56`.
+**A bundled row is not a clean duplicate and must not be subtracted as one** —
+it is the collapsed-block problem at a scale of two.
+
+## I3. What I am NOT claiming
+
+**229 candidates at 13-of-16 head precision does not license an estimate of the
+tail.** The head is where a lexical matcher is strongest and I have measured
+twice today that its ordering concentrates truth without separating it. **The
+honest statement is: 13 confirmed duplicates beyond the four already executed,
+and an unmeasured tail of 213.**
+
+**And none is subtractable on my authority.** Only `messaging-and-content.md`
+carries a written conditional, and I have already fired it. The rest —
+jobs↔profile, profile↔network — have **no register**, so each subtraction is a
+new decision and belongs where Amendment G's does.
+
+**The population finding stands and is now evidenced rather than argued:** two
+slices stating one capability usually AGREE about it, so a different-state filter
+selects against exactly what it was built to find.
