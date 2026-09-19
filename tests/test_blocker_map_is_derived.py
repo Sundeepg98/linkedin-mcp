@@ -301,7 +301,27 @@ import build_blocker_map as bbm  # noqa: E402
 #: The sweep itself records the claims arising from one A9-adjacent passage
 #: where those names sit near these ids, which is the junk shape the
 #: evidence file's own header warns about.
-UNASSIGNED_CEILING = 123
+#: 123 -> 120. CREATOR-HUB-SURFACE to 3 of 4, and the point of this entry is
+#: the row it REFUSES. profile.md section L ("Creator tools, followers and
+#: analytics") holds exactly FOUR unassigned frozen-GAP rows against a
+#: blocker published at 4 -- an exact count match, and it is WRONG. The
+#: ledger publishes 4R, all reads, and the census's own R/W column makes L6
+#: ("Audio events") a W. A bare count match is a birthday problem; the
+#: split is the discriminator, and here it disqualifies the row the count
+#: would have admitted. This is the same test JOB-ALERTS passed and
+#: PREMIUM-APPLY-SURFACES failed, applied to a fit I wanted.
+#:
+#: THE FOURTH READ IS NOT TAKEN. The only other section-L reads GAP at the
+#: freeze are held: P L4 by NEWSLETTER-SURFACE on shipped code, P L2 by
+#: PARSER-ON-A-LOADED-PAGE. Either closes this at 4; taking one would
+#: overturn an existing assignment on a weaker source, which is a ruling.
+#:
+#: AND THE LIKELIEST FOURTH CANNOT BE FILED AT ALL: P L2b ("Own follower
+#: LIST") is GAP today and is NOT in the frozen set -- split out of the
+#: compound L2 on 2026-09-04, the day AFTER the freeze. If the published 4R
+#: counted the compound row, this under-count is an artifact of a split that
+#: postdates the count, and no map edit can reach it.
+UNASSIGNED_CEILING = 120
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
