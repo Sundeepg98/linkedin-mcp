@@ -190,7 +190,20 @@ import build_blocker_map as bbm  # noqa: E402
 #: is blocker 20's shape again. Its verification rows K1-K7 were EXCLUDED-RULED
 #: AT THE FREEZE, so the only frozen-GAP section-K rows are BADGE rows (K8 K9
 #: K10). Reported, not assigned.
-UNASSIGNED_CEILING = 201
+#: 201 -> 178, the largest single recovery of the campaign. GROUPS-SURFACE to
+#: 30 of 32, and it RESOLVES A DISCREPANCY ITS OWN SOURCE DECLARED
+#: IRRECONCILABLE: that document walks the group family to 35 against a
+#: published 32 and says "No subset of the 35 reconciles to 32 by any rule I
+#: can state", calling its exclusion candidates guesses.
+#:
+#: The rule it could not state is that three of its 35 are ADMIN rows -- its
+#: table counts N A10 A11 A12, assigned to ADMIN-RIGHTS-NOT-HELD at 5509166 on
+#: four independent axes. 35 - 3 = 32 exactly. A recovery in one blocker
+#: reconciled another, which is an argument for doing them in one pass.
+#:
+#: RESIDUAL: 30 not 32, because N 161 and M C70 are in the same walk and filed
+#: to SEARCH-RESULTS-SURFACE -- carved out by that same document. Left open.
+UNASSIGNED_CEILING = 178
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
