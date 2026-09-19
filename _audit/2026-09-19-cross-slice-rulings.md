@@ -114,3 +114,69 @@ order, while the loop fixed that order alphabetically.
 
 **So the honest statement of extent is: at least ten rows, a measured ~50%
 precision at the head, and an unknown tail.** Not 233.
+
+---
+
+# AMENDMENT A — the deepest reason: ONE ruling, THREE names, nothing to search for
+
+Section 1 says one slice named its rulings and the rest did not. That is true and
+it is not the whole mechanism. **The same shipped ruling has been independently
+re-derived and re-named in three slices**, which is why no amount of diligence
+inside any one of them could have found the others.
+
+One sentence in the package, `linkedin_server/server.py:7371` (in
+`linkedin_update_setting` — **cite the symbol, the line has already drifted
+once**):
+
+> *...is admitted by name or not at all.*
+
+and three census names for it:
+
+| slice | how it appears | citable? |
+|---|---|---|
+| `network.md` | **`R11`** — *"the settings family is admitted by name or not at all"*, with a scope and a 21-row list | yes |
+| `messaging-and-content.md` | **`MESSAGING-SETTINGS` (3.10)** — *"a setting is admitted by name or not at all"* | yes, under a different id |
+| `profile.md` | bare prose **`settings family`**, 7 rows, no id and no citation | **no** |
+
+**A ruling that is RE-DERIVED rather than CITED cannot propagate, because there
+is nothing to search for.** Three waves each read the same sentence in the same
+file, each wrote down a correct verdict, and each invented a name for it. Any
+reader auditing `R11` finds 21 rows and stops; the other two names are invisible
+to that search.
+
+## A1. The case that proves it, because the disease recurred inside its own cure
+
+`M M42`'s note, written 2026-09-05:
+
+> **RE-FILED as EXCLUDED-RULED under `MESSAGING-SETTINGS` (3.10). NOT a new
+> decision — the operator already made it and TWO CENSUS SLICES APPLIED IT
+> DIFFERENTLY.**
+
+A wave diagnosed this exact disease, on this exact capability, named it
+correctly, fixed the messaging side — **and left its own twin `N 170` GAP for
+two weeks.** Flipped here (`260e29d`).
+
+**The propagation failure recurred inside the act of fixing a propagation
+failure**, and it did so because the fix introduced the third name rather than
+citing the first.
+
+## A2. I walked past it too, which is the honest part
+
+My own settings-tail wave on 2026-09-19 quoted this same sentence — from
+`server.py:6874`, as the line then was — and treated it as the shipped ruling
+governing that surface. **I did not recognise it as the ruling the census
+already files under two other names**, and I had read `network.md`'s R11 in the
+same session. Four encounters with one sentence before anyone joined them.
+
+## A3. The remedy is a name, not a re-derivation
+
+Nothing here needs a new decision. What it needs is that the three names resolve
+to one, and the only durable anchor is **the symbol in the package** —
+`linkedin_update_setting` — since the line number has already moved and one
+census note says so in its own text. That is a single edit to three slices and a
+ruling nobody has to make.
+
+**I have not made it**, because renaming a ruling across three slices is a
+census-wide convention change with an owner, and my mandate here is rows that
+disagree — not the register they cite. Routed with the evidence rather than
+taken.
