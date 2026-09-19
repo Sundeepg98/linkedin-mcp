@@ -182,6 +182,22 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("messaging-and-content.md", "2026-09-05-article-publish.md"): (
+        "the citation is the RULING'S OWN AUTHORITY, not a document being "
+        "corrected. Rows M23, C66 and C86 were retired 2026-09-19 on the "
+        "mention/tag ACTION-CLASS ruling, and each note cites the document "
+        "that reached that ruling in order to say WHOSE ruling is applied. "
+        "The phrase that trips the vocabulary is 'only half applied' -- and "
+        "that is a statement about the CENSUS, not about the cited document, "
+        "which said the remainder was owed in its own words: 'whoever holds "
+        "the map should apply it ROW BY ROW rather than take my count'. "
+        "Completing an instruction a document gives is the opposite of "
+        "correcting it. Note also that the same document IS corrected "
+        "elsewhere and that pair is declared properly -- its Amendment E "
+        "retracts its own section 1 -- so this entry is not a blanket "
+        "exemption for the file, only for the retirement rows quoting its "
+        "ruling"
+    ),
     ("jobs.md", "2026-08-31-linkedin-perform.md"): (
         "the cited document was RIGHT WHEN WRITTEN and is not corrected by "
         "this row -- MEASURED, not argued. J 127 quoted it for 'the boundary "
