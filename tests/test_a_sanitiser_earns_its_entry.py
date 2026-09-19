@@ -302,6 +302,30 @@ ENROLLED: dict[tuple[str, str], str] = {
     # this name and leaked its input on the first run, so `it is the same
     # function` is a claim that has been wrong here before.
     ("_probe_premium_entitlement.py", "_relation"): TWO_ARG,
+    # TWO MORE CLAIMANTS, 2026-09-19, AND THEY ARE MY OWN DEBT. I created both
+    # probes earlier today with a byte-identical copy of `_relation`, and in
+    # doing so created two claimants of a guarded name that nothing had
+    # measured. They were trusted BY SPELLING for several hours. That is the
+    # exact event the paragraph above records twice already, committed by
+    # somebody who had read it.
+    #
+    # THE BODIES WERE CHECKED BEFORE THESE ROWS WERE ADDED, not after, and
+    # programmatically rather than by reading: both extract byte-identical to
+    # the canonical copy in `_probe_groups_events_live.py`, which this table
+    # already exercises. The eighth row exists because a wave once shipped a
+    # DIFFERENT body under this name, so "it is the same function" is a claim
+    # that has been wrong here before and is not taken on sight.
+    ("_probe_anchor_surfaces_live.py", "_relation"): TWO_ARG,
+    ("_probe_job_collections_live.py", "_relation"): TWO_ARG,
+    # NOT ENROLLED, DELIBERATELY: ("_probe_creator_content_analytics.py",
+    # "_relation"). It is NOT a copy -- it is a DIFFERENT FUNCTION wearing the
+    # name: `_relation(landed)`, one argument, returning AUTH-WALL / target /
+    # REDIRECTED-WITHIN-ANALYTICS. Enrolling it would be vouching for a
+    # contract I did not write, which this table's own rule forbids, and its
+    # arity is not even the one the two-arg invoker would call. It is safe in
+    # fact -- every return in it is a string constant, measured off the AST --
+    # but that is a measurement somebody else must make into a claim. Its
+    # owner is `a6efc4b`.
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this

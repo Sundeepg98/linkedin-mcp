@@ -156,7 +156,7 @@ _SINK_ATTRS = frozenset(
 #: are standalone by design -- and the test below asserts the two definitions
 #: are byte-identical, so a fix or a widening cannot land in one and not the
 #: other.
-_SANITISERS = frozenset({"_shape_of", "_redact", "_relation", "_why_refused"})
+_SANITISERS = frozenset({"_shape_of", "_redact", "_relation"})
 
 #: CALLS WHOSE RESULT IS A NUMBER, whatever went in.
 _COUNTING_CALLS = frozenset({"len"})
@@ -690,7 +690,7 @@ def test_output_stays_green_on_a_value_that_carries_nothing(body, why):
 def test_a_sanitiser_entry_is_a_claim_about_a_contract():
     """PINNED, because the set is the one place this rule can be defeated.
 
-    Adding a name to ``_SANITISERS`` silences every site that calls it. FOUR
+    Adding a name to ``_SANITISERS`` silences every site that calls it. THREE
     entries today, each earned: ``_shape_of`` returns a relation, ``_redact``
     has its own both-directions test file, ``_relation`` was admitted WITH the
     test that proves it, and ``_why_refused`` follows that precedent rather
@@ -714,7 +714,7 @@ def test_a_sanitiser_entry_is_a_claim_about_a_contract():
     landing quietly.
     """
     assert _SANITISERS == frozenset(
-        {"_shape_of", "_redact", "_relation", "_why_refused"}
+        {"_shape_of", "_redact", "_relation"}
     ), _SANITISERS
     assert "_member_path" not in _SANITISERS
     assert "_path_of" not in _SANITISERS

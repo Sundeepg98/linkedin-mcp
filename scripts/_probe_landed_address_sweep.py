@@ -234,7 +234,26 @@ async def _sweep_one(page, label: str, url: str) -> bool:
     else:
         print("    the LANDED address is admitted: NO -- the server has come to")
         print("    rest where its own allowlist refuses")
-        print("    refused ON: %s" % _why_refused(str(landed)))
+        # THE REASON IS NOT PRINTED, AND THE REASON FOR THAT IS WORTH MORE
+        # THAN THE PRINT WOULD HAVE BEEN. Printing it means handing a
+        # navigation-derived value to an output sink, which
+        # test_navigation_is_never_derived refuses -- correctly, since it
+        # tracks the NAME and cannot know _why_refused returns only literals.
+        #
+        # The sanctioned route is an entry in _SANITISERS, and I took it and
+        # then GAVE IT BACK: the enrolment table refused the entry.
+        # _why_refused fails MUST_DISCRIMINATE on both pairs, because all four
+        # of those urls are ADMITTED and it correctly returns one verdict for
+        # them. That table certifies SHAPERS -- functions mapping a url to a
+        # relation or a redaction -- and this is a VERDICT function, a kind it
+        # has never been asked to certify.
+        #
+        # Reshaping the function to satisfy the table, or widening the table
+        # to admit the function, would both have been getting a green rather
+        # than earning one. So the classification lives in this file's
+        # docstring, measured once and dated, and the helper stays available
+        # to a caller who wants it without printing it.
+        pass
     return landed_admitted
 
 
