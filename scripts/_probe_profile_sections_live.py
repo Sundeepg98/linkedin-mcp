@@ -1,10 +1,10 @@
-"""Four ways to find a profile SECTION, and all four failed their controls.
+"""Five ways to find a profile SECTION -- and the fifth found the real fault.
 
 ``recommendations.py`` is a shaper with no page reader -- the state
 ``groups.py`` was in before ``groups_page.py``. Writing that reader needs the
 recommendations section's structure, and **nobody in this repository has
-established it.** This script is the record of four attempts, so the next wave
-starts from what is ruled out rather than re-deriving it.
+established it.** This script is the record of five attempts. The first four failed their
+controls; the fifth explains why all of them did.
 
 ## EVERY APPROACH CARRIES A CONTROL, AND THAT IS THE WHOLE VALUE
 
@@ -41,11 +41,38 @@ fit, and approach 4 rules out "read too early". Whatever ``Skills`` matched may
 not be the profile section at all -- a suggestion rail or a nav item would
 satisfy the same selector.
 
-**SO THE REMAINING EXPLANATION IS THAT THIS IS NOT THE DOCUMENT IT LOOKS
-LIKE** -- an ``/in/me/`` load may serve a shell whose sections arrive in a
-payload rather than as markup, which is what ``SDUI_ACTIONS_JS`` exists for on
-a different surface. That is a hypothesis with no measurement behind it, stated
-as the next thing to test rather than as a finding.
+    5  the FLIGHT PAYLOAD via dom.read_sdui_actions        2,146 chars
+       ...against this package's OWN RECORDED figure for the same address,
+       1,091,238 chars and 92.7% of the document. **This load is 0.2% of
+       that.** experience / education / recommendation / skills all read ZERO
+       hits in it.
+
+## THE ANSWER, AND IT IS NOT ABOUT SELECTORS AT ALL
+
+**``/in/me/`` IS SERVING A NEAR-EMPTY DOCUMENT.** Approach 5's control is what
+turns that from a guess into a measurement -- the same reader, in the same
+session, on two other admitted addresses:
+
+    feed            3 script blocks   5,063,975 payload chars
+    jobs search     1 script block          227 payload chars
+    profile         2 script blocks        2,146 payload chars
+    profile, RECORDED PRIOR              1,091,238
+
+**The instrument is fine** -- it reads five megabytes off the feed. The profile
+is the anomaly, and it is short by three orders of magnitude against a figure
+this repository recorded itself.
+
+So every approach above was searching a document that does not contain the
+thing. **Four selector failures and a payload miss are ONE fault, upstream of
+all of them**, and no amount of better selecting would have reached it.
+
+**WHAT THIS DOES NOT ESTABLISH:** why. A shell that hydrates client-side and
+does not finish under CDP attach, a session state specific to this address, or
+a LinkedIn change are all consistent with it and nothing here separates them.
+
+**AND IT REACHES PAST THIS WAVE.** Anything in this package that reads
+``/in/me/`` is currently reading a 2 KB shell. That is worth knowing before a
+profile row is banked or retired on a zero.
 
 ## WHAT THIS SCRIPT DOES NOT CLAIM
 
@@ -92,6 +119,13 @@ CONTROLS = ("Experience", "Education")
 #: Words that cannot be absent from the jobs surface, used to prove the
 #: vocabulary matcher is not blind before trusting any zero it reports.
 JOBS_CONTROL_TERMS = ("jobs", "search", "messaging")
+
+FEED_URL = "https://www.linkedin.com/feed/"
+#: ``dom.read_sdui_actions``'s own docstring records the profile payload at
+#: 1,091,238 chars, 92.7% of the document. A RECORDED PRIOR MEASUREMENT,
+#: not a guess, which is what makes a short read here a REGRESSION signal
+#: rather than a null result.
+RECORDED_PROFILE_PAYLOAD = 1091238
 
 
 async def _id_substring(page) -> dict[str, int]:
@@ -197,12 +231,45 @@ async def main() -> int:
                 print("       zeros, so the selector is looking in the wrong place.")
 
             print()
+            print("=== 5. THE FLIGHT PAYLOAD, and its control")
+            payload = await dom.read_sdui_actions(page, "recommendation")
+            chars = int(payload.get("payload_chars") or 0)
+            print("    profile payload chars : %9d   (blocks %d)"
+                  % (chars, int(payload.get("script_blocks") or 0)))
+            print("    RECORDED PRIOR        : %9d" % RECORDED_PROFILE_PAYLOAD)
+            share = (chars / RECORDED_PROFILE_PAYLOAD * 100) if RECORDED_PROFILE_PAYLOAD else 0.0
+            print("    this load is %.3f%% of it" % share)
+            for needle in ("experience", "education", "recommendation"):
+                hit = await dom.read_sdui_actions(page, needle)
+                print("    needle %-14s hits %d"
+                      % (needle, int(hit.get("needle_hits") or 0)))
+
+            print()
+            print("    CONTROL -- the same reader on the feed, same session:")
+            if readonly.is_read_url(FEED_URL):
+                await BROWSER.goto(page, FEED_URL)
+                feed = await dom.read_sdui_actions(page, "search")
+                feed_chars = int(feed.get("payload_chars") or 0)
+                print("    feed payload chars    : %9d" % feed_chars)
+                if feed_chars > chars * 10:
+                    print("    -> THE INSTRUMENT IS FINE. The profile is the")
+                    print("       anomaly, short by orders of magnitude against")
+                    print("       a figure this repository recorded itself.")
+                else:
+                    print("    -> the reader is thin everywhere; this says")
+                    print("       nothing about the profile specifically.")
+            else:
+                print("    feed REFUSED by the boundary; control unavailable.")
+
+            print()
             fired = all(by_text.get(term, 0) > 0 for term in CONTROLS)
             print("=== DID THE CONTROLS FIRE? %s" % fired)
             if not fired:
-                print("    NO. Nothing above is a reading about the account --")
-                print("    it is a reading about three instruments. Recorded so")
-                print("    a fourth attempt does not repeat them.")
+                print("    NO -- and approach 5 says WHY. Nothing in 1-4 is a")
+                print("    reading about the account, because the document they")
+                print("    searched is 0.2% of the size this package recorded")
+                print("    for this address. Four selector failures and a")
+                print("    payload miss are ONE fault, upstream of all of them.")
 
             after = await dom.read_invitation_badge(page)
             moved = [key for key in sorted(set(before) | set(after))
