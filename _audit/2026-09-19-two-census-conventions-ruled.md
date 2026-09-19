@@ -399,3 +399,136 @@ file it flagged was not a hole -- the url comes from an env var and **the CALLER
 checks it.** *"A function-scoped detector cannot see a guard in the caller."*
 Routed anyway, because it was the only probe with **neither** half of the door
 and no rate discipline at all on a shared account.
+
+
+---
+
+## 5. THE FIRST SANCTIONED PRESS CONVICTED TWO OF ITS OWN CONDITIONS
+
+Ruled 2026-09-19 11:50, on the wave's own report of the press it was authorised
+to take. **It executed the press, then argued that two of the four conditions
+pass whether or not the thing they describe occurred** -- including one that,
+read strictly, would have made that press a REFUSAL.
+
+**It declined to rule on that itself**, with the right reason: *"a wave arguing
+its own permitted press should have been refused is exactly the argument that
+should be made by someone else."*
+
+### WHAT ACTUALLY HAPPENED, AND IT IS CLEAN
+
+    1  is_read_url True, check_address admitted True   BOTH BEFORE ANY LOAD
+    2  shape '[aria-expanded]' a KEY from SANCTIONED_SHAPES, no selector, no label
+    3  priced_by ['invitations','notifications_unread'], both read, neither None
+    4  closure verified, AND MEASURED INDEPENDENTLY OF THE GATE:
+         BEFORE  expanded_true 0  expanded_false 9  dialogs 0  shape_total 9
+         AFTER   expanded_true 0  expanded_false 9  dialogs 0  shape_total 9
+
+CDP pages 10 before, 10 after. Page closed in a `finally`. **The page was left
+exactly as found and that is established outside the gate, which is the part
+that matters most and is not in dispute.**
+
+**It banked nothing.** `N 133` / `N 134` stay GAP.
+
+### DEFECT ONE: CONDITION 4 CANNOT WITNESS DISCLOSURE
+
+Four lines of `press.disclose`, in this order:
+
+    expanded_before = await locator.get_attribute("aria-expanded")
+    await locator.click(...)
+    await page.keyboard.press("Escape")        # DISMISSED FIRST
+    expanded_after  = await locator.get_attribute("aria-expanded")
+
+**`expanded_after` is read AFTER the dismissal.** Nothing reads the control while
+it is open, and `check_closure` requires before == after -- **which a successful
+Escape guarantees whether or not anything ever opened.**
+
+> **TWO READINGS CANNOT DESCRIBE THREE STATES.**
+
+**Shown, not argued.** `tests/test_the_press_gate_cannot_witness_disclosure.py`
+builds three pages that differ IN THE WORLD -- the control really opens; the
+press lands on nothing; it opens AS A DIALOG while the control's own
+`aria-expanded` never moves -- and `disclose` returns **one identical verdict for
+all three.** Its control is a fourth case, a moved counter, **shown SEPARATING
+through the same comparison, because a test asserting things are
+indistinguishable passes trivially if it is comparing the wrong thing.**
+
+**RULED: the gate is SAFE and BLIND, and those are different properties.** It
+proves the page was left as found. It cannot show that anything was disclosed,
+so **no row may be banked on a press verdict alone.** The witness fix is
+verified, not proposed, and its two design points are adopted as ruled:
+
+* **AN ENUMERATED CLOSED SET, NEVER A CALLER'S CALLABLE.** *"A seam taking
+  arbitrary code at the open moment is a press seam wearing an observer's
+  clothes -- it reintroduces exactly what `SANCTIONED_SHAPES` prevents, at the
+  most privileged instant."*
+* **IT READS THE PAGE, NOT ONLY THE CONTROL, AND IT IS A PAIR.** The dialog case
+  decides it: a one-attribute witness sees false while a dialog is open and
+  **reports real disclosure as a MISS** -- a false negative that *"manufactures
+  a confident wrong answer where there was an honest silence."*
+* **THE WITNESS IS NOT A FIFTH CONDITION.** Permission stays decided on safety
+  alone. Folding disclosure in *"would turn a reading into a gate and refuse a
+  safe press for being uninformative."*
+
+**And the correction of the correction is the transferable part:** the wave first
+filed the ambiguity as a limit of THAT RUN, then corrected it to a limit of the
+GATE. *"A limit of a run is fixed by running again, and this one cannot be -- a
+later wave reading my original wording would spend a press on his live account
+to learn nothing."*
+
+### DEFECT TWO: CONDITION 3 CHECKS READABILITY AND CALLS IT PRICING
+
+`check_counters` refuses `no_counter_prices_this_press` when
+`set(before) & set(after)` is empty -- **a test for whether a counter was READ
+at both ends, never for whether it COULD HAVE MOVED.**
+
+> **`priced_by` names counters shown READABLE, not counters shown SENSITIVE.**
+
+The ruling's own words are the stronger ones -- *"where no counter can price a
+press, unmeasurable resolves AGAINST the press"* -- and the implementation's
+reading of "can price" is the weaker. **Invitations and unread notifications are
+nav badges; no derived reason either responds to expanding a filter panel on an
+analytics page.** They are the same class as the nav badges already recorded as
+the wrong instrument for a feed press: **a counter that cannot move for the act
+in question prices nothing.**
+
+**So condition 3 on that surface can be shown PASSING and CANNOT BE SHOWN
+CAPABLE OF FAILING** -- which is this repo's own definition of a check that
+certifies nothing.
+
+### RULED, AND IT IS NOT "REFUSE", BECAUSE THAT ANSWER IS ALSO WRONG
+
+Requiring a counter shown SENSITIVE would be unsatisfiable almost everywhere:
+**sensitivity can only be established by a press of that class moving the
+counter, which for an outward counter is the write the gate exists to
+prevent.** A condition nothing can satisfy is not a stricter gate, it is a
+disabled one -- and a per-capability bar above the shipped one is theatre that
+costs coverage.
+
+**CONDITION 3 IS SATISFIED IN EITHER OF TWO WAYS, AND THE VERDICT MUST SAY
+WHICH:**
+
+    (a) A COUNTER SHOWN SENSITIVE to this press class -- as `off_state` was
+        derived for a feed press, from what the label MEANS.
+    (b) A STRUCTURAL ARGUMENT that no OUTWARD effect is possible from this
+        surface -- made explicitly, recorded, and open to refutation.
+
+**What is NOT sufficient is (c): a counter that was merely readable.** That is
+what happened here, and it is why `priced_by: ['invitations',
+'notifications_unread']` overstates what was established.
+
+**So the press was SAFE and its VERDICT OVERSTATED ITS EVIDENCE.** The act was
+permissible -- expanding a panel on his own analytics page, no third party, page
+proven unchanged. What was not established is the thing condition 3 exists to
+establish. `priced_by` should have read `[]`, with the structural argument in
+its place.
+
+**`press.disclose` must distinguish the three cases in its verdict**, and a
+readable-only counter may no longer be reported as pricing anything.
+
+### WHY THIS DOES NOT UNDO THE PRESS
+
+Condition 4's independent measurement stands: the page was left as found, proven
+outside the gate, on every field. Conditions 1 and 2 are untouched. **The defect
+is in what the record CLAIMED, not in what was done** -- and it was found, shown
+failing, and handed over by the wave that would have looked best leaving it
+alone.
