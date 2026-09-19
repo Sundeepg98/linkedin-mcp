@@ -1,4 +1,4 @@
-# The blocker table, refreshed -- 13 blockers are already empty and 53 cannot be checked at all
+# The blocker table, refreshed -- 14 blockers are already empty and 53 cannot be checked at all
 
 > **QUOTE THESE NUMBERS, NOT SECTION 3's.** Every per-blocker row count in
 > `_audit/2026-09-03-linkedin-gap-blockers.md` section 3 is dated 2026-09-03
@@ -7,13 +7,15 @@
 > it. This document supersedes its COUNTS and nothing else: its assignment
 > rule, its cost model and its reasoning all still stand.
 >
-> **The figures to quote: 13 EMPTY-CERTAIN, 1 EMPTY-UNCERTIFIABLE, 53
-> UNLOCATABLE, 30 LIVE, across 97 blockers and 409 published rows.**
+> **The figures to quote: 14 EMPTY-CERTAIN, 1 EMPTY-UNCERTIFIABLE, 53
+> UNLOCATABLE, 29 LIVE, across 97 blockers and 409 published rows.**
 >
-> Derived 2026-09-19 09:36 by `scripts/blocker_table_refresh.py`, whose
-> controls are reproduced in s1. Re-derive rather than re-quote: the script
-> reads live census state and this table will go stale exactly the way section
-> 3 did.
+> Derived 2026-09-19 09:43 by `scripts/blocker_table_refresh.py`, whose
+> controls are reproduced in s1. **RE-DERIVE RATHER THAN RE-QUOTE, and this
+> document proved its own point while being written: the first derivation at
+> 09:36 read 13 EMPTY-CERTAIN over 28 rows; seven minutes later it read 14
+> over 30**, because another wave retired `M C10` and `M C28` in between (s8).
+> A published count is a reading with a timestamp, including this one.
 
 ## Why this exists, and the cost it is meant to stop
 
@@ -76,12 +78,12 @@ is **not** *"the blocker is empty"*.
 | `LIVE` | at least one recovered row is still GAP. |
 | `UNLOCATABLE` | no committed source names any row against it. The published count cannot be checked at all. |
 
-    EMPTY-CERTAIN           13 blockers     28 published rows
+    EMPTY-CERTAIN           14 blockers     30 published rows
     EMPTY-UNCERTIFIABLE      1 blocker       3 published rows
     UNLOCATABLE             53 blockers    175 published rows
-    LIVE                    30 blockers    203 published rows
+    LIVE                    29 blockers    201 published rows
 
-## 3. PRIORITY 1 -- THE THIRTEEN ALREADY EMPTY
+## 3. PRIORITY 1 -- THE FOURTEEN ALREADY EMPTY
 
 **Each of these is a wave that would otherwise be briefed at a closed door.**
 Every published row is accounted for and every one has left GAP.
@@ -94,6 +96,7 @@ Every published row is accounted for and every one has left GAP.
 | **`PANEL-NOT-OBSERVED`** | **3** | **1** | **MEASURE** |
 | `AI-ASSIST-MESSAGING` | 2 | 1 | DECIDE-RETIRE |
 | `LIVE-BROADCAST` | 2 | 1 | DECIDE-RETIRE |
+| `MENTION-COMPOSITION-RULING` | 2 | 1 | DECIDE-RETIRE |
 | `PARSER-ON-A-LOADED-PAGE` | 2 | 2 | BUILD |
 | `DEVICE-GEOLOCATION` | 1 | 1 | DECIDE-RETIRE |
 | **`FEED-PREFERENCES`** | **1** | **7** | **BUILD** |
@@ -102,10 +105,11 @@ Every published row is accounted for and every one has left GAP.
 | `SIGNIN-INTERSTITIAL` | 1 | 1 | DECIDE-RETIRE |
 | `VOICE-CAPTURE` | 1 | 1 | DECIDE-RETIRE |
 
-**Nine of the thirteen were already queued DECIDE-RETIRE** and the retirements
-landed 2026-09-05 -- so for those, section 3 is merely trailing its own
-resolved queue. **The four in bold or otherwise are the expensive ones**,
-because they are queued for EXECUTION work that has nothing left to execute:
+**Ten of the fourteen were already queued DECIDE-RETIRE** and those
+retirements landed 2026-09-05 (one of them 2026-09-19) -- so for those,
+section 3 is merely trailing its own resolved queue. **The four queued for
+EXECUTION work are the expensive ones, because there is nothing left to
+execute:**
 
 * **`PANEL-NOT-OBSERVED`, queued MEASURE.** Its three rows retired 2026-09-05.
   A wave was briefed to measure it on 2026-09-19 and found the door shut. Its
@@ -230,6 +234,32 @@ Individually mis-queued, on measured grounds:
    "cannot be checked". That is not a gap in this instrument; it is the
    headline finding of `_audit/2026-09-05-blocker-map.md` restated with
    today's states.
+
+   > **MOVED DOWNWARD LATER THE SAME DAY -- quote 268.** `ae1894b` recovered
+   > seven rows and closed three blockers at their published counts. The
+   > figures above were correct when measured and are left standing rather
+   > than rewritten; finding 6.1 asks for a pointer, not for a document that
+   > edits its own history to look prescient. **RE-DERIVED with this
+   > document's own script rather than recomputed by hand**, per its header:
+   >
+   >     EMPTY-CERTAIN           13 -> 14 blockers    28 -> 30 published rows
+   >     EMPTY-UNCERTIFIABLE      1 ->  1 blockers     3 ->  3 published rows
+   >     UNLOCATABLE             53 -> 50 blockers   175 -> 168 published rows
+   >     LIVE                    30 -> 32 blockers   203 -> 208 published rows
+   >
+   > **THREE BLOCKERS LEFT `UNLOCATABLE`, AND ONE OF THEM IS A PRIORITY-1
+   > ENTRY THIS DOCUMENT COULD NOT SEE.** `MENTION-COMPOSITION-RULING` is now
+   > `EMPTY-CERTAIN` -- 2 published, 2 recovered, **0 live** -- and it is
+   > queued **DECIDE**. That is exactly the shape section 3 is about: a
+   > blocker queued for a ruling that has nothing left to rule on. It belongs
+   > in the priority-1 table above and is not added there by me, because that
+   > table is this document's own derivation and re-running the script is the
+   > sanctioned way to refresh it.
+   >
+   > The other two became `LIVE` rather than empty: `COLLABORATIVE-CONTENT`
+   > 4 recovered / 3 still GAP, `PUBLISH-POST-AUDIENCE-PARAM` 1 / 1. Both were
+   > uncheckable before and are checkable now, which is the point of recovery
+   > rather than a verdict about them.
 3. **The shared-parse blind spot**, inherited from `count_census_states`: a
    row whose state cell is prose is invisible. `N 132` is the known instance.
 4. **`published` is the ledger's own 2026-09-03 figure** and some of those
@@ -251,3 +281,69 @@ To re-derive:
     ./venv/Scripts/python.exe scripts/blocker_table_refresh.py --control
     ./venv/Scripts/python.exe scripts/blocker_table_refresh.py
     ./venv/Scripts/python.exe scripts/blocker_table_refresh.py --tsv
+
+## 8. A SECOND SIGNAL ON THE LIST ANYBODY WILL ACT ON
+
+Section 3 is the one output a reader will act on, and it is derived from row
+STATE alone. **State says a row left GAP. It does not say anybody RULED it
+closed** -- a row can leave GAP because a wave measured it, and it can leave
+because a wave re-stated it. A blocker closed on this list deserves the
+difference, so every row was independently checked for a closure CITATION in
+its own census cell:
+
+    ./venv/Scripts/python.exe scripts/blocker_table_refresh.py --provenance
+
+**RESULT: 29 of the 30 rows cite a committed closure document.** Twenty-six
+cite `_audit/2026-09-05-decide-retire-rulings.md`; the rest cite the dated
+ruling that moved them.
+
+**The one exception is not a gap in provenance, it is a limit of my needle.**
+`P L2` (own follower count, `PARSER-ON-A-LOADED-PAGE`) cites
+`scripts/_probe_endorse_and_follow_lines.py` and a dated live measurement
+instead of an audit document, and the needle only matches `_audit/*.md`. A
+probe script is arguably the stronger citation of the two.
+
+### The provenance reader was WRONG TWICE before it was right, and both are worth recording
+
+**Both failures produced a CLEAN, CONFIDENT, FALSE result**, which is why this
+mode now ships with a control of its own.
+
+1. **It read the wrong COLUMN.** `enumerate_gap_rows.rows()` yields `c[1]`,
+   documented as `first_prose_cell` -- the CAPABILITY column. Closure
+   citations live in the NOTE column. Pointed at `c[1]`, the mode reported
+   *"no row carries a closure citation"* for **every row in the list**,
+   including rows whose citations had been written by hand an hour earlier.
+   Caught only because the author recognised a cell he had written himself.
+2. **It read the wrong ROWS.** The replacement kept every pipe-table row and
+   read **770 against the census's 704**. A census slice contains other
+   tables and **ids collide across them**: `| 17 |` appears twice in
+   `jobs.md` -- once as the census row carrying its retirement citation, once
+   in an unrelated analysis table -- and the second silently overwrote the
+   first, so `J 17` reported as citing nothing.
+
+> **A READER POINTED AT THE WRONG COLUMN, AND A READER THAT MATCHES TOO MUCH,
+> BOTH REPORT A TIDY ABSENCE.** Neither errors loudly. The fix in both cases
+> was to adopt the shipped enumerator's filter condition for condition, and
+> the control that now guards it is an equality: rows read must equal the
+> shipped counter's stated-row total, and a row known to carry a citation must
+> yield one.
+
+Controls now reported before any provenance line is printed:
+
+    a row known to cite a closure (J 25) yields one   PASS
+    a string with no citation yields none             PASS
+    rows read 704 == shipped stated rows 704          PASS
+
+## 9. THIS DOCUMENT WENT STALE WHILE IT WAS BEING WRITTEN
+
+The first derivation, 09:36 by the box: **13 EMPTY-CERTAIN over 28 rows.**
+The second, 09:43: **14 over 30.**
+
+`MENTION-COMPOSITION-RULING` joined in between, because another wave moved
+`M C10` and `M C28` to EXCLUDED-RULED with a retirement dated 2026-09-19 --
+neither row touched by this wave. Seven minutes.
+
+**That is not an embarrassment to put in a footnote; it is the finding this
+document exists to make, arriving to its own author.** Section 3's counts are
+wrong for exactly the same reason, and they had sixteen days rather than seven
+minutes to drift. **Re-derive. The script takes seconds and needs no browser.**

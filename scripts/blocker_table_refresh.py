@@ -94,6 +94,57 @@ ZEROCOST_ROW = re.compile(
     r"^\|\s*`([A-Z0-9-]+)`\s*\|\s*(\d+)\s*\|\s*([^|]*?)\s*\|"
 )
 
+#: A citation to a committed audit document, inside a census cell. This is the
+#: SECOND SIGNAL for --provenance: row STATE says a row left GAP, and says
+#: nothing about whether anybody RULED it closed.
+CITATION = re.compile(r"_audit/[0-9A-Za-z._/-]+\.md")
+
+
+def full_cells() -> dict[str, str]:
+    """Row id -> the WHOLE row's text, for --provenance.
+
+    **THIS EXISTS BECAUSE THE OBVIOUS ROUTE IS BLIND.** ``egr.rows()`` yields
+    ``c[1]``, documented as ``first_prose_cell`` -- the CAPABILITY column. A
+    closure citation lives in the NOTE column, which is the last cell. Pointed
+    at ``c[1]``, this mode reported "no row carries a closure citation" for
+    every row in the list, INCLUDING rows whose citations were written by hand
+    an hour earlier. That was a fact about the reader, and it is the reason
+    ``--provenance`` now ships with a control of its own.
+
+    Tokenisation is still the shipped ``ccs.cells``; only the column choice
+    differs, so this is not a second parse of the slice format.
+
+    SECOND DEFECT, FOUND THE SAME WAY: this first kept EVERY pipe-table row,
+    which read 770 rows against the census's 704. A census slice contains
+    OTHER tables, and ids collide across them -- ``| 17 |`` appears twice in
+    ``jobs.md``, once as the census row carrying its retirement citation and
+    once in an unrelated analysis table with no state column. The second
+    silently overwrote the first, and ``J 17`` was reported as citing nothing.
+
+    So the row filter is now the SHIPPED enumerator's, condition for
+    condition, and the count is asserted against the shipped counter.
+    """
+    ccs = bbm.egr.ccs
+    out: dict[str, str] = {}
+    for letter, name in ccs.SLICES.items():
+        for line in bbm.egr.slice_text(name, None).splitlines():
+            if not line.startswith("|"):
+                continue
+            c = ccs.cells(line)
+            if len(c) < 3:
+                continue
+            if c[0] and set(c[0]) <= set("-: "):
+                continue
+            if not ccs.ROW.match(line) or c[0].lower() in ccs.HEADERS:
+                continue
+            st = ccs.state_of(c)
+            if not st and letter == "N" and bbm.egr.ADMIN_ONLY.fullmatch(c[0]):
+                st = "GAP"
+            if not st:
+                continue
+            out[f"{letter} {c[0]}"] = " | ".join(c)
+    return out
+
 
 def ledger_detail() -> dict[str, dict]:
     """Full section-3 columns, read out of the ledger's own tables.
@@ -291,6 +342,69 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{name}\t{v['verdict']}\t{v['published']}\t{v['recovered']}"
                   f"\t{v['live']}\t{v['cost']}\t{v['boundary']}\t{v['queue']}"
                   f"\t{','.join(v['rows'])}")
+        return 0
+
+    if "--provenance" in argv:
+        # A SECOND SIGNAL ON THE ONE LIST ANYBODY WILL ACT ON.
+        # EMPTY-CERTAIN is derived from row STATE alone. State says a row
+        # left GAP; it does not say anybody RULED it closed. A row can leave
+        # GAP because a wave measured it, and a row can leave GAP because a
+        # wave re-stated it -- and a blocker the lead closes on this list
+        # deserves the difference. So each row is checked for a closure
+        # CITATION in its own census cell, independently of its state.
+        text = full_cells()
+        # THE CONTROL FOR THIS MODE, AND IT IS HERE BECAUSE ITS ABSENCE
+        # ALREADY PRODUCED A FALSE RESULT. Every needle below is expected to
+        # read zero on a blind reader, so a reader pointed at the wrong
+        # column reports a clean "nothing cites anything" -- which is what
+        # the first version of this mode did. So: a row KNOWN to carry a
+        # citation must yield one, and a nonsense needle must yield none.
+        probe = text.get("J 25", "")
+        can_see = bool(CITATION.findall(probe))
+        cannot_hallucinate = not CITATION.findall("no citation here at all")
+        print("\n" + "=" * 74)
+        print("PROVENANCE CONTROL")
+        print("=" * 74)
+        print(f"  a row known to cite a closure (J 25) yields one   "
+              f"{'PASS' if can_see else 'FAIL'}")
+        print(f"  a string with no citation yields none             "
+              f"{'PASS' if cannot_hallucinate else 'FAIL'}")
+        # THE COUNT CONTROL, which is what catches the collision class.
+        # Reading MORE rows than the census states means other tables are
+        # being picked up, and ids collide across them -- the defect that
+        # made J 17 report as citing nothing.
+        stated = len({f"{L} {r}" for L, r, _s, _l, _t in bbm.egr.rows(None)})
+        count_ok = len(text) == stated
+        print(f"  rows read {len(text)} == shipped stated rows {stated}     "
+              f"{'PASS' if count_ok else 'FAIL'}")
+        if not (can_see and cannot_hallucinate and count_ok):
+            print("\n  READER BLIND. No provenance is reported; a clean "
+                  "'nothing cites anything' from a reader pointed at the "
+                  "wrong column is indistinguishable from a real absence.")
+            return 1
+        print("\n" + "=" * 74)
+        print("PROVENANCE for EMPTY-CERTAIN -- does each row CITE a closure?")
+        print("=" * 74)
+        for name, v in rows:
+            if v["verdict"] != "EMPTY-CERTAIN":
+                continue
+            print(f"\n  {name}")
+            for rid in v["rows"]:
+                cell = text.get(rid, "")
+                cites = sorted(set(CITATION.findall(cell)))
+                marks = [m for m in ("RETIRED", "RE-FILED", "MEASURED-ABSENT",
+                                     "CORRECTED", "EXCLUDED-RULED")
+                         if m in cell]
+                flag = "OK " if cites else "!! "
+                print(f"    {flag}{rid:8s} {current.get(rid, 'ROW-GONE'):22s} "
+                      f"marks={','.join(marks) or '-'}")
+                for c in cites[:2]:
+                    print(f"           cites {c}")
+            missing = [r for r in v["rows"] if not CITATION.findall(
+                text.get(r, ""))]
+            if missing:
+                print(f"    ^^ {len(missing)} row(s) carry NO closure "
+                      f"citation: {', '.join(missing)}")
         return 0
 
     tally = collections.Counter(v["verdict"] for _n, v in rows)
