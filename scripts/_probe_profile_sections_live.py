@@ -226,10 +226,10 @@ async def main() -> int:
         "/in/me/details/recommendations/", readonly.is_read_url(DETAIL_URL)))
     print("    %-46s admitted=%s" % ("/in/me/", readonly.is_read_url(PROFILE_URL)))
 
-    page_ref = None
+    _own_page = None
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
             before = await dom.read_invitation_badge(page)
 
             print()
@@ -358,9 +358,9 @@ async def main() -> int:
         return 1
     finally:
         # THE PAGE, NEVER THE CONTEXT: the context is his signed-in session.
-        if page_ref is not None:
+        if _own_page is not None:
             try:
-                await page_ref.close()
+                await _own_page.close()
                 print("    tab closed")
             except Exception as error:  # noqa: BLE001
                 print("    tab NOT closed: %s" % type(error).__name__)
