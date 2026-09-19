@@ -1,8 +1,18 @@
-# The intro editor's controls are unread because they are UNNAMEABLE, and one blocker is a closed door
+# The intro editor's controls are unread because they are UNNAMEABLE
 
-**THE HEADLINE, IN FOUR LINES.** Blocker 20 gates zero live GAP rows — its
-eleven are already EXCLUDED-RULED, and a wave routed by the ledger alone would
-have spent itself measuring a closed door. Blocker 22's editor DOES render, and
+> **CORRECTION, 2026-09-19 -- READ AMENDMENT E BEFORE SECTION 1.**
+> This document's original title and section 1 claimed blocker 20 is a
+> CLOSED DOOR. **That is wrong.** I identified its eleven rows as
+> `profile.md` `I2`-`I12` on a count-and-R/W match and never checked
+> whether those rows were in the frozen GAP set the ledger divided. They
+> were not. The blocker's real rows are `J92`-`J98` + `P I13`-`I16`, and
+> it gates LIVE rows. Amendment E has the verification and the method
+> error. Section 1 is left standing, wrong, so the correction has
+> something to point at.
+
+**THE HEADLINE — with its first clause now RETRACTED, see Amendment E.**
+~~Blocker 20 gates zero live GAP rows.~~ It does not; that claim rested on a
+row identification I got wrong. Blocker 22's editor DOES render, and
 **5 of its 11 fields carry no accessible name by any route**, which is why the
 shipped census sees them and cannot list them. Blocker 38's entry control
 carries **no activation relation at all**. Blocker 42 reproduces the prior
@@ -536,3 +546,84 @@ patient: the mechanism, when it exists, will not reach this row.
 
 **That last line is the useful one for scheduling:** of my four blockers, exactly
 one is a genuine customer for the disclosing-press mechanism, and it is 42.
+
+---
+
+# AMENDMENT E — SECTION 1 IS WRONG. Blocker 20 is not a closed door.
+
+`skew-gate` refused eleven of my twenty-three handed-over assignment lines
+(`3a1e2df`) and the refusal is correct. I re-verified it against the frozen
+commit myself rather than accept it, because a correction taken on trust is the
+same defect as a claim taken on trust.
+
+## E1. The verification, at the frozen commit `1c08e5f`
+
+    P I2 - I12     EXCLUDED-RULED      <- already ruled AT THE FREEZE
+    J 92 - J 98    GAP   (7 rows)
+    P I13 - I16    GAP   (4 rows)
+
+**The ledger divided the FROZEN GAP SET.** `I2`–`I12` were not in it, so they
+cannot be blocker 20's rows. `J92`–`J98` + `I13`–`I16` is **11 rows, all W, all
+GAP at the freeze** — which is the blocker's published `11 / 11W` exactly.
+
+## E2. The method error, named precisely
+
+I identified `I2`–`I12` on **count plus R/W split** — 11 rows, 11W against a
+published 11 rows, 11W — and called it "exact on two independent axes".
+
+**It was one axis wearing two names, and it was a coincidence.** `J92`–`J98` +
+`I13`–`I16` is also 11 and also all-W. Two different row sets satisfied my test,
+so the test never identified anything.
+
+**The property that actually decides membership is the one I never checked: was
+the row GAP at the frozen commit the ledger divided?** A duplicate check cannot
+see this either — `skew-gate`'s sharpest line is that **a row can be unique and
+still not be in the denominator**, which is two questions and I asked one.
+
+**And the corroboration I leaned on made it worse, not better.** I cited the
+2026-09-05 wave as reaching the same identification independently. Two readers
+agreeing is not evidence when both made the same unchecked assumption; it is one
+error with two witnesses. **This repository's own law — date both readings
+before adjudicating either — has a sibling I had not met: ask what each reading
+CHECKED, not just when it was taken.**
+
+## E3. The sting: my own table pointed at the right rows
+
+Section 1.1 pairs the Open-To-Work FIELD capabilities across two slices and
+finds them EXCLUDED-RULED in `profile.md` and **GAP in `jobs.md`**. The GAP side
+is where a frozen-GAP-set row must live. **I published the table that located the
+blocker's real rows and drew the opposite conclusion from it in the section
+above it.**
+
+## E4. What this changes, and what it does not
+
+**RETRACTED:** "blocker 20 gates zero live GAP rows", "closed door", and the
+advice to report it and move on. It gates live rows and was worth measuring.
+Section 1 is left standing rather than rewritten, so this correction has
+something to point at.
+
+**NOT retracted — the six flips in `539752b` stand on their own artifacts**,
+which never depended on which rows the ledger assigned:
+
+1. `profile.md` `I4`–`I10` are EXCLUDED-RULED on the NEVER-LOADED ruling;
+2. `jobs.md`'s **own** collapsed-block note says `92`–`100` live behind the same
+   modal as `89`–`91`, and those are XR in that same slice.
+
+**But the consequence is now larger than when I made them, and the lead should
+have it in one line:** those six were blocker 20's own rows, so the flip moved
+**6 of its 11**, leaving `J98` + `I13`–`I16` — **5 live GAP rows**. The
+reopening path is written into each flipped row: one operator-present consented
+capture reopens the block.
+
+**Also retracted by implication:** section 1.1's closing sentence that *"nine GAP
+rows (J92–J100) still stand on this ground"* is stale twice over — six of them
+are now EXCLUDED-RULED by my own commit, and the set was never nine.
+
+## E5. Why this one is worth the space
+
+Every other correction in this document was the instrument catching me — a
+control, a wait series, a negative control. **This one was a peer catching me,
+on a claim I had wrapped in the language of rigour** ("exact on two independent
+axes", "corroborated independently"). Confident phrasing is not an evidence
+class, and the two phrases I reached for were both describing the same unchecked
+assumption.
