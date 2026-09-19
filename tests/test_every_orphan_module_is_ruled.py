@@ -115,6 +115,25 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "mutations are already in readonly.SANCTIONED_MUTATIONS. NOT "
         "PERMANENT: delete this entry when it is wired."
     ),
+    "search_results": (
+        "A CAPABILITY HELD ON A CONDITION, and the condition is written down "
+        "rather than implied. The module and its 963-line test file landed "
+        "2026-09-19; the navigation admission for /search/results/ did not, "
+        "and deliberately so. A SEARCH RESULTS PAGE IS A LIST OF OTHER "
+        "PEOPLE -- every row carries a name and a /in/<slug> href, and a slug "
+        "IS a name -- so the admission is held on the rule that it and a "
+        "name-free shaper land TOGETHER OR NEITHER LANDS. The groups "
+        "admission was granted the same day precisely because it does NOT "
+        "have this problem: a group id is numeric, so that address names "
+        "nobody and needs no shaper. "
+        "THE WAVE THAT WROTE THIS ENDED BEFORE WIRING IT, so this entry "
+        "records a held condition rather than a completed ruling -- the "
+        "shaper exists in linkedin_server/search_results.py and is tested, "
+        "but nothing calls it and no address admits it. "
+        "NOT PERMANENT: delete this entry when the admission and a tool land "
+        "together. Until then the module is reachable only from "
+        "tests/test_search_results.py, which is the honest state."
+    ),
 }
 
 
