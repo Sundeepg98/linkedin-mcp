@@ -182,6 +182,40 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-19-cross-slice-rulings.md", "jobs.md"): (
+        "a STRUCTURAL GAP is reported, not a claim refuted. Amendment C "
+        "measures that jobs.md carries no R/W column at all -- 151 rows, 0 "
+        "with a value, against 199/138/208 in the other three slices -- and "
+        "explains that the author's own earlier '74% unknown' was that hole "
+        "rather than a parser bug. Nothing jobs.md ASSERTS is contradicted; "
+        "the finding is about a column it does not have. A CORRECTED BY: "
+        "pointer would tell a reader the slice's content had been refuted, "
+        "when what was found is that a field was never recorded"
+    ),
+    ("2026-09-19-cross-slice-rulings.md", "profile.md"): (
+        "profile.md is cited on the same line as the COMPARISON that makes "
+        "the jobs.md gap legible -- it records R/W for 199 of 202 rows. Being "
+        "named as the well-formed case is not being corrected. The repair "
+        "vocabulary near the citation belongs to the jobs.md clause"
+    ),
+    ("2026-09-19-profile-modals-measured.md", "profile.md"): (
+        "the correction is of MY OWN DOCUMENT and profile.md is the thing I "
+        "misread, not the thing that was wrong. The banner retracts this "
+        "document's claim that blocker 20's rows were profile.md I2-I12: "
+        "those rows were EXCLUDED-RULED at the frozen commit and so were "
+        "never in the GAP set the ledger divided. profile.md recorded that "
+        "correctly the whole time; I identified rows on a count-and-R/W match "
+        "without checking frozen-set membership. A CORRECTED BY: pointer on "
+        "profile.md would credit it with an error that was mine"
+    ),
+    ("2026-09-19-scope-jobs-rw-column.md", "jobs.md"): (
+        "a COSTING of a structural change, explicitly not an edit and not a "
+        "refutation. The document prices adding the R/W column jobs.md lacks "
+        "-- 66 rows needing judgement, 179 lines in the diff, no "
+        "position-sensitive guard found -- and states in its own last section "
+        "that no cell was added and no row touched. Nothing jobs.md says is "
+        "asserted wrong"
+    ),
     ("messaging-and-content.md", "2026-09-05-article-publish.md"): (
         "the citation is the RULING'S OWN AUTHORITY, not a document being "
         "corrected. Rows M23, C66 and C86 were retired 2026-09-19 on the "
