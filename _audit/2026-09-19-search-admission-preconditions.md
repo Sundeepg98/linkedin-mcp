@@ -268,8 +268,39 @@ passing vacuously.
 4. **The tool must handle denylisted keywords** (B.4). Not by narrowing the
    denylist.
 5. **`N 194`'s address is unsettled** (A.4) and should not shape the pattern.
-6. **The AST boundary freeze will fire.** `tests/test_readonly_boundary_invariant.py`
-   pins `_ALLOWED_URL_PATTERNS` by digest; updating it in the same commit is
-   the review moment that file exists to create.
+6. **The AST boundary freeze will fire, and EXACTLY ONE digest moves.**
+   Measured 12:42 by running that file's own `ast_digest` over `readonly.py`
+   with the S1 candidate appended, on a string in memory -- the file on disk
+   was read and never written:
+
+       _ALLOWED_URL_PATTERNS   34f364971cf9e81c -> 2d0695183ccb5a44   MOVES
+       the other six pinned structures and <functions>                UNCHANGED
+
+   **The `2d06...` value is specific to S1 appended at the tail** and will
+   differ for another spelling or another insertion point -- recompute it.
+   What travels is the shape: a pure allowlist addition moves the allowlist
+   digest and nothing else, so a run that moves a SECOND digest means the
+   admission was not additive and should be re-read before it lands.
 7. **File the normalisation finding** (B.3) as its own row. It is not this
    surface's problem and it is not fixed.
+
+---
+
+## E. WHAT WAS RUN, AND THE TWO REDS THAT ARE NOT THIS WAVE'S
+
+Boundary subset at 12:41, 6 files: **607 passed, 2 failed.** Both failures are
+`tests/test_navigation_is_never_derived.py::test_no_navigation_derived_value_reaches_an_output_sink`,
+parametrised on `_probe_add_section_menu.py` (a standing red named in this
+wave's brief) and `_probe_creator_content_analytics.py` (uncommitted in another
+wave's working tree at the time of the run). **Neither file is this wave's and
+neither was touched.**
+
+**That same test DOES cover this wave's probe, and it passes** -- checked by
+name at 12:41, 2 parametrised cases, both green. The check matters because a
+test that silently skipped the new file would certify nothing about it.
+
+    identity sweep 12:38     PASS, 0 hits across 459 swept files
+    ASCII                    all four artifacts, no byte above 127
+    readonly.py              0 lines changed, 32 patterns before and after
+    commits                  3, none touching a file owned by another wave
+    AI attribution           0
