@@ -99,3 +99,72 @@ missing column stops being a reporting gap and starts blocking rulings.
 No cell was added, no header changed, no row in `jobs.md` touched by this
 document. **The decision is the lead's and the edit is the slice owner's**; this
 is the price tag.
+
+---
+
+# AMENDMENT A — THE FILE ALREADY CARRIES R/W FOR 84 ROWS. My scope missed a table.
+
+**This corrects the numbers a ruling has already been made on, so it is stated
+first and plainly.**
+
+My scope said `jobs.md` "records direction **nowhere**". That is true of its
+**thirteen capability tables** — 151 rows, header `| # | capability | source |
+state | tool/reason |`, no R/W column — and **false of the file.**
+
+Section 2, *"WHAT EACH GAP WOULD TAKE"*, is headed
+`| rows | gap | shape | R/W | REV |` and **carries an R/W value for 24 entries**.
+Its first column is RANGES (`9-14`, `31-36, 41`) rather than single ids, which is
+why every row-keyed reader — mine included — walked straight past it.
+
+## A1. The measurement
+
+    jobs.md capability rows                              151
+    reached by a range with ONE unambiguous value         84      R 37 | R+W 26 | W 21
+    reached with CONFLICTING values                        0
+    not reached by any range                              67
+
+**Zero conflicts across 84 rows.** That is committed evidence **in the same
+file** — the best possible source, and categorically better than the
+cross-slice twins I correctly told you not to trust.
+
+## A2. What it does to the fill policy — the ruling's PRINCIPLE survives intact
+
+| | scope said | measured now |
+|---|---:|---:|
+| free from committed evidence | 3 (note-derived) | **84 + 3** |
+| judgement / leave empty | 66 | **~64**, from the 67 unreached |
+| from unreliable cross-slice twins | 47 — *do not use* | **still do not use; now unnecessary** |
+
+**"Empty beats guessed" is unchanged and is now cheaper to honour**, because the
+84 are not a guess: they are a value this file already recorded about the same
+capability. The ruling refused an *inference* laundered into a schema; copying a
+value from the same document's own table is not that.
+
+**One caveat, stated rather than glossed:** that table describes **what each GAP
+would take**, so for rows that have since left GAP the value was written when
+the row was a gap. Direction is a property of the CAPABILITY rather than of its
+state, so it transfers — but a wave executing this should carry the caveat into
+the cell's provenance rather than present the value as freshly determined.
+
+## A3. And a second corpus hazard found on the way
+
+**Thirteen row ids appear more than once in `jobs.md`** — `57` and `127` three
+times each; `17`, `37`, `38`, `39`, `40`, `42`, `68`, `129`, `131`, `150` twice.
+The duplicates live in different tables with different layouts, so **a row id
+alone does not identify a row in this slice.**
+
+This bit me inside this very analysis: my parser read `jobs 17` as having state
+`R`, because a second table's R/W value landed where the first table's state
+column sits. **Any row-keyed join against `jobs.md` — the blocker map included —
+is matching on a key the file does not guarantee is unique.** Reported, not
+fixed: it is a slice-owner's problem and a different edit from the column.
+
+## A4. How I found it, because the method is the transferable part
+
+Not by re-reading the file. **A pair in my own output showed `jobs 17` with the
+state `R`, which is not a state.** Chasing a value that could not be what it
+claimed to be found both the ranges table and the duplicate ids.
+
+**An impossible value in your own output is a better lead than a plausible
+one**, and the only reason it was visible is that the pipeline printed the state
+rather than just counting it.
