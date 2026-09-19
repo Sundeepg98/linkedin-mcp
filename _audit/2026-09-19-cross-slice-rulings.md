@@ -359,3 +359,76 @@ capability from a capability it shares a noun with**, and no threshold repairs
 that, because the failure is not in the cutoff but in what is being measured.
 Section 6's "lexical, not semantic" limit is that same fact; this is its cost
 measured in a real adjudication rather than predicted.
+
+---
+
+# AMENDMENT E — the 19 are CLOSED. All nineteen are false, and the column was blocking a METHOD, not the question.
+
+## E1. The verdict
+
+**19 of 19 are false pairs. `COVERED-PROVEN vs EXCLUDED-RULED` is an artefact of
+the matcher, not a third class.** No row moved and none should.
+
+Ten were decidable from a recorded direction — five from the census's own R/W
+column, and **five more from `jobs.md`'s ranges table, found while writing
+this** (scope Amendment A). Of those ten, **eight are opposite-direction pairs**:
+
+    read notifications        [R]  vs  manage notification settings  [W]
+    mark notifications read   [W]  vs  read notifications            [R]
+    Who's-Viewed list         [R]  vs  unsubscribe from its emails   [W]
+    filter by employment type [R]  vs  edit employment type on a job [W]
+    filter by employment type [R]  vs  the OTW employment-type field [W]
+
+**A read and a write of one subject are not one capability, and their states are
+supposed to differ.** The two same-direction pairs are false for a different
+reason — `see who you blocked` matched `the groups you belong to` and `the Pages
+you follow` on the phrase *list of*.
+
+The nine without a recorded direction are false on **capability identity**:
+following a company vs **pressing an off-platform Follow widget on someone
+else's website** (ruled out under `OFF-PLATFORM-WIDGET`); saved JOBS vs saved
+RESUMES; a job-search location filter vs a people-search location filter — the
+exact pair `small-measures` measured at 0.595, outscoring a true pair.
+
+## E2. B2's mechanism is RESTORED; its generalisation stays withdrawn
+
+Amendment B2 said this class is mostly read-versus-write. Amendment C withdrew
+that **for lack of evidence** — 74% unanswerable. With ten now decidable,
+**eight are exactly that shape.**
+
+> **B2's MECHANISM was right. B2's GENERALISATION — asserting it over nineteen
+> from ten hand-read — was not, and withdrawing it was still correct.**
+
+The difference is the whole point: C did not withdraw a wrong idea, it withdrew
+an unevidenced one. **A mechanism that later turns out true does not
+retrospectively justify having asserted it without measurement**, and the
+evidence that vindicates it arrived only because the withdrawal sent me looking
+for a column instead of arguing from wording.
+
+## E3. And the sharper correction: the column was blocking a METHOD
+
+I reported this class as "84% unanswerable". That was true of answering it **by
+direction**. **Answering it by capability identity was always available** —
+nine of the nineteen are settled by reading what the two rows describe, and
+needed no column at all.
+
+> **"Unanswerable" was a fact about the route I had chosen, not about the
+> question.** The missing column blocked the cheap mechanical test; it never
+> blocked the expensive manual one, and I did not say so at the time.
+
+**This does not deflate the column's value elsewhere** — a blocker's published
+R/W split, a read-only queue, and a boundary cost that turns on direction all
+genuinely need it, and `skew-gate` declined a surface on exactly that ground.
+It does deflate the urgency I attached to it *for this class*.
+
+## E4. What remains, so the next reader does not re-derive it
+
+**Nothing.** The 19 are adjudicated and closed. The nine that "needed the column"
+did not need it; their verdicts rest on capability identity and are recorded
+above.
+
+**When the column lands, the only work here is confirmation**, and it is a
+lookup: the nine rows are `J89, J90, J88 (x2), J103, J104, J45, J3, J91`, whose
+expected directions from their capability text are `W, W, R, R, W, W, R, R, W`.
+**If any measured value contradicts that list, the pair is worth re-opening; if
+they match, nothing changes.** That is the whole residual obligation.
