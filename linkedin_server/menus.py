@@ -80,6 +80,48 @@ clothes -- ``groups.py`` rejected exactly that for group identifiers and the
 reasoning transfers without change. Length is BANDED, never exact, because an
 exact length over a known vocabulary is itself an identifier.
 
+## IF YOU COPY THIS PATTERN, COPY ITS BOUNDARY OBLIGATIONS TOO
+
+**ADDED 2026-09-19, BECAUSE THE PATTERN SPREAD AND THESE DID NOT TRAVEL WITH
+IT.** Ship-the-vocabulary-in-and-get-integers-back is a good shape and it has
+already been copied into another package module. Within hours that module put
+the package's central guarantee into a red state, in two ways that have nothing
+to do with whether the idea is sound:
+
+1. **`page.evaluate` IS A SCANNED MUTATING CALL.** It is in
+   ``readonly._MUTATION_CALL_PATTERNS`` deliberately -- injected code *could*
+   mutate, so the scanner refuses to take anyone's word for it. A read-only
+   harvester inside ``linkedin_server/`` must either carry a trailing
+   ``# readonly-ok`` ON THE LINE WITH THE CALL, or earn an entry in
+   ``readonly.SANCTIONED_MUTATIONS``. Note the placement: the scanner works
+   line by line, so on a multi-line call the waiver belongs on the line
+   carrying the call itself and nowhere else.
+
+   **AND WRITING THIS PARAGRAPH TRIPPED THE SCANNER, WHICH IS THE POINT
+   TWICE OVER.** The first draft spelled that call out with its leading dot
+   and open bracket, and the scanner flagged THIS MODULE -- prose is matched
+   line by line like anything else, and the skip rules cover comments,
+   ``re.compile(`` lines and bare string literals but NOT docstring text.
+   Caught by measuring the package straight after the edit rather than by a
+   later gate. So: name these calls in prose without writing them in the form
+   the scanner hunts for, and re-scan after documenting them.
+
+2. **THE INJECTED JAVASCRIPT IS SCANNED SEPARATELY, BY A DIFFERENT TABLE.**
+   ``readonly.JS_MUTATION_TOKENS`` refuses 24 tokens including ``innerHTML =``,
+   ``setAttribute``, ``appendChild``, ``.value =``, ``fetch(`` and ``eval(``.
+   **Parsing markup by assigning it into an element trips this**, even on a
+   detached node that nobody can see -- and the guard is right to refuse it,
+   because the argument that a node is detached is exactly the kind of thing
+   that is true until somebody edits two lines above it. Read the DOM you were
+   given; do not build one.
+
+**THIS MODULE ITSELF TOUCHES NEITHER.** It is pure functions over strings
+somebody else read, which is why it needs no waiver and appears in no sanction
+-- and that is the property worth copying, not just the vocabulary trick. The
+module that does the evaluating is the one that owes the boundary work, so
+keeping the classifier free of the browser is what makes the obligation small
+and obvious rather than diffuse.
+
 ## WHAT THIS MODULE IS NOT
 
 * It **does not open a page**, press a control, or touch a browser. It is handed
