@@ -203,7 +203,28 @@ import build_blocker_map as bbm  # noqa: E402
 #:
 #: RESIDUAL: 30 not 32, because N 161 and M C70 are in the same walk and filed
 #: to SEARCH-RESULTS-SURFACE -- carved out by that same document. Left open.
-UNASSIGNED_CEILING = 178
+#: 178 -> 162. EVENTS-SURFACE to 17 of 18, and it is the strongest source in
+#: the recovery because it ENUMERATES THE LEDGER'S OWN SET AND THEN CLOSES ITS
+#: OWN ARITHMETIC. _audit/2026-09-05-events-surface-recosted.md section 1
+#: recovers blocker 13's rows from _route-gap-rows.tsv and accepts them only
+#: because the derivation reproduces the ledger's arithmetic exactly -- not
+#: merely the 18, but the 7R/11W SPLIT. A candidate set that reproduces a
+#: two-way split of a published count is not a plausible set, it is the set.
+#:
+#: Section 5 then carries exactly 18 table rows, one per id, and section 6
+#: totals them: MISFILED 3 + EXCLUDED-RULED-ALREADY 4 + MEASURED-ABSENT 3 +
+#: against-this-surface 8 = 18, every row named in the total.
+#:
+#: RESIDUAL: 17 not 18. N 179 is filed to SEARCH-RESULTS-SURFACE by THIS SAME
+#: DOCUMENT, at the line that assignment cites. The two agree, so the
+#: under-count is the agreement rather than a gap.
+#:
+#: NOTHING IS RETIRED BY THIS. Fourteen of the seventeen carry a verdict there
+#: that would move them out of GAP and not one is enforced by a shipped rule --
+#: the four EXCLUDED-RULED rest on readonly.py's admission COMMENT, prose in a
+#: source file, which nothing can be shown failing against. They stay GAP and
+#: the map records where the ledger counts them.
+UNASSIGNED_CEILING = 162
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
