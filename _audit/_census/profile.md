@@ -223,7 +223,7 @@ of which appear below on other evidence.
 | B7 | #Hiring photo frame apply / remove | W | GAP | implied by `a519730` and never enumerated -- **no Help Center article lists the frame set at all**, so the full frame inventory is unknown on both sides |
 | B8 | Top Voice badge show / hide | W | GAP | `a1577365`; no tool, no reason |
 | B9 | Premium profile badge show / hide | W | GAP | `a569234`; no tool, no reason |
-| B10 | Open Profile setting (who may message without connecting) | W | GAP | `a541684`; no tool, no reason |
+| B10 | Open Profile setting (who may message without connecting) | W | EXCLUDED-RULED | R11 (`network.md:814`) -- twin `N159` *Enable or disable Open Profile on your own profile* is EXCLUDED-RULED under it. R11's premise re-verified 2026-09-19: `/mypreferences/d/categories/` is on `_FORBIDDEN_URL_SUBSTRINGS` and `categories/privacy` + `categories/profile-visibility` both return `is_read_url=False`. Corroborated independently by `_audit/2026-09-19-settings-tail-addresses.md`: the settings index draws 20 addresses and this toggle is not among them, so it sits behind a denylisted category page. Was GAP on *no tool, no reason* while a shipped ruling covered it |
 
 ### C. Public profile and vanity URL (8)
 
