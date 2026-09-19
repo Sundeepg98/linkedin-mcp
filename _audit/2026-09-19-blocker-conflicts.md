@@ -325,3 +325,25 @@ assertion on that column would couple every census state edit to a map rebuild,
 and four waves are editing census slices concurrently. Whether that coupling is
 wanted is a decision for whoever owns the map. It is written down here because
 the gap is invisible from either test's name.
+
+### It reproduced within nine minutes, on a different row, unprompted
+
+The paragraph above rested on one instance (`D25`), which is an anecdote. It is
+now a measurement.
+
+At 09:26 this wave rebuilt the map, which pulled `D25` back into agreement with
+the census. At 09:35, measured:
+
+    the census slice says   M C52   EXCLUDED-RULED
+    the committed map says  M C52   MEASURED-ABSENT
+    both governing guards               16 passed
+
+A sibling wave had withdrawn its own state change for that row in the interval.
+**The map went stale again immediately, on a row this wave had just touched,
+with every test green** -- and nothing in the suite will say so until somebody
+happens to run `--write` for an unrelated reason, as this wave did.
+
+That is the difference between a control and a repetition: the first showed the
+column CAN go unchecked, the second shows it does, in ordinary operation, at
+the rate the census actually changes. **The gap is not a corner case; it is the
+normal state of the file between rebuilds.**
