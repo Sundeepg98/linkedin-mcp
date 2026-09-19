@@ -129,6 +129,26 @@ home. It is also falsifiable -- if the ledger's counts are right, then each of
 these rows belongs to some blocker nobody has connected it to, and naming which
 is a ruling.
 
+### AND THE BOUND THAT PROVES IT IS NOT JUST MY READING
+
+Summing every deficit across the eighteen blockers still short of their
+published count:
+
+    HOLES still open across 18 blockers      26
+    UNASSIGNED frozen-GAP rows left          24
+    ------------------------------------------
+    holes that CANNOT be filled from the
+    remaining rows, however perfectly
+    every one of them were placed            >= 2
+
+**That is arithmetic, not judgement.** Even a perfect router ends with at least
+two holes and zero rows to put in them. Combined with the seven rows in the
+table above -- rows the census names in a family whose blocker is COMPLETE
+without them -- the published division and the census enumeration do not
+reconcile in both directions at once: **some rows have no hole, and some holes
+have no row.** Any future pass that treats "UNASSIGNED > 0" as a search target
+will burn itself on that.
+
 ## 2.2 CONTESTED BY AN EXISTING RULING REQUEST -- 7 rows
 
 `J 78 J 79 J 80 J 81 J 82 J 83` (`PREMIUM-APPLY-SURFACES`, 0 of 5) are the

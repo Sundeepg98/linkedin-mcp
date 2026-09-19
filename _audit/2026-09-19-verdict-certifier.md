@@ -8,7 +8,9 @@ rather than built against a closing deadline; this is the build.
 
 **Artifact:** `tests/test_a_verdict_earns_its_entry.py` -- 16 passed, 4 skipped.
 **`tests/test_a_sanitiser_earns_its_entry.py`: 86 passed, NOT EDITED.**
-**Mutation study: 8 mutations, 8 caught, ZERO survivors.**
+**Mutation study: 9 mutations, 9 caught, ZERO survivors**, re-run under
+`_audit/INSTRUMENTS.md`'s scratch-tree protocol after the first run violated it.
+**Harvested as register section 19.**
 
 ---
 
@@ -106,21 +108,52 @@ subject. So each proof was replaced with a no-op and the suite re-run:
 | M6 `falls_off_the_end` says all closed | NO | the fallthrough arm |
 | M7 `falls_off_the_end` says all fall through | NO | the fallthrough arm |
 | M8 `_always_exits` always True (no branch analysis) | NO | the fallthrough arm |
+| M9 `members_spoken` returns one member | NO | the mute-verdict arm |
 
-**SURVIVING MUTANTS: 0 of 8.** Every proof is broken in BOTH directions --
+**SURVIVING MUTANTS: 0 of 9.** Every proof is broken in BOTH directions --
 accept-everything and reject-everything -- because a check that refuses
 everything certifies nothing and fails in the direction that looks like
 diligence. M5 is worth naming on its own: it confirms the false-red arm was
 measured rather than assumed, since the naive walk really does count a nested
 helper's `return x` as the outer function's alphabet.
 
-**The harness is DECLARED DISPOSABLE, with the reason.** It writes a mutant
-into `tests/` under a temporary name and deletes it in a `finally`, which is
-unsafe in a tree several waves write to concurrently -- a stray collected file
-would land in someone else's suite run. The measurement above is the durable
-artifact; the tree was verified clean afterwards. Its own first version failed
-for this file's exact subject: a regex missed every target because they carry
-return annotations, and it was rewritten to work off the AST.
+**THE FIRST RUN VIOLATED `_audit/INSTRUMENTS.md`'S OWN MUTATION PROTOCOL, AND
+IT IS DISCLOSED HERE RATHER THAN FOUND IN REVIEW.** That preamble says to copy
+the tree to a scratch directory and never plant a mutation in a tree other
+agents write to -- and to read it BEFORE planting one. It was read after. The
+first harness wrote `test_zzz_mutant_scratch.py` into the live `tests/` and
+deleted it in a `finally`: eight runs, each leaving a collectable file for
+roughly one to two seconds, about twelve seconds in total.
+
+**The window is measured and it is a different shape from the 2026-09-04
+receipt in that file.** No existing file was modified, so there was no clobber
+risk; the realistic cost was another wave's `pytest tests/` collecting a file
+that then vanished, producing unexplained reds in someone else's run. Not
+destructive, and still not mine to spend.
+
+It was **re-run in full under the protocol** -- tree copied, resolution under
+the copy ASSERTED rather than confirmed, one mutation at a time, only the
+selector that should die, restore after each, clean control runs at both ends
+(`16 passed, 4 skipped` before and after). The table above is the compliant
+run, extended to nine mutations.
+
+**And the compliant harness's own control selected NOTHING.** It built its
+pytest node id by appending `"::"` unconditionally, so both control runs
+executed zero tests and printed `no tests ran` -- a control that could not
+fail, inside the study whose whole purpose is proving checks can. Caught by
+reading the output, not the exit code. `run_selector` now raises when a
+summary line says `no tests ran`.
+
+**The harness is DECLARED DISPOSABLE**, not harvested: it rewrites a tree and
+plants mutants, which belongs under the protocol rather than lying in
+`scripts/`. The durable artifacts are the register entry and the four proof
+functions, which are importable and were used exactly that way to measure the
+three candidates. The first version also failed for this file's exact subject
+-- a regex missed every target because they carry return annotations -- and was
+rewritten to work off the AST.
+
+**Harvested:** `_audit/INSTRUMENTS.md` section 19, appended (never inserted --
+that file is append-ordered under contention).
 
 **Two defects were caught by the file's own first run, not by reading:**
 

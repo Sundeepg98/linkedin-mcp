@@ -3356,168 +3356,128 @@ about what LinkedIn happens to put there rather than a property anything
 enforces**; the navigation taint guard does not cover it, because a badge is not
 navigation-derived. Now counted with a `label_present` flag, not shown.
 
+## 19. The verdict certifier, 2026-09-19
 
-## 20. The send control, 2026-09-19
+`tests/test_a_verdict_earns_its_entry.py`. Built from the brief at
+`_audit/2026-09-19-the-sanitiser-list-holds-two-kinds.md`; the wave's own
+close is `_audit/2026-09-19-verdict-certifier.md`.
 
-### 20.1 `tests/test_click_is_not_its_own_evidence.py` -- the positive control now runs BOTH shapes
+`_SANITISERS` holds two kinds of function and its certifier understands one.
+SHAPERS map input to a derived output and are safe iff no input survives AND
+they discriminate. VERDICT FUNCTIONS map input to one of a closed enumerated
+set and are safe iff no input survives AND the alphabet is closed. **Four
+proofs, every one shown failing in BOTH directions.**
 
-The one live tool that reaches another person has one liveness proof, in a file
-that is otherwise entirely refusals. **It was red for fourteen days and the red
-was the safety fix working.**
+    non_constant_returns   every return is a bare ast.Constant
+    falls_off_the_end      no implicit None escapes a fallthrough
+    measured_alphabet      the constant set, read off the AST
+    members_spoken         two DIFFERENT members actually returned
 
-`9503723` tightened `dom.SELECTED_RECIPIENT_JS` from `indexOf` to a word-bounded
-match and said in its own message that a label running a name onto a connection
-degree must refuse. The committing double builds its chip label from the pressed
-row's text, and the row runs the name onto the degree badge -- so the shipped
-matcher refused the double, and **the commit that tightened the gate broke the
-gate's own positive control and shipped.**
+### 19.1 THE INVERSION IS A MEASUREMENT HERE, NOT A PARAGRAPH
 
-Reproduced before anything was edited, and the branch is the whole diagnosis:
-the refusal was `3_needle_does_not_match`, which is reached only AFTER
-`total == 1`. **A chip WAS committed.** The failure was never "the flow stopped
-working", which is the single thing this control exists to detect.
+The brief's central claim is that the shaper table does not merely misfit a
+verdict function, it **scores it backwards**. That shipped as prose, and prose
+is what a later tidier overrules. It now runs as a control against the
+sibling's **real** `MUST_DISCRIMINATE`, imported rather than copied so it
+cannot drift away from the table it names:
 
-### 20.2 THE LAW: A CONTROL BUILT ON AN UNREAD SHAPE IS A HOSTAGE OF THE MATCHER
+    honest(url) -> one closed verdict for both halves   FAILS the arm
+    leaky(url)  -> "landed on " + url                   PASSES the arm
 
-`dom.RECIPIENT_CHIP_SELECTORS` has never matched anything on any real page. The
-double therefore encodes a GUESS about the label, and the moment the matcher was
-tightened, that guess became the thing under test -- silently, in a file whose
-subject is something else entirely.
+Both directions asserted, so a table that separated nothing would also fail
+this. **The shaper table is not blind, it is MIS-AIMED** -- its needle arm
+still refuses the leak its discrimination arm rewards, and the two are welded
+together over there. That is why widening the shaper table was never a
+loosening, and the argument is now re-runnable rather than re-readable.
 
-The tempting repair is to draw the label the way the matcher likes. **That is a
-ruling on an unread surface, entered as a test fix**, on a gate whose docstring
-says refusing a legitimate recipient *is the ruling and not a regression*.
+### 19.2 THE MUTATIONS, AND THE BOTH-DIRECTIONS RULE
 
-    The repair is to make the unread property a VARIABLE and assert the
-    RELATION. Run the control over both shapes; assert the verdict is
-    determined by the shape; answer neither half.
+Nine planted, nine died, zero survivors. Every proof is broken BOTH ways --
+accept-everything and reject-everything -- because a check that refuses
+everything certifies nothing and fails in the direction that looks like
+diligence.
 
-`_committing(separator)` builds both pages, and the separator is the SAME
-variable `_row` already names for the listbox in that file -- a convention
-`tests/test_selectors_resolve.py` already cites, so the repair imports a settled
-vocabulary rather than inventing one.
+    M1  non_constant_returns -> []              6 derived-return arms die
+    M2  non_constant_returns -> ['no']          both accept arms die
+    M3  measured_alphabet -> frozenset()        the gained-member arm dies
+    M4  members_spoken -> {'a','b'}             the mute-verdict arm dies
+    M5  _returns_of -> naive ast.walk           the nested-return arm dies
+    M6  falls_off_the_end -> False              the fallthrough arm dies
+    M7  falls_off_the_end -> True               the fallthrough arm dies
+    M8  _always_exits -> True                   the fallthrough arm dies
+    M9  members_spoken -> one member            the mute-verdict arm dies
 
-| shape | chips committed | typeahead gate | recipient gate | body / send |
-|---|---|---|---|---|
-| separated | 1 | proceeds, 1 press | proceeds, matches 1 | typed, pressed |
-| run-together | 1 | proceeds, 1 press | `3_needle_does_not_match`, matches 0 | neither |
+M5 earns its own line: it proves the false-red arm was MEASURED and not
+assumed. The naive `ast.walk` really does count a nested helper's `return x`
+as the outer function's alphabet, which would fail an honest verdict function
+for a reason its author cannot fix -- and a false red is how a check gets
+deleted.
 
-**Read the second column first.** `total` is 1 in BOTH rows, which is the
-separation `9503723`'s own four-case table was built to make: it tells "the
-matcher got stricter" apart from "the fixture stopped drawing". Both rows clear
-the typeahead gate with one press, so the difference is downstream of the click.
-And the pair is PROVED to be a pair -- a module-level assertion collapses the
-inserted separator out of the second page and requires it to equal the first
-exactly, failing loudly rather than degrading if its anchor rots.
+### 19.3 THE PROTOCOL ABOVE WAS VIOLATED, AND THE WINDOW IS MEASURED
 
-### 20.3 Shown failing THREE ways, and the mutations are named
+**Disclosed unprompted rather than found in review.** The first run of this
+study planted its mutants in the LIVE `tests/` directory, writing
+`test_zzz_mutant_scratch.py` and deleting it in a `finally`. The preamble of
+this file says to copy the tree to a scratch directory first, and it says to
+read it BEFORE planting a mutation. It was read after.
 
-**(a) The shipped matcher against itself, minus one clause.**
-`test_the_shape_determination_is_one_clause_and_here_it_is_removed` reads both
-rails with `dom.SELECTED_RECIPIENT_JS` and again with that same source mutated,
-the word-boundary clause removed -- **imported and mutated, never rewritten**,
-because a hand-written loose matcher is a second implementation and this
-repository has twice measured a reimplementation disagreeing with the shipped
-instrument and been wrong. The anchor is asserted, so a moved target fails
-instead of silently comparing the matcher against itself.
+**The window, and why it differs from section 0's receipt.** Eight runs, each
+leaving a collectable test file in a shared `tests/` for roughly one to two
+seconds -- call it twelve seconds total. **No existing file was modified, so
+there was no clobber risk**, which is the material difference from the wave
+that mutated a real `writes.py`. The realistic failure was another wave's
+`pytest tests/` picking up a file that then vanished, producing unexplained
+reds in somebody else's run and costing them a triage. Non-destructive, and
+still not mine to spend.
 
-    shape           chips   shipped   loosened
-    separated         1        1         1
-    run-together      1        0         1
+It was then **re-run under the protocol in full**: tree copied, resolution
+under the copy ASSERTED rather than confirmed, one mutation at a time, only
+the selector that should die, the file restored after each, and a clean
+control run at both ends. Both compliant control runs report `16 passed,
+4 skipped`. The numbers in 19.2 are from the compliant run.
 
-The only zero is produced by one clause. That table is also the whole two-week
-regression in four numbers, and the loosened column is what the control was
-passing against before the fix.
+### 19.4 A CONTROL THAT SELECTED NOTHING, IN THE HARNESS THAT ENFORCES CONTROLS
 
-**(b) The repaired control against a dead flow.** `_recipient_gate` monkeypatched
-to refuse unconditionally: red at the `total == 1` assertion. The liveness duty
-survives the repair.
+The compliant harness's own control step built its pytest node id by appending
+`"::"` unconditionally, so both the before and after control runs selected
+**zero tests** and printed `no tests ran` -- a control that could not fail,
+inside the study whose entire purpose is proving that checks can. It reported
+`final control passed: False` and was caught by READING THE OUTPUT rather than
+the exit code.
 
-**(c) Both controls against a reverted ruling.** The boundary clause
-monkeypatched back out of the SHIPPED constant: both red, the second naming
-exactly what moved.
+The repair is a guard rather than a fix: `run_selector` now asserts that
+`"no tests ran"` is not in the summary line, so a selector that matches nothing
+raises instead of reading as a pass.
 
-**RED-PROOFS BY MONKEYPATCH, NOT BY MUTATING THE TREE.** This file's own rule is
-to copy the package to a scratch directory first, because several agents write
-`linkedin_server/` concurrently. A pytest plugin in the scratchpad that
-monkeypatches the constant is strictly better than the copy: **it never touches
-disk at all**, so there is no window in which another wave can read or clobber a
-planted mutation, and no restore step to forget.
+> **A HARNESS THAT PROVES CONTROLS IS NOT EXEMPT FROM NEEDING ONE.** This is
+> the third time in one wave that the instrument caught its own author: the
+> no-discrimination test matched its own assertion text, the AST walk compared
+> nodes with `==` instead of identity, and the first mutation harness's regex
+> missed every target because they carry return annotations -- reading text
+> where it should have read structure, which is this file's whole subject
+> arriving in the tool that measures it.
 
-### 20.4 A GATE THAT TESTS THE WRONG TREE CERTIFIES NOTHING -- `scripts/pre_commit_boundary_gate.py`
+### 19.5 WHY THE ENROLMENT TABLE IS EMPTY, AND WHY THAT IS THE ENTRY
 
-Found by being refused. `REPO` was `Path(__file__).resolve().parent.parent`, and
-`.git/hooks/` is SHARED by every linked worktree, so the hook always invokes the
-MAIN checkout's copy of the gate. Meanwhile `git diff --cached` is answered from
-the `GIT_DIR` git exports into a hook, so the staged NAMES came from the
-worktree. **One tree's index, the other tree's files.**
+`VERDICTS` ships with no real rows. Three candidates were measured against all
+four proofs -- `_landing_class` (5-member alphabet) and `is_read_url`
+(`True`/`False`) certify today; `_why_refused` is refused on one
+`%`-interpolated return whose token comes from a runtime module attribute.
+**None was enrolled, because this wave wrote none of them.** Enrolment ASSERTS
+a contract is safe and that is the author's claim to make; a measurement is not
+an enrolment.
 
-    main checkout   30 tests + 11 coupled = 41      <- what the hook ran
-    worktree        31 tests + 11 coupled = 42      <- what it was judging
+An empty table makes every parametrized arm SKIP, which is why the controls
+above are not decoration -- they are the only thing holding the file up until a
+first row lands. `test_the_enrolment_table_is_empty_by_design` pins the
+emptiness so the first enrolment is a deliberate act and not a quiet one, the
+same handshake as the `_SANITISERS` pin in the sibling file.
 
-and the failure it named was the test the commit repaired.
+### 19.6 THE HARNESS IS DISPOSABLE, AND THE MEASUREMENT IS NOT
 
-**THE SECOND DIRECTION IS THE DANGEROUS ONE AND IT NEEDED NO RED TO EXIST:** a
-guard a worktree commit BREAKS is checked against the main checkout's clean copy
-and ALLOWED. This register's own second law, applied to the gate itself.
-
-Same root cause as the interpreter bug fixed in `.git/hooks/pre-commit` the same
-day -- a path hard-coded against one checkout in a file every worktree shares --
-and **fixing only the tooling half converted a LOUD no-op into a SILENT
-mis-aim.** Before it, a worktree hook printed *"GATES DID NOT RUN. Allowing."*
-After it, the gate runs and certifies the wrong tree.
-
-Two roots now, deliberately different answers:
-
-    REPO  = git rev-parse --show-toplevel                 the tree being committed
-    TOOLS = dirname(git rev-parse --git-common-dir)       the one that owns venv/
-
-Content -- staged paths, coupling reads, the pytest plan, its cwd -- takes the
-first. Only the interpreter takes the second, because a linked worktree has no
-venv and that absence is not an infrastructure case. The git helper takes NO
-cwd: a hook runs at the top of the tree being committed and git exports
-`GIT_DIR` into it, so the ambient environment IS the answer, and pinning a cwd
-is what produced the split-brain read.
-
-    Practical form: when a check runs from a file that several checkouts
-    SHARE, ask which tree each of its inputs resolves against -- separately.
-    The index and the files are two different questions and this one answered
-    them from two different trees for as long as worktrees have existed here.
-
-### 20.5 TWO DOUBLES OF ONE UNOBSERVED SURFACE, IN TWO FILES, AND NOBODY RECONCILED THEM
-
-`tests/test_send_message_gate.py`'s static `_chip` draws the name alone, bounded
-on both sides, and sailed through `9503723`. The click-produced chip in
-`tests/test_click_is_not_its_own_evidence.py` runs the name onto the degree and
-did not. **Two guesses at the same never-observed rail, disagreeing, in a
-repository that says at length that nobody has seen a chip.**
-
-The tightening did not create the divergence -- it made it load-bearing, and it
-surfaced as a red in exactly one of the two files, which reads like a bug in
-that file rather than like an unreconciled guess. **Unifying them would be
-choosing a shape**, so they are left divergent and named here instead. The
-question closes when a chip is observed; the refusal's own `per_selector` counts
-are the instrument, and they come back without any accessible name being read.
-
-### 20.6 A DEAD CONSTANT WAS THE ONLY THING HOLDING A COUPLING OPEN
-
-Refactoring this file left `LISTBOX` defined and unreferenced. Deleting it is
-the obvious tidy, and the measurement before the delete is the entry:
-
-    coupled set with LISTBOX     ['tests/test_typeahead_gate.py']
-    coupled set without it       []
-
-The boundary gate SUBTRACTS any constant defined in several test files as a
-convention rather than a shared structure, and `TARGET` is one of those. So
-`LISTBOX` -- matched only in a COMMENT over there -- was the single name
-keeping the neighbouring gate's whole suite in the plan for every edit to this
-file. **Deleting dead code would have narrowed a gate, silently, which is
-verbatim the defect that gate's docstring exists to prevent.**
-
-It is kept, and made load-bearing rather than merely present: an import-time
-assertion requires it to appear in the inert composer, so it now pins which
-shape the load-bearing half of this file demonstrates the click over.
-
-    Practical form: before deleting an unreferenced module-level CONSTANT in
-    a tests/ file here, ask what it couples. `grep` the name across tests/ --
-    a hit in a COMMENT still counts, because the gate matches text.
+The mutation harness is **declared disposable** rather than harvested: it
+rewrites a tree and plants mutants, which is a thing to do deliberately under
+the protocol above and not a thing to leave lying in `scripts/`. What is
+durable is this entry plus the four proof functions, which are importable from
+the test module and were used exactly that way to measure the three candidate
+sites without enrolling any of them.
