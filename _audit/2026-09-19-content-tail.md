@@ -317,3 +317,99 @@ written to record a different one.
 a state, and this document will not publish one.** Run
 `scripts/count_census_states.py` yourself; that is what it is tracked for. What
 a wave can honestly claim is its own DELTA, and mine is three rows, named.
+
+## 9. I SENT A CHILD AFTER A HYPOTHESIS AND IT CAME BACK REFUTED. The refutation is the finding.
+
+**My hypothesis:** every row that publishes to his feed is gated behind ONE
+refusal -- `publish_post`'s *the audience is unread* -- so the ledger prices
+each such row as if it had its own blocker and one measurement would unblock
+the family.
+
+**REFUTED as stated, and the truth points the OTHER WAY.** The child enumerated
+all 79 GAP+W rows in this slice and found **nine** that require the shared
+composer (`C2` through `C9`, plus `C54`), not the wide family I expected. And
+for eight of those nine the ledger's defect is the OPPOSITE of what I proposed:
+it splits them across **five separately-costed blockers that do not
+cross-reference each other** -- `FILE-UPLOAD-UNSANCTIONED`, `POLL-SURFACE`,
+`CELEBRATION-COMPOSER`, `COLLABORATIVE-CONTENT`, `PUBLISH-POST-AUDIENCE-PARAM`
+-- so it **undercounts a shared downstream dependency** rather than
+overcounting a shared blocker. Only the `C1`/`C2` pair reads the way I guessed,
+and the article-publish wave had already said so in its own words: *"row `M C2`
+is not one missing parameter on a working tool; it is the gate holding the only
+publish capability shut."*
+
+**I VERIFIED THE LOAD-BEARING CLAIM MYSELF RATHER THAN ADOPTING IT**, because a
+child's report is a reading with a timestamp like any other:
+
+    grep -n _composer_audience_is_readable linkedin_server/*.py
+      server.py:6871  def _composer_audience_is_readable
+      server.py:7031  if not _composer_audience_is_readable():
+
+One definition, one call site, both inside `linkedin_publish_post`. The gate is
+narrow, which is what makes the hypothesis wrong and the child right.
+
+**AND THE ONE CAPABILITY MOST LIKELY TO BE MISTAKEN FOR THIS FAMILY IS RULED
+OUT BY THE REPO'S OWN WORDS**, `readonly.py:568-571`: posting in a group *"is a
+second broadcast route with a different audience and is `publish_post`'s equal
+in risk rather than a lesser case."* A planner folding group posting into the
+composer family would be widening a broadcast surface while believing they were
+reusing a gate.
+
+**WHY THIS IS WORTH MORE THAN A CONFIRMATION WOULD HAVE BEEN.** A confirmed
+hypothesis here would have produced a leverage claim I wanted to be true --
+*one read unblocks nine rows* -- and this repository has a name for the class of
+finding that agrees with its author. The refutation cost one child and it
+changes what a planner should do: the nine rows need a CROSS-REFERENCE between
+five blockers, which no boundary pattern and no WriteSpec supplies.
+
+## 10. A DEFECT IN THE CROSSWALK ITSELF, reported and deliberately NOT fixed
+
+`_audit/_census/blocker-map.tsv` is the artifact built to end re-derivation. Row
+`M C2` reads:
+
+    M C2   UNASSIGNED   UNASSIGNED   -   -   ...   no committed source names
+                                                   this row against any blocker
+
+**That is false, and the refuting source is the ledger's own amendment.**
+`_audit/2026-09-03-linkedin-gap-blockers.md:716` is inside Amendment A3, which
+is titled `PUBLISH-POST-AUDIENCE-PARAM IS NOT CLOSED`, and it names the row
+verbatim: *"But census row `M C2` is ..."*. A second committed source names it
+again at `_audit/2026-09-05-article-publish.md:251`. By the crosswalk's own
+vocabulary this is `LEDGER-AMENDMENT` with locator `L716` -- the same class it
+already uses for `M C11` and `M C52`.
+
+**THREE MORE ROWS ARE NOW ASSIGNABLE and were not when the crosswalk was
+written:** `C10`, `C28` and `C55` acquired a committed source naming them
+against `MENTION-COMPOSITION-RULING` two commits ago (`8a3df07`, this
+document). Their `state_today` has already been updated by the crosswalk's
+owner; their `blocker` column has not.
+
+**I AM NOT EDITING IT, and the reason is a measurement rather than caution.**
+`git status` reported that file clean -- and the same wave had, minutes earlier,
+written my three retirements into its `state_today` column, so it is
+demonstrably live in exactly this file. **A clean `git status` is a reading with
+a timestamp, and I have already watched one expire today** (section 8). The fix
+is also better made by its owner in one pass across all four slices than by me
+in one slice. The citations above are the whole cost of it.
+
+## 11. WHAT THIS WAVE DID NOT DO -- the honest list, and it is most of the tail
+
+Twelve of the seventeen rows did not move, and none of them moved for a reason
+I would defend as "not enough time":
+
+* **`C36`, `C37`, `C12`** are blocked on an address question ahead of their
+  write question. Building a WriteSpec on an unmeasured address is Amendment
+  A10 with extra steps, so no gate was designed for any of them.
+* **`C2`** needs one composer read that this wave could not price (section 4.4).
+* **`C88`, `C89`** need an address nobody has opened (section 4.2).
+* **`C87`** is re-filed, not closed (section 4.3).
+* **`C54`, `C56`, `C76`, `C46`, `C48`, `C49`, `C78`** carry corrected costs and
+  no new capability.
+* **`C9`** stays conditional exactly where the article-publish wave left it: one
+  read of the celebration template settles it, and that read is the composer
+  read with C12's hazard attached.
+
+**No write was fired, designed or gated.** That is not the brief being
+under-served -- it is the brief's own sequence being respected: every write in
+this tail is behind an address or a ruling that is not settled, and a gate built
+in front of an unsettled address is theatre that costs a later wave a revert.

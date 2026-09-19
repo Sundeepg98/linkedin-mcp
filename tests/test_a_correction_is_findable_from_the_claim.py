@@ -182,6 +182,36 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-19-content-tail.md", "2026-09-03-linkedin-gap-blockers.md"): (
+        "the cited document is the REFUTING SOURCE, not the refuted one, and "
+        "the thing being corrected is a THIRD file the scan cannot see. "
+        "Section 10 reports that `_audit/_census/blocker-map.tsv` files row "
+        "M C2 as UNASSIGNED with the note 'no committed source names this row "
+        "against any blocker' -- and the blockers document refutes that at "
+        "L716, inside Amendment A3, by naming the row verbatim. So the "
+        "correction vocabulary near the citation is the ledger being quoted "
+        "as EVIDENCE that a TSV is wrong. A CORRECTED BY: pointer in the "
+        "blockers document would tell a reader that the document supplying "
+        "the refutation had itself been refuted, which is the same inversion "
+        "the two profile.md entries below record from their own directions. "
+        "The TSV is not markdown and is outside this corpus by construction, "
+        "so the pair the scan CAN see is the only one available and it is the "
+        "wrong two documents"
+    ),
+    ("messaging-and-content.md", "2026-09-19-content-tail.md"): (
+        "the row CORRECTS ITSELF IN PLACE and cites this wave's document as "
+        "its REASON -- the same shape as the "
+        "('profile.md', '2026-09-05-search-results-consent.md') entry below. "
+        "C36 read that saved posts are 'one allowlist entry away'; the 09-19 "
+        "annotation says that rests on an unmeasured premise and dates the "
+        "correction in the cell, so the row NAMES ITS OWN CORRECTOR and the "
+        "reachability this file exists to guarantee is already satisfied "
+        "without a marker pair. The citing document is not wrong about "
+        "anything here and needs no CORRECTED BY: pointer; it is the "
+        "corrector. Ten sibling rows in the same slice carry the same "
+        "dated-in-place shape from the same wave, and C36 is the one whose "
+        "vocabulary trips the scan"
+    ),
     ("2026-09-19-settings-tail-addresses.md", "2026-09-05-settings-tail.md"): (
         "the cited claim is CONDITIONAL and survives intact. The 09-05 wave "
         "wrote that FEED-PREFERENCES is substring-blocked and so cannot be "
