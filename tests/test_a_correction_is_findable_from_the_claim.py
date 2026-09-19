@@ -182,6 +182,31 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+
+    # TWO MORE, ADDED 2026-09-19 AFTER READING BOTH LINES. Each was produced by
+    # today's landings, and in each the correction vocabulary belongs to a
+    # sentence ABOUT a correction rather than to a correction being made.
+    ("2026-09-19-routing-the-unassigned.md", "messaging-and-content.md"): (
+        "A ROUTING DOCUMENT READING THE CENSUS AS EVIDENCE, and it says so in "
+        "its own words two lines above the match: 'I am not overturning a "
+        "ruling. I am reporting that its stated ground moved.' It quotes "
+        "messaging-and-content.md L498 to establish which eleven items the "
+        "conversation-management row enumerates, then observes that nine are "
+        "already filed and the two that are not -- M M35 (layout) and M M49 "
+        "(delivery indicators) -- match the blocker's unfilled 1R/1W split. "
+        "The census file is the SOURCE being read, not a document being "
+        "corrected; nothing in it is asserted wrong."
+    ),
+    ("2026-09-19-the-my-items-premise-is-sheltered.md", "2026-09-19-content-tail.md"): (
+        "THE WORD 'CORRECTED' DESCRIBES WHAT THE CITED DOCUMENT DID, NOT WHAT "
+        "THIS ONE DOES TO IT. The line reads 'content-tail.md section 4.1 "
+        "corrected upward on the ground that the /my-items/ redirect is "
+        "asserted, never measured' -- that is content-tail correcting its own "
+        "cost estimate, reported here as the premise this document then goes "
+        "and tests offline. Its conclusion agrees with content-tail: nothing "
+        "fired, no pattern moved, C36 and C37 stay GAP. A document that "
+        "investigates another's premise and confirms it is not correcting it."
+    ),
     # FOUR ENTRIES BELOW, ADDED 2026-09-19 AFTER READING EVERY LINE.
     # A census cell citing the document that EVIDENCES a state is not a
     # document correcting another document -- it is a row showing its work.

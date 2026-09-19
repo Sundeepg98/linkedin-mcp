@@ -47,6 +47,29 @@ LOOSE_DRIVE_LETTER = re.compile(r"[A-Za-z]:[\\/]")
 #: gets suppressed or deleted rather than fixed.
 DRIVE_LETTER = re.compile(r"(?<![A-Za-z])[A-Za-z]:[\\/]")
 
+#: A POSIX absolute path -- what "absolute" looks like where there are no
+#: drive letters. Anchored on a preceding boundary so it CANNOT fire on a
+#: relative path that merely contains a slash: checked against the scrubbed
+#: message "...: _state/chrome-profile-does-not-exist", which it must not
+#: match, or the control below becomes inert in the other direction.
+POSIX_ABSOLUTE = re.compile(r"(?:^|[\s:=(\[])/[A-Za-z0-9_.]")
+
+#: AN ABSOLUTE PATH AS THIS PLATFORM SPELLS IT, and the distinction is not
+#: cosmetic. test_that_forced_failure_can_actually_fail is a CONTROL: its
+#: whole job is to show the scrubbing assertion CAN fail. Asserting a drive
+#: letter makes that control UNFIREABLE on Linux -- this repository's own
+#: law, that a check which cannot fail certifies nothing, defeating a check
+#: written to enforce it.
+#:
+#: MEASURED ON CI 2026-09-19, run 35449299090, ubuntu py3.10 and py3.13
+#: shard 5. The unscrubbed message read "chrome profile directory does not
+#: exist: /home/runner/work/linkedin-mcp/linkedin-mcp/_state/chrome-profile
+#: -does-not-exist"; DRIVE_LETTER found nothing in it and the control failed
+#: with its own words -- "the unscrubbed message carried no drive letter, so
+#: the assertion above proves nothing on this platform". It was right. The
+#: build box is windows-only, which is why local runs never saw it.
+ABSOLUTE_PATH = DRIVE_LETTER if os.name == "nt" else POSIX_ABSOLUTE
+
 #: The ONE subtree allowed to carry an absolute path, and why.
 #:
 #: ``preflight`` answers "there is no browser to launch -- is that because it is
@@ -472,7 +495,9 @@ def test_that_forced_failure_can_actually_fail(monkeypatch):
     with pytest.raises(cookie_jar.CookieJarUnavailableError) as excinfo:
         cookie_jar.read_jar(CHROME_PROFILE, ["li_at"])
 
-    assert DRIVE_LETTER.search(str(excinfo.value)) is not None, (
-        "the unscrubbed message carried no drive letter, so the assertion "
-        "above proves nothing on this platform"
+    assert ABSOLUTE_PATH.search(str(excinfo.value)) is not None, (
+        "the unscrubbed message carried no absolute path of this "
+        "platform's shape, so the assertion above proves nothing here. "
+        "On Windows that is a drive letter; on POSIX a leading-slash "
+        "path. Message was: %s" % str(excinfo.value)
     )
