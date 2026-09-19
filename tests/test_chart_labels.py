@@ -154,3 +154,16 @@ def test_the_output_has_nowhere_to_put_a_name():
     }
     for metric in reading["metrics"]:
         assert metric in chart_labels.KNOWN_METRICS
+
+
+def test_the_vocabulary_is_not_a_coverage_claim():
+    """PARSEABLE IS NOT REACHABLE, and the module must not let them blur.
+
+    Seven metrics are accepted; ONE has been seen. The admitted address is
+    anchored with no query group and LinkedIn selects a metric with
+    ``?metricType=``, so the other six are an allowlist decision away, not a
+    reader improvement. A caller reporting coverage reads MEASURED_METRICS.
+    """
+    assert chart_labels.MEASURED_METRICS == ("impressions",)
+    assert set(chart_labels.MEASURED_METRICS) < set(chart_labels.KNOWN_METRICS)
+    assert len(chart_labels.KNOWN_METRICS) > len(chart_labels.MEASURED_METRICS)

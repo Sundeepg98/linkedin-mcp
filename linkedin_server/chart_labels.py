@@ -61,15 +61,36 @@ from typing import Any, Iterable, Optional
 
 #: Metrics this module will name. CLOSED, for the same reason the press gate's
 #: shapes are: an open vocabulary is a place for arbitrary page text to land.
+#:
+#: **ONLY ONE OF THESE HAS BEEN SEEN, AND THE LIST IS NOT A COVERAGE CLAIM.**
+#: `impressions` is the only metric measured live (7 points, 2026-09-19). The
+#: rest are spellings this parser would ACCEPT if LinkedIn drew them -- which
+#: is not the same as metrics it can reach, and the difference is a boundary
+#: fact rather than a parsing one:
+#:
+#:     readonly admits `/analytics/creator/content/` ANCHORED, with NO query
+#:     group, and LinkedIn's analytics pages select a metric with
+#:     `?metricType=`.
+#:
+#: So **the admitted address serves the DEFAULT view and nothing else**, and
+#: reaching another metric is an allowlist decision, not a reader improvement.
+#: Listing seven here and letting a reader infer seven are reachable would be
+#: the same overstatement as naming a readable counter "priced_by" -- a
+#: vocabulary is a claim about what can be PARSED, never about what can be
+#: REACHED.
 KNOWN_METRICS = (
-    "impressions",
-    "engagements",
-    "members reached",
-    "reactions",
-    "comments",
-    "reposts",
-    "followers",
+    "impressions",      # MEASURED LIVE 2026-09-19
+    "engagements",      # accepted if drawn; NOT reachable at the admitted url
+    "members reached",  # ditto
+    "reactions",        # ditto
+    "comments",         # ditto
+    "reposts",          # ditto
+    "followers",        # ditto
 )
+
+#: The subset actually observed. A caller reporting coverage should read THIS,
+#: not the vocabulary above.
+MEASURED_METRICS = ("impressions",)
 
 #: "Sunday, Sep 13, 2026, 0. Impressions."
 #: Deliberately anchored at BOTH ends. An unanchored search would match the
