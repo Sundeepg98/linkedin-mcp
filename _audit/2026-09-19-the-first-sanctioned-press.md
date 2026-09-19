@@ -250,3 +250,72 @@ boundary, and a wave arguing its own permitted press should have been refused
 is exactly the argument that should be made by someone else. It is recorded
 because **the record every later press is measured against should carry the
 limits of its own strongest claim.**
+
+---
+
+# 8. RULED (`afefaad`), AND THE RULING IS BETTER THAN THE QUESTION I ASKED
+
+I posed condition 3 as a binary -- either a readable counter suffices or it
+does not -- and **the ruling refused both horns, correctly.** Requiring
+sensitivity everywhere would be unsatisfiable almost everywhere, since a
+counter is shown sensitive only by a press of that class moving it, which for
+an outward counter is the write the gate exists to prevent. **A condition
+nothing can satisfy is a disabled gate, not a stricter one**, and I had not
+seen that.
+
+Condition 3 is now satisfied in EITHER of two ways, **and the verdict must say
+which**:
+
+    (a) a counter shown SENSITIVE to this press class, as `off_state` was
+        derived for a feed press from what the label MEANS
+    (b) a STRUCTURAL ARGUMENT that no outward effect is possible from this
+        surface, made EXPLICITLY and OPEN TO REFUTATION
+
+A merely readable counter is neither. So, in the ruling's words: **the press
+was SAFE and its verdict OVERSTATED ITS EVIDENCE. `priced_by` should have read
+empty, with the structural argument in its place.**
+
+## THE STRUCTURAL ARGUMENT FOR THIS SURFACE, WHICH IS OWED BY THE WAVE THAT PRESSED HERE
+
+Route (a) is unavailable on `/analytics/profile-views/`: no counter on it has
+been shown sensitive, and showing one would require the write. So route (b),
+stated explicitly so it can be attacked:
+
+1. **THE SURFACE ADDRESSES NO ONE.** It renders his own profile-view
+   analytics. There is no recipient, no composer, no third-party subject, and
+   nothing on it names another account as a destination. On this repository's
+   own `DESTINATION vs CONTENT` line, **an outward effect requires a
+   destination and this page has none.**
+2. **THE PRESS TARGET'S SEMANTICS ARE VISIBILITY, NOT SUBMISSION.**
+   `aria-expanded` denotes the expanded state of a region the control owns --
+   content already delivered to the client. It is not a submit affordance, and
+   the press is a single click with an immediate Escape.
+3. **THE RULING ALREADY REFUSES THE ALTERNATIVES INDEPENDENTLY.** Navigation,
+   submission, composers, typing and third-party surfaces are out by
+   construction, so the press cannot be any of them.
+
+**THE BOUND, STATED RATHER THAN HIDDEN: this argues NO OUTWARD EFFECT, not NO
+EFFECT.** An expansion could plausibly cause a client-side or remembered-filter
+write. That is a write in the weak sense and **no other person can observe
+it**, which is precisely what an outward counter measures. Anyone using this
+argument for a surface where that distinction does not hold is misusing it.
+
+## WHAT WOULD REFUTE IT, WHICH IS THE HALF THAT MAKES IT AN ARGUMENT AND NOT AN ASSERTION
+
+* the expanded region containing **any control that addresses a person** -- a
+  message, invite, follow or endorse affordance drawn inside the panel
+* the expansion issuing a request **whose effect another account could
+  observe**
+* LinkedIn surfacing a third-party-visible signal from this page, the way a
+  profile view is surfaced to the profile's owner
+* **any counter later shown sensitive to a press on this surface** -- which
+  would not refute the press, but would move it from (b) to the stronger (a)
+
+**AND (b) IS WEAKER THAN (a), WHICH SHOULD TRAVEL WITH IT EVERY TIME.** It is
+an argument, not a measurement. The ruling admits it because (a) is
+unsatisfiable here, **not because the two are equivalent** -- and the first
+structural argument on the record is exactly the one most likely to be cited
+later as though it were.
+
+**None of this changes the verdict of the press already taken, and none of it
+banks a row.** `N 133` / `N 134` remain GAP; no content was read.
