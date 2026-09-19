@@ -131,3 +131,65 @@ correct interim posture, already taken for `_why_refused`:
 **Do not re-add a name to turn a red green.** That is the enrolment argument
 wearing a rename's clothes, and its cost is now measured: it conceals whatever
 sits downstream.
+
+---
+
+## AMENDMENT, SAME DAY: A THIRD INSTANCE, AND IT IS THE CLEAREST OF THE THREE
+
+Measured 12:43 by the box, on the orphaned red two waves had each reported as
+*"not mine"*: `scripts/_probe_add_section_menu.py` carries **two** undeclared
+taint sites. Owner `edd24f8`, a commit rather than a live agent.
+
+```
+287  print(f"  anchor {index}: rel={rel:20s} haspopup={haspopup} ...
+                role={role} EVIDENCED-DISCLOSURE={pressable}")
+310  print(f"    boundary: is_read_url={admitted}  path_depth={depth}
+                forbidden_tokens_present={trips}")
+```
+
+### LINE 310 ALREADY COMPLIES WITH THE GUARD'S OWN REMEDY
+
+The failure message says: *"If you ADDED one, emit a RELATION or a count
+instead."* **Line 310 emits nothing else.** `admitted` is the boolean returned
+by `is_read_url`; `depth` is an integer; `trips` is a presence flag. There is no
+browser-chosen string anywhere in it.
+
+> **The guard flags a line that already satisfies the remedy the guard
+> prescribes.**
+
+It is not wrong to flag it -- it **tracks the NAME**, and it cannot know that
+`is_read_url` returns a boolean. That is the identical mechanism as
+`_why_refused` and `_landing_class`: **a function whose output alphabet is
+closed, with no way to say so.**
+
+### SO THE COUNT IS THREE, AND THEY ARRIVED BY THREE DIFFERENT ROUTES
+
+    _why_refused      refused by the adversarial table when its author enrolled it
+    _landing_class    exposed by a rename withdrawing a false trust claim
+    is_read_url       standing in an orphaned red two waves declined to own
+
+**Three functions, three instruments, one missing certifier.** The third is the
+most persuasive because **nobody was looking for it** -- it was sitting in a red
+that had been triaged twice as somebody else's problem, and it turns out to be
+the same problem as the other two.
+
+### WHAT THIS CHANGES ABOUT PRIORITY, AND WHAT IT DOES NOT
+
+**It changes the priority:** this is not a tidiness gap. Three real sites are
+currently unrepresentable, and the only way to green two of them today would be
+to declare safe code as a known violation or to re-add a name -- **both of which
+record something false.**
+
+**It does not change the decision to file rather than build.** Line 287 is the
+mixed case and needs judgement: `index` is a count and `controls` is already
+reduced to `yes`/`no`, but `role` is an ARIA attribute read off the page, and
+*"ARIA roles are a closed set in the spec"* is a claim about the spec, not about
+what a page may put there. **That distinction is the whole subject of this
+brief, and settling it in the last quarter-hour of a session is how the defects
+above got written.**
+
+**FIRST WORK FOR WHOEVER PICKS THIS UP:** build `_VERDICTS` and its certifier as
+specified, then re-run these three. Two should resolve without an exemption
+entry. **The third, line 287's `role`, is a genuine open question and should be
+ruled rather than assumed** -- it is the one place in this brief where the
+closed-alphabet argument may not hold.
