@@ -91,15 +91,48 @@ GUARD_CALLS = frozenset({"assert_read_url", "is_read_url"})
 #: legitimate measurement means arguing what it measures and why the allowlist
 #: should not bound it, and that argument belongs to the author -- pinning a
 #: file adopts its disclosure as well as its design.
+#: **SEVEN OF THE ORIGINAL EIGHT LEFT BY BEING FIXED, NOT BY BEING DECLARED**,
+#: on 2026-09-19. Four were ROUTED through ``BROWSER.goto`` -- which changed
+#: nothing they measure, because ``NAV_TIMEOUT_MS`` IS the 45_000 they
+#: hardcoded and the door's settle is the same networkidle-then-flat-wait
+#: against the same ``SETTLE_MS``. Three were HAND-GUARDED instead, because
+#: routing them would have deleted a measurement rather than merely changed a
+#: wait:
+#:
+#:   _probe_apply_flow          captures the document BEFORE the settle and
+#:                              after; a door that settles cannot yield the
+#:                              pre-settle document at all
+#:   _probe_manage_pages_both   the file name is the reason -- BOTH states
+#:   _probe_apply_route_screen  waits for a CONTROL, not a clock (settling is
+#:                              the behaviour it was rewritten to stop), and
+#:                              turns a failed navigation into a return value
+#:                              rather than an exception
+#:
+#: Hand-guarding is a FIX and not a declaration: ``assert_read_url`` is lifted
+#: out of the door and called in the same position in the sequence, so the
+#: boundary holds and the measurement is untouched.
 KNOWN_UNGUARDED: dict[str, str] = {
-    "_probe_apply_flow.py": "c0b8bb4",
-    "_probe_apply_route_screen.py": "c0b8bb4",
-    "_probe_badge_and_language_affordances.py": "9d89134",
-    "_probe_following.py": "264e11a",
+    # THE ONE GENUINE DECLARATION, and it is the case the rule was written for.
+    #
+    # This probe exists to discover WHICH ``?stage=`` value the jobs tracker
+    # actually renders, by trying five candidates in order and keeping the
+    # first that returns rows: draft, in-progress, inprogress, in_review,
+    # applied. Measured against the boundary today, the allowlist admits
+    # ``?stage=draft`` and ``?stage=applied`` and REFUSES ``in-progress``,
+    # ``inprogress``, ``in_review`` and the bare ``/jobs-tracker/``.
+    #
+    # **SO NEITHER ROUTING NOR HAND-GUARDING IS AVAILABLE HERE**: both call the
+    # same check, and both would raise on three of the five candidates, ending
+    # the sweep partway through the question it exists to answer. A probe that
+    # can only try the values already known to be admitted cannot discover
+    # which value is real.
+    #
+    # That is what "a probe legitimately navigates where the package must not"
+    # means concretely, and it is why the remedy is a declaration rather than a
+    # fix. Corroborated independently by ``_probe_apply_flow``'s own docstring,
+    # which records the same experiment: only ``draft`` renders the rows, and
+    # the other spellings redirect to a bare tracker with no counts.
     "_probe_in_progress.py": "c0b8bb4",
-    "_probe_interests.py": "3e0ae37",
-    "_probe_manage_pages_both.py": "264e11a",
-    "_probe_messaging.py": "db2ac54",
 }
 
 

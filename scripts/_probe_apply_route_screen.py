@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.readonly import assert_read_url  # noqa: E402
 
 #: The two measured labels, from the apply census. Anything else is unknown --
 #: never guessed, because the census showed several fields that LOOK like
@@ -35,6 +36,23 @@ OFFSITE = "Apply on company website"
 
 async def screen(page, job_id: str) -> str:
     url = f"{BASE_URL}/jobs/view/{job_id}/"
+    # HAND-GUARDED 2026-09-19 RATHER THAN ROUTED, for two reasons that both
+    # sit in this function's own comments.
+    #
+    # 1. IT WAITS FOR THE CONTROL, NOT FOR A CLOCK. The note below records
+    #    that an earlier version settled for SETTLE_MS and then read the
+    #    labels, and reported UNKNOWN with zero apply-ish labels for four
+    #    postings in a row. ``BROWSER.goto`` settles on exactly that clock, so
+    #    routing would reinstate the behaviour this screen was rewritten to
+    #    stop doing.
+    # 2. A FAILED NAVIGATION IS A RESULT HERE, not an error: it is caught and
+    #    returned as "load_failed" so the sweep continues to the next posting.
+    #    The door raises BrowserUnavailableError instead, which would end the
+    #    run on one bad id.
+    #
+    # So the boundary check is lifted out of the door and called here, in the
+    # same position in the sequence, leaving both behaviours intact.
+    assert_read_url(url)
     await BROWSER.wait_for_rate_slot()
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=45_000)

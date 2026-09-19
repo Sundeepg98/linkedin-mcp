@@ -17,7 +17,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
-from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.config import BASE_URL  # noqa: E402
+from linkedin_server.readonly import is_read_url  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
 #: ``/in/me/`` redirects to whoever is signed in, so this surface needs no
@@ -32,16 +33,17 @@ async def main() -> None:
         for name, url in (
             ("interests", f"{BASE_URL}/in/{ME}/details/interests/"),
         ):
-            print(f"\n=== UNLISTED SURFACE PROBE: {url}")
-            await BROWSER.wait_for_rate_slot()
-            await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
-            import time
-
-            BROWSER._last_navigation_at = time.monotonic()
-            try:
-                await page.wait_for_load_state("networkidle", timeout=SETTLE_MS)
-            except Exception:
-                await page.wait_for_timeout(SETTLE_MS)
+            # THE LABEL IS DERIVED FROM THE BOUNDARY, NEVER TYPED. It read
+            # "UNLISTED SURFACE PROBE" unconditionally, which was true when
+            # written and is false now -- this address was admitted to the
+            # allowlist since. A label somebody must remember to update is a
+            # claim that rots; one computed from the thing it describes cannot.
+            listed = "LISTED" if is_read_url(url) else "UNLISTED"
+            print(f"\n=== {listed} SURFACE PROBE: {url}")
+            # ROUTED THROUGH THE GUARDED DOOR 2026-09-19, and it measures the
+            # same thing: NAV_TIMEOUT_MS IS 45_000 and the settle is the same
+            # networkidle-then-flat-wait against the same SETTLE_MS.
+            await BROWSER.goto(page, url)
             html = await page.content()
             (OUT / f"_probe-{name}-hyd.html").write_text(html, encoding="utf-8")
             print(f"    final url: {page.url}")

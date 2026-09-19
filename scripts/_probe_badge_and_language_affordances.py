@@ -215,8 +215,29 @@ _SCRIPT = """
 
 
 async def _read(page, url):
-    """Navigate and read. Returns a dict of INTEGERS keyed by this file's literals."""
-    await page.goto(url, wait_until="domcontentloaded")
+    """Navigate and read. Returns a dict of INTEGERS keyed by this file's literals.
+
+    ROUTED THROUGH THE GUARDED DOOR 2026-09-19, and this file is the one that
+    most needed it -- not because it was reckless but because of what it lacked.
+
+    **IT WAS THE ONLY PROBE WITH NEITHER HALF OF ``BROWSER.goto``**: no
+    ``assert_read_url``, and no ``wait_for_rate_slot`` either, so it navigated
+    a shared signed-in account with no rate discipline at all. Nine of the ten
+    raw sites had reimplemented the rate slot by hand; this one had not.
+
+    **AND IT WAS NOT UNGUARDED IN THE WAY A SCAN REPORTS.** One of its three
+    call sites takes a url from an ENVIRONMENT VARIABLE, and the caller checks
+    it with ``readonly.is_read_url`` before calling in. A function-scoped
+    detector cannot see that -- the guard is in the CALLER -- so this file read
+    as a hole and was not one. Routing makes the guarantee structural rather
+    than a property of whoever calls, which is the difference between safe and
+    safe-so-far.
+
+    The measurement is unchanged: the read is an ``evaluate`` returning
+    integers, taken after this function's own fixed wait, and the door settles
+    before that wait rather than instead of it.
+    """
+    await BROWSER.goto(page, url)
     await page.wait_for_timeout(2500)
     raw = await page.evaluate(_SCRIPT, list(NEEDLES))
     return {

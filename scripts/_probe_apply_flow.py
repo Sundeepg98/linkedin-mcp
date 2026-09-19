@@ -81,6 +81,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.readonly import assert_read_url  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
 
@@ -120,6 +121,19 @@ def _strip(html: str) -> str:
 
 
 async def _load(page, url: str, *, label: str) -> str:
+    # HAND-GUARDED 2026-09-19 RATHER THAN ROUTED, and the distinction matters.
+    #
+    # ``BROWSER.goto`` SETTLES BEFORE IT RETURNS. This function's measurement
+    # is the document at TWO moments -- ``html_pre`` is captured BEFORE the
+    # settle and written to its own file, and the settled document after -- so
+    # routing would not change what this probe waits for, it would delete one
+    # of the two things it measures. The pre-settle document is unobtainable
+    # through a door that settles.
+    #
+    # So the boundary line is lifted out of the door and called here, which is
+    # the same check the door performs, in the same place in the sequence. The
+    # rate slot below is the door's other half, already reimplemented.
+    assert_read_url(url)
     await BROWSER.wait_for_rate_slot()
     await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
     BROWSER._last_navigation_at = time.monotonic()

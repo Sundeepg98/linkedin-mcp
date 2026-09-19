@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.readonly import assert_read_url, is_read_url  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
 URL = f"{BASE_URL}/mynetwork/network-manager/company/"
@@ -30,7 +31,20 @@ URL = f"{BASE_URL}/mynetwork/network-manager/company/"
 
 async def main() -> None:
     async with BROWSER.session() as page:
-        print(f"=== UNLISTED SURFACE PROBE (both states): {URL}")
+        # THE LABEL IS DERIVED FROM THE BOUNDARY, NEVER TYPED. It said
+        # "UNLISTED" unconditionally, which was true when written and is false
+        # now -- this address has since been admitted. A label somebody must
+        # remember to update is a claim that rots; one computed from the thing
+        # it describes cannot.
+        listed = "LISTED" if is_read_url(URL) else "UNLISTED"
+        print(f"=== {listed} SURFACE PROBE (both states): {URL}")
+        # HAND-GUARDED RATHER THAN ROUTED, and the file name says why: it
+        # captures BOTH STATES. ``pre`` is the document before the settle and
+        # ``hyd`` the one after, and ``BROWSER.goto`` settles before it
+        # returns -- so routing would not change what this waits for, it would
+        # delete one of the two documents it exists to compare. The boundary
+        # check is lifted out of the door and called here instead.
+        assert_read_url(URL)
         await BROWSER.wait_for_rate_slot()
         await page.goto(URL, wait_until="domcontentloaded", timeout=45_000)
         BROWSER._last_navigation_at = time.monotonic()

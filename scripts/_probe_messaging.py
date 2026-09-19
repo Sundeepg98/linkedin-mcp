@@ -48,7 +48,6 @@ from __future__ import annotations
 import asyncio
 import re
 import sys
-import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -283,13 +282,13 @@ def _badges(html: str) -> dict[str, list[str]]:
 
 
 async def _load(page, url: str, *, label: str) -> str:
-    await BROWSER.wait_for_rate_slot()
-    await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
-    BROWSER._last_navigation_at = time.monotonic()
-    try:
-        await page.wait_for_load_state("networkidle", timeout=SETTLE_MS)
-    except Exception:
-        await page.wait_for_timeout(SETTLE_MS)
+    # ROUTED THROUGH THE GUARDED DOOR 2026-09-19. Same measurement: this
+    # reimplemented the door's body by hand -- rate slot, goto at 45_000, the
+    # navigation stamp, networkidle with a flat-wait fallback -- and omitted
+    # the one line that is a boundary. NAV_TIMEOUT_MS IS 45_000 and the
+    # settle is the same against the same SETTLE_MS, so nothing waits
+    # differently; the allowlist check is what is added.
+    await BROWSER.goto(page, url)
     html = await page.content()
     # NO CAPTURE IS WRITTEN. Not for the inbox, and not for the feed either --
     # both render other people. An earlier version wrote three of these and

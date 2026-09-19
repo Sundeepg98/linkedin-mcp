@@ -17,7 +17,6 @@ from __future__ import annotations
 import asyncio
 import re
 import sys
-import time
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
@@ -26,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, SETTLE_MS  # noqa: E402
+from linkedin_server.readonly import is_read_url  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "_audit"
 
@@ -37,15 +37,21 @@ TARGETS = (
 async def main() -> None:
     async with BROWSER.session() as page:
         for name, url in TARGETS:
-            print(f"\n=== UNLISTED SURFACE PROBE: {url}")
-            await BROWSER.wait_for_rate_slot()
+            # THE LABEL IS DERIVED FROM THE BOUNDARY, NEVER TYPED. It read
+            # "UNLISTED SURFACE PROBE" unconditionally, which was true when
+            # written and is false now -- this address has since been admitted.
+            # A label somebody must remember to update is a claim that rots;
+            # one computed from the thing it describes cannot.
+            listed = "LISTED" if is_read_url(url) else "UNLISTED"
+            print(f"\n=== {listed} SURFACE PROBE: {url}")
+            # ROUTED THROUGH THE GUARDED DOOR 2026-09-19, and it measures the
+            # same thing: NAV_TIMEOUT_MS IS 45_000 and the door's settle is the
+            # same networkidle-then-flat-wait against the same SETTLE_MS.
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=45_000)
+                await BROWSER.goto(page, url)
             except Exception as exc:
                 print(f"    navigation failed: {type(exc).__name__}: {exc}")
-                BROWSER._last_navigation_at = time.monotonic()
                 continue
-            BROWSER._last_navigation_at = time.monotonic()
             try:
                 await page.wait_for_load_state("networkidle", timeout=SETTLE_MS)
             except Exception:
