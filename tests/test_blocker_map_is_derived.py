@@ -128,7 +128,20 @@ import build_blocker_map as bbm  # noqa: E402
 #: 247 -> 246. `JOB-COLLECTIONS-SURFACE` recovered at 1 of 1 on APPOSITION --
 #: "JOB-COLLECTIONS-SURFACE (J 42) is one row..." -- plus a 1R/1R split match.
 #: The count axis is vacuous at published=1 and is NOT what carries that line.
-UNASSIGNED_CEILING = 246
+#: 246 -> 243, from a THIRD instrument: a LINE-SCOPED scan of markdown TABLE
+#: ROWS carrying exactly one blocker name. The paragraph-scoped scan cannot
+#: resolve inside a table, because a whole table is one paragraph and its
+#: "nearest blocker name" filter then picks a neighbouring row's blocker --
+#: which is the rank-table-scrape junk shape this corpus already records.
+#:
+#:   NEWSLETTER-SURFACE      N 58    named by SHIPPED CODE (readonly.py:708)
+#:   SEARCH-RESULTS-SURFACE  N 179   a contested row, conceded by the claimant
+#:   SERVICES-PAGE-SURFACE   P H9    named in the blocker's composition, 11->10
+#:
+#: THREE MORE WERE FOUND AND LEFT: N 55, N 56 and M C80 are named by the same
+#: shipped comment and are on the sweep's three-way self-conflict list.
+#: Adjudicating a three-way claim is a RULING, not a recovery.
+UNASSIGNED_CEILING = 243
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
