@@ -1048,6 +1048,47 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "sentence corrects a brief, and briefs are not documents this "
         "discipline can point at."
     ),
+    # FOUR FROM THE FOUR-DEFECTS WAVE, 2026-09-19. A FIFTH pair the same scan
+    # produced is NOT here: four-defects-fixed.md really does correct
+    # the-four-absent-blockers.md section 5 item 4, and is declared with a
+    # CORRECTS:/CORRECTED BY: pair instead. This test found it, which is the
+    # design working.
+    ("2026-09-19-four-defects-fixed.md", "2026-09-19-the-empty-blockers.md"): (
+        "THE LINE IS A FINDING THAT THE DOCUMENT IS SOUND. It reads that "
+        "the-empty-blockers.md QUOTES EVERY CELL IT USES, VERBATIM, which is "
+        "the evidence for ruling that nothing in the gitignored file it names "
+        "is load-bearing. The four-defects wave DID edit that document, but "
+        "only to mark an unreadable path as provenance -- a pointer repair, "
+        "not a claim asserted wrong. Nothing it concludes is contradicted; the "
+        "sentence is the opposite, a reason to trust it."
+    ),
+    ("2026-09-19-four-defects-fixed.md", "2026-09-19-blocker-map-ruling-requests.md"): (
+        "SAME POINTER REPAIR, SAME REASON. The line records that this document "
+        "deferred to a gitignored file for an enumeration, and that the "
+        "enumeration is recomputable from committed code. What was wrong was "
+        "the ADDRESS, not the claim: the remaining blockers do fail on those "
+        "three axes and the document's own next paragraph already restates the "
+        "closing arithmetic. A CORRECTED BY: pointer would tell a reader a "
+        "finding had been overturned when only a citation was re-aimed."
+    ),
+    ("2026-09-19-four-defects-fixed.md", "jobs.md"): (
+        "HISTORY ABOUT THE COUNTER, NOT A CLAIM ABOUT THE SLICE. The line says "
+        "23 verdicts were invisible because jobs.md used its own short "
+        "spelling XR -- already recorded in count_census_states.py's own "
+        "receipt, and already resolved by teaching the counter rather than "
+        "rewriting the rows. The slice was never wrong; the vocabulary was "
+        "short. The line names jobs.md as the place a dialect was first seen."
+    ),
+    ("2026-09-19-four-defects-fixed.md", "mcp-inventory.md"): (
+        "THE THING CALLED WRONG IS THE WAVE'S OWN DISCARDED DRAFT. The line "
+        "reports that the FIRST dialect detector written by this wave flagged "
+        "101 cells at HEAD, including every R/W/REV column and the whole of "
+        "mcp-inventory.md, and was narrowed for that reason. mcp-inventory.md "
+        "is the corpus the bad detector fired on, not a document whose claims "
+        "are evaluated -- the report's ruling about it is that its "
+        "PROVEN-LIVE / TESTED-ONLY vocabulary is a DIFFERENT LANGUAGE and "
+        "correctly outside the count."
+    ),
     # 2026-09-19, added by the wave that stopped two documents deferring to a
     # gitignored file. Read in context before declaring, as this list requires.
     ("2026-09-19-blocker-map-ruling-requests.md", "2026-09-19-the-empty-blockers.md"): (

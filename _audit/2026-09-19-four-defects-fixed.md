@@ -71,12 +71,15 @@ hidden rows were CANNOT-DELIVER; neither was ever GAP at any point in its
 history. The denominator was wrong by two; the numerator was right.
 
 **A HALF-CORRECTION TO THE REPORTING WAVE, and it is the half that matters.**
-`2026-09-19-the-four-absent-blockers.md` section 5 item 4 says the dialect cost
-`M M1` "its membership in the 690 **and the 409**". Only the first is true, and
-that document's own section 4.2 says so in terms -- *"the row has never been GAP
-at any point in its history"*. The section-5 summary overstated the section-4
-finding. Stated here rather than edited into their document: it is their wave's
-record of their own measurement, and the measurement was right.
+
+**CORRECTS:** `_audit/2026-09-19-the-four-absent-blockers.md` -- section 5 item 4 says the dialect cost `M M1` its membership in "the 690 and the 409"; the 409 half is wrong, because the row was CANNOT-DELIVER and was never GAP, and measured at `1c08e5f` the stated rows go 690 to 692 while GAP stays 409.
+
+That document's own section 4.2 already says it in terms -- *"the row has never
+been GAP at any point in its history"* -- so this corrects a SUMMARY that
+overstated its own measurement, not the measurement, which was right. It is
+declared as a correction rather than merely noted here because a reader
+starting from the claim cannot find a note: the back-pointer is the only thing
+that makes a correction reachable from the thing it corrects.
 
 ### 1.4 The fix
 
@@ -375,9 +378,14 @@ integrator merges.
   section 9.2 (a "what was not walked" table, no row id, no state, no count) --
   revertible in one line if a sibling conflicts.
 * Did not rewrite any commit sha citation.
-* Did not edit `2026-09-19-the-four-absent-blockers.md`. Its section 5 item 4
-  overstates its own section 4.2 (see 1.3); that is its wave's record of its own
-  measurement and the correction belongs here, not in their document.
+* Did not change any FINDING in `2026-09-19-the-four-absent-blockers.md`. One
+  line was added to it: the `CORRECTED BY:` back-pointer this corpus requires,
+  so that a reader arriving at section 5 item 4 can reach the correction in 1.3.
+  Its measurements are untouched, and its section 4.2 was right all along.
+  **That back-pointer was NOT in the first draft of this wave** -- the intent
+  was to state the correction here and leave their document alone. The shipped
+  guard `tests/test_a_correction_is_findable_from_the_claim.py` refused it, and
+  refused correctly: a correction nobody can find from the claim is not one.
 
 ## 6. FILES
 
