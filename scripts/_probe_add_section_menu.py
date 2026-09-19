@@ -496,10 +496,18 @@ async def main() -> int:
                 return 0
 
             async def structure(when: str) -> None:
+                # The three awaits are hoisted out of the f-string because an
+                # escaped quote inside an f-string EXPRESSION is a SyntaxError
+                # before 3.12, and this repo's CI matrix runs 3.10. The
+                # selectors are byte-identical to what was inlined; only where
+                # they are evaluated moved.
+                n_menus = await page.locator('[role="menu"]').count()
+                n_items = await page.locator('[role="menuitem"]').count()
+                n_dialogs = await page.locator('[role="dialog"]').count()
                 print(f"    {when:7s} "
-                      f"menus={await page.locator('[role=\"menu\"]').count()}  "
-                      f"items={await page.locator('[role=\"menuitem\"]').count()}  "
-                      f"dialogs={await page.locator('[role=\"dialog\"]').count()}")
+                      f"menus={n_menus}  "
+                      f"items={n_items}  "
+                      f"dialogs={n_dialogs}")
 
             print("\n    ABSOLUTE COUNTS on both sides of the press:")
             await structure("BEFORE")
