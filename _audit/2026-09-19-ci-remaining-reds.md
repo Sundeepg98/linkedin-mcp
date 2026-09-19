@@ -132,19 +132,45 @@ I could not reproduce it locally: this box is 3.13 only, where it passes. Why
 the same data and the same code diverge by interpreter is **not established**,
 and I am recording that rather than guessing.
 
-### UNRESOLVED -- `test_feed_tally`, 2 sites, py3.10 only
+### SETTLED BY MEASUREMENT, EDIT NOT LANDED -- `test_feed_tally`, 2 sites, py3.10 only
 
     feed.urlsplit accepts ['url','scheme','allow_fragments'], outside _PERMITTED_PARAMETER_NAMES
     a public callable was added or removed and this sweep was not updated: ['urlsplit']
     assert {'author_kind...y','overlap'} == {'author_kind...','urlsplit'}
 
-The pin contains `urlsplit`; the live module on 3.10 yields `overlap` instead. A
-stdlib import is being seen as one of the module's own public callables, and the
-two sides disagree **by interpreter version**. The obvious repair -- import it
-privately as `_urlsplit` -- would clear the second assertion, but I have not
-established why 3.13 and 3.10 enumerate the module differently, and shipping a
-rename on an unexplained divergence moves a red rather than fixing it. Not
-touched.
+`PUBLIC_CALLABLES` (`test_feed_tally.py:36`) is *every non-underscore name in
+`vars(feed)` that `inspect.isfunction`*. `feed.py:200` does
+`from urllib.parse import urlsplit`. Measured on this box:
+
+    3.13.14  isfunction(urlsplit) = False   <class 'functools._lru_cache_wrapper'>
+    PUBLIC_CALLABLES: ['author_kind', 'authorship_concentration', 'feed_tally', 'overlap']
+
+**CPython wrapped `urlsplit` in an lru_cache after 3.10.** On 3.13 the wrapper
+is not a function, so the stdlib import silently drops out of the set and the
+sweep matches. On 3.10 it is a plain function, so it enters -- and the sweep
+then inspects a stdlib signature and reports its parameters as an unpermitted
+widening of this repo's closed set.
+
+So `inspect.isfunction` is being used as the test for *"is this one of ours"*,
+and it is not one -- it is a test of how CPython happens to implement a stdlib
+function this release. **The three-parameter "widening" it reported is
+`urllib.parse.urlsplit`'s own signature and has nothing to do with this repo.**
+
+The repair is one clause, and it makes the set mean what the assertion already
+says it means:
+
+    and getattr(value, "__module__", None) == feed.__name__
+
+It changes no product code, admits nothing, and leaves 3.13's coverage exactly
+as it is today -- it makes 3.10 agree with 3.13 rather than lowering either.
+The message's own warning against widening `_PERMITTED_PARAMETER_NAMES` is
+respected: nothing is widened.
+
+**I did not land it.** It is a `tests/` edit, which fires the ~142s boundary
+hook over itself plus every coupled file, and there was not enough clock left to
+stage it and still be able to hand back a clean tree if the hook refused on a
+foreign red. A dirty `tests/` file in this shared tree is the hazard the
+downlink is mostly about. One line, fully specified above, for the next wave.
 
 ## STATE AT THE STOP
 
@@ -157,3 +183,14 @@ touched.
     NOT verified      the full suite. I ran two files and I am naming exactly
                       which, because a subset reported as a gate is the failure
                       this file opens with.
+
+## WHY THERE IS NO RE-MEASUREMENT ON CI
+
+The brief said to push from "the existing clone at the scratchpad path named in
+the downlink". **The downlink names no such path**, and this session's
+scratchpad holds six `clone-*` directories of which exactly one is a git repo,
+sitting on an unrelated commit. The `ci-offload` push at 17:16 was an ORPHAN
+with no ancestry and `master` untouched; getting that recipe wrong publishes the
+working history that is under freeze. I did not reconstruct it from guesswork
+with minutes left. **The two fixes are local and unmeasured on CI, and I am
+saying so rather than implying a green.**
