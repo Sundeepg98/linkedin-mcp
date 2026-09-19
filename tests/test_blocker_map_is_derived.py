@@ -182,7 +182,15 @@ import build_blocker_map as bbm  # noqa: E402
 #: preference: INVITE-NOTE-PARAM publishes ONE row and is claimed against four;
 #: HASHTAG-EXISTENCE publishes three and A13 already named all three, none a
 #: profile row, so it can hold zero.
-UNASSIGNED_CEILING = 207
+#: 207 -> 201. RECOMMENDATIONS-SURFACE at 6 of 6, ABSENT -> COMPLETE. Section F
+#: is 1R+5W and the ledger publishes 1R/5W; F3 F4 F5 were already EXCLUDED-RULED
+#: at the frozen commit and are correctly outside the denominator.
+#:
+#: ACCOUNT-VERIFICATION was the other name-plus-count match and is NOT taken: it
+#: is blocker 20's shape again. Its verification rows K1-K7 were EXCLUDED-RULED
+#: AT THE FREEZE, so the only frozen-GAP section-K rows are BADGE rows (K8 K9
+#: K10). Reported, not assigned.
+UNASSIGNED_CEILING = 201
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
