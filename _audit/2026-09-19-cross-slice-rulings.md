@@ -180,3 +180,61 @@ ruling nobody has to make.
 census-wide convention change with an owner, and my mandate here is rows that
 disagree — not the register they cite. Routed with the evidence rather than
 taken.
+
+---
+
+# AMENDMENT B — two more relation types the matcher cannot see
+
+Section 4 lists where false pairs cluster by SHARED PHRASE. Two further classes
+are structural rather than lexical, and neither is a disagreement at all.
+
+## B1. CONTAINER and CONTENT — a page ruled out, a control on it still GAP
+
+    P I12  Job preferences / career-interests page        EXCLUDED-RULED
+           ("measured: zero of 237 urls reach one")
+    J 99   Control career-interests visibility to recruiters   GAP
+
+**These are not the same capability.** One is the SURFACE, the other is a
+CONTROL on it. The matcher scores them alike because they share the distinctive
+token `career-interests`, and a wave working from the score alone would flip the
+control because its container is ruled out.
+
+**I did not flip it.** Whether a ruled-out container rules out its contents is a
+question nobody in this census has answered, and it is a different question from
+the one this wave was given. A page measured unreachable across 237 captured
+urls is not the same claim as a control being unreachable — the Open-To-Work
+editor is exactly the case where the surface has no url and the controls are
+still reachable, by a click.
+
+**So this is a third relation type**, beside "same capability" and "different
+capability", and it needs a ruling rather than an adjudication.
+
+## B2. READ vs WRITE of one subject — states that are SUPPOSED to differ
+
+The `COVERED-PROVEN vs EXCLUDED-RULED` class (19 pairs) looks like the sharpest
+contradiction available — one slice says built, the other says will-not-build.
+**Hand-reading the ten highest-scoring shows it is mostly not a contradiction at
+all:**
+
+    jobs 88  READ the current Open to Work state    COVERED-PROVEN
+    P I2     Turn Open To Work on or off            EXCLUDED-RULED
+
+Reading a value is built; writing it is ruled out. **Both are correct, and the
+states are supposed to differ.** The same shape recurs across the class: read
+the Who's-Viewed list vs unsubscribe from its emails; read notifications vs
+manage them; filter by employment type vs edit employment type on a position.
+
+**THE LIMIT, AND IT IS A LIMIT ON ME, NOT ON THE DATA.** I tried to confirm this
+across all 19 by extracting each row's R/W column and counting opposite pairs.
+**The extractor failed: 74% of that subset came back "unknown"**, because the
+R/W column sits at a different index in each slice's table and my heuristic
+could not find it. So:
+
+> **The read/write reading rests on hand-inspecting ten pairs, not on a
+> measurement over nineteen.** The automated check I ran does not support it and
+> does not contradict it — it mostly measured my own parser.
+
+Reported that way rather than dropped, because a number that turns out to be
+about the instrument is exactly the thing this repository keeps catching late.
+The cheap fix, for whoever wants the count: parse the R/W column per slice from
+that slice's own header row instead of guessing its index.
