@@ -439,7 +439,20 @@ import build_blocker_map as bbm  # noqa: E402
 #: EASY-APPLY-MULTISTEP, on the token "apply". Both refused.
 #:
 #: POST-COMMENT-CONTROLS is untouched: 15 candidates for 4 slots, 1R/3W.
-UNASSIGNED_CEILING = 90
+#: 90 -> 89. CELEBRATION-COMPOSER 1 of 1 on M C9, and the interesting part
+#: is WHY it was not decidable an hour ago. The mutual-best test asks that
+#: the row's best blocker be this one among blockers WITH ROOM. M C9 named
+#: POST-DRAFT-SURFACE as its best and the pair failed. POST-DRAFT-SURFACE
+#: closed at 5dc71d5 on M C12, left the open set, and the pair became
+#: mutual. The evidence did not change; the FIELD did. Second cascade of
+#: this recovery -- the first was J 112, carved out of COMPANY-PAGE-SURFACE
+#: and then closing SCHOOL-PAGE-SURFACE.
+#:
+#: UNIQUENESS MEASURED, NOT ASSERTED: "celebrat" appears four times in the
+#: census and exactly one is a capability that IS a celebration. C33
+#: ("Choose WHICH reaction (Celebrate, Support, Love...)") would have been
+#: taken by a substring match; reading what the capability DOES excludes it.
+UNASSIGNED_CEILING = 89
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
