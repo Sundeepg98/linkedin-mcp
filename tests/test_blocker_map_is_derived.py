@@ -110,7 +110,22 @@ import build_blocker_map as bbm  # noqa: E402
 #: carry a stated STRENGTH. `M C87` looked like a MENTION-TAG-CONTROLS hit and
 #: its note is an argument for filing it ELSEWHERE; taking the mechanical match
 #: would have recorded an exclusion as an assignment.
-UNASSIGNED_CEILING = 259
+#:
+#: 259 -> 247 on 2026-09-19. Twelve lines handed over by the profile-modals
+#: wave, verified before pasting rather than inherited:
+#:
+#:   CONTACT-INFO-PANEL            P A25-A29   5 of 5   count AND 1R/4W close
+#:   INTRO-EDITOR-UNREAD-CONTROLS  P A9 A14 A15 A22   4 of 4   elimination, re-run
+#:   OPEN-TO-HIRING-MODAL          P J1-J3     4 of 5 with J4   PARTIAL
+#:
+#: **ELEVEN MORE WERE HANDED OVER AND REFUSED.** `P I2`-`P I12` were
+#: EXCLUDED-RULED at the frozen commit AND are EXCLUDED-RULED today -- they
+#: never moved, so they were never in the 409-row set the ledger divided, and
+#: `test_the_evidence_resolves_and_no_row_carries_two_blockers` would have
+#: refused them. The handing wave checked for DUPLICATES, which is a different
+#: check and cannot see this: a row can be unique and still not be in the
+#: denominator.
+UNASSIGNED_CEILING = 247
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
