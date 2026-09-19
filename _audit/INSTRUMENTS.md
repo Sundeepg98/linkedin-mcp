@@ -3481,3 +3481,123 @@ the protocol above and not a thing to leave lying in `scripts/`. What is
 durable is this entry plus the four proof functions, which are importable from
 the test module and were used exactly that way to measure the three candidate
 sites without enrolling any of them.
+
+## 20. The CI instruments, 2026-09-19
+
+CI had been red since 2026-09-05 and unrun since. These three are what recovered
+it. Each is entered because it was **shown failing** — the register's own second
+law — and each names the control that showed it.
+
+### 20.1 THE LAW: A PROBE THAT CANNOT REACH THE DEFECT RETURNS THE SAME GREEN AS HEALTH
+
+The inherited premise was *"history-dependent tests cannot resolve SHAs on an
+orphan branch."* It was TRUE. It was "refuted" by grepping
+`rev-list|rev-parse|log|cat-file|merge-base`, finding two files, running them
+against a shallow clone, and getting **27 passed in 19.42 s**.
+
+**That grep cannot match `git show <sha>:<path>`**, which is the shape that
+actually breaks. The measurement was real; the instrument was blind; the
+conclusion was wrong for 8.5 hours, during which the whole suite was paid for
+locally.
+
+**Before trusting a clean probe, show it going RED on a known-bad input.** A
+green from an instrument that cannot see the defect is indistinguishable from a
+green from a healthy system, and it is the more dangerous of the two because it
+closes the question.
+
+### 20.2 The shallow-vs-full clone control — does this suite need history?
+
+```bash
+git clone --quiet --depth 1 --single-branch --branch <b> "file://$PWD" /tmp/shallow
+git clone --quiet           --single-branch --branch <b> "file://$PWD" /tmp/full
+# run the same file in each
+```
+
+**SHOWN FAILING, same commit, same tests:** shallow **1 passed, 6 errors**; full
+**6 passed, 1 failed**. Both arms bite — the shallow arm reproduces CI's
+`ERROR at setup`, and the full arm's single failure was a real defect the errors
+had been hiding (a census map with 427 data lines against 409 frozen GAP rows).
+
+**What it settled:** `actions/checkout` defaults to `fetch-depth: 1`, and this
+suite pins frozen baselines by literal SHA (`build_blocker_map.FROZEN_REF =
+"1c08e5f"`, `test_connections_reader` pins `84dccba`). Fix is one line per
+checkout step. **This control is the cheapest way to answer "is a shallow
+checkout enough" for any repo, and it answers in seconds.**
+
+### 20.3 `uv run --python <floor>` — run a CI matrix cell on a box that has no such cell
+
+```bash
+uv run --quiet --python 3.10 --with pytest --no-project -- \
+    python -m pytest tests/<file>.py -q -p no:cacheprovider
+```
+
+The build box is **windows py3.13 only**; the matrix is ubuntu 3.10, ubuntu
+3.13, windows 3.13. Two of three cells had never been exercised here.
+
+**SHOWN FAILING:** `test_the_package_compiles_on_its_oldest_python.py` reported
+**4 failed** on a real 3.10 while passing on 3.13. After the fix, the same
+command **immediately surfaced a SECOND instance of the identical bug**. An
+8-minute CI round trip surfaces those one at a time.
+
+**The bug class it catches: A GUARD WRITTEN TO POLICE A LOWER BOUND, ONLY EVER
+EXECUTED ABOVE THAT BOUND.** `lint.violations()` calls `ast.parse`, and its
+fixtures are PEP 701 constructs — legal from 3.12, a `SyntaxError` before it —
+so on the floor the PARSER refused the fixture before the rule could fire. The
+guard for the 3.10 floor could not itself run on 3.10.
+
+**LIMIT, stated because it matters:** this does NOT cover the ubuntu-vs-windows
+axis. Path separators, drive letters, junctions, symlink privileges and POSIX
+absolute paths still need a real Linux runner — and that axis produced its own
+defect the same day (20.4). For those, CI is the only instrument.
+
+### 20.4 THE LAW, SECOND FORM: A CONTROL THAT CANNOT FIRE ON A PLATFORM CERTIFIES NOTHING THERE
+
+`test_that_forced_failure_can_actually_fail` exists to prove the path-scrubbing
+assertion CAN fail. It did that by asserting the unscrubbed message carries a
+**DRIVE LETTER** — which is only how "absolute" looks on Windows. On ubuntu the
+message read a POSIX path and the control failed **in its own words**: *"the
+unscrubbed message carried no drive letter, so the assertion above proves
+nothing on this platform."*
+
+**It was right about itself.** The repair is `ABSOLUTE_PATH = DRIVE_LETTER if
+os.name == "nt" else POSIX_ABSOLUTE`, verified in BOTH directions: it matches
+CI's real unscrubbed message and does NOT match the scrubbed relative one, so it
+cannot go inert either way.
+
+**THREE VARIANTS OF THIS ONE LAW LANDED ON 2026-09-19**, and all three looked
+green: a control that could not fire on Linux; an identity guard silently
+disarmed in every worktree (gitignored wordlist, and git does not carry ignored
+files into a linked worktree); and a floor guard that could not run on its floor.
+
+### 20.5 The two-root resolver probe — which tree is being gated?
+
+```python
+spec = importlib.util.spec_from_file_location("bg", "<gate>.py")
+m = ...; spec.loader.exec_module(m)
+print(m._tree_being_committed(), m._tooling_root())   # run from main AND from a worktree
+```
+
+**SHOWN DISCRIMINATING:** from the main checkout both roots are the same; from a
+linked worktree content=worktree, tooling=main, venv still reachable. The
+unfixed copy collapses both to the script's own checkout.
+
+**What it settled:** the boundary gate read one tree's INDEX and ran the other
+tree's FILES, because `REPO = Path(__file__).resolve().parent.parent` and
+`.git/hooks` is shared. Both directions were live and the dangerous one is
+silent — a guard a worktree commit BREAKS was checked against main's clean copy
+and ALLOWED.
+
+**The distinction the probe makes visible: GIT QUERIES RIDE `GIT_INDEX_FILE`;
+FILESYSTEM READS FOLLOW `REPO`.** Measured from a probe hook: git exports
+`GIT_DIR` and `GIT_INDEX_FILE` absolute into every hook, so `git diff --cached`
+answers for the worktree even with `cwd` forced to main — which is why the
+identity gate was correct by construction and must NOT be "fixed" the same way.
+Pointing its `REPO` at the worktree would lose the gitignored wordlist and hit
+`if not wordlist: ... ALLOWING`.
+
+### 20.6 DISPOSABLE, declared
+
+`scripts/purge_denied_term.py` is **not** disposable and already shipped; it is
+the tool that unblocked a 14-day push freeze in four minutes. The ad-hoc probe
+hook used in 20.5 (`core.hooksPath` pointed at a scratch dir for one commit) IS
+disposable — its finding is recorded above and the technique is one line.
