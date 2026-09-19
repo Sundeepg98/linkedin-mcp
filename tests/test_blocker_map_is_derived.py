@@ -733,7 +733,24 @@ import build_blocker_map as bbm  # noqa: E402
 #: its two candidates were duplicates OF EACH OTHER, so either id reached
 #: the same page -- unknowable AND near consequence-free. A misfiled J 82
 #: sends a wave to the wrong surface. Opposite case, opposite answer.
-UNASSIGNED_CEILING = 42
+#:
+#: 42 -> 23 on 2026-09-19 by wave `absent-blockers`. ONE row, and it takes the
+#: LAST of the four blockers that had recovered nothing to COMPLETE:
+#: THIRD-PARTY-PROFILE-FORBIDDEN <- `M M5`. The other three are declined with
+#: mechanical reasons in `_audit/2026-09-19-the-four-absent-blockers.md`, and
+#: TWO OF THEM ARE LEDGER DEFECTS RATHER THAN MAP HOLES -- `FOUND-A-JOB-FLOW`
+#: and `MESSAGE-ADDRESSING` each publish a row count with NO REFERENT inside
+#: the 409. `MESSAGE-ADDRESSING`'s is the sharper case: the only committed
+#: source naming a row for it names `M 1`, whose frozen state cell reads
+#: `**CANNOT-DELIVER**` -- a dialect outside the shipped STATES vocabulary, so
+#: `state_of` returned '' and the row was in neither the numerator nor the
+#: denominator at the freeze. A count cannot be filled from a set its row was
+#: never in, and no amount of searching will change that.
+#:
+#: INTEGRATOR: the concurrent wave `partial-close` is filing from the SAME
+#: 24-row pool in another worktree, so the merged tree will sit BELOW 23. Take
+#: the LOWER of the two ceilings on merge, not this one by default.
+UNASSIGNED_CEILING = 23
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
