@@ -447,3 +447,92 @@ shipped predicate, C1 against a ruling quoted in the census itself.
 **I flipped nothing here either.** `M5` and `N158` belong to two slices, neither
 mine, and the fix is a ruling about which verdict governs — not an edit I can
 justify from a similarity score.
+
+---
+
+# AMENDMENT D — re-taken after the outage, and the press ruling closes two rows by refusing them
+
+## D1. The outage, and why nothing here needed unwinding
+
+The automation Chrome was down roughly **09:48–10:04**. The hazard is not the
+outage but the error text: an attach failure blames Chrome, and a wave can
+record the resulting zero as MEASURED-ABSENT.
+
+**No row of mine moved on any reading, in or out of that window** — this wave
+flipped nothing anywhere, so there was no claim to unwind, only readings to
+re-confirm.
+
+**Re-taken 10:21–10:22 against the restarted browser (pid 3104,
+Chrome/153.0.8010.48). All four reproduce:**
+
+| reading | then | now |
+|---|---|---|
+| contact-info listeners | `click` x1 on the node | **identical** |
+| its negative control | NONE on 3 static live nodes | **identical** |
+| intro-editor field enumeration | 11 fields, 5 unnamed | **identical, field for field** |
+| render gate (scroll) | 3 boxes, count held at 11 | **identical** |
+
+**And the silent-zero failure mode is structurally impossible in these
+probes**, which is worth stating because it is a property of the instrument
+rather than luck: every probe's only `try` is a `try/finally` for tab closure.
+There is no `except` anywhere, so `BROWSER.session()` raising
+`BrowserUnavailableError` propagates and the run dies with a traceback. That is
+exactly what happened at **09:50:03**, when one probe crashed loudly with
+`ECONNREFUSED` and recorded nothing. **A probe with no exception handler cannot
+file an outage as an absence.**
+
+## D2. The press ruling REFUSES both of my open presses — on its own terms
+
+`_audit/2026-09-19-the-disclosing-press-ruling.md` condition 2: the control must
+match an enumerated disclosure shape **by attribute** — `[aria-expanded]` or
+`[aria-haspopup]` — *"not by label text"*, and *"anything not on that list is
+REFUSED"*.
+
+**Blocker 38's contact-info control carries NEITHER.** That is the same
+measurement as section 3's table (`haspopup=0, expanded=0, controls=0`), read
+against the ruling instead of against my own verdict vocabulary.
+
+**And the irony is structural, not incidental: the finding in Amendment A is
+exactly what disqualifies it.** The control is WIRED by a click handler and
+DECLARES NOTHING. A control that declares nothing can only be matched by label
+text, and label text is the one route condition 2 forbids. **So the ruling
+permits pressing controls that announce themselves, and this one is precisely a
+control that does not.**
+
+It is refused a second time independently: the ruling refuses *"anything that
+navigates, submits, or opens a composer or editor"*, and the control is named
+for opening an editor.
+
+## D3. A9 is closed too, and by three measurements rather than one
+
+The two unnamed switches were A9's only candidates. Measured on the restarted
+browser — **the read the outage had blocked**:
+
+| identifier route | result across all 11 fields |
+|---|---|
+| accessible name (4 routes) | **5 of 11 resolve to nothing** |
+| `aria-expanded` / `aria-haspopup` | **0 of 11 carry either** |
+| `id` | **every one shapes to `<opaque>`** — fails the shaper's gate |
+| `name` attribute | **absent on all 11** |
+
+So the two switches cannot be identified by name, cannot be identified by id,
+carry no `name`, and **match no sanctioned press shape**. Pressing one would in
+any case be a WRITE — a switch toggles a setting, it does not disclose one —
+and they sit inside an editor, which the ruling refuses outright.
+
+**A9 is therefore NOT "blocked on the press mechanism".** It is refused by the
+ruling's terms and unidentifiable by every non-press route this server can read.
+Filing it as awaiting the mechanism would have been wrong in a way that looks
+patient: the mechanism, when it exists, will not reach this row.
+
+## D4. What each of my four blockers is actually waiting on, final
+
+| # | waiting on |
+|---|---|
+| 20 | nothing — **closed door**, 11 rows EXCLUDED-RULED. Its live twin is `jobs.md` J92–J100, which a ruling never reached (section 1.1) |
+| 22 | **A14/A15/A22: nothing measurable** — not drawn, render gate closed. **A9: refused**, see D3 |
+| 38 | **a ruling**, not the press mechanism — the control is off the sanctioned shape list and opens an editor. Reopening it needs the shape list widened, which the ruling says grows only by a further ruling |
+| 42 | still the aim: deciding which of three `open_to` openers is the menu, **by reading relations**. These DO carry `aria-expanded`, so this is the one row of mine the press mechanism could serve once it exists |
+
+**That last line is the useful one for scheduling:** of my four blockers, exactly
+one is a genuine customer for the disclosing-press mechanism, and it is 42.
