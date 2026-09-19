@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -136,10 +137,33 @@ def partition_problems(shards: list[list[str]], weights: dict[str, int]) -> list
         if path not in weights:
             problems.append(f"{path} is in a shard but in no collection")
 
-    packed = sum(weights[path] for path in placement if path in weights)
-    expected = sum(weights.values())
-    if packed != expected:
-        problems.append(f"{expected} tests collected, {packed} tests packed")
+    # A MASS CHECK USED TO LIVE HERE AND ITS REMOVAL IS THE REPAIR. It was:
+    #
+    #     packed   = sum(weights[path] for path in placement if path in weights)
+    #     expected = sum(weights.values())
+    #     if packed != expected:
+    #         problems.append(f"{expected} tests collected, {packed} tests packed")
+    #
+    # IT COULD NOT FAIL FOR A REAL REASON. `placement` is keyed by file, and
+    # the three loops above already report every file in no shard, in two
+    # shards, or in no collection. Once those are silent the two key sets are
+    # identical, so under exact arithmetic the two sums are the same number by
+    # construction. Nothing reaches that line that the loops have not already
+    # named.
+    #
+    # AND IT DID FAIL FOR A FAKE ONE. The sums are accumulated in two different
+    # orders -- `placement` in shard order, `weights` in collection order -- and
+    # the "seconds" shape is floats, so `!=` was comparing the rounding of two
+    # orderings. CPython 3.12 gave builtin sum() a Neumaier compensated fast
+    # path for floats; before that it accumulates naively. Measured, and the
+    # match is exact rather than suggestive: naive summation disagrees at
+    # of=2,3,4,5,6,7,8 and agrees at of=1,11,16 -- which is precisely the set
+    # of seven `seconds-ofN` cases that failed on ubuntu py3.10 in run
+    # 35441013901 and precisely the three that did not.
+    #
+    # test_the_removed_mass_check_was_a_false_positive_generator below holds
+    # that measurement as a control, so this box can convict the line without
+    # a 3.10 interpreter.
     return problems
 
 
@@ -273,6 +297,96 @@ def test_the_partition_check_passes_a_correct_split():
     its first morning."""
     weights = weights_for("real")
     assert partition_problems(shard.plan_shards(weights, 6), weights) == []
+
+
+def _naive_mass_check(shards: list[list[str]], weights: dict[str, float]) -> str:
+    """The deleted mass line, reproduced with PRE-3.12 float summation.
+
+    Builtin ``sum`` over floats is compensated from 3.12 and naive before it,
+    so the bug this reproduces is invisible to the interpreter that runs this
+    file. Reproducing the arithmetic rather than the interpreter is what lets
+    a 3.13-only box convict a 3.10-only failure -- and it is the same move the
+    rest of this suite makes when it packs a frozen SHAPE instead of today's
+    real timings.
+    """
+
+    def naive(values):
+        total = 0
+        for value in values:
+            total = total + value
+        return total
+
+    placement = {path: None for group in shards for path in group}
+    packed = naive([weights[path] for path in placement if path in weights])
+    expected = naive(list(weights.values()))
+    if packed != expected:
+        return f"{expected} tests collected, {packed} tests packed"
+    return ""
+
+
+#: The seven widths at which naive summation of the "seconds" shape disagrees
+#: with itself, and the three at which it does not. Not a guess: this is the
+#: `seconds-ofN` failure set of run 35441013901 on ubuntu py3.10, reproduced
+#: here arithmetically. If this list ever needs changing, the thing that moved
+#: was the shape or the packer, and the mass check is not coming back either
+#: way.
+NAIVE_SUM_DISAGREES_AT = [2, 3, 4, 5, 6, 7, 8]
+
+
+@pytest.mark.parametrize("of", [1, 2, 3, 4, 5, 6, 7, 8, 11, 16])
+def test_the_removed_mass_check_was_a_false_positive_generator(of):
+    """THE CONTROL FOR A DELETION, which is the one nobody writes.
+
+    Two things have to hold together or the deletion was not safe: the plan is
+    a correct partition (so there is nothing real to report), AND the deleted
+    line reports a problem anyway at exactly the widths CI saw. One without the
+    other proves nothing -- a plan that is genuinely broken would make the old
+    line right, and a line that never fires would make the deletion pointless.
+    """
+    weights = weights_for("seconds")
+    plan = shard.plan_shards(weights, of)
+
+    assert partition_problems(plan, weights) == [], (
+        "the plan itself is not a partition, so this control is measuring the "
+        "wrong thing"
+    )
+
+    complaint = _naive_mass_check(plan, weights)
+    if of in NAIVE_SUM_DISAGREES_AT:
+        assert complaint, (
+            f"of={of} is in the recorded py3.10 failure set but the deleted "
+            "line is silent here -- either the shape moved or the packer did"
+        )
+        assert "tests packed" in complaint, complaint
+    else:
+        assert not complaint, (
+            f"of={of} was green on py3.10 and the reproduction disagrees: "
+            f"{complaint}"
+        )
+
+
+def test_the_deleted_line_was_redundant_and_not_merely_wrong():
+    """Being WRONG would argue for repairing it; being REDUNDANT is why it went.
+
+    Under exact arithmetic the mass comparison is decided entirely by whether
+    the two key sets match -- and every way they can fail to match is already
+    reported, by name, by the loops above. Shown over every mutation the
+    controls use: each one is caught by file identity, so the mass line never
+    had a failure of its own to catch.
+    """
+    weights = weights_for("seconds")
+    for mutate in (_drops_a_file, _duplicates_a_file, _invents_a_file):
+        broken = mutate(weights, 6)
+        problems = partition_problems(broken, weights)
+        assert problems, (mutate.__name__, "slipped past the identity loops")
+        assert all("tests packed" not in problem for problem in problems), problems
+
+    good = shard.plan_shards(weights, 6)
+    placement = {path for group in good for path in group}
+    assert placement == set(weights)
+    assert math.fsum(weights[path] for path in placement) == math.fsum(
+        weights.values()
+    ), "exact summation disagrees, which would mean the keys are not the same"
 
 
 # ---------------------------------------------------------------------------
