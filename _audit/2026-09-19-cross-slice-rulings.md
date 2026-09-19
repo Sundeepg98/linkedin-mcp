@@ -510,3 +510,65 @@ consistent enough to state as a rule rather than an apology:
 > **The score generates candidates. It must never settle one.** Every true
 > finding this round came from an artifact — a ruling id, a code predicate, a
 > neighbour that agrees — and none came from a number I chose.
+
+---
+
+# AMENDMENT G — an OPEN QUESTION in the corpus, answered: four of twelve are double-counted
+
+`network.md:1113` carries an open question nobody had answered:
+
+> *"**Whether rows 67-78 are double-counted against `_audit/_census/profile.md`.**
+> Both slices map the settings family under the same R11 ruling. Resolving it
+> requires comparing this table against that file's 145-row settings walk
+> row-by-row, which is a **top-level de-duplication job, not a slice one.**"*
+
+**The answer is YES for four of the twelve**, and the reason it stayed open is
+structural rather than anybody's oversight.
+
+## G1. The four
+
+`profile.md`'s `O6-O20` is a **COLLAPSED block — fifteen capabilities stated as
+one row** — and its own summary enumerates them. Read against network's table:
+
+| network row | the item inside `P O6-O20` that claims it |
+|---|---|
+| `N 67` Limit who can follow you to your 1st-degree connections | *"who can follow you"* |
+| `N 68` Allow everyone on LinkedIn to follow you | *"who can follow you"* |
+| `N 71` Set who can see the members you follow | *"who can see members you follow"* |
+| `N 74` Choose whether your connections can see your connections | *"connection-list visibility"* |
+
+**Eight are NOT double-counted** and the distinction is legible: `N69`/`N70`
+(primary action on your profile), `N72`/`N73`/`N75` (who may send or follow
+invitations), `N77` (appearing in another member's followers list), `N78`
+(activity notifications) — **none appears in `O6-O20`'s fifteen**, and `N76` is
+not a settings row at all.
+
+## G2. Why it stayed open, and it is a blind spot I had already written down
+
+**A collapsed block is invisible to a lexical matcher.** `profile.md` states
+fifteen capabilities in one row, so `"Limit who can follow you to your 1st-degree
+connections"` is scored against a fifteen-item summary string and scores
+nothing. **My own sweep's stated limits name exactly this** — *"collapsed blocks
+dilute against any single matching row"* — and this is that limit costing a real
+finding for weeks.
+
+**It was not found by scoring. It was found by reading `O6-O20`'s own list**,
+after the open question pointed at the range. The score never surfaced it and
+never could.
+
+## G3. NOT EXECUTED, and the reason is the document's own
+
+Unlike `messaging-and-content.md` s10 — which carried a written conditional whose
+trigger I measured and then fired — **there is no conditional here.** `profile.md`
+and `jobs.md` carry **no reconciliation register at all**; only `messaging` has
+one and only `network` recorded removing duplicates at harvest.
+
+And the network note states its own authority: *"a top-level de-duplication job,
+not a slice one."* **Subtracting four capabilities from a collapsed block is a
+new decision, not the execution of an old one**, and the block's arithmetic
+(15 capabilities in 1 row) means the correction is to a stated capability count
+rather than to a row.
+
+**So this is reported with the evidence and the four named, for a ruling.** What
+was missing was never the authority — it was the measurement, and that part is
+now done.
