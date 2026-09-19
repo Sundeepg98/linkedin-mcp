@@ -128,10 +128,21 @@ def read_profile_stamp(profile_dir: PathLike) -> Optional[str]:
     file, an unreadable file, an empty one -- because the caller does the same
     thing with all of them: allow the launch. Distinguishing them here would
     be a distinction nothing acts on.
+
+    READ AS ``utf-8-sig``, NOT ``utf-8``, and this is the one decoding detail
+    that matters. Every "cannot read it" path in this module ends in the
+    launch being ALLOWED, so an encoding wrinkle does not produce an error --
+    it produces a silent pass on the exact input the gate exists to refuse. A
+    leading BOM would leave ``\\ufeff153.0.8010.48``, which fails the version
+    pattern and opens the gate on a real downgrade. ``utf-8-sig`` strips a BOM
+    if there is one and is identical to ``utf-8`` when there is not, so it
+    costs nothing and removes the only realistic way a genuine stamp goes
+    unread. Chrome writes this file as plain ASCII today; that is a fact about
+    today's Chrome, not a property of the file.
     """
     try:
         path = Path(profile_dir) / PROFILE_STAMP_FILE
-        raw = path.read_text(encoding="utf-8", errors="replace")
+        raw = path.read_text(encoding="utf-8-sig", errors="replace")
     except (OSError, ValueError):
         return None
     line = raw.strip().splitlines()[0].strip() if raw.strip() else ""
