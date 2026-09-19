@@ -257,3 +257,63 @@ either pattern has a reader behind it.
     Sat, Sep 19, 2026  8:31:57 AM    wave start, freeze file read
     Sat, Sep 19, 2026  8:50:16 AM    two child slices back, build starts
     Sat, Sep 19, 2026  8:52:49 AM    three rows retired, instrument green
+
+## 8. A NEIGHBOUR'S LINE IS IN MY COMMIT. Credited, not rewritten.
+
+`f3d2b6c` reports **12 insertions where 11 were staged.** The twelfth is census
+row `C11` (*add a hashtag to a post*), moved to EXCLUDED-RULED and re-filed out
+of `HASHTAG-EXISTENCE` by another wave. **It is not mine and I do not vouch for
+it.** I did not read it before it was committed, because it did not exist when I
+read the staged diff.
+
+**HOW IT HAPPENED, precisely, because the mechanism is the transferable part.**
+I staged by name, ran the identity sweep AFTER staging, and read
+`git diff --cached` line by line -- eleven rows, all mine. I then committed with
+`git commit --only`, which commits the named paths **FROM THE WORKING TREE** and
+never consults the index for them. The neighbour wrote `C11` into the file in
+the seconds between those two commands, and `--only` carried it.
+
+**`--only` WAS WORKING EXACTLY AS DESIGNED AND COULD NOT HELP.** It protects at
+FILE granularity: it kept three other waves' dirty census slices (`jobs.md`,
+`profile.md`) out of this commit, which is the failure it exists to prevent.
+`C11` was inside a path I legitimately named. This repository has recorded that
+distinction twice and this is the third instance; what is new is only that the
+reading which looked clean was a **line-level** `git diff --cached`, not a
+`--numstat`. **Reading the staged LINES narrows the window to the gap between
+the read and the commit. It does not close it, because that gap is where this
+landed.**
+
+**WHAT I CHECKED BEFORE LEAVING IT THERE**, since adopting somebody's lines
+adopts their DISCLOSURE and not only their design: the shipped identity sweep
+re-run against the committed tree reads **PASS, 0 hits across 389 swept files**.
+The row carries no identifier.
+
+**WHAT I AM NOT DOING:** rewriting `HEAD`. The sanctioned outcome in a
+multi-writer tree is an adopt-commit plus credit, and rewriting trades a
+mis-attributed line for something genuinely hard to undo while three waves are
+writing the same four files.
+
+**THE AUTHOR IS NAMED BY ARTIFACT AND I COULD NOT RESOLVE IT.** The line
+re-files out of the `HASHTAG-EXISTENCE` blocker and cites
+`tests/test_typed_bytes.py:115-145`; `git log -- _audit/_census/messaging-and-content.md`
+names only this wave and two census waves before it, so the artifact does not
+resolve to a live name. **I am deliberately NOT guessing**, because a send to a
+guessed idle name forks that agent. Routed to the lead instead, who holds the
+roster.
+
+**ONE CONSEQUENCE FOR THE COUNT, stated so nobody attributes it to this wave:**
+`C11` moves a row, and it is not one of mine. **This wave banked exactly three**
+-- `C10`, `C28`, `C55` -- and that number is the only one here worth quoting.
+
+**THE TOTAL IS NOT, AND THE REASON IS A MEASUREMENT I WATCHED GO STALE.** I
+wrote *"GAP 366 / EXCLUDED-RULED 233"* into this section, and the counter run in
+the same minute read **GAP 362 / EXCLUDED-RULED 234**. Nothing was wrong with
+either reading: three census slices were dirty at that moment and other waves
+were retiring rows while I typed. The first number was true when taken and false
+when read, which is this repository's oldest law arriving inside a paragraph
+written to record a different one.
+
+**So a census total in a multi-writer tree is a reading with a timestamp, never
+a state, and this document will not publish one.** Run
+`scripts/count_census_states.py` yourself; that is what it is tracked for. What
+a wave can honestly claim is its own DELTA, and mine is three rows, named.
