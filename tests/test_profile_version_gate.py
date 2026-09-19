@@ -161,7 +161,7 @@ def test_a_stamp_written_with_a_bom_is_still_refused(tmp_path):
     (profile / profile_version.PROFILE_STAMP_FILE).write_bytes(
         b"\xef\xbb\xbf" + PROFILE_STAMPED_NEWER.encode("ascii")
     )
-    assert profile_version.read_profile_stamp(profile) == PROFILE_STAMPED_NEWER
+    assert profile_version._read_profile_stamp(profile) == PROFILE_STAMPED_NEWER
 
     with pytest.raises(BrowserUnavailableError):
         profile_version.assert_no_downgrade(profile, make_chromium(tmp_path))
@@ -174,7 +174,7 @@ def test_a_stamp_with_trailing_whitespace_and_a_newline_is_read(tmp_path):
     (profile / profile_version.PROFILE_STAMP_FILE).write_text(
         PROFILE_STAMPED_NEWER + "  \r\n", encoding="utf-8"
     )
-    assert profile_version.read_profile_stamp(profile) == PROFILE_STAMPED_NEWER
+    assert profile_version._read_profile_stamp(profile) == PROFILE_STAMPED_NEWER
 
 
 def test_an_unresolvable_chromium_version_is_allowed(tmp_path):

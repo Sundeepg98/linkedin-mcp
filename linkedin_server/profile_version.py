@@ -121,13 +121,26 @@ def parse_version(text: Optional[str]) -> Optional[tuple[int, ...]]:
         return None
 
 
-def read_profile_stamp(profile_dir: PathLike) -> Optional[str]:
+def _read_profile_stamp(profile_dir: PathLike) -> Optional[str]:
     """The profile's ``Last Version`` line, or ``None`` if there is not one.
 
     ``None`` covers every way of not having an answer -- no directory, no
     file, an unreadable file, an empty one -- because the caller does the same
     thing with all of them: allow the launch. Distinguishing them here would
     be a distinction nothing acts on.
+
+    UNDERSCORED, AND NOT TO DODGE A GUARD -- the rename is what the guard
+    correctly pointed out. ``tests/test_readers_outside_dom_are_a_pinned_
+    inventory.py`` selects module-level ``read_*`` functions that NO OTHER
+    MODULE calls, because a reader the package ships and nobody can reach
+    passes every test it has. Named ``read_profile_stamp`` this tripped it,
+    and the honest reading is that the name was wrong rather than the guard:
+    every other ``read_*`` in this package is an entry point some other module
+    calls, while this one is a step inside :func:`check`. The module IS wired
+    -- ``browser.start()`` calls :func:`assert_no_downgrade` -- so the right
+    fix was to stop claiming a vocabulary this function does not belong to,
+    not to add the package's first line to that inventory's deliberately
+    EMPTY dict.
 
     READ AS ``utf-8-sig``, NOT ``utf-8``, and this is the one decoding detail
     that matters. Every "cannot read it" path in this module ends in the
@@ -271,7 +284,7 @@ def check(profile_dir: PathLike, resolved_path: Optional[str]) -> dict[str, Any]
     * ``profile_stamp`` / ``chromium_version`` -- the raw strings, or ``None``.
     * ``message`` -- present only when ``ok`` is False.
     """
-    stamp = read_profile_stamp(profile_dir)
+    stamp = _read_profile_stamp(profile_dir)
     verdict: dict[str, Any] = {
         "ok": True,
         "profile_dir": str(profile_dir),
