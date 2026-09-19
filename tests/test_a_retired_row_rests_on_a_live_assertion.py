@@ -64,7 +64,14 @@ _CENSUS = (
 )
 
 #: A census table row: ``| C55 | capability | source | STATE | ...``.
-_ROW = re.compile(r"^\|\s*(C\d+)\s*\|[^|]*\|[^|]*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|")
+#:
+#: WIDENED 2026-09-19 from ``C\d+`` to ``[CM]\d+``. The messaging slice holds
+#: two id families and this read only one of them, so ``M23`` -- a mention row
+#: in the same action class as ``C10`` and ``C28`` -- could not have been bound
+#: here at all. A reader scoped to one prefix does not report the other as
+#: missing; it passes over it, which is the failure mode this file's own
+#: readability control exists to catch one level up.
+_ROW = re.compile(r"^\|\s*([CM]\d+)\s*\|[^|]*\|[^|]*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|")
 
 #: row id -> (required state, the shipped name it rests on, why in one line).
 #:
@@ -89,6 +96,44 @@ RETIRED_ON_A_SHIPPED_ASSERTION: dict[str, tuple[str, str, str]] = {
         "collaborators",
         "inviting a named collaborator carries a third party's identity into "
         "content this server publishes, and the invitee is notified",
+    ),
+    # -- added 2026-09-19: the half of the action-class ruling never applied --
+    #
+    # `_audit/2026-09-05-article-publish.md:82` reached the ruling and said
+    # what was still owed: "The ruling reaches the ACTION CLASS -- compose a
+    # mention or a tag into published content -- and whoever holds the map
+    # should apply it ROW BY ROW rather than take my count." It enumerated
+    # FOUR mention rows. Two were applied in `8a3df07`; these were not.
+    #
+    # `C9` is deliberately absent. The same document is headed "why
+    # celebration is conditional and not ruled outright" and says the template
+    # naming a third party was expected, not verified. Two waves have declined
+    # it for that reason and a third declining is the precondition still being
+    # unmet, not indecision.
+    #
+    # `C87`, `C88`, `C89` are deliberately absent too, and the same source
+    # rules them out BY ARTICLE ID: they are self-scoped privacy controls
+    # governing who may tag HIM, and "nothing above touches them".
+    "M23": (
+        "EXCLUDED-RULED",
+        "mentions",
+        "a mention in a group chat is the same composition act as C10 and C28 "
+        "on a conversational surface -- an entity the composer inserts, not "
+        "text, so typing @Name produces no mention",
+    ),
+    "C66": (
+        "EXCLUDED-RULED",
+        "mentions",
+        "mentioning group members in a conversation names third parties to "
+        "every other member of it, and is the fourth of the four mention rows "
+        "the ruling's own document enumerates",
+    ),
+    "C86": (
+        "EXCLUDED-RULED",
+        "tagged_people",
+        "a coordinate-anchored tag names a third party on media published to "
+        "others -- the TAG half of the action class, which is why five of the "
+        "thirteen forbidden names are tag spellings",
     ),
 }
 
