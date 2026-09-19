@@ -193,3 +193,5 @@ specified, then re-run these three. Two should resolve without an exemption
 entry. **The third, line 287's `role`, is a genuine open question and should be
 ruled rather than assumed** -- it is the one place in this brief where the
 closed-alphabet argument may not hold.
+
+**CORRECTED BY:** `_audit/2026-09-19-verdict-certifier.md` -- built and re-run the same day: two of three do resolve, but they are `_landing_class` and `is_read_url`, because `_why_refused` is refused a second time by the new proof over its `%`-interpolated return; and `_landing_class` returns five verdicts, not the three counted above.

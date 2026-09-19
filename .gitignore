@@ -200,3 +200,7 @@ shard-files.txt
 shard-plan.json
 junit.xml
 reports/
+
+# Agent worktrees. Each is its own checkout with its own .git file; git add -A
+# would otherwise stage them as embedded repositories.
+.claude/worktrees/

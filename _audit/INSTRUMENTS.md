@@ -3355,3 +3355,169 @@ not marshalling those. It carries no member name today, **and that is a fact
 about what LinkedIn happens to put there rather than a property anything
 enforces**; the navigation taint guard does not cover it, because a badge is not
 navigation-derived. Now counted with a `label_present` flag, not shown.
+
+
+## 20. The send control, 2026-09-19
+
+### 20.1 `tests/test_click_is_not_its_own_evidence.py` -- the positive control now runs BOTH shapes
+
+The one live tool that reaches another person has one liveness proof, in a file
+that is otherwise entirely refusals. **It was red for fourteen days and the red
+was the safety fix working.**
+
+`9503723` tightened `dom.SELECTED_RECIPIENT_JS` from `indexOf` to a word-bounded
+match and said in its own message that a label running a name onto a connection
+degree must refuse. The committing double builds its chip label from the pressed
+row's text, and the row runs the name onto the degree badge -- so the shipped
+matcher refused the double, and **the commit that tightened the gate broke the
+gate's own positive control and shipped.**
+
+Reproduced before anything was edited, and the branch is the whole diagnosis:
+the refusal was `3_needle_does_not_match`, which is reached only AFTER
+`total == 1`. **A chip WAS committed.** The failure was never "the flow stopped
+working", which is the single thing this control exists to detect.
+
+### 20.2 THE LAW: A CONTROL BUILT ON AN UNREAD SHAPE IS A HOSTAGE OF THE MATCHER
+
+`dom.RECIPIENT_CHIP_SELECTORS` has never matched anything on any real page. The
+double therefore encodes a GUESS about the label, and the moment the matcher was
+tightened, that guess became the thing under test -- silently, in a file whose
+subject is something else entirely.
+
+The tempting repair is to draw the label the way the matcher likes. **That is a
+ruling on an unread surface, entered as a test fix**, on a gate whose docstring
+says refusing a legitimate recipient *is the ruling and not a regression*.
+
+    The repair is to make the unread property a VARIABLE and assert the
+    RELATION. Run the control over both shapes; assert the verdict is
+    determined by the shape; answer neither half.
+
+`_committing(separator)` builds both pages, and the separator is the SAME
+variable `_row` already names for the listbox in that file -- a convention
+`tests/test_selectors_resolve.py` already cites, so the repair imports a settled
+vocabulary rather than inventing one.
+
+| shape | chips committed | typeahead gate | recipient gate | body / send |
+|---|---|---|---|---|
+| separated | 1 | proceeds, 1 press | proceeds, matches 1 | typed, pressed |
+| run-together | 1 | proceeds, 1 press | `3_needle_does_not_match`, matches 0 | neither |
+
+**Read the second column first.** `total` is 1 in BOTH rows, which is the
+separation `9503723`'s own four-case table was built to make: it tells "the
+matcher got stricter" apart from "the fixture stopped drawing". Both rows clear
+the typeahead gate with one press, so the difference is downstream of the click.
+And the pair is PROVED to be a pair -- a module-level assertion collapses the
+inserted separator out of the second page and requires it to equal the first
+exactly, failing loudly rather than degrading if its anchor rots.
+
+### 20.3 Shown failing THREE ways, and the mutations are named
+
+**(a) The shipped matcher against itself, minus one clause.**
+`test_the_shape_determination_is_one_clause_and_here_it_is_removed` reads both
+rails with `dom.SELECTED_RECIPIENT_JS` and again with that same source mutated,
+the word-boundary clause removed -- **imported and mutated, never rewritten**,
+because a hand-written loose matcher is a second implementation and this
+repository has twice measured a reimplementation disagreeing with the shipped
+instrument and been wrong. The anchor is asserted, so a moved target fails
+instead of silently comparing the matcher against itself.
+
+    shape           chips   shipped   loosened
+    separated         1        1         1
+    run-together      1        0         1
+
+The only zero is produced by one clause. That table is also the whole two-week
+regression in four numbers, and the loosened column is what the control was
+passing against before the fix.
+
+**(b) The repaired control against a dead flow.** `_recipient_gate` monkeypatched
+to refuse unconditionally: red at the `total == 1` assertion. The liveness duty
+survives the repair.
+
+**(c) Both controls against a reverted ruling.** The boundary clause
+monkeypatched back out of the SHIPPED constant: both red, the second naming
+exactly what moved.
+
+**RED-PROOFS BY MONKEYPATCH, NOT BY MUTATING THE TREE.** This file's own rule is
+to copy the package to a scratch directory first, because several agents write
+`linkedin_server/` concurrently. A pytest plugin in the scratchpad that
+monkeypatches the constant is strictly better than the copy: **it never touches
+disk at all**, so there is no window in which another wave can read or clobber a
+planted mutation, and no restore step to forget.
+
+### 20.4 A GATE THAT TESTS THE WRONG TREE CERTIFIES NOTHING -- `scripts/pre_commit_boundary_gate.py`
+
+Found by being refused. `REPO` was `Path(__file__).resolve().parent.parent`, and
+`.git/hooks/` is SHARED by every linked worktree, so the hook always invokes the
+MAIN checkout's copy of the gate. Meanwhile `git diff --cached` is answered from
+the `GIT_DIR` git exports into a hook, so the staged NAMES came from the
+worktree. **One tree's index, the other tree's files.**
+
+    main checkout   30 tests + 11 coupled = 41      <- what the hook ran
+    worktree        31 tests + 11 coupled = 42      <- what it was judging
+
+and the failure it named was the test the commit repaired.
+
+**THE SECOND DIRECTION IS THE DANGEROUS ONE AND IT NEEDED NO RED TO EXIST:** a
+guard a worktree commit BREAKS is checked against the main checkout's clean copy
+and ALLOWED. This register's own second law, applied to the gate itself.
+
+Same root cause as the interpreter bug fixed in `.git/hooks/pre-commit` the same
+day -- a path hard-coded against one checkout in a file every worktree shares --
+and **fixing only the tooling half converted a LOUD no-op into a SILENT
+mis-aim.** Before it, a worktree hook printed *"GATES DID NOT RUN. Allowing."*
+After it, the gate runs and certifies the wrong tree.
+
+Two roots now, deliberately different answers:
+
+    REPO  = git rev-parse --show-toplevel                 the tree being committed
+    TOOLS = dirname(git rev-parse --git-common-dir)       the one that owns venv/
+
+Content -- staged paths, coupling reads, the pytest plan, its cwd -- takes the
+first. Only the interpreter takes the second, because a linked worktree has no
+venv and that absence is not an infrastructure case. The git helper takes NO
+cwd: a hook runs at the top of the tree being committed and git exports
+`GIT_DIR` into it, so the ambient environment IS the answer, and pinning a cwd
+is what produced the split-brain read.
+
+    Practical form: when a check runs from a file that several checkouts
+    SHARE, ask which tree each of its inputs resolves against -- separately.
+    The index and the files are two different questions and this one answered
+    them from two different trees for as long as worktrees have existed here.
+
+### 20.5 TWO DOUBLES OF ONE UNOBSERVED SURFACE, IN TWO FILES, AND NOBODY RECONCILED THEM
+
+`tests/test_send_message_gate.py`'s static `_chip` draws the name alone, bounded
+on both sides, and sailed through `9503723`. The click-produced chip in
+`tests/test_click_is_not_its_own_evidence.py` runs the name onto the degree and
+did not. **Two guesses at the same never-observed rail, disagreeing, in a
+repository that says at length that nobody has seen a chip.**
+
+The tightening did not create the divergence -- it made it load-bearing, and it
+surfaced as a red in exactly one of the two files, which reads like a bug in
+that file rather than like an unreconciled guess. **Unifying them would be
+choosing a shape**, so they are left divergent and named here instead. The
+question closes when a chip is observed; the refusal's own `per_selector` counts
+are the instrument, and they come back without any accessible name being read.
+
+### 20.6 A DEAD CONSTANT WAS THE ONLY THING HOLDING A COUPLING OPEN
+
+Refactoring this file left `LISTBOX` defined and unreferenced. Deleting it is
+the obvious tidy, and the measurement before the delete is the entry:
+
+    coupled set with LISTBOX     ['tests/test_typeahead_gate.py']
+    coupled set without it       []
+
+The boundary gate SUBTRACTS any constant defined in several test files as a
+convention rather than a shared structure, and `TARGET` is one of those. So
+`LISTBOX` -- matched only in a COMMENT over there -- was the single name
+keeping the neighbouring gate's whole suite in the plan for every edit to this
+file. **Deleting dead code would have narrowed a gate, silently, which is
+verbatim the defect that gate's docstring exists to prevent.**
+
+It is kept, and made load-bearing rather than merely present: an import-time
+assertion requires it to appear in the inert composer, so it now pins which
+shape the load-bearing half of this file demonstrates the click over.
+
+    Practical form: before deleting an unreferenced module-level CONSTANT in
+    a tests/ file here, ask what it couples. `grep` the name across tests/ --
+    a hit in a COMMENT still counts, because the gate matches text.

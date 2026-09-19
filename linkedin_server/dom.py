@@ -9516,3 +9516,282 @@ async def read_collection_groupings(
         COLLECTION_GROUPINGS_JS,
         {"vocabulary": vocabulary, "html": html or ""},
     )
+
+
+#: Classify a SEARCH RESULTS page's anchors by CLOSED PATH SEGMENT SEQUENCE.
+#: :data:`ANCHOR_CLASSIFY_JS` one level sharper: THREE fixed segments instead
+#: of one or two, the query counted rather than dropped silently, and a
+#: traversal segment REFUSED instead of walked past. See
+#: ``linkedin_server/search_results.py`` -- the last of those is not a
+#: refinement, it is the defect the condition-2 amendment measured.
+SEARCH_RESULTS_JS = """
+(args) => {
+  const table = args.table || [];
+  const host = args.host || "";
+  const html = args.html || "";
+  const classes = args.classes || [];
+  const classCount = args.classCount || 0;
+  // THE DECISION IS A PURE FUNCTION, AND THAT IS NOT TIDINESS -- IT IS WHAT
+  // MAKES THE CONTROL RUNNABLE. ``classifyRoute`` closes over NOTHING: every
+  // input is a parameter and there is no DOM in it, so the SHIPPED SOURCE can
+  // be lifted out by brace-matching and run under V8, exactly as
+  // ``tests/test_compose_fields.py`` lifts ``shapeOf``. Before this split the
+  // classifier could only be exercised by loading a page, which meant the
+  // fixture's expected counts were a prediction NOBODY HAD EVER COMPUTED --
+  // and a control whose result nobody computed cannot fail.
+  //
+  // It returns INTEGERS: an index into ``routeClasses``, and two small flags.
+  // No string it was given is in its return value, on any path.
+  const classifyRoute = (raw, routeTable, routeClasses, expectedHost) => {
+    const indexOfClass = (token) => {
+      for (let i = 0; i < routeClasses.length; i += 1) {
+        if (routeClasses[i] === token) return i;
+      }
+      return -1;
+    };
+    if (!raw) { return { kind: indexOfClass("no_href"), query: 0, entity: -1 }; }
+    let path = raw;
+    let isExternal = false;
+    if (raw.indexOf("//") !== -1) {
+      const afterScheme = raw.slice(raw.indexOf("//") + 2);
+      const slash = afterScheme.indexOf("/");
+      const hostPart = slash === -1 ? afterScheme : afterScheme.slice(0, slash);
+      if (hostPart !== expectedHost) isExternal = true;
+      path = slash === -1 ? "/" : afterScheme.slice(slash);
+    }
+    if (isExternal) { return { kind: indexOfClass("off_search"), query: 0, entity: -1 }; }
+    // THE QUERY IS DROPPED BEFORE ANYTHING IS READ, and its PRESENCE is
+    // reported instead. On THIS surface the query is the needle -- it is where
+    // a person's name is typed -- so it is never a string in this process.
+    let query = 0;
+    const q = path.indexOf("?");
+    if (q !== -1) { query = 1; path = path.slice(0, q); }
+    const h = path.indexOf("#"); if (h !== -1) path = path.slice(0, h);
+    const segments = path.split("/").filter((s) => s.length > 0);
+    // THE TRAVERSAL RULE, AND IT RUNS BEFORE MATCHING ON PURPOSE. A dot
+    // segment anywhere makes a route UNJUDGEABLE from its leading segments:
+    // three segments of a people search can address something else entirely,
+    // and the denylist refuses that address's siblings while missing it. It
+    // is refused as a class of its own and NEVER resolved -- resolving it
+    // would mean this classifier deciding what a traversal means, which is
+    // the browser's job and not a shaper's.
+    for (const segment of segments) {
+      if (segment === ".." || segment === ".") {
+        return { kind: indexOfClass("traversal_refused"), query: query, entity: -1 };
+      }
+    }
+    let matched = -1;
+    for (const row of routeTable) {
+      // SEGMENT EQUALITY AT THREE FIXED POSITIONS -- the amended condition 2
+      // in code. Never a substring, never floating, and never fewer than the
+      // three the table declares.
+      if (segments.length < 3) continue;
+      if (segments[0] !== row[1]) continue;
+      if (segments[1] !== row[2]) continue;
+      if (segments[2] !== row[3]) continue;
+      matched = indexOfClass(row[0]);
+      break;
+    }
+    if (matched === -1) {
+      // "A SEARCH VERTICAL I DO NOT KNOW" AND "NOT A SEARCH" ARE DIFFERENT
+      // ANSWERS, and collapsing them would hide a new vertical appearing.
+      const token = (segments.length > 0 && segments[0] === "search")
+        ? "unclassified" : "off_search";
+      return { kind: indexOfClass(token), query: query, entity: -1 };
+    }
+    // THE ENTITY SEGMENT'S SHAPE, never its value -- groups.py's numeric
+    // rule, arriving at position 3 because this table closes three segments.
+    let entity = -1;
+    if (segments.length > 3) {
+      entity = /^[0-9]+$/.test(segments[3]) ? 0 : 1;
+    }
+    return { kind: matched, query: query, entity: entity };
+  };
+  // THE CONTROL PATH, identical in role to ANCHOR_CLASSIFY_JS's: the SAME
+  // classifier over a DETACHED document, so the demonstration that it
+  // classifies -- and that it refuses the adversarial routes -- costs no
+  // navigation. DOMParser, never a markup assignment; see anchors.py for the
+  // full reason, and note this comment does not spell the refused token.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  const anchors = Array.from(root.querySelectorAll("a"));
+  const counts = Array.from({ length: classCount }, () => 0);
+  let queriesPresent = 0;
+  let numericEntity = 0;
+  let nonNumericEntity = 0;
+  // THE LOOP HOLDS NO POLICY. Everything that decides anything is above, in
+  // the pure function; this only reads attributes and adds up integers, so a
+  // green control on ``classifyRoute`` really is a green control on the rule.
+  for (const node of anchors) {
+    const verdict = classifyRoute(node.getAttribute("href"), table, classes, host);
+    if (verdict.kind >= 0) counts[verdict.kind] += 1;
+    queriesPresent += verdict.query;
+    if (verdict.entity === 0) numericEntity += 1;
+    else if (verdict.entity === 1) nonNumericEntity += 1;
+  }
+  // INTEGERS ONLY. Every field below is a number, by construction.
+  return {
+    anchors: anchors.length,
+    counts: counts,
+    queries_present: queriesPresent,
+    numeric_entity: numericEntity,
+    non_numeric_entity: nonNumericEntity,
+  };
+}
+"""
+
+
+async def read_search_result_classes(
+    page: Any,
+    *,
+    table: list,
+    classes: list,
+    host: str,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`SEARCH_RESULTS_JS`. Returns counts and integers only.
+
+    ``html`` is the CONTROL path, as in :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        SEARCH_RESULTS_JS,
+        {
+            "table": table,
+            "classes": classes,
+            "classCount": len(classes),
+            "host": host,
+            "html": html or "",
+        },
+    )
+
+
+#: Which FILTERS a search page offers, matched against a CLOSED VOCABULARY
+#: supplied by the caller. Returns an index per control and counts, NEVER a
+#: label -- and on this surface that is not hygiene: a people-search filter's
+#: label can be ``Connections of <a person>``, so the matching happens in the
+#: page and only integers come back.
+#:
+#: ``menus.py`` classifies labels in PYTHON, which is correct for ITS surface
+#: because a menu label is a UI verb. **It is not correct here**, so the rule
+#: is applied one level earlier. The rule itself is the SAME rule, and
+#: ``tests/test_search_results.py`` measures the two engines agreeing rather
+#: than arguing that they do.
+FILTER_PANEL_JS = """
+(args) => {
+  const phrases = args.phrases || [];
+  const html = args.html || "";
+  const termCount = args.termCount || 0;
+  // NORMALISE, LIFTED FROM menus.py's RULE AND KEPT CHARACTER-COMPATIBLE.
+  // Lowercase, then collapse every non-word character to a single space --
+  // collapsed rather than stripped, so a slash-joined label cannot fuse into
+  // one token and match neither side. The word set is a-z0-9 exactly, which
+  // is what the Python side uses, so an accented label reduces the same way
+  // in both engines. A corpus test measures that; it is not assumed.
+  const normaliseLabel = (label) => {
+    const lower = (label || "").toLowerCase();
+    let out = "";
+    let previousSpace = true;
+    for (const character of lower) {
+      const isWord =
+        (character >= "a" && character <= "z") ||
+        (character >= "0" && character <= "9");
+      if (isWord) { out += character; previousSpace = false; }
+      else if (!previousSpace) { out += " "; previousSpace = true; }
+    }
+    return out.trim();
+  };
+  // THE MATCH, AND ITS ASYMMETRY IS THE WHOLE POINT. A SINGLE-WORD PHRASE
+  // MUST BE THE WHOLE LABEL; a multi-word phrase may be contained. That is
+  // menus.py's scar -- a single-word term matched inside a two-token label
+  // and counted a person as a menu item -- and it lands HERE on the hazard
+  // filters, because this vocabulary holds a single-word term that is a
+  // PREFIX of a two-word one. Without the asymmetry the person-valued
+  // filter and the degree filter are indistinguishable.
+  //
+  // Written as a token-window comparison rather than a substring test,
+  // because the scar it avoids WAS a substring test and a window cannot
+  // silently decay into one.
+  const matchPhrase = (haystack, phrase) => {
+    const words = haystack.split(" ").filter((w) => w.length > 0);
+    const needle = phrase.split(" ").filter((w) => w.length > 0);
+    if (needle.length === 0 || needle.length > words.length) return false;
+    if (needle.length === 1) {
+      return words.length === 1 && words[0] === needle[0];
+    }
+    for (let start = 0; start + needle.length <= words.length; start += 1) {
+      let matched = true;
+      for (let i = 0; i < needle.length; i += 1) {
+        if (words[start + i] !== needle[i]) { matched = false; break; }
+      }
+      if (matched) return true;
+    }
+    return false;
+  };
+  // THE CONTROL PATH, as in the other readers here. DOMParser, never a
+  // markup assignment; see anchors.py for the full reason.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  // FILTER PILLS ARE PRESSABLE CONTROLS, not headings -- measured on the
+  // collections page, where the live strip was 47 buttons and 0 matching
+  // headings. The same shape is assumed here and the DENOMINATOR is
+  // returned so a caller can tell "no filters" from "wrong selector".
+  const controls = Array.from(
+    root.querySelectorAll(
+      "button, [role='button'], [role='radio'], [role='checkbox'], " +
+      "[role='tab'], select, fieldset legend, [aria-label]"
+    )
+  );
+  const counts = Array.from({ length: termCount }, () => 0);
+  let matchedControls = 0;
+  let unmatchedControls = 0;
+  let emptyLabels = 0;
+  for (const node of controls) {
+    // The accessible name, preferring the explicit one. Either way it is
+    // normalised and compared IN HERE; neither form is ever returned.
+    const raw = node.getAttribute("aria-label") || node.textContent || "";
+    const label = normaliseLabel(raw);
+    if (!label) { emptyLabels += 1; continue; }
+    // PHRASES ARRIVE SORTED LONGEST-FIRST, so the two-word term is tried
+    // before the one-word term it contains. Order is the caller's, computed
+    // once in Python; this loop does not re-sort and must not.
+    let index = -1;
+    for (const pair of phrases) {
+      if (matchPhrase(label, pair[0])) { index = pair[1]; break; }
+    }
+    if (index === -1) { unmatchedControls += 1; continue; }
+    counts[index] += 1;
+    matchedControls += 1;
+  }
+  // INTEGERS ONLY. No label is in this return value, by construction.
+  return {
+    controls: controls.length,
+    counts: counts,
+    matched_controls: matchedControls,
+    unmatched_controls: unmatchedControls,
+    empty_labels: emptyLabels,
+  };
+}
+"""
+
+
+async def read_search_filters(
+    page: Any,
+    *,
+    phrases: list,
+    term_count: int,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`FILTER_PANEL_JS`. Returns indices and integers only.
+
+    ``phrases`` is ``[[normalised phrase, term index], ...]`` ALREADY SORTED
+    longest-first by the caller. ``html`` is the CONTROL path, as in
+    :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        FILTER_PANEL_JS,
+        {"phrases": phrases, "termCount": term_count, "html": html or ""},
+    )

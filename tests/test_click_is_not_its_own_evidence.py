@@ -155,25 +155,57 @@ TARGET = NAMED_RECIPIENT + TARGET_JOIN + MESSAGE_BODY
 # quoted whole-string spelling pass here and fail in production.
 
 
-def _option(name: str, degree: str) -> str:
+#: **THE SEPARATOR IS THE VARIABLE, AND IT IS THE SAME VARIABLE ``_row``
+#: NAMES FURTHER DOWN THIS FILE.** A row's accessible name is its whole text,
+#: so a span holding the name beside a span holding the degree computes as the
+#: two run together when nothing sits between them, and as two words when a
+#: space does. WHICH ONE LINKEDIN DRAWS HAS NEVER BEEN READ -- on the listbox
+#: or on the chip rail -- so both are built and neither is preferred.
+RUN_ON = ""
+SEPARATED = " "
+
+
+def _option(name: str, degree: str, separator: str = RUN_ON) -> str:
+    """One suggestion row, with the degree badge run onto the name or not.
+
+    The third argument exists because the chip this page's script appends is
+    built FROM this row's text, so the row's shape is the chip's shape. See
+    the note above ``_committing``.
+    """
     return (
         '<div role="option"><span>'
         + name
-        + "</span><span>"
+        + "</span>"
+        + separator
+        + "<span>"
         + degree
         + "</span></div>"
     )
 
 
-LISTBOX = (
-    '<div role="listbox">'
-    + _option(NAMED_RECIPIENT, "1st")
-    + _option(SOMEBODY_ELSE, "2nd")
-    + "</div>"
-)
+def _listbox(separator: str = RUN_ON) -> str:
+    return (
+        '<div role="listbox">'
+        + _option(NAMED_RECIPIENT, "1st", separator)
+        + _option(SOMEBODY_ELSE, "2nd", separator)
+        + "</div>"
+    )
 
 
-def _with_listbox(markup: str, extra: str = "") -> str:
+#: THE RUN-TOGETHER LISTBOX, AS A NAME, AND DO NOT DELETE IT AS DEAD.
+#:
+#: It is asserted into the inert composer below, so it is load-bearing here --
+#: and it is also THE ONLY CONSTANT THIS FILE DEFINES THAT COUPLES
+#: ``tests/test_typeahead_gate.py`` TO IT in the pre-commit boundary gate.
+#: MEASURED 2026-09-19 by deleting it: the coupled set went from that one file
+#: to EMPTY, because the gate subtracts any name defined in several test files
+#: as a convention and ``TARGET`` is one. So removing this would silently stop
+#: the neighbouring gate's suite from running on every edit to this file --
+#: verbatim the narrowing that gate's own docstring exists to prevent.
+LISTBOX = _listbox()
+
+
+def _with_listbox(markup: str, extra: str = "", separator: str = RUN_ON) -> str:
     """Put a typeahead under the composer. DERIVED, and it proves it changed.
 
     The same assertion ``_with_chips`` makes in the module that owns the base
@@ -181,7 +213,9 @@ def _with_listbox(markup: str, extra: str = "") -> str:
     stopped matching becomes a silent no-op, and the test built on it goes on
     passing while testing the base fixture under another name.
     """
-    out = markup.replace(CHIP_RAIL_EMPTY, CHIP_RAIL_EMPTY + LISTBOX + extra, 1)
+    out = markup.replace(
+        CHIP_RAIL_EMPTY, CHIP_RAIL_EMPTY + _listbox(separator) + extra, 1
+    )
     assert out != markup, (
         "the chip-rail anchor changed nothing, so this variant is the empty "
         "composer wearing another name. Repoint it, and do not delete this."
@@ -196,6 +230,14 @@ def _with_listbox(markup: str, extra: str = "") -> str:
 #:
 #: This is what "the click is not its own evidence" MEANS, drawn as a page.
 COMPOSER_TYPEAHEAD_INERT = _with_listbox(COMPOSER_MARKUP)
+
+# AND IT REALLY CARRIES THE RUN-TOGETHER LISTBOX. The inert half is the
+# load-bearing one, so a refactor that quietly changed which shape it draws
+# would change what "the click commits nobody" was demonstrated over.
+assert LISTBOX in COMPOSER_TYPEAHEAD_INERT, (
+    "the inert composer no longer contains the run-together listbox, so it is "
+    "demonstrating the click over a shape nobody chose. Do not delete this."
+)
 
 
 #: THE COMMITTING COMPOSER, and it carries a script for the reason
@@ -218,8 +260,13 @@ COMPOSER_TYPEAHEAD_INERT = _with_listbox(COMPOSER_MARKUP)
 #: WHAT IT PROVES: that the pipeline is ALIVE. Without it every assertion in
 #: this file would be satisfied by a ``perform`` that refused unconditionally,
 #: which is the shape a section full of refusals cannot distinguish.
-COMPOSER_TYPEAHEAD_COMMITS = _with_listbox(
-    COMPOSER_MARKUP,
+#:
+#: **AND THE CHIP IT APPENDS CARRIES THE ROW'S TEXT, WHICH IS WHY THIS PAGE
+#: COMES IN TWO SHAPES.** The label is the remove word plus whatever the row
+#: read as, so the separator chosen for the listbox is the separator the chip
+#: rail inherits. That makes ONE variable control both surfaces of this
+#: double, which is what lets the verdict be attributed to it.
+COMMIT_SCRIPT = (
     "<script>"
     "var railOf = function () { return document.getElementById('chip-rail'); };"
     "var bodyOf = function () {"
@@ -250,7 +297,45 @@ COMPOSER_TYPEAHEAD_COMMITS = _with_listbox(
     "  var send = sendOf();"
     "  if (body && send) { send.disabled = (body.textContent.trim().length === 0); }"
     "}, true);"
-    "</script>",
+    "</script>"
+)
+
+
+def _committing(separator: str) -> str:
+    """The committing composer, drawn with ONE shape of accessible name.
+
+    THE ONLY DIFFERENCE BETWEEN THE TWO PAGES THIS RETURNS IS THE SEPARATOR,
+    and that is asserted below rather than trusted -- a pair that differed in
+    any second respect could not attribute a difference in verdict to either.
+    """
+    return _with_listbox(COMPOSER_MARKUP, COMMIT_SCRIPT, separator)
+
+
+#: **THE SHAPE THE SHIPPED MATCHER REFUSES.** The degree badge runs onto the
+#: name with nothing between them, so the chip label holds the needle with a
+#: DIGIT immediately after it -- and ``dom.SELECTED_RECIPIENT_JS`` counts a
+#: letter or digit on either side of a hit as proof the needle is a fragment
+#: of a longer word. Refusing this is the 2026-09-05 ruling working, not a
+#: defect: that commit says in as many words that a label running a name onto
+#: a connection degree must refuse rather than match.
+COMPOSER_COMMITS_RUN_ON = _committing(RUN_ON)
+
+#: **THE SHAPE THE SHIPPED MATCHER ACCEPTS.** One space, and the needle is
+#: bounded by whitespace on both sides. Nothing else about this page differs.
+COMPOSER_COMMITS_SEPARATED = _committing(SEPARATED)
+
+
+# THE PAIR IS A PAIR, AND THIS IS THE PROOF. Collapsing the inserted
+# separator out of the second page must yield the first EXACTLY. If the anchor
+# below ever stops matching, ``replace`` becomes a no-op and the two strings
+# stay different -- so this assertion fails loudly rather than degrading into
+# a comparison of two pages that drifted apart for reasons nobody recorded.
+assert COMPOSER_COMMITS_RUN_ON == COMPOSER_COMMITS_SEPARATED.replace(
+    "</span> <span>", "</span><span>"
+), (
+    "the two committing composers differ in more than the separator, so no "
+    "difference in verdict between them can be attributed to the shape of an "
+    "accessible name. Rebuild them from _committing and do not delete this."
 )
 
 
@@ -358,27 +443,195 @@ async def test_the_receipt_does_not_call_a_typeahead_press_a_submit(
 async def test_a_click_that_does_commit_reaches_the_body_and_the_send(
     writes_on, over
 ):
-    """THE POSITIVE CASE, and it goes here for the reason it always does.
+    """THE POSITIVE CASE, RUN OVER BOTH SHAPES, ANSWERING NEITHER HALF.
 
-    A file full of refusals passes perfectly against a ``perform`` that refuses
-    unconditionally. This is the test that fails if the flow stops working.
+    A file full of refusals passes perfectly against a ``perform`` that
+    refuses unconditionally. This is the test that fails if the flow stops
+    working -- and from 2026-09-05 to 2026-09-19 it was the test that failed
+    while the flow worked fine, which is a worse state than either.
+
+    WHAT HAPPENED, BECAUSE THE RED WAS NOT A BUG IN EITHER HALF. ``9503723``
+    tightened ``dom.SELECTED_RECIPIENT_JS`` to a word-bounded match and said
+    in its own message that a label running a name onto a connection degree
+    must refuse. This double's chip carries exactly that label, because the
+    script copies the pressed row's text. So the gate refused the double, the
+    positive control went red, and the commit that tightened the gate shipped
+    with the gate's own liveness proof broken.
+
+    **THE REPAIR IS NOT TO PICK A SEPARATOR.** Which shape LinkedIn draws on
+    the chip rail has never been read -- ``dom.RECIPIENT_CHIP_SELECTORS`` has
+    never matched anything on any real page, and both this file and
+    ``tests/test_the_needle_is_matched_as_a_bare_substring.py`` say so at
+    length. Turning this green by drawing the label the way the matcher likes
+    would be RULING on an unread surface from inside a fixture, and it would
+    smuggle that ruling in as a test fix.
+
+    SO THE CONTROL RUNS BOTH SHAPES AND ASSERTS THE VERDICT IS SHAPE-
+    DETERMINED. Three claims, and the third is the one that needed the pair:
+
+      1. THE PIPELINE IS ALIVE. On the shape the shipped matcher accepts, the
+         run reaches the body fill and the send press. An unconditional
+         refuser fails this, which is the duty this test has always had.
+      2. THE REFUSAL IS A MATCHER VERDICT, NOT AN ABSENT CHIP. On the other
+         shape ``total`` is still 1 -- a recipient WAS committed by the same
+         click -- and the refusal is ``3_needle_does_not_match``. That is the
+         separation ``9503723``'s own four-case table was built to make, and
+         without it a refusal here would prove only that the fixture stopped
+         drawing.
+      3. NOTHING UPSTREAM MOVED. Both runs clear the typeahead gate with one
+         press, so the difference between them is downstream of the click and
+         attributable to the label's shape alone.
+
+    WHAT THIS TEST DOES NOT CLAIM, and the omission is deliberate: that
+    LinkedIn draws either shape, that the accepted one is the live one, or
+    that the matcher is right for this rail. It asserts a RELATION between two
+    doubles. The question of which shape is real needs a chip observed, and
+    the refusal's own per-selector counts are how that gets read.
     """
-    block = await over(
-        COMPOSER_TYPEAHEAD_COMMITS,
-        lambda page: _run(page, COMPOSER_TYPEAHEAD_COMMITS),
+    accepted = await over(
+        COMPOSER_COMMITS_SEPARATED,
+        lambda page: _run(page, COMPOSER_COMMITS_SEPARATED),
+    )
+    refused = await over(
+        COMPOSER_COMMITS_RUN_ON,
+        lambda page: _run(page, COMPOSER_COMMITS_RUN_ON),
     )
 
-    assert block["typeahead_gate"]["proceeded"] is True, block["typeahead_gate"]
-    assert block["recipient_gate"]["proceeded"] is True, block["recipient_gate"]
-    assert block["send_gate"] is not None
-    assert block["send_gate"]["proceeded"] is True, block["send_gate"]
+    # 3. NOTHING UPSTREAM MOVED. Asserted first, because every claim below is
+    # about what happened AFTER the press and means nothing if the press
+    # itself differed between the two runs.
+    for block in (accepted, refused):
+        assert block["typeahead_gate"]["proceeded"] is True, block["typeahead_gate"]
+        assert block["clicked"]["error"] is None, block["clicked"]
+        assert block["clicked"]["typeahead_clicks"] == 1, block["clicked"]
+
+    # 2. A RECIPIENT WAS COMMITTED IN BOTH. The same click, the same rail, one
+    # chip each. So the refusal below is the matcher speaking and not the
+    # fixture falling silent.
+    assert accepted["recipient_gate"]["observed"]["total"] == 1, accepted[
+        "recipient_gate"
+    ]["observed"]
+    assert refused["recipient_gate"]["observed"]["total"] == 1, refused[
+        "recipient_gate"
+    ]["observed"]
+
+    # 1. THE PIPELINE IS ALIVE on the shape the shipped matcher accepts.
+    assert accepted["recipient_gate"]["proceeded"] is True, accepted["recipient_gate"]
+    assert accepted["recipient_gate"]["observed"]["matches"] == 1
+    assert accepted["send_gate"] is not None
+    assert accepted["send_gate"]["proceeded"] is True, accepted["send_gate"]
 
     # TWO CLICKS AND ONE OF THEM WAS THE SUGGESTION. The receipt reports both
     # numbers rather than one that has to be interpreted.
-    assert block["clicked"]["clicks_made"] == 2, block["clicked"]
-    assert block["clicked"]["typeahead_clicks"] == 1, block["clicked"]
-    assert block["typed_text"]["submit_was_pressed"] is True
-    assert block["typed_text"]["left_in_the_composer"] is False
+    assert accepted["clicked"]["clicks_made"] == 2, accepted["clicked"]
+    assert accepted["typed_text"]["submit_was_pressed"] is True
+    assert accepted["typed_text"]["left_in_the_composer"] is False
+
+    # AND THE OTHER SHAPE STOPS AT THE GATE, with his words never typed --
+    # which is the ruling's accepted cost, drawn as a run.
+    assert refused["recipient_gate"]["proceeded"] is False, refused["recipient_gate"]
+    assert refused["recipient_gate"]["observed"]["matches"] == 0
+    assert (
+        refused["recipient_gate"]["refused_condition"] == "3_needle_does_not_match"
+    ), refused["recipient_gate"]
+    assert refused["send_gate"] is None, refused["send_gate"]
+    assert refused["clicked"]["clicks_made"] == 1, refused["clicked"]
+    assert refused["typed_text"]["submit_was_pressed"] is False
+    assert refused["typed_text"]["left_in_the_composer"] is True
+
+
+def _matcher_without_its_boundary_clause() -> str:
+    """The SHIPPED script with its word-boundary clause taken out. MUTATED.
+
+    NOT A REWRITE. The source comes from ``dom.SELECTED_RECIPIENT_JS`` and
+    one clause is removed from it, because a hand-written "loose matcher"
+    would be a second implementation and this repository has already paid
+    twice for a reimplementation that disagreed with the shipped instrument.
+
+    THE ANCHOR IS ASSERTED. A mutation whose target has moved silently
+    returns the original script, and the control built on it would then
+    compare the shipped matcher against itself and go green for the worst
+    possible reason.
+    """
+    anchor = "if (!wordish.test(before) && !wordish.test(after)) { return true; }"
+    source = dom.SELECTED_RECIPIENT_JS
+    assert anchor in source, (
+        "the word-boundary clause this control mutates is no longer spelled "
+        "the way it was on 2026-09-05. Re-point the anchor; do not delete "
+        "this control, because without it the discrimination asserted above "
+        "has never been shown able to fail."
+    )
+    mutated = source.replace(anchor, "return true;", 1)
+    assert mutated != source
+    return mutated
+
+
+async def _press_and_count(over, html: str) -> tuple[dict, dict]:
+    """Press the suggestion, then read the rail with BOTH matchers.
+
+    Returns ``(shipped, loosened)``. The press is aimed with the shipped
+    selector rather than a hand-written one, for the reason that function's
+    own docstring gives: the row is drawn from somebody's name, so the aim is
+    the name and it is resolved inside the browser.
+    """
+
+    async def work(page):
+        await page.locator(dom.typeahead_option_selector(NAMED_RECIPIENT)).click()
+        shipped = await dom.read_selected_recipients(page, NAMED_RECIPIENT)
+        loosened = await page.evaluate(
+            _matcher_without_its_boundary_clause(),
+            {
+                "needle": NAMED_RECIPIENT,
+                "selectors": list(dom.RECIPIENT_CHIP_SELECTORS),
+            },
+        )
+        return shipped, dict(loosened or {})
+
+    return await over(html, work)
+
+
+async def test_the_shape_determination_is_one_clause_and_here_it_is_removed(
+    over,
+):
+    """**THE CONTROL SHOWN FAILING.** A check that cannot fail certifies
+    nothing, and the check above asserts that two verdicts DIFFER -- the
+    easiest kind of assertion to hold green by accident.
+
+    So the same two rails are read twice: once with the shipped matcher, once
+    with the shipped matcher minus its word-boundary clause. The shipped one
+    separates the shapes. The loosened one does not, and it is the matcher
+    this gate actually had until 2026-09-05.
+
+        shape        chips   shipped matches   loosened matches
+        separated      1            1                 1
+        run-together   1            0                 1
+
+    READ THE SECOND COLUMN FIRST. A chip is committed in all four readings,
+    so no cell in this table is explained by a fixture that stopped drawing.
+    The only zero in it is produced by one clause, and removing that clause
+    removes it -- which is what makes ``the verdict is shape-determined`` a
+    claim with a demonstrated failure mode rather than a coincidence.
+
+    IT ALSO DATES THE RED. The loosened column is what the positive control
+    was passing against before ``9503723``, so this table is the whole
+    two-week regression in four numbers, and neither column decides what
+    LinkedIn draws.
+    """
+    sep_shipped, sep_loose = await _press_and_count(over, COMPOSER_COMMITS_SEPARATED)
+    run_shipped, run_loose = await _press_and_count(over, COMPOSER_COMMITS_RUN_ON)
+
+    # THE SECOND COLUMN. One committed chip in every reading.
+    for reading in (sep_shipped, sep_loose, run_shipped, run_loose):
+        assert reading["total"] == 1, reading
+
+    # THE SHIPPED MATCHER DISCRIMINATES.
+    assert sep_shipped["matches"] == 1, sep_shipped
+    assert run_shipped["matches"] == 0, run_shipped
+
+    # AND WITHOUT THE CLAUSE IT DOES NOT, so the assertion it supports has
+    # been shown able to go red.
+    assert sep_loose["matches"] == 1, sep_loose
+    assert run_loose["matches"] == 1, run_loose
 
 
 #: THE NAMES THAT ARE ONLY EVER ON THE PAGE, never in his request. Every one
@@ -413,7 +666,11 @@ async def test_no_name_this_server_merely_READ_reaches_the_receipt(
     Per WORD rather than per name, because a partial leak is still a leak: a
     receipt carrying one distinctive token has published a person.
     """
-    for html in (COMPOSER_TYPEAHEAD_INERT, COMPOSER_TYPEAHEAD_COMMITS):
+    for html in (
+        COMPOSER_TYPEAHEAD_INERT,
+        COMPOSER_COMMITS_RUN_ON,
+        COMPOSER_COMMITS_SEPARATED,
+    ):
         block = await over(html, lambda page: _run(page, html))
         rendered = json.dumps(block, default=str).lower()
         for name in READ_ONLY_NAMES:
@@ -436,7 +693,11 @@ async def test_his_own_needle_never_leaks_out_of_a_block_that_READ_the_page(
     the single most natural thing to write into a refusal message and the
     reason this assertion exists rather than being assumed from the design.
     """
-    for html in (COMPOSER_TYPEAHEAD_INERT, COMPOSER_TYPEAHEAD_COMMITS):
+    for html in (
+        COMPOSER_TYPEAHEAD_INERT,
+        COMPOSER_COMMITS_RUN_ON,
+        COMPOSER_COMMITS_SEPARATED,
+    ):
         block = await over(html, lambda page: _run(page, html))
         for key in READING_BLOCKS:
             rendered = json.dumps(block.get(key), default=str).lower()

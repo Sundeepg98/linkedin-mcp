@@ -32,6 +32,7 @@ checkout is a legitimate state and only the caller knows whether this one is.
 
 from __future__ import annotations
 
+import pathlib
 import subprocess
 import unittest.mock as mock
 
@@ -40,8 +41,11 @@ import pytest
 from linkedin_server import server as server_module
 from linkedin_server.server import (
     BUILD,
+    BUILD_DIGEST,
+    BUILD_MODULES,
     STALE_PROCESS_KEY,
     _announce_staleness,
+    _digest_of,
     _head_commit_on_disk,
     _staleness,
     linkedin_server_info,
@@ -98,7 +102,7 @@ def test_a_stale_process_announces_itself_in_an_ordinary_payload():
     helper: the caller must not have to ask."""
     with mock.patch.object(
         server_module, "BUILD", BUILD.__class__(**{**BUILD.as_dict(), "commit": "0" * 12})
-    ):
+    ), mock.patch.object(server_module, "BUILD_DIGEST", "0" * 12):
         out = _announce_staleness({"rows": []})
     assert STALE_PROCESS_KEY in out, out
     block = out[STALE_PROCESS_KEY]
@@ -192,7 +196,14 @@ async def test_a_real_tool_call_carries_it_through_the_decorator():
     network, so the assertion is about the wrapper and nothing else.
     """
     fake = BUILD.__class__(**{**BUILD.as_dict(), "commit": "0" * 12})
-    with mock.patch.object(server_module, "BUILD", fake):
+    # THE BUILD IS FAKED TOO, and that is the 2026-09-19 ruling showing in a
+    # test. Staleness is now decided by the BYTES of the loaded modules, not
+    # by the commit, so moving the commit alone no longer makes a process
+    # stale -- it makes it "commit moved, build did not", which is the whole
+    # point. A process is stale when its loaded source differs from disk.
+    with mock.patch.object(server_module, "BUILD", fake), mock.patch.object(
+        server_module, "BUILD_DIGEST", "0" * 12
+    ):
         payload = await linkedin_server_info()
 
     assert STALE_PROCESS_KEY in payload, sorted(payload)
@@ -206,3 +217,196 @@ async def test_a_real_tool_call_carries_it_through_the_decorator():
         "a healthy process is adding the top-level key, so its presence no "
         "longer distinguishes a stale answer from an ordinary one"
     )
+
+
+# ===========================================================================
+# COMMIT IDENTITY IS NOT BUILD IDENTITY  (2026-09-19)
+#
+# THE DEFECT, MEASURED TWICE IN ONE DAY. This detector compared the commit the
+# process was imported at against the commit on disk. That is the right
+# question asked of the wrong object. On 2026-09-19 it stopped Tier 1 for ten
+# minutes on a delta that genuinely touched writes.py, readonly.py, server.py
+# and dom.py -- CORRECTLY, and that arm must survive any change here. Then it
+# blocked Tier 2 on the delta 5c5ebf9dda43..70d7c0f62e97, which was ONE
+# MARKDOWN FILE, +142 lines, ZERO PYTHON. A neighbour committing a DOCUMENT
+# flipped a write gate red on a process whose loaded Python was provably
+# identical to disk. On a multi-writer tree that is every neighbour, all day.
+#
+# BOTH ARMS ARE ASSERTED BELOW, because a detector shown only not-firing has
+# been shown nothing: the only way to make the doc-only case quiet is to make
+# the whole thing quiet, and that trade is strictly worse than the over-report
+# it fixes. These tests fail in opposite directions, so no single mistake
+# satisfies both.
+# ===========================================================================
+
+
+def _with_commit(commit: str):
+    """The process presenting as imported from ``commit``. Build untouched."""
+    return mock.patch.object(
+        server_module, "BUILD", BUILD.__class__(**{**BUILD.as_dict(), "commit": commit})
+    )
+
+
+def test_arm_b_a_document_only_commit_does_not_make_a_process_stale():
+    """ARM B -- THE OVER-REPORT THIS WAVE EXISTS TO REMOVE.
+
+    The commit moves and not one byte of loaded Python does. The old detector
+    could only say "stale"; this one must say "the commit moved and the build
+    did not", because the code answering you IS the code on disk.
+    """
+    with _with_commit("0" * 12):
+        block = _staleness()
+    assert block["commit_moved"] is True, block
+    assert block["stale"] is False, (
+        "ARM B REGRESSION: a delta with zero Python still fires, which is the "
+        "exact defect measured on 2026-09-19"
+    )
+    assert block["loaded_build"] == block["disk_build"], block
+    assert "BUILD DID NOT" in block["why"], block["why"]
+    # And an ordinary payload stays byte-identical: not stale is silence.
+    assert _announce_staleness({"a": 1}) == {"a": 1}
+
+
+def test_arm_a_a_python_delta_still_fires():
+    """ARM A -- THE STOP THAT WAS RIGHT, AND MUST STILL HAPPEN.
+
+    The same commit move, but the loaded source no longer matches disk. This
+    is the Tier 1 case: writes.py moved under a running write gate. Firing
+    through an unknown build of the write machinery is the worst available
+    outcome, so this stays a hard, loud report.
+    """
+    with _with_commit("0" * 12), mock.patch.object(
+        server_module, "BUILD_DIGEST", "0" * 12
+    ):
+        block = _staleness()
+    assert block["commit_moved"] is True, block
+    assert block["stale"] is True, "ARM A REGRESSION: a real Python delta went quiet"
+    assert block["loaded_build"] != block["disk_build"], block
+    assert "restart" in block["why"].lower(), block["why"]
+
+
+def test_arm_a2_an_uncommitted_edit_to_a_loaded_module_is_stale():
+    """STRICTLY LOUDER, NOT QUIETER -- the case the old detector could not see.
+
+    The commit is unchanged, so commit identity reads a clean bill. The bytes
+    of a loaded module are not. This is an ordinary developer box mid-edit, and
+    it is a process running code that exists nowhere else; the previous
+    implementation certified it as fresh by construction.
+    """
+    with mock.patch.object(server_module, "BUILD_DIGEST", "0" * 12):
+        block = _staleness()
+    assert block["commit_moved"] is False, block
+    assert block["stale"] is True, (
+        "an uncommitted edit to a loaded module is invisible again -- the "
+        "change bought sensitivity on documents and sold it on working edits"
+    )
+    assert "never committed" in block["why"], block["why"]
+
+
+def test_the_digest_is_taken_over_real_bytes_and_not_a_mock(tmp_path):
+    """THE CONTROL UNDER BOTH ARMS. Every arm above fakes a digest; this
+    proves the digest actually tracks bytes on disk.
+
+    Without it ``_digest_of`` could return a constant and all four arms would
+    still pass.
+
+    IT DOES NOT EDIT REPOSITORY SOURCE. An earlier draft of this test appended
+    a comment to the real ``writes.py`` and restored it in ``finally``, which
+    works and is still the wrong shape: a suite that momentarily mutates the
+    module under test is a suite that cannot be run beside anything, and this
+    package's whole multi-writer discipline exists because that class of edit
+    is the one nobody can recover from. A throwaway module in ``tmp_path``
+    proves the same thing -- the digest reads a file and changes when the file
+    does -- and touches nothing anyone else can be reading.
+    """
+    import sys
+    import types
+
+    probe = tmp_path / "digest_probe.py"
+    probe.write_text("X = 1\n", encoding="utf-8")
+    module = types.ModuleType("linkedin_server._digest_probe")
+    module.__file__ = str(probe)
+    names = ("linkedin_server._digest_probe",)
+
+    with mock.patch.dict(sys.modules, {"linkedin_server._digest_probe": module}):
+        first, why_not = _digest_of(names)
+        assert first is not None and why_not is None, why_not
+
+        probe.write_text("X = 2\n", encoding="utf-8")
+        second, _ = _digest_of(names)
+        assert second != first, (
+            "changing a module's bytes did not move the digest -- it is "
+            "reading something other than the file"
+        )
+
+        probe.write_text("X = 1\n", encoding="utf-8")
+        assert _digest_of(names)[0] == first, "the digest is not deterministic"
+
+
+def test_the_frozen_digest_agrees_with_a_fresh_one_over_real_source():
+    """AND THE REAL SET IS REAL. The tmp_path control proves the mechanism;
+    this proves it is pointed at this package's actual files."""
+    fresh, why_not = _digest_of(BUILD_MODULES)
+    assert why_not is None, why_not
+    assert fresh == BUILD_DIGEST, (fresh, BUILD_DIGEST)
+    import sys
+
+    for name in BUILD_MODULES:
+        path = pathlib.Path(sys.modules[name].__file__)
+        assert path.is_file(), path
+        assert path.suffix == ".py", path
+
+
+def test_the_digest_covers_the_write_machinery_it_is_guarding():
+    """A DIGEST OVER THE WRONG SET GUARDS NOTHING. The modules the write gate
+    depends on must be inside the compared set, by name."""
+    assert len(BUILD_MODULES) > 5, BUILD_MODULES
+    for required in (
+        "linkedin_server.writes",
+        "linkedin_server.readonly",
+        "linkedin_server.server",
+        "linkedin_server.dom",
+    ):
+        assert required in BUILD_MODULES, (required, BUILD_MODULES)
+
+
+def test_an_unreadable_source_is_reported_and_never_skipped():
+    """UNREADABLE IS NOT UNCHANGED. Skipping a file that cannot be read would
+    shrink the compared set in silence, which is the one failure mode this
+    detector may not have."""
+    digest, why_not = _digest_of(("linkedin_server.no_such_module",))
+    assert digest is None
+    assert why_not and "no_such_module" in why_not
+
+
+def test_a_missing_commit_does_not_silence_the_build_reading():
+    """A WORKTREE IS THE ORDINARY CASE, NOT AN EDGE ONE. When the commit
+    cannot be compared, a DIFFERING digest is still positive evidence of
+    staleness and must be reported as such rather than as "cannot tell"."""
+    with mock.patch.object(
+        server_module, "_head_commit_on_disk", lambda: (None, "no .git here")
+    ), mock.patch.object(server_module, "BUILD_DIGEST", "0" * 12):
+        block = _staleness()
+    assert block["commit_moved"] is None, block
+    assert block["stale"] is True, (
+        "the commit was unreadable and the build provably moved, and this "
+        "reported 'cannot tell' -- silence bought with available evidence"
+    )
+
+
+def test_the_branch_ref_resolves_inside_a_linked_worktree():
+    """MEASURED 2026-09-19: THIS DETECTOR WAS BLIND IN EVERY WORKTREE.
+
+    A linked worktree's gitdir holds its own HEAD but neither ``refs/`` nor
+    ``packed-refs`` -- those stay in the main checkout, named by a
+    ``commondir`` file. Without that hop the ref lookup missed and the whole
+    answer degraded to "cannot tell" in exactly the trees the fleet works in.
+    Asserted here against git itself, so it holds in a worktree and in a
+    normal checkout alike.
+    """
+    commit, why_not = _head_commit_on_disk()
+    assert commit is not None, why_not
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    )
+    assert commit == proc.stdout.strip()

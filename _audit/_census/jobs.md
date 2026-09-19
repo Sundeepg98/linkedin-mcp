@@ -264,9 +264,9 @@ Every alert WRITE is a GAP. Everything the alerts DELIVER is served by the skill
 | 68 | Save an application as a draft / resume one | a8684146 | GAP | -- |
 | 69 | Discard a draft application | a8684146 | XR | `server.py:988` names the control and declines it: a "Delete" control, "**never pressed from here**", behind a dialog "this server does not act on either" |
 | 70 | Upload a NEW resume | a510363 | GAP | -- |
-| 71 | List / delete stored resumes (max 4) | a510363, a512405 | GAP | -- |
+| 71 | List / delete stored resumes (max 4) | a510363, a512405 | EXCLUDED-RULED | -- **REFUSED BY THE SECOND GATE, WHICH IS THIS CENSUS'S OWN NAMED BAR FOR A RULING.** Stored resumes are managed under `/jobs/application-settings/`, and `/jobs/application` is an entry on `readonly._FORBIDDEN_URL_SUBSTRINGS` -- checked before the allowlist, so no pattern edit could reach it. Measured: `is_read_url` returns REFUSE. The blocker this row already carries, `JOBS-APPLICATION-FORBIDDEN`, is that gate wearing its own name. THE ROW IS COMPOUND -- "list / delete" carries a write verb -- but the substring closes both halves identically, so the state does not depend on which half is read. |
 | 72 | Download a stored resume | a8313636 | GAP | -- |
-| 73 | See which resume was submitted for a given application | a506680 | GAP | -- |
+| 73 | See which resume was submitted for a given application | a506680 | EXCLUDED-RULED | -- As `J 71`, and on the same gate. The capability necessarily addresses an application, and `/jobs/application` is an entry on `readonly._FORBIDDEN_URL_SUBSTRINGS`, checked before the allowlist -- measured: `is_read_url` returns REFUSE. No tool reaches it and no allowlist edit could. |
 | 74 | Toggle "Share resume data with recruiters" | a1327213 | XR | `readonly.py:521` -- `/mypreferences/d/categories/` is on the forbidden-substring list; `server.py:4400` -- "ONE SETTING IS WRITABLE" (dark mode) |
 | 75 | Toggle "Share your full profile when you click Apply" (and the Undo banner) | a512339 | XR | same settings-family refusal |
 | 76 | Opt out of saving job-application data | a507694 | XR | same settings-family refusal |

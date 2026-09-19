@@ -299,9 +299,11 @@ line:
 from __future__ import annotations
 
 import functools
+import hashlib
 import inspect
 import logging
 import re
+import sys
 from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlencode, urlsplit
@@ -381,6 +383,76 @@ CLOCK = buildinfo.ProcessClock()
 #: without having asked for it.
 STALE_PROCESS_KEY = "stale_process"
 
+#: The package whose identity a write gate actually depends on. NOT "the
+#: repository": this process's own Python. A neighbour committing an audit
+#: document moves the repository and changes nothing here.
+_CODE_PACKAGE = "linkedin_server"
+
+
+def _digest_of(names: tuple[str, ...]) -> tuple[Optional[str], Optional[str]]:
+    """One digest over the SOURCE FILES of exactly ``names``, read from disk.
+
+    NO SUBPROCESS, by the same rule that shaped ``_head_commit_on_disk``:
+    ``test_build_echo.test_the_stamp_is_not_re_resolved_per_call`` forbids git
+    on a request path, correctly -- a hung git behind a five-second timeout
+    would hold a tool answer hostage. This is plain file I/O over a few dozen
+    files, which is also why ``git diff --stat loaded..disk`` was refused as
+    the fix: it is the obvious comparison and it is a subprocess.
+
+    THE MODULE NAME IS HASHED WITH ITS BYTES. Hashing bytes alone would let a
+    rename that swaps two files' contents pass as unchanged.
+
+    Returns ``(digest, None)`` or ``(None, why not)``. An unreadable source
+    file is NOT skipped. Skipping it would shrink the covered set in silence
+    and quieten the detector, which is the one failure mode forbidden here:
+    a detector that stops reporting a real staleness is worse than one that
+    over-reports.
+    """
+    h = hashlib.sha256()
+    for name in names:
+        module = sys.modules.get(name)
+        path = getattr(module, "__file__", None)
+        if not path:
+            return None, "%s is no longer loaded, or has no source file" % name
+        try:
+            body = Path(path).read_bytes()
+        except OSError:
+            return None, "the source of %s could not be read" % name
+        h.update(name.encode("utf-8"))
+        h.update(b"\x00")
+        h.update(hashlib.sha256(body).digest())
+    return h.hexdigest()[:12], None
+
+
+def _loaded_python_modules() -> tuple[str, ...]:
+    """The ``linkedin_server`` modules THIS PROCESS imported, by name.
+
+    Frozen at import into :data:`BUILD_MODULES` and never recomputed. A module
+    imported lazily AFTER import would otherwise join the set mid-life and make
+    the digest differ from itself -- reporting a change nobody made, which is
+    the over-report this whole wave exists to remove.
+    """
+    return tuple(
+        sorted(
+            name
+            for name in list(sys.modules)
+            if (name == _CODE_PACKAGE or name.startswith(_CODE_PACKAGE + "."))
+            and getattr(sys.modules.get(name), "__file__", None)
+            and str(sys.modules[name].__file__).endswith(".py")
+        )
+    )
+
+
+#: The module set whose bytes get compared, frozen with the process. Sorted,
+#: so the digest is stable across runs of the same code.
+BUILD_MODULES = _loaded_python_modules()
+
+#: The digest of that source AS THIS PROCESS LOADED IT. Taken at import, while
+#: the files on disk still are what was just read into memory, then frozen for
+#: the same reason ``BUILD`` is: a digest re-taken inside a stale process would
+#: report what is on disk NOW and read as confirmation that the fix is loaded.
+BUILD_DIGEST, BUILD_DIGEST_WHY_NOT = _digest_of(BUILD_MODULES)
+
 
 def _head_commit_on_disk() -> tuple[Optional[str], Optional[str]]:
     """The checkout's current HEAD, read from FILES. Never a subprocess.
@@ -421,24 +493,44 @@ def _head_commit_on_disk() -> tuple[Optional[str], Optional[str]]:
     ref = head.partition("ref:")[2].strip()
     if not ref:
         return None, "the .git/HEAD ref line names no ref"
+
+    # WHERE REFS ACTUALLY LIVE. A linked worktree's gitdir holds its own HEAD
+    # but NOT refs/ and NOT packed-refs -- those stay in the main checkout, and
+    # the worktree names it in a ``commondir`` file. Without this hop the
+    # lookup below misses in every worktree, and the whole answer degrades to
+    # "cannot tell": measured 2026-09-19, this detector was blind in every
+    # worktree the fleet works in, which is all of them.
+    search = [git_path]
     try:
-        return (git_path / ref).read_text(encoding="ascii").strip(), None
+        common = (git_path / "commondir").read_text(encoding="ascii").strip()
     except OSError:
-        pass
+        common = ""
+    if common:
+        common_path = Path(common)
+        if not common_path.is_absolute():
+            common_path = (git_path / common_path).resolve()
+        search.append(common_path)
+
+    for base in search:
+        try:
+            return (base / ref).read_text(encoding="ascii").strip(), None
+        except OSError:
+            pass
     # A ref that has been packed away has no loose file. This is the ordinary
     # state of a freshly cloned repository, not an error.
-    try:
-        packed = (git_path / "packed-refs").read_text(
-            encoding="ascii", errors="replace"
-        )
-    except OSError:
-        return None, "the branch ref is neither loose nor in packed-refs"
-    for line in packed.splitlines():
-        if line.startswith(("#", "^")):
+    for base in search:
+        try:
+            packed = (base / "packed-refs").read_text(
+                encoding="ascii", errors="replace"
+            )
+        except OSError:
             continue
-        sha, _, name = line.partition(" ")
-        if name.strip() == ref:
-            return sha.strip(), None
+        for line in packed.splitlines():
+            if line.startswith(("#", "^")):
+                continue
+            sha, _, name = line.partition(" ")
+            if name.strip() == ref:
+                return sha.strip(), None
     return None, "the branch ref is neither loose nor in packed-refs"
 
 
@@ -463,40 +555,172 @@ def _staleness() -> dict[str, Any]:
     ``None``: this cannot tell, which is a different fact from "not stale" and
     must not be reported as one.
 
-    DIRTINESS IS REPORTED AND DOES NOT SET ``stale``. Uncommitted edits mean
-    the FILES differ from the commit; they say nothing about whether the
-    process loaded them. Conflating the two would make every developer box
-    permanently "stale" and teach everyone to ignore the field.
+    COMMIT IDENTITY IS NOT BUILD IDENTITY, and this reports both. On
+    2026-09-19 a neighbour committing ONE MARKDOWN FILE -- +142 lines, zero
+    Python -- flipped this red on a process whose loaded Python was provably
+    identical to disk, and held a write wave for ten minutes. On a multi-writer
+    tree every neighbour's audit file did that. So ``commit_moved`` is now its
+    own field and ``stale`` is decided by the BYTES of the ``linkedin_server``
+    modules this process actually imported, frozen at import in
+    :data:`BUILD_DIGEST` and re-read here.
+
+    THIS IS STRICTLY LOUDER, NOT QUIETER, and that is the point. It gains a
+    case the commit comparison could not see at all: an UNCOMMITTED edit to a
+    loaded module, where the commit matches and the code does not. It loses
+    only the case where the code provably did not move. ``buildinfo``'s own
+    ``dirty`` flag stays a separate reading, because it counts untracked audit
+    files and says nothing about what was loaded; the digest counts loaded
+    source and nothing else.
+
+    UNREADABLE IS NOT UNCHANGED. If the digest cannot be taken, this falls back
+    to the commit comparison and reports stale rather than silence.
     """
     on_disk, why_not = _head_commit_on_disk()
     loaded = BUILD.commit
+    disk_digest, digest_why_not = _digest_of(BUILD_MODULES)
     if on_disk is not None and loaded is not None:
         on_disk = on_disk[: len(loaded)]
     block: dict[str, Any] = {
         "loaded_commit": loaded,
         "disk_commit": on_disk,
+        "loaded_build": BUILD_DIGEST,
+        "disk_build": disk_digest,
+        "build_modules": len(BUILD_MODULES),
         "process_started_at": CLOCK.started_at,
     }
     if loaded is None or on_disk is None:
+        block["commit_moved"] = None
+        cannot = why_not or BUILD.detail or "no commit on one side"
+        # A MISSING COMMIT DOES NOT SILENCE THE BUILD READING. It is the
+        # ordinary state inside a git worktree, where the branch ref lives in
+        # the main checkout's common dir and never in the worktree's own
+        # gitdir -- so the whole worktree fleet reaches this branch. Commit
+        # identity cannot tell there; byte identity still can, and a DIFFERING
+        # digest is positive evidence of staleness with no commit in sight.
+        if BUILD_DIGEST is not None and disk_digest is not None:
+            if BUILD_DIGEST != disk_digest:
+                block["stale"] = True
+                block["why"] = (
+                    "THIS PROCESS IS RUNNING OLDER CODE. The commit could not "
+                    "be compared (%s), but the %s source on disk no longer "
+                    "matches what this process loaded (%s -> %s across %d "
+                    "modules), so a fix on disk is NOT loaded here. Restart "
+                    "the server. This is reported, never enforced."
+                    % (
+                        cannot,
+                        _CODE_PACKAGE,
+                        BUILD_DIGEST,
+                        disk_digest,
+                        len(BUILD_MODULES),
+                    )
+                )
+                return block
+            block["stale"] = None
+            block["why"] = (
+                "cannot tell for certain: %s. The %d %s modules this process loaded "
+                "ARE byte-identical to disk (%s), so nothing it runs has "
+                "changed -- but a module imported after startup is outside "
+                "that set, so this is not reported as a clean bill."
+                % (cannot, len(BUILD_MODULES), _CODE_PACKAGE, disk_digest)
+            )
+            return block
         block["stale"] = None
         block["why"] = (
-            "cannot tell: %s. A missing commit on either side is not evidence "
-            "that the running code is current."
-            % (why_not or BUILD.detail or "no commit on one side")
+            "cannot tell: %s, and the build could not be read either (%s). A "
+            "missing commit on either side is not evidence that the running "
+            "code is current."
+            % (cannot, digest_why_not or BUILD_DIGEST_WHY_NOT or "no digest")
         )
         return block
-    block["stale"] = loaded != on_disk
+    moved = loaded != on_disk
+    block["commit_moved"] = moved
+    if not moved:
+        # A MATCHING COMMIT IS NOT A CLEAN BILL. An uncommitted edit to a
+        # module this process loaded leaves the commit identical and the code
+        # different, and that is the state a developer box is in all day. The
+        # old detector could not see it by construction; this one must, or the
+        # change would have bought sensitivity on documents and sold it on
+        # working edits.
+        if (
+            BUILD_DIGEST is not None
+            and disk_digest is not None
+            and BUILD_DIGEST != disk_digest
+        ):
+            block["stale"] = True
+            block["why"] = (
+                "THIS PROCESS IS RUNNING OLDER CODE. The commit is unchanged "
+                "(%s) but the %s source on disk no longer matches what this "
+                "process loaded (%s -> %s across %d modules) -- an edit that "
+                "was never committed, which a commit comparison cannot see at "
+                "all. Restart the server. This is reported, never enforced."
+                % (
+                    loaded,
+                    _CODE_PACKAGE,
+                    BUILD_DIGEST,
+                    disk_digest,
+                    len(BUILD_MODULES),
+                )
+            )
+            return block
+        block["stale"] = False
+        block["why"] = (
+            "the loaded commit matches the checkout, and the %d %s modules "
+            "this process loaded are byte-identical to disk"
+            % (len(BUILD_MODULES), _CODE_PACKAGE)
+            if disk_digest is not None
+            else "the loaded commit matches the checkout (build unreadable: %s)"
+            % (digest_why_not or BUILD_DIGEST_WHY_NOT or "no digest")
+        )
+        return block
+    if disk_digest is None or BUILD_DIGEST is None:
+        block["stale"] = True
+        block["why"] = (
+            "THE COMMIT MOVED (%s -> %s) AND THE BUILD COULD NOT BE READ: %s. "
+            "Unreadable is not unchanged, so this falls back to the commit "
+            "comparison and reports stale. Restart the server. This is "
+            "reported, never enforced: a deliberately detached checkout is a "
+            "legitimate state and only the caller knows which one this is."
+            % (
+                loaded,
+                on_disk,
+                digest_why_not or BUILD_DIGEST_WHY_NOT or "no digest",
+            )
+        )
+        return block
+    block["stale"] = BUILD_DIGEST != disk_digest
     block["why"] = (
         (
-            "THIS PROCESS IS RUNNING OLDER CODE. It was imported from %s and "
-            "the checkout is now at %s, so any fix committed since is NOT "
-            "loaded here and no answer below reflects it. Restart the server. "
-            "This is reported, never enforced: a deliberately detached "
-            "checkout is a legitimate state and only the caller knows which "
-            "one this is." % (loaded, on_disk)
+            "THIS PROCESS IS RUNNING OLDER CODE. It was imported from %s, the "
+            "checkout is now at %s, AND the %s source on disk no longer "
+            "matches what this process loaded (%s -> %s across %d modules), so "
+            "any fix committed since is NOT loaded here and no answer below "
+            "reflects it. Restart the server. This is reported, never "
+            "enforced: a deliberately detached checkout is a legitimate state "
+            "and only the caller knows which one this is."
+            % (
+                loaded,
+                on_disk,
+                _CODE_PACKAGE,
+                BUILD_DIGEST,
+                disk_digest,
+                len(BUILD_MODULES),
+            )
         )
         if block["stale"]
-        else "the loaded commit matches the checkout"
+        else (
+            "THE COMMIT MOVED AND THE BUILD DID NOT. The checkout went %s -> "
+            "%s, but every one of the %d %s modules this process loaded is "
+            "byte-identical to disk (%s), so the code answering you IS the "
+            "code on disk. The commit moved on something this process does not "
+            "run -- a document, a test, a sibling package. Not stale."
+            % (
+                loaded,
+                on_disk,
+                len(BUILD_MODULES),
+                _CODE_PACKAGE,
+                disk_digest,
+            )
+        )
     )
     return block
 
