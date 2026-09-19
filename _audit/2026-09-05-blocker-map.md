@@ -7,6 +7,15 @@
 > and is stated with its pass; the ratchet exists precisely so this direction
 > needs no ceremony. Finding 6.1 is about a document left stating a number its
 > own data had moved past, so this pointer is not optional here.
+>
+> **SUPERSEDED AGAIN, 2026-09-19: QUOTE 268.** `ae1894b` recovered seven more
+> rows and closed three blockers at exactly their published counts --
+> `PUBLISH-POST-AUDIENCE-PARAM` 1 of 1, `MENTION-COMPOSITION-RULING` 2 of 2,
+> `COLLABORATIVE-CONTENT` 4 of 4. **The second line of the count below moves
+> too: 50 of 97 blockers now have NOT ONE recoverable row, not 58.** The
+> ratchet ceiling was lowered to 268 in the same commit and shown failing
+> first, so a future reader can trust this pointer against the instrument
+> rather than against this sentence.
 
 **THE HEADLINE IS THE UNASSIGNED COUNT: 284 at this pass, 278 after the sweep.**
 

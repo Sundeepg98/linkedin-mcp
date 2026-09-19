@@ -341,6 +341,76 @@ is the dangerous one, because it means a committed source and the ledger
 disagree about set membership. C55 is a collaborators row, and the ledger's own
 correction puts `C54 C55 C56` on the post composer.
 
+### Finding 6.1's pointer obligation, and where half of it ended up
+
+Moving UNASSIGNED 275 -> 268 left two committed documents quoting a number
+their own data had moved past. Finding 6.1 is precisely that: *"a document left
+stating a number its own data had moved past, so this pointer is not optional
+here."* `3da9c1b` set the precedent -- the wave that moves the number points
+the document at it, by APPENDING a pointer rather than editing the original
+figure, because a document that rewrites its own history to look prescient is
+worse than a stale note.
+
+The 2026-09-05 map document is pointed at 268 here.
+
+**THE SECOND POINTER IS IN SOMEBODY ELSE'S COMMIT, and it is not being
+rewritten.** I staged a pointer into the 2026-09-19 blocker-table-refresh
+document and, in the seconds before I committed, that file's owner committed it
+-- `7bca683`, whose own title is *"the table went stale while being written"*.
+My ~25 lines are 25 of the 94 that commit adds to that file.
+
+(Both documents are named without their extensions above, deliberately: a
+`.md` path within two lines of correction vocabulary mints a candidate
+correction pair, and there is no correction between these documents to
+declare. Third time this wave; the reflex is now to name the document and
+skip the path.)
+
+**Adopt and credit, never rewrite.** The lines stay byte-identical where they
+are. The split, measured rather than estimated: the MOVED DOWNWARD pointer
+block, the four re-derived class counts, and the `MENTION-COMPOSITION-RULING`
+paragraph are mine; everything else in that commit is its author's. **I do not
+vouch for the rest of it** -- I did not review it, and pinning a file adopts
+its author's disclosure as well as their design, so this says plainly which
+half I stand behind.
+
+The figures in that block were RE-DERIVED with that document's own script, per
+its header's instruction to re-derive rather than re-quote:
+
+    EMPTY-CERTAIN           13 -> 14      UNLOCATABLE   53 -> 50
+    EMPTY-UNCERTIFIABLE      1 ->  1      LIVE          30 -> 32
+
+**And one consequence in it is worth more than the counts.**
+`MENTION-COMPOSITION-RULING` is now `EMPTY-CERTAIN` -- 2 published, 2
+recovered, **0 live** -- and it is still queued **DECIDE**. A blocker queued
+for a ruling with nothing left to rule on is the exact shape that document
+exists to catch, and it could not see this one until the two rows were
+recovered, because a blocker with no located rows is `UNLOCATABLE` rather than
+empty.
+
+**Two corrections to that document, left for its owner rather than edited in.**
+Its own instruments contradict its hand-written table on the first, and its
+causal note is incomplete on the second. Both are small; neither is mine to
+fix while its owner is live in the file and has already carried my lines once.
+
+1. **Its priority-1 table files this blocker as `DECIDE-RETIRE`.** The ledger's
+   ranked table, rank 16, files it `DECIDE`, and the document's own
+   `scripts/blocker_table_refresh.py` prints `DECIDE`. Two instruments against
+   one transcription. The distinction is load-bearing in that very table: the
+   document's argument is that the DECIDE-RETIRE entries are merely trailing a
+   resolved queue while the EXECUTION-queued ones are the expensive surprises.
+   Filed as DECIDE-RETIRE this blocker reads as routine; filed as DECIDE, which
+   is what the ledger says, it is a fifth expensive entry.
+
+2. **It attributes the class change to the wrong cause.** Its note reads
+   *"`MENTION-COMPOSITION-RULING` joined in between, because another wave moved
+   `M C10` and `M C28` to EXCLUDED-RULED"*. The state move (`8a3df07`) was
+   necessary and is not sufficient: `EMPTY-CERTAIN` requires recovered ==
+   published AND zero live, and before `ae1894b` this blocker had **0 rows
+   recovered**, so the state move alone leaves it `UNLOCATABLE` no matter what
+   the rows' states are. It is the row-to-blocker RECOVERY that moved it, which
+   is precisely the distinction that document's own four-class table exists to
+   draw -- *"every row I can find has left GAP" is not "the blocker is empty"*.
+
 ## What was applied, and what the numbers did
 
 Applied at `c4d2be2`, by editing `blocker-assignments.tsv` and re-running
