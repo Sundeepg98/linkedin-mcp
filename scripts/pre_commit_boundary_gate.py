@@ -126,6 +126,17 @@ TESTS = "tests/"
 #: exists to stop -- and says so, because the repair is a narrower shared
 #: structure, not a narrower check.
 COUPLING_NOISY_AT = 12
+
+#: Plans at or above this many FILES run under ``-n auto --dist loadfile``.
+#: Below it, serial is faster -- xdist pays a fixed per-worker startup, and on
+#: one 29-test file that cost 31.74s against 26.10s serial (measured
+#: 2026-09-19). Five is deliberately low rather than tuned: the expensive case
+#: this exists for is a tests/ file dragging in eighteen coupled ones, and a
+#: threshold that only fires at the very top would leave the middle paying full
+#: price. The number is cheap to re-measure and the measurement is in the
+#: comment beside the invocation.
+_PARALLEL_FILE_THRESHOLD = 5
+
 BOUNDARY_TEST = REPO / "tests" / "test_readonly.py"
 #: The interpreter the repo's own scripts use. Absent in a bare clone, which is
 #: an infrastructure case and therefore a FAIL-OPEN.
@@ -278,11 +289,58 @@ def main() -> int:
 
     for reason in reasons:
         print(f"pre-commit[boundary]: {reason}", file=sys.stderr)
+
+    # PARALLELISE ONLY A BIG PLAN, AND THE THRESHOLD IS MEASURED RATHER THAN
+    # GUESSED. ``-n`` pays a fixed per-worker startup, so on a small set it is
+    # a LOSS: measured 2026-09-19 on tests/test_click_is_not_its_own_evidence.py
+    # -- 29 tests, one file -- serial 26.10s against 31.74s at ``-n 8``. On the
+    # whole suite it is a win: 913s serial against 601s, and that comparison was
+    # taken while a neighbour's suite competed for the same cores, so the real
+    # margin is wider.
+    #
+    # ``--dist loadfile`` KEEPS EACH FILE ON ONE WORKER, which is the half that
+    # makes this safe to put in a gate. These files carry module-level state and
+    # frozen captures; splitting a file across workers would be an isolation
+    # change, and AN ISOLATION CHANGE THAT ALTERS A VERDICT IS REPORTING ON THE
+    # ISOLATION RATHER THAN ON THE CODE.
+    #
+    # THE VERDICT WAS CHECKED, NOT ASSUMED, on the one file where a parallel run
+    # had disagreed with a serial one earlier that day: both give 1 failed,
+    # 28 passed, 1 xfailed, same test. The earlier disagreement was a real red
+    # that had since been fixed, not an artefact -- which is exactly the thing a
+    # tree that moves under you makes easy to misattribute.
+    #
+    # WHY THIS EXISTS AT ALL: this gate cost ~240s of HELD INDEX LOCK on every
+    # commit touching a tests/ file. On 2026-09-19 that serialised four waves,
+    # killed one commit process at five minutes, and stranded three finished
+    # pieces of work. The right long-run answer is that CI owns this check --
+    # .github/workflows/ci.yml already runs the boundary and tool-surface gates
+    # across three platform cells this box does not have -- and the hook keeps
+    # only the identity gate, which is 0.2s and CANNOT run on a runner because
+    # _audit/_sanitisation_key.json is gitignored. Until a push makes CI live,
+    # this keeps the coverage and buys back most of the latency.
+    parallel: list[str] = []
+    if len(plan) >= _PARALLEL_FILE_THRESHOLD:
+        parallel = ["-n", "auto", "--dist", "loadfile"]
+
     proc = subprocess.run(
         [str(PYTHON), "-m", "pytest", *[str(REPO / name) for name in plan],
-         "-q", "-p", "no:randomly", "--tb=line"],
+         "-q", "-p", "no:randomly", "--tb=line", *parallel],
         cwd=REPO, capture_output=True, text=True, encoding="utf-8",
     )
+    # A MISSING PLUGIN MUST NOT BECOME A REFUSAL. If pytest-xdist is absent the
+    # run exits non-zero for a reason that is infrastructure rather than a red
+    # guard, and the exit-code branch below already allows that case -- but it
+    # would allow it SILENTLY on every commit, which is a gate that has stopped
+    # running. So the retry is explicit and says so.
+    if parallel and proc.returncode not in (0, 1):
+        print("pre-commit[boundary]: parallel run failed to start "
+              f"(exit {proc.returncode}); RETRYING SERIALLY.", file=sys.stderr)
+        proc = subprocess.run(
+            [str(PYTHON), "-m", "pytest", *[str(REPO / name) for name in plan],
+             "-q", "-p", "no:randomly", "--tb=line"],
+            cwd=REPO, capture_output=True, text=True, encoding="utf-8",
+        )
     if proc.returncode == 0:
         return 0
 
