@@ -118,9 +118,101 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+#: Where this FILE sits, which from a linked worktree is the MAIN checkout --
+#: ``.git/hooks/`` is shared, so the hook always invokes the main copy of this
+#: script. Kept only as the fallback when git cannot answer.
+_SCRIPT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _git(*args: str) -> str | None:
+    """One git query. Returns None on any failure -- never raises, never refuses.
+
+    NO ``cwd``. A hook runs at the top of the working tree being committed and
+    git exports ``GIT_DIR`` into it, so the ambient environment IS the answer;
+    pinning a cwd here is what produced the defect this function exists to fix.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", *args], capture_output=True, text=True, encoding="utf-8"
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout.strip() or None
+
+
+def _tree_being_committed() -> Path:
+    """The working tree THIS COMMIT is being made in. NOT this file's parent.
+
+    **THE DEFECT, MEASURED 2026-09-19 AND IT REFUSED A REAL COMMIT.** ``REPO``
+    was ``Path(__file__).resolve().parent.parent``. From a linked worktree that
+    is the MAIN checkout, while ``git diff --cached`` -- which git answers from
+    the exported ``GIT_DIR`` -- correctly returned the WORKTREE's staged names.
+    So the gate read one tree's index and ran the other tree's files.
+
+    Both directions were live and the second is the dangerous one:
+
+      * a red sitting in the main checkout REFUSED a worktree commit that had
+        just fixed exactly that red. Measured: the plan ran 41 tests where the
+        worktree's own content has 42, and the failure named the test the
+        commit repaired;
+      * a guard a worktree commit BREAKS would be checked against the main
+        checkout's clean copy and ALLOWED. A gate that tests the wrong tree
+        certifies nothing, which is this repository's own second law about
+        registers applied to the gate itself.
+
+    Same root cause as the interpreter bug fixed in ``.git/hooks/pre-commit``
+    the same day: a path hard-coded against one checkout, in a file every
+    worktree shares. That fix resolved the TOOLING root; this resolves the
+    CONTENT root, and they are deliberately two different answers.
+
+    THE RESULT IS CHECKED, NOT TRUSTED. A toplevel that does not hold the two
+    directories this gate reasons about is not the tree being committed, and
+    falling back loudly beats gating the wrong files silently.
+    """
+    top = _git("rev-parse", "--show-toplevel")
+    if top:
+        candidate = Path(top).resolve()
+        if (candidate / TESTS_DIR).is_dir() or (candidate / PACKAGE_DIR).is_dir():
+            return candidate
+        print(
+            f"pre-commit[boundary]: git reported {candidate} as the tree being "
+            "committed and it holds neither tests/ nor linkedin_server/. "
+            "Falling back to this script's own checkout -- the plan below may "
+            "be aimed at files this commit did not write.",
+            file=sys.stderr,
+        )
+    return _SCRIPT_ROOT
+
+
+def _tooling_root() -> Path:
+    """The checkout that owns ``venv/``. The MAIN one, from any worktree.
+
+    A linked worktree has no interpreter of its own, so this deliberately does
+    NOT follow the content root. ``--git-common-dir`` resolves to the main
+    repository's ``.git`` from inside any worktree, which is the same anchor
+    ``.git/hooks/pre-commit`` uses to find the same interpreter.
+    """
+    common = _git("rev-parse", "--git-common-dir")
+    if not common:
+        return _SCRIPT_ROOT
+    return Path(common).resolve().parent
+
+
 PACKAGE = "linkedin_server/"
 TESTS = "tests/"
+#: The same two names as directory components, for the toplevel sanity check.
+PACKAGE_DIR = "linkedin_server"
+TESTS_DIR = "tests"
+
+#: **THE CONTENT ROOT.** Staged paths, coupling reads and the pytest plan all
+#: resolve here, so the gate judges what this commit would write.
+REPO = _tree_being_committed()
+
+#: **THE TOOLING ROOT**, which is a different question and often a different
+#: directory. See ``_tooling_root``.
+TOOLS = _tooling_root()
 #: Above this many coupled files the hook is slow enough to get bypassed.
 #: It still runs ALL of them -- silently narrowing is the defect this file
 #: exists to stop -- and says so, because the repair is a narrower shared
@@ -137,10 +229,14 @@ COUPLING_NOISY_AT = 12
 #: comment beside the invocation.
 _PARALLEL_FILE_THRESHOLD = 5
 
+#: The boundary test AS THIS COMMIT WOULD WRITE IT -- content, so the content
+#: root.
 BOUNDARY_TEST = REPO / "tests" / "test_readonly.py"
 #: The interpreter the repo's own scripts use. Absent in a bare clone, which is
-#: an infrastructure case and therefore a FAIL-OPEN.
-PYTHON = REPO / "venv" / "Scripts" / "python.exe"
+#: an infrastructure case and therefore a FAIL-OPEN -- and absent in EVERY
+#: linked worktree, which is not an infrastructure case at all and is why this
+#: one line takes the TOOLING root while everything else takes the content one.
+PYTHON = TOOLS / "venv" / "Scripts" / "python.exe"
 
 
 def staged_paths() -> list[str]:
