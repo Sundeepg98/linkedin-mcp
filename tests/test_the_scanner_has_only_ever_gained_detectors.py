@@ -31,6 +31,7 @@ such race and costs one import.
 """
 from __future__ import annotations
 
+import pathlib
 import re
 
 from linkedin_server import readonly
@@ -149,6 +150,60 @@ def test_the_roster_knows_every_class_the_scanner_currently_has():
         f"{unrecorded}. Add them to DETECTOR_CLASSES_EVER so a later deletion "
         "is visible. This is bookkeeping, not a judgement."
     )
+
+
+def test_the_root_entrypoint_is_scanned_too():
+    """`linkedin.py` IS OUTSIDE `MODULES`, AND IT IS NOW SCANNED ANYWAY.
+
+    ``tests/test_readonly.py`` walks ``PACKAGE_DIR.glob("*.py")`` -- 31 files
+    under ``linkedin_server/``. **The repo-root entrypoint is not among them**,
+    so the package's mutation guarantee has never covered the file that starts
+    the server.
+
+    It holds ZERO mutating calls today. **That is a property of this
+    afternoon, not of the file**, which is exactly why an empty hole still
+    gets a check rather than a note saying it was empty when somebody looked.
+
+    WHY HERE RATHER THAN IN ``MODULES``. Adding the root file to that glob
+    means threading a second path shape through nine usages, three of which
+    build ``f"linkedin_server/{name}"`` to match against
+    ``SANCTIONED_MUTATIONS``. That is a real edit to the most load-bearing
+    test file in the package, for a file of 32 lines that imports two symbols
+    and dispatches on one argument. **The blast radius of the fix exceeded the
+    blast radius of the hole**, so the entrypoint gets its own scan with the
+    same scanner and the same standard.
+
+    If the entrypoint ever grows a mutating call, this goes red and whoever
+    added it decides whether it belongs in ``SANCTIONED_MUTATIONS`` -- which
+    is the whole of what being in ``MODULES`` would have bought.
+    """
+    entrypoint = pathlib.Path(readonly.__file__).resolve().parents[1] / "linkedin.py"
+    assert entrypoint.exists(), (
+        "the root entrypoint is gone or has moved; this check is now aimed at "
+        "nothing and must be re-aimed rather than deleted."
+    )
+    source = entrypoint.read_text(encoding="utf-8")
+    hits = readonly.scan_source_for_mutations(source)
+    assert not hits, (
+        f"the root entrypoint contains mutating calls: {hits}. It is outside "
+        "tests/test_readonly.py's MODULES glob, so nothing else in the suite "
+        "would have told you. Either remove the call or argue it into "
+        "SANCTIONED_MUTATIONS with a path of 'linkedin.py'."
+    )
+
+
+def test_the_entrypoint_scan_would_actually_fire():
+    """The control. A scan over a 32-line shim passes trivially, and a check
+    that cannot fail certifies nothing -- so the same scanner is shown
+    catching a planted call in the same shape of file."""
+    planted = (
+        "import sys\n"
+        "from linkedin_server.server import main\n"
+        "if __name__ == '__main__':\n"
+        "    await page.click('#go')\n"
+    )
+    kinds = {kind for _line, kind, _text in readonly.scan_source_for_mutations(planted)}
+    assert "click" in kinds
 
 
 def test_every_class_name_is_unique():

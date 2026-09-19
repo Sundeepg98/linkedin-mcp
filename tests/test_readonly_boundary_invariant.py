@@ -989,8 +989,12 @@ PINNED = (
 #: against all 31 package modules with the scanner's REAL semantics -- which
 #: skip comments, ``re.compile(`` lines, bare string literals and
 #: ``# readonly-ok``, and those rules change the answer -- and found ZERO hits.
-#: The package still contains exactly five mutating calls and the sanctioned
-#: list still has exactly five entries.
+#: The package's mutating-call count and the sanctioned list still matched
+#: exactly, in both directions, which is the property
+#: ``test_every_sanctioned_entry_is_actually_present`` asserts. **The absolute
+#: number is deliberately not repeated here**: this note said "exactly five"
+#: and was stale within the day, because the disclosing-press ruling added a
+#: pair of entries that afternoon.
 #:
 #: **AND A DIGEST CANNOT TELL A TABLE THAT GREW FROM ONE THAT SHRANK**, which
 #: is the erosion this file already names for the forbidden roster. The remedy

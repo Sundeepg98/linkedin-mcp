@@ -130,10 +130,15 @@ harvest returns none of them, which blocks the save-family previews at
 
 WHAT IS HERE, AND WHAT STILL IS NOT
 -----------------------------------
-FIVE mutating calls exist in this package. FOUR are in :func:`perform` -- an
-anchored click, a fill, a select_option and, from 2026-09-04, a
-set_input_files -- and the fifth is the messaging filter's click in
-``dom.activate_messaging_filter``. ``readonly.scan_source_for_mutations``
+**THE COUNT IS NOT WRITTEN HERE. Read ``readonly.SANCTIONED_MUTATIONS``.**
+
+This paragraph opened with a number for weeks and the number went stale twice
+-- most recently on 2026-09-19, when the disclosing-press ruling added a pair
+of entries in ``press.disclose`` and nothing here noticed. What is stable and
+worth stating is the SHAPE rather than the size: most of the package's
+mutating calls are in :func:`perform`, draining queues at single call sites,
+and the rest are named read-path clicks that argued for themselves in
+``readonly.py``. ``readonly.scan_source_for_mutations``
 still finds every one of them -- the scanner was not taught to stop looking --
 and each is admitted by name, path and kind in
 ``readonly.SANCTIONED_MUTATIONS``, which ``tests/test_readonly.py`` fails if it

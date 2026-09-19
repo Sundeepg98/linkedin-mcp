@@ -42,10 +42,16 @@ in four parts:
    shown catching something rather than merely passing.
 
    Since 2026-08-23 the package has contained mutating calls, and the scanner
-   still reports every one of them -- **FIVE as of 2026-09-19; this sentence
-   said ONE until then and was wrong from the day the second landed.** The
-   count is not repeated here any more, because a number written in prose
-   beside a list it does not read is a number that goes stale in silence.
+   still reports every one of them. **THE COUNT IS NOT WRITTEN HERE. Read
+   :data:`SANCTIONED_MUTATIONS`.**
+
+   This sentence said "exactly ONE" for weeks and then, on the morning it was
+   corrected, said "FIVE as of 2026-09-19" -- true for about three hours and
+   stale by lunchtime, because the disclosing-press ruling added two entries
+   that afternoon. **THE SECOND VERSION WAS WRITTEN BY THE PERSON FIXING THE
+   FIRST**, which is the whole argument for carrying no number at all: a count
+   in prose beside a list it cannot read goes stale in silence, and knowing
+   that does not stop you writing one.
    ``test_the_stated_guarantee_matches_the_sanctioned_list`` now asserts the
    two agree. What changed in 2026-08-23 is not the SCANNER but the POLICY
    applied to what it finds: :data:`SANCTIONED_MUTATIONS` enumerates, by
@@ -83,13 +89,15 @@ What is true now, and is what the four parts above enforce:
   single-use grant is redeemed against it. See ``writes.py``.
 
   **THIS BULLET SAID "EXACTLY TWO ... BOTH INSIDE writes.perform" UNTIL
-  2026-09-19, AND IT WAS WRONG IN BOTH HALVES.** The list held FIVE entries
-  across TWO functions in TWO files: ``writes.perform`` has ``click``,
-  ``fill``, ``select_option`` and ``set_input_files``, and
-  ``dom.activate_messaging_filter`` has a ``click`` of its own -- a READ-path
-  click, admitted 2026-08-26 on the argument that a view filter changes
-  nothing on LinkedIn's servers. So a dropdown choice and a FILE UPLOAD were
-  permitted while this sentence named neither.
+  2026-09-19, AND IT WAS WRONG IN BOTH HALVES** -- it undercounted the list
+  and it named one home for entries that live in several. A dropdown choice
+  and a FILE UPLOAD were permitted while that sentence named neither, and a
+  READ-path click in ``dom.activate_messaging_filter`` sat outside the
+  function it claimed held everything.
+
+  **THE CORRECTED VERSION IS NOT A BETTER NUMBER**, deliberately. Every count
+  written here has gone stale, including the one written by the wave fixing
+  the previous one. Read the list.
 
   **Nothing tested the prose against the list**, which is why it drifted
   through three separate widenings without anyone noticing. The list could not
@@ -1817,7 +1825,7 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # stated as an accepted cost. Refusing the lesser act while performing the
     # greater one is backwards.
     ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
-    # ENTRIES FOUR AND FIVE, added 2026-09-19 on the DISCLOSING-PRESS RULING
+    # THE PRESS PAIR, added 2026-09-19 on the DISCLOSING-PRESS RULING
     # (`_audit/2026-09-19-the-disclosing-press-ruling.md`). They are a pair and
     # they belong to ONE function, ``press.disclose``: a click that opens a
     # disclosure, and the Escape that closes it again. The second is not
