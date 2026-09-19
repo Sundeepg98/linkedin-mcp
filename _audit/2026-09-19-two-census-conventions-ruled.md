@@ -206,3 +206,110 @@ eight buildable rows behind a decision nobody made.
 A rule that names one of these **acts** rather than their addresses. Then it is
 section 3's first line and the row is EXCLUDED-RULED on that rule, cited by
 symbol per section 1.
+
+
+---
+
+# AMENDMENT A -- 2026-09-19 11:20
+
+Three corrections from the wave that requested the original rulings, plus one
+from the wave that applied them. **The first EXTENDS section 2 rather than
+fixing it.**
+
+## A1. AN INHERITED EXCLUSION CARRIES THE CITATION, NEVER THE REOPENER
+
+Section 2 requires a content row inheriting a container's exclusion to CITE the
+container, so a reopener on the container reaches the content. **That is right
+and it is not enough.**
+
+`P I12` was excluded on measured URL-UNREACHABILITY -- zero of 237 urls reach
+the page -- so **its reopener is about a url appearing. A CLICK ROUTE to that
+container would not be caught by it**, and the OTW editor is the standing case
+that click routes exist where url routes do not.
+
+So `J99` was given a **narrower reopener than its container's**: an observed
+click route, which `I12`'s own note does not state.
+
+**RULED, extending section 2: an inherited exclusion carries the container's
+CITATION, never automatically its REOPENER.** The content row must ask what
+would make IT reachable, which may be a different event. **An inherited reopener
+is a silent assumption that the two share a failure mode.**
+
+## A2. THE READ/WRITE READING'S EVIDENCE IS SUPERSEDED; ITS CONCLUSION IS NOT
+
+The section headed *"A THIRD RELATION"* records that reading as resting on
+hand-inspecting ten of nineteen with a 74%-unknown extractor. **Superseded.**
+
+The conclusion holds -- all nineteen false, no row moved, none should -- but now
+on: **5** decidable from the census's own column, **5 more** from the jobs
+ranges table (**8 of those 10 are opposite-direction pairs**, a read and a write
+of one subject whose states are SUPPOSED to differ), and **9** settled on
+**capability identity** -- following a company vs an off-platform Follow widget
+on someone else's site; saved JOBS vs saved RESUMES; a job-search location
+filter vs a people-search one.
+
+**AND THE SHARPER SELF-CORRECTION.** That wave had called the class **"84%
+unanswerable"**:
+
+> **That was true of answering it BY DIRECTION. Answering it BY CAPABILITY
+> IDENTITY was always available, and nine were settled that way with no column
+> at all. "Unanswerable" was a fact about THE ROUTE I CHOSE, not about the
+> question.**
+
+**Before recording anything as unanswerable, name the route that failed and ask
+what other route exists.** An unanswerable finding is a claim about the world; a
+failed route is a claim about you, and both end in not knowing.
+
+## A3. THE COLUMN IS CHEAPER THAN ITS OWN SCOPE SAID
+
+`jobs.md` **already carries R/W for 84 of its 151 rows**, in section 2's ranges
+table keyed by RANGES rather than ids -- 37 R, 26 R+W, 21 W, **zero conflicts.**
+
+    free from committed evidence     3  ->  87
+    judgement / leave empty         66  ->  ~64
+    unreliable twins                47  ->  unused, now unnecessary
+
+**The empty-beats-guessed ruling survives and is cheaper to honour:** the 84 are
+not a guess laundered into a schema, they are a value the file already recorded.
+
+**HOW IT WAS FOUND:** its own output showed a row with state `R` -- **which is
+not a state.**
+
+> **An impossible value in your own output is a better lead than a plausible
+> one.**
+
+## A4. THE MAP IS SOUND, AND WHY IS THE KEEPER
+
+409 ids checked, **406 exact, 13 ambiguous all resolving correctly, ZERO
+pointing at a non-existent row.**
+
+**The map carries capability TEXT beside the id, and the redundancy that looks
+like verbosity is what makes the join auditable.** The wave's own scratch parser
+hit the ambiguity precisely because it joined on the id alone. **Join on
+`(id, capability)`, or verify, or you are guessing.**
+
+**A correction to a correction:** a stricter re-run reported 8 duplicates where
+the first reported 13. **The stricter run was wrong; 13 is definitive.** *"The
+tell was that two readings disagreed at all"* -- a disagreement between two of
+your own passes is a fact about your instrument before it is a fact about the
+data.
+
+## A5. THE LEAD'S OWN ORPHAN SCAN WAS WRONG, IN THE SHAPE IT HAD JUST CRITICISED
+
+The lead reported five unreachable reader modules from an AST import graph,
+having first reported two of them wrongly from a grep and said so.
+
+**The AST scan was also wrong.** It recorded, for the top-level entrypoint, only
+the imported SYMBOL and not the SUBMODULE -- so `from linkedin_server.transport
+import serve_http` at `linkedin.py:26` never registered, and `transport` was
+reported dead while being imported by the program's entry point. It also missed
+`press`.
+
+**The orphan list is 7, not 5, and one of the five was never an orphan.**
+
+> **A scan whose scope excludes the caller reports the callee as dead.**
+
+Two wrong instruments in one hour on one question, both the lead's, each caught
+by a wave. The standing form of this is already in the repo -- parse, do not
+grep -- and the missing half is: **parsing is not enough if the parse is
+asymmetric across the corpus.**
