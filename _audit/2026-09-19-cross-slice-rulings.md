@@ -575,7 +575,14 @@ now done.
 
 ---
 
-# AMENDMENT H — the published 761 does not reconcile with the file, and one of its two terms is missing
+# AMENDMENT H — ~~the published 761 does not reconcile~~ RETRACTED, see Amendment J
+
+> **THIS AMENDMENT IS WRONG AND IS LEFT STANDING SO THE CORRECTION HAS
+> SOMETHING TO POINT AT.** Its central claim -- that `profile.md` contains no
+> `P-R` block -- is false. The block exists, as a SECTION heading
+> (`### P-R. Data privacy, advertising data, notification settings (45)`),
+> and my search could not match it. **761 reconciles to within one.**
+> Amendment J has the reconstruction.
 
 **Reported, not corrected.** This is the campaign's headline capability
 denominator and its owner is the counter's.
@@ -700,3 +707,70 @@ new decision and belongs where Amendment G's does.
 **The population finding stands and is now evidenced rather than argued:** two
 slices stating one capability usually AGREE about it, so a different-state filter
 selects against exactly what it was built to find.
+
+---
+
+# AMENDMENT J — 761 RECONCILES. Amendment H was my search failing, not the file.
+
+**The derivation reproduces to within one. Nothing needs changing, and Amendment
+H is retracted.**
+
+## J1. The `P-R` block exists. My pattern could not match it.
+
+It is a **SECTION heading**, not a row id:
+
+    ### P-R. Data privacy, advertising data, notification settings (45)   profile.md:487
+
+I searched for a *row* id `P-R` and for headings matching `^#+ [PQR][.) ]`.
+**Neither can match `P-R.` — the hyphen sits where my pattern expected a dot or a
+space.** The block has been there since `61d3816`, where it entered claiming
+**(34)** and has since grown to 45.
+
+**So Amendment H's "no such block exists" was a fact about my regex.** This is
+the same defect I named against the census twice today — a dialect the
+instrument does not speak — committed by me, twice, in one session: first `XR`
+vs `EXCLUDED-RULED` (Amendment I), now a hyphen in a section id.
+
+## J2. The arithmetic, term by term
+
+| section | claims | rows | collapse |
+|---|---:|---:|---:|
+| `O` (the `O6-O20` row) | 23 | 9 | **+14** |
+| `P-R` | 45 | 1 | **+44** |
+| **profile.md total** | **261** | **203** | **+58** |
+
+    docstring   705 rows  +  59 collapsed  -  2 stateless
+    measured    704 rows  +  58 collapsed  -  2 stateless  =  760
+
+**Both collapsed blocks are real and the +58 is real.** The residual is **one
+row and one capability**, and `705 + 59 - 2` is written as `761` where it
+evaluates to `762` — a one-out arithmetic slip in the docstring, not a missing
+term.
+
+## J3. The answer to the three questions asked
+
+1. **Reproduced.** The derivation stands up: two collapsed blocks, both present,
+   contributing exactly what it says to within one.
+2. **Neither expanded nor removed.** The block was never touched; the docstring
+   is accurate about structure and one out on two numbers. **No commit did
+   anything to it, which is why `git log -S` on the marker found only its
+   introduction.**
+3. **761 is usable.** It is a reproducible figure to within one row, not an
+   unverifiable quotation. Today's file derives **760**.
+
+**I did not change 761**, per the instruction — and now there is no reason to:
+the one-row gap is consistent with ordinary drift since the docstring was
+written, and correcting a headline by one on a reconstruction would cost more
+trust than it buys.
+
+## J4. What Amendment H got right, kept
+
+The *method* was sound and the restraint was right — H declined to claim the
+number was wrong by 44, and named three futures that fit the evidence. **Had it
+asserted the 44, this correction would have been retracting a claim rather than
+a search.** The discipline held; the grep did not.
+
+**And the useful residue:** the docstring's arithmetic line evaluates to 762
+while stating 761. That is worth fixing by whoever owns the counter — it is one
+character, and an expression that does not evaluate to its own stated result is
+the cheapest possible thing for a future reader to trip over.
