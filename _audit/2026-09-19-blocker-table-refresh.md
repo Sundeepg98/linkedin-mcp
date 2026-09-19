@@ -7,8 +7,20 @@
 > it. This document supersedes its COUNTS and nothing else: its assignment
 > rule, its cost model and its reasoning all still stand.
 >
-> **The figures to quote: 14 EMPTY-CERTAIN, 1 EMPTY-UNCERTIFIABLE, 53
-> UNLOCATABLE, 29 LIVE, across 97 blockers and 409 published rows.**
+> **The figure to quote is 14 EMPTY-CERTAIN over 30 published rows, and it
+> is the STABLE one.** Measured three times in eleven minutes:
+>
+>     09:36   13 EMPTY-CERTAIN   1 UNCERT   53 UNLOCATABLE   30 LIVE
+>     09:43   14 EMPTY-CERTAIN   1 UNCERT   53 UNLOCATABLE   29 LIVE
+>     09:47   14 EMPTY-CERTAIN   1 UNCERT   50 UNLOCATABLE   32 LIVE
+>
+> **EMPTY-CERTAIN and EMPTY-UNCERTIFIABLE held. UNLOCATABLE and LIVE did
+> not**, because row-assignment work is landing continuously and every
+> assignment moves a blocker out of UNLOCATABLE. So the actionable list is the
+> steady one and the churn is in the column that measures how much of the
+> ledger is still unrecoverable -- which is the number you would expect to
+> move while somebody is recovering it. Totals are always 97 blockers and 409
+> published rows.
 >
 > Derived 2026-09-19 09:43 by `scripts/blocker_table_refresh.py`, whose
 > controls are reproduced in s1. **RE-DERIVE RATHER THAN RE-QUOTE, and this
@@ -337,13 +349,22 @@ Controls now reported before any provenance line is printed:
 ## 9. THIS DOCUMENT WENT STALE WHILE IT WAS BEING WRITTEN
 
 The first derivation, 09:36 by the box: **13 EMPTY-CERTAIN over 28 rows.**
-The second, 09:43: **14 over 30.**
+The second, 09:43: **14 over 30.** The third, 09:47: still 14 over 30, but
+**UNLOCATABLE had fallen 53 -> 50 and LIVE risen 29 -> 32** in four minutes.
 
 `MENTION-COMPOSITION-RULING` joined in between, because another wave moved
 `M C10` and `M C28` to EXCLUDED-RULED with a retirement dated 2026-09-19 --
 neither row touched by this wave. Seven minutes.
 
-**That is not an embarrassment to put in a footnote; it is the finding this
-document exists to make, arriving to its own author.** Section 3's counts are
+**AND THE SPLIT IS THE USEFUL PART.** Across all three derivations the two
+EMPTY verdicts never moved, while UNLOCATABLE and LIVE moved twice. That is
+not noise: an assignment landing moves a blocker OUT of UNLOCATABLE and into
+LIVE or EMPTY, so the churn sits exactly where other waves are working. **The
+list section 3 of this document publishes is the stable one; the recoverability
+counts are the volatile ones, and they will keep moving while `skew-gate` is
+recovering rows.**
+
+**None of this is an embarrassment to put in a footnote; it is the finding
+this document exists to make, arriving to its own author.** Section 3's counts are
 wrong for exactly the same reason, and they had sixteen days rather than seven
 minutes to drift. **Re-derive. The script takes seconds and needs no browser.**
