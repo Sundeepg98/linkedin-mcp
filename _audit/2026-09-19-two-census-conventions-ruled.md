@@ -532,3 +532,90 @@ outside the gate, on every field. Conditions 1 and 2 are untouched. **The defect
 is in what the record CLAIMED, not in what was done** -- and it was found, shown
 failing, and handed over by the wave that would have looked best leaving it
 alone.
+
+
+---
+
+## 6. SEARCH RESULTS: ADMISSION APPROVED IN PRINCIPLE, CONDITIONAL ON THE
+##    SHAPER LANDING IN THE SAME COMMIT
+
+Ruled 2026-09-19 12:00, on a backlog item filed costed rather than relayed as
+blocked.
+
+### THE MEASUREMENT THAT FORCED IT
+
+`SEARCH-RESULTS-SURFACE` is **the largest reader-reachable blocker in the
+census: 20 rows, every one a READ, and NO ADMITTED ADDRESS for any of them.**
+
+> **It is not waiting on a reader, an instrument, or a measurement. It is
+> waiting on a decision nobody has made.**
+
+And this repository's own record says it has been reported before -- *"people
+search had no address at all, logged in my own audit as 23 gaps nobody
+considered"* -- against a standing rule that **a refusal reported twice is a
+design gap wearing a safety costume**, and that the second report is the one to
+engineer past rather than relay.
+
+**This is the seventh time this class has been reported blocked. Refusing again
+is not caution; it is the design work not being done.**
+
+### RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING.
+
+**1. ADMISSION AND A NAME-FREE SHAPER LAND IN THE SAME COMMIT, OR NEITHER
+LANDS.** Search results **are made of other people.** An admitted address with
+no shaper in front of it hands this server a surface denser in third-party
+identity than anything else on the platform -- and the entire boundary exists
+to prevent exactly that. The wave that raised this said so before I did, which
+is why the admission is being granted at all.
+
+**The shaper is the shipped pattern, not a new one:** structurally name-free on
+`inspect.signature`, closed output alphabet, vocabulary shipped INTO the page
+and an index or token returned -- `groups.py`, then `menus.py`, then
+`anchors.py`, each sharper than the last. **A slug is refused BECAUSE a slug is
+a name**, and that rule does not soften because the page is a search result.
+
+**2. A NARROW ANCHORED PATTERN. NEVER A `/search/` FAMILY WILDCARD.** This is
+the boundary trap and it is measured: `close-account` is refused by **no pattern
+matching it**, and a settings-family wildcard would admit **six** account-ending
+spellings, **three defended by nothing but the absence of a rule.** A
+`/search/` wildcard is that risk on a bigger surface.
+
+**3. THE BLAST RADIUS IS MEASURED BEFORE THE PATTERN LANDS**, and the guard is
+shown failing on what it must still refuse. What else does this pattern admit?
+Answer it with `is_read_url` on concrete URLs -- **never with a substring grep
+over the patterns**, which reported 32 of 32 matching a needle in this very
+wave and is the grep-instead-of-parse error this repo keeps paying for.
+
+**4. A REVERT PATH EXISTS BEFORE THE ADMISSION, NOT AFTER.** The pattern's
+removal is one line; the test that shows the address refused must be written
+and shown failing BEFORE the pattern is added, so the rollback is proven rather
+than assumed. Amendment A10's shape.
+
+**5. NOTHING IS FIRED FROM THAT SURFACE.** No connect, no follow, no message, no
+invitation, however reachable the controls become. **Reading a result page
+invites nobody and messages nobody** -- that is the whole basis of this
+admission and it does not extend one step further.
+
+### THE BOUND, AND IT TRAVELS WITH THE RULING
+
+**This admits a READ of a page listing other people. It does not admit
+ANYTHING ABOUT THOSE PEOPLE leaving this server.** The shaper is not a courtesy
+attached to the admission; **it is the condition of it.** An implementation that
+admits the address and defers the shaper to a later wave has not partially
+satisfied this ruling -- it has violated it.
+
+**And this is the first admission granted on a THIRD-PARTY-DENSE surface.** Like
+the first structural argument, it is the one most likely to be cited later as a
+precedent for something weaker. **It is not a precedent for admitting a surface
+because its rows are reads.** It is granted because reads of this page invite
+nobody, a shaper exists as a shipped pattern, the blast radius is measurable,
+and the refusal has now been reported seven times.
+
+### WHAT WOULD REOPEN IT, IN EITHER DIRECTION
+
+* A measured case of the shaper emitting a name, a slug, a member id or an urn
+  from that surface -- which revokes the admission, not merely the shaper.
+* A control on that page that addresses a person and is reachable by a read.
+* Or, the other way: a later wave showing the narrow pattern is TOO narrow to
+  serve the 20 rows, which is a request to widen it and gets its own blast
+  radius, not an extension of this one.
