@@ -122,6 +122,32 @@ module that does the evaluating is the one that owes the boundary work, so
 keeping the classifier free of the browser is what makes the obligation small
 and obvious rather than diffuse.
 
+## RULED 2026-09-19: DELIBERATELY UNWIRED. This is an INSTRUMENT, not a tool.
+
+Nothing in the package imports this module, and that is the intended state
+rather than an oversight. An import-graph audit found five reader modules with
+no caller, and an orphan nobody has ruled on is how an unbanked backlog grows
+by one -- so this paragraph is the ruling, attached to the module, where the
+next audit will find it instead of a question.
+
+**There is no operator-facing question it answers.** He wants rows, jobs and
+capabilities. *"Classify the labels on this menu into UI verbs"* is something a
+PROBE asks on the way to a measurement, never something he calls. Wiring it
+would widen the tool surface permanently with a classifier nobody would invoke,
+and **wiring something that should not be a tool is worse than leaving it
+orphaned**, because the tool surface does not shrink again.
+
+**And it is load-bearing for the press boundary specifically by staying
+uncallable.** ``linkedin_server/press.py`` implements the disclosing-press
+ruling, whose condition 2 is that a control is matched by ATTRIBUTE and never
+by label text. This module is exactly what a caller must NOT reach for when
+deciding what to press. Keeping it out of the tool surface keeps that boundary
+obvious rather than a matter of discipline.
+
+Its callers are ``scripts/_probe_messaging_menu_enumeration.py`` and
+``tests/test_menus.py``, and nothing else. That is the shape it is meant to
+have.
+
 ## WHAT THIS MODULE IS NOT
 
 * It **does not open a page**, press a control, or touch a browser. It is handed
