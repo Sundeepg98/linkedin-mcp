@@ -339,5 +339,118 @@ the only way this number can be honest while somebody else is live.
 
     worktree   scratchpad/gate-889f488, clean, 0 dirty files
     collected  5648 tests
+    ran        14:44:53 - 15:02:20, nothing committed across it
 
-RESULT: see section 9a.
+    11 failed, 5625 passed, 11 skipped, 1 xfailed in 1053.77s (17:33)
+
+### The eleven, named. NONE OF THEM IS MINE.
+
+    test_a_correction_is_findable_from_the_claim   every_marker_names_one_document
+    test_a_correction_is_findable_from_the_claim   every_candidate_pair_is_declared
+    test_a_probe_closes_its_own_tab                the_tab_leak_only_ever_shrinks
+    test_ci_shard                                  the_timings_table_still_prices
+    test_click_is_not_its_own_evidence             a_click_that_does_commit_reaches
+    test_every_tool_is_on_the_surface              both_rules_reject_the_registry
+    test_messaging_overview                        the_url_guard_still_refuses
+    test_messaging_overview                        the_click_is_on_the_sanctioned
+    test_server_surface                            the_surface_is_exactly_fortytwo
+    test_server_surface                            no_docstring_claims_a_write
+    test_server_surface                            the_exemption_does_not_cover
+
+**All three guards this wave touched are green and absent from that list:**
+`test_page_text_is_never_printed`,
+`test_a_person_name_is_never_a_literal`, `test_no_committed_identity`.
+
+### The delta, stated as narrowly as it can honestly be stated
+
+The lead's single-writer baseline was **16 at ~13:33**, at an **earlier HEAD**.
+This is **11 at 889f488**. **That five is NOT this wave's.** Several waves
+committed across that interval -- the surface pin and the docstring guard were
+being repaired by a neighbour while this suite ran -- and attributing a tree
+delta to whoever measured it last is the error this file has already recorded
+twice in other forms.
+
+**What this wave can claim is the three names above, each measured before and
+after.** The rest of the movement belongs to whoever did it.
+
+### A METHOD FINDING THAT COST NOTHING HERE AND COULD COST A LOT
+
+The gate run above reports `test_no_committed_identity` green, **and that was
+worth less than it looks.** Its own skip message said so:
+
+> "THE EXACT-VALUE SWEEP DID NOT RUN, so nothing in this session checked any
+> tracked file for a real name, city, employer or campus. The wordlist
+> `_audit/_sanitisation_key.json` is absent -- it is gitignored on purpose."
+
+**A detached worktree gives single-writer isolation by dropping exactly the
+files git does not track -- and one of those is the de-anonymisation key that
+arms the strongest half of the identity guard.** The isolation and the
+disarming are the same mechanism. Nothing warned about it except the test,
+which said it plainly and would have been read as a routine skip.
+
+That matters here specifically because **this wave modified that guard.** So
+the key was copied into the worktree and the module re-run:
+
+    tests/test_no_committed_identity.py   519 passed, 0 failed   15:03:40
+                                          WITH the exact-value key present
+
+**Anyone measuring a gate in a fresh worktree is measuring a weaker suite than
+they think**, and the difference is invisible unless the skip lines are read.
+
+---
+
+## 10. THE INSTRUMENTS, DECLARED RATHER THAN LEFT IN A TEMP DIRECTORY
+
+Four were built. **None is harvested into the repository** -- that is a
+decision for whoever owns the register, not something to take unilaterally in
+a tree with live neighbours -- so they are described here precisely enough to
+rebuild, which is the alternative the standing rule allows.
+
+**TWO ARE WORTH KEEPING. They turned a 34-line list into a 3-line diagnosis
+and they are not specific to this wave:**
+
+* **`why.py` -- name the exact tainted sub-expression at each sink.** Walks a
+  flagged `print`'s arguments with the guard's own stopping conditions and
+  reports every MINIMAL tainted node: `TAINTED NAME <id>` or
+  `TEXT-CALL .<attr>()`. This is the thing the brief asked for in prose
+  ("a neighbour found the engine flagged two names on a line where six looked
+  suspicious"), as a command.
+
+* **`chain.py` -- trace each taint to its root.** Re-runs `_tainted_names`'
+  fixed point one round at a time and prints `r<round> L<line> <name> <= <the
+  expression that bound it>`. **This is what found the name collisions.**
+  Without it, `run_detector_control`'s `label` and `_page_control`'s `label`
+  parameter look like page text, and the repair would have been to shape a
+  value that never touched a page.
+
+Both are ~40 lines, import the guard rather than reimplementing it, and would
+work unchanged on the sibling url rule.
+
+**TWO WERE SINGLE-USE AND ARE DISPOSABLE:** `equiv.py`, the 4000-document
+differential for `partition_word` with its broken-variant control (result in
+section 4); and `email_control.py`, which reverts `_email_ok` in place to show
+the narrowing is load-bearing (result in section 7). Both results are
+recorded; neither harness has a second customer.
+
+**THE ONE THAT ALREADY EXISTED AND WAS NOT REWRITTEN:** the guard engines
+themselves. Every measurement in this file comes from
+`tests/test_page_text_is_never_printed.py` and
+`tests/test_no_committed_identity.py` imported and called, never from a
+reimplementation of their rules. Writing a second copy of a taint walk is how
+two rules drift, and this repo keeps the note about that in the file it would
+have drifted from.
+
+---
+
+## 11. ONE HAZARD FOR WHOEVER WRITES THE NEXT BRIEF
+
+**THE SESSION SCRATCHPAD IS SHARED BETWEEN TEAMMATES, NOT PRIVATE.** Two of
+this wave's commit-message files were overwritten by another wave's files of
+the same name while they sat there -- `msg-a.txt` and `msg-b.txt` both came
+back holding a neighbour's surface-pin and docstring-guard messages.
+
+Nothing was lost here because both had already been committed, and that is
+luck rather than design: a message file written and used ten minutes later
+would have committed a neighbour's text under this wave's changes. **Same
+class as the shared index, one directory over.** Use a wave-specific filename,
+or read the file back immediately before the commit that consumes it.
