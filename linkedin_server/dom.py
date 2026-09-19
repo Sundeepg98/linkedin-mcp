@@ -1,0 +1,9797 @@
+"""Reading the rendered page.
+
+LinkedIn's class names are generated and its GraphQL query ids rotate with
+every deploy, so both make brittle anchors. What does not rotate is the shape
+of a link: a person is behind ``/in/<slug>``, a job is behind
+``/jobs/view/<id>``. Every list surface here is harvested by finding those
+links and taking the text of the card around them.
+
+Sixteen small scripts are injected. Each is a module-level constant so it can
+be read in one place and scanned by ``tests/test_readonly.py`` against
+:data:`readonly.JS_MUTATION_TOKENS` -- the scripts query the DOM and return
+text, tag names, character counts or, in several, nothing but integers.
+
+**CORRECTED 2026-09-05, AND THE CORRECTION IS THE INTERESTING PART.** This
+sentence read "Six small scripts are injected, and only six -- this sentence
+said 'three' for long enough to survive three additions, so the count is now
+stated as a count somebody has to change." It then survived NINE more
+additions, so it was wrong by nine before the sixteenth arrived. A count
+"somebody has to change" is not a check; the sentence that promised to be
+maintained by hand was maintained by nobody, exactly as the version before it
+had not been. **A DOCSTRING IS A STANDING INSTRUCTION READ AS CURRENT TRUTH,
+and this repository's ``CORRECTS:`` machinery governs ``_audit/*.md`` alone,
+so nothing could bind it.** What DOES bind it is one directory away and was
+already there: ``tests/test_readonly.py::test_every_injected_script_is_scanned``
+derives the set from ``dir(dom)`` and asserts it equals ``INJECTED_SCRIPTS``,
+so a seventeenth script cannot be added without that list moving. Read the
+number there; this line is a summary of it and can rot again.
+The Python side of each call carries a ``# readonly-ok`` waiver, which is what
+keeps a future ``evaluate`` from slipping in unreviewed.
+
+The harvesters return ``{"href": ..., "text": ...}`` records, plus a handful
+of OBSERVATIONS about where that text came from -- which strings the page
+marked screen-reader-only, what the matched link itself says, the accessible
+name of the entity's logo. They are observations rather than fields on
+purpose: deciding which one is the company and which is the location is
+``shape.py``'s job, and it is pure, so the parsing can be tested without a
+browser.
+"""
+
+from __future__ import annotations
+
+import re
+import time
+from typing import Any, Optional
+
+from linkedin_server import shape
+from linkedin_server.config import logger
+from linkedin_server.errors import ExtractionFailedError
+
+# ---------------------------------------------------------------------------
+# Injected scripts (read-only: query, read text, return)
+# ---------------------------------------------------------------------------
+
+#: Harvest cards anchored on a link whose href matches a pattern.
+#:
+#: The walk up from the link is the whole game. LinkedIn's newer surfaces are
+#: nested anonymous DIVs with hash-generated class names -- no ``li``, no
+#: ``article``, and ``data-view-name`` is attached by the client AFTER
+#: hydration, so it is there or not depending on how far the page got before
+#: we read it. When none of those three stops fires, an unbounded walk runs
+#: to ``maxHops`` and lands on a container holding the whole list AND the page
+#: heading, at which point every row reports the heading as its name. That is
+#: measured, not hypothetical: on /analytics/profile-views/ it produced four
+#: viewers all called "Who's viewed your profile".
+#:
+#: So the stop that matters is structural and needs no attribute: a row is the
+#: LARGEST ancestor that still speaks for exactly ONE match. One hop further
+#: swallows a sibling row. Nothing about that depends on class names, tag
+#: names, or how much of the page has hydrated.
+#:
+#: That rule has a blind spot, and the job tracker fell straight into it: it
+#: counts DEDUPED KEYS, so a card carrying two anchors to the SAME job is still
+#: "one match" and the walk sails past it. On a tracker page holding a single
+#: job the walk therefore ran to ``maxHops`` and every field came back as page
+#: furniture -- title "Job tracker", company "Saved <dot> 0". Measured on the
+#: real page, not imagined.
+#:
+#: The second stop closes it: once the row we have ACCEPTED already has text, a
+#: candidate holding more matching ANCHORS than one is a container, not a row.
+#: The "already has text" clause is what keeps it safe on profile views, where
+#: LinkedIn wraps the photo in its own link to the same person: the walk starts
+#: on that empty anchor, and a bare link-count stop would freeze there and drop
+#: the viewer entirely. Both fixtures pin that.
+#:
+#: Alongside the row's text this returns four OBSERVATIONS about where the
+#: text came from. They exist because reading a job card as "line 1, line 2,
+#: line 3" makes every field hostage to whatever LinkedIn inserts above it,
+#: and LinkedIn inserts plenty: a verified employer adds a screen-reader line
+#: reading "<title> with verification", which landed in ``company`` and pushed
+#: the real company down into ``location`` on 5 of 14 rows measured live on
+#: 2026-08-22. "Promoted", "Viewed", "Actively reviewing applicants", a salary
+#: chip and an alumni line were on the same page and are each capable of the
+#: same shift. So each field is anchored on the thing that IDENTIFIES it:
+#:
+#: * ``link_text`` / ``link_hidden`` -- the matched link's own text, and the
+#:   screen-reader copies inside it. The link is what MAKES this row a job
+#:   row, so its text is the title; subtracting its hidden copies is what
+#:   removes the decoration without knowing the phrase.
+#: * ``logo_name`` -- the accessible name LinkedIn gives the employer's logo,
+#:   "<Company> logo". An image is not a line, so no inserted line moves it.
+#: * ``meta_line`` -- the first entry of the metadata list inside the entity
+#:   LOCKUP, where the lockup is found without a class name: the smallest
+#:   ancestor of the link that also holds that logo. The insight line, the
+#:   footer chips and the dismiss button all sit OUTSIDE it.
+#:
+#: All four are absent when the surface does not offer them -- the job tracker
+#: has no logo and no metadata list -- and ``shape.parse_job_card`` falls back
+#: to reading lines in order, which is what it has always done.
+HARVEST_LINKED_CARDS_JS = """
+(cfg) => {
+  const re = new RegExp(cfg.hrefPattern);
+  const keyOf = (href) => {
+    const m = (href || '').match(re);
+    return m ? (m[1] || href) : null;
+  };
+  const keysWithin = (node) => {
+    const keys = new Set();
+    if (!node.querySelectorAll) return keys;
+    for (const link of node.querySelectorAll('a[href]')) {
+      const key = keyOf(link.getAttribute('href') || '');
+      if (key) keys.add(key);
+    }
+    return keys;
+  };
+  const anchorWithin = (node) => {
+    if (!node || !node.querySelectorAll) return null;
+    for (const link of node.querySelectorAll('a[href]')) {
+      if (keyOf(link.getAttribute('href') || '')) return link;
+    }
+    return null;
+  };
+  const linkWithin = (node) => {
+    const link = anchorWithin(node);
+    return link ? (link.getAttribute('href') || '') : '';
+  };
+  const linksWithin = (node) => {
+    if (!node.querySelectorAll) return 0;
+    let count = 0;
+    for (const link of node.querySelectorAll('a[href]')) {
+      if (keyOf(link.getAttribute('href') || '')) count += 1;
+    }
+    return count;
+  };
+  const hasText = (node) => !!(node && node.innerText && node.innerText.trim());
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  // IS THIS ELEMENT'S TEXT ACTUALLY IN innerText? That is the only question
+  // the hidden budget may ask, and asking a different one was a live defect.
+  //
+  // shape.strip_screen_reader_copies subtracts BY COUNT: each hidden element
+  // removes ONE occurrence of its own text from the card. That is correct for
+  // the CLIP pattern, where the element IS rendered and innerText therefore
+  // carries a second copy. It is WRONG for display:none and
+  // visibility:hidden, whose text innerText never returned -- and textOf()
+  // still reads them, because innerText on a NON-RENDERED element falls back
+  // to textContent. So the budget charged the card for a duplicate that was
+  // never there, and the subtraction paid for it out of the VISIBLE copy.
+  //
+  // Measured 2026-08-30: a row whose title was duplicated in a display:none
+  // span lost its title entirely, parse_job_card then had nothing to read,
+  // and the row was dropped. UNKNOWN COUNTS AS RENDERED -- an engine without
+  // checkVisibility keeps the old behaviour rather than silently halving the
+  // subtraction.
+  // TWO PARTS OF THIS ARE NOT REACHED BY ANY TEST, measured 2026-08-30 rather
+  // than assumed, and both are recorded instead of being quietly kept:
+  //
+  //   * the `return true` fallback is DEAD in this engine. Chromium 151 has
+  //     checkVisibility and it does not throw, so the line never evaluates.
+  //     It is kept as the answer for an engine that lacks the API, where the
+  //     alternative -- defaulting to false -- would silently halve every
+  //     subtraction on every surface. A fallback that is wrong in the safe
+  //     direction is worth more than a line count.
+  //   * `visibilityProperty` changes no SUBTRACTION. A visibility:hidden
+  //     element yields no innerText, so textOf() returns '' and it is never
+  //     pushed either way; the option only makes the skip COUNTER accurate.
+  //     Measured: dropping it moves hidden_not_rendered 2 -> 0 and leaves the
+  //     budget identical.
+  const isRendered = (el) => {
+    try {
+      if (el && el.checkVisibility) {
+        return el.checkVisibility({
+          contentVisibilityAuto: true,
+          visibilityProperty: true
+        });
+      }
+    } catch (e) { /* fall through to the permissive answer */ }
+    return true;
+  };
+  let skippedHidden = 0;
+  const hiddenWithin = (node) => {
+    const out = [];
+    if (!node || !node.querySelectorAll || !cfg.hiddenSelector) return out;
+    let marked;
+    try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
+    for (const el of marked) {
+      if (!isRendered(el)) { skippedHidden += 1; continue; }
+      const value = textOf(el);
+      if (value) out.push(value.slice(0, cfg.maxChars));
+      if (out.length >= cfg.maxHidden) break;
+    }
+    return out;
+  };
+  const LOGO = / logo$/i;
+  const logoNameIn = (node) => {
+    if (!node || !node.querySelectorAll) return '';
+    for (const img of node.querySelectorAll('img[alt]')) {
+      const alt = (img.getAttribute('alt') || '').trim();
+      if (LOGO.test(alt)) return alt.slice(0, alt.length - 5).trim();
+    }
+    return '';
+  };
+  // The entity lockup: the smallest ancestor of the link that also holds the
+  // employer's logo. Named by nothing -- no class, no id, no tag -- so it
+  // survives the generated class names LinkedIn ships.
+  const lockupOf = (anchor, row) => {
+    let node = anchor;
+    let hops = 0;
+    while (node && hops <= cfg.maxHops) {
+      if (logoNameIn(node)) return node;
+      if (node === row) return null;
+      node = node.parentElement;
+      hops += 1;
+    }
+    return null;
+  };
+  const rowOf = (anchor) => {
+    let node = anchor;
+    let row = anchor;
+    let hops = 0;
+    while (node && hops < cfg.maxHops) {
+      if (keysWithin(node).size > 1) break;
+      // A container, not a row: it repeats the link we came in on, and we
+      // already hold something readable. Before we hold text, a second link
+      // to the same target is the row's own photo link and must be climbed
+      // through rather than stopped at.
+      if (hasText(row) && linksWithin(node) > 1) break;
+      row = node;
+      const tag = node.tagName;
+      if (tag === 'LI' || tag === 'ARTICLE') break;
+      if (node.dataset && node.dataset.viewName) break;
+      node = node.parentElement;
+      hops += 1;
+    }
+    return row;
+  };
+  const record = (href, node, anchor) => {
+    const text = (node.innerText || '').trim();
+    if (!text) return null;
+    const out = {
+      href: href,
+      text: text.slice(0, cfg.maxChars),
+      hidden: hiddenWithin(node)
+    };
+    // Not a safety clause -- every helper below tolerates a null anchor. It
+    // keeps empty keys out of the payload for a sibling row that carries no
+    // link at all, which is what profile views are full of.
+    if (anchor) {
+      out.link_text = textOf(anchor).slice(0, cfg.maxChars);
+      out.link_hidden = hiddenWithin(anchor);
+      const lockup = lockupOf(anchor, node);
+      if (lockup) {
+        out.logo_name = logoNameIn(lockup).slice(0, cfg.maxChars);
+        const list = lockup.querySelector('ul, ol');
+        if (list && list.children.length) {
+          out.meta_line = textOf(list.children[0]).slice(0, cfg.maxChars);
+        }
+      }
+    }
+    return out;
+  };
+
+  const found = [];
+  const seen = new Set();
+  for (const anchor of document.querySelectorAll('a[href]')) {
+    const href = anchor.getAttribute('href') || '';
+    const key = keyOf(href);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    found.push({ href: href, row: rowOf(anchor), anchor: anchor });
+  }
+
+  if (cfg.siblingRows && found.length) {
+    // The list is the NEAREST COMMON ANCESTOR of the rows, not the parent of
+    // any one of them. Where the walk stopped varies with hydration -- the
+    // same page puts the rows at different depths from one load to the next
+    // -- so "the rows share a parent" is true on one render and false on the
+    // other, and keying on it silently returns nothing extra half the time.
+    const rowNodes = found.map((item) => item.row);
+    let list = rowNodes[0];
+    while (list && !rowNodes.every((node) => list.contains(node))) {
+      list = list.parentElement;
+    }
+    // The list has to be a STRICT ancestor of every row, or its "children"
+    // are one row's internals rather than the rows.
+    while (list && rowNodes.some((node) => node === list)) {
+      list = list.parentElement;
+    }
+    if (list) {
+      const rows = [];
+      let orderly = true;
+      for (const child of list.children) {
+        const keys = keysWithin(child);
+        if (child.tagName === 'A') {
+          const own = keyOf(child.getAttribute('href') || '');
+          if (own) keys.add(own);
+        }
+        if (keys.size > 1) { orderly = false; break; }
+        const item = record(linkWithin(child), child, anchorWithin(child));
+        if (item) rows.push(item);
+        if (rows.length >= cfg.maxItems) break;
+      }
+      if (orderly && rows.length >= found.length) return rows;
+    }
+  }
+
+  const out = [];
+  let droppedEmpty = 0;
+  for (const item of found) {
+    const rec = record(item.href, item.row, item.anchor);
+    if (rec) {
+      out.push(rec);
+    } else {
+      // A DROP THAT NOBODY COUNTED, until 2026-08-30. record() returns null
+      // for a row whose innerText is empty, and a walk that discards rows
+      // without saying how many is indistinguishable from a page that had
+      // none -- which is precisely the ambiguity that cost this repo a day on
+      // the Saved tab. Counted here, reported by harvest_census, and NOT
+      // acted on: an untitled row is still not a row.
+      droppedEmpty += 1;
+    }
+    if (out.length >= cfg.maxItems) break;
+  }
+  if (cfg.census) {
+    return {
+      rows: out,
+      anchors_keyed: found.length,
+      hidden_not_rendered: skippedHidden,
+      dropped_empty_text: droppedEmpty
+    };
+  }
+  return out;
+}
+"""
+
+#: Harvest block-shaped cards (notifications) that have no reliable link.
+#:
+#: Alongside the card's text this returns three things the text alone cannot
+#: give, and each one fixes a measured defect:
+#:
+#: * ``hidden`` -- the strings the page itself marked screen-reader-only.
+#:   ``innerText`` includes them, so every notification body arrived with
+#:   "Unread notification." or "Status is reachable" welded to the front. They
+#:   are returned as a LIST rather than subtracted here, because some of them
+#:   are a second copy of the VISIBLE body and deleting those by phrase would
+#:   empty the notification. ``shape.parse_notification`` removes one
+#:   occurrence per hidden element, which is exact and needs no phrase list.
+#: * ``time`` -- the card's own timestamp element. The page writes "2h", with
+#:   no "ago", so no amount of scanning the body finds it; ``when`` was null on
+#:   all 22 rows.
+#: * ``unread`` -- whether LinkedIn was still calling this one unread at the
+#:   moment we looked, which is the one fact loading the page destroys.
+HARVEST_BLOCK_CARDS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  // IS THIS ELEMENT'S TEXT ACTUALLY IN innerText? The hidden budget may ask
+  // nothing else, and asking a different question was a live defect on the
+  // sibling walk.
+  //
+  // PORTED FROM HARVEST_LINKED_CARDS_JS (8573b8b), which fixed it there and
+  // left this script alone for a stated reason: notifications are its only
+  // caller, no fixture exercised a non-rendered duplicate here, and a surface
+  // that cannot be verified may not be changed on the strength of an
+  // argument. That fixture now exists -- tests/test_sdui_surfaces_fixture.py
+  // section 4c -- and it was RED against this script before this guard.
+  //
+  // shape.strip_screen_reader_copies subtracts BY COUNT: each hidden element
+  // removes ONE occurrence of its own text from the card. Correct for the
+  // CLIP pattern, where the element IS rendered and innerText therefore
+  // carries a second copy. WRONG for display:none, whose copy innerText never
+  // returned -- and textOf() reads it anyway, because innerText on a
+  // NON-RENDERED element falls back to textContent. So the budget was charged
+  // for a duplicate that was never in the card, and the subtraction paid for
+  // it out of the VISIBLE one.
+  //
+  // Measured 2026-08-31, on a notification repeating its whole body in a
+  // display:none span: hidden=[body], the card's single visible copy spent,
+  // parse_notification left with no line at all, the row DROPPED --
+  // records=1, dropped=1. UNKNOWN COUNTS AS RENDERED, so an engine without
+  // checkVisibility keeps the old behaviour rather than silently halving
+  // every subtraction.
+  //
+  // TWO THINGS THIS SCRIPT DOES NOT GET, recorded rather than quietly
+  // omitted. There is no skip COUNTER: harvest_block_cards returns a bare
+  // list of cards, and widening that shape to carry a census field would
+  // change every caller for a diagnostic nothing has asked this surface for.
+  // And visibilityProperty is consequently observable in NOTHING here -- a
+  // visibility:hidden element yields no innerText, so textOf() returns '' and
+  // it was never pushed either way, measured both before and after this
+  // guard. It is passed regardless, so the two walks ask the DOM the same
+  // question instead of drifting into two different ones.
+  //
+  // TWO LINES BELOW ARE NOT REACHED BY ANY TEST, mutation-checked 2026-08-31
+  // rather than assumed, and recorded instead of quietly kept. Dropping
+  // visibilityProperty leaves all three of section 4c's cases green, and so
+  // does flipping the `return true` fallback to false: Chromium 151.0.7922.34
+  // has checkVisibility and does not throw, so that line never evaluates
+  // here. Both are kept anyway. The fallback is the answer for an engine that
+  // LACKS the API, where returning false would silently halve every
+  // subtraction on this surface -- a fallback wrong in the safe direction is
+  // worth more than a line count.
+  const isRendered = (el) => {
+    try {
+      if (el && el.checkVisibility) {
+        return el.checkVisibility({
+          contentVisibilityAuto: true,
+          visibilityProperty: true
+        });
+      }
+    } catch (e) { /* fall through to the permissive answer */ }
+    return true;
+  };
+  for (const selector of cfg.selectors) {
+    let nodes;
+    try { nodes = document.querySelectorAll(selector); } catch (e) { continue; }
+    if (!nodes || nodes.length === 0) continue;
+    const out = [];
+    for (const node of nodes) {
+      const text = textOf(node);
+      if (!text) continue;
+      const link = node.querySelector('a[href]');
+      const hidden = [];
+      if (cfg.hiddenSelector) {
+        let marked;
+        try { marked = node.querySelectorAll(cfg.hiddenSelector); } catch (e) { marked = []; }
+        for (const el of marked) {
+          if (!isRendered(el)) continue;
+          const value = textOf(el);
+          if (value) hidden.push(value.slice(0, cfg.maxChars));
+        }
+      }
+      let when = '';
+      if (cfg.timeSelector) {
+        let stamp;
+        try { stamp = node.querySelector(cfg.timeSelector); } catch (e) { stamp = null; }
+        when = textOf(stamp).slice(0, 40);
+      }
+      let unread = null;
+      if (cfg.unreadClass && node.classList) {
+        unread = node.classList.contains(cfg.unreadClass);
+      }
+      out.push({
+        href: link ? (link.getAttribute('href') || '') : '',
+        text: text.slice(0, cfg.maxChars),
+        hidden: hidden,
+        time: when,
+        unread: unread,
+        selector: selector
+      });
+      if (out.length >= cfg.maxItems) break;
+    }
+    if (out.length) return out;
+  }
+  return [];
+}
+"""
+
+#: Read the operator's own profile page as a list of SECTIONS.
+#:
+#: The old version of this script asked for ``main h1`` and for elements with
+#: ids ``about`` / ``experience`` / ``education`` / ``skills``. LinkedIn has
+#: since rebuilt the profile on server-driven UI: measured 2026-08-22, the page
+#: contains ZERO ``h1`` and none of those ids. Every field came back null and
+#: the tool errored on its own owner's profile.
+#:
+#: What survives is the same shape the row walk leans on, one level up: a
+#: SECTION is the largest ancestor of its heading that still holds exactly ONE
+#: heading. Nothing in that depends on a class name, an id, or a tag beyond
+#: h1/h2/h3, and it produces byte-identical topcard lines on the pre-hydration
+#: and hydrated renders -- which is the property the two frozen fixtures pin.
+#:
+#: The climb is bounded by ``main`` rather than by a hop count: a page with a
+#: single heading would otherwise walk out to ``documentElement`` and return
+#: the entire document as one "section".
+#:
+#: This returns raw LINES and does no interpretation. Deciding which line is a
+#: headline and which is a location is ``shape.py``'s job, where it can be
+#: tested without a browser.
+READ_PROFILE_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const linesOf = (node) =>
+    textOf(node).split('\\n').map((s) => s.trim()).filter(Boolean);
+  const main = document.querySelector('main');
+  const headingsIn = (node) =>
+    node.querySelectorAll ? node.querySelectorAll('h1,h2,h3').length : 0;
+  const sections = [];
+  if (main) {
+    for (const heading of main.querySelectorAll('h1,h2,h3')) {
+      let node = heading;
+      let block = heading;
+      let hops = 0;
+      while (node && node !== main && hops < cfg.maxHops) {
+        if (headingsIn(node) > 1) break;
+        block = node;
+        node = node.parentElement;
+        hops += 1;
+      }
+      sections.push({
+        heading: textOf(heading).slice(0, 120),
+        lines: linesOf(block).slice(0, cfg.maxLines),
+        images: block.querySelectorAll ? block.querySelectorAll('img').length : 0
+      });
+      if (sections.length >= cfg.maxSections) break;
+    }
+  }
+  return {
+    url: document.location.href,
+    title: document.title || '',
+    has_main: !!main,
+    sections: sections
+  };
+}
+"""
+
+
+# ---------------------------------------------------------------------------
+# Harvesters
+# ---------------------------------------------------------------------------
+
+
+async def harvest_linked_cards(
+    page: Any,
+    *,
+    href_pattern: str,
+    max_items: int,
+    max_chars: int = 1200,
+    max_hops: int = 8,
+    sibling_rows: bool = False,
+    max_hidden: int = 12,
+) -> list[dict[str, Any]]:
+    """Return one record per card anchored on a matching link.
+
+    Every record carries ``href`` and ``text``. A record whose card offered
+    them also carries ``hidden``, ``link_text``, ``link_hidden``, ``logo_name``
+    and ``meta_line`` -- the anchors described on
+    :data:`HARVEST_LINKED_CARDS_JS`. They are OBSERVATIONS, not fields: which
+    of them is the company and which is the location is decided in
+    ``shape.py``, where it can be tested without a browser.
+
+    Args:
+        sibling_rows: also return the rows that carry NO link, by reading
+            every child of the list the linked rows sit in. Off by default,
+            because on most surfaces a row without a link is chrome. On
+            profile views it is a person: LinkedIn draws privacy-limited
+            viewers ("Someone at Acme", "Recruiter at Acme") with no link at
+            all, so a harvest anchored only on links cannot see one of them
+            and silently reports a shorter list than the page shows. Six of
+            ten viewers were invisible this way when it was measured.
+        max_hidden: cap on the screen-reader strings returned per card, so a
+            page that marks half of itself hidden cannot inflate a result.
+    """
+    cfg = {
+        "hrefPattern": href_pattern,
+        "maxItems": int(max_items),
+        "maxChars": int(max_chars),
+        "maxHops": int(max_hops),
+        "siblingRows": bool(sibling_rows),
+        "hiddenSelector": CARD_HIDDEN_SELECTOR,
+        "maxHidden": int(max_hidden),
+    }
+    try:
+        records = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return list(records or [])
+
+
+async def harvest_census(
+    page: Any, *, href_pattern: str, max_items: int
+) -> dict[str, Any]:
+    """The same walk, reporting WHAT IT THREW AWAY as well as what it kept.
+
+    WHY THIS EXISTS, and it is the same lesson this package has now learned on
+    three surfaces. ``harvest_linked_cards`` returns a list. A list of length
+    zero is returned both when the page offered no keyed anchor at all and
+    when it offered several and the walk discarded every one -- and those want
+    completely different repairs. On 2026-08-30 the Saved tab produced FOUR
+    job-row anchors and zero rows, and nothing in this package could say which
+    of the two had happened, or whether the row parser had even been reached.
+
+    Two numbers close that:
+
+    ``anchors_keyed``       how many DISTINCT keyed anchors the walk considered
+                            (deduped by key, which is what the walk itself does)
+    ``dropped_empty_text``  how many of those produced a row the walk refused
+                            because its ``innerText`` was empty
+
+    NOT A SECOND IMPLEMENTATION. It runs the identical script under a flag, so
+    it cannot drift from the walk it is describing -- a separate counting
+    routine would be free to disagree with the thing it counts, which is how a
+    diagnostic starts lying.
+
+    ``sibling_rows`` IS NOT AVAILABLE HERE and that is deliberate rather than
+    an omission: that path returns early with its own list, so a census over it
+    would report the tail's counters for the head's rows. The tracker, which is
+    what this was built for, does not use it.
+
+    A DIAGNOSTIC, NEVER A DECISION INPUT. Nothing branches on either number.
+    An untitled row is still not a row, and this does not make one.
+    """
+    cfg = {
+        "hrefPattern": href_pattern,
+        "maxItems": int(max_items),
+        "maxChars": 1200,
+        "maxHops": 8,
+        "siblingRows": False,
+        "hiddenSelector": CARD_HIDDEN_SELECTOR,
+        "maxHidden": 12,
+        "census": True,
+    }
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE. A census that could not run must not come back
+        # looking like a page that offered nothing.
+        "rows": [],
+        "anchors_keyed": None,
+        "dropped_empty_text": None,
+        "hidden_not_rendered": None,
+    }
+    try:
+        result = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
+        logger.debug("harvest census failed: %s: %s", type(exc).__name__, exc)
+        return out
+    if isinstance(result, dict):
+        out["rows"] = list(result.get("rows") or [])
+        out["anchors_keyed"] = result.get("anchors_keyed")
+        out["dropped_empty_text"] = result.get("dropped_empty_text")
+        out["hidden_not_rendered"] = result.get("hidden_not_rendered")
+    return out
+
+
+#: How many row anchors :func:`read_tracker_row_shape` will describe, and how
+#: far up from each it will climb. The climb matches ``rowOf``'s own
+#: ``maxHops`` so the report describes the walk the harvest actually performs
+#: rather than a deeper one nobody runs.
+TRACKER_SHAPE_ROWS = 3
+TRACKER_SHAPE_HOPS = 8
+
+#: The shape reader's script. TAG NAMES AND LENGTHS ONLY -- never text, never
+#: an attribute value. A tracker row names a company and a job, so the same
+#: ruling the save sweep took applies here: the question is WHERE the text is,
+#: and that is answerable in integers.
+TRACKER_ROW_SHAPE_JS = """
+(cfg) => {
+  const re = new RegExp(cfg.hrefPattern);
+  const out = [];
+  const anchors = document.querySelectorAll(cfg.rowSelector);
+  const seen = new Set();
+  for (const anchor of anchors) {
+    const m = (anchor.getAttribute('href') || '').match(re);
+    const key = m ? (m[1] || '') : '';
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const keysIn = (node) => {
+      const keys = new Set();
+      if (!node.querySelectorAll) return keys;
+      for (const link of node.querySelectorAll('a[href]')) {
+        const hit = (link.getAttribute('href') || '').match(re);
+        if (hit) keys.add(hit[1] || '');
+      }
+      return keys;
+    };
+    const climb = [];
+    let node = anchor;
+    let hops = 0;
+    while (node && hops <= cfg.maxHops) {
+      // DISTINCT KEYS, not link count, and it is the same test rowOf stops on
+      // (keysWithin(node).size > 1). It is what separates "still inside this
+      // row" from "climbed out into the container holding the others", and
+      // without it a verdict about the ROW's text ends up measuring the whole
+      // page's chrome -- which is what the first draft of this did.
+      climb.push({
+        tag: node.tagName,
+        children: node.childElementCount,
+        text_chars: (node.innerText || '').trim().length,
+        content_chars: (node.textContent || '').trim().length,
+        keys: keysIn(node).size,
+        links: node.querySelectorAll ? node.querySelectorAll('a[href]').length : 0
+      });
+      node = node.parentElement;
+      hops += 1;
+    }
+    out.push(climb);
+    if (out.length >= cfg.maxRows) break;
+  }
+  return out;
+}
+"""
+
+
+async def read_tracker_row_shape(page: Any) -> list[list[dict[str, Any]]]:
+    """WHERE a tracker row's text lives, in integers and tag names.
+
+    THE QUESTION THIS ANSWERS. ``harvest_census`` says the walk discarded rows
+    for carrying no text. It cannot say whether the text is somewhere the walk
+    did not climb to, present but unrendered, or absent from the document
+    altogether -- and those are three different repairs. This climbs from each
+    row anchor exactly as ``rowOf`` does and reports, at every level, how many
+    characters are RENDERED against how many are merely PRESENT.
+
+    Read the two columns against each other:
+
+    ``text_chars`` 0 and ``content_chars`` 0 at every level
+        the row genuinely holds no text. LinkedIn drew the link and not its
+        contents, and no reader keyed on text can find one.
+    ``text_chars`` 0 with ``content_chars`` non-zero
+        the text is in the DOM and not being rendered. ``innerText`` reports
+        nothing for a rendered ancestor whose subtree is hidden -- note this
+        is NOT true of a node that is itself unrendered, which returns its
+        ``textContent`` instead, so the level at which the two diverge is
+        the level that is hidden.
+    both non-zero at some level above the anchor
+        the text exists and the walk stopped short of it.
+
+    TAG NAMES, COUNTS AND LENGTHS ONLY. No text and no attribute value leaves
+    this function. A tracker row names a company and a job, and the save sweep
+    already took this ruling for the same reason.
+
+    Never raises; an empty list means the shape could not be read.
+    """
+    cfg = {
+        "hrefPattern": JOB_HREF,
+        "rowSelector": TRACKER_ROW_LINK,
+        "maxRows": TRACKER_SHAPE_ROWS,
+        "maxHops": TRACKER_SHAPE_HOPS,
+    }
+    try:
+        result = await page.evaluate(TRACKER_ROW_SHAPE_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
+        logger.debug("tracker row shape failed: %s: %s", type(exc).__name__, exc)
+        return []
+    return list(result or [])
+
+
+async def harvest_block_cards(
+    page: Any,
+    *,
+    selectors: list[str],
+    max_items: int,
+    max_chars: int = 800,
+    hidden_selector: str = "",
+    time_selector: str = "",
+    unread_class: str = "",
+) -> list[dict[str, Any]]:
+    """Return ``{href, text, hidden, time, unread, selector}`` per card.
+
+    Args:
+        hidden_selector: elements inside a card whose text the page marks
+            screen-reader-only. Returned verbatim so the shaper can subtract
+            exactly one occurrence of each -- see the script's own note for
+            why subtracting by phrase would be wrong.
+        time_selector: the element carrying the card's timestamp, for surfaces
+            that write the time somewhere the body text never reaches.
+        unread_class: a class the card wears while it is unread.
+    """
+    cfg = {
+        "selectors": list(selectors),
+        "maxItems": int(max_items),
+        "maxChars": int(max_chars),
+        "hiddenSelector": str(hidden_selector or ""),
+        "timeSelector": str(time_selector or ""),
+        "unreadClass": str(unread_class or ""),
+    }
+    try:
+        records = await page.evaluate(HARVEST_BLOCK_CARDS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return list(records or [])
+
+
+async def read_profile_fields(
+    page: Any,
+    *,
+    max_sections: int = 40,
+    max_lines: int = 60,
+    max_hops: int = 20,
+) -> dict[str, Any]:
+    """Return the profile page's sections, each as a heading plus its lines."""
+    cfg = {
+        "maxSections": int(max_sections),
+        "maxLines": int(max_lines),
+        "maxHops": int(max_hops),
+    }
+    try:
+        data = await page.evaluate(READ_PROFILE_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the profile page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return dict(data or {})
+
+
+#: The employer block on a job posting. LinkedIn labels it itself --
+#: ``aria-label="Company, Ashgrove Systems."`` -- and that label is the
+#: strongest anchor the page offers: it is the page DECLARING which element
+#: is the employer, rather than this module inferring it from position or
+#: from a generated class name. Measured on the 2026-08-22 capture: it occurs
+#: exactly ONCE in both the pre-hydration and the hydrated render, and not at
+#: all in the unrendered shell, which is exactly the discrimination wanted.
+#:
+#: The posting carries several other ``/company/`` links -- the insights
+#: panel, the About-the-company card -- so "the first company link on the
+#: page" is NOT the same thing and would drift with LinkedIn's layout.
+COMPANY_BLOCK = '[aria-label^="Company,"]'
+
+#: ``Company, Ashgrove Systems.`` -> ``Ashgrove Systems``.
+_COMPANY_LABEL = re.compile(r"^\s*Company\s*,\s*(.+?)\s*\.?\s*$", re.I)
+
+#: The employer's slug, taken out of whatever company url the block carries
+#: (``/life/``, ``/insights/?insightType=...``). The base page is rebuilt from
+#: the slug rather than the href being returned as found, so a tracking query
+#: never travels out in a tool result.
+_COMPANY_SLUG = re.compile(r"/company/([A-Za-z0-9\-_%]+)")
+
+#: The ceiling on ONE ELEMENT READ -- a single attribute or text node -- taken
+#: from a page that has already settled.
+#:
+#: WHY IT HAS TO BE NAMED AT ALL. Playwright's reads AUTO-WAIT, and the default
+#: ceiling is THIRTY SECONDS. Every read below sits behind a ``try`` that turns
+#: a miss into ``None`` and moves on, which reads like a fast miss and is not
+#: one: an absent element costs the full thirty seconds first. MEASURED
+#: 2026-09-05 over ``tests/fixtures/job_detail_shell.html``, a capture with no
+#: company block:
+#:
+#:   read_job_identity   30.03 s   -> company=None
+#:   read_main_text       0.00 s   (that capture DOES draw a main)
+#:
+#: so a page that drew no posting cost thirty seconds to learn nothing, on a
+#: DOM that was already complete and could not change. The default is right
+#: for a control being waited ON; it is wrong for a field being read OFF a
+#: settled page, and the difference was invisible because nothing named it.
+#:
+#: WHAT THE NUMBER IS FOR. The reads that are allowed to wait for hydration
+#: have their own named ceilings and take them FIRST --
+#: :data:`JOB_DESCRIPTION_TIMEOUT_MS`, :data:`SAVE_READY_TIMEOUT_MS`,
+#: :data:`TRACKER_LIST_TIMEOUT_MS`. By the time anything below runs, the page
+#: has either drawn or spent one of those bounds failing to. This ceiling
+#: therefore covers the read itself, not the drawing: 2 s against the 0.04-0.07 s
+#: a present element has measured on every capture in this repo.
+#:
+#: It changes NO answer. Every site that carries it already returned ``None``
+#: or ``""`` on a miss; it changes only how long the miss takes to report.
+ELEMENT_READ_TIMEOUT_MS = 2_000
+
+
+async def read_job_identity(page: Any) -> dict[str, Any]:
+    """Return the employer and the document title of a job posting.
+
+    Both are plain Playwright reads -- an attribute, a title, no script is
+    injected and nothing is evaluated. Every field is ``None`` when the page
+    did not render it, and a missing employer is the signal the caller uses to
+    tell an unrendered page from a real posting: LinkedIn sets the document
+    title server-side, so the title arrives even on a shell that carries no
+    posting at all, and a reader that trusted it alone would report a job that
+    was never on the page.
+    """
+    out: dict[str, Any] = {
+        "company": None,
+        "company_url": None,
+        "document_title": None,
+    }
+
+    try:
+        out["document_title"] = str(await page.title() or "").strip() or None
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("document title unreadable: %s: %s", type(exc).__name__, exc)
+
+    try:
+        block = page.locator(COMPANY_BLOCK).first
+        label = await block.get_attribute(
+            "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS
+        )
+    except Exception as exc:
+        logger.debug("company block unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+
+    match = _COMPANY_LABEL.match(str(label or ""))
+    if match:
+        out["company"] = match.group(1).strip() or None
+
+    try:
+        href = await block.locator('a[href*="/company/"]').first.get_attribute(
+            "href", timeout=ELEMENT_READ_TIMEOUT_MS
+        )
+    except Exception as exc:
+        logger.debug("company url unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+
+    slug = _COMPANY_SLUG.search(str(href or ""))
+    if slug:
+        out["company_url"] = f"https://www.linkedin.com/company/{slug.group(1)}/"
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The About-the-company card, on the posting that is already open
+# ---------------------------------------------------------------------------
+
+#: WHY THIS IS A DEDICATED READ AND NOT A CALL TO ``harvest_linked_cards``,
+#: which is what it was written as first.
+#:
+#: The card is ANCHORED on a ``/company/`` link that wraps the employer's name
+#: and its follower count. The industry, the self-declared size band and the
+#: "N on LinkedIn" line are SIBLINGS of that anchor, one level up. So the
+#: obvious implementation is the generic card walk with a ``/company/``
+#: pattern -- and it cannot work, for a reason that is in the walk rather than
+#: in the depth.
+#:
+#: MEASURED over the four tracked ``job_detail*`` fixtures at six depths
+#: (1, 2, 3, 4, 6, 8 -- ``_audit/_scratch/_probe_company_about_hops.py``):
+#: the card anchored on the ``/company/.../life/`` link is **16 characters at
+#: every one of them** and carries none of the three fields at any depth. The
+#: cause is ``HARVEST_LINKED_CARDS_JS``'s own stop rule,
+#: ``if (keysWithin(node).size > 1) break``: the About section holds TWO
+#: distinct ``/company/`` targets -- the name link and the Premium-insights
+#: link -- so the climb halts at the anchor itself, before it ever reaches the
+#: element the meta lines hang off. That separation is correct and deliberate,
+#: because it is what keeps two cards from merging into one. It simply means
+#: this card is not a card in that walk's sense, and raising ``max_hops``
+#: cannot reach it -- the walk is not stopping because it ran out of budget.
+#:
+#: THE ANCHORS ARE LINKEDIN'S OWN, read off the fixtures rather than guessed,
+#: and there are two because they do not appear at the same moment:
+#:
+#:     componentkey="JobDetails_AboutTheCompany_<job id>"   5 of 6 captures
+#:     data-sdui-component="...aboutTheCompanyForJobDetails" 4 of 6 captures
+#:
+#: The ``componentkey`` container is present on ``job_detail_following.html``
+#: while the SDUI attribute is not, AND THAT CAPTURE'S CONTAINER IS EMPTY --
+#: a skeleton with a ``width:24rem`` shimmer bar and no text at all. So the
+#: earlier anchor finds a box before LinkedIn has put anything in it, and a
+#: reader that used it alone would report an employer with no follower count
+#: and no industry as a FACT about the employer. It is a fact about the
+#: hydration state, and :func:`read_company_about_card` returns the two
+#: separately for exactly that reason.
+#:
+#: The suffix match on the SDUI name is deliberate: the full attribute is
+#: ``com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheCompanyForJobDetails``
+#: and the generated prefix is LinkedIn's build detail, not its contract. The
+#: same file already waits on ``...dsl.impl.aboutTheJob`` for hydration, so
+#: this is the anchor family this page is already read through.
+ABOUT_COMPANY_CONTAINER = 'div[componentkey^="JobDetails_AboutTheCompany"]'
+
+#: The corroborating anchor. Present LATER than the one above, so its absence
+#: is evidence about hydration and never about the employer.
+ABOUT_COMPANY_SDUI = '[data-sdui-component$="aboutTheCompanyForJobDetails"]'
+
+#: Cap on the lines returned, so a page that renders an unusually long company
+#: description cannot make this read unbounded. The card is nine lines of
+#: chrome plus a description on every capture held here; forty is generous
+#: and finite.
+ABOUT_COMPANY_MAX_LINES = 40
+
+
+async def read_company_about_card(page: Any) -> dict[str, Any]:
+    """Return the About-the-company card's OBSERVATIONS, deciding nothing.
+
+    A plain Playwright ``inner_text`` read of a container LinkedIn labels
+    itself. No script is injected, nothing is evaluated, no control is
+    pressed, and no page is loaded -- this reads the render
+    ``linkedin_job_detail`` has already performed.
+
+    Returns ``container``, ``sdui``, ``lines`` and ``error``. WHICH LINE IS
+    THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED HERE; that is
+    ``shape.company_about_card``'s job, where it can be tested without a
+    browser. The three-way distinction this function exists to preserve:
+
+        container False              -- LinkedIn drew no such card
+        container True,  lines []    -- the card is a skeleton, not yet filled
+        container True,  lines [...] -- there is something to parse
+
+    The middle case is the one worth the extra field. It looks identical to
+    "this employer has no follower count" in any shape that returns only a
+    list, and this repository has already paid for that confusion once, on a
+    harvest that could not tell "no anchor on the page" from "every anchor
+    discarded".
+    """
+    out: dict[str, Any] = {
+        "container": False,
+        "sdui": False,
+        "lines": [],
+        "error": None,
+    }
+
+    try:
+        container = page.locator(ABOUT_COMPANY_CONTAINER).first
+        found = int(await container.count())
+    except Exception as exc:
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("about-the-company container unreadable: %s", out["error"])
+        return out
+
+    if not found:
+        return out
+    out["container"] = True
+
+    try:
+        out["sdui"] = bool(await page.locator(ABOUT_COMPANY_SDUI).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("sdui marker unreadable: %s: %s", type(exc).__name__, exc)
+
+    try:
+        text = str(
+            await container.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS) or ""
+        )
+    except Exception as exc:
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("about-the-company text unreadable: %s", out["error"])
+        return out
+
+    lines = [line.strip() for line in text.splitlines()]
+    out["lines"] = [line for line in lines if line][:ABOUT_COMPANY_MAX_LINES]
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Save state
+# ---------------------------------------------------------------------------
+
+#: The accessible names the job-SAVE control has been SEEN wearing. TWO of
+#: them since 2026-08-30, and the pairing is the point -- see
+#: ``shape.SAVE_LABELS`` for what each one MEANS and for the four observations
+#: the second one rests on.
+#:
+#: MEASURED. The OFF label across all four frozen postings at BOTH hydration
+#: states; the ON label on the live posting the operator saved, read three
+#: times through ``linkedin_job_detail`` after the write path reported it once:
+#:
+#:   not saved -> ``<button type="button" ... aria-label="Save the job">``
+#:   saved     -> ``<button type="button" ... aria-label="Unsave the job">``
+#:
+#: NO FIXTURE CARRIES THE ON LABEL. Every capture in ``tests/fixtures`` was
+#: taken while the account had nothing saved, so every offline test that needs
+#: a saved posting DERIVES one by relabelling the control. That is stated here
+#: because it is the one asymmetry left between the two rows: the OFF label is
+#: reproducible from disk, the ON label is reproducible only from the live
+#: account. A capture of a saved posting would close it.
+#:
+#: Anchored on the accessible name, and the alternatives are ruled out by
+#: measurement rather than by preference. ``data-view-name="job-save-button"``
+#: is on the 2026-08-22 hydrated capture and GONE from the 2026-08-23 one --
+#: same surface, same account, one day, the whole instrumenting layer removed.
+#: The class list is a build hash and is byte-identical to the follow button's
+#: neighbours. ``componentkey`` is a per-posting uuid. The accessible name is
+#: the only handle that survived the day it was tested on.
+SAVE_LABELS_SEEN: tuple[str, ...] = ("Save the job", "Unsave the job")
+
+#: Matches the save control in any state this reader recognises -- which since
+#: 2026-08-30 is BOTH states, so a saved posting now matches and reports its
+#: label instead of reporting count 0. Count 0 has correspondingly narrowed in
+#: meaning: it no longer covers "the state nobody has photographed", only "the
+#: page has not drawn its controls" or "LinkedIn renamed one". Still ambiguous,
+#: still refuses, one fewer reading to hold open: see ``shape.save_state``.
+SAVE_CONTROL = ", ".join(
+    f'button[aria-label="{label}"]' for label in SAVE_LABELS_SEEN
+)
+
+
+#: The ARIA role an ``<input>`` of a given type carries, for the two types
+#: this package builds a click from. DELIBERATELY NOT THE WHOLE HTML-AAM
+#: TABLE: a mapping is only here if a control of that kind has actually been
+#: measured on a page this server acts on, so an input type absent from this
+#: dict makes :func:`aria_role_of` return ``None`` and the caller refuse.
+#:
+#: WHY IT MATTERS AT ALL. ``radio`` and ``checkbox`` are two different roles
+#: wearing one tag, and Playwright's accessible-name selector engine is
+#: addressed BY ROLE -- so a selector built on the wrong one matches nothing.
+#: Six readings of the dark-mode page established three checkable inputs and
+#: NONE of them established which of the two types they are, because the
+#: census's ``checked`` gate admits both. The type is therefore read off the
+#: row at click time and mapped here.
+INPUT_TYPE_ROLES: dict[str, str] = {
+    "radio": "radio",
+    "checkbox": "checkbox",
+}
+
+
+def aria_role_of(row: dict[str, Any]) -> Optional[str]:
+    """The role a censused control carries, or ``None`` if it is not one this
+    package will build a click from.
+
+    THREE ROUTES, IN ORDER, AND THE LAST IS A REFUSAL. An explicit ``role``
+    attribute wins, because it is what the author wrote and what the browser
+    honours. Otherwise an ``<input>``'s type decides it, through
+    :data:`INPUT_TYPE_ROLES`. Anything else -- an input type nobody has
+    measured here, a tag with an implicit role this package has never needed
+    -- returns ``None``, and every caller treats that as a refusal rather
+    than falling back to a plausible role.
+
+    ``None`` IS NOT "no role". Every rendered element has one; this says THIS
+    READER WILL NOT NAME IT, which is the same distinction ``checked: None``
+    and ``name_source: "none"`` each cost this module once before it was
+    written down.
+    """
+    explicit = row.get("role")
+    if isinstance(explicit, str) and explicit.strip():
+        return explicit.strip().lower()
+    if str(row.get("tag") or "").lower() != "input":
+        return None
+    return INPUT_TYPE_ROLES.get(str(row.get("input_type") or "").lower())
+
+
+#: The characters a name may not contain if it is going into a role selector.
+#: A quote would end the quoted value early and a bracket would end the
+#: attribute clause, so either could turn one control's name into a selector
+#: matching something else entirely.
+_SELECTOR_UNSAFE = ('"', "'", "[", "]", "\\", "\n", "\r", "\t", ">", "<")
+
+
+def named_role_selector(role: str, name: str) -> str:
+    """A selector for the ONE control with this role and this accessible name.
+
+    Playwright's ``role=`` engine, because it is the only selector form that
+    computes an ACCESSIBLE NAME -- and the dark-mode radios are named through
+    ``aria-labelledby``, which no attribute selector can follow.
+    ``save_control_selector`` can use ``button[aria-label="..."]`` because its
+    control is named by the attribute itself; this one cannot.
+
+    THIS SAID ``[exact=true]`` UNTIL 2026-09-02, and that is not an attribute
+    Playwright's role engine has. It raises ``Unknown attribute "exact"`` on
+    any page, so this builder returned a string that could not resolve and
+    ``update_setting``'s only click could not land. Nothing caught it because
+    every test compared the STRING and no test ever handed one to a browser --
+    a selector test that never resolves the selector is a check that cannot
+    fail on the one thing the selector is for.
+    ``tests/test_selectors_resolve.py`` is the instrument that closes that,
+    and it is what found this.
+
+    AND THE REASON THE CLAUSE WAS THERE WAS ALSO WRONG. It read: *"a substring
+    match would let ``Always on`` select a control named ``Always on,
+    recommended``"*. MEASURED 2026-09-02 against this Playwright: the role
+    engine matches a name WHOLE, never as a substring, with or without any
+    suffix -- ``[name="Always"]`` matches nothing on a page drawing both of
+    those controls. The clause was defending against something the engine does
+    not do, spelled in a way that made every selector it built unusable.
+
+    WHAT THE ``s`` SUFFIX ACTUALLY BUYS, measured on the same page: CASE
+    SENSITIVITY. ``[name="always on"]`` matches 0 and ``[name="always on"i]``
+    matches 1. Case-sensitive is also this version's DEFAULT, so the suffix is
+    the behaviour written down rather than inherited -- which is the reason to
+    keep it, and the honest size of that reason.
+
+    SO THE SUFFIX IS DOCUMENTATION AND THE TEST IS THE GUARD. Because
+    case-sensitivity is already the default, dropping ``s`` changes nothing
+    observable -- a mutation doing exactly that passes the suite, and is
+    recorded passing rather than hidden. What actually protects this package
+    from a future Playwright flipping that default is
+    ``tests/test_selectors_resolve.py`` pinning ``[name="always on"]`` to
+    ZERO. That assertion is load-bearing and the suffix is not; deleting it
+    on the grounds that the ``s`` covers it would leave the suffix looking
+    correct while silently doing nothing, which is precisely the state
+    ``[exact=true]`` was in.
+
+    GUARDED THE SAME WAY :func:`save_control_selector` IS, and the guard has
+    to be here rather than at the call site: this is a string a CLICK is built
+    from. The role must be one this package maps, and the name must contain
+    none of the characters that would let it escape its own quotes. Both
+    refuse rather than escaping, because an escaping rule is a thing to get
+    subtly wrong and a refusal is not.
+    """
+    if role not in set(INPUT_TYPE_ROLES.values()):
+        raise ExtractionFailedError(
+            f"refusing to build a selector for role {role!r}: this package "
+            f"builds clicks only for {sorted(set(INPUT_TYPE_ROLES.values()))}. "
+            "A selector assembled for an unmeasured role is a guess pointed "
+            "at a control."
+        )
+    if not name or any(bad in name for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a selector from this name: it is empty or "
+            "carries a character that would end the selector's own quoting. "
+            "The name is not escaped and made to work -- an escaping rule is "
+            "a thing to get subtly wrong, and what a wrong one produces here "
+            "is a click on a different control."
+        )
+    return f'role={role}[name="{name}"s]'
+
+
+def settings_radio_label_selector(name: str) -> str:
+    """Aim at the ``<label for>`` that ACTIVATES a settings radio, by its name.
+
+    **THE INPUT IS UNCLICKABLE AND THIS IS MEASURED, NOT INFERRED.** On
+    2026-09-03 the first end-to-end ``update_setting`` fired with a real
+    confirm token and came back ``clicks_made: 0``. The selector was right:
+    ``role=radio[name="Always on"s]`` resolved the correct input, and
+    Playwright reported it visible, enabled and stable. It then retried 23
+    times over ten seconds and every attempt was intercepted::
+
+        <div class="setting-radio__button"> intercepts pointer events
+
+    LinkedIn draws its radios by covering the real ``<input>`` with a
+    decorative div. The verification re-navigated, re-read all three radios,
+    and correctly reported the state UNCHANGED -- so nothing downstream was
+    wrong. The click simply cannot land on the input.
+
+    **WHY THE LABEL, AND WHY A DIRECT QUERY SETTLED IT.** Two candidates were
+    measured before this was written, and the reading inverted the expected
+    answer. ``linkedin_surface_census`` reports ``name_source:
+    "aria-labelledby"`` for all three radios, which was read as proving there
+    is no ``<label for>`` binding -- ``aria-labelledby`` NAMES a control,
+    ``<label for>`` ACTIVATES one, and only the second makes a click on the
+    text move the radio. On that reading the label would pass every
+    actionability check and set nothing: a candidate that FAILS BY SUCCEEDING,
+    which is the worst shape available.
+
+    A direct query refuted it. ``label[for="theme__dark"]`` counts **1**. The
+    element ``aria-labelledby`` points at IS a ``<label>``, and its ``for``
+    attribute is the input's id -- a real activation relation. So
+    ``name_source`` is not a reliable proxy for whether a label-for binding
+    exists, and the inference from it was wrong where the query was right.
+
+    The other candidate died in the same reading: ``.setting-radio__button``
+    is present 3 times on the page and **0 times inside the target radio's
+    row**, so an ancestor walk to it resolves nothing.
+
+    **THIS IS STILL A NAME AIM.** The label's text IS the accessible name --
+    that is what ``aria-labelledby`` means here -- so matching the label by
+    its normalised text aims at exactly the control the caller asked for.
+    Re-ordering the three rows changes nothing, and no index is taken.
+    """
+    if not name or any(bad in name for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a settings-radio label selector from this "
+            "name: it is empty or carries a character that would end the "
+            "selector's own quoting. Same rule as named_role_selector, and "
+            "for the same reason -- what a wrong escaping produces here is a "
+            "click on a different control."
+        )
+    return 'xpath=//label[normalize-space(.)="' + name + '"]'
+
+
+async def read_radio_label_binding(
+    page: Any, role: str, name: str
+) -> dict[str, Any]:
+    """Is the label this aim presses actually WIRED to the radio it names?
+
+    :func:`settings_radio_label_selector` matches a ``<label>`` by its
+    normalised text. That is a NAMING relation. What makes a click on a label
+    move a radio is a ``<label for=X>`` binding to the control with id ``X`` --
+    an ACTIVATION relation. **The two look identical on a page and only one of
+    them does anything**, and confusing them is what this whole round cost.
+
+    So the binding is READ rather than assumed, immediately before the click,
+    and every clause is a refusal:
+
+    1. exactly ONE control carries the accessible name asked for, and it has
+       an ``id``;
+    2. exactly ONE label matches that name's text -- more than one and
+       pressing either would be picking by position;
+    3. that label's ``for`` EQUALS the input's own id.
+
+    Clause 3 is the whole point. A label with the right text and no ``for``
+    passes every actionability check and sets nothing -- a target that fails
+    by SUCCEEDING. A label whose ``for`` points at a DIFFERENT radio is worse:
+    it sets the wrong one, which is the only outcome worse than setting none.
+
+    MEASURED 2026-09-03, on all three radios: the element ``aria-labelledby``
+    points at IS a label, and its ``for`` is that radio's own id. This check
+    passes today. It exists because nothing in the markup requires it to keep
+    passing, and because the alternative is a click aimed by a string that
+    stopped meaning what it meant.
+
+    WHY NOT FOLD THIS INTO THE SELECTOR BUILDER. A builder returns a string
+    and cannot read a page; a reader can. Keeping them apart is also what lets
+    ``tests/test_selectors_resolve.py`` resolve the builder against real
+    markup as a pure function of its argument, which is the property that
+    file exists to hold.
+    """
+    out: dict[str, Any] = {
+        "bound": False,
+        "why": "",
+        "observed": {
+            "controls_named": None,
+            "input_id": None,
+            "labels_matching": None,
+            "label_for": None,
+        },
+    }
+    try:
+        control = page.locator(named_role_selector(role, name))
+        found = int(await control.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["why"] = (
+            f"the control named {name!r} could not be counted: "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return out
+    out["observed"]["controls_named"] = found
+    if found != 1:
+        out["why"] = (
+            f"{found} control(s) carry the accessible name {name!r}, where "
+            "exactly one is the measured shape."
+        )
+        return out
+
+    input_id = await control.get_attribute("id")
+    out["observed"]["input_id"] = input_id
+    if not input_id:
+        out["why"] = (
+            "the control has no id, so no label can be bound to it by 'for' "
+            "and there is no activation relation to verify."
+        )
+        return out
+
+    try:
+        labels = page.locator(settings_radio_label_selector(name))
+        matching = int(await labels.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["why"] = (
+            f"the label for {name!r} could not be counted: "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return out
+    out["observed"]["labels_matching"] = matching
+    if matching != 1:
+        out["why"] = (
+            f"{matching} <label> element(s) carry that text. More than one and "
+            "pressing either would be picking by position. "
+            + (
+                # ZERO IS THE INTERESTING ONE AND IT HAS A KNOWN NEXT STEP.
+                #
+                # The aim matches a label by its XPath STRING VALUE, and the
+                # name it is matched against is an ACCESSIBLE NAME. Those come
+                # from two different algorithms: CSS ::before content and an
+                # <img alt> inside the label reach the accessible name and not
+                # the string value, and a visually-hidden span can reach the
+                # string value and not the name. They agree on this page today.
+                # Nothing makes them agree tomorrow.
+                #
+                # So a zero here is most likely a MISMATCH rather than a
+                # missing label, and the refusal says where to look instead --
+                # a dead end that names its own exit is worth more than one
+                # that reports a count.
+                "ZERO IS PROBABLY A TEXT MISMATCH RATHER THAN A MISSING "
+                "LABEL: this aim matches a label by its rendered text, and "
+                "the name it matches against is an ACCESSIBLE NAME computed "
+                "by a different rule. The route that does not depend on the "
+                "two agreeing is the control's own aria-labelledby, which "
+                "points at its label directly -- measured on all three "
+                "dark-mode radios on 2026-09-03, each naming a <label> whose "
+                "for is that radio's id."
+                if matching == 0
+                else ""
+            )
+        )
+        return out
+
+    bound_to = await labels.get_attribute("for")
+    out["observed"]["label_for"] = bound_to
+    if bound_to != input_id:
+        out["why"] = (
+            f"the label carrying that text is bound to {bound_to!r} and this "
+            f"control's id is {input_id!r}. A label that NAMES a control and "
+            "does not ACTIVATE it clicks cleanly and sets nothing; one bound "
+            "elsewhere sets somebody else's radio."
+        )
+        return out
+
+    out["bound"] = True
+    out["why"] = (
+        f"the label carrying that text is bound by 'for' to {bound_to!r}, "
+        "which is this control's own id -- an ACTIVATION relation, read off "
+        "the page rather than assumed."
+    )
+    return out
+
+
+def save_control_selector(label: str) -> str:
+    """A selector for the save control wearing exactly ``label``.
+
+    GUARDED, because this is the one string in this package that a click is
+    built from. The label may only be one this reader has actually seen
+    LinkedIn render, so the selector cannot be assembled out of a value that
+    arrived from somewhere else -- the same discipline ``writes.assert_write_url``
+    applies to a url, applied to the other half of the click.
+    """
+    if label not in SAVE_LABELS_SEEN:
+        raise ExtractionFailedError(
+            f"refusing to build a save-control selector for {label!r}: this "
+            f"reader has only ever seen {list(SAVE_LABELS_SEEN)}. A selector "
+            "assembled from an unmeasured label is a guess pointed at a "
+            "button."
+        )
+    return f'button[aria-label="{label}"]'
+
+
+async def read_save_control(page: Any) -> dict[str, Any]:
+    """Return the save control's accessible name, and how sure we are.
+
+    Same three outcomes as :func:`read_follow_control`, and the same reason for
+    keeping them three: ``count`` 0 means the control did not render IN A STATE
+    THIS READER KNOWS. Absence is not a state.
+
+    WHAT CHANGED ON 2026-08-30. Until the ON label was measured, an
+    already-saved posting was the commonest way to reach count 0 -- the
+    selector held one name and a saved posting wore the other. It now matches
+    both, so a saved posting reports ``"Unsave the job"`` and count 0 means
+    what it says: nothing this reader recognises is on the page.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    try:
+        controls = page.locator(SAVE_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("save control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("save label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
+
+
+#: How many labelled controls the unanchored save sweep will walk before it
+#: stops walking. The same number and the same reasoning as
+#: :data:`APPLY_ADVANCE_SCAN_LIMIT`: a posting drawing more labelled controls
+#: than this is not a shape this reader has seen, and REPORTING the count is
+#: worth more than sampling past it.
+#:
+#: IT REPLACES A SILENT 60. ``read_any_save_control_label`` walked
+#: ``min(total, 60)`` and told nobody when it stopped early -- the exact defect
+#: this section now exists to fix, sitting inside the one instrument that was
+#: supposed to fix it.
+SAVE_SCAN_LIMIT = 200
+
+#: What an accessible name must contain before this reader will REPORT it.
+#:
+#: A WHOLE WORD, AND THE WORD BOUNDARY IS LOAD-BEARING. The substring test this
+#: replaces -- ``"sav" in text.casefold()`` -- also matches the member names
+#: Savita and Savannah, and a job posting draws a hiring team and a "people
+#: also viewed" rail, so the substring rule was a member-name filter that let
+#: member names through. ``\b(?:un)?saved?\b`` matches save, saved, unsave and
+#: unsaved and matches neither of those names.
+_SAVE_WORD = re.compile(r"\b(?:un)?saved?\b", re.IGNORECASE)
+
+#: Both element kinds the save control could be wearing. Every capture this
+#: repo holds draws a ``<button>``; the APPLY control sitting beside it is an
+#: ``<a>`` in every capture, so a save control that had become an anchor is a
+#: shape worth being able to SEE rather than one worth being blind to.
+SAVE_SWEEP_SELECTOR = "main button[aria-label], main a[aria-label]"
+
+#: Every ``<button>`` under ``<main>``, labelled or not. THE ONE COUNT THAT
+#: SEPARATES "NOT READY" FROM "RENAMED", and it earns that job by measurement
+#: rather than by argument.
+#:
+#: Measured 2026-08-30 across every job capture in this repo:
+#:
+#:   job_detail_shell               0 buttons   (the un-hydrated shell)
+#:   job_detail_following           2
+#:   job_detail                     8
+#:   job_detail_hydrated            8
+#:   job_detail_following_hydrated 12
+#:
+#: Zero on the shell, never fewer than two on a posting that actually drew.
+#: WHY NOT THE APPLY CONTROL, which was the obvious candidate and was tried
+#: first: the apply control is an ``<a>`` in every capture, and an anchor
+#: survives in a document whose BUTTON layer has not attached -- a derived page
+#: with every ``<button>`` stripped still reports one apply control and a
+#: believable title and employer. Apply therefore cannot tell the two states
+#: apart, and a readiness signal that cannot fail is not one.
+MAIN_BUTTONS = "main button"
+
+#: What the captures actually draw, carried as data so the refusal can quote
+#: them instead of a reader having to go and look. Measured 2026-08-30 over
+#: every job capture in this repo, counting ``<button>`` under ``<main>``.
+#:
+#: THE SECOND NUMBER IS THE INTERESTING ONE. ``job_detail_following`` draws
+#: only two buttons and is plainly a PARTIAL render beside its own hydrated
+#: sibling (167 nodes under the primary-content section against 715) -- and it
+#: still carries exactly one save control, as do all four rendered captures.
+#: So a low button count does not by itself mean the save control is absent,
+#: and that is precisely why the readiness verdict must report the count
+#: rather than merely pass or fail on it.
+SAVE_CAPTURE_BUTTONS_FULL = "8-12"
+SAVE_CAPTURE_BUTTONS_MIN = 2
+
+#: The labelled half of :data:`MAIN_BUTTONS`. Reported beside the sweep total
+#: so that "labelled controls" can be split into buttons and anchors -- the
+#: anchors are what remain when the button layer has not attached.
+SAVE_LABELLED_BUTTONS = "main button[aria-label]"
+
+#: How long :func:`wait_for_save_control` will wait for the control to attach.
+#:
+#: ON TOP OF ``config.SETTLE_MS`` (3500ms), which every navigation already
+#: spends -- and which is a FLAT TIMER, not a condition: ``browser.goto`` tries
+#: ``networkidle`` first and LinkedIn's long-poll connections mean it "rarely
+#: settles", so in practice every read falls through to the flat wait. That
+#: timer is the bet this constant exists to stop making. A save is a supervised
+#: write behind a token that expires in two minutes, so ten seconds of WAITING
+#: FOR A NAMED THING is affordable where another blind 3500ms is not.
+SAVE_READY_TIMEOUT_MS = 10_000
+
+
+async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
+    """Every save-WORDED control on the page, plus the scan's own receipts.
+
+    Returns RAW accessible names, in document order, and nothing here is fit to
+    publish: :func:`read_save_candidates` is the one that reduces them. The two
+    callers want different things from the same walk -- one wants the raw
+    string to write into a table, the other wants a shaped string to print in a
+    refusal -- so the walk is shared and the OUTPUT is not.
+    """
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE, the same discipline ``read_apply_modal`` runs
+        # on: a page that was never scanned and a page carrying no save
+        # control must not reach a reader as the same pair of values.
+        "names": [],
+        "buttons_total": 0,
+        "labelled_buttons": 0,
+        # UNREPORTED, NOT ZERO. Zero is a measurement that says the button
+        # layer never attached, and it is the whole discriminator -- so it may
+        # only ever be set by a count that actually ran. None is what an
+        # unread page says, and the note prints the two differently.
+        "main_buttons_total": None,
+        "scan_complete": False,
+    }
+    try:
+        controls = page.locator(SAVE_SWEEP_SELECTOR)
+        total = int(await controls.count())
+    except Exception as exc:
+        logger.debug("save sweep failed: %s: %s", type(exc).__name__, exc)
+        return out
+
+    # The two counts that separate an unattached page from a renamed control.
+    # Read BEFORE the walk, and each in its own try, because a sweep that comes
+    # back empty is exactly when they matter most -- these must not be lost to
+    # the same failure that emptied it.
+    try:
+        out["labelled_buttons"] = int(await page.locator(SAVE_LABELLED_BUTTONS).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("labelled-button count failed: %s", type(exc).__name__)
+    try:
+        out["main_buttons_total"] = int(await page.locator(MAIN_BUTTONS).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("main-button count failed: %s", type(exc).__name__)
+
+    out["buttons_total"] = total
+    if total > SAVE_SCAN_LIMIT:
+        # DELIBERATELY NOT SCANNED, and reported as not scanned. The count is
+        # the answer at this point; walking past the limit would spend the
+        # round trips to reach one that is already known to be incomplete.
+        return out
+
+    names: list[str] = []
+    complete = True
+    for index in range(total):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # pragma: no cover - defensive
+            # A control that would not read is a control that cannot be RULED
+            # OUT, so this makes the scan incomplete rather than merely
+            # shorter. ``continue`` alone was what turned a failed read into
+            # "nothing found here".
+            complete = False
+            continue
+        text = str(label or "").strip()
+        if text and _SAVE_WORD.search(text):
+            names.append(text)
+    out["names"] = names
+    out["scan_complete"] = complete
+    return out
+
+
+async def read_any_save_control_label(page: Any) -> Optional[str]:
+    """The accessible name of whatever save-shaped control the page now draws.
+
+    UNANCHORED ON PURPOSE, and used for exactly one thing: after a supervised
+    write, reading back what the control changed INTO. :data:`SAVE_CONTROL`
+    cannot be trusted with that job even now that it knows both labels -- the
+    whole point of the read-back is to catch a name NOBODY has written down,
+    and an anchored selector can only ever confirm the names it already holds.
+
+    IT DID ITS JOB ONCE AND IS STILL HERE. This is what reported
+    ``"Unsave the job"`` on the operator's first save, 2026-08-30, which is the
+    row ``shape.SAVE_LABELS`` gained that evening. It is kept, not retired,
+    because the next rename lands the same way: the anchored reader goes to
+    count 0 and says nothing, and this is what says what the page drew.
+
+    It is a MEASUREMENT INSTRUMENT, never a decision input. Nothing branches on
+    what this returns; ``writes.perform`` prints it so a new label can be
+    written into ``shape.SAVE_LABELS`` by a human who saw it. Locating "the
+    save control" without knowing its name means locating it by POSITION, which
+    is precisely what this package refuses to decide on -- so the value comes
+    back for a person to read and for nothing else.
+
+    RAW, AND THAT IS THE POINT OF IT: the string here is the one a human copies
+    into ``shape.SAVE_LABELS``, so reducing it would hand them ``<opaque>`` to
+    write down. What protects the value instead is :data:`_SAVE_WORD` -- and
+    tightening that from a substring to a whole word closed a leak on THIS
+    path, not only on the diagnostic one, because a hiring-team control named
+    "Savita ..." satisfied the old rule and would have been printed as the
+    label the save control changed into.
+    """
+    names = (await _sweep_save_shaped(page))["names"]
+    return names[0] if names else None
+
+
+async def read_save_candidates(page: Any) -> dict[str, Any]:
+    """What the page ACTUALLY draws, for a refusal that found no known control.
+
+    THE POINT OF THIS FUNCTION IS THAT A REFUSAL SHOULD TEACH SOMETHING, and
+    the reason it has to be a SECOND reading is worth stating exactly.
+    :func:`read_save_control` asks the page ONE question -- is there a
+    ``button[aria-label="Save the job"]`` -- and a page that answers no leaves
+    it holding ``{"label": None, "count": 0}``. There is nothing to salvage
+    from that reading, because nothing was ever read: the other controls on the
+    posting were walked past by a CSS selector, not measured and then
+    discarded. So the diagnostic cannot be a matter of printing what the first
+    read already had. It has to go and look again, wider.
+
+    A MEASUREMENT INSTRUMENT, NEVER A DECISION INPUT, exactly as
+    :func:`read_any_save_control_label` is. Nothing branches on what comes
+    back and no selector is built from it: :func:`save_control_selector` still
+    refuses every label outside :data:`SAVE_LABELS_SEEN`, so a name cannot
+    become a click by having been reported here.
+
+    WHAT IS WITHHELD, AND WHY IT IS WITHHELD RATHER THAN TRUSTED. A job posting
+    renders a hiring team and a "people also viewed" rail, so its accessible
+    names include real members'. TWO gates run, in this order:
+
+    1. the name must carry a save WORD (:data:`_SAVE_WORD`) -- the filter, and
+       a word rather than a substring because "Savita" contains "sav";
+    2. whatever survives is reduced by ``shape.census_shape``, the same
+       function the whole privacy property of ``linkedin_surface_census`` rests
+       on, which returns ``<opaque>`` for anything over 60 characters or
+       outside a narrow ASCII class.
+
+    ``shape.census_redact_rare`` is deliberately NOT applied, and that is a
+    decision rather than an omission: it blanks a run of two capitalised words
+    in any shape seen ONCE, and the save control is drawn once. A genuine ON
+    label reading "Saved Job" would come back ``<redacted>`` -- the instrument
+    would destroy the exact measurement it was called to take.
+    """
+    swept = await _sweep_save_shaped(page)
+    names = swept["names"]
+    return {
+        "candidates": sorted({shape.census_shape(name) for name in names}),
+        # KEPT SEPARATE FROM len(candidates) BECAUSE THE SET LOSES A CASE.
+        # Two controls both labelled "Saved" dedupe to one shape, and "two
+        # save controls rendered" is the fact that decides whether the reader
+        # is looking at a rename or at a page it cannot scope.
+        "matched_total": len(names),
+        "buttons_total": swept["buttons_total"],
+        "labelled_buttons": swept["labelled_buttons"],
+        # Derived rather than counted, because the two selectors are disjoint
+        # by construction: a node is a button or an anchor, never both.
+        "labelled_links": swept["buttons_total"] - swept["labelled_buttons"],
+        "main_buttons_total": swept["main_buttons_total"],
+        "scan_complete": swept["scan_complete"],
+    }
+
+
+async def wait_for_save_control(page: Any, timeout_ms: int) -> dict[str, Any]:
+    """Wait for the save control to ATTACH. Reports what happened, not a verdict.
+
+    Returns ``{"ready", "waited_ms", "timeout_ms", "failure"}`` and refuses to
+    summarise, the same contract :func:`read_apply_modal` keeps: a caller that
+    gets a bare ``False`` cannot tell a page that was asked and said no from a
+    page that could not be asked at all, and those are different findings. The
+    numbers are the ones that ACTUALLY happened rather than the constant that
+    was meant to apply, so a refusal cannot quote a duration it did not spend.
+
+    A POSITIVE CONDITION AND NOT A SLEEP, and the difference is the point of
+    the function. ``browser.goto`` already spends ``config.SETTLE_MS`` on every
+    navigation, but it spends it as a FLAT TIMER -- ``networkidle`` is tried
+    first and LinkedIn's long-poll connections mean it rarely settles, so the
+    read lands wherever 3500ms happens to put it. That is a bet on a duration.
+    This waits for a NAMED ELEMENT and returns the moment it exists, so a page
+    that is ready in 200ms costs 200ms and a page that never becomes ready
+    costs the ceiling and SAYS SO.
+
+    ONE BOUNDED WAIT, ONE VERDICT. There is no retry loop here, deliberately:
+    re-reading until the answer changes is how a racy reader is made to look
+    reliable while staying racy, and it would also make the timeout meaningless.
+
+    ``attached`` rather than ``visible``: the question is whether the control
+    layer has rendered this control at all. Whether it is scrolled into view is
+    a different question, and ``page.click`` waits on actionability itself.
+
+    Never raises. ``ready`` is False on timeout AND on any locator failure,
+    because the caller refuses on False and an exception that came back True
+    would be a failure that opened the gate. ``failure`` is what separates the
+    two for a human reading the refusal.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT REFUSES. Nothing below sets ready True except the wait
+        # actually returning.
+        "ready": False,
+        "waited_ms": 0,
+        "timeout_ms": int(timeout_ms),
+        "failure": None,
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(SAVE_CONTROL).first.wait_for(
+            state="attached", timeout=timeout_ms
+        )
+        out["ready"] = True
+    except Exception as exc:
+        out["failure"] = type(exc).__name__
+        logger.debug(
+            "save control did not attach in %dms: %s: %s",
+            timeout_ms,
+            type(exc).__name__,
+            exc,
+        )
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Apply route
+# ---------------------------------------------------------------------------
+
+#: The accessible names the APPLY control has been SEEN wearing, MEASURED
+#: 2026-08-24 across thirteen job captures. Two, and they are two ROUTES rather
+#: than two states of one thing -- see ``shape.APPLY_LABELS``.
+#:
+#: BOTH ARE ANCHORS, NOT BUTTONS. Every apply control in every capture is an
+#: ``<a href=...>``; there are zero apply ``<button>`` elements anywhere. So
+#: activating one is a NAVIGATION, and the destination is readable BEFORE
+#: anything is activated. That is the single most useful property this surface
+#: has: the route can be identified, and the third-party site named, without
+#: touching the control at all.
+APPLY_LABELS_SEEN: tuple[str, ...] = (
+    "LinkedIn Apply to this job",
+    "Apply on company website",
+)
+
+#: Matches the apply control in either route this reader recognises. An
+#: already-applied posting is NOT known to match -- that state has never been
+#: observed, because the applied list on this account is empty -- so count 0
+#: here is genuinely ambiguous and ``shape.apply_route`` says so.
+#:
+#: THE LINKEDIN-HOSTED ARM IS A PREFIX MATCH, and it had to become one: the
+#: exact-equality version of this selector carried the SAME defect that was
+#: found in ``shape.APPLY_LABELS`` on 2026-08-24, one layer down. LinkedIn
+#: serves that control as "LinkedIn Apply to this job" while the page is
+#: hydrating and as "LinkedIn Apply to <TITLE> at <COMPANY>" once it settles,
+#: so an ``[aria-label="..."]`` selector finds ZERO controls on a fully
+#: rendered posting -- and count 0 reads as "no apply control here", which is
+#: indistinguishable from a posting that genuinely has none.
+#:
+#: Fixing the classifier without fixing the selector would have left the bug
+#: exactly where it was: the classifier would simply never have been handed
+#: anything to classify. ``^=`` is CSS prefix matching, and it is deliberately
+#: NOT used for the off-site arm, whose label has never been observed varying.
+APPLY_CONTROL = ", ".join(
+    (
+        f'a[aria-label^="{shape.LINKEDIN_APPLY_PREFIX}"]'
+        if label.startswith(shape.LINKEDIN_APPLY_PREFIX)
+        else f'a[aria-label="{label}"]'
+    )
+    for label in APPLY_LABELS_SEEN
+)
+
+
+#: The LINKEDIN-ROUTE apply control alone, and deliberately NOT
+#: :data:`APPLY_CONTROL`, which matches both routes because it exists to FIND
+#: whichever control a posting draws. This one exists to be CLICKED, and the
+#: whole off-site refusal rests on never driving the other one -- so the
+#: selector that a click is built from must be incapable of matching it,
+#: rather than merely unlikely to.
+#:
+#: A prefix, for the same reason ``APPLY_CONTROL`` uses one: LinkedIn writes
+#: the posting's own title and employer into this label, so there is no exact
+#: string to match. See ``shape.LINKEDIN_APPLY_PREFIX``.
+LINKEDIN_APPLY_CONTROL = f'a[aria-label^="{shape.LINKEDIN_APPLY_PREFIX}"]'
+
+
+async def read_apply_control(page: Any) -> dict[str, Any]:
+    """Return the apply control's name, destination and target attribute.
+
+    Reads THREE fields rather than one, because ``shape.apply_route`` refuses
+    to classify on any single one of them: the accessible name has already been
+    changed once by LinkedIn on this control, and the outbound href is a
+    generic wrapper that also carries links which have nothing to do with
+    applying. Same three-outcome discipline as :func:`read_follow_control`;
+    count 0 and count above 1 are both reported rather than resolved.
+    """
+    out: dict[str, Any] = {
+        "label": None,
+        "href": None,
+        "link_target": None,
+        "count": 0,
+    }
+    try:
+        controls = page.locator(APPLY_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("apply control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    control = controls.first
+    for field, attribute in (
+        ("label", "aria-label"),
+        ("href", "href"),
+        ("link_target", "target"),
+    ):
+        try:
+            value = await control.get_attribute(attribute)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("apply %s unreadable: %s", attribute, exc)
+            continue
+        out[field] = str(value or "").strip() or None
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Follow state
+# ---------------------------------------------------------------------------
+
+#: The two accessible names the company-follow control on a JOB POSTING wears,
+#: MEASURED on 2026-08-23 against his live account rather than guessed:
+#:
+#:   not following -> ``<button ... aria-label="Follow">``
+#:   following     -> ``<button ... aria-label="Following">``
+#:
+#: Both bare -- no company name, unlike every other follow control LinkedIn
+#: draws (``Follow EXL`` on a profile rail, ``Click to stop following X`` on
+#: Manage Pages, ``Following, click to unfollow X`` in Interests). Four
+#: conventions for one concept, which is why the ON state had to be captured
+#: on THIS control rather than inferred from a sibling.
+#:
+#: THE CLASS ATTRIBUTE IS NOT A SIGNAL ON THIS SURFACE AND THIS IS MEASURED,
+#: not assumed: on ``/jobs/view/`` the two buttons carry BYTE-IDENTICAL class
+#: lists and ``aria-pressed`` appears nowhere on the page, so the accessible
+#: name is the whole of the difference and that is the entire case for
+#: anchoring on it.
+#:
+#: THE SURFACE QUALIFIER IS LOAD-BEARING AND IT WAS MISSING UNTIL 2026-08-24,
+#: when a census found a capture IN THIS REPO refuting the universal form of
+#: the sentence. ``/jobs/search/`` renders a different, older control --
+#: ``class="follow is-following ..." aria-pressed="true"`` -- so on THAT
+#: surface the class and ``aria-pressed`` do both carry the state. The reader
+#: below is unaffected, because it is only ever pointed at a posting page and
+#: measured count 1 on both. The correction is recorded rather than quietly
+#: applied: a comment claiming something universal that one of this repo's own
+#: files disproves is the same defect class as a gate printing an unmeasured
+#: reversibility claim, one layer down.
+FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
+
+
+def follow_control_selector(label: str) -> str:
+    """A selector for the follow control wearing exactly ``label``.
+
+    The twin of :func:`save_control_selector`, and guarded for the same
+    reason: this is a string a CLICK is built from, so the label may only be
+    one ``shape.FOLLOW_LABELS`` has actually seen LinkedIn render. Added
+    2026-08-30, when ``follow_company`` moved into ``writes.PERFORMABLE`` --
+    before that there was no follow click and therefore no follow selector,
+    and the gap was invisible precisely because nothing called it.
+
+    NOTE WHAT THIS DELIBERATELY DOES NOT DO. It never returns the two-state
+    :data:`FOLLOW_CONTROL` union. That constant exists to READ a state and
+    matches the control in either one; a click built from it would press
+    whichever of the two happened to be on the page, which on a toggle is how
+    an action performs its opposite.
+    """
+    from linkedin_server import shape as _shape
+
+    if label not in _shape.FOLLOW_LABELS:
+        raise ExtractionFailedError(
+            f"refusing to build a follow-control selector for {label!r}: this "
+            f"reader has only ever seen {sorted(_shape.FOLLOW_LABELS)}. A "
+            "selector assembled from an unmeasured label is a guess pointed "
+            "at a button."
+        )
+    return f'button[aria-label="{label}"]'
+
+
+async def read_follow_control(page: Any) -> dict[str, Any]:
+    """Return the company-follow control's accessible name, and how sure we are.
+
+    Three outcomes, and keeping them three rather than two is the point:
+
+    * ``label`` set, ``count`` 1 -- the state is known.
+    * ``count`` 0 -- the control did not render. On a job posting that means
+      the page has not hydrated yet, NOT that he is not following: measured
+      2026-08-23, the same posting showed no follow control at all before it
+      settled and ``Following`` after. A reader that treated absence as "not
+      following" would hand a confirm gate the wrong direction, silently.
+    * ``count`` above 1 -- ambiguous. More than one follow control means the
+      page is drawing something besides the posting's own employer, and
+      picking the first would be picking by position.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    try:
+        controls = page.locator(FOLLOW_CONTROL)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("follow control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("follow label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
+
+
+#: One row of LinkedIn's "Manage Pages" list. Anchored on the accessible name
+#: of its button, which states the inverse action outright -- ``Click to stop
+#: following Ashgrove Systems``.
+FOLLOWED_PAGE_BUTTON = 'button[aria-label^="Click to stop following "]'
+
+#: The scope a followed-Page row's OWN company link lives in, as pure XPath
+#: rather than an injected script.
+#:
+#: WHY NO ``page.evaluate`` HERE, when the three harvesters above all use one.
+#: Every injected script in this package has to be declared in
+#: ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
+#: scanner, and ``test_readonly.py`` is under a standing zero-line-diff
+#: constraint. A locator chain needs no declaration because it injects nothing,
+#: so the read-only boundary is not asked to grow a new entry to accommodate a
+#: read. That is the cheaper side of the trade and it was taken deliberately.
+#:
+#: WHY "NEAREST" AND NOT "LARGEST", WHICH IS WHAT THIS USED TO SAY. The rule
+#: was THE ROW RULE stated literally -- the LARGEST ancestor containing
+#: exactly ONE of these buttons, which on the reverse ``ancestor::`` axis is
+#: ``[last()]``. That rule is UNBOUNDED ABOVE whenever a single row has
+#: rendered, because then the whole document contains exactly one button and
+#: the document is an ancestor. Measured 2026-08-23 in headless Chromium, on
+#: one genuine row inside ``main`` plus one unrelated ``/company/`` link in
+#: the nav: the hop resolved to ``html``, the link search under it then took
+#: the first company link in DOCUMENT order, and the harvest returned a
+#: single record wearing one company's NAME beside another company's ID --
+#: ``{'name': 'Really Followed Co', 'id': 'unrelated-nav-corp'}``. Downstream
+#: that is a confident ``following`` for a Page he does not follow AND a
+#: confident ``not_following`` for the one he does. Neither came back
+#: ``unknown``, which is the one wrong answer this reader is allowed.
+#:
+#: THE REPLACEMENT, and why it cannot degenerate the same way. The button
+#: count only GROWS as you climb, so the ancestors containing exactly one of
+#: them are a contiguous run starting at the button; ``[last()]`` took the top
+#: of that run and the top is the document. This takes the LOWEST member of
+#: the run that carries a company link at all, so the search stops at the
+#: first enclosing scope that can answer and can never widen past it. Three
+#: conditions, each closing one way of being wrong:
+#:
+#: * ``[1]`` on the reverse axis -- NEAREST, so no climb out of the row.
+#: * a scope must not BE a document landmark, so a row whose own link has not
+#:   drawn yields no id rather than the page's first unrelated one.
+#: * exactly one button, so a scope straddling two rows yields no id rather
+#:   than the neighbouring row's.
+#:
+#: Nothing here counts children, indexes a list or names a class, so the
+#: property the original was written for survives intact: a restyled or
+#: reordered row still reads, and a build-hash class change cannot break it.
+#: The row predicate itself, WITHOUT the ``xpath=`` prefix, so it can be spliced
+#: into a longer expression. Defined once and consumed twice -- by the reader
+#: below and by :func:`unfollow_control_selector` -- because the READ and the
+#: WRITE agreeing about what a row is cannot be left to two copies of a string.
+#:
+#: THIS SHARING IS A REPAIR, NOT A TIDY-UP. The write path shipped its own copy
+#: on 2026-08-24 with a comment claiming it was "reused verbatim", and it was
+#: not: it had dropped the ``[.//a[contains(@href,'/company/')]]`` condition.
+#: Measured consequence on the real capture -- ALL TWENTY rows resolved to a
+#: bare wrapping ``<div>`` holding zero company links, so the selector matched
+#: NOTHING and every unfollow would have refused. Caught by a slice that
+#: instrumented the scope resolution instead of trusting the comment. A comment
+#: asserting that two strings are the same is worth exactly nothing; being the
+#: same string is worth what the comment claimed.
+_ROW_SCOPE = (
+    "ancestor::*["
+    "not(self::html or self::body or self::main or self::nav"
+    " or self::header or self::footer or @role='main' or @role='navigation'"
+    " or @role='banner' or @role='contentinfo')"
+    "][.//a[contains(@href,'/company/')]]"
+    "[count(.//button[starts-with(@aria-label,'Click to stop following ')])=1]"
+    "[1]"
+)
+
+_FOLLOWED_PAGE_ID_SCOPE = "xpath=" + _ROW_SCOPE
+
+#: The Page link inside that scope. Kept separate so a row that has none still
+#: yields its NAME, which is the field the follow question is actually asked
+#: in; the id is corroboration, not the answer. Which is also why NO ID is a
+#: perfectly good outcome here and a NEIGHBOUR'S id is not: one loses the
+#: corroboration, the other corroborates the wrong thing.
+_FOLLOWED_PAGE_LINK = 'a[href*="/company/"]'
+
+
+async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
+    """Every followed-Page row LinkedIn has rendered, in document order.
+
+    Plain Playwright locators throughout: an attribute read per row and a
+    BOUNDED XPath hop to the scope holding that row's own Page link. No script
+    is injected and nothing is evaluated.
+
+    The name comes off the button's own accessible name, so it is anchored to
+    the row by construction and cannot be another row's. The id is the field
+    that has to be hopped for, and the hop is the part that used to be able to
+    leave the row -- see ``_FOLLOWED_PAGE_ID_SCOPE``.
+    """
+    try:
+        buttons = page.locator(FOLLOWED_PAGE_BUTTON)
+        count = int(await buttons.count())
+    except Exception as exc:
+        logger.debug("followed pages unreadable: %s: %s", type(exc).__name__, exc)
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for index in range(count):
+        button = buttons.nth(index)
+        try:
+            label = await button.get_attribute("aria-label")
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("row %d label unreadable: %s", index, exc)
+            continue
+        href = None
+        try:
+            link = button.locator(_FOLLOWED_PAGE_ID_SCOPE).locator(
+                _FOLLOWED_PAGE_LINK
+            )
+            if await link.count():
+                href = await link.first.get_attribute("href")
+        except Exception as exc:
+            # A row with no readable link is still a row. Losing the id costs
+            # corroboration; dropping the row would lose the follow itself.
+            logger.debug("row %d link unreadable: %s", index, exc)
+        rows.append({"label": str(label or ""), "href": href})
+    return rows
+
+
+def unfollow_control_selector(company_id: str) -> str:
+    """A selector for the unfollow button of ONE company, keyed by its id.
+
+    GUARDED, like :func:`save_control_selector`, and for the same reason: this
+    is a string a click is built from. ``company_id`` must be digits, so
+    nothing a caller supplies can escape the quoting or widen the predicate.
+
+    WHY THE ID AND NOT THE NAME, even though the name is right there in the
+    accessible name this anchors on. The label states the inverse action --
+    ``Click to stop following <Page>`` -- which is what makes it the strongest
+    anchor in this package. It is also the WEAKEST KEY: display names collide,
+    change, and are chosen by somebody else. So the button is found by its
+    label and the ROW is found by its company id, and both must agree.
+
+    WHY THE ROW MUST CARRY A ``/company/`` LINK AT ALL, which is the part that
+    is a safety property rather than a nicety. A census on 2026-08-24 measured
+    LinkedIn rendering the IDENTICAL label template -- ``Click to stop
+    following <name>`` -- over PEOPLE on ``/feed/following/``: twenty rows,
+    ``urn:li:member:`` urns, and no company link anywhere in them. A selector
+    anchored on the label alone matched all twenty. This server cannot reach
+    that surface (it is not on the read allowlist), so nothing was ever at
+    risk; the requirement is here because the day the selector meets a page
+    nobody predicted is the day the requirement has to already be in it.
+    Requiring the company link discriminates 80 company rows from 20 member
+    rows with no exceptions in either direction.
+    """
+    identifier = str(company_id or "").strip()
+    if not identifier.isdigit() or len(identifier) < 4:
+        raise ExtractionFailedError(
+            f"refusing to build an unfollow selector for {company_id!r}: a "
+            "followed Page is addressed by its numeric LinkedIn company id. A "
+            "selector assembled from anything else is a guess pointed at "
+            "whichever row happens to match."
+        )
+    return (
+        "xpath=//button[starts-with(@aria-label,'Click to stop following ')]["
+        + _ROW_SCOPE
+        + f"/descendant::a[contains(@href,'/company/{identifier}/')]]"
+    )
+
+
+async def read_unfollow_control(page: Any, company_id: str) -> dict[str, Any]:
+    """The unfollow button belonging to ONE company row, and how sure we are.
+
+    Same three outcomes as every other control reader here, and the middle one
+    is not theoretical on this surface: LinkedIn renders twenty rows of a
+    larger list, so count 0 means "that company's row is not on the page",
+    which is emphatically NOT "he does not follow them". The caller reconciles
+    that against LinkedIn's own stated total -- see
+    ``shape.followed_page_state`` -- and this reader does not pretend to.
+    """
+    out: dict[str, Any] = {"label": None, "count": 0}
+    selector = unfollow_control_selector(company_id)
+    try:
+        controls = page.locator(selector)
+        out["count"] = int(await controls.count())
+    except Exception as exc:
+        logger.debug("unfollow control unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["count"] != 1:
+        return out
+    try:
+        label = await controls.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("unfollow label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = str(label or "").strip() or None
+    return out
+
+
+async def read_main_text(page: Any) -> str:
+    """Return the rendered text of ``main``, or an empty string if there is none.
+
+    A plain Playwright text read -- no script is injected and nothing is
+    evaluated. It exists because two facts the job tracker will not put in any
+    card are printed in its own furniture: the per-tab COUNTS, and the empty
+    state. Without them an empty list and a broken parse look identical, which
+    is the failure this whole module is arranged to prevent.
+    """
+    try:
+        return str(
+            await page.inner_text("main", timeout=ELEMENT_READ_TIMEOUT_MS) or ""
+        )
+    except Exception as exc:
+        logger.debug("main text unreadable: %s: %s", type(exc).__name__, exc)
+        return ""
+
+
+# ---------------------------------------------------------------------------
+# Job description readiness
+# ---------------------------------------------------------------------------
+
+#: The description section, as LinkedIn's SDUI layer marks it FILLED.
+#: MEASURED 2026-08-30 over the five job captures in tests/fixtures, and
+#: re-counted independently before this shipped:
+#:
+#:   capture                         this anchor   id="JobDetails_AboutTheJob_<id>"
+#:   job_detail_shell                     0                  0
+#:   job_detail_following                 0                  1   <-- description ABSENT
+#:   job_detail                           1                  1
+#:   job_detail_hydrated                  1                  1
+#:   job_detail_following_hydrated        1                  1
+#:
+#: THE OBVIOUS ANCHOR IS THE WRONG ONE, AND WRONG IN THE DANGEROUS DIRECTION.
+#: ``id="JobDetails_AboutTheJob_<id>"`` is the SLOT and is drawn before its
+#: content; it is PRESENT on ``job_detail_following``, the capture whose
+#: description is missing, so a wait anchored on it reports READY in precisely
+#: the state this wait exists to detect. The ``data-sdui-component`` attribute
+#: marks the slot FILLED. Measured, not preferred -- and the difference is a
+#: whole column of the table above.
+JOB_DESCRIPTION_SLOT = (
+    'main [data-sdui-component='
+    '"com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheJob"]'
+)
+
+#: The ceiling this wait may spend. Generous, and it costs nothing on a page
+#: that has drawn -- the sibling wait, ``wait_for_save_control``, was measured
+#: at 27 ms on a ready page, because an attached element satisfies the wait at
+#: once. What the bound buys is that a page which never draws costs this much
+#: ONCE and then SAYS SO, instead of producing a confident refusal about
+#: LinkedIn from a read taken before LinkedIn had answered.
+JOB_DESCRIPTION_TIMEOUT_MS = 10_000
+
+
+async def wait_for_job_description(page: Any) -> dict[str, Any]:
+    """Wait for the description to ATTACH. Three outcomes, and none is a verdict.
+
+    WHY THIS EXISTS, and it is a defect in this package rather than in
+    LinkedIn. ``browser.goto`` settles a navigation with ``networkidle`` and
+    falls back to a flat timer, and those two branches are SEVEN SECONDS APART
+    -- roughly 1 s if networkidle resolves, roughly 7 s if it does not.
+    Measured across 37 recorded ``/jobs/view/<id>`` loads, the fast branch ran
+    28 times; across 15 reads whose outcome was recorded the split was total,
+    13 of 13 early reads refusing for a missing description and 2 of 2
+    late reads drawing the posting in full. The page was fine. The read was
+    early.
+
+    A DURATION IS THE WRONG FIX AND IS NOT TAKEN HERE. Raising the settle, or
+    flooring it, would tax every surface for one surface's missing readiness
+    check -- and nothing measured through the shipped build can distinguish
+    "2 s would be enough" from "6 s would be enough", because the settle is
+    binary by construction and every candidate number sits inside an unmeasured
+    bracket. This waits for the NAMED ELEMENT and returns the moment it exists,
+    so a drawn page costs almost nothing and an undrawn one costs the ceiling
+    and reports that it did.
+
+    ONE BOUNDED WAIT, ONE VERDICT, NO RETRY LOOP -- the same contract as
+    :func:`wait_for_save_control`. Re-reading until the answer changes is how a
+    racy reader is made to LOOK reliable while staying racy, and it would make
+    the timeout mean nothing.
+
+    THREE-VALUED, AND THE THIRD VALUE IS NOT DECORATION:
+
+    ======================  ==================================================
+    ``attached`` is True    the anchor attached. The description is drawn.
+    ``attached`` is False   the wait ran its full course and found nothing.
+                            THIS IS A FINDING about the page.
+    ``attached`` is None    the readiness check ITSELF failed -- a locator
+                            error, a closed page. Evidence for NEITHER.
+    ======================  ==================================================
+
+    Collapsing None into False would report a broken instrument as a finding
+    about LinkedIn, which is the same class of error as a gate printing an
+    unmeasured reversibility claim. It is also not hypothetical: that exact
+    mutation came back green on first pass in the save wave.
+
+    ``attached`` rather than ``visible``: the question is whether the content
+    layer has rendered this section at all, not whether it is scrolled into
+    view.
+
+    Never raises. The caller decides what to do with all three.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT IS THE INSTRUMENT-FAILED VALUE, not the finding. Nothing
+        # below sets True except the wait returning, and nothing sets False
+        # except a timeout specifically -- so a path nobody thought about
+        # cannot arrive claiming to have measured LinkedIn.
+        "attached": None,
+        "waited_ms": 0,
+        "timeout_ms": int(JOB_DESCRIPTION_TIMEOUT_MS),
+        "failure": None,
+        "why": "the readiness check did not run",
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(JOB_DESCRIPTION_SLOT).first.wait_for(
+            state="attached", timeout=JOB_DESCRIPTION_TIMEOUT_MS
+        )
+        out["attached"] = True
+        out["why"] = "the description section attached"
+    except Exception as exc:  # noqa: BLE001 - classified below, never re-raised
+        # CLASSIFIED BY NAME, which is this package's own idiom rather than a
+        # shortcut -- writes.py already tells a genuine expiry from an
+        # instrument failure the same way, and it avoids importing playwright
+        # into a module that has never needed it. Python's builtin TimeoutError,
+        # asyncio's, and playwright's all carry the name and all mean the same
+        # thing here: the wait ran its course.
+        name = type(exc).__name__
+        out["failure"] = name
+        if name == "TimeoutError":
+            # THE ONLY PATH THAT MAY REPORT A FINDING. A timeout is the page
+            # answering "not here" for the whole bounded period; every other
+            # exception is this function failing to ask.
+            out["attached"] = False
+            out["why"] = (
+                "the description section did not attach within the bound, so "
+                "the page had not drawn it"
+            )
+        else:
+            out["why"] = (
+                f"the readiness check itself failed ({name}), so this says "
+                "nothing about the page"
+            )
+            logger.debug("description readiness check failed: %s: %s", name, exc)
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
+async def read_job_posting(page: Any) -> dict[str, Any]:
+    """THE reader for a job posting. Both job-detail paths call this one.
+
+    WHY IT EXISTS, and the history is the argument. ``linkedin_job_detail`` and
+    ``writes._read_posting_facts`` each held their own copy of the same three
+    calls -- ``read_job_identity``, ``read_main_text``, ``shape.parse_job_detail``
+    -- in the same order with the same arguments. Two copies of one sequence is
+    how "the two readers must be using different strategies" becomes a
+    plausible theory about a disagreement they cannot possibly have caused.
+    They cannot drift apart now because there is one of them.
+
+    THE RENDER EVIDENCE IS THE OTHER HALF. ``read_main_text`` returns ``""``
+    both when ``<main>`` is missing and when it is empty, so a caller could
+    never tell "the page drew nothing" from "the page drew something this
+    parser could not read". Those want completely different responses -- one is
+    a page to re-read, the other is a parser to fix -- so the presence of
+    ``<main>`` and the SIZE of its text are reported alongside the parse.
+
+    Character counts, never the text: a job page carries a hiring team and a
+    "people also viewed" rail, so the body is not this server's to hand around
+    for diagnostics.
+
+    THE READINESS WAIT RUNS FIRST, AND THE ORDER IS THE WHOLE OF ITS VALUE.
+    Added 2026-08-30. After the text has been read, waiting for the description
+    changes nothing about what was read -- it would spend up to ten seconds to
+    produce a field describing a page that had already been parsed. Every read
+    below it therefore happens on a page that has either drawn its description
+    or spent the bound failing to, and ``description_wait`` says which.
+    """
+    description_wait = await wait_for_job_description(page)
+    identity = await read_job_identity(page)
+    main_text = await read_main_text(page)
+    try:
+        main_present = int(await page.locator("main").count()) > 0
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("main presence unreadable: %s", type(exc).__name__)
+        # UNKNOWN, NOT ABSENT. False here would say "the page drew no main",
+        # which is the strongest thing this evidence can claim.
+        main_present = None
+    return {
+        "identity": identity,
+        "detail": shape.parse_job_detail(
+            main_text,
+            company=identity.get("company"),
+            document_title=identity.get("document_title"),
+        ),
+        "main_present": main_present,
+        "main_chars": len(main_text),
+        "description_wait": description_wait,
+    }
+
+
+def _url_of(page: Any) -> str:
+    try:
+        return str(page.url)
+    except Exception:  # pragma: no cover
+        return ""
+
+
+# ---------------------------------------------------------------------------
+# Href patterns used by the tools
+# ---------------------------------------------------------------------------
+
+#: A person card. The capture group is the public identifier, used to dedupe.
+PERSON_HREF = r"/in/([A-Za-z0-9\-_%]{2,})"
+#: A job card. The capture group is the numeric job id.
+JOB_HREF = r"/jobs/view/(?:[^/?#]*-)?(\d{6,})"
+
+#: One entry on the skills page. LinkedIn hangs an inline edit affordance off
+#: every skill on the owner's own profile, and its id is the only per-skill key
+#: the page offers -- the names sit in generated-class divs with no list
+#: semantics, and ``main ul li`` finds the three filter pills ("All", "Industry
+#: Knowledge", "Tools & Technologies"), which is what this tool used to return
+#: as the operator's skills.
+#:
+#: It is used ONLY as a DOM key. Nothing navigates to it, and nothing could:
+#: ``readonly._FORBIDDEN_URL_SUBSTRINGS`` blocks ``/edit/`` outright, so a url
+#: built from one of these hrefs is refused before the allowlist is even
+#: consulted.
+SKILL_HREF = r"/details/skills/edit/forms/(\d+)"
+
+#: Where LinkedIn parks text meant only for a screen reader, across surfaces.
+#: A job card's verification decoration lives in the first of these; the header
+#: toggles use the second. The selector is passed to ``querySelectorAll`` in a
+#: try/catch, so an entry a browser cannot parse costs nothing.
+#:
+#: These strings are CSS classes, which this package otherwise refuses to lean
+#: on because LinkedIn generates them. These are the exception and the reason
+#: is that they are not layout classes: they are the page DECLARING which of
+#: its own text is a duplicate, and there is no other way to be told. Losing
+#: them costs the decoration removal and nothing else -- the parse falls back
+#: to reading lines in order.
+CARD_HIDDEN_SELECTOR = ".visually-hidden, .a11y-text, .sr-only, .screen-reader-text"
+
+#: Notification cards mark their screen-reader-only text with this class, carry
+#: their timestamp in this element, and wear this class while unread.
+NOTIFICATION_HIDDEN_SELECTOR = ".visually-hidden"
+NOTIFICATION_TIME_SELECTOR = "p.nt-card__time-ago"
+NOTIFICATION_UNREAD_CLASS = "nt-card--unread"
+
+#: Notification cards, in order of preference. LinkedIn's notification list
+#: has no dependable per-item link, so this is the one surface anchored on
+#: structure instead. It is also the surface most likely to need updating,
+#: which is why a miss raises rather than returning an empty list.
+NOTIFICATION_SELECTORS = [
+    "article.nt-card",
+    "div.nt-card-list article",
+    "main article",
+    'main [data-view-name*="notification"]',
+    "main ul li",
+]
+
+
+def require_rows(
+    rows: list[dict[str, Any]],
+    *,
+    url: str,
+    surface: str,
+    hint: str = "",
+) -> list[dict[str, Any]]:
+    """Raise instead of returning nothing.
+
+    An empty list from a page that failed to render is indistinguishable from
+    an empty list because the operator genuinely has none, and the two must
+    never be confusable. Callers that can legitimately be empty pass through
+    :func:`allow_empty` instead.
+    """
+    if rows:
+        return rows
+    raise ExtractionFailedError(
+        f"nothing readable found on the {surface} page. Either the page did "
+        "not finish rendering, the session is not signed in, or LinkedIn "
+        "changed this surface. Open the url yourself to see which.",
+        url=url,
+        hint=hint,
+    )
+
+
+def allow_empty(rows: list[dict[str, Any]], *, surface: str) -> list[dict[str, Any]]:
+    """Pass an empty harvest through, logging it."""
+    if not rows:
+        logger.info("%s: page rendered but held no rows", surface)
+    return rows
+
+
+def parse_all(
+    records: list[dict[str, Any]],
+    parser,
+) -> tuple[list[dict[str, Any]], int]:
+    """Run ``parser`` over records, returning ``(rows, dropped_count)``."""
+    rows: list[dict[str, Any]] = []
+    dropped = 0
+    for record in records:
+        try:
+            parsed: Optional[dict[str, Any]] = parser(record)
+        except Exception as exc:  # a bad row must not lose the good ones
+            logger.debug("row parse failed: %s: %s", type(exc).__name__, exc)
+            parsed = None
+        if parsed:
+            rows.append(parsed)
+        else:
+            dropped += 1
+    return rows, dropped
+
+
+# ---------------------------------------------------------------------------
+# The apply modal
+# ---------------------------------------------------------------------------
+
+#: LinkedIn's own test hook on the control that SUBMITS an application.
+#: Measured 2026-08-24 on a live posting: exactly one occurrence, on
+#: ``<button aria-label="Submit application" ... type="button">``.
+#:
+#: PREFERRED OVER THE ACCESSIBLE NAME, which is the opposite of the choice
+#: made for every other control in this package, so the reason matters: an
+#: apply cannot be withdrawn by this server, and the accessible name is the
+#: field LinkedIn has already been measured changing WITHIN a single page load
+#: (see ``shape.LINKEDIN_APPLY_PREFIX``). A hook LinkedIn maintains for its own
+#: tests is the more stable of the two, and the name is checked as well rather
+#: than instead -- both must agree before anything is pressed.
+#:
+#: Note it still says ``easy-apply``, the retired product name, while the
+#: aria-label says "LinkedIn Apply". A parser keyed on the visible product name
+#: and one keyed on this hook disagree about what this surface is called.
+APPLY_SUBMIT_HOOK = "data-live-test-easy-apply-submit-button"
+APPLY_SUBMIT_SELECTOR = f"button[{APPLY_SUBMIT_HOOK}]"
+
+#: The modal root. Measured: exactly 1 ``role="dialog"`` on the rendered flow,
+#: and 0 ``aria-modal`` -- so this is the only usable root and aria-modal must
+#: NOT be required.
+APPLY_MODAL_SELECTOR = "[role=dialog]"
+
+#: Words that mean "this control advances the flow rather than ending it".
+#: Their PRESENCE is what makes a posting unsafe to drive: the one flow
+#: measured had zero of them and a single Submit, and a posting that renders a
+#: Next is a shape nobody here has ever seen finish.
+APPLY_ADVANCE_WORDS = ("next", "continue", "review")
+
+#: How many buttons inside the dialog the advance scan will walk. A TRIPWIRE,
+#: NOT A BUDGET, and the difference is the whole point of this constant: when
+#: a modal draws more than this, the scan does NOT run and does NOT truncate --
+#: it reports itself INCOMPLETE and the gate refuses. Silently walking the
+#: first N and reporting "no advance controls" is how a multi-step flow reads
+#: as single-screen, which is precisely the failure this number used to cause
+#: at 40 against a modal recorded with 43 buttons.
+#:
+#: 200 because an apply dialog carrying more controls than that is not a shape
+#: this reader has ever seen, and the right response to an unrecognised shape
+#: here is to stop rather than to sample it.
+APPLY_ADVANCE_SCAN_LIMIT = 200
+
+
+async def read_apply_modal(page: Any) -> dict[str, Any]:
+    """Read the apply modal WITHOUT touching it.
+
+    Returns what the caller needs to decide whether this flow is the one that
+    was measured, and refuses to summarise: every field is reported so a
+    surprise shows up as a surprise rather than as a False.
+
+    THE ADVANCE COUNT IS THE SAFETY FIELD. One posting was measured, and it was
+    a single screen carrying one enabled Submit and no Next. Another posting
+    may well be a multi-step flow. Rather than assume it is not, this reports
+    the advance controls it can see, and the caller refuses when there are any
+    -- so a shape nobody has measured stops the action instead of being driven
+    on a guess.
+    """
+    out: dict[str, Any] = {
+        "modal_present": False,
+        "submit_present": False,
+        "submit_enabled": False,
+        "submit_name": None,
+        "advance_names": [],
+        # DEFAULTS THAT REFUSE. Every early return below leaves these as they
+        # are, and an unscanned modal must never read as one with no advance
+        # controls -- so "complete" starts false and is earned, not assumed.
+        "buttons_total": 0,
+        "advance_scan_complete": False,
+        "why": "",
+    }
+    try:
+        out["modal_present"] = int(await page.locator(APPLY_MODAL_SELECTOR).count()) > 0
+    except Exception:
+        out["modal_present"] = False
+
+    try:
+        submit = page.locator(APPLY_SUBMIT_SELECTOR)
+        count = int(await submit.count())
+    except Exception as exc:
+        out["why"] = f"the submit control could not be read ({type(exc).__name__})"
+        return out
+
+    if count != 1:
+        out["why"] = (
+            f"expected exactly one {APPLY_SUBMIT_HOOK} control and found "
+            f"{count}. One is the measured shape; anything else is a flow "
+            "this reader has never seen."
+        )
+        return out
+
+    out["submit_present"] = True
+    for key, coro in (
+        ("submit_name", submit.get_attribute("aria-label")),
+        ("_disabled", submit.get_attribute("disabled")),
+        ("_aria_disabled", submit.get_attribute("aria-disabled")),
+    ):
+        try:
+            out[key] = await coro
+        except Exception:
+            out[key] = None
+    try:
+        visible = bool(await submit.is_visible())
+    except Exception:
+        visible = False
+    out["submit_enabled"] = (
+        visible
+        and out.pop("_disabled", None) is None
+        and out.pop("_aria_disabled", None) != "true"
+    )
+    out.pop("_disabled", None)
+    out.pop("_aria_disabled", None)
+
+    # Advance controls anywhere in the modal.
+    #
+    # AN EMPTY LIST AND AN UNFINISHED SCAN ARE NOT THE SAME VALUE, and until
+    # 2026-08-26 they were. This loop walked ``min(total, 40)`` and reported
+    # whatever it found; a Next past the fortieth button came back as
+    # ``advance_names: []``, which the gate reads as a single-screen flow and
+    # proceeds to submit on. The one modal ever observed was recorded at 43
+    # buttons. The margin was three.
+    #
+    # THREE WAYS THIS SCAN CAN COME UP SHORT, and all three now say so instead
+    # of returning a tidy empty list:
+    #   * more controls than the tripwire  -- not scanned at all, see below;
+    #   * one control that would not read  -- a button this reader could not
+    #     read is a button it cannot RULE OUT;
+    #   * the locator itself raising       -- previously ``pass``, which
+    #     turned a failed scan into "no advance controls found".
+    names: list[str] = []
+    total = 0
+    complete = False
+    try:
+        buttons = page.locator(f"{APPLY_MODAL_SELECTOR} button")
+        total = int(await buttons.count())
+        if total > APPLY_ADVANCE_SCAN_LIMIT:
+            # DELIBERATELY NOT SCANNED. The gate refuses an incomplete scan, so
+            # walking hundreds of controls would spend the round trips to reach
+            # the answer it already has. Reporting the count is what matters.
+            complete = False
+        else:
+            complete = True
+            for i in range(total):
+                node = buttons.nth(i)
+                try:
+                    if not await node.is_visible():
+                        continue
+                    label = (await node.get_attribute("aria-label")) or ""
+                    text = (await node.inner_text()) or ""
+                except Exception:
+                    complete = False
+                    continue
+                name = " ".join(f"{label} {text}".split()).lower()
+                if not name:
+                    continue
+                if any(w in name for w in APPLY_ADVANCE_WORDS):
+                    names.append(name[:60])
+    except Exception:
+        complete = False
+    out["advance_names"] = sorted(set(names))
+    out["buttons_total"] = total
+    out["advance_scan_complete"] = complete
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Messaging filters
+# ---------------------------------------------------------------------------
+
+#: The ONLY controls this server may activate on the messaging surface, by
+#: accessible name. A closed set, matched exactly, refusing everything else --
+#: the same shape as ``config.PERMITTED_LAUNCH_FLAGS`` allowing exactly two
+#: Chromium flags and refusing a third.
+#:
+#: WHY A CLICK IS PERMITTED HERE AT ALL, since this is a READ path.
+#:
+#: The measurement first: all six pills are ``<button>`` with no href, so the
+#: filter surface is not reachable by navigation. Reading their destinations
+#: rather than guessing a ``?filter=`` parameter is what established that.
+#:
+#: Then the argument, which the operator made and which is right. A filter
+#: pill SENDS NOTHING and CHANGES NOTHING on LinkedIn's servers -- it alters
+#: which rows are displayed. Counted by EFFECT rather than by verb, which is
+#: how this family classifies everything else, a view filter is a read.
+#:
+#: And the part that settles it: ``linkedin_open_messaging`` ALREADY opens
+#: somebody's conversation and may fire a read receipt, and ships with that
+#: stated as an accepted cost. Refusing the lesser act while performing the
+#: greater one is backwards. The previous refusal was a convention wearing the
+#: costume of a limit -- the server's own verdict said InMails were
+#: unreachable "without interacting with the page, which it does not do", and
+#: that clause was a decision, not a wall.
+MESSAGING_FILTERS: tuple[str, ...] = (
+    "focused",
+    "other",
+    "unread",
+    "jobs",
+    "connections",
+    "inmail",
+    "starred",
+)
+
+
+def filter_name_matches(accessible_name: str, wanted: str) -> bool:
+    """THE ONE RULE BOTH PATHS USE. Substring, case-insensitive.
+
+    THIS EXISTS BECAUSE THE TWO PATHS DISAGREED ON HIS LIVE PAGE, inside a
+    single response: the enumerator reported an ``inmail`` pill and the
+    activator reported "expected exactly one and found 0". Same page, same
+    call, opposite answers.
+
+    The cause was not a broken matcher. It was TWO MATCHERS ASKING DIFFERENT
+    QUESTIONS. The enumerator asked "does the accessible name CONTAIN inmail";
+    the activator rebuilt a selector demanding the name be EXACTLY "InMail",
+    from a guess about how LinkedIn capitalises it. Any real label -- "InMail
+    messages", "InMail 1 new", "Filter by InMail" -- satisfies the first and
+    fails the second.
+
+    The activator was the wrong one. It reconstructed a selector from an
+    assumption instead of using what the page actually carries, which is the
+    same mistake as guessing an apply url rather than reading the anchor.
+
+    So there is now ONE predicate and both call it. A disagreement of this
+    shape is not possible while that holds, and a test asserts it.
+    """
+    return str(wanted or "").strip().lower() in str(accessible_name or "").lower()
+
+
+def assert_permitted_filter(name: str) -> str:
+    """The closed-set check, unchanged, and still done BEFORE anything else.
+
+    The narrowing was never the bug. The permission granted is to activate one
+    of seven named pills, not to press things on a page, and that is enforced
+    here before any locator exists.
+    """
+    wanted = str(name or "").strip().lower()
+    if wanted not in MESSAGING_FILTERS:
+        raise ValueError(
+            f"{name!r} is not a messaging filter this server may activate. "
+            f"The permitted set is {list(MESSAGING_FILTERS)} and it is closed: "
+            "a control outside it is refused rather than clicked, because the "
+            "permission granted here is to filter a view, not to press things "
+            "on a page."
+        )
+    return wanted
+
+
+async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
+    """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
+
+    Located by ACCESSIBLE NAME with substring matching -- the same rule the
+    enumerator uses -- rather than by a selector rebuilt from a guess about
+    LinkedIn's exact capitalisation. See :func:`filter_name_matches`.
+
+    Returns what happened, including the url before and after, because the
+    caller has to be able to tell a FILTER from a NAVIGATION. If activating a
+    pill turns out to move the page, that is a finding rather than a detail:
+    it would mean the control does more than filter, and the read
+    classification that permits this click would no longer hold.
+    """
+    wanted = assert_permitted_filter(name)
+    before = page.url
+    try:
+        pills = page.get_by_role("button", name=wanted, exact=False)
+        count = int(await pills.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never fatal
+        return {"activated": False, "why": f"pill unreadable ({type(exc).__name__})"}
+    if count != 1:
+        return {
+            "activated": False,
+            "found": count,
+            "why": (
+                f"expected exactly one {name!r} pill and found {count}. One is "
+                "the measured shape; anything else is a page this reader has "
+                "not seen, and it is not clicked on speculation."
+            ),
+        }
+
+    # THE ACCESSIBLE NAME, which is what the locator matched on. Reading
+    # aria-label alone reported empty for every successful activation on his
+    # live page -- his pills carry visible TEXT and no aria-label -- and an
+    # empty label beside activated:true reads like a contradiction when it is
+    # only a field looking in the wrong place.
+    label = ""
+    try:
+        label = str(await pills.first.get_attribute("aria-label") or "").strip()
+        if not label:
+            label = str(await pills.first.inner_text() or "").strip()
+    except Exception:  # pragma: no cover - a report, not a gate
+        label = ""
+
+    await pills.first.click(timeout=FILTER_CLICK_TIMEOUT_MS)
+    try:
+        await page.wait_for_timeout(FILTER_SETTLE_MS)
+    except Exception:  # pragma: no cover - a settle, not a gate
+        pass
+    # REDACTED AT THE SOURCE, NOT AT ONE CALLER.
+    #
+    # THESE TWO FIELDS SHIPPED RAW AND A REAL CONVERSATION IDENTIFIER REACHED A
+    # TRANSCRIPT ON 2026-09-03. Its twin was already safe: the same reading's
+    # ``thread_opened.landed_url`` goes through ``shape.redact_thread_id`` and
+    # came back ``.../messaging/thread/<THREAD-ID>/``, while these came back
+    # whole -- a redaction applied at one site and not at the site beside it,
+    # because the second pair was added later by somebody reading the first as
+    # decoration.
+    #
+    # IT IS FIXED HERE RATHER THAN IN THE TOOL THAT PRINTED IT, because a
+    # caller-side fix leaves the raw value on the next caller. Nothing that
+    # consumes this function can leak what it never receives.
+    #
+    # AND THE TAINT RULE WAS NEVER GOING TO CATCH IT.
+    # ``tests/test_navigation_is_never_derived.py`` guards two SINKS -- a
+    # navigation and a print. This value reaches neither: it is RETURNED, as
+    # data, and travels to a model's context that way. A returned identifier is
+    # a third sink that rule does not model, and saying so is worth more than
+    # the fix.
+    #
+    # ``navigated`` stays a plain comparison, which yields a boolean and
+    # carries nothing -- it is the signal a caller actually needs from these
+    # two, and it survives redaction untouched.
+    return {
+        "activated": True,
+        "filter": wanted,
+        "pill_label": label,
+        "url_before": shape.redact_thread_id(before),
+        "url_after": shape.redact_thread_id(page.url),
+        "navigated": page.url != before,
+    }
+
+
+#: How long to wait for a pill to be actionable, and for the list to redraw
+#: after it. Short: this is a client-side filter, not a page load.
+FILTER_CLICK_TIMEOUT_MS = 10_000
+FILTER_SETTLE_MS = 2_000
+
+
+# ---------------------------------------------------------------------------
+# The surface census (measurement instrument, not a job-search reader)
+# ---------------------------------------------------------------------------
+
+#: Enumerate the CONTROLS on a rendered page, with no interpretation.
+#:
+#: THE FOURTH SCRIPT, and it is the only one here that is not in service of a
+#: job-search feature. It exists so that the capabilities this server has never
+#: measured -- and therefore refuses -- can be costed by READING what a page
+#: actually carries, rather than by guessing a selector and finding out at the
+#: moment it fires. ``tests/test_readonly.py`` scans it like the other three.
+#:
+#: It reads and returns. There is no click, no focus, no attribute write, no
+#: request, and no scroll: the tokens that would do any of those are refused by
+#: :data:`readonly.JS_MUTATION_TOKENS`, and this script is scanned against that
+#: list by name.
+#:
+#: WHAT IT RETURNS IS RAW AND IS NOT SAFE TO PUBLISH. Accessible names on a
+#: feed contain other members' names, so every name and every href leaving this
+#: script goes through ``shape.census_shape`` in the wrapper below, BEFORE it
+#: reaches any caller. This script is the only place raw names exist and its
+#: only caller shapes them.
+#:
+#: THE NAME IS RESOLVED IN THE ORDER A SCREEN READER WOULD, which is the whole
+#: reason to read the accessible name rather than the text: LinkedIn labels its
+#: reaction buttons with ``aria-label`` and leaves their text as an icon, so a
+#: text-only census reports a page of nameless buttons.
+#:
+#: THE CHAIN, AND THE DAY IT GREW. In order: ``aria-label``,
+#: ``aria-labelledby``, ``title``, ``<label for=id>``, an ancestor ``<label>``,
+#: then the element's own text. The two label routes were added 2026-08-31, and
+#: they were added because the instrument was caught being BLIND rather than
+#: because a spec says so. ``linkedin_surface_census("profile_edit_intro")``
+#: was run twice against ``/in/me/edit/intro/`` and came back identical both
+#: times: 67 controls, ``forms: 1``, and three ``input`` controls at
+#: ``name_source: "none"`` with an empty shape -- while the same day's
+#: ``settings_dark_mode`` capture resolved its three inputs through
+#: ``aria-labelledby``. Every surface censused before that day was made of
+#: buttons and anchors, which LinkedIn labels with ``aria-label``; the profile
+#: editor is the first one made of FORM FIELDS, and a form field is named by a
+#: ``<label>``. So ``name_source: "none"`` had been reading as "this control
+#: carries no name" when what it meant was "this instrument cannot read one",
+#: which is the conflation this package exists to refuse.
+#:
+#: TWO ROUTES, REPORTED SEPARATELY -- ``label-for`` and ``label-ancestor`` --
+#: and not collapsed into one ``label`` source. The whole value of
+#: ``name_source`` is that it says WHERE the string came from; a reader costing
+#: a capability off a census can act on "this field is labelled by a sibling"
+#: and cannot act on "something labelled it".
+#:
+#: THE GATE IS ``el.labels``, chosen over a ``document.querySelector`` on an
+#: escaped id, and the reason is blast radius rather than escaping. ``.labels``
+#: exists only on the elements HTML lets a ``<label>`` name -- input, button,
+#: select, textarea, and the meter/output/progress family -- so an anchor or a
+#: ``div[role="button"]`` that happens to sit inside a label cannot be renamed
+#: by one. A querySelector would have had to be TOLD that rule; this way the
+#: browser holds it, and ``CSS.escape`` never enters the script. It also
+#: settles the ``<label for="other">`` case for free: HTML drops the implicit
+#: association when the wrapper points elsewhere, so ``.labels`` is empty and
+#: no name is invented.
+#:
+#: PRECEDENCE IS DELIBERATELY NARROWER THAN THE ACCESSIBLE-NAME SPEC, which
+#: ranks a native label ABOVE ``title``. Here ``title`` still wins, and
+#: ``aria-label`` wins over everything. The constraint is not correctness in
+#: the abstract: captures taken with the three-route chain are already in the
+#: audit record, and a new route that outranked an existing one would rename
+#: controls inside them with nothing in the diff saying so.
+#:
+#: WHAT THE FALL-THROUGH ACTUALLY REACHES WAS MEASURED, not reasoned about.
+#: This script and one with the label call site deleted were both run over all
+#: 19 committed fixtures -- 537 controls -- and 28 controls move. 26 are
+#: ``input`` controls going from ``none`` to ``label-for``, which is the blind
+#: spot, and they are in the Easy Apply and job-tracker captures as well as on
+#: the profile editor that found it. The other 2 are one ``select`` -- a footer
+#: language picker -- going from ``text`` to ``label-for``: its ``text`` name
+#: was the entire option list in a dozen scripts, which the shaper refused as
+#: ``<opaque>``, and its label reads ``Select language``. NOT ONE control whose
+#: published shape was a readable name changed, so no census already written
+#: down is contradicted by this edit; a non-answer became an answer. The sweep
+#: is pinned in ``tests/test_surface_census.py`` rather than described here.
+#:
+#: WHICH CONTAINER EACH CONTROL SITS IN, added 2026-08-31 as ``container``,
+#: and added because the flat list had already been GUESSED AT TWICE.
+#: ``linkedin_surface_census("profile_edit_intro")`` was run four times; the
+#: two most recent agree exactly -- 256 controls, ``forms: 2``, ``dialogs:
+#: 5`` -- and among them sit ``Save`` (button, enabled), ``Submit`` (button,
+#: disabled, count 2), ``Additional name``, ``City``, ``Comments`` and
+#: ``Posts``. The editor is a DIALOG inside a full profile render and the same
+#: page draws an ad-report dialog and an activity rail, so nobody could say
+#: whether ``Save`` was the editor's commit control or whether
+#: ``Comments``/``Posts`` were profile fields or the rail's filters. Two
+#: readers answered it from ADJACENCY IN THE LIST. Adjacency here is
+#: ``querySelectorAll`` order, which is document order, and document order is
+#: not containment.
+#:
+#: THE DESCRIPTOR IS A SHAPE, NEVER A NAME, and that constraint is what makes
+#: it narrow rather than useful. A container is a NEW source of page text into
+#: this script -- a dialog is named by an ``aria-label``, a section by its
+#: heading -- and both of those can be a member; an id or a class can carry a
+#: member slug. So none of them is read. What is returned is the container's
+#: ROLE or TAG plus an INDEX, e.g. ``form#0``, ``dialog#3``, and ``none`` for
+#: a control with no such ancestor. ``none`` is a string and the key is always
+#: present, because a missing key and a null are two ways of saying "not
+#: measured" and this script already paid once for that conflation.
+#:
+#: ONE INDEX SEQUENCE OVER THE UNION, in document order, assigned once per
+#: run. Not one counter per kind: a single sequence makes the descriptor
+#: unique within the document, so ``dialog#3`` and ``form#3`` cannot be two
+#: names for different containers, and two controls in one container get a
+#: string a reader can GROUP BY -- which is the whole capability being bought.
+#:
+#: NEAREST ANCESTOR, via ``closest()``, and the nesting is not hypothetical:
+#: the intro editor is a FORM INSIDE A DIALOG, so nearest-versus-outermost is
+#: the difference between naming the editor and naming the page furniture
+#: around it. The outermost walk is derived and shown FAILING in the tests.
+#: ``closest()`` starts at the element itself; a control that also matched the
+#: container selector would therefore name itself, which no member of
+#: ``CENSUS_CONTROL_SELECTOR`` can do while wearing only the roles that
+#: selector already names.
+#:
+#: THIS PARAGRAPH USED TO GO FURTHER, AND THE EXTRA CLAUSE WAS FALSE. It read
+#: "...which no member of CENSUS_CONTROL_SELECTOR can do without a role a
+#: real page does not write, and which has never been observed -- documented
+#: rather than guarded", stretching a narrow point about self-containment
+#: into a general claim that a role outside this selector is not one a real
+#: page writes. MEASURED WRONG 2026-09-04: opening the overflow menu on one
+#: of the operator's own comments draws three ``[role="menuitem"]`` nodes --
+#: ``Copy link to comment``, ``Edit``, ``Delete`` -- a role
+#: ``CENSUS_CONTROL_SELECTOR`` has never covered and a real LinkedIn page
+#: does write. The selector is still not widened for it, for the reasons
+#: :data:`CENSUS_JS`'s ``counts`` block gives; that count, not this sentence,
+#: is what the gap is measured and guarded by now.
+#:
+#: THE SELECTOR IS A LITERAL HERE, not a ``cfg`` entry like the control
+#: selector, because nothing in Python reads it. It is deliberately a
+#: SUPERSET of the counts block: ``counts.forms`` is ``form`` and
+#: ``counts.dialogs`` is ``[role="dialog"], dialog``, and neither counts
+#: ``[role="form"]``. A reader who adds those two counts and expects that many
+#: descriptors will be wrong; the mismatch is pinned in the tests.
+#:
+#: ADDITIVE, AND MEASURED TO BE. The key is appended last and no existing
+#: field is renamed, removed or reordered. This script and one with the
+#: container call site deleted were run over all 19 committed fixtures -- 537
+#: controls -- and NOT ONE pre-existing field moved on any control: same
+#: names, same ``name_source``, same counts, same order. Captures already in
+#: ``_audit/`` are therefore still true readings of this instrument.
+#:
+#: WHERE A NEW FIELD GOES, and this paragraph said the OPPOSITE until
+#: 2026-08-31: it read "WHAT IT DOES NOT YET REACH ... this descriptor stops
+#: at this script's own return value and no tool output carries it yet". That
+#: was true of ``container`` for as long as it took to close and is true of
+#: nothing here now -- but the MECHANISM it described is permanent, which is
+#: why the paragraph is corrected rather than deleted. BOTH DOWNSTREAM SITES
+#: ENUMERATE THEIR FIELDS: ``read_surface_census`` below shapes each row by
+#: building a dict literal that NAMES ITS KEYS, and ``shape.census_aggregate``
+#: merges rows on an explicit tuple whose field names are
+#: ``shape.CENSUS_KEY_FIELDS``. A field this script emits and neither of those
+#: names is dropped in SILENCE -- which is exactly what happened to
+#: ``container`` on the day it was added, with the aggregate's docstring
+#: calling itself "the WHOLE record" as the sentence that made the drop
+#: invisible. ``checked`` and ``checked_source`` were added to both sites in
+#: one edit, and ``input_type`` in another on 2026-08-31.
+#:
+#: THE COUNTS THAT USED TO BE IN THIS PARAGRAPH HAVE BEEN REMOVED, and the
+#: removal is the lesson rather than an omission. It read "NAMES TEN KEYS ...
+#: an explicit TEN-FIELD tuple" and told the reader those two numbers were the
+#: thing to re-check -- which is a comment asking to be kept in step with code
+#: by hand, and this module's most-repeated defect is exactly that going
+#: stale. ``shape.CENSUS_KEY_FIELDS`` is now the single place the field list
+#: exists, the published row is BUILT from it, and a test pins the tool's
+#: promised key set against it. There is no number here to rot.
+CENSUS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const countOf = (selector) => {
+    try { return document.querySelectorAll(selector).length; } catch (e) { return 0; }
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
+    const body = textOf(el);
+    if (body) return { name: body, source: 'text' };
+    return { name: '', source: 'none' };
+  };
+
+  const containerSelector = 'form, dialog, [role="dialog"], [role="form"]';
+  let containerNodes;
+  try {
+    containerNodes = Array.from(document.querySelectorAll(containerSelector));
+  } catch (e) { containerNodes = []; }
+  const containerKind = (node) => {
+    const role = attrOf(node, 'role').trim().toLowerCase();
+    if (role === 'dialog' || role === 'form') return role;
+    return (node.tagName || '').toLowerCase();
+  };
+  const containerOf = (el) => {
+    let found = null;
+    try { found = el.closest(containerSelector); } catch (e) { found = null; }
+    if (!found) return 'none';
+    const index = containerNodes.indexOf(found);
+    if (index < 0) return 'none';
+    return containerKind(found) + '#' + index;
+  };
+
+  // NATIVE BEFORE ARIA, and the order is deliberate rather than incidental:
+  // it is the OPPOSITE of nameOf above, which tries aria-label first. On a
+  // native radio or checkbox el.checked is the state the browser holds and
+  // the state a click would move, and an aria-checked written beside it is
+  // redundant markup that can go stale; on a div[role="radio"] there is no
+  // native state and ARIA is the only truth. THE TYPE GATE is the point, not
+  // a detail: HTMLInputElement.checked is defined for every input type and
+  // reads false on a text box, so an ungated read would report every text
+  // field as "unchecked" -- not-checkable reported as checkable-and-off.
+  // null means NOT A CHECKABLE CONTROL; false means CHECKABLE AND OFF.
+  const checkedOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const type = String(el.type || '').toLowerCase();
+      if (type === 'radio' || type === 'checkbox') {
+        return { checked: el.checked === true, source: 'native' };
+      }
+    }
+    const aria = attrOf(el, 'aria-checked').trim().toLowerCase();
+    if (aria === 'true') return { checked: true, source: 'aria-checked' };
+    if (aria === 'false') return { checked: false, source: 'aria-checked' };
+    if (aria === 'mixed') return { checked: 'mixed', source: 'aria-checked' };
+    return { checked: null, source: 'none' };
+  };
+
+  // THE INPUT'S TYPE, and it is read from the PROPERTY rather than the
+  // attribute on purpose: an <input> with no type attribute is a text box,
+  // and el.type reports the default the browser actually applies while
+  // getAttribute reports the empty string. A selector has to match what the
+  // browser applied.
+  //
+  // null MEANS NOT AN INPUT, and it is the same tri-state discipline
+  // checkedOf keeps one function up. A <button> and an <input type="button">
+  // are different elements with different ARIA roles, and reporting the
+  // second's type as "" would put them in one row.
+  //
+  // WHY IT IS HERE AT ALL, since the census counts controls rather than
+  // driving them: writes._live_control for update_setting builds its click
+  // selector from the ROLE the control actually has, and an input's role is
+  // decided by its type -- radio and checkbox are different roles wearing
+  // one tag. Without this the selector would have to assume one of them,
+  // which is exactly the guessed shape this package refuses on a write.
+  const inputTypeOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag !== 'input') return null;
+    const type = String(el.type || '').toLowerCase();
+    return type ? type : null;
+  };
+
+  const controls = [];
+  let nodes;
+  try { nodes = document.querySelectorAll(cfg.controlSelector); } catch (e) { nodes = []; }
+  for (const el of nodes) {
+    const named = nameOf(el);
+    const href = attrOf(el, 'href');
+    const expanded = attrOf(el, 'aria-expanded');
+    const ariaDisabled = attrOf(el, 'aria-disabled');
+    const state = checkedOf(el);
+    controls.push({
+      tag: (el.tagName || '').toLowerCase(),
+      input_type: inputTypeOf(el),
+      role: attrOf(el, 'role') || null,
+      name: named.name,
+      name_source: named.source,
+      has_href: !!href,
+      href: href,
+      aria_expanded: expanded ? expanded : null,
+      disabled: el.disabled === true || ariaDisabled === 'true',
+      container: containerOf(el),
+      checked: state.checked,
+      checked_source: state.source
+    });
+    if (controls.length >= cfg.maxControls) break;
+  }
+
+  return {
+    url: document.location.href,
+    title: document.title || '',
+    truncated: controls.length >= cfg.maxControls,
+    counts: {
+      forms: countOf('form'),
+      buttons: countOf('button, [role="button"]'),
+      links: countOf('a[href]'),
+      contenteditable: countOf('[contenteditable]:not([contenteditable="false"])'),
+      file_inputs: countOf('input[type="file"]'),
+      dialogs: countOf('[role="dialog"], dialog'),
+      menus: countOf('[role="menu"]'),
+      menu_items: countOf('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')
+    },
+    controls: controls
+  };
+}
+"""
+
+#: What counts as a control worth censusing. Roles as well as tags, because
+#: LinkedIn builds plenty of its buttons out of divs.
+CENSUS_CONTROL_SELECTOR = (
+    'button, a[href], input, textarea, select, '
+    '[role="button"], [role="link"], [role="textbox"], [role="combobox"], '
+    '[contenteditable]:not([contenteditable="false"])'
+)
+
+#: Ceiling on controls returned from one page. A feed carries hundreds and the
+#: census is a distribution, not a list, so the tail costs nothing to lose --
+#: but it is REPORTED as truncated rather than silently cut.
+CENSUS_MAX_CONTROLS = 400
+
+
+#: **``name_source`` NAMES THE RESOLVER, NOT THE RELATION.** Recorded here on
+#: 2026-09-03 because it was misread as a fact about the DOM and the misreading
+#: nearly shipped a click at the wrong element.
+#:
+#: :data:`CENSUS_JS`'s ``nameOf`` dispatches in this order::
+#:
+#:     aria-label -> aria-labelledby -> title -> labelRoutes -> text
+#:
+#: and ``labelRoutes`` is what finds a ``<label for>`` or a label ancestor. So
+#: ``aria-labelledby`` is consulted SECOND and ``label-for`` FOURTH: **once the
+#: second answers, the fourth is never reached.**
+#:
+#: WHAT THAT MEANS FOR A READER. ``name_source: "aria-labelledby"`` says the
+#: name came from that attribute. It says NOTHING about whether a ``<label
+#: for>`` binding also exists, and on the dark-mode settings page one does --
+#: ``label[for="theme__dark"]`` counts 1 while the census reports
+#: ``aria-labelledby`` for the same control.
+#:
+#: WHY THE DIFFERENCE MATTERS ENOUGH TO WRITE DOWN. ``aria-labelledby`` is a
+#: NAMING relation and ``<label for>`` is an ACTIVATION relation. Only the
+#: second makes a click on the text operate the control. An instrument that
+#: reports the first is not evidence about the second, and treating it as such
+#: produces a target that passes every actionability check and sets nothing.
+#:
+#: THE HABIT THIS BREAKS. ``labelRoutes`` is DEFINED earlier in the script than
+#: ``nameOf``, and its order was inferred from that. Position in a file is not
+#: order of execution. If you want to know whether a relation exists, query for
+#: it -- ``page.locator('label[for="<id>"]').count()`` is one line and it is
+#: the only thing that answers.
+async def read_surface_census(
+    page: Any,
+    *,
+    max_controls: int = CENSUS_MAX_CONTROLS,
+    max_chars: int = 300,
+) -> dict[str, Any]:
+    """Return the control census of the rendered page, ALREADY SHAPED.
+
+    The shaping is done here, in the only caller of :data:`CENSUS_JS`, so that
+    a raw accessible name has only one exit: this function returns records
+    whose ``shape`` and ``href_shape`` have been through
+    ``shape.census_shape``, and the unshaped strings are dropped inside it.
+
+    That placement is the privacy property. Shaping in the tool instead would
+    leave a function on this module returning other members' names to anyone
+    who called it later, which is precisely the shape of defect that gets
+    found a release after it is introduced.
+
+    **BE PRECISE ABOUT WHAT ``census_shape`` BUYS, BECAUSE IT IS NOT WHAT ITS
+    NAME SUGGESTS AND A CONSUMER OF THESE RECORDS WILL RELY ON THE ANSWER.**
+    This paragraph said "the raw strings are discarded" until 2026-09-04 and
+    that reads as redaction. Measured: ``census_shape('Ada Lovelace')``
+    returns ``'Ada Lovelace'``. It is a CHARACTER AND LENGTH GATE plus
+    placeholder substitution -- ``<opaque>`` past ``CENSUS_NAME_LIMIT`` or on
+    punctuation outside the safe set, and VERBATIM for anything short and
+    plain. That is correct and deliberate: opaquing ``Notifications`` would
+    cost the census its use and buy nothing.
+
+    SO THE MEMBER-NAME PROTECTION IS NOT HERE. It is two functions, both in
+    ``shape``, and a caller that reads these records without them is weaker
+    than the tool that ships them:
+
+    * ``census_href_identifies_entity`` -- applied in the loop below, blanking
+      the name of any control whose href points at a person;
+    * ``census_redact_rare`` -- **NOT applied here**, because it needs a COUNT
+      and these records are not yet counted. It fires on a capitalised run in
+      a shape seen exactly once, which is what separates ``Start A Post`` from
+      a member's name, and it lives in ``shape.census_aggregate``.
+
+    **A CALLER THAT EMITS THESE RECORDS WITHOUT AGGREGATING THEM MUST APPLY
+    ``census_redact_rare`` ITSELF.** That is not hypothetical: ``read_file_inputs``
+    below shipped without it on 2026-09-04, so one payload of
+    ``linkedin_surface_census`` blanked ``Message Ada Lovelace`` in
+    ``control_shapes`` and printed it in ``file_inputs``. Corrected the same
+    day by calling the same function rather than re-deriving the rule.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+    }
+    try:
+        data = await page.evaluate(CENSUS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    shaped: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        href_shape = shape.census_shape(control.get("href")) or None
+        # A control that POINTS AT a member or a company is a link to a named
+        # entity, so its accessible name is that entity's name whatever the
+        # string looks like. Refused here, at the earliest point the two
+        # fields exist together, rather than left for the aggregation pass --
+        # the aggregation pass still checks it, and neither is redundant: this
+        # one keeps a raw name out of THIS function's return value, which is
+        # what lets its docstring claim what it claims.
+        name_shape = shape.census_shape(control.get("name"))
+        if shape.census_href_identifies_entity(href_shape):
+            name_shape = shape.CENSUS_REDACTED
+        shaped.append(
+            {
+                "shape": name_shape,
+                "tag": str(control.get("tag") or ""),
+                # THE INPUT'S TYPE, or ``None`` for anything that is not an
+                # ``<input>``. UNCOERCED, for the same reason ``checked`` is:
+                # ``str(... or "")`` would turn "not an input" into the empty
+                # string, which is a value a real type could never take and
+                # would put a ``<button>`` and an ``<input type="button">`` in
+                # one row. Added 2026-08-31 with the eleventh key.
+                "input_type": control.get("input_type"),
+                "role": control.get("role"),
+                "name_source": control.get("name_source"),
+                "has_href": bool(control.get("has_href")),
+                "href_shape": href_shape,
+                "aria_expanded": control.get("aria_expanded"),
+                "disabled": bool(control.get("disabled")),
+                # WHICH CONTAINER, as a SHAPE. Carried from 2026-08-31,
+                # and this literal is why it needed a deliberate edit: the
+                # keys are NAMED, so a field the script emits and this dict
+                # does not name is dropped in silence -- which is what
+                # happened to this one on the day it was added. Ten keys are
+                # named now. ``str()`` with a ``none`` default rather than the
+                # value, so a control from an older script that never emitted
+                # the field reads ``none`` instead of ``None`` -- the same
+                # absent-is-a-value discipline the rest of this reader keeps.
+                "container": str(control.get("container") or "none"),
+                # WHETHER IT IS CHECKED, carried from 2026-08-31, and it
+                # passes through UNSHAPED AND UNCOERCED on purpose. The value
+                # is ``True``, ``False``, the string ``"mixed"`` or ``None``,
+                # and ``bool()`` here would turn the ``None`` into ``False``
+                # -- which is the conflation the field was built to refuse:
+                # ``None`` means the control is NOT CHECKABLE and ``False``
+                # means it is checkable and OFF. A shaper would also flatten
+                # ``"mixed"`` to ``True``.
+                "checked": control.get("checked"),
+                # The SOURCE gets the same ``str(... or "none")`` default
+                # ``container`` uses, for the same reason: a record from an
+                # older script that never emitted the key reads ``"none"``
+                # rather than ``None``, so absent and unknown wear one string
+                # instead of two.
+                "checked_source": str(control.get("checked_source") or "none"),
+            }
+        )
+
+    counts = {
+        key: int((data.get("counts") or {}).get(key) or 0)
+        for key in (
+            "forms",
+            "buttons",
+            "links",
+            "contenteditable",
+            "file_inputs",
+            "dialogs",
+            "menus",
+            "menu_items",
+        )
+    }
+    return {
+        "counts": counts,
+        "controls": shaped,
+        "controls_read": len(shaped),
+        "truncated": bool(data.get("truncated")),
+    }
+
+
+# ---------------------------------------------------------------------------
+# The file inputs a surface exposes -- COUNTED AND DESCRIBED, never aimed at
+# ---------------------------------------------------------------------------
+
+
+async def read_file_inputs(
+    page: Any, *, census: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
+    """Every ``input[type="file"]`` the rendered page draws, described.
+
+    WHY THIS EXISTS, AND IT IS A PRECONDITION RATHER THAN A FEATURE. The
+    operator opened file upload on 2026-09-04 and
+    ``readonly.SANCTIONED_MUTATIONS`` gained ``set_input_files``. Wiring any
+    composer to that drain point needs a control to aim at, and MEASURED
+    2026-09-04: nothing in this package could name one. ``CENSUS_JS`` COUNTED
+    file inputs -- ``counts.file_inputs`` -- and no reader picked them out; the
+    only two file-input names this project has ever seen live as PROSE in a
+    test docstring and an audit file, from a 2026-09-01 census, reproducible
+    by no instrument here. A name recorded in prose is not a measurement a
+    later wave can act on, and aiming at one would be asserting a shape nobody
+    can re-take.
+
+    NO NEW SCRIPT AND NO NEW WAIVER, deliberately. This filters
+    :func:`read_surface_census`, which already runs ``CENSUS_JS``, already
+    reports ``input_type`` per control, and already carries the module's only
+    ``evaluate`` waivers. A second harvester would have needed its own
+    ``# readonly-ok``, and that budget is pinned by
+    ``tests/test_readonly.py::test_only_dom_module_waives_evaluate`` precisely
+    so a new waiver has to argue for itself. This one needs none.
+
+    WHAT IT RETURNS AND WHAT IT DELIBERATELY DOES NOT. Shaped names, like
+    every other census record -- meaning they have been through
+    ``shape.census_shape`` inside ``read_surface_census`` before this function
+    sees them.
+
+    BE PRECISE ABOUT WHAT THAT BUYS, because this paragraph said "the raw
+    string is discarded" until it was measured on 2026-09-04 and that was an
+    OVERSTATEMENT. ``census_shape`` is a CHARACTER AND LENGTH GATE plus
+    placeholder substitution, not a name redactor: a label over
+    ``CENSUS_NAME_LIMIT`` or carrying unusual characters becomes
+    ``<opaque>``, and everything short and plain PASSES THROUGH VERBATIM --
+    which is the contract, since "Send" and "Attach a file for your draft
+    conversation" identify nobody and opaquing them would cost the census its
+    use without buying safety. The member-name protection lives one field
+    over, in ``census_href_identifies_entity``, which redacts the name of any
+    control whose href points at a person.
+
+    So this can tell a caller HOW MANY file inputs a surface draws,
+    whether they are disabled, and which container each sits in. It cannot
+    hand back a name to build a selector from, and it is not meant to: a
+    future ``_live_control`` arm must compare a needle against an accessible
+    name INSIDE THE PAGE, the way ``_typeahead_gate`` already does, so that no
+    string crosses the boundary in either direction.
+
+    ``ambiguous`` IS THE FIELD THAT DECIDES A WIRING. Aiming needs exactly one
+    candidate. Measured on the two surfaces this project has read: the message
+    composer draws TWO file inputs (2026-09-01) and is therefore ambiguous by
+    count -- it can only be aimed by name; the Easy Apply modal drew ONE
+    (2026-08-24, page-level count), which a count alone can address. Those are
+    different wiring costs and this field is what tells them apart, rather
+    than a comment somebody has to remember.
+    """
+    # ONE READING, NOT TWO. ``census`` is passed in by a caller that has
+    # ALREADY taken it -- ``linkedin_surface_census`` does -- so the count this
+    # returns and the counts that caller reports are the same observation of
+    # the same page rather than two evaluations moments apart. A composer
+    # hydrates while it is being read, so two readings can legitimately
+    # disagree, and a payload carrying both would contradict itself with no
+    # way for a reader to tell which half was stale. Omitted, it takes its own.
+    if census is None:
+        census = await read_surface_census(page)
+    inputs = []
+    for control in list(census.get("controls") or []):
+        if control.get("input_type") != "file":
+            continue
+        # THE SINGLETON REDACTION, AND WITHOUT IT THIS BLOCK WAS THE WEAKER
+        # HALF OF ITS OWN PAYLOAD. Shipped without it on 2026-09-04 and
+        # corrected the same day, measured rather than reasoned about:
+        #
+        #     control_shapes (aggregated)  'Message Ada Lovelace' -> <redacted>
+        #     file_inputs    (as shipped)  'Message Ada Lovelace' -> verbatim
+        #
+        # `census_shape` is only a character and length gate, so a short plain
+        # string survives it whatever it names. What actually catches a member
+        # name is `census_redact_rare`, which fires on a capitalised run in a
+        # shape seen ONCE -- and it lives in `census_aggregate`, which this
+        # function does not use. So `linkedin_surface_census` would have
+        # emitted, in ONE payload, a name blanked in `control_shapes` and
+        # printed in `file_inputs`.
+        #
+        # A REDACTION APPLIED AT ONE SITE AND NOT AT ITS TWIN is the defect
+        # this file's own history records three times in a single day. Fixed
+        # by CALLING the same function rather than re-deriving the rule, so
+        # there is no second copy to drift.
+        #
+        # COUNT 1 IS THE HONEST COUNT HERE. These records are emitted
+        # individually rather than merged, so each one has been seen exactly
+        # once by the time it is reported -- which is the condition
+        # `census_redact_rare` is defined on. It over-redacts a genuinely
+        # unique two-word label by construction, and that is the direction to
+        # be wrong in. Measured: the real chrome survives it --
+        # 'Attach a file for your draft conversation' and 'Resume' both pass
+        # through unchanged.
+        record = dict(control)
+        record["shape"] = shape.census_redact_rare(str(record.get("shape") or ""), 1)
+        inputs.append(record)
+    # THE COUNT COMES FROM THE COUNTS BLOCK, NOT FROM len(inputs), and the
+    # difference is the whole reason both are returned. ``counts.file_inputs``
+    # is a document-wide ``querySelectorAll``; ``inputs`` is filtered from the
+    # censused controls, which stop at ``CENSUS_MAX_CONTROLS`` and are reported
+    # ``truncated`` when they do. A page with more controls than the cap would
+    # make the filtered list an UNDERCOUNT, and a reader that returned only
+    # that would quietly say "one file input" about a page with three.
+    counted = int((census.get("counts") or {}).get("file_inputs") or 0)
+    described = len(inputs)
+    return {
+        "count": counted,
+        "described": described,
+        # TRUE WHEN THE TWO DISAGREE, which means the census stopped before it
+        # reached them all. A caller must not aim on a truncated reading.
+        "undercounted": bool(census.get("truncated")) or described != counted,
+        # AIMABLE BY COUNT ALONE only when the page draws exactly one and the
+        # reading was complete. Anything else needs a name, and a name needs an
+        # in-page comparison this reader does not do.
+        "ambiguous": counted != 1,
+        "inputs": inputs,
+    }
+
+
+# ---------------------------------------------------------------------------
+# The self-owned editor: NAMES, inside ONE measured container
+# ---------------------------------------------------------------------------
+#
+# WHAT THIS IS AND WHY IT IS NOT THE CENSUS. ``linkedin_surface_census``
+# reports SHAPES and never names, and that gate is what makes it safe to point
+# at a page made of other members. It is also why
+# ``linkedin_update_profile_field`` cannot name a field to type into: the
+# 2026-08-31 capture of ``/in/me/edit/intro/`` found the editor at ``dialog#0``
+# with ``Save`` enabled inside it and ELEVEN controls in there, of which the
+# ones that capability would target came back ``<opaque>`` -- read by the
+# census and deliberately not published. Section 2g of
+# ``_audit/2026-08-31-linkedin-finish.md`` carries the table.
+#
+# THE OPERATOR RULED on that measurement: a reader scoped to ONE container,
+# MEASURED to be self-owned, may publish names the document-wide gate would
+# redact, because ``dialog#0`` on his own profile editor holds only his data
+# and there is no third party inside it to protect. This is that reader. The
+# census is NOT changed by any of it -- nothing already published changes
+# meaning, and there is no argument a caller can pass to
+# ``linkedin_surface_census`` that reaches this behaviour.
+#
+# THE RELAXATION IS EXACTLY ONE THING WIDE, and the two halves are worth
+# separating because only one of them moved:
+#
+# * DROPPED -- the ``<opaque>`` length/character gate, and the singleton
+#   blanking in ``shape.census_redact_rare``. Both exist to stop a STRANGER'S
+#   name being published, and the containment measurement is what removes the
+#   stranger.
+# * KEPT -- the substitutions, which are these five rules: urn,
+#   ``/in/<member>/``, ``/company/<company>/``, the two possessives, and long
+#   digit runs. A urn identifies somebody whichever container it was read in.
+#   This reader calls ``shape.census_substitute``, which is the SAME code
+#   ``shape.census_shape`` runs as its first half; the move that created it is
+#   recorded in that function and pinned against pre-move outputs in
+#   ``tests/test_editor_fields.py``.
+#
+# WHAT IT STILL MAY NOT DO. It reads control LABELS. It does not read or return
+# any control's VALUE -- ``.value`` appears nowhere in the script below, and
+# that is asserted rather than described. A label is "First name"; a value is
+# his first name, and nothing this reader serves needs one. It returns no href
+# either, only whether there was one: the container's controls can link out.
+#
+# THE NAME CHAIN BELOW IS A COPY OF THE ONE IN :data:`CENSUS_JS`, and the
+# duplication is forced rather than chosen. ``CENSUS_JS`` is document-wide and
+# returns raw names for the whole page -- running it here would bring every
+# stranger's name on the profile render into this process, which is the thing
+# being avoided. Assembling this script from a shared fragment is also not
+# available: ``tests/test_readonly.py`` resolves injected scripts from the
+# ``evaluate`` CALL SITE and every ``_JS`` attribute of this module has to be
+# declared, so a fragment constant would join the declaration list as a script
+# that never runs. So the chain is written twice and the two copies are held to
+# agreeing by ``test_the_editor_chain_resolves_the_same_names_as_the_census``,
+# which runs both scripts over one document and compares.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request: the tokens that would do any of those are refused by
+# ``readonly.JS_MUTATION_TOKENS``, and this script is scanned against that list
+# by name.
+#
+# TEN FIELDS PER CONTROL, enumerated rather than summarised because this module
+# has already dropped a field by describing a dict instead of listing it --
+# ``container`` on the day it was added: ``name``, ``name_source``, ``tag``,
+# ``type``, ``role``, ``disabled``, ``checked``, ``checked_source``,
+# ``required``, ``has_href``. The count and the names are pinned in
+# ``tests/test_editor_fields.py`` rather than trusted to this comment.
+EDITOR_FIELDS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+  // WHETHER THIS CONTROL'S OWN TEXT IS ITS VALUE, which for exactly one kind
+  // of control it is. A contenteditable node HOLDS what has been typed into
+  // it, and its accessible name falls back to that content -- so the LAST
+  // route in nameOf below publishes a VALUE for these and a LABEL for
+  // everything else.
+  const isEditable = (el) => {
+    try { if (el.isContentEditable === true) return true; } catch (e) {}
+    const flag = attrOf(el, 'contenteditable').trim().toLowerCase();
+    if (flag && flag !== 'false') return true;
+    return attrOf(el, 'role').trim().toLowerCase() === 'textbox';
+  };
+
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
+    const body = textOf(el);
+    if (body) {
+      // THE ONE PLACE THIS TOOL'S "LABELS, NEVER VALUES" PROMISE WAS FALSE,
+      // and it was false on the field it matters most on.
+      //
+      // MEASURED 2026-08-31 on the live intro editor: the headline control is
+      // a div[role=textbox] whose accessible name resolves through THIS
+      // route, so the answer carried his headline VERBATIM. The three layers
+      // built to keep values out -- a script scan for the value property, the
+      // field dict's named keys, a JSON sweep of the whole answer -- all
+      // catch a value read through a PROPERTY, and NONE of them covers a
+      // control whose NAME IS ITS CONTENT.
+      //
+      // REFUSED HERE, IN THE PAGE, rather than shaped in Python, for the same
+      // reason INVITE_NEEDLE_JS does its comparison in the page: a value that
+      // reaches this process can reach a traceback or a log line, and no care
+      // downstream un-rings that.
+      //
+      // THE MARKER follows the census's <opaque>/<redacted> convention and
+      // means something specific: this control HAS a name, that name is its
+      // own content, and this instrument will not publish it. It is not the
+      // same answer as 'none', which means no name was found at all.
+      //
+      // WHAT THIS COSTS, stated because it is the interesting half: the
+      // current value of a field is exactly what would make an edit
+      // REVERTIBLE, which is one of the two things still blocking
+      // update_profile_field. Withholding it keeps the promise and leaves
+      // that blocker standing. Publishing it would widen this tool's stated
+      // contract -- and this tool exists BECAUSE the operator ruled a narrow
+      // widening, not because widenings are cheap. So it is a ruling.
+      if (isEditable(el)) return { name: '<content>', source: 'content' };
+      return { name: body, source: 'text' };
+    }
+    return { name: '', source: 'none' };
+  };
+
+  // NATIVE BEFORE ARIA, the same order and for the same reason as the census:
+  // el.checked is the state the browser holds, and the TYPE GATE is what stops
+  // a text box reporting as checkable-and-off. null means NOT CHECKABLE.
+  const checkedOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const kind = String(el.type || '').toLowerCase();
+      if (kind === 'radio' || kind === 'checkbox') {
+        return { checked: el.checked === true, source: 'native' };
+      }
+    }
+    const aria = attrOf(el, 'aria-checked').trim().toLowerCase();
+    if (aria === 'true') return { checked: true, source: 'aria-checked' };
+    if (aria === 'false') return { checked: false, source: 'aria-checked' };
+    if (aria === 'mixed') return { checked: 'mixed', source: 'aria-checked' };
+    return { checked: null, source: 'none' };
+  };
+
+  // THE SAME TRI-STATE DISCIPLINE checkedOf keeps, for the same reason. A
+  // native form control always answers the question, so it gets true or false;
+  // a button or an anchor cannot be required at all, so it gets null unless it
+  // wears an aria-required saying otherwise. false there would have meant
+  // "this one is optional", which is a claim nobody measured.
+  const requiredOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+      return el.required === true;
+    }
+    const aria = attrOf(el, 'aria-required').trim().toLowerCase();
+    if (aria === 'true') return true;
+    if (aria === 'false') return false;
+    return null;
+  };
+
+  const out = {
+    anchor_controls: 0,
+    container_kind: null,
+    controls_inside: 0,
+    truncated: false,
+    controls: []
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // THE ANCHOR IS COUNTED ACROSS THE WHOLE DOCUMENT, not within a container,
+  // and that is the strict direction: a second control wearing the anchor name
+  // anywhere on the page means the aim is ambiguous, and choosing between them
+  // would be choosing by position -- which is the defect the container
+  // descriptor was added to end.
+  const anchors = [];
+  for (const el of all) {
+    if (nameOf(el).name.trim() === cfg.anchorName) anchors.push(el);
+  }
+  out.anchor_controls = anchors.length;
+  if (anchors.length !== 1) return out;
+
+  let container = null;
+  try { container = anchors[0].closest(cfg.containerSelector); }
+  catch (e) { container = null; }
+  if (!container) return out;
+
+  // WHAT THE CONTAINER ACTUALLY IS -- and this LIED until 2026-09-02.
+  // It read `containerTag === 'dialog' ? 'dialog' : 'role=dialog'`, under a
+  // comment asserting "the selector admits exactly two things". That was true
+  // of EDITOR_CONTAINER_SELECTOR and stopped being true the moment the
+  // selector became an ARGUMENT: read_compose_fields passes "form", so every
+  // <form> came back labelled `role=dialog`. Nothing branched on the value --
+  // Python only checks it for truthiness -- so nothing failed, and the unit
+  // test's double returned "form", a shape the real script could not produce.
+  // The double and the script disagreed, and the double was the one that
+  // looked right.
+  const containerTag = (container.tagName || '').toLowerCase();
+  const containerRole = attrOf(container, 'role').trim().toLowerCase();
+  out.container_kind = (containerTag === 'dialog' || containerTag === 'form')
+    ? containerTag
+    : (containerRole ? 'role=' + containerRole : containerTag);
+
+  let inside;
+  try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { inside = []; }
+  out.controls_inside = inside.length;
+
+  for (const el of inside) {
+    if (out.controls.length >= cfg.maxControls) break;
+    const named = nameOf(el);
+    const tag = (el.tagName || '').toLowerCase();
+    const state = checkedOf(el);
+    out.controls.push({
+      name: named.name,
+      name_source: named.source,
+      tag: tag,
+      // THE ADDRESSABLE HANDLE, added 2026-09-02 because this reader could
+      // NAME every control in the container and address NONE of them. The six
+      // editable profile fields are all `label-for` named -- their label
+      // carries `for=<id>` -- so the id is what turns a measured name into a
+      // selector a write can aim at.
+      //
+      // EMPTY STRING WHEN THERE IS NONE, and a caller that gets one must
+      // REFUSE rather than fall back to a positional or text-matched
+      // selector. Aiming by position is the defect the container measurement
+      // was taken to end, and it would come back here first.
+      //
+      // NOT ADDED TO EDITOR_VALUES_JS. That script is the widest-publishing
+      // one on the list and nothing needs an id from it: the write aims from
+      // the FIELDS reading and the values reading is compared against it.
+      dom_id: attrOf(el, 'id'),
+      type: tag === 'input' ? String(el.type || '').toLowerCase() : null,
+      role: attrOf(el, 'role') || null,
+      disabled: el.disabled === true
+        || attrOf(el, 'aria-disabled').trim().toLowerCase() === 'true',
+      checked: state.checked,
+      checked_source: state.source,
+      required: requiredOf(el),
+      // WHETHER, never WHICH. The address itself stays in the page: a control
+      // in this container can link out, and an href is the one field here that
+      // could carry an identity out of a container measured to hold none.
+      has_href: !!attrOf(el, 'href')
+    });
+  }
+  out.truncated = out.controls.length < inside.length;
+  return out;
+}
+"""
+
+#: The accessible name of the intro editor's commit control, and the ONLY
+#: structural handle this reader has on the container.
+#:
+#: MEASURED, not chosen: ``Save``, ``disabled: false``, in ``dialog#0`` beside
+#: the editor's own fields, read twice on 2026-08-31 and recorded in
+#: ``_audit/2026-08-31-linkedin-finish.md`` section 2g. The two DISABLED
+#: ``Submit`` controls on the same render sit in ``form#3`` and ``form#6``
+#: beside "Report this ad" -- they are the ad-report forms and were never this
+#: editor's commit control.
+#:
+#: WHY A NAME AND NOT ``dialog#0``. That descriptor is an INDEX assigned in
+#: document order over whatever containers the page happens to draw, and the
+#: same capture found five dialogs. Which one is first is LinkedIn's business
+#: and can change without anything here being wrong. The anchor is the one
+#: property of the container that means something.
+EDITOR_ANCHOR_NAME = "Save"
+
+#: What counts as the container. Deliberately NARROWER than the container
+#: selector inside :data:`CENSUS_JS`, which also admits ``form`` and
+#: ``[role="form"]``: the ruling was about a DIALOG on his own profile editor,
+#: and a form is the wrong shape to inherit it -- the same render draws two
+#: ad-report forms.
+EDITOR_CONTAINER_SELECTOR = 'dialog, [role="dialog"]'
+
+#: Ceiling on controls returned from one container. The measured container held
+#: eleven, so this is not a limit anybody is near; it exists so that a page
+#: that changes shape cannot hand this reader an unbounded list, and it is
+#: REPORTED as truncated rather than silently cut.
+EDITOR_MAX_CONTROLS = 200
+
+
+async def read_self_owned_editor_fields(
+    page: Any,
+    *,
+    max_controls: int = EDITOR_MAX_CONTROLS,
+    max_chars: int = 300,
+    anchor_name: str = EDITOR_ANCHOR_NAME,
+    container_selector: str = EDITOR_CONTAINER_SELECTOR,
+    include_dom_id: bool = False,
+) -> dict[str, Any]:
+    """Label every control inside the editor dialog, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED SELF-OWNERSHIP BEFORE THIS RUNS. This
+    function reads a container; it does not and cannot establish whose page it
+    is on. ``server.linkedin_profile_editor_fields`` is the only caller and it
+    does that first, from LinkedIn's own ``isSelfProfile=true`` assertion plus
+    a same-member comparison across two landed urls. Pointing this at an
+    arbitrary page would publish names off it, which is precisely what the
+    census's gate exists to prevent -- so it is not exposed as a tool and takes
+    no argument selecting a surface.
+
+    TWO RETURN SHAPES, AND THEY DO NOT OVERLAP.
+
+    * Success carries ``container`` and ``fields``.
+    * A refusal carries ``refused`` and ``reason`` and CARRIES NO ``fields``
+      KEY AT ALL. Not an empty list: a caller must not be able to read "this
+      reader would not aim" as "the container has no fields in it". That is the
+      absent-is-not-zero rule the rest of this module keeps, applied to the one
+      place where the wrong reading would be acted on.
+
+    THE THREE REFUSALS, and each is the anchor rule rather than a policy:
+
+    * ``no_anchor`` -- nothing on the page is named :data:`EDITOR_ANCHOR_NAME`.
+    * ``ambiguous_anchor`` -- two or more are. Choosing between them would be
+      choosing by position, which is what this reader exists not to do. Note
+      the count is DOCUMENT-WIDE: a second one outside any dialog still makes
+      it ambiguous, because "the one in the dialog" is itself a rule about
+      position.
+    * ``anchor_outside_a_container`` -- exactly one, with no
+      ``dialog, [role="dialog"]`` ancestor. There is no container to scope to,
+      and the whole permission is the scope.
+
+    NAMES COME BACK UNGATED AND SUBSTITUTED. See the block above this script
+    for the ruling and for the half of the shaping that survives it.
+    """
+    # THE ANCHOR AND CONTAINER ARE ARGUMENTS FROM 2026-09-01, defaulting to
+    # the profile editor's. EDITOR_FIELDS_JS was ALREADY fully parameterised
+    # on all three -- cfg.anchorName, cfg.containerSelector,
+    # cfg.controlSelector -- so a second surface needs no second script, no
+    # second `# readonly-ok` waiver and no budget bump. That was checked
+    # before one was written: the composer's send-mode question looked like it
+    # needed a new injected script and it needed a keyword argument.
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "containerSelector": container_selector,
+        "anchorName": anchor_name,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+    }
+    try:
+        data = await page.evaluate(EDITOR_FIELDS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the editor container: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    anchors = int(data.get("anchor_controls") or 0)
+    if anchors == 0:
+        return {
+            "refused": "no_anchor",
+            "reason": (
+                f"no control on this page is named {anchor_name!r}, so "
+                "there is nothing to identify the editor container by. This "
+                "reader does not fall back to a position."
+            ),
+            "anchor_controls": anchors,
+        }
+    if anchors > 1:
+        return {
+            "refused": "ambiguous_anchor",
+            "reason": (
+                f"{anchors} controls on this page are named "
+                f"{anchor_name!r}. Picking one of them would be picking "
+                "by document order, which is not containment."
+            ),
+            "anchor_controls": anchors,
+        }
+    kind = data.get("container_kind")
+    if not kind:
+        return {
+            "refused": "anchor_outside_a_container",
+            "reason": (
+                f"the one control named {anchor_name!r} has no "
+                f"{container_selector} ancestor, so there is no "
+                "container to scope this read to -- and the scope is the whole "
+                "of the permission."
+            ),
+            "anchor_controls": anchors,
+        }
+
+    fields: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        record = {
+            # THE UNGATED NAME. ``census_substitute`` and not
+            # ``census_shape``: the substitutions run, the <opaque> gate
+            # does not. That one-word difference IS the capability.
+            "name": shape.census_substitute(control.get("name")),
+            "name_source": str(control.get("name_source") or "none"),
+            "tag": str(control.get("tag") or ""),
+            "type": control.get("type"),
+            "role": control.get("role"),
+            "disabled": bool(control.get("disabled")),
+            # UNCOERCED, exactly as the census carries it: None means NOT
+            # CHECKABLE and False means checkable and off, and bool() here
+            # would collapse the two.
+            "checked": control.get("checked"),
+            "checked_source": str(control.get("checked_source") or "none"),
+            # Same tri-state, same reason -- None is "no required marker is
+            # readable on this kind of control", never "optional".
+            "required": control.get("required"),
+            "has_href": bool(control.get("has_href")),
+        }
+        # THE ADDRESSABLE HANDLE, AND IT IS OFF BY DEFAULT.
+        #
+        # ``EDITOR_FIELDS_JS`` has emitted ``dom_id`` since 2026-09-02 -- it
+        # was added because the reader could NAME every control in this
+        # container and ADDRESS NONE of them. THIS PROJECTION DROPPED IT. The
+        # script produced the id, the rebuild above discarded it, and
+        # ``writes._live_control`` aimed from ``control["dom_id"]``, so the
+        # value was always None and that arm always took its "carries no id"
+        # refusal. The success path could not be entered by any page at all,
+        # which is why the eleventh capability shipped unable to act.
+        #
+        # WHY A KEYWORD RATHER THAN JUST ADDING THE KEY. This projection is a
+        # PRIVACY BOUNDARY -- rebuilding each control into a fixed key set is
+        # exactly what makes it one -- and its output reaches a caller through
+        # ``server.linkedin_profile_editor_fields``. A DOM id is not identity
+        # IN THE IDS THAT HAVE BEEN SEEN (``e-city``, ``e-country-region``),
+        # which is not the same statement as "is not identity": LinkedIn also
+        # writes ids like ``ember-view-urn:li:fsd_profile:<id>``.
+        #
+        # So the id is NOT PUBLISHED. Only ``writes._live_control`` asks for
+        # it, to build a selector it never prints; the tool path never passes
+        # this flag and therefore never sees one. That dissolves the question
+        # rather than answering it -- no substitution has to be correct for a
+        # value that does not leave. It is the same move as reading the
+        # payload with a passive listener instead of an interceptor: remove
+        # the exposure rather than guard it, because a guard is one edit from
+        # being an absent guard.
+        if include_dom_id:
+            record["dom_id"] = str(control.get("dom_id") or "")
+        fields.append(record)
+
+    out: dict[str, Any] = {
+        "container": {
+            "kind": str(kind),
+            "anchor": anchor_name,
+            "controls_inside": int(data.get("controls_inside") or 0),
+        },
+        "fields": fields,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the container carried more than {max_controls} controls and the "
+            "tail was not read. controls_inside is the whole-container count."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The SAME container, read for VALUES. The restore path.
+# ---------------------------------------------------------------------------
+#
+# WHY THIS EXISTS AND WHAT IT IS FOR. ``linkedin_update_profile_field``
+# overwrites a field and this server cannot say what it overwrote. The
+# operator ruled on 2026-08-31 that it may ship that way PROVIDED the preview
+# says so -- and then refined it on 2026-09-01, which is the ruling this
+# reader answers: the previous value is the FEATURE, not the blocker. It is
+# what makes the write UNDOABLE. Code can make an action correct; it cannot
+# make an irreversible outward-facing action undoable. Only the old value can,
+# and only if somebody has it.
+#
+# So this reads it. Nothing here writes, nothing here previews and nothing
+# here is wired into the gate: it hands the operator the string he would need
+# to type back, and the typing back is his own call through the ordinary
+# two-step gate.
+#
+# WHY A SECOND SCRIPT RATHER THAN A FLAG ON :data:`EDITOR_FIELDS_JS`. That
+# script is guarded by ``assert ".value" not in dom.EDITOR_FIELDS_JS``, which
+# is UNCONDITIONAL: there is no code path, no argument and no caller mistake
+# that reaches a value through it. Adding ``cfg.readValues`` would convert
+# that into a claim about a branch -- the narrowest, most-scrutinised reader
+# in this package would then be one flag-check away from publishing values,
+# and the whole reason it is trusted is that it is not. The cost of a second
+# script is a third copy of the name chain, and that cost is PAID rather than
+# waved at: ``test_the_three_name_chains_agree`` runs all three over one
+# document and compares name AND name_source.
+#
+# THE NAME HALF IS THE LABEL READER'S, UNCHANGED, and that is deliberate down
+# to the ``<content>`` marker. A contenteditable's accessible name IS its own
+# content, and the label reader refuses to publish it there. This reader keeps
+# that refusal -- so the content is disclosed EXACTLY ONCE, in the value slot,
+# where a reader knows what it is looking at. A tool that answered "the
+# control called <his headline> holds <his headline>" would be publishing the
+# same string twice under two different promises.
+#
+# VALUES COME BACK VERBATIM. NOT substituted, and this is the one place in
+# this module where ``shape.census_substitute`` is deliberately NOT called on
+# something published. The substitutions replace a urn, a member path, a
+# company path, a possessive and a long digit run -- and every one of those is
+# a legal thing to have in a headline. A substituted value is not a restore
+# path; it is a corrupted string that would be pasted back as-is. Anything
+# that is not exactly what the field holds is worse than nothing here, because
+# the failure is SILENT: he would restore the mangled version and the tool
+# would have caused the loss it was built to prevent.
+#
+# WHAT IS WITHHELD, IN THE PAGE, AND WHY EACH:
+#
+# * ``input[type=file]`` -- its value is a PATH ON HIS DISK. It names a
+#   directory layout and often a real filename, neither of which is a profile
+#   field and neither of which any restore needs.
+# * ``input[type=password]`` -- a secret. There is no editor field this is,
+#   which is exactly why it is withheld structurally rather than by noticing
+#   its absence: a surface that grows one must not start publishing it.
+# * checkbox and radio -- their ``value`` attribute is a submission token, not
+#   the state. The STATE is ``checked`` and that is the label reader's field.
+#   Publishing ``value`` here would answer a different question in the same
+#   slot, which is how a caller ends up restoring the wrong thing.
+#
+# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` does its
+# comparison there: a string that reaches this process can reach a traceback
+# or a log line, and no care downstream un-rings that.
+#
+# TEN FIELDS PER CONTROL, enumerated rather than summarised for the reason the
+# label reader's ten are -- this module has dropped a field by describing a
+# dict instead of listing it: ``name``, ``name_source``, ``tag``, ``type``,
+# ``role``, ``index``, ``value``, ``value_source``, ``value_chars``,
+# ``value_truncated``. ``index`` is the pairing key: both readers enumerate
+# the same container with the same control selector, so position within
+# ``controls_inside`` lines a value up with the label reader's record for the
+# same control. Across TWO CALLS that is pairing across two renders, and the
+# tool says so rather than implying the pairing is free.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request.
+EDITOR_VALUES_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+  const isEditable = (el) => {
+    try { if (el.isContentEditable === true) return true; } catch (e) {}
+    const flag = attrOf(el, 'contenteditable').trim().toLowerCase();
+    if (flag && flag !== 'false') return true;
+    return attrOf(el, 'role').trim().toLowerCase() === 'textbox';
+  };
+
+  // BYTE-FOR-BYTE THE LABEL READER'S CHAIN, the <content> marker included.
+  // The content is published ONCE, by valueOf below, in the slot that says
+  // what it is.
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { name: aria, source: 'aria-label' };
+    const referenced = labelledBy(el);
+    if (referenced) return { name: referenced, source: 'aria-labelledby' };
+    const title = attrOf(el, 'title');
+    if (title) return { name: title, source: 'title' };
+    const labelled = labelRoutes(el);
+    if (labelled) return labelled;
+    const body = textOf(el);
+    if (body) {
+      if (isEditable(el)) return { name: '<content>', source: 'content' };
+      return { name: body, source: 'text' };
+    }
+    return { name: '', source: 'none' };
+  };
+
+  // THE VALUE CHAIN. Every branch is total: a control either yields a string
+  // or says in source which rule withheld it, and 'none' means no route
+  // applied rather than 'the field is empty'. An empty string is a REAL
+  // ANSWER here -- a cleared headline is a thing he can have.
+  const valueOf = (el) => {
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input') {
+      const kind = String(el.type || '').toLowerCase();
+      if (kind === 'file' || kind === 'password') {
+        return { value: null, source: 'withheld_by_type' };
+      }
+      if (kind === 'checkbox' || kind === 'radio') {
+        return { value: null, source: 'state_not_value' };
+      }
+      // BOUND FIRST, and that is not a style choice. Comparing the
+      // property against null IN PLACE puts a dot-value immediately
+      // before an equals sign, and that sequence is one of
+      // ``readonly.JS_MUTATION_TOKENS`` -- so the scanner reads a
+      // COMPARISON as an assignment and refuses the whole script. The
+      // scanner is RIGHT to be crude in that direction and must not be
+      // taught about equality: a token list that starts making exceptions
+      // for things that only LOOK like writes is one an actual write can
+      // be dressed to slip past. So the SCRIPT is written not to look
+      // like one -- and this comment is worded around the sequence for
+      // the same reason, because the first draft of it tripped the
+      // scanner by quoting the token it was explaining.
+      const held = el.value;
+      return { value: held == null ? '' : String(held), source: 'native' };
+    }
+    if (tag === 'textarea') {
+      const held = el.value;
+      return { value: held == null ? '' : String(held), source: 'native' };
+    }
+    if (tag === 'select') {
+      // THE OPTION'S TEXT, not el.value. A select's value is the submission
+      // token behind the option; what he would have to re-pick is what the
+      // option SAYS. Restoring by token is not something a human can do in
+      // the editor, so the token is the wrong answer to the question asked.
+      let index = -1;
+      try { index = el.selectedIndex; } catch (e) { index = -1; }
+      if (index < 0) return { value: null, source: 'no_selection' };
+      let chosen = null;
+      try { chosen = el.options[index]; } catch (e) { chosen = null; }
+      if (!chosen) return { value: null, source: 'no_selection' };
+      const label = chosen.textContent == null ? '' : String(chosen.textContent);
+      return { value: label, source: 'selected_option' };
+    }
+    if (isEditable(el)) {
+      // NOT TRIMMED, unlike every name route above, and the difference is the
+      // point of this reader. A name is being read for a human to recognise;
+      // a value is being read for a human to put BACK. Trimming would return
+      // a string that is not what the field holds, and the restore would
+      // silently differ from the original.
+      const held = el.innerText;
+      return { value: held == null ? '' : String(held), source: 'content' };
+    }
+    return { value: null, source: 'none' };
+  };
+
+  const out = {
+    anchor_controls: 0,
+    container_kind: null,
+    controls_inside: 0,
+    truncated: false,
+    controls: []
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // THE SAME DOCUMENT-WIDE ANCHOR COUNT the label reader keeps, and it is the
+  // same rule for the same reason: a second control wearing the anchor name
+  // anywhere on the page means the aim is ambiguous, and choosing between
+  // them would be choosing by position.
+  const anchors = [];
+  for (const el of all) {
+    if (nameOf(el).name.trim() === cfg.anchorName) anchors.push(el);
+  }
+  out.anchor_controls = anchors.length;
+  if (anchors.length !== 1) return out;
+
+  let container = null;
+  try { container = anchors[0].closest(cfg.containerSelector); }
+  catch (e) { container = null; }
+  if (!container) return out;
+
+  const containerTag = (container.tagName || '').toLowerCase();
+  const containerRole = attrOf(container, 'role').trim().toLowerCase();
+  out.container_kind = (containerTag === 'dialog' || containerTag === 'form')
+    ? containerTag
+    : (containerRole ? 'role=' + containerRole : containerTag);
+
+  let inside;
+  try { inside = Array.from(container.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { inside = []; }
+  out.controls_inside = inside.length;
+
+  for (let i = 0; i < inside.length; i += 1) {
+    if (out.controls.length >= cfg.maxControls) break;
+    const el = inside[i];
+    const named = nameOf(el);
+    const tag = (el.tagName || '').toLowerCase();
+    const held = valueOf(el);
+    const raw = held.value;
+    const full = raw === null ? null : raw.length;
+    out.controls.push({
+      name: named.name,
+      name_source: named.source,
+      tag: tag,
+      type: tag === 'input' ? String(el.type || '').toLowerCase() : null,
+      role: attrOf(el, 'role') || null,
+      // POSITION WITHIN THE CONTAINER, which is what pairs this record with
+      // the label reader's.
+      //
+      // AND IT IS THE SAME NUMBER AS out.controls.length UNDER THIS LOOP,
+      // which is worth saying because the comment here used to claim they
+      // diverge once maxControls truncates. THEY DO NOT: truncation cuts the
+      // TAIL, so every row that IS pushed has the same container position as
+      // row number. A mutation swapping one for the other was run and the
+      // test PASSED, which is how the false claim was found.
+      //
+      // The two would only diverge if this loop began SKIPPING a control
+      // inside the container without pushing a row -- which nothing here
+      // does, and which is exactly the change that would silently break the
+      // pairing with the label reader. Writing the container position is
+      // what keeps that change honest rather than invisible.
+      index: i,
+      value: raw === null ? null : raw.slice(0, cfg.maxValueChars),
+      value_source: held.source,
+      // THE FULL LENGTH, always, even when the string was cut. A count is not
+      // content, and a caller cannot otherwise tell a value that fitted from
+      // one that did not.
+      value_chars: full,
+      value_truncated: full !== null && full > cfg.maxValueChars
+    });
+  }
+  out.truncated = out.controls.length < inside.length;
+  return out;
+}
+"""
+
+#: Ceiling on ONE value's characters. Chosen against the surface rather than
+#: picked: LinkedIn's headline caps at 220 and the About section at 2,600, so
+#: 3,000 returns every profile field this reader can meet WHOLE. That is the
+#: number that matters -- a truncated value is a BROKEN restore path, not a
+#: shorter one, and the honest failure mode is to say so via
+#: ``value_truncated`` rather than to hand back a prefix that looks complete.
+EDITOR_VALUE_MAX_CHARS = 3000
+
+
+async def read_self_owned_editor_values(
+    page: Any,
+    *,
+    max_controls: int = EDITOR_MAX_CONTROLS,
+    max_chars: int = 300,
+    max_value_chars: int = EDITOR_VALUE_MAX_CHARS,
+    anchor_name: str = EDITOR_ANCHOR_NAME,
+    container_selector: str = EDITOR_CONTAINER_SELECTOR,
+) -> dict[str, Any]:
+    """Read what the editor's controls HOLD, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED SELF-OWNERSHIP BEFORE THIS RUNS, and the
+    bar is not merely the same as :func:`read_self_owned_editor_fields`'s -- it
+    is literally the same code. ``server._establish_self_owned_editor`` is the
+    one place either tool proves whose page it is on, and
+    ``tests/test_editor_values.py`` pins that neither tool re-implements it.
+    That matters more here than there: a label read off a stranger's page
+    publishes what LinkedIn already shows the viewer, and a VALUE read off one
+    publishes what they typed.
+
+    TWO RETURN SHAPES AND THEY DO NOT OVERLAP, the same rule the label reader
+    keeps: success carries ``container`` and ``fields``; a refusal carries
+    ``refused`` and ``reason`` and NO ``fields`` key at all, so "this reader
+    would not aim" can never be read as "the container holds nothing".
+
+    THE THREE REFUSALS ARE THE ANCHOR RULE, identical to the label reader's --
+    ``no_anchor``, ``ambiguous_anchor``, ``anchor_outside_a_container``.
+
+    VALUES ARE RETURNED VERBATIM AND UNSUBSTITUTED. See the block above
+    :data:`EDITOR_VALUES_JS` for why that is the only honest answer for a
+    restore path, and for the three kinds of control whose value is withheld
+    inside the page.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "containerSelector": container_selector,
+        "anchorName": anchor_name,
+        "maxControls": int(max_controls),
+        "maxChars": int(max_chars),
+        "maxValueChars": int(max_value_chars),
+    }
+    try:
+        data = await page.evaluate(EDITOR_VALUES_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the editor container: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    anchors = int(data.get("anchor_controls") or 0)
+    if anchors == 0:
+        return {
+            "refused": "no_anchor",
+            "reason": (
+                f"no control on this page is named {anchor_name!r}, so "
+                "there is nothing to identify the editor container by. This "
+                "reader does not fall back to a position."
+            ),
+            "anchor_controls": anchors,
+        }
+    if anchors > 1:
+        return {
+            "refused": "ambiguous_anchor",
+            "reason": (
+                f"{anchors} controls on this page are named "
+                f"{anchor_name!r}. Picking one of them would be picking "
+                "by document order, which is not containment."
+            ),
+            "anchor_controls": anchors,
+        }
+    kind = data.get("container_kind")
+    if not kind:
+        return {
+            "refused": "anchor_outside_a_container",
+            "reason": (
+                f"the one control named {anchor_name!r} has no "
+                f"{container_selector} ancestor, so there is no "
+                "container to scope this read to -- and the scope is the whole "
+                "of the permission."
+            ),
+            "anchor_controls": anchors,
+        }
+
+    fields: list[dict[str, Any]] = []
+    for control in list(data.get("controls") or []):
+        raw_value = control.get("value")
+        fields.append(
+            {
+                # THE NAME HALF IS THE LABEL READER'S, substitutions and all.
+                # A urn in a LABEL identifies somebody whichever container it
+                # was read in, and that argument does not weaken because the
+                # same record also carries a value.
+                "name": shape.census_substitute(control.get("name")),
+                "name_source": str(control.get("name_source") or "none"),
+                "tag": str(control.get("tag") or ""),
+                "type": control.get("type"),
+                "role": control.get("role"),
+                "index": int(control.get("index") or 0),
+                # THE VALUE HALF, AND census_substitute IS NOT CALLED ON IT.
+                # Deliberate, argued above the script, and pinned by
+                # test_a_value_that_looks_like_a_urn_is_not_substituted: a
+                # substituted value is a corrupted restore string, and the
+                # failure would be silent.
+                "value": None if raw_value is None else str(raw_value),
+                "value_source": str(control.get("value_source") or "none"),
+                # UNCOERCED. None means no value route applied at all, which
+                # is not the same as a zero-length value -- the
+                # absent-is-not-zero rule, on the field where confusing them
+                # would mean restoring an empty string over real content.
+                "value_chars": control.get("value_chars"),
+                "value_truncated": bool(control.get("value_truncated")),
+            }
+        )
+
+    out: dict[str, Any] = {
+        "container": {
+            "kind": str(kind),
+            "anchor": anchor_name,
+            "controls_inside": int(data.get("controls_inside") or 0),
+        },
+        "fields": fields,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the container carried more than {max_controls} controls and the "
+            "tail was not read. controls_inside is the whole-container count."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# His OWN activity rail: ITEM KEYS, and only for items he wrote
+# ---------------------------------------------------------------------------
+#
+# WHAT PROBLEM THIS SOLVES. ``linkedin_comment_on_item`` and
+# ``linkedin_react_to_item`` are specced, registered and REFUSING, and the
+# blocker was never the read boundary or the click anchor -- both are in hand.
+# They are UNAIMABLE: no tool in this package returns an item key. The census
+# cannot publish one by construction (``shape.census_substitute`` turns every
+# ``urn:li:...`` into ``<urn>`` before a count is taken, which is the whole
+# reason it is safe to point at a page of strangers), and
+# ``shape.notification_handles`` deliberately yields ``{}`` for a feed urn --
+# pinned in ``tests/test_notification_handles.py`` under
+# ``test_a_link_with_no_usable_key_says_nothing``.
+#
+# THE OPERATOR RULED on 2026-08-31: build a reader over HIS OWN activity that
+# returns item keys FOR HIS OWN ITEMS ONLY, and establish authorship rather
+# than infer it from placement. This is that reader.
+#
+# THE MEASUREMENT THIS RESTS ON, taken live 2026-08-31 by
+# ``linkedin_surface_census`` on the two surfaces this server may read. The two
+# rows below differ in a way that IS the finding:
+#
+#     /in/me/   232 controls, landed .../in/<member>/?isSelfProfile=true
+#       shape "Open control menu for post by <his name, in full>"  count 8
+#       shape "Reaction button state: no reaction"                 count 8
+#       shape "Comment"  count 8, a, href_shape .../feed/update/<urn>/
+#       href_shape "https://www.linkedin.com/feed/update/<urn>/"   20 hrefs
+#
+#     /feed/    297 controls
+#       shape "Open control menu for post by <redacted>"           count 8
+#       href_shape ".../feed/update/<urn>/"                        ZERO
+#
+# On the profile the shape came back with a READABLE NAME at count 8, because
+# ``shape.census_redact_rare`` blanks a shape only at ``count == 1`` -- so
+# eight controls carried ONE author string. On the feed the same shape came
+# back ``<redacted>`` at count 8, because eight controls carried EIGHT
+# DIFFERENT author strings, each redacted as a singleton and then re-merged.
+# THE PROFILE ACTIVITY RAIL IS UNANIMOUS IN ITS AUTHOR AND THE FEED IS NOT,
+# and that asymmetry is the whole design.
+#
+# THREE CONJUNCTIVE CONDITIONS, ALL REQUIRED, ALL REPORTED. Two of them live
+# in this script; the first lives in the caller because it is a fact about a
+# url rather than about a document.
+#
+# * C1 -- LinkedIn's own self-assertion. ``isSelfProfile=true`` on the landed
+#   url of ``/in/me/``. ``server._goto_self_profile_asserted``, the same
+#   loader ``linkedin_profile_editor_fields`` uses -- it reads the TRI-STATE
+#   ``server._self_assertion_state`` and retries only the ABSENT case, which
+#   is a reading that failed rather than an answer. This line named
+#   ``_self_assertion_on`` until 2026-09-03, when the activity path stopped
+#   using it: that boolean collapses ABSENT into FALSE, so a redirect that
+#   simply did not carry the parameter was reported as LinkedIn denying the
+#   profile was his. Not in this script.
+# * C2 -- UNANIMITY. Every control whose accessible name starts with
+#   :data:`ACTIVITY_OVERFLOW_PREFIX` must carry the SAME remainder, and there
+#   must be at least one. Two different authors anywhere on the page is MIXED
+#   and is a refusal.
+# * C3 -- that one author is the PAGE OWNER, compared against the page's own
+#   ``h1``.
+#
+# C2 IS THE SAME RULE ``writes._read_item_permalink`` APPLIES to reaction
+# state -- "a mixed page cannot settle a direction for any single item", and
+# picking one would be picking by position. THE POINTER MOVED ON 2026-09-05
+# and the rule got STRICTER on the way: it lived in ``writes._read_feed_item``
+# and asked for UNANIMITY across every control the FEED drew, which is the
+# best a page of several items allows. The direction is now read on the item's
+# own permalink, where the rule is EXACTLY ONE CONTROL -- unanimity among one.
+# It is also what makes the pairing
+# in C4 safe: IF EVERY OVERFLOW CONTROL ON THE PAGE NAMES ONE AUTHOR, NO
+# PAIRING CAN ATTRIBUTE AN ITEM TO THE WRONG PERSON. The pairing rule below
+# still has to hold, and it is separately tested, but its failure mode under
+# C2 is "his item is missed", never "somebody else's item is published".
+#
+# NO NAME AND NO HEADING TEXT LEAVES THE PAGE. The C3 comparison happens
+# INSIDE the document and only booleans come out -- the same discipline
+# :data:`INVITE_NEEDLE_JS` keeps, and for the same reason: a string that
+# reaches Python can reach a traceback, a cache key or a log line. The author
+# string and the ``h1`` text are read, compared and discarded in the page;
+# neither is in this script's return value, and there is nothing for the
+# reader below to redact because there is nothing to redact.
+#
+# THE PREFIX RULE IS WEAKER THAN EQUALITY AND THIS COMMENT SAYS SO RATHER THAN
+# LETTING A LATER READER ASSUME OTHERWISE. C3 accepts when either string is a
+# prefix of the other, because LinkedIn is MEASURED to write a shortened form
+# of his name into the overflow label while the ``h1`` carries the full one --
+# exact equality would refuse a page that is entirely his. The cost is that a
+# prefix rule would also accept a DIFFERENT member whose display name is a
+# prefix of the owner's. That cannot arise here, because C2 has already
+# established there is exactly one author on the page and C1 has established
+# the page is his -- but the rule on its own is weaker than equality, and a
+# future reader who drops either of the other two conditions inherits a hole
+# rather than an inconvenience.
+#
+# THE NAME CHAIN IS THE THIRD COPY IN THIS MODULE and the duplication is
+# forced for the reason recorded above :data:`EDITOR_FIELDS_JS`: ``CENSUS_JS``
+# is document-wide and returns RAW NAMES for the whole page, so running it here
+# would bring every stranger's name on the render into this process, which is
+# the thing being avoided; and a script assembled from a shared fragment cannot
+# be certified by ``tests/test_readonly.py``, which resolves injected scripts
+# from the ``evaluate`` CALL SITE. So the chain is written a third time and
+# held to agreeing with the census's by
+# ``test_the_activity_chain_resolves_the_same_names_as_the_census``.
+#
+# IT MATCHES ON THE UNION, NOT ON THE CHAIN'S WINNER, and that difference is
+# deliberate and is the safety direction. ``CENSUS_JS`` resolves ONE name per
+# control -- the first route that answers. This script asks whether ANY of the
+# five routes yields a name carrying the overflow prefix. A control whose
+# ``aria-label`` is generic while its ``title`` names an author would be
+# invisible to the chain, and an author this script cannot see is an author
+# C2 cannot count: unanimity would hold over a page that is not unanimous,
+# which is exactly the failure A1 exists to catch. The union can only ever
+# find MORE authors than the chain, so it can only ever refuse more.
+#
+# IT READS AND RETURNS. No click, no focus, no attribute write, no scroll, no
+# request: the tokens that would do any of those are refused by
+# ``readonly.JS_MUTATION_TOKENS``, and this script is scanned against that
+# list by name in ``tests/test_readonly.py`` and a second time in
+# ``tests/test_activity_items.py``.
+#
+# IT READS NO CONTROL'S VALUE. ``.value`` appears nowhere below, and that is
+# asserted rather than described.
+#
+# THE ONE THING IT PUBLISHES IS A REAL IDENTIFIER. Every other reader in this
+# module hands its output to ``shape.census_shape`` or at least to
+# ``shape.census_substitute``; this one deliberately does neither for the urn
+# list, because the urn IS the deliverable. Everything else it returns is a
+# NUMBER or a BOOLEAN. That is the complete enumeration of what crosses this
+# boundary: one list of urn strings, one mapping of those same urns to
+# integers, and otherwise integers and booleans.
+
+#: The accessible-name prefix of the item overflow control. MEASURED, not
+#: chosen: ``Open control menu for post by <name>``, ``button``, ``aria-label``,
+#: ``aria_expanded=false``, count 8 on his own profile and count 8 on the feed,
+#: 2026-08-31. ``writes.py`` already quotes the same string in the aiming
+#: preview for ``comment_on_item``.
+#:
+#: THE TRAILING SPACE IS LOAD-BEARING. Without it the remainder of every label
+#: would begin with a space, which ``norm`` would strip anyway -- but the
+#: prefix would also match a control named ``Open control menu for post byline``
+#: and hand back ``line`` as an author. The space is what makes the match a
+#: word boundary.
+ACTIVITY_OVERFLOW_PREFIX = "Open control menu for post by "
+
+#: The substring that marks an item permalink. MEASURED as the ``href_shape``
+#: ``https://www.linkedin.com/feed/update/<urn>/``, 20 hrefs on his profile and
+#: ZERO on the feed -- which is the second half of why this reader points at
+#: the profile and no argument selects a surface.
+ACTIVITY_PERMALINK_MARKER = "/feed/update/"
+
+#: How short an author string may be before the TITLE route refuses to use it.
+#:
+#: A BOUND, NOT A FIX, and it is written as one. The heading routes compare by
+#: a bidirectional PREFIX; the title route can only compare by CONTAINMENT,
+#: because a browser title carries decoration a prefix cannot survive -- an
+#: unread count in front of it and " | LinkedIn" behind. Containment is looser,
+#: and the way it is loosest is a very short author string being a coincidental
+#: substring of some other word in the title.
+#:
+#: Four characters is chosen against the shape LinkedIn actually writes into
+#: the overflow label, which is a given name plus an initial -- ``Ada L`` is
+#: five. It is not chosen against a threat model, because there is not one to
+#: choose against: what this bound does is stop the DEGENERATE case, where a
+#: one- or two-character author matches almost any title, from reading as an
+#: established authorship claim.
+ACTIVITY_MIN_AUTHOR_CHARS = 4
+
+#: Ceiling on the ancestor climb used to find an item root when LinkedIn has
+#: labelled none. Twelve, and it is a REFUSAL bound rather than a performance
+#: one: a climb that runs out reports the anchor as UNPAIRED rather than
+#: pairing it to something further away.
+#:
+#: IT IS NOT WHAT STOPS THE CLIMB REACHING ``body``, and this comment said it
+#: was until the fixtures were written. ``body`` contains every overflow
+#: control on the page, so a climb that stopped there would pair every urn to
+#: the whole render -- and a shallow document reaches ``body`` in TWO hops,
+#: well inside twelve. The script refuses ``body`` and ``documentElement`` by
+#: name; see ``isDocumentLevel`` in it. The two bounds do different jobs and
+#: neither replaces the other.
+ACTIVITY_MAX_HOPS = 12
+
+#: Ceiling on permalink anchors walked. The measured page carried 20; this is
+#: not a limit anybody is near, and it is REPORTED as truncated rather than
+#: silently cut. ``permalink_anchors`` counts every one found, so the count and
+#: the walk can disagree and say so.
+ACTIVITY_MAX_ANCHORS = 200
+
+ACTIVITY_ITEMS_JS = """
+(cfg) => {
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found).slice(0, cfg.maxChars);
+  };
+  const labelledBy = (el) => {
+    const ids = attrOf(el, 'aria-labelledby');
+    if (!ids) return '';
+    const parts = [];
+    for (const id of ids.split(/\\s+/)) {
+      if (!id) continue;
+      let target = null;
+      try { target = document.getElementById(id); } catch (e) { target = null; }
+      if (target) parts.push(textOf(target));
+    }
+    return parts.join(' ').trim();
+  };
+  const labelName = (node) => textOf(node).slice(0, cfg.maxChars);
+  const labelRoutes = (el) => {
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (!labels || !labels.length) return null;
+    const id = attrOf(el, 'id');
+    if (id) {
+      for (const node of labels) {
+        if (attrOf(node, 'for') !== id) continue;
+        const named = labelName(node);
+        if (named) return { name: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = labelName(wrapper);
+      if (named) return { name: named, source: 'label-ancestor' };
+    }
+    return null;
+  };
+
+  // EVERY route that answers, in the census's order -- not the first one that
+  // does. nameOf() below reproduces the census's single answer and exists so
+  // the two can be compared; candidatesOf() is what the prefix match runs
+  // over, because a control naming an author through a LATER route than the
+  // one that wins is an author C2 must still count.
+  const candidatesOf = (el) => {
+    const found = [];
+    const aria = attrOf(el, 'aria-label');
+    if (aria) found.push({ name: aria, source: 'aria-label' });
+    const referenced = labelledBy(el);
+    if (referenced) found.push({ name: referenced, source: 'aria-labelledby' });
+    const title = attrOf(el, 'title');
+    if (title) found.push({ name: title, source: 'title' });
+    const labelled = labelRoutes(el);
+    if (labelled) found.push(labelled);
+    const body = textOf(el);
+    if (body) found.push({ name: body, source: 'text' });
+    return found;
+  };
+  const nameOf = (el) => {
+    const found = candidatesOf(el);
+    return found.length ? found[0] : { name: '', source: 'none' };
+  };
+
+  // WHITESPACE-NORMALISED ON BOTH SIDES of every comparison. A label wrapped
+  // across two source lines and a heading with a trailing newline are the same
+  // name to a reader and different strings to ===, and the C3 comparison is
+  // the one place in this package where that difference would be read as
+  // "a different member".
+  const norm = (value) => String(
+    value === null || value === undefined ? '' : value
+  ).replace(/\\s+/g, ' ').trim();
+
+  const prefix = String(cfg.overflowPrefix);
+
+  // null means NOT AN OVERFLOW CONTROL. The empty string means it IS one and
+  // carries no author behind the prefix -- a distinction C3 needs, because an
+  // empty author must never satisfy a prefix rule.
+  const overflowAuthorOf = (el) => {
+    const found = candidatesOf(el);
+    for (const candidate of found) {
+      const named = norm(candidate.name);
+      if (named.indexOf(prefix) === 0) return norm(named.slice(prefix.length));
+    }
+    return null;
+  };
+
+  let all;
+  try { all = Array.from(document.querySelectorAll(cfg.controlSelector)); }
+  catch (e) { all = []; }
+
+  // C2. The author strings live in this array and NOWHERE ELSE -- they are
+  // counted, compared and dropped, and the array is not part of the return.
+  const distinct = [];
+  let overflowControls = 0;
+  for (const el of all) {
+    const author = overflowAuthorOf(el);
+    if (author === null) continue;
+    overflowControls += 1;
+    if (distinct.indexOf(author) === -1) distinct.push(author);
+  }
+  const unanimous = distinct.length === 1;
+  const soleAuthor = unanimous ? distinct[0] : null;
+
+  // C3. EXACTLY ONE non-empty h1, never "the first one". A page drawing two
+  // headings has no unambiguous owner, and choosing between them would be
+  // choosing by document order -- the same defect the container descriptor was
+  // added to end. Zero and two are different refusals and are reported as a
+  // COUNT so the caller can tell them apart.
+  //
+  // TWO ROUTES TO THE HEADING'S TEXT, AND THE SECOND EXISTS BECAUSE THE
+  // FIRST ANSWERED ZERO ON THE LIVE PAGE. Until 2026-08-31 the only route was
+  // ``innerText``, and it returned ZERO owner headings on the live profile --
+  // twice, identically, on a page the census measured at 233 controls, so not
+  // a half-render.
+  //
+  // WHAT IS MEASURED AND WHAT IS NOT, kept apart on purpose. MEASURED: the
+  // innerText route finds no heading there. NOT MEASURED: why. ``innerText``
+  // is a RENDERED-TEXT reading and returns '' for an element CSS has taken
+  // out of layout, so a heading LinkedIn draws for assistive readers and
+  // hides visually would produce exactly this -- but so would a heading
+  // inside a shadow root, and so would a page with no h1 at all. THIS CHANGE
+  // DOES NOT ASSUME WHICH. It adds the second route and reports BOTH counts,
+  // so the next live reading says which of the three it is instead of being
+  // interpreted. If ``textContent`` also answers zero, the refusal stands and
+  // means something stronger than it did.
+  //
+  // WHY TAKING THE SECOND ROUTE IS NOT A RELAXATION. What C3 is checking is
+  // whether LINKEDIN'S OWN MARKUP names this page's owner. That is a claim
+  // about the document, not about what a sighted viewer sees, so making it
+  // depend on CSS was the defect -- the same class as ``name_source: "none"``
+  // meaning "this instrument cannot read one" while reading as "the control
+  // has none". A visually-hidden h1 is still LinkedIn asserting whose page
+  // this is, and an assistive reader is told exactly that.
+  //
+  // ``innerText`` IS STILL PREFERRED AND BOTH COUNTS ARE REPORTED, so a
+  // caller can see which route answered and the reading stays falsifiable. If
+  // BOTH are zero the refusal stands and now means something stronger: there
+  // is no h1 element with any text in it at all.
+  let headings;
+  try { headings = Array.from(document.querySelectorAll('h1')); }
+  catch (e) { headings = []; }
+  const rendered = [];
+  const contained = [];
+  for (const node of headings) {
+    const shown = norm(textOf(node));
+    if (shown) rendered.push(shown);
+    let raw = '';
+    try { raw = norm(node && node.textContent ? node.textContent : ''); }
+    catch (e) { raw = ''; }
+    if (raw) contained.push(raw);
+  }
+  // PREFER THE RENDERED ROUTE; FALL BACK ONLY WHEN IT FOUND NOTHING AT ALL.
+  //
+  // WRITTEN AS TWO EXPRESSIONS RATHER THAN A BRANCH CHAIN, and that is a
+  // correction rather than a style choice. The first draft was three arms --
+  // "exactly one rendered", "zero rendered and exactly one contained", and a
+  // catch-all -- and the CATCH-ALL ALREADY DID BOTH JOBS, so the middle arm
+  // was dead. It was caught by the mutation that deletes the fallback: the
+  // suite stayed green, because deleting a dead arm changes nothing. A check
+  // that cannot fail certifies nothing, and neither does the code shape that
+  // makes it unable to.
+  //
+  // NO ARITY TEST HERE ON PURPOSE. "Exactly one" is enforced downstream, on
+  // ``owners.length``, so two rendered headings refuse as ambiguous instead
+  // of falling through to the contained route and being resolved by it --
+  // which would be resolving an ambiguity by changing the question.
+  const owners = rendered.length ? rendered : contained;
+  const ownerSource = rendered.length
+    ? 'h1-innertext'
+    : (contained.length ? 'h1-textcontent' : null);
+
+  // THE THIRD ROUTE, AND IT EXISTS BECAUSE THE FIRST TWO BOTH ANSWERED ZERO
+  // ON THE LIVE PAGE. Measured 2026-08-31, after the textContent route
+  // shipped: ``owner_headings_rendered: 0`` AND ``owner_headings_contained:
+  // 0``, on a page the census measured at 233 controls with
+  // ``isSelfProfile=true`` and one unanimous author. The CSS hypothesis the
+  // second route was built on is REFUTED -- the profile has no h1 carrying
+  // text by any route. Reporting both counts is what settled that in one
+  // call instead of leaving it to be argued.
+  //
+  // ``document.title`` IS LINKEDIN'S OWN MARKUP NAMING THE PAGE, which is the
+  // same class of assertion as ``isSelfProfile=true`` on the url and is what
+  // C3 has always been asking for. It is consulted LAST, so a page with a
+  // real heading is still judged on the heading.
+  //
+  // CONTAINMENT, NOT THE PREFIX RULE, and the difference is forced by the
+  // string rather than chosen: a browser title carries decoration a prefix
+  // cannot survive -- an unread count in front, " | LinkedIn" behind -- so
+  // the question asked is whether the ONE author every overflow control names
+  // appears INSIDE it.
+  //
+  // WHAT THAT STILL REFUSES, which is the whole point of keeping C3 at all:
+  // a rail of eight reshares by one OTHER member is unanimous and passes C2,
+  // and its author does not appear in the title of HIS profile, so it refuses
+  // here exactly as it would have on a heading.
+  //
+  // THE WEAKNESS, WRITTEN DOWN RATHER THAN HIDDEN, as the prefix rule's is:
+  // containment is looser than a prefix, so a very short author string could
+  // be a coincidental substring. A minimum length is required below for that
+  // reason, and it is a bound rather than a fix.
+  let pageTitle = '';
+  try { pageTitle = norm(document.title || ''); } catch (e) { pageTitle = ''; }
+  let titleMatch = null;
+  if (unanimous && owners.length !== 1 && pageTitle && soleAuthor
+      && soleAuthor.length >= cfg.minAuthorChars) {
+    titleMatch = pageTitle.toLowerCase().indexOf(soleAuthor.toLowerCase()) !== -1;
+  }
+
+  // null means NOT COMPARED -- there was no single author, or no single
+  // heading. false means compared and different. Collapsing the two would be
+  // the absent-is-not-zero conflation this module keeps paying for.
+  let ownerMatch = null;
+  let namedBy = null;
+  if (unanimous && owners.length === 1) {
+    const owner = owners[0];
+    ownerMatch = !!(soleAuthor && owner)
+      && (soleAuthor.indexOf(owner) === 0 || owner.indexOf(soleAuthor) === 0);
+    namedBy = ownerSource;
+  } else if (titleMatch !== null) {
+    ownerMatch = titleMatch;
+    namedBy = 'document-title';
+  }
+
+  // ESTABLISHED IS NOW "C3 ANSWERED AND AGREED", whichever route answered,
+  // rather than "there was exactly one heading". The heading count is still
+  // what decides WHICH route runs; it is no longer what decides whether the
+  // question can be asked at all.
+  const established = unanimous && ownerMatch === true;
+
+  const out = {
+    overflow_controls: overflowControls,
+    authors_found: distinct.length,
+    unanimous: unanimous,
+    owner_headings: owners.length,
+    // BOTH ROUTES' COUNTS, ALWAYS, and never only the one that answered. A
+    // caller that sees ``owner_headings_rendered: 0`` beside
+    // ``owner_headings_contained: 1`` is being shown the CSS-visibility
+    // finding directly rather than having to infer it, and a future drift in
+    // either direction is visible in the reading instead of in a refusal.
+    owner_headings_rendered: rendered.length,
+    owner_headings_contained: contained.length,
+    owner_source: namedBy,
+    owner_heading_source: ownerSource,
+    owner_title_present: pageTitle ? 1 : 0,
+    owner_match: ownerMatch,
+    established: established,
+    permalink_anchors: 0,
+    distinct_urns: 0,
+    unrecognised: 0,
+    unpaired: 0,
+    item_root_source: { 'data-urn': 0, 'data-id': 0, 'climb': 0 },
+    truncated: false
+  };
+
+  // C4. ANCHORED, so a malformed href cannot smuggle a string out. The shape
+  // is the one MEASURED in the census's href_shape column and nothing wider:
+  // a percent-encoded urn does not match and is counted unrecognised, because
+  // the encoded spelling has never been observed in this position and a shape
+  // nobody has seen is not a shape to admit.
+  const urnShape = /^urn:li:[A-Za-z]+:[0-9]+$/;
+
+  const hasOverflowInside = (root) => {
+    if (!root || !root.querySelectorAll) return false;
+    let inside;
+    try { inside = Array.from(root.querySelectorAll(cfg.controlSelector)); }
+    catch (e) { inside = []; }
+    for (const el of inside) {
+      if (overflowAuthorOf(el) !== null) return true;
+    }
+    return false;
+  };
+
+  // THREE ROUTES, IN ORDER, AND WHICH ONE FIRED IS REPORTED. The first two ask
+  // LinkedIn where the item boundary is; the third is this script guessing,
+  // and a caller has to be able to tell those apart -- the same name_source
+  // discipline the rest of this module keeps. The attribute VALUE is never
+  // read: [data-urn] is used as a MARKER of a boundary, and the urn that gets
+  // published is always the one parsed out of the href.
+  //
+  // THE DOCUMENT IS NOT AN ITEM. body and documentElement contain every
+  // overflow control on the page, so a route that landed on either would
+  // "pair" any urn on the render to the whole render -- which is not pairing,
+  // it is giving up while reporting success. THE HOP CEILING DOES NOT CLOSE
+  // THIS ON ITS OWN and the tempting reading that it does is wrong: a shallow
+  // page reaches body in two hops, well inside twelve. So both are here, and
+  // they bound different things -- the ceiling bounds how far a deep page is
+  // walked, this bounds where the walk is allowed to stop.
+  const isDocumentLevel = (node) => (
+    !node || node === document.body || node === document.documentElement
+  );
+  const rootOf = (el) => {
+    let node = null;
+    try { node = el.closest('[data-urn]'); } catch (e) { node = null; }
+    if (node && !isDocumentLevel(node)) {
+      return { root: node, source: 'data-urn' };
+    }
+    try { node = el.closest('[data-id]'); } catch (e) { node = null; }
+    if (node && !isDocumentLevel(node)) {
+      return { root: node, source: 'data-id' };
+    }
+    let hop = el.parentElement;
+    let hops = 0;
+    while (hop && !isDocumentLevel(hop) && hops < cfg.maxHops) {
+      if (hasOverflowInside(hop)) return { root: hop, source: 'climb' };
+      hop = hop.parentElement;
+      hops += 1;
+    }
+    return { root: null, source: 'none' };
+  };
+
+  const marker = String(cfg.permalinkMarker);
+  let anchors;
+  try { anchors = Array.from(document.querySelectorAll('a[href]')); }
+  catch (e) { anchors = []; }
+
+  const seen = [];
+  const perItem = [];
+  let walked = 0;
+  for (const el of anchors) {
+    // THE RAW ATTRIBUTE, uncapped, unlike every other read in this script. The
+    // cap on attrOf exists so a huge string cannot be RETURNED; an href is
+    // never returned from here, only searched, and a cap would silently cut a
+    // long tracking url mid-segment and report a real urn as unrecognised.
+    let href = '';
+    try {
+      const raw = el.getAttribute('href');
+      href = raw === null ? '' : String(raw);
+    } catch (e) { href = ''; }
+    const at = href.indexOf(marker);
+    if (at === -1) continue;
+    out.permalink_anchors += 1;
+    if (walked >= cfg.maxAnchors) { out.truncated = true; continue; }
+    walked += 1;
+    let segment = href.slice(at + marker.length);
+    const stop = segment.search(/[\\/?#]/);
+    if (stop !== -1) segment = segment.slice(0, stop);
+    if (!urnShape.test(segment)) { out.unrecognised += 1; continue; }
+    const paired = rootOf(el);
+    if (!paired.root || !hasOverflowInside(paired.root)) {
+      out.unpaired += 1;
+      continue;
+    }
+    out.item_root_source[paired.source] += 1;
+    const index = seen.indexOf(segment);
+    if (index === -1) { seen.push(segment); perItem.push(1); }
+    else { perItem[index] += 1; }
+  }
+  out.distinct_urns = seen.length;
+
+  // THE GATE IS HERE, IN THE PAGE, and not only in the reader below. The
+  // counts above are numbers and cross the boundary on every path; the urn
+  // LIST crosses it on one path only. A caller that has not established
+  // authorship never receives an identifier, whatever the Python half does or
+  // stops doing.
+  if (established) {
+    out.items = seen;
+    out.anchors_per_item = {};
+    for (let i = 0; i < seen.length; i += 1) {
+      out.anchors_per_item[seen[i]] = perItem[i];
+    }
+  }
+  return out;
+}
+"""
+
+
+#: The refusal codes, enumerated because a caller branching on them needs the
+#: whole set and because "the reader refuses when authorship does not hold" is
+#: a completeness claim this module is not allowed to make without listing what
+#: it means. C1 is not here: it is the caller's, and it never reaches this
+#: reader.
+ACTIVITY_REFUSALS = (
+    "no_overflow_controls",
+    "mixed_authors",
+    "no_page_owner_heading",
+    "ambiguous_page_owner_heading",
+    "author_is_not_the_page_owner",
+)
+
+
+async def read_own_activity_items(
+    page: Any,
+    *,
+    max_anchors: int = ACTIVITY_MAX_ANCHORS,
+    max_hops: int = ACTIVITY_MAX_HOPS,
+    max_chars: int = 300,
+) -> dict[str, Any]:
+    """Item keys for items the page owner wrote, or REFUSE and name why.
+
+    THE CALLER MUST HAVE ESTABLISHED C1 BEFORE THIS RUNS. This function reads a
+    document; it cannot see a url's query string and does not try.
+    ``server.linkedin_my_activity_items`` is the only caller and it checks
+    LinkedIn's own ``isSelfProfile=true`` first, through the same
+    ``server._goto_self_profile_asserted`` ``linkedin_profile_editor_fields``
+    uses -- one loader, reading the tri-state and retrying only the ABSENT
+    case. That parity was a CLAIM this line made and the code did not keep
+    until 2026-09-03: this path used the collapsing boolean and loaded once,
+    so a redirect that did not carry the parameter refused as though LinkedIn
+    had said no. Both paths share the loader now. This
+    reader is not exposed as a tool and takes no argument selecting a surface,
+    for the reason ``read_self_owned_editor_fields`` is not: pointed at an
+    arbitrary page it would publish item keys off it.
+
+    TWO RETURN SHAPES, AND THEY DO NOT OVERLAP.
+
+    * Success carries ``items`` and ``anchors_per_item``.
+    * A refusal carries ``refused`` and ``reason`` and CARRIES NO ``items`` KEY
+      AT ALL. Not an empty list: a caller must not be able to read "this reader
+      would not aim" as "he has no items". That is the absent-is-not-zero rule
+      this module keeps, applied to the one place where the wrong reading is a
+      claim about him rather than about a page.
+
+    BOTH SHAPES CARRY ``counts`` AND ``item_root_source``, and that is
+    deliberate. Every field in them is an integer or a boolean, so a refusal
+    can say what it saw -- eight overflow controls, two authors, four
+    permalinks -- without publishing anything. The one thing that changes
+    between the two shapes is whether any urn string is present.
+
+    THE FIVE REFUSALS, enumerated in :data:`ACTIVITY_REFUSALS`:
+
+    * ``no_overflow_controls`` -- nothing on the page is named with
+      :data:`ACTIVITY_OVERFLOW_PREFIX`. An empty rail is not an authorship
+      claim, and treating "no author found" as "no author disagrees" is how a
+      unanimity rule becomes a rubber stamp.
+    * ``mixed_authors`` -- two or more distinct authors. The feed's shape, and
+      the reason no argument selects a surface.
+    * ``no_page_owner_heading`` -- NOTHING ON THE PAGE NAMES ITS OWNER, by any
+      of the three routes. The name is kept from when there was one route,
+      because a refusal code a caller branches on is not worth renaming; what
+      it MEANS has widened twice in one day and both widenings were forced by
+      a live reading rather than chosen.
+
+      THREE ROUTES, IN ORDER: an ``h1``'s ``innerText``, the same ``h1``'s
+      ``textContent``, then ``document.title``. The second was added when the
+      live profile answered ZERO by the first on two identical readings, on
+      the hypothesis that LinkedIn draws a heading CSS hides -- ``innerText``
+      is a RENDERED-text reading and C3 asks a question about the DOCUMENT, so
+      making it depend on CSS was a real defect whatever the live page turned
+      out to do. THE LIVE PAGE THEN ANSWERED ZERO BY BOTH: it has no ``h1``
+      carrying text at all, which REFUTED the hypothesis and is exactly what
+      reporting both counts was for -- it settled in one call what would
+      otherwise have been argued. The third route is the page's own title,
+      which is LinkedIn's markup naming the page in the same sense
+      ``isSelfProfile=true`` is LinkedIn's url naming it.
+
+      Compared by CONTAINMENT rather than by prefix, and that is forced by the
+      string: a browser title carries an unread count in front and
+      " | LinkedIn" behind. Looser, so a minimum author length applies --
+      ``ACTIVITY_MIN_AUTHOR_CHARS``, a bound and not a fix. What it still
+      refuses is the case C3 exists for: a rail of reshares by one OTHER
+      member is unanimous, passes C2, and its author is not in the title of
+      HIS profile.
+    * ``ambiguous_page_owner_heading`` -- two or more, so the comparison would
+      have to choose one by document order.
+    * ``author_is_not_the_page_owner`` -- C1 and C2 both held and the strings
+      do not satisfy the prefix rule. This is the only refusal that says
+      something about WHOSE items are on the page rather than about whether the
+      page can be read.
+
+    NOTHING THIS RETURNS IS SHAPED, AND NOTHING NEEDS TO BE. The author string
+    and the heading text never leave the document -- see the block above the
+    script -- so there is no name here for ``shape.census_substitute`` to act
+    on. The urns are returned RAW and on purpose: a substituted urn is
+    ``<urn>``, which is exactly the useless answer this reader exists to
+    replace.
+    """
+    cfg = {
+        "controlSelector": CENSUS_CONTROL_SELECTOR,
+        "overflowPrefix": ACTIVITY_OVERFLOW_PREFIX,
+        "permalinkMarker": ACTIVITY_PERMALINK_MARKER,
+        "maxAnchors": int(max_anchors),
+        "maxHops": int(max_hops),
+        "maxChars": int(max_chars),
+        "minAuthorChars": ACTIVITY_MIN_AUTHOR_CHARS,
+    }
+    try:
+        data = await page.evaluate(ACTIVITY_ITEMS_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the activity rail: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+
+    data = dict(data or {})
+    overflow = int(data.get("overflow_controls") or 0)
+    authors = int(data.get("authors_found") or 0)
+    headings = int(data.get("owner_headings") or 0)
+    owner_match = data.get("owner_match")
+    owner_source = data.get("owner_source")
+
+    facts = {
+        "authors_found": authors,
+        # RE-DERIVED IN PYTHON from the count rather than carried over from the
+        # script's own boolean. The two agree, and a test asserts they do; the
+        # point of deriving it here is that ``authors_found`` is the primitive
+        # a reader can check by eye against ``overflow_controls``, and a
+        # boolean that disagreed with its own count would otherwise be
+        # invisible.
+        "unanimous": authors == 1,
+        "matches_page_owner": owner_match,
+        # WHICH ROUTE NAMED THE OWNER, or ``None`` when no heading did. Part
+        # of the authorship facts rather than of the counts because it is a
+        # statement about HOW the claim was established, and this reader's
+        # whole contract is that the claim is established rather than
+        # inferred. ``"h1-innertext"`` is the rendered heading;
+        # ``"h1-textcontent"`` is a heading LinkedIn draws for assistive
+        # readers and CSS hides. ``"document-title"`` is the page's own title,
+        # consulted last and only when no heading named anybody -- which is
+        # what the LIVE profile turned out to require, both heading routes
+        # having answered zero on it.
+        "owner_source": data.get("owner_source"),
+        # WHICH HEADING ROUTE WOULD HAVE ANSWERED, separately from which route
+        # actually did. ``None`` here beside a non-null ``owner_source`` is
+        # exactly the live profile's shape, and reporting the two apart is
+        # what makes that visible rather than inferable.
+        "owner_heading_source": data.get("owner_heading_source"),
+    }
+    counts = {
+        "overflow_controls": overflow,
+        "owner_headings": headings,
+        # THE TWO ROUTES, SEPARATELY, so a refusal can be diagnosed from the
+        # answer instead of from the source. ``rendered`` is the innerText
+        # count -- what a sighted viewer sees -- and ``contained`` is the
+        # textContent count. They differ exactly when LinkedIn draws a heading
+        # CSS has taken out of layout, which is what it does on the live
+        # profile and what made this reader refuse for a day.
+        "owner_headings_rendered": int(data.get("owner_headings_rendered") or 0),
+        "owner_headings_contained": int(
+            data.get("owner_headings_contained") or 0
+        ),
+        # WHETHER THE PAGE HAS A TITLE AT ALL, as a count rather than the
+        # string. It is the third owner route's raw material and an empty one
+        # is a different refusal from a title that simply does not carry the
+        # author -- the same absent-is-not-zero distinction the two heading
+        # counts keep.
+        "owner_title_present": int(data.get("owner_title_present") or 0),
+        "permalink_anchors": int(data.get("permalink_anchors") or 0),
+        "distinct_urns": int(data.get("distinct_urns") or 0),
+        "unrecognised": int(data.get("unrecognised") or 0),
+        "unpaired": int(data.get("unpaired") or 0),
+    }
+    routes = dict(data.get("item_root_source") or {})
+    item_root_source = {
+        key: int(routes.get(key) or 0) for key in ("data-urn", "data-id", "climb")
+    }
+
+    def refusal(code: str, reason: str) -> dict[str, Any]:
+        return {
+            "refused": code,
+            "reason": reason,
+            "authorship_facts": facts,
+            "counts": counts,
+            "item_root_source": item_root_source,
+        }
+
+    if overflow == 0:
+        return refusal(
+            "no_overflow_controls",
+            f"no control on this page is named with "
+            f"{ACTIVITY_OVERFLOW_PREFIX!r}, so nothing on it asserts an "
+            "author. An empty rail is not an authorship claim, and this "
+            "reader does not treat 'nobody disagreed' as agreement.",
+        )
+    if authors != 1:
+        return refusal(
+            "mixed_authors",
+            f"{overflow} control(s) on this page name an author and "
+            f"{authors} distinct names are among them. A mixed page cannot "
+            "say whose item any single urn belongs to, and picking one would "
+            "be picking by position. None of the names is reported here; that "
+            "they differ is the whole of the answer.",
+        )
+    # THE HEADING COUNT DECIDES WHICH ROUTE RUNS; IT NO LONGER DECIDES WHETHER
+    # C3 CAN BE ASKED. Two headings is still ambiguous and still refuses --
+    # picking one would be picking by document order. ZERO headings is no
+    # longer a refusal by itself, because a third route exists: the page's own
+    # title. Both refusals below fire only when NO route named an owner.
+    if headings > 1:
+        return refusal(
+            "ambiguous_page_owner_heading",
+            f"the page draws {headings} h1 elements with text in them, so "
+            "there is no unambiguous page owner to compare the one author "
+            "against. Choosing one of them would be choosing by document "
+            "order -- and falling through to the title route instead would be "
+            "resolving an ambiguity by changing the question.",
+        )
+    if owner_source is None:
+        return refusal(
+            "no_page_owner_heading",
+            "NOTHING ON THIS PAGE NAMES ITS OWNER, by any of the three routes "
+            "this reader consults. No h1 carries text -- neither rendered "
+            f"({counts['owner_headings_rendered']}) nor contained "
+            f"({counts['owner_headings_contained']}) -- and the page title "
+            f"{'is empty' if not counts['owner_title_present'] else 'does not carry the one author found, or that author is too short to compare by containment'}"
+            ". So the one author found has nothing to be compared against, "
+            "and authorship is not inferred from the address this reader was "
+            "pointed at.",
+        )
+    if owner_match is not True:
+        return refusal(
+            "author_is_not_the_page_owner",
+            "the page carries exactly one author and an owner named through "
+            f"{owner_source!r}, and the two do not match -- by prefix for a "
+            "heading, by containment for the title, which is what a browser "
+            "title's decoration forces. The comparison happened inside the "
+            "page and NEITHER STRING is reported here; that they do not match "
+            "is the whole of the answer.",
+        )
+
+    items = [str(value) for value in (data.get("items") or [])]
+    per_item_raw = dict(data.get("anchors_per_item") or {})
+    out: dict[str, Any] = {
+        "authorship_facts": facts,
+        "items": items,
+        "anchors_per_item": {
+            key: int(per_item_raw.get(key) or 0) for key in items
+        },
+        "counts": counts,
+        "item_root_source": item_root_source,
+    }
+    if data.get("truncated"):
+        out["truncated"] = True
+        out["truncated_note"] = (
+            f"the page carried more than {max_anchors} permalink anchors and "
+            "the tail was not walked. counts.permalink_anchors is the "
+            "whole-page count, so it and the walk can disagree and say so."
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The nine surfaces
+# ---------------------------------------------------------------------------
+#
+# READERS FOR THE CAPABILITIES THAT ARE SANCTIONED AND REFUSE. Every constant
+# below is a string MEASURED on the operator's live account on 2026-08-30 by
+# ``linkedin_surface_census``, and the census that produced it is named beside
+# it. None was inferred from a sibling, a screenshot or a plausible
+# convention -- which is the whole reason this block exists rather than the
+# selectors being written inline where they are used.
+#
+# WHY THESE READ AND NEVER CLICK. The seven actions they serve are sanctioned
+# and NOT performable; what each reader exists to do is let the confirm gate
+# refuse with a FRESH measurement instead of a stored sentence. "I looked just
+# now and here is what was there" is a different artefact from "somebody
+# looked once in August", and the second is what goes stale silently.
+#
+# WHY ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE. This comment
+# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31 and it is
+# quoted rather than deleted, because the trade it describes is still the
+# right one for six of these seven readers: an injected script has to be
+# declared in ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the
+# JS mutation scanner, and a locator chain injects nothing.
+#
+# ``INVITE_NEEDLE_JS`` is the exception and it BUYS something the other six do
+# not need. Their readers count controls; this one has to COMPARE a label
+# against a needle, and the label is a third party's name. A locator chain
+# doing that comparison in Python would have to fetch the label into this
+# process first, which is the exact thing the ruling on this capability
+# forbids -- so here the cheap side of the trade is the unacceptable one. The
+# script pays a boundary declaration in order to keep a name out of Python
+# entirely. See the constant for what it returns, which is three numbers.
+
+#: The feed composer's entry control. MEASURED on ``/feed/`` 2026-08-30 as
+#: ``shape "Start a post", tag div, role button, name_source text,
+#: has_href false``, count 1.
+#:
+#: A ``div`` with ``role=button`` and NO href, so the composer is not reachable
+#: by navigation -- it opens as a MODAL. The same run measured
+#: ``contenteditable: 0`` across the whole page, and that is the finding which
+#: matters more than the control: THE EDITOR ITSELF HAS NEVER BEEN OBSERVED.
+#: What is measured here is the door, not the room behind it.
+COMPOSER_CONTROL_NAME = "Start a post"
+
+#: THE POST COMPOSER'S OWN TWO CONTROLS, measured on /preload/sharebox/ across
+#: three settle-agreeing readings (31 controls each, verdict "consistent" on
+#: the third). Both sit in ``dialog#0``.
+#:
+#: THE SUBMIT'S EMPTY STATE IS THE LOAD-BEARING FACT and it is why this action
+#: can be gated at all: ``Post`` renders **disabled** on an empty composer. So
+#: a fill produces an OBSERVABLE TRANSITION -- disabled to enabled -- and a
+#: gate can require that transition before it presses anything.
+#:
+#: CONTRAST, because the same reasoning fails one surface over: the comment
+#: control on an item permalink is named ``Comment`` and is measured ENABLED
+#: while the box is empty, so no transition exists there and enabled-ness
+#: discriminates nothing. Same family, opposite outcome, one measured boolean
+#: apart. See ``writes._publish_submit_gate``.
+POST_EDITOR_LABEL = "Text editor for creating content"
+POST_SUBMIT_NAME = "Post"
+
+
+def post_editor_selector() -> str:
+    """The contenteditable a post's text is typed into. NO ARGUMENT.
+
+    Assembled from a module constant, like :func:`reaction_control_selector`,
+    so there is nothing a caller can influence about where a fill lands.
+    """
+    return 'div[role="textbox"][aria-label="' + POST_EDITOR_LABEL + '"]'
+
+
+def post_submit_selector() -> str:
+    """The control that publishes. NO ARGUMENT, for the same reason.
+
+    NOT BUILT THROUGH :func:`named_role_selector`, and the reason is a guard
+    worth leaving intact. That function refuses any role outside
+    ``INPUT_TYPE_ROLES`` -- checkbox and radio -- because it exists to address
+    a control whose ROLE was read off the row, and a role it has never
+    measured would be a guess. Widening it to admit ``button`` so that this
+    one call could use it would trade a measured restriction for a
+    convenience, and every other caller would inherit the widening.
+
+    So this builds its own, from a MODULE CONSTANT rather than any argument,
+    and re-runs the same unsafe-character check against that constant. The
+    check cannot fail today; it is here because the constant is a string
+    somebody may one day re-measure and re-type, and a name carrying a quote
+    would otherwise end the selector's own quoting.
+    """
+    if not POST_SUBMIT_NAME or any(
+        bad in POST_SUBMIT_NAME for bad in _SELECTOR_UNSAFE
+    ):
+        raise ExtractionFailedError(
+            "refusing to build the composer's submit selector: "
+            "POST_SUBMIT_NAME is empty or carries a character that would end "
+            "the selector's own quoting."
+        )
+    return 'role=button[name="' + POST_SUBMIT_NAME + '"s]'
+
+
+async def read_post_composer(page: Any) -> dict[str, Any]:
+    """The composer's two controls and the SUBMIT'S ENABLED STATE.
+
+    Counts and one boolean, never text. It does NOT read what is in the
+    editor: the text this server would type is already known to it -- the
+    caller supplied it and the preview printed it -- so reading it back would
+    add nothing and would put a draft's contents into this process for no
+    purpose.
+
+    ``submit_enabled`` is ``None`` when the control is absent, which is a
+    different answer from ``False``. Absent means the page had not drawn it;
+    False means it is drawn and refusing. A gate that collapsed the two would
+    read a half-rendered page as a composer declining to publish.
+    """
+    out: dict[str, Any] = {
+        "editors": 0,
+        "submits": 0,
+        "submit_enabled": None,
+        "error": None,
+    }
+    try:
+        out["editors"] = int(await page.locator(post_editor_selector()).count())
+        submits = page.locator(post_submit_selector())
+        out["submits"] = int(await submits.count())
+        if out["submits"] == 1:
+            out["submit_enabled"] = bool(await submits.first.is_enabled())
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("post composer unreadable: %s", out["error"])
+    return out
+
+#: The two URL-ADDRESSABLE publish routes, both MEASURED as real anchors:
+#: ``Write article`` -> ``/article/new/`` on ``/feed/``, and ``Create a post``
+#: -> ``/preload/sharebox/`` on ``/in/me/``. Recorded because "a post cannot be
+#: reached by navigation" would be FALSE if anybody wrote it. It can. Neither
+#: address is on the read allowlist and neither editor has ever been loaded,
+#: which are different objections and both are stated.
+ARTICLE_COMPOSER_HREF = "/article/new/"
+SHAREBOX_COMPOSER_HREF = "/preload/sharebox/"
+
+#: The comment affordance, MEASURED in both of its shapes -- and they are not
+#: the same control:
+#:
+#:   ``/feed/``   shape "Comment", tag button, name_source text,
+#:                has_href false, count 3 -- an inline composer.
+#:   ``/in/me/``  shape "Comment", tag a, name_source text, href_shape
+#:                ``https://www.linkedin.com/feed/update/<urn>/``, count 8 --
+#:                a LINK to the item's permalink.
+#:
+#: The second is where the target key lives: a feed item is addressed by its
+#: urn, in a url this server's read boundary forbids (``/feed/update``).
+COMMENT_CONTROL_NAME = "Comment"
+
+#: THE SDUI ACTION TOKENS, as LinkedIn writes them into the React flight
+#: payload. Counted, never returned as text.
+#:
+#: WHY THESE FOUR. ``ServerRequest`` is the one that decides: the operator
+#: ruled 2026-09-01 that a click measured to issue NO ServerRequest is by
+#: effect a READ. The other three are counted so that a reading of ZERO
+#: ServerRequest can be told apart from a reading of NOTHING AT ALL -- a
+#: parser that has stopped working reports zero of everything, and zero of
+#: everything is not a measurement.
+SDUI_ACTION_TOKENS: dict[str, str] = {
+    "server_request": "ServerRequest",
+    "navigate": "Navigate",
+    "set_state": "SetState",
+    "show_menu": "ShowMenu",
+}
+
+#: How far either side of a needle a component's actions are looked for.
+#: DELIBERATELY GENEROUS: an over-wide window counts a NEIGHBOUR's
+#: ServerRequest and refuses a click that would have been safe, where a
+#: too-narrow one misses this control's own and permits a click that sends.
+#: Those two errors are not symmetric, so the window errs at the safe end.
+SDUI_WINDOW_CHARS = 6000
+
+#: THE RESIDUE A HYDRATED PAGE KEEPS AFTER LINKEDIN DISCARDS ITS BOOTSTRAP
+#: PAYLOAD. Measured 2026-09-19 by sampling one load every few seconds out to
+#: 90s, with a second address as a concurrent control::
+#:
+#:     feed     t=0  5,112,866 chars   t=5  5,112,866   t=10  2,146   t=90  2,146
+#:     profile  t=0      2,146 chars                              t=90  2,146
+#:
+#: **The payload is DELETED about ten seconds after navigation.** So this is a
+#: HEURISTIC and not a law: it is the number two different pages settled to on
+#: one day, and a third page or a later LinkedIn could settle elsewhere. It
+#: exists so :func:`read_sdui_actions` can say WHICH SIDE OF THE RACE it landed
+#: on, rather than leaving a caller to infer it from a small number.
+MEASURED_POST_CLEANUP_RESIDUE = 2146
+
+#: Read-only: sums the length of every script's text and counts token
+#: occurrences. It reads ``textContent`` and returns INTEGERS -- no payload
+#: string is ever returned, which is what keeps a megabyte of his profile out
+#: of this process.
+SDUI_ACTIONS_JS = """
+(cfg) => {
+  const tokens = cfg.tokens || {};
+  const out = {
+    script_blocks: 0,
+    payload_chars: 0,
+    needle_hits: 0,
+    global: {},
+    scoped: {},
+  };
+  for (const key of Object.keys(tokens)) { out.global[key] = 0; out.scoped[key] = 0; }
+  const texts = [];
+  for (const el of Array.from(document.scripts)) {
+    const t = el.textContent || '';
+    if (!t) continue;
+    out.script_blocks += 1;
+    out.payload_chars += t.length;
+    texts.push(t);
+  }
+  const countIn = (hay, token) => {
+    if (!token) return 0;
+    let n = 0, i = hay.indexOf(token);
+    while (i !== -1) { n += 1; i = hay.indexOf(token, i + token.length); }
+    return n;
+  };
+  for (const t of texts) {
+    for (const key of Object.keys(tokens)) {
+      out.global[key] += countIn(t, tokens[key]);
+    }
+  }
+  const needle = cfg.needle || '';
+  if (needle) {
+    const span = cfg.window || 6000;
+    for (const t of texts) {
+      let i = t.indexOf(needle);
+      while (i !== -1) {
+        out.needle_hits += 1;
+        const slice = t.slice(Math.max(0, i - span), i + needle.length + span);
+        for (const key of Object.keys(tokens)) {
+          out.scoped[key] += countIn(slice, tokens[key]);
+        }
+        i = t.indexOf(needle, i + needle.length);
+      }
+    }
+  }
+  return out;
+}
+"""
+
+
+async def read_sdui_actions(
+    page: Any, needle: str = "", *, window: int = SDUI_WINDOW_CHARS
+) -> dict[str, Any]:
+    """Count SDUI action types in the flight payload. COUNTS ONLY, never text.
+
+    THIS IS THE INSTRUMENT THE NO-ServerRequest RULING TURNS ON. The operator
+    ruled that a click measured to issue no ``ServerRequest`` is, by effect, a
+    read -- so something has to do the measuring, and this is it.
+
+    IT RETURNS INTEGERS AND A NEEDLE-HIT COUNT AND NOTHING ELSE. The profile's
+    flight payload was measured at 1,091,238 characters, 92.7% of the
+    document, and it is where his identity lives -- which is exactly why the
+    sanitised fixtures in this repo carry ZERO script characters. Returning
+    any of it would undo that. So the page counts and this function receives
+    numbers.
+
+    **THAT 1,091,238 IS A PRE-CLEANUP READING AND THE CONDITION IS PART OF THE
+    FIGURE.** LinkedIn DISCARDS its bootstrap payload about ten seconds after
+    navigation -- measured 2026-09-19 by sampling one load out to 90 seconds
+    with a second address as a concurrent control:
+
+        feed     t=0  5,112,866   t=5  5,112,866   t=10  2,146   t=90  2,146
+        profile  t=0      2,146                                  t=90  2,146
+
+    **SO EVERY READING OF ``payload_chars`` IS A RACE**, and it measures
+    whether you sampled before or after cleanup rather than what the address
+    carries. ``2,146`` is the residue a hydrated page keeps, not an empty page
+    -- see :data:`MEASURED_POST_CLEANUP_RESIDUE`.
+
+    **THE FAILURE MODE HAS A NAME AND A RECEIPT: a late read returns the
+    residue and looks exactly like an absent payload.** On 2026-09-19 one
+    reading of 2,146 against the 1,091,238 above was published as "this
+    address serves a 2 KB shell", escalated to a lead, and retracted within the
+    hour when the same reader returned 5.1 MB for the control address it had
+    just called thin. **``residue_suspected`` in the return exists so the next
+    caller is told rather than expected to remember this paragraph.**
+
+    SAMPLE IMMEDIATELY AFTER NAVIGATION. A settle, a wait, or any intervening
+    work spends the window.
+
+    ``needle`` SCOPES THE COUNT and must be a STABLE, NON-IDENTIFYING string --
+    a payload ``viewName`` such as ``opento_preview_otw``, which names a
+    surface rather than a person. It is never a member name.
+
+    THE WINDOW ERRS TOWARD REFUSING. A component's actions are looked for
+    within :data:`SDUI_WINDOW_CHARS` either side of the needle, and multiple
+    needle hits are SUMMED rather than disambiguated. Both choices over-count:
+    an over-wide window attributes a neighbour's ``ServerRequest`` to this
+    control and refuses a click that would have been safe, where a too-narrow
+    one misses this control's own and permits a click that SENDS. Those errors
+    are not symmetric and this leans at the safe end deliberately.
+
+    WHAT A CALLER MUST DO WITH THE RESULT, because the numbers alone are not
+    the ruling: a zero ``scoped["server_request"]`` means nothing unless the
+    reader has been shown returning NON-ZERO on a control known to have one.
+    A parser that has stopped working returns zero for everything. See
+    ``writes`` for the gate that requires that negative control before it will
+    treat any zero as permission.
+    """
+    out: dict[str, Any] = {
+        "script_blocks": 0,
+        "payload_chars": 0,
+        "needle_hits": 0,
+        "global": {key: 0 for key in SDUI_ACTION_TOKENS},
+        "scoped": {key: 0 for key in SDUI_ACTION_TOKENS},
+        "readable": False,
+        #: WHICH SIDE OF THE CLEANUP RACE THIS READING LANDED ON. See
+        #: :data:`MEASURED_POST_CLEANUP_RESIDUE`. A caller that treats a small
+        #: payload as an empty page is making the mistake this field exists to
+        #: prevent, and it was made and published on 2026-09-19.
+        "residue_suspected": False,
+        "error": None,
+    }
+    cfg = {
+        "tokens": dict(SDUI_ACTION_TOKENS),
+        "needle": str(needle or ""),
+        "window": int(window),
+    }
+    try:
+        reading = await page.evaluate(SDUI_ACTIONS_JS, cfg)  # readonly-ok
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("sdui actions unreadable: %s", out["error"])
+        return out
+    for key in ("script_blocks", "payload_chars", "needle_hits"):
+        out[key] = int(reading.get(key) or 0)
+    for bucket in ("global", "scoped"):
+        got = reading.get(bucket) or {}
+        out[bucket] = {key: int(got.get(key) or 0) for key in SDUI_ACTION_TOKENS}
+    # READABLE means the payload was there AND carried recognisable actions.
+    # A page with script blocks but no action tokens is a page this reader
+    # cannot speak for, and it says so rather than reporting a comfortable
+    # row of zeroes.
+    out["readable"] = bool(
+        out["payload_chars"] > 0 and sum(out["global"].values()) > 0
+    )
+    # THE RACE, REPORTED RATHER THAN LEFT TO BE REMEMBERED. LinkedIn discards
+    # its bootstrap payload about ten seconds after navigation, so a late read
+    # returns the residue and looks exactly like an empty page. A caller that
+    # sees a small payload and concludes "absent" is making the mistake this
+    # field exists to prevent -- and it was made, published and retracted on
+    # 2026-09-19 by the author of this field.
+    out["residue_suspected"] = bool(
+        out["payload_chars"] <= MEASURED_POST_CLEANUP_RESIDUE
+    )
+    return out
+
+#: The comment editor on an item permalink, MEASURED 2026-09-01: a div with
+#: role=textbox, named through aria-label, count 1, on a page reporting
+#: contenteditable == 1. Every previous census of every readable surface
+#: reported zero, so this is the first comment editor this server has seen.
+COMMENT_EDITOR_LABEL = "Text editor for creating comment"
+
+#: THE COMPOSER'S TWO NAMED CONTROLS, measured 2026-09-01 on
+#: /messaging/compose/ with the badge at 0 either side, no redirect and zero
+#: dialogs. Recorded here because they were paid for and are the half of
+#: send_message's first clause that IS met.
+#:
+#: THE OTHER HALF IS NOT: the message BODY's aria-label and the two SEND-MODE
+#: radio labels all come back reduced by the census, and reading them needs a
+#: script of its own -- see the note in writes.py. `Send` is drawn DISABLED on
+#: an empty composer, the same transition signal as `Post`.
+MESSAGE_RECIPIENT_LABEL = "Enter message recipients"
+MESSAGE_SEND_NAME = "Send"
+
+#: The composer's own container -- and it does NOT hold the send-mode radios.
+#:
+#: THIS COMMENT SAID THE OPPOSITE UNTIL 2026-09-02. It read "every composer
+#: control -- the body editor, BOTH SEND-MODE RADIOS, Send and the two attach
+#: buttons -- reports ``form#0``". Two independent censuses of
+#: ``messaging_compose`` say otherwise, and they agree with each other:
+#:
+#:     both radios                 containers {"none": 1}   -- no form ancestor
+#:     Enter message recipients    containers {"none": 1}   -- nor does it
+#:
+#: measured 2026-08-31 (``_audit/2026-08-31-linkedin-perform.md`` section 83)
+#: and again 2026-09-02, 77 controls expected and 77 read, settle consistent.
+#:
+#: WHAT ``form#0`` ACTUALLY HOLDS, thirteen controls: the body editor
+#: (``div[role=textbox]``, the page's only contenteditable), ``Send``
+#: (disabled on an empty composer), the two attach buttons, ``Maximize compose
+#: field``, ``Open send options``, four hidden inputs, two file inputs, and two
+#: buttons whose aria-labels the census redacts.
+#:
+#: WHY THE WRONG VERSION MATTERED. It is the justification for scoping this
+#: reader to ``form``, so it read as evidence that the scope was right when it
+#: was in fact the reason the radios have never been read -- they are outside
+#: the container BY CONSTRUCTION, and no anchor's ``closest()`` reaches an
+#: element that has no such ancestor. A comment asserting a measurement nobody
+#: re-took is how this package loses a day, and it has now lost two to exactly
+#: this shape.
+#:
+#: The page does draw exactly one form; that half was true.
+MESSAGE_CONTAINER_SELECTOR = "form"
+#: The two dispatch radios and the message body, SHAPED IN THE PAGE.
+#:
+#: WHY A TWELFTH SCRIPT RATHER THAN A FLAG ON :data:`EDITOR_FIELDS_JS`. Two
+#: reasons, and the second is the one that decided it.
+#:
+#: FIRST, REACH. That script is anchor-then-``closest(containerSelector)``.
+#: The dispatch radios have NO container ancestor at all -- measured twice,
+#: ``containers {"none": 1}`` -- so no value of any parameter it already takes
+#: can reach them. Giving it a document-wide mode would put a
+#: select-anywhere path inside a script whose entire safety story is "the
+#: container IS the permission", and the profile editor runs that same script.
+#:
+#: SECOND, AND DECISIVELY: EDITOR_FIELDS_JS RETURNS ACCESSIBLE NAMES UNGATED.
+#: That is by design and correct for a container measured to be his own. On
+#: THIS surface the labels ARE his name -- the checked radio reads ``<him>
+#: will send message`` -- so returning them and then guarding them in Python
+#: makes :func:`shape.looks_name_shaped` the only thing between his name and
+#: the output. That guard failed OPEN on this exact label until 2026-09-02.
+#: A correct guard is one regex edit from being an incorrect guard, so this
+#: script does not rely on one: THE RAW LABEL NEVER LEAVES THE BROWSER, on any
+#: path, refusals included. The guard becomes a second line rather than the
+#: only one.
+#:
+#: WHAT COMES BACK is the discriminator and nothing else: how many capitalised
+#: runs a label carries, whether they are joined by "to", and the name-free
+#: TAIL that survives the last run. Never the label.
+#:
+#: THE RUN RULE IS HANDED IN, NOT REWRITTEN. ``cfg.nameShapeRun`` carries
+#: :func:`shape.name_shape_run_pattern`, so the predicate has ONE definition
+#: that two engines compile. A hand-written copy here would be the same drift
+#: this package removed the morning it was written.
+#:
+#: AND ``tail`` IS NULL WHEN NOTHING MATCHED, which is the one place the
+#: Python descriptor cannot be copied. :func:`shape.describe_name_shaped`
+#: returns ``tail: raw.strip()`` on zero runs -- the WHOLE STRING -- which is
+#: safe there because the caller already holds the string. Here it would be
+#: the leak. Zero runs returns ``null`` and the reader refuses.
+COMPOSE_MODES_JS = """
+(cfg) => {
+  const attrOf = (el, name) => {
+    if (!el || !el.getAttribute) return '';
+    const found = el.getAttribute(name);
+    return found === null ? '' : String(found);
+  };
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+
+  // THE NAME, RESOLVED BUT NEVER RETURNED. Every route here feeds shapeOf and
+  // nothing else; no branch puts `raw` on `out`.
+  const nameOf = (el) => {
+    const aria = attrOf(el, 'aria-label');
+    if (aria) return { raw: aria, source: 'aria-label' };
+    const ids = attrOf(el, 'aria-labelledby');
+    if (ids) {
+      const parts = [];
+      for (const id of ids.split(/\\s+/)) {
+        if (!id) continue;
+        let target = null;
+        try { target = document.getElementById(id); } catch (e) { target = null; }
+        if (target) parts.push(textOf(target));
+      }
+      const joined = parts.join(' ').trim();
+      if (joined) return { raw: joined, source: 'aria-labelledby' };
+    }
+    let labels = null;
+    try { labels = el.labels; } catch (e) { labels = null; }
+    if (labels && labels.length) {
+      const id = attrOf(el, 'id');
+      for (const node of labels) {
+        if (id && attrOf(node, 'for') !== id) continue;
+        const named = textOf(node);
+        if (named) return { raw: named, source: 'label-for' };
+      }
+    }
+    let wrapper = null;
+    try { wrapper = el.closest('label'); } catch (e) { wrapper = null; }
+    if (wrapper) {
+      const named = textOf(wrapper);
+      if (named) return { raw: named, source: 'label-ancestor' };
+    }
+    return { raw: '', source: 'none' };
+  };
+
+  // THE SHAPING, and the only thing downstream of a raw label.
+  const shapeOf = (raw) => {
+    let re;
+    try { re = new RegExp(cfg.nameShapeRun, 'g'); }
+    catch (e) { return null; }
+    const spans = [];
+    let match;
+    while ((match = re.exec(raw)) !== null) {
+      if (match[0] === '') { re.lastIndex += 1; continue; }
+      spans.push([match.index, match.index + match[0].length]);
+      if (spans.length > 64) break;
+    }
+    if (!spans.length) return { runs: 0, joined_by_to: false, tail: null };
+    const last = spans[spans.length - 1];
+    const between = spans.length > 1 ? raw.slice(spans[0][1], last[0]) : '';
+    return {
+      runs: spans.length,
+      joined_by_to: between.trim().toLowerCase() === 'to',
+      // NAME-FREE BY CONSTRUCTION: what survives the LAST capitalised run.
+      tail: raw.slice(last[1]).trim()
+    };
+  };
+
+  const out = {
+    radio_count: 0,
+    checked_count: 0,
+    textbox_count: 0,
+    body_present: false,
+    body_is_editable: false,
+    body_name_source: null,
+    modes: [],
+    refused: null
+  };
+
+  let radios = [];
+  let boxes = [];
+  try { radios = Array.from(document.querySelectorAll('input[type="radio"]')); }
+  catch (e) { radios = []; }
+  try { boxes = Array.from(document.querySelectorAll('div[role="textbox"]')); }
+  catch (e) { boxes = []; }
+
+  out.radio_count = radios.length;
+  out.textbox_count = boxes.length;
+
+  // EXACTLY TWO, EXACTLY ONE CHECKED, asserted BEFORE anything is shaped. The
+  // count is the whole structural claim: on this surface `input[type=radio]`
+  // is measured at exactly 2 across 77 controls, so a third radio means the
+  // page is not the page this was built against and the aim is not safe.
+  let checked = 0;
+  for (const el of radios) { if (el.checked === true) checked += 1; }
+  out.checked_count = checked;
+  if (radios.length !== 2) { out.refused = 'radio_count_not_two'; return out; }
+  if (checked !== 1) { out.refused = 'checked_count_not_one'; return out; }
+  if (boxes.length !== 1) { out.refused = 'textbox_count_not_one'; return out; }
+
+  // THE BODY: presence and KIND only. Its label is never shaped, never
+  // guarded and never returned -- see the note on read_compose_fields.
+  const body = boxes[0];
+  out.body_present = true;
+  try { out.body_is_editable = body.isContentEditable === true; }
+  catch (e) { out.body_is_editable = false; }
+  out.body_name_source = nameOf(body).source;
+
+  for (const el of radios) {
+    const shaped = shapeOf(nameOf(el).raw);
+    if (!shaped) { out.refused = 'shaping_unavailable'; out.modes = []; return out; }
+    if (shaped.runs === 0) { out.refused = 'label_carried_no_run'; out.modes = []; return out; }
+    out.modes.push({
+      runs: shaped.runs,
+      joined_by_to: shaped.joined_by_to,
+      tail: shaped.tail,
+      checked: el.checked === true,
+      disabled: el.disabled === true
+        || attrOf(el, 'aria-disabled').trim().toLowerCase() === 'true'
+    });
+  }
+  return out;
+}
+"""
+
+
+
+#: WHY EACH STRUCTURAL REFUSAL HAPPENED, in words, with the counts filled in.
+#:
+#: EVERY ONE OF THESE IS "THE PAGE IS NOT THE PAGE THIS WAS BUILT AGAINST".
+#: None of them is a privacy refusal, because there is no privacy decision left
+#: to make here -- the script never hands over a label. That is the whole point
+#: of shaping in the page: the only thing this reader can still get wrong is
+#: AIM, and aim is what these report.
+_COMPOSE_REFUSALS = {
+    "radio_count_not_two": (
+        "this surface draws {radios} radio(s); the composer's dispatch choice "
+        "is measured at EXACTLY TWO across 77 controls, on 2026-08-31 and "
+        "again on 2026-09-02. A different number means the page changed shape "
+        "and this reader cannot say which control is a send mode. Nothing was "
+        "shaped and nothing is returned."
+    ),
+    "checked_count_not_one": (
+        "{checked} of the two dispatch radios report checked. A radio group "
+        "has exactly one selection; zero means the page had not settled and "
+        "two means these are not one group. Either way the question 'which "
+        "mode is default' has no answer, so none is invented."
+    ),
+    "textbox_count_not_one": (
+        "this surface draws {boxes} div[role=textbox]; the composer's message "
+        "body is measured at exactly one, corroborated by a contenteditable "
+        "count of one. A different number means the body cannot be identified "
+        "by role alone."
+    ),
+    "label_carried_no_run": (
+        "a dispatch radio's label carries no capitalised run at all, so the "
+        "page cannot produce a name-free tail for it. THE STRING IS NOT "
+        "RETURNED SO THAT IT CAN BE INSPECTED -- that would be the disclosure "
+        "this reader exists to avoid. Note the case that reaches here: the run "
+        "rule is ASCII, so a name in another script scores zero runs, and "
+        "refusing is the only safe answer to 'I cannot analyse this'."
+    ),
+    "shaping_unavailable": (
+        "the page could not compile the run rule handed to it, so no label "
+        "was shaped. Reported rather than fallen back on: a fallback here "
+        "would be a second, unreviewed predicate."
+    ),
+}
+
+
+async def read_compose_modes(page: Any) -> dict[str, Any]:
+    """Shape the two dispatch radios IN THE PAGE. No label comes back.
+
+    THIS IS THE TWELFTH INJECTED SCRIPT AND THE ARGUMENT FOR IT IS PRIVACY,
+    not reach. Reach alone could have been bought by widening
+    :data:`EDITOR_FIELDS_JS`, and that was considered and refused: it would
+    put a select-anywhere path into a script whose safety story is "the
+    container IS the permission", which the profile editor also runs.
+
+    The deciding argument is the other one. ``EDITOR_FIELDS_JS`` returns
+    accessible names UNGATED -- correct for a container measured to be his own.
+    Here the labels ARE his name, so returning them would make
+    :func:`shape.looks_name_shaped` the only thing standing between his name
+    and the output. It failed open on this exact label until 2026-09-02. So
+    the label is shaped where it lives and never crosses into this process.
+
+    WHAT COMES BACK: counts, a checked flag, and per radio the run count,
+    whether the runs are joined by "to", and the name-free tail. On any
+    refusal, ``modes`` is EMPTY -- a refusal that quotes what it refused is
+    the leak wearing an apology.
+    """
+    cfg = {
+        # ONE DEFINITION, TWO ENGINES. Handing the pattern over is what stops a
+        # second copy of the run rule existing in JavaScript and drifting from
+        # the Python one -- which is the exact defect this package removed on
+        # the morning this script was written.
+        "nameShapeRun": shape.name_shape_run_pattern(),
+    }
+    try:
+        data = await page.evaluate(COMPOSE_MODES_JS, cfg)  # readonly-ok
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the composer's dispatch modes: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return dict(data or {})
+
+
+async def read_compose_fields(page: Any) -> dict[str, Any]:
+    """Name the composer's controls, or REFUSE. Labels, never values.
+
+    WHY THIS EXISTS AND WHY IT IS NOT THE BODY'S NAME. The composer draws TWO
+    SEND-MODE RADIOS, one checked, and the census reduces both to
+    ``<redacted>`` and ``<redacted> to <redacted>``. **He is on Premium
+    Career, and one of those modes may be an InMail** -- a metered allowance,
+    not a free action. So the unreadable choice is potentially the difference
+    between sending a message and SPENDING ONE OF HIS CREDITS, and a gate that
+    cannot tell him whether an action costs him something is not a gate, it is
+    a formality. That makes this a hard precondition rather than a nicety.
+
+    IT REUSES :data:`EDITOR_FIELDS_JS` RATHER THAN ADDING A SCRIPT. That
+    script was already parameterised on anchor, container and control
+    selector, so this surface costs no new ``# readonly-ok`` waiver and no
+    budget bump -- checked before one was written.
+
+    TWO GUARDS, AND EITHER REFUSES.
+
+    **No recipient may be selected.** The self-ownership argument here is
+    stronger than the profile editor's -- a composer with nobody in it
+    contains no third party AT ALL, so there is nothing to disclose. That is
+    asserted rather than assumed: once a recipient is chosen the labels start
+    describing a conversation with a person in it and the argument evaporates.
+
+    **Nothing name-shaped is published.** Any label carrying a run of
+    capitalised words stops this reader. The second send-mode label came back
+    from the census as ``<redacted> to <redacted>``, two name-shaped tokens,
+    which is exactly the case that must stop it. A reader that guessed there
+    would be publishing a stranger's name to explain a radio button.
+
+    AND IT IS NO LONGER "the same rule ``shape.census_redact_rare`` applies",
+    which is what this paragraph said until 2026-09-02. It was, and the shared
+    rule declined to match a capitalised word at position 0 -- so it scored the
+    CHECKED default radio, ``<him> will send message``, at zero runs and this
+    guard failed OPEN on it. :func:`shape.looks_name_shaped` now carries its
+    own predicate, strictly stricter than the redactor's; the reasoning is on
+    :data:`shape._NAME_SHAPE_RUN`. The visible cost here is that one-word
+    furniture in this container -- ``Send``, ``Open send options`` -- is
+    name-shaped too, so this reader refuses on every composer measured so far
+    and answers through ``label_shapes`` rather than through ``fields``.
+
+    A REFUSAL CARRIES NO FIELD DATA, following the profile editor's rule:
+    there is no ``fields`` key on a refusal, so a refusal cannot be misread as
+    "the container has none".
+    """
+    out: dict[str, Any] = {"refused": None, "recipients_selected": None}
+    try:
+        chosen = int(
+            await page.locator(
+                'button[aria-label^="Remove"], [data-test-selected-recipient]'
+            ).count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        out["refused"] = "recipient_count_unreadable"
+        out["why"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["recipients_selected"] = chosen
+    if chosen:
+        out["refused"] = "recipient_already_selected"
+        out["why"] = (
+            f"{chosen} recipient(s) are already selected, so this composer "
+            "holds a third party and the self-ownership argument this reader "
+            "rests on does not apply. Nothing was read."
+        )
+        return out
+
+    reading = await read_compose_modes(page)
+    refused = reading.get("refused")
+    if refused:
+        return {
+            "refused": refused,
+            "recipients_selected": chosen,
+            "why": _COMPOSE_REFUSALS[refused].format(
+                radios=reading.get("radio_count"),
+                checked=reading.get("checked_count"),
+                boxes=reading.get("textbox_count"),
+            ),
+            "radio_count": reading.get("radio_count"),
+            "checked_count": reading.get("checked_count"),
+            "textbox_count": reading.get("textbox_count"),
+        }
+
+    # THE ANSWER, AND THERE IS NO LABEL IN IT TO WITHHOLD.
+    #
+    # Until 2026-09-02 this returned raw labels and then asked
+    # ``shape.looks_name_shaped`` whether to refuse -- which made that
+    # predicate the only thing between his name and the output, on the one
+    # surface whose labels ARE his name. It failed open on the checked default
+    # for a day and a half. Now the shaping happens in the page, so the raw
+    # label never enters this process at all.
+    modes = list(reading.get("modes") or [])
+
+    # AND THE GUARD IS A SECOND LINE, WHICH UNTIL NOW WAS ONLY A CLAIM.
+    #
+    # The re-anchoring left ``shape.looks_name_shaped`` with NO caller, while
+    # three docstrings and a commit message described it as defence in depth.
+    # An uncalled function is not a second line; it is a comment. This is the
+    # call that makes the sentence true.
+    #
+    # WHAT IT ACTUALLY CHECKS, because a redundant assertion would be worse
+    # than none. ``tail`` arrives from the PAGE, asserted name-free by an
+    # implementation this process cannot see running. That is a claim from
+    # across a trust boundary, and this is the boundary. Verifying it here
+    # catches a regression in the page's shaping -- the one failure mode the
+    # in-page design cannot self-report -- using an independent implementation
+    # of the same rule.
+    #
+    # It has never fired. That is the expected state for a boundary check, and
+    # it is why the refusal names the page rather than the label.
+    offending = [m for m in modes if shape.looks_name_shaped(str(m.get("tail") or ""))]
+    if offending:
+        return {
+            "refused": "page_shaping_returned_a_name",
+            "recipients_selected": chosen,
+            "why": (
+                f"{len(offending)} of {len(modes)} tails came back from the page "
+                "still carrying a capitalised run, which the page asserts cannot "
+                "happen -- a tail is what SURVIVES the last run. The tails are "
+                "NOT returned, because a tail that failed this check is the one "
+                "string on this path most likely to be a name. Nothing is "
+                "published from this reading."
+            ),
+        }
+
+    return {
+        "recipients_selected": chosen,
+        "modes": modes,
+        # THE BODY, PRESENCE AND KIND ONLY. Its label is deliberately NOT
+        # shaped, NOT guarded and NOT returned, and that is a decision rather
+        # than an omission. The guard gates PUBLICATION; a label that is never
+        # published has nothing to gate. And the split predicate is strict
+        # enough that ordinary furniture trips it -- the body's own label is
+        # something like "Write a message", which opens with a capital -- so
+        # feeding it to the guard would make this reader refuse forever on its
+        # own placeholder. See the note on :data:`shape._NAME_SHAPE_RUN`.
+        "body": {
+            "present": bool(reading.get("body_present")),
+            "is_editable": bool(reading.get("body_is_editable")),
+            # A KIND, never the name: 'aria-label', 'label-for', 'content'...
+            "name_source": reading.get("body_name_source"),
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# The composer's WRITE path: three selectors and two readers
+# ---------------------------------------------------------------------------
+#
+# NOTHING BELOW IS REACHED BY A READ TOOL. ``read_compose_fields`` above is the
+# read path and answers "which dispatch mode is checked" without returning a
+# label. These are for ``writes.perform``, which needs strings a fill and a
+# click can be aimed at.
+
+
+def compose_recipient_selector() -> str:
+    """The combobox a recipient is typed into. NO ARGUMENT.
+
+    THE ROLE ENGINE, because the control is named through ``label-for`` --
+    measured -- and no attribute selector can follow that. NOT routed through
+    :func:`named_role_selector`, which refuses any role outside
+    ``INPUT_TYPE_ROLES``: widening that function so one caller could use it
+    would trade a measured restriction for a convenience every other caller
+    inherits, which is the argument :func:`post_submit_selector` already makes
+    for standing apart.
+
+    GUARDED ON THE CONSTANT rather than on an argument, because there is no
+    argument. The check is here anyway so a future rename that introduced a
+    quote could not produce a selector that silently matches something else.
+    """
+    if any(bad in MESSAGE_RECIPIENT_LABEL for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build the composer's recipient selector: "
+            f"{MESSAGE_RECIPIENT_LABEL!r} carries a character that would end "
+            "the selector's own quoting."
+        )
+    return 'role=combobox[name="' + MESSAGE_RECIPIENT_LABEL + '"s]'
+
+
+def compose_body_selector() -> str:
+    """The contenteditable a message's text is typed into. NO ARGUMENT.
+
+    **ADDRESSED BY ROLE ALONE, AND IT NEEDS NO LABEL.** That is the whole
+    reason this control was never a blocker: its ``aria-label`` comes back
+    ``<opaque>`` from the census, so a label-based selector was never
+    available -- and it was never needed, because ``div[role="textbox"]`` is
+    MEASURED at exactly ONE on this surface, corroborated by a
+    contenteditable count of one, on 2026-08-31 and again on 2026-09-02.
+
+    THE COUNT IS THE IDENTIFICATION and it is checked by the reader rather
+    than by this string: :func:`read_compose_modes` refuses
+    ``textbox_count_not_one`` before anything is typed. A selector that
+    matched two boxes would be aiming by document order, which is what that
+    refusal exists to prevent.
+    """
+    return 'div[role="textbox"]'
+
+
+def compose_send_selector() -> str:
+    """The control that dispatches the message. NO ARGUMENT.
+
+    ``Send`` is TEXT-NAMED -- measured -- so the accessible name is the
+    element's own text and the role engine reads it. Drawn DISABLED on an
+    empty composer, which is the transition the send gate requires.
+    """
+    if any(bad in MESSAGE_SEND_NAME for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build the composer's send selector: "
+            f"{MESSAGE_SEND_NAME!r} carries a character that would end the "
+            "selector's own quoting."
+        )
+    return 'role=button[name="' + MESSAGE_SEND_NAME + '"s]'
+
+
+#: WHERE A COMMITTED RECIPIENT MIGHT BE DRAWN, as several independent
+#: spellings rather than one.
+#:
+#: **NOT ONE OF THESE HAS EVER MATCHED ANYTHING.** ``read_compose_fields`` has
+#: counted selected recipients since 2026-09-02 using the first two, and every
+#: reading it has ever taken returned ZERO -- on a composer that genuinely had
+#: nobody in it, so a zero proves nothing about the selector. The test that
+#: covers its non-zero branch injects the count through a double whose
+#: ``locator`` DISCARDS the selector argument, so the strings below have never
+#: been executed against a page on either branch.
+#:
+#: THAT IS WHY THIS IS A LIST AND WHY THE READER REPORTS PER-SELECTOR COUNTS.
+#: A single guessed selector that matches nothing is indistinguishable from a
+#: composer with nobody in it, and on THIS surface those two answers are
+#: "refuse" and "send". The counts are the measurement the first supervised
+#: run exists to produce -- the same shape ``_comment_submit_gate`` takes,
+#: where the refusal is the instrument.
+RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
+    'button[aria-label^="Remove"]',
+    "[data-test-selected-recipient]",
+    'li[class*="selected"] button',
+    '[role="listitem"] button[aria-label*="emove"]',
+)
+
+
+#: COUNT the committed recipients, and count how many carry HIS NEEDLE. The
+#: comparison happens IN THE PAGE and no label comes back.
+#:
+#: **THE MATCH IS WORD-BOUNDED, AND IT WAS A BARE SUBSTRING UNTIL 2026-09-05.**
+#: The substring version was measured letting a STRANGER through in two ways,
+#: both in ``tests/test_the_needle_is_matched_as_a_bare_substring.py``:
+#:
+#:   1. every candidate in :data:`RECIPIENT_CHIP_SELECTORS` constrains
+#:      ``aria-label``, and this script then SEARCHES ``aria-label`` -- so the
+#:      haystack was selected BECAUSE it contains a fixed word, and a needle
+#:      that is a substring of that word matched a chip naming somebody else;
+#:   2. a short name is a substring of a longer one, so a stranger whose name
+#:      merely CONTAINS his needle counted as a match.
+#:
+#: A letter or digit on either side of the hit now refuses it. Digits count as
+#: word characters deliberately: a label running a name onto a connection
+#: degree (``<name>1st``) must REFUSE rather than match, because this gate is
+#: required to fail closed.
+#:
+#: **IT MAY REFUSE A LEGITIMATE RECIPIENT AND THAT IS THE RULING, NOT AN
+#: OVERSIGHT.** Nobody has ever observed a real chip, so the shape of a real
+#: label is unknown. The two error directions are not symmetric: too strict
+#: costs him a retry, too loose commits a stranger to an irreversible message
+#: under his name. When the directions differ that much the DOM does not have
+#: to be known -- only which way to fail. Relaxing this is a later question,
+#: and it needs a chip observed first.
+#:
+#: THE SAME ARGUMENT AS :data:`INVITE_NEEDLE_JS`, on a surface where it is
+#: sharper: a committed recipient IS a third party, by definition, so any label
+#: read here names somebody who is not him. A name that reaches Python can
+#: reach a traceback, a log line or a cache key, and no care downstream
+#: un-rings that. So the needle is handed in and only integers come out.
+#:
+#: THERE IS NO ``revealSingleMatch`` HERE, unlike the invitation script. That
+#: flag exists so a PREVIEW can show him who he is about to reach; this script
+#: runs inside ``perform``, after he has already confirmed, where there is
+#: nothing left to show him and therefore no reason for a name to exist in
+#: this process at all.
+SELECTED_RECIPIENT_JS = r"""
+(cfg) => {
+  const needle = String(cfg.needle).toLowerCase();
+  const perSelector = {};
+  const seen = [];
+  for (const selector of cfg.selectors) {
+    let nodes = [];
+    try { nodes = Array.from(document.querySelectorAll(selector)); }
+    catch (e) { perSelector[selector] = -1; continue; }
+    perSelector[selector] = nodes.length;
+    for (const node of nodes) { if (seen.indexOf(node) === -1) seen.push(node); }
+  }
+  // A WORD-BOUNDARY MATCH, NOT A SUBSTRING. See the note above the constant.
+  // A letter or a digit on either side of the hit means the needle is a
+  // FRAGMENT of a longer word, and a fragment is not a name.
+  const wordish = /[\p{L}\p{N}]/u;
+  const bounded = (haystack, term) => {
+    if (!term) { return false; }
+    let from = 0;
+    for (;;) {
+      const at = haystack.indexOf(term, from);
+      if (at === -1) { return false; }
+      const before = at === 0 ? '' : haystack.charAt(at - 1);
+      const after = haystack.charAt(at + term.length);
+      if (!wordish.test(before) && !wordish.test(after)) { return true; }
+      from = at + 1;
+    }
+  };
+  let matches = 0;
+  for (const node of seen) {
+    // THE LABEL IS READ AND IMMEDIATELY DISCARDED. It exists for the length of
+    // this comparison and is never assigned anywhere that leaves the loop.
+    const label =
+      (node.getAttribute('aria-label') || '') + ' ' + (node.textContent || '');
+    if (bounded(label.toLowerCase(), needle)) { matches += 1; }
+  }
+  return {
+    per_selector: perSelector,
+    total: seen.length,
+    matches: matches
+  };
+}
+"""
+
+
+async def read_selected_recipients(page: Any, needle: str) -> dict[str, Any]:
+    """How many recipients are committed, and how many carry ``needle``.
+
+    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
+    candidate string, ``total`` is the de-duplicated node count, ``matches`` is
+    how many of those carry his needle. No accessible name, no text, no
+    identifier.
+
+    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
+    an invalid string, not an empty page -- and it is reported rather than
+    folded into zero, because "this selector is wrong" and "there is nobody
+    here" are the two answers this whole gate turns on.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            SELECTED_RECIPIENT_JS,
+            {"needle": str(needle or ""), "selectors": list(RECIPIENT_CHIP_SELECTORS)},
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the composer's selected recipients: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    return dict(data or {})
+
+
+#: WHERE THE TYPEAHEAD DRAWS ITS SUGGESTIONS, as several spellings rather than
+#: one, for the same reason :data:`RECIPIENT_CHIP_SELECTORS` is a list: a single
+#: guessed selector that matches nothing is indistinguishable from a dropdown
+#: that never opened, and on THIS surface those two answers are "refuse" and
+#: "refuse for the wrong reason".
+#:
+#: **NONE OF THESE HAS EVER MATCHED ANYTHING**, because nobody has typed into
+#: that combobox through this server. The per-selector counts the first
+#: supervised run returns ARE the measurement, exactly as the recipient chips'
+#: were.
+TYPEAHEAD_OPTION_SELECTORS: tuple[str, ...] = (
+    '[role="option"]',
+    '[role="listbox"] [role="option"]',
+    '[aria-controls] ~ * [role="option"]',
+)
+
+#: THE DROPDOWN ITSELF, waited for SEPARATELY FROM ITS ROWS.
+#:
+#: THE FIRST VERSION WAITED FOR AN OPTION AND IT COLLAPSED TWO STATES. "The
+#: dropdown never opened" and "the dropdown opened and offered nobody" are
+#: different facts -- the first is about this reader and the page, the second
+#: is about the name he supplied -- and waiting on a ROW made them the same
+#: timeout. A test written to assert they differ is what found it, which is
+#: this repository's own rule arriving on its own code: collapsing two states
+#: does not merely give a wrong answer, it removes the test that would catch
+#: it.
+TYPEAHEAD_LISTBOX_SELECTOR = '[role="listbox"]'
+
+#: How long to wait for the dropdown after the needle is typed. BOUNDED, and
+#: short: a typeahead that has not drawn in this long has not drawn, and a
+#: longer wait would be a poll loop against his account.
+TYPEAHEAD_TIMEOUT_MS = 5_000
+
+#: Characters that would end the SELECTOR's own delimiting, refused rather than
+#: escaped. ``/`` closes the regex, a backslash starts an escape this function
+#: did not author, and a quote ends the attribute.
+_SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
+
+#: Regex metacharacters, escaped so a name is matched LITERALLY. A ``.`` in
+#: ``Jr.`` must match a period and not any character -- an unescaped needle is
+#: a selector that matches MORE rows than the name it came from, and matching
+#: more rows on this surface means pressing somebody else.
+_REGEX_META = ".^$*+?()[]{}|"
+
+
+#: THE CANDIDATE MATCHERS, AS A CENSUS RATHER THAN A CHOICE.
+#:
+#: WHY THIS EXISTS, and it is a live measurement rather than a worry. On
+#: 2026-09-03 ``scripts/_probe_typeahead_commit.py`` was run against his own
+#: account with a real first-degree name and returned::
+#:
+#:     listbox appeared        True
+#:     options (total)         10
+#:     carrying the needle     10
+#:     refused                 4_several_options_match
+#:
+#: **THAT IS THE SUBSTRING MATCHER COUNTING LINKEDIN'S OWN RESULT SET.** A
+#: typeahead returns a row BECAUSE it matched what was typed, so "this row
+#: contains the needle" is close to tautological and ten-of-ten is the
+#: expected reading rather than the surprising one. A gate whose only
+#: discriminator is that predicate cannot discriminate: it refuses whenever
+#: LinkedIn returns more than one row, which is almost always, and the refusal
+#: reads as caution while being a defect.
+#:
+#: WHAT IS AND IS NOT ESTABLISHED, kept apart on purpose. Ten of ten is
+#: VERIFIED -- one live reading. That the ratio is STRUCTURAL is DERIVED, and
+#: one observation of one number does not show an instrument can return
+#: another. This tuple exists to take that measurement rather than to argue
+#: about it.
+#:
+#: EVERY ENTRY IS A READ. Counting how many rows a pattern WOULD match costs
+#: one locator count each and presses nothing, so the census can be attached
+#: to a refusal and the refusal becomes the instrument -- the same shape
+#: ``_comment_submit_gate`` and the chip selectors already take.
+#:
+#: ``{n}`` is replaced by the ESCAPED needle. The order is
+#: loosest-to-strictest and it is meaningful: a reader compares adjacent rows
+#: to learn what shape the page is drawing.
+#:
+#: THE ONE THAT IS NOT OBVIOUS, and it is the reason this is a census and not
+#: a one-line fix. The natural boundary assertion is ``\b``, and on this
+#: surface it may reject the very person it is meant to find: a suggestion
+#: row's accessible name concatenates the name with the connection degree, and
+#: if it does so WITHOUT A SEPARATOR the name becomes ``<name>1st``. ``\b``
+#: sits between a word character and a non-word character; ``G`` and ``1`` are
+#: both word characters, so there is no boundary there and ``^<n>\b`` matches
+#: NOTHING. ``^<n>(?![A-Za-z])`` accepts the digit and still rejects
+#: ``<n>upta``, which is the discrimination actually wanted. Whether the live
+#: rows carry a separator has never been read -- no accessible name from that
+#: listbox has ever entered this process -- so both are counted and the page
+#: answers.
+TYPEAHEAD_NAME_PATTERNS: tuple[tuple[str, str], ...] = (
+    # What ships today. Expected to equal the option count.
+    ("substring", "{n}"),
+    # The name is at the START of the accessible name. Distinguishes a row
+    # that merely mentions him from one that is his.
+    ("prefix", "^{n}"),
+    # Prefix, and the next character is not a Latin letter -- so a degree
+    # suffix, a comma, a space or end-of-string all pass and a longer name
+    # does not.
+    ("prefix_then_nonletter", "^{n}(?![A-Za-z])"),
+    # Prefix and a regex word boundary. Defeated by a digit-initial degree
+    # suffix run onto the name, which is exactly what this census is for.
+    ("prefix_boundary", "^{n}\\b"),
+    # Prefix, then whitespace or the end. The strictest of the prefix family
+    # and the one that needs a separator to exist at all.
+    ("prefix_then_space_or_end", "^{n}(\\s|$)"),
+    # The accessible name is the needle and nothing else.
+    ("whole", "^{n}$"),
+)
+
+#: THE CANDIDATE THE SERVER PRESSES BY. Named rather than spelled out at the
+#: call site, so "which matcher reaches a human being" is a row in the table
+#: above and a reviewer reads it there.
+#:
+#: IT IS THE LOOSEST ONE, AND THAT IS MEASURED RATHER THAN CHOSEN. Three live
+#: runs on 2026-09-03, three separate browser sessions, identical numbers:
+#: substring 10, and ZERO for every anchored candidate including the one named
+#: strictest below. The rows do not begin with the name -- something precedes
+#: it inside the accessible name -- so anchoring refuses everybody rather than
+#: refusing correctly. Until an offset reading says what precedes it, the
+#: substring is the only candidate that matches anything at all.
+TYPEAHEAD_SHIPPED_PATTERN = "substring"
+
+#: THE STRICTEST CANDIDATE that can still match a row whose connection degree
+#: is run onto the name. Named rather than indexed so the ambiguity refusal,
+#: the census and the probe's aim cannot drift apart.
+#:
+#: MEASURED DEAD ON THE LIVE SURFACE, and the name is kept because the reason
+#: is worth keeping: it is strictest among the ANCHORED family, and the
+#: anchored family is what three live runs measured at zero. It is what the
+#: probe would aim by if anchoring worked, and the refusal that reports it
+#: matching zero is how a reader learns that it does not.
+TYPEAHEAD_STRICTEST_PATTERN = "prefix_then_nonletter"
+
+
+def escaped_needle(needle: str) -> str:
+    """The needle as a LITERAL regex body, or a refusal.
+
+    Extracted from :func:`typeahead_option_selector` so the census and the
+    aim escape identically. Two escapers would be two chances to disagree,
+    and a disagreement here means one function counting rows that another
+    would not press.
+    """
+    for bad in _SELECTOR_BREAKING:
+        if bad in needle:
+            raise ExtractionFailedError(
+                "refusing to build the typeahead's option selector: the name "
+                "you supplied carries a quote, a slash or a backslash, any of "
+                "which would end this selector's own delimiting and could aim "
+                "it at a different row. Refused rather than escaped."
+            )
+    return "".join(
+        (chr(92) + char) if char in _REGEX_META else char for char in needle
+    )
+
+
+def typeahead_pattern_selector(needle: str, body: str) -> str:
+    """One candidate matcher, as a role selector. COUNTED, never pressed.
+
+    ``body`` is a template from :data:`TYPEAHEAD_NAME_PATTERNS` whose ``{n}``
+    is replaced by the escaped needle. The template itself is a MODULE
+    CONSTANT and never a caller's string, so the only thing a caller
+    contributes is the needle and the only thing that reaches a regex is the
+    escaped form of it.
+
+    WHAT THIS IS FOR. Every selector it builds is handed to ``locator.count``
+    and to nothing else. The census reports how many rows each candidate WOULD
+    match; which candidate the click is aimed by is
+    :func:`typeahead_option_selector`'s answer and is a separate decision,
+    deliberately, because a function that both proposed and chose would be
+    choosing its own evidence.
+    """
+    return "role=option[name=/" + body.replace("{n}", escaped_needle(needle)) + "/i]"
+
+
+def _typeahead_selector_named(needle: str, label: str) -> str:
+    """Resolve ONE named candidate from the table and build its selector.
+
+    THE SINGLE LOOKUP, and it exists because there are two named aims -- the
+    one the server presses by and the one the probe presses by -- and they
+    must be two different NAMES rather than two different pieces of string
+    surgery. Resolving both through here means neither can drift from the
+    table the census counts, or from the label the refusal texts print.
+
+    Raises:
+        ExtractionFailedError: no candidate carries that label. Refused rather
+            than defaulted: guessing which candidate was meant is exactly the
+            choice this function exists to remove.
+    """
+    for candidate, body in TYPEAHEAD_NAME_PATTERNS:
+        if candidate == label:
+            return typeahead_pattern_selector(needle, body)
+    raise ExtractionFailedError(
+        f"refusing to build a typeahead selector: {label!r} is not a candidate "
+        "in TYPEAHEAD_NAME_PATTERNS. A name and the table have diverged, and "
+        "guessing which candidate was meant is exactly the choice this lookup "
+        "exists to remove."
+    )
+
+
+def typeahead_strictest_selector(needle: str) -> str:
+    """The STRICTEST candidate matcher, as a selector. FOR AN INSTRUMENT ONLY.
+
+    :data:`TYPEAHEAD_STRICTEST_PATTERN` names it and this resolves it, so a
+    caller that wants the strictest aim cannot pick a different one by
+    indexing into the tuple and cannot drift from the label the refusal texts
+    print.
+
+    **THIS IS NOT WHAT THE SERVER PRESSES.** ``typeahead_option_selector`` is,
+    and it is still the substring form. The two are deliberately different
+    functions rather than a flag, because a flag would put "which matcher
+    presses his message" one boolean away from changing, and that decision is
+    supposed to cost a live measurement.
+
+    WHO MAY USE THIS. ``scripts/_probe_typeahead_commit.py``, which exists to
+    take a measurement the shipped gate can no longer reach: the substring
+    matcher counts LinkedIn's own result set, so it refuses on every real
+    dropdown, and a probe that always stops at that refusal can never answer
+    whether pressing a suggestion commits anybody. The strictest form is
+    STRICTLY NARROWER than the shipped one -- anchored at the start and
+    refusing a longer name where the substring accepts it -- so the instrument
+    presses less than the server would, never more.
+    """
+    return _typeahead_selector_named(needle, TYPEAHEAD_STRICTEST_PATTERN)
+
+
+async def read_typeahead_pattern_census(
+    page: Any, needle: str
+) -> dict[str, int]:
+    """How many suggestion rows each candidate matcher WOULD match.
+
+    RETURNS INTEGERS KEYED BY THE PATTERN'S OWN NAME. No accessible name, no
+    row text, no identifier -- every comparison happens inside the browser
+    through Playwright's role engine, exactly as the aim does.
+
+    A ``-1`` means that candidate RAISED -- an unparseable pattern, not an
+    empty page -- and it is reported rather than folded into zero, because
+    "this pattern is wrong" and "nothing matched it" are the two answers the
+    choice between candidates turns on.
+
+    THIS IS THE MEASUREMENT NOBODY CAN TAKE ANY OTHER WAY, and it is the
+    reason the refusal carries it: reading the live shape means reading
+    accessible names that belong to other people, and this counts them
+    instead. One live refusal now hands back enough to choose the matcher
+    without anybody's name entering this process.
+    """
+    out: dict[str, int] = {}
+    for label, body in TYPEAHEAD_NAME_PATTERNS:
+        try:
+            selector = typeahead_pattern_selector(needle, body)
+        except ExtractionFailedError:
+            out[label] = -1
+            continue
+        try:
+            out[label] = int(await page.locator(selector).count())
+        except Exception:  # noqa: BLE001 - an unusable pattern is reported as -1
+            out[label] = -1
+    return out
+
+
+def typeahead_option_selector(needle: str) -> str:
+    """Aim at ONE suggestion BY ITS ACCESSIBLE NAME, never by position.
+
+    **THIS IS THE WHOLE SAFETY ARGUMENT OF THE CLICK IT AIMS.** Every other
+    click in this package targets a control whose label is UI furniture --
+    ``Save the job``, ``Send``, a filter pill. A typeahead row exists because
+    LinkedIn matched A PERSON, so the thing being clicked is drawn from
+    somebody's name. Two consequences, and both are met here rather than
+    routed around:
+
+    * **The name never enters this process.** Playwright's ``name=`` matches
+      the ACCESSIBLE NAME inside the browser; what crosses back is a count.
+      The only string this function holds is the needle, which is HIS OWN
+      input and was already in this process before it was called.
+    * **The aim is the name, not the row.** ``nth``, ``first`` or an index
+      derived from a match would all press whatever LinkedIn drew in that
+      slot, which is verbatim the ``aim_invitation`` failure. If the name does
+      not resolve to exactly one row, the caller refuses; it never falls back
+      to a position.
+
+    **A REGEX, AND THE QUOTED FORM WAS MEASURED WRONG BEFORE THIS WAS
+    WRITTEN.** The obvious spelling is ``[name="Thornwick M"i]`` and it does not
+    do what it reads like. Measured on 2026-09-03 against a two-row listbox::
+
+        role=option[name="Thornwick M"i]      0
+        role=option[name="Thornwick M"]       0
+        role=option[name="Thornwick M"s]      0
+        role=option[name=/Thornwick M/i]      1
+        [role="option"]                      2
+
+    **The quoted form is a WHOLE-STRING match**, and a suggestion row's
+    accessible name is the whole row -- ``Thornwick M1st`` in that fixture, name
+    and degree concatenated. So the quoted form matches a real suggestion
+    NEVER, and the failure is silent: zero matches reads exactly like "he is
+    not in the list". Only the regex form is a substring, which is the
+    relation ``_recipient_gate`` already uses on the committed chip -- his
+    needle is PART of a fuller name, not equal to it.
+
+    That is why ``_compose_send_selector``'s quoted ``"s]`` spelling is right
+    THERE and wrong here: ``Send`` IS the entire accessible name of its
+    control. Same syntax, different relation, and copying it across would have
+    produced a gate that could never aim at anybody.
+
+    **THE NEEDLE IS ESCAPED, NOT TRUSTED.** An unescaped ``.`` matches any
+    character, so ``Jr.`` would match ``JrX`` -- a selector matching MORE rows
+    than the name it came from, which on this surface means pressing somebody
+    else. Metacharacters are escaped; the three characters that would break
+    the selector's own delimiting are REFUSED instead, because escaping those
+    correctly is a second parser to get subtly wrong.
+
+    Raises:
+        ExtractionFailedError: the needle carries a selector-breaking
+            character. REFUSED RATHER THAN ESCAPED: this server would rather
+            not send at all than send accurately-quoted to somebody else.
+    """
+    # ONE CONSTRUCTOR, AND THIS IS A TABLE LOOKUP RATHER THAN A THIRD PIECE OF
+    # STRING SURGERY.
+    #
+    # THREE FUNCTIONS BUILT THIS SHAPE FOR A WHILE and the team lead called it
+    # out: this one, the census's parameterised builder, and the probe's
+    # strictest aim. They are not competitors -- they answer three different
+    # questions -- but they were three places that knew how to spell
+    # "role=option[name=/.../i]" and how to escape a needle, which is three
+    # chances to disagree about which row is meant.
+    #
+    # SO THERE IS NOW ONE CONSTRUCTOR (typeahead_pattern_selector), ONE ESCAPER
+    # (escaped_needle) and ONE LOOKUP (_typeahead_selector_named), and the two
+    # named aims are each a single line naming a row of the table the census
+    # counts. What did NOT collapse is the pair of NAMES: the aim the server
+    # presses by and the aim the probe presses by stay two different constants
+    # rather than one flag, because a flag puts "which matcher reaches a human
+    # being" one boolean away from changing.
+    return _typeahead_selector_named(needle, TYPEAHEAD_SHIPPED_PATTERN)
+
+
+async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
+    """How many suggestions the typeahead drew, and how many carry ``needle``.
+
+    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
+    candidate spelling, ``total`` is the largest of them, ``matches`` is how
+    many rows Playwright's accessible-name match resolves to. No name, no
+    identifier, no ``urn``.
+
+    THE WAIT IS PART OF THE READING. A dropdown is asynchronous, so a count
+    taken too early is a zero that means "not yet" and reads identically to a
+    zero that means "nobody". This waits, once, bounded, and reports
+    ``appeared`` separately from ``total`` so those two zeroes stay
+    distinguishable -- the same tri-state discipline ``_self_assertion_state``
+    pays for.
+
+    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
+    an invalid string, not an empty dropdown -- reported rather than folded
+    into zero.
+    """
+    out: dict[str, Any] = {
+        "appeared": False,
+        "per_selector": {},
+        "total": 0,
+        "matches": 0,
+        "selector": None,
+        "error": None,
+        # ABSENT IS NOT EMPTY. An unbuildable needle returns before the census
+        # is taken, and {} there means "nobody counted" rather than "every
+        # candidate matched nothing".
+        "pattern_census": {},
+    }
+    try:
+        out["selector"] = typeahead_option_selector(needle)
+    except ExtractionFailedError as exc:
+        out["error"] = str(exc)
+        return out
+
+    try:
+        # NO ``# readonly-ok`` HERE, DELIBERATELY. ``wait_for_selector`` is on
+        # no entry of ``readonly._MUTATION_CALL_PATTERNS`` -- it observes and
+        # cannot act -- so a waiver would be claiming an exemption this call
+        # does not need, and the waiver COUNT is pinned precisely so that an
+        # unnecessary one shows up as a boundary change. It did: the first
+        # version of this line carried one and moved dom.py's count from 13 to
+        # 14.
+        await page.wait_for_selector(
+            TYPEAHEAD_LISTBOX_SELECTOR,
+            timeout=TYPEAHEAD_TIMEOUT_MS,
+            state="attached",
+        )
+        out["appeared"] = True
+    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
+        # NOT AN ERROR. The dropdown not drawing is one of the outcomes this
+        # reader exists to report, and calling it an error would put it in the
+        # same bucket as a broken selector.
+        logger.debug("typeahead did not appear: %s", type(exc).__name__)
+
+    for selector in TYPEAHEAD_OPTION_SELECTORS:
+        try:
+            out["per_selector"][selector] = await page.locator(selector).count()
+        except Exception:  # noqa: BLE001 - an invalid selector is reported as -1
+            out["per_selector"][selector] = -1
+    out["total"] = max([0] + [n for n in out["per_selector"].values() if n > 0])
+
+    try:
+        out["matches"] = await page.locator(out["selector"]).count()
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+
+    # THE CENSUS, TAKEN ON EVERY READING AND NOT ONLY ON A REFUSAL. It costs
+    # one locator count per candidate and presses nothing, and taking it
+    # unconditionally means the PROCEEDING case is measured too -- otherwise
+    # the only shape ever recorded would be the shape that failed, which is
+    # how a family of instruments ends up knowing nothing about success.
+    out["pattern_census"] = await read_typeahead_pattern_census(page, needle)
+    return out
+
+
+#: THE RECIPIENT ID INSIDE A MESSAGE BUTTON'S HREF.
+#:
+#: Captured, not guessed: ``tests/fixtures/profile_views_analytics.html`` is a
+#: sanitised freeze of the Who's-Viewed-Me page, and every row that offers a
+#: Message button draws it as an anchor into the compose surface carrying the
+#: viewer's member id twice -- once bare, once inside a profile urn.
+RECIPIENT_ID_HREF = r"[?&]recipient=([A-Za-z0-9_-]{1,64})"
+
+#: How far up from a Message button to look for the person link that names the
+#: same row. Small, because a row is small: past this the walk leaves the row
+#: and the next person link belongs to somebody else.
+#:
+#: THE HOP CAP WAS NEVER THE THING THAT KEPT THE WALK INSIDE THE ROW, and that
+#: was MEASURED on 2026-09-04 rather than reasoned about. A Message control
+#: with no person row of its own -- a promo block offering to message a
+#: recruiter -- climbed TWO hops, reached ``<main>``, and was attributed to the
+#: FIRST person on the page: a stranger's identifier on somebody else's row,
+#: arriving through the slug join rather than around it. Two hops is well
+#: inside a budget of eight, so no cap could have stopped it.
+#:
+#: WHAT STOPS IT IS CONTAINMENT, and the rule is not invented here: it is the
+#: one ``rowOf`` in :data:`HARVEST_LINKED_CARDS_JS` already runs and has run on
+#: every surface this package reads -- ``if (keysWithin(node).size > 1) break``.
+#: An ancestor holding MORE THAN ONE distinct person is not this button's row;
+#: it is the container holding everybody's. The two walks now stop on the same
+#: condition, which is what stops them disagreeing about where a row ends.
+RECIPIENT_ROW_HOPS = 8
+
+RECIPIENT_IDS_JS = """
+(cfg) => {
+  const personRe = new RegExp(cfg.personPattern);
+  const recipientRe = new RegExp(cfg.recipientPattern);
+  const out = [];
+  let buttons = 0;
+  for (const anchor of Array.from(document.querySelectorAll('a[href]'))) {
+    const href = anchor.getAttribute('href') || '';
+    const found = href.match(recipientRe);
+    if (!found) continue;
+    buttons += 1;
+    // WALK UP FOR THE ROW, then find the person link inside it. Anchoring on
+    // the message button and climbing is the only direction that works: the
+    // person link and the button are SIBLING subtrees, so neither contains
+    // the other.
+    let node = anchor;
+    let slug = '';
+    let hops = 0;
+    let leftTheRow = false;
+    while (node && hops < cfg.maxHops && !slug) {
+      node = node.parentElement;
+      hops += 1;
+      if (!node || !node.querySelectorAll) continue;
+      // DISTINCT PEOPLE, not the first link found. This is rowOf's own stop
+      // condition (keysWithin(node).size > 1) and it is what keeps the climb
+      // inside the row: an ancestor holding two different people is the
+      // container holding everybody, so this button's row ended below it and
+      // the id is UNATTRIBUTABLE rather than the first person's.
+      const keys = new Set();
+      for (const link of Array.from(node.querySelectorAll('a[href]'))) {
+        const person = (link.getAttribute('href') || '').match(personRe);
+        if (person) { keys.add(person[1]); }
+      }
+      if (keys.size > 1) { leftTheRow = true; break; }
+      if (keys.size === 1) { slug = Array.from(keys)[0]; }
+    }
+    out.push({
+      slug: slug,
+      recipient: found[1],
+      hops: hops,
+      left_the_row: leftTheRow
+    });
+  }
+  return {rows: out, buttons: buttons};
+}
+"""
+
+
+async def read_recipient_ids(page: Any) -> dict[str, Any]:
+    """Member ids off the Message buttons already drawn on this page.
+
+    ZERO EXTRA PAGE LOADS. This reads the page a caller has already opened --
+    the Who's-Viewed-Me analytics surface draws a Message button per row that
+    offers one, and the id has been on screen the whole time. The
+    link-anchored harvest beside this one is anchored on the PERSON link and
+    discards the button, so the id was being thrown away rather than being
+    unavailable.
+
+    **THE VALUES IT RETURNS ARE IDENTIFIERS AND THEY ARE DATA, NOT OUTPUT.**
+    A member id names a real person as surely as their name does. Nothing here
+    logs one, and nothing that consumes this may print one -- the id travels to
+    a caller and stops there. That is why this function has no ``logger`` line
+    at all: the cheapest way not to log an identifier is to have nowhere that
+    does.
+
+    ABSENT IS NOT EMPTY, AND THE PAGE HAS THREE STATES RATHER THAN TWO. The
+    obvious model is "named rows have an id, anonymous rows do not", and the
+    captured page refutes it: of four named viewers, only TWO carry a Message
+    button. The others offer Connect or Follow instead, because LinkedIn draws
+    the action the relationship allows. So a row can be named and still have no
+    id, which is a fact about the connection rather than about visibility.
+
+    A caller therefore gets ``slug`` and ``recipient`` per BUTTON, and joins
+    onto its own rows by slug. Rows with no button simply do not appear here --
+    they must not be given an empty id, because "" and "no button" would then
+    be the same value and this package has already lost measurements to
+    exactly that collapse.
+
+    ``slug`` MAY BE EMPTY, and that is a different absence again: it means the
+    walk found a Message button and could not say WHOSE it is. An
+    unattributable id is reported with an empty slug rather than dropped,
+    because a caller silently receiving fewer ids than the page has buttons
+    would have no way to notice.
+
+    ``left_the_row`` SEPARATES THE TWO WAYS THAT HAPPENS, and it exists
+    because the second one used to produce a WRONG ANSWER rather than an empty
+    slug. Measured 2026-09-04 on a page carrying a promo Message control with
+    no person row of its own: the climb reached the list container in two hops
+    and attributed that id to the FIRST person on the page. ``true`` means the
+    climb reached an ancestor holding more than one distinct person and
+    stopped -- this control has no row. ``false`` with an empty slug means it
+    ran out of hops instead, which is a row deeper than the budget and a
+    different repair entirely.
+    """
+    out: dict[str, Any] = {"rows": [], "buttons": 0, "error": None}
+    try:
+        data = await page.evaluate(  # readonly-ok
+            RECIPIENT_IDS_JS,
+            {
+                "personPattern": PERSON_HREF,
+                "recipientPattern": RECIPIENT_ID_HREF,
+                "maxHops": RECIPIENT_ROW_HOPS,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["buttons"] = int((data or {}).get("buttons") or 0)
+    for row in (data or {}).get("rows") or []:
+        out["rows"].append(
+            {
+                "slug": str(row.get("slug") or ""),
+                "recipient": str(row.get("recipient") or ""),
+                "hops": int(row.get("hops") or 0),
+                # WHY the slug is empty, which is a different question from
+                # whether it is. An empty slug because the climb ran out of
+                # hops means the row is deeper than the budget; an empty slug
+                # because the climb LEFT THE ROW means this control has no row
+                # of its own. The first wants a bigger budget and the second
+                # must never get one.
+                "left_the_row": bool(row.get("left_the_row")),
+            }
+        )
+    return out
+
+
+async def read_compose_send_state(page: Any) -> dict[str, Any]:
+    """The Send control: how many, and whether the one is enabled.
+
+    ``Send`` is measured DISABLED on an empty composer, which is the same
+    observable transition ``publish_post``'s gate rests on. Counted rather
+    than assumed at one, because more than one control named ``Send`` would
+    make pressing either a choice by position.
+    """
+    out: dict[str, Any] = {
+        "controls": 0,
+        "enabled": None,
+        "textboxes": 0,
+        "error": None,
+    }
+    try:
+        control = page.locator(compose_send_selector())
+        out["controls"] = int(await control.count())
+        out["textboxes"] = int(
+            await page.locator(compose_body_selector()).count()
+        )
+        if out["controls"] == 1:
+            out["enabled"] = bool(await control.first.is_enabled())
+    except Exception as exc:  # pragma: no cover - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+    return out
+
+
+def comment_editor_selector() -> str:
+    """The contenteditable a comment's text is typed into. NO ARGUMENT."""
+    return 'div[role="textbox"][aria-label="' + COMMENT_EDITOR_LABEL + '"]'
+
+
+def comment_submit_selector(name: str) -> str:
+    """A selector for the comment submit, by a name MEASURED AFTER a fill.
+
+    THE ONE SELECTOR BUILDER HERE WHOSE NAME IS NOT A MODULE CONSTANT, and it
+    is guarded hardest for exactly that reason. ``post_submit_selector`` and
+    ``reaction_control_selector`` take no argument because their labels are
+    measured and frozen; this control's label CANNOT be frozen, because it
+    does not exist until a fill lands and nobody has ever seen it.
+
+    So the name arrives from ``writes._comment_submit_gate``, which obtained it
+    by diffing a SHAPED census -- meaning any label carrying a member's
+    identity has already had it substituted out and will fail the check below
+    on its ``<`` bracket. That is the intended path, not an edge case: a
+    control this server cannot name without naming a person is one it does not
+    press.
+
+    NOT ROUTED THROUGH :func:`named_role_selector` for the reason
+    ``post_submit_selector`` gives -- that function refuses any role outside
+    ``INPUT_TYPE_ROLES``, and widening it so one caller could use it would
+    trade a measured restriction for a convenience that every other caller
+    would inherit.
+    """
+    text = str(name or "").strip()
+    if not text or any(bad in text for bad in _SELECTOR_UNSAFE):
+        raise ExtractionFailedError(
+            "refusing to build a comment submit selector from this name: it "
+            "is empty or carries a character that would end the selector's "
+            "own quoting. A shaped name containing '<' means the label held "
+            "somebody's identity, and that is a refusal rather than a bug."
+        )
+    return 'role=button[name="' + text + '"s]'
+
+
+async def read_comment_surface(page: Any) -> dict[str, Any]:
+    """The editor, and a SHAPED NAME CENSUS of every control on the page.
+
+    BUILT ON ``read_surface_census`` RATHER THAN BESIDE IT, because that
+    function is the only caller of ``CENSUS_JS`` and is where a raw accessible
+    name is discarded. This surface is the one place in the package where
+    reading names matters most and is most dangerous: LinkedIn writes OTHER
+    MEMBERS' NAMES into the labels here -- ``View more options for <member>'s
+    comment.`` is measured on it -- so a reader that returned raw names would
+    pull third-party identity into this process to build a selector with.
+
+    Everything below is therefore a SHAPE. A name that carried somebody's
+    identity comes back with it substituted out, which also means it comes
+    back UNUSABLE AS A SELECTOR -- and that is the correct outcome, not a
+    limitation to work around.
+
+    WHY A WHOLE-PAGE CENSUS AND NOT A SCOPED ONE. The comment apparatus has no
+    container to scope to: the editor, the ``Comment`` control and all four
+    ``Reply`` buttons report container ``none``, measured. The only
+    container-bearing controls on that permalink are two ad dialogs and the
+    ad-report form. So there is nothing to narrow to, and the delta this feeds
+    is over the whole page with that noise named rather than hidden.
+
+    ``names`` WAS PERMANENTLY ``{}``, FOUND AND FIXED 2026-09-04. This body
+    read::
+
+        for row in census.get("control_shapes", []):
+            name = str(row.get("shape") or "")
+            if not name: continue
+            counts[name] = counts.get(name, 0) + int(row.get("count") or 0)
+
+    against ``read_surface_census``, whose return keys are exactly
+    ``counts``, ``controls``, ``controls_read`` and ``truncated`` -- there
+    has never been a ``control_shapes`` key at that layer, so the loop
+    iterated ``[]`` on every call, on every page, forever. It would have
+    stayed wrong even keyed correctly: ``read_surface_census`` returns ONE
+    RECORD PER CONTROL and none of them carries a ``count`` field, so
+    ``row.get("count") or 0`` summed zeros. THE FIX reads
+    ``census.get("controls")`` -- the key that actually exists -- and counts
+    OCCURRENCES, one per record, which is what a census over individual rows
+    means.
+
+    WHY THIS DID NOT SHOW UP AS AN ERROR. With ``names`` stuck at ``{}``,
+    ``writes._comment_submit_gate`` computed ``arrived`` as permanently
+    empty and refused ``2_nothing_arrived`` on every page, for a reason that
+    had nothing to do with LinkedIn -- and that refusal reads exactly like
+    the gate's OWN documented first-use refusal, so nothing about it looked
+    wrong. ``tests/test_comment_delta_gate.py`` could not have caught it
+    either: it monkeypatches this entire function with a fixed stand-in, so
+    the suite that exercises the gate never ran this body at all.
+
+    ``unnamed``, ADDED THE SAME DAY. A control whose shaped name is empty
+    still cannot become a selector -- that part of the old behaviour was
+    correct, and empty shapes are still skipped out of ``names`` -- but the
+    gate reading this census needs "nothing changed" to look different from
+    "something changed and this reader cannot name it", and a ``names`` dict
+    that silently drops both said the same thing about either. This is that
+    count.
+
+    ``menus`` AND ``menu_items``, ALSO ADDED 2026-09-04. ``CENSUS_CONTROL_
+    SELECTOR`` carries no menu role, so a ``[role="menu"]`` opened on this
+    surface was as invisible to a caller as the counting bug made everything
+    else -- except this gap is real, measured, and by design: see
+    :data:`CENSUS_JS`'s ``counts`` block for what closed it and why it is a
+    count rather than a widened selector.
+    """
+    out: dict[str, Any] = {
+        "editors": 0,
+        "names": {},
+        "unnamed": 0,
+        "controls_read": 0,
+        "menus": 0,
+        "menu_items": 0,
+        "error": None,
+    }
+    try:
+        out["editors"] = int(
+            await page.locator(comment_editor_selector()).count()
+        )
+        census = await read_surface_census(page)
+    except Exception as exc:  # pragma: no cover - defensive
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        logger.debug("comment surface unreadable: %s", out["error"])
+        return out
+    counts: dict[str, int] = {}
+    unnamed = 0
+    for row in census.get("controls", []):
+        name = str(row.get("shape") or "")
+        if not name:
+            unnamed += 1
+            continue
+        counts[name] = counts.get(name, 0) + 1
+    out["names"] = counts
+    out["unnamed"] = unnamed
+    out["controls_read"] = int(census.get("controls_read") or 0)
+    census_counts = census.get("counts") or {}
+    out["menus"] = int(census_counts.get("menus") or 0)
+    out["menu_items"] = int(census_counts.get("menu_items") or 0)
+    return out
+
+#: The reaction control, and the most informative string measured that day.
+#: MEASURED ``aria-label="Reaction button state: no reaction"``: count 3 on
+#: ``/feed/`` and count 8 on ``/in/me/``. Eleven controls, every one of them in
+#: the OFF state.
+#:
+#: LINKEDIN WRITES THE TOGGLE STATE INTO THE ACCESSIBLE NAME. That is the same
+#: convention as the follow control and the unfollow row, and it means the
+#: OFF-to-ON direction has a measured anchor. THE ON-STATE LABEL HAS NEVER
+#: BEEN SEEN, because nothing on either surface had been reacted to -- exactly
+#: the position ``unsave_job`` WAS in, and it gets the same answer: the missing
+#: half is not guessed.
+#:
+#: AND THE SAVE PAIR IS NOW THE WORKED EXAMPLE OF HOW IT GETS UNSTUCK, which
+#: is worth more here than the analogy was. Its ON label was measured on
+#: 2026-08-30 by a supervised write, and then RE-measured three times through a
+#: read-only route built so the measurement never had to be bought twice. The
+#: same shape applies here: one supervised reaction produces the ON label, and
+#: a reader that reports the reaction control's name off a page already open
+#: makes it re-measurable for nothing. Neither exists yet.
+REACTION_STATE_PREFIX = "Reaction button state:"
+REACTION_OFF_LABEL = "Reaction button state: no reaction"
+REACTION_CONTROL = 'button[aria-label^="Reaction button state:"]'
+
+
+def reaction_control_selector() -> str:
+    """The ONE control a reaction would press, on an item permalink.
+
+    TAKES NO ARGUMENT, AND THAT IS THE SAFETY PROPERTY RATHER THAN a
+    simplification. Every other selector builder in this module is GUARDED
+    because a caller supplies part of it -- a numeric job id, a company id, an
+    index. This one is assembled from a module constant and nothing else, so
+    there is no input to escape, no predicate to widen, and no way for a
+    caller to influence what gets clicked.
+
+    IT ANCHORS ON THE OFF LABEL, not on the state PREFIX. ``REACTION_CONTROL``
+    matches any toggle state and is the right thing for COUNTING; a click must
+    land only on a control measured to be in the state the action is valid
+    from, so it anchors on the exact name that means "no reaction" and matches
+    nothing once that has stopped being true. Pressing a control whose state
+    has changed under the gate is the one thing gate 5 exists to prevent.
+    """
+    return 'button[aria-label="' + REACTION_OFF_LABEL + '"]'
+
+#: The reaction PICKER, measured beside the toggle: ``aria-label="Open
+#: reactions menu"``, ``aria-expanded="false"``, count 3 and 8. Its contents
+#: have never been observed, so WHICH reactions exist is unknown.
+REACTIONS_MENU_LABEL = "Open reactions menu"
+
+#: The invitation control, and the finding that gives the invitation
+#: capability a route costing no badge. MEASURED on ``/in/me/`` 2026-08-30:
+#: 9 controls shaped ``"<redacted> to connect"``, tag button, name_source
+#: aria-label.
+#:
+#: THE PREFIX IS REDACTED AND THAT IS NOT A HOLE IN THE MEASUREMENT, it is the
+#: measurement working. LinkedIn writes the other person's NAME into this
+#: label and the census blanks a name before counting it. So the suffix is the
+#: whole of what may be known about this control without collecting a third
+#: party's identity, and a suffix is what a selector may be built from.
+INVITE_CONTROL_SUFFIX = " to connect"
+INVITE_CONTROL = 'button[aria-label$=" to connect"]'
+
+
+def invite_control_selector(index: int) -> str:
+    """A selector for ONE of the invitation controls, by its position.
+
+    GUARDED, like every other selector builder here that takes an argument.
+    ``index`` must be a real, non-negative ``int`` -- a bool is refused too,
+    because ``True`` is ``1`` in Python and a boolean arriving here means a
+    caller passed the wrong thing entirely.
+
+    POSITION, AND WHY THAT IS NOT "PICKING BY POSITION". This package refuses
+    to aim a write by position, and this selector is an index -- so the
+    distinction has to be exact. The index is not CHOSEN; it is the output of
+    :func:`writes.aim_invitation`, which returns one ONLY when the operator's
+    own needle matched exactly one control on the surface. Two matches erase
+    it rather than picking the first. So the position is a way of ADDRESSING
+    a control his word already selected, not a way of selecting one.
+
+    THE ANCHOR IS THE SUFFIX, NOT A NAME. These controls are labelled with
+    another person's name plus :data:`INVITE_CONTROL_SUFFIX`, and this server
+    does not read those names. Anchoring on the suffix keeps the selector free
+    of any third-party identity while still restricting it to controls that
+    are demonstrably invitations.
+    """
+    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+        raise ValueError(
+            "invite_control_selector needs a non-negative int index; a click "
+            "target is built from this string, so nothing else may reach it."
+        )
+    return INVITE_CONTROL + " >> nth=" + str(index)
+
+#: AIMING ONE OF THOSE NINE, AND THE REASON THIS IS A SCRIPT RATHER THAN A
+#: LOCATOR CHAIN. Every other reader in the block below deliberately injects
+#: nothing; this one injects, and the trade runs the other way here for one
+#: reason: A NAME THAT REACHES PYTHON CANNOT BE TAKEN BACK. It can reach an
+#: exception message, a log line, a cache key, a traceback, a rendered confirm
+#: block -- and no care downstream un-rings that. So the comparison happens
+#: INSIDE THE PAGE, where the label already lives, and what crosses back is
+#: arithmetic.
+#:
+#: WHAT GOES IN is a needle THE OPERATOR TYPED at call time, handed over as a
+#: script ARGUMENT rather than spliced into source -- so the script is a
+#: constant that ``test_readonly.py`` can read whole, and no caller string ever
+#: becomes executable text.
+#:
+#: WHAT COMES OUT IS THREE NUMBERS AND NOTHING ELSE: how many controls wear the
+#: suffix, how many of those contain the needle, and -- only when that is
+#: exactly one -- which position in the suffix-matched list it sits at. No
+#: label, no fragment of one, no href, not even truncated. The prefix of these
+#: labels has never been read by this server and is not read here either: the
+#: suffix is matched AS A SUFFIX with ``endsWith``, never by rebuilding a whole
+#: label from a prefix nobody has seen.
+#:
+#: ``index`` IS ``null`` AND NOT ``-1`` when there is no aim, deliberately. A
+#: sentinel integer is an index, and ``-1`` handed to Playwright's ``nth``
+#: means THE LAST CONTROL -- so the sentinel for "do not aim" would aim, at a
+#: stranger, which is the one failure this whole reader exists to prevent.
+INVITE_NEEDLE_JS = """
+(cfg) => {
+  const needle = String(cfg.needle).toLowerCase();
+  const nodes = document.querySelectorAll(cfg.selector);
+  let total = 0;
+  let matches = 0;
+  let index = null;
+  let only = null;
+  for (const node of nodes) {
+    const label = node.getAttribute('aria-label') || '';
+    // MATCHED AS A SUFFIX, and re-checked here even though cfg.selector is
+    // itself a suffix selector. The two predicates are written in different
+    // languages over the same fact, so a CSS engine that ever matched more
+    // loosely than endsWith would be narrowed by this line rather than
+    // followed by it.
+    if (!label.endsWith(cfg.suffix)) continue;
+    const position = total;
+    total += 1;
+    if (label.toLowerCase().indexOf(needle) !== -1) {
+      matches += 1;
+      // The FIRST match records where it sits; a SECOND erases the aim rather
+      // than keeping either. Choosing between two would be choosing by
+      // position, which is what the caller is refused for doing.
+      index = (matches === 1) ? position : null;
+      // THE LABEL RIDES THE SAME RULE AS THE INDEX, and it is erased by a
+      // second match for the same reason: it exists only to let him CHECK
+      // that the control his own word selected is the person he meant, and
+      // there is nothing to check if the word picked out two people.
+      only = (matches === 1) ? label : null;
+    }
+  }
+  // GATED ON THE CALLER ASKING, ON TOP OF matches === 1. Two independent
+  // conditions rather than one, because this is the only line in this script
+  // that can emit a third party's name and a single condition is a single
+  // edit away from always being true.
+  const reveal = (cfg.revealSingleMatch === true) && (matches === 1);
+  return {
+    total: total,
+    matches: matches,
+    index: index,
+    label: reveal ? only : null
+  };
+}
+"""
+
+#: The profile editors, MEASURED as ordinary anchors on ``/in/me/``
+#: 2026-08-30 -- each a single ``<a href>`` with an aria-label, count 1.
+#:
+#: THIS IS THE MEASUREMENT THAT REFUTES A SENTENCE THIS SERVER WAS SHIPPING.
+#: The live page carries 2 forms where every tracked profile fixture carries
+#: 0, and it carries these three anchors where the fixtures carry none. A
+#: profile editor IS url-addressed. See ``server._WHY_NOT_PERFORMED``, where
+#: the claim is narrowed to the one thing that survived rather than deleted.
+PROFILE_EDITOR_HREFS = (
+    "/edit/intro/",
+    "/edit/forms/summary/new/",
+    "/overlay/contact-info/",
+)
+
+async def _count_by_role(page, name):
+    """How many controls carry EXACTLY the accessible name ``name``.
+
+    ``get_by_role`` rather than a CSS selector because both controls this is
+    pointed at are named by their TEXT and not by an aria-label, and CSS
+    cannot match text. It injects nothing, so the read-only boundary is not
+    asked to grow an entry to accommodate a read.
+    """
+    try:
+        return int(await page.get_by_role("button", name=name, exact=True).count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("role count unreadable: %s: %s", type(exc).__name__, exc)
+        return 0
+
+
+async def _count_links_with(page, fragment):
+    """How many anchors carry ``fragment`` inside their href."""
+    try:
+        return int(await page.locator('a[href*="' + fragment + '"]').count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("href count unreadable: %s: %s", type(exc).__name__, exc)
+        return 0
+
+
+async def read_composer_surface(page: Any) -> dict[str, Any]:
+    """What this page offers for publishing, and what it does not.
+
+    ``editors`` is the field that decides the question. A LinkedIn composer is
+    a ``contenteditable`` node; the census measured ZERO of them on the first
+    render of both the feed and the profile, so a non-zero count here would be
+    a finding and a zero is the expected reading. Either way it is taken
+    afresh rather than asserted from a run in August.
+    """
+    out: dict[str, Any] = {
+        "composer_controls": await _count_by_role(page, COMPOSER_CONTROL_NAME),
+        "article_routes": await _count_links_with(page, ARTICLE_COMPOSER_HREF),
+        "sharebox_routes": await _count_links_with(page, SHAREBOX_COMPOSER_HREF),
+        "editors": 0,
+    }
+    try:
+        out["editors"] = int(await page.locator("[contenteditable]").count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("editor count unreadable: %s: %s", type(exc).__name__, exc)
+    return out
+
+
+#: Below this many elements a LinkedIn page has not rendered at all.
+#:
+#: AN ABSOLUTE FLOOR RATHER THAN A RATIO, because a ratio needs a settled
+#: baseline and no thread has earned one. The census's two observed half-renders
+#: came in at roughly a QUARTER of their settled counts -- 67 of 233 and 67 of
+#: 255 -- so even a badly truncated LinkedIn page still draws dozens of
+#: elements. A page under this figure has not arrived in any sense worth
+#: arguing about.
+#:
+#: IT CANNOT CATCH THE INTERESTING CASE and says so: a page that renders 200
+#: elements of a 900-element thread passes this floor and is still incomplete.
+#: That is what a settled baseline would catch, and earning one takes two
+#: agreeing readings nobody has taken.
+THREAD_RENDERED_FLOOR = 50
+
+
+async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
+    """What an OPEN CONVERSATION offers for replying, counted and nothing else.
+
+    WHY THIS SURFACE AT ALL. Addressing a NEW message is the hard problem: by
+    name is a measured dead end, and by identifier needs an id this server can
+    only get from a page that happens to be showing one. **A REPLY NEEDS NO
+    ADDRESS.** The conversation already exists, the recipient is already in it,
+    and the whole recipient-gate apparatus has nothing to decide. The capability
+    census called replying the most job-hunt-relevant messaging action in the
+    package, and the economics agree: answering an InMail he was sent is free
+    where sending one spends a credit.
+
+    **EVERY FIELD IS A COUNT OR A BOOLEAN AND THAT IS NOT FASTIDIOUSNESS
+    HERE.** A conversation page is a third party's words, in full, addressed to
+    him privately -- the single richest surface in this package. There is no
+    field on this reader that could carry a message, a name or a thread id, so
+    there is nothing for a caller to leak and nothing for a traceback to
+    print. The same discipline the compose readers use, on the surface that
+    most needs it.
+
+    WHAT THE FIELDS ARE FOR:
+
+    * ``editors`` / ``textboxes`` -- the reply box. Two spellings because a
+      LinkedIn editor has been measured as both a ``contenteditable`` and a
+      ``div[role=textbox]``, and a reader that knew only one would report zero
+      on a page that has the other.
+    * ``send_controls`` / ``send_disabled`` -- the transition ``publish_post``
+      and ``send_message`` both gate on. An empty box draws ``Send`` DISABLED,
+      so a fill that lands is observable without reading what was typed.
+    * ``recipient_boxes`` -- **EXPECTED TO BE ZERO, AND THE ZERO IS THE
+      POINT.** A thread has nobody to choose, so a recipient combobox here
+      would mean this is not the surface it looks like. It is the one field
+      whose non-zero reading would refute the whole approach.
+
+    NOTHING IS ASSERTED FROM A PREVIOUS RUN. Every number is taken afresh, and
+    a caller that gets zeroes everywhere is looking at a page this reader
+    cannot speak for rather than a conversation with no reply box.
+    """
+    out: dict[str, Any] = {
+        "elements": 0,
+        "settle": "unread",
+        "settle_why": "",
+        "editors": 0,
+        "editable_true": 0,
+        "textboxes": 0,
+        "textareas": 0,
+        "text_inputs": 0,
+        "send_controls": 0,
+        "send_disabled": None,
+        "recipient_boxes": 0,
+        "error": None,
+    }
+    try:
+        # THE DENOMINATOR, AND IT IS WHY THIS READER'S ZEROS MEANT NOTHING
+        # UNTIL NOW.
+        #
+        # On 2026-09-03 this reported editors 0, textboxes 0, send_controls 0
+        # and recipient_boxes 0 on a live thread, and that reading was passed
+        # on as "a thread is addressless". **It established nothing.** On a
+        # page that has not rendered, every count reads zero -- including the
+        # one the whole route turned on. Same zero, two meanings, and no field
+        # telling them apart.
+        #
+        # THE INSTRUMENT ALREADY EXISTED ON A SIBLING. The surface census
+        # carries a settle check, and on the same day it said in its own
+        # output "read it as a reading of a page that had not arrived rather
+        # than as a reading of the page" -- and proved the point: a SETTLED
+        # post-composer census reads contenteditable 2, while a HALF-RENDERED
+        # profile-editor census reads 0. The zeros were never about LinkedIn.
+        # This reader simply never carried the check its sibling had.
+        out["elements"] = int(await page.locator("*").count())
+        if out["elements"] < THREAD_RENDERED_FLOOR:
+            out["settle"] = "unrendered"
+            out["settle_why"] = (
+                "%d elements, under the %d floor. A LinkedIn page draws "
+                "hundreds; this one had not arrived, so EVERY count below is "
+                "uninterpretable rather than zero."
+                % (out["elements"], THREAD_RENDERED_FLOOR)
+            )
+        else:
+            # NO BASELINE, AND THAT IS STATED RATHER THAN GUESSED. The census
+            # earns a settled figure by reading a surface twice and having the
+            # readings agree; nobody has done that for a thread. So this says
+            # the page is plainly rendered and refuses to claim it is COMPLETE
+            # -- which is the difference between "not obviously broken" and
+            # "trustworthy", and only the first is measured.
+            out["settle"] = "rendered_no_baseline"
+            out["settle_why"] = (
+                "%d elements, so the page rendered. No settled baseline has "
+                "been earned for a thread -- two agreeing readings would earn "
+                "one -- so a zero below is CREDIBLE and not CONFIRMED."
+                % out["elements"]
+            )
+
+        out["editors"] = int(await page.locator("[contenteditable]").count())
+        # SPLIT FROM THE BARE ATTRIBUTE, because `[contenteditable]` also
+        # matches `contenteditable="false"` -- an editor that refuses input
+        # would otherwise be counted as an editor.
+        out["editable_true"] = int(
+            await page.locator('[contenteditable="true"]').count()
+        )
+        out["textboxes"] = int(await page.locator('[role="textbox"]').count())
+        # THE MECHANISM NO EDITOR-READER IN THIS PACKAGE LOOKED FOR. The
+        # settled post-composer census draws a `textarea` alongside its
+        # contenteditable nodes, and every reader here counted neither. Half a
+        # hypothesis that turned out true on its own terms even though page
+        # rendering, not selector coverage, was what produced the zeros.
+        out["textareas"] = int(await page.locator("textarea").count())
+        out["text_inputs"] = int(
+            await page.locator('input[type="text"]').count()
+        )
+        out["recipient_boxes"] = int(
+            await page.locator(
+                '[aria-label="' + MESSAGE_RECIPIENT_LABEL + '"]'
+            ).count()
+        )
+        send = page.locator(compose_send_selector())
+        out["send_controls"] = int(await send.count())
+        if out["send_controls"] == 1:
+            # TRI-STATE ON PURPOSE. None means "not asked", which is a
+            # different fact from False. Asking a control that does not
+            # uniquely exist would be reading whichever one Playwright
+            # resolved first.
+            out["send_disabled"] = bool(await send.first.is_disabled())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+    return out
+
+
+async def read_reaction_surface(page: Any) -> dict[str, Any]:
+    """The reaction and comment controls on this page, and the states worn.
+
+    ``labels`` holds the DISTINCT accessible names found, sorted, each put
+    through ``shape.census_shape`` on the way out. Not decoration: if LinkedIn
+    ever writes a member's name into this label -- which it already does on
+    the neighbouring ``Hide post by <name>`` control -- an unshaped read would
+    publish it into a confirm block. The measured label carries no name and
+    survives shaping unchanged, so nothing is lost while that stays true.
+    """
+    out: dict[str, Any] = {
+        "controls": 0,
+        "off_state": 0,
+        "menus": 0,
+        "comment_controls": await _count_by_role(page, COMMENT_CONTROL_NAME),
+        "permalinks": await _count_links_with(page, "/feed/update/"),
+        "labels": [],
+    }
+    try:
+        controls = page.locator(REACTION_CONTROL)
+        out["controls"] = int(await controls.count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("reaction controls unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    try:
+        out["menus"] = int(
+            await page.locator(
+                'button[aria-label="' + REACTIONS_MENU_LABEL + '"]'
+            ).count()
+        )
+        out["off_state"] = int(
+            await page.locator(
+                'button[aria-label="' + REACTION_OFF_LABEL + '"]'
+            ).count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("reaction menus unreadable: %s: %s", type(exc).__name__, exc)
+    seen = set()
+    for index in range(min(int(out["controls"]), CENSUS_MAX_CONTROLS)):
+        try:
+            label = await controls.nth(index).get_attribute("aria-label")
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            continue
+        shaped = shape.census_shape(str(label or "").strip())
+        if shaped:
+            seen.add(shaped)
+    out["labels"] = sorted(seen)
+    return out
+
+
+async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
+    """Which profile editors this page addresses by url. COUNTS ONLY.
+
+    No href is returned and no accessible name is read. The addresses carry
+    his own member slug, the question being asked is "is there an anchor at
+    all", and a count answers it without carrying a slug into a tool result.
+    """
+    out: dict[str, Any] = {"forms": 0, "editors": {}}
+    for fragment in PROFILE_EDITOR_HREFS:
+        out["editors"][fragment] = await _count_links_with(page, fragment)
+    try:
+        out["forms"] = int(await page.locator("form").count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("form count unreadable: %s: %s", type(exc).__name__, exc)
+    return out
+
+
+async def read_invitation_surface(
+    page: Any,
+    needle: Optional[str] = None,
+    *,
+    reveal_single_match: bool = False,
+) -> dict[str, Any]:
+    """How many invitation controls this page draws, and -- if asked -- which.
+
+    STILL NUMBERS AND NOTHING ELSE, WHICHEVER QUESTION IS ASKED. This control's
+    accessible name IS another person's name. A reader that returned the label
+    would be collecting third-party identity in order to populate a confirm
+    block, which is the cost this whole family of rulings refuses to pay. So
+    the label is never returned -- not shaped, not truncated, not dropped after
+    a peek in Python.
+
+    ``needle`` IS THE OPERATOR'S OWN WORD, NOT A STORED ONE. Ruled 2026-08-31:
+    this server may RECEIVE a person's identity per call and must not persist
+    it. That is why the needle is a parameter and not a field: it arrives, it
+    is handed into the page, and it leaves with the frame. It is not written
+    into the result, not into a log line, and not into any exception message
+    raised below.
+
+    WHY THE COMPARISON HAPPENS IN THE PAGE. It is what makes "never stored"
+    ENFORCEABLE rather than promised. Doing it in Python would require the
+    label here first, and a name that reaches this process can reach a
+    traceback, a cache key or a rendered block, where no downstream care
+    retrieves it. See :data:`INVITE_NEEDLE_JS`.
+
+    THE THREE FIELDS, and the difference between two of them is the whole
+    aiming rule:
+
+    * ``controls`` -- how many controls wear :data:`INVITE_CONTROL_SUFFIX`.
+    * ``matches`` -- ``None`` when NO needle was asked for, which is a
+      different answer from ``0``. Zero means the question was put and nobody
+      on this surface carries that word; ``None`` means nobody asked.
+    * ``index`` -- the position within the suffix-matched list, set ONLY when
+      ``matches`` is exactly 1. Two matches erase it rather than picking one.
+
+    AN EMPTY NEEDLE IS NOT A NEEDLE. A blank string is a substring of every
+    label, so passing one through would report a match on all nine controls --
+    true, useless, and indistinguishable from a real ambiguity. It is treated
+    as "nothing was asked" instead, so the two honest answers stay separable
+    and no branch silently matches everybody.
+    """
+    out: dict[str, Any] = {
+        "controls": 0,
+        "matches": None,
+        "index": None,
+        # THE ONE LABEL, and ``None`` unless the caller ASKED for it AND the
+        # needle picked out exactly one control.
+        #
+        # ADMITTED 2026-08-31, and the ruling turned on a distinction worth
+        # keeping in view: loading a stranger's PROFILE stays refused because
+        # it EMITS -- linkedin_who_viewed_me measures the receiving end, so
+        # the cost lands on somebody who did not agree to it. Reading one
+        # accessible name off a page already rendered on HIS OWN profile emits
+        # NOTHING. Nobody is notified, no record is created, and the person is
+        # not made aware. The cost to the third party is nil.
+        #
+        # AND HE ALREADY KNOWS THE NAME -- he supplied the needle. Reading the
+        # label back is not disclosing a stranger to him; it confirms that the
+        # control his own word uniquely selected belongs to the person he
+        # meant. That is verification of his input, which is the opposite of
+        # collection.
+        "label": None,
+    }
+    wanted = "" if needle is None else str(needle).strip()
+    if not wanted:
+        try:
+            out["controls"] = int(await page.locator(INVITE_CONTROL).count())
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("invite controls unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    cfg = {
+        "selector": INVITE_CONTROL,
+        "suffix": INVITE_CONTROL_SUFFIX,
+        "needle": wanted,
+        "revealSingleMatch": bool(reveal_single_match),
+    }
+    try:
+        reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok
+    except Exception as exc:  # pragma: no cover - defensive
+        # THE EXCEPTION IS NOT STRINGIFIED HERE, and every other reader in this
+        # module does stringify its own. The needle was handed to that call;
+        # a driver that echoes an argument back inside its error text would be
+        # publishing the operator's word into a log through this line. The
+        # type alone says which failure happened and carries nothing.
+        logger.debug("invite needle unreadable: %s", type(exc).__name__)
+        return out
+    out["controls"] = int(reading.get("total") or 0)
+    out["matches"] = int(reading.get("matches") or 0)
+    position = reading.get("index")
+    out["index"] = None if position is None else int(position)
+    # THE THIRD GATE, IN PYTHON, over the two already applied in the page.
+    # Three conditions rather than one on the line that can carry a name, and
+    # they are written in two different languages so that a single edit
+    # cannot open all of them.
+    label = reading.get("label")
+    if reveal_single_match and out["matches"] == 1 and isinstance(label, str):
+        out["label"] = label
+    return out
+
+
+async def read_messaging_badge(page: Any) -> dict[str, Any]:
+    """The messaging nav badge, read WITHOUT opening messaging.
+
+    This is the whole of what the send-a-message gate is allowed to look at,
+    and the restraint is the design rather than a limitation of it. Loading
+    /messaging/ is MEASURED to redirect into one specific conversation of
+    LinkedIn's choosing and to reset this very badge -- so a gate that opened
+    it in order to describe it would spend, on a stranger and on his own
+    unread count, exactly what it is supposed to be warning him about.
+
+    The nav link is present on every signed-in page. Its accessible name
+    carries the count LinkedIn would consume: measured 2026-08-30 as
+    ``Messaging, 0 new notifications`` on both the feed and the profile. The
+    label is shaped on the way out for the usual reason -- it is a nav label
+    today and nothing guarantees it stays one.
+    """
+    out: dict[str, Any] = {"links": 0, "label": None}
+    try:
+        links = page.locator('a[href*="/messaging/"]')
+        out["links"] = int(await links.count())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("messaging link unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    if out["links"] < 1:
+        return out
+    try:
+        label = await links.first.get_attribute("aria-label")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("messaging label unreadable: %s: %s", type(exc).__name__, exc)
+        return out
+    out["label"] = shape.census_shape(str(label or "").strip()) or None
+    return out
+
+
+#: THE PENDING-INVITATION BADGE, and every part of this aim is measured rather
+#: than guessed -- which matters because the obvious spelling is not available.
+#:
+#: WHAT WAS MEASURED, from this repository's own audit:
+#:
+#:   * ``_audit/2026-08-31-linkedin-perform.md:1208`` -- the complete numeric
+#:     control inventory of one page lists ``..., N new notification(s)`` as an
+#:     ``a``/``button`` shape occurring FIVE times: the nav badges. The TAIL of
+#:     the label is the measured part.
+#:   * ``_audit/2026-08-31-linkedin-lift.md:174`` --
+#:     ``<redacted>, 0 new notifications   (mynetwork, both surfaces)``. The
+#:     mynetwork badge was read on ``/feed/`` AND on ``/in/me/``, and **its
+#:     leading word is redacted in the audit**.
+#:
+#: SO THE PREFIX IS NOT AVAILABLE TO AIM WITH, and writing one would be
+#: inventing a string the record deliberately does not contain. The href is
+#: what identifies WHICH badge this is, and the label tail is what identifies
+#: it as a badge at all -- so the aim is the conjunction of the two, and the
+#: label's own leading word is never matched, never stored and never needed.
+#:
+#: ``read_messaging_badge`` beside this one aims at ``a[href*="/messaging/"]``
+#: and takes ``.first``. This does NOT, and the difference is deliberate: a
+#: page can draw several ``/mynetwork/`` links -- the nav item and any
+#: in-page link to the same surface -- so ``.first`` would be a choice by
+#: POSITION between candidates that are not interchangeable. Requiring the
+#: badge substring narrows the aim to the one control that carries a count,
+#: and the reader below refuses unless exactly one resolves.
+INVITATION_BADGE_TAIL = "new notification"
+
+#: THE HREF HALF OF THE AIM, AND THE TRAILING SLASH IS DELIBERATELY ABSENT.
+#:
+#: It was PRESENT until 2026-09-04 and the aim matched nothing on the live
+#: feed. Measured rather than reasoned about -- the two network controls the
+#: nav actually draws:
+#:
+#:     a  aria-label with a count   href="https://www.linkedin.com/mynetwork"
+#:     a  no aria-label at all      href=".../mynetwork/network-manager/newsletters/"
+#:
+#: **The badged one has NO trailing slash and the unbadged one does.** So the
+#: old aim resolved zero badge controls while reporting one mynetwork link --
+#: it had found the newsletters link and rejected it for carrying no label.
+#: The refusal said exactly that (``mynetwork_links=1``,
+#: ``links_carrying_a_count=0``), which is the only reason this was a
+#: five-minute diagnosis instead of a wrong conclusion: a bare "zero matched"
+#: would have read as "he has no pending invitations", and the badge was
+#: reading ONE at the time.
+#:
+#: SAME CLASS AS THE ``&amp;`` TRAP in tests/test_connections_reader.py --
+#: an instrument matching a spelling the page does not use, failing CLOSED and
+#: therefore looking like an absence rather than a miss.
+INVITATION_BADGE_HREF = "/mynetwork"
+
+
+def invitation_badge_selector() -> str:
+    """The mynetwork nav control that carries a count. NO ARGUMENT.
+
+    Both halves are constants measured on the live nav, so this takes nothing
+    from a caller and cannot be aimed at a person: there is no name in it.
+
+    The href needle matches the badged control AND its sub-pages, and the
+    LABEL half is what narrows it back to one: of the two network controls on
+    a live feed, only the badge carries a count.
+    """
+    return (
+        'a[href*="' + INVITATION_BADGE_HREF + '"]'
+        '[aria-label*="' + INVITATION_BADGE_TAIL + '"]'
+    )
+
+
+async def read_invitation_badge(page: Any) -> dict[str, Any]:
+    """The pending-invitation nav badge, read WITHOUT opening My Network.
+
+    THE POINT OF READING IT AT ALL. ``/mynetwork/`` is refused because opening
+    it is believed to consume this badge, and the connections sub-page was
+    admitted on the argument that listing people he already knows sends
+    nothing. "Believed" and "argued" are not measurements, so
+    ``linkedin_connections`` reads this before and after and refuses when it
+    cannot -- and this is the reader that makes that possible.
+
+    IT COSTS NO PAGE LOAD. The nav renders on every signed-in page, which is
+    the same property ``read_messaging_badge`` relies on: the badge was
+    measured through it on ``/feed/`` and on ``/in/me/`` alike. So the AFTER
+    reading can be taken on the connections page itself.
+
+    EXACTLY ONE OR IT REFUSES, and it reports BOTH counts when it does. A page
+    may draw several links to ``/mynetwork/``; only one of them carries a
+    count. Taking ``.first`` would be choosing by position between controls
+    that are not interchangeable, and answering "no badge" would be the
+    "zero matched" refusal this package has been told twice now says nothing.
+    So the failure carries ``links`` (every mynetwork link on the page) beside
+    ``badge_links`` (those that also carry the measured tail), and a reader of
+    the refusal can tell "the nav did not hydrate" from "the label changed
+    shape" without opening a browser.
+
+    THE LABEL IS SHAPED ON THE WAY OUT, the same route
+    ``read_messaging_badge`` takes, and the count is parsed from the SHAPED
+    string by :func:`shape.invitation_badge`. That ordering is deliberate: it
+    means the only string this process ever holds has already been through the
+    census shaper, so a nav label that one day carries a name carries it no
+    further than the page.
+    """
+    out: dict[str, Any] = {
+        # DEFAULTS THAT REFUSE. Every early return below leaves the label
+        # None, so a reader that could not run never looks like a badge at
+        # zero -- which is the distinction this whole measurement rests on.
+        "links": None,
+        "badge_links": None,
+        "label": None,
+        "error": None,
+    }
+    try:
+        out["links"] = int(
+            await page.locator(
+                'a[href*="' + INVITATION_BADGE_HREF + '"]'
+            ).count()
+        )
+        badges = page.locator(invitation_badge_selector())
+        out["badge_links"] = int(await badges.count())
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    if out["badge_links"] != 1:
+        return out
+    try:
+        label = await badges.first.get_attribute("aria-label")
+    except Exception as exc:  # noqa: BLE001 - reported, never raised
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["label"] = shape.census_shape(str(label or "").strip()) or None
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Job tracker readiness
+# ---------------------------------------------------------------------------
+
+#: A drawn row on the job tracker, as a SELECTOR rather than as the regex the
+#: harvest matches. The two are deliberately different instruments over the
+#: same fact: ``JOB_HREF`` decides which harvested card is a job, this decides
+#: whether any such card has ATTACHED yet, and only the second can be waited
+#: on. Measured over the two tracker captures -- zero hits on
+#: ``jobs_tracker_empty``, two on ``jobs_tracker_row`` (LinkedIn draws the row
+#: twice, once per layout, both anchored at the same job id).
+TRACKER_ROW_LINK = 'main a[href*="/jobs/view/"]'
+
+#: The ceiling the wait below may spend, matching its two siblings. It costs
+#: almost nothing on a tab that has drawn -- either half of the disjunction
+#: satisfies it at once -- and a tab that never resolves costs this much ONCE
+#: and then SAYS SO, rather than producing a confident claim about an empty
+#: list.
+TRACKER_LIST_TIMEOUT_MS = 10_000
+
+
+def tracker_list_selector() -> str:
+    """WHAT "THE LIST RESOLVED" MEANS, assembled from what ``shape`` owns.
+
+    A DISJUNCTION rather than one element, because the tracker has two
+    legitimate finished states and a reader that waits only for the first
+    hangs for the full bound on every empty tab.
+
+    The disjunction is EXACTLY the condition the refusal tests.
+    ``_read_tracker`` raises when it has neither rows NOR a corroborated empty
+    state, so this waits for whichever of those two arrives and returns the
+    moment one does. Waiting for the same condition the caller is about to
+    judge is the whole reason this cannot drift into waiting for something
+    irrelevant.
+
+    THE EMPTY HALF IS DERIVED FROM ``shape.TRACKER_EMPTY_MARKERS``, never
+    written down a second time -- the same discipline
+    ``writes.anchor_label_for`` runs on ``shape.SAVE_LABELS``. A marker added
+    there is waited on here automatically, and one renamed there cannot leave a
+    stale copy behind.
+
+    WHY THIS ANCHOR CAN FAIL IN THE STATE IT DETECTS, which is the law the
+    description anchor was chosen under. The tab strip is NOT part of it, and
+    that is measured rather than preferred: on 2026-08-30 the live Saved tab
+    reported LinkedIn's own count of 1 -- so the strip HAD drawn -- while no
+    row and no empty state had. An anchor on the strip would have reported
+    READY in precisely the state this wait exists to detect. The strip's own
+    links are ``/jobs-tracker/?stage=...``, which ``TRACKER_ROW_LINK`` does not
+    match.
+
+    AND THE EMPTY HALF SURVIVES THE SAME TEST, which matters because a marker
+    that LinkedIn always draws -- hidden until needed -- would satisfy this
+    wait on an undrawn page and be the same mistake in the other half. It does
+    not: the six live Saved-tab failures on 2026-08-30 each reported that no
+    empty state had been drawn, read out of the same ``<main>`` text
+    :func:`shape.tracker_empty_state` matches on. So the marker is absent in
+    exactly the state this wait must fail in.
+    """
+    parts = [TRACKER_ROW_LINK]
+    parts += ['main :text-is("%s")' % marker for marker in shape.TRACKER_EMPTY_MARKERS]
+    return ", ".join(parts)
+
+
+async def wait_for_tracker_list(page: Any) -> dict[str, Any]:
+    """Wait for the tracker's LIST to resolve. Three outcomes, none a verdict.
+
+    The third sibling of :func:`wait_for_save_control` and
+    :func:`wait_for_job_description`, and it keeps their contract exactly: ONE
+    bounded wait, ONE verdict, NO retry loop. Re-reading until the answer
+    changes is how a racy reader is made to LOOK reliable while staying racy.
+
+    THREE-VALUED, and the third value is not decoration:
+
+    ======================  ==================================================
+    ``attached`` is True    a job row or an empty state attached. It drew.
+    ``attached`` is False   the wait ran its full course and found neither.
+                            THIS IS A FINDING about the page.
+    ``attached`` is None    the readiness check ITSELF failed -- a locator
+                            error, a closed page. Evidence for NEITHER.
+    ======================  ==================================================
+
+    ``attached`` is the key name both siblings use for the same idea, so a
+    caller holding any of the three reads out through one timing note.
+
+    WHAT THIS DOES AND DOES NOT CLAIM TO FIX, because the difference is the
+    finding of the wave that added it. It closes the read-too-early failure on
+    this surface, which the posting page had and has since had fixed. It is NOT
+    established as the cause of the Saved tab failing on 2026-08-30: measured
+    that afternoon through this same loader, inside one ten-minute window,
+    Saved failed 6 of 6 while Draft succeeded 2 of 2 and Applied 2 of 2. A
+    settle race does not produce 6-0 against 4-0. That is why
+    :func:`read_tracker_evidence` ships beside this and why the refusal reports
+    both: the wait removes one candidate cause, the evidence names the next.
+
+    Never raises. The caller decides what to do with all three.
+    """
+    out: dict[str, Any] = {
+        # THE DEFAULT IS THE INSTRUMENT-FAILED VALUE, not the finding, so a
+        # path nobody thought about cannot arrive claiming to have measured
+        # LinkedIn.
+        "attached": None,
+        "waited_ms": 0,
+        "timeout_ms": int(TRACKER_LIST_TIMEOUT_MS),
+        "failure": None,
+        "why": "the readiness check did not run",
+    }
+    started = time.monotonic()
+    try:
+        await page.locator(tracker_list_selector()).first.wait_for(
+            state="attached", timeout=TRACKER_LIST_TIMEOUT_MS
+        )
+        out["attached"] = True
+        out["why"] = "a job row or an empty state attached"
+    except Exception as exc:  # noqa: BLE001 - classified below, never re-raised
+        # CLASSIFIED BY NAME, the same idiom wait_for_job_description runs and
+        # for the same reason: only a timeout is the page answering "not here"
+        # for the whole bounded period. Every other exception is this function
+        # failing to ask.
+        name = type(exc).__name__
+        out["failure"] = name
+        if name == "TimeoutError":
+            out["attached"] = False
+            out["why"] = (
+                "neither a job row nor an empty state attached within the "
+                "bound, so the list had not resolved"
+            )
+        else:
+            out["why"] = (
+                "the readiness check itself failed (%s), so this says nothing "
+                "about the page" % name
+            )
+            logger.debug("tracker readiness check failed: %s: %s", name, exc)
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
+#: Cap on the anchor walk below. The tracker draws each row twice and carries a
+#: tab strip and a footer, so a healthy page is tens of links; this exists so a
+#: page that has gone wrong cannot turn a diagnostic into a sweep.
+TRACKER_LINK_SCAN_LIMIT = 400
+
+
+async def read_tracker_evidence(page: Any) -> dict[str, Any]:
+    """WHAT THE TRACKER PAGE ACTUALLY HELD, counted and never quoted.
+
+    WHY THIS EXISTS, and it is the same lesson twice. The save refusal was
+    rebuilt on 2026-08-30 because it "made a correct decision and then threw
+    away the evidence for it"; the tracker refusal has the identical shape --
+    it reports LinkedIn's tab count and its own zero, and nothing whatever
+    about the page those two disagree over. So a reader cannot tell three
+    causes apart, and they want completely different responses:
+
+      * the list never drew            -> re-read; the readiness wait says so
+      * the list drew and is empty     -> an empty state nobody matched
+      * the list drew rows the harvest -> the row's link shape changed, and the
+        does not match                    fix is to re-measure, not to re-read
+
+    THE THIRD IS THE LIVE SUSPECT AND THIS REPO CANNOT CURRENTLY SEE IT. Every
+    tracker capture on disk is either the DRAFT tab carrying a row or the SAVED
+    tab carrying nothing; a POPULATED SAVED tab has never been captured, so the
+    shape of a saved row is unmeasured. ``rows_matching`` set against
+    ``anchors_total`` is what separates that case from a page that never drew:
+    many anchors and zero matching rows is a rename, few anchors is a page that
+    did not render.
+
+    COUNTS, NEVER TEXT. A tracker row names a company and a job, and this
+    package does not hand page bodies around for diagnostics -- the save sweep
+    took the same ruling, for the same reason.
+    """
+    out: dict[str, Any] = {
+        # UNREPORTED, NOT ZERO. Zero is a measurement; None is what an unread
+        # page says, and the note prints the two differently.
+        "main_present": None,
+        "main_chars": None,
+        "main_content_chars": None,
+        "anchors_total": None,
+        "rows_matching": None,
+        "rows_visible": None,
+        "scan_complete": False,
+    }
+    try:
+        out["main_present"] = int(await page.locator("main").count()) > 0
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker main presence unreadable: %s", type(exc).__name__)
+        return out
+
+    out["main_chars"] = len(await read_main_text(page))
+
+    # RENDERED TEXT AGAINST TEXT THAT IS MERELY PRESENT, and this pair is the
+    # measurement the 2026-08-30 refusal could not take. ``read_main_text`` is
+    # ``inner_text``, which returns what is RENDERED; ``textContent`` returns
+    # what is in the DOM whether painted or not. The whole harvest is built on
+    # ``innerText`` -- ``HARVEST_LINKED_CARDS_JS``'s ``record`` drops any row
+    # whose ``innerText`` is empty -- so a list drawn into the DOM and not
+    # painted is INVISIBLE to it while being plainly present to a selector.
+    #
+    # Those two readings being far apart is the signature of exactly that, and
+    # nothing else in this payload can distinguish it from a page that drew no
+    # text at all.
+    #
+    # ``locator.text_content()`` RATHER THAN AN INJECTED SCRIPT, deliberately:
+    # it is Playwright's own first-class read of ``textContent`` and needs no
+    # ``readonly-ok`` waiver, where the obvious one-line ``page.evaluate``
+    # would have spent one to learn the same integer. The waiver budget exists
+    # to make each injection reviewable, so an injection that a plain API call
+    # replaces does not get to spend it.
+    try:
+        content = await page.locator("main").first.text_content(
+            timeout=ELEMENT_READ_TIMEOUT_MS
+        )
+        out["main_content_chars"] = len(str(content or "").strip())
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker main content unreadable: %s", type(exc).__name__)
+
+    try:
+        anchors = page.locator("main a[href]")
+        total = int(await anchors.count())
+        out["anchors_total"] = min(total, TRACKER_LINK_SCAN_LIMIT)
+        out["rows_matching"] = int(await page.locator(TRACKER_ROW_LINK).count())
+        # OVER-LIMIT IS NOT A COMPLETE SCAN, said out loud rather than by a
+        # silent min(). That silent cap was itself a defect in the save sweep.
+        out["scan_complete"] = total <= TRACKER_LINK_SCAN_LIMIT
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker anchor scan failed: %s", type(exc).__name__)
+
+    # THE SAME QUESTION ASKED OF THE ROWS THEMSELVES. Its own try, because
+    # ``:visible`` is a Playwright pseudo-class rather than CSS and a future
+    # engine that rejects it must cost this ONE number rather than the four
+    # above it. rows_matching against rows_visible says whether the anchors a
+    # selector can see are anchors a reader could have read.
+    try:
+        out["rows_visible"] = int(
+            await page.locator(f"{TRACKER_ROW_LINK}:visible").count()
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("tracker visible scan failed: %s", type(exc).__name__)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The free reads -- what an already-open page carries and nobody was reading
+# ---------------------------------------------------------------------------
+#
+# EVERY READER BELOW COSTS ZERO NAVIGATIONS. Each is handed a page a tool has
+# ALREADY loaded for another reason, and reads what was on it the whole time.
+# That is the entire design constraint, and it is why none of them takes a
+# url, builds one, or may ever be given one.
+#
+# NOTHING HERE PRESSES ANYTHING. Two of the panels this section is about are
+# COLLAPSED behind a control on the posting -- measured 2026-09-03, one
+# occurrence each of ``Show match details`` and ``Show Premium Insights`` in
+# BOTH committed captures AND on a live posting, with ZERO occurrences of the
+# text they reveal. So "How you match" is not missing from the render; it is
+# one click away, and a click is a different permission from a read. The
+# reader REPORTS those controls by name instead, because naming what this
+# server will not do is worth more than five silent nulls.
+
+
+#: LinkedIn's own words on a job posting, each MEASURED rather than guessed.
+#: The capture each came from is named, because a furniture string is a fact
+#: about LinkedIn on a date and not a constant.
+#:
+#: ``tests/fixtures/job_detail_following_hydrated.html``::
+#:
+#:     <span>Promoted by hirer &#183; </span>
+#:     <span>Responses managed off LinkedIn</span>
+#:     <span role="img" aria-label="Verified job">
+#:
+#: The badge is the one to notice: the capability census recorded that this
+#: repository "prints no rendered badge wording anywhere" for it, and the
+#: wording was sitting in a committed fixture the whole time.
+JOB_PROMOTED_MARKER = "Promoted by hirer"
+JOB_RESPONSES_OFF_MARKER = "Responses managed off LinkedIn"
+JOB_VERIFIED_BADGE_NAME = "Verified job"
+
+#: The two controls that HIDE a panel rather than being one. Measured once
+#: each in both job captures and on the live posting, 2026-09-03.
+JOB_COLLAPSED_CONTROL_NAMES: tuple[str, ...] = (
+    "Show match details",
+    "Show Premium Insights",
+)
+
+#: The applicant-insights panel's heading, in BOTH spellings LinkedIn draws.
+#:
+#: THE SECOND SPELLING IS NOT A NICETY. ``job_detail_hydrated.html`` says
+#: "other applicants" and ``job_detail_following_hydrated.html`` says "others
+#: who clicked apply" -- and that second capture carries NO ``data-view-name``
+#: attribute at all, so a reader anchored on the view name reads one capture
+#: and not the other, while one anchored on the word "Applicant" misses the
+#: clicked-apply posting entirely. Both anchors are load-bearing, and both
+#: spellings were measured rather than anticipated.
+JOB_APPLICANT_PANEL_HEADINGS: tuple[str, ...] = (
+    "See how you compare to other applicants",
+    "See how you compare to others who clicked apply",
+)
+
+#: The metric and breakdown headings under that panel, again in both
+#: spellings. ``Applicants for this job`` carries its numbers as sibling lines
+#: under its own heading -- measured live 2026-09-03: five lines, being the
+#: heading, 7691, "Applicants", 200, "Applicants in the past day".
+JOB_APPLICANT_SECTION_HEADINGS: tuple[str, ...] = (
+    "Applicants for this job",
+    "Candidates who clicked apply",
+)
+JOB_SENIORITY_HEADINGS: tuple[str, ...] = (
+    "Applicant seniority level",
+    "Candidate seniority level",
+)
+JOB_EDUCATION_HEADINGS: tuple[str, ...] = (
+    "Applicant education level",
+    "Candidate education level",
+)
+
+#: The Premium company panel. Its heading NAMES THE EMPLOYER --
+#: "Exclusive Job Seeker Insights about <employer>" -- so it is matched on its
+#: stable prefix and republished with the employer replaced. A heading list
+#: that reprints an employer's name is a heading list that publishes one.
+JOB_COMPANY_PANEL_PREFIX = "Exclusive Job Seeker Insights about "
+JOB_COMPANY_PANEL_SHAPE = JOB_COMPANY_PANEL_PREFIX + "<company>"
+
+#: The other posting heading that carries a name -- the job title, inside a
+#: control label. Same treatment, same reason.
+JOB_ALERT_HEADING_PREFIX = "Set alert for similar jobs as "
+JOB_ALERT_HEADING_SHAPE = JOB_ALERT_HEADING_PREFIX + "<title>"
+
+#: Caps. A panel that grew a hundred rows would otherwise become the result.
+JOB_PANEL_MAX_LINES = 24
+JOB_PANEL_MAX_HEADINGS = 40
+
+
+def job_heading_shape(heading: str) -> str:
+    """A posting heading, with the two that carry a name reduced to a shape.
+
+    NOT A FILTER AND NOT A GUESS. Exactly two headings on this surface carry
+    an identity, both were measured, and both are matched on a stable prefix
+    LinkedIn writes itself. Everything else comes back verbatim, because a
+    reader that blanked headings it merely did not recognise would destroy the
+    tally that makes a null answer legible.
+    """
+    text = str(heading or "").strip()
+    if text.startswith(JOB_COMPANY_PANEL_PREFIX):
+        return JOB_COMPANY_PANEL_SHAPE
+    if text.startswith(JOB_ALERT_HEADING_PREFIX):
+        return JOB_ALERT_HEADING_SHAPE
+    return text
+
+
+def section_matching(
+    sections: list[dict[str, Any]], wanted: tuple[str, ...]
+) -> Optional[dict[str, Any]]:
+    """The first section whose heading is one of ``wanted``, else None."""
+    for section in sections:
+        if str(section.get("heading") or "").strip() in wanted:
+            return section
+    return None
+
+
+def lines_below(section: Optional[dict[str, Any]]) -> list[str]:
+    """A section's lines with its own heading dropped, capped.
+
+    The heading walker returns the heading as the first line of its own block,
+    so every caller here would otherwise have to strip it, and one of them
+    would forget.
+    """
+    if not section:
+        return []
+    heading = str(section.get("heading") or "").strip()
+    lines = [str(line).strip() for line in (section.get("lines") or [])]
+    lines = [line for line in lines if line and line != heading]
+    return lines[:JOB_PANEL_MAX_LINES]
+
+
+#: A line that is nothing but a share -- ``12%``. Anchored at both ends,
+#: because ``60% Entry level people applied for this job`` is a whole row and
+#: must not be treated as a dangling number.
+_BARE_SHARE = re.compile(r"^\d{1,3}%$")
+
+
+#: The attribution label LinkedIn draws INSIDE the Premium company panel,
+#: between the panel's own heading and its first row. Measured on both
+#: captures and live on 2026-09-03, always in that position.
+#:
+#: IT IS A HEADING, WHICH MAKES IT A TRAP. The section walk sees it as one, so
+#: it lands in the heading list and would end the positional read at the very
+#: first line -- returning an empty panel for a panel that is plainly there.
+#: It is a byline, not a section, so it is SKIPPED rather than stopped at.
+JOB_COMPANY_ATTRIBUTION = "Powered by Bing"
+
+#: Lines the company panel draws for a SCREEN READER rather than for a reader.
+#: Measured on both captures: a bare "Chart", an "End of interactive chart.",
+#: and two sentences describing the axes and their ranges. The one line worth
+#: keeping from that block is "Chart with 25 data points." -- the same shape
+#: the profile-views trend reader keeps -- so the drop is by exact match and
+#: by one prefix rather than by the word "chart".
+JOB_COMPANY_LINE_NOISE: tuple[str, ...] = ("Chart", "End of interactive chart.")
+JOB_COMPANY_LINE_NOISE_PREFIXES: tuple[str, ...] = ("The chart has ",)
+
+
+def lines_after_heading(
+    body: str,
+    heading: str,
+    stop_headings: set[str],
+    cap: int,
+    ignore: tuple[str, ...] = (),
+) -> list[str]:
+    """Lines that follow a heading in ``main``'s rendered text.
+
+    THE FALLBACK FOR A BLOCK THE SECTION WALK CANNOT SEE, and it exists
+    because of a real defect rather than as belt and braces.
+
+    ``READ_PROFILE_JS`` finds a heading's block by climbing from the heading
+    while each ancestor holds exactly ONE heading. That is the right rule and
+    it fails on this page for a reason no rule about headings could have
+    anticipated: the posting draws the education shares as a ``<tbody>`` with
+    four ``<tr>`` rows and **no ``<table>`` anywhere in the document**. An
+    HTML parser drops ``<tbody>`` and ``<tr>`` outside a table, so the
+    ``<h3>`` is reparented into a div that already holds the counts block and
+    the seniority block -- three headings in one parent -- and the climb
+    breaks at the first hop. The section comes back holding its heading and
+    nothing else.
+
+    THE ROWS WERE NEVER LOST. ``main``'s rendered text carries all four, in
+    order, directly under the heading; only the structural walk misses them.
+    So this reads them positionally out of the text, bounded by the NEXT
+    heading the same walk found -- which means the boundary comes from the
+    page's own headings rather than from a line count.
+
+    Used ONLY when the structural read returned nothing. A block the walk can
+    see is read the structural way, because position in a text dump is the
+    weaker anchor and is worth using exactly where the stronger one has been
+    measured to fail.
+    """
+    lines = [line.strip() for line in str(body or "").splitlines()]
+    try:
+        start = lines.index(heading.strip())
+    except ValueError:
+        return []
+    out: list[str] = []
+    for line in lines[start + 1:]:
+        if not line:
+            continue
+        # IGNORED BEFORE STOPPED AT, and the order is the whole of it. A byline
+        # LinkedIn draws as a heading INSIDE a panel would otherwise end the
+        # read at the panel's first line -- see JOB_COMPANY_ATTRIBUTION, which
+        # sits between the company panel's heading and its first row on both
+        # captures and live.
+        if line in ignore:
+            continue
+        if line in stop_headings:
+            break
+        out.append(line)
+        if len(out) >= cap:
+            break
+    return out
+
+
+#: A line that STARTS with a share, whether or not it carries its own text.
+_SHARE_PREFIX = re.compile(r"^\d{1,3}%")
+
+
+def share_rows(lines: list[str]) -> list[str]:
+    """The leading run of share rows, joined, stopping where the run stops.
+
+    TWO JOBS, AND THE SECOND IS THE ONE THAT WAS LEARNED RATHER THAN DESIGNED.
+
+    THE JOIN. The two breakdowns on this panel are drawn DIFFERENTLY, and a
+    reader that assumed one shape would silently halve the other. Measured on
+    both captures::
+
+        seniority   "60% Entry level people applied for this job"   one line
+        education   "12%" then "have a Bachelor's Degree"           two lines
+
+    So a share ALONE on its line is joined to the line after it, and a share
+    that already carries its own text is kept exactly as it is.
+
+    THE STOP. The positional fallback this feeds is bounded by the next
+    HEADING, and on both captures the next thing after the education rows is
+    ``Insights about the company`` -- a ``<strong>``, not a heading, so the
+    heading boundary does not see it and one line of the next panel came back
+    inside the education list. Measured, not foreseen: the first run returned
+    five rows where the page draws four.
+
+    A heading list could not have caught that and a longer list of furniture
+    strings is the wrong instrument -- the next such title would just be a
+    different string. What actually bounds the run is its own SHAPE: every
+    row of a share breakdown starts with a share, and the first line that
+    does not is not part of it. So the run ends there.
+
+    TRUNCATING RATHER THAN FILTERING, deliberately. Keeping only the lines
+    that match would silently drop a breakdown row drawn without a leading
+    share; stopping makes the same case show up as a SHORT list, which a
+    caller comparing against the page can see. A wrong length is legible and
+    a quietly filtered list is not.
+
+    A trailing bare share with nothing after it is kept on its own rather than
+    dropped -- a row this function cannot complete is still a row the page
+    drew.
+    """
+    out: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        following = lines[index + 1] if index + 1 < len(lines) else ""
+        if _BARE_SHARE.match(line):
+            if following and not _SHARE_PREFIX.match(following):
+                out.append("%s %s" % (line, following))
+                index += 2
+                continue
+            out.append(line)
+            index += 1
+            continue
+        if _SHARE_PREFIX.match(line):
+            out.append(line)
+            index += 1
+            continue
+        break
+    return out
+
+
+def pair_metrics(lines: list[str]) -> list[dict[str, str]]:
+    """Number-then-label lines into label/value pairs.
+
+    LinkedIn draws the NUMBER FIRST and its label after it -- measured live
+    2026-09-03, where "Applicants for this job" held 7691, "Applicants", 200,
+    "Applicants in the past day" in that order.
+
+    A NUMBER WITH NO LABEL IS REPORTED WITH AN EMPTY ONE RATHER THAN DROPPED.
+    A metric this function cannot name is still a metric the page carried, and
+    dropping it would make a partial read indistinguishable from a page that
+    drew fewer numbers.
+    """
+    out: list[dict[str, str]] = []
+    pending: Optional[str] = None
+    for line in lines:
+        bare = line.replace(",", "").replace("%", "").replace("+", "")
+        if bare.isdigit():
+            if pending is not None:
+                out.append({"value": pending, "label": ""})
+            pending = line
+            continue
+        if pending is not None:
+            out.append({"value": pending, "label": line})
+            pending = None
+    if pending is not None:
+        out.append({"value": pending, "label": ""})
+    return out
+
+
+def company_panel_lines(lines: list[str], heading: str) -> list[str]:
+    """The company panel's rows, with the employer substituted and the
+    screen-reader plumbing dropped.
+
+    TWO JOBS, AND THE FIRST IS A CONSISTENCY RULE THIS MODULE IMPOSES ON
+    ITSELF. The panel's heading is republished as
+    :data:`JOB_COMPANY_PANEL_SHAPE` so that a heading TALLY cannot print an
+    employer -- and its rows say things like "<employer> hired 6 people from
+    <another company>" and "Sources: <employer's domain>". Shaping the heading
+    and shipping the name three lines below it would be a rule that only
+    looked like one.
+
+    IT COSTS NOTHING THE PANEL WAS FOR. "<company> hired 6 people from X" is
+    the same fact as the sentence with the name in it, and the employer is
+    already on the result under ``company`` and ``company_url`` -- read off
+    the page's own structure rather than out of a prose line. Nothing is
+    hidden; one string is simply not repeated into a place where a tally could
+    reprint it.
+
+    THE SECOND JOB is dropping what LinkedIn writes for a screen reader: a
+    bare "Chart", an "End of interactive chart.", and two sentences describing
+    the axes. "Chart with 25 data points." is KEPT -- it is the same
+    one-sentence summary the profile-views trend reader keeps, and it is the
+    only line of that block a reader can use.
+
+    WHAT THIS DOES NOT CLAIM, stated because the claim above is easy to
+    over-read. The substitution is an EXACT-STRING one on the employer's name
+    as the heading spells it. The panel's "Sources:" line carries the
+    employer's own DOMAIN, and a domain is a different string, so it survives.
+    That is deliberate rather than missed: it is the employer's public
+    website, this same result already carries their LinkedIn page under
+    ``company_url``, and a substitution loose enough to catch a slugified
+    domain would be loose enough to eat words out of ordinary prose. The
+    property is "the name is not repeated into the rows", not "no trace of the
+    employer can be inferred from them".
+    """
+    employer = ""
+    text = str(heading or "").strip()
+    if text.startswith(JOB_COMPANY_PANEL_PREFIX):
+        employer = text[len(JOB_COMPANY_PANEL_PREFIX):].strip()
+    out: list[str] = []
+    for line in lines:
+        if line in JOB_COMPANY_LINE_NOISE:
+            continue
+        if any(line.startswith(prefix) for prefix in JOB_COMPANY_LINE_NOISE_PREFIXES):
+            continue
+        if employer:
+            line = line.replace(employer, "<company>")
+        out.append(line)
+    return out
+
+
+JOB_INSIGHT_MARKERS_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  const names = [];
+  const collapsed = [];
+  let verified = false;
+  let chars = 0;
+  if (main) {
+    for (const el of main.querySelectorAll('[data-view-name]')) {
+      const value = el.getAttribute('data-view-name') || '';
+      if (value && names.indexOf(value) === -1) names.push(value);
+      if (names.length >= cfg.maxNames) break;
+    }
+    for (const el of main.querySelectorAll('[aria-label]')) {
+      if ((el.getAttribute('aria-label') || '').trim() === cfg.verifiedName) {
+        verified = true;
+        break;
+      }
+    }
+    const text = main.innerText || '';
+    chars = text.length;
+    for (const name of cfg.collapsedNames) {
+      if (text.indexOf(name) !== -1) collapsed.push(name);
+    }
+  }
+  return {
+    view_names: names,
+    verified: verified,
+    collapsed: collapsed,
+    main_present: !!main,
+    main_chars: chars
+  };
+}
+"""
+
+
+async def read_job_insight_panels(page: Any) -> dict[str, Any]:
+    """The Premium insight panels on a job posting that is ALREADY OPEN.
+
+    ZERO EXTRA PAGE LOADS AND ZERO CLICKS. ``linkedin_job_detail`` loads the
+    posting for its description and its pay; these panels were on that same
+    render and were being thrown away. It is the same move
+    ``read_follow_control``, ``read_save_control`` and ``read_apply_control``
+    already make on this surface, and it costs exactly what they cost, which
+    is nothing.
+
+    WHAT IT WILL NOT DO, said here rather than discovered later. Two panels on
+    this page are COLLAPSED behind a control -- ``Show match details`` and
+    ``Show Premium Insights`` -- and pressing one is not a read. They come
+    back named in ``more_behind_a_control``, so a caller learns the panel
+    exists, learns this server did not open it, and can open it themselves. A
+    silent absence would have read as "LinkedIn does not show you this", which
+    is false.
+
+    ``observed`` IS ALWAYS POPULATED, AND IT IS THE WHOLE ANSWER WHEN THE
+    PANELS ARE NULL. A bare null has already cost this repository two wrong
+    diagnoses, so the headings seen, the view names seen and the size of
+    ``main`` come back whatever the panels do: "no panel, and main carried
+    17,825 characters under 13 headings" and "no panel, and main was empty"
+    are different findings, and a reader that cannot tell them apart is not
+    worth calling.
+
+    THE EMPLOYER'S NAME NEVER LEAVES THIS FUNCTION. LinkedIn writes it into
+    the company panel's own heading, so both that heading and every heading in
+    the tally pass through :func:`job_heading_shape`, which replaces the two
+    measured name-carrying prefixes and leaves everything else verbatim.
+    """
+    fields = await read_profile_fields(page)
+    sections = [dict(section) for section in (fields.get("sections") or []) if section]
+    try:
+        markers = await page.evaluate(  # readonly-ok
+            JOB_INSIGHT_MARKERS_JS,
+            {
+                "verifiedName": JOB_VERIFIED_BADGE_NAME,
+                "collapsedNames": list(JOB_COLLAPSED_CONTROL_NAMES),
+                "maxNames": JOB_PANEL_MAX_HEADINGS,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the job posting: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    markers = dict(markers or {})
+
+    applicant_heading = section_matching(sections, JOB_APPLICANT_PANEL_HEADINGS)
+    counts_section = section_matching(sections, JOB_APPLICANT_SECTION_HEADINGS)
+    seniority_section = section_matching(sections, JOB_SENIORITY_HEADINGS)
+    education_section = section_matching(sections, JOB_EDUCATION_HEADINGS)
+
+    # main's rendered text, read once. It answers the two marker questions
+    # below AND backs the fallback for a block the section walk cannot see --
+    # see lines_after_heading for the measured reason one exists.
+    body = await read_main_text(page)
+    stop_headings = {
+        str(section.get("heading") or "").strip()
+        for section in sections
+        if str(section.get("heading") or "").strip()
+    }
+
+    def _breakdown(section: Optional[dict[str, Any]]) -> list[str]:
+        """A share breakdown, structurally if possible and positionally if not.
+
+        THE STRUCTURAL READ IS TRIED FIRST AND KEPT WHEN IT WORKS. Seniority
+        comes back through it on both captures; education comes back EMPTY on
+        both, because the page draws its rows as table elements outside a
+        table and the parser reparents them out of reach. Falling back only
+        on an empty result means the weaker anchor -- position in a text dump
+        -- is used exactly where the stronger one has been measured to fail,
+        and nowhere else.
+        """
+        structural = lines_below(section)
+        if structural or not section:
+            return structural
+        heading = str(section.get("heading") or "")
+        return share_rows(
+            lines_after_heading(
+                body, heading, stop_headings, JOB_PANEL_MAX_LINES
+            )
+        )
+
+    applicant: Optional[dict[str, Any]] = None
+    if applicant_heading or counts_section or seniority_section:
+        applicant = {
+            "heading": str((applicant_heading or {}).get("heading") or "").strip()
+            or None,
+            "metrics": pair_metrics(lines_below(counts_section)),
+            "seniority": _breakdown(seniority_section),
+            "education": _breakdown(education_section),
+        }
+
+    company: Optional[dict[str, Any]] = None
+    for section in sections:
+        heading = str(section.get("heading") or "").strip()
+        if heading.startswith(JOB_COMPANY_PANEL_PREFIX):
+            # SAME FALLBACK AS THE BREAKDOWNS, and this panel needs it on
+            # every capture and live -- the structural read returns the
+            # heading and nothing else, so shipping only that would have
+            # published an empty panel for a panel that is plainly there.
+            #
+            # THE HEADING PASSED IN IS THE RAW ONE, carrying the employer's
+            # name, because that is the string that appears in the page's own
+            # text and there is nothing to find without it. It is used to
+            # LOCATE and is never returned: what comes back on the result is
+            # JOB_COMPANY_PANEL_SHAPE.
+            lines = lines_below(section) or lines_after_heading(
+                body,
+                heading,
+                # THE COLLAPSED CONTROLS BOUND THIS PANEL. "Show Premium
+                # Insights" sits at its end and is not a heading, so without
+                # it the read ran one line past the panel -- the same
+                # one-line bleed the education rows had, and caught the same
+                # way: by looking at what came back rather than at the code.
+                stop_headings | set(JOB_COLLAPSED_CONTROL_NAMES),
+                JOB_PANEL_MAX_LINES,
+                ignore=(JOB_COMPANY_ATTRIBUTION,),
+            )
+            company = {
+                "heading": JOB_COMPANY_PANEL_SHAPE,
+                "lines": company_panel_lines(lines, heading),
+            }
+            break
+
+    # THE TWO MARKER STRINGS ARE MATCHED IN PYTHON, AGAINST main's text.
+    # ``JOB_INSIGHT_MARKERS_JS`` returns the LENGTH of that text and never the
+    # text itself, so the substring tests live here where the constants they
+    # test for are declared and can be read beside them. ``body`` was read
+    # once above, before the breakdowns that also need it.
+    return {
+        "applicant_insights": applicant,
+        "company_insights": company,
+        "promoted": JOB_PROMOTED_MARKER in body,
+        "responses_managed_off_linkedin": JOB_RESPONSES_OFF_MARKER in body,
+        "verified_job": bool(markers.get("verified")),
+        "more_behind_a_control": list(markers.get("collapsed") or []),
+        "observed": {
+            "headings": [
+                job_heading_shape(section.get("heading") or "")
+                for section in sections[:JOB_PANEL_MAX_HEADINGS]
+            ],
+            "heading_count": len(sections),
+            "view_names": list(markers.get("view_names") or []),
+            "main_present": bool(markers.get("main_present")),
+            "main_chars": int(markers.get("main_chars") or 0),
+        },
+    }
+
+
+#: The profile-views analytics surface, measured from
+#: ``tests/fixtures/profile_views_analytics_hydrated.html`` and confirmed on
+#: the live page 2026-09-03.
+#:
+#: **THAT PAGE HAS NO h1, h2 OR h3 AT ALL.** :func:`read_profile_fields` walks
+#: ``h1,h2,h3`` and returns two sections there, both of them advertising
+#: furniture. It is the wrong instrument for this surface and is deliberately
+#: not used by the reader below -- recorded here because "reuse the heading
+#: walker" is the obvious next idea and it does not work.
+#:
+#: What the page DOES carry, and what the reader takes::
+#:
+#:     <p>27</p><p>Profile viewers</p>              the headline metric
+#:     <p>50%</p><p>vs. prior 7 days</p>            the delta
+#:     data-view-name="line-chart"                  THE TREND GRAPH
+#:       aria-label="Chart. Highcharts interactive chart."
+#:       "Line chart with 13 data points."          its own description
+#:     data-view-name="search-filter-top-bar-select" x3, each wrapping a
+#:       <label>: "Past 90 days", "Interesting viewers", "Company"
+#:
+#: **AND WHAT IT DOES NOT CARRY.** There is no top-companies panel and no
+#: locations control of any kind, in the capture or live. The capability
+#: census recorded this tool as discarding "the trend graph, top companies and
+#: top locations"; the trend graph is real and the other two are not on this
+#: page. What is there is a COMPANY FILTER, which is the likeliest thing that
+#: description was remembering. No ``top_companies`` or ``top_locations``
+#: field is returned, because a field that is always null is a claim the page
+#: does not support.
+VIEWS_CHART_VIEW_NAME = "line-chart"
+VIEWS_FILTER_VIEW_NAME = "search-filter-top-bar-select"
+VIEWS_ROW_VIEW_NAME = "viewer-list-item"
+
+#: A metric value is the text of a ``<p>`` that is a bare number, a
+#: percentage, or a number with LinkedIn's own thousands comma. Its label is
+#: the very next ``<p>``.
+VIEWS_METRIC_MAX = 6
+VIEWS_FILTER_MAX = 10
+VIEWS_VIEW_NAME_MAX = 60
+
+#: Caps on the two FALLBACK routes, which are looser than the view-name
+#: anchors they stand in for and so need a bound the precise routes do not.
+#: A filter caption is three or four words ("Interesting viewers", "Past 90
+#: days"); the chart's own sentence is one line. Anything longer is not the
+#: thing being looked for, and the cap is what stops a loose anchor turning
+#: into a text dump off a page made of other members.
+VIEWS_LABEL_MAX_CHARS = 40
+VIEWS_CHART_DESC_MAX_CHARS = 120
+
+PROFILE_VIEWS_INSIGHTS_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  // THE SCOPE IS THE DOCUMENT, AND main IS REPORTED RATHER THAN OBEYED.
+  //
+  // This scoped to main and returned nulls for three fields on the live page
+  // -- measured 2026-09-03: trend null, filters [], viewer_rows 0, while the
+  // controls were on screen and nine viewer rows had just been harvested. The
+  // committed capture explains it: it has NO main element at all and 45
+  // data-view-name elements outside one. LinkedIn draws this page's furniture
+  // above and beside the content region, not inside it.
+  //
+  // WIDENING IS SAFE HERE BY CONSTRUCTION, WHICH IS THE ONLY REASON IT IS
+  // DONE. This page is a list of other members and the usual answer to
+  // "widen the scope" is no. But this script's privacy property is not its
+  // scope -- it is WHAT IT LOOKS AT: paragraph pairs whose first is a bare
+  // number, <label> text, a line carrying the chart's own description, and
+  // COUNTS of view names. None of those touches a person at document scope
+  // any more than at main scope, because none of them reads an aria-label or
+  // any text inside a viewer row. A scope change that cannot reach a name is
+  // a scope change with nothing to weigh.
+  //
+  // main_present and main_chars are still reported, because the difference
+  // between "no main" and "an empty main" is exactly the kind of two-zeros
+  // distinction this package keeps.
+  const scope = main || document.body;
+  const out = {
+    metrics: [], filters: [], view_names: [], view_name_counts: {},
+    viewer_rows: 0, chart_present: false, chart_description: null,
+    main_present: !!main, main_chars: 0
+  };
+  if (!scope) return out;
+  out.main_chars = main && main.innerText ? main.innerText.length : 0;
+
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const NUMBERISH = /^[0-9][0-9,.]*%?$/;
+
+  // THE METRIC PAIRS. LinkedIn draws the number and then its label, as two
+  // sibling <p> elements. Anchoring on the number is what makes this stable:
+  // the label is prose and changes, the shape "a <p> that is only a number
+  // followed by a <p> that is not" does not.
+  const paragraphs = Array.from(scope.querySelectorAll('p'));
+  for (let i = 0; i < paragraphs.length && out.metrics.length < cfg.metricMax; i++) {
+    const value = textOf(paragraphs[i]);
+    if (!NUMBERISH.test(value)) continue;
+    const label = textOf(paragraphs[i + 1]);
+    if (!label || NUMBERISH.test(label)) continue;
+    out.metrics.push({value: value, label: label});
+  }
+
+  // THE FILTERS, by their own <label> text.
+  //
+  // TWO ROUTES, AND THE SECOND EXISTS BECAUSE THE FIRST WAS MEASURED DEAD ON
+  // THE LIVE PAGE. The committed capture wraps each filter in a
+  // data-view-name holder; the live page on 2026-09-03 carried NO
+  // data-view-name attribute ANYWHERE, so the holder query matched nothing
+  // and this came back empty while the controls were plainly on screen. The
+  // fallback reads every <label> in main, which is what the holder contained
+  // anyway.
+  //
+  // <label> TEXT, NEVER an aria-label. That is the whole privacy rule of this
+  // script and the fallback does not bend it: this page's aria-labels name
+  // other members ("Send a message to <a person>"), and a <label> is a form
+  // control's own caption.
+  for (const holder of scope.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
+    const label = textOf(holder.querySelector('label')) || textOf(holder);
+    if (label && out.filters.indexOf(label) === -1 &&
+        out.filters.length < cfg.filterMax) {
+      out.filters.push(label);
+    }
+  }
+  if (!out.filters.length) {
+    for (const node of scope.querySelectorAll('label')) {
+      const label = textOf(node);
+      if (label && label.length <= cfg.labelMaxChars &&
+          out.filters.indexOf(label) === -1 &&
+          out.filters.length < cfg.filterMax) {
+        out.filters.push(label);
+      }
+    }
+  }
+
+  // THE TREND CHART and its OWN accessible description. Never a data point,
+  // never a date: the description is LinkedIn's sentence about the chart.
+  //
+  // SAME TWO ROUTES AND THE SAME REASON. The view-name holder is the precise
+  // anchor where it exists; where it does not, the chart still announces
+  // itself in main's text -- "Line chart with 13 data points." -- and that
+  // sentence IS the thing this field returns, so finding it directly loses
+  // nothing. Presence is then asserted from the sentence rather than from the
+  // holder, which is the honest order: what is being reported is the
+  // description, so the description is what has to be found.
+  const chart = scope.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  let described = null;
+  if (chart) {
+    out.chart_present = true;
+    for (const node of chart.querySelectorAll('div')) {
+      const line = textOf(node);
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        break;
+      }
+    }
+  }
+  if (!described) {
+    const text = scope.innerText || '';
+    for (const raw of text.split('\\n')) {
+      const line = raw.trim();
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        out.chart_present = true;
+        break;
+      }
+    }
+  }
+  out.chart_description = described;
+
+  // COUNTS OF EVERY VIEW NAME, and the viewer rows counted and NOT read.
+  for (const el of scope.querySelectorAll('[data-view-name]')) {
+    const value = el.getAttribute('data-view-name') || '';
+    if (!value) continue;
+    out.view_name_counts[value] = (out.view_name_counts[value] || 0) + 1;
+    if (out.view_names.indexOf(value) === -1 &&
+        out.view_names.length < cfg.viewNameMax) {
+      out.view_names.push(value);
+    }
+  }
+  out.viewer_rows = out.view_name_counts[cfg.rowName] || 0;
+  return out;
+}
+"""
+
+
+async def read_profile_views_insights(page: Any) -> dict[str, Any]:
+    """What the profile-views page carries BESIDES the viewer rows.
+
+    ZERO EXTRA PAGE LOADS. ``linkedin_who_viewed_me`` already opens this page
+    for the viewer list and discards everything around it -- the headline
+    count, the change against the previous period, the trend chart and the
+    filters LinkedIn is currently applying. Every one of those was on the
+    render the whole time.
+
+    **THIS PAGE IS MADE OF OTHER PEOPLE, AND THAT IS WHY THE READER IS SHAPED
+    LIKE THIS RATHER THAN BEING A GENERAL CENSUS.** Its accessible names carry
+    strangers -- "Send a message to <a person>", "Invite <a person> to
+    connect", "Follow <a person>". So this function reads FOUR things and no
+    others: paragraph pairs where the first is a bare number, the ``<label>``
+    text inside a filter control, the chart's own one-sentence description,
+    and COUNTS of ``data-view-name`` values. It reads no ``aria-label`` at
+    all, and it never reads text from inside a viewer row -- those are counted
+    and not opened. The viewer rows are ``linkedin_who_viewed_me``'s business
+    and it already returns them; nothing here needs to see one.
+
+    That constraint is not caution. A probe written for this same wave printed
+    a raw control census of this page and published thirteen real names,
+    because it hand-rolled a tally and so skipped the redaction the shipped
+    tool applies at publish time. A reader that only ever looks at numbers,
+    ``<label>`` text and view names cannot make that mistake, whatever a
+    future caller does with it.
+
+    ``observed`` is always populated, so a page that rendered nothing this
+    reader recognises still says how big ``main`` was and which view names
+    were on it. Absent is UNKNOWN here, never zero: this reader does not
+    scroll, and the page defers most of itself.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            PROFILE_VIEWS_INSIGHTS_JS,
+            {
+                "chartName": VIEWS_CHART_VIEW_NAME,
+                "filterName": VIEWS_FILTER_VIEW_NAME,
+                "rowName": VIEWS_ROW_VIEW_NAME,
+                "metricMax": VIEWS_METRIC_MAX,
+                "filterMax": VIEWS_FILTER_MAX,
+                "viewNameMax": VIEWS_VIEW_NAME_MAX,
+                "labelMaxChars": VIEWS_LABEL_MAX_CHARS,
+                "chartMaxChars": VIEWS_CHART_DESC_MAX_CHARS,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the profile-views page: {type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    data = dict(data or {})
+
+    metrics = [dict(row) for row in (data.get("metrics") or [])]
+    headline = metrics[0] if metrics else None
+    delta = metrics[1] if len(metrics) > 1 else None
+    trend = None
+    if data.get("chart_present"):
+        trend = {
+            "present": True,
+            "description": data.get("chart_description") or None,
+        }
+    return {
+        "headline": headline,
+        "delta": delta,
+        "trend": trend,
+        "filters": list(data.get("filters") or []),
+        "observed": {
+            "metrics_seen": len(metrics),
+            "view_names": list(data.get("view_names") or []),
+            "view_name_counts": dict(data.get("view_name_counts") or {}),
+            "viewer_rows": int(data.get("viewer_rows") or 0),
+            "main_present": bool(data.get("main_present")),
+            "main_chars": int(data.get("main_chars") or 0),
+        },
+    }
+
+
+#: The three profile sections LinkedIn serves at ``/in/me/details/<section>/``,
+#: which is the spelling the read allowlist admits and the only one. This
+#: tuple is the whole of what any caller may ask for; nothing here accepts a
+#: free-text section name, because the section becomes part of an address.
+#:
+#: THIS PARAGRAPH CITED A PATTERN THAT NO LONGER EXISTS, until 2026-09-05. It
+#: named ``readonly.py``'s ``/in/<member>/details/(skills|experience|education)/``
+#: -- dropped when the boundary stopped admitting third-party profiles, a
+#: removal RULED in ``readonly.py`` beside the ``/in/me/`` entry. So this
+#: comment sent a reader to a pattern they would not find, in support of a
+#: permission the boundary no longer grants.
+#:
+#: Measured rather than inferred: ``assert_read_url`` raises on the
+#: member-slug spelling of all three sections and admits only the ``/in/me/``
+#: form. Two other sites in this package carried the same stale claim and were
+#: corrected the same day; the class is checked by
+#: ``tests/test_prose_that_makes_a_claim.py``.
+PROFILE_DETAIL_SECTIONS: tuple[str, ...] = ("experience", "education", "skills")
+
+#: The per-entry key on each of those pages, one per section.
+#:
+#: MEASURED LIVE 2026-09-03, not predicted from the skills pattern. The
+#: prediction was reasonable and this repository has already ruled that
+#: reasonable is not measured, so the probe ran every candidate once and
+#: printed the count beside it::
+#:
+#:     /in/me/details/experience/   SERVED, main 2585 chars
+#:       /details/experience/edit/forms/(\\d+)   ->  3
+#:       /company/([A-Za-z0-9\\-_%]+)            ->  3
+#:       /details/skills/edit/forms/(\\d+)       ->  0   <- THE CONTROL
+#:
+#:     /in/me/details/education/    SERVED, main 1231 chars
+#:       /details/education/edit/forms/(\\d+)    ->  1
+#:       /school/([A-Za-z0-9\\-_%]+)             ->  1
+#:       /details/skills/edit/forms/(\\d+)       ->  0   <- THE CONTROL
+#:
+#: **THE CONTROL LINE IS WHY THE OTHER NUMBERS MEAN ANYTHING.**
+#: :data:`SKILL_HREF` is the pattern already proven on the skills page, and it
+#: reads ZERO on both of these. That is what establishes the form ids are
+#: section-specific -- without it, three hits could have been three of
+#: something else. A count with no control beside it is not a measurement.
+PROFILE_DETAIL_ENTRY_HREF: dict[str, str] = {
+    "experience": r"/details/experience/edit/forms/(\d+)",
+    "education": r"/details/education/edit/forms/(\d+)",
+    "skills": SKILL_HREF,
+}
+
+#: Entries per section this reader will return. Well above the three and one
+#: measured, and well below a number that could turn a result into a dump.
+PROFILE_DETAIL_MAX_ENTRIES = 200
+PROFILE_DETAIL_MAX_CHARS = 300
+
+#: Anything an endorsement line could be spelled as. DELIBERATELY WIDER THAN
+#: ``N endorsements``: the question is whether LinkedIn draws such a line AT
+#: ALL, so a pattern narrow enough to miss ``Endorsed by 3 people`` would
+#: answer a different question and answer it wrongly. It matches the stem, so
+#: it catches every inflection and cannot be defeated by a rewording.
+_ENDORSEMENT = re.compile(r"endors", re.I)
+
+
+async def read_profile_detail_entries(
+    page: Any, *, section: str
+) -> dict[str, Any]:
+    """Entries on a ``/in/me/details/<section>/`` page that is ALREADY OPEN.
+
+    ONE SECTION, ONE ALREADY-LOADED PAGE, NO NAVIGATION. The caller does the
+    loading, because the caller is the one that owns the page-load budget --
+    this package's ceiling is two loads per call and a reader that navigated
+    would spend one without the tool knowing.
+
+    WHY THIS EXISTS. ``linkedin_my_profile`` has been DECLARING
+    ``experience_entries``, ``education_entries`` and ``skills_listed`` and
+    returning ``None`` for all three by construction. That is not a capability
+    nobody considered -- it is a tool that runs and cannot deliver three of
+    its own stated outputs. Both details addresses were already on the read
+    allowlist and nothing had ever navigated to either.
+
+    THE HARVEST IS THE ONE THAT ALREADY WORKS. ``linkedin_my_profile``'s
+    skills read runs :func:`harvest_linked_cards` against :data:`SKILL_HREF`
+    and returns 20 cards; this runs the same harvest against
+    :data:`PROFILE_DETAIL_ENTRY_HREF`, whose experience and education patterns
+    were measured on 2026-09-03 rather than inferred from the skills one.
+
+    ``count`` IS THE ANSWER AND ``entries`` IS THE EVIDENCE. The field
+    ``my_profile`` promises is a count, and a count does not depend on any
+    entry's text being readable. So a page that yields cards with no text
+    still yields a count, and says so in ``why`` rather than reporting an
+    empty list that would read as an empty profile.
+
+    ``observed`` CARRIES WHAT WAS SEEN WHEN NOTHING MATCHED, because a zero
+    that cannot say what it looked at is the thing that has cost this
+    repository two wrong diagnoses. Zero cards with 2,585 characters of main
+    text is a key this reader did not ask for; zero cards with no text at all
+    is a page that did not draw, and this reader does not scroll.
+    """
+    key = str(section or "").strip().lower()
+    if key not in PROFILE_DETAIL_ENTRY_HREF:
+        # A REFUSAL THAT RETURNS. The section names a document, so an unknown
+        # one must not reach a harvest, and there is no failure here to route
+        # through an exception -- only a question this reader will not answer.
+        return {
+            "section": key,
+            "refused": "unknown_section",
+            "reason": (
+                "section must be one of %s"
+                % ", ".join(PROFILE_DETAIL_SECTIONS)
+            ),
+        }
+
+    records = await harvest_linked_cards(
+        page,
+        href_pattern=PROFILE_DETAIL_ENTRY_HREF[key],
+        max_items=PROFILE_DETAIL_MAX_ENTRIES,
+        max_chars=PROFILE_DETAIL_MAX_CHARS,
+    )
+    entries: list[str] = []
+    evidence: list[dict[str, Any]] = []
+    for record in records:
+        lines = shape.content_lines(record.get("text", ""))
+        if not lines:
+            continue
+        name = shape.trim(lines[0], 120)
+        if name and name not in entries:
+            entries.append(name)
+        # THE REST OF THE CARD, WHICH THIS READER USED TO THROW AWAY.
+        #
+        # `harvest_linked_cards` already returns every line of every card;
+        # this function kept line 0 and dropped the remainder, so the page was
+        # read and the reading discarded. Measured live 2026-09-04: 9 of his
+        # 20 skill cards carry a line after the name -- where a skill was
+        # used, and how many places used it -- and no tool has ever reported
+        # one.
+        #
+        # THEY DO NOT REJOIN `entries`, AND THAT IS A RULE RATHER THAN A
+        # PREFERENCE. `tests/test_sdui_surfaces_fixture.py::
+        # test_a_skill_keeps_only_its_name_not_its_evidence_lines` exists
+        # because these lines WERE once returned as skills -- "2 experiences
+        # at ..." listed as a thing he can do. Structured beside the name is
+        # the shape that test permits; flattened into the list is the defect
+        # it was written for.
+        rest = [shape.trim(line, PROFILE_DETAIL_MAX_CHARS) for line in lines[1:]]
+        rest = [line for line in rest if line]
+        if name and rest:
+            evidence.append({"name": name, "lines": rest})
+
+    body = await read_main_text(page)
+    out: dict[str, Any] = {
+        "section": key,
+        "count": len(records),
+        "entries": entries,
+        "evidence": evidence,
+        "observed": {
+            "cards": len(records),
+            "cards_with_text": len(entries),
+            "cards_with_evidence": len(evidence),
+            "main_chars": len(body),
+        },
+    }
+    if key == "skills":
+        # CENSUS ROW N 118, ANSWERED BY MEASUREMENT INSTEAD OF BY A PARSER.
+        #
+        # The row asks for the endorsement count on each of his own skills,
+        # and two audits costed it at zero extra page loads because this page
+        # is already open. It is not a parser that is missing.
+        # **LINKEDIN DRAWS NO ENDORSEMENT LINE HERE.** Measured live
+        # 2026-09-04: 20 skill cards, 2,359 characters of `main`, and ZERO
+        # occurrences of "endors" anywhere on the page -- cards or body. The
+        # committed fixture agrees, and a 2026-08-23 audit had already found
+        # the same thing in it and been read past twice since.
+        #
+        # THIS IS A LIVE READING AND NOT A CONSTANT, which is the whole point.
+        # Two worlds fit the evidence -- LinkedIn draws the line only when the
+        # count is non-zero and his is zero, or LinkedIn stopped drawing it --
+        # and nothing on his own account can separate them. So the reader
+        # takes the measurement every time rather than hard-coding the answer:
+        # the day a count appears, this reports it instead of continuing to
+        # deny it, and no-one has to remember to come back.
+        endorsement_lines = [
+            shape.trim(line, PROFILE_DETAIL_MAX_CHARS)
+            for record in records
+            for line in shape.content_lines(record.get("text", ""))
+            if _ENDORSEMENT.search(line)
+        ]
+        out["endorsements"] = {
+            "drawn": bool(endorsement_lines),
+            "lines": endorsement_lines,
+            # WHAT IT DID SEE, not only what it failed to match. A "no" with
+            # no denominator is indistinguishable from a page that never
+            # loaded, and this repository has paid for that confusion twice.
+            "looked_at": {
+                "cards": len(records),
+                "card_lines": sum(
+                    len(shape.content_lines(record.get("text", "")))
+                    for record in records
+                ),
+                "main_chars": len(body),
+                "main_mentions_endorsement": bool(_ENDORSEMENT.search(body)),
+            },
+        }
+        if not endorsement_lines:
+            out["endorsements"]["why"] = (
+                "LinkedIn drew no endorsement count on this page. That is a "
+                "reading of what rendered, not a limit of this reader: it "
+                "searched %d card line(s) across %d card(s) and %d characters "
+                "of main text and found no mention of one. Two things produce "
+                "that and nothing on your own profile can tell them apart -- "
+                "LinkedIn draws the line only for a skill someone has "
+                "endorsed, or LinkedIn no longer draws it at all."
+                % (
+                    out["endorsements"]["looked_at"]["card_lines"],
+                    len(records),
+                    len(body),
+                )
+            )
+
+    if records and len(entries) != len(records):
+        # THE TWO NUMBERS DISAGREE, SO SAY WHY BEFORE A READER HAS TO GUESS.
+        #
+        # MEASURED LIVE 2026-09-03: three experience cards, two names. Without
+        # this the result carried experience_entries: 3 beside
+        # experience_count: 2 and offered nothing to reconcile them, which
+        # reads as a contradiction rather than as two different facts.
+        #
+        # It fires on ANY mismatch, not only on zero. The zero case -- no card
+        # carried readable text -- was the only one this said anything about,
+        # and the partial case is the one that actually occurs and the one
+        # more likely to be misread: an empty list is obviously a failure,
+        # while a SHORT list looks like an answer.
+        out["why"] = (
+            "the page drew %d entry cards and %d name(s) could be read from "
+            "them. Two things produce that gap and this reader cannot tell "
+            "them apart: a card whose text did not render, and two entries "
+            "sharing a name -- the names are de-duplicated, so a second spell "
+            "at the same title collapses into the first. THE COUNT IS THE "
+            "COUNT either way; the shorter list is a failed or merged read of "
+            "the NAMES and never a smaller section."
+            % (len(records), len(entries))
+        )
+    elif not records:
+        out["why"] = (
+            "no entry card matched. main carried %d characters, so read this "
+            "against that number: text with no cards means LinkedIn keys "
+            "these entries on something this reader does not ask for, and no "
+            "text at all means the page had not drawn. This reader does not "
+            "scroll." % len(body)
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Search appearances: HIS OWN, and the page is still made of other people
+# ---------------------------------------------------------------------------
+
+#: His own search-appearances page. ONE module constant, built here rather
+#: than at a call site, because ``readonly.py``'s entry for this address
+#: carries no query group and says so on the ground that nothing appends one.
+#: A caller that formats its own url is how a query gets appended.
+SEARCH_APPEARANCES_URL = "https://www.linkedin.com/analytics/search-appearances/"
+
+#: How many numberish paragraph pairs may carry their LABEL out of the page.
+#:
+#: THIS IS THE PRIMARY DEFENCE AND IT IS DELIBERATELY CRUDE. The sibling
+#: reader :func:`read_profile_views_insights` takes any ``<p>`` whose text is a
+#: bare number followed by a ``<p>`` that is not, up to six of them. On the
+#: profile-views page that rule is safe because the page draws exactly two such
+#: pairs -- the headline count and the change against the prior period.
+#:
+#: **THIS PAGE IS EXPECTED TO DRAW MORE, AND THE EXTRA ONES ARE MADE OF OTHER
+#: PEOPLE.** LinkedIn's search-appearances surface is understood to carry
+#: breakdown panels about the SEARCHERS -- where they work, what they do, what
+#: they typed. A breakdown row renders as exactly the shape the pair rule
+#: matches::
+#:
+#:     <p>12</p><p>Acme Corp</p>
+#:
+#: and the pair rule would publish the second paragraph verbatim. That is the
+#: per-record emission path this repository shipped once already: a hand-rolled
+#: tally on the profile-views page published thirteen real names, because
+#: ``shape.census_shape`` is a length-and-charset gate rather than a redactor,
+#: and the redaction that would have caught them runs at AGGREGATION time,
+#: where a count exists.
+#:
+#: NOTE THE EVIDENCE CLASS, because it is the weakest one here and it DECIDED
+#: this design rather than being decided by it. **The breakdown panels are an
+#: ASSUMPTION.** No capture of this page exists in this repository, and nobody
+#: here has opened it. So this constant is not tuned to a measured layout; it
+#: is set to the number of metrics this reader is FOR, and everything past it
+#: is withheld INSIDE THE PAGE. If the live read shows the headline is not
+#: among the first two pairs, this reader returns two shaped labels that do not
+#: say what was wanted -- a visible miss, which is the failure to have.
+SEARCH_APPEARANCES_LABELLED_PAIRS = 2
+
+#: Caps on the loose routes, taken from the profile-views reader for the same
+#: reason: a string longer than a caption is not a caption, and a loose anchor
+#: without a bound is how a reader turns into a text dump off a page made of
+#: other members.
+SEARCH_APPEARANCES_PAIR_MAX = 40
+SEARCH_APPEARANCES_LABEL_MAX_CHARS = 40
+SEARCH_APPEARANCES_FILTER_MAX = 10
+SEARCH_APPEARANCES_VIEW_NAME_MAX = 60
+SEARCH_APPEARANCES_CHART_DESC_MAX_CHARS = 120
+
+#: How far up from a paragraph to look for the anchor that would make its row
+#: an entity row.
+#:
+#: A BUDGET ON HOW FAR THE SEARCH GOES IS NOT A RULE ABOUT WHERE IT MAY STOP.
+#: That distinction is why the walk below has THREE outcomes: ``yes`` and
+#: ``no`` are answers, and ``unwalked`` means the budget ran out before the
+#: walk reached a stopping place. Folding ``unwalked`` into ``no`` would turn
+#: a limit on the search into a finding about the page.
+#:
+#: THE WALK STOPS AT THE PAGE ROOT, AND THAT STOP IS WHAT MAKES THE ANSWER
+#: MEAN ANYTHING. Without it the walk reaches ``main`` -- which on this page
+#: contains every member and company link there is -- and answers ``yes`` for
+#: EVERY pair including the headline. A reader whose every label comes back
+#: redacted is not a cautious reader, it is an instrument that cannot report,
+#: which is the same defect as one that returns zero because it cannot see.
+#: So the question this asks is "does the ROW around this pair link to an
+#: entity", and ``main``, ``body`` and ``html`` are not rows.
+SEARCH_APPEARANCES_ANCESTOR_HOPS = 6
+
+SEARCH_APPEARANCES_JS = """
+(cfg) => {
+  const main = document.querySelector('main');
+  // SAME SCOPE RULING AS THE PROFILE-VIEWS READER AND FOR THE SAME MEASURED
+  // REASON: LinkedIn draws this tree's furniture outside main, and the
+  // committed profile-views capture has no main element at all. Widening is
+  // safe here by WHAT THIS LOOKS AT rather than by where it looks -- numbers,
+  // <label> captions, the chart's own sentence, booleans and counts. None of
+  // those reaches a person at document scope any more than at main scope.
+  const scope = main || document.body;
+  const out = {
+    pairs: [], filters: [], view_names: [], view_name_counts: {},
+    chart_present: false, chart_description: null,
+    person_anchors: 0, company_anchors: 0, total_anchors: 0,
+    list_items: 0, headings: 0, images: 0,
+    paragraphs_seen: 0, pairs_seen: 0, pairs_withheld: 0,
+    main_present: !!main, main_chars: 0
+  };
+  if (!scope) return out;
+  out.main_chars = main && main.innerText ? main.innerText.length : 0;
+
+  const textOf = (node) => (node && node.innerText ? node.innerText.trim() : '');
+  const NUMBERISH = /^[0-9][0-9,.]*%?$/;
+  const PERSON = /\\/in\\//;
+  const COMPANY = /\\/company\\//;
+
+  // WHETHER THE ROW AROUND THIS PAIR IS A LINK TO SOMEBODY. Walks up from the
+  // paragraph and asks whether any ancestor SHORT OF THE PAGE ROOT contains a
+  // member or company link. RETURNS A WORD AND NEVER THE HREF: the test
+  // happens inside the page, the way the invitation needle and the recipient
+  // check do theirs, so no destination string crosses into the process.
+  //
+  // THE ROOT STOP IS NOT A DETAIL. main contains every link on the page, so a
+  // walk that reaches it answers 'yes' for the headline metric too, and every
+  // label comes back redacted. The question is about the ROW, and main, body
+  // and html are not rows.
+  //
+  // THREE STATES, NOT TWO. 'yes' and 'no' are answers -- 'no' means the walk
+  // reached the root having found nothing. 'unwalked' means the hop budget
+  // ran out FIRST, which is not the same claim at all. Collapsing those two is
+  // how a limit on how far a search went becomes a finding about the page.
+  const ROOTS = {MAIN: 1, BODY: 1, HTML: 1};
+  const entityLinked = (node) => {
+    let cur = node;
+    for (let hop = 0; hop < cfg.ancestorHops; hop++) {
+      const parent = cur ? cur.parentElement : null;
+      if (!parent || ROOTS[parent.tagName] === 1 || parent === scope) return 'no';
+      cur = parent;
+      let found = false;
+      for (const a of cur.querySelectorAll('a[href]')) {
+        const h = a.getAttribute('href') || '';
+        if (PERSON.test(h) || COMPANY.test(h)) { found = true; break; }
+      }
+      if (found) return 'yes';
+    }
+    return 'unwalked';
+  };
+
+  // THE PAIRS. Anchored on the NUMBER, like the sibling reader: the label is
+  // prose and changes, "a <p> that is only a number followed by a <p> that is
+  // not" does not.
+  //
+  // THE LABEL IS WITHHELD IN THE PAGE past the first cfg.labelledPairs -- not
+  // dropped in Python afterwards. A breakdown row's text never crosses this
+  // boundary at all, so no later caller can undo the decision and no future
+  // field can accidentally carry it.
+  const paragraphs = Array.from(scope.querySelectorAll('p'));
+  out.paragraphs_seen = paragraphs.length;
+  for (let i = 0; i < paragraphs.length && out.pairs.length < cfg.pairMax; i++) {
+    const value = textOf(paragraphs[i]);
+    if (!NUMBERISH.test(value)) continue;
+    const label = textOf(paragraphs[i + 1]);
+    if (!label || NUMBERISH.test(label)) continue;
+    out.pairs_seen++;
+    const rank = out.pairs.length;
+    const row = {
+      rank: rank,
+      value: value,
+      label: null,
+      label_withheld: true,
+      label_chars: label.length,
+      entity_linked: entityLinked(paragraphs[i])
+    };
+    if (rank < cfg.labelledPairs && label.length <= cfg.labelMaxChars) {
+      row.label = label;
+      row.label_withheld = false;
+    } else {
+      out.pairs_withheld++;
+    }
+    out.pairs.push(row);
+  }
+
+  // THE FILTERS, by their own <label> text, and the same two routes the
+  // profile-views reader needs: the view-name holder where the client has
+  // hydrated, every <label> where it has not. <label> TEXT, NEVER an
+  // aria-label -- this page's aria-labels are expected to name searchers, and
+  // a <label> is a form control's own caption.
+  for (const holder of scope.querySelectorAll('[data-view-name="' + cfg.filterName + '"]')) {
+    const label = textOf(holder.querySelector('label')) || textOf(holder);
+    if (label && label.length <= cfg.labelMaxChars &&
+        out.filters.indexOf(label) === -1 &&
+        out.filters.length < cfg.filterMax) {
+      out.filters.push(label);
+    }
+  }
+  if (!out.filters.length) {
+    for (const node of scope.querySelectorAll('label')) {
+      const label = textOf(node);
+      if (label && label.length <= cfg.labelMaxChars &&
+          out.filters.indexOf(label) === -1 &&
+          out.filters.length < cfg.filterMax) {
+        out.filters.push(label);
+      }
+    }
+  }
+
+  // THE CHART and its OWN sentence. Never a data point, never a date.
+  const chart = scope.querySelector('[data-view-name="' + cfg.chartName + '"]');
+  let described = null;
+  if (chart) {
+    out.chart_present = true;
+    for (const node of chart.querySelectorAll('div')) {
+      const line = textOf(node);
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        break;
+      }
+    }
+  }
+  if (!described) {
+    const text = scope.innerText || '';
+    for (const raw of text.split('\\n')) {
+      const line = raw.trim();
+      if (line && line.length < cfg.chartMaxChars &&
+          line.indexOf('data point') !== -1) {
+        described = line;
+        out.chart_present = true;
+        break;
+      }
+    }
+  }
+  out.chart_description = described;
+
+  // THE ANCHOR CENSUS, AND IT IS THE WHOLE POINT OF THIS READER.
+  //
+  // Whether this page NAMES the people who searched is the question the
+  // ruling on people search turns on, and an INTEGER answers it. So these are
+  // counts of hrefs matched INSIDE the page: the string is tested here and a
+  // number leaves. No href and no anchor text crosses.
+  for (const a of scope.querySelectorAll('a[href]')) {
+    out.total_anchors++;
+    const h = a.getAttribute('href') || '';
+    if (PERSON.test(h)) out.person_anchors++;
+    if (COMPANY.test(h)) out.company_anchors++;
+  }
+
+  // STRUCTURE, counted and not read.
+  out.list_items = scope.querySelectorAll('li,[role="listitem"]').length;
+  out.headings = scope.querySelectorAll('h1,h2,h3').length;
+  out.images = scope.querySelectorAll('img').length;
+
+  for (const el of scope.querySelectorAll('[data-view-name]')) {
+    const value = el.getAttribute('data-view-name') || '';
+    if (!value) continue;
+    out.view_name_counts[value] = (out.view_name_counts[value] || 0) + 1;
+    if (out.view_names.indexOf(value) === -1 &&
+        out.view_names.length < cfg.viewNameMax) {
+      out.view_names.push(value);
+    }
+  }
+  return out;
+}
+"""
+
+
+def _search_appearance_labels(pairs: list[dict[str, Any]]) -> list[Optional[str]]:
+    """Shape, tally and redact the few labels the page let out.
+
+    **THIS IS THE AGGREGATION STEP, AND IT EXISTS BECAUSE THE COUNT LIVES
+    HERE AND NOWHERE ELSE.** ``shape.census_shape`` is a length-and-charset
+    gate; it is not the redactor and it has never claimed to be. The two rules
+    that actually refuse a name are
+    :func:`shape.census_href_identifies_entity`, which needs a destination,
+    and :func:`shape.census_redact_rare`, which needs a COUNT -- so a
+    per-record emission path inherits neither, which is exactly the defect
+    that put thirteen real names into a probe's output on the sibling page.
+
+    So the labels are shaped, TALLIED AGAINST EACH OTHER, and only then
+    published. The entity rule is applied from the page's own answer rather
+    than from an href: ``entity_linked`` is computed inside the page and comes
+    back as a word, and anything but a flat ``no`` costs the label.
+
+    ``census_redact_rare`` fires at ``count == 1`` and blanks a run of two or
+    more capitalised words. On this page's expected furniture that is the
+    right way round: "Search appearances" and "vs. prior 7 days" carry no such
+    run and survive; "Acme Corp" is exactly such a run and does not. It
+    over-redacts a genuinely unique two-word caption, which is the direction
+    to be wrong in.
+    """
+    shaped: list[Optional[str]] = []
+    for pair in pairs:
+        raw = pair.get("label")
+        if raw is None:
+            shaped.append(None)
+            continue
+        # ANYTHING BUT A FLAT "no" COSTS THE LABEL. 'unwalked' is not evidence
+        # of absence -- see SEARCH_APPEARANCES_ANCESTOR_HOPS.
+        if str(pair.get("entity_linked") or "") != "no":
+            shaped.append(shape.CENSUS_REDACTED)
+            continue
+        shaped.append(shape.census_shape(raw))
+
+    counts: dict[str, int] = {}
+    for value in shaped:
+        if value is None:
+            continue
+        counts[value] = counts.get(value, 0) + 1
+    return [
+        None if value is None else shape.census_redact_rare(value, counts[value])
+        for value in shaped
+    ]
+
+
+async def read_search_appearances(page: Any) -> dict[str, Any]:
+    """What his own search-appearances page says, with no name on it.
+
+    THE RECIPROCAL INSTRUMENT. ``linkedin_who_viewed_me`` reads the receiving
+    end of a PROFILE VIEW, and that reading is what settled whether this
+    server may load a stranger's profile. This is the receiving end of a
+    SEARCH: how often other people's searches put him in front of them. It
+    sits on his own account, it costs no third party anything, and it needed
+    no ruling.
+
+    **THE PAGE IS STILL MADE OF OTHER PEOPLE, AND MORE OF THEM THAN THE
+    SIBLING PAGE IS.** The profile-views surface draws two numberish
+    paragraph pairs and its reader may safely take six. This one is expected
+    to draw breakdown panels about the searchers -- their employers, their
+    titles, the words they typed -- in the SAME shape. So the label past the
+    first :data:`SEARCH_APPEARANCES_LABELLED_PAIRS` is withheld inside the
+    page, and the two that do cross are shaped, tallied and redacted by
+    :func:`_search_appearance_labels` before anything is returned.
+
+    **WHAT THIS READER CAN AND CANNOT SETTLE, stated here rather than left to
+    whoever reads its output.** ``anchors.person`` is the measurement that
+    matters: a non-zero count means this page draws links to individual
+    members, so the record LinkedIn keeps of a search IDENTIFIES the people in
+    it. A zero there means this page draws none -- it does NOT mean a search
+    emits nothing, because absence on a panel LinkedIn chose the contents of
+    is not absence in LinkedIn's store.
+
+    AND A ZERO HEADLINE IS NOT A NEGATIVE RESULT. If ``headline`` reports zero
+    appearances, that is consistent with "searches do not emit" AND with
+    "nobody searched for him this week", and this reader cannot separate them.
+    An instrument that returns zero because there was nothing to see is not
+    reporting a negative -- which is why ``observed`` is always populated and
+    why ``headline`` is ``None`` rather than ``0`` when no pair was found at
+    all. Absent and zero are different answers here.
+
+    ZERO EXTRA PAGE LOADS beyond the one its caller made. This reader does not
+    navigate, does not click and does not scroll, so a page that defers most
+    of itself reports less than the page holds -- ``observed.main_chars`` and
+    ``observed.paragraphs_seen`` are what say whether anything rendered.
+    """
+    try:
+        data = await page.evaluate(  # readonly-ok
+            SEARCH_APPEARANCES_JS,
+            {
+                "chartName": VIEWS_CHART_VIEW_NAME,
+                "filterName": VIEWS_FILTER_VIEW_NAME,
+                "labelledPairs": SEARCH_APPEARANCES_LABELLED_PAIRS,
+                "pairMax": SEARCH_APPEARANCES_PAIR_MAX,
+                "labelMaxChars": SEARCH_APPEARANCES_LABEL_MAX_CHARS,
+                "filterMax": SEARCH_APPEARANCES_FILTER_MAX,
+                "viewNameMax": SEARCH_APPEARANCES_VIEW_NAME_MAX,
+                "chartMaxChars": SEARCH_APPEARANCES_CHART_DESC_MAX_CHARS,
+                "ancestorHops": SEARCH_APPEARANCES_ANCESTOR_HOPS,
+            },
+        )
+    except Exception as exc:
+        raise ExtractionFailedError(
+            f"could not read the search-appearances page: "
+            f"{type(exc).__name__}: {exc}",
+            url=_url_of(page),
+        ) from exc
+    data = dict(data or {})
+
+    pairs = [dict(row) for row in (data.get("pairs") or [])]
+    labels = _search_appearance_labels(pairs)
+    metrics = [
+        {
+            "value": pair.get("value"),
+            "label_shape": label,
+            "label_withheld": bool(pair.get("label_withheld")),
+            "entity_linked": pair.get("entity_linked"),
+        }
+        for pair, label in zip(pairs, labels)
+    ]
+    trend = None
+    if data.get("chart_present"):
+        trend = {
+            "present": True,
+            "description": data.get("chart_description") or None,
+        }
+    return {
+        # None rather than 0 when nothing was found: absent is not zero.
+        "headline": metrics[0] if metrics else None,
+        "delta": metrics[1] if len(metrics) > 1 else None,
+        "metrics": metrics,
+        "trend": trend,
+        "filters": list(data.get("filters") or []),
+        # THE ANSWER TO THE QUESTION THIS PAGE WAS OPENED FOR.
+        "anchors": {
+            "person": int(data.get("person_anchors") or 0),
+            "company": int(data.get("company_anchors") or 0),
+            "total": int(data.get("total_anchors") or 0),
+        },
+        "observed": {
+            "pairs_seen": int(data.get("pairs_seen") or 0),
+            "pairs_withheld": int(data.get("pairs_withheld") or 0),
+            "paragraphs_seen": int(data.get("paragraphs_seen") or 0),
+            "list_items": int(data.get("list_items") or 0),
+            "headings": int(data.get("headings") or 0),
+            "images": int(data.get("images") or 0),
+            "view_names": list(data.get("view_names") or []),
+            "view_name_counts": dict(data.get("view_name_counts") or {}),
+            "main_present": bool(data.get("main_present")),
+            "main_chars": int(data.get("main_chars") or 0),
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# THE TWO VOCABULARY-INTO-THE-PAGE SCRIPTS, 2026-09-19.
+#
+# They live HERE rather than beside their readers because this package has one
+# rule about page contact and it is structural: only ``dom.py`` may waive
+# ``evaluate``, and every executed script is declared and scanned. My first
+# version ran each evaluate inside its own reader module, which put page
+# contact in two more files and would have spread a narrow allowance into a
+# habit -- exactly what ``test_only_dom_module_waives_evaluate`` exists to
+# stop. The readers keep the vocabulary, the closed alphabet and the tallying;
+# this file keeps the one call that touches a document.
+#
+# BOTH SHIP A VOCABULARY IN AND RETURN INTEGERS. No page string crosses the
+# CDP boundary in either -- not shaped, not redacted, not present -- which is
+# the property their readers are built on and the reason they are worth their
+# waivers.
+# ---------------------------------------------------------------------------
+
+#: Classify a page's anchors by ROUTE SHAPE. The route table is an ARGUMENT,
+#: and what comes back is positions in it plus integers. See
+#: ``linkedin_server/anchors.py`` for the segment rule and the measured harm of
+#: the containment version it replaced.
+ANCHOR_CLASSIFY_JS = """
+(args) => {
+  const table = args.table || [];
+  const host = args.host || "";
+  const html = args.html || "";
+  const classCount = args.classCount || 0;
+  const indexOfClass = (token) => {
+    for (let i = 0; i < args.classes.length; i += 1) {
+      if (args.classes[i] === token) return i;
+    }
+    return -1;
+  };
+  // THE CONTROL PATH. When html is supplied the SAME classifier runs against a
+  // DETACHED container, so the demonstration that it CAN classify -- and that
+  // it refuses the adversarial cases -- costs no navigation. A classifier that
+  // returns one class for everything is indistinguishable from a broken one.
+  // DOMParser, NOT createElement plus a markup assignment. The read-only
+  // scanner refuses that assignment in package code and it is RIGHT to: it
+  // cannot tell a detached node from an attached one, and one future edit
+  // that appends this container turns the same line into a real page
+  // mutation, silently. parseFromString builds a detached DOCUMENT with no
+  // assignment to flag, so the shape is REMOVED rather than sanctioned -- a
+  // sanctioned entry would tolerate it in this file forever.
+  //
+  // AND THE COMMENT ITSELF HAD TO BE REWORDED: naming the refused token in
+  // prose put the token back in the scanned string. The scanner reads the
+  // whole script, comments included, which is correct -- it cannot parse JS --
+  // and it is the same shape as a correction guard matching a sentence that
+  // merely DESCRIBES a marker.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  const anchors = Array.from(root.querySelectorAll("a"));
+  // Array.from rather than the array-filling method: the scanner refuses that
+  // method's spelling, because on a Playwright locator the same word TYPES
+  // INTO A FIELD, and it cannot tell one inside a JS string from a real call.
+  // Removing the shape costs nothing here. The comment does not spell the
+  // refused token either -- naming it in prose puts it straight back into the
+  // scanned text, which is how this paragraph got written twice.
+  const counts = Array.from({ length: classCount }, () => 0);
+  let numericEntity = 0;
+  let nonNumericEntity = 0;
+  for (const node of anchors) {
+    const raw = node.getAttribute("href");
+    if (!raw) { counts[indexOfClass("no_href")] += 1; continue; }
+    let path = raw;
+    let isExternal = false;
+    if (raw.indexOf("//") !== -1) {
+      // A protocol-relative or absolute url. Anything not on the LinkedIn host
+      // is EXTERNAL and is counted without being looked at further.
+      const afterScheme = raw.slice(raw.indexOf("//") + 2);
+      const slash = afterScheme.indexOf("/");
+      const hostPart = slash === -1 ? afterScheme : afterScheme.slice(0, slash);
+      if (hostPart !== host) isExternal = true;
+      path = slash === -1 ? "/" : afterScheme.slice(slash);
+    }
+    if (isExternal) { counts[indexOfClass("external")] += 1; continue; }
+    // SEGMENTS, and the query and fragment are DROPPED BEFORE ANYTHING IS
+    // READ -- groups.py's rule: a part that is never read cannot carry
+    // anything. /groups/123/?invitedBy=<token> survives shaping with the
+    // token intact, and this is the same escape one level over.
+    const q = path.indexOf("?"); if (q !== -1) path = path.slice(0, q);
+    const h = path.indexOf("#"); if (h !== -1) path = path.slice(0, h);
+    const segments = path.split("/").filter((s) => s.length > 0);
+    let matched = -1;
+    for (const row of table) {
+      const token = row[0], first = row[1], second = row[2];
+      // SEGMENT EQUALITY AT A FIXED POSITION. Never a substring, never
+      // floating -- see this module's docstring for the scar.
+      if (segments.length < 1 || segments[0] !== first) continue;
+      if (second) {
+        if (segments.length < 2 || segments[1] !== second) continue;
+      }
+      matched = indexOfClass(token);
+      break;
+    }
+    if (matched === -1) { counts[indexOfClass("other_internal")] += 1; continue; }
+    counts[matched] += 1;
+    // THE ENTITY SEGMENT'S SHAPE, never its value. groups.py's numeric rule:
+    // a non-numeric segment is a slug, and a slug is a name.
+    const entityAt = table.find((r) => indexOfClass(r[0]) === matched);
+    const position = entityAt && entityAt[2] ? 2 : 1;
+    if (segments.length > position) {
+      if (/^[0-9]+$/.test(segments[position])) numericEntity += 1;
+      else nonNumericEntity += 1;
+    }
+  }
+  // INTEGERS ONLY. Every field below is a number, by construction.
+  return {
+    anchors: anchors.length,
+    counts: counts,
+    numeric_entity: numericEntity,
+    non_numeric_entity: nonNumericEntity,
+  };
+}
+"""
+
+#: Match a page's headings and tab-like controls against a CLOSED VOCABULARY of
+#: job-collection groupings, supplied by the caller. Returns an index per node
+#: and a card count, never a label. See ``linkedin_server/collections_page.py``.
+COLLECTION_GROUPINGS_JS = """
+(args) => {
+  const vocabulary = args.vocabulary || [];
+  const html = args.html || "";
+  const norm = (s) => (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  const wordBounded = (hay, needle) => {
+    if (!hay || !needle) return false;
+    const h = " " + hay + " ";
+    const n = " " + needle + " ";
+    return h.indexOf(n) !== -1;
+  };
+  // THE CONTROL PATH, and it is the reason this takes an object rather than a
+  // bare vocabulary. When ``html`` is supplied the SAME matching code runs
+  // against a DETACHED container, so a positive control can be run on any page
+  // without navigating anywhere. A matcher that returns zero everywhere is
+  // indistinguishable from a broken one, and this repository has been bitten
+  // by exactly that -- so the demonstration that it CAN match ships with it
+  // rather than living in a side script that can drift.
+  // DOMParser, NOT createElement plus a markup assignment -- see anchors.py
+  // for the full reason. The scanner cannot tell a detached node from an
+  // attached one and should not try, so the shape is REMOVED rather than
+  // sanctioned. Note the comment avoids naming the refused token: writing it
+  // in prose puts it back in the scanned string.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  // HEADINGS AND TAB-LIKE CONTROLS BOTH. Measured 2026-09-19: the live page
+  // draws 18 headings and matched NONE of the five groupings, while carrying
+  // 47 buttons -- and LinkedIn renders a collection strip as pressable pills,
+  // not as headings. Scanning headings alone could not tell "he has no
+  // collections" from "the labels are not headings".
+  const headings = Array.from(
+    root.querySelectorAll(
+      "h1, h2, h3, [role='heading'], [role='tab'], button, a[role='button']"
+    )
+  );
+  const out = [];
+  for (const node of headings) {
+    const text = norm(node.textContent);
+    if (!text) continue;
+    let index = -1;
+    for (let i = 0; i < vocabulary.length; i += 1) {
+      if (wordBounded(text, vocabulary[i])) { index = i; break; }
+    }
+    // A SECTION'S CARD COUNT, taken from the heading's own container so it is
+    // a count of what sits UNDER that heading rather than of the whole page.
+    let scope = node.closest("section, li, div[data-view-name]") || node.parentElement;
+    let cards = 0;
+    if (scope) {
+      cards = scope.querySelectorAll("a[href*='/jobs/view/'], li").length;
+    }
+    out.push({ index: index, cards: cards });
+  }
+  // INTEGERS ONLY. No element text is in this return value, by construction:
+  // every field above is a number.
+  return { headings: headings.length, matches: out };
+}
+"""
+
+
+async def read_anchor_classes(
+    page: Any,
+    *,
+    table: list,
+    classes: list,
+    host: str,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`ANCHOR_CLASSIFY_JS`. Returns counts and integers only.
+
+    ``html`` is the CONTROL path: when supplied the same classifier runs
+    against a DETACHED document parsed from that string, so a positive control
+    can be run without navigating. It is a parameter of this reader and of
+    nothing a caller publishes.
+    """
+    return await page.evaluate(  # readonly-ok
+        ANCHOR_CLASSIFY_JS,
+        {
+            "table": table,
+            "classes": classes,
+            "classCount": len(classes),
+            "host": host,
+            "html": html or "",
+        },
+    )
+
+
+async def read_collection_groupings(
+    page: Any, *, vocabulary: list, html: str = ""
+) -> dict[str, Any]:
+    """Run :data:`COLLECTION_GROUPINGS_JS`. Returns indices and integers only.
+
+    ``html`` is the CONTROL path, as in :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        COLLECTION_GROUPINGS_JS,
+        {"vocabulary": vocabulary, "html": html or ""},
+    )
+
+
+#: Classify a SEARCH RESULTS page's anchors by CLOSED PATH SEGMENT SEQUENCE.
+#: :data:`ANCHOR_CLASSIFY_JS` one level sharper: THREE fixed segments instead
+#: of one or two, the query counted rather than dropped silently, and a
+#: traversal segment REFUSED instead of walked past. See
+#: ``linkedin_server/search_results.py`` -- the last of those is not a
+#: refinement, it is the defect the condition-2 amendment measured.
+SEARCH_RESULTS_JS = """
+(args) => {
+  const table = args.table || [];
+  const host = args.host || "";
+  const html = args.html || "";
+  const classes = args.classes || [];
+  const classCount = args.classCount || 0;
+  // THE DECISION IS A PURE FUNCTION, AND THAT IS NOT TIDINESS -- IT IS WHAT
+  // MAKES THE CONTROL RUNNABLE. ``classifyRoute`` closes over NOTHING: every
+  // input is a parameter and there is no DOM in it, so the SHIPPED SOURCE can
+  // be lifted out by brace-matching and run under V8, exactly as
+  // ``tests/test_compose_fields.py`` lifts ``shapeOf``. Before this split the
+  // classifier could only be exercised by loading a page, which meant the
+  // fixture's expected counts were a prediction NOBODY HAD EVER COMPUTED --
+  // and a control whose result nobody computed cannot fail.
+  //
+  // It returns INTEGERS: an index into ``routeClasses``, and two small flags.
+  // No string it was given is in its return value, on any path.
+  const classifyRoute = (raw, routeTable, routeClasses, expectedHost) => {
+    const indexOfClass = (token) => {
+      for (let i = 0; i < routeClasses.length; i += 1) {
+        if (routeClasses[i] === token) return i;
+      }
+      return -1;
+    };
+    if (!raw) { return { kind: indexOfClass("no_href"), query: 0, entity: -1 }; }
+    let path = raw;
+    let isExternal = false;
+    if (raw.indexOf("//") !== -1) {
+      const afterScheme = raw.slice(raw.indexOf("//") + 2);
+      const slash = afterScheme.indexOf("/");
+      const hostPart = slash === -1 ? afterScheme : afterScheme.slice(0, slash);
+      if (hostPart !== expectedHost) isExternal = true;
+      path = slash === -1 ? "/" : afterScheme.slice(slash);
+    }
+    if (isExternal) { return { kind: indexOfClass("off_search"), query: 0, entity: -1 }; }
+    // THE QUERY IS DROPPED BEFORE ANYTHING IS READ, and its PRESENCE is
+    // reported instead. On THIS surface the query is the needle -- it is where
+    // a person's name is typed -- so it is never a string in this process.
+    let query = 0;
+    const q = path.indexOf("?");
+    if (q !== -1) { query = 1; path = path.slice(0, q); }
+    const h = path.indexOf("#"); if (h !== -1) path = path.slice(0, h);
+    const segments = path.split("/").filter((s) => s.length > 0);
+    // THE TRAVERSAL RULE, AND IT RUNS BEFORE MATCHING ON PURPOSE. A dot
+    // segment anywhere makes a route UNJUDGEABLE from its leading segments:
+    // three segments of a people search can address something else entirely,
+    // and the denylist refuses that address's siblings while missing it. It
+    // is refused as a class of its own and NEVER resolved -- resolving it
+    // would mean this classifier deciding what a traversal means, which is
+    // the browser's job and not a shaper's.
+    for (const segment of segments) {
+      if (segment === ".." || segment === ".") {
+        return { kind: indexOfClass("traversal_refused"), query: query, entity: -1 };
+      }
+    }
+    let matched = -1;
+    for (const row of routeTable) {
+      // SEGMENT EQUALITY AT THREE FIXED POSITIONS -- the amended condition 2
+      // in code. Never a substring, never floating, and never fewer than the
+      // three the table declares.
+      if (segments.length < 3) continue;
+      if (segments[0] !== row[1]) continue;
+      if (segments[1] !== row[2]) continue;
+      if (segments[2] !== row[3]) continue;
+      matched = indexOfClass(row[0]);
+      break;
+    }
+    if (matched === -1) {
+      // "A SEARCH VERTICAL I DO NOT KNOW" AND "NOT A SEARCH" ARE DIFFERENT
+      // ANSWERS, and collapsing them would hide a new vertical appearing.
+      const token = (segments.length > 0 && segments[0] === "search")
+        ? "unclassified" : "off_search";
+      return { kind: indexOfClass(token), query: query, entity: -1 };
+    }
+    // THE ENTITY SEGMENT'S SHAPE, never its value -- groups.py's numeric
+    // rule, arriving at position 3 because this table closes three segments.
+    let entity = -1;
+    if (segments.length > 3) {
+      entity = /^[0-9]+$/.test(segments[3]) ? 0 : 1;
+    }
+    return { kind: matched, query: query, entity: entity };
+  };
+  // THE CONTROL PATH, identical in role to ANCHOR_CLASSIFY_JS's: the SAME
+  // classifier over a DETACHED document, so the demonstration that it
+  // classifies -- and that it refuses the adversarial routes -- costs no
+  // navigation. DOMParser, never a markup assignment; see anchors.py for the
+  // full reason, and note this comment does not spell the refused token.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  const anchors = Array.from(root.querySelectorAll("a"));
+  const counts = Array.from({ length: classCount }, () => 0);
+  let queriesPresent = 0;
+  let numericEntity = 0;
+  let nonNumericEntity = 0;
+  // THE LOOP HOLDS NO POLICY. Everything that decides anything is above, in
+  // the pure function; this only reads attributes and adds up integers, so a
+  // green control on ``classifyRoute`` really is a green control on the rule.
+  for (const node of anchors) {
+    const verdict = classifyRoute(node.getAttribute("href"), table, classes, host);
+    if (verdict.kind >= 0) counts[verdict.kind] += 1;
+    queriesPresent += verdict.query;
+    if (verdict.entity === 0) numericEntity += 1;
+    else if (verdict.entity === 1) nonNumericEntity += 1;
+  }
+  // INTEGERS ONLY. Every field below is a number, by construction.
+  return {
+    anchors: anchors.length,
+    counts: counts,
+    queries_present: queriesPresent,
+    numeric_entity: numericEntity,
+    non_numeric_entity: nonNumericEntity,
+  };
+}
+"""
+
+
+async def read_search_result_classes(
+    page: Any,
+    *,
+    table: list,
+    classes: list,
+    host: str,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`SEARCH_RESULTS_JS`. Returns counts and integers only.
+
+    ``html`` is the CONTROL path, as in :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        SEARCH_RESULTS_JS,
+        {
+            "table": table,
+            "classes": classes,
+            "classCount": len(classes),
+            "host": host,
+            "html": html or "",
+        },
+    )
+
+
+#: Which FILTERS a search page offers, matched against a CLOSED VOCABULARY
+#: supplied by the caller. Returns an index per control and counts, NEVER a
+#: label -- and on this surface that is not hygiene: a people-search filter's
+#: label can be ``Connections of <a person>``, so the matching happens in the
+#: page and only integers come back.
+#:
+#: ``menus.py`` classifies labels in PYTHON, which is correct for ITS surface
+#: because a menu label is a UI verb. **It is not correct here**, so the rule
+#: is applied one level earlier. The rule itself is the SAME rule, and
+#: ``tests/test_search_results.py`` measures the two engines agreeing rather
+#: than arguing that they do.
+FILTER_PANEL_JS = """
+(args) => {
+  const phrases = args.phrases || [];
+  const html = args.html || "";
+  const termCount = args.termCount || 0;
+  // NORMALISE, LIFTED FROM menus.py's RULE AND KEPT CHARACTER-COMPATIBLE.
+  // Lowercase, then collapse every non-word character to a single space --
+  // collapsed rather than stripped, so a slash-joined label cannot fuse into
+  // one token and match neither side. The word set is a-z0-9 exactly, which
+  // is what the Python side uses, so an accented label reduces the same way
+  // in both engines. A corpus test measures that; it is not assumed.
+  const normaliseLabel = (label) => {
+    const lower = (label || "").toLowerCase();
+    let out = "";
+    let previousSpace = true;
+    for (const character of lower) {
+      const isWord =
+        (character >= "a" && character <= "z") ||
+        (character >= "0" && character <= "9");
+      if (isWord) { out += character; previousSpace = false; }
+      else if (!previousSpace) { out += " "; previousSpace = true; }
+    }
+    return out.trim();
+  };
+  // THE MATCH, AND ITS ASYMMETRY IS THE WHOLE POINT. A SINGLE-WORD PHRASE
+  // MUST BE THE WHOLE LABEL; a multi-word phrase may be contained. That is
+  // menus.py's scar -- a single-word term matched inside a two-token label
+  // and counted a person as a menu item -- and it lands HERE on the hazard
+  // filters, because this vocabulary holds a single-word term that is a
+  // PREFIX of a two-word one. Without the asymmetry the person-valued
+  // filter and the degree filter are indistinguishable.
+  //
+  // Written as a token-window comparison rather than a substring test,
+  // because the scar it avoids WAS a substring test and a window cannot
+  // silently decay into one.
+  const matchPhrase = (haystack, phrase) => {
+    const words = haystack.split(" ").filter((w) => w.length > 0);
+    const needle = phrase.split(" ").filter((w) => w.length > 0);
+    if (needle.length === 0 || needle.length > words.length) return false;
+    if (needle.length === 1) {
+      return words.length === 1 && words[0] === needle[0];
+    }
+    for (let start = 0; start + needle.length <= words.length; start += 1) {
+      let matched = true;
+      for (let i = 0; i < needle.length; i += 1) {
+        if (words[start + i] !== needle[i]) { matched = false; break; }
+      }
+      if (matched) return true;
+    }
+    return false;
+  };
+  // THE CONTROL PATH, as in the other readers here. DOMParser, never a
+  // markup assignment; see anchors.py for the full reason.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  // FILTER PILLS ARE PRESSABLE CONTROLS, not headings -- measured on the
+  // collections page, where the live strip was 47 buttons and 0 matching
+  // headings. The same shape is assumed here and the DENOMINATOR is
+  // returned so a caller can tell "no filters" from "wrong selector".
+  const controls = Array.from(
+    root.querySelectorAll(
+      "button, [role='button'], [role='radio'], [role='checkbox'], " +
+      "[role='tab'], select, fieldset legend, [aria-label]"
+    )
+  );
+  const counts = Array.from({ length: termCount }, () => 0);
+  let matchedControls = 0;
+  let unmatchedControls = 0;
+  let emptyLabels = 0;
+  for (const node of controls) {
+    // The accessible name, preferring the explicit one. Either way it is
+    // normalised and compared IN HERE; neither form is ever returned.
+    const raw = node.getAttribute("aria-label") || node.textContent || "";
+    const label = normaliseLabel(raw);
+    if (!label) { emptyLabels += 1; continue; }
+    // PHRASES ARRIVE SORTED LONGEST-FIRST, so the two-word term is tried
+    // before the one-word term it contains. Order is the caller's, computed
+    // once in Python; this loop does not re-sort and must not.
+    let index = -1;
+    for (const pair of phrases) {
+      if (matchPhrase(label, pair[0])) { index = pair[1]; break; }
+    }
+    if (index === -1) { unmatchedControls += 1; continue; }
+    counts[index] += 1;
+    matchedControls += 1;
+  }
+  // INTEGERS ONLY. No label is in this return value, by construction.
+  return {
+    controls: controls.length,
+    counts: counts,
+    matched_controls: matchedControls,
+    unmatched_controls: unmatchedControls,
+    empty_labels: emptyLabels,
+  };
+}
+"""
+
+
+async def read_search_filters(
+    page: Any,
+    *,
+    phrases: list,
+    term_count: int,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`FILTER_PANEL_JS`. Returns indices and integers only.
+
+    ``phrases`` is ``[[normalised phrase, term index], ...]`` ALREADY SORTED
+    longest-first by the caller. ``html`` is the CONTROL path, as in
+    :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        FILTER_PANEL_JS,
+        {"phrases": phrases, "termCount": term_count, "html": html or ""},
+    )

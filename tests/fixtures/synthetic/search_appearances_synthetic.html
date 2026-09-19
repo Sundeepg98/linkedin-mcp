@@ -1,0 +1,113 @@
+<!--
+  SYNTHETIC. THIS IS NOT A CAPTURE AND IT MUST NEVER BE CITED AS ONE.
+
+  Every other fixture beside it in this directory is a page LinkedIn served,
+  frozen. This one is a page NOBODY IN THIS REPOSITORY HAS EVER OPENED. It was
+  hand-built on 2026-09-05 to carry the leak shapes that a reader of a
+  search-appearances page would have to refuse, and it establishes NOTHING
+  about what the real page contains -- not the panel headings, not the metric
+  labels, not whether searchers are linked at all.
+
+  So the tests over it prove one direction only: that the reader REFUSES what
+  is put in front of it. They cannot and do not prove that the reader reads
+  the real surface, and the live capture replaces this file rather than
+  joining it.
+
+  Every name here is invented. The company names, the person, the slug, the
+  headline and the titles are all made up, and none of them belongs to
+  anybody. They are chosen to sit exactly on the boundaries the guards run on:
+
+    * "Northgate Analytics" -- TWO capitalised words, appearing ONCE. This is
+      the shape census_redact_rare was built for and the one it catches.
+    * "Hillcrest" -- ONE capitalised word, appearing once. census_redact_rare
+      CANNOT catch this, by its own docstring, so it is here to prove that the
+      withholding rule and not the redactor is what stops it.
+    * "Priya Sharma" behind /in/ -- the person anchor. Her name must never
+      appear in any output, and the person-anchor COUNT must be non-zero,
+      because that integer is the whole answer to whether this surface names
+      the people who searched.
+    * "Talent Acquisition Lead" -- three capitalised words inside a company
+      link, so both the entity rule and the singleton rule would catch it.
+      Present so that a mutation killing ONE of them still leaves the other
+      able to fail, which is what tells the two guards apart.
+    * "Rivermouth" -- ONE capitalised word, appearing once, in a row with NO
+      anchor at all. NEITHER of the two redaction rules can touch it: the
+      count rule needs two capitalised words and the entity rule needs a
+      link. It is here because without it the two guards OVERLAP on every
+      row in this file, and a fixture on which killing one guard still leaves
+      the other holding cannot show either of them failing. This row is what
+      makes the withholding rule provable ALONE.
+-->
+<html>
+<head><title>Search appearances</title></head>
+<body>
+<main>
+
+  <div id="header">
+    <p>18</p>
+    <p>Search appearances</p>
+    <p>12%</p>
+    <p>vs. prior week</p>
+  </div>
+
+  <div data-view-name="search-filter-top-bar-select">
+    <label>Past 7 days</label>
+  </div>
+  <div data-view-name="search-filter-top-bar-select">
+    <label>All searchers</label>
+  </div>
+
+  <div data-view-name="line-chart" aria-label="Chart. Highcharts interactive chart.">
+    <div>Line chart with 7 data points.</div>
+  </div>
+
+  <h2>Where your searchers work</h2>
+  <ul>
+    <li data-view-name="search-appearance-company">
+      <a href="https://www.linkedin.com/company/northgate-analytics/">
+        <p>6</p>
+        <p>Northgate Analytics</p>
+      </a>
+    </li>
+    <li data-view-name="search-appearance-company">
+      <a href="/company/hillcrest/">
+        <p>4</p>
+        <p>Hillcrest</p>
+      </a>
+    </li>
+  </ul>
+
+  <h2>What your searchers do</h2>
+  <ul>
+    <li data-view-name="search-appearance-title">
+      <a href="/company/northgate-analytics/">
+        <p>5</p>
+        <p>Talent Acquisition Lead</p>
+      </a>
+    </li>
+  </ul>
+
+  <h2>Keywords your searchers used</h2>
+  <ul>
+    <li data-view-name="search-appearance-keyword">
+      <p>9</p>
+      <p>node typescript</p>
+    </li>
+    <li data-view-name="search-appearance-keyword">
+      <p>7</p>
+      <p>Rivermouth</p>
+    </li>
+  </ul>
+
+  <h2>Who found you</h2>
+  <ul>
+    <li data-view-name="search-appearance-searcher">
+      <a href="/in/priya-sharma-8a41b207/">Priya Sharma</a>
+      <p>3</p>
+      <p>Recruiting at Northgate Analytics</p>
+    </li>
+  </ul>
+
+</main>
+</body>
+</html>
