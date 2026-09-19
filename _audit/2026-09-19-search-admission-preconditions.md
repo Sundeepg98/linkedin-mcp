@@ -346,8 +346,13 @@ The other red in that same file -- `REGIONS` in
     identity sweep 12:49     PASS, 0 hits across 465 swept files
     ASCII                    all four artifacts, no byte above 127
     readonly.py              0 lines changed, 32 patterns before and after
-    commits                  8; one touches scripts/blast_radius.py, on the
-                             lead's routing in _TEAM_LEAD_GATE_IS_27_RED.md
+    commits                  read `git log`; the count is deliberately not
+                             written here, because this repository has watched
+                             every count in prose go stale including the ones
+                             written by the wave fixing the last. One touches
+                             scripts/blast_radius.py, on the lead's routing in
+                             _TEAM_LEAD_GATE_IS_27_RED.md; no other touches a
+                             file another wave owns.
     AI attribution           0
 
 ---
