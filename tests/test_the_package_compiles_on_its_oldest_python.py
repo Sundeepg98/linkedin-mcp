@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
@@ -181,8 +182,26 @@ def test_no_tracked_file_uses_an_f_string_form_the_floor_refuses():
 
 
 def test_the_lint_convicts_the_defect_that_caused_this_file():
-    """The strongest control available: the thing that actually happened."""
-    found = lint.violations(THE_DEFECT_AS_IT_SHIPPED, "_probe_add_section_menu.py")
+    """The strongest control available: the thing that actually happened.
+
+    BELOW THE FLOOR THE PARSER CONVICTS IT INSTEAD, and that is not a weaker
+    result -- it is the defect's ORIGINAL SIGNATURE. This whole file exists
+    because that source "did not parse on 3.10 at all, so every guard in this
+    suite that walks the package with ast.parse raised SyntaxError instead of
+    returning a verdict". Reproducing that on 3.10 is the same event, seen from
+    the other side of the boundary.
+
+    Measured on a real CPython 3.10 2026-09-19, after CI found it on
+    ubuntu-latest py3.10 shard 0.
+    """
+    try:
+        found = lint.violations(THE_DEFECT_AS_IT_SHIPPED, "_probe_add_section_menu.py")
+    except SyntaxError as error:
+        assert sys.version_info < (3, 12), (
+            "an interpreter at or above PEP 701 refused source it should "
+            "accept: %s" % error
+        )
+        return
     assert len(found) == 2, found
     assert {rule for _, rule, _ in found} == {lint.BACKSLASH}, found
     assert all("page.locator" in text for _, _, text in found), found
@@ -206,7 +225,36 @@ def test_the_lint_clears_the_repair_that_landed():
     ],
 )
 def test_each_rule_fires_on_its_own_smallest_case(source, rule):
-    found = lint.violations(source)
+    """The construct is refused on the floor, by whichever mechanism applies.
+
+    **THIS TEST USED TO ASSUME IT WAS ALWAYS RUNNING ABOVE THE FLOOR**, and CI
+    caught that on 2026-09-19 (run 35450659149, ubuntu-latest py3.10 shard 0,
+    4 failed). ``lint.violations`` calls ``ast.parse``, which on 3.10 REFUSES
+    these fixtures outright -- ``SyntaxError: f-string: unmatched '('`` -- so
+    the rule never got the chance to fire and the test errored instead of
+    passing. The guard written to prove the package survives its floor could
+    not itself run on that floor.
+
+    THERE ARE TWO MECHANISMS AND BOTH ARE A PASS, because the claim is
+    "the floor refuses this", not "the linter flags this":
+
+    * ABOVE the floor (3.12+, where PEP 701 made it legal) the source parses
+      and the RULE must convict it. That is the interesting direction and the
+      reason the linter exists -- nothing else would notice.
+    * AT OR BELOW the floor the PARSER refuses it, which is a STRONGER verdict
+      than the rule gives and is the exact outcome the rule exists to predict.
+
+    Each branch asserts on its own terms, so neither is a silent pass.
+    """
+    try:
+        found = lint.violations(source)
+    except SyntaxError as error:
+        assert sys.version_info < (3, 12), (
+            "the running interpreter refused a fixture it should accept: this "
+            "branch is only correct at or below the PEP 701 boundary, and here "
+            "it fired on %s. Error: %s" % (sys.version.split()[0], error)
+        )
+        return
     assert found, source
     assert {name for _, name, _ in found} == {rule}, found
 
