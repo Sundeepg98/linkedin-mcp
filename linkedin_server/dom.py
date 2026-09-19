@@ -5336,6 +5336,20 @@ SDUI_ACTION_TOKENS: dict[str, str] = {
 #: Those two errors are not symmetric, so the window errs at the safe end.
 SDUI_WINDOW_CHARS = 6000
 
+#: THE RESIDUE A HYDRATED PAGE KEEPS AFTER LINKEDIN DISCARDS ITS BOOTSTRAP
+#: PAYLOAD. Measured 2026-09-19 by sampling one load every few seconds out to
+#: 90s, with a second address as a concurrent control::
+#:
+#:     feed     t=0  5,112,866 chars   t=5  5,112,866   t=10  2,146   t=90  2,146
+#:     profile  t=0      2,146 chars                              t=90  2,146
+#:
+#: **The payload is DELETED about ten seconds after navigation.** So this is a
+#: HEURISTIC and not a law: it is the number two different pages settled to on
+#: one day, and a third page or a later LinkedIn could settle elsewhere. It
+#: exists so :func:`read_sdui_actions` can say WHICH SIDE OF THE RACE it landed
+#: on, rather than leaving a caller to infer it from a small number.
+MEASURED_POST_CLEANUP_RESIDUE = 2146
+
 #: Read-only: sums the length of every script's text and counts token
 #: occurrences. It reads ``textContent`` and returns INTEGERS -- no payload
 #: string is ever returned, which is what keeps a megabyte of his profile out
@@ -5406,6 +5420,30 @@ async def read_sdui_actions(
     any of it would undo that. So the page counts and this function receives
     numbers.
 
+    **THAT 1,091,238 IS A PRE-CLEANUP READING AND THE CONDITION IS PART OF THE
+    FIGURE.** LinkedIn DISCARDS its bootstrap payload about ten seconds after
+    navigation -- measured 2026-09-19 by sampling one load out to 90 seconds
+    with a second address as a concurrent control:
+
+        feed     t=0  5,112,866   t=5  5,112,866   t=10  2,146   t=90  2,146
+        profile  t=0      2,146                                  t=90  2,146
+
+    **SO EVERY READING OF ``payload_chars`` IS A RACE**, and it measures
+    whether you sampled before or after cleanup rather than what the address
+    carries. ``2,146`` is the residue a hydrated page keeps, not an empty page
+    -- see :data:`MEASURED_POST_CLEANUP_RESIDUE`.
+
+    **THE FAILURE MODE HAS A NAME AND A RECEIPT: a late read returns the
+    residue and looks exactly like an absent payload.** On 2026-09-19 one
+    reading of 2,146 against the 1,091,238 above was published as "this
+    address serves a 2 KB shell", escalated to a lead, and retracted within the
+    hour when the same reader returned 5.1 MB for the control address it had
+    just called thin. **``residue_suspected`` in the return exists so the next
+    caller is told rather than expected to remember this paragraph.**
+
+    SAMPLE IMMEDIATELY AFTER NAVIGATION. A settle, a wait, or any intervening
+    work spends the window.
+
     ``needle`` SCOPES THE COUNT and must be a STABLE, NON-IDENTIFYING string --
     a payload ``viewName`` such as ``opento_preview_otw``, which names a
     surface rather than a person. It is never a member name.
@@ -5432,6 +5470,11 @@ async def read_sdui_actions(
         "global": {key: 0 for key in SDUI_ACTION_TOKENS},
         "scoped": {key: 0 for key in SDUI_ACTION_TOKENS},
         "readable": False,
+        #: WHICH SIDE OF THE CLEANUP RACE THIS READING LANDED ON. See
+        #: :data:`MEASURED_POST_CLEANUP_RESIDUE`. A caller that treats a small
+        #: payload as an empty page is making the mistake this field exists to
+        #: prevent, and it was made and published on 2026-09-19.
+        "residue_suspected": False,
         "error": None,
     }
     cfg = {
@@ -5456,6 +5499,15 @@ async def read_sdui_actions(
     # row of zeroes.
     out["readable"] = bool(
         out["payload_chars"] > 0 and sum(out["global"].values()) > 0
+    )
+    # THE RACE, REPORTED RATHER THAN LEFT TO BE REMEMBERED. LinkedIn discards
+    # its bootstrap payload about ten seconds after navigation, so a late read
+    # returns the residue and looks exactly like an empty page. A caller that
+    # sees a small payload and concludes "absent" is making the mistake this
+    # field exists to prevent -- and it was made, published and retracted on
+    # 2026-09-19 by the author of this field.
+    out["residue_suspected"] = bool(
+        out["payload_chars"] <= MEASURED_POST_CLEANUP_RESIDUE
     )
     return out
 
