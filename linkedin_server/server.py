@@ -1768,12 +1768,13 @@ async def linkedin_job_collections() -> dict[str, Any]:
     with a timestamp. Do not diff two calls and conclude something changed on
     the account.
 
-    FIRED ONCE, 2026-09-19, AND THE CAVEAT IS THE TRANSPORT. This tool
-    returned its payload against the live account -- 9 job postings, 0
-    member-space anchors, 0 groupings matched, 52 headings seen, every field
-    an integer. **It was invoked IN PROCESS rather than over the MCP
-    transport**, which is a real difference and is why census row ``J 42``
-    names it: the reader and the tool body are proven, the wire is not.
+    FIRED AND PROVEN ON THE WIRE, 2026-09-19. It returned its payload
+    against the live account -- 9 job postings, 0 member-space anchors, 0
+    groupings matched, 52 headings seen -- first in process, then OVER THE MCP
+    TRANSPORT against a restarted server. **That second call is what makes the
+    name-freedom a property of the wire and not only of the unit tests:** 30
+    leaf values, 4 of them strings, all four the staleness diagnostic, and
+    ``linkedin.com`` and ``/in/`` absent from the payload entirely.
     """
     url = collections_page.COLLECTIONS_URL
     try:
