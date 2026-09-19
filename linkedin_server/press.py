@@ -126,6 +126,35 @@ _COMPOSER_MARKERS: tuple[str, ...] = (
 #: is signed in; anything else under ``/in/`` is a third party's surface.
 _SELF_SEGMENTS = frozenset({"me"})
 
+#: THE WITNESS. What is counted at the open moment, as a CLOSED SET.
+#:
+#: **ADDED 2026-09-19 because the gate could not see disclosure at all.** The
+#: first version read the control's ``aria-expanded`` before the click and
+#: again AFTER the dismissal, so nothing observed the open state -- and
+#: ``check_closure`` requires those two to be equal, which a successful Escape
+#: guarantees whether or not anything ever opened. The gate was structurally
+#: unable to distinguish "opened and closed cleanly" from "never opened".
+#: Measured and handed over by the wave that took the first sanctioned press.
+#:
+#: **A CLOSED SET, NEVER A CALLER'S CALLABLE.** A seam that accepts arbitrary
+#: code at the open moment is a press seam wearing an observer's clothes: it
+#: would hand a caller execution at the single most privileged instant this
+#: module has, which is exactly what :data:`SANCTIONED_SHAPES` exists to
+#: prevent one line earlier.
+#:
+#: **PAGE-WIDE, NOT ONLY THE PRESSED CONTROL, and the dialog case decides it.**
+#: A witness reading only the pressed control's own ``aria-expanded`` sees
+#: ``false`` while a dialog is open elsewhere on the page, and reports real
+#: disclosure as a MISS. **A false negative is worse than no witness**, because
+#: it manufactures a confident wrong answer where there was honest silence.
+WITNESS_SELECTORS: tuple[tuple[str, str], ...] = (
+    ("expanded_true", '[aria-expanded="true"]'),
+    ("dialogs", '[role="dialog"]'),
+    ("menus", '[role="menu"]'),
+    ("menuitems", '[role="menuitem"]'),
+    ("listboxes", '[role="listbox"]'),
+)
+
 
 def _refuse(reason: str, why: str, *, terminal: bool) -> dict[str, Any]:
     """A refusal that names what it saw and says whether it can ever pass.
@@ -267,7 +296,99 @@ def check_counters(before: Optional[dict], after: Optional[dict]) -> dict[str, A
             terminal=True,
         )
 
-    return {"pressed": False, "counters_ok": True, "priced_by": sorted(shared)}
+    return {
+        "pressed": False,
+        "counters_ok": True,
+        # READ AT BOTH ENDS. That is the whole of what this establishes.
+        "priced_by": sorted(shared),
+        # **AND THIS IS THE HONEST LABEL ON IT.** ``priced_by`` names counters
+        # shown READABLE, never counters shown SENSITIVE to the press. The
+        # check compares readings taken at two moments; it cannot and does not
+        # establish that any of them WOULD have moved had the press done
+        # something.
+        #
+        # THE RULING'S LANGUAGE IS THE STRONGER ONE -- "where no counter CAN
+        # price a press, unmeasurable resolves AGAINST the press" -- and this
+        # implementation reads "can price" in the weaker sense. The gap is
+        # recorded here rather than papered over, because a field called
+        # ``priced_by`` invites the strong reading and would be believed.
+        #
+        # WHY IT IS NOT SIMPLY TIGHTENED: sensitivity of an OUTWARD counter to
+        # a press class is shown only by a press of that class moving it --
+        # which, for an outward counter, is the write the gate exists to
+        # prevent. On a surface that offers no safe sensitive counter, the
+        # strong reading can be shown PASSING and can never be shown capable
+        # of FAILING, and a condition that cannot fail certifies nothing.
+        #
+        # Whether that resolves against the press is a BOUNDARY RULING and not
+        # this module's to take. Routed; see the wave notes.
+        "sensitivity_established": False,
+        "sensitivity_note": (
+            "priced_by names counters READ at both ends, not counters shown "
+            "SENSITIVE to this press. Establishing sensitivity for an outward "
+            "counter requires a press of the class that moves it, which is "
+            "the act this gate exists to prevent."
+        ),
+    }
+
+
+def witness_verdict(
+    before: Optional[dict], after: Optional[dict], *, control_open: Any = None
+) -> dict[str, Any]:
+    """DID ANYTHING ACTUALLY OPEN? A READING, NEVER A GATE. PURE.
+
+    **NOT A FIFTH CONDITION, DELIBERATELY.** Permission stays decided on safety
+    alone. Folding disclosure into permission would turn a reading into a gate
+    and refuse a perfectly safe press for the sin of being uninformative -- and
+    "this press disclosed nothing" is a fact about the control, not a reason the
+    press should not have happened.
+
+    **THE PAIR IS THE POINT.** A page-wide count means nothing without its
+    baseline: the live analytics page already carried nine ``[aria-expanded]``
+    nodes before any press. So the same readings are taken at both moments and
+    compared, rather than a single count being read as evidence.
+
+    Returns ``disclosed`` True / False / None, where **None is
+    UNDETERMINED and is not False** -- a reading that did not happen is not a
+    reading that saw nothing.
+    """
+    if not before or not after:
+        return {
+            "disclosed": None,
+            "why": (
+                "no witness reading at one or both moments, so whether "
+                "anything opened is UNDETERMINED. That is not the same as "
+                "nothing having opened."
+            ),
+        }
+    shared = sorted(set(before) & set(after))
+    if not shared:
+        return {
+            "disclosed": None,
+            "why": "no reading was taken at both moments; nothing to compare.",
+        }
+    moved = sorted(name for name in shared if before[name] != after[name])
+    if moved:
+        return {"disclosed": True, "moved": moved, "witnessed_by": shared}
+    if control_open is not None and str(control_open).lower() == "true":
+        # The control says it is open even though no page count moved --
+        # believed, because a control reporting its own state is the narrower
+        # and more direct claim.
+        return {
+            "disclosed": True,
+            "moved": ["control_aria_expanded"],
+            "witnessed_by": shared,
+        }
+    return {
+        "disclosed": False,
+        "moved": [],
+        "witnessed_by": shared,
+        "why": (
+            "nothing this witness counts changed between the press and the "
+            "dismissal. That is a MISS rather than a failure: the press was "
+            "permitted and safe, and it disclosed nothing this set can see."
+        ),
+    }
 
 
 def check_closure(expanded_before: Any, expanded_after: Any) -> dict[str, Any]:
@@ -388,9 +509,20 @@ async def disclose(
                 terminal=False,
             )
         expanded_before = await locator.get_attribute("aria-expanded")
+        # THE BASELINE HALF OF THE WITNESS, taken before anything is pressed.
+        # A page-wide count is meaningless without it.
+        witness_before = await _read_witness(page)
         before = await read_counters()
         await locator.click(timeout=CLICK_TIMEOUT_MS)
         after = await read_counters()
+        # THE OBSERVATION AT THE OPEN MOMENT, and it is the whole of the fix.
+        # This is the ONLY instant at which disclosure exists to be seen: the
+        # dismissal below destroys it, and every earlier version of this
+        # function read the control's state only before the press and after
+        # the dismissal, so it could not tell an open-and-closed from a
+        # never-opened.
+        witness_after = await _read_witness(page)
+        control_open = await locator.get_attribute("aria-expanded")
         # CLOSE IT. Escape first, because it is the dismissal this repository's
         # probes already use and it closes a menu that has no toggle.
         await page.keyboard.press("Escape")
@@ -407,7 +539,7 @@ async def disclose(
             terminal=False,
         )
 
-    return evaluate(
+    verdict = evaluate(
         url=getattr(page, "url", None),
         shape=shape,
         before=before,
@@ -415,6 +547,30 @@ async def disclose(
         expanded_before=expanded_before,
         expanded_after=expanded_after,
     )
+    # THE WITNESS RIDES ALONGSIDE THE VERDICT AND NEVER DECIDES IT. It is
+    # attached to a refusal too, because "the press was refused on its
+    # counters AND nothing opened" is a different fact from "refused", and a
+    # reader who has to infer which one they have will infer wrong.
+    verdict["witness"] = witness_verdict(
+        witness_before, witness_after, control_open=control_open
+    )
+    return verdict
+
+
+async def _read_witness(page: Any) -> dict[str, Any]:
+    """Count the closed witness set. Returns None per reading that failed.
+
+    **An unreadable count is not a zero**, for the same reason an unreadable
+    counter is not one: a reading that did not happen and a reading that saw
+    nothing are different facts, and only one of them is evidence.
+    """
+    out: dict[str, Any] = {}
+    for name, selector in WITNESS_SELECTORS:
+        try:
+            out[name] = int(await page.locator(selector).count())
+        except Exception:  # noqa: BLE001
+            out[name] = None
+    return out
 
 
 #: The one timeout, named here rather than inline so a reviewer finds it.

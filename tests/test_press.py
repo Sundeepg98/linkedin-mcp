@@ -238,6 +238,39 @@ def test_unchanged_counters_pass_and_name_what_priced_it():
     assert verdict["priced_by"] == ["invitations"]
 
 
+def test_priced_by_means_READABLE_and_says_so_rather_than_implying_sensitive():
+    """THE WEAK SENSE, LABELLED.
+
+    ``priced_by`` names counters READ at both ends. It does NOT establish that
+    any of them would have moved had the press done something, and the field
+    name invites exactly that stronger reading -- so the weaker one is stated
+    in the verdict rather than left to a reader's charity.
+
+    The ruling's own language is the strong sense: *where no counter CAN price
+    a press, unmeasurable resolves AGAINST the press.* This implementation
+    reads "can price" as "was read at both ends". **That gap is real and is
+    recorded rather than closed**, because closing it would require showing a
+    counter SENSITIVE to a press class -- which, for an outward counter, is
+    shown only by a press of that class moving it, which is the write the gate
+    exists to prevent.
+
+    So on a surface offering no safe sensitive counter, the strong reading can
+    be shown passing and can never be shown capable of failing. Whether that
+    resolves against the press is a boundary ruling, not a code change.
+    """
+    verdict = press.check_counters(
+        {"invitations": 0, "notifications_unread": 6},
+        {"invitations": 0, "notifications_unread": 6},
+    )
+    assert verdict["counters_ok"] is True
+    assert verdict["priced_by"] == ["invitations", "notifications_unread"]
+    assert verdict["sensitivity_established"] is False, (
+        "a passing counter check must not claim its counters were sensitive "
+        "to the press -- it only ever showed they were readable."
+    )
+    assert "SENSITIVE" in verdict["sensitivity_note"]
+
+
 # ---------------------------------------------------------------------------
 # CONDITION 4 -- closure
 # ---------------------------------------------------------------------------
@@ -299,9 +332,24 @@ async def test_a_permitted_press_clicks_exactly_the_sanctioned_shape():
     assert verdict["pressed"] is True, verdict
     assert page.clicks == ["[aria-expanded]"]
     assert page.keys == ["Escape"], "condition 4 requires the closure"
-    assert set(page.selectors) == {"[aria-expanded]"}, (
-        "the only selector handed to the page must be the sanctioned shape "
-        "itself -- no label, no derived string."
+    # EVERY SELECTOR THE PAGE IS HANDED COMES FROM A CLOSED SET IN THIS
+    # PACKAGE -- the sanctioned shape, or a member of WITNESS_SELECTORS.
+    #
+    # This assertion used to read ``== {"[aria-expanded]"}``, and the witness
+    # added on 2026-09-19 made that false BY DESIGN: seeing whether anything
+    # opened requires reading the PAGE and not only the pressed control. The
+    # property that actually mattered was never "exactly one selector" -- it
+    # was that no selector is ever derived from page text or from a caller's
+    # string, and that is what is asserted now.
+    witness = {selector for _name, selector in press.WITNESS_SELECTORS}
+    assert set(page.selectors) <= {"[aria-expanded]"} | witness, (
+        "a selector was handed to the page that is neither the sanctioned "
+        "shape nor a member of the closed witness set -- no label, no "
+        "derived string, no caller input."
+    )
+    assert page.clicks == ["[aria-expanded]"], (
+        "the witness must READ the page and never press it: exactly one "
+        "control is clicked however many selectors are counted."
     )
 
 

@@ -203,25 +203,63 @@ def test_the_comparison_can_separate_two_verdicts_when_the_gate_carries_it():
 # ---------------------------------------------------------------------------
 
 
-def test_three_different_worlds_return_one_identical_verdict():
-    """THE GAP, stated as an equality nobody should be able to produce."""
+def test_three_different_worlds_now_return_THREE_DIFFERENT_VERDICTS():
+    """REWRITTEN 2026-09-19, WHICH IS WHAT THIS FILE ASKED FOR.
+
+    It used to assert the three verdicts were IDENTICAL, with the instruction
+    that if they ever differed the gate had gained a disclosure witness and the
+    test should be rewritten rather than deleted. It has, and this is that
+    rewrite.
+
+    ``press.disclose`` now takes a third reading BETWEEN the click and the
+    dismissal -- the only instant at which disclosure exists to be seen -- and
+    reports it as ``witness``, alongside the verdict and never deciding it.
+    """
     verdicts = {mode: _press(mode)[1] for mode in WORLDS}
 
+    # PERMISSION IS UNCHANGED IN ALL THREE, which is the half that must not
+    # have moved: the witness is a READING, not a fifth condition.
     for mode, verdict in verdicts.items():
         assert verdict.get("permitted") is True, mode
 
-    assert verdicts["opens"] == verdicts["misses"] == verdicts["dialog"], (
-        "if these ever differ, the gate has gained a disclosure witness and "
-        "this test should be REWRITTEN rather than deleted"
-    )
+    assert verdicts["opens"]["witness"]["disclosed"] is True
+    assert verdicts["dialog"]["witness"]["disclosed"] is True
+    assert verdicts["misses"]["witness"]["disclosed"] is False
+
+    # And the three are no longer one object.
+    assert verdicts["opens"] != verdicts["misses"]
+    assert verdicts["dialog"] != verdicts["misses"]
 
 
-def test_the_distinguishing_state_exists_in_the_page_and_is_never_read():
-    """THE FIX IS CHEAP, AND THIS IS THE LINE THAT SHOWS IT.
+def test_a_miss_is_reported_as_a_miss_and_not_as_a_failure():
+    """A permitted press that disclosed nothing is still a permitted press.
 
-    At the instant Escape is pressed the three pages hold DIFFERENT states.
-    The information is not missing from the world; it is missing from the
-    verdict.
+    The wording matters: ``disclosed: False`` must not read as a refusal, or
+    the next caller will treat an uninformative press as an unsafe one and the
+    witness will have become the fifth condition it was built not to be.
+    """
+    _, verdict = _press("misses")
+    assert verdict["pressed"] is True
+    assert verdict["permitted"] is True
+    assert verdict["witness"]["disclosed"] is False
+    assert "miss" in verdict["witness"]["why"].lower()
+
+
+def test_an_unread_witness_is_undetermined_and_never_false():
+    """None is not False, for the same reason an unreadable counter is not a
+    zero: a reading that did not happen and a reading that saw nothing are
+    different facts and only one of them is evidence."""
+    assert press.witness_verdict(None, None)["disclosed"] is None
+    assert press.witness_verdict({}, {})["disclosed"] is None
+    assert press.witness_verdict({"a": 1}, {"b": 1})["disclosed"] is None
+
+
+def test_the_distinguishing_state_IS_NOW_READ():
+    """THE FIX LANDED, AND THIS IS THE LINE THAT SHOWS IT.
+
+    The three pages still hold different states at the open moment -- the
+    information was never missing from the world. It is now in the verdict
+    too.
     """
     pages = {mode: _press(mode)[0] for mode in WORLDS}
 
@@ -238,10 +276,12 @@ def test_the_distinguishing_state_exists_in_the_page_and_is_never_read():
     distinct = {tuple(sorted(p.state_at_dismissal.items())) for p in pages.values()}
     assert len(distinct) == 3, "three worlds, three states, at the open moment"
 
-    # And the gate's own two readings are equal on ALL THREE -- which is why
-    # check_closure passes for every one and says nothing about any of them.
+    # AND THE GATE NOW READS THE CONTROL THREE TIMES, not twice. The third is
+    # the one taken while the disclosure is still open.
     for mode, page in pages.items():
-        assert page.reads == ["false", "false"], mode
+        assert len(page.reads) == 3, mode
+        assert page.reads[0] == "false", mode
+        assert page.reads[2] == "false", mode  # after the dismissal
 
 
 def test_a_one_attribute_witness_would_call_the_dialog_a_miss():
@@ -264,14 +304,32 @@ def test_a_one_attribute_witness_would_call_the_dialog_a_miss():
     assert dialog.state_at_dismissal["dialogs"] != miss.state_at_dismissal["dialogs"]
 
 
-def test_the_gate_takes_exactly_two_readings_and_both_are_outside_the_open_state():
-    """The count is the argument. Two readings cannot describe three states."""
-    page, _ = _press("opens")
+def test_the_gate_now_takes_THREE_readings_and_the_middle_one_is_inside():
+    """REWRITTEN 2026-09-19. The count was the argument and the count moved.
 
-    assert len(page.reads) == 2, (
-        "a third reading between the click and the Escape is exactly what a "
-        "disclosure witness is"
+    It used to assert exactly TWO readings, with the note that *a third reading
+    between the click and the Escape is exactly what a disclosure witness is*.
+    That is now what happens, so the assertion is inverted rather than removed
+    -- the sentence was right and the code caught up with it.
+
+    Two readings cannot describe three states. Three can, and the middle one is
+    taken at the only instant the disclosure exists.
+    """
+    page, verdict = _press("opens")
+
+    assert len(page.reads) == 3, (
+        "the witness reading between the click and the dismissal is gone; "
+        "without it the gate is blind to disclosure again."
     )
+    assert page.reads == ["false", "true", "false"], (
+        "the middle reading must be taken while the control is OPEN -- before "
+        "the press it is closed, and after the dismissal it is closed again."
+    )
+    assert verdict["witness"]["disclosed"] is True
+
+    # AND STILL EXACTLY ONE CLICK AND ONE DISMISSAL. The witness reads; it
+    # must never press. A third observation that cost a second interaction
+    # would be a second press wearing an observer's clothes.
     assert page.clicks == [SHAPE]
     assert page.keys == ["Escape"]
 
