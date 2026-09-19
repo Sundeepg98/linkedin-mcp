@@ -364,3 +364,63 @@ exists**: those two rows in their pre-correction form, which the check must be
 shown failing on before it is admitted anywhere. Not built here, for the same
 reason the `NOT_A_CORRECTION` entry is not: it is a `tests/` file and the hook
 refuses while the foreign reds stand.
+
+---
+
+## 10. THE GATE: WHAT I RAN, AND WHAT I DID NOT
+
+**I did NOT run the tree.** Naming that first, because the standing finding of
+the day is that every wave reported a subset as the gate.
+
+**WHAT I RAN, 14:24:18-14:32:24 by the box, single command:** every test file in
+`tests/` that READS the audit corpus at runtime, enumerated rather than chosen --
+`grep -rln "_audit" tests/*.py` filtered to the files that actually open, glob or
+`git ls-files` it. **37 files.**
+
+    2155 passed   4 failed   4 skipped   486.19s
+
+**ALL FOUR FAILURES ARE FOREIGN TO THIS WAVE**, and each is attributed rather
+than asserted:
+
+| failure | whose |
+|---|---|
+| `test_a_correction_is_findable_from_the_claim::test_every_marker_names_one_document_and_carries_a_reason` | `2026-09-19-search-admission-preconditions.md:184`, not written here |
+| `...::test_every_candidate_pair_is_declared_or_triaged` | 4 pairs, in `2026-09-19-the-three-ruling-requests-ruled.md`, `jobs.md` row 42 (twice) and `network.md:436` -- none of them this wave's prose; see s8 for the three that WERE |
+| `test_ci_shard::test_the_timings_table_still_prices_most_of_the_suite` | a timings pin last touched `7bcbcc6`, 2026-09-05; this wave added no test file |
+| `test_no_committed_identity::test_no_tracked_file_carries_a_real_identifier[_RECOVER_groups_admission.patch]` | **see below -- it is a SAFETY guard and it is live** |
+
+The 4 skips are environmental: 3 `test_uploads` symlink skips (`WinError 1314`,
+privilege not held) and 1 reader that does not exist yet by design.
+
+**A SUBSET IS STILL A SUBSET.** These 37 files are the ones that can SEE a change
+to `_audit/`, which is the only thing this wave changed -- no code, no test, no
+script. That is the argument for the scope, not a claim about the tree.
+
+### THE SAFETY RED, ROUTED WITH ITS MEASUREMENT AND ITS LIMIT
+
+    _RECOVER_groups_admission.patch: 4 unallowed email hit(s), 0 declared
+
+**MEASURED, 14:33:** the file is **UNTRACKED** -- `git ls-files --error-unmatch`
+returns *"did not match any file(s) known to git"* -- and its mtime is
+**14:22:50 today**. It did not exist in this tree at 14:18. **Nothing is
+committed and nothing is published.**
+
+**THE GUARD IS DOING EXACTLY WHAT IT WAS WIDENED TO DO.** Its `sweepable()`
+docstring: *"TRACKED plus UNTRACKED-NOT-IGNORED. WIDENED 2026-09-01 ... A guard
+against committing an identity has to see what is ABOUT TO BE committed;
+sweeping only what already was makes its first true answer arrive one commit
+late."* A `_RECOVER_*.patch` is a file staged for `git apply` -- precisely the
+"about to be committed" case.
+
+**AND THE STANDING RULE APPLIES: A RED ON THIS GUARD MEANS UNDECLARED, NEVER
+REAL.** Four hits, all rendered by the guard as the same 25-character redaction,
+which is the shape of ONE token repeated -- consistent with a synthetic address,
+and not established as one. The repair is a declaration or a rename, not alarm.
+
+**I CANNOT MEASURE ITS AUTHOR AND I AM NOT GOING TO INFER ONE.** `git log -1 --
+<path>` returns nothing, because the file is untracked -- so the one command the
+lead's own routing rule prescribes has no answer here. The filename and the
+timing point at the groups admission work; **that is exactly the
+inference-from-a-name that was recorded twice today as a routing error**, so it
+is offered as a lead to verify and not as an attribution. Whoever holds that
+patch should declare or rename the token before applying it.
