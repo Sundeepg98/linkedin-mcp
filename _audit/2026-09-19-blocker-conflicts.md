@@ -277,6 +277,70 @@ leaves it.
 
 ---
 
+## ADDENDUM, 09:43 -- what later evidence changed, and what it did not
+
+### A is SPENT, and the flag that reported it was true when taken
+
+Both files now read `SEARCH-RESULTS-SURFACE` for `N 194`. They read that
+because `c4d2be2`, above, put it there.
+
+**A re-report of A as a live contradiction is the fix's own audit trail being
+read as the defect.** The evidence line's note column records that the line
+PREVIOUSLY read `HASHTAG-EXISTENCE` -- that sentence is history, deliberately
+kept, and a scan that matches blocker names inside note text will find it and
+call it a disagreement. The flag was true when taken and false when read.
+Nothing further is owed on A.
+
+### C's evidence is now CITABLE, which it was not when this document was written
+
+The live hashtag readings existed only under `_audit/_scratch/`, which is
+gitignored and cannot carry a verdict. They are now tracked at
+`_audit/2026-09-19-hashtag-surface-live-evidence.md` (`e801c4b`), four loads
+each gated by a control that had to fire first.
+
+**This document's verdict on C did not and does not rest on them.** It rests on
+the row's text, the misquote, the article id and the seventeen-hour gap -- all
+document evidence, all citable when written. The live readings are a SECOND and
+independent line of support, and the wave that took them says plainly that its
+own hashtag evidence undermines the `HASHTAG-EXISTENCE` reading rather than
+supporting it: a feed with no hashtag surface gives that blocker nothing to
+have been about.
+
+**The stated bound travels with it and is not widened here.** That wave's first
+context classifier accounted for **0 of 15** raw-HTML occurrences of the word;
+the partition that replaced it places those strings inside or outside `<script>`
+and no finer. The zero-anchors result is stable across all four loads and does
+not depend on the classifier. What may NOT be concluded: that there is no
+hashtag anything, or anything about `network.md` rows 59-61 -- a feed with no
+hashtag anchors is consistent both with the follow surface having been retired
+and with its existing somewhere the feed does not link to.
+
+### Seven more rows recovered, at `ae1894b`
+
+Adjacent to the four conflicts rather than part of them, and recorded here
+because the same evidence file carries them:
+
+    PUBLISH-POST-AUDIENCE-PARAM   M C2                  1 of 1   ABSENT -> COMPLETE
+    MENTION-COMPOSITION-RULING    M C10, M C28          2 of 2   ABSENT -> COMPLETE
+    COLLABORATIVE-CONTENT         M C54 C55 C56 C76     4 of 4   ABSENT -> COMPLETE
+
+    UNASSIGNED  275 -> 268      ceiling lowered 278 -> 268, shown failing first
+
+**One of the seven was relayed to me against the wrong blocker, and the catch
+is the transferable part.** `M C55` was reported assignable to
+`MENTION-COMPOSITION-RULING` alongside C10 and C28, on the ground that
+`8a3df07` moved all three GAP -> EXCLUDED-RULED. That commit records a
+RETIREMENT REASON and names no blocker -- C10 and C28 retire on the typing
+ruling, C55 on `collaborator` being in `FORBIDDEN_PARAMETER_NAMES`. **A state
+change is not a blocker assignment.**
+
+Filing C55 there would have put three rows in a blocker the ledger publishes at
+two, tripping `test_no_blocker_recounts_higher_than_the_ledger_published` --
+NOT the ratchet. The two guards catch different halves and the over-count half
+is the dangerous one, because it means a committed source and the ledger
+disagree about set membership. C55 is a collaborators row, and the ledger's own
+correction puts `C54 C55 C56` on the post composer.
+
 ## What was applied, and what the numbers did
 
 Applied at `c4d2be2`, by editing `blocker-assignments.tsv` and re-running
@@ -325,6 +389,21 @@ assertion on that column would couple every census state edit to a map rebuild,
 and four waves are editing census slices concurrently. Whether that coupling is
 wanted is a decision for whoever owns the map. It is written down here because
 the gap is invisible from either test's name.
+
+### A third instance, and this one rode inside a commit of mine
+
+`ae1894b` regenerated the map and changed EIGHT lines for SEVEN recovered rows.
+The eighth is `M C52`: its blocker column is unchanged, and its `state_today`
+moved MEASURED-ABSENT -> EXCLUDED-RULED, picking up a sibling's `e801c4b`.
+
+Named here because the commit message did not name it. Same mechanism as the
+`P D25` line in `c4d2be2`: the map is derived, `--write` regenerates every
+column, and whichever census edits have landed since the last rebuild arrive
+with it. It moves the column TOWARD the census, never away.
+
+**Three instances now, on three different rows, inside one session.** The
+column is not occasionally stale; it is stale by default between rebuilds, and
+the rebuild is triggered by unrelated work.
 
 ### It reproduced within nine minutes, on a different row, unprompted
 
