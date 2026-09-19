@@ -61,8 +61,51 @@ difference. The one ADMITTED reading is unexplained and is the outlier.
 **THE LESSON IS THE ONE THIS FILE ALREADY TEACHES, AIMED AT ITSELF: a sweep
 row is a single reading.** Ten addresses measured once each is ten single
 readings, and the one that disagreed with a sibling probe was the only one that
-got repeated. The other nine are no better evidenced -- they simply have
+got repeated. The other nine were no better evidenced -- they simply had
 nothing contradicting them yet.
+
+## SECOND PASS, 2026-09-19, ORDER REVERSED -- and it settles the profile
+
+Run again with ``--reverse``: the control stays first and every other row gets
+a DIFFERENT PREDECESSOR than in pass one, so a row that agrees with itself has
+agreed across two contexts rather than reproduced one sequence.
+
+    nine rows            SAME VERDICT as pass one
+    the profile          REFUSED this time, where pass one read ADMITTED
+
+**So the profile is now REFUSED in 7 of 8 readings** across three probes and
+four different predecessors, and pass one's ADMITTED stands alone and
+unexplained. **The outlier was the sweep's own row**, which is the instrument
+this file is -- and it took a repeat to find that, exactly as the paragraph
+above predicted of itself.
+
+One thing that moved without mattering: the CONTROL's relation differs between
+passes while its admission does not. A relation is sensitive to query strings
+and canonicalisation; the verdict is not. Worth knowing before anyone treats a
+changed relation as a changed outcome.
+
+## WHAT EACH REFUSAL ACTUALLY REFUSES ON
+
+Reported as the RULE, never the url -- a landed address carrying a vanity slug
+is precisely what the identity apparatus exists to keep out of files.
+
+    /in/me/                          NO PATTERN MATCHES
+    /jobs/collections/recommended    NO PATTERN MATCHES
+    /jobs/collections/recommended/   NO PATTERN MATCHES
+
+**NOT ONE OF THE THREE IS A FORBIDDEN SUBSTRING.** That distinction is the
+whole of the ruling that follows, and it cuts against the natural reading:
+
+* a FORBIDDEN SUBSTRING is a deliberate class ban, checked before the allowlist
+  is consulted at all -- somebody decided;
+* NO PATTERN MATCHING is **the absence of a permission, not the presence of a
+  prohibition** -- nobody decided anything about this spelling.
+
+So the landed profile is not refused *because a slug is a name*; there is no
+rule to that effect. It is refused because the allowlist admits ``/in/me/`` and
+nothing else under ``/in/``, and the canonical spelling LinkedIn redirects to
+was never considered. This repository has a name for that: a GAP with a named
+blocker, not a decision.
 
 ## THE CONTROL
 
@@ -139,6 +182,33 @@ NOT_SWEPT: tuple[tuple[str, str], ...] = (
 )
 
 
+def _why_refused(url: str) -> str:
+    """WHICH RULE refuses this address -- reported as the rule, never the url.
+
+    **THE TOKEN PRINTED IS THIS PACKAGE'S OWN CONSTANT**, not a string read off
+    a page, so naming it discloses nothing. The landed url is NEVER printed:
+    one carrying his vanity slug is exactly what the identity apparatus exists
+    to keep out of files and transcripts, and a probe that printed it to
+    explain a refusal would reproduce the defect it documents.
+
+    The two refusals are different rulings wearing one word:
+
+    * a FORBIDDEN SUBSTRING is a deliberate class ban, checked before the
+      allowlist is consulted at all;
+    * NO PATTERN MATCHING is the absence of a permission rather than the
+      presence of a prohibition -- nobody ruled on it.
+    """
+    if readonly.is_read_url(url):
+        return "admitted"
+    exemptions = getattr(readonly, "_FORBIDDEN_SUBSTRING_EXEMPTIONS", {}) or {}
+    if url in exemptions:
+        return "exempted from a substring, then refused by NO PATTERN"
+    for token in getattr(readonly, "_FORBIDDEN_URL_SUBSTRINGS", ()) or ():
+        if token in url:
+            return "FORBIDDEN SUBSTRING %r (a deliberate class ban)" % token
+    return "NO PATTERN MATCHES (absence of a permission, not a prohibition)"
+
+
 async def _sweep_one(page, label: str, url: str) -> bool:
     """Returns True when the landing is still admitted."""
     print(f"\n--- {label}")
@@ -164,6 +234,7 @@ async def _sweep_one(page, label: str, url: str) -> bool:
     else:
         print("    the LANDED address is admitted: NO -- the server has come to")
         print("    rest where its own allowlist refuses")
+        print("    refused ON: %s" % _why_refused(str(landed)))
     return landed_admitted
 
 
@@ -186,7 +257,17 @@ async def main() -> int:
     try:
         async with BROWSER.session() as page:
             _own_page = page
-            for index, (label, url) in enumerate(SWEEP):
+            order = list(SWEEP)
+            if "--reverse" in sys.argv:
+                # SAME ROWS, DIFFERENT PREDECESSOR FOR EVERY ONE. A second pass
+                # in the same order would repeat each row's neighbour too, so a
+                # row that agrees with itself would only have shown that the
+                # sequence is reproducible.
+                control, rest = order[0], order[1:]
+                order = [control] + list(reversed(rest))
+                print("    ORDER REVERSED: every row has a different predecessor")
+                print("    than pass one. The control stays first.")
+            for index, (label, url) in enumerate(order):
                 ok = await _sweep_one(page, label, url)
                 if index == 0:
                     if not ok:

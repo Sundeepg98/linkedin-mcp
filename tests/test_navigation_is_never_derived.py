@@ -156,7 +156,7 @@ _SINK_ATTRS = frozenset(
 #: are standalone by design -- and the test below asserts the two definitions
 #: are byte-identical, so a fix or a widening cannot land in one and not the
 #: other.
-_SANITISERS = frozenset({"_shape_of", "_redact", "_relation"})
+_SANITISERS = frozenset({"_shape_of", "_redact", "_relation", "_why_refused"})
 
 #: CALLS WHOSE RESULT IS A NUMBER, whatever went in.
 _COUNTING_CALLS = frozenset({"len"})
@@ -690,14 +690,31 @@ def test_output_stays_green_on_a_value_that_carries_nothing(body, why):
 def test_a_sanitiser_entry_is_a_claim_about_a_contract():
     """PINNED, because the set is the one place this rule can be defeated.
 
-    Adding a name to ``_SANITISERS`` silences every site that calls it. Two
-    entries today, each earned: ``_shape_of`` returns a relation, and
-    ``_redact`` has its own both-directions test file. ``_member_path`` is NOT
-    there and must not be -- it returns a path, and a member path is an
-    identity. That single distinction is the whole of the third leak.
+    Adding a name to ``_SANITISERS`` silences every site that calls it. FOUR
+    entries today, each earned: ``_shape_of`` returns a relation, ``_redact``
+    has its own both-directions test file, ``_relation`` was admitted WITH the
+    test that proves it, and ``_why_refused`` follows that precedent rather
+    than ``_redact``'s original one -- see
+    ``test_why_refused_returns_only_its_own_literals``, which runs it over
+    urls carrying every identifying fragment and asserts none survives, plus a
+    control that it DISCRIMINATES rather than returning one literal for
+    everything.
+
+    **THE FOURTH ENTRY EXISTS SO A PROBE CAN SAY WHY A LANDING WAS REFUSED
+    WITHOUT PRINTING THE LANDED ADDRESS** -- and a landed address on that
+    surface can carry his vanity slug, which is the one string this whole
+    apparatus exists to keep out of files.
+
+    ``_member_path`` is NOT there and must not be -- it returns a path, and a
+    member path is an identity. That single distinction is the whole of the
+    third leak.
+
+    **THIS PIN IS THE REVIEW MOMENT AND IT WORKED:** adding the entry turned
+    this test red, which is how a silencing change gets looked at instead of
+    landing quietly.
     """
     assert _SANITISERS == frozenset(
-        {"_shape_of", "_redact", "_relation"}
+        {"_shape_of", "_redact", "_relation", "_why_refused"}
     ), _SANITISERS
     assert "_member_path" not in _SANITISERS
     assert "_path_of" not in _SANITISERS
@@ -827,3 +844,75 @@ def test_every_relation_definition_is_byte_identical():
     assert len(sources) >= 2, sources
     bodies = {body for _name, _text, body in sources}
     assert len(bodies) == 1, sorted(name for name, _text, _body in sources)
+
+
+# ---------------------------------------------------------------------------
+# ``_why_refused`` -- admitted to _SANITISERS 2026-09-19, WITH ITS CONTRACT.
+#
+# ``_redact`` was once admitted to this list on the strength of its NAME and
+# turned out to carry no slug rule at all. ``_relation`` was then admitted with
+# the test that proves it. This follows that precedent rather than the first
+# one: the entry above is worth nothing without the assertion below.
+# ---------------------------------------------------------------------------
+
+
+def _why_refused_source() -> str:
+    """The one definition, lifted from the sweep probe."""
+    path = REPO / "scripts" / "_probe_landed_address_sweep.py"
+    text = path.read_text(encoding="utf-8")
+    start = text.index("def _why_refused(")
+    end = text.index("\nasync def ", start)
+    return text[start:end]
+
+
+def test_why_refused_returns_only_its_own_literals() -> None:
+    """It reads a url and returns a RULE. No part of the url may survive.
+
+    The function exists so a probe can say WHY a landing was refused without
+    printing the landed address -- and a landed address on this surface can
+    carry his vanity slug, which is the single string the identity apparatus
+    exists to keep out of files and transcripts.
+
+    **SO THE CLAIM IS NOT "it usually returns a constant".** It is that NO
+    INPUT produces a return carrying any part of that input, and this runs the
+    adversarial ones.
+    """
+    from linkedin_server import readonly  # imported here: the rest of
+    # this file is pure AST work and must not need the package.
+    namespace: dict[str, object] = {"readonly": readonly}
+    exec(compile(_why_refused_source(), "<why_refused>", "exec"), namespace)
+    why_refused = namespace["_why_refused"]
+
+    base = "https://www.linkedin.com"
+    slug, urn, digits, thread = _IDENTIFYING_FRAGMENTS
+    cases = [
+        base + "/in/" + slug + "/",
+        base + "/in/" + slug + "/details/recommendations/",
+        base + "/feed/update/" + urn + "/",
+        base + "/messaging/thread/" + thread + "/",
+        base + "/jobs/view/" + digits + "/",
+        base + "/jobs/collections/recommended",
+        base + "/feed/",
+        base + "/in/me/edit/",
+        "",
+        "not-a-url-at-all",
+    ]
+    seen = set()
+    for url in cases:
+        result = why_refused(url)
+        seen.add(result.split(" ")[0])
+        assert isinstance(result, str)
+        for fragment in _IDENTIFYING_FRAGMENTS:
+            assert fragment not in result, (result, fragment)
+        assert "linkedin.com" not in result, result
+        assert "/in/" not in result, result
+        assert slug not in result, result
+
+    # THE CONTROL: it must actually DISCRIMINATE. A function that returned one
+    # literal for everything would pass every assertion above and be useless,
+    # which is the shape ``_redact`` was admitted in.
+    assert len(seen) >= 2, (
+        "_why_refused returned the same verdict for every case, including an "
+        "admitted address and a substring-banned one. A sanitiser that cannot "
+        "tell them apart is not reporting a rule."
+    )
