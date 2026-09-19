@@ -358,6 +358,54 @@ in that pool carry standing rulings that are not obvious from the row text:
 
 ---
 
+## 7. TWO CORRECTIONS TO THIS WAVE'S BRIEF, AND WHAT THEY DID TO THE VERDICTS
+
+Both arrived mid-wave. Recorded because one of them is the reason section 3
+declines rather than files.
+
+**(a) "UNASSIGNED rows are column 2 EMPTY" is wrong; they carry the literal
+string.** Reproduced here:
+
+    rows with EMPTY column 2       : 0
+    rows with literal UNASSIGNED   : 23   (24 before this wave's filing)
+
+An emptiness filter returns nothing, silently. **This wave never hit the defect**
+-- every extraction used the literal `UNASSIGNED`, so no candidate was lost to
+it. Stated because "I would have caught it" is not a measurement and the file
+above is.
+
+**(b) The 24 unassigned rows are NOT the same set as the open published slots.**
+The totals matching is a coincidence: some published slots have no row in the
+corpus, and some unassigned rows have no slot. **So the arithmetic guarantees
+that some published slot in this census has no row behind it.**
+
+**Sections 3 and 4 are two of those slots, and the correction is why section 3
+is a decline.** `FOUND-A-JOB-FLOW` is short exactly one row, there were 23 rows
+still unassigned, and `P I16` is a clean-looking fill. That reasoning is the one
+the coincidence makes unsound, and it is the reasoning the row's boundary
+currency and the ledger's closed 120-sum both refuse. The count did not get to
+decide.
+
+**(c) On the seven suggested candidates: TWO of them have this shape, not one.**
+The brief warned that one of `J 78 / J 79 / J 80 / J 150 / M M5 / M M13 / M M47`
+has a committed source naming a DIFFERENT row id for the blocker it most
+resembles. Measured, two do:
+
+* `M M5` resembles `MESSAGE-ADDRESSING`; `_audit/2026-09-19-blocker-table-refresh.md:37`
+  names `M 1` -- and section 4.2 measures that `M 1` was never in the 409.
+* `M M47` "Respond to a Recruiter InMail" resembles `INMAIL-COMPOSE-SURFACE`;
+  that blocker closed 1 of 1 on `J 129` "InMail the job poster after applying".
+
+Neither changes a verdict here. `M M5` was filed against a third blocker on its
+own stated condition, and the resemblance test was never what carried it.
+
+**ON OVERLAP WITH THE SIBLING WAVE.** `M M5` is the row where this wave and the
+row-first pass can be compared: it is the only row filed here, and it sits in
+the shared pool. A matching filing is a cross-check, not a collision; a
+different one is the finding. No attempt was made to avoid the overlap.
+
+---
+
 ## PROVENANCE
 
 * No write fired. No browser opened. No `git add -A`, no `--no-verify`.
