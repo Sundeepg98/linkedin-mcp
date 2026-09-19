@@ -1,6 +1,6 @@
 # SEARCH-RESULTS: the two pre-admission conditions, discharged. NO PATTERN LANDED.
 
-> Wave `search-admission`. All measurements taken 2026-09-19 **12:28-12:44 by
+> Wave `search-admission`. All measurements taken 2026-09-19 **12:28-12:46 by
 > the box** (`date`, pasted at each run), against the working tree at
 > `9421af9`. `linkedin_server/readonly.py` is **unmodified** -- verify with
 > `git diff --stat linkedin_server/readonly.py`, which is empty.
