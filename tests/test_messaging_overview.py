@@ -17,9 +17,84 @@ beats no tool.
 """
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 
 from linkedin_server import shape
+
+REPO = pathlib.Path(__file__).resolve().parents[1]
+
+#: THE DRAIN POINT. Everything sanctioned inside it sits behind the two-call
+#: token gate and cannot be reached from a read path, which is why this file
+#: subtracts it rather than reasoning about its contents.
+_TOKEN_GATED_DRAIN = ("linkedin_server/writes.py", "perform")
+
+
+def _read_path_gated(entries, source_for):
+    """Sanctioned mutations a READ PATH owns that hand LinkedIn real input.
+
+    **THIS REPLACED TWO HARD-CODED COUNTS AND ONE BROKEN PROXY**, and the
+    three failed for one reason, so they are repaired once rather than three
+    times. What this file actually cares about is not how many mutating calls
+    the package contains -- that is a fact about ``readonly.py``, pinned
+    entry-by-entry in ``tests/test_readonly.py`` where the person who widens
+    the list already has the file open. What it cares about is whether
+    anything reachable from the messaging surface can put input in front of
+    LinkedIn. That is a question about CLASSES, and it has an answer that
+    maintains itself.
+
+    THE TAXONOMY IS IMPORTED, NOT REBUILT. ``test_probe_interaction_budget``
+    already splits every verb the scanner knows into OPEN (a read in effect:
+    click, hover, evaluate) and GATED (persists, sends, or hands LinkedIn
+    input a human did not approve), and it derives the gated half BY
+    SUBTRACTION -- so a detector class added to
+    ``readonly._MUTATION_CALL_PATTERNS`` tomorrow is gated here without an
+    edit. Writing a fourth count in this file would have been the same
+    mistake in a new place.
+
+    AND ``press`` IS SPLIT BY ITS KEY, read from the source rather than
+    assumed. ``press("Escape")`` dismisses and ``press("Enter")`` submits;
+    they are the same call and opposite acts, so the argument is what decides
+    it. That split is the sibling's too, applied to the package instead of to
+    ``scripts/``.
+
+    Args:
+        entries: ``(path, function, kind)`` triples -- ``SANCTIONED_MUTATIONS``
+            in practice.
+        source_for: ``path -> source text``. A parameter so the control below
+            can run this over a tree that does not exist.
+    """
+    from linkedin_server import readonly
+    from tests.test_probe_interaction_budget import DISMISS_KEYS, gated_classes
+
+    gated = gated_classes()
+    offenders = []
+    for path, function, kind in entries:
+        if (path, function) == _TOKEN_GATED_DRAIN:
+            continue
+        if kind not in gated:
+            continue
+        source = source_for(path)
+        texts = [
+            text
+            for lineno, found_kind, text in readonly.scan_source_for_mutations(source)
+            if found_kind == kind
+            and readonly.enclosing_function(source, lineno) == function
+        ]
+        if (
+            kind == "press"
+            and texts
+            and all(any(key in text for key in DISMISS_KEYS) for text in texts)
+        ):
+            continue
+        offenders.append((path, function, kind))
+    return offenders
+
+
+def _package_source(path):
+    return (REPO / path).read_text(encoding="utf-8")
+
 
 LIST_URL = "https://www.linkedin.com/messaging/"
 THREAD_URL = "https://www.linkedin.com/messaging/thread/2-NjY1ZDkwYWEt==/"
@@ -238,43 +313,84 @@ def test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted():
     Those were the same sentence until that call and are not any more.
 
     What still holds is why this is a disclosure and not an incident:
-    rendering a composer is not sending. There is no typing call site, and the
-    mutation allowlist holds exactly two clicks, neither of which is a send.
+    rendering a composer is not sending. Nothing a read path can reach types,
+    sends, uploads or chooses -- asserted below against the allowlist itself
+    rather than described here, for the reason the assertion's own comment
+    gives.
+
+    **THAT SENTENCE READ "there is no typing call site, and the mutation
+    allowlist holds exactly TWO CLICKS, neither of which is a send" UNTIL
+    2026-09-19.** Both halves had gone false: a typing call site was
+    sanctioned on 2026-09-01, and the allowlist holds three clicks since the
+    disclosing-press ruling. It is quoted rather than deleted because that is
+    how this repository records a corrected claim -- and it is worth reading
+    twice, because the prose went stale in exactly the direction the numbers
+    underneath it did, in the same file, unnoticed for the same reason.
     """
     from linkedin_server import readonly
 
     assert readonly.is_read_url("https://www.linkedin.com/messaging/compose/?body=hi") is False
     assert readonly.is_read_url("https://www.linkedin.com/messaging/") is True
-    # THREE SINCE 2026-09-01, when one page.fill entered for publish_post.
-    # The number is what this asserts; that none of them is reachable from
-    # a READ path is what it means. A fill inside the gated write cannot be
-    # reached by this call and the count moving does not change that.
-    # FOUR SINCE 2026-09-02, when the profile editor's select_option was
-    # sanctioned. The number is what makes growth visible in a diff; the
-    # load-bearing half is that an unlisted mutating call still fails.
-    # FIVE SINCE 2026-09-04, when set_input_files was sanctioned. That one
-    # matters to THIS test more than the others did: the compose surface draws
-    # two file inputs, so the entry this count records is reachable in
-    # principle from the very page this file is about. It is not reachable
-    # from HERE -- writes.UPLOAD_ACTIONS is empty and the call sits behind the
-    # two-call token gate -- and that is the property below, asserted rather
-    # than assumed.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 5
-    # NOT ALL CLICKS ANY MORE, and the assertion is re-aimed at the property
-    # this test is actually about rather than loosened. It read
-    # ``all(kind == "click" ...)`` until 2026-09-01, which was a true
-    # statement about the whole allowlist and a PROXY for the thing that
-    # matters here: that nothing on a READ path can type. The fill that
-    # arrived is inside writes.perform, behind the two-call token gate, and
-    # this call cannot reach it -- so the proxy broke while the property held.
+    # THE COUNT THAT STOOD HERE IS GONE, 2026-09-19. It read
+    # ``assert len(readonly.SANCTIONED_MUTATIONS) == 5``, under a comment
+    # block that had been extended THREE TIMES -- "THREE SINCE 2026-09-01",
+    # "FOUR SINCE 2026-09-02", "FIVE SINCE 2026-09-04" -- each time by
+    # somebody who had just found it red.
     #
-    # Asserted directly now: every entry that is NOT a click lives in
-    # writes.perform, so no read path owns one.
-    for path, function, kind in readonly.SANCTIONED_MUTATIONS:
-        if kind != "click":
-            assert (path, function) == ("linkedin_server/writes.py", "perform"), (
-                path, function, kind,
-            )
+    # **THE LIST WAS AT SEVEN AND THIS SAID FIVE**, and it had been wrong for
+    # the whole of the disclosing-press ruling without anybody noticing,
+    # because nothing that moves the list reads this file. That is the defect,
+    # and it is not a defect of care: a count OF ANOTHER MODULE, asserted in a
+    # file about messaging, has no reader at the moment it goes stale. It is
+    # found by whoever runs the suite next, who is the one person with no
+    # standing to say what the right number is -- so they bump it, which is
+    # the fourth version of the same sentence and stale again by the next
+    # ruling.
+    #
+    # THE SAME LITERAL IS KEPT, DELIBERATELY, IN tests/test_readonly.py, and
+    # the difference is OWNERSHIP rather than arithmetic. That file's subject
+    # IS the boundary: it pins SANCTIONED_MUTATIONS entry-by-entry, in order,
+    # so an admission cannot arrive quietly there and the person who widens
+    # the list already has the file open. A count belongs in the file that
+    # owns the claim. This file does not own it and never did.
+    #
+    # WHAT THIS FILE OWNS is the question a messaging test should be asking,
+    # and the assertion below asks it instead.
+    #
+    # -----------------------------------------------------------------
+    #
+    # THE PROXY BELOW BROKE FOR THE SECOND TIME, and its own comment predicted
+    # the first. It read ``all(kind == "click" ...)`` until 2026-09-01, was
+    # re-aimed to "every entry that is NOT a click lives in writes.perform",
+    # and the comment recorded the lesson exactly right -- *"the proxy broke
+    # while the property held"*. Then press.disclose's Escape landed on a READ
+    # path on 2026-09-19 and broke the replacement the same way. **This
+    # failure was masked**: it sits after the count assertion, so the suite
+    # reported the count and never reached it.
+    #
+    # A SHAPE-BASED PROXY FOR A CLASS-BASED PROPERTY WILL BREAK EVERY TIME THE
+    # CLASSES MOVE. "not a click" and "lives in writes.perform" are both
+    # descriptions of the list AS IT HAPPENED TO BE. The property underneath
+    # has never changed: nothing reachable from a read path may hand LinkedIn
+    # input. So it is asserted as a CLASS question, against the taxonomy that
+    # already exists and already derives itself -- see _read_path_gated above.
+    #
+    # THE DECLARED CEILING IS ZERO, and zero is the only ceiling here that is
+    # not a ratchet. Any other number would have to be raised one admission at
+    # a time by whoever met it; this one cannot be raised at all without
+    # somebody arguing that a read path may type, upload or submit -- which is
+    # a ruling, made in readonly.py and in test_probe_interaction_budget's
+    # OPEN_CLASSES, neither of which is this file. That instrument states the
+    # refusal in its own words: *"Do NOT widen OPEN_CLASSES to clear this:
+    # that silences the verb everywhere at once."*
+    assert _read_path_gated(readonly.SANCTIONED_MUTATIONS, _package_source) == [], (
+        "a sanctioned mutation outside the token-gated drain point is in a "
+        "GATED verb class -- it persists, sends, or hands LinkedIn input a "
+        "human did not approve, and it is reachable from a read path. That "
+        "is the boundary this file is about. Do not widen OPEN_CLASSES or "
+        "DISMISS_KEYS to clear it: they are read by every probe in the "
+        "repository and widening one silences the verb everywhere at once."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -399,34 +515,149 @@ def test_anything_outside_the_named_set_is_refused_before_a_selector_exists(name
     assert "not a messaging filter" in str(excinfo.value)
 
 
-def test_the_click_is_on_the_sanctioned_list_and_the_list_is_still_short():
+def test_the_click_is_on_the_sanctioned_list_and_is_a_read_in_effect():
     """A click that is not on the allowlist does not exist; one that is has to
-    be readable there. The COUNT stays pinned so a third has to argue for
-    itself rather than arriving quietly."""
-    from linkedin_server import readonly
+    be readable there, AND has to be the kind of act this file can justify.
 
-    assert (
+    **RENAMED FROM ``..._and_the_list_is_still_short`` ON 2026-09-19**, and the
+    rename is the honest half of the edit rather than tidying. That name was
+    backed by ``len(readonly.SANCTIONED_MUTATIONS) == 5`` over a list holding
+    seven, and it could not have been backed by anything better: *short* with
+    no stated maximum is unfalsifiable, so the assertion under it was always
+    going to be a number somebody bumped. Two things were wrong and only one
+    was the number.
+
+    WHAT THE OLD NAME WAS REACHING FOR is in its own comment -- *"the COUNT
+    stays pinned so a third has to argue for itself rather than arriving
+    quietly"* -- and that job is done, better, in ``tests/test_readonly.py``,
+    which pins ``SANCTIONED_MUTATIONS`` ENTRY BY ENTRY IN ORDER. An admission
+    cannot arrive quietly past a full-content pin, and when it fails it prints
+    which entry arrived instead of which digit moved.
+
+    SO THIS TEST KEEPS THE HALF IT OWNS: this click, on this surface, is on
+    the list, and it is an OPEN-class verb -- a read in effect. That is the
+    argument that admitted it in the first place (*"counted by EFFECT rather
+    than by verb, a view filter is a read"*), and asserting the argument is
+    strictly more than asserting the membership.
+    """
+    from linkedin_server import readonly
+    from tests.test_probe_interaction_budget import gated_classes
+
+    entry = (
         "linkedin_server/dom.py",
         "activate_messaging_filter",
         "click",
-    ) in readonly.SANCTIONED_MUTATIONS
-    # THREE SINCE 2026-09-01, when one page.fill entered for publish_post.
-    # The number is what this asserts; that none of them is reachable from
-    # a READ path is what it means. A fill inside the gated write cannot be
-    # reached by this call and the count moving does not change that.
-    # FOUR SINCE 2026-09-02, when the profile editor's select_option was
-    # sanctioned. The number is what makes growth visible in a diff; the
-    # load-bearing half is that an unlisted mutating call still fails.
-    # FIVE SINCE 2026-09-04, when set_input_files was sanctioned. That one
-    # matters to THIS test more than the others did: the compose surface draws
-    # two file inputs, so the entry this count records is reachable in
-    # principle from the very page this file is about. It is not reachable
-    # from HERE -- writes.UPLOAD_ACTIONS is empty and the call sits behind the
-    # two-call token gate. THE COUNT IS ALL THIS TEST ASSERTS ABOUT IT: the
-    # reachability property is asserted in
+    )
+    assert entry in readonly.SANCTIONED_MUTATIONS
+    # THE ARGUMENT, NOT JUST THE MEMBERSHIP. If this ever became a gated verb
+    # -- a fill, a select, a submit -- it would still be "on the list" and the
+    # membership assertion above would still pass, while the thing that made a
+    # click on a READ path defensible would be gone. Derived from the shared
+    # taxonomy, so the day a verb changes class this notices.
+    assert entry[2] not in gated_classes(), (
+        "the messaging filter's verb has moved into the GATED classes. The "
+        "permission granted on this surface was 'may activate one of these "
+        "seven pills', defended by a view filter being a read IN EFFECT. A "
+        "gated verb is not that, and this needs a ruling rather than an edit."
+    )
+    # THE SECOND COPY OF THE COUNT WAS HERE and is gone with the first. Its
+    # own comment said the quiet part: *"THE COUNT IS ALL THIS TEST ASSERTS
+    # ABOUT IT"* -- so when the number went stale, this test asserted nothing
+    # about the list at all, and still passed for three admissions before it
+    # stopped. It also carried the same three-paragraph ratchet log as its
+    # twin, copied verbatim, which is what a number duplicated across files
+    # looks like once it starts being maintained by whoever tripped over it.
+    #
+    # THE REACHABILITY PROPERTY IT DEFERRED TO still lives in
     # test_the_url_guard_still_refuses_compose_even_though_it_was_not_consulted
-    # above, and is not repeated here as prose.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 5
+    # above and is NOT repeated here, for the reason that file's sibling gives
+    # about overlapping guards: two checks over one claim disagree eventually,
+    # and the disagreement is worse than the gap. This test keeps the half
+    # that is local to the messaging surface and nothing else.
+
+
+def test_the_read_path_rule_is_shown_refusing_and_shown_allowing():
+    """THE CONTROL. A guard that has never been seen failing certifies nothing.
+
+    ``_read_path_gated`` returns ``[]`` on the live tree, which is the same
+    answer a rule with a typo returns, and the same answer one that silently
+    subtracts everything returns. So it is run over SYNTHETIC lists whose
+    correct answers are known, with a source lookup that describes a tree
+    which does not exist.
+
+    THE FOUR CASES ARE THE FOUR DECISIONS IT MAKES, and the last two are the
+    ones that would go wrong silently: a press is judged by its KEY, so the
+    same call is allowed with Escape and refused with Enter. If that split
+    ever inverted, the live assertion would go on passing while a read path
+    could submit.
+    """
+    sources = {
+        "linkedin_server/dom.py": 'async def f():\n    await page.click("x")\n',
+        "linkedin_server/press.py": (
+            'async def disclose():\n    await page.keyboard.press("Escape")\n'
+        ),
+        "linkedin_server/submit.py": (
+            'async def send():\n    await page.keyboard.press("Enter")\n'
+        ),
+        "linkedin_server/typer.py": 'async def t():\n    await page.fill("a", "b")\n',
+    }
+
+    # 1. AN OPEN VERB ON A READ PATH -- allowed. This is the live case.
+    assert _read_path_gated(
+        [("linkedin_server/dom.py", "f", "click")], sources.get
+    ) == []
+
+    # 2. A GATED VERB INSIDE THE DRAIN POINT -- allowed, because the token
+    #    gate is what bounds it and no read path reaches it.
+    assert _read_path_gated(
+        [("linkedin_server/writes.py", "perform", "fill")], sources.get
+    ) == []
+
+    # 3. A GATED VERB ON A READ PATH -- REFUSED. The failure this exists for,
+    #    and the one that would have to be argued rather than edited.
+    assert _read_path_gated(
+        [("linkedin_server/typer.py", "t", "fill")], sources.get
+    ) == [("linkedin_server/typer.py", "t", "fill")]
+
+    # 4. PRESS, SPLIT BY ITS KEY. Escape dismisses and is allowed; Enter
+    #    submits and is refused. Same verb, same shape, opposite answers --
+    #    and if these two ever returned the same thing, the split has stopped
+    #    working and the live assertion above has stopped meaning anything.
+    assert _read_path_gated(
+        [("linkedin_server/press.py", "disclose", "press")], sources.get
+    ) == []
+    assert _read_path_gated(
+        [("linkedin_server/submit.py", "send", "press")], sources.get
+    ) == [("linkedin_server/submit.py", "send", "press")]
+
+
+def test_the_live_press_entry_really_is_the_escape_and_not_a_submit():
+    """The control above proves the RULE splits; this proves the TREE is on
+    the allowed side of the split, by reading the call rather than trusting
+    the entry.
+
+    ``readonly.SANCTIONED_MUTATIONS`` grants ``(press.py, disclose, press)``
+    and a triple cannot say which key it sends. The disclosing-press ruling
+    turns on the key being a dismissal -- *"the only key it sends is a
+    dismissal; a press that sent Enter would submit"* -- so the key is read
+    here from the source, which is the only place that fact exists.
+    """
+    from linkedin_server import readonly
+    from tests.test_probe_interaction_budget import DISMISS_KEYS
+
+    source = _package_source("linkedin_server/press.py")
+    presses = [
+        text
+        for _lineno, kind, text in readonly.scan_source_for_mutations(source)
+        if kind == "press"
+    ]
+    assert presses, "press.py has no press call; the sanction now grants nothing"
+    for text in presses:
+        assert any(key in text for key in DISMISS_KEYS), (
+            f"a press in press.py is not a dismissal: {text.strip()!r}. The "
+            "entry in SANCTIONED_MUTATIONS was admitted on the ruling that "
+            "the only key it sends closes a disclosure."
+        )
 
 
 def test_the_compose_surface_is_still_refused_after_all_of_this():
