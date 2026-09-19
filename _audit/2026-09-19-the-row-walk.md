@@ -578,6 +578,48 @@ Ranked by how informative the disagreement would be.
    mis-assignment inside the recovered 385. **A census with one wrong filing in
    it is worse than one with a hole**, and this is the only one I found.
 
+## 6b. TWO ROW-ID ENUMERATIONS SWEPT AFTERWARDS, BECAUSE THAT CLASS HAS BEATEN THIS CAMPAIGN TWICE
+
+Row-id enumerations are the strongest class in this corpus short of the ledger,
+and two separate passes have been refuted by one they had not swept. So all four
+slices were re-swept for enumerations covering my 24. **Two were found. Neither
+changes a verdict; both sharpen one.**
+
+**`profile.md:563-566` -- section 5.3, "Surfaces nobody in this repo has ever
+named (64)":**
+
+    A23, A24, B7-B10, C8, D24, D25, D27-D29, E6, E7, F1, F2, F6-F9, G2, G6, G7,
+    H1-H11, I13-I16, J1-J4, K8-K10, L1-L8, M11, M12, N12-N14, N25, N30, N31,
+    O3, O5, O23
+
+It covers `P B8` and `P D24`. **It cannot force either** -- 64 rows against any
+blocker is the non-co-extensive case my section-2 rule excludes. What it does do
+is put `B7`-`B10`, `J1`-`J4` and `K8`-`K10` in ONE enumerated bucket, which is
+where both duplicate pairs I rely on live: `B8`/`K9` (section 4.23) and
+`B7`/`J2` (section 4.24). **Both pairs are intra-bucket, so neither rests on my
+pairing them across unrelated parts of the slice.**
+
+**`network.md:1026` -- section 9.2, "Attempted and NOT reached -- named holes":**
+
+> **Hashtag following** (`answer/a528144`) | 404 on all four URL forms tried |
+> **Rows 59-61** are a floor, not a saturation claim
+
+**This makes the `N 61` anomaly worse, and it is the reason I am reporting it
+rather than leaving it.** The census groups 59, 60 and 61 as ONE family with one
+cause. The ledger amendment enumerates `HASHTAG-EXISTENCE`'s three published rows
+as `N 194`, `C 11`, `C 52` -- **none of the three.** So either all three of
+59-61 belong to that blocker (and it is published at 3 with the wrong three), or
+none does. **`N 61` alone is the one combination no source supports**, and it is
+the combination the map currently holds.
+
+The same section also carries a named hole for `N 51`: *"**Mute article** ...
+the body served contained zero mute content across three URL forms. Mute's
+EXISTENCE is established from two other directly-fetched pages; the exact mute
+mechanics are not."* Consistent with section 4.16 -- mute is a measured hole in
+the census, not a blocker in the division.
+
+---
+
 ## 7. WHAT THIS DOES NOT CLAIM
 
 Locating a row does not measure it, unblock it or schedule it. All 24 remain GAP
