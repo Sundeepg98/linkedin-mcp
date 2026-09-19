@@ -3084,3 +3084,59 @@ STANDING INSTRUCTION and a stale one is worse than an absent one:
 **One definition, one call site, both inside `linkedin_publish_post`** -- so
 14.2's gate is still exactly as narrow as it describes. And both files still
 pass at this tree, run together with the three surfaces they guard: **63 passed**.
+
+### 16.5 SUCCESSOR TO 16.3 -- "no git-level fix" is wrong. It is a TRADE.
+
+**Appended rather than edited into 16.3, under this register's own law: an entry
+that is TRUE but one inference from being WRONG gets a successor, never a
+charitable reading.** 16.3 is accurate about the window it measured and its
+closing sentence overstates the conclusion. The correction came from the lead,
+within the hour, and it is the useful half.
+
+16.3 says the window is between the READ and the COMMIT and that no flag moves
+it. True. It then implies there is nothing to choose between the two commit
+forms. **There is, and it is a choice about WHICH NEIGHBOUR BEHAVIOUR YOU ARE
+EXPOSED TO:**
+
+    git commit --only <paths>   commits the WORKING TREE for those paths
+                                PROTECTS from a neighbour's STAGED files
+                                EXPOSES to their UNSTAGED edits inside yours
+
+    git commit (plain)          commits the INDEX exactly as staged
+                                PROTECTS from a neighbour's working-tree edits
+                                EXPOSES to anything they STAGED
+
+Neither is airtight. **So the form is chosen by what the neighbours around that
+file actually DO, not by which flag is safer in general:**
+
+* **A shared census slice or register -- several waves EDITING, rarely staging
+  -- takes the INDEX form.** That is the case 16.3 lost: the neighbour's line
+  arrived in the working tree, which is precisely the side `--only` exposes.
+* **Your own new module while others stage freely takes `--only`.** That is the
+  case it WON in the same commit, keeping two other waves' dirty census slices
+  out.
+
+**THE REFUSAL THAT MAKES THE INDEX FORM SAFE, and it is the transferable part:**
+stage by name, then require
+
+    git diff --cached --name-only
+
+to equal EXACTLY your one path, and abandon-and-reset the path if it does not.
+That does not close the window either -- it narrows it to the check-to-commit
+gap. **What it changes is the FAILURE MODE: a rider becomes an ABORT instead of
+a surprise**, and an abort is recoverable where a mis-attributed commit is
+something you must then credit rather than undo.
+
+**WHAT DOES NOT CHANGE, and it is the part that actually holds:** when you lose
+the race anyway, adopt and credit, never rewrite. Rewriting HEAD in a tree
+several waves are writing trades a mis-attributed line for something genuinely
+hard to undo. 16.3's resolution stands; only its last sentence needed this.
+
+**AND NOTE HOW THIS ENTRY CAME TO EXIST.** 16.3 was committed as a register
+section -- a standing instruction -- roughly four minutes before it was
+corrected. It was not caught by its author re-reading it. **A peer who had been
+running the other form behind a refusal read the claim and knew it was a trade
+from having paid for both sides.** That is the register's own section 3 disease
+in the mildest possible form: an entry that measured its own instance correctly
+and generalised one step too far, which is exactly the class a second reader
+catches and the author cannot.
