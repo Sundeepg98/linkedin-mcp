@@ -103,6 +103,74 @@ _JS = """
 _SPENT: list[int] = []
 
 
+async def _read_both_badges(page):
+    """Both nav badges, REDUCED TO TWO PAIRS OF SCALARS AT THE BOUNDARY.
+
+    Copied from ``_read_both_badges`` in the predecessor probe, including the
+    reason: the shaped badge dicts carry ``why``, ``saw`` and ``shaped_label``
+    -- fields that can hold text LinkedIn wrote -- so a printer handed the whole
+    dict can reach them, and a later edit adding one more ``.get`` would be a
+    real leak no guard could see. Handing back scalars closes that in the
+    SIGNATURE rather than in a habit.
+
+    ``page.content()`` is a text call, so the markup taints the shaped reading
+    and everything unpacked from it. Terminating that here, behind a function
+    whose return type is four primitives, is what keeps it out of ``_run``.
+    """
+    markup = await page.content()
+    messaging = shape.messaging_badge(markup)
+    invitation = shape.invitation_badge(await dom.read_invitation_badge(page))
+    return (
+        (messaging.get("new_since_last_visit"), messaging.get("state")),
+        (invitation.get("pending"), invitation.get("state")),
+    )
+
+
+async def _census(page) -> list[tuple[str, int, int, bool]]:
+    """The whole census, REDUCED TO PRIMITIVES AT THE BOUNDARY.
+
+    Returns one ``(label, total, undisplayed, failed)`` tuple per probe, where
+    ``label`` is a string from ``_PROBES`` -- written in this file -- and the
+    rest are an int, an int and a bool. **No printer downstream ever touches
+    the evaluate result object.**
+
+    **WHY THIS IS A SEPARATE FUNCTION RATHER THAN A LOOP IN ``_run``, and it is
+    not to clear a red by renaming.** The first version evaluated and printed
+    in one scope, and ``test_page_text_is_never_printed`` refused this file on
+    two sites the moment the commit made it tracked. The mechanism is the one
+    ``196394d`` and ``_read_both_badges`` already document in this package:
+    **the taint engine tracks a name ACROSS THE WHOLE MODULE, not per scope,
+    and it follows the BINDING rather than the meaning.** ``page.evaluate`` is
+    a text call, so its result taints whatever it is bound to, and everything
+    unpacked out of it one line later, all the way into the prints -- even
+    though not one of those sites ever held a label, because the JavaScript
+    returns nothing but integers and booleans.
+
+    A rename would have been the laundering this repository has a scar for. The
+    honest fix is to stop handing a printer a page-derived object at all, which
+    is what the return type above does: it closes the door in the SIGNATURE, so
+    a future edit that wanted to print a label would have to change the type
+    and show up in a diff.
+
+    Note that the guard is RIGHT to refuse the original shape even though
+    nothing leaked. It cannot know what the JavaScript returns, and it exists
+    because the operator's own slug reached a transcript three times. A
+    structural guard firing on a file with nothing to hide is the guard
+    working, not a false positive to be waived.
+    """
+    measured = await page.evaluate(_JS, [[n, s] for n, s in _PROBES])
+    out: list[tuple[str, int, int, bool]] = []
+    for label, _selector in _PROBES:
+        entry = (measured or {}).get(label) or {}
+        out.append((
+            label,
+            int(entry.get("total") if entry.get("total") is not None else -1),
+            int(entry.get("hidden") if entry.get("hidden") is not None else -1),
+            bool(entry.get("failed")),
+        ))
+    return out
+
+
 async def _run(page) -> None:
     print("\n1. BEFORE THE SPEND -- both badges, off the feed")
     landed = await BROWSER.goto(page, FEED_URL)
@@ -110,16 +178,11 @@ async def _run(page) -> None:
         print("    AUTH WALL. Nothing measured, nothing spent.")
         return
 
-    markup = await page.content()
-    messaging = shape.messaging_badge(markup)
-    invitation = shape.invitation_badge(await dom.read_invitation_badge(page))
-    msg_count = messaging.get("new_since_last_visit")
-    msg_state = messaging.get("state")
-    inv_state = invitation.get("state")
-    print("      messaging  new_since_last_visit=%r state=%r"
-          % (msg_count, msg_state))
-    print("      invitation pending=%r state=%r"
-          % (invitation.get("pending"), inv_state))
+    msg_pair, inv_pair = await _read_both_badges(page)
+    msg_count, msg_state = msg_pair
+    inv_state = inv_pair[1]
+    print("      messaging  new_since_last_visit=%r state=%r" % msg_pair)
+    print("      invitation pending=%r state=%r" % inv_pair)
 
     if msg_state != "read" or inv_state != "read":
         print("    REFUSED. An unreadable badge is not a zero, and a load whose")
@@ -147,16 +210,13 @@ async def _run(page) -> None:
 
     print("\n3. TOTAL vs NOT-DISPLAYED, per selector")
     print("    %-24s %7s %7s" % ("selector", "total", "hidden"))
-    counts = await page.evaluate(_JS, [[n, s] for n, s in _PROBES])
+    readings = await _census(page)
     control_ok = True
-    for name, _selector in _PROBES:
-        record = counts.get(name) or {}
-        total = record.get("total")
-        hidden = record.get("hidden")
-        flag = "  READER FAILED" if record.get("failed") else ""
-        if name.startswith("CONTROL") and not total:
+    for label, total, undisplayed, failed in readings:
+        flag = "  READER FAILED" if failed else ""
+        if label.startswith("CONTROL") and not total:
             control_ok = False
-        print("    %-24s %7r %7r%s" % (name, total, hidden, flag))
+        print("    %-24s %7r %7r%s" % (label, total, undisplayed, flag))
 
     print()
     if not control_ok:
