@@ -32,6 +32,26 @@ because a count that silently rewrites itself cannot be cited:
       MEASURED-ABSENT              0  ->    1   L2, the follower COUNT
       GAP                         79  ->   79   L2 left it, L2b entered it
 
+    COVERED-PROVEN                19  ->   20   N2, dark mode CHANGE, fired
+    COVERED-UNFIRED                7  ->    6   same row
+
+**Why N2 moved, 2026-09-19.** It is the only state change on this slice from the
+first writes this server has ever fired. The row was never short of a tool --
+it was short of a fire, and it had NAMED the verification that would settle it:
+*"a fresh navigation and a re-read of all three radios."* That is exactly what
+was done, so this is the row's own criterion being met rather than a new and
+easier one being found. **The verification read a DIFFERENT surface from the one
+clicked**, which is the standard this campaign applies to every write.
+**Nothing moved out of GAP and the GAP count is untouched.**
+
+**NOT MOVED, and this is the larger half of the pass.** `N1` (dark mode current
+state) was already COVERED-PROVEN on six agreeing readings and does not move --
+re-reading a surface that was already proven adds a reading, not a state. Every
+`EXCLUDED-RULED` settings row in sections K, M and N stays exactly where it is:
+firing the ONE setting admitted by name is the ruling *working*, not a reason to
+revisit the family. **A fire on an admitted page is not an argument for
+admitting its neighbours.**
+
 **Why the split, since a split is the unusual move.** `L2` read "Own follower
 count and follower list" -- two capabilities on one row. A live reading on
 2026-09-04 retired one half and never touched the other, and no single state is
@@ -141,7 +161,7 @@ one row carries both.
 | `linkedin_profile_editor_fields` | control LABELS inside `/in/me/edit/intro/`, never values | FIRED-SUCCEEDED twice: 23 controls 2026-08-31 (`_audit/2026-08-31-linkedin-perform.md:370`), 17 controls 2026-09-02 (`:2925`) |
 | `linkedin_profile_editor_values` | what those controls HOLD -- the restore path for an edit | FIRED-SUCCEEDED 2026-09-02 (`:2925`) |
 | `linkedin_update_profile_field` | change ONE intro-editor field, behind the two-call gate | **FIRED-FAILED.** Shipped `a540461` 2026-09-02, could not navigate once -- three independent fatal defects, `NAVIGATIONS ATTEMPTED: []` -- while minting a live `confirm_token` off a real preview he confirmed. Repaired `ea5354d` the same day. **No successful edit exists, before or after the repair. "It fired" is not "it worked", and no prose calling it well-verified counts as coverage.** |
-| `linkedin_update_setting` | dark mode: read the three-state radio group, then change it | READ FIRED-SUCCEEDED -- six readings, two days, three builds, agreeing on every count: 20 controls, ZERO forms, 16 links, no dialogs, no redirect, exactly one of three radios checked. **WRITE NEVER FIRED.** For any setting but dark mode the tool refuses in Python and loads nothing: `READABLE_SETTINGS` has exactly one key |
+| `linkedin_update_setting` | dark mode: read the three-state radio group, then change it | READ FIRED-SUCCEEDED -- six readings, two days, three builds, agreeing on every count: 20 controls, ZERO forms, 16 links, no dialogs, no redirect, exactly one of three radios checked. **WRITE FIRED AND VERIFIED 2026-09-19** -- off -> on -> off, each state read back after a fresh navigation (`_audit/2026-09-19-tier1-fires.md`); this superseded a standing **WRITE NEVER FIRED**. For any setting but dark mode the tool refuses in Python and loads nothing: `READABLE_SETTINGS` has exactly one key |
 | `linkedin_surface_census` | control counts on `profile`, `profile_edit_intro`, `settings`, `settings_dark_mode`, `premium` (plus six keys outside this slice) | FIRED-SUCCEEDED on all five of this slice's keys: profile 4, profile_edit_intro 4, settings 3, settings_dark_mode 2 (`_audit/2026-08-31-linkedin-finish.md:275-279`); premium 3 (`_audit/2026-08-31-linkedin-perform.md:2035`) |
 | `linkedin_who_viewed_me` | Who's Viewed Your Profile; 365 days on his Premium Career account | FIRED-SUCCEEDED -- "Now 10 rows, 10 distinct names, verified live" (`mcp-servers/_audit/2026-08-21-linkedin-parse-fix.md:5`) |
 | `linkedin_my_activity_items` | his own activity rail -- the profile Activity section | FIRED-SUCCEEDED, and measured UNRELIABLE: 233 controls on one reading, 67 on another, same session, minutes apart |
@@ -439,7 +459,7 @@ Help Center now states all members have access.
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
 | N1 | Dark mode current state | R | COVERED-PROVEN | six agreeing readings across two days and three builds |
-| N2 | Dark mode change | W | COVERED-UNFIRED | in `PERFORMABLE`; verification is a fresh navigation and a re-read of all three radios. Never fired |
+| N2 | Dark mode change | W | **COVERED-PROVEN 2026-09-19** | **FIRED AND VERIFIED BOTH WAYS.** In `PERFORMABLE`; the verification this row specified -- a fresh navigation and a re-read of all three radios -- is the one that was performed. Round trip watched end to end: prior state read off the radio group (3 radios, exactly one checked), one click, page RELOADED, changed state read back with the other two reading unchecked, undo clicked, restoration read identical to the prior state. **The read-back is stronger than re-reading the control that was pressed** -- a control that redrew wrongly would have to report itself checked AND both others report themselves unchecked to pass. Two refusals on the way in, both correct and both naming what they SAW: an unknown state value listed the three known ones, and a no-op change was refused rather than performed. Audience: NOBODY -- broadcast nowhere, no feed, no notification. **This also settles `reversibility_class`, which every preview until today printed as `STILL-UNKNOWN`** and which the tool's own gate said needed exactly ONE ROUND TRIP, WATCHED. Evidence: `_audit/2026-09-19-tier1-fires.md` rung 1 |
 | N3 | Which settings sections exist (the index) | R | COVERED-PROVEN | census `settings`, 34 controls, live 2026-08-30, three readings. The six sections are fixed by `a1337839`: Account preferences, Sign in & security, Visibility, Data privacy, Advertising data, Notifications |
 | N4 | Two-step verification on / off | W | EXCLUDED-RULED | settings family -- ruling: `linkedin_update_setting` (`linkedin_server/server.py`), *"a setting is admitted by name or not at all"*; the SAME ruling as `network.md` **R11** and messaging **MESSAGING-SETTINGS** (3.10). Methods named by `a1381088`: authenticator app, SMS. **Denylist-uncaught -- finding 7.1, and the most consequential of the six** |
 | N5 | Change password | W | EXCLUDED-RULED | settings family -- ruling: `linkedin_update_setting` (`linkedin_server/server.py`), *"a setting is admitted by name or not at all"*; the SAME ruling as `network.md` **R11** and messaging **MESSAGING-SETTINGS** (3.10). `a1379143`: min 8 chars, plus a "Require all devices to sign in with new password" checkbox. Denylist-uncaught |

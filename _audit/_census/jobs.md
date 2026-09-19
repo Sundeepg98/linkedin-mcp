@@ -51,6 +51,33 @@ than creating one.
 
 **CORRECTED BY:** `_audit/2026-09-19-unfired-but-built.md` -- rows 103 and 104 moved COVERED-PROVEN to COVERED-UNFIRED, on the four readings in its section 4.
 
+**SECOND DELTA, 2026-09-19, and it moves the number the other way.** The block
+above is still UNCHANGED; this records the movement:
+
+    COVERED-PROVEN    19  ->  20    row 44, unsave a job, FIRED
+    COVERED-UNFIRED    9  ->   8    same row
+
+Net across both deltas on this slice today: **CP 21 -> 20, CU 7 -> 8.** Two rows
+left COVERED-PROVEN on evidence that turned out to be a gate verdict, and one
+entered it on a watched fire. **Both directions were measured the same way, and
+the pass that moved the count down and the pass that moved it up applied the
+identical standard:** a state is COVERED-PROVEN when the capability was
+exercised and read back, on a surface other than the one acted on.
+
+**NOT MOVED, and this is the larger half of the pass.** Rows **43** (save a job),
+**45** (read the saved list) and **46** (read whether one posting is saved) were
+ALREADY COVERED-PROVEN and do not move -- today's fires re-exercised all three,
+and re-proving a proven row adds a reading, not a state. Rows **103** and **104**
+(follow / unfollow a company) stay COVERED-UNFIRED: `follow_company` was
+attempted today and **REFUSED, twice, identically**, because prior state came
+back `unknown` from both available sources and the gate will not guess which way
+it would move. **A refusal is not a fire**, and the refusal was measured on a
+second independent target, so it is the gate's standing behaviour and not one
+posting's quirk. Nothing about that changes their state. **Row 58 (bulk-unsave)
+stays `n/a`** -- LinkedIn itself has no such control, and a fire on the
+single-job path says nothing about a capability that does not exist.
+**Nothing moved out of GAP and the GAP count is untouched.**
+
 **122 of 150 job capabilities cannot be reached through this server** -- 99 because nobody
 considered them, 23 because somebody wrote down a reason. That is 81.3%, up from 78.8%. Of
 the **28** a tool can reach, **21** have live-fire evidence and 7 have never run against
@@ -127,7 +154,7 @@ against the audits, they are in **three different states**:
 | action | live fire? | receipt |
 |---|---|---|
 | `save_job` | **YES, and it landed.** | `_audit/2026-08-30-linkedin-undo.md:433` -- "`writes.perform` gate-5 sweep, on the redeemed save \| `newly_observed_save_label: "Unsave the job"`". The ON label existed only because a real save produced it; `:1645` -- "on his first save, then three times by a read-only route that costs no write." |
-| `unsave_job` | **NO. NEVER FIRED.** | `_audit/2026-08-30-linkedin-undo.md:1775` -- "`unsave_job` was **never fired**, including after it became capable." Same file records the same at `:639`, `:921`, `:1156`, `:1369`, `:1585`. |
+| `unsave_job` | **SUPERSEDED 2026-09-19: FIRED AND VERIFIED** (saved-tab count 2 -> 1 on a different surface from the one clicked; `_audit/2026-09-19-tier1-fires.md`). This cell read **NO. NEVER FIRED.** from 2026-08-30 until that fire, and the six citations below are why -- they are kept because they were accurate when written. | `_audit/2026-08-30-linkedin-undo.md:1775` -- "`unsave_job` was **never fired**, including after it became capable." Same file records the same at `:639`, `:921`, `:1156`, `:1369`, `:1585`. |
 | `apply_job` | **FIRED ONCE, AND IT DID NOT SUBMIT.** | `_audit/2026-08-31-linkedin-perform.md:790` -- "The operator authorised his first apply; the lead performed it. **IT DID NOT SUBMIT.** The gate held, on an irreversible action, on a real posting with a real employer at the other end." That firing found two defects. |
 
 **Zero applications have ever been submitted through this server.** The same audit at
@@ -205,7 +232,7 @@ Every alert WRITE is a GAP. Everything the alerts DELIVER is served by the skill
 | # | capability | source | state | tool, or the repo's own reason |
 |---|---|---|---|---|
 | 43 | Save a job | a513247 | CP | `linkedin_save_job`. **The one write proven to land** -- see section above |
-| 44 | Unsave a job | a513247 | CU | `linkedin_unsave_job`. Built, gated, **never fired**, including after it became capable |
+| 44 | Unsave a job | a513247 | **CP 2026-09-19** | `linkedin_unsave_job`. **FIRED AND VERIFIED.** Six separate places in `_audit/` recorded this as never fired, including after it became capable; that is now superseded. **The verification read a DIFFERENT surface from the one clicked** -- the saved tab (`?stage=saved`) count went 2 -> 1, and the posting's own label flipped Unsave -> Save. Prior state had been established TWO ways before the fire (the tab contained the posting, and the posting reported itself saved). Re-saved afterwards, 1 -> 2, so the membership round trip is closed in both directions. **ONE THING STAYS UNSETTLED AND THE GATE IS RIGHT ABOUT IT:** whether re-saving restores the original saved DATE, and therefore the list's ORDER -- reversible in membership is not reversible in ordering. The fire could not distinguish the two hypotheses (the posting had been saved sixty seconds earlier, so both put it at position 1), and the version that WOULD answer it risks a pre-existing save's place permanently. Evidence: `_audit/2026-09-19-tier1-fires.md` rungs 2 and 3 |
 | 45 | Read the Saved list | a513247 | CP | `linkedin_saved_jobs`, `?stage=saved` |
 | 46 | Read whether ONE posting is saved, from the posting | a513247 | CP | `job_detail.save_state`; three-valued, `shape.SAVE_LABELS` both states measured |
 | 47 | Read the Applied list | a512329 | CP | `linkedin_my_applications`, `?stage=applied` |
@@ -529,7 +556,7 @@ touches LinkedIn. He sends by hand in the browser. Do not add sending."
    should say what the audits say: it fired once, the gate held, and the Applied tab still
    reads zero. `server.py`'s docstring is honest about the gate; the risk is in summaries
    that flatten "PERFORMS" into "has applied".
-3. **`unsave_job` is the only PERFORMABLE write with no live fire at all.** Six separate
+3. **`unsave_job` WAS the only PERFORMABLE write with no live fire at all -- RESOLVED 2026-09-19, it fired and was verified** (`_audit/2026-09-19-tier1-fires.md`). The paragraph below is kept as written because its reasoning is what made the fire safe to choose, and it was accurate for twenty days. Six separate
    audit entries record it not being fired. It is one supervised call from being proven,
    and it is the cheapest and most reversible write on the whole surface -- `save_job`
    restores its own effect exactly.
