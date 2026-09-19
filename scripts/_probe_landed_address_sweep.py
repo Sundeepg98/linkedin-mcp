@@ -31,6 +31,39 @@ two BOOLEANS printed as literal branches -- did the landed PATH keep the asked
 path, and does the shipped predicate admit the landed address. No url is
 printed and none is derived into an output.
 
+## THE RESULT, 2026-09-19, AND THE COUNT IS 3 OF 10
+
+    refused after landing   /jobs/collections/recommended       (no slash)
+                            /jobs/collections/recommended/      (with slash)
+                            /in/me/
+    admitted after landing  jobs search, three tracker stages,
+                            premium, search appearances, groups, messaging
+
+**SO IT IS A CLASS, NOT A CURIOSITY.** Three of ten admitted addresses come to
+rest where this server's own allowlist would refuse them. The allowlist is
+guaranteeing something about REQUESTS that does not hold for LANDINGS.
+
+**AND THE PROFILE ROW COST TWO EXTRA PROBES, WHICH IS THE PART WORTH READING.**
+This sweep read ``/in/me/`` as ADMITTED after landing. A standalone probe had
+read it REFUSED, once. Rather than pick the reading that agreed with the sweep,
+both were repeated:
+
+    standalone, 3 rounds                    REFUSED 3 of 3
+    cold / after jobs search / after feed   REFUSED 3 of 3
+    this sweep, loaded 7th                  ADMITTED  1 of 1
+
+**Six refusals against one admission, across two probes and three different
+predecessor pages.** The warming hypothesis -- that a single-page app routes
+``/in/me/`` client-side once it is hot, so only a cold load takes the server
+redirect -- was tested directly and REFUTED: the predecessor makes no
+difference. The one ADMITTED reading is unexplained and is the outlier.
+
+**THE LESSON IS THE ONE THIS FILE ALREADY TEACHES, AIMED AT ITSELF: a sweep
+row is a single reading.** Ten addresses measured once each is ten single
+readings, and the one that disagreed with a sibling probe was the only one that
+got repeated. The other nine are no better evidenced -- they simply have
+nothing contradicting them yet.
+
 ## THE CONTROL
 
 The job-search page is read first and must come back admitted-after-landing. An
@@ -74,6 +107,35 @@ SWEEP: tuple[tuple[str, str], ...] = (
      "https://www.linkedin.com/jobs-tracker/?stage=draft"),
     ("the recommended collection",
      "https://www.linkedin.com/jobs/collections/recommended"),
+    # WIDENED 2026-09-19. /in/me/ was measured ADMITTED AT THE REQUEST AND
+    # REFUSED AT THE LANDING while chasing an unrelated question, which turned
+    # this from a two-instance curiosity into a class worth sizing. Every
+    # address below is on the allowlist AND is opened by a shipped tool in
+    # ordinary use, so the sweep still adds no exposure those tools do not.
+    ("the recommended collection, WITH the trailing slash",
+     "https://www.linkedin.com/jobs/collections/recommended/"),
+    ("his own profile (my_activity_items, the intro readers)",
+     "https://www.linkedin.com/in/me/"),
+    ("premium entitlement (linkedin_premium_status)",
+     "https://www.linkedin.com/premium/my-premium/"),
+    ("search appearances (linkedin_search_appearances)",
+     "https://www.linkedin.com/analytics/search-appearances/"),
+    ("groups (groups_page.read_group_memberships)",
+     "https://www.linkedin.com/groups/"),
+    ("messaging (linkedin_open_messaging)",
+     "https://www.linkedin.com/messaging/"),
+)
+
+#: LEFT ALONE DELIBERATELY, and the reason is a measurement rather than
+#: caution. ``/notifications/`` is admitted and IS opened by a shipped tool --
+#: and the census records one measured call on 2026-08-21 taking the badge from
+#: 1 to 0, where it stayed. Loading it to ask a boundary question would consume
+#: something to learn where a redirect goes. ``/feed/`` is omitted for the
+#: opposite reason: it was read four times today and serves EXACT every time,
+#: so a fifth load buys nothing.
+NOT_SWEPT: tuple[tuple[str, str], ...] = (
+    ("/notifications/", "loading it consumes the invitation badge"),
+    ("/feed/", "already measured SERVED exact four times today"),
 )
 
 
@@ -108,6 +170,15 @@ async def _sweep_one(page, label: str, url: str) -> bool:
 async def main() -> int:
     print("=== DO ADMITTED ADDRESSES STAY ADMITTED AFTER THE REDIRECT?")
     print("    Only addresses shipped tools already load. No write is fired.")
+    print()
+    print("    NOT SWEPT, and the exclusions are part of the answer:")
+    for address, why in NOT_SWEPT:
+        print("      %-18s %s" % (address, why))
+    print()
+    print("    SCOPE, because it bounds the result: this gates on is_read_url")
+    print("    BEFORE navigating, so it can only measure landings for addresses")
+    print("    ALREADY ADMITTED. It answers 'do admitted addresses stay")
+    print("    admitted', never 'should a refused address be admitted'.")
 
     _own_page = None
     refused_after_landing = 0
