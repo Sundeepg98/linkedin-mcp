@@ -3601,3 +3601,134 @@ Pointing its `REPO` at the worktree would lose the gitignored wordlist and hit
 the tool that unblocked a 14-day push freeze in four minutes. The ad-hoc probe
 hook used in 20.5 (`core.hooksPath` pointed at a scratch dir for one commit) IS
 disposable — its finding is recorded above and the technique is one line.
+
+## 21. The blocker-map instruments, 2026-09-19
+
+Four checks built while closing the eight blockers still PARTIAL. Two of them
+caught their own author before they caught anything else, which is why they are
+here rather than in a progress file.
+
+### 21.1 `scripts/_check_jobs_range_directions.py` -- the 19 blockers nobody was watching
+
+`_check_published_split.py` compares each blocker's held R/W split against the
+ledger's published split, and SKIPS any blocker holding a jobs-slice row. Its
+docstring says why: `jobs.md` keys direction by RANGE, not by row id. **That
+was 19 of 88 published splits unwatched, including `COMPANY-PAGE-SURFACE`, the
+largest PARTIAL in the map.** The ranges are machine-readable -- section 2 is a
+table `| rows | gap | shape | R/W | REV |` whose first cell is a range spec --
+so this expands them. 19 skipped -> 14 readable, 5 still blind.
+
+**THE LAW IT ADDS: THE SAME NOTATION MEANS DIFFERENT THINGS IN A PER-ROW TABLE
+AND IN A RANGE TABLE.** In `messaging-and-content.md` an `R/W` cell means THAT
+ROW both reads and writes. In `jobs.md` section 2 a `R + W` cell means the
+BLOCK contains both -- `70-73` is "resume upload, list, delete, download", four
+rows of mixed direction, not four rows that each do both.
+
+**SHOWN FAILING, AND IT FAILED IN THE DIRECTION THAT LOOKS LIKE A FINDING.**
+The first draft mapped `R + W` to `RW`. That put 5 phantom `RW` rows into
+`FILE-UPLOAD-UNSANCTIONED` and 7 into `OPEN-TO-WORK-MODAL`, and both then
+reported **OVER on a direction no row in them carries** -- two new over-runs
+that would have been argued rather than doubted. Compound cells now resolve
+nothing and the unresolved count is printed, so the reading's coverage is
+visible instead of implied.
+
+**CONTROLS.** `--control-blind` blanks one range's direction cell and requires
+its rows to move into UNRESOLVED rather than keep a stale reading.
+`--control-overrun` inflates one blocker's held writes and requires the printed
+table to NAME it -- **and it injects into a blocker the report calls "within
+split" on the real data.** The first version injected into
+`COMPANY-PAGE-SURFACE`, which the report already names for a different
+direction, so the control passed whether or not the injection did anything: it
+was measuring the baseline, not the instrument.
+
+### 21.2 `scripts/_check_refile_destination_credit.py` -- COMPLETE over a blocker that is short
+
+`RE_FILED` fixed the SOURCE side of a re-file: a blocker short a row that now
+lives elsewhere reads ACCOUNTED rather than PARTIAL. **Nothing fixes the
+DESTINATION side.** The moved row still counts toward the receiving blocker's
+published total, so an incoming re-file pays for one of ITS OWN published rows
+that nobody recovered, and the verdict prints *"COMPLETE -- every published row
+recovered"* over a blocker that has not recovered them.
+
+    SEARCH-RESULTS-SURFACE   publishes 21, holds 21, 4 incoming -> 17 of 21
+    FEED-PREFERENCES         publishes  1, holds  1, 1 incoming ->  0 of 1
+
+**THE LAW: A COUNT-NEUTRAL MOVE IS INVISIBLE TO EVERY COUNT ASSERTION, BY
+CONSTRUCTION.** That is the same structural blindness `_check_published_split`
+exists for, one level up -- and the split caught one of these as "+1R on
+`SEARCH-RESULTS-SURFACE`" when the real figure is four rows.
+
+**CONTROL.** `--control` adds a synthetic incoming re-file at a blocker the
+real data does not name, and requires the report to name it.
+
+### 21.3 `scripts/_sweep_frozen_rows.py` -- the sweep every "family exhausted" verdict was run by hand
+
+Telling a MISSED ROW from an OVER-COUNT means answering one question: does any
+UNASSIGNED row belong to this family? Every such verdict in this repository has
+rested on somebody running that sweep by hand and committing only the
+conclusion, so the next wave re-ran it from memory and the one after took the
+conclusion on trust.
+
+**IT IS EVIDENCE FOR THE NEGATIVE ONLY, and the docstring says so.** A name
+match is not evidence for an assignment. But if a word naming a blocker's
+family returns rows and every one is already filed, the family is closed.
+
+**CONTROL, BOTH ARMS, BECAUSE ONE ARM PROVES NOTHING.** A word the frozen set
+certainly contains must return hits; a word it cannot contain must return none.
+A sweep that only ever confirms cannot be shown to discriminate; one that only
+ever misses cannot be shown to see.
+
+### 21.4 `scripts/_check_duplicate_rows_share_a_blocker.py` -- and a shape pairwise similarity cannot see
+
+Built to test one premise: `blocker-assignments.tsv` admits `P B7` to
+`BADGES-SURFACE` on an arithmetic requiring that `B8` and `K9` *"collapse to
+one slot"* -- that one blocker cannot hold two frozen rows of one capability.
+Measured: **15 near-duplicate pairs are filed to ONE blocker, 6 of them
+intra-slice.** The premise is false.
+
+**THE SECOND ARM IS THE ENTRY.** A compound row split across a slice boundary
+into halves is INVISIBLE to pairwise similarity: `M C79` *"Follow or unfollow
+member articles"* scores **0.50** against each of `N 41` and `N 42`, under any
+useful threshold, while its token set is wholly CONTAINED in their union. A
+wave running only the pairwise arm reports the two halves as unrelated to a row
+sitting in the very blocker they are candidates for.
+
+**SHOWN FAILING AS A COINCIDENCE GENERATOR.** Bare containment returned **1217
+hits** -- nearly all a row plus an unrelated bystander carrying the one missing
+word. Three STRUCTURAL constraints cut it, each describing the shape rather
+than tuning the output: the two halves live in one slice and the compound in
+another; neither half may cover less than half the compound's tokens; neither
+may already contain the whole. **A detector tuned until it agrees with the
+reader is the reader wearing an instrument's clothes**, which is why the fix is
+stated as three shape rules and not as a threshold.
+
+**CONTROLS, ONE PER ARM.** Pairwise must find `M C83`/`P L4`, which
+`2026-09-19-the-five-requests-ruled.md` names by hand. Containment must find
+`M C79` inside `N 41` + `N 42`, which `2026-09-19-partial-blockers-closed.md`
+names by hand. An arm that misses its known pair is blind and its silence means
+nothing.
+
+### 21.5 THE METHOD THAT PAID BEST: CHECK THE CLAIMS YOU DO NOT NEED
+
+`network.md:590` is a table of eight family claims and one verdict needed
+exactly one of them. Checking the other seven:
+
+    5 of 8 direction counts reconcile.  3 are wrong, each by exactly one.
+    8 of 8 id lists are right.
+
+So the table is reliable for WHICH ROWS are in a family and only 5-of-8
+reliable for HOW MANY read and write -- and the verdict happened to need the id
+list for its exclusion and a direction count that was among the five. **Leaning
+on the direction count alone would have been one wrong claim from a wrong
+verdict, with nothing to signal it.** The same method priced two other sources
+the same hour: `scripts/_probe_jobs_tail_boundary.py` transcribes three row
+ranges, the two checkable ones land on the published count exactly and the
+third -- the contested one -- over-names by one; and `linkedin_server/menus.py`
+groups menu terms under blocker-named headings whose sizes are 10/7/2/1 against
+published 10/2/1/4, which is why membership there was reported as necessary and
+not sufficient.
+
+### 21.6 DISPOSABLE, declared
+
+Nothing from this wave is disposable. All four scripts are committed under
+`scripts/` and all four carry controls.
