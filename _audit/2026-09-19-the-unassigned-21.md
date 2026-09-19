@@ -73,6 +73,8 @@ is written out in 1.6 for whoever owns both halves.**
 
 ### 1.1 The row-walk's strongest stated ground is FALSE, and the true ground is stronger
 
+**CORRECTS:** `_audit/2026-09-19-the-row-walk.md` -- its line 214 states the network slice has no *what each gap would take* section and concludes from that absence that a BLOCKER IS MISSING. The section exists, at line 573 of that slice, and line 583 prices the disputed rows. The conclusion does not follow.
+
 It declined on "`network.md` ... has no *what each gap would take* section."
 **It has one.** `_audit/_census/network.md:573`, section 5, *"THE 107 GAPS: WHAT
 EACH FAMILY WOULD TAKE"*. And it covers the disputed rows:

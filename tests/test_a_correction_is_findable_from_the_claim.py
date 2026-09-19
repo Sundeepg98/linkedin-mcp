@@ -183,6 +183,34 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # THREE MORE, 2026-09-19, from the unassigned-21 wave. All three cite the
+    # record that SETTLES a dispute rather than a record being corrected. The
+    # genuine correction that wave made -- against the row-walk, not against any
+    # census slice -- is declared with a CORRECTS:/CORRECTED BY: pair instead,
+    # which is what this table exists to leave room for.
+    #
+    # FOURTH AND FIFTH INSTANCE TONIGHT of the scan pairing a corrector with its
+    # EVIDENCE. That is proximity matching working as designed; it is not a
+    # defect, and five instances in one evening is the reason to say so here.
+    ("2026-09-19-the-unassigned-21.md", "jobs.md"): (
+        "A COLUMN OF THE CENSUS REFUTES AN OBJECTION MADE AGAINST A RULING. "
+        "The objection was that a section test proves too much because J "
+        "78-J 83 all sit in section D; the refutation is measured over "
+        "jobs.md's citation column, where J 81 and J 82 share a Help-Center "
+        "id occurring exactly twice while the six rows carry four distinct "
+        "ids. jobs.md is quoted as the discriminator, not contradicted -- "
+        "the ruling it supports is CONFIRMED, not overturned. "
+    ),
+    ("2026-09-19-the-unassigned-21.md", "profile.md"): (
+        "THE SLICE PROVES THE ARITHMETIC WRONG, IN ITS OWN WORDS, WHICH IS "
+        "THE PHRASE THE SCAN MATCHED. An arithmetic argument closes for P "
+        "D24 against OPEN-TO-HIRING-MODAL's last W slot; the wave then "
+        "shows profile.md itself refutes the reading the arithmetic rests "
+        "on. What is wrong is the argument the wave had just built and then "
+        "abandoned, and profile.md is what killed it. A file quoted to kill "
+        "an argument is not a file being corrected. "
+    ),
+
     # THREE MORE, 2026-09-19, from the premium-apply wave. All citations. The
     # first refutes MY OWN BRIEF rather than the document it cites, which is
     # worth keeping: a wave correcting the orchestrator is not a document

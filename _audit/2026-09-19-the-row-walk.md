@@ -214,6 +214,8 @@ mentions search history in exactly those two lines and nowhere else, and that
 slice has no "what each gap would take" section. There is no boundary text for
 `N 95`/`N 96` anywhere in the corpus.
 
+**CORRECTED BY:** `_audit/2026-09-19-the-unassigned-21.md` -- the claim above, that the network slice has no *what each gap would take* section, is FALSE. That section is at line 573 of the slice, and line 583 prices the disputed rows 79-96 as one allowlist pattern, READ, with no denylist and no WriteSpec. The conclusion drawn here -- that a BLOCKER IS MISSING -- does not follow; the pair belongs to SEARCH-HISTORY-SURFACE and the jobs rows now hold it.
+
 **And the filing that holds the slots was admitted by count and split alone.**
 `_audit/2026-09-05-settings-tail.md:222` files them with its method stated
 against itself: *"Row ids located and cross-checked (**row-level lookup
