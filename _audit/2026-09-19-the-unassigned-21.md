@@ -34,7 +34,12 @@ nine cost-0 rows at `:316-326`).
 
 **A LIVE GATE READING, taken because one cheap measurement could have settled
 section 1 and it is the only one that could.** Shipped `readonly.assert_read_url`
-at this tree, via `_audit/_scratch/_probe_hist.py` (untracked, gitignored dir):
+at this tree, called directly on each candidate address. **The runner is DECLARED
+DISPOSABLE** -- it is a loop over the list below calling
+`readonly.assert_read_url(url)` inside `try/except` and printing the exception's
+first line, so the reading below is reproducible from this page without it (it
+lived in the gitignored `_audit/_scratch/`, which does not survive this
+worktree):
 
     /jobs/search-history/             REFUSED -- not on the read-only allowlist (PATTERN MISS)
     /mypreferences/d/search-history   REFUSED -- not on the read-only allowlist (PATTERN MISS)
