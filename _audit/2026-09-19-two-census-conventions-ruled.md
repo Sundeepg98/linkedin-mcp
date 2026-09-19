@@ -129,3 +129,80 @@ reported as such.
 -- a provenance reader that read the wrong column, a retirement guard whose row
 pattern saw one id family of two, and now this. **Parse the structure; never
 index into it.**
+
+
+---
+
+## 3. A CLASS FILTER THAT CATCHES AN ADDRESS INCIDENTALLY IS A BLOCKER,
+##    NOT A DECISION
+
+Added 2026-09-19 11:14, on a request from `small-measures`, which declined to
+bank eight rows and asked rather than stretched.
+
+### The measurement
+
+`FORBIDDEN-CLASS-FIX-LANDED`, 8 rows, cost 0. Machine-verified:
+
+    /public-profile/settings    is_read_url False    caught by "settings"
+    /uas/login                  is_read_url False    caught by "/uas/"
+    /badges/profile/create      is_read_url False    caught by "/create"
+
+So the addresses are genuinely refused. **The question is whether being refused
+by a filter written for a CLASS amounts to a RULING on the CAPABILITY.**
+
+### RULED: NO. THEY STAY GAP, WITH THE BLOCKER NAMED PRECISELY.
+
+A denylist substring written to stop a class of addresses is **a general
+mechanism that happens to catch this one.** Nobody weighed this capability;
+nobody decided it was out of scope. The prior wave recorded exactly that at
+ledger L118-123 -- *"a GAP with a NAMED BLOCKER, not laundered into a
+decision"* -- and that reasoning stands.
+
+**The requesting wave reached the same answer from its own prior work, in the
+opposite direction, which is what makes this a convention rather than a
+one-off.** It banked `M C62` this morning **because** `delete_or_withdraw_
+anything` names the **ACT**, and it called the url match the weak half. Here no
+rule names the capability and only a class filter catches an address
+incidentally. **Banking these would have contradicted its own reasoning from
+four hours earlier.** Consistency with your own morning is a better test than
+consistency with a ledger.
+
+### THE GENERAL FORM
+
+    a rule that names the ACT            ->  EXCLUDED-RULED
+    a filter that catches the ADDRESS    ->  GAP, blocker named
+    an address measured UNREACHABLE      ->  see section 2
+
+**The three are different states and the difference is WHO DECIDED WHAT.** A
+rule about an act is a decision about the capability. A filter about an address
+is a decision about a class of URLs that this capability happens to live in. An
+unreachability measurement is not a decision at all -- it is a fact about
+LinkedIn.
+
+**Name the blocker precisely: "refused by a class filter written for a different
+purpose."** That is a distinct blocker from "nobody built it" and from "ruled
+out", and collapsing them loses the information a future reader needs: **these
+eight are one narrowing away from buildable, and an EXCLUDED-RULED row is not.**
+
+### NARROWING THE FILTER IS NOT AUTHORISED BY THIS RULING
+
+The obvious next thought -- *narrow "settings" so it stops catching
+`/public-profile/settings`* -- is **a separate decision with its own cost, and
+it is the dangerous direction.**
+
+This repo already measured that `close-account` is refused by **no pattern
+matching it**, and that a settings-family wildcard would admit **six**
+account-ending spellings, **three defended by nothing but the absence of a
+rule.** A narrowing is that risk run in reverse: it must come with **a measured
+blast radius -- what else does the narrowed filter now admit --** and a test
+shown failing on the admissions it must still refuse.
+
+**So: the rows stay GAP, the blocker is named, and the narrowing is a costed
+piece of work nobody has scoped.** Filing them EXCLUDED-RULED would have hidden
+eight buildable rows behind a decision nobody made.
+
+### What would reopen it
+
+A rule that names one of these **acts** rather than their addresses. Then it is
+section 3's first line and the row is EXCLUDED-RULED on that rule, cited by
+symbol per section 1.
