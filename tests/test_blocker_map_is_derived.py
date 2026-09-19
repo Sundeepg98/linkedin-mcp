@@ -605,7 +605,26 @@ import build_blocker_map as bbm  # noqa: E402
 #: letter, source files, and now the wrong COLUMN: four times the corpus
 #: had a shape the search could not see, and four times the fix was
 #: structural rather than a wider search.
-UNASSIGNED_CEILING = 62
+#: 62 -> 60. EASY-APPLY-MULTISTEP 1/1 and NOTIFY-COST-UNMEASURED 1/1, both
+#: EMPTY -> COMPLETE, both found in the REASON cell and invisible to every
+#: capability-column matcher.
+#:
+#: J 68's reason: "the Easy Apply modal's own control; blocked behind the
+#: same multi-step gate as row 60" -- W against 1W. And row 60, the obvious
+#: candidate, is NOT IN THE FROZEN 409, so J 68 is the only frozen-GAP row
+#: that gate blocks. THIS IS THE BLOCKER MY MATCHER EMBARRASSED ITSELF ON:
+#: reading only the capability column it offered "#Hiring photo frame apply
+#: / remove" on the token "apply", and called it UNIQUE.
+#:
+#: P O23's reason: the update_profile_field docstring "states this as an
+#: UNMEASURED cost" -- R against 1R, for a blocker named NOTIFY-COST-
+#: UNMEASURED. The capability says "notifies" where the blocker says
+#: NOTIFY, which a token match treats as different strings; the reason cell
+#: matches "unmeasured" and "cost" exactly, no stemming needed.
+#:
+#: A search that cannot see the column its answer lives in will confidently
+#: return the nearest thing in the column it can see.
+UNASSIGNED_CEILING = 60
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
