@@ -115,6 +115,13 @@ one collapsed -- and not with `aria-haspopup` at all.
 changes the shape of these 12 rows: the stated blocker was that enumerating
 the items needs a press, and **the items do not need a press to be counted.**
 
+**CORRECTED BY:** `_audit/2026-09-19-messaging-menu-enumeration.md` -- this conclusion does not reproduce: three runs on 2026-09-19, two passes each with the arrival control firing (1220 elements, 50 buttons), read 0 `role=menu` and 0 `role=menuitem` case-insensitively on a page whose 24 overflow triggers are all collapsed, so enumerating these menus still requires a press and the twelve rows this would have reshaped are not reshaped.
+
+The reading above is sound AS DATED and must not be carried forward. Nothing here
+says this wave was wrong -- the two readings are fourteen days apart, and the
+standing diagnostic in this repository is to date both readings before
+adjudicating either.
+
 **WHAT I AM AND AM NOT CLAIMING.** I am refuting a CONCLUSION -- "0 menu
 items" -- with a direct count on a live page. **I am NOT diagnosing the prior
 instrument**: I never saw it and do not know what it aimed at. The `aria-haspopup`
