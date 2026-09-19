@@ -224,12 +224,26 @@ the tidiness argument is weaker than it looks.
 
 ## A NOTE ON WHAT IS NOT HERE
 
-The remaining EMPTY blockers not listed above fail on the same three axes and
-are enumerated with their candidate counts in
-`_audit/_scratch/_progress-unlocatable-recovery.md` section 47. They are not
-raised individually because each is one or two rows and the answers would be
-guesses of the same kind. **If the three classes above are ruled, the method
-generalises to most of them.**
+The remaining EMPTY blockers not listed above fail on the same three axes. They
+are not raised individually because each is one or two rows and the answers
+would be guesses of the same kind. **If the three classes above are ruled, the
+method generalises to most of them.**
+
+**WHERE THAT ENUMERATION WAS FIRST WRITTEN, AND WHY THIS DOES NOT SEND YOU
+THERE.** It was a table in `_audit/_scratch/_progress-unlocatable-recovery.md`
+section 47, taken at 12:21. That path is GITIGNORED by design -- `.gitignore`
+holds `_audit/_scratch/` as a quarantine for working notes so they cannot be
+swept into a commit, and `tests/test_every_ignore_entry_is_declared.py` pins
+the entry -- so the file is in no clone and no worktree, and this sentence used
+to defer to it as though it were readable. It is named here as PROVENANCE only.
+Two things make that the right call rather than a loss. The snapshot was
+already stale when it was cited: `_audit/2026-09-19-the-empty-blockers.md`
+section 3 records inheriting its staleness and getting three blockers wrong,
+because the map had moved by 12:40 -- nineteen minutes. And the enumeration is
+DERIVABLE rather than merely recorded: `./venv/Scripts/python.exe
+scripts/build_blocker_map.py --check` recomputes every per-blocker hole from
+committed sources on demand, which is a live answer where a copied table would
+be a second quotation aging from the moment it landed.
 
 **The three classes close the remaining rows exactly, which is how I know the
 routing is complete:** needs a ruling 31, no published split 10, no source at

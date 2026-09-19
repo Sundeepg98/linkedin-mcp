@@ -342,6 +342,10 @@ not set out to be tested.
    measured; it is worth a guard that fails on an unrecognised state cell rather
    than returning the empty string.
 
+   **CORRECTED BY:** `_audit/2026-09-19-four-defects-fixed.md` -- "and the 409" is wrong and section 4.2 above already had it right, the row being CANNOT-DELIVER and never GAP; only the 690 moved, it moved by TWO rather than one because `M M2` carries the identical cell and is named in no document, and the guard this item asks for now exists.
+
+   Measured at `1c08e5f`: stated rows 690 -> 692, GAP 409 -> 409.
+
 ---
 
 ## 6. COORDINATION -- TWO STANDING RULINGS A SIBLING WAVE COULD TRIP

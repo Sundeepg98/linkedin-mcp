@@ -95,6 +95,17 @@ def _tables(path: pathlib.Path):
 
 
 def _offenders(letter: str, path: pathlib.Path) -> list[str]:
+    """Rows in a state-promising table that carry no state this repo can read.
+
+    NAMES THE CAUSE, because the two causes need opposite fixes and this test
+    used to report them identically. A row whose cell is PROSE is a defect in
+    the row. A row whose cell is a DIALECT -- a state assembled from the
+    vocabulary's own words in a spelling it does not hold -- is a defect in
+    `count_census_states.STATES`, and rewriting the row to satisfy this test
+    would destroy the evidence. `classify` is used rather than `state_of`
+    precisely so both land here as findings instead of one arriving as a
+    stack trace.
+    """
     out: list[str] = []
     for header, body in _tables(path):
         if not _is_capability_table(header):
@@ -106,9 +117,17 @@ def _offenders(letter: str, path: pathlib.Path) -> list[str]:
                 continue
             if (letter, c[0]) in DECLARED_STATELESS:
                 continue
-            if C.state_of(c):
+            state, dialects = C.classify(c)
+            if dialects:
+                out.append(
+                    f"{letter} {c[0]} (line {lineno}): DIALECT "
+                    f"{'/'.join(dialects)} -- teach the counter this spelling, "
+                    f"do NOT rewrite the row: {c[1][:60]}")
                 continue
-            out.append(f"{letter} {c[0]} (line {lineno}): {c[1][:70]}")
+            if state:
+                continue
+            out.append(f"{letter} {c[0]} (line {lineno}): PROSE, no state cell "
+                       f"at all: {c[1][:70]}")
     return out
 
 
@@ -143,7 +162,10 @@ def test_the_declared_stateless_rows_really_are_stateless():
             if "state" not in header:
                 continue
             for _lineno, c, raw in body:
-                if (letter, c[0]) in DECLARED_STATELESS and not C.state_of(c):
+                if (letter, c[0]) not in DECLARED_STATELESS:
+                    continue
+                state, dialects = C.classify(c)
+                if not state and not dialects:
                     still_bare.add((letter, c[0]))
     assert still_bare == DECLARED_STATELESS, (
         f"DECLARED_STATELESS is {sorted(DECLARED_STATELESS)} but only "

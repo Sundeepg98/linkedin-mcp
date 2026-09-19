@@ -231,8 +231,17 @@ Excluded from section 2 automatically, before any human read, because
 applying them would have pushed `ANALYTICS-CONTROLS-UNPRESSED` to 5 rows
 against a published 4 (current committed recount: 3):
 
-    ANALYTICS-CONTROLS-UNPRESSED  (2 candidate rows, files/lines in
-    _audit/_scratch/_would-exceed-published.tsv, gitignored)
+    ANALYTICS-CONTROLS-UNPRESSED  J 28   _audit/2026-09-03-linkedin-gap-blockers.md:491
+    ANALYTICS-CONTROLS-UNPRESSED  N 132  _audit/INSTRUMENTS.md:2531
+
+Both pointers are as recorded 2026-09-06 and both name TRACKED files, so they
+can be checked from a clone. They were previously deferred to
+`_audit/_scratch/_would-exceed-published.tsv` -- 168 bytes, a header and these
+two rows -- which is gitignored and reaches no clone and no worktree. INLINED
+2026-09-19 rather than tracked: a two-row pointer list is not evidence that
+needs a home, it is a sentence, and the quarantine in `.gitignore` exists so
+working notes do not ship. Nothing else in that file was load-bearing; it held
+nothing but these two lines.
 
 Not investigated further -- `test_no_blocker_recounts_higher_than_the_ledger_
 published` exists precisely so this class of disagreement reaches a person

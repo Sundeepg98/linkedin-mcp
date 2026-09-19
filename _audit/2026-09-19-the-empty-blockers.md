@@ -45,8 +45,11 @@ first version of this file raised.
 
 Section 47 of `_audit/_scratch/_progress-unlocatable-recovery.md` publishes
 `PER-MESSAGE-OVERFLOW-MENU` as **"8 candidates for 2 slots; 21 survive the
-split"**. A subset cannot outnumber its superset, so the cell cannot be read as
-written -- that much the twelve-minute version got right. Its DIAGNOSIS was
+split"**. (That path is GITIGNORED working notes and reaches no clone, so every
+cell this document uses from it is QUOTED here in full rather than deferred to.
+The quotations are the evidence; the path is provenance.) A subset cannot
+outnumber its superset, so the cell cannot be read as written -- that much the
+twelve-minute version got right. Its DIAGNOSIS was
 wrong. I wrote that one of the two counts was computed over a different set, and
 concluded the blocker "has no verified axis diagnosis at all". Neither number is
 wrong. **The LABEL is wrong**, and the quantity is a different KIND.
@@ -256,7 +259,14 @@ over-supplied side.
   are under-supplied (1 candidate for 2, 3 for 4) and remain searches rather than
   contests. `PREMIUM-APPLY-SURFACES` has been declined three times on a source
   that names six rows for five slots and makes no R/W claim.
-  **Reason: out of scope for this wave; unchanged since section 47.**
+  **Reason: out of scope for this wave; unchanged since the 12:21 triage.**
+  That triage was section 47 of
+  `_audit/_scratch/_progress-unlocatable-recovery.md`, which is GITIGNORED
+  working notes and reaches no clone -- named as provenance, not as somewhere
+  to look. The values it carried for these four are the ones stated in this
+  bullet, so nothing here rests on reading it; and section 3 above records what
+  happened the last time this document trusted that snapshot instead of the
+  map.
 
 **A REFINEMENT OF MY OWN EARLIER FINDING 2, because it was stated too broadly.**
 I wrote that under-supplied blockers "are searches, not contests" and that

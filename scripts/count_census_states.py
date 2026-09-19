@@ -29,6 +29,34 @@ that carry NO recognised state at all, which is the only way a row silently
 leaves the numerator without anybody ruling it. Measured 2026-09-05: `N 132` is
 GAP in its own prose and uncountable here, because its state cell was replaced
 with a sentence.
+
+TWO CAUSES WEARING ONE COSTUME, AND ONLY ONE OF THEM IS THE CENSUS'S FAULT.
+`--unstated` collapses PROSE (the census wrote a sentence where a state goes --
+a defect in the row) with DIALECT (the census wrote a state this counter does
+not speak -- a defect in THIS FILE). They need opposite fixes and they were
+reported identically, which is how `XR` survived a fortnight and how
+`CANNOT-DELIVER` survived the freeze. So a dialect is now a REFUSAL rather than
+an empty string: `state_of` RAISES `UnknownStateDialect`, `--unstated` keeps
+only the prose class, and a dialect fails the run under its own heading.
+
+WHAT A DIALECT IS, STATED SO IT CAN BE ARGUED WITH. A cell is a dialect when it
+is ENTIRELY a verdict -- one to three shouted words, nothing else in the cell --
+and every word it is built from is a word the shipped vocabulary is built from,
+yet the combination is not in the vocabulary. `**CANNOT-DELIVER**` qualifies:
+CANNOT and DELIVER are both `COVERED-CANNOT-DELIVER`'s own words. A prose cell
+does not qualify (`**MEASURED AND DELIBERATELY NOT CLOSED ...**` on `N 174` is
+four words and AND is not a vocabulary word), and neither does a NEIGHBOURING
+vocabulary -- `mcp-inventory.md` runs `PROVEN-LIVE` / `TESTED-ONLY` /
+`KNOWN-BROKEN`, which share no complete word set with this one and are not
+counted here at all. MEASURED over all 61 commits that ever touched the four
+counted slices: the rule fires on exactly two rows in the whole history of this
+census, `M M1` and `M M2`, and on nothing at HEAD.
+
+THE BLIND SPOT IS NAMED RATHER THAN HIDDEN: the dialect scan reads the SAME
+cells `state_of` reads, `row_cells[1:]`. A dialect written into a row's FIRST
+cell is invisible to both, because that is where the summary tables put the
+state as a ROW LABEL (`| GAP | 99 | 66.0% |`) and firing there would flag every
+slice's own roll-up.
 """
 from __future__ import annotations
 
@@ -49,7 +77,79 @@ STATES = {
     "GAP", "CP", "CU", "CCD", "ER", "XR",
     "EXCLUDED-RULED", "COVERED-PROVEN", "COVERED-UNFIRED",
     "COVERED-CANNOT-DELIVER", "MEASURED-ABSENT",
+    "CANNOT-DELIVER",
 }
+#: `CANNOT-DELIVER` is the SECOND dialect this counter was taught, admitted
+#: 2026-09-19 on the same principle as `XR` and for a worse reason. It is
+#: `messaging-and-content.md`'s own first spelling of COVERED-CANNOT-DELIVER,
+#: and it cost TWO rows -- `M M1` "Send a message to a 1st-degree connection"
+#: and `M M2` "Send an InMail to a non-connection" -- their membership of the
+#: census for the whole window 2026-09-03..2026-09-05 (11 commits), including
+#: the freeze at `1c08e5f` that the number 409 is taken from. MEASURED, not
+#: inferred: the frozen census enumerates 692 stated rows with this spelling
+#: admitted and 690 without, and the GAP count is 409 either way -- the two rows
+#: were CANNOT-DELIVER, never GAP, so the 409 does not move and is not touched.
+#: `02e617d` (2026-09-05) rewrote both cells to the long spelling, which is why
+#: HEAD reads 0 dialects and why this entry only ever matters to a reader of
+#: history -- and a census whose own frozen denominator cannot be recomputed is
+#: exactly the disease this script was written against.
+#:
+#: IT IS REPORTED UNDER ITS OWN KEY, never folded into COVERED-CANNOT-DELIVER,
+#: for the reason `XR` is: a counter that silently merges two spellings cannot
+#: show you that a slice used two.
+
+#: Every word the shipped vocabulary is built from. A cell assembled only out of
+#: these, in a combination the vocabulary does not hold, is a MISSPELLED STATE
+#: rather than a different kind of cell -- which is the whole discrimination.
+STATE_ATOMS = frozenset(atom for state in STATES for atom in state.split("-"))
+#: A verdict is SHOUTED and has no lowercase in it. Anything with a lowercase
+#: letter, a comma, a full stop or a backtick-wrapped identifier is prose.
+_SHOUTED_WORD = re.compile(r"^[A-Z][A-Z0-9-]*$")
+
+
+class UnknownStateDialect(Exception):
+    """A state cell is spelled in a dialect this counter does not speak.
+
+    RAISED RATHER THAN SWALLOWED because the alternative was measured: an empty
+    string from `state_of` removes the row from the NUMERATOR and the
+    DENOMINATOR at the same instant, with no error, no diff that looks like a
+    state change, and no way for any downstream artifact to notice. Every
+    caller that wants to report several at once calls `classify` instead and
+    says so; a caller that does nothing special gets the refusal.
+    """
+
+    def __init__(self, spelling: str, cell: str) -> None:
+        super().__init__(
+            f"census state cell {cell!r} spells a state as {spelling!r}, which "
+            f"is not in the shipped vocabulary {sorted(STATES)}. This row is in "
+            f"NEITHER the numerator NOR the denominator until it is resolved. "
+            f"THE FIX IS USUALLY THIS FILE, NOT THE ROW: if the spelling is a "
+            f"real state, add it to STATES under its own key with the receipt, "
+            f"as `XR` and `CANNOT-DELIVER` are. Rewrite the census row only if "
+            f"the spelling is a mistake nobody meant."
+        )
+        self.spelling = spelling
+        self.cell = cell
+
+
+def dialect_of(cell: str) -> str:
+    """The misspelled state in `cell`, or '' if the cell is not one.
+
+    Returns '' for every cell that carries a RECOGNISED state, so this answers
+    only "is this a state spelled wrong", never "is this a state".
+    """
+    bare = cell.replace("`", "").replace("*", "").strip()
+    words = bare.split()
+    if not words or len(words) > 3:
+        return ""
+    if not all(_SHOUTED_WORD.match(w) for w in words):
+        return ""
+    joined = "-".join(words)
+    if joined in STATES:
+        return ""
+    if all(atom in STATE_ATOMS for atom in joined.split("-")):
+        return joined
+    return ""
 #: `XR` was added 2026-09-05 and is the single biggest thing this counter could
 #: not see. It is `jobs.md`'s own short spelling of EXCLUDED-RULED, used 23
 #: times and NOWHERE ELSE in the four slices -- and `jobs.md`'s own frozen
@@ -72,13 +172,40 @@ def cells(line: str) -> list[str]:
     return [c.strip() for c in s.split("|")]
 
 
-def state_of(row_cells: list[str]) -> str:
+def classify(row_cells: list[str]) -> tuple[str, list[str]]:
+    """(the row's state or '', every misspelled state found in the same cells).
+
+    The non-raising half of `state_of`, for the callers that must report EVERY
+    offending row rather than die on the first. A row can return both: a state
+    AND a dialect means `state_of` picked a different cell from the one the
+    author wrote the verdict in, which is the masking case and the worse one.
+    """
+    state = ""
+    dialects: list[str] = []
     for cell in row_cells[1:]:
         bare = cell.replace("`", "").replace("*", "").strip()
         head = bare.split(" ")[0]
         if head in STATES:
-            return head
-    return ""
+            if not state:
+                state = head
+            continue
+        spelling = dialect_of(cell)
+        if spelling:
+            dialects.append(spelling)
+    return state, dialects
+
+
+def state_of(row_cells: list[str]) -> str:
+    """The row's state, REFUSING on a cell whose state it cannot spell.
+
+    Returning '' for an unreadable state cell is the defect this raise exists
+    to end; '' now means one thing only -- the row carries no state cell at all,
+    which is a fact about the CENSUS and is reported by `--unstated`.
+    """
+    state, dialects = classify(row_cells)
+    if dialects:
+        raise UnknownStateDialect(dialects[0], " | ".join(row_cells))
+    return state
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -96,6 +223,7 @@ def main(argv: list[str] | None = None) -> int:
 
     totals: dict[str, int] = {}
     failed = False
+    refused: list[str] = []
     for letter, name in SLICES.items():
         path = CENSUS / name
         counts: dict[str, int] = {}
@@ -112,7 +240,12 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             if not ROW.match(line) or c[0].lower() in HEADERS:
                 continue
-            st = state_of(c)
+            st, dialects = classify(c)
+            for spelling in dialects:
+                refused.append(
+                    f"{letter} {c[0]} ({name} line {lineno}) spells a state "
+                    f"{spelling!r}; state_of reads {st or 'NOTHING'} -- "
+                    f"{c[1][:60]}")
             # The network slice's admin-only table carries no state column at
             # all; its own prose says all fifteen are GAP.
             if not st and letter == "N" and re.fullmatch(r"A\d+", c[0]):
@@ -144,6 +277,21 @@ def main(argv: list[str] | None = None) -> int:
     for st in sorted(totals):
         print(f"  {st:26s} {totals[st]:4d}")
     print(f"  {'stated rows':26s} {sum(totals.values()):4d}")
+
+    # LOUD, AND UNDER ITS OWN HEADING. A dialect is not an unstated row and
+    # must never be read as one: an unstated row is a fact about the census, a
+    # dialect is a fact about THIS FILE's vocabulary. Reported last so it is
+    # the final thing on the terminal, and it fails the run on its own.
+    if refused:
+        print(f"\nREFUSED -- {len(refused)} state cell(s) spelled in a dialect "
+              f"this counter does not speak. Each of these rows is in NEITHER "
+              f"the numerator NOR the denominator:")
+        for r in refused:
+            print(f"  {r}")
+        print("  Teach STATES the spelling under its own key with a receipt "
+              "(as `XR` and `CANNOT-DELIVER` are), or fix the cell if nobody "
+              "meant it. Do not widen the counter to guess.")
+        failed = True
     if expect:
         want = sum(expect.values())
         got = totals.get("GAP", 0)
