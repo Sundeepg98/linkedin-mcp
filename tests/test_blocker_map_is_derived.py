@@ -470,7 +470,33 @@ import build_blocker_map as bbm  # noqa: E402
 #: id the lost classifier used is exactly the substitution risk the
 #: retire-rulings wave flagged for M 24 / M 42, and it called that a
 #: RULING. Reported, not assigned.
-UNASSIGNED_CEILING = 85
+#: 85 -> 76. SERVED-BY-GMAIL-SKILL 6 of 6, SAVED-POSTS-SURFACE 2 of 2,
+#: ARTICLE-SURFACE 5 of 6.
+#:
+#: SERVED-BY-GMAIL-SKILL IS THE STRONGEST SHAPE THIS RECOVERY FOUND: a
+#: STRUCTURAL MARKER IN THE CENSUS'S STATE COLUMN. jobs.md writes the state
+#: of rows the linkedin-jobs skill serves as GAP `SKILL`. Counted
+#: mechanically, exactly SIX carry it -- 37 38 39 40 57 131 -- against a
+#: published 6. And the near miss is excluded BY THE DATA: J 127 carries
+#: the SKILL tag but reads MEASURED-ABSENT `SKILL`. Tag alone gives seven;
+#: tag plus state gives exactly six.
+#: Note what the blocker IS: filed NOT-OURS, "available to him today
+#: through linkedin-jobs, with no LinkedIn session at all". Locating these
+#: schedules nothing -- it records that six of the 409 are already served.
+#:
+#: ARTICLE-SURFACE at 5 of 6 with the shortfall's candidates ENUMERATED:
+#: C44, C47, C77 are not in the frozen set (EXCLUDED-RULED at the freeze),
+#: C45 is filed to FILE-UPLOAD-UNSANCTIONED and C76 to COLLABORATIVE-
+#: CONTENT. So the sixth is one of those two on a ruling I am not making,
+#: or lies outside the article family.
+#: M C46 arrives here having been REFUSED from CONTENT-ANALYTICS-SURFACE in
+#: this same pass for being a W against 5R -- the split earning its keep in
+#: both directions, as L6 did between CREATOR-HUB and AUDIO-EVENTS.
+#:
+#: SAVED-POSTS-SURFACE: the census pairs its two rows itself -- C37 cites
+#: the same Help source as C36 (its evidence cell reads literally "same")
+#: and records "COST CORRECTED 2026-09-19 with C36".
+UNASSIGNED_CEILING = 76
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
