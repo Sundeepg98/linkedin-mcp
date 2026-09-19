@@ -1817,6 +1817,38 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # stated as an accepted cost. Refusing the lesser act while performing the
     # greater one is backwards.
     ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
+    # ENTRIES FOUR AND FIVE, added 2026-09-19 on the DISCLOSING-PRESS RULING
+    # (`_audit/2026-09-19-the-disclosing-press-ruling.md`). They are a pair and
+    # they belong to ONE function, ``press.disclose``: a click that opens a
+    # disclosure, and the Escape that closes it again. The second is not
+    # optional decoration -- condition 4 of the ruling is that the control is
+    # closed and the closure VERIFIED, because a disclosure left open is a
+    # change to the rendered state the next reader inherits.
+    #
+    # WHY A READ PATH MAY PRESS AT ALL, and it is the same argument that
+    # admitted ``activate_messaging_filter`` above: counted by EFFECT rather
+    # than by verb, a control that only renders what is already there is a
+    # read. The ruling is narrower than that argument alone, because "discloses
+    # rather than changes" is a claim about a SPECIFIC CONTROL and not a
+    # property of presses -- this package already holds the counterexample, in
+    # that opening the article composer may autosave a draft no surface here
+    # can detect.
+    #
+    # SO THE PERMISSION IS NOT "may press on that page". It is: the address is
+    # already admitted AND the control matches an enumerated ATTRIBUTE shape
+    # (never a label) AND the press is shown not to move an outward counter AND
+    # the closure is verified -- all four, in that order, with the first two
+    # evaluated BEFORE anything is touched. ``press.SANCTIONED_SHAPES`` is a
+    # closed tuple matched by exact membership, so an arbitrary string can
+    # never become a press target, exactly as ``dom.MESSAGING_FILTERS`` does
+    # for the entry above.
+    #
+    # AND THE PRESS ALLOWLIST IS A STRICT SUBSET OF THE READ ALLOWLIST.
+    # ``press._COMPOSER_MARKERS`` is the difference: `/article/new/` is
+    # admitted for READING and refused for PRESSING. A page this server may
+    # open is not thereby a page whose controls it may activate.
+    ("linkedin_server/press.py", "disclose", "click"),
+    ("linkedin_server/press.py", "disclose", "press"),
     # THE THIRD ENTRY, added 2026-09-01, and the FIRST that is not a click.
     # This package typed nothing at all until this line, and that fact was
     # printed in the module docstring above, in server_info, and in four

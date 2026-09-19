@@ -918,6 +918,44 @@ PINNED = (
 #: interpreter-independent; ``<functions>`` -- the one digest that has split
 #: along the interpreter matrix -- did not move, so the 3.10 cell has nothing
 #: new to disagree about. CI runs that cell on push.
+#: RE-FROZEN 2026-09-19 (second time today), AND ONE DIGEST MOVED. IT IS A
+#: PERMISSION GROWING, WHICH IS THE SHAPE THIS PIN EXISTS FOR:
+#:
+#:     SANCTIONED_MUTATIONS   ab8fdd31f93ef4fc -> 3676d309ead50c61
+#:
+#: TWO ENTRIES ADDED, and they are a PAIR belonging to one function:
+#: ``press.disclose``'s click, and the Escape that closes what it opened. The
+#: second is not decoration -- condition 4 of the disclosing-press ruling is
+#: that the control is closed and the closure VERIFIED, because a disclosure
+#: left open is a change to the rendered state the next reader inherits.
+#:
+#: THE RULING IS `_audit/2026-09-19-the-disclosing-press-ruling.md` and its
+#: four conditions are CONJUNCTIVE: the address is already admitted (checked
+#: BEFORE any press, because a press never extends reach), the control matches
+#: an enumerated ATTRIBUTE shape and never a label, the press is SHOWN not to
+#: move an outward counter, and the closure is verified. Where no counter can
+#: price a press, unmeasurable resolves AGAINST it.
+#:
+#: **THE PRESS ALLOWLIST IS A STRICT SUBSET OF THE READ ALLOWLIST.**
+#: ``press._COMPOSER_MARKERS`` is the difference, and `/article/new/` is the
+#: worked case: admitted for READING, refused for PRESSING, because opening a
+#: composer may autosave a draft no surface in this package can detect.
+#:
+#: EVERY OTHER DIGEST IS BYTE-IDENTICAL -- all three denylists, both exemption
+#: tables, ``JS_MUTATION_TOKENS``, ``_MUTATION_CALL_PATTERNS`` and
+#: ``<functions>``. **NOT ONE REFUSAL MOVED.** That is the load-bearing half:
+#: a permission grew and nothing that refuses anything was touched, so
+#: ``DENYLISTS_AT_A76FE32`` needed no edit at all this time and its four
+#: values still hold.
+#:
+#: AND THE DIRECTION IS VISIBLE HERE, unusually. A digest cannot normally tell
+#: growth from shrinkage, which is why the scanner's direction had to be pinned
+#: by contents. For THIS structure the growth is legible a different way: the
+#: package's mutating-call count and this list are asserted EQUAL in both
+#: directions by ``test_every_sanctioned_entry_is_actually_present``, so an
+#: entry cannot be added without a real call site appearing to match it, and a
+#: call site cannot be removed while its entry stays.
+#:
 #: RE-FROZEN 2026-09-19, AND ONE DIGEST MOVED. IT IS THE SCANNER, AND THIS IS
 #: THE FIRST RE-FREEZE IN THIS FILE'S HISTORY WHERE THE MOVING DIGEST IS A
 #: DETECTOR TABLE GROWING:
@@ -965,7 +1003,10 @@ PINNED = (
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
-    "SANCTIONED_MUTATIONS": "ab8fdd31f93ef4fc",
+    # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
+    # entries added for press.disclose's click and its closing Escape, on the
+    # disclosing-press ruling. A PERMISSION grew; no refusal moved.
+    "SANCTIONED_MUTATIONS": "3676d309ead50c61",
     "_ALLOWED_URL_PATTERNS": "34f364971cf9e81c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",

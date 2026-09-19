@@ -119,15 +119,46 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     calls" while asserting four, and would have said it while asserting five.
     A name that has to be edited every time the thing it names grows is a name
     that will eventually not be.
+
+    SEVEN FROM 2026-09-19, AND THE TWO NEW ONES ARE A PAIR ON A READ PATH.
+    They belong to ``press.disclose``: the click that opens a disclosure, and
+    the Escape that closes it. **The Escape is not decoration** -- condition 4
+    of the disclosing-press ruling is that the control is closed and the
+    closure VERIFIED, because a disclosure left open is a change to the
+    rendered state the next reader inherits. A sanction for the opening
+    without one for the closing would have made the compliant implementation
+    impossible and the non-compliant one legal, which is the wrong way round.
+
+    WHAT MAKES THEM ARGUABLE RATHER THAN A WIDENING, and it is the same
+    argument that admitted ``activate_messaging_filter`` one level up: counted
+    by EFFECT rather than by verb, a control that only renders what is already
+    there is a read. The ruling is NARROWER than that argument on its own,
+    because "discloses rather than changes" is a claim about a SPECIFIC
+    CONTROL and not a property of presses -- this package holds the
+    counterexample, in that opening the article composer may autosave a draft
+    no surface here can detect.
+
+    SO THE PERMISSION IS NOT "may press on that page". Four conjunctive
+    conditions, the first two evaluated BEFORE anything is touched: the address
+    is already admitted (a press never extends reach), the control matches an
+    enumerated ATTRIBUTE shape and never a label, the press is SHOWN not to
+    move an outward counter, and the closure is verified. Where no counter can
+    price a press, unmeasurable resolves AGAINST it.
+
+    AND THE PRESS ALLOWLIST IS A STRICT SUBSET OF THE READ ALLOWLIST --
+    `/article/new/` is admitted for reading and refused for pressing. A page
+    this server may open is not thereby a page whose controls it may activate.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
         ("linkedin_server/dom.py", "activate_messaging_filter", "click"),
+        ("linkedin_server/press.py", "disclose", "click"),
+        ("linkedin_server/press.py", "disclose", "press"),
         ("linkedin_server/writes.py", "perform", "fill"),
         ("linkedin_server/writes.py", "perform", "select_option"),
         ("linkedin_server/writes.py", "perform", "set_input_files"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 5
+    assert len(readonly.SANCTIONED_MUTATIONS) == 7
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -140,11 +171,21 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # FIVE FROM 2026-09-04, and that one is the WIDEST by a distance -- which
     # is why the argument for it is the longest of the five and why most of it
     # is about a path rather than about a call.
+    #
+    # SEVEN FROM 2026-09-19, and one of the two new kinds is a FIRST: ``press``
+    # has never been on this list. It is the Escape that closes a disclosure,
+    # and it is the narrowest possible member of its class -- the only key it
+    # sends is a dismissal. A ``press`` that sent Enter would submit, which is
+    # why the probe rule next door splits that verb by its ARGUMENT rather than
+    # by its name, and why this entry is bound to one function that sends one
+    # key.
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
     assert kinds == [
         "click",
         "click",
+        "click",
         "fill",
+        "press",
         "select_option",
         "set_input_files",
     ], kinds
