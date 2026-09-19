@@ -11,13 +11,23 @@ shows the address refused must be written and shown failing BEFORE the pattern
 is added, so the rollback is proven rather than assumed."*
 
 **WHAT THE ADMITTING WAVE MUST DO WITH THIS FILE, stated here so it is not a
-judgement call at 2am.** Delete it, in the same commit that adds the pattern,
-with the deletion named in the commit message. Do NOT silence it, do NOT
-narrow its url list to whatever still refuses, and do NOT mark it xfail. A
-deleted test is a recorded decision; a silenced one is a rollback nobody can
-find later. Until that deletion happens this file is the executable statement
-that the boundary refuses the surface -- which is what makes the one-line
-removal of the pattern a PROVEN rollback rather than an assumed one.
+judgement call at 2am.** **REWRITE IT AND INVERT IT**, in the same commit that
+adds the pattern: the entries in `_SEARCH_RESULTS_URLS` that the pattern now
+admits flip to asserting they ARE admitted, and everything the pattern must
+still refuse stays asserting refusal. Do NOT silence it, do NOT narrow its url
+list to whatever still refuses, and do NOT mark it xfail.
+
+**THIS SAID "DELETE IT" UNTIL 2026-09-19 13:05, AND THE LEAD RULED THE OTHER
+WAY.** The argument that changed it: a deleted test leaves no record that the
+transition happened, an inverted one keeps asserting something true, and its
+diff is the clearest possible statement of what flipped. `17733f1`
+(`tests/test_search_admission_blast_radius.py`) said so first and was adopted;
+this file is brought into line rather than left contradicting it, because two
+guards giving opposite instructions is worse than either instruction.
+
+Until that rewrite happens this file is the executable statement that the
+boundary refuses the surface -- which is what makes the one-line removal of
+the pattern a PROVEN rollback rather than an assumed one.
 
 **AND IT ALSO SAYS WHY THE REVERT IS ONE LINE.**
 `test_the_refusal_is_the_allowlist_and_not_the_denylist` measures which of the
@@ -102,16 +112,19 @@ def _refused(url: str) -> bool:
 def test_every_search_results_address_is_refused_today():
     """GREEN TODAY BECAUSE NOTHING IS ADMITTED. RED WHEN THE PATTERN LANDS.
 
-    The admitting wave deletes this file in the commit that adds the pattern.
-    See this module's docstring: that deletion is the rollback being given up
-    deliberately, which is the whole value of writing this first.
+    The admitting wave REWRITES AND INVERTS this file in the commit that adds
+    the pattern. See this module's docstring: that diff is the rollback being
+    spent deliberately and visibly, which is the whole value of writing it
+    first.
     """
     for url in _SEARCH_RESULTS_URLS:
         assert _refused(url), (
             f"search-results address admitted as a read: {url!r}. If the "
             "admission ruled at 569dc5e section 6 has landed, this file has "
-            "done its job and should be DELETED in that same commit -- not "
-            "narrowed, not silenced, not xfailed."
+            "done its job and should be REWRITTEN AND INVERTED in that same "
+            "commit -- the admitted entries flipped to assert admission, the "
+            "rest still asserting refusal. Not deleted, not narrowed, not "
+            "silenced, not xfailed."
         )
 
 
@@ -171,7 +184,7 @@ def test_one_narrow_pattern_is_all_that_stands_between(monkeypatch):
         f"expected the narrow candidate to admit {target!r}. If this fails, "
         "either the candidate no longer matches LinkedIn's spelling or the "
         "denylist has grown an entry that bites it -- and in the second case "
-        "the revert is no longer one line. Re-measure before deleting this."
+        "the revert is no longer one line. Re-measure before rewriting this."
     )
 
     monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", original)
