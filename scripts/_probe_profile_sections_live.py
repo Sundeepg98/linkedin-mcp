@@ -76,11 +76,43 @@ statement is the narrower one above: it varies per load, so a single sample is
 not evidence. **Correcting a correction is worth the two lines it costs --
 a retraction resting on a wrong reason is one more thing to retract.**
 
-**WHAT THE READINGS DO AND DO NOT SUPPORT.** The profile read 2,146 on every
-load measured (four); the feed read large on two of three. That is suggestive
-and it is NOT a regression claim, because the same instrument produced 2,146
-for the feed as well, and one sample per address cannot carry three orders of
-magnitude.
+**AND THE MECHANISM IS NOW MEASURED, which settles it.** A time series on one
+load, sampling out to 90 seconds, with the feed as a concurrent control:
+
+    FEED       t=0    5,112,866 chars    123 controls
+               t=2    5,112,866          123
+               t=5    5,112,866          132
+               t=10       2,146          132      <- the payload DISAPPEARS
+               t=90       2,146          132
+
+    PROFILE    t=0        2,146          230
+               t=90       2,146          230      <- flat from the first sample
+
+**LINKEDIN DISCARDS ITS BOOTSTRAP PAYLOAD AFTER HYDRATION.** The scripts are in
+the document immediately after navigation and are gone within about ten
+seconds. So ``payload_chars`` is not measuring what a page HOLDS -- it is
+measuring **whether you read before or after cleanup**, and every reading of it
+is a race.
+
+That explains all three earlier numbers at once: the feed's 5,063,129 and
+5,147,717 were pre-cleanup reads and its 2,146 was post-cleanup. The profile
+read 2,146 every time because it had always finished by the time I looked.
+
+**SO 2,146 IS THE RESIDUE EVERY HYDRATED PAGE KEEPS, NOT A SHELL.** And the
+profile's control count is **230, flat from t=0 to t=90** -- a fully rendered
+page that was never incomplete.
+
+**THIS CLOSES THE RENDERING QUESTION ENTIRELY.** Not a shell: 230 controls. Not
+incomplete hydration: nothing grows, because hydration had already finished.
+Not a session fault: the feed served five megabytes on the same session. **The
+sections are simply not findable by the four selectors above**, which is where
+this file started -- now with the alternative explanations eliminated rather
+than merely unexamined.
+
+**AND IT IS A LIMIT ON dom.read_sdui_actions THAT REACHES PAST THIS FILE:** its
+own recorded 1,091,238 was a pre-cleanup read. Anyone using that instrument
+must sample immediately after navigation or measure the residue and conclude
+the page is empty.
 
 **AND THE DOM SAYS THE OPPOSITE OF A SHELL:** the profile draws **236
 controls, 143 links, 85 buttons**. That is a fully rendered page. A document
