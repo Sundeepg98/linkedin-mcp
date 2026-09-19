@@ -234,3 +234,70 @@ aimed there fails silently and reports "the editor draws three controls".
   surface. That proves the reader can stay silent; it says nothing about its
   sensitivity to any particular real label, which is exactly the failure that
   produced my three wrong zeros in 2.1.
+
+---
+
+# AMENDMENT A — 2026-09-19, and it corrects section 3 rather than extending it
+
+## A1. The contact-info control is NOT inert. It is WIRED and UNDECLARED.
+
+Section 3 reports `Edit contact info` as NAMED BUT INERT, and section 6 states
+the limit that makes that verdict narrow: *a control wired by a JavaScript
+handler with no ARIA relation is indistinguishable from an inert one to that
+reader.* **That limit was answerable without pressing anything, so I answered
+it.**
+
+`DOMDebugger.getEventListeners` over CDP reports the listeners REGISTERED on a
+node. Registration is not activation — reading the table runs no handler, fires
+no request and changes nothing. It is strictly a read, and a cheaper one than
+the click it replaces.
+
+    contact info control   level 0 (the node)   click x1   ->  WIRED
+    open to    control     level 0 (the node)   click x1   ->  WIRED
+
+**THE CONTROL FOR THIS READING, because both targets said yes and two yeses
+are not a measurement.** A reader that had only ever reported listeners had not
+been shown able to report none. Against three static nodes on the same live
+page:
+
+    document.documentElement   listeners: NONE
+    first <li>                 listeners: NONE
+    first <span>               listeners: NONE
+
+So the reader can report zero on a live node, and the two WIRED verdicts are
+not an artefact of a method that answers yes to everything.
+
+## A2. What that changes, stated exactly
+
+**Blocker 38's obstacle is not that no route exists. It is that the route is
+UNDECLARED.** The control opens something; the DOM simply does not say what.
+The corrected reading of section 3's table:
+
+| was | is |
+|---|---|
+| "nothing evidences that this control opens anything" | **a click handler is registered on it; nothing declares its TARGET** |
+| "the row needs a declared route" | the row needs either a declared target, or a press |
+
+`ONE OPENER` versus `NAMED BUT INERT` is a statement about **ARIA**, not about
+**behaviour**, and section 6 said so in advance. This is that stated limit being
+cashed rather than a surprise — but the conclusion it changes is section 3's,
+so the correction belongs here beside it.
+
+## A3. What it does NOT settle, and I am not rounding this off
+
+**Whether the handler WRITES is not determinable from a listener table.** For
+the open-to-work editor this repo holds the request's own name —
+`saveAndFetchNextStep` — which is why that surface is ruled unmeasurable by any
+read. **No equivalent record exists for the contact-info control**, so I have
+evidence that it acts and no evidence about what it does. Absence of a recorded
+write is not evidence of a read.
+
+So I still did not press it, and the reason is now sharper than "it looks
+inert": the five rows behind that control are his website, phone number,
+instant-messenger accounts and birthday, and the one thing I could not
+establish is precisely the one that decides whether opening it is free.
+
+**The next unit of work on blocker 38 is therefore a DECIDE, not a MEASURE** —
+the same shape the prior wave found for blocker 20, reached by a different
+route and with a much smaller residual unknown: one press, on a control now
+known to be wired, whose handler nobody has named.
