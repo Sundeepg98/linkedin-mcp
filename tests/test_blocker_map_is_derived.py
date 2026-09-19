@@ -367,7 +367,31 @@ import build_blocker_map as bbm  # noqa: E402
 #: contains "audio" zero times. And L6 is the row REFUSED from
 #: CREATOR-HUB-SURFACE at f461e9c for being a W against 4R -- the same
 #: split that excluded it there admits it here.
-UNASSIGNED_CEILING = 110
+#: 110 -> 105. SCHOOL-PAGE-SURFACE 3 of 3 and POLL-SURFACE 2 of 2, both
+#: EMPTY -> COMPLETE, by the singleton test generalised to k rows: the top
+#: k rows must each name this blocker as their own best, there must be a
+#: strict score gap to row k+1, and the R/W split must match the ledger's.
+#: The split is checked rather than reported afterwards, because a perfect
+#: count match with a wrong split is what CREATOR-HUB-SURFACE turned out
+#: to be.
+#:
+#: SCHOOL-PAGE-SURFACE: three rows at 1.00, next row 0.50, 3R vs published
+#: 3R. A THIRD AXIS AGREES -- the ledger charges "allowlist +1" and N 99's
+#: census note says what the missing pattern is: "No /school/ pattern; 0
+#: grep hits for /school/". Published cost and measured absence are the
+#: same fact from opposite ends.
+#:
+#: AND J 112 IS HERE BECAUSE I CARVED IT OUT AT 5d06446, where I left it
+#: out of COMPANY-PAGE-SURFACE as the one row in that census run that is
+#: not a Company Page. Taking the run whole would have left this blocker
+#: empty permanently.
+#:
+#: POLL-SURFACE: both rows 1.00, next 0.00 -- the widest edge in the field
+#: -- 2W vs published 2W. M C8 "Create a poll", NOT P C8 "Save profile as
+#: a PDF" which went to PROFILE-PDF-DOWNLOAD one commit earlier. The two
+#: C8s land in different blockers in adjacent commits: the ambiguous-id
+#: hazard, met twice in five minutes.
+UNASSIGNED_CEILING = 105
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
