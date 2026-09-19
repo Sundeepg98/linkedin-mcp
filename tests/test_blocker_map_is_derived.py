@@ -541,7 +541,19 @@ import build_blocker_map as bbm  # noqa: E402
 #: SERVICES-PAGE-SURFACE is complete at 11 of 11 and cannot hold another
 #: row without tripping the over-count guard, so the sweep's unadjudicated
 #: two-way conflict is settled by arithmetic elsewhere.
-UNASSIGNED_CEILING = 72
+#: 72 -> 71. ANALYTICS-CONTROLS-UNPRESSED 4 of 4, COMPLETING A SET THE
+#: LEDGER ITSELF CALLED PARTIAL. N 133's evidence line is LEDGER-EXPLICIT on
+#: the ledger's sentence "N 136 is therefore filed with N 133 134 under
+#: ANALYTICS-CONTROLS-UNPRESSED", and it records its own shortfall --
+#: "PARTIAL -- three of a published four". The fourth has been sitting in
+#: a committed probe since 2026-09-05:
+#:   ("P O3 N 133 N 134 N 136", "the profile-views page with a filter in
+#:    the url", .../analytics/profile-views/?timeRange=past_90_days)
+#: Four ids, one label, one url -- the grouping the code was AIMED at.
+#: P O3 "WVYP Premium insights and filters" is the profile slice's name for
+#: what the three network rows enumerate, it is marked R, and the ledger
+#: publishes 4R.
+UNASSIGNED_CEILING = 71
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
