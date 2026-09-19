@@ -391,7 +391,32 @@ import build_blocker_map as bbm  # noqa: E402
 #: a PDF" which went to PROFILE-PDF-DOWNLOAD one commit earlier. The two
 #: C8s land in different blockers in adjacent commits: the ambiguous-id
 #: hazard, met twice in five minutes.
-UNASSIGNED_CEILING = 105
+#: 105 -> 99. MESSAGE-REQUESTS-SURFACE 4 of 4 and RESUME-TOOLS-SURFACE 2 of
+#: 2, both EMPTY -> COMPLETE, and both rest on the SPLIT rather than on the
+#: name score.
+#:
+#: MESSAGE-REQUESTS-SURFACE, published 1R/3W: M6 Send (W), M7 Accept (W),
+#: M8 Decline (W), M9 Review previously declined (R). Exactly 1R/3W.
+#: THE SCORER TIED EIGHT ROWS HERE and that is a defect in the scorer, not
+#: an ambiguity in the corpus: a bag-of-words normalised over the blocker's
+#: own tokens weights "message" and "requests" EQUALLY, and "message"
+#: is everywhere in that slice. Of the eight, exactly these four contain
+#: the word request. Recorded because the next similarity match will hit it.
+#:
+#: RESUME-TOOLS-SURFACE, published 1R/1RW: a blocker published 1R/1RW needs
+#: a row that is literally R/W, and the R/W class is rare here. P M11
+#: "Resume Builder" is R/W, P M12 "Resume Tips" is R. Both carry the
+#: same census reason verbatim, which is the census recording them as one
+#: unresolved pair.
+#:
+#: THE MESSAGE-REQUESTS DECLINE IS OVERRIDDEN, NOT CONTRADICTED. I reported
+#: it undecidable on messaging-rows.md section 3a -- "there is no list" --
+#: which remains TRUE: no source LISTS these ids. This is a reconstruction
+#: from the census, the weaker class this map is built on throughout,
+#: admitted on split + discriminating word + contiguity. The blocker named
+#: in that same sentence, CONVERSATION-OVERFLOW-MENU, still does not close
+#: -- only 6 of its 10 have any signal -- and stays declined.
+UNASSIGNED_CEILING = 99
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
