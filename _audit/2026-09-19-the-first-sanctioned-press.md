@@ -202,3 +202,51 @@ edit it.** What is handed over is a red-when-fixed test, a verified design, and
 the one case that picks it. `N 133` / `N 134` remain GAP either way -- **no
 content has been read** -- and the second half, a name-free shaper for what the
 panel draws, is still unbuilt.
+
+---
+
+# 7. THE SAME SHAPE IN CONDITION 3, AND THIS ONE BOUNDS MY OWN EVIDENCE
+
+Having found one check that passes whether or not the thing it describes
+occurred, the honest next question is whether any other condition has that
+shape. **Condition 3 does**, and since this record's headline is *"priced by
+two counters"*, the bound belongs here rather than in a note about someone
+else's file.
+
+`check_counters` refuses `no_counter_prices_this_press` when
+`set(before) & set(after)` is empty -- **that is a test for whether a counter
+was READ at both ends, not for whether it COULD HAVE MOVED.** So `priced_by`
+names counters that were *readable*, never counters that were *sensitive to
+this press*. The ruling's language is the stronger one -- *"where no counter
+can price a press, unmeasurable resolves AGAINST the press"* -- and **the
+implementation's reading of "can price" is the weaker of the two.**
+
+**What that does and does not do to the press recorded above.** It does not
+make it unsafe: a counter that did not move is still a counter that did not
+move, and nothing here weakens conditions 1, 2 or 4. It does mean the natural
+strong reading of *"priced by two counters"* -- that a write would have been
+caught -- **is not established by this run.** Pending invitations and unread
+notifications are nav badges on his own account; there is no derived reason
+either would respond to expanding a filter panel on an analytics page.
+
+**And the boundary is the interesting part: sensitivity cannot be established
+here without doing the thing the gate exists to prevent.** A counter is shown
+sensitive to a class of press only by a press of that class moving it -- which,
+for an outward counter, is the write. `messaging-measure` derived it for a feed
+press against `off_state` because that surface offered a safe one. **This page
+offers none, so condition 3 on `/analytics/profile-views/` can be shown
+passing and cannot be shown capable of failing.**
+
+That is a real limit, not a defect to fix by trying harder, and the useful form
+of it is a question for the owner rather than a patch from this wave:
+
+> **Should `priced_by` distinguish a counter shown SENSITIVE to a press class
+> from one merely shown READABLE?** If it should, the sensitive set is empty
+> for this page and the ruling's own words resolve that against the press --
+> which would have made this first press a REFUSAL.
+
+**This wave is not ruling on that**, and deliberately: it is the owner's
+boundary, and a wave arguing its own permitted press should have been refused
+is exactly the argument that should be made by someone else. It is recorded
+because **the record every later press is measured against should carry the
+limits of its own strongest claim.**
