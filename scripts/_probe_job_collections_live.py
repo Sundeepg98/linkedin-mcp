@@ -11,8 +11,25 @@ reader written against an imagined DOM fails CLOSED as *"he has no
 collections"* -- the exact answer the surface exists to produce -- which is the
 trap the newsletter wave named and correctly refused to walk into.
 
-THIS SCRIPT OPENS IT ONCE AND MEASURES, AND BUILDS NOTHING. Its output is the
-input a reader needs and does not have.
+THIS SCRIPT OPENS IT ONCE AND MEASURES.
+
+**THAT SENTENCE USED TO END "AND BUILDS NOTHING. Its output is the input a
+reader needs and does not have."** It was true when written and is not any
+more: the reader exists (``linkedin_server.collections_page``, 2026-09-19) and
+this script now RUNS it, beside the census, on the same load. Corrected rather
+than left, because a module docstring is a STANDING INSTRUCTION -- whoever opens
+this file next reads it as current truth -- and this repository has watched a
+stale premise propagate through exactly that channel.
+
+## THE POSITIVE CONTROL RUNS FIRST AND THE SCRIPT ABORTS WITHOUT IT
+
+The first live read here matched ZERO of the five groupings, and **a matcher
+that returns zero everywhere is indistinguishable from a broken one.** So before
+any page is opened, the same in-page matcher is run against a DETACHED
+container built from a synthetic fixture -- no navigation, no page load. It must
+match 5 and leave the decoy unmatched. If it does not, every zero below would be
+meaningless and this script says so and stops, rather than reporting a number
+nobody can read.
 
 ## WHAT LEAVES THIS PROCESS: INTEGERS, SHAPES AND VERDICTS
 
@@ -45,7 +62,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from linkedin_server import dom, readonly  # noqa: E402
+from linkedin_server import collections_page, dom, readonly  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
 
 #: The address under test. One row, and the reason this script exists.
@@ -173,6 +190,15 @@ async def _read(page, label: str, url: str) -> dict:
         print("    AUTH WALL. Nothing else measured.")
         return {"authwall": True}
 
+    # THE READER, beside the census, so both are taken on the SAME load rather
+    # than compared across runs -- this surface's counts move between loads.
+    grouping_read = await collections_page.read_collections(page)
+    grouping_tally = collections_page.tally(
+        grouping_read["indices"], grouping_read["cards"])
+    print(f"    groupings    : matched={grouping_tally['matched_groupings']}  "
+          f"unmatched={grouping_tally['unmatched_headings']}  "
+          f"nodes={grouping_read['headings_seen']}")
+
     census = await dom.read_surface_census(page)
     controls = list(census.get("controls") or [])
     counts = census.get("counts") or {}
@@ -203,7 +229,27 @@ async def main() -> int:
     try:
         async with BROWSER.session() as page:
             page_ref = page
-            print("\n### CONTROL FIRST. If this is wrong, nothing else is a reading.")
+            print("\n### POSITIVE CONTROL FIRST, and it needs no page load.")
+            print("    The same in-page matcher over a DETACHED container.")
+            print("    A matcher that returns zero everywhere is")
+            print("    indistinguishable from a broken one, so this must")
+            print("    fire before any zero below means anything.")
+            fixture = await collections_page.read_collections(
+                page, collections_page.control_fixture())
+            fixture_tally = collections_page.tally(
+                fixture["indices"], fixture["cards"])
+            matched = int(fixture_tally["matched_groupings"])
+            decoys = int(fixture_tally["unmatched_headings"])
+            print(f"    matched_groupings : {matched}  (MUST be "
+                  f"{len(collections_page.GROUPINGS)})")
+            print(f"    unmatched decoy   : {decoys}  (MUST be 1)")
+            if matched != len(collections_page.GROUPINGS) or decoys != 1:
+                print("    THE MATCHER CANNOT MATCH, or cannot discriminate.")
+                print("    EVERY ZERO BELOW WOULD BE MEANINGLESS. Aborting")
+                print("    rather than reporting a zero nobody can read.")
+                return 1
+
+            print("\n### CONTROL PAGE. If this is wrong, nothing else is a reading.")
             control_first = await _read(page, "CONTROL  jobs search", CONTROL_URL)
             await _badge(page, "before")
 
