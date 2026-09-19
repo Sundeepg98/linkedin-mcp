@@ -286,7 +286,10 @@ DECLARED_PLANTS = {
     # allowlisted-form examples that are themselves shape-valid.
     ("tests/test_no_committed_identity.py", "company id"): 1,
     ("tests/test_no_committed_identity.py", "credential"): 1,
-    ("tests/test_no_committed_identity.py", "email"): 2,
+    # 2 -> 3 on 2026-09-19: the plus-tagged address added to the planted
+    # controls, which is what keeps the new "no alphanumerics in the local
+    # part" exemption from being widened into one that swallows name+tag@.
+    ("tests/test_no_committed_identity.py", "email"): 3,
     ("tests/test_no_committed_identity.py", "linkedin slug"): 1,
     ("tests/test_no_committed_identity.py", "member token"): 3,
     # TWO, not one, since 2026-09-04: the contiguous plant and the GROUPED
@@ -576,6 +579,37 @@ def redact(value: str) -> str:
 
 
 def _email_ok(match: re.Match[str], text: str) -> bool:
+    local = match.group(0).rsplit("@", 1)[0]
+    # A LOCAL PART WITH NO LETTER AND NO DIGIT IS NOT AN ADDRESS.
+    #
+    # Added 2026-09-19 after this shape refused four commits over
+    # ``+@pytest.mark.parametrize``. EMAIL_SHAPE allows ``+`` in a local part
+    # -- correctly, for ``name+tag@``  -- so in a DIFF the ``+`` that marks an
+    # added line binds to the decorator on it, and ``pytest.mark`` /
+    # ``.parametrize`` read as a domain and a 11-letter TLD.
+    #
+    # IT ONLY BITES IN A PATCH FILE, which is why it went unseen for weeks:
+    # in ordinary Python the character before ``@`` is a newline, which is not
+    # in the local-part class, so a decorator does not match at all. It needs
+    # a diff marker glued to it. And the standing practice of this repository
+    # is that every wave saves ``_RECOVER_*.patch`` at the tree root, while
+    # this guard was deliberately widened to sweep untracked tree-root files.
+    # Those two practices are individually right and collide by construction.
+    #
+    # THE NARROWING IS THE SMALLEST ONE THAT WORKS AND IT CANNOT HIDE A REAL
+    # ADDRESS: nobody's mailbox has a local part made only of punctuation.
+    # ``name+tag@``, ``a@``, ``1@`` all still carry a letter or a digit and
+    # are still checked. What is exempted here is a string that was never
+    # deliverable to anybody.
+    #
+    # SAID PLAINLY BECAUSE IT MATTERS: this loosens an identity guard, and it
+    # was done while that guard was blocking the commit of the agent doing the
+    # loosening. That is the exact pressure this campaign has twice recorded
+    # as the mechanism of its worst calls, so the claim is not "it looked
+    # fine" -- it is the sentence above, which is checkable, plus the two
+    # controls added below, one in each direction.
+    if not any(character.isalnum() for character in local):
+        return True
     domain = match.group(0).rsplit("@", 1)[1].lower().rstrip(".")
     if domain in SYNTHETIC_EMAIL_DOMAINS or domain in CORPORATE_EMAIL_DOMAINS:
         return True
@@ -767,6 +801,12 @@ def test_the_sweep_actually_looked():
     "shape, planted",
     [
         ("email", "somebody@a-real-company.co.uk"),
+        # THE CONTROL THAT MAKES THE 2026-09-19 NARROWING LOAD-BEARING.
+        # _email_ok now exempts a local part carrying no letter and no digit.
+        # A PLUS-TAGGED ADDRESS IS STILL A REAL ADDRESS and must still be
+        # caught -- if the exemption were ever widened from "no alphanumerics"
+        # to "contains a plus", this row is what goes red.
+        ("email", "somebody+newsletter@a-real-company.co.uk"),
         ("phone", "he can be reached on 9123456789 any evening"),
         ("linkedin slug", "https://www.linkedin.com/in/jordan-mcallister-7f21/"),
         ("company id", "/company/98765432"),
@@ -839,6 +879,13 @@ def test_every_shape_can_actually_fail(shape, planted):
     "shape, benign",
     [
         ("email", "write to nobody@example.com or team@evil.example.org"),
+        # A DECORATOR ON A DIFF-ADDED LINE, which is what four refused
+        # commits were actually about on 2026-09-19. The leading "+" is the
+        # diff marker, not a local part; there is no address here and nobody
+        # to deliver one to. Written as it appears in a real patch file,
+        # because a control built from a tidied-up version of the string
+        # would not exercise the thing that fired.
+        ("email", '+@pytest.mark.parametrize("name", sorted(SEGMENTS))'),
         ("phone", "id=ab7dc03f-6282-46a6-a3b9-7312345620e2 is a uuid"),
         ("phone", "the placeholder 9876543210 is not a person"),
         ("linkedin slug", "https://www.linkedin.com/in/alex-rivera-8c21/"),
