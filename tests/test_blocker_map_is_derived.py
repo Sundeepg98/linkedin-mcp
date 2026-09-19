@@ -125,7 +125,10 @@ import build_blocker_map as bbm  # noqa: E402
 #: refused them. The handing wave checked for DUPLICATES, which is a different
 #: check and cannot see this: a row can be unique and still not be in the
 #: denominator.
-UNASSIGNED_CEILING = 247
+#: 247 -> 246. `JOB-COLLECTIONS-SURFACE` recovered at 1 of 1 on APPOSITION --
+#: "JOB-COLLECTIONS-SURFACE (J 42) is one row..." -- plus a 1R/1R split match.
+#: The count axis is vacuous at published=1 and is NOT what carries that line.
+UNASSIGNED_CEILING = 246
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
