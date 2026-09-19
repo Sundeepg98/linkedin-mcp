@@ -240,3 +240,68 @@ move is worth being exact about. It is now **46**, not 47: four rows became
 ASSIGNED, but all FIVE left the empty bucket, because the blocker itself is no
 longer empty. **A blocker leaving that set takes its whole published count with
 it, including the row still unassigned inside it.** 51 - 5 = 46.
+
+
+---
+
+# AMENDMENT A -- MEASURED 12:28 BY THE BOX, after four more blockers closed
+
+**The numbers at the head of this file are stale and are left standing rather
+than rewritten**, because a request whose state silently changes underneath it
+cannot be audited. What follows supersedes them.
+
+    ASSIGNED   351        UNASSIGNED  58
+    COMPLETE   72 of 97   EMPTY  15 (39 rows)
+
+## WHAT CHANGED, AND WHY IT CHANGED AFTER I DECLARED A FLOOR
+
+I filed this file saying every instrument was at a fixed point. That was true of
+every instrument I had built -- **and all of them read only the CAPABILITY
+column.** The census also names blockers in the REASON cell, and four blockers
+closed out of it within the half hour after:
+
+* `PICKER-SURFACES` 2/2 -- `M16`/`M17`, whose whole reason is *"a picker
+  surface, never censused"*. Exactly two rows in the corpus give that reason.
+* `EASY-APPLY-MULTISTEP` 1/1 -- `J 68`, reason *"blocked behind the same
+  multi-step gate as row 60"*, and row 60 is not in the frozen 409.
+* `NOTIFY-COST-UNMEASURED` 1/1 -- `P O23`, reason *"states this as an UNMEASURED
+  cost"*.
+* `BADGES-SURFACE` 4/5 and `ACCOUNT-VERIFICATION` 2/3 -- see below.
+
+**`EASY-APPLY-MULTISTEP` is the one to read.** My split-first matcher had
+offered `P B7` *"#Hiring photo frame apply / remove"* for it, on the shared
+token "apply", and reported it UNIQUE. I refused that for looking absurd, which
+was luck dressed as judgement: the real row shares **no capability-text token
+with the blocker's name at all**, so no threshold on that column would ever have
+reached it.
+
+## TWO REQUESTS ARE NARROWED
+
+**REQUEST 3 (`BADGES-SURFACE`) is now 4 of 5, not 0 of 5.** Collapsing the
+`B8`/`K9` duplicate on their identical `a1577365` citation forced four rows.
+Only the single question in this file remains: **`B8` or `K9`.**
+
+**REQUEST 2a gains a consequence I did not know when I wrote it.**
+`ACCOUNT-VERIFICATION` is now **2 of 3** (`P N14`, `P A24`) -- and my twice-made
+decline of it was right about its evidence and wrong about its candidate set: I
+had been searching section K, whose title matches the blocker's name, when its
+rows were never there. **Its one empty slot is `J 81`**, the row 2a proposes
+dropping from `PREMIUM-APPLY-SURFACES`.
+
+**So 2a is now a single question with two known answers**, not an open search:
+`J 81` goes to `ACCOUNT-VERIFICATION` (3 of 3, and `PREMIUM-APPLY-SURFACES`
+drops to five candidates for five slots), or it stays with
+`PREMIUM-APPLY-SURFACES` and `ACCOUNT-VERIFICATION` stands at 2 of 3 permanently.
+
+**I have NOT taken `J 81` on my own recommendation.** A recommendation is not a
+permission to act on itself; if I may adopt my own proposals the moment I
+publish them, filing them was theatre.
+
+## ONE CAUTION ON 2a, MEASURED SINCE
+
+`PREMIUM-APPLY-SURFACES` does **not** cleanly close even with `J 81` removed.
+Its published split is `1R/4W`, but **jobs.md section 2 marks the whole
+`78-83` group `W`** -- so the `1R` is a row the census calls a write. Calling
+`J 82` the read is MY inference from the word "Observe", not the census's.
+**That conflict between ledger and census is itself a ruling**, and it survives
+whichever way `J 81` goes.
