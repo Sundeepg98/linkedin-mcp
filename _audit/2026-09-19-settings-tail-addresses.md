@@ -163,3 +163,55 @@ leaves the page at all.
 
 Guards run after staging, not before: `sweep_tracked_for_identity.py` PASS, 0
 hits across 391 files, on both commits.
+
+---
+
+# AMENDMENT A -- 2026-09-19, after the gate table was written
+
+## A1. The feed-preferences address costs TWO boundary edits, not one
+
+The ledger charges `FEED-PREFERENCES` one allowlist pattern. Now that the
+address is known, the charge can be stated exactly, and it is double:
+
+`/mypreferences/d/unfollowed` is refused at the FORBIDDEN-SUBSTRING gate by
+`/unfollow`, which runs before the allowlist loop is consulted at all. So
+admitting it needs **both** edits, in this order:
+
+1. an entry in `_FORBIDDEN_SUBSTRING_EXEMPTIONS`, whose shape fits this case
+   exactly -- it is an EXACT-URL table, the address is a constant with no
+   variable part, and an equality key would let this one url past `/unfollow`
+   while that substring stays on the tuple refusing every other spelling. The
+   table has two entries today and both were added on the operator's ruling;
+2. **and then** an anchored allowlist pattern, because an exemption only gets a
+   url past the first gate.
+
+**The substring is write-shaped and the address is read-shaped, and that is the
+argument this row turns on.** `/unfollow` is on the denylist to stop this server
+unfollowing people -- an act against a third party. The address it is catching
+here renders the list of sources the account holder has already unfollowed,
+which is his own data and emits nothing anyone can observe. That is the same
+argument that admitted the message composer through this same table.
+
+**I did not make either edit.** Both are boundary changes, both are the
+operator's by the standing one-named-page ruling, and the row they would serve
+is already off GAP (A2). The costing is the deliverable.
+
+## A2. An observation on the row, routed rather than acted on
+
+The census row for feed preferences was moved to MEASURED-ABSENT today by a
+sibling wave on the strength of a live feed read finding **no followable hashtag
+surface** -- zero hashtag anchors across two loads on two instruments, with its
+page control passing and its own blind spot stated.
+
+That measurement is sound and I am not disputing it. But the row's text covers
+**"follow / unfollow topics and sources"**, and the settings index draws an
+address for the second half of that -- the unfollowed-sources list -- which
+exists and is enumerated in section 3 above. The row is also the one the blocker
+map records as CONTESTED between two blockers for precisely this reason: it
+"supports both readings".
+
+**So the absence may be measured over one half of a two-half row.** That is a
+question for the row's owner and the wave that took the reading, not for me: it
+turns on what the row was always meant to mean, and removing or keeping a
+capability on somebody else's inference is the error that census pass exists to
+fix. Recorded here so it is visible in a diff rather than lost.
