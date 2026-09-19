@@ -570,7 +570,25 @@ import build_blocker_map as bbm  # noqa: E402
 #: changed -- the FIELD did. Third cascade of this recovery, after J 112
 #: closing SCHOOL-PAGE-SURFACE and M C12 freeing CELEBRATION-COMPOSER, and
 #: the third argument for running this enumerator to a FIXED POINT.
-UNASSIGNED_CEILING = 68
+#: 68 -> 64. BADGES-SURFACE to 4 of 5, declined TWICE earlier today and now
+#: mostly forced, because the duplicate that blocked it is evidenced by an
+#: IDENTICAL SOURCE CITATION rather than by my reading: B8 "Top Voice badge
+#: show / hide" cites a1577365 and K9 "Show / hide the Top Voice badge"
+#: cites a1577365. One act, censused under section B and again under K.
+#:
+#: Collapse the pair to one slot and 2R/3W closes exactly: K8 R, K10 R,
+#: B7 W, B9 W, and ONE of B8/K9. B7 is admitted BY THE ARITHMETIC, not by
+#: resemblance -- "#Hiring photo frame" does not read like a badge, but
+#: the only writes available are B7, B9 and the pair, so 3W is unreachable
+#: without it.
+#:
+#: THE FIFTH IS AN ASSIGNMENT QUESTION, NOT A SUBTRACTION ONE, and so does
+#: NOT inherit the hold on cross-slice duplicates pending the 761
+#: reconciliation. Both rows stay in the frozen 409 either way; one lands
+#: here and the other stays UNASSIGNED. No denominator moves. The pair is
+#: also INTRA-slice -- both in profile.md -- where that hold covers
+#: CROSS-slice pairs. Filed as a ruling request.
+UNASSIGNED_CEILING = 64
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
