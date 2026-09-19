@@ -13,7 +13,7 @@ mutual-best matching, split-first subset search, the committed-source comment
 vein, and a co-occurrence sweep over every tracked file. Each of these is a
 CHOICE among candidates.
 
-**State at the time of writing, 2026-09-19 12:25 by the box:** frozen GAP 409,
+**State, MEASURED 2026-09-19 12:21 by the box** (the first version of this line carried 12:25, a time I had not taken -- an agent's sense of the clock is not an instrument, and a stamp exists so a reader can tell how stale a number is): frozen GAP 409,
 ASSIGNED 345, UNASSIGNED 64, blockers COMPLETE 69 of 97, EMPTY 19 (46 rows).
 
 ---
