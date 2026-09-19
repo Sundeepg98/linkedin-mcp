@@ -16,12 +16,12 @@ constraint is a page nobody has opened.
 PAGE WAS LOADED, AND `LINKEDIN_ENABLE_WRITES` WAS NEVER SET.** Every
 measurement below is against code and against the shipped predicates.
 
-    commits   6b90622   boundary: the job-alerts READ half            726 / 2
-              27598ef   the refusal table cannot take a row whose
+    commits   61e3237   boundary: the job-alerts READ half            726 / 2
+              8940ee8   the refusal table cannot take a row whose
                         surface nobody opened                         174 / 0
-              0d66ebe   this document, and the ledger back-pointer     428 / 0
-              93bfa7c   the admitted address is not served             399 / 11
-              e309ebe   the landing narrowed to one word               147 / 1
+              f7594c0   this document, and the ledger back-pointer     428 / 0
+              bb82b94   the admitted address is not served             399 / 11
+              8c0f73c   the landing narrowed to one word               147 / 1
 
 Insertion counts are from `git show --numstat` per commit, and the three new
 source files were checked against `wc -l` on disk rather than against the
@@ -75,7 +75,7 @@ it is the case for fixing it rather than recording it a second time.
 
 ### What I built instead, and why it is a mechanism rather than a note
 
-`27598ef` does two things and neither is a requeue:
+`8940ee8` does two things and neither is a requeue:
 
 * **`writes.py:971` gets a SUCCESSOR**, appended rather than substituted,
   because the paragraph is true of the day it describes and only its last
@@ -106,7 +106,7 @@ thirteenth spec arriving and two pinned integers would not.
 
 ## 2. WHAT DID LAND: THE ALERTS READ HALF, BOUGHT AND FROZEN
 
-`6b90622`. One anchored pattern, census row J37, blocker 36.
+`61e3237`. One anchored pattern, census row J37, blocker 36.
 
     _ALLOWED_URL_PATTERNS   fa201106ecfce5ef -> 34f364971cf9e81c   31 -> 32
     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
@@ -261,7 +261,7 @@ exact address plus the exemption, not one pattern for the blocker.
 is two blockers under the ledger's own merge rule, because the same single
 action does not close both halves:
 
-    the READ half   1 pattern, 0 exemptions, no write machinery.  BOUGHT at 6b90622.
+    the READ half   1 pattern, 0 exemptions, no write machinery.  BOUGHT at 61e3237.
     the WRITE half  1 anchored pattern PER address + the exemption list + 3*W,
                     and every one of its surfaces is still unopened.
 
@@ -286,7 +286,7 @@ it needs a gate.
 
 ### 3.4 THE CORRECTION THAT OUTRANKS THE OTHER THREE: the row counts are not measurements
 
-Committed at `d5f6409` by wave `blocker-map`, after the ledger was written:
+Committed at `c294507` by wave `blocker-map`, after the ledger was written:
 `_audit/_census/blocker-map.tsv`, which assigns each of the 409 GAP rows to a
 blocker **where a committed source names it**. Its own headline is that 306 of
 409 were never recoverable, and 71 of 97 blockers have not one row.
@@ -317,7 +317,7 @@ nobody can audit. That is worth having and it is not worth more than that.
 ## 4. THE REQUEUE, ROW BY ROW
 
     blocker                    ledger queue   corrected queue   why
-    36 JOB-ALERTS-SURFACE      BUILD          READ: DONE        read bought at 6b90622
+    36 JOB-ALERTS-SURFACE      BUILD          READ: DONE        read bought at 61e3237
                                               WRITE: MEASURE    three unopened surfaces
     61 PREMIUM-APPLY-SURFACES  BUILD          MEASURE           surfaces unopened; +2 is +1
     62 TRACKER-ROW-MENU        BLOCKED        MEASURE           boundary cost is 0
@@ -570,10 +570,10 @@ protect.** The rule is right -- *"a pattern that accepts a query accepts
 whatever a caller appends"* -- and its consequence, never stated, is that such
 a pattern **refuses the address LinkedIn actually serves.** Harmless while
 nothing re-checks the landing; a trap the moment anything does. Two entries now
-sit in that state, and the newer one was admitted at `db0dc40` two and a half
+sit in that state, and the newer one was admitted at `47e10d0` two and a half
 hours before this reading.
 
-**I DID NOT TOUCH THE COLLECTIONS PATTERN.** It is the `db0dc40` wave's artifact
+**I DID NOT TOUCH THE COLLECTIONS PATTERN.** It is the `47e10d0` wave's artifact
 by `git log`, the reading is reported rather than acted on, and **the remedy is
 a decision rather than an edit**: either the no-query rule accepts that anchored
 entries do not cover their own landings, or a landed-url check is added and

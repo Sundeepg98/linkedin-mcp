@@ -450,7 +450,7 @@ async def test_a_click_that_does_commit_reaches_the_body_and_the_send(
     working -- and from 2026-09-05 to 2026-09-19 it was the test that failed
     while the flow worked fine, which is a worse state than either.
 
-    WHAT HAPPENED, BECAUSE THE RED WAS NOT A BUG IN EITHER HALF. ``9503723``
+    WHAT HAPPENED, BECAUSE THE RED WAS NOT A BUG IN EITHER HALF. ``773a409``
     tightened ``dom.SELECTED_RECIPIENT_JS`` to a word-bounded match and said
     in its own message that a label running a name onto a connection degree
     must refuse. This double's chip carries exactly that label, because the
@@ -475,7 +475,7 @@ async def test_a_click_that_does_commit_reaches_the_body_and_the_send(
       2. THE REFUSAL IS A MATCHER VERDICT, NOT AN ABSENT CHIP. On the other
          shape ``total`` is still 1 -- a recipient WAS committed by the same
          click -- and the refusal is ``3_needle_does_not_match``. That is the
-         separation ``9503723``'s own four-case table was built to make, and
+         separation ``773a409``'s own four-case table was built to make, and
          without it a refusal here would prove only that the fixture stopped
          drawing.
       3. NOTHING UPSTREAM MOVED. Both runs clear the typeahead gate with one
@@ -613,7 +613,7 @@ async def test_the_shape_determination_is_one_clause_and_here_it_is_removed(
     claim with a demonstrated failure mode rather than a coincidence.
 
     IT ALSO DATES THE RED. The loosened column is what the positive control
-    was passing against before ``9503723``, so this table is the whole
+    was passing against before ``773a409``, so this table is the whole
     two-week regression in four numbers, and neither column decides what
     LinkedIn draws.
     """

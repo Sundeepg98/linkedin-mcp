@@ -596,20 +596,20 @@ enough to mislead its own author.
 
 ## 11. THE WAVE, BY COMMIT
 
-    5131271  wire the membership reader -- 41 -> 42
-    8d9ad77  the cost prediction refuted by the run; the audit; the property tests
-    343b192  a zero is interpretable now, and one branch is honestly ambiguous
-    e1a81e9  two dangling citations my own rename created; the stale README headline
-    564ed73  why this tool reports a moved counter where its sibling refuses
-    6531223  the close: freeze numbers, and how to falsify each claim
-    be1a6cd  the package front-door docstring understated the writes by nine tools
-    5023667  the tab guard could not see my close; the pin it enforces over-counts
-    7568f1c  page loads computed at freeze; the rename verified live
+    4ad3704  wire the membership reader -- 41 -> 42
+    6ce068b  the cost prediction refuted by the run; the audit; the property tests
+    633e424  a zero is interpretable now, and one branch is honestly ambiguous
+    71036a6  two dangling citations my own rename created; the stale README headline
+    f81f181  why this tool reports a moved counter where its sibling refuses
+    99ff2f8  the close: freeze numbers, and how to falsify each claim
+    d20a501  the package front-door docstring understated the writes by nine tools
+    15971ba  the tab guard could not see my close; the pin it enforces over-counts
+    a4ff8ee  page loads computed at freeze; the rename verified live
 
-    97398e9  this list said five and there were nine
+    767de82  this list said five and there were nine
     <this one> the count is self-referential; the range is not
 
-**THE WAVE IS THE RANGE `5131271..HEAD` AT FREEZE, AND STATING IT AS A COUNT
+**THE WAVE IS THE RANGE `4ad3704..HEAD` AT FREEZE, AND STATING IT AS A COUNT
 WAS THE MISTAKE.** This list said FIVE for half an hour, then NINE for one
 commit -- and it could not have said anything else, because **writing the
 number is itself a commit, so a self-counting list is wrong the instant it is
@@ -628,7 +628,7 @@ the message bodies.**
 Nothing pushed; the push freeze is the operator's.
 
 Neighbours committed five times INTO THIS RANGE while this wave ran
-(`697b609`, `a373547`, `d1b1a62`, `38ea9dc`, `e4a7947` -- a messaging wave).
+(`82a9a85`, `948cd83`, `7d41e11`, `1923b40`, `5dc5d45` -- a messaging wave).
 **None of their files is in any of the five commits above**, checked per
 commit with `git show --stat` rather than by trusting `--only`, which protects
 at FILE granularity and cannot protect a path two waves both legitimately own.

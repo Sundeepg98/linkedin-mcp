@@ -671,14 +671,14 @@ tooling twice.
 **Recomputed from `git log` and `pytest --collect-only` at freeze, not
 re-read from the drafts above. Two numbers moved when I recomputed them.**
 
-    commits            8     812abc3  feed.py + tests (the ruling)
-                             8c028d3  corpus probe + the measured correction
-                             f86f27f  row-58 transport invariant
-                             840f143  this document + the back-pointer
-                             00211ce  the live probe, unrun and labelled
-                             a5a988a  needle declared, neighbour's left red
-                             1583c58  freeze recomputed (the 1295 correction)
-                             a01796e  the candidate-host gate table
+    commits            8     aa4cb09  feed.py + tests (the ruling)
+                             409fa7b  corpus probe + the measured correction
+                             a585229  row-58 transport invariant
+                             41b8f02  this document + the back-pointer
+                             2f596ca  the live probe, unrun and labelled
+                             4ac5b61  needle declared, neighbour's left red
+                             c901e71  freeze recomputed (the 1295 correction)
+                             2e0004e  the candidate-host gate table
                              + the commit carrying this line, which a ledger
                                cannot count -- stated rather than left to
                                drift, since every correction of this figure
@@ -712,7 +712,7 @@ list -- checked by reading the list, not inferred from the targeted runs passing
 | failing test | note |
 |---|---|
 | `test_a_correction_is_findable_from_the_claim` | the two untriaged pairs name other waves' documents |
-| `test_a_person_name_is_never_a_literal` | **my item is fixed**; the survivor is `fc10b99`'s, established by `merge-base --is-ancestor` |
+| `test_a_person_name_is_never_a_literal` | **my item is fixed**; the survivor is `460852e`'s, established by `merge-base --is-ancestor` |
 | `test_a_probe_closes_its_own_tab` | 41 vs 39; neither of my probes is in the leaking list it prints |
 | `test_click_is_not_its_own_evidence` | not this wave's surface |
 | `test_publish_post_names_its_audience` | not this wave's surface |
@@ -738,8 +738,8 @@ proofreading cannot reach a number that is wrong, only recomputation can.)
 
 | red | owner | how established |
 |---|---|---|
-| `test_every_person_constant_holds_a_declared_invented_name`, first item | **MINE -- FIXED at `a5a988a`** | the assertion named `test_feed_tally.py:32` |
-| the same test, second item -- still red | `fc10b99` (recommendations) | `git merge-base --is-ancestor fc10b99 812abc3` is TRUE, so it has been red since 19:15:46, about two hours before this wave existed |
+| `test_every_person_constant_holds_a_declared_invented_name`, first item | **MINE -- FIXED at `4ac5b61`** | the assertion named `test_feed_tally.py:32` |
+| the same test, second item -- still red | `460852e` (recommendations) | `git merge-base --is-ancestor 460852e aa4cb09` is TRUE, so it has been red since 19:15:46, about two hours before this wave existed |
 | `test_the_tab_leak_only_ever_shrinks` (41, up from 39) | two other waves | **neither of my probes is in the leaking list the failure prints** -- one attaches no browser at all, the other closes the PAGE in a `finally` |
 | `test_every_candidate_pair_is_declared_or_triaged` | `article-publish`, `jobs-tail` | the two untriaged pairs name those documents; already red before I wrote a line |
 

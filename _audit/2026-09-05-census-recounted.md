@@ -251,20 +251,20 @@ is what the census says"*, is closed there and closed toward the census.
     counter, tracked     scripts/count_census_states.py
     counter, existing    _audit/_scratch/_route_extract_gaps.py (gitignored)
     applier              _audit/_scratch/_census_apply_retirements.py (gitignored)
-    identity sweep       see 7.1 -- PASS at `990bbd3`, FAIL at `cc3745f`,
+    identity sweep       see 7.1 -- PASS at `990bbd3`, FAIL at `eb37793`,
                          and the difference is not this wave's file
     correction guard     8 of 9 passed; the one red is NOT this wave's -- see below
     push                 BLOCKED, and not by anything here. See 7.1
 
 ## 7.1 THE SWEEP PASSED, THEN FAILED, AND MY OWN COMMIT MESSAGE IS WRONG ABOUT IT
 
-**CORRECTING MY OWN COMMIT MESSAGE, `cc3745f`.** Its closing line reads
+**CORRECTING MY OWN COMMIT MESSAGE, `eb37793`.** Its closing line reads
 *"sweep_tracked_for_identity: PASS, 0 hits across 311 files, run at the gate."*
 **That is the reading from the FIRST commit, `990bbd3`, and it was already false
-when I wrote it.** The run I took immediately before `cc3745f` FAILED:
+when I wrote it.** The run I took immediately before `eb37793` FAILED:
 
     before 990bbd3   sweeping 314 tracked files   PASS, 0 hits across 311
-    before cc3745f   sweeping 332 tracked files   FAIL: 1 hit
+    before eb37793   sweeping 332 tracked files   FAIL: 1 hit
                      _audit/2026-09-05-jobs-tail.md:403 [operator_own_denied_terms]
 
 **EIGHTEEN FILES ENTERED THE INDEX BETWEEN THE TWO RUNS**, and one of them
@@ -285,8 +285,8 @@ the four `_audit/_census/` slices and
     file      _audit/2026-09-05-jobs-tail.md, line 403
     class     operator_own_denied_terms
     command   ./venv/Scripts/python.exe scripts/sweep_tracked_for_identity.py
-    owner     `git log --oneline -1 --` names `39b5a64` as its most recent
-              commit; it was created in `f8e706c`, both after `990bbd3`
+    owner     `git log --oneline -1 --` names `83bf200` as its most recent
+              commit; it was created in `7edbd0a`, both after `990bbd3`
 
 **THE STANDING RULE APPLIES AND I AM NOT INVOKING THE EXCEPTION.** A red guard
 means UNDECLARED, not real -- except for the one class where they coincide,
@@ -300,11 +300,11 @@ that reported the opposite.
 ### AMENDMENT, TAKEN TWO MINUTES AFTER THE COMMIT ABOVE: PASS -> FAIL -> PASS
 
     before 990bbd3   314 tracked files   PASS, 0 hits across 311
-    before cc3745f   332 tracked files   FAIL, 1 hit
-    before 7da74fd   333 tracked files   PASS, 0 hits across 330
+    before eb37793   332 tracked files   FAIL, 1 hit
+    before fc0ed87   333 tracked files   PASS, 0 hits across 330
 
 **The hit was gone by the next run.** Its owner cleared it between my FAIL and my
-next gate, and `7da74fd` -- which says *"a push is blocked"* -- was already stale
+next gate, and `fc0ed87` -- which says *"a push is blocked"* -- was already stale
 when it landed. That sentence is corrected here rather than rewritten in history.
 
 **THE THIRD READING DOES NOT WEAKEN THE FINDING, IT COMPLETES IT.** Three
@@ -330,7 +330,7 @@ repository has done that too, twice today, on four synthetic member ids.
     shape   the citing line carries repair vocabulary within two lines of the
             citation, and the pair is on neither the declaration channel nor
             the triage list
-    owner   that document landed in f8e706c, which git merge-base
+    owner   that document landed in 7edbd0a, which git merge-base
             --is-ancestor confirms is AFTER this wave's 990bbd3, and row 127
             is not one of the 37
 

@@ -10,8 +10,8 @@ this wave ~18 min). It is not a property of one agent.
     19:38:42   first live run, both surfaces read
     19:39:24   clock re-measured; the taint engine named its own hit
     19:41      second live run, fresh process, reproduced exactly
-    19:45      probe committed  707583b
-    19:49      test committed   79e126b
+    19:45      probe committed  cb8a8f7
+    19:49      test committed   80a20ca
 
 ## WHAT THIS WAVE MOVED
 
@@ -44,7 +44,7 @@ statement than a re-pin and is checkable in one command.
 
 ### The measurement, reproduced in two processes
 
-`scripts/_probe_badge_and_language_affordances.py`, run twice, `707583b`.
+`scripts/_probe_badge_and_language_affordances.py`, run twice, `cb8a8f7`.
 
     CONTROL PAGE  /mypreferences/d/dark-mode   (admitted; draws neither surface)
       controls 20   text_length 507   distinct_langs 1
@@ -190,7 +190,7 @@ different form on a different surface.
 > **SUPERSEDED, four paragraphs down, before this document was pushed.** The
 > sentence that stood here read *"the next reading of this row should aim at
 > accessible names, not at text. I did not take it."* I then took it, in
-> `b88211b`, and **the defect fired.** No `CORRECTS:` marker: a marker naming
+> `840f172`, and **the defect fired.** No `CORRECTS:` marker: a marker naming
 > the file it lives in resolves zero documents and turns the suite red, and a
 > reader who reaches this line has already reached the correction. The pointer
 > is here rather than at the foot of the file because this is where the stale
@@ -243,7 +243,7 @@ is closed.
 ## 2b. K10 WAS AN ARGUMENT. IT IS NOW A MEASUREMENT.
 
 This document said, in section 6, that I argued K10 from the address and did
-not open a posting. **I opened one** (`9d89134`), and the reading changed what
+not open a posting. **I opened one** (`c45f8a6`), and the reading changed what
 I would have concluded.
 
 ### First, the address, measured rather than recalled
@@ -383,7 +383,7 @@ with nothing in the diff naming it.
 turns that accident into an invariant**, and it is owed whether or not anybody
 ever writes the pattern.
 
-### IT LANDED: `tests/test_the_settings_boundary_refuses_account_deletion.py`, `85364e7`
+### IT LANDED: `tests/test_the_settings_boundary_refuses_account_deletion.py`, `cd79015`
 
 Delegated as a closed-form slice, reviewed against the shipped predicate
 before admission. The load-bearing test **passes today and that is the
@@ -425,7 +425,7 @@ asserting the weaker half only.
 
 ### ANOTHER WAVE FOUND THE SAME THING INDEPENDENTLY, AND THAT IS THE STRONGEST PART
 
-`db0dc40` (`boundary: two anchored reads, and the family pattern shown
+`47e10d0` (`boundary: two anchored reads, and the family pattern shown
 admitting deletion`) landed from a different wave while mine was in flight. It
 carries `test_the_family_pattern_the_trap_names_does_admit_account_deletion`
 and `test_every_account_ending_spelling_is_still_refused`, and its docstring
@@ -453,7 +453,7 @@ patterns added by another wave after my test landed -- and close-account is
 **still refused**, with my file green at 4 passed. A guard that survives an
 independent, unannounced boundary change is doing the thing it was built for.
 
-**One correction to my own commit message while I am here:** `85364e7` says
+**One correction to my own commit message while I am here:** `cd79015` says
 the slice found something the brief did not know. True of *my* wave. It was
 not the only wave to find it, and saying so is cheaper than letting a reader
 infer sole discovery from a commit message.
@@ -496,7 +496,7 @@ legitimately read 0 on the control page, an off-by-one on the must-be-absent
 index reports a healthy gate over a **disarmed control**. That is this
 repository's recurring shape arriving inside my own remedy.
 
-`tests/test_badge_and_language_affordances.py` (`79e126b`), **shown failing
+`tests/test_badge_and_language_affordances.py` (`80a20ca`), **shown failing
 under two mutations before admission:**
 
     MUST_BE_ABSENT_AT 8 -> 7      2 failed, 4 passed
@@ -522,10 +522,10 @@ inert.
   still has none.
 * **I pressed nothing.** No control on either surface was activated. The
   `profile language` hit proves a phrase renders, not that a control exists.
-* ~~**K8's reading is text-only.**~~ **DONE in `b88211b`** -- see section 2.
+* ~~**K8's reading is text-only.**~~ **DONE in `840f172`** -- see section 2.
   The accessible-name corpus was added, the blind spot fired on `premium`
   (0 in text, 19 in names), and `top voice` stayed 0 in both.
-* ~~**K10 was never read.**~~ **DONE in `9d89134`** -- see section 2b. What
+* ~~**K10 was never read.**~~ **DONE in `c45f8a6`** -- see section 2b. What
   remains on K10 is narrower and is stated there: **a sample of one posting**,
   and I did not determine whose verification the marker refers to.
 * **The probe was NOT admitted to any instrument register**, and I am not
@@ -563,7 +563,7 @@ The honest residue: **where the badge could be read at all, it read `0 new`**,
 and no counter is observed moving. But *a reading no instrument can fail is
 not a reading*, and half of this pair could not have failed.
 
-### FIXED IN `b88211b`, AND THE OBLIGATION IS NOW DISCHARGED
+### FIXED IN `840f172`, AND THE OBLIGATION IS NOW DISCHARGED
 
 Both readings are taken on the SAME address, bracketing the second load of it:
 
@@ -614,7 +614,7 @@ papered over.
     AssertionError: these functions claim a _SANITISERS name and are not
     enrolled: [('_probe_premium_entitlement.py', '_relation')]
 
-    owner, by path:  ae469cc  measure(premium): the admitted door opens ...
+    owner, by path:  6770e03  measure(premium): the admitted door opens ...
 
 Two checks, neither of them a guess. My probe contains **zero** occurrences of
 `_relation`, `_redact` or `_sanit` -- it defines no sanitiser and claims no
@@ -697,17 +697,17 @@ count over a pool a dozen waves share. The PAGE was closed, never the context.
 
 ## 9. COMMITS, AND EVERY BLOB VERIFIED AGAINST ITS REPORTED COUNT
 
-    707583b  probe: the badge/language reader                +241  -0
-    79e126b  test: the two vocabularies and two gate indices +125  -0
-    57117d4  audit: this document                            +419  -0
-    b88211b  probe: accessible names, badge pair, escape      +55 -12
-    85364e7  test: the settings boundary refuses deletion    +158  -0
-    7700cc6  audit: corrections (blind spot fired, plural)   +191 -27
-    9d89134  probe: K10 on a live job posting                 +49  -0
-    10c02b6  audit: K10 measured, blind spot fired twice      +68  -6
-    ae2ed91  audit: another wave converged independently      +35  -0
-    2956c05  audit: a freeze red that was not real            +45  -0
-    6b90f42  audit: freeze the commit ledger                  +15  -9
+    cb8a8f7  probe: the badge/language reader                +241  -0
+    80a20ca  test: the two vocabularies and two gate indices +125  -0
+    99acab8  audit: this document                            +419  -0
+    840f172  probe: accessible names, badge pair, escape      +55 -12
+    cd79015  test: the settings boundary refuses deletion    +158  -0
+    a934bbb  audit: corrections (blind spot fired, plural)   +191 -27
+    c45f8a6  probe: K10 on a live job posting                 +49  -0
+    ff8fdc6  audit: K10 measured, blind spot fired twice      +68  -6
+    162db0b  audit: another wave converged independently      +35  -0
+    5287113  audit: a freeze red that was not real            +45  -0
+    20d157b  audit: freeze the commit ledger                  +15  -9
     ----------------------------------------------------------------
     ELEVEN COMMITS, FOUR DISTINCT PATHS
 
@@ -735,10 +735,10 @@ files** -- recomputed with `git show --numstat` at freeze, because the
 sentence that first stood here said "two scripts" and there is only one,
 committed three times:
 
-    scripts/_probe_badge_and_language_affordances.py    (707583b, b88211b)
-    tests/test_badge_and_language_affordances.py        (79e126b)
-    tests/test_the_settings_boundary_refuses_account_deletion.py  (85364e7)
-    _audit/2026-09-05-profile-rest.md                   (57117d4, and this update)
+    scripts/_probe_badge_and_language_affordances.py    (cb8a8f7, 840f172)
+    tests/test_badge_and_language_affordances.py        (80a20ca)
+    tests/test_the_settings_boundary_refuses_account_deletion.py  (cd79015)
+    _audit/2026-09-05-profile-rest.md                   (99acab8, and this update)
 
 `readonly.py`, `dom.py`, `server.py` and `writes.py` are untouched by this
 wave, which is a stronger statement than a re-pinned digest and is checkable
@@ -757,7 +757,7 @@ and it is theirs, not mine.
    unmeasured, and that wave's reader answers exactly this question without
    pressing anything.
 3. **Do NOT write a settings-family pattern.** Row 78 names no address, so
-   there is nothing to admit; and `85364e7` now makes the cost of writing one
+   there is nothing to admit; and `cd79015` now makes the cost of writing one
    visible as a red rather than as a silent admission.
 4. **The ledger's row 43 is one row too big** (B8 == K9) and both its
    `allowlist +1` charges are refuted. Re-costing is the lead's; the

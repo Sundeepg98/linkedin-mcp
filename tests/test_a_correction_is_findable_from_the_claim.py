@@ -566,7 +566,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "the row CORRECTS ITSELF IN PLACE and cites the 09-19 addresses "
         "document as its REASON -- the same shape as the "
         "('messaging-and-content.md', '2026-09-19-content-tail.md') entry "
-        "above. C52 was moved to MEASURED-ABSENT by a402c35 on a live read of "
+        "above. C52 was moved to MEASURED-ABSENT by 09d56d4 on a live read of "
         "the FEED; that was the wrong surface for this row and the cell now "
         "withdraws the state IN the cell, dated, citing the sibling wave that "
         "measured the real address (/mypreferences/d/unfollowed, refused at "
@@ -913,7 +913,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     ("2026-09-19-the-three-ruling-requests-ruled.md", "2026-09-19-blocker-map-ruling-requests.md"): (
         "the line is a PROVENANCE note and not a claim about the cited "
         "document. It records WHICH STATE of the ruling requests was ruled "
-        "against -- `5f57610`, 'corrected at `1957df7` and `6271708`' -- and "
+        "against -- `5e144bb`, 'corrected at `4fb12a3` and `d6d1479`' -- and "
         "those two commits are corrections the cited document's OWN AUTHOR "
         "made to it. Naming the commits at which a document was fixed is how "
         "a reader knows which version was read; it is the opposite of a claim "

@@ -67,7 +67,7 @@ lint = _load("_py_baseline_lint", "py_baseline_lint.py")
 UNPARSEABLE, OFFENCES = lint.scan(REPO)
 
 
-#: The defect, verbatim, as ``08ceb1e`` found it. Pinned as TEXT rather than
+#: The defect, verbatim, as ``de2ed08`` found it. Pinned as TEXT rather than
 #: fetched with ``git show`` on purpose: CI runs on a branch with no ancestry,
 #: where every historical SHA is unresolvable, and a control that evaporates on
 #: the branch it is meant to protect is not a control. Note it sits inside an

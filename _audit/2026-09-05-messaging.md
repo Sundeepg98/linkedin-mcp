@@ -142,7 +142,7 @@ twenty minutes at the end of one.
 
 ## 1a. THE NARROWING IS SMALLER THAN I SAID, AND HERE IS ITS REACH
 
-**VERIFIED-BY-INSTRUMENT.** Commit `a745176`, same file, 2 further tests,
+**VERIFIED-BY-INSTRUMENT.** Commit `809fde1`, same file, 2 further tests,
 7 passed total.
 
 A claim about a repair is worth what a measurement of its reach is worth. On
@@ -277,7 +277,7 @@ Recomputed at freeze, not re-read from the sections above.
 
     commits               3c3bfa3  the gate's substring match, 307 insertions
                           9a9dbad  this document, 225 insertions
-                          a745176  the narrowing's reach, 123 insertions
+                          809fde1  the narrowing's reach, 123 insertions
                           + the commit carrying section 1a
     file                  tests/test_the_needle_is_matched_as_a_bare_substring.py
                           430 lines, 7 tests
@@ -365,7 +365,7 @@ the end of this one.
 
 ## 7. THE RULING WENT THE OTHER WAY, AND THE ARGUMENT IS BETTER THAN MINE
 
-**VERIFIED-BY-INSTRUMENT.** Commit `9503723`. 27 passed across this wave's
+**VERIFIED-BY-INSTRUMENT.** Commit `773a409`. 27 passed across this wave's
 file and `tests/test_send_message_gate.py`, including all 19 pre-existing gate
 tests.
 

@@ -10,7 +10,7 @@ assertion is ABOUT, and clear only what may honestly be cleared.
 ## THE HEADLINE: a clean clone says THREE, not nine
 
     3 failed, 4864 passed, 11 skipped, 1 xfailed   in 1678.56s (27:58)
-    clone of 693f488, git clone --no-hardlinks, run serially
+    clone of 783bba0, git clone --no-hardlinks, run serially
 
 **Six of the nine did not exist.** They are the moving-tree class that
 over-reported this repo's red count by 150% earlier today -- ten failures where
@@ -46,12 +46,12 @@ most candidates:
 ### The tree did not stay quiet, and the reading is dated by the TREE
 
 It was quiet at 23:17 by the box: four untracked files, no modified tracked
-file. By 23:27 HEAD had moved from `693f488` to `d5f6409`,
+file. By 23:27 HEAD had moved from `783bba0` to `c294507`,
 `linkedin_server/readonly.py` carried 52 uncommitted lines from a live writer,
 and three more untracked scripts had appeared.
 
 So the authority reading is dated by its tree and not by "HEAD": it is the clone
-of `693f488`. The commit that landed underneath it touched two census TSV files
+of `783bba0`. The commit that landed underneath it touched two census TSV files
 and two scripts, and **neither script opens a browser session** -- checked, not
 assumed, because the tab guard scans that directory. It therefore cannot reach
 any red classified here. Stated so the gap is visible rather than glossed.
@@ -66,9 +66,9 @@ four shared-tree-only scripts open no session. The two trees agree at 41.
 
 | # | test | what the assertion is ABOUT | class | disposition |
 |---|---|---|---|---|
-| 1 | `test_a_person_name_is_never_a_literal::test_every_person_constant_holds_a_declared_invented_name` | a person-carrying constant that is not on the declared-invented table | **guard correctly refusing on an UNDECLARED value** | **LEFT RED.** Owner `fc10b99`. Precedent `a5a988a`. |
-| 2 | `test_a_probe_closes_its_own_tab::test_the_tab_leak_only_ever_shrinks` | a ratchet on how many session-opening scripts never close their tab | **ratchet correctly refusing: one genuine new leak** | **LEFT RED.** Real leak owed by `ae469cc`. Pin defect quantified below. |
-| 3 | `test_click_is_not_its_own_evidence::test_a_click_that_does_commit_reaches_the_body_and_the_send` | the positive path through the recipient gate on `send_message` | **guard correctly refusing after a deliberate fail-closed ruling** | **LEFT RED.** Owed by `9503723`. |
+| 1 | `test_a_person_name_is_never_a_literal::test_every_person_constant_holds_a_declared_invented_name` | a person-carrying constant that is not on the declared-invented table | **guard correctly refusing on an UNDECLARED value** | **LEFT RED.** Owner `460852e`. Precedent `4ac5b61`. |
+| 2 | `test_a_probe_closes_its_own_tab::test_the_tab_leak_only_ever_shrinks` | a ratchet on how many session-opening scripts never close their tab | **ratchet correctly refusing: one genuine new leak** | **LEFT RED.** Real leak owed by `6770e03`. Pin defect quantified below. |
+| 3 | `test_click_is_not_its_own_evidence::test_a_click_that_does_commit_reaches_the_body_and_the_send` | the positive path through the recipient gate on `send_message` | **guard correctly refusing after a deliberate fail-closed ruling** | **LEFT RED.** Owed by `773a409`. |
 | 4-9 | six failures present in both 9-failure readings | -- | **PHANTOM, moving tree** | Dissolved by the clone. |
 
 ## The three, one at a time, with the reason each stays
@@ -90,10 +90,10 @@ so the red is about a missing declaration and nothing else. That is this repo's
 standing law -- a red identity guard proves a value is UNDECLARED and never that
 it is REAL -- holding for the fourth time today.
 
-**Why this wave does not declare it.** The owner is `fc10b99`, established by
-ordering rather than by name. And a wave has already been here: `a5a988a`
+**Why this wave does not declare it.** The owner is `460852e`, established by
+ordering rather than by name. And a wave has already been here: `4ac5b61`
 declared its OWN needle in the same table, named this one as belonging to
-`fc10b99`, and left it red deliberately, writing *"Declaring somebody else's
+`460852e`, and left it red deliberately, writing *"Declaring somebody else's
 needle would be adopting their disclosure, not helping them."* That is the
 correct call and clearing it now would overturn a ruling on no new evidence.
 
@@ -122,7 +122,7 @@ re-deriving the leaker set at the pin's own commit and at HEAD:
       _probe_premium_entitlement.py   no close() at all     -- A REAL LEAK
 
 **So the ratchet fired for a real reason.** One genuine new leak entered the
-corpus, owed by `ae469cc`; the remedy is a `finally` that closes the PAGE, never
+corpus, owed by `6770e03`; the remedy is a `finally` that closes the PAGE, never
 the context. The other `+1` is the pin's own defect, and **that defect predates
 the pin** -- 6 of the original 39 were already miscounted, so the pin has never
 measured the quantity its docstring names. It counts scripts the pattern cannot
@@ -136,7 +136,7 @@ There is no third option, so the honest outcome is the report.
 
 ### 3. The recipient gate refusing the positive path -- a ruling, not a regression
 
-`9503723` made `dom.SELECTED_RECIPIENT_JS` require a WORD-BOUNDED match, and
+`773a409` made `dom.SELECTED_RECIPIENT_JS` require a WORD-BOUNDED match, and
 counted digits as word characters **deliberately**, in its author's words so that
 *"a label running a name onto a connection degree must refuse rather than
 match."*
@@ -231,7 +231,7 @@ the shared tree and diffed against the clone as a SET.
 
 | reading | tree | result | wall |
 |---|---|---|---|
-| authority | clone of `693f488`, serial | **3 failed**, 4864 passed, 11 skipped, 1 xfailed | 27:58 |
+| authority | clone of `783bba0`, serial | **3 failed**, 4864 passed, 11 skipped, 1 xfailed | 27:58 |
 | comparison | shared tree, 13 commits landed underneath it | **14 failed**, 4890 passed, 4 skipped, 1 xfailed | 33:45 |
 
     in both (the real ones)      3
@@ -250,7 +250,7 @@ passed and 11 skipped against 4890 and 4 -- which is the cheapest available tell
 that two runs did not read the same corpus, and it needs no failure analysis at
 all.
 
-**"ABSENT AT 693f488" IS NOT "NOT REAL", and collapsing the two would be this
+**"ABSENT AT 783bba0" IS NOT "NOT REAL", and collapsing the two would be this
 document's own error.** The eleven sort into causes, and several are real right
 now in a tree that did not exist when the clone was taken:
 
@@ -263,11 +263,11 @@ now in a tree that did not exist when the clone was taken:
   **REAL AND CURRENT.** That probe was untracked at 23:17 and its author
   committed it mid-run. It is owed by that author, is the UNDECLARED class
   again (the exact-value sweep passes at 0 hits over the whole tree), and it is
-  not in the clone only because the file did not exist at `693f488`.
+  not in the clone only because the file did not exist at `783bba0`.
 - **2** in `test_server_surface`, including the order-dependent login red.
 - **1** `test_typeahead_gate::test_the_recipient_gate_is_still_the_authority` --
   same word-bounded family as red 3 above, and further evidence that the
-  coverage gap in `9503723` is wider than the one file this triage found.
+  coverage gap in `773a409` is wider than the one file this triage found.
 - **1** each in `test_publish_post_names_its_audience` and
   `test_radio_label_binding`.
 

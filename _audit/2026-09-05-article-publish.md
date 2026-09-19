@@ -379,7 +379,7 @@ Said plainly, because the wave was 45 minutes and six blockers is not a
   and the celebration template (section 3) -- are both still owed.
 * **I went as far as the census tool and stopped there.** `linkedin_server_info`
   reports the running process **STALE** -- loaded `1b940ff99ffc`, disk
-  `825543dbbaf8` -- so a census taken through it would be a measurement by older
+  `33c5dd37f059` -- so a census taken through it would be a measurement by older
   code, reported without that sentence attached. **I did not restart the
   server**: it is `transport`'s artifact, a dozen waves are attached to it, and
   restarting a shared process to take my own reading is the shared-state move

@@ -131,7 +131,7 @@ INVENTED_NAMES = frozenset(
         # DECLARED BY SOMEBODY OTHER THAN ITS AUTHOR. That is a departure and
         # it needs its reason on the record.
         #
-        # It was left red DELIBERATELY at a5a988a -- "declare this wave's
+        # It was left red DELIBERATELY at 4ac5b61 -- "declare this wave's
         # needle, and leave the neighbour's red standing" -- on the principle
         # that you do not vouch for a claim you did not make. That principle
         # is right and is not weakened here. It is that this table does not

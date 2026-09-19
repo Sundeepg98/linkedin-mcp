@@ -2512,7 +2512,7 @@ left GAP, 1 has entered (`P L2b`), 409 - 40 + 1 = 370, which is what 12.11
 returns. Before this, 409 and 370 were two numbers from two passes.
 
 **A TWO-POINT DIFF CANNOT SEE A ROUND TRIP.** `N 132` was countable at
-`1c08e5f`, invisible by `990bbd3^`, and countable again after `02e617d`. Both
+`1c08e5f`, invisible by `990bbd3^`, and countable again after `083a872`. Both
 endpoints agree and the middle does not. Sample a third ref before claiming a
 row never moved.
 
@@ -2542,7 +2542,7 @@ itself:
 
 **THE FIFTH IS THE ENTRY'S WHOLE ARGUMENT, because it was not planted.** One
 hour after the guard was written, a neighbouring wave appended 19 lines to the
-ledger (`0d66ebe`, 1546 -> 1565 lines); both its tables slid 28 rows down, and
+ledger (`f7594c0`, 1546 -> 1565 lines); both its tables slid 28 rows down, and
 `ledger_counts()` -- which read them out of a HARDCODED LINE WINDOW -- lost the
 cost-0 table entirely. Nine blockers parsed as absent, `.get(b, 0)` turned absent
 into zero, and four legitimate blockers read as over-counted.
@@ -2695,8 +2695,8 @@ Companion record: `_audit/2026-09-05-jobs-requeue.md`.
     tests/test_profile_version_gate.py      its control, 36 tests
 
 Refuses a Playwright launch when the persistent profile's `Last Version` stamp
-is NEWER than the chromium about to open it. Commits `d6b55a0`, `05c2038`,
-`12dffe9`.
+is NEWER than the chromium about to open it. Commits `27aa37e`, `7b26c00`,
+`3f6235e`.
 
 ### 15.1 A NET IS NOT A GATE, and the difference is where it runs
 
@@ -2963,7 +2963,7 @@ shape both times: bind the claim to something a test can read.
 Recorded because the register already holds two instances and this one narrows
 the rule rather than repeating it.
 
-Commit `f3d2b6c` carries 12 insertions where 11 were staged. The twelfth is
+Commit `ccbc62f` carries 12 insertions where 11 were staged. The twelfth is
 another wave's census row, written in the seconds between the check and the
 commit. The wave had staged by name, run the identity sweep AFTER staging, and
 read **`git diff --cached` LINE BY LINE** -- eleven rows, all its own.
@@ -2981,7 +2981,7 @@ commit -- it is between the READ and the commit, and no flag moves that.**
 Reading the staged lines narrows it to seconds. It does not close it.
 
 Handled per the sanctioned protocol: adopt-commit, credit in a follow-up
-(`9baa992`), the swept content checked for disclosure (shipped identity sweep,
+(`aecec70`), the swept content checked for disclosure (shipped identity sweep,
 PASS, 0 hits), the neighbour's line left byte-identical, and the author NOT
 guessed -- a send to a guessed idle name forks that agent, so it was routed to
 the lead who holds the roster.

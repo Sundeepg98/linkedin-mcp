@@ -1,7 +1,7 @@
 """THE BLAST RADIUS OF THE SEARCH ADMISSION, PINNED BEFORE THE PATTERN LANDS.
 
 `SEARCH-RESULTS-SURFACE` is 20 still-GAP rows, every one a READ, with no
-admitted address. The lead ruled admission APPROVED IN PRINCIPLE (`569dc5e`,
+admitted address. The lead ruled admission APPROVED IN PRINCIPLE (`09f9961`,
 section 6) under five binding conditions. **This file is conditions 3 and 4,
 and it exists BEFORE the pattern by design**:
 

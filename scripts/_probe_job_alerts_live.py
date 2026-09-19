@@ -1,7 +1,7 @@
 """Does LinkedIn serve the job-alerts manage page, and how many alerts are there?
 
 THE ADDRESS WAS ADMITTED AS A HYPOTHESIS AND THIS IS WHAT SETTLES IT. The
-boundary entry frozen at ``6b90622`` says so in its own comment: everything
+boundary entry frozen at ``61e3237`` says so in its own comment: everything
 measured up to that point was about the GATE, and not one byte of it said
 LinkedIn serves that spelling. **If this probe reports the address unserved,
 the correct response is to change the pattern, not to conclude he has no

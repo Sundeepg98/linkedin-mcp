@@ -37,7 +37,7 @@ thousand.
     ./venv/Scripts/python.exe scripts/name_shaped_runs_in_range.py <base>
     ./venv/Scripts/python.exe scripts/name_shaped_runs_in_range.py --selftest
 
-MEASURED 2026-09-19 over ``3da9c1b..HEAD`` -- 4993 added lines across 24 tracked
+MEASURED 2026-09-19 over ``96df35b..HEAD`` -- 4993 added lines across 24 tracked
 files reduced to 22 distinct runs, all of which read clean on inspection: six
 fictional names a test file declares as invented at the point of use, nine
 LinkedIn UI labels, two deliberate non-person substitutes, a filename, and two

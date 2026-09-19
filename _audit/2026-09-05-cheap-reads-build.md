@@ -286,7 +286,7 @@ again here rather than quietly rounded up.
 
 ## 6. ROW 56: THE READER IS BUILT, AND IT CANNOT PUBLISH A NUMBER THAT PICKS
 
-`linkedin_server/premium.py` + `tests/test_premium_reader.py`, at `2097401`.
+`linkedin_server/premium.py` + `tests/test_premium_reader.py`, at `d24dd37`.
 345 and 438 lines, 33 tests, zero deletions.
 
 The objection that stopped two earlier waves is discharged rather than argued
@@ -384,9 +384,9 @@ sentence.
 
 | commit | + | - | what |
 |---|---:|---:|---|
-| `db0dc40` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
-| `2097401` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
-| `0c077a9` | 231 | 0 | this document, sections 1-4 |
+| `47e10d0` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
+| `d24dd37` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
+| `c1fa602` | 231 | 0 | this document, sections 1-4 |
 
 **THE TWO DELETIONS ARE NAMED RATHER THAN ROUNDED TO ZERO.** Both are the
 same line in `tests/test_readonly_boundary_invariant.py` -- the old
@@ -433,8 +433,8 @@ The fix is `git add -- <path>` by name first. Not `-A`.
 
 ### A neighbour reached the same finding from the other side, within the hour
 
-`85364e7` (`profile-rest`) landed `test(boundary): account deletion is refused
-by ACCIDENT -- assert it before someone tidies it` shortly after `db0dc40`.
+`cd79015` (`profile-rest`) landed `test(boundary): account deletion is refused
+by ACCIDENT -- assert it before someone tidies it` shortly after `47e10d0`.
 Two waves converged on the same trap from different directions and neither
 swept the other's lines. **Disagreement between instruments not sharing a
 defect is the cheapest signal available; agreement between two that reached the
@@ -485,10 +485,10 @@ Recomputed from `git` after that commit landed, not carried forward:
 
 | commit | + | - | what |
 |---|---:|---:|---|
-| `db0dc40` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
-| `2097401` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
-| `0c077a9` | 231 | 0 | this document, sections 1-4 |
-| `73c46e9` | 247 | 7 | this document, sections 5-8 |
+| `47e10d0` | 493 | 2 | the two anchored patterns, the re-freeze, the boundary tests |
+| `d24dd37` | 783 | 0 | `premium.py`, `tests/test_premium_reader.py` |
+| `c1fa602` | 231 | 0 | this document, sections 1-4 |
+| `51bd141` | 247 | 7 | this document, sections 5-8 |
 
 **ALL NINE DELETIONS ARE THIS WAVE'S OWN LINES** and they are named rather
 than rounded away: two are the superseded `_ALLOWED_URL_PATTERNS` digest in
@@ -552,7 +552,7 @@ not exist until the reader does, and it is invisible to any run scoped to the
 new file. **A slice cannot be briefed to run the guard that its own existence
 turns red unless whoever wrote the brief already knew.**
 
-Cleared at `9ed2b62` by giving the reason the guard asks for rather than
+Cleared at `018e5ab` by giving the reason the guard asks for rather than
 widening the inventory silently. The row is worth reading for one thing beyond
 itself: **this is the THIRD reader in one day to arrive with no consumer and
 the SECOND to name the last-hour crowding of `server.py` as the cause.** One
@@ -579,7 +579,7 @@ row records a wave that shipped a DIFFERENT body under this name and leaked its
 input on the first run, so *it is the same function* is a claim that has been
 wrong here before.
 
-Cleared at `9993170`. **336 passed** across the sanitiser table, both taint
+Cleared at `aac50c3`. **336 passed** across the sanitiser table, both taint
 guards and the unwired-reader inventory.
 
 ### A promotion attempted and REVERTED, which is a result rather than a failure
@@ -619,13 +619,13 @@ carelessness.
 
 | commit | + | - |
 |---|---:|---:|
-| `db0dc40` | 493 | 2 |
-| `2097401` | 783 | 0 |
-| `0c077a9` | 231 | 0 |
-| `73c46e9` | 247 | 7 |
-| `e868f5d` | 60 | 0 |
-| `9ed2b62` | 19 | 0 |
-| `9993170` | 22 | 0 |
+| `47e10d0` | 493 | 2 |
+| `d24dd37` | 783 | 0 |
+| `c1fa602` | 231 | 0 |
+| `51bd141` | 247 | 7 |
+| `1fdc382` | 60 | 0 |
+| `018e5ab` | 19 | 0 |
+| `aac50c3` | 22 | 0 |
 
 All nine deletions are still this wave's own lines, named in section 9. **AI
 attribution: 0, per commit, across all seven.** Nothing pushed -- the push is
@@ -647,7 +647,7 @@ shipped guard rather than relayed**, which is the standing rule, and it agreed:
     41 scripts open a browser session and never close the tab   (pin: 39)
 
 `scripts/_probe_premium_entitlement.py` is on that list, and it is the probe
-this wave enrolled at `9993170`, which made it arguably this wave's to fix.
+this wave enrolled at `aac50c3`, which made it arguably this wave's to fix.
 
 **A FIX WAS STARTED AND IS NOT IN ANY COMMIT.** A tab-closing helper was added
 to that probe and the re-measured ratchet moved 41 -> 40 -- **while the probe's
@@ -674,6 +674,6 @@ all three.
 
 Eight commits, none pushed. The push is blocked on a history purge that must
 not run while this range is held, and this wave did not touch it. Two guards
-that were red are green (`9ed2b62`, `9993170`); one guard is red and was red
+that were red are green (`018e5ab`, `aac50c3`); one guard is red and was red
 before this wave and is not this wave's (`test_a_probe_closes_its_own_tab`, at
 41 against a pin of 39).

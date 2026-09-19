@@ -8,7 +8,7 @@ sweep failure was repaired by adding a line to ``.gitignore``, and each time the
 repair was correct -- but the argument for why it was correct lived in a commit
 message, where the next person adding a line will not read it.
 
-``c47a070`` wrote the rule out while repairing the third one:
+``4e80b79`` wrote the rule out while repairing the third one:
 
     the same argument for why ignoring is the repair rather than declaring:
     the ids are DERIVED from the test files, and those are swept directly.
@@ -99,7 +99,7 @@ DECLARED: dict[str, tuple[str, str | None]] = {
     ".coverage": ("LOCAL_STATE", None),
     "htmlcov/": ("LOCAL_STATE", None),
     "*.log": ("LOCAL_STATE", None),
-    # CI's own working files. THE c47a070 CASE: pytest node ids are a second
+    # CI's own working files. THE 4e80b79 CASE: pytest node ids are a second
     # copy of text that lives in tests/, and tests/ is swept directly.
     "junit*.xml": ("DERIVED", "tests"),
     "collected*.txt": ("DERIVED", "tests"),
@@ -228,7 +228,7 @@ def test_every_declaration_uses_a_real_class():
 
 
 # ===========================================================================
-# 2. The DERIVED rule -- c47a070's sentence, made mechanical
+# 2. The DERIVED rule -- 4e80b79's sentence, made mechanical
 # ===========================================================================
 
 

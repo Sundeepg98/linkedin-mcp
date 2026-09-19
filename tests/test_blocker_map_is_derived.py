@@ -142,7 +142,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: shipped comment and are on the sweep's three-way self-conflict list.
 #: Adjudicating a three-way claim is a RULING, not a recovery.
 #: 243 -> 232. Blocker 20 `OPEN-TO-WORK-MODAL` recovered at 11 of 11, ABSENT
-#: -> COMPLETE, and it REPLACES eleven lines refused at `3a1e2df`. Those named
+#: -> COMPLETE, and it REPLACES eleven lines refused at `ce4de48`. Those named
 #: `P I2`-`I12`, EXCLUDED-RULED AT THE FROZEN COMMIT and so never in the
 #: 409-row set. The real rows are `J 92`-`J 98` + `P I13`-`I16`.
 #:
@@ -151,7 +151,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: headline. That class keeps earning its rank: `article-publish`'s "THE CAVEAT
 #: RESOLVED, AGAINST ME" carried MENTION-TAG-CONTROLS the same way.
 #:
-#: The blocker reads LIVE at 5 still-GAP rows, not 11: `539752b` moved J 92-97
+#: The blocker reads LIVE at 5 still-GAP rows, not 11: `73bcbaa` moved J 92-97
 #: to EXCLUDED-RULED mid-session. MEMBERSHIP is a fact about the FROZEN set;
 #: `state_today` is a separate column and moves under you.
 #: 232 -> 217, the largest single recovery of the campaign. ADMIN-RIGHTS-NOT-HELD
@@ -197,7 +197,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: can state", calling its exclusion candidates guesses.
 #:
 #: The rule it could not state is that three of its 35 are ADMIN rows -- its
-#: table counts N A10 A11 A12, assigned to ADMIN-RIGHTS-NOT-HELD at 5509166 on
+#: table counts N A10 A11 A12, assigned to ADMIN-RIGHTS-NOT-HELD at f927f69 on
 #: four independent axes. 35 - 3 = 32 exactly. A recovery in one blocker
 #: reconciled another, which is an argument for doing them in one pass.
 #:
@@ -334,14 +334,14 @@ import build_blocker_map as bbm  # noqa: E402
 #: published blocker and is empty. The group's own title says "company AND
 #: school", so the group is a SHAPE, not a blocker.
 #:
-#: AND THIS RECORDS A CORRECTION TO MY OWN COMMIT c1a2a46, which said
+#: AND THIS RECORDS A CORRECTION TO MY OWN COMMIT ed1c0f4, which said
 #: "jobs.md CARRIES NO R/W COLUMN" as the ground for declining
 #: JOB-ALERTS-SURFACE. That was true of section 1's table and WRONG about
 #: the file: section 2 carries R/W, and its grouping row reads
 #: "31-36, 41 | all alert writes" -- the exact seven, named by the census
 #: itself. The assignment I made from the probe comment is right and now has
 #: a second independent source; the REASON I gave for having declined it
-#: earlier was not. Found via a sibling's amendment 5bdebba.
+#: earlier was not. Found via a sibling's amendment ac637fa.
 #: 113 -> 110. THREE ONE-ROW BLOCKERS CLOSE, and the instrument's test is
 #: UNIQUENESS rather than similarity -- the retire-rulings wave's own
 #: deflation is that a singleton's R/W split is a two-bit check, so these
@@ -365,7 +365,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: on the shared token "events" and has room 1, but its row set is
 #: enumerated in full by its own document, which names L6 zero times and
 #: contains "audio" zero times. And L6 is the row REFUSED from
-#: CREATOR-HUB-SURFACE at f461e9c for being a W against 4R -- the same
+#: CREATOR-HUB-SURFACE at 2e3d83d for being a W against 4R -- the same
 #: split that excluded it there admits it here.
 #: 110 -> 105. SCHOOL-PAGE-SURFACE 3 of 3 and POLL-SURFACE 2 of 2, both
 #: EMPTY -> COMPLETE, by the singleton test generalised to k rows: the top
@@ -381,7 +381,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: grep hits for /school/". Published cost and measured absence are the
 #: same fact from opposite ends.
 #:
-#: AND J 112 IS HERE BECAUSE I CARVED IT OUT AT 5d06446, where I left it
+#: AND J 112 IS HERE BECAUSE I CARVED IT OUT AT bc721dc, where I left it
 #: out of COMPANY-PAGE-SURFACE as the one row in that census run that is
 #: not a Company Page. Taking the run whole would have left this blocker
 #: empty permanently.
@@ -443,7 +443,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: is WHY it was not decidable an hour ago. The mutual-best test asks that
 #: the row's best blocker be this one among blockers WITH ROOM. M C9 named
 #: POST-DRAFT-SURFACE as its best and the pair failed. POST-DRAFT-SURFACE
-#: closed at 5dc71d5 on M C12, left the open set, and the pair became
+#: closed at ca374c6 on M C12, left the open set, and the pair became
 #: mutual. The evidence did not change; the FIELD did. Second cascade of
 #: this recovery -- the first was J 112, carved out of COMPANY-PAGE-SURFACE
 #: and then closing SCHOOL-PAGE-SURFACE.
@@ -503,12 +503,12 @@ import build_blocker_map as bbm  # noqa: E402
 #: a measured absence are the same fact from opposite ends (SCHOOL's
 #: /school/, CONTENT-ANALYTICS's /analytics/creator/, now this).
 #: N 102 "employee insights on a Page's People tab" is also the same tab
-#: as J 108 "Company Page People tab", already filed here at 5d06446.
+#: as J 108 "Company Page People tab", already filed here at bc721dc.
 #:
 #: N 104 IS DELIBERATELY NOT TAKEN: a company row by subject, a SEARCH row
 #: by act, and named by search-results-consent.md as one of three candidates
 #: for that blocker's two unattributed slots. I left it out of
-#: SEARCH-RESULTS-SURFACE at 68949ea and will not take it here on a weaker
+#: SEARCH-RESULTS-SURFACE at 5a5d2a3 and will not take it here on a weaker
 #: argument than the one I declined to use there.
 #:
 #: HASHTAG-EXISTENCE NEEDS NOTHING, and the near miss is worth recording:
@@ -565,7 +565,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: filled EMPTY rather than inferred. Nothing here judges a direction.
 #:
 #: THE FIT DID NOT EXIST AN HOUR AGO. Section H held FOUR unassigned rows
-#: until J 127 left for PREMIUM-READER-NOT-BUILT at 9d4bd59. Four against
+#: until J 127 left for PREMIUM-READER-NOT-BUILT at dcc8a36. Four against
 #: three is no fit; three is exact. The evidence for these three never
 #: changed -- the FIELD did. Third cascade of this recovery, after J 112
 #: closing SCHOOL-PAGE-SURFACE and M C12 freeing CELEBRATION-COMPOSER, and
@@ -644,7 +644,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: acting ahead of my own request, which is the inversion the
 #: disclosing-press ruling names: a recommendation is not permission to act
 #: on itself.
-#: 58 -> 48. The three ruling requests are RULED at 12c20e1 and filed:
+#: 58 -> 48. The three ruling requests are RULED at e72af67 and filed:
 #: CONVERSATION-OVERFLOW-MENU 8 of 10, PREMIUM-APPLY-SURFACES 1 of 5,
 #: BADGES-SURFACE 5 of 5.
 #:
@@ -660,7 +660,7 @@ import build_blocker_map as bbm  # noqa: E402
 #: SHARES WITH A RIVAL is not admitted), and I wrote "read receipts are a
 #: setting, not a menu item" two lines under recommending M49.
 #: PREMIUM-APPLY-SURFACES: I proposed dropping J 81 and filing five. Only
-#: J 82 is filed, on the standard I supplied and c1a2a46 turned on -- the
+#: J 82 is filed, on the standard I supplied and ed1c0f4 turned on -- the
 #: claim made by the SOURCE, not the reader. The probe over-names by one
 #: and cannot say which, so no WRITE is forced; only the unambiguous 1R is.
 #:
@@ -716,8 +716,8 @@ import build_blocker_map as bbm  # noqa: E402
 #: resolving, and that a genuine retraction should be recorded deliberately
 #: rather than cleared. This is that case, and it is exactly ONE row.
 #:
-#: J 82 was filed to PREMIUM-APPLY-SURFACES at 1349fe6 under the ruling at
-#: 12c20e1, on the strength of the blocker table's published 1R -- J 82
+#: J 82 was filed to PREMIUM-APPLY-SURFACES at 81c8534 under the ruling at
+#: e72af67, on the strength of the blocker table's published 1R -- J 82
 #: being the only row of the six that merely OBSERVES. The ruling is
 #: retracted by its own author because of a caution I filed with it:
 #: jobs.md section 2 marks the whole 78-83 group plain W, so calling J 82

@@ -369,8 +369,8 @@ freeze rather than re-read.
 
 ## 7. FREEZE, 19:15 IST -- numbers RECOMPUTED, not re-read
 
-    commits   3     6291bb6 (instrument)  d78aa99 (this doc + back-pointer)
-                    0850082 (inventory pin)
+    commits   3     8166d36 (instrument)  eb183d9 (this doc + back-pointer)
+                    c8c5b93 (inventory pin)
     files     6     3 new source, 1 new doc, 2 pins/back-pointers
     AI attribution  ZERO across all three, verified per commit
     sweep at gate   PASS, 0 hits across 335 tracked files

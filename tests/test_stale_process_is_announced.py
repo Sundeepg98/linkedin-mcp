@@ -227,7 +227,7 @@ async def test_a_real_tool_call_carries_it_through_the_decorator():
 # question asked of the wrong object. On 2026-09-19 it stopped Tier 1 for ten
 # minutes on a delta that genuinely touched writes.py, readonly.py, server.py
 # and dom.py -- CORRECTLY, and that arm must survive any change here. Then it
-# blocked Tier 2 on the delta 5c5ebf9dda43..70d7c0f62e97, which was ONE
+# blocked Tier 2 on the delta 851bf80d5e8a..f66107c2c17b, which was ONE
 # MARKDOWN FILE, +142 lines, ZERO PYTHON. A neighbour committing a DOCUMENT
 # flipped a write gate red on a process whose loaded Python was provably
 # identical to disk. On a multi-writer tree that is every neighbour, all day.

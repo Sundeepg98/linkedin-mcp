@@ -11,14 +11,14 @@ taken with `date`, not from an agent's sense of elapsed time.
     19:05      run 3: a second instrument, and it settled both declared defects
     19:07      implementer measured on disk: NEITHER file exists
     19:10      both files exist. It was working, not stalled
-    19:15      reviewed independently and committed at fc10b99
+    19:15      reviewed independently and committed at 460852e
 
 ## WHAT THIS WAVE ACTUALLY MOVED
 
 | row | blocker | queue | what happened |
 |---|---|---|---|
 | 38 | `CONTACT-INFO-PANEL` | MEASURE | **MEASURED LIVE. The panel was opened for the first time in this repository.** |
-| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | **RULED AND BUILT.** `linkedin_server/recommendations.py` + `tests/test_recommendation_tally.py`, reviewed independently and committed at `fc10b99`. No write designed, none fired |
+| 39 | `RECOMMENDATIONS-SURFACE` | DECIDE | **RULED AND BUILT.** `linkedin_server/recommendations.py` + `tests/test_recommendation_tally.py`, reviewed independently and committed at `460852e`. No write designed, none fired |
 | 43 | `BADGES-SURFACE` | BUILD | **NOT STARTED** |
 | 72 | `MULTILANG-PROFILE` | BUILD | **NOT STARTED** |
 | 78 | `OPEN-PROFILE-SETTING` | BUILD | **NOT STARTED** |
@@ -224,7 +224,7 @@ The slug domain is worse: slugs are enumerable and guessable, so a digest would
 be a lookup table wearing a redaction's clothes -- the shape this repository
 calls worse than the leak.
 
-**IT LANDED AT `fc10b99`, AND THE SEQUENCE IS THE LESSON.** The module was
+**IT LANDED AT `460852e`, AND THE SEQUENCE IS THE LESSON.** The module was
 delegated at 18:50. At 19:07 -- 28 minutes in -- `ls` reported neither file
 existing and `git status` showed nothing recommendations-named. This document
 recorded that disk reading and explicitly declined to call the agent stalled,
@@ -388,7 +388,7 @@ it four times in twenty-four minutes and the interval is much shorter than
 
     18:54:44   PASS   0 hits / 314 files
     18:59      FAIL   1 hit  -- _audit/2026-09-05-jobs-tail.md, another wave's
-                              COMMITTED file (f8e706c, b312d98)
+                              COMMITTED file (7edbd0a, b312d98)
     19:15:23   PASS   0 hits / 339 files  -- that wave had fixed it
     19:17:42   FAIL   1 hit
     19:18:24   PASS   0 hits / 339 files

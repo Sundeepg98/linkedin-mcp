@@ -213,8 +213,8 @@ EXPECTED_TOOLS = {
     # listed together because they arrived together and the write count did
     # not move -- which is the half of this entry worth checking.
     #
-    #   linkedin_creator_analytics   4272994   content impressions over time
-    #   linkedin_job_collections     633312f   the jobs home collection rails
+    #   linkedin_creator_analytics   a8a7556   content impressions over time
+    #   linkedin_job_collections     b64580a   the jobs home collection rails
     #
     # WHAT THIS PIN IS FOR, demonstrated on itself. Both tools were registered
     # and green in their own files, and this set-equality is what noticed the
@@ -524,8 +524,8 @@ async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
 
     THE TWELFTH RENAME, 2026-09-19, IS THE FIRST ONE THIS FILE DID NOT NOTICE
     FOR ITSELF, and that is the part worth reading rather than the number.
-    ``linkedin_creator_analytics`` (4272994) and ``linkedin_job_collections``
-    (633312f) arrived together, both READS, write count untouched at twelve
+    ``linkedin_creator_analytics`` (a8a7556) and ``linkedin_job_collections``
+    (b64580a) arrived together, both READS, write count untouched at twelve
     for the fifth correction running -- and the pin sat at forty-two for the
     rest of that day while ``server.py``'s headline and ``README.md`` were
     moved to forty-four without it.
@@ -603,8 +603,8 @@ async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
     # menu offers `Leave this group`, measured on all five. This tool
     # presses nothing, follows no per-row control, and returns counts.
     # MEASURED off mcp.list_tools(): 41 before the edit and 42 after.
-    # FORTY-FOUR FROM 2026-09-19: linkedin_creator_analytics (4272994) and
-    # linkedin_job_collections (633312f), two READS. No write was added, which
+    # FORTY-FOUR FROM 2026-09-19: linkedin_creator_analytics (a8a7556) and
+    # linkedin_job_collections (b64580a), two READS. No write was added, which
     # is again the half that matters. MEASURED off mcp.list_tools(): 42 before
     # the edit and 44 after -- and measured off the REGISTRY rather than by
     # counting `@mcp.tool()` in the source, because an AST count of that

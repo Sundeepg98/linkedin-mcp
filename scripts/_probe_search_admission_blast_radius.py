@@ -1,7 +1,7 @@
 """BLAST RADIUS FOR THE SEARCH-RESULTS ADMISSION -- condition 3, taken BEFORE
 any pattern lands.
 
-The ruling at `569dc5e` section 6 grants `SEARCH-RESULTS-SURFACE` in principle
+The ruling at `09f9961` section 6 grants `SEARCH-RESULTS-SURFACE` in principle
 on five binding conditions. Condition 3 is that **the blast radius is measured
 before the pattern lands, with the guard shown failing on what it must still
 refuse**, answered with `is_read_url` on concrete urls and **never** with a

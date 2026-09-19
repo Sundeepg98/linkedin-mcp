@@ -13,7 +13,7 @@ refuted the relayed zero behind rows 17 and 67. But the most reusable thing
 found today was found without a browser: `known_side_effects` -- the field a
 caller reads to decide which tool is safe -- makes CLOSED ENUMERATION CLAIMS
 that nothing checks, and the messaging one is wrong in both directions at
-once. Section 6. `a86c849` repaired the neighbouring bullet 51 minutes before
+once. Section 6. `2f27a83` repaired the neighbouring bullet 51 minutes before
 I looked at this one.
 
 ---
@@ -21,7 +21,7 @@ I looked at this one.
 ## 1. WHAT THE LOAD COST. First-class, as instructed.
 
 **VERIFIED-BY-INSTRUMENT.** `scripts/_probe_messaging_surface_census.py`,
-commits `697b609` + `a373547`, run 22:20:49 -> 22:21:19 by the box.
+commits `82a9a85` + `948cd83`, run 22:20:49 -> 22:21:19 by the box.
 
     reading            messaging badge          invitation badge
     BEFORE (on /feed/) new_since_last_visit=0   pending=0
@@ -289,7 +289,7 @@ answer.
 ### 2.9 THE SAME QUESTION FROM `/feed/`, AT ZERO MESSAGING COST -- row 50 answered twice
 
 **VERIFIED-BY-INSTRUMENT.** `scripts/_probe_messaging_family_off_the_feed.py`,
-commit `e4a7947`, run 22:34:13. **Zero `/messaging/` loads.**
+commit `5dc5d45`, run 22:34:13. **Zero `/messaging/` loads.**
 
 `/feed/` is loaded by `linkedin_new_messages`, by every badge read in this
 package, and by the messaging probe at both of its own ends. It does not
@@ -483,12 +483,12 @@ The test was renamed to what it measures and the third shape got its own test.
 
 ## 6. `known_side_effects` MAKES ENUMERATION CLAIMS AND NOTHING CHECKED THEM
 
-**VERIFIED-BY-INSTRUMENT.** Commit `d1b1a62`,
+**VERIFIED-BY-INSTRUMENT.** Commit `7d41e11`,
 `tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`, 7 tests, measured
 by AST over `server.py` rather than by grep.
 
 The brief warned that one sentence in this field had been measured false. It
-had been repaired at `a86c849`, 21:33, **51 minutes before I read the
+had been repaired at `2f27a83`, 21:33, **51 minutes before I read the
 neighbouring bullet.** The messaging bullet is wrong in BOTH directions.
 
 ### 6.1 TOO LARGE -- it names a tool that structurally cannot incur the cost
@@ -544,7 +544,7 @@ repository's own rules:
   when I looked (22:24), and there is no git-level protection for a
   neighbour's lines inside a file you legitimately name.
 * The block has a measured owner by `git log --oneline -3 -- <path>`:
-  `a86c849`, 21:33, the wave that repaired the adjacent bullet. **Route the
+  `2f27a83`, 21:33, the wave that repaired the adjacent bullet. **Route the
   artifact, not the verdict.**
 
 So the tests **assert TODAY'S DEFECT**. Green means present-and-recorded;
@@ -576,7 +576,7 @@ they needed to read two adjacent bullets as one claim.
 
 **NOT EDITED, same ruling as 6.4.** `README.md` was committed at 22:33 --
 six minutes before I read it -- by a wave actively working that file
-(`e1a81e9`). Route the artifact.
+(`71036a6`). Route the artifact.
 
 **What landed instead is a DIVERGENCE DETECTOR**: a test asserting the two
 copies name the SAME tool set. Today they agree, both wrong identically; it
@@ -644,7 +644,7 @@ package**, and "it ran clean" is the sentence that hides them.
 
 | to | what | artifact |
 |---|---|---|
-| owner of `known_side_effects` (`a86c849`) | the messaging bullet is wrong in both directions; and the field's FORM cannot express a checkable closed claim | `tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`, 7 tests, `d1b1a62` |
+| owner of `known_side_effects` (`2f27a83`) | the messaging bullet is wrong in both directions; and the field's FORM cannot express a checkable closed claim | `tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`, 7 tests, `7d41e11` |
 | whoever owns the blockers ledger | rows 17/67 relayed zero is refuted by a direct count; 12 menu items need no press; rows 66's two rows are answered; row 50's `+1` is a measured unknown | section 2, and `scripts/_probe_messaging_surface_census.py` re-runs it |
 | owner of `tests/test_click_is_not_its_own_evidence.py` | the digit-adjacency ruling is UNCHANGED. No chip was observed, so this load produced no evidence either way | section 2.5 |
 | whoever re-costs this family | row 57's blocker is unreachable by any read, because a chip requires a committed recipient | section 2.5 |
@@ -668,16 +668,16 @@ Recomputed at freeze, not re-read from the sections above. The two counts most
 worth recomputing are the ones that flatter, and both moved: page loads 3 -> 4
 (the feed-side probe added one), commits 3 -> 6.
 
-    commits            697b609  the census probe, planned before spent  320 ins
-                       a373547  restore the body a rewrite ate          152 ins
-                       d1b1a62  the enumeration-claim instrument        457 ins
-                       38ea9dc  this document, first form               510 ins
-                       e4a7947  the feed-side family probe              206 ins
-                       f6a4fd1  section 2.9 and the freeze recount    119 ins
-                       fdc063c  section 3a, the row-mapping limit       37 ins
-                       ca6f4cc  the commit count made self-consistent    9 ins
-                       616ba2a  the README site + divergence detector   119 ins
-                       4c423ea  the refusals shown able to fire         168 ins
+    commits            82a9a85  the census probe, planned before spent  320 ins
+                       948cd83  restore the body a rewrite ate          152 ins
+                       7d41e11  the enumeration-claim instrument        457 ins
+                       1923b40  this document, first form               510 ins
+                       5dc5d45  the feed-side family probe              206 ins
+                       3b8684e  section 2.9 and the freeze recount    119 ins
+                       7277b1b  section 3a, the row-mapping limit       37 ins
+                       4ca232f  the commit count made self-consistent    9 ins
+                       c3f1279  the README site + divergence detector   119 ins
+                       4b168b5  the refusals shown able to fire         168 ins
                        + the commit carrying this line, which is the 8th.
                        A count that names its own commit has to include it:
                        the earlier "6" was correct when written and stale by

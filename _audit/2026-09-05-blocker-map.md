@@ -1,6 +1,6 @@
 # The row-to-blocker map, rebuilt from committed sources -- and 284 of 409 are named nowhere
 
-> **SUPERSEDED, AND ONLY DOWNWARD.** A whole-corpus sweep (`11f2f43`,
+> **SUPERSEDED, AND ONLY DOWNWARD.** A whole-corpus sweep (`690c737`,
 > `_audit/2026-09-06-corpus-sweep-blocker-evidence.md`) took UNASSIGNED to
 > **278** across 41 of 97 blockers, adding six rows this document's own filter
 > had not reached. **Quote 278.** Every number below was correct when measured
@@ -8,7 +8,7 @@
 > needs no ceremony. Finding 6.1 is about a document left stating a number its
 > own data had moved past, so this pointer is not optional here.
 >
-> **SUPERSEDED AGAIN, 2026-09-19: QUOTE 268.** `ae1894b` recovered seven more
+> **SUPERSEDED AGAIN, 2026-09-19: QUOTE 268.** `3c0b3e1` recovered seven more
 > rows and closed three blockers at exactly their published counts --
 > `PUBLISH-POST-AUDIENCE-PARAM` 1 of 1, `MENTION-COMPOSITION-RULING` 2 of 2,
 > `COLLABORATIVE-CONTENT` 4 of 4. **The second line of the count below moves
@@ -48,7 +48,7 @@ output survives in a form anybody can audit, and the answer is a quarter.
 read as an author's assertion rather than as a measurement, unless it appears in
 `_audit/_census/blocker-map.tsv`.
 
-Wave `blocker-map`, 2026-09-05. Commits `d5f6409`, `78729da`, `b343795` and the
+Wave `blocker-map`, 2026-09-05. Commits `c294507`, `db1955f`, `115afdc` and the
 commit carrying this revision. Read-only against the census: **no row's STATE was
 re-adjudicated, and none was edited.**
 
@@ -313,7 +313,7 @@ coverage is part of the reason:
 
 `N 132` **round-tripped** -- countable at the freeze, invisible by `990bbd3^`
 (its state cell had been replaced with a sentence, which the shipped counter's
-own docstring records), countable again after `02e617d` restored it. **A
+own docstring records), countable again after `083a872` restored it. **A
 two-point diff cannot see a round trip**, and mine would have missed it had the
 endpoints not happened to differ from the middle.
 
@@ -349,8 +349,8 @@ both failures are somebody else's. Neither is cleared here.**
 
 | red | evidence | owner, by artifact |
 |---|---|---|
-| `test_every_person_constant_holds_a_declared_invented_name` | `tests/test_recommendation_tally.py:71` holds `NEEDLE = 'ZZQXNEEDLE7'`, not on `INVENTED_NAMES` | that file's only commit, `fc10b99` -- the name-free recommendations reader |
-| `test_the_tab_leak_only_ever_shrinks` | 41 leaking scripts against a pinned 39 | `_probe_contact_info_panel.py` (`f08e62b`) and `_probe_premium_entitlement.py` (`ae469cc`) -- the only two leakers added since the pin `002a9dd` |
+| `test_every_person_constant_holds_a_declared_invented_name` | `tests/test_recommendation_tally.py:71` holds `NEEDLE = 'ZZQXNEEDLE7'`, not on `INVENTED_NAMES` | that file's only commit, `460852e` -- the name-free recommendations reader |
+| `test_the_tab_leak_only_ever_shrinks` | 41 leaking scripts against a pinned 39 | `_probe_contact_info_panel.py` (`6ca9590`) and `_probe_premium_entitlement.py` (`6770e03`) -- the only two leakers added since the pin `002a9dd` |
 
 **Both are the UNDECLARED class, not the REAL class.** `ZZQXNEEDLE7` is
 transparently invented and the remedy is one line in `INVENTED_NAMES` by its
@@ -376,7 +376,7 @@ between this wave's two commits.** The scratchpad path carries this session's
 own id and is not the shared tree, which is precisely why it read as private.
 
 Nothing was lost -- verified rather than assumed: `git log -1 --format=%B` on
-`d5f6409` contains zero lines of the neighbour's text, so the overwrite landed
+`c294507` contains zero lines of the neighbour's text, so the overwrite landed
 after the commit consumed the file. **Had the order been reversed, this wave
 would have committed a neighbour's commit message onto its own four files, and
 `--only` would not have helped: the hazard is in the MESSAGE, not the paths.**
@@ -430,7 +430,7 @@ several writers share, and no instrument that can tell you it moved.
   and keeping the one that exists.
 * Identity sweep `scripts/sweep_tracked_for_identity.py` run **at the gate,
   after staging**: PASS, 0 hits across 374 swept files, 377 tracked.
-* Commit `d5f6409`, four new files, 916 insertions, verified line-for-line
+* Commit `c294507`, four new files, 916 insertions, verified line-for-line
   against `git show HEAD --numstat` (143 + 410 + 205 + 158) and the map re-read
   out of `git show HEAD:_audit/_census/blocker-map.tsv` rather than off disk.
 * Zero AI attribution.
@@ -554,7 +554,7 @@ it, and no amount of scanning can find what was never written down.
 
 ## 10. THE GUARD FIRED WITHIN THE HOUR, ON A DEFECT IN MY OWN INSTRUMENT
 
-Written at `b343795`. Fired at 23:48, before this wave closed.
+Written at `115afdc`. Fired at 23:48, before this wave closed.
 
     FAILED test_the_ledger_tables_still_total_97_blockers_and_409_rows
     FAILED test_no_blocker_recounts_higher_than_the_ledger_published
@@ -564,7 +564,7 @@ Written at `b343795`. Fired at 23:48, before this wave closed.
 
 **Nothing was wrong with the data. `ledger_counts()` read the ledger's two
 tables out of a HARDCODED LINE WINDOW, `text[140:311]`.** Another wave appended
-19 lines (`0d66ebe`), the file went 1546 -> 1565, both tables slid 28 lines down,
+19 lines (`f7594c0`), the file went 1546 -> 1565, both tables slid 28 lines down,
 and the cost-0 table left the window entirely. Its nine blockers then parsed as
 absent, `published.get(b, 0)` turned absent into **zero**, and four blockers the
 map holds legitimately read as over-counted.
@@ -592,13 +592,13 @@ failing** by breaking the header anchor deliberately:
 
 ### And the reassuring measurement, taken because the alarm demanded it
 
-Re-parsed at `b343795` and at HEAD with the fixed reader:
+Re-parsed at `115afdc` and at HEAD with the fixed reader:
 
-    b343795   97 blockers   409 rows
+    115afdc   97 blockers   409 rows
     HEAD      97 blockers   409 rows
     per-blocker count changes:  NONE
 
-`0d66ebe`'s *"four cells corrected"* touched cells other than the row counts, so
+`f7594c0`'s *"four cells corrected"* touched cells other than the row counts, so
 **every comparison in sections 4 and 9 stands unchanged.** That is worth stating
 explicitly, because the honest reading of a fired guard is not "it was a false
 alarm" -- it is "the alarm was right about something, and here is what."
@@ -614,12 +614,12 @@ author who wrote it.
 Section 6.4 read the tab ratchet at **41** against a pinned 39, at 23:34. Read
 again at 23:55, immediately before this wave closed, it is **42**.
 
-    23:34   41 leaking scripts   +2 since the pin: _probe_contact_info_panel.py (f08e62b)
-                                                   _probe_premium_entitlement.py (ae469cc)
+    23:34   41 leaking scripts   +2 since the pin: _probe_contact_info_panel.py (6ca9590)
+                                                   _probe_premium_entitlement.py (6770e03)
     23:55   42 leaking scripts   +1 more:          _probe_job_alerts_live.py     (NO COMMIT)
 
 **THE THIRD LEAKER IS IN THE INDEX AND IN NO COMMIT ANYWHERE**, and I nearly
-published a wrong owner for it. I attributed it to `6b90622` because that commit
+published a wrong owner for it. I attributed it to `61e3237` because that commit
 carries the job-alerts boundary work and the name matched. Then I ran the check
 this repository already requires -- `git log --oneline -1 -- <path>` -- and it
 returned NOTHING. `git log --all` returns nothing either, while

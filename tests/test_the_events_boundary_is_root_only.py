@@ -7,7 +7,7 @@ above that pattern lists what it declines to admit **by census row id** --
 
 **THAT COMMENT IS PROSE, AND PROSE CANNOT FAIL.** The census said so in its own
 words and declined to retire the rows on it -- `_audit/_census/
-blocker-assignments.tsv`, the `N 181` line, `c1991ac`:
+blocker-assignments.tsv`, the `N 181` line, `0aca3d0`:
 
     NONE of those verdicts is enforced by a shipped rule -- the four
     EXCLUDED-RULED rest on readonly.py's admission COMMENT, which is prose in

@@ -301,12 +301,12 @@ denylist, a different list from `readonly._FORBIDDEN_URL_SUBSTRINGS`. Measured,
 the only overlap is `set` sitting inside `settings` -- an entry about the
 settings surface. Cost 6, queue MEASURE. **Row 36** `JOB-ALERTS-SURFACE` is two
 blockers under this section's own merge rule: the READ half cost one anchored
-pattern and no exemption and **was bought at `6b90622`**, while each of the
+pattern and no exemption and **was bought at `61e3237`**, while each of the
 three writes needs a pattern AND an exemption because the shipped refusal
 reports BOTH gates refusing it -- so `allowlist +1` prices the read and the
 writes at the same rate. **Row 61** `PREMIUM-APPLY-SURFACES` is charged
 `allowlist +2` when `/premium/my-premium/` is already on the list; +1, cost 10.
-**And the row counts themselves:** `_audit/_census/blocker-map.tsv` (`d5f6409`)
+**And the row counts themselves:** `_audit/_census/blocker-map.tsv` (`c294507`)
 assigns 0 rows to any of these six from any committed source, so the corrected
 denominators sit under numerators nobody can audit -- which the correcting
 document states against itself.

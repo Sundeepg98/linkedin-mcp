@@ -227,7 +227,7 @@ because this one gates the push rather than any single row.
 **It is COMMITTED, not working-tree.** `git diff --numstat` on that path is
 empty, so the string is in history and a clean working copy proves nothing about
 it. Route by artifact, not by guess: `git log -- _audit/2026-09-05-jobs-tail.md`
-names `f8e706c` and `b312d98`, both from the jobs-tail measurement work. **That
+names `7edbd0a` and `b312d98`, both from the jobs-tail measurement work. **That
 wave owns the remedy.** This wave does not fix it -- a neighbour's lines are not
 swept, and for this class the author is the only person who can say what the
 string is.
@@ -326,8 +326,8 @@ together than separately, and neither needs the boundary moved.
     sweep roughly ten minutes later   PASS, 0 hits / 329 tracked files
 
 The change is not drift and was not guessed at: `git log` on that path names
-`1eae6ff`, *"a real denied term reached a tracked audit doc, redacted at the
-tree"*, and the same wave had already committed `7da74fd`, *"my last commit
+`ebc2e1d`, *"a real denied term reached a tracked audit doc, redacted at the
+tree"*, and the same wave had already committed `fc0ed87`, *"my last commit
 reported a sweep PASS that had already failed, and a push is blocked."*
 
 **Three things are worth separating, because they are three different results.**
@@ -340,7 +340,7 @@ reported a sweep PASS that had already failed, and a push is blocked."*
    wrong to hedge** -- the evidence available at the time supported no stronger
    claim, and a stronger claim would have been the error the lead made twice
    today.
-2. **The owning wave found it independently and first.** `7da74fd` predates this
+2. **The owning wave found it independently and first.** `fc0ed87` predates this
    wave's section 8. Two waves converged on the same push blocker from different
    directions within minutes, which is the fleet working rather than duplication
    to be trimmed -- and the one that owned the string is the one that fixed it,
@@ -371,9 +371,9 @@ the author.
 |---|---:|---:|---:|---|
 | `6456701` | 1 | 144 | 0 | the seven-address measurement |
 | `67da282` | 3 | 290 | 0 | `jobfilter.py`, its tests, the `server.py` wire |
-| `825543d` | 2 | 79 | 0 | the `company_id` docstring, section 7 |
-| `780a5c2` | 1 | 56 | 0 | the gate sweep red |
-| `88bd02c` | 1 | 87 | 0 | its close |
+| `33c5dd3` | 2 | 79 | 0 | the `company_id` docstring, section 7 |
+| `a29e7e8` | 1 | 56 | 0 | the gate sweep red |
+| `29516d1` | 1 | 87 | 0 | its close |
 
 **ZERO DELETIONS ACROSS ALL FIVE, and that is the load-bearing number rather
 than the insertions.** It says no neighbour's line was swept into any commit
@@ -547,11 +547,11 @@ Recomputed from `git` at 19:14 by the box, not carried forward from section 11:
 |---|---:|---|
 | `6456701` | 144 | the seven-address measurement |
 | `67da282` | 290 | `jobfilter.py`, its tests, the `server.py` wire |
-| `825543d` | 79 | the `company_id` docstring, section 7 |
-| `780a5c2` | 56 | the gate sweep red |
-| `88bd02c` | 87 | its close |
-| `ce2c815` | 74 | the first freeze |
-| `ae469cc` | 488 | the premium load |
+| `33c5dd3` | 79 | the `company_id` docstring, section 7 |
+| `a29e7e8` | 56 | the gate sweep red |
+| `29516d1` | 87 | its close |
+| `a981b99` | 74 | the first freeze |
+| `6770e03` | 488 | the premium load |
 
 **ZERO DELETIONS ACROSS ALL SEVEN.** Still the load-bearing number, still
 measured with `--numstat` rather than recalled: no neighbour's line entered any

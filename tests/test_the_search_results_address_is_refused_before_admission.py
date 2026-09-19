@@ -5,7 +5,7 @@ is admitted -- and the wave that lands the `SEARCH-RESULTS-SURFACE` pattern
 will turn it red on its first run. That is not a defect in this file and it is
 not a defect in that wave. It is the point.
 
-Condition 4 of the ruling at `569dc5e` section 6: *"A REVERT PATH EXISTS BEFORE
+Condition 4 of the ruling at `09f9961` section 6: *"A REVERT PATH EXISTS BEFORE
 THE ADMISSION, NOT AFTER. The pattern's removal is one line; the test that
 shows the address refused must be written and shown failing BEFORE the pattern
 is added, so the rollback is proven rather than assumed."*
@@ -20,7 +20,7 @@ list to whatever still refuses, and do NOT mark it xfail.
 **THIS SAID "DELETE IT" UNTIL 2026-09-19 13:05, AND THE LEAD RULED THE OTHER
 WAY.** The argument that changed it: a deleted test leaves no record that the
 transition happened, an inverted one keeps asserting something true, and its
-diff is the clearest possible statement of what flipped. `17733f1`
+diff is the clearest possible statement of what flipped. `a603a61`
 (`tests/test_search_admission_blast_radius.py`) said so first and was adopted;
 this file is brought into line rather than left contradicting it, because two
 guards giving opposite instructions is worse than either instruction.
@@ -120,7 +120,7 @@ def test_every_search_results_address_is_refused_today():
     for url in _SEARCH_RESULTS_URLS:
         assert _refused(url), (
             f"search-results address admitted as a read: {url!r}. If the "
-            "admission ruled at 569dc5e section 6 has landed, this file has "
+            "admission ruled at 09f9961 section 6 has landed, this file has "
             "done its job and should be REWRITTEN AND INVERTED in that same "
             "commit -- the admitted entries flipped to assert admission, the "
             "rest still asserting refusal. Not deleted, not narrowed, not "

@@ -46,7 +46,7 @@ the same event four times (``_shape_of`` -> ``_redact`` -> ``_relation`` ->
 **THIS TABLE SHIPS EMPTY OF REAL ROWS, AND THAT IS THE HONEST STATE.** The
 three functions this file was built for are not this wave's to enrol:
 
-    _why_refused      scripts/_probe_landed_address_sweep.py      owner a6efc4b
+    _why_refused      scripts/_probe_landed_address_sweep.py      owner 1f244e1
     _landing_class    scripts/_probe_creator_content_analytics.py
     is_read_url       linkedin_server/readonly.py
 

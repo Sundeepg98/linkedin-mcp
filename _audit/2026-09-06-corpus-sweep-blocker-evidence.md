@@ -63,7 +63,7 @@ Separately (found and fixed by a sibling agent in this same wave, not this
 pass, while this pass was running): `ledger_counts()`'s hardcoded
 `text[140:311]` line slice had gone stale as the ledger grew, silently
 truncating the 9-row cost-0 table out of the parse. That fix landed at
-`0d66ebe` and is why this pass's baseline reads 97 blockers / 409 rows rather
+`f7594c0` and is why this pass's baseline reads 97 blockers / 409 rows rather
 than the 88/359 a run five minutes earlier would have shown. Recorded here
 only because this pass's own first "fresh" reading briefly showed the two
 downstream test failures that bug causes, before the sibling's fix was

@@ -2,7 +2,7 @@
 
 **CORRECTS:** `_audit/2026-09-05-census-recounted.md` — its section 5 describes `--unstated` as listing "every row in a capability table carrying no recognised state". It lists rows in EVERY table, capability or not, and 78 of the 117 are correctly stateless. The same section's open one-row disagreement — "369 is what the instrument reads, 370 is what the census says" — is closed here, toward the census.
 
-Wave `census-hygiene`, 2026-09-05. Commits `02e617d` (the restoration) and `c34916c` (the guard).
+Wave `census-hygiene`, 2026-09-05. Commits `083a872` (the restoration) and `ba145db` (the guard).
 
 ---
 
@@ -99,7 +99,7 @@ The honest reconciliation is against the ledger's **705 table rows**:
 
 ## 6. THE GUARD, AND WHAT ITS FIRST RUN TAUGHT ME
 
-`tests/test_census_rows_carry_a_state.py`, commit `c34916c`. It asserts over exactly the rows where a missing state is a defect: **a row in a table whose own HEADER declares a `state` column.** That table promised a state per row.
+`tests/test_census_rows_carry_a_state.py`, commit `ba145db`. It asserts over exactly the rows where a missing state is a defect: **a row in a table whose own HEADER declares a `state` column.** That table promised a state per row.
 
 **SHOWN FAILING FIRST, on the row that started the class:**
 
@@ -114,7 +114,7 @@ The restore came from a **byte copy taken before the edit**, not a retyped strin
 
 **THE GUARD'S FIRST RUN FAILED ON ITSELF, AND THAT IS WHERE THE REAL SCOPE CAME FROM.** Scoping on the header word `state` alone red-flagged all four slices' opening summary tables — headed `| state | count | share |`, where `state` names the **row** rather than a cell in it. So the extra condition is that **`state` must not be the FIRST column.** A guard failing on the one thing it exists to ignore is cheap to find and impossible to find by reading.
 
-**Two genuine finds came out of that same first run** — `M M1`/`M M2`'s non-canonical spelling — and are in `02e617d`. **The guard paid for itself before it was committed.**
+**Two genuine finds came out of that same first run** — `M M1`/`M M2`'s non-canonical spelling — and are in `083a872`. **The guard paid for itself before it was committed.**
 
 It **imports** `scripts/count_census_states.py` rather than reimplementing its parser. Four waves reimplemented a shipped instrument here in one day and three got a broken one; if the guard and the counter disagreed about where a state lives, the guard would certify a count the counter cannot take.
 
@@ -130,8 +130,8 @@ Same shape as everything else in this repository this week: **the number was rig
 
 ## 8. RECEIPTS
 
-    restoration          02e617d   4 files, 32 insertions, 17 deletions
-    guard                c34916c   tests/test_census_rows_carry_a_state.py, 152 lines
+    restoration          083a872   4 files, 32 insertions, 17 deletions
+    guard                ba145db   tests/test_census_rows_carry_a_state.py, 152 lines
     counter              scripts/count_census_states.py  (XR taught, tracked)
     recount, recomputed  stated rows 667 -> 704 (+37); --unstated 117 -> 80 (-37); GAP 369 -> 370
     red/green            planted -> rc=1 naming 1 row; restored byte-identical -> rc=0, 5 passed

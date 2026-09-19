@@ -415,7 +415,7 @@ presence reading. This probe is absent from
                                              39 -> 41 on two other waves' probes;
                                              this probe is not in the set
 
-**Commits: 4.** `ac7ee5b`, `49dc9d4`, `e8831b6`, `fe30911`. Every one carries
+**Commits: 4.** `ac7ee5b`, `563bd1a`, `e480252`, `de18cf4`. Every one carries
 exactly two files, both created by this wave; no neighbour's lines were swept
 and no follow-up credit is owed. **Zero AI attribution across all four,
 verified by grep rather than by intention.** Nothing pushed.

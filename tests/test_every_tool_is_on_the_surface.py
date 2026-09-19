@@ -263,8 +263,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # 44 FROM 2026-09-19: TWO AT ONCE, BOTH READS, AND THIS PIN WAS NOT THE
     # LAST SITE TO MOVE -- IT IS THE ONE THAT GOT MISSED.
     #
-    #     linkedin_job_collections     633312f, 11:13
-    #     linkedin_creator_analytics   4272994, 12:42
+    #     linkedin_job_collections     b64580a, 11:13
+    #     linkedin_creator_analytics   a8a7556, 12:42
     #
     # MEASURED OFF THE REGISTRY, NOT THE SOURCE, and not relayed from the
     # commit that moved the other sites: ``len(_tool_names())`` reads 44 on
@@ -272,7 +272,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # decorator returned 46 on this same tree the same afternoon and was wrong,
     # which is why the registry is the instrument and the decorator is not.
     #
-    # ``385eeda`` moved four sites -- ``EXPECTED_TOOLS``, the count assertion
+    # ``a4565cb`` moved four sites -- ``EXPECTED_TOOLS``, the count assertion
     # in ``test_server_surface.py``, the read split, and that test's own name
     # -- under a message reading "the pin was the LAST site to move". It was
     # not. This fifth site sat at forty-two, and the file left stale was the

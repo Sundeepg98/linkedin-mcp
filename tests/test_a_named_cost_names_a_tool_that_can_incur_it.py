@@ -8,7 +8,7 @@ merely describe a cost; it makes a CLOSED claim about who can incur it:
 
 **THE NEIGHBOURING BULLET IN THE SAME LIST WAS FALSE FOR TWO DAYS.** It read
 "no tool here loads /mynetwork/ at all" while ``linkedin_connections`` had
-loaded an address under it since 2026-09-03. It was corrected at ``a86c849``
+loaded an address under it since 2026-09-03. It was corrected at ``2f27a83``
 on 2026-09-05 at 21:33 -- by the wave that added the SECOND violation, which
 is to say it was found because somebody tripped over it, not because anything
 was watching.
@@ -38,7 +38,7 @@ built to protect the counter it is warning about.
 WHAT THESE TESTS ASSERT, AND IT IS TODAY'S DEFECT RATHER THAN THE FIX. The
 sentence lives in ``linkedin_server/server.py``, which was DIRTY with another
 wave's uncommitted lines when this was written, and whose ``known_side_effects``
-block has a measured owner (``a86c849``). This repository's standing rule is
+block has a measured owner (``2f27a83``). This repository's standing rule is
 that you hand a peer the measurement, not the fix, and you do not sweep a
 neighbour's lines. So:
 

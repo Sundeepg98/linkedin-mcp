@@ -100,7 +100,7 @@ SOURCE = "\n".join(
 )
 
 #: The commit BEFORE this wave banked the eight rows it verified by hand.
-CONTROL_REF = "0843e54^"
+CONTROL_REF = "bab9538^"
 #: Rows that were GAP at CONTROL_REF and are known-unbanked. Verified against
 #: the source and the suite, not against a progress file.
 CONTROL_MUST_FLAG = ("J 9", "J 11", "J 12", "J 13", "J 14", "M C60", "N 173")

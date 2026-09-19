@@ -509,7 +509,7 @@ cannot reach a number that is wrong and only recomputation can.
     exact-url exemptions       2     (unchanged)
     files this wave committed  2     _audit/2026-09-05-network-tail.md
                                      scripts/_probe_network_tail_boundary.py
-    commits                    3     ffc57c7, a867488, f834091
+    commits                    3     ffc57c7, 6315915, 1bf0981
     linkedin_server/readonly.py      NOT TOUCHED, byte-unchanged
 
 **Zero AI attribution across all three commit bodies, with the check SHOWN
@@ -548,7 +548,7 @@ document names the failures print rather than by reading the summary line.
 
 The shipped exact-value identity sweep went RED at my commit gate on a file that
 is not mine and is already COMMITTED: `_audit/2026-09-05-jobs-tail.md:403`,
-class `operator_own_denied_terms`, blob at `f8e706c`. The file is clean in the
+class `operator_own_denied_terms`, blob at `7edbd0a`. The file is clean in the
 working tree, so tree and blob are the same object and the hit is in history.
 Push freeze is on, so nothing is published.
 
@@ -574,7 +574,7 @@ it was made, instead of leaving it to a neighbour committing two minutes later.
 Somebody fixed the working-tree copy in that window. **That is the correct
 remedy in a shared tree -- a follow-up commit, not a rewrite -- and it settles
 nothing about what a push would publish.** The file has six commits and grew
-from 22483 to 29800 bytes across them, so the fix is later than `f8e706c` and
+from 22483 to 29800 bytes across them, so the fix is later than `7edbd0a` and
 the earlier blobs are untouched. This repo's own rule: *a clean working tree
 says nothing about history; to make a claim about what a push would publish,
 sweep the BLOBS.*
@@ -584,7 +584,7 @@ ad-hoc blob sweeper that imported the shipped `load_wordlist()` and then
 extracted the values from it myself. It printed:
 
     sweeping blobs with 0 spellings
-      916d013 ... classes hit: NONE      (and five more, all NONE)
+      556d6e0 ... classes hit: NONE      (and five more, all NONE)
 
 **Zero spellings. An empty needle set matches nothing, and its `NONE` is not a
 result.** I am recording the broken output rather than deleting it, because six

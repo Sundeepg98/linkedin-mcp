@@ -103,7 +103,7 @@ RETIRED_ON_A_SHIPPED_ASSERTION: dict[str, tuple[str, str, str]] = {
     # what was still owed: "The ruling reaches the ACTION CLASS -- compose a
     # mention or a tag into published content -- and whoever holds the map
     # should apply it ROW BY ROW rather than take my count." It enumerated
-    # FOUR mention rows. Two were applied in `8a3df07`; these were not.
+    # FOUR mention rows. Two were applied in `58ba421`; these were not.
     #
     # `C9` is deliberately absent. The same document is headed "why
     # celebration is conditional and not ruled outright" and says the template

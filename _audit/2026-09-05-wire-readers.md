@@ -1,6 +1,6 @@
 # Wiring the readers that were built and could not be called
 
-**Wave `wire-readers`, 2026-09-05 evening. Commits `4f6d646`, `55ce03c`.**
+**Wave `wire-readers`, 2026-09-05 evening. Commits `3f0293f`, `4db911b`.**
 
 **CORRECTED BY:** `_audit/2026-09-05-groups-wire.md` -- all three reasons in section 2 for not wiring `groups.py` are now obsolete: the walk was re-expressed with Playwright locators so it needs no `page.evaluate` waiver and no `dom.py` change, it answers five rather than ten, and a tool does not have to certify its cost from the page it loads -- the counter-example is `linkedin_notify_cost_precondition`, wired in this same document. `groups.py` is wired and the tool count is 42.
 

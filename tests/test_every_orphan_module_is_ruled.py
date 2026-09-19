@@ -95,7 +95,7 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "probe's docstring."
     ),
     "intro_fields": (
-        "LANDED 2026-09-19 (d7ffc42) FROM ANOTHER WAVE, and the ruling is its "
+        "LANDED 2026-09-19 (2ac9aea) FROM ANOTHER WAVE, and the ruling is its "
         "author's rather than mine. It is a PROJECTION over an existing "
         "reader -- its own docstring says it 'does not re-read' the container "
         "and takes dom.read_self_owned_editor_fields' output -- so it is in "

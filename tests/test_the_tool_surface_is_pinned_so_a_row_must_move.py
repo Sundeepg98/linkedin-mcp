@@ -139,7 +139,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: pin edited to an empty dict cannot quietly disable the guard.
 #:
 #: **RE-PINNED 2026-09-19 at 43.** `linkedin_job_collections` shipped in
-#: `633312f`, and **the guard's substantive demand was already met in that
+#: `b64580a`, and **the guard's substantive demand was already met in that
 #: commit**: it moved `J 42` from GAP to COVERED-PROVEN in the same change,
 #: verified here rather than taken on the commit subject's word. What was
 #: missing was only this pin, which is the bookkeeping half.

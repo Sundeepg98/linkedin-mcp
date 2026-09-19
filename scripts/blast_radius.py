@@ -1,6 +1,6 @@
 """WHAT WOULD A CANDIDATE ALLOWLIST PATTERN NEWLY ADMIT?
 
-Built for the conditional admission at `569dc5e`, which grants
+Built for the conditional admission at `09f9961`, which grants
 `SEARCH-RESULTS-SURFACE` on condition that exactly this measurement is taken
 first. **The instrument is separable from the entry**: this answers the
 question for ANY candidate pattern, and the wave that owns a surface writes the

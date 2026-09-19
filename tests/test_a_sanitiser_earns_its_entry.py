@@ -325,7 +325,7 @@ ENROLLED: dict[tuple[str, str], str] = {
     # arity is not even the one the two-arg invoker would call. It is safe in
     # fact -- every return in it is a string constant, measured off the AST --
     # but that is a measurement somebody else must make into a claim. Its
-    # owner is `a6efc4b`.
+    # owner is `1f244e1`.
 }
 
 #: The address a two-argument claimant is told was ASKED FOR. A constant this

@@ -104,7 +104,7 @@ LEDGER = ROOT / "_audit" / "2026-09-03-linkedin-gap-blockers.md"
 
 #: The two tables are located by their HEADER ROW, never by line offset.
 #: MEASURED 2026-09-05 23:48, and it is why this is not a window: another wave
-#: appended 19 lines to the ledger (`0d66ebe`), the file went 1546 -> 1565, both
+#: appended 19 lines to the ledger (`f7594c0`), the file went 1546 -> 1565, both
 #: tables slid 28 lines down, and the cost-0 table left the hardcoded slice
 #: `text[140:311]` entirely -- so four blockers silently read as published 0 and
 #: the over-count assertion fired on them. It fired CORRECTLY on a defect in
