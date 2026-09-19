@@ -62,12 +62,14 @@ POSIX_ABSOLUTE = re.compile(r"(?:^|[\s:=(\[])/[A-Za-z0-9_.]")
 #: written to enforce it.
 #:
 #: MEASURED ON CI 2026-09-19, run 35449299090, ubuntu py3.10 and py3.13
-#: shard 5. The unscrubbed message read "chrome profile directory does not
-#: exist: /home/runner/work/linkedin-mcp/linkedin-mcp/_state/chrome-profile
-#: -does-not-exist"; DRIVE_LETTER found nothing in it and the control failed
-#: with its own words -- "the unscrubbed message carried no drive letter, so
-#: the assertion above proves nothing on this platform". It was right. The
-#: build box is windows-only, which is why local runs never saw it.
+#: shard 5. The unscrubbed message carried a POSIX absolute path rooted
+#: under the runner's home directory -- not reproduced here, because a
+#: /home/<name> shape is exactly what this file's own guard refuses in a
+#: tracked file, and it refused this comment when it named one. DRIVE_LETTER
+#: found nothing in that message and the control failed with its own words
+#: -- "the unscrubbed message carried no drive letter, so the assertion
+#: above proves nothing on this platform". It was right. The build box is
+#: windows-only, which is why local runs never saw it.
 ABSOLUTE_PATH = DRIVE_LETTER if os.name == "nt" else POSIX_ABSOLUTE
 
 #: The ONE subtree allowed to carry an absolute path, and why.
