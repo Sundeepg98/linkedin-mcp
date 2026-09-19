@@ -832,6 +832,17 @@ def test_the_relation_sanitiser_cannot_reconstruct_its_input():
     assert branches == {"SERVED", "REDIRECTED"}, branches
 
 
+def _relation_arity(filename: str) -> int:
+    """How many arguments that file's ``_relation`` takes. Parsed, not read."""
+    path = REPO / "scripts" / filename
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "_relation":
+            args = node.args
+            return len(args.posonlyargs) + len(args.args)
+    return -1
+
+
 def test_every_relation_definition_is_byte_identical():
     """Two standalone probes, one contract. They cannot drift apart.
 
@@ -843,7 +854,35 @@ def test_every_relation_definition_is_byte_identical():
     sources = _relation_sources()
     assert len(sources) >= 2, sources
     bodies = {body for _name, _text, body in sources}
-    assert len(bodies) == 1, sorted(name for name, _text, _body in sources)
+
+    # THE MESSAGE DISTINGUISHES DRIFT FROM IMPERSONATION, and it did not until
+    # 2026-09-19. It said the copies had DRIFTED and listed every file holding
+    # one -- which points the reader at making them identical. That was the
+    # WRONG REPAIR for the case that actually fired: a probe had defined a
+    # DIFFERENT FUNCTION under this name, one argument instead of two, its own
+    # return vocabulary. Different arity is not drift, and "make them
+    # identical" would have rewritten somebody's working function to satisfy a
+    # test.
+    #
+    # **A GUARD WHOSE SUGGESTED FIX WOULD LAND AND CLEAR THE RED IS WORSE THAN
+    # A SILENT ONE**, because the red goes away and the defect does not. So
+    # the arities are reported alongside the bodies: a split in ARITY says
+    # impersonation and the repair is a RENAME; a split with matching arity
+    # says drift and the repair is to reconcile them.
+    if len(bodies) != 1:
+        by_arity = {}
+        for name, _text, body in sources:
+            by_arity.setdefault(_relation_arity(name), []).append(name)
+        assert len(bodies) == 1, (
+            "`_relation` has %d distinct bodies. Grouped by ARITY: %s. "
+            "SAME arity in more than one group means the copies have DRIFTED "
+            "and the repair is to reconcile them. A group with a DIFFERENT "
+            "arity is not a copy at all -- it is a different function wearing "
+            "a guarded name, and the repair is a RENAME, not reconciliation. "
+            "Renaming vouches for nothing, which is why it is available to "
+            "anyone; enrolling asserts the contract and belongs to its author."
+            % (len(bodies), {k: sorted(v) for k, v in by_arity.items()})
+        )
 
 
 # ---------------------------------------------------------------------------
