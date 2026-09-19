@@ -182,6 +182,32 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("profile.md", "2026-09-05-decide-retire-rulings.md"): (
+        "CROSS-ROW PROXIMITY, measured before the reason was written. The "
+        "citation is on line 205, row A23 (name pronunciation audio, retired "
+        "MOBILE-APP-ONLY), and A23 carries NO correction vocabulary at all. "
+        "The only vocabulary in the two-line window is 'wrong' on line 204 -- "
+        "row A22, a different capability (Primary Position in the intro "
+        "editor), where it belongs to this wave stating that the BLOCKER'S "
+        "PREMISE is wrong because the controls have now been read. Neither "
+        "the word nor the row has anything to do with the retire-rulings "
+        "document A23 cites. A census table has one row per LINE, so a "
+        "line-based window reaches ACROSS rows -- the same shape already "
+        "recorded twice in this table"
+    ),
+    ("messaging-and-content.md", "2026-09-19-the-disclosing-press-ruling.md"): (
+        "the cited document is the GRANTING AUTHORITY and the row is applying "
+        "it. C 72 cites the disclosing-press ruling to record which of its "
+        "four conditions refuses this press and that the refusal is "
+        "reachable_by_this_route -- NOT YET rather than NEVER. The four "
+        "vocabulary words in that cell all belong to THIS WAVE CORRECTING "
+        "ITSELF, twice: the row first said no counter prices a feed press, "
+        "and the cell now records that reading as ACCURATE AND IRRELEVANT "
+        "because the nav badges could not have moved for the act in question. "
+        "A self-correction in place, citing the ruling it obeys. A CORRECTED "
+        "BY: pointer in the ruling would tell a reader that the document "
+        "granting the permission had been refuted by a row obeying it"
+    ),
     ("2026-09-19-cross-slice-rulings.md", "jobs.md"): (
         "a STRUCTURAL GAP is reported, not a claim refuted. Amendment C "
         "measures that jobs.md carries no R/W column at all -- 151 rows, 0 "
