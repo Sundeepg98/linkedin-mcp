@@ -48,8 +48,8 @@ leaves **20 reads**, matching the figure in
 | `N 179` (1) | events | `/search/results/events/` | `2026-09-05-events-surface-recosted.md:252` |
 | `N 194` (1) | content/hashtag | **UNSETTLED** -- `/search/results/content/?keywords=%23...` or `/feed/hashtag/<tag>/`, which is a different family | see A.4 |
 
-**CORRECTS:** `_audit/2026-09-05-search-results-consent.md:163` -- it lists two
-rows as unattributed and names `N 104` (find an organization's Page by
+**CORRECTS:** `_audit/2026-09-05-search-results-consent.md:163` -- it lists two rows as unattributed
+and names `N 104` (find an organization's Page by
 searching) as one of the candidates. Those two have since been resolved to
 `N 161` and `N 179`, and **`N 104` appears nowhere in
 `_audit/_census/blocker-assignments.tsv` at all** -- not under this blocker and
@@ -181,8 +181,8 @@ difference: 18 against 3.** A family wildcard reaches fifteen addresses beyond
 the narrow candidate's, none of them refused by anything else, and the
 alternation in S2 costs exactly three of them, and S2b two.
 
-**CORRECTS:** `_audit/2026-09-05-search-results-consent.md:195` -- its boundary
-snapshot reads *"33 forbidden substrings, 24 allowed patterns"*. The substring
+**CORRECTS:** `_audit/2026-09-05-search-results-consent.md:195` -- its boundary snapshot reads
+*"33 forbidden substrings, 24 allowed patterns"*. The substring
 count still holds; the pattern count is **32** as of 12:34 today. Flagged, not
 edited: the document is another wave's and its conclusion is unaffected.
 

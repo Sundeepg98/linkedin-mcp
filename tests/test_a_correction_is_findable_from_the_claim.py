@@ -766,6 +766,81 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "on exactly the question the citing document went out of its way not "
         "to answer"
     ),
+    # ----------------------------------------------------------------- 2026-09-19
+    # SEVEN TRIAGED AT THE GATE-TO-ZERO PASS. One pair from the same sweep WAS
+    # a correction and is declared with markers instead -- groups-admission
+    # against groups-surface, a bucket table summing to 22 under a heading
+    # saying 21. One in eight, which is the ratio this file's own header
+    # documents and the reason the vocabulary alone cannot be the check.
+    ("2026-09-19-the-three-ruling-requests-ruled.md", "2026-09-19-blocker-map-ruling-requests.md"): (
+        "the line is a PROVENANCE note and not a claim about the cited "
+        "document. It records WHICH STATE of the ruling requests was ruled "
+        "against -- `5f57610`, 'corrected at `1957df7` and `6271708`' -- and "
+        "those two commits are corrections the cited document's OWN AUTHOR "
+        "made to it. Naming the commits at which a document was fixed is how "
+        "a reader knows which version was read; it is the opposite of a claim "
+        "that the document is wrong. This document RULES ON the requests "
+        "filed there, and a ruling on a request is not a correction of it"
+    ),
+    # THE THREE BELOW ARE ONE SHAPE, AND IT IS THE SHAPE THIS GUARD CANNOT SEE.
+    ("2026-09-19-unfired-but-built.md", "2026-09-19-search-admission-preconditions.md"): (
+        "the citation sits inside a TABLE OF TEST FAILURES that wave observed "
+        "and attributed elsewhere -- its columns are 'failure' and 'whose', "
+        "and this row's whose-cell reads 'not written here'. The correction "
+        "vocabulary is not a verb about the cited document: it is the word "
+        "'correction' inside a TEST'S OWN NAME, "
+        "`test_a_correction_is_findable_from_the_claim`, quoted verbatim in "
+        "the failure column. **THE GUARD CANNOT DISTINGUISH 'X CORRECTS Y' "
+        "FROM 'X REPORTS THAT A TEST WHOSE NAME CONTAINS correction FIRED ON "
+        "Y'**, and reporting a red is not correcting the document the red "
+        "names"
+    ),
+    ("2026-09-19-unfired-but-built.md", "2026-09-19-the-three-ruling-requests-ruled.md"): (
+        "same table, next row, and the same reading: the cell names the four "
+        "documents that row's failure was counted in and says 'none of them "
+        "this wave's prose'. It is an attribution of somebody else's red, "
+        "written so the next wave does not spend the pass hunting for it. The "
+        "vocabulary is again the test name in the failure column and not a "
+        "verb this document applies to the cited one"
+    ),
+    ("2026-09-19-unfired-but-built.md", "network.md"): (
+        "third citation in the same failure row, listing `network.md:436` as "
+        "one of the four places that red was counted. A census slice named as "
+        "the SITE of another wave's untriaged pair is being located, not "
+        "corrected -- and this pass has now read that very line and triaged "
+        "it, three entries below"
+    ),
+    # AND TWO WHERE THE VOCABULARY IS A SUBSTRING OF AN UNRELATED WORD.
+    ("jobs.md", "2026-09-19-anchor-reader.md"): (
+        "'stale' is matched as a SUBSTRING OF 'staleness'. The phrase in row "
+        "42's cell is 'all four are the staleness diagnostic' -- the name of "
+        "a field in the `linkedin_job_collections` payload, describing the "
+        "only four strings that tool returns. Nothing in the window says a "
+        "document is stale. The citation itself is an evidence pointer, "
+        "'See `_audit/...`', which is how every census cell names where its "
+        "reading is written up"
+    ),
+    ("jobs.md", "2026-09-19-read-tail.md"): (
+        "the same cell, the same word, the same reason: row 42 cites both "
+        "write-ups as evidence pointers, and the single 'staleness "
+        "diagnostic' in that 4.7k-character cell puts BOTH citations inside "
+        "the window. Two candidates from one substring is the cost of a "
+        "deliberately loose vocabulary over census rows that hold a whole "
+        "investigation on one line, and it is paid here rather than by "
+        "narrowing the scan"
+    ),
+    ("network.md", "2026-09-19-the-first-sanctioned-press.md"): (
+        "the citation is the evidence pointer closing row 133's cell, 'Full "
+        "evidence: `_audit/2026-09-19-the-first-sanctioned-press.md`'. TWO "
+        "UNRELATED THINGS put vocabulary in the window and neither is about "
+        "the cited document. The parenthetical '(a self-correction: that "
+        "wave's s1 had reported the page carries no such controls and s11 "
+        "measured that FALSE)' describes a correction INSIDE A THIRD "
+        "document, `_audit/_scratch/_progress-analytics-creator.md`, a "
+        "working note no clone carries. And the next row opens 'NOTE THE "
+        "NEIGHBOUR THIS CORRECTS:', which corrects a neighbouring CENSUS ROW "
+        "-- `N 136` -- and not a document at all"
+    ),
 }
 
 

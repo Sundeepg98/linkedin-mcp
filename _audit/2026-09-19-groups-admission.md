@@ -297,6 +297,8 @@ the new control file rather than left to be read as current truth.
 
 ## 9. A COUNT CORRECTION IN A DOCUMENT FROM EARLIER TODAY
 
+**CORRECTS:** `_audit/2026-09-19-groups-surface.md` -- its section 4 states twenty-one remaining rows and then tables seven buckets that sum to twenty-two
+
 `_audit/2026-09-19-groups-surface.md` section 4 states the remaining 21 and
 then tables them in seven buckets that sum to **22**. The slip is the
 double-refused bucket, given as 4.

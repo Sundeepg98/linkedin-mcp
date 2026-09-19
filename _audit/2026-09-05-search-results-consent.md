@@ -8,6 +8,8 @@ be made in two minutes, consistently with the two he has already made.**
 
 **CORRECTED BY:** `_audit/2026-09-05-search-results-measured.md` -- the instrument this document says has never been read WAS read at 14:24 the same day (LOAD A, headline 108, twice, stable), and taking it did not produce the evidence the fork below promised: the counter's caption came back redacted, which class of search feeds it is open, and the AFTER half needs the very act this ruling gates
 
+**CORRECTED BY:** `_audit/2026-09-19-search-admission-preconditions.md` -- two statements here are superseded: the two rows line 163 lists as unattributed have since been resolved, and the pattern count in line 195 has moved while its substring count still holds
+
 ## 0. THE SENTENCE THAT GOES FIRST
 
 **I could not establish that opening a people-search results page leaves the

@@ -130,6 +130,8 @@ reach the groups recommendation row eighteen lines above it in the same table**.
 
 ## 4. THE REMAINING 21, STATED SO A READER CAN CHECK THEM
 
+**CORRECTED BY:** `_audit/2026-09-19-groups-admission.md` -- the seven buckets below sum to twenty-two, not to the twenty-one this section states; the double-refused bucket is the slip
+
 Against the boundary as it stands: `/groups/` root only, anchored, no query and
 no sub-path.
 
