@@ -627,3 +627,71 @@ on a claim I had wrapped in the language of rigour** ("exact on two independent
 axes", "corroborated independently"). Confident phrasing is not an evidence
 class, and the two phrases I reached for were both describing the same unchecked
 assumption.
+
+---
+
+# AMENDMENT F — every profile row of mine audited against the `/in/me/` shell report
+
+`content-tail` measured `/in/me/` serving **2,146 chars, 0.197% of the recorded
+prior**, with the feed full in the same session. That makes every profile zero
+taken today suspect. **All of mine were audited; none moved.**
+
+## F1. The audit, row by row
+
+| row | rests on | exposed? | outcome |
+|---|---|---|---|
+| `P A9` | a live zero on the intro editor | **YES** | **re-taken, stands** — see F2 |
+| `P A25` | aim zeros on `/in/me/` | **YES** | **re-taken, stands** — and see F3 |
+| `P B10` | R11 + a **positive** enumeration of 20 settings addresses on `/mypreferences/d/` | no | different address, and a positive |
+| `P F2/F6/F7/F8/F9` | `network.md` R3 + the three-of-eight control inside block F | no | document evidence, not a live read |
+| the 32 anchored rows | nothing live; no state changed | no | — |
+
+Non-profile rows were checked too and none is exposed: `N 39` rests on
+`is_read_url` returning False (a **code** measurement), `M C69`/`M24`/`M5` and
+`J92`–`J97`/`J99` on document evidence.
+
+## F2. `P A9`, three fresh readings
+
+    /in/me/ html    398,365 / 398,234 / 398,424      controls 236 / 235 / 236
+    intro editor    10-11 fields, 8 labelled, in all three
+    the zeros       aria-expanded 0, aria-haspopup 0, name attribute 0  -- all three
+
+**36.5% of the recorded prior, not 0.2%**, and stable to within 200 chars across
+three reads. **A shell cannot draw a labelled form.**
+
+## F3. `P A25` — and the reason it was never really a zero
+
+    contact_info   named=1   haspopup=0  expanded=0  controls=0   stable over 2 reads
+    listener       click x1 registered on the node                  WIRED
+
+**`named=1` is a POSITIVE.** The control was FOUND; what was zero is the ARIA
+relations *on a control that is there*. A shell returns `named=0`.
+
+## F4. THE GENERAL POINT, which is worth more than the audit
+
+Every one of my zero-bearing rows carries **a positive finding from the same
+reading of the same surface** — 11 labelled fields beside A9's attribute zeros,
+`named=1` and a click listener beside A25's.
+
+> **A zero taken alongside a positive from the same read is SELF-CONTROLLING.**
+> The positive proves the surface rendered, so the zero is a fact about the data
+> rather than about the reader.
+
+That is why these rows survived a report that could have invalidated them, and
+it is a cheaper discipline than re-taking every zero after the fact: **record
+one positive from the same read, and the zero carries its own control.**
+
+## F5. Two of my own thresholds were miscalibrated, reported not dropped
+
+* **I used the FEED as a size control with an arbitrary 200,000-char bar**, and
+  it printed `CONTROL FAILED`. The feed measured **175,185 → 187,871 → 199,811**
+  across three reads: **it grows as it paginates.** A surface whose size depends
+  on dwell time cannot be a size control for another surface, and my bar was a
+  number I picked rather than derived.
+* **My verdict line required `fields==11`** and printed DIFFERS when it read 10 —
+  conflating *"the zero reproduces"* with *"the whole reading reproduces"*. A9
+  rests on the attribute zeros; the field count is known to drift here.
+
+**NO THEORY is offered for the shell.** It was not reproduced; a transient
+hydration failure, a session state and a product change are all consistent with
+what I can see, and nothing here separates them.
