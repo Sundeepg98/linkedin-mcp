@@ -572,3 +572,66 @@ rather than to a row.
 **So this is reported with the evidence and the four named, for a ruling.** What
 was missing was never the authority — it was the measurement, and that part is
 now done.
+
+---
+
+# AMENDMENT H — the published 761 does not reconcile with the file, and one of its two terms is missing
+
+**Reported, not corrected.** This is the campaign's headline capability
+denominator and its owner is the counter's.
+
+`scripts/count_census_states.py`'s docstring derives it:
+
+> *"`profile.md` collapses two blocks (`O6-O20` stands for 15, **the `P-R` block
+> stands for 45**), so the published capability DENOMINATOR is **705 rows + 59
+> collapsed - 2 stateless = 761**."*
+
+Three things measured against the file today:
+
+| the docstring says | the file says |
+|---|---|
+| `O6-O20` stands for 15 | **true** — one row, fifteen capabilities in its own text |
+| a **`P-R` block** stands for 45 | **NO SUCH BLOCK EXISTS.** The only `P`/`Q`/`R`-prefixed row in `profile.md` is `P1` *Mark notifications read*, an ordinary single row. No row anywhere claims to stand for 45 |
+| 705 rows | **704** stated rows |
+| 705 + 59 − 2 = 761 | 705 + 59 − 2 = **762** |
+
+## H1. What I am and am not claiming
+
+**Claiming:** the derivation cannot be reproduced from the file. One of its two
+collapse terms names a block that is not there, its row count is one out, and
+its arithmetic is one out.
+
+**NOT claiming the denominator is wrong by 44.** Three futures are consistent
+with what I can see and nothing here separates them:
+
+* the `P-R` block was **expanded into individual rows** — in which case those
+  capabilities are already inside the 704 and the `+45` double-counts them;
+* it was **removed** — in which case the capabilities are gone and the `+45` is
+  stale;
+* the docstring describes **a historical file** and was never updated.
+
+**Only the first two move the number, and in opposite directions from the same
+evidence.** Guessing which would be exactly the inference this round has spent
+the day removing from rows.
+
+## H2. Why it matters more than its size
+
+`761` is quoted as the campaign's denominator — *"~80 of 755 built"*, *"6%
+coverage"*, every ratio derived from it. **A denominator whose derivation cannot
+be reproduced makes every percentage above it uncheckable**, which is the same
+defect class as a ruling that cannot be cited: correct or not, **nobody
+downstream can verify it.**
+
+And the counter's own docstring states the principle this violates: *"a
+measurement nobody else can take is a measurement on its way to becoming a
+quotation."* That sentence was written about the count; **it now applies to the
+denominator in the same file.**
+
+## H3. How it was found
+
+Not by looking for it. Amendment G needed `O6-O20` because a collapsed block was
+hiding four double-counted capabilities; the docstring named **two** collapsed
+blocks, so I went to read the second and it was not there. **A finding about one
+collapsed block led to the file's arithmetic because the docstring enumerated
+its terms** — the same property that made the blocker map auditable is what made
+this checkable.
