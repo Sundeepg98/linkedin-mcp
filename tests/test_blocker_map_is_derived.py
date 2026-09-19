@@ -255,7 +255,30 @@ import build_blocker_map as bbm  # noqa: E402
 #: taking in two re-files moves the split while leaving the count alone --
 #: which is what a re-file does, and A13 says it itself ("taking the
 #: ledger's own figure to 22"). The count is the check that survives.
-UNASSIGNED_CEILING = 145
+#: 145 -> 133. THREE BLOCKERS GO FROM EMPTY TO COMPLETE IN ONE PASS, off a
+#: vein this recovery had not mined: COMMITTED SOURCE FILES. A probe script's
+#: comment block names the ledger ROW NUMBER, the blocker NAME and the ROW
+#: SET on one line, sitting directly above the addresses it exercised.
+#:
+#:   scripts/_probe_jobs_tail_boundary.py
+#:     # 36 JOB-ALERTS-SURFACE -- census rows J31-J36 and J41, all writes.
+#:     # 62 TRACKER-ROW-MENU   -- census rows J54-J56.
+#:   scripts/_probe_small_measures_live.py
+#:     ALL-FILTERS-PANEL (2 rows: J15, J16)
+#:
+#: JOB-ALERTS-SURFACE ANSWERS A DECLINE I MADE AT 11:02 ON ITS OWN TERMS. I
+#: refused it because section B holds NINE unassigned rows against seven
+#: slots and jobs.md CARRIES NO R/W COLUMN, so picking the seven writes would
+#: have been my reading rather than a source's. The comment names which seven
+#: AND makes the write claim itself. The split is no longer mine.
+#:
+#: PREMIUM-APPLY-SURFACES IS DECLINED AGAIN FROM THE SAME COMMENT BLOCK, and
+#: the consistency is the point: it names J78-J83, which is SIX against a
+#: published FIVE, and unlike the alerts line it makes no R/W claim. Only
+#: row 82 ("Observe the Easy Apply daily limit") is unambiguously the 1R;
+#: choosing which of the five writes leaves would be my inference, which is
+#: the ground the alerts decline stood on. Reported, not assigned.
+UNASSIGNED_CEILING = 133
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
