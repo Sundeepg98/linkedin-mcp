@@ -49,6 +49,53 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import enumerate_gap_rows as egr  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+#: ROWS A BLOCKER PUBLISHED THAT NOW LIVE SOMEWHERE ELSE, each with the
+#: committed source that moved it. RULED 2026-09-19 after three waves reported
+#: the same defect from three directions.
+#:
+#: THE VERDICT STRING WAS FALSE. "PARTIAL -- N row(s) named by no committed
+#: source" claims nobody can name the row. For these five, a committed source
+#: names the row AND names where it went -- the map simply had no way to say so,
+#: because it compared AT-HEAD membership against AS-PUBLISHED counts and those
+#: are two different questions.
+#:
+#: WHY AT-HEAD MEMBERSHIP AND NOT AS-PUBLISHED. Strict as-published would undo
+#: deliberate re-files: `M C52` was moved to FEED-PREFERENCES on 2026-09-19 on
+#: four measurements, one of which is that the ledger's own supporting quote for
+#: keeping it was a MISQUOTE. A convention that reverses a better-evidenced
+#: later reading is not a convention, it is a ratchet pointing backwards.
+#:
+#: So membership follows the best current evidence, and THIS TABLE carries the
+#: history. A published row is ACCOUNTED if it is held here or listed here.
+#: Anything else is still PARTIAL and still means what it says.
+RE_FILED: dict[str, dict[str, str]] = {
+    "HASHTAG-EXISTENCE": {
+        "N 194": "SEARCH-RESULTS-SURFACE -- the ledger's OWN amendment table "
+                 "(2026-09-03-linkedin-gap-blockers.md:1171-1180) carries an "
+                 "'at HEAD' column and puts it there, quoting the census note "
+                 "'no people search'. The map had been reading that column for "
+                 "this row and the 'as published' column for C 11, out of one "
+                 "table, which is the mixed convention this ruling ends.",
+        "M C52": "FEED-PREFERENCES -- moved 2026-09-19 reversing a "
+                 "LEDGER-AMENDMENT on four measurements, including that the "
+                 "note keeping it here quoted the row as 'follow / unfollow "
+                 "topics/hashtags' while the capability cell contains no "
+                 "occurrence of hashtag. The misquote was doing the work.",
+    },
+    "GROUPS-SURFACE": {
+        "N 161": "SEARCH-RESULTS-SURFACE -- carved by the groups wave's own "
+                 "table 5.4. Direction confirms it: this blocker is short two "
+                 "READS with its write side full at 20/20, and both carved "
+                 "rows are R.",
+        "M C70": "SEARCH-RESULTS-SURFACE -- same table 5.4, same wave, same "
+                 "direction arithmetic.",
+    },
+    "EVENTS-SURFACE": {
+        "N 179": "SEARCH-RESULTS-SURFACE -- conceded by the events wave. "
+                 "Short one READ with 11/11 writes full; the conceded row is R.",
+    },
+}
+
 FROZEN_REF = "1c08e5f"
 EVIDENCE = ROOT / "_audit" / "_census" / "blocker-assignments.tsv"
 MAP_OUT = ROOT / "_audit" / "_census" / "blocker-map.tsv"
@@ -193,8 +240,20 @@ def main(argv: list[str] | None = None) -> int:
             verdict = "COMPLETE -- every published row recovered"
             complete += 1
         else:
-            verdict = f"PARTIAL -- {-d} row(s) named by no committed source"
-            partial += 1
+            moved = RE_FILED.get(b, {})
+            if len(moved) >= -d:
+                where = ', '.join(sorted(moved))
+                verdict = (
+                    f"ACCOUNTED -- {-d} published row(s) re-filed elsewhere on a "
+                    f"committed source ({where}); see RE_FILED"
+                )
+                complete += 1
+            else:
+                verdict = (
+                    f"PARTIAL -- {-d + len(moved)} row(s) neither held nor named "
+                    f"as re-filed by any committed source"
+                )
+                partial += 1
         print(f"  {b:32s} {published[b]:4d} {got:4d} {d:+6d}  {verdict}")
         if d > 0:
             print("     FAIL: the map assigns MORE rows than the ledger published")
