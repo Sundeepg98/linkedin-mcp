@@ -3280,3 +3280,78 @@ two reads, on a page carrying 53 cards. Shown failing besides: a clamping
 `term_for` and an alphabet leak, each with a discrimination case, plus an
 in-suite reorder demo asserting the SPECIFIC harm -- that the same index
 resolves to a different term.
+
+## 18. The anchor reader, 2026-09-19
+
+### 18.1 `linkedin_server/anchors.py` -- route SHAPE, and the hazard class is counted
+
+The fourth and strictest point on section 17's line. `groups.py` takes hrefs
+somebody else read; `menus.py` is handed a label and returns only its own
+literals; `collections_page.py` ships a vocabulary in and gets an index back.
+**This does the same for ROUTES, and the reason it had to is sharper: an anchor
+reader that can see hrefs can see `/in/<slug>`, and a slug is a name.**
+
+Closed alphabet of 13 route classes. `member_profile` is index 0 and is
+COUNTED, NEVER DESCRIBED. `term_for` REFUSES out of range rather than clamping,
+**because a clamp at the low end renames anything into the hazard class.**
+
+### 18.2 THE LAW: A PREDICTED HARM IS NOT A MEASURED ONE, AND MINE WAS BACKWARDS
+
+The segment rule -- a route term must be a whole path segment at a fixed
+position -- is `menus.py`'s `Star Anise` scar generalised. Writing it, I also
+wrote down the harm I expected from the containment version: *a name-bearing
+anchor moves OUT of `member_profile`.*
+
+**Run in a page against the control fixture, it did the reverse:**
+
+    member_profile   1 -> 4       help_article  1 -> 0
+                                  messaging     1 -> 0
+                                  school_page   1 -> 0
+
+`in` is a substring of `linkedin`, `messaging` and `institute`. **Three
+non-member routes were swept INTO the hazard class.** Over-reporting it is not
+the safe direction: it makes the one count a caller must never publish
+per-record wrong by 4x.
+
+**AND THE DEMONSTRATION UNDERSTATED ITS OWN RESULT.** Its branch tested only
+whether the count FELL, and printed *"member_profile held; the harm landed on
+other classes"* -- while the hazard count had quadrupled. **A harm check written
+from the author's model of the risk reads the measurement through that model.**
+Section 14's law one level on: there the probe INPUT came from the author's
+model; here the probe's INTERPRETATION did.
+
+    Practical form: when a mutation demo reports "no harm on the axis I
+    watched", diff EVERY class before believing it. The axis you did not
+    watch is where a prediction that was wrong shows up.
+
+### 18.3 A CONTROL WITHOUT A WRITTEN EXPECTATION CANNOT FAIL
+
+`CONTROL_EXPECTATION` is a dict in the module covering all 13 classes, and the
+probe ABORTS unless the fixture reproduces it exactly. The fixture carries the
+two anchors a containment design gets wrong -- a COMPANY slug containing the
+`school` term, and a MEMBER slug containing the `company` term. **Synthetic and
+deliberately not people**, for the reason `menus.py` uses a spice.
+
+### 18.4 A SINGLE RUN OF A COMPARISON IS NOT A COMPARISON
+
+Interleaved live reads gave, in run 1: premium repeats, collections does not --
+which reads as *the reader is deterministic and the surface is not*. **Run 2,
+minutes later, flipped both.**
+
+> A control proves an instrument CAN speak; only REPETITION proves what it said
+> was stable. That applies to a DISCRIMINATION exactly as it applies to a
+> reading, and a discrimination is the more tempting one to publish because it
+> arrives sounding like a conclusion.
+
+**Where determinism is actually readable: the DETACHED fixture**, which holds
+the input constant and reproduced its expectation on every run. A live repeat
+varies the DOM and the reader together and can separate neither.
+
+### 18.5 Found by reading the stream, not the exit code
+
+`_badge` printed the invitation badge's raw `label`, which came back as a nav
+element's accessible name -- a raw page string, in a wave whose whole subject is
+not marshalling those. It carries no member name today, **and that is a fact
+about what LinkedIn happens to put there rather than a property anything
+enforces**; the navigation taint guard does not cover it, because a badge is not
+navigation-derived. Now counted with a `label_present` flag, not shown.
