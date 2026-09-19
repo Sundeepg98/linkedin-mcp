@@ -144,6 +144,8 @@ Two committed sources now name the SAME fully-qualified id for two different
 blockers. One of them is wrong, or the ledger's bare `C 52` was never `M C52`
 at all.
 
+**CORRECTED BY:** `_audit/2026-09-19-blocker-conflicts.md` -- the dichotomy above is false on both sides: exactly one census slice carries a C 52 at all, so the bare id is unambiguous, and neither source is mistaken, because the row's capability was rewritten from "Follow a hashtag / topic" to feed preferences seventeen hours before A13 was written, so the two sources read different capabilities under one id. Resolved to FEED-PREFERENCES and applied 2026-09-19.
+
 **D. `M 24` / `M 42` -- the source itself flags the uncertainty.**
 `_audit/2026-09-05-decide-retire-rulings.md:114`: "| `MESSAGING-SETTINGS` |
 `M M42` | `M M24`, if the classifier put `M 42` rather than `M 24` in
