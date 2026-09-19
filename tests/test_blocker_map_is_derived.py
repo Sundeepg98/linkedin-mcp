@@ -553,7 +553,24 @@ import build_blocker_map as bbm  # noqa: E402
 #: P O3 "WVYP Premium insights and filters" is the profile slice's name for
 #: what the three network rows enumerate, it is marked R, and the ledger
 #: publishes 4R.
-UNASSIGNED_CEILING = 71
+#: 71 -> 68. PREMIUM-JOBS-SURFACES 3 of 3, EMPTY -> COMPLETE, by the
+#: section enumerator's own discriminator: count match PLUS name match.
+#: jobs.md section H "How you match and Premium job features" holds
+#: exactly three unassigned rows against a blocker published at three, and
+#: the names agree on PREMIUM and JOBS.
+#: Direction is CITED, NOT INFERRED: section 2 records "116-126 ... R"
+#: for the group containing all three, against a published 3R. That
+#: distinction is what the standing ruling requires -- the jobs R/W column
+#: is approved in principle but deferred, and judgement rows are to be
+#: filled EMPTY rather than inferred. Nothing here judges a direction.
+#:
+#: THE FIT DID NOT EXIST AN HOUR AGO. Section H held FOUR unassigned rows
+#: until J 127 left for PREMIUM-READER-NOT-BUILT at 9d4bd59. Four against
+#: three is no fit; three is exact. The evidence for these three never
+#: changed -- the FIELD did. Third cascade of this recovery, after J 112
+#: closing SCHOOL-PAGE-SURFACE and M C12 freeing CELEBRATION-COMPOSER, and
+#: the third argument for running this enumerator to a FIXED POINT.
+UNASSIGNED_CEILING = 68
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
