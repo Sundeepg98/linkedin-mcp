@@ -588,7 +588,24 @@ import build_blocker_map as bbm  # noqa: E402
 #: here and the other stays UNASSIGNED. No denominator moves. The pair is
 #: also INTRA-slice -- both in profile.md -- where that hold covers
 #: CROSS-slice pairs. Filed as a ruling request.
-UNASSIGNED_CEILING = 64
+#: 64 -> 62. PICKER-SURFACES 2 of 2, EMPTY -> COMPLETE, and it exposes a
+#: FOURTH defect in my own enumerators. M16 "Send a GIF" and M17 "Send an
+#: emoji" each give, as their ENTIRE reason, "a picker surface, never
+#: censused" -- the census naming the blocker in the REASON cell. Published
+#: 2 rows, 2W; both rows W; exactly two rows in the corpus give that reason.
+#: A third mentions a picker (C27, "picker + set_input_files") and is
+#: already in FILE-UPLOAD-UNSANCTIONED -- correctly, since its blocker is
+#: the upload, not the picker. The test is whether the picker is the WHOLE
+#: reason.
+#:
+#: THE DEFECT: every matcher built this round reads the CAPABILITY column
+#: and nothing else. "picker" appears nowhere in "Send a GIF", so this
+#: blocker reported "no row shares a token" through every pass while the
+#: census had been naming it in the next column along. Ranges, the slice
+#: letter, source files, and now the wrong COLUMN: four times the corpus
+#: had a shape the search could not see, and four times the fix was
+#: structural rather than a wider search.
+UNASSIGNED_CEILING = 62
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
