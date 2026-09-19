@@ -278,7 +278,30 @@ import build_blocker_map as bbm  # noqa: E402
 #: row 82 ("Observe the Easy Apply daily limit") is unambiguously the 1R;
 #: choosing which of the five writes leaves would be my inference, which is
 #: the ground the alerts decline stood on. Reported, not assigned.
-UNASSIGNED_CEILING = 133
+#: 133 -> 123. NEWSLETTER-SURFACE COMPLETE at 12 of 12 from SHIPPED PACKAGE
+#: CODE -- readonly.py's boundary comment, which is load-bearing for the
+#: entry it documents rather than a retrospective reconstruction. It
+#: enumerates the blocker in three named halves: reader-side 5 (N 55-58,
+#: M C80, as "this blocker's reader-side rows"), author-side 5 (M C50,
+#: C51, C81, C84, P L3, "newsletters he WRITES"), analytics 2 (M C83,
+#: P L4). 5 + 5 + 2 = 12, the published count.
+#:
+#: THE 1R/11W SPLIT IS NOT CONTRADICTED although it reads as if it is:
+#: reader-side is a ROLE (newsletters he reads vs writes), not an operation
+#: class, and unsubscribing from one he reads is still a write.
+#:
+#: THIS OVERTURNS MY OWN RESTRAINT AT 990bbd3 -- "N 55, N 56 and M C80 are
+#: on the sweep's three-way self-conflict list. Adjudicating a three-way
+#: claim is a RULING, not a recovery." That was right then. All three rivals
+#: are now dead by MEASUREMENT: EVENTS-SURFACE and GROUPS-SURFACE each
+#: enumerate their own full row set and name all ten of these rows ZERO
+#: times (measured, whole file, both documents); OWNED-BY-A-SIBLING-SLICE is
+#: COMPLETE at 4 of 4 on rows the ledger names explicitly, N 149 150 151 160.
+#: Neither document rival lost the argument -- neither ever made the claim.
+#: The sweep itself records the claims arising from one A9-adjacent passage
+#: where those names sit near these ids, which is the junk shape the
+#: evidence file's own header warns about.
+UNASSIGNED_CEILING = 123
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
