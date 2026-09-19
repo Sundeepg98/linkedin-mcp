@@ -183,6 +183,40 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # THREE MORE, 2026-09-19, from the premium-apply wave. All citations. The
+    # first refutes MY OWN BRIEF rather than the document it cites, which is
+    # worth keeping: a wave correcting the orchestrator is not a document
+    # correcting a document.
+    ("2026-09-19-premium-apply-surfaces.md", "2026-09-19-routing-the-unassigned.md"): (
+        "THE THING BEING REFUTED IS MY BRIEF, NOT THE CITED DOCUMENT. I "
+        "handed the wave seven candidate rows chosen from their titles, "
+        "warning that a title is not evidence. The wave checked one of "
+        "them, J 150, found the blocker it resembles is COMPLETE at 2 of 2 "
+        "with no room per the routing pass, and wrote that the brief's "
+        "inclusion of it on its title is refuted. The routing pass is the "
+        "source that SUPPLIED the refutation and is not itself corrected. "
+    ),
+    ("2026-09-19-premium-apply-surfaces.md", "2026-09-19-the-three-ruling-requests-ruled.md"): (
+        "IT HONOURS THE RULING AND SAYS SO IN THREE WORDS: Not re- "
+        "litigated. The passage notes that a 1R/4W split would close if J "
+        "82 were the read, records that the filing was made and retracted, "
+        "and then states that Request 4 ruled the ledger's 1R an error and "
+        "closed the door -- quoting the ruling's own sentence that the 1R "
+        "may no longer be cited as evidence in any filing. A wave declining "
+        "to reopen a ruling is the opposite of correcting it. "
+    ),
+    ("2026-09-19-premium-apply-surfaces.md", "jobs.md"): (
+        "THE CENSUS IS THE CORRECT SOURCE, QUOTED TO REFUTE A THIRD "
+        "DOCUMENT. The correction vocabulary belongs to a sentence about "
+        "cheap-reads.md, which the wave measures as a paraphrase wrong on "
+        "two of its three items; jobs.md section H is quoted verbatim as "
+        "the record that settles it, and PREMIUM-JOBS-SURFACES is COMPLETE "
+        "at 3 of 3 on exactly those rows. This is the THIRD time tonight "
+        "the scan has paired a corrector with its EVIDENCE rather than with "
+        "what it corrects -- a property of proximity matching, recorded "
+        "here rather than filed as a defect. "
+    ),
+
     # SEVEN MORE, 2026-09-19, AFTER THE THREE-WAVE CENSUS ROUND, each read in
     # context before declaring. Six are plain citations. The seventh is a
     # passage using the word "correction" about a THIRD document which turns
