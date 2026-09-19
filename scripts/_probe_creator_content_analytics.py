@@ -89,7 +89,25 @@ EXPECTED_VOCAB = (
 )
 
 
-def _relation(landed: str) -> str:
+def _landing_class(landed: str) -> str:
+    """RENAMED FROM ``_relation`` 2026-09-19, and the rename is the point.
+
+    ``_relation`` is a name in ``tests/test_navigation_is_never_derived._SANITISERS``,
+    so the taint engine trusted every call to this function BY SPELLING -- and
+    this is not a copy of that function. It takes ONE argument where the
+    canonical takes two, and returns its own vocabulary. Nothing had measured
+    it.
+
+    **THE RENAME VOUCHES FOR NOTHING, WHICH IS WHY IT WAS AVAILABLE TO DO.**
+    Enrolling the function would ASSERT it is safe -- a claim only its author
+    can make. Renaming WITHDRAWS its claim to be trusted, and requires knowing
+    nothing about its contract. Those are different acts and collapsing them
+    is what left a known-false trust claim standing for hours.
+
+    It IS safe in fact -- every return below is a string constant, measured off
+    the AST rather than read. That measurement is its author's to turn into an
+    enrolment if this name should be trusted again.
+    """
     landed = str(landed or "")
     if "/login" in landed or "/checkpoint" in landed or "/authwall" in landed:
         return "AUTH-WALL"
@@ -123,7 +141,7 @@ async def main() -> int:
         async with BROWSER.session() as opened:
             page = opened
             landed = await BROWSER.goto(page, TARGET)
-            rel = _relation(landed)
+            rel = _landing_class(landed)
             print(f"  landed relation      : {rel}")
             if rel == "AUTH-WALL":
                 print("\n  AUTH WALL. Nothing here is a reading. Stopping.")

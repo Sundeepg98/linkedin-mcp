@@ -69,6 +69,42 @@ because ``exec`` replaces the shell and anything after it never runs::
 
 ``scripts/install_git_hooks.py`` writes exactly that and is idempotent.
 
+AND THE SAME ARGUMENT, APPLIED TO ``tests/`` -- ADDED 2026-09-19.
+
+The hook above was built because I reported a tree having run only what I
+edited. **It then happened again four hours later, and this hook did not fire
+either time, because both instances were ``tests/``.**
+
+    morning  changed a shared structure, ran tests/test_readonly.py's subject,
+             reported the tree; the boundary was red for 22 minutes
+    12:15    changed ``_SANITISERS``, ran the file being edited, reported the
+             tree; a DIFFERENT test file's pin had gone red
+
+    A GUARD SCOPED TO WHERE YOU EXPECTED THE DEFECT IS NOT SCOPED TO WHERE
+    THE DEFECT IS.
+
+So a staged ``tests/*.py`` now runs the staged file **plus every test file
+COUPLED to it**, and the coupling is COMPUTED rather than listed. A hand-written
+pair -- the two files that collided today -- would be the same mistake in a new
+place: correct for the instance that produced it and blind to the next one.
+
+**THE COUPLING RULE:** file B is coupled to staged file A when B names a
+module-level CONSTANT that A defines. That is the shape of both of today's
+misses and of the whole class: a shared structure lives in one file and is
+pinned in another, so editing the structure moves an assertion the editor never
+opened. Whole-word matching, so ``MY_SANITISERS`` does not match
+``_SANITISERS``.
+
+It is deliberately NOT an import graph. These files pin each other by NAME --
+the taint engine matches a sanitiser by its name corpus-wide, and the second pin
+on ``_SANITISERS`` is a literal copy of the set, not an import. An import graph
+would see neither.
+
+**WHAT THIS STILL CANNOT SEE:** a coupling carried by a string, a glob, or a
+structure whose name B never spells. Those exist, and the honest claim for this
+hook is the narrow one -- it catches the constant-sharing class, which is the
+class with two receipts, and it makes no claim beyond it.
+
 BYPASS, when you genuinely need it: ``git commit --no-verify``. Documented
 rather than hidden -- an undocumented bypass gets discovered at the worst
 moment.
@@ -76,20 +112,28 @@ moment.
 
 from __future__ import annotations
 
+import ast
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 PACKAGE = "linkedin_server/"
+TESTS = "tests/"
+#: Above this many coupled files the hook is slow enough to get bypassed.
+#: It still runs ALL of them -- silently narrowing is the defect this file
+#: exists to stop -- and says so, because the repair is a narrower shared
+#: structure, not a narrower check.
+COUPLING_NOISY_AT = 12
 BOUNDARY_TEST = REPO / "tests" / "test_readonly.py"
 #: The interpreter the repo's own scripts use. Absent in a bare clone, which is
 #: an infrastructure case and therefore a FAIL-OPEN.
 PYTHON = REPO / "venv" / "Scripts" / "python.exe"
 
 
-def staged_package_files() -> list[str]:
-    """Package files this commit would write. Reads the INDEX, not the tree."""
+def staged_paths() -> list[str]:
+    """Python files this commit would write. Reads the INDEX, not the tree."""
     proc = subprocess.run(
         ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR"],
         cwd=REPO, capture_output=True, text=True, encoding="utf-8",
@@ -101,32 +145,141 @@ def staged_package_files() -> list[str]:
         return []
     return [
         line.strip() for line in proc.stdout.splitlines()
-        if line.strip().startswith(PACKAGE) and line.strip().endswith(".py")
+        if line.strip().endswith(".py")
     ]
 
 
+def shared_names(path: Path) -> set[str]:
+    """Module-level CONSTANT names defined in a file, off the AST.
+
+    Parsed rather than grepped: an assignment inside a function or a string
+    that happens to contain the name is not a definition, and a regex cannot
+    tell the difference. Unparseable or unreadable returns EMPTY -- this
+    function's failure must never refuse a commit.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, ValueError):
+        return set()
+    names: set[str] = set()
+    for node in tree.body:
+        targets: list[ast.expr] = []
+        if isinstance(node, ast.Assign):
+            targets = list(node.targets)
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+        for target in targets:
+            # ``_SANITISERS``.isupper() is True -- underscores are uncased.
+            if isinstance(target, ast.Name) and target.id.isupper():
+                if len(target.id) > 3:
+                    names.add(target.id)
+    return names
+
+
+def coupled_test_files(staged: list[str]) -> list[str]:
+    """Test files that NAME a module-level constant a staged test defines.
+
+    This is the mechanism, and its whole claim is in the sentence above: the
+    structure lives in one file and is pinned in another, so editing it moves
+    an assertion the editor never opened. Twice in one day.
+    """
+    wanted: set[str] = set()
+    for rel in staged:
+        wanted |= shared_names(REPO / rel)
+    if not wanted:
+        return []
+
+    # A NAME DEFINED IN MORE THAN ONE TEST FILE IS A CONVENTION, NOT A SHARED
+    # STRUCTURE. ``REPO`` and ``SCANNED`` are declared at the top of dozens of
+    # files here; coupling on them drags 31 files in on a single edit, and a
+    # hook that runs the tree is a hook that gets bypassed. Measured: the
+    # filter costs 0.64s over 157 files and takes the same edit from 31 files
+    # to 1 -- the one that actually pins the structure.
+    #
+    # It is a SUBTRACTION rather than a list of names to ignore, so a
+    # convention invented tomorrow is handled without editing this file.
+    elsewhere: set[str] = set()
+    for path in sorted((REPO / "tests").glob("*.py")):
+        if TESTS + path.name in staged:
+            continue
+        elsewhere |= shared_names(path)
+    wanted -= elsewhere
+    if not wanted:
+        return []
+
+    pattern = re.compile(
+        r"\b(" + "|".join(re.escape(n) for n in sorted(wanted)) + r")\b"
+    )
+    out: list[str] = []
+    for path in sorted((REPO / "tests").glob("*.py")):
+        rel = TESTS + path.name
+        if rel in staged:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if pattern.search(text):
+            out.append(rel)
+    return out
+
+
 def main() -> int:
-    staged = staged_package_files()
-    if not staged:
+    staged = staged_paths()
+    package = [name for name in staged if name.startswith(PACKAGE)]
+    tests = [name for name in staged if name.startswith(TESTS)]
+    if not package and not tests:
         # NOT A PASS -- the check did not apply. Silent on purpose: a hook that
         # prints on every unrelated commit trains people to stop reading it.
         return 0
 
     if not PYTHON.exists():
         print(f"pre-commit[boundary]: {PYTHON.name} not found; ALLOWING. "
-              "tests/test_readonly.py still applies -- run it yourself.",
-              file=sys.stderr)
-        return 0
-    if not BOUNDARY_TEST.exists():
-        print("pre-commit[boundary]: tests/test_readonly.py is missing; "
-              "ALLOWING. That absence is itself worth looking at.",
+              "The guards still apply -- run them yourself.",
               file=sys.stderr)
         return 0
 
-    print(f"pre-commit[boundary]: {len(staged)} package file(s) staged; "
-          "running the read-only boundary.", file=sys.stderr)
+    targets: list[str] = []
+    reasons: list[str] = []
+
+    if package:
+        if BOUNDARY_TEST.exists():
+            targets.append("tests/test_readonly.py")
+            reasons.append(
+                f"{len(package)} package file(s) staged "
+                "-> the read-only boundary"
+            )
+        else:
+            print("pre-commit[boundary]: tests/test_readonly.py is missing; "
+                  "not running it. That absence is itself worth looking at.",
+                  file=sys.stderr)
+
+    if tests:
+        coupled = coupled_test_files(tests)
+        targets.extend(tests)
+        targets.extend(coupled)
+        reasons.append(
+            f"{len(tests)} test file(s) staged -> themselves "
+            f"+ {len(coupled)} coupled by a shared constant"
+        )
+        if len(coupled) > COUPLING_NOISY_AT:
+            print(f"pre-commit[boundary]: {len(coupled)} coupled files. "
+                  "Running all of them. If this is slow, narrow the SHARED "
+                  "STRUCTURE -- narrowing the check is the defect this hook "
+                  "exists to stop.", file=sys.stderr)
+
+    # Dedupe, order preserved, and drop anything that has since vanished: a
+    # staged DELETION is filtered out upstream, but a rename race is not.
+    seen: set[str] = set()
+    plan = [name for name in targets
+            if (REPO / name).exists() and not (name in seen or seen.add(name))]
+    if not plan:
+        return 0
+
+    for reason in reasons:
+        print(f"pre-commit[boundary]: {reason}", file=sys.stderr)
     proc = subprocess.run(
-        [str(PYTHON), "-m", "pytest", str(BOUNDARY_TEST),
+        [str(PYTHON), "-m", "pytest", *[str(REPO / name) for name in plan],
          "-q", "-p", "no:randomly", "--tb=line"],
         cwd=REPO, capture_output=True, text=True, encoding="utf-8",
     )
@@ -135,7 +288,7 @@ def main() -> int:
 
     # EXIT CODES ABOVE 1 ARE PYTEST FAILING TO RUN -- a collection error, a
     # missing plugin, an internal error. That is infrastructure, not a red
-    # boundary, and refusing on it is how a hook earns a bypass habit.
+    # guard, and refusing on it is how a hook earns a bypass habit.
     if proc.returncode not in (1,):
         print(f"pre-commit[boundary]: pytest could not run "
               f"(exit {proc.returncode}); ALLOWING. Output follows.",
@@ -144,23 +297,25 @@ def main() -> int:
         return 0
 
     print("", file=sys.stderr)
-    print("COMMIT REFUSED: the read-only boundary is RED and this commit "
-          "touches the package.", file=sys.stderr)
+    print("COMMIT REFUSED: a guard over what this commit touches is RED.",
+          file=sys.stderr)
     print("", file=sys.stderr)
     for line in proc.stdout.splitlines():
         if line.startswith("FAILED") or " failed" in line:
             print("    " + line, file=sys.stderr)
     print("", file=sys.stderr)
-    print("  staged package files:", file=sys.stderr)
-    for name in staged:
+    print("  staged:", file=sys.stderr)
+    for name in package + tests:
+        print("    " + name, file=sys.stderr)
+    print("  ran:", file=sys.stderr)
+    for name in plan:
         print("    " + name, file=sys.stderr)
     print("", file=sys.stderr)
-    print("  This is the project's central safety property. A red boundary at "
-          "HEAD makes", file=sys.stderr)
-    print("  the read-only claim false in the tree, and code lands on top of "
-          "it meanwhile.", file=sys.stderr)
-    print("  Run: ./venv/Scripts/python.exe -m pytest tests/test_readonly.py "
-          "-q --tb=line", file=sys.stderr)
+    print("  A file NOT in the staged list means a shared structure moved an "
+          "assertion", file=sys.stderr)
+    print("  somewhere you did not open. That is the whole reason this runs "
+          "more than", file=sys.stderr)
+    print("  what you edited.", file=sys.stderr)
     print("  Bypass, if you truly mean to: git commit --no-verify",
           file=sys.stderr)
     return 1
