@@ -155,26 +155,104 @@ if (-not (Test-Path $ChromeExe)) {
 # So the moment real Chrome opens the server's persistent profile, that profile
 # is stamped for real Chrome. The attach path is then fine forever, but FALLING
 # BACK to the launch path puts playwright's chromium in front of a profile it
-# considers from the future. Measured on this machine today: the profile reads
-# 151.0.7922.34, playwright's chromium IS 151.0.7922.34, and the installed
-# Chrome is 152.0.7977.77 -- so this is a live skew, not a hypothetical one.
+# considers from the future. Measured on this machine 2026-09-19: the profile
+# reads 153.0.8010.48, the installed Chrome is 153.0.8010.48, and playwright's
+# chromium is 151.0.7922.34 -- a live TWO-major skew, not a hypothetical one.
+#
+# THE WARNING BELOW USED TO MISSTATE THE ONE NUMBER A READER WOULD ACT ON. It
+# interpolated $stamp -- the profile's OLD stamp -- where playwright's version
+# belongs, so on 2026-09-19 it printed "the LAUNCH path (playwright chromium,
+# 152.0.7977.77)" when playwright's chromium was 151.0.7922.34. Now it asks the
+# venv what playwright would actually launch, through the same resolver the
+# runtime gate uses (linkedin_server/profile_version.py), and if it cannot get
+# an answer it says so rather than printing a number it does not have.
 #
 # The fix is a copy taken BEFORE the first attach start, and the rollback step
 # in the runbook restores it. This script does not take that copy itself: a
 # hundreds-of-megabytes silent duplication is not a side effect a "start the
 # browser" command should have.
+
+function Get-PlaywrightChromiumVersion {
+    <#
+        The version of the chromium Playwright WOULD launch, or $null.
+
+        Only python can answer this: four chromium-NNNN directories sit under
+        the browsers path on this machine and picking one here would be a
+        guess. So it asks playwright for the executable path and hands that to
+        the server's own resolver -- one implementation, used by both the
+        runtime gate and this warning. No browser is started; the driver is a
+        node process that opens nothing.
+
+        Returns $null on ANY failure, and every caller must print no number
+        when it does. A wrong version here is worse than a missing one: this
+        warning exists to be acted on.
+
+        The child's stderr is discarded, which is a deliberate trade and not
+        laziness: playwright's driver teardown writes a "Task was destroyed /
+        TargetClosedError" traceback on every single run of this, and a
+        script whose whole job is a clear diagnostic cannot print an
+        unrelated traceback in front of it. Nothing is lost by it -- a
+        genuine failure is already reported, as the absence of a number.
+
+        AND THAT REDIRECT IS WHY $ErrorActionPreference IS SET HERE. Measured
+        2026-09-19: in Windows PowerShell 5.1, redirecting a NATIVE command's
+        stderr wraps each line in an ErrorRecord, so under this script's
+        file-level 'Stop' the first line playwright's teardown wrote became a
+        TERMINATING error and this function returned $null on a machine where
+        it could resolve the version perfectly well. Assigning the preference
+        inside the function scopes it to the function; the try/catch below is
+        this code's real error handling and it does not need the file-level
+        setting to do its job.
+    #>
+    param([string] $Py, [string] $Root)
+
+    $ErrorActionPreference = 'Continue'
+    if (-not (Test-Path $Py)) { return $null }
+    $code = @'
+import sys
+from playwright.sync_api import sync_playwright
+from linkedin_server import profile_version
+driver = sync_playwright().start()
+try:
+    path = str(driver.chromium.executable_path)
+finally:
+    driver.stop()
+sys.stdout.write(profile_version.chromium_version_from_executable(path) or "")
+'@
+    $previous = $env:PYTHONPATH
+    try {
+        $env:PYTHONPATH = $Root
+        $answer = ($code | & $Py - 2>$null | Out-String).Trim()
+    } catch {
+        return $null
+    } finally {
+        $env:PYTHONPATH = $previous
+    }
+    if ($answer -match '^\d+(\.\d+)*$') { return $answer }
+    return $null
+}
+
 $stampFile = Join-Path $ProfileDir "Last Version"
 if (Test-Path $stampFile) {
     $stamp = (Get-Content $stampFile -TotalCount 1).Trim()
     $chromeVersion = (Get-Item $ChromeExe).VersionInfo.ProductVersion
     try {
         if ([version]$stamp -lt [version]$chromeVersion) {
+            $pwVersion = Get-PlaywrightChromiumVersion `
+                -Py (Join-Path $RepoRoot "venv\Scripts\python.exe") -Root $RepoRoot
+            if ($pwVersion) {
+                $launchClause = "playwright chromium, $pwVersion"
+            } else {
+                $launchClause = "playwright chromium, version not resolved here"
+            }
             Write-Warning @"
 This profile is stamped $stamp and Chrome $chromeVersion is about to open it.
 Chrome will migrate it and re-stamp it to $chromeVersion. That is safe going
-forward, but it makes the LAUNCH path (playwright chromium, $stamp) a DOWNGRADE
-for this profile, which is the failure that cost the signed-in session on
-2026-08-25.
+forward, but it makes the LAUNCH path ($launchClause) a DOWNGRADE for this
+profile, which is the failure that cost the signed-in session on 2026-08-25.
+
+The server now REFUSES that launch rather than warning about it -- see
+linkedin_server/profile_version.py. ATTACH mode is the supported path.
 
 If you have not already copied $ProfileDir, stop and do it now -- it is the
 rollback.

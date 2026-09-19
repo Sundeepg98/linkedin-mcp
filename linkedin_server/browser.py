@@ -42,7 +42,11 @@ TWO MODES, and the second is for recovery only:
   the profile lock, ``preflight`` asks Playwright whether a browser
   executable is actually there, so a missing install fails with one
   actionable line naming the resolved path and ``PLAYWRIGHT_BROWSERS_PATH``
-  rather than a raw traceback that has already been misdiagnosed once.
+  rather than a raw traceback that has already been misdiagnosed once. Then
+  ``profile_version`` refuses the launch outright if that chromium is OLDER
+  than the build that last stamped the profile -- Chromium migrates a
+  newer-stamped profile by moving it aside, and the signed-in session is in
+  the part it moves. That used to be a rule written in prose.
 * **ATTACH.** With ``LINKEDIN_CDP_ATTACH=1`` this server launches nothing
   and connects over CDP to a Chrome the operator started himself. It takes no
   profile lock (it owns no profile), it opens its own tab rather than driving
@@ -57,7 +61,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
-from linkedin_server import preflight, profile_lock
+from linkedin_server import preflight, profile_lock, profile_version
 from linkedin_server.session_store import SessionStore
 from linkedin_server.config import (
     CDP_ATTACH,
@@ -197,12 +201,12 @@ class LinkedInBrowser:
 
         headless = _headless()
         try:
-            # Three gates, in this order, and the order is the design.
+            # Four gates, in this order, and the order is the design.
             #
             # FIRST the launch boundary, enforced at runtime and not only in
             # the test suite: a flag added here never reaches Chromium unless
             # it is one the operator sanctioned. It goes first because it is
-            # the only one of the three that is a SECURITY invariant, it
+            # the only one of the four that is a SECURITY invariant, it
             # depends on nothing outside this process, and it must therefore
             # hold identically on a machine with no browser installed at all.
             assert_launch_flags_permitted(LAUNCH_ARGS)
@@ -211,11 +215,23 @@ class LinkedInBrowser:
             # would be reported to the operator as a locked profile, sending
             # him after the wrong problem. See preflight.py for the day this
             # cost a wrong diagnosis and nearly 150 MB onto a full drive.
-            preflight.assert_ready(self._pw, headless=headless)
+            ready = preflight.assert_ready(self._pw, headless=headless)
+            # THEN, would this launch DOWNGRADE the profile? It consumes the
+            # path the gate above just resolved, so it costs no second query,
+            # and it is before the lock for exactly the same reason that one
+            # is: a refusal that had already taken the lock would be reported
+            # to the operator as a LOCKED PROFILE, which is a different
+            # problem with a different fix. See profile_version.py -- until
+            # it existed this rule was prose in three files, and the session
+            # store below is a net under the fall rather than a gate before
+            # it.
+            profile_version.assert_no_downgrade(
+                CHROME_PROFILE, ready.get("resolved_path")
+            )
             # LAST, refuse to launch if another process owns the profile.
             # Raising here is the point -- corrupting the profile costs the
             # operator his session, which is far worse than a failed tool
-            # call -- and it is last because it is the only gate of the three
+            # call -- and it is last because it is the only gate of the four
             # that changes anything on disk.
             profile_lock.acquire()
             self._holds_profile_lock = True
