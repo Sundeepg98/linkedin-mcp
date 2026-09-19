@@ -342,7 +342,32 @@ import build_blocker_map as bbm  # noqa: E402
 #: itself. The assignment I made from the probe comment is right and now has
 #: a second independent source; the REASON I gave for having declined it
 #: earlier was not. Found via a sibling's amendment 5bdebba.
-UNASSIGNED_CEILING = 113
+#: 113 -> 110. THREE ONE-ROW BLOCKERS CLOSE, and the instrument's test is
+#: UNIQUENESS rather than similarity -- the retire-rulings wave's own
+#: deflation is that a singleton's R/W split is a two-bit check, so these
+#: rest on capability text being unique in the corpus. Required a MUTUAL
+#: BEST MATCH: the blocker's best row beats every other unassigned row AND
+#: that row's best blocker beats every other blocker with room. Of THIRTEEN
+#: one-row empty blockers, three survived; ten are reported, not filed.
+#:
+#:   POST-DRAFT-SURFACE     M C12  "Save a post as a draft"   W vs 1W
+#:   PROFILE-PDF-DOWNLOAD   P C8   "Save profile as a PDF"    R vs 1R
+#:   AUDIO-EVENTS-EXISTENCE P L6   "Audio events"             W vs 1W
+#:
+#: M C12 scores 1.00 -- it covers every token of its blocker's name.
+#:
+#: P C8 IS THE AMBIGUOUS-ID TRAP ITSELF: there are two C8 rows, M C8
+#: ("Create a poll", W) and P C8 ("Save profile as a PDF", R). The
+#: matcher takes the slice letter from the FILE, and the split settles it
+#: independently -- a 1R blocker cannot hold the poll write.
+#:
+#: P L6's only rival is measured out, not out-argued: EVENTS-SURFACE scores
+#: on the shared token "events" and has room 1, but its row set is
+#: enumerated in full by its own document, which names L6 zero times and
+#: contains "audio" zero times. And L6 is the row REFUSED from
+#: CREATOR-HUB-SURFACE at f461e9c for being a W against 4R -- the same
+#: split that excluded it there admits it here.
+UNASSIGNED_CEILING = 110
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
