@@ -487,3 +487,41 @@ tail's status. **The artifact was verified instead of the exit code and the
 discrepancy was visible immediately**, which is the standing rule in this repo
 doing exactly the job it was written for. Anyone reading an exit code from a
 chain in this session should assume it belongs to the last command in it.
+
+---
+
+## 12. THE RE-CERTIFIED NUMBER, AND A CLAIM IN THIS DOCUMENT THAT EXPIRED
+
+**Measured on a detached worktree at `eed87a5` -- the commit that carries this
+document -- so the corpus the guards scan includes it:**
+
+    WINDOW      16:34:39 - 16:50:34 by the box, 955.82s (15:55)
+    RESULT      1 failed, 5643 passed, 11 skipped, 1 xfailed
+    CAPTURE     FAILED lines counted: 1    summary line: 1    -- complete
+    THE ONE     test_a_click_that_does_commit_reaches_the_body_and_the_send
+
+**The gate reads the same with this document in the tree as without it**, which
+is what section 10 said had to be checked rather than assumed. The passed count
+moves 5641 -> 5643 because a neighbour's commit landed between the two runs and
+added two marker pairs the correction guard now checks.
+
+### AND THAT NEIGHBOUR MEANS THE HEADER OF THIS FILE HAS EXPIRED
+
+This document opens *"Sole writer, and that was measured at 15:30."* **That was
+true at 15:30 and it is no longer true of the wave.** `806360a` landed at
+16:17:40 -- another writer, correcting two of its own rulings.
+
+**It is left standing rather than edited, because the timestamp is what makes
+it honest and a claim with a timestamp is not wrong when the world moves.** The
+correction belongs here, where a reader reaches it after the claim:
+
+    measured 15:30   sole writer -- true, and the basis for running the suite
+    806360a 16:17:40 a second writer committed
+    measured 16:51   HEAD unmoved since eed87a5; no index lock; no git processes
+
+**The collision was checked rather than hoped over.** That commit touched four
+audit documents, one of which this wave had triaged. It declared corrections in
+the OPPOSITE direction to the triaged pair -- a different key -- so nothing
+collided, and the guard was re-run to confirm it rather than the diff read and
+pronounced safe. **Both certifying runs were taken on detached worktrees pinned
+to a SHA, which is why a second writer could not contaminate either number.**
