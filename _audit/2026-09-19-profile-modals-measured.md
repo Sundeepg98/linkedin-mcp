@@ -301,3 +301,88 @@ establish is precisely the one that decides whether opening it is free.
 the same shape the prior wave found for blocker 20, reached by a different
 route and with a much smaller residual unknown: one press, on a control now
 known to be wired, whose handler nobody has named.
+
+---
+
+# AMENDMENT B — the cross-slice split generalises, and one case is adjudicable against code
+
+Section 1.1 found six Open-To-Work capabilities filed in two slices in opposite
+states. The obvious next question is whether that is a one-off. It is not.
+
+## B1. The sweep, and its precision stated before its count
+
+A lexical sweep over all four census slices — normalise the capability text,
+score every cross-slice pair by sequence similarity plus shared distinctive
+tokens — returns **233 candidate pairs whose two rows are in different states**.
+
+**233 IS A CANDIDATE COUNT AND MUST NOT BE READ AS A FINDING COUNT.** The top
+15 different-state candidates were hand-inspected in their section context:
+**7 are plausibly the same capability and 8 are not** — mostly "send X to a
+1st-degree connection" collisions, where message, recommendation, endorsement
+and removal share the phrase and are four different capabilities. So roughly
+half of the head is noise, and the true population is unknown rather than
+"about 116".
+
+Calibration and its bugs, recorded because they decide whether the recall
+figure means anything: the six confirmed pairs are all recovered, but only
+after two real defects were found and fixed —
+
+* a corpus-frequency stopword cutoff at 6% stripped `job` as filler, which
+  broke the very pair the sweep was calibrated on;
+* **`difflib.SequenceMatcher.ratio()` is not symmetric.** The same two strings
+  scored 0.533 and 0.667 depending on argument order, and the loop fixed the
+  order alphabetically, so one direction of every comparison was being silently
+  penalised.
+
+What the method cannot see, stated: true paraphrases sharing no vocabulary; the
+collapsed blocks (`profile.md` states 15 and 45 capabilities as single rows),
+which dilute against any single matching row; and a capability that is a row in
+one slice and prose in another. It is lexical, not semantic.
+
+## B2. The InMail balance — THREE slices, two states, and the code settles it
+
+| slice | row | capability | state |
+|---|---|---|---|
+| `jobs.md` | 127 | Read the InMail credit balance | **GAP** |
+| `messaging-and-content.md` | M4 | View available InMail credit balance | **EXCLUDED-RULED** |
+| `network.md` | 157 | View your available InMail credits | **EXCLUDED-RULED** |
+
+**This one does not need adjudicating by argument, because the two rows disagree
+about a FACT and the fact is checkable.**
+
+* `M4` says `readonly.py` *admits* `/premium/my-premium/` for exactly this, and
+  the page carries no balance.
+* `jobs.md 127` says *"the boundary entry and reader are **NOT built**"*.
+
+Put to the shipped predicate at this tree:
+
+    is_read_url("https://www.linkedin.com/premium/my-premium/")   True
+    is_read_url("https://www.linkedin.com/premium/my-premium")    True
+
+**The boundary entry EXISTS.** `M4`'s account matches the code; `jobs.md 127` is
+GAP on the strength of a claim its own package refutes.
+
+And the jobs row contradicts itself in its own slice: its collapsed-block entry
+reads *"`/premium/my-premium/` is already ruled admitted as a census key; the
+boundary entry and the reader were deliberately not built."* **Admitted as a
+census key and the boundary entry not built cannot both be true** — a census key
+must be admitted by the read boundary before the census can load it, which is
+what the two `True`s above are.
+
+**The defensible reading is that the row's evidence conflates two things**: the
+BOUNDARY ENTRY, which is built and measured here, and the READER for the
+balance, which may genuinely not be. Only the second can still be blocking, and
+"the boundary entry is not built" is false today whatever its status was when
+written.
+
+## B3. I am flipping nothing, and the reason is the same as in section 1.1
+
+Three rows across three slices, two of which I did not measure and none of which
+is mine. Removing a capability on an inference is the undercount the recovery
+pass exists to fix. What is owed is a ruling by whoever owns those slices, and
+they now start from a predicate reading rather than from two prose claims that
+disagree.
+
+The candidate list is at `_audit/_scratch/_cross-slice-duplicates.md` with the
+script beside it, both untracked. **Do not paste that list anywhere as findings:
+half of its head is noise and it says so.**
