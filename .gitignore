@@ -154,3 +154,25 @@ auth_state*.json
 # ignored unconditionally, it contradicts nothing, and a slice that lands here
 # cannot be swept into a commit by accident.
 _audit/_scratch/
+
+# PLAYWRIGHT'S DOWNLOADED BROWSERS, AND THIS LINE IS WHY CI WAS RED FOR 14 DAYS.
+#
+# .github/workflows/ci.yml sets PLAYWRIGHT_BROWSERS_PATH to
+# ${{ github.workspace }}/.pw-browsers -- INSIDE the repo, because the cache
+# step at its `path: .pw-browsers` needs it there. Nothing ignored it, and
+# tests/test_no_committed_identity.py's sweepable() is "tracked +
+# untracked-not-ignored", so every CI run swept a 100 MB Chromium binary and
+# found byte sequences in it that look like email addresses and drive roots:
+#
+#   .pw-browsers/.../chrome: 9 unallowed drive root hit(s), 0 declared
+#   .pw-browsers/.../chrome_crashpad_handler: 2 unallowed email hit(s)
+#
+# TWO INDEPENDENT REASONS IT GOT THROUGH, and fixing either alone would have
+# left the other: it was not ignored, AND the BINARY_SUFFIXES filter cannot
+# reach it because a Linux executable named `chrome` HAS NO SUFFIX.
+#
+# THIS DOES NOT WEAKEN THE GUARD. sweepable()'s own docstring names .gitignore
+# as the mechanism that "still keeps _state/, caches and build output out", and
+# a downloaded browser is build output by any reading. Nothing under this path
+# is ours; the guard's subject is what we are about to commit.
+.pw-browsers/
