@@ -168,7 +168,21 @@ import build_blocker_map as bbm  # noqa: E402
 #: method found THIRTEEN candidates for ELEVEN slots, so that set does NOT close
 #: by elimination and its lines say so. Here it does, and the difference is
 #: measured rather than assumed.
-UNASSIGNED_CEILING = 217
+#: 217 -> 207. SERVICES-PAGE-SURFACE at 11 of 11, ABSENT -> COMPLETE. Same
+#: structural enumerator; the discriminator is that the section NAME and the
+#: blocker NAME agree, which is what separates a real match from the 26 other
+#: size coincidences the sweep produced.
+#:
+#: Count AND R/W close: section H is 1R + 10W, the ledger publishes 1R/10W, and
+#: two sources state the split in prose ("TEN WRITES GATED, UNFIRED"; "11 rows
+#: as filed and 10 as ruled: 1R + 9W" -- arithmetic that only works if the
+#: ruled-out row is one of the W, which P H9 is).
+#:
+#: THE SWEEP'S CONTESTS ON H1/H2/H10/H11 DISSOLVE ON PUBLISHED COUNTS, not on
+#: preference: INVITE-NOTE-PARAM publishes ONE row and is claimed against four;
+#: HASHTAG-EXISTENCE publishes three and A13 already named all three, none a
+#: profile row, so it can hold zero.
+UNASSIGNED_CEILING = 207
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
