@@ -25,6 +25,19 @@ Arrival reading, taken by me before any edit, `262bab6`:
     ledger blockers parsed              97  rows 409
 
 **It matched the brief exactly**, so nothing here works from a different tree.
+
+**TWO CORRECTIONS TO THE BRIEF, RECORDED BECAUSE ONE OF THEM COULD HAVE COST A
+SEARCH AND DID NOT.** (1) The brief said an unassigned row shows as an EMPTY
+column 2; it does not, it carries the literal `UNASSIGNED`, and a filter on
+emptiness returns nothing SILENTLY. I used `$2=="UNASSIGNED"` from my first
+extraction, so the pool I worked was the right 24. (2) The brief framed the
+partial shortfall (16) plus the absent blockers' rows (8) as *"the same 24 rows
+viewed two ways"*, and a later correction called the match a coincidence.
+**Neither is right, and section 5 shows why: the two totals are an IDENTITY,
+forced equal by the builder's own assertions -- while the MATCHING between holes
+and rows genuinely fails.** The correction's substance is right and its
+arithmetic is not, and the distinction is load-bearing: it is precisely because
+the totals must balance that they can never report the mismatch.
 (The worktree carries no `venv/` -- it is gitignored -- so the interpreter used
 throughout is the main checkout's `venv/Scripts/python.exe` running the
 worktree's own copy of each script, which resolves `ROOT` from `__file__` and
@@ -478,6 +491,60 @@ manufacture exactly the guesses this map exists to keep out.
 
 ---
 
+## 5A. THE TOTALS ARE AN IDENTITY; THE MATCHING IS NOT. THE SPLIT IS WHAT SEES IT.
+
+**Two things are being conflated whenever the 24 is discussed, and separating
+them is the whole use of section 5.**
+
+* **THE TOTALS** -- holes vs unassigned rows. **Forced equal, always** (section
+  5). This tells you nothing and can never tell you anything.
+* **THE MATCHING** -- whether a valid assignment exists that fills every hole.
+  **It does not**, and sections 1-4 name fifteen reasons why not. Some published
+  slots have no row in the corpus; some rows in the pool belong to families whose
+  blocker is already COMPLETE without them.
+
+**THE IDENTITY IS EXACTLY WHAT HIDES THE MISMATCH.** A quantity that must
+balance cannot report an imbalance. So the aggregate is not a weak signal here
+-- it is a guaranteed-silent one, and any future pass that watches it will watch
+it stay at zero while the matching fails underneath.
+
+### What DOES see it: the published R/W split, which nothing checks
+
+**The builder asserts on COUNTS and never on the SPLIT**, although the ledger
+publishes a split for 88 of the 97 blockers and it was my primary discriminator
+all session. That gap is not theoretical. I measured it across all 97:
+
+    blockers with a published split                               88
+    blockers OVER on some direction                                2
+    blockers SKIPPED, a held row's direction unreadable           19
+
+    OVER on R   NEWSLETTER-SURFACE        published R1  W11   held R3  W9
+    OVER on R   SEARCH-RESULTS-SURFACE    published R19 W2    held R20 W1
+
+**Both are COMPLETE on their counts, so the shipped assertion sees nothing.**
+A third, `COMPANY-PAGE-SURFACE` at **14R held against 13R published**, is among
+the NINETEEN SKIPPED, and the limitation is stated rather than hidden: `jobs.md`
+keys direction by RANGE (`106-114`) and not by row id, so no `J` row's direction
+is readable and any blocker holding one is skipped. I established that case by
+hand in section 4; it is already an open ruling request. **Nineteen skipped
+against 88 is the honest size of this instrument's blind spot, and closing it
+means giving `jobs.md` a per-row direction column, not patching the reader.**
+
+**AND ALL THREE TRACE TO SECTION 1's MECHANISM.** A re-file is count-neutral
+across the pair of blockers, so the count assertion is structurally blind to it
+-- but it MOVES THE SPLIT, and `SEARCH-RESULTS-SURFACE`'s own assignment note
+concedes this in writing: *"the split is not claimed for the post-freeze set ...
+That is what a re-file does."*
+
+**PROPOSED INSTRUMENT, and it arrives already shown failing** -- three named
+blockers, three named rows, on today's tree. It must ship as a REPORT first, not
+as an assertion: two of the three violations are documented and deliberate, so a
+red gate would fail CI on work that was ruled correct. The right shape is a
+printed `split delta` column beside the existing count delta, and a rule that a
+NEW over-run must be argued. **Ruling request D.**
+
+---
+
 ## 6. RULING REQUESTS THIS PASS RAISES
 
 **A. DECLARE THE MAP'S CONVENTION: as-published, or at-head?** It currently
@@ -496,6 +563,24 @@ Left in place pending A, because A decides it.
 evidence offered for reopening (L498) mislabels the direction of three of its own
 eleven members, including both rows at issue. Recorded so the request is not
 re-raised a third time on the same cell.
+
+**D. CHECK THE PUBLISHED SPLIT, AS A REPORT.** Section 5A: three blockers hold
+more rows of a direction than the ledger published, all three invisible to the
+count assertion, and the split is the only thing that can see a re-file. Report
+first, assert later -- two of the three are deliberate.
+
+**E. TWO OF MY THIRTEEN LOOK LIKE LEDGER OVER-COUNTS RATHER THAN LOST ROWS, AND
+I AM NOT RULING IT.** `CREATOR-HUB-SURFACE` (4R published, 3 held) and
+`POST-COMMENT-CONTROLS` (1R/3W published, 3 held) are my class B: in both, the
+census family the blocker is named for is **exhausted with every member homed**
+-- profile section L, 8 frozen rows, all filed; the comment surface, 9 rows, all
+filed -- and **no unassigned row in the whole pool is a member of either
+family.** That is the shape of *"the ledger published a count the corpus never
+supported."* It is also the shape of *"the fourth row sits inside a COMPLETE
+neighbour and one of those neighbours is over-published"*, and I cannot
+distinguish the two from where I stand. **Naming which is a ruling, not a
+search**, and the thing that would decide it is request D: if a neighbour is
+over-published, its split will say so.
 
 ---
 
