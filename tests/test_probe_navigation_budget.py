@@ -111,29 +111,31 @@ GUARD_CALLS = frozenset({"assert_read_url", "is_read_url"})
 #: Hand-guarding is a FIX and not a declaration: ``assert_read_url`` is lifted
 #: out of the door and called in the same position in the sequence, so the
 #: boundary holds and the measurement is untouched.
-KNOWN_UNGUARDED: dict[str, str] = {
-    # THE ONE GENUINE DECLARATION, and it is the case the rule was written for.
-    #
-    # This probe exists to discover WHICH ``?stage=`` value the jobs tracker
-    # actually renders, by trying five candidates in order and keeping the
-    # first that returns rows: draft, in-progress, inprogress, in_review,
-    # applied. Measured against the boundary today, the allowlist admits
-    # ``?stage=draft`` and ``?stage=applied`` and REFUSES ``in-progress``,
-    # ``inprogress``, ``in_review`` and the bare ``/jobs-tracker/``.
-    #
-    # **SO NEITHER ROUTING NOR HAND-GUARDING IS AVAILABLE HERE**: both call the
-    # same check, and both would raise on three of the five candidates, ending
-    # the sweep partway through the question it exists to answer. A probe that
-    # can only try the values already known to be admitted cannot discover
-    # which value is real.
-    #
-    # That is what "a probe legitimately navigates where the package must not"
-    # means concretely, and it is why the remedy is a declaration rather than a
-    # fix. Corroborated independently by ``_probe_apply_flow``'s own docstring,
-    # which records the same experiment: only ``draft`` renders the rows, and
-    # the other spellings redirect to a bare tracker with no counts.
-    "_probe_in_progress.py": "c0b8bb4",
-}
+#: **EMPTY, AND EVERY ENTRY LEFT BY BEING FIXED.** That is the property the
+#: inverse-exemption design depends on: a table that shrinks by declaration
+#: becomes an exemption list wearing a record's name.
+#:
+#: The last entry was ``_probe_in_progress``, and it was the one case where
+#: neither routing nor hand-guarding was available: it tried five ``?stage=``
+#: tokens to discover which renders rows, and the allowlist admits two of them
+#: and refuses three, so any check would have raised partway through its own
+#: question.
+#:
+#: **RULED 2026-09-19** (``_audit/2026-09-19-two-census-conventions-ruled.md``
+#: section 4): **a discovery probe may not navigate to a refused address, even
+#: to find out whether it should be admitted.** The tension is real -- a probe
+#: that can only try admitted values cannot discover which value is real -- and
+#: that is the argument for ADMITTING the three addresses, not for navigating
+#: without the check. Every bypass in this repository's history was taken for a
+#: reason that sounded like that one.
+#:
+#: So it was CONSTRAINED to the two admitted tokens and routed through the
+#: guarded door, with the three refused ones named in its own
+#: ``UNMEASURED_STAGES`` and printed at the end of every run. **A probe that
+#: reports which values were never tried, and why, is worth more than one that
+#: tried them without permission**, and the discovery question stays open for
+#: an admit-and-measure wave with a revert path.
+KNOWN_UNGUARDED: dict[str, str] = {}
 
 
 def _enclosing(tree: ast.AST, lineno: int):
@@ -289,12 +291,44 @@ def test_the_measurement_exemplar_proves_the_distinction_discriminates():
     )
 
 
+def test_the_record_is_empty_and_that_is_a_claim_rather_than_an_absence():
+    """EVERY ENTRY LEFT BY BEING FIXED, and this asserts the end state.
+
+    **WITHOUT THIS, THE TABLE BEING EMPTY WOULD BE INVISIBLE.** The test below
+    iterates ``KNOWN_UNGUARDED`` and is therefore VACUOUS while it is empty --
+    it passes over nothing and certifies nothing, which is the shape this
+    repository calls a guard that scans nothing and passes forever. So the
+    emptiness is asserted directly, where it reads as a claim.
+
+    Adding an entry turns this red ON PURPOSE. A recorded unguarded navigation
+    should cost a deliberate edit here plus an argument, because the ONLY
+    reason the record is trustworthy is that entries leave it by being fixed.
+    If a genuine case appears -- a probe whose measurement no admitted address
+    can answer -- it gets recorded and this assertion gets a named exception
+    with its ruling, not a quiet bump.
+    """
+    assert KNOWN_UNGUARDED == {}, (
+        f"unguarded navigations are recorded again: {sorted(KNOWN_UNGUARDED)}. "
+        "That may be right -- but a record is the LAST resort, after routing "
+        "through BROWSER.goto and after hand-guarding with assert_read_url, "
+        "and after checking the probe is not simply navigating to an address "
+        "that should be admitted instead. The disclosing-press round ruled "
+        "that a discovery probe may not navigate to a refused address even to "
+        "find out whether it should be admitted."
+    )
+
+
 def test_every_recorded_site_takes_content_and_that_is_the_actual_risk():
     """The other side of the same distinction, asserted so it stays true.
 
-    All eight recorded sites harvest the document. If one is ever rewritten to
-    report only a relation -- the landed address, a count -- it has become a
-    measurement and should be re-argued rather than left in a table of routes.
+    **VACUOUS WHILE ``KNOWN_UNGUARDED`` IS EMPTY**, which it is -- said out
+    loud because a vacuous test reads exactly like a passing one. The test
+    above is what carries the claim today; this one arms itself the moment an
+    entry appears.
+
+    When it does apply: a recorded site rewritten to report only a relation --
+    the landed address, a count -- has become a MEASUREMENT and should be
+    re-argued rather than left in a table of routes.
     """
     takers = {
         name for name in KNOWN_UNGUARDED
