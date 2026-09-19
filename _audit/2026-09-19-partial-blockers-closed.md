@@ -584,6 +584,30 @@ over-published, its split will say so.
 
 ---
 
+## 7. METHOD NOTE: A HAZARD NOW SEEN AT A SECOND SITE
+
+An exhaustive sweep of the corpus for row-id ENUMERATION LINES (all 147 tracked
+`.md` files, run as a closed-form slice and reviewed here) reproduced every
+enumeration this pass leaned on and added none that changes a verdict. It did
+independently re-find a trap that `_audit/2026-09-19-the-empty-blockers.md` s4
+recorded once:
+
+> **BLOCKER RANKS AND CENSUS ROW IDS SHARE A NUMBER SPACE.** The empty-blockers
+> wave was nearly taken in by *"ROW 57 MESSAGE-ADDRESSING"*, where 57 is the
+> blocker's LEDGER INDEX. The sweep found a second, worse instance: the ledger's
+> own L1571 reads **"Blockers 72, 78, 79, 80, 85, 86 and 87 are each charged
+> `allowlist +1`"** -- which collides numerically with the `J 78`-`J 83` range
+> that `PREMIUM-APPLY-SURFACES` and `ACCOUNT-VERIFICATION` both contest, and with
+> `J 85`/`J 86`, contested between `COMPANY-PAGE-SURFACE` and
+> `JOBCARD-OVERFLOW-MENU`. A bare-number grep over the ledger lands on it.
+
+**One instance is an anecdote; two make it a rule.** Any sweep of this corpus for
+bare row numbers must require a slice letter or a corroborating context token,
+and must print what it MATCHED rather than only what it did not -- which is this
+project's own standing lesson about refusals, pointed at its own searches.
+
+---
+
 ## WHAT THIS DOES NOT CLAIM
 
 Locating a row measures nothing and unblocks nothing. `THREAD-REPLY-BOX` is
