@@ -182,6 +182,21 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("network.md", "2026-09-19-the-disclosing-press-ruling.md"): (
+        "the cited document is the GRANTING AUTHORITY and the row is applying "
+        "it, not overturning it. N 133 and N 134 cite the disclosing-press "
+        "ruling to record that they are now blocked on the MECHANISM rather "
+        "than on a ruling. MEASURED which line carries the vocabulary, "
+        "because assuming it would have produced a wrong reason twice today: "
+        "the words are on lines 436 and 437, the SAME rows that carry the "
+        "citation, and they belong to a sentence about an ANALYTICS WAVE "
+        "correcting ITSELF -- its section 1 reported the page carries no such "
+        "controls and its section 11 measured that false. That self-correction "
+        "predates the ruling by a fortnight and has nothing to do with it. A "
+        "CORRECTED BY: pointer in the ruling would tell a reader that the "
+        "document granting the permission had itself been refuted by a row "
+        "obeying it"
+    ),
     ("messaging-and-content.md", "2026-09-05-groups-surface-measured.md"): (
         "the cited document is the MEASURING SOURCE and the row AGREES with "
         "it. C61 (join a group) was re-costed from MEASURE to DECIDE on that "
