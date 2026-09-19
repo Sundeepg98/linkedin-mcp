@@ -212,8 +212,8 @@ verdict from a fire, and applies it to three actions -- giving `unsave_job`
 **NO. NEVER FIRED.** Rows 103 and 104 are the same error, two hundred rows later
 in the same file, on the two actions that section did not cover.
 
-**CORRECTED HERE: 103 and 104 move CP -> CU**, which is what `network.md` rows
-46 and 48 have held all along. The two slices now agree.
+**CORRECTED HERE: 103 and 104 move CP -> CU**, which is what the NETWORK census
+slice has held all along in its rows 46 and 48. The two slices now agree.
 
     jobs.md state counts       CP 21 -> 19        CU 7 -> 9
 
