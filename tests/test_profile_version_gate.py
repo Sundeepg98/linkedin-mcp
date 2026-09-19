@@ -327,6 +327,43 @@ def test_the_browsers_json_fallback_maps_a_revision_to_a_version(
     )
 
 
+def test_the_headless_shell_carries_the_same_version_as_the_headful_binary():
+    """The assumption a HEADLESS launch rests on, turned into a check.
+
+    Playwright publishes ONE executable path and it is the headful binary; a
+    headless launch uses a separate ``chrome-headless-shell`` whose path the
+    Python API does not expose -- ``preflight``'s docstring records measuring
+    exactly that. So in headless mode this gate reads the version of a binary
+    that is NOT the one about to run, and it is right only because playwright
+    rolls the two together at one revision and one version.
+
+    That is an assumption about somebody else's release process, which is the
+    kind that stops being true silently. Asserted here against the installed
+    package's own manifest, so a playwright that ever decouples them turns
+    this red instead of quietly making the gate read the wrong binary.
+
+    Not pinned to a number: what is asserted is that the two AGREE, whatever
+    they are.
+    """
+    playwright = pytest.importorskip("playwright")
+    manifest = Path(playwright.__file__).resolve().parent.joinpath(
+        "driver", "package", "browsers.json"
+    )
+    if not manifest.is_file():  # pragma: no cover - a layout without it
+        pytest.skip("this playwright ships no browsers.json")
+
+    versions = {
+        entry["name"]: (entry.get("revision"), entry.get("browserVersion"))
+        for entry in json.loads(manifest.read_text(encoding="utf-8"))["browsers"]
+        if entry.get("name") in {"chromium", "chromium-headless-shell"}
+    }
+    assert set(versions) == {"chromium", "chromium-headless-shell"}
+    assert versions["chromium"] == versions["chromium-headless-shell"], (
+        "playwright has decoupled the headless shell from chromium; in "
+        "headless mode this gate now reads the wrong binary's version"
+    )
+
+
 def test_the_shipped_playwright_reports_a_parseable_version():
     """The resolver answers for the playwright THIS repo has installed.
 
