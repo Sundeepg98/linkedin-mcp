@@ -182,6 +182,32 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("jobs.md", "2026-08-31-linkedin-perform.md"): (
+        "the cited document was RIGHT WHEN WRITTEN and is not corrected by "
+        "this row -- MEASURED, not argued. J 127 quoted it for 'the boundary "
+        "entry and reader are NOT built'. readonly.is_read_url on that "
+        "address returns True today, but the allowlist entry landed in "
+        "f80526e on 2026-09-01, the day AFTER that document is dated. So the "
+        "document reported the tree it saw and nothing in it is wrong. What "
+        "expired is THIS ROW's inheritance of a dated reading, and the row "
+        "now says so in those terms. A CORRECTED BY: pointer in the perform "
+        "document would tell a reader it had been refuted, when what actually "
+        "happened is that a condition it correctly reported changed a day "
+        "later -- the relayed-measurements-go-stale law with a census row as "
+        "the receiver"
+    ),
+    ("jobs.md", "messaging-and-content.md"): (
+        "the cited slice is the CORROBORATING SOURCE and this row agrees with "
+        "it. J 127 and M4 are the same capability -- the InMail credit "
+        "balance -- in two slices, and M4 already records the measurement "
+        "that settles both: the admitted page carries no balance. J 127 cites "
+        "M4 to adopt that finding, not to overturn it. The correction "
+        "vocabulary in the cell belongs to this row correcting ITSELF (it was "
+        "GAP on an expired premise) and to a note REPORTING, deliberately "
+        "without changing, that M4 carries the same measurement under a "
+        "different state name. Both rows are out of GAP so no count moves; "
+        "flagging a duplicate is not refuting it"
+    ),
     ("profile.md", "2026-09-19-settings-tail-addresses.md"): (
         "the citation is CORROBORATION and the cited document is not asserted "
         "wrong. Census row P B10 was flipped GAP -> EXCLUDED-RULED under "
