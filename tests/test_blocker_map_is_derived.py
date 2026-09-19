@@ -321,7 +321,28 @@ import build_blocker_map as bbm  # noqa: E402
 #: compound L2 on 2026-09-04, the day AFTER the freeze. If the published 4R
 #: counted the compound row, this under-count is an artifact of a split that
 #: postdates the count, and no map edit can reach it.
-UNASSIGNED_CEILING = 120
+#: 120 -> 113. COMPANY-PAGE-SURFACE to 8 of 18 on a SIBLING argument, not a
+#: name match: J 107 ("Company Page Jobs tab") is already filed to this
+#: blocker from routes-already-admitted.md's "filed as" column, and the
+#: seven added are its immediate siblings in the same census run, each
+#: spelled "Company Page <x> tab" in the capability column. jobs.md
+#: section 2 groups the whole run as one shape and marks it R, against a
+#: blocker published 13R/5W.
+#:
+#: J 112 IS LEFT OUT DELIBERATELY -- "School Page Alumni tab", the one row
+#: in the run that is not a Company Page. SCHOOL-PAGE-SURFACE is its own
+#: published blocker and is empty. The group's own title says "company AND
+#: school", so the group is a SHAPE, not a blocker.
+#:
+#: AND THIS RECORDS A CORRECTION TO MY OWN COMMIT c1a2a46, which said
+#: "jobs.md CARRIES NO R/W COLUMN" as the ground for declining
+#: JOB-ALERTS-SURFACE. That was true of section 1's table and WRONG about
+#: the file: section 2 carries R/W, and its grouping row reads
+#: "31-36, 41 | all alert writes" -- the exact seven, named by the census
+#: itself. The assignment I made from the probe comment is right and now has
+#: a second independent source; the REASON I gave for having declined it
+#: earlier was not. Found via a sibling's amendment 5bdebba.
+UNASSIGNED_CEILING = 113
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
