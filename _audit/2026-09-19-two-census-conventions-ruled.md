@@ -313,3 +313,89 @@ Two wrong instruments in one hour on one question, both the lead's, each caught
 by a wave. The standing form of this is already in the repo -- parse, do not
 grep -- and the missing half is: **parsing is not enough if the parse is
 asymmetric across the corpus.**
+
+
+---
+
+## 4. A DISCOVERY PROBE MAY NOT NAVIGATE TO A REFUSED ADDRESS, EVEN TO FIND OUT
+##    WHETHER IT SHOULD BE ADMITTED
+
+Added 2026-09-19 11:25, on the one case `messaging-measure` could close neither
+by routing nor by hand-guarding.
+
+### The measurement
+
+`_probe_in_progress` tries five `?stage=` values to discover which one renders
+rows. Measured against the shipped predicate:
+
+    draft         ADMITTED        in-progress    REFUSED
+    applied       ADMITTED        inprogress     REFUSED
+                                  in_review      REFUSED
+                                  /jobs-tracker/ REFUSED
+
+**Neither routing nor hand-guarding is available: both call the same check and
+both raise on three of five.** The wave stated the tension exactly:
+
+> **A probe that can only try values already known to be admitted cannot
+> discover which value is real.**
+
+That is true, and it is the argument for admitting the addresses -- not the
+argument for navigating without the check.
+
+### RULED: THE CHECK STANDS. THE PROBE MUST NOT TRY REFUSED VALUES.
+
+**The allowlist is the boundary, and a measurement is not an exemption from
+it.** Every bypass in this repo's history was taken for a reason that sounded
+like this one. If the reason is good, it is good enough to admit the address
+properly -- and if it is not good enough to admit the address, it is not good
+enough to navigate there unchecked.
+
+**What the probe does instead:** constrain it to the two admitted values, and
+record in its own docstring that the other three are UNMEASURED, naming them, so
+the absence is a stated limitation rather than a silence. **A probe that reports
+"these three were never tried, and why" is worth more than one that tried them
+without permission.**
+
+**The discovery question stays open and is answerable** -- by an admit-and-
+measure wave carrying its own blast radius and a revert path, which is Amendment
+A10's shape. That is a costed piece of work with an owner, not a side effect of
+a probe run.
+
+### WHY THIS IS NOT THE SAME AS THE SEVEN THAT WERE FIXED
+
+The seven were navigating to **admitted** addresses without calling the check --
+a missing guard on a legitimate act, and fixing them changed nothing they
+measure. **This one is a request to navigate to a REFUSED address**, which is
+the act the boundary exists to prevent. The distinction is the whole ruling:
+
+    guard missing on an admitted address   ->  FIX IT, and it costs nothing
+    navigation to a refused address        ->  REFUSED, admit it first or
+                                               record it unmeasured
+
+### What would reopen it
+
+An admit-and-measure wave establishing that those three addresses are read-safe,
+after which they are admitted and the probe needs no exemption at all.
+
+---
+
+## A NOTE ON WHAT THE SEVEN FIXES PROVED, WHICH IS MORE THAN THE COUNT
+
+**"Routing changes nothing they measure, and that is checkable, not hoped."**
+`NAV_TIMEOUT_MS` *is* 45_000 -- the exact value every raw call hardcoded -- and
+the door's settle is the same networkidle-then-flat-wait against the same
+`SETTLE_MS`. **The door is a strict superset**, so routing was provably free.
+
+**Three were hand-guarded rather than routed, because routing would have DELETED
+A MEASUREMENT rather than changed a wait:** one captures the document *before*
+the settle, and a door that settles cannot yield a pre-settle document at all;
+one waits for **a control, not a clock**, its own comment recording that
+settling returned UNKNOWN on four postings that were running. **Hand-guarding is
+a fix, not a concession** -- `assert_read_url` lifted out of the door into the
+same position in the sequence.
+
+**And the instrument's own precision limit, recorded rather than hidden:** one
+file it flagged was not a hole -- the url comes from an env var and **the CALLER
+checks it.** *"A function-scoped detector cannot see a guard in the caller."*
+Routed anyway, because it was the only probe with **neither** half of the door
+and no rate discipline at all on a shared account.
