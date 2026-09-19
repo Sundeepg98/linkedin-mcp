@@ -177,7 +177,17 @@ def test_his_own_profile_is_permitted_and_a_third_party_is_not():
     """
     mine = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-haspopup]")
     assert mine.get("permitted_to_attempt") is True
-    theirs = press.check_address(f"{BASE}/in/a-third-party/")
+    # ``another-person`` rather than an invented slug: it is a member of
+    # ``test_no_committed_identity.SYNTHETIC_SLUG_TOKENS``, so ``_slug_ok``
+    # passes it ON SIGHT. The first version read ``a-third-party`` -- equally
+    # fictional, and the guard has no way to know that, so it correctly
+    # refused a slug-shaped string it had never been told was fake.
+    #
+    # RENAMED RATHER THAN DECLARED, deliberately. A ``DECLARED_PLANTS`` entry
+    # tolerates that shape in this file forever and is inherited by readers who
+    # take the list to mean "known safe" rather than "known fake". A value that
+    # argues for itself costs less than one that needs an argument.
+    theirs = press.check_address(f"{BASE}/in/another-person/")
     assert theirs["refused"] in {"address_not_admitted", "third_party_surface"}
     assert theirs["reachable_by_this_route"] is False
 
