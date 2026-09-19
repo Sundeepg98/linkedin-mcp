@@ -309,6 +309,15 @@ passing vacuously.
 
 ## E. WHAT WAS RUN, AND THE TWO REDS THAT ARE NOT THIS WAVE'S
 
+**THE TREE IS 27 RED AND THIS SECTION ORIGINALLY REPORTED A SUBSET.**
+`_TEAM_LEAD_GATE_IS_27_RED.md`, written 12:46, records a full-suite run taken
+at 12:43 by the lead: **27 failed, 5549 passed, 4 skipped, 1 xfailed**, 24
+minutes -- and that every wave today, this one included, ran the files it was
+editing and reported that as the gate. **A subset reported as a gate is a
+different measurement wearing the gate's name.** The subset numbers below are
+kept because they are true of the subset and were named as one; they are not
+the gate, and this wave did not measure the gate.
+
 Boundary subset at 12:41, 6 files: **607 passed, 2 failed.** Both failures are
 `tests/test_navigation_is_never_derived.py::test_no_navigation_derived_value_reaches_an_output_sink`,
 parametrised on `_probe_add_section_menu.py` (a standing red named in this
@@ -320,10 +329,25 @@ neither was touched.**
 name at 12:41, 2 parametrised cases, both green. The check matters because a
 test that silently skipped the new file would certify nothing about it.
 
-    identity sweep 12:38     PASS, 0 hits across 459 swept files
+**ONE OF THE 27 WAS ROUTED TO THIS WAVE AND IS FIXED.**
+`test_no_tracked_file_carries_a_real_identifier` was red on
+`scripts/blast_radius.py` -- the shipped instrument this wave imports -- with
+3 unallowed slug hits and 0 declared. **A red on that guard means UNDECLARED,
+never real.** Repaired in the order the lead's downlink sets: renamed to a
+sanctioned token rather than declared, and the blast-radius verdicts measured
+on both sides of the rename and shown identical (corpus 67, admitted 12, newly
+1, undefended set, all unchanged up to the renamed string). Green at 12:49,
+and `sweep_tracked_for_identity` passes 0 hits across 465 files.
+
+The other red in that same file -- `REGIONS` in
+`_probe_creator_content_analytics.py` -- and all five files under
+`test_page_text_is_never_printed` belong to other waves and were not touched.
+
+    identity sweep 12:49     PASS, 0 hits across 465 swept files
     ASCII                    all four artifacts, no byte above 127
     readonly.py              0 lines changed, 32 patterns before and after
-    commits                  3, none touching a file owned by another wave
+    commits                  8; one touches scripts/blast_radius.py, on the
+                             lead's routing in _TEAM_LEAD_GATE_IS_27_RED.md
     AI attribution           0
 
 ---
