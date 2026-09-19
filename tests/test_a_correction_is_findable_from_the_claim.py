@@ -952,6 +952,37 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "at finish.md would refute a control-count table over a dark-mode "
         "write it never made a claim about"
     ),
+
+    # TWO FROM WAVE `absent-blockers`, ADDED 2026-09-19 AFTER READING BOTH
+    # LINES THE SCAN PRODUCED. In each the correction vocabulary belongs to
+    # something OTHER than the cited document: in the first it is inside a
+    # block quotation of that document's OWN ruling, and in the second the
+    # thing called wrong is this wave's own handed input.
+    ("2026-09-19-the-four-absent-blockers.md",
+     "2026-09-19-the-three-ruling-requests-ruled.md"): (
+        "THE CORRECTION VOCABULARY IS INSIDE A BLOCK QUOTATION OF THE CITED "
+        "DOCUMENT'S OWN RULING, and the thing it calls an ERROR is the 2026-09-03 "
+        "LEDGER, not the document being cited. Section 2.2 explains why "
+        "PREMIUM-APPLY-SURFACES cannot be filled, and quotes Request 4 verbatim "
+        "-- 'RULED: THE CENSUS IS RIGHT. THE LEDGER'S 1R IS THE ERROR ... That "
+        "1R may no longer be cited as evidence in any filing.' The ruling is "
+        "being RELIED ON as the authority that closes one of the two routes to "
+        "5-of-6; it is not contradicted anywhere in the citing document, which "
+        "goes on to reproduce its 14-of-15 measurement and reach the same "
+        "answer. A CORRECTED BY: pointer here would tell a reader that a "
+        "ruling had been overturned when it was upheld and acted on."
+    ),
+    ("2026-09-19-the-four-absent-blockers.md", "mcp-inventory.md"): (
+        "THE THING CALLED WRONG IS THIS WAVE'S OWN HANDED INPUT, AND THE CITED "
+        "FILE IS THE REMEDY RATHER THAN THE SUBJECT. The provenance section "
+        "records that a delegated agent was given frozen copies of FOUR census "
+        "slices when the census has FIVE, said so instead of sweeping 80% of "
+        "the file set, and extracted mcp-inventory.md itself to close the gap. "
+        "No claim in mcp-inventory.md is asserted wrong, or even evaluated -- "
+        "it is named only as the slice that was missing from a brief. The "
+        "sentence corrects a brief, and briefs are not documents this "
+        "discipline can point at."
+    ),
 }
 
 
