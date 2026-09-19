@@ -88,7 +88,7 @@ _CONTROL_ALLOW = (
 )
 _CONTROL_REFUSE = (
     "control-refuse: another member's profile, the sharpest refusal there is",
-    "https://www.linkedin.com/in/some-other-member/",
+    "https://www.linkedin.com/in/another-person/",
 )
 
 
