@@ -416,7 +416,30 @@ import build_blocker_map as bbm  # noqa: E402
 #: admitted on split + discriminating word + contiguity. The blocker named
 #: in that same sentence, CONVERSATION-OVERFLOW-MENU, still does not close
 #: -- only 6 of its 10 have any signal -- and stays declined.
-UNASSIGNED_CEILING = 99
+#: 99 -> 90. FEED-ITEM-OVERFLOW-MENU 5 of 5 and COMMENT-IDENTIFIER 4 of 4,
+#: argued as ONE SIMULTANEOUS PARTITION rather than two fits. Both draw on
+#: overlapping pools and both claim N 148 "Report a post or a comment in
+#: your feed". Only one assignment of that row makes EITHER count land,
+#: and it makes BOTH land: N 148 in the feed menu gives 5 and 4; N 148 in
+#: the comment blocker gives 4 and five-candidates-for-four. Neither
+#: closes. The wrong assignment is refuted by arithmetic, not preference,
+#: and the row's own text settles it anyway by saying WHERE -- in your feed.
+#:
+#: The feed five are that menu's actual contents -- Hide, Hide, Unfollow,
+#: Mute, Report -- all W against 5W. The comment four are the operations
+#: that require naming WHICH comment, which is what the blocker IS: hide,
+#: reply, edit, react, all W against 4W.
+#:
+#: THE INSTRUMENT THAT FOUND THIS IS BLIND TO THE JOBS SLICE, and that is
+#: stated so the result is not read as stronger than it is: only 5 of 37
+#: unassigned jobs rows carry a parsable R/W (jobs.md's main table has no
+#: R/W column) against 23 of 23 in network.md. Its uniqueness is uniqueness
+#: among non-jobs rows. It produced two absurd hits for exactly that reason
+#: -- it offered "#Hiring photo frame apply / remove" for
+#: EASY-APPLY-MULTISTEP, on the token "apply". Both refused.
+#:
+#: POST-COMMENT-CONTROLS is untouched: 15 candidates for 4 slots, 1R/3W.
+UNASSIGNED_CEILING = 90
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
