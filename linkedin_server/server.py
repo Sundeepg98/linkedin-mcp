@@ -44,7 +44,7 @@ both. The second is the one worth a reader's attention: its PURPOSE is a
 write. It exists so ``linkedin_update_profile_field`` can be undone, and it
 does that by READING the old value -- a tool that made the write undoable by
 writing would belong in the other column, and would fail
-``test_the_surface_is_exactly_the_fortytwo_tools``'s split rather than
+``test_the_surface_is_exactly_the_fortyfour_tools``'s split rather than
 being argued about here.
 
 THE NINTH IS A COLUMN CHANGE RATHER THAN AN ARRIVAL, 2026-09-02, and it is the
@@ -119,17 +119,32 @@ out. The other was an orphaned output-guard red in
 ``scripts/_probe_add_section_menu.py`` that two waves had each reported as not
 theirs.
 
-ONE THING IS LEFT DELIBERATELY UNDONE HERE. The pin cited below is still named
-``test_the_surface_is_exactly_the_fortytwo_tools`` over a surface of
-forty-four, and by that file's own doctrine -- *a test name is a CLAIM like
-any other* -- the name is now an instance of what it exists to catch. Renaming
-it belongs in ``test_server_surface.py``'s own repair with its own reasoning,
-not folded into this one.
+ONE THING WAS LEFT DELIBERATELY UNDONE HERE AND IS NOW DONE, 2026-09-19. This
+paragraph recorded that the pin cited below still carried the old count in its
+NAME over a surface of forty-four, that by that file's own doctrine -- *a test
+name is a CLAIM like any other* -- the name had become an instance of what it
+exists to catch, and that renaming it belonged in ``test_server_surface.py``'s
+own repair with its own reasoning rather than folded into this one.
+
+It did, and it was: the pin, its module headline and its names-over-
+capabilities sentence all moved together, and the four citations in THIS file
+moved with them -- which is the half a rename usually forgets. This file has
+its own paragraph about what that costs: the guard was real and passing while
+the POINTER to it was dangling, and a reader who followed it found nothing.
+
+**THE DEBT WAS PAID BY A THIRD PARTY, A DAY LATE**, and that is the part worth
+keeping. The wave that shipped the two tools moved the headline here and in
+``README.md`` and did not move the pin; the wave that corrected the two
+sentences a hundred lines below recorded the remaining debt instead of paying
+it, correctly, because it was not that wave's file. Neither of those is a
+mistake. What it shows is that a debt written down in a docstring is not
+assigned to anybody -- it waits for whoever next runs the suite, and in the
+meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Forty-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortytwo_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fortyfour_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -1256,7 +1271,7 @@ PROFILE_DETAIL_FIELD: dict[str, str] = {
 #     Extra items in the left set:  '_attach_recipient_ids'
 #     Extra items in the right set: 'linkedin_who_viewed_me'
 #
-# ``test_the_surface_is_exactly_the_fortytwo_tools`` compares the SET of tool
+# ``test_the_surface_is_exactly_the_fortyfour_tools`` compares the SET of tool
 # NAMES, not a count -- so a decorator sliding onto an adjacent def changes
 # that set and fails, naming both halves of the swap. A count would have been
 # blind, which is presumably where the wrong claim came from.

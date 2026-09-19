@@ -1,4 +1,4 @@
-"""The tool surface: forty-two tools, thirty of which do not write.
+"""The tool surface: forty-four tools, thirty-two of which do not write.
 
 **THIS LINE SAID "twenty-three tools, nineteen of which do not write" UNTIL
 2026-09-05 ~22:52** -- stale by nineteen tools, in the file that PINS the tool
@@ -209,6 +209,27 @@ EXPECTED_TOOLS = {
     # groups page carries no counter to certify its own cost. The answer
     # is that a tool need not certify its cost from the page it loads.
     "linkedin_group_memberships",
+    # THE FORTY-THIRD AND FORTY-FOURTH, 2026-09-19, BOTH READS, and they are
+    # listed together because they arrived together and the write count did
+    # not move -- which is the half of this entry worth checking.
+    #
+    #   linkedin_creator_analytics   4272994   content impressions over time
+    #   linkedin_job_collections     633312f   the jobs home collection rails
+    #
+    # WHAT THIS PIN IS FOR, demonstrated on itself. Both tools were registered
+    # and green in their own files, and this set-equality is what noticed the
+    # surface had grown -- three days after `server.py`'s headline and
+    # `README.md` had already been moved to forty-four, and one day after the
+    # two sentences a hundred lines below that headline were found still
+    # saying forty-two. A pin that only fails when somebody forgets is a pin
+    # that fails exactly when it is needed, and this is that occasion.
+    #
+    # NEITHER TOOL OPENS A NEW ADDRESS and neither can act. The analytics
+    # reader takes its values from `aria-label` on drawn chart nodes because
+    # the page carries no table, and the collections reader returns rail names
+    # and counts. `readonly.SANCTIONED_MUTATIONS` is unchanged by both.
+    "linkedin_creator_analytics",
+    "linkedin_job_collections",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
     "linkedin_search_jobs",
@@ -422,7 +443,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortytwo_tools(tools):
+async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -501,8 +522,40 @@ async def test_the_surface_is_exactly_the_fortytwo_tools(tools):
     even the label reader refuses them, on the operator's ruling that the
     previous value is what makes his own write undoable.
 
-    FORTY-TWO NAMES OVER FORTY-ONE CAPABILITIES; the login pair is still the
-    only pair.
+    THE TWELFTH RENAME, 2026-09-19, IS THE FIRST ONE THIS FILE DID NOT NOTICE
+    FOR ITSELF, and that is the part worth reading rather than the number.
+    ``linkedin_creator_analytics`` (4272994) and ``linkedin_job_collections``
+    (633312f) arrived together, both READS, write count untouched at twelve
+    for the fifth correction running -- and the pin sat at forty-two for the
+    rest of that day while ``server.py``'s headline and ``README.md`` were
+    moved to forty-four without it.
+
+    SO THE PIN WAS THE LAST OF FOUR SITES TO MOVE, NOT THE FIRST, which is the
+    opposite of the order it exists to enforce. ``server.py``'s own docstring
+    recorded the debt in the meantime -- *"the pin cited below is still named
+    ``test_the_surface_is_exactly_the_fortytwo_tools`` over a surface of
+    forty-four ... renaming it belongs in ``test_server_surface.py``'s own
+    repair with its own reasoning, not folded into this one"* -- and this is
+    that repair, arriving one day late and by the hand of a third party rather
+    than the wave that shipped the tools.
+
+    **A PIN IS NOT A NOTIFICATION.** It fails when somebody next runs it, and
+    between the shipping commit and that run it says the old number as
+    confidently as it ever did. That gap is not a defect in this file and
+    cannot be closed inside it; it is the argument for the pre-commit hook
+    that now runs a staged test file plus everything coupled to it, which is
+    what turned this red into something a commit had to answer for rather
+    than something a suite would mention eventually.
+
+    FORTY-FOUR NAMES OVER FORTY-THREE CAPABILITIES; the login pair is still
+    the only pair.
+
+    **THAT SENTENCE READ "FORTY-TWO NAMES OVER FORTY-ONE" UNTIL 2026-09-19**,
+    for the same reason it once read "thirty-six over thirty-five": two tools
+    moved the body and nothing moved the prose. It is corrected rather than
+    deleted for the reason the paragraph below already gives -- the arithmetic
+    is the load-bearing part, and names minus capabilities being exactly the
+    login pair is a claim that stays checkable when the count moves again.
 
     **THAT SENTENCE READ "THIRTY-SIX NAMES OVER THIRTY-FIVE" UNTIL 2026-09-05
     EVENING, THROUGH TWO BUMPS THAT MOVED THE BODY AND NOT THE PROSE.** The
@@ -550,7 +603,36 @@ async def test_the_surface_is_exactly_the_fortytwo_tools(tools):
     # menu offers `Leave this group`, measured on all five. This tool
     # presses nothing, follows no per-row control, and returns counts.
     # MEASURED off mcp.list_tools(): 41 before the edit and 42 after.
-    assert len(tools) == 42
+    # FORTY-FOUR FROM 2026-09-19: linkedin_creator_analytics (4272994) and
+    # linkedin_job_collections (633312f), two READS. No write was added, which
+    # is again the half that matters. MEASURED off mcp.list_tools(): 42 before
+    # the edit and 44 after -- and measured off the REGISTRY rather than by
+    # counting `@mcp.tool()` in the source, because an AST count of that
+    # decorator returned 46 on this tree the same afternoon and was wrong.
+    #
+    # THIS LITERAL IS HAND-MAINTAINED AND IT STAYS, and the reason is worth
+    # one paragraph because the identical line is being REMOVED from
+    # tests/test_messaging_overview.py in the same hour and the two decisions
+    # have to be tellable apart.
+    #
+    # It is implied: ``set(tools) == EXPECTED_TOOLS`` above compares key sets
+    # and dict keys are unique, so this length is already forced by the time
+    # the interpreter reaches this line. That is an argument for deleting it
+    # and this repository has already weighed it -- ``test_readonly.py``'s
+    # ``total == len(...) == 7`` carries a long comment naming its own
+    # constant as hardcoded and keeps it anyway, *"because the constant is
+    # what makes a widening visible in a diff"*. The precedent is followed
+    # rather than re-litigated.
+    #
+    # WHAT MAKES IT SAFE HERE AND NOT THERE IS NOT THE NUMBER, IT IS THE
+    # OWNERSHIP. This file's whole subject IS the tool surface: the person
+    # who moves the surface opens this file, the pin is why, and the history
+    # above is that person's log. A count of the same thing asserted in a
+    # file about MESSAGING has no such reader -- it goes stale in silence and
+    # is bumped by whoever is unlucky enough to run the suite next, which is
+    # exactly how the one in test_messaging_overview reached three admissions
+    # out of date. A count belongs in the file that owns the claim.
+    assert len(tools) == 44
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -662,7 +744,15 @@ async def test_the_surface_is_exactly_the_fortytwo_tools(tools):
     # thirtieth read and the write side is BYTE-IDENTICAL across the
     # change, which is the assertion that carries the weight on a tool
     # whose page draws a leave-this-group control on every row.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 30
+    #
+    # THIRTY-TWO FROM 2026-09-19: linkedin_creator_analytics and
+    # linkedin_job_collections are BOTH READS, and the write side is
+    # BYTE-IDENTICAL across them -- which is the half of this split that
+    # matters and the reason two tools arriving at once is not alarming.
+    # Neither opens an address that was not already admitted and neither adds
+    # an entry to readonly.SANCTIONED_MUTATIONS, so the widening is in what
+    # can be READ and in nothing else.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 32
 
 
 def test_the_read_that_was_nearly_named_a_write():
