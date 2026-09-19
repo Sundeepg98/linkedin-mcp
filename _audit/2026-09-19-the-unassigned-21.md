@@ -369,6 +369,16 @@ subtraction without a documented conditional, and this pair has none. It should
 be entered in the register as the first member of an INTRA-SLICE section, with
 `B7`/`J2` beside it as the near-miss.
 
+**AND THE OVERSTATEMENT IS BOUNDED AT EXACTLY ONE ROW, which is the part a
+future wave needs.** The same measurement ran over all four slices, and I checked
+every intra-file near-duplicate pair scoring 0.6 or higher against my pool:
+`jobs.md` returns 2 pairs (`118`/`119`, `94`/`96`), `network.md` 12,
+`messaging-and-content.md` 3 (`M11`/`M12`, `C24`/`C25`, `C50`/`C81`),
+`profile.md` 15. **Not one of those pairs contains any of my other twenty rows.**
+So `P B8` is the only member of the residue that duplicates a row already filed,
+the residue is overstated by one and not by more, and nobody needs to re-run this
+search to find out.
+
 ---
 
 ## 6. `J 99` / `J 100` -- DECLINE. The elimination still does not close, and nobody has named the discriminator.
