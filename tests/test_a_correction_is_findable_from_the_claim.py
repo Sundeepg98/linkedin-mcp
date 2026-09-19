@@ -182,6 +182,19 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("profile.md", "network.md"): (
+        "the citation names an AUTHORITY, not a corrected party. Census row "
+        "P B10 was flipped GAP -> EXCLUDED-RULED and its note cites "
+        "network.md:814 -- ruling R11, 'the settings family is admitted by name "
+        "or not at all' -- as the ruling that governs it, together with the "
+        "twin N159 that already carried that verdict. network.md is where the "
+        "rule is written down and it is asserted CORRECT, not wrong; the row "
+        "that changed is the profile one. The repair vocabulary near the "
+        "citation is B10 describing what was wrong with ITS OWN prior state "
+        "(GAP on the words 'no tool, no reason'). A CORRECTED BY: pointer on "
+        "network.md would tell a reader its ruling had been refuted by a row "
+        "that exists only because it applied it"
+    ),
     ("profile.md", "2026-09-05-decide-retire-rulings.md"): (
         "CROSS-ROW PROXIMITY, measured before the reason was written. The "
         "citation is on line 205, row A23 (name pronunciation audio, retired "
