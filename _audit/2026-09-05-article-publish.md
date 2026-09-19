@@ -2,6 +2,8 @@
 
 **CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- blocker 51 `COLLABORATIVE-CONTENT` is filed as one blocker and is two under that document's own merge rule, so three of its four rows are costed higher than they are; detail in section 4.
 
+**CORRECTED BY:** `_audit/2026-09-19-content-tail.md` -- section 5's address table below reports `/article/new/` and `/feed/` as True on BARE PATHS, and `is_read_url` matches absolute `https://www.linkedin.com/...` spellings only, so both bare forms return False; the ten verdicts are unchanged when re-measured with absolute spellings, so this is a transcription correction and not a changed conclusion.
+
 Wave `article-publish`, 2026-09-05, 18:46 to 19:1x by the box (`date`, stamps in
 section 8). Six blockers, 17 rows. Three commits. Nothing pushed.
 
