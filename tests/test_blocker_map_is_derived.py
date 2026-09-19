@@ -520,7 +520,28 @@ import build_blocker_map as bbm  # noqa: E402
 #: dispersed set, not an under-count. LEDGER-EXPLICIT beats a name-plus-
 #: split match, and this is the one place today the matcher would have
 #: written a wrong row had the ledger not been read first.
-UNASSIGNED_CEILING = 74
+#: 74 -> 72. PREMIUM-READER-NOT-BUILT 1 of 1 and PEOPLE-FOLLOW-LISTS 4 of 4,
+#: both COMPLETE, found by a co-occurrence sweep over EVERY tracked file --
+#: a row id and exactly ONE open blocker's name within three lines.
+#:
+#: PREMIUM-READER-NOT-BUILT: 2026-09-19-read-tail.md section 5 opens a
+#: bullet "PREMIUM-READER-NOT-BUILT (J127)" and concludes "Correctly
+#: still GAP" -- a source asserting membership while arguing against its
+#: own convenience. 1R published, and the row is "Read the InMail credit
+#: balance". Its state TODAY is MEASURED-ABSENT; the map enumerates the
+#: FROZEN set, as with J 15. It is also the row excluded from
+#: SERVED-BY-GMAIL-SKILL this morning for reading MEASURED-ABSENT `SKILL`
+#: rather than GAP `SKILL` -- the row that made that count work has a home.
+#:
+#: PEOPLE-FOLLOW-LISTS: N 44 is named inside the blocker's own probe block,
+#: headed "# --- 52 PEOPLE-FOLLOW-LISTS ---" with the ledger's row number,
+#: as ("FOLLOW-LISTS", "N 44 / P L2b", "R", .../people-follow/
+#: followers/). The split closes exactly: N 38 R, N 39 R, N 40 W, N 44 R =
+#: 3R/1W published. Its rival is extinguished by ITS OWN COUNT --
+#: SERVICES-PAGE-SURFACE is complete at 11 of 11 and cannot hold another
+#: row without tripping the over-count guard, so the sweep's unadjudicated
+#: two-way conflict is settled by arithmetic elsewhere.
+UNASSIGNED_CEILING = 72
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
