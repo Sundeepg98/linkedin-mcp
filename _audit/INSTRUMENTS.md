@@ -3247,3 +3247,36 @@ the context.**
 **AND ONE INSTABILITY IT RECORDED RATHER THAN SMOOTHED:** the same address read
 75 controls on one run and 93 about five minutes later. A count off that surface
 is a reading with a timestamp.
+
+### 17.3 `linkedin_server/collections_page.py` -- the vocabulary travels INTO the page
+
+**THE THIRD AND STRICTEST POINT ON A LINE THIS REGISTER ALREADY HOLDS.**
+`groups.py` is structurally name-free because no name is a PARAMETER; `menus.py`
+is structurally name-free because `classify` is pure and returns only its own
+literals. Both still let a page string enter the process.
+
+**This one does not.** The vocabulary is shipped INTO the page, the comparison
+happens in the document, and what crosses the CDP boundary is a POSITION IN A
+TUPLE defined in the module. A label is not redacted, not shaped, and not
+present -- which needs no argument about what a shaper can recognise.
+
+Out-of-range REFUSES rather than clamps, because a clamp silently renames one
+grouping to another. A zero card count is kept distinct from an absent one.
+
+**ADMITTED ON A CONTROL THAT SHIPS WITH IT, and the reason is the transferable
+part.** Its first live read matched ZERO of five, and **a matcher that returns
+zero everywhere is indistinguishable from a broken one**. The same in-page code
+therefore runs against a DETACHED container built from a synthetic fixture --
+no navigation, no page load -- and matched **5 of 5 plus 1 decoy unmatched**, so
+it matches AND discriminates.
+
+    THE RULE: a reader whose answer is a COUNT must ship the input that
+    makes its count non-zero. Otherwise "nothing found" and "nothing
+    works" are the same output, and only one of them is a finding.
+
+With that control firing, the live zero became a measurement: 79 nodes scanned
+across headings, tabs and buttons, none of the five matched, identical across
+two reads, on a page carrying 53 cards. Shown failing besides: a clamping
+`term_for` and an alphabet leak, each with a discrimination case, plus an
+in-suite reorder demo asserting the SPECIFIC harm -- that the same index
+resolves to a different term.
