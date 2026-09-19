@@ -182,6 +182,25 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-19-duplicate-register.md", "jobs.md"): (
+        "the fault described is the CITING document's own, not the cited "
+        "slice's. jobs.md writes XR where the other three slices write "
+        "EXCLUDED-RULED -- a legitimate shorthand that slice has used "
+        "throughout -- and the register records that MY same-state filter "
+        "compared state strings literally and therefore read every agreement "
+        "spelled in two dialects as a disagreement. The repair vocabulary is "
+        "me describing a bug in my own instrument. A CORRECTED BY: pointer on "
+        "jobs.md would credit that slice with an error belonging to a parser "
+        "written against it"
+    ),
+    ("2026-09-19-the-cross-slice-round.md", "jobs.md"): (
+        "same reason, in the round write-up: the six-failure table names XR "
+        "versus EXCLUDED-RULED as failure 5, and the failure is the reader's. "
+        "count_census_states.py documents this same dialect costing IT 23 "
+        "invisible rows, so the hazard is a known property of the corpus that "
+        "instruments must accommodate -- not a defect in jobs.md, which is "
+        "internally consistent. Nothing that slice asserts is contradicted"
+    ),
     ("profile.md", "network.md"): (
         "the citation names an AUTHORITY, not a corrected party. Census row "
         "P B10 was flipped GAP -> EXCLUDED-RULED and its note cites "
