@@ -253,8 +253,10 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 from fastmcp import FastMCP
 
 from linkedin_server import (
+    anchors,
     buildinfo,
     cdp_bridge,
+    collections_page,
     dom,
     events,
     groups_page,
@@ -1722,6 +1724,89 @@ async def linkedin_premium_status() -> dict[str, Any]:
                 "needles_fired": list(reading["needles_fired"]),
                 "read_error": reading["error"],
                 **verdict,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_job_collections() -> dict[str, Any]:
+    """What your recommended-jobs collection holds -- COUNTS ONLY, no titles.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant
+    and has been on the read allowlist since the school/collections boundary
+    was admitted; **it sat there with nothing behind it until 2026-09-19**,
+    which is Amendment A10's shape and the reason this tool exists.
+
+    WHAT IT RETURNS, AND WHY EVERY FIELD IS AN INTEGER. Two readers run on the
+    same load. ``collections_page`` matches LinkedIn's five named groupings
+    against the page, shipping the vocabulary INTO the document and getting
+    back a POSITION IN A TUPLE. ``anchors`` classifies every anchor by ROUTE
+    SHAPE the same way. **No page string crosses the process boundary in
+    either -- not shaped, not redacted, not present.**
+
+    WHAT IT WILL NOT TELL YOU, and this is the part to read before asking it
+    for more. **No job title, no company name, no posting id, no member
+    name.** ``member_profile_anchors`` is a COUNT of anchors pointing into
+    member space and nothing else: a raw href there would carry ``/in/<slug>``
+    and a slug is a name. If you need a specific posting, ``linkedin_job_detail``
+    addresses one by its numeric id, which this tool does not return.
+
+    TWO MEASURED FACTS THE PAYLOAD WILL LOOK WRONG WITHOUT.
+
+    **The five named groupings are NOT DRAWN on this surface.** Measured
+    2026-09-19 across four loads, scanning headings, tabs and buttons, with a
+    positive control that matched 5 of 5 on a synthetic fixture and a decoy
+    unmatched. So ``groupings.matched`` is expected to be 0 and that is a fact
+    about LinkedIn's page, not a failure of the reader -- ``groupings.unmatched``
+    counts the headings it did see, so a vocabulary going stale shows up as a
+    number rather than as a silent zero.
+
+    **The surface MOVES between loads.** The same address gave 25, 28, 29 and
+    35 anchors across four reads minutes apart, and one load drew 4
+    member-space anchors where another drew 0. Every count here is a reading
+    with a timestamp. Do not diff two calls and conclude something changed on
+    the account.
+
+    FIRED ONCE, 2026-09-19, AND THE CAVEAT IS THE TRANSPORT. This tool
+    returned its payload against the live account -- 9 job postings, 0
+    member-space anchors, 0 groupings matched, 52 headings seen, every field
+    an integer. **It was invoked IN PROCESS rather than over the MCP
+    transport**, which is a real difference and is why census row ``J 42``
+    names it: the reader and the tool body are proven, the wire is not.
+    """
+    url = collections_page.COLLECTIONS_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="job collections")
+            grouping_read = await collections_page.read_collections(page)
+            grouping_tally = collections_page.tally(
+                grouping_read["indices"], grouping_read["cards"]
+            )
+            anchor_read = await anchors.read_anchors(page)
+            anchor_tally = anchors.tally(anchor_read["counts"])
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the requested url is a
+                # module constant a caller can already read, and a
+                # navigation-derived string buys nothing a boolean does not.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                "groupings": {
+                    "matched": grouping_tally["matched_groupings"],
+                    "unmatched_headings": grouping_tally["unmatched_headings"],
+                    "by_term": grouping_tally["by_term"],
+                    "nodes_scanned": grouping_read["headings_seen"],
+                },
+                "anchors": {
+                    "seen": anchor_read["anchors_seen"],
+                    "by_class": anchor_tally["by_class"],
+                    "job_postings": anchor_tally["by_class"].get("job_posting", 0),
+                    "member_profile_anchors": anchor_tally["member_profile_anchors"],
+                    "numeric_entity_segments": anchor_read["numeric_entity"],
+                    "non_numeric_entity_segments": anchor_read["non_numeric_entity"],
+                },
             }
     except Exception as exc:
         return _error(exc)

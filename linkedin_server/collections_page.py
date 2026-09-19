@@ -81,6 +81,11 @@ GROUPINGS: tuple[str, ...] = (
     "corporate commitments",
 )
 
+#: The one address this reader is for. On the read allowlist since the
+#: school/collections boundary was admitted, and it carried no reader at
+#: all until 2026-09-19 -- Amendment A10's shape.
+COLLECTIONS_URL = "https://www.linkedin.com/jobs/collections/recommended/"
+
 #: What a caller sees when the page drew a heading the vocabulary does not know.
 #: A TERM, not a label -- an unmatched heading is counted and never named.
 UNMATCHED = "unmatched"
