@@ -14,7 +14,7 @@ vein, and a co-occurrence sweep over every tracked file. Each of these is a
 CHOICE among candidates.
 
 **State at the time of writing, 2026-09-19 12:25 by the box:** frozen GAP 409,
-ASSIGNED 345, UNASSIGNED 64, blockers COMPLETE 69 of 97, EMPTY 19 (47 rows).
+ASSIGNED 345, UNASSIGNED 64, blockers COMPLETE 69 of 97, EMPTY 19 (46 rows).
 
 ---
 
@@ -233,5 +233,10 @@ generalises to most of them.**
 
 **The three classes close the remaining rows exactly, which is how I know the
 routing is complete:** needs a ruling 31, no published split 10, no source at
-all 10 -- totalling the 51 empty rows counted before `BADGES-SURFACE` moved four
-of them.
+all 10 = 51, against a measured 51 empty rows.
+
+That count was taken before `BADGES-SURFACE` moved, and the arithmetic of the
+move is worth being exact about. It is now **46**, not 47: four rows became
+ASSIGNED, but all FIVE left the empty bucket, because the blocker itself is no
+longer empty. **A blocker leaving that set takes its whole published count with
+it, including the row still unassigned inside it.** 51 - 5 = 46.
