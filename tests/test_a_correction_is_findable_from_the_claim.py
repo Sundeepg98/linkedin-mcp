@@ -183,6 +183,71 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # SEVEN MORE, 2026-09-19, AFTER THE THREE-WAVE CENSUS ROUND, each read in
+    # context before declaring. Six are plain citations. The seventh is a
+    # passage using the word "correction" about a THIRD document which turns
+    # out to agree with it already -- so the pair the scan produced is not the
+    # pair the sentence is about. That is a property of proximity scanning and
+    # is recorded in the entry rather than filed as a defect in the scan.
+    ("2026-09-19-partial-blockers-closed.md", "2026-09-19-the-three-ruling-requests-ruled.md"): (
+        "IT UPHOLDS THE RULING AND SAYS SO. The sentence is AND THE RULING "
+        "IT WOULD HAVE OVERTURNED -- conditional, about a case the wave "
+        "built and then refuted itself -- and it calls the ruling's test "
+        "the blocker's own name restated, not a test invented to fit, which "
+        "is agreement. A document reporting why it did NOT overturn "
+        "something is the opposite of a correction. "
+    ),
+    ("2026-09-19-partial-blockers-closed.md", "messaging-and-content.md"): (
+        "THE CENSUS IS THE EVIDENCE FOR A CASE THE WAVE THEN REFUTED. The "
+        "line opens The case I built and quotes the census grouping to "
+        "state that case; section 3.2 then kills it on an address, "
+        "concluding that a census family groups by SUBJECT while a blocker "
+        "groups by WHAT BLOCKS IT. The census is quoted, not contradicted "
+        "-- the wave's own reading of it is what changed. "
+    ),
+    ("2026-09-19-the-row-walk.md", "2026-09-03-linkedin-gap-blockers.md"): (
+        "A RULING REQUEST, NOT A CORRECTION, AND THE DOCUMENT DECLINES TO "
+        "ACT. It says it thinks the ruling answers the wrong question and "
+        "cites the ledger's own ASSIGNMENT RULE at L166-169 as the right "
+        "one -- then files NOTHING, writing that if the ruling flips six "
+        "rows resolve at once and two blockers close, which is exactly why "
+        "it did not file. Nothing in the ledger is asserted wrong; a "
+        "question is asked of whoever rules. "
+    ),
+    ("2026-09-19-the-row-walk.md", "2026-09-19-the-empty-blockers.md"): (
+        "CORROBORATION, EXPLICITLY INDEPENDENT. The line registers a false- "
+        "positive class and adds that it re-derived the same thing "
+        "independently from the ledger table BEFORE reading that "
+        "registration. Two waves reaching one conclusion by separate routes "
+        "is the strongest evidence this census produces, and is the "
+        "opposite of one document correcting another. "
+    ),
+    ("2026-09-19-the-row-walk.md", "2026-09-19-the-three-ruling-requests-ruled.md"): (
+        "IT REPORTS THE RULING RETIRING ITS OWN DISCRIMINATOR. The quoted "
+        "sentence is the ruling's own: that the 1R may no longer be cited "
+        "as evidence in any filing, written after a row filed on it was "
+        "retracted. The row-walk cites that retirement to explain why no "
+        "discriminator remains. Reporting what a ruling did to itself is "
+        "citation. "
+    ),
+    ("2026-09-19-the-row-walk.md", "messaging-and-content.md"): (
+        "THE CENSUS SUPPLIES THE FACT AND THE DOCUMENT UNDER DISCUSSION IS "
+        "A DIFFERENT ONE. The passage reads M 1's state from messaging-and- "
+        "content.md:332 as EVIDENCE. Checked 2026-09-19: the document it "
+        "discusses, blocker-table-refresh.md:37, ALREADY records M 1 as "
+        "moved to COVERED-CANNOT-DELIVER -- so the two agree and nothing is "
+        "corrected. The correction vocabulary sits beside the evidence "
+        "citation rather than beside any corrected claim, which is why "
+        "proximity scanning paired it this way. "
+    ),
+    ("2026-09-19-the-row-walk.md", "profile.md"): (
+        "THE SLICE FILE IS READ TO REFUTE AN ARGUMENT ABOUT SLICES. The "
+        "point made is that the blocker's two filed rows are both "
+        "profile.md rows, so wrong slice was never the bar. profile.md is "
+        "the record consulted to establish where the existing rows live. A "
+        "file read to settle a question is not a file being corrected. "
+    ),
+
     # TWO MORE, ADDED 2026-09-19 AFTER READING BOTH LINES. Each was produced by
     # today's landings, and in each the correction vocabulary belongs to a
     # sentence ABOUT a correction rather than to a correction being made.
