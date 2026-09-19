@@ -46,9 +46,28 @@ REPO = Path(__file__).resolve().parent.parent
 HOOK = REPO / ".git" / "hooks" / "pre-commit"
 
 LEGACY_PYTHON = "./venv/Scripts/python.exe"
+#: ONLY THE IDENTITY GATE RUNS IN THE HOOK. The boundary gate moved to CI
+#: on 2026-09-19, which is what its own docstring asked for: "THIS IS AN
+#: INTERIM. The right owner of this check is CI ... this box is windows
+#: py3.13 only -- two of three cells have never been exercised here."
+#:
+#: THE TRADE IS STATED RATHER THAN ASSUMED. The hook cost 142-240s on any
+#: commit touching tests/, because one staged test file drags in eighteen
+#: coupled ones; the identity gate costs 0.203s. That 240s was also a
+#: CONCURRENCY tax -- one .git/index lock means every wave queues behind
+#: every other wave's hook. On 2026-09-19 it serialised four waves, left
+#: three finished pieces of work stranded in the index, killed one commit
+#: process at five minutes still holding the lock, and swept one wave's
+#: audit file into a neighbour's commit during the window it held open.
+#:
+#: THE SPLIT IS BY WHAT EACH GATE GUARDS. The identity gate guards a PUSH
+#: and CANNOT run on a runner -- its wordlist is gitignored and absent from
+#: every clone -- so it stays local. The boundary gate guards a BUILD and
+#: runs better on three platforms than on one, so it goes. What is given up:
+#: a test regression now surfaces in ~7 minutes rather than before the
+#: commit exists. That is a real cost and it is the one being chosen.
 GATES = (
     "scripts/pre_commit_identity_gate.py",
-    "scripts/pre_commit_boundary_gate.py",
 )
 
 #: BOTH ROOTS COME FROM GIT, AND THEY ARE DELIBERATELY TWO ANSWERS. The
