@@ -432,3 +432,81 @@ lookup: the nine rows are `J89, J90, J88 (x2), J103, J104, J45, J3, J91`, whose
 expected directions from their capability text are `W, W, R, R, W, W, R, R, W`.
 **If any measured value contradicts that list, the pair is worth re-opening; if
 they match, nothing changes.** That is the whole residual obligation.
+
+---
+
+# AMENDMENT F — the SAME-STATE pairs, and why I had been mining the worst subset
+
+## F1. The structural reason my precision was poor
+
+I spent this round on the **different-state** pairs and measured their precision
+at ~7-of-15, with `small-measures` finding 1-of-61 in one class. **The
+explanation is in the selection, not in the matcher:**
+
+> **A different-state filter selects AGAINST true duplicates**, because two
+> slices stating one capability usually agree about it. So the class I was
+> mining is the one where a true duplicate is least likely to be, by
+> construction.
+
+The same-state class (264 pairs) is where they actually live. Hand-reading its
+twelve highest-scoring pairs: `Opt out of saving job-application data` /
+`Opt out of saving job application data` (0.987); `Turn Open to Work on / off` /
+`Turn Open To Work on or off` (0.972); `Delete a recommendation you sent` /
+`Delete a recommendation you have sent` (0.889). **Eleven of twelve are
+plainly one capability.**
+
+**This does not rescue the score.** It says the score was being applied to a
+population selected against it.
+
+## F2. But the double-count is DELIBERATE, BOUNDED, and already registered
+
+Before treating any of that as an over-count I checked whether the census
+intends it. **It does, and it says so.** `messaging-and-content.md` section 10:
+
+> *"Flagged rather than deleted, per the lead's instruction that double-counting
+> is preferable to dropping between two agents. **These rows are still counted in
+> this file's 142.** If the sibling's slice claims them, subtract exactly the
+> rows named here."*
+
+And `network.md` records removing **26 duplicates plus 16 recovery rows** that
+belonged to other slices. **So one slice removed its duplicates and another
+deliberately kept and registered its own, with a subtraction condition.**
+
+**The denominator is not silently inflated. It carries a documented, conditional
+correction that nobody had evaluated.**
+
+## F3. The condition is MET for four of the sixteen
+
+Hand-read against `network.md`'s group and event rows — **not** matched by score,
+for the reason in F4:
+
+| flagged row | network twin | condition |
+|---|---|---|
+| `M C60` Access your LinkedIn Groups | **`N 173`** Access the list of groups you belong to | **MET** — both COVERED-PROVEN |
+| `M C61` Join a group | **`N 63`** Join a LinkedIn group | **MET** |
+| `M C63` Leave a group | **`N 64`** Leave a LinkedIn group | **MET** |
+| `M C69` Invite connections to join a group | **`N 168`** Invite your connections to join a group | **MET** |
+| `C62`, `C64`–`C68`, `C91`, `C57`, `C92`, `C59`, `C75` | none | not met — correctly still counted |
+
+**Reported, not executed.** Subtracting rows changes a published denominator and
+belongs to the slice owners; what was missing was the factual half, and that is
+now measured.
+
+**`C69`/`N168` is closed** (`52b80c7`) — and I had to close it because **my own
+flip of `C69` opened it**: I moved the messaging row and left its network twin
+GAP, which is the exact failure this round documents.
+
+## F4. A fourth badly-chosen threshold, reported
+
+I first matched the sixteen flagged rows by similarity at a 0.62 bar. It
+returned **nine twins of which only three were real** — `"Create a LinkedIn
+Event"` matched `"Leave a LinkedIn group"` at **0.67**, and `"Post content in a
+group feed"` matched `"Report a post or a comment in your feed"` at 0.63.
+
+**That is the fourth threshold I have picked badly today**, after the feed size
+bar, the `fields==11` verdict and the stricter duplicate-id run. The pattern is
+consistent enough to state as a rule rather than an apology:
+
+> **The score generates candidates. It must never settle one.** Every true
+> finding this round came from an artifact — a ruling id, a code predicate, a
+> neighbour that agrees — and none came from a number I chose.
