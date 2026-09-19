@@ -45,26 +45,66 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 HOOK = REPO / ".git" / "hooks" / "pre-commit"
 
-PYTHON = "./venv/Scripts/python.exe"
+LEGACY_PYTHON = "./venv/Scripts/python.exe"
 GATES = (
     "scripts/pre_commit_identity_gate.py",
     "scripts/pre_commit_boundary_gate.py",
 )
 
-WANTED = "#!/bin/sh\n" + "".join(
-    f"{PYTHON} {gate} || exit 1\n" for gate in GATES
+#: BOTH ROOTS COME FROM GIT, AND THEY ARE DELIBERATELY TWO ANSWERS. The
+#: interpreter and the gate scripts come from the checkout that owns venv/
+#: (--git-common-dir resolves there from inside any linked worktree); each gate
+#: then works out for itself which TREE is being committed. Hard-coding one root
+#: for both is what broke this hook twice on 2026-09-19 -- first it could not
+#: find the interpreter from a worktree at all, then it found it and certified
+#: the main checkout's files against the worktree's index.
+WANTED = (
+    "#!/bin/sh\n"
+    "# RESOLVE THE INTERPRETER AGAINST THE MAIN CHECKOUT, NOT THE CWD.\n"
+    "#\n"
+    "# This read './venv/Scripts/python.exe' until 2026-09-19. Linked worktrees\n"
+    "# SHARE this hooks directory but have no venv of their own, so every worktree\n"
+    "# agent hit \"interpreter not found\" -- and three reported, independently and\n"
+    "# in the same hour, that the tempting fix at that moment is --no-verify.\n"
+    "# A gate that cannot run is indistinguishable from a gate that passed, and\n"
+    "# the one it disarms first is the identity gate.\n"
+    "#\n"
+    "# git rev-parse --git-common-dir resolves to the MAIN repository's .git from\n"
+    "# inside any linked worktree, so its parent owns the venv. Each gate then\n"
+    "# resolves the TREE BEING COMMITTED for itself -- two roots, two questions.\n"
+    "COMMON=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0\n"
+    'ROOT=$(cd "$(dirname "$COMMON")" && pwd)\n'
+    'PY="$ROOT/venv/Scripts/python.exe"\n'
+    "\n"
+    "# NOT FOUND IS A LOUD ALLOW, NEVER A SILENT ONE. A missing interpreter is\n"
+    "# infrastructure rather than a red guard, and refusing on it is how a hook\n"
+    "# earns a bypass habit -- but passing in silence is how it stops being a gate.\n"
+    'if [ ! -x "$PY" ]; then\n'
+    '  echo "pre-commit: interpreter not found at $PY -- GATES DID NOT RUN. Allowing." >&2\n'
+    "  exit 0\n"
+    "fi\n"
+    "\n"
+) + "".join(f'"$PY" "$ROOT/{gate}" || exit 1\n' for gate in GATES)
+
+#: The relative-path body this script emitted until 2026-09-19. Known BY CONTENT
+#: so --check reports it as upgradeable rather than "unrecognised", which would
+#: refuse to touch it and leave every fresh clone with a hook that cannot run.
+LEGACY_RELATIVE = "#!/bin/sh\n" + "".join(
+    f"{LEGACY_PYTHON} {gate} || exit 1\n" for gate in GATES
 )
 
 #: The hook this repository installed before the boundary gate existed. Known
 #: BY CONTENT so an upgrade is safe; anything else is somebody's own work.
 KNOWN_IDENTITY_ONLY = (
-    f"#!/bin/sh\nexec {PYTHON} {GATES[0]}\n"
+    f"#!/bin/sh\nexec {LEGACY_PYTHON} {GATES[0]}\n"
 )
 
 
 def classify(text: str) -> str:
     if text == WANTED:
         return "current"
+    if text.strip() == LEGACY_RELATIVE.strip():
+        return "legacy-relative"
     if text.strip() == KNOWN_IDENTITY_ONLY.strip():
         return "identity-only"
     return "unrecognised"
@@ -98,7 +138,7 @@ def main() -> int:
         print("silently. Merge the two gate lines in by hand:")
         print()
         for gate in GATES:
-            print(f"    {PYTHON} {gate} || exit 1")
+            print(f"    {LEGACY_PYTHON} {gate} || exit 1")
         return 3
 
     if check_only:
