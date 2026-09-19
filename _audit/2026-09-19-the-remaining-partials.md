@@ -16,11 +16,28 @@ from a committed script and the command is named at each claim.**
 | `ARTICLE-SURFACE` | 6 | 5 | DECLINED -- prior wave's reason, now mechanised |
 | `ACCOUNT-VERIFICATION` | 3 | 2 | DECLINED -- sole candidate cross-claimed and already ruled |
 
-**ONE RED YOU MUST EXPECT.**
+**ONE RED YOU MUST EXPECT, AND ONE THAT IS NOT MINE.**
+
+*Mine, by design:*
 `tests/test_blocker_map_is_derived.py::test_the_committed_map_still_matches_what_the_evidence_derives`
 fails on exactly one row, `M M13`, because I appended evidence and did **not**
 run `--write` as instructed. Verified it is mine and only mine: restoring the
-tsv to `b43250b` and re-running gives **7 passed**. `--write` clears it.
+tsv to `b43250b` and re-running gives **7 passed**. `--write` clears it. The
+four non-browser census/menu suites are **74 passed, 1 failed** -- that one.
+
+*Not mine, and it is a BOX-LEVEL condition affecting every agent running
+browser tests tonight.* `tests/test_tracker_harvest_census.py`,
+`test_surface_census.py` and `test_the_messaging_census_refusals_can_fire.py`
+give 16 failed / 51 errors, all the same cause:
+
+    BrowserType.launch: Executable doesn't exist at
+    D:\dev-cache\ms-playwright\chromium_headless_shell-1243\...
+
+`playwright` is at **1.63.0**, which wants build **1243**; the shared cache
+holds `chromium_headless_shell` up to **1234**. The Python package was upgraded
+past the browsers. The fix is `playwright install chromium`, and **I did not run
+it**: it writes to a cache every live agent shares and downloads while other
+waves are mid-test. Flagged rather than done.
 
 ---
 
