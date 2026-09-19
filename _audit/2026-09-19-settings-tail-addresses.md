@@ -215,3 +215,45 @@ question for the row's owner and the wave that took the reading, not for me: it
 turns on what the row was always meant to mean, and removing or keeping a
 capability on somebody else's inference is the error that census pass exists to
 fix. Recorded here so it is visible in a diff rather than lost.
+
+## A3. WHAT THIS READING COULD NOT SEE, stated because a refusal that reports only what it missed is half a measurement
+
+**"Not among the 20" means NO HREF FOR IT IS DRAWN ON THE INDEX. It does not
+mean the capability is absent from settings**, and the difference is the whole
+of this section.
+
+The reading is narrower than it looks, for a measured reason: the index landed
+on `categories/account` and rendered **849 characters of text** with 0 forms, 0
+inputs and 0 toggles. All eleven subject needles -- `open profile`, `activity`,
+`embed`, `feed preferences`, `profile language`, `skill`, `certificate`,
+`learning` and the rest -- read **0 on both loads**. On a page carrying only its
+navigation chrome, those zeros are a fact about the INSTRUMENT and not about the
+data. This repository already has the law for it: *every "read zero" taken from
+a surface without its content rendered is a fact about the reader.*
+
+So the two claims this document is entitled to make are:
+
+1. **STRONG, and structural:** twenty settings addresses are drawn, they are
+   enumerated, and each one's refusing gate is pinned in a test. Nothing here
+   depends on page text.
+2. **WEAKER, and it is the one a reader will over-read:** none of those twenty
+   *is* the Open Profile toggle, the Activity default view or the embed setting.
+   That follows from the addresses alone. But a setting reachable only as a
+   **modal opened from inside a category page** would draw no href on the index
+   and would be invisible to this reading -- and `readonly.py`'s own reason for
+   admitting the index names exactly that possibility: *"whether a section is
+   url-addressed or a modal"*. **I answered the first half and not the second.**
+
+The control that keeps this honest rather than merely modest: the needle
+`easy apply` read 0 as required, but **so did every other needle**, so that
+control proves the counter runs and proves nothing about its sensitivity on this
+page. A control that cannot distinguish a true zero from an unrendered one is
+not a control for the question I was asking.
+
+**WHAT WOULD SETTLE IT**, named rather than implied: a read of one
+`categories/` page -- privacy or profile-visibility -- which is where these
+three toggles most plausibly live. Every one of those six pages is denylisted,
+so that measurement cannot be taken without a boundary change, which is the
+ruling section 6 already routes. **The blocker on these rows is therefore not
+"nobody knows the address". It is that the surface which would name it is behind
+a refusal this repository put there deliberately.**
