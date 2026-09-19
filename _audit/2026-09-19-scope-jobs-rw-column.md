@@ -168,3 +168,65 @@ claimed to be found both the ranges table and the duplicate ids.
 **An impossible value in your own output is a better lead than a plausible
 one**, and the only reason it was visible is that the pipeline printed the state
 rather than just counting it.
+
+---
+
+# AMENDMENT B — the ambiguous ids did NOT corrupt the map, and the reason is worth keeping
+
+Amendment A reported that row ids repeat in `jobs.md` and flagged the risk to
+any row-keyed join, the blocker map included. **I chased it, and the map is
+sound.** Reporting the reassuring result with the same care as the alarming one.
+
+## B1. The measurement
+
+    numeric row ids in jobs.md                     151
+    appearing in MORE THAN ONE row                  13   (57 and 127 three times)
+    of those, carrying a blocker-map entry          13
+    whose map entry resolves to the RIGHT row       13
+
+And across the whole map, not just the duplicates:
+
+    blocker-map rows checked against their census row's capability   409
+      exact match                                                    406  (99%)
+      truncated (a strict prefix of the census text)                   2
+      different wording                                                1
+      pointing at a census row that does not exist                     0
+
+**Zero bad joins.** The two truncations are both on capabilities longer than 109
+characters — a field-width clip, not a mis-resolution — and `J 42` is one of
+them, which is the only reason it looked ambiguous to my first check.
+
+## B2. WHY it is sound, which is the part to keep
+
+**The map carries the capability TEXT beside the id.** The id alone is ambiguous
+in 13 cases; the id plus the text is unambiguous in all 13.
+
+> **The redundancy that looks like verbosity is exactly what makes the join
+> auditable.** A leaner schema — id and blocker only — would have been
+> indistinguishable from this one while silently resolving some rows against the
+> wrong table, and nothing in the file would have shown it.
+
+## B3. The risk is real and it is for NEW tools
+
+**A future reader joining on the id alone is unsound**, and this is not
+hypothetical: **my own scratch parser hit it inside this analysis.** It read
+`jobs 17`'s state as `R` — because a second table's `R/W` value sits where the
+capability table's `state` sits, and a later row overwrote the earlier in a dict
+keyed by id alone.
+
+That is the same defect the map avoids, reproduced in a tool written by someone
+who had just finished reading the file.
+
+**So the standing instruction is a schema rule rather than a repair:** any join
+against `jobs.md` keys on `(id, capability)`, or verifies its match, or it is
+guessing. Nothing needs fixing in the map today.
+
+## B4. And a correction to Amendment A's own count
+
+A2 said "thirteen row ids"; a stricter re-run in this amendment initially said
+**eight**, and **the stricter run was the wrong one** — its header detection
+skipped tables and undercounted. The definitive count is **13 of 151**.
+
+Two readings, one instrument, and the more careful-looking one was less correct.
+**The tell was that they disagreed at all**, which is the only reason either got
+checked.
