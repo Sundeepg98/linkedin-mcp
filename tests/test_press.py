@@ -301,15 +301,79 @@ def test_the_structural_path_prices_by_argument_and_names_no_counter():
     counter at all, and claiming one would be the same over-claim in the other
     direction.
     """
+    basis = press.sensitivity_basis(
+        "https://www.linkedin.com/analytics/profile-views/"
+    )
+    assert basis["kind"] == "structural"
+    verdict = press.check_counters(
+        {"invitations": 0}, {"invitations": 0}, basis=basis
+    )
+    assert verdict["counters_ok"] is True
+    assert verdict["condition_3_route"] == "structural_argument"
+    assert verdict["priced_by"] == []
+    assert verdict["sensitivity_established"] is False, (
+        "route (b) is an ARGUMENT, not a measurement, and the field that "
+        "says so is what stops it being cited later as the stronger thing."
+    )
+    assert "argument, not a measurement" in verdict["weaker_than_route_a"]
+    assert verdict["bound"] and verdict["refuters"]
+
+
+def test_a_bare_assertion_is_not_a_structural_argument():
+    """A ROUTE (b) ENTRY MUST CARRY ITS BOUND AND ITS REFUTERS.
+
+    An argument nobody can attack is the shape this package refuses
+    everywhere else, and the first structural argument on the record is
+    exactly the one most likely to be cited later as though it were a
+    measurement. So the SHAPE is enforced rather than trusted.
+    """
     verdict = press.check_counters(
         {"invitations": 0},
         {"invitations": 0},
         basis={"kind": "structural", "why": "no third party on this surface"},
     )
-    assert verdict["counters_ok"] is True
-    assert verdict["basis"] == "structural"
-    assert verdict["priced_by"] == []
-    assert verdict["why"]
+    assert verdict["refused"] == "structural_argument_incomplete"
+    assert "bound" in verdict["why"] and "refuters" in verdict["why"]
+    assert verdict["reachable_by_this_route"] is True
+
+
+def test_every_declared_structural_basis_carries_the_full_shape():
+    """The table cannot acquire a bare assertion later without this going red."""
+    for marker, basis in press.SENSITIVITY_BASES:
+        if basis.get("kind") != "structural":
+            continue
+        for field in press._STRUCTURAL_REQUIRED:
+            assert basis.get(field), f"{marker} is missing {field}"
+        assert isinstance(basis["refuters"], tuple) and basis["refuters"], marker
+
+
+def test_the_route_field_distinguishes_all_three_outcomes():
+    """ESTABLISHED BY MEASUREMENT, ESTABLISHED BY ARGUMENT, OR NEITHER.
+
+    The third is a refusal, and the first two must be tellable apart at the
+    call site -- a verdict that said only "condition 3 passed" would collapse
+    a derivation and an argument into one word.
+    """
+    feed = press.check_counters(
+        {"off_state": 3}, {"off_state": 3},
+        basis=press.sensitivity_basis("https://www.linkedin.com/feed/"),
+    )
+    analytics = press.check_counters(
+        {"invitations": 0}, {"invitations": 0},
+        basis=press.sensitivity_basis(
+            "https://www.linkedin.com/analytics/profile-views/"
+        ),
+    )
+    neither = press.check_counters(
+        {"invitations": 0}, {"invitations": 0}, basis=None
+    )
+
+    assert feed["condition_3_route"] == "sensitive_counter"
+    assert feed["sensitivity_established"] is True
+    assert analytics["condition_3_route"] == "structural_argument"
+    assert analytics["sensitivity_established"] is False
+    assert neither.get("condition_3_route") is None
+    assert neither["refused"] == "no_sensitivity_basis"
 
 
 def test_the_basis_table_is_closed_and_not_caller_supplied():

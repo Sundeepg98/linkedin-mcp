@@ -42,6 +42,41 @@ probe rule concludes about it.
 4. **IT IS CLOSED AND THE CLOSURE VERIFIED** -- the toggle restored and the page
    confirmed as found.
 
+## THE WITNESS RIDES ALONGSIDE THE VERDICT AND NEVER DECIDES IT
+
+**THIS IS THE DESIGN POINT MOST LIKELY TO ERODE, so it is here rather than only
+in a wave's report.** :func:`disclose` returns a ``witness`` saying whether
+anything actually opened. It is **not a fifth condition**. Permission stays
+decided on safety alone, and folding disclosure in would turn a READING into a
+GATE -- refusing a perfectly safe press for the sin of being uninformative.
+
+**AND THE WITNESS IS ATTACHED TO REFUSALS TOO**, which is the half that looks
+like an oversight and is not. *"Refused on counters AND nothing opened"* is a
+different fact from *"refused"*, and a reader who has to infer which one they
+have will infer wrong. A refusal that drops the witness is a refusal that
+cannot be told from a press that was never informative in the first place.
+
+**WHY IT EXISTS AT ALL:** condition 4 compares the control's state before the
+press with its state after the DISMISSAL, and a successful Escape makes those
+equal whether or not anything ever opened. **Two readings cannot describe three
+states.** The gate was SAFE and BLIND, and those are different properties -- no
+row may be banked on a press verdict that carries no witness.
+
+## HOW CONDITION 3 IS SATISFIED, AND WHY THERE ARE TWO WAYS
+
+``priced_by`` once named every counter READ at both ends, so condition 3 could
+be shown PASSING and never shown capable of FAILING. Requiring SENSITIVITY
+instead would have been unsatisfiable almost everywhere -- a counter is shown
+sensitive only by a press of that class moving it, which for an outward counter
+is the write this gate prevents -- and **a condition nothing can satisfy is a
+disabled gate, not a stricter one**.
+
+So ``condition_3_route`` names which of two ways it was satisfied:
+``sensitive_counter`` (established, though DERIVED from what a label MEANS) or
+``structural_argument`` (an explicit case that no OUTWARD effect is possible,
+carrying its BOUND and its REFUTERS). ``sensitivity_established`` separates
+them, and **a merely readable counter is neither and prices nothing.**
+
 ## WHY THE CALLER CANNOT HAND IN A SELECTOR
 
 :func:`disclose` takes a SHAPE KEY from a closed tuple, not a selector string.
@@ -155,6 +190,19 @@ _SELF_SEGMENTS = frozenset({"me"})
 #: same reason ``SANCTIONED_SHAPES`` is: a basis a caller can assert is a basis
 #: a caller can invent, and "no outward effect is possible here" is exactly the
 #: claim somebody in a hurry would assert about a surface they had not read.
+#: **WHAT A ROUTE (b) ENTRY MUST CARRY.** A bare assertion is not an argument,
+#: and the shape is taken from the first one written
+#: (``_audit/2026-09-19-the-first-sanctioned-press.md`` section 8) rather than
+#: invented: the claims, THE BOUND it does not exceed, and what would REFUTE
+#: it. Enforced at runtime below and asserted in ``tests/test_press.py``.
+#:
+#: **ROUTE (b) IS WEAKER THAN ROUTE (a) AND MUST TRAVEL SAYING SO.** It is an
+#: argument, not a measurement. The ruling admits it because (a) is
+#: unsatisfiable on some surfaces, **not because the two are equivalent** --
+#: and the first structural argument on the record is exactly the one most
+#: likely to be cited later as though it were a measurement.
+_STRUCTURAL_REQUIRED = ("why", "bound", "refuters")
+
 SENSITIVITY_BASES: tuple[tuple[str, dict[str, Any]], ...] = (
     (
         "/feed/",
@@ -169,6 +217,48 @@ SENSITIVITY_BASES: tuple[tuple[str, dict[str, Any]], ...] = (
                 "a reaction is visible to the post's author -- so it is "
                 "OUTWARD. Availability verified by instrument (non-zero, read "
                 "3 on a live feed); sensitivity DERIVED and marked as such."
+            ),
+        },
+    ),
+    (
+        "/analytics/profile-views/",
+        {
+            "kind": "structural",
+            # WRITTEN BY THE WAVE THAT PRESSED HERE, not by this module.
+            # Recorded verbatim in shape from
+            # _audit/2026-09-19-the-first-sanctioned-press.md section 8, which
+            # is where the full argument and its provenance live.
+            "why": (
+                "(1) THE SURFACE ADDRESSES NO ONE -- it renders his own "
+                "profile-view analytics, with no recipient, no composer, no "
+                "third-party subject and nothing naming another account as a "
+                "destination; on this package's DESTINATION vs CONTENT line "
+                "an outward effect requires a destination and this page has "
+                "none. (2) THE PRESS TARGET'S SEMANTICS ARE VISIBILITY, NOT "
+                "SUBMISSION -- aria-expanded denotes the expanded state of a "
+                "region the control owns, over content already delivered to "
+                "the client. (3) THE RULING ALREADY REFUSES THE ALTERNATIVES "
+                "INDEPENDENTLY -- navigation, submission, composers, typing "
+                "and third-party surfaces are out by construction."
+            ),
+            "bound": (
+                "THIS ARGUES NO OUTWARD EFFECT, NOT NO EFFECT. An expansion "
+                "could plausibly cause a client-side or remembered-filter "
+                "write. That is a write in the weak sense and NO OTHER PERSON "
+                "CAN OBSERVE IT, which is precisely what an outward counter "
+                "measures. Anyone using this argument for a surface where "
+                "that distinction does not hold is misusing it."
+            ),
+            "refuters": (
+                "the expanded region containing any control that addresses a "
+                "person (message, invite, follow, endorse)",
+                "the expansion issuing a request whose effect another account "
+                "could observe",
+                "LinkedIn surfacing a third-party-visible signal from this "
+                "page, as a profile view is surfaced to its owner",
+                "any counter later shown sensitive to a press here -- which "
+                "would not refute the press but would move it from (b) to "
+                "the stronger (a)",
             ),
         },
     ),
@@ -382,12 +472,36 @@ def check_counters(
 
     kind = str(basis.get("kind"))
     if kind == "structural":
+        # A BARE ASSERTION IS NOT AN ARGUMENT. An entry without its BOUND and
+        # its REFUTERS cannot be attacked, and an argument nobody can attack
+        # is the shape this package refuses everywhere else.
+        missing = [f for f in _STRUCTURAL_REQUIRED if not basis.get(f)]
+        if missing:
+            return _refuse(
+                "structural_argument_incomplete",
+                f"this surface declares a structural basis missing {missing}. "
+                "Route (b) must state its claims, THE BOUND it does not "
+                "exceed, and what would REFUTE it -- otherwise it is an "
+                "assertion wearing an argument's clothes.",
+                terminal=False,
+            )
         return {
             "pressed": False,
             "counters_ok": True,
+            "condition_3_route": "structural_argument",
+            # NOT established by measurement. Route (b) is an ARGUMENT, and
+            # this field is what stops it being read as the stronger thing.
+            "sensitivity_established": False,
             "basis": "structural",
             "priced_by": [],
             "why": basis.get("why"),
+            "bound": basis.get("bound"),
+            "refuters": list(basis.get("refuters") or ()),
+            "weaker_than_route_a": (
+                "route (b) is an argument, not a measurement. It is admitted "
+                "because (a) is unsatisfiable on this surface, NOT because "
+                "the two are equivalent."
+            ),
             "read_at_both_ends": sorted(shared),
         }
 
@@ -405,6 +519,10 @@ def check_counters(
     return {
         "pressed": False,
         "counters_ok": True,
+        "condition_3_route": "sensitive_counter",
+        # Established, though DERIVED rather than watched: off_state's
+        # sensitivity follows from what the label constant MEANS.
+        "sensitivity_established": True,
         "basis": "sensitive",
         # NOW MEANS: shown sensitive to this press class AND read at both ends.
         "priced_by": sorted(named),
