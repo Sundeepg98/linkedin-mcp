@@ -2688,3 +2688,204 @@ permanently widens what the guard tolerates:
   `_relation` documents about itself.
 
 Companion record: `_audit/2026-09-05-jobs-requeue.md`.
+
+## 15. The profile version-skew gate, 2026-09-19
+
+    linkedin_server/profile_version.py      the gate
+    tests/test_profile_version_gate.py      its control, 36 tests
+
+Refuses a Playwright launch when the persistent profile's `Last Version` stamp
+is NEWER than the chromium about to open it. Commits `d6b55a0`, `05c2038`,
+`12dffe9`.
+
+### 15.1 A NET IS NOT A GATE, and the difference is where it runs
+
+`session_store.restore_into_context` had stood for three weeks as the answer to
+the downgrade that cost the signed-in session on 2026-08-25. It is not an
+answer, and reading its own docstring says why: it runs AFTER
+`launch_persistent_context`, it is "additive and conditional", and "every
+failure path returns restored: False". By the time it is asked anything,
+Chromium has already migrated the profile and moved it aside.
+
+**THE TEST THAT SEPARATES THE TWO, and it is two questions, not one:**
+
+* does it run BEFORE or AFTER the step that cannot be undone?
+* when it fails, does anything go red -- or does it return a falsey field into
+  a log line nobody reads?
+
+A mechanism that answers "after" and "returns falsey" is a net. Nets are worth
+having and this one is; what it must not do is occupy the slot where a gate
+was never built, which is what it had been doing.
+
+The rule it was standing in for existed only as PROSE -- a comment in
+`browser.py`, a docstring in `start_chrome.ps1`, a paragraph in the handoff
+file. Three statements of a rule and no consequence.
+
+### 15.2 WHEN A GATE FAILS OPEN, AUDIT THE READ, NOT THE COMPARE
+
+This gate allows on every uncertainty: no stamp file, unparseable stamp,
+unresolvable chromium version. That is correct -- you cannot prove a downgrade
+you cannot read, and failing closed would let one corrupt byte block every tool
+in the server.
+
+**But it means no input problem ever surfaces as an error. It surfaces as a
+silent pass on exactly the input the gate exists to refuse.** A leading BOM
+leaves the stamp as `\ufeff153.0.8010.48`, misses the version pattern, and the
+downgrade proceeds -- reported as `stamp_unparseable`, which reads like a
+diagnosis and is actually the failure. Fixed by reading `utf-8-sig`.
+
+**GENERALISES:** for any fail-open check, the decode and the parse are part of
+the attack surface and the comparison is not. Review effort goes where the
+silence is.
+
+### 15.3 A VERSION COMPARISON IS NEVER A STRING COMPARISON, and the data hides it
+
+`"152.0.7977.77" > "151.0.7922.34"` is True as text and would have passed
+review. `"9.0.1.0" > "10.0.1.0"` is also True as text, and wrong.
+
+**The live skew on this box sorts correctly either way**, so the bug could not
+have been found on the data anyone was looking at. It needs its own case,
+asserted in the direction the real data cannot exercise, with a control in the
+opposite direction so the case is not passing because the gate stopped
+refusing anything.
+
+### 15.4 Verifying a `.ps1` you must NOT run
+
+`scripts/start_chrome.ps1` starts Chrome. Its skew warning was misstating a
+version and could not be tested by running the script.
+
+**THE INSTRUMENT:** parse the shipped file with
+`[System.Management.Automation.Language.Parser]::ParseFile`, assert zero parse
+errors, `Find` the `FunctionDefinitionAst` by name, and `Invoke-Expression` its
+`.Extent.Text` -- the function's OWN shipped source, not a copy retyped into
+the harness. Then call it with arguments that exercise each arm. Reusable for
+any script whose side effects make a live run unacceptable, and the parse
+check alone is worth having: it is a syntax gate over the whole file for free.
+
+### 15.5 THE POWERSHELL NATIVE-STDERR TRAP -- latent in every script here
+
+Under `$ErrorActionPreference = 'Stop'`, Windows PowerShell 5.1 wraps each line
+of a NATIVE command's REDIRECTED stderr in an ErrorRecord, and Stop makes the
+first one TERMINATING. Measured:
+
+    CAUGHT:  System.Management.Automation.RemoteException
+    MESSAGE: Task was destroyed but it is pending!
+
+That is playwright's ordinary teardown noise becoming a control-flow event.
+Adding `2>$null` to hide it is what broke the function, on a box where it
+resolves perfectly. It failed CLOSED -- no number rather than a wrong one --
+so nothing was misreported, but the warning would have been permanently
+numberless with no visible cause.
+
+**Every `.ps1` in `scripts/` that sets Stop at file level and redirects a
+python or node child's stderr has this, whether or not anyone has noticed.**
+The fix is to scope `$ErrorActionPreference = 'Continue'` inside the function
+that owns its own try/catch, not to drop the redirect.
+
+### 15.6 `python -` puts the CURRENT DIRECTORY on `sys.path`
+
+An arm of the harness deliberately passed a WRONG module root and passed
+anyway, because cwd happened to be the repo. **Any check of an import path, run
+from inside the repo, is measuring cwd and not the argument.** Run those arms
+from `C:\`.
+
+Same family as the 2026-09-05 finding that a targeted run clears SHAPE
+violations but never ENUMERATION ones: what the check can see is decided by
+where it runs, not only by what it asserts.
+
+### 15.7 A GATE'S WORTH IS ITS CALL-SITE CENSUS, and it is one grep
+
+    grep -rn 'launch_persistent_context' --include='*.py' linkedin_server/ scripts/
+      linkedin_server/browser.py:239      <- the call site, gated
+      linkedin_server/preflight.py:5      <- a docstring quoting the error text
+
+    grep -rn 'user_data_dir' --include='*.py' linkedin_server/ scripts/
+      linkedin_server/browser.py:240      <- the same call
+
+One call site, so the gate is THE door and not one of several. **State the
+census, not the intent**: "nothing else launches" is a claim, and the two greps
+are the measurement. A gate on one of four doors and a gate on the only door
+are different objects that read identically in a commit message.
+
+### 15.8 An assumption you cannot discharge becomes a test, not a comment
+
+In HEADLESS mode this gate reads the version of a binary that is NOT the one
+about to run: Playwright publishes one executable path and it is the HEADFUL
+chromium, while a headless launch uses a separate `chrome-headless-shell` whose
+path the Python API does not expose (`preflight` measured that on 2026-08-22).
+The gate is right headless only because Playwright rolls both at one revision
+and one version.
+
+That is an assumption about somebody else's release process -- the kind that
+stops being true silently, in the direction of PASSING. It is now asserted
+against the installed package's own `browsers.json`, as AGREEMENT rather than
+as a number, so a routine browser roll needs no edit and a decoupling turns it
+red.
+
+**GENERALISES:** when a check rests on an upstream invariant you did not
+choose, the cheap move is not a comment. It is one assertion against the
+upstream artifact that already states it.
+
+### 15.9 Where the version came from, and why not the obvious places
+
+NOT a constant (`151` would be wrong after the next upgrade, silently, in the
+direction of passing) and NOT by running the binary (a launch is the thing
+being gated). Read off the path Playwright itself published, which `preflight`
+had already resolved -- so no second query and no reimplementation of the
+locating machinery:
+
+    <browsers>/chromium-1234/chrome-win64/151.0.7922.34.manifest
+
+**The version is the NAME of a file beside the executable.** Fallback for a
+layout without it (every Linux cell): the revision is in the path and the
+package ships `driver/package/browsers.json` mapping revision to
+`browserVersion`. Both routes are live -- the CI matrix runs two ubuntu cells
+and one windows, so the matrix exercises them rather than an argument.
+
+### 15.10 THE FULL SUITE EARNED ITS 21 MINUTES, and a clean clone did not
+
+This wave ran, in increasing order of cost and apparent authority: the new
+test file; the four affected files; the same five files IN A CLEAN CLONE. All
+green. The full suite then found a red that is this wave's:
+
+    FAILED tests/test_readers_outside_dom_are_a_pinned_inventory.py
+      newly unwired: ['profile_version.read_profile_stamp']
+
+**A CLEAN CLONE IS NOT A STRONGER VERSION OF A TARGETED RUN. It is the same
+SCOPE with less contamination.** It answers "does my slice depend on somebody's
+uncommitted file", which is worth knowing and is what it was run for. It cannot
+answer "did adding a module change a fact about the PACKAGE", because that
+question is not inside the files I named -- and I named the files.
+
+This is 2026-09-05's law arriving from a new direction. That entry said a
+targeted run clears SHAPE violations and never ENUMERATION ones, because an
+enumeration guard fires on *somebody added one* and that condition does not
+exist until it is added. The new half: **isolating the tree does not convert a
+targeted run into a whole-package one.** Sorting reds by what the assertion is
+ABOUT has a companion question -- what is the assertion QUANTIFIED OVER? A
+guard whose subject is "every module in the package" is only ever answered by
+running it over every module in the package.
+
+Practical form: **adding a FILE to `linkedin_server/` is an enumeration event.**
+Whatever else a wave runs, it owes the package-scope guards -- this one,
+`test_reader_reachability`, `test_page_text_is_never_printed`,
+`test_a_person_name_is_never_a_literal` -- which together take about 30 seconds
+and would have caught this before the commit rather than after it.
+
+### 15.11 The guard was right about the NAME, which is the rarer outcome
+
+The remedy was NOT a line in `KNOWN_UNWIRED`. That dict is empty and its own
+docstring says why: *"Do not read the empty dict as permission to add a line to
+it; read it as the state a new line would break."*
+
+The detector selects `read_*` functions no OTHER module calls. Every other
+`read_*` in the package is an entry point somebody calls; this one was a step
+inside `check()`, and the module IS wired -- `browser.start()` calls
+`assert_no_downgrade`. So the function was reachable and was claiming a
+vocabulary it did not belong to. Renamed `_read_profile_stamp`, matching the
+three private helpers already beside it.
+
+**Declaring would have moved "readers nobody can call" from a measured ZERO to
+a declared ONE, permanently**, to avoid a rename. When a guard fires on
+something you just wrote, the first question is not how to declare it -- it is
+whether the guard has just told you something true about your own code.
