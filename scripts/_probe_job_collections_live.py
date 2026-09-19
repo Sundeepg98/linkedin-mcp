@@ -168,9 +168,21 @@ async def _badge(page, label: str) -> None:
     except Exception as error:  # noqa: BLE001
         print(f"    badge {label}: UNREADABLE ({type(error).__name__})")
         return
+    # INTEGERS AND A PRESENCE FLAG. The badge's ``label`` is a raw page string
+    # -- measured 2026-09-19, it came back as a nav element's accessible name --
+    # and printing it is exactly what this wave's reader exists to avoid. It
+    # carries no member name today, and that is a fact about what LinkedIn
+    # happens to put there rather than a property anything enforces. The
+    # navigation taint guard does not cover it, because a badge is not
+    # navigation-derived; nothing else did either. So it is counted, not shown.
+    shown = {
+        key: value for key, value in sorted(read.items())
+        if key != "raw" and isinstance(value, (int, bool)) and not isinstance(value, str)
+    }
+    has_label = bool(read.get("label"))
     print(f"    badge {label}: " + "  ".join(
-        f"{key}={read.get(key)!r}" for key in sorted(read) if key != "raw"
-    ))
+        f"{key}={value!r}" for key, value in shown.items()
+    ) + f"  label_present={has_label}  error={read.get('error') is not None}")
 
 
 async def _read(page, label: str, url: str) -> dict:
