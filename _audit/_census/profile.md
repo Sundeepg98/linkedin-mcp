@@ -398,7 +398,7 @@ the denylist does not.
 | K7 | Remove a verification | W | EXCLUDED-RULED | `delete_or_withdraw_anything`, and `/delete` |
 | K8 | Top Voice blue badge on the profile | R | GAP | no tool, no reason |
 | K9 | Show / hide the Top Voice badge | W | GAP | `a1577365`; no tool, no reason |
-| K10 | Verification badge as it appears on job posts | R | GAP | no tool, no reason |
+| K10 | Verification badge as it appears on job posts | R | COVERED-UNFIRED | **BANKED 2026-09-19; SHIPPED CODE ALREADY SURFACES IT AND THE ROW SAID *no tool, no reason*.** `dom.read_job_insight_panels` returns `"verified_job": bool(markers.get("verified"))` (`dom.py:8313`), and `server.py:3665` assigns that WHOLE dict to `linkedin_job_detail`'s `insights`, so the field reaches a tool result. Read off `/jobs/view/<id>` -- an address already admitted and already loaded -- so **no boundary cost and no page load added**. It is a BOOLEAN, which is why it is admissible at all: a badge's presence carries no name. **HOW THIS WAS NEARLY MISSED, because the method transfers:** a grep for `verified_job` in `server.py` and `shape.py` returns ZERO, which reads exactly like a dead field. A field-name grep CANNOT SEE A DICT THAT PASSES THROUGH BY REFERENCE; only tracing the assignment does. **UNFIRED, NOT PROVEN:** no audit records this field's value coming back from a live posting. See `_audit/2026-09-19-read-tail.md` |
 
 ### L. Creator tools, followers and analytics (9)
 
