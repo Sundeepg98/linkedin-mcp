@@ -14,7 +14,7 @@ own instruments were wrong in ways I had to find myself.
 | denominator executed (`messaging`, a documented conditional) | **142 → 138** |
 | open question in the corpus answered | 1 (4 of 12 double-counted) |
 | published denominator reconciled | **761**, to within one row |
-| duplicates confirmed and held | 10 clean + 1 containment + 2 bundled |
+| duplicates confirmed and held | 10 clean + 1 containment (ruled, input pending) + 2 bundled |
 | guards built | **0** — feasibility says NOT TRACTABLE |
 | calibration failures of mine | **6**, all self-named |
 
@@ -156,8 +156,16 @@ the correction has a referent — the same method used on the blocker-20 headlin
 * **216 same-state candidates unread.** Head precision was 13 of 16; the tail is
   unmeasured and I decline to estimate it.
 * **13 duplicates registered, not subtracted** — no conditional exists for
-  `jobs`↔`profile` or `profile`↔`network`. The 2 bundled and 1 containment are
-  **not** subtractable even then.
+  `jobs`↔`profile` or `profile`↔`network`, so each subtraction is a new
+  decision and none has been asked for. **10 clean; 2 bundled, which are not
+  subtractable at all; and 1 containment, now RULED.**
+* **The containment is settled as a rule and open only as a reading**
+  (`cdcf14d` s7): **the grain follows what the platform DRAWS.** One control
+  with a reason parameter is one capability; two controls are two. *A
+  parameter value is not a capability.* Both rows stay until somebody reads
+  which shape that control has — **one read of an already-admitted surface.**
+  **That is a ruling with a missing input, not a deferral**, and the next wave
+  measures rather than re-argues.
 * **4 more double-counts found in a collapsed block** (`N67`/`N68`/`N71`/`N74`
   against `P O6-O20`), answering a question open in `network.md` since before
   today — also unexecuted, and the note states its own authority as *"a
