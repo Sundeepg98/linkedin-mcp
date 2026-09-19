@@ -179,3 +179,74 @@ for the measurement queue.
 **Every hole is recorded with WHY it is a hole.** An empty slot with no reason
 attached is indistinguishable from one nobody got to, and that confusion is what
 produced a 268-row backlog in the first place.
+
+---
+
+## REQUEST 4 -- THE LEDGER-VS-CENSUS CONFLICT: RULED FOR THE CENSUS
+
+Ruled 2026-09-19 12:50 by the box, on amendment B of the ruling-requests file
+and the measurement at `c1991ac`.
+
+### MY OWN PROPOSED DEFENCE WAS REFUTED BY MEASUREMENT, AND THAT IS THE POINT
+
+I suggested the conflict might dissolve if section 2's range-keyed column were
+**coarse by construction** -- a range-level `W` never having been a row-level
+claim. **It was measured and it is not.**
+
+    groups marked plain R or plain W, wholly inside a published blocker   15
+    AGREE with the published split                                        14
+    CONTRADICT                                                             1   <- 78-83
+
+**And `106-114` is the case that kills the defence.** It sits inside
+`COMPANY-PAGE-SURFACE`, published **13R/5W** -- a MIXED blocker -- and the group
+is still correctly all-`R`, because that blocker's writes are elsewhere. **A
+coarse column would have smeared exactly there, and did not.**
+
+**The vocabulary settles what is left.** It carries `R + W`,
+`R (results) + W (the session)`, and decisively **`R (28, 30 are W)`**. A column
+that can say *"R except rows 28 and 30 are W"* has per-row exceptions available
+and uses them when it means them. **So a plain `W` from that vocabulary is a
+positive claim of no reads**, not a shrug.
+
+### RULED: THE CENSUS IS RIGHT. THE LEDGER'S `1R` IS THE ERROR.
+
+Three independent grounds, and the third is the general one:
+
+1. The census column is **demonstrably precise** -- 14 of 15, plus the mixed
+   blocker it did not smear, plus exceptions it declines to use here.
+2. All six capabilities in `78-83` read as acts. Observing a rate-limit state is
+   a **side effect of applying** rather than a surface anyone reads on purpose,
+   which is plausibly how it came to be costed as a write.
+3. **The ledger's `1R` is a single number with no stated derivation.**
+
+> **WHEN TWO FIRST-PARTY SOURCES DISAGREE, PREFER THE ONE WHOSE PRECISION IS
+> MEASURABLE.** The census column can be TESTED for coarseness, and was, and
+> passed. The ledger split cannot be tested at all. **A source that can be
+> audited beats a source that can only be believed** -- and that is a different
+> rule from *source beats reader*, which does not decide a case with no reader
+> in it.
+
+### WHAT THIS DOES AND DOES NOT DO
+
+**It does not fill a row.** The wave said so before I could: ruled this way the
+blocker is `5W`-shaped with six candidates for five slots and **still does not
+close.** `PREMIUM-APPLY-SURFACES` stays 0 of 5.
+
+**What it does is retire a discriminator.** That `1R` may no longer be cited as
+evidence in any filing. **A wrong discriminator is worse than a missing one**,
+because it produces confident wrong filings instead of honest holes -- which is
+precisely what it did to me ninety minutes ago, when I filed `J 82` on it and
+had to retract.
+
+**Nothing retroactive.** Section 2's column was evidence in four filings this
+round -- `JOB-ALERTS` 7/7, `PREMIUM-JOBS` 3/3, `COMPANY-PAGE`,
+`JOBS-APPLICATION-FORBIDDEN` 3/3 -- and **all four agree with their ledger
+split**, so none is disturbed whichever way this went. The wave declined to
+retract them pre-emptively and was right to: they have other axes.
+
+### AND THE RETRACTION'S BOOKKEEPING WAS HANDLED CORRECTLY
+
+`UNASSIGNED 41 -> 42` is **the only rise of the campaign**, and it was recorded
+deliberately with the reason in the ratchet comment rather than cleared. **That
+is the difference between recording a retraction and hiding a regression**, and
+a ratchet that can never move up is a ratchet that punishes honesty.
