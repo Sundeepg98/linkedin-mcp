@@ -272,6 +272,32 @@ and it is about the test.**
   twelve shipped writes meet it; the bar is neither to be raised per-capability
   nor lowered; and `writes._NINE_REFUSALS` is measured shut and must not be
   routed into. **The blocking input is the enumeration, which is section 3.1.**
+
+  **BUT ONE OF THE SIXTEEN IS NOT BLOCKED, AND IT IS THE ONE WORTH WRITING
+  FIRST.** Row 66's two writes are the exception to everything in this bullet,
+  because their DOM has actually been measured -- by the predecessor, twice, with
+  two independent readers:
+
+      recipient_boxes  0     <- a thread has nobody to choose
+      editors          1     contenteditable
+      send_controls    1
+      send_disabled    True  <- on an empty box
+
+  A reply into an existing thread is therefore **ADDRESSLESS** -- there is no
+  recipient to commit, which is exactly the step that makes the rest of this
+  surface unmeasurable by any read -- and the disabled-on-empty Send is the
+  transition signal `publish_post` and `send_message` already gate on, so a fill
+  that lands is observable without reading what was typed. The census calls the
+  addressless-reply route the most job-hunt-relevant messaging action in all 761
+  rows.
+
+  **So the honest split of the write half is 14 blocked and 2 available**, and
+  the two available ones need no menu, no press and no hover. I did not write
+  that spec -- it belongs in `writes.py` beside the twelve shipped writes, it is
+  the most safety-critical file in this package, and starting it in the last
+  forty minutes of a session is how a gate gets written that nobody re-reads.
+  **It is the first thing to pick up, and it starts from a measured DOM rather
+  than an imagined one, which is the whole difference.**
 * **The full suite was not run** (29 minutes). Run: `test_readonly.py` +
   `test_readonly_boundary_invariant.py` (249 passed), `test_menus.py` (57
   passed), the taint guard, and the tracked-file identity sweep after every
