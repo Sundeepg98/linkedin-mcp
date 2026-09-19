@@ -1,10 +1,12 @@
-"""Five ways to find a profile SECTION -- and the fifth found the real fault.
+"""Five ways to find a profile SECTION. Four failed their controls; the fifth misled me.
 
 ``recommendations.py`` is a shaper with no page reader -- the state
 ``groups.py`` was in before ``groups_page.py``. Writing that reader needs the
 recommendations section's structure, and **nobody in this repository has
-established it.** This script is the record of five attempts. The first four failed their
-controls; the fifth explains why all of them did.
+established it.** This script is the record of five attempts and one RETRACTION. The first
+four failed their controls. The fifth produced a dramatic finding that I
+published and then refuted myself -- the retraction is below and is the most
+useful part of the file.
 
 ## EVERY APPROACH CARRIES A CONTROL, AND THAT IS THE WHOLE VALUE
 
@@ -43,36 +45,61 @@ satisfy the same selector.
 
     5  the FLIGHT PAYLOAD via dom.read_sdui_actions        2,146 chars
        ...against this package's OWN RECORDED figure for the same address,
-       1,091,238 chars and 92.7% of the document. **This load is 0.2% of
-       that.** experience / education / recommendation / skills all read ZERO
-       hits in it.
+       1,091,238. **I CONCLUDED FROM THAT THAT /in/me/ SERVES A 2 KB SHELL,
+       PUBLISHED IT, AND IT IS WRONG. See the retraction below.**
 
-## THE ANSWER, AND IT IS NOT ABOUT SELECTORS AT ALL
+## RETRACTED: THE "2 KB SHELL" FINDING, AND HOW IT FELL
 
-**``/in/me/`` IS SERVING A NEAR-EMPTY DOCUMENT.** Approach 5's control is what
-turns that from a guess into a measurement -- the same reader, in the same
-session, on two other admitted addresses:
+I read ``payload_chars`` ONCE on the profile (2,146), compared it to the
+recorded 1,091,238, and took a feed reading of 5,063,129 in the same run as
+the control that said the instrument was fine. That looked like a regression
+three orders of magnitude deep.
 
-    feed            3 script blocks   5,063,975 payload chars
-    jobs search     1 script block          227 payload chars
-    profile         2 script blocks        2,146 payload chars
-    profile, RECORDED PRIOR              1,091,238
+**THEN THE FEED READ 2,146 TOO** -- same address, minutes later, same reader,
+the exact number the profile gave. So I asked the question I should have asked
+first.
 
-**The instrument is fine** -- it reads five megabytes off the feed. The profile
-is the anomaly, and it is short by three orders of magnitude against a figure
-this repository recorded itself.
+    WITHIN one load, read 5 times     feed 2146 x5      profile 2146 x5
+    ACROSS loads, same address        feed 5,063,129
+                                           2,146
+                                           5,147,717
 
-So every approach above was searching a document that does not contain the
-thing. **Four selector failures and a payload miss are ONE fault, upstream of
-all of them**, and no amount of better selecting would have reached it.
+**STABLE WITHIN A LOAD, AND THREE ORDERS OF MAGNITUDE APART ACROSS LOADS OF THE
+SAME ADDRESS.** So ``payload_chars`` measures how much script content that
+PARTICULAR load happened to carry, and **one reading of it cannot establish
+anything about a page.** My finding was one reading.
 
-**WHAT THIS DOES NOT ESTABLISH:** why. A shell that hydrates client-side and
-does not finish under CDP attach, a session state specific to this address, or
-a LinkedIn change are all consistent with it and nothing here separates them.
+**I ALSO GOT THE RETRACTION'S REASON WRONG ONCE.** Seeing feed and profile both
+at 2,146 I wrote that the number was a CONSTANT and distinguished nothing. The
+next run read the feed at 5,147,717, which refutes that too. The accurate
+statement is the narrower one above: it varies per load, so a single sample is
+not evidence. **Correcting a correction is worth the two lines it costs --
+a retraction resting on a wrong reason is one more thing to retract.**
 
-**AND IT REACHES PAST THIS WAVE.** Anything in this package that reads
-``/in/me/`` is currently reading a 2 KB shell. That is worth knowing before a
-profile row is banked or retired on a zero.
+**WHAT THE READINGS DO AND DO NOT SUPPORT.** The profile read 2,146 on every
+load measured (four); the feed read large on two of three. That is suggestive
+and it is NOT a regression claim, because the same instrument produced 2,146
+for the feed as well, and one sample per address cannot carry three orders of
+magnitude.
+
+**AND THE DOM SAYS THE OPPOSITE OF A SHELL:** the profile draws **236
+controls, 143 links, 85 buttons**. That is a fully rendered page. A document
+serving 2 KB does not have 236 controls, and I had that number in the same run
+without reconciling it against the story I was telling.
+
+**WHAT ACTUALLY REMAINS TRUE FROM APPROACH 5:** nothing about the profile. The
+needle hits were zero, on an instrument that reports a constant, so they say
+nothing either.
+
+## THE ONE SOLID FINDING FROM THIS RUN, and it is not the one I chased
+
+    /in/me/   requested: ADMITTED      landed: REFUSED BY THE BOUNDARY
+
+**The profile is admitted at the REQUEST and its landing is refused.** That is
+the class this repository already has an instrument for -- an address that
+passes ``assert_read_url`` on the way out and would not on the way back. It is
+measured, reproducible, and it is a genuine boundary observation rather than a
+story about rendering.
 
 ## WHAT THIS SCRIPT DOES NOT CLAIM
 
@@ -251,10 +278,16 @@ async def main() -> int:
                 feed = await dom.read_sdui_actions(page, "search")
                 feed_chars = int(feed.get("payload_chars") or 0)
                 print("    feed payload chars    : %9d" % feed_chars)
-                if feed_chars > chars * 10:
-                    print("    -> THE INSTRUMENT IS FINE. The profile is the")
-                    print("       anomaly, short by orders of magnitude against")
-                    print("       a figure this repository recorded itself.")
+                if feed_chars == chars:
+                    print("    -> IDENTICAL TO THE PROFILE on this load. The")
+                    print("       same reader has also read this address at")
+                    print("       5.1M, so the number varies per load and one")
+                    print("       sample of it is not evidence about a page.")
+                elif feed_chars > chars * 10:
+                    print("    -> the feed reads far larger on THIS load. That")
+                    print("       is suggestive and NOT sufficient: the same")
+                    print("       address has read 2,146 on another load, so")
+                    print("       compare across loads before believing it.")
                 else:
                     print("    -> the reader is thin everywhere; this says")
                     print("       nothing about the profile specifically.")
@@ -265,11 +298,12 @@ async def main() -> int:
             fired = all(by_text.get(term, 0) > 0 for term in CONTROLS)
             print("=== DID THE CONTROLS FIRE? %s" % fired)
             if not fired:
-                print("    NO -- and approach 5 says WHY. Nothing in 1-4 is a")
-                print("    reading about the account, because the document they")
-                print("    searched is 0.2% of the size this package recorded")
-                print("    for this address. Four selector failures and a")
-                print("    payload miss are ONE fault, upstream of all of them.")
+                print("    NO. Nothing in 1-4 is a reading about the account.")
+                print("    Approach 5 looked like it explained why and did not:")
+                print("    payload_chars returns the SAME CONSTANT on the feed")
+                print("    and on the profile, so it distinguishes nothing. The")
+                print("    census in this run reports 236 controls on the")
+                print("    profile, which is a fully rendered page, not a shell.")
 
             after = await dom.read_invitation_badge(page)
             moved = [key for key in sorted(set(before) | set(after))
