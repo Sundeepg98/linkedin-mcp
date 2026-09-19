@@ -473,3 +473,50 @@ capture of the delta above was piped through `tail -12` and cut two failures
 off the top, which would have let me claim five tests cleared instead of
 three. It is the same truncation defect that left thirteen failures unseen
 this morning. Re-taken in full rather than reported from the fragment.
+
+---
+
+## 8. AMENDMENT: THE PRIVATE-INDEX ROUTE HAS A SECOND EDGE, MEASURED AT 13:54
+
+`d9bfff7` identifies the private index as the route for committing a NEW file
+in a contended tree, and it is right: `GIT_INDEX_FILE` at a scratch path plus
+`git read-tree HEAD` means the shared index is never touched and the
+eleven-second sweep window never opens. This document was committed that way,
+as `6382c56`, and the window did not open.
+
+**BUT IT LEAVES THE SHARED INDEX STALE AGAINST THE NEW HEAD, AND THE STALENESS
+HAS A DIRECTION THAT MATTERS.** Measured immediately after, with
+`GIT_INDEX_FILE` unset:
+
+    $ git status --porcelain
+    D  _audit/2026-09-19-unblocking-the-stranded-commits.md
+
+The shared index still held the pre-commit tree, which does not contain the
+new file, while HEAD now does. Git reads that difference as a **STAGED
+DELETION**. A neighbour running a plain `git commit` in that window would not
+merely have missed the file -- **it would have committed its removal**, under
+their message, which is the same sweep hazard with the sign flipped and a
+worse outcome: the sweep preserved the bytes and lost the attribution, this
+would lose the bytes.
+
+**THE REPAIR IS ONE SURGICAL COMMAND, AND THE SURGICAL PART IS LOAD-BEARING:**
+
+    git reset -q -- <the one path>
+
+A bare `git reset` would have done it too and would have been wrong: it resets
+every path, so in a shared tree it silently unstages whatever a neighbour has
+staged at that moment. **The remedy for a multi-writer hazard must not itself
+be a multi-writer hazard.** Pathspec-scoped, the working tree is untouched and
+no other writer's staging is disturbed. Verified after: `git diff --cached`
+empty, the file present on disk and resolvable at `HEAD`.
+
+**THE RULE, SO THE NEXT WAVE DOES NOT PAY FOR IT:** a private-index commit is
+two steps, not one. Commit with `GIT_INDEX_FILE` set, then `git reset -- <the
+same path>` with it unset. Between those two steps the shared index carries a
+staged deletion of the file you have just committed, so keep the gap as short
+as one command.
+
+**AND IT IS ONLY NEEDED ONCE PER FILE.** `git add` is unavoidable for an
+untracked path, which is what opens the window at all. Once the file is
+tracked, `git commit --only -- <path>` needs no add and has no window -- which
+is how this amendment itself was committed.
