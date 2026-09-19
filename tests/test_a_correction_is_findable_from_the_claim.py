@@ -183,6 +183,27 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # TWO MORE, 2026-09-19, from the remaining-partials wave. Both cite the
+    # record that SETTLES a question. The third candidate that wave produced IS
+    # a real correction -- of a RULING, not of a slice -- and is declared with a
+    # CORRECTS:/CORRECTED BY: pair instead of an entry here.
+    ("2026-09-19-the-remaining-partials.md", "messaging-and-content.md"): (
+        "THE CENSUS IS THE RECORD THAT KILLS A CLAIM, NOT THE CLAIM BEING "
+        "KILLED. The sentence reads 'That is dead:' followed by what the "
+        "slice's own C48 note records. The census is quoted as the "
+        "authority that settles it; nothing in it is asserted wrong. Sixth "
+        "instance tonight of proximity matching pairing a corrector with "
+        "its evidence. "
+    ),
+    ("2026-09-19-the-remaining-partials.md", "profile.md"): (
+        "A ROW'S SLICE AND SECTION STATED AS A FACT. The passage identifies "
+        "Newsletter analytics as a profile.md section L row while testing "
+        "whether an over-published neighbour holds a row of the creator-hub "
+        "family. profile.md is the record consulted to establish where a "
+        "row lives, which is the ordinary use of a census slice and not a "
+        "correction of it. "
+    ),
+
     # THREE MORE, 2026-09-19, from the unassigned-21 wave. All three cite the
     # record that SETTLES a dispute rather than a record being corrected. The
     # genuine correction that wave made -- against the row-walk, not against any

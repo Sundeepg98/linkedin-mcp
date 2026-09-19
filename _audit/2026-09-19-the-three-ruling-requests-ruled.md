@@ -259,3 +259,5 @@ retract them pre-emptively and was right to: they have other axes.
 deliberately with the reason in the ratchet comment rather than cleared. **That
 is the difference between recording a retraction and hiding a regression**, and
 a ratchet that can never move up is a ratchet that punishes honesty.
+
+**CORRECTED BY:** `_audit/2026-09-19-the-remaining-partials.md` -- the pick above was forced by a single open write slot, and that slot was held by a row that did not belong to this blocker. With it moved, both candidates fit and the split closes at 2R/3W exactly. The tiebreak this ruling called a coin-flip no longer has to be taken, and the candidate it set aside is now filed.

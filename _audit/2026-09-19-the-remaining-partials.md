@@ -156,6 +156,8 @@ one capability sharing a blocker is the ledger's ordinary behaviour.
 
 ### 2.3 What follows
 
+**CORRECTS:** `_audit/2026-09-19-the-three-ruling-requests-ruled.md` -- its request 3 set one candidate aside on a tiebreak it named a coin-flip, forced by a single open write slot. The slot was held by a row that belongs to another blocker; with that corrected both candidates fit and the set-aside one is filed.
+
     BADGES-SURFACE         K8(R) K10(R)  B8(W) B9(W) K9(W)  = 2R/3W = published
     OPEN-TO-HIRING-MODAL   J4(R)         J1 J2 J3(W) B7(W)  = 1R/4W = published
 
