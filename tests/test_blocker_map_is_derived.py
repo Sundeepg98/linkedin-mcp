@@ -694,7 +694,24 @@ import build_blocker_map as bbm  # noqa: E402
 #:
 #: ONE ASSIGNMENT OF N 5 LANDS BOTH COUNTS AND THE OTHER LANDS NEITHER.
 #: The wrong answer is refuted by arithmetic, not by preference.
-UNASSIGNED_CEILING = 44
+#: 44 -> 41. JOBS-APPLICATION-FORBIDDEN 3 of 3, the lexical matcher from
+#: request 2b applied a SECOND time. That misroute taught that a blocker
+#: named for a MECHANISM is separated by that mechanism, not by direction.
+#: This one is named for a forbidden substring too, and the ledger says so:
+#: "/jobs/application is the FIRST entry on the forbidden tuple" --
+#: literally true, readonly.py opens the tuple at 1101 and it is line 1102.
+#:
+#: Section 2 answers the lexical question for the whole run: 70-73 "needs
+#: the JOB APPLICATION SETTINGS surface on the allowlist AND a file-input
+#: driver" -- TWO blockers named in one sentence, and the run splits the
+#: same way N 5 split from N 6-N 8. J 70 needs the DRIVER and is already in
+#: FILE-UPLOAD-UNSANCTIONED; J 71, J 72, J 73 need only the address.
+#:
+#: AND THE LEDGER'S WHY CITES ROWS THAT ARE NOT ITS OWN: "the same slice
+#: cites it as EXCLUDED-RULED for rows 74-77" -- and J 74-77 are NOT IN THE
+#: FROZEN 409. They are precedent for the substring biting, not membership.
+#: A why that names row ids is not always naming its own rows.
+UNASSIGNED_CEILING = 41
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
