@@ -182,6 +182,24 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("2026-09-19-settings-tail-addresses.md", "2026-09-05-settings-tail.md"): (
+        "the cited claim is CONDITIONAL and survives intact. The 09-05 wave "
+        "wrote that FEED-PREFERENCES is substring-blocked and so cannot be "
+        "reached by an allowlist edit -- expressly hedged, in its own words, "
+        "as true 'even if that is its address'. It never asserted an address. "
+        "The 09-19 wave read the real one off LinkedIn's settings index "
+        "(/mypreferences/d/unfollowed, refused by '/unfollow' rather than the "
+        "illustrative /feed/follows/ refused by '/follow') and reached the "
+        "SAME verdict by the same gate. So nothing in the 09-05 document is "
+        "asserted wrong: a conditional whose consequent is confirmed is not "
+        "refuted by learning its antecedent. The repair vocabulary near the "
+        "citation is the 09-19 wave describing the REASONING ROUTE -- that a "
+        "guessed address happening to reach the right verdict still leaves "
+        "the row unmeasured -- which is a remark about method, not a claim "
+        "that the conclusion is false. A CORRECTED BY: pointer would tell a "
+        "reader the 09-05 analysis had been refuted by a document whose own "
+        "heading says it sharpens that analysis rather than overturning it"
+    ),
     ("2026-09-05-article-publish.md", "INSTRUMENTS.md"): (
         "a handover note about WHO COMMITS the register, not a claim about "
         "what it contains. The wave found another wave's 49 uncommitted "
