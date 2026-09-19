@@ -224,7 +224,38 @@ import build_blocker_map as bbm  # noqa: E402
 #: the four EXCLUDED-RULED rest on readonly.py's admission COMMENT, prose in a
 #: source file, which nothing can be shown failing against. They stay GAP and
 #: the map records where the ledger counts them.
-UNASSIGNED_CEILING = 162
+#: 162 -> 145. SEARCH-RESULTS-SURFACE COMPLETE at 21 of 21, the last big
+#: blocker, and it was found by FIXING THE ENUMERATOR A SECOND TIME.
+#: 2026-09-05-search-results-consent.md scored 3 on every earlier sweep and
+#: names 18 unassigned rows, because it writes its set as a DASH RANGE --
+#: `N 79-95` is seventeen rows and the pattern saw two. Same defect as the
+#: word list: an approximate reader over a structured notation.
+#:
+#: Its section 4 closes its counts twice. By row: N 79-95 (17R) + 2
+#: unattributed (2R) + N 96 (1W) + N 4 (1W) = 21. By SPLIT: 19R/2W, the
+#: ledger's published split exactly. The 17 decomposes to its own prose too
+#: -- person + People + 13 filters + multi-location + recent = 17.
+#:
+#: THE TWO IT COULD NOT ATTRIBUTE WERE CLOSED FROM OUTSIDE. It offers three
+#: candidates for two slots (N 104, N 161, N 179), which does not eliminate.
+#: The groups document gave N 161 to this blocker by name and the events
+#: document gave N 179; both were filed here before this source was read, so
+#: the fit is not one I arranged. N 104 is the leftover and stays out.
+#:
+#: THE TWO IT OVER-CLAIMS SETTLE THE COUNT. Its 17R block ends at N 95 and
+#: its 1W line is N 96; both are held by SEARCH-HISTORY-SURFACE, which
+#: publishes exactly 2 and is COMPLETE holding exactly those two. The source
+#: half-concedes it -- of N 96 it says "It is a re-file, not a decision."
+#: So the block is sixteen rows, and with that the blocker closes on the
+#: nose: 16 + N 4 + the two carve-ins + the two post-freeze re-files (N 194
+#: by Amendment A13, M C70 by the groups document) = 21 of 21.
+#:
+#: THE SPLIT IS NOT CLAIMED FOR THE POST-FREEZE SET. The published 19R/2W
+#: describes the FROZEN set, which held N 95 and N 96. Giving those back and
+#: taking in two re-files moves the split while leaving the count alone --
+#: which is what a re-file does, and A13 says it itself ("taking the
+#: ledger's own figure to 22"). The count is the check that survives.
+UNASSIGNED_CEILING = 145
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
