@@ -259,4 +259,33 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # would have forced it into the one module ``_composer_audience_is_
     # readable`` feature-detects on; it was re-expressed with locators
     # instead and reproduced the validated split on its first live run.
-    assert len(_tool_names()) == 42
+    #
+    # 44 FROM 2026-09-19: TWO AT ONCE, BOTH READS, AND THIS PIN WAS NOT THE
+    # LAST SITE TO MOVE -- IT IS THE ONE THAT GOT MISSED.
+    #
+    #     linkedin_job_collections     633312f, 11:13
+    #     linkedin_creator_analytics   4272994, 12:42
+    #
+    # MEASURED OFF THE REGISTRY, NOT THE SOURCE, and not relayed from the
+    # commit that moved the other sites: ``len(_tool_names())`` reads 44 on
+    # this tree and both names are in it. An AST count of the ``@mcp.tool()``
+    # decorator returned 46 on this same tree the same afternoon and was wrong,
+    # which is why the registry is the instrument and the decorator is not.
+    #
+    # ``385eeda`` moved four sites -- ``EXPECTED_TOOLS``, the count assertion
+    # in ``test_server_surface.py``, the read split, and that test's own name
+    # -- under a message reading "the pin was the LAST site to move". It was
+    # not. This fifth site sat at forty-two, and the file left stale was the
+    # one whose own comments say a bump is the cheapest way to clear a test.
+    # **A COUNT PINNED IN TWO FILES IS TWO PINS**, and a rename sweep that
+    # greps for the number it is moving finds the sites spelled in digits and
+    # misses none; a sweep that greps for the test NAME finds only its own
+    # file. The second is what happened.
+    #
+    # IT STILL DOES NOT WEAKEN THE CONTROL ABOVE, and that was re-measured
+    # rather than assumed: with the pin standing at 42 against a real 44, this
+    # test failed HERE and nowhere else -- both rule assertions ran green over
+    # ``REGISTRY_WHILE_BROKEN`` first. The demonstration compares a two-entry
+    # reading BY CONTENT and reads no count, so the number moving cannot reach
+    # it.
+    assert len(_tool_names()) == 44
