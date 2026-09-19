@@ -452,7 +452,25 @@ import build_blocker_map as bbm  # noqa: E402
 #: census and exactly one is a capability that IS a celebration. C33
 #: ("Choose WHICH reaction (Celebrate, Support, Love...)") would have been
 #: taken by a substring match; reading what the capability DOES excludes it.
-UNASSIGNED_CEILING = 89
+#: 89 -> 85. CONTENT-ANALYTICS-SURFACE to 4 of 5, published 5R.
+#: The split does the selecting again and excludes a row the name score
+#: wanted: M C46 "Embed content within an article" ties at the top and is
+#: a W, so a 5R blocker cannot hold it. The four that remain are all R and
+#: all analytics. M C38's census note names an /analytics/creator/ address,
+#: which is the allowlist +1 the ledger charges -- cost and measured
+#: address agreeing from opposite ends, as with SCHOOL-PAGE-SURFACE.
+#: The fifth is NOT guessed: every other analytics row is already filed on
+#: a stronger source (P L1, P L8 by census section; P L4 by shipped code).
+#:
+#: BADGES-SURFACE IS DECLINED, AND THE REASON IS A DUPLICATED CAPABILITY.
+#: Published 2R/3W with SIX candidates: K8 (R), K10 (R), B7 (W), B8 (W),
+#: B9 (W), K9 (W). The two reads are forced, but four writes compete for
+#: three slots -- and B8 "Top Voice badge show / hide" and K9 "Show /
+#: hide the Top Voice badge" are THE SAME CAPABILITY in two slices. Which
+#: id the lost classifier used is exactly the substitution risk the
+#: retire-rulings wave flagged for M 24 / M 42, and it called that a
+#: RULING. Reported, not assigned.
+UNASSIGNED_CEILING = 85
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
