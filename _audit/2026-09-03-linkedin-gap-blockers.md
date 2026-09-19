@@ -1563,3 +1563,56 @@ and 2885's urls are only EMITTED -- but the distinction is not in the words,
 and it is load-bearing prose about the boundary. Not edited here: `server.py`
 had another wave writing in it throughout this review, and the correction is a
 sentence somebody who owns that file should choose.
+
+---
+
+# AMENDMENT C -- 2026-09-19. SEVEN SETTINGS-SHAPED BLOCKERS ARE COSTED IN THE WRONG CURRENCY
+
+Blockers 72, 78, 79, 80, 85, 86 and 87 are each charged **`allowlist +1,
+WriteSpec`, cost 7, queue BUILD** in the ranked table at section 3. A recon doc
+on 2026-09-05 found that none of their rows names an in-product address, so the
+charge stood for an unknown. The addresses have now been read off LinkedIn's own
+settings index -- an address already on the allowlist, no pattern added -- and
+the charge is wrong in a second and deeper way.
+
+**Of the 20 settings addresses that index draws, 16 are refused by a FORBIDDEN
+SUBSTRING and 3 by nothing but the absence of a pattern.** The substring gate
+runs before the allowlist loop is consulted at all, so on those 16 an allowlist
+addition changes nothing. `allowlist +1` is not a smaller version of the right
+edit; it is a different edit that does not reach.
+
+## C1. The re-costing, per blocker
+
+| # | blocker | the ranked table says | what it actually needs |
+|---|---|---|---|
+| 78 | `OPEN-PROFILE-SETTING` | allowlist +1, BUILD | **a RULING** -- no href on the index; the toggle sits behind a denylisted `categories/` page |
+| 80 | `ACTIVITY-VIEW-SETTING` | allowlist +1, BUILD | same, plus the surface is still unidentified |
+| 86 | `EMBED-SETTING` | allowlist +1, BUILD | same |
+| 85 | `FEED-PREFERENCES` | allowlist +1, BUILD | **an exact-url exemption AND an anchored pattern** -- two boundary edits, not one |
+| 72 | `MULTILANG-PROFILE` | allowlist +1, BUILD | **+0 for the read half** -- the phrase renders on an already-admitted address |
+| 87 | `SKILL-PAGE-SURFACE` | allowlist +1, BUILD | **MEASURE** -- not a settings surface at all |
+| 79 | `LEARNING-CERTIFICATE` | allowlist +1, BUILD | **MEASURE** -- not a settings surface at all |
+
+**Five of the seven need a decision or a page load before a line of code could be
+written, and BUILD means no decision is needed.** That was already the 09-05
+finding; what is added here is that the queue stays wrong even once the unknown
+it named is filled in.
+
+## C2. The cheapest row in the cluster is cheaper than the table says
+
+Blocker 72's READ half needs no new address: a live probe recorded the phrase
+`profile language` rendering on `/in/me/`, which is already admitted. Its
+boundary cost is **+0**, against a charged 7. That is the only row of the seven
+that moves in the cheap direction, and it is the one to take first.
+
+## C3. A caution on this amendment's own reach
+
+The enumeration is structural and strong -- twenty addresses, each with its
+refusing gate pinned in a test. The inference from it is narrower than it looks:
+a setting reachable only as a MODAL opened from inside a category page would
+draw no href on the index and would be invisible to this reading. So "no address
+on the index" is not "no address exists", and rows 78, 80 and 86 are blocked by
+a refusal this repository placed deliberately rather than by an unknown.
+
+Evidence, method, the full address table and the stated blind spot:
+`_audit/2026-09-19-settings-tail-addresses.md`.
