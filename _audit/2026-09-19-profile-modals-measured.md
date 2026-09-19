@@ -386,3 +386,64 @@ disagree.
 The candidate list is at `_audit/_scratch/_cross-slice-duplicates.md` with the
 script beside it, both untracked. **Do not paste that list anywhere as findings:
 half of its head is noise and it says so.**
+
+---
+
+# AMENDMENT C — a second adjudicated instance, and the class already had a name
+
+## C1. `M5` is GAP for a capability another slice EXCLUDED-RULED under four rulings
+
+| slice | row | capability | state | basis |
+|---|---|---|---|---|
+| `messaging-and-content.md` | M5 | Send an Open Profile message | **GAP** | "needs a third party's profile loaded to find the control" |
+| `network.md` | 158 | Send an Open Profile message without spending an InMail | **EXCLUDED-RULED** | **R9**, NOT-REV |
+
+`network.md`'s ruling **R9** is not a one-line note. It is headed *"InMail and
+outreach automation. Produces 3 rows. FOUR independent rulings, none
+contradicted"*, and its verdict is quoted in the slice itself:
+
+> *the sending half is where all of the risk lives and almost none of the
+> value.*
+
+with the arithmetic beside it — five InMail credits a month, no follow-ups
+permitted, and a paid subscription that a restriction would strand.
+
+**Sending an Open Profile message is a sending action, so R9 reaches it.** The
+two rows are not weighing the same evidence and landing differently; **one slice
+received a ruling and the other did not.**
+
+Note the asymmetry in what each side is actually saying. `M5`'s note gives a
+BLOCKER — no route to the control — which is a reason the capability is *not
+built*. `N158` gives a VERDICT — it will not be built. Those are compatible
+sentences about the world and **incompatible states in a census**, which is
+precisely how this kind of split survives review: each row reads defensibly on
+its own.
+
+## C2. And R9 is the same ruling that settles B2
+
+R9 produces three rows: `N156` (InMail outside your network), **`N157` (view
+InMail credits)** and `N158`. `N157` is the third slice of the InMail balance
+capability in B2. So the pattern across both amendments is one thing, not two:
+
+    network.md              applied R9 across its rows          156, 157, 158
+    messaging-and-content   applied it at M4 and NOT at M5
+    jobs.md                 applied it at neither               (127 still GAP)
+
+**A ruling propagating to some of its twins and not the others** — which is the
+identical shape as the OTW retirement pass in section 1.1, and as this
+repository's own recurring finding that *a redaction was applied at one site and
+not at its twin.*
+
+## C3. The class was already named. What is new is its extent.
+
+`_audit/2026-09-05-settings-tail.md` records, in passing, that a retirement wave
+found *"the profile slice and the messaging slice filing the same ruling in
+opposite states."* **So this is a known class, and nobody had measured how big
+it is.** This wave's contribution is that measurement — 233 different-state
+candidate pairs with a hand-counted 7-of-15 precision at the head — plus two
+instances adjudicated against something better than prose: B2 against the
+shipped predicate, C1 against a ruling quoted in the census itself.
+
+**I flipped nothing here either.** `M5` and `N158` belong to two slices, neither
+mine, and the fix is a ruling about which verdict governs — not an edit I can
+justify from a similarity score.
