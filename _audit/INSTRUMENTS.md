@@ -2889,3 +2889,198 @@ three private helpers already beside it.
 a declared ONE, permanently**, to avoid a rename. When a guard fires on
 something you just wrote, the first question is not how to declare it -- it is
 whether the guard has just told you something true about your own code.
+
+## 16. The content tail, 2026-09-19
+
+### 16.1 `tests/test_a_retired_row_rests_on_a_live_assertion.py`
+
+**A CENSUS ROW RETIRED ON A SHIPPED ASSERTION GOES RED WHEN THAT ASSERTION
+LEAVES.** For each retired row the guard reads the census STATE and the SHIPPED
+ASSERTION together, so deleting a name from
+`test_no_write_tool_names_a_third_party.FORBIDDEN_PARAMETER_NAMES` turns the
+rows resting on it red rather than leaving three retirements standing on a rule
+nobody ships any more.
+
+`scripts/count_census_states.py` cannot do this and is not failing to: it counts
+STATES, so a row retired on a live rule and a row retired on a rule deleted last
+week are the same green to it. **That gap is the entire subject.**
+
+**SHOWN FAILING THREE WAYS, each against a COPY so no contended file was
+edited, and two of the three carry a discrimination case:**
+
+    natural, before the census edit   RED   3 failed / 5 passed -- the STATE
+                                            check red on all three rows while
+                                            the ASSERTION check was GREEN on all
+                                            three
+    MUT-1  a row deleted from a copy   RED   named MISSING rather than passed over
+           discrimination C10          PASS  the mutation is row-specific
+           control: census readable    PASS  so the red is about the row
+    MUT-2  'collaborators' removed
+           from the forbidden set      RED   named the assertion
+           discrimination C10          PASS  C10 rests on 'mentions'
+
+**THE NATURAL RED IS THE ONE WORTH COPYING AND IT COST NOTHING.** Written
+BEFORE the census was edited, the guard failed on exactly the property that was
+not yet true and passed on the property that already was. That is a
+discrimination proof obtained from the tree as it stood, with no mutation at
+all -- and it is only available if you write the guard before you make the
+change it will assert. Written afterwards it would have gone green on the first
+run and proved nothing.
+
+**TWO CONTROLS, because a guard that reads an empty corpus refuses nothing:**
+the census must parse >= 80 `C` rows and contain `C1`, and the imported
+forbidden set must hold >= 10 names. A slice rename or a table reformat would
+otherwise leave every assertion passing over zero rows and reading as coverage.
+
+**WHAT IT DOES NOT ASSERT, stated so it is not read as wider than it is:** it
+does not claim any row is CORRECTLY retired -- that is a judgement no test makes
+-- and it does not require a row to retire because a rule exists. It asserts
+only that a retirement and its stated reason cannot be separated.
+
+### 16.2 The law it discharges, and why prose could not
+
+The article-publish wave closed with this and could do nothing else with it:
+
+> **A RULING NOT ATTACHED TO THE ROW IT DECIDES GETS RE-DERIVED.** Four of this
+> wave's six blockers were answerable from documents already in the tree --
+> the operator's typing ruling living in a TEST DOCSTRING, A9's
+> closed-vocabulary decision, the ledger's own merge rule, and an existing
+> EXCLUDED-RULED note. Nobody had joined any of them to the rows they settle.
+
+It wrote the law into an audit document, which is asserted by nothing. **Two
+weeks later its own two ruled rows still read GAP**, because the same wave had
+correctly declined to edit the ledger in the time it had and nobody picked the
+intention up. The law described its own future accurately and could not prevent
+it.
+
+**THIS IS SECTION 3'S DISEASE ONE LEVEL UP.** There, a guard measured a NAME
+instead of a CONTRACT. Here, a finding was recorded as PROSE instead of as an
+assertion -- and prose is the guard that can never fire. The remedy is the same
+shape both times: bind the claim to something a test can read.
+
+### 16.3 A NEW INSTANCE OF THE STAGING WINDOW, and the reading that failed was the good one
+
+Recorded because the register already holds two instances and this one narrows
+the rule rather than repeating it.
+
+Commit `f3d2b6c` carries 12 insertions where 11 were staged. The twelfth is
+another wave's census row, written in the seconds between the check and the
+commit. The wave had staged by name, run the identity sweep AFTER staging, and
+read **`git diff --cached` LINE BY LINE** -- eleven rows, all its own.
+
+**`--only` WAS WORKING EXACTLY AS DESIGNED AND COULD NOT HELP.** It kept two
+other waves' dirty census slices out of the commit, which is the failure it
+exists to prevent. The neighbour's line was inside a path this wave legitimately
+named.
+
+**THE NARROWING:** the register's existing entries record that `--numstat` is
+the file-level check wearing the line-level check's costume. True, and
+insufficient as a remedy. **A line-level `git diff --cached` is the correct
+check and it still loses, because the window is not between the flag and the
+commit -- it is between the READ and the commit, and no flag moves that.**
+Reading the staged lines narrows it to seconds. It does not close it.
+
+Handled per the sanctioned protocol: adopt-commit, credit in a follow-up
+(`9baa992`), the swept content checked for disclosure (shipped identity sweep,
+PASS, 0 hits), the neighbour's line left byte-identical, and the author NOT
+guessed -- a send to a guessed idle name forks that agent, so it was routed to
+the lead who holds the roster.
+
+### 16.4 A MEASUREMENT I WATCHED GO STALE INSIDE THE PARAGRAPH WRITTEN TO RECORD IT
+
+The same wave wrote `GAP 366 / EXCLUDED-RULED 233` into an audit section, and
+the counter run **in the same minute** read `GAP 362 / EXCLUDED-RULED 234`.
+Neither reading was wrong: three census slices were dirty and other waves were
+retiring rows while the sentence was being typed.
+
+**SO A CENSUS TOTAL IN A MULTI-WRITER TREE IS A READING WITH A TIMESTAMP AND
+NEVER A STATE.** What a wave can honestly publish is its own DELTA, named row by
+row. This is `relayed-measurements-go-stale` arriving at a distance of about
+forty seconds, which is shorter than anybody had previously measured it.
+
+---
+
+## 14. The article-publish wave, 2026-09-05 -- LIFTED FROM WHERE IT WAS STRANDED
+
+**THIS ENTRY IS NOT THIS WAVE'S WORK AND I DO NOT VOUCH FOR IT.** It is lifted
+VERBATIM from `_audit/2026-09-05-article-publish.md` section 10, where its
+author parked it with the instruction *"Whoever holds `INSTRUMENTS.md` can lift
+the block below verbatim; it is written as a register section and needs no
+editing."*
+
+**IT HAD BEEN STRANDED FOR TWO WEEKS.** Its author staged it into this file and
+found the staged diff carried 118 lines of which 49 were another wave's, backed
+their own 69 lines out, left the neighbour's byte-identical, and moved the entry
+to their audit document -- exactly the behaviour this register prescribes. The
+register then went 13 -> 15 and neither instrument below appears anywhere in it.
+**The correct move under contention left the entry unreachable, and nobody
+noticed for a fortnight.** That is the cost of the append-only hazard stated as
+a number rather than as a risk.
+
+**ITS NUMBER IS OUT OF ORDER ON PURPOSE.** Section 14 is the slot its author
+predicted would be taken; it was not taken, it was left empty. This file is
+APPEND-ORDERED by its own header rule -- *an in-place insert into a contended
+file loses somebody's work* -- so the entry is appended here and numbered 14,
+which is what that rule costs and what the header already warns a reader to
+expect.
+
+### 14.1 `tests/test_no_write_tool_names_a_third_party.py`
+
+Parses `server.py` with `ast`, enumerates every `linkedin_*` function, and
+refuses a parameter whose VALUE would be another member carried into published
+content -- `mention(s)`, `tag(s)`, `collaborator(s)`, `invitee(s)`, `celebrant`,
+`honoree`. Shown failing under a planted `mentions` parameter; a `tag` case
+stays green under that mutation, which is the discrimination proof. Carries a
+control pinning >= 30 tools parsed, because a rename of the `linkedin_` prefix
+would otherwise leave every case passing over an empty corpus.
+
+**THE PATTERN WORTH REUSING: EXEMPT BY NAME, NEVER BY SILENCE.**
+`audience`/`visibility` are ADMISSIBLE under Amendment A9's closed-vocabulary
+ruling and are listed in a `RULED_ADMISSIBLE` constant with A9 cited, plus a
+third test asserting the two sets stay disjoint. A guard that forbade them by
+omission would read, six weeks from now, as forbidding the very parameter a
+written ruling permits -- and nobody would be able to tell the omission from a
+decision.
+
+### 14.2 `tests/test_the_audience_reader_arrives_with_its_contract.py`
+
+`server._composer_audience_is_readable()` lifts `linkedin_publish_post`'s
+refusal by FEATURE DETECTION -- `callable(getattr(dom, _COMPOSER_AUDIENCE_READER,
+None))`. The reasoning beside it is sound: keying on the capability beats a
+boolean that must be flipped by hand and goes stale.
+
+**THE PROPERTY NOBODY WROTE DOWN: the act that re-arms an IRREVERSIBLE broadcast
+under his own name is DEFINING A FUNCTION WITH THAT NAME.** A stub sketching the
+interface satisfies `callable()` and opens the gate.
+
+**That is section 3 of this register, arriving where it costs the most.**
+`_redact` entered `_SANITISERS` on the strength of its name and carried no slug
+rule at all; `_relation` was later admitted WITH the test that proves its
+contract. This writes the same requirement BEFORE the reader exists, which is
+the only order in which it is free.
+
+The guard: if `dom.read_post_composer_audience` exists, a contract test for it
+must exist too. Two controls -- the exact keyed string, and that the live
+refusal still returns `audience_unread` -- so a rename fails there with a reason
+instead of leaving the guard watching an attribute nothing consults.
+
+**SHOWN FAILING IN-SUITE RATHER THAN IN A SIDE SCRIPT**, by monkeypatching the
+name onto `dom` and asserting the guard turns red. Two details worth copying:
+the demo **branches** and states which branch it took, so it cannot silently
+invert into a vacuous pass once a contract test lands; and the main assertion
+**skips** today with its reason rather than passing, because a test that passes
+because its subject is absent is the worst green available.
+
+### 14.3 Verified at lift time, 2026-09-19, rather than taken on trust
+
+The entry above is the author's text. These are re-measurements of its two
+load-bearing claims, taken by the lifting wave because a register entry is a
+STANDING INSTRUCTION and a stale one is worse than an absent one:
+
+    grep -n _composer_audience_is_readable linkedin_server/*.py
+      server.py:6871  def _composer_audience_is_readable
+      server.py:7031  if not _composer_audience_is_readable():
+
+**One definition, one call site, both inside `linkedin_publish_post`** -- so
+14.2's gate is still exactly as narrow as it describes. And both files still
+pass at this tree, run together with the three surfaces they guard: **63 passed**.
