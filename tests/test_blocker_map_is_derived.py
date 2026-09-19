@@ -154,7 +154,21 @@ import build_blocker_map as bbm  # noqa: E402
 #: The blocker reads LIVE at 5 still-GAP rows, not 11: `539752b` moved J 92-97
 #: to EXCLUDED-RULED mid-session. MEMBERSHIP is a fact about the FROZEN set;
 #: `state_today` is a separate column and moves under you.
-UNASSIGNED_CEILING = 232
+#: 232 -> 217, the largest single recovery of the campaign. ADMIN-RIGHTS-NOT-HELD
+#: at 15 of 15, ABSENT -> COMPLETE, found by a STRUCTURAL enumerator (census
+#: SECTION, not a word list) after the lexical one proved lossy on blocker 20.
+#:
+#: It closes on four independent axes: a committed source saying the family is
+#: "already true of ALL FIFTEEN" and arguing to move "the TABLE WHOLESALE"; the
+#: ledger's own reason enumerating the section's three families ("administers no
+#: Page, owns no group, organises no event"); the count; and COMPLETENESS -- no
+#: other N A-row exists in the frozen set at all.
+#:
+#: CONTRAST WITH BLOCKER 20, which is why the enumerator matters: there the same
+#: method found THIRTEEN candidates for ELEVEN slots, so that set does NOT close
+#: by elimination and its lines say so. Here it does, and the difference is
+#: measured rather than assumed.
+UNASSIGNED_CEILING = 217
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
