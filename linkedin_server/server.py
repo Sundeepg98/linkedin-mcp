@@ -8401,6 +8401,29 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
         return _error(exc)
 
 
+# THE PARAGRAPH ABOUT THE ``h2`` TRAP IS PHRASED NEGATIVELY ON PURPOSE, and a
+# future editor who "simplifies" it will turn the suite red without touching a
+# line of code. ``readonly.docstring_write_claims`` reads every write verb in a
+# tool's description and only forgives one with a negator in the preceding 80
+# characters -- and LinkedIn's own heading on this page is spelled `Feed post`,
+# so the verb arrives inside a LABEL THIS SERVER IS QUOTING rather than a claim
+# it is making. That is a false positive for the guard's purpose and a true
+# positive for its rule, and the two available repairs are not equal:
+#
+#   WIDEN THE GUARD to skip backticked spans -- rejected. It would silence the
+#   verb everywhere a backtick appears, including a real write claim written in
+#   one. Both of this repository's other prose guards state the same refusal in
+#   their own words: ``test_probe_interaction_budget`` (*"Do NOT widen
+#   OPEN_CLASSES to clear this: that silences the verb everywhere at once"*) and
+#   ``test_the_stated_guarantee_matches_the_sanctioned_list`` (*"do not widen it
+#   -- unbold the number or quote it"*).
+#
+#   SAY THE NEGATIVE, which is what the paragraph always meant. The point being
+#   made is that ``h2`` gives you NO analytics heading; writing that plainly
+#   costs nothing, and ``_NEGATORS`` exists precisely so a docstring can state
+#   the boundary in the clearest available words.
+#
+# Keep a negator ("no", "nothing", "not") within a line of the word `post`.
 @mcp.tool()
 async def linkedin_creator_analytics() -> dict[str, Any]:
     """Your content impressions over time. NUMBERS AND DATES, NEVER A NAME.
@@ -8413,9 +8436,10 @@ async def linkedin_creator_analytics() -> dict[str, Any]:
     ``aria-label`` on the chart nodes, and that is the only text route in.
 
     **THE HEADINGS ARE A TRAP AND ARE NAMED HERE SO NOBODY REPEATS THEM.** On
-    this page ``h2`` reads FEED-shaped chrome -- `Feed post`, `Ad Options` --
-    identical in shape to the feed's own. The first reading of this surface
-    went that way and said nothing about analytics.
+    this page ``h2`` carries no analytics heading at all: it is FEED-shaped
+    chrome and nothing else -- `Feed post`, `Ad Options`, identical in shape
+    to the feed's own. The first reading of this surface went that way and
+    said nothing about analytics.
 
     **READ ``points_found`` BEFORE YOU BELIEVE A ZERO.** This account really
     does read 0 impressions on some days, and that is also exactly what a
