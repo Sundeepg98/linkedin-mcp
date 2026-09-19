@@ -108,7 +108,7 @@ Every published row is accounted for and every one has left GAP.
 | **`PANEL-NOT-OBSERVED`** | **3** | **1** | **MEASURE** |
 | `AI-ASSIST-MESSAGING` | 2 | 1 | DECIDE-RETIRE |
 | `LIVE-BROADCAST` | 2 | 1 | DECIDE-RETIRE |
-| `MENTION-COMPOSITION-RULING` | 2 | 1 | DECIDE-RETIRE |
+| `MENTION-COMPOSITION-RULING` | 2 | 1 | DECIDE |
 | `PARSER-ON-A-LOADED-PAGE` | 2 | 2 | BUILD |
 | `DEVICE-GEOLOCATION` | 1 | 1 | DECIDE-RETIRE |
 | **`FEED-PREFERENCES`** | **1** | **7** | **BUILD** |
@@ -247,6 +247,16 @@ Individually mis-queued, on measured grounds:
    headline finding of `_audit/2026-09-05-blocker-map.md` restated with
    today's states.
 
+   > *(The indented block below is NOT this document's author's. It was
+   > written into this file by the wave that recovered the assignments, in
+   > the seconds between my last read and my commit `7bca683`, and my
+   > `--only` carried it: `--only` protects at FILE granularity and cannot
+   > keep a neighbour's lines out of a path I legitimately own. It is left
+   > byte-identical and credited here rather than rewritten. I have since
+   > independently verified its `MENTION-COMPOSITION-RULING` claim -- zero
+   > rows recovered before `ae1894b`, two after -- and I do not vouch for
+   > the rest.)*
+   >
    > **MOVED DOWNWARD LATER THE SAME DAY -- quote 268.** `ae1894b` recovered
    > seven rows and closed three blockers at their published counts. The
    > figures above were correct when measured and are left standing rather
@@ -352,9 +362,28 @@ The first derivation, 09:36 by the box: **13 EMPTY-CERTAIN over 28 rows.**
 The second, 09:43: **14 over 30.** The third, 09:47: still 14 over 30, but
 **UNLOCATABLE had fallen 53 -> 50 and LIVE risen 29 -> 32** in four minutes.
 
-`MENTION-COMPOSITION-RULING` joined in between, because another wave moved
-`M C10` and `M C28` to EXCLUDED-RULED with a retirement dated 2026-09-19 --
-neither row touched by this wave. Seven minutes.
+`MENTION-COMPOSITION-RULING` joined in between, and **MY FIRST EXPLANATION OF
+WHY WAS NECESSARY BUT NOT SUFFICIENT.** I wrote that it joined because another
+wave moved `M C10` and `M C28` to EXCLUDED-RULED. `skew-gate` corrected that,
+and the correction is sharper than the fix:
+
+**IT TOOK TWO SEPARATE EVENTS, AND MY OWN FOUR-CLASS DEFINITION IS WHAT MAKES
+THAT PRECISE.** `EMPTY-CERTAIN` requires `recovered == published`, and recovery
+is a different event from a row leaving GAP. Measured: before `ae1894b`
+(09:42:47) this blocker had **ZERO** rows recovered -- the state move alone
+would have left it `UNLOCATABLE`, where an empty blocker is indistinguishable
+from an unknown one. It took the state move AND the assignment recovery.
+
+> **SO RECOVERING ASSIGNMENTS DOES NOT ONLY UNBLOCK BUILDING. IT REVEALS
+> BLOCKERS THAT WERE ALREADY EMPTY AND WERE HIDING AS `UNLOCATABLE`.**
+
+That is a second, independent reason to prioritise the assignment work, and it
+is invisible to any table that does not separate "no rows left" from "no rows
+findable". `MENTION-COMPOSITION-RULING` is now 2 of 2 recovered, 0 live, queued
+**DECIDE** -- a blocker awaiting a ruling with nothing left to rule on -- and
+this document could not see it until the rows existed to be counted.
+
+Seven minutes.
 
 **AND THE SPLIT IS THE USEFUL PART.** Across all three derivations the two
 EMPTY verdicts never moved, while UNLOCATABLE and LIVE moved twice. That is

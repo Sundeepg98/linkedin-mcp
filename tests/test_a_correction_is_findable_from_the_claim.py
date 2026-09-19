@@ -182,6 +182,51 @@ CORRECTION_VOCABULARY = (
 #: about a document that ALREADY CARRIES ITS CORRECTION IN PLACE, which is the
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
+    ("messaging-and-content.md", "2026-09-05-groups-surface-measured.md"): (
+        "the cited document is the MEASURING SOURCE and the row AGREES with "
+        "it. C61 (join a group) was re-costed from MEASURE to DECIDE on that "
+        "wave's finding that no join control is drawn on any suggestion row, "
+        "and cites it for exactly that. The correction vocabulary beside the "
+        "citation belongs to this row re-costing ITSELF -- the ledger's "
+        "queue column is what is called wrong, and the ledger is a THIRD "
+        "document the scan cannot see from this pair. Nothing in the groups "
+        "measurement is contradicted; it is the evidence"
+    ),
+    ("network.md", "2026-09-03-linkedin-gap-blockers.md"): (
+        "the cited document ALREADY MADE this correction and the row is "
+        "agreeing with it, not overturning it. N 136 moved to "
+        "MEASURED-ABSENT citing the ledger's own section 6, which had "
+        "already corrected the census: the live page carries a Company "
+        "FILTER and no top-locations breakdown. A CORRECTED BY: pointer in "
+        "the ledger would tell a reader that the document which got this "
+        "right first had been refuted by a row quoting it"
+    ),
+    ("messaging-and-content.md", "2026-09-05-decide-retire-rulings.md"): (
+        "CROSS-ROW PROXIMITY, and the two halves are in DIFFERENT ROWS with "
+        "nothing to do with each other. MEASURED: the citation is on line "
+        "448, row C59 (LinkedIn Live), and C59 carries NO correction "
+        "vocabulary at all. The only vocabulary within the two-line window "
+        "is the word 'stale' on line 449 -- row C60, a different capability, "
+        "where it describes C60's OWN cell having been stale about the "
+        "/groups/ boundary. **A census table has one row per LINE, so a "
+        "line-based window reaches ACROSS rows**: one row's vocabulary "
+        "manufactures a candidate on its neighbour's citation. This is the "
+        "complement of the table-row proximity shape already recorded for a "
+        "single 2.4k-character row; the window runs unbounded ALONG a row "
+        "and two rows DEEP through the table"
+    ),
+    ("network.md", "2026-09-05-search-appearances-load-a.md"): (
+        "CROSS-ROW PROXIMITY, same shape as the "
+        "('messaging-and-content.md', '2026-09-05-decide-retire-rulings.md') "
+        "entry above and measured the same way. The citation is on line 435, "
+        "row N 132 (switch between search appearances and who-viewed), which "
+        "carries NO correction vocabulary. The words 'correction' and "
+        "'false' sit on lines 436 and 437 -- rows N 133 and N 134, different "
+        "capabilities on a different page, where they describe an analytics "
+        "wave correcting ITSELF about which controls render. Neither word is "
+        "about the search-appearances document and neither is in the row "
+        "that cites it"
+    ),
     ("messaging-and-content.md", "network.md"): (
         "TABLE-ROW PROXIMITY and a DECLINE TO RULE, and both halves were "
         "measured rather than inferred. The row is C52, and a markdown table "
