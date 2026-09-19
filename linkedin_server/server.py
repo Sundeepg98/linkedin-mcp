@@ -1,4 +1,4 @@
-"""The tool surface: forty-two tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-four tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -257,6 +257,7 @@ from linkedin_server import (
     buildinfo,
     cdp_bridge,
     collections_page,
+    creator_analytics,
     dom,
     events,
     groups_page,
@@ -8355,6 +8356,66 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
             },
         }
         return _trim_info(full, verbose)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_creator_analytics() -> dict[str, Any]:
+    """Your content impressions over time. NUMBERS AND DATES, NEVER A NAME.
+
+    **THE VALUES ARE IN THE ACCESSIBLE NAMES, NOT IN THE TEXT**, and that is
+    the whole reason this tool exists rather than a text reader. Measured
+    2026-09-19: the page carries **1,869 characters of text** in total, with
+    **zero** ``table``, ``h3`` or ``canvas`` nodes against 56 ``svg``. The
+    numbers are drawn. LinkedIn renders them for a screen reader as
+    ``aria-label`` on the chart nodes, and that is the only text route in.
+
+    **THE HEADINGS ARE A TRAP AND ARE NAMED HERE SO NOBODY REPEATS THEM.** On
+    this page ``h2`` reads FEED-shaped chrome -- `Feed post`, `Ad Options` --
+    identical in shape to the feed's own. The first reading of this surface
+    went that way and said nothing about analytics.
+
+    **READ ``points_found`` BEFORE YOU BELIEVE A ZERO.** This account really
+    does read 0 impressions on some days, and that is also exactly what a
+    broken reader returns. The two are not separable from the value:
+
+        points_found 0   the reader reached NOTHING. The account is
+                         UNMEASURED. It is never "zero impressions"
+        points_found > 0 the numbers are a reading, zeros included
+
+    ``readable`` answers that question directly, and ``labels_seen`` beside it
+    distinguishes a page that drew nothing from a page whose shape changed --
+    a large ``labels_seen`` with ``points_found`` 0 means this route is dead,
+    not that you have no data.
+
+    **ONE METRIC IS REACHABLE AND THAT IS A BOUNDARY FACT, NOT A PARSER
+    LIMIT.** ``chart_labels.KNOWN_METRICS`` lists seven spellings this can
+    PARSE; only ``impressions`` has been seen. The allowlist admits this
+    address ANCHORED WITH NO QUERY GROUP, and LinkedIn selects a metric with
+    ``?metricType=`` -- so the admitted address serves the DEFAULT view and
+    reaching another metric is an allowlist decision, not a better reader.
+    Report coverage from ``chart_labels.MEASURED_METRICS``.
+
+    **WHAT IT COSTS, AND WHY IT DOES NOT RE-BRACKET.** The allowlist entry for
+    this page records the cost already measured -- the invitation badge read
+    before and after, twice, unmoved. A three-navigation bracket on every call
+    would spend two extra loads on his account to re-derive a settled answer,
+    so this takes ONE navigation and cites that. If a badge is ever seen
+    responding to this surface, revisit that.
+
+    **IT CANNOT EMIT A NAME BY CONSTRUCTION.** The output holds dates,
+    integers and closed-vocabulary metric names. A label that does not parse
+    into that shape is discarded, so a name has nowhere to land even if
+    LinkedIn starts drawing one.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(
+                page, creator_analytics.CONTENT_ANALYTICS_URL
+            )
+            assert_not_authwall(landed, surface="creator-analytics")
+            return await creator_analytics.read_content_analytics(page)
     except Exception as exc:
         return _error(exc)
 

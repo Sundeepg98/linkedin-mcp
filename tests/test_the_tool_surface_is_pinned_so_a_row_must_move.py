@@ -90,6 +90,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_compose_fields": (),
     "linkedin_connections": ("limit",),
+    "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
@@ -134,7 +135,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_who_viewed_me": ("limit",),
 }
 
-#: 43 tools and 61 parameters at the pin. Asserted rather than assumed, so a
+#: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
 #: pin edited to an empty dict cannot quietly disable the guard.
 #:
 #: **RE-PINNED 2026-09-19 at 43.** `linkedin_job_collections` shipped in
@@ -150,7 +151,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: looking found a real, banked row. **A red guard left standing becomes
 #: noise, and a guard everybody has learned to ignore is worse than none** --
 #: which is the only reason this wave re-pinned a tool it did not ship.
-PINNED_TOOL_COUNT = 43
+#:
+#: **RE-PINNED AGAIN AT 44 IN THE SAME SESSION**, this time for a tool
+#: this wave DID ship: `linkedin_creator_analytics`, banking `M C40` in
+#: the same commit -- which is the sequence this guard exists to force,
+#: demonstrated by its author rather than only demanded of others.
+PINNED_TOOL_COUNT = 44
 PINNED_PARAMETER_COUNT = 61
 
 
