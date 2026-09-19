@@ -45,8 +45,16 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from tests.leakwalk import url_spellings  # noqa: E402
+from tests.repo_paths import sanitisation_key_path  # noqa: E402
 
-KEY_PATH = REPO / "_audit" / "_sanitisation_key.json"
+#: RESOLVED THROUGH :mod:`tests.repo_paths` SINCE 2026-09-19. This was
+#: ``REPO / "_audit" / "_sanitisation_key.json"``, and in a linked worktree
+#: that path cannot exist: git populates a worktree from the index and the key
+#: is gitignored, so it stays behind in the main checkout. The sweep then
+#: exited with "the wordlist is missing" and the pre-commit gate printed
+#: "identity wordlist absent; ALLOWING" -- on the operator's own machine, with
+#: the key on the same disk.
+KEY_PATH = sanitisation_key_path(REPO)
 
 #: Files that must be allowed to name real strings, by EXACT repo-relative
 #: path, because a denylist has to name what it denies. There is no way to

@@ -135,14 +135,23 @@ from pathlib import Path
 import pytest
 
 from tests.leakwalk import url_spellings
+from tests.repo_paths import describe_key_path, sanitisation_key_path
 from tests.test_no_committed_credential import committable_files, tracked_files
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE_DIR = REPO / "tests" / "fixtures"
 
 #: The exact-value half of the guard, and the gitignored wordlist it reads.
+#:
+#: RESOLVED THROUGH :mod:`tests.repo_paths` SINCE 2026-09-19, not as
+#: ``REPO / ...``, because a linked worktree carries no gitignored files: the
+#: key sits in the main checkout and this constant pointed at a path that
+#: cannot exist. Every agent in this fleet works in a worktree, so the
+#: exact-value half of the guard was skipping for all of them while
+#: ci_expected_skips.json still described that skip as happening only on
+#: machines that do not have the key.
 SWEEP_PATH = REPO / "scripts" / "sweep_tracked_for_identity.py"
-SWEEP_KEY_PATH = REPO / "_audit" / "_sanitisation_key.json"
+SWEEP_KEY_PATH = sanitisation_key_path(REPO)
 
 # ===========================================================================
 # WIRING -- the only repo-specific part. A sibling repo replaces this block.
@@ -1368,7 +1377,7 @@ def test_the_exact_value_sweep_actually_runs():
             "fixtures. The SHAPE half of this module ran and needs nothing; "
             "the EXACT-VALUE half did not, and a green run here does not mean "
             "what it means on a machine that has the key."
-            % SWEEP_KEY_PATH.relative_to(REPO).as_posix()
+            % describe_key_path(REPO, SWEEP_KEY_PATH)
         )
 
     proc = subprocess.run(
