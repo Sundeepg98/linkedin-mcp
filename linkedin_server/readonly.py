@@ -603,6 +603,108 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # a group is a second broadcast route with a different audience and is
     # ``publish_post``'s equal in risk rather than a lesser case.
     re.compile(r"^https://www\.linkedin\.com/groups/?$"),
+    # A GROUP BY ITS NUMERIC ID, AND THE RECOMMENDATION LISTING. Added
+    # 2026-09-19 on the team lead's ruling, which approved these two in
+    # principle under four binding conditions. The entry records what was
+    # measured against each, because a condition nobody can check later was
+    # not a condition.
+    #
+    # WHY THIS IS NOT THE SEARCH-RESULTS ADMISSION WEARING A GROUP'S CLOTHES.
+    # That one is held on a condition this pair satisfies by construction:
+    # the admission and a name-free shaper land together or neither lands.
+    # **A GROUP ID IS NUMERIC, so the ADDRESS names nobody** -- there is no
+    # slug, no vanity name and no urn in it to shape. ``groups.py`` already
+    # refuses a non-numeric segment, in its own words, BECAUSE A SLUG IS A
+    # NAME: a group named after a person gets that person's name in its slug.
+    #
+    # CONDITION 1 -- A CLOSED SEGMENT, AND ``\d`` IS NOT ONE. The ruling was
+    # written as ``/groups/\d+/?$`` and this entry deliberately does not say
+    # that. **MEASURED 2026-09-19 13:54, five scripts, on this box:** Python's
+    # ``\d`` on a str pattern matches ANY Unicode decimal digit, so
+    # ``/groups/\d+/?$`` admits the Arabic-Indic, Extended Arabic-Indic,
+    # Devanagari and fullwidth spellings of an id as well as the ASCII one --
+    # SIX addresses newly admitted against TWO for the form below.
+    #
+    # That is the same defect ``groups.py`` found in ``str.isdigit()`` and
+    # fixed by naming the ten characters, and its sentence governs here too:
+    # *a charset wide enough to hold a slug is wide enough to hold a name.*
+    # The concrete cost of ignoring it is a BOUNDARY THAT DISAGREES WITH ITS
+    # OWN SHAPER -- the allowlist would open an address ``group_identifier``
+    # then refuses as ``identifier_is_not_numeric``, which is an inconsistency
+    # bought for nothing. ``[0-9]`` is the closed segment the ruling meant.
+    #
+    # CONDITION 3 -- THE BLAST RADIUS, MEASURED BEFORE THIS LANDED, with
+    # ``scripts/blast_radius.py`` over 98 concrete addresses (its own 67 plus
+    # 31 group-family spellings, traversals and non-ASCII digit forms) and
+    # never a substring grep over this list. **Each pattern below newly
+    # admits exactly TWO addresses, its own target with and without the
+    # trailing slash, and nothing else.** Zero traversals, zero slugs, zero
+    # sub-paths, and ``newly_refused`` empty for both.
+    #
+    # WHAT STAYS REFUSED, RE-MEASURED WITH THESE INSTALLED rather than
+    # inherited from the entry above -- 13 probes, 13 refusals, no mismatch:
+    #
+    #     /groups/<id>/members/    THE MEMBER ROSTER, census row N 165, out of
+    #                              scope BY NAME. Still refused by exactly ONE
+    #                              gate and the count is still the point.
+    #     /groups/<id>/requests/   a pending-member queue
+    #     /groups/<id>/about/      the same page by another spelling
+    #     /groups/<id>/invite/     refused TWICE, ``/invite`` firing first
+    #     /groups/<slug>/          a slug, including ``<digits>-<word>``
+    #     /groups/urn:li:group:<id>/
+    #     /groups/<id>/?<query>    no query on either, for the reason the root
+    #                              gives: nothing builds one
+    #     /groups/<id>/../../...   TRAVERSALS, five spellings, including the
+    #                              two that normalise onto account-ending
+    #                              addresses and the one that normalises onto
+    #                              a member profile. The closed segment plus
+    #                              the ``/?$`` anchor is what refuses these,
+    #                              and it is why an anchored ``.*`` would not
+    #                              have: measured today on a sibling surface,
+    #                              an ``.*`` anchored at BOTH ends admitted 18
+    #                              addresses, identical to the bare wildcard.
+    #
+    # CONDITION 4 -- NOTHING IS FIRED, AND NOTHING HERE FIRES ANYTHING. This
+    # entry opens two addresses. It builds no tool, and **no tool in this
+    # package can navigate to either**: measured by parsing ``server.py``,
+    # ZERO of its registered tools take a url, an href or a link as a
+    # parameter, and the one group tool takes no parameter at all. A group is
+    # made of other people; joining, leaving, posting, commenting, reacting
+    # and inviting each still need their own url, their own sanction entry and
+    # their own ruling, exactly as the root entry above already says.
+    #
+    # SO THIS BUYS A PRECONDITION, NOT A CAPABILITY, and the census cells say
+    # so. Nine still-GAP rows were blocked on this address; eight of them are
+    # WRITES and this changes nothing about them. It is recorded here because
+    # the honest reading of a widening is what it bought, not what it unblocked.
+    #
+    # AND THE WARNING THAT OUTLIVES THIS ENTRY: ``/groups/<id>/`` DRAWS A
+    # GROUP FEED -- other members' posts in full. This list decides what may
+    # be OPENED and the shaper decides what may be SAID, and today there is no
+    # reader and therefore no shaper. **Whoever writes the first reader for
+    # this address owes it a shaper as strict as the search-results one**, and
+    # that obligation belongs to the reader rather than to this line, which is
+    # why this line could land without one.
+    #
+    # AND BOUNDED AT TWENTY, WHICH IS ``groups.py``'s NUMBER AND NOT A NEW ONE.
+    # The first spelling of this entry was ``[0-9]+``, and the coupling test
+    # caught it on its first run: ``group_identifier`` caps an identifier at
+    # ``_MAX_IDENTIFIER_DIGITS`` = 20 because *an unbounded repetition on
+    # attacker-shaped input is a cost nobody chose*, so an unbounded pattern
+    # here opened a 21-digit address the shaper then refused. Same divergence
+    # as the ``\d`` one, found the same way, and the bound is taken from that
+    # module rather than restated -- if it ever moves, the coupling test is
+    # what says so.
+    re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/?$"),
+    # THE RECOMMENDATION LISTING, on the same ruling: "a recommendation
+    # listing, no third party named in the address". It is the deep-path twin
+    # of the suggestion section LinkedIn already draws on the admitted root,
+    # which ``linkedin_group_memberships`` reads today and publishes as a
+    # COUNT -- census row N 162, banked COVERED-CANNOT-DELIVER precisely
+    # because the tool can report how many are recommended and never which.
+    # Admitting this address does not change that; it opens the standalone
+    # page the same section links to.
+    re.compile(r"^https://www\.linkedin\.com/groups/discover/?$"),
     # HIS OWN EVENTS, AND THE ROOT ONLY. Added 2026-09-05, same ruling, same
     # anchoring, same refusals -- and BOUGHT ON A THINNER ROW BASIS THAN
     # ``/groups/`` ABOVE, which is recorded here rather than glossed.

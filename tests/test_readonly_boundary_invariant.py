@@ -1011,7 +1011,19 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # entries added for press.disclose's click and its closing Escape, on the
     # disclosing-press ruling. A PERMISSION grew; no refusal moved.
     "SANCTIONED_MUTATIONS": "3676d309ead50c61",
-    "_ALLOWED_URL_PATTERNS": "34f364971cf9e81c",
+    # 34f364971cf9e81c until 2026-09-19. GREW by TWO anchored deep paths in
+    # the groups family -- a group by its NUMERIC id, bounded at twenty
+    # digits, and the recommendation listing -- on the team lead's ruling.
+    # Same shape as every other move here: a deliberate READ admission, with
+    # the three denylists, both exemption tables, SANCTIONED_MUTATIONS and
+    # `<functions>` byte-identical. SEVEN of eight digests unchanged.
+    #
+    # ATTRIBUTED IN THE FORM THIS DICT ADOPTED: the tree MINUS exactly those
+    # two lines hashes to `34f364971cf9e81c`, the value this line replaces --
+    # so nothing else is riding inside the re-pin. Both controls behave:
+    # dropping a DIFFERENT allowlist line lands on a third value entirely,
+    # and a needle no line carries drops zero lines and moves nothing.
+    "_ALLOWED_URL_PATTERNS": "5b5d34b6e3cc8059",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1455,7 +1467,20 @@ DENYLISTS_AT_A76FE32 = {
     # boundary admitted the job-alerts manage page, one anchored pattern, and
     # THE WRITE STILL DID NOT TOUCH THIS. Said here rather than changed in
     # silence, because a value updated quietly is a check quietly retired.
-    "_ALLOWED_URL_PATTERNS": "34f364971cf9e81c",
+    #
+    # UPDATED AGAIN 2026-09-19, same reason a seventh time: the READ boundary
+    # admitted two anchored deep paths in the groups family -- a group by its
+    # NUMERIC id, bounded at twenty digits, and the recommendation listing --
+    # and THE WRITE STILL DID NOT TOUCH THIS. The three denylists and both
+    # exemption tables below are byte-identical, which is the whole of what
+    # this dict is for.
+    #
+    # AND THE ADMISSION BUYS NO WRITE, which is worth one line here because
+    # the family is full of them: joining, posting, commenting, reacting and
+    # inviting each still need their own url, their own sanction entry and
+    # their own ruling. Nothing in this change fires anything, and no
+    # registered tool in the package can even navigate to either address.
+    "_ALLOWED_URL_PATTERNS": "5b5d34b6e3cc8059",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

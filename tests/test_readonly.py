@@ -750,7 +750,11 @@ def test_only_dom_module_waives_evaluate():
     # comparison has to happen where the strings are. For the anchor
     # classifier that matters most: a raw href would carry ``/in/<slug>``, and
     # a slug is a name.
-    assert waived_in.get("dom.py", 0) <= 19, waived_in
+    # 19 -> 21 on 2026-09-19: SEARCH_RESULTS_JS and FILTER_PANEL_JS each add
+    # one evaluate call site in dom.py. The cap is a ratchet on WHERE evaluate
+    # may appear, not on how many scripts exist, so it moves with declared
+    # additions and never with undeclared ones.
+    assert waived_in.get("dom.py", 0) <= 21, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -939,6 +943,26 @@ INJECTED_SCRIPTS = {
     # against a SYNTHETIC fixture that says so in its own first line, and the
     # scan below certifies that it cannot mutate, not that it can read.
     "SEARCH_APPEARANCES_JS": dom.SEARCH_APPEARANCES_JS,
+    # 2026-09-19. The search-results pair, landed with the search shaper. Both
+    # are declared for the ordinary reason -- an executed script that is not
+    # declared is one nobody reviewed -- and declaring them ENROLS them in
+    # test_every_script_this_package_executes_cannot_mutate.
+    #
+    # THE PRIVACY ARGUMENT IS THE SHARPEST IN THIS DICT, because a search
+    # results page IS a list of other people. Neither script returns a page
+    # string on any path, and both say so at their own return site:
+    # SEARCH_RESULTS_JS returns "an index into routeClasses, and two small
+    # flags"; FILTER_PANEL_JS returns under "INTEGERS ONLY. No label is in this
+    # return value, by construction." FILTER_PANEL_JS does build a string, but
+    # only inside normaliseLabel, whose result is compared in the page and
+    # never leaves it -- the script's own words are "normalised and compared IN
+    # HERE; neither form is ever returned."
+    #
+    # THE DECLARATION IS WHAT WAS MISSING, NOT THE PROPERTY. The wave that
+    # wrote these two ended before registering them, and the gate caught it
+    # exactly as designed: three reds naming both scripts by name.
+    "SEARCH_RESULTS_JS": dom.SEARCH_RESULTS_JS,
+    "FILTER_PANEL_JS": dom.FILTER_PANEL_JS,
 }
 
 
@@ -1116,7 +1140,13 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # DOMParser rather than assigning markup to a detached node, because the
     # scanner refuses that assignment and is right to: it cannot tell a
     # detached node from an attached one.
-    assert len(EXECUTED_SCRIPTS) == 19, sorted(EXECUTED_SCRIPTS)
+    # 19 -> 21 on 2026-09-19 for SEARCH_RESULTS_JS and FILTER_PANEL_JS, which
+    # arrived with the search shaper and were declared in INJECTED_SCRIPTS in
+    # the same change. This count is keyed by CALL SITE where INJECTED_SCRIPTS
+    # is keyed by NAME, so the two move together only when a script is added
+    # with exactly one call site -- which is why it is asserted rather than
+    # derived from the other.
+    assert len(EXECUTED_SCRIPTS) == 21, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
@@ -1244,6 +1274,24 @@ ALLOWED = [
     "https://www.linkedin.com/groups",
     "https://www.linkedin.com/events/",
     "https://www.linkedin.com/events",
+    # TWO GROUPS DEEP PATHS, 2026-09-19, on the team lead's ruling. These four
+    # lines are the INVERTED form of two that stood in BLOCKED until this
+    # commit -- rewritten rather than moved silently, so the diff states
+    # exactly what flipped and in which direction.
+    #
+    # THE ID SEGMENT IS CLOSED: ``[0-9]{1,20}``, not a wildcard and not
+    # ``\d``. A group id is numeric, so the ADDRESS names nobody -- which is
+    # the whole of why this admission needed no shaper built beside it, unlike
+    # the search-results one. The bound is ``groups.py``'s own.
+    #
+    # ``tests/test_the_groups_id_segment_is_closed.py`` is the control: it
+    # holds the 27 addresses this pair must never reach and fails on demand
+    # under three wider spellings. THE EVENTS FAMILY IS UNCHANGED -- an event
+    # page is still refused, and the asymmetry is deliberate.
+    "https://www.linkedin.com/groups/12345678/",
+    "https://www.linkedin.com/groups/12345678",
+    "https://www.linkedin.com/groups/discover/",
+    "https://www.linkedin.com/groups/discover",
 ]
 
 BLOCKED = [
@@ -1380,11 +1428,22 @@ BLOCKED = [
     # who did not choose to be enumerated by him, and it was put out of scope
     # BY NAME. If a future widening ever admits it, this line is what goes
     # red.
+    #
+    # TWO OF THIS BLOCK'S ENTRIES LEFT IT ON 2026-09-19 and they are REWRITTEN
+    # RATHER THAN DELETED, three lines down in ALLOWED, because a deletion
+    # here would make this list quietly narrower while reading as untouched.
+    # `/groups/<id>/` and `/groups/discover/` were admitted on the team lead's
+    # ruling, as a CLOSED numeric segment and a literal page name. What did
+    # NOT move is everything below, and the roster is still the line that goes
+    # red if a future widening reaches it.
     "https://www.linkedin.com/groups/12345678/members/",
-    "https://www.linkedin.com/groups/12345678/",
     "https://www.linkedin.com/groups/12345678/requests/",
     "https://www.linkedin.com/groups/12345678/about/",
-    "https://www.linkedin.com/groups/discover/",
+    # A SLUG STAYS REFUSED, and this line is why the admission above is narrow
+    # rather than a family: a group named after a person carries that person's
+    # name in its slug.
+    "https://www.linkedin.com/groups/example-group/",
+    "https://www.linkedin.com/groups/12345678-placeholder/",
     "https://www.linkedin.com/mynetwork/groups/",
     "https://www.linkedin.com/search/results/groups/?keywords=engineering",
     # A QUERY STRING ON EITHER ROOT. Neither pattern takes one -- nothing
@@ -1449,12 +1508,26 @@ def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
     An ALLOWED entry says a url opens. It says nothing about where the
     permission stopped, and where it stopped is the whole of what was ruled:
     HIS OWN memberships yes, a directory of other people no.
+
+    **AMENDED 2026-09-19, AND THE TWO FAMILIES NO LONGER MATCH.** A group by
+    its NUMERIC id was admitted on the team lead's ruling; an event page was
+    not. So the groups line moved and the events line did not, and this test
+    now asserts an ASYMMETRY rather than a pair -- which is the honest shape,
+    because the two roots were never bought on the same basis. The event page
+    is census row N 184 and stays refused.
+
+    What did NOT move on either side is the part this test exists for: the
+    member roster and the attendee list are still refused, and they are what
+    the ruling on both roots was protecting.
     """
     assert readonly.is_read_url(GROUPS_ROOT)
     assert readonly.is_read_url(EVENTS_ROOT)
+    # THE GROUPS FAMILY, ONE STEP WIDER THAN IT WAS.
+    assert readonly.is_read_url("https://www.linkedin.com/groups/12345678/")
+    # AND THE EVENTS FAMILY, EXACTLY WHERE IT WAS.
     for url in (
         GROUP_MEMBER_ROSTER,
-        "https://www.linkedin.com/groups/12345678/",
+        "https://www.linkedin.com/groups/12345678/requests/",
         "https://www.linkedin.com/events/12345678901234567890/",
         "https://www.linkedin.com/events/12345678901234567890/comments/",
     ):
@@ -1477,6 +1550,16 @@ def test_the_member_roster_is_refused_by_ONE_gate_and_the_count_is_the_point():
     That is a true statement about a boundary and it is the kind that gets
     lost. It is asserted here so that anyone widening ``/groups/`` later finds
     out from a red test rather than from the roster arriving in an answer.
+
+    **AND SOMEBODY DID WIDEN ``/groups/`` -- 2026-09-19, one segment deeper.**
+    This test is unchanged and still green, which is the useful fact: the
+    anchor holding the roster is no longer on ``/groups/?$`` but on
+    ``/groups/[0-9]{1,20}/?$``, and a closed numeric segment refuses
+    ``/members/`` exactly as the root anchor did. The sentence above was
+    written about a pattern that has since moved, so it is re-measured against
+    the current one in
+    ``tests/test_the_groups_id_segment_is_closed.py::test_the_roster_is_still_refused_by_exactly_one_gate``
+    rather than left to be read as a claim about a line that no longer exists.
     """
     invite_substrings = [
         substring
