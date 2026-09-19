@@ -1,6 +1,6 @@
 # SEARCH-RESULTS: the two pre-admission conditions, discharged. NO PATTERN LANDED.
 
-> Wave `search-admission`. All measurements taken 2026-09-19 **12:28-12:37 by
+> Wave `search-admission`. All measurements taken 2026-09-19 **12:28-12:44 by
 > the box** (`date`, pasted at each run), against the working tree at
 > `9421af9`. `linkedin_server/readonly.py` is **unmodified** -- verify with
 > `git diff --stat linkedin_server/readonly.py`, which is empty.
@@ -23,7 +23,7 @@ violated the ruling rather than partially satisfied it:
   `/search/` address is refused today, and section 4 of the same ruling forbids
   a discovery probe from navigating to a refused address even to find out
   whether it should be admitted.
-* **No candidate was CHOSEN.** Three plausible spellings are named below with
+* **No candidate was CHOSEN.** Four plausible spellings are named below with
   their measured blast radii. Picking one is the admitting wave's call, or the
   lead's; this document is the input to that decision and not the decision.
 
@@ -48,10 +48,22 @@ leaves **20 reads**, matching the figure in
 | `N 179` (1) | events | `/search/results/events/` | `2026-09-05-events-surface-recosted.md:252` |
 | `N 194` (1) | content/hashtag | **UNSETTLED** -- `/search/results/content/?keywords=%23...` or `/feed/hashtag/<tag>/`, which is a different family | see A.4 |
 
+**CORRECTS:** `_audit/2026-09-05-search-results-consent.md:163` -- it lists two
+rows as unattributed and names `N 104` (find an organization's Page by
+searching) as one of the candidates. Those two have since been resolved to
+`N 161` and `N 179`, and **`N 104` appears nowhere in
+`_audit/_census/blocker-assignments.tsv` at all** -- not under this blocker and
+not under any other. Checked at 12:43 against BOTH `HEAD` and the working tree,
+because that file is uncommitted in another wave's tree right now; the
+`SEARCH-RESULTS-SURFACE` id set is byte-identical in the two.
+
+**The consequence is not cosmetic: `/search/results/companies/` serves no
+assigned row**, so admitting it buys nothing and costs blast radius.
+
 **16 of the 20 are one vertical.** That is the single most useful fact for
 choosing a spelling: a people-only pattern serves 80% of the blocker.
 
-### A.2 The three spellings, named rather than picked
+### A.2 The four spellings, named rather than picked
 
     S1  people, open query
         ^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$
@@ -59,6 +71,10 @@ choosing a spelling: a people-only pattern serves 80% of the blocker.
     S2  four enumerated verticals, open query
         ^https://www\.linkedin\.com/search/results/
         (people|companies|groups|events)/?(\?[^#]*)?$
+
+    S2b three enumerated verticals THAT HAVE ROWS, open query
+        ^https://www\.linkedin\.com/search/results/
+        (people|groups|events)/?(\?[^#]*)?$
 
     S3  people, STRUCTURED query
         ^https://www\.linkedin\.com/search/results/people/?
@@ -71,13 +87,16 @@ choosing a spelling: a people-only pattern serves 80% of the blocker.
   carry, so it introduces no new shape to review. It serves 16 of 20 rows.
 * **S2** closes the blocker in one entry instead of four. Its path segment is a
   **closed enumeration**, which is what condition 2 asks for -- an alternation
-  of four literal words is not a wildcard. Its cost is that it admits three
-  more third-party-dense pages at once, and `companies` serves a row (`N 104`)
-  whose assignment to this blocker the consent doc itself calls unattributed.
+  of literal words is not a wildcard. Its cost is that it admits three more
+  third-party-dense pages at once.
+* **S2b is S2 with `companies` dropped**, and it is strictly better than S2 on
+  the evidence: `companies` serves no assigned row (see the correction above),
+  so S2 pays for a page nothing asks for. S2b covers **19 of the 20 reads** in
+  one entry and admits one address fewer than S2.
 * **S3** is the narrowest and the only one that constrains what may follow the
   `?`. It is a NEW shape for this repository, which is a real review cost.
 
-**A note on the trailing `/?`, because it is easy to misread.** In all three,
+**A note on the trailing `/?`, because it is easy to misread.** In all four,
 `people/?` means *an optional trailing slash*, not a literal `?`. The literal
 question mark is the escaped `\?` that opens the query group.
 
@@ -105,7 +124,7 @@ captured (a value carrying a `/`, or a bare flag) would refuse.
 
 **`N 194` (find hiring managers through the #Hiring hashtag) may not belong to
 any of these patterns.** Its route is either `/search/results/content/` -- which
-none of S1-S3 admits -- or `/feed/hashtag/<tag>/`, which is a different family
+none of S1, S2, S2b or S3 admits -- or `/feed/hashtag/<tag>/`, which is a different family
 entirely. `_audit/2026-09-19-hashtag-surface-live-evidence.md:35` records
 `/feed/hashtag/` appearing **zero** times across four live loads, which is
 evidence about the feed and not about the address. Whichever way it goes, it is
@@ -148,6 +167,7 @@ put in the corpus is invisible here."*
 |---|---:|---:|
 | **S1** people, open query | **5** | 5 |
 | **S2** four verticals, open query | **8** | 8 |
+| **S2b** three verticals that have rows | **7** | 7 |
 | **S3** people, structured query | **3** | 3 |
 | W1 `/search/.*$` (counterfactual) | **18** | 18 |
 | W2 `/search/` unanchored (counterfactual) | **18** | 18 |
@@ -159,7 +179,7 @@ candidate admits is by construction defended by nothing -- including the three
 addresses the admission is FOR. **The number that carries information is the
 difference: 18 against 3.** A family wildcard reaches fifteen addresses beyond
 the narrow candidate's, none of them refused by anything else, and the
-alternation in S2 costs exactly three of them.
+alternation in S2 costs exactly three of them, and S2b two.
 
 **CORRECTS:** `_audit/2026-09-05-search-results-consent.md:195` -- its boundary
 snapshot reads *"33 forbidden substrings, 24 allowed patterns"*. The substring
@@ -181,7 +201,7 @@ matches the string it was handed. Measured:
 **This is the neighbourhood check the brief asked for, and it found one.** The
 denylist bounds a wildcard's blast radius exactly where somebody already wrote
 a rule; what it does not bound is what the wildcard reaches that nobody thought
-to forbid. **S1, S2 and S3 all refuse all three**, because a closed path
+to forbid. **S1, S2, S2b and S3 all refuse all three**, because a closed path
 segment cannot be followed by `..`.
 
 **AND THE ANCHOR IS NOT THE FIX.** W1 is anchored at both ends with `.*$` and
@@ -208,7 +228,7 @@ eleven ordinary search keywords put through it at 12:37:
     visibility  cookies   open-to-work  two-factor     -> 8 REFUSED by the denylist
     recruiter   engineer  director                     -> 3 clean
 
-So `?keywords=password` refuses **after** any of S1-S3 lands, and it refuses
+So `?keywords=password` refuses **after** any candidate lands, and it refuses
 with a message about a write guard. **The ruling explicitly does not authorise
 narrowing the filter** (section 3), so this is not a licence to touch the
 denylist -- it is a requirement on the TOOL: it must decide, in advance, what
@@ -258,8 +278,9 @@ passing vacuously.
 ## D. WHAT THE ADMITTING WAVE INHERITS
 
 1. **Pick a spelling from A.2.** S1 serves 16 of 20 rows in the shipped house
-   style; S2 closes the blocker in one entry at three more admitted pages; S3
-   is the only one that constrains the query, at the cost of a new shape.
+   style; **S2b** serves 19 in one entry at two more admitted pages and
+   dominates S2, which pays for a `companies` page no row asks for; S3 is the
+   only one that constrains the query, at the cost of a new shape.
 2. **Condition 1 is still entirely unmet.** No shaper exists. Admitting on the
    strength of this document alone violates the ruling -- section 6 says so in
    those words.

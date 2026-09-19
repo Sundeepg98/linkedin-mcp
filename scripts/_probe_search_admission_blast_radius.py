@@ -74,7 +74,11 @@ SEARCH_FAMILY: tuple[tuple[str, str], ...] = (
         f"{BASE}/search/results/content/?keywords=%23hiring",
         "RECORDED -- N 194's candidate route, itself unsettled",
     ),
-    (f"{BASE}/search/results/companies/?keywords=x", "RECORDED -- N 104 shape"),
+    (
+        f"{BASE}/search/results/companies/?keywords=x",
+        "RECORDED spelling, NO ASSIGNED ROW -- N 104 appears nowhere in "
+        "blocker-assignments.tsv, at HEAD or in the working tree (12:43)",
+    ),
     # --- the rest of the family, which a wildcard cannot help admitting ---
     (f"{BASE}/search/", "PLAUSIBLE -- family root"),
     (f"{BASE}/search/results/", "PLAUSIBLE -- family index"),
@@ -138,9 +142,17 @@ CANDIDATES: tuple[tuple[str, str], ...] = (
         r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$",
     ),
     (
-        "S2-enumerated-verticals",
+        "S2-four-verticals",
         r"^https://www\.linkedin\.com/search/results/"
         r"(people|companies|groups|events)/?(\?[^#]*)?$",
+    ),
+    (
+        # THE SAME IDEA, TRIMMED TO WHAT THE ROWS ACTUALLY ASK FOR. `companies`
+        # serves no assigned row, so S2 pays blast radius for nothing; these
+        # three cover 19 of the 20 reads.
+        "S2b-three-verticals-that-have-rows",
+        r"^https://www\.linkedin\.com/search/results/"
+        r"(people|groups|events)/?(\?[^#]*)?$",
     ),
     (
         "S3-people-structured-query",
