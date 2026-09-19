@@ -1095,6 +1095,22 @@ def test_no_tracked_file_pairs_fixture_content_with_anything_else():
 #: on the day it was written.
 NOT_A_PRE_IMAGE: dict[tuple[str, str], str] = {
     (
+        "scripts/_probe_creator_content_analytics.py",
+        "REGIONS",
+    ): (
+        "Rows pair a COUNTER NAME with the CSS SELECTOR it counts -- "
+        "'tablists'/'[role=\"tablist\"]', 'svg_charts'/'svg'. Both halves are "
+        "structural vocabulary: one is this file's own label for a count, the "
+        "other is a selector out of the HTML spec. NEITHER IS AN IDENTIFIER "
+        "AND NEITHER IS A PRE-IMAGE -- there is no person, page or account on "
+        "either side, so nothing here reverses anything. It trips because "
+        "selectors appear in fixtures (they are what fixtures are made of) "
+        "and the bare label names do not, which is the exact CLASS LABEL case "
+        "this table exists for. RENAME WAS CONSIDERED FIRST and does not "
+        "apply: the collision is between a selector and a fixture, and a "
+        "selector cannot be renamed without changing what is measured."
+    ),
+    (
         "tests/test_the_second_gate_covers_the_class.py",
         "CLASS_MEMBERS",
     ): (
