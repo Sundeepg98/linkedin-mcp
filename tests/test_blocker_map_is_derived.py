@@ -673,7 +673,28 @@ import build_blocker_map as bbm  # noqa: E402
 #: OTHER, so a wave routed to either arrives at the same page. Recorded as
 #: a PICK ON A WEAK TIEBREAK and explicitly NOT a precedent. B8 stays a
 #: frozen-GAP row, UNASSIGNED -- not retired, not subtracted.
-UNASSIGNED_CEILING = 48
+#: 48 -> 44. INVITATION-SUBSTRING-BLOCKED 3/3 and INVITE-NOTE-PARAM 1/1,
+#: from request 2b -- which was NOT ruled but MISROUTED BACK TO ME. I had
+#: reported its discriminator "cannot be made to exist" because the cost-0
+#: table publishes no R/W split. TRUE OF THE SPLIT, FALSE OF THE
+#: DISCRIMINATOR: the blocker is named for a forbidden SUBSTRING, so the
+#: test is LEXICAL. All four candidates are writes, so direction could never
+#: have separated them -- I had been running the one instrument that could
+#: not work, and calling its silence an absence of evidence.
+#:
+#: readonly.py's forbidden list carries "/invite" and "invitation" as
+#: adjacent entries, and the census names an address itself: on
+#: /mynetwork/invitation-manager/, "ABSENT twice -- no pattern, AND
+#: invitation is a forbidden substring".
+#:
+#: N 6 needs the Sent surface (that address); N 7 and N 8 need a /invite
+#: route on a Page. N 5 is NOT an address problem and its own evidence cell
+#: says so -- "takes no note parameter" -- and there is a blocker named
+#: for exactly that, INVITE-NOTE-PARAM, 1W, empty.
+#:
+#: ONE ASSIGNMENT OF N 5 LANDS BOTH COUNTS AND THE OTHER LANDS NEITHER.
+#: The wrong answer is refuted by arithmetic, not by preference.
+UNASSIGNED_CEILING = 44
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
