@@ -156,3 +156,45 @@ Stamps, by the box:
     Sat, Sep 19, 2026 10:32:01 AM   control fixture matches its expectation
     Sat, Sep 19, 2026 10:37:14 AM   reader + 13 tests committed
     Sat, Sep 19, 2026 10:41:22 AM   run-2 refutation recorded
+
+## 8. MY ROWS REACHED HEAD IN SOMEBODY ELSE'S COMMIT AGAIN -- and the rule I wrote does not cover it
+
+Census rows `J 42` and `J 112` carry this wave's annotations in HEAD, committed
+by `58c3101` -- another wave's. **Byte-identical to what I wrote, so nothing is
+lost and nothing is rewritten.** Credited here and routed, per the standing
+protocol. That is the second time today, after `J 10` in `6353f6b`.
+
+### THE WINDOW IS EDIT-TO-COMMIT, NOT STAGE-TO-COMMIT
+
+After the first instance I adopted -- and the lead recorded as standing -- *stage
+and commit in ONE chained command, never two steps with thinking in between.*
+**I followed it here and it did not help**, which makes the rule narrower than
+it reads:
+
+    stage -> commit    the window that rule closes
+    EDIT  -> commit    the window that actually matters on a shared file
+
+My edit landed in the working tree; the neighbour ran `git add` on that path
+minutes later, for their own reasons, and committed everything in it. **A
+chained stage-and-commit closes seconds at the END of that window and leaves
+the whole editing interval open.** On a file several waves append to, the only
+thing that shortens the real window is editing and committing in one motion --
+and even then a neighbour's `git add` between the two is unpreventable.
+
+### WHAT ACTUALLY WORKED, and it is worth keeping
+
+The blob technique from section 6 of `_audit/2026-09-19-read-tail.md` -- build
+HEAD-plus-only-my-rows, `git hash-object -w`, `git update-index --cacheinfo` --
+**refused correctly here rather than doing damage.** Run after the neighbour's
+commit, it reported *"already identical to HEAD"* for both rows and staged
+nothing, because its premise (my rows differ from HEAD) was false. A tool that
+discovers its own premise has expired and stops is the behaviour worth having;
+it is how I learned the rows had already landed.
+
+### THE HONEST ACCOUNTING
+
+**Three of this session's census rows reached history under other waves'
+commits, and every one of them is content I wrote and stand behind.** The cost
+is attribution, not correctness, and the remedy is credit rather than a rewrite
+-- rewriting HEAD in a tree with several live writers trades a mis-attributed
+line for something genuinely hard to undo.
