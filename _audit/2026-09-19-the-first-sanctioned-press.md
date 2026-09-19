@@ -125,3 +125,80 @@ this run did not have:
 
 **The witness is the harder half and it is the one worth building first**,
 because without it a permitted press cannot be told from a press that missed.
+
+---
+
+# 6. CORRECTION, SAME DAY ~11:50 -- I UNDERSTATED THIS, AND IN THE DIRECTION THAT MATTERS
+
+Section 4 above filed the ambiguity as a limit of THIS RUN. **It is a limit of
+the GATE**, and the two are not close: a limit of a run is fixed by running
+again, and this one cannot be. **Every press through `press.disclose`, past and
+future, carries the same silence.**
+
+The evidence is four lines of `press.disclose`, in this order:
+
+    expanded_before = await locator.get_attribute("aria-expanded")
+    await locator.click(...)
+    await page.keyboard.press("Escape")          # <-- DISMISSED FIRST
+    expanded_after = await locator.get_attribute("aria-expanded")
+
+**`expanded_after` is read AFTER the dismissal.** Nothing reads the control
+while it is open. `check_closure` requires `before == after`, and a successful
+Escape guarantees that equality whether or not anything ever opened. The gate
+takes exactly **two readings, and both are outside the open state. Two readings
+cannot describe three states.**
+
+Why the original wording was wrong in the dangerous direction: "this run could
+not distinguish them" invites a later wave to run it again and expect an
+answer. **It would get the same verdict, and would have spent a press on his
+live account to learn nothing.**
+
+## SHOWN, NOT ARGUED
+
+`tests/test_the_press_gate_cannot_witness_disclosure.py` builds three pages
+that differ IN THE WORLD and shows `disclose` returning **one identical
+verdict** for all three:
+
+    opens    the control really opens      aria-expanded false -> true
+    misses   the press lands on nothing    nothing changes
+    dialog   it really opens AS A DIALOG, and the control's own
+             aria-expanded never moves
+
+Its control is a fourth case -- a moved counter -- **shown SEPARATING** through
+the same comparison, because a test asserting that things are
+indistinguishable passes trivially if it is comparing the wrong thing.
+
+## THE FIX IS ONE READING, AND IT IS VERIFIED RATHER THAN PROPOSED
+
+A local copy of `disclose` with a single observation taken between the click
+and the dismissal was measured: the three verdicts separate, `disclosed` is
+True only where something opened, **the four safety conditions are unchanged
+field for field, exactly one control is clicked, and a refused press carries no
+witness at all.**
+
+Two design points, both decided by measurement rather than taste:
+
+1. **THE OBSERVATION IS AN ENUMERATED CLOSED SET, NEVER A CALLER'S CALLABLE.**
+   A seam that accepts arbitrary code at the open moment is a press seam
+   wearing an observer's clothes -- it would reintroduce precisely what
+   `SANCTIONED_SHAPES` exists to prevent, at the most privileged instant.
+2. **IT READS THE PAGE, NOT ONLY THE CONTROL, AND IT IS A PAIR.** The `dialog`
+   case decides this: a witness reading only the pressed control's own
+   `aria-expanded` sees `false` while a dialog is open on the page, and
+   **reports a real disclosure as a miss.** That false negative is worse than
+   no witness, because it manufactures a confident wrong answer where there was
+   an honest silence. A page-wide count also needs its baseline -- this page
+   already carried nine `[aria-expanded]` nodes before any press -- so the
+   witness is the SAME readings taken at both moments, never a single one.
+
+**And the witness is not a fifth condition.** Permission stays decided on
+safety alone. Folding disclosure into permission would turn a READING into a
+GATE and refuse a perfectly safe press for the sin of being uninformative.
+
+## WHAT IS OWED, AND TO WHOM
+
+`linkedin_server/press.py` is owned by `messaging-measure`. **This wave did not
+edit it.** What is handed over is a red-when-fixed test, a verified design, and
+the one case that picks it. `N 133` / `N 134` remain GAP either way -- **no
+content has been read** -- and the second half, a name-free shaper for what the
+panel draws, is still unbuilt.
