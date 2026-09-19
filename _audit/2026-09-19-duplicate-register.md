@@ -52,8 +52,25 @@ arithmetic.
 ## 3. THE THREE THAT ARE NOT CLEAN, AND WHY EACH IS DIFFERENT
 
 * **CONTAINMENT — `M M38` *Report a message as spam* vs `N 149` *Report a
-  message*.** Spam is a *subtype* of reporting. Subtracting either loses a
-  distinction the census may want; the ruling is which grain the census keeps.
+  message*.** Spam is a *subtype* of reporting. **RULED 2026-09-19, `cdcf14d`
+  section 7: THE GRAIN FOLLOWS WHAT THE PLATFORM DRAWS.** One control with a
+  reason parameter is **one** capability and the contained row duplicates the
+  containing one; two controls are **two** capabilities and both rows stand.
+  *A parameter value is not a capability* — reaching one control reaches
+  everything its parameters express.
+
+  **BOTH ROWS STAY, because the input is unmeasured.** Nobody has read which
+  shape that control has. **This is not a deferral wearing a ruling's
+  clothes:** the rule is decided and only its input is missing, and the input
+  is **one read of an already-admitted surface**. A future wave measures and
+  applies it — it does not re-argue it.
+
+  **Why the rule points at the platform rather than at taste:** a grain decided
+  by preference must be re-decided for every containment pair that ever
+  appears; one that points at the page is decided once and measured
+  thereafter. **Containment is a fact about the words; the grain is a fact
+  about the page** — and this round holds four separate instances of a lexical
+  relation that did not survive contact with a surface.
 * **BUNDLED — `M C80` *Subscribe or unsubscribe to a newsletter* spans `N 55`
   *Subscribe* and `N 56` *Unsubscribe*.** One row against two. **Subtracting
   `C80` removes two capabilities and one row, and the counts diverge.**
