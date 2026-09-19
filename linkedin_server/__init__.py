@@ -30,7 +30,25 @@ two highest-traffic count claims in the repository are the two unguarded ones.
 It was stale in the direction that matters: understating the write surface by
 NINE TOOLS, five of which are irreversible.
 
-WHAT IS TRUE, measured rather than remembered: twelve write tools ship, five
+**AND IT WENT STALE A THIRD TIME, 2026-09-19, IN A NEW DIRECTION.** Not by
+understating the write surface -- twelve is still twelve -- but by a count
+that moved underneath this sentence. ``readonly.SANCTIONED_MUTATIONS`` went
+from FIVE to SEVEN at 12:12 that day, when ``press.py``'s disclosing press
+added a ``click`` and a ``press``: two real calls in a new module, not a
+reclassification of anything already here. Nothing was argued about and no
+line changed meaning. The number simply moved and this sentence did not.
+
+**WHAT IS DIFFERENT THIS TIME IS THAT SOMETHING NOTICED.** The paragraph above
+says this docstring "is pinned by nothing" and diagnoses the remedy as
+building something that would notice rather than writing a better sentence.
+That sentence is now out of date, and this is the happiest way for a claim to
+go stale: ``test_the_package_docstring_agrees_about_writes_and_mutations``
+reads THESE WORDS, derives the write count from the live registry and the
+mutation count from ``SANCTIONED_MUTATIONS``, and went red on its own three
+hours after the table moved. It is left standing above rather than edited,
+because the correction is the record.
+
+WHAT IS TRUE, measured rather than remembered: twelve write tools ship, seven
 sanctioned mutating calls exist, writes are off unless a per-process flag is
 set, and every write needs a single-use token from its own preview. See
 ``writes.py``, and prefer ``server.py``'s docstring over this one for counts,
