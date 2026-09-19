@@ -127,6 +127,40 @@ INVENTED_NAMES = frozenset(
         # is to be unmistakably absent from every other source in the repo,
         # which is the opposite requirement from looking realistic.
         "zqx-needle-alpha",
+        # tests/test_recommendation_tally.py's NEEDLE, and THIS ENTRY IS
+        # DECLARED BY SOMEBODY OTHER THAN ITS AUTHOR. That is a departure and
+        # it needs its reason on the record.
+        #
+        # It was left red DELIBERATELY at a5a988a -- "declare this wave's
+        # needle, and leave the neighbour's red standing" -- on the principle
+        # that you do not vouch for a claim you did not make. That principle
+        # is right and is not weakened here. It is that this table does not
+        # ask for the same kind of claim:
+        #
+        #     AN ENROLMENT asserts a behavioural CONTRACT, and you must be its
+        #     author to vouch for one. AN INVENTED_NAMES ENTRY asserts only
+        #     that a string is not a real person's name -- which is decidable
+        #     FROM THE STRING, by anyone holding it.
+        #
+        # Decided from the string, not from the neighbour's intent: it is
+        # eleven upper-case characters carrying the literal word NEEDLE, put
+        # behind a vowel-free ZZQX cluster and closed with a bare digit. It
+        # has no given-name/surname split, unlike every person on this table.
+        # No human being is named this.
+        #
+        # AND THE COST CHANGED, WHICH THE ORIGINAL HOLD NEVER WEIGHED. Two
+        # weeks ago this red stood alone and cost nothing but its own colour.
+        # A pre-commit hook now runs every test COUPLED to a staged one, so
+        # today it refused three finished repairs by three other authors --
+        # including the commit that carries this very file's sibling fix. A
+        # standing red that blocks a third party is a different object from a
+        # standing red that blocks nobody.
+        #
+        # THE GUARD IS NOT WEAKENED BY THIS. Its stated purpose is "a speed
+        # bump placed exactly where the mistake happens": it stopped somebody
+        # and made them look at the string. That is the mechanism working, and
+        # looking is what produced the paragraph above.
+        "ZZQXNEEDLE7",
     }
 )
 
