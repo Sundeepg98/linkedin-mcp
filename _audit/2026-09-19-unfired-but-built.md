@@ -11,7 +11,7 @@ rather than a rewrite. Section 4 below holds the four readings.
 OPPOSITE ONE.** I was sent to bank `COVERED-UNFIRED` on GAP write rows served by
 the twelve shipped performable actions. **Every one of the twelve already has its
 capability banked by an earlier wave.** No GAP row in the census is served by any
-of them. **0 rows banked out of GAP; 296 GAP rows left where they are.**
+of them. **0 rows banked out of GAP; all 296 GAP rows left where they are.**
 
 What I found instead, looking at the same twelve actions from the coverage side:
 **two rows banked COVERED-PROVEN on evidence that does not say what the rows say
@@ -53,11 +53,22 @@ either number and I am recording that rather than quoting one I did not take.
     blocker-map.tsv, a FROZEN spine of 409 rows,
     state_today == GAP                                 310
 
-The three denominators disagree because they are three different sets: the
+    2026-09-03-linkedin-gap-blockers.md, summing the
+    R/W cells of its 86 ranked blockers            R 125 / W 222
+
+**Three sources, three different W counts, and none of them is 181.** The
+denominators disagree because they are different sets: the
 census `.md` files are today's rows, `blocker-map.tsv` is the 2026-09-03 frozen
 set carrying today's state, and jobs.md's count block is a frozen block its own
-slice deliberately does not rewrite. **I examined all 296 individually**, which
-is the number that matters here regardless of which denominator is quoted.
+slice deliberately does not rewrite.
+
+**WHAT I ACTUALLY EXAMINED, stated exactly rather than generously:** all **222**
+GAP rows that are W-marked, R+W-marked or carry no R/W column, one at a time,
+listed by id and capability; plus a verb sweep over all **296** GAP rows for the
+twelve action verbs (save, bookmark, apply, follow, connect, invite, message,
+InMail, post, publish, comment, react, setting, profile, edit). The 74 R-marked
+GAP rows were covered only by that sweep, which is correct for a write pass and
+is the limit of this reading.
 
 ---
 
@@ -87,7 +98,7 @@ LEDGER's narrative and false of the CENSUS's rows.
 
 ---
 
-## 3. THE 296 I DID NOT BANK, AND WHY
+## 3. THE 222 WRITE-SIDE ROWS I DID NOT BANK, AND WHY
 
 Every GAP row fails at least one of three tests. **The discriminator is not my
 invention -- it is the census's own**, set by `network.md` rows 46 and 47:
@@ -147,6 +158,14 @@ the intro editor. Six of their siblings (`A8`, `A11`, `A13`, `A17`, `A19`,
 `A21`) are banked CU on the stated ground *"aimable by `label-for`"* /
 *"aimable by `aria-label`"*; three others (`A2`, `A4`, `A6`) are
 COVERED-CANNOT-DELIVER on a measurement that they are **unaimable**.
+
+**THE MECHANISM, read at 14:28 rather than assumed.** `anchor_label_for` for
+this action *"returns THE FIELD NAME, PER CALL"*, and `_live_control` checks
+that name *"against THE LIVE CONTROL LIST, requiring exactly one match, on the
+very page the write will act on"* -- and `perform` checks aiming FIRST, before
+the write door, before the navigation, before any control is read. So for these
+rows the question "would the gate refuse?" is decided entirely by whether the
+field carries a matchable accessible name on that container.
 
 `A14` and `A22` are **neither**. `linkedin_server.intro_fields.signature`
 returns a TRI-STATE and both read `unknown`: no label matched, AND four controls
@@ -261,3 +280,87 @@ only he can revisit it.**
     page loads                0
     census rows moved out of GAP   0
     census rows corrected downward 2
+
+---
+
+## 8. A SHIPPED GUARD CAUGHT THREE DEFECTS IN THIS WAVE'S OWN COMMITS
+
+`tests/test_a_correction_is_findable_from_the_claim.py` is the instrument and it
+worked on the wave that thought it was being careful. Recorded because the
+failures are more useful than the fix.
+
+1. **The `CORRECTED BY:` back-pointer wrapped its reason onto the next line.**
+   The guard's own design note says it: *"a DECLARATION is a line, not a
+   phrase"*, and the reason must sit on the marker's own line. I wrote the
+   marker correctly and then let the editor wrap it.
+2. **The corrected rows cited their corrector by filename, in cells that also
+   carry the word CORRECTED**, which mints a candidate pair in the REVERSE
+   direction of the declared one. A declared pair runs corrector -> target; the
+   corrected rows pointing back at their corrector is not a second correction.
+   The cells now route through the DELTA note, which carries the declared
+   citation, so a reader of row 103 is still one hop from the evidence.
+3. **Two prose lines named another census slice by filename inside the
+   two-line vocabulary window**, for a slice that was RIGHT all along and is
+   being corroborated rather than corrected.
+
+**THE HONEST LONG-TERM FIX FOR 2 AND 3 IS A `NOT_A_CORRECTION` ENTRY, AND IT IS
+OWED RATHER THAN DONE.** That table lives in a `tests/` file. Staging one fires
+`scripts/pre_commit_boundary_gate.py`, the hook refuses while the foreign reds
+stand, and the standing ruling is that it is not bypassed -- one wave's finished
+file is already held for exactly this reason. Rewording to avoid minting a FALSE
+pair is not the same act as suppressing a real one: the real correction stays
+declared, in both directions, by the marker pair the guard checks.
+
+**GUARD STATE AFTER THIS WAVE: 4 untriaged candidate pairs and 1 marker without
+a reason, every one of them in a file this wave never wrote** --
+`2026-09-19-the-three-ruling-requests-ruled.md:4`, `jobs.md:201` (row 42, twice),
+`network.md:436`, and `2026-09-19-search-admission-preconditions.md:184`.
+
+---
+
+## 9. THIS PASS IS THE CROSS-REFERENCE A FAILED INSTRUMENT ASKED FOR, AND THE
+## DIRECTION OF THE JOIN IS WHY IT WORKED
+
+`scripts/unbanked_row_sweep.py` is a **deliberately kept failed instrument** for
+exactly this problem -- *"rows already built but still filed GAP"* -- and its
+docstring records four designs, each convicted by its own control:
+
+    1  cell-text signals      0 of 7   the census not knowing is the defect itself
+    2  identifier matching    1 of 7   and that one was a FALSE match
+    3  parameter matching     7 of 7   PASSING BY COINCIDENCE -- three job-search
+                                       rows matched a MESSAGING tool on "filter"
+    4  self-contradiction     9 candidates, 0 genuine
+
+Its conclusion: *"The durable fix is not a detector, it is a discipline ... For
+the backlog that already exists, the only method that has produced a correct
+answer is a HUMAN cross-reference of the 42 tools against the GAP rows -- every
+one of the ten instances above was found by a person reading the tree, none by a
+machine."*
+
+**THE WRITE HALF OF THAT CROSS-REFERENCE IS NOW DONE, AND SECTION 2 IS ITS
+RESULT.** What made it tractable is the DIRECTION OF THE JOIN, and that is the
+transferable part:
+
+> **All four failed designs scanned the CENSUS -- 296 rows, no closed source to
+> join against -- and tried to infer "this was built". This pass enumerated the
+> CAPABILITY SOURCE instead: `writes.PERFORMABLE` is a CLOSED SET OF TWELVE,
+> each with a spec, a `url_pattern` and a `target_kind`, and asked of each
+> "where is this banked?" The denominator is twelve, not two hundred and
+> ninety-six, and every one of the twelve resolves by hand.**
+
+**IT DOES NOT GENERALISE TO READS AND THAT LIMIT IS THE POINT.** The join works
+because the write side HAS a closed enumeration with addresses attached. There
+is no `READABLE` frozenset; the read surface is an allowlist of patterns with no
+one-to-one correspondence to capabilities, which is precisely why the four
+census-scanning designs were tried in the first place.
+
+**AND A GUARD IS OWED THAT WOULD HAVE CAUGHT SECTION 4 AUTOMATICALLY.** No
+shipped test distinguishes `COVERED-PROVEN` from `COVERED-UNFIRED`: rows 103 and
+104 passed `test_a_covered_row_names_the_artifact_that_covers_it.py` for three
+weeks because they DID name an artifact -- the state was the wrong one, not the
+citation. The missing check is *a `COVERED-PROVEN` row must cite a live-fire
+receipt, not a performability verdict*, **and its positive control already
+exists**: those two rows in their pre-correction form, which the check must be
+shown failing on before it is admitted anywhere. Not built here, for the same
+reason the `NOT_A_CORRECTION` entry is not: it is a `tests/` file and the hook
+refuses while the foreign reds stand.
