@@ -306,3 +306,56 @@ than I understood at the time I over-claimed it.
 **The cheap repair is a column, not a ruling**, and it is not mine: adding `R/W`
 to `jobs.md`'s five table headers is a slice-owner's edit. Routed with the
 number attached — 151 rows, 0 recorded — so whoever takes it knows the size.
+
+---
+
+# AMENDMENT D — what the 61-pair handoff came back as, and what it says about the RANKING
+
+`small-measures` adjudicated the whole 61-pair COVERED-vs-GAP list I handed over
+(`de48d76`) and the result is **1 true of 61**. Their finding outranks the row,
+and it is about my instrument rather than theirs, so it belongs here.
+
+## D1. Verified in my own data, not accepted from theirs
+
+The one true pair — `P K10` / `J 27`, the verification badge on a posting —
+scores **0.589** in my list. Checking the distribution of the file I handed over:
+
+    scores above it:  0.869  0.712  0.683  0.595      <- four pairs, ALL FALSE
+    the true pair:    0.589                           <- rank 5 of 61
+
+**Every pair scoring higher than the only true one is false.**
+
+## D2. The accurate statement, which is narrower than "the ranking is useless"
+
+With one true pair in 61, chance would put it at rank ~31. It came back at rank
+5 — **the top 8%** — so the score does carry signal. But:
+
+> **The ordering CONCENTRATES truth without SEPARATING it.** Any cutoff above
+> rank 5 loses the only true pair, and every cutoff at or below rank 5 admits
+> four false ones first.
+
+**So "precision at the head" — the framing I used in section 1 and in the
+handoff README — overstates how usable the ordering is.** It reports a rate and
+implies a strategy (work from the top), and the strategy does not follow from the
+rate. A 7-true-of-15 head is not 7 findings you can reach before the 8 others.
+
+## D3. What I should have handed over instead
+
+Not a ranked list. **A list sorted by whether the EXCLUDED-RULED or COVERED side
+carries a citable basis** — because that is the property that predicted every
+one of my own thirteen flips, and it is checkable without judgement. Score never
+predicted a single one of them; the presence of a nameable ruling predicted all
+of them.
+
+The handoff README did give the working discriminator (*do neighbouring rows
+agree across the two slices*), and that is what `small-measures` used. **The
+score column should have been dropped from it rather than led with.**
+
+## D4. And the lexical ceiling, stated with their number
+
+They measured `"Filter: Location"` against `"Filter by Locations"` at **0.595** —
+a false pair outscoring the true one. **A lexical matcher cannot tell a
+capability from a capability it shares a noun with**, and no threshold repairs
+that, because the failure is not in the cutoff but in what is being measured.
+Section 6's "lexical, not semantic" limit is that same fact; this is its cost
+measured in a real adjudication rather than predicted.
