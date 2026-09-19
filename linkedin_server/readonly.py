@@ -41,8 +41,13 @@ in four parts:
    module in the package AND over a deliberately bad sample, so the check is
    shown catching something rather than merely passing.
 
-   Since 2026-08-23 the package contains exactly ONE mutating call, and the
-   scanner still reports it. What changed is not the SCANNER but the POLICY
+   Since 2026-08-23 the package has contained mutating calls, and the scanner
+   still reports every one of them -- **FIVE as of 2026-09-19; this sentence
+   said ONE until then and was wrong from the day the second landed.** The
+   count is not repeated here any more, because a number written in prose
+   beside a list it does not read is a number that goes stale in silence.
+   ``test_the_stated_guarantee_matches_the_sanctioned_list`` now asserts the
+   two agree. What changed in 2026-08-23 is not the SCANNER but the POLICY
    applied to what it finds: :data:`SANCTIONED_MUTATIONS` enumerates, by
    ``(path, function, kind)``, the calls that are permitted, and
    :func:`partition_mutation_hits` splits a scan into the sanctioned and the
@@ -71,12 +76,32 @@ What is true now, and is what the four parts above enforce:
 
 * This server can open a fixed set of LinkedIn's own read pages in the
   operator's browser and read what rendered.
-* It contains **exactly two** calls that can change anything on LinkedIn,
-  both inside ``writes.perform`` and both named in
-  :data:`SANCTIONED_MUTATIONS`: a ``click``, and -- from 2026-09-01 -- a
-  ``fill``. Neither runs unless a per-process flag is set, a human has read a
-  confirm gate built from a live read, and a single-use grant is redeemed
-  against it. See ``writes.py``.
+* Every call it contains that can change anything on LinkedIn is named in
+  :data:`SANCTIONED_MUTATIONS`, and **that list is the count** -- read it
+  rather than a number written here. None of them runs unless a per-process
+  flag is set, a human has read a confirm gate built from a live read, and a
+  single-use grant is redeemed against it. See ``writes.py``.
+
+  **THIS BULLET SAID "EXACTLY TWO ... BOTH INSIDE writes.perform" UNTIL
+  2026-09-19, AND IT WAS WRONG IN BOTH HALVES.** The list held FIVE entries
+  across TWO functions in TWO files: ``writes.perform`` has ``click``,
+  ``fill``, ``select_option`` and ``set_input_files``, and
+  ``dom.activate_messaging_filter`` has a ``click`` of its own -- a READ-path
+  click, admitted 2026-08-26 on the argument that a view filter changes
+  nothing on LinkedIn's servers. So a dropdown choice and a FILE UPLOAD were
+  permitted while this sentence named neither.
+
+  **Nothing tested the prose against the list**, which is why it drifted
+  through three separate widenings without anyone noticing. The list could not
+  rot -- ``test_every_sanctioned_entry_is_actually_present`` asserts it in both
+  directions -- but the sentence a reader actually reads could, and did. This
+  module warns about exactly that failure nine lines below, in its own words:
+  *enumerating what this server does not do, without naming the things it
+  does, is how a true list misleads.*
+
+  The fix is not a better number. It is that the number is gone from the prose
+  and ``test_the_stated_guarantee_matches_the_sanctioned_list`` now fails if
+  one reappears here without matching the list.
 * **IT TYPES, AND THIS SENTENCE SAID IT DID NOT UNTIL 2026-09-01.** The old
   text read *"It still types nothing, submits no form, issues no non-GET
   request"*, and the first clause is now false. It is corrected rather than
