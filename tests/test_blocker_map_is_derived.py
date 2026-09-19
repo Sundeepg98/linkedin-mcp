@@ -61,7 +61,25 @@ import build_blocker_map as bbm  # noqa: E402
 #: NEWSLETTER-SURFACE N 57). The 22 refined CONTRADICTS were left for a person,
 #: not absorbed. Lowering it is the intended direction and requires no
 #: ceremony; raising it needs a reason.
-UNASSIGNED_CEILING = 278
+#:
+#: 278 -> 268 on 2026-09-19, SEVEN rows, three blockers taken from ABSENT to
+#: COMPLETE. `M C2` to PUBLISH-POST-AUDIENCE-PARAM (1 of 1) -- amendment A3 is
+#: HEADED with the blocker name and states the row verbatim inside it, so the
+#: map's "no committed source names this row against any blocker" was false
+#: twice over. `M C10` and `M C28` to MENTION-COMPOSITION-RULING (2 of 2) --
+#: `2026-09-05-article-publish.md:130` names the pair and ties it to "exactly
+#: blocker 16's count of two", and rank 16 IS that blocker. `M C54 C55 C56 C76`
+#: to COLLABORATIVE-CONTENT (4 of 4) -- its section 4 enumerates that blocker's
+#: four rows in one sentence.
+#:
+#: ONE OF THOSE SEVEN WAS REPORTED AGAINST THE WRONG BLOCKER AND THIS CEILING IS
+#: WHY IT MATTERS. `M C55` was relayed as assignable to MENTION-COMPOSITION-
+#: RULING alongside C10 and C28. That blocker publishes TWO rows, C10 and C28
+#: close it exactly, and a third would have tripped the over-count assertion
+#: rather than this one -- the two guards catch different halves, and the
+#: dangerous half is the other one. C55 is a collaborators row, not a mention
+#: row.
+UNASSIGNED_CEILING = 268
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
