@@ -397,6 +397,42 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "BY: pointer aimed at the rulings document would tell a reader the "
         "ruling had been refuted by the row that implements it"
     ),
+    # THE CENSUS-WAVE PAIR, triaged 2026-09-19. Both were produced by the scan
+    # on 2026-09-06 and sat red through a thirteen-day gap; neither document
+    # carries a marker of any kind, and the corpus-sweep never cites the
+    # blocker map at all, so there was no reverse declaration to find.
+    ("2026-09-05-blocker-map.md", "2026-09-06-corpus-sweep-blocker-evidence.md"): (
+        "A RATCHET ADVANCE, NOT A REFUTATION, and the citing document says so "
+        "in the same breath: 'SUPERSEDED, AND ONLY DOWNWARD ... Every number "
+        "below was correct when measured and is stated with its pass; the "
+        "ratchet exists precisely so this direction needs no ceremony.' The "
+        "whole-corpus sweep took UNASSIGNED from 284 to 278 by reaching six "
+        "rows this document's filter had not, which moves the count the one "
+        "way the ratchet permits. Nothing in the blocker map is asserted "
+        "wrong, so the arrow inverts twice over: the citation runs from the "
+        "SUPERSEDED document to the one that superseded it, and a CORRECTED "
+        "BY: pointer aimed at the sweep would tell a reader the later, wider "
+        "measurement had been refuted by the narrower one it replaced. The "
+        "reader-reachability this file exists to protect is already better "
+        "served than a marker would serve it: the banner is the document's "
+        "line 3, above every number it qualifies, and it names the figure to "
+        "quote instead"
+    ),
+    ("2026-09-06-corpus-sweep-blocker-evidence.md", "2026-09-03-linkedin-gap-blockers.md"): (
+        "AN UNRESOLVED CONFLICT THE AUTHOR DECLINES TO FILE, which is the "
+        "opposite of a correction -- the same ground as the two "
+        "census-hygiene entries above. Finding B quotes the ledger at "
+        "1236-1242 to show that an amendment proposes renaming the blocker "
+        "carrying rows J 116-J 120, and then refuses to act on it, because "
+        "the passage settles on a THIRD name that is not one of the 97 and "
+        "was never ruled: 'a proposal, not a ruling ... Recorded as-is rather "
+        "than filed under either side.' The sweep asserts nothing about the "
+        "ledger's correctness; it records that the ledger disagrees with "
+        "itself and leaves the adjudication to whoever owns it. A CORRECTED "
+        "BY: pointer aimed at the ledger would publish a ruling nobody made, "
+        "on exactly the question the citing document went out of its way not "
+        "to answer"
+    ),
 }
 
 
