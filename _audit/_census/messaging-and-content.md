@@ -24,7 +24,7 @@ found, hole by hole, including the holes that came back empty.
 | messaging | 45 | 51 | +6 |
 | content | 75 | 91 | +16 |
 
-**Denominator: 142 member-performable capabilities** -- 51 messaging, 91 content.
+**Denominator: 138 member-performable capabilities** -- 51 messaging, 91 content, **MINUS the 4 subtracted 2026-09-19 under this slice's own section-10 condition** (`C60`, `C61`, `C63`, `C69` -- the sibling claimed them). **The figure was 142 until then and section 10 records exactly which four moved and why.** Note this is the CAPABILITY denominator: the file still holds 142 stated ROWS, and `scripts/count_census_states.py` still counts them, because rows are not capabilities -- that script's own docstring makes the same distinction.
 Every row is sourced to a LinkedIn Help Center page; none was recalled from memory.
 
 | state | count | share | delta |
@@ -601,8 +601,35 @@ operator's account.
 ## 10. RECONCILIATION -- ROWS THAT MAY BELONG TO A SIBLING
 
 Flagged rather than deleted, per the lead's instruction that double-counting is
-preferable to dropping between two agents. **These rows are still counted in this file's
-142.** If the sibling's slice claims them, subtract exactly the rows named here.
+preferable to dropping between two agents. If the sibling's slice claims them,
+subtract exactly the rows named here.
+
+**EXECUTED 2026-09-19. THE CONDITION WAS MEASURED MET FOR FOUR OF THESE ROWS AND
+THE DENOMINATOR IS NOW 138.** This is not a new decision -- it is this section's
+own conditional, fired once its trigger was checked, which nobody had done.
+
+| subtracted | the sibling row that claims it | matched how |
+|---|---|---|
+| `C60` Access your LinkedIn Groups | `N 173` Access the list of groups you belong to | hand-read; both COVERED-PROVEN |
+| `C61` Join a group | `N 63` Join a LinkedIn group | hand-read |
+| `C63` Leave a group | `N 64` Leave a LinkedIn group | hand-read |
+| `C69` Invite connections to join a group | `N 168` Invite your connections to join a group | hand-read; both now EXCLUDED-RULED under R2 |
+
+**The other twelve flagged rows have NO sibling twin and are correctly still
+counted** -- `C62`, `C64`-`C68`, `C91`, `C57`, `C58`, `C92`, `C59`, `C75`.
+`network.md` has no group-composer rows and no create-an-Event row, so those
+capabilities exist in this slice alone.
+
+**MATCHED BY HAND, NOT BY SCORE, and that mattered:** a similarity pass over
+these sixteen at a 0.62 bar returned nine twins of which only three were real --
+it scored *Create a LinkedIn Event* against *Leave a LinkedIn group* at **0.67**.
+The four above were read, not ranked.
+
+**The rows are NOT deleted**, per this section's own title: their content and
+evidence stay here for whoever reads them. What changed is that they no longer
+count toward this slice's capability denominator, because the sibling counts
+them. Nothing was pinned to 142 -- checked across `tests/` and `scripts/` before
+the edit.
 
 | rows | capability | my read of where it belongs |
 |---|---|---|
