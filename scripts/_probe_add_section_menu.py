@@ -137,6 +137,29 @@ def href_relation(href: str | None, page_url: str) -> str:
     return "off-product"
 
 
+#: EVERY VALUE ``href_relation`` CAN RETURN -- eight literals, every one of
+#: them written in this file.
+#:
+#: THE ANCHOR LINE BELOW PRINTS THE ONE THAT MATCHES RATHER THAN PRINTING
+#: ``rel``, and that is what clears the output guard without a declaration.
+#: ``rel`` is navigation-derived -- ``here`` is a ``goto`` return -- so the
+#: engine taints it correctly and a print of it is a true positive. Comparing
+#: it against this tuple emits a token THIS FILE OWNS: even a bug in
+#: ``href_relation`` that let a raw href through would render as
+#: ``UNKNOWN-RELATION`` here rather than leaking it. That is strictly stronger
+#: than trusting the function, which is the point -- see the note on the
+#: anchor print.
+#:
+#: A NINTH RELATION ADDED WITHOUT ADDING IT HERE FAILS LOUD AND LEAKS NOTHING:
+#: the line prints ``UNKNOWN-RELATION``. The control below asserts the classes
+#: it exercises are all present, which is four of the eight; the other four are
+#: covered by that fallback rather than by a claim.
+RELATIONS: tuple[str, ...] = (
+    "no-href-attribute", "empty-href", "javascript-href", "fragment-only",
+    "same-path", "in-product-path", "same-host-path", "off-product",
+)
+
+
 def is_disclosure_control(rel: str, haspopup: str | None,
                           expanded: str | None) -> bool:
     """Evidenced as opening something already here, rather than going away.
@@ -189,6 +212,20 @@ async def run_detector_control() -> bool:
               f"{'PASS' if rel_ok else 'FAIL'}   "
               f"press={str(got_press):5s} want={str(want_press):5s} "
               f"{'PASS' if press_ok else 'FAIL'}")
+    # AND THE ALPHABET IS CHECKED, because the anchor print now renders a
+    # relation by matching against RELATIONS: a class that classifier can
+    # return and this tuple does not name would print as UNKNOWN-RELATION and
+    # teach a reader nothing.
+    unnamed = sorted(
+        {want for _l, _h, _hp, _ex, want, _w in CONTROL_CASES}
+        - set(RELATIONS)
+    )
+    print()
+    print(f"  every control relation is named in RELATIONS: "
+          f"{'PASS' if not unnamed else 'FAIL -- ' + str(unnamed)}")
+    if unnamed:
+        ok = False
+
     # A classifier that says PRESS to everything is the failure that matters.
     presses = sum(
         1 for _l, h, hp, ex, _r, _w in CONTROL_CASES
@@ -284,10 +321,31 @@ async def main() -> int:
                         role = value
                 rel = href_relation(href, here)
                 pressable = is_disclosure_control(rel, haspopup, expanded)
-                print(f"      anchor {index}: rel={rel:20s} "
+                # THE RELATION IS MATCHED, NOT PRINTED, and the verdict is
+                # printed as a comparison. Both are the output guard's own
+                # sanctioned shapes, and neither adds an entry to
+                # KNOWN_TAINTED_OUTPUT.
+                #
+                # ``href_relation`` does return a closed alphabet and its
+                # docstring says so. IT IS STILL NOT TRUSTED BY NAME, because
+                # the sibling probe already paid for that: while its own
+                # classifier wore the name ``_relation`` the engine trusted the
+                # call BY SPELLING and stopped examining everything downstream
+                # of it. A guard silenced by a name does not merely stop
+                # checking that function.
+                #
+                # ``rel`` and ``pressable`` STAY TAINTED deliberately. The fix
+                # is at the sink, not at the binding, so a future print of
+                # either one goes red again instead of inheriting this
+                # exemption.
+                shown = "/".join(
+                    name for name in RELATIONS if rel == name
+                ) or "UNKNOWN-RELATION"
+                print(f"      anchor {index}: rel={shown:20s} "
                       f"haspopup={str(haspopup):6s} expanded={str(expanded):6s} "
                       f"controls={'yes' if controls else 'no':3s} "
-                      f"role={str(role):8s} EVIDENCED-DISCLOSURE={pressable}")
+                      f"role={str(role):8s} "
+                      f"EVIDENCED-DISCLOSURE={pressable is True}")
                 # WOULD THE BOUNDARY ADMIT IT? A BOOLEAN ABOUT THE ADDRESS,
                 # NEVER THE ADDRESS. This turns "somebody should check the
                 # href" into an answer, and it is the only question that
@@ -307,8 +365,16 @@ async def main() -> int:
                                             "/settings")
                         if token in target
                     ]
+                    # A COMPARISON, for the same reason and with the same
+                    # restraint: ``is_read_url`` returns a literal True/False,
+                    # so this prints the identical text it printed before. The
+                    # engine flagged it because it tracks the NAME ``admitted``
+                    # and cannot see what the call returns -- which is the
+                    # engine being right, not over-strict, since the name is
+                    # bound from a tainted ``target``.
                     print(f"                 boundary: "
-                          f"is_read_url={admitted}  path_depth={depth}  "
+                          f"is_read_url={admitted is True}  "
+                          f"path_depth={depth}  "
                           f"forbidden_tokens_present={trips}")
                 if pressable and candidate is None:
                     candidate = node
