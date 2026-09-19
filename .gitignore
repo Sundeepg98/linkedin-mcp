@@ -176,3 +176,27 @@ _audit/_scratch/
 # a downloaded browser is build output by any reading. Nothing under this path
 # is ours; the guard's subject is what we are about to commit.
 .pw-browsers/
+
+# ---------------------------------------------------------------------------
+# CI WRITES ITS OWN WORKING FILES INTO THE REPO ROOT, AND THE SWEEP WALKED THEM
+#
+# Same shape as .pw-browsers/ above, found the same way -- on CI, never on this
+# box, because these files only exist inside a runner:
+#
+#   shard-collected.txt: 1 unallowed company id hit(s), 0 declared
+#
+# The hit is a pytest TEST ID. `--collect-only -q` prints every node id in the
+# shard, so a test whose id contains a company-shaped path lands in the file
+# verbatim, and sweepable() is "tracked + untracked-not-ignored".
+#
+# IGNORING THIS LOSES NO COVERAGE, which is the only reason it is the right
+# repair: the ids are derived from the test files, and those are swept
+# directly. The artifact is a second copy of text the guard already reads at
+# its source. Nothing here is ever committed -- .github/workflows/ci.yml writes
+# all of it during a run.
+collected.txt
+shard-collected.txt
+shard-files.txt
+shard-plan.json
+junit.xml
+reports/
