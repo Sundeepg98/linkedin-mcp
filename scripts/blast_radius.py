@@ -70,9 +70,18 @@ def corpus() -> list[str]:
         f"{BASE}/feed/",
         f"{BASE}/in/me/",
         f"{BASE}/in/me/details/skills/",
-        f"{BASE}/in/a-member/",
-        f"{BASE}/in/a-member/details/skills/",
-        f"{BASE}/in/a-member/recent-activity/all/",
+        # RENAMED FROM a PLAUSIBLE-SLUG SPELLING, 2026-09-19 12:49. The
+        # identity guard fired on it -- 3 unallowed hits, 0 declared -- and a
+        # red there means UNDECLARED, never real. Renaming is the first
+        # remedy and declaring the second, because a declaration spends the
+        # guard's precision to keep a string nothing needed. "someone-else"
+        # carries the sanctioned token "someone" and is the spelling
+        # tests/test_search_admission_blast_radius.py already uses. The
+        # VERDICTS ARE UNCHANGED, measured before and after: all three refuse
+        # under the shipped predicate either way -- see the commit message.
+        f"{BASE}/in/someone-else/",
+        f"{BASE}/in/someone-else/details/skills/",
+        f"{BASE}/in/someone-else/recent-activity/all/",
         f"{BASE}/mypreferences/d/",
         f"{BASE}/mypreferences/d/change-password",
         f"{BASE}/mypreferences/d/two-factor-authentication",
