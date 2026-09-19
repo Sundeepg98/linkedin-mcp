@@ -580,6 +580,8 @@ matching it**, and a settings-family wildcard would admit **six** account-ending
 spellings, **three defended by nothing but the absence of a rule.** A
 `/search/` wildcard is that risk on a bigger surface.
 
+**CORRECTED BY:** `_audit/2026-09-19-search-admission-condition-2-amended.md` -- ANCHORED is the wrong property and this condition now reads CLOSED PATH SEGMENTS, because `^https://www.linkedin.com/search/.*$` anchored at BOTH ends was measured to admit 18 addresses, identical to the bare wildcard, including a traversal whose normalised form is an account-ending address no forbidden substring names.
+
 **3. THE BLAST RADIUS IS MEASURED BEFORE THE PATTERN LANDS**, and the guard is
 shown failing on what it must still refuse. What else does this pattern admit?
 Answer it with `is_read_url` on concrete URLs -- **never with a substring grep

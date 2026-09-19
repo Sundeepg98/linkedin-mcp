@@ -314,6 +314,8 @@ whichever way `J 81` goes.
 # REQUEST 4 -- the ledger table and the census contradict each other on `78-83`
 
 **Request 2a is RETRACTED by its own author, and this is what replaces it.**
+
+**CORRECTS:** `_audit/2026-09-19-the-three-ruling-requests-ruled.md` -- its Request 2a rules FILE `J 82` ONLY on the strength of the blocker table's published `1R`, and the census marks that row's whole group plain `W` in a vocabulary that carries per-row exceptions and declines to use one, so the `1R` is contested and the row was never forced.
 `J 82` was filed to `PREMIUM-APPLY-SURFACES` at `1349fe6` on the strength of the
 blocker table's published `1R`. **A row filed on a contested premise is not a
 forced row.** The blocker is back to 0 of 5 and the hole now records its reason.

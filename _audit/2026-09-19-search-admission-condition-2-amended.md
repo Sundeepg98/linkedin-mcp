@@ -3,6 +3,8 @@
 Ruled 2026-09-19 12:57 by the box, on the `search-admission` deliverable and
 `17733f1`.
 
+**CORRECTS:** `_audit/2026-09-19-two-census-conventions-ruled.md` -- its section 6 condition 2 demands a NARROW ANCHORED pattern, and anchoring was measured to do none of the work assigned to it: `^https://www.linkedin.com/search/.*$` anchored at both ends admits 18 addresses, identical to the bare wildcard, so the condition now demands CLOSED PATH SEGMENTS instead.
+
 ---
 
 ## FIRST, MY ERROR: I SPAWNED A SECOND WAVE ONTO WORK ALREADY TAKEN

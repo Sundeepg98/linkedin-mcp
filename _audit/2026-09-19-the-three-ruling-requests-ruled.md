@@ -97,6 +97,15 @@ That is the whole basis of the ruling this request cites in its own defence.
 published `1R`. **The four `W` slots stay EMPTY**, with the six-against-five
 discrepancy recorded as the reason.
 
+**CORRECTED BY:** `_audit/2026-09-19-blocker-map-ruling-requests.md` -- this ruling is RETRACTED and `PREMIUM-APPLY-SURFACES` returns to 0 of 5, because the census marks rows 78-83 plain `W` in a vocabulary that carries per-row exceptions and declines to use one, so the published `1R` is contested and the row was never forced.
+
+**A reader arriving at the paragraph above must not act on it.** It is kept
+rather than deleted because **the ruling it contradicts is the one that matters:
+*fill what is forced, leave what is chosen*.** I wrote that rule two sections
+earlier and then filed a row on a premise a measurement contested within the
+hour -- a chosen row wearing a forced one's clothes. **Deleting the paragraph
+would hide the most instructive thing in this document.**
+
 ---
 
 ## REQUEST 2b -- `INVITATION-SUBSTRING-BLOCKED`: NOT A RULING REQUEST. MISROUTED.
