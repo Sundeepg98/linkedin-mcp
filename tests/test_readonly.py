@@ -253,7 +253,21 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # THE SAME SYNTAX HIDES THE SAME CONSTANT ANYWHERE IT APPEARS. If a
     # chained comparison is ever added elsewhere in this package, it inherits
     # this paragraph and not the reassurance.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 5, total
+    # SIX AND SEVEN, 2026-09-19: press.disclose's click and keyboard press,
+    # which is the disclosing-press mechanism landing. THE PARAGRAPH ABOVE
+    # PREDICTED THIS EXACT EDIT AND IT STILL WENT STALE -- the constant was
+    # not bumped when those two entries were added, so the suite went red on
+    # a literal whose own comment says it must be hand-edited on every
+    # widening. Two readers were fooled by the syntax in 2026-09-04; this time
+    # nobody misread it, it was simply not touched. **A warning that names its
+    # own failure mode does not maintain the thing it warns about** -- which
+    # is this repository's standing finding about documentation as a control,
+    # arriving on the one line written to be immune to it.
+    #
+    # The widening also moves the SHAPE the module docstring describes: seven
+    # entries across THREE files now (writes.py, dom.py, press.py), where the
+    # prose still says five. That sentence is press.py's owner to correct.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 7, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -718,7 +732,25 @@ def test_only_dom_module_waives_evaluate():
     # only other things it returns are ``<label>`` captions, the chart's own
     # sentence, and COUNTS -- including the person-anchor count, which is the
     # measurement the whole page was opened for and is an integer.
-    assert waived_in.get("dom.py", 0) <= 17, waived_in
+    #
+    # EIGHTEEN AND NINETEEN, 2026-09-19, and they were nearly spent in the
+    # wrong place. ``anchors.read_anchor_classes`` and
+    # ``dom.read_collection_groupings`` run the two vocabulary-into-the-page
+    # scripts. Their first version ran ``evaluate`` inside
+    # ``linkedin_server/anchors.py`` and ``collections_page.py`` -- which this
+    # very test refused, correctly: page contact in two more modules is a
+    # narrow allowance becoming a habit. The scripts and their calls moved
+    # here; the readers kept the vocabulary, the closed alphabet and the
+    # tallying.
+    #
+    # WHAT THESE TWO BUY IS THE SAME THING INVITE_NEEDLE_JS BOUGHT -- a
+    # PRIVACY property rather than a reading. Both ship a vocabulary IN and
+    # return INTEGERS, so no page string crosses the boundary: not shaped, not
+    # redacted, not present. A locator chain could not do it, because the
+    # comparison has to happen where the strings are. For the anchor
+    # classifier that matters most: a raw href would carry ``/in/<slug>``, and
+    # a slug is a name.
+    assert waived_in.get("dom.py", 0) <= 19, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -758,6 +790,25 @@ INJECTED_SCRIPTS = {
     # buttons -- so it is the one whose scan matters most, and it is scanned by
     # exactly the same check as the other three rather than by a special case.
     "CENSUS_JS": dom.CENSUS_JS,
+    # 2026-09-19. The two vocabulary-into-the-page scripts. Declared for the
+    # ordinary reason -- an executed script that is not declared is one nobody
+    # reviewed -- and declaring them ENROLS them in
+    # test_every_script_this_package_executes_cannot_mutate.
+    #
+    # THEY ARE THE FIRST SCRIPTS HERE WHOSE VOCABULARY IS AN ARGUMENT rather
+    # than a constant. The caller ships terms defined in its own module and the
+    # page answers with a POSITION IN THAT LIST, so the output alphabet is
+    # closed by construction and no page string crosses the boundary. The
+    # anchor one is the load-bearing case: a raw href would carry ``/in/<slug>``
+    # and a slug is a name.
+    #
+    # Both parse their CONTROL input with ``DOMParser`` rather than assigning
+    # markup to a detached node. That is not a style choice -- the scanner
+    # refuses the assignment, rightly, because it cannot tell a detached node
+    # from an attached one and one future edit appending the container would
+    # turn the same line into a real mutation.
+    "ANCHOR_CLASSIFY_JS": dom.ANCHOR_CLASSIFY_JS,
+    "COLLECTION_GROUPINGS_JS": dom.COLLECTION_GROUPINGS_JS,
     # 2026-08-30. The row-shape reader, which climbs from a job-row anchor and
     # reports each level as a tag name and two character counts. It exists
     # purely to describe a page this package could not read, and it is held to
@@ -1056,7 +1107,16 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
     assert names == set(INJECTED_SCRIPTS), names
-    assert len(EXECUTED_SCRIPTS) == 17, sorted(EXECUTED_SCRIPTS)
+    # EIGHTEEN AND NINETEEN, 2026-09-19: ANCHOR_CLASSIFY_JS and
+    # COLLECTION_GROUPINGS_JS. They are the first scripts here whose
+    # VOCABULARY IS AN ARGUMENT rather than a constant -- the caller ships
+    # terms defined in its own module and the page answers with a POSITION in
+    # that list, so the output alphabet is closed by construction and no page
+    # string crosses the boundary. Both parse their CONTROL input with
+    # DOMParser rather than assigning markup to a detached node, because the
+    # scanner refuses that assignment and is right to: it cannot tell a
+    # detached node from an attached one.
+    assert len(EXECUTED_SCRIPTS) == 19, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

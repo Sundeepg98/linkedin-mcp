@@ -65,8 +65,8 @@ ABORTS if the fixture does not reproduce it.
 
 It carries the two adversarial anchors that convict a containment design:
 
-    /company/star-anise-school/        must stay company_page
-    /in/star-anise-company-ltd/        must stay member_profile
+    /company/example-school-group/        must stay company_page
+    /in/example-company-ltd/        must stay member_profile
 
 Reproduced exactly on every run. **The slugs are synthetic and deliberately not
 people** -- `menus.py` uses a spice for the same reason: a tracked file may not

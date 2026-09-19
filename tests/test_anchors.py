@@ -136,7 +136,7 @@ def test_the_in_page_comparison_is_segment_equality_and_not_containment() -> Non
 
     This is the ``Star Anise`` class of defect, and pinning the FORM is what
     closes the class. A rewrite to ``path.indexOf(first)`` classifies
-    ``/company/star-anise-school/`` as ``school_page`` -- and, measured rather
+    ``/company/example-school-group/`` as ``school_page`` -- and, measured rather
     than predicted, sweeps a help article, a messaging thread and a school page
     into ``member_profile``, taking that count from 1 to 4.
     """
@@ -162,12 +162,12 @@ def test_the_control_fixture_carries_both_adversarial_anchors() -> None:
     2026-09-19: it reproduced ``CONTROL_EXPECTATION`` exactly, twice.
     """
     fixture = anchors.control_fixture()
-    assert '"/in/star-anise-company-ltd/"' in fixture, (
+    assert '"/in/example-company-ltd/"' in fixture, (
         "the fixture no longer carries a MEMBER slug containing a route term. "
         "That is the adversarial case that matters most: a containment "
         "matcher moves it out of member_profile."
     )
-    assert '"/company/star-anise-school/"' in fixture, (
+    assert '"/company/example-school-group/"' in fixture, (
         "the fixture no longer carries a COMPANY slug containing the 'school' "
         "route term."
     )

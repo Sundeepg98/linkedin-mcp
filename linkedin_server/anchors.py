@@ -42,7 +42,7 @@ label, because A NAME ADDS TOKENS.
 than the one predicted.** A route term tested by CONTAINMENT matches inside any
 segment::
 
-    /company/star-anise-school/   -> school_page     (WRONG)
+    /company/example-school-group/   -> school_page     (WRONG)
 
 **AND THE PREDICTION THAT PRODUCED THIS RULE WAS ITSELF REFUTED, which is why
 the number is written down.** The expectation was that containment would move a
@@ -88,6 +88,8 @@ publishes -- takes INDICES and cannot be handed an address even by mistake.
 from __future__ import annotations
 
 from typing import Any, Iterable
+
+from linkedin_server import dom
 
 #: THE CLOSED OUTPUT ALPHABET. Order is the contract: the page returns a
 #: POSITION in this tuple, so reordering silently renames every reading ever
@@ -138,85 +140,13 @@ _HOST = "www.linkedin.com"
 #: The in-page classifier. **THE ROUTE TABLE IS AN ARGUMENT**, so this function
 #: is the entire boundary crossing and its return type is the safety property:
 #: integers and booleans, never a string from the document.
-_CLASSIFY_IN_PAGE = """
-(args) => {
-  const table = args.table || [];
-  const host = args.host || "";
-  const html = args.html || "";
-  const classCount = args.classCount || 0;
-  const indexOfClass = (token) => {
-    for (let i = 0; i < args.classes.length; i += 1) {
-      if (args.classes[i] === token) return i;
-    }
-    return -1;
-  };
-  // THE CONTROL PATH. When html is supplied the SAME classifier runs against a
-  // DETACHED container, so the demonstration that it CAN classify -- and that
-  // it refuses the adversarial cases -- costs no navigation. A classifier that
-  // returns one class for everything is indistinguishable from a broken one.
-  let root = document;
-  if (html) {
-    root = document.createElement("div");
-    root.innerHTML = html;
-  }
-  const anchors = Array.from(root.querySelectorAll("a"));
-  const counts = new Array(classCount).fill(0);
-  let numericEntity = 0;
-  let nonNumericEntity = 0;
-  for (const node of anchors) {
-    const raw = node.getAttribute("href");
-    if (!raw) { counts[indexOfClass("no_href")] += 1; continue; }
-    let path = raw;
-    let isExternal = false;
-    if (raw.indexOf("//") !== -1) {
-      // A protocol-relative or absolute url. Anything not on the LinkedIn host
-      // is EXTERNAL and is counted without being looked at further.
-      const afterScheme = raw.slice(raw.indexOf("//") + 2);
-      const slash = afterScheme.indexOf("/");
-      const hostPart = slash === -1 ? afterScheme : afterScheme.slice(0, slash);
-      if (hostPart !== host) isExternal = true;
-      path = slash === -1 ? "/" : afterScheme.slice(slash);
-    }
-    if (isExternal) { counts[indexOfClass("external")] += 1; continue; }
-    // SEGMENTS, and the query and fragment are DROPPED BEFORE ANYTHING IS
-    // READ -- groups.py's rule: a part that is never read cannot carry
-    // anything. /groups/123/?invitedBy=<token> survives shaping with the
-    // token intact, and this is the same escape one level over.
-    const q = path.indexOf("?"); if (q !== -1) path = path.slice(0, q);
-    const h = path.indexOf("#"); if (h !== -1) path = path.slice(0, h);
-    const segments = path.split("/").filter((s) => s.length > 0);
-    let matched = -1;
-    for (const row of table) {
-      const token = row[0], first = row[1], second = row[2];
-      // SEGMENT EQUALITY AT A FIXED POSITION. Never a substring, never
-      // floating -- see this module's docstring for the scar.
-      if (segments.length < 1 || segments[0] !== first) continue;
-      if (second) {
-        if (segments.length < 2 || segments[1] !== second) continue;
-      }
-      matched = indexOfClass(token);
-      break;
-    }
-    if (matched === -1) { counts[indexOfClass("other_internal")] += 1; continue; }
-    counts[matched] += 1;
-    // THE ENTITY SEGMENT'S SHAPE, never its value. groups.py's numeric rule:
-    // a non-numeric segment is a slug, and a slug is a name.
-    const entityAt = table.find((r) => indexOfClass(r[0]) === matched);
-    const position = entityAt && entityAt[2] ? 2 : 1;
-    if (segments.length > position) {
-      if (/^[0-9]+$/.test(segments[position])) numericEntity += 1;
-      else nonNumericEntity += 1;
-    }
-  }
-  // INTEGERS ONLY. Every field below is a number, by construction.
-  return {
-    anchors: anchors.length,
-    counts: counts,
-    numeric_entity: numericEntity,
-    non_numeric_entity: nonNumericEntity,
-  };
-}
-"""
+#: THE SCRIPT LIVES IN ``dom.py``. Only that module may waive
+#: ``evaluate``, and every executed script is declared and scanned
+#: there -- so putting page contact here would spread a narrow
+#: allowance into a habit. This module keeps the vocabulary, the
+#: closed alphabet and the tallying; ``dom`` keeps the one call that
+#: touches a document. ``dom.ANCHOR_CLASSIFY_JS`` is that script.
+_CLASSIFY_IN_PAGE = dom.ANCHOR_CLASSIFY_JS
 
 
 async def read_anchors(page: Any, html: str = "") -> dict[str, Any]:
@@ -230,15 +160,12 @@ async def read_anchors(page: Any, html: str = "") -> dict[str, Any]:
     prove the classifier works and refuses the adversarial cases, at no page
     load. It is a parameter of the READER, never of :func:`tally`.
     """
-    raw = await page.evaluate(
-        _CLASSIFY_IN_PAGE,
-        {
-            "table": [list(row) for row in ROUTE_TABLE],
-            "classes": list(ROUTE_CLASSES),
-            "classCount": len(ROUTE_CLASSES),
-            "host": _HOST,
-            "html": html or "",
-        },
+    raw = await dom.read_anchor_classes(
+        page,
+        table=[list(row) for row in ROUTE_TABLE],
+        classes=list(ROUTE_CLASSES),
+        host=_HOST,
+        html=html or "",
     )
     counts = list((raw or {}).get("counts") or [])
     return {
@@ -300,7 +227,7 @@ def control_fixture() -> str:
     happens to be uniform, so the fixture carries the two shapes that convicted
     the containment design:
 
-    * ``/company/star-anise-school/`` -- a slug CONTAINING a route term, which
+    * ``/company/example-school-group/`` -- a slug CONTAINING a route term, which
       a containment matcher calls ``school_page``. It is a company.
     * ``/in/<a slug containing 'company'>`` -- the same trick aimed at the
       hazard class, and the worse of the two: it would move a name-bearing
@@ -310,11 +237,22 @@ def control_fixture() -> str:
     a spice for the same reason: a tracked file may not carry a third party's
     name even as an illustration, and the substitute demonstrates the same
     thing -- a route term sitting inside a segment that is not a route.
+
+    **AND THEY WERE RENAMED ON 2026-09-19 TO ARGUE FOR THEMSELVES.** The first
+    version used a spice directly, which is slug-SHAPED and read as an
+    UNDECLARED identifier to the shape guard. **A red there proves a string is
+    undeclared and never that it is real** -- but the remedy is still a rename
+    rather than a declaration, because a declaration tolerates that shape in
+    this file forever and is inherited by readers who read the list as "known
+    safe" rather than "known fake". Every slug here now carries ``example``,
+    which is in the shape guard's own synthetic vocabulary, so it passes on
+    sight and costs no argument. The ``Star Anise`` reference stays in the
+    PROSE, where it is a citation rather than a fixture.
     """
     return (
-        '<a href="/in/star-anise-company-ltd/">a</a>'
-        '<a href="/company/star-anise-school/">b</a>'
-        '<a href="/school/some-institute/">c</a>'
+        '<a href="/in/example-company-ltd/">a</a>'
+        '<a href="/company/example-school-group/">b</a>'
+        '<a href="/school/example-institute/">c</a>'
         '<a href="/jobs/view/1234567890/">d</a>'
         '<a href="/jobs/collections/recommended/">e</a>'
         '<a href="/jobs/search/?keywords=x">f</a>'

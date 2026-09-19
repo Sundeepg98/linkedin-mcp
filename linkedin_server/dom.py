@@ -9237,3 +9237,230 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
             "main_chars": int(data.get("main_chars") or 0),
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# THE TWO VOCABULARY-INTO-THE-PAGE SCRIPTS, 2026-09-19.
+#
+# They live HERE rather than beside their readers because this package has one
+# rule about page contact and it is structural: only ``dom.py`` may waive
+# ``evaluate``, and every executed script is declared and scanned. My first
+# version ran each evaluate inside its own reader module, which put page
+# contact in two more files and would have spread a narrow allowance into a
+# habit -- exactly what ``test_only_dom_module_waives_evaluate`` exists to
+# stop. The readers keep the vocabulary, the closed alphabet and the tallying;
+# this file keeps the one call that touches a document.
+#
+# BOTH SHIP A VOCABULARY IN AND RETURN INTEGERS. No page string crosses the
+# CDP boundary in either -- not shaped, not redacted, not present -- which is
+# the property their readers are built on and the reason they are worth their
+# waivers.
+# ---------------------------------------------------------------------------
+
+#: Classify a page's anchors by ROUTE SHAPE. The route table is an ARGUMENT,
+#: and what comes back is positions in it plus integers. See
+#: ``linkedin_server/anchors.py`` for the segment rule and the measured harm of
+#: the containment version it replaced.
+ANCHOR_CLASSIFY_JS = """
+(args) => {
+  const table = args.table || [];
+  const host = args.host || "";
+  const html = args.html || "";
+  const classCount = args.classCount || 0;
+  const indexOfClass = (token) => {
+    for (let i = 0; i < args.classes.length; i += 1) {
+      if (args.classes[i] === token) return i;
+    }
+    return -1;
+  };
+  // THE CONTROL PATH. When html is supplied the SAME classifier runs against a
+  // DETACHED container, so the demonstration that it CAN classify -- and that
+  // it refuses the adversarial cases -- costs no navigation. A classifier that
+  // returns one class for everything is indistinguishable from a broken one.
+  // DOMParser, NOT createElement plus a markup assignment. The read-only
+  // scanner refuses that assignment in package code and it is RIGHT to: it
+  // cannot tell a detached node from an attached one, and one future edit
+  // that appends this container turns the same line into a real page
+  // mutation, silently. parseFromString builds a detached DOCUMENT with no
+  // assignment to flag, so the shape is REMOVED rather than sanctioned -- a
+  // sanctioned entry would tolerate it in this file forever.
+  //
+  // AND THE COMMENT ITSELF HAD TO BE REWORDED: naming the refused token in
+  // prose put the token back in the scanned string. The scanner reads the
+  // whole script, comments included, which is correct -- it cannot parse JS --
+  // and it is the same shape as a correction guard matching a sentence that
+  // merely DESCRIBES a marker.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  const anchors = Array.from(root.querySelectorAll("a"));
+  // Array.from rather than the array-filling method: the scanner refuses that
+  // method's spelling, because on a Playwright locator the same word TYPES
+  // INTO A FIELD, and it cannot tell one inside a JS string from a real call.
+  // Removing the shape costs nothing here. The comment does not spell the
+  // refused token either -- naming it in prose puts it straight back into the
+  // scanned text, which is how this paragraph got written twice.
+  const counts = Array.from({ length: classCount }, () => 0);
+  let numericEntity = 0;
+  let nonNumericEntity = 0;
+  for (const node of anchors) {
+    const raw = node.getAttribute("href");
+    if (!raw) { counts[indexOfClass("no_href")] += 1; continue; }
+    let path = raw;
+    let isExternal = false;
+    if (raw.indexOf("//") !== -1) {
+      // A protocol-relative or absolute url. Anything not on the LinkedIn host
+      // is EXTERNAL and is counted without being looked at further.
+      const afterScheme = raw.slice(raw.indexOf("//") + 2);
+      const slash = afterScheme.indexOf("/");
+      const hostPart = slash === -1 ? afterScheme : afterScheme.slice(0, slash);
+      if (hostPart !== host) isExternal = true;
+      path = slash === -1 ? "/" : afterScheme.slice(slash);
+    }
+    if (isExternal) { counts[indexOfClass("external")] += 1; continue; }
+    // SEGMENTS, and the query and fragment are DROPPED BEFORE ANYTHING IS
+    // READ -- groups.py's rule: a part that is never read cannot carry
+    // anything. /groups/123/?invitedBy=<token> survives shaping with the
+    // token intact, and this is the same escape one level over.
+    const q = path.indexOf("?"); if (q !== -1) path = path.slice(0, q);
+    const h = path.indexOf("#"); if (h !== -1) path = path.slice(0, h);
+    const segments = path.split("/").filter((s) => s.length > 0);
+    let matched = -1;
+    for (const row of table) {
+      const token = row[0], first = row[1], second = row[2];
+      // SEGMENT EQUALITY AT A FIXED POSITION. Never a substring, never
+      // floating -- see this module's docstring for the scar.
+      if (segments.length < 1 || segments[0] !== first) continue;
+      if (second) {
+        if (segments.length < 2 || segments[1] !== second) continue;
+      }
+      matched = indexOfClass(token);
+      break;
+    }
+    if (matched === -1) { counts[indexOfClass("other_internal")] += 1; continue; }
+    counts[matched] += 1;
+    // THE ENTITY SEGMENT'S SHAPE, never its value. groups.py's numeric rule:
+    // a non-numeric segment is a slug, and a slug is a name.
+    const entityAt = table.find((r) => indexOfClass(r[0]) === matched);
+    const position = entityAt && entityAt[2] ? 2 : 1;
+    if (segments.length > position) {
+      if (/^[0-9]+$/.test(segments[position])) numericEntity += 1;
+      else nonNumericEntity += 1;
+    }
+  }
+  // INTEGERS ONLY. Every field below is a number, by construction.
+  return {
+    anchors: anchors.length,
+    counts: counts,
+    numeric_entity: numericEntity,
+    non_numeric_entity: nonNumericEntity,
+  };
+}
+"""
+
+#: Match a page's headings and tab-like controls against a CLOSED VOCABULARY of
+#: job-collection groupings, supplied by the caller. Returns an index per node
+#: and a card count, never a label. See ``linkedin_server/collections_page.py``.
+COLLECTION_GROUPINGS_JS = """
+(args) => {
+  const vocabulary = args.vocabulary || [];
+  const html = args.html || "";
+  const norm = (s) => (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  const wordBounded = (hay, needle) => {
+    if (!hay || !needle) return false;
+    const h = " " + hay + " ";
+    const n = " " + needle + " ";
+    return h.indexOf(n) !== -1;
+  };
+  // THE CONTROL PATH, and it is the reason this takes an object rather than a
+  // bare vocabulary. When ``html`` is supplied the SAME matching code runs
+  // against a DETACHED container, so a positive control can be run on any page
+  // without navigating anywhere. A matcher that returns zero everywhere is
+  // indistinguishable from a broken one, and this repository has been bitten
+  // by exactly that -- so the demonstration that it CAN match ships with it
+  // rather than living in a side script that can drift.
+  // DOMParser, NOT createElement plus a markup assignment -- see anchors.py
+  // for the full reason. The scanner cannot tell a detached node from an
+  // attached one and should not try, so the shape is REMOVED rather than
+  // sanctioned. Note the comment avoids naming the refused token: writing it
+  // in prose puts it back in the scanned string.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+  // HEADINGS AND TAB-LIKE CONTROLS BOTH. Measured 2026-09-19: the live page
+  // draws 18 headings and matched NONE of the five groupings, while carrying
+  // 47 buttons -- and LinkedIn renders a collection strip as pressable pills,
+  // not as headings. Scanning headings alone could not tell "he has no
+  // collections" from "the labels are not headings".
+  const headings = Array.from(
+    root.querySelectorAll(
+      "h1, h2, h3, [role='heading'], [role='tab'], button, a[role='button']"
+    )
+  );
+  const out = [];
+  for (const node of headings) {
+    const text = norm(node.textContent);
+    if (!text) continue;
+    let index = -1;
+    for (let i = 0; i < vocabulary.length; i += 1) {
+      if (wordBounded(text, vocabulary[i])) { index = i; break; }
+    }
+    // A SECTION'S CARD COUNT, taken from the heading's own container so it is
+    // a count of what sits UNDER that heading rather than of the whole page.
+    let scope = node.closest("section, li, div[data-view-name]") || node.parentElement;
+    let cards = 0;
+    if (scope) {
+      cards = scope.querySelectorAll("a[href*='/jobs/view/'], li").length;
+    }
+    out.push({ index: index, cards: cards });
+  }
+  // INTEGERS ONLY. No element text is in this return value, by construction:
+  // every field above is a number.
+  return { headings: headings.length, matches: out };
+}
+"""
+
+
+async def read_anchor_classes(
+    page: Any,
+    *,
+    table: list,
+    classes: list,
+    host: str,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`ANCHOR_CLASSIFY_JS`. Returns counts and integers only.
+
+    ``html`` is the CONTROL path: when supplied the same classifier runs
+    against a DETACHED document parsed from that string, so a positive control
+    can be run without navigating. It is a parameter of this reader and of
+    nothing a caller publishes.
+    """
+    return await page.evaluate(  # readonly-ok
+        ANCHOR_CLASSIFY_JS,
+        {
+            "table": table,
+            "classes": classes,
+            "classCount": len(classes),
+            "host": host,
+            "html": html or "",
+        },
+    )
+
+
+async def read_collection_groupings(
+    page: Any, *, vocabulary: list, html: str = ""
+) -> dict[str, Any]:
+    """Run :data:`COLLECTION_GROUPINGS_JS`. Returns indices and integers only.
+
+    ``html`` is the CONTROL path, as in :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        COLLECTION_GROUPINGS_JS,
+        {"vocabulary": vocabulary, "html": html or ""},
+    )

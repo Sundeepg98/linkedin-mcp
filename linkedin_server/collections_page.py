@@ -67,6 +67,8 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Optional, Sequence
 
+from linkedin_server import dom
+
 #: LinkedIn's five job-collection groupings, as the census row names them,
 #: sourced there to help article ``a1652837``. THE ORDER IS THE CONTRACT: the
 #: page returns a position in this tuple, so reordering it silently renames
@@ -97,64 +99,8 @@ REFUSALS: tuple[str, ...] = (
 #: ``includes``: ``writes._recipient_gate`` once used a bare ``indexOf`` and
 #: could have committed a stranger to an irreversible message, and a bare
 #: ``editorial`` would match a heading about an editorial team.
-_MATCH_IN_PAGE = """
-(args) => {
-  const vocabulary = args.vocabulary || [];
-  const html = args.html || "";
-  const norm = (s) => (s || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-  const wordBounded = (hay, needle) => {
-    if (!hay || !needle) return false;
-    const h = " " + hay + " ";
-    const n = " " + needle + " ";
-    return h.indexOf(n) !== -1;
-  };
-  // THE CONTROL PATH, and it is the reason this takes an object rather than a
-  // bare vocabulary. When ``html`` is supplied the SAME matching code runs
-  // against a DETACHED container, so a positive control can be run on any page
-  // without navigating anywhere. A matcher that returns zero everywhere is
-  // indistinguishable from a broken one, and this repository has been bitten
-  // by exactly that -- so the demonstration that it CAN match ships with it
-  // rather than living in a side script that can drift.
-  let root = document;
-  if (html) {
-    root = document.createElement("div");
-    root.innerHTML = html;
-  }
-  // HEADINGS AND TAB-LIKE CONTROLS BOTH. Measured 2026-09-19: the live page
-  // draws 18 headings and matched NONE of the five groupings, while carrying
-  // 47 buttons -- and LinkedIn renders a collection strip as pressable pills,
-  // not as headings. Scanning headings alone could not tell "he has no
-  // collections" from "the labels are not headings".
-  const headings = Array.from(
-    root.querySelectorAll(
-      "h1, h2, h3, [role='heading'], [role='tab'], button, a[role='button']"
-    )
-  );
-  const out = [];
-  for (const node of headings) {
-    const text = norm(node.textContent);
-    if (!text) continue;
-    let index = -1;
-    for (let i = 0; i < vocabulary.length; i += 1) {
-      if (wordBounded(text, vocabulary[i])) { index = i; break; }
-    }
-    // A SECTION'S CARD COUNT, taken from the heading's own container so it is
-    // a count of what sits UNDER that heading rather than of the whole page.
-    let scope = node.closest("section, li, div[data-view-name]") || node.parentElement;
-    let cards = 0;
-    if (scope) {
-      cards = scope.querySelectorAll("a[href*='/jobs/view/'], li").length;
-    }
-    out.push({ index: index, cards: cards });
-  }
-  // INTEGERS ONLY. No element text is in this return value, by construction:
-  // every field above is a number.
-  return { headings: headings.length, matches: out };
-}
-"""
+#: THE SCRIPT LIVES IN ``dom.py`` -- see ``anchors.py`` for the rule.
+_MATCH_IN_PAGE = dom.COLLECTION_GROUPINGS_JS
 
 
 async def read_collections(page: Any, html: str = "") -> dict[str, Any]:
@@ -170,8 +116,8 @@ async def read_collections(page: Any, html: str = "") -> dict[str, Any]:
     :func:`tally`, so nothing a caller publishes can be handed a page string
     through it.
     """
-    raw = await page.evaluate(
-        _MATCH_IN_PAGE, {"vocabulary": list(GROUPINGS), "html": html or ""}
+    raw = await dom.read_collection_groupings(
+        page, vocabulary=list(GROUPINGS), html=html or ""
     )
     matches = list((raw or {}).get("matches") or [])
     return {
