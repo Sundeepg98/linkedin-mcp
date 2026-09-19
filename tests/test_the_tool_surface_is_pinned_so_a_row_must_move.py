@@ -95,6 +95,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_followed_companies": ("company", "limit"),
     "linkedin_group_memberships": (),
+    "linkedin_job_collections": (),
     "linkedin_job_detail": ("job_id",),
     "linkedin_login": ("wait_seconds",),
     "linkedin_login_browser": ("wait_seconds",),
@@ -133,9 +134,23 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_who_viewed_me": ("limit",),
 }
 
-#: 42 tools and 61 parameters at the pin. Asserted rather than assumed, so a
+#: 43 tools and 61 parameters at the pin. Asserted rather than assumed, so a
 #: pin edited to an empty dict cannot quietly disable the guard.
-PINNED_TOOL_COUNT = 42
+#:
+#: **RE-PINNED 2026-09-19 at 43.** `linkedin_job_collections` shipped in
+#: `633312f`, and **the guard's substantive demand was already met in that
+#: commit**: it moved `J 42` from GAP to COVERED-PROVEN in the same change,
+#: verified here rather than taken on the commit subject's word. What was
+#: missing was only this pin, which is the bookkeeping half.
+#:
+#: **THAT DISTINCTION IS WHY THE RE-PIN IS NOT A WAIVER.** The guard fires on
+#: an unpinned surface whether or not a row moved, because it cannot check
+#: WHICH row -- that correspondence is semantic and four designs failed to
+#: detect it. So greening it always requires somebody to go and look. Here the
+#: looking found a real, banked row. **A red guard left standing becomes
+#: noise, and a guard everybody has learned to ignore is worse than none** --
+#: which is the only reason this wave re-pinned a tool it did not ship.
+PINNED_TOOL_COUNT = 43
 PINNED_PARAMETER_COUNT = 61
 
 
