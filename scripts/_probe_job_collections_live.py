@@ -237,10 +237,10 @@ async def main() -> int:
     print("=== JOB COLLECTIONS, LIVE. One row, an open boundary, no reader.")
     print("    Integers, shapes and verdicts only.")
 
-    page_ref = None
+    _own_page = None
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
             print("\n### POSITIVE CONTROL FIRST, and it needs no page load.")
             print("    The same in-page matcher over a DETACHED container.")
             print("    A matcher that returns zero everywhere is")
@@ -286,9 +286,9 @@ async def main() -> int:
         # timer, so the tab OUTLIVES THE PROCESS -- one leaked tab per probe
         # run in the operator's own Chrome. THE PAGE, NEVER THE CONTEXT: the
         # context is his signed-in browser session.
-        if page_ref is not None:
+        if _own_page is not None:
             try:
-                await page_ref.close()
+                await _own_page.close()
                 print("\n    tab closed")
             except Exception as error:  # noqa: BLE001
                 print(f"\n    tab NOT closed: {type(error).__name__}")

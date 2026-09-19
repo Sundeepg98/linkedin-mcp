@@ -279,108 +279,119 @@ async def _run() -> int:
         return 2
 
     async with BROWSER.session() as page:
-        print("\n1. PRE -- badges read off the feed's nav")
-        feed_landed = await BROWSER.goto(page, FEED_URL)
-        if "/login" in str(feed_landed) or "/checkpoint" in str(feed_landed):
-            print("    AUTH WALL on the feed. Nothing loaded, nothing spent.")
-            return 1
-        print("    feed relation: %s" % _relation(feed_landed, FEED_URL))
+        try:
+            print("\n1. PRE -- badges read off the feed's nav")
+            feed_landed = await BROWSER.goto(page, FEED_URL)
+            if "/login" in str(feed_landed) or "/checkpoint" in str(feed_landed):
+                print("    AUTH WALL on the feed. Nothing loaded, nothing spent.")
+                return 1
+            print("    feed relation: %s" % _relation(feed_landed, FEED_URL))
 
-        reading_pre = await dom.read_invitation_badge(page)
-        badge_pre = shape.invitation_badge(reading_pre)
-        print("    mynetwork badge: pending=%r state=%r"
-              % (badge_pre["pending"], badge_pre["state"]))
-        nav_pre = await _all_nav_badges(page)
-        _show_badges("all nav badges", nav_pre)
-        live = [row for row in nav_pre if (row[1] or 0) > 0]
-        print("    instrument control: %d of %d badges read NON-ZERO%s"
-              % (len(live), len(nav_pre),
-                 "" if live else "   <-- nothing here could show a drop"))
+            reading_pre = await dom.read_invitation_badge(page)
+            badge_pre = shape.invitation_badge(reading_pre)
+            print("    mynetwork badge: pending=%r state=%r"
+                  % (badge_pre["pending"], badge_pre["state"]))
+            nav_pre = await _all_nav_badges(page)
+            _show_badges("all nav badges", nav_pre)
+            live = [row for row in nav_pre if (row[1] or 0) > 0]
+            print("    instrument control: %d of %d badges read NON-ZERO%s"
+                  % (len(live), len(nav_pre),
+                     "" if live else "   <-- nothing here could show a drop"))
 
-        if badge_pre["state"] != "read":
-            print("\nSTOPPED: the pending-invitation badge is UNREADABLE.")
-            print("    Nothing loaded beyond the feed, so nothing was spent. "
-                  "An unreadable pre cannot anchor a post.")
-            return 1
+            if badge_pre["state"] != "read":
+                print("\nSTOPPED: the pending-invitation badge is UNREADABLE.")
+                print("    Nothing loaded beyond the feed, so nothing was spent. "
+                      "An unreadable pre cannot anchor a post.")
+                return 1
 
-        print("\n2. THE LOAD UNDER TEST")
-        landed = await BROWSER.goto(page, PREMIUM_URL)
-        relation = _relation(landed, PREMIUM_URL)
-        walled = "/login" in str(landed) or "/checkpoint" in str(landed)
-        print("    relation: %s" % relation)
-        print("    authwall: %r" % walled)
-        served = relation.startswith("SERVED") and not walled
+            print("\n2. THE LOAD UNDER TEST")
+            landed = await BROWSER.goto(page, PREMIUM_URL)
+            relation = _relation(landed, PREMIUM_URL)
+            walled = "/login" in str(landed) or "/checkpoint" in str(landed)
+            print("    relation: %s" % relation)
+            print("    authwall: %r" % walled)
+            served = relation.startswith("SERVED") and not walled
 
-        print("\n3. POST -- badges read off the loaded page's own nav")
-        reading_post = await dom.read_invitation_badge(page)
-        badge_post = shape.invitation_badge(reading_post)
-        print("    mynetwork badge: pending=%r state=%r"
-              % (badge_post["pending"], badge_post["state"]))
-        nav_post = await _all_nav_badges(page)
-        _show_badges("all nav badges", nav_post)
+            print("\n3. POST -- badges read off the loaded page's own nav")
+            reading_post = await dom.read_invitation_badge(page)
+            badge_post = shape.invitation_badge(reading_post)
+            print("    mynetwork badge: pending=%r state=%r"
+                  % (badge_post["pending"], badge_post["state"]))
+            nav_post = await _all_nav_badges(page)
+            _show_badges("all nav badges", nav_post)
 
-        print("\n4. DID ANYTHING MOVE?")
-        if badge_post["state"] != "read":
-            print("    UNREADABLE POST. The page was opened, so whatever it "
-                  "costs has been spent, and this run CANNOT say what that "
-                  "was. Reported rather than guessed.")
-        moved = {}
-        pre_map = {family: count for family, count, _ in nav_pre}
-        post_map = {family: count for family, count, _ in nav_post}
-        for family in sorted(set(pre_map) | set(post_map)):
-            if pre_map.get(family) != post_map.get(family):
-                moved[family] = (pre_map.get(family), post_map.get(family))
-        print("    nav families that MOVED: %d" % len(moved))
-        for family, (was, now) in sorted(moved.items()):
-            print("        %-16s %r -> %r" % (family, was, now))
-        print("    mynetwork pending: %r -> %r"
-              % (badge_pre["pending"], badge_post["pending"]))
-        if badge_pre["pending"] == 0:
-            print("    SAFETY  discharged by ABSENCE -- nothing pending "
-                  "was consumed, because nothing was pending.")
-            print("    COST    UNMEASURED -- and it stays unmeasured until a "
-                  "day the badge is not zero. These are two claims and this "
-                  "run makes only the first.")
+            print("\n4. DID ANYTHING MOVE?")
+            if badge_post["state"] != "read":
+                print("    UNREADABLE POST. The page was opened, so whatever it "
+                      "costs has been spent, and this run CANNOT say what that "
+                      "was. Reported rather than guessed.")
+            moved = {}
+            pre_map = {family: count for family, count, _ in nav_pre}
+            post_map = {family: count for family, count, _ in nav_post}
+            for family in sorted(set(pre_map) | set(post_map)):
+                if pre_map.get(family) != post_map.get(family):
+                    moved[family] = (pre_map.get(family), post_map.get(family))
+            print("    nav families that MOVED: %d" % len(moved))
+            for family, (was, now) in sorted(moved.items()):
+                print("        %-16s %r -> %r" % (family, was, now))
+            print("    mynetwork pending: %r -> %r"
+                  % (badge_pre["pending"], badge_post["pending"]))
+            if badge_pre["pending"] == 0:
+                print("    SAFETY  discharged by ABSENCE -- nothing pending "
+                      "was consumed, because nothing was pending.")
+                print("    COST    UNMEASURED -- and it stays unmeasured until a "
+                      "day the badge is not zero. These are two claims and this "
+                      "run makes only the first.")
 
-        if not served:
-            print("\n5. NOT SERVED. No entitlement reading is taken, because a "
-                  "vocabulary count on a page that did not serve measures the "
-                  "redirect target.")
-            return 1
+            if not served:
+                print("\n5. NOT SERVED. No entitlement reading is taken, because a "
+                      "vocabulary count on a page that did not serve measures the "
+                      "redirect target.")
+                return 1
 
-        print("\n5. ENTITLEMENT -- counts of OUR OWN needles, never a label")
-        entitled = await _count_needles(page, _ENTITLED_NEEDLES)
-        unentitled = await _count_needles(page, _UNENTITLED_NEEDLES)
-        entitled_hits = sum(entitled.values())
-        unentitled_hits = sum(unentitled.values())
-        print("    management-verb matches: %d across %d needles"
-              % (entitled_hits, len([k for k, v in entitled.items() if v])))
-        print("    sales-verb matches:      %d across %d needles"
-              % (unentitled_hits, len([k for k, v in unentitled.items() if v])))
-        # WHICH NEEDLE FIRED, and this is safe to print where a label is not:
-        # these strings are AUTHORED IN THIS FILE. Naming them describes our
-        # own instrument, not the page. A verdict resting on ONE match is thin,
-        # and a reader cannot weigh it without knowing which one -- "billing"
-        # matching once and "cancel subscription" matching once are very
-        # different pieces of evidence for the same integer.
-        print("    needles that fired: %r"
-              % sorted(k for k, v in {**entitled, **unentitled}.items() if v))
-        print("    VERDICT: %s" % _entitlement_verdict(entitled_hits,
-                                                       unentitled_hits))
-        if entitled_hits + unentitled_hits <= 1:
-            print("    STRENGTH: THIN -- a single match. Reported as such "
-                  "rather than rounded up to a settled reading.")
+            print("\n5. ENTITLEMENT -- counts of OUR OWN needles, never a label")
+            entitled = await _count_needles(page, _ENTITLED_NEEDLES)
+            unentitled = await _count_needles(page, _UNENTITLED_NEEDLES)
+            entitled_hits = sum(entitled.values())
+            unentitled_hits = sum(unentitled.values())
+            print("    management-verb matches: %d across %d needles"
+                  % (entitled_hits, len([k for k, v in entitled.items() if v])))
+            print("    sales-verb matches:      %d across %d needles"
+                  % (unentitled_hits, len([k for k, v in unentitled.items() if v])))
+            # WHICH NEEDLE FIRED, and this is safe to print where a label is not:
+            # these strings are AUTHORED IN THIS FILE. Naming them describes our
+            # own instrument, not the page. A verdict resting on ONE match is thin,
+            # and a reader cannot weigh it without knowing which one -- "billing"
+            # matching once and "cancel subscription" matching once are very
+            # different pieces of evidence for the same integer.
+            print("    needles that fired: %r"
+                  % sorted(k for k, v in {**entitled, **unentitled}.items() if v))
+            print("    VERDICT: %s" % _entitlement_verdict(entitled_hits,
+                                                           unentitled_hits))
+            if entitled_hits + unentitled_hits <= 1:
+                print("    STRENGTH: THIN -- a single match. Reported as such "
+                      "rather than rounded up to a settled reading.")
 
-        print("\n6. WHAT THIS SETTLES, AND WHAT IT LEAVES OPEN")
-        print("    SETTLES   state A (not entitled) versus {B, C}, and only "
-              "to the strength of the verdict above.")
-        print("    LEAVES OPEN   B versus C -- entitled-but-not-drawn versus "
-              "drawn-but-unread on a JOB POSTING. That is a different "
-              "surface and NO reading taken here can reach it.")
-        print("    A posting load with the 1/1/0 control firing is the next "
-              "step and is NOT attempted by this run.")
+            print("\n6. WHAT THIS SETTLES, AND WHAT IT LEAVES OPEN")
+            print("    SETTLES   state A (not entitled) versus {B, C}, and only "
+                  "to the strength of the verdict above.")
+            print("    LEAVES OPEN   B versus C -- entitled-but-not-drawn versus "
+                  "drawn-but-unread on a JOB POSTING. That is a different "
+                  "surface and NO reading taken here can reach it.")
+            print("    A posting load with the 1/1/0 control firing is the next "
+                  "step and is NOT attempted by this run.")
 
-    return 0
+            return 0
+        finally:
+            # CLOSE THE TAB THIS RUN OPENED, on every path out of this block.
+            # BELT AND SUSPENDERS beside BROWSER.stop() in main(): that call
+            # also closes this same page (tolerantly, if already closed), but
+            # it does so inside browser.py -- the static ratchet in
+            # tests/test_a_probe_closes_its_own_tab.py can only see a receiver
+            # named page/tab/_own_page in THIS file. THE PAGE, NEVER THE
+            # CONTEXT.
+            if not page.is_closed():
+                await page.close()
 
 
 if __name__ == "__main__":

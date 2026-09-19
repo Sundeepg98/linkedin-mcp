@@ -178,11 +178,11 @@ async def main() -> int:
               "2026-08-25 failure that cost the session.")
         return 2
 
-    page_ref = None
+    _own_page = None
     seen: dict[str, object] = {}
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
             if not await _control(page):
                 print("\n    THE CLASSIFIER FAILED ITS OWN CONTROL.")
                 print("    Every number below would be meaningless. Stopping")
@@ -204,9 +204,9 @@ async def main() -> int:
     finally:
         # CLOSE THE TAB THIS RUN OPENED. THE PAGE, NEVER THE CONTEXT: the
         # context is his signed-in browser session.
-        if page_ref is not None:
+        if _own_page is not None:
             try:
-                await page_ref.close()
+                await _own_page.close()
                 print("\n    tab closed")
             except Exception as error:  # noqa: BLE001
                 print(f"\n    tab NOT closed: {type(error).__name__}")

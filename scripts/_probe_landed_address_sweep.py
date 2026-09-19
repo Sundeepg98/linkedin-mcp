@@ -109,12 +109,12 @@ async def main() -> int:
     print("=== DO ADMITTED ADDRESSES STAY ADMITTED AFTER THE REDIRECT?")
     print("    Only addresses shipped tools already load. No write is fired.")
 
-    page_ref = None
+    _own_page = None
     refused_after_landing = 0
     measured = 0
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
             for index, (label, url) in enumerate(SWEEP):
                 ok = await _sweep_one(page, label, url)
                 if index == 0:
@@ -137,8 +137,8 @@ async def main() -> int:
         return 1
     finally:
         # THE PAGE, NEVER THE CONTEXT. The context is his signed-in browser.
-        if page_ref is not None and not page_ref.is_closed():
-            await page_ref.close()
+        if _own_page is not None and not _own_page.is_closed():
+            await _own_page.close()
 
     print("\n=== RESULT")
     print(f"    addresses measured beside the control : {measured}")

@@ -330,10 +330,10 @@ async def main() -> int:
     print("    Integers, relations and verdicts only. No keyword is read out.")
     print("    No control is clicked and no write is fired.")
 
-    page_ref = None
+    _own_page = None
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
 
             print("\n### CONTROL FIRST. If this is wrong, nothing else is a reading.")
             control_first = await _read(page, "CONTROL", CONTROL_URL)
@@ -388,8 +388,8 @@ async def main() -> int:
         # THE PAGE, NEVER THE CONTEXT. The context is his signed-in browser
         # session; closing it closes his window. In a finally, because the runs
         # that ABORT are exactly the ones that leak a tab.
-        if page_ref is not None and not page_ref.is_closed():
-            await page_ref.close()
+        if _own_page is not None and not _own_page.is_closed():
+            await _own_page.close()
     return 0
 
 

@@ -337,7 +337,7 @@ def report(title, result):
 
 
 async def main() -> int:
-    page_ref = None
+    _own_page = None
     control_before = 0
     control_after = 0
     on_profile = None
@@ -346,7 +346,7 @@ async def main() -> int:
     badge_after = {}
     try:
         async with BROWSER.session() as page:
-            page_ref = page
+            _own_page = page
 
             # THE SESSION LIVENESS CONTROL and THE PRESSER'S OWN CONTROL,
             # taken on the SAME load. A page KNOWN to draw no contact-info
@@ -382,10 +382,10 @@ async def main() -> int:
     finally:
         # THE PAGE, NEVER THE CONTEXT. The context is his own signed-in browser
         # session and a dozen waves share it.
-        if page_ref is not None and not page_ref.is_closed():
-            await page_ref.close()
+        if _own_page is not None and not _own_page.is_closed():
+            await _own_page.close()
         print("\n    tab closed:",
-              page_ref.is_closed() if page_ref is not None else "no tab opened")
+              _own_page.is_closed() if _own_page is not None else "no tab opened")
 
     if on_control is not None:
         report("CONTROL PAGE -- the presser must find NOTHING here", on_control)
