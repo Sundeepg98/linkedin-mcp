@@ -267,6 +267,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # FULL HISTORY, NOT A SHALLOW CLONE. actions/checkout defaults to
+          # fetch-depth: 1. The census tests resolve a FROZEN BASELINE by literal
+          # commit SHA -- scripts/build_blocker_map.py sets FROZEN_REF = 1c08e5f --
+          # and tests/test_connections_reader.py pins 84dccba the same way. On a
+          # depth-1 checkout those objects are absent, so the tests ERROR AT SETUP
+          # rather than fail, and they do it on every shard on every platform.
+          # Measured 2026-09-19 on run 35447846889: 36 occurrences of
+          # "git show '1c08e5f:_audit/_census/jobs.md' returned non-zero", 14 of 19
+          # jobs red, on a commit whose history was complete ON THE SERVER.
+          fetch-depth: 0
 
       # tests/test_vendored_buildinfo.py compares linkedin_server/buildinfo.py
       # and paths.py against jobcore's originals, and SKIPS when it cannot find
@@ -460,6 +471,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # FULL HISTORY, NOT A SHALLOW CLONE. actions/checkout defaults to
+          # fetch-depth: 1. The census tests resolve a FROZEN BASELINE by literal
+          # commit SHA -- scripts/build_blocker_map.py sets FROZEN_REF = 1c08e5f --
+          # and tests/test_connections_reader.py pins 84dccba the same way. On a
+          # depth-1 checkout those objects are absent, so the tests ERROR AT SETUP
+          # rather than fail, and they do it on every shard on every platform.
+          # Measured 2026-09-19 on run 35447846889: 36 occurrences of
+          # "git show '1c08e5f:_audit/_census/jobs.md' returned non-zero", 14 of 19
+          # jobs red, on a commit whose history was complete ON THE SERVER.
+          fetch-depth: 0
 
       # Left strict on purpose. If NOTHING uploaded, this step fails with its
       # own message and the run is red -- which is the right outcome, and a
