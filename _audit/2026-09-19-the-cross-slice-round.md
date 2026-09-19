@@ -165,3 +165,28 @@ the correction has a referent — the same method used on the blocker-20 headlin
 * **The `jobs.md` R/W column**: approved in principle, deferred in execution,
   **empty beats guessed**. 84 of 151 rows already have a value in that file's own
   ranges table — found only because an impossible value led there.
+
+---
+
+## 10. TWO OPERATIONAL HAZARDS FROM THE LAST HOUR, both cheap and both real
+
+**1. `add && verify && commit` EARNED ITS PLACE, on its first use.** The verify
+step read **three** files in the index where one was expected — a sibling had
+staged two between my `git add` and the check. **The `&&` chain stopped and the
+commit never ran.** Without it, two files I had never read would have ridden
+into a commit of mine. `--only` then committed exactly my path.
+
+**2. A COMMIT MESSAGE IN `/tmp` IS NOT DURABLE HERE, and this is new.** The
+standing rule is *message as a FILE PATH, never stdin* — it does not say where
+the file goes. In git-bash on this box `/tmp` maps to the Windows user temp
+directory, which **is cleaned underneath a running session**: a message written
+minutes earlier was gone at commit time —
+
+    fatal: could not read log file '/tmp/msg-....txt': No such file or directory
+
+and because the message vanished rather than the content being wrong, **the
+failure looks like a git problem rather than a storage one.**
+
+> **Write commit messages into the session scratchpad, not `/tmp`.** The rule
+> that saves you from stdin does not save you from a temp sweeper, and the two
+> failures are indistinguishable from the error text.
