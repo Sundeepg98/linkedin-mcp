@@ -9,14 +9,21 @@ be distinguished from a per-blocker guess. This script emits the ID SET so the
 division can be checked against something.
 
 IT IMPORTS THE SHIPPED COUNTER RATHER THAN REPARSING. `cells`, `state_of`,
-`ROW`, `HEADERS`, `SLICES` and `CENSUS` all come from `count_census_states`.
-Four waves reimplemented a shipped instrument on 2026-09-05 and three got a
-broken one; the standing rule is IMPORT IT. The consequence is stated rather
-than hidden: THIS SCRIPT INHERITS THAT PARSE'S BLIND SPOTS EXACTLY. A row whose
-state cell is prose is invisible here for the same reason it is invisible there
-(`N 132`), and `--unstated` in the shipped counter is still the only way to see
-those. A shared parse is not a second opinion, and this file does not pretend
-to be one.
+`classify`, `ROW`, `HEADERS`, `SLICES` and `CENSUS` all come from
+`count_census_states`. Four waves reimplemented a shipped instrument on
+2026-09-05 and three got a broken one; the standing rule is IMPORT IT. The
+consequence is stated rather than hidden: THIS SCRIPT INHERITS THAT PARSE'S
+BLIND SPOTS EXACTLY. A row whose state cell is prose is invisible here for the
+same reason it is invisible there (`N 132`), and `--unstated` in the shipped
+counter is still the only way to see those. A shared parse is not a second
+opinion, and this file does not pretend to be one.
+
+ONE OF THOSE BLIND SPOTS WAS CLOSED 2026-09-19 and it mattered most HERE, at a
+`--ref`. A state cell spelled in a dialect used to yield '' and the row simply
+did not appear -- so `--ref 1c08e5f`, the reading the number 409 rests on, was
+enumerating 690 rows when the file held 692. `state_of` now REFUSES on such a
+cell; `rows()` refuses with it unless the caller passes a `dialects` collector
+and takes responsibility for reporting them.
 
 ONE BEHAVIOUR IS REPLICATED, NOT IMPORTED, because it lives inside the shipped
 counter's `main()` and has no seam: the network slice's admin-only table carries
@@ -72,8 +79,16 @@ def slice_text(name: str, ref: str | None) -> str:
     return out.stdout.decode("utf-8", errors="replace")
 
 
-def rows(ref: str | None = None):
-    """Yield (letter, row_id, state, lineno, first_prose_cell) for every stated row."""
+def rows(ref: str | None = None, dialects: list[str] | None = None):
+    """Yield (letter, row_id, state, lineno, first_prose_cell) for every stated row.
+
+    A STATE CELL SPELLED IN A DIALECT REFUSES BY DEFAULT rather than silently
+    dropping the row, which is the defect that cost the frozen census `M M1`
+    and `M M2` and let a blocker publish a row count with no referent inside the
+    409. Pass `dialects` -- a list this function appends to -- if you would
+    rather collect every offender and report them together; the rows still drop
+    out of the enumeration, but the caller now KNOWS they did and can say so.
+    """
     for letter, name in ccs.SLICES.items():
         for lineno, line in enumerate(slice_text(name, ref).splitlines(), 1):
             if not line.startswith("|"):
@@ -85,7 +100,15 @@ def rows(ref: str | None = None):
                 continue
             if not ccs.ROW.match(line) or c[0].lower() in ccs.HEADERS:
                 continue
-            st = ccs.state_of(c)
+            if dialects is None:
+                st = ccs.state_of(c)          # refuses loudly
+            else:
+                st, found = ccs.classify(c)
+                for spelling in found:
+                    dialects.append(
+                        f"{letter} {c[0]} ({name} line {lineno} at "
+                        f"{ref or 'HEAD'}) spells a state {spelling!r}, which "
+                        f"the shipped vocabulary does not hold")
             if not st and letter == "N" and ADMIN_ONLY.fullmatch(c[0]):
                 st = "GAP"
             if not st:

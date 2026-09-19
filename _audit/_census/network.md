@@ -1027,7 +1027,7 @@ muting, and Page-follow invitations including the admin variants.
 | **Invitation expiry** (`answer/a546712`) | 404 on every URL form while still appearing in search | The six-month expiry and two-reminder numbers were recovered independently from `answer/a548242`, so no capability was lost -- but the dedicated page was not read |
 | **AI-powered people-search filters** (`answer/a8085506`) | Renders a gated-rollout notice with no body | **The newest people-search filter set is UNMEASURED.** Rows 81-93 are LinkedIn's classic filter list; if the AI filters have shipped to his account, that block is incomplete |
 | **Mute article** (`answer/a524326`) | Indexed under "Follow, unfollow, or mute people" but the body served contained zero mute content across three URL forms | Mute's EXISTENCE is established from two other directly-fetched pages; the exact mute mechanics are not |
-| **24 linked-but-unwalked pages** in the following cluster | Link budget | Enumerated in `_audit/_scratch/_census-hc-following.md` |
+| **24 linked-but-unwalked pages** in the following cluster | Link budget | Enumerated in `_audit/_scratch/_census-hc-following.md` -- GITIGNORED working notes that reach no clone, so that path is provenance and not somewhere to look; the 24 are unwalked either way, which is what this row records |
 
 ### 9.3 NOT WALKED AT ALL -- deliberate scope calls, listed so they are visible
 

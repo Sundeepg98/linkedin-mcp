@@ -14,6 +14,15 @@ behind that assignment, and the committed source. Rows no committed source names
 are emitted as `UNASSIGNED`, which is the honest majority and the headline
 number -- it bounds how much of the ledger's division was ever recoverable.
 
+AN UNASSIGNED ROW HAS TWO CAUSES AND THE CELL NOW SAYS WHICH. Until 2026-09-19
+every unassigned row carried the same generated sentence: "no committed source
+names this row against any blocker". That is a universal negative asserted from
+a lookup in ONE file, and it was FALSE for six rows -- `J 78`-`J 83` are named
+against `PREMIUM-APPLY-SURFACES` in a tracked probe. The second cause is
+NAMED-UNFILEABLE: a committed source names the row, and the naming cannot be
+turned into an assignment (here, a six-row range against a five-row published
+count). Both are still UNASSIGNED; only one of them means nobody knows.
+
 THE SPINE IS THE FROZEN ROW SET, NOT TODAY'S. The map enumerates the 409 GAP
 rows as of `1c08e5f` (the census commit, 2026-09-03 15:53), because that is the
 set the ledger divided and the only set its counts can be checked against. Every
@@ -101,6 +110,126 @@ EVIDENCE = ROOT / "_audit" / "_census" / "blocker-assignments.tsv"
 MAP_OUT = ROOT / "_audit" / "_census" / "blocker-map.tsv"
 LEDGER = ROOT / "_audit" / "2026-09-03-linkedin-gap-blockers.md"
 
+#: SOURCES THAT NAME A ROW AGAINST A BLOCKER WITHOUT BEING ABLE TO FILE IT.
+#:
+#: THE DEFECT THIS EXISTS TO END. The UNASSIGNED reason cell used to read "no
+#: committed source names this row against any blocker" for every unassigned
+#: row. That is a UNIVERSAL NEGATIVE asserted from a lookup in ONE file --
+#: `blocker-assignments.tsv` -- and it was FALSE for six rows: `J 78`-`J 83`
+#: are named against `PREMIUM-APPLY-SURFACES`, in a tracked probe, in one
+#: comment. A generator default is not a measurement, and a sweep reading that
+#: column would have concluded the six were unnamed and gone looking again.
+#:
+#: WHY THE SIX STILL CANNOT BE FILED, which is the part the true cell has to
+#: carry: the probe names SIX rows and the ledger publishes that blocker at
+#: FIVE. Filing all six trips the over-count assertion below, and picking five
+#: of six is a CHOICE wearing a forced row's clothes -- the same reasoning that
+#: pulled `J 82` back out of this very blocker on 2026-09-19. So the honest
+#: answer is neither "unnamed" nor an assignment: it is NAMED-UNFILEABLE, with
+#: the arithmetic conflict printed in the cell.
+#:
+#: THE MARK IS PARSED, NEVER RETYPED. Both the blocker and the row range are
+#: read out of the probe on every run, and the line number is computed rather
+#: than quoted, so this cannot rot into a plausible wrong answer the way a
+#: hand-copied citation does. If the mark disappears, `probe_marks` returns
+#: nothing and `build` raises it as a problem -- the map refuses to write
+#: rather than silently reverting to the false default.
+NAMED_BY_PROBES = ("scripts/_probe_jobs_tail_boundary.py",)
+PROBE_MARK = re.compile(
+    r"^\s*#\s*\d+\s+(?P<blocker>[A-Z][A-Z0-9-]+)\s*--\s*census rows\s+(?P<spec>.+?)\s*$"
+)
+#: `J78-J83`, `J31-J36 and J41`, `J54-J56`. A bare number after a hyphen
+#: inherits the letter (`J78-J83` and `J78-83` both mean the same six rows).
+_SPEC_TOKEN = re.compile(r"\b([A-Z])\s?(\d+)(?:\s*-\s*(?:([A-Z])\s?)?(\d+))?")
+
+
+def _expand(spec: str) -> list[str]:
+    """Row ids named by a probe mark's row spec, slice-qualified."""
+    out: list[str] = []
+    for letter, first, _l2, last in _SPEC_TOKEN.findall(spec):
+        lo = int(first)
+        hi = int(last) if last else lo
+        if hi < lo:
+            continue
+        out.extend(f"{letter} {n}" for n in range(lo, hi + 1))
+    return out
+
+
+def probe_marks() -> tuple[dict[str, tuple[str, str, str, int]], list[str]]:
+    """rid -> (source, locator, blocker, rows_named), plus any parse problems.
+
+    Derived from the tracked probe on every run. A source that vanishes or
+    stops matching is a PROBLEM, never a silent fallback to the old claim.
+    """
+    found: dict[str, tuple[str, str, str, int]] = {}
+    problems: list[str] = []
+    for rel in NAMED_BY_PROBES:
+        path = ROOT / rel
+        if not path.exists():
+            problems.append(f"NAMED-BY-PROBE source missing: {rel}")
+            continue
+        marks = 0
+        for lineno, line in enumerate(
+            path.read_text(encoding="utf-8", errors="replace").splitlines(), 1
+        ):
+            m = PROBE_MARK.match(line)
+            if not m:
+                continue
+            ids = _expand(m.group("spec"))
+            if not ids:
+                problems.append(
+                    f"NAMED-BY-PROBE {rel}:L{lineno} matched the mark grammar "
+                    f"but named no rows: {m.group('spec')!r}")
+                continue
+            marks += 1
+            for rid in ids:
+                found[rid] = (rel, f"L{lineno}", m.group("blocker"), len(ids))
+        if not marks:
+            problems.append(
+                f"NAMED-BY-PROBE {rel} carries no parseable "
+                f"'# <n> <BLOCKER> -- census rows <spec>' mark any more. The "
+                f"UNASSIGNED reason cell would silently revert to claiming no "
+                f"committed source names those rows, which was false before.")
+    return found, problems
+
+
+def unassigned_row(rid: str, marks: dict[str, tuple[str, str, str, int]],
+                   published: dict[str, int]) -> tuple[str, str, str, str, str]:
+    """The five map columns for a row no evidence line files, and WHY.
+
+    THE BLOCKER AND THE EVIDENCE CLASS STAY `UNASSIGNED` IN EVERY BRANCH, and
+    that is deliberate rather than lazy. Naming a row is not filing it, so this
+    generator does not get to promote one into the division -- and the two
+    columns downstream readers key on (`blocker`, `evidence_class`) are
+    asserted against the committed map by `test_blocker_map_is_derived`, which
+    a sibling wave regenerates. Moving the distinction into a column somebody
+    else's artifact is pinned to would break their tree to make a point that
+    belongs in the reason cell. The distinction lives in the NOTE, tagged
+    `NAMED-UNFILEABLE` so it is still greppable, and the `source` and `locator`
+    columns -- empty for every unassigned row until now -- carry the citation.
+    """
+    named = marks.get(rid)
+    if named is None:
+        return ("UNASSIGNED", "UNASSIGNED", "-", "-",
+                f"no line in {EVIDENCE.name} files this row, and no probe mark "
+                f"in {'/'.join(NAMED_BY_PROBES)} names it")
+    source, locator, blocker, rows_named = named
+    pub = published.get(blocker)
+    if pub is None:
+        why = (f"the ledger's tables do not publish {blocker} at all, so there "
+               f"is no count to file this row into")
+    elif rows_named > pub:
+        why = (f"the mark names {rows_named} rows and the ledger publishes "
+               f"{blocker} at {pub}; filing them all would trip the over-count "
+               f"assertion, and filing {pub} of {rows_named} would be a CHOICE "
+               f"wearing a forced row's clothes")
+    else:
+        why = (f"named but not filed: {blocker} publishes {pub} and the mark "
+               f"names {rows_named}; no evidence line assigns this row")
+    return ("UNASSIGNED", "UNASSIGNED", source, locator,
+            f"NAMED-UNFILEABLE -- named against {blocker} by "
+            f"{source}:{locator}, {why}")
+
 
 #: The two tables are located by their HEADER ROW, never by line offset.
 #: MEASURED 2026-09-05 23:48, and it is why this is not a window: another wave
@@ -164,11 +293,25 @@ def evidence() -> list[tuple[str, str, str, str, str, str]]:
 
 
 def build():
-    frozen = {f"{L} {r}": (st, txt) for L, r, st, _ln, txt in egr.rows(FROZEN_REF)}
-    current = {f"{L} {r}": st for L, r, st, _ln, _t in egr.rows(None)}
+    # A DIALECT IN A STATE CELL IS A PROBLEM OF THIS MAP, NOT ONLY OF THE
+    # COUNTER. Both enumerations collect them rather than refusing, because the
+    # map's job is to report every defect it can see in one pass -- but they go
+    # straight into `problems`, so the map will not WRITE while one is open.
+    # Measured 2026-09-19: at `1c08e5f` two rows wore `**CANNOT-DELIVER**` and
+    # this function saw 690 stated rows where the file held 692.
+    dialects: list[str] = []
+    frozen = {f"{L} {r}": (st, txt)
+              for L, r, st, _ln, txt in egr.rows(FROZEN_REF, dialects)}
+    current = {f"{L} {r}": st
+               for L, r, st, _ln, _t in egr.rows(None, dialects)}
     gap = {k: v for k, v in frozen.items() if v[0] == "GAP"}
 
-    problems: list[str] = []
+    problems: list[str] = [f"STATE-CELL-DIALECT {d}" for d in dialects]
+    # The UNASSIGNED reason cell is DERIVED from these marks. If they stop
+    # parsing, the cell reverts to a claim that was measured false, so the
+    # derivation failing is a problem for the map and not just for the cell.
+    _marks, mark_problems = probe_marks()
+    problems.extend(mark_problems)
     assign: dict[str, tuple[str, str, str, str, str]] = {}
     for blocker, rid, klass, source, locator, note in evidence():
         if rid not in frozen:
@@ -270,13 +413,17 @@ def main(argv: list[str] | None = None) -> int:
     print(f"today's GAP total, derived                 "
           f"{len(gap) - left + len(entered)}")
 
+    marks, _mp = probe_marks()
+    named_unassigned = sorted(r for r in gap if r not in assign and r in marks)
+    print(f"\nUNASSIGNED rows a committed probe DOES name   "
+          f"{len(named_unassigned)}  {' '.join(named_unassigned)}")
+
     if args.write and not fail:
         lines = ["row_id\tblocker\tevidence_class\tsource\tlocator\t"
                  "state_at_freeze\tstate_today\tcapability\tnote"]
         for rid in sorted(gap, key=lambda s: (s[0], len(s), s)):
             b, klass, source, locator, note = assign.get(
-                rid, ("UNASSIGNED", "UNASSIGNED", "-", "-",
-                      "no committed source names this row against any blocker"))
+                rid, unassigned_row(rid, marks, published))
             txt = gap[rid][1].replace("\t", " ").replace("|", "/")[:110]
             lines.append(f"{rid}\t{b}\t{klass}\t{source}\t{locator}\t"
                          f"GAP\t{current.get(rid, 'ROW-GONE')}\t{txt}\t{note}")

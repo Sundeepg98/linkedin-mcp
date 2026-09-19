@@ -1048,6 +1048,23 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "sentence corrects a brief, and briefs are not documents this "
         "discipline can point at."
     ),
+    # 2026-09-19, added by the wave that stopped two documents deferring to a
+    # gitignored file. Read in context before declaring, as this list requires.
+    ("2026-09-19-blocker-map-ruling-requests.md", "2026-09-19-the-empty-blockers.md"): (
+        "THE WORD STALE IS ABOUT A THIRD DOCUMENT, AND THE CITED FILE IS THE "
+        "WITNESS RATHER THAN THE SUBJECT. The sentence says the SCRATCH "
+        "SNAPSHOT it had been deferring to -- _progress-unlocatable-recovery.md "
+        "section 47, a 12:21 reading -- was already stale when cited, and names "
+        "the-empty-blockers.md because that document's own section 3 REPORTS "
+        "BEING MISLED BY IT and getting three blockers wrong nineteen minutes "
+        "later. Citing a document's self-retraction as evidence about a THIRD "
+        "file is the opposite of correcting that document; nothing it claims is "
+        "asserted wrong, and a CORRECTED BY: pointer would tell a reader its "
+        "retraction had itself been overturned. Same proximity-scanning "
+        "property already recorded on the row-walk / messaging pair above: the "
+        "correction vocabulary sits beside the EVIDENCE citation, not beside "
+        "any corrected claim."
+    ),
 }
 
 
