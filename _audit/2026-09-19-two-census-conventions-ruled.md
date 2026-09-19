@@ -619,3 +619,70 @@ and the refusal has now been reported seven times.
 * Or, the other way: a later wave showing the narrow pattern is TOO narrow to
   serve the 20 rows, which is a request to widen it and gets its own blast
   radius, not an extension of this one.
+
+
+---
+
+## 7. WHEN ONE CAPABILITY CONTAINS ANOTHER, THE GRAIN FOLLOWS THE PLATFORM'S
+##    CONTROL -- AND WHERE THAT IS UNMEASURED, BOTH ROWS STAY
+
+Ruled 2026-09-19 12:16, on the one case in the duplicate register that could not
+be classed CLEAN or BUNDLED.
+
+### The case
+
+`M M38` *report as spam* sits **inside** `N 149` *report a message*. Neither is
+a restatement of the other and neither is a bundle: **one is a proper subset of
+the other's ground.** The register correctly refused to call it a duplicate and
+asked which grain the census keeps.
+
+### RULED: THE GRAIN FOLLOWS WHAT THE PLATFORM DRAWS
+
+**If LinkedIn presents ONE control with a reason parameter, it is ONE
+capability**, and the contained row is a duplicate of the containing one.
+**If it presents TWO controls, they are TWO capabilities**, and both rows stand.
+
+The census enumerates **what the platform offers that this server might
+reach.** Reaching one control reaches everything that control's parameters can
+express, so a parameter value is not a capability. Two controls are two
+reachings and two rows.
+
+**This makes the question EMPIRICAL rather than editorial, which is the point.**
+A ruling that decided the grain by preference would have to be re-decided for
+every containment pair; a ruling that points at the platform is decided once and
+measured thereafter.
+
+### AND WHERE IT IS UNMEASURED, BOTH ROWS STAY
+
+**Nobody has measured which shape that control has.** So `M M38` and `N 149`
+**both stand, recorded as a containment pair, and neither is subtracted.**
+
+**This is not a deferral wearing a ruling's clothes.** The rule is decided; only
+its input is missing, and the input is one read of an admitted surface. A future
+wave measures the control and applies the rule -- it does not re-argue it.
+
+**Do not subtract on the inference that one contains the other.** Containment is
+a fact about the WORDS; the grain is a fact about the PAGE, and today's record
+carries four separate instances of a lexical relation that did not survive
+contact with the surface.
+
+### WHAT THIS DOES NOT TOUCH
+
+The register's other classes are unaffected: **10 CLEAN** (subtractable if ever
+ruled, and one of them is a TRIPLE -- `jobs 127` with `M M4` and `N 157` --
+where a subtraction removes **two** rows, not one), and **2 BUNDLED**, which
+stay by the rule that a bundled row is not a clean duplicate.
+
+**None of the ten is subtracted today.** That hold was sequenced on the 761
+reconciliation, which has now landed -- so the remaining bar is the one the
+register itself names: `jobs`-`profile` and `profile`-`network` carry **no
+written conditional**, so each subtraction is a new decision rather than a
+trigger being fired, and none has been asked for.
+
+### THE BOUND THIS REGISTER CARRIES, AND IT IS THE REGISTER'S OWN
+
+**The method is lexical and demonstrably cannot see a collapsed block at all** --
+which is exactly how `O6-O20` hid four double-counts from every pass until they
+were read by hand. **229 swept, 13 read, 216 not.** So the register is a floor
+on the duplicate count and not an estimate of it, and no tail figure may be
+derived from its head precision.
