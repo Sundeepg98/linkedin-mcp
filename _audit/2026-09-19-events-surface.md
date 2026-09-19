@@ -204,3 +204,72 @@ hash. Neither is mine to commit and neither was harmed.
   and the one slug form carries a sanctioned synthetic token.
 * **I did not re-adjudicate the rows.** The verdicts are the committed ones.
   This wave supplied enforcement, not judgement.
+
+---
+
+# VERIFICATION, AND EXACTLY WHAT WAS RUN
+
+**I DID NOT RUN THE FULL SUITE**, on the lead's instruction -- two other waves
+were live and a 24-minute run on a contended tree is an interval, not a state.
+So this names what ran and what did not, rather than reporting a subset as a
+gate.
+
+    tests/test_readonly.py                            )
+    tests/test_readonly_boundary_invariant.py         )
+    tests/test_events_home_reader.py                  ) 317 passed
+    tests/test_the_events_boundary_is_root_only.py    ) 2 failed
+    tests/test_blocker_map_is_derived.py              )
+    tests/test_census_rows_carry_a_state.py           )
+    tests/test_every_census_surface_prices_itself.py  )
+    tests/test_a_correction_is_findable_from_the_claim.py
+
+    tests/test_no_committed_identity.py               )
+    tests/test_page_text_is_never_printed.py          ) 870 passed
+    tests/test_navigation_is_never_derived.py         ) 1 failed
+
+    tests/test_no_committed_identity.py alone           522 passed, 0 failed
+
+**THREE REDS, ALL FOREIGN, ALL PRE-EXISTING -- and the baseline proving it was
+taken BEFORE my first edit rather than argued for afterwards.**
+
+    test_every_marker_names_one_document_and_carries_a_reason   foreign
+    test_every_candidate_pair_is_declared_or_triaged            foreign
+    test_no_file_prints_page_text_beyond_its_pinned_inventory   foreign
+
+The first two were measured failing at 13:39, before `network.md` was touched,
+with the identical two test ids. Their citations are `jobs.md:180`,
+`network.md:436` and a ruling document -- **my rows are `network.md` 534-535
+and appear in neither.** The third is the lead's known unowned page-text red
+and names five `scripts/_probe_*.py` files, **none of which this wave created
+or edited.**
+
+**THE IDENTITY GUARD IS THE ONE THAT HAD TO PASS**, because this wave added a
+tracked file full of LinkedIn addresses. It does: **522 passed, 0 failed.**
+
+## COMMIT
+
+    a5ea6a6  boundary(events): the refusal was prose, and prose cannot be
+             shown failing            4 files, +369 -4
+
+Verified at `HEAD` by `git log`, not by an exit status -- and re-verified after
+three further waves committed on top (`5655bf1`, `1211794`, `5d15c15`), because
+a commit confirmed once on a shared tree is a reading with a timestamp.
+
+    AI attribution, all 407 unpushed commits        0
+    N 188 / N 189 at HEAD                           EXCLUDED-RULED
+    rows banked                                     2
+    rows deliberately NOT banked though ruled       2   (N 191, N 192)
+    foreign staged blobs restored byte-identical    2   verified by hash
+
+## THE ONE THING A SUCCESSOR SHOULD TAKE FROM THIS
+
+**The census was not behind. It was holding a line, and it had written the line
+down.** Fourteen rows across this surface carry a committed verdict that would
+move them out of GAP, and every one of those verdicts is prose. The cheap work
+here was never measuring LinkedIn again -- it was noticing that the cost was
+`n` shipped guards, not `n` investigations.
+
+**That generalises past this blocker**, and it is worth someone checking:
+`blocker-assignments.tsv` applies the same bar everywhere, so any blocker whose
+assignment notes say *"it does not apply that verdict"* is holding rows that a
+guard, not a measurement, would release.

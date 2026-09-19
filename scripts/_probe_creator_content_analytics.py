@@ -142,10 +142,37 @@ async def main() -> int:
             page = opened
             landed = await BROWSER.goto(page, TARGET)
             rel = _landing_class(landed)
-            print(f"  landed relation      : {rel}")
+            # THE VERDICT IS NOT PRINTED, and the reason is a measurement.
+            #
+            # ``_landing_class`` returns a closed alphabet of five string
+            # constants, so no input survives it and printing one leaks
+            # nothing. That is true IN FACT and undeclarable IN FORM: the
+            # taint engine can see "returns a constant" but has no way to say
+            # "closed alphabet", and it must not be asked to take the claim on
+            # trust. It already did once. While this function wore the name
+            # ``_relation`` the engine trusted the call BY SPELLING, and
+            # because the call looked sanitised it never examined this print
+            # at all.
+            #
+            #     A GUARD SILENCED BY A NAME DOES NOT MERELY STOP CHECKING
+            #     THAT FUNCTION. IT STOPS CHECKING EVERYTHING DOWNSTREAM
+            #     OF IT.
+            #
+            # A COMPARISON is the engine's own sanctioned shape, so the branch
+            # that matters prints as a boolean. The class itself stays in the
+            # control flow below, where it was always doing the work -- what
+            # is lost is a transcript line, not a diagnosis.
+            print(f"  landed on target     : {rel == 'target'}")
             if rel == "AUTH-WALL":
                 print("\n  AUTH WALL. Nothing here is a reading. Stopping.")
                 return 1
+            if rel != "target":
+                # NAMED BY ITS BRANCH, NOT BY ITS VALUE: the reader learns a
+                # redirect happened and that it was not the auth wall, which
+                # is enough to route the failure, without the verdict string
+                # reaching a sink.
+                print("  redirected away from the target, and not to the "
+                      "auth wall.")
             try:
                 await page.wait_for_load_state("networkidle", timeout=15_000)
             except Exception as exc:  # noqa: BLE001
