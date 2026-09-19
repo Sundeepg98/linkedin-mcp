@@ -305,3 +305,93 @@ Its published split is `1R/4W`, but **jobs.md section 2 marks the whole
 `J 82` the read is MY inference from the word "Observe", not the census's.
 **That conflict between ledger and census is itself a ruling**, and it survives
 whichever way `J 81` goes.
+
+
+---
+
+# AMENDMENT B -- MEASURED 12:40 BY THE BOX
+
+# REQUEST 4 -- the ledger table and the census contradict each other on `78-83`
+
+**Request 2a is RETRACTED by its own author, and this is what replaces it.**
+`J 82` was filed to `PREMIUM-APPLY-SURFACES` at `1349fe6` on the strength of the
+blocker table's published `1R`. **A row filed on a contested premise is not a
+forced row.** The blocker is back to 0 of 5 and the hole now records its reason.
+`UNASSIGNED` rose 41 -> 42 -- **the only rise of this campaign**, ruled and
+exactly one row.
+
+## THE CONTRADICTION
+
+| source | says |
+|---|---|
+| `2026-09-03-linkedin-gap-blockers.md`, ranked table | `PREMIUM-APPLY-SURFACES` is `1R/4W` |
+| `_census/jobs.md` section 2, the row-range table | `78-83` is plain **`W`** |
+
+Six rows, both sources first-party, and **the ledger's own row set for this
+blocker IS `J78-J83`** (named by `scripts/_probe_jobs_tail_boundary.py`). So the
+same six rows are `1R/4W` in one place and all-writes in the other.
+**Source-beats-reader does not decide it, because there is no reader in it.**
+
+## THE DISCRIMINATOR THAT WAS PROPOSED, AND THE ANSWER IS MEASURED
+
+The question asked was whether section 2's column is **coarse by construction**
+-- keyed to ranges, so a range-level `W` was never a row-level claim, and there
+would be no conflict at all.
+
+**MEASURED: IT IS NOT COARSE. The hypothesis is refuted.**
+
+Of section 2's groups marked plain `R` or plain `W`, fifteen fall wholly inside
+a blocker whose split the ledger publishes. **Fourteen agree. One contradicts --
+and it is `78-83`.**
+
+    9-14     [R] -> JOB-SEARCH-PARAMS         6R       agree
+    15-16    [R] -> ALL-FILTERS-PANEL         2R       agree
+    31-36,41 [W] -> JOB-ALERTS-SURFACE        7W       agree
+    54-56    [W] -> TRACKER-ROW-MENU          3W       agree
+    106-114  [R] -> COMPANY-PAGE-SURFACE      13R/5W   agree
+    116-126  [R] -> PREMIUM-JOBS-SURFACES     3R       agree
+    78-83    [W] -> PREMIUM-APPLY-SURFACES    1R/4W    ** CONTRADICTS **
+    ... 14 agreements, 1 contradiction
+
+**`106-114` is the case that kills the coarseness defence.** It sits inside
+`COMPANY-PAGE-SURFACE`, published `13R/5W` -- a MIXED blocker -- and the group is
+still correctly all-`R`, because that blocker's writes are elsewhere. A coarse
+column would have smeared there and did not.
+
+**And the column's vocabulary is finer than the hypothesis allows.** It carries
+`R + W`, `R (results) + W (the session)`, and -- decisively -- **`R (28, 30 are
+W)`**. A column that can say *"R except rows 28 and 30 are W"* is not coarse by
+construction; it is precise and it uses per-row exceptions when it means them.
+**A plain `W` from that vocabulary is a claim of no reads.**
+
+## WHAT I WOULD RULE
+
+**The census is right and the ledger's `1R` is the error.** Confidence: moderate.
+
+1. The census marks `78-83` with a vocabulary that demonstrably expresses
+   exceptions, and used none here.
+2. All six capabilities read as acts: draft a cover letter, mark Top Choice,
+   attach a message, verify to raise a limit, save self-ID answers. `J 82`
+   "Observe the Easy Apply daily limit / rate-pause state" is the only arguable
+   read -- and **observing a rate-limit state is a side effect of applying, not
+   a surface anybody reads on purpose**, which is likely how it was costed as a
+   write.
+3. The ledger's split is a derived arithmetic (`19R/2W`-style totals were
+   reconstructed for other blockers this campaign); the census's direction is
+   recorded per group by the person who walked the surface.
+
+**If that is ruled, `PREMIUM-APPLY-SURFACES` becomes `5W`-shaped with six
+candidates for five slots and STILL does not close** -- the source over-names by
+one and cannot say which. So this ruling does not fill the blocker. **It decides
+whether a future filing may use `1R` as a discriminator at all**, which is the
+part that outlives this blocker.
+
+## WHAT TURNS ON IT BEYOND THESE FIVE ROWS
+
+Section 2's direction column was used as evidence in **four** filings this round
+-- `JOB-ALERTS-SURFACE` 7/7, `PREMIUM-JOBS-SURFACES` 3/3,
+`COMPANY-PAGE-SURFACE`, `JOBS-APPLICATION-FORBIDDEN` 3/3. **All four agree with
+their ledger split**, so none is disturbed whichever way this goes. But if the
+ruling went the other way -- census wrong, ledger right -- then that column stops
+being usable evidence, and those four would rest on their other axes alone.
+**They have them; that is why they are not being retracted pre-emptively.**

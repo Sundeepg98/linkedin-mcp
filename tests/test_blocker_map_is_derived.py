@@ -711,7 +711,29 @@ import build_blocker_map as bbm  # noqa: E402
 #: cites it as EXCLUDED-RULED for rows 74-77" -- and J 74-77 are NOT IN THE
 #: FROZEN 409. They are precedent for the substring biting, not membership.
 #: A why that names row ids is not always naming its own rows.
-UNASSIGNED_CEILING = 41
+#: 41 -> 42. THE ONLY RISE OF THIS CAMPAIGN, AND IT IS A RULED RETRACTION.
+#: The guard's own text says a rise means evidence was removed or stopped
+#: resolving, and that a genuine retraction should be recorded deliberately
+#: rather than cleared. This is that case, and it is exactly ONE row.
+#:
+#: J 82 was filed to PREMIUM-APPLY-SURFACES at 1349fe6 under the ruling at
+#: 12c20e1, on the strength of the blocker table's published 1R -- J 82
+#: being the only row of the six that merely OBSERVES. The ruling is
+#: retracted by its own author because of a caution I filed with it:
+#: jobs.md section 2 marks the whole 78-83 group plain W, so calling J 82
+#: the read is a READER'S inference, not the census's.
+#:
+#: A ROW FILED ON A CONTESTED PREMISE IS NOT A FORCED ROW -- IT IS A CHOSEN
+#: ONE WEARING A FORCED ONE'S CLOTHES. "Fill what is forced, leave what is
+#: chosen" therefore removes it, and PREMIUM-APPLY-SURFACES returns to 0 of
+#: 5 with the ledger-vs-census conflict recorded as the reason the hole is a
+#: hole.
+#:
+#: IT DOES NOT INHERIT THE BADGES-SURFACE EXCEPTION. That pick stood because
+#: its two candidates were duplicates OF EACH OTHER, so either id reached
+#: the same page -- unknowable AND near consequence-free. A misfiled J 82
+#: sends a wave to the wrong surface. Opposite case, opposite answer.
+UNASSIGNED_CEILING = 42
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
