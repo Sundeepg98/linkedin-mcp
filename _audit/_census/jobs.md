@@ -30,6 +30,28 @@ here was taken by grep against the finished table, not estimated:
 | EXCLUDED-RULED | 23 | 15.3% | 23 |
 | GAP | 99 | 66.0% | 81 |
 
+**DELTA, 2026-09-19. The block above is UNCHANGED and still reads as it did when
+this census was written**, so every document citing those numbers still resolves
+against them. What moved is recorded here instead, because a count that silently
+rewrites itself cannot be cited:
+
+    COVERED-PROVEN    21  ->  19    rows 103 and 104 moved to COVERED-UNFIRED
+    COVERED-UNFIRED    7  ->   9    same two rows
+
+**Why, since it moves the number the wrong way for this slice.** Both rows were
+banked on the word `PERFORMS` quoted out of a REFUSES/PERFORMS ledger, which is
+a verdict about the gate and not a receipt for a fire; the cited document's own
+receipts read `writes performed 0` and *"Nothing was fired."* This slice's own
+section *"THE SECOND CORRECTION: what 'live-fire' means for the three writes"*
+draws exactly that distinction and gave `unsave_job` **NO. NEVER FIRED.** on it.
+The NETWORK census slice has held both actions at COVERED-UNFIRED all along in
+its rows 46 and 48, so this removes a contradiction between two slices rather
+than creating one.
+**Nothing moved out of GAP and the GAP count is untouched.**
+
+**CORRECTED BY:** `_audit/2026-09-19-unfired-but-built.md` -- rows 103 and 104
+moved COVERED-PROVEN to COVERED-UNFIRED, on the four readings in its section 4.
+
 **122 of 150 job capabilities cannot be reached through this server** -- 99 because nobody
 considered them, 23 because somebody wrote down a reason. That is 81.3%, up from 78.8%. Of
 the **28** a tool can reach, **21** have live-fire evidence and 7 have never run against
@@ -263,8 +285,8 @@ Every alert WRITE is a GAP. Everything the alerts DELIVER is served by the skill
 |---|---|---|---|---|
 | 101 | Identify the employer and its Page url from a posting | a550270 | CP | `job_detail.company_url` |
 | 102 | Read whether the employer is already followed, from the posting | a548013 | CP | `job_detail.company_follow_state`, three-valued, read off the same rendering |
-| 103 | Follow a company | a548013 | CP | `linkedin_follow_company`; `2026-08-31-linkedin-perform.md:1318` -- "**PERFORMS** \| verified by re-reading the followed list" |
-| 104 | Unfollow a company | a548013 | CP | `linkedin_unfollow_company`; same table -- "**PERFORMS** \| addressed by NUMERIC id; refuses when the Page is not among the rendered rows" |
+| 103 | Follow a company | a548013 | CU | `linkedin_follow_company`. **CORRECTED CP -> CU 2026-09-19. The cited evidence is a PERFORMABILITY verdict, not a fire.** The row quoted `2026-08-31-linkedin-perform.md:1318` -- "**PERFORMS** \| verified by re-reading the followed list" -- but that table is `## 29. THE THIRTEEN-ROW LEDGER`, whose subject is *"`writes.SANCTIONED_WRITES` holds thirteen actions"* and whose closing line is *"Rows 7-12 are the six refusals a caller can reach through a tool"*; the same verdicts appear at `## 10` under columns headed `before \| after`. **`apply_job` reads `PERFORMS` in that same ledger while row 59 of THIS table records "zero applications have ever landed"**, so `PERFORMS` is demonstrably not a landing claim. And the receipts of the cited document itself, `:1058-1059`, `:1462`, `:1794`: `confirm_tokens used 0`, `writes performed 0`, **"Nothing was fired."** No live-fire receipt for this action exists anywhere in `_audit/`. **This slice already knew the distinction** -- its own section *"THE SECOND CORRECTION: what 'live-fire' means for the three writes"* draws it, and gave `unsave_job` **NO. NEVER FIRED.** on the same ground. The NETWORK census slice's row 46 has held COVERED-UNFIRED all along; the two slices now agree. Evidence `_audit/2026-09-19-unfired-but-built.md` s4 |
+| 104 | Unfollow a company | a548013 | CU | `linkedin_unfollow_company`; same table, same correction and same date -- it quoted "**PERFORMS** \| addressed by NUMERIC id; refuses when the Page is not among the rendered rows", which describes the gate's aiming and not a write that landed. The NETWORK census slice's row 48 has held COVERED-UNFIRED all along. Evidence `_audit/2026-09-19-unfired-but-built.md` s4 |
 | 105 | List followed companies | a548013 | CP | `linkedin_followed_companies` |
 | 106 | Company Page About tab (size, industry, locations) | a550270 | GAP | -- |
 | 107 | Company Page Jobs tab / "see all jobs at this company" | a550270, a567373 | GAP | -- |
