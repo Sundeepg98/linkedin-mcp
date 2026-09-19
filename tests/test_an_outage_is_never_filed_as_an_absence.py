@@ -98,7 +98,17 @@ def _is_verdict_role(function: ast.AST) -> bool:
 #: **NOT AN EXEMPTION.** An exemption says "this is fine"; this says "this is a
 #: defect, here is who owns it, and the guard will notice when it goes."
 KNOWN_UNFIXED: dict[tuple[str, int], str] = {
-    ("_probe_apply_flow.py", 313): (
+    # LINE MOVED 313 -> 327 on 2026-09-19, and the guard caught it rather than
+    # a human noticing. The navigation round hand-guarded this file's ``_load``
+    # with ``assert_read_url``, adding lines above the defect -- so the record
+    # aged out of true the moment an unrelated edit landed in the same file.
+    #
+    # **THAT IS THE COST OF PINNING A DEFECT BY LINE NUMBER**, and it is paid
+    # deliberately: a record keyed on the line is brittle, and a record keyed
+    # on something looser would not tell you the defect had MOVED rather than
+    # been fixed. The guard's own message anticipated exactly this -- "if the
+    # line merely MOVED, update it" -- and that is what happened.
+    ("_probe_apply_flow.py", 327): (
         "await page.inner_text('main') wrapped in a bare `except Exception: "
         "return {}`, with no logging. An empty mapping flows on as 'the page "
         "drew no tracker tabs', which is indistinguishable from a failed read "
