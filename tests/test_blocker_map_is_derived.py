@@ -624,7 +624,27 @@ import build_blocker_map as bbm  # noqa: E402
 #:
 #: A search that cannot see the column its answer lives in will confidently
 #: return the nearest thing in the column it can see.
-UNASSIGNED_CEILING = 60
+#: 60 -> 58. ACCOUNT-VERIFICATION to 2 of 3, CORRECTING MY OWN TWICE-MADE
+#: DECLINE. I refused it twice on the ground that section K ("Verification
+#: and badges") holds only BADGE rows in the frozen set, K1-K7 having been
+#: EXCLUDED-RULED at the freeze. All true -- and K8/K10 have since gone to
+#: BADGES-SURFACE, confirming it. But this blocker's rows were NEVER IN
+#: SECTION K. I was searching the section whose TITLE matched the blocker's
+#: name: the same one-column mistake that hid PICKER-SURFACES and
+#: EASY-APPLY-MULTISTEP, made a third time on a different axis.
+#:
+#: P N14 "Identity verification for account recovery (Persona)" is the act
+#: itself; P A24 "ID name as additional name" has the reason cell
+#: "requires an identity verification first (block K)".
+#:
+#: THE THIRD SLOT IS LEFT OPEN ON PURPOSE. J 81 "Verify account to raise
+#: the Easy Apply daily limit" is contested -- a committed probe names it
+#: among PREMIUM-APPLY-SURFACES' J78-J83 -- and I filed it minutes ago as
+#: ruling request 2a recommending it land here. Taking it now would be
+#: acting ahead of my own request, which is the inversion the
+#: disclosing-press ruling names: a recommendation is not permission to act
+#: on itself.
+UNASSIGNED_CEILING = 58
 FROZEN_GAP_ROWS = 409
 LEDGER_BLOCKERS = 97
 
