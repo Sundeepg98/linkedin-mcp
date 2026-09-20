@@ -299,7 +299,12 @@ alongside it. State A is refuted; the verdict does not overclaim.
 
 ### 6b. The surfaces LinkedIn draws, against what the server may read
 
-**43 distinct route shapes across the six captures. 6 admitted, 37 refused.**
+**43 distinct route shapes across the six captures. 6 admitted, 37 refused
+when this section was written -- and 7 / 36 from section 11 onward**, because
+the seventh is the one this wave admitted itself. Re-running the instrument
+today prints 7; the 6 is kept above with this sentence beside it rather than
+overwritten, so the two numbers stay reconcilable instead of one of them
+quietly becoming wrong.
 Every row below is an address LinkedIn SERVED to this account -- none is
 guessed, which is the standard the newsletter wave set and this table keeps.
 
@@ -309,7 +314,8 @@ guessed, which is the standard the newsletter wave set and this table keeps.
 | `/analytics/recruiter-views` | profile-views | no | unread | **reader COULD exist** -- not previously recorded anywhere in this repo |
 | `/jobs/collections/top-applicant` | premium-hub | no | unread | **reader COULD exist** -- this is the Top Applicant signal the question names |
 | `/jobs/collections/top-choice` | premium-hub | no | unread | reader could exist; sibling of the admitted `/recommended` |
-| `/learning/role-play/scenarios/new` | premium-hub | no | n/a | **create route, refused class** -- section 4d |
+| `/learning/role-play/scenarios/new` | premium-hub | no | n/a | **create route, still refused** -- section 4d |
+| `/learning/role-play/scenarios` (the listing) | not drawn; reached by admission | **yes, section 11** | **NO** -- `main` is 17 chars | **served and empty** -- section 11 |
 | `/premium/profile-key-skills` | search-appearances | no | unread | reader could exist |
 | `/premium/premium-perks` | premium-hub | no | unread | reader could exist, low value |
 | `/premium/sb/explore`, `/premium/switcher` | premium-hub | no | unread | plan chrome, not member data |
