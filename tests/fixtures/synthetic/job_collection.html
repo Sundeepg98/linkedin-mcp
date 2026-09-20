@@ -1,0 +1,195 @@
+<!doctype html>
+<!--
+  SYNTHETIC. NOT A CAPTURE. AND NOT A CAPTURE OF THE PAGE IT STANDS FOR.
+
+  THE HONEST PROVENANCE, FIRST, BECAUSE IT IS WEAKER THAN EVERY OTHER FIXTURE
+  IN THIS DIRECTORY AND SAYING SO IS THE POINT.
+
+  Nobody has ever opened /jobs/collections/top-applicant or
+  /jobs/collections/top-choice. There is no capture of either. This file's
+  STRUCTURE is a measurement off the two job-list surfaces that HAVE been
+  captured -- /jobs/collections/recommended/ and /jobs/search/, both admitted,
+  both captured by a live authenticated session on 2026-09-20 -- taken by
+  scripts/_probe_job_list_shape.py, which reports counts and attribute NAMES
+  and never a value.
+
+  So this is a fixture for a SIBLING'S shape, standing in for a page nobody has
+  seen. A reader proven against it is proven to work IF the target draws what
+  its two siblings draw. That is a hypothesis, it is the best evidence
+  available at zero page loads, and it is not a measurement of the target.
+
+  THE LIST HAS TWO TIERS, AND THE FIRST VERSION OF THIS FIXTURE HAD ONLY ONE.
+
+  That version drew eight bare cards, because a job card is what a job list
+  looks like. Re-measured, LinkedIn draws ONE li[data-occludable-job-id] per
+  posting it has placed in the window -- hydrated or not -- and fills only the
+  few near the viewport:
+
+      metric                         recommended   search    here
+      list slots (tier 1)                     24       25      10  (+1 decoy)
+      hydrated cards (tier 2)                  7        7       3  (+1 decoy)
+      placeholder slots                       17       18       7
+      slots neither hydrated nor placeholder   0        0       0
+      hydration ratio                       7/24     7/25    3/10
+      cross-tier id equality                 7/7      7/7     3/3
+      slot tag / list parent               li / ul  li / ul li / ul
+      slot -> card nesting            slot>div>card   same    same
+      id digit length                      10-10    10-10   10-10
+      <main> count                             1        1       1
+      <nav> / <footer> count                 1/1      1/1     1/1
+      <aside> count                            2        2       2
+
+  A READER COUNTING TIER 2 REPORTS 7 WHEN THE COLLECTION HOLDS 24. The
+  hydration ratio here is 3/10 against the measured 7/24 and 7/25 -- deliberately
+  close, so that a reader which silently swapped the tiers produces a visibly
+  wrong number here rather than a plausible one.
+
+  THE SLOT COUNT IS NOT A CONSTANT OF THE PAGE FAMILY and this fixture does not
+  pretend otherwise: the two captures disagree (24 vs 25) while their SHAPE is
+  identical. So the numbers asserted against this file are facts about this
+  file, measured off it by an independent parse in the test.
+
+  ITS CONTENT IS INVENTED AND CARRIES NO PAGE TEXT AT ALL. There is no job
+  title, company name, location, salary or recruiter name anywhere in this
+  file -- not redacted, not shaped: ABSENT. The captures carry all five and are
+  gitignored for that reason. The only values here are markup, class tokens
+  LinkedIn's own DOM uses, and digit runs in an obviously synthetic band
+  (1000000001 upward), chosen so no id here could collide with a real posting.
+
+  THE DECOY, and it is load-bearing.
+
+  ONE SLOT sits OUTSIDE <main>, in an <aside>, and it is hydrated -- so it
+  decoys BOTH tiers at once. The captures draw two asides, so an aside is a
+  real container on this page family rather than a box invented to fail a
+  selector.
+
+  It is here because of a measurement, not a hunch. On both captures every
+  candidate selector counts IDENTICALLY document-wide and inside main
+  (data-occludable-job-id 24==24 and 25==25; data-job-id 7==7 and 7==7), so a
+  naive document-wide reader would agree with a scoped one on every real page
+  this wave can see, and a scoping claim proved only against them would be
+  proving nothing at all. The decoy is the input that separates them: a
+  document-wide counter reports 11 slots in main and 0 outside, against the
+  shipped reader's 10 and 1, and publishes the decoy's posting id as one of his.
+
+  And the hazard it stands for is measured on a SIBLING SURFACE rather than
+  imagined: a live load of /analytics/profile-views/ parsed 12 viewer rows
+  document-wide and 0 inside an 1835-character <main>. A reader on this family
+  looking in the wrong box is a thing that has already happened here.
+
+  THE BAD-ID SLOT is the other deliberate divergence. One slot inside main
+  carries a data-occludable-job-id that is not a digit run. The reader's output
+  gate must DROP it and COUNT it, because the one page-derived value this
+  module publishes is a posting id, and a page that puts something else in that
+  attribute must produce a refusal count rather than a string in a caller's
+  hands.
+
+  WHAT THIS FILE DELIBERATELY DOES NOT DRAW: an empty-state message. All twelve
+  of the reader's empty-state needles measured ZERO RENDERED on both captures
+  (three of them -- try again, sorry, something went wrong -- appear once each
+  in the SOURCE and zero times rendered, which is the bundle, not the page).
+  Drawing one here would be inventing copy LinkedIn does not show.
+  tests/test_job_collections.py builds the empty-state document separately, in
+  the test, where it is visibly an author's construction.
+-->
+<html lang="en">
+<head><title>Job collection</title></head>
+<body>
+
+<nav>
+  <a href="https://www.linkedin.com/feed/">Home</a>
+  <a href="https://www.linkedin.com/jobs/">Jobs</a>
+</nav>
+
+<!-- THE DECOY. Outside main, in an aside the real page family also draws, and
+     HYDRATED so that it decoys both tiers. A document-wide counter reports 11
+     slots in main and 0 outside; the shipped reader reports 10 and 1. -->
+<aside class="rail rail--right">
+  <ul>
+    <li data-occludable-job-id="1000000099" id="ember-decoy">
+      <div>
+        <div class="job-card-container" data-job-id="1000000099">
+          <a href="/jobs/view/1000000099/"><img alt="" src="data:," /></a>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <button aria-label="dismiss"></button>
+          <div aria-label="posted"></div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</aside>
+
+<main>
+  <ul class="scaffold-layout__list">
+
+    <!-- THREE HYDRATED SLOTS. Tier 1 and tier 2 both present, ids equal
+         across the tiers, which is what the captures measured 7 of 7. -->
+    <li data-occludable-job-id="1000000001" id="ember-1">
+      <div>
+        <div class="job-card-container" data-job-id="1000000001">
+          <a href="/jobs/view/1000000001/"><img alt="" src="data:," /></a>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <button aria-label="dismiss"></button>
+          <div aria-label="posted"></div>
+        </div>
+      </div>
+    </li>
+
+    <li data-occludable-job-id="1000000002" id="ember-2">
+      <div>
+        <div class="job-card-container" data-job-id="1000000002">
+          <a href="/jobs/view/1000000002/"><img alt="" src="data:," /></a>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <button aria-label="dismiss"></button>
+          <div aria-label="posted"></div>
+          <div aria-label="easy apply"></div>
+        </div>
+      </div>
+    </li>
+
+    <li data-occludable-job-id="1000000003" id="ember-3">
+      <div>
+        <div class="job-card-container" data-job-id="1000000003">
+          <a href="/jobs/view/1000000003/"><img alt="" src="data:," /></a>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <button aria-label="dismiss"></button>
+          <div aria-label="posted"></div>
+        </div>
+      </div>
+    </li>
+
+    <!-- SIX PLACEHOLDER SLOTS. A posting each, no card drawn. THESE ARE THE
+         REASON THE READER COUNTS TIER 1: they are invisible to any selector
+         aimed at a card, and on the captures they are 17 and 18 of the list. -->
+    <li data-occludable-job-id="1000000004" id="ember-4"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+    <li data-occludable-job-id="1000000005" id="ember-5"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+    <li data-occludable-job-id="1000000006" id="ember-6"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+    <li data-occludable-job-id="1000000007" id="ember-7"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+    <li data-occludable-job-id="1000000008" id="ember-8"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+    <li data-occludable-job-id="1000000009" id="ember-9"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+
+    <!-- THE BAD-ID SLOT. Slot-shaped in every other respect, so it is counted
+         as a posting and refused as an id. The reader must report slots 10,
+         job_ids 9, ids_refused 1 -- three numbers that cannot all be right by
+         accident. -->
+    <li data-occludable-job-id="see-job-details" id="ember-10"
+        class="jobs-search-results__job-card-search--generic-occludable-area"></li>
+
+  </ul>
+</main>
+
+<aside class="rail rail--footer"></aside>
+<footer></footer>
+
+</body>
+</html>

@@ -1159,7 +1159,44 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # a deliberate READ admission with the three denylists, both exemption
     # tables, SANCTIONED_MUTATIONS and `<functions>` byte-identical. SEVEN of
     # eight digests unchanged. See the re-freeze note above.
-    "_ALLOWED_URL_PATTERNS": "85e821d1af9060f3",
+    #
+    # 85e821d1af9060f3 until 2026-09-20. GREW by FOUR anchored entries, in one
+    # deliberate READ admission by the `premium-four` wave:
+    #
+    #     /jobs/collections/top-applicant     reader ships with it
+    #     /jobs/collections/top-choice        reader ships with it
+    #     /analytics/recruiter-views          NO READER -- see the entry
+    #     /premium/profile-key-skills         NO READER -- see the entry
+    #
+    #     _ALLOWED_URL_PATTERNS   85e821d1af9060f3 -> 0225ae77ddcefe2e   36 -> 40
+    #
+    # ALL FOUR ADDRESSES WERE READ OFF LINKEDIN as DRAWN ANCHORS in stripped
+    # markup, never as substrings of the raw document -- the distinction that
+    # puts `inmail` at 16-21 raw and 0 rendered on the same corpus, and that
+    # shows `/premium/profile-key-skills` occurring twice raw and once drawn.
+    # None carries a member segment; none carries a forbidden substring, so the
+    # allowlist anchor is the whole of each refusal and `is_read_url` measured
+    # all four False before this change.
+    #
+    # EACH IS +1 OVER `tests/fixtures/synthetic/drawn_routes.txt` -- exactly
+    # its own address -- where the family mutations are +2, +1 and +3 and the
+    # wildcards +4 and +3. **ALL OF THOSE MEASURE +0 AGAINST
+    # `scripts/blast_radius.py`'s OWN CORPUS**, which holds zero addresses
+    # under `/jobs/collections/` and `/premium/`; that zero is a fact about the
+    # denominator and is cited as evidence nowhere.
+    #
+    # TWO OF THE FOUR BUY NO ROW AND THE AUDIT SAYS SO ON ITS LEDGER LINE
+    # rather than in a footnote. `/analytics/recruiter-views` has a sibling
+    # with at least two DOM generations (its capture draws 24 rows with
+    # `data-view-name` absent document-wide; the live read the same morning saw
+    # 12 rows and a scope split), so a fixture from it would silently test one
+    # of two shapes. `/premium/profile-key-skills` has no captured sibling that
+    # resembles it at all. Neither reader is built from imagination.
+    #
+    # Same shape as every other move here: a deliberate READ admission with the
+    # three denylists, both exemption tables, SANCTIONED_MUTATIONS and
+    # `<functions>` byte-identical. SEVEN of eight digests unchanged.
+    "_ALLOWED_URL_PATTERNS": "0225ae77ddcefe2e",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1631,7 +1668,7 @@ DENYLISTS_AT_A76FE32 = {
     # own ruling. It also buys no PAGE READ: `company_page.py` opens nothing
     # and has no page function, so what landed is a precondition and a
     # vocabulary. The honest reading of a widening is what it bought.
-    "_ALLOWED_URL_PATTERNS": "85e821d1af9060f3",
+    "_ALLOWED_URL_PATTERNS": "0225ae77ddcefe2e",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
