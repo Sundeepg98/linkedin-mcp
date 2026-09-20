@@ -252,20 +252,38 @@ def _bindings(node: ast.AST):
     knowledge of what taint is -- so it is the part that can be identical, and
     the drift test asserts it is.
 
-    FORMS DELIBERATELY NOT HERE, named rather than implied. MEASURED blind on
-    2026-09-20, four of them: ``except ... as`` (its ``ExceptHandler.type`` is
-    an exception CLASS, not the value bound, so a binding here would be an
-    invention -- the leak shape that matters there is inter-procedural and this
-    engine is not), ``AugAssign``, ``global`` / ``nonlocal``, and function
-    parameters. Left blind ON PURPOSE, at parity with the sibling: closing one
-    here alone would re-open the very divergence this commit exists to close.
+    FORMS DELIBERATELY NOT HERE, named rather than implied. A 38-row census
+    with a positive AND a negative control on every row settled these on
+    2026-09-20; the table is in the audit. BLIND, measured: ``except ... as``
+    and ``except*`` groups (an ``ExceptHandler``'s ``.type`` is an exception
+    CLASS, not the value bound, so a binding here would be an invention -- and
+    the leak shape that matters is inter-procedural, which this engine is not),
+    ``AugAssign``, every function-parameter form (positional, keyword-only,
+    default, ``*args``, ``**kwargs``), lambda parameters, ``match`` capture /
+    ``as`` / star patterns, decorator-bound names, and the PEP 695
+    ``type X = EXPR`` alias statement. Left blind ON PURPOSE, at parity with the
+    sibling: closing one here alone would re-open the divergence this commit
+    exists to close.
 
-    NOT MEASURED BY ME, and said so rather than folded into the list above:
-    ``import ... as``, ``match`` capture / ``as`` / star patterns, ``except*``
-    groups, lambda parameters, decorator-bound names and PEP 695 type
-    parameters. They are almost certainly blind for the same structural reason,
-    but "almost certainly" is not a measurement and this file's whole subject is
-    the difference. The audit carries the census that settles them.
+    **``global`` / ``nonlocal`` ARE NOT ON THAT LIST, AND I PUT THEM THERE
+    ONCE.** An earlier version of this docstring called the form blind. It is
+    not: ``global LEAK; LEAK = landed`` is TWO statements -- an inert
+    ``ast.Global`` plus an ORDINARY ``ast.Assign`` that this function already
+    handles -- and taint is tracked by name across the whole module regardless
+    of scope, so the rebinding propagates. Deleting the word ``global`` from
+    that source produces the byte-identical verdict, which is the proof the
+    declaration contributes nothing either way. My probe said "blind" because
+    the value reached it through a PARAMETER, and parameters are blind; I filed
+    a parameter miss under the global row. ``test_the_two_walkers_bind_the_same
+    _forms`` pins the narrower and TRUE claim -- this function never dispatches
+    on a bare ``ast.Global`` node -- and that is all it ever claimed.
+
+    STRUCTURALLY INCAPABLE of carrying taint, so not "blind" at all:
+    ``import ... as`` and ``from m import ... as`` (the bound name comes from a
+    static dotted path, never an evaluated expression, and ``alias.asname`` is a
+    plain str), bare ``def`` / ``class`` name binding, and PEP 695 generic
+    parameter brackets. There is no value-expression slot for a tainted value to
+    arrive through.
     """
     if isinstance(node, ast.Assign):
         yield node.value, node.targets
