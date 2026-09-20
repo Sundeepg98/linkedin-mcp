@@ -206,6 +206,18 @@ variable, so the class does not appear in the 129 at all -- not as a
 low-priority row, not as a false positive, simply not as anything. Both sites
 now bind and branch, exactly as `read_jobs_search` does.
 
+**AND A SIBLING WAVE HIT (b) THE SAME AFTERNOON, INDEPENDENTLY.** Commit
+`9d8bcdb` on master repairs `scripts/_probe_premium_collections_live.py`,
+whose verdict block ended with `print(analytics.get('count'))` and nothing
+else -- so a boundary refusal, an auth wall and a reader exception would all
+have rendered as `None` beside the word "drawn" and the probe would still have
+exited 0. Two things about that are worth carrying: it reached the same
+sentence this wave did from a different file (*"a reading taken and never
+branched on is not a control"*), and **its red came from the detector's GAINED
+direction on CI, on a test a local impact gate did not select.** The ratchet
+built by the census is already catching new instances rather than only
+describing old ones.
+
 **(b) A VERDICT PRINTED FOR A READER TO EVALUATE.** Section 2's `feed_hits` is
 one instance. `_probe_creator_content_analytics.py` also prints *"structural
 fields EQUAL to the feed: N of M"* followed by *"IF THAT IS MOST OF THEM,
@@ -221,7 +233,7 @@ into four mechanisms, two of which were not previously written down:
 
 | mechanism | instances here | corpus-wide |
 |---|---|---|
-| the bare Python `pass` STATEMENT in an `except` handler, inside the window | 2 | **4 of 133 (3.0%)** |
+| the bare Python `pass` STATEMENT in an `except` handler, inside the window | 2 | **4 of 133 (3.0%)**, measured before the repairs; the same 4 of 131 (3.1%) after |
 | the window reaching an unrelated banner or `emit()` string | 3 | not measured |
 | LinkedIn-UI vocabulary (`controls_read`, `controls`) in a field or variable name | 3 | see below |
 | a marker-bearing CONSTANT name (`EXPECTED_VOCAB`) | 1 | not measured |
@@ -304,6 +316,21 @@ one fixed `OUT_PATH`. Timestamps on disk:
 The thirteen-load run's own output was overwritten twice, forty minutes before
 the document that cites it was written. It survives only in that document's
 prose.
+
+**AND THAT DOCUMENT IS GITIGNORED.** `.gitignore:156` quarantines
+`_audit/_scratch/` unconditionally and `git ls-files _audit/_scratch/` returns
+nothing, so **for rows 9, 11, 12, 13 and 14 the entire evidence chain ends
+outside the repository**: the raw output is destroyed, and the document
+holding the surviving prose reaches no clone and no worktree. What a reader of
+a fresh checkout actually has is the cell text -- which is why correcting the
+cells, rather than only writing this file, is the whole remedy.
+
+The five cells CITE rather than DEFER, so
+`tests/test_no_committed_document_defers_to_an_ignored_path.py` is right to
+pass them: the numbers are stated in the row. The point is narrower and worse
+than a guard violation. The numbers are stated in the row AND NOWHERE
+CHECKABLE, so an over-stated one survives until somebody opens a machine that
+still has the file.
 
 **(iii) THE TWO RUNS DISAGREE ABOUT THE DRIFT FLOOR, AND THE ROWS QUOTE THE
 FRIENDLIER ONE.**
@@ -420,7 +447,7 @@ instruments' name-matching and then tripped one.
     tests/test_probe_controls_are_never_decorative.py   reason field, shown failing
     tests/test_a_correction_is_findable_from_the_claim.py  one triage entry
     _audit/_census/jobs.md                              five cells corrected + back-pointer
-    _audit/INSTRUMENTS.md                               entry 35
+    _audit/INSTRUMENTS.md                               entry 36
 
 The two gitignored captures copied into this worktree to re-run section 1
 (`_audit/_probe-groups-hyd.html`, `_audit/_probe-events-hyd.html`) are ignored

@@ -5618,7 +5618,7 @@ totals are inflated by this class. 34.8 establishes that at least some of the
 129-row decorative-control census is detector artifact; nobody has measured how
 much, and this entry does not either.
 
-## 35. THE FIVE PROBES UNDER A BANKED ROW, 2026-09-20
+## 36. THE FIVE PROBES UNDER A BANKED ROW, 2026-09-20
 
 The 129-row decorative-control census (section 27) ranked five probe files as
 TIER 1: the ones a census row had already been banked on. This wave took those
@@ -5627,7 +5627,7 @@ five. Full reading: `_audit/2026-09-20-the-five-under-banked.md`.
 **ALL NINE BANKED ROWS HOLD. TWO OF TWELVE FLAGGED INSTANCES WERE REAL
 DECORATIVE CONTROLS.** Both are repaired; neither repair moved a row.
 
-### 35.1 `scripts/_check_repaired_probe_controls_can_fail.py` -- SHOWN FAILING
+### 36.1 `scripts/_check_repaired_probe_controls_can_fail.py` -- SHOWN FAILING
 
 The receipt this register requires before a repair is believed. Ten
 demonstrations, two kinds. BEHAVIOURAL: the real `_analyse` from
@@ -5684,7 +5684,7 @@ VERDICT: A2 would have FAILED at HEAD, so the receipt is not vacuous.
 **The committed code printed FAIL and returned True in the same run.** That is
 the census's defect, caught in the act, in a file under a banked row.
 
-### 35.2 THE HONEST LIMIT OF THE REPAIRED CONTROL
+### 36.2 THE HONEST LIMIT OF THE REPAIRED CONTROL
 
 `IMPOSSIBLE_HEADING` is `<h9>`, a level HTML does not have, so this control
 reads 0 by construction on any real capture. **The repair proves the WIRING
@@ -5694,7 +5694,7 @@ because the live green could not have told me the difference. Registered as a
 limit rather than smoothed, because a control that comes back the colour you
 expected is the one nobody re-examines.
 
-### 35.3 TWO DEFECT CLASSES A VARIABLE-BASED DETECTOR CANNOT SEE
+### 36.3 TWO DEFECT CLASSES A VARIABLE-BASED DETECTOR CANNOT SEE
 
 Found by reading the five files, not by the detector, and neither appears in
 the 129 in any form.
@@ -5718,7 +5718,7 @@ THE FEED"*, and returns 0 either way. For a declared CAPTURE that is a design
 choice and it is NOT repaired here; it is written down so the next reader
 knows the sentence is an instruction to a person, not a branch.
 
-### 35.4 TWO MORE FALSE-POSITIVE MECHANISMS IN THE DETECTOR, MEASURED
+### 36.4 TWO MORE FALSE-POSITIVE MECHANISMS IN THE DETECTOR, MEASURED
 
 Disclosed in `scripts/detect_unbranched_probe_controls.py`'s own docstring
 beside the `passes` mechanism it already carried. The detector is NOT changed:
@@ -5728,8 +5728,10 @@ narrowing the marker rule moves a published census and is a wave of its own.
 which is the idiomatic body of a swallowed `except` and therefore lands inside
 the window of any value read in a `try`. Sweep: strip every line that is a bare
 `pass` statement from each finding's window, re-test for a marker, count the
-findings that lose their last one. **4 of 133 (3.0%)** -- larger than the 1.6%
-`passes` mechanism already disclosed.
+findings that lose their last one. **4 of 133 (3.0%)** as measured before this
+wave's two repairs, and the same 4 of 131 (3.1%) after -- larger either way
+than the 1.6% `passes` mechanism already disclosed. The denominator is dated
+because it moved inside this wave.
 
 **A WINDOW THAT REACHES A BANNER.** The window runs to the first later sibling
 whose subtree sinks the name, which for a report accumulator flushed by a
@@ -5749,7 +5751,7 @@ in the name or window.** An upper bound on the class, not a verdict -- a real
 control can be named without verdict words. The three disputed entries sit
 inside that 56.
 
-### 35.5 THE RATCHET NOW CARRIES ITS TRIAGE, WHICH 34.8 ASKED FOR
+### 36.5 THE RATCHET NOW CARRIES ITS TRIAGE, WHICH 34.8 ASKED FOR
 
 133 -> 131, GAINED 0, LOST 2, both removed rather than left to rot.
 
@@ -5781,7 +5783,7 @@ two-way ratchet since the peer review that caught it being one-way. A reader
 obeying the comment would have left both repaired entries in place and gone
 red. Rewritten.
 
-### 35.6 THE LAW THIS WAVE ADDS, AND THE CENSUS FINDING DID NOT FIND IT
+### 36.6 THE LAW THIS WAVE ADDS, AND THE CENSUS FINDING DID NOT FIND IT
 
 Five banked rows cite one instrument, one session, one evidence document. The
 document is a composite of TWO runs and names only one; the raw output path it
@@ -5793,6 +5795,16 @@ four rows get stronger (MOVED 14, 14, 12, 14 above a 4-id floor) and one flips:
 
 > **A THRESHOLD MEASURED PER SESSION MUST BE QUOTED WITH ITS SESSION, OR THE
 > FRIENDLIEST SESSION BECOMES A PROPERTY OF THE SURFACE.**
+
+**AND THE WHOLE EVIDENCE CHAIN FOR THOSE FIVE ROWS ENDS OUTSIDE THE
+REPOSITORY.** The raw output was overwritten twice the same hour, and the
+progress document holding the surviving prose is under `_audit/_scratch/`,
+which `.gitignore:156` quarantines unconditionally -- `git ls-files
+_audit/_scratch/` returns nothing. The cells CITE rather than DEFER so
+`tests/test_no_committed_document_defers_to_an_ignored_path.py` is right to
+pass them; the narrower problem is that the numbers are stated in the row and
+checkable nowhere, so an over-stated one survives until somebody opens a
+machine that still has the file.
 
 The probe understood this -- it takes the stability control LAST, on purpose,
 so it spans the whole session -- and five census cells then copied one
@@ -5806,7 +5818,7 @@ flagged control in that file was an accumulator. A decorative control is a
 defect you can grep for. This one was reachable only by opening the evidence
 and reading it against the outputs still on disk.
 
-### 35.7 DISPOSABLE, declared
+### 36.7 DISPOSABLE, declared
 
 The three edit scripts, the counter-check harness, the baseline updater and the
 doctored-baseline demonstration were scratchpad-only and are not shipped. The

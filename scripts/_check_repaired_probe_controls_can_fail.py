@@ -80,6 +80,7 @@ CLEAN = (
     "</body></html>"
 )
 
+
 def broken_capture() -> str:
     """CLEAN with ONE impossible heading injected.
 

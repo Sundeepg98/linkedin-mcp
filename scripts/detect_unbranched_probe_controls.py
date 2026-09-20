@@ -84,7 +84,8 @@ not a control at all::
 
 A corpus-wide sweep (strip every line that is a bare ``pass`` statement from
 each finding's window, re-test for a marker, and count the findings that lose
-their last one) returned **4 of the 133 live findings, 3.0%**: two in
+their last one) returned **4 of the 133 findings live when it was measured,
+3.0%** -- the same 4 of 131 after that day's two repairs: two in
 ``_probe_small_measures_followup.py`` ``part_b_suggested_filters`` (``html``,
 ``main_text``) and two in ``_probe_small_measures_live.py`` (``_needles`` and
 ``read_feed_hashtag_context``, both ``main_text``). All four are named with
