@@ -4190,3 +4190,166 @@ answers the same question directly. The fourth shipped, as the import in 24.1.
 without touching a tracked file, and it is how the option of ruling the two
 handed-over defects together was costed before it was declined. Their results
 are in `_audit/2026-09-20-the-split-ruling.md`.
+
+## 26. `scripts/detect_unbranched_probe_controls.py` -- 129 controls that print FAIL and certify anyway, 2026-09-20
+
+### 24.1 THE CENSUS, AND WHY IT IS A DIFFERENT CLASS FROM A SINGLE FIX
+
+Section 23.3 already named one instance of this defect by hand:
+`scripts/_probe_events_surface_shape.py`'s `silent` control, printed and never
+branched on, fixed in commit `2fba253`. This entry is what happened when the
+same shape was asked to be COUNTED rather than described: an AST-based census
+over every `scripts/_probe_*.py` file, run under a wave lead by an implementer
+who reported the number rather than the feeling. Full write-up:
+`_audit/2026-09-20-control-census.md`.
+
+**56 of 88 probe files carried at least one never-branched control. At the
+instance level: 129 of 762 control-like readings never branch (17%), 630
+branch correctly, and 13 more are assigned and never even read.** Both
+denominators matter and neither alone is honest: the file count alone reads
+as "most of the corpus is broken" (it repeats a claim the census's own author
+first put to the operator before re-deriving the instance share), and the
+instance count alone hides that the defect concentrates rather than
+spreading evenly (distribution is in the write-up).
+
+**Independently replicated**, same detector, main tree, by the wave lead:
+`with_finding=56` exactly. The one-file, one-instance delta (89 files, 130
+instances there against 88/129 here) is `scripts/_probe_premium_surfaces_
+shape.py`, an untracked probe a live browser wave was writing at the moment
+of the run -- the tool's own drift check named it.
+
+### 24.2 THE CONTROL PAIR: SAME FILE, TWO SHAS, OPPOSITE VERDICTS
+
+A single calibration file is a check that cannot fail if nobody re-derives it
+against what actually changed. `scripts/_probe_events_surface_shape.py` was
+the working calibration target mid-census -- until it was independently fixed
+(the same repair section 23.3 had already named) WHILE the census was
+running, in the SAME shared worktree. That turned the textbook positive into
+a negative between one read and the next, which is precisely the shown-
+failing proof this register asks for, arriving uninvited: the wave lead's
+ruling was to keep the ORIGINAL committed shape as a frozen synthetic
+positive and pair it with the repaired shape as a discrimination control --
+same file, same variable, two shas, opposite verdicts, proving the detector
+reads content rather than asserting a fixed answer. That pair is now
+permanent, as inline fixtures (not a git reference, which would eventually
+stop meaning anything once the real file changes again) in
+`tests/test_probe_controls_are_never_decorative.py`.
+
+Receipt, `scripts/_check_unbranched_control_detector_can_fail.py`, run
+2026-09-20:
+
+```
+A/B. same shape, one branch apart -- must flip verdict
+PASS   A: broken fixture flags `silent`
+PASS   B: fixed fixture does NOT flag `silent`
+PASS   B: fixed fixture's `silent` reads as correctly branched
+
+C. an `if` beside the print that tests a DIFFERENT variable
+PASS   C: `hits` is still flagged despite the nearby `if needle == ...`
+
+D. the ratchet itself must be able to go RED
+PASS   D: removing one real baseline entry (('_probe_add_section_menu.py', 'main', 'controls')) from view makes the ratchet report it as new
+PASS   D control: with the FULL baseline, that entry is NOT reported
+
+all demonstrations behaved as stated
+```
+
+Demonstration C is the sharper of the two shapes this instrument has to
+tell apart, and it is the one a cheaper check would get wrong: an `if`
+sits in the SAME loop body as the print, one line away, and it is still not
+a branch on the printed variable, because it tests `needle` rather than
+`hits`. A detector that credits any nearby `if` as covering any nearby
+variable would have cleared this and every row like it.
+
+### 24.3 A RATCHET, NOT AN EXACT PIN -- AND WHY THIS REPO'S OWN IDIOM WAS REJECTED
+
+`scripts/_check_tool_count_pin_control.py` (section unlisted, but its
+receipt is the model this entry followed most closely) pins an EXACT
+count and forces a review moment on every bump. That idiom was considered
+and rejected here on purpose: this corpus gains new probe files from
+unrelated waves most days (24.1's replication found one mid-flight), so an
+exact global count would fail as often on someone else's unrelated
+addition as on a real regression, and a guard that cries wolf gets
+`--no-verify`d. Instead, `scripts/probe_controls_known_decorative_
+baseline.json` pins the 129 findings by `(file, function, variable)` and
+`tests/test_probe_controls_are_never_decorative.py::
+test_probe_corpus_has_no_new_decorative_control` fails ONLY on a finding
+outside that set. Shrinking the baseline as the backlog gets fixed is
+invited, not required -- demonstration D above proves the mechanism can
+still go red with the real baseline missing a real entry, which is what
+makes "not required" different from "cannot detect."
+
+### 24.4 THE FALSE-POSITIVE MECHANISM THIS ENTRY DISCLOSES RATHER THAN HIDES
+
+The marker list (`PASS`, `FAIL`, `CONTROL`, `VOID`, ...) is matched as a
+bare case-insensitive substring, exactly as specified when this was built.
+Bare `pass` and `void` can embed inside an unrelated word. Measured, not
+assumed: a corpus-wide sweep for known embeddings (`passes`, `password`,
+`bypass`, `avoid`, ...) found exactly ONE site where this fires --
+`scripts/_probe_messaging_menu_enumeration.py`, function
+`_report_overlaps`, variables `one` and `overlap_label`, whose only marker
+hit is `pass` sitting inside the parameter name `passes: dict` -- **2 of the
+129 findings (1.6%), both at this one site, nowhere else in the corpus.** A
+stricter word-boundary regex was tried and rejected: it also rejects
+legitimate inflections with a trailing letter (plural `controls`), which
+would have thrown away a hand-verified TRUE positive
+(`scripts/_probe_groups_menu.py`'s `stuck`) to fix a problem that affects
+1.6% of findings. Documented in the detector module's own docstring so the
+next person who re-tightens the marker rule re-runs the comparison rather
+than assuming a boundary regex is free.
+
+### 24.5 WHAT IS SHIPPED, WHAT IS NOT
+
+Shipped (tracked, not disposable): `scripts/detect_unbranched_probe_
+controls.py` (the detector, importable), `scripts/probe_controls_known_
+decorative_baseline.json` (the 129-entry ratchet baseline),
+`tests/test_probe_controls_are_never_decorative.py` (the guard, run on
+every test pass), `scripts/_check_unbranched_control_detector_can_fail.py`
+(this entry's receipt generator, re-run whenever the detector's marker or
+sink logic changes).
+
+DISPOSABLE, declared: the census run's scratch materialization of a frozen
+`git stash create` snapshot, its per-file JSON dump, and the cost-ranking
+cross-reference script -- all session-scratchpad only, never committed.
+Their numbers live on in `_audit/2026-09-20-control-census.md`, which is
+the durable artifact; the scratch scripts that produced it are not.
+
+### 24.6 WHAT THE CENSUS COST, RANKED -- FOR THE FIXER, NOT AS A VERDICT
+
+The census does not itself say which of the 129 findings matter. Cross-
+referenced against `_audit/_census/*.md`: 5 of the 56 flagged files sit
+directly under a census row that is BANKED (moved off GAP on a state such
+as `COVERED-PROVEN`), meaning that row's claim was concluded using this
+exact probe's output while the probe's own self-check on itself was
+decorative. Ranked by that fact, not by finding count alone:
+
+* `scripts/_probe_small_measures_live.py` (5 findings) -- underlies
+  `_audit/_census/jobs.md` row 15 (`COVERED-PROVEN`), the "All filters"
+  panel, where the row's own evidence text calls this probe "shown failing
+  before admission." The irony is the finding: a probe vetted for ITS
+  addition can still carry a decorative control on a DIFFERENT variable
+  than the one it was vetted on.
+* `scripts/_probe_job_collections_live.py` (3 findings) -- underlies
+  `_audit/_census/jobs.md` row 42 (`COVERED-PROVEN`), job collections and
+  their five groupings.
+* `scripts/_probe_creator_content_analytics.py` (2 findings) -- underlies
+  `_audit/_census/messaging-and-content.md` row C40 (`COVERED-PROVEN`),
+  creator analytics.
+* `scripts/_probe_job_search_result_sets.py` (1 finding) -- underlies FIVE
+  `_audit/_census/jobs.md` rows at once (9, 11, 12, 13, 14, all
+  `COVERED-PROVEN`), the job-search filter parameters, all five citing the
+  same instrument and evidence block.
+* `scripts/_probe_membership_sections.py` (1 finding, `silent`, the same
+  must-stay-silent shape as this entry's own calibration positive) --
+  underlies `_audit/_census/network.md` row 162 (`COVERED-CANNOT-DELIVER`).
+
+The other 51 flagged files either sit under a row still marked `GAP` or
+`EXCLUDED-RULED` (2 files -- no live claim is banked on them yet), are
+named only in a journal write-up rather than a census row (43 files), or
+were not found cited anywhere searched (6 files). Full per-file breakdown:
+`triage-by-cost.json`, referenced from `_audit/2026-09-20-control-census.md`.
+This is not a claim that the 5 banked rows are WRONG -- a decorative
+control does not mean the probe's finding was false, only that the probe
+never checked whether it could have been. The fixer's cheapest next step is
+those 5, because they are the only ones where something already rests on
+the answer.
