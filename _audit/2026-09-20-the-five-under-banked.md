@@ -369,7 +369,34 @@ one is not.
 
 **Rows moved: 0. Evidence cells corrected: 5. Claims refuted: 1.**
 
-## 10. WHAT IS NOT CLAIMED
+## 10. TWO THINGS THIS WAVE'S OWN RECEIPT GOT WRONG
+
+Both caught by the full suite rather than by reading, which is the argument
+for running it.
+
+**(i) THE RECEIPT WAS PINNED TO `HEAD:` AND PASSED TEN OF TEN -- UNTIL THE
+COMMIT LANDED.** Demonstration B compares the flagged variable's verdict
+before and after. Reading the "before" side from `HEAD` worked right up to the
+moment the repair became HEAD, at which point two of the ten went red because
+the before side and the after side were the same blob.
+
+    A receipt pinned to a moving reference stops being a receipt at the
+    moment it is most likely to be believed.
+
+Now pinned to `0882d35` -- the commit the census measured and this repair
+landed on -- and if that blob stops resolving the demonstration says so and
+FAILS rather than skipping.
+
+**(ii) A STRING `.replace()` AT MODULE LEVEL IS A WRITE, TO A GUARD THAT
+MATCHES BY NAME.** `tests/test_scripts_are_import_safe.py` flagged
+`BROKEN = CLEAN.replace(...)` as "replace at import time". A pure string
+operation is not a write -- this is the same name-matching family the register
+records four times over in 34.10 -- but the remedy here is to stop acting at
+import rather than to argue with the guard, so the injection moved into
+`broken_capture()`. Recorded because this wave spent a section counting other
+instruments' name-matching and then tripped one.
+
+## 11. WHAT IS NOT CLAIMED
 
 * Nothing about the other 51 flagged files. They sit under GAP or
   EXCLUDED-RULED rows or are cited nowhere, exactly as the ranking said.
@@ -382,7 +409,7 @@ one is not.
   quote one of them as a property.
 * No claim that the drift floor is 4 either. It was 0 once and 4 once.
 
-## 11. FILES
+## 12. FILES
 
     scripts/_probe_membership_sections.py               the silent control now gates
     scripts/_probe_creator_content_analytics.py         feed_hits enters the verdict

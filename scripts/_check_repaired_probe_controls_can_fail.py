@@ -31,11 +31,18 @@ A. BEHAVIOURAL (membership only, because it is the offline probe). The real
    read as a pass.
 
 B. MECHANICAL (both). ``detect_unbranched_probe_controls`` is run over the
-   HEAD blob and over the working file. The variable must appear in
-   ``findings`` at HEAD and in ``branched_controls`` now. Same file, two shas,
+   PRE-REPAIR blob and over the working file. The variable must appear in
+   ``findings`` before and in ``branched_controls`` now. Same file, two shas,
    opposite verdicts -- the shape the census's own calibration used, and the
    only receipt available for the creator-analytics repair, whose branch needs
    a live browser session to execute.
+
+   THE BLOB IS PINNED TO A SHA AND NOT TO ``HEAD``, and that is not caution.
+   The first version of this file read ``HEAD:``, passed ten of ten, and went
+   RED ON TWO the moment the repair was committed -- because HEAD then WAS the
+   repair. A reference that moves is not a reference, and a receipt that
+   silently re-points at its own subject proves nothing. If ``PRE_REPAIR``
+   stops resolving, this says so and FAILS rather than skipping.
 
 NOT CLAIMED. ``feed_hits``'s new branch is PROVISIONAL-UNSMOKED: it is proven
 to be a real use of the value and proven reachable only by reading. What would
@@ -73,14 +80,32 @@ CLEAN = (
     "</body></html>"
 )
 
-#: THE INJECTION, and it is one tag. ``IMPOSSIBLE_HEADING`` is ``<h9>`` -- a
-#: level HTML does not have -- so on any real capture this control reads 0 by
-#: construction. That is the honest limit of the needle and it is stated rather
-#: than glossed: what this demonstration proves is that the WIRING now refuses,
-#: not that the needle is strong.
-BROKEN = CLEAN.replace("<h2>Section two</h2>", "<h9>ZZ</h9><h2>Section two</h2>")
+def broken_capture() -> str:
+    """CLEAN with ONE impossible heading injected.
+
+    THE INJECTION IS ONE TAG. ``IMPOSSIBLE_HEADING`` is ``<h9>`` -- a level
+    HTML does not have -- so on any real capture this control reads 0 by
+    construction. That is the honest limit of the needle, stated rather than
+    glossed: this demonstration proves the WIRING refuses, not that the needle
+    is strong.
+
+    BUILT IN A FUNCTION, NOT AT MODULE LEVEL, and the reason is a guard in this
+    repository rather than taste: ``tests/test_scripts_are_import_safe.py``
+    reads a top-level ``.replace(...)`` as a write at import time. A pure
+    string operation is not a write, but that guard matches by NAME and the
+    remedy is to stop acting at import, not to argue with it -- which is also
+    the right shape here, since a script that builds nothing on import is
+    easier to trust.
+    """
+    return CLEAN.replace("<h2>Section two</h2>",
+                         "<h9>ZZ</h9><h2>Section two</h2>")
 
 ANCHOR_PATTERN = r'href="[^"]*/groups/([A-Za-z0-9\-_%.]+)'
+
+#: The commit the 2026-09-20 census measured, and the one this repair landed on
+#: top of. Immutable, unlike ``HEAD`` -- see demonstration B in the module
+#: docstring for what reading ``HEAD`` cost.
+PRE_REPAIR = "0882d35"
 
 RESULTS: list[tuple[bool, str]] = []
 
@@ -107,7 +132,7 @@ def demonstration_a(tmp: Path) -> None:
     clean = _run_analyse(CLEAN, tmp, expected=3)
     record(clean is True,
            "A1: the clean capture returns True (3 anchors, no <h9>)")
-    broken = _run_analyse(BROKEN, tmp, expected=3)
+    broken = _run_analyse(broken_capture(), tmp, expected=3)
     record(broken is False,
            "A2: the SAME capture plus one <h9> returns False -- the "
            "must-stay-silent control now voids the tallies")
@@ -150,17 +175,21 @@ def demonstration_a_live() -> None:
 
 def demonstration_b() -> None:
     print("\nB. MECHANICAL -- same file, two shas, opposite verdicts.")
+    print("   pre-repair blob: %s (pinned, never HEAD)" % PRE_REPAIR)
     for relpath, func, var in (
         ("scripts/_probe_membership_sections.py", "_analyse", "silent"),
         ("scripts/_probe_creator_content_analytics.py", "main", "feed_hits"),
     ):
         name = Path(relpath).name
         head = subprocess.run(
-            ["git", "show", "HEAD:%s" % relpath],
+            ["git", "show", "%s:%s" % (PRE_REPAIR, relpath)],
             cwd=REPO, capture_output=True, text=True, check=False,
         )
         if head.returncode != 0:
-            record(False, "B: could not read HEAD:%s" % relpath)
+            record(False,
+                   "B: could not read %s:%s -- the pinned pre-repair blob is "
+                   "unreachable, so this demonstration did NOT run"
+                   % (PRE_REPAIR, relpath))
             continue
         before = detector.analyse_source(head.stdout, filename=name)
         after = detector.analyse_file(REPO / relpath)
@@ -171,7 +200,8 @@ def demonstration_b() -> None:
         now_finding = any(f["function"] == func and f["variable"] == var
                           for f in after["findings"])
         record(was_finding,
-               "B: %s %s() -> %r is a FINDING at HEAD" % (name, func, var))
+               "B: %s %s() -> %r is a FINDING at %s"
+               % (name, func, var, PRE_REPAIR))
         record(now_branched and not now_finding,
                "B: %s %s() -> %r is CORRECTLY BRANCHED in the working tree"
                % (name, func, var))

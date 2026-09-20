@@ -5649,13 +5649,25 @@ PASS   A4 control-for-the-control: a clean capture with the WRONG expected
 PASS   A-LIVE1: the real groups capture still returns True with the control
        now gating -- the banked reading survives
 PASS   A-LIVE2: and it does so because the control read 0
-PASS   B: _probe_membership_sections.py _analyse() -> 'silent' is a FINDING at HEAD
+   pre-repair blob: 0882d35 (pinned, never HEAD)
+PASS   B: _probe_membership_sections.py _analyse() -> 'silent' is a FINDING at 0882d35
 PASS   B: ... is CORRECTLY BRANCHED in the working tree
-PASS   B: _probe_creator_content_analytics.py main() -> 'feed_hits' is a FINDING at HEAD
+PASS   B: _probe_creator_content_analytics.py main() -> 'feed_hits' is a FINDING at 0882d35
 PASS   B: ... is CORRECTLY BRANCHED in the working tree
 
 all 10 demonstrations behaved as stated
 ```
+
+**AND IT READ `HEAD:` UNTIL THE COMMIT LANDED.** The first version of this
+receipt passed ten of ten and went RED ON TWO the instant the repair was
+committed, because HEAD then WAS the repair and the "before" side became the
+"after" side. Caught by the full suite, not by reading.
+
+> **A RECEIPT PINNED TO A MOVING REFERENCE STOPS BEING A RECEIPT AT THE MOMENT
+> IT IS MOST LIKELY TO BE BELIEVED** -- the commit that makes the fix real is
+> exactly the event that re-points the reference at the fix. It is now pinned
+> to `0882d35`, and if that blob ever stops resolving the demonstration says
+> so and FAILS rather than skipping.
 
 **AND THE RECEIPT WAS SHOWN NON-VACUOUS**, which is the half a receipt
 generator usually skips. Demonstration A2 was re-run against the PRE-REPAIR
