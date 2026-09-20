@@ -67,7 +67,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Optional, Sequence
 
-from linkedin_server import dom
+from linkedin_server import coerce, dom
 
 #: LinkedIn's five job-collection groupings, as the census row names them,
 #: sourced there to help article ``a1652837``. THE ORDER IS THE CONTRACT: the
@@ -124,11 +124,30 @@ async def read_collections(page: Any, html: str = "") -> dict[str, Any]:
     raw = await dom.read_collection_groupings(
         page, vocabulary=list(GROUPINGS), html=html or ""
     )
-    matches = list((raw or {}).get("matches") or [])
+    source = raw if isinstance(raw, dict) else {}
+    rows = source.get("matches")
+    matches = list(rows) if isinstance(rows, (list, tuple)) else []
+    # THE SUBSTITUTE FOR A GARBLED INDEX IS -1, WHICH IS ``UNMATCHED``, AND
+    # THE CHOICE IS THE WHOLE POINT. Falling back to 0 would name the heading
+    # ``domains`` -- asserting a grouping the page never said -- where -1 says
+    # "a heading was drawn and this reader could not place it", which is the
+    # true statement and the one :func:`tally` already counts separately.
+    indices, indices_refused = coerce.counts_only(
+        [row.get("index", -1) if isinstance(row, dict) else -1 for row in matches],
+        default=-1,
+    )
+    cards, cards_refused = coerce.counts_only(
+        [row.get("cards", 0) if isinstance(row, dict) else 0 for row in matches]
+    )
+    scalars, scalars_refused = coerce.scalars_only(
+        source, (("headings_seen", "headings"),)
+    )
     return {
-        "headings_seen": int((raw or {}).get("headings") or 0),
-        "indices": [int(m.get("index", -1)) for m in matches],
-        "cards": [int(m.get("cards", 0)) for m in matches],
+        "headings_seen": scalars["headings_seen"],
+        "indices": indices,
+        "cards": cards,
+        # NOT A SHAPE, A FINDING. See ``search_results.read_results``.
+        "values_refused": indices_refused + cards_refused + scalars_refused,
     }
 
 
@@ -157,11 +176,17 @@ def tally(indices: Iterable[int], cards: Optional[Sequence[int]] = None) -> dict
     per_term_cards: dict[str, int] = {}
     unknown_cards = 0
     card_list = list(cards or [])
-    for position, index in enumerate(indices):
-        term = term_for(int(index))
+    # Same repair as the reader above, and for the same reason: the docstring
+    # says a label cannot reach this function, which was true of the RETURN
+    # path only. ``int(index)`` handed a string would have quoted it into a
+    # ValueError and carried it back out of the process.
+    safe_indices, _ = coerce.counts_only(list(indices), default=-1)
+    safe_cards, _ = coerce.counts_only(card_list)
+    for position, index in enumerate(safe_indices):
+        term = term_for(index)
         counts[term] = counts.get(term, 0) + 1
-        if position < len(card_list):
-            per_term_cards[term] = per_term_cards.get(term, 0) + int(card_list[position])
+        if position < len(safe_cards):
+            per_term_cards[term] = per_term_cards.get(term, 0) + safe_cards[position]
         else:
             unknown_cards += 1
     return {

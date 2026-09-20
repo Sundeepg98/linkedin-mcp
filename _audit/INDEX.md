@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 196 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 163 |
+| audit documents git tracks under `_audit` | 197 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 164 |
 | distinct dates | 13 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 68 |
-| `CORRECTED BY:` marker lines | 68 |
-| distinct declared correction edges | 65 |
-| documents something later corrects | 38 |
-| documents that correct something | 50 |
-| documents at either end of a cross-document edge | 73 |
+| `CORRECTS:` marker lines | 69 |
+| `CORRECTED BY:` marker lines | 69 |
+| distinct declared correction edges | 66 |
+| documents something later corrects | 39 |
+| documents that correct something | 51 |
+| documents at either end of a cross-document edge | 74 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 121 |
@@ -394,6 +394,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
 
   > the empty `view_names` is NOT a scope artifact: the scope fix `353c04f` had already landed when this reading was taken, `data-view-name` is absent document-wide, and on this page widening the scope cannot change any field the reader returns. The conclusion that `N 136` is absent survives on other grounds.
+
+### [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md)
+
+2026-09-20 &middot; THE SEARCH ADMISSION: a condition nobody came back to close, closed
+
+- CORRECTED BY [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md)
+
+  > the second half of the sentence above is FALSE: `collections_page.read_collections` leaks on the same path as `anchors.py`, and the survey could not have seen it because that reader reads `raw.get("matches")` and `matches` is not a key in the payload the survey plants, so the list came back empty, the comprehension iterated nothing, and the coercion never ran.
 
 ### [2026-09-20-the-six-unremapped.md](2026-09-20-the-six-unremapped.md)
 
@@ -829,6 +837,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its ranked table publishes `NEWSLETTER-SURFACE` as 12 rows at `1R/11W`, and the corpus holds THIRTEEN newsletter-named frozen-GAP rows split `3R/10W`, so every 12-subset of them holds at least TWO reads and `1R` was unreachable from the census's own direction column on the day the table was written. Not a re-file and not the cross-slice duplication: the published cell was wrong when it was written. Section 6a below.
 
+### [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md)
+
+2026-09-20 &middot; A name can leave the process through an exception
+
+- CORRECTS [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md)
+
+  > its section 7 states that `collections_page.read_collections` does not leak; it does, on the same path as `anchors.py`, and the survey that cleared it was driving a payload missing `matches`, the one key that reader reads, so the coercion never ran and "not driven" printed as "clean". The `anchors` half of that sentence stands.
+
 ### [2026-09-20-the-decides.md](2026-09-20-the-decides.md)
 
 2026-09-20 &middot; The five DECIDEs, ruled against committed evidence
@@ -1170,6 +1186,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-newsletter-built.md](2026-09-20-newsletter-built.md) | NEWSLETTER-SURFACE, built. One capability, no boundary change, and two | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-audit-index.md](2026-09-20-the-audit-index.md) | The audit index: 195 documents, 5.4 MB, and no way in but grep |  |
 | 2026-09-20 | [2026-09-20-the-chain-verification.md](2026-09-20-the-chain-verification.md) | The source-chain verification: 8 claims, 6 clean, 1 real drift, and 1 DRIFT THAT WAS NOT ONE |  |
+| 2026-09-20 | [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md) | A name can leave the process through an exception | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-contingent-writeoffs.md](2026-09-20-the-contingent-writeoffs.md) | The contingent write-offs | **CORRECTED x1** |
 | 2026-09-20 | [2026-09-20-the-decides.md](2026-09-20-the-decides.md) | The five DECIDEs, ruled against committed evidence | **CORRECTED x1** corrects x2 |
 | 2026-09-20 | [2026-09-20-the-deduplication-ruling.md](2026-09-20-the-deduplication-ruling.md) | RULING: a duplicate census row is MARKED, never DELETED |  |
@@ -1192,7 +1209,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) | The reopener triggers | corrects x3 |
 | 2026-09-20 | [2026-09-20-the-sanctioned-seventh.md](2026-09-20-the-sanctioned-seventh.md) | The seventh sanctioned mutation: a reason that went false, a boundary that did not move | corrects x2 |
 | 2026-09-20 | [2026-09-20-the-sanitiser-scope.md](2026-09-20-the-sanitiser-scope.md) | The sanitiser scope hole: a proof about urls, spent on page text |  |
-| 2026-09-20 | [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md) | THE SEARCH ADMISSION: a condition nobody came back to close, closed | corrects x1 |
+| 2026-09-20 | [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md) | THE SEARCH ADMISSION: a condition nobody came back to close, closed | **CORRECTED x1** corrects x1 |
 | 2026-09-20 | [2026-09-20-the-six-unremapped.md](2026-09-20-the-six-unremapped.md) | The six unremapped: SHAs off master's history, and where their content actually lives | **CORRECTED x1** corrects x1 |
 | 2026-09-20 | [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md) | The sixty dangling: 60 was 49, and the open set was 2 | **CORRECTED x1** corrects x2 |
 | 2026-09-20 | [2026-09-20-the-split-ruling.md](2026-09-20-the-split-ruling.md) | THE SPLIT RULING. One cell corrected, one row refused, and they were never | corrects x1 |

@@ -39,15 +39,15 @@ many say so themselves?**
 
 | | count |
 | --- | --- |
-| documents a later document declares a correction of | **38** |
-| of those, that say so themselves | **38** |
-| documents that declare a correction of another | 50 |
-| documents at either end of a cross-document edge | 73 |
+| documents a later document declares a correction of | **39** |
+| of those, that say so themselves | **39** |
+| documents that declare a correction of another | 51 |
+| documents at either end of a cross-document edge | 74 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 121 |
 
 **The corpus is in better shape than the brief feared, and the reason is
-structural rather than lucky.** Every one of the 38 says so itself because the
+structural rather than lucky.** Every one of the 39 says so itself because the
 correction guard makes it impossible not to: a `CORRECTS:` marker with no
 matching back-pointer fails, and a back-pointer no document declares fails too.
 Both directions are asserted, so a half-finished edit cannot read as a joined
@@ -63,7 +63,7 @@ read as a clean bill of health.
 
 ## 3. What the index surfaces, and why each earns its place
 
-_audit/INDEX.md, 1293 lines, six sections, every cell derived.
+_audit/INDEX.md, 1269 lines, six sections, every cell derived.
 
 **Section 1, the counts.** Twenty-one derived numbers, including every number
 quoted in this document. Nothing in the index restates a number it did not
@@ -85,8 +85,9 @@ and a marker column reading CORRECTED, corrects, self-corrected, or blank.
 
 **Section 6, what the scan rejected, could not join, or had to repair.**
 Printed only when non-empty, because an empty section is a claim. It currently
-carries 65 truncations, 2 lopsided edges, 5 non-ASCII titles and 1 defused
-citation, each named with the document and line.
+carries 15 reasons that run past their own line, the tightest admission
+margin, 2 lopsided edges, 5 non-ASCII titles and 6 defused citations, each
+named with the document and line.
 
 ### What could not be derived, and was left out rather than guessed
 
@@ -114,7 +115,9 @@ a file that did not have one before.
 
 None of these were looked for. Each fell out of deriving something.
 
-**4.1 -- 65 of 136 correction reasons are truncated where a reader sees them.**
+**4.1 -- 65 of 136 correction reasons were truncated where a reader saw them.**
+(Closed upstream the same day -- see the addendum in section 7b, which is
+where the sequel lives; this section stays as the reading that caused it.)
 The shipped `_reason_on` returns everything after the LAST backtick on a marker
 line. Its own docstring says *whatever a marker line says after the document it
 names*. Those are the same thing only when no backtick follows the cited path,
@@ -227,8 +230,8 @@ note about how it spells document names.
 | file | what it is |
 | --- | --- |
 | `scripts/build_audit_index.py` | the generator: `--write`, `--check`, or counts to stdout |
-| _audit/INDEX.md | the generated index, 1293 lines |
-| `tests/test_the_audit_index_is_derived.py` | 27 tests: the drift check, the preconditions, and 13 planted controls |
+| _audit/INDEX.md | the generated index, 1269 lines |
+| `tests/test_the_audit_index_is_derived.py` | 33 tests: the drift check, the preconditions, and the planted controls |
 | `scripts/_check_audit_index_guard_can_fail.py` | the red proof: 7 mutations against the real selector |
 
     python scripts/build_audit_index.py --write
@@ -257,7 +260,7 @@ restored. Every planted run also asserts the failure is the RIGHT one: an
 import error or a collection error would fail the run too and would prove only
 that the harness is broken.
 
-The thirteen controls in the test file run over a SYNTHETIC corpus in
+The planted controls in the test file run over a SYNTHETIC corpus in
 `tmp_path`, never the live tree, because `_audit/` is written continuously by
 concurrent waves and this register's own preamble records a wave that proved
 three gates by mutating a file another agent was holding uncommitted work in.
@@ -315,7 +318,7 @@ plants the divergence and one watches the live half.
 
 **A third truncation class survived, and the new property test cannot see it.**
 The shipped extractor reads ONE PHYSICAL LINE and this corpus hard-wraps at
-about 78 columns. 15 of 136 reasons continue onto a following line, hiding
+about 78 columns. 15 of 138 reasons continue onto a following line, hiding
 **5,832 characters**; the worst shows a reader 20 characters of a 723-character
 reason. The new suffix property convicts **0** of the 15, by construction: it
 compares one line against the same line, so a missing continuation satisfies it
@@ -345,7 +348,9 @@ quietly.
 
 **EVERY FIGURE BELOW IS A READING AT FREEZE, 2026-09-20**, and the corpus moved
 twice while this wave ran: 190 in the brief, 195 when the generator was first
-run, 196 once this document was itself tracked. Section 1 of the generated
+run, 196 once this document was itself tracked, and 197 after a sibling
+wave's deliverable merged under it -- which brought a new correction edge
+with it, moving the headline from 38 to 39. Section 1 of the generated
 index recomputes all of them on every regeneration, and a guard fails if the
 committed index disagrees with the corpus. This table does not; it is a dated
 record of what the wave found, which is exactly the thing the index exists to
@@ -353,16 +358,16 @@ make checkable.
 
 | reading | value |
 | --- | --- |
-| tracked audit documents (excluding the generated index) | 196 |
-| carrying a `YYYY-MM-DD-` filename date | 163 |
+| tracked audit documents (excluding the generated index) | 197 |
+| carrying a `YYYY-MM-DD-` filename date | 164 |
 | distinct dates | 13 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 68 |
-| back-pointer marker lines | 68 |
-| distinct declared correction edges | 65 |
-| documents a later document corrects | 38 |
-| documents that correct something | 50 |
-| documents at either end of a cross-document edge | 73 |
+| `CORRECTS:` marker lines | 69 |
+| back-pointer marker lines | 69 |
+| distinct declared correction edges | 66 |
+| documents a later document corrects | 39 |
+| documents that correct something | 51 |
+| documents at either end of a cross-document edge | 74 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 120 |
@@ -372,10 +377,10 @@ make checkable.
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
 | reasons the shipped extractor cuts short | 65 |
-| marker lines with exactly one resolving citation | 136 |
+| marker lines with exactly one resolving citation | 138 |
 | titles carrying a non-ASCII character | 5 |
-| quoted strings whose backticked citation had to be defused | 1 |
-| generated index, lines | 1293 |
+| quoted strings whose backticked citation had to be defused | 6 |
+| generated index, lines | 1269 |
 
 Two independent census slices were run against the generator rather than taken
 on trust, and both reproduced it: one counted 136 declarations over 99,511
