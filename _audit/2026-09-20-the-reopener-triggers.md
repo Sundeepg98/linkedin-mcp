@@ -19,6 +19,8 @@ instruments over the committed tree.
 
 **CORRECTS:** `_audit/_census/network.md` -- row `N 157` moved EXCLUDED-RULED to MEASURED-ABSENT on the same ground, and it was filed under a ruling about sending while being a read.
 
+**CORRECTS:** `_audit/_census/profile.md` -- rows B2 and M1 and finding 7.11 called the upload ban package-wide and the verb unsanctioned; one call site has been sanctioned since 2026-09-04, and no state moved.
+
 ---
 
 ## 1. THE POPULATION, RE-DERIVED RATHER THAN INHERITED
@@ -422,7 +424,64 @@ so a reader landing on `M M4` can find what moved it.
 
 ---
 
-## 7. WHAT I DID NOT RESOLVE
+## 7. FIVE ROWS WHOSE REASON HAD ALREADY GONE FALSE
+
+Handed to this wave as a measurement by the integrator, re-measured here by
+importing the modules rather than by grep. **It is the same defect one step
+further along: not a write-off missing a trigger, but a write-off whose stated
+reason has ALREADY been falsified and nobody noticed.**
+
+    readonly.SANCTIONED_MUTATIONS    7 entries
+      entry 7  ('linkedin_server/writes.py', 'perform', 'set_input_files')
+    writes.PERFORMABLE               12 actions -- the upload verb is NOT one
+    writes.writes_enabled()          False
+    readonly._ALLOWED_URL_PATTERNS   41
+
+All four figures reproduce exactly. `profile.md` said, in three places, that the
+ban on `set_input_files` was **package-wide** and the verb **unsanctioned**.
+Both have been false since 2026-09-04.
+
+**THE ROWS DO NOT MOVE AND THAT IS WHY IT IS WORTH THE TIME.** Upload is absent
+from `PERFORMABLE`, so no caller can name it, and writes are off. Nothing became
+reachable. **Right answer, wrong reason is indistinguishable to a later reader
+from wrong answer, wrong reason** -- which is the same indistinguishability this
+whole document is about, one level down.
+
+Repaired, with reopeners that are checkable by import rather than by reading
+prose -- *the upload verb entering `writes.PERFORMABLE`, or
+`writes.writes_enabled()` returning True*:
+
+| site | what was false |
+|---|---|
+| `B2` | *"a test-enforced **package-wide** ban"* |
+| `M1` | *"`set_input_files` is **unsanctioned** on top of that"* |
+| finding 7.11 | *"asserts the kind **absent** from `SANCTIONED_MUTATIONS`"* -- the test asserts the exact inverse, and says so in its own docstring |
+| finding 7.11 | the citation `tests/test_readonly.py:306-341` now lands inside `test_the_partition_conserves_every_hit`, a different test |
+| section 6 roll-up | the four-row attribution, annotated (below) |
+
+**A STALE LINE RANGE DOES NOT DANGLE -- IT HANDS BACK A PLAUSIBLE WRONG ANSWER**
+and stops the reader looking. Re-cited by SYMBOL,
+`test_exactly_one_place_in_this_package_can_reach_a_file_input`, which cannot
+drift.
+
+**WHAT I DID NOT RULE, because it is not a wave's to rule.** The ban's stated
+ground is *"the operator has never been asked about it"*. **No operator answer
+is recorded anywhere in the corpus.** The 2026-09-04 sanction is a dated fact
+about the code and is NOT an answer to that question; every repaired cell says
+so explicitly, and the honest phrasing used throughout is that **the verb is
+permitted at exactly one switched-off call site while the capability stays
+closed.**
+
+**AND A MEMBERSHIP CLAIM THAT DOES NOT SURVIVE ITS OWN POINTER GRAPH.** The
+roll-up attributes four rows to this ban -- `B2, B3, B5, G3`. Resolved, only
+`B3` inherits `B2`: **`B5` backreferences `B4` and `G3` backreferences `G1`**,
+so two of the four rest on a different cell than the roll-up says. Annotated in
+place and deliberately NOT re-pointed -- moving a backreference changes what a
+row MEANS, and it is a different decision from fixing a false sentence.
+
+---
+
+## 8. WHAT I DID NOT RESOLVE
 
 **`M M2` and `N 57`** -- contingent, no reopener, `COVERED-CANNOT-DELIVER`.
 Outside the row-set this wave was scoped to, so they are PINNED in the guard

@@ -15,6 +15,8 @@ no tracked file was edited.
 
 ## 1. COUNTS
 
+**CORRECTED BY:** `_audit/2026-09-20-the-reopener-triggers.md` -- rows B2 and M1 called the upload ban package-wide and the verb unsanctioned; one call site has been sanctioned since 2026-09-04, and no state moved.
+
     CAPABILITIES ENUMERATED, IN SCOPE, MAPPED       260
 
       COVERED-PROVEN                                 19
@@ -235,7 +237,7 @@ of which appear below on other evidence.
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
 | B1 | Whether a profile photo exists | R | COVERED-PROVEN | `my_profile.completeness.has_photo`, off the topcard images |
-| B2 | Profile photo add / change / delete | W | EXCLUDED-RULED | `tests/test_readonly.py:306-341`, a test-enforced package-wide ban on `set_input_files`: *"UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words in a box; a file input puts a FILE from this machine into somebody else's inbox, chosen by a path string. Nothing in this package should be one edit away from that, and the operator has never been asked about it."* An OPEN QUESTION, not silence -- finding 7.11 |
+| B2 | Profile photo add / change / delete | W | EXCLUDED-RULED | **REASON REPAIRED 2026-09-20. THE STATE IS UNCHANGED AND CORRECT; THE REASON HAD GONE FALSE, WHICH IS THE HARDER DEFECT** -- right answer, wrong reason is indistinguishable to a later reader from wrong answer, wrong reason. This cell said *"a test-enforced **package-wide** ban on `set_input_files`"*. **There is no package-wide ban and has not been since 2026-09-04.** Measured by importing, not by grep: `readonly.SANCTIONED_MUTATIONS` holds **7** entries and the seventh is `('linkedin_server/writes.py', 'perform', 'set_input_files')`. The test does not assert the kind ABSENT -- it asserts it PRESENT, exactly once, and its own docstring calls that *"the literal inverse of the line this test used to end on"*. **WHY THE ROW STILL DOES NOT MOVE:** `writes.PERFORMABLE` holds **12** actions and the upload verb is NOT one of them, so no caller can name it, and `writes.writes_enabled()` is **False**, so every write path is off. **The verb is permitted at exactly ONE switched-off call site while the capability stays closed.** **THE OPEN QUESTION IS STILL OPEN AND IS NOT RESOLVED HERE:** the docstring's ground was *"Nothing in this package should be one edit away from that, and the operator has never been asked about it"* -- and **no operator answer is recorded anywhere in this corpus**, so the sanction is a dated code fact and not an answer to it. **REOPENER, NAMED, and both halves are checkable by import rather than by reading prose: the upload verb entering `writes.PERFORMABLE`, OR `writes.writes_enabled()` returning True by default.** WHO: either is one import. **CITATION REPAIRED TOO:** the old `tests/test_readonly.py:306-341` now lands inside `test_the_partition_conserves_every_hit`, a different test -- a stale line range does not dangle, it gives a plausible wrong answer. The ban lives in `test_exactly_one_place_in_this_package_can_reach_a_file_input`, cited by SYMBOL so it cannot drift again. Full reading in `_audit/2026-09-20-the-sanctioned-seventh.md`. Prior framing kept: an OPEN QUESTION, not silence -- finding 7.11 |
 | B3 | Profile photo crop / filter / adjust | W | EXCLUDED-RULED | same ruling. `a541850` names the pop-up controls -- Edit, Add photo, Frames, Delete |
 | B4 | Profile photo visibility audience | W | GAP | `/public-profile/settings`, which no forbidden substring catches and no allowlist pattern admits |
 | B5 | Background / banner image add / change / delete | W | EXCLUDED-RULED | same ruling |
@@ -441,7 +443,7 @@ Help Center now states all members have access.
 
 | # | capability | R/W | state | evidence / blocker |
 |---|---|---|---|---|
-| M1 | Upload a resume from Job Application Settings | W | EXCLUDED-RULED | `/jobs/application-settings/` contains `"/jobs/application"`, the FIRST entry on the forbidden tuple; `set_input_files` is unsanctioned on top of that |
+| M1 | Upload a resume from Job Application Settings | W | EXCLUDED-RULED | `/jobs/application-settings/` contains `"/jobs/application"`, the FIRST entry on the forbidden tuple. **SECOND CLAUSE REPAIRED 2026-09-20; THE STATE IS UNCHANGED AND THE LOAD-BEARING HALF IS UNTOUCHED.** This cell went on to say *"`set_input_files` is **unsanctioned** on top of that"*, which has been false since 2026-09-04: `readonly.SANCTIONED_MUTATIONS` holds it as its seventh entry, at `('linkedin_server/writes.py', 'perform', 'set_input_files')`. **That changes nothing about this row**, and saying so is the point -- the forbidden-substring gate is what excludes it, the upload clause was never doing the work, and a stale clause beside a live one is how a reader comes to doubt both. **The capability is closed on its own terms anyway:** the verb is absent from `writes.PERFORMABLE` (12 actions) and `writes.writes_enabled()` is False. **REOPENER, NAMED, in two independent halves because this row has two reasons: the forbidden-substring entry `"/jobs/application"` being re-ruled by the operator, OR the upload verb entering `writes.PERFORMABLE`. BOTH must fall for the row to reopen**, which is why a reopener on either one alone would be a trigger that cannot fire. WHO: the operator for the first, one import for the second. See `_audit/2026-09-20-the-sanctioned-seventh.md` for the full reading of the sanction |
 | M2 | Saved resumes list (4 most recent) | R | EXCLUDED-RULED | same address, same entry |
 | M3 | Delete a saved resume | W | EXCLUDED-RULED | same address, plus `delete_or_withdraw_anything` and `/delete` |
 | M4 | Download a saved resume | R | EXCLUDED-RULED | same address |
@@ -626,6 +628,14 @@ Split of the 150:
       (E4, E5, F3, F4, F5, K7, N28, N29, O2, P1)                     10
     /jobs/application forbidden entry (M1-M7)                         7
     set_input_files, test-enforced (B2, B3, B5, G3)                    4
+      ^ 2026-09-20: the ban is NOT package-wide -- one sanctioned call site
+        since 2026-09-04. The four rows are unchanged and still correct; see
+        B2 and finding 7.11. AND THE MEMBERSHIP IS SOFTER THAN THIS LINE
+        READS: resolved through the pointer graph, only B3 inherits B2's
+        argument. B5 backreferences B4 and G3 backreferences G1, so two of
+        these four rest on a DIFFERENT cell than this roll-up attributes to
+        them. Recorded rather than re-pointed -- moving a backreference is a
+        change to what a row means, not a typo fix.
     my_profile's own declaration (D26)                                1
     ---------------------------------------------------------------
                                                                     150
@@ -788,10 +798,35 @@ is not this census's fault and cannot be fixed by more searching.
 Revision 1 scored profile-photo and banner upload as GAP -- "nothing in this repo
 has ever considered photo upload". **That was wrong**, and the correction came from
 the lead rather than from this census's own method.
-`tests/test_readonly.py:306-341` carries a complete, argued, test-enforced ban: it
-scans every module for `set_input_files`, PLANTS a mutation to prove the pattern
-still bites, and asserts the kind absent from `SANCTIONED_MUTATIONS` by name. Its
-docstring states the ground:
+`tests/test_readonly.py` carries a complete, argued, test-enforced ban in
+`test_exactly_one_place_in_this_package_can_reach_a_file_input`: it scans every
+module for `set_input_files`, PLANTS a mutation to prove the pattern still bites,
+and pins the kind's membership of `SANCTIONED_MUTATIONS` by name. Its docstring
+states the ground:
+
+**TWO REPAIRS TO THE SENTENCE ABOVE, 2026-09-20, and the second is the one that
+matters.** (1) The citation was `tests/test_readonly.py:306-341`, which today
+lands inside `test_the_partition_conserves_every_hit` -- a different test about
+a different property. A stale line range does not dangle; it hands the reader a
+PLAUSIBLE WRONG ANSWER and stops them looking. It is now cited by SYMBOL.
+(2) The sentence read *"asserts the kind ABSENT from `SANCTIONED_MUTATIONS` by
+name"*, and **since 2026-09-04 the test asserts the exact inverse** -- that the
+kind IS on the list, exactly once. The test's own docstring says so: *"the
+literal inverse of the line this test used to end on."*
+
+**THE BAN IS NARROWER THAN THIS SECTION SAID, AND THE ROWS STILL DO NOT MOVE.**
+`readonly.SANCTIONED_MUTATIONS` holds 7 entries, the seventh being
+`('linkedin_server/writes.py', 'perform', 'set_input_files')`. What keeps the
+capability closed is elsewhere and was measured by import: the upload verb is
+absent from `writes.PERFORMABLE` (12 actions), so no caller can name it, and
+`writes.writes_enabled()` is False. **The verb is permitted at exactly one
+switched-off call site while the capability stays closed.**
+
+**AND THE OPEN QUESTION BELOW IS STILL OPEN.** The docstring's ground is that
+the operator *"has never been asked"*. **No operator answer is recorded anywhere
+in this corpus**, so the 2026-09-04 sanction is a dated fact about the code and
+must not be read as an answer to it. Full reading:
+`_audit/2026-09-20-the-sanctioned-seventh.md`.
 
 > *"UPLOADING IS A DIFFERENT CAPABILITY FROM TYPING. A fill puts his words in a
 > box; a file input puts a FILE from this machine into somebody else's inbox,

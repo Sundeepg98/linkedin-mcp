@@ -1752,6 +1752,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "recorded here rather than argued away: it is the price of not "
         "missing a correction, and it is cheap. "
     ),
+    ("profile.md", "2026-09-20-the-sanctioned-seventh.md"): (
+        "THE CITATION IS A POINTER AT THE FULL READING, AND THE ARROW POINTS "
+        "THE OTHER WAY. The line is row `B2`, whose REASON was repaired "
+        "2026-09-20 -- it had called the `set_input_files` ban "
+        "*package-wide*, which stopped being true on 2026-09-04 when a single "
+        "call site was sanctioned. `B2` cites `the-sanctioned-seventh.md` as "
+        "the place that sanction is measured and argued in full. **The cited "
+        "document is not corrected by this citation; it is the CORRECTOR's "
+        "evidence.** The correction vocabulary beside it is this row "
+        "describing its OWN repair. "
+        "**THE REAL CORRECTION IS DECLARED, and it is a different pair:** "
+        "`profile.md` carries a CORRECTED BY: marker naming "
+        "`2026-09-20-the-reopener-triggers.md`, which carries the matching "
+        "CORRECTS:. The sanctioned-seventh document deliberately edited no "
+        "census row -- its own NOT_A_CORRECTION entry above says so and names "
+        "that as its failure condition -- so the wave that DID edit the row "
+        "owns the declaration. "
+        "**AND THE STATE DID NOT MOVE:** `B2` was EXCLUDED-RULED and remains "
+        "so. Upload is absent from `writes.PERFORMABLE` and "
+        "`writes.writes_enabled()` is False, so nothing became reachable. "
+        "Right answer, wrong reason -- which is worth a correction precisely "
+        "because a later reader cannot tell it from wrong answer, wrong "
+        "reason. "
+    ),
 }
 
 
