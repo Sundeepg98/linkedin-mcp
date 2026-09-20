@@ -8450,7 +8450,11 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   // main_present and main_chars are still reported, because the difference
   // between "no main" and "an empty main" is exactly the kind of two-zeros
   // distinction this package keeps.
-  const scope = main || document.body;
+  // 2026-09-20: was `main || document.body`, which OBEYED main whenever it
+  // existed -- the opposite of the ruling above, and the live page HAS a main.
+  // No fixture caught it: every committed capture of this page has zero <main>
+  // elements, so the tests took one branch and production took the other.
+  const scope = document.body;
   const out = {
     metrics: [], filters: [], view_names: [], view_name_counts: {},
     viewer_rows: 0, chart_present: false, chart_description: null,
@@ -8968,7 +8972,11 @@ SEARCH_APPEARANCES_JS = """
   // safe here by WHAT THIS LOOKS AT rather than by where it looks -- numbers,
   // <label> captions, the chart's own sentence, booleans and counts. None of
   // those reaches a person at document scope any more than at main scope.
-  const scope = main || document.body;
+  // 2026-09-20: was `main || document.body`, which OBEYED main whenever it
+  // existed -- the opposite of the ruling above, and the live page HAS a main.
+  // No fixture caught it: every committed capture of this page has zero <main>
+  // elements, so the tests took one branch and production took the other.
+  const scope = document.body;
   const out = {
     pairs: [], filters: [], view_names: [], view_name_counts: {},
     chart_present: false, chart_description: null,
