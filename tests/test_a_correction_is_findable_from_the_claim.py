@@ -226,6 +226,33 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "else's blocker. A document citing another one for having seen a "
         "problem first is the opposite of correcting it. "
     ),
+    # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
+    # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
+    # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED
+    # ITSELF. The correction vocabulary is real, but it describes somebody else's
+    # self-correction inside their own session, and the citing wave goes on to
+    # ENDORSE the corrected reasoning rather than supersede it. A CORRECTS:
+    # marker here would tell a reader that the later file replaces the earlier,
+    # which is the opposite of what the passage says.
+    ("2026-09-20-the-contingent-writeoffs.md", "2026-09-05-network-tail.md"): (
+        "IT NARRATES A SELF-CORRECTION AND THEN AGREES WITH IT. The passage "
+        "reads '`_audit/2026-09-05-network-tail.md` s3 corrects its own "
+        "`allowlist +1` in the same session, on the right ground', and closes "
+        "the paragraph with '**The address reasoning is right.**' The wave's "
+        "own finding is a DIFFERENT question it says nobody joined -- whether "
+        "the section is drawn at all. Citing a document for a correction it "
+        "made to itself, and endorsing the result, is not correcting it. "
+    ),
+    ("2026-09-20-the-contingent-writeoffs.md", "2026-09-05-lead-rulings-round-two.md"): (
+        "IT COUNTS THE DOCUMENT AS EVIDENCE THAT A REASON EXISTS. The passage "
+        "is the orphan tally -- 'named SOMEWHERE outside the seven: 34, named "
+        "NOWHERE at all: 0' -- and cites this ruling as the clean example of a "
+        "blocker whose reason was written down twice and simply not in the "
+        "seven documents the sweep read. The correction vocabulary belongs to "
+        "the OTHER file named in the same sentence, which corrected its own "
+        "cost. Naming a ruling as present is the opposite of correcting it. "
+    ),
+
     ("jobs.md", "2026-09-20-job-search-params-built.md"): (
         "A CENSUS CELL CITING THE WRITE-UP THAT EVIDENCES ITS NEW STATE. "
         "Row 151 moved to COVERED-UNFIRED on 2026-09-20 and the cell names "
