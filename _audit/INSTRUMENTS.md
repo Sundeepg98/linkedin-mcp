@@ -5617,3 +5617,83 @@ cheap to write and its false positives are quiet until somebody counts them.
 totals are inflated by this class. 34.8 establishes that at least some of the
 129-row decorative-control census is detector artifact; nobody has measured how
 much, and this entry does not either.
+
+---
+
+## 35. THE POINTER-GRAPH WAVE: A CENSUS ROW WHOSE ARGUMENT MOVES WITHOUT IT, 2026-09-20
+
+**THIS SECTION WAS WRITTEN AS 35 against a maximum of 34 at `0882d35`.** Several
+waves append here at once, and the standing rule is renumber the INCOMING section,
+never the published one. If `tests/test_the_register_numbers_are_unique.py` fires
+on this, renumber it and move 35.1 and 35.2 with it.
+
+### 35.1 `scripts/measure_pointer_graph.py` -- the pin, and the guard over it
+
+ADMITTED. 69 census reason cells lead with the word `same` and inherit the reason of
+the nearest substantive row above them IN THE SAME TABLE. Nothing marks a row as
+load-bearing for the rows beneath it, so a row inserted mid-table re-points every
+dependent below it and changes its published classification with no edit to those
+rows. **Measured over the whole corpus, not argued:** 71 insertion slots, 48 of which
+move a verdict, **45 distinct write-off rows movable by an edit that never touches
+them** -- and on the single plant, `count_census_states.py` reported the added row
+(`stated rows 704 -> 705`) with ZERO lines naming the three rows whose verdicts had
+just changed, while `build_blocker_map.py --check` was byte-identical.
+
+`--pin` writes the graph to `_audit/_census/pointer-graph.tsv`; `--check` re-derives
+it and convicts a pointer whose argument moved. The pin carries the donor's KIND
+rather than its TEXT, deliberately: prose here is appended to several times a day and
+a guard that cries wolf gets switched off. **The cost is published on every green
+run** -- a donor rewrite that changes the ARGUMENT without changing its KIND passes
+this guard.
+
+    control                      mutation                                     result
+    G1 re-point                  plant a substantive row above P D15          RED
+    G2 donor rewrite             replace P D14's own reason, same position    RED
+    G3 source goes dark          blank jobs.md's 13 pointers, 56 remain       RED
+    G4 empty pin                 pin reduced to its header                    RED
+    G5 CALIBRATION               whitespace in P D15's capability cell        GREEN
+
+`--selftest` drives all five and exits non-zero if any behaves otherwise; the wrapper
+is `tests/test_pointer_graph_guard.py` (3 tests, 26s), which asserts each control by
+NAME so a control silently deleted from the instrument fails the suite instead of
+shrinking it to a green nothing. G3 is asserted PER SLICE because a union assertion
+over a redundant corpus cannot detect a lost source. **A second refusal is admitted
+with its own red proof:** `--plant-sweep --plant-reason same` plants a cell that
+cannot become a donor, finds zero verdict changes, and REFUSES (exit 1) rather than
+reporting a clean sweep.
+
+### 35.2 THREE DEFECTS IN THIS WAVE'S OWN INSTRUMENT, AND THE ONE THAT CAUGHT THEM
+
+1. **The selftest went red on all five controls, calibration included.** Its sandbox
+   is `git archive HEAD`, chosen so an uncommitted edit cannot leak into a
+   measurement -- and the instrument on trial was uncommitted, so the sandbox did not
+   contain it. **G5 is what convicted it.** A harness in which the control that must
+   PASS also fails is announcing it is broken; without a calibration, five reds read
+   as five successes.
+2. **A refusal was computed and never printed.** The per-slice check built the
+   sentence *"jobs.md contributed ZERO positional pointers"*, put it in the failure
+   tally, and printed nowhere. The run went red with a count and no cause.
+3. **A control claimed more than it ran.** The single-plant path printed *"rows that
+   survived EVERY plant unchanged: 43"* after planting one row, over 43 rows nothing
+   was planted near. It now refuses that claim unless `--plant-sweep` earned it.
+
+**THE LAW THIS WAVE ADDS: BYTE-IDENTITY ON THE COUNTERS IS NECESSARY AND NOT
+SUFFICIENT FOR A CENSUS NOTATION CHANGE.** The obvious repair -- rewrite `same` to
+`same as P D14` -- was built and priced rather than judged. It left
+`count_census_states.py` and `build_blocker_map.py` byte-identical **and moved three
+published classifier verdicts**, one from `US-RULING` to `UNCLEAR`: `P G3`'s entire
+cell is `same ruling`, and the US-RULING signal fires on that ADJACENCY, which three
+inserted tokens break. Neither counter reads a reason cell, so neither could ever have
+seen it. Any future notation change over these files needs
+`classify_writeoff_reasons.py` in its proof. The rewrite was refused; see
+`_audit/2026-09-20-the-pointer-graph.md` section 4 for the other three axes it was
+priced on, including that it buys no safety at all while the resolver still resolves
+by position.
+
+**NOT AN INSTRUMENT, RECORDED SO IT IS NOT REDISCOVERED A FIFTH TIME.**
+`count_census_states.cells()` splits on `|` without honouring the markdown escape
+`\|`. Four lines carry one, all in `jobs.md`; the STATE is read correctly on every one
+of them -- which is why no instrument has noticed -- and the REASON is read as a
+truncated tail (`J 103`: 795 chars seen, 1322 held). No census number and no pointer
+count is affected. Found by a child forbidden to import the shipped parser, which is
+the argument for briefing one that way.

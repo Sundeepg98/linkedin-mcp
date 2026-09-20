@@ -395,16 +395,16 @@ considered.
 
 | # | capability | R/W | state |
 |---|---|---|---|
-| 119 | Request a recommendation from a 1st-degree connection | W | EXCLUDED-RULED |
-| 120 | Write and send a recommendation for a 1st-degree connection | W | EXCLUDED-RULED |
-| 121 | Accept a received recommendation onto your profile | W | EXCLUDED-RULED |
-| 122 | Dismiss a recommendation you received | W | EXCLUDED-RULED |
-| 123 | Ask for a revision of a recommendation you received | W | EXCLUDED-RULED |
-| 124 | Revise a recommendation you have given | W | EXCLUDED-RULED |
-| 125 | Delete a recommendation you have sent | W (also R5) | EXCLUDED-RULED |
-| 126 | Hide or unhide a recommendation you received | W | EXCLUDED-RULED |
-| 127 | Set the visibility of a recommendation you have given | W | EXCLUDED-RULED |
-| 128 | Decline a recommendation request someone sent you | W | EXCLUDED-RULED |
+| 119 | Request a recommendation from a 1st-degree connection | W | EXCLUDED-RULED (R3) |
+| 120 | Write and send a recommendation for a 1st-degree connection | W | EXCLUDED-RULED (R3) |
+| 121 | Accept a received recommendation onto your profile | W | EXCLUDED-RULED (R3) |
+| 122 | Dismiss a recommendation you received | W | EXCLUDED-RULED (R3) |
+| 123 | Ask for a revision of a recommendation you received | W | EXCLUDED-RULED (R3) |
+| 124 | Revise a recommendation you have given | W | EXCLUDED-RULED (R3) |
+| 125 | Delete a recommendation you have sent | W (also R5) | EXCLUDED-RULED (R3) |
+| 126 | Hide or unhide a recommendation you received | W | EXCLUDED-RULED (R3) |
+| 127 | Set the visibility of a recommendation you have given | W | EXCLUDED-RULED (R3) |
+| 128 | Decline a recommendation request someone sent you | W | EXCLUDED-RULED (R3) |
 
 **The state column was added 2026-09-05 and carries no new judgement.** This table
 shipped with no state column at all, so its ten rows were in no counter's numerator
