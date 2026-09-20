@@ -9,6 +9,17 @@ back. The fifth is genuinely open, two of its three sub-questions are already
 answered, and the cheap route somebody costed at "one line" is measured
 refused.**
 
+| blocker | verdict | who decided, and when | live rows after |
+|---|---|---|---|
+| `FILE-UPLOAD-UNSANCTIONED` | **DECIDED -- the blocker retires, the rows do not** | the OPERATOR, 2026-09-04, landed `615a5c4` | 15, re-filed across 5 successors, **none cost 1** |
+| `AI-INTERVIEW-PRODUCT` | **RETIRE -- already applied, 11 of 14** | ruling 2026-09-05, applied `990bbd3` | 3, under `AI-INTERVIEW-RESULTS-NO-ADDRESS`, cost 4 |
+| `MESSAGING-SETTINGS` | **RETIRE -- already applied, and it was a RE-FILE, never a decision anybody owed** | the operator's settings ruling, pre-dating the blocker | **0** |
+| `CONTACT-IMPORT` | **RETIRE -- already applied, 5 of 5, on three separate grounds** | ruling 2026-09-05, applied `990bbd3` | **0** |
+| `MATCH-DETAILS-COLLAPSED` | **UNDECIDED -- and section 5.6 names the reading that settles it, needing no new permission** | -- | 5 |
+
+**The only thing on this page that needs the operator is a FACT, not a ruling:**
+has he ever taken a LinkedIn practice AI interview? (section 2, section 6D.)
+
 ---
 
 ## 0. THE HEADLINE IS AN ARITHMETIC ONE, AND IT IS MEASURED
