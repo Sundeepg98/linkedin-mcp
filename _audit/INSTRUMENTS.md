@@ -4834,3 +4834,104 @@ extraction, per-phrase slot scoring, registry-variant comparison, and the
 frozen-snapshot census. All are superseded by the committed guard, which does
 what they did with controls. Their numbers are the tables in
 `_audit/2026-09-20-names-that-do-not-exist.md`.
+
+---
+
+## 31. THE WRITE-OFF REASON KINDS, AND A CORPUS THAT TURNED OUT TO BE A POINTER GRAPH, 2026-09-20
+
+`scripts/classify_writeoff_reasons.py` + `_audit/_census/reason-kind-adjudications.tsv`,
+guarded by `tests/test_writeoff_kinds_are_derivable.py` (11 tests, 4.8s).
+Full argument: `_audit/2026-09-20-the-reason-kinds.md`.
+
+**WHAT IT MEASURES.** Every census row in a write-off state -- EXCLUDED-RULED, XR,
+MEASURED-ABSENT, COVERED-CANNOT-DELIVER -- rests on a reason, and the corpus spells several
+different kinds of thing identically. The classifier sorts all **309** by the kind of fact
+the reason asserts: **US-RULING** (somebody decided it), **US-BOUNDARY** (a line somebody
+typed in an allow/deny list), **WORLD-FACT**, **ACCOUNT-FACT**, **PROCESS-FACT**. The split
+that does the work is two-way: the first two are OURS and re-checkable by reading this
+tree; the other three are CONTINGENT and go stale silently. Result at `cd08e05`:
+**54 contingent, 30 of them carrying no reopener** -- which is the re-examination list.
+
+### 31.1 THE LAW IT SERVES, AND WHY THE UNIT OF ADJUDICATION IS NOT THE ROW
+
+118 of the 309 reason cells are NOT reasons, they are POINTERS; `network.md`'s median
+write-off reason cell is FOURTEEN CHARACTERS. Six dialects, three of which were found by
+measuring a previous draft's failures rather than by design. The first draft keyword-matched
+each pointer row against the whole 926-to-2735-character body it pointed at, and a row whose
+entire cell is `R2` came out `ACCOUNT-FACT+US-BOUNDARY+US-RULING` -- a three-kind verdict
+carrying no information. **Eleven rulings carry 72 rows, so the ruling is adjudicated once
+by hand and the rows inherit**, which is what the census means when it writes `R2`.
+
+### 31.2 SHOWN FAILING -- 6 of 7 mutations RED, 1 GREEN BY DESIGN
+
+Driven over mutated SANDBOX copies; no committed file written.
+
+    M1  empty network.md of all 101 write-offs, leave J/P/M at 48/112/48   RED  (exit 1)
+    M2  reword R2's pinned quote by two words                              RED
+    M3  move J 134 out of a write-off state                                RED
+    M4  delete the whole ### R5 ruling section                             RED
+    M5  empty all four slices                                              RED  (exit 1)
+    M7  plant one row between P D14 and P D15                              RED
+    M8  one space in a CAPABILITY cell, reason untouched                   GREEN (calibration)
+
+**M1 IS THE PER-FILE PROOF.** With `network.md` at zero the other three slices still hold
+208 write-off rows, so a UNION assertion over 309 would pass. A union assertion over a
+redundant corpus cannot detect a lost source. **M8 is not decorative:** a harness where
+every mutation goes red is not discriminating, it is broken.
+
+**TEN SIGNALS FIRE ZERO TIMES AND ALL TEN NEEDLES WERE PROVED ALIVE** against synthetic
+positives, including the whole PROCESS-FACT class. A needle that never fires and a fact that
+is never true look identical in a count; that is what makes the PROCESS-FACT zero a
+measurement rather than a broken regex.
+
+### 31.3 TWO DEFECTS THE HARNESS FOUND -- ONE IN THE INSTRUMENT, ONE IN ITSELF
+
+**In the instrument, silently wrong across 46 rows.** Backreference inheritance recovered its
+donor by re-parsing the label `backref<-P D14` with a non-whitespace capture. **Every row key
+in this corpus contains a space**, so the capture stopped at `P`, the lookup missed, and
+INHERITANCE NEVER RAN. No error, no warning -- every `same` row came out UNCLEAR, which looks
+exactly like a census that never wrote a reason. Fixed by storing the donor on the row
+instead of encoding it in a display string.
+**UNCLEAR fell 50 -> 33 and contingency rose 49 -> 54.**
+
+**In the harness, the same disease one level down.** M1's first version rewrote state cells
+with one regex and left 12 of network.md's 101 write-offs standing, because the corpus also
+writes `EXCLUDED-RULED (R11)` and a bolded `COVERED-CANNOT-DELIVER`. The per-file control
+then passed CORRECTLY and was one step from being recorded as *a control that cannot fail*.
+**ASSERTING THAT A MUTATION CHANGED BYTES IS NOT ASSERTING THAT IT ACHIEVED ITS INTENT** --
+every mutation now asserts its postcondition first. Compounding it: that same M1 was
+asserting against `build()`'s problems list while the per-file control lives in
+`main(--check)`, so it was testing the wrong surface entirely.
+
+### 31.4 THE LAW THIS ENTRY ADDS: A HAND JUDGEMENT MUST INVALIDATE ITSELF
+
+A derived classification tracks the text for free, but the 12 hand adjudications cannot.
+So each one **pins a verbatim single-line quote from the thing it rules on**, and `--check`
+fails when that quote stops being present (M2, M3). When somebody rewrites a reason out from
+under a hand judgement, the judgement goes RED rather than silently mislabelling the row.
+
+This is why the tag was NOT written into the census cells, which was the obvious design: an
+in-cell tag is still hand-maintained, written once against the reason that was there that
+day, and **a wrong tag that travels with the row is worse than no tag because it looks
+maintained**. Keys are ROW IDS, never line numbers -- s4.1 of
+`_audit/2026-09-20-the-contingent-writeoffs.md` measured all six of the census's
+line-number locators drifting 48 to 51 lines, one landing on a different row that read
+COVERED-PROVEN.
+
+### 31.5 A CENSUS DEFECT WORTH ITS OWN LINE
+
+`network.md` section K is headed *"### K. Recommendations (10) -- all EXCLUDED-RULED under
+R3"*, and **not one of `N 119`-`N 128` carries that attribution in any cell** -- those rows
+have no note column at all. Confirmed from two directions: R3's own body declares 13 rows,
+and a parse looking for an `R<n>` token in every cell of every row finds 4. The difference
+is exactly those ten. Five of the nine codes that declare a row set match element for
+element, so this is not a slack parse.
+
+### 31.6 DISPOSABLE, declared
+
+Four scratch probes in `_audit/_scratch/`: the reason-length profile, the signal-frequency
+miner (own-cell vs inherited firing), the Premium-section state tally, and the mutation
+driver `_mutate_kinds.py`. The first three are superseded by the committed classifier's own
+reporting; the fourth is superseded by the pytest guard, which runs the same mutations with
+postcondition assertions. Their numbers are the tables in
+`_audit/2026-09-20-the-reason-kinds.md`.

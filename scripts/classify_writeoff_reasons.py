@@ -355,7 +355,7 @@ SIGNALS = [(label, kind, re.compile(pat)) for label, kind, pat in _SIGNALS_RAW]
 class Row:
     __slots__ = ("letter", "rid", "state", "lineno", "capability", "reason",
                  "section", "table_key", "resolved", "resolution", "signals",
-                 "kinds", "kind", "source", "has_reason_cell")
+                 "kinds", "kind", "source", "has_reason_cell", "backref_donor")
 
     def __init__(self, **kw):
         for k, v in kw.items():
@@ -456,7 +456,8 @@ def walk(ref: str | None = None) -> tuple[list[Row], list[str], dict[str, int]]:
                             reason=reason, has_reason_cell=has_reason,
                             section=section, table_key=table_key,
                             resolved="", resolution="own-cell",
-                            signals=[], kinds=set(), kind="", source=""))
+                            signals=[], kinds=set(), kind="", source="",
+                            backref_donor=""))
     return rows, dialects, stated
 
 
@@ -564,6 +565,7 @@ def resolve(rows: list[Row], rulings: dict[str, str],
                     f"({r.reason[:40]!r}) with no substantive row above it in its table")
             else:
                 parts.append(inherited)
+                r.backref_donor = donor
                 how.append(f"backref<-{donor}")
 
         if r.letter == "N":
@@ -757,9 +759,15 @@ def build(ref: str | None = None):
             r.kinds |= ruling_kinds.get(f"R{code}", set())
             if ruling_kinds.get(f"R{code}"):
                 r.source = "inherit-ruling" if r.source == "none" else r.source
-        m = re.search(r"backref<-(\S+)", r.resolution)
-        if m:
-            donor = by_key.get(m.group(1))
+        # READ THE SLOT, NEVER RE-PARSE THE LABEL. The first version of this matched
+        # `backref<-(\S+)` out of `r.resolution` -- and every row key in this corpus
+        # contains a space (`P D14`), so the capture stopped at `P`, `by_key.get("P")`
+        # returned None, and BACKREFERENCE INHERITANCE SILENTLY NEVER RAN for any of the
+        # 46 rows that need it. It produced no error and no warning; it just left every
+        # `same` row UNCLEAR, which looked exactly like a census that had not written a
+        # reason. Found by the mutation harness (M7), not by reading this code.
+        if r.backref_donor:
+            donor = by_key.get(r.backref_donor)
             if donor is not None:
                 r.kinds |= donor.kinds
                 if r.source == "none":
