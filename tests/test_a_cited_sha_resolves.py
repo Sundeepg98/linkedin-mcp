@@ -41,43 +41,38 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_cited_shas_resolve as guard  # noqa: E402
 
 
-#: (token, document, occurrences) -- measured at 800b617, 2026-09-20.
-#: Named with the evidence in `_audit/2026-09-20-the-sixty-dangling.md`.
+#: **THE PIN IS EMPTY, 2026-09-20, BECAUSE THE DEFECT IS GONE AND NOT BECAUSE
+#: THE DETECTOR STOPPED SEEING IT.** All 26 (token, document) rows previously
+#: pinned here -- 22 distinct SHAs across 29 citation sites in 19 documents --
+#: were REPAIRED by the `evidence-that-resolves` wave. The evidence is in
+#: `_audit/2026-09-20-the-evidence-that-resolves.md` and the receipt that made
+#: the edits is `scripts/_repair_branch_only_citations.py`.
 #:
-#: WHAT THEY HAVE IN COMMON, and it is not the August history rewrite that
-#: produced the previous batch: all but one are commits made on a
-#: `worktree-agent-*` branch by a wave that then reported its work by SHA. The
-#: branch never merged, so the SHA never reached `master`, so the citation was
-#: unresolvable from the moment it was written. This is a LIVE generator, not
-#: an inherited mess.
-PINNED: set[tuple[str, str, int]] = {
-    ("f6ddfe3", "_audit/2026-09-03-typeahead-name-matching-is-dead.md", 1),
-    ("ae1894b", "_audit/2026-09-19-blocker-conflicts.md", 1),
-    ("c4d2be2", "_audit/2026-09-19-blocker-conflicts.md", 3),
-    ("1349fe6", "_audit/2026-09-19-blocker-map-ruling-requests.md", 1),
-    ("a604394", "_audit/2026-09-19-blocker-map-ruling-requests.md", 1),
-    ("7bca683", "_audit/2026-09-19-blocker-table-refresh.md", 1),
-    ("c1991ac", "_audit/2026-09-19-events-surface.md", 1),
-    ("744a1f4", "_audit/2026-09-19-groups-admission.md", 1),
-    ("7668b40", "_audit/2026-09-19-groups-admission.md", 1),
-    ("a5a988a", "_audit/2026-09-19-groups-admission.md", 1),
-    ("1349fe6", "_audit/2026-09-19-premium-apply-surfaces.md", 1),
-    ("12c20e1", "_audit/2026-09-19-routing-the-unassigned.md", 1),
-    ("569dc5e", "_audit/2026-09-19-search-admission-preconditions.md", 1),
-    ("d588034", "_audit/2026-09-19-search-admission-preconditions.md", 1),
-    ("c48ec60", "_audit/2026-09-19-the-first-sanctioned-press.md", 1),
-    ("66e2038", "_audit/2026-09-19-the-gate-at-zero.md", 1),
-    ("806360a", "_audit/2026-09-19-the-gate-at-zero.md", 1),
-    ("eed87a5", "_audit/2026-09-19-the-gate-at-zero.md", 1),
-    ("59192ac", "_audit/2026-09-19-the-last-five-reds.md", 1),
-    ("889f488", "_audit/2026-09-19-the-last-two-reds.md", 2),
-    ("c1991ac", "_audit/2026-09-19-the-three-ruling-requests-ruled.md", 1),
-    ("12c20e1", "_audit/2026-09-19-the-unassigned-21.md", 1),
-    ("5c5ebf9dda43", "_audit/2026-09-19-tier1-fires.md", 1),
-    ("70d7c0f62e97", "_audit/2026-09-19-tier2-fires.md", 1),
-    ("12c20e1", "_audit/2026-09-19-two-waves-agreed-on-nine-rows.md", 1),
-    ("ded0048", "_audit/2026-09-19-unblocking-the-stranded-commits.md", 1),
-}
+#: WHAT THEY WERE. Commits made on a `worktree-agent-*` branch by a wave that
+#: then reported its work by SHA. The branch never merged, so the SHA never
+#: reached `master`, so the citation was unresolvable from the moment it was
+#: written.
+#:
+#: WHAT THE REPAIR FOUND, and it is the reason every one could be repaired
+#: rather than annotated: **all 22 commits have an exact twin on `master`** --
+#: byte-identical subject, byte-identical author identity and date, and an
+#: identical `git patch-id --stable`, each subject occurring exactly once on
+#: `master`. The branches never merged but the WORK was re-applied. Each
+#: document now carries a `## Dead hashes, recovered` table naming that twin,
+#: and the dead hash is kept in place because it is the key a reader arrives
+#: with.
+#:
+#: **AN EMPTY PIN HERE IS STRONGER THAN A FULL ONE, and that is worth stating
+#: because it looks like the opposite.** With nothing pinned, ANY regression in
+#: the suppressors -- a broken mapping-table parser, a lost declaration, a
+#: dropped cross-repo entry -- puts a citation straight back into `bad`, and
+#: `appeared` is then non-empty and this test goes RED naming it. A pin of 26
+#: absorbed exactly those regressions silently for the 26. The one direction an
+#: empty pin cannot cover is the detector going blind, and that is held by
+#: `test_the_detector_finds_a_planted_citation`,
+#: `test_every_suppressor_fires_on_the_real_corpus` and
+#: `test_a_mapping_row_that_cannot_be_checked_is_a_finding`.
+PINNED: set[tuple[str, str, int]] = set()
 
 #: Every verdict the classifier can hand down other than the finding itself.
 #: Kept explicit so that ADDING a suppressor without a corpus example fails
@@ -399,6 +394,258 @@ def test_an_empty_corpus_fails_rather_than_passes():
     """
     assert guard.candidates({}) == []
     assert guard.findings(REPO, []) == []
+
+
+# --------------------------------------------------------------------------
+# THE MAPPING ROW MUST PAY FOR ITSELF
+#
+# `MARKED-MAPPED` is the strongest suppressor here: one table row silences a
+# dead hash at every site in its document. Until 2026-09-20 it fired on the
+# mere PRESENCE of the hash in column 0, so a row naming a garbage live hash --
+# or none -- switched the guard off just as effectively as a correct one.
+# **A repair nobody can check is this guard's own defect wearing its uniform.**
+# --------------------------------------------------------------------------
+
+_GOOD_TABLE = (
+    "# A document\n\n"
+    "Measured at `{dead}` on a settled tree.\n\n"
+    "## Dead hashes, recovered\n\n"
+    "| dead hash | subject (the durable reference) | live hash | confidence |\n"
+    "|---|---|---|---|\n"
+    "| `{dead}` | {subject} | `{live}` | CONFIRMED |\n"
+)
+
+
+def _live_and_subject():
+    short = _on_master()
+    subject = _git("log", "-1", "--format=%s", short).stdout.rstrip("\n")
+    return short, subject
+
+
+def test_a_correct_mapping_row_suppresses_and_checks_out():
+    """The positive control. Without it the red proof below proves nothing:
+    an instrument that convicts everything convicts a correct row too."""
+    live, subject = _live_and_subject()
+    blob = _GOOD_TABLE.format(dead="deadbee", live=live, subject=subject)
+    sites = guard.candidates({"_audit/_planted.md": blob})
+    assert [s.verdict for s in sites if s.token == "deadbee"] == ["MARKED-MAPPED"], sites
+    claims = guard.remap_claims({"_audit/_planted.md": blob})
+    assert len(claims) == 1, claims
+    assert guard.broken_remaps(REPO, claims) == []
+
+
+@pytest.mark.parametrize("label, mutate, needle", [
+    ("live hash does not resolve",
+     lambda b, live, subj: b.replace("`" + live + "`", "`0000000`"),
+     "does not resolve"),
+    ("no live hash at all, and silent about it",
+     lambda b, live, subj: b.replace("| `" + live + "` | CONFIRMED |", "| -- | CONFIRMED |"),
+     "names no live hash"),
+    ("subject cell names a different commit",
+     lambda b, live, subj: b.replace(subj, "chore: a subject this commit does not have"),
+     "does not match the live commit"),
+    ("the row maps the hash to itself",
+     lambda b, live, subj: b.replace("`deadbee`", "`" + live + "`"),
+     "maps the hash to itself"),
+])
+def test_a_mapping_row_that_cannot_be_checked_is_a_finding(label, mutate, needle):
+    """RED PROOF, four ways. A check that has never been shown failing
+    certifies nothing, and this one suppresses 44 occurrences in the live
+    corpus -- it is the most load-bearing check in the file."""
+    live, subject = _live_and_subject()
+    blob = mutate(_GOOD_TABLE.format(dead="deadbee", live=live, subject=subject),
+                  live, subject)
+    claims = guard.remap_claims({"_audit/_planted.md": blob})
+    assert claims, f"{label}: the mutation destroyed the row itself, so nothing was tested"
+    bad = guard.broken_remaps(REPO, claims)
+    assert bad, f"{label}: the check passed a row it cannot verify"
+    assert needle in bad[0][1], (label, bad[0][1])
+
+
+def test_a_declared_no_twin_row_is_not_convicted_and_the_exemption_can_be_defeated():
+    """THE EXEMPTION, controlled -- and it exists because the check convicted
+    the corpus's own correct repair on its first run.
+
+    `94600de` and `db99276` in `2026-08-24-perform-save-unsave.md` read
+    `| ... | **UNMAPPED** -- see below | -- | UNMAPPED |` and the document
+    spends two paragraphs on why no honest twin exists. Recording the gap IS
+    the repair. A guard that convicts it is a guard that gets switched off.
+    """
+    row = ("# A document\n\nMeasured at `deadbee` on a settled tree.\n\n"
+           "## Dead hashes, recovered\n\n"
+           "| dead hash | subject | live hash | confidence |\n|---|---|---|---|\n"
+           "| `deadbee` | **UNMAPPED** -- see below | -- | UNMAPPED |\n")
+    claims = guard.remap_claims({"_audit/_planted.md": row})
+    assert len(claims) == 1 and claims[0].declares_no_twin
+    assert guard.broken_remaps(REPO, claims) == []
+
+    # Defeat it: the SAME row with an ordinary confidence cell is a finding.
+    silent = row.replace("| -- | UNMAPPED |", "| -- | CONFIRMED |")
+    claims = guard.remap_claims({"_audit/_planted.md": silent})
+    assert not claims[0].declares_no_twin
+    assert guard.broken_remaps(REPO, claims), (
+        "a row with no live hash and no declaration was accepted; the "
+        "exemption is matching something other than the declaration"
+    )
+
+
+def test_the_whole_corpus_mapping_table_checks_out(measured):
+    """The live reading. 51 rows across 21 documents at the time of writing."""
+    blobs = guard.load_corpus(REPO)
+    claims = guard.remap_claims(blobs)
+    assert claims, "no mapping rows found at all -- the table parser is broken"
+    bad = guard.broken_remaps(REPO, claims)
+    assert bad == [], "\n".join(f"{c}: {why}" for c, why in bad)
+
+
+# --------------------------------------------------------------------------
+# THE IN-LINE MARKER MUST BE SELF-VERIFYING
+# --------------------------------------------------------------------------
+
+#: The 2026-09-20 repair writes, at the citation itself:
+#:
+#:     at `c4d2be2` (branch-only; on `master` at `5073827`)
+#:
+#: The live hash is deliberately placed in the ``at `X` `` slot this guard
+#: already reads, so a marker naming a hash that does not resolve is convicted
+#: by the EXISTING matcher and no new one was needed.
+#:
+#: THAT ONLY WORKS IF THE TWO STAY ON ONE LINE, and the first pass of the
+#: repair did not. `candidates()` scans line by line; six markers wrapped
+#: between `at` and the backtick, so six live hashes sat in no slot and were
+#: verified by nothing, and a seventh marker pushed itself between `806360a`
+#: and the `landed` that gave that token its only slot -- so the DEAD hash
+#: vanished from the guard entirely, which reads the same from outside as a
+#: hash somebody deleted. Both were caught by measuring the repair rather than
+#: by reading it, and this test is what makes the next one impossible.
+_MARKER = "`master` at `"
+
+
+def _marker_live_tokens(blob: str):
+    """Every marker occurrence whose live slot holds something HASH-SHAPED.
+
+    The hex requirement is not decoration. Documents that EXPLAIN the marker
+    write it with a placeholder -- ``on `master` at `<live>` `` -- and a
+    placeholder is not a claim about any commit, so demanding it sit in a
+    commit slot convicts a document for describing the mechanism correctly.
+    That is 37.8's shape one more time, arriving through the control rather
+    than through the guard.
+
+    The filter is safe in the only direction that matters because
+    `test_every_inline_remap_marker_is_self_verifying` also asserts a COUNT
+    FLOOR: if this predicate ever started eating real markers, the count would
+    drop below 21 and the test would go red rather than quietly checking less.
+    """
+    for lineno, line in enumerate(blob.splitlines(), 1):
+        start = 0
+        while True:
+            i = line.find(_MARKER, start)
+            if i < 0:
+                break
+            rest = line[i + len(_MARKER):]
+            end = rest.find("`")
+            if end > 0:
+                token = rest[:end]
+                if re.fullmatch(r"[0-9a-f]{7,40}", token):
+                    yield lineno, line, token
+            start = i + len(_MARKER)
+
+
+def test_every_inline_remap_marker_is_self_verifying():
+    found = 0
+    for doc, blob in sorted(guard.load_corpus(REPO).items()):
+        if "branch-only" not in blob:
+            continue
+        for lineno, line, token in _marker_live_tokens(blob):
+            found += 1
+            in_slot = {
+                m.group(1)
+                for slot in guard.SLOTS
+                for m in slot.pattern.finditer(line)
+            }
+            assert token in in_slot, (
+                f"{doc}:{lineno} names `{token}` as the live twin but the token "
+                "sits in NO commit slot on that line -- most likely the line "
+                "wrapped between `at` and the backtick. Nothing verifies this "
+                "marker, so a wrong hash here would never be caught.\n"
+                f"  line: {line.strip()[:140]}"
+            )
+            assert guard.resolves(REPO, token), (
+                f"{doc}:{lineno} names `{token}` as a `master` twin and it does "
+                "not resolve as an ancestor of master"
+            )
+    assert found >= 21, (
+        f"only {found} in-line remap markers found; the 2026-09-20 repair wrote "
+        "21 and a drop means the corpus lost them or this matcher broke"
+    )
+
+
+def test_a_placeholder_marker_is_not_treated_as_a_claim():
+    """The hex filter, controlled in both directions.
+
+    A document explaining the marker writes it with a placeholder. That is
+    prose about the mechanism and must not be audited as the mechanism -- but
+    the filter must not be so loose that a real marker slips through it
+    either, so both cases are asserted here together.
+    """
+    live = _on_master()
+    template = "The marker is ``on `master` at `<live>` ``, which puts it in a slot."
+    real = f"Applied at `deadbee` (branch-only; on `master` at `{live}`)."
+    assert list(_marker_live_tokens(template)) == [], (
+        "a placeholder was read as a live-hash claim"
+    )
+    assert [t for _, _, t in _marker_live_tokens(real)] == [live]
+
+
+def test_the_marker_matcher_convicts_a_wrapped_marker():
+    """MUTATION. The test above must be able to fail, or it is decoration.
+
+    Break one marker the way the repair's own first pass broke six -- wrap the
+    line between `at` and the backtick -- and the token must leave the slot.
+    """
+    live = _on_master()
+    good = f"Applied at `deadbee` (branch-only; on `master` at `{live}`)."
+    wrapped = f"Applied at `deadbee` (branch-only; on `master` at\n`{live}`)."
+
+    def slotted(text):
+        return {
+            m.group(1)
+            for line in text.splitlines()
+            for slot in guard.SLOTS
+            for m in slot.pattern.finditer(line)
+        }
+
+    assert live in slotted(good), "the intact marker was not in a slot to begin with"
+    assert live not in slotted(wrapped), (
+        "a marker wrapped between `at` and the backtick was STILL found in a "
+        "slot; this control cannot detect the defect it was written for"
+    )
+
+
+def test_a_marker_alone_suppresses_nothing():
+    """THE MARKER IS NOT A SUPPRESSOR, and this is the control for the trap
+    this repository has now hit four times: prose about a mechanism read as
+    the mechanism.
+
+    The marker is a courtesy to a human reading mid-document. The MAPPING
+    TABLE is what silences the guard. So a document that carries the marker
+    phrase and no table must still be convicted -- which also means a document
+    that merely QUOTES a marker (this wave's own audit file does, repeatedly)
+    cannot clear anything.
+    """
+    live = _on_master()
+    blob = (
+        "# A document\n\n"
+        f"Applied at `deadbee` (branch-only; on `master` at `{live}`).\n"
+    )
+    sites = guard.candidates({"_audit/_planted.md": blob})
+    assert {s.token for s in sites} == {"deadbee", live}, sites
+    verdicts = {s.token: s.verdict for s in sites}
+    assert verdicts["deadbee"] == "CANDIDATE", (
+        "the marker phrase suppressed the dead hash on its own; it is being "
+        f"read as a mark rather than as prose (got {verdicts['deadbee']})"
+    )
+    assert [s.token for s in guard.findings(REPO, sites)] == ["deadbee"]
 
 
 def test_the_guard_stays_cheap_enough_to_gate():

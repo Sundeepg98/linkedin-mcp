@@ -1,5 +1,13 @@
 # `PREMIUM-APPLY-SURFACES` -- the five slots measured, and the reason they stay empty is arithmetic, not evidence
 
+> **SHA NOTE, added 2026-09-20.** The short hash `1349fe6` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Wave `premium-apply`, 2026-09-19, from master `201b757`. Scope: the largest
 single unreached block in the census -- one blocker publishing 5 rows, with
 zero ever recovered, declined by four previous waves.
@@ -145,7 +153,8 @@ two that looked strongest -- because a sixth wave will otherwise re-derive them.
 ### 2.1 The published `1R` -- RETIRED, not available
 
 `{J 78, J 79, J 80, J 82, J 83}` is exactly `1R/4W` if `J 82` is the read. That
-filing was made at `1349fe6` and retracted at `0aca3d0`. Request 4
+filing was made at `1349fe6` (branch-only; on `master` at `81c8534`) and
+retracted at `0aca3d0`. Request 4
 (`_audit/2026-09-19-the-three-ruling-requests-ruled.md:220`) ruled the ledger's
 `1R` an ERROR against the census and closed the door explicitly: *"That `1R` may
 no longer be cited as evidence in any filing."* **Not re-litigated.**
@@ -483,3 +492,25 @@ would rewrite a gate every concurrent wave is running.
   that homes any one of the six anywhere, retracts section 3 and this decline
   with it. Any ruling on Q1 closes the blocker outright.
 * Relations and counts only. No identifier value is emitted anywhere above.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `1349fe6` | census(blockers): file the three rulings -- fill what is forced, leave what is chosen | `81c8534` | CONFIRMED |

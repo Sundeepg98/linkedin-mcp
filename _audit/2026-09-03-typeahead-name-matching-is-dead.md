@@ -1,5 +1,13 @@
 # Addressing a message recipient BY NAME is dead, and it was measured dead
 
+> **SHA NOTE, added 2026-09-20.** The short hash `f6ddfe3` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 **2026-09-03. Owner: the typeahead wave. Status: CLOSED, NEGATIVE.**
 
 This file exists so that nobody re-opens this in three weeks with a clever
@@ -220,7 +228,8 @@ uncommitted work is PINNED -- reviewed, committed alone, credited as not yours
 -- before you make any edit of your own. Interleaved uncommitted edits are the
 only unrecoverable state; after the pin, an alien change is a diff.
 
-**THE COST, MEASURED.** The full suite at `f6ddfe3` reported four failures.
+**THE COST, MEASURED.** The full suite at `f6ddfe3` (branch-only; on `master` at `8450abd`)
+reported four failures.
 THREE were the direct cost of the pin: the regex-form change had landed in
 `dom.py` while the test asserting the old quoted spelling had not, so the pin
 captured a file pair mid-edit. All four were green individually within the
@@ -356,3 +365,25 @@ same call site; the name matching and both censuses run through Playwright's
 role engine rather than through an injected script.
 
 Nothing was sent to anybody at any point.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `f6ddfe3` | feat(probe): press one suggestion and STOP -- the measurement nobody can take another way | `8450abd` | CONFIRMED |

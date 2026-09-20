@@ -6065,6 +6065,289 @@ that branch**, and it was committed in the file whose subject is that error.
 Controls now resolve `master`, and `_on_master()` fails loudly rather than
 skipping if it cannot.
 
+## 40. THE EVIDENCE-THAT-RESOLVES WAVE: A REPAIR THAT PAYS FOR ITSELF, AND A COUNT OF 9, 2026-09-20
+
+Full evidence: `_audit/2026-09-20-the-evidence-that-resolves.md`.
+Two instruments enter, one strengthened and one new. Both shown failing.
+
+### 40.1 `scripts/check_cited_shas_resolve.py` -- THE SUPPRESSOR NOW PAYS FOR ITSELF
+
+**THE HOLE.** `MARKED-MAPPED` is the strongest suppressor in that guard: one
+row of a `## Dead hashes, recovered` table silences a dead hash at every one of
+its sites in that document. It fired on the mere PRESENCE of the hash in column
+0. A row naming a garbage live hash -- or none at all -- switched the guard off
+exactly as well as a correct one.
+
+> **A REPAIR NOBODY CAN CHECK IS THE GUARD'S OWN DEFECT WEARING THE GUARD'S
+> UNIFORM.** A suppressor that costs nothing to satisfy will eventually be
+> satisfied by something that is not a repair.
+
+`broken_remaps()` now requires, per row: a live hash exists; it is an ancestor
+of `master`; the SUBJECT CELL byte-matches that commit's real subject; and the
+row does not map a hash to itself. The subject check is the one that catches a
+remap pointing at a real-but-wrong commit -- the failure where everything
+resolves and the reader still lands in the wrong place.
+
+**SHOWN FAILING FOUR WAYS** on planted rows (non-resolving live hash; absent
+live hash; wrong subject; self-map), each asserting its specific message, with
+a positive control on a correct row so the red means something.
+
+**AND IT CONVICTED THE CORRECT REPAIR ON ITS FIRST RUN.** It red-flagged
+`94600de` and `db99276`, whose rows read `**UNMAPPED** -- see below` above two
+paragraphs explaining that every positional candidate is already claimed on
+better evidence. Section 37 had already ruled: *"'UNMAPPED' is not a shortfall.
+A guessed hash has no twin to find. Recording the gap IS the repair."*
+
+> **A ROW THAT SAYS IT HAS NO TWIN HAS DISCHARGED THE BURDEN; A ROW THAT IS
+> MERELY SILENT HAS NOT.** The exemption keys on the confidence cell
+> (`UNMAPPED`, `NEVER-LANDED`) and is controlled by DEFEATING it -- the same
+> row with an ordinary confidence cell is still a finding. Silent and honest
+> are different, and a guard that cannot tell them apart convicts the honest
+> annotation and is then switched off.
+
+### 40.2 THE MARKER WHOSE SHAPE IS ITS OWN VERIFICATION
+
+The 22 repaired citations carry, in prose:
+
+    at `<dead>` (branch-only; on `master` at `<live>`)
+
+**WRITTEN WITH PLACEHOLDERS, DELIBERATELY.** A register that documents a
+citation form is itself inside the corpus the guard scans. 37.1 records this
+file being convicted for quoting a planted citation into a live commit slot,
+and a first draft of THIS section did it again with the real pair -- the
+boundary gate refused the commit, naming `_audit/INSTRUMENTS.md` for
+`c4d2be2` and `806360a`. Real hashes belong in the wave's audit document,
+which carries a mapping table for them; the register keeps the SHAPE.
+
+``on `master` at `<live>` `` puts the live hash into the ``at `<live>` `` slot the guard
+already reads. **A marker naming a hash that does not resolve is convicted by
+the existing, already-controlled matcher**, so no new matcher was written for
+that half.
+
+> **BUILD A NEW MARK OUT OF A SLOT THE INSTRUMENT ALREADY READS.** A mark that
+> needs its own matcher needs its own controls, its own quote-trap and its own
+> way to rot. A mark assembled from an existing verified slot inherits all
+> three solutions.
+
+**THE FOURTH INSTANCE OF 37.8's SHAPE, AND THE FIRST THAT WENT THE RIGHT WAY.**
+The wave's own audit document quotes that marker verbatim to explain it, which
+is a genuine citation of a branch-only hash in a document with no mapping
+table. **The guard convicted it, at that file's own line 85, on the first run
+after it was written.** The first three instances of this shape all made a
+guard QUIETER. This one made it louder, and by construction rather than by
+luck: the marker is deliberately NOT a suppressor -- the mapping table is -- so
+quoting a marker can only ADD a citation that must then be answered. Pinned by
+`test_a_marker_alone_suppresses_nothing`. That document now carries its own
+one-row table.
+
+### 40.3 TWO DEFECTS THE REPAIR HAD, FOUND BY MEASURING THE REPAIR
+
+Both survived a green guard and a reading of the diff.
+
+**SIX MARKERS WERE VERIFIED BY NOTHING.** `candidates()` scans LINE BY LINE.
+Six markers wrapped between `at` and the backtick, so six live hashes sat in no
+slot -- the self-verification in 40.2 was absent on six of twenty-one, and
+nothing said so.
+
+**ONE REPAIRED TOKEN VANISHED INSTEAD OF READING AS REPAIRED.** One hash held
+its only slot through the `landed-after` form -- the backticked hash and the
+word `landed` adjacent on one line. The marker went between them and the token
+left the guard's view entirely.
+
+> **A CITATION THE GUARD CAN NO LONGER SEE IS INDISTINGUISHABLE FROM ONE
+> SOMEBODY DELETED.** When you annotate a token in place, check the token still
+> occupies a slot afterwards. An annotation can silence the thing it annotates.
+
+Pinned by `test_every_inline_remap_marker_is_self_verifying`, mutation-
+controlled by `test_the_marker_matcher_convicts_a_wrapped_marker`. A third
+non-uniformity -- a marker wrapping between `` `master` `` and `at`, still
+verified but in a second spelling -- was caught by that test's count floor and
+made canonical: **a matcher that tolerates two spellings will one day tolerate
+three and then miss one.**
+
+### 40.4 `scripts/check_banked_evidence_is_reachable.py` -- NEW
+
+Can a reader who CLONES this repository reach the evidence under a census row
+in a banked state? Reachable means TRACKED IN GIT; everything else is a named
+class (GITIGNORED / ABSENT / UNTRACKED-LOCAL / ABSOLUTE-PATH / NOT-IN-REPO).
+
+**IT MEASURES AND DOES NOT DEMOTE.** Moving a row is a ruling. The instrument
+produces a count and a per-row list naming the artifact, and nothing else.
+
+**Measured 2026-09-20 and RE-MEASURED after each of two merges of `master`,**
+because the census moved under the wave three times while it ran. Final
+reading: 94 banked rows, 126 cited artifacts, **9 rows** resting on at least
+one unreachable artifact, **0** with no reachable artifact at all, 15
+unreachable artifacts and all 15 are `_audit/_scratch/` paths. 26 further rows
+describe a live run with no tracked script, reported separately as the softer
+number it is.
+
+> **THE ANSWER MOVED THREE TIMES AND ONLY RE-MEASURING CAUGHT IT.** 7, then 7,
+> then 9 -- the last jump because a sibling wave banked thirteen more rows in
+> the same window and two of them cite `_audit/_scratch/`. **This class is not
+> an inherited mess being counted down; the generator is live.** A figure taken
+> before a merge and reported after one is a reading with a timestamp the
+> reader cannot see.
+
+**THE RE-RUN SAID 8, AND RE-MEASURING RATHER THAN RELAYING IS WHY IT SAYS 7.**
+A row `master` had just corrected into a banked state brought a citation of
+`perform.md:3462-3487` with it. No tracked file has that name -- but exactly
+one tracked basename ENDS with it, and the line number settles which: 4,966
+lines against 298 for the only other candidate.
+
+> **AN ABBREVIATED CITATION IS NOT AN UNREACHABLE ONE.** The evidence is
+> reachable and the path as written is not; folding the second complaint into
+> the first inflates the one integer the instrument exists to state exactly.
+> Give it its own class, print it in full, and do not count it -- with the
+> mirror asserted both ways, or the class is a hole rather than a distinction.
+
+**SHOWN FAILING** on a planted banked row citing a gitignored path, with a
+mirror control on a row citing only tracked paths, and an unbanked row citing
+the same path asserted clean.
+
+**EVERY DENOMINATOR IS A REFUSAL POINT**, because the brief that commissioned
+it named the hazard: `sweep_blobs_for_identity.py --help` took `--help` as a
+git range, swept 0 blobs and printed `PASS: 0 hits across 0 blobs`. Missing
+slice, zero table rows, zero banked rows, zero artifacts, unknown argument --
+all exit 2. `--help` prints usage and exits 0.
+
+### 40.5 FOUR DEFECTS THE NEW INSTRUMENT FOUND IN ITSELF
+
+**A LINKEDIN ROUTE IS NOT A PATH, AND THE CRASH WAS THE GOOD OUTCOME.** The
+first extractor admitted `/jobs/collections/recommended/`; the first run died
+inside `git check-ignore` on a token cleaned down to `/`. Had `check-ignore`
+shrugged instead, every route would have read ABSENT, the tool would have
+reported hundreds of wrong findings, and **the real nine would have been
+invisible inside its own noise**.
+
+**FOUR BANKED ROWS WERE DROPPED BY A STATE SPELLING.** The corpus writes
+`**CP 2026-09-19**`, `**COVERED-PROVEN 2026-09-05**` and
+``MEASURED-ABSENT `SKILL` ``. They were visible ONLY because the instrument
+prints every state spelling it does not recognise.
+
+> **PRINT THE VOCABULARY YOU REJECTED.** A refusal that names only what it did
+> not match is half a measurement -- and here the other half was four rows of
+> the answer.
+
+**A STALE STATE COLUMN, AND 121 ROWS SKIPPED ON WIDTH.** A header index carries
+into the NEXT table: a summary table headed `| family | rows | read/write |
+reversible | shape |` was read as five rows with a state of `REV`. And
+requiring a row's cell count to match its header's silently discarded 121 rows
+across four slices, some of them malformed capability rows. **The state cell is
+now found BY VALUE with the header as tiebreak**, rows naming several are
+reported rather than guessed at, and 10 state-legend rows
+(`| COVERED-PROVEN | 21 | 14.0% | 21 |`) that were inflating the denominator
+are excluded AND counted.
+
+**A WINDOWS LINE ENDING TURNED EVERY GITIGNORED ARTIFACT INTO "ABSENT".**
+`git check-ignore --stdin` was fed newline-separated paths through a
+`text=True` pipe: Python wrote CR LF, git took the CR as part of the path and
+echoed it back C-quoted, so every membership test missed. Non-empty set, exit
+0, nothing to notice.
+
+> **USE `-z` FOR ANY BATCHED GIT PATH CALL ON WINDOWS.** The newline form is
+> wrong silently, and wrong in the direction that changes a CLASS rather than a
+> COUNT -- which is worse, because a count that moves gets questioned and a
+> class that is wrong gets quoted.
+
+### 40.6 THE PIN AT ZERO
+
+`tests/test_a_cited_sha_resolves.py` `PINNED` went 26 rows to `set()`, because
+all 22 SHAs were repaired rather than because the detector stopped seeing them.
+
+> **AN EMPTY TWO-WAY PIN IS STRONGER THAN A FULL ONE.** With nothing pinned,
+> any regression in any suppressor puts a citation straight back into the
+> finding set and the ratchet reds naming it. A pin of 26 absorbed exactly
+> those regressions silently, for those 26. The only direction an empty pin
+> cannot cover is the detector going blind, and that needs a planted red proof
+> -- a different test, which must exist separately.
+
+### 40.7 THE STATE VOCABULARY WAS IMPORTED, AND THE IMPORT WAS MEASURED
+
+40.4's first draft hand-rolled its own census state vocabulary.
+`scripts/count_census_states.py` already ships one, holding `ER`, `CCD` and
+`CANNOT-DELIVER` beside the long forms -- each admitted with the receipt for
+what its absence once cost -- and guarded by
+`tests/test_state_cell_dialects_refuse_loudly.py`. A third hand-rolled copy in
+this repository would have been exactly the scar that file already carries.
+
+> **IMPORTING AN INSTRUMENT IS A CHANGE TO THE MEASUREMENT, NOT A TIDY-UP.**
+> Print the numbers before and after. Here the banked-row count stayed 79 and
+> the finding count stayed 7, so the import bought dialect coverage at no cost
+> to the answer -- but "it was only a refactor" is the sentence that stops
+> anyone checking.
+
+Two things keep the copies from drifting apart later, and neither is a comment:
+any banked spelling that leaves the shipped vocabulary raises at IMPORT time
+rather than quietly un-banking those rows, and the run prints a
+`MISSPELLED state cells` count on every invocation.
+
+**AND THE IMPORT BROUGHT ONE FALSE POSITIVE, WHICH IS WHY THE SCOPE IS NOW
+LOAD-BEARING.** The shipped `dialect_of` flags `ABSENT` twice, both in a
+two-column table about page ADDRESSES where it means the page is not drawn. It
+is a shouted word built only out of the state vocabulary's own atoms, so the
+heuristic cannot help but see it. Scoped to rows of four cells or more -- a
+capability row's shape in these slices -- because **an instrument that cries
+wolf in a census is disbelieved exactly where it is most needed.**
+
+### 40.8 `scripts/sweep_blobs_for_identity.py` -- THE GREEN THAT MEASURED NOTHING
+
+`sweep_blobs_for_identity.py --help` took `--help` as a git range, swept 0
+blobs and printed **`PASS: 0 hits across 0 blobs`** -- exit 0 from the tool
+that checks blobs for a real person's identifiers before they are published.
+`_git()` returned `out.stdout` and discarded `returncode` and `stderr`, so a
+failed `rev-list` produced an empty commit list and `main()` fell through to
+its `PASS` branch. The module already had a MUTE CHECK for an empty NEEDLE set
+and none for an empty CORPUS.
+
+> **A MUTE-CHECK ON THE NEEDLES AND NONE ON THE CORPUS IS HALF A GUARD.** Both
+> ends of a search can be empty and both emptinesses produce the same clean
+> result. Whichever one you thought of first, the other is the one that bites.
+
+Every zero now refuses: unresolvable range, resolvable-but-empty range, and
+commits-with-no-blobs, each with a DISTINCT message, none beginning `PASS` or
+`FAIL`.
+
+**REFUSING ON A VALID-BUT-EMPTY RANGE IS NOT OBVIOUS AND THE RULING WENT ROUND
+TWICE.** The case for passing is real: an empty `origin/master..HEAD` is the
+normal state of a synced repo and it is the one live caller's real invocation.
+
+> **AN EMPTY RESULT IS AMBIGUOUS BETWEEN "THERE IS NOTHING TO CHECK" AND "I WAS
+> POINTED AT THE WRONG HISTORY", AND THE TOOL CANNOT TELL THEM APART.** A
+> misconfigured upstream, a detached HEAD, a typo'd ref that resolves, a fresh
+> clone with no `origin/master` -- each yields zero while unpushed work sits
+> outside the measured range. **FAIL-CLOSED BEATS FAIL-INFORMATIVE WHEN THE
+> MISS IS IRREVERSIBLE**, and publishing an identifier here is irreversible:
+> a force-push leaves retained objects resolvable by SHA.
+
+**THE REJECTED MIDDLE OPTION, recorded with its argument.** An intermediate
+build exited 0 with TAGGED verdicts -- `PASS (NOTHING IN RANGE)`,
+`PASS (NOTHING SWEPT)` -- never the bare sentence. It loses on a fact:
+`purge_denied_term.py` selects the verdict with
+`l.startswith(("PASS", "FAIL"))`.
+
+> **A QUALIFIER AFTER THE FIRST WORD IS INVISIBLE TO A PREFIX MATCH.** When one
+> string is read by a human AND by a gate, and they do not parse it the same
+> way, the tag informs the reader and does none of the gate's work. Put the
+> distinction where the machine reads, or accept that only the human has it.
+
+And the prefix carries a second load: that script's closing line is *"If either
+FAILs, run: `git reset --hard <tag>`"*, so **`FAIL` there names a DESTRUCTIVE
+remedy**. A refusal meaning "I could not establish anything" may not be spelled
+as the word that tells an operator to hard-reset. `(no verdict)` is the correct
+rendering and is now deliberate rather than incidental.
+
+**THE CONTROL THAT TOOK THREE DRAFTS, and it is 37.8's shape a fifth time.** A
+static check banning the original sentence from the source first text-searched
+the whole file and hit the docstring's own explanation of the invariant; then
+searched past the docstring and hit two code COMMENTS that name it for the same
+reason.
+
+> **WALK THE AST FOR STRING CONSTANTS AND EXCLUDE DOCSTRINGS BY NODE IDENTITY.**
+> A text scan cannot tell "explains the sentence" from "prints the sentence".
+> An AST walk can: a comment is never a node, and a docstring is an
+> identifiable one. What remains is exactly the set of literals that can reach
+> stdout.
 
 ---
 

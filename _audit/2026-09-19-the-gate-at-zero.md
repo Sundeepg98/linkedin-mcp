@@ -1,5 +1,13 @@
 # The gate at zero: six reds, five repaired, one handed back
 
+> **SHA NOTE, added 2026-09-20.** The short hashes `66e2038`, `eed87a5` and `806360a` cited
+> below were committed on a `worktree-agent-*` branch that never merged, so
+> they are reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to their `master` twins -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; each is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Wave `gate-zero`, 2026-09-19. Sole writer, and that was measured at 15:30
 before any edit rather than assumed: no `git` processes, no `.git/index.lock`,
 and the only python processes in this tree were the two MCP server workers
@@ -381,7 +389,8 @@ reason; it is still a test whose verdict depends on which tree it runs in.
 
 ## 10. THE FINAL NUMBER
 
-**Taken on a detached worktree at `66e2038` -- single-writer by construction,
+**Taken on a detached worktree at `66e2038` (branch-only; on
+`master` at `266d030`) -- single-writer by construction,
 and zero commits landed across the window, which is checked rather than
 asserted: the last commit was `66e2038` at 15:57:46, and `git log` over
 15:58:00-16:15:00 returns nothing.**
@@ -492,7 +501,8 @@ chain in this session should assume it belongs to the last command in it.
 
 ## 12. THE RE-CERTIFIED NUMBER, AND A CLAIM IN THIS DOCUMENT THAT EXPIRED
 
-**Measured on a detached worktree at `eed87a5` -- the commit that carries this
+**Measured on a detached worktree at `eed87a5` (branch-only; on
+`master` at `097626a`) -- the commit that carries this
 document -- so the corpus the guards scan includes it:**
 
     WINDOW      16:34:39 - 16:50:34 by the box, 955.82s (15:55)
@@ -509,7 +519,8 @@ added two marker pairs the correction guard now checks.
 
 This document opens *"Sole writer, and that was measured at 15:30."* **That was
 true at 15:30 and it is no longer true of the wave.** `806360a` landed at
-16:17:40 -- another writer, correcting two of its own rulings.
+16:17:40 (branch-only; on `master` at `1b94540`) -- another writer,
+correcting two of its own rulings.
 
 **It is left standing rather than edited, because the timestamp is what makes
 it honest and a claim with a timestamp is not wrong when the world moves.** The
@@ -525,3 +536,27 @@ the OPPOSITE direction to the triaged pair -- a different key -- so nothing
 collided, and the guard was re-run to confirm it rather than the diff read and
 pronounced safe. **Both certifying runs were taken on detached worktrees pinned
 to a SHA, which is why a second writer could not contaminate either number.**
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hashes mapped here were made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `66e2038` | perf(ci): regenerate the shard timings -- the table priced 92 of 158 files | `266d030` | CONFIRMED |
+| `eed87a5` | audit(gate-zero): six reds to one, and the one left standing is a ruling | `097626a` | CONFIRMED |
+| `806360a` | correct(rulings): two of my own rulings stated things I had withdrawn, with nothing pointing at the withdrawal | `1b94540` | CONFIRMED |

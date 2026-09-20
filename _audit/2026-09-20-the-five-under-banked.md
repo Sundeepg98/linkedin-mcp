@@ -453,3 +453,14 @@ The two gitignored captures copied into this worktree to re-run section 1
 (`_audit/_probe-groups-hyd.html`, `_audit/_probe-events-hyd.html`) are ignored
 here as they are everywhere and are not part of this commit. The main
 checkout was read and not written.
+
+**CORRECTED BY:** `_audit/2026-09-20-the-evidence-that-resolves.md` -- section 8's "the entire evidence chain ends outside the repository" is narrower than it reads.
+Measured over the whole corpus at ARTIFACT granularity, rows 9 and 11-14 each
+also cite four TRACKED artifacts, and the count of banked rows with no
+reachable artifact at all is **0** across all four slices. The narrower claim
+made here -- that the chain behind the NUMBERS terminates in
+`_audit/_scratch/` -- is not contradicted, and that wave's instrument cannot
+check it, because it binds a row to its artifacts and not a claim to the
+artifact that backs it. That wave also found **7** banked rows in this class
+rather than five: `jobs.md` 15 and `network.md` 136 are outside the control
+census this wave was routed by.

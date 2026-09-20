@@ -183,6 +183,48 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, the EVIDENCE-THAT-RESOLVES wave. Both triaged by reading the
+    # line that produced them.
+    ("2026-09-20-the-evidence-that-resolves.md",
+     "2026-09-20-the-chain-verification.md"): (
+        "THE CITATION IS AN ANALOGY, NOT A CORRECTION. The line reads *'it is "
+        "the same shape as the census at `_audit/2026-09-20-the-chain-"
+        "verification.md`: a correct measurement of the wrong population'* -- "
+        "the cited document is being AGREED WITH and used as the precedent for "
+        "why the citing wave checked a relayed claim instead of acting on it. "
+        "The correction vocabulary in the window belongs to what that document "
+        "ITSELF corrected, which it already declares with its own marker pair. "
+        "A CORRECTED BY marker here would tell every future reader that this "
+        "wave withdrew something in it, and nothing in it is withdrawn."
+    ),
+    ("2026-09-20-the-evidence-that-resolves.md", "messaging-and-content.md"): (
+        "THE CITING DOCUMENT REPORTS A CORRECTION SOMEBODY ELSE MADE, AND "
+        "DECLINES TO MAKE ONE. The line says row `M4` was corrected -- by "
+        "`master`, from EXCLUDED-RULED to MEASURED-ABSENT, in that row's own "
+        "words -- and that the correction moved M4 into the banked population "
+        "for the first time, which is why a re-measurement found it. NOTHING "
+        "IN THAT SLICE IS WITHDRAWN BY THE CITING WAVE: no row is edited, no "
+        "state is proposed, and the instrument that found M4 is documented as "
+        "measuring and never demoting. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if that document ever asserted "
+        "M4's state or its cited numbers were mistaken, rather than reporting "
+        "that its own first reading of M4 counted an abbreviated path as "
+        "unreachable -- which is a correction of the INSTRUMENT, and is "
+        "recorded against the instrument."
+    ),
+    ("2026-09-20-the-evidence-that-resolves.md", "network.md"): (
+        "THE CITATION IS A FALSE-POSITIVE REPORT ABOUT AN INSTRUMENT, NOT A "
+        "CLAIM ABOUT THE CENSUS. The line names `network.md` lines 171-172 to "
+        "record that the shipped `dialect_of` heuristic flags `ABSENT` there, "
+        "in a two-column table about page ADDRESSES where the word means the "
+        "page is not drawn. NO ROW OF THAT SLICE IS CONTRADICTED and no state "
+        "moves: the finding is about the scope of a matcher the citing wave "
+        "imported, and the repair was made in the importing file. The citing "
+        "wave DOES correct a census claim elsewhere and declares it with a "
+        "CORRECTS:/CORRECTED BY: pair, so its threshold for declaring one is "
+        "on the record and this pair sits below it deliberately."
+    ),
+
     # 2026-09-20, the UNFIRED-TWENTYSEVEN wave. Three candidates, triaged by
     # reading each line. Two are a cell superseding ITSELF with a live fire;
     # the third is the scan attributing one row's vocabulary to its neighbour.

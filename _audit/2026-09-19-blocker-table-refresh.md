@@ -1,5 +1,15 @@
 # The blocker table, refreshed -- 14 blockers are already empty and 53 cannot be checked at all
 
+> **SHA NOTE, added 2026-09-20.** The short hash `7bca683` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+>
+> The one citation site sits inside a block this document itself labels as another wave's words, left byte-identical and credited. It is not edited here.
+
 > **QUOTE THESE NUMBERS, NOT SECTION 3's.** Every per-blocker row count in
 > `_audit/2026-09-03-linkedin-gap-blockers.md` section 3 is dated 2026-09-03
 > and rows have moved since. That document is the historical record and is
@@ -413,3 +423,25 @@ recovering rows.**
 this document exists to make, arriving to its own author.** Section 3's counts are
 wrong for exactly the same reason, and they had sixteen days rather than seven
 minutes to drift. **Re-derive. The script takes seconds and needs no browser.**
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `7bca683` | audit(blockers): provenance for the empty list, and the table went stale while being written | `29e4613` | CONFIRMED |

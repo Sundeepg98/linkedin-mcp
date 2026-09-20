@@ -1,5 +1,13 @@
 # The four row-to-blocker contradictions, adjudicated
 
+> **SHA NOTE, added 2026-09-20.** The short hashes `c4d2be2` and `ae1894b` cited
+> below were committed on a `worktree-agent-*` branch that never merged, so
+> they are reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to their `master` twins -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; each is kept in place here because a short hash
+> is the key a reader arrives with.
+
 `_audit/2026-09-06-corpus-sweep-blocker-evidence.md` section 3 left four
 disagreements between committed sources "for a person", declining on purpose
 to resolve them: *"resolving them means editing
@@ -17,7 +25,8 @@ tell which entries were decided and which were tidied.
 the LAST backtick on the line, so a quoted id inside the reason silently eats
 it and the marker reads as having no reason at all. Measured here, twice.)
 
-Applied at `c4d2be2`. Ratchet, counts and tests at the foot.
+Applied at `c4d2be2` (branch-only; on `master` at `5073827`). Ratchet,
+counts and tests at the foot.
 
 ---
 
@@ -317,6 +326,8 @@ and with its existing somewhere the feed does not link to.
 
 ### Seven more rows recovered, at `ae1894b`
 
+*(`ae1894b` is branch-only; on `master` at `3c0b3e1`.)*
+
 Adjacent to the four conflicts rather than part of them, and recorded here
 because the same evidence file carries them:
 
@@ -496,3 +507,26 @@ That is the difference between a control and a repetition: the first showed the
 column CAN go unchecked, the second shows it does, in ordinary operation, at
 the rate the census actually changes. **The gap is not a corner case; it is the
 normal state of the file between rebuilds.**
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hashes mapped here were made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `c4d2be2` | census(blockers): two of the four contradictions resolve, and two genuinely do not | `5073827` | CONFIRMED |
+| `ae1894b` | census(blockers): seven rows recovered, three blockers closed, and one relayed assignment that was wrong | `3c0b3e1` | CONFIRMED |

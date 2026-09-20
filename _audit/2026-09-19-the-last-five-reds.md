@@ -1,5 +1,13 @@
 # THE LAST FIVE REDS: WHAT EACH ONE ACTUALLY ENCODED
 
+> **SHA NOTE, added 2026-09-20.** The short hashes `59192ac` and `889f488` cited
+> below were committed on a `worktree-agent-*` branch that never merged, so
+> they are reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to their `master` twins -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; each is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Wave `gate-green`. All numbers stamped with when they were taken, by the box.
 
     reproduced          14:38    5 failed, on the five named
@@ -236,7 +244,8 @@ attempt 1, with a retry loop armed and never needed.
 
 ## WHAT WAS NOT MEASURED, SAID PLAINLY
 
-**THE FULL SUITE WAS NOT RUN.** A neighbour committed `59192ac` between my
+**THE FULL SUITE WAS NOT RUN.** A neighbour committed `59192ac` (branch-only; on
+`master` at `de2d4bf`) between my
 second and third commits, so I was not the only writer, and the brief's own
 finding is that an interval over a mutating tree inflates the count. What WAS
 run, each stamped:
@@ -257,3 +266,26 @@ unmeasured by this wave.
 `tests/test_the_groups_id_segment_is_closed.py`. That is `groups-admit`'s
 admission, left exactly where it was. The four `_RECOVER_*.patch` files at tree
 root are untouched; landing them is the lead's call and not this wave's.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hashes mapped here were made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `59192ac` | audit(last-two): the gate at 889f488, and a worktree that disarms half a guard | `de2d4bf` | CONFIRMED |
+| `889f488` | guard(navigation): a split in ARITY is impersonation, not drift -- say which | `1c84d34` | CONFIRMED |
