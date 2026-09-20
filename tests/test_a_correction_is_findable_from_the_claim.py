@@ -1534,6 +1534,53 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "CORRECTED BY: pointer in it would tell a reader that the document "
         "supplying the measurement had itself been refuted"
     ),
+    # 2026-09-20, the five-under-banked wave. THE DECLARED CORRECTION, SEEN
+    # FROM THE CORRECTED END. The wave's CORRECTS: marker names jobs.md and
+    # jobs.md carries the matching CORRECTED BY: above section A's table, so
+    # the pair IS declared -- in the (corrector, target) direction the marker
+    # channel records. This candidate is the other direction: five corrected
+    # CELLS end with "Reading: `_audit/2026-09-20-the-five-under-banked.md`",
+    # which is the corrected document naming its corrector inside the row, so
+    # a reader who lands on the claim finds the correction without having to
+    # notice the marker. That is the outcome this file exists to require, and
+    # the dict header already records the shape ("a report about a document
+    # that ALREADY CARRIES ITS CORRECTION IN PLACE ... cannot also be a
+    # violation of it"). jobs.md corrects nothing in the wave document.
+    ("jobs.md", "2026-09-20-the-five-under-banked.md"): (
+        "THE DECLARED CORRECTION READ BACKWARDS. jobs.md is the CORRECTED "
+        "document, not the corrector: rows 9, 11, 12, 13 and 14 carry a dated "
+        "correction to their own drift-floor sentence and name the wave "
+        "document as where the reading lives. The correction itself is "
+        "declared with a CORRECTS:/CORRECTED BY: pair in the "
+        "(five-under-banked.md, jobs.md) direction. A CORRECTED BY: pointer "
+        "in the wave document would tell a reader that the measurement which "
+        "corrected these cells had itself been refuted by the cells it "
+        "corrected"
+    ),
+    # 2026-09-20, the five-under-banked wave, and it is TABLE-ROW PROXIMITY --
+    # the shape this dict's own header names first. READ THE LINE: the pair is
+    # produced by jobs.md row 10 (Filter: Company), which cites
+    # 2026-09-05-company-about-card.md for its own UNFIRED reason and is
+    # untouched by this wave. The correction vocabulary sits in rows 9 and 11,
+    # the lines either side of it, where this wave appended a dated correction
+    # about the DRIFT FLOOR of a different probe entirely
+    # (_probe_job_search_result_sets.py). A markdown table has no blank lines,
+    # so two unrelated rows are always within WINDOW of each other. Row 10
+    # makes no claim about the cited document; it quotes it approvingly, as the
+    # source that says the L1 live verification was not taken. A CORRECTED BY:
+    # pointer in company-about-card.md would tell a reader that the document
+    # holding row 10's reason had been refuted, which nothing here claims.
+    ("jobs.md", "2026-09-05-company-about-card.md"): (
+        "TABLE-ROW PROXIMITY. The candidate is row 10 (Filter: Company), which "
+        "cites this document as the source for its own UNFIRED state -- the L1 "
+        "live verification was not taken -- and is not edited by the wave that "
+        "produced the vocabulary. The words 'CORRECTED', 'wrong' and 'refuted' "
+        "are in rows 9 and 11, the adjacent lines, and they govern the DRIFT "
+        "FLOOR quoted from scripts/_probe_job_search_result_sets.py, which this "
+        "document says nothing about. Row 10 endorses the cited document rather "
+        "than correcting it, and the real correction this wave made IS declared, "
+        "with a CORRECTS:/CORRECTED BY: pair against jobs.md itself"
+    ),
     ("network.md", "2026-09-20-the-live-capture.md"): (
         "ROW 135 IS PROMOTED, NOT CORRECTED. Its prior cell said "
         "COVERED-UNFIRED and gave the reason: surfaced, with no recorded run "

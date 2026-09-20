@@ -69,6 +69,39 @@ plural), which produced a much larger and untrustworthy drop. Anyone
 re-tightening the marker rule should re-run that comparison rather than
 assume a boundary regex is free.
 
+A SECOND FALSE-POSITIVE MECHANISM, MEASURED 2026-09-20 AND LARGER THAN THE
+FIRST. The marker "pass" also matches the bare Python ``pass`` STATEMENT, which
+is the idiomatic body of a swallowed ``except`` and therefore sits inside the
+window of any value read in a ``try``. The value is then the probe's INPUT and
+not a control at all::
+
+    main_text = ""
+    try:
+        main_text = await page.inner_text("main")
+    except Exception:
+        pass                      # <- the only marker in the window
+    print(f"... {len(main_text.split(needle)) - 1}")
+
+A corpus-wide sweep (strip every line that is a bare ``pass`` statement from
+each finding's window, re-test for a marker, and count the findings that lose
+their last one) returned **4 of the 133 findings live when it was measured,
+3.0%** -- the same 4 of 131 after that day's two repairs: two in
+``_probe_small_measures_followup.py`` ``part_b_suggested_filters`` (``html``,
+``main_text``) and two in ``_probe_small_measures_live.py`` (``_needles`` and
+``read_feed_hashtag_context``, both ``main_text``). All four are named with
+their reasons in the baseline. THE DETECTOR IS NOT CHANGED HERE: narrowing the
+marker rule would move a published 129-row census, which is a wave of its own
+and not a footnote -- and the boundary-regex alternative was already tried and
+rejected for over-rejecting legitimate inflections (above).
+
+A THIRD MECHANISM, same sweep: the window is *"as far as the first later
+sibling statement whose subtree contains a sink call referencing the name"*,
+which for a REPORT ACCUMULATOR written by a nested ``emit()`` and flushed by a
+``_write(lines)`` that prints, stretches across whatever the probe happened to
+announce in between. ``_probe_job_search_result_sets.py`` ``main() -> lines``
+is flagged solely because an ``emit("positive control keyword: ...")`` string
+sits ten lines into a 28-line window. Also unchanged, for the same reason.
+
 ALSO DISCLOSED: for-loop/async-for targets are included as candidates (25.6%
 of the 129 at last count) and are structurally weaker evidence than a
 computed Assign/AugAssign/NamedExpr value -- a loop target is sometimes a
