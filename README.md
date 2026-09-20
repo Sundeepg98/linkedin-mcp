@@ -3,10 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Forty-six tools ship. Thirty-four read. Twelve write. None is
+**Forty-seven tools ship. Thirty-five read. Twelve write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Forty-five ... Thirty-three" UNTIL LATER ON 2026-09-20**,
+**THAT LINE READ "Forty-six ... Thirty-four" UNTIL LATER STILL ON 2026-09-20**,
+and it moved a third time that day. The forty-seventh is
+`linkedin_people_search_shape`, a read of the people-search page -- and it is
+the first tool here on a surface whose every row is a THIRD PARTY. Its address
+was refused by the boundary until that commit and was admitted only together
+with the shaper in front of it, on a written ruling that says admitting it
+without one would violate the ruling rather than partially satisfy it. It
+takes no parameters, because a search query is where a person's name is typed.
+
+**AND THAT LINE READ "Forty-five ... Thirty-three" EARLIER ON 2026-09-20**,
 and it moved twice in one day. The forty-sixth is
 `linkedin_premium_job_collection`, a read of the two Premium job collections
 -- and it is the first tool here whose reader was written, tested and shipped
@@ -833,7 +842,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the forty-six tools
+  server.py                  the forty-seven tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

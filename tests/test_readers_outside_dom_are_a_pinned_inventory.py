@@ -132,14 +132,24 @@ COVERED_ELSEWHERE = {"dom.py"}
 #: ``recommendations.py`` is unchanged and still has no consumer: it has no
 #: admitted address, and no page behind it has ever been opened. It remains
 #: invisible here for the same reason and is NOT a candidate for a line.
-KNOWN_UNWIRED: dict[str, str] = {
-    "search_results.read_results": (
-        "Held with the module, not stranded by accident. linkedin_server/search_results.py landed 2026-09-19 with its tests and WITHOUT the /search/results/ navigation admission, deliberately: a search results page IS a list of other people -- every row carries a name and a /in/<slug> href, and a slug is a name -- so the admission is held on the rule that it and a name-free shaper land TOGETHER OR NEITHER LANDS. The groups admission was granted the same day precisely because a numeric group id names nobody and needs no shaper. NOT PERMANENT: delete these two lines in the same commit that wires the reader and admits the address. See DELIBERATELY_UNWIRED['search_results'] in tests/test_every_orphan_module_is_ruled.py, which rules the same module at module level for the same reason."
-    ),
-    "search_results.read_filters": (
-        "Held with the module, not stranded by accident. linkedin_server/search_results.py landed 2026-09-19 with its tests and WITHOUT the /search/results/ navigation admission, deliberately: a search results page IS a list of other people -- every row carries a name and a /in/<slug> href, and a slug is a name -- so the admission is held on the rule that it and a name-free shaper land TOGETHER OR NEITHER LANDS. The groups admission was granted the same day precisely because a numeric group id names nobody and needs no shaper. NOT PERMANENT: delete these two lines in the same commit that wires the reader and admits the address. See DELIBERATELY_UNWIRED['search_results'] in tests/test_every_orphan_module_is_ruled.py, which rules the same module at module level for the same reason."
-    ),
-}
+#:
+#: **BOTH search_results LINES WERE DELETED 2026-09-20, ON THEIR OWN
+#: INSTRUCTION.** They read *"delete these two lines in the same commit that
+#: wires the reader and admits the address"*, and that commit landed the
+#: `/search/results/people/` pattern, the tool `linkedin_people_search_shape`
+#: which calls BOTH readers, and the name-freedom proof the admission was held
+#: on. `server.py` now calls them, so they are wired and this dict is empty --
+#: `test_the_unwired_readers_are_exactly_the_pinned_inventory` compares both
+#: directions and would have failed on a kept line.
+#:
+#: **AN EMPTY DICT IS A REAL STATE HERE, NOT A DISABLED GUARD**, and the
+#: distinction matters because an allowlist that has been emptied looks
+#: identical to one nobody maintains. The detector is unchanged; there is
+#: currently no reader outside `dom.py` that nothing calls. The two controls
+#: below (`test_the_detector_fires_on_a_planted_unwired_reader` and its
+#: silent-on-a-called-reader twin) are what keep that readable as a
+#: measurement rather than as an absence.
+KNOWN_UNWIRED: dict[str, str] = {}
 
 
 def _called_names(tree: ast.AST) -> set[str]:

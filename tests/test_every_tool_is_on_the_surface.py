@@ -296,4 +296,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # moved in the SAME edit as the tool, which is what the paragraph
     # above asks for and what a4565cb did not do. FIVE sites, measured
     # off the registry rather than relayed from a commit message.
-    assert len(_tool_names()) == 46
+    # FORTY-SEVEN FROM 2026-09-20: linkedin_people_search_shape, a READ on the
+    # people-search surface, admitted together with its shaper.
+    assert len(_tool_names()) == 47

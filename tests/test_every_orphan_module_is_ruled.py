@@ -115,26 +115,30 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "mutations are already in readonly.SANCTIONED_MUTATIONS. NOT "
         "PERMANENT: delete this entry when it is wired."
     ),
-    "search_results": (
-        "A CAPABILITY HELD ON A CONDITION, and the condition is written down "
-        "rather than implied. The module and its 963-line test file landed "
-        "2026-09-19; the navigation admission for /search/results/ did not, "
-        "and deliberately so. A SEARCH RESULTS PAGE IS A LIST OF OTHER "
-        "PEOPLE -- every row carries a name and a /in/<slug> href, and a slug "
-        "IS a name -- so the admission is held on the rule that it and a "
-        "name-free shaper land TOGETHER OR NEITHER LANDS. The groups "
-        "admission was granted the same day precisely because it does NOT "
-        "have this problem: a group id is numeric, so that address names "
-        "nobody and needs no shaper. "
-        "THE WAVE THAT WROTE THIS ENDED BEFORE WIRING IT, so this entry "
-        "records a held condition rather than a completed ruling -- the "
-        "shaper exists in linkedin_server/search_results.py and is tested, "
-        "but nothing calls it and no address admits it. "
-        "NOT PERMANENT: delete this entry when the admission and a tool land "
-        "together. Until then the module is reachable only from "
-        "tests/test_search_results.py, which is the honest state."
-    ),
 }
+
+# THE search_results ENTRY WAS DELETED 2026-09-20, ON ITS OWN INSTRUCTION.
+#
+# It read "NOT PERMANENT: delete this entry when the admission and a tool land
+# together", and they did, in one commit: the `/search/results/people/` pattern
+# in readonly._ALLOWED_URL_PATTERNS, the tool `linkedin_people_search_shape` in
+# server.py, and the name-freedom proof in
+# tests/test_the_search_shaper_emits_no_name.py. The module now has an
+# importer, so `test_every_ruling_is_still_about_a_real_orphan` would have
+# failed on a kept entry -- a spent ruling fails as loudly as a missing one,
+# which is that test working.
+#
+# **THE CONDITION IT HELD WAS DISCHARGED, NOT WAIVED, AND ONE PART OF IT WAS
+# NOT.** The shaper is proven name-free by measurement: hostile payloads driven
+# through the real readers, result AND exception walked, shown failing on the
+# coercion that shipped until that day -- which was leaking, and is the reason
+# the proof exists rather than a formality. What is NOT established is that the
+# shaper FITS the live page: no capture of a /search/ surface exists in this
+# repository and no browser slot was available, so its selectors have never met
+# LinkedIn's rendered dialect. That is a CORRECTNESS gap, not a name-freedom
+# gap, it is stated in the tool's own payload under `not_claimed`, and it is
+# written up in _audit/2026-09-20-the-search-admission.md. It is deliberately
+# NOT held as an orphan ruling here, because the module is no longer an orphan.
 
 
 def _entry_points() -> list[pathlib.Path]:

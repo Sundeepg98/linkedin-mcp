@@ -1,33 +1,58 @@
-"""THE REVERT PATH FOR THE SEARCH-RESULTS ADMISSION, WRITTEN BEFORE IT LANDS.
+"""THE REVERT PATH FOR THE SEARCH-RESULTS ADMISSION. **THE PATTERN HAS LANDED.**
 
-**THIS FILE'S JOB IS TO GO RED.** It is committed green, today, while nothing
-is admitted -- and the wave that lands the `SEARCH-RESULTS-SURFACE` pattern
-will turn it red on its first run. That is not a defect in this file and it is
-not a defect in that wave. It is the point.
+**INVERTED 2026-09-20, WHICH IS THIS FILE DOING ITS JOB.** It was committed
+green while nothing was admitted, went red the moment the pattern landed, and
+is rewritten here in that same commit -- entries the pattern now admits assert
+ADMISSION, everything it must still refuse goes on asserting refusal. Not
+deleted, not narrowed, not silenced, not xfailed. **The diff against the
+previous revision is the clearest available statement of exactly what flipped,
+and that is why the lead ruled invert over delete on 2026-09-19 13:05.**
+
+WHAT LANDED, so this file records it rather than pointing elsewhere: the S1
+candidate `^https://www\\.linkedin\\.com/search/results/people/?(\\?[^#]*)?$`,
+the PEOPLE vertical only, with its shaper (`linkedin_server/search_results.py`)
+and its tool (`linkedin_people_search_shape`) in the same commit, which is
+condition 1. The other five verticals below were NOT admitted and are now the
+durable half of this file.
+
+**WHY ONLY PEOPLE, WHEN FOUR MORE ADDRESSES SIT BELOW.** 16 of the blocker's
+20 reads are the people vertical. The three-vertical alternation would have
+served 19 and admitted two more third-party-dense pages; it was refused
+because this is the precedent-setting admission on the platform's densest
+third-party surface and the ruling's own reopening clause gives widening a
+named route -- *"a later wave showing the narrow pattern is TOO NARROW to
+serve the 20 rows, which is a request to widen it and gets its own blast
+radius"*. Groups, events and content should take that route.
 
 Condition 4 of the ruling at `09f9961` section 6: *"A REVERT PATH EXISTS BEFORE
 THE ADMISSION, NOT AFTER. The pattern's removal is one line; the test that
 shows the address refused must be written and shown failing BEFORE the pattern
 is added, so the rollback is proven rather than assumed."*
 
-**WHAT THE ADMITTING WAVE MUST DO WITH THIS FILE, stated here so it is not a
-judgement call at 2am.** **REWRITE IT AND INVERT IT**, in the same commit that
-adds the pattern: the entries in `_SEARCH_RESULTS_URLS` that the pattern now
-admits flip to asserting they ARE admitted, and everything the pattern must
-still refuse stays asserting refusal. Do NOT silence it, do NOT narrow its url
-list to whatever still refuses, and do NOT mark it xfail.
+**THE INSTRUCTION THIS FILE CARRIED, now discharged.** It said: rewrite and
+invert, in the same commit that adds the pattern; do not silence, narrow or
+xfail. It said "DELETE IT" until 2026-09-19 13:05 and the lead ruled the other
+way, on the argument that a deleted test leaves no record that the transition
+happened while an inverted one keeps asserting something true. `a603a61`
+(`tests/test_search_admission_blast_radius.py`) said so first and was adopted.
+**Both guards were brought into line, and both were followed here.**
 
-**THIS SAID "DELETE IT" UNTIL 2026-09-19 13:05, AND THE LEAD RULED THE OTHER
-WAY.** The argument that changed it: a deleted test leaves no record that the
-transition happened, an inverted one keeps asserting something true, and its
-diff is the clearest possible statement of what flipped. `a603a61`
-(`tests/test_search_admission_blast_radius.py`) said so first and was adopted;
-this file is brought into line rather than left contradicting it, because two
-guards giving opposite instructions is worse than either instruction.
+**A STALE INSTRUCTION SURVIVED ELSEWHERE AND IS NOW DECLARED CORRECTED.**
+`_audit/2026-09-19-search-admission-preconditions.md` section C and section
+D.3 told the admitting wave to DELETE this file -- that document was written
+at 12:46, before the 13:05 ruling, and nobody went back to it.
 
-Until that rewrite happens this file is the executable statement that the
-boundary refuses the surface -- which is what makes the one-line removal of
-the pattern a PROVEN rollback rather than an assumed one.
+The 2026-09-20 wave first recorded that only here, reasoning that another
+wave's audit doc should not be edited. **`test_a_correction_is_findable_from
+_the_claim` went red on exactly that**, and it was right: a correction the
+corrected document cannot name is unreachable from the claim, so a reader who
+starts at the stale instruction never learns it was superseded. The pair is
+declared -- `CORRECTS:` in `_audit/2026-09-20-the-search-admission.md` and
+`CORRECTED BY:` at the head of that document's section C.
+
+The one-line removal of the pattern is still what reverts the surface, and
+section 4 below now proves that in the live direction rather than the
+hypothetical one.
 
 **AND IT ALSO SAYS WHY THE REVERT IS ONE LINE.**
 `test_the_refusal_is_the_allowlist_and_not_the_denylist` measures which of the
@@ -43,6 +68,7 @@ one-character placeholder keyword.
 
 from __future__ import annotations
 
+import pathlib
 import re
 
 from linkedin_server import readonly
@@ -51,23 +77,40 @@ from linkedin_server import readonly
 # 1. The addresses the 20 rows need
 # ---------------------------------------------------------------------------
 
-#: `SEARCH-RESULTS-SURFACE` carries 21 census rows, 20 of them reads, and not
-#: one has an admitted address. These are the spellings those rows need,
-#: recorded in `_audit/2026-09-05-search-results-consent.md` section 4 and
+#: `SEARCH-RESULTS-SURFACE` carries 21 census rows, 20 of them reads. These
+#: are the spellings those rows need, recorded in
+#: `_audit/2026-09-05-search-results-consent.md` section 4 and
 #: `_audit/2026-09-05-search-results-measured.md` section 1.
-_SEARCH_RESULTS_URLS: tuple[str, ...] = (
+#:
+#: **THE SPLIT BELOW IS THE ADMISSION.** It is kept as two named tuples rather
+#: than one list plus a filter, because which side an address is on is a
+#: RULING and not a computation -- deriving it from the live allowlist would
+#: make this file agree with whatever the boundary currently says, which is
+#: the one thing a guard may never do.
+_ADMITTED_NOW: tuple[str, ...] = (
     "https://www.linkedin.com/search/results/people/",
     "https://www.linkedin.com/search/results/people/?keywords=x",
     (
         "https://www.linkedin.com/search/results/people/?keywords=x"
         "&network=%5B%22F%22%5D&geoUrn=%5B%22000%22%5D"
     ),
+)
+
+#: **THE DURABLE HALF.** Five verticals the admission did NOT buy. Each is its
+#: own third-party-dense surface and each needs its own blast radius, so a
+#: green run here is the statement that the admission stayed the size it was
+#: ruled at.
+_STILL_REFUSED: tuple[str, ...] = (
     "https://www.linkedin.com/search/results/all/?keywords=x",
     "https://www.linkedin.com/search/results/companies/?keywords=x",
     "https://www.linkedin.com/search/results/groups/?keywords=x",
     "https://www.linkedin.com/search/results/events/?keywords=x",
     "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
 )
+
+#: Every spelling the rows named, on both sides of the line. Used where a
+#: claim is about the SURFACE rather than about one side of it.
+_SEARCH_RESULTS_URLS: tuple[str, ...] = _ADMITTED_NOW + _STILL_REFUSED
 
 #: The candidate the pre-admission wave measured. Carried here ONLY so the
 #: monkeypatched test below can show the refusal above is one pattern away
@@ -109,22 +152,38 @@ def _refused(url: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def test_every_search_results_address_is_refused_today():
-    """GREEN TODAY BECAUSE NOTHING IS ADMITTED. RED WHEN THE PATTERN LANDS.
+def test_the_people_vertical_is_now_admitted():
+    """THE INVERTED HALF. These three asserted refusal until 2026-09-20.
 
-    The admitting wave REWRITES AND INVERTS this file in the commit that adds
-    the pattern. See this module's docstring: that diff is the rollback being
-    spent deliberately and visibly, which is the whole value of writing it
-    first.
+    They are the address the 16 people rows need, and they are admitted
+    together with the shaper and the tool -- condition 1 of the ruling, which
+    says an admission that defers the shaper has VIOLATED it rather than
+    partially satisfied it.
     """
-    for url in _SEARCH_RESULTS_URLS:
+    for url in _ADMITTED_NOW:
+        assert not _refused(url), (
+            f"the people-search address is refused again: {url!r}. Either the "
+            "admission was reverted -- in which case this file is inverted "
+            "BACK, in that same commit, and the shaper's tool goes with it -- "
+            "or the pattern was edited and no longer matches LinkedIn's "
+            "spelling."
+        )
+
+
+def test_the_other_five_verticals_are_still_refused():
+    """THE DURABLE HALF, and it is what makes the admission narrow rather than
+    a family.
+
+    Every one of these is a search-results page too, and every one stays shut.
+    If one of them opens without its own blast radius and its own ruling, the
+    admission grew by accident -- which is exactly what condition 2 forbids.
+    """
+    for url in _STILL_REFUSED:
         assert _refused(url), (
-            f"search-results address admitted as a read: {url!r}. If the "
-            "admission ruled at 09f9961 section 6 has landed, this file has "
-            "done its job and should be REWRITTEN AND INVERTED in that same "
-            "commit -- the admitted entries flipped to assert admission, the "
-            "rest still asserting refusal. Not deleted, not narrowed, not "
-            "silenced, not xfailed."
+            f"a vertical nobody admitted became readable: {url!r}. The "
+            "2026-09-20 admission was the PEOPLE vertical only. Widening is "
+            "allowed by the ruling's reopening clause and it costs a fresh "
+            "blast radius -- it is not something a pattern edit does quietly."
         )
 
 
@@ -150,9 +209,22 @@ def test_the_refusal_is_the_allowlist_and_not_the_denylist():
             "The rollback for this surface needs re-costing before it is "
             "attempted."
         )
+
+    # AND THE TWO SIDES REALLY ARE DECIDED BY THE ALLOWLIST, each in its own
+    # direction. Asserting only the refusals would let the admitted three be
+    # admitted by something nobody looked at.
+    for url in _STILL_REFUSED:
         assert not any(p.match(url) for p in readonly._ALLOWED_URL_PATTERNS), (
-            f"{url!r} matches an allowlist pattern, which contradicts the "
-            "test above and means the two are reading different state"
+            f"{url!r} matches an allowlist pattern, which contradicts "
+            "test_the_other_five_verticals_are_still_refused and means the "
+            "two are reading different state"
+        )
+    for url in _ADMITTED_NOW:
+        matching = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+        assert len(matching) == 1, (
+            f"{url!r} is admitted by {len(matching)} patterns, not one. The "
+            "revert is 'remove one line' only while exactly one line admits "
+            "it; two would make the rollback silently incomplete."
         )
 
 
@@ -161,36 +233,126 @@ def test_the_refusal_is_the_allowlist_and_not_the_denylist():
 # ---------------------------------------------------------------------------
 
 
-def test_one_narrow_pattern_is_all_that_stands_between(monkeypatch):
-    """PASSES TODAY, and that is the point.
+def test_removing_the_one_shipped_pattern_reverts_the_whole_surface(monkeypatch):
+    """THE ROLLBACK, NOW RUN IN THE LIVE DIRECTION.
 
-    It proves the refusal in section 2 is the absence of one line rather than
-    a defended boundary, and it proves the revert direction too: take the
-    pattern away and the address refuses again, in the same process.
+    Before the admission this test installed a candidate and showed it
+    admitted; the rollback it proved was the hypothetical half. **It now takes
+    the SHIPPED pattern out of the live tuple and shows every admitted address
+    refusing again** -- which is the direction an actual revert would travel,
+    and the one that was previously impossible to run.
 
-    `monkeypatch` restores the original tuple when the test ends, so no test
-    running after this one inherits a widened boundary.
+    `monkeypatch` restores the tuple when the test ends, so nothing after this
+    inherits a narrowed boundary.
     """
-    target = _SEARCH_RESULTS_URLS[1]
-    assert _refused(target), "precondition: the address refuses before we widen"
-
     original = readonly._ALLOWED_URL_PATTERNS
-    monkeypatch.setattr(
-        readonly,
-        "_ALLOWED_URL_PATTERNS",
-        original + (re.compile(_CANDIDATE_NARROW),),
+    for url in _ADMITTED_NOW:
+        assert not _refused(url), "precondition: the surface is admitted"
+
+    survivors = tuple(
+        pattern for pattern in original
+        if not any(pattern.match(url) for url in _ADMITTED_NOW)
     )
-    assert not _refused(target), (
-        f"expected the narrow candidate to admit {target!r}. If this fails, "
-        "either the candidate no longer matches LinkedIn's spelling or the "
-        "denylist has grown an entry that bites it -- and in the second case "
-        "the revert is no longer one line. Re-measure before rewriting this."
+    assert len(survivors) == len(original) - 1, (
+        f"removing what admits the people search took "
+        f"{len(original) - len(survivors)} patterns out, not one. The revert "
+        "is only 'delete one line' while exactly one line does the admitting."
     )
+
+    monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", survivors)
+    for url in _ADMITTED_NOW:
+        assert _refused(url), (
+            f"removing the one admitting pattern did NOT restore the refusal "
+            f"of {url!r} -- something else now admits it and the rollback "
+            "this file exists to prove does not work."
+        )
 
     monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", original)
-    assert _refused(target), (
-        "removing the pattern did NOT restore the refusal -- the rollback "
-        "this file exists to prove does not work"
+    for url in _ADMITTED_NOW:
+        assert not _refused(url), "restoring the tuple did not restore the read"
+
+
+def test_the_pattern_admits_the_spellings_LINKEDIN_ITSELF_EMITS():
+    """THE ONLY REAL-LINKEDIN EVIDENCE AVAILABLE FOR THIS SURFACE OFFLINE.
+
+    No capture of a `/search/` PAGE exists in this repository. But LinkedIn
+    links TO the people search from pages that WERE captured -- the
+    profile-views analytics page draws "search for who viewed you"
+    call-to-action links, and a job detail page carries a canned search -- so
+    those fixtures contain search URLs **that LinkedIn wrote**, not ones this
+    repository guessed.
+
+    Measured 2026-09-20: seven distinct spellings across three captures, and
+    the shipped pattern admits all seven. They carry `keywords`, `origin`,
+    `currentCompany` and `pastCompany` parameters in varying order and with
+    one of them lacking `keywords` entirely.
+
+    **WHAT THIS DOES AND DOES NOT ESTABLISH.** It establishes that the
+    admitted ADDRESS SHAPE is the one the platform really uses, which no
+    amount of reasoning about the regex could. It establishes NOTHING about
+    whether the shaper reads the resulting page correctly -- that needs a
+    capture of the page itself and a browser slot.
+
+    The hrefs are read from the fixtures at run time and never written down
+    here: they carry real query values, and a test that embedded them would
+    put into a tracked file exactly what this surface's whole discipline
+    exists to keep out.
+    """
+    hrefs: set[str] = set()
+    for name in (
+        "profile_views_analytics.html",
+        "profile_views_analytics_hydrated.html",
+        "job_detail_following_hydrated.html",
+    ):
+        path = pathlib.Path(__file__).resolve().parent / "fixtures" / name
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        hrefs |= set(re.findall(r'href="([^"]*search/results/people/[^"]*)"', text))
+
+    assert hrefs, (
+        "no LinkedIn-authored people-search href was found in any capture. "
+        "Either the fixtures moved or this test is now vacuous -- and a "
+        "vacuous version of THIS test would silently stop being the only "
+        "real-platform evidence the admission has."
+    )
+
+    refused = []
+    for href in hrefs:
+        url = href if href.startswith("http") else "https://www.linkedin.com" + href
+        # A captured href is HTML-escaped; a browser sends the unescaped form.
+        # BOTH must be admitted or the pattern is right about a spelling
+        # nothing actually uses.
+        for spelling in (url, url.replace("&amp;", "&")):
+            if _refused(spelling):
+                refused.append(re.sub(r"=[^&]*", "=<value>", spelling))
+
+    assert not refused, (
+        "the admission refuses a people-search address LinkedIn itself "
+        "emits, so the pattern is narrower than the platform: "
+        + "; ".join(sorted(set(refused)))
+    )
+
+
+def test_the_narrow_candidate_on_record_is_the_one_that_shipped(monkeypatch):
+    """THE MEASURED CANDIDATE AND THE SHIPPED LINE ARE THE SAME STRING.
+
+    `_CANDIDATE_NARROW` is what the pre-admission wave ran its blast radius
+    on. If the line that actually landed had drifted from it by one character,
+    every number in
+    `_audit/2026-09-19-search-admission-preconditions.md` would describe
+    something other than the boundary this repository ships -- a measurement
+    correctly taken of the wrong artifact, which is this repo's most expensive
+    recurring defect.
+    """
+    shipped = [
+        pattern.pattern for pattern in readonly._ALLOWED_URL_PATTERNS
+        if pattern.match(_ADMITTED_NOW[0])
+    ]
+    assert shipped == [_CANDIDATE_NARROW], (
+        "the pattern on disk is not the candidate that was measured:\n"
+        f"  measured: {_CANDIDATE_NARROW!r}\n"
+        f"  shipped : {shipped!r}"
     )
 
 

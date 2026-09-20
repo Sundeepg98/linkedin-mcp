@@ -242,14 +242,25 @@ def test_the_pattern_carries_no_member_segment():
 def test_the_address_this_reading_informs_is_still_refused():
     """The creator surfaces buy nothing next door.
 
-    ``/search/results/people/`` is refused and stays refused; so does the
-    newsletters analytics path the census names beside these rows. An entry
-    that quietly widened either would be the failure this repository has
-    written down more than once: a load argued for one purpose reaching a
-    second surface nobody ruled on.
+    The newsletters analytics path the census names beside these rows is
+    refused and stays refused. An entry that quietly widened it would be the
+    failure this repository has written down more than once: a load argued for
+    one purpose reaching a second surface nobody ruled on.
+
+    **``/search/results/people/`` WAS THE FIRST ADDRESS HERE AND IS NOW
+    ADMITTED, AND THIS TEST STILL MEANS WHAT IT MEANT.** It was admitted
+    2026-09-20 under `09f9961` section 6 -- its own ruling, its own blast
+    radius, and a name-free shaper in the same commit -- and NOT by anything
+    the creator-analytics entries reach. The thing this test forbids is a
+    creator-analytics load being the argument that opens a second surface;
+    that did not happen, so the case is REPLACED by search-family spellings
+    that are still refused rather than deleted. The sub-path is the sharper
+    one: it is the spelling that would address a PERSON, and the admitted
+    pattern takes no sub-path.
     """
     for url in (
-        "https://www.linkedin.com/search/results/people/",
+        "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
+        "https://www.linkedin.com/search/results/companies/?keywords=x",
         "https://www.linkedin.com/analytics/creator/newsletters/",
     ):
         assert not _allowed(url), url

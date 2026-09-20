@@ -220,11 +220,129 @@ DOT_SEGMENTS: frozenset[str] = frozenset({"..", "."})
 
 _HOST = "www.linkedin.com"
 
+#: THE ONE ADDRESS THIS MODULE'S TOOL OPENS, and it is a LITERAL with no
+#: caller-supplied part. **THIS CONSTANT IS NOT AN ADMISSION AND CANNOT BE
+#: ONE** -- it is a string; the navigation boundary is a separate module and
+#: nothing here edits it. The entry that admits this address lives there, with
+#: the measurement beside it, and 2026-09-20 is the day the two landed
+#: together.
+#:
+#: **IT CARRIES NO QUERY, AND THAT IS THE DESIGN RATHER THAN AN OMISSION.** A
+#: search query is where a person's name is typed, so a tool that accepted one
+#: would take a needle as a parameter -- the exact thing every function in this
+#: module is asserted not to do, one layer up where the assertion does not
+#: reach. ``_audit/2026-09-19-search-admission-preconditions.md`` section B.4
+#: hands the admitting wave a problem that follows from accepting one: eight of
+#: eleven ordinary search keywords (``password``, ``settings``, ``invitation``
+#: ...) are refused by the forbidden-substring list, so a keyword-taking tool
+#: must decide what to answer when a caller's word trips a write guard.
+#: **Taking no keyword dissolves that question instead of answering it.**
+#:
+#: The pattern admits a query shape so the address stays usable if a later
+#: wave rules that a keyword may be passed. Nothing today passes one.
+PEOPLE_SEARCH_URL = f"https://{_HOST}/search/results/people/"
+
 #: THE SCRIPT LIVES IN ``dom.py``. Only that module may waive ``evaluate``, and
 #: every executed script is declared and scanned there -- so putting page
 #: contact here would spread a narrow allowance into a habit. This module keeps
 #: the vocabulary, the closed alphabet and the tallying.
 _CLASSIFY_IN_PAGE = dom.SEARCH_RESULTS_JS
+
+
+#: WHY THE READERS BELOW NEVER CALL ``int()`` ON WHAT THE PAGE HANDS BACK.
+#:
+#: **MEASURED 2026-09-20, and it was a hole rather than a tidy-up.** The
+#: shipped form was ``int(value)``, and ``int()`` PUTS THE VALUE IT REFUSED
+#: VERBATIM INTO ITS OWN ValueError::
+#:
+#:     ValueError: invalid literal for int() with base 10: '<the label>'
+#:
+#: That exception leaves the reader, is caught by ``server._error``, and is
+#: rendered through ``config.scrub`` -- which substitutes THIS SERVER'S OWN
+#: PATHS and nothing else, **because a name has no shape to scrub and
+#: ``tests/test_no_committed_identity.py`` says so in its first line.** So a
+#: string the page put in a count slot reached a caller INTACT, inside an
+#: error message, on the one surface whose every row is a third party.
+#:
+#: Three payloads reached it, driven through the real functions: a string
+#: inside ``counts``, a string in the ``anchors`` scalar, and the first of
+#: those again through :func:`read_filters`. The module docstring's claim is
+#: *"no string from the document, by construction"* -- and the construction
+#: had an exception-shaped gap in it.
+#:
+#: The ruling that admits this surface names *"a measured case of the shaper
+#: emitting a name, a slug, a member id or an urn"* as the thing that REVOKES
+#: the admission. This was one, found before the admission rather than after.
+
+
+def _as_int(value: Any) -> int | None:
+    """An integer, or ``None``. IT NEVER RAISES AND NEVER QUOTES ITS INPUT.
+
+    Both halves are the contract. ``int()`` answers the same question and
+    carries the rejected value out in its message, which on this surface is
+    how a name leaves the process. The only things this can ever return are
+    an integer it was handed and ``None``, so it can carry nothing.
+
+    ``bool`` is refused deliberately: ``True`` is an ``int`` in Python, and a
+    count of ``True`` results is a reading nobody took.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    return None
+
+
+def _counts_only(values: Any) -> tuple[list[int], int]:
+    """Position-preserving integers, and how many entries were not integers.
+
+    **A NON-INTEGER IS SUBSTITUTED, NEVER DROPPED**, and the difference is the
+    hazard class. ``counts`` is POSITIONAL -- position N is
+    ``RESULT_KINDS[N]`` -- so dropping one entry renames every kind behind it,
+    and index 0 is ``person_result``. That is exactly the rename
+    :func:`term_for` refuses to commit by clamping, arriving one function
+    earlier.
+
+    The substitute is 0 and the substitution is COUNTED, so a page answering
+    with something other than a number becomes a VISIBLE INTEGER rather than a
+    silent shift or a raised string.
+    """
+    if not isinstance(values, (list, tuple)):
+        return [], 0 if values is None else 1
+    out: list[int] = []
+    refused = 0
+    for value in values:
+        number = _as_int(value)
+        if number is None:
+            refused += 1
+            number = 0
+        out.append(number)
+    return out, refused
+
+
+def _scalars_only(
+    raw: Any, names: tuple[tuple[str, str], ...]
+) -> tuple[dict[str, int], int]:
+    """``{output name: integer}``, and how many values were not integers.
+
+    **ABSENT IS NOT THE SAME AS WRONG**, and they are counted differently. A
+    key the page never set reads 0 and is NOT counted -- that is the shipped
+    ``or 0`` behaviour and it means "I was not told". A key set to something
+    that is not an integer IS counted, because that is the page answering with
+    a string, and a string from this page is a name until shown otherwise.
+    """
+    source = raw if isinstance(raw, dict) else {}
+    out: dict[str, int] = {}
+    refused = 0
+    for output_name, key in names:
+        value = source.get(key)
+        number = _as_int(value)
+        if number is None:
+            if value is not None:
+                refused += 1
+            number = 0
+        out[output_name] = number
+    return out, refused
 
 
 async def read_results(page: Any, html: str = "") -> dict[str, Any]:
@@ -239,6 +357,11 @@ async def read_results(page: Any, html: str = "") -> dict[str, Any]:
     prove the classifier works and refuses the adversarial routes, at no page
     load and with no navigation. It is a parameter of the READER, never of
     :func:`tally`.
+
+    ``values_refused`` is the count of fields the page answered with something
+    that was not an integer. It is normally 0; a nonzero is a FINDING rather
+    than a shape, and it is reported as a number precisely because the value
+    that caused it may not be. See :func:`_as_int`.
     """
     raw = await dom.read_search_result_classes(
         page,
@@ -247,13 +370,24 @@ async def read_results(page: Any, html: str = "") -> dict[str, Any]:
         host=_HOST,
         html=html or "",
     )
-    counts = list((raw or {}).get("counts") or [])
+    source = raw if isinstance(raw, dict) else {}
+    counts, counts_refused = _counts_only(source.get("counts"))
+    scalars, scalars_refused = _scalars_only(
+        source,
+        (
+            ("anchors_seen", "anchors"),
+            ("queries_present", "queries_present"),
+            ("numeric_entity", "numeric_entity"),
+            ("non_numeric_entity", "non_numeric_entity"),
+        ),
+    )
     return {
-        "anchors_seen": int((raw or {}).get("anchors") or 0),
-        "counts": [int(value) for value in counts],
-        "queries_present": int((raw or {}).get("queries_present") or 0),
-        "numeric_entity": int((raw or {}).get("numeric_entity") or 0),
-        "non_numeric_entity": int((raw or {}).get("non_numeric_entity") or 0),
+        "anchors_seen": scalars["anchors_seen"],
+        "counts": counts,
+        "queries_present": scalars["queries_present"],
+        "numeric_entity": scalars["numeric_entity"],
+        "non_numeric_entity": scalars["non_numeric_entity"],
+        "values_refused": counts_refused + scalars_refused,
     }
 
 
@@ -275,8 +409,14 @@ def tally(counts: Iterable[int], queries_present: int = 0) -> dict[str, Any]:
     A short list is reported as such rather than padded, because a missing kind
     and a zero-count kind are different answers, and collapsing them is how a
     reader says "none of those" when it means "I was not told".
+
+    **"CANNOT BE HANDED A NEEDLE EVEN BY MISTAKE" IS NOW TRUE OF THE
+    BEHAVIOUR AND NOT ONLY OF THE SIGNATURE.** It coerced with ``int()`` until
+    2026-09-20, so handing it a string raised an exception QUOTING that string
+    -- the sentence was a claim about the parameter's type while the mechanism
+    said something weaker. It now refuses the same way the readers do.
     """
-    values = [int(value) for value in counts]
+    values, _refused = _counts_only(list(counts))
     by_kind = {
         RESULT_KINDS[position]: value
         for position, value in enumerate(values)
@@ -438,6 +578,11 @@ async def read_filters(page: Any, html: str = "") -> dict[str, Any]:
     page precisely because a label on this surface can be a person's name.
 
     ``html`` IS THE CONTROL PATH, as in :func:`read_results`.
+
+    ``values_refused`` carries the same meaning as in :func:`read_results`,
+    and the hazard is sharper here: the thing a filter control holds that is
+    not an integer is its LABEL, and a label on this surface reads
+    ``Connections of <a person>``.
     """
     raw = await dom.read_search_filters(
         page,
@@ -445,15 +590,27 @@ async def read_filters(page: Any, html: str = "") -> dict[str, Any]:
         term_count=len(FILTER_TERMS),
         html=html or "",
     )
-    counts = list((raw or {}).get("counts") or [])
+    source = raw if isinstance(raw, dict) else {}
+    counts, counts_refused = _counts_only(source.get("counts"))
+    scalars, scalars_refused = _scalars_only(
+        source,
+        (
+            ("controls_seen", "controls"),
+            ("matched_controls", "matched_controls"),
+            # THE DENOMINATOR, and it is reported because without it a page
+            # with a changed selector is indistinguishable from a page with
+            # no filters.
+            ("unmatched_controls", "unmatched_controls"),
+            ("empty_labels", "empty_labels"),
+        ),
+    )
     return {
-        "controls_seen": int((raw or {}).get("controls") or 0),
-        "counts": [int(value) for value in counts],
-        "matched_controls": int((raw or {}).get("matched_controls") or 0),
-        # THE DENOMINATOR, and it is reported because without it a page with a
-        # changed selector is indistinguishable from a page with no filters.
-        "unmatched_controls": int((raw or {}).get("unmatched_controls") or 0),
-        "empty_labels": int((raw or {}).get("empty_labels") or 0),
+        "controls_seen": scalars["controls_seen"],
+        "counts": counts,
+        "matched_controls": scalars["matched_controls"],
+        "unmatched_controls": scalars["unmatched_controls"],
+        "empty_labels": scalars["empty_labels"],
+        "values_refused": counts_refused + scalars_refused,
     }
 
 
@@ -480,8 +637,11 @@ def tally_filters(counts: Iterable[int]) -> dict[str, Any]:
 
     A short list is reported as such rather than padded -- "the page has no
     School filter" and "I was told about eight terms" are different answers.
+
+    Refuses a non-integer rather than raising on it, for the reason given in
+    :func:`tally`.
     """
-    values = [int(value) for value in counts]
+    values, _refused = _counts_only(list(counts))
     by_term = {
         FILTER_TERMS[position]: value
         for position, value in enumerate(values)

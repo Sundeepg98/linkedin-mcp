@@ -1332,7 +1332,18 @@ BLOCKED = [
     "https://www.linkedin.com/voyager/api/relationships/invitations",
     "https://www.linkedin.com/notifications/?action=markAllRead",
     # Other people's data at scale, and other hosts entirely.
-    "https://www.linkedin.com/search/results/people/?keywords=cto",
+    #
+    # ``/search/results/people/?keywords=cto`` WAS HERE UNTIL 2026-09-20 and
+    # is now READABLE -- the admission at `09f9961` section 6, landed with its
+    # shaper and its tool. **THE CATEGORY THIS ENTRY SAT IN IS STILL RIGHT**,
+    # which is why the replacement is a sub-path rather than nothing: a people
+    # search IS other people's data at scale, and what the ruling admits is a
+    # READ OF THE PAGE, never a reach at anyone listed on it. The shipped
+    # pattern takes no sub-path, so no row is addressable, and the shaper in
+    # front of it returns counts -- `linkedin_server/search_results.py`, with
+    # its name-freedom proof in
+    # `tests/test_the_search_shaper_emits_no_name.py`.
+    "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
     "https://www.linkedin.com/company/acme/people/",
     "https://evil.example.com/steal",
     "http://www.linkedin.com/feed/",
@@ -2098,12 +2109,59 @@ MUST_STAY_UNREADABLE = (
     # the sibling nobody may reach for. It carries ``/follow`` and the new
     # exemption does not excuse that substring for any address.
     "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/",
-    # PEOPLE SEARCH, which is the GENERAL case where connections is the
-    # specific one. It has no allowlist pattern and no written reason, and the
-    # lead ruled it a SEPARATE decision rather than part of this one. Pinned
-    # here so that admitting it later is a deliberate edit to this table
-    # rather than a side effect of some other widening.
-    'https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D',
+    # ``https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D``
+    # WAS HERE UNTIL 2026-09-20 and is now READABLE. **THIS IS THE DELIBERATE
+    # EDIT THE OLD COMMENT ASKED FOR**, which read: *"pinned here so that
+    # admitting it later is a deliberate edit to this table rather than a side
+    # effect of some other widening."* It was neither a side effect nor a
+    # widening of something else -- it is the ruling at `09f9961` section 6,
+    # granted on five conditions, landing with its shaper
+    # (`linkedin_server/search_results.py`), its tool
+    # (`linkedin_people_search_shape`) and its name-freedom proof
+    # (`tests/test_the_search_shaper_emits_no_name.py`) in one commit, which
+    # is condition 1.
+    #
+    # IT IS RECORDED RATHER THAN SILENTLY DROPPED, and what replaces it is the
+    # set of neighbours the admission must NOT have carried -- the same
+    # STRONGER check the company-page transition below makes. The risk was
+    # never that one query opened; it was that the `/search/` FAMILY did.
+    # Measured 2026-09-20 over a 90-address corpus
+    # (`scripts/_probe_search_admission_blast_radius.py`): the family wildcard
+    # reaches EIGHTEEN addresses and the shipped people-only pattern reaches
+    # FIVE, and every one of the eighteen is defended by nothing but the
+    # absence of a rule, because no forbidden substring names any `/search/`
+    # address at all.
+    #
+    # THE SUB-PATH FIRST, because it is the one spelling under this root where
+    # the member-profile cause comes straight back: a search result row IS a
+    # person, and a pattern that took a sub-path would let this server address
+    # one. The shipped pattern takes NO sub-path.
+    "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
+    # THE TRAVERSAL WHOSE NORMALISED FORM ENDS THE ACCOUNT. A browser resolves
+    # `..` before it issues a request; `assert_read_url` matches the string it
+    # was handed. The family wildcard admits this and NO forbidden substring
+    # names it -- the denylist refuses its `/psettings/` and `/invite`
+    # siblings and misses this one. A closed path segment cannot be followed
+    # by `..`, which is what refuses it here; the anchor is not.
+    "https://www.linkedin.com/search/results/people/../../mypreferences/d/close-account",
+    # THE SIBLING VERTICALS, each its own third-party-dense surface and each a
+    # census row this admission deliberately did not buy: groups (`N 161`,
+    # `M C70`), events (`N 179`), content (`N 194`). The ruling's reopening
+    # clause gives them a route -- a request to widen, with its own blast
+    # radius -- and riding in on this entry is not it.
+    "https://www.linkedin.com/search/results/all/?keywords=x",
+    "https://www.linkedin.com/search/results/companies/?keywords=x",
+    "https://www.linkedin.com/search/results/groups/?keywords=x",
+    "https://www.linkedin.com/search/results/schools/?keywords=x",
+    "https://www.linkedin.com/search/results/events/?keywords=x",
+    "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
+    # THE FAMILY ROOTS, which are what a prefix pattern would have opened.
+    "https://www.linkedin.com/search/",
+    "https://www.linkedin.com/search/results/",
+    # THE CONTAINMENT TRAP: a vertical whose name CONTAINS the hazard one.
+    # `menus.py`'s `Star Anise` scar arriving on an address, and the reason
+    # the shipped comparison is segment EQUALITY rather than a prefix.
+    "https://www.linkedin.com/search/results/peoplefinder/",
     # ``https://www.linkedin.com/company/example-co/`` WAS HERE UNTIL
     # 2026-09-20 and is now READABLE, by the ruling recorded on the allowlist
     # entry itself: an ORGANISATION Page emits no view receipt, which is the

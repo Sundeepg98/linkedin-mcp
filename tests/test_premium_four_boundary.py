@@ -120,7 +120,18 @@ NOT_BOUGHT = (
     f"{BASE}/analytics/creator/",
     # And the surface the search-appearances entry says it deliberately did
     # not buy, restated so a later widening cannot quietly reach it.
-    f"{BASE}/search/results/people/",
+    #
+    # ``{BASE}/search/results/people/`` STOOD HERE UNTIL 2026-09-20 and is now
+    # admitted -- **not by any widening this gate watches**, but by its own
+    # ruling (`09f9961` section 6), landing with a name-free shaper and the
+    # tool `linkedin_people_search_shape` in one commit. This entry's JOB is
+    # unchanged: it exists so the PREMIUM-FOUR admission cannot reach the
+    # search family. So it is replaced rather than deleted, by two spellings
+    # that are still refused and that keep testing exactly that -- and the
+    # replacement is STRICTLY STRONGER, because the sub-path is the spelling
+    # that would address one PERSON rather than the page listing them.
+    f"{BASE}/search/results/people/example-person-a1b2c3/",
+    f"{BASE}/search/results/companies/?keywords=x",
 )
 
 

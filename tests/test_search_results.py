@@ -951,9 +951,18 @@ def test_THIS_CONTROL_CAN_FAIL_the_firing_guard_catches_a_real_offender() -> Non
 def test_the_module_admits_nothing() -> None:
     """Condition 1 in test form, from this side: the shaper admits no address.
 
-    The admission is a LATER commit that consumes this module. A shaper that
-    quietly carried an allowlist entry would have satisfied neither half of
-    condition 1 -- it would have violated it.
+    **THE ADMISSION LANDED 2026-09-20, IN THE SAME COMMIT AS THIS MODULE'S
+    TOOL, AND THIS TEST DID NOT RELAX.** It was written while the admission
+    was still a later commit; its job now is the durable one, which is the
+    better one: the permission to open an address lives in the navigation
+    boundary and NOWHERE ELSE, so a future wave cannot widen the surface by
+    editing the shaper. A shaper that quietly carried an allowlist entry would
+    have satisfied neither half of condition 1 -- it would have violated it.
+
+    It caught the admitting wave's own comment on the first run, which is a
+    grep-shaped false positive and was repaired by rewording the comment
+    rather than by loosening the token list. **A guard that is narrowed the
+    first time it inconveniences its author is not a guard.**
     """
     source = inspect.getsource(search_results)
     for forbidden in ("ALLOW", "ADMIT", "readonly.py", "PERMITTED_"):

@@ -6064,3 +6064,224 @@ branch is published is the same error as a wave reporting its work by a SHA on
 that branch**, and it was committed in the file whose subject is that error.
 Controls now resolve `master`, and `_on_master()` fails loudly rather than
 skipping if it cannot.
+
+---
+
+## 42. THE SEARCH SHAPER'S NAME-FREEDOM PROOF, AND THE LEAK THAT WAS IN THE EXCEPTION (search-admission-close, 2026-09-20)
+
+`tests/test_the_search_shaper_emits_no_name.py`, driven red by
+`scripts/_check_the_shaper_leak_guard_can_fail.py`.
+
+**WHAT IT CHECKS.** That no string from a search-results page can cross
+`search_results.read_results` / `read_filters` into a caller. It plants a
+name and a slug in every position a document value can occupy, drives the
+REAL reader functions, and walks BOTH the return value and any raised
+exception with `tests/leakwalk.walk`.
+
+**SHOWN FAILING, ON THE CODE THAT SHIPPED.** The plant is not an invented
+mutation: `scripts/_check_the_shaper_leak_guard_can_fail.py` points
+`search_results._as_int` back at `int`, which is what both readers used until
+this entry was written, and 3 of 3 assertions go red and green again on
+removal, in one process, printed side by side. **A control whose defect is the
+real previous state needs no argument that it is representative.**
+
+### THE DEFECT IT FOUND, WHICH WAS LIVE
+
+    ValueError: invalid literal for int() with base 10: '<a label from the page>'
+
+**`int()` PUTS THE VALUE IT REFUSED VERBATIM INTO ITS OWN EXCEPTION.** Three
+payloads reached it -- a string inside `counts`, a string in the `anchors`
+scalar, and the first again through `read_filters`. The exception leaves the
+reader, `server._error` catches it, and `config.scrub` renders it -- and scrub
+substitutes THIS SERVER'S OWN PATHS and nothing else, because **a name has no
+shape to scrub**, which `tests/test_no_committed_identity.py` states in its own
+first line. So the label arrived at the caller intact, on the one surface whose
+every row is a third party.
+
+> **AN INTEGER-ONLY RETURN VALUE DOES NOT MAKE A FUNCTION INTEGER-ONLY,
+> BECAUSE AN EXCEPTION IS NOT A RETURN VALUE.**
+
+The module docstring claimed "no string from the document, by construction",
+and the claim was true of every path anybody had looked at. `leakwalk` had
+already written this lesson down for CREDENTIALS -- *"a credential in a log
+record, in an exception's `args` ... is invisible to it"* -- and **nobody had
+applied it to IDENTIFIERS.** The walker was reused; only the aim was new.
+
+### THE THREE THINGS THAT MADE THE PROOF POSSIBLE WITHOUT A CAPTURE
+
+There is no capture of a `/search/` page in this repository and no browser was
+available. That turned out not to matter, and the reasoning generalises:
+
+1. **NAME-FREEDOM IS INPUT-INDEPENDENT WHERE THE RETURN IS BUILT FROM
+   ACCUMULATORS.** The page script returns integer counters and the Python
+   reader rebuilds a fixed set of integer fields. The set of strings that can
+   cross is empty for EVERY input, so **a hostile payload is a strictly
+   stronger probe than any capture** -- it supplies values no real page would
+   produce. A capture exercises one input; the adversarial payload exercises
+   the shape of all of them.
+2. **A LEAK TEST MUST WALK THE ERROR CHANNEL**, or it measures the half that
+   was already safe.
+3. **THE MARKER MUST BE LONG AND SELF-EVIDENTLY INVENTED.** Both plants carry
+   `example`, which is in `SYNTHETIC_SLUG_TOKENS`, so the identity gate passes
+   them on sight rather than on a declaration -- a guard is not exempt from
+   what it guards.
+
+### AND THE REPAIR HAS A SHAPE WORTH COPYING
+
+`_as_int` never raises and never quotes its input; the only things it can
+return are an integer it was given and `None`. A refused value is
+**SUBSTITUTED, NEVER DROPPED** -- `counts` is positional and index 0 is
+`person_result`, so dropping one entry renames a page of people into a page of
+companies, which is the rename `term_for` already refuses to commit by
+clamping. The substitution is **counted** into `values_refused`, so the anomaly
+is a loud integer rather than a silent shift.
+
+### FILED WITH A MEASUREMENT, NOT FIXED
+
+`anchors.read_anchors` carries the identical coercion and **leaks**, measured
+with the same plant the same day. `collections_page.read_collections` does not.
+Not repaired here: `anchors.py` is an already-admitted surface with consumers
+in `company_page.py` and `server.py`, and repairing it would widen an
+admission commit's blast radius past the surface it was sent to close. The
+repair is the three helpers above, copied.
+
+### THE ADJACENT GUARD THAT CAUGHT ITS OWN AUTHOR, AND WAS NOT NARROWED
+
+`test_the_module_admits_nothing` greps the shaper's source for `ALLOW`,
+`ADMIT`, `readonly.py`, `PERMITTED_`. It went red on this wave's own COMMENT,
+which named the allowlist constant in prose -- the register's standing
+observation that prose about a mechanism is indistinguishable from the
+mechanism to a matcher reading shape, arriving for the Nth time, this time as a
+FALSE POSITIVE rather than a quiet false negative. **Repaired by rewording the
+comment, not by loosening the token list.** A guard that is narrowed the first
+time it inconveniences its author is not a guard -- and its docstring now
+records that the admission has landed and that its job is the durable one:
+permission to open an address lives in the navigation boundary and nowhere
+else.
+
+### 42a. THE DETECTOR WAS A BARE SUBSTRING HUNT AND ITS OWN CONTROL CONVICTED IT
+
+Added the same day, by the control rather than by review.
+
+The tool-level assertions needed a control: a payload that DOES publish the
+landed url, which the detector must complain about. The fake browser lands on
+the address a browser really lands on -- and there the planted name is
+**percent-encoded**:
+
+    hunted:    Exampleperson Markersurname
+    published: ...?keywords=Exampleperson%20Markersurname
+
+**The detector reported that payload CLEAN.** Every no-leak assertion in the
+file was, at that moment, hunting a spelling this surface does not use --
+because the surface that matters here is a QUERY STRING, and a query string is
+where spaces stop being spaces.
+
+This is `leakwalk.url_spellings`'s own recorded scar arriving one surface over.
+Its docstring: *a committed fixture leaked a real job title while its check
+reported "69/69 forbidden strings absent", because the forbidden list held the
+SPACED spelling and the apply link spelled it with hyphens.* The helper
+existed; this file had not called it.
+
+> **A LIST OF LITERALS ONLY CATCHES THE SPELLING SOMEBODY TYPED**, and the
+> author of a leak test types the spelling they are thinking of, which is the
+> one the code they are testing does not use.
+
+Repaired by generating the hunted set from `url_spellings` -- 2 literals became
+9 spellings -- and NOT by adding `%20` to a hand-written list, which would have
+fixed this instance and left the next encoding to be discovered the same way.
+
+**THE PRODUCTION CODE WAS NEVER WRONG HERE.** The tool publishes a boolean and
+not the landed url, so nothing leaked. What was wrong was the instrument that
+certified it, which would have gone on certifying it after a future edit made
+it false. **A green from a detector that cannot see the encoding in use is the
+same green it gives when there is nothing to find**, and that is the entire
+reason this register requires a shown-failing control before an entry.
+
+### 42b. THE PLATFORM'S OWN SPELLINGS, BORROWED FROM CAPTURES OF OTHER PAGES
+
+`test_the_pattern_admits_the_spellings_LINKEDIN_ITSELF_EMITS` in
+`tests/test_the_search_results_address_is_refused_before_admission.py`.
+
+**THE MOVE WORTH REUSING: when a surface has never been captured, check
+whether another surface's capture LINKS to it.** No `/search/` page has ever
+been opened by this server, so there was no evidence about the address beyond
+what this repository had written down about itself -- and a pattern validated
+only against addresses this repository invented is a pattern validated against
+its own assumptions. But LinkedIn links TO the people search from pages that
+WERE captured: the profile-views analytics page draws a "search for who viewed
+you" call to action, and a job-detail capture carries a canned search. **Seven
+distinct people-search URLs that the PLATFORM wrote were already sitting in
+tracked fixtures**, and nobody had looked.
+
+    distinct LinkedIn-authored people-search hrefs   7
+    admitted by the shipped pattern                  7 of 7
+
+SHOWN FAILING, two plants, in one process:
+
+    shipped pattern                GREEN
+    plant: pattern with NO query   red -- refuses an address LinkedIn emits
+    plant: admission removed       red
+    restored                       GREEN
+
+**AND IT CHANGED A DESIGN ANSWER RATHER THAN CONFIRMING ONE.** The candidate
+list carried a "structured query" spelling that constrains what may follow the
+`?`, described in its own pre-admission audit as the narrowest option at the
+cost of being a new shape. This check says the open-query clause is
+LOAD-BEARING: a pattern admitting only the bare address refuses every spelling
+the platform actually produces. The trade was never "narrow versus
+house-style"; it was "narrow versus matching reality", and that is only
+visible once something real is in the corpus.
+
+**THE VACUITY GUARD IS PART OF THE INSTRUMENT.** It asserts the href set is
+non-empty before it asserts anything about the verdicts, because the fixtures
+could move or be renamed and a check that found zero addresses would go green
+having measured nothing -- and this one is the ONLY real-platform evidence the
+admission has, so its silent failure would be the expensive one.
+
+**IT IS SCOPED HONESTLY.** It is evidence about the ADDRESS and says nothing
+about the PAGE. The shaper's fit to LinkedIn's rendered dialect stays
+unmeasured until a browser slot, and the tool's payload says so in its own
+`not_claimed` field.
+
+### 42c. A REFUSED ADDRESS IS LOAD-BEARING FURNITURE IN OTHER WAVES' GUARDS
+
+Not an instrument. A finding about what ADMITTING one costs, measured because
+the full suite was run and would have been invisible otherwise.
+
+`/search/results/people/` was the densest third-party surface this server
+refused, which made it the natural thing to point at when writing *"my pattern
+did not leak into the neighbourhood."* **Three boundary tests belonging to
+three unrelated surfaces had each done exactly that:**
+
+    tests/test_premium_four_boundary.py        test_the_neighbours_stay_refused
+    tests/test_search_appearances.py           test_the_neighbours_of_that_address_are_still_refused
+    tests/test_analytics_creator_boundary.py   test_the_address_this_reading_informs_is_still_refused
+
+Admitting it broke all three at once, in files whose subject has nothing to do
+with search and which name no symbol in the diff.
+
+> **ADMITTING AN ADDRESS DOES NOT ONLY CHANGE THE BOUNDARY. IT FALSIFIES EVERY
+> SENTENCE ELSEWHERE THAT USED THAT ADDRESS AS AN EXAMPLE OF A REFUSAL** --
+> and those sentences are, by construction, in the guards of waves that had no
+> reason to watch yours.
+
+**THE REPAIR RULE, AND IT IS THE TRANSFERABLE PART.** In none of the three was
+the property worth guarding *"that one url is red"*; it was *"THIS admission
+does not reach that family."* So none was deleted and none was weakened: each
+canary was replaced by two spellings still refused -- a people-search SUB-PATH
+and a sibling vertical -- which leaves all three **strictly stronger**, because
+a sub-path is the spelling that would address one PERSON rather than the page
+listing them, and the admitted pattern takes no sub-path.
+
+**ASK WHAT A GUARD IS FOR BEFORE EDITING IT, because a canary and the property
+it stands for are not the same claim, and only the canary expired.**
+
+One of the three needed more than a substitution. `test_search_appearances`'s
+case existed because that reading was commissioned to INFORM a ruling on people
+search -- so admitting the page under consideration would have been using one
+load of it as the evidence that authorises it. That bootstrap is still
+forbidden and is NOT what happened, and the repair had to say so in the
+docstring rather than quietly swap a url: the distinction between "this
+address is refused" and "this address was not opened by THIS argument" is the
+entire reason the case was written, and a swap that lost it would have
+retired a real guard while appearing to keep it.
