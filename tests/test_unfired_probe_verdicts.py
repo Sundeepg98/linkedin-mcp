@@ -191,6 +191,70 @@ def test_an_errored_reading_is_never_treated_as_a_zero_badge():
 
 
 # --------------------------------------------------------------------------
+# MODE 4 -- THE PANEL JUDGEMENT. Two of these branches exist only because a
+# ratchet caught them missing, so each is shown FIRING here rather than
+# assumed. A branch nobody can reach is the same defect as a check that
+# cannot fail.
+# --------------------------------------------------------------------------
+
+_ALL_ZERO = {"percentile": 0, "rank": 0, "skill": 0, "%": 0}
+
+
+def test_an_empty_sample_refuses_to_judge_either_row():
+    """THE PLANTED DEFECT: zero panels read, every tally therefore zero.
+
+    Without this branch the all-zero tallies fall into each `else` and the
+    probe prints NOT DELIVERED -- a negative claim about LinkedIn drawn from
+    nothing observed. It must decline to judge instead.
+    """
+    lines = "\n".join(insights.judge_panels(0, dict(_ALL_ZERO), 0))
+    assert "NOT JUDGED" in lines
+    assert "OBSERVED NOTHING" in lines
+    assert "NOT DELIVERED" not in lines, (
+        "an empty sample produced a NOT DELIVERED verdict: " + lines
+    )
+
+
+def test_a_missing_percentile_with_no_gated_control_is_not_blamed_on_premium():
+    """THE PLANTED DEFECT: no percentile AND the gated control never seen.
+
+    The ordinary reading blames Premium gating. With zero sightings of the
+    control that attribution is unobserved, and stating it would name a
+    mechanism this run never saw.
+    """
+    lines = "\n".join(insights.judge_panels(11, dict(_ALL_ZERO), 0))
+    assert "THE USUAL EXPLANATION DOES NOT" in lines
+    assert "CANNOT be attributed to Premium gating" in lines
+
+
+def test_the_ordinary_reading_still_blames_premium_when_it_was_seen():
+    """THE POSITIVE CONTROL, and it is the shape the real run produced:
+    11 panels read, no percentile token, the gated control drawn on 7."""
+    lines = "\n".join(insights.judge_panels(11, dict(_ALL_ZERO), 7))
+    assert "NOT DELIVERED" in lines
+    assert "sits behind the" in lines
+    assert "7 of 11" in lines
+    assert "THE USUAL EXPLANATION DOES NOT" not in lines
+
+
+def test_a_percentile_token_stops_the_row_being_written_off():
+    """The other direction: if the token IS there, do not print NOT DELIVERED."""
+    hits = dict(_ALL_ZERO)
+    hits["percentile"] = 3
+    lines = "\n".join(insights.judge_panels(11, hits, 7))
+    assert "inspect before banking" in lines
+    assert "NOT DELIVERED" not in lines.split("J 122")[0]
+
+
+def test_a_skills_token_stops_the_partial_verdict():
+    hits = dict(_ALL_ZERO)
+    hits["skill"] = 2
+    lines = "\n".join(insights.judge_panels(11, hits, 7))
+    assert "a skills token IS present" in lines
+    assert "PARTIAL" not in lines
+
+
+# --------------------------------------------------------------------------
 # The two probes must agree, because they carry the same three functions.
 # --------------------------------------------------------------------------
 
