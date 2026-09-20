@@ -183,6 +183,47 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, premium-four wave. A DOCUMENT POINTING AT THE REGISTER ENTRY
+    # THAT HOLDS ITS OWN FINDING.
+    ("2026-09-20-the-premium-four.md", "INSTRUMENTS.md"): (
+        "THE LINE IS A FILING POINTER, NOT A VERDICT ON THE REGISTER. It reads "
+        "'The defect is against the SCRIPT and is filed at INSTRUMENTS.md "
+        "31.2', and 31.2 is a section THIS SAME WAVE wrote in the same commit "
+        "series -- as 29.2, renumbered to 31 on merge because two other waves "
+        "published 29 and 30 first. "
+        "A wave citing the register entry that carries its own finding "
+        "is an attribution -- the direction a reader needs in order to find the "
+        "detail -- and a CORRECTED BY marker would assert that INSTRUMENTS.md "
+        "had said something wrong, which nothing here claims. The correction "
+        "vocabulary the scan matched ('defect') belongs to the SUBJECT of the "
+        "sentence, a probe script in another wave's file, not to its object. "
+        "THIS PAIR WAS CAUGHT AFTER THE GATE HAD ALREADY READ THE INDEX and "
+        "therefore after the commit that introduced it, which is its own "
+        "lesson: an amendment made after staging is an unchecked change."
+    ),
+
+    # 2026-09-20, premium-four wave. Triaged by READING THE LINE, which is what
+    # this table asks for -- and the line is a DISCLAIMER of the very thing the
+    # scan suspects.
+    ("2026-09-20-the-premium-four.md", "2026-09-20-the-live-capture.md"): (
+        "THE SENTENCE THAT TRIPS THE SCAN IS THE ONE REFUSING TO CORRECT. It "
+        "reads 'THE WAVE THAT OWNS THAT PROBE GOT THIS RIGHT IN PROSE AND THIS "
+        "IS NOT A CORRECTION OF ITS CONCLUSION', and the paragraph goes on to "
+        "say the cited document states plainly that the create route is drawn "
+        "and refused and that the listing is 'not drawn; reached by "
+        "admission'. What the premium-four wave found is a defect in the "
+        "TABLE the cited wave's INSTRUMENT prints -- depth-3 truncation "
+        "displaying a refused create route as an admitted read -- not in the "
+        "cited document's reasoning, which is correct. A finding about a "
+        "script's output that explicitly exonerates the prose citing it is an "
+        "attribution, not a correction, and inserting a CORRECTED BY marker "
+        "into the live-capture audit would tell every future reader that its "
+        "conclusion was wrong when this wave's own text says it was right. "
+        "The defect itself is recorded at INSTRUMENTS.md section 31.2, filed "
+        "against the SCRIPT, and deliberately not edited by this wave because "
+        "it belongs to another wave's file."
+    ),
+
     # SURFACED BY A MERGE, not by either wave alone. The register entry and the
     # document it cites arrived on two different branches; neither tree held
     # both, so neither wave's green run could see this pair. It was triaged once

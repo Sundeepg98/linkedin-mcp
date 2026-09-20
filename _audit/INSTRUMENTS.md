@@ -4834,3 +4834,207 @@ extraction, per-phrase slot scoring, registry-variant comparison, and the
 frozen-snapshot census. All are superseded by the committed guard, which does
 what they did with controls. Their numbers are the tables in
 `_audit/2026-09-20-names-that-do-not-exist.md`.
+---
+
+## 31. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
+
+**THIS SECTION WAS WRITTEN AS 29 AND IS PUBLISHED AS 31.** The wave computed
+29 from a maximum of 28 at `dc5aaa6` and said in this paragraph that it should
+be renumbered if it collided. It collided: `live-capture` published 29 and
+`names-that-do-not-exist` published 30 while this wave was in its own worktree,
+so the integration took 31. `tests/test_the_register_numbers_are_unique.py` is
+the guard that makes the collision visible at merge time rather than to a
+reader months later, and its rule -- renumber the INCOMING section, never the
+published one -- is what was applied here. Citations elsewhere in this commit
+that pointed at 29.2 were moved to 31.2 in the same edit.
+
+### 31.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
+
+ADMITTED. Six controls, **each driven into its failing state in-process, and
+the run exits non-zero when any of them cannot be made to fail.**
+
+    control                                    driven state              result
+    1 the anchor rule excludes a non-anchor    <link> retagged as <a>    admits 2, FAIL
+    2 a bundled anchor is not drawn            STRIPPED_TAGS emptied     admits 2, FAIL
+    3 the reducer still changes a name         per-case needles          0 of 4 leak
+    4 no placeholder survives substitution     SUBSTITUTIONS emptied     "<entity>" survives, FAIL
+    5 an empty corpus refuses, not zeroes      empty file                raises, PASS
+    6 controls 1/2/4 all fail when broken      --                        3 of 3
+
+**WHY IT EXISTS, AS A NUMBER.** `scripts/blast_radius.py` is the shipped answer
+to "what would this candidate pattern newly admit". Run over its own corpus for
+four candidates and five over-broad mutations -- including a bare `.*` wildcard
+over `/premium/` -- **all nine measured +0.** Counted:
+
+    corpus size                           67
+    addresses under /jobs/collections/     0
+    addresses under /premium/              0
+    addresses under /analytics/            1   (already admitted)
+
+The instrument is not broken and its docstring states the limit in advance. The
+zero is a fact about the denominator. Over this file's corpus -- 44 route
+shapes, every one produced by a DRAWN ANCHOR on six live captures, reduced by
+the SHIPPED reducer, substituted to sanctioned tokens, written to a TRACKED
+fixture because `_state/` exists in neither a clone nor CI -- the same nine
+separate: narrow +1 each, `/premium/<class>/` +3, `/premium/.*` +4, `/jobs/.*`
++3.
+
+**CONTROL 3 CONVICTED A CLEAN REDUCER ON ITS FIRST RUN, AND THE LEAK WAS IN THE
+CONTROL.** It derived its needle by segment position -- index `[1]`, which is
+the identifying segment after a member-bearing prefix and is the literal `view`
+in `/jobs/view/<id>`. It voided a clean run. **A needle derived by position
+from the input is a rule about the inputs that happened to be listed.** Fixed
+by naming the needle per case.
+
+### 31.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
+
+Found by building 31.1. Both belong to another wave's file and are recorded
+with their evidence rather than fixed in a surprise diff.
+
+1. **It asks `is_read_url` about shapes that still carry the literal
+   `<entity>`/`<opaque>` placeholders.** No allowlist regex can match an angle
+   bracket, so every placeholder-bearing shape reads REFUSED by construction.
+   It under-reports admitted by two on this corpus: `/jobs/view/<opaque>` and
+   `/messaging/thread/<opaque>` are both admitted in fact. Its "7 admitted, 36
+   refused" is a lower bound on the first and an upper bound on the second.
+
+2. **Depth-3 truncation displays a refused CREATE route as an admitted read.**
+   The only role-play anchor drawn anywhere is
+   `/learning/role-play/scenarios/new`; truncated to three segments it becomes
+   the listing address, which IS admitted, and the table prints ADMITTED beside
+   it. **The owning wave's PROSE has this right; its instrument's TABLE does
+   not**, and a later reader consults the table.
+
+### 31.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
+
+I expected its raw `href="..."` extraction to inflate its inventory with
+strings no anchor draws. Measured over the same six captures through the same
+reducer: **43 and 43, difference 0.** The shipped inventory is right. It is
+right by luck of this corpus rather than by construction -- a `<link href=>` on
+some future capture would enter it and nothing would say so -- which is a
+different sentence and the one kept.
+
+### 31.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
+
+ADMITTED, with `tests/test_job_collections.py` (29 assertions over a real
+headless page) and `tests/test_premium_four_boundary.py` (50, pure).
+
+**THE RECEIPT IS A DEFECT IN MY OWN SHIPPED-AND-GREEN CODE.** The first reader
+counted hydrated cards, because that is what a job card looks like. The list
+has two tiers:
+
+    metric                    recommended   search
+    list slots (tier 1)                24       25
+    hydrated cards (tier 2)             7        7
+    cross-tier id equality            7/7      7/7
+
+It would have reported **7 postings where the collection holds 24** -- 3.4x
+low, on the surface the operator named, with 23 tests passing against it.
+**IT WAS CAUGHT BY A BOUNCE ISSUED FOR AN UNRELATED REASON**: a slice returned
+without its control transcript, the bounce also asked for one number nobody had
+taken, and taking that number surfaced the second tier.
+
+**THE SCOPING PROOF, SHOWN BOTH DIRECTIONS.** The fixture carries a DECOY slot
+outside `main`, hydrated so it decoys both tiers. The suite installs the naive
+document-wide selector and measures it: 11 slots in main and 0 outside against
+the shipped 10 and 1 -- **and publishing the decoy's posting id as one of his**.
+Driven the other way, with the shipped reader's scope removed, all five shipped
+assertions fail.
+
+**THE DECOY IS LOAD-BEARING FOR A MEASURED REASON.** On both real captures
+every candidate selector agrees exactly across the two scopes -- 24==24, 25==25,
+7==7, 7==7 -- so a scoping claim proved against the captures alone would prove
+nothing at all.
+
+### 31.5 THE LAW THIS WAVE ADDS
+
+**A DENOMINATOR THAT CANNOT SEE YOUR CHANGE REPORTS ZERO, AND ZERO READS AS
+SAFE.** A blast-radius tool, a coverage number and a needle census all fail the
+same way: they answer honestly about a set nobody checked contains the thing
+being asked about. The repair is not a better tool -- 31.1 imports the shipped
+one unchanged -- it is to **count the denominator before believing the
+numerator**, and to keep an assertion that the corpus still DISCRIMINATES, so
+the day it stops the suite says so instead of reporting reassuring zeros.
+
+### 31.6 THE INTEGRATION'S LAW: A SCOPED GATE CANNOT SEE A TEST THAT ASSERTS AN ABSENCE
+
+Added 2026-09-20 by the integration that merged this wave, from a defect the
+merge found in the wave itself. Full argument:
+`_audit/2026-09-20-the-premium-integration.md` section 3.
+
+**THE SPECIMEN.** This wave admitted `/analytics/recruiter-views` and its entry
+opened *"NEVER RECORDED ANYWHERE IN THIS REPOSITORY BEFORE 2026-09-20."* The
+tree disagreed at the merge base: commit `4c2de7e`, 2026-09-05, had put that
+exact address in `tests/test_analytics_creator_boundary.py`'s refused-neighbours
+table, reason *"DRAWN BY THE PROFILE-VIEWS PAGE, twice, and not admitted"*, and
+the drawn url had been sitting in two TRACKED fixtures the whole time.
+
+**THE FILE IS UNCHANGED AT THE BASE AND AT THE WAVE TIP, so the wave's own tree
+was already red on it before any merge.** Its freeze reported a PASS over 29
+files and 1354 tests; that file was not among them.
+
+**THE LAW.** `scripts/impact_gate.py` already records that a NAME-based impact
+rule waved a markdown edit through to a red parser -- a file type the analyser
+skips. This is the same defect through the other door, and it is worse because
+no file-type fix reaches it:
+
+> **A scoped gate can find the tests that NAME the code you changed. It cannot
+> find the tests that assert the ABSENCE of what you just added.** A refusal
+> test -- "this address stays refused", "this count is exactly N" -- is that
+> assertion, and the name it would be keyed on does not exist in the tree until
+> the moment you add it. The coupling edge runs BACKWARDS in time from the
+> analyser's point of view.
+
+**THE CHEAP MITIGATION, stated as a rule rather than built here.** Any change
+that ADDS a member to a guarded collection -- an allowlist entry, a sanctioned
+mutation, a detector -- must also run the tests that assert that collection's
+SIZE or its refusals, and those are findable by the collection's NAME even when
+the new member's name is not. `_ALLOWED_URL_PATTERNS` is named by
+`test_analytics_creator_boundary.py` and would have been caught by exactly that
+rule.
+
+**SHOWN FAILING, and it fired on its own author.** The 2026-09-05 count test
+said in its docstring that it existed so *"a fourth analytics page cannot arrive
+unnoticed"*. A fourth arrived on 2026-09-20 and it noticed -- at merge time,
+three tests red, having never been run by the wave that tripped it. The tripwire
+worked; the gate that should have shown it to its author did not.
+
+### 31.7 AND A BASELINE THAT IS RE-SYNCED IS A MIRROR WEARING A HISTORICAL NAME
+
+Same integration, second finding, full argument in section 4 of that document.
+
+`tests/test_readonly_boundary_invariant.py` carries `DENYLISTS_AT_A76FE32`,
+documented as *"the four denylist digests as they stood at `oldsha14`"*, so that
+"the write widened nothing" is checkable rather than a sentence in a comment.
+Measured across all 39 commits that have touched the file, both dicts extracted
+by `ast` from each committed blob:
+
+    commits where the baseline dict exists             36
+    commits where it was REWRITTEN                     25
+    commits where a shared key held a DIFFERENT value   0
+
+Never once, not even transiently. Every baseline change landed in the same
+commit as the corresponding pin change, and the 7 pin-only changes each moved
+only a key the baseline does not carry. The lockstep has an origin: the live pin
+was ITSELF named `READONLY_AST_AT_A76FE32` before the baseline was split out of
+it. The dict is named for a commit that no longer resolves in this repository.
+
+**SHOWN FAILING -- or rather, shown UNABLE to fail.** Eight single-structure
+edits applied in memory to master's `readonly.py`, both test bodies evaluated:
+
+    edits that red BOTH tests              5
+    edits that red the PIN test only       3
+    edits that red the BASELINE test only  0
+
+**THE LAW.** A baseline constant exists to disagree with the live value. **The
+moment updating it becomes part of the routine that updates the live pin, it
+stops being a baseline and becomes a second copy** -- and a second copy asserts
+nothing the first did not, while still reading like independent corroboration to
+anyone counting green checks. The tell is not the values; it is the EDIT
+PATTERN. If every commit that touches A also touches B, B is not measuring A.
+
+The integration removed the one key that every READ admission forced to be
+re-synced, so a read admission can no longer touch that dict at all. It did NOT
+claim the repair restored the check's power: the four remaining values still
+equal the live pin's, the test still cannot fail alone, and the docstring now
+says so. Whether to delete it outright is left as a ruling.

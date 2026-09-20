@@ -301,6 +301,173 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # ADDRESS on payload grounds would refuse `/analytics/profile-views/`,
     # which is admitted above and is the harder case.
     re.compile(r"^https://www\.linkedin\.com/analytics/creator/content/?$"),
+    # HIS OWN RECRUITER VIEWS. Admitted 2026-09-20 by the `premium-four` wave.
+    # **THIS ENTRY SHIPS WITH NO READER AND THAT IS DELIBERATE** -- see the
+    # last three paragraphs, which are the part of this comment that matters.
+    #
+    # **THIS ADMISSION REVERSES A PRIOR DELIBERATE REFUSAL, and the wave that
+    # made it did not know that.** Corrected 2026-09-20 by the integration.
+    # The original text here read "NEVER RECORDED ANYWHERE IN THIS REPOSITORY
+    # BEFORE 2026-09-20", and that is FALSE. On 2026-09-05, commit 4c2de7e,
+    # `tests/test_analytics_creator_boundary.py` put this exact address in its
+    # REFUSED-NEIGHBOURS table with the reason:
+    #
+    #     "DRAWN BY THE PROFILE-VIEWS PAGE, twice, and not admitted"
+    #
+    # So a previous wave saw the SAME TWO ANCHORS, considered this address,
+    # and declined it -- under "one named page at a time, never the family",
+    # which was a refusal to sweep in siblings, not a ruling that this page
+    # may never be admitted. `test_readonly_boundary_invariant.py` recorded the
+    # same sighting, and the drawn url has been sitting in two TRACKED fixtures
+    # since before either. An admission is not a first sighting when the tree
+    # already holds the sighting.
+    #
+    # THE REVERSAL IS KEPT, because what the 2026-09-05 entry asked for is
+    # exactly what this entry supplies: its OWN named argument rather than
+    # inheritance from a neighbour that was already admitted. That is the
+    # standard being met, not bypassed. The refused-neighbours table and the
+    # analytics COUNT in that file were both updated in this same commit --
+    # the count is a tripwire that says "a fourth analytics page cannot arrive
+    # unnoticed", and it fired, correctly, on this change.
+    #
+    # It is the fourth member of the analytics family above: same tree, same
+    # account scope, and the same class of instrument -- it reads the RECEIVING
+    # end of a signal other people emit at him, which is what makes it his to
+    # read.
+    #
+    # THE ADDRESS WAS READ OFF LINKEDIN, NOT SPELLED FROM A HELP ARTICLE. It is
+    # drawn on his own /analytics/profile-views/ page, measured as a DRAWN
+    # ANCHOR in the stripped markup rather than as a substring of the bundle:
+    # 2 raw, 2 stripped, 2 anchors. The distinction is not pedantry on this
+    # corpus -- `inmail` counts 16-21 raw and 0 rendered on the same six
+    # captures.
+    #
+    # IT CANNOT ADDRESS ANYBODY ELSE, structurally rather than by promise. No
+    # slug, no id, no `/in/`: the account is chosen by the session cookie and
+    # by nothing in the string, exactly as the search-appearances entry above
+    # argues for itself.
+    #
+    # ANCHORED, NO QUERY GROUP, NO SUB-PATH, written under the rule that entry
+    # states about itself. `/analytics/` and every other page under it stay
+    # refused; one named page at a time, never the family.
+    #
+    # **AND THE HREF LINKEDIN DRAWS CARRIES A QUERY, SO THIS PATTERN REFUSES
+    # THE EXACT URL THE SITE ITSELF PRODUCED.** Measured, not anticipated: both
+    # anchors on `/analytics/profile-views/` carry one parameter, named
+    # `timeRange`. Put to the live predicate:
+    #
+    #     .../recruiter-views                                          True
+    #     .../recruiter-views/                                         True
+    #     .../recruiter-views/?timeRange=WvmpSearchFilterTimeRange_...  FALSE
+    #     .../recruiter-views?timeRange=WvmpSearchFilterTimeRange_...   FALSE
+    #
+    # THIS IS DELIBERATE AND IT IS A TRAP LAID FOR THE NEXT WAVE, so it is
+    # written down rather than left to be discovered as a puzzling refusal.
+    # A caller must navigate the BARE address; nothing in this package builds
+    # this url yet, so there is nothing to strip a query from today.
+    #
+    # **THE VALUE IS KNOWN, AND THIS ENTRY USED TO SAY IT WAS NOT.** Corrected
+    # 2026-09-20 by the integration that merged this wave. The original text
+    # read "the values are unknown ... one page load settles them"; that was
+    # true of the wave's own measurement and FALSE of this repository. The
+    # token is:
+    #
+    #     timeRange=WvmpSearchFilterTimeRange_LAST_90_DAYS
+    #
+    # ONE distinct value, drawn TWICE as a real `<a>` anchor in RENDERED markup
+    # (both hits outside all 16 script spans of the capture), and it has been
+    # sitting in TWO TRACKED FIXTURES the whole time --
+    # `tests/fixtures/profile_views_analytics.html` and its `_hydrated`
+    # sibling, both carrying the full url verbatim, twice each. So the evidence
+    # SURVIVES A CLONE, which is the bar the jobs-tracker entry sets.
+    #
+    # AND `past_90_days` IS A GUESS THAT DOES NOT WORK ON THIS ROUTE. Two
+    # different vocabularies live under this one parameter name: an enum token
+    # here (WVMP = who-viewed-my-profile), and snake_case `past_7_days` on the
+    # `/analytics/creator/...` routes. Reading one route's values tells you
+    # NOTHING about another's. This is the jobs-tracker entry's label/address
+    # split again and it points the same way: the page's own control reads
+    # "Past 90 days" while the address reads `..._LAST_90_DAYS`, so the words
+    # on the control are once more the one guess that fails.
+    #
+    # **THE PATTERN IS STILL NOT WIDENED, AND THE REASON IS NOT THE VALUE.**
+    # The jobs-tracker precedent has three parts: read the token off an anchor
+    # (met), keep the evidence in a tracked fixture (met), and ADMIT ONLY WHAT
+    # SOMETHING ACTUALLY OPENS -- "values LinkedIn's payload names but nothing
+    # builds stay deliberately absent". That third part is NOT met: there is no
+    # caller anywhere in `linkedin_server/` outside this file, measured, and
+    # NOBODY HAS LOADED THE BARE ADDRESS. "If the bare address does not serve"
+    # is still a hypothesis, and admitting a second spelling to pre-empt it
+    # would be the `/jobs/alerts/` error run backwards -- guessing where an
+    # address lands instead of recording it.
+    #
+    # THE REPAIR, WHEN SOMETHING FINALLY OPENS THIS PAGE, is now a ONE-LINE
+    # EDIT rather than a re-measurement -- enumerate the token exactly as the
+    # jobs-tracker entry enumerates its stages, and NOT a `(\?[^#]*)?` group,
+    # which would accept whatever a caller appends:
+    #
+    #     r"^https://www\.linkedin\.com/analytics/recruiter-views/?"
+    #     r"(\?timeRange=WvmpSearchFilterTimeRange_LAST_90_DAYS)?$"
+    #
+    # Any OTHER period LinkedIn's filter offers stays absent until it is drawn
+    # somewhere on disk: inventing `LAST_7_DAYS` from the shape of this one is
+    # the same guess one layer down. THE TRAP IS TESTED, not merely described
+    # -- `tests/test_premium_four_boundary.py` pins the REAL drawn url as
+    # refused, so this comment cannot drift away from the gate's behaviour.
+    #
+    # It is also the reason this is worth saying at all: the three other
+    # addresses admitted by this wave draw NO query, and `/premium/profile-key-skills`
+    # is drawn with no trailing slash either. Both spellings of all four are
+    # asserted in `tests/test_premium_four_boundary.py`.
+    #
+    # BLAST RADIUS, MEASURED RATHER THAN ASSERTED, and the denominator is the
+    # part worth reading. `scripts/blast_radius.py` over its own corpus says
+    # this pattern admits +0 -- and says +0 for a bare `.*` wildcard over
+    # `/analytics/` as well, because that corpus holds exactly ONE address
+    # under this tree. Over `tests/fixtures/synthetic/drawn_routes.txt`, built
+    # from every route a drawn anchor produced on six live captures, this
+    # entry is +1 (its own address) and the wildcard is also +1 -- so on today's
+    # evidence the family pattern reaches nothing extra, and it is still not
+    # taken, because a wildcard's blast radius is a fact about the corpus and
+    # this one cannot see an address LinkedIn has not drawn yet.
+    #
+    # ------------------------------------------------------------------
+    # WHY NO READER SHIPS WITH THIS, AND WHAT THAT COSTS
+    #
+    # **THE PAGE IS MADE OF RECRUITERS**, so a reader for it is a people-bearing
+    # reader -- this boundary's highest hazard class, and the one the shaper
+    # discipline exists for. It was costed against the only sibling that has
+    # ever been captured, and the measurement refused the build:
+    #
+    #   * THE SIBLING HAS AT LEAST TWO DOM GENERATIONS. `cap-profile-views.html`
+    #     draws 24 viewer rows as bare `<div>`s with `data-view-name` ABSENT
+    #     document-wide (0, not merely 0 inside `main`). The live reading of the
+    #     same address the same morning found 12 rows and a `data-view-name`
+    #     scope split. Those are two different shapes of one page, and `dom.py`'s
+    #     own `HARVEST_LINKED_CARDS_JS` docstring already predicts it:
+    #     `data-view-name` is attached by the client AFTER hydration.
+    #   * SO A FIXTURE FROM THAT CAPTURE WOULD SILENTLY TEST ONE OF TWO SHAPES,
+    #     and a reader proven against it would carry a confidence it has not
+    #     earned onto a page nobody has opened.
+    #   * AND THE SHAPER PROBLEM IS SIZED: only 7 of 24 rows carry a `/in/`
+    #     anchor at all. A reader that follows member anchors misses 71% of the
+    #     rows, which is the wrong answer in the direction that looks like a
+    #     clean measurement.
+    #
+    # **SO THIS IS AN ADMISSION THAT BUYS NO ROW TODAY AND THE LEDGER SAYS SO.**
+    # By this repository's own standard -- *"a surface admitted and unusable is
+    # not a partial win; it is a blast radius paid for nothing"* -- that has to
+    # be declared rather than dressed up, and `_audit/2026-09-20-the-premium-four.md`
+    # declares it.
+    #
+    # WHAT IT IS FOR: **you cannot capture a page you refuse to open, and the
+    # refusal was ours.** The argument, the drawn-anchor evidence and the blast
+    # radius are the expensive half and they are done here; the next wave that
+    # holds the signed-in profile spends one page load, and the reader is then
+    # built against the shape the target actually draws instead of against a
+    # sibling's guess. The role-play listing was admitted on exactly this
+    # reasoning on 2026-09-20 and the load is what settled it.
+    re.compile(r"^https://www\.linkedin\.com/analytics/recruiter-views/?$"),
     # The job tracker, which is where /my-items/saved-jobs/ now redirects (the
     # cardType query is dropped on the way, and that older address is no longer
     # on this list because nothing builds it any more). ``?stage=`` selects
@@ -1150,6 +1317,63 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # particular ``/premium/`` has purchase and upgrade flows under it and
     # NONE of them is admitted here.
     re.compile(r"^https://www\.linkedin\.com/premium/my-premium/?$"),
+    # HIS OWN PREMIUM KEY-SKILLS PAGE. Admitted 2026-09-20 by the
+    # `premium-four` wave. **NO READER SHIPS WITH THIS EITHER**, and the reason
+    # is different from the recruiter-views one above: there, the evidence was
+    # unstable; here, there is none.
+    #
+    # THE ADDRESS WAS READ OFF LINKEDIN. Drawn on his own
+    # /analytics/search-appearances/ page, ONE anchor, landmark stack
+    # `main > section > a` -- product content, not global chrome.
+    #
+    # AND IT IS THE ONE ADDRESS IN THIS WAVE WHERE THE RAW/RENDERED GAP IS
+    # VISIBLE IN THE EVIDENCE ITSELF: it occurs TWICE raw and ONCE rendered on
+    # that capture, so one of its two occurrences is bundle text. A census over
+    # the raw document would have reported this surface linking the page twice
+    # as often as it does. That is the same measurement that put `inmail` at
+    # 16-21 raw and 0 rendered, applied to an address rather than a word.
+    #
+    # IT CANNOT ADDRESS ANYBODY ELSE: no slug, no id, no `/in/`. The account is
+    # chosen by the session cookie and by nothing in the string. `profile` here
+    # is a product noun in a `/premium/` path, not a member segment -- it takes
+    # no following entity, which is what `/in/<slug>` does and this does not.
+    #
+    # ANCHORED, NO QUERY, NO SUB-PATH. `/premium/` and every other page under
+    # it stay refused, and this is the SECOND named page under that root rather
+    # than the root itself -- `/premium/my-premium/` above is the first.
+    #
+    # THE FAMILY IS EXPENSIVE HERE AND THE NUMBER IS MEASURED. Over the drawn
+    # corpus, a `/premium/<class>/` pattern admits +3 -- reaching
+    # `/premium/premium-perks/` and `/premium/switcher/`, two surfaces nobody
+    # has argued for -- and `/premium/.*` admits +4, adding
+    # `/premium/sb/explore/`. This entry admits +1: its own address. Both
+    # mutations measure +0 against `scripts/blast_radius.py`'s own corpus,
+    # which holds ZERO addresses under `/premium/`, so that zero is a fact
+    # about the denominator and is not cited as evidence anywhere.
+    #
+    # ------------------------------------------------------------------
+    # WHY NO READER, STATED AS AN ABSENCE OF EVIDENCE RATHER THAN A JUDGEMENT
+    #
+    # **NOBODY HAS OPENED THIS PAGE AND NOTHING CAPTURED RESEMBLES IT.** The
+    # two collections admitted today could be built against two captured
+    # sibling job lists that agree on one card shape. There is no captured
+    # sibling for a skills page: `cap-premium-hub.html` and
+    # `cap-search-appearances.html` are chrome-plus-a-few-controls surfaces
+    # (3346 and 2642 rendered characters), and neither contains a list of
+    # skills, a ranking, or anything a key-skills reader would parse.
+    #
+    # So a reader here would be built from imagination, and this repository has
+    # a name for that: an affordance invented in a fixture, which a reader
+    # passes a test against and then finds nothing on the page. The newsletter
+    # fixture's header refuses to draw an analytics route for exactly this
+    # reason and says so.
+    #
+    # WHAT THIS ENTRY IS FOR, then: one page load by whoever next holds the
+    # signed-in profile. The address is argued, bounded and measured; the shape
+    # is not known and this comment does not pretend it is. **IT BUYS NO ROW
+    # TODAY** and `_audit/2026-09-20-the-premium-four.md` carries that on the
+    # ledger line rather than in a footnote.
+    re.compile(r"^https://www\.linkedin\.com/premium/profile-key-skills/?$"),
     # HIS OWN CONNECTIONS LIST. Admitted 2026-09-03; the full argument is on
     # the paired entry in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS, which is
     # where the interesting half lives. This is the SECOND, INDEPENDENT gate:
@@ -1365,6 +1589,81 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # NO QUERY AND NO SUB-PATH. Nothing in this package builds either, and a
     # pattern that accepts a query accepts whatever a caller appends.
     re.compile(r"^https://www\.linkedin\.com/jobs/collections/recommended/?$"),
+    # THE TWO PREMIUM JOB COLLECTIONS. Admitted 2026-09-20 by the
+    # `premium-four` wave, census rows for TOP-APPLICANT and TOP-CHOICE.
+    #
+    # THE ENTRY ABOVE ANTICIPATED THIS EXACT EDIT AND SET ITS PRICE: *"One
+    # named collection, and a second is a boundary change rather than a
+    # maintenance edit."* This is that boundary change, made deliberately,
+    # with the evidence rather than by widening the line above into a family.
+    # TWO NAMED ADDRESSES, TWO PATTERNS -- not one alternation, so that
+    # retiring either one is a one-line deletion and neither hides inside the
+    # other's argument.
+    #
+    # BOTH ADDRESSES WERE READ OFF LINKEDIN AND NEITHER WAS GUESSED, which is
+    # the standard `/jobs/alerts/` explicitly could not meet and said so.
+    # Each is an href LinkedIn SERVED to this account on his own
+    # /premium/my-premium/ hub. Measured as a DRAWN ANCHOR in the stripped
+    # markup, not as a substring of the bundle -- the distinction is not
+    # pedantry here: `inmail` occurs 16-21 times raw and 0 times rendered on
+    # this same corpus, and /premium/profile-key-skills occurs twice raw and
+    # once rendered, so one of its occurrences IS bundle text.
+    #
+    #     capture       route                              raw strip anchor
+    #     premium-hub   /jobs/collections/top-applicant      1     1      1
+    #     premium-hub   /jobs/collections/top-choice         1     1      1
+    #
+    # THE FAMILY IS STILL NOT BOUGHT, AND THIS TIME THE COST OF BUYING IT WAS
+    # MEASURED INSTEAD OF ARGUED. `scripts/drawn_route_corpus.py` builds a
+    # corpus from every route shape a drawn anchor produced across six live
+    # captures; `scripts/blast_radius.py` -- imported, never re-implemented --
+    # then reports what each candidate newly admits over it:
+    #
+    #     each of these two, narrow            +1   exactly its own address
+    #     MUT /jobs/collections/<class>/       +2   reaches BOTH, so a class
+    #                                               pattern is these two
+    #                                               entries with the argument
+    #                                               deleted
+    #     MUT /jobs/.*                         +3   reaches /jobs/ itself
+    #
+    # AND THE SHIPPED CORPUS COULD NOT HAVE TOLD US ANY OF THAT: it holds
+    # ZERO addresses under /jobs/collections/, so all three of those numbers
+    # measure 0 against it -- including the wildcard. That instrument's own
+    # docstring names the state ("a tool that reports zero for everything is
+    # indistinguishable from a broken one"), so the zero was treated as a
+    # question about the denominator and not as an answer about the pattern.
+    #
+    # IT NAMES NOBODY, AND THAT IS STRUCTURAL RATHER THAN PROMISED. Neither
+    # address carries a slug, an id, an `/in/` or any member segment: the
+    # account is chosen by the session cookie and by nothing in the string.
+    # The collection is LinkedIn's own curated furniture, assembled by the
+    # platform for the signed-in account, and there is no third party at the
+    # other end to receive a view record -- the cause `linkedin_who_viewed_me`
+    # MEASURED for profile loads has nothing to attach to here.
+    #
+    # THE PAGE IS MADE OF POSTINGS, NOT OF PEOPLE, and the reader is bounded
+    # anyway: `linkedin_server/job_collections.py` lands in the same commit
+    # and publishes integers plus NUMERIC POSTING IDS ONLY, each gated on a
+    # digits-only shape in Python before it is returned. No job title, company
+    # name, recruiter name, location or salary is read at all -- there is
+    # nothing to redact because nothing textual is taken.
+    #
+    # NO QUERY AND NO SUB-PATH, written under the rule the search-appearances
+    # entry states about itself. Nothing in this package builds either, and a
+    # pattern accepting a query accepts whatever a caller appends.
+    #
+    # THE SHAPE IS A HYPOTHESIS AND THIS COMMENT WILL NOT PRETEND OTHERWISE --
+    # the discipline `/jobs/alerts/` set for itself, applied here. **NOBODY
+    # HAS OPENED EITHER PAGE.** Everything above measures the GATE and the
+    # ADDRESS; not one byte of it says what the pages DRAW. The reader is
+    # built against the measured shape of their two captured siblings
+    # (/jobs/collections/recommended/ and /jobs/search/, which draw one card
+    # shape between them), and if the first load draws something else the
+    # correct response is to fix the reader -- NOT to report that he has no
+    # top-applicant postings. The reader is built so that it says which of
+    # those two it is.
+    re.compile(r"^https://www\.linkedin\.com/jobs/collections/top-applicant/?$"),
+    re.compile(r"^https://www\.linkedin\.com/jobs/collections/top-choice/?$"),
     # THE JOB-ALERTS MANAGE PAGE, AND NOTHING ELSE UNDER THAT ROOT. Admitted
     # 2026-09-05, census row J37, blocker 36 ``JOB-ALERTS-SURFACE``.
     #

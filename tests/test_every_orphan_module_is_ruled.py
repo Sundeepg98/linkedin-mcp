@@ -52,6 +52,27 @@ _PKG = _ROOT / "linkedin_server"
 #: missing one. That discipline is copied from
 #: ``test_a_correction_is_findable_from_the_claim.NOT_A_CORRECTION``.
 DELIBERATELY_UNWIRED: dict[str, str] = {
+    "job_collections": (
+        "A SHAPER FOR A PAGE NOBODY HAS EVER OPENED -- ruled by the "
+        "premium-four wave lead, 2026-09-20. It landed in the same commit as "
+        "the two allowlist entries it is the shaper for, on this "
+        "repository's standing rule that an address and its name-free reader "
+        "land TOGETHER OR NEITHER LANDS. What it cannot have is a wired tool: "
+        "there is no capture of /jobs/collections/top-applicant or "
+        "/jobs/collections/top-choice and there never has been, so every "
+        "selector in it is measured off the two captured SIBLING job lists "
+        "and the module is a HYPOTHESIS about its target. Wiring a tool now "
+        "would hand a caller a posting count it could not distinguish from a "
+        "measured one -- which is the failure the module's own "
+        "list_container_seen field exists to prevent, one level up. "
+        "NOT PERMANENT, and the unblocking step is one page load: see "
+        "_audit/2026-09-20-the-premium-four.md section 9, which names the "
+        "exact call and states what each outcome banks. Delete this line in "
+        "the commit that fires the reader live and wires the tool. See also "
+        "KNOWN_UNWIRED['job_collections.read_job_collection'] in "
+        "tests/test_readers_outside_dom_are_a_pinned_inventory.py, which "
+        "rules the same module at READER level for the same reason."
+    ),
     "menus": (
         "AN INSTRUMENT, NOT A CAPABILITY -- ruled by its author 2026-09-19. It "
         "classifies menu labels INSIDE the page on a surface where a label is "

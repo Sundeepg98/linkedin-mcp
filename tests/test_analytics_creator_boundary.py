@@ -79,9 +79,33 @@ def test_the_creator_content_page_is_admitted():
             "https://www.linkedin.com/analytics/creator/top-posts/",
             "THE OTHER SIBLING, same reading, same reason",
         ),
+        # `/analytics/recruiter-views/` WAS ON THIS TABLE FROM 2026-09-05 TO
+        # 2026-09-20, with the reason "DRAWN BY THE PROFILE-VIEWS PAGE, twice,
+        # and not admitted". IT IS NOW ADMITTED, by the `premium-four` wave,
+        # and the line is removed rather than edited so that nobody reads a
+        # refusal this file no longer makes.
+        #
+        # THE ROW WAS NOT WRONG AND IS NOT BEING OVERRULED. Its own reason
+        # said the address was CONSIDERED and not argued for -- "being drawn
+        # by an admitted page is a reason to CONSIDER an address, never a
+        # reason to have admitted it -- one named page at a time, never the
+        # family". The new entry supplies precisely the missing half: its own
+        # named argument, its own blast-radius measurement, and a reader
+        # costed and DECLINED. The argument is on the entry in
+        # `linkedin_server/readonly.py`; the integration that moved this line
+        # is `_audit/2026-09-20-the-premium-integration.md`.
+        #
+        # WHAT REPLACES IT HERE is the query spelling, which this file can
+        # still legitimately refuse -- the entry is anchored with no query
+        # allowance, and the url LinkedIn actually draws carries one.
         (
-            "https://www.linkedin.com/analytics/recruiter-views/",
-            "DRAWN BY THE PROFILE-VIEWS PAGE, twice, and not admitted",
+            "https://www.linkedin.com/analytics/recruiter-views/"
+            "?timeRange=WvmpSearchFilterTimeRange_LAST_90_DAYS",
+            "THE ADDRESS IS NOW ADMITTED BUT THIS SPELLING IS NOT. It is the "
+            "exact href the profile-views page draws, twice; the entry is "
+            "anchored with no query group, so the site's own url is refused "
+            "by our gate. Deliberate, documented on the entry, and pinned "
+            "here so the trap is tested rather than only described",
         ),
         (
             "http://www.linkedin.com/analytics/creator/content/",
@@ -134,7 +158,13 @@ def test_the_refusals_are_not_carried_by_this_pattern():
         "https://www.linkedin.com/analytics/creator/",
         "https://www.linkedin.com/analytics/",
         "https://www.linkedin.com/analytics/creator/audience/",
-        "https://www.linkedin.com/analytics/recruiter-views/",
+        # `/analytics/recruiter-views/` was here until 2026-09-20 and is now
+        # ADMITTED by its own entry, so it can no longer be asserted refused
+        # with only the creator-content pattern removed. The QUERY spelling
+        # replaces it: still refused, and refused for a reason that has
+        # nothing to do with the pattern this control removes.
+        "https://www.linkedin.com/analytics/recruiter-views/"
+        "?timeRange=WvmpSearchFilterTimeRange_LAST_90_DAYS",
     ):
         assert not allowed_without(url), url
 
@@ -178,17 +208,35 @@ def test_the_address_this_reading_informs_is_still_refused():
         assert not _allowed(url), url
 
 
-def test_the_admitted_analytics_pages_are_exactly_three():
-    """A COUNT, so a fourth analytics page cannot arrive unnoticed.
+def test_the_admitted_analytics_pages_are_exactly_four():
+    """A COUNT, so a fifth analytics page cannot arrive unnoticed.
 
-    Profile views (both spellings), search appearances, creator content. The
-    ``/me/profile-views/`` spelling makes it four PATTERNS over three pages,
-    and the split is stated rather than smoothed over because a reader
-    checking this number will otherwise find it off by one and assume drift.
+    Profile views (both spellings), search appearances, creator content, and
+    recruiter views. The ``/me/profile-views/`` spelling makes it five
+    PATTERNS over four pages, and the split is stated rather than smoothed
+    over because a reader checking this number will otherwise find it off by
+    one and assume drift.
+
+    **THIS TRIPWIRE FIRED, AND IT WAS RIGHT TO.** It was written on
+    2026-09-05 as "a fourth analytics page cannot arrive unnoticed". On
+    2026-09-20 a fourth arrived -- ``/analytics/recruiter-views/``, admitted
+    by the `premium-four` wave -- and this assertion is the thing that
+    noticed. It was raised 3 -> 4 pages and 4 -> 5 patterns only after the
+    arrival was checked against the entry that admits it, which carries a
+    named argument, a blast-radius measurement over a populated corpus, and a
+    reader costed and declined.
+
+    A COUNT LIKE THIS IS RAISED, NEVER LOOSENED. What would be illegitimate
+    is replacing it with a bound, or bumping it silently; the number stays
+    exact so the next arrival costs the same conversation. See
+    ``_audit/2026-09-20-the-premium-integration.md``.
     """
     analytics = [
         pattern.pattern
         for pattern in readonly._ALLOWED_URL_PATTERNS
         if re.search(r"analytics|profile-views", pattern.pattern)
     ]
-    assert len(analytics) == 4, analytics
+    assert len(analytics) == 5, analytics
+    # The fourth page, named rather than absorbed into the number, so that a
+    # future reader can see WHICH page took the count up.
+    assert any("recruiter-views" in pattern for pattern in analytics), analytics

@@ -1180,7 +1180,100 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # a deliberate READ admission with the three denylists, both exemption
     # tables, SANCTIONED_MUTATIONS and `<functions>` byte-identical. SEVEN of
     # eight digests unchanged. See the re-freeze note above.
-    "_ALLOWED_URL_PATTERNS": "3561b00ed3a817bc",
+    #
+    # 3561b00ed3a817bc until 2026-09-20. GREW BY FIVE ANCHORED ENTRIES, AND
+    # THIS ENTRY IS AN INTEGRATION OF TWO INDEPENDENTLY-ARGUED ADMISSIONS THAT
+    # NEITHER SIDE'S CI EVER RAN TOGETHER. Both halves are named here because a
+    # reader arriving at this value from the one above it cannot otherwise see
+    # that two waves are inside it, and neither wave's own audit mentions the
+    # other.
+    #
+    #     _ALLOWED_URL_PATTERNS  3561b00ed3a817bc -> 286c233a7db458c7   37 -> 41
+    #
+    # HALF ONE -- the `live-capture` wave, +1, already on master before this
+    # merge:
+    #
+    #     /jobs/jam      the address `/jobs/alerts/` LANDS on
+    #
+    # `/jobs/alerts/` is ALLOWED by this gate and LinkedIn REDIRECTS AWAY FROM
+    # IT. It does not 404; it serves a page at a DIFFERENT address, which is
+    # why a load scored pass/fail looks like success. That entry's own comment
+    # pre-authorised the repair -- "if the first load failed, the correct
+    # response was to CHANGE THIS PATTERN" -- and `jam` was not among the
+    # sixteen three-letter spellings a probe had enumerated, so the row sat
+    # dead for fifteen days behind a search space that looked guessable. It
+    # was closed by RECORDING THE LANDING URL of one load.
+    #
+    # HALF TWO -- the `premium-four` wave, +4, arriving in this merge:
+    #
+    #     /jobs/collections/top-applicant     reader ships with it
+    #     /jobs/collections/top-choice        reader ships with it
+    #     /analytics/recruiter-views          NO READER -- see the entry
+    #     /premium/profile-key-skills         NO READER -- see the entry
+    #
+    # ALL FOUR WERE READ OFF LINKEDIN as DRAWN ANCHORS in stripped markup,
+    # never as substrings of the raw document -- the distinction that puts
+    # `inmail` at 16-21 raw and 0 rendered on the same corpus, and that shows
+    # `/premium/profile-key-skills` occurring twice raw and once drawn.
+    # `top-applicant` and `top-choice` occur 8-10 times as BARE SUBSTRINGS on
+    # four captures that draw ZERO anchors for either route; a raw-substring
+    # census would have argued both entries on evidence that does not exist.
+    #
+    # None of the five carries a member segment, and none carries a forbidden
+    # substring -- so the allowlist anchor is the whole of each refusal, and
+    # `is_read_url` measured every one of them False before its admission.
+    #
+    # TWO OF THE FOUR BUY NO ROW TODAY AND THE LEDGER SAYS SO rather than
+    # dressing it up. `/analytics/recruiter-views` has a sibling capture with
+    # at least two DOM generations (24 rows with `data-view-name` absent
+    # document-wide; a live read the same morning saw 12 rows and a scope
+    # split), so a fixture from it would silently test one of two shapes.
+    # `/premium/profile-key-skills` has no captured sibling that resembles it
+    # at all. Neither reader is built from imagination.
+    #
+    # AND ONE OF THOSE TWO IS ADMITTED AT A SPELLING THE PAGE DOES NOT DRAW.
+    # Both `/analytics/recruiter-views` anchors carry a `timeRange` parameter;
+    # the entry is anchored with no query allowance, so the exact href the
+    # site produces is REFUSED by this gate. Kept deliberately, measured in
+    # advance rather than met later as a puzzling refusal, with the named
+    # repair on the entry. See the entry, and section 5 of
+    # `_audit/2026-09-20-the-premium-integration.md`.
+    #
+    # THE WAVE'S OWN PIN WAS `0225ae77ddcefe2e` AND THAT TREE NEVER SHIPPED.
+    # It was computed over a 40-pattern roster branched from `dc5aaa6` (36
+    # entries, `85e821d1af9060f3`), which did not carry `/jobs/jam`. The
+    # transition `85e821d1af9060f3 -> 0225ae77ddcefe2e` appears nowhere in this
+    # ledger because master never made it. The merged roster was verified to be
+    # EXACTLY THE UNION: both sides' additions present, nothing deleted by
+    # either side, and NO PATTERN IN COMMON between the two waves' additions.
+    #
+    # SEVEN OF EIGHT DIGESTS UNCHANGED, measured across all four trees -- base
+    # `dc5aaa6`, master, the wave tip, and this merge. The three denylists,
+    # both exemption tables, SANCTIONED_MUTATIONS and `<functions>` are
+    # byte-identical in all four. `<functions>` unchanged means
+    # `assert_read_url` is BYTE-IDENTICAL across a change that admitted five
+    # addresses: the whole change is DATA, which is the only shape of boundary
+    # change a reviewer can check by reading a list.
+    #
+    # PUT THROUGH THE REAL GUARD, both spellings of each of the five, against
+    # master's module and against this one. All ten were False before and are
+    # True after, each matched by EXACTLY ONE pattern; `/jobs/collections/`,
+    # `/analytics/`, `/premium/` and `/premium/premium-perks/` remain refused,
+    # with NO denylist substring involved -- so for these addresses the
+    # allowlist anchor is the WHOLE of the refusal, which is precisely what
+    # each of the five entries claims about itself.
+    #
+    # ONE STRUCTURAL CHANGE RIDES IN THIS COMMIT AND IT IS NOT A DIGEST.
+    # `_ALLOWED_URL_PATTERNS` was REMOVED from `DENYLISTS_AT_A76FE32` below,
+    # taking that dict from five keys to four. It is deliberate, it is argued
+    # in full at the dict, and it is named HERE as well because a reviewer
+    # checking a re-freeze should not have to discover a structural edit
+    # elsewhere in the same file. In short: that dict was re-synced to this one
+    # at 25 of the 36 commits of its life and has NEVER held a different value
+    # on a shared key, so for the allowlist it was a mirror wearing a
+    # historical name. Removing the key loses no coverage, because the
+    # assertion it made is the line directly below this comment.
+    "_ALLOWED_URL_PATTERNS": "286c233a7db458c7",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1652,7 +1745,53 @@ DENYLISTS_AT_A76FE32 = {
     # own ruling. It also buys no PAGE READ: `company_page.py` opens nothing
     # and has no page function, so what landed is a precondition and a
     # vocabulary. The honest reading of a widening is what it bought.
-    "_ALLOWED_URL_PATTERNS": "3561b00ed3a817bc",
+    # _ALLOWED_URL_PATTERNS WAS REMOVED FROM THIS DICT ON 2026-09-20, by the
+    # integration that merged the `premium-four` wave. IT IS NOT A DENYLIST,
+    # and it was the only key here that had to be re-synced every time a READ
+    # was admitted -- which is how a baseline turned into a mirror.
+    #
+    # MEASURED OVER THE WHOLE HISTORY OF THIS FILE BEFORE IT WAS TOUCHED --
+    # 39 commits, every version of both dicts extracted by `ast` from the
+    # committed blob:
+    #
+    #   * the baseline dict exists at 36 of those commits and was REWRITTEN at
+    #     25 of them. A dict whose name asserts "as they stood at a76fe32" has
+    #     been re-synced 25 times since.
+    #   * at NO commit, not once and not transiently, did any shared key hold a
+    #     different value in the two dicts. Every baseline change landed in the
+    #     SAME COMMIT as the corresponding pin change. It is lockstep.
+    #   * `a76fe32` DOES NOT RESOLVE in this repository any more, so the dict
+    #     is named for a commit a reader cannot reach.
+    #   * the docstring's "the values from oldsha14, BEFORE the write" is true
+    #     today only of JS_MUTATION_TOKENS. `_ALLOWED_URL_PATTERNS` stopped
+    #     being its pre-write value at 5681130 (2026-08-26) and 22 times since;
+    #     `_FORBIDDEN_URL_SUBSTRINGS` five times; `_MUTATION_CALL_PATTERNS` at
+    #     989e19d; `_FORBIDDEN_SUBSTRING_EXEMPTIONS` never had one.
+    #
+    # REMOVING THIS KEY LOSES NO COVERAGE, and that is shown rather than
+    # asserted. Eight single-structure edits were applied to master's
+    # readonly.py in memory and both test bodies evaluated against each:
+    #
+    #     edits that red BOTH tests              5
+    #     edits that red the PIN test only       3
+    #     edits that red THIS test only          0
+    #
+    # The failure set of the test below is a strict SUBSET of the pin test's,
+    # so the allowlist assertion removed here is still made, at the same value,
+    # by READONLY_AST_AT_LAST_REFREEZE above -- which every read admission has
+    # to update anyway and which carries the argument. After this removal the
+    # allowlist digest is asserted EXACTLY ONCE, in the place whose job it is.
+    #
+    # WHAT REMAINS IS DECLARED, NOT OVERSOLD. The four values below are also
+    # equal to the live pin's, so this test STILL cannot fail on its own; that
+    # is stated in its docstring instead of being left for a reader to find.
+    # It is kept, narrowed, because a READ ADMISSION CAN NO LONGER TOUCH THIS
+    # DICT AT ALL -- the four remaining keys move only when a refusal moves or
+    # a grant widens, so the next edit this dict needs is itself that signal.
+    # Whether it should be redesigned or deleted outright is NOT decided here:
+    # it is an open item in
+    # `_audit/2026-09-20-the-premium-integration.md` section 4, because
+    # deleting a boundary guard is a ruling and this was an integration.
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
@@ -1921,15 +2060,32 @@ def test_the_read_only_boundary_is_where_it_was_re_frozen():
 def test_the_write_did_not_touch_any_of_the_four_denylists():
     """THE HALF OF THE RE-FREEZE THAT IS A CLAIM ABOUT THE WRITE.
 
-    Re-freezing a boundary is only honest if somebody can see WHAT moved. Two
-    digests moved -- a new allowlist, and two new functions. These four did
-    not, and they are the four that would have to move for the write to have
-    weakened anything: a widened navigation allowlist, a shortened forbidden
-    list, a detector removed from the scanner, a JS token dropped.
+    **THIS IS A STATIC DIGEST COMPARISON OVER SOURCE TEXT. IT OBSERVES NO
+    RUNTIME BEHAVIOUR AND NO WRITE PATH.** "The write" names the 2026-08-23
+    code change that gave this package a write capability, not anything this
+    test executes. That sentence is here because the name misled a careful
+    reader on 2026-09-20 into holding a merge while they tried to work out
+    whether a runtime invariant was at stake; none was.
 
-    Compared against the values from ``oldsha14``, the baseline BEFORE the
-    write, so this is a statement about the change and not a restatement of the
-    new map.
+    Re-freezing a boundary is only honest if somebody can see WHAT moved.
+    These four are REFUSAL structures, and they are what would have to move
+    for something to have been weakened on the way past: a shortened forbidden
+    list, a widened exemption beside it, a detector removed from the scanner,
+    a JS token dropped.
+
+    **WHAT THIS TEST IS NOT.** It is not an independent check. Its four values
+    are equal to the live pin's today, so it cannot go red unless
+    ``test_the_read_only_boundary_is_where_it_was_re_frozen`` goes red first.
+    That is declared here rather than left for a reader to discover, and the
+    measurement behind it is in
+    ``_audit/2026-09-20-the-premium-integration.md`` section 4. What it does
+    buy is a tripwire with a different trigger: a READ admission cannot touch
+    this dict at all, so the next edit this dict needs is itself the signal
+    that a refusal moved.
+
+    ``_ALLOWED_URL_PATTERNS`` was removed from the dict on 2026-09-20 -- it is
+    not a denylist, and it was the one key that every read admission forced to
+    be re-synced. See the comment on the dict.
     """
     live = ast_digest(READONLY.read_text(encoding="ascii"))
     for name, digest in DENYLISTS_AT_A76FE32.items():
