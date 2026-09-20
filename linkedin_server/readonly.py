@@ -326,6 +326,33 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # states about itself. `/analytics/` and every other page under it stay
     # refused; one named page at a time, never the family.
     #
+    # **AND THE HREF LINKEDIN DRAWS CARRIES A QUERY, SO THIS PATTERN REFUSES
+    # THE EXACT URL THE SITE ITSELF PRODUCED.** Measured, not anticipated: both
+    # anchors on `/analytics/profile-views/` carry one parameter, named
+    # `timeRange` (the VALUE was never read). Put to the live predicate:
+    #
+    #     .../recruiter-views                      True
+    #     .../recruiter-views/                     True
+    #     .../recruiter-views?timeRange=<value>    FALSE
+    #     .../recruiter-views/?timeRange=<value>   FALSE
+    #
+    # THIS IS DELIBERATE AND IT IS A TRAP LAID FOR THE NEXT WAVE, so it is
+    # written down rather than left to be discovered as a puzzling refusal.
+    # A caller must navigate the BARE address; nothing in this package builds
+    # this url yet, so there is nothing to strip a query from today.
+    #
+    # IF THE BARE ADDRESS DOES NOT SERVE, the repair is a DELIBERATE EDIT HERE
+    # that ENUMERATES the parameter -- the `?stage=(saved|applied|draft)`
+    # shape the jobs-tracker entry uses -- and NOT a `(\?[^#]*)?` group, which
+    # would accept whatever a caller appends. The values are unknown because
+    # reading them was out of scope for the measurement that found this; one
+    # page load settles them.
+    #
+    # It is also the reason this is worth saying at all: the three other
+    # addresses admitted by this wave draw NO query, and `/premium/profile-key-skills`
+    # is drawn with no trailing slash either. Both spellings of all four are
+    # asserted in `tests/test_premium_four_boundary.py`.
+    #
     # BLAST RADIUS, MEASURED RATHER THAN ASSERTED, and the denominator is the
     # part worth reading. `scripts/blast_radius.py` over its own corpus says
     # this pattern admits +0 -- and says +0 for a bare `.*` wildcard over

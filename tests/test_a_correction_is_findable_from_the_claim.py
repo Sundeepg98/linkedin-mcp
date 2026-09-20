@@ -183,6 +183,28 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, premium-four wave. Triaged by READING THE LINE, which is what
+    # this table asks for -- and the line is a DISCLAIMER of the very thing the
+    # scan suspects.
+    ("2026-09-20-the-premium-four.md", "2026-09-20-the-live-capture.md"): (
+        "THE SENTENCE THAT TRIPS THE SCAN IS THE ONE REFUSING TO CORRECT. It "
+        "reads 'THE WAVE THAT OWNS THAT PROBE GOT THIS RIGHT IN PROSE AND THIS "
+        "IS NOT A CORRECTION OF ITS CONCLUSION', and the paragraph goes on to "
+        "say the cited document states plainly that the create route is drawn "
+        "and refused and that the listing is 'not drawn; reached by "
+        "admission'. What the premium-four wave found is a defect in the "
+        "TABLE the cited wave's INSTRUMENT prints -- depth-3 truncation "
+        "displaying a refused create route as an admitted read -- not in the "
+        "cited document's reasoning, which is correct. A finding about a "
+        "script's output that explicitly exonerates the prose citing it is an "
+        "attribution, not a correction, and inserting a CORRECTED BY marker "
+        "into the live-capture audit would tell every future reader that its "
+        "conclusion was wrong when this wave's own text says it was right. "
+        "The defect itself is recorded at INSTRUMENTS.md section 29.2, filed "
+        "against the SCRIPT, and deliberately not edited by this wave because "
+        "it belongs to another wave's file."
+    ),
+
     # SURFACED BY A MERGE, not by either wave alone. The register entry and the
     # document it cites arrived on two different branches; neither tree held
     # both, so neither wave's green run could see this pair. It was triaged once

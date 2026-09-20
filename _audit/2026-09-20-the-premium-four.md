@@ -306,16 +306,462 @@ and this repository already ships.
 
 ---
 
-## 4. THE MEASUREMENTS -- pending
+## 4. THE MEASUREMENTS, AND THE CAPTURES THEY WERE TAKEN FROM
 
-## 5. THE READERS -- pending
+Three closed-form slices, each run by a child in this worktree, each reading
+the captures by absolute path out of the main checkout, read-only. Every child
+recorded the sha256 of every capture it read, because `_state/` is a directory
+another wave may overwrite and a number pinned to no bytes is a number that
+cannot be re-derived.
 
-## 6. THE FIXTURES -- pending
+    capture                      sha256 (first 16)   bytes
+    cap-jobs-recommended.html    979aadcf0f24e2f5    1702493
+    cap-jobs-search.html         1804f0b660b57591    1555561
+    cap-profile-views.html       (per slice file)     143680
+    cap-search-appearances.html  (per slice file)    1522974
+    cap-premium-hub.html         (per slice file)     132198
+    cap-newsletters.html         (per slice file)      73903
 
-## 7. THE BOUNDARY -- pending
+Slice files, all name-free and derived:
 
-## 8. WHAT COULD NOT BE BUILT, AND WHAT IT ACTUALLY COSTS -- pending
+    _audit/_slice-premium-four-jobshape.md
+    _audit/_slice-premium-four-analyticsshape.md
+    _audit/_slice-premium-four-anchors.md
 
-## 9. THE EXACT CALL THAT WOULD BANK EACH ROW -- pending
+### 4a. THE FINDING THAT CHANGED THE BUILD -- THE LIST HAS TWO TIERS
 
-## 10. THE HONEST LEDGER -- pending
+**IT ARRIVED FROM A SLICE I BOUNCED FOR AN UNRELATED REASON**, which is worth
+recording because it is the argument for bouncing at all. The jobshape slice
+came back with good numbers and no control transcript. The bounce asked for
+the control and, separately, for one number it had not taken -- the
+`job-card-container` CLASS TOKEN count, document-wide against inside-`main`.
+Taking that number is what surfaced the second tier.
+
+    metric                            recommended    search
+    list slots       (tier 1)                  24        25
+    hydrated cards   (tier 2)                   7         7
+    placeholder slots                          17        18
+    slots neither hydrated nor placeholder      0         0
+    hydration ratio                          7/24      7/25
+    cross-tier id equality                    7/7       7/7
+    slot tag / list parent                 li / ul   li / ul
+    id digit length                         10-10     10-10
+
+LinkedIn draws ONE `li[data-occludable-job-id]` per posting it has placed in
+the list window -- hydrated or not -- and fills only those near the viewport.
+
+**MY FIRST READER COUNTED TIER 2, AND IT WAS ALREADY WRITTEN, TESTED AND
+GREEN.** It would have reported **7 postings where the collection holds 24**: a
+3.4x undercount, with a number attached to make it look measured, on the
+single surface the operator named. Twenty-three tests passed against it.
+
+Nothing in the reading would have contradicted it. That is the exact failure
+shape this corpus keeps finding, and the only reason it did not ship is that a
+bounce for a missing control returned a measurement nobody had asked for.
+
+### 4b. THE SELECTOR WAS CHOSEN BY MEASUREMENT, NOT BY TASTE
+
+Four candidates, counted document-wide and inside `main` on both captures:
+
+    attribute                    doc-wide / in-main     doc-wide / in-main
+                                    (recommended)            (search)
+    class                            733 / 524             1067 / 557
+    id                               249 / 148              350 / 190
+    data-occludable-job-id            24 /  24               25 /  25
+    data-job-id                        7 /   7                7 /   7
+
+A reader aimed at `class` or `id` is a reader whose answer depends on where it
+happens to look. `data-occludable-job-id` is on every slot and its document-wide
+count equals the slot count exactly on both captures.
+
+**AND THAT LAST FACT IS WHY THE FIXTURE NEEDS A DECOY.** Every candidate agrees
+across the two scopes on every real page this wave can see. A scoping claim
+proved against the captures alone would be proving nothing at all.
+
+---
+
+## 5. THE READERS
+
+### 5a. `linkedin_server/job_collections.py` -- SHIPPED
+
+One reader serving both collections. What it publishes:
+
+    slots                    tier 1, inside main -- THE POSTING COUNT
+    slots_outside_main       the scope control
+    hydrated                 tier 2, inside main -- the render state
+    hydrated_outside_main
+    containers               the class token, inside main
+    containers_outside_main
+    list_container_seen      THE CONTROL a zero is only readable beside
+    job_ids                  from tier 1, digits only, shape-gated
+    ids_refused              candidates the gate dropped
+    empty_state_needles      of a vocabulary this module authors
+    refusal                  a literal of REFUSALS
+    error
+
+**`slots` IS THE ANSWER AND `hydrated` IS NOT**, and they never share a field.
+
+**THE ONE PAGE-DERIVED VALUE IS A NUMERIC POSTING ID, AND IT IS GATED.** A
+posting id is not a person: it addresses a public advertisement, the shipped
+`linkedin_search_jobs` already returns them, and `/jobs/view/<digits>/` is
+already admitted -- so an id handed back here is consumable by
+`linkedin_job_detail` without widening anything. That consumability is the
+capability: it turns "Top Applicant" from a label into postings a caller can
+read. Every candidate is matched against a digits-only shape in Python before
+publication; anything else is DROPPED and COUNTED. No job title, company name,
+recruiter name, location or salary is read at all.
+
+**A ZERO AND A PARSE MISS NEVER SHARE A FIELD:**
+
+    slots == 0  and  list_container_seen True   ->  HIS ACCOUNT HAS NONE
+    slots == 0  and  list_container_seen False  ->  THIS READER COULD NOT SEE
+
+and the second carries `refusal` plus `empty_state_needles`. A page that says
+"nothing here" and a page that says nothing at all are different findings --
+section 11 of the live-capture audit is the case that earned that field: the
+role-play listing served, rendered 17 characters in `main`, and drew no
+empty-state message at all.
+
+### 5b. THE SCOPING PROOF, WITH THE NAIVE SELECTOR SHOWN GETTING IT WRONG
+
+The fixture carries a DECOY slot outside `main`, hydrated so that it decoys
+both tiers. `tests/test_job_collections.py` installs the naive document-wide
+selector and measures it:
+
+                              shipped      naive
+    slots                          10         11
+    slots_outside_main              1          0
+    hydrated                        3          4
+    hydrated_outside_main           1          0
+    job_ids                         9         10
+
+**THE NAIVE READER DOES NOT ONLY MISCOUNT, IT CORRUPTS THE PAYLOAD** -- it
+publishes the decoy's posting id as though it were one of his.
+
+Driven the other way, with the SHIPPED reader's scope removed, every shipped
+assertion fails:
+
+    cards == 8                       FAIL
+    cards_outside_main == 1          FAIL
+    containers == 8                  FAIL
+    containers_outside_main == 1     FAIL
+    len(job_ids) == 7                FAIL
+
+    ALL 5 SHIPPED ASSERTIONS FAILED when the scope was removed.
+
+(That transcript is from the pre-two-tier reader; the tier rewrite kept the
+same decoy mechanism and the suite's current numbers are the table above. The
+older transcript is left standing rather than re-typed, because it is what was
+actually run at that moment.)
+
+### 5c. AND THE HAZARD IS NOT HYPOTHETICAL ON THIS PAGE FAMILY
+
+A live load of `/analytics/profile-views/` parsed **12 viewer rows
+document-wide and 0 inside an 1835-character `main`** -- a reader looking in
+the wrong box, confirmed rather than inferred, and the second time that census
+row had been closed or nearly closed on an instrument that could not have seen
+it. The scope pair in this reader exists because of that measurement.
+
+---
+
+## 6. THE FIXTURE, AND ITS PROVENANCE STATED AS A WEAKNESS
+
+`tests/fixtures/synthetic/job_collection.html`. Its STRUCTURE is the
+measurement in section 4a; its CONTENT is invented and carries **no page text
+at all** -- no job title, company name, location, salary or recruiter name.
+Not redacted, not shaped: absent. Two tests assert that, one as an allowlist
+over the whole document (two nav words this repository authors) and one as a
+hard emptiness assertion over the list region.
+
+Ids are a synthetic band (`1000000001` upward) chosen so nothing here could
+collide with a real posting.
+
+**IT IS A FIXTURE FOR A SIBLING'S SHAPE, STANDING IN FOR A PAGE NOBODY HAS
+SEEN**, and the header says so before it says anything else. A reader proven
+against it is proven to work IF the target draws what its two siblings draw.
+
+Three deliberate divergences from the captures, each with a job:
+
+* **the decoy slot outside `main`** -- section 5b; without it the scoping
+  assertions pass while testing nothing;
+* **one slot whose id is not a digit run** -- the shape gate has no reaching
+  input otherwise;
+* **a hydration ratio of 3/10** against the measured 7/24 and 7/25 -- close
+  enough that a reader which swapped the tiers produces a visibly wrong number
+  here rather than a plausible one.
+
+And one deliberate ABSENCE: **no empty-state message.** All twelve needles
+measured zero rendered on both captures; three of them (`try again`, `sorry`,
+`something went wrong`) appear once each in the SOURCE and zero times rendered,
+which is the bundle, not the page. Drawing one would be inventing copy LinkedIn
+does not show -- the failure the newsletter fixture's header refuses by name.
+
+---
+
+## 7. THE BOUNDARY
+
+    _ALLOWED_URL_PATTERNS        36 -> 40
+    ast digest                   85e821d1af9060f3 -> 0225ae77ddcefe2e
+    other seven digests          BYTE-IDENTICAL
+
+No denylist, no exemption table, no `SANCTIONED_MUTATIONS`, no `<functions>`.
+
+    pattern                                          reader   blast radius
+    /jobs/collections/top-applicant/?                  yes      +1
+    /jobs/collections/top-choice/?                     yes      +1
+    /analytics/recruiter-views/?                       NO       +1
+    /premium/profile-key-skills/?                      NO       +1
+
+Each `+1` is exactly its own address, measured over the drawn corpus with this
+wave's four entries SUBTRACTED FIRST.
+
+### 7a. THE SUBTRACTION, AND THE SCAR -- WHICH I REPRODUCED
+
+`tests/test_company_page_boundary.py` records that its probe measured mutations
+against a roster that already admitted the target, and so reported a smaller
+blast radius than it had. **I reproduced that exact mistake while writing this
+wave**, re-running the measurement after installing the patterns and getting
+`+0` across the board. The numbers above are the pre-installation run; the
+shipped test rebuilds the roster by subtraction and asserts the removal count
+rather than trusting it.
+
+### 7b. WHAT THE FAMILY SPELLINGS WOULD HAVE COST, MEASURED
+
+    MUT /jobs/collections/<class>/       +2   reaches BOTH collections, i.e.
+                                              these two entries with the
+                                              argument deleted
+    MUT /analytics/<class>/              +1
+    MUT /premium/<class>/                +3   reaches /premium/premium-perks/
+                                              and /premium/switcher/ --
+                                              surfaces nobody has argued for
+    MUT /premium/.*                      +4   adds /premium/sb/explore/
+    MUT /jobs/.*                         +3   reaches /jobs/ itself
+
+**ALL FIVE MEASURE +0 AGAINST THE SHIPPED CORPUS**, including both wildcards.
+That is section 1d, and it is why this wave built a denominator.
+
+### 7c. THE TWO ENTRIES THAT SHIP NO READER, AND WHY THAT IS THE HONEST ANSWER
+
+The brief hoped for four surfaces one line and one reader away. **TWO ARE. TWO
+ARE NOT, AND SAYING SO IS THE FINDING RATHER THAN A SHORTFALL.**
+
+**`/analytics/recruiter-views` -- the evidence is UNSTABLE.**
+The page is made of recruiters, so a reader for it is a people-bearing reader,
+this boundary's highest hazard class. Costed against the only captured sibling:
+
+    data-view-name, document-wide (capture)        0
+    data-view-name, inside main   (capture)        0
+    viewer rows, document-wide    (capture)       24
+    viewer rows, inside main      (capture)       24
+    main chars                    (capture)     2256
+    ---- the LIVE reading of the same address, the same morning ----
+    viewer rows, document-wide                    12
+    viewer rows, inside main                       0
+    main chars                                  1835
+
+**THE CAPTURE DOES NOT REPRODUCE THE LIVE DEFECT ON EITHER AXIS**, and the
+slice reported that straight rather than adjusting its row-finder until the two
+agreed. `dom.py`'s own `HARVEST_LINKED_CARDS_JS` docstring already predicts
+why: `data-view-name` is attached by the client AFTER hydration. So **this
+surface has at least two DOM generations**, and a fixture built from one would
+silently test one of them.
+
+And the shaper problem is sized: **only 7 of 24 rows carry an `/in/` anchor at
+all.** A reader following member anchors misses 71% of the rows -- wrong in the
+direction that looks like a clean measurement.
+
+**`/premium/profile-key-skills` -- the evidence is ABSENT.**
+No captured sibling resembles it. `cap-premium-hub.html` and
+`cap-search-appearances.html` are chrome-plus-a-few-controls surfaces (3346 and
+2642 rendered characters) holding no list of skills, no ranking, nothing a
+key-skills reader would parse. A reader would be built from imagination.
+
+**SO BOTH ADMISSIONS BUY NO ROW TODAY AND THE LEDGER SAYS SO.** By this
+corpus's own standard -- *"a surface admitted and unusable is not a partial
+win; it is a blast radius paid for nothing"* -- that is declared rather than
+dressed up.
+
+**WHAT THEY DO BUY:** you cannot capture a page you refuse to open, and the
+refusal was ours. The argument, the drawn-anchor evidence and the blast radius
+are the expensive half and they are done. The role-play listing was admitted on
+exactly this reasoning on 2026-09-20, and the load is what settled it.
+
+**AND IF THAT TRADE IS JUDGED WRONG, THE REVERSAL IS TWO DELETED LINES.** Each
+entry is its own pattern, not an alternation, precisely so that retiring either
+costs one line and disturbs no argument but its own.
+
+---
+
+## 8. WHAT I GOT WRONG, IN THIS WAVE, FOUND BY MY OWN INSTRUMENTS
+
+Four, and the first is the one that would have shipped.
+
+**8a. MY READER COUNTED THE WRONG TIER** -- section 4a. Written, tested, green,
+and wrong by 3.4x on the operator's headline surface. Caught by a bounce issued
+for an unrelated reason.
+
+**8b. MY BRIEFS PUT A REAL PERSON'S NAME IN THREE CHILD SCRIPTS.** I instructed
+every child to read the captures at an absolute path whose second segment is
+the operator's first name. The shape guard classified it `[drive root]` in
+three files and refused the wave's commit. My error, in the brief, not the
+children's. Corrected by a disk ruling at the worktree root -- and **the
+ruling's own first version quoted the path in order to explain the rule, and
+was refused by the rule.**
+
+**8c. MY FIRST CONTROL CONVICTED A CLEAN REDUCER.** `drawn_route_corpus.py`'s
+control 3 derived its needle by segment position -- index `[1]`, which is the
+identifying segment after a member-bearing prefix and is the literal `view` in
+`/jobs/view/<id>`. It reported a leak, voided a clean run, and the leak was in
+the control. **A needle derived by position from the input is a rule about the
+inputs that happened to be listed.** Fixed by naming the needle per case; the
+scar is in the source.
+
+**8d. I RE-MEASURED BLAST RADIUS AGAINST A ROSTER THAT ALREADY HELD MY
+ENTRIES** -- section 7a -- reproducing a mistake a sibling test documents in
+its own source, an hour after reading it.
+
+**AND ONE HYPOTHESIS OF MINE, REFUTED AND REPORTED STRAIGHT** -- section 1c. I
+expected the shipped probe's raw `href=` extraction to inflate its route
+inventory. Measured: 43 and 43, difference 0. It is right.
+
+---
+
+## 8bis. THREE STANDING GUARDS WENT RED ON THIS CHANGE, AND ALL THREE WERE RIGHT
+
+The impact gate refused the freeze with three reds. None was a false alarm and
+none was worked around; each is recorded here because what a guard catches is
+a better description of a wave than what its author meant to do.
+
+### 8bis-a. A SWALLOWED EXCEPTION WOULD HAVE MISCLASSIFIED A PERSON AS NOT-A-PERSON
+
+`tests/test_an_outage_is_never_filed_as_an_absence.py` flagged
+`scripts/_probe_analytics_list_shape.py:273`:
+
+    try:
+        return shape_path(href, depth=2) == "/in/<entity>"
+    except Exception:
+        return False
+
+That is `is_member_route`, and its callers read `False` as **"this anchor does
+not address a person"**. So a reducer that raised would have silently
+reclassified a MEMBER anchor as a non-member one -- **the unsafe direction, on
+the one classification that file exists to get right, and indistinguishable
+from an honest negative.**
+
+Fixed by DELETING the handler rather than by returning `None`: `shape_path`
+takes a string and does not raise on one, and if it ever does that is a defect
+which must stop the run. The probe's three controls still pass and its
+break-demo still exits 1.
+
+### 8bis-b. THE READER IS UNWIRED, AND THAT NOW HAS TO BE SAID TWICE
+
+`tests/test_readers_outside_dom_are_a_pinned_inventory.py` and
+`tests/test_every_orphan_module_is_ruled.py` both refused
+`linkedin_server/job_collections.py`: a reader imported by nothing, ruled by
+nobody. **Both are correct and the module is deliberately unwired** -- it
+shapes a page nobody has ever opened, so wiring a tool to it would hand a
+caller a posting count indistinguishable from a measured one.
+
+Entered in both tables with the reason, the cross-reference between them, and
+the un-blocking step: one page load, section 9. Neither entry is permanent and
+both say so.
+
+**THE GUARDS ARE WHY THIS IS A RULING RATHER THAN A LOOSE END.** An orphan
+nobody has ruled on is how a backlog grows: the code is not wrong and it is not
+reachable, and nothing records which of those was intended.
+
+### 8bis-c. A DISCLAIMER READ AS A CORRECTION
+
+`tests/test_a_correction_is_findable_from_the_claim.py` flagged this document
+citing `2026-09-20-the-live-capture.md` with correction vocabulary nearby. The
+line it caught is section 1e-iii's **"THIS IS NOT A CORRECTION OF ITS
+CONCLUSION"** -- the sentence refusing to do the thing the scan suspects.
+
+Triaged onto `NOT_A_CORRECTION` with that reading, because inserting a
+`CORRECTED BY:` marker into the live-capture audit would tell every future
+reader its conclusion was wrong when this document says it was right. The
+defect is against the SCRIPT and is filed at `INSTRUMENTS.md` 29.2.
+
+**THE TABLE ASKS FOR TRIAGE AFTER READING THE LINE, AND THE LINE IS THE
+ANSWER.** A scan that cannot tell an attribution from a correction is doing its
+job by asking; answering it without reading would have published a false
+retraction of somebody else's correct work.
+
+---
+
+## 9. THE EXACT CALL THAT WOULD BANK EACH ROW
+
+**NOTHING FIRES IN THIS WAVE.** Every row below stays GAP. Each line is the one
+call that would move it, named precisely enough that whoever next holds the
+signed-in profile spends no thought on what to run.
+
+    surface                        the call                             banks
+    ---------------------------------------------------------------------------
+    /jobs/collections/top-applicant
+        assert_read_url(job_collections.collection_url(0))
+        navigate, then read_job_collection(page, expect=0)
+        BANKS IF: list_container_seen is True and slots > 0.
+        A zero with list_container_seen True is a fact about HIS ACCOUNT and
+        banks the row MEASURED-EMPTY, not GAP.
+        A zero with list_container_seen False banks NOTHING and means the
+        target does not draw the sibling shape -- fix the reader, do not
+        report that he has no top-applicant postings.
+
+    /jobs/collections/top-choice
+        the same, with collection_url(1) and expect=1.
+
+    /analytics/recruiter-views
+        assert_read_url, navigate, and CAPTURE THE PAGE to _state/.
+        BANKS NOTHING BY ITSELF. Its deliverable is the capture, because the
+        reader cannot honestly be built until the target's own shape is
+        known -- section 7c. Build the reader from that capture, then fire.
+
+    /premium/profile-key-skills
+        the same: one load, one capture, and the reader afterwards.
+
+**ONE MORE READ IS WORTH MORE THAN ALL FOUR OF THESE AND COSTS THE SAME.**
+Re-open `/analytics/profile-views/` and capture it. The capture this wave read
+and the live reading taken the same morning disagree on both axes (section
+7c), so that surface has at least two DOM generations and nobody knows which
+one is normal. `N 136` has now been nearly closed twice on an instrument that
+could not have seen it. A second capture is what tells the two generations
+apart, and it unblocks the recruiter-views reader as a side effect.
+
+---
+
+## 10. THE HONEST LEDGER
+
+    rows banked out of GAP                      0    nothing fired
+    rows inflated                               0
+    allowlist patterns added                    4    36 -> 40
+    of those, shipping a reader                 2
+    of those, buying no row today               2    section 7c, declared
+    readers shipped                             1    serving two addresses
+    synthetic fixtures committed                1    plus one in-module control
+    captures committed                          0    and none may ever be
+    live page loads spent                       0
+    browser sessions touched                    0
+    writes enabled                              0    at any point
+    tests added                                79    50 boundary + 29 reader
+    standing guards that went RED on me         3    8bis -- all three right
+    guard tables amended with a ruling          3    2 unwired, 1 triage
+    instruments shipped                         1    + 6 controls, all shown failing
+    defects found in my own work                4    section 8
+    of those, that would have shipped           1    the tier undercount
+    hypotheses of mine refuted                  1    section 1c
+    defects found in other waves' work          2    section 1e, neither edited
+    prior-wave numbers reproduced exactly       3    7, 13, 3346/3344
+    prior-wave numbers CONTRADICTED             2    section 7c, reported straight
+    surfaces priced and declined for a reader   2
+
+**THE DELIVERABLE IS TWO WORKING SURFACES AND TWO HONEST REFUSALS**, not four
+readers. The brief asked for that trade explicitly and this is it: an honest
+"two of four, and the other two need one page load each" beats four readers
+built on a sibling's guess, one of which would have been built on a surface
+whose two captures disagree with each other.
+
+**THE NUMBERS IN THIS DOCUMENT WERE RE-DERIVED FROM THE ARTIFACTS BEFORE IT
+WAS FROZEN**, because a wave that writes numbers into prose should re-take them
+from the tree rather than from its own earlier sentences -- the discipline that
+caught a stale admitted-count and an understated needle count in the wave
+before this one.

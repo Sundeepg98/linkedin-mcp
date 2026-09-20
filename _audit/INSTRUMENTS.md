@@ -4643,3 +4643,121 @@ is no longer possible for this dispute to be forgotten by default -- it
 sits in the baseline, live, until someone with the standing to adjudicate
 the marker question does.
 
+
+---
+
+## 29. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
+
+Section number chosen as 29 because 28 was the maximum at
+`dc5aaa6`. **IF THIS COLLIDES, RENUMBER THIS ONE** --
+`tests/test_the_register_numbers_are_unique.py` exists because five waves all
+picked 24 on 2026-09-20, and the guard's own rule is that the wave which
+published first keeps its number.
+
+### 29.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
+
+ADMITTED. Six controls, **each driven into its failing state in-process, and
+the run exits non-zero when any of them cannot be made to fail.**
+
+    control                                    driven state              result
+    1 the anchor rule excludes a non-anchor    <link> retagged as <a>    admits 2, FAIL
+    2 a bundled anchor is not drawn            STRIPPED_TAGS emptied     admits 2, FAIL
+    3 the reducer still changes a name         per-case needles          0 of 4 leak
+    4 no placeholder survives substitution     SUBSTITUTIONS emptied     "<entity>" survives, FAIL
+    5 an empty corpus refuses, not zeroes      empty file                raises, PASS
+    6 controls 1/2/4 all fail when broken      --                        3 of 3
+
+**WHY IT EXISTS, AS A NUMBER.** `scripts/blast_radius.py` is the shipped answer
+to "what would this candidate pattern newly admit". Run over its own corpus for
+four candidates and five over-broad mutations -- including a bare `.*` wildcard
+over `/premium/` -- **all nine measured +0.** Counted:
+
+    corpus size                           67
+    addresses under /jobs/collections/     0
+    addresses under /premium/              0
+    addresses under /analytics/            1   (already admitted)
+
+The instrument is not broken and its docstring states the limit in advance. The
+zero is a fact about the denominator. Over this file's corpus -- 44 route
+shapes, every one produced by a DRAWN ANCHOR on six live captures, reduced by
+the SHIPPED reducer, substituted to sanctioned tokens, written to a TRACKED
+fixture because `_state/` exists in neither a clone nor CI -- the same nine
+separate: narrow +1 each, `/premium/<class>/` +3, `/premium/.*` +4, `/jobs/.*`
++3.
+
+**CONTROL 3 CONVICTED A CLEAN REDUCER ON ITS FIRST RUN, AND THE LEAK WAS IN THE
+CONTROL.** It derived its needle by segment position -- index `[1]`, which is
+the identifying segment after a member-bearing prefix and is the literal `view`
+in `/jobs/view/<id>`. It voided a clean run. **A needle derived by position
+from the input is a rule about the inputs that happened to be listed.** Fixed
+by naming the needle per case.
+
+### 29.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
+
+Found by building 29.1. Both belong to another wave's file and are recorded
+with their evidence rather than fixed in a surprise diff.
+
+1. **It asks `is_read_url` about shapes that still carry the literal
+   `<entity>`/`<opaque>` placeholders.** No allowlist regex can match an angle
+   bracket, so every placeholder-bearing shape reads REFUSED by construction.
+   It under-reports admitted by two on this corpus: `/jobs/view/<opaque>` and
+   `/messaging/thread/<opaque>` are both admitted in fact. Its "7 admitted, 36
+   refused" is a lower bound on the first and an upper bound on the second.
+
+2. **Depth-3 truncation displays a refused CREATE route as an admitted read.**
+   The only role-play anchor drawn anywhere is
+   `/learning/role-play/scenarios/new`; truncated to three segments it becomes
+   the listing address, which IS admitted, and the table prints ADMITTED beside
+   it. **The owning wave's PROSE has this right; its instrument's TABLE does
+   not**, and a later reader consults the table.
+
+### 29.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
+
+I expected its raw `href="..."` extraction to inflate its inventory with
+strings no anchor draws. Measured over the same six captures through the same
+reducer: **43 and 43, difference 0.** The shipped inventory is right. It is
+right by luck of this corpus rather than by construction -- a `<link href=>` on
+some future capture would enter it and nothing would say so -- which is a
+different sentence and the one kept.
+
+### 29.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
+
+ADMITTED, with `tests/test_job_collections.py` (29 assertions over a real
+headless page) and `tests/test_premium_four_boundary.py` (50, pure).
+
+**THE RECEIPT IS A DEFECT IN MY OWN SHIPPED-AND-GREEN CODE.** The first reader
+counted hydrated cards, because that is what a job card looks like. The list
+has two tiers:
+
+    metric                    recommended   search
+    list slots (tier 1)                24       25
+    hydrated cards (tier 2)             7        7
+    cross-tier id equality            7/7      7/7
+
+It would have reported **7 postings where the collection holds 24** -- 3.4x
+low, on the surface the operator named, with 23 tests passing against it.
+**IT WAS CAUGHT BY A BOUNCE ISSUED FOR AN UNRELATED REASON**: a slice returned
+without its control transcript, the bounce also asked for one number nobody had
+taken, and taking that number surfaced the second tier.
+
+**THE SCOPING PROOF, SHOWN BOTH DIRECTIONS.** The fixture carries a DECOY slot
+outside `main`, hydrated so it decoys both tiers. The suite installs the naive
+document-wide selector and measures it: 11 slots in main and 0 outside against
+the shipped 10 and 1 -- **and publishing the decoy's posting id as one of his**.
+Driven the other way, with the shipped reader's scope removed, all five shipped
+assertions fail.
+
+**THE DECOY IS LOAD-BEARING FOR A MEASURED REASON.** On both real captures
+every candidate selector agrees exactly across the two scopes -- 24==24, 25==25,
+7==7, 7==7 -- so a scoping claim proved against the captures alone would prove
+nothing at all.
+
+### 29.5 THE LAW THIS WAVE ADDS
+
+**A DENOMINATOR THAT CANNOT SEE YOUR CHANGE REPORTS ZERO, AND ZERO READS AS
+SAFE.** A blast-radius tool, a coverage number and a needle census all fail the
+same way: they answer honestly about a set nobody checked contains the thing
+being asked about. The repair is not a better tool -- 29.1 imports the shipped
+one unchanged -- it is to **count the denominator before believing the
+numerator**, and to keep an assertion that the corpus still DISCRIMINATES, so
+the day it stops the suite says so instead of reporting reassuring zeros.
