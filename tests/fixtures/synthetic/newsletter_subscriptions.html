@@ -20,6 +20,26 @@
   The hashed class names are LinkedIn's own shape and are here so that a
   reader aimed at a class rather than at an href fails against this file the
   way it would fail against a deploy.
+
+  AMENDED 2026-09-20 by the newsletter build wave, from a second measurement
+  of the same capture -- scripts/_probe_newsletter_surface_shape.py, which
+  reports every needle with its enclosing landmark stack rather than only its
+  count. Three changes, all structural, none touching a row:
+
+    * a <main> wrapper, because the live page nests the product section as
+      main > section > section and this file omitted it, which left any
+      container-scoped reading untestable;
+    * the create route inside the section, where the capture draws it;
+    * a SECOND create route in the nav, which the capture does NOT draw. It
+      is a DECOY, the same deliberate divergence as the eleventh anchor, and
+      it exists so a document-wide counter cannot pass a scoped assertion.
+
+  WHAT THE SAME MEASUREMENT FOUND AND THIS FILE DELIBERATELY STILL DOES NOT
+  DRAW: an analytics route, a subscribe control and an unsubscribe control.
+  All three are ZERO on the capture -- the words appear zero times in 74234
+  characters -- so adding any of them here would be inventing an affordance
+  LinkedIn does not offer, and a reader built against it would pass a test
+  and find nothing on the page.
 -->
 <html lang="en">
 <head><title>Newsletters</title></head>
@@ -27,10 +47,32 @@
 <nav>
   <a href="https://www.linkedin.com/feed/">Home</a>
   <a href="https://www.linkedin.com/mynetwork">My Network</a>
+
+  <!-- THE DECOY, and it is the same deliberate divergence from the live page
+       that the eleventh anchor above is. The real page draws ONE create route
+       and draws it inside main; a fixture that only mirrored that would let a
+       DOCUMENT-WIDE counter pass while claiming to be container-scoped. This
+       anchor is outside main, so a reader that counts the whole document
+       reports 2 in main and 0 outside, and the scoping assertion fails. It is
+       the branch, not the page. -->
+  <a href="/article/newsletter/new/">Create a newsletter</a>
 </nav>
+
+<!-- MAIN, added 2026-09-20. The live page nests the product section as
+     main > section > section -- measured off the 2026-09-05 capture by
+     scripts/_probe_newsletter_surface_shape.py, which reports every needle
+     with its enclosing landmark stack. The fixture omitted the wrapper, so
+     any container-scoped reading was untestable against it. -->
+<main>
 
 <section class="b4babbf6 _4ba07c9b _6b38db02">
   <h2 class="_3519784e">Newsletters</h2>
+
+  <!-- THE SECTION'S OWN HEADER ACTION. On the capture it sits 302 characters
+       after the heading and 1932 before the first row, in the heading's own
+       container -- which is what makes it an eligibility signal about this
+       account rather than furniture drawn for everybody. -->
+  <a class="_2b9d0c14" href="/article/newsletter/new/">Create a newsletter</a>
 
   <div class="_5bf80336 _63abe882 _46f248c1 _0b880753">
 
@@ -186,6 +228,8 @@
   <h2>Don't want to see this</h2>
   <a href="https://www.linkedin.com/ad/start">Report this ad</a>
 </section>
+
+</main>
 
 </body>
 </html>
