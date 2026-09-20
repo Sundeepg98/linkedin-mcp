@@ -123,6 +123,37 @@ def test_the_registry_cannot_absorb_a_name_from_its_own_instruments():
     )
 
 
+def test_the_partial_parse_refusal_can_actually_fire(monkeypatch):
+    """The guard REFUSES to run on a partial ledger parse. Prove the refusal.
+
+    An unproven refusal is the same disease as an unproven check. This one
+    matters more than most: if `ledger_counts()` ever returns a partial parse --
+    a renamed table header is enough, and it has happened here before -- then
+    real blockers read as absent and the guard convicts the corpus for the
+    PARSER's failure, loudly and wrongly, in the most credible-looking way
+    available to it.
+
+    Driven both directions, because a refusal that fires on everything is as
+    useless as one that fires on nothing.
+    """
+    import build_blocker_map as bbm
+
+    monkeypatch.setattr(bbm, "ledger_counts", lambda: {"ONLY-ONE": 1})
+    with pytest.raises(RuntimeError) as caught:
+        guard.blocker_registry(REPO)
+    assert "not ~97" in str(caught.value), (
+        "the refusal fired but did not say what it saw. A refusal that reports "
+        "only what it did NOT match is half a measurement."
+    )
+
+    monkeypatch.undo()
+    assert len(guard.blocker_registry(REPO)) == 97, (
+        "the refusal now fires on the REAL ledger parse, or the ledger no "
+        "longer holds 97 blockers. Either way every blocker verdict in this "
+        "module is resting on a set that moved."
+    )
+
+
 def test_the_detector_finds_a_planted_assertion():
     """The detector can speak -- in every slot form, on a name it cannot know.
 

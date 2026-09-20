@@ -23,7 +23,7 @@ the detector.
 | artifact | what it is |
 |---|---|
 | `scripts/check_asserted_names_resolve.py` | the guard. 1.3s end to end over the whole corpus |
-| `tests/test_an_asserted_name_resolves.py` | seven controls and the pin, 8 tests |
+| `tests/test_an_asserted_name_resolves.py` | eight controls and the pin, 9 tests |
 
 **Headline:** **4 asserted-and-absent citations, all in one document.** And one
 finding about the instrument itself that is worth more than the four: **the
