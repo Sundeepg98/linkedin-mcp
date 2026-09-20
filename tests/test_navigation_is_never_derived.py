@@ -223,6 +223,65 @@ def _is_tainted_expr(node: ast.AST, tainted: set[str]) -> bool:
     return False
 
 
+def _bindings(node: ast.AST):
+    """Every ``(value, targets)`` pair in a node that BINDS a name.
+
+    **ITERATION IS A BINDING, AND THIS ENGINE DID NOT KNOW THAT UNTIL
+    2026-09-20.** It walked ``Assign`` and ``AnnAssign`` only, so::
+
+        queue = [landed]
+        for u in queue:
+            await BROWSER.goto(page, u)
+
+    tainted ``queue`` and never ``u``, and the navigation went unseen -- by the
+    one rule written to catch exactly that. A list of landed addresses, looped
+    over and visited, is the most natural way to walk pages in this codebase.
+
+    **THE FIX ALREADY EXISTED IN THIS REPOSITORY AND HAD NOT COME BACK.** The
+    page-text guard forked from this engine, hit the identical hole while
+    red-proofing itself, wrote this function, and recorded in its own docstring
+    that "the same hole exists in the url rule for a list of landed addresses".
+    It sat there. A sibling's fix is not this file's fix until somebody carries
+    it, and nothing was checking that the two agreed -- which is what
+    ``test_the_two_walkers_bind_the_same_forms`` is now for.
+
+    THE TREATMENT IS PORTED, NOT THE CODE. The two walkers are NOT one engine:
+    their taint sources differ (``goto`` and ``.url`` here, sixteen text
+    readers there) and their sanitiser sets differ (three entries here, a
+    deliberately empty one there). What they share is this -- pure syntax, no
+    knowledge of what taint is -- so it is the part that can be identical, and
+    the drift test asserts it is.
+
+    FORMS DELIBERATELY NOT HERE, named rather than implied. MEASURED blind on
+    2026-09-20, four of them: ``except ... as`` (its ``ExceptHandler.type`` is
+    an exception CLASS, not the value bound, so a binding here would be an
+    invention -- the leak shape that matters there is inter-procedural and this
+    engine is not), ``AugAssign``, ``global`` / ``nonlocal``, and function
+    parameters. Left blind ON PURPOSE, at parity with the sibling: closing one
+    here alone would re-open the very divergence this commit exists to close.
+
+    NOT MEASURED BY ME, and said so rather than folded into the list above:
+    ``import ... as``, ``match`` capture / ``as`` / star patterns, ``except*``
+    groups, lambda parameters, decorator-bound names and PEP 695 type
+    parameters. They are almost certainly blind for the same structural reason,
+    but "almost certainly" is not a measurement and this file's whole subject is
+    the difference. The audit carries the census that settles them.
+    """
+    if isinstance(node, ast.Assign):
+        yield node.value, node.targets
+    elif isinstance(node, ast.AnnAssign):
+        yield node.value, [node.target]
+    elif isinstance(node, (ast.For, ast.AsyncFor)):
+        yield node.iter, [node.target]
+    elif isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
+        for generator in node.generators:
+            yield generator.iter, [generator.target]
+    elif isinstance(node, ast.withitem):
+        yield node.context_expr, [node.optional_vars] if node.optional_vars else []
+    elif isinstance(node, ast.NamedExpr):
+        yield node.value, [node.target]
+
+
 def _tainted_names(tree: ast.AST) -> set[str]:
     """Every name in a module bound, however indirectly, to a navigation.
 
@@ -236,21 +295,28 @@ def _tainted_names(tree: ast.AST) -> set[str]:
     function-scoped analysis would be blind to the exact shape this was written
     for. To a fixed point because an assignment can taint a name that an
     EARLIER line already copied, and one pass in document order would miss it.
+
+    WHAT BINDS IS ``_bindings``' ANSWER, not a test in this loop. Six passes
+    rather than four, matching the sibling: more binding forms means longer
+    derivation chains, and the loop exits the moment the set stops growing, so
+    the cap only ever costs on a chain deeper than six. MEASURED 2026-09-20
+    over all 175 files in ``scripts`` and ``linkedin_server``: the deepest
+    module converges in 4 passes -- which is the OLD cap exactly, so this
+    number was one binding form away from silently truncating. It is
+    written down because a cap that under-approximates does not raise; it
+    returns a smaller taint set and the rule goes quiet.
     """
     tainted: set[str] = set()
-    for _ in range(4):
+    for _ in range(6):
         before = set(tainted)
         for node in ast.walk(tree):
-            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
-                continue
-            value = node.value
-            if value is None or not _is_tainted_expr(value, tainted):
-                continue
-            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            for target in targets:
-                for name in ast.walk(target):
-                    if isinstance(name, ast.Name):
-                        tainted.add(name.id)
+            for value, targets in _bindings(node):
+                if value is None or not _is_tainted_expr(value, tainted):
+                    continue
+                for target in targets:
+                    for name in ast.walk(target):
+                        if isinstance(name, ast.Name):
+                            tainted.add(name.id)
         if tainted == before:
             break
     return tainted
@@ -492,6 +558,49 @@ _HEAD = "async def main(page):\n"
             "    await BROWSER.goto(page, await BROWSER.goto(page, X))\n",
             "a goto return passed straight back in",
         ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    queue = [landed]\n"
+            "    for u in queue:\n"
+            "        await BROWSER.goto(page, u)\n",
+            "A FOR TARGET IS A BINDING. Read a list of landed addresses, loop, "
+            "navigate each -- and until 2026-09-20 this walker bound Assign and "
+            "AnnAssign ONLY, so `u` was never tainted and the navigation was "
+            "invisible to the rule written to catch exactly it",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    queue = [landed]\n"
+            "    seen = [await BROWSER.goto(page, u) for u in queue]\n",
+            "A COMPREHENSION TARGET IS A BINDING TOO, and here the sink is "
+            "INSIDE the comprehension -- so `u` is the only route the taint can "
+            "take, and a subtree walk of the enclosing assignment cannot reach "
+            "the goto argument",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    async for u in following(landed):\n"
+            "        await BROWSER.goto(page, u)\n",
+            "AsyncFor binds exactly as For does, and every probe in this "
+            "package is async -- treating one and not the other would leave the "
+            "hole open in the dialect the code is actually written in",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    with holding(landed) as u:\n"
+            "        await BROWSER.goto(page, u)\n",
+            "`with ... as` binds. Included for PARITY with the sibling walker "
+            "rather than on a measured site -- said plainly, because a case "
+            "admitted on a shape nobody has seen is still a case, and pretending "
+            "otherwise is how a list stops meaning anything",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    if (u := landed):\n"
+            "        await BROWSER.goto(page, u)\n",
+            "THE WALRUS BINDS, and guard-and-bind is the idiom it exists for -- "
+            "`if (u := landed)` reads as a null check and is an assignment",
+        ),
     ],
 )
 def test_it_goes_red_on_a_derived_navigation(body, why):
@@ -524,6 +633,38 @@ def test_it_goes_red_on_a_derived_navigation(body, why):
             "READING a landed url is fine -- the rule is about navigating to "
             "one, and the auth-wall check must stay possible",
         ),
+        (
+            '    for u in (BASE_URL + "/in/me/", BASE_URL + "/jobs/"):\n'
+            "        await BROWSER.goto(page, u)\n",
+            "THE PAIR TO THE LOOP RED, and the reason binding a for target is "
+            "not the same as flagging every loop: a sweep over urls this "
+            "repository authored is the sanctioned way to visit several pages",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "    for i in range(len(landed)):\n"
+            '        await BROWSER.goto(page, f"{BASE_URL}/x/{i}/")\n',
+            "len() IS A COUNT, so an index derived from one carries nothing. The "
+            "counting carve-out has to survive the new bindings or the rule "
+            "starts forbidding its own remedy",
+        ),
+        (
+            "    async for u in planned(SEARCH_URL):\n"
+            "        await BROWSER.goto(page, u)\n",
+            "the async pair: iterating a plan this repository built is the "
+            "sanctioned shape and must stay writable",
+        ),
+        (
+            "    with holding(SEARCH_URL) as u:\n"
+            "        await BROWSER.goto(page, u)\n",
+            "the `with` pair, over a module constant",
+        ),
+        (
+            "    if (u := SEARCH_URL):\n"
+            "        await BROWSER.goto(page, u)\n",
+            "the walrus pair -- binding is not derivation, and a walrus over a "
+            "constant is a constant",
+        ),
     ],
 )
 def test_it_stays_green_on_a_url_this_repository_authored(body, why):
@@ -554,6 +695,43 @@ def test_it_stays_green_on_a_url_this_repository_authored(body, why):
 #: has measured what they emit, and the declaration makes that visible instead
 #: of latent. Fixing one -- print a RELATION, or route it through a proven
 #: redactor as ``_probe_messaging`` already does -- forces its entry out.
+#: THE NINTH ENTRY IS NOT A NINTH LEAK, AND SAYING SO IS THE POINT.
+#:
+#: ``_probe_job_search_filter_params.py`` line 1295 is ``print(text)`` inside
+#: a nested ``emit`` helper whose PARAMETER is called ``text``. It became
+#: visible on 2026-09-20 when this walker learned that a ``for`` target
+#: binds, because line 964 of the same module does::
+#:
+#:     for text in _key_kept_lines(parameter, kept_reading):
+#:
+#: and ``kept_reading`` was already tainted. Taint here is BY NAME AND PER
+#: MODULE -- a deliberate over-approximation, argued in ``_tainted_names``
+#: -- so one module-level ``text`` taints every ``text``, including an
+#: unrelated parameter three hundred lines away.
+#:
+#: **WHAT THE SITE ACTUALLY EMITS WAS MEASURED, NOT ASSUMED**, which is the
+#: difference between this entry and the eight below it. ``_key_kept_lines``
+#: returns the parameter literal this file asked for, two integers
+#: (``asked_chars``, ``landed_chars``, both ``len``), two booleans rendered
+#: as YES/NO and IS/IS NOT, and an occurrence count. ``_key_kept`` builds
+#: ``raw_values`` and ``decoded`` off the landed query and returns NEITHER.
+#: No landed value leaves it.
+#:
+#: **SO WHY DECLARE IT RATHER THAN CALL IT CLEAN?** Because the clean route
+#: is ``_SANITISERS``, and that list has a bar: a function must SHIP WITH
+#: THE TEST THAT PROVES ITS CONTRACT. ``_redact`` was admitted on the
+#: strength of its name and turned out to have no rule at all. My reading
+#: of ``_key_kept_lines`` is a reading, not an instrument, and a reading is
+#: exactly what ``_redact`` had. The declaration states the truth available
+#: today: a rule sees this site, its emission has been read and looks
+#: clean, and nothing yet PROVES it. Admitting it to ``_SANITISERS`` with
+#: its own both-directions proof is the follow-up, and it is a silencing
+#: change, so it goes through the pin test rather than through here.
+#:
+#: THE ONE REPAIR THAT IS NOT ALLOWED is renaming the loop variable at line
+#: 964 to clear the red. That tunes the instrument's input until it agrees
+#: with the holder, and the leak class would be back the next time two
+#: scopes happened to pick the same word.
 KNOWN_TAINTED_OUTPUT: dict[str, list[str]] = {
     "_capture_toggle_states.py": [
         "print(f'    final url : {page.url}')",
@@ -575,6 +753,9 @@ KNOWN_TAINTED_OUTPUT: dict[str, list[str]] = {
     ],
     "_probe_interests.py": [
         "print(f'    final url: {page.url}')",
+    ],
+    "_probe_job_search_filter_params.py": [
+        "print(text)",
     ],
     "_probe_manage_pages_both.py": [
         "print(f'    final url: {page.url}')",
@@ -638,6 +819,24 @@ def test_every_declared_output_site_still_exists():
             "A MEMBER PATH IS AN IDENTITY. _member_path is deliberately not a "
             "sanitiser, and this is the third leak's exact shape",
         ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            "    for u in [landed]:\n"
+            "        print(u)\n",
+            "THE SAME HOLE AT THE OTHER SINK, because both sinks read ONE taint "
+            "set: a loop variable carrying a landed url into a print",
+        ),
+        (
+            "    landed = await BROWSER.goto(page, X)\n"
+            "    queue = [landed]\n"
+            "    [logger.info(u) for u in queue]\n",
+            "A COMPREHENSION TARGET AT THIS SINK, and the shape matters: the "
+            "sink is INSIDE the comprehension. `print(next(u for u in [landed]))` "
+            "was tried first and was ALREADY red -- the iterable sits in the "
+            "same expression as the sink, so the subtree walk reached `landed` "
+            "without ever needing the binding. A red that passes for the wrong "
+            "reason proves nothing",
+        ),
     ],
 )
 def test_output_goes_red_on_a_navigation_derived_value(body, why):
@@ -675,6 +874,13 @@ def test_output_goes_red_on_a_navigation_derived_value(body, why):
             "forbid telling him what he asked for",
         ),
         ("    print(response.status)\n", "a status code is not a url"),
+        (
+            '    for u in (BASE_URL + "/a/", BASE_URL + "/b/"):\n'
+            "        print(u)\n",
+            "THE PAIR TO THE LOOP RED AT THIS SINK. A loop over constants this "
+            "repository wrote is not a leak, and reporting one must stay "
+            "writable after the bindings widen",
+        ),
     ],
 )
 def test_output_stays_green_on_a_value_that_carries_nothing(body, why):
@@ -718,6 +924,106 @@ def test_a_sanitiser_entry_is_a_claim_about_a_contract():
     ), _SANITISERS
     assert "_member_path" not in _SANITISERS
     assert "_path_of" not in _SANITISERS
+
+
+def test_the_two_walkers_bind_the_same_forms():
+    """THE CHECK THAT DID NOT EXIST, AND ITS ABSENCE IS WHY THIS WAS A BUG.
+
+    The page-text guard forked from this engine, found the loop-binding hole
+    while red-proofing itself, fixed it, and WROTE IN ITS OWN DOCSTRING that
+    "the same hole exists in the url rule for a list of landed addresses".
+    That sentence sat in the repository, true and unenforced, while this
+    file went on missing every ``for`` target. **A ruling that is only prose
+    is section 90's defect** -- this file says so at the top about its own
+    subject -- and a sibling's finding written only in a sibling's docstring
+    is the same failure between two files.
+
+    WHAT IS ASSERTED IS SYNTAX ONLY. The two walkers are NOT one engine and
+    must not be made one: their taint sources differ (``goto`` and ``.url``
+    here, sixteen text readers there), and their sanitiser sets differ
+    (three entries here, a deliberately EMPTY one there, which is that
+    file's finding rather than a gap). ``_bindings`` knows nothing about
+    taint -- it answers "does this node bind a name", which has one correct
+    answer -- so it is the part that CAN be identical, and this is where
+    that is enforced instead of hoped for.
+
+    THE NEGATIVE HALF IS THE HONEST HALF. Four forms neither walker binds
+    are pinned ABSENT by name, so "we do not handle ``except ... as``" is a
+    statement this file makes out loud rather than a silence a reader has to
+    infer. The fixture is asserted to CONTAIN all four first -- otherwise
+    the four absences are four assertions that cannot fail.
+    """
+    import test_page_text_is_never_printed as text_rule
+
+    fixture = (
+        "a = SRC\n"
+        "b: str = SRC\n"
+        "for c in SRC:\n    pass\n"
+        "async def go():\n    async for d in SRC:\n        pass\n"
+        "e = [f for f in SRC]\n"
+        "g = {h for h in SRC}\n"
+        "i = (j for j in SRC)\n"
+        "k = {m: n for m, n in SRC}\n"
+        "with SRC as o:\n    pass\n"
+        "if (p := SRC):\n    pass\n"
+        "try:\n    pass\nexcept SRC as q:\n    pass\n"
+        "r = SRC\nr += SRC\n"
+        "def s(t, u=SRC):\n    global v\n    v = t\n"
+    )
+    tree = ast.parse(fixture)
+
+    def bound(fn):
+        out = set()
+        for node in ast.walk(tree):
+            for _value, targets in fn(node):
+                for target in targets:
+                    for name in ast.walk(target):
+                        if isinstance(name, ast.Name):
+                            out.add((type(node).__name__, name.id))
+        return out
+
+    def classes(fn):
+        return {
+            type(node).__name__
+            for node in ast.walk(tree)
+            for _ in fn(node)
+        }
+
+    mine, theirs = bound(_bindings), bound(text_rule._bindings)
+    assert mine == theirs, (
+        "the two walkers no longer bind the same names. only in the url "
+        "rule: %s ; only in the page-text rule: %s. Whichever gained a "
+        "form, the other is now blind to it -- carry it across rather than "
+        "widening this assertion." % (sorted(mine - theirs), sorted(theirs - mine))
+    )
+    assert len(mine) >= 12, (
+        "TWO EMPTY SETS AGREE. The fixture stopped exercising the walkers, "
+        "so the equality above proves nothing: %s" % sorted(mine)
+    )
+    assert classes(_bindings) == {
+        "Assign",
+        "AnnAssign",
+        "For",
+        "AsyncFor",
+        "ListComp",
+        "SetComp",
+        "GeneratorExp",
+        "DictComp",
+        "withitem",
+        "NamedExpr",
+    }, sorted(classes(_bindings))
+
+    present = {type(node).__name__ for node in ast.walk(tree)}
+    for form in ("ExceptHandler", "AugAssign", "Global", "arg"):
+        assert form in present, (
+            "the fixture no longer contains a %s, so asserting that neither "
+            "walker binds one is an assertion that cannot fail" % form
+        )
+        assert form not in classes(_bindings), (
+            "%s is now bound here and not in the sibling -- that is the "
+            "divergence this test exists to stop. Carry it across, update "
+            "this list, and say in the commit what it can now see" % form
+        )
 
 
 def test_the_checker_reads_both_goto_arities():
