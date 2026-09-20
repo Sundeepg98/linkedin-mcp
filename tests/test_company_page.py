@@ -250,6 +250,73 @@ def test_the_tally_is_integers_and_a_count_list():
         assert isinstance(out[key], int)
 
 
+@pytest.mark.parametrize(
+    "href",
+    [
+        "https://[",
+        "http://[::1",
+        "//[bad",
+        "https://[/company/1234/",
+    ],
+)
+def test_a_malformed_href_is_counted_rather_than_raised(href):
+    """SHOWN FAILING AT HEAD, before ``_parts`` existed.
+
+    ``urlsplit("https://[")`` raises ``ValueError`` -- Invalid IPv6 URL -- and
+    MEASURED: ``tally`` propagated it straight out of ``linkedin_job_detail``.
+    **One malformed href anywhere on a posting would have failed a read that
+    had already succeeded**, turning a route this module cannot classify into
+    a tool that returns nothing.
+
+    A route that cannot be parsed cannot be judged, so it is COUNTED as
+    unjudgeable -- a visible integer -- rather than guessed at or thrown.
+    """
+    assert company_page.classify_route(href) == company_page.UNCLASSIFIED
+    assert company_page.identifier_kind(href) == "none"
+    assert company_page.slug_is_addressable(href) is False
+    out = company_page.tally([href, f"{BASE}/company/{IDENTIFIER}/"])
+    assert out["hrefs"] == 2
+    # The good row still lands, so this is not "everything became unjudgeable".
+    assert out["counts"][company_page.TAB_KINDS.index("home_tab")] == 1
+    assert out["page_roots"] == 1
+
+
+@pytest.mark.parametrize(
+    "href",
+    [
+        "https://evil.example/company/1234/",
+        "https://linkedin.com.evil.example/company/1234/",
+        "https://www.linkedin.com.evil.example/company/1234/",
+        "http://www.linkedin.com:8080/company/1234/",
+    ],
+)
+def test_a_foreign_host_is_not_an_organisation_route(href):
+    """SHOWN FAILING AT HEAD. ``_HOST`` was defined and never read, so
+    ``https://evil.example/company/1234/`` classified as ``home_tab`` and was
+    COUNTED as a LinkedIn organisation.
+
+    A count is a claim about what a page links to, and one that cannot tell
+    LinkedIn's own routes from a foreign host's is making a different claim
+    than its name makes. The port form is here because a netloc comparison
+    that ignored it would be a different bug with the same shape.
+    """
+    assert company_page.classify_route(href) == company_page.UNCLASSIFIED
+    assert company_page.slug_is_addressable(href) is False
+    # And the shipped door agrees, which is the point of comparing at all.
+    assert readonly.is_read_url(href) is False
+
+
+def test_a_relative_href_still_classifies():
+    """THE CONTROL for the host check, and it is not hypothetical: LinkedIn
+    writes ``/company/<id>`` bare in the notification rail, measured in
+    ``tests/fixtures/notifications.html``. A host check that refused an empty
+    netloc would stop counting the one spelling this corpus actually holds."""
+    assert company_page.classify_route(f"/company/{IDENTIFIER}") == "home_tab"
+    assert company_page.classify_route("/company/x/people/") == "people_tab"
+    assert company_page.identifier_kind(f"/company/{IDENTIFIER}") == "numeric"
+    assert company_page.slug_is_addressable(f"/company/{IDENTIFIER}/") is True
+
+
 def test_the_page_creation_flow_is_not_counted_as_an_organisation():
     """``/company/setup/new/`` puts the literal ``setup`` in segment 1, which a
     naive count would read as a slug and file as an organisation. It names

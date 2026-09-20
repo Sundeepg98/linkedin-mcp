@@ -161,7 +161,7 @@ member profile.
 All four are pinned as executable tests in `tests/test_company_page_boundary.py`,
 not only in the probe.
 
-### AND TWO GUARDS CAUGHT DEFECTS IN MY OWN MODULE ON THEIR FIRST RUN
+### AND FOUR DEFECTS IN MY OWN MODULE, TWO CAUGHT BY ITS OWN GUARDS
 
 Both were real, both were red before they were green, and both are pinned:
 
@@ -181,6 +181,27 @@ Both were real, both were red before they were green, and both are pinned:
    Caught by the coupling test, which is the same instrument the groups wave's
    equivalent caught a real divergence with on ITS first run. Pinned by
    `test_the_shaper_and_the_boundary_agree_address_for_address`.
+
+3. **`tally` RAISED on a malformed href, out through the tool.**
+   `urlsplit("https://[")` is a `ValueError` -- Invalid IPv6 URL -- and
+   nothing caught it, so ONE malformed href anywhere on a posting would have
+   failed a `linkedin_job_detail` read that had already succeeded. A route
+   this module cannot parse is now COUNTED as unjudgeable, which is a visible
+   integer, rather than thrown or guessed at.
+
+4. **`_HOST` WAS DEFINED AND NEVER READ**, which is worse than not having it:
+   `https://evil.example/company/1234/` classified as `home_tab` and was
+   counted as a LinkedIn organisation. A count is a claim about what a page
+   links to, and one that cannot tell LinkedIn's own routes from a foreign
+   host's is making a different claim than its name makes. Now checked, with
+   the EMPTY netloc still accepted -- LinkedIn writes `/company/<id>` bare in
+   the notification rail, so a host check that refused a relative href would
+   stop counting the one spelling this corpus actually holds. That control
+   ships beside it.
+
+Both were found by reading the shipped module rather than by a test, which is
+worth stating: the coupling check caught 1 and 2 and could not have caught
+these. Their tests exist now.
 
 One documented asymmetry REMAINS and is in the safe direction: a slug carrying a
 forbidden substring is refused at gate one, which `slug_is_addressable` knows
@@ -478,7 +499,7 @@ Shipped:
 
 Tests:
 
-- `tests/test_company_page.py` -- NEW, 64 tests. The shaper.
+- `tests/test_company_page.py` -- NEW, 73 tests. The shaper.
 - `tests/test_company_page_boundary.py` -- NEW, 45 tests. The limits, with
   four planted mutations shown firing.
 - `tests/test_readonly.py` -- `/company/example-co/` left `MUST_STAY_UNREADABLE`

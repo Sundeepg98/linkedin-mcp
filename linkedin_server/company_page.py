@@ -261,8 +261,51 @@ TRAVERSAL_REFUSED = "traversal_refused"
 #: invented a second, disagreeing URL parser inside the guard.
 DOT_SEGMENTS: frozenset[str] = frozenset({"..", "."})
 
+#: The only host an organisation route may name.
+#:
+#: **A RELATIVE HREF CARRIES NO HOST AND MUST STILL CLASSIFY** -- LinkedIn
+#: writes ``/company/<id>`` bare in the notification rail, measured in
+#: ``tests/fixtures/notifications.html`` -- so an EMPTY netloc is accepted and
+#: a NON-EMPTY one must match this exactly.
+#:
+#: THE FIRST VERSION OF THIS MODULE DEFINED THIS CONSTANT AND NEVER READ IT,
+#: which is worse than not having it: ``https://evil.example/company/x/``
+#: classified as ``home_tab`` and was counted as a LinkedIn organisation. A
+#: count is a claim about what a page links to, and one that cannot tell
+#: LinkedIn's own routes from a foreign host's is making a different claim
+#: than the one its name makes.
 _HOST = "www.linkedin.com"
 _SCHEME_HOST = "https://" + _HOST
+
+
+def _parts(href: Optional[str]):
+    """Split an href, or ``None`` if it cannot be split or is off-host.
+
+    **``urlsplit`` RAISES**, which is the reason this exists rather than being
+    inlined three times. ``urlsplit("https://[")`` is a ``ValueError`` --
+    Invalid IPv6 URL -- and MEASURED before this function existed,
+    ``tally`` propagated it straight out of ``linkedin_job_detail``. One
+    malformed href anywhere on a posting would have failed a read that had
+    already succeeded, turning a route this module could not classify into a
+    tool that returns nothing.
+
+    A route this module cannot parse is a route it cannot judge, and the whole
+    discipline here is that an unjudgeable route is COUNTED as unjudgeable
+    rather than guessed at. So the refusal is total and silent to the caller:
+    ``classify_route`` reports ``unclassified``, which is a visible integer.
+    """
+    if href is None:
+        return None
+    text = str(href).strip()
+    if not text:
+        return None
+    try:
+        parts = urlsplit(text)
+    except ValueError:
+        return None
+    if parts.netloc and parts.netloc != _HOST:
+        return None
+    return parts
 
 #: The one address form this package will ASSEMBLE. The slug form is admitted
 #: by the boundary and is deliberately not buildable here -- see the module
@@ -421,8 +464,13 @@ def classify_route(href: Optional[str]) -> str:
     if href is None or not str(href).strip():
         return "no_href"
 
-    path = urlsplit(str(href).strip()).path
-    segments = [segment for segment in path.split("/") if segment]
+    parts = _parts(href)
+    if parts is None:
+        # Unparseable, or a host this module has no business classifying.
+        # ``off_company`` would be a CLAIM about where it points; this one
+        # says only that it could not be judged.
+        return UNCLASSIFIED
+    segments = [segment for segment in parts.path.split("/") if segment]
 
     if any(segment in DOT_SEGMENTS for segment in segments):
         return TRAVERSAL_REFUSED
@@ -454,10 +502,10 @@ def identifier_kind(href: Optional[str]) -> str:
     can name somebody (the search-results case). It does not need the string,
     and this function is incapable of returning it.
     """
-    if href is None or not str(href).strip():
+    parts = _parts(href)
+    if parts is None:
         return "none"
-    path = urlsplit(str(href).strip()).path
-    segments = [segment for segment in path.split("/") if segment]
+    segments = [segment for segment in parts.path.split("/") if segment]
     if any(segment in DOT_SEGMENTS for segment in segments):
         return "none"
     if len(segments) < 2 or segments[0] != ORGANISATION_MARKER.strip("/"):
@@ -499,13 +547,12 @@ def slug_is_addressable(href: Optional[str]) -> bool:
     coupling check that quietly tolerates a mismatch has stopped coupling
     anything.
     """
-    if href is None or not str(href).strip():
+    parts = _parts(href)
+    if parts is None:
         return False
-    parts = urlsplit(str(href).strip())
     if parts.query or parts.fragment:
         return False
-    path = parts.path
-    segments = [segment for segment in path.split("/") if segment]
+    segments = [segment for segment in parts.path.split("/") if segment]
     if len(segments) != 2 or segments[0] != ORGANISATION_MARKER.strip("/"):
         return False
     segment = segments[1]
@@ -555,7 +602,8 @@ def tally(hrefs: Iterable[Optional[str]]) -> dict[str, Any]:
     for href in rows:
         kind = classify_route(href)
         counts[index[kind]] += 1
-        if href and urlsplit(str(href).strip()).query:
+        parts = _parts(href)
+        if parts is not None and parts.query:
             queries += 1
         # ``page_creation`` IS IN THIS SKIP SET AND THE OTHERS ARE OBVIOUS.
         # ``/company/setup/new/`` puts the literal ``setup`` in segment 1,
@@ -572,9 +620,8 @@ def tally(hrefs: Iterable[Optional[str]]) -> dict[str, Any]:
             numeric += 1
         elif spelling == "slug":
             slug += 1
-        if spelling != "none":
-            path = urlsplit(str(href).strip()).path
-            segments = [s for s in path.split("/") if s]
+        if spelling != "none" and parts is not None:
+            segments = [s for s in parts.path.split("/") if s]
             if len(segments) >= 2:
                 seen.add(segments[1])
         if slug_is_addressable(href):
