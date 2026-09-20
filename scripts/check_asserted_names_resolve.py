@@ -213,10 +213,28 @@ def tracked(repo: pathlib.Path, *paths: str) -> list[str]:
     return [p for p in proc.stdout.splitlines() if p.strip()]
 
 
+#: `_audit/INDEX.md` is GENERATED -- a derived view of this corpus, not a
+#: member of it. It quotes 65 correction reasons verbatim, and A QUOTE DOES NOT
+#: CARRY THE QUOTED DOCUMENT'S MARKS. One of those reasons says a cell "names
+#: `linkedin_applied_jobs` ... and no such tool exists anywhere"; the document
+#: that wrote it clears the name with a doc-scoped mark, which the quote leaves
+#: behind, so the index read as ASSERTING a tool the corpus was explicitly
+#: denying. **The index makes no claims; it reports that others did.** Scanning
+#: it for assertions therefore measures the reporter. See INSTRUMENTS.md
+#: section 45, and `scripts/find_blocker_reason.py::corpus` for the same
+#: exclusion made for a different instrument on the same day.
+GENERATED_VIEWS = frozenset({"_audit/INDEX.md"})
+
+
 def load_corpus(repo: pathlib.Path) -> dict[str, list[str]]:
-    """Every tracked `_audit/` file, as lines. One read each, no re-reads."""
+    """Every tracked `_audit/` file, as lines. One read each, no re-reads.
+
+    Excludes the generated views -- see `GENERATED_VIEWS`.
+    """
     out: dict[str, list[str]] = {}
     for rel in tracked(repo, CORPUS_DIR):
+        if rel in GENERATED_VIEWS:
+            continue
         path = repo / rel
         if not path.is_file():
             continue

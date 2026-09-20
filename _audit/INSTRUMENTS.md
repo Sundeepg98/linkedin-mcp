@@ -7387,3 +7387,236 @@ already covers it: *the surface may not print a claim it cannot derive.* Every
 census section that quotes a constant, a count or a boundary verdict is one
 edit away from being a confident lie, and the fix is never to re-read it more
 carefully. It is to let the document be the thing under test.
+
+## 45. THE AUDIT INDEX: a way into 195 documents that is not grep, and five defects that fell out of deriving it (audit-index, 2026-09-20)
+
+`_audit/` held 195 tracked documents and 5.4 MB of prose with no index of any
+kind, and `scripts/` contained nothing that made one. The only ways in were
+grep and somebody's memory. **A corpus nobody can navigate is a corpus nobody
+RE-READS**, and the same day this was measured produced four count-drifts
+between a machine-checked constant and the prose beside it, a section asserting
+a 22-pattern read allowlist that had held 42 for a fortnight, a correction
+marker that was itself stale, and 22 commit ids cited across 19 documents that
+no clone can resolve.
+
+The wave's own answer to the question it was set: **38 documents are corrected
+by something later, and all 38 say so themselves** -- because the correction
+guard makes it impossible not to, asserting both directions of every pair. 120
+documents carry no correction marker at all, which is a fact about markers and
+not a verdict, and the index says so in those words rather than letting a blank
+cell read as a clean bill of health.
+
+### 45.1 `scripts/build_audit_index.py` + `tests/test_the_audit_index_is_derived.py` -- ADMITTED, SHOWN FAILING SEVEN WAYS
+
+The generator derives every cell from the corpus; the test re-derives it and
+compares line for line. Newlines are normalised before comparing, because
+`core.autocrlf` is true on this machine and false on CI, so the same committed
+bytes arrive CRLF here and LF there -- a byte comparison would pass on one and
+fail on the other, which is the local-passes/clone-fails shape this repository
+has paid for once already.
+
+`scripts/_check_audit_index_guard_can_fail.py` is the red proof, and it makes
+the claim the in-test controls cannot: it copies the tree, plants seven defects
+and runs THE REAL PYTEST SELECTOR against each.
+
+    a line appended to the committed index       RED
+    a line deleted from the committed index      RED
+    one count flipped by one                     RED
+    a document added and not re-indexed          RED
+    a title edited and not re-indexed            RED
+    a correction declared and not re-indexed     RED
+    the corpus gutted to ten documents           RED  (the vacuity floor)
+
+Bracketed by a green control before the first mutation and after the last
+restore, because a proof that ends red says nothing about whether the tree was
+restored. Every planted run also asserts the failure is the RIGHT one -- an
+import or collection error would fail the run too, and would prove only that
+the harness is broken. The thirteen controls inside the test file run over a
+SYNTHETIC corpus in `tmp_path`: `render()` is pure over an explicit document
+list precisely so no live mutation is ever needed, in a directory four waves
+write to continuously.
+
+### 45.2 IMPORT THE PARSE, REIMPLEMENT ONLY THE LOOP, THEN ASSERT THE TWO AGREE
+
+The marker vocabulary, the line-anchored pattern, the citation pattern, the
+three spellings this corpus uses for one target and the rule for where a
+reason starts are all IMPORTED from the correction guard. What is
+reimplemented is the `for document, for line` iteration -- and only because a
+pure function over an explicit document list is what makes the red proof
+possible without touching the live tree.
+
+**That reimplementation is exactly where a fourth broken parser would come
+from, so it is not trusted.** Both composites run over the live corpus and
+their key sets are asserted identical. Reuse where reuse is load-bearing,
+reimplement the trivial half, assert the two agree. The VALUES deliberately
+differ, and 45.3 is why.
+
+### 45.3 THE SHIPPED REASON EXTRACTOR CUTS 65 OF 136 REASONS, AND THE GUARD IS GREEN ON EVERY ONE
+
+`_reason_on` returns everything after the LAST backtick on a marker line. Its
+own docstring says *whatever a marker line says after the document it names*.
+Those are the same thing only when no backtick follows the cited path, and
+marker reasons here quote commit ids, symbols and branch names constantly.
+
+    65 of 136 marker lines disagree
+    every one is a strict SUFFIX -- text is lost, never invented
+    13 are cut below 60 characters
+    the worst returns 29 characters of a 767-character reason
+
+One reads, in full, `. The dated note sits at that block.` Its real reason is a
+four-clause re-measurement against a freshly fetched remote. **The guard stays
+green on all 65**, because its only check is that the fragment is 20 characters
+long, and a fragment can be.
+
+**A LENGTH CHECK IS NOT A CONTENT CHECK, AND THIS IS THE GENERAL FORM.** A
+guard that asks whether a field is non-empty certifies that something is there,
+never that it is the thing. The index takes its text from the end of the
+citation match -- the stated intent implemented -- while still using the
+shipped function to decide what is ADMITTED, so the edge set it advertises is
+provably the edge set the guard enforces. Nothing in `tests/` was edited.
+
+### 45.4 A PAIR-KEYED DICTIONARY CANNOT HOLD A PAIR DECLARED TWICE
+
+68 `CORRECTS:` lines and 68 back-pointer lines resolve to 65 distinct pairs.
+Three pairs are declared twice, for two different claims each, and a dictionary
+keyed by the pair drops the first silently. The guard has that shape correctly
+-- it only ever asks whether the pair exists -- but anything reading it FOR THE
+REASON gets the last one written and never learns there was another.
+
+Two of those pairs are also LOPSIDED: declared twice in one direction and once
+in the other. The both-directions test is over distinct pairs, so two corrected
+claims under one back-pointer read to it as one clean pair. Reported by the
+index, not ruled on by it.
+
+### 45.5 THE RELATION THE CORPUS HAS AND THE GUARD HAS NO MODEL FOR
+
+Four tracked markers sit BEHIND A BLOCKQUOTE, where the anchor's `^\s*` never
+consumes `> `. Verified directly rather than reasoned about: `> **CORRECTED
+BY:** x` does not match, `**CORRECTED BY:** x` and `   CORRECTS: y` both do.
+
+**Every one names "this section" or "this document".** They are a later section
+correcting an earlier one in the same file -- a relation nobody formalised. So
+WIDENING THE ANCHOR WOULD HAVE MADE THINGS WORSE: the guard requires a marker
+to name exactly one resolving document, "this section" resolves to none, and
+all four would have become malformed reds on well-intentioned annotations.
+
+The measurement that settles it: **zero blockquoted markers in this corpus name
+another document**, so widening gains no edge at all. The index records them as
+their own relation, and two preconditions hold the position --
+`test_no_blockquoted_marker_names_another_document` (the day one names a file,
+it IS a missing edge and somebody adjudicates) and
+`test_no_marker_hides_inside_a_fenced_code_block` (the anchor is fence-blind
+too; 0 of 136, measured independently by a census slice as well).
+
+**THE TRANSFERABLE PART: A PATTERN'S BLIND SPOT IS A KIND, NOT A MISS.** The
+instinct on finding four invisible markers is to widen the pattern. One step
+further -- what ARE they? -- inverted the remedy, because they were never the
+thing the pattern was looking for.
+
+### 45.6 AN INDEX OF A CORPUS IS NOT A CLAIM ABOUT IT, AND THE GUARD CANNOT TELL
+
+Two defects found by the red proof and by a probe, both fatal, neither visible
+by reading the code.
+
+**IT INDEXED ITSELF.** Once the generated index is tracked it is part of its
+own corpus, and it quotes four marker-shaped lines verbatim. The count went 4,
+then 8, then 12 on successive regenerations. **No fixpoint exists, so `--check`
+could never pass after `--write`.** The harness whose only job was to prove the
+guard could fail found this by failing its own opening control, before the
+first commit.
+
+**IT SPOKE TO THE CORRECTION GUARD.** That guard raises a candidate pair
+whenever correction vocabulary sits within two lines of a backticked `*.md`
+that resolves, and an index is nothing but document names beside the words
+CORRECTED and corrects. Measured with the link text backticked, which is the
+obvious way to write it: **490 resolvable citations and 153 candidate pairs**,
+each demanding a declaration or a hand-written triage entry in a guard three
+other waves edited the same day.
+
+The measurement is what made the remedy local: all 490 came from LINK TEXT,
+zero from the verbatim quoted reasons. So link text is not backticked, and the
+one quoted title carrying a resolving spelling is DEFUSED -- backticks removed,
+not one character of text changed, and reported by name in the index's own
+section 6. `test_the_index_raises_no_candidate_pair_in_the_correction_guard`
+asserts the OUTPUT rather than the two mechanisms, so a third channel nobody
+thought of is covered by the same line, and a planted control re-backticks a
+link to prove the zero was won rather than never at risk.
+
+> **AND THE WAVE'S OWN DELIVERABLE TRIPPED IT, AFTER ALL OF THE ABOVE WAS
+> WRITTEN.** The wave's audit document explains this mechanism in prose, and
+> named the index in backticks four times while doing so. One of
+> those sat two lines from the word "correction" and raised a candidate pair,
+> turning the guard red. Knowing a mechanism exactly does not stop you
+> instantiating it in the document describing it -- which is the same shape as
+> the correction guard's own `MARKER`, convicted the hour its register entry
+> was written, and the reason that entry says prose about a mechanism is
+> indistinguishable from the mechanism.
+>
+> **IT THEN HAPPENED A SECOND TIME, IN THIS ENTRY.** The paragraph you are
+> reading named that audit document in backticks two lines from the word
+> "correction" and turned the same guard red again -- after the first
+> instance had been diagnosed, written up and fixed. Three instances in one
+> wave, the last two inside the prose explaining the defect. **A mechanism
+> you can state exactly is not a mechanism you have stopped running**, which
+> is the argument for the guard rather than for the write-up.
+
+### 45.7 DERIVED, NEVER RESTATED -- AND A HAND COUNT PROVED THE POINT IMMEDIATELY
+
+Every number in the index is computed; the generator's own docstring carries no
+count it does not derive, on the same rule. One test was written with a
+hand-grepped allowlist of ONE non-ASCII title, taken from eyeballing a single
+date's files. **The test convicted it on its first run and named five.** A hand
+count of a corpus, committed inside the fix for hand counts of corpora, caught
+within a minute by the only thing that catches them.
+
+### 45.9 THE LAW THIS WAVE ACTUALLY ESTABLISHED: a derived view is not a member of the corpus it views
+
+**A DERIVED VIEW OF A CORPUS MUST NOT BE AN INPUT TO INSTRUMENTS THAT MEASURE
+THAT CORPUS.** Stated here because it cost two other guards, neither of which
+this wave touched or expected to, and both were found by the full suite rather
+than by reading.
+
+The generated index is tracked, so every instrument sweeping tracked markdown
+under `_audit` picks it up. It carries every document's title and 65 correction
+reasons quoted verbatim. That breaks two DIFFERENT kinds of instrument for two
+DIFFERENT reasons, and the pair is the general form:
+
+**A RANKER GETS DILUTED.** `find_blocker_reason` ranks documents by how well
+they ARGUE a blocker. An index mentions every blocker-shaped word in the
+repository while arguing nothing, so it competes with real arguments and wins
+on surface overlap. Measured: GROUPS-SURFACE's real argument fell from rank 1
+to rank **17**, and that tool's recall floor went red. Its own corpus function
+already carried a long comment about `_scratch/` changing its rankings -- the
+same lesson arriving from the opposite direction, one holding files no reader
+has and the other a file that is only a picture of the others.
+
+**A QUOTE DOES NOT CARRY THE QUOTED DOCUMENT'S MARKS.** One reason quoted in
+the index says a cell names a server tool "and no such tool exists anywhere".
+The document that wrote that clears the name with a DOC-SCOPED mark, and a
+quote leaves the mark behind -- so `check_asserted_names_resolve` read the
+index as ASSERTING a tool the corpus was explicitly DENYING. **The index makes
+no claims; it reports that others did.** Scanning a reporter for assertions
+measures the reporter.
+
+Both are fixed at the instrument's single corpus entry point, each with the
+reason written beside it, and `test_the_generated_index_is_not_read_as_an_audit_document`
+asserts both exclusions rather than trusting those comments -- because a filter
+with a long comment beside it is exactly what a later cleanup deletes.
+
+**THE STANDING OBLIGATION, for whoever adds the next generated artifact under
+`_audit/`.** The three instruments that exclude it today are the correction
+guard (by the index making no citation it can resolve), the blocker-reason
+locator, and the asserted-name checker. A fourth instrument that sweeps this
+corpus will pick the index up silently and will be wrong in whichever of the
+two ways above fits its question. The precedent already in the tree is worth
+noticing: the repository's other generated artifacts under `_audit/_census/`
+are `.tsv`, which is why no markdown sweep has ever met one.
+
+### 45.8 DISPOSABLE, DECLARED
+
+`scripts/_check_audit_index_guard_can_fail.py` is NOT disposable and is
+registered above. The three scratch probes this wave ran -- the collapsed-pair
+diagnostic, the reason-truncation census and the blockquote verification -- ARE
+disposable: each was a one-shot measurement whose finding is now a permanent
+assertion in `tests/test_the_audit_index_is_derived.py` or a derived row in the
+index itself. They were written to the scratchpad and are not committed.
