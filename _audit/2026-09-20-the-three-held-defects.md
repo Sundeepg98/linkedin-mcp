@@ -375,6 +375,28 @@ rows left GAP since the freeze, 1 entered (`P L2b`), 302 today, and the same six
 column added nothing but itself.** Re-running `--write` after the census edits
 produced output byte-identical to the run before them.
 
+### 4.1 And again after merging master, because a derived column must be re-derived
+
+`origin/master` gained the `live-capture` wave's commit while this wave ran, and
+it touches the SAME two census files. Merged in here rather than left for the
+integrator. It auto-merged with no conflict, and **both sides were verified by
+RE-READING the files rather than by trusting the merge**: that wave's two
+promotions and all six of this wave's corrected cells are present on disk. There
+is no row overlap at all -- it edited `J 123`, `J 136`-`J 138` and `N 135`.
+
+Its two promotions are COVERED-UNFIRED to COVERED-PROVEN, so the GAP numerator
+does not move. Re-measured on the merged tree, every figure above is unchanged:
+704 stated rows, 302 GAP, 409 frozen, 97 blockers / 409 rows, 390 assigned, 19
+UNASSIGNED, 86 complete / 8 partial / 3 absent, 108 left, 1 entered, 302 today.
+
+**`reason_doc` DID move, for eleven blockers, and that is the column working.**
+The merge added a 501-line audit document, which is corpus the locator reads.
+Nine of the eleven are candidate-count increments. One is substantive:
+`OWNED-BY-A-SIBLING-SLICE` goes from score 2 to score 6 and now points at this
+document, which argues that blocker at length where the previous best merely
+named it. A cached column would have kept the old answer and been quietly wrong;
+this one was re-derived and committed.
+
 ---
 
 ## 5. INSTRUMENTS
