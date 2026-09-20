@@ -353,3 +353,59 @@ subjects. `scripts/build_blocker_map.py --check` was run before and after the
 three document edits; its output is unchanged (no table in
 `_audit/_census/blocker-map.tsv` was touched by this task, and the check
 output matches byte-for-byte).
+
+---
+
+## 9. A CI-VERDICT CITATION HAS THE SAME FAILURE MODE THIS DOCUMENT IS ABOUT
+
+Flagged by the coordinator mid-task, and it lands squarely on this task's own
+subject: a run id is not a verdict, the same way a commit SHA is not the
+content it names. `gh run watch --exit-status` returned a non-zero exit for
+all three of this task's pushes today, and the raw output showed why before
+the coordinator's warning confirmed it independently: the Actions REST API is
+403'd fleet-wide (`gh api rate_limit` reports `core: 5000/5000, used 0` --
+the exhausted bucket is a DIFFERENT one than that endpoint reports, so the
+403 is the measurement, not the quota check). A watcher that loses the API
+mid-poll and gives up is not a report of the run's conclusion; it is a report
+of the watcher's own failure, and it can print either exit code depending on
+where in its loop it was standing when the 403 landed. Waiting out the rate
+limit did not help (re-checked after a 180s backoff, still 403) -- consistent
+with a SUSTAINED fleet-wide load, not a burst.
+
+**THE WORKING CHANNEL, FOUND BY TRYING A DIFFERENT REQUEST PATH ENTIRELY:**
+`curl` against the PUBLIC, UNAUTHENTICATED check-runs endpoint --
+`GET /repos/Sundeepg98/linkedin-mcp/commits/<sha>/check-runs` -- answered with
+HTTP 200 while every authenticated `gh` call to the adjacent `runs/<id>`
+endpoint was still 403ing. This is queried BY THE EXACT COMMIT SHA rather
+than by run id, which satisfies the coordinator's headSha discipline by
+construction: every one of the 19 returned check-runs carries a `head_sha`
+equal to this task's actual final commit, `d4a7cd6`, confirmed by direct
+field comparison against the full form queried, not assumed from run
+recency. This channel has its own budget (60 requests/hour, unauthenticated,
+almost certainly shared across this fleet's outbound IP the same way the
+token-based budget is shared across its accounts), so it is used sparingly
+here, not looped.
+
+**READ AS AN ARTIFACT, TIMESTAMPED, NOT INHERITED FROM ANY watch OUTPUT:**
+first read at 2026-09-20 ~05:52 UTC -- 1 of 19 check-runs completed (`shard
+plan`, conclusion `success`), 2 `in_progress`, 16 `queued`, 0 `failure`.
+**This is "still running," stated as that and not rounded up to a pass or
+down to a fail.** See the addendum immediately below this section (added
+after a second read) for whichever of {completed, still running, UNKNOWN
+because the channel closed too} turned out to be true, so this document does
+not cite a run id without saying how its conclusion was actually read.
+
+**ADDENDUM -- FINAL READ, 2026-09-20 ~06:11 UTC.** Same channel, same commit,
+polled five more times at spaced intervals rather than looped: 20 of 20
+check-runs `completed`, conclusion `success` on every one -- the 18 pytest
+shards, the `shard plan` job, and a final `every shard reported` gate job
+that only appears once every shard has reported and itself completed
+successfully. `head_sha` verified equal to this task's actual final commit
+on all 20, checked again at this final read, not carried over from the first
+one. Two annotations on the gate job, both infrastructure notices unrelated
+to this task's changes (a Node.js 20 deprecation warning on `actions/checkout`
+and `actions/download-artifact`, and an `ubuntu-latest` image-migration
+notice for October 2026) -- read and confirmed harmless, not skipped.
+**CI RESULT: run `35491410424`, commit `d4a7cd6`, SUCCESS, read as an
+artifact via the unauthenticated check-runs API, headSha-verified, not
+inherited from any `gh run watch` exit code.**
