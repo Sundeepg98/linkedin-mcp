@@ -150,27 +150,24 @@ def main(argv: list[str]) -> int:
 
     rev_range = argv[1] if len(argv) > 1 else _default_range()
 
-    wordlist = load_wordlist()
-    spellings = [(cls, s) for cls, values in wordlist.items() for s in values]
-
     # ------------------------------------------------------------------
-    # THE MUTE CHECK. This is the whole reason the file exists and it runs
-    # BEFORE anything is swept, so no reassuring output can precede it.
-    # ------------------------------------------------------------------
-    print(f"needles: {len(spellings)} spellings across {len(wordlist)} classes")
-    if not spellings:
-        print(
-            "REFUSING TO SWEEP: the needle set is EMPTY.\n"
-            "  A sweep with no needles matches nothing and its clean result\n"
-            "  would be a statement about this instrument, not about the\n"
-            "  blobs. Three hand-rolled versions of this check reported\n"
-            "  exactly that all-clear on 2026-09-05. Fix the key, not this\n"
-            "  message."
-        )
-        return 2
-
-    # ------------------------------------------------------------------
-    # THE RANGE MUST BE REAL. A git rev-list that FAILS and a range that
+    # THE RANGE IS VALIDATED FIRST, BEFORE THE WORDLIST IS EVEN LOADED,
+    # and the order is deliberate. Rejecting a bad ARGUMENT must not depend
+    # on the ENVIRONMENT: the wordlist is gitignored, so on a machine that
+    # has none -- every CI runner, by design -- `load_wordlist()` raises
+    # before the range is ever looked at, and the tool then reports a
+    # missing key for what is actually a malformed range. Measured on
+    # 2026-09-20: three CI platforms failed with "the wordlist is missing"
+    # on a test whose whole subject was a garbage rev range.
+    #
+    # It also removes a real overload. `load_wordlist()` exits 1, and exit 1
+    # HERE means "hits found" -- so on a keyless machine a missing wordlist
+    # was indistinguishable, by exit code, from a positive identity
+    # detection. Validating the argument first means the only paths that can
+    # still reach the wordlist are ones where a sweep is genuinely about to
+    # happen.
+    #
+    # A git rev-list that FAILS and a range that
     # RESOLVES to ZERO commits are different facts about the world -- see
     # the module docstring for why the second one refuses too, rather
     # than passing on the strength of an empty result this script cannot
@@ -200,6 +197,28 @@ def main(argv: list[str]) -> int:
             "  here would be indistinguishable from a range that was\n"
             "  actually swept. Pick a range that contains at least one\n"
             "  commit."
+        )
+        return 2
+
+    # ------------------------------------------------------------------
+    # THE MUTE CHECK. This is the whole reason the file exists, and it still
+    # runs BEFORE anything is swept, so no reassuring output can precede it.
+    # It moved BELOW the range validation on 2026-09-20 and not one line
+    # earlier: by here the range is known real and non-empty, so a sweep is
+    # genuinely about to happen and the needles genuinely matter.
+    # ------------------------------------------------------------------
+    wordlist = load_wordlist()
+    spellings = [(cls, s) for cls, values in wordlist.items() for s in values]
+
+    print(f"needles: {len(spellings)} spellings across {len(wordlist)} classes")
+    if not spellings:
+        print(
+            "REFUSING TO SWEEP: the needle set is EMPTY.\n"
+            "  A sweep with no needles matches nothing and its clean result\n"
+            "  would be a statement about this instrument, not about the\n"
+            "  blobs. Three hand-rolled versions of this check reported\n"
+            "  exactly that all-clear on 2026-09-05. Fix the key, not this\n"
+            "  message."
         )
         return 2
 

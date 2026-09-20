@@ -113,9 +113,20 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from tests.repo_paths import describe_key_path, sanitisation_key_path
+
 REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "sweep_blobs_for_identity.py"
 PYTHON = Path(sys.executable)
+
+#: The gitignored de-anonymisation wordlist the sweep needs in order to sweep
+#: ANYTHING. Resolved through the shipped helper rather than joined by hand,
+#: because a linked worktree has no key of its own and the helper is what
+#: answers "the local one, else the main checkout's, else say where I looked".
+#: Absent on every CI runner by design -- see the positive control below.
+KEY_PATH = sanitisation_key_path(REPO)
 
 #: Generous but bounded. The positive control below does a real sweep of one
 #: commit's worth of blobs (low hundreds -- 610 the last time this was
@@ -302,7 +313,37 @@ def test_a_real_range_sweeps_and_never_silently_passes():
     gitignored key is entirely absent rather than merely empty) is left to
     fail the assertions below loudly, which is the correct outcome for an
     environment this test cannot silently paper over.
+
+    THAT STANCE IS ANSWERED, NOT DELETED, 2026-09-20. It was right about a
+    developer box and wrong about CI, and the difference is whether the
+    absence is TEMPORARY. On a machine that ought to have the key, a loud
+    failure is correct: somebody can go and fix it. **On CI the key is absent
+    BY DESIGN and permanently** -- it is the de-anonymisation wordlist for the
+    committed fixtures and it is gitignored on purpose, so it will never be
+    there. A test that fails on every CI run forever is not failing loudly; it
+    is training every reader to scroll past a red run, which costs more than
+    the check was ever worth.
+
+    So this now takes the SAME route this repository already chose for the
+    identical situation in
+    ``test_no_committed_identity.py::test_the_exact_value_sweep_actually_runs``:
+    skip, with **a sentence rather than a dot**, so "did not run" is SAID in
+    the summary of every run instead of being indistinguishable from "ran and
+    found nothing". The original stance survives everywhere it was right --
+    an EMPTY wordlist still fails loudly below, because that is a machine that
+    has a key and the key is broken.
     """
+    if not KEY_PATH.exists():
+        pytest.skip(
+            "THE POSITIVE CONTROL DID NOT RUN, so nothing in this session "
+            "proved this sweep can actually sweep. The wordlist %s is absent "
+            "-- gitignored on purpose, and never present on CI. The REFUSAL "
+            "cases above all ran and need no key: they are validated before "
+            "the wordlist is loaded, deliberately. What is unproven here is "
+            "only the positive direction."
+            % describe_key_path(REPO, KEY_PATH)
+        )
+
     result = _run("HEAD~1..HEAD")
     if result.returncode == 2:
         assert "the needle set is EMPTY" in result.stdout, (
