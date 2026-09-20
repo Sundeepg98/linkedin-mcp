@@ -179,7 +179,20 @@ VOCABULARY: dict[str, tuple[str, ...]] = {
     "mark_read_state": ("mark as read", "mark as unread"),
     "mute": ("mute", "unmute", "mute conversation"),
     "report_conversation": ("report conversation", "report this conversation"),
-    "star": ("star", "unstar", "remove star", "add star"),
+    # ``star conversation`` ADDED 2026-09-20, AND THE VOCABULARY WAS BLIND TO
+    # THE ONE SHAPE THIS SURFACE ACTUALLY DRAWS. Measured offline by
+    # ``scripts/_probe_labels_in_capture.py`` over a capture of ``/messaging/``
+    # taken 2026-09-20: **eleven** nodes carry the accessible name
+    # ``Star conversation``, and the classifier matched NONE of them. ``star``
+    # is a ONE-WORD term, so section 1.1's rule requires it to match the WHOLE
+    # label -- the rule the ``Star Anise`` defect bought -- and the drawn label
+    # is two words. The rule is right; the phrase list was short.
+    #
+    # THE MULTI-WORD FORM IS SAFE UNDER THAT SAME RULE: a phrase of two or
+    # more words may be CONTAINED, and no person's name contains
+    # ``star conversation``. Only the direction that was OBSERVED is added --
+    # no ``unstar conversation`` is invented here, because nobody has seen one.
+    "star": ("star", "unstar", "remove star", "add star", "star conversation"),
     "move_folder": ("move to other", "move to focused", "move to inbox"),
     "leave_conversation": ("leave conversation", "leave this conversation"),
     "block_or_remove": ("block", "remove connection", "block and report"),
@@ -215,6 +228,15 @@ VOCABULARY: dict[str, tuple[str, ...]] = {
     "send": ("send", "send message"),
     "attach": (
         "attach", "attach a file", "add a photo", "add an attachment", "gif",
+        # ``attach an image`` ADDED 2026-09-20, same measurement as ``star``
+        # above. ``/messaging/compose/`` draws TWO ``input[type=file]`` nodes
+        # and the classifier saw ONE of them: the labels are
+        # ``Attach a file ...`` (matched, the phrase was already here) and
+        # ``Attach an image ...`` (unmatched, this is the phrase that was
+        # missing). A tally reading ``attach: 1`` over two file inputs
+        # UNDERSTATES the upload surface by half, which is the worst kind of
+        # miss on a surface whose whole question is what it can be given.
+        "attach an image",
     ),
     "emoji_picker": ("emoji", "open emoji keyboard", "emoji keyboard"),
     # -- generic openers. These are TRIGGERS, not items, and are kept

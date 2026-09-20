@@ -7163,3 +7163,227 @@ docstring rather than quietly swap a url: the distinction between "this
 address is refused" and "this address was not opened by THIS argument" is the
 entire reason the case was written, and a swap that lost it would have
 retired a real guard while appearing to keep it.
+
+---
+
+---
+
+## 39. THE MESSAGING-GAP WAVE: reading a capture is an instrument, and one of the ones it imported was blind, 2026-09-20
+
+Wave `messaging-and-content`, from master `e6b11e5`. Six instruments, every
+one shown failing. **No browser was opened and no page was loaded** -- every
+measurement here was taken offline, against committed files and against
+captures a sibling wave had already paid for.
+
+**THE ENTRY THAT MATTERS MOST IS 39.3: an instrument shipped yesterday could
+not see the control its own surface draws eleven times, and only running it
+over a capture found that out.**
+
+---
+
+### 39.1 `linkedin_server/item_addresses.py` + `tests/test_item_addresses.py`
+
+Classifies LinkedIn item addresses out of a page's hrefs and publishes counts;
+whole anchored `urn:li:<letters>:<digits>` matches leave only on an explicit
+opt-in.
+
+**FIVE PLANTED MUTATIONS, ALL RED after the suite was repaired. The fourth is
+the reason this entry exists.**
+
+| mutation | first round | after |
+|---|---|---|
+| ambiguity resolved by check order instead of refused | RED | RED |
+| `tally` always discloses the urns | RED | RED |
+| `distinct_by_kind` counts hrefs instead of urns | RED | RED |
+| **`_is_urn` widened from `startswith` to a containment test** | **GREEN** | RED |
+| an unreadable element dropped instead of counted | RED | RED |
+
+**THE FOURTH SURVIVED, AND TELLING A WEAK MUTATION FROM A HOLE TOOK A SECOND
+ROUND.** Replacing the anchor check with `in` leaves almost every input
+unchanged, because the slice that follows still cuts at offset 7 and then
+fails the digit test. The two implementations differ only where the prefix
+sits at offset 3 so that the mis-aligned slice happens to parse -- and there
+the containment version ACCEPTS the string and publishes three leading
+characters along with the urn:
+
+    _is_urn("abcurn:li:123")     original False     mutated True
+
+"Only a WHOLE anchored match may leave" was stated in three docstrings and
+asserted nowhere. **A mutation the suite survives is either weak or a hole,
+and the only way to know is to construct the separating input.** It is now a
+parametrised case with the reasoning beside it.
+
+**A SECOND DEFECT, IN THE CHECK RATHER THAN THE CODE.** The disclosure
+property was first written as *no four-character substring of any input
+appears in the output*. It went red on `link` -- a fragment of the module's
+own word `permalink`, and also of `linkedin.com`. **A check whose failures are
+ordinary English gets its threshold raised until it certifies nothing.**
+Replaced with the closed-alphabet property `menus.py` carries: every published
+string must be a word the module declares. A closed alphabet has no threshold
+to raise.
+
+**A THIRD DEFECT, IN A COUNT, FOUND BY RUNNING THE THING RATHER THAN READING
+IT.** The field was `distinct_items` and the docstring said *distinct items 2*.
+The probe returned 4: LinkedIn draws TWO urn families for the same content
+(`urn:li:share:` on permalinks, `urn:li:activity:` on analytics addresses) and
+their digit runs do not match -- overlap 0 over four 19-digit runs. Four urns
+are consistent with two posts drawn twice and with four posts, and nothing in
+the reading separates them. Renamed `distinct_urns`; a test asserts the module
+publishes no field called `items` at all. **This is `newsletters.py`'s ten
+anchors / five newsletters, one surface over.**
+
+### 39.2 `scripts/_probe_item_addresses_in_capture.py`
+
+Re-derives 39.1's figures from any capture of `/analytics/creator/content/`.
+Opens nothing. `include_identifiers` is hard-wired False and **there is no
+flag to turn it on**; only counts and the urn TYPE words (letters, no digits)
+are printed.
+
+**SHOWN FAILING:** `--self-test` plants four hrefs, one per refusal branch,
+and requires each to land on its own reason -- plus a positive control,
+because four refusals prove nothing if nothing can be recognised. It refuses
+to report a reading at all when it parses zero anchors, so a parse failure
+cannot be read as a page with no item addresses on it.
+
+**THE EVIDENCE CHAIN, which is the point of it being a script.** The capture
+is gitignored and always will be. `tests/fixtures/synthetic/creator_content_addresses.html`
+reproduces the capture's figures exactly -- 27 anchors, 4 permalink hrefs over
+2 urns, 2 post-summary hrefs over 2 urns, 21 no-marker refusals -- and
+`test_the_fixture_reproduces_the_captured_figures` requires the two to agree.
+A second test requires the fixture NOT to be trivially clean: 21 refusals over
+21 copies of one anchor would pass the count and exercise one code path.
+
+### 39.3 `scripts/_probe_labels_in_capture.py` -- AND THE BLIND SPOT IT FOUND IN `menus.py`
+
+Classifies a capture's accessible names with the SHIPPED classifier rather
+than a second copy of it. Its first run, over a capture of `/messaging/`:
+
+    aria-labels parsed   42      matched   1      buttons  50
+
+**One.** Eleven of those 42 nodes carry the accessible name
+`Star conversation`, and `menus.VOCABULARY` holds a `star` term.
+
+**THE CLASSIFIER WAS RIGHT AND THE VOCABULARY WAS SHORT, AND THE DIFFERENCE
+IS THE FINDING.** `star` is a ONE-WORD term, and section 1.1 of
+`_audit/2026-09-19-messaging-menu-enumeration.md` requires a one-word term to
+match the WHOLE label -- the rule `classify("Star Anise") -> star` bought. The
+rule is correct. Nobody had added the two-word form LinkedIn actually draws.
+
+Same run over `/messaging/compose/`: 40 labels, **two** `input[type=file]`
+nodes, `attach` matched **one**. `Attach a file ...` was in the list;
+`Attach an image ...` was not.
+
+    before   messaging  matched  1      compose  attach 1 of 2 file inputs
+    after    messaging  matched 12      compose  attach 2 of 2
+
+**THE METHOD, AND IT GENERALISES.** A closed vocabulary is a safety property
+and a coverage liability at the same time, and the two failure modes look
+nothing alike from the inside: a WRONG match is caught by the module's own
+alphabet tests, and a MISSING match is caught by nothing at all -- it reads as
+a surface with no controls on it. **The only instrument that finds a missing
+phrase is the vocabulary run over a real corpus with its denominator
+printed.** `matched 1 of 42` is a question; `matched 1` alone is a sentence
+nobody re-reads.
+
+**SHOWN FAILING, BOTH DIRECTIONS.** Removing either phrase turns
+`tests/test_labels_in_capture.py` red. And the widening's BOUND is asserted,
+because a vocabulary that grows is a vocabulary that can start swallowing
+names: `Star Anise` must stay unmatched, and four name-shaped labels whose
+first token is a vocabulary term (`Star Gazer`, `Attach Anderson`, ...) must
+match nothing. Both added phrases are multi-word, which is what makes them
+safe under the module's own rule -- and **only the OBSERVED direction was
+added**: no `unstar conversation` was invented, because nobody has seen one.
+
+A further test asserts the probe prints no accessible name at all, on a corpus
+containing a name-shaped label. On `/messaging/` a label IS a person's name by
+LinkedIn's own design, so that is the property that makes the probe safe to
+run rather than a nicety.
+
+### 39.4 `scripts/triage_messaging_gap_rows.py` + `tests/test_triage_instrument.py`
+
+Splits a census slice's GAP rows by direction and by blocker. It imports
+`count_census_states`, `enumerate_gap_rows` and
+`reader_closable_blockers.direction_of` and reimplements none of them.
+
+**IT REFUSES TO PRINT A TALLY UNLESS THREE CONTROLS PASS**, and each is shown
+failing:
+
+| control | shown failing by |
+|---|---|
+| the shipped counter agrees with the enumeration | `_control_count` handed a total wrong by one -- must name both numbers |
+| every enumerated row joins to a blocker | `unjoined_rows` over a map with one, then three, holes punched in it -- must name every hole, not the first |
+| the direction reader is alive | inherited `reader_closable_blockers.control_negative`, four planted cases |
+
+**WHY THE COVERAGE CONTROL WAS EXTRACTED INTO A FUNCTION.** It began inline in
+`main()`, where it could only ever run over the real, complete blocker map --
+a check that has never been observed to fail. Pulling it out cost three lines
+and made it provable.
+
+### 39.5 `tests/test_c43_rests_on_the_feed_content_ruling.py`
+
+The second instance of the law `tests/test_a_retired_row_rests_on_a_live_assertion.py`
+states: *a ruling not attached to the row it decides gets re-derived.*
+
+**THAT FILE COULD NOT HOLD THE ROW**, and the reason is worth recording rather
+than working around: its own invariant is that every entry names a parameter
+in `FORBIDDEN_PARAMETER_NAMES`. Census row `C43` is retired on a different
+shipped assertion -- `feed._PERMITTED_PARAMETER_NAMES`, the IN half of the
+FEED-CONTENT-READ-RULING. A seventh entry would have broken the invariant that
+makes the original file readable. **A second file is the right shape when a
+binding rests on a second assertion; widening the first would have made both
+weaker.**
+
+**SHOWN FAILING, THREE WAYS, each against a COPY of the census so no contended
+file was edited:**
+
+    CONTROL  the real tree, unmutated                  reds 0
+    1        C43's state flipped back to GAP           reds 1   names the row and its state
+    2        the C43 row deleted outright              reds 1   names it MISSING, not absent
+    3        `text` added to feed._PERMITTED_...        reds 1   names the assertion
+
+Mutation 2 is the one that is easy to omit and the one that matters: a guard
+that passes over an absent row is the `PASS: 0 hits across 0 blobs` shape with
+a census table instead of a blob list.
+
+### 39.6 `tests/test_the_census_prose_matches_the_boundary.py` -- A CENSUS SECTION THAT WAS STALE IN EVERY CLAIM
+
+`_audit/_census/messaging-and-content.md` section 4 is the section that
+explains why most of that slice is a GAP. Measured against the shipped
+`readonly` module on 2026-09-20:
+
+    the allowlist is 22 patterns            ->  41
+    nothing reaches Groups/Events/
+      newsletters/creator analytics         ->  all four reachable
+    set_input_files is unsanctioned         ->  entry 7 of 7, since 2026-09-04
+    no document has discussed it            ->  8 documents under _audit/
+
+**Ten GAP rows carried the third of those as their stated reason.** The
+section was written 2026-09-03 and never re-run, while the same FILE took
+eighteen further commits on 2026-09-19 that edited other sections. Nothing
+went red, because prose is asserted by nothing.
+
+**THE REPAIR IS NOT A CORRECTED NUMBER.** A new count rots exactly as fast, and
+`readonly.py` says so about itself: *"a count in prose beside a list it cannot
+read goes stale in silence, and knowing that does not stop you writing one."*
+So this guard makes the DOCUMENT the subject: it PARSES the claim out of the
+census table and compares it with `len(readonly._ALLOWED_URL_PATTERNS)`, and
+it is the census that fails.
+
+**THE THREE CONTROLS, because a check over prose is the easiest kind to make
+vacuous:**
+
+1. **Readability.** The section heading and the claim row must both be FOUND.
+   Rename the section or reformat the table and this fails loudly instead of
+   checking zero claims.
+2. **The boundary is not mute.** `is_read_url` is shown REFUSING
+   (`/psettings/`, an off-site url) and ACCEPTING (`/feed/`) in the same run,
+   so a table of False verdicts cannot come from a dead instrument.
+3. **Shown failing.** The claim is mutated by one and the comparison must not
+   survive it.
+
+**THE GENERAL FORM, and it is the transferable part of this wave.** A census
+that states a fact about the code is a SURFACE, and this repository's own law
+already covers it: *the surface may not print a claim it cannot derive.* Every
+census section that quotes a constant, a count or a boundary verdict is one
+edit away from being a confident lie, and the fix is never to re-read it more
+carefully. It is to let the document be the thing under test.

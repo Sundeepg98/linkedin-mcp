@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from . import chart_labels
+from . import chart_labels, item_addresses
 from .config import BASE_URL
 
 CONTENT_ANALYTICS_URL = f"{BASE_URL}/analytics/creator/content/"
@@ -80,6 +80,29 @@ async def read_content_analytics(page: Any) -> dict[str, Any]:
     The page must already be at :data:`CONTENT_ANALYTICS_URL`; navigation is
     the caller's, so this stays testable and does no IO of its own beyond
     reading attributes.
+
+    ## THE SECOND READING, ADDED 2026-09-20, AND IT COSTS NOTHING EXTRA
+
+    ``item_addresses`` is read off the SAME already-open page, so this adds no
+    navigation, no click and no page load -- the expensive thing was opening
+    the address, and it is already open. The field is ADDITIVE: every key this
+    function returned before is unchanged, which matters because ``C40`` is
+    banked on a live run that quoted ``points_found``, ``values`` and
+    ``readable``, and a banked reading should not be invalidated by a wave
+    that added a field beside it.
+
+    **WHY IT IS HERE AND NOT IN A SECOND TOOL.** This page draws LinkedIn's
+    own item permalinks and per-post analytics addresses in its hrefs, and
+    ``scripts/_probe_creator_content_analytics.py`` -- the probe that captured
+    it -- deliberately emitted **no href at all**, on the correct ground that
+    LinkedIn urls carry member and entity identifiers. So the addresses were
+    captured and never read: the instrument's own disclosure rule hid them.
+    The answer is a classifier that keeps the identifiers inside and publishes
+    a closed alphabet, which is what ``item_addresses`` is.
+
+    It defaults to ``include_identifiers=False``, so this function's payload
+    gains counts and no identifiers. A caller that has decided to hold real
+    post identifiers asks ``item_addresses.read_item_addresses`` directly.
     """
     labels = await collect_labels(page)
     reading = chart_labels.series(labels)
@@ -93,4 +116,5 @@ async def read_content_analytics(page: Any) -> dict[str, Any]:
         "points_found is 0 while labels_seen is large, the page still renders "
         "but this route no longer finds datapoints."
     )
+    reading["item_addresses"] = await item_addresses.read_item_addresses(page)
     return reading
