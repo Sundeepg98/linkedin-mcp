@@ -178,6 +178,12 @@ def test_a_marked_name_is_not_convicted():
             "```",
             "E  assert {'linkedin_zzz_quoted_output'} == set()",
             "```",
+            "",
+            "    FORBIDDEN = {",
+            "        \"linkedin_zzz_indented_quote\",",
+            "    }",
+            "",
+            "Rows 1-3 are COVERED-PROVEN, `ZZZ-INDENTED-BLOCKER` under it.",
         ]
     }
     sites = guard.classify(
@@ -189,10 +195,22 @@ def test_a_marked_name_is_not_convicted():
         f"output was convicted: {[str(s) for s in convicted]}. A guard that "
         "cannot be satisfied is a guard that gets suppressed."
     )
-    assert not any(s.name == "linkedin_zzz_quoted_output" for s in sites), (
-        "a name inside a ``` fence reached the classifier at all. Quoted tool "
-        "output is not the document speaking."
-    )
+    for quoted in ("linkedin_zzz_quoted_output", "linkedin_zzz_indented_quote"):
+        assert not any(s.name == quoted for s in sites), (
+            f"{quoted} reached the classifier at all. Quoted source is not the "
+            "document speaking, and this corpus quotes it BOTH ways -- ``` "
+            "fences and 4-space indented blocks."
+        )
+
+    # THE INDENTED HALF IS EXERCISED HERE BECAUSE THE CORPUS NO LONGER
+    # EXERCISES IT. A red-proof deleted `fenced()`'s indent handling entirely
+    # and the guard's corpus-wide candidate count did not move by one: the
+    # document that motivated it -- `_slice-parity-census.md` quoting
+    # `FORBIDDEN_TOOLS` -- is independently covered by `CONTRACT_MODULES`, and
+    # no other indented block in 167 files carries a candidate-shaped name.
+    # So the mechanism is CORRECT and currently LOAD-BEARING NOWHERE, which is
+    # precisely the state in which a component rots unnoticed. This synthetic
+    # block is the only thing that will notice.
 
 
 def test_every_marker_class_fires_on_the_real_corpus(measured):

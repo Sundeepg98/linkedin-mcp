@@ -173,16 +173,32 @@ guard whose silences are accidents cannot be audited.
 The corpus quotes source two ways: ``` fences (2,127 lines) and **4-space
 indented blocks (5,405 lines)** -- 7,532 lines, 9.5% of the corpus, and the
 indented form is the larger half. The guard shipped handling only fences, and
-the omission was not cosmetic: `_audit/_slice-parity-census.md:475-490`
-reproduces `tests/test_server_surface.py`'s `FORBIDDEN_TOOLS` set in an
-indented block -- twelve write-tool names the suite exists to keep OUT of the
-surface -- and the guard convicted the document for quoting a shipped contract.
-Eight false positives, from one missing block form.
+`_audit/_slice-parity-census.md:475-490` reproduces
+`tests/test_server_surface.py`'s `FORBIDDEN_TOOLS` set in an indented block --
+twelve write-tool names the suite exists to keep OUT of the surface -- which the
+guard convicted as invented. Eight false positives.
 
 An indented run counts as a block only when a blank line precedes it, which is
 what markdown itself requires; without that, every wrapped table cell and
 continued list item is swallowed and the guard goes quiet in places nobody can
 predict.
+
+**AND THE HONEST PART: THIS MECHANISM IS LOAD-BEARING NOWHERE IN THE CORPUS
+TODAY, MEASURED.** A red-proof deleted the indent handling outright and the
+guard's corpus-wide candidate count did not move by one -- 38 before, 38 after,
+the same 4 findings. The parity census is **doubly defended**: `CONTRACT_MODULES`
+puts those sixteen names in the registry independently, by a path `fenced()`
+never touches, so they resolve before block detection is ever consulted. The two
+fixes were developed against the same eight false positives and are now
+redundant for that document, and no OTHER indented block in 167 files carries a
+candidate-shaped name.
+
+That is exactly the state in which a component rots unnoticed, so it is written
+down rather than quietly kept: the indented-block path is now exercised by a
+synthetic block inside `test_a_marked_name_is_not_convicted`, which is the only
+thing that will notice if it breaks. It was not deleted, because "nothing in
+today's corpus needs it" is an argument about today and the next document to
+quote an indented `FORBIDDEN_*` list is one commit away.
 
 ---
 
