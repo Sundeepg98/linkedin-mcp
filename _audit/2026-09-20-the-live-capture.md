@@ -25,6 +25,7 @@ without the argument in section 7.**
     open questions closed later       1    section 11 answered section 10's first
     CANNOT-TELL blockers measured    10    section 12, 7 loads, 0 rows moved
     redirect targets named            2    section 12, one of them 15 days old
+    write-offs classified by fact     13    section 13, 0 moved, 2 re-verified
 
 **THE SCARCE RESOURCE WAS THE SESSION AND IT WAS SPENT ON READS.** Thirteen
 tool calls, one six-page capture, and -- after the first freeze -- four more
@@ -913,3 +914,124 @@ cost one re-read of a file that was already there** -- which is register entry
 that ten of them now rest on a measurement instead of on nobody having looked,
 and two of them turned out to rest on a question nobody had asked -- whether
 an address our gate admits is an address LinkedIn serves.
+
+---
+
+## 13. WHAT KIND OF FACT EACH WRITE-OFF RESTS ON -- ALL 13 PREMIUM EXCLUSIONS, AND MY OWN THREE
+
+No browser. Offline over the committed census, answering a question that has
+no page: **a write-off resting on a fact about the ACCOUNT or the WORLD goes
+stale silently, because nothing in the cell flags the dependency.** One
+resting on a RULING does not -- it changes only when somebody re-rules it.
+
+### 13.1 The classification, and why three kinds and not two
+
+    US-RULING     somebody decided this. Stale only on a new decision.
+    US-BOUNDARY   a fact about our own allowlist or denylist. We can change it
+                  unilaterally, so it is stale the moment we do -- and nothing
+                  tells the cell.
+    WORLD-FACT    a fact about what LinkedIn draws or offers. Goes stale when
+                  LinkedIn ships, and nobody sends us a note.
+    ACCOUNT-FACT  a fact about THIS account -- its locale, its subscription,
+                  what it has done. Goes stale when he changes, and it is the
+                  kind most often mistaken for a capability limit.
+
+**US-BOUNDARY is split out from US-RULING deliberately.** Both are ours, but a
+ruling is a decision somebody defended and a boundary entry is a line somebody
+typed -- and section 12.1 is this wave's proof that the second can be simply
+WRONG while looking settled for fifteen days.
+
+### 13.2 The 13 Premium rows filed EXCLUDED-RULED
+
+| row | what the reason rests on | kind | goes stale when |
+|---|---|---|---|
+| `M 3` | operator ruling: do not touch the dispatch radios | US-RULING | he re-rules |
+| `M 4` | **the balance is not on the page** | **WORLD-FACT** | LinkedIn redesigns the hub |
+| `M 5` | R9 + R4 -- a send, and it needs a third party's profile loaded | US-RULING | he re-rules |
+| `M 39` | `writes.py` -- a reply in his name he did not read | US-RULING | he re-rules |
+| `M 46` | a setting is admitted BY NAME or not at all | US-RULING | a named address + a WriteSpec |
+| `N 156` | R9, four written rulings, NOT-REV | US-RULING | he re-rules |
+| `N 157` | **the balance is not on the composer** | **WORLD-FACT** | LinkedIn redesigns compose |
+| `N 158` | R9, NOT-REV | US-RULING | he re-rules |
+| `N 159` | R11, the settings family | US-BOUNDARY | we admit a named settings address |
+| `P B10` | R11 + `/mypreferences/d/categories/` on the forbidden substrings | **US-BOUNDARY** | **we edit one list** |
+| `P K5` | settings family, same ruling | US-RULING | as `M 46` |
+| `J 97` | India-only, and behind a NEVER-LOADED modal | **WORLD + ACCOUNT** | his locale, or one capture |
+| `P I10` | same, its twin | **WORLD + ACCOUNT** | same |
+
+    US-RULING     7      the durable ones
+    US-BOUNDARY   2      ours to change, and nothing would tell the cell
+    WORLD-FACT    2      both re-verified today, section 13.3
+    WORLD+ACCOUNT 2      the two that most need a re-check trigger
+
+### 13.3 TWO OF THE WORLD-FACTS WERE RE-VERIFIED TODAY, BY A DIFFERENT INSTRUMENT, AND BOTH HOLD
+
+This is the point of the classification rather than a footnote: the two rows
+whose reasons could have rotted are the two this wave happened to re-measure,
+and they did not rot.
+
+**`M 4` -- the balance is not on `/premium/my-premium/`.** Section 6c, whole-
+document rendered-text census: `inmail` 0, `credit` 0, on a page where the
+same pass named `premium` 9, `insight` 3, `applicant` 1, `top applicant` 1,
+`interview` 1, `recruiter` 1, `manage` 2, `edit` 1. **The original verdict was
+reached with a 16-needle scan over `a`/`button` accessible names, which could
+not have seen a balance if one were there.** A stronger instrument agrees with
+a weaker one's conclusion, which is the only way that conclusion becomes safe.
+
+**`N 157` -- the balance is not on the composer.** Section 12.6, on
+`/messaging/compose/`: `credit` 0, `premium` 0, `subject` 0 in text and 0 in
+the accessibility tree. The original reason cites *"a conversation FILTER PILL
+-- five independent readings"*; I measured `inmail` 4 on that surface and the
+absence of any subject field, which is the sixth reading and says the same
+thing.
+
+**NEITHER ROW MOVES.** Both stay EXCLUDED-RULED. What changed is that their
+reasons are now WORLD-FACTS with a dated re-measurement behind them instead of
+world-facts with an old one.
+
+### 13.4 THE ANSWER THIS COMPLETES, AND IT IS THE OPERATOR'S ORIGINAL QUESTION
+
+Section 6 established that **18 Premium rows sit GAP and not one is blocked on
+the subscription.** This section extends it to the other end of the population:
+
+> **NOT ONE OF THE 13 PREMIUM EXCLUSIONS RESTS ON THE ENTITLEMENT EITHER.**
+
+Seven are rulings he made or that were made in his interest. Two are our own
+boundary. Two are measurements of LinkedIn's pages. Two are about India and a
+modal nobody has loaded. **Across the entire Premium population -- 18 GAP and
+13 EXCLUDED -- the subscription is the blocker exactly zero times.**
+
+So the honest answer to *why does this MCP cover none of my Premium* is not
+that Premium is hard to reach. It is that **one Premium surface is built and
+fired, four more are one address and one reader away, and everything else was
+either ruled off deliberately or is a write** -- and none of that has anything
+to do with what he pays for.
+
+### 13.5 THE SAME CLASSIFICATION, TURNED ON MY OWN THREE REFUTED REASONS
+
+`J 136` / `J 137` / `J 138`, section 4. Applying the test to my own work is
+the only way to know the test is worth anything.
+
+**THE REASON I REFUTED WAS AN ACCOUNT-FACT WEARING A CAPABILITY COSTUME.** It
+read: *it requires a completed session to exist, and completing one means
+holding a live audio interview*. That is a claim about what HE has done. It
+was filed in a cell whose column is about what the SERVER can do, and it
+survived fifteen days because nothing in the cell flags that the two are
+different questions.
+
+**AND THE REASON I REPLACED IT WITH IS ALSO NOT A CAPABILITY-FACT, WHICH I
+WILL NOT HIDE.** The new reason is *the surface renders no session content on
+this account and the member-side experiment flag reads `control`* --
+**ACCOUNT-FACT plus WORLD-FACT**, both of which can rot.
+
+**THAT IS EXACTLY WHY SECTION 11e SHIPS A RE-CHECK TRIGGER** and why the
+trigger is mechanical rather than a reminder: *re-run the one read when that
+flag's treatment changes*. A write-off resting on an account-fact is
+acceptable when it names the event that would falsify it. It is a defect only
+when it does not.
+
+**THE RULE THAT FALLS OUT, AND IT IS CHEAP ENOUGH TO ADOPT EVERYWHERE:** a
+cell that closes a row should say which of the four kinds its reason is, and
+every ACCOUNT-FACT and WORLD-FACT should carry the event that reopens it.
+Seven of the thirteen above need nothing -- a ruling is its own trigger. Four
+need one and have none. Two now have one.
