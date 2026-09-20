@@ -225,6 +225,48 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "on the record and this pair sits below it deliberately."
     ),
 
+    # 2026-09-20, the UNFIRED-TWENTYSEVEN wave. Three candidates, triaged by
+    # reading each line. Two are a cell superseding ITSELF with a live fire;
+    # the third is the scan attributing one row's vocabulary to its neighbour.
+    ("jobs.md", "2026-09-19-covered-vs-gap-pairs.md"): (
+        "THE CELL SUPERSEDES ITSELF, AND THE CITED DOCUMENT CORRECTS NOTHING. "
+        "Row `J 27` moved COVERED-UNFIRED -> COVERED-PROVEN because "
+        "`verified_job` was finally fired over 11 live postings and came back "
+        "true on 5 and false on 6. The cited document banked the row UNFIRED "
+        "on a source trace and said so honestly -- *no run has been recorded "
+        "asserting a value on a live posting* -- which was ACCURATE WHEN "
+        "WRITTEN and is why the row sat UNFIRED at all. This wave supplied "
+        "the measurement that cell had been waiting for; it did not find a "
+        "fault in it. A CORRECTED BY: pointer would claim the fire report "
+        "convicted the earlier document, when what it did was finish it. "
+        "The one genuinely critical remark in the new cell -- that the row's "
+        "`_audit/_scratch/` TSV is gitignored and unreachable from a clone -- "
+        "is about the CENSUS ROW'S OWN CITATION, not about anything the cited "
+        "document claims, and the new cell replaces that reference in place"
+    ),
+    ("profile.md", "2026-09-19-read-tail.md"): (
+        "IDENTICAL CASE, THE TWIN SLICE. Row `K10` is the same capability as "
+        "`jobs.md J 27` and moved on the same fired reading. The cited "
+        "document said *no audit records this field's value coming back from "
+        "a live posting*, which was true when written and is now false "
+        "because this wave took the reading -- a claim overtaken by a "
+        "measurement, not a claim refuted. The two slices agreed before and "
+        "agree after"
+    ),
+    ("messaging-and-content.md", "2026-08-30-linkedin-writes.md"): (
+        "THE VOCABULARY BELONGS TO THE NEXT ROW, NOT TO THIS CITATION. The "
+        "flagged line is row `M43`, which this wave did NOT touch and whose "
+        "citation still stands exactly as written: `linkedin_open_messaging` "
+        "was deliberately never called because *the cost lands on somebody "
+        "who is not him*. THIS WAVE DECLINED IT FOR THE SAME REASON and "
+        "changed nothing about M43. The correction vocabulary inside the "
+        "window is the word *superseded* in row `M45` two lines below, where "
+        "a live fire of `linkedin_compose_fields` supersedes that row's OWN "
+        "2026-09-02 refusal -- again a cell superseding itself. "
+        "**THE SCAN IS RIGHT TO OFFER IT AND RIGHT TO BE OVERRULED HERE:** a "
+        "two-line window cannot tell which row a word sits in, which is the "
+        "known cost of the window and is why this table exists"
+    ),
     # 2026-09-20, the sanctioned-seventh reading. Triaged by the integrator who
     # wrote the citing line, deliberately, to say what he was NOT doing.
     ("2026-09-20-the-sanctioned-seventh.md", "profile.md"): (

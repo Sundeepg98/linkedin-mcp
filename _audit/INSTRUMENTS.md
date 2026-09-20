@@ -6065,7 +6065,7 @@ that branch**, and it was committed in the file whose subject is that error.
 Controls now resolve `master`, and `_on_master()` fails loudly rather than
 skipping if it cannot.
 
-## 40. THE EVIDENCE-THAT-RESOLVES WAVE: A REPAIR THAT PAYS FOR ITSELF, AND A COUNT OF 7, 2026-09-20
+## 40. THE EVIDENCE-THAT-RESOLVES WAVE: A REPAIR THAT PAYS FOR ITSELF, AND A COUNT OF 9, 2026-09-20
 
 Full evidence: `_audit/2026-09-20-the-evidence-that-resolves.md`.
 Two instruments enter, one strengthened and one new. Both shown failing.
@@ -6174,12 +6174,20 @@ class (GITIGNORED / ABSENT / UNTRACKED-LOCAL / ABSOLUTE-PATH / NOT-IN-REPO).
 **IT MEASURES AND DOES NOT DEMOTE.** Moving a row is a ruling. The instrument
 produces a count and a per-row list naming the artifact, and nothing else.
 
-**Measured 2026-09-20, re-measured after merging `master`** because three of the
-four slices moved while the wave ran: 81 banked rows, 93 cited artifacts,
-**7 rows** resting on at least one unreachable artifact, **0** with no reachable
-artifact at all, 13 unreachable artifacts and all 13 are `_audit/_scratch/`
-paths. 26 further rows describe a live run with no tracked script, reported
-separately as the softer number it is.
+**Measured 2026-09-20 and RE-MEASURED after each of two merges of `master`,**
+because the census moved under the wave three times while it ran. Final
+reading: 94 banked rows, 126 cited artifacts, **9 rows** resting on at least
+one unreachable artifact, **0** with no reachable artifact at all, 15
+unreachable artifacts and all 15 are `_audit/_scratch/` paths. 26 further rows
+describe a live run with no tracked script, reported separately as the softer
+number it is.
+
+> **THE ANSWER MOVED THREE TIMES AND ONLY RE-MEASURING CAUGHT IT.** 7, then 7,
+> then 9 -- the last jump because a sibling wave banked thirteen more rows in
+> the same window and two of them cite `_audit/_scratch/`. **This class is not
+> an inherited mess being counted down; the generator is live.** A figure taken
+> before a merge and reported after one is a reading with a timestamp the
+> reader cannot see.
 
 **THE RE-RUN SAID 8, AND RE-MEASURING RATHER THAN RELAYING IS WHY IT SAYS 7.**
 A row `master` had just corrected into a banked state brought a citation of
@@ -6209,7 +6217,7 @@ all exit 2. `--help` prints usage and exits 0.
 first extractor admitted `/jobs/collections/recommended/`; the first run died
 inside `git check-ignore` on a token cleaned down to `/`. Had `check-ignore`
 shrugged instead, every route would have read ABSENT, the tool would have
-reported hundreds of wrong findings, and **the real seven would have been
+reported hundreds of wrong findings, and **the real nine would have been
 invisible inside its own noise**.
 
 **FOUR BANKED ROWS WERE DROPPED BY A STATE SPELLING.** The corpus writes
@@ -6340,6 +6348,211 @@ reason.
 > An AST walk can: a comment is never a node, and a docstring is an
 > identifiable one. What remains is exactly the set of literals that can reach
 > stdout.
+
+---
+
+## 38. THE UNFIRED-TWENTYSEVEN WAVE: DISCRIMINATION, NOT RESPONSE, 2026-09-20
+
+The census carried 27 rows as `COVERED-UNFIRED` plus 8 in `jobs.md`'s short
+spelling `CU` -- 35 rows whose tool SHIPS and had never been fired. This wave
+fired what could honestly be fired. Three probes and one control suite enter
+the register; one instrument was REPAIRED after shipping a false positive on
+live data, and that repair is the most transferable thing here.
+
+### 38.1 THE LAW THIS WAVE IS AN INSTANCE OF: A RESPONSE IS NOT A MEASUREMENT
+
+Every one of these rows had been banked UNFIRED on a SOURCE TRACE -- the
+constant exists, the field is emitted, therefore the capability is covered.
+True about the tree, and silent about LinkedIn. **The obvious repair, "fire it
+and see if it comes back", is ALSO wrong, and in the same direction.**
+
+    a job-search filter LinkedIn ignores      returns 7 healthy rows
+    a filter appended to the WRONG query key  returns 7 healthy rows
+    an insight reader whose selector rotted   returns False for every posting
+
+All three respond. All three look exactly like success. **So the measure is
+DISCRIMINATION: does the thing change its answer when its input changes?**
+
+* For the BOOLEAN insight fields, a THREE-WAY tally -- true / false / absent --
+  and a row banks only on `OBSERVED-BOTH`. Measured: every value returned
+  exactly 7 rows, the known per-page window, **so a row COUNT would have
+  discriminated nothing at all.**
+* For the FILTERS, the returned JOB ID SETS are compared across every permitted
+  value, and the verdict is the number of distinct sets.
+
+### 38.2 THE DRIFT FLOOR, AND WHY A DIFFERENCE IS NOT EVIDENCE EITHER
+
+LinkedIn reshuffles its own results between two identical requests seconds
+apart. So "the filtered set differs from the baseline" proves nothing until you
+know how much the platform already disagrees with itself.
+
+`scripts/_probe_unfired_job_search_filters.py` fires the baseline query TWICE,
+back to back, before any filter runs, and prints that symmetric difference as
+the DRIFT FLOOR. Every filter verdict is judged against it, and a filter whose
+widest disagreement falls at or below the floor is reported as
+`INDISTINGUISHABLE FROM DRIFT` rather than counted.
+
+**THE FLOOR IS A PER-SESSION MEASUREMENT AND IS QUOTED WITH ITS SESSION.** It
+was **2 of 7** on the main run and **0** on the J 7 re-fire an hour later. A
+threshold taken once and carried forever becomes a property of the friendliest
+session; these two readings of the same quantity, an hour apart, are the
+argument for never doing that.
+
+### 38.3 THE INSTRUMENT THAT SHOUTED A FALSE POSITIVE, AND THE REPAIR
+
+This repo requires `dom.read_invitation_badge` before and after any live read,
+to prove the read consumed no counter it passed. The first version of this
+wave's check compared `len(str(reading))` -- **the character length of the
+whole dict's repr** -- and reported, on a run that opened four job postings:
+
+    badge BEFORE: a reading of 60 characters
+    badge AFTER:  a reading of 89 characters
+    CONSUMPTION: THE BADGE MOVED. Something was spent.
+
+Nothing was spent. The reader returns `{links, badge_links, label, error}` and
+leaves `label` None whenever the nav has not hydrated or draws a number of
+badge links other than one. **An unhydrated first read followed by a hydrated
+second read lengthens the repr by exactly the label** -- and a length check
+cannot tell that from a consumed invitation.
+
+**THE GENERAL FORM: A PROXY OVER A STRUCTURE MEASURES THE SERIALISATION, NOT
+THE QUANTITY.** The repair compares the structured fields, and answers UNKNOWN
+unless BOTH ends are readable -- because "one end could not be read" and
+"nothing was consumed" are different claims, and only one of them is about the
+account.
+
+### 38.4 THE THREE PROBES
+
+| file | fires | rows |
+|---|---|---|
+| `scripts/_probe_unfired_job_detail_insights.py` | `linkedin_job_detail` over N live postings | J 24, J 26, J 27, J 121, J 122, P K10 |
+| `scripts/_probe_unfired_job_search_filters.py` | `linkedin_search_jobs` across every filter value | J 2, J 4, J 5, J 6, J 7, J 10, J 151 |
+| `scripts/_probe_unfired_self_reads.py` | `linkedin_compose_fields`, `linkedin_my_activity_items` | M M45, M C41 |
+
+All three take the same shape, and it is forced by a defect measured here:
+
+**`BROWSER.session()` HOLDS A SINGLE-FLIGHT LOCK FOR THE WHOLE OF ITS BODY,
+AND EVERY SHIPPED TOOL OPENS A SESSION OF ITS OWN.** A probe that holds a
+session and then calls a shipped tool DEADLOCKS. It presents as a silent hang
+indistinguishable from a slow page load, and it cost two timed-out runs before
+it was found. **Anything firing a shipped tool must own no session at the
+moment it does so**, so each probe is three phases: our session for the control
+and opening badge, NO session while the tools run, our session again to close.
+
+Each probe also carries the standing obligations: a known-served admitted
+address read FIRST and again LAST (a control that stops serving mid-run makes
+the readings VOID, not data), the badge readings at both ends, and counts and
+verdicts only on the way out -- no title, employer, location, job id or panel
+text is printed, with raw captures going to gitignored `_state/`.
+
+### 38.5 `tests/test_unfired_probe_verdicts.py` -- ADMITTED, AND SHOWN FAILING
+
+13 controls. Every one plants the specific defect that would have let this wave
+inflate its own count, and requires the instrument to REFUSE.
+
+**SHOWN FAILING, NOT ASSUMED.** Two defects were planted in the probes and the
+suite was re-run:
+
+    _bankable() also banks "NEVER-TRUE"      -> test_a_field_false_on_every_
+                                                posting_is_refused_not_banked
+                                                FAILED
+    _verdict()'s identical-sets arm disabled -> test_a_filter_whose_every_value_
+                                                returns_the_same_rows_is_refused
+                                                FAILED
+
+    2 failed, 11 passed
+
+Both mutations were reverted and the suite is 13 green. The two red tests are
+the two failure modes that would have cost this wave four rows and five rows
+respectively -- a dead reader banked as a working one, and a dropped filter
+banked as a live one.
+
+Positive controls are included deliberately: without
+`test_a_discriminating_field_is_the_only_thing_that_banks` the refusals prove
+only that the function refuses everything, which certifies nothing either.
+
+### 38.6 WHAT THE WAVE ACTUALLY MOVED, INCLUDING WHAT IT REFUSED TO MOVE
+
+    COVERED-PROVEN           39 -> 51    (+12)
+    COVERED-UNFIRED          27 -> 19
+    CU                        8 ->  3
+    COVERED-CANNOT-DELIVER   15 -> 16    (N A6)
+    stated rows                   704    unchanged
+    GAP                           300    unchanged
+
+**THE CEILING WAS NEVER 27.** Of those 27 rows, 13 are inherently WRITES
+against a real professional identity (`publish_post`, `comment_on_item`,
+`react_to_item`, `send_invitation`, `follow_company`, `unfollow_company`, the
+six profile-field writes) or have no input to fire with. They cannot be fired
+at any price and were not.
+
+**THREE ROWS WERE FIRED AND DELIBERATELY NOT BANKED**, which is the wave's most
+load-bearing output:
+
+* `J 121` -- `applicant_insights` arrived on 11 of 11 postings, and the row is
+  about a RANKING PERCENTILE. Measured across all 11 panels: percentile 0,
+  rank 0. `metrics` carries applicant COUNTS. **7 of 11 postings drew the gated
+  control `Show Premium Insights`, which the reader does not open** -- that is
+  where the percentile lives. NOT DELIVERED.
+* `J 122` -- same panel, and PARTIAL: seniority and education arrive with
+  percentage splits, `skill` appears in **0 of 11**, and the panel has no
+  skills sub-key at all. Half a capability is not a banked row.
+* `M C41` -- `linkedin_my_activity_items` refused again, with a THIRD distinct
+  reason (`self_assertion_unreadable`) alongside the recorded
+  `no_page_owner_heading` and `no_self_assertion`. It has still never returned
+  an item.
+
+**A PROBE REPORTING ONLY "THE PANEL ARRIVED" WOULD HAVE BANKED J 121 AND J 122
+ON EVIDENCE FOR NEITHER.** That is the same disease as a check that cannot
+fail, one level up: a measurement aimed at the container rather than at the
+claim.
+
+### 38.7 FOUR ROWS NOT FIRED BECAUSE THE COST LANDS ON SOMEBODY ELSE
+
+`N 20`, `N 45`, `M M33` and `M M43` are READ-ONLY by this codebase's write-gate
+classification -- no `_write_tool` call, no `confirm_token`, absent from the
+server's own twelve-name write list. **They were still not fired.**
+
+`linkedin_notifications` loads `/notifications/`, which CLEARS THE UNREAD
+BADGE. Its own docstring: *"this is the only server-side change any READ in
+this package causes WITHOUT BEING ASKED FOR IT."* `linkedin_open_messaging`
+opens a LinkedIn-chosen conversation thread and may reset the messaging badge;
+`_audit/2026-08-30-linkedin-writes.md` already declined it in as many words --
+*"The cost lands on somebody who is not him, so it is his to spend."*
+
+**READ-ONLY BY THE GATE IS NOT THE SAME AS FREE.** A tool that destroys
+information the operator has -- which notifications he has not yet seen -- is
+spending something, whatever the classifier says. That reasoning had not
+expired, and a second wave spending it quietly would have been worse than the
+first wave declining it loudly.
+
+### 38.8 TWO SMALLER TRANSFERABLE FINDINGS
+
+**A REFUSED ARGUMENT MUST NOT BE RETURNED AS AN EMPTY RESULT.** `_ids()`
+originally returned `frozenset()` for every unhappy path alike. `sort_by` was
+fired with LinkedIn's UI label `recent` at a tool whose permitted values are
+`relevance` and `date`; the tool refused correctly, and the probe reported
+`rows=0`, which read as LinkedIn serving nothing and was nearly written up as a
+server defect. **The argument was wrong, the server was right, and the
+instrument could not say so.** It now announces an argument refusal distinctly.
+
+**A ROW-ID PREFIX IS NOT UNIQUE IN THESE CENSUS FILES.** `| 151 |` matches two
+lines in `jobs.md` -- the census row and a ledger row in a different table. The
+banking script asserts EXACTLY ONE candidate carrying the state and refuses
+otherwise. Relatedly, the four census files do NOT share a column layout
+(network puts the state at index 3 with evidence at 4; messaging puts it at 3
+with the evidence at 6), so the state cell is located BY CONTENT and never by
+index -- an index would have silently rewritten the wrong cell in two files.
+
+### 38.9 LINE-NUMBER CITATIONS IN THESE ROWS HAVE ROTTED
+
+Several rows cite `server.py:3410` for `linkedin_job_detail`. It is at **4008**
+at this HEAD, and the insights assignment the rows describe is at 4290. The
+citations resolve to plausible wrong places, which is the failure mode this
+repo already recorded for line numbers. The six insight fields were therefore
+verified by **AST parse of the reader's return dict** -- seven keys, named --
+rather than by grep, because a field-name grep returns ZERO for a dict that
+passes through by reference and reads exactly like a dead field.
 ---
 
 ## 41. THE REOPENER TRIGGERS: A WRITE-OFF THAT RESTS ON A FACT NOBODY RE-CHECKS, 2026-09-20

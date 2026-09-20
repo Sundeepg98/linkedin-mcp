@@ -1,15 +1,24 @@
-# The evidence that resolves: 22 citations repaired, and 7 banked rows nobody can check
+# The evidence that resolves: 22 citations repaired, and 9 banked rows nobody can check
 
 **Wave:** evidence-that-resolves. **2026-09-20.** Base `e6b11e5`, merged forward
-to `724d327` before freezing. Text and git archaeology only -- no browser, no
-LinkedIn surface, no page load.
+three times as `master` moved under the wave -- `96e90f3`, `724d327`, then
+`c0cab56` and `043a292` -- and every figure below is the reading AFTER the last
+of those. Text and git archaeology only: no browser, no LinkedIn surface, no
+page load.
 
 One question, two artifacts: **can a reader starting from a clone reach this
 corpus's evidence?**
 
     HALF A  22 dangling SHA citations       ->  22 of 22 REPAIRED, 0 unrepaired
     HALF B  banked rows resting on evidence
-            no clone can reach              ->  7   (exact; of 79 banked rows)
+            no clone can reach              ->  9   (exact; of 94 banked rows)
+
+**HALF B's ANSWER MOVED WHILE THE WAVE RAN, AND RE-MEASURING RATHER THAN
+RELAYING IS THE ONLY REASON IT IS RIGHT.** It read 7 at first measurement, 7
+again after the first merge, and 9 after the second, when a sibling wave banked
+thirteen further rows and two of them cited `_audit/_scratch/`. A third reading
+briefly said 8 and was wrong for a different reason, in section *"the merge
+moved the denominators"* below.
 
 ---
 
@@ -223,7 +232,7 @@ the every-suppressor-fires control, and the new mapping-row red proof.
 
 ---
 
-## HALF B -- WHAT A CLONE CANNOT REACH. **THE COUNT IS 7.**
+## HALF B -- WHAT A CLONE CANNOT REACH. **THE COUNT IS 9.**
 
 **MEASURED, NOT DEMOTED.** Moving a row out of a banked state is a ruling and it
 is not mine. Below is the count and the per-row list with the specific artifact
@@ -231,9 +240,9 @@ named.
 
 ### The denominators, printed because a finding without them is not a measurement
 
-**Re-measured at the merge point `master` was fast-forwarded to, because three
-of the four slices moved under this wave while it was running.** The
-denominators grew; the answer did not.
+**Re-measured after each of two merges of `master`, because the census moved
+under this wave three separate times while it ran.** Figures below are the
+final reading, at the second merge.
 
     census slices read                     4
     table lines seen                     929
@@ -242,10 +251,10 @@ denominators grew; the answer did not.
       rows naming several                  0   NOT guessed at
       state-legend rows                   28   the state IS the row id
       MISSPELLED state cells               0   shipped `dialect_of`
-    rows in a BANKED state                81   (79 before the merge)
-    evidence artifacts cited              93   (87 before)
-      TRACKED                             79
-      GITIGNORED                          13
+    rows in a BANKED state                94   (79, then 81, then 94)
+    evidence artifacts cited             126   (87, then 93, then 126)
+      TRACKED                            110
+      GITIGNORED                          15
       ABBREVIATED                          1   reachable, but not as written
       ambiguous / unclassifiable           0
 
@@ -271,9 +280,17 @@ this instrument most needs to be believed.
 
 ### THE ANSWER
 
-    BANKED ROWS RESTING ON AT LEAST ONE ARTIFACT NO CLONE CAN REACH   7
+    BANKED ROWS RESTING ON AT LEAST ONE ARTIFACT NO CLONE CAN REACH   9
       of those, rows with NO reachable artifact at all                0
     BANKED ROWS DESCRIBING A LIVE RUN WITH NO TRACKED SCRIPT         26
+
+**IT WAS 7 WHEN THIS WAVE STARTED AND 7 AFTER THE FIRST MERGE. THE SECOND MERGE
+MADE IT 9, AND THAT IS THE FINDING RATHER THAN A NUISANCE.** A sibling wave
+banked thirteen more rows, and two of them -- `jobs.md` 27 and 151 -- cite
+`_audit/_scratch/` paths. **This is not an inherited mess being counted down;
+the generator is live.** A row banked today can land in this set tomorrow,
+which is precisely what a two-way ratchet is for and why the pin is worth more
+than the number.
 
 ### THE MERGE MOVED THE DENOMINATORS AND NOT THE ANSWER, AND IT NEARLY MOVED THE ANSWER
 
@@ -305,7 +322,7 @@ The mirror is asserted in both directions, or the class would be a hole rather
 than a distinction: a name matching nothing is still NOT-IN-REPO, and a name
 matching exactly is still TRACKED.
 
-**The 7 are the same 7 rows as before the merge**, and the pin -- keyed on
+**The 7 were the same 7 rows as before that merge**, and the pin -- keyed on
 (slice, row id, state) rather than on a line number -- held across it while
 `network.md` row 136 moved from line 439 to 458.
 
@@ -319,18 +336,21 @@ matching exactly is still TRACKED.
 | `jobs.md` | 13 | COVERED-PROVEN | 194 | same two | GITIGNORED |
 | `jobs.md` | 14 | COVERED-PROVEN | 195 | same two | GITIGNORED |
 | **`jobs.md`** | **15** | COVERED-PROVEN | 196 | `_audit/_scratch/_probe-small-measures-live.txt` | GITIGNORED |
-| **`network.md`** | **136** | MEASURED-ABSENT | 439 | `_audit/_scratch/_progress-analytics-creator.md`, `_audit/_scratch/_live-analytics-controls-4.txt` | GITIGNORED |
+| **`jobs.md`** | **27** | COVERED-PROVEN | 208 | `_audit/_scratch/_for-small-measures-covered-vs-gap.tsv` | GITIGNORED |
+| **`jobs.md`** | **151** | COVERED-PROVEN | 422 | `_audit/_scratch/_progress-job-search-params.md` | GITIGNORED |
+| **`network.md`** | **136** | MEASURED-ABSENT | 458 | `_audit/_scratch/_progress-analytics-creator.md`, `_audit/_scratch/_live-analytics-controls-4.txt` | GITIGNORED |
 
-**Five of the seven are the five the previous wave found by hand. Two are new**
--- `jobs.md` row 15 and `network.md` row 136 -- and neither was reachable from
-the five-under-banked wave's starting point, because that wave was routed to
-those five by a control census and these two sit outside it.
+**Five of the nine are the five the previous wave found by hand. Four are new**
+-- `jobs.md` rows 15, 27 and 151, and `network.md` row 136. None was reachable
+from the five-under-banked wave's starting point: that wave was routed to its
+five by a control census, and rows 27 and 151 were not in a banked state at all
+until a sibling wave banked them hours later, in the window this wave ran.
 
 `network.md` row 136 is the sharper of the two: **it is MEASURED-ABSENT**, a
 state that claims a live reading showed LinkedIn draws nothing, and both
 artifacts behind that reading are in `_audit/_scratch/`.
 
-**ALL 13 UNREACHABLE ARTIFACTS ARE `_audit/_scratch/` PATHS**, quarantined by
+**ALL 15 UNREACHABLE ARTIFACTS ARE `_audit/_scratch/` PATHS**, quarantined by
 `.gitignore:156`. Not one absolute local path, not one session-local capture
 outside `_scratch`, not one citation of a file that never existed. The class is
 narrower than the brief's list allowed for, and that is the finding: **there is
@@ -354,7 +374,7 @@ reachable evidence" would otherwise read as a refutation, and it is not one.
 
 ### The 24 rows describing a run with no tracked script
 
-Weaker evidence, reported separately and not counted in the 7. These cells say
+Weaker evidence, reported separately and not counted in the 9. These cells say
 a live reading was taken -- *loads*, *one session*, *fired live*, *measured
 live* -- and name no tracked script that could take it again.
 
@@ -366,7 +386,7 @@ live* -- and name no tracked script that could take it again.
 **THIS ONE IS SOFT AND I AM SAYING SO.** The vocabulary is a heuristic; a row
 can describe a reading taken through an MCP tool call, which is re-runnable
 without any script in `scripts/`. It is offered as a second, separate number for
-the ruling, not folded into the 7.
+the ruling, not folded into the 9.
 
 ### The instrument, and the vacuous pass it cannot have
 
@@ -598,7 +618,7 @@ wrong -- and it was the pause, not the code, that produced the argument above.
 1. **Half B's 24 "no re-runnable script" rows are a heuristic**, not a
    measurement, and I have not separated the rows whose reading came through an
    MCP tool call from those whose method is genuinely gone. Handed up as its own
-   number, deliberately not folded into the 7.
+   number, deliberately not folded into the 9.
 2. **The instrument binds a row to its ARTIFACTS, never a claim to the artifact
    that backs it.** So it cannot confirm the narrower statement that the numbers
    in rows 9 and 11-14 have no reachable backing, and it does not contradict it.

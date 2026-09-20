@@ -1,8 +1,8 @@
 """Controls and the pin for `scripts/check_banked_evidence_is_reachable.py`.
 
-WHAT IS PINNED. **7** banked census rows rest on at least one evidence
+WHAT IS PINNED. **9** banked census rows rest on at least one evidence
 artifact that a reader cloning this repository cannot reach. Measured
-2026-09-20 over 79 banked rows and 87 cited artifacts across the four
+2026-09-20 over 94 banked rows and 126 cited artifacts across the four
 capability slices. The list is in
 `_audit/2026-09-20-the-evidence-that-resolves.md`.
 
@@ -33,9 +33,18 @@ import check_banked_evidence_is_reachable as chk  # noqa: E402
 
 SCRIPT = REPO / "scripts" / "check_banked_evidence_is_reachable.py"
 
-#: (slice, row id, state) -- the 7. Measured 2026-09-20.
-#: Every one of the 13 unreachable artifacts behind these rows is a
-#: `_audit/_scratch/` path, which `.gitignore:156` quarantines outright.
+#: (slice, row id, state) -- the 9. Measured 2026-09-20 at the second merge of
+#: `master` into this wave. Every one of the 15 unreachable artifacts behind
+#: these rows is a `_audit/_scratch/` path, which `.gitignore:156` quarantines
+#: outright.
+#:
+#: **THE SET GREW WHILE THE WAVE RAN, AND THAT IS THE FINDING RATHER THAN AN
+#: INCONVENIENCE.** It was 7 at the first measurement and 7 again after the
+#: first merge. The second merge brought a sibling wave that banked 13 more
+#: rows, and TWO of them -- `jobs.md` 27 and 151 -- cite `_audit/_scratch/`
+#: paths. So this is not an inherited mess being counted down: the generator
+#: is live, and a row banked today can land here tomorrow. That is exactly what
+#: a two-way ratchet is for.
 PINNED = {
     ("_audit/_census/jobs.md", "9", "COVERED-PROVEN"),
     ("_audit/_census/jobs.md", "11", "COVERED-PROVEN"),
@@ -43,6 +52,8 @@ PINNED = {
     ("_audit/_census/jobs.md", "13", "COVERED-PROVEN"),
     ("_audit/_census/jobs.md", "14", "COVERED-PROVEN"),
     ("_audit/_census/jobs.md", "15", "COVERED-PROVEN"),
+    ("_audit/_census/jobs.md", "27", "COVERED-PROVEN"),
+    ("_audit/_census/jobs.md", "151", "COVERED-PROVEN"),
     ("_audit/_census/network.md", "136", "MEASURED-ABSENT"),
 }
 
@@ -366,7 +377,7 @@ def test_every_unreachable_artifact_is_named_and_classified(measured):
     """A count with no per-row list is not a measurement anybody can act on."""
     rows, _, _ = measured
     bad = [a for r in rows for a in r.unreachable]
-    assert len(bad) == 13, [str(a) for a in bad]
+    assert len(bad) == 15, [str(a) for a in bad]
     assert {a.verdict for a in bad} == {"GITIGNORED"}, sorted({a.verdict for a in bad})
     assert all(a.path.startswith("_audit/_scratch/") for a in bad), bad
 
