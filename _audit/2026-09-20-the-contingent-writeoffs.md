@@ -394,7 +394,117 @@ ground. This measurement is 4 rows deep and stops there.)
 
 ## 3. THE SWEPT LIST
 
-(pending -- filled in below from the two extraction passes)
+### 3.1 By the subject the BLOCKER NAME asserts
+
+Derived from `_audit/_census/blocker-map.tsv` at HEAD -- 409 rows, 301 still
+GAP today. **This is a candidate list, not a set of verdicts.** It classifies
+each of the 97 blockers by what its NAME asserts, which is cheap and
+reproducible; whether the assertion is still true is the per-blocker work in
+s1, s2 and s3.3.
+
+| subject the name asserts | blockers | rows | still GAP |
+|---|---:|---:|---:|
+| **OPERATOR** -- what he owns, holds or administers | 1 | 15 | 14 |
+| **ACCOUNT** -- what LinkedIn renders for his account | 7 | 19 | 14 |
+| **WORLD** -- another codebase, slice, product or platform | 18 | 45 | 18 |
+| **SURFACE?** -- a surface whose existence FOR HIM is contingent | 22 | 139 | 108 |
+| CODE -- this repo: no tool, no parser, no pattern, a ruling | 47 | 191 | 147 |
+| | **95** | **409** | **301** |
+
+**Two things about that bottom row, so it is not quoted wrong.** The blocker
+column holds **95 distinct values over 409 rows**, and one of them is
+`UNASSIGNED` carrying **19 rows** -- so **94 named blockers** appear in the map
+against the ledger's published 97, and the 19 unassigned rows sit inside the
+CODE line above without being a code fact or anything else. They are
+unclassified, and a sibling is on them.
+
+**OPERATOR, ACCOUNT and WORLD together: 26 blockers, 79 rows, 46 still GAP.**
+Those are the ones whose name alone says the reason is contingent.
+
+    OPERATOR  ADMIN-RIGHTS-NOT-HELD           15 rows, 14 GAP   <- instance 1, sibling owns
+
+    ACCOUNT   MATCH-DETAILS-COLLAPSED          5 rows,  5 GAP
+              ANALYTICS-CONTROLS-UNPRESSED     4 rows,  3 GAP
+              PANEL-NOT-OBSERVED               3 rows,  0 GAP   <- SOUND, see below
+              PREMIUM-JOBS-SURFACES            3 rows,  3 GAP   <- instance 2, siblings own
+              ACCOUNT-VERIFICATION             2 rows,  2 GAP
+              OPEN-PROFILE-SETTING             1 row,   0 GAP
+              PREMIUM-READER-NOT-BUILT         1 row,   1 GAP   <- instance 3 (J 127)
+
+    WORLD     AI-INTERVIEW-PRODUCT            14 rows,  3 GAP
+              SERVED-BY-GMAIL-SKILL            6 rows,  6 GAP   <- s1, 2 overturned
+              OWNED-BY-A-SIBLING-SLICE         4 rows,  4 GAP   <- s2, 2 orphaned
+              HELP-CENTER-FORM                 3 rows,  0 GAP
+              OFF-PLATFORM-WIDGET              3 rows,  2 GAP
+              AI-ASSIST-MESSAGING              2 rows,  0 GAP
+              LIVE-BROADCAST                   2 rows,  0 GAP
+              AUDIO-EVENTS-EXISTENCE           1 row,   1 GAP
+              DEVICE-GEOLOCATION               1 row,   0 GAP
+              HASHTAG-EXISTENCE                1 row,   0 GAP
+              LEARNING-CERTIFICATE             1 row,   1 GAP
+              MOBILE-APP-ONLY                  1 row,   0 GAP
+              NO-URL-AT-ALL                    1 row,   0 GAP
+              PAID-BOOST                       1 row,   0 GAP
+              SIGNIN-INTERSTITIAL              1 row,   0 GAP
+              THIRD-PARTY-PROFILE-FORBIDDEN    1 row,   0 GAP
+              VIDEO-MEETING-INTEGRATION        1 row,   1 GAP
+              VOICE-CAPTURE                    1 row,   0 GAP
+
+**Read the "still GAP" column, because it is the load-bearing one.** Twelve of
+the eighteen WORLD blockers have already gone to zero GAP -- they were ruled,
+retired or built, and almost all of them under `decide-retire-rulings`, WITH a
+reopener. **The two that are entirely still GAP are the two this document
+overturns.** That is not a coincidence: a write-off that was never given a
+reopener is a write-off nobody revisited.
+
+`PANEL-NOT-OBSERVED` is the ACCOUNT-class write-off done RIGHT, and is
+confirmed here rather than criticised. Its reason is an account fact -- *the
+panel is not drawn for this account* -- and it ships with a control that
+reproduces 1/1/0 on four committed captures, reads 0/0/0 on exactly the two
+the fixture table marks un-hydrated, reproduced live twice across a browser
+restart, and a reopener stated as an instrument: *the control at 1/1/0 AND a
+target needle non-zero; a zero without the control firing reopens nothing.*
+**That is what an account-contingent write-off is supposed to look like.**
+
+### 3.2 The SURFACE? class is the biggest unexamined block, and I am not claiming it
+
+139 rows, 108 still GAP, across 22 blockers whose names read like code facts
+(`SERVICES-PAGE-SURFACE`, `CREATOR-HUB-SURFACE`, `NEWSLETTER-SURFACE`,
+`BADGES-SURFACE`, `SCHOOL-PAGE-SURFACE`, `MULTILANG-PROFILE`, ...) while the
+underlying claim is often an account fact: does that surface EXIST for him.
+
+**I am flagging this class, not adjudicating it.** Several already have live
+siblings (`build-company-page`, `build-newsletter`), several have already been
+re-costed twice, and a name-level guess is not a measurement. The one worked
+example below is offered as the SHAPE of the check rather than as a verdict on
+the class.
+
+### 3.3 One worked example from the SURFACE? class -- `P H11`, and the answer is "nobody looked"
+
+`SERVICES-PAGE-SURFACE` has been re-costed carefully already:
+`_audit/2026-09-05-network-tail.md` s3 corrects its own `allowlist +1` in the
+same session, on the right ground -- row `P H11` is *the "Providing services"
+section AS RENDERED ON THE PROFILE*, which is `/in/me/`, ALLOWED, so no pattern
+is owed. **The address reasoning is right.**
+
+What nobody measured is whether the section is drawn at all. Both committed
+captures of that address read **0** for `providing services`:
+
+    profile_topcard.html            providing services 0
+    profile_topcard_hydrated.html   providing services 0
+
+**And that zero does not settle it either**, which is the whole point of
+reporting it this way. The same captures read `Experience` 0, `Licenses` 0,
+`Recommendations` 0, `Activity` 0, `Add profile section` 0 -- they are
+TOPCARD-SCOPED, so they never reach the part of the page where the section
+would sit. **A needle that never reached the region is not a zero**, exactly as
+`jobs.md` row 16 says about the suggested-filters strip.
+
+**VERDICT for `P H11`: UNKNOWN, and the census does not have a word for it.**
+The row is costed as though the section renders; no committed evidence says it
+does or does not; the capture that would answer it has never been taken. Queue
+MEASURE -- one full-profile capture at an address already admitted -- not
+BUILD.
 
 ---
 
