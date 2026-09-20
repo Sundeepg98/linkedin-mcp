@@ -115,7 +115,6 @@ SURFACE_ADDRESSES: dict[str, str] = {
     "BADGES-SURFACE": "/in/me/",
     "COMPANY-PAGE-SURFACE": "/company/example/",
     "CONTENT-ANALYTICS-SURFACE": "/analytics/creator/content/",
-    "CREATOR-HUB-SURFACE": "/analytics/creator/content/",
     "EVENTS-SURFACE": "/events/",
     "GROUP-CHAT-SURFACE": "/messaging/",
     "GROUPS-SURFACE": "/groups/",
@@ -137,6 +136,28 @@ SURFACE_ADDRESSES: dict[str, str] = {
     "SEARCH-RESULTS-SURFACE": "/search/results/people/?keywords=example",
     "SERVICES-PAGE-SURFACE": "/services/page/",
     "SKILL-PAGE-SURFACE": "/skill/example/",
+}
+
+#: BLOCKERS WHOSE BASE ADDRESS TWO COMMITTED SOURCES DISAGREE ABOUT.
+#:
+#: These are held OUT of the "already allowed" tally rather than resolved by
+#: preference, because the two candidates carry OPPOSITE verdicts and no
+#: capture exists either way. Counting one of them would move the headline by
+#: a whole blocker on the strength of a guess.
+#:
+#: `CREATOR-HUB-SURFACE` was found by an evidence sweep on 2026-09-20 to be a
+#: DUPLICATE in the first cut of this table: it had been given
+#: `/analytics/creator/content/`, the identical address as its sibling
+#: `CONTENT-ANALYTICS-SURFACE`, which is a guess wearing a measurement's
+#: clothes. `_audit/2026-09-19-what-a-reader-could-actually-close.md`, under its
+#: table heading "REFUSED BY THE READ BOUNDARY", gives `/creator-hub/` and
+#: reports it REFUSED. Same blocker, two addresses, opposite verdicts. The
+#: sweep declined to adjudicate it and so does this file: its three rows are
+#: `P L1` creator analytics, `P L7` "Ideas for your next post" and `P L8`
+#: "Analytics and tools hub", and which page draws them is exactly the open
+#: question.
+DISPUTED_ADDRESSES: dict[str, tuple[str, ...]] = {
+    "CREATOR-HUB-SURFACE": ("/analytics/creator/content/", "/creator-hub/"),
 }
 
 
@@ -317,7 +338,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n  {'blocker':30s} {'ledger boundary':26s} {'live gate':9s} address")
         print("  " + "-" * 104)
         overtaken: list[str] = []
-        unmapped = [b for b in klass if b not in SURFACE_ADDRESSES]
+        unmapped = [b for b in klass
+                    if b not in SURFACE_ADDRESSES and b not in DISPUTED_ADDRESSES]
         for b in klass:
             url = SURFACE_ADDRESSES.get(b)
             if url is None:
@@ -327,8 +349,25 @@ def main(argv: list[str] | None = None) -> int:
             if allowed and OURS_ADDRESS.search(cell):
                 overtaken.append(b)
             print(f"  {b:30s} {cell[:26]:26s} {'ALLOWED' if allowed else 'refused':9s} {url}")
+
+        # A DISPUTED ADDRESS IS NOT A QUIET ONE. Printed with BOTH candidates
+        # and BOTH verdicts, and excluded from the tally, because a blocker
+        # whose two committed sources disagree cannot be counted either way
+        # without choosing -- and the choice is the open question.
+        for b, urls in sorted(DISPUTED_ADDRESSES.items()):
+            if b not in klass:
+                continue
+            print(f"  {b:30s} {ledger[b]['boundary'][:26]:26s} {'DISPUTED':9s} "
+                  + " | ".join(
+                      f"{u} -> "
+                      f"{'ALLOWED' if readonly.is_read_url('https://www.linkedin.com' + u) else 'refused'}"
+                      for u in urls))
+
+        counted = len(klass) - sum(1 for b in DISPUTED_ADDRESSES if b in klass)
         print(f"\n  base address ALREADY ALLOWED while the ledger still bills an "
-              f"allowlist entry: {len(overtaken)} of {len(klass)}")
+              f"allowlist entry: {len(overtaken)} of {counted}")
+        print(f"  (denominator excludes {len(klass) - counted} blocker(s) whose "
+              f"address is DISPUTED; see DISPUTED_ADDRESSES)")
         for b in overtaken:
             print(f"    {b:30s} ledger={ledger[b]['boundary']!r}")
         if unmapped:

@@ -1,5 +1,7 @@
 # The five DECIDEs, ruled against committed evidence
 
+**CORRECTED BY:** `_audit/2026-09-20-the-surface-class.md` -- the warrant this wave wrote into the ledger head, *"the COST and boundary columns here are properties of the work and do not go stale"*, holds for COST and fails for BOUNDARY. A cell reading `allowlist +1` bills a pattern still owed, so it goes stale the moment the pattern lands -- and the allowlist has grown since 2026-09-03. Measured against the live `readonly.is_read_url` (35 patterns): **15 of the 25 undisputed SURFACE-named blockers have their base address ALREADY ALLOWED while the ledger still bills the entry**, among them `GROUPS-SURFACE` (`allowlist +2`), `COMPANY-PAGE-SURFACE`, `EVENTS-SURFACE`, `NEWSLETTER-SURFACE` (`allowlist +2`) and `JOB-ALERTS-SURFACE`. The reasoning that produced the warrant is sound -- cost IS a property of the work -- and boundary is the one column the distinction does not cover, because it bills a thing that can be DONE rather than a thing that is true. The per-blocker table is in that document's section 3.4 and is re-derivable by the classifier script it ships, so read the tool's output rather than the cell.
+
 Wave `decide-16`, 2026-09-20. Scope: the five highest rows-per-cost blockers the
 ledger's ranking table queues `DECIDE` or `DECIDE-RETIRE`. Nothing was pushed.
 No census row was moved. `scripts/build_blocker_map.py --write` was not run.

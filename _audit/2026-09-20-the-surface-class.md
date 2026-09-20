@@ -1,5 +1,9 @@
 # The SURFACE? class, adjudicated
 
+**CORRECTS:** `_audit/2026-09-20-the-decides.md` -- the warrant it wrote into the ledger head, *"the COST and boundary columns here are properties of the work and do not go stale"*, is FALSE for the boundary column. That column bills an `allowlist +N` for a pattern still owed, and the allowlist has grown since 2026-09-03: **15 of the 25 undisputed SURFACE-named blockers have their base address ALREADY ALLOWED** by the live 35-pattern boundary while the cell still bills the entry. The COST half of the claim is untouched here; only the boundary half falls. Detail and the per-blocker table in section 3.4.
+
+**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its ranked table boundary column is stale in the same 15 cells, which is where a reader meets the claim. Section 3.4.
+
 The brief: `SURFACE?` covers "roughly 22 blockers, 139 rows, 108 still GAP",
 has been NAMED and never ADJUDICATED, and is the largest block of census rows
 whose disposition nobody has ruled. For each blocker, one question: is the row
@@ -183,13 +187,13 @@ owed. The live boundary is `linkedin_server.readonly._ALLOWED_URL_PATTERNS`,
 shipped `readonly.is_read_url`:
 
     base address ALREADY ALLOWED while the ledger still bills an
-    allowlist entry:                                      16 of 26
+    allowlist entry:                                      15 of 25
+    (denominator excludes 1 blocker whose address is DISPUTED)
 
     ARTICLE-SURFACE             /article/new/                       ALLOWED
     BADGES-SURFACE              /in/me/                             ALLOWED
     COMPANY-PAGE-SURFACE        /company/example/                   ALLOWED
     CONTENT-ANALYTICS-SURFACE   /analytics/creator/content/         ALLOWED
-    CREATOR-HUB-SURFACE         /analytics/creator/content/         ALLOWED
     EVENTS-SURFACE              /events/                            ALLOWED
     GROUPS-SURFACE              /groups/                            ALLOWED
     INMAIL-COMPOSE-SURFACE      /messaging/compose/                 ALLOWED
@@ -212,6 +216,25 @@ misses is half a measurement:**
     SEARCH-RESULTS-SURFACE      /search/results/people/?keywords=   refused
     SERVICES-PAGE-SURFACE       /services/page/                     refused
     SKILL-PAGE-SURFACE          /skill/example/                     refused
+
+**And the one the evidence sweep took off the board, which is the part of this
+section I got wrong:**
+
+    CREATOR-HUB-SURFACE   /analytics/creator/content/ -> ALLOWED
+                          /creator-hub/               -> refused     DISPUTED
+
+My first cut of the address table gave `CREATOR-HUB-SURFACE` the **identical
+address as its sibling** `CONTENT-ANALYTICS-SURFACE` -- a duplicate, which is a
+guess wearing a measurement's clothes, and it counted a whole blocker into the
+"already allowed" tally on the strength of it. The group-B sweep caught it
+against `_audit/2026-09-19-what-a-reader-could-actually-close.md`, whose table
+"REFUSED BY THE READ BOUNDARY" gives `/creator-hub/` and reports it REFUSED.
+**Two addresses, opposite verdicts, no capture either way.** It is now held in
+`DISPUTED_ADDRESSES`, printed with both candidates and both verdicts, and
+**excluded from the denominator** -- which is why this section says 15 of 25 and
+not 16 of 26. A guard requires a disputed entry to carry at least two distinct
+addresses, so "disputed" cannot become a quieter way of dropping a blocker out
+of a number.
 
 The address table is a stated CLAIM, not a derivation -- it is written out in
 `SURFACE_ADDRESSES` in the classifier precisely so it can be argued with, and
@@ -242,7 +265,7 @@ its five targets because it needs "no new surface and no new allowlist entry".
 
 That is the structural reason this class sat unmeasured, and it is a far better
 explanation than any per-blocker guess. **It also means the deadlock is already
-broken for 16 of the 26 and nobody noticed**, because the allowlist grew while
+broken for 15 of the 25 and nobody noticed**, because the allowlist grew while
 the ledger's cost column did not.
 
 ---
@@ -259,6 +282,84 @@ LinkedIn render it), ADDRESSABILITY (does our boundary allow it) and READER
 capture DID contain rather than only what it lacked. Prior art was required to
 be searched before any new evidence was generated, via the shipped locator
 `scripts/find_blocker_reason.py`.
+
+**A CONTAMINATION I CAUSED AND THEN MEASURED.** My own three artifacts landed
+in the shared tree at `9d15c11`, AFTER the sweeps were briefed, and all three
+name all 26 blockers -- so the raw grep in their briefs began hitting this
+wave's own output. Measured rather than assumed: the shipped locator is NOT
+affected (this document appears as a candidate for **0 of the 26**, because it
+scans `_audit/` only and scores a line only when it carries an argument word;
+`SKILL-PAGE-SURFACE` still reports ORPHANED after my commit). Only the raw grep
+needed the exclusion, which was issued as a disk ruling. One sweep then verified
+the exclusion empirically against its own already-completed grep set rather than
+taking it on my word, and found none of the three present. **A citation of this
+wave's own artifacts is rejected wherever it appears below.**
+
+### 4.1 Group A -- the six with recent sibling activity
+
+| blocker | rows / GAP | EXISTENCE, as measured | ruling |
+|---|---:|---|---|
+| `NEWSLETTER-SURFACE` | 12 / 11 | list page **live-loaded 2026-09-05**, capture re-read 2026-09-20 | **US-FACT** for the list rows |
+| `GROUPS-SURFACE` | 30 / 21 | root **live-fired 2026-09-05** | **US-FACT**; per-group page CANNOT-TELL |
+| `EVENTS-SURFACE` | 17 / 13 | root **live-loaded twice**, cross-instrument agreement | **US-FACT**; per-event page CANNOT-TELL |
+| `COMPANY-PAGE-SURFACE` | 16 / 15 | **referenced, never opened** -- 86 hrefs across 22 captures | **US-FACT** for tabs; root render CANNOT-TELL |
+| `SERVICES-PAGE-SURFACE` | 11 / 11 | create entry point **live-measured on 5 captures**; the Page itself never captured | **CONTINGENT** -- see 4.1.2 |
+| `SEARCH-RESULTS-SURFACE` | 21 / 21 | **never measured**, and the artifacts say why | **CANNOT-TELL**, see 4.1.1 |
+
+**Read the EXISTENCE column, because it is the one the class name is about.**
+Four of the six surfaces have been SEEN. None of the six is recorded anywhere as
+a page LinkedIn does not draw. **Nothing here supports a MEASURED-ABSENT ruling
+for any row, and nothing here is a surface absence.**
+
+#### 4.1.1 `SEARCH-RESULTS-SURFACE` -- 21 rows, and the circularity is the campaign's own words
+
+The largest all-GAP blocker in the class, and the one where the deadlock in s3.5
+is stated by the artifacts themselves rather than inferred by me.
+`_audit/2026-09-19-search-shaper.md`:
+
+> **NOT CLAIMED:** that this shaper has ever seen a live search page. It has
+> not, and the emission question the 2026-09-05 measurement left open (**"the
+> evidence path is CIRCULAR: the measurement that would justify opening the
+> surface can only be completed by opening it"**) is untouched by this work.
+
+`_audit/2026-09-19-search-admission-preconditions.md` confirms it operationally:
+every `/search/` address is refused today, and a ruling **forbids a discovery
+probe from navigating to a refused address even to find out whether it should be
+admitted**. Independently re-confirmed on disk this wave: no `/search/results/`
+pattern exists in `readonly.py`; every such string in the file is inside a
+comment. So this blocker is not stale -- it is current, and genuinely shut.
+
+A reader exists (`linkedin_server/search_results.py`) and is **confirmed not
+wired to any tool**; its controls ran against synthetic fixtures and a
+JavaScript classifier executed under V8, never against a real capture. What the
+shaper "knows" about the page is a modelled vocabulary, not a measurement.
+
+**A real defect surfaced by that wave, recorded here because it prices the
+fix:** an anchored family wildcard `^https://www\.linkedin\.com/search/.*$`
+admits a path-traversal string that normalises onto an account-ending address,
+and no forbidden substring catches it. **"Anchored" does not mean "closed".**
+Whoever admits the pattern inherits that.
+
+#### 4.1.2 `SERVICES-PAGE-SURFACE` -- the one genuinely contingent blocker, and it is not contingent on LinkedIn
+
+11 rows, all still GAP. The entry point to CREATE a Service Page is rendered on
+his profile -- measured across five committed captures, via the `Open to` menu
+resolving to exactly three items. He has never used it. `P H11` is the section
+that appears once a Service Page EXISTS, and it does not exist.
+
+**So the reason is a fact about the OPERATOR, not about LinkedIn or about us.**
+Under the vocabulary of `_audit/2026-09-20-the-contingent-writeoffs.md` s0 this
+is **TRUE BUT CHANGEABLE, at the cost of one operator action** -- the same shape
+as `ADMIN-RIGHTS-NOT-HELD`, and spelled nowhere in the census.
+
+**CONDITION, named so this does not go stale the way the write-offs did:** the
+ruling holds only while he has no Service Page. **REOPENER:** he creates one, or
+a capture of `/in/me/` shows a "Providing services" section. **WHO CAN
+ESTABLISH IT:** the operator, then a capture.
+
+And the sweep independently caught the staleness of 3.4 from the other
+direction: this blocker's `allowlist +1` is **NOT OWED** -- `P H11` renders on
+`/in/me/`, which is already open.
 
 ---
 

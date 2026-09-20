@@ -134,7 +134,7 @@ def test_every_selected_blocker_has_a_candidate_address():
 
     The check prints `NOT CHECKED -- no candidate address stated for N`. That
     line is the honest fallback, but if the class grows and nobody adds the
-    address, the "16 of 26" headline quietly becomes "16 of a smaller
+    address, the "15 of 25" headline quietly becomes "15 of a smaller
     denominator" -- a number shrinking its own denominator is this project's
     2.3 law, and this is where it would happen.
     """
@@ -142,10 +142,20 @@ def test_every_selected_blocker_has_a_candidate_address():
     ledger, _ = csb.ledger_rows()
     tot, _gap, _rows = csb.map_counts()
     selected = sorted(b for b in tot if csb.NAME_RULE.search(b))
-    missing = [b for b in selected if b not in csb.SURFACE_ADDRESSES]
+    placed = set(csb.SURFACE_ADDRESSES) | set(csb.DISPUTED_ADDRESSES)
+    missing = [b for b in selected if b not in placed]
     assert not missing, (
         f"these selected blockers have no candidate address, so the live-"
         f"boundary section silently skips them: {missing}")
+
+    # DISPUTED is a HOME, not a hiding place. A disputed blocker is printed
+    # with both candidates and both verdicts and is excluded from the tally's
+    # denominator -- so it must carry at least two addresses, or "disputed" is
+    # just a quieter way of dropping a blocker out of a number.
+    for blocker, urls in csb.DISPUTED_ADDRESSES.items():
+        assert len(set(urls)) >= 2, (
+            f"{blocker} is filed DISPUTED but names fewer than two distinct "
+            f"addresses: {urls}")
 
 
 def test_the_live_boundary_section_actually_measured_something(capsys):
@@ -167,7 +177,7 @@ def test_the_live_boundary_section_actually_measured_something(capsys):
 
 
 def test_the_two_boundary_entry_points_agree_on_every_candidate():
-    """CROSS-INSTRUMENT CONTROL for the "16 of 26 already allowed" finding.
+    """CROSS-INSTRUMENT CONTROL for the "15 of 25 already allowed" finding.
 
     The classifier asks `is_read_url`. A capture calls `assert_read_url` --
     `scripts/_capture_toggle_states.py`: "Every navigation goes through
