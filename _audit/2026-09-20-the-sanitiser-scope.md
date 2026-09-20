@@ -658,9 +658,19 @@ this repository reads prose for sense. The general form, worth more than the ins
 **a rename by pattern is a rename of every STRING that matches, and identifier renames
 in a corpus this prose-heavy need the match anchored or the occurrences read back.**
 
-**HARVESTED:** `_audit/INSTRUMENTS.md` section **31** -- 31.1 the scope law and its
-both-directions assertion, 31.2 the before/after sweep instrument and the stale-corpus
-trap that convicted it, 31.3 the declared-vacuous loop against the silently-skipping
-parametrize, 31.4 the name-based stop and its named residual. Numbered 31 as max-plus-one
-after re-reading the register at `d6b7e4b` (master had added 30 while this wave ran);
-`tests/test_the_register_numbers_are_unique.py` green.
+**HARVESTED:** `_audit/INSTRUMENTS.md` section **32** -- 32.1 the scope law and its
+both-directions assertion, 32.2 the before/after sweep instrument and the stale-corpus
+trap that convicted it, 32.3 the declared-vacuous loop against the silently-skipping
+parametrize, 32.4 the name-based stop and its named residual, 32.5 the enumeration hole
+I shipped and then closed.
+
+**IT WAS WRITTEN AS 31 AND RENUMBERED TO 32, WHICH IS THE PREDICTED COLLISION HAPPENING.**
+Max-plus-one was re-derived from the register at `d6b7e4b` and gave 31. By the time this
+wave finished, `origin/master` had published its own
+`## 31. THE WRITE-OFF REASON KINDS...` from a sibling. Two waves computed max-plus-one
+against two different trees and both got 31 -- which is what max-plus-one does under
+concurrency, and why the register carries
+`tests/test_the_register_numbers_are_unique.py` at all. **The published number is not
+mine to move**, so mine moved: 31 -> 32, subsections and every cross-reference with it.
+Caught by comparing against the remote BEFORE the merge rather than by a conflict
+during it.
