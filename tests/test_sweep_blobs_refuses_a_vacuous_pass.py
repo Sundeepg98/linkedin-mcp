@@ -80,16 +80,29 @@ process boundary (exactly what the original one was: an exit code and
 stderr thrown away by a function, not a Python-level exception) cannot hide
 from the test the way it hid from the script's own author.
 
-WHY THE INTERPRETER PATH IS COMPUTED, NEVER LITERAL: a linked worktree (this
-repository's tests always run from one) has no ``venv/`` of its own --
-``venv/`` is gitignored and git does not carry gitignored files into a
-worktree -- so the interpreter lives in the MAIN checkout. ``tests.repo_paths
-.main_checkout`` is the module this repository already ships to answer "where
-is the main checkout from in here," used the same way by
-``tests/test_no_committed_identity.py`` for the sibling case (the gitignored
-sanitisation key). Importing it rather than re-deriving it is the same rule
-this repository's own sweep scripts cite for themselves: when a repo ships an
-instrument, import it.
+WHY THE INTERPRETER IS ``sys.executable``, AND WHY IT USED TO BE COMPUTED.
+
+The original reasoning was right about the case it considered and wrong about
+the one it did not. A linked worktree has no ``venv/`` of its own -- ``venv/``
+is gitignored and git does not carry gitignored files into a worktree -- so
+this resolved the interpreter through ``tests.repo_paths.main_checkout``,
+reaching across to the main checkout exactly as
+``tests/test_no_committed_identity.py`` does for the gitignored sanitisation
+key.
+
+**THAT PATH DOES NOT EXIST ON CI, WHERE THERE IS NO ``venv/`` AT ALL**, and the
+precondition assert turned into a hard failure on all three platforms the
+moment this was published -- ubuntu py3.10, ubuntu py3.13 and windows py3.13
+alike, green on the box it was written on. Same shape as the ancestry control
+that pinned a local-only branch, and as a wave citing a SHA on a branch that
+never merged: **a test that assumes the shape of the repository it happens to
+be standing in.**
+
+``sys.executable`` is the interpreter ALREADY RUNNING these tests, so it is
+correct in all three environments and solves the worktree problem more directly
+than computing it -- in a worktree, the thing that invoked pytest IS the main
+checkout's venv. It also needs no import of a helper to answer a question the
+runtime already knows.
 """
 
 from __future__ import annotations
@@ -97,13 +110,12 @@ from __future__ import annotations
 import ast
 import importlib.util
 import subprocess
+import sys
 from pathlib import Path
-
-from tests.repo_paths import main_checkout
 
 REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "sweep_blobs_for_identity.py"
-PYTHON = main_checkout(REPO) / "venv" / "Scripts" / "python.exe"
+PYTHON = Path(sys.executable)
 
 #: Generous but bounded. The positive control below does a real sweep of one
 #: commit's worth of blobs (low hundreds -- 610 the last time this was
@@ -120,7 +132,17 @@ _TIMEOUT_SECONDS = 300
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
     """Run the real script through the real interpreter, as a caller would."""
-    assert PYTHON.exists(), f"interpreter not found at {PYTHON} -- is this a worktree with no main checkout reachable?"
+    # `sys.executable` is documented as possibly EMPTY -- an embedded or frozen
+    # interpreter can leave it unset -- and an empty string here would run the
+    # script through the shell's idea of "" rather than failing. That is the
+    # only way this precondition can still bite, and it is worth one line.
+    # It deliberately does NOT re-assert `PYTHON.exists()`: for the interpreter
+    # currently executing this function that is true by construction, and a
+    # precondition that cannot fail is the defect this whole module is about.
+    assert str(PYTHON), (
+        "sys.executable is empty, so there is no interpreter to run the script "
+        "under and every result below would be about the shell, not the sweep"
+    )
     return subprocess.run(
         [str(PYTHON), str(SCRIPT), *args],
         cwd=str(REPO),
