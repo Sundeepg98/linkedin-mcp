@@ -543,40 +543,63 @@ Two things that make this kind hard, named rather than smoothed over:
   slice collisions. This wave did not adjudicate them; the number is handed
   over as the size of what is uncovered.
 
-### 6.4 COMMIT SHAS -- 325 that no clone can resolve, and one that matters
+### 6.4 COMMIT SHAS -- and the wave's own worst answer, corrected
 
-**791 distinct hex tokens** in the corpus. Resolved against this repository:
+> **THIS SECTION FIRST SAID: "`a8684146` is cited 11 times, ten of them in the
+> EVIDENCE column of `_census/jobs.md`. Nine census rows rest their evidence on
+> a commit no clone can resolve." THAT IS WRONG, AND IT IS WRONG IN EXACTLY THE
+> WAY THIS WAVE EXISTS TO CATCH.**
+>
+> `a8684146` is not a commit citation. It is a **LinkedIn Help Center article
+> id**. The census column is headed `source`, not "commit", and the same files
+> write the same class of id in URL form -- `_census/jobs.md` itself contains
+> `help/linkedin/answer/a512388`. The ids are `a` followed by six or seven
+> digits and are hex-shaped by coincidence.
+>
+> I checked the name against the wrong registry, got a true answer to a question
+> nobody asked -- it does not resolve as a commit, because it was never a
+> commit -- and published a plausible wrong answer. **That is this document's
+> subject matter, committed by its author, and it is the third instance today.**
+> It survived a relay, a child's confirmation of the count, and my own
+> verification, because all three of us verified the COUNT and the
+> NON-RESOLUTION and none of us verified the KIND. Worse: the child had already
+> named this exact contamination pattern for run ids -- "LinkedIn job ids are
+> also bare 10-digit integers" -- and I did not carry the lesson one column
+> across.
+>
+> Re-measured below. Nothing in this section is now taken from a relay.
+
+Re-measured at `8b58dcb`, over every 7-8 character lowercase-hex token standing
+as a word and not all digits -- **732 distinct, 1,997 occurrences.** The
+batch-resolve is controlled: two known-good abbreviations must resolve and a
+nonsense token must not, asserted before any "missing" verdict is believed,
+because a batch-check that cannot resolve an abbreviation at all would report
+everything missing and look exactly like a finding.
 
 | bucket | distinct | occurrences |
 |---|---:|---:|
-| resolves, ancestor of master | 309 | 945 |
-| resolves, NOT an ancestor (the superseded pre-purge line) | 99 | 295 |
-| `DANGLING_COMMITISH` -- 7-8 chars, resolves nowhere | **325** | 772 |
-| mid-length 9-15, unclassified | 13 | 40 |
-| `NOT_A_COMMITISH` -- 16+ even, content digests and urns | 36 | 99 |
-| `LONG_ODD_UNRESOLVED` -- `worktree-agent-<hex>` fragments | 5 | 10 |
+| resolves as a commit in this repository | 392 | -- |
+| dangles, and is a **LinkedIn Help Center article id** (`a` + 6-7 digits) | **280** | 646 |
+| dangles and is genuinely commit-shaped | **60** | **138** |
 
-**The split is the whole point.** A raw "383 unresolved SHAs" merges commit
-citations with content digests, LinkedIn urns, and branch-name fragments, and
-means nothing. Four more were removed from the dangling count after being
-identified as single hyphen-segments of LinkedIn opaque UUIDs -- 8 characters
-long, passing a length gate, never a sha at all.
+**Four fifths of the "dangling commit citations" were never commit citations.**
+The corroboration is the corpus's own: 14 of those 280 ids also appear in URL
+form as `help/linkedin/answer/a<digits>` in these same files, and the census
+column that holds them is headed `source`, beside capability rows whose source
+genuinely is a help article.
 
-**The one that matters, verified here rather than relayed:**
+**So the real number is 60 distinct commit-shaped citations that resolve
+nowhere, across 138 occurrences**, clustered in a handful of documents --
+`2026-08-24-perform-save-unsave.md`, `2026-08-24-out-of-scope-wave.md`,
+`2026-08-31-jobcore-paths.md`. The most-cited are `3d55dd6` (7), `94600de` (7),
+`5a69147` (6), `b2f5d16` (6). A sibling wave owns SHA-citation repair and this
+is handed to it as 60, not 325.
 
-```
-$ git cat-file -e a8684146^{commit}
-fatal: Not a valid object name a8684146^{commit}
-$ git grep -c "a8684146" -- _audit
-_audit/2026-09-20-the-contingent-writeoffs.md:1
-_audit/_census/jobs.md:10
-```
-
-`a8684146` is cited **11 times**, ten of them in the EVIDENCE column of
-`_census/jobs.md` rows 49-57 and 68-69 -- *"| 49 | Read the In Progress / Draft
-list | a8684146 | CP | ..."*. **Nine census rows rest their evidence on a
-commit no clone can resolve.** This is the asserted-but-absent class exactly,
-in the corpus's most load-bearing file, and a sibling wave owns the repair.
+A separate population, also not commit citations and also worth splitting out:
+content digests and LinkedIn urns at 16+ even length, and `worktree-agent-<hex>`
+branch-name fragments at odd length 17. **A raw "unresolved SHAs" count merges
+at least four unrelated things.** Which is the whole point of section 1.1, one
+kind along.
 
 ### 6.5 CI RUN-ID CITATIONS -- the class is real here but small, and the trap is a trap
 
@@ -638,6 +661,16 @@ reported as a text census.
 5. **A name absent from the tree but present in an UNTRACKED file reads as
    absent.** Correct for CI, which sees only the tracked tree, and worth saying
    because a reader in the main checkout may find the file sitting on disk.
+
+6. **KIND-BEFORE-RESOLUTION is not a rule I applied evenly, and section 6.4
+   records where it failed.** The guard enforces it for UPPER-KEBAB tokens,
+   where a slot decides which registry a name is drawn from before anything is
+   resolved. The hand-run SHA census had no such step, so 280 LinkedIn Help
+   Center article ids -- hex-shaped by coincidence, sitting in a column headed
+   `source` -- were resolved against git and reported as dangling commits.
+   **The check answered truthfully and the question was wrong.** Any future
+   kind added to this guard needs its slot before it needs its resolver;
+   resolution is the cheap half and it is never the half that goes wrong.
 
 6. **The disclosure window is 120 characters and nothing makes that the right
    number.** It was line-bounded at first, which measured the author's text

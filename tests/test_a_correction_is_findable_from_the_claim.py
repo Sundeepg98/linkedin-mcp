@@ -288,6 +288,22 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "report is the source, not the target. "
     ),
 
+    # 2026-09-20, the same wave's fourth pair, and the shape is worth naming:
+    # a document correcting ITSELF, inside a block quote, about a third file it
+    # had mis-described. The correction vocabulary is real; its target is the
+    # citing document's own earlier sentence, not the file it names.
+    ("2026-09-20-names-that-do-not-exist.md", "jobs.md"): (
+        "IT IS A SELF-RETRACTION THAT CLEARS THE NAMED FILE. The quoted block "
+        "opens 'THIS SECTION FIRST SAID' and withdraws this wave's own claim "
+        "that nine rows of `_census/jobs.md` rest their evidence on an "
+        "unresolvable commit. The census is not wrong: its column is headed "
+        "`source` and holds LinkedIn Help Center article ids, which the same "
+        "file writes elsewhere as `help/linkedin/answer/a512388`. The wave "
+        "had resolved them against git, which is a true answer to a question "
+        "nobody asked. A CORRECTS: marker would tell a reader this document "
+        "supersedes the census, when what it supersedes is its own paragraph. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED
