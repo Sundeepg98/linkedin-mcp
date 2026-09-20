@@ -2017,9 +2017,37 @@ def _citations(line: str, index: dict[str, pathlib.Path]) -> list[pathlib.Path]:
     return out
 
 
+#: The document a marker names, which is always the FIRST backticked span on
+#: the line: ``**CORRECTS:** `_audit/x.md` -- the reason``.
+_CITED = re.compile(r"`[^`]+`")
+
+
 def _reason_on(line: str) -> str:
-    """Whatever a marker line says after the document it names."""
-    return line[line.rindex("`") + 1 :].strip().lstrip("-*: ").strip()
+    """Whatever a marker line says after the document it names.
+
+    **IT USED TO READ AFTER THE LAST BACKTICK, AND THAT IS NOT WHAT THIS
+    DOCSTRING SAYS.** The sentence above was always the intent; ``rindex``
+    was the implementation. Any reason that mentions a backticked symbol --
+    which is most of the good ones -- was therefore cut at its LAST symbol
+    instead of its first citation, and what came back was a tail.
+
+    MEASURED 2026-09-20 over the tracked corpus: **65 of 136 markers**
+    returned a strict suffix of their own reason. Thirteen were cut below 60
+    characters. The shortest surviving fragment was 23 characters and read,
+    entire, ``was re-opened to GAP on``.
+
+    **AND THE GUARD WAS GREEN ON ALL 65.** Its only check is that the
+    fragment is at least 20 characters, and a fragment can be: the one above
+    clears the bar by three. A length floor tests that something is there,
+    never that it is the thing. I satisfied that same floor by hand earlier
+    the same day, by rewriting a marker to end in prose rather than a
+    backticked symbol -- routing around this defect without noticing it,
+    which is how it survived being edited three times in one session.
+    """
+    cited = _CITED.search(line)
+    if cited is None:
+        return ""
+    return line[cited.end():].strip().lstrip("-*: ").strip()
 
 
 def _declarations():
@@ -2435,3 +2463,62 @@ def test_control_the_shadow_check_convicts_a_planted_duplicate():
     assert _shadowed(_module_level_dicts(clean)[0][1]) == [], (
         "the detector convicts a table with no duplicate, so it proves nothing"
     )
+
+
+def test_a_reason_is_not_cut_at_its_last_backtick():
+    """No marker's reason may be a strict suffix of the text after its citation.
+
+    THE PROPERTY, not the implementation: whatever `_reason_on` returns must be
+    everything the line says after the document it names -- not a tail of it.
+    Stated this way the test still fails if somebody reintroduces `rindex`, or
+    invents a third rule that happens to truncate.
+
+    It is a FLOOR-FREE check on purpose. The length floor beside it (20
+    characters) is what let 65 truncated reasons pass for weeks: a floor tests
+    that something is there, never that it is the thing.
+    """
+    offenders = []
+    for doc in _documents():
+        for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), 1):
+            if _is_marker(line) is None:
+                continue
+            cited = _CITED.search(line)
+            if cited is None:
+                continue
+            full = line[cited.end():].strip().lstrip("-*: ").strip()
+            got = _reason_on(line)
+            if got != full:
+                offenders.append((doc.name, number, len(got), len(full)))
+    assert not offenders, (
+        "%d marker reason(s) are truncated -- the reader is shown a fragment "
+        "of the argument, not the argument. (file, line, shown, actual): %s"
+        % (len(offenders), offenders[:8])
+    )
+
+
+def test_control_the_truncation_check_convicts_the_rule_it_replaced():
+    """SHOWN FAILING against the exact rule that shipped, on a real shape.
+
+    The specimen is the shape that produced the 65: a reason that mentions a
+    backticked symbol partway through. Under the old last-backtick rule the
+    reader saw everything after `PERFORMABLE` and nothing before it.
+    """
+    line = (
+        "**CORRECTS:** `_audit/x.md` -- the row was excluded citing a "
+        "package-wide ban, and upload is absent from `PERFORMABLE` so nothing "
+        "became reachable."
+    )
+    old = line[line.rindex("`") + 1:].strip().lstrip("-*: ").strip()
+    new = _reason_on(line)
+
+    assert old != new, "the old and new rules agree here, so this proves nothing"
+    assert new.startswith("the row was excluded"), new
+    assert old.startswith("so nothing became reachable"), old
+    assert len(old) < len(new), (len(old), len(new))
+    # And the old fragment CLEARS the 20-character floor, which is the whole
+    # reason the floor never caught this.
+    assert len(old) >= 20, len(old)
+
+    # A marker with no citation at all must come back empty rather than raise;
+    # the old rule raised ValueError on a line with no backtick.
+    assert _reason_on("**CORRECTS:** nothing cited here") == ""
