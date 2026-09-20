@@ -152,7 +152,26 @@ stated per row, because "carried by `fa13985`" is not equally true of all six:
 | `COMPANY-PAGE-SURFACE` N 54 | verbatim | same |
 | `COMPANY-PAGE-SURFACE` N 33 | verbatim PLUS a same-branch appendix | `fa13985` carries `86b8ed5`'s text unchanged; a later same-branch commit, `1d14fb4e` ("census: N 104, which my own arithmetic had refused..."), appends a dated "AMENDED 18:4x BY ITS OWN AUTHOR" paragraph to the SAME cell, noting the 13R count is now contested. Nothing of `86b8ed5`'s original text is removed. |
 | `HASHTAG-EXISTENCE` N 61 | carried, then withdrawn by unrelated LATER master-side work, for a stated reason | `fa13985` adds it verbatim (confirmed: its diff carries a `+` line matching `86b8ed5` character for character). Three hours later, on `master`'s own line -- not the replay -- `c8dd0098` ("the row walk...") reports it as a probable mis-assignment against the ledger's own row-id enumeration of `HASHTAG-EXISTENCE`, explicitly without repairing it ("Not my rows, not my file to rewrite"); `201b757e` ("rule all five requests...") then removes the row: "N 61 REMOVED from HASHTAG-EXISTENCE -- the ledger enumerates that blocker's three rows by id and N 61 is not among them. Two waves found it independently." The row is not on `master` at HEAD. This is ordinary subsequent project work reversing one finding on its own evidence, not a defect of the replay. |
-| `PER-MESSAGE-OVERFLOW-MENU` M M11 | conclusion kept, text replaced by an independent parallel commit | `86b8ed5`'s own text (locator `L342`) is not on `master`. In its place is a differently-worded row (locator "M11 row", axis-numbered prose) written by `937b6b71` ("census: five forced rows into four empty blockers..."), a commit that is neither an ancestor nor a descendant of `86b8ed5` (`git merge-base --is-ancestor` fails both directions) yet reaches the same M M11 -> `PER-MESSAGE-OVERFLOW-MENU` filing independently, ten minutes before `5581950`. The merge that combined the eight branches (`50e00eb7`) shows the literal conflict resolution in one hunk: a `+` for `937b6b7`'s text, a `-` for the `L342` text. `86b8ed5`'s specific contribution to this one row did not survive; the row's conclusion did, credited on `master` to a different, independently-arrived-at source. |
+| `PER-MESSAGE-OVERFLOW-MENU` M M11 | conclusion kept, text replaced by an independent parallel commit | `86b8ed5`'s own text (locator `L342`) is not on `master`. In its place is a differently-worded row (locator "M11 row", axis-numbered prose) written by `937b6b71` ("census: five forced rows into four empty blockers..."), a commit that is neither an ancestor nor a descendant of `86b8ed5` (`git merge-base --is-ancestor` fails both directions) yet reaches the same M M11 -> `PER-MESSAGE-OVERFLOW-MENU` filing independently, ten minutes before `5581950`. The merge that combined the eight branches (`50e00eb0`, on `integrate-1821` only -- see the note under this table) shows the literal conflict resolution in one hunk: a `+` for `937b6b7`'s text, a `-` for the `L342` text. `86b8ed5`'s specific contribution to this one row did not survive; the row's conclusion did, credited on `master` to a different, independently-arrived-at source. |
+
+**A ONE-CHARACTER SLIP IN THE ROW ABOVE, REPAIRED 2026-09-20 -- and it is the
+cheapest possible proof that this defect class is generated continuously rather
+than inherited.** The merge commit was first written here as `50e00eb7`. There
+is no such object: `git rev-parse --disambiguate=50e00eb` returns exactly one
+commit, `50e00eb0e064` ("Merge branch 'worktree-agent-aa255d5b6ed0788c7' into
+integrate-1821", 2026-09-19T19:09:02+05:30), whose eighth character is `0`. A
+single wrong character turned a resolvable citation into one that reads exactly
+like the six this document exists to repair -- written by the repair itself, the
+same day, in the document whose whole subject is unresolvable citations. It is
+corrected in place above rather than footnoted, because the wrong token has no
+value to a reader arriving with it: unlike a rewritten hash, it never named
+anything.
+
+**And the corrected form still does not resolve in a clone.** `50e00eb0` is an
+ancestor of `integrate-1821` and of no published ref
+(`git merge-base --is-ancestor 50e00eb0 master` exits 1), which is the same
+condition section 6 recommends keeping `integrate-1821` for. Cited here as a
+branch-only object, deliberately, rather than silently dropped.
 
 ### `5581950` -- census, nine rows
 
@@ -409,3 +428,7 @@ notice for October 2026) -- read and confirmed harmless, not skipped.
 **CI RESULT: run `35491410424`, commit `d4a7cd6`, SUCCESS, read as an
 artifact via the unauthenticated check-runs API, headSha-verified, not
 inherited from any `gh run watch` exit code.**
+
+---
+
+**CORRECTED BY:** `_audit/2026-09-20-the-sixty-dangling.md` -- section 3's PER-MESSAGE-OVERFLOW-MENU row cited the eight-branch merge as a SHA that names no object; a one-character slip. The row is repaired in place above and the note under that table records both the slip and the fact that the corrected form still resolves only on a branch, never in a clone.

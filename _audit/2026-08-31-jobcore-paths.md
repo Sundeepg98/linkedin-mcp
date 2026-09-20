@@ -36,6 +36,31 @@ failure you would actually see is
 `test_the_vendored_body_is_identical_to_canonical[paths]`, and the pin check
 would go quiet at the same time. **Push jobcore, then linkedin.**
 
+> **STALE AS OF 2026-09-20, AND THE PUSH HAPPENED.** Everything above this note
+> was true when written and the block it annotates is now false. Re-measured
+> today against a freshly fetched remote: `jobcore`'s `origin/master` is
+> `fff1438` and all three SHAs this document pins or names -- `5480246`,
+> `6acc7e6`, `b2f5d16` -- are ancestors of it
+> (`git merge-base --is-ancestor`, exit 0, each disambiguating to exactly one
+> object). So `git show b2f5d16:...` DOES resolve in a clone of the remote
+> today, the header-pin test does not skip, and the push ordering warning has
+> been discharged rather than ignored.
+>
+> **THE SHAPE IS WORTH MORE THAN THE FACT.** This was a claim about another
+> repository's PUBLICATION STATE, written as a flat assertion with nothing in
+> it saying what it depended on. It went false without anybody editing the file
+> it lives in -- the same way a citation pinned to a hash goes false -- and a
+> reader arriving at "cannot resolve in a clone" would have stopped looking.
+> A claim that depends on a push, a merge or a branch still existing should say
+> so at the point it is made.
+>
+> **The SHAs in this document are `jobcore` and `ats-jobs` commits, not
+> `linkedin` ones.** Asking this repository about them returns zero, and a zero
+> from a resolver means "not of this kind, OR absent" -- it cannot tell those
+> apart. Two citation censuses counted these five as dangling `linkedin`
+> citations before the containing document's own title was read.
+> `_audit/2026-09-20-the-sixty-dangling.md` has the measurement.
+
 **TWO MORE THINGS NEED YOUR DECISION, neither taken here** (detail in section 6):
 
 1. **`ats-jobs` carries THREE leaks of this class and they are ALREADY
@@ -529,3 +554,7 @@ repo clean.
    replace the value rather than the escaping, and port the sweep so the repo
    guards itself and not only its scrubber. Not taken here -- out of scope,
    and the push is not this wave's to make.
+
+---
+
+**CORRECTED BY:** `_audit/2026-09-20-the-sixty-dangling.md` -- the "is the pinned commit `b2f5d16` on origin/master? NO -- unpushed" block above, and the sentence that `git show b2f5d16:...` cannot resolve in a clone of the remote. Both were true when written; re-measured 2026-09-20 against a freshly fetched jobcore remote, all three jobcore SHAs this document names are ancestors of its `origin/master`. The dated note sits at that block.
