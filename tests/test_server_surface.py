@@ -1,4 +1,13 @@
-"""The tool surface: forty-four tools, thirty-two of which do not write.
+"""The tool surface: forty-seven tools, thirty-five of which do not write.
+
+**AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
+a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
+live 47 and 35 -- and the two corrections recorded below were both done in
+place, by hand, which is precisely the practice that let it rot again. A number
+a human retypes is a number that drifts; the fix is not a more careful human.
+``test_the_headline_is_derived_from_the_constants`` at the foot of this module
+now reads this first line, spells the live counts, and fails if they disagree,
+so the fourth drift is caught by the file rather than by somebody noticing.
 
 **THIS LINE SAID "twenty-three tools, nineteen of which do not write" UNTIL
 2026-09-05 ~22:52** -- stale by nineteen tools, in the file that PINS the tool
@@ -2277,3 +2286,89 @@ def test_a_grant_needs_permission_and_not_merely_an_address():
     assert addressed_but_unperformable.url_template is not None
     assert addressed_but_unperformable.action not in writes.PERFORMABLE
     assert writes.grant_is_possible(addressed_but_unperformable) is False
+
+
+# ---------------------------------------------------------------------------
+# THE HEADLINE IS DERIVED, NOT MAINTAINED
+# ---------------------------------------------------------------------------
+
+_ONES = (
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+    "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+    "sixteen", "seventeen", "eighteen", "nineteen",
+)
+_TENS = (
+    "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+    "eighty", "ninety",
+)
+
+
+def _spell(n: int) -> str:
+    """A two-digit integer in the house spelling: 47 -> 'forty-seven'."""
+    if n < 20:
+        return _ONES[n]
+    tens, ones = divmod(n, 10)
+    return _TENS[tens] if ones == 0 else f"{_TENS[tens]}-{_ONES[ones]}"
+
+
+def test_the_headline_is_derived_from_the_constants():
+    """This module's FIRST LINE must agree with the constants it pins.
+
+    WHY THIS EXISTS, and it is the file's own history. That line has gone stale
+    three times: "nineteen tools, fifteen of which read LinkedIn" until
+    2026-08-25, "twenty-three tools, nineteen of which do not write" until
+    2026-09-05, and "forty-four tools, thirty-two of which do not write" until
+    2026-09-20 -- each time inside the module whose entire job is pinning the
+    tool count, three lines above assertions that WERE updated at every bump.
+
+    Each was corrected by hand. **Correcting it by hand is the practice that
+    produced the next drift**, which is why this is a test and not a fourth
+    correction. The pins get maintained because something fails when they are
+    not; the prose beside them drifts because nothing did.
+
+    SCOPED TO THE FIRST LINE ONLY, deliberately. Everything below it in the
+    docstring is HISTORY -- previous headlines, and dated notes recording which
+    tool was the thirty-eighth or the forty-seventh. Those numbers are evidence
+    of what was true when they were written and correcting them in place would
+    destroy exactly the record this module keeps. A guard that reached the whole
+    docstring would demand the history be falsified to stay green.
+    """
+    first_line = (__doc__ or "").strip().splitlines()[0]
+    total = len(EXPECTED_TOOLS)
+    non_write = total - len(SANCTIONED_WRITE_TOOLS)
+
+    assert total and non_write, (
+        "derived zero tools or zero non-write tools, so this check has nothing "
+        "to compare and would pass on any headline at all"
+    )
+    expected = (
+        f"The tool surface: {_spell(total)} tools, "
+        f"{_spell(non_write)} of which do not write."
+    )
+    assert first_line == expected, (
+        "the headline has drifted from the constants below it.\n"
+        f"  headline : {first_line}\n"
+        f"  derived  : {expected}\n"
+        f"  from     : EXPECTED_TOOLS={total}, "
+        f"SANCTIONED_WRITE_TOOLS={len(SANCTIONED_WRITE_TOOLS)}"
+    )
+
+
+def test_control_the_speller_and_the_headline_check_can_both_fail():
+    """SHOWN FAILING. A spelling table and a comparison are both places a
+    check like this dies silently, so both are exercised."""
+    assert _spell(47) == "forty-seven", _spell(47)
+    assert _spell(35) == "thirty-five", _spell(35)
+    assert _spell(40) == "forty", _spell(40)
+    assert _spell(12) == "twelve", _spell(12)
+
+    # The comparison must reject a headline that is wrong by ONE tool -- the
+    # drift size that actually occurs, and the one a loose check would miss.
+    derived = f"The tool surface: {_spell(47)} tools, {_spell(35)} of which do not write."
+    off_by_one = f"The tool surface: {_spell(46)} tools, {_spell(35)} of which do not write."
+    assert derived != off_by_one, "the comparison cannot tell 47 from 46"
+
+    # And it must reject a drift in the SECOND number while the first is right,
+    # which is the shape the 2026-09-20 instance had (44/32 against 47/35).
+    second_wrong = f"The tool surface: {_spell(47)} tools, {_spell(32)} of which do not write."
+    assert derived != second_wrong, "the comparison only checks the first number"
