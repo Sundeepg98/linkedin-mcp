@@ -607,6 +607,58 @@ whole document set exists to avoid.
 
 ---
 
+## Review: the guard that landed on this branch after the fix
+
+A child agent committed `94e4601` on top of this wave's commit, shipping the
+census detector as a standing instrument: `scripts/detect_unbranched_probe_controls.py`,
+a `tests/test_probe_controls_are_never_decorative.py` ratchet, a 129-entry
+baseline, a shown-failing control, and an `_audit/INSTRUMENTS.md` entry.
+Reviewed here because it is on this branch and therefore this wave's
+responsibility.
+
+**It passes review on the things this repository treats as non-negotiable.**
+Its control is real and was run: `scripts/_check_unbranched_control_detector_can_fail.py`
+demonstrates the A/B flip (same code one branch apart, verdict flips), the
+different-variable `if` case, and -- the one that matters -- that **the ratchet
+itself can go RED**, by removing one real baseline entry and watching it be
+reported as new. An instrument that has not been shown failing certifies
+nothing, and this one has. Five tests green, no AI attribution, no non-ASCII
+introduced (the 13 characters in `INSTRUMENTS.md` are pre-existing).
+
+**Two things a future reader should know, neither of which blocks it.**
+
+**1. It is a ONE-WAY ratchet, and this repository's established pattern for the
+same shape is an EXACT MAPPING.** `KNOWN_TEXT_SINKS` states the rule in its own
+comment: *"asserted as an EXACT MAPPING, so it cannot rot in either direction: a
+file that gains a site fails, and a file that is FIXED also fails until its
+entry is corrected. The documentation of a defect may not outlive the defect."*
+This baseline fails on a NEW finding and stays silent when a pinned one is
+fixed, so nothing ever forces a pruned entry. That is defensible for a disclosed
+backlog someone is working through, which is what its docstring claims, but it
+is the weaker form and it is not what the neighbouring guards do.
+
+**2. The baseline necessarily pins this detector's false positives, including
+in the file this wave just repaired.** All three flagged names in
+`_probe_events_surface_shape.py` are in it:
+
+```
+  {'file': '_probe_events_surface_shape.py', 'variable': 'rows_with_any', 'line': 274}
+  {'file': '_probe_events_surface_shape.py', 'variable': 'hits',          'line': 306}
+  {'file': '_probe_events_surface_shape.py', 'variable': 'note',          'line': 307}
+```
+
+`rows_with_any` and `note` are display values, not controls. `hits` is a Q4
+tally that is correctly not branched, because the must-fire control was hoisted
+above it and IS branched. **They cannot simply be deleted**: the detector still
+flags them, so removing them turns the ratchet red on a file with no defect.
+The fix is to tighten the marker vocabulary so a self-check is distinguishable
+from a UI control -- the same prerequisite the census section above names before
+any count here is quotable. Until then the baseline is 129 entries of which an
+unknown minority are not defects, and the one-way ratchet means nothing will
+make anyone revisit them.
+
+---
+
 ## Cross-check against the lead's independent classification
 
 A `_TEAM_LEAD_*.md` note at the worktree root carried a sibling agent's
