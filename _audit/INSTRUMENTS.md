@@ -4991,3 +4991,141 @@ driver `_mutate_kinds.py`. The first three are superseded by the committed class
 reporting; the fourth is superseded by the pytest guard, which runs the same mutations with
 postcondition assertions. Their numbers are the tables in
 `_audit/2026-09-20-the-reason-kinds.md`.
+
+## 33 The sanitiser-scope wave, 2026-09-20
+
+### 33.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
+
+`tests/test_page_text_is_never_printed.py` imported the url rule's
+`_is_sanitiser_call` and ORed it into a taint walk whose sources are sixteen TEXT
+readers. Every name that predicate matches -- `_shape_of`, `_redact`, `_relation`
+-- is certified by a needle table of **eight url-bearing lines and nothing else**.
+So a page-text site wrapped in any of them was reported CLEAN on the strength of
+a proof about addresses.
+
+**Nobody ruled that. It fell out of an import.** The words "page text", "prose"
+and "display name" appear nowhere in the certifier.
+
+It was not theoretical. `scripts/_probe_messaging.py::_redact` returns an
+invented display name **byte-identical** on 3 of 6 realistic page-text shapes --
+a card byline, plain prose, a name beside a lowercase word -- while correctly
+HOLDING on the url it was proven for. It is not broken; it is correctly scoped,
+and the scope was written in a docstring where no check could read it.
+
+THE GENERAL FORM, for any guard that stops at a certified helper: **a
+certification names a corpus, and the entry must carry that corpus with it.**
+`PROVEN_FOR` maps each guarded name to the kind of value it was measured
+against; `GUARD_SCOPE` maps each guard to the kind it taints;
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` asserts
+`consults == (kind == SCOPE_URL)` -- **both directions in one assertion**,
+because written one-sided the check still passes if the URL rule LOSES its own
+stop, which would silently forbid that rule's own fix.
+
+SHOWN FAILING, against the real pre-fix source rather than a stub:
+
+```
+HEAD source names _is_sanitiser_call    : True      <- RED
+working source names _is_sanitiser_call : False
+the url rule itself names it            : True      <- and must
+```
+
+`_names_used` parses rather than greps and counts an import with no call, because
+a symbol in a namespace is one word from being a stop condition again. It is
+shown rejecting a docstring that mentions the name -- what a grep would match,
+and this corpus writes `_is_sanitiser_call` in prose a dozen times.
+
+**TWO OVERLAPPING DEFENCES WERE MUTATED SEPARATELY**, per the standing law.
+Restoring the OR in memory: the walker's five red cases fire (mechanism a) AND
+the certifier's structural check fires (mechanism b). Removing either leaves the
+other convicting.
+
+### 33.2 BUILD BOTH VARIANTS FROM SOURCE TEXT -- NEVER IMPORT A MODULE YOU ARE EDITING
+
+**This one convicted itself the same hour.** To measure what the fix newly
+flags, a child was briefed to sweep the tree with two walkers, taking the
+"before" variant by importing `text_violations` from the real module. The module
+was then edited underneath it. Both variants became the fixed walker, they agreed
+on all 178 files, and the delta was reported as zero.
+
+**A corpus you told somebody to read can go stale while they read it**, and the
+result looks exactly like a clean measurement.
+
+The brief's mandatory control caught it -- the two variants had to be SHOWN
+DISAGREEING on planted cases before any agreement counted, and the child reported
+`CONTROL 2 overall: FAIL` rather than presenting the agreement. **The defect was
+in the brief, not the work.**
+
+THE INSTRUMENT, reusable for any before/after guard comparison: load the BEFORE
+variant from `git show <sha>:<path>` and the AFTER from disk, `exec` both into
+separate module objects, and gate the whole sweep on a disagreement control:
+
+```
+pre-fix  walker names _is_sanitiser_call in its namespace : True
+post-fix walker names _is_sanitiser_call in its namespace : False
+  5 of 7 planted cases disagree
+  UNWRAPPED -- both must flag    pre=[(2,'print')] post=[(2,'print')] agree
+  len() -- both must stay clean  pre=[]            post=[]            agree
+```
+
+The two AGREE rows are as load-bearing as the five DISAGREE rows: they show the
+variants agree exactly where they must, so the disagreement is one condition
+rather than two different programs. Corrected result: 179 files, 111 sites before
+and after, **0 newly flagged, 0 unflagged**, and `post == KNOWN_TEXT_SINKS`
+exactly.
+
+### 33.3 A VACUOUS LOOP DECLARED BEATS A PARAMETRIZE THAT SKIPS
+
+`test_no_claimant_declares_page_text_without_surviving_the_text_table` checks
+ZERO claimants today, because nothing declares `SCOPE_TEXT`. Its docstring says so
+in its first line and it asserts its own checked-count, so the day something does
+declare TEXT the reader can see it stopped being vacuous.
+
+The alternative is in the same repository: `tests/test_a_verdict_earns_its_entry.py`
+has **four tests that SKIP** with *"got empty parameter set"*. A parametrize over
+an empty table does not announce that it checked nothing -- it announces a skip,
+which reads like a pass in a green run.
+
+The table is made real by two controls over functions that EXIST, not stubs:
+`_probe_messaging.py::_redact` is shown FAILING it (3 of 6 shapes) while still
+holding its url needle, and `_probe_search_render_timeline.py::_redact` -- the
+same name, a different function, allowlist-based -- is shown PASSING all six.
+**Two functions, one spelling, opposite results**, which is also the plainest
+statement of why a name-matched stop cannot be trusted.
+
+### 33.4 THE NAME-BASED STOP CANNOT BE REPLACED HERE, AND THE COLLISION IS NOW DOCUMENTED RATHER THAN LATENT
+
+Asked directly and answered honestly: **no.** These guards are pure AST analysis,
+per module, and deliberately so -- resolving a call to a definition needs either
+an import graph plus scope analysis (which still cannot resolve a rebinding, a
+dict of functions, or a call through a parameter) or importing all 179 scanned
+modules, which for a directory of live browser probes means executing them.
+Every scanned file is standalone by design, which is what makes a name the only
+handle there is.
+
+What was done instead is to raise the cost of the name: enrolment already
+demands a written claim per claimant, `test_every_relation_definition_is_byte_identical`
+already refuses two different bodies under `_relation`, and `PROVEN_FOR` now
+makes the name carry its corpus.
+
+**THE RESIDUAL, NAMED:** nothing asserts the `_redact` bodies are one function
+the way `_relation`'s are -- and they are genuinely two different functions doing
+two different jobs, so the honest repair is a RENAME, not reconciliation. A
+rename vouches for nothing, which is why it is available to anyone, and it was
+not taken unilaterally. Left for its owners, in the open.
+### 33.5 A TABLE-DRIVEN GUARD NEEDS THE ENUMERATION HALF, AND I SHIPPED ONE WITHOUT IT
+
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` iterates its own
+declaration table, so a new consumer of the url-proven predicate would be invisible
+to it. **Committed that way, by the wave that spent the afternoon fixing exactly this
+class.** The enrolment half of this same file exists because a claimant inherits trust
+the instant it is typed; a CONSUMER inherits it the same way.
+
+The repair is the pattern already in the file: enumerate off the TREE, subtract the
+table, and assert the enumeration is non-empty so the subtraction is over something.
+
+THE MUTATION THAT TAUGHT ME MOST CAME BACK GREEN. Dropping the page-text row from the
+table fired nothing, because after the fix that file is no longer a USER -- the
+containment is one-way, users are a SUBSET of the declarations, and the
+declared-but-not-a-user row IS the fix. **A wrong mutation is cheap; a wrong mutation
+that returns the colour you expected is not.** Re-run against a real user made
+undeclared, and against an invented new one: both red.
