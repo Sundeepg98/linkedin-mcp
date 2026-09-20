@@ -329,14 +329,24 @@ and in text.** The row does not shorten.
 feed.** GAP, **and it is filed against the wrong blocker.** This is an email
 SETTING. The captured newsletter page contains `email` 0 times, `frequency` 0,
 `settings` 0 and `notify` 0, so the control is not drawn on this surface at
-all. Its earliest binding constraint is the settings family:
-`linkedin_update_setting` is scoped to **dark mode alone**, and its own
-WriteSpec residue says why widening is not available -- *"two of the
-thirty-three addresses are account destruction ... so a setting has to be
-admitted BY NAME or not at all."* So `N 58` needs a named settings address
-plus a second WriteSpec plus a live read of that page, and none of the three
-is a newsletter problem. Handed over rather than re-filed: this wave does not
-run `build_blocker_map.py --write`.
+all.
+
+**THE MEASURED HALF AND THE INFERRED HALF ARE KEPT APART.** MEASURED: the
+control is not on the newsletter surface. INFERRED: its likeliest home is
+Settings, under email frequency -- and if that is right the constraint is the
+settings family, where `linkedin_update_setting` is scoped to **dark mode
+alone** and its own WriteSpec residue says why widening is unavailable --
+*"two of the thirty-three addresses are account destruction ... so a setting
+has to be admitted BY NAME or not at all."* That route needs a named settings
+address plus a second WriteSpec plus a live read of that page. A SECOND
+POSSIBILITY is not excluded and would be worse: LinkedIn also carries an
+unsubscribe link in the newsletter EMAIL itself, which is off-platform
+entirely and outside this server's reach in any spelling. **Nobody has
+looked**, and which of the two it is decides whether the row is expensive or
+impossible.
+
+Either way it is not a newsletter-surface problem. Handed over rather than
+re-filed: this wave does not run `build_blocker_map.py --write`.
 
 ---
 
