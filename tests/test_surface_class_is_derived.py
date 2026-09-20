@@ -166,6 +166,36 @@ def test_the_live_boundary_section_actually_measured_something(capsys):
     assert "base address ALREADY ALLOWED" in out
 
 
+def test_the_two_boundary_entry_points_agree_on_every_candidate():
+    """CROSS-INSTRUMENT CONTROL for the "16 of 26 already allowed" finding.
+
+    The classifier asks `is_read_url`. A capture calls `assert_read_url` --
+    `scripts/_capture_toggle_states.py`: "Every navigation goes through
+    ``readonly.assert_read_url`` ... exactly as a tool does". If the predicate
+    and the asserting form ever disagree, the finding is ambiguous: a page
+    counted reachable would raise the moment somebody tried to capture it.
+
+    Measured 2026-09-20: 0 disagreements across all 26.
+    """
+    sys.path.insert(0, str(ROOT))
+    from linkedin_server import readonly
+
+    disagree = []
+    for blocker, path in sorted(csb.SURFACE_ADDRESSES.items()):
+        url = "https://www.linkedin.com" + path
+        predicate = readonly.is_read_url(url)
+        try:
+            readonly.assert_read_url(url)
+            asserted = True
+        except Exception:
+            asserted = False
+        if predicate != asserted:
+            disagree.append((blocker, path, predicate, asserted))
+    assert not disagree, (
+        f"is_read_url and assert_read_url disagree, so 'reachable for a "
+        f"capture' is no longer well defined: {disagree}")
+
+
 def test_a_broken_ranked_header_is_loud(repoint, capsys):
     broken = LEDGER_TEXT.replace(csb.RANKED_HEADER,
                                  csb.RANKED_HEADER.replace("boundary", "BOUNDARY"), 1)
