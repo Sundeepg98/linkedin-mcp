@@ -561,6 +561,64 @@ whoever owns the map.
 
 ---
 
+## 6b. INCIDENTAL, AND REPORTED RATHER THAN FIXED: the identity gate may be BLIND in a linked worktree, not merely runnable in one
+
+Found while verifying that my own commits were gated rather than silently
+allowed. **It is not this wave's artifact and I have not touched it.** Stated at
+its real strength, because a guard finding that outruns its measurement is the
+failure this repository names.
+
+**WHAT IS MEASURED.** `.git/hooks/pre-commit` was fixed on 2026-09-19 to resolve
+the interpreter against the MAIN checkout, because a worktree has no venv and
+"a gate that cannot run is indistinguishable from a gate that passed". That fix
+works: the gate runs, and it loads its gitignored wordlist (`REPO` resolves to
+the main checkout, which holds it) -- confirmed, because the gate prints a LOUD
+`ALLOWING` when the wordlist is absent and printed nothing on either of my
+commits.
+
+**But `scripts/pre_commit_identity_gate.py` asks git which paths are staged with
+`cwd=REPO`, and `REPO` is that same MAIN checkout** (`_staged_paths`, and
+`_staged_content` does it again). Measured just now, with a file staged in this
+worktree and a control:
+
+    cwd = this worktree           rc=0   1 staged path   <- CONTROL FIRES
+    cwd = the MAIN checkout       rc=0   0 staged paths
+    cwd = MAIN + GIT_INDEX_FILE
+          set to this worktree's
+          index                   rc=0   2 staged paths  <- and one of the two
+                                                            was already COMMITTED
+
+**WHAT THAT MEANS, in the two branches, and I cannot yet say which is real.**
+
+* If git does **not** export `GIT_INDEX_FILE` to a pre-commit hook here, the
+  gate enumerated ZERO paths on every worktree commit since the fix, inspected
+  nothing, and exited 0. It would be armed, loaded, and blind -- the same class
+  of failure the fix was written to end, one layer in.
+* If git **does** export it, the gate sees the worktree's index but diffs it
+  against the MAIN checkout's HEAD. Measured: that returned a file I had already
+  committed here. That over-reports rather than under-reports, which is the safe
+  direction, but the set is no longer "paths this commit would write".
+
+**EVIDENCE CLASS.** The three readings above are VERIFIED-BY-INSTRUMENT. Whether
+git exports `GIT_INDEX_FILE` to this installation's pre-commit hook is
+**UNVERIFIED**, and it is the single fact that decides between the branches.
+
+**THE MEASUREMENT THAT SETTLES IT, in one line and seconds:** echo
+`GIT_INDEX_FILE` to stderr from the hook, make one commit from a worktree, read
+it. **I did not do it**, and the reason is specific rather than squeamish: that
+hook is shared by every worktree in this repository and siblings are committing
+through it right now. Editing a live shared gate to measure it is the two-writer
+hazard this repo has already disclosed once. It belongs to whoever owns the
+hook, at a quiet moment.
+
+**AND IT DOES NOT WEAKEN THIS WAVE'S OWN COMMITS.** Both carry documentation
+only, both were checked for non-ASCII bytes before staging, and neither contains
+a name, city, employer or campus. `tests/test_no_committed_identity` -- the
+shape-based guard the gate's own docstring defers to -- is unaffected by any of
+this and runs in CI.
+
+---
+
 ## 7. WHAT THIS WAVE DID NOT DO
 
 * **It did not move a census row, run `build_blocker_map.py --write`, or touch
@@ -570,8 +628,11 @@ whoever owns the map.
   and named a reading that needs no new permission. The third question is
   genuinely open and stays open.
 * **It did not press, click, navigate, or open a browser.** The only code run
-  was `scripts/enumerate_gap_rows.py` and a scratch script calling
-  `readonly.is_read_url` on literal strings.
+  was `scripts/enumerate_gap_rows.py`, a scratch script calling
+  `readonly.is_read_url` on literal strings, and a scratch script running
+  `git diff --cached --name-only` for section 6b.
+* **It did not edit, fix or instrument the shared pre-commit hook** (6b), and it
+  did not settle which of that section's two branches is real.
 * **It did not re-verify `a14c027`'s live posting readings, the 2026-09-04
   post-composer read, or the 2026-09-05 `accept` read.** All three are carried
   forward on their own waves' measurements, cited so a reader can go and look.
