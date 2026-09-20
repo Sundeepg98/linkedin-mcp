@@ -209,32 +209,100 @@ def test_every_marker_class_fires_on_the_real_corpus(measured):
     )
 
 
-def test_the_table_slot_still_reproduces_the_registry():
-    """The blocker table-cell slot selects exactly the ledger's 97 names.
+#: Every header spelling that carries blocker cells in this corpus, measured,
+#: with the cell-selections each one brings. Five of the six are NOT the bare
+#: word, and they are the whole reason the predicate is a substring test.
+BLOCKER_HEADER_SPELLINGS = (
+    "blocker",                        # 347 selections
+    "first blocker, corrected",       #   7
+    "successor blocker (proposed)",   #   5
+    "the blocker",                    #   4
+    "new blocker",                    #   2
+    "blocker name",                   #   2
+)
 
-    This is the whole precision argument for the slot, asserted rather than
-    believed. It was measured at 358 selected cells, 353 naming a ledger
-    blocker, 97 distinct -- the registry, reproduced by position alone.
+
+def test_the_table_slot_still_recognises_every_header_spelling():
+    """The header predicate, tested DIRECTLY -- because the union test could not.
+
+    **THIS ASSERTION REPLACES ONE THAT COULD NOT FAIL, AND THE REPLACEMENT IS
+    THE POINT.** The first version asked whether all 97 ledger blockers still
+    appear SOMEWHERE in the table-cell slot's output, and its docstring called
+    that "the whole precision argument for the slot, asserted rather than
+    believed". It was not. A red-proof narrowed the header predicate from a
+    substring test to an exact match -- removing twelve genuinely
+    blocker-labelled columns across the corpus -- and the test **passed
+    cleanly**, because this corpus is redundant enough that every one of the 97
+    is also cited under a bare `blocker` header or in a backtick phrase slot
+    somewhere else. A union claim over a redundant corpus cannot see a
+    narrowing. It was a check that could not fail, in the module whose own
+    docstring says why that is the expensive kind.
+
+    So the predicate is exercised directly, on a synthetic table per spelling,
+    through the real `table_headers` / `_blocker_candidates` path. Narrow the
+    predicate and this goes red on the first spelling it drops.
+    """
+    ledger_name = sorted(guard.blocker_registry(REPO))[0]
+    missed = []
+    for spelling in BLOCKER_HEADER_SPELLINGS:
+        lines = [
+            f"| row | {spelling} | note |",
+            "|---|---|---|",
+            f"| `J 1` | `{ledger_name}` | a cell under a blocker header |",
+        ]
+        _heads, cols = guard.table_headers(lines)
+        found = [
+            name for name, form in guard._blocker_candidates(lines[2], cols[3])
+            if form == "table-cell"
+        ]
+        if found != [ledger_name]:
+            missed.append(spelling)
+    assert missed == [], (
+        f"the header predicate no longer recognises these spellings as blocker "
+        f"columns: {missed}. Every one of them carries real blocker cells in "
+        "the corpus today. A narrowing here does not announce itself -- the "
+        "guard simply stops looking at those columns, and the union of names it "
+        "still finds elsewhere hides the loss completely."
+    )
+
+
+def test_the_table_slot_still_reproduces_the_registry():
+    """The slot's coverage claim: all 97, plus a floor on how much it selects.
+
+    Kept alongside the predicate test above, not instead of it. This one
+    catches a slot that COLLAPSES; that one catches a slot that NARROWS. The
+    red-proof showed they are different failures and only one of them was
+    covered.
     """
     corpus = guard.load_corpus(REPO)
     ledger = set(guard.blocker_registry(REPO))
     picked: set[str] = set()
+    selections = 0
     for lines in corpus.values():
         _heads, cols = guard.table_headers(lines)
         for n, line in enumerate(lines, 1):
             for name, form in guard._blocker_candidates(line, cols[n]):
                 if form == "table-cell":
                     picked.add(name)
+                    selections += 1
     assert ledger <= picked, (
         f"{len(ledger - picked)} of the ledger's blockers are no longer "
         "selected by the table-cell slot: "
         f"{sorted(ledger - picked)[:8]}. The slot has narrowed, so the guard is "
         "now blind wherever those names are cited."
     )
+    assert selections >= 340, (
+        f"the table-cell slot now makes {selections} selections, down from 360. "
+        "A drop of that size means whole columns stopped being recognised. The "
+        "set of names may still look complete because the corpus cites most "
+        "blockers in several places -- check "
+        "`test_the_table_slot_still_recognises_every_header_spelling` before "
+        "lowering this floor."
+    )
     stray = picked - ledger
     assert len(stray) <= 6, (
         f"the table-cell slot now picks up {len(stray)} names the ledger does "
-        f"not know, up from 6: {sorted(stray)}. Either real new blockers were "
+        f"not know, up from 5: {sorted(stray)}. Either real new blockers were "
         "minted (re-measure and re-pin) or the slot has widened into some "
         "other vocabulary, which is how this guard loses its precision."
     )
