@@ -272,6 +272,22 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "correcting it. "
     ),
 
+    # 2026-09-20. The register pointing at the wave report that produced the
+    # entry. The correction vocabulary is the ENTRY'S SUBJECT -- two numbers
+    # that wave got wrong and corrected in itself -- not a relation between the
+    # two files.
+    ("INSTRUMENTS.md", "2026-09-20-names-that-do-not-exist.md"): (
+        "IT IS A REGISTER ENTRY CITING ITS OWN SOURCE DOCUMENT. Section 24.6 "
+        "declares twelve scratch probes disposable and closes 'Their numbers "
+        "are the tables in `_audit/2026-09-20-names-that-do-not-exist.md`.' "
+        "Section 24.5 above it is headed 'TWO NUMBERS THIS WAVE GOT WRONG' -- "
+        "self-corrections the wave made and published in that same report, "
+        "which is what puts correction vocabulary near the citation. A "
+        "register naming where an instrument's workings live is a POINTER. "
+        "If it were a correction the arrow would run the wrong way: the "
+        "report is the source, not the target. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED
