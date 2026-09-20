@@ -196,6 +196,34 @@ async def test_the_tool_returns_the_company_page_tally(
     assert named == {"life_tab": 2, "off_company": 3}
 
 
+async def test_an_empty_href_list_can_be_told_from_an_unreadable_one(
+    monkeypatch, chromium_page
+):
+    """THE THREE-WAY DISTINCTION, on the field this wave added.
+
+    An empty ``hrefs`` from a failed read and an empty one from a card with no
+    links are the SAME VALUE and DIFFERENT ANSWERS. ``dom.py`` already refuses
+    to collapse that pair in the other direction -- ``container`` true with
+    ``lines`` empty is a fact about hydration, not about the employer -- and
+    ``hrefs_error`` is the same refusal for the links.
+
+    Asserted on the healthy path, which is the only one a fixture can reach:
+    links were read AND the error field is null, so a future reader can treat
+    a null there as "the count is real" rather than having to guess.
+    """
+    fixture, job_id = OFFSITE_ROUTE
+    out = await _job_detail(monkeypatch, chromium_page, fixture, job_id)
+
+    assert out["company_page"]["hrefs"] == 5
+    # The shell capture draws no card at all: zero links AND no error, which
+    # is the other half of the distinction and is a different zero again.
+    shell = await _job_detail(
+        monkeypatch, chromium_page, "job_detail_shell", "4600000042"
+    )
+    assert shell.get("error") == "extraction_failed", shell
+    assert "company_page" not in shell
+
+
 async def test_the_tool_publishes_no_slug_anywhere_in_the_company_page_block(
     monkeypatch, chromium_page
 ):

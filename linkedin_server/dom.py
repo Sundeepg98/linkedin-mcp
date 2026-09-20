@@ -982,10 +982,10 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     pressed, and no page is loaded -- this reads the render
     ``linkedin_job_detail`` has already performed.
 
-    Returns ``container``, ``sdui``, ``lines``, ``hrefs`` and ``error``.
-    WHICH LINE IS THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED
-    HERE; that is ``shape.company_about_card``'s job, where it can be tested
-    without a browser.
+    Returns ``container``, ``sdui``, ``lines``, ``hrefs``, ``hrefs_error``
+    and ``error``. WHICH LINE IS THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY
+    IS NOT DECIDED HERE; that is ``shape.company_about_card``'s job, where it
+    can be tested without a browser.
 
     ``hrefs`` WAS ADDED 2026-09-20 AND IS A SEPARATE LIST ON PURPOSE. The
     comment on the container above already records that this card holds TWO
@@ -1018,6 +1018,7 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
         "sdui": False,
         "lines": [],
         "hrefs": [],
+        "hrefs_error": None,
         "error": None,
     }
 
@@ -1054,21 +1055,30 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     # returns its lines. An unreadable link costs a route classification; a
     # raise here would cost the follower count, the industry and the size
     # band as well, which is the wrong thing to lose to the smaller failure.
+    #
+    # AND ``hrefs_error`` EXISTS FOR THE REASON ``container``/``lines`` ARE
+    # TWO FIELDS RATHER THAN ONE. An empty list from a failed read and an
+    # empty list from a card with no links are the same value and DIFFERENT
+    # ANSWERS, and this module's whole shape is built on not collapsing that
+    # pair -- the paragraph above about the skeleton container says so in the
+    # other direction. Nothing reads this field; it exists so a zero can be
+    # interpreted. The partial list is kept on a mid-loop failure, because
+    # three links read and a fourth that raised is more than nothing and the
+    # field beside it says the count is a floor.
+    hrefs: list[str] = []
     try:
         links = container.locator("a[href]")
         count = min(int(await links.count()), ABOUT_COMPANY_MAX_LINKS)
-        hrefs: list[str] = []
         for index in range(count):
             href = await links.nth(index).get_attribute("href")
             if href:
                 hrefs.append(str(href))
-        out["hrefs"] = hrefs
     except Exception as exc:
+        out["hrefs_error"] = f"{type(exc).__name__}: {exc}"
         logger.debug(
-            "about-the-company links unreadable: %s: %s",
-            type(exc).__name__,
-            exc,
+            "about-the-company links unreadable: %s", out["hrefs_error"]
         )
+    out["hrefs"] = hrefs
     return out
 
 
