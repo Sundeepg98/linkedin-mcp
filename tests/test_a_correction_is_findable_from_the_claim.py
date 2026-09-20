@@ -244,6 +244,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "its favour, is the opposite of correcting it. "
     ),
 
+    # 2026-09-20, the same wave's second pair. The correction vocabulary here
+    # belongs to a COLUMN HEADING in a precision table, not to a relation
+    # between the two documents.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-09-05-leave-group-writespec.md"): (
+        "IT IS A ROW IN A PRECISION TABLE, AND THE VERDICT IN IT IS "
+        "AGREEMENT. The line reads '`2026-09-05-leave-group-writespec.md:31` "
+        "| `linkedin_leave_group` | discuss (spec) | `MARKED-SPEC-DOC` | yes'. "
+        "The WriteSpec is one of the labelled sites in this wave's "
+        "hand-versus-guard census, and the label says the WriteSpec marked "
+        "its own name correctly -- it declares 'This is a SPECIFICATION, not "
+        "a build.' and thereby earns the suppressor. The wave cites it as "
+        "the corpus receipt for a marker class, which is the opposite of "
+        "correcting it. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED

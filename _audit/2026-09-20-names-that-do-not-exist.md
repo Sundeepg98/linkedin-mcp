@@ -1,7 +1,9 @@
 # Names that do not exist
 
-**Wave:** names-that-do-not-exist. **Date:** 2026-09-20. **Tree:** `8b58dcb`.
-**Corpus measured:** the 166 tracked files under `_audit/`, 78,656 lines, 5.1 MB.
+**Wave:** names-that-do-not-exist. **Date:** 2026-09-20.
+**Corpus measured:** the 166 tracked files under `_audit/` at `8b58dcb`, 78,656
+lines, 5.1 MB -- the corpus as other waves left it, before this wave wrote into
+it.
 
 A citation to something that does not exist does not rot into an obviously
 dangling reference. **It rots into a PLAUSIBLE WRONG ANSWER**, which stops the
@@ -20,8 +22,13 @@ the detector.
 
 | artifact | what it is |
 |---|---|
-| `scripts/check_asserted_names_resolve.py` | the guard. 2.1s over the whole corpus |
-| `tests/test_an_asserted_name_resolves.py` | four controls and the pin, 6 tests |
+| `scripts/check_asserted_names_resolve.py` | the guard. 0.5s over the whole corpus |
+| `tests/test_an_asserted_name_resolves.py` | five controls and the pin, 7 tests |
+
+**Headline:** **4 asserted-and-absent citations, all in one document.** And one
+finding about the instrument itself that is worth more than the four: **the
+guard disarmed itself by documenting itself, inside an hour, in the live tree.**
+Section 7.
 
 ---
 
@@ -49,10 +56,10 @@ The marks, each quoted from the corpus, each now a suppressor in the guard:
 |---|---|
 | `MARKED-PROPOSAL` | `2026-09-05-decide-retire-rulings.md:478` -- *"**New blocker: `LINK-FOR-OFF-PLATFORM-USE` -- 2 rows, 2R, queue BUILD, cost 2**"* |
 | `MARKED-PROPOSAL-TABLE` | `2026-09-20-the-decides.md:187` -- a column headed *"successor blocker (proposed)"*, whose own cells write *"`PICKER-SURFACES` (exists)"* for the two that do |
-| `MARKED-PROPOSAL-DOC` | `2026-09-05-decide-retire-rulings.md:953` -- the same document's ruling table, re-citing the blocker **it opened 653 lines earlier** |
+| `MARKED-PROPOSAL-DOC` | `2026-09-05-decide-retire-rulings.md:953` -- the same document's ruling table, re-citing a blocker **it opened 653 lines earlier** |
 | `MARKED-HYPOTHETICAL` | `2026-09-03-linkedin-gap-blockers.md:791` -- *"A single `NO-ADDRESS` blocker **would** have..."* |
 | `MARKED-ABSENT` | `2026-09-20-the-decides.md:95` -- *"`AI-INTERVIEW-RESULTS-NO-ADDRESS` **exists only in** `_audit/2026-09-05-decide-retire-rulings.md` lines 300-303"* |
-| `MARKED-SPEC-DOC` | `2026-09-05-leave-group-writespec.md:7` -- *"**This is a SPECIFICATION, not a build.**"*, in the document whose field table reads `| \`tool_name\` | \`linkedin_leave_group\` |` |
+| `MARKED-SPEC-DOC` | `2026-09-05-leave-group-writespec.md:7` -- *"**This is a SPECIFICATION, not a build.**"*, in the document whose field table reads `tool_name` = `linkedin_leave_group` |
 
 Two of those are DOCUMENT-scoped and **name-specific**, which is load-bearing
 in both directions. Name-specific, so a document that legitimately opens one
@@ -65,9 +72,9 @@ Document-scoped, because the damage model is *a reader is stopped*: a reader of
 A report about absent names is a document full of absent names. The guard scans
 `_audit/`, so it scans this file, and when it first did it convicted this
 report eight times. **That is correct behaviour and it is not being special-cased
-away.** A reader who meets `linkedin_applied_jobs` in a table here is owed the
-same disclosure as a reader who meets it anywhere else, and the only honest way
-to earn silence is to say the true thing plainly:
+away.** A reader who meets a name in a table here is owed the same disclosure as
+a reader who meets it anywhere else, and the only honest way to earn silence is
+to say the true thing plainly:
 
 * **`linkedin_applied_jobs` does not exist** anywhere in `linkedin_server/`.
   The write-off that names it is wrong; the real tools are
@@ -81,9 +88,12 @@ to earn silence is to say the true thing plainly:
   once under a modal and once as work to be done.
 * **`PROXIMITY-NOT-PARSED` and `ALERTS-PAGE-UNREAD` are not one of the 97**
   blockers the ledger published.
+* **`linkedin_zzz_not_a_real_tool` does not exist**, deliberately. It is a
+  fabricated control needle, named here only because section 7.1 is about the
+  hour it stopped being one.
 
 The guard is silent on this file now, and it is silent for the reason it is
-silent on the other 160 clean documents: **the marks were discharged.** No
+silent on the other 162 clean documents: **the marks were discharged.** No
 suppression was added, no path was excluded, and
 `scripts/check_asserted_names_resolve.py` contains no mention of this
 document's name. If a future edit removes those sentences, this file goes red
@@ -96,8 +106,8 @@ For blocker names the dominant error is not proposal-versus-assertion at all.
 vocabularies**, and asking "does this token exist?" without first asking "which
 registry is it drawn from?" is what builds the guard nobody reads.
 
-Measured: **235 occurrences of a backticked UPPER-KEBAB token that is not one of
-the ledger's 97.** Sorted by what they actually are:
+Measured: **234 occurrences of a backticked UPPER-KEBAB token that is not one of
+the ledger's 97**, 78 distinct. Sorted by what they actually are:
 
 | vocabulary | occurrences | examples |
 |---|---:|---|
@@ -111,7 +121,7 @@ the ledger's 97.** Sorted by what they actually are:
 | queue verdicts | 3 | `DECIDE-RETIRE` 2, `RULING-FORK` |
 | **genuinely blocker-position** | **13** | the population this guard is about |
 
-**A guard that fired on the shape would run at 13/235 = 5.5% precision.** It
+**A guard that fired on the shape would run at 13/234 = 5.6% precision.** It
 would be suppressed inside a day, and a suppressed guard certifies nothing.
 
 So a blocker candidate must sit in a **SLOT** -- a position this corpus's own
@@ -158,19 +168,39 @@ anyway: leaving it out would have hidden `NO-ADDRESS` behind an **accident** of
 the prefix rule rather than behind the marker that actually excuses it, and a
 guard whose silences are accidents cannot be audited.
 
+### 2.1 Quoted material is not the document speaking
+
+The corpus quotes source two ways: ``` fences (2,127 lines) and **4-space
+indented blocks (5,405 lines)** -- 7,532 lines, 9.5% of the corpus, and the
+indented form is the larger half. The guard shipped handling only fences, and
+the omission was not cosmetic: `_audit/_slice-parity-census.md:475-490`
+reproduces `tests/test_server_surface.py`'s `FORBIDDEN_TOOLS` set in an
+indented block -- twelve write-tool names the suite exists to keep OUT of the
+surface -- and the guard convicted the document for quoting a shipped contract.
+Eight false positives, from one missing block form.
+
+An indented run counts as a block only when a blank line precedes it, which is
+what markdown itself requires; without that, every wrapped table cell and
+continued list item is swallowed and the guard goes quiet in places nobody can
+predict.
+
 ---
 
 ## 3. Precision and recall, with denominators
 
 Both kinds are measured over a **complete census of their decision space**, not
-a sample. A guard can only ever fire where a name fails to resolve, so that set
-is the denominator, and it is small enough to label exhaustively by hand.
+a sample. A guard can only ever fire where a name fails to resolve and the line
+is the document speaking, so that set is the denominator, and it is small enough
+to label exhaustively by hand.
 
-### 3.1 TOOL names -- complete population, n = 5 occurrences
+All numbers below are against the FROZEN `8b58dcb` corpus -- documents written
+by other waves, before this report existed.
 
-72 distinct `linkedin_*` tokens appear in the corpus. 68 resolve against the
-tree. The 4 that do not are the **entire** decision space, at 5 sites. Every one
-is labelled:
+### 3.1 TOOL names -- complete population, n = 4 occurrences
+
+72 distinct `linkedin_*` tokens appear in the corpus. 69 resolve against the
+registry. The 3 that do not are the **entire** decision space, at 4 sites. Every
+one is labelled:
 
 | site | name | hand label | guard verdict | agree |
 |---|---|---|---|:-:|
@@ -178,19 +208,19 @@ is labelled:
 | `2026-08-25-cannot-vs-will-not.md:234` | `linkedin_read_inbox` | discuss (modal) | `MARKED-HYPOTHETICAL` | yes |
 | `2026-08-25-cannot-vs-will-not.md:421` | `linkedin_read_inbox` | discuss (build-it) | `MARKED-PROPOSAL` | yes |
 | `2026-09-05-leave-group-writespec.md:31` | `linkedin_leave_group` | discuss (spec) | `MARKED-SPEC-DOC` | yes |
-| `_slice-activity-items.md:537` | `linkedin_my` | not a name at all | never reaches the classifier (fenced) | yes |
 
-**precision 1/1 = 1.00 (n=1 fired). recall 1/1 = 1.00 (n=1 should fire).
-false positives 0/4 (n=4 should not fire).**
+**precision 1/1 = 1.00. recall 1/1 = 1.00. false positives 0/3.**
 
-`linkedin_my` deserves its own line. It is not a truncated citation; it is the
-**elided middle** of a pytest assertion diff, `{'linkedin_my...n_saved_jobs'}`,
-inside a fenced block. Quoted tool output is not the document speaking, and a
-guard that reads it as a claim would convict the corpus for pasting a traceback.
+A fourth token, `linkedin_my`, is NOT in the decision space and that is the
+right answer. It is the **elided middle** of a pytest assertion diff,
+`{'linkedin_my...n_saved_jobs'}`, inside a fenced block -- not a truncated
+citation but a rendering artifact. Quoted tool output is not the document
+speaking, and a guard that read it as a claim would convict the corpus for
+pasting a traceback.
 
-### 3.2 BLOCKER names -- complete population, n = 235 occurrences
+### 3.2 BLOCKER names -- complete population, n = 234 occurrences
 
-Every one of the 235 was hand-labelled from the full-context worksheet. 222 are
+Every one of the 234 was hand-labelled from a full-context worksheet. 221 are
 some other vocabulary and are not in a blocker slot; 13 are blocker-position.
 Those 13, in full:
 
@@ -210,10 +240,9 @@ Those 13, in full:
 | `the-decides.md:193` | `RESUME-MANAGER-ADDRESS` | proposal column | `MARKED-PROPOSAL-TABLE` | yes |
 | `gap-blockers.md:791` | `NO-ADDRESS` | modal | `MARKED-HYPOTHETICAL` | yes |
 
-**precision 3/3 = 1.00 (n=3 fired). recall 3/3 = 1.00 (n=3 should fire).
-false positives 0/232 (n=232 should not fire).**
+**precision 3/3 = 1.00. recall 3/3 = 1.00. false positives 0/231.**
 
-The 222 non-slot occurrences are silent because of the SLOT, and the 10 slotted
+The 221 non-slot occurrences are silent because of the SLOT, and the 10 slotted
 ones are silent because of a MARK -- two independent mechanisms, and the second
 is only reachable because the first did its job.
 
@@ -235,8 +264,8 @@ stopped in is a document. Stated rather than buried:
 
 ```
 $ ./venv/Scripts/python.exe scripts/check_asserted_names_resolve.py
-candidate sites considered : 17
-cleared by an author mark  : 13
+candidate sites considered : 38
+cleared by an author mark  : 34
 ASSERTED and ABSENT        : 4
 NOT checked: unbackticked UPPER-KEBAB outside a slot, prose names of no fixed
 vocabulary, whether a RESOLVING citation points at the right thing, and locator
@@ -252,17 +281,17 @@ _audit/2026-09-20-the-contingent-writeoffs.md:269  BLOCKER PROXIMITY-NOT-PARSED 
     **REPLACEMENT.** `J 57` -- **GAP**, blocker `PROXIMITY-NOT-PARSED` (BLOCKED
 ```
 
-Positives 1 and 2 -- `linkedin_applied_jobs` and `PROXIMITY-NOT-PARSED` -- fire.
-So does a **third the brief did not name**: `ALERTS-PAGE-UNREAD`, in the same
-document, by the same mechanism.
+Calibration positives 1 and 2 fire. So does a **third the brief did not name**:
+`ALERTS-PAGE-UNREAD`, in the same document, by the same mechanism.
 
 ### 4.1 The negatives, shown NOT firing
 
-The `--all` listing is the receipt: 13 of 17 candidate sites are cleared, and
+The `--all` listing is the receipt: 34 of 38 candidate sites are cleared, and
 every one of the six marker classes is earned by a real corpus line. Section 3's
-two tables label all of them. `test_every_marker_class_fires_on_the_real_corpus`
-asserts that none of the six is dead code, because a suppressor with no example
-is untested width that can only ever excuse something in future.
+two tables label all 17 sites in the frozen corpus.
+`test_every_marker_class_fires_on_the_real_corpus` asserts that none of the six
+is dead code, because a suppressor with no example is untested width that can
+only ever excuse something in future.
 
 ### 4.2 Positives 3 and 4 are NOT of this class, and the brief is corrected
 
@@ -282,7 +311,7 @@ is said to bear on does not cite it at all -- `_census/jobs.md:362` for `J 131`
 names `referral_join.py` and `inmail-targeting.md`, and no ledger. Under the
 rule in section 1 this is `MARKED-ABSENT`. It is also **out of tree**:
 `mcp-servers/_audit/` is a sibling directory of this repository, unresolvable
-from any clone, and a guard that convicts it would convict every CI run.
+from any clone, and a guard that convicted it would convict every CI run.
 **Firing here would mean convicting a document for correctly reporting a
 defect** -- which is precisely how a guard earns the suppression that makes it
 worthless.
@@ -330,7 +359,7 @@ luck. The other 165 documents were written by waves that marked their proposals.
 
 Two blockers were **opened by a committed ruling** and never entered the ledger:
 
-| blocker | minted at | rows it claims | in the ledger's 97? |
+| blocker name | minted at | rows it claims | in the ledger's 97? |
 |---|---|---:|:-:|
 | `AI-INTERVIEW-RESULTS-NO-ADDRESS` | `2026-09-05-decide-retire-rulings.md:300` | 3 | no |
 | `LINK-FOR-OFF-PLATFORM-USE` | `2026-09-05-decide-retire-rulings.md:478` | 2 | no |
@@ -356,9 +385,85 @@ over a complete census of their decision space.
 honestly beats shipping a check that gets suppressed -- the brief's own
 instruction, and this repository's most expensive recurring failure.
 
-_(sections 6.1-6.4 below carry the path, row-id, SHA and locator censuses.)_
+### 6.1 FILE PATHS -- measured, narrowed, and NOT gated
 
-### 6.5 Things I could not separate, stated plainly
+**7,956 path-shaped citations** in the corpus. Buckets: RESOLVES_TRACKED 5,595,
+UNRESOLVED 2,318, OUT_OF_TREE 43, AMBIGUOUS_BASENAME 0.
+
+**The 2,318 is a precision artifact and I will not report it as a defect
+count.** A fixed-seed hand-read of 60 of them (`random.Random(20260920)`, method
+stated so it is reproducible) classified every row:
+
+| what it actually was | of 60 |
+|---|---:|
+| not a path at all -- ratios, glob and regex fragments, route segments | 24 (40.0%) |
+| read/write-capability shorthand -- `R/W`, `1R/4W`, `12R/20W`, the census tables' own notation | 16 (26.7%) |
+| gitignored runtime path -- `_state/*`, `venv/Scripts/python.exe`, capture html | 7 (11.7%) |
+| a bare directory, not a file | 6 (10.0%) |
+| resolvable, blocked only by a pytest `::testname` suffix | 5 (8.3%) |
+| out of tree -- the cross-repo `SKILL.md` | 2 (3.3%) |
+| **a real defect** | **0 (0.0%)** |
+
+Two near-misses were deliberately kept OUT of the shorthand class despite
+matching its shape: `CR/LF` and `read/unread`. A class that absorbs everything
+resembling it stops being a measurement.
+
+So the broad bucket is shorthand containing a slash, not dead references. **A
+guard that cried 2,318 would be suppressed within a day.** It is not gated.
+
+**The narrow subset IS clean enough to read by hand.** `STRICT` = backticked,
+directory-bearing, first segment a real top-level entry, known extension:
+**1,988 rows, 1,854 resolving, 134 unresolved.** All 134 were read:
+
+* **121** cite `_audit/_scratch/*`, `_audit/_probe-*` or other gitignored
+  working artifacts -- most say "gitignored" or "untracked" in their own line.
+* **12** cite `tests/test_*.py` from `2026-08-31-jobcore-paths.md`, which is
+  explicitly comparing against a SIBLING project's suite. Real files, wrong
+  repo, and no prefix rule can reach them because they carry no marker.
+* **1 is a genuine defect**, verified independently at `8b58dcb`:
+
+> `_audit/INSTRUMENTS.md:1180` reads *"...over
+> `tests/fixtures/search_appearances_synthetic.html`"*, present tense. That path
+> does not exist. The fixture lives at
+> `tests/fixtures/synthetic/search_appearances_synthetic.html` -- it was moved
+> into a `synthetic/` subdirectory and the citing line never followed. Both
+> commits that touched it (`4958fe3`, `2d13a41`) predate `8b58dcb`.
+
+**1 defect in 194 hand-read citations.** The corpus's path citations are
+overwhelmingly sound.
+
+### 6.2 LOCATORS -- a resolving path is not a working citation
+
+A `path:line` whose FILE exists says nothing about the LINE. **851 citations
+carry a locator into a resolved file.** Two buckets, both computed against
+`8b58dcb` blobs:
+
+| bucket | n | meaning |
+|---|---:|---|
+| `LOCATOR_OUT_OF_RANGE` | **2** | the target has FEWER lines than the locator names. Outright wrong. |
+| `LOCATOR_SUSPECT` | 529 | the target has commits after the last commit touching the CITING document. Unverifiable by the reader, not necessarily wrong. |
+| OK | 320 | the target has not moved since the citation was written |
+
+Both out-of-range hits verified independently:
+
+| citation | target | target length at `8b58dcb` |
+|---|---|---:|
+| `_audit/2026-09-19-the-remaining-partials.md:166` | `2026-09-19-the-three-ruling-requests-ruled.md:400` | **263 lines** |
+| `_audit/_census/mcp-inventory.md:206` | `_audit/2026-08-31-linkedin-lift.md:1456` | **1,299 lines** |
+
+Plus the brief's own `L296,L537,L647` case in section 4.2, which is IN range and
+therefore invisible to this check -- which is exactly why 529 SUSPECT is
+reported rather than swept up. **A line number is not an anchor in a live tree**
+(`INSTRUMENTS` 3.5), and none of this is gated: the second bucket is a
+"nobody can verify this" signal, not a defect count, and the census files
+involved belong to sibling waves.
+
+**A third locator convention exists and is NOT handled:** pytest node ids,
+`path/test_x.py::test_name`, 93 lines. Named rather than guessed at.
+
+_(sections 6.3-6.4 carry the SHA and run-id censuses.)_
+
+### 6.9 Things I could not separate, stated plainly
 
 1. **Occurrence-level recall on blockers is 0.50 on the one name where it can be
    measured** (`PROXIMITY-NOT-PARSED`, 2 of 4 sites). The two missed sites sit
@@ -373,21 +478,82 @@ _(sections 6.1-6.4 below carry the path, row-id, SHA and locator censuses.)_
    corpus writes blocker names in backticks with high consistency, but "high"
    is not "always" and I did not measure the exception rate, because doing so
    requires deciding which bare UPPER-KEBAB tokens are blocker references --
-   the 5.5%-precision problem the slot exists to avoid. This is an honest hole,
+   the 5.6%-precision problem the slot exists to avoid. This is an honest hole,
    not a covered case.
 
-3. **The guard cannot tell a RESOLVING citation that points at the wrong thing.**
+3. **A test fixture and a shipped contract are not mechanically separable, and
+   the guard does not pretend otherwise.** `tests/test_server_surface.py`'s
+   `FORBIDDEN_TOOLS` and this wave's own `PINNED` tuple are both module-level
+   constants holding whole-string tool names in a test file. Nothing in their
+   structure tells them apart. The guard resolves this by ADMITTING ONE MODULE
+   BY NAME, in a one-line list with the reason written beside it, rather than by
+   inventing a rule that would be wrong the first time somebody tested it.
+
+4. **The guard cannot tell a RESOLVING citation that points at the wrong thing.**
    `linkedin_saved_jobs` serves `J 45`, not `J 47`; `J 47`/`J 48` are both
    `linkedin_my_applications`. Every one of those names resolves, so every one
    passes. Row-to-artifact correctness is a different instrument and this guard
    does not pretend to it.
 
-4. **A name absent from the tree but present in an UNTRACKED file reads as
+5. **A name absent from the tree but present in an UNTRACKED file reads as
    absent.** Correct for CI, which sees only the tracked tree, and worth saying
    because a reader in the main checkout may find the file sitting on disk.
 
 ---
 
-## 7. The instrument, shown failing
+## 7. The instrument, shown failing -- starting with the time it failed for real
 
-_(section 7 carries the red-proof battery: six mutations, six reds.)_
+**An instrument enters `INSTRUMENTS.md` only if it has been SHOWN FAILING.**
+This one was shown failing in the live tree within an hour of landing, with
+nothing planted, and the failure is the same defect class the guard exists to
+catch -- one level up.
+
+### 7.1 The guard disarmed itself by documenting itself
+
+`tool_registry()` shipped scanning raw text of `linkedin_server/`, `scripts/`
+and `tests/` for anything matching `linkedin_[a-z0-9_]+`. Measured correct:
+4 findings, matching a hand census of all 72 tokens.
+
+Then the guard was **committed**. Its own module docstring names
+`linkedin_applied_jobs` as the worked example and `linkedin_leave_group` as the
+spec-document example. Its test module plants `linkedin_zzz_not_a_real_tool` as
+a control needle and writes `linkedin_applied_jobs` into the pin. Every one of
+those strings landed in `scripts/` and `tests/`. On the next run:
+
+| what should have happened | what happened |
+|---|---|
+| 4 findings | **0 findings** |
+| the control needle convicted | absorbed -- the planted name registered itself as real before the classifier saw it |
+| `MARKED-SPEC-DOC` earns its keep | dead -- **the guard's prose ABOUT a case made the case stop occurring** |
+| the pin holds | red in the "these defects were REPAIRED" direction |
+
+**Nothing was repaired.** `linkedin_applied_jobs` is a live defect and the
+instrument built to catch invented names was manufacturing the appearance of
+their repair, by quoting them.
+
+This is the corpus's defect exactly: **writing ABOUT a name is not the name
+existing.** A test's string literal and an `_audit/` sentence are the same kind
+of thing, and a registry that reads one but not the other draws the line in the
+wrong place.
+
+**The smallest fix was measured and rejected.** Scoping the registry to
+`linkedin_server/` alone convicts `_slice-parity-census.md` for quoting
+`FORBIDDEN_TOOLS` -- names that are real because they are a shipped contract.
+Restricting to AST identifiers was measured too: 26 of 72 corpus tokens would
+have gone absent, because real tool names live in string literals here
+(`shape.py` maps "LinkedIn Apply to this job" -> `linkedin_apply`). **The defect
+was never the extraction technique. It was the scope.**
+
+What shipped: the registry is `linkedin_server/`, plus **one** module admitted
+by name because its subject matter IS a name enumeration, whole-string constants
+only. This guard's own test module is not on that list and must never be.
+`test_the_registry_cannot_absorb_a_name_from_its_own_instruments` names the four
+exact strings that did it, so it is a regression test for a real event rather
+than a hypothetical.
+
+The fix was NOT to rename the fixtures. That would have tuned the test to dodge
+the bug and left production blind -- the `linkedin_leave_group` suppressor would
+have stayed dead, and the next real invented name that anyone documented would
+have disappeared the same way.
+
+_(section 7.2 carries the planted red-proof battery.)_
