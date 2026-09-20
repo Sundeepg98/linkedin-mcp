@@ -226,6 +226,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "else's blocker. A document citing another one for having seen a "
         "problem first is the opposite of correcting it. "
     ),
+    # 2026-09-20, from the names-that-do-not-exist wave. Read the line before
+    # judging the shape: the correction vocabulary belongs to the SUBJECT being
+    # discussed (an unapplied ruling), not to the relation between the two
+    # documents.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-09-20-the-decides.md"): (
+        "IT CITES THE OTHER DOCUMENT AS CORROBORATION, IN THE SAME SENTENCE "
+        "THAT CREDITS IT. The passage reports a second class the guard found "
+        "-- blockers opened by a committed ruling that never entered the "
+        "ledger -- and closes 'which is a different problem with a different "
+        "owner. `2026-09-20-the-decides.md:95` already says so about the "
+        "first one in its own words.' The named line is that document "
+        "stating `AI-INTERVIEW-RESULTS-NO-ADDRESS` exists only in one other "
+        "file, which is the reason THIS wave's guard rules it MARKED-ABSENT "
+        "rather than a finding. Citing a document for having disclosed "
+        "something first, and letting that disclosure decide a verdict in "
+        "its favour, is the opposite of correcting it. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED

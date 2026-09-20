@@ -60,6 +60,35 @@ blocker is not thereby excused for citing a different unregistered one.
 Document-scoped, because the damage model is *a reader is stopped*: a reader of
 `2026-09-20-the-decides.md` meets its line 95 and is not stopped.
 
+### 1.0 This document is bound by its own rule, and discharges it here
+
+A report about absent names is a document full of absent names. The guard scans
+`_audit/`, so it scans this file, and when it first did it convicted this
+report eight times. **That is correct behaviour and it is not being special-cased
+away.** A reader who meets `linkedin_applied_jobs` in a table here is owed the
+same disclosure as a reader who meets it anywhere else, and the only honest way
+to earn silence is to say the true thing plainly:
+
+* **`linkedin_applied_jobs` does not exist** anywhere in `linkedin_server/`.
+  The write-off that names it is wrong; the real tools are
+  `linkedin_my_applications` and `linkedin_draft_applications`.
+* **`linkedin_leave_group` does not exist** as a built tool. It is the
+  `tool_name` field of a WriteSpec that says of itself *"This is a
+  SPECIFICATION, not a build."*
+* **`linkedin_my` does not exist** and never did. It is the elided middle of a
+  pytest diff, `{'linkedin_my...n_saved_jobs'}`, not a citation at all.
+* **`linkedin_read_inbox` does not exist.** It is named twice in one document,
+  once under a modal and once as work to be done.
+* **`PROXIMITY-NOT-PARSED` and `ALERTS-PAGE-UNREAD` are not one of the 97**
+  blockers the ledger published.
+
+The guard is silent on this file now, and it is silent for the reason it is
+silent on the other 160 clean documents: **the marks were discharged.** No
+suppression was added, no path was excluded, and
+`scripts/check_asserted_names_resolve.py` contains no mention of this
+document's name. If a future edit removes those sentences, this file goes red
+like any other.
+
 ### 1.1 The half that does more work than the rule: KIND
 
 For blocker names the dominant error is not proposal-versus-assertion at all.

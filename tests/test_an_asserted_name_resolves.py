@@ -83,6 +83,46 @@ def measured():
 # --------------------------------------------------------------------------
 # CONTROLS
 # --------------------------------------------------------------------------
+def test_the_registry_cannot_absorb_a_name_from_its_own_instruments():
+    """The guard may not be fed by its own commentary. THIS ONE ALREADY FIRED.
+
+    The registry shipped reading `linkedin_server/`, `scripts/` AND `tests/`,
+    and was measured correct at 4 findings. Then the guard was committed. Its
+    docstring names `linkedin_applied_jobs` as the worked example; the control
+    below plants `linkedin_zzz_not_a_real_tool`. Both strings landed in
+    `scripts/` and `tests/`, the registry swallowed them, and the next run
+    reported ZERO absent tool names -- with the pin going red in the direction
+    that reads "these defects were repaired". Nothing was repaired.
+
+    **Writing ABOUT a name is not the name existing.** That is the corpus defect
+    this whole wave is about, and the guard committed it against itself inside
+    an hour. The three names below are the exact ones that did it, so this
+    assertion is a regression test for a real event rather than a hypothetical.
+    """
+    registry = guard.tool_registry(REPO)
+    absorbed = [
+        name for name in (
+            "linkedin_zzz_not_a_real_tool",   # planted in THIS file, below
+            "linkedin_zzz_quoted_output",     # planted in THIS file, below
+            "linkedin_applied_jobs",          # named in the guard's docstring
+            "linkedin_leave_group",           # named in the guard's docstring
+        )
+        if name in registry
+    ]
+    assert absorbed == [], (
+        f"the tool registry has absorbed {absorbed} from the guard's own "
+        "instruments. A name mentioned in a test, a script or a document is "
+        "prose; only `linkedin_server/` is the server. A registry that reads "
+        "its own commentary goes silently blind exactly where it is being "
+        "written about, which is where the defects are."
+    )
+    assert len(registry) > 40, (
+        f"the registry holds only {len(registry)} names. It was 59. A registry "
+        "that has collapsed convicts the whole corpus; check that "
+        "`git ls-files linkedin_server` still answers before widening anything."
+    )
+
+
 def test_the_detector_finds_a_planted_assertion():
     """The detector can speak -- in every slot form, on a name it cannot know.
 

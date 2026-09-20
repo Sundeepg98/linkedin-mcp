@@ -128,7 +128,55 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 CORPUS_DIR = "_audit"
-CODE_DIRS = ("linkedin_server", "scripts", "tests")
+
+#: THE REGISTRY IS BUILT FROM THE SUBJECT, NEVER FROM THE INSTRUMENTS, AND THIS
+#: ONE-ELEMENT TUPLE IS THE WHOLE LESSON OF THIS GUARD'S FIRST HOUR.
+#:
+#: It shipped as ``("linkedin_server", "scripts", "tests")`` and was measured
+#: correct: 4 asserted-and-absent citations, matching a hand-labelled census of
+#: all 72 `linkedin_*` tokens in the corpus. Then the guard was COMMITTED --
+#: with a docstring that names `linkedin_applied_jobs` and `linkedin_leave_group`
+#: as examples, and a test module whose control plants
+#: `linkedin_zzz_not_a_real_tool`. Every one of those strings landed in
+#: `scripts/` and `tests/`. On the next run the registry contained them, the
+#: names resolved, and the guard reported **zero** absent tool names. Three of
+#: its own tests went red, including the pin, in the direction that reads "these
+#: defects were repaired".
+#:
+#: Nothing was repaired. **The guard disarmed itself by documenting itself**,
+#: which is the corpus's own defect one level up: writing ABOUT a name is not
+#: the name existing. A test's string literal and an `_audit/` sentence are
+#: exactly the same kind of thing -- prose that mentions an identifier -- and a
+#: registry that reads one and not the other is drawing the line in the wrong
+#: place.
+#:
+#: So the line is drawn where it can be defended: `linkedin_server/` IS the
+#: server; `scripts/`, `tests/` and `_audit/` are commentary on it. The guard
+#: lives in `scripts/`, so it is structurally incapable of feeding itself.
+#: `test_the_registry_cannot_absorb_a_name_from_its_own_instruments` asserts
+#: that, and would have caught this before the commit.
+#:
+#: Restricting an AST walk to identifiers was tried first and rejected on a
+#: measurement: 26 of the corpus's 72 tokens would have gone absent, because
+#: real tool names live in string literals here (`shape.py` maps
+#: "LinkedIn Apply to this job" -> "linkedin_apply"). The defect was never the
+#: extraction technique. It was the scope.
+CODE_DIRS = ("linkedin_server",)
+
+#: AND THE SCOPE FIX ALONE IS NOT ENOUGH EITHER -- measured, not assumed.
+#: `_audit/_slice-parity-census.md` quotes `tests/test_server_surface.py`'s
+#: `FORBIDDEN_TOOLS` set verbatim: twelve write-tool names the suite exists to
+#: keep OUT of the surface, "listed explicitly so that adding one is a failing
+#: test". Those names are real -- they are a shipped contract -- and a
+#: server-only registry convicts a document for quoting it.
+#:
+#: So one module is admitted by NAME, because its subject matter IS a name
+#: enumeration. The list is explicit, one line long, and greppable on purpose:
+#: a fixture that wants to count as evidence has to be added here deliberately,
+#: by someone who reads the paragraph above. **This module is not on it and
+#: must never be**, which is the difference between a contract and a quotation.
+#: Only whole-string constants and identifiers are taken from it, never prose.
+CONTRACT_MODULES = ("tests/test_server_surface.py",)
 
 
 class Site(NamedTuple):
@@ -176,23 +224,53 @@ def load_corpus(repo: pathlib.Path) -> dict[str, list[str]]:
     return out
 
 
-def fenced(lines: Iterable[str]) -> set[int]:
-    """1-based line numbers sitting inside a ``` fence.
+def fenced(lines: list[str]) -> set[int]:
+    """1-based line numbers holding QUOTED material rather than the document.
 
     Quoted tool output is not a claim. `_audit/_slice-activity-items.md:537`
     holds a pytest assertion diff -- `{'linkedin_my...n_saved_jobs'}` -- whose
     ELIDED middle tokenises as a tool named `linkedin_my`. Nothing in that line
     is the document speaking.
+
+    **BOTH BLOCK FORMS, and the second was missed at first.** The corpus quotes
+    source in ``` fences (2,127 lines) AND in 4-space indented blocks (5,405
+    lines) -- 7,532 lines, roughly 9.5% of the corpus, and the indented form is
+    the larger half. `_audit/_slice-parity-census.md:475-490` reproduces
+    `tests/test_server_surface.py`'s `FORBIDDEN_TOOLS` set that way: twelve
+    write-tool names, indented, quoted verbatim. Reading an indented block as
+    prose convicted a document for accurately quoting a shipped contract.
+
+    A run of indented lines counts as a block only when a BLANK line precedes
+    it, which is what markdown itself requires. Without that, every wrapped
+    table cell and continued list item would be swallowed, and the guard would
+    go quiet in places nobody could predict.
     """
     inside: set[int] = set()
     open_fence = False
+    prev_blank = True
+    in_indent_block = False
     for i, line in enumerate(lines, 1):
+        stripped = line.strip()
         if line.lstrip().startswith("```"):
             open_fence = not open_fence
             inside.add(i)
+            prev_blank = False
             continue
         if open_fence:
             inside.add(i)
+            continue
+        if not stripped:
+            prev_blank = True
+            if in_indent_block:
+                inside.add(i)
+            continue
+        if line.startswith("    "):
+            if prev_blank or in_indent_block:
+                in_indent_block = True
+                inside.add(i)
+        else:
+            in_indent_block = False
+        prev_blank = False
     return inside
 
 
@@ -211,6 +289,7 @@ def tool_registry(repo: pathlib.Path) -> set[str]:
     """
     found: set[str] = set()
     pattern = re.compile(r"\blinkedin_[a-z0-9_]+")
+    whole = re.compile(r"^linkedin_[a-z0-9_]+$")
     for rel in tracked(repo, *CODE_DIRS):
         if not rel.endswith(".py"):
             continue
@@ -218,6 +297,22 @@ def tool_registry(repo: pathlib.Path) -> set[str]:
         if not path.is_file():
             continue
         found.update(pattern.findall(path.read_text(encoding="utf-8", errors="replace")))
+
+    for rel in CONTRACT_MODULES:
+        path = repo / rel
+        if not path.is_file():
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                if whole.match(node.value.strip()):
+                    found.add(node.value.strip())
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if whole.match(node.name):
+                    found.add(node.name)
     return found
 
 
@@ -457,7 +552,14 @@ def classify(
         inside_fence = fenced(lines)
         heads, cols = table_headers(lines)
         blob = "\n".join(lines)
-        doc_is_spec = bool(_SPEC_DOC.search(blob))
+        # A document DECLARES itself a specification up front, the way
+        # `2026-09-05-leave-group-writespec.md` does at line 7. Searching the
+        # whole body instead let THIS wave's own report -- which QUOTES that
+        # sentence as evidence at line 55 -- register as a spec document and
+        # silently excuse every tool name in it. Scoping the self-declaration
+        # to the header is the difference between a document saying what it is
+        # and a document quoting one that did.
+        doc_is_spec = bool(_SPEC_DOC.search("\n".join(lines[:40])))
         doc_cache: dict[str, str | None] = {}
 
         for n, line in enumerate(lines, 1):
