@@ -61,10 +61,10 @@ P I10	P I4	6	UNCLEAR	EXCLUDED-RULED	profile.md	same
 P I11	P I4	7	UNCLEAR	EXCLUDED-RULED	profile.md	same, plus `delete_or_withdraw_anything`
 P J2	P J1	1	-	GAP	profile.md	same
 P J3	P J1	2	-	GAP	profile.md	same
-P M2	P M1	1	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address, same entry
-P M3	P M1	2	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address, plus `delete_or_withdraw_anything`
-P M4	P M1	3	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address
-P M5	P M1	4	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address
-P M6	P M1	5	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address
-P M7	P M1	6	US-BOUNDARY	EXCLUDED-RULED	profile.md	same address
+P M2	P M1	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address, same entry
+P M3	P M1	2	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address, plus `delete_or_withdraw_anything`
+P M4	P M1	3	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
+P M5	P M1	4	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
+P M6	P M1	5	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
+P M7	P M1	6	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
 P N31	P N30	1	ACCOUNT-FACT+WORLD-FACT	EXCLUDED-RULED	profile.md	same article, different form slug (`/help/linked

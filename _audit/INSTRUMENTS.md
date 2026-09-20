@@ -6270,3 +6270,194 @@ repo already recorded for line numbers. The six insight fields were therefore
 verified by **AST parse of the reader's return dict** -- seven keys, named --
 rather than by grep, because a field-name grep returns ZERO for a dict that
 passes through by reference and reads exactly like a dead field.
+---
+
+## 41. THE REOPENER TRIGGERS: A WRITE-OFF THAT RESTS ON A FACT NOBODY RE-CHECKS, 2026-09-20
+
+Full record: `_audit/2026-09-20-the-reopener-triggers.md`.
+
+A write-off resting on a fact about the operator, his account or the world is
+excluded WHILE THAT FACT HOLDS. With no stated reopener it reads exactly like a
+permanent exclusion, and the census shrinks its own denominator by an amount
+nobody ruled. The discipline already existed here and was applied to exactly
+one queue -- `2026-09-05-decide-retire-rulings.md` s6 gives all twelve of its
+retirements a concrete reopener AND names who can establish it. The other queue
+was exempt, and the exemption was measurable: **15% still GAP with a reopener,
+91% without.**
+
+### 41.1 `scripts/check_contingent_writeoffs_carry_a_reopener.py` -- ADMITTED, SHOWN FAILING THREE WAYS
+
+Fails the run if a write-off row is CONTINGENT (`WORLD-FACT` / `ACCOUNT-FACT` /
+`PROCESS-FACT`, per the shipped classifier) and names no `REOPENER` in its
+RESOLVED text. It imports `classify_writeoff_reasons` rather than reparsing.
+
+**RESOLVED, NOT RAW, AND THAT IS LOAD-BEARING.** 127 write-off reason cells are
+POINTERS and 21 rows carry no reason cell at all (`N 67`-`78`, `N 119`-`128`
+ship four-column tables). A guard reading the raw cell would demand the
+impossible of a fifth of the corpus.
+
+**THE RED IS THREE REDS, AND EACH COVERS A BLIND SPOT OF THE OTHERS.** A verdict that
+fires on an injected row proves nothing about whether the WALK would ever hand
+it one -- that gap is exactly the shape of the decorative controls this repo
+has been finding all day. So `--demonstrate-red` runs: (1) a synthetic row,
+convicted, **plus the same row carrying a reopener, cleared** -- a rule that
+convicts both is not discriminating, it is just failing; (2) an END-TO-END red
+that copies the four census files to a temp dir, plants one row inside a live
+table, repoints the walker and runs the shipped `build()` pipeline. It asserts
+the walk FINDS the row, the guard FAILS, and the failure NAMES it; **(3) a cell
+whose only reopener-shaped text is the sentence "reopens nothing", convicted --
+see 41.4, the defect that made the first two insufficient.**
+
+Four decorative holes closed and named in the docstring: per-slice liveness
+(never a union assertion -- a union over a redundant corpus cannot detect a
+lost source); SELF-RETIRING exemptions (the guard fails when a pinned row no
+longer needs its pin); it prints what it did NOT check; and red 2 above.
+
+### 41.2 `scripts/_check_cells_honours_escaped_pipe.py` -- ADMITTED, SHOWN FAILING
+
+**THIS CLOSES SECTION 35's "NOT AN INSTRUMENT" ENTRY.** `cells()` split on `|`
+without honouring the markdown escape. The control carries the pre-fix
+implementation VERBATIM -- a control that describes a bug in prose cannot fail
+when the bug returns -- and asserts the old code fails **exactly four of six**
+specimens: the two carrying no escape must still pass, or the repair's subject
+would be the parse in general rather than the escape.
+
+Corpus half: old vs new over every line of five census files. **5 lines carry
+an escaped pipe, 5 lines differ, and the sets are equal** -- the repair does its
+job and nothing else. `J 103`: 795 chars read of the 1320 it holds.
+
+**AN EMPTY DISAGREEMENT SET IS A LOUD EVENT.** If the corpus stops carrying an
+escaped pipe the corpus half exercises nothing, so it says so and returns
+non-zero rather than printing ok over a vacuum.
+
+**NO REGEX, DELIBERATELY.** The standard lookbehind for "a backslash not
+preceded by a backslash" is wrong at a doubled backslash; a left-to-right scan
+has no such case to get wrong.
+
+**AND IT MOVED NOTHING BUT THE TEXT**, which section 35 required of any
+notation change over these files: census counts identical before and after, and
+`classify_writeoff_reasons.py --tsv` byte-identical on all six verdict columns
+for all 310 rows.
+
+### 41.3 THE LAWS THIS WAVE ADDS
+
+**A REOPENER BELONGS WHERE THE CONTINGENT FACT IS ASSERTED, NOT ON EVERY ROW
+THAT INHERITS IT.** 16 of the 37 repaired rows resolve through a pointer into a
+shared ruling and 10 have no cell to write in. Copying a clause onto 37 cells
+is hand-maintenance by another name -- the classifier's own design section
+rejected the in-cell tag because a sibling rewriting a reason leaves the tag
+behind, and a WRONG tag that travels with a row is worse than none. **The cost
+is that a backreference resolves BY POSITION and can silently re-point, which
+is the argument for a GUARD rather than a one-time repair.**
+
+**A WORLD-FACT SITTING BESIDE A RULING IS COLOUR, NOT THE LOAD-BEARING REASON
+-- AND A REOPENER WRITTEN ON THE COLOUR IS A TRIGGER THAT CAN NEVER FIRE.**
+Five rows are this shape. `N 10` asserts *"LinkedIn DOES offer this"*, which is
+the live-LOOKING half and reopens nothing: it is already true and the row is
+excluded anyway by `R5`, which is ours and is the half that can actually move.
+`P D13`/`D14`: a Help article resolving supplies field names and does not touch
+the `/edit/` ruling. Those cells now say so explicitly, because **a reader who
+takes the contingent-looking clause for the trigger has it exactly backwards.**
+
+**A TRIGGER THAT EXISTS IN CODE AND IS NOT NAMED IN THE CELL IS INVISIBLE.**
+`N 118`'s reopener had been shipping since 2026-09-04 --
+`dom.read_profile_detail_entries` re-takes the reading on every call. It lacked
+the word `REOPENER`, so no sweep could see it and the row read as permanently
+closed. Zero new code, one clause.
+
+**A MEASUREMENT IS NOT A RULING, AND THE CENSUS HELD ONE FACT UNDER TWO STATE
+WORDS.** `J 127`, `M M4` and `N 157` assert that the InMail balance is not
+rendered; `J 127` read MEASURED-ABSENT and the other two read EXCLUDED-RULED.
+`M M4` and `N 157` are now MEASURED-ABSENT. Three supports, none of them this
+wave's: `9a140a3` files `M 4` as WORLD-FACT in the table built to draw that
+line; `network.md` s2's definition fits unstretched; and **`readonly.py` ADMITS
+`/premium/my-premium/` -- a row whose page we are allowed to open, and did
+open, cannot be written off as a refusal.** `2026-09-20-the-first-firing.md`
+s4d named the defect, declined it on timing and wrote *"the owner of the state
+vocabulary can rule it in one line"*; this is that line. GAP untouched, 704
+stated rows untouched.
+
+**AND THE HANDED-DOWN NUMBER WAS RIGHT ABOUT THE WRONG POPULATION.** The brief
+said ~40. Over all write-off states it is exactly 40; over `EXCLUDED-RULED` +
+`XR` it is **37**. The other three sit in `COVERED-CANNOT-DELIVER` and
+`MEASURED-ABSENT`. Re-deriving cost one run of a shipped instrument.
+
+### 41.4 THE GUARD WAS GREEN ON A CELL THAT SAID THE OPPOSITE, AND ONLY A MUTATION FOUND IT
+
+**The first version of 41.1 could not fail in the exact case it exists for.**
+It reused `classify_writeoff_reasons.REOPENER`, which is
+`REOPEN(?:ER|S)\b` CASE-INSENSITIVE. That is right for its own job -- reporting,
+where over-reach is free -- and wrong for a gate, because it matches the
+ordinary verb.
+
+Found by MUTATION, never by re-reading: stripping the real `REOPENER:` clause
+out of `P D13` and `P D14` left the guard **green**, because both cells also
+contain the sentence *"the Help-article half REOPENS NOTHING"*. **A cell could
+state in prose that nothing reopens it and thereby satisfy a check whose entire
+subject is whether something does.** The sentences were written by this wave, in
+the same pass, for a good reason (see 41.3) -- which is the uncomfortable part:
+the guard and the text that defeated it came from one author on one afternoon.
+
+**THE DISCRIMINATOR IS CASE, AND IT WAS MEASURED BEFORE IT WAS ADOPTED.** The
+house marker is always SHOUTED (`REOPENER:`, `REOPENER, NAMED:`, `REOPENER a
+parser over either capture`); the ordinary verb is not. Over the whole corpus
+exactly **five** contingent rows pass the loose regex with no shouted marker,
+and all five are the `D13`/`D14` family that prompted this -- so tightening to
+`REOPENER\b` convicts the mutation and **moves nothing else**.
+
+**NOT NARROWED FURTHER, DELIBERATELY.** `REOPENER: none plausible` and
+`REOPENER: nothing that keeps the shape` must keep passing -- an argued "this is
+genuinely permanent" is a real answer to the question, and three of
+`decide-retire-rulings.md` s6's twelve are written that way. **The defect is an
+UNMARKED sentence, never a negative verdict somebody defended.**
+
+It is now RED 3 of the guard's `--demonstrate-red`, asserting both halves: that
+the loose regex DOES match the negative sentence (or the control has stopped
+exercising the defect) and that the shouted marker does NOT.
+
+**THE LAW: A GATE MAY NOT BORROW A REPORTER'S PREDICATE.** The same regex is
+correct in a report and decorative in a guard, because over-matching costs a
+reporter nothing and costs a gate everything. Reuse the instrument, re-derive
+the threshold.
+
+### 41.5 A GUARD NOBODY RUNS HAS ALREADY STOPPED WORKING
+
+`tests/test_contingent_writeoffs_carry_a_reopener.py` wraps 41.1 so CI runs it,
+following `test_pointer_graph_guard.py`. Two tests, and **the second is the one
+that matters**: a green property test is ambiguous between "the census is
+clean" and "the guard was broken into something that cannot speak" -- an import
+returning nothing, a walk finding no rows, a predicate inverted. So the second
+test re-runs `--demonstrate-red` and asserts each red's marker string
+individually, because a demonstration that silently skipped its expensive half
+would still exit 0.
+
+### 41.6 PROSE WRITTEN INTO A CLASSIFIED CORPUS IS DATA, NOT COMMENTARY
+
+**The pointer-graph guard convicted this wave, on four words.** A reopener
+added to `P D14` contained *"each on his own ruling"*; `his own` matches the
+shipped `AF:his-thing` signal, so `D14`'s verdict moved to include
+`ACCOUNT-FACT` -- and `D15`-`D17`, which resolve to `D14` by backreference,
+were suddenly resting on an argument different from the one they were pinned
+against. `P D14` is an `/edit/` family row and nothing about it is a fact about
+the account.
+
+**THE GUARD OFFERS `--pin` AS THE REMEDY AND TAKING IT WOULD HAVE BEEN WRONG.**
+Re-pinning bakes the new verdict in; here the new verdict was a false
+`ACCOUNT-FACT`, and it would have propagated to three inherited rows. **A
+re-pin makes the guard agree with whatever you just did, so the question a red
+pin asks is "did you mean this", never "make this go away."** Reworded; the
+verdict returned and the pins held untouched.
+
+**SO EVERY KIND CHANGE A CENSUS EDIT CAUSES GETS DIFFED, THE WAY A PARSER
+CHANGE DOES.** These cells are INPUT to a running classifier with 12 pinned
+adjudications and 69 pinned pointers hanging off them. This pass moved three
+verdicts, kept two deliberately (`M M4` gains `ACCOUNT-FACT` and thereby AGREES
+with its twin `J 127`; `N 10` fires `operator-must-act`, the same phrasing the
+`CONTACT-IMPORT` reopener uses) and reworded one.
+
+**AND A `+-2` LINE WINDOW OVER A MARKDOWN TABLE IS A `+-2` CAPABILITY WINDOW.**
+The correction-findability scan flagged `M M5`, which no wave touched: it sits
+one line under `M M4`, whose cell now opens `STATE CORRECTED`. Every table row
+is one line, so the heuristic's reach is two neighbouring capabilities. That is
+a real cost of the window on this corpus, paid in a triage entry exactly as its
+own comment says it should be.
