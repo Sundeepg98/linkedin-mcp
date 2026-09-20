@@ -368,7 +368,7 @@ rather than adding the two slices' EXCLUDED totals.
 | 93 | Filter by Keywords (first name, last name, title, company, school) | R | GAP | |
 | 94 | Add more than one location to a single search | R | GAP | |
 | 95 | View and re-run a recent search | R | GAP | |
-| 96 | Clear your search history | W | GAP | NOT-REV |
+| 96 | Clear your search history | W | EXCLUDED-RULED | NOT-REV  **EXCLUDED-RULED 2026-09-20 UNDER R5, not a new decision.** Clearing a history is destruction, and `delete_or_withdraw_anything` in `writes.py` covers it by act-class: *"destruction is not a write this design covers, at any confirm level."* R5 already files `110` (delete all imported contacts) and `29` (remove a 1st-degree connection), so the act-class is established in this table rather than stretched to reach this row. |
 | 97 | Browse People You May Know suggestions | R | EXCLUDED-RULED | R1 |
 | 98 | Remove or dismiss a People You May Know suggestion | W | EXCLUDED-RULED | R1. NOT-REV |
 | 99 | View the Alumni page for your school | R | GAP | No `/school/` pattern; 0 grep hits for `/school/` |
@@ -598,20 +598,20 @@ control. See `_audit/2026-09-20-admin-rights-ready.md`.
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
 | A1 | Notify employees of a Page post | W | GAP | no Page; address refused |
-| A2 | Follow another organization's Page on behalf of your Page | W | GAP | refused by `/follow` before the allowlist |
+| A2 | Follow another organization's Page on behalf of your Page | W | EXCLUDED-RULED | refused by `/follow` before the allowlist  **EXCLUDED-RULED 2026-09-20, taking this row's own blocker to its verdict.** `/follow` is on the forbidden substring tuple in `readonly.py` and is checked BEFORE the allowlist, so the address cannot be opened however the allowlist is edited later; that tuple is documented there as *"a second, independent gate"*. **WHAT DOES NOT HOLD THIS ROW, stated so nobody later thinks it does: the Page-admin question.** The prose above this table records that the admin-absence reading rests on a FRAGMENT capture and is a fact about the capture rather than about the account; this exclusion neither uses it nor needs it. |
 | A3 | View the Pages your Page follows | R | GAP | refused by `/follow` before the allowlist |
 | A4 | Invite connections to follow a Page you manage | W | GAP | needs a second consenting human |
 | A5 | View your Page's invitation credit balance | R | GAP | refused by `/invite` before the allowlist |
 | A6 | Build a Page Follow button for your organization's website | W | COVERED-CANNOT-DELIVER | **FIRED OFFLINE 2026-09-20, AND THE STATE NOW MATCHES THE REASON THE ROW ALREADY GAVE.** `linkedin_page_plugin_snippet` is the ONE tool in this wave that needed no browser at all: its body is `page_plugin.follow_plugin_snippet(page_id)`, `page_plugin.py` imports nothing that can reach a network, and the function is a plain `def`. So it was fired directly, three times, and it DISCRIMINATES: a synthetic all-digits id returned `refused: None` and a **177-character** `html` snippet carrying that id, while `not-a-page-id` and the empty string BOTH returned `refused: not_ascii_digits` with **0 characters** of html. Its refusal reports a SHAPE (`saw`: length band, ascii-digit count, letter count, looks-like-a-url) and never echoes the value it rejected. **SO THE BUILDER IS PROVEN AND THE CAPABILITY STILL CANNOT BE DELIVERED**, which is why this is CANNOT-DELIVER and not PROVEN: the row is about *your organization's* Page and no organization Page id exists to build one from -- an absent INPUT, not a code gap. Independently, the tool reports `verified_live: False`: no snippet it has built has ever been confirmed working on a live page. |
-| A7 | Turn on automatic invitations to content engagers (Premium) | W | GAP | refused by `/settings/` before the allowlist |
-| A8 | Turn off automatic invitations (Premium) | W | GAP | refused by `/settings/` before the allowlist |
+| A7 | Turn on automatic invitations to content engagers (Premium) | W | EXCLUDED-RULED | refused by `/settings/` before the allowlist  **EXCLUDED-RULED 2026-09-20, taking this row's own blocker to its verdict.** Both `/settings/` and the bare word `settings` are on the forbidden substring tuple in `readonly.py`, checked BEFORE the allowlist, and R11 is the standing ruling that the settings family is admitted by name or not at all. **THE PREMIUM ENTITLEMENT IS NOT WHAT HOLDS THIS ROW** -- the address is refused with or without it -- but it is a second blocker and is named rather than hidden. **REOPENER, NAMED: (1) the `settings` or `/settings/` entry leaving `_FORBIDDEN_URL_SUBSTRINGS`, or an exact-url exemption for this surface entering `_FORBIDDEN_SUBSTRING_EXEMPTIONS` -- either is a reviewable one-line edit and `tests/test_readonly.py` pins that tuple; WHO: whoever edits the boundary. (2) The account acquiring both the entitlement and an administered Page, which is what would make the second blocker stop applying; WHO: the operator.** |
+| A8 | Turn off automatic invitations (Premium) | W | EXCLUDED-RULED | refused by `/settings/` before the allowlist  **EXCLUDED-RULED 2026-09-20, taking this row's own blocker to its verdict.** Both `/settings/` and the bare word `settings` are on the forbidden substring tuple in `readonly.py`, checked BEFORE the allowlist, and R11 is the standing ruling that the settings family is admitted by name or not at all. **THE PREMIUM ENTITLEMENT IS NOT WHAT HOLDS THIS ROW** -- the address is refused with or without it -- but it is a second blocker and is named rather than hidden. **REOPENER, NAMED: (1) the `settings` or `/settings/` entry leaving `_FORBIDDEN_URL_SUBSTRINGS`, or an exact-url exemption for this surface entering `_FORBIDDEN_SUBSTRING_EXEMPTIONS` -- either is a reviewable one-line edit and `tests/test_readonly.py` pins that tuple; WHO: whoever edits the boundary. (2) The account acquiring both the entitlement and an administered Page, which is what would make the second blocker stop applying; WHO: the operator.** |
 | A9 | Invite followers of similar Pages to follow your Page (Premium) | W | GAP | needs a second consenting human |
 | A10 | Invite your connections to a group you own or manage | W | GAP | needs a second consenting human |
 | A11 | Message an individual group member as owner or manager | W | GAP | needs a second consenting human |
 | A12 | Send a message request as a group admin to a member you are not connected to | W | GAP | needs a second consenting human |
 | A13 | Privately message any event attendee as the organizer, without being connected | W | GAP | needs a second consenting human |
-| A14 | Remove an attendee from an event you organize | W | GAP | `/events/<id>/` is not admitted; only the events root is |
-| A15 | Withdraw an event invitation before the invitee responds | W | GAP | refused by `/invite`; also needs an invitation already sent |
+| A14 | Remove an attendee from an event you organize | W | EXCLUDED-RULED | `/events/<id>/` is not admitted; only the events root is  **EXCLUDED-RULED 2026-09-20 UNDER R5, which is the stronger of the two reasons and the one that does not depend on an allowlist edit.** Removing an attendee destroys an attendance record, and `delete_or_withdraw_anything` in `writes.py` covers it by act-class: *"destruction is not a write this design covers, at any confirm level."* R5 already files `29` on the identical verb. **The allowlist half is the weaker half and is recorded rather than relied on:** an address absent from an allowlist is an address nobody built, which is a GAP reason, not a ruling. |
+| A15 | Withdraw an event invitation before the invitee responds | W | EXCLUDED-RULED | refused by `/invite`; also needs an invitation already sent  **EXCLUDED-RULED 2026-09-20 UNDER R5 + R2, by the same pair that files `10` and `12`.** Withdrawing is named in `delete_or_withdraw_anything` (`writes.py`) -- *"destruction is not a write this design covers, at any confirm level"* -- and `/withdraw`, `/invite` and `invitation` are all on the forbidden substring tuple in `readonly.py`, checked before the allowlist. Row `10`, *withdraw a pending invitation you sent*, is already EXCLUDED-RULED on exactly this pair; this is the event-shaped member of the same family. **The `needs an invitation already sent` clause is a precondition, not the reason, and nothing here rests on it.** |
 
 ---
 
@@ -681,7 +681,7 @@ reset its badge -- and taking that measurement requires resetting the badge.
 Rows: 3, 13, 14, 15, 16, 17, 18, 19, 21, 22, 32, 62, 97, 98. (14 -- row 15 also
 carries R8.)
 
-### R2 -- `invitation`, `/invite`, `/connect`, `/withdraw` are forbidden substrings. Produces 15 rows.
+### R2 -- `invitation`, `/invite`, `/connect`, `/withdraw` are forbidden substrings. Produces 16 rows.
 
 `readonly.py:469-471`, checked BEFORE the allowlist. `_audit/2026-08-30-linkedin-nine.md:326`:
 
@@ -692,14 +692,36 @@ are on that list too. So even a loosened allowlist cannot reach the invitation
 surfaces. That was already true and is not a change.
 ```
 
-Rows: 9, 10, 11, 12, 23, 24, 25, 26, 27, 28, 29, 30, 72, 73, 75 (plus 13, 14,
-16, 19 shared with R1).
+Rows: 9, 10, 11, 12, 23, 24, 25, 26, 27, 28, 29, 30, 72, 73, 75, A15 (plus 13,
+14, 16, 19 shared with R1). `A15` was added 2026-09-20 and also carries R5.
 
 **This is the ruling that removes his connections list**, and it does so as a
 side effect. The list's only address is `/mynetwork/invite-connect/connections/`,
 which contains both `/invite` and `/connect` -- two substrings put on the list
 to stop invitations, catching a read that has nothing to do with inviting
 anyone.
+
+**THAT PARAGRAPH IS FALSE AT HEAD, MEASURED 2026-09-20, AND IT IS LEFT STANDING
+BECAUSE A READER ARRIVING FROM A DOCUMENT THAT CITES IT NEEDS TO FIND IT.**
+`readonly.assert_read_url("https://www.linkedin.com/mynetwork/invite-connect/connections/")`
+**RETURNS** -- the address is on `_ALLOWED_URL_PATTERNS` AND carries an anchored
+entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` exempting it for `/invite`
+and `/connect`. Somebody admitted it deliberately; the side effect this
+paragraph describes has been undone and nothing told this file.
+
+**CORRECTED BY:** `_audit/2026-09-20-the-write-partition.md` -- the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
+
+**WHAT THAT DOES AND DOES NOT CHANGE, stated narrowly because this wave did not
+own these rows and did not move them.** Rows `23`-`28` are the connections-list
+rows. Their STATE may well still be right -- no tool in this package reads that
+list whatever the boundary says -- but **the reason under them names a refusal
+that no longer happens**, which is a different defect from a wrong state and a
+worse one to inherit. The write-direction rows `169` and `187` rest on the same
+premise and stay GAP. **A ruling for the read wave that owns them, not something
+this wave was scoped to make.** Two siblings measured in the same run and
+recorded here for the same reader: `/company/<slug>/` and `/school/<slug>/` are
+BOTH on the allowlist now, against this slice's own surface table calling them
+ABSENT.
 
 ### R3 -- `endorse_or_recommend`. Produces 13 rows, and it is a MEASUREMENT.
 
@@ -784,7 +806,7 @@ the rule to any load, and because no code path builds such a url. But the
 wants to follow a person through this server, that gap in the wording is where
 the argument will happen.
 
-### R5 -- `delete_or_withdraw_anything`. Produces 6 rows.
+### R5 -- `delete_or_withdraw_anything`. Produces 9 rows.
 
 `writes.py:1801`:
 
@@ -799,7 +821,17 @@ the argument will happen.
 ),
 ```
 
-Rows: 10, 12, 29, 110, 113, 125.
+Rows: 10, 12, 29, 96, 110, 113, 125, A14, A15. (9 -- A15 also carries R2.)
+
+**THREE ADDED 2026-09-20 BY THE WRITE-PARTITION WAVE, and the count above moved
+with them rather than after them**: `96` clear your search history, `A14` remove
+an attendee from an event you organize, `A15` withdraw an event invitation. All
+three are the act-class this key names, each has a precedent already on this
+table (`110` deletes, `29` removes, `10` withdraws), and none of them needed a
+new reason. **The count is here because a ruling heading that does not move
+when its row set does is how a published number becomes a quotation** --
+`tests/test_writeoff_kinds_are_derivable.py` pins this one and caught it the
+same hour the rows moved. See `_audit/2026-09-20-the-write-partition.md`.
 
 ### R6 -- `deanonymise_a_viewer`. Produces 1 row (131).
 
@@ -919,7 +951,7 @@ actually holding it was the measured absence of a balance. It is filed
 MEASURED-ABSENT 2026-09-20 and carries its own reopener; see its row. Rows
 here are now **156 and 158**.
 
-### R11 -- the settings family is admitted by name or not at all. Produces 21 rows.
+### R11 -- the settings family is admitted by name or not at all. Produces 23 rows.
 
 `readonly.py:521` forbids `/mypreferences/d/categories/`; `:522` forbids
 `/psettings/`. The ruling is at `server.py:1949`:
@@ -932,7 +964,15 @@ here are now **156 and 158**.
 ```
 
 Rows: 67, 68, 69, 70, 71, 72, 73, 74, 75, 77, 78, 115, 116, 117, 137, 138, 139,
-140, 142, 143, 159. (21 -- several also carry R2.)
+140, 142, 143, 159, A7, A8. (23 -- several also carry R2.)
+
+**`A7` AND `A8` WERE ADDED 2026-09-20** -- turn automatic invitations on and
+off. Both already recorded *"refused by `/settings/` before the allowlist"* as
+their blocker and were filed GAP anyway; the write-partition wave took the
+row's own stated blocker to the verdict this vocabulary says it produces. They
+are the only two rows of this ruling that carry a REOPENER, because each names
+a Premium entitlement as a SECOND blocker and a second blocker that is a fact
+about the account is exactly what a reopener is for.
 
 ### R10 / R7 -- not load-bearing here
 

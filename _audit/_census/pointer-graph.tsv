@@ -41,9 +41,9 @@ P A27	P A26	1	-	GAP	profile.md	same. **There is no address field** -- `a565128`
 P A28	P A26	2	-	GAP	profile.md	same panel
 P A29	P A26	3	-	GAP	profile.md	same panel
 P B3	P B2	1	US-RULING	EXCLUDED-RULED	profile.md	same ruling. `a541850` names the pop-up controls
-P B5	P B4	1	US-BOUNDARY	EXCLUDED-RULED	profile.md	same ruling
-P C5	P C4	1	-	GAP	profile.md	same page
-P C6	P C4	2	-	GAP	profile.md	same page
+P B5	P B4	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same ruling
+P C5	P C4	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
+P C6	P C4	2	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
 P D10	P D9	1	US-RULING	COVERED-CANNOT-DELIVER	profile.md	same shape as D4: `education_entries: None` decl
 P D15	P D14	1	US-RULING+WORLD-FACT	EXCLUDED-RULED	profile.md	same. One official fact only: the Project URL fi
 P D16	P D14	2	US-RULING+WORLD-FACT	EXCLUDED-RULED	profile.md	same

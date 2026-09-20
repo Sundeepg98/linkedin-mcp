@@ -6744,3 +6744,130 @@ one line under `M M4`, whose cell now opens `STATE CORRECTED`. Every table row
 is one line, so the heuristic's reach is two neighbouring capabilities. That is
 a real cost of the window on this corpus, paid in a triage entry exactly as its
 own comment says it should be.
+
+## 43. A BLOCKER CELL THAT ASSERTS WHAT THE BOUNDARY DOES NOT CATCH (write-partition, 2026-09-20)
+
+**THE INSTRUMENT.** `scripts/check_gap_rows_on_refused_addresses.py`, wired by
+`tests/test_gap_rows_on_refused_addresses.py`. It walks every capability row in
+the four census slices, pulls each BACKTICKED LinkedIn path out of the reason
+cell, and puts it through the SHIPPED read gate, `readonly.assert_read_url`. A
+GAP row whose address the gate refuses **on a forbidden substring** is reported,
+because that is this census's own named bar for EXCLUDED-RULED -- the `N 38`
+cell says so in as many words: *"A forbidden-substring entry is this census's
+own named bar for EXCLUDED-RULED."*
+
+**SHOWN FAILING ON REAL DATA, NOT ON A FIXTURE.** Pointed at the census as it
+stood at `c0cab56` it convicts **13 distinct GAP rows**. Eight of them are rows
+this wave then moved -- `P B4`, `P C2`, `P N12`, `P O5`, `N A2`, `N A7`, `N A8`,
+`N A15` -- and five were already outside the wave's scope. After the wave it
+reports **5** and passes against its pin. Receipt `_state/preedit-receipt.txt`;
+the wave is `_audit/2026-09-20-the-write-partition.md`.
+
+**WHAT IT FOUND, WHICH IS WORTH MORE THAN THE ROWS.** Four cells in the 101
+write-direction GAP rows assert a NEGATIVE about the boundary -- *"no forbidden
+substring catches it"*, *"caught by no substring"*, *"named nowhere in this
+repo"*, and a section header's *"Nothing else in this repo names it either"* --
+and **every one of those claims is false**. Two of the three addresses are
+NAMED VERBATIM in the boundary's own comment as the members that motivated the
+entry that refuses them:
+
+```
+* A SECOND SPELLING. ``/public-profile/settings`` has no trailing
+  slash, so ``"/settings/"`` ... does not match it.
+```
+
+```
+THE VERB THAT WAS NEVER ON THIS LIST. ... ``/badges/profile/create``
+is the member that exposed it ...
+```
+
+The cause is datable and is not carelessness: those ten entries went into
+`readonly._FORBIDDEN_URL_SUBSTRINGS` on **2026-09-03**, the day after
+`profile.md` was written, and nothing re-reads a census cell against a boundary
+edit. **A blocker that asserts what a gate does NOT catch is a measurement with
+a timestamp, and this corpus had no instrument that re-takes one.**
+
+**THE TRAP IT WAS DELIBERATELY BUILT AROUND -- THE SAME ONE THE REOPENER GUARD
+PAID FOR (section 41).** The obvious implementation matches the NEGATIVE CLAIM
+("no forbidden substring", "not on the allowlist") and convicts the cell that
+carries it. That is wrong here in the exact way section 41's first version was
+wrong: `N 38` and `N 44` QUOTE their own superseded negative claim and then
+correct it in the next sentence, so a matcher aimed at the claim convicts the
+two rows that already did the right thing and clears every row that never
+noticed. **So this check never reads a claim. It reads the ADDRESS and asks the
+gate.** Same discipline one level up: it ignores an allowlist-only refusal
+entirely, because `network.md` section 2 says allowlist silence is not a reason.
+
+**FOUR HOLES CLOSED, EACH NAMED IN THE SCRIPT.** (1) an empty walk is loud PER
+SLICE, never over the union -- a union assertion over a redundant corpus cannot
+detect a lost source; (2) **a gate mutated into a no-op reads exactly like a
+clean census**, so the run asserts the shipped gate refused something and prints
+its verdict tally (this run: 87 refused-on-substring, 38 refused-by-allowlist,
+53 admitted); (3) it prints what it did NOT check, including the 55
+EXCLUDED-RULED rows already past the bar -- which are the evidence the bar is
+real practice rather than this file's invention; (4) `--demonstrate-red` plants
+a GAP row on a REFUSED address **and a second on an ADMITTED one**, proving the
+rule can clear as well as convict. A rule that convicts everything is not
+discriminating, it is failing.
+
+**IT SHIPS AS A PINNED REPORTER, NOT A GATE, AND THE REASON IS IN THE FILE.**
+Five GAP rows still sit on a refused address and every one is outside the wave
+that wrote this -- two in the messaging slice, two READ-direction, one a
+menu-contents row. Hard-gating would mean ruling on rows nobody scoped, so
+`--expect-gap 5` fails on a move in EITHER direction: a new offender AND a
+silent fix are both loud.
+
+**AND THE UNIT COST A WRONG PIN BEFORE IT WAS WRITTEN DOWN.** The first reading
+said EIGHT, which was (row, address) PAIRS -- `P D25` alone carries three. The
+shipped count is DISTINCT ROWS. A count whose unit is unstated is a count that
+will be compared against a different one.
+
+### 43.1 -- THE ACCOUNT-FACT NEEDLE SET IS A CLOSED VERB LIST, AND THE PROBE THAT SIZES IT
+
+`_state/probe_accountfact_verbs.py`, DISPOSABLE but recorded, because the
+mechanism will outlive the probe. `classify_writeoff_reasons` decides
+ACCOUNT-FACT from `he (has|had|holds|owns|never|wants)`. A write-off stating a
+fact about the account with ANY OTHER VERB is called non-contingent and leaves
+the reopener guard's scope with nothing said. Twelve of this wave's fourteen
+moves were filed non-contingent, so the tightness of that list is load-bearing
+for the freeze rather than a curiosity.
+
+**MEASURED, THEN DEFLATED BEFORE BEING REPORTED, WHICH IS THE POINT.** 17 of
+257 non-contingent write-offs say `he <verb>` with a verb the set misses, 16
+carrying no reopener. **Then: 14 of the 17 are the verb `chooses`, and all
+fourteen are R4's rows inheriting R4's own sentence** -- *"Whether HE chooses to
+open a profile is his own affair"* -- which is a clause of OUR prohibition, not
+a fact about the account. `N 15` is R8's *"a reply in his name that he did not
+read"*, same shape. `N 38` is a US-BOUNDARY row, correctly non-contingent.
+
+**ONE REAL INSTANCE REMAINS AND IT IS ALREADY PROTECTED.** `P L5` states *"he
+clears the >150-follower gate at 275"* -- a numeric account fact, and a follower
+count is precisely a thing that changes -- and is non-contingent because the
+verb is `clears`. The same cell's *"LinkedIn says outright that no native path
+exists"* is missed too: the `linkedin-says` needle knows `does not / draws no /
+offers / no longer / cannot / makes / retired / redesigns`, not `says`. The row
+carries a reopener anyway. **So: mechanism real, live casualties ZERO, and this
+wave's own fourteen all clean** -- the probe reports `clean` for all fourteen
+AND confirms the walk found 14 of 14, so its green is not a walk that found
+nothing. Registered without a fix because widening either needle set is a
+boundary change to a classifier 324 rows depend on, and it needs its own
+measured casualty list first.
+
+### 43.2 -- DISPOSABLE, DECLARED
+
+`_state/preflight_reasons.py` + `_state/draft_reasons.py` (classify a DRAFT
+reason cell through the shipped classifier and the guard's strict marker BEFORE
+it is written into a tracked file -- it is why nothing bounced), plus
+`_state/probe_code_authority.py`, `_state/probe_code_detail.py`,
+`_state/extract_write_gap.py`, `_state/crossref_boundary.py`,
+`_state/classify_stayed_gap.py`, `_state/probe_no_tool_leak.py`,
+`_state/probe_stale_premises.py`, `_state/probe_gap_on_refused.py`,
+`_state/run_on_preedit.py`, `_state/performable_coverage.py`.
+
+**The pre-flight is the one a future wave should rebuild rather than reinvent**:
+every edit that adds an EXCLUDED-RULED row is a guess about what
+`classify_writeoff_reasons` will call it, and that guess is computable from the
+text before anything is written. Fourteen drafts, zero bounces, and it is what
+caught `N A7`/`N A8` coming back ACCOUNT-FACT on the word "Premium" -- which was
+then answered with a two-clause reopener rather than by rewording the cell to
+dodge the classifier.

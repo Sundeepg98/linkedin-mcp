@@ -318,9 +318,22 @@ def test_a_deleted_ruling_section_is_reported(census):
     the other rot -- a corpus with no rows citing R5 would still need the
     orphaned adjudication reported, and vice versa.
 
-    The count is asserted too. R5's own heading says "Produces 6 rows", and
-    exactly six rows complain, so the ruling's published count is checked
+    The count is asserted too. R5's own heading says "Produces 9 rows", and
+    exactly nine rows complain, so the ruling's published count is checked
     against the corpus for free.
+
+    **THE PIN MOVED 6 -> 9 ON 2026-09-20 AND THE NUMBER IS WRITTEN OUT HERE
+    RATHER THAN DERIVED FROM THE HEADING, DELIBERATELY.** Reading the count out
+    of the heading would make this assertion unfalsifiable: the heading and the
+    corpus would then be compared against each other by a test that got its
+    expectation from one of them, so a wave that moved rows and updated the
+    heading to match would stay green while a wave that moved rows and forgot
+    would ALSO stay green. A literal here is the only version that can convict.
+
+    It moved because the write-partition wave filed three more rows under R5 --
+    `96`, `A14`, `A15` -- and this test is what caught the heading still saying
+    six. That is the guard working, and the cost of the design is exactly one
+    line of maintenance per real change, paid here.
     """
     path = census / "network.md"
     before = _read(path)
@@ -349,8 +362,8 @@ def test_a_deleted_ruling_section_is_reported(census):
 
     citing = [l for l in out.splitlines()
               if "cites R5, which has no ruling section" in l]
-    assert len(citing) == 6, (
-        f"R5's heading says it produces 6 rows; {len(citing)} rows reported an "
+    assert len(citing) == 9, (
+        f"R5's heading says it produces 9 rows; {len(citing)} rows reported an "
         f"unresolvable citation:\n" + "\n".join(citing))
     assert ("ADJUDICATION 'RULING R5' names a ruling section that network.md "
             "no longer has") in out, out
