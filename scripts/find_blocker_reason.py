@@ -223,8 +223,19 @@ def corpus() -> tuple[tuple[str, str], ...]:
         ["git", "-C", str(ROOT), "ls-files", "_audit"],
         capture_output=True, check=True,
     ).stdout.decode("utf-8", "replace").splitlines()
+    # AND THE GENERATED INDEX IS NOT AN AUDIT DOCUMENT. `_audit/INDEX.md` is a
+    # derived VIEW of this corpus -- every document's title, and 65 correction
+    # reasons quoted verbatim -- so it mentions every blocker-shaped word in
+    # the repository and ranks against documents that actually ARGUE one. It is
+    # the same lesson as the `_scratch/` paragraph above, arriving from the
+    # opposite direction: there the corpus held files no reader has, here it
+    # would hold a file that is only a picture of the others. Measured the hour
+    # it was added: GROUPS-SURFACE's real argument fell from rank 1 to rank 17
+    # and the recall floor went red. See INSTRUMENTS.md section 45.
     wanted = sorted(
-        r for r in tracked if r and (r.endswith(".md") or r.endswith(".tsv"))
+        r for r in tracked
+        if r and (r.endswith(".md") or r.endswith(".tsv"))
+        and r != "_audit/INDEX.md"
     )
     out: list[tuple[str, str]] = []
     for rel in wanted:
