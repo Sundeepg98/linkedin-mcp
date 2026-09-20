@@ -1229,7 +1229,16 @@ it can still see the browser. Both are read-only and both take seconds.
 > phantom tool name, caught by the guard built to catch it"* and which
 > belongs to a different wave. It was staged in the shared main tree when
 > that wave committed, and a commit taking the whole index swept it in --
-> 208 insertions, all of them this section. **Nothing was lost and nothing
+> 208 insertions, all of them this section.
+>
+> **THE COMMIT WAS THE CAMPAIGN LEAD'S, and the mechanism is worth naming
+> exactly.** The lead ran `git add` with two explicit paths -- correctly
+> pathspec-limited -- and then a plain `git commit`, which builds from the
+> WHOLE INDEX and therefore took this file too. A pathspec on the `add`
+> constrains nothing about what is already staged; `git commit --only <paths>`
+> is the form that does. The lead had warned two other waves about precisely
+> this hazard in the hours before doing it, which is the part worth keeping:
+> knowing the rule is not the same as reaching for the right flag. **Nothing was lost and nothing
 > was altered:** both correction markers survived and the nine correction
 > guards pass. Recorded rather than repaired, because rewriting published
 > history to fix an attribution is a worse trade than one paragraph.
