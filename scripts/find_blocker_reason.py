@@ -143,7 +143,15 @@ PARAGRAPH = re.compile(r"\n\s*\n")
 #:     in the top 3     5 of 8  ->  7 of 8
 #:     at rank 1        0 of 8  ->  4 of 8
 #: and over the 26 SURFACE-named blockers, documents ranked as a share of
-#: documents that mention the blocker: 80.5% -> 85.6%.
+#: documents that mention the blocker: 80.5% -> 85.6%. THAT PAIR ISOLATES F4
+#: ALONE -- both sides already carry F1-F3. The END-TO-END figure, against the
+#: module at `8b58dcb` on the same denominator a sibling wave used:
+#:     BEFORE   99 of 309 mentions ranked   32.0%
+#:     AFTER   241 of 309 mentions ranked   78.0%   (85.5% net of the one file
+#:                                                   this tool may not rank)
+#: Their independent measurement was 93 of 286, 32.5%, on a slightly smaller
+#: corpus -- the rate reproduces, which is why their denominator was reused
+#: rather than a fresh one invented.
 #:
 #: IT IS NOT UNIFORMLY BETTER AND THE ONE REGRESSION IS STATED RATHER THAN
 #: BURIED: `GROUPS-SURFACE`'s hand-found document fell from rank 7 to rank 14,

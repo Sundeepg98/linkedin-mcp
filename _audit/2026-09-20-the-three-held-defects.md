@@ -159,6 +159,29 @@ conclusion, which is why it is a footnote and not a re-run.
 the document arguing the reason for 59 of 97 blockers** -- and the map is the
 file the column lives in.
 
+### 2.2a The end-to-end number, on a denominator this wave did not invent
+
+The table above measures whether the RIGHT document is found. A sibling wave
+measured the other question -- how much of the corpus the locator can see at
+all -- and got **93 of 286 mentions ranked, 32.5%**, over the 26 SURFACE-named
+blockers. Re-run here on their method (MENTIONS = corpus files naming the
+blocker; RANKED = files `candidates()` returns with score > 0), against the
+tool at `8b58dcb` loaded from git and pointed at the real corpus:
+
+    BEFORE   99 of 309 mentions ranked =  32.0%   (210 blind)
+    AFTER   241 of 309 mentions ranked =  78.0%   ( 68 blind)
+    AFTER, net of the one file this tool may no longer rank:
+            241 of 282                 =  85.5%
+
+**32.0% against their 32.5% is an independent reproduction**, on a corpus that
+has gained files since they measured -- the absolute counts differ, the rate
+does not. Using their denominator rather than a fresh one is what makes the
+after-number a comparison instead of an encouraging figure.
+
+The third line is the honest footnote: `blocker-map.tsv` still MENTIONS every
+blocker, and this tool is now forbidden to rank it, so it is counted as a miss
+in the 78.0%. Both readings are given rather than the flattering one.
+
 ### 2.3 Four defects, each diagnosed separately so the repair is aimed
 
 **F1 -- every STEM in the vocabulary was dead.** The word list was written with
