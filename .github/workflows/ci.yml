@@ -175,6 +175,33 @@ on:
   pull_request:
   workflow_dispatch:
 
+# WHY THIS EXISTS, and why master is deliberately EXEMPT.
+#
+# Every push here fans out to a 20-job matrix on the SHARED FREE POOL. That pool
+# is the entire reason this repository is public. Measured 2026-09-20 with seven
+# waves in flight: 10 runs active and 8 more QUEUED -- roughly 200 jobs deep,
+# most of them superseded before they could finish. One wave pushed five times
+# in a single run and cancelled three of its own runs BY HAND.
+#
+# So supersede automatically on every branch: a newer push to the same ref makes
+# the older run's answer worthless, and a worthless run that still occupies a
+# runner is taking capacity from a run somebody is waiting on.
+#
+# MASTER IS EXEMPT ON PURPOSE. This repo cites CI run ids as receipts -- "20 of
+# 20 SUCCESS at <sha>" is how a wave proves its tree was green. Cancelling an
+# in-flight master run to start a newer one destroys the receipt for the commit
+# in between, and an unproven commit in master's history is exactly what the
+# receipts exist to prevent. Branch runs carry no such claim.
+#
+# NOT DONE HERE, and deliberately: `paths-ignore` for documentation. It looks
+# like the bigger saving and it is the wrong call in THIS repo -- on 2026-09-20 a
+# marker inserted between a table header and its first data row broke
+# build_blocker_map.py so every blocker read as unknown, and CI is what caught
+# it. Here a markdown edit IS a code change.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
   plan:
     # ONE literal, in one place, feeding BOTH the matrix and the guard that

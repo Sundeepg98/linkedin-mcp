@@ -4031,3 +4031,615 @@ role-play probes (the second re-reading the first's address at three settle
 depths). Their results are the numbers in
 `_audit/2026-09-20-the-live-capture.md`. The capture driver's job is done --
 the captures it wrote are on disk and the committed probe reads them.
+
+## 25. THE SURFACE-CLASS ADJUDICATION, 2026-09-20
+
+Appended, not inserted -- see this file's preamble; find these by NAME.
+
+One instrument, `scripts/classify_surface_blockers.py`, with
+`tests/test_surface_class_is_derived.py` (13 tests). Full write-up in
+`_audit/2026-09-20-the-surface-class.md`.
+
+### 25.1 `classify_surface_blockers` -- a membership rule that RUNS
+
+**WHY IT EXISTS.** `_audit/2026-09-20-the-contingent-writeoffs.md` s3.1
+published a class named `SURFACE?` at 22 blockers / 139 rows / 108 GAP. The
+classifier was never committed and its three inputs are gitignored and gone,
+so the membership survives only as three integers -- and **186,629,988,917,605
+distinct 22-blocker subsets of the residual pool fit them exactly.** The same
+defect `build_blocker_map.py` exists to end, one level up.
+
+**SHOWN FAILING in five directions**, each planted against a COPY of the ledger
+in the scratchpad with the module's `LEDGER`/`MAP` constants repointed, so
+nothing tracked was touched:
+
+    ranked table header broken        every boundary cell reads as absent
+    cost-0 table header broken        its blockers read as missing entirely
+    one ranked row deleted            97/409 stops closing
+    SURFACE blocker in neither table  a map/ledger membership disagreement
+    boundary cell IS a surface fact   headline count must move 0 -> 1
+
+### 25.2 `A-ZERO-FROM-A-BRANCH-THAT-CANNOT-FIRE` -- the mutation that matters
+
+The wave's headline is a ZERO: none of the 26 blockers is blocked by a surface
+fact. **A zero is the most dangerous shape a finding can take**, because a
+branch that never fires and a branch that fires and finds nothing print the
+same character. `test_the_surface_fact_branch_can_fire` plants a boundary cell
+reading "LinkedIn draws no such page" and REQUIRES the count to become 1 and
+the blocker to be named.
+
+It earned its place twice over: the red-proof harness itself reported
+`*** DEAD BRANCH` on its first run because it built the planted ledger and
+never passed it, then failed again asserting `"surface fact: 1"` against a
+program that prints `"SURFACE fact: 1"`. **Both defects were in the checker,
+not the checked.** A mutation of the classifier (`return "SURFACE-FACT"` ->
+`"NONE-STATED"`) turns exactly this one test red and leaves the other twelve
+green, which is what a discriminating guard looks like.
+
+### 25.3 `A-HAND-WRITTEN-LOOKUP-NEEDS-A-DUPLICATE-CONTROL`
+
+`SURFACE_ADDRESSES` maps each blocker to a candidate base address, checked
+against the live boundary. It is hand-written, so a copy-paste puts one
+blocker's address on another and the report then prints a verdict for a page
+that blocker has nothing to do with. **That is not hypothetical: it shipped.**
+`CREATOR-HUB-SURFACE` was given the identical address as its sibling
+`CONTENT-ANALYTICS-SURFACE` and was counted into a headline on the strength of
+it -- caught by an evidence sweep reading a 2026-09-19 document, not by the
+author.
+
+`test_no_two_blockers_share_a_base_address_undeclared`. A shared address is not
+banned -- `/messaging/` genuinely draws three of these surfaces -- it must be
+DECLARED, which turns a silent copy-paste into a statement somebody wrote down.
+The guard ALSO fails when the declaration drifts from the table, because a
+stale declaration launders a real duplicate. **SHOWN FAILING** by re-inserting
+the original bug:
+
+    AssertionError: these base addresses are shared by more than one blocker
+    without being declared in DELIBERATE_SHARES, so at least one of them is
+    reporting a verdict for a page it does not own:
+    {'/analytics/creator/content/': ['CONTENT-ANALYTICS-SURFACE',
+                                     'CREATOR-HUB-SURFACE']}
+
+**The general form, worth copying:** any lookup table a human types, whose
+entries are compared against a live system, needs a control that the entries
+are DISTINCT unless distinctness was deliberately waived. Without it a
+duplicate is indistinguishable from a measurement.
+
+### 25.4 `REFUSED-IS-NOT-ABSENT`, and its sharper twin `ALLOWED-AND-STILL-WRONG`
+
+The converse of s9.1's standing ALLOWED IS NOT SERVED, and the reason this
+wave banked zero rows. A probe that runs candidate URLs through
+`readonly.assert_read_url` and reports them refused has measured OUR GATE, not
+LinkedIn. Filing such a refusal as a surface absence writes a fact about this
+repository into the census as a fact about the world.
+
+**And the twin, measured in-class on `JOB-ALERTS-SURFACE`:** `/jobs/alerts/` is
+ALLOWED by the boundary and LinkedIn **redirects away from it, twice
+reproducibly with a control serving correctly at both ends of the session**. So
+a pattern can be ALLOWED-AND-STILL-WRONG -- matching nothing LinkedIn resolves
+to -- and a naive `is_read_url` check reports the row addressable when the one
+live test on record says the address does not serve.
+
+**THE CROSS-INSTRUMENT CONTROL THIS IMPLIES**, and it is cheap:
+`test_the_two_boundary_entry_points_agree_on_every_candidate` asserts
+`is_read_url` and `assert_read_url` return the same verdict for all 26
+addresses (measured: 0 disagreements). The classifier asks the predicate; a
+capture calls the asserting form. If they ever diverge, "reachable for a
+capture" stops being well defined and every number built on it is ambiguous.
+
+### 25.5 A TOOL THIS WAVE MEASURED AND DID NOT WRITE -- `find_blocker_reason`
+
+Not an entry for this register's usual purpose; a WARNING about one already in
+it. Measured across the 26 SURFACE blockers: **286 mentions, 93 ranked, 193
+blind (67.5%)**. A fixed-seed sample of 51 blind mentions read in context came
+back **42 substantive / 9 incidental**.
+
+**THE MECHANISM: a document that argues by CENSUS ROW ID -- this campaign's own
+convention -- instead of repeating the blocker's compound name is nearly
+invisible to a same-line co-occurrence test.** All three flagship
+`SEARCH-RESULTS-SURFACE` admission documents and both 2026-09-20 build-wave
+reports are blind for their own blocker. Precision is fine (18 of 19 top-ranked
+non-census documents substantive); **recall is the defect**. Its silence is
+UNKNOWN, never absence, and no `reason_doc` column may be derived from it.
+
+### 25.6 DISPOSABLE, declared
+
+A subset-counting script (the 1.87e14 figure), a fixture-corpus path-family
+tally, and the standalone red-proof harness. The first two produced numbers now
+quoted in the wave document; the third is superseded by the committed test
+file, which plants the same five defects and is re-runnable in CI.
+
+### 25.7 `A-WATCHER-THAT-EXITS-ZERO-WHEN-IT-NEVER-SAW-A-VERDICT`
+
+**Found 2026-09-20 in the CI-reporting path every wave uses.** Not a test: the
+command waves run to decide whether to report a run green.
+
+`gh run watch <id> --exit-status` is documented to exit non-zero when the run
+fails. **It also exits ZERO when it never learns the run's conclusion at all.**
+Four watches in this wave returned exit code 0 and their transcripts end:
+
+    * every shard reported (ID 106027531906)
+    failed to get run: HTTP 403: API rate limit exceeded for user ID ...
+    [exited with code 0]
+
+The watcher polled, lost the API to a fleet-wide 403 (5,000/hr is shared across
+every tool and agent, and several waves were pushing at once), gave up, and
+**reported success by exiting 0**. Four background tasks then notified
+"completed (exit code 0)", which reads exactly like four green runs.
+
+**THE SHAPE IS THIS REPOSITORY'S OWN STANDING RULE, arriving from outside the
+codebase:** verify by ARTIFACT, never by exit code, because a loop that
+exhausts its attempts exits 0. It has been written here about retry loops. It
+is equally true of a WATCHER, and a watcher is more dangerous because its exit
+code is the only thing a notification carries.
+
+**THE CHECK, and it costs one command.** Never report a conclusion from the
+watcher's exit code. Read the conclusion back:
+
+    gh run view <id> --json status,conclusion,headSha
+
+and if THAT call fails, the run's state is UNKNOWN -- which is a different
+answer from green and must be reported as such. A rate-limited query is an
+outage, not a measurement: this is the same law as
+`A-BLIND-CHANNEL-MUST-NOT-REPORT-A-CLEAN-ABSENCE` (s2.2), and the same one a
+memory in this project already records -- a probe with no `except` turns an
+infrastructure outage into a finding about the platform.
+
+**WHAT IT COST HERE: nothing, because the exit codes were disbelieved** and the
+run list had already been read as an artifact for the two commits that matter.
+Recorded so the next wave does not spend the discovery again, and so that
+"exit code 0" never again appears in a wave report as evidence of a green CI.
+
+**A SECOND-ORDER NOTE WORTH HAVING.** `gh api rate_limit` reported
+`core: 5000/5000, used 0` while `gh run list` and `gh run view` both returned
+403 in the same minute. **The bucket that is exhausted is not the bucket that
+endpoint reports**, so "rate_limit says we are fine" does not license a retry.
+Treat the 403 itself as the measurement.
+
+## 26. THE THIRD CAUSE, AND A CONTROL THAT PASSED WHILE ITS REPORT LIED, 2026-09-20
+
+### 26.1 `scripts/_check_published_split.py` -- it printed two words for two unrelated situations
+
+The report classified nothing. It printed `OVER on R` for a blocker whose
+surplus was four rows that ARRIVED on committed re-files, and `OVER on R` for a
+blocker where nothing had arrived, nothing was missing, and the count closed
+exactly. Its docstring named two causes -- a row LOST, a row RE-FILED OUT --
+and both describe movement AFTER publication. **The third is an error AT
+publication, and a report that cannot show it will have its one instance read
+as one of the other two.**
+
+**THE LAW: A CAUSE THE INSTRUMENT CANNOT NAME GETS ATTRIBUTED TO THE NEAREST
+CAUSE IT CAN.** That is not a gap in coverage, it is a manufactured wrong
+answer, and it is the same shape as a line-number citation rotting into a
+plausible one rather than a dangling one.
+
+**THE DISCRIMINATOR WAS ALREADY WRITTEN, ONE FILE AWAY, AND NOBODY CALLED IT.**
+`_check_refile_destination_credit.publishers()` (register 21.2) knows which
+rows arrived from elsewhere. Subtracting their directions from `held` separates
+the causes in three lines:
+
+    RE-FILED-IN   the over-run vanishes once arrivals are subtracted
+    LOST          own rows fall short of the published total
+    AT-BIRTH      count COMPLETE, nothing incoming, and STILL over
+
+No new instrument was written. The import was the whole fix, which is the
+second time in this register that the answer was to call a shipped tool rather
+than build a cousin of it.
+
+**WHAT IT CONVICTED, and the arithmetic is the conviction rather than the
+verdict:** `NEWSLETTER-SURFACE` published `1R/11W` over twelve rows while the
+whole newsletter family in the frozen 409 holds **ten** writes. Eleven writes
+do not exist, so no subset, no re-file and no lost row could ever have produced
+that cell. The read-side version of the same argument -- every 12-subset of the
+thirteen holds at least two reads -- is weaker, because it depends on which
+twelve were chosen. **A supply argument beats a subset argument: one of them
+has to know which rows were picked and the other does not.**
+
+### 26.2 THE CONTROL WAS SHOWN FAILING, AND ONE OF THE MUTATIONS CONVICTED THE CONTROL
+
+Three mutations, each applied in-process and reverted, each required to turn a
+control red:
+
+| mutation | `--control` (pre-existing) | `--control-causes` (new) |
+|---|---|---|
+| classifier returns one word always | exit 0, BLIND | exit 1, 2 of 3 WRONG |
+| `_incoming()` stubbed to `{}` | n/a | exit 1, `DEAD, the subtraction reaches nothing` |
+| clean-victim pool starved | n/a | exit 2, REFUSES to inject |
+
+**THE SECOND ROW IS THIS ENTRY'S REASON FOR EXISTING, BECAUSE ON ITS FIRST
+VERSION IT READ EXIT 0.** With the incoming derivation stubbed dead, all three
+injected cases still classified correctly -- while the report four lines above
+called `SEARCH-RESULTS-SURFACE` AT-BIRTH, the one verdict reserved for a
+published figure that was wrong when written, handed to a blocker whose surplus
+is four documented arrivals.
+
+**THE LAW: A CONTROL THAT SUPPLIES THE INPUT WHOSE DERIVATION IT PROTECTS
+CERTIFIES AN INSTRUMENT THAT IS ALREADY LYING.** The RE-FILED-IN injection
+planted its own arrival into the table, so it exercised the classifier's LOGIC
+and never its INPUT. Repaired with a derivation-liveness assertion -- arrivals
+derived from `publishers()` must equal the `RE_FILED` row count and must not be
+zero:
+
+    HEALTHY            arrivals 5 against 5 RE_FILED rows -- LIVE       exit 0
+    _incoming STUBBED  arrivals 0 against 5 RE_FILED rows -- DEAD       exit 1
+
+The victim-selection guard is register 21.1's lesson applied with the sign
+flipped: injecting a CLASS into a blocker the report already names would
+compare the injected class against the real one and read as a
+misclassification, so the victims are chosen from an asserted-clean pool and
+the control REFUSES rather than injecting anywhere when fewer than three exist.
+
+### 26.3 `scripts/_check_jobs_range_directions.py` -- it widened the COVERAGE and dropped the READING
+
+This file exists to show the twenty blockers the split check SKIPS. It already
+imported that check. It still printed a bare `OVER on R` for
+`COMPANY-PAGE-SURFACE` -- the third known over-run and the ONLY one the narrow
+report cannot see at all -- while the sibling one import away had just learned
+to say which of three causes it was.
+
+**THE LAW: WIDENING WHAT AN INSTRUMENT CAN SEE IS NOT THE SAME AS WIDENING
+WHAT IT CAN SAY, AND THE SECOND IS THE ONE A READER USES.** A report that
+reaches further and reports more coarsely has moved a blind spot rather than
+closed one -- and the blocker only this report can see was the one getting the
+coarsest verdict available.
+
+One import later the whole known set is named, and the third answer is new:
+
+    SEARCH-RESULTS-SURFACE   RE-FILED-IN   four rows arrived on committed re-files
+    NEWSLETTER-SURFACE       AT-BIRTH      corrected in the ledger, 24.1
+    COMPANY-PAGE-SURFACE     LOST          own 16 against a published 18
+
+**AND TWO INSTRUMENTS THAT DO NOT KNOW ABOUT EACH OTHER AGREE ON IT.**
+`_check_open_slots.py` independently lists `COMPANY-PAGE-SURFACE` with 2
+FILLABLE slots -- slots whose row is neither re-filed nor a ruled phantom, i.e.
+rows genuinely missing. `LOST` is the same fact reached from the direction
+column instead of the slot table. A verdict two unrelated parses produce is
+worth more than a verdict one produces twice.
+
+**THE NEW ASSERTION, SHOWN FAILING.** `--control-overrun` already required the
+table to NAME an injected over-run; it now also requires the CAUSE to read
+`OVER-COUNT`, which is the only honest verdict for a blocker holding 99 more
+rows than it published. Stub the classifier to one word and it reads
+`expected OVER-COUNT, got RE-FILED-IN -- WRONG`, exit 1. Healthy: plain,
+`--control-blind` and `--control-overrun` all exit 0.
+
+**AND THE GAP IN IT IS STATED HERE RATHER THAN DISCOVERED LATER.** Dropping
+the incoming subtraction does NOT move this control: its victim has no
+incoming rows and neither does `COMPANY-PAGE-SURFACE`. That mutation is caught
+by the sibling's derivation-liveness assertion (24.2), where the derivation
+lives. **A control that cannot fail for a given defect should say which file
+catches that defect, not imply it catches everything beside it.** Building a
+second copy here would have been the cheaper-feeling move and would have
+produced two controls testing one thing.
+
+### 26.4 DISPOSABLE, declared
+
+Five scratch scripts in the session scratchpad: the 13/3R-10W re-measurement at
+three refs, the whole-line needle widener, the partition-closure arithmetic,
+the incoming-subtraction prototype, and the ledger red-reproduction that
+repoints `build_blocker_map.LEDGER` at an edited copy. The first two are
+superseded by the shipped `scripts/_sweep_frozen_rows.py newsletter`, which was
+used as the cross-instrument control and agrees exactly. The third is
+superseded by the shipped `scripts/_check_open_slots.py`, whose open-slot table
+answers the same question directly. The fourth shipped, as the import in 24.1.
+**The fifth is the only one worth re-deriving and the technique is two lines**
+-- `bbm.LEDGER = <a copy>` prices a ledger edit against every shipped assertion
+without touching a tracked file, and it is how the option of ruling the two
+handed-over defects together was costed before it was declined. Their results
+are in `_audit/2026-09-20-the-split-ruling.md`.
+
+## 27. `scripts/detect_unbranched_probe_controls.py` -- 129 controls that print FAIL and certify anyway, 2026-09-20
+
+### 27.1 THE CENSUS, AND WHY IT IS A DIFFERENT CLASS FROM A SINGLE FIX
+
+Section 23.3 already named one instance of this defect by hand:
+`scripts/_probe_events_surface_shape.py`'s `silent` control, printed and never
+branched on, fixed in commit `2fba253`. This entry is what happened when the
+same shape was asked to be COUNTED rather than described: an AST-based census
+over every `scripts/_probe_*.py` file, run under a wave lead by an implementer
+who reported the number rather than the feeling. Full write-up:
+`_audit/2026-09-20-control-census.md`.
+
+**56 of 88 probe files carried at least one never-branched control. At the
+instance level: 129 of 762 control-like readings never branch (17%), 630
+branch correctly, and 13 more are assigned and never even read.** Both
+denominators matter and neither alone is honest: the file count alone reads
+as "most of the corpus is broken" (it repeats a claim the census's own author
+first put to the operator before re-deriving the instance share), and the
+instance count alone hides that the defect concentrates rather than
+spreading evenly (distribution is in the write-up).
+
+**Independently replicated**, same detector, main tree, by the wave lead:
+`with_finding=56` exactly. The one-file, one-instance delta (89 files, 130
+instances there against 88/129 here) is `scripts/_probe_premium_surfaces_
+shape.py`, an untracked probe a live browser wave was writing at the moment
+of the run -- the tool's own drift check named it.
+
+### 27.2 THE CONTROL PAIR: SAME FILE, TWO SHAS, OPPOSITE VERDICTS
+
+A single calibration file is a check that cannot fail if nobody re-derives it
+against what actually changed. `scripts/_probe_events_surface_shape.py` was
+the working calibration target mid-census -- until it was independently fixed
+(the same repair section 23.3 had already named) WHILE the census was
+running, in the SAME shared worktree. That turned the textbook positive into
+a negative between one read and the next, which is precisely the shown-
+failing proof this register asks for, arriving uninvited: the wave lead's
+ruling was to keep the ORIGINAL committed shape as a frozen synthetic
+positive and pair it with the repaired shape as a discrimination control --
+same file, same variable, two shas, opposite verdicts, proving the detector
+reads content rather than asserting a fixed answer. That pair is now
+permanent, as inline fixtures (not a git reference, which would eventually
+stop meaning anything once the real file changes again) in
+`tests/test_probe_controls_are_never_decorative.py`.
+
+Receipt, `scripts/_check_unbranched_control_detector_can_fail.py`, run
+2026-09-20:
+
+```
+A/B. same shape, one branch apart -- must flip verdict
+PASS   A: broken fixture flags `silent`
+PASS   B: fixed fixture does NOT flag `silent`
+PASS   B: fixed fixture's `silent` reads as correctly branched
+
+C. an `if` beside the print that tests a DIFFERENT variable
+PASS   C: `hits` is still flagged despite the nearby `if needle == ...`
+
+D. the ratchet itself must be able to go RED
+PASS   D: removing one real baseline entry (('_probe_add_section_menu.py', 'main', 'controls')) from view makes the ratchet report it as new
+PASS   D control: with the FULL baseline, that entry is NOT reported
+
+all demonstrations behaved as stated
+```
+
+Demonstration C is the sharper of the two shapes this instrument has to
+tell apart, and it is the one a cheaper check would get wrong: an `if`
+sits in the SAME loop body as the print, one line away, and it is still not
+a branch on the printed variable, because it tests `needle` rather than
+`hits`. A detector that credits any nearby `if` as covering any nearby
+variable would have cleared this and every row like it.
+
+### 27.3 A RATCHET, NOT AN EXACT PIN -- AND WHY THIS REPO'S OWN IDIOM WAS REJECTED
+
+`scripts/_check_tool_count_pin_control.py` (section unlisted, but its
+receipt is the model this entry followed most closely) pins an EXACT
+count and forces a review moment on every bump. That idiom was considered
+and rejected here on purpose: this corpus gains new probe files from
+unrelated waves most days (24.1's replication found one mid-flight), so an
+exact global count would fail as often on someone else's unrelated
+addition as on a real regression, and a guard that cries wolf gets
+`--no-verify`d. Instead, `scripts/probe_controls_known_decorative_
+baseline.json` pins the 129 findings by `(file, function, variable)` and
+`tests/test_probe_controls_are_never_decorative.py::
+test_probe_corpus_has_no_new_decorative_control` fails ONLY on a finding
+outside that set. Shrinking the baseline as the backlog gets fixed is
+invited, not required -- demonstration D above proves the mechanism can
+still go red with the real baseline missing a real entry, which is what
+makes "not required" different from "cannot detect."
+
+### 27.4 THE FALSE-POSITIVE MECHANISM THIS ENTRY DISCLOSES RATHER THAN HIDES
+
+The marker list (`PASS`, `FAIL`, `CONTROL`, `VOID`, ...) is matched as a
+bare case-insensitive substring, exactly as specified when this was built.
+Bare `pass` and `void` can embed inside an unrelated word. Measured, not
+assumed: a corpus-wide sweep for known embeddings (`passes`, `password`,
+`bypass`, `avoid`, ...) found exactly ONE site where this fires --
+`scripts/_probe_messaging_menu_enumeration.py`, function
+`_report_overlaps`, variables `one` and `overlap_label`, whose only marker
+hit is `pass` sitting inside the parameter name `passes: dict` -- **2 of the
+129 findings (1.6%), both at this one site, nowhere else in the corpus.** A
+stricter word-boundary regex was tried and rejected: it also rejects
+legitimate inflections with a trailing letter (plural `controls`), which
+would have thrown away a hand-verified TRUE positive
+(`scripts/_probe_groups_menu.py`'s `stuck`) to fix a problem that affects
+1.6% of findings. Documented in the detector module's own docstring so the
+next person who re-tightens the marker rule re-runs the comparison rather
+than assuming a boundary regex is free.
+
+### 27.5 WHAT IS SHIPPED, WHAT IS NOT
+
+Shipped (tracked, not disposable): `scripts/detect_unbranched_probe_
+controls.py` (the detector, importable), `scripts/probe_controls_known_
+decorative_baseline.json` (the 129-entry ratchet baseline),
+`tests/test_probe_controls_are_never_decorative.py` (the guard, run on
+every test pass), `scripts/_check_unbranched_control_detector_can_fail.py`
+(this entry's receipt generator, re-run whenever the detector's marker or
+sink logic changes).
+
+DISPOSABLE, declared: the census run's scratch materialization of a frozen
+`git stash create` snapshot, its per-file JSON dump, and the cost-ranking
+cross-reference script -- all session-scratchpad only, never committed.
+Their numbers live on in `_audit/2026-09-20-control-census.md`, which is
+the durable artifact; the scratch scripts that produced it are not.
+
+### 27.6 WHAT THE CENSUS COST, RANKED -- FOR THE FIXER, NOT AS A VERDICT
+
+The census does not itself say which of the 129 findings matter. Cross-
+referenced against `_audit/_census/*.md`: 5 of the 56 flagged files sit
+directly under a census row that is BANKED (moved off GAP on a state such
+as `COVERED-PROVEN`), meaning that row's claim was concluded using this
+exact probe's output while the probe's own self-check on itself was
+decorative. Ranked by that fact, not by finding count alone:
+
+* `scripts/_probe_small_measures_live.py` (5 findings) -- underlies
+  `_audit/_census/jobs.md` row 15 (`COVERED-PROVEN`), the "All filters"
+  panel, where the row's own evidence text calls this probe "shown failing
+  before admission." The irony is the finding: a probe vetted for ITS
+  addition can still carry a decorative control on a DIFFERENT variable
+  than the one it was vetted on.
+* `scripts/_probe_job_collections_live.py` (3 findings) -- underlies
+  `_audit/_census/jobs.md` row 42 (`COVERED-PROVEN`), job collections and
+  their five groupings.
+* `scripts/_probe_creator_content_analytics.py` (2 findings) -- underlies
+  `_audit/_census/messaging-and-content.md` row C40 (`COVERED-PROVEN`),
+  creator analytics.
+* `scripts/_probe_job_search_result_sets.py` (1 finding) -- underlies FIVE
+  `_audit/_census/jobs.md` rows at once (9, 11, 12, 13, 14, all
+  `COVERED-PROVEN`), the job-search filter parameters, all five citing the
+  same instrument and evidence block.
+* `scripts/_probe_membership_sections.py` (1 finding, `silent`, the same
+  must-stay-silent shape as this entry's own calibration positive) --
+  underlies `_audit/_census/network.md` row 162 (`COVERED-CANNOT-DELIVER`).
+
+The other 51 flagged files either sit under a row still marked `GAP` or
+`EXCLUDED-RULED` (2 files -- no live claim is banked on them yet), are
+named only in a journal write-up rather than a census row (43 files), or
+were not found cited anywhere searched (6 files). Full per-file breakdown:
+`triage-by-cost.json`, referenced from `_audit/2026-09-20-control-census.md`.
+This is not a claim that the 5 banked rows are WRONG -- a decorative
+control does not mean the probe's finding was false, only that the probe
+never checked whether it could have been. The fixer's cheapest next step is
+those 5, because they are the only ones where something already rests on
+the answer.
+
+## 28. THE BLOCKER-REASON LOCATOR, MEASURED BEFORE IT WAS BUILT ON, 2026-09-20
+
+### 28.1 `tests/test_the_blocker_reason_locator_states_its_recall.py` -- a recall number, pinned
+
+ADMITTED. Shown failing 10 of 10 against `scripts/find_blocker_reason.py` as of
+`8b58dcb`, loaded out of git into a temp file and re-run through the same
+assertions. It pins four properties: the one miss a human found by hand, two
+recall floors, the exclusion of generated artifacts from candidacy, and -- the
+unusual one -- a CEILING on at-rank-1 accuracy that fails if the locator ever
+gets good enough that the column's shape should be re-decided.
+
+**THE VALIDATION SET IS THE INSTRUMENT'S WHOLE VALUE, AND IT IS NOT THE TOOL'S
+OWN OUTPUT.** It is six blockers a sibling wave's child researched by hand, with
+the documents it named in its deliverable before this work began. A tool
+evaluated on the cases it found is measuring itself, and every recall number
+this repository has published for a locator before now was of that shape.
+
+### 28.2 THE FALSE RED I ALMOST BANKED, and the assertion that now prevents it
+
+The first run of the red harness reported `candidates()` returning **0**
+documents for every blocker, which looked like a spectacular confirmation. It
+was a harness defect: the old module computes `ROOT` from `__file__`, the
+harness had written it to a temp directory, and it was scanning an empty tree.
+A zero from a real corpus and a zero from no corpus are the same integer.
+
+The harness now asserts its corpus size before it trusts any result --
+`assert len(list(old.AUDIT.rglob("*.md"))) > 100`. **A red is a measurement and
+has to be defended exactly as hard as a green**, and a red that agrees with your
+hypothesis is the one you will not check.
+
+### 28.3 FOUR DEFECTS IN ONE WORD LIST, AND ONLY ONE WAS "ADD MORE WORDS"
+
+Diagnosed and measured SEPARATELY, because each has a different fix and three of
+them are invisible to the obvious remedy:
+
+* **A STEM WRAPPED IN `\b(...)\b` MATCHES NOTHING.** The list was written with
+  stems -- `refus`, `measur`, `admit` -- and every one was dead. `measur` matched
+  zero occurrences in a corpus carrying "measured" 1910 times. The comment above
+  the regex read "deliberately broad"; the regex was the opposite. **A vocabulary
+  can be silently empty and still look carefully chosen.**
+* **A PHYSICAL LINE IS NOT A UNIT OF ARGUMENT.** Scoring required the needle and
+  an argue-word on one line, over a corpus hard-wrapped at 76 columns (mean
+  non-blank line 70.6 chars, median 75). It was measuring typography -- and
+  DIRECTIONALLY, because a `.tsv` record is one line (mean 544.5) and carried
+  every word of a record on the needle's own line.
+* **THE GENERATED INDEX WON 59 OF 97 RACES.** The top-ranked "document that
+  argues this blocker's reason" was `blocker-map.tsv`, which restates
+  assignments and argues nothing -- and is the file the proposed column would be
+  written into, making the derivation a fixpoint on its own content. The
+  hand-written evidence TSV beside it is deliberately NOT excluded, and the test
+  asserts that distinction rather than banning a file extension.
+* **THE JOIN KEY WAS WRONG.** The needle was the blocker NAME; this corpus
+  argues by census ROW ID. A build report argues at length about `J 40` and
+  names its blocker twice in the whole file.
+
+Recall against the hand-built set, 1 of 8 -> 8 of 8 found, 0 of 8 -> 4 of 8 at
+rank 1. **The fixes were measured one at a time, and the known-miss case passes
+as a CONSEQUENCE of the vocabulary repair rather than as its target** -- which
+is the difference between a repair and a tool tuned to its own test.
+
+### 28.4 THE SHAPE A MEASURED RECALL FORCED ON A DERIVED COLUMN
+
+`reason_doc` ships, but it may not carry a bare path: at 4-of-8 at rank 1 a path
+in a table cell is a coin flip wearing a fact's clothes, and a table reads as
+data rather than as a claim. Every populated cell begins
+`CANDIDATE-<rank>-OF-<n> SCORE-<n>`, and a test asserts that no cell is ever a
+bare path. **The measurement did not just qualify the column, it specified its
+format.**
+
+The fixpoint was verified rather than argued: `--write` twice, byte-identical.
+
+### 28.5 A ROW THAT LOSES ITS ASSIGNMENT IS NOT A ROW THAT WAS DELETED
+
+A control was commissioned on the premise that a union merge had resurrected a
+deleted census row. The pickaxe refuted it: exactly one commit ever touched
+those row texts and it is the one that created them, and the repository has no
+`.gitattributes`, so no union driver was ever configured. What had actually been
+removed was the rows' BLOCKER ASSIGNMENT, in a different file, on a different
+object. **Two different deletions wearing one sentence.** The refutation was
+worth more than the confirmation would have been: it established that no census
+row has ever been deleted in this tree, which turned a bookkeeping chore into a
+ruling.
+
+### 28.6 DISPOSABLE, declared
+
+Five scratch scripts in the session scratchpad -- a reproduction of the reported
+miss, a corpus-geometry and top-candidate census, a three-way mechanism
+isolator, a five-variant recall harness, and a row-join A/B. All five are
+retired in favour of the committed test, which pins the properties they
+discovered. Their numbers are recorded in this wave's own audit document,
+`_audit/2026-09-20-the-three-held-defects.md` section 2.
+
+### 28.7 A SAME-DAY PEER REVIEW CAUGHT A REAL GAP: THE RATCHET WAS ONE-WAY
+
+Commit `94e4601` landed on a branch another wave (`_audit/2026-09-20-the-
+floor-again.md`) was also writing to, and that wave reviewed it because it
+was now theirs to have reviewed. Two findings, addressed here rather than
+left standing:
+
+**1. The baseline was a ONE-WAY ratchet; this repository's established
+pattern for the identical shape is TWO-WAY.** `tests/test_page_text_is_
+never_printed.py`'s `KNOWN_TEXT_SINKS` states its own rule: "asserted as an
+EXACT MAPPING, so it cannot rot in either direction: a file that gains a
+site fails, and a file that is FIXED also fails until its entry is
+corrected. The documentation of a defect may not outlive the defect." The
+first cut of `test_probe_corpus_has_no_new_decorative_control` only failed
+on GAINED (a new finding outside the baseline); it stayed green forever on
+LOST (a baseline entry the detector no longer finds), so a fixed control
+could sit in the tracked baseline indefinitely with nothing prompting its
+removal. FIXED: the test is renamed `test_probe_corpus_baseline_is_an_
+exact_mapping` and now fails on either direction, with GAINED and LOST
+reported separately (same message shape as `KNOWN_TEXT_SINKS`'s own test,
+deliberately). The corpus-churn concern that motivated the one-way version
+in the first place still holds and did not require abandoning the
+two-way check: matching is on `(file, function, variable)`, not a global
+count, so an unrelated wave's brand-new probe file cannot trip either
+direction -- only a change to one of the 129 pinned sites can. Demonstration
+E in `scripts/_check_unbranched_control_detector_can_fail.py` now proves the
+LOST direction can go red (a fabricated baseline entry is correctly
+reported lost), alongside D's original proof that GAINED can. Receipt,
+re-run after the fix:
+
+```
+D. the ratchet's GAINED direction must be able to go RED
+PASS   D: removing one real baseline entry (('_probe_add_section_menu.py', 'main', 'controls')) from view makes the ratchet report it as GAINED
+PASS   D control: with the FULL baseline, that entry is NOT reported
+
+E. the ratchet's LOST direction must be able to go RED
+PASS   E: adding one FABRICATED baseline entry makes the ratchet report it as LOST
+PASS   E control: no REAL baseline entry is reported lost at this moment (if this fails, the corpus moved under this check -- see [])
+```
+
+**2. Three of the 129 pinned entries are a live dispute, not a settled
+false positive, and this entry does not resolve it.** The review named
+`_probe_events_surface_shape.py`'s `rows_with_any` and `note` as "display
+values, not controls," and `hits` as "correctly not branched, because the
+must-fire control was hoisted above it and IS branched" -- a semantically
+equivalent sibling variable already gates the same condition the census's
+marker-only rule cannot see. Checked directly rather than taken on trust:
+the file's code is UNCHANGED since commit `2fba253` (`git status` clean),
+and re-running the detector against it live still returns exactly these
+three, mechanically correct under the rule as written (section 24 above and
+the census's own section 6 already named "control" as domain-overloaded
+vocabulary in this exact corpus -- LinkedIn UI controls and self-check
+controls share the one word). Left alone rather than resolved unilaterally:
+narrowing the marker vocabulary to tell the two apart is a real, separable
+piece of work with its own false-positive/false-negative tradeoff, it was
+not this task's brief, and the two-way ratchet built for point 1 means it
+is no longer possible for this dispute to be forgotten by default -- it
+sits in the baseline, live, until someone with the standing to adjudicate
+the marker question does.
+
