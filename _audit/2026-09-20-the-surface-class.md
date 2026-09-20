@@ -281,7 +281,10 @@ the ledger's cost column did not.
 
 ## 4. PER-BLOCKER RULINGS
 
-(Section 4 is filled from the evidence sweep; see 4.0 for method.)
+Section 3 measured what the LEDGER says blocks each row. This section measures
+what the EVIDENCE says, per blocker, from the rows rather than from a column --
+which is the only way the s3 finding could be confirmed rather than restated.
+The dispositions are summarised in 4.4.
 
 ### 4.0 Method
 
