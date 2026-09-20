@@ -430,6 +430,40 @@ Verified live on the committed, unmodified sibling instrument, since
 
 ---
 
+## 7. DEFECTS HANDED ON
+
+1. **`M C82` NEEDS A FIFTH RULED PHANTOM, NOT A COUNT EDIT** -- section 4c. The
+   task is: name the blocker whose published count has no referent inside the
+   409, so a thirteenth newsletter row and a phantom cancel and the partition
+   still closes. `COMPANY-PAGE-SURFACE` is the addressed hypothesis and it is
+   not an assignment.
+2. **THE SPLIT CHECKER IS STILL BLIND TO 20 OF 88 BLOCKERS**, and this one
+   was HALF CLOSED HERE rather than handed on whole -- see section 11. The
+   narrow report still skips any blocker holding a row whose direction it
+   cannot read, and joining the two readers properly would mean reversing an
+   import direction, which is a refactor rather than a ruling. What is closed
+   is the READING: the widened report now classifies causes instead of
+   printing the same undifferentiated verdict the narrow one had just stopped
+   printing.
+
+   **AND THE SIX THAT ARE STILL BLIND ARE NOT ON THIS LIST, because they are
+   not a defect.** They are blind on compound `R + W` range cells, and such a
+   cell describes a BLOCK rather than a row -- `70-73` is "resume upload,
+   list, delete, download" and its `R + W` means the block contains both, not
+   that each of the four does both. A direction read off it would be invented,
+   and inventing one feeds straight into a split comparison: the first draft
+   of the range reader did exactly that and manufactured two over-runs on a
+   direction no row in those blockers carries. **The honest ceiling of this
+   reading is the ledger's own notation**, and `J 131`, named by no section-2
+   range at all, is the same shape. Handing those on as work would be asking
+   somebody to close them, which is asking for the defect back.
+3. **NOT A DEFECT, RECORDED SO IT IS NOT RE-FOUND:** `M C82`'s UNASSIGNED
+   reason cell is correct and scoped (section 4d), and the role-vs-direction
+   comment in `tests/test_blocker_map_is_derived.py` is correct as written
+   (section 3a). Both look like defects from the outside.
+
+---
+
 ## 8. THE BEFORE/AFTER, BY ARTIFACT
 
 ### 8a. `build_blocker_map.py` -- BYTE-IDENTICAL, WHICH IS THE POINT
@@ -511,40 +545,6 @@ live -- arrivals derived from `publishers()` must equal the number of
 
     HEALTHY                 arrivals 5 against 5 RE_FILED rows -- LIVE            exit 0
     _incoming STUBBED       arrivals 0 against 5 RE_FILED rows -- DEAD ...        exit 1
-
----
-
-## 7. DEFECTS HANDED ON
-
-1. **`M C82` NEEDS A FIFTH RULED PHANTOM, NOT A COUNT EDIT** -- section 4c. The
-   task is: name the blocker whose published count has no referent inside the
-   409, so a thirteenth newsletter row and a phantom cancel and the partition
-   still closes. `COMPANY-PAGE-SURFACE` is the addressed hypothesis and it is
-   not an assignment.
-2. **THE SPLIT CHECKER IS STILL BLIND TO 20 OF 88 BLOCKERS**, and this one
-   was HALF CLOSED HERE rather than handed on whole -- see section 11. The
-   narrow report still skips any blocker holding a row whose direction it
-   cannot read, and joining the two readers properly would mean reversing an
-   import direction, which is a refactor rather than a ruling. What is closed
-   is the READING: the widened report now classifies causes instead of
-   printing the same undifferentiated verdict the narrow one had just stopped
-   printing.
-
-   **AND THE SIX THAT ARE STILL BLIND ARE NOT ON THIS LIST, because they are
-   not a defect.** They are blind on compound `R + W` range cells, and such a
-   cell describes a BLOCK rather than a row -- `70-73` is "resume upload,
-   list, delete, download" and its `R + W` means the block contains both, not
-   that each of the four does both. A direction read off it would be invented,
-   and inventing one feeds straight into a split comparison: the first draft
-   of the range reader did exactly that and manufactured two over-runs on a
-   direction no row in those blockers carries. **The honest ceiling of this
-   reading is the ledger's own notation**, and `J 131`, named by no section-2
-   range at all, is the same shape. Handing those on as work would be asking
-   somebody to close them, which is asking for the defect back.
-3. **NOT A DEFECT, RECORDED SO IT IS NOT RE-FOUND:** `M C82`'s UNASSIGNED
-   reason cell is correct and scoped (section 4d), and the role-vs-direction
-   comment in `tests/test_blocker_map_is_derived.py` is correct as written
-   (section 3a). Both look like defects from the outside.
 
 ---
 
