@@ -259,6 +259,19 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "correcting it. "
     ),
 
+    # 2026-09-20, the same wave's third pair. The correction vocabulary here is
+    # the word "wrong" applied to a REPOSITORY, not to a claim.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-08-31-jobcore-paths.md"): (
+        "IT EXPLAINS WHY TWELVE CITATIONS ARE NOT DEFECTS. The passage "
+        "reports that 12 of 134 strict-unresolved path citations come from "
+        "that document, and then says why they are fine: it 'is explicitly "
+        "comparing against a SIBLING project's suite. Real files, wrong "
+        "repo, and no prefix rule can reach them because they carry no "
+        "marker.' The wave is ACQUITTING those citations on the strength of "
+        "the document's own stated scope. Clearing another document is not "
+        "correcting it. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED

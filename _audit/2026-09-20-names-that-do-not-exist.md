@@ -461,7 +461,99 @@ involved belong to sibling waves.
 **A third locator convention exists and is NOT handled:** pytest node ids,
 `path/test_x.py::test_name`, 93 lines. Named rather than guessed at.
 
-_(sections 6.3-6.4 carry the SHA and run-id censuses.)_
+### 6.3 CENSUS ROW IDS -- an honest zero, backed by a live control
+
+**12,134 row-id citations.** RESOLVES 9,779, UNRESOLVED 232, AMBIGUOUS 2,123.
+By citation form: canonical 7,357, range 3,690, bare-number 759, run 328.
+
+The gateable subset is `STRICT` -- backticked, canonical form, explicit prefix:
+**2,814 occurrences, 2,399 resolving, 408 ambiguous, and 7 unresolved.** All
+seven were hand-read and **not one is a hallucinated row citation**:
+
+| site | id | what it actually is |
+|---|---|---|
+| `2026-09-05-blocker-map.md:672,677` | `P 0`, `N 05`, `N 09`, `N 2026` | a PRIOR wave's audit of bad-id extraction, quoting its own junk examples -- *"fragments of a date in a source comment, wearing the exact shape of a network row id"* |
+| `2026-09-19-four-defects-fixed.md:221` | `L 63` | a line locator: *"the line at `L63` must..."* |
+| `2026-09-19-messaging-menu-enumeration.md:122` | `A 0`, `B 0` | DOM set counts: *"It returns `A 0, B 0, shared 0`"* |
+
+All three verified independently at `8b58dcb`. **Zero asserted-absent row ids.**
+
+A zero is only worth reporting when the detector can speak, so it was asserted
+rather than printed: synthetic `` `J 9999` `` and `` `M C9999` `` come back
+UNRESOLVED, synthetic `` `J 40` `` comes back RESOLVES.
+
+Two things that make this kind hard, named rather than smoothed over:
+
+* **The prefix alphabet must be DERIVED from the census, never listed.** An
+  early pass accepted a bare `L` prefix -- which this census does not have,
+  though `P L` does -- and range-expanded 16,000 line locators into phantom row
+  ids. Deriving the alphabet from the built universe collapsed UNRESOLVED from
+  16,083 to 232.
+* **2,123 AMBIGUOUS is not a defect count either.** The largest cluster,
+  `A13`/`A1`/`A9` (224), is the ledger's **Amendment rounds**, which share the
+  row-id surface grammar exactly. The `M` and `C` entries are likelier real
+  slice collisions. This wave did not adjudicate them; the number is handed
+  over as the size of what is uncovered.
+
+### 6.4 COMMIT SHAS -- 325 that no clone can resolve, and one that matters
+
+**791 distinct hex tokens** in the corpus. Resolved against this repository:
+
+| bucket | distinct | occurrences |
+|---|---:|---:|
+| resolves, ancestor of master | 309 | 945 |
+| resolves, NOT an ancestor (the superseded pre-purge line) | 99 | 295 |
+| `DANGLING_COMMITISH` -- 7-8 chars, resolves nowhere | **325** | 772 |
+| mid-length 9-15, unclassified | 13 | 40 |
+| `NOT_A_COMMITISH` -- 16+ even, content digests and urns | 36 | 99 |
+| `LONG_ODD_UNRESOLVED` -- `worktree-agent-<hex>` fragments | 5 | 10 |
+
+**The split is the whole point.** A raw "383 unresolved SHAs" merges commit
+citations with content digests, LinkedIn urns, and branch-name fragments, and
+means nothing. Four more were removed from the dangling count after being
+identified as single hyphen-segments of LinkedIn opaque UUIDs -- 8 characters
+long, passing a length gate, never a sha at all.
+
+**The one that matters, verified here rather than relayed:**
+
+```
+$ git cat-file -e a8684146^{commit}
+fatal: Not a valid object name a8684146^{commit}
+$ git grep -c "a8684146" -- _audit
+_audit/2026-09-20-the-contingent-writeoffs.md:1
+_audit/_census/jobs.md:10
+```
+
+`a8684146` is cited **11 times**, ten of them in the EVIDENCE column of
+`_census/jobs.md` rows 49-57 and 68-69 -- *"| 49 | Read the In Progress / Draft
+list | a8684146 | CP | ..."*. **Nine census rows rest their evidence on a
+commit no clone can resolve.** This is the asserted-but-absent class exactly,
+in the corpus's most load-bearing file, and a sibling wave owns the repair.
+
+### 6.5 CI RUN-ID CITATIONS -- the class is real here but small, and the trap is a trap
+
+This corpus proves greenness by citing GitHub Actions run ids. That is a name
+asserted to exist with a property attached, and it fails two ways a reader
+cannot see: the id resolves but nobody read its conclusion, or it is green on a
+commit that is not the branch HEAD, certifying a prefix rather than what
+shipped.
+
+**113 run-id-shaped occurrences, 37 distinct.** Buckets: 94 carry no verdict
+word nearby, 10 carry a verdict AND a sha, 9 carry a verdict and no sha.
+
+**The trap, and it is specific to this repository: LinkedIn job ids are also
+bare 10-digit integers.** The most-cited "run ids" are job postings --
+`4456021840` (31 citations), `4423880462` (17), `4448301715` (11). Genuine CI
+run ids here are consistently **11 digits in the 32-35 billion range**, and
+there are only a handful (`32661307599`, `32688677004`), both of which do carry
+a sha. One 10-digit job id landed in the verdict-bearing bucket purely through
+line proximity -- `linkedin_job_detail("4423880462")` on one row and an
+unrelated failure sentence on the next.
+
+**No GitHub API call was made.** A rate-limited 403 is indistinguishable from a
+real answer, and this wave hit exactly that while reading its own CI run
+(section 8). A text census is what is defensible without the API, and it is
+reported as a text census.
 
 ### 6.9 Things I could not separate, stated plainly
 
