@@ -24,14 +24,15 @@ measurement below is offline, over committed files and git objects.
     handover claims re-measured     3   all three agree, section 1
     handover claims SHARPENED       1   the read-side argument is the weak half
     prior art the handover missed   1   and it is a DAY OLDER, section 2
-    instruments modified            1   shown failing before it was registered
+    instruments modified            2   both shown failing before registering
     instruments NOT written         1   the discriminator already existed
     stale claims corrected in place 2   a docstring and a test comment, both
                                         keeping their text -- 6b and 3a
-    defects in my own output        2   a control that passed while the report
-                                        lied (9a), and a child brief missing
-                                        the line that would have saved it a
-                                        turn (10a)
+    defects in my own output        3   a control that passed while the report
+                                        lied (9a), a child brief missing the
+                                        line that would have saved it a turn
+                                        (10a), and an ASCII check of my own
+                                        that could not fail (12a)
     defects handed on               2   section 7, and neither is newsletter's
 
 **THE SECOND DEFECT IS DECLINED AND THAT IS THE LOAD-BEARING RESULT.** The
@@ -520,12 +521,16 @@ live -- arrivals derived from `publishers()` must equal the number of
    409, so a thirteenth newsletter row and a phantom cancel and the partition
    still closes. `COMPANY-PAGE-SURFACE` is the addressed hypothesis and it is
    not an assignment.
-2. **THE SPLIT CHECKER IS STILL BLIND TO 20 OF 88 BLOCKERS** -- it skips any
-   blocker holding a row whose direction it cannot read.
-   `scripts/_check_jobs_range_directions.py` exists to widen exactly that and
-   is a separate script; the two have never been joined, so the count of
-   unwatched splits depends on which of the two a reader happens to run.
-   `COMPANY-PAGE-SURFACE`, the third known over-run, is on the blind list.
+2. **THE SPLIT CHECKER IS STILL BLIND TO 20 OF 88 BLOCKERS**, and this one
+   was HALF CLOSED HERE rather than handed on whole -- see section 11. The
+   narrow report still skips any blocker holding a row whose direction it
+   cannot read, and joining the two readers properly would mean reversing an
+   import direction, which is a refactor rather than a ruling. What is closed
+   is the READING: the widened report now classifies causes instead of
+   printing the same undifferentiated verdict the narrow one had just stopped
+   printing. What remains: SIX blockers are still blind even to the widened
+   read, on compound `R + W` range cells that describe a block rather than a
+   row, and `J 131` is named by no section-2 range at all.
 3. **NOT A DEFECT, RECORDED SO IT IS NOT RE-FOUND:** `M C82`'s UNASSIGNED
    reason cell is correct and scoped (section 4d), and the role-vs-direction
    comment in `tests/test_blocker_map_is_derived.py` is correct as written
@@ -582,3 +587,109 @@ section 1 is the positive case: every count in it was taken at a named ref, not
 from the working tree.
 
 ---
+
+## 11. THE THIRD OVER-RUN NOW HAS A CAUSE, AND IT IS `LOST`
+
+Written after the ruling above was committed, because leaving it undone would
+have been this wave's own finding committed twice.
+
+Section 6 says the discriminator existed one file away and nothing called it.
+`scripts/_check_jobs_range_directions.py` is the report that WIDENS the split
+check to the twenty blockers it skips -- and it already imported
+`_check_published_split`, and it still printed a bare `OVER on R` for
+`COMPANY-PAGE-SURFACE`, the third known over-run and the one blocker the
+narrow report cannot see. **It was widening the COVERAGE while dropping the
+READING.** Fixing that in one file and not the other would have been register
+24.1's defect committed in the same wave that named it.
+
+One import later, the whole set is named:
+
+| over-run | cause | what it means |
+|---|---|---|
+| `SEARCH-RESULTS-SURFACE` | `RE-FILED-IN` | four rows arrived on committed re-files; the published cell is not implicated |
+| `NEWSLETTER-SURFACE` | `AT-BIRTH` | nothing moved, nothing missing -- **corrected in this wave** |
+| `COMPANY-PAGE-SURFACE` | `LOST` | own rows 16 against a published 18; R reads over because the missing rows are not reads |
+
+    OVER on R  COMPANY-PAGE-SURFACE  published R13 W5 RW0  held R14 W2 RW0  short on W
+        incoming R0 W0 RW0   own R14 W2 RW0
+        CAUSE LOST -- own rows 16 against a published 18
+
+**TWO INSTRUMENTS AGREE ON THAT VERDICT AND NEITHER KNOWS ABOUT THE OTHER.**
+`_check_open_slots.py` independently lists `COMPANY-PAGE-SURFACE` with **2
+FILLABLE slots** -- open slots whose row is neither re-filed elsewhere nor
+ruled a phantom, i.e. rows that really are missing. `LOST` is the split
+report's name for the same fact, reached from the direction column instead of
+from the slot table.
+
+**AND IT SHARPENS SECTION 4c WITHOUT CLOSING IT.** The blocker is short on
+`W`; `M C82` is a `W`; the two fillable slots are here and nowhere else. That
+is three facts pointing one way and it is still not an assignment -- a bare
+count-and-direction match is the birthday problem with one extra column, and
+this repository has already declined a row on exactly that ground
+(`CREATOR-HUB-SURFACE`, where an exact four-for-four count match was refused
+because the split disqualified the row the count would have admitted). What
+would settle it is a committed source naming `M C82` against a blocker, which
+is what `blocker-assignments.tsv` is for. **Nothing here files it.**
+
+### 11a. THE NEW ASSERTION, SHOWN FAILING -- AND ONE HONEST GAP IN IT
+
+A cause printed beside every over-run and asserted by nothing is decoration,
+and decoration in a report is read as a measurement. `--control-overrun`
+already inflated a clean blocker's held writes by 99 and required the table to
+NAME it; it now also requires the CAUSE to read `OVER-COUNT`, which is the only
+honest verdict for a blocker holding far more rows than it published.
+
+    classifier stubbed to one word
+      control-overrun: cause for <victim> -- expected OVER-COUNT,
+                       got RE-FILED-IN -- WRONG          exit 1
+
+    healthy: plain exit 0, --control-blind exit 0, --control-overrun exit 0
+
+**THE GAP, STATED RATHER THAN PAPERED OVER:** dropping the incoming
+subtraction does NOT move this control, because its victim has no incoming
+rows and neither does `COMPANY-PAGE-SURFACE`. That mutation is caught one file
+away, by the sibling's derivation-liveness assertion (section 9a), and it is
+caught there because that is where the derivation lives. Saying so is cheaper
+than building a second copy of the same control here and believing this file
+guards something it does not.
+
+## 12. TWO THINGS FOUND WHILE CHECKING MY OWN WORK
+
+### 12a. MY ASCII CHECK COULD NOT FAIL, AND I COMMITTED ON IT
+
+Before the first commit I swept every changed file for non-ASCII and reported
+seven zeros. The sweep was:
+
+    n=$(LC_ALL=C grep -c -P '[^\x00-\x7F]' "$f" 2>/dev/null || echo 0)
+
+**`LC_ALL=C` makes GNU grep refuse `-P` outright** -- *"grep: -P supports only
+unibyte and UTF-8 locales"* -- so every invocation errored, stderr went to
+`/dev/null`, and `|| echo 0` supplied the answer. Seven files, seven zeros,
+zero bytes examined. It surfaced only because a later run without `LC_ALL=C`
+returned **12** for a file the same sweep had just called clean.
+
+**AND THE FIRST REPLACEMENT CONTROL WAS ALSO EMPTY.** Asked to prove the
+pattern could match, I planted a needle file containing no non-ASCII byte at
+all and read its `0` as a passing control. The real needle -- one em dash --
+returns 1.
+
+So: a check that could not fail, then a control that could not fire, inside the
+wave whose entire subject is a report that could not distinguish three causes.
+**The re-measurement with a working probe says every file I touched is clean**,
+and that is luck rather than diligence. A right answer from a broken instrument
+is still an unmeasured claim, and the only reason this one is now measured is
+that a number disagreed with itself.
+
+### 12b. TWELVE NON-ASCII LINES IN `INSTRUMENTS.md`, AND THEY ARE NOT MINE
+
+`_audit/INSTRUMENTS.md` carries 12 lines with non-ASCII bytes, all em dashes,
+all inside **section 20** (the CI instruments, 2026-09-19) -- committed and
+pushed before this wave. Every section 24 line added here is clean, measured
+with the working probe.
+
+**FLAGGED RATHER THAN SWEPT.** Rewriting another wave's prose inside a commit
+about a split cell would put unrelated churn in a diff somebody has to review,
+and the house rule it violates is one a one-line `sed` closes whenever its
+owner wants it. The measurement is the useful part: `grep -n -P '[^\x00-\x7F]'`
+over the register names the lines directly, and it needs no `LC_ALL` in front
+of it.

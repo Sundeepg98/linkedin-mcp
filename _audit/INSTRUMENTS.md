@@ -4015,7 +4015,50 @@ compare the injected class against the real one and read as a
 misclassification, so the victims are chosen from an asserted-clean pool and
 the control REFUSES rather than injecting anywhere when fewer than three exist.
 
-### 24.3 DISPOSABLE, declared
+### 24.3 `scripts/_check_jobs_range_directions.py` -- it widened the COVERAGE and dropped the READING
+
+This file exists to show the twenty blockers the split check SKIPS. It already
+imported that check. It still printed a bare `OVER on R` for
+`COMPANY-PAGE-SURFACE` -- the third known over-run and the ONLY one the narrow
+report cannot see at all -- while the sibling one import away had just learned
+to say which of three causes it was.
+
+**THE LAW: WIDENING WHAT AN INSTRUMENT CAN SEE IS NOT THE SAME AS WIDENING
+WHAT IT CAN SAY, AND THE SECOND IS THE ONE A READER USES.** A report that
+reaches further and reports more coarsely has moved a blind spot rather than
+closed one -- and the blocker only this report can see was the one getting the
+coarsest verdict available.
+
+One import later the whole known set is named, and the third answer is new:
+
+    SEARCH-RESULTS-SURFACE   RE-FILED-IN   four rows arrived on committed re-files
+    NEWSLETTER-SURFACE       AT-BIRTH      corrected in the ledger, 24.1
+    COMPANY-PAGE-SURFACE     LOST          own 16 against a published 18
+
+**AND TWO INSTRUMENTS THAT DO NOT KNOW ABOUT EACH OTHER AGREE ON IT.**
+`_check_open_slots.py` independently lists `COMPANY-PAGE-SURFACE` with 2
+FILLABLE slots -- slots whose row is neither re-filed nor a ruled phantom, i.e.
+rows genuinely missing. `LOST` is the same fact reached from the direction
+column instead of the slot table. A verdict two unrelated parses produce is
+worth more than a verdict one produces twice.
+
+**THE NEW ASSERTION, SHOWN FAILING.** `--control-overrun` already required the
+table to NAME an injected over-run; it now also requires the CAUSE to read
+`OVER-COUNT`, which is the only honest verdict for a blocker holding 99 more
+rows than it published. Stub the classifier to one word and it reads
+`expected OVER-COUNT, got RE-FILED-IN -- WRONG`, exit 1. Healthy: plain,
+`--control-blind` and `--control-overrun` all exit 0.
+
+**AND THE GAP IN IT IS STATED HERE RATHER THAN DISCOVERED LATER.** Dropping
+the incoming subtraction does NOT move this control: its victim has no
+incoming rows and neither does `COMPANY-PAGE-SURFACE`. That mutation is caught
+by the sibling's derivation-liveness assertion (24.2), where the derivation
+lives. **A control that cannot fail for a given defect should say which file
+catches that defect, not imply it catches everything beside it.** Building a
+second copy here would have been the cheaper-feeling move and would have
+produced two controls testing one thing.
+
+### 24.4 DISPOSABLE, declared
 
 Five scratch scripts in the session scratchpad: the 13/3R-10W re-measurement at
 three refs, the whole-line needle widener, the partition-closure arithmetic,
