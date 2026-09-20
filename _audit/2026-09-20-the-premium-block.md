@@ -51,6 +51,9 @@ that returned the absence could not have seen the thing if it were there.**
 
 ## 1.1 J 127 -- "Read the InMail credit balance" -- WRONGLY CLOSED
 
+**CORRECTS:** `_audit/_census/jobs.md` -- its row 127 banks MEASURED-ABSENT on a reading that could not have produced that verdict.
+
+
 State today: `MEASURED-ABSENT SKILL` (`_audit/_census/jobs.md:343`).
 Blocker map: `PREMIUM-READER-NOT-BUILT`, `state_at_freeze GAP`, `state_today
 MEASURED-ABSENT` (`blocker-map.tsv`, row `J 127`).

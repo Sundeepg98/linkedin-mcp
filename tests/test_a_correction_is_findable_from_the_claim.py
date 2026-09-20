@@ -183,6 +183,21 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, from the premium-block wave. The OTHER candidate it produced
+    # IS a real correction -- of the jobs census cell that banked J 127
+    # MEASURED-ABSENT on a reading whose instrument carries no needle for a
+    # balance -- and is declared with a CORRECTS:/CORRECTED BY: pair instead.
+    ("2026-09-20-the-premium-block.md", "2026-09-19-blocker-map-ruling-requests.md"): (
+        "IT REPORTS A REQUEST ITS OWN AUTHOR RETRACTED. The passage records "
+        "that Request 2a was filed and then retracted by the person who "
+        "filed it, and that the caution left behind says the blocker does "
+        "not cleanly close even with the disputed row removed. The wave "
+        "then writes 'Sibling waves own this adjudication. I report it and "
+        "leave it.' Citing a document for a retraction its author already "
+        "made, and declining to act on somebody else's blocker, is not "
+        "correcting it. "
+    ),
+
     # TWO MORE, 2026-09-20. Both citations. The two REAL corrections that same
     # wave made -- of the ledger's stale ranking tables and of a costing that
     # priced a needle which does not exist -- are declared with CORRECTS: /
@@ -547,18 +562,6 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "happened is that a condition it correctly reported changed a day "
         "later -- the relayed-measurements-go-stale law with a census row as "
         "the receiver"
-    ),
-    ("jobs.md", "messaging-and-content.md"): (
-        "the cited slice is the CORROBORATING SOURCE and this row agrees with "
-        "it. J 127 and M4 are the same capability -- the InMail credit "
-        "balance -- in two slices, and M4 already records the measurement "
-        "that settles both: the admitted page carries no balance. J 127 cites "
-        "M4 to adopt that finding, not to overturn it. The correction "
-        "vocabulary in the cell belongs to this row correcting ITSELF (it was "
-        "GAP on an expired premise) and to a note REPORTING, deliberately "
-        "without changing, that M4 carries the same measurement under a "
-        "different state name. Both rows are out of GAP so no count moves; "
-        "flagging a duplicate is not refuting it"
     ),
     ("profile.md", "2026-09-19-settings-tail-addresses.md"): (
         "the citation is CORROBORATION and the cited document is not asserted "
