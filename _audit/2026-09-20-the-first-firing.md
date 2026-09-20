@@ -447,16 +447,25 @@ guard's own message says so: *"do NOT add it here to clear the red."*
   `True` and a string, one live call, payload checked on itself -- but the
   running server on 8322 holds the code it started with, so a caller there
   still sees 45 tools. **I did not restart it**: two `linkedin.py --http`
-  processes are up and another agent is running `measure_pointer_graph.py
-  --selftest` on this tree, and restarting a shared server out from under a
-  live wave is not mine to do on my own judgement. NEXT STEP, one line: restart
-  8322 at a quiescent moment and call `linkedin_premium_job_collection` over
-  the transport, which is what made `linkedin_job_collections`' name-freedom a
-  property of the wire rather than of its unit tests.
-* **Two `linkedin.py --http` processes are running** (pids 10800, 29200). Only
-  one can hold 8322. Observed and left alone -- neither is mine, and killing a
-  process another wave may own is exactly the class of action that costs a
-  session. Worth somebody's look.
+  processes are up and other waves are live on this tree, and restarting a
+  shared server out from under one is not mine to do on my own judgement.
+  **THE HOLD IS MEASURED, NOT ASSUMED**: at the moment I would have restarted
+  it, `Win32_Process` showed another agent running a full parallel suite --
+  `pytest -n 8 --dist loadfile` with sixteen worker processes, started 16:47 --
+  and earlier a `measure_pointer_graph.py --selftest`. NEXT STEP, one line:
+  restart 8322 at a quiescent moment and call
+  `linkedin_premium_job_collection` over the transport, which is what made
+  `linkedin_job_collections`' name-freedom a property of the wire rather than
+  of its unit tests.
+* **AND A CORRECTION TO MY OWN OBSERVATION, MADE BEFORE I FILED IT.** I had
+  written that two `linkedin.py --http` processes are up (pids 10800, 29200)
+  and only one can hold 8322, flagging the other as worth a look. **Their
+  creation timestamps are identical to the second -- both 15:53:02 -- which
+  is a parent and its child from ONE launch, not two servers.** Every other
+  MCP server on this box shows the same doubled shape (`uplers`, `instahyre`,
+  and the memory service, all in pairs). There is no orphan. A process list
+  read without its timestamps invents a problem; nothing was killed, and the
+  finding is withdrawn rather than left standing for somebody to chase.
 
 ## 8. WHAT MOVED, AND BY HOW MUCH
 
@@ -467,7 +476,25 @@ corrected by measurement rather than by argument (`J 127`), one shipped-reader
 defect found with its mechanism proven on two captures, and two instruments
 harvested.
 
-**The wave was aimed at moving GAP and it moved it by one.** It could have
+**MEASURED AGAINST `0882d35`, NOT ASSERTED.** Re-counting `_audit/_census/
+jobs.md` at the commit this wave started from and at HEAD:
+
+    state                 0882d35   HEAD   delta
+    ------------------------------------------------
+    GAP                        61     59      -2
+    COVERED-PROVEN             10     11      +1
+    MEASURED-ABSENT             0      1      +1
+    COVERED-UNFIRED             9      9       0
+    EXCLUDED-RULED             27     27       0
+
+**GAP falls by two and exactly two rows moved** -- no collateral drift, which
+is worth checking rather than assuming on a file three other waves touched
+today. **Only ONE of the two is a banked capability.** `J 125` is the bank;
+`J 127` left GAP by being corrected to a measured absence, which removes a row
+from the backlog without anything being built, and folding the two together is
+how a ledger flatters itself.
+
+**The wave was aimed at moving GAP and it banked one row.** It could have
 reported two by not checking what `COVERED-PROVEN` requires, and four by
 counting top-choice and the analytics surface as rows. One is the number that
 is true.
