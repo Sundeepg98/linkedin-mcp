@@ -327,6 +327,55 @@ def build():
     return gap, current, assign, problems
 
 
+#: WHICH DOCUMENT ARGUES A BLOCKER'S REASON -- derived, and never a bare path.
+#:
+#: THE PROBLEM. A blocker's reason is usually NAMED in the ledger and ARGUED
+#: somewhere else entirely, so a reader starting at this map reaches the name
+#: and never the argument. The column points at the argument.
+#:
+#: WHY THE CELL IS SHAPED LIKE THIS RATHER THAN HOLDING A PATH. The locator's
+#: recall was MEASURED on 2026-09-20 against a validation set it did not build,
+#: and its top-ranked document is the one a careful human reader chose 4 times
+#: in 8. A bare path at that accuracy is a coin flip wearing a fact's clothes,
+#: and a TABLE READS AS DATA RATHER THAN AS A CLAIM -- this repo has already
+#: pushed a defect of exactly that family. So the cell states its own rank and
+#: score and a reader cannot mistake a ranking for an identification.
+#:
+#: IT IS DERIVED ON EVERY RUN AND NEVER HAND-MAINTAINED, and the file it is
+#: written into is excluded from the locator's candidacy, so writing the column
+#: cannot change the column -- re-running `--write` twice is a fixpoint, which
+#: it would not be if the map could score itself.
+#:
+#: ALL ROWS OF A BLOCKER SHARE THE VALUE, because the claim is about the
+#: BLOCKER's reason, not about the individual row's.
+def reason_doc_column(assign: dict) -> dict[str, str]:
+    """blocker -> the reason_doc cell, from the shipped locator.
+
+    Imported here rather than at module scope: `find_blocker_reason` imports
+    THIS module, so a top-level import would be a cycle.
+    """
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+    import find_blocker_reason as fbr
+
+    rows: dict[str, list[str]] = {}
+    for rid, (blocker, *_rest) in assign.items():
+        rows.setdefault(blocker, []).append(rid)
+    # Hand the locator the mapping we already have, so it does not re-run this
+    # module's whole build to re-derive it.
+    fbr.set_row_index(rows)
+
+    out: dict[str, str] = {"UNASSIGNED": "NO-BLOCKER-ASSIGNED"}
+    for blocker in sorted(ledger_counts()):
+        ranked = fbr.candidates(blocker)
+        if not ranked:
+            out[blocker] = "NO-ARGUMENT-FOUND"
+            continue
+        score, doc = ranked[0]
+        out[blocker] = (f"CANDIDATE-1-OF-{len(ranked)} SCORE-{score} "
+                        f"{doc.replace(chr(9), ' ')}")
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--write", action="store_true", help="write the map file")
@@ -439,15 +488,23 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\nUNASSIGNED rows a committed probe DOES name   "
           f"{len(named_unassigned)}  {' '.join(named_unassigned)}")
 
+    reason = reason_doc_column(assign)
+    named = sum(1 for v in reason.values() if v.startswith("CANDIDATE-"))
+    print(f"\nreason_doc  blockers with a ranked candidate  {named} of "
+          f"{len(reason)}")
+    print("  the cell carries RANK and SCORE, never a bare path: the locator's "
+          "measured at-rank-1 is 4 of 8 (see find_blocker_reason.py)")
+
     if args.write and not fail:
         lines = ["row_id\tblocker\tevidence_class\tsource\tlocator\t"
-                 "state_at_freeze\tstate_today\tcapability\tnote"]
+                 "state_at_freeze\tstate_today\tcapability\tnote\treason_doc"]
         for rid in sorted(gap, key=lambda s: (s[0], len(s), s)):
             b, klass, source, locator, note = assign.get(
                 rid, unassigned_row(rid, marks, published))
             txt = gap[rid][1].replace("\t", " ").replace("|", "/")[:110]
             lines.append(f"{rid}\t{b}\t{klass}\t{source}\t{locator}\t"
-                         f"GAP\t{current.get(rid, 'ROW-GONE')}\t{txt}\t{note}")
+                         f"GAP\t{current.get(rid, 'ROW-GONE')}\t{txt}\t{note}\t"
+                         f"{reason.get(b, 'NO-BLOCKER-ASSIGNED')}")
         MAP_OUT.write_text("\n".join(lines) + "\n", encoding="ascii", errors="replace")
         print(f"\nwrote {MAP_OUT.relative_to(ROOT).as_posix()}  "
               f"{len(lines) - 1} data lines")
