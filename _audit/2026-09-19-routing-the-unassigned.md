@@ -1,5 +1,13 @@
 # Routing the unassigned
 
+> **SHA NOTE, added 2026-09-20.** The short hash `12c20e1` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 **UNASSIGNED 40 -> 24.** Sixteen rows routed, each on a committed source. Six
 blockers closed. The rest are routed to a REASON, which is the other half of
 the job and the longer half of this file.
@@ -159,7 +167,8 @@ six rows for five slots and cannot say which is out. `J 81` is additionally
 
 ## 2.3 DELIBERATELY LEFT EMPTY BY A RULING, AND I FOUND NEW EVIDENCE -- 2 rows
 
-`M M35` and `M M49` were refused at `12c20e1` on the ruling's own sentences.
+`M M35` and `M M49` were refused at `12c20e1` (branch-only; on
+`master` at `e72af67`) on the ruling's own sentences.
 **I am not overturning a ruling. I am reporting that its stated ground moved.**
 
 `messaging-and-content.md` L498 enumerates *"Conversation management (archive,
@@ -300,3 +309,25 @@ few more of the nine (`M C23`, `M C29`, `M C90`, `M M10`) carry evidence text
 a later same-branch commit rewrote before the replay; the row's own
 assignment is unchanged in every one of those. Row-by-row evidence:
 `_audit/2026-09-20-the-six-unremapped.md`.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `12c20e1` | rule(blockers): the three ruling requests -- fill what is forced, leave what is chosen | `e72af67` | CONFIRMED |

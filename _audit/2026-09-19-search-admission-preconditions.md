@@ -1,11 +1,19 @@
 # SEARCH-RESULTS: the two pre-admission conditions, discharged. NO PATTERN LANDED.
 
+> **SHA NOTE, added 2026-09-20.** The short hashes `569dc5e` and `d588034` cited
+> below were committed on a `worktree-agent-*` branch that never merged, so
+> they are reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to their `master` twins -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; each is kept in place here because a short hash
+> is the key a reader arrives with.
+
 > Wave `search-admission`. All measurements taken 2026-09-19 **12:28-12:46 by
 > the box** (`date`, pasted at each run), against the working tree at
 > `9421af9`. `linkedin_server/readonly.py` is **unmodified** -- verify with
 > `git diff --stat linkedin_server/readonly.py`, which is empty.
 
-The ruling at `569dc5e`, section 6 of
+The ruling at `569dc5e` (branch-only; on `master` at `09f9961`), section 6 of
 `_audit/2026-09-19-two-census-conventions-ruled.md`, grants
 `SEARCH-RESULTS-SURFACE` **in principle** on five binding conditions.
 Conditions 3 and 4 are by their own wording pre-admission work. **They are the
@@ -136,7 +144,8 @@ one row and it should not shape the pattern the other 19 need.
 
 ### B.1 The instrument is imported, not rewritten
 
-`scripts/blast_radius.py` (commit `d588034`, subject *"tools(boundary): what
+`scripts/blast_radius.py` (commit `d588034`, branch-only; on
+`master` at `5952ace`; subject *"tools(boundary): what
 would a candidate allowlist pattern newly admit"*) was built for exactly this
 admission. It installs a candidate on the in-process tuple, re-runs the shipped
 `is_read_url` over concrete urls, diffs the two verdicts and restores the tuple
@@ -397,3 +406,26 @@ filter-query shape that 13 of the 16 people rows actually need.
 **WHAT IS NOT IN DISPUTE**, and it is most of it: nothing is admitted, nothing
 is fired, `readonly.py` is unchanged, and both waves refused to land the
 pattern without the shaper.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hashes mapped here were made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `569dc5e` | rule(boundary): search results admitted in principle, conditional on the shaper landing with it | `09f9961` | CONFIRMED |
+| `d588034` | tools(boundary): what would a candidate allowlist pattern newly admit | `5952ace` | CONFIRMED |

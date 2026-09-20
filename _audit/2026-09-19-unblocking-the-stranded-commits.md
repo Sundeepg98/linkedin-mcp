@@ -1,5 +1,13 @@
 # Unblocking the stranded commits
 
+> **SHA NOTE, added 2026-09-20.** The short hash `ded0048` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Wave `unblock`, 2026-09-19. Written as the work happened, not afterwards.
 **Every number below carries the time it was taken.** The single defect this
 wave exists to clear is an orphaned red in `scripts/_probe_add_section_menu.py`
@@ -433,7 +441,8 @@ two weeks, by deliberate decision, and it is not this wave's to overturn.
 * **I did not fix the page-text inventory** -- 35 sites, five files, five
   authors. Measured and reported, per the order.
 * **I did not add anything to `KNOWN_TAINTED_OUTPUT` or to `_SANITISERS`.**
-  Both are byte-identical to what they were at `ded0048`.
+  Both are byte-identical to what they were at `ded0048`
+  (branch-only; on `master` at `eb1b6e8`).
 * **I did not use `--no-verify`**, and did not offer it upward.
 * **I did not rewrite history** to correct the misattributed commit. The push
   is frozen, a neighbour wave is actively committing, and a rebase under a
@@ -520,3 +529,25 @@ as one command.
 untracked path, which is what opens the window at all. Once the file is
 tracked, `git commit --only -- <path>` needs no add and has no window -- which
 is how this amendment itself was committed.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `ded0048` | boundary(search): rewrite-inverted, not delete -- the other guard was right first | `eb1b6e8` | CONFIRMED |

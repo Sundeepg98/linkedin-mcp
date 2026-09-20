@@ -1,5 +1,15 @@
 # GROUPS DEEP PATHS: the admission is BUILT AND GATE-REFUSED, and it banks ZERO rows
 
+> **SHA NOTE, added 2026-09-20.** The short hashes `744a1f4`, `7668b40` and `a5a988a` cited
+> below were committed on a `worktree-agent-*` branch that never merged, so
+> they are reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to their `master` twins -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; each is kept in place here because a short hash
+> is the key a reader arrives with.
+>
+> All three citation sites sit inside indented verbatim transcripts. Editing a transcript to improve it falsifies it, so they are left byte-identical.
+
 Wave: `groups-admit`. 2026-09-19, 13:50-14:10 IST. Every time below was taken
 with `date` on the box and is stamped where it was taken. All paths are
 repo-relative; commands ran from the repo root.
@@ -506,3 +516,27 @@ reasoning.
     commits landed by this wave  1   this document only
     code commits landed          0   REFUSED by the gate, on foreign reds
     --no-verify used             0
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hashes mapped here were made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `744a1f4` | rule(search): condition 2 is amended to CLOSED path segments, and a guard contradiction is ruled | `f370443` | CONFIRMED |
+| `7668b40` | census(jobs): the two follow rows were banked on a performability verdict, not a fire | `bd0cfad` | CONFIRMED |
+| `a5a988a` | test(identity): declare this wave's needle, and leave the neighbour's red standing | `4ac5b61` | CONFIRMED |

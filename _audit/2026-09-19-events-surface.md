@@ -1,5 +1,13 @@
 # EVENTS-SURFACE, 16 GAP rows -- why, and what actually moves them
 
+> **SHA NOTE, added 2026-09-20.** The short hash `c1991ac` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Wave: `events-reader`. All timestamps are box time, 2026-09-19.
 Written as the wave ran, not reconstructed at the end.
 
@@ -26,6 +34,7 @@ it** -- with the reason written down at the time.
 ## THE BAR, VERBATIM, AND IT IS COMMITTED
 
 `_audit/_census/blocker-assignments.tsv`, the `N 181` line, committed `c1991ac`
+(branch-only; on `master` at `0aca3d0`)
 today at 12:41. Working tree clean against it at 13:31, so this is HEAD and not
 somebody's draft:
 
@@ -273,3 +282,25 @@ here was never measuring LinkedIn again -- it was noticing that the cost was
 `blocker-assignments.tsv` applies the same bar everywhere, so any blocker whose
 assignment notes say *"it does not apply that verdict"* is holding rows that a
 guard, not a measurement, would release.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `c1991ac` | census(blockers): retract J 82, and the coarseness defence is refuted by measurement | `0aca3d0` | CONFIRMED |

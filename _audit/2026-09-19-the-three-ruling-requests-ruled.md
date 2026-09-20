@@ -1,5 +1,13 @@
 # The three ruling requests, ruled
 
+> **SHA NOTE, added 2026-09-20.** The short hash `c1991ac` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 Ruled 2026-09-19 12:26 by the box, against
 `_audit/2026-09-19-blocker-map-ruling-requests.md` (`5f57610`, corrected at
 `1957df7` and `6271708`).
@@ -194,7 +202,7 @@ produced a 268-row backlog in the first place.
 ## REQUEST 4 -- THE LEDGER-VS-CENSUS CONFLICT: RULED FOR THE CENSUS
 
 Ruled 2026-09-19 12:50 by the box, on amendment B of the ruling-requests file
-and the measurement at `c1991ac`.
+and the measurement at `c1991ac` (branch-only; on `master` at `0aca3d0`).
 
 ### MY OWN PROPOSED DEFENCE WAS REFUTED BY MEASUREMENT, AND THAT IS THE POINT
 
@@ -261,3 +269,25 @@ is the difference between recording a retraction and hiding a regression**, and
 a ratchet that can never move up is a ratchet that punishes honesty.
 
 **CORRECTED BY:** `_audit/2026-09-19-the-remaining-partials.md` -- the pick above was forced by a single open write slot, and that slot was held by a row that did not belong to this blocker. With it moved, both candidates fit and the split closes at 2R/3W exactly. The tiebreak this ruling called a coin-flip no longer has to be taken, and the candidate it set aside is now filed.
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `c1991ac` | census(blockers): retract J 82, and the coarseness defence is refuted by measurement | `0aca3d0` | CONFIRMED |

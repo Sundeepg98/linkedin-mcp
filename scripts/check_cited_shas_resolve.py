@@ -352,18 +352,62 @@ def load_corpus(repo: pathlib.Path) -> dict[str, str]:
     return blobs
 
 
-def mapped_tokens(blob: str) -> set[str]:
-    """Dead hashes recorded in this document's own mapping table.
+#: A mapping row is allowed to have NO live hash, but only when it SAYS SO.
+#:
+#: MEASURED, AND IT CONVICTED THE CORRECT REPAIR ON ITS FIRST RUN. The live-hash
+#: check below was written without this exemption and immediately red-flagged
+#: `94600de` and `db99276` in `2026-08-24-perform-save-unsave.md`. Those two
+#: rows read ``| `94600de` | **UNMAPPED** -- see below | -- | UNMAPPED |`` and
+#: the document spends two paragraphs explaining that the evidence CONFLICTS --
+#: every positional candidate is already claimed on better evidence by a
+#: different dead hash. The 2026-09-20 sixty-dangling wave ruled on exactly
+#: this: *"'UNMAPPED' is not a shortfall. A guessed hash has no twin to find.
+#: Recording the gap IS the repair."*
+#:
+#: So a declared no-twin row is a legitimate, ruled state and is counted and
+#: printed rather than convicted. A row that is merely SILENT about its missing
+#: live hash is still a finding: the difference between the two is the whole
+#: point, and it is the difference between an author who looked and an author
+#: who did not.
+#:
+#: `NEVER-LANDED` is admitted beside `UNMAPPED` for the neighbouring case a
+#: sibling measurement found the same day -- 22 commits on eight unmerged local
+#: branches whose subjects appear nowhere on `master`. For those the honest
+#: annotation is not a twin hash at all; it is that the work never arrived.
+_DECLARED_NO_TWIN = ("unmapped", "never-landed", "never landed")
 
-    Only column 0 of a row UNDER the mapping heading counts. A SHA in the
-    subject or live-hash column is a different claim and is not suppressed by
-    being nearby.
+
+class Remap(NamedTuple):
+    """One row of a `## Dead hashes, recovered` table, as the document claims it."""
+    doc: str
+    line: int
+    dead: str
+    subject: str
+    live: str
+    confidence: str
+
+    @property
+    def declares_no_twin(self) -> bool:
+        cell = _EMPHASIS.sub("", self.confidence).strip().casefold()
+        return any(cell.startswith(w) for w in _DECLARED_NO_TWIN)
+
+    def __str__(self) -> str:
+        return f"{self.doc}:{self.line}  {self.dead} -> {self.live or '(no live hash)'}"
+
+
+def mapping_rows(blob: str) -> list[tuple[int, str, str, str, str]]:
+    """(lineno, dead, subject-cell, live) for every row of the mapping table.
+
+    Only a row UNDER the mapping heading counts, and only column 0 supplies a
+    dead hash. A SHA in the subject or live column is a different claim and is
+    not suppressed by being nearby.
     """
     m = _MAPPING_HEADING.search(blob)
     if not m:
-        return set()
-    found: set[str] = set()
-    for line in blob[m.end():].splitlines():
+        return []
+    offset = blob[: m.end()].count("\n")
+    rows: list[tuple[int, str, str, str, str]] = []
+    for i, line in enumerate(blob[m.end():].splitlines(), start=offset + 1):
         stripped = line.strip()
         if stripped.startswith("#"):
             # A later heading of the same or higher level ends the section.
@@ -373,8 +417,84 @@ def mapped_tokens(blob: str) -> set[str]:
             continue
         cells = [c.strip().strip("`* ") for c in stripped.strip("|").split("|")]
         if cells and _TOKEN_OK.match(cells[0]):
-            found.add(cells[0])
-    return found
+            subject = cells[1].strip() if len(cells) > 1 else ""
+            live = cells[2].strip().strip("`* ") if len(cells) > 2 else ""
+            confidence = cells[3].strip() if len(cells) > 3 else ""
+            rows.append((i, cells[0], subject,
+                         live if _TOKEN_OK.match(live) else "", confidence))
+    return rows
+
+
+def mapped_tokens(blob: str) -> set[str]:
+    """Dead hashes this document's own mapping table claims to have recovered."""
+    return {dead for _, dead, _, _, _ in mapping_rows(blob)}
+
+
+def remap_claims(blobs: dict[str, str]) -> list[Remap]:
+    """Every mapping-table row in the corpus, with NO resolver consulted."""
+    out: list[Remap] = []
+    for doc in sorted(blobs):
+        for line, dead, subject, live, confidence in mapping_rows(blobs[doc]):
+            out.append(Remap(doc, line, dead, subject, live, confidence))
+    return out
+
+
+def broken_remaps(repo: pathlib.Path, claims: Iterable[Remap]) -> list[tuple[Remap, str]]:
+    """Mapping rows whose own repair does not hold up. THE POINT OF THIS CHECK.
+
+    `MARKED-MAPPED` is the strongest suppressor this guard has: it silences a
+    dead hash at every one of its sites in a document. Until now it fired on
+    the mere PRESENCE of the hash in column 0 -- so a row could name any live
+    hash at all, or none, and still switch the guard off for that token. A
+    repair nobody can check is the defect this guard exists to find, wearing
+    the guard's own uniform.
+
+    So the suppressor now pays for itself. Each row must satisfy, and each
+    failure is reported with what was SEEN rather than only that it failed:
+
+      * the row names a live hash at all;
+      * that live hash resolves as an ancestor of `master` -- a reader of a
+        clone can reach it;
+      * the subject cell byte-matches that commit's actual subject, because
+        the subject is the durable reference the whole repair rests on and a
+        row that quotes the wrong one has mapped the wrong commit;
+      * the dead hash is not the live hash.
+
+    **A silently wrong hash is not a repair.** This is the check that says so.
+    """
+    cache: dict[str, bool] = {}
+    subjects: dict[str, str] = {}
+    bad: list[tuple[Remap, str]] = []
+    for c in claims:
+        if c.declares_no_twin:
+            # A row that SAYS it has no twin has discharged the burden. See
+            # `_DECLARED_NO_TWIN` -- this exemption exists because the check
+            # convicted the corpus's own correct repair on its first run.
+            continue
+        if not c.live:
+            bad.append((c, "the row names no live hash in column 2, and its "
+                           "confidence cell does not declare the hash UNMAPPED "
+                           "or NEVER-LANDED either -- so it is silent rather "
+                           "than honest"))
+            continue
+        if c.live == c.dead:
+            bad.append((c, "the row maps the hash to itself"))
+            continue
+        if c.live not in cache:
+            cache[c.live] = resolves(repo, c.live)
+            subjects[c.live] = _git(
+                repo, "log", "-1", "--format=%s", c.live
+            ).stdout.rstrip("\n") if cache[c.live] else ""
+        if not cache[c.live]:
+            bad.append((c, f"the live hash `{c.live}` does not resolve on {BASELINE_REF} "
+                           f"either -- this repair points at nothing"))
+            continue
+        actual = subjects[c.live]
+        if c.subject and actual and c.subject != actual:
+            bad.append((c, "the subject cell does not match the live commit.\n"
+                           f"          table says: {c.subject}\n"
+                           f"          commit says: {actual}"))
+    return bad
 
 
 def resolves(repo: pathlib.Path, token: str, ref: str = BASELINE_REF) -> bool:
@@ -471,7 +591,16 @@ def run(repo: pathlib.Path = ROOT) -> tuple[list[Site], list[Site]]:
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     verbose = "-v" in argv or "--verbose" in argv
-    sites, bad = run(ROOT)
+    blobs = load_corpus(ROOT)
+    if not blobs:
+        # An instrument handed an empty corpus must be LOUD, never green.
+        print(f"EMPTY CORPUS -- `git ls-files {CORPUS_DIR}` returned no .md files.")
+        print("That is a broken aim, not a clean repository. Treating as FAIL.")
+        return 2
+    sites = candidates(blobs)
+    bad = findings(ROOT, sites)
+    claims = remap_claims(blobs)
+    broken = broken_remaps(ROOT, claims)
 
     if verbose:
         for s in sorted(sites, key=lambda x: (x.doc, x.line)):
@@ -485,6 +614,12 @@ def main(argv: list[str] | None = None) -> int:
     for v in sorted(by_verdict):
         print(f"  {v:<20} {by_verdict[v]}")
     print(f"distinct tokens in slot : {len({s.token for s in sites})}")
+    declared = [c for c in claims if c.declares_no_twin]
+    print(f"remap rows checked      : {len(claims)}"
+          f" in {len({c.doc for c in claims})} document(s)")
+    print(f"  of those, rows that DECLARE no twin exists: {len(declared)}")
+    for c in declared:
+        print(f"      {c.doc}:{c.line}  {c.dead}  [{c.confidence}]")
 
     if not sites:
         # An assertion satisfied by an empty result cannot fail.
@@ -492,8 +627,23 @@ def main(argv: list[str] | None = None) -> int:
         print("That is a broken extractor, not a clean corpus. Treating as FAIL.")
         return 2
 
+    if broken:
+        print(f"\n{len(broken)} mapping-table row(s) whose own repair does not hold:\n")
+        for c, why in broken:
+            print(f"  {c}")
+            print(f"      {why}")
+        print(
+            "\nA `## Dead hashes, recovered` row SILENCES this guard for that hash at\n"
+            "every one of its sites. A row that cannot be checked is a suppression\n"
+            "wearing a repair's name. Fix the row or remove it -- an unrepaired\n"
+            "citation that the guard still reports is better than a repaired-looking\n"
+            "one nobody can follow."
+        )
+        return 1
+
     if not bad:
-        print(f"OK: every cited SHA resolves as an ancestor of {BASELINE_REF}.")
+        print(f"OK: every cited SHA resolves as an ancestor of {BASELINE_REF}, and"
+              f" all {len(claims)} remap row(s) check out.")
         return 0
 
     print(f"\n{len(bad)} citation(s), {len({s.token for s in bad})} distinct SHA(s), "

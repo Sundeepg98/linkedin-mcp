@@ -1,5 +1,13 @@
 # The unassigned 21, attacked with evidence the row-walk did not use
 
+> **SHA NOTE, added 2026-09-20.** The short hash `12c20e1` cited
+> below was committed on a `worktree-agent-*` branch that never merged, so
+> it is reachable only from that branch and never from `master`. **The work
+> itself landed.** Mapped to its `master` twin -- identical subject, identical
+> author date, identical `git patch-id` -- under **"Dead hashes, recovered"**
+> at the foot of this file; it is kept in place here because a short hash
+> is the key a reader arrives with.
+
 **RESULT: 0 rows filed. 1 contest SETTLED with a swap named for the integrator.
 20 declines, each with what was searched. 2 previously-filed rows audited and
 both confirmed, one of them on a source neither wave read.**
@@ -273,7 +281,8 @@ of that line.
 
 ### 2.4 Verdict and consequence
 
-**`J 81` stays UNASSIGNED. The ruling at `12c20e1` stands -- not honoured,
+**`J 81` stays UNASSIGNED. The ruling at `12c20e1` (branch-only;
+on `master` at `e72af67`) stands -- not honoured,
 CONFIRMED, on evidence it did not have.** `ACCOUNT-VERIFICATION` stays 2 of 3,
 and its third slot is a strong candidate for the "slot with no row" class: the
 ledger's own cell says the blocker's applicability is assumed, so the third row
@@ -640,3 +649,25 @@ none: every one of the 21 stays where it was. The gate readings in section 0 are
 readings of the SHIPPED read boundary at this tree and say nothing about what
 LinkedIn serves. **I did not write the filings I audited in sections 8 and 9.4,
 and nothing here vouches for the rest of the recovered 388.**
+
+## Dead hashes, recovered
+
+Added 2026-09-20. The hash mapped here was made on a `worktree-agent-*` branch
+that never merged, so the citation was never checkable from a clone -- NOT
+because history was rewritten, but because the branch carrying the commit was
+never published. **The underlying work did reach `master`**, re-applied under a
+new hash.
+
+Method, measured per pair rather than inferred from ordering: the live hash is
+an ancestor of `master` and the dead hash is not; both commits carry a
+byte-identical SUBJECT and a byte-identical author identity and date;
+`git patch-id --stable` returns the SAME id for both, so the CONTENT is
+identical and not merely the message; that subject occurs EXACTLY ONCE on
+`master`, so the key is unambiguous; and the dead hash prefixes exactly one
+object, so a reader typing it gets one answer. The four controls that show those
+checks can fail, and the whole 22-row table, are in
+`_audit/2026-09-20-the-evidence-that-resolves.md`.
+
+| dead hash | subject (the durable reference) | live hash | confidence |
+|---|---|---|---|
+| `12c20e1` | rule(blockers): the three ruling requests -- fill what is forced, leave what is chosen | `e72af67` | CONFIRMED |
