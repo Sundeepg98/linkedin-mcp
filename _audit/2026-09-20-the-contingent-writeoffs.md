@@ -567,6 +567,91 @@ settings-family boilerplate `"a setting is admitted by name or not at all"`
 alone contributed ~33 rows of pure artifact. Word-boundary regexes removed 33
 and added 0. The 179 above is the corrected figure.)*
 
+### 3.5 Why the reopener predictor works: 34 blockers' reasons are UNREACHABLE from the blocker table
+
+A second sweep took every one of the 95 blockers in `blocker-map.tsv` and
+harvested its reason prose from the seven documents a reader starting at the
+blocker table would reach:
+
+    2026-09-03-linkedin-gap-blockers.md    2026-09-05-blocker-map.md
+    2026-09-05-decide-retire-rulings.md    2026-09-19-blocker-table-refresh.md
+    2026-09-19-blocker-conflicts.md        2026-09-19-the-four-absent-blockers.md
+    2026-09-05-routes-already-admitted.md
+
+**It found no reason for 34 of them -- 100 rows, 86 of them still GAP.**
+
+**That result is a claim about the CORPUS, not about the blockers, and I
+measured the difference rather than reporting the headline.** Re-run over every
+`.md` under `_audit/` INCLUDING the slice-specific audit documents:
+
+    named SOMEWHERE outside the seven : 34
+    named NOWHERE at all              :  0
+
+**Not one is orphaned.** Every reason exists. `SERVICES-PAGE-SURFACE` is the
+clean example: NO-REASON-FOUND in the seven, and two careful rulings about it
+in `2026-09-05-lead-rulings-round-two.md` s4 and `2026-09-05-network-tail.md`
+s3 -- the second of which corrects its own cost in the same session. I had read
+both by hand before this sweep ran, which is how the over-report was caught.
+
+**So the corrected finding, and it is the mechanism under s6.** For 34 of 95
+blockers, carrying **100 rows and 86 of the census's 301 remaining GAPs**, the
+reason is real, careful, sometimes self-correcting -- and **it cannot be found
+from the artifact people actually read.** The blocker table names no corrector;
+the corrector names the blocker. A reader who starts at the blocker and stops
+at the seven sees a name, a row count, a cost, and no argument.
+
+**That is why a reopener predicts revisiting and a good reason does not.** A
+reopener lives IN the blocker's own row. A reason two documents away does not
+get re-read, however good it is.
+
+**The cheapest fix is not to rewrite 34 reasons.** It is one column in
+`blocker-map.tsv`: `reason_doc`, the document that argues this blocker. The
+assignments file already carries `source` and `locator` for the row-to-blocker
+mapping; the blocker-to-reason mapping has no such column, which is the entire
+gap.
+
+### 3.6 Four blockers carry TWO reasons on different subjects, and the NAME keeps the wrong one
+
+The ledger sweep found four blockers whose reason prose gives two different
+subjects. In three of them a CODE reason was later corrected to an ACCOUNT or
+WORLD one -- **and the blocker NAME was never changed, so the superseded
+reason is the one a reader meets first.**
+
+**`ENDORSE-SUBSTRING-OVERREACH` -- 3 rows, 2 still GAP.** Named for a forbidden
+substring, i.e. a fact about our boundary. Corrected in
+`routes-already-admitted.md`: the substring appears *"at exactly one site in
+`linkedin_server/` -- its own entry in the tuple"*, and
+
+> *"what stops these rows is that LinkedIn draws no endorsement line for this
+> account to read, which is a measurement, where the substring was an
+> inference. The rows stay blocked and the reason changes"*
+
+The correction is exemplary and its consequence was not followed through:
+**"no endorsement line for this account" is CONTINGENT.** One endorsement
+received and the line is drawn. That is TRUE-BUT-CHANGEABLE at a cost nobody
+here controls but nobody here has named either, and the blocker is still
+called `ENDORSE-SUBSTRING-OVERREACH`.
+
+**`OPEN-TO-HIRING-MODAL` -- 5 rows, 5 still GAP.** Two reasons: a CODE one
+(*"50 rows sit behind a control on a page this server already loads and already
+parses ... none has ever been opened"*) and an ACCOUNT one, *"`P J4` IS
+UNVERIFIABLE ON THIS ACCOUNT, AND THAT IS THE POINT OF LISTING IT."* The
+account reason is the binding one and it is contingent: the #Hiring state
+becomes verifiable the moment he turns #Hiring on. Same shape as
+`ADMIN-RIGHTS-NOT-HELD`, and unspelled.
+
+**`PARSER-ON-A-LOADED-PAGE` -- 2 rows, 0 still GAP.** Ranked as *"the cheapest
+BUILD in the document: zero extra page loads, zero boundary change, zero
+ruling"*, then corrected 900 lines later: *"`N 118` is not a missing parser. It
+is a line LinkedIn does not draw."* Resolved, and worth keeping as the pattern:
+**a cheap-BUILD costing is the most likely place for a contingent fact to hide,
+because nobody audits a cheap row.**
+
+**`CONTACT-IMPORT` -- 5 rows, 0 still GAP.** Two reasons, both correct and both
+retired: a WORLD one (mobile address-book flow, no address book to offer) and a
+CODE one (a shipped ruling about driving a form on another party's domain).
+Sound; listed for completeness.
+
 ---
 
 ## 4. TWO SECONDARY FINDINGS
@@ -699,6 +784,19 @@ GAP**:
 | `OPEN-PROFILE-SETTING` | 1 | 0 | closed; reopener still owed |
 | `THIRD-PARTY-PROFILE-FORBIDDEN` | 1 | 0 | closed by OUR ruling; permanent, but say so |
 
+**AND TWO MORE THAT THE NAME-LEVEL SWEEP COULD NOT SEE**, found by the
+reason-level sweep instead (s3.6) -- which is why both were run:
+
+| blocker | rows | still GAP | the contingent claim, and where it is hidden |
+|---|---:|---:|---|
+| `OPEN-TO-HIRING-MODAL` | 5 | 5 | *"UNVERIFIABLE ON THIS ACCOUNT"* -- becomes verifiable when he turns #Hiring on. Name says CODE |
+| `ENDORSE-SUBSTRING-OVERREACH` | 3 | 2 | *"LinkedIn draws no endorsement line for this account"* -- one endorsement received and it is drawn. Name says CODE |
+
+**A blocker named for a code fact can hold an account fact, and the name is
+what everybody reads.** That is 8 more rows, 7 still GAP, on top of the queue
+above -- and it means the name-level classification in s3.1 is a FLOOR, not a
+census.
+
 **RECOMMENDED STANDING RULE, one line, and it is the cheapest thing in this
 document.** *A write-off whose reason asserts a fact about the operator, his
 account or the world may not be filed without a REOPENER and the name of who
@@ -724,3 +822,38 @@ costs nothing and is the only measure above that prevents instance 6.
 5. **The `J 39` and `J 131` confirmations are narrower than they look.** Both
    say the skill DOES serve the row. Neither says the row could not ALSO be
    served here -- `J 39` explicitly could, and is held shut by a ruling.
+6. **s3.1's name-level classification is a FLOOR.** s3.6 found two contingent
+   blockers wearing code-fact names, so the 26 is an undercount by at least
+   two and the SURFACE? class of 22 is a guess about names, not a measurement
+   of reasons.
+7. **The reopener scan is a text search and can be fooled both ways.** Its
+   over-reporting receipt is in s6 (`MATCH-DETAILS-COLLAPSED` at a 6-line
+   window). It can also under-report: a reopener written as a condition
+   without the word would read as absent. Both bounds are published.
+
+---
+
+## 8. PROVENANCE, AND THE ARTIFACTS
+
+Everything here is re-runnable offline. Nothing needs a session or a mailbox.
+
+| artifact | what it is |
+|---|---|
+| `tests/test_proximity_is_on_a_read_surface.py` | the only thing that ships; 6 tests, shown failing 4 of 4 |
+| `_audit/_scratch/_contingent-census-sweep.tsv` | 179 row-level reason cells + 1 exclusion marker, over four slices |
+| `_audit/_scratch/_contingent-ledger-sweep.tsv` | 99 blocker-level reasons over 95 blockers, classified by subject |
+| `_audit/_scratch/_cw-writeoffs.tsv` | the 144 of those 179 in a write-off state |
+
+The scratch TSVs are gitignored by design and are inputs, not conclusions --
+every number quoted above was re-derived from them in this document and each
+one is reproducible from the committed census.
+
+**What was run, and what was deliberately not.** Read: `blocker-map.tsv`,
+`blocker-assignments.tsv`, the four census slices, the ledger documents, the
+skill's own source and fixtures, `linkedin_server/readonly.py`,
+`shape.py`, `dom.py`, and 20 committed HTML captures. Executed: the skill's
+three selftests, `parse_digest --json` and `referral_join --json` over their
+own fixtures, `readonly.is_read_url` over nine addresses by import, and the
+guard's own mutation harness. **Not executed: any browser, any LinkedIn page
+load, any mailbox read, any write, `build_blocker_map.py --write`.** No census
+row was moved and `readonly.py` was not edited.
