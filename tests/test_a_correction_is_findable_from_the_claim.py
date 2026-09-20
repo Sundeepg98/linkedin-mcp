@@ -183,6 +183,21 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, from the impact-gate wave. A citation of a defect ALREADY
+    # REPAIRED at 5d0efb5, reused as the gate's own proving input -- which is
+    # the best kind of test case, because it is a failure that really happened.
+    ("2026-09-20-the-impact-gate.md", "2026-09-03-linkedin-gap-blockers.md"): (
+        "IT NARRATES A DEFECT ALREADY FIXED, AND USES IT AS THE GATE'S TEST "
+        "CASE. The passage describes commit 5d0efb5 -- a CORRECTED BY "
+        "marker inserted between a table header and its first data row, "
+        "which made _table_after() take zero rows so every blocker read as "
+        "unknown. The wave staged the REVERSE of that commit as the input "
+        "its selector had to catch, and the old selector returned zero "
+        "tests while the truth was two failures. The ledger is the file "
+        "that was broken and then repaired; it is the wave's fixture, not a "
+        "claim being corrected. "
+    ),
+
     # 2026-09-20, from the premium-block wave. The OTHER candidate it produced
     # IS a real correction -- of the jobs census cell that banked J 127
     # MEASURED-ABSENT on a reading whose instrument carries no needle for a
