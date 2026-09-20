@@ -580,9 +580,18 @@ both times:
    prints `"SURFACE fact: 1"`. Case-sensitive string matching against a
    program's prose: the assertion failed on a report that was correct.
 
+**The third was in the classifier itself and a reader found it, not me** --
+the duplicate address that put `CREATOR-HUB-SURFACE` into a headline on its
+sibling's page (s3.4, s5.0). That is the one that reached a published number,
+and it is the one I could not have caught by mutation testing: nothing was
+broken, the table was simply wrong, and every guard I had written agreed with
+it.
+
 Every fresh instrument built in a session has had a bug on its first attempt in
-this project's history. Two of the three defects found in this wave's own
-tooling were in the checker, not the checked.
+this project's history. **Two of the three defects were in the checker rather
+than the checked; the third was in the data and needed a second pair of
+eyes.** The two classes need different remedies, which is why 5.0's control now
+exists.
 
 ---
 
