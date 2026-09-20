@@ -214,6 +214,33 @@ SCOPE_URL safely", "SIXTEEN SCOPE_TEXT READERS", four `:data:` references. Caugh
 reading every occurrence back rather than by a test, because no test reads prose.
 Repaired; 22 occurrences checked by hand.
 
+### 3.4 A HOLE IN MY OWN CHECK, FOUND AFTER IT WAS COMMITTED
+
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` iterates
+`GUARD_SCOPE`. **So a THIRD guard file that imported `_is_sanitiser_call` tomorrow
+would be invisible to it** -- declared nowhere, checked by nothing, and green.
+
+That is the same defect this certifier was built for, committed by somebody who had
+spent the afternoon writing the fix for it. The enrolment half exists because a
+claimant inherits trust the instant it is typed; a CONSUMER inherits it exactly the
+same way, and I wrote a table-driven check without the enumeration half.
+
+`test_every_consumer_of_the_url_proven_predicate_declares_its_scope` closes it:
+every file under `tests/` whose AST imports or calls the predicate must be declared,
+enumerated off the TREE rather than off the table. It is paired with a non-vacuity
+assertion, because otherwise it subtracts one empty set from another.
+
+**THE FIRST MUTATION I WROTE FOR IT CAME BACK GREEN, AND THAT WAS THE USEFUL PART.**
+I removed `test_page_text_is_never_printed.py` from `GUARD_SCOPE` and nothing fired --
+because after this wave's fix that file is no longer a USER of the predicate. The
+containment is one-way: users must be a SUBSET of `GUARD_SCOPE`, not equal to it, and
+the page-text row being declared-but-not-a-user IS the fix. The biconditional test owns
+that direction. Re-mutated correctly -- a real user made undeclared, and a new user
+invented -- both red, unmutated green.
+
+A control that comes back the colour you expected is the one you do not re-examine.
+This one came back the wrong colour and was therefore cheap to catch.
+
 ---
 
 ## 4. Shown failing -- every new check, each mutated on its own

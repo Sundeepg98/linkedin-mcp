@@ -4955,3 +4955,20 @@ the way `_relation`'s are -- and they are genuinely two different functions doin
 two different jobs, so the honest repair is a RENAME, not reconciliation. A
 rename vouches for nothing, which is why it is available to anyone, and it was
 not taken unilaterally. Left for its owners, in the open.
+### 31.5 A TABLE-DRIVEN GUARD NEEDS THE ENUMERATION HALF, AND I SHIPPED ONE WITHOUT IT
+
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` iterates its own
+declaration table, so a new consumer of the url-proven predicate would be invisible
+to it. **Committed that way, by the wave that spent the afternoon fixing exactly this
+class.** The enrolment half of this same file exists because a claimant inherits trust
+the instant it is typed; a CONSUMER inherits it the same way.
+
+The repair is the pattern already in the file: enumerate off the TREE, subtract the
+table, and assert the enumeration is non-empty so the subtraction is over something.
+
+THE MUTATION THAT TAUGHT ME MOST CAME BACK GREEN. Dropping the page-text row from the
+table fired nothing, because after the fix that file is no longer a USER -- the
+containment is one-way, users are a SUBSET of the declarations, and the
+declared-but-not-a-user row IS the fix. **A wrong mutation is cheap; a wrong mutation
+that returns the colour you expected is not.** Re-run against a real user made
+undeclared, and against an invented new one: both red.

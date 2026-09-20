@@ -763,6 +763,58 @@ def test_a_guard_consults_only_sanitisers_proven_for_its_own_kind():
         )
 
 
+def _predicate_users() -> set[str]:
+    """Every file under ``tests/`` that IMPORTS OR CALLS the url-proven predicate.
+
+    Enumerated off the tree, never off :data:`GUARD_SCOPE`, for the reason the
+    enrolment half exists: a table cannot list a file nobody has written yet.
+    """
+    found: set[str] = set()
+    for path in sorted((REPO / "tests").glob("*.py")):
+        if URL_PROVEN_PREDICATE in _names_used(path.read_text(encoding="utf-8")):
+            found.add(path.name)
+    return found
+
+
+def test_every_consumer_of_the_url_proven_predicate_declares_its_scope():
+    """**THE ENUMERATION HALF, AND IT CLOSES A HOLE IN THE TEST ABOVE.**
+
+    That test iterates :data:`GUARD_SCOPE`, so a THIRD guard file that imported
+    ``_is_sanitiser_call`` tomorrow would be invisible to it -- declared
+    nowhere, checked by nothing, and green. **That is the same defect this file
+    was built for, committed by somebody who had just written the fix for it:**
+    the enrolment guard exists because a claimant inherits trust the instant it
+    is typed, and a CONSUMER inherits it exactly the same way.
+
+    The certifier itself holds the name as a STRING and in prose a dozen times
+    and is correctly absent here, because :func:`_names_used` parses. A grep
+    would demand this file declare itself a guard.
+
+    **THE CONTAINMENT IS ONE-WAY, AND THE FIRST MUTATION OF THIS TEST GOT IT
+    BACKWARDS.** Users must be a SUBSET of :data:`GUARD_SCOPE`, not equal to
+    it: since 2026-09-20 ``test_page_text_is_never_printed.py`` is declared
+    there and is NOT a user, which is precisely the fix. So dropping the
+    page-text row does not go red here -- it goes red in the biconditional
+    above, which owns that direction. Mutating this test means making a REAL
+    user undeclared, or inventing a new one. Both were run; both are red.
+    """
+    undeclared = sorted(_predicate_users() - set(GUARD_SCOPE))
+    assert not undeclared, (
+        "these files under tests/ import or call %s and declare no scope: %s. "
+        "The predicate carries a certification measured against urls only. Add "
+        "each to GUARD_SCOPE with the KIND of value it taints -- and if that "
+        "kind is not %r, it may not name the predicate at all."
+        % (URL_PROVEN_PREDICATE, undeclared, SCOPE_URL)
+    )
+    # AND THE SET IS NOT EMPTY, so the subtraction above is over something. Two
+    # empty sets agree; that agreement would prove nothing.
+    assert _predicate_users(), (
+        "no file under tests/ uses %s at all, so this check subtracts one empty "
+        "set from another and the green is vacuous. If the predicate really is "
+        "gone, delete GUARD_SCOPE and this test with it." % URL_PROVEN_PREDICATE
+    )
+
+
 def test_the_scope_check_would_notice_a_guard_reaching_outside_its_kind():
     """THE CONTROL, and without it the test above is a green over two files.
 
