@@ -531,7 +531,27 @@ worktree before. `scripts/sweep_tracked_for_identity.py` run at this tip:
 The loaded-spelling count is the half that proves it was armed; the zero alone
 would not.
 
-**THE FULL SUITE IS CI'S.** The first commit is CERTIFIED GREEN: run
-35481841288 completed success across all 18 jobs -- ubuntu 3.10 x 6 shards,
-ubuntu 3.13 x 6, windows 3.13 x 6. Later commits are queued behind it on the
-same branch.
+**THE FULL SUITE, AND IT WENT RED TWICE BEFORE IT WENT GREEN.** Both reds were
+real, both were mine, and both had the same cause: a LOCAL SELECTION that ran
+the files I touched and their neighbours, and missed a guard whose name and
+imports connect it to nothing I was working on.
+
+    run 35482897665   6 of 20 red   test_page_text_is_never_printed.py
+                                    dom.py's page-text inventory 9 -> 10, on
+                                    the links reader's own logger call
+    run 35483455478   3 of 20 red   test_no_committed_identity.py
+                                    the foreign-host cases minted an
+                                    undeclared company id
+    run 35484363311   20 of 20 GREEN, at ff4e6e3
+
+Each fix took the remedy the guard itself named rather than the one that
+clears the red: the text sink became a MARKER (the exception's type name) so
+the site is GONE rather than pinned, and the id was RE-AIMED at a declared
+synthetic value rather than declared.
+
+The third attempt was verified differently: the FULL suite, locally, sharded
+six ways with pytest-xdist instead of run serially -- **6189 passed, 8 skipped,
+1 xfailed, 10m41s** -- and then CI agreed across ubuntu 3.10 x 6 shards,
+ubuntu 3.13 x 6 and windows 3.13 x 6.
+
+Only this file changes after ff4e6e3.
