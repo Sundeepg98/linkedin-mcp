@@ -46,8 +46,8 @@ cell is prose is invisible here exactly as it is there, and `count_census_states
 THE THING THAT MAKES THIS HARDER THAN A KEYWORD SWEEP, MEASURED BEFORE IT WAS DESIGNED
 =============================================================================
 
-107 of the 309 write-off reason cells -- 34.6% -- ARE NOT REASONS. They are POINTERS.
-`network.md`'s median write-off reason cell is FOURTEEN CHARACTERS. Four dialects, all of
+127 of the 309 write-off reason cells -- 41% -- ARE NOT REASONS. They are POINTERS.
+`network.md`'s median write-off reason cell is FOURTEEN CHARACTERS. Six dialects, all of
 which must be RESOLVED before any word in the cell can be classified:
 
   1. BACKREFERENCE   `same`, `same gate`, `same ruling`, `same measurement`.  46 cells.
@@ -66,19 +66,42 @@ which must be RESOLVED before any word in the cell can be classified:
   3. RETIREMENT      `RETIRED 2026-09-05, `BLOCKER` (3.13)`. Carries its argument inline
                      and cites `decide-retire-rulings.md`, the one queue in this corpus
                      that gives every entry a REOPENER. No resolution needed.
-  4. FAMILY RULING   `/edit/ family ruling`, `delete_or_withdraw_anything`. Substantive as
-                     written.
+  4. FAMILY RULING   `/edit/ family ruling`. Substantive as written.
+  5. NAMED KEY       `delete_or_withdraw_anything`, `PERMANENTLY_FORBIDDEN["..."]`. A
+                     complete reason to anybody who knows the codebase and invisible to a
+                     keyword sweep. The key list is READ FROM `writes.py`, not hardcoded.
+  6. SECTION HEADING `### K. Recommendations (10) -- all EXCLUDED-RULED under R3`, and
+                     NOT ONE of `N 119`-`N 128` carries that attribution in any cell --
+                     those rows have no note column to put it in. THE MOST INVISIBLE
+                     DIALECT: a reader who lands on `N 126` from the blocker map sees a
+                     capability, a state, and no argument at all. Scoped on a measured
+                     fact rather than a guess -- exactly ONE heading in the whole census
+                     cites an R-code without being a ruling heading itself, and `--check`
+                     fails if that stops being true.
 
-A cell classified without resolving these would put 107 rows in UNCLEAR and call the
-corpus unclassifiable. That would be a fact about the instrument, not about the census.
+A cell classified without resolving these would put 127 rows in UNCLEAR and call 41% of
+the corpus unclassifiable. That would be a fact about the instrument, not about the
+census.
 
 =============================================================================
-TWO DEFECTS THIS SCRIPT HAD ON ITS FIRST DRAFT, BOTH CAUGHT BY MEASUREMENT
+FIVE DEFECTS THIS SCRIPT HAD, EVERY ONE CAUGHT BY MEASUREMENT AND NONE BY RE-READING IT
 =============================================================================
 
 Recorded because the standing law here is that every fresh instrument built in one session
-had a bug on its first attempt, and both of these were found by a child's independent
-extraction rather than by re-reading my own code.
+had a bug on its first attempt. Two were found by a child's independent extraction and two
+more by a cold mutation harness; the fifth is listed at the end of the rule section.
+
+**0. A CONTROL THAT COULD NOT FAIL.** The per-file check's second half read
+`unkinded = [r for r in sub if not r.kind]`, and `finalise` sets `r.kind = "UNCLEAR"` on an
+empty kind set -- so `r.kind` is NEVER falsy and the branch was unreachable. It printed
+"all 112 write-off rows carry a kind" and could never have said anything else. Replaced
+with the invariant that actually broke: a row resolved through a pointer must carry at
+least what it points at. Shown failing on 102 rows with inheritance disabled.
+
+**0b. BACKREFERENCE INHERITANCE WAS SILENTLY DEAD.** The donor was recovered by re-parsing
+the label `backref<-P D14` with a non-whitespace capture; every row key here contains a
+space, so the capture stopped at `P` and the lookup missed. 46 rows never inherited a kind and simply
+came out UNCLEAR, which is indistinguishable from a census that never wrote a reason.
 
 **1. HEADING SCANNING MUST BE FENCE-AWARE.** `network.md` quotes OTHER documents' markdown
 headings inside ``` fences: line 644 `### #7 -- connection invitations` sits inside R1's
@@ -211,7 +234,11 @@ _SIGNALS_RAW: list[tuple[str, str, str]] = [
     # ---- US-BOUNDARY: a line somebody typed in our own allow/deny lists ---------------
     ("allowlist",            "US-BOUNDARY", r"(?i)\ballow[- ]?list\b|_ALLOWED_URL_PATTERNS"),
     ("denylist",             "US-BOUNDARY", r"(?i)\bdeny[- ]?list\b"),
-    ("forbidden-substring",  "US-BOUNDARY", r"(?i)forbidden substring|_FORBIDDEN_URL_SUBSTRINGS"),
+    # The census writes this list three ways -- "forbidden substring", "forbidden
+    # tuple", "forbidden-substring list". `P M1`/`M2`/`M4`-`M7` and `P N29` say "the FIRST
+    # entry on the forbidden tuple" and read as UNCLEAR until the spelling was widened.
+    ("forbidden-substring",  "US-BOUNDARY", r"(?i)forbidden[- ](?:substring|tuple|list)"
+                                            r"|_FORBIDDEN_URL_SUBSTRINGS"),
     ("mutation-verb",        "US-BOUNDARY", r"(?i)mutation[- ]verb"),
     ("not-on-allowlist",     "US-BOUNDARY", r"(?i)not (?:on|admitted)\b.{0,24}\b(?:allow|admit)"),
     ("admitted-by-name",     "US-BOUNDARY", r"(?i)admitted by name|by name or not at all"),
@@ -807,6 +834,33 @@ def build(ref: str | None = None):
             r.kinds |= want
             if want:
                 r.source = "inherit-ruling" if r.source == "none" else r.source
+
+        # A SIXTH POINTER DIALECT, AND THE MOST INVISIBLE ONE. `network.md` section K is
+        # headed "### K. Recommendations (10) -- all EXCLUDED-RULED under R3", and NOT ONE
+        # of `N 119`-`N 128` carries that attribution in any cell -- those rows ship four
+        # columns with no note column, so there is nowhere to put it. A reader who lands
+        # on `N 126` from the blocker map sees a capability, a state, and no argument.
+        #
+        # Confirmed from two directions before it was implemented: R3's own body declares
+        # `Rows: 111, 112, 113, 119-128` (13), while a token scan over every cell of every
+        # row finds 4. The difference is exactly those ten.
+        #
+        # SCOPED NARROWLY ON A MEASUREMENT, not on a guess: of all headings in all four
+        # slices, exactly ONE cites an R-code without being a ruling heading itself. The
+        # control below fails if that stops being true, because a heading that merely
+        # mentions a code in passing would silently repaint every row beneath it.
+        if r.letter == "N" and not re.match(r"^\s*R\d{1,2}\b", r.section):
+            for code in sorted(set(RCODE.findall(r.section)), key=int):
+                want = ruling_kinds.get(f"R{code}", set())
+                if not want:
+                    continue
+                r.inherited_kinds |= want
+                r.kinds |= want
+                if r.source == "none":
+                    r.source = "inherit-heading"
+                if "heading" not in r.resolution:
+                    r.resolution = (f"heading<-R{code}" if r.resolution == "own-cell"
+                                    else f"{r.resolution}+heading<-R{code}")
         # READ THE SLOT, NEVER RE-PARSE THE LABEL. The first version of this matched
         # `backref<-(\S+)` out of `r.resolution` -- and every row key in this corpus
         # contains a space (`P D14`), so the capture stopped at `P`, `by_key.get("P")`
@@ -1021,6 +1075,33 @@ def main(argv: list[str] | None = None) -> int:
             inherited = sum(1 for r in sub if r.resolution != "own-cell")
             print(f"  ok    {name}: {len(sub)} write-off rows, {inherited} resolved "
                   f"through a pointer, all inheriting what they point at")
+
+    # The heading-inheritance rule is scoped on a measured fact: exactly ONE heading in
+    # the whole census cites an R-code without being a ruling heading. If that stops being
+    # true, the rule starts silently repainting rows under headings that merely mention a
+    # code in passing, so it is asserted rather than assumed.
+    cite_headings = []
+    for letter, name in ccs.SLICES.items():
+        in_fence = False
+        for lineno, line in enumerate(egr.slice_text(name, args.ref).splitlines(), 1):
+            if FENCE.match(line):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
+            m = HEADING.match(line)
+            if m and RCODE.search(m.group(2)) and not re.match(r"^\s*R\d{1,2}\b",
+                                                               m.group(2)):
+                cite_headings.append(f"{name}:{lineno} {m.group(2)[:60]}")
+    if len(cite_headings) == 1:
+        print(f"  ok    exactly 1 non-ruling heading cites an R-code, as measured: "
+              f"{cite_headings[0]}")
+    else:
+        print(f"  FAIL  {len(cite_headings)} non-ruling headings cite an R-code; the "
+              f"heading-inheritance rule was scoped to exactly 1 and must be re-read")
+        for h in cite_headings:
+            print(f"          {h}")
+        failed = True
 
     if dialects:
         print(f"  FAIL  {len(dialects)} dialect state cell(s)")

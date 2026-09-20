@@ -49,11 +49,11 @@ says so.**
 
     slice                      write-offs  US-RULING  US-BOUNDARY  WORLD  ACCOUNT  PROCESS  CONTINGENT  UNCLEAR
     jobs.md                            48         39           12      5       11        0          12        1
-    profile.md                        112         88           42     10       11        0          18       17
+    profile.md                        112         88           50     10       11        0          18       11
     messaging-and-content.md           48         41           14      2        8        0          10        2
-    network.md                        101         52           46      9        9        0          14       13
+    network.md                        101         61           46      9       19        0          24        4
     ----------------------------------------------------------------------------------------------------------
-    TOTAL (kinds overlap)             309        220          114     26       39        0          54       33
+    TOTAL (kinds overlap)             309        229          122     26       49        0          64       18
 
 Kinds overlap because a reason may assert more than one; the exact single-count verdicts:
 
@@ -71,15 +71,19 @@ Kinds overlap because a reason may assert more than one; the exact single-count 
     ACCOUNT-FACT+US-BOUNDARY+US-RULING                2
     ACCOUNT-FACT+US-BOUNDARY+US-RULING+WORLD-FACT     1
 
-**54 of 309 write-offs are CONTINGENT, and 30 of those carry no reopener.** Those 30 are
+**64 of 309 write-offs are CONTINGENT, and 40 of those carry no reopener.** Those 40 are
 section 6, and they are the point of the document.
 
-**54 IS A FLOOR, NOT A CENSUS, and the reason is stated rather than left to be found:**
-33 rows are still UNCLEAR, and 10 of them (`N 119`-`N 128`) are known to rest on a ruling
-that is itself part ACCOUNT-FACT -- their attribution simply lives somewhere no row-level
-reader can see it (section 3.2). Resolving that alone would put contingency at 64.
-Section 7 says exactly why each remaining UNCLEAR is unclear, and how much of it is my
-instrument rather than the census's silence.
+**THE PREDICTION THIS DOCUMENT MADE AND THEN TESTED.** An earlier draft reported 54
+contingent and said: *10 UNCLEAR rows are known to rest on a ruling that is itself part
+ACCOUNT-FACT, and resolving that alone would put contingency at 64.* Implementing the
+section-heading resolution (3.2) landed it on **exactly 64**, and took UNCLEAR from 33 to
+24. Three further spelling fixes took it to **18**. The figure is reported this way
+because a number that was predicted and then hit is worth more than one that was merely
+measured.
+
+**64 IS STILL A FLOOR.** 18 rows remain UNCLEAR; section 7 says which of those are the
+census's silence and which are my instrument's vocabulary.
 
 ---
 
@@ -87,14 +91,14 @@ instrument rather than the census's silence.
 
 This is the part worth reading even if the taxonomy is uninteresting.
 
-**118 of the 309 write-off reason cells are not reasons. They are references.**
+**127 of the 309 write-off reason cells -- 41% -- are not reasons. They are references.**
 `network.md`'s median write-off reason cell is **fourteen characters**. Six dialects:
 
 | dialect | cells | resolves to | how fragile |
 |---|---:|---|---|
 | **BACKREFERENCE** `same`, `same gate`, `same measurement` | 46 | the nearest preceding substantive row **in the same table** | **BY POSITION.** Transitive: `P D17` -> `D16` -> `D15` -> `D14` |
 | **RULING CODE** `R4. NOT-REV`, `R1 + R2` | 72 | a `### R<n>` section in `network.md` | stable, but the body is where the argument is |
-| **SECTION HEADING** | 10 | the table's own `###` heading | **invisible to every row-level reader** |
+| **SECTION HEADING** | 9 | the table's own `###` heading | **invisible to every row-level reader** |
 | **RETIREMENT** `RETIRED 2026-09-05, X (3.13)` | 38 | argument inline + `decide-retire-rulings.md` | the only queue carrying reopeners |
 | **FAMILY RULING** `/edit/ family ruling` | ~14 | a named ruling | fine |
 | **NAMED KEY** `delete_or_withdraw_anything` | ~20 | a `PERMANENTLY_FORBIDDEN` entry in `writes.py` | fine |
@@ -301,7 +305,7 @@ tests every zero-firing signal against a synthetic positive.
 
 ## 6. THE RE-EXAMINATION LIST
 
-**30 write-offs rest on a fact about him or the world, and carry nothing that would ever
+**40 write-offs rest on a fact about him or the world, and carry nothing that would ever
 say it had changed.** Ordered by what it would cost to settle, cheapest first. The full
 machine-generated list is `classify_writeoff_reasons.py --contingent`; this is its
 structure, which is what makes it actionable.
@@ -390,20 +394,28 @@ reached a census reason cell.
 UNCLEAR is the honest answer only when nobody could tell from what is written. It is **not**
 honest when my rule simply does not know a spelling, so the 50 are split:
 
-UNCLEAR fell from 50 to 33 once backreference inheritance was fixed (section 8.3). The
-remaining 33:
+UNCLEAR fell **50 -> 33 -> 24 -> 18** across three corrections: backreference inheritance
+(8.3), section-heading resolution (3.2), and three spellings the rule did not know. Every
+one was found by reading the UNCLEAR bucket rather than by design, which is the argument
+for printing it at all.
+
+The **spellings** were worth fixing because they were not ambiguity, they were vocabulary:
+`P M1`/`M2`/`M4`-`M7` and `P N29` say *"the FIRST entry on the forbidden TUPLE"* where the
+rule knew only "forbidden substring"; `P I4`-`I10` say *"editor never loaded"*, the
+NEVER-LOADED ruling by its lowercase name. Fourteen rows, all plainly US-BOUNDARY or
+US-RULING, sitting in UNCLEAR because of a word.
+
+**The remaining 18, and who is at fault for each:**
 
 | cause | rows | whose fault |
 |---|---:|---|
-| reason lives only in a section heading (`N 119`-`N 128`) | 10 | **the census** -- section 3.2 |
-| my rule does not know the spelling -- *"the residue clause of the `set_open_to_work` spec"*, *"measured: zero of 237 urls reach one"*, `forbidden-substring` hyphenated | ~13 | **mine**, and fixable |
-| genuinely undecidable from what is written | ~10 | nobody's -- UNCLEAR is the right answer |
+| a `same` chain whose donor is itself undecidable | ~5 | the chain |
+| the reason is a retirement whose argument is a shape, not a subject (`N 107`, `N 108` -- *"a step INSIDE an import, so it has no life if the import cannot run"*) | 2 | nobody's |
+| genuinely undecidable from what is written -- `P I12` *"measured: zero of 237 urls reach one"*, `N 101` which flags its OWN blocker as stale | ~11 | nobody's -- UNCLEAR is the right answer |
 
-**About 40% of the remaining UNCLEAR bucket is my instrument's vocabulary rather than the
-census's silence**, and saying so is the difference between a measurement and an excuse.
-Those fixes are named but NOT applied: each one shifts the headline, and shipping a number
-I have not re-verified against the guard is how a corrected figure gets quoted in its
-superseded form.
+**UNCLEAR is now mostly the census's silence rather than my instrument's vocabulary**,
+which is the state it should be in before anybody quotes it. It is not zero and should not
+be: a classifier that can always decide is not measuring anything.
 
 ---
 

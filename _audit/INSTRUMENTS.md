@@ -4850,13 +4850,19 @@ the reason asserts: **US-RULING** (somebody decided it), **US-BOUNDARY** (a line
 typed in an allow/deny list), **WORLD-FACT**, **ACCOUNT-FACT**, **PROCESS-FACT**. The split
 that does the work is two-way: the first two are OURS and re-checkable by reading this
 tree; the other three are CONTINGENT and go stale silently. Result at `cd08e05`:
-**54 contingent, 30 of them carrying no reopener** -- which is the re-examination list.
+**64 contingent, 40 of them carrying no reopener** -- which is the re-examination list.
+That 64 was PREDICTED at 54 and then hit exactly, by implementing the section-heading
+resolution the earlier draft had named as the missing piece.
 
 ### 31.1 THE LAW IT SERVES, AND WHY THE UNIT OF ADJUDICATION IS NOT THE ROW
 
-118 of the 309 reason cells are NOT reasons, they are POINTERS; `network.md`'s median
-write-off reason cell is FOURTEEN CHARACTERS. Six dialects, three of which were found by
-measuring a previous draft's failures rather than by design. The first draft keyword-matched
+127 of the 309 reason cells -- 41% -- are NOT reasons, they are POINTERS; `network.md`'s
+median write-off reason cell is FOURTEEN CHARACTERS. Six dialects, three of which were
+found by reading the UNCLEAR bucket rather than by design. The most invisible is the
+SECTION HEADING: `### K. Recommendations (10) -- all EXCLUDED-RULED under R3`, where not
+one of the ten rows beneath carries that attribution in any cell. It is scoped on a
+measurement -- exactly ONE heading in the census cites an R-code without being a ruling
+heading -- and `--check` fails if that stops being true. The first draft keyword-matched
 each pointer row against the whole 926-to-2735-character body it pointed at, and a row whose
 entire cell is `R2` came out `ACCOUNT-FACT+US-BOUNDARY+US-RULING` -- a three-kind verdict
 carrying no information. **Eleven rulings carry 72 rows, so the ruling is adjudicated once
