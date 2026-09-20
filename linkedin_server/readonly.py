@@ -1411,12 +1411,57 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # rule carry a query group, entries written under it do not, and nothing
     # here needs one.
     #
-    # THE ADDRESS IS A HYPOTHESIS AND THIS COMMENT WILL NOT PRETEND
-    # OTHERWISE. Nobody has opened this page. Everything above measures the
-    # GATE; not one byte of it says LinkedIn serves that spelling. If the
-    # first load 404s, the correct response is to CHANGE THIS PATTERN, not to
-    # conclude he has no alerts -- the skill's own inventory says he has five.
+    # THE ADDRESS WAS A HYPOTHESIS AND IT HAS NOW BEEN OPENED. This paragraph
+    # used to read "Nobody has opened this page", and it told a successor that
+    # if the first load failed, the correct response was to CHANGE THIS
+    # PATTERN rather than conclude he has no alerts. That instruction was
+    # right and it is hereby carried out.
+    #
+    #   MEASURED 2026-09-20 by the live-capture wave, and again on a second
+    #   load: this spelling is ALLOWED by the gate below and LINKEDIN
+    #   REDIRECTS AWAY FROM IT. It does not 404 -- it returns a page at a
+    #   DIFFERENT address, which is why a load that is scored pass/fail looks
+    #   like success:
+    #
+    #       requested  /jobs/alerts/       landed  /jobs/jam     query: none
+    #
+    # **THE ENTRY BELOW IS KEPT ANYWAY**, and not out of sentiment: it is the
+    # spelling LinkedIn's own Help Center documents, a caller may well try it,
+    # and the redirect target is only reachable by being allowed to start the
+    # navigation that redirects. Keeping it costs one dead pattern; removing
+    # it would make the documented address unreachable and teach nobody why.
+    #
+    # ALLOWED-AND-STILL-WRONG IS A REAL CATEGORY AND THIS IS ITS SPECIMEN.
+    # "Our list admits this address" is a statement about THIS FILE. Whether
+    # LinkedIn serves it is a statement about LinkedIn, and no amount of
+    # reading this file can answer it.
     re.compile(r"^https://www\.linkedin\.com/jobs/alerts/?$"),
+    # The address the line above actually lands on. Census J 31-J 36 and J 41.
+    #
+    # NOT GUESSED AND NOT GUESSABLE -- and the second half is the point. The
+    # 2026-09-05 probe narrowed the landing to ``/jobs/<three characters>``
+    # and then enumerated SIXTEEN three-letter spellings against it: all, new,
+    # set, top, job, alt, hub, sub, rec, sav, pre, JAT, jat, mgr, geo, r-r.
+    # **``jam`` is not among them**, and the row sat dead for fifteen days
+    # behind a search space that looked small enough to guess. It was closed
+    # by RECORDING THE LANDING URL of one load. Enumerating candidates is not
+    # a substitute for reading where the browser went.
+    #
+    # NO SUB-PATH, NO QUERY, NO ID, and the no-sub-path part is load-bearing
+    # for exactly the reason the entry above states about its own family: a
+    # ``pause`` verb under this root would be a WRITE nobody has named,
+    # defended by nothing but the absence of a rule. Measured over eight
+    # spellings, 8 of 8 as intended -- the bare page admitted with and without
+    # its trailing slash; an alert id, a ``manage`` sub-path, ``pause``,
+    # ``delete``, any query and a sibling three-letter root all refused.
+    #
+    # IT CARRIES NO FORBIDDEN SUBSTRING, checked rather than assumed, and it
+    # names nobody: three literal characters.
+    #
+    # WHAT IT BUYS: the READ precondition for all seven alert rows, which are
+    # writes and stay refused. Nothing here creates, edits, deletes, pauses or
+    # re-schedules an alert.
+    re.compile(r"^https://www\.linkedin\.com/jobs/jam/?$"),
     # The role-play scenario LISTING. Census J 136 / J 137 / J 138, which ask
     # whether a past practice-interview session's readiness score, summary and
     # transcript have a stable address.

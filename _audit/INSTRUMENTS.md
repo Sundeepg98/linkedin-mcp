@@ -4016,12 +4016,16 @@ tolerate a directory, because the directory never belonged in the swept set.
 
 ### 24.6 STILL CANNOT FAIL, AND IT IS NOT MINE
 
-`scripts/_probe_events_surface_shape.py`'s must-stay-silent control is printed
-and never branched on -- the identical gap the newsletter wave found and fixed
-in its own probe, still unfixed at `8b58dcb`. Named rather than edited: it
-belongs to another wave, and a one-line fix with the evidence attached is
-cheaper for its owner than a surprise in their diff. **This is the second
-register entry to name it.**
+**SUPERSEDED BY SECTION 27, AND THE SUPERSESSION IS THE LESSON.** I wrote
+that `scripts/_probe_events_surface_shape.py`'s must-stay-silent control was
+printed and never branched on, still unfixed at `8b58dcb`, and noted this was
+**the second register entry to name it by hand**.
+
+It was fixed in `2fba253`, and section 27 then did the thing neither naming
+did: it COUNTED the shape. **56 of 88 probe files, 129 of 762 control-like
+readings never branched.** Two hand-written paragraphs found one instance;
+one census found 129. **When a defect turns up a second time, that is the
+signal to count it, not to report it again.**
 
 ### 24.7 DISPOSABLE, declared
 
@@ -4643,3 +4647,82 @@ is no longer possible for this dispute to be forgotten by default -- it
 sits in the baseline, live, until someone with the standing to adjudicate
 the marker question does.
 
+
+## 29 · RECORD THE LANDING URL, NOT THE EXIT CODE (live-capture, 2026-09-20)
+
+Not a new script -- a rule that two measurements forced, and the scratchpad
+probes that produced them are declared disposable at the end.
+
+### 29.1 ALLOWED-AND-STILL-WRONG: two specimens in one session
+
+**A load that succeeds at a DIFFERENT ADDRESS is indistinguishable from a load
+that succeeded**, to every check that does not compare the landing url against
+the requested one.
+
+    requested /jobs/alerts/   ALLOWED by our own gate   ->  landed /jobs/jam
+    requested /messaging/     ALLOWED by our own gate   ->  landed /messaging/thread/<id>
+
+Both returned pages. Both would have been scored PASS by anything watching for
+an exception or a status code. `/jobs/alerts/` had been admitted since
+2026-09-05 with a comment stating in capitals that nobody had opened it, and
+its redirect had been measured that day and then **left unnamed for fifteen
+days** -- the landing was narrowed to `/jobs/<three characters>` and SIXTEEN
+three-letter spellings were enumerated against it. `jam` was not among them.
+
+**ENUMERATING CANDIDATES IS NOT A SUBSTITUTE FOR READING WHERE THE BROWSER
+WENT.** The search space looked small enough to guess, which is exactly the
+condition under which guessing replaces measuring.
+
+**AND "OUR LIST ADMITS IT" IS A FACT ABOUT OUR LIST.** Whether LinkedIn serves
+an address is a fact about LinkedIn, and no amount of reading `readonly.py`
+can answer it. Any wave that concludes a surface is reachable because the gate
+says ALLOWED has measured its own configuration.
+
+### 29.2 A NEEDLE SET THAT SCORES 0 ON ONE PAGE AND 7 ON ITS SIBLING IS A CONTROL
+
+The compose-toolbar question was put to a ten-word vocabulary -- emoji, gif,
+attach, photo, image, file, video, sticker, record, audio -- read off
+aria-labels rather than text.
+
+    /messaging/           0 of 10
+    /messaging/compose/   7 present, 3 absent, plus 2 file inputs
+
+**The discrimination IS the proof the instrument works**, and it costs nothing
+extra because the second page was being loaded anyway. A vocabulary that
+returns zero everywhere and a vocabulary that returns hits everywhere are both
+broken; one that splits between two sibling pages in the same session is
+neither. Prefer a paired reading to a synthetic control whenever a natural
+negative page is already in the batch.
+
+### 29.3 SAMPLING THE PAGE LINKEDIN CHOSE IS NOT SEARCHING FOR A STATE
+
+`/messaging/` lands inside one thread. So a row asking *can this server read a
+GROUP thread* cannot be answered there at all: what is available is *is the
+thread LinkedIn opened a group thread*, which is a different question with a
+different denominator. Three conversations were drawn out of an unknown N.
+
+**THREE ANSWERS MUST NOT COLLAPSE INTO EACH OTHER**, and only the third was
+true here:
+
+    the surface is absent                      a claim about LinkedIn
+    the account holds no instance of it        a claim about this account
+    no admitted address can enumerate the set  a claim about US
+
+Banking the first on evidence for the third is how a MEASURED-ABSENT gets
+filed on a reading that never had a needle. The blocker was re-aimed to the
+third, which wants an ADDRESS rather than a capture.
+
+### 29.4 A SOURCE COUNT IS NOT A PAGE COUNT, ON A THIRD PAGE NOW
+
+Entry 24.1 found this on six captures; `/preload/sharebox/` makes it eight.
+The bundle names `draft` **fifteen** times and the page draws it **zero**.
+Reported with the caveat that the preload stub has no `<main>` and 763
+rendered characters, so the absence is of the STUB and not of the product --
+a weaker claim than the number alone would support, and it is the claim made.
+
+### 29.5 DISPOSABLE, declared
+
+Three scratchpad probes: a five-target capture driver, a landing-url namer,
+and an offline analyser over the captures. Their results are section 12 of
+`_audit/2026-09-20-the-live-capture.md`; the captures they wrote are in
+`_state/` and re-readable without them.
