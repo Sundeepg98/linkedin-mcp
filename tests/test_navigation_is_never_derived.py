@@ -252,13 +252,20 @@ def _bindings(node: ast.AST):
     knowledge of what taint is -- so it is the part that can be identical, and
     the drift test asserts it is.
 
-    FORMS DELIBERATELY NOT HERE, named rather than implied: ``except ... as``
-    (its ``ExceptHandler.type`` is an exception CLASS, not the value bound, so
-    a binding here would be an invention), ``AugAssign``, ``global`` /
-    ``nonlocal``, function parameters, ``import ... as`` and ``match`` capture
-    patterns. Each was measured blind and each is left blind ON PURPOSE, at
-    parity with the sibling: closing one here alone would re-open the very
-    divergence this commit exists to close. See the audit for the measurements.
+    FORMS DELIBERATELY NOT HERE, named rather than implied. MEASURED blind on
+    2026-09-20, four of them: ``except ... as`` (its ``ExceptHandler.type`` is
+    an exception CLASS, not the value bound, so a binding here would be an
+    invention -- the leak shape that matters there is inter-procedural and this
+    engine is not), ``AugAssign``, ``global`` / ``nonlocal``, and function
+    parameters. Left blind ON PURPOSE, at parity with the sibling: closing one
+    here alone would re-open the very divergence this commit exists to close.
+
+    NOT MEASURED BY ME, and said so rather than folded into the list above:
+    ``import ... as``, ``match`` capture / ``as`` / star patterns, ``except*``
+    groups, lambda parameters, decorator-bound names and PEP 695 type
+    parameters. They are almost certainly blind for the same structural reason,
+    but "almost certainly" is not a measurement and this file's whole subject is
+    the difference. The audit carries the census that settles them.
     """
     if isinstance(node, ast.Assign):
         yield node.value, node.targets
