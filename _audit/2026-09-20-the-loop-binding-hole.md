@@ -274,6 +274,19 @@ correctly scoped to urls, and the page-text guard is applying it outside that sc
   inherits the recognition **without** inheriting the warning -- because it imports
   `_is_sanitiser_call`, not the paragraph above it.
 
+### Is this a known trade or a gap nobody ruled? Measured: nobody ruled it
+
+`tests/test_a_sanitiser_earns_its_entry.py` is the certifier that admits a function to
+`_SANITISERS`. **Every fixture in its corpus is a url** -- I grepped its whole fixture
+set and its `MUST_DISCRIMINATE` pairs and found `https://www.linkedin.com/...` and
+nothing else. It contains no page text, no prose, no display-name case, and the words
+"page text", "inner_text", "prose" and "display name" do not appear in it at all.
+
+So the certification means "shapes a url safely" and was never asked to mean more. The
+page-text guard then consumes that certification as if it were general. **Nobody
+decided that; it fell out of an import.** That is the difference between a trade-off
+and an invariant nobody ruled, and it is why this is escalated rather than filed.
+
 ### How live is it
 
 **Zero live instances.** I swept all 175 scanned files for an output sink whose
