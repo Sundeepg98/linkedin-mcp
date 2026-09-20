@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 196 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 163 |
+| audit documents git tracks under `_audit` | 197 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 164 |
 | distinct dates | 13 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 68 |
-| `CORRECTED BY:` marker lines | 68 |
-| distinct declared correction edges | 65 |
-| documents something later corrects | 38 |
-| documents that correct something | 50 |
-| documents at either end of a cross-document edge | 73 |
+| `CORRECTS:` marker lines | 69 |
+| `CORRECTED BY:` marker lines | 69 |
+| distinct declared correction edges | 66 |
+| documents something later corrects | 39 |
+| documents that correct something | 51 |
+| documents at either end of a cross-document edge | 74 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 121 |
@@ -45,9 +45,10 @@ are listed as `(undated)`; no date is taken from git history, because
 | edges declared a different number of times in each direction | 2 |
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
-| reasons the shipped `_reason_on` cuts short (printed in full below) | 65 |
+| reasons that continue past their own line (printed whole below) | 15 |
+| tightest margin over the 20-character admission floor, in characters | 0 |
 | titles carrying a non-ASCII character | 5 |
-| quoted strings whose backticked citation had to be defused | 1 |
+| quoted strings whose backticked citation had to be defused | 6 |
 
 **THE MARKER LINES OUTNUMBER THE EDGES**, because some pairs are
 declared more than once, for two different claims. Every reason is
@@ -70,7 +71,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-08-23-build-linkedin.md](2026-08-23-build-linkedin.md)
 
-  > measured the next day: the committed skills capture carries zero endorsement counts, so this is not 0 extra page loads.
+  > measured the next day: the committed skills capture carries zero endorsement counts, so this is not 0 extra page loads. 3. **Job recommendations** (`/jobs/collections/recommended/`) -- overlaps the `linkedin-jobs` Gmail skill, which already reads the recommendation digests for free. Only worth it if the on-site set proves richer than the email. 4. Post/follower analytics -- he is not posting; no job-hunt value today. Not recommended.
 
 ### [2026-08-23-measure-linkedin.md](2026-08-23-measure-linkedin.md)
 
@@ -124,7 +125,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > the queue was ruled and it converts 37 rows rather than 39, and the answer was not no for all twelve: three rows of AI-INTERVIEW-PRODUCT (the READ side, a past session's readiness score, summary and transcript) and two of OFF-PLATFORM-WIDGET (both reads drawn on a LinkedIn page) meet no reason that retires them and are handed back as gaps under two new blocker names, while five of the 37 are a RE-FILE against a ruling that already existed rather than a new decision.
 
-  > they were already ruled: the settings ruling is quoted in the live linkedin_update_setting docstring at HEAD, a setting is admitted by name or not at all, and the profile slice applied that same ruling to 93 rows as EXCLUDED-RULED while this slice filed five as GAP; the ruling says a setting, not a profile setting, so the five are a RE-FILE and not a decision anybody still owes.
+  > they were already ruled: the settings ruling is quoted in the live linkedin_update_setting docstring at HEAD, a setting is admitted by name or not at all, and the profile slice applied that same ruling to 93 rows as EXCLUDED-RULED while this slice filed five as GAP; the ruling says a setting, not a profile setting, so the five are a RE-FILE and not a decision anybody still owes. 4. **Whether `RECOMMENDATIONS-SURFACE` collides with the network slice's R3.** The same capability family is EXCLUDED-RULED under `endorse_or_recommend` in network.md and GAP in profile.md. One of the two slices is wrong and I cannot tell which from the text.
 
   > it is at least 6 and it is not the only direction: the newsletter wave measured two further duplicate pairs that no slice had flagged (M C80 against N 55 plus N 56, and P L4 against M C83, both verified on disk), while A1 subtracted P N12 on an address nothing in this package builds, which is an error in the OTHER direction; its section 9 recomputes the ledger with every movement named and its TAKEN-or-FLAGGED status stated, and applies the duplicates to the 761 denominator, which nobody had done.
 
@@ -154,7 +155,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-05-settings-tail.md](2026-09-05-settings-tail.md)
 
-  > rows 74, 79, 80, 82,
+  > rows 74, 79, 80, 82, 85, 86 and 87 are queued BUILD ("engineering only, no ruling needed, the shape is known") and none of the three clauses holds. A ruling that already ships -- *"a setting is admitted by name or not at all"*, `server.py`, the operator's -- governs any of them sitting in the settings family, so their earliest binding constraint is a decision and not a pattern. And measured: **not one of those rows names an in-product address**, so the "allowlist +1" charged against every one of them is not a unit of work but a placeholder for an unknown. Row 32 (`NOTIFY-COST-UNMEASURED`) is also corrected there: it was never waiting on an experiment, it was waiting on an instrument, and that instrument now ships.
 
 - CORRECTED BY [2026-09-20-newsletter-built.md](2026-09-20-newsletter-built.md)
 
@@ -202,7 +203,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-05-census-hygiene.md](2026-09-05-census-hygiene.md)
 
-  > on two points, both in
+  > on two points, both in this section. (1) `--unstated` lists rows in EVERY table, not only capability tables; the code never makes the check this sentence describes, and 78 of the 117 it printed are correctly stateless. (2) `N 132` is NOT the shape of the class. All 117 were read: exactly TWO have prose where a state belongs. The largest cause is 23 rows spelled `XR` -- jobs.md's own short form of EXCLUDED-RULED, unknown to both parsers -- which is why two instruments agreed at 406. The one-row disagreement this document leaves open, *"369 is what the instrument reads, 370 is what the census says"*, is closed there and closed toward the census.
 
 ### [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md)
 
@@ -380,7 +381,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-20-the-evidence-that-resolves.md](2026-09-20-the-evidence-that-resolves.md)
 
-  > section 8's "the entire evidence chain ends outside the repository" is narrower than it reads.
+  > section 8's "the entire evidence chain ends outside the repository" is narrower than it reads. Measured over the whole corpus at ARTIFACT granularity, rows 9 and 11-14 each also cite four TRACKED artifacts, and the count of banked rows with no reachable artifact at all is **0** across all four slices. The narrower claim made here -- that the chain behind the NUMBERS terminates in `_audit/_scratch/` -- is not contradicted, and that wave's instrument cannot check it, because it binds a row to its artifacts and not a claim to the artifact that backs it. That wave also found **7** banked rows in this class rather than five: jobs.md 15 and network.md 136 are outside the control census this wave was routed by.
 
 ### [2026-09-20-the-live-capture.md](2026-09-20-the-live-capture.md)
 
@@ -393,6 +394,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
 
   > the empty `view_names` is NOT a scope artifact: the scope fix `353c04f` had already landed when this reading was taken, `data-view-name` is absent document-wide, and on this page widening the scope cannot change any field the reader returns. The conclusion that `N 136` is absent survives on other grounds.
+
+### [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md)
+
+2026-09-20 &middot; THE SEARCH ADMISSION: a condition nobody came back to close, closed
+
+- CORRECTED BY [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md)
+
+  > the second half of the sentence above is FALSE: `collections_page.read_collections` leaks on the same path as `anchors.py`, and the survey could not have seen it because that reader reads `raw.get("matches")` and `matches` is not a key in the payload the survey plants, so the list came back empty, the comprehension iterated nothing, and the coercion never ran.
 
 ### [2026-09-20-the-six-unremapped.md](2026-09-20-the-six-unremapped.md)
 
@@ -424,7 +433,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-05-jobs-tail.md](2026-09-05-jobs-tail.md)
 
-  > row 127 above cites a
+  > row 127 above cites a 2026-08-31 audit for "the boundary entry and reader are NOT built". Measured 2026-09-05: the boundary entry IS built and is one of the admitted patterns at that tree; the reader is still not built. Half that sentence is current and half is stale, which is the shape that survives a careless check -- a reader who verifies either half concludes the whole is sound.
 
 - CORRECTED BY [2026-09-19-unfired-but-built.md](2026-09-19-unfired-but-built.md)
 
@@ -672,7 +681,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md)
 
-  > seven settings-shaped
+  > seven settings-shaped rows are queued BUILD when their earliest binding constraint is a shipped ruling or a missing address, and `NOTIFY-COST-UNMEASURED` was waiting on an instrument rather than on an experiment.
 
 ### [2026-09-05-the-newsletter-create-route.md](2026-09-05-the-newsletter-create-route.md)
 
@@ -724,7 +733,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-19-the-three-ruling-requests-ruled.md](2026-09-19-the-three-ruling-requests-ruled.md)
 
-  > its Request 2a rules FILE `J 82` ONLY on the strength of the blocker table's published `1R`, and the census marks that row's whole group plain `W` in a vocabulary that carries per-row exceptions and declines to use one, so the `1R` is contested and the row was never forced.
+  > its Request 2a rules FILE `J 82` ONLY on the strength of the blocker table's published `1R`, and the census marks that row's whole group plain `W` in a vocabulary that carries per-row exceptions and declines to use one, so the `1R` is contested and the row was never forced. `J 82` was filed to `PREMIUM-APPLY-SURFACES` at `1349fe6` (branch-only; on `master` at `81c8534`) on the strength of the blocker table's published `1R`. **A row filed on a contested premise is not a forced row.** The blocker is back to 0 of 5 and the hole now records its reason. `UNASSIGNED` rose 41 -> 42 -- **the only rise of this campaign**, ruled and exactly one row.
 
 ### [2026-09-19-boundary-perimeter.md](2026-09-19-boundary-perimeter.md)
 
@@ -784,9 +793,9 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-05-search-results-consent.md](2026-09-05-search-results-consent.md)
 
-  > it lists two rows as unattributed
+  > it lists two rows as unattributed and names `N 104` (find an organization's Page by searching) as one of the candidates. Those two have since been resolved to `N 161` and `N 179`, and **`N 104` appears nowhere in `_audit/_census/blocker-assignments.tsv` at all** -- not under this blocker and not under any other. Checked at 12:43 against BOTH `HEAD` and the working tree, because that file is uncommitted in another wave's tree right now; the `SEARCH-RESULTS-SURFACE` id set is byte-identical in the two.
 
-  > its boundary snapshot reads
+  > its boundary snapshot reads *"33 forbidden substrings, 24 allowed patterns"*. The substring count still holds; the pattern count is **32** as of 12:34 today. Flagged, not edited: the document is another wave's and its conclusion is unaffected.
 
 ### [2026-09-19-the-remaining-partials.md](2026-09-19-the-remaining-partials.md)
 
@@ -810,7 +819,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [_census/jobs.md](_census/jobs.md)
 
-  > rows 103 and 104 were banked
+  > rows 103 and 104 were banked COVERED-PROVEN on a PERFORMABILITY verdict quoted as though it were a live-fire receipt; both move to COVERED-UNFIRED, and the slice's count block gains a delta rather than a rewrite. Section 4 below holds the four readings.
 
 ### [2026-09-19-verdict-certifier.md](2026-09-19-verdict-certifier.md)
 
@@ -827,6 +836,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 - CORRECTS [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md)
 
   > its ranked table publishes `NEWSLETTER-SURFACE` as 12 rows at `1R/11W`, and the corpus holds THIRTEEN newsletter-named frozen-GAP rows split `3R/10W`, so every 12-subset of them holds at least TWO reads and `1R` was unreachable from the census's own direction column on the day the table was written. Not a re-file and not the cross-slice duplication: the published cell was wrong when it was written. Section 6a below.
+
+### [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md)
+
+2026-09-20 &middot; A name can leave the process through an exception
+
+- CORRECTS [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md)
+
+  > its section 7 states that `collections_page.read_collections` does not leak; it does, on the same path as `anchors.py`, and the survey that cleared it was driving a payload missing `matches`, the one key that reader reads, so the coercion never ran and "not driven" printed as "clean". The `anchors` half of that sentence stands.
 
 ### [2026-09-20-the-decides.md](2026-09-20-the-decides.md)
 
@@ -846,11 +863,11 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md)
 
-  > section 8 -- its "the ENTIRE evidence chain ends outside the repository" is narrower than it reads.
+  > section 8 -- its "the ENTIRE evidence chain ends outside the repository" is narrower than it reads. Its words are *"for rows 9, 11, 12, 13 and 14 the entire evidence chain ends outside the repository"*. Measured at artifact granularity those five rows each also cite four TRACKED artifacts, and the corpus-wide count of banked rows with NO reachable artifact is 0. The narrower claim -- that the chain behind the NUMBERS terminates in `_audit/_scratch/` -- is not contradicted and is not checkable by this instrument.
 
 - CORRECTS [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md)
 
-  > section 6 -- it records
+  > section 6 -- it records the 22 as NOT REPAIRED and pinned, with the pin standing at 26 (token, document) rows. All 22 are repaired as of this document and `PINNED` is now empty; the section's reasoning for deferring (nineteen documents, three waves live) was correct at the time and those waves have since merged.
 
 ### [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md)
 
@@ -858,7 +875,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [_census/jobs.md](_census/jobs.md)
 
-  > row `J 127` was re-opened to GAP on
+  > row `J 127` was re-opened to GAP on 2026-09-20 on the ground that `read_premium_surface` could not have seen an InMail balance. That ground is correct and does not support the conclusion: it is a fact about the instrument, not evidence the balance exists. Three instruments have since looked, including a raw-versus-rendered sweep over all 25 captures with firing controls, and the balance is drawn nowhere. The row returns to MEASURED-ABSENT with a named reopener.
 
 ### [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md)
 
@@ -866,7 +883,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [_census/jobs.md](_census/jobs.md)
 
-  > rows 9, 11, 12, 13 and 14 all state
+  > rows 9, 11, 12, 13 and 14 all state "the drift floor is ZERO" as a property, from one of two runs the same probe made that hour; the other run measured 4. Row 11's "4 ids moved on a floor of 0" is refuted outright by that second run, which reported the same filter as WITHIN DRIFT. No row's state changes; five evidence cells are corrected in place.
 
 ### [2026-09-20-the-live-capture.md](2026-09-20-the-live-capture.md)
 
@@ -1169,6 +1186,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-newsletter-built.md](2026-09-20-newsletter-built.md) | NEWSLETTER-SURFACE, built. One capability, no boundary change, and two | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-audit-index.md](2026-09-20-the-audit-index.md) | The audit index: 195 documents, 5.4 MB, and no way in but grep |  |
 | 2026-09-20 | [2026-09-20-the-chain-verification.md](2026-09-20-the-chain-verification.md) | The source-chain verification: 8 claims, 6 clean, 1 real drift, and 1 DRIFT THAT WAS NOT ONE |  |
+| 2026-09-20 | [2026-09-20-the-coercion-leak.md](2026-09-20-the-coercion-leak.md) | A name can leave the process through an exception | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-contingent-writeoffs.md](2026-09-20-the-contingent-writeoffs.md) | The contingent write-offs | **CORRECTED x1** |
 | 2026-09-20 | [2026-09-20-the-decides.md](2026-09-20-the-decides.md) | The five DECIDEs, ruled against committed evidence | **CORRECTED x1** corrects x2 |
 | 2026-09-20 | [2026-09-20-the-deduplication-ruling.md](2026-09-20-the-deduplication-ruling.md) | RULING: a duplicate census row is MARKED, never DELETED |  |
@@ -1191,7 +1209,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) | The reopener triggers | corrects x3 |
 | 2026-09-20 | [2026-09-20-the-sanctioned-seventh.md](2026-09-20-the-sanctioned-seventh.md) | The seventh sanctioned mutation: a reason that went false, a boundary that did not move | corrects x2 |
 | 2026-09-20 | [2026-09-20-the-sanitiser-scope.md](2026-09-20-the-sanitiser-scope.md) | The sanitiser scope hole: a proof about urls, spent on page text |  |
-| 2026-09-20 | [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md) | THE SEARCH ADMISSION: a condition nobody came back to close, closed | corrects x1 |
+| 2026-09-20 | [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md) | THE SEARCH ADMISSION: a condition nobody came back to close, closed | **CORRECTED x1** corrects x1 |
 | 2026-09-20 | [2026-09-20-the-six-unremapped.md](2026-09-20-the-six-unremapped.md) | The six unremapped: SHAs off master's history, and where their content actually lives | **CORRECTED x1** corrects x1 |
 | 2026-09-20 | [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md) | The sixty dangling: 60 was 49, and the open set was 2 | **CORRECTED x1** corrects x2 |
 | 2026-09-20 | [2026-09-20-the-split-ruling.md](2026-09-20-the-split-ruling.md) | THE SPLIT RULING. One cell corrected, one row refused, and they were never | corrects x1 |
@@ -1207,84 +1225,42 @@ there is something in it.** Everything below is a thing somebody
 should look at; none of it is absorbed silently.
 
 `tests/test_a_correction_is_findable_from_the_claim.py::_reason_on`
-returns everything after the LAST backtick on a marker line. Its
-docstring says *whatever a marker line says after the document it
-names*, which is the same thing only when no backtick follows the
-cited path. The lines below are the ones where it is not. Every
-case is a strict SUFFIX -- text is lost, never invented -- and the
-guard stays green on all of them, because it only asks whether the
-fragment is 20 characters long. **Sections 2 and 3 above print the
-full reason**, taken from the end of the citation match.
+reads ONE PHYSICAL LINE, and this corpus hard-wraps prose at about
+78 columns. The markers below write their reason across several
+lines, so everything past the first is outside its reach. **Sections
+2, 3 and 4 above print the whole paragraph.**
 
-- TRUNCATED REASON [2026-08-31-jobcore-paths.md](2026-08-31-jobcore-paths.md) line 560 -- the shipped extractor returns 36 of 378 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-capability-census.md](2026-09-03-linkedin-capability-census.md) line 199 -- the shipped extractor returns 240 of 615 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 168 -- the shipped extractor returns 175 of 644 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 169 -- the shipped extractor returns 345 of 718 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 170 -- the shipped extractor returns 118 of 529 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 171 -- the shipped extractor returns 29 of 767 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 172 -- the shipped extractor returns 152 of 776 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 266 -- the shipped extractor returns 180 of 211 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 434 -- the shipped extractor returns 191 of 391 characters.
-- TRUNCATED REASON [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 667 -- the shipped extractor returns 83 of 274 characters.
-- TRUNCATED REASON [2026-09-04-file-input-survey.md](2026-09-04-file-input-survey.md) line 129 -- the shipped extractor returns 112 of 305 characters.
-- TRUNCATED REASON [2026-09-04-file-input-survey.md](2026-09-04-file-input-survey.md) line 137 -- the shipped extractor returns 77 of 246 characters.
-- TRUNCATED REASON [2026-09-05-article-publish.md](2026-09-05-article-publish.md) line 3 -- the shipped extractor returns 152 of 187 characters.
-- TRUNCATED REASON [2026-09-05-article-publish.md](2026-09-05-article-publish.md) line 5 -- the shipped extractor returns 189 of 347 characters.
-- TRUNCATED REASON [2026-09-05-census-hygiene.md](2026-09-05-census-hygiene.md) line 3 -- the shipped extractor returns 314 of 353 characters.
-- TRUNCATED REASON [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md) line 1414 -- the shipped extractor returns 178 of 253 characters.
-- TRUNCATED REASON [2026-09-05-groups-events-precondition.md](2026-09-05-groups-events-precondition.md) line 132 -- the shipped extractor returns 506 of 675 characters.
-- TRUNCATED REASON [2026-09-05-groups-surface-measured.md](2026-09-05-groups-surface-measured.md) line 5 -- the shipped extractor returns 150 of 188 characters.
-- TRUNCATED REASON [2026-09-05-groups-surface-measured.md](2026-09-05-groups-surface-measured.md) line 11 -- the shipped extractor returns 241 of 398 characters.
-- TRUNCATED REASON [2026-09-05-groups-wire.md](2026-09-05-groups-wire.md) line 3 -- the shipped extractor returns 267 of 324 characters.
-- TRUNCATED REASON [2026-09-05-groups-wire.md](2026-09-05-groups-wire.md) line 5 -- the shipped extractor returns 292 of 433 characters.
-- TRUNCATED REASON [2026-09-05-messaging-rows.md](2026-09-05-messaging-rows.md) line 118 -- the shipped extractor returns 187 of 367 characters.
-- TRUNCATED REASON [2026-09-05-routes-already-admitted.md](2026-09-05-routes-already-admitted.md) line 300 -- the shipped extractor returns 83 of 337 characters.
-- TRUNCATED REASON [2026-09-05-routes-already-admitted.md](2026-09-05-routes-already-admitted.md) line 302 -- the shipped extractor returns 156 of 285 characters.
-- TRUNCATED REASON [2026-09-05-the-newsletter-create-route.md](2026-09-05-the-newsletter-create-route.md) line 3 -- the shipped extractor returns 94 of 144 characters.
-- TRUNCATED REASON [2026-09-05-upload-sanction.md](2026-09-05-upload-sanction.md) line 115 -- the shipped extractor returns 54 of 117 characters.
-- TRUNCATED REASON [2026-09-05-upload-sanction.md](2026-09-05-upload-sanction.md) line 308 -- the shipped extractor returns 85 of 250 characters.
-- TRUNCATED REASON [2026-09-05-wire-readers.md](2026-09-05-wire-readers.md) line 5 -- the shipped extractor returns 34 of 428 characters.
-- TRUNCATED REASON [2026-09-19-blocker-map-ruling-requests.md](2026-09-19-blocker-map-ruling-requests.md) line 341 -- the shipped extractor returns 42 of 274 characters.
-- TRUNCATED REASON [2026-09-19-boundary-perimeter.md](2026-09-19-boundary-perimeter.md) line 11 -- the shipped extractor returns 193 of 369 characters.
-- TRUNCATED REASON [2026-09-19-boundary-perimeter.md](2026-09-19-boundary-perimeter.md) line 13 -- the shipped extractor returns 206 of 422 characters.
-- TRUNCATED REASON [2026-09-19-content-tail.md](2026-09-19-content-tail.md) line 3 -- the shipped extractor returns 202 of 356 characters.
-- TRUNCATED REASON [2026-09-19-content-tail.md](2026-09-19-content-tail.md) line 194 -- the shipped extractor returns 88 of 425 characters.
-- TRUNCATED REASON [2026-09-19-four-defects-fixed.md](2026-09-19-four-defects-fixed.md) line 75 -- the shipped extractor returns 50 of 240 characters.
-- TRUNCATED REASON [2026-09-19-messaging-menu-enumeration.md](2026-09-19-messaging-menu-enumeration.md) line 13 -- the shipped extractor returns 244 of 345 characters.
-- TRUNCATED REASON [2026-09-19-messaging-menu-enumeration.md](2026-09-19-messaging-menu-enumeration.md) line 133 -- the shipped extractor returns 157 of 349 characters.
-- TRUNCATED REASON [2026-09-19-search-admission-condition-2-amended.md](2026-09-19-search-admission-condition-2-amended.md) line 6 -- the shipped extractor returns 133 of 299 characters.
-- TRUNCATED REASON [2026-09-19-the-four-absent-blockers.md](2026-09-19-the-four-absent-blockers.md) line 345 -- the shipped extractor returns 100 of 278 characters.
-- TRUNCATED REASON [2026-09-19-the-sanitiser-list-holds-two-kinds.md](2026-09-19-the-sanitiser-list-holds-two-kinds.md) line 197 -- the shipped extractor returns 51 of 276 characters.
-- TRUNCATED REASON [2026-09-19-the-three-ruling-requests-ruled.md](2026-09-19-the-three-ruling-requests-ruled.md) line 108 -- the shipped extractor returns 42 of 256 characters.
-- TRUNCATED REASON [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md) line 583 -- the shipped extractor returns 192 of 321 characters.
-- TRUNCATED REASON [2026-09-19-verdict-certifier.md](2026-09-19-verdict-certifier.md) line 7 -- the shipped extractor returns 51 of 345 characters.
-- TRUNCATED REASON [2026-09-20-newsletter-built.md](2026-09-20-newsletter-built.md) line 4 -- the shipped extractor returns 207 of 419 characters.
-- TRUNCATED REASON [2026-09-20-the-contingent-writeoffs.md](2026-09-20-the-contingent-writeoffs.md) line 17 -- the shipped extractor returns 440 of 800 characters.
-- TRUNCATED REASON [2026-09-20-the-decides.md](2026-09-20-the-decides.md) line 3 -- the shipped extractor returns 385 of 1059 characters.
-- TRUNCATED REASON [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- the shipped extractor returns 23 of 35 characters.
-- TRUNCATED REASON [2026-09-20-the-live-capture.md](2026-09-20-the-live-capture.md) line 252 -- the shipped extractor returns 36 of 306 characters.
-- TRUNCATED REASON [2026-09-20-the-messaging-gap.md](2026-09-20-the-messaging-gap.md) line 3 -- the shipped extractor returns 250 of 460 characters.
-- TRUNCATED REASON [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md) line 178 -- the shipped extractor returns 31 of 262 characters.
-- TRUNCATED REASON [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) line 18 -- the shipped extractor returns 104 of 115 characters.
-- TRUNCATED REASON [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) line 20 -- the shipped extractor returns 125 of 137 characters.
-- TRUNCATED REASON [2026-09-20-the-sanctioned-seventh.md](2026-09-20-the-sanctioned-seventh.md) line 6 -- the shipped extractor returns 73 of 398 characters.
-- TRUNCATED REASON [2026-09-20-the-sanctioned-seventh.md](2026-09-20-the-sanctioned-seventh.md) line 8 -- the shipped extractor returns 191 of 380 characters.
-- TRUNCATED REASON [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md) line 3 -- the shipped extractor returns 261 of 404 characters.
-- TRUNCATED REASON [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md) line 485 -- the shipped extractor returns 180 of 485 characters.
-- TRUNCATED REASON [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md) line 487 -- the shipped extractor returns 65 of 228 characters.
-- TRUNCATED REASON [2026-09-20-the-sixty-dangling.md](2026-09-20-the-sixty-dangling.md) line 489 -- the shipped extractor returns 57 of 343 characters.
-- TRUNCATED REASON [2026-09-20-the-split-ruling.md](2026-09-20-the-split-ruling.md) line 4 -- the shipped extractor returns 446 of 494 characters.
-- TRUNCATED REASON [2026-09-20-the-surface-class.md](2026-09-20-the-surface-class.md) line 3 -- the shipped extractor returns 357 of 557 characters.
-- TRUNCATED REASON [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) line 7 -- the shipped extractor returns 219 of 395 characters.
-- TRUNCATED REASON [INSTRUMENTS.md](INSTRUMENTS.md) line 1547 -- the shipped extractor returns 70 of 157 characters.
-- TRUNCATED REASON [_census/messaging-and-content.md](_census/messaging-and-content.md) line 54 -- the shipped extractor returns 99 of 110 characters.
-- TRUNCATED REASON [_census/messaging-and-content.md](_census/messaging-and-content.md) line 303 -- the shipped extractor returns 122 of 231 characters.
-- TRUNCATED REASON [_census/messaging-and-content.md](_census/messaging-and-content.md) line 536 -- the shipped extractor returns 148 of 273 characters.
-- TRUNCATED REASON [_census/network.md](_census/network.md) line 36 -- the shipped extractor returns 99 of 111 characters.
+This is not the last-backtick defect, which was fixed upstream on
+2026-09-20. It is a different class, and the suffix property that
+closed the first one cannot see it: that test compares one line
+against the same line, so a missing continuation satisfies it.
+
+- REASON PAST ITS LINE [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) line 19 -- a line-scoped reader sees 119 of 437 characters.
+- REASON PAST ITS LINE [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 -- a line-scoped reader sees 20 of 723 characters.
+- REASON PAST ITS LINE [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 555 -- a line-scoped reader sees 381 of 645 characters.
+- REASON PAST ITS LINE [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) line 221 -- a line-scoped reader sees 22 of 653 characters.
+- REASON PAST ITS LINE [2026-09-05-settings-tail.md](2026-09-05-settings-tail.md) line 3 -- a line-scoped reader sees 21 of 212 characters.
+- REASON PAST ITS LINE [2026-09-19-blocker-map-ruling-requests.md](2026-09-19-blocker-map-ruling-requests.md) line 341 -- a line-scoped reader sees 274 of 647 characters.
+- REASON PAST ITS LINE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) line 59 -- a line-scoped reader sees 33 of 505 characters.
+- REASON PAST ITS LINE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) line 193 -- a line-scoped reader sees 27 of 243 characters.
+- REASON PAST ITS LINE [2026-09-19-unfired-but-built.md](2026-09-19-unfired-but-built.md) line 5 -- a line-scoped reader sees 28 of 253 characters.
+- REASON PAST ITS LINE [2026-09-20-the-evidence-that-resolves.md](2026-09-20-the-evidence-that-resolves.md) line 664 -- a line-scoped reader sees 23 of 313 characters.
+- REASON PAST ITS LINE [2026-09-20-the-evidence-that-resolves.md](2026-09-20-the-evidence-that-resolves.md) line 670 -- a line-scoped reader sees 99 of 517 characters.
+- REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
+- REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
+- REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 352 -- a line-scoped reader sees 21 of 385 characters.
+
+- TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
 - LOPSIDED EDGE [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) declares 1 correction of [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md), which carries 2 back-pointers to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - LOPSIDED EDGE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) declares 2 corrections of [2026-09-05-search-results-consent.md](2026-09-05-search-results-consent.md), which carries 1 back-pointer to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
+- DEFUSED CITATION [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) -- its CORRECTED BY: reason quotes the spelling network.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
+- DEFUSED CITATION [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) -- its CORRECTED BY: reason quotes the spelling profile.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
+- DEFUSED CITATION [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) -- its CORRECTED BY: reason quotes the spelling jobs.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
 - DEFUSED CITATION [2026-09-19-scope-jobs-rw-column.md](2026-09-19-scope-jobs-rw-column.md) -- its title quotes the spelling jobs.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
+- DEFUSED CITATION [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) -- its CORRECTED BY: reason quotes the spelling jobs.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
+- DEFUSED CITATION [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) -- its CORRECTED BY: reason quotes the spelling network.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
 - NON-ASCII TITLE [2026-08-30-nine-live-census.md](2026-08-30-nine-live-census.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
 - NON-ASCII TITLE [2026-09-05-census-hygiene.md](2026-09-05-census-hygiene.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
 - NON-ASCII TITLE [2026-09-19-duplicate-register.md](2026-09-19-duplicate-register.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.

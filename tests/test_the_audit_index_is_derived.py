@@ -556,43 +556,219 @@ def test_control_a_pair_declared_twice_keeps_both_reasons(tmp_path):
     assert "LOPSIDED EDGE" in text
 
 
-def test_control_a_reason_after_a_backticked_symbol_is_printed_in_full(tmp_path):
-    """MEASURED: the shipped extractor cuts 65 of 136 reasons in this corpus.
+def test_control_a_reason_that_wraps_is_printed_whole(tmp_path):
+    """THE TRUNCATION CLASS THE UPSTREAM FIX DID NOT CLOSE, planted.
 
-    `guard._reason_on` reads everything after the LAST backtick on the line.
-    Plant a marker whose reason quotes a symbol AFTER naming its target -- the
-    shape every SHA-citing correction in this corpus has -- and the shipped
-    function returns the tail. It is still over 20 characters, so the guard is
-    GREEN on it; only a reader notices, and only if they go and look.
+    **THIS CONTROL REPLACES ONE THAT CORRECTLY MADE ITSELF VACUOUS.** Until
+    2026-09-20 `guard._reason_on` read after the LAST backtick on the line;
+    this wave measured that it cut 65 of 136 reasons, it was fixed upstream,
+    and the control asserting `shipped != mine` then failed with its own
+    message -- *the shipped extractor did not truncate; vacuous.* A control
+    that notices its justification has evaporated is doing its job; replacing
+    it with one whose justification is live is the other half of that job.
 
-    This asserts BOTH halves: that the shipped function really does truncate
-    (or this control is proving nothing), and that the index does not.
+    What remains is a DIFFERENT class. `_reason_on` reads ONE PHYSICAL LINE
+    and this corpus hard-wraps at about 78 columns, so 15 of 136 reasons
+    continue onto a following line and 5,832 characters sit below the line
+    scope. The worst shows a reader 20 characters of a 723-character reason.
+
+    **AND THE PROPERTY TEST THAT CLOSED THE FIRST DEFECT CANNOT SEE THIS ONE.**
+    `test_a_reason_is_not_cut_at_its_last_backtick` compares `_reason_on(line)`
+    against `line[cited.end():]`; both sides are scoped to the same line, so a
+    missing continuation satisfies it exactly. It convicts 0 of the 15. A
+    suffix test cannot detect a missing tail that was never on the line.
+
+    Asserted in both directions, so neither half can go vacuous quietly: the
+    line-scoped read really does lose text, and the index really does print
+    the whole paragraph.
     """
-    line = ("**CORRECTS:** `_audit/2026-01-01-the-claim.md` -- the whole of "
-            "this clause sits between the citation and the next backtick, "
-            "which is where the shipped extractor loses it; the pinned commit "
-            "`b2f5d16` is an ancestor of origin/master after all.")
+    wrapped = (
+        "# The measurement\n"
+        "\n"
+        "**CORRECTS:** `_audit/2026-01-01-the-claim.md` -- rows 74, 79 and 80 are\n"
+        "queued BUILD when their earliest binding constraint is a shipped\n"
+        "ruling, and none of the three clauses holds for any of them.\n"
+        "\n"
+        "A separate paragraph, which is not part of the reason.\n"
+    )
     docs, root = _corpus(tmp_path, {
         "2026-01-01-the-claim.md": (
             "# The claim\n"
             "\n"
             "**CORRECTED BY:** `_audit/2026-01-02-the-measurement.md` -- "
-            "re-measured against a freshly fetched remote on a later day.\n"
+            "re-measured on a later day against the shipped ruling.\n"
         ),
-        "2026-01-02-the-measurement.md": "# The measurement\n\n%s\n" % line,
+        "2026-01-02-the-measurement.md": wrapped,
     })
+
+    lines = wrapped.splitlines()
+    number = 3
+    assert guard._is_marker(lines[number - 1]) == "CORRECTS", lines[number - 1]
+
+    one_line = guard._reason_on(lines[number - 1])
+    whole = bai.reason_on(bai.paragraph_at(lines, number))
+    assert whole != one_line, "the reason did not wrap; this control is vacuous"
+    assert whole.startswith(one_line), (whole, one_line)
+    assert len(whole) > 2 * len(one_line), (len(whole), len(one_line))
+    assert "A separate paragraph" not in whole, (
+        "the paragraph join ran past the blank line"
+    )
+
+    # The property that closed the LAST-BACKTICK defect is satisfied here, and
+    # that is the point: it cannot see this class.
+    cited = guard._CITED.search(lines[number - 1])
+    within = lines[number - 1][cited.end():].strip().lstrip("-*: ").strip()
+    assert guard._reason_on(lines[number - 1]) == within, (
+        "the upstream suffix property is violated by this fixture, so it is "
+        "not the clean illustration this control needs"
+    )
+
+    text = bai.render(docs, root)
+    assert "none of the three clauses holds" in text, (
+        "the index printed only the marker's first line"
+    )
+    assert "REASON PAST ITS LINE" in text
+    assert "| reasons that continue past their own line" in text
+
+
+def test_control_the_two_reason_anchors_are_not_the_same_rule():
+    """Why `bai.reason_on` is not a duplicate of the shipped function.
+
+    THEY AGREE ON ALL 136 MARKERS IN THIS CORPUS, which is exactly the
+    condition under which somebody deletes one of them as redundant. They are
+    different rules: the shipped function anchors on the FIRST BACKTICKED SPAN
+    OF ANY KIND, this one anchors on the first backticked span that RESOLVES AS
+    A CITATION. A marker that backticks a row id before naming its target parts
+    them, and the shipped result then carries the citation inside the reason.
+
+    This corpus writes backticked row ids, tool names and SHAs constantly, so
+    the shape is one line away at all times. Planted rather than waited for.
+    """
+    line = ("**CORRECTS:** `J 57` in `_audit/2026-01-01-the-claim.md` -- the "
+            "reason, which should not carry a document path in front of it.")
 
     shipped = guard._reason_on(line)
     mine = bai.reason_on(line)
-    assert shipped != mine, "the shipped extractor did not truncate; vacuous"
-    assert len(shipped) >= 20, "the guard would have rejected it; vacuous"
-    assert mine.endswith(shipped), (mine, shipped)
-    assert len(mine) > 2 * len(shipped), (len(mine), len(shipped))
+    assert shipped != mine, "the two anchors agreed; this control proves nothing"
+    assert "_audit/2026-01-01-the-claim.md" in shipped, (
+        "the shipped anchor should have stopped at `J 57` and carried the "
+        "citation into its reason"
+    )
+    assert "_audit/" not in mine, mine
+    assert mine == ("the reason, which should not carry a document path in "
+                    "front of it.")
+
+
+def test_the_two_reason_anchors_agree_on_every_marker_in_the_corpus():
+    """And the live half: today they never disagree, which is why both stay.
+
+    A divergence here is not a failure of either function -- it means somebody
+    has written the shape above for real, and the index and the correction
+    guard would then be quoting different text for the same marker. Worth a
+    person looking.
+    """
+    disagree = []
+    for doc in bai.tracked_documents(ROOT):
+        for number, line in enumerate(
+                doc.read_text(encoding="utf-8").splitlines(), 1):
+            if guard._is_marker(line) is None:
+                continue
+            if guard._reason_on(line) != bai.reason_on(line):
+                disagree.append((doc.name, number))
+    assert disagree == [], disagree
+
+
+def test_the_admission_floor_is_still_twenty():
+    """`ADMISSION_FLOOR` mirrors a LITERAL in the shipped guard, not a constant.
+
+    `_declarations` writes `if len(_reason_on(line)) < 20`. There is nothing to
+    import, so this index writes the number down and this test is what stops
+    the copy going stale -- the same drift-between-two-copies the whole wave is
+    about, in its smallest possible form.
+
+    Driven rather than read: a reason one character under the floor must be
+    rejected and one character over must be admitted. Reading the source for
+    the digit would pass just as well against a guard that had stopped using
+    it.
+    """
+    assert bai.ADMISSION_FLOOR == 20
+
+    under = "x" * (bai.ADMISSION_FLOOR - 1)
+    over = "x" * bai.ADMISSION_FLOOR
+    assert len(guard._reason_on("**CORRECTS:** `a.md` -- " + under)) < 20
+    assert len(guard._reason_on("**CORRECTS:** `a.md` -- " + over)) >= 20
+
+
+def test_control_a_wrapped_marker_can_be_rejected_for_a_long_reason(tmp_path):
+    """THE HAZARD THE MARGIN ROW EXISTS FOR, planted -- and found by accident.
+
+    This control exists because the FIXTURE for the wrapped-reason test above
+    tripped it: its first line's tail came to 18 characters, the marker was
+    rejected as malformed, and the index reported a half-joined edge for a
+    reason 200 characters long. The mechanism was a guess until the fixture
+    demonstrated it.
+
+    In the live corpus one marker clears the floor by EXACTLY ZERO -- 20
+    characters admitting a 723-character reason -- and all five of the tightest
+    five wrap. This is one reflow away at all times, which is why the index
+    prints the tightest margin on every regeneration instead of a rejection
+    count that reads zero until the day it does not.
+    """
+    short_first_line = (
+        "# The measurement\n"
+        "\n"
+        "**CORRECTS:** `_audit/2026-01-01-the-claim.md` -- rows 74 and 79\n"
+        "are queued BUILD when their earliest binding constraint is a shipped\n"
+        "ruling, and none of the three clauses holds for any of them.\n"
+    )
+    lines = short_first_line.splitlines()
+    tail = guard._reason_on(lines[2])
+    assert len(tail) < bai.ADMISSION_FLOOR, (
+        "the first line clears the floor, so this control proves nothing: %r"
+        % tail
+    )
+    whole = bai.reason_on(bai.paragraph_at(lines, 3))
+    assert len(whole) > 10 * len(tail), (len(whole), len(tail))
+
+    docs, root = _corpus(tmp_path, {
+        "2026-01-01-the-claim.md": (
+            "# The claim\n"
+            "\n"
+            "**CORRECTED BY:** `_audit/2026-01-02-the-measurement.md` -- "
+            "re-measured on a later day against the shipped ruling.\n"
+        ),
+        "2026-01-02-the-measurement.md": short_first_line,
+    })
+    _, malformed, half_joined, _, _ = bai.edges(docs, root)
+
+    assert len(malformed) == 1, malformed
+    assert malformed[0][3] == "carries no reason after the citation"
+    assert half_joined, "the pair should not have joined"
 
     text = bai.render(docs, root)
-    assert "the whole of this clause" in text, "the index printed the fragment"
-    assert "TRUNCATED REASON" in text
-    assert "| reasons the shipped `_reason_on` cuts short" in text
+    assert "MALFORMED MARKER" in text
+    assert "HALF-JOINED EDGE" in text
+
+
+def test_joining_a_paragraph_changes_no_word(tmp_path):
+    """The join is whitespace-only. Nothing here may rewrite what was written.
+
+    An index that silently reflows quoted prose is worse than one that
+    truncates it, because truncation is visible and a reflow is not.
+    """
+    lines = [
+        "**CORRECTS:** `_audit/x.md` -- the first line of a reason",
+        "   the second line, indented",
+        "the third line",
+        "",
+        "a separate paragraph",
+    ]
+    joined = bai.paragraph_at(lines, 1)
+    assert joined == (
+        "**CORRECTS:** `_audit/x.md` -- the first line of a reason "
+        "the second line, indented the third line"
+    )
+    assert joined.split() == " ".join(lines[:3]).split()
 
 
 def test_the_index_is_excluded_from_its_own_corpus():
@@ -646,6 +822,7 @@ def test_the_generated_index_is_not_read_as_an_audit_document():
     """
     sys.path.insert(0, str(ROOT / "scripts"))
     import check_asserted_names_resolve as names  # noqa: E402
+    import check_cited_shas_resolve as shas  # noqa: E402
     import find_blocker_reason as locator  # noqa: E402
 
     ranked = [rel for rel, _ in locator.corpus()]
@@ -661,6 +838,14 @@ def test_the_generated_index_is_not_read_as_an_audit_document():
         "other documents' claims without their marks"
     )
     assert len(scanned) > 50, len(scanned)
+
+    cited = shas.load_corpus(ROOT)
+    assert "_audit/INDEX.md" not in cited, (
+        "the generated index is being scanned for SHA citations; the four "
+        "documents citing 1349fe6 each declare it branch-only in a SHA NOTE, "
+        "and a quote leaves that note behind"
+    )
+    assert len(cited) > 50, len(cited)
 
 
 def test_the_index_raises_no_candidate_pair_in_the_correction_guard():

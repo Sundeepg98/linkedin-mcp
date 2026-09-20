@@ -7621,6 +7621,101 @@ disposable: each was a one-shot measurement whose finding is now a permanent
 assertion in `tests/test_the_audit_index_is_derived.py` or a derived row in the
 index itself. They were written to the scratchpad and are not committed.
 
+### 45.10 ADDENDUM 2026-09-20: 45.3 was closed upstream, and closing it exposed a third class
+
+**45.3 ABOVE STAYS EXACTLY AS WRITTEN.** Its "65 of 136" was true when written
+and is the evidence for why the fix happened; correcting a number in place
+destroys the record of what was known when. This is what changed afterwards.
+
+**CLOSED.** The shipped `_reason_on` was fixed to read after the first
+backticked span rather than the last, with a test stating the PROPERTY -- no
+reason may be a strict suffix of the text after its citation -- so it still
+fails if somebody reintroduces `rindex` or invents a third truncating rule.
+Independently re-measured before the change: 136 markers, 65 truncated,
+shortest surviving fragment 23 characters reading entire "was re-opened to GAP
+on".
+
+**AND THE WAVE THAT FOUND IT WAS ASKED TO UNWIND ITS OWN WORKAROUND, WHICH IS
+THE RIGHT INSTINCT AND WAS THE WRONG ANSWER HERE.** Two things were checked
+before deleting anything, and both refused the deletion:
+
+**THE TWO EXTRACTORS ARE NOT THE SAME RULE.** The shipped one anchors on the
+first backticked span OF ANY KIND; the index's anchors on the first span that
+resolves AS A CITATION. A marker that backticks a row id BEFORE naming its
+target parts them, and the shipped result then carries the citation INSIDE the reason.
+
+(The example is described rather than written out. Set at line start it IS a
+marker to the shipped anchor, indented or not -- which this addendum found by
+turning the guard red with its own illustration, the third time in one wave
+that writing about this mechanism instantiated it.)
+
+They agree on all 136 markers today -- which is precisely the condition under
+which somebody deletes one as redundant. This corpus backticks row ids, tool
+names and SHAs constantly, so the shape is one line away at all times.
+`test_control_the_two_reason_anchors_are_not_the_same_rule` plants it, and
+`test_the_two_reason_anchors_agree_on_every_marker_in_the_corpus` watches the
+live half.
+
+**A THIRD TRUNCATION CLASS SURVIVED THE FIX, AND THE NEW PROPERTY TEST CANNOT
+SEE IT.** `_reason_on` reads ONE PHYSICAL LINE and this corpus hard-wraps at
+about 78 columns:
+
+    15 of 136 reasons continue onto a following line
+    5,832 characters of reason text sit below the line scope
+    the worst shows a reader 20 characters of a 723-character reason
+    the new suffix property convicts 0 of the 15
+
+It convicts zero BY CONSTRUCTION: it compares `_reason_on(line)` against
+`line[cited.end():]`, and both sides are scoped to the same line, so a missing
+continuation satisfies it exactly. **A SUFFIX TEST CANNOT DETECT A MISSING
+TAIL THAT WAS NEVER ON THE LINE.** The 23-character fragment quoted in the fix
+is one of these: it was read as the floor admitting a short reason, and it is a
+465-character reason showing 35 characters.
+
+So the index now reads the marker's whole PARAGRAPH (`paragraph_at`), the join
+is asserted whitespace-only so nothing can silently reflow quoted prose, and
+the count row that used to say "reasons the shipped extractor cuts short" --
+which would now read 0 forever, and a row that can only read zero is
+reassurance rather than information -- says how many reasons run past their own
+line instead.
+
+### 45.11 THE FLOOR IS APPLIED TO A LINE-SCOPED READ, AND ONE MARKER CLEARS IT BY ZERO
+
+Found by a test FIXTURE, not by looking. The wrapped-reason control was written
+with a first line whose tail came to 18 characters; the marker was rejected as
+malformed and the index reported a half-joined edge for a 200-character reason.
+The mechanism was a guess until the fixture demonstrated it, so it became its
+own control.
+
+Admission is `len(_reason_on(line)) >= 20` and `_reason_on` stops at the end of
+the physical line, so a WRAPPED marker is judged on its first line alone.
+Measured over the corpus:
+
+    one marker clears the floor by EXACTLY 0 -- 20 characters admitting a
+      723-character reason
+    five clear it by 3 or fewer, and ALL FIVE of those wrap
+
+Nothing is rejected today. Reflow any of those five paragraphs by one word and
+a guard rejects a long, carefully written reason saying it *carries no reason
+after the citation*, which would not be true.
+
+**THE INDEX REPORTS THE TIGHTEST MARGIN ON EVERY REGENERATION RATHER THAN A
+COUNT OF REJECTIONS**, because a count of rejections reads zero until the day
+it does not, and nobody reads a row that has only ever said zero. That is the
+general form worth carrying: **when a hazard is a DISTANCE, publish the
+distance, not the crossing.**
+
+`ADMISSION_FLOOR` is mirrored in the index because the guard writes it as a
+LITERAL rather than a named constant, and
+`test_the_admission_floor_is_still_twenty` drives the shipped function either
+side of the boundary rather than reading the digit out of the source -- reading
+it would pass just as well against a guard that had stopped using it.
+
+**WHAT IS LEFT FOR SOMEBODY ELSE.** Teaching the shipped `_reason_on` to read a
+paragraph, and applying the floor to what it returns, would close both. That is
+a change to a guard other waves are editing and it is not this wave's to make;
+it is reported with the measurement attached rather than done quietly.
+
 ---
 
 
