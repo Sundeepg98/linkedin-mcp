@@ -215,10 +215,19 @@ STILL MISSING: the tab's CONTENT. `/company/<x>/life/` is not admitted.
 **J 110 -- Company Page Home / Posts tabs.** PRECONDITION SHIPPED.
 The Home tab IS the admitted root. The address is open; no reader exists.
 
-**N 33 / N 54 -- connections who work at / follow a Page.** PRECONDITION SHIPPED.
+**N 33 / N 54 -- connections who work at / follow a Page.** PRECONDITION
+SHIPPED, AND THE CHEAP ROUTE IS MEASURED DEAD.
+
 Both render on the Page root, which is now addressable. No reader exists, and
 whoever writes one owes it the strictness `company_page.py` already defines --
 these two modules name employees the operator knows.
+
+**THE POSTING DOES NOT CARRY EITHER NUMBER.** `dom.read_job_insight_panels` was
+dumped whole over both hydrated captures: the applicant panel gives applicant
+counts, seniority and education; the company panel gives headcount, growth and
+tenure; and NO line in either names a connection. So these two cannot be lifted
+off a render the server already performs, the way N 53 and J 106 were. Recorded
+so the next wave does not spend the same hour proving it.
 
 ### Rows already delivered before this wave (found, not built)
 
@@ -229,8 +238,14 @@ posting; no company Page is opened.
 
 **J 106 -- Company Page About tab (size, industry, locations).** PARTIAL,
 pre-existing. `size_band` and `industry` ship via `shape.company_about_card`.
-**LOCATIONS DO NOT.** Nothing in the package reads an organisation's locations,
-and the About TAB that carries them is not admitted.
+
+**LOCATIONS DO NOT, AND THAT IS MEASURED RATHER THAN ASSUMED.** Every line of
+the About-the-company card was dumped over three fixtures: the meta row is
+`<industry> BULLET <size band> BULLET <N on LinkedIn>` and there is no location
+line anywhere on the card, at either hydration state. An organisation's
+locations live on the About TAB, which this admission did not buy. The job
+posting's own location field is a different fact -- where the ROLE is, not
+where the company is -- and must not be substituted for it.
 
 **J 107 -- Company Page Jobs tab / "see all jobs at this company".** SHIPPED,
 pre-existing, and it needs no company Page at all.
