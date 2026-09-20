@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 197 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 164 |
-| distinct dates | 13 |
+| audit documents git tracks under `_audit` | 198 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 165 |
+| distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 69 |
-| `CORRECTED BY:` marker lines | 69 |
-| distinct declared correction edges | 66 |
-| documents something later corrects | 39 |
-| documents that correct something | 51 |
-| documents at either end of a cross-document edge | 74 |
+| `CORRECTS:` marker lines | 70 |
+| `CORRECTED BY:` marker lines | 70 |
+| distinct declared correction edges | 67 |
+| documents something later corrects | 40 |
+| documents that correct something | 52 |
+| documents at either end of a cross-document edge | 76 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 121 |
+| documents no correction marker touches at all | 120 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -394,6 +394,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
 
   > the empty `view_names` is NOT a scope artifact: the scope fix `353c04f` had already landed when this reading was taken, `data-view-name` is absent document-wide, and on this page widening the scope cannot change any field the reader returns. The conclusion that `N 136` is absent survives on other grounds.
+
+### [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md)
+
+2026-09-20 &middot; The census is not one schema, and 171 of the answerable GAP rows are writes
+
+- CORRECTED BY [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+  > the `no direction column` cell for the jobs slice is right about its per-row tables and wrong about the file, because section 2 of that slice IS a direction table keyed by ROW-RANGE rather than by row id; its 57 GAP rows are now classified per row as **R 29 / W 25 / R/W 2 / AMBIGUOUS 1**, the `300 GAP rows` denominator above measures 285 at HEAD so the 242-row answerable population must be RE-TAKEN before anything adds the jobs split to it, and jobs measures read-heavy at 29 of 57 (50.9%) against the non-jobs 70 of 242 (28.9%).
 
 ### [2026-09-20-the-search-admission.md](2026-09-20-the-search-admission.md)
 
@@ -1009,6 +1017,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+2026-09-21 &middot; THE JOBS DIRECTION: the fifth of the GAP that was never asked the question
+
+- CORRECTS [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md)
+
+  > it records the jobs slice's GAP rows as carrying **no direction column at all** and therefore leaves them unmeasured; the first half is true of the per-row tables and the second is now discharged, and its own non-jobs numbers need re-taking before anything combines them with these (section 7).
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1204,7 +1220,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-premium-four.md](2026-09-20-the-premium-four.md) | The Premium four: what a drawn address is worth before anybody opens it |  |
 | 2026-09-20 | [2026-09-20-the-premium-integration.md](2026-09-20-the-premium-integration.md) | THE PREMIUM INTEGRATION: a union neither side's CI ever ran, and a refusal one of them reversed without knowing |  |
 | 2026-09-20 | [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md) | The profile-views recapture: one generation, not two, and a defect that was diagnosed backwards | corrects x1 |
-| 2026-09-20 | [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md) | The census is not one schema, and 171 of the answerable GAP rows are writes |  |
+| 2026-09-20 | [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md) | The census is not one schema, and 171 of the answerable GAP rows are writes | **CORRECTED x1** |
 | 2026-09-20 | [2026-09-20-the-reason-kinds.md](2026-09-20-the-reason-kinds.md) | The reason kinds |  |
 | 2026-09-20 | [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) | The reopener triggers | corrects x3 |
 | 2026-09-20 | [2026-09-20-the-sanctioned-seventh.md](2026-09-20-the-sanctioned-seventh.md) | The seventh sanctioned mutation: a reason that went false, a boundary that did not move | corrects x2 |
@@ -1217,6 +1233,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) | The three held defects | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
