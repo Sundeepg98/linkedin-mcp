@@ -4840,7 +4840,7 @@ what they did with controls. Their numbers are the tables in
 ## 31. THE WRITE-OFF REASON KINDS, AND A CORPUS THAT TURNED OUT TO BE A POINTER GRAPH, 2026-09-20
 
 `scripts/classify_writeoff_reasons.py` + `_audit/_census/reason-kind-adjudications.tsv`,
-guarded by `tests/test_writeoff_kinds_are_derivable.py` (11 tests, 4.8s).
+guarded by `tests/test_writeoff_kinds_are_derivable.py` (69 tests, 8.6s).
 Full argument: `_audit/2026-09-20-the-reason-kinds.md`.
 
 **WHAT IT MEASURES.** Every census row in a write-off state -- EXCLUDED-RULED, XR,
@@ -4884,7 +4884,7 @@ positives, including the whole PROCESS-FACT class. A needle that never fires and
 is never true look identical in a count; that is what makes the PROCESS-FACT zero a
 measurement rather than a broken regex.
 
-### 31.3 TWO DEFECTS THE HARNESS FOUND -- ONE IN THE INSTRUMENT, ONE IN ITSELF
+### 31.3 FOUR DEFECTS THE HARNESSES FOUND -- THREE IN THE INSTRUMENT, ONE IN A HARNESS
 
 **In the instrument, silently wrong across 46 rows.** Backreference inheritance recovered its
 donor by re-parsing the label `backref<-P D14` with a non-whitespace capture. **Every row key
@@ -4902,6 +4902,21 @@ then passed CORRECTLY and was one step from being recorded as *a control that ca
 every mutation now asserts its postcondition first. Compounding it: that same M1 was
 asserting against `build()`'s problems list while the per-file control lives in
 `main(--check)`, so it was testing the wrong surface entirely.
+
+**A CONTROL THAT COULD NOT FAIL, in the instrument, found by the second reader.** The
+per-file control's second half read `unkinded = [r for r in sub if not r.kind]`, and
+`finalise` sets `r.kind = "UNCLEAR"` on an empty kind set -- so `r.kind` is NEVER falsy and
+that branch was unreachable. It printed "all N write-off rows carry a kind" over 309 rows
+and could never have said anything else. **Second instance of this shape in one wave, so it
+is counted rather than reported again.** REPLACED with the invariant that actually broke:
+a row resolved through a pointer must carry at least what it points at. With inheritance
+disabled the replacement convicts 102 rows across all four slices and names each one; the
+tautology stayed green through all of them.
+
+**A DOCSTRING CLAIM THE CODE DID NOT HONOUR.** `forbidden_keys()` promised every fallback
+path "SAYS SO in the run header"; `FKEYS_SOURCE` was assigned once and read nowhere, so a
+reader of a FALLBACK run could not tell it was one. An artifact claiming more than it ran --
+the exact defect this wave audits the census for -- inside the auditing instrument. Fixed.
 
 ### 31.4 THE LAW THIS ENTRY ADDS: A HAND JUDGEMENT MUST INVALIDATE ITSELF
 

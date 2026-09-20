@@ -409,8 +409,15 @@ superseded form.
 
 ## 8. THE GUARD, SHOWN FAILING
 
-`tests/test_writeoff_kinds_are_derivable.py` -- 11 tests, 5.1s, driven over **mutated
+`tests/test_writeoff_kinds_are_derivable.py` -- **69 tests, 8.6s**, driven over **mutated
 sandbox copies** of the census. No committed file is written at any point.
+
+The first version was mine and had 11 tests. It was replaced by a colder, independent one
+that runs each mutation against EVERY slice rather than only the one the design document
+names, asserts byte-identical output on the calibration rather than equal verdicts, and
+writes through with `newline=""` because **the slices are CRLF and my version was
+silently rewriting their line endings**. Its findings are in 8.3; two of the three are
+defects in my instrument that I did not find by re-reading my own code.
 
 | mutation | what it does | verdict |
 |---|---|---|
@@ -448,7 +455,7 @@ needles.** That is what makes section 6.2's PROCESS-FACT zero a measurement:
 
     live-process   PROCESS-FACT   matches "measured off the live server, which is 58 commits stale"
 
-### 8.3 TWO DEFECTS THE HARNESS FOUND, ONE IN THE INSTRUMENT AND ONE IN ITSELF
+### 8.3 FOUR DEFECTS THE HARNESSES FOUND -- THREE IN MY INSTRUMENT, ONE IN A HARNESS
 
 **In the instrument, and it was silently wrong across 46 rows.** Backreference inheritance
 read its donor by re-parsing the label `backref<-P D14` with `(\S+)` -- and **every row key
@@ -467,6 +474,35 @@ achieved its intent.** Every mutation now asserts its postcondition first. A sec
 instance of the same shape: M1 was checking `build()`'s problems list, while the per-file
 control lives in `main(--check)` -- so it was asserting against the wrong surface entirely.
 
+**A CONTROL OF MINE THAT COULD NOT FAIL, and it took a second reader to see it.** The
+per-file control's second half read
+
+    unkinded = [r for r in sub if not r.kind]
+
+and `finalise` sets `r.kind = "UNCLEAR"` whenever the kind set is empty. **`r.kind` is
+therefore never falsy and that branch was unreachable.** It printed *"all 112 write-off
+rows carry a kind"* over four slices and could never have said anything else -- a control
+computed, printed and structurally unable to fire, which is the exact defect this repo
+built `scripts/detect_unbranched_probe_controls.py` to find in 129 other places. **That is
+the second time this shape has turned up in my own work in one wave, so it is counted
+rather than reported again.**
+
+It is replaced with the invariant that actually broke: **a row resolved through a pointer
+must end up carrying at least what it points at.** With inheritance disabled, that control
+convicts 102 rows across all four slices (13 / 11 / 6 / 72) and names them:
+
+    N 10 resolved through ruling<-R2+ruling<-R5 but is missing ['US-BOUNDARY', 'US-RULING']
+    P A6 resolved through backref<-P A4 but is missing ['US-RULING']
+
+The tautology it replaced would have stayed green through every one of those.
+
+**AND MY DOCSTRING MADE A CLAIM MY CODE DID NOT HONOUR.** `forbidden_keys()` says every
+fallback path returns the nine known names *"AND SAYS SO in the run header"*. `FKEYS_SOURCE`
+was assigned once and **read nowhere**, so a reader of a FALLBACK run could not tell it was
+one. That is precisely the half-truth this wave is auditing the census for -- an artifact
+claiming more than it ran -- reproduced in the instrument doing the auditing. Now printed
+on every run.
+
 ---
 
 ## 9. WHAT THIS PASS DID NOT DO
@@ -482,5 +518,17 @@ control lives in `main(--check)` -- so it was asserting against the wrong surfac
    fixes would move it.
 6. **The classification is only as good as the eleven ruling adjudications**, which are
    mine and are hand judgements. They are pinned to verbatim quotes so they fail loudly if
-   the rulings change, but a pin detects movement, not misreading. Anyone who disagrees can
-   run `--explain <row>` and convict the rule at the pattern.
+   the rulings change, but **a pin detects movement, not misreading**. Anyone who disagrees
+   can run `--explain <row>` and convict the rule at the pattern rather than argue with the
+   verdict.
+7. **The re-check triggers are derived per KIND, not written per row.** That is deliberate
+   -- a per-row table of 309 triggers is the hand-maintained artifact this whole design
+   rejects -- but it means the trigger is the right SHAPE for a row rather than tailored to
+   it. `--contingent` prints them tiered; section 6 is that output with the clusters named.
+8. **One delegated slice failed and then did not.** The mutation child produced nothing on
+   disk for 35 minutes, against a live process check and repeated `ls`. I wrote the harness
+   myself rather than stay blocked on a hard requirement. It then delivered -- a better
+   file than mine, which replaced it, and which found two defects in my instrument that my
+   own harness had not. Recorded because "no output on disk" was indistinguishable from
+   death for more than half an hour, and the recovery that mattered was doing the work
+   anyway rather than waiting or re-spawning.

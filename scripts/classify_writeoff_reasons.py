@@ -355,7 +355,8 @@ SIGNALS = [(label, kind, re.compile(pat)) for label, kind, pat in _SIGNALS_RAW]
 class Row:
     __slots__ = ("letter", "rid", "state", "lineno", "capability", "reason",
                  "section", "table_key", "resolved", "resolution", "signals",
-                 "kinds", "kind", "source", "has_reason_cell", "backref_donor")
+                 "kinds", "kind", "source", "has_reason_cell", "backref_donor",
+                 "inherited_kinds")
 
     def __init__(self, **kw):
         for k, v in kw.items():
@@ -457,7 +458,7 @@ def walk(ref: str | None = None) -> tuple[list[Row], list[str], dict[str, int]]:
                             section=section, table_key=table_key,
                             resolved="", resolution="own-cell",
                             signals=[], kinds=set(), kind="", source="",
-                            backref_donor=""))
+                            backref_donor="", inherited_kinds=set()))
     return rows, dialects, stated
 
 
@@ -584,6 +585,51 @@ def resolve(rows: list[Row], rulings: dict[str, str],
         r.resolved = "\n".join(parts)
         r.resolution = "+".join(how) if how else "own-cell"
     return problems
+
+
+#: What MECHANICALLY re-checks a write-off of each kind, and what it costs. Keyed by the
+#: kind rather than written per row, because a per-row list of 309 triggers is the
+#: hand-maintained table this whole script exists to avoid.
+#:
+#: A CLASSIFICATION THAT ONLY LABELS ROWS GOES STALE AS SILENTLY AS THE REASONS IT LABELS.
+#: The label says a row depends on something outside the codebase; only the trigger says
+#: what would tell anybody it had changed. Ordered cheapest first, which is also the order
+#: the re-examination list is printed in.
+RECHECK = {
+    "US-BOUNDARY": (0, "read the allow/deny list in `linkedin_server/readonly.py` and "
+                       "confirm the substring or pattern still does what the cell says. "
+                       "Zero page loads. CHEAP TO CHECK AND CHEAP TO GET WRONG -- "
+                       "/jobs/alerts/ was ALLOWED and redirecting away for fifteen days"),
+    "PROCESS-FACT": (1, "restart the MCP server and re-ask. A running server holds the "
+                        "allowlist it booted with, so the refusal measured a process"),
+    "ACCOUNT-FACT": (2, "one read on his own session, or one question to him. The fact "
+                        "flips when he acquires, spends, toggles or receives something"),
+    "WORLD-FACT":   (3, "one page load or one help-article fetch. The fact flips when "
+                        "LinkedIn ships, and nobody sends a note"),
+    "US-RULING":    (9, "nothing -- re-read the ruling. It changes only when somebody "
+                        "re-rules it, which is a visible act"),
+}
+
+
+def recheck_of(r: Row) -> tuple[int, str]:
+    """(cost rank, what would mechanically re-check this row). Cheapest kind wins.
+
+    A row carrying several kinds is ranked by its CHEAPEST contingent kind, because the
+    cheapest check is the one somebody will actually run, and if it settles the row the
+    dearer ones are never needed.
+    """
+    # RANKED OVER ALL ITS KINDS, NOT ONLY THE CONTINGENT ONES. The row is on the list
+    # because something about it is contingent, but the cheapest way to make progress may
+    # be the OTHER half: `M C52`, `N 10` and `P N20` each carry a US-BOUNDARY alongside a
+    # WORLD-FACT, and reading one file to find out whether the boundary is the binding
+    # half costs nothing and may settle the row outright. Ranking on the contingent kinds
+    # alone filed all three under "one page load", which is the dearer answer to a
+    # question that has a free one.
+    if not r.kinds:
+        return (99, "nothing derivable -- the cell does not say what it depends on")
+    rank, text = min((RECHECK[k] for k in r.kinds if k in RECHECK),
+                     default=(99, "unknown kind"))
+    return rank, text
 
 
 def classify_own_cell(r: Row) -> None:
@@ -756,8 +802,10 @@ def build(ref: str | None = None):
     by_key = {r.key: r for r in rows}
     for r in rows:
         for code in codes_by_key.get(r.key, []) if r.letter == "N" else []:
-            r.kinds |= ruling_kinds.get(f"R{code}", set())
-            if ruling_kinds.get(f"R{code}"):
+            want = ruling_kinds.get(f"R{code}", set())
+            r.inherited_kinds |= want
+            r.kinds |= want
+            if want:
                 r.source = "inherit-ruling" if r.source == "none" else r.source
         # READ THE SLOT, NEVER RE-PARSE THE LABEL. The first version of this matched
         # `backref<-(\S+)` out of `r.resolution` -- and every row key in this corpus
@@ -769,6 +817,7 @@ def build(ref: str | None = None):
         if r.backref_donor:
             donor = by_key.get(r.backref_donor)
             if donor is not None:
+                r.inherited_kinds |= donor.kinds
                 r.kinds |= donor.kinds
                 if r.source == "none":
                     r.source = "inherit-backref"
@@ -840,6 +889,12 @@ def main(argv: list[str] | None = None) -> int:
           f"({', '.join(sorted(rulings, key=lambda s: int(s[1:])))})")
     print(f"adjudications loaded         : {len(adj)}"
           f"{'  (NONE ON DISK -- overlay absent)' if not adj else ''}")
+    # THE DOCSTRING PROMISED THIS LINE AND THE CODE DID NOT PRINT IT. `FKEYS_SOURCE` was
+    # assigned once and read nowhere, while `forbidden_keys()` claimed every failure path
+    # "SAYS SO in the run header". A reader of a FALLBACK run could not tell it was one --
+    # which is the same half-truth this wave is auditing the census for, in my own
+    # instrument. Found by the mutation child, not by me.
+    print(f"PERMANENTLY_FORBIDDEN keys   : {len(_FKEYS)}  [{FKEYS_SOURCE}]")
     noreason = [r for r in wo if not r.has_reason_cell]
     print(f"write-off rows with NO REASON CELL AT ALL: {len(noreason)}")
     if noreason:
@@ -884,11 +939,20 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  ... carrying NONE (re-examine list): {len(noreop)}")
 
     if args.contingent:
-        print("\n--- RE-EXAMINATION LIST: contingent, and nothing would ever say it changed ---")
-        order = {"US-BOUNDARY": 0, "PROCESS-FACT": 1, "ACCOUNT-FACT": 2, "WORLD-FACT": 3}
-        for r in sorted(noreop, key=lambda r: (min((order.get(k, 9) for k in r.kinds),
-                                                   default=9), r.letter, r.lineno)):
-            print(f"{r.key:9s} {r.kind:34s} {r.state:22s} {r.capability[:46]}")
+        print("\n--- RE-EXAMINATION LIST: contingent, and nothing would ever say it "
+              "changed ---")
+        print("Grouped by WHAT WOULD MECHANICALLY RE-CHECK IT, cheapest first. A "
+              "classification\nthat only labels rows goes stale as silently as the "
+              "reasons it labels.\n")
+        last = None
+        for r in sorted(noreop, key=lambda r: (recheck_of(r)[0], r.letter, r.lineno)):
+            rank, trigger = recheck_of(r)
+            if rank != last:
+                import textwrap
+                print(f"\n=== TIER {rank}: " + textwrap.fill(
+                    trigger, 84, subsequent_indent="    ") + "\n")
+                last = rank
+            print(f"  {r.key:9s} {r.kind:34s} {r.state:22s} {r.capability[:44]}")
 
     if args.show:
         want = args.show.strip().upper()
@@ -929,12 +993,34 @@ def main(argv: list[str] | None = None) -> int:
                   f"being read looks exactly like a slice with nothing to say")
             failed = True
             continue
-        unkinded = [r for r in sub if not r.kind]
-        if unkinded:
-            print(f"  FAIL  {name}: {len(unkinded)} write-off rows carry no kind")
+        # WHAT USED TO BE HERE COULD NOT FAIL, and it took a second reader to see it:
+        #   unkinded = [r for r in sub if not r.kind]
+        # `finalise` sets `r.kind = "UNCLEAR"` whenever the kind set is empty, so
+        # `r.kind` is never falsy and that branch was unreachable. It printed
+        # "all N write-off rows carry a kind" over 309 rows and could never have said
+        # anything else -- a control computed, printed, and structurally unable to fire,
+        # which is the exact defect `scripts/detect_unbranched_probe_controls.py` was
+        # built to find in 129 other places.
+        #
+        # REPLACED WITH THE INVARIANT THAT ACTUALLY BROKE. A row that resolved through a
+        # pointer must end up carrying AT LEAST what it points at. When backreference
+        # inheritance was silently dead, 46 rows had a donor and none of the donor's
+        # kinds; this assertion fails loudly in that state, and the tautology did not.
+        broken = [
+            f"{r.key} resolved through {r.resolution} but is missing "
+            f"{sorted(r.inherited_kinds - r.kinds)}"
+            for r in sub if not r.inherited_kinds <= r.kinds
+        ]
+        if broken:
+            print(f"  FAIL  {name}: {len(broken)} row(s) resolved through a pointer and "
+                  f"did NOT inherit what it points at")
+            for b in broken[:4]:
+                print(f"          {b}")
             failed = True
         else:
-            print(f"  ok    {name}: all {len(sub)} write-off rows carry a kind")
+            inherited = sum(1 for r in sub if r.resolution != "own-cell")
+            print(f"  ok    {name}: {len(sub)} write-off rows, {inherited} resolved "
+                  f"through a pointer, all inheriting what they point at")
 
     if dialects:
         print(f"  FAIL  {len(dialects)} dialect state cell(s)")
