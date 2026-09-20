@@ -51,7 +51,7 @@ none is forced.
 
 ## 2. WHAT ACTUALLY HAPPENED (a squash-replay, not a rewrite)
 
-`master` never merged `integrate-1821`. Commit `fa13985cf3928` ("integrate:
+`master` never merged `integrate-1821`. Commit `fa13985` ("integrate:
 eight waves' work, replayed as content onto the purged history",
 2026-09-19T19:44:51+05:30) is a single commit whose diff against its parent
 equals the CONTENT of `a867dd4..integrate-1821` -- the combined effect of
@@ -247,8 +247,9 @@ part of, and the whole already trails `master`.
 **The one gap the coordinator's weaker check could not see, closed:** file
 EXISTENCE says nothing about a file present on both sides holding different
 CONTENT. Checked this session, `git diff --shortstat master <branch>` for all
-nine shows real per-branch diffs (roughly 550-720 insertions across 150-165
-files each) that `--diff-filter=A` is blind to by construction. Traced rather
+nine shows real per-branch diffs (543-723 insertions across 156-164 files
+each, exact per-branch numbers on file) that `--diff-filter=A` is blind to by
+construction. Traced rather
 than waved away: 19 of the 85 modified files (sampled on
 `worktree-agent-a192c75aa377ee39a`, cross-checked on `integrate-1821`) are
 `_audit/2026-09-05-*.md` documents, and the one common to both samples,
