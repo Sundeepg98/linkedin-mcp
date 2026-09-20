@@ -7929,3 +7929,118 @@ browser.
 
 `events.py` and `groups_page.py` are not on that list: they were ACQUITTED BY
 MEASUREMENT, not omitted from it.
+
+---
+
+## 46. A VERDICT TABLE THAT GOES RED WHEN THE CORPUS MOVES UNDER IT, AND AN INSTRUMENT THAT COULD NOT RUN WHERE WAVES RUN (read-triage, 2026-09-21)
+
+`scripts/triage_read_gap_rows.py`. Triages the 59 READ-direction GAP rows of
+`profile.md` and `network.md` by REMAINING COST -- BUILDABLE / ADDRESS / RULING
+/ PRESS / SERVED -- and refuses to print a tally unless six controls pass.
+Deliverable `_audit/2026-09-21-the-read-triage.md`.
+
+### 46.1 THE LAW: A JUDGEMENT SHIPS WITH A TRIPWIRE ON ITS OWN DENOMINATOR
+
+Section 34's law is that a count in prose beside a table it cannot read goes
+stale in silence. **This is that law applied to a JUDGEMENT rather than a
+count, and the failure mode is worse**, because a verdict has no arithmetic
+anybody can re-check.
+
+`scripts/triage_messaging_gap_rows.py` (section 39) joins two columns somebody
+else wrote; it can be re-derived from the census outright. A five-class read
+triage cannot -- every verdict is an argument, taken row by row, and once
+written it is indistinguishable from a verdict taken carefully and a verdict
+taken by pattern-match.
+
+So the verdicts live in a committed table whose **KEY SET is recomputed from
+the shipped census on every run**, and the run REFUSES on any difference in
+either direction:
+
+    a row in the census's read-GAP set with NO verdict   -> refuse, name it
+    a verdict for a row NOT in that set                  -> refuse, name it
+
+**THE SECOND DIRECTION IS THE ONE THAT MATTERS AND IT IS THE ONE A CARELESS
+CONTROL OMITS.** "Every row has a verdict" is the obvious check and it cannot
+fail when a row is BANKED, RE-RULED, or has its direction cell corrected from R
+to W -- exactly the events a live census produces. What is left behind is a
+verdict pointing at nothing, which reads identically to a correct one.
+`--plant stale-census` is that direction, shown failing.
+
+### 46.2 SHOWN FAILING, THREE WAYS, EACH A DIFFERENT DECAY
+
+    --plant drop-a-row      a verdict goes missing         CONTROL 4 refuses, exit 1
+    --plant stale-census    a row leaves the read-GAP set  CONTROL 4 refuses, exit 1
+    --plant bad-verdict     a verdict off the alphabet     CONTROL 5 refuses, exit 1
+
+Clean run exits 0. Controls 1-3 are IMPORTED and print their own labels -- the
+counter agreement from `enumerate_gap_rows.control`, the direction reader shown
+refusing from `reader_closable_blockers.control_negative` -- so this file's own
+controls start at 4 and a reader can tell whose is whose.
+
+### 46.3 CONTROL 6 MAKES LAW 45.9 A MEASURED PROPERTY RATHER THAN A PROMISE
+
+45.9: a derived view of a corpus must not be an input to the instruments that
+measure that corpus, and three sweeping instruments have needed an explicit
+`_audit/INDEX.md` exclusion. **An exclusion written as a filter is a promise; an
+exclusion written as an equality over the file set is a measurement.** Control 6
+asserts the set of files read IS the census slices named by
+`count_census_states.SLICES` for this scope, and nothing else. A future edit
+that points this file at `_audit/` goes red rather than quiet.
+
+### 46.4 THE DEFECT: A SHIPPED INSTRUMENT COULD NOT RUN IN ANY LINKED WORKTREE
+
+`scripts/enumerate_gap_rows.py :: control` spelled its interpreter
+`root / "venv" / "Scripts" / "python.exe"`. **`venv/` is gitignored, so it does
+not exist in any linked worktree** -- the only tree a fan-out wave has. Not a
+degraded run: `FileNotFoundError: [WinError 2]`, and it took
+`scripts/reader_closable_blockers.py` down with it, since that instrument's
+first act is to call this control. **The instrument whose entire job is "which
+live blockers could a reader actually close" could not report at all from the
+place the question gets asked.**
+
+Repaired to `sys.executable`. That is the right answer and not merely a working
+one: the control re-runs the SHIPPED COUNTER over THIS TREE, and
+`count_census_states.py` imports nothing outside the standard library, so the
+interpreter is not part of what is being measured. **Reaching for a named venv
+asserted a dependency this control does not have.**
+
+> ISOLATION SELLS GITIGNORED FILES, AND A PATH TO ONE IS A DEPENDENCY NOBODY
+> DECLARED. The worktree hazard is normally told about a DISARMED GUARD -- a
+> key or wordlist missing, the check running and reporting ALLOW. This is the
+> other shape: the instrument does not run at all, which is louder and
+> therefore easier, but it is the same purchase.
+
+**AND THE ANSWER WAS ALREADY IN THIS REPOSITORY, ONE FILE AWAY.**
+`scripts/pre_commit_boundary_gate.py` solves it deliberately with
+`_tooling_root()` off `--git-common-dir`, under a comment naming this exact
+case: *"absent in EVERY linked worktree, which is not an infrastructure case at
+all."* **The two fixes are different and both are correct**, which is why the
+repair here is not a copy: that gate runs pytest and genuinely needs the
+installed environment; this control does not. Three further tracked scripts
+carry the same spelling and are reported unfixed in the deliverable's 6.3,
+because each needs that same judgement -- content root or tooling root -- and a
+mechanical sweep would get one of them wrong.
+
+### 46.5 WHAT THE WAVE MEASURED THAT IS NOT AN INSTRUMENT
+
+* **A BLOCKER TEXT OUTLIVES THE BOUNDARY IT DESCRIBES.** Sixteen rows carried
+  *"no `/search/results/` pattern"* five days after that pattern was admitted
+  with its shaper and its tool. Two more carried *"No `/company/`"* after the
+  company root landed -- and one of those two, `N 53`, had been found SHIPPED by
+  a build wave that recorded it in a document and not in the row. **A finding
+  that lands in a document and not in the row is a finding the census cannot
+  see.**
+* **A SHIPPED MODULE'S PROSE CAN MISCOUNT ITS OWN TABLE.**
+  `search_results.py` claims to serve *"`N 80`-`N 94` -- sixteen consecutive
+  FILTER rows"*. That span is fifteen rows and `FILTER_TERM_ROWS` holds
+  fourteen, stopping at `N 93`. Found by reading the tuple out of the loaded
+  module, which is the module's own rule -- *"a row with no term is a row this
+  shaper cannot serve, and both are findings rather than opinions."* **Reported,
+  not edited**: a comment is a standing instruction, and rewriting one on a
+  triage wave's authority is how it stops being one.
+* **A RULING CAN BE GRANTED, ITS GUARD BUILT, AND NOTHING WIRED.**
+  `press.disclose` implements a ruling made 2026-09-19 and now carries the
+  disclosure witness that ruling's first firing was named blind for. It has
+  **zero callers among the 47 shipped tools.** The gap between "permitted and
+  built" and "reachable" is invisible to every instrument that reads the
+  boundary, because the boundary is not where it lives.

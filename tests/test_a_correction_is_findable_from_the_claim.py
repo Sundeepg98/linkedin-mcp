@@ -1926,6 +1926,86 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "declared pair. "
     ),
 
+    # SEVEN, 2026-09-21, from the read-triage wave. Every one was triaged by
+    # reading the line that produced it, and every one is a shape this table
+    # already holds: a corrector paired with its EVIDENCE, and a back-pointer
+    # seen from the wrong end. The corrections that wave DID make -- nine cells
+    # in network.md and one in profile.md -- are declared with CORRECTS: /
+    # CORRECTED BY: pairs instead, which is what this table leaves room for.
+    ("2026-09-21-the-read-triage.md", "2026-09-20-company-page-built.md"): (
+        "THE CITED DOCUMENT IS AGREED WITH, AND THE CENSUS IS WHAT IS "
+        "CORRECTED. The line reads that that wave 'found the same thing five "
+        "days ago and filed it SHIPPED, pre-existing -- and the census row "
+        "was left carrying the refuted blocker'. The word 'refuted' belongs "
+        "to the census cell, not to the cited wave: its finding is quoted as "
+        "the authority the correction rests on. A CORRECTED BY marker there "
+        "would tell every future reader that the build wave withdrew "
+        "something, and nothing in it is withdrawn -- what the triage adds is "
+        "that its finding never reached the row. "
+    ),
+    ("network.md", "2026-09-19-search-admission-preconditions.md"): (
+        "THE CITATION IS A PRICE, NOT A CORRECTION. Row 79's corrected cell "
+        "cites that document's section B.4 for a measurement it still holds: "
+        "8 of 11 ordinary search keywords trip the forbidden-substring list. "
+        "The correction vocabulary in the window ('EXPIRED', 'FALSE') "
+        "belongs to the BLOCKER TEXT the same cell strikes through, three "
+        "sentences earlier -- a markdown table row has no blank lines, so a "
+        "whole corrected cell is one line and everything it cites lands "
+        "inside the window. Nothing in the cited document is withdrawn. "
+    ),
+    ("network.md", "2026-09-19-the-read-rows.md"): (
+        "A DECISION RE-FILED UNCHANGED IS THE OPPOSITE OF A CORRECTION. Row "
+        "99's corrected cell quotes that document calling an unmade ruling "
+        "'the single highest-yield decision left in this row set' and records "
+        "that it is still unanswered. The triage endorses it and re-files it; "
+        "a CORRECTED BY marker would claim the read-rows wave got it wrong, "
+        "when the finding is that nobody answered it. The vocabulary in the "
+        "window is the cell's own verdict on its STRUCK-THROUGH blocker text. "
+    ),
+    ("network.md", "2026-09-20-company-page-built.md"): (
+        "SAME PAIR AS THE FIRST ENTRY ABOVE, SEEN FROM THE CENSUS SIDE. Row "
+        "53's corrected cell cites that wave as the source of the finding the "
+        "correction applies -- 'found the same thing and filed it SHIPPED, "
+        "pre-existing'. The cited document is the evidence for the "
+        "correction, never its target. "
+    ),
+    ("network.md", "2026-09-21-the-read-triage.md"): (
+        "THIS IS THE BACK-POINTER ITSELF, SEEN FROM THE WRONG END -- the same "
+        "shape as the messaging-gap entry above. The correction runs from the "
+        "triage TO this census, and that pair is declared: the triage carries "
+        "CORRECTS: and this slice carries CORRECTED BY:. What the scan "
+        "produces here is a corrected ROW naming the document its reasoning "
+        "is written up in, the 'See ...' pointer every such row in this "
+        "corpus carries. Reading it as the census correcting the triage "
+        "inverts the direction of the declared pair. "
+    ),
+    ("profile.md", "2026-09-05-profile-rest.md"): (
+        "THE CITED DOCUMENT IS THE MEASUREMENT THAT REFUTES THE CELL, NOT A "
+        "DOCUMENT BEING REFUTED. Row K8's corrected cell says its own old "
+        "reason -- 'no tool, no reason' -- is false BECAUSE that document "
+        "measured the capability live at allowlist +0, and quotes its "
+        "conclusion verbatim. The word 'FALSE' in the window is the cell's "
+        "verdict on ITSELF. Seventh instance in this corpus of proximity "
+        "matching pairing a corrector with its evidence. "
+    ),
+    ("profile.md", "2026-09-21-the-read-triage.md"): (
+        "THE BACK-POINTER FROM THE WRONG END AGAIN, on the profile slice. The "
+        "declared pair runs triage -> profile.md, with CORRECTS: on one side "
+        "and CORRECTED BY: on the other; row K8's 'See ...' pointer is the "
+        "row naming where its reasoning lives. "
+    ),
+    ("2026-09-21-the-read-triage.md", "2026-09-19-search-shaper.md"): (
+        "THE CITED DOCUMENT IS A DATA POINT IN A RANKING, NOT A CLAIM BEING "
+        "WITHDRAWN. The line reports that it and the citing document BOTH "
+        "SCORE 5.000 for SEARCH-RESULTS-SURFACE in the blocker-reason "
+        "locator, so it fell out of the top 3 on an arbitrary tie-break "
+        "rather than on merit. The correction vocabulary in the window -- "
+        "'worse', 'wrong' -- is the citing document's verdict on THE OBVIOUS "
+        "READING OF ITS OWN TEST FAILURE ('the locator got worse ... is "
+        "wrong'), not on anything the shaper document says. Nothing in it is "
+        "asserted mistaken; it is named because its rank moved. "
+    ),
+
 }
 
 

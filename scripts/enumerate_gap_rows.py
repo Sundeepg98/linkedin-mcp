@@ -122,8 +122,27 @@ def control(ref: str | None) -> int:
         print("control: SKIPPED -- the shipped counter reads the working tree only")
         return 0
     root = pathlib.Path(__file__).resolve().parents[1]
+    # THE INTERPRETER IS `sys.executable`, NOT `root/venv`, AND THE DIFFERENCE
+    # IS A LINKED WORKTREE. `venv/` is gitignored, so it does not exist in any
+    # worktree this repository's waves are run from -- the shipped spelling
+    # raised `FileNotFoundError: [WinError 2]` there, which took down this
+    # control AND `scripts/reader_closable_blockers.py`, whose first act is to
+    # call it. The failure was not a soft skip: the instrument could not report
+    # at all, from the only tree a fan-out wave has.
+    #
+    # `sys.executable` is the right answer rather than merely a working one:
+    # the control's job is to re-run the SHIPPED COUNTER OVER THIS TREE, and
+    # `count_census_states.py` imports nothing outside the standard library, so
+    # the interpreter is not part of what is being measured. Reaching for a
+    # named venv asserted a dependency this control does not have.
+    #
+    # `scripts/pre_commit_boundary_gate.py` solves the SAME problem the other
+    # way, with `_tooling_root()` off `--git-common-dir`, and that is correct
+    # THERE because that gate runs pytest and genuinely needs the installed
+    # environment. Copying it here would import a git call this file does not
+    # otherwise make.
     out = subprocess.run(
-        [str(root / "venv" / "Scripts" / "python.exe"),
+        [sys.executable,
          str(root / "scripts" / "count_census_states.py")],
         cwd=str(root), capture_output=True, check=True,
     ).stdout.decode("utf-8", errors="replace")

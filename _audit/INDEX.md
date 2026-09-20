@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 197 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 164 |
-| distinct dates | 13 |
+| audit documents git tracks under `_audit` | 198 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 165 |
+| distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 69 |
-| `CORRECTED BY:` marker lines | 69 |
-| distinct declared correction edges | 66 |
+| `CORRECTS:` marker lines | 71 |
+| `CORRECTED BY:` marker lines | 71 |
+| distinct declared correction edges | 68 |
 | documents something later corrects | 39 |
-| documents that correct something | 51 |
-| documents at either end of a cross-document edge | 74 |
+| documents that correct something | 52 |
+| documents at either end of a cross-document edge | 75 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 121 |
@@ -483,6 +483,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
 
+- CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > nine rows carried a stated reason that is FALSE at HEAD and each is now corrected in place: `33`, `53`, `54`, `102` and `104` on the company root (admitted 2026-09-20), `79` on the people-search pattern (admitted 2026-09-20 with its shaper and its tool), `99` and `100` on the `/school/` pattern (admitted 2026-09-05, and the cell's "0 grep hits" was a reading of a tree that no longer exists), and `132` on the claim that no tool returns an appearance count. **NO STATE MOVED ON ANY OF THEM** -- the slice's GAP count is 91 before and after, and the census total is 285 either way, re-measured by `scripts/count_census_states.py --expect J=57,P=55,M=82,N=91`. The one row that could move is `53`, which a build wave already found SHIPPED and pre-existing; what stops it here is that no committed record shows the key POPULATED in a live fire, and this wave was forbidden the browser.
+
 ### [_census/profile.md](_census/profile.md)
 
 (undated) &middot; CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY
@@ -490,6 +494,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md)
 
   > rows B2 and M1 called the upload ban package-wide and the verb unsanctioned; one call site has been sanctioned since 2026-09-04, and no state moved.
+
+- CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > row `K8`'s reason cell read "no tool, no reason", and the second half is FALSE: the capability was measured live on 2026-09-05 at allowlist +0, on an instrument shown able to disagree with itself on the same page. The "no tool" half is true and is kept. **NO STATE MOVED** -- this slice's GAP count is 55 before and after. The same document triages all 17 of this slice's read-direction GAP rows by remaining cost and finds 16 of the 17 gated on an address, a decision or a press.
 
 ## 3. What a document corrected in itself
 
@@ -1009,6 +1017,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+2026-09-21 &middot; The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > nine cells whose stated reason is measurably false at HEAD: rows `33`, `53`, `54`, `79`, `99`, `100`, `102`, `104` and `132`, each corrected in place.
+
+- CORRECTS [_census/profile.md](_census/profile.md)
+
+  > row `K8`, whose reason cell reads "no tool, no reason" when the reading exists and was taken at allowlist +0.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1051,8 +1071,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x3** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x3** |
-| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x1** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x4** |
+| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
 | 2026-08-23 | [2026-08-23-build-linkedin.md](2026-08-23-build-linkedin.md) | linkedin, 2026-08-23 -- leak walker, and a write design that is scoped rather than unlocked | corrects x1 |
@@ -1217,6 +1237,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) | The three held defects | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | corrects x2 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
