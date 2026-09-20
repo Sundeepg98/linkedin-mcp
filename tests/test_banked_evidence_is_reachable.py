@@ -246,6 +246,27 @@ def test_a_nonsense_argument_is_loud_not_green():
     assert "PASS" not in out.stdout and "OK:" not in out.stdout
 
 
+def test_the_refusal_does_not_echo_an_absolute_path():
+    """A REFUSAL IS A DISCLOSURE PATH, and this one echoes its argument.
+
+    The findings already redact an absolute path, but the ARGUMENT refusal did
+    not -- so a mistyped workspace path would have been printed in full, by the
+    one code path a confused user is most likely to reach, into a terminal, a
+    transcript or a CI log. Found by handing the tool `/etc/passwd` on Windows,
+    where the shell rewrote it to an absolute path and the refusal echoed the
+    whole thing back.
+    """
+    out = _run("Z:/some/private/place/notes.md")
+    assert out.returncode == 2, out.stdout
+    assert "private" not in out.stdout and "place" not in out.stdout, out.stdout
+    assert "<absolute path" in out.stdout, out.stdout
+    # The mirror: a RELATIVE bad argument is still named, or the refusal stops
+    # being useful.
+    rel = _run("not-a-slice.md")
+    assert rel.returncode == 2
+    assert "not-a-slice.md" in rel.stdout, rel.stdout
+
+
 def test_help_is_help_and_not_a_corpus():
     out = _run("--help")
     assert out.returncode == 0, out.stdout

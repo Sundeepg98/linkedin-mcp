@@ -592,7 +592,19 @@ def main(argv: list[str] | None = None) -> int:
     wanted = [a for a in argv if not a.startswith("-")]
     unknown_args = [a for a in wanted if a.replace("\\", "/") not in SLICES]
     if unknown_args:
-        print("REFUSING: not a census slice: " + ", ".join(unknown_args))
+        # THE REFUSAL ECHOES WHAT IT WAS HANDED, AND THAT IS A DISCLOSURE PATH.
+        # This output reaches terminals, transcripts and CI logs. An absolute
+        # path is an identifier by this repository's own rule, and the
+        # findings already redact one -- but the ARGUMENT refusal did not, so
+        # a mistyped workspace path would have been printed in full by the one
+        # code path a confused user is most likely to reach. Found by handing
+        # the tool `/etc/passwd`, which the shell rewrote to an absolute path
+        # and the refusal echoed back whole.
+        shown = [
+            "<absolute path, " + str(len(a)) + " chars>" if _is_absolute(a) else a
+            for a in unknown_args
+        ]
+        print("REFUSING: not a census slice: " + ", ".join(shown))
         print("  Known slices:")
         for s in SLICES:
             print("    " + s)
