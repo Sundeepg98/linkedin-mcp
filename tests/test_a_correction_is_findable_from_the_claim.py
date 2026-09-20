@@ -242,6 +242,84 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "else's blocker. A document citing another one for having seen a "
         "problem first is the opposite of correcting it. "
     ),
+    # 2026-09-20, from the names-that-do-not-exist wave. Read the line before
+    # judging the shape: the correction vocabulary belongs to the SUBJECT being
+    # discussed (an unapplied ruling), not to the relation between the two
+    # documents.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-09-20-the-decides.md"): (
+        "IT CITES THE OTHER DOCUMENT AS CORROBORATION, IN THE SAME SENTENCE "
+        "THAT CREDITS IT. The passage reports a second class the guard found "
+        "-- blockers opened by a committed ruling that never entered the "
+        "ledger -- and closes 'which is a different problem with a different "
+        "owner. `2026-09-20-the-decides.md:95` already says so about the "
+        "first one in its own words.' The named line is that document "
+        "stating `AI-INTERVIEW-RESULTS-NO-ADDRESS` exists only in one other "
+        "file, which is the reason THIS wave's guard rules it MARKED-ABSENT "
+        "rather than a finding. Citing a document for having disclosed "
+        "something first, and letting that disclosure decide a verdict in "
+        "its favour, is the opposite of correcting it. "
+    ),
+
+    # 2026-09-20, the same wave's second pair. The correction vocabulary here
+    # belongs to a COLUMN HEADING in a precision table, not to a relation
+    # between the two documents.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-09-05-leave-group-writespec.md"): (
+        "IT IS A ROW IN A PRECISION TABLE, AND THE VERDICT IN IT IS "
+        "AGREEMENT. The line reads '`2026-09-05-leave-group-writespec.md:31` "
+        "| `linkedin_leave_group` | discuss (spec) | `MARKED-SPEC-DOC` | yes'. "
+        "The WriteSpec is one of the labelled sites in this wave's "
+        "hand-versus-guard census, and the label says the WriteSpec marked "
+        "its own name correctly -- it declares 'This is a SPECIFICATION, not "
+        "a build.' and thereby earns the suppressor. The wave cites it as "
+        "the corpus receipt for a marker class, which is the opposite of "
+        "correcting it. "
+    ),
+
+    # 2026-09-20, the same wave's third pair. The correction vocabulary here is
+    # the word "wrong" applied to a REPOSITORY, not to a claim.
+    ("2026-09-20-names-that-do-not-exist.md", "2026-08-31-jobcore-paths.md"): (
+        "IT EXPLAINS WHY TWELVE CITATIONS ARE NOT DEFECTS. The passage "
+        "reports that 12 of 134 strict-unresolved path citations come from "
+        "that document, and then says why they are fine: it 'is explicitly "
+        "comparing against a SIBLING project's suite. Real files, wrong "
+        "repo, and no prefix rule can reach them because they carry no "
+        "marker.' The wave is ACQUITTING those citations on the strength of "
+        "the document's own stated scope. Clearing another document is not "
+        "correcting it. "
+    ),
+
+    # 2026-09-20. The register pointing at the wave report that produced the
+    # entry. The correction vocabulary is the ENTRY'S SUBJECT -- two numbers
+    # that wave got wrong and corrected in itself -- not a relation between the
+    # two files.
+    ("INSTRUMENTS.md", "2026-09-20-names-that-do-not-exist.md"): (
+        "IT IS A REGISTER ENTRY CITING ITS OWN SOURCE DOCUMENT. Section 24.6 "
+        "declares twelve scratch probes disposable and closes 'Their numbers "
+        "are the tables in `_audit/2026-09-20-names-that-do-not-exist.md`.' "
+        "Section 24.5 above it is headed 'TWO NUMBERS THIS WAVE GOT WRONG' -- "
+        "self-corrections the wave made and published in that same report, "
+        "which is what puts correction vocabulary near the citation. A "
+        "register naming where an instrument's workings live is a POINTER. "
+        "If it were a correction the arrow would run the wrong way: the "
+        "report is the source, not the target. "
+    ),
+
+    # 2026-09-20, the same wave's fourth pair, and the shape is worth naming:
+    # a document correcting ITSELF, inside a block quote, about a third file it
+    # had mis-described. The correction vocabulary is real; its target is the
+    # citing document's own earlier sentence, not the file it names.
+    ("2026-09-20-names-that-do-not-exist.md", "jobs.md"): (
+        "IT IS A SELF-RETRACTION THAT CLEARS THE NAMED FILE. The quoted block "
+        "opens 'THIS SECTION FIRST SAID' and withdraws this wave's own claim "
+        "that nine rows of `_census/jobs.md` rest their evidence on an "
+        "unresolvable commit. The census is not wrong: its column is headed "
+        "`source` and holds LinkedIn Help Center article ids, which the same "
+        "file writes elsewhere as `help/linkedin/answer/a512388`. The wave "
+        "had resolved them against git, which is a true answer to a question "
+        "nobody asked. A CORRECTS: marker would tell a reader this document "
+        "supersedes the census, when what it supersedes is its own paragraph. "
+    ),
+
     # TWO FROM THE CONTINGENT-WRITEOFFS WAVE, surfaced 2026-09-20 when the
     # newsletter wave strengthened this scan. Both are the SAME SHAPE, and it is
     # a shape worth naming: a document REPORTING THAT A THIRD DOCUMENT CORRECTED
