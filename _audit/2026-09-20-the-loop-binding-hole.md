@@ -289,12 +289,35 @@ and an invariant nobody ruled, and it is why this is escalated rather than filed
 
 ### How live is it
 
-**Zero live instances.** I swept all 175 scanned files for an output sink whose
-argument applies any of the three sanitiser names to a value the page-text walker
-considers page text: none. So this is a demonstrated bypass that nothing exercises
-today -- which is the moment to rule on it, not evidence that it is safe. "Nothing has
-leaked" is the argument that produced the third slug leak, and this file says so at
-the top.
+**Zero live instances, in BOTH spellings, with both detectors shown working.**
+
+My first sweep was wrong and I caught it before reporting it. It looked only for a
+sanitiser call sitting INSIDE a sink argument -- `print(_redact(name))` -- and would
+have missed the two-step form, which is at least as natural a thing to write:
+
+```
+shaped = _redact(name)      # the taint stops here, by design
+print(shaped)               # and sweep 1 never looks at this line
+```
+
+A zero from a sweep that cannot see the commoner spelling is not a zero. Re-run over
+all 175 files looking for both:
+
+```
+files parsed: 175
+form 1  sanitiser call INSIDE a sink argument      : 0
+form 2  name bound to a laundered value, then sunk : 0
+
+CONTROL form 1 planted -> detector form1=1 form2=0  (SEEN)
+CONTROL form 2 planted -> detector form1=0 form2=1  (SEEN)
+```
+
+Each detector convicts its own planted case and not the other's, so neither zero is an
+empty result standing in for a pass.
+
+So this is a demonstrated bypass that nothing exercises today -- which is the moment
+to rule on it, not evidence that it is safe. "Nothing has leaked" is the argument that
+produced the third slug leak, and this file says so at the top.
 
 ### What I did NOT do, deliberately
 
