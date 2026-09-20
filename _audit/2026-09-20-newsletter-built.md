@@ -619,8 +619,53 @@ then passing on the one line between them.
 
 Re-pushed as CI run `35488009146`.
 
-Three commits, none carrying an AI attribution trailer:
+### The commits, none carrying an AI attribution trailer
 
     6a2a992  probe(newsletter): the manager page draws no analytics and no unsubscribe
     92b6882  feat(newsletter): the create control is an eligibility fact, and it is scoped
     9bd57b3  docs(newsletter): three claims the capture made false, and the register entry
+    1fb66bd  docs(newsletter): the wave report, and the ledger's split cell was wrong at birth
+    e87ee01  fix(deps): pyproject was missing pytest-xdist and CI has been red since 07:53
+    56b6b35  fix(identity): a planted control was copied into prose, and the shape guard bit
+    8ba8ad2  docs(newsletter): the creator analytics reader was checked, and it carries none
+    b048e0a  docs(newsletter): the reader suite goes 15 -> 21, not 16 -> 21
+    e388eb7  fix(probe): the must-stay-silent control announced FAIL and certified anyway
+
+Verified at push time as well as at commit time: the range was grepped
+case-insensitively for the assistant's name, the vendor's name, the
+co-author trailer and the generated-with line. Zero hits, and every author is
+the repository's own.
+
+**THE SPELLINGS ARE NOT REPRODUCED HERE, AND THAT IS ALSO A MEASUREMENT.** The
+first draft of this paragraph listed all four as backticked literals, and the
+EXACT-VALUE identity sweep went red on this very file -- one hit, class
+`followed_pages`. One of those words is a page the operator follows, so the
+attribution check cannot be documented by quoting its own needles. That is the
+second time in this wave a control caught a literal copied into prose, and
+both times the remedy was to stop copying rather than to widen an allowlist.
+
+---
+
+## 9. WHAT THE NEXT WAVE ON THIS SURFACE SHOULD DO, IN ORDER
+
+1. **ONE LIVE READ, AND IT IS THE ONLY THING THAT UNBLOCKS THE TWO READS.**
+   Open `/analytics/creator/content/` -- already admitted, already read -- and
+   look for a newsletters TAB or an `?metricType=`-style switch. Then, and
+   only then, is there a measured address for `M C83` and `P L4`. Do NOT admit
+   either candidate spelling first: both are unobserved, and this surface's
+   founding lesson is that an admitted address is not a served one.
+2. **WHILE THAT SESSION IS OPEN, CAPTURE THE PAGE.** Every question this wave
+   answered for free came out of a capture somebody else had already paid for,
+   fifteen days earlier. `scripts/_probe_newsletter_surface_shape.py` reads a
+   new one with `--capture`.
+3. **`N 58` NEEDS A DIFFERENT SESSION ENTIRELY** -- the settings tree, not a
+   newsletter page -- and the first question is whether the control is on
+   LinkedIn at all or only in the newsletter email. That decides whether the
+   row is expensive or impossible, and nobody has looked.
+4. **DO NOT ADMIT `/newsletters/<slug>/` TO UNBLOCK THE WRITES.** Section 3b is
+   the argument. Until a numeric newsletter spelling is measured to exist, the
+   package cannot assemble that address, and the door opens onto a room nothing
+   may walk into.
+5. **`M C82` AND THE SPLIT CELL ARE ONE DECISION, NOT TWO.** Both say the
+   ledger's published figures for this blocker are short a row and short two
+   reads. Whoever holds the map should rule on them together.
