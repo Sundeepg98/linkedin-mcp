@@ -39,9 +39,16 @@ either end and nothing in between would notice.
 ## WHAT IS DELIBERATELY NOT ASSERTED
 
 * **Not that the row's state is CORRECT.** No test can judge that.
-* **Not that the capability WORKS.** These rows are COVERED-UNFIRED precisely
-  because nothing has seen them return a payload live, and this file does not
-  pretend otherwise -- it asserts the artifact exists, never that it ran.
+* **Not that the capability WORKS.** This file asserts the artifact EXISTS,
+  never that it ran. **AMENDED 2026-09-20 AND THE AMENDMENT IS THE POINT:**
+  this paragraph used to say the pinned rows are COVERED-UNFIRED *"precisely
+  because nothing has seen them return a payload live"*. All three have since
+  been fired live and now read COVERED-PROVEN. The sentence was true when it
+  was written and became false without anything editing it -- so it is
+  corrected here rather than left to describe a world that moved. What this
+  file checks is unchanged: it reads the state cell and compares it to a pin,
+  and the EVIDENCE for the promotion lives in the census row and in
+  ``_audit/2026-09-20-the-unfired-twentyseven.md``, not here.
 * **Not that every COVERED row is listed here.** The table holds rows whose
   coverage this repository has written down against a named artifact.
 
@@ -66,17 +73,29 @@ _ROW = re.compile(r"^\|\s*([A-Za-z]{0,2}\s?\d+[a-z]?)\s*\|[^|]*\|(?:[^|]*\|)?\s*
 
 #: (slice file, row id) -> (required state, why in one line).
 COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
+    # ALL THREE MOVED UNFIRED -> PROVEN ON 2026-09-20, and the pin is updated
+    # DELIBERATELY rather than relaxed. This guard caught the upgrade on the
+    # same run that banked it, which is the guard working in the direction
+    # nobody designed it for: it was written to catch a banked row silently
+    # reverting to GAP, and it also catches a row being promoted without
+    # anybody saying so. A pin that only notices downgrades would have let an
+    # unannounced upgrade through, and those are the ones that inflate a count.
     ("jobs.md", "10"): (
-        "COVERED-UNFIRED",
-        "the company filter: a resolver, a tool parameter and the f_C key",
+        "COVERED-PROVEN",
+        "the company filter, FIRED 2026-09-20: an id resolved off a real "
+        "posting, fed back to the search tool, filtered vs unfiltered "
+        "overlapping in only 1 of 7 against a drift floor of 2",
     ),
     ("profile.md", "K10"): (
-        "COVERED-UNFIRED",
-        "the job-posting verification badge, as a boolean inside insights",
+        "COVERED-PROVEN",
+        "the job-posting verification badge, FIRED 2026-09-20 over 11 live "
+        "postings: true on 5 and false on 6, so the reader discriminates "
+        "rather than defaulting",
     ),
     ("jobs.md", "151"): (
-        "COVERED-UNFIRED",
-        "multi-location search: a plan, a merge, and one url per place",
+        "COVERED-PROVEN",
+        "multi-location search, FIRED 2026-09-20: 2 searches, 12 rows, 12 "
+        "distinct ids, all carrying found_in, attributed to 2 places",
     ),
 }
 
