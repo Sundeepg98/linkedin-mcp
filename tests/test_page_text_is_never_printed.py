@@ -89,9 +89,20 @@ import pathlib
 
 import pytest
 
+#: **``_is_sanitiser_call`` IS DELIBERATELY NOT IMPORTED. REMOVED 2026-09-20.**
+#:
+#: It was, and ORed into the stop below, and that single ``or`` made the
+#: paragraph above -- and the sibling's own drift test, which says this file has
+#: "a deliberately EMPTY" sanitiser set -- false as executed. The predicate
+#: matches ``_shape_of``, ``_redact`` and ``_relation`` by NAME; every one of
+#: them was certified against a corpus of URLS; and this rule taints page text.
+#: The import carried the RECOGNITION without the SCOPE.
+#:
+#: ``tests/test_a_sanitiser_earns_its_entry.py`` now records what each guarded
+#: name is PROVEN FOR and asserts this absence structurally, so re-adding the
+#: import goes red in that file rather than quietly restoring the hole.
 from test_navigation_is_never_derived import (  # the ONE engine
     _COUNTING_CALLS,
-    _is_sanitiser_call,
     _sink_calls,
 )
 
@@ -164,15 +175,25 @@ TEXT_SANITISERS: frozenset[str] = frozenset()
 def _reads_page_text(node: ast.AST, tainted: set[str]) -> bool:
     """Does this expression read anything LinkedIn wrote?
 
-    The same walk as the sibling rule's, with the same three stopping
-    conditions -- a sanitiser call, a comparison, a counting call -- so that a
-    count of a name and a name are not confused. Those carve-outs are IMPORTED,
-    not restated.
+    The same walk as the sibling rule's, and the carve-outs that are about
+    ARITHMETIC rather than about identity -- a comparison, a counting call --
+    are IMPORTED, not restated, so a count of a name and a name are not
+    confused.
+
+    **THE SANITISER STOP IS THIS FILE'S OWN AND IT IS EMPTY. CHANGED
+    2026-09-20.** It used to be ``_is_sanitiser_call(child) or
+    _is_text_sanitiser_call(child)``, the first half imported from the url
+    rule. A carve-out is not one thing: ``len(x)`` is an integer whatever ``x``
+    was, and that argument transfers to any kind of value. "This function's
+    result carries none of its input" does NOT transfer -- it is a claim proved
+    against a specific corpus, and that corpus was urls. Importing the second
+    kind alongside the first is the whole defect, and the two are separated
+    here so the next reader can see which is which.
     """
     stack: list[ast.AST] = [node]
     while stack:
         child = stack.pop()
-        if _is_sanitiser_call(child) or _is_text_sanitiser_call(child):
+        if _is_text_sanitiser_call(child):
             continue
         if isinstance(child, ast.Compare):
             # A COMPARISON YIELDS A BOOLEAN whatever it compared.
@@ -326,9 +347,85 @@ _GREEN_CASES = [
 ]
 
 
+#: **A SANITISER PROVEN FOR URLS DOES NOT LAUNDER PAGE TEXT.**
+#:
+#: Kept apart from ``_RED_CASES`` deliberately: these five are one ruling, and
+#: a list several waves append to is the wrong place for a block that has to be
+#: read together.
+#:
+#: Every name in the sibling's ``_SANITISERS`` was certified against a corpus of
+#: URLS -- ``tests/test_a_sanitiser_earns_its_entry.py``'s needle table is eight
+#: url-bearing lines and nothing else. This rule taints PAGE TEXT. Honouring
+#: that certification here spends a proof about addresses on a question about
+#: prose, and one of the three claimants is MEASURED returning a display name
+#: byte-identical on three realistic page-text shapes while correctly holding on
+#: the url it was proven for.
+#:
+#: ALL THREE NAMES AND BOTH SPELLINGS, because the predicate matched all of
+#: them and a case list covering one name would let the next author reach for
+#: either of the others. The two-step form is here for the same reason: the
+#: taint follows the binding, so ``shaped = _redact(name)`` then ``print(shaped)``
+#: is at least as natural to write as the nested spelling and was the form a
+#: first sweep of this defect could not see.
+_SCOPE_RED_CASES = [
+    (
+        "name = await item.inner_text()\nprint(_redact(name))\n",
+        "_redact is certified against urls; handed a display name beside a "
+        "lowercase word it returns it byte-identical",
+    ),
+    (
+        "name = await item.inner_text()\nshaped = _redact(name)\nprint(shaped)\n",
+        "the two-step spelling -- the taint follows the binding, so the stop "
+        "has to be wrong in both shapes or in neither",
+    ),
+    (
+        "name = await item.inner_text()\nprint(_shape_of(name, ASKED))\n",
+        "_shape_of takes a LANDED URL and an ASKED-FOR URL; page text is "
+        "neither, and its proof says nothing about what it does with one",
+    ),
+    (
+        "name = await item.inner_text()\nprint(_relation(name, ASKED))\n",
+        "same argument, third name -- the predicate matched all three",
+    ),
+    (
+        "name = await item.inner_text()\nprint(helper._redact(name))\n",
+        "the attribute spelling, which the predicate also matched",
+    ),
+]
+
+
 @pytest.mark.parametrize("body,why", _RED_CASES, ids=range(len(_RED_CASES)))
 def test_it_goes_red_on_page_text_reaching_a_print(body, why):
     assert text_violations(body), why
+
+
+@pytest.mark.parametrize(
+    "body,why", _SCOPE_RED_CASES, ids=range(len(_SCOPE_RED_CASES))
+)
+def test_a_url_proven_sanitiser_does_not_clear_page_text(body, why):
+    """THE PROOF OBLIGATION MUST MATCH THE USE.
+
+    These went GREEN before 2026-09-20 -- every one of them -- because this
+    file imported the url rule's ``_is_sanitiser_call`` and ORed it into the
+    stop. The import carried the RECOGNITION without the SCOPE.
+    """
+    assert text_violations(body), why
+
+
+def test_this_rule_still_flags_something_so_the_block_above_is_not_vacuous():
+    """PAIRED WITH THE BLOCK ABOVE, and that pairing is the whole point.
+
+    Every assertion in this file's scope block is of the form *this is
+    flagged*. A walker that flagged EVERYTHING would satisfy all five while
+    being useless, so the counting and comparison carve-outs are asserted
+    surviving in the same breath -- the green list below is the long form and
+    this is the one that cannot be skipped by a reader.
+    """
+    assert text_violations("name = await item.inner_text()\nprint(name)\n")
+    assert text_violations("name = await item.inner_text()\nprint(len(name))\n") == []
+    assert text_violations(
+        "text = await node.text_content()\nprint('needle' in text)\n"
+    ) == []
 
 
 @pytest.mark.parametrize("body,why", _GREEN_CASES, ids=range(len(_GREEN_CASES)))

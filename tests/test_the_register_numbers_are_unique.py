@@ -15,9 +15,18 @@ it has been shown failing; this is the register failing to hold its own entries
 apart.
 
 WHAT THIS DOES NOT DO. It does not renumber anything and it does not enforce
-contiguity -- the file already has a real gap at 22 and closing it would rewrite
-published section numbers that other documents cite. Uniqueness is the property
-that matters to a reader following a citation; density is not.
+contiguity -- the file has real gaps (5 and 32 today) and closing them would
+rewrite published section numbers that other documents cite. Uniqueness is the
+property that matters to a reader following a citation; density is not.
+
+THE GAP AT 22 WAS NEVER REAL, and this sentence used to say it was. Section 22
+is at line 3736, spelled `## 22 THE IMPACT GATE...` with no separator after the
+number -- which the heading pattern below could not match until 2026-09-20. The
+guard could not see the section, so it reported a gap, and the gap was then
+written down here as a fact about the register. **A measurement artifact became
+documentation of the thing being measured**, and it survived every reading of
+this file until a collision forced somebody to count headings by hand. See the
+note on HEADING below for what it cost.
 """
 import collections
 import pathlib
@@ -25,9 +34,29 @@ import re
 
 REGISTER = pathlib.Path(__file__).resolve().parents[1] / "_audit" / "INSTRUMENTS.md"
 
-#: Headings are written both `## 24.` and `## 24 ·` in the committed file, by
-#: different waves. Both spellings are real and neither is being normalised here.
-HEADING = re.compile(r"^##\s+(\d+)\s*[.·]", re.M)
+#: Headings are written `## 24.`, `## 24 ·` and `## 24 <title>` in the committed
+#: file, by different waves. All three spellings are real and none is being
+#: normalised here.
+#:
+#: WIDENED 2026-09-20, AND THE GUARD WAS BLIND UNTIL IT WAS. The pattern
+#: required a `.` or `·` AFTER the digits, so a heading that runs straight into
+#: its title was invisible. Two sections are spelled that way, and the guard
+#: could not see either:
+#:
+#:     ## 22 THE IMPACT GATE, AND THE THREE MUTATIONS THAT KILL IT
+#:     ## 33 The sanitiser-scope wave, 2026-09-20
+#:
+#: **IT PASSED ON A REGISTER CARRYING TWO SECTION 33s.** The premium-four
+#: integration renumbered its own section onto 33 believing 33 was free --
+#: because this guard said the register was unique -- and found the collision by
+#: reading the headings by hand. That is this file's own failure mode arriving
+#: in this file: a check that reports what you wanted.
+#:
+#: AND THE DOCSTRING ABOVE USED TO ASSERT THE ARTIFACT AS A FACT. It said the
+#: register "has a real gap at 22". There is no gap: section 22 is at line 3736
+#: and always was. A number this guard could not see became, in its own prose, a
+#: property of the thing it was measuring.
+HEADING = re.compile(r"^##\s+(\d+)\b", re.M)
 
 
 def _numbers(text: str) -> list[str]:
@@ -56,6 +85,42 @@ def test_the_register_actually_has_sections_to_check():
         "has probably drifted, and a uniqueness check over nothing is not a check"
         % len(found)
     )
+
+
+def test_control_the_guard_sees_a_heading_with_no_separator():
+    """SHOWN FAILING on the exact spelling this guard was blind to until
+    2026-09-20, and shown blind on the OLD pattern in the same breath.
+
+    Without the second half this is just a green that could not fail: the point
+    is not that the new pattern matches, it is that the old one did NOT, so the
+    widening is doing work rather than decorating.
+    """
+    old_pattern = re.compile(r"^##\s+(\d+)\s*[.·]", re.M)
+
+    specimen = (
+        "## 33 The sanitiser-scope wave, 2026-09-20\n"
+        "\n"
+        "## 33. THE PREMIUM-FOUR WAVE\n"
+    )
+    assert _numbers(specimen) == ["33", "33"], _numbers(specimen)
+    assert old_pattern.findall(specimen) == ["33"], (
+        "the OLD pattern was supposed to see only one of these two headings; "
+        "if it sees both, this control no longer demonstrates anything"
+    )
+
+    counts = collections.Counter(_numbers(specimen))
+    assert [n for n, c in counts.items() if c > 1] == ["33"]
+    assert not [n for n, c in collections.Counter(old_pattern.findall(specimen)).items()
+                if c > 1], (
+        "the old pattern must report this duplicated register as UNIQUE -- that "
+        "is the defect being fixed, and it is the state master was in"
+    )
+
+    # And the two real headings in the committed file that the old pattern
+    # could not see at all.
+    real = REGISTER.read_text(encoding="utf-8")
+    invisible = sorted(set(_numbers(real)) - set(old_pattern.findall(real)), key=int)
+    assert invisible == ["22", "33"], invisible
 
 
 def test_control_the_guard_convicts_a_planted_duplicate():

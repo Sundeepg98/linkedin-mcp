@@ -216,7 +216,7 @@ edge, because the name only appears once the entry is written.
 The general shape, and it generalises past this repo: **a scoped gate can see
 which tests name the code you changed. It cannot see which tests assert the
 ABSENCE of what you just added.** A refusal test is exactly that assertion.
-Filed as an instrument-register finding, section 32.6.
+Filed as an instrument-register finding, section 34.6.
 
 ---
 
@@ -497,7 +497,11 @@ renumbered if it collided.
     collision 2     30   names-that-do-not-exist published it first
     taken           31   at 13:05, correct against master at d6b7e4b
     collision 3     31   reason-kinds landed it on master at 13:12
-    PUBLISHED AS    32
+    taken           32
+    collision 4     32   sanitiser-scope landed it on master first
+    taken           33
+    collision 5     33   sanitiser-scope had ALREADY moved to 33
+    PUBLISHED AS    34
 
 I took 31 at 13:05 having seen `reason-kinds` staging its own 31 in an
 uncommitted scratch file, and recorded the prediction that the guard would
@@ -513,9 +517,21 @@ of that yet, because the two renumbers happened twenty minutes apart on one
 desk. It is not an argument for a different numbering scheme in this document,
 but it is the evidence anybody proposing one should start from.
 
-All citations moved with it: three to 32.2 in `readonly.py`'s sibling documents
+**THE FIFTH COLLISION WAS INVISIBLE TO THE GUARD, AND THAT IS THE REAL
+FINDING HERE.** `sanitiser-scope` spells its heading `## 33 The sanitiser-scope
+wave` -- no separator after the number -- and
+`tests/test_the_register_numbers_are_unique.py` matched only `## N.` or
+a middle-dot separator. So it could not see that section at all: it reported the
+register UNIQUE while the file carried TWO section 33s, and I found the
+collision by reading the headings by hand. The guard is widened in this commit,
+with a two-sided control, and the receipt is at INSTRUMENTS.md 34.9. Its
+docstring had also promoted the artifact to a fact, asserting a "real gap at
+22" that does not exist -- section 22 is spelled the same way and was equally
+invisible.
+
+All citations moved with it: three to 34.2 in `readonly.py`'s sibling documents
 and the correction-findability table, plus this document's own references to
-32.6 and 32.7.
+34.6 and 34.7.
 
 ### 8.3 AND MASTER MOVED UNDER THIS INTEGRATION, WHICH IS WHY IT WAS RE-MEASURED
 
@@ -614,5 +630,5 @@ name**, and that is worth more than the four rows.
 * I did not "fix" the detector. Three false positives in one probe is a real
   signal about `scripts/detect_unbranched_probe_controls.py`, but changing a
   detector that produced a 129-row published census is a wave, not a merge
-  step. Filed at INSTRUMENTS.md 32.8.
+  step. Filed at INSTRUMENTS.md 34.8.
 * I did not claim the ratchet is undamaged. It grew, on my commit, by four.

@@ -4991,9 +4991,147 @@ driver `_mutate_kinds.py`. The first three are superseded by the committed class
 reporting; the fourth is superseded by the pytest guard, which runs the same mutations with
 postcondition assertions. Their numbers are the tables in
 `_audit/2026-09-20-the-reason-kinds.md`.
+
+## 33 The sanitiser-scope wave, 2026-09-20
+
+### 33.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
+
+`tests/test_page_text_is_never_printed.py` imported the url rule's
+`_is_sanitiser_call` and ORed it into a taint walk whose sources are sixteen TEXT
+readers. Every name that predicate matches -- `_shape_of`, `_redact`, `_relation`
+-- is certified by a needle table of **eight url-bearing lines and nothing else**.
+So a page-text site wrapped in any of them was reported CLEAN on the strength of
+a proof about addresses.
+
+**Nobody ruled that. It fell out of an import.** The words "page text", "prose"
+and "display name" appear nowhere in the certifier.
+
+It was not theoretical. `scripts/_probe_messaging.py::_redact` returns an
+invented display name **byte-identical** on 3 of 6 realistic page-text shapes --
+a card byline, plain prose, a name beside a lowercase word -- while correctly
+HOLDING on the url it was proven for. It is not broken; it is correctly scoped,
+and the scope was written in a docstring where no check could read it.
+
+THE GENERAL FORM, for any guard that stops at a certified helper: **a
+certification names a corpus, and the entry must carry that corpus with it.**
+`PROVEN_FOR` maps each guarded name to the kind of value it was measured
+against; `GUARD_SCOPE` maps each guard to the kind it taints;
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` asserts
+`consults == (kind == SCOPE_URL)` -- **both directions in one assertion**,
+because written one-sided the check still passes if the URL rule LOSES its own
+stop, which would silently forbid that rule's own fix.
+
+SHOWN FAILING, against the real pre-fix source rather than a stub:
+
+```
+HEAD source names _is_sanitiser_call    : True      <- RED
+working source names _is_sanitiser_call : False
+the url rule itself names it            : True      <- and must
+```
+
+`_names_used` parses rather than greps and counts an import with no call, because
+a symbol in a namespace is one word from being a stop condition again. It is
+shown rejecting a docstring that mentions the name -- what a grep would match,
+and this corpus writes `_is_sanitiser_call` in prose a dozen times.
+
+**TWO OVERLAPPING DEFENCES WERE MUTATED SEPARATELY**, per the standing law.
+Restoring the OR in memory: the walker's five red cases fire (mechanism a) AND
+the certifier's structural check fires (mechanism b). Removing either leaves the
+other convicting.
+
+### 33.2 BUILD BOTH VARIANTS FROM SOURCE TEXT -- NEVER IMPORT A MODULE YOU ARE EDITING
+
+**This one convicted itself the same hour.** To measure what the fix newly
+flags, a child was briefed to sweep the tree with two walkers, taking the
+"before" variant by importing `text_violations` from the real module. The module
+was then edited underneath it. Both variants became the fixed walker, they agreed
+on all 178 files, and the delta was reported as zero.
+
+**A corpus you told somebody to read can go stale while they read it**, and the
+result looks exactly like a clean measurement.
+
+The brief's mandatory control caught it -- the two variants had to be SHOWN
+DISAGREEING on planted cases before any agreement counted, and the child reported
+`CONTROL 2 overall: FAIL` rather than presenting the agreement. **The defect was
+in the brief, not the work.**
+
+THE INSTRUMENT, reusable for any before/after guard comparison: load the BEFORE
+variant from `git show <sha>:<path>` and the AFTER from disk, `exec` both into
+separate module objects, and gate the whole sweep on a disagreement control:
+
+```
+pre-fix  walker names _is_sanitiser_call in its namespace : True
+post-fix walker names _is_sanitiser_call in its namespace : False
+  5 of 7 planted cases disagree
+  UNWRAPPED -- both must flag    pre=[(2,'print')] post=[(2,'print')] agree
+  len() -- both must stay clean  pre=[]            post=[]            agree
+```
+
+The two AGREE rows are as load-bearing as the five DISAGREE rows: they show the
+variants agree exactly where they must, so the disagreement is one condition
+rather than two different programs. Corrected result: 179 files, 111 sites before
+and after, **0 newly flagged, 0 unflagged**, and `post == KNOWN_TEXT_SINKS`
+exactly.
+
+### 33.3 A VACUOUS LOOP DECLARED BEATS A PARAMETRIZE THAT SKIPS
+
+`test_no_claimant_declares_page_text_without_surviving_the_text_table` checks
+ZERO claimants today, because nothing declares `SCOPE_TEXT`. Its docstring says so
+in its first line and it asserts its own checked-count, so the day something does
+declare TEXT the reader can see it stopped being vacuous.
+
+The alternative is in the same repository: `tests/test_a_verdict_earns_its_entry.py`
+has **four tests that SKIP** with *"got empty parameter set"*. A parametrize over
+an empty table does not announce that it checked nothing -- it announces a skip,
+which reads like a pass in a green run.
+
+The table is made real by two controls over functions that EXIST, not stubs:
+`_probe_messaging.py::_redact` is shown FAILING it (3 of 6 shapes) while still
+holding its url needle, and `_probe_search_render_timeline.py::_redact` -- the
+same name, a different function, allowlist-based -- is shown PASSING all six.
+**Two functions, one spelling, opposite results**, which is also the plainest
+statement of why a name-matched stop cannot be trusted.
+
+### 33.4 THE NAME-BASED STOP CANNOT BE REPLACED HERE, AND THE COLLISION IS NOW DOCUMENTED RATHER THAN LATENT
+
+Asked directly and answered honestly: **no.** These guards are pure AST analysis,
+per module, and deliberately so -- resolving a call to a definition needs either
+an import graph plus scope analysis (which still cannot resolve a rebinding, a
+dict of functions, or a call through a parameter) or importing all 179 scanned
+modules, which for a directory of live browser probes means executing them.
+Every scanned file is standalone by design, which is what makes a name the only
+handle there is.
+
+What was done instead is to raise the cost of the name: enrolment already
+demands a written claim per claimant, `test_every_relation_definition_is_byte_identical`
+already refuses two different bodies under `_relation`, and `PROVEN_FOR` now
+makes the name carry its corpus.
+
+**THE RESIDUAL, NAMED:** nothing asserts the `_redact` bodies are one function
+the way `_relation`'s are -- and they are genuinely two different functions doing
+two different jobs, so the honest repair is a RENAME, not reconciliation. A
+rename vouches for nothing, which is why it is available to anyone, and it was
+not taken unilaterally. Left for its owners, in the open.
+### 33.5 A TABLE-DRIVEN GUARD NEEDS THE ENUMERATION HALF, AND I SHIPPED ONE WITHOUT IT
+
+`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` iterates its own
+declaration table, so a new consumer of the url-proven predicate would be invisible
+to it. **Committed that way, by the wave that spent the afternoon fixing exactly this
+class.** The enrolment half of this same file exists because a claimant inherits trust
+the instant it is typed; a CONSUMER inherits it the same way.
+
+The repair is the pattern already in the file: enumerate off the TREE, subtract the
+table, and assert the enumeration is non-empty so the subtraction is over something.
+
+THE MUTATION THAT TAUGHT ME MOST CAME BACK GREEN. Dropping the page-text row from the
+table fired nothing, because after the fix that file is no longer a USER -- the
+containment is one-way, users are a SUBSET of the declarations, and the
+declared-but-not-a-user row IS the fix. **A wrong mutation is cheap; a wrong mutation
+that returns the colour you expected is not.** Re-run against a real user made
+undeclared, and against an invented new one: both red.
 ---
 
-## 32. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
+## 34. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
 
 **THIS SECTION WAS WRITTEN AS 29 AND IS PUBLISHED AS 31.** The wave computed
 29 from a maximum of 28 at `dc5aaa6` and said in this paragraph that it should
@@ -5001,14 +5139,23 @@ be renumbered if it collided. It collided: `live-capture` published 29 and
 `names-that-do-not-exist` published 30 while this wave was in its own worktree,
 so the integration took 31 -- and then collided A SECOND TIME, in the
 twenty minutes the integration itself took: the `reason-kinds` wave landed
-31 on master first, so this is published as 32. THREE waves computed a next
-integer from the same stale maximum for one section. `tests/test_the_register_numbers_are_unique.py` is
+31 on master first. Renumbered to 32, then to 33, then to 34 -- three more
+collisions inside one integration, because `sanitiser-scope` was pushed off
+31 too and landed on 32 and then 33 ahead of me. **PUBLISHED AS 34.**
+
+**AND THE LAST OF THOSE WAS INVISIBLE TO THE GUARD.** `sanitiser-scope`
+spells its heading `## 33 The sanitiser-scope wave` with NO separator after
+the number, and `tests/test_the_register_numbers_are_unique.py` matched
+`^##\s+(\d+)\s*[.·]` -- so it could not see that section at all, reported
+the register as unique while it carried TWO section 33s, and I only found
+the collision by reading the headings myself. That guard is widened in this
+same commit and the specimen is 34.9. `tests/test_the_register_numbers_are_unique.py` is
 the guard that makes the collision visible at merge time rather than to a
 reader months later, and its rule -- renumber the INCOMING section, never the
 published one -- is what was applied here. Citations elsewhere in this commit
-that pointed at 29.2 were moved to 32.2 in the same edit.
+that pointed at 29.2 were moved to 34.2 in the same edit.
 
-### 32.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
+### 34.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
 
 ADMITTED. Six controls, **each driven into its failing state in-process, and
 the run exits non-zero when any of them cannot be made to fail.**
@@ -5046,9 +5193,9 @@ in `/jobs/view/<id>`. It voided a clean run. **A needle derived by position
 from the input is a rule about the inputs that happened to be listed.** Fixed
 by naming the needle per case.
 
-### 32.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
+### 34.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
 
-Found by building 32.1. Both belong to another wave's file and are recorded
+Found by building 34.1. Both belong to another wave's file and are recorded
 with their evidence rather than fixed in a surprise diff.
 
 1. **It asks `is_read_url` about shapes that still carry the literal
@@ -5065,7 +5212,7 @@ with their evidence rather than fixed in a surprise diff.
    it. **The owning wave's PROSE has this right; its instrument's TABLE does
    not**, and a later reader consults the table.
 
-### 32.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
+### 34.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
 
 I expected its raw `href="..."` extraction to inflate its inventory with
 strings no anchor draws. Measured over the same six captures through the same
@@ -5074,7 +5221,7 @@ right by luck of this corpus rather than by construction -- a `<link href=>` on
 some future capture would enter it and nothing would say so -- which is a
 different sentence and the one kept.
 
-### 32.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
+### 34.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
 
 ADMITTED, with `tests/test_job_collections.py` (29 assertions over a real
 headless page) and `tests/test_premium_four_boundary.py` (50, pure).
@@ -5106,17 +5253,17 @@ every candidate selector agrees exactly across the two scopes -- 24==24, 25==25,
 7==7, 7==7 -- so a scoping claim proved against the captures alone would prove
 nothing at all.
 
-### 32.5 THE LAW THIS WAVE ADDS
+### 34.5 THE LAW THIS WAVE ADDS
 
 **A DENOMINATOR THAT CANNOT SEE YOUR CHANGE REPORTS ZERO, AND ZERO READS AS
 SAFE.** A blast-radius tool, a coverage number and a needle census all fail the
 same way: they answer honestly about a set nobody checked contains the thing
-being asked about. The repair is not a better tool -- 32.1 imports the shipped
+being asked about. The repair is not a better tool -- 34.1 imports the shipped
 one unchanged -- it is to **count the denominator before believing the
 numerator**, and to keep an assertion that the corpus still DISCRIMINATES, so
 the day it stops the suite says so instead of reporting reassuring zeros.
 
-### 32.6 THE INTEGRATION'S LAW: A SCOPED GATE CANNOT SEE A TEST THAT ASSERTS AN ABSENCE
+### 34.6 THE INTEGRATION'S LAW: A SCOPED GATE CANNOT SEE A TEST THAT ASSERTS AN ABSENCE
 
 Added 2026-09-20 by the integration that merged this wave, from a defect the
 merge found in the wave itself. Full argument:
@@ -5159,7 +5306,7 @@ unnoticed"*. A fourth arrived on 2026-09-20 and it noticed -- at merge time,
 three tests red, having never been run by the wave that tripped it. The tripwire
 worked; the gate that should have shown it to its author did not.
 
-### 32.7 AND A BASELINE THAT IS RE-SYNCED IS A MIRROR WEARING A HISTORICAL NAME
+### 34.7 AND A BASELINE THAT IS RE-SYNCED IS A MIRROR WEARING A HISTORICAL NAME
 
 Same integration, second finding, full argument in section 4 of that document.
 
@@ -5199,7 +5346,7 @@ claim the repair restored the check's power: the four remaining values still
 equal the live pin's, the test still cannot fail alone, and the docstring now
 says so. Whether to delete it outright is left as a ruling.
 
-### 32.8 THE DECORATIVE-CONTROL DETECTOR FLAGS A CONTROL'S INPUTS, AND ITS RATCHET HAS NOWHERE TO SAY SO
+### 34.8 THE DECORATIVE-CONTROL DETECTOR FLAGS A CONTROL'S INPUTS, AND ITS RATCHET HAS NOWHERE TO SAY SO
 
 Found by the integration that merged this wave, while triaging a red the merge
 caused. Full reading of all four specimens:
@@ -5256,3 +5403,61 @@ wave and not a merge step. What the integration did do is grow the ratchet by
 four with every specimen argued in the audit, and write a pointer into the
 file's own `_comment` and `generated_from` so a reader of the JSON is sent to
 the reasons rather than left with four more bare tuples.
+
+### 34.9 THE UNIQUENESS GUARD COULD NOT SEE TWO OF THE SECTIONS IT GUARDS, AND CALLED ONE OF THEM A GAP
+
+Found by this integration, at the cost of a fifth renumber. The guard is
+`tests/test_the_register_numbers_are_unique.py`, section 24's own instrument,
+and it is widened in the same commit as this entry.
+
+**THE DEFECT.** Its heading pattern required a separator after the number:
+
+    HEADING = re.compile(r"^##\s+(\d+)\s*[.·]", re.M)
+
+Two committed sections run straight from the number into the title and matched
+NEITHER spelling:
+
+    ## 22 THE IMPACT GATE, AND THE THREE MUTATIONS THAT KILL IT
+    ## 33 The sanitiser-scope wave, 2026-09-20
+
+**SHOWN FAILING, on the state the register was actually in.** This integration
+renumbered its own section onto 33 because the guard reported the register
+unique, and 33 was not free. The real test body, run against that register:
+
+    register carrying TWO '## 33' headings
+      OLD pattern   30 headings seen   duplicates: NONE   <-- PASSED, wrongly
+      NEW pattern   32 headings seen   duplicates: ['33']
+
+    after renumbering mine to 34
+      OLD pattern   30 headings seen   duplicates: NONE
+      NEW pattern   32 headings seen   duplicates: NONE
+
+    sections the OLD pattern cannot see at all: ['22', '33']
+
+The collision was found by READING THE HEADINGS BY HAND, not by the guard whose
+entire purpose is to find it. A duplicate would have shipped.
+
+**AND THE ARTIFACT HAD BEEN PROMOTED TO DOCUMENTATION.** The guard's docstring
+said the register *"already has a real gap at 22"*, and used that supposed gap
+to justify not enforcing contiguity. There is no gap. Section 22 is at line
+3736 and always has been; the guard could not see it, reported its absence, and
+a later reader wrote the absence down as a property of the register.
+
+> **A NUMBER YOUR INSTRUMENT CANNOT SEE COMES BACK AS A FACT ABOUT THE THING
+> YOU ARE MEASURING.** Not as an error, not as a gap in coverage -- as a
+> feature of the subject, in prose, in the instrument's own file, where the next
+> reader inherits it. This is the same shape as the empty-denominator zero in
+> 34.1 and the mirror baseline in 34.7: three instruments in one register, each
+> reporting cleanly about a set that did not contain what was being asked about.
+
+**THE FIX IS ONE CHARACTER CLASS** -- `r"^##\s+(\d+)\b"` -- plus a control that
+is two-sided: it asserts the NEW pattern convicts the duplicate AND that the OLD
+pattern did not, so the widening is shown doing work rather than decorating. The
+control also pins the exact two sections the old pattern missed, so if either
+heading is ever normalised the control says so instead of silently passing.
+
+**NOT FIXED: the numbering scheme itself.** Five waves computed "the next
+integer" from the same stale maximum for one section today, and three of the
+renumbers happened inside this single integration. The guard makes the collision
+visible at merge time, which is worth having; it does not make appending to a
+register concurrent-safe, and nothing here claims it does.
