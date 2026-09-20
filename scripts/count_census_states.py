@@ -163,13 +163,66 @@ ROW = re.compile(r"^\|\s*([A-Za-z0-9][A-Za-z0-9 .\-]*?)\s*\|")
 HEADERS = {"#", "id", "row", "rows", "state", "blocker", "capability"}
 
 
+#: The markdown escape for a literal pipe INSIDE a table cell. GFM says a
+#: backslash-pipe is content, not a column break, and this corpus uses it:
+#: `readonly.py:198` enumerates `(saved|applied|draft)` on `J 50` is written
+#: that way because the alternation would otherwise split the row.
+_ESCAPED_PIPE = "\\|"
+
+
 def cells(line: str) -> list[str]:
+    """The row's cells, honouring the markdown escape for a literal pipe.
+
+    THE DEFECT THIS REPLACED, AND WHY NO INSTRUMENT CAUGHT IT FOR A FORTNIGHT.
+    The first version was `s.strip('|').split('|')`, which treats an escaped
+    pipe as a column break. Four lines in the whole census carry one, all in
+    `jobs.md` -- and on every one of them THE STATE CELL IS STILL READ
+    CORRECTLY, because the escape always falls in the REASON, which is the last
+    cell. So every count this file publishes was right, every control passed,
+    and the only thing that was wrong was invisible to all of them: the reason
+    came back as the TAIL AFTER the escape. `J 103` held 1322 characters and
+    handed back 795. A downstream reader classifying that reason is reading
+    60% of an argument and cannot tell.
+
+    WHY THIS MATTERS MORE THAN A TRUNCATION USUALLY WOULD. The tail is not
+    merely short, it is SYNTACTICALLY VALID -- it looks like a whole reason
+    cell, so nothing downstream can discriminate it from one. Registered in
+    `_audit/INSTRUMENTS.md` section 35 as "not an instrument" and fixed here
+    with section 41's control, `scripts/_check_cells_honours_escaped_pipe.py`,
+    which shows the old behaviour failing and asserts the new one changes
+    NOTHING on the 4461 lines that carry no escape.
+
+    NO REGEX, DELIBERATELY. A lookbehind for "backslash not preceded by a
+    backslash" is the standard one-liner and it is wrong at a doubled
+    backslash; a left-to-right scan has no such case to get wrong.
+    """
     s = line.strip()
-    if s.startswith("|"):
-        s = s[1:]
-    if s.endswith("|"):
-        s = s[:-1]
-    return [c.strip() for c in s.split("|")]
+    out: list[str] = []
+    buf: list[str] = []
+    i = 0
+    n = len(s)
+    while i < n:
+        if s.startswith(_ESCAPED_PIPE, i):
+            buf.append("|")
+            i += 2
+            continue
+        if s[i] == "|":
+            out.append("".join(buf))
+            buf = []
+            i += 1
+            continue
+        buf.append(s[i])
+        i += 1
+    out.append("".join(buf))
+    # Drop the BORDER pipes -- and only real ones. An empty first element means
+    # the line opened with an unescaped `|`; an empty last element means it
+    # closed with one. A line ending in an ESCAPED pipe leaves a non-empty last
+    # element and keeps it, which is the whole repair.
+    if len(out) > 1 and out[0] == "":
+        out = out[1:]
+    if len(out) > 1 and out[-1] == "":
+        out = out[:-1]
+    return [c.strip() for c in out]
 
 
 def classify(row_cells: list[str]) -> tuple[str, list[str]]:
