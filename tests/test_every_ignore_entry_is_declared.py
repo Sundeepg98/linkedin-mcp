@@ -94,6 +94,19 @@ DECLARED: dict[str, tuple[str, str | None]] = {
     "*.egg-info/": ("FOREIGN", None),
     "build/": ("FOREIGN", None),
     "dist/": ("FOREIGN", None),
+    # Claude Code's agent worktrees. MACHINE-LOCAL SCAFFOLDING, added
+    # 2026-09-20 by the live-capture wave after 23 of them on disk put 22
+    # directories into committable_files() and turned the credential sweep
+    # red on a tree whose own diff was clean.
+    #
+    # WHY IGNORING THEM LOSES NO COVERAGE, which is the only question this
+    # register asks. A worktree holds a CHECKOUT of files that are tracked in
+    # the main tree and swept there directly, plus that agent's uncommitted
+    # work -- and the uncommitted half can never enter a commit made from
+    # HERE. It enters through the worktree's own index, where the same
+    # pre-commit gate runs over its own staged set. Coverage is not lost; it
+    # is held one tree over, by the same guard.
+    ".claude/worktrees/": ("LOCAL_STATE", None),
     # Local run output.
     ".pytest_cache/": ("LOCAL_STATE", None),
     ".coverage": ("LOCAL_STATE", None),

@@ -1293,6 +1293,48 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "being listed, which is the EVIDENCE-citation shape this dict already "
         "records twice."
     ),
+
+    # 2026-09-20, from the live-capture wave. THREE PAIRS, ALL THE SAME SHAPE
+    # THIS DICT ALREADY RECORDS SEVERAL TIMES: a census row withdrawing or
+    # advancing ITS OWN state in place and citing the wave that measured it.
+    # In each the cited document is the CORRECTOR, never the corrected.
+    ("jobs.md", "2026-09-20-the-live-capture.md"): (
+        "ROWS 136-138 WITHDRAW THEIR OWN STANDING REASON IN PLACE AND NAME "
+        "THE MEASUREMENT THAT REFUTED IT. The reason being withdrawn is "
+        "theirs: that answering needs a completed audio session and so only "
+        "the operator can discharge it. A live page load refuted that -- the "
+        "member-side product is offered, its address is same-origin and "
+        "carries no member segment, the one drawn route is a create route, "
+        "and no results route is drawn on any of six captured surfaces. The "
+        "rows STAY GAP; only their blocker changes. The cited document is "
+        "where that measurement lives, so it is the refuting source. A "
+        "CORRECTED BY: pointer in it would tell a reader that the document "
+        "supplying the measurement had itself been refuted"
+    ),
+    ("network.md", "2026-09-20-the-live-capture.md"): (
+        "ROW 135 IS PROMOTED, NOT CORRECTED. Its prior cell said "
+        "COVERED-UNFIRED and gave the reason: surfaced, with no recorded run "
+        "asserting a value live. That was TRUE when written and is not "
+        "withdrawn -- a run was simply taken, and the row advanced to "
+        "COVERED-PROVEN on it. The correction vocabulary in the cell belongs "
+        "to the neighbouring scope defect the same call confirmed, which is a "
+        "statement about dom.py's reader and not about the cited document. A "
+        "CORRECTED BY: pointer in it would tell a reader that the run which "
+        "promoted this row had been refuted"
+    ),
+    ("network.md", "2026-09-20-the-premium-block.md"): (
+        "THE CITED DOCUMENT WAS RIGHT AND THIS ROW NOW CONFIRMS IT. Its "
+        "section 5 reported, from the tree alone, that the profile-views "
+        "insights reader obeys a main scope its own comment says it only "
+        "reports, that no committed fixture of that page has a main element, "
+        "and that the live branch is therefore untested -- and it called the "
+        "consequence ambiguity because offline analysis could go no further. "
+        "The live call in this wave turned that hypothesis into a "
+        "contradiction: 12 viewer rows parsed by the outer reader, 0 seen by "
+        "the scoped one, on the same load. CORROBORATION, arriving from the "
+        "other end. A CORRECTED BY: pointer there would tell a reader that "
+        "the source which diagnosed the defect first had been refuted"
+    ),
 }
 
 
