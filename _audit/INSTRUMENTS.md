@@ -4992,7 +4992,7 @@ reporting; the fourth is superseded by the pytest guard, which runs the same mut
 postcondition assertions. Their numbers are the tables in
 `_audit/2026-09-20-the-reason-kinds.md`.
 
-## 33 The sanitiser-scope wave, 2026-09-20
+## 32. The sanitiser-scope wave, 2026-09-20
 
 ### 33.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
 
